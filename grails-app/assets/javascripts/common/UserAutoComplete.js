@@ -21,7 +21,7 @@
  */
 
 // Override jQuery-UI functions to allow rendering of table
-$.ui.autocomplete.prototype._renderMenu = (ul, items) => {
+$.ui.autocomplete.prototype._renderMenu = function (ul, items) {
   const self = this;
   ul.append("<table style='margin-right: 20px'></table>");
   $.each(items, (index, item) => {
@@ -29,11 +29,11 @@ $.ui.autocomplete.prototype._renderMenu = (ul, items) => {
   });
 };
 
-$.ui.autocomplete.prototype._renderItemData = function renderItemData(ul, table, item) {
+$.ui.autocomplete.prototype._renderItemData = function (ul, table, item) {
   return this._renderItem(table, item).data('ui-autocomplete-item', item);
 };
 
-$.ui.autocomplete.prototype._renderItem = (table, item) => {
+$.ui.autocomplete.prototype._renderItem = function (table, item) {
   let autocompleteContent = `<td class='ui-state-disabled'>${item.placeholder}</td>`;
 
   if (item.user) {
@@ -50,7 +50,7 @@ $.ui.autocomplete.prototype._renderItem = (table, item) => {
     .appendTo(table);
 };
 
-const renderPlaceholder = (searchElement, placeholderContent) => {
+const renderPlaceholder = function (searchElement, placeholderContent) {
   searchElement.autocomplete({
     minLength: 1,
     delay: 0,
@@ -63,7 +63,7 @@ const renderPlaceholder = (searchElement, placeholderContent) => {
 };
 
 $(() => {
-  const failure = (title, message) => {
+  const failure = function (title, message) {
     if ($.otp.toaster) {
       $.otp.toaster.showErrorToast(title, message);
     } else {

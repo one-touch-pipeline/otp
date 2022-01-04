@@ -21,7 +21,7 @@
  */
 
 $(() => {
-  $('.expandable-button').on('click', () => {
+  $('.expandable-button').on('click', function () {
     $(this).siblings('.expandable-container').toggleClass('collapsed');
     $(this).siblings('.expandable-container').toggleClass('expanded');
   });

@@ -292,7 +292,7 @@ $(() => {
     }
   });
 
-  $('#steps tbody').on('click', 'td .details-control', () => {
+  $('#steps tbody').on('click', 'td .details-control', function () {
     const tr = $(this).closest('tr');
     const row = table.row(tr);
 

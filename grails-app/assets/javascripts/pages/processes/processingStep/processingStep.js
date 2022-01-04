@@ -99,7 +99,7 @@ $.otp.workflows.processingStep = {
       { bSortable: false, aTargets: [2] },
       { bSortable: false, aTargets: [3] }
     ], [{ name: 'input', value: inputOrOutput }]);
-    $(selector).on('click', 'tbody tr td ul li a', () => {
+    $(selector).on('click', 'tbody tr td ul li a', function () {
       $('li', $(this).parent().parent()).show();
       $(this).parent().hide();
     });

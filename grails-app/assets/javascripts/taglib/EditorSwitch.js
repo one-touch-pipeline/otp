@@ -21,7 +21,7 @@
  */
 
 $(() => {
-  const success = (title = 'Operation completed', message = 'The change was successful.') => {
+  const success = function (title = 'Operation completed', message = 'The change was successful.') {
     if ($.otp.toaster) {
       $.otp.toaster.showSuccessToast(title, message);
     } else {
@@ -29,7 +29,7 @@ $(() => {
     }
   };
 
-  const failure = (title = 'Unknown error', message = 'An unknown error occurred.') => {
+  const failure = function (title = 'Unknown error', message = 'An unknown error occurred.') {
     if ($.otp.toaster) {
       $.otp.toaster.showErrorToast(title, message);
     } else {
@@ -37,7 +37,7 @@ $(() => {
     }
   };
 
-  $('td.add-table-buttons button.add').on('click', (event) => {
+  $('td.add-table-buttons button.add').on('click', function (event) {
     'use strict';
 
     event.preventDefault();
@@ -48,7 +48,7 @@ $(() => {
     $('.add-table-fields', p.parent().parent()).show();
   });
 
-  $('td.add-table-buttons button.cancel').on('click', (event) => {
+  $('td.add-table-buttons button.cancel').on('click', function (event) {
     'use strict';
 
     event.preventDefault();
@@ -59,7 +59,7 @@ $(() => {
     $('.add-table-fields', p.parent().parent()).hide();
   });
 
-  $('tr.edit-table-buttons button.button-edit').on('click', (event) => {
+  $('tr.edit-table-buttons button.button-edit').on('click', function (event) {
     'use strict';
 
     event.preventDefault();
@@ -71,7 +71,7 @@ $(() => {
     $('.show-fields', p.parent()).hide();
   });
 
-  $('tr.edit-table-buttons button.cancel').on('click', (event) => {
+  $('tr.edit-table-buttons button.cancel').on('click', function (event) {
     'use strict';
 
     event.preventDefault();
@@ -84,9 +84,9 @@ $(() => {
   });
 
   $.otp.editorswitch = {};
-  $('div.edit-switch .edit-switch-label button.js-edit').on('click', () => { outerContainerSwitch($(this)); });
+  $('div.edit-switch .edit-switch-label button.js-edit').on('click', function () { outerContainerSwitch($(this)); });
 
-  $('div.edit-switch .edit-switch-label button.js-remove').on('click', () => { outerContainerSwitch($(this)); });
+  $('div.edit-switch .edit-switch-label button.js-remove').on('click', function () { outerContainerSwitch($(this)); });
 
   function outerContainerSwitch(that) {
     'use strict';
@@ -97,7 +97,7 @@ $(() => {
   }
 
   // eslint-disable-next-line max-len
-  $('div.edit-switch-text .edit-switch-editor button.save, div.edit-switch-integer .edit-switch-editor button.save').on('click', () => {
+  $('div.edit-switch-text .edit-switch-editor button.save, div.edit-switch-integer .edit-switch-editor button.save').on('click', function () {
     'use strict';
 
     const container = $(this).parent();
@@ -134,7 +134,7 @@ $(() => {
     $('p.edit-switch-label', outerContainer).show();
   });
 
-  $('div.edit-switch-text-area p.edit-switch-editor button.save').on('click', () => {
+  $('div.edit-switch-text-area p.edit-switch-editor button.save').on('click', function () {
     'use strict';
 
     const container = $(this).parent();
@@ -174,7 +174,7 @@ $(() => {
     $('p.edit-switch-label', outerContainer).show();
   });
 
-  $('div.edit-switch-url p.edit-switch-editor button.save').on('click', () => {
+  $('div.edit-switch-url p.edit-switch-editor button.save').on('click', function () {
     'use strict';
 
     const container = $(this).parent();
@@ -205,7 +205,7 @@ $(() => {
     $('p.edit-switch-label', outerContainer).show();
   });
 
-  $('div.edit-switch-drop-down p.edit-switch-editor button.delete').on('click', () => { deleteRole($(this)); });
+  $('div.edit-switch-drop-down p.edit-switch-editor button.delete').on('click', function () { deleteRole($(this)); });
 
   function deleteRole(that) {
     'use strict';
@@ -251,7 +251,7 @@ $(() => {
     });
   }
 
-  $('div.submit-container button.addRole').on('click', () => {
+  $('div.submit-container button.addRole').on('click', function () {
     'use strict';
 
     const container = $(this).parent();
@@ -295,13 +295,13 @@ $(() => {
           for (let j = 0; j < data.newProjectRolesNodes.length; j++) {
             outerContainer.prepend(data.newProjectRolesNodes[j]);
             // update event listener for added object only
-            $(outerContainer.children()[0]).find('button.js-remove').on('click', () => {
+            $(outerContainer.children()[0]).find('button.js-remove').on('click', function () {
               outerContainerSwitch($(this));
             });
-            $(outerContainer.children()[0]).find('button.delete').on('click', () => {
+            $(outerContainer.children()[0]).find('button.delete').on('click', function () {
               deleteRole($(this));
             });
-            $(outerContainer.children()[0]).find('button.cancel').on('click', () => {
+            $(outerContainer.children()[0]).find('button.cancel').on('click', function () {
               cancelAddRoleCommand($(this));
             });
           }
@@ -319,7 +319,7 @@ $(() => {
     });
   });
 
-  $('div.edit-switch-drop-down p.edit-switch-editor button.save').on('click', () => { saveRole($(this)); });
+  $('div.edit-switch-drop-down p.edit-switch-editor button.save').on('click', function () { saveRole($(this)); });
 
   function saveRole(that) {
     'use strict';
@@ -364,7 +364,7 @@ $(() => {
     $('p.edit-switch-label', outerContainer).show();
   }
 
-  $('div.edit-switch-multi-drop-down p.edit-switch-editor button.save').on('click', () => {
+  $('div.edit-switch-multi-drop-down p.edit-switch-editor button.save').on('click', function () {
     saveMultiDropDownOptions($(this));
   });
 
@@ -416,7 +416,7 @@ $(() => {
     $('p.edit-switch-label', outerContainer).show();
   }
 
-  $('div.edit-switch-date p.edit-switch-editor button.save').on('click', () => {
+  $('div.edit-switch-date p.edit-switch-editor button.save').on('click', function () {
     'use strict';
 
     const container = $(this).parent();
@@ -446,13 +446,13 @@ $(() => {
     $('p.edit-switch-label', outerContainer).show();
   });
 
-  $('div.edit-switch-checkboxes p.edit-switch-editor button.save').on('click', () => {
+  $('div.edit-switch-checkboxes p.edit-switch-editor button.save').on('click', function () {
     'use strict';
 
     const container = $(this).parent();
     const outerContainer = container.parent();
     const value = {};
-    $('input:checked', container).each((index) => {
+    $('input:checked', container).each(function (index) {
       value[`value[${index}]`] = this.name;
     });
     $.ajax({
@@ -464,7 +464,7 @@ $(() => {
         if (data.success) {
           success('Success', 'Data stored successfully');
           const names = [];
-          $('input:checkbox', container).each(() => {
+          $('input:checkbox', container).each(function () {
             if (this.checked) {
               names.push(this.name);
               $(this).data('checked', true);
@@ -492,12 +492,12 @@ $(() => {
   });
 
   function resetCheckboxes(container) {
-    $('input:checkbox', container).each(() => {
+    $('input:checkbox', container).each(function () {
       this.checked = $(this).data('checked');
     });
   }
 
-  $('div.edit-switch-new-value p.edit-switch-editor button.save').on('click', () => {
+  $('div.edit-switch-new-value p.edit-switch-editor button.save').on('click', function () {
     'use strict';
 
     const container = $(this).parent();
@@ -530,7 +530,7 @@ $(() => {
     window.setTimeout(() => { location.reload(); }, 300); // reloads page after 0.3 seconds
   });
 
-  $('div.edit-switch-new-free-text-value p.edit-switch-editor button.save').on('click', () => {
+  $('div.edit-switch-new-free-text-value p.edit-switch-editor button.save').on('click', function () {
     'use strict';
 
     const container = $(this).parent();
@@ -563,19 +563,19 @@ $(() => {
     window.setTimeout(() => { location.reload(); }, 300); // reloads page after 0.3 seconds
   });
 
-  $('div.edit-switch-new-free-text-values span.edit-switch-editor button.save').on('click', () => {
+  $('div.edit-switch-new-free-text-values span.edit-switch-editor button.save').on('click', function () {
     'use strict';
 
     const data = {};
     const container = $(this).parent();
     const outerContainer = container.parent();
-    $('input:text', container).each(() => {
+    $('input:text', container).each(function () {
       data[this.name] = $(this).val();
     });
-    $('input:checked', container).each(() => {
+    $('input:checked', container).each(function () {
       data[this.name] = $(this).is(':checked');
     });
-    $('select', container).each(() => {
+    $('select', container).each(function () {
       data[this.name] = $(this).val();
     });
     $.ajax({
@@ -603,7 +603,7 @@ $(() => {
     $('span.edit-switch-label', outerContainer).show();
   });
 
-  $('div.edit-switch-toggle p.edit-switch-editor button.toggle').on('click', () => {
+  $('div.edit-switch-toggle p.edit-switch-editor button.toggle').on('click', function () {
     'use strict';
 
     const container = $(this).parent();
@@ -627,7 +627,7 @@ $(() => {
       success(data) {
         if (data.success) {
           success('Success', 'Data stored successfully');
-          $.each(['label', 'editor'], () => {
+          $.each(['label', 'editor'], function () {
             $(`p.edit-switch-${this} span`, outerContainer)
               .removeClass(`icon-${orgVal}`).addClass(`icon-${invVal}`);
           });
@@ -655,7 +655,7 @@ $(() => {
     $('p.edit-switch-label', outerContainer).show();
   });
 
-  $('div.edit-switch .edit-switch-editor button.cancel').on('click', () => { cancelAddRoleCommand($(this)); });
+  $('div.edit-switch .edit-switch-editor button.cancel').on('click', function () { cancelAddRoleCommand($(this)); });
 
   function cancelAddRoleCommand(that) {
     'use strict';
@@ -669,7 +669,7 @@ $(() => {
     }
   }
 
-  $('div.multi-edit-switch .edit-switch-label button.js-edit').on('click', () => {
+  $('div.multi-edit-switch .edit-switch-label button.js-edit').on('click', function () {
     'use strict';
 
     const outerContainer = $(this).parent().parent();
@@ -698,7 +698,7 @@ $(() => {
     $('.edit-switch-label', outerContainer).hide();
   });
 
-  $('div.multi-edit-switch .edit-switch-editor button.cancel').on('click', () => {
+  $('div.multi-edit-switch .edit-switch-editor button.cancel').on('click', function () {
     'use strict';
 
     const outerContainer = $(this).parent().parent();
@@ -707,7 +707,7 @@ $(() => {
     $('.multi-input-field .field', outerContainer).remove();
   });
 
-  $('div.edit-switch-multi-input .edit-switch-editor button.save').on('click', () => {
+  $('div.edit-switch-multi-input .edit-switch-editor button.save').on('click', function () {
     'use strict';
 
     const dataValues = {};
@@ -717,7 +717,7 @@ $(() => {
     const outerContainer = container.parent();
     const multiInputField = $('.multi-input-field', outerContainer);
     let valid = true;
-    $('input', multiInputField).each(() => {
+    $('input', multiInputField).each(function () {
       if (!($(this)[0].validity.valid)) {
         window.alert('The input is not valid. Please provide a valid input value.');
         valid = false;

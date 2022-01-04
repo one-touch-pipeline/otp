@@ -47,7 +47,7 @@ $(() => {
   $('.project-role-select').on('change', () => {
     const manageUsersBox = $('.project-request-user-table').find('.set-for-authority');
     manageUsersBox.prop('disabled', false);
-    $('.project-role-select option:selected').each(() => {
+    $('.project-role-select option:selected').each(function () {
       if (this.text === 'PI') {
         manageUsersBox.prop('checked', true);
         manageUsersBox.prop('disabled', true);

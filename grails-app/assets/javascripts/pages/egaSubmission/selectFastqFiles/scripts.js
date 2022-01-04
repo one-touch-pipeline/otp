@@ -25,7 +25,7 @@ $.otp.selectFastqFiles = {
   combineCheckBoxes() {
     'use strict';
 
-    $(document).on('click', 'input[type="checkbox"][data-group]', (event) => {
+    $(document).on('click', 'input[type="checkbox"][data-group]', function (event) {
       const actor = $(this);
       const checked = actor.prop('checked');
       const group = actor.data('group');

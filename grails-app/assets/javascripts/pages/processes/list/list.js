@@ -24,7 +24,7 @@
  * Creates the datatables view for the list of all JobExecutionPlans
  * @param selector The JQuery selector for the table to create the datatable into
  */
-$.otp.workflows.registerJobExecutionPlan = (selector) => {
+$.otp.workflows.registerJobExecutionPlan = function (selector) {
   'use strict';
 
   $.otp.createListView(selector, $.otp.createLink({

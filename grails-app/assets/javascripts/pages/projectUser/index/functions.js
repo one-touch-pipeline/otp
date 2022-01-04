@@ -56,7 +56,7 @@ function postFileAccessChange(context) {
     data: { value: invVal },
     success(response) {
       if (response.success) {
-        $.each(['label', 'editor'], () => {
+        $.each(['label', 'editor'], function () {
           $(`.modal-editor-switch-${this} span`, container)
             .removeClass(`icon-${orgVal}`).addClass(`icon-${invVal}`);
         });
@@ -134,19 +134,19 @@ function hideEditorAndShowLabel(context) {
 }
 
 $(() => {
-  $('input[type=radio][name=addViaLdap]').on('change', () => {
+  $('input[type=radio][name=addViaLdap]').on('change', function () {
     const ldapUserChecked = (this.value === 'true');
     $('.inputField.ldapUser').prop('disabled', !ldapUserChecked);
     $('.inputField.nonLdapUser').prop('disabled', ldapUserChecked);
   }).filter(':checked').trigger('change');
 
-  $('#listEmails').on('click', () => {
+  $('#listEmails').on('click', function () {
     const project = $(this).data('project');
     const emails = $(this).data('emails');
     prompt(`Emails for ${project}`, emails);
   });
 
-  $('#add-button').on('click', () => {
+  $('#add-button').on('click', function () {
     const modalText = $('input:hidden[name=confirmationTextHtml]').val();
 
     // This is needed to prevent multiple submits
@@ -164,7 +164,7 @@ $(() => {
     }
   });
 
-  $('div.submit-container button.changeProjectAccess').on('click', () => {
+  $('div.submit-container button.changeProjectAccess').on('click', function () {
     'use strict';
 
     const container = $(this).parent();

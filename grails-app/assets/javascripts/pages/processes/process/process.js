@@ -25,7 +25,7 @@
  * @param selector The JQuery selector for the table to create the datatable into
  * @param processId The id of the Process for which the list of ProcessingSteps should be retrieved.
  */
-$.otp.workflows.registerProcessingStep = (selector, processId) => {
+$.otp.workflows.registerProcessingStep = function (selector, processId) {
   'use strict';
 
   $.otp.createListView(selector, $.otp.createLink({

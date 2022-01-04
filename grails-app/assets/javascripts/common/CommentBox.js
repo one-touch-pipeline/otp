@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-$.setDisableForControls = (value) => {
+$.setDisableForControls = function (value) {
   $('#button-save').prop('disabled', value);
   $('#button-cancel').prop('disabled', value);
 };
@@ -33,7 +33,7 @@ $(() => {
   commentContent.on('input', () => {
     $.setDisableForControls(false);
   });
-  $('#button-save').on('click', () => {
+  $('#button-save').on('click', function () {
     const controller = $(this).data('controller');
     const action = $(this).data('action');
 

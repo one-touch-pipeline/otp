@@ -80,7 +80,7 @@ $.otp.clusterJobJobTypeSpecific = {
       parameters: {
         jobClass: jobClassSelect, seqType: seqTypeSelect, from: startDate, to: endDate
       }
-    }), () => {
+    }), function () {
       const json = JSON.parse(this.response);
       $('#jobTypeSpecificAvgMemory').html(json.data);
     });
@@ -91,7 +91,7 @@ $.otp.clusterJobJobTypeSpecific = {
       parameters: {
         jobClass: jobClassSelect, seqType: seqTypeSelect, from: startDate, to: endDate
       }
-    }), () => {
+    }), function () {
       const json = JSON.parse(this.response);
       $('#jobTypeSpecificAvgCPU').html(json.data);
     });
@@ -107,7 +107,7 @@ $.otp.clusterJobJobTypeSpecific = {
         from: startDate,
         to: endDate
       }
-    }), () => {
+    }), function () {
       const json = JSON.parse(this.response);
       $('#jobTypeSpecificAvgDelay').html(json.data.avgQueue);
       $('#jobTypeSpecificAvgProcessing').html(json.data.avgProcess);
@@ -119,7 +119,7 @@ $.otp.clusterJobJobTypeSpecific = {
       parameters: {
         jobClass: jobClassSelect, seqType: seqTypeSelect, bases: basesInput, from: startDate, to: endDate
       }
-    }), () => {
+    }), function () {
       const json = JSON.parse(this.response);
       $('#jobTypeSpecificMinCov').html(json.data.minCov);
       $('#jobTypeSpecificAvgCov').html(json.data.avgCov);
@@ -138,9 +138,9 @@ $.otp.clusterJobJobTypeSpecific = {
       controller: 'clusterJobJobTypeSpecific',
       action: 'getJobClassesByDate',
       parameters: { from: $('#dpFrom').val(), to: $('#dpTo').val() }
-    }), () => {
+    }), function () {
       const json = JSON.parse(this.response);
-      $.each(json.data, () => {
+      $.each(json.data, function () {
         const cOption = $('<option>', {
           value: this,
           text: this
@@ -164,9 +164,9 @@ $.otp.clusterJobJobTypeSpecific = {
       controller: 'clusterJobJobTypeSpecific',
       action: 'getSeqTypesByJobClass',
       parameters: { jobClass: $('#jobClassSelect').val(), from: $('#dpFrom').val(), to: $('#dpTo').val() }
-    }), () => {
+    }), function () {
       const json = JSON.parse(this.response);
-      $.each(json.data, () => {
+      $.each(json.data, function () {
         const cOption = $('<option>', {
           value: this.id,
           text: `${this.name} ${this.libraryLayout}`
@@ -217,7 +217,7 @@ $.otp.clusterJobJobTypeSpecificGraph = {
       parameters: {
         jobClass: jobClassSelect, seqType: seqTypeSelect, from: startDate, to: endDate
       }
-    }), () => {
+    }), function () {
       $.otp.clusterJobJobTypeSpecificGraph.getJobTypeSpecificExitCodes(this);
     });
 
@@ -227,7 +227,7 @@ $.otp.clusterJobJobTypeSpecificGraph = {
       parameters: {
         jobClass: jobClassSelect, seqType: seqTypeSelect, from: startDate, to: endDate
       }
-    }), () => {
+    }), function () {
       $.otp.clusterJobJobTypeSpecificGraph.getJobTypeSpecificExitStatuses(this);
     });
 
@@ -237,7 +237,7 @@ $.otp.clusterJobJobTypeSpecificGraph = {
       parameters: {
         jobClass: jobClassSelect, seqType: seqTypeSelect, from: startDate, to: endDate
       }
-    }), () => {
+    }), function () {
       $.otp.clusterJobJobTypeSpecificGraph.getJobTypeSpecificStates(this);
     });
 
@@ -247,7 +247,7 @@ $.otp.clusterJobJobTypeSpecificGraph = {
       parameters: {
         jobClass: jobClassSelect, seqType: seqTypeSelect, from: startDate, to: endDate
       }
-    }), () => {
+    }), function () {
       $.otp.clusterJobJobTypeSpecificGraph.getJobTypeSpecificWalltimes(this);
     });
   },

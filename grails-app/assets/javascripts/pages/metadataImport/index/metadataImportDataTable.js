@@ -34,7 +34,7 @@ $(() => {
 
 // sticky header
 $(() => {
-  $('table').each(() => {
+  $('table').each(function () {
     if ($(this).find('thead').length > 0 && $(this).find('th').length > 0) {
       // Clone <thead>
       const $w = $(window);
@@ -86,7 +86,7 @@ $(() => {
         .find('tbody')
         .remove();
 
-      const setPositionAndSize = () => {
+      const setPositionAndSize = function () {
         const stickyCols = $('.sticky-col');
         const stickyIntersects = $('.sticky-intersect');
         let i;
@@ -107,12 +107,12 @@ $(() => {
         }
 
         $t
-          .find('thead th').each((element) => {
+          .find('thead th').each(function (element) {
             $stickyHead.find('th').eq(element).width($(this).width());
           })
           .end()
           .find('tr')
-          .each((element) => {
+          .each(function (element) {
             $stickyCol.find('tr').eq(element).height($(this).height());
             $stickyInsct.find('tr').eq(element).height($(this).height());
           });
@@ -123,7 +123,7 @@ $(() => {
         // Set width of sticky table col
         $stickyCol.find('th').add($stickyInsct.find('th')).width($t.find('thead th').width());
       };
-      const repositionStickyHead = () => {
+      const repositionStickyHead = function () {
         // Return value of calculated allowance
         const allowance = calcAllowance();
 
@@ -169,10 +169,10 @@ $(() => {
           });
         }
       };
-      const calcAllowance = () => {
+      const calcAllowance = function () {
         let a = 0;
         // Calculate allowance
-        $t.find('tbody tr:lt(3)').each(() => {
+        $t.find('tbody tr:lt(3)').each(function () {
           a += $(this).height();
         });
 
@@ -215,7 +215,7 @@ $(($) => {
   };
   $('.fixed-scrollbar-container').css('overflow', 'AUTO');
 
-  $('.fixed-scrollbar-container').each(() => {
+  $('.fixed-scrollbar-container').each(function () {
     const $container = $(this);
     if ($container[0].offsetWidth < $container[0].scrollWidth) {
       const $bar = $(fixedBarTemplate).appendTo($container).css(fixedBarCSS);
@@ -228,8 +228,8 @@ $(($) => {
     }
   });
 
-  const fixSize = () => {
-    $('.fixed-scrollbar').each(() => {
+  const fixSize = function () {
+    $('.fixed-scrollbar').each(function () {
       const $bar = $(this);
       const $container = $bar.parent();
 
@@ -249,7 +249,7 @@ $(($) => {
   $(window).add($('.fixed-scrollbar-container')).on('scroll.fixedbar', () => {
     clearTimeout(scrollTimeout);
     scrollTimeout = setTimeout(() => {
-      $('.fixed-scrollbar-container').each(() => {
+      $('.fixed-scrollbar-container').each(function () {
         const $container = $(this);
         const $bar = $container.children('.fixed-scrollbar');
 

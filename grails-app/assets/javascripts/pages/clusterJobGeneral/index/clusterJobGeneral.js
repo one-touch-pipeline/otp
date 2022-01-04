@@ -117,7 +117,7 @@ $.otp.clusterJobGeneralGraph = {
       controller: 'clusterJobGeneral',
       action: 'getAllExitCodes',
       parameters: { from, to }
-    }), () => {
+    }), function () {
       $.otp.clusterJobGeneralGraph.generatePieGraphic('generalGraphExitCode', this);
     });
 
@@ -125,7 +125,7 @@ $.otp.clusterJobGeneralGraph = {
       controller: 'clusterJobGeneral',
       action: 'getAllExitStatuses',
       parameters: { from, to }
-    }), () => {
+    }), function () {
       $.otp.clusterJobGeneralGraph.generatePieGraphic('generalGraphExitStatus', this);
     });
 
@@ -133,7 +133,7 @@ $.otp.clusterJobGeneralGraph = {
       controller: 'clusterJobGeneral',
       action: 'getAllFailed',
       parameters: { from, to }
-    }), () => {
+    }), function () {
       $.otp.clusterJobGeneralGraph.generateLineGraphic('generalGraphFailed', this);
     });
 
@@ -141,7 +141,7 @@ $.otp.clusterJobGeneralGraph = {
       controller: 'clusterJobGeneral',
       action: 'getAllStates',
       parameters: { from, to }
-    }), () => {
+    }), function () {
       $.otp.clusterJobGeneralGraph.generateLineGraphic('generalGraphStates', this);
     });
 
@@ -149,7 +149,7 @@ $.otp.clusterJobGeneralGraph = {
       controller: 'clusterJobGeneral',
       action: 'getAllAvgCoreUsage',
       parameters: { from, to }
-    }), () => {
+    }), function () {
       $.otp.clusterJobGeneralGraph.generateLineGraphic('generalGraphCores', this);
     });
 
@@ -157,7 +157,7 @@ $.otp.clusterJobGeneralGraph = {
       controller: 'clusterJobGeneral',
       action: 'getAllMemoryUsage',
       parameters: { from, to }
-    }), () => {
+    }), function () {
       $.otp.clusterJobGeneralGraph.generateLineGraphic('generalGraphMemory', this);
     });
   },
@@ -238,7 +238,7 @@ $.otp.clusterJobGeneralProgress = {
       controller: 'clusterJobGeneral',
       action: 'getAllStatesTimeDistribution',
       parameters: { from: $('#dpFrom').val(), to: $('#dpTo').val() }
-    }), () => {
+    }), function () {
       $.otp.clusterJobGeneralProgress.generateProgress('generalGraphQueuedStartedEndedProgress', this);
     });
   },

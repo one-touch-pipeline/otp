@@ -157,7 +157,7 @@ $.otp = {
 /**
  * @deprecated Use Bootstrap toasts instead, see toaster.js
  */
-$.otp.message = (message, warning) => {
+$.otp.message = function (message, warning) {
   'use strict';
 
   if (!message) {
@@ -168,7 +168,7 @@ $.otp.message = (message, warning) => {
     classes += ' errors';
   }
   const button = $('<div class="close-info-box"><button></button></div>');
-  $('button', button).on('click', () => {
+  $('button', button).on('click', function () {
     $(this).parent().parent().remove();
   });
   const divCode = $(`<div class="${classes}"><p>${message}</p></div>`);
@@ -179,7 +179,7 @@ $.otp.message = (message, warning) => {
 /**
  * @deprecated Use Bootstrap toasts instead, see toaster.js
  */
-$.otp.infoMessage = (message) => {
+$.otp.infoMessage = function (message) {
   'use strict';
 
   this.message(message, false);
@@ -187,7 +187,7 @@ $.otp.infoMessage = (message) => {
 /**
  * @deprecated Use Bootstrap toasts instead, see toaster.js
  */
-$.otp.warningMessage = (message) => {
+$.otp.warningMessage = function (message) {
   'use strict';
 
   this.message(message, true);
@@ -384,7 +384,7 @@ $.otp.simpleSearch = {
   }
 };
 
-$.otp.highlight = (path) => {
+$.otp.highlight = function (path) {
   'use strict';
 
   const menuElement = $(`.menu a[href="${path}"]`).not('.menuLinkContainer');
@@ -397,7 +397,7 @@ $.otp.highlight = (path) => {
 };
 
 /** used for data tables */
-$.otp.resizeBodyInit = (table, margin) => {
+$.otp.resizeBodyInit = function (table, margin) {
   'use strict';
 
   $(window).on('resize', () => {
@@ -437,24 +437,26 @@ $.otp.getDownloadButton = (columnSelector, fileName, beforeDownload = (callback)
   }];
 };
 
-$.otp.getDownloadButtonServerSide = (downloadLink) => [{
-  extend: 'csv',
-  text: 'Download CSV',
-  titleAttr: 'Attention: Download can take a while',
-  action(e, dt, node, config) {
-    const iframe = document.createElement('iframe');
-    iframe.style.height = '0px';
-    iframe.style.width = '0px';
-    iframe.style.border = '0px';
-    iframe.src = downloadLink();
-    document.body.appendChild(iframe);
-  }
-}];
+$.otp.getDownloadButtonServerSide = function (downloadLink) {
+  return [{
+    extend: 'csv',
+    text: 'Download CSV',
+    titleAttr: 'Attention: Download can take a while',
+    action(e, dt, node, config) {
+      const iframe = document.createElement('iframe');
+      iframe.style.height = '0px';
+      iframe.style.width = '0px';
+      iframe.style.border = '0px';
+      iframe.src = downloadLink();
+      document.body.appendChild(iframe);
+    }
+  }];
+};
 
 /**
  * Copies a given text to the clipboard.
  */
-$.otp.copyToClipboard = (text) => {
+$.otp.copyToClipboard = function (text) {
   const body = document.getElementsByTagName('body')[0];
   const $tempInput = document.createElement('INPUT');
   $.otp.toaster.showInfoToast('Info', 'Copied to clipboard.');
@@ -478,7 +480,7 @@ $.otp.copyToClipboard = (text) => {
  *        Careful: This method assumes that the selection only contains `select` tags.
  *        If other tags are in there, strange things will happen.
  */
-$.otp.applySelect2 = (jqSelection) => {
+$.otp.applySelect2 = function (jqSelection) {
   /** Syncs the HTML5 validity styling between the 'real' select, and its Select2 imitation */
   function syncValidity(realSelect) {
     // voodoo to go from the 'real' select to its select2 imitation input-field.
@@ -530,7 +532,7 @@ $(document).ready(() => {
   $.otp.applySelect2($('.use-select-2').not('.dont-use-select-2'));
 
   // close toasts that are not added with js
-  $('body').on('click', '[data-dismiss="toast"]', () => {
+  $('body').on('click', '[data-dismiss="toast"]', function () {
     $(this).closest('.toast').toast('hide');
   });
 });

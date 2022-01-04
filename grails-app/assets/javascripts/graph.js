@@ -32,21 +32,21 @@ $.otp.graph.overview = {
       controller: 'statistic',
       action: 'projectCountPerDate',
       parameters: { projectGroupName: projectGroup }
-    }), () => {
+    }), function () {
       $.otp.graph.overview.projectCountPerDate(this, projectGroup);
     });
     RGraph.AJAX($.otp.createLink({
       controller: 'statistic',
       action: 'laneCountPerDate',
       parameters: { projectGroupName: projectGroup }
-    }), () => {
+    }), function () {
       $.otp.graph.overview.laneCountPerDate(this, projectGroup);
     });
     RGraph.AJAX($.otp.createLink({
       controller: 'statistic',
       action: 'gigaBasesPerDay',
       parameters: { projectGroupName: projectGroup }
-    }), () => {
+    }), function () {
       $.otp.graph.overview.gigaBasesPerDay(this, projectGroup);
     });
     RGraph.AJAX($.otp.createLink({
@@ -450,13 +450,13 @@ $.otp.graph.info = {
     RGraph.AJAX($.otp.createLink({
       controller: 'info',
       action: 'projectCountPerDate'
-    }), () => {
+    }), function () {
       $.otp.graph.overview.projectCountPerDate(this, 'All projects');
     });
     RGraph.AJAX($.otp.createLink({
       controller: 'info',
       action: 'laneCountPerDate'
-    }), () => {
+    }), function () {
       $.otp.graph.overview.laneCountPerDate(this, 'All projects');
     });
   }
