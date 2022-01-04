@@ -44,6 +44,7 @@ if (process.env.CI) {
     'no-alert': 'off',
     'array-callback-return': 'off',
     'no-restricted-syntax': 'off',
+    'no-useless-call': 'off',
     'no-useless-escape': 'off'
   });
 }
