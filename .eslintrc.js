@@ -49,6 +49,7 @@ if (process.env.CI) {
     'no-restricted-syntax': 'off',
     'block-scoped-var': 'off',
     'no-useless-call': 'off',
+    'no-underscore-dangle': 'off',
     'no-useless-escape': 'off'
   });
 }

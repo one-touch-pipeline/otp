@@ -21,23 +21,18 @@
  */
 
 // Override jQuery-UI functions to allow rendering of table
-// eslint-disable-next-line no-underscore-dangle
 $.ui.autocomplete.prototype._renderMenu = (ul, items) => {
   const self = this;
   ul.append("<table style='margin-right: 20px'></table>");
   $.each(items, (index, item) => {
-    // eslint-disable-next-line no-underscore-dangle
     self._renderItemData(ul, ul.find('table'), item);
   });
 };
 
-// eslint-disable-next-line no-underscore-dangle
 $.ui.autocomplete.prototype._renderItemData = function renderItemData(ul, table, item) {
-  // eslint-disable-next-line no-underscore-dangle
   return this._renderItem(table, item).data('ui-autocomplete-item', item);
 };
 
-// eslint-disable-next-line no-underscore-dangle
 $.ui.autocomplete.prototype._renderItem = (table, item) => {
   let autocompleteContent = `<td class='ui-state-disabled'>${item.placeholder}</td>`;
 
