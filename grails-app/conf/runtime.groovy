@@ -136,7 +136,7 @@ environments {
     // Everything is set in general data source
     development {
         dataSource {
-            //logSql = true
+            // logSql = true
         }
     }
     test {

@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.project
 
 import grails.gorm.transactions.Transactional
 import grails.validation.ValidationException
+import org.hibernate.sql.JoinType
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.prepost.*
 import org.springframework.validation.Errors
@@ -104,7 +105,10 @@ class ProjectService {
      */
     @PostFilter("hasRole('ROLE_OPERATOR') or hasPermission(filterObject, 'OTP_READ_ACCESS')")
     List<Project> getAllProjects() {
-        return Project.list(sort: "name", order: "asc", fetch: [projectGroup: 'join'])
+        return Project.withCriteria {
+            createAlias 'projectGroup', 'projectGroup', JoinType.LEFT_OUTER_JOIN
+            order('name', 'asc')
+        }
     }
 
     List<Project> getAllPublicProjects() {
