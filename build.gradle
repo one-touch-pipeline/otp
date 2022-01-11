@@ -422,6 +422,12 @@ task codenarcAll(type: CodeNarc) {
     group = LifecycleBasePlugin.VERIFICATION_GROUP
 }
 
+tasks.withType(GroovyCompile) {
+    configure(groovyOptions) {
+        forkOptions.jvmArgs = ['-Xmx4096m']
+    }
+}
+
 tasks.withType(CodeNarc) {
     sourceSets.each { SourceSet s ->
         if (s.name != "script") {
