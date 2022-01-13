@@ -33,21 +33,21 @@ $.otp.graph.overview = {
       action: 'projectCountPerDate',
       parameters: { projectGroupName: projectGroup }
     }), function () {
-      $.otp.graph.overview.projectCountPerDate(this, projectGroup);
+      $.otp.graph.overview.projectCountPerDate(this);
     });
     RGraph.AJAX($.otp.createLink({
       controller: 'statistic',
       action: 'laneCountPerDate',
       parameters: { projectGroupName: projectGroup }
     }), function () {
-      $.otp.graph.overview.laneCountPerDate(this, projectGroup);
+      $.otp.graph.overview.laneCountPerDate(this);
     });
     RGraph.AJAX($.otp.createLink({
       controller: 'statistic',
       action: 'gigaBasesPerDay',
       parameters: { projectGroupName: projectGroup }
     }), function () {
-      $.otp.graph.overview.gigaBasesPerDay(this, projectGroup);
+      $.otp.graph.overview.gigaBasesPerDay(this);
     });
     RGraph.AJAX($.otp.createLink({
       controller: 'statistic',
@@ -66,7 +66,7 @@ $.otp.graph.overview = {
     }), $.otp.graph.overview.projectCountPerSequenceType);
   },
 
-  projectCountPerDate(data, project) {
+  projectCountPerDate(data) {
     'use strict';
 
     const json = JSON.parse(data.responseText);
@@ -104,7 +104,7 @@ $.otp.graph.overview = {
     }).draw();
   },
 
-  laneCountPerDate(data, project) {
+  laneCountPerDate(data) {
     'use strict';
 
     const json = JSON.parse(data.responseText);
@@ -137,7 +137,7 @@ $.otp.graph.overview = {
     }).draw();
   },
 
-  gigaBasesPerDay(data, project) {
+  gigaBasesPerDay(data) {
     'use strict';
 
     const json = JSON.parse(data.responseText);
@@ -290,7 +290,6 @@ $.otp.graph.project = {
   init() {
     'use strict';
 
-    const project = $('#project').find('option:selected').text();
     RGraph.AJAX(
       $.otp.createLink({
         controller: 'statistic',
@@ -427,7 +426,7 @@ $.otp.graph.project = {
         xmax: 13,
         eventsClick(e, shape) {
           const idx = shape[5];
-          location.href = $.otp.createLink({
+          window.location.href = $.otp.createLink({
             controller: 'individual',
             action: 'show',
             parameters: {
@@ -435,7 +434,7 @@ $.otp.graph.project = {
             }
           });
         },
-        eventsMousemove(e, shape) {
+        eventsMousemove() {
           return true;
         }
       }

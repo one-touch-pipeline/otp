@@ -66,8 +66,8 @@ $.otp.projectOverviewTable = {
             oTable.fnSettings().oFeatures.bServerSide = false;
           },
           success(json) {
-            json = successUpdate(json);
-            fnCallback(json);
+            const result = successUpdate(json);
+            fnCallback(result);
             oTable.fnSettings().oFeatures.bServerSide = false;
           }
         });

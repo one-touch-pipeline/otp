@@ -33,7 +33,8 @@ $.otp.workflows.registerProcessingStep = function (selector, processId) {
     action: 'processData',
     id: `${processId}/`
   }), false, (json) => {
-    json.aaData.forEach((data, index) => {
+    const result = json;
+    result.aaData.forEach((data, index) => {
       const row = [];
       row[0] = $.otp.createLinkMarkup({
         controller: 'processes',
@@ -61,7 +62,8 @@ $.otp.workflows.registerProcessingStep = function (selector, processId) {
       row[7] = data.lastUpdate.state;
 
       row[8] = '';
-      for (const action of data.actions) {
+
+      data.actions.forEach((action) => {
         switch (action) {
           case 'restart':
             row[8] += $.otp.workflows.createRestartProcessingStepLink(data.processingStep.id, selector);
@@ -70,8 +72,9 @@ $.otp.workflows.registerProcessingStep = function (selector, processId) {
             // nothing
             break;
         }
-      }
-      json.aaData[index] = row;
+      });
+
+      result.aaData[index] = row;
     });
   }, [
     { bSortable: true, aTargets: [0] },

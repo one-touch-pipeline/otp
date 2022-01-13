@@ -20,12 +20,14 @@
  * SOFTWARE.
  */
 
+// eslint-disable-next-line no-unused-vars
 function onEditUnixGroup() {
   $('#button-edit-unixGroup').hide();
   $('#button-save-unixGroup').show();
   $('#unixGroupInput').prop('disabled', false);
 }
 
+// eslint-disable-next-line no-unused-vars
 function onSaveUnixGroup() {
   const unixGroupInputField = $('#unixGroupInput');
   const oldUnixGroup = unixGroupInputField.attr('data-fixed');

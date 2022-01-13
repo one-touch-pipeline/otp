@@ -107,7 +107,7 @@ $.otp.workflows.registerJobExecutionPlan = function (selector) {
   undefined,
   140, {
     aaSorting: [[5, 'desc']],
-    fnRowCallback(nRow, aData, iDisplayIndex, iDisplayIndexFull) {
+    fnRowCallback(nRow, aData) {
       if (aData.enabled === false) {
         $(nRow).addClass('withdrawn');
       }

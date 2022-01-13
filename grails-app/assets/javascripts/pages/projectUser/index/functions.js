@@ -20,6 +20,7 @@
  * SOFTWARE.
  */
 
+// eslint-disable-next-line no-unused-vars
 function disableNotification() {
   const otpcheckbox = $('input[type = checkbox][name=accessToOtp]');
   const notificationcheckbox = $('input[type=checkbox][name=receivesNotifications]');
@@ -78,6 +79,7 @@ function postFileAccessChange(context) {
   });
 }
 
+// eslint-disable-next-line no-unused-vars
 function onFileAccessEditClick(context) {
   const outerContainer = $(context).closest('.modal-editor-switch');
   const permissionState = $('input:hidden[name=permissionState]', outerContainer).val();
@@ -188,7 +190,7 @@ function submitChangeProjectAccess(postUrl) {
     type: 'POST',
     success(data) {
       if (data.success) {
-        location.reload();
+        window.location.reload();
       } else {
         $.otp.toaster.showErrorToast('Saving failed.', data.error);
       }

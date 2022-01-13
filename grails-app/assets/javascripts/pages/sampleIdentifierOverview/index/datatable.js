@@ -65,6 +65,7 @@ $.otp.sampleIdentifierOverviewTable = {
             oTable.fnSettings().oFeatures.bServerSide = false;
           },
           success(json) {
+            const result = json;
             oTable.fnSettings().oFeatures.bServerSide = false;
             let i; let rowData; let
               row;
@@ -90,9 +91,9 @@ $.otp.sampleIdentifierOverviewTable = {
                 row.seqType.displayText,
                 $.otp.sampleIdentifierOverviewTable.formatSampleIdentifier(row.sampleIdentifier)
               ];
-              json.aaData[i] = rowData;
+              result.aaData[i] = rowData;
             }
-            fnCallback(json);
+            fnCallback(result);
           }
         });
       }

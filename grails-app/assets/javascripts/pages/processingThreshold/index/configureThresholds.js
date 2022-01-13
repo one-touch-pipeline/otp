@@ -22,7 +22,7 @@
 
 $(() => {
   $('form.confirm').on('submit', (e) => {
-    if (!confirm('Are you sure you want to create these thresholds?')) {
+    if (!window.confirm('Are you sure you want to create these thresholds?')) {
       e.preventDefault();
     }
   });

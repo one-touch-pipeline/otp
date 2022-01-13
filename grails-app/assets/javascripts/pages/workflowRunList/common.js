@@ -50,12 +50,14 @@ const statusToClassName = function (status) {
       return 'dot orange';
     case 'KILLED':
       return 'dot black';
+    default:
+      return '';
   }
-  return '';
 };
 
+// eslint-disable-next-line no-unused-vars
 const button = function (action, value, title, buttonsDisabled, icon) {
-  return `<button class="btn btn-xs btn-primary" formaction="${action}" 
+  return `<button class="btn btn-xs btn-primary" formaction="${action}"
                   name="step" value="${value}" title="${title}" ${buttonsDisabled}>
             <i class="bi-${icon}"></i>
           </button>`;

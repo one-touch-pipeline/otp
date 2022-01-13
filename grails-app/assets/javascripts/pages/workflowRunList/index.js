@@ -24,7 +24,7 @@ $(() => {
   const table = runsTable.DataTable({
     columns: [
       {
-        data(row, type, set, meta) {
+        data(row, type) {
           if (type === 'sort') {
             return null;
           }
@@ -35,7 +35,7 @@ $(() => {
         orderable: false
       },
       {
-        data(row, type, set, meta) {
+        data(row, type) {
           if (type === 'sort') {
             return row.state;
           }
@@ -44,7 +44,7 @@ $(() => {
         }
       },
       {
-        data(row, type, set, meta) {
+        data(row, type) {
           if (type === 'sort') {
             return row.comment;
           }
@@ -56,7 +56,7 @@ $(() => {
       },
       { data: 'workflow', orderable: false },
       {
-        data(row, type, set, meta) {
+        data(row, type) {
           if (type === 'sort') {
             return row.shortName;
           }
@@ -85,7 +85,7 @@ $(() => {
       { data: 'duration', orderable: false },
       { data: 'id' },
       {
-        data(row, type, set, meta) {
+        data(row, type) {
           if (type === 'sort') {
             return null;
           }
@@ -151,9 +151,11 @@ $(() => {
         action: 'data'
       }),
       data(data) {
-        data['workflow.id'] = $('#workflow').val();
-        data.state = $('#state').val();
-        data.name = $('#name').val();
+        const json = data;
+        json['workflow.id'] = $('#workflow').val();
+        json.state = $('#state').val();
+        json.name = $('#name').val();
+        return json;
       },
       dataSrc(json) {
         setCount(json.count);
@@ -180,6 +182,7 @@ $(() => {
     const checkboxes = $('input.tableCheckbox:not([disabled])');
     const { checked } = e.target;
     checkboxes.each((i, el) => {
+      // eslint-disable-next-line no-param-reassign
       el.checked = checked;
     });
   });

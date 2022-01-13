@@ -37,22 +37,26 @@ $.otp = {
   addLinkComponent(link, component) {
     'use strict';
 
+    let newLink = link;
+    let componentString = component;
+
     if (component === undefined || !component) {
-      return link;
+      return newLink;
     }
-    if (typeof link !== 'string') {
-      link = link.toString();
+    if (typeof newLink !== 'string') {
+      newLink = link.toString();
     }
+
     if (typeof component !== 'string') {
-      component = component.toString();
+      componentString = component.toString();
     }
-    if (link.charAt(link.length - 1) !== '/' && component.charAt(0) !== '/') {
-      link += '/';
-    } else if (link.charAt(link.length - 1) === '/' && component.charAt(0) === '/') {
-      component = component.substring(1);
+    if (newLink.charAt(newLink.length - 1) !== '/' && componentString.charAt(0) !== '/') {
+      newLink += '/';
+    } else if (newLink.charAt(newLink.length - 1) === '/' && componentString.charAt(0) === '/') {
+      componentString = componentString.substring(1);
     }
-    link += component;
-    return link;
+    newLink += componentString;
+    return newLink;
   },
   /**
      * Creates an URL from the passed in options in the same way as the Grails
@@ -75,8 +79,9 @@ $.otp = {
   createLink(options) {
     'use strict';
 
-    let link; let parameter; let
-      counter;
+    let link;
+    let counter;
+
     link = $.otp.contextPath;
     if (options === undefined || !options) {
       return link;
@@ -94,7 +99,9 @@ $.otp = {
     if (parameters !== undefined && parameters && Object.keys(parameters).length > 0) {
       link += '?';
       counter = 0;
-      for (parameter in parameters) {
+
+      /* eslint-disable no-restricted-syntax */
+      for (const parameter in parameters) {
         if ({}.hasOwnProperty.call(parameters, parameter)) {
           if (counter > 0) {
             link += '&';
@@ -103,6 +110,7 @@ $.otp = {
           counter += 1;
         }
       }
+      /* eslint-enable no-restricted-syntax */
     }
     return link;
   },
@@ -442,7 +450,7 @@ $.otp.getDownloadButtonServerSide = function (downloadLink) {
     extend: 'csv',
     text: 'Download CSV',
     titleAttr: 'Attention: Download can take a while',
-    action(e, dt, node, config) {
+    action() {
       const iframe = document.createElement('iframe');
       iframe.style.height = '0px';
       iframe.style.width = '0px';

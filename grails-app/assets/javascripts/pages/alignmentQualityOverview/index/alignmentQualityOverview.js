@@ -307,18 +307,19 @@ $(() => {
      * @param abstractBamFileId
      */
   const changeQcStatus = function (dropdownMenu, abstractBamFileId) {
-    const oldValue = $(dropdownMenu).find('option[selected]').val();
+    const currentDropdownMenu = dropdownMenu;
+    const oldValue = $(currentDropdownMenu).find('option[selected]').val();
     const statusCell = $(`#status-cell-${abstractBamFileId}`);
     const statusCellOldContent = statusCell.html();
     const rowData = getTableDataRowById(abstractBamFileId);
     const msgSuffix = `<br><br><b>(${rowData.pid}, ${rowData.sampleType})</b>`;
-    const modalTitle = buildModalTitle(dropdownMenu.value);
+    const modalTitle = buildModalTitle(currentDropdownMenu.value);
 
-    updateQcChangeDefaultComment(dropdownMenu.value);
+    updateQcChangeDefaultComment(currentDropdownMenu.value);
 
     openConfirmationModal(modalTitle, (comment) => {
       if (comment == null) {
-        dropdownMenu.value = oldValue;
+        currentDropdownMenu.value = oldValue;
       } else {
         statusCell.html(`<div class="spinner-border spinner-border-sm" role="status">
                              <span class="sr-only">Loading...</span>
@@ -343,7 +344,7 @@ $(() => {
             } else {
               $.otp.toaster.showErrorToast('Status change failed', `Unknown error.${msgSuffix}`);
             }
-            dropdownMenu.value = oldValue;
+            currentDropdownMenu.value = oldValue;
             statusCell.html(statusCellOldContent);
           },
           success(result) {
@@ -354,7 +355,7 @@ $(() => {
         });
       }
     }, () => {
-      dropdownMenu.value = oldValue;
+      currentDropdownMenu.value = oldValue;
       statusCell.html(statusCellOldContent);
     });
   };
@@ -456,7 +457,7 @@ $(() => {
   const getTableDataRowById = function (id) {
     const dataTable = $('#overviewTableProcessedMergedBMF').DataTable();
 
-    return dataTable.rows((idx, data, node) => data.rowId === id.toString()).data()[0];
+    return dataTable.rows((idx, data) => data.rowId === id.toString()).data()[0];
   };
 
   /**

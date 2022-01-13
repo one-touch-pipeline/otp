@@ -31,27 +31,15 @@ const lintRules = {
   ],
   'comma-dangle': ['error', 'never'],
   'no-plusplus': ['error', { allowForLoopAfterthoughts: true }],
-  'no-undef': 'off'
+  'no-undef': 'off',
+  'func-names': 'off'
 };
 
 if (process.env.CI) {
   Object.assign(lintRules, {
     strict: 'off',
-    'func-names': 'off',
     'no-use-before-define': 'off',
-    'no-param-reassign': 'off',
-    'no-unused-vars': 'off',
-    'no-restricted-globals': 'off',
-    'default-case': 'off',
-    'no-alert': 'off',
-    'array-callback-return': 'off',
-    'no-new': 'off',
-    'no-unused-expressions': 'off',
-    'no-restricted-syntax': 'off',
-    'block-scoped-var': 'off',
-    'no-useless-call': 'off',
-    'no-underscore-dangle': 'off',
-    'no-useless-escape': 'off'
+    'no-alert': 'off'
   });
 }
 

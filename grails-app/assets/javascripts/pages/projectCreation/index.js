@@ -23,7 +23,7 @@
 $(() => {
   const form = $('form.projectCreationBasisSelection');
 
-  $(form).find('select').on('change', (e) => {
+  $(form).find('select').on('change', () => {
     form.submit();
   });
 });

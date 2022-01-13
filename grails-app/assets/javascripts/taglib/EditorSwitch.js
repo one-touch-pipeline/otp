@@ -149,12 +149,10 @@ $(() => {
           success('Success', 'Data stored successfully');
           $('p.edit-switch-label span', outerContainer).text($('textarea', container).val());
           if (data.updateMap) {
-            for (const key in data.updateMap) {
-              if ({}.hasOwnProperty.call(data.updateMap, key)) {
-                const el = $(`.${key}`, outerContainer);
-                el.text(data.updateMap[key]);
-              }
-            }
+            data.updateMap.forEach((key) => {
+              const el = $(`.${key}`, outerContainer);
+              el.text(data.updateMap[key]);
+            });
           }
         } else {
           failure('Data could not be stored', data.error);
@@ -216,7 +214,7 @@ $(() => {
 
     const confirmationText = $('button[data-confirmation]', container).attr('data-confirmation');
     if (confirmationText) {
-      const confirmed = confirm(confirmationText);
+      const confirmed = window.confirm(confirmationText);
       if (!confirmed) {
         return;
       }
@@ -268,7 +266,7 @@ $(() => {
     if (selectedNewRoles.length !== 0) {
       const confirmationText = $('button[data-confirmation]', container).attr('data-confirmation');
       if (confirmationText) {
-        const confirmed = confirm(confirmationText);
+        const confirmed = window.confirm(confirmationText);
         if (confirmed === false) {
           return;
         }
@@ -329,7 +327,7 @@ $(() => {
 
     const confirmationText = $('button[data-confirmation]', container).attr('data-confirmation');
     if (confirmationText) {
-      const confirmed = confirm(confirmationText);
+      const confirmed = window.confirm(confirmationText);
       if (confirmed === false) {
         return;
       }
@@ -379,7 +377,7 @@ $(() => {
 
     const confirmationText = $('button[data-confirmation]', container).attr('data-confirmation');
     if (confirmationText) {
-      const confirmed = confirm(confirmationText);
+      const confirmed = window.confirm(confirmationText);
       if (!confirmed) {
         return;
       }
@@ -527,7 +525,7 @@ $(() => {
     });
     $('p.edit-switch-editor', outerContainer).hide();
     $('p.edit-switch-label', outerContainer).show();
-    window.setTimeout(() => { location.reload(); }, 300); // reloads page after 0.3 seconds
+    window.setTimeout(() => { window.location.reload(); }, 300); // reloads page after 0.3 seconds
   });
 
   $('div.edit-switch-new-free-text-value p.edit-switch-editor button.save').on('click', function () {
@@ -560,7 +558,7 @@ $(() => {
     });
     $('p.edit-switch-editor', outerContainer).hide();
     $('p.edit-switch-label', outerContainer).show();
-    window.setTimeout(() => { location.reload(); }, 300); // reloads page after 0.3 seconds
+    window.setTimeout(() => { window.location.reload(); }, 300); // reloads page after 0.3 seconds
   });
 
   $('div.edit-switch-new-free-text-values span.edit-switch-editor button.save').on('click', function () {
@@ -586,7 +584,7 @@ $(() => {
       success(response) {
         if (response.success) {
           success('Success', 'Data stored successfully');
-          window.setTimeout(() => { location.reload(); }, 300);
+          window.setTimeout(() => { window.location.reload(); }, 300);
         } else {
           failure('Data could not be stored', response.error);
         }
@@ -611,7 +609,7 @@ $(() => {
     const confirmationText = $('button[data-confirmation]', container).attr('data-confirmation');
 
     if (confirmationText) {
-      const confirmed = confirm(confirmationText);
+      const confirmed = window.confirm(confirmationText);
       if (confirmed === false) {
         return;
       }
@@ -637,7 +635,7 @@ $(() => {
           $('input:hidden[name=value]', container).attr('value', invVal);
           const pageReload = $('button[data-pageReload]', container).attr('data-pageReload');
           if (pageReload === 'true') {
-            window.setTimeout(() => { location.reload(); }, 100); // reloads page after 0.5 seconds
+            window.setTimeout(() => { window.location.reload(); }, 100); // reloads page after 0.5 seconds
           }
         } else {
           failure('Data could not be stored', data.error);
@@ -677,23 +675,23 @@ $(() => {
     const template = $('.inputTemplate', outerContainer);
     const dataValues = multiInputField.data('values');
     let first = true;
-    for (const key in dataValues) {
-      if ({}.hasOwnProperty.call(dataValues, key)) {
-        const field = $('<div class="field"></div>');
-        const clonedField = template.clone();
-        clonedField.removeClass('inputTemplate');
-        clonedField.val(dataValues[key]);
-        field.append(clonedField);
-        if (first) {
-          field.append(' <button class="add-field">+</button>');
-          first = false;
-        } else {
-          field.append(' <button class="remove-field">-</button>');
-        }
-        $.otp.applySelect2($('select.use-select-2', clonedField));
-        multiInputField.append(field);
+
+    dataValues.forEach((key) => {
+      const field = $('<div class="field"></div>');
+      const clonedField = template.clone();
+      clonedField.removeClass('inputTemplate');
+      clonedField.val(dataValues[key]);
+      field.append(clonedField);
+      if (first) {
+        field.append(' <button class="add-field">+</button>');
+        first = false;
+      } else {
+        field.append(' <button class="remove-field">-</button>');
       }
-    }
+      $.otp.applySelect2($('select.use-select-2', clonedField));
+      multiInputField.append(field);
+    });
+
     $('.edit-switch-editor', outerContainer).show();
     $('.edit-switch-label', outerContainer).hide();
   });

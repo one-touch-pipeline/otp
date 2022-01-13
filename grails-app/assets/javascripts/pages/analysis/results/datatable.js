@@ -23,10 +23,9 @@
 $.otp.resultsTable = {
 
   registerDataTable(tableElement, source, columnDefs, convertRowData) {
-    const fileName = `${document.title.replaceAll(' ', '_')}-${$('.selected-project-value strong').text()}`;
-
     'use strict';
 
+    const fileName = `${document.title.replaceAll(' ', '_')}-${$('.selected-project-value strong').text()}`;
     const oTable = tableElement.dataTable({
       sDom: '<i> B rt<"clear">',
       buttons: $.otp.getDownloadButton('', fileName),
@@ -55,17 +54,18 @@ $.otp.resultsTable = {
             oTable.fnSettings().oFeatures.bServerSide = false;
           },
           success(json) {
+            const result = json;
             let i;
             for (i = 0; i < json.aaData.length; i += 1) {
-              json.aaData[i] = convertRowData(json.aaData[i]);
+              result.aaData[i] = convertRowData(json.aaData[i]);
             }
-            fnCallback(json);
+            fnCallback(result);
             oTable.fnSettings().oFeatures.bServerSide = false;
           }
         });
       },
       fnInitComplete() {
-        new $.fn.dataTable.FixedColumns(this, {
+        $.fn.dataTable.FixedColumns(this, {
           leftColumns: 2
         });
       }
@@ -81,7 +81,7 @@ $.otp.resultsTable = {
   getEllipsisRenderer(nCharacters) {
     'use strict';
 
-    return function (data, type, row) {
+    return function (data) {
       return `<div class="trim-text-with-ellipsis" \
                    style="max-width: ${nCharacters}em" \
                    title="${data}">

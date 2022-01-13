@@ -66,6 +66,7 @@ $.otp.run = {
             fnCallback({ aaData: [], iTotalRecords: 0, iTotalDisplayRecords: 0 });
           },
           success(json) {
+            const result = json;
             let i; let rowData; let
               row;
             for (i = 0; i < json.aaData.length; i += 1) {
@@ -81,9 +82,9 @@ $.otp.run = {
                 row.dateCreated,
                 row.dateExecuted
               ];
-              json.aaData[i] = rowData;
+              result.aaData[i] = rowData;
             }
-            fnCallback(json);
+            fnCallback(result);
           }
         });
       }

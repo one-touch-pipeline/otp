@@ -53,8 +53,8 @@ $.otp.projectConfig = {
             oTable.fnSettings().oFeatures.bServerSide = false;
           },
           success(json) {
-            json = successUpdate(json);
-            fnCallback(json);
+            const result = successUpdate(json);
+            fnCallback(result);
             oTable.fnSettings().oFeatures.bServerSide = false;
           }
         });
@@ -66,7 +66,7 @@ $.otp.projectConfig = {
   referenceGenome() {
     'use strict';
 
-    const oTable = $.otp.projectConfig.registerDataTable(
+    $.otp.projectConfig.registerDataTable(
       '#listReferenceGenome',
       $.otp.createLink({
         controller: 'alignmentConfigurationOverview',

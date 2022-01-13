@@ -37,10 +37,10 @@ $(() => {
       alert('Please select a run.');
       submit = false;
     } else if (radios.filter('[value=delete]').size() === 1) {
-      submit = confirm(`All runs of this individual/sample type/seq.
+      submit = window.confirm(`All runs of this individual/sample type/seq.
        type/version/reference combination will be deleted on the filesystem. Continue?`);
     } else {
-      submit = confirm(`If existing, all other runs of this individual/sample type/seq.
+      submit = window.confirm(`If existing, all other runs of this individual/sample type/seq.
        type/version/reference combination will be deleted on the filesystem. Continue?`);
     }
     if (submit === false) {
