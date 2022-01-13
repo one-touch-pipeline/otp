@@ -168,7 +168,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
             dirAnalysis = "${temporaryFolder.newFolder()}${dirAnalysis}"
             Path analysisPath = Paths.get(dirAnalysis)
             1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(analysisPath.parent, _, '', FileService.DIRECTORY_WITH_OTHER_PERMISSION_STRING)
-            1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(analysisPath, _, unixGroup)
+            1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(analysisPath, _, unixGroup, FileService.OWNER_AND_GROUP_DIRECTORY_PERMISSION_STRING)
         }
 
         when:
@@ -279,7 +279,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(projectPath.parent, _, '', FileService.DIRECTORY_WITH_OTHER_PERMISSION_STRING)
         1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(projectPath, _, unixGroup)
         1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(analysisPath.parent, _, '', FileService.DIRECTORY_WITH_OTHER_PERMISSION_STRING)
-        1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(analysisPath, _, unixGroup)
+        1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(analysisPath, _, unixGroup, FileService.OWNER_AND_GROUP_DIRECTORY_PERMISSION_STRING)
         0 * projectService.fileService._
 
         project
@@ -325,7 +325,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         1 * projectService.fileService.setGroupViaBash(projectPath, _, unixGroup)
         1 * projectService.fileService.setPermissionViaBash(projectPath, _, FileService.DEFAULT_DIRECTORY_PERMISSION_STRING)
         1 * projectService.fileService.setGroupViaBash(analysisPath, _, unixGroup)
-        1 * projectService.fileService.setPermissionViaBash(analysisPath, _, FileService.DEFAULT_DIRECTORY_PERMISSION_STRING)
+        1 * projectService.fileService.setPermissionViaBash(analysisPath, _, FileService.OWNER_AND_GROUP_DIRECTORY_PERMISSION_STRING)
         0 * projectService.fileService._
 
         project
@@ -376,7 +376,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(projectPath.parent, _, '', FileService.DIRECTORY_WITH_OTHER_PERMISSION_STRING)
         1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(projectPath, _, unixGroup)
         1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(analysisPath.parent, _, '', FileService.DIRECTORY_WITH_OTHER_PERMISSION_STRING)
-        1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(analysisPath, _, unixGroup) >> {
+        1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(analysisPath, _, unixGroup, FileService.OWNER_AND_GROUP_DIRECTORY_PERMISSION_STRING) >> {
             throw new OtpFileSystemException(exceptionMessage)
         }
         0 * projectService.fileService._
@@ -544,7 +544,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(projectPath.parent, _, '', FileService.DIRECTORY_WITH_OTHER_PERMISSION_STRING)
         1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(projectPath, _, unixGroup)
         1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(analysisPath.parent, _, '', FileService.DIRECTORY_WITH_OTHER_PERMISSION_STRING)
-        1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(analysisPath, _, unixGroup)
+        1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(analysisPath, _, unixGroup, FileService.OWNER_AND_GROUP_DIRECTORY_PERMISSION_STRING)
         0 * projectService.fileService._
     }
 

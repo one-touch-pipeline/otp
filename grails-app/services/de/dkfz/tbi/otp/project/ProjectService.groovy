@@ -325,14 +325,15 @@ class ProjectService {
         if (Files.exists(analysisDirectory)) {
             //ensure correct permission and group
             fileService.setGroupViaBash(analysisDirectory, realm, project.unixGroup)
-            fileService.setPermissionViaBash(analysisDirectory, realm, FileService.DEFAULT_DIRECTORY_PERMISSION_STRING)
+            fileService.setPermissionViaBash(analysisDirectory, realm, FileService.OWNER_AND_GROUP_DIRECTORY_PERMISSION_STRING)
             return
         }
 
         try {
             fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(analysisDirectory.parent,
                     realm, '', FileService.DIRECTORY_WITH_OTHER_PERMISSION_STRING)
-            fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(analysisDirectory, realm, project.unixGroup)
+            fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(analysisDirectory, realm, project.unixGroup,
+                    FileService.OWNER_AND_GROUP_DIRECTORY_PERMISSION_STRING)
         } catch (AssertionError | FileSystemException | OtpFileSystemException e) {
             String header = "Could not automatically create analysisDir '${project.dirAnalysis}' for Project '${project.name}'."
             mailHelperService.sendEmailToTicketSystem(
