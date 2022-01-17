@@ -21,11 +21,12 @@
 FROM azul/zulu-openjdk-centos:8
 MAINTAINER OTP Developers <otp-devel@dkfz-heidelberg.de>
 
+RUN rpm -ivh http://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
 # Install dependencies
 RUN yum -y update && \
     yum -y install \
         git \
-        install \
+        jq \
         postgresql.x86_64 \
         python-mako.noarch \
         unzip && \

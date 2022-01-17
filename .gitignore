@@ -73,8 +73,10 @@ out
 *.otp.war.properties
 *.env
 ##sprint review
-review/
+/review/
 /otp_local_setup.sh
+##gitlab ci
+response.json
 
 ### Node ###
 node_modules/

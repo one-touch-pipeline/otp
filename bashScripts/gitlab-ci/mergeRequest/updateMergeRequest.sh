@@ -1,4 +1,5 @@
----
+#!/bin/bash
+
 # Copyright 2011-2019 The OTP authors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -19,30 +20,35 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-include:
-  - local: '.gitlab-ci-core.yml'
-  - local: '.gitlab-ci-merge-request.yml'
-  - template: Dependency-Scanning.gitlab-ci.yml
-  - template: License-Scanning.gitlab-ci.yml
+source `dirname $0`/initMergeRequest.sh
 
-variables:
-  #Default is: DS_DEFAULT_ANALYZERS: "gemnasium, retire.js, gemnasium-python, gemnasium-maven, bundler-audit"`
-  DS_DEFAULT_ANALYZERS: "retire.js, gemnasium-maven, bundler-audit"
+if [ "$NO_MERGE_REQUEST_EXIST" == "true" ]
+then
+    exit 0
+fi
 
-stages:
-  - create merge request
-  - scanning
-  - test
-  - codestyle
-  - war
-  - doc
-  - public doc
-  - update merge request
+echo "merge request"
+MR_ID=`jq -e '.[0].iid' responseCheck.json`
+echo "Merge request id: ${MR_ID}"
 
+echo "check merge request approvals"
+curl --header "PRIVATE-TOKEN: $PROJECT_TOKEN" \
+  "$PROJECT_URL/merge_requests/$MR_ID/approval_state" > responseApproval.json
+jq -C -e '.' responseApproval.json
 
-gemnasium-maven-dependency_scanning:
-  stage: scanning
-license_scanning:
-  stage: scanning
-retire-js-dependency_scanning:
-  stage: scanning
+ALREADY_APPROVED=`cat responseApproval.json | jq -Mc '.rules | map(.approved_by) | map(select(.| length > 0)) | length > 0'`
+echo $ALREADY_APPROVED
+
+if [ "$ALREADY_APPROVED" == "true" ]
+then
+    LABEL="waiting for reviewer 2"
+else
+    LABEL="waiting for reviewer"
+fi
+echo $LABEL
+
+curl -X PUT --header "PRIVATE-TOKEN: $PROJECT_TOKEN" \
+  --data-urlencode "add_labels=$LABEL" \
+  --data-urlencode "remove_labels=waiting for author" \
+  "$PROJECT_URL/merge_requests/$MR_ID" > responseUpdate.json
+jq -C -e '.' responseUpdate.json

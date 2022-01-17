@@ -1,4 +1,5 @@
----
+#!/bin/bash
+
 # Copyright 2011-2019 The OTP authors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -19,30 +20,27 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-include:
-  - local: '.gitlab-ci-core.yml'
-  - local: '.gitlab-ci-merge-request.yml'
-  - template: Dependency-Scanning.gitlab-ci.yml
-  - template: License-Scanning.gitlab-ci.yml
+set -e -o pipefail
 
-variables:
-  #Default is: DS_DEFAULT_ANALYZERS: "gemnasium, retire.js, gemnasium-python, gemnasium-maven, bundler-audit"`
-  DS_DEFAULT_ANALYZERS: "retire.js, gemnasium-maven, bundler-audit"
+if [[ ! -v PROJECT_TOKEN ]]
+then
+    echo "The variable PROJECT_TOKEN is not defined"
+    exit 1
+fi
 
-stages:
-  - create merge request
-  - scanning
-  - test
-  - codestyle
-  - war
-  - doc
-  - public doc
-  - update merge request
+if [[ ! -v PROJECT_URL ]]
+then
+    echo "The variable PROJECT_URL is not defined"
+    exit 1
+fi
 
+set -vx
 
-gemnasium-maven-dependency_scanning:
-  stage: scanning
-license_scanning:
-  stage: scanning
-retire-js-dependency_scanning:
-  stage: scanning
+echo "search for existing merge request"
+curl --header "PRIVATE-TOKEN: $PROJECT_TOKEN" "$PROJECT_URL/merge_requests?state=all&source_branch=$CI_COMMIT_BRANCH" >  responseCheck.json
+jq -C '.' responseCheck.json
+
+#does already a merge request exist?
+NO_MERGE_REQUEST_EXIST="$(jq '. | length==0' responseCheck.json)"
+
+echo "NO_MERGE_REQUEST_EXIST: $NO_MERGE_REQUEST_EXIST"

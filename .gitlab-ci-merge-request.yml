@@ -19,30 +19,23 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-include:
-  - local: '.gitlab-ci-core.yml'
-  - local: '.gitlab-ci-merge-request.yml'
-  - template: Dependency-Scanning.gitlab-ci.yml
-  - template: License-Scanning.gitlab-ci.yml
+create merge request:
+  image: registry.gitlab.com/one-touch-pipeline/otp/otp-gitlab-ci
+  stage: create merge request
+  dependencies: [ ]
+  needs: [ ]
+  only:
+    - /^review\/.*$/
+  script:
+    - bashScripts/gitlab-ci/mergeRequest/createMergeRequest.sh
+  variables:
+    GIT_DEPTH: "0"
 
-variables:
-  #Default is: DS_DEFAULT_ANALYZERS: "gemnasium, retire.js, gemnasium-python, gemnasium-maven, bundler-audit"`
-  DS_DEFAULT_ANALYZERS: "retire.js, gemnasium-maven, bundler-audit"
-
-stages:
-  - create merge request
-  - scanning
-  - test
-  - codestyle
-  - war
-  - doc
-  - public doc
-  - update merge request
-
-
-gemnasium-maven-dependency_scanning:
-  stage: scanning
-license_scanning:
-  stage: scanning
-retire-js-dependency_scanning:
-  stage: scanning
+update merge request:
+  image: registry.gitlab.com/one-touch-pipeline/otp/otp-gitlab-ci
+  stage: update merge request
+  dependencies: [ ]
+  only:
+    - branches
+  script:
+    - bashScripts/gitlab-ci/mergeRequest/updateMergeRequest.sh
