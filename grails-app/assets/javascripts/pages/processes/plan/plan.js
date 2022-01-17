@@ -48,7 +48,7 @@ $.otp.workflows.registerProcesses = function (selector, planId, state) {
         text: rowData[0]
       });
       rowData[1] = $.otp.workflows.statusDivHtml(rowData[1]);
-      if (rowData[2]) {
+      if (Object.keys(rowData[2]).length !== 0) {
         rowData[2] = rowData[2].text;
       } else {
         rowData[2] = '-';

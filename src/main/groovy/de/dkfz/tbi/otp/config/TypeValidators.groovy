@@ -108,6 +108,10 @@ enum TypeValidators {
         value != null && validator(value)
     }
 
+    /**
+     * @return a list of allowed values, or null if everything is allowed
+     */
+    @SuppressWarnings("ReturnsNullInsteadOfEmptyCollection")
     List<String> getAllowedValues() {
         if (allowedValues) {
             return allowedValues.call()

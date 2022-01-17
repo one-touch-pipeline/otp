@@ -28,8 +28,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.util.spreadsheet.*
-import de.dkfz.tbi.util.spreadsheet.validation.ColumnSetValidator
-import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
+import de.dkfz.tbi.util.spreadsheet.validation.*
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 import static de.dkfz.tbi.otp.ngsdata.MultiplexingService.combineLaneNumberAndBarcode
@@ -92,11 +91,13 @@ class SeqTrackValidator extends ColumnSetValidator<MetadataValidationContext> im
     }
 
     List<RowWithExtractedValues> getRowsWithExtractedValues(MetadataValidationContext context) {
-        List<Column> columns = findColumns(context)
-        if (!columns) {
-            return Collections.emptyList()
+        Column runColumn
+        Column laneNumberColumn
+        try {
+            (runColumn, laneNumberColumn) = findColumns(context)
+        } catch (ColumnsMissingException ignored) {
+            return []
         }
-        def (Column runColumn, Column laneNumberColumn) = columns
         return context.spreadsheet.dataRows.collect {
             Cell runCell = it.getCell(runColumn)
             Cell laneNumberCell = it.getCell(laneNumberColumn)
@@ -232,10 +233,7 @@ class SeqTrackValidator extends ColumnSetValidator<MetadataValidationContext> im
         if (filenameColumn && seqTrackRows.size() > 1) {
             Collection<Cell> filenameCells = seqTrackRows*.row*.getCell(filenameColumn)
             Map<String, Character> extractedMateNumbers = extractDistinguishingCharacter(filenameCells*.text)
-            if (extractedMateNumbers == null) {
-                context.addProblem(mateCells(seqTrackRows) + filenameCells,
-                        LogLevel.ERROR, "The filenames '${filenameCells*.text.sort().join("', '")}' for ${seqTrackRows.first().seqTrackString} do not differ in exactly one character. They must differ in exactly one character which is the mate number.", "The filenames of one seqTrack do not differ in exactly one character. They must differ in exactly one character which is the mate number.")
-            } else {
+            if (extractedMateNumbers) {
                 seqTrackRows.each {
                     Cell filenameCell = it.row.getCell(filenameColumn)
                     String filename = filenameCell.text
@@ -245,6 +243,9 @@ class SeqTrackValidator extends ColumnSetValidator<MetadataValidationContext> im
                                 LogLevel.ERROR, "The filenames '${filenameCells*.text.sort().join("', '")}' for ${seqTrackRows.first().seqTrackString} differ in exactly one character as expected, but the distinguishing character '${extractedMateNumber}' in filename '${filename}' is not the mate number '${it.mateNumber.value}'.", "The filenames of one seqTrack differ in exactly one character as expected, but the distinguishing character is not the mate number.")
                     }
                 }
+            } else {
+                context.addProblem(mateCells(seqTrackRows) + filenameCells,
+                        LogLevel.ERROR, "The filenames '${filenameCells*.text.sort().join("', '")}' for ${seqTrackRows.first().seqTrackString} do not differ in exactly one character. They must differ in exactly one character which is the mate number.", "The filenames of one seqTrack do not differ in exactly one character. They must differ in exactly one character which is the mate number.")
             }
         }
     }

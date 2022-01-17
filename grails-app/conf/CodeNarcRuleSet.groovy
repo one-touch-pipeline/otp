@@ -468,7 +468,7 @@ All the Rules that will be used for OTP
         priority = CRITICAL
     }
     ReturnsNullInsteadOfEmptyCollection {
-        priority = HIGH
+        priority = CRITICAL
     }
     SimpleDateFormatMissingLocale {
         priority = CRITICAL

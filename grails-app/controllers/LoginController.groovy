@@ -45,7 +45,7 @@ class LoginController extends grails.plugin.springsecurity.LoginController {
 
         if (springSecurityService.isLoggedIn()) {
             redirect uri: cmd.target ?: conf.successHandler.defaultTargetUrl
-            return
+            return [:]
         }
 
         String postUrl = "${request.contextPath}${conf.apf.filterProcessesUrl}"

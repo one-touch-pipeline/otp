@@ -36,17 +36,17 @@ class StringUtilsSpec extends Specification {
 
     void 'extractDistinguishingCharacter, when strings have different lengths, returns null'() {
         expect:
-        StringUtils.extractDistinguishingCharacter(['abc', 'abbc']) == null
+        StringUtils.extractDistinguishingCharacter(['abc', 'abbc']) == [:]
     }
 
     void 'extractDistinguishingCharacter, when strings are empty, returns null'() {
         expect:
-        StringUtils.extractDistinguishingCharacter(['', '']) == null
+        StringUtils.extractDistinguishingCharacter(['', '']) == [:]
     }
 
     void 'extractDistinguishingCharacter, when more characters are different, returns null'(List<String> strings) {
         expect:
-        StringUtils.extractDistinguishingCharacter(strings) == null
+        StringUtils.extractDistinguishingCharacter(strings) == [:]
 
         where:
         strings | _
@@ -56,7 +56,7 @@ class StringUtilsSpec extends Specification {
 
     void 'extractDistinguishingCharacter, when strings are equal, returns null'(List<String> strings) {
         expect:
-        StringUtils.extractDistinguishingCharacter(strings) == null
+        StringUtils.extractDistinguishingCharacter(strings) == [:]
 
         where:
         strings | _

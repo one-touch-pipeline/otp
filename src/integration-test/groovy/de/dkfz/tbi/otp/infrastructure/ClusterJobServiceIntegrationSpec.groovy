@@ -1595,7 +1595,7 @@ class ClusterJobServiceIntegrationSpec extends Specification implements DomainFa
         setupData()
 
         expect:
-        null == clusterJobService.findJobSpecificStatesTimeDistributionByJobId(0)
+        [:] == clusterJobService.findJobSpecificStatesTimeDistributionByJobId(0)
     }
 
     void test_findJobSpecificStatesTimeDistributionByJobId_WhenJobIsFound_ReturnStatesTimeDistribution() {

@@ -42,9 +42,10 @@ class ColumnSetValidatorSpec extends Specification {
         ] as ColumnSetValidator<ValidationContext>
 
         when:
-        List<Column> columns = validator.findColumns(context)
+        validator.findColumns(context)
+
         then:
-        columns == null
+        thrown(ColumnsMissingException)
         Problem problem = exactlyOneElement(context.problems)
         problem.affectedCells.empty
         problem.level == LogLevel.ERROR

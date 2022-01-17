@@ -53,8 +53,7 @@ class IndividualController {
         } else if (params.mockPid) {
             individual = individualService.getIndividualByMockPid(params.mockPid)
         } else {
-            response.sendError(404)
-            return
+            return response.sendError(404)
         }
 
         if (!individual) {

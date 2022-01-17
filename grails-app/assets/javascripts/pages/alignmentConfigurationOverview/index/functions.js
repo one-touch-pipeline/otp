@@ -108,7 +108,7 @@ $.otp.projectConfig = {
      */
   initialiseAlignmentInfo(data) {
     $('#loader').remove();
-    if (data.alignmentInfo != null) {
+    if (data.alignmentInfo.length > 0) {
       $('#alignment_info_table').css('visibility', 'visible');
       $.otp.projectConfig.createAlignmentTable(data);
     } else {

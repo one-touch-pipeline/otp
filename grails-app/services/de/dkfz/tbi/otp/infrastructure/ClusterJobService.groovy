@@ -1001,7 +1001,7 @@ WHERE
     Map<String, Map<String, Long>> findJobSpecificStatesTimeDistributionByJobId(Long id) {
         ClusterJob job = ClusterJob.get(id)
         if (!job) {
-            return null
+            return [:]
         }
 
         Duration queue = Duration.between(job.queued, job.started)

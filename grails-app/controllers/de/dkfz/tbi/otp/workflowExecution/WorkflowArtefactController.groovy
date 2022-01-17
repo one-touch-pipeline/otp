@@ -23,8 +23,6 @@ package de.dkfz.tbi.otp.workflowExecution
 
 import grails.plugin.springsecurity.annotation.Secured
 
-import de.dkfz.tbi.otp.FlashMessage
-
 @Secured("hasRole('ROLE_OPERATOR')")
 class WorkflowArtefactController {
 
@@ -34,9 +32,7 @@ class WorkflowArtefactController {
 
     def index(WorkflowArtefact workflowArtefact) {
         if (!workflowArtefact) {
-            flash.message = new FlashMessage(g.message(code: "workflowArtefact.message.artefactIdNotSet") as String,
-                    g.message(code: "workflowArtefact.message.artefactIdNotSet.error") as String)
-            return
+            return response.sendError(404)
         }
 
         List<WorkflowRunInputArtefact> workflowRunInputArtefact = WorkflowRunInputArtefact.findAllByWorkflowArtefact(workflowArtefact)

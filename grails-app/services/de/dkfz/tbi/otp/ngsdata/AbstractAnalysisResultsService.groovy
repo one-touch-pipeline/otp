@@ -140,7 +140,7 @@ abstract class AbstractAnalysisResultsService<T extends BamFilePairAnalysis> {
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#callingInstance.project, 'OTP_READ_ACCESS')")
     List<Path> getFiles(BamFilePairAnalysis callingInstance, PlotType plotType) {
         if (!callingInstance) {
-            return null
+            return []
         }
 
         List<Path> filePaths = []

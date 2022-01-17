@@ -58,22 +58,22 @@ class StringUtils {
             throw new IllegalArgumentException('At least two strings must be provided')
         }
         if (strings*.length().unique().size() != 1) {
-            return null
+            return [:]
         }
         int characterIndex = commonPrefixLength(strings[0], strings[1])
         if (characterIndex == strings[0].length()) {
-            return null
+            return [:]
         }
         String prefix = strings[0].substring(0, characterIndex)
         String suffix = strings[0].substring(characterIndex + 1)
         Map<String, Character> result = [:]
         for (String it : strings) {
             if (!it.startsWith(prefix) || !it.endsWith(suffix)) {
-                return null
+                return [:]
             }
             if (result.put(it, it.charAt(characterIndex))) {
                 // At least two of the strings are equal
-                return null
+                return [:]
             }
         }
         return result

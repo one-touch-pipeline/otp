@@ -49,8 +49,7 @@ class AceseqController extends AbstractAnalysisController {
 
     Map plots(BamFilePairAnalysisCommand cmd) {
         if (cmd.hasErrors()) {
-            render status: 404
-            return
+            return response.sendError(404)
         }
 
         Map<PlotType, List<Integer>> plotNumber = [:]
@@ -80,12 +79,11 @@ class AceseqController extends AbstractAnalysisController {
 
     Map plotImages(BamFilePairAnalysisCommand cmd) {
         if (cmd.hasErrors()) {
-            render status: 404
-            return
+            return response.sendError(404)
         }
         List<Path> files = aceseqResultsService.getFiles(cmd.bamFilePairAnalysis, cmd.plotType)
         if (files.isEmpty()) {
-            render status: 404
+            return response.sendError(404)
         } else {
             if (cmd.plotType in [PlotType.ACESEQ_EXTRA, PlotType.ACESEQ_ALL]) {
                 render file: files[cmd.index].bytes, contentType: "image/png"

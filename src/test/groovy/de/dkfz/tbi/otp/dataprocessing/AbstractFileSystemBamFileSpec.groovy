@@ -78,7 +78,7 @@ class MockAbstractFileSystemBamFile extends AbstractFileSystemBamFile implements
 
     @Override
     Set<SeqTrack> getContainedSeqTracks() {
-        return null
+        return [] as Set
     }
 
     @Override

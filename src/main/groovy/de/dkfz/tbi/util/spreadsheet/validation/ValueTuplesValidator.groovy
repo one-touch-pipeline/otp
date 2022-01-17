@@ -33,18 +33,21 @@ abstract class ValueTuplesValidator<C extends ValidationContext> extends ColumnS
 
     @Override
     final void validate(C context) {
-        List<Column> columns = findColumns(context)
-        if (columns != null) {
-            Map<Map<String, String>, Set<Cell>> cellsByValues = [:]
-            context.spreadsheet.dataRows.each { Row row ->
-                Map<Column, Cell> cellsByColumn = columns.findAll().collectEntries { [it, row.getCell(it)] }
-                Map<String, String> valuesByColumnTitle = cellsByColumn.collectEntries { column, cell -> [column.headerCell.text, cell.text ] }
-                CollectionUtils.getOrPut(cellsByValues, valuesByColumnTitle, new LinkedHashSet<Cell>()).addAll(cellsByColumn.values())
-            }
-            validateValueTuples(context, cellsByValues.collect { Map<String, String> valuesByColumnTitle, Set<Cell> cells ->
-                new ValueTuple(valuesByColumnTitle.asImmutable(), cells.asImmutable())
-            }.asImmutable())
+        List<Column> columns
+        try {
+            columns = findColumns(context)
+        } catch (ColumnsMissingException ignored) {
+            return
         }
+        Map<Map<String, String>, Set<Cell>> cellsByValues = [:]
+        context.spreadsheet.dataRows.each { Row row ->
+            Map<Column, Cell> cellsByColumn = columns.findAll().collectEntries { [it, row.getCell(it)] }
+            Map<String, String> valuesByColumnTitle = cellsByColumn.collectEntries { column, cell -> [column.headerCell.text, cell.text] }
+            CollectionUtils.getOrPut(cellsByValues, valuesByColumnTitle, new LinkedHashSet<Cell>()).addAll(cellsByColumn.values())
+        }
+        validateValueTuples(context, cellsByValues.collect { Map<String, String> valuesByColumnTitle, Set<Cell> cells ->
+            new ValueTuple(valuesByColumnTitle.asImmutable(), cells.asImmutable())
+        }.asImmutable())
     }
 
     /**

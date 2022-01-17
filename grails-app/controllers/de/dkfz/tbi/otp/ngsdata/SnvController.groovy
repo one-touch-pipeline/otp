@@ -38,8 +38,7 @@ class SnvController extends AbstractAnalysisController {
 
     Map plots(BamFilePairAnalysisCommand cmd) {
         if (cmd.hasErrors()) {
-            render status: 404
-            return
+            return response.sendError(404)
         }
         return snvResultsService.getFiles(cmd.bamFilePairAnalysis, cmd.plotType) ? [
                 id      : cmd.bamFilePairAnalysis.id,
@@ -54,8 +53,7 @@ class SnvController extends AbstractAnalysisController {
 
     def renderPDF(BamFilePairAnalysisCommand cmd) {
         if (cmd.hasErrors()) {
-            response.sendError(404)
-            return
+            return response.sendError(404)
         }
         List<Path> filePaths = snvResultsService.getFiles(cmd.bamFilePairAnalysis, cmd.plotType)
         Path file = filePaths.first()

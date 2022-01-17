@@ -92,7 +92,7 @@ class MockAbstractBamFile extends AbstractBamFile implements DomainClass, GormEn
 
     @Override
     Set<SeqTrack> getContainedSeqTracks() {
-        return null
+        return [] as Set
     }
 
     @Override

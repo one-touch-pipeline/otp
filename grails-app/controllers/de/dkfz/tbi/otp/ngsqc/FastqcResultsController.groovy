@@ -50,8 +50,7 @@ class FastqcResultsController {
     def show() {
         DataFile dataFile = metaDataService.getDataFile(params.id as long)
         if (!dataFile) {
-            render status: 404
-            return
+            return response.sendError(404)
         }
 
         String result
@@ -93,7 +92,7 @@ class FastqcResultsController {
      */
     def renderFile(RenderFileCommand cmd) {
         if (cmd.hasErrors()) {
-            render status: 404
+            return response.sendError(404)
         } else {
             InputStream stream
             try {

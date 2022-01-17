@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.util.spreadsheet.validation
 
+import de.dkfz.tbi.otp.OtpRuntimeException
 import de.dkfz.tbi.util.spreadsheet.Column
 
 /**
@@ -42,8 +43,9 @@ abstract class ColumnSetValidator<C extends ValidationContext> implements Valida
     }
 
     /**
-     * @return The columns in the same order as returned by {@link #getRequiredColumnTitles(C)} and {@link #getOptionalColumnTitles(C)} . Contains {@code null} in place of
-     * missing columns. Or {@code null} if the validator cannot continue because of missing columns
+     * @return The columns in the same order as returned by {@link #getRequiredColumnTitles(C)} and {@link #getOptionalColumnTitles(C)}. Contains {@code null}
+     * in place of missing columns.
+     * @throws ColumnsMissingException if the validator cannot continue because of missing columns
      */
     final List<Column> findColumns(C context) {
         List<Column> columns = []
@@ -57,7 +59,7 @@ abstract class ColumnSetValidator<C extends ValidationContext> implements Valida
             }
         }
         if (!missingColumns.empty) {
-            return null
+            throw new ColumnsMissingException()
         }
         getOptionalColumnTitles(context).each {
             Column column = context.spreadsheet.getColumn(it)
@@ -96,4 +98,7 @@ abstract class ColumnSetValidator<C extends ValidationContext> implements Valida
     static final void addWarningForMissingOptionalColumn(C context, String columnTitle, String additionalWarningMessage = '') {
         context.addProblem(Collections.emptySet(), LogLevel.WARNING, "Optional column '${columnTitle}' is missing. ${additionalWarningMessage}".trim())
     }
+}
+
+class ColumnsMissingException extends OtpRuntimeException {
 }

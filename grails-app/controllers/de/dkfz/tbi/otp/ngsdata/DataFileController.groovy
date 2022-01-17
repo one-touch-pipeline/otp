@@ -39,14 +39,12 @@ class DataFileController {
 
     def showDetails(ShowDetailsCommand cmd) {
         if (cmd.hasErrors()) {
-            response.sendError(404)
-            return
+            return response.sendError(404)
         }
 
         DataFile dataFile = metaDataService.getDataFile(cmd.id)
         if (!dataFile) {
-            response.sendError(404)
-            return
+            return response.sendError(404)
         }
 
         return [

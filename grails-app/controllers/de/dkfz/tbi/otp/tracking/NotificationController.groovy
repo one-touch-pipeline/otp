@@ -48,8 +48,7 @@ class NotificationController implements CheckAndCall {
         if (cmd.hasErrors()) {
             flash.cmd = cmd
             flash.message = new FlashMessage(g.message(code: "notification.notificationPreview.failure") as String, cmd.errors)
-            redirect(controller: "metadataImport", action: "details", id: cmd.fastqImportInstance.id)
-            return
+            return redirect(controller: "metadataImport", action: "details", id: cmd.fastqImportInstance.id)
         }
         try {
             flash.message = new FlashMessage(g.message(code: "notification.notificationPreview.success") as String)

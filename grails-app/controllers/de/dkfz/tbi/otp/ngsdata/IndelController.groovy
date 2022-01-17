@@ -38,8 +38,7 @@ class IndelController extends AbstractAnalysisController {
 
     Map plots(BamFilePairAnalysisCommand cmd) {
         if (cmd.hasErrors()) {
-            render status: 404
-            return
+            return response.sendError(404)
         }
         return indelResultsService.getFiles(cmd.bamFilePairAnalysis, cmd.plotType) ? [
                 id      : cmd.bamFilePairAnalysis.id,
@@ -54,8 +53,7 @@ class IndelController extends AbstractAnalysisController {
 
     def renderPlot(BamFilePairAnalysisCommand cmd) {
         if (cmd.hasErrors()) {
-            response.sendError(404)
-            return
+            return response.sendError(404)
         }
         List<Path> filePaths = indelResultsService.getFiles(cmd.bamFilePairAnalysis, cmd.plotType)
         Path file = filePaths.first()

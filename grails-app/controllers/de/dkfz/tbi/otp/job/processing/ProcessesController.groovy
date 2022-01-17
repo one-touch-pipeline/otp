@@ -443,7 +443,7 @@ class ProcessesController {
                 text: parameter.toObject().toString(),
             ] : [text: parameter.value] // not a class, just use the value
         }
-        return null
+        return [:]
     }
 
     // params.id, params.comment, date

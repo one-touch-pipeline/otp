@@ -48,8 +48,7 @@ class RunController {
         params.id = params.id ?: "0"
         Run run = runService.getRun(params.id)
         if (!run) {
-            response.sendError(404)
-            return
+            return response.sendError(404)
         }
         //This page requires using SAMPLE_NAME, since the DataFile has no connection to a SeqTrack. Its only used for legacy objects
         List<MetaDataKey> keys = []
