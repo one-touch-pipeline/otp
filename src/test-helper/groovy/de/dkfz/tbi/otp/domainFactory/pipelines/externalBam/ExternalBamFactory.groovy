@@ -43,6 +43,7 @@ trait ExternalBamFactory implements IsAlignment {
                 seqType        : { createSeqType() },
                 pipeline       : { findOrCreatePipeline() },
                 referenceGenome: { createReferenceGenome() },
+                antibodyTarget : { properties.seqType?.hasAntibodyTarget ? createAntibodyTarget() : null },
         ], properties, saveAndValidate)
     }
 

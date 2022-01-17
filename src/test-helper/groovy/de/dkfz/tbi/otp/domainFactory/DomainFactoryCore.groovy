@@ -236,7 +236,8 @@ trait DomainFactoryCore implements DomainFactoryHelper {
 
     SeqTrack createSeqTrack(Map properties = [:]) {
         return createDomainObject(SeqTrack, getSeqTrackProperties(properties) + [
-                seqType: { createSeqType() },
+                seqType       : { createSeqType() },
+                antibodyTarget: { properties.seqType?.hasAntibodyTarget ? createAntibodyTarget() : null },
         ], properties)
     }
 

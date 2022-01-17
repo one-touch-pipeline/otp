@@ -47,21 +47,23 @@ class MergingConflictsValidatorIntegrationSpec extends Specification implements 
 
     void setup() {
         validator = new MergingConflictsValidator([
-                antibodyTargetService       : new AntibodyTargetService(),
-                libraryPreparationKitService: new LibraryPreparationKitService(),
-                metadataImportService       : new MetadataImportService([
+                mergingPreventionService: new MergingPreventionService([
+                        antibodyTargetService       : new AntibodyTargetService(),
+                        libraryPreparationKitService: new LibraryPreparationKitService(),
+                        seqPlatformService          : new SeqPlatformService([
+                                seqPlatformModelLabelService: new SeqPlatformModelLabelService(),
+                                sequencingKitLabelService   : new SequencingKitLabelService()
+                        ]),
+                        seqTypeService              : new SeqTypeService(),
+                ]),
+                metadataImportService   : new MetadataImportService([
                         seqTypeService: new SeqTypeService(),
                 ]),
-                sampleIdentifierService     : Spy(SampleIdentifierService) {
+                sampleIdentifierService : Spy(SampleIdentifierService) {
                     _ * getSampleIdentifierParser(_) >> { SampleIdentifierParserBeanName sampleIdentifierParserBeanName ->
                         new TestSampleIdentifierParser()
                     }
                 },
-                seqPlatformService          : new SeqPlatformService([
-                        seqPlatformModelLabelService: new SeqPlatformModelLabelService(),
-                        sequencingKitLabelService   : new SequencingKitLabelService()
-                ]),
-                seqTypeService              : new SeqTypeService(),
         ])
     }
 

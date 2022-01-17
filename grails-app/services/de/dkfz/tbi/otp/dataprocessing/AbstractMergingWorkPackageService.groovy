@@ -52,6 +52,17 @@ class AbstractMergingWorkPackageService {
         }
     }
 
+    @GrailsCompileStatic(TypeCheckingMode.SKIP)
+    @GrailsTypeChecked
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    List<AbstractMergingWorkPackage> findAllBySampleAndSeqTypeAndAntibodyTarget(Sample sample, SeqType seqType, AntibodyTarget antibodyTarget = null) {
+        return AbstractMergingWorkPackage.findAllWhere(
+                sample: sample,
+                seqType: seqType,
+                antibodyTarget: antibodyTarget,
+        )
+    }
+
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     List<AbstractMergingWorkPackage> filterByCategory(List<AbstractMergingWorkPackage> mergingWorkPackages, SampleTypePerProject.Category category) {
         return mergingWorkPackages.findAll {

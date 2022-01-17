@@ -334,7 +334,7 @@ class SeqTrackService {
      * @return all the SamplePairs
      */
     List<SeqTrack> findAllByIndividualSampleTypeSeqTypeSampleName(Individual individual,
-        SampleType sampleType = null, SeqType seqType = null, String sampleName = null) {
+                                                                  SampleType sampleType = null, SeqType seqType = null, String sampleName = null) {
         return SeqTrack.withCriteria {
             sample {
                 eq('individual', individual)
@@ -411,5 +411,14 @@ class SeqTrackService {
     void throwExceptionInCaseOfSeqTracksAreOnlyLinked(List<SeqTrack> seqTracks) {
         int linkedSeqTracks = seqTracks.findAll { SeqTrack seqTrack -> seqTrack.linkedExternally }.size()
         assert !linkedSeqTracks: "There are ${linkedSeqTracks} seqTracks only linked"
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#sample.project, 'OTP_READ_ACCESS')")
+    List<SeqTrack> findAllBySampleAndSeqTypeAndAntibodyTarget(Sample sample, SeqType seqType, AntibodyTarget antibodyTarget) {
+        return SeqTrack.findAllWhere(
+                sample: sample,
+                seqType: seqType,
+                antibodyTarget: antibodyTarget,
+        )
     }
 }

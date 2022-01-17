@@ -692,9 +692,13 @@ class MetadataImportService {
         if (!libLayout) {
             return null
         }
+        String seqTypeName = getSeqTypeNameFromMetadata(tuple)
+        if (!seqTypeName) {
+            return null
+        }
 
         return seqTypeService.findByNameOrImportAlias(
-                getSeqTypeNameFromMetadata(tuple),
+                seqTypeName,
                 [libraryLayout: libLayout, singleCell: isSingleCell],
         )
     }

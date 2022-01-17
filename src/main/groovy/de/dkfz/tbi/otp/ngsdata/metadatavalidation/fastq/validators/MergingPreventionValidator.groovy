@@ -24,44 +24,60 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.SqlUtil
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.dataprocessing.MergingCriteria
+import de.dkfz.tbi.otp.ngsdata.LibraryPreparationKit
+import de.dkfz.tbi.otp.ngsdata.SeqPlatformGroup
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
-import de.dkfz.tbi.otp.parser.ParsedSampleIdentifier
-import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.util.spreadsheet.validation.*
+import de.dkfz.tbi.util.spreadsheet.validation.ValueTuple
+import de.dkfz.tbi.util.spreadsheet.validation.ValueTuplesValidator
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
-import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
+/**
+ * Validator to check, if some merging would be happen.
+ *
+ * The following checks are done:
+ * - prechecks: Ensure that necessary information are provided in the metadata file. If something miss, the check can not be done
+ *   - seqType
+ *   - sample: given via registered sample name or via parsable sample name
+ *   - seqPlatform
+ * - check for MergingWorkPackages:
+ *   - Check in OTP, if there already exist an MergingWorkPackage
+ *   - if yes,
+ *     - if it is a single cell seq type: create an error
+ *     - if it is a bulk seq type: create an warning
+ *       - if it is mergeable the warning should say, that it will be merged into the existing
+ *       - otherwise: the warning should say, that it won't be aligned and merged because of the incompatible {@link SeqPlatformGroup} or {@link LibraryPreparationKit}
+ * - check for lanes of the same sample
+ *   - Check in OTP, if there already exist lanes for the sample seqType combination
+ *   - if yes,
+ *     - if it is a single cell seq type: create an error
+ *     - if it is a bulk seq type: create an warning
+ *       - if it is mergeable the warning should say, that it will be merged into the existing
+ *       - otherwise: the warning should say, that it won't be aligned and merged because of the incompatible {@link SeqPlatformGroup} or {@link LibraryPreparationKit}
+ *
+ *  Which data can be merged is defined over the {@link MergingCriteria} using {@link SeqPlatformGroup} and {@link LibraryPreparationKit}.
+ *  - if {@link MergingCriteria#useLibPrepKit} is set, the {@link LibraryPreparationKit} have to be match
+ *  - if {@link MergingCriteria#useSeqPlatformGroup} is:
+ *    - {@link MergingCriteria.SpecificSeqPlatformGroups#IGNORE_FOR_MERGING}: all seqPlatform can be merged
+ *    - {@link MergingCriteria.SpecificSeqPlatformGroups#USE_OTP_DEFAULT}: seqPlatform can be merged according the default OTP definition of compatible seqPlatforms
+ *    - {@link MergingCriteria.SpecificSeqPlatformGroups#USE_PROJECT_SEQ_TYPE_SPECIFIC}: seqPlatform can be merged according the project and seqType specific defintion
+ *  - if no MergingCriteria is defined yet, then assumes the default settings for MergingCriteria:
+ *    - {@link MergingCriteria#useLibPrepKit} is for wgbs seq types false, otherwise true
+ *    - {@link MergingCriteria#useSeqPlatformGroup} is {@link MergingCriteria.SpecificSeqPlatformGroups#USE_OTP_DEFAULT}
+ */
 @Component
 class MergingPreventionValidator extends ValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
 
     @Autowired
-    AntibodyTargetService antibodyTargetService
-
-    @Autowired
-    LibraryPreparationKitService libraryPreparationKitService
-
-    @Autowired
-    MetadataImportService metadataImportService
-
-    @Autowired
-    SampleIdentifierService sampleIdentifierService
-
-    @Autowired
-    SeqPlatformService seqPlatformService
-
-    @Autowired
-    SeqTypeService seqTypeService
+    MergingPreventionService mergingPreventionService
 
     @Override
     Collection<String> getDescriptions() {
         return [
-                "Check whether a new sample would be merged with existing samples",
-                "Check whether a new sample could not be merged because of incompatible merging criteria (seqPlatform, library preparation kit)",
+                "Check whether a new data would be merged with existing bam files",
+                "Check whether a new data could not be merged because of incompatible merging criteria (seqPlatform, library preparation kit)",
         ]
     }
 
@@ -92,131 +108,12 @@ class MergingPreventionValidator extends ValueTuplesValidator<MetadataValidation
         }
     }
 
-    private List<SeqType> getSingleCellSeqTypes() {
-        SeqTypeService.cellRangerAlignableSeqTypes
-    }
-
-    private List<SeqType> getBulkSeqTypes() {
-        SeqTypeService.roddyAlignableSeqTypes
-    }
-
-    void validateValueTuple(MetadataValidationContext context, ValueTuple valueTuple) {
-        SeqType seqType = metadataImportService.getSeqTypeFromMetadata(valueTuple)
-        if (!seqType) {
+    protected void validateValueTuple(MetadataValidationContext context, ValueTuple valueTuple) {
+        MergingPreventionDataDto data = mergingPreventionService.parseMetaData(valueTuple)
+        if (!data.filledCompletely) {
             return
         }
-
-        AntibodyTarget antibodyTarget = findAntibodyTarget(valueTuple, seqType)
-
-        Sample sample = findExistingSampleForValueTuple(valueTuple)
-        if (!sample) {
-            return
-        }
-
-        SeqPlatform seqPlatform = findSeqPlatform(valueTuple)
-        if (!seqPlatform) {
-            return
-        }
-
-        String libraryPreparationKitName = valueTuple.getValue(LIB_PREP_KIT.name())
-        LibraryPreparationKit libraryPreparationKit = libraryPreparationKitName ?
-                libraryPreparationKitService.findByNameOrImportAlias(libraryPreparationKitName) : null
-
-        List<MergingWorkPackage> mergingWorkPackages = MergingWorkPackage.findAllWhere(
-                sample: sample,
-                seqType: seqType,
-                antibodyTarget: antibodyTarget,
-        )
-
-        if (mergingWorkPackages) {
-            String messagePrefix = "Sample ${sample.displayName} with sequencing type ${seqType.displayNameWithLibraryLayout}"
-            if (seqType in singleCellSeqTypes) {
-                if (mergingWorkPackages.any { hasNonWithdrawnSeqTracks(it) }) {
-                    context.addProblem(valueTuple.cells, LogLevel.ERROR,
-                            "${messagePrefix} would be automatically merged with existing samples.",
-                            "Sample would be automatically merged with existing samples.")
-                }
-            } else if (seqType in bulkSeqTypes && sample.project.alignmentDeciderBeanName != AlignmentDeciderBeanName.NO_ALIGNMENT) {
-                mergingWorkPackages.each { MergingWorkPackage mergingWorkPackage ->
-                    MergingCriteria mergingCriteria = atMostOneElement(MergingCriteria.findAllByProjectAndSeqType(mergingWorkPackage.project, seqType))
-                    boolean useLibPrepKit = mergingCriteria ? mergingCriteria.useLibPrepKit : true
-                    boolean mergeableSeqPlatform = mergingWorkPackage.seqPlatformGroup.seqPlatforms.contains(seqPlatform)
-                    boolean mergeableLibPrepKit = useLibPrepKit ? mergingWorkPackage.libraryPreparationKit == libraryPreparationKit : true
-                    boolean seqPlatformIsNotIgnoredForMerging = mergingCriteria == null ||
-                            mergingCriteria.useSeqPlatformGroup != MergingCriteria.SpecificSeqPlatformGroups.IGNORE_FOR_MERGING
-
-                    if (mergeableSeqPlatform && mergeableLibPrepKit && seqPlatformIsNotIgnoredForMerging) {
-                        if (hasNonWithdrawnSeqTracks(mergingWorkPackage)) {
-                            context.addProblem(valueTuple.cells, LogLevel.WARNING,
-                                    "${messagePrefix} would be automatically merged with existing samples.",
-                                    "Sample would be automatically merged with existing samples.")
-                        }
-                    } else if (seqPlatformIsNotIgnoredForMerging) {
-                        List<String> warnings = []
-                        if (!mergeableSeqPlatform) {
-                            warnings << "new seq platform ${seqPlatform} is not compatible with seq platform group ${mergingWorkPackage.seqPlatformGroup}"
-                        }
-                        if (!mergeableLibPrepKit) {
-                            warnings << "new library preparation kit ${libraryPreparationKit} differs from old library preparation kit ${mergingWorkPackage.libraryPreparationKit}"
-                        }
-                        context.addProblem(valueTuple.cells, LogLevel.WARNING,
-                                "${messagePrefix} can not be merged with the existing bam file, since ${warnings.join(' and ')}",
-                                "Sample can not be merged with existing data, because merging criteria is incompatible.")
-                    }
-                }
-            }
-        }
-    }
-
-    private boolean hasNonWithdrawnSeqTracks(MergingWorkPackage mergingWorkPackage) {
-        return mergingWorkPackage.seqTracks.find {
-            !it.withdrawn
-        }
-    }
-
-    protected AntibodyTarget findAntibodyTarget(ValueTuple valueTuple, SeqType seqType) {
-        String antibodyTargetName = valueTuple.getValue(ANTIBODY_TARGET.name()) ?: ""
-        if (seqType.hasAntibodyTarget && antibodyTargetName) {
-            return antibodyTargetService.findByNameOrImportAlias(antibodyTargetName)
-        }
-        return null
-    }
-
-    protected SeqPlatform findSeqPlatform(ValueTuple valueTuple) {
-        return seqPlatformService.findSeqPlatform(
-                valueTuple.getValue(INSTRUMENT_PLATFORM.name()),
-                valueTuple.getValue(INSTRUMENT_MODEL.name()),
-                valueTuple.getValue(SEQUENCING_KIT.name())
-        )
-    }
-
-    private Sample findExistingSampleForValueTuple(ValueTuple valueTuple) {
-        String sampleName = valueTuple.getValue(SAMPLE_NAME.name())
-        SampleIdentifier sampleIdentifier = atMostOneElement(SampleIdentifier.findAllByName(sampleName))
-        if (sampleIdentifier) {
-            return sampleIdentifier.sample
-        }
-
-        Project project = metadataImportService.getProjectFromMetadata(valueTuple)
-        if (!project) {
-            return
-        }
-
-        ParsedSampleIdentifier parsedSampleIdentifier = sampleIdentifierService.parseSampleIdentifier(sampleName, project)
-        if (!parsedSampleIdentifier) {
-            return
-        }
-
-        return Sample.createCriteria().get {
-            individual {
-                eq("pid", parsedSampleIdentifier.pid)
-            }
-            sampleType {
-                or {
-                    ilike("name", SqlUtil.replaceWildcardCharactersInLikeExpression(parsedSampleIdentifier.sampleTypeDbName))
-                    ilike("name", SqlUtil.replaceWildcardCharactersInLikeExpression(parsedSampleIdentifier.sampleTypeDbName.replace('_', '-')))
-                }
-            }
-        } as Sample
+        mergingPreventionService.checkForMergingWorkPackage(context, valueTuple, data)
+        mergingPreventionService.checkForSeqTracks(context, valueTuple, data)
     }
 }

@@ -67,15 +67,11 @@ class SeqPlatform implements Entity, Legacy {
 
         MergingCriteria mergingCriteria = MergingCriteria.findByProjectAndSeqType(project, seqType)
 
-        if (!mergingCriteria) {
-            return null
-        }
-
         List<SeqPlatformGroup> seqPlatformGroups = SeqPlatformGroup.withCriteria {
             seqPlatforms {
                 eq("id", this.id)
             }
-            if (mergingCriteria.useSeqPlatformGroup == MergingCriteria.SpecificSeqPlatformGroups.USE_OTP_DEFAULT) {
+            if (!mergingCriteria || mergingCriteria.useSeqPlatformGroup == MergingCriteria.SpecificSeqPlatformGroups.USE_OTP_DEFAULT) {
                 isNull("mergingCriteria")
             } else {
                 eq("mergingCriteria", mergingCriteria)

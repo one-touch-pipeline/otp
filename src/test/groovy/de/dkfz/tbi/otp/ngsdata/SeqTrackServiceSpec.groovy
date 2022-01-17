@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
+import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.LogMessage
@@ -35,7 +36,7 @@ class SeqTrackServiceSpec extends Specification implements DataTest, DomainFacto
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 DataFile,
                 LogMessage,
                 MergingCriteria,
@@ -243,7 +244,7 @@ class SeqTrackServiceSpec extends Specification implements DataTest, DomainFacto
         given:
         SeqTrack seqTrack = createDataForDetermineAndStoreIfFastqFilesHaveToBeLinked()
         DomainFactory.createDataFile([
-                seqTrack: seqTrack,
+                seqTrack : seqTrack,
                 indexFile: true,
         ])
 
@@ -311,7 +312,7 @@ class SeqTrackServiceSpec extends Specification implements DataTest, DomainFacto
         SeqTrack seqTrack = createDataForAreFilesLocatedOnMidTermStorage()
 
         expect:
-        true == seqTrackService.doesImportDirAllowLinking(seqTrack)
+        seqTrackService.doesImportDirAllowLinking(seqTrack)
     }
 
     void "test doesImportDirAllowLinking, data files in other linkable dir"() {
@@ -319,7 +320,7 @@ class SeqTrackServiceSpec extends Specification implements DataTest, DomainFacto
         SeqTrack seqTrack = createDataForAreFilesLocatedOnMidTermStorage("/link_this")
 
         expect:
-        true == seqTrackService.doesImportDirAllowLinking(seqTrack)
+        seqTrackService.doesImportDirAllowLinking(seqTrack)
     }
 
     void "test doesImportDirAllowLinking, data files in other non linkable dir"() {
@@ -327,7 +328,7 @@ class SeqTrackServiceSpec extends Specification implements DataTest, DomainFacto
         SeqTrack seqTrack = createDataForAreFilesLocatedOnMidTermStorage("/link_this_too")
 
         expect:
-        false == seqTrackService.doesImportDirAllowLinking(seqTrack)
+        !seqTrackService.doesImportDirAllowLinking(seqTrack)
     }
 
     void "test doesImportDirAllowLinking, data files not in linkable dir"() {
@@ -335,7 +336,7 @@ class SeqTrackServiceSpec extends Specification implements DataTest, DomainFacto
         SeqTrack seqTrack = createDataForAreFilesLocatedOnMidTermStorage("/other_path")
 
         expect:
-        false == seqTrackService.doesImportDirAllowLinking(seqTrack)
+        !seqTrackService.doesImportDirAllowLinking(seqTrack)
     }
 
     void "test doesImportDirAllowLinking, seq center doesn't have linkable dir"() {
@@ -346,7 +347,7 @@ class SeqTrackServiceSpec extends Specification implements DataTest, DomainFacto
         seqTrack.run.seqCenter.save(flush: true)
 
         expect:
-        false == seqTrackService.doesImportDirAllowLinking(seqTrack)
+        !seqTrackService.doesImportDirAllowLinking(seqTrack)
     }
 
     private SeqTrack createDataForAreFilesLocatedOnMidTermStorage(String path = null) {
@@ -372,15 +373,15 @@ class SeqTrackServiceSpec extends Specification implements DataTest, DomainFacto
         SeqType seqTypeA = createSeqType()
         SeqType seqTypeB = createSeqType()
         List<SeqTrack> seqTracks = [
-            createSeqTrack(getProperties(seqTypeA, sampleTypeA)),
-            createSeqTrack(getProperties(seqTypeA, sampleTypeB)),
-            createSeqTrack(getProperties(seqTypeB, sampleTypeC)),
-            createSeqTrack(getProperties(seqTypeB, sampleTypeA)),
-            createSeqTrack(getProperties(seqTypeA, sampleTypeB)),
-            createSeqTrack(getProperties(seqTypeA, sampleTypeC)),
-            createSeqTrack(getProperties(seqTypeB, sampleTypeA)),
-            createSeqTrack(getProperties(seqTypeB, sampleTypeB)),
-            createSeqTrack(getProperties(seqTypeA, sampleTypeC)),
+                createSeqTrack(getProperties(seqTypeA, sampleTypeA)),
+                createSeqTrack(getProperties(seqTypeA, sampleTypeB)),
+                createSeqTrack(getProperties(seqTypeB, sampleTypeC)),
+                createSeqTrack(getProperties(seqTypeB, sampleTypeA)),
+                createSeqTrack(getProperties(seqTypeA, sampleTypeB)),
+                createSeqTrack(getProperties(seqTypeA, sampleTypeC)),
+                createSeqTrack(getProperties(seqTypeB, sampleTypeA)),
+                createSeqTrack(getProperties(seqTypeB, sampleTypeB)),
+                createSeqTrack(getProperties(seqTypeA, sampleTypeC)),
         ]
 
         when:
@@ -390,5 +391,58 @@ class SeqTrackServiceSpec extends Specification implements DataTest, DomainFacto
         seqTracks.each {
             result[it.seqType][it.sampleType].seqTracks.contains(it)
         }
+    }
+
+    @Unroll
+    void "findAllBySampleAndSeqTypeAndAntibodyTarget, when no SeqTrack exist and #name, then return empty list"() {
+        given:
+        SeqType seqType = createSeqType([
+                hasAntibodyTarget: hasAntibodyTarget,
+        ])
+        Sample sample = createSample()
+        createSeqTrack([seqType: seqType])
+        createSeqTrack([sample: sample])
+        AntibodyTarget antibodyTarget = hasAntibodyTarget ? createAntibodyTarget() : null
+
+        SeqTrackService service = new SeqTrackService()
+
+        when:
+        List<SeqTrack> seqTracks = service.findAllBySampleAndSeqTypeAndAntibodyTarget(sample, seqType, antibodyTarget)
+
+        then:
+        seqTracks.empty
+
+        where:
+        hasAntibodyTarget | _
+        true              | _
+        false             | _
+
+        name = "hasAntibodyTarget: ${hasAntibodyTarget}"
+    }
+
+    @Unroll
+    void "findAllBySampleAndSeqTypeAndAntibodyTarget, when mergingWorkPackage exist and #name, then return the correct one"() {
+        given:
+        SeqType seqType = createSeqType([
+                hasAntibodyTarget: hasAntibodyTarget
+        ])
+        SeqTrack seqTrack = createSeqTrack([seqType: seqType])
+        createSeqTrack([seqType: seqType])
+        createSeqTrack([sample: seqTrack.sample])
+
+        SeqTrackService service = new SeqTrackService()
+
+        when:
+        List<SeqTrack> seqTracks = service.findAllBySampleAndSeqTypeAndAntibodyTarget(seqTrack.sample, seqTrack.seqType, seqTrack.antibodyTarget)
+
+        then:
+        seqTracks == [seqTrack]
+
+        where:
+        hasAntibodyTarget | _
+        true              | _
+        false             | _
+
+        name = "hasAntibodyTarget: ${hasAntibodyTarget}"
     }
 }

@@ -23,27 +23,58 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 
 import groovy.transform.Canonical
 import groovy.transform.TupleConstructor
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.MergingCriteria
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.otp.parser.ParsedSampleIdentifier
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.util.spreadsheet.Cell
-import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
-import de.dkfz.tbi.util.spreadsheet.validation.ValueTuple
+import de.dkfz.tbi.util.spreadsheet.validation.*
 
-import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.SAMPLE_NAME
+import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
 @Component
-class MergingConflictsValidator extends MergingPreventionValidator {
+class MergingConflictsValidator extends ValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
+
+    @Autowired
+    MetadataImportService metadataImportService
+
+    @Autowired
+    MergingPreventionService mergingPreventionService
+
+    @Autowired
+    SampleIdentifierService sampleIdentifierService
+
     @Override
     Collection<String> getDescriptions() {
         return [
                 "Check whether a new sample could not be merged with other new samples because of incompatible sequencing platforms",
         ]
+    }
+
+    @Override
+    List<String> getRequiredColumnTitles(MetadataValidationContext context) {
+        /** This content is used externally. Please discuss a change in the team */
+        return [SAMPLE_NAME, SEQUENCING_TYPE, SEQUENCING_READ_TYPE, PROJECT, INSTRUMENT_PLATFORM, INSTRUMENT_MODEL]*.name()
+    }
+
+    @Override
+    List<String> getOptionalColumnTitles(MetadataValidationContext context) {
+        /** This content is used externally. Please discuss a change in the team */
+        return [BASE_MATERIAL, ANTIBODY_TARGET, SEQUENCING_KIT, LIB_PREP_KIT]*.name()
+    }
+
+    @Override
+    void checkMissingRequiredColumn(MetadataValidationContext context, String columnTitle) {
+    }
+
+    @Override
+    void checkMissingOptionalColumn(MetadataValidationContext context, String columnTitle) {
     }
 
     @Override
@@ -55,14 +86,14 @@ class MergingConflictsValidator extends MergingPreventionValidator {
                     getSampleIdentifier(values),
                     getSampleType(values),
                     seqType,
-                    seqType ? findAntibodyTarget(values, seqType) : null,
+                    seqType ? mergingPreventionService.findAntibodyTarget(values, seqType) : null,
                     getMergingCriteria(values, seqType),
             )
         }.findAll { key, values ->
             key.individual && key.sampleType && key.seqType
         }.findAll { key, values ->
             values.collect { ValueTuple valueTuple ->
-                findSeqPlatformGroup(valueTuple, key.seqType) ?: findSeqPlatform(valueTuple)
+                findSeqPlatformGroup(valueTuple, key.seqType) ?: mergingPreventionService.findSeqPlatform(valueTuple)
             }.unique().size() > 1
         }.each { key, values ->
             if (key.mergingCriteria == null || key.mergingCriteria.useSeqPlatformGroup != MergingCriteria.SpecificSeqPlatformGroups.IGNORE_FOR_MERGING) {
@@ -76,10 +107,11 @@ class MergingConflictsValidator extends MergingPreventionValidator {
     }
 
     SeqPlatformGroup findSeqPlatformGroup(ValueTuple valueTuple, SeqType seqType) {
-        return findSeqPlatform(valueTuple).getSeqPlatformGroupForMergingCriteria(
+        SeqPlatform seqPlatform = mergingPreventionService.findSeqPlatform(valueTuple)
+        return seqPlatform ? seqPlatform.getSeqPlatformGroupForMergingCriteria(
                 metadataImportService.getProjectFromMetadata(valueTuple),
                 seqType,
-        )
+        ) : null
     }
 
     String getSampleIdentifier(ValueTuple valueTuple) {
