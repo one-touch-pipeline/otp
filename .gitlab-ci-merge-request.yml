@@ -30,7 +30,7 @@ create merge request:
   only:
     - /^review\/.*$/
   script:
-    - bashScripts/gitlab-ci/mergeRequest/createMergeRequest.sh
+    - devScripts/gitlab-ci/mergeRequest/createMergeRequest.sh
   variables:
     GIT_DEPTH: "0"
 
@@ -41,4 +41,4 @@ update merge request:
   only:
     - branches
   script:
-    - bashScripts/gitlab-ci/mergeRequest/updateMergeRequest.sh
+    - devScripts/gitlab-ci/mergeRequest/updateMergeRequest.sh
