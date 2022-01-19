@@ -67,13 +67,5 @@ class DataInstallationWorkflow implements OtpWorkflow {
     void reconnectDependencies(Artefact artefact, WorkflowArtefact newWorkflowArtefact) {
     }
 
-    /**
-     * Since it is an import workflow, it uses other output also for input.
-     */
-    @Override
-    boolean useOutputArtefactAlsoAsInputArtefact() {
-        return true
-    }
-
     final String userDocumentation = null
 }

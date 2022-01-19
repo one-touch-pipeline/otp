@@ -26,7 +26,6 @@ import grails.transaction.Rollback
 import spock.lang.Specification
 import spock.lang.Unroll
 
-import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.utils.CollectionUtils
@@ -35,87 +34,11 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 @Integration
 class WorkflowServiceIntegrationSpec extends Specification implements WorkflowSystemDomainFactory {
 
-    private WorkflowService service
-
-    void setupData(boolean useOutputAsInput = false) {
-        service = new WorkflowService()
-        service.jobService = Mock(JobService)
-        service.otpWorkflowService = Mock(OtpWorkflowService) {
-            _ * lookupOtpWorkflowBean(_) >> Mock(OtpWorkflow) {
-                1 * useOutputArtefactAlsoAsInputArtefact() >> useOutputAsInput
-            }
-        }
-    }
-
-    void "test, createRestartedWorkflow should create a copy of the old workflowArtefacts"() {
-        given:
-        setupData()
-
-        WorkflowStep workflowStep = createWorkflowStep()
-        workflowStep.workflowRun.state = WorkflowRun.State.FAILED
-        WorkflowArtefact wa1 = createWorkflowArtefact(state: WorkflowArtefact.State.SUCCESS, producedBy: workflowStep.workflowRun, outputRole: "asdf")
-        WorkflowArtefact wa2 = createWorkflowArtefact(state: WorkflowArtefact.State.SUCCESS, producedBy: workflowStep.workflowRun, outputRole: "qwertz")
-        workflowStep.workflowRun.save(flush: true)
-
-        when:
-        service.createRestartedWorkflow(workflowStep, false)
-
-        then:
-        noExceptionThrown()
-        WorkflowArtefact.count() == 4
-        WorkflowArtefact.findAllByProducedBy(workflowStep.workflowRun) == [wa1, wa2]
-    }
+    WorkflowService workflowService
 
     @Unroll
-    void "test createRestartedWorkflow, if workflow use separate input artefacts, then create restarted workflow"() {
+    void "test createRestartedWorkflow, should create new WorkflowRun based on failed WorkflowRun and start it directly: #startDirectly"() {
         given:
-        setupData(false)
-
-        WorkflowStep workflowStep = createWorkflowStep()
-        WorkflowRun oldRun = workflowStep.workflowRun
-        WorkflowArtefact wa1 = createWorkflowArtefact(state: WorkflowArtefact.State.SUCCESS, producedBy: oldRun, outputRole: "asdf")
-        WorkflowArtefact wa2 = createWorkflowArtefact(state: WorkflowArtefact.State.SUCCESS, producedBy: oldRun, outputRole: "qwertz")
-        oldRun.state = WorkflowRun.State.FAILED
-        oldRun.save(flush: true)
-        WorkflowArtefact wa3 = createWorkflowRunInputArtefact([
-                workflowRun: oldRun,
-        ]).workflowArtefact
-
-        WorkflowRun wr2 = createWorkflowRun()
-        createWorkflowRunInputArtefact(workflowRun: wr2, workflowArtefact: wa1)
-
-        WorkflowRun wr3 = createWorkflowRun()
-        createWorkflowRunInputArtefact(workflowRun: wr3, workflowArtefact: wa2)
-
-        when:
-        WorkflowRun newRun = service.createRestartedWorkflow(workflowStep, startDirectly)
-
-        then:
-        workflowStep.workflowRun.state == WorkflowRun.State.RESTARTED
-        [wa1, wa2].every { it.state == WorkflowArtefact.State.FAILED }
-        WorkflowArtefact.count == 5
-        WorkflowRun.count == 4
-        List<WorkflowArtefact> newWorkflowArtefacts = (WorkflowArtefact.all - [wa1, wa2, wa3])
-        TestCase.assertContainSame(newRun.inputArtefacts, oldRun.inputArtefacts)
-        TestCase.assertContainSame(newRun.outputArtefacts.values(), newWorkflowArtefacts)
-        newWorkflowArtefacts.every { it.state == WorkflowArtefact.State.PLANNED_OR_RUNNING }
-        newWorkflowArtefacts.every { it.producedBy == newRun }
-        [wr2, wr3]*.inputArtefacts.every { Map<String, WorkflowArtefact> inputArtefacts ->
-            inputArtefacts.values().every { it in newWorkflowArtefacts }
-        }
-
-        (startDirectly ? 1 : 0) * service.jobService.createNextJob(_) >> {
-        }
-
-        where:
-        startDirectly << [true, false]
-    }
-
-    @Unroll
-    void "test createRestartedWorkflow, if workflow use output artefacts also for input, then create restarted workflow with output artefact connected to the concrete artefact"() {
-        given:
-        setupData(true)
-
         WorkflowStep workflowStep = createWorkflowStep([
                 workflowRun: createWorkflowRun([
                         state: WorkflowRun.State.FAILED,
@@ -132,10 +55,20 @@ class WorkflowServiceIntegrationSpec extends Specification implements WorkflowSy
         WorkflowRun wr2 = createWorkflowRun()
         createWorkflowRunInputArtefact(workflowRun: wr2, workflowArtefact: wa)
 
+        workflowService.jobService = Mock(JobService)
+        workflowService.otpWorkflowService = Mock(OtpWorkflowService)
+        OtpWorkflow otpWorkflow = Mock(OtpWorkflow)
+
         when:
-        WorkflowRun newRun = service.createRestartedWorkflow(workflowStep, startDirectly)
+        WorkflowRun newRun = workflowService.createRestartedWorkflow(workflowStep, startDirectly)
 
         then:
+        _ * workflowService.otpWorkflowService.lookupOtpWorkflowBean(_) >> otpWorkflow
+        1 * otpWorkflow.createCopyOfArtefact(seqTrack) >> seqTrack
+        (startDirectly ? 1 : 0) * workflowService.jobService.createNextJob(_)
+        _ * otpWorkflow.reconnectDependencies(_, _)
+
+        and:
         workflowStep.workflowRun.state == WorkflowRun.State.RESTARTED
         newRun.state == WorkflowRun.State.PENDING
         wa.state == WorkflowArtefact.State.FAILED
@@ -143,7 +76,6 @@ class WorkflowServiceIntegrationSpec extends Specification implements WorkflowSy
         WorkflowRun.count == 3
 
         WorkflowArtefact newWorkflowArtefact = WorkflowArtefact.last()
-        seqTrack.workflowArtefact == newWorkflowArtefact
         CollectionUtils.containSame(newRun.outputArtefacts.values(), [newWorkflowArtefact])
 
         newWorkflowArtefact.state == WorkflowArtefact.State.PLANNED_OR_RUNNING
@@ -151,13 +83,7 @@ class WorkflowServiceIntegrationSpec extends Specification implements WorkflowSy
 
         wr2.inputArtefacts.values().every { it == newWorkflowArtefact }
 
-        (startDirectly ? 1 : 0) * service.jobService.createNextJob(_) >> {
-        }
-
         where:
-        startDirectly << [
-                true,
-                false,
-        ]
+        startDirectly << [true, false]
     }
 }

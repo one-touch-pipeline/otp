@@ -19,13 +19,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+package de.dkfz.tbi.otp.workflow.panCancer
 
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPancanFactory
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.workflow.panCancer.PanCancerWorkflow
 
 class PanCancerWorkflowSpec extends Specification implements RoddyPancanFactory, DataTest {
 
@@ -42,9 +42,15 @@ class PanCancerWorkflowSpec extends Specification implements RoddyPancanFactory,
         ]
     }
 
-    void "test getJobBeanNames"() {
-        given:
-        List<String> expectedJobBeanNames = [
+    PanCancerWorkflow panCancerWorkflow
+
+    void setup() {
+        panCancerWorkflow = new PanCancerWorkflow()
+    }
+
+    void "getJobBeanNames, should return all PanCancerJob bean names in correct order"() {
+        expect:
+        panCancerWorkflow.jobBeanNames == [
                 "panCancerConditionalFailJob",
                 "panCancerPrepareJob",
                 "panCancerExecuteJob",
@@ -56,24 +62,18 @@ class PanCancerWorkflowSpec extends Specification implements RoddyPancanFactory,
                 "panCancerLinkJob",
                 "panCancerFinishJob",
         ]
-        when:
-        PanCancerWorkflow panCancerWorkflow = new PanCancerWorkflow()
-        List<String> jobBeanNames = panCancerWorkflow.jobBeanNames
-
-        then:
-        jobBeanNames == expectedJobBeanNames
     }
 
-    void "test createCopyOfArtefact"() {
+    void "createCopyOfArtefact, should create a new artifact but copy the content of the old artifact"() {
         given:
         MergingWorkPackage mergingWorkPackage = createMergingWorkPackage()
         RoddyBamFile roddyBamFile = createBamFile(workPackage: mergingWorkPackage)
 
         when:
-        PanCancerWorkflow panCancerWorkflow = new PanCancerWorkflow()
         RoddyBamFile outputRoddyBamFile = panCancerWorkflow.createCopyOfArtefact(roddyBamFile) as RoddyBamFile
 
         then:
+        outputRoddyBamFile != roddyBamFile
         outputRoddyBamFile.mergingWorkPackage == roddyBamFile.mergingWorkPackage
         outputRoddyBamFile.identifier == 1
         outputRoddyBamFile.workDirectoryName == "${RoddyBamFile.WORK_DIR_PREFIX}_1"

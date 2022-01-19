@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2022 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflow.datainstallation
+package de.dkfz.tbi.otp.workflow.fastqc
 
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
@@ -28,7 +28,7 @@ import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.workflowExecution.Artefact
 
-class DataInstallationWorkflowSpec extends Specification implements DataTest, DomainFactoryCore {
+class FastqcWorkflowSpec extends Specification implements DataTest, DomainFactoryCore {
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -37,21 +37,21 @@ class DataInstallationWorkflowSpec extends Specification implements DataTest, Do
         ]
     }
 
-    DataInstallationWorkflow dataInstallationWorkflow
+    FastqcWorkflow fastqcWorkflow
 
     void setup() {
-        dataInstallationWorkflow = new DataInstallationWorkflow()
+        fastqcWorkflow = new FastqcWorkflow()
     }
 
-    void "getJobBeanNames, should return all dataInstallationJob bean names in correct order"() {
+    void "getJobBeanNames, should return all FastqcJob bean names in correct order"() {
         expect:
-        dataInstallationWorkflow.jobBeanNames == [
-                "dataInstallationConditionalFailJob",
-                "dataInstallationPrepareJob",
-                "copyOrLinkFastqsOfLaneJob",
-                "dataInstallationValidationJob",
-                "dataInstallationSingleCellLinkJob",
-                "dataInstallationPidLinkJob",
+        fastqcWorkflow.jobBeanNames == [
+                "fastqcPrepareJob",
+                "fastqcConditionalFailJob",
+                "fastqcExecuteClusterPipelineJob",
+                "fastqcValidationJob",
+                "fastqcParseJob",
+                "fastqcFinishJob",
         ]
     }
 
@@ -60,6 +60,6 @@ class DataInstallationWorkflowSpec extends Specification implements DataTest, Do
         Artefact artefact = createSeqTrack()
 
         expect:
-        dataInstallationWorkflow.createCopyOfArtefact(artefact) == artefact
+        fastqcWorkflow.createCopyOfArtefact(artefact) == artefact
     }
 }

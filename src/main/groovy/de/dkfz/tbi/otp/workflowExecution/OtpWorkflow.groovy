@@ -48,20 +48,6 @@ trait OtpWorkflow {
     abstract void reconnectDependencies(Artefact artefact, WorkflowArtefact newWorkflowArtefact)
 
     /**
-     * Indicate, if an workflow use their output artefacts also for input.
-     *
-     * Usually a workflow works on input artefacts and produce from these output artefacts.
-     * But their are some special workflows used complete a gui import.
-     * These workflows has no separate input artefact, but only output artefacts.
-     * Some operation needs to know that, since they have to do something a little bit another way.
-     *
-     * @return false to indicate, that this workflow use separate input artefacts
-     */
-    boolean useOutputArtefactAlsoAsInputArtefact() {
-        return false
-    }
-
-    /**
      * Return message code for user documentation and code links,
      * to include in notification emails or show in user interface
      *

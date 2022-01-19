@@ -41,7 +41,7 @@ class WorkflowService {
         assert step.workflowRun.state == WorkflowRun.State.FAILED
 
         WorkflowRun oldRun = step.workflowRun
-        boolean useOutputAsInput = otpWorkflowService.lookupOtpWorkflowBean(oldRun).useOutputArtefactAlsoAsInputArtefact()
+        OtpWorkflow otpWorkflow = otpWorkflowService.lookupOtpWorkflowBean(oldRun)
 
         WorkflowRun run = new WorkflowRun([
                 workflow        : oldRun.workflow,
@@ -63,28 +63,32 @@ class WorkflowService {
             ]).save(flush: true)
         }
 
-        oldRun.outputArtefacts.each { String role, WorkflowArtefact oldArtefact ->
-            WorkflowArtefact newArtefact = new WorkflowArtefact(
+        oldRun.outputArtefacts.each { String role, WorkflowArtefact oldWorkflowArtefact ->
+            WorkflowArtefact newWorkflowArtefact = new WorkflowArtefact(
                     state: WorkflowArtefact.State.PLANNED_OR_RUNNING,
                     producedBy: run,
-                    outputRole: oldArtefact.outputRole,
-                    displayName: oldArtefact.displayName,
-                    artefactType: oldArtefact.artefactType,
+                    outputRole: oldWorkflowArtefact.outputRole,
+                    displayName: oldWorkflowArtefact.displayName,
+                    artefactType: oldWorkflowArtefact.artefactType,
             ).save(flush: true)
 
-            if (useOutputAsInput) {
-                Artefact concreteArtefact = oldArtefact.artefact.get()
-                concreteArtefact.workflowArtefact = newArtefact
-                concreteArtefact.save(flush: true)
-            }
+            Artefact oldArtefact = oldWorkflowArtefact.artefact.orElseThrow({
+                new AssertionError("The old WorkflowArtefact ${oldWorkflowArtefact} of WorkflowRun ${oldRun} must have an concrete artefact" as Object)
+            })
 
-            WorkflowRunInputArtefact.findAllByWorkflowArtefact(oldArtefact).each { WorkflowRunInputArtefact workflowRunInputArtefact ->
-                workflowRunInputArtefact.workflowArtefact = newArtefact
+            Artefact newArtefact = otpWorkflow.createCopyOfArtefact(oldArtefact)
+            newArtefact.workflowArtefact = newWorkflowArtefact
+            newArtefact.save(flush: true)
+
+            WorkflowRunInputArtefact.findAllByWorkflowArtefact(oldWorkflowArtefact).each { WorkflowRunInputArtefact workflowRunInputArtefact ->
+                workflowRunInputArtefact.workflowArtefact = newWorkflowArtefact
                 workflowRunInputArtefact.save(flush: true)
+
+                otpWorkflowService.lookupOtpWorkflowBean(workflowRunInputArtefact.workflowRun).reconnectDependencies(newArtefact, newWorkflowArtefact)
             }
 
-            oldArtefact.state = WorkflowArtefact.State.FAILED
-            oldArtefact.save(flush: true)
+            oldWorkflowArtefact.state = WorkflowArtefact.State.FAILED
+            oldWorkflowArtefact.save(flush: true)
         }
 
         oldRun.state = WorkflowRun.State.RESTARTED
