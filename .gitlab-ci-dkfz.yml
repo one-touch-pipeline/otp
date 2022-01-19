@@ -21,7 +21,10 @@
 
 
 # A dkfz specific ci, which additional jobs for trigger the deployment
-
+# This is the entry point for dkfz specific gitlab ci
+# It includes:
+# - .gitlab-ci-core.yml with default jobs
+# - some jobs for trigger pipelines of an intern repository
 
 include:
   - local: '.gitlab-ci-core.yml'

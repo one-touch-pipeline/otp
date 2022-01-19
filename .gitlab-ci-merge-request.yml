@@ -19,6 +19,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+# This file contains gitlab ci jobs for automize merge request.
+# Therefore, the both environment variables PROJECT_TOKEN and PROJECT_URL have to be provided
+
 create merge request:
   image: registry.gitlab.com/one-touch-pipeline/otp/otp-gitlab-ci
   stage: create merge request

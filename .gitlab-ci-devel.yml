@@ -19,6 +19,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+# This is the entry point for gitlab ci devel repositories, where only the test should run.
+# It includes:
+# - .gitlab-ci-core.yml with default jobs
+
 include:
   - local: '.gitlab-ci-core.yml'
 

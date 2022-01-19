@@ -19,6 +19,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+# This file contains gitlab ci jobs running in all repositories.
+# The jobs shouldn't have dependencies to jobs running not in all repositories
+
 image: registry.gitlab.com/one-touch-pipeline/otp/otp-gitlab-ci
 
 
@@ -63,18 +66,6 @@ variables:
 # ------------------------------------------------------
 # jobs stage scanning
 # ------------------------------------------------------
-
-new licenses:
-  image: groovy:3.0-jdk11-alpine
-  stage: scanning
-  needs: ["license_scanning"]
-  dependencies:
-    - license_scanning
-  only:
-    - branches
-    - tags
-  script:
-    - groovy devScripts/gitlab-ci/license-checker/findNewLicenses.groovy
 
 otp license:
   image: groovy:3.0-jdk11-alpine
