@@ -20,12 +20,23 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-set -euxo pipefail
-
-if hash buildah 2>/dev/null && hash podman 2>/dev/null; then
-  bashScripts/postgres/create-image.sh
-else
-  bashScripts/postgres/create-image-docker.sh
+# execute local git hooks
+if [ -x $0.local ]; then
+    $0.local "$@" || exit $?
 fi
 
-bashScripts/postgres/apply-dump.sh "$@"
+HOOK_NAME=$(basename $0)
+HOOK_FILE=devScripts/git-hooks/${HOOK_NAME}
+
+# execute git hooks in OTP repository
+if [ -x ${HOOK_FILE} -a -f ${HOOK_FILE} ]; then
+    ${HOOK_FILE} "$@" || exit $?
+fi
+
+if [ -d ${HOOK_FILE} ]; then
+    for file in ${HOOK_FILE}/*; do
+        if [ -x ${file} ]; then
+            ${file} "$@" || exit $?
+        fi
+    done
+fi

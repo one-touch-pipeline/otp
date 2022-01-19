@@ -29,5 +29,5 @@ for hook in ${HOOK_NAMES}; do
         mv ${HOOK_DIR}/${hook} ${HOOK_DIR}/${hook}.local
     fi
     # create the symlink, overwriting the file if it exists
-    ln -sf ../../bashScripts/git-hooks/git-hook ${HOOK_DIR}/${hook}
+    ln -sf ../../devScripts/git-hooks/git-hook ${HOOK_DIR}/${hook}
 done

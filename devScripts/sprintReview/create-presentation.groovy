@@ -155,7 +155,7 @@ details << "\n*) Issue finished in last sprint after sprint review"
 
 // add data to template
 new File("review/presentation.html").text = new SimpleTemplateEngine()
-        .createTemplate(new File("bashScripts/sprintReview/template.html"))
+        .createTemplate(new File("devScripts/sprintReview/template.html"))
         .make([
                 OVERVIEW     : overview,
                 DETAILS      : details.join("\n"),

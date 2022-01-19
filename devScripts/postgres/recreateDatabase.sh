@@ -20,23 +20,12 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# execute local git hooks
-if [ -x $0.local ]; then
-    $0.local "$@" || exit $?
+set -euxo pipefail
+
+if hash buildah 2>/dev/null && hash podman 2>/dev/null; then
+  devScripts/postgres/create-image.sh
+else
+  devScripts/postgres/create-image-docker.sh
 fi
 
-HOOK_NAME=$(basename $0)
-HOOK_FILE=bashScripts/git-hooks/${HOOK_NAME}
-
-# execute git hooks in OTP repository
-if [ -x ${HOOK_FILE} -a -f ${HOOK_FILE} ]; then
-    ${HOOK_FILE} "$@" || exit $?
-fi
-
-if [ -d ${HOOK_FILE} ]; then
-    for file in ${HOOK_FILE}/*; do
-        if [ -x ${file} ]; then
-            ${file} "$@" || exit $?
-        fi
-    done
-fi
+devScripts/postgres/apply-dump.sh "$@"

@@ -25,16 +25,16 @@
 #
 # by default, loads the most recent database dump in $LATEST_DUMP_LOCATION into the local otp database.
 # to load other dumps, specify a search pattern in $USE_DUMP, like so:
-#    USE_DUMP=<SEARCH> ./bashScripts/postgres/recreateDatabase.sh
+#    USE_DUMP=<SEARCH> ./devScripts/postgres/recreateDatabase.sh
 # <SEARCH> can be any substring of a dump-identifier, and is glob-expanded on both ends to find a full dump string.
 # when multiple dumps match the search pattern, the youngest match is taken.
 # recommended search strings are "YYYY-MM-DD", "allData_YYYY-MM-DD" or "YYYY-MM-DD_hh-mm-ss" (or any part/combination thereof)
 #
 # examples:
-#   ./bashScripts/postgres/recreateDatabase.sh                # default: loads most recent dump
-#   ./bashScripts/postgres/recreateDatabase.sh 2019-02-12
-#   ./bashScripts/postgres/recreateDatabase.sh allData_2019-02-12
-#   ./bashScripts/postgres/recreateDatabase.sh 2019-02-12_09-52-22
+#   ./devScripts/postgres/recreateDatabase.sh                # default: loads most recent dump
+#   ./devScripts/postgres/recreateDatabase.sh 2019-02-12
+#   ./devScripts/postgres/recreateDatabase.sh allData_2019-02-12
+#   ./devScripts/postgres/recreateDatabase.sh 2019-02-12_09-52-22
 
 set -Eeux
 

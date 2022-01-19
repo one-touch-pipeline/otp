@@ -39,10 +39,16 @@ stages:
   - public doc
   - update merge request
 
-
 gemnasium-maven-dependency_scanning:
   stage: scanning
+
 license_scanning:
   stage: scanning
+  artifacts:
+    paths:
+      - gl-license-scanning-report.json
+    reports:
+      license_scanning: gl-license-scanning-report.json
+
 retire-js-dependency_scanning:
   stage: scanning
