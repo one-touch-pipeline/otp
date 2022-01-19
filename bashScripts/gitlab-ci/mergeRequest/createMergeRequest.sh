@@ -65,6 +65,7 @@ then
   exit 0
 fi
 
+set +o pipefail
 echo "add some labels from youtrack"
 echo "$LABEL_VALUES" | \
   sed -e "s/,/\n/g" | \
