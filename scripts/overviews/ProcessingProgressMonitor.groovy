@@ -85,12 +85,12 @@ String projectString ="""
 
 //if enabled, shows all lanes in progressing.
 //see file header comment for details
-boolean allProcessed = false
+boolean allProcessed = true
 
 //flag if for all workflows the finished entries should be shown
 boolean showFinishedEntries = false
 
-//flag if for all workflows the finished entries should be shown
+//flag if all seqTypes that are not supported by the workflow should be listed in the output
 boolean showUnsupportedSeqTypes = false
 
 //==================================================
