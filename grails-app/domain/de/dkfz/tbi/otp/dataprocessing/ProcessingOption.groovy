@@ -578,6 +578,11 @@ class ProcessingOption implements Entity {
                 Necessity.OPTIONAL, "", TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
         ),
 
+        NEWS_BANNER(
+                "Text showing in the news banner",
+                Necessity.OPTIONAL, "", TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
+        ),
+
         private final String description
         private final Necessity necessity
         private final String defaultValue

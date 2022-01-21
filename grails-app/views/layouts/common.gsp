@@ -35,6 +35,8 @@
     <g:layoutHead/>
 </head>
 
+<g:render template="/templates/stickyNewsBanner"/>
+
 <body id="otp">
 <div class="body_position">
     <div class="header">

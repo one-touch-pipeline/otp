@@ -35,5 +35,6 @@
 //= require /webjars/select2/4.0.13/js/select2.full.js
 
 //= require otp.js
+//= require banner.js
 //= require common/toaster.js
 //= require common/globalInitializer.js

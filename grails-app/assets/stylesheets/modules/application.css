@@ -34,5 +34,6 @@
 
 *= require otp.less
 *= require toaster.less
+*= require banner.less
 *= require ../bootstrapped.less
 */
