@@ -23,21 +23,44 @@
 import de.dkfz.tbi.otp.Comment
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
+import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
+import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaQc
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.utils.HelperUtils
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
+import de.dkfz.tbi.util.TimeFormats
 
 import java.nio.file.FileSystem
 import java.nio.file.Path
+import java.text.DecimalFormat
+import java.text.NumberFormat
+
+import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
 /**
- * script to create example data on Bam level for WGS, WES, WGBS, and WGBS_TAG.
+ * script to create example data.
+ *
+ * Its generates:
+ * - fastq
+ * - fastqc
+ * - bam files
+ *   - only PanCan supported yet: WGS, WES, WGBS, and WGBS_TAG
+ *   - would create the same also for other seqtypes
+ * - snv
+ * - indel
+ * - sophia
  *
  * It doesn't expect any existing data except the default SeqType's.
  *
- * It needs some time for execution.
+ * The script can also generates dummy files for the objects. That is limited to the files OTP is aware of.
+ * The real pipelines generates much more files.
+ *
+ * For file generation (on per default), the selected {@link ExampleData#realmName} needs to be valid for remote access.
  */
 class ExampleData {
 //------------------------------
@@ -47,6 +70,11 @@ class ExampleData {
      * Name of the project for the example data. If it not exist, it is created.
      */
     String projectName = "ExampleProject"
+
+    /**
+     * Name of the realm to use. If it not exist, it is created in {@link #findOrCreateRealm()}.
+     */
+    String realmName = "dev_realm"
 
     /**
      * The count of patients to create
@@ -59,6 +87,13 @@ class ExampleData {
     int lanesPerSampleAndSeqType = 2
 
     /**
+     * Should dummy files and other required directories be created?
+     * Please ensure that otp has the necessary write permissions remotely for the project directory
+     * (or any parent directory in which the directories needs to be created)
+     */
+    boolean createFilesOnFilesystem = true
+
+    /**
      * The SeqTypes for which data is to be created.
      */
     List<SeqType> seqTypes = [
@@ -69,34 +104,23 @@ class ExampleData {
     ]
 
     /**
-     * The SampleType names for which data is to be created.
+     * The disease SampleType names for which data is to be created.
+     *
+     * If analysis are created, each diseaseSampleTypeNames is combined with each controlSampleTypeNames.
      */
-    List<String> sampleTypeNames = [
+    List<String> diseaseSampleTypeNames = [
             "tumor01",
             "tumor02",
-            "control01",
     ]
 
     /**
-     * Should dummy files and links are created for the {@link DataFile}s?
-     * Please ensure that otp has the necessary write permissions remotely for the project directory
-     * (or any parent directory in which the directories needs to be created)
+     * The control SampleType names for which data is to be created.
+     *
+     * If analysis are created, each diseaseSampleTypeNames is combined with each controlSampleTypeNames.
      */
-    boolean shouldDataFilesCreatedOnFilesystem = false
-
-    /**
-     * Should dummy files are created for the {@link FastqcProcessedFile}s?
-     * Please ensure that otp has the necessary write permissions remotely for the project directory
-     * (or any parent directory in which the directories needs to be created)
-     */
-    boolean shouldFastqcFilesCreatedOnFilesystem = false
-
-    /**
-     * Should dummy files and other required directories be created for the generated {@link RoddyBamFile}s?
-     * Please ensure that otp has the necessary write permissions remotely for the project directory
-     * (or any parent directory in which the directories needs to be created)
-     */
-    boolean shouldBamFilesCreatedOnFilesystem = false
+    List<String> controlSampleTypeNames = [
+            "control01",
+    ]
 
 //------------------------------
 //work
@@ -108,6 +132,14 @@ class ExampleData {
     FileSystemService fileSystemService
 
     LsdfFilesService lsdfFilesService
+
+    SnvCallingService snvCallingService
+
+    IndelCallingService indelCallingService
+
+    SophiaService sophiaService
+
+    AceseqService aceseqService
 
     static final List<String> chromosomeXY = [
             "X",
@@ -126,15 +158,29 @@ class ExampleData {
     SeqPlatformGroup seqPlatformGroup
     SoftwareTool softwareTool
 
-    List<SampleType> sampleTypes = []
+    List<SampleType> diseaseSampleTypes = []
+    List<SampleType> controlSampleTypes = []
     List<RoddyBamFile> roddyBamFiles = []
+    List<RoddySnvCallingInstance> roddySnvCallingInstances = []
+    List<IndelCallingInstance> indelCallingInstances = []
+    List<SophiaInstance> sophiaInstances = []
+    List<AceseqInstance> aceseqInstances = []
     List<DataFile> dataFiles = []
     List<FastqcProcessedFile> fastqcProcessedFiles = []
 
+    List<SeqType> analyseAbleSeqType = []
+
     void init() {
-        sampleTypes = sampleTypeNames.collect {
+        diseaseSampleTypes = diseaseSampleTypeNames.collect {
             findOrCreateSampleType(it)
         }
+        controlSampleTypes = controlSampleTypeNames.collect {
+            findOrCreateSampleType(it)
+        }
+        analyseAbleSeqType = SeqTypeService.allAnalysableSeqTypes.findAll {
+            seqTypes.contains(it)
+        }
+
         processingPriority = findOrCreateProcessingPriority()
         fileType = findOrCreateFileType()
         libraryPreparationKit = findOrCreateLibraryPreparationKit()
@@ -155,36 +201,45 @@ class ExampleData {
             println "- pid: ${pid}"
             Individual individual = createIndividual(project, pid)
             println "- individual: ${individual}"
-            sampleTypes.each { SampleType sampleType ->
-                Sample sample = createSample(individual, sampleType)
-                println "  - sample: ${sample}"
-                seqTypes.each { SeqType seqType ->
-                    println "    - for: ${seqType}"
-                    List<SeqTrack> seqTracks = (1..lanesPerSampleAndSeqType).collect {
-                        SeqTrack seqTrack = createSeqTrack(fastqImportInstance, sample, seqType)
-                        println "      - seqtrack: ${seqTrack}"
-                        return seqTrack
+            Map<SeqType, List<AbstractMergedBamFile>> diseaseBamFiles = diseaseSampleTypes.collectMany { SampleType sampleType ->
+                createSampleWithSeqTracksAndBamFile(individual, sampleType)
+            }.groupBy {
+                it.seqType
+            }
+            Map<SeqType, List<AbstractMergedBamFile>> controlBamFiles = controlSampleTypes.collectMany { SampleType sampleType ->
+                createSampleWithSeqTracksAndBamFile(individual, sampleType)
+            }.groupBy {
+                it.seqType
+            }
+            analyseAbleSeqType.each { SeqType seqType ->
+                diseaseBamFiles[seqType].each { AbstractMergedBamFile diseaseBamFile ->
+                    controlBamFiles[seqType].each { AbstractMergedBamFile controlBamFile ->
+                        SamplePair samplePair = createSamplePair(diseaseBamFile.mergingWorkPackage, controlBamFile.mergingWorkPackage)
+                        createRoddySnvCallingInstance(samplePair)
+                        createIndelCallingInstance(samplePair)
+                        createSophiaInstance(samplePair)
+                        createAceseqInstance(samplePair)
                     }
-                    MergingWorkPackage mergingWorkPackage = createMergingWorkPackage(seqTracks)
-                    println "      - mwp: ${mergingWorkPackage}"
-                    RoddyBamFile roddyBamFile = createRoddyBamFile(mergingWorkPackage)
-                    println "      - roddy: ${roddyBamFile}"
                 }
             }
         }
     }
 
     void createFiles() {
-        createDataFilesFilesOnFilesystem()
-        createFastqcFilesOnFilesystem()
-        createBamFilesOnFilesystem()
+        if (createFilesOnFilesystem) {
+            createDataFilesFilesOnFilesystem()
+            createFastqcFilesOnFilesystem()
+            createBamFilesOnFilesystem()
+            createSnvFilesOnFilesystem()
+            createIndelFilesOnFilesystem()
+            createSophiaFilesOnFilesystem()
+            createAceseqFilesOnFilesystem()
+        } else {
+            println "Skipp creating dummy files/directories on file system"
+        }
     }
 
     void createDataFilesFilesOnFilesystem() {
-        if (!shouldDataFilesCreatedOnFilesystem) {
-            println "Skipp creating dummy datafiles on file system"
-            return
-        }
         println "creating dummy datafiles on file system"
         dataFiles.each { DataFile dataFile ->
             Path directPath = lsdfFilesService.getFileFinalPathAsPath(dataFile)
@@ -201,16 +256,12 @@ class ExampleData {
     }
 
     void createFastqcFilesOnFilesystem() {
-        if (!shouldFastqcFilesCreatedOnFilesystem) {
-            println "Skipp creating dummy fastqc reports on file system"
-            return
-        }
         println "creating dummy fastqc reports on file system"
         FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
 
         fastqcProcessedFiles.each { FastqcProcessedFile fastqcProcessedFile ->
             Path fastqcPath = fileSystem.getPath(fastqcDataFilesService.fastqcOutputFile(fastqcProcessedFile.dataFile))
-            Path fastqcMd5Path = fastqcPath.resolveSibling("${fastqcPath.fileName}.md5sum")
+            Path fastqcMd5Path = fastqcPath.resolveSibling("${fastqcPath.getFileName()}.md5sum")
             [
                     fastqcPath,
                     fastqcMd5Path,
@@ -221,28 +272,25 @@ class ExampleData {
     }
 
     void createBamFilesOnFilesystem() {
-        if (!shouldBamFilesCreatedOnFilesystem) {
-            println "Skipp creating dummy bam files on file system"
-            return
-        }
         println "creating dummy bam files on file system"
         FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
 
         roddyBamFiles.each { RoddyBamFile bam ->
-            List<File> files = [
-                    bam.workBamFile,
-                    bam.workBaiFile,
-                    bam.workMd5sumFile,
+            Map<File, File> filesMap = [
+                    (bam.finalBamFile)   : bam.workBamFile,
+                    (bam.finalBaiFile)   : bam.workBaiFile,
+                    (bam.finalMd5sumFile): bam.workMd5sumFile,
             ]
-            List<File> dirs = [
-                    bam.workDirectory,
-                    bam.workMergedQADirectory,
+
+            Map<File, File> dirsMap = [
+                    (bam.finalMergedQADirectory)      : bam.workMergedQADirectory,
+                    (bam.finalExecutionStoreDirectory): bam.workExecutionStoreDirectory,
             ]
-            dirs.addAll(bam.workExecutionDirectories)
+            List<File> dirs = [bam.workDirectory]
             dirs.addAll(bam.workSingleLaneQADirectories.values())
 
             if (bam.seqType.isWgbs()) {
-                files << bam.workMetadataTableFile
+                filesMap[bam.finalMetadataTableFile] = bam.workMetadataTableFile
                 if (bam.containedSeqTracks*.libraryDirectoryName.unique().size() > 1) {
                     dirs.addAll(bam.workLibraryQADirectories.values())
                     dirs.addAll(bam.workLibraryMethylationDirectories.values())
@@ -254,9 +302,92 @@ class ExampleData {
                 fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(path, realm)
             }
 
-            files.each {
-                Path path = fileSystem.getPath(it.toString())
-                fileService.createFileWithContent(path, path.toString(), realm)
+            dirsMap.each {
+                Path pathFinal = fileSystem.getPath(it.key.toString())
+                Path pathWork = fileSystem.getPath(it.value.toString())
+                fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(pathWork, realm)
+                fileService.createLink(pathFinal, pathWork, realm)
+            }
+
+            filesMap.each {
+                Path pathFinal = fileSystem.getPath(it.key.toString())
+                Path pathWork = fileSystem.getPath(it.value.toString())
+                fileService.createFileWithContent(pathWork, pathWork.toString(), realm)
+                fileService.createLink(pathFinal, pathWork, realm)
+            }
+        }
+    }
+
+    void createSnvFilesOnFilesystem() {
+        println "creating dummy snv files on file system"
+
+        roddySnvCallingInstances.each { RoddySnvCallingInstance snvCallingInstance ->
+            [
+                    snvCallingService.getSnvCallingResult(snvCallingInstance),
+                    snvCallingService.getSnvDeepAnnotationResult(snvCallingInstance),
+                    snvCallingService.getCombinedPlotPath(snvCallingInstance),
+            ].each {
+                fileService.createFileWithContent(it, it.toString(), realm)
+            }
+        }
+    }
+
+    void createIndelFilesOnFilesystem() {
+        println "creating dummy indel files on file system"
+
+        indelCallingInstances.each { IndelCallingInstance indelCallingInstance ->
+            [
+                    indelCallingService.getCombinedPlotPath(indelCallingInstance),
+                    indelCallingService.getCombinedPlotPathTiNDA(indelCallingInstance),
+                    indelCallingService.getIndelQcJsonFile(indelCallingInstance),
+                    indelCallingService.getSampleSwapJsonFile(indelCallingInstance),
+            ].each {
+                fileService.createFileWithContent(it, it.toString(), realm)
+            }
+        }
+    }
+
+    void createSophiaFilesOnFilesystem() {
+        println "creating dummy sophia files on file system"
+
+        sophiaInstances.each { SophiaInstance sophiaInstance ->
+            [
+                    sophiaService.getCombinedPlotPath(sophiaInstance),
+                    sophiaService.getFinalAceseqInputFile(sophiaInstance),
+                    sophiaService.getQcJsonFile(sophiaInstance),
+            ].each {
+                fileService.createFileWithContent(it, it.toString(), realm)
+            }
+        }
+    }
+
+    void createAceseqFilesOnFilesystem() {
+        println "creating dummy aceseq files on file system"
+
+        aceseqInstances.each { AceseqInstance aceseqInstance ->
+            Path base = aceseqService.getWorkDirectory(aceseqInstance)
+            AceseqQc aceseqQc = CollectionUtils.exactlyOneElement(AceseqQc.findAllByNumberAndAceseqInstance(1, aceseqInstance))
+            DecimalFormat decimalFormat = (DecimalFormat) NumberFormat.getInstance(Locale.ENGLISH)
+            decimalFormat.applyPattern("0.##")
+            String plotPrefixAceseqExtra = "${aceseqInstance.individual.pid}_plot_${aceseqQc.ploidyFactor}extra_${decimalFormat.format(aceseqQc.tcc)}_"
+                    .replace('.', '\\.')
+
+            [
+                    aceseqService.getQcJsonFile(aceseqInstance),
+                    aceseqService.getPlot(aceseqInstance, PlotType.ACESEQ_GC_CORRECTED),
+                    aceseqService.getPlot(aceseqInstance, PlotType.ACESEQ_QC_GC_CORRECTED),
+                    aceseqService.getPlot(aceseqInstance, PlotType.ACESEQ_TCN_DISTANCE_COMBINED_STAR),
+                    aceseqService.getPlot(aceseqInstance, PlotType.ACESEQ_WG_COVERAGE),
+                    //files for pattern for PlotType.ACESEQ_ALL
+                    base.resolve("${aceseqInstance.individual.pid}_plot_1_ALL.png"),
+                    base.resolve("${aceseqInstance.individual.pid}_plot_3_ALL.png"),
+                    base.resolve("${aceseqInstance.individual.pid}_plot_4_ALL.png"),
+                    //files for pattern for PlotType.ACESEQ_EXTRA
+                    base.resolve("${plotPrefixAceseqExtra}_1.png"),
+                    base.resolve("${plotPrefixAceseqExtra}_3.png"),
+                    base.resolve("${plotPrefixAceseqExtra}_5.png"),
+            ].each {
+                fileService.createFileWithContent(it, it.toString(), realm)
             }
         }
     }
@@ -296,9 +427,8 @@ class ExampleData {
     }
 
     Realm findOrCreateRealm() {
-        String name = "dev_realm"
-        return Realm.findByName(name) ?: new Realm([
-                name                       : name,
+        return Realm.findByName(realmName) ?: new Realm([
+                name                       : realmName,
                 jobScheduler               : Realm.JobScheduler.LSF,
                 host                       : "localhost",
                 port                       : 22,
@@ -400,6 +530,24 @@ class ExampleData {
                 mockFullName: pid,
                 type        : Individual.Type.REAL,
         ]).save(flush: true)
+    }
+
+    List<AbstractMergedBamFile> createSampleWithSeqTracksAndBamFile(Individual individual, SampleType sampleType) {
+        Sample sample = createSample(individual, sampleType)
+        println "  - sample: ${sample}"
+        return seqTypes.collect { SeqType seqType ->
+            println "    - for: ${seqType}"
+            List<SeqTrack> seqTracks = (1..lanesPerSampleAndSeqType).collect {
+                SeqTrack seqTrack = createSeqTrack(fastqImportInstance, sample, seqType)
+                println "      - seqtrack: ${seqTrack}"
+                return seqTrack
+            }
+            MergingWorkPackage mergingWorkPackage = createMergingWorkPackage(seqTracks)
+            println "      - mwp: ${mergingWorkPackage}"
+            RoddyBamFile roddyBamFile = createRoddyBamFile(mergingWorkPackage)
+            println "      - roddy: ${roddyBamFile}"
+            return roddyBamFile
+        }
     }
 
     Sample createSample(Individual individual, SampleType sampleType) {
@@ -578,6 +726,178 @@ class ExampleData {
                 genomeWithoutNCoverageQcBases: 100,
         ] + map).save(flush: true)
     }
+
+    SamplePair createSamplePair(MergingWorkPackage disease, MergingWorkPackage control) {
+        SamplePair samplePair = new SamplePair([
+                mergingWorkPackage1: disease,
+                mergingWorkPackage2: control,
+        ]).save(flush: true)
+        println "  - samplePair: ${samplePair}"
+        return samplePair
+    }
+
+    RoddySnvCallingInstance createRoddySnvCallingInstance(SamplePair samplePair) {
+        RoddyWorkflowConfig config = getOrCreateConfig(samplePair, Pipeline.Name.RODDY_SNV)
+        String instanceName = "results_${config.programVersion.replaceAll(":", "-")}_${config.configVersion}_${TimeFormats.DATE_TIME_SECONDS_DASHES.getFormattedDate(new Date())}"
+        BamFilePairAnalysis analysis = new RoddySnvCallingInstance([
+                samplePair        : samplePair,
+                instanceName      : instanceName,
+                config            : config,
+                sampleType1BamFile: samplePair.mergingWorkPackage1.bamFileInProjectFolder,
+                sampleType2BamFile: samplePair.mergingWorkPackage2.bamFileInProjectFolder,
+                processingState   : AnalysisProcessingStates.FINISHED,
+        ]).save(flush: true)
+        println "    - snv: ${analysis}"
+        roddySnvCallingInstances << analysis
+        return analysis
+    }
+
+    IndelCallingInstance createIndelCallingInstance(SamplePair samplePair) {
+        RoddyWorkflowConfig config = getOrCreateConfig(samplePair, Pipeline.Name.RODDY_INDEL)
+        String instanceName = "results_${config.programVersion.replaceAll(":", "-")}_${config.configVersion}_${TimeFormats.DATE_TIME_SECONDS_DASHES.getFormattedDate(new Date())}"
+        BamFilePairAnalysis analysis = new IndelCallingInstance([
+                samplePair        : samplePair,
+                instanceName      : instanceName,
+                config            : config,
+                sampleType1BamFile: samplePair.mergingWorkPackage1.bamFileInProjectFolder,
+                sampleType2BamFile: samplePair.mergingWorkPackage2.bamFileInProjectFolder,
+                processingState   : AnalysisProcessingStates.FINISHED,
+        ]).save(flush: true)
+        println "    - indel: ${analysis}"
+        indelCallingInstances << analysis
+
+        new IndelQualityControl([
+                indelCallingInstance  : analysis,
+                file                 : "/tmp/file",
+                numIndels            : 10,
+                numIns               : 20,
+                numDels              : 30,
+                numSize1_3           : 40,
+                numSize4_10          : 50,
+                numSize11plus        : 60,
+                numInsSize1_3        : 70,
+                numInsSize4_10       : 80,
+                numInsSize11plus     : 90,
+                numDelsSize1_3       : 100,
+                numDelsSize4_10      : 110,
+                numDelsSize11plus    : 120,
+                percentIns           : 130.123,
+                percentDels          : 140.123,
+                percentSize1_3       : 150.123,
+                percentSize4_10      : 160.123,
+                percentSize11plus    : 170.123,
+                percentInsSize1_3    : 180.123,
+                percentInsSize4_10   : 190.123,
+                percentInsSize11plus : 200.123,
+                percentDelsSize1_3   : 210.123,
+                percentDelsSize4_10  : 220.123,
+                percentDelsSize11plus: 230.123,
+        ]).save(flush: true)
+
+        new IndelSampleSwapDetection([
+                indelCallingInstance                            : analysis,
+                somaticSmallVarsInTumorCommonInGnomADPer        : 500,
+                somaticSmallVarsInControlCommonInGnomad         : 510,
+                tindaSomaticAfterRescue                         : 520,
+                somaticSmallVarsInControlInBiasPer              : 530,
+                somaticSmallVarsInTumorPass                     : 540,
+                pid                                             : analysis.individual.pid,
+                somaticSmallVarsInControlPass                   : 550,
+                somaticSmallVarsInControlPassPer                : 560,
+                tindaSomaticAfterRescueMedianAlleleFreqInControl: 560.123,
+                somaticSmallVarsInTumorInBiasPer                : 570.123,
+                somaticSmallVarsInControlCommonInGnomadPer      : 580,
+                somaticSmallVarsInTumorInBias                   : 590,
+                somaticSmallVarsInControlCommonInGnomasPer      : 600,
+                germlineSNVsHeterozygousInBothRare              : 610,
+                germlineSmallVarsHeterozygousInBothRare         : 620,
+                tindaGermlineRareAfterRescue                    : 630,
+                somaticSmallVarsInTumorCommonInGnomad           : 640,
+                somaticSmallVarsInControlInBias                 : 650,
+                somaticSmallVarsInControl                       : 660,
+                somaticSmallVarsInTumor                         : 670,
+                germlineSNVsHeterozygousInBoth                  : 680,
+                somaticSmallVarsInTumorPassPer                  : 690.123,
+                somaticSmallVarsInTumorCommonInGnomadPer        : 700,
+        ]).save(flush: true)
+
+        return analysis
+    }
+
+    SophiaInstance createSophiaInstance(SamplePair samplePair) {
+        RoddyWorkflowConfig config = getOrCreateConfig(samplePair, Pipeline.Name.RODDY_SOPHIA)
+        String instanceName = "results_${config.programVersion.replaceAll(":", "-")}_${config.configVersion}_${TimeFormats.DATE_TIME_SECONDS_DASHES.getFormattedDate(new Date())}"
+        BamFilePairAnalysis analysis = new SophiaInstance([
+                samplePair        : samplePair,
+                instanceName      : instanceName,
+                config            : config,
+                sampleType1BamFile: samplePair.mergingWorkPackage1.bamFileInProjectFolder,
+                sampleType2BamFile: samplePair.mergingWorkPackage2.bamFileInProjectFolder,
+                processingState   : AnalysisProcessingStates.FINISHED,
+        ]).save(flush: true)
+        println "    - sophia: ${analysis}"
+        sophiaInstances << analysis
+
+        new SophiaQc([
+                sophiaInstance                       : analysis,
+                controlMassiveInvPrefilteringLevel   : 10,
+                tumorMassiveInvFilteringLevel        : 20,
+                rnaContaminatedGenesMoreThanTwoIntron: "arbitraryGeneName1,arbitraryGeneName2",
+                rnaContaminatedGenesCount            : 30,
+                rnaDecontaminationApplied            : true,
+        ]).save(flush: true)
+
+        return analysis
+    }
+
+    AceseqInstance createAceseqInstance(SamplePair samplePair) {
+        RoddyWorkflowConfig config = getOrCreateConfig(samplePair, Pipeline.Name.RODDY_ACESEQ)
+        String instanceName = "results_${config.programVersion.replaceAll(":", "-")}_${config.configVersion}_${TimeFormats.DATE_TIME_SECONDS_DASHES.getFormattedDate(new Date())}"
+        BamFilePairAnalysis analysis = new AceseqInstance([
+                samplePair        : samplePair,
+                instanceName      : instanceName,
+                config            : config,
+                sampleType1BamFile: samplePair.mergingWorkPackage1.bamFileInProjectFolder,
+                sampleType2BamFile: samplePair.mergingWorkPackage2.bamFileInProjectFolder,
+                processingState   : AnalysisProcessingStates.FINISHED,
+        ]).save(flush: true)
+        println "    - aceseq: ${analysis}"
+        aceseqInstances << analysis
+
+        new AceseqQc([
+                aceseqInstance  : analysis,
+                number          : 1,
+                tcc             : 20,
+                ploidyFactor    : '1.0',
+                ploidy          : 30,
+                goodnessOfFit   : 40,
+                gender          : 'M',
+                solutionPossible: 50,
+        ]).save(flush: true)
+
+        return analysis
+    }
+
+    ConfigPerProjectAndSeqType getOrCreateConfig(SamplePair samplePair, Pipeline.Name pipelineName) {
+        Pipeline pipeline = pipelineName.pipeline
+        RoddyWorkflowConfig config = atMostOneElement(RoddyWorkflowConfig.findAllByProjectAndSeqTypeAndPipelineAndObsoleteDateAndIndividual(
+                samplePair.project, samplePair.seqType, pipeline, null, null))
+        if (config) {
+            return config
+        }
+        String nameUsedInConfig = "${pipelineName.name()}_${samplePair.seqType.roddyName}_${samplePair.seqType.libraryLayout}"
+        return new RoddyWorkflowConfig([project              : samplePair.project,
+                                        seqType              : samplePair.seqType,
+                                        pipeline             : pipeline,
+                                        programVersion       : "programVersion:1.1.1",
+                                        configVersion        : "v1_0",
+                                        nameUsedInConfig     : "",
+                                        adapterTrimmingNeeded: false,
+                                        nameUsedInConfig     : nameUsedInConfig,
+                                        md5sum               : HelperUtils.getRandomMd5sum(),
+                                        configFilePath       : "/dev/null/${nameUsedInConfig}_${samplePair.id}"
+        ]).save(flush: true)
+    }
 }
 
 Project.withTransaction {
@@ -586,7 +906,12 @@ Project.withTransaction {
             fileService           : ctx.fileService,
             fileSystemService     : ctx.fileSystemService,
             lsdfFilesService      : ctx.lsdfFilesService,
+            snvCallingService     : ctx.snvCallingService,
+            indelCallingService   : ctx.indelCallingService,
+            sophiaService         : ctx.sophiaService,
+            aceseqService         : ctx.aceseqService,
     ])
+
     exampleData.init()
     exampleData.createObjects()
     exampleData.createFiles()
