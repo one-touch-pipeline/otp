@@ -34,6 +34,7 @@ class FilteredSpreadsheet extends Spreadsheet {
                         @ClosureParams(value = SimpleType, options = ['de.dkfz.tbi.util.spreadsheet.Row']) Closure<Boolean> dataRowFilter = { true }) {
         super(document, delimiter, renameHeader)
         dataRows = super.dataRows.findAll(dataRowFilter).asImmutable()
+        dataRows -= dataRows.findAll { it.cells == it.cells.findAll { it.text == "" } }
     }
 
     @Override
