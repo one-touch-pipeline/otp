@@ -71,6 +71,5 @@ new licenses:
     - license_scanning
   only:
     - branches
-    - tags
   script:
     - groovy devScripts/gitlab-ci/license-checker/findNewLicenses.groovy
