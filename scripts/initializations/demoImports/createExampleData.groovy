@@ -193,6 +193,13 @@ class ExampleData {
 
         fastqImportInstance = createFastqImportInstance()
         project = findOrCreateProject(projectName)
+        diseaseSampleTypes.each { SampleType sampleType ->
+            findOrCreateSampleTypePerProject(sampleType, SampleTypePerProject.Category.DISEASE)
+        }
+        controlSampleTypes.each { SampleType sampleType ->
+            findOrCreateSampleTypePerProject(sampleType, SampleTypePerProject.Category.DISEASE)
+        }
+        findOrCreateProcessingThresholds()
     }
 
     void createObjects() {
@@ -394,8 +401,35 @@ class ExampleData {
 
     SampleType findOrCreateSampleType(String name) {
         return SampleType.findByName(name) ?: new SampleType([
-                name: name,
+                name                   : name,
+                specificReferenceGenome: SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT,
         ]).save(flush: true)
+    }
+
+    SampleTypePerProject findOrCreateSampleTypePerProject(SampleType sampleType, SampleTypePerProject.Category category) {
+        return SampleTypePerProject.findByProjectAndSampleType(project, sampleType) ?: new SampleTypePerProject([
+                project   : project,
+                sampleType: sampleType,
+                category  : category,
+        ]).save(flush: true)
+    }
+
+    void findOrCreateProcessingThresholds() {
+        [
+                diseaseSampleTypes,
+                controlSampleTypes,
+        ].flatten().each { SampleType sampleType ->
+            analyseAbleSeqType.each { SeqType seqType ->
+                return ProcessingThresholds.findByProjectAndSampleTypeAndSeqType(project, sampleType, seqType) ?:
+                        new ProcessingThresholds([
+                                project      : project,
+                                seqType      : seqType,
+                                sampleType   : sampleType,
+                                coverage     : 20,
+                                numberOfLanes: 1,
+                        ]).save(flush: true)
+            }
+        }
     }
 
     ProcessingPriority findOrCreateProcessingPriority() {
@@ -438,7 +472,7 @@ class ExampleData {
     }
 
     ReferenceGenome findOrCreateReferenceGenome() {
-        String name = "ExampleReferenceGenome"
+        String name = "1KGRef_PhiX"
         ReferenceGenome referenceGenome = ReferenceGenome.findByName(name)
         if (referenceGenome) {
             return referenceGenome
@@ -559,12 +593,14 @@ class ExampleData {
 
     SeqTrack createSeqTrack(FastqImportInstance fastqImportInstance, Sample sample, SeqType seqType) {
         SeqTrack seqTrack = new SeqTrack([
-                sample          : sample,
-                seqType         : seqType,
-                run             : createRun(),
-                laneId          : (SeqTrack.count() % 8) + 1,
-                sampleIdentifier: "sample_${SeqTrack.count() + 1}",
-                pipelineVersion : softwareTool,
+                sample               : sample,
+                seqType              : seqType,
+                run                  : createRun(),
+                laneId               : (SeqTrack.count() % 8) + 1,
+                sampleIdentifier     : "sample_${SeqTrack.count() + 1}",
+                pipelineVersion      : softwareTool,
+                dataInstallationState: SeqTrack.DataProcessingState.FINISHED,
+                fastqcState          : SeqTrack.DataProcessingState.FINISHED,
         ]).save(flush: true)
 
         (1..2).each {
@@ -603,6 +639,7 @@ class ExampleData {
                 fileLinked         : true,
                 fileSize           : 1000000000,
                 nReads             : 185000000,
+                dateLastChecked    : new Date()
         ]).save(flush: true)
 
         dataFiles << dataFile
@@ -636,13 +673,14 @@ class ExampleData {
     }
 
     RoddyBamFile createRoddyBamFile(MergingWorkPackage mergingWorkPackage) {
+        RoddyWorkflowConfig config = findOrCreateRoddyWorkflowConfig(mergingWorkPackage)
         RoddyBamFile roddyBamFile = new RoddyBamFile([
                 workPackage            : mergingWorkPackage,
                 seqTracks              : mergingWorkPackage.seqTracks.collect() as Set,
                 numberOfMergedLanes    : mergingWorkPackage.seqTracks.size(),
                 coverage               : 35,
                 coverageWithN          : 35,
-                config                 : findOrCreateRoddyWorkflowConfig(mergingWorkPackage),
+                config                 : config,
                 dateFromFileSystem     : new Date(),
                 workDirectoryName      : ".merging_0",
                 md5sum                 : "0" * 32,
@@ -650,7 +688,7 @@ class ExampleData {
                 fileSize               : 100,
                 fileOperationStatus    : AbstractMergedBamFile.FileOperationStatus.PROCESSED,
                 qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
-                qcTrafficLightStatus   : AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED,
+                qcTrafficLightStatus   : AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED,
                 comment                : createComment(),
         ]).save(flush: true)
 
@@ -671,17 +709,19 @@ class ExampleData {
     }
 
     RoddyWorkflowConfig findOrCreateRoddyWorkflowConfig(MergingWorkPackage mergingWorkPackage) {
-        return RoddyWorkflowConfig.findByProjectAndSeqType(mergingWorkPackage.project, mergingWorkPackage.seqType) ?: new RoddyWorkflowConfig([
-                project              : mergingWorkPackage.project,
-                seqType              : mergingWorkPackage.seqType,
-                pipeline             : mergingWorkPackage.pipeline,
-                programVersion       : "PanCan:1.2.3-4",
-                configFilePath       : "/tmp/file_${RoddyWorkflowConfig.count()}.xml",
-                configVersion        : "v1_0",
-                nameUsedInConfig     : "name",
-                md5sum               : "0" * 32,
-                adapterTrimmingNeeded: mergingWorkPackage.seqType.isWgbs(),
-        ]).save(flush: true)
+        return RoddyWorkflowConfig.findByProjectAndSeqTypeAndPipelineAndObsoleteDateIsNull(
+                mergingWorkPackage.project, mergingWorkPackage.seqType, mergingWorkPackage.pipeline) ?:
+                new RoddyWorkflowConfig([
+                        project              : mergingWorkPackage.project,
+                        seqType              : mergingWorkPackage.seqType,
+                        pipeline             : mergingWorkPackage.pipeline,
+                        programVersion       : "PanCan:1.2.3-4",
+                        configFilePath       : "/tmp/file_${RoddyWorkflowConfig.count()}.xml",
+                        configVersion        : "v1_0",
+                        nameUsedInConfig     : "name",
+                        md5sum               : "0" * 32,
+                        adapterTrimmingNeeded: mergingWorkPackage.seqType.isWgbs(),
+                ]).save(flush: true)
     }
 
     Comment createComment() {
@@ -729,8 +769,13 @@ class ExampleData {
 
     SamplePair createSamplePair(MergingWorkPackage disease, MergingWorkPackage control) {
         SamplePair samplePair = new SamplePair([
-                mergingWorkPackage1: disease,
-                mergingWorkPackage2: control,
+                mergingWorkPackage1     : disease,
+                mergingWorkPackage2     : control,
+                snvProcessingStatus     : SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED,
+                indelProcessingStatus   : SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED,
+                sophiaProcessingStatus  : SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED,
+                aceseqProcessingStatus  : SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED,
+                runYapsaProcessingStatus: SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED,
         ]).save(flush: true)
         println "  - samplePair: ${samplePair}"
         return samplePair
@@ -767,7 +812,7 @@ class ExampleData {
         indelCallingInstances << analysis
 
         new IndelQualityControl([
-                indelCallingInstance  : analysis,
+                indelCallingInstance : analysis,
                 file                 : "/tmp/file",
                 numIndels            : 10,
                 numIns               : 20,
