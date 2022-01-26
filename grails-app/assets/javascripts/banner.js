@@ -29,7 +29,7 @@ $.otp = $.otp || {};
 $.otp.polling = {
   // polling every minute
   POLL_INTERVAL: 60000,
-  URL: '/info/newsBanner',
+  URL: $.otp.createLink({ controller: 'info', action: 'newsBanner' }),
 
   /**
    * Stop polling
@@ -63,10 +63,10 @@ $.otp.polling = {
 
 $.otp.banner = {
   show: () => {
-    $('div.news-banner').removeClass('hidden');
+    $('div.news-banner').removeClass('news-banner-hidden').addClass('news-banner-shown');
   },
   hide: () => {
-    $('div.news-banner').hide();
+    $('div.news-banner').removeClass('news-banner-shown').addClass('news-banner-hidden');
     $.otp.polling.stopPolling();
   }
 };

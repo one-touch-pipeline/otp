@@ -22,11 +22,13 @@
 
 %{--
   - A reusable News Banner, which should be used together with banner.less and banner.js
-  -
+  - It is hidden initially, and can be turned to visible by replacing css class
+  - news-banner-hidden with news-banner-shown
+  _
   - Usage example: <g:render template="/templates/bootstrap/stickyNewsBanner"/>
   --}%
 
-<div class="news-banner hidden">
+<div class="news-banner news-banner-hidden">
     <div class="news-banner-header">&#x1F4E2;</div>
     <div class="news-banner-body"></div>
     <div class="news-banner-close">
