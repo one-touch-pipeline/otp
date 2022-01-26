@@ -60,7 +60,7 @@ abstract class AbstractAlignmentChecker extends PipelinesChecker<SeqTrack> {
         }
         seqTracks.unique()
 
-        output.showWorkflow(workflowName)
+        output.showWorkflowOldSystem(workflowName)
 
         List<SeqType> supportedSeqTypes = seqTypes
 

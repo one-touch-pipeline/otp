@@ -29,6 +29,7 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.util.TimeFormats
 
@@ -81,7 +82,37 @@ class MonitorOutputCollector {
         }
     }
 
-    void showWorkflow(String workflowName, boolean withSlots = true) {
+    void showWorkflowSystemSlots() {
+        int longColumn = 20
+        int shortColumn = 10
+        output << '\nSlots (new System)'
+        int running = WorkflowRun.countByStateInList(WorkflowRunService.STATES_COUNTING_AS_RUNNING)
+        output << "${INDENT}- Currently running workflows: ${running}"
+        output << "${INDENT}- Slots per priority:"
+        output << prefix([
+                "name".padRight(longColumn),
+                "priority".padLeft(shortColumn),
+                "max slots".padLeft(shortColumn),
+                "free slots".padLeft(shortColumn),
+        ].join(' '), INDENT2)
+
+        output << prefix(ProcessingPriority.list().sort {
+            -it.priority
+        }.collect {
+            [
+                    it.name.padRight(longColumn),
+                    it.priority.toString().padLeft(shortColumn),
+                    it.allowedParallelWorkflowRuns.toString().padLeft(shortColumn),
+                    Math.max(it.allowedParallelWorkflowRuns - running, 0).toString().padLeft(shortColumn),
+            ].join(' ')
+        }.join('\n'), INDENT2)
+    }
+
+    /**
+     * @Deprecated old workflow system
+     */
+    @Deprecated
+    void showWorkflowOldSystem(String workflowName, boolean withSlots = true) {
         output << '\n' << workflowName
         if (withSlots) {
             List<JobExecutionPlan> jobExecutionPlans = JobExecutionPlan.findAllByName(workflowName)
@@ -93,6 +124,20 @@ class MonitorOutputCollector {
                 )
                 long normalSlots = totalSlots - fastTrackSlots
                 output << "${INDENT}Used Slots: ${occupiedSlots}, Normal priority slots: ${normalSlots}, additional fasttrack slots: ${fastTrackSlots}"
+            }
+        }
+        output << ''
+    }
+
+    void showWorkflowNewSystem(String workflowName, boolean withSlots = true) {
+        output << '\n' << workflowName
+        if (withSlots) {
+            Workflow workflow = CollectionUtils.atMostOneElement(Workflow.findAllByName(workflowName))
+            if (workflow) {
+                long occupiedSlots = WorkflowRun.countByWorkflowAndStateInList(workflow, WorkflowRunService.STATES_COUNTING_AS_RUNNING)
+                long totalSlots = workflow.maxParallelWorkflows
+                long freeSlots = totalSlots - occupiedSlots
+                output << "${INDENT}Used workflow slots: ${occupiedSlots}, total workflow slots: ${totalSlots}, free workflow slots: ${freeSlots}"
             }
         }
         output << ''
@@ -271,4 +316,3 @@ ${prefix(objectsToStrings(objects, valueToShow).join('\n'))}
         return false
     }
 }
-

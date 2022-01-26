@@ -50,7 +50,7 @@ abstract class AbstractVariantCallingPipelineChecker extends PipelinesChecker<Sa
         }
         List<SamplePair> samplePairs = samplePairsInput
 
-        output.showWorkflow(workflowName)
+        output.showWorkflowOldSystem(workflowName)
 
         List<SeqType> supportedSeqTypes = seqTypes
 

@@ -340,7 +340,7 @@ abstract class AbstractAlignmentCheckerIntegrationSpec extends Specification {
         List<AbstractMergedBamFile> result = checker.handle(seqTracks, output)
 
         then:
-        1 * output.showWorkflow(workflowName)
+        1 * output.showWorkflowOldSystem(workflowName)
 
         then:
         1 * output.showUniqueNotSupportedSeqTypes([wrongSeqType], _)

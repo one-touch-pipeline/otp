@@ -370,7 +370,7 @@ class SamplePairCheckerIntegrationSpec extends Specification {
         List<SamplePair> result = samplePairChecker.handle(bamFiles, output)
 
         then:
-        1 * output.showWorkflow(_, _)
+        1 * output.showWorkflowOldSystem(_, _)
 
         samplePairs == result
 

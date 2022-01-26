@@ -118,7 +118,7 @@ class MonitorOutputCollectorSpec extends Specification implements DataTest {
         String expected = "\n\n${workflowName}\n"
 
         when:
-        collector.showWorkflow(workflowName, false)
+        collector.showWorkflowOldSystem(workflowName, false)
 
         then:
         expected == collector.output
@@ -143,7 +143,7 @@ class MonitorOutputCollectorSpec extends Specification implements DataTest {
         String expected = "\n\n${plan.name}\n    Used Slots: 7, Normal priority slots: 30, additional fasttrack slots: 20\n"
 
         when:
-        collector.showWorkflow(plan.name)
+        collector.showWorkflowOldSystem(plan.name)
 
         then:
         expected == collector.output

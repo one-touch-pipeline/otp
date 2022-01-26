@@ -150,13 +150,13 @@ class VariantCallingPipelinesCheckerIntegrationSpec extends Specification {
 
         then:
         expectedSamplePairs == result
-        1 * output.showWorkflow('Sample pairs', false)
+        1 * output.showWorkflowOldSystem('Sample pairs', false)
 
         then: 'monitor should have asked each workflow for details'
-        workflowNames.each { 1 * output.showWorkflow(it) }
+        workflowNames.each { 1 * output.showWorkflowOldSystem(it) }
 
         then: 'and no workflows should have been overlooked by this test'
-        0 * output.showWorkflow(_)
-        0 * output.showWorkflow(_, _)
+        0 * output.showWorkflowOldSystem(_)
+        0 * output.showWorkflowOldSystem(_, _)
     }
 }

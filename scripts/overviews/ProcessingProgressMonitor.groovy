@@ -97,6 +97,7 @@ boolean showUnsupportedSeqTypes = false
 
 ProcessingOptionService processingOptionService = ctx.processingOptionService
 MonitorOutputCollector output = new MonitorOutputCollector(showFinishedEntries, showUnsupportedSeqTypes)
+output.showWorkflowSystemSlots()
 
 SeqType exomePaired = SeqTypeService.exomePairedSeqType
 List<SeqType> alignableSeqtypes = SeqTypeService.allAlignableSeqTypes
@@ -149,7 +150,7 @@ Closure<List<SeqTrack>> findNotWithdrawn = { List<SeqTrack> seqTracks ->
 }
 
 Closure handleStateMap = { Map map, String workflow, Closure objectToCheck = {it} ->
-    output.showWorkflow(workflow)
+    output.showWorkflowNewSystem(workflow)
     def ret
     def keys = map.keySet().sort{it}
 
@@ -193,7 +194,7 @@ Closure showSeqTracks = { Collection<SeqTrack> seqTracks ->
             seqTracksNotWithdrawn.groupBy {it.dataInstallationState}
 
     allFinished &= dataInstallationState.keySet() == [SeqTrack.DataProcessingState.FINISHED] as Set
-    Collection<SeqTrack> seqTracksFinishedDataInstallationWorkflow = handleStateMap(dataInstallationState, "DataInstallationWorkflow")
+    Collection<SeqTrack> seqTracksFinishedDataInstallationWorkflow = handleStateMap(dataInstallationState, "FASTQ installation")
 
     if (!seqTracksFinishedDataInstallationWorkflow) {
         output << "\nnot all workflows are finished"
@@ -205,7 +206,7 @@ Closure showSeqTracks = { Collection<SeqTrack> seqTracks ->
             seqTracksFinishedDataInstallationWorkflow.groupBy {it.fastqcState}
 
     allFinished &= seqTracksNotWithdrawnByFastqcState.keySet() == [SeqTrack.DataProcessingState.FINISHED] as Set
-    Collection<SeqTrack> seqTracksNotWithdrawnFinishedFastqcWorkflow = handleStateMap(seqTracksNotWithdrawnByFastqcState, "FastqcWorkflow")
+    Collection<SeqTrack> seqTracksNotWithdrawnFinishedFastqcWorkflow = handleStateMap(seqTracksNotWithdrawnByFastqcState, "FastQC")
 
     if (!seqTracksNotWithdrawnFinishedFastqcWorkflow) {
         output << "\nnot all workflows are finished"

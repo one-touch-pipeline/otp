@@ -59,7 +59,7 @@ class SamplePairChecker extends PipelinesChecker<AbstractMergedBamFile> {
         if (!bamFilesInput) {
             return []
         }
-        output.showWorkflow("Sample pairs", false)
+        output.showWorkflowOldSystem("Sample pairs", false)
 
         List<SeqType> supportedSeqTypes = SeqTypeService.allAnalysableSeqTypes
 

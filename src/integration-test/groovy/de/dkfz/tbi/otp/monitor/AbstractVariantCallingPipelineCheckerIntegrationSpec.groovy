@@ -414,7 +414,7 @@ abstract class AbstractVariantCallingPipelineCheckerIntegrationSpec extends Spec
         List<SamplePair> result = pipelineChecker.handle(samplePairs, output)
 
         then:
-        1 * output.showWorkflow(_)
+        1 * output.showWorkflowOldSystem(_)
 
         finishedSamplePairs == result
 

@@ -81,10 +81,10 @@ class AllAlignmentsCheckerIntegrationSpec extends Specification implements Roddy
         1 * output.showUniqueList(AllAlignmentsChecker.HEADER_NOT_SUPPORTED_SEQTYPES, [wrongSeqType], _)
 
         then:
-        1 * output.showWorkflow('PanCanWorkflow')
-        1 * output.showWorkflow('WgbsAlignmentWorkflow')
-        1 * output.showWorkflow('RnaAlignmentWorkflow')
-        0 * output.showWorkflow(_)
+        1 * output.showWorkflowOldSystem('PanCanWorkflow')
+        1 * output.showWorkflowOldSystem('WgbsAlignmentWorkflow')
+        1 * output.showWorkflowOldSystem('RnaAlignmentWorkflow')
+        0 * output.showWorkflowOldSystem(_)
 
         then:
         finishedRoddyBamFiles == result
