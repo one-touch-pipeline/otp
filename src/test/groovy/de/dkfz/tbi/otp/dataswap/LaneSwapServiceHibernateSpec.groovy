@@ -60,6 +60,7 @@ class LaneSwapServiceHibernateSpec extends HibernateSpec implements ServiceUnitT
 
         final Individual individual = createIndividual()
         final Sample sample = createSample(individual: individual)
+        final SeqType seqType = DomainFactory.createRnaPairedSeqType()
         if (seqTrackRemain) {
             createSeqTrack(sample: sample)
         }
@@ -73,7 +74,9 @@ class LaneSwapServiceHibernateSpec extends HibernateSpec implements ServiceUnitT
 
         final LaneSwapData data = new LaneSwapData([
                 individualSwap: new Swap(individual, null),
-                sampleSwap    : new Swap(sample, null)
+                sampleSwap    : new Swap(sample, null),
+                seqTypeSwap   : new Swap(seqType, null
+                )
         ])
 
         when:
@@ -117,9 +120,8 @@ class LaneSwapServiceHibernateSpec extends HibernateSpec implements ServiceUnitT
         Individual.count == 1
 
         String bashScriptSnippet = data.moveFilesCommands.join("\n")
-        bashScriptSnippet.contains("################ cleanup empty sample directories ################")
+        bashScriptSnippet.contains("################ cleanup empty sample and pid directories ################")
         bashScriptSnippet.contains("rm -rf ${vbpPath.resolve(sampleDir)}")
-        !bashScriptSnippet.contains("################ cleanup empty individual directories ################")
         !bashScriptSnippet.contains("rm -rf ${vbpPath}\n")
     }
 
@@ -147,9 +149,8 @@ class LaneSwapServiceHibernateSpec extends HibernateSpec implements ServiceUnitT
         !Individual.count
 
         String bashScriptSnippet = data.moveFilesCommands.join("\n")
-        bashScriptSnippet.contains("################ cleanup empty sample directories ################")
+        bashScriptSnippet.contains("################ cleanup empty sample and pid directories ################")
         bashScriptSnippet.contains("rm -rf ${vbpPath.resolve(sampleDir)}")
-        bashScriptSnippet.contains("################ cleanup empty individual directories ################")
         bashScriptSnippet.contains("rm -rf ${vbpPath}")
     }
 }

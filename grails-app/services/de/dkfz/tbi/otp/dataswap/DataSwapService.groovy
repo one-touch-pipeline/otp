@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 The OTP authors
+ * Copyright 2011-2022 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -469,7 +469,7 @@ abstract class DataSwapService<P extends DataSwapParameters, D extends DataSwapD
      * @param data DTO containing all entities necessary to perform a swap
      */
     void cleanupLeftOverSamples(D data) {
-        data.moveFilesCommands << "\n\n################ cleanup empty sample directories ################\n\n"
+        data.moveFilesCommands << "\n\n"
         data.moveFilesCommands << data.cleanupIndividualPaths*.resolve(data.cleanupSampleDir).collect { "rm -rf ${it}" }.join("\n")
 
         if (!data.individualSwap.old.samples) {
@@ -491,8 +491,8 @@ abstract class DataSwapService<P extends DataSwapParameters, D extends DataSwapD
         if (cleanupDatabase) {
             data.individualSwap.old.delete(flush: true)
         }
-        data.moveFilesCommands << "\n\n################ cleanup empty individual directories ################\n\n"
         data.moveFilesCommands << data.cleanupIndividualPaths.collect { "rm -rf ${it}" }.join("\n")
+        data.moveFilesCommands << "\n"
     }
 
     /**

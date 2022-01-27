@@ -161,6 +161,7 @@ class SampleSwapService extends DataSwapService<SampleSwapParameters, SampleSwap
 
     @Override
     protected void cleanupLeftOvers(SampleSwapData data) {
+        data.moveFilesCommands << "\n\n################ cleanup empty sample and pid directories ################\n\n"
         cleanupLeftOverSamples(data)
     }
 
@@ -218,4 +219,3 @@ class SampleSwapService extends DataSwapService<SampleSwapParameters, SampleSwap
         return seqTrackList
     }
 }
-

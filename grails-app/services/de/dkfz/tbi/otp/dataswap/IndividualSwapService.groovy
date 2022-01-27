@@ -139,6 +139,7 @@ class IndividualSwapService extends DataSwapService<IndividualSwapParameters, In
 
     @Override
     protected void cleanupLeftOvers(IndividualSwapData data) {
+        data.moveFilesCommands << "\n\n################ cleanup empty sample and pid directories ################\n\n"
         cleanupLeftOverIndividual(data)
     }
 

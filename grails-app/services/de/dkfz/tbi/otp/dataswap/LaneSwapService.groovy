@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 The OTP authors
+ * Copyright 2011-2022 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -143,6 +143,7 @@ class LaneSwapService extends DataSwapService<LaneSwapParameters, LaneSwapData> 
 
     @Override
     protected void cleanupLeftOvers(LaneSwapData data) {
+        data.moveFilesCommands << "\n\n################ cleanup empty sample and pid directories ################\n\n"
         List<SeqTrack> leftOverSeqTracks = SeqTrack.findAllBySample(data.sampleSwap.old)
         List<ExternallyProcessedMergedBamFile> leftOverBamFiles = ExternallyProcessedMergedBamFile.withCriteria {
             'workPackage' {
@@ -153,6 +154,25 @@ class LaneSwapService extends DataSwapService<LaneSwapParameters, LaneSwapData> 
         if (!leftOverSeqTracks && !leftOverBamFiles) {
             data.sampleSwap.old.delete(flush: true) // needs to be done here since only LaneSwapData has a sampleSwap object
             cleanupLeftOverSamples(data)
+        } else {
+            List<SeqTrack> seqTrackSampleList = SeqTrack.createCriteria().list {
+                eq('sample', data.sampleSwap.old)
+                eq('seqType', data.seqTypeSwap.old)
+            } as List<SeqTrack>
+            if (seqTrackSampleList.empty) {
+                cleanupLeftOverSamples(data)
+            }
+
+            List<SeqTrack> seqTrackIndividualList = SeqTrack.createCriteria().list {
+                sample {
+                    eq('individual', data.individualSwap.old)
+                }
+                eq('seqType', data.seqTypeSwap.old)
+            } as List<SeqTrack>
+            if (seqTrackIndividualList.empty) {
+                data.moveFilesCommands << "\n\n"
+                cleanupLeftOverIndividual(data)
+            }
         }
     }
 
@@ -184,11 +204,10 @@ class LaneSwapService extends DataSwapService<LaneSwapParameters, LaneSwapData> 
      */
     private void checkForRemainingSeqTracks(LaneSwapData data) {
         if (SeqTrack.findAllBySampleAndSeqType(data.sampleSwap.old, data.seqTypeSwap.old).empty) {
-            data.moveFilesCommands << "\n #There are no seqTracks belonging to the sample ${data.sampleSwap.old} -> delete it on the filesystem\n\n"
             String basePath = projectService.getSequencingDirectory(data.projectSwap.old)
             data.moveFilesCommands << "rm -rf '${basePath}/${data.seqTypeSwap.old.dirName}/" +
                     "view-by-pid/${data.individualSwap.old.pid}/${data.sampleTypeSwap.old.dirName}/" +
-                    "${data.seqTypeSwap.old.libraryLayoutDirName}'\n"
+                    "${data.seqTypeSwap.old.libraryLayoutDirName}'"
         }
     }
 

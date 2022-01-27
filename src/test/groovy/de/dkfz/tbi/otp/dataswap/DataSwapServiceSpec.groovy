@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 The OTP authors
+ * Copyright 2011-2022 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -1153,12 +1153,9 @@ class DataSwapServiceSpec extends Specification implements DataTest, RoddyPancan
         then:
         futherSample && Individual.count || !Individual.count
         String bashScriptSnippet = dataSwapData.moveFilesCommands.join("\n")
-        bashScriptSnippet.contains("################ cleanup empty sample directories ################")
         bashScriptSnippet.contains("rm -rf ${vbpPath.resolve(sampleDir)}")
 
-        String cleanupIndividualHeader = "################ cleanup empty individual directories ################"
         String cleanupIndividualCommand = "rm -rf ${vbpPath}\n"
-        futherSample && !cleanupIndividualHeader || cleanupIndividualHeader
         futherSample && !cleanupIndividualCommand || cleanupIndividualCommand
 
         where:
@@ -1182,7 +1179,6 @@ class DataSwapServiceSpec extends Specification implements DataTest, RoddyPancan
         then:
         cleanupDatabase && !Individual.count || Individual.count
         String bashScriptSnippet = dataSwapData.moveFilesCommands.join("\n")
-        bashScriptSnippet.contains("################ cleanup empty individual directories ################")
         bashScriptSnippet.contains("rm -rf ${vbpPath}")
 
         where:
