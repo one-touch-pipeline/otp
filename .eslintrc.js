@@ -32,13 +32,13 @@ const lintRules = {
   'comma-dangle': ['error', 'never'],
   'no-plusplus': ['error', { allowForLoopAfterthoughts: true }],
   'no-undef': 'off',
-  'func-names': 'off'
+  'func-names': 'off',
+  'no-use-before-define': 'off'
 };
 
 if (process.env.CI) {
   Object.assign(lintRules, {
     strict: 'off',
-    'no-use-before-define': 'off',
     'no-alert': 'off'
   });
 }
