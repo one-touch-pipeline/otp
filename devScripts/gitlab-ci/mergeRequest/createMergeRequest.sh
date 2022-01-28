@@ -69,8 +69,11 @@ set +o pipefail
 echo "add some labels from youtrack"
 echo "$LABEL_VALUES" | \
   sed -e "s/,/\n/g" | \
-  grep -e "sprint goal" -e "last sprint" -e "CRITICAL" -e "refactoring day" | \
-  sed -e "s/CRITICAL/priority::critical/g" | \
+  grep -e "sprint goal" -e "last sprint" -e "CRITICAL" -e "refactoring day" -e "Gamma" -e "otp issue meeting" -e "Guide dependency" | \
+  sed -e "s/CRITICAL/priority::critical/g" \
+      -e "s/Gamma/waiting for gamma/g" \
+      -e "s/otp issue meeting/waiting for otp issue meeting/g" \
+      -e "s/Guide dependency/coordinate with guide/g" | \
 while read LABEL
 do
   echo "add $LABEL"
