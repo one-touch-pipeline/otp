@@ -35,7 +35,9 @@ import de.dkfz.tbi.otp.tracking.ProcessingTimeStatisticsService
 import de.dkfz.tbi.util.TimeFormats
 import de.dkfz.tbi.util.TimeUtils
 
+import java.time.Instant
 import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 
 @Rollback
 @Integration
@@ -117,17 +119,17 @@ class ProcessingTimeStatisticsServiceIntegrationSpec extends Specification {
         comment.save(flush: true)
 
         OtrsTicket ticket = DomainFactory.createOtrsTicket(
-                submissionReceivedNotice: new Date() - 1,
+                submissionReceivedNotice: Date.from(Instant.now().minus(1, ChronoUnit.DAYS)),
                 ticketCreated: new Date(),
-                dateCreated: new Date() + 1,
-                installationStarted: new Date() + 2,
-                installationFinished: new Date() + 3,
-                fastqcStarted: new Date() + 4,
-                fastqcFinished: new Date() + 5,
-                alignmentStarted: new Date() + 6,
-                alignmentFinished: new Date() + 7,
-                snvStarted: new Date() + 8,
-                snvFinished: new Date() + 9,
+                dateCreated: Date.from(Instant.now().plus(1, ChronoUnit.DAYS)),
+                installationStarted: Date.from(Instant.now().plus(2, ChronoUnit.DAYS)),
+                installationFinished: Date.from(Instant.now().plus(3, ChronoUnit.DAYS)),
+                fastqcStarted: Date.from(Instant.now().plus(4, ChronoUnit.DAYS)),
+                fastqcFinished: Date.from(Instant.now().plus(5, ChronoUnit.DAYS)),
+                alignmentStarted: Date.from(Instant.now().plus(6, ChronoUnit.DAYS)),
+                alignmentFinished: Date.from(Instant.now().plus(7, ChronoUnit.DAYS)),
+                snvStarted: Date.from(Instant.now().plus(8, ChronoUnit.DAYS)),
+                snvFinished: Date.from(Instant.now().plus(9, ChronoUnit.DAYS)),
                 finalNotificationSent: true,
                 comment: comment,
         )
@@ -152,7 +154,7 @@ class ProcessingTimeStatisticsServiceIntegrationSpec extends Specification {
         List expect = [
                 url,
                 [seqTrackA.ilseId as String, seqTrackB.ilseId as String],
-                [projectA.name, projectB.name],
+                [projectA.name, projectB.name].sort(),
                 [seqTrackA.run.name],
                 [sampleA.displayName, sampleB.displayName],
                 ["${seqTrackA.run}, lane: ${seqTrackA.laneId}", "${seqTrackB.run}, lane: ${seqTrackB.laneId}"],

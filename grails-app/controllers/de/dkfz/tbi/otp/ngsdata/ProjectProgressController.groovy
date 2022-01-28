@@ -30,6 +30,9 @@ import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.utils.DataTableCommand
 import de.dkfz.tbi.util.TimeFormats
 
+import java.time.Instant
+import java.time.temporal.ChronoUnit
+
 class ProjectProgressDataTableCommand extends DataTableCommand {
 
     @BindingFormat('yyyy-MM-dd')
@@ -57,7 +60,7 @@ class ProjectProgressController {
 
     def progress() {
         return [
-            startDate: TimeFormats.DATE.getFormattedDate(new Date() - 8),
+            startDate: TimeFormats.DATE.getFormattedDate(Date.from(Instant.now().minus(8, ChronoUnit.DAYS))),
             endDate: TimeFormats.DATE.getFormattedDate(new Date()),
         ]
     }
@@ -67,7 +70,7 @@ class ProjectProgressController {
         List<Project> projects = projectProgressService.getProjectsFromNameList(cmd.projectNames ?: projectService.allProjects*.name)
 
         //the end date is increased by one day, since the check consider also the time
-        List<Run> runs = projectProgressService.getListOfRuns(projects, cmd.startDate, cmd.endDate + 1)
+        List<Run> runs = projectProgressService.getListOfRuns(projects, cmd.startDate, Date.from(cmd.endDate.toInstant().plus(1, ChronoUnit.DAYS)))
         List data = fillTable(runs)
         dataToRender.iTotalRecords = data.size()
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords

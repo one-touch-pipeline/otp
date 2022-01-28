@@ -38,6 +38,7 @@ import de.dkfz.tbi.otp.security.User
 
 import java.time.LocalDate
 import java.time.ZoneId
+import java.time.temporal.ChronoUnit
 
 @Rollback
 @Integration
@@ -69,7 +70,7 @@ class DeNbiKpiServiceIntegrationSpec extends Specification implements RoddyRnaFa
                 workPackage: workPackage,
         ])
 
-        roddyBamFile.dateCreated = startDate + 1
+        roddyBamFile.dateCreated = Date.from(startDate.toInstant().plus(1, ChronoUnit.DAYS))
         roddyBamFile.save(flush: true)
 
         // create more RoddyBamFiles (where the date criteria doesn't fit)
@@ -98,7 +99,7 @@ class DeNbiKpiServiceIntegrationSpec extends Specification implements RoddyRnaFa
                 workPackage: workPackage,
         ])
 
-        rnaRoddyBamFile.dateCreated = startDate + 1
+        rnaRoddyBamFile.dateCreated = Date.from(startDate.toInstant().plus(1, ChronoUnit.DAYS))
         rnaRoddyBamFile.save(flush: true)
 
         // create more RoddyBamFiles (where the date criteria doesn't fit)
@@ -126,7 +127,7 @@ class DeNbiKpiServiceIntegrationSpec extends Specification implements RoddyRnaFa
                 workPackage: workPackage,
         ])
 
-        singleCellBamFile.dateCreated = startDate + 1
+        singleCellBamFile.dateCreated = Date.from(startDate.toInstant().plus(1, ChronoUnit.DAYS))
         singleCellBamFile.save(flush: true)
 
         when:
@@ -152,7 +153,7 @@ class DeNbiKpiServiceIntegrationSpec extends Specification implements RoddyRnaFa
                 samplePair: samplePair,
         ])
 
-        bamFileAnalysis.dateCreated = startDate + 1
+        bamFileAnalysis.dateCreated = Date.from(startDate.toInstant().plus(1, ChronoUnit.DAYS))
         bamFileAnalysis.save(flush: true)
 
         when:
@@ -178,7 +179,7 @@ class DeNbiKpiServiceIntegrationSpec extends Specification implements RoddyRnaFa
                 samplePair: samplePair,
         ])
 
-        bamFileAnalysis.dateCreated = startDate + 1
+        bamFileAnalysis.dateCreated = Date.from(startDate.toInstant().plus(1, ChronoUnit.DAYS))
         bamFileAnalysis.save(flush: true)
 
         when:
@@ -204,7 +205,7 @@ class DeNbiKpiServiceIntegrationSpec extends Specification implements RoddyRnaFa
                 samplePair: samplePair,
         ])
 
-        bamFileAnalysis.dateCreated = startDate + 1
+        bamFileAnalysis.dateCreated = Date.from(startDate.toInstant().plus(1, ChronoUnit.DAYS))
         bamFileAnalysis.save(flush: true)
 
         when:
@@ -230,7 +231,7 @@ class DeNbiKpiServiceIntegrationSpec extends Specification implements RoddyRnaFa
                 samplePair: samplePair,
         ])
 
-        bamFileAnalysis.dateCreated = startDate + 1
+        bamFileAnalysis.dateCreated = Date.from(startDate.toInstant().plus(1, ChronoUnit.DAYS))
         bamFileAnalysis.save(flush: true)
 
         when:
@@ -256,7 +257,7 @@ class DeNbiKpiServiceIntegrationSpec extends Specification implements RoddyRnaFa
                 samplePair: samplePair,
         ])
 
-        bamFileAnalysis.dateCreated = startDate + 1
+        bamFileAnalysis.dateCreated = Date.from(startDate.toInstant().plus(1, ChronoUnit.DAYS))
         bamFileAnalysis.save(flush: true)
 
         when:
@@ -276,7 +277,7 @@ class DeNbiKpiServiceIntegrationSpec extends Specification implements RoddyRnaFa
                 individual: createIndividual(),
                 oldSystem: true,
         ])
-        oldClusterJob.dateCreated = startDate + 1
+        oldClusterJob.dateCreated = Date.from(startDate.toInstant().plus(1, ChronoUnit.DAYS))
         oldClusterJob.save(flush: true)
 
         ClusterJob newClusterJob = createClusterJob([
@@ -284,7 +285,7 @@ class DeNbiKpiServiceIntegrationSpec extends Specification implements RoddyRnaFa
                 individual: null,
                 oldSystem: false,
         ])
-        newClusterJob.dateCreated = startDate + 1
+        newClusterJob.dateCreated = Date.from(startDate.toInstant().plus(1, ChronoUnit.DAYS))
         newClusterJob.save(flush: true)
 
         // create more cluster jobs with newer start date

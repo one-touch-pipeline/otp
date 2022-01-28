@@ -29,6 +29,8 @@ import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.project.Project
 
+import java.time.temporal.ChronoUnit
+
 @Rollback
 @Integration
 class SampleServiceIntegrationSpec extends Specification implements DomainFactoryCore {
@@ -38,11 +40,11 @@ class SampleServiceIntegrationSpec extends Specification implements DomainFactor
     void "test getCountOfSamplesForSpecifiedPeriodAndProjects for given date"() {
         given:
         Date baseDate = new Date(0, 0, 10)
-        Date startDate = startDateOffset  == null ? null : baseDate - startDateOffset
-        Date endDate = endDateOffset == null ? null : baseDate - endDateOffset
+        Date startDate = startDateOffset  == null ? null : Date.from(baseDate.toInstant().minus(startDateOffset, ChronoUnit.DAYS))
+        Date endDate = endDateOffset == null ? null : Date.from(baseDate.toInstant().minus(endDateOffset, ChronoUnit.DAYS))
 
         Sample sample = createSample()
-        sample.dateCreated = baseDate - 1
+        sample.dateCreated = Date.from(baseDate.toInstant().minus(1, ChronoUnit.DAYS))
         sample.save(flush: true)
 
         when:

@@ -38,8 +38,8 @@ class ProcessingTimeStatisticsController {
 
     def index() {
         return [
-                dateFrom: TimeFormats.DATE.getFormattedDate((new Date() - 6)),
-                dateTo  : TimeFormats.DATE.getFormattedDate(new Date()),
+                dateFrom: TimeFormats.DATE.getFormattedLocalDate(LocalDate.now() - 6),
+                dateTo  : TimeFormats.DATE.getFormattedLocalDate(LocalDate.now()),
         ]
     }
 

@@ -25,6 +25,7 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 import java.time.*
+import java.time.temporal.ChronoUnit
 
 class TimeUtilsSpec extends Specification {
 
@@ -45,7 +46,7 @@ class TimeUtilsSpec extends Specification {
 
     void "getFormattedDurationWithDays, when both provided, then return expected string"() {
         expect:
-        TimeUtils.getFormattedDurationWithDays(new Date(), new Date() + 1) == "1d 00h 00m"
+        TimeUtils.getFormattedDurationWithDays(new Date(), Date.from(Instant.now().plus(1, ChronoUnit.DAYS))) == "1d 00h 00m"
     }
 
     @Unroll

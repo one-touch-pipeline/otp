@@ -37,6 +37,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 import java.time.*
+import java.time.temporal.ChronoUnit
 
 import static java.util.concurrent.TimeUnit.HOURS
 
@@ -622,13 +623,13 @@ class ClusterJobServiceIntegrationSpec extends Specification implements DomainFa
         setupData()
 
         Date baseDate = new Date(0, 0, 10)
-        Date startDate = startDateOffset == null ? null : baseDate - startDateOffset
-        Date endDate = endDateOffset == null ? null : baseDate - endDateOffset
+        Date startDate = startDateOffset == null ? null : Date.from(baseDate.toInstant().minus(startDateOffset, ChronoUnit.DAYS))
+        Date endDate = endDateOffset == null ? null : Date.from(baseDate.toInstant().minus(endDateOffset, ChronoUnit.DAYS))
 
         Individual individual = createIndividual()
 
         ClusterJob clusterJob = DomainFactory.createClusterJob('individual': individual)
-        clusterJob.dateCreated = baseDate - 1
+        clusterJob.dateCreated = Date.from(baseDate.toInstant().minus(1, ChronoUnit.DAYS))
         clusterJob.save(flush: true)
 
         when:

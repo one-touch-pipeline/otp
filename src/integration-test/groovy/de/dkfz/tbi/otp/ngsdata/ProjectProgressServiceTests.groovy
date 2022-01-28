@@ -28,6 +28,9 @@ import org.junit.Test
 
 import de.dkfz.tbi.otp.project.Project
 
+import java.time.temporal.ChronoUnit
+import java.time.Instant
+
 @Rollback
 @Integration
 class ProjectProgressServiceTests {
@@ -102,7 +105,7 @@ class ProjectProgressServiceTests {
     void testSamples() {
         setupData()
         List<Project> projects = Project.list()
-        Date date = new Date() - 50
+        Date date = Date.from(Instant.now().minus(50, ChronoUnit.DAYS))
         Date toDate = new Date()
         List<Run> runs = projectProgressService.getListOfRuns(projects, date, toDate)
         for (Run run in runs) {

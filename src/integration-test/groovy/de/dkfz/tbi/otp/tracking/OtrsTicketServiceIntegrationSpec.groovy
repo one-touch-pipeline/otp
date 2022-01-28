@@ -33,6 +33,9 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.user.UserException
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
+import java.time.Instant
+import java.time.temporal.ChronoUnit
+
 import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus.*
 
 @Rollback
@@ -270,8 +273,8 @@ class OtrsTicketServiceIntegrationSpec extends Specification implements DomainFa
 
     void "assignOtrsTicketToFastqImportInstance, adjust ProcessingStatus of new OtrsTicket"() {
         given:
-        Date minDate = new Date() - 1
-        Date maxDate = new Date() + 1
+        Date minDate = Date.from(Instant.now().minus(1, ChronoUnit.DAYS))
+        Date maxDate = Date.from(Instant.now().plus(1, ChronoUnit.DAYS))
 
         OtrsTicket oldOtrsTicket = createOtrsTicket(
                 ticketNumber: '2000010112345678',

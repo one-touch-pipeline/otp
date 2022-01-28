@@ -45,6 +45,8 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.utils.*
 
+import java.time.temporal.ChronoUnit
+
 @Rollback
 @Integration
 class UserProjectRoleServiceIntegrationSpec extends Specification implements UserAndRoles, DomainFactoryCore, UserDomainFactory {
@@ -1253,11 +1255,11 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         setupData()
 
         Date baseDate = new Date(0, 0, 10)
-        Date startDate = startDateOffset == null ? null : baseDate - startDateOffset
-        Date endDate = endDateOffset == null ? null : baseDate - endDateOffset
+        Date startDate = startDateOffset == null ? null : Date.from(baseDate.toInstant().minus(startDateOffset, ChronoUnit.DAYS))
+        Date endDate = endDateOffset == null ? null : Date.from(baseDate.toInstant().minus(endDateOffset, ChronoUnit.DAYS))
 
         UserProjectRole userProjectRole = createUserProjectRole()
-        userProjectRole.user.dateCreated = baseDate - 1
+        userProjectRole.user.dateCreated = Date.from(baseDate.toInstant().minus(1, ChronoUnit.DAYS))
         userProjectRole.user.save(flush: true)
 
         when:
