@@ -177,6 +177,7 @@ class ProjectCreationController {
                     redirect(controller: "projectConfig", params: [(ProjectSelectionService.PROJECT_SELECTION_PARAMETER): project.name])
                     return
                 } catch (RuntimeException e) {
+                    log.error(e.message, e)
                     flash.message = new FlashMessage(g.message(code: "projectCreation.fieldstore.failure", args: [cmd?.name ?: '']) as String, e.message)
                 }
                 flash.cmd = cmd

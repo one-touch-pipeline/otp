@@ -361,7 +361,7 @@ class ProjectService {
      * @param project which was just created
      * @param receivers mail addresses
      */
-    private void sendProjectCreationMail(Project project, List<String> receivers) {
+    void sendProjectCreationMail(Project project, List<String> receivers) {
         String subject = messageSourceService.createMessage("notification.projectCreation.subject", [projectName: project.displayName])
         String content = messageSourceService.createMessage("notification.projectCreation.message",
                 [
