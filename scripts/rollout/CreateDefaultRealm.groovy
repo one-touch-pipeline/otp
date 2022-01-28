@@ -71,7 +71,7 @@ Realm realm = new Realm([
 static String createDefaultRealm (AnnotationConfigEmbeddedWebApplicationContext ctx, Realm realm){
     Realm.withTransaction {
         assert realm.save(flush: true)
-        ctx.ProcessingOptionService.createOrUpdate(ProcessingOption.OptionName.REALM_DEFAULT_VALUE, realm.name)
+        ctx.processingOptionService.createOrUpdate(ProcessingOption.OptionName.REALM_DEFAULT_VALUE, realm.name)
         return "$realm.name created"
     }
 }
