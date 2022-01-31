@@ -23,8 +23,8 @@ package de.dkfz.tbi.otp.project.dta
 
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.plugin.springsecurity.SpringSecurityUtils
-import grails.test.mixin.integration.Integration
-import grails.transaction.Rollback
+import grails.testing.mixin.integration.Integration
+import grails.gorm.transactions.Rollback
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import org.springframework.web.multipart.MultipartFile

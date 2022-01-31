@@ -21,10 +21,8 @@
  */
 package de.dkfz.tbi.otp.dataprocessing.roddyExecution
 
-import grails.test.mixin.Mock
-import grails.test.mixin.TestMixin
-import grails.test.mixin.web.ControllerUnitTestMixin
-import org.junit.*
+import grails.testing.gorm.DataTest
+import spock.lang.Specification
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
@@ -35,96 +33,105 @@ import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.utils.HelperUtils
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
-@Mock([
-        Individual,
-        Pipeline,
-        ProcessingPriority,
-        Project,
-        Realm,
-        RoddyWorkflowConfig,
-        SeqType,
-])
-@TestMixin(ControllerUnitTestMixin)
-class RoddyWorkflowConfigUnitTests {
+class RoddyWorkflowConfigUnitSpec extends Specification implements DataTest {
 
     File configDir
     File configFile
 
-    @Before
-    void setUp() {
+    @Override
+    Class<?>[] getDomainClassesToMock() {
+        return [
+                Individual,
+                Pipeline,
+                ProcessingPriority,
+                Project,
+                Realm,
+                RoddyWorkflowConfig,
+                SeqType,
+        ]
+    }
+
+    void setup() {
         configDir = TestCase.createEmptyTestDirectory()
     }
 
-    @After
-    void tearDown() {
-        TestCase.cleanTestDirectory()
-    }
-
-    @Test
     void testSaveRoddyWorkflowConfig_allFine() {
+        given:
         RoddyWorkflowConfig roddyWorkflowConfig = DomainFactory.createRoddyWorkflowConfig()
-        assert roddyWorkflowConfig.save(flush: true)
+
+        when:
+        roddyWorkflowConfig.save(flush: true)
+
+        then:
+        noExceptionThrown()
     }
 
-    @Test
     void testSaveRoddyWorkflowConfig_NoWorkflow_ShouldFail() {
+        given:
         RoddyWorkflowConfig roddyWorkflowConfig = DomainFactory.createRoddyWorkflowConfig()
         roddyWorkflowConfig.pipeline = null
 
+        expect:
         TestCase.assertValidateError(roddyWorkflowConfig, 'pipeline', 'nullable', null)
     }
 
-    @Test
     void testSaveRoddyWorkflowConfig_ConfigFilePathIsBlank_ShouldFail() {
+        given:
         RoddyWorkflowConfig roddyWorkflowConfig = DomainFactory.createRoddyWorkflowConfig()
         roddyWorkflowConfig.configFilePath = ''
 
+        expect:
         TestCase.assertValidateError(roddyWorkflowConfig, 'configFilePath', 'blank', '')
     }
 
-    @Test
     void testSaveRoddyWorkflowConfig_ConfigFileIsNotAbsolute_ShouldFail() {
+        given:
         RoddyWorkflowConfig roddyWorkflowConfig = DomainFactory.createRoddyWorkflowConfig()
         roddyWorkflowConfig.configFilePath = "tmp/"
 
+        expect:
         TestCase.assertValidateError(roddyWorkflowConfig, 'configFilePath', 'validator.absolute.path', 'tmp/')
     }
 
-    @Test
     void testSaveRoddyWorkflowConfig_NoConfigVersion_ShouldBeValid() {
+        given:
         RoddyWorkflowConfig roddyWorkflowConfig = DomainFactory.createRoddyWorkflowConfig()
         roddyWorkflowConfig.configVersion = null
 
-        assert roddyWorkflowConfig.validate()
+        expect:
+        roddyWorkflowConfig.validate()
     }
 
-    @Test
     void testSaveRoddyWorkflowConfig_ConfigVersionIsEmpty_ShouldBeInvalid() {
+        given:
         RoddyWorkflowConfig roddyWorkflowConfig = DomainFactory.createRoddyWorkflowConfig()
         roddyWorkflowConfig.configVersion = ''
 
+        expect:
         TestCase.assertValidateError(roddyWorkflowConfig, 'configVersion', 'blank', '')
     }
 
-    @Test
     void testSaveRoddyWorkflowConfig_ConfigVersionIsInvalid_ShouldBeInvalid() {
-        String someInvalidVersion =  'invalidVersion'
+        given:
+        String someInvalidVersion = 'invalidVersion'
         RoddyWorkflowConfig roddyWorkflowConfig = DomainFactory.createRoddyWorkflowConfig()
         roddyWorkflowConfig.configVersion = someInvalidVersion
 
+        expect:
         TestCase.assertValidateError(roddyWorkflowConfig, 'configVersion', 'matches.invalid', someInvalidVersion)
     }
 
-    @Test
     void testSaveRoddyWorkflowConfig_ConfigVersionWithTwoDigits_ShouldBeValid() {
+        given:
         RoddyWorkflowConfig roddyWorkflowConfig = DomainFactory.createRoddyWorkflowConfig()
         roddyWorkflowConfig.configVersion = 'v12_34'
 
-        assert roddyWorkflowConfig.validate()
+        expect:
+        roddyWorkflowConfig.validate()
     }
 
-    @Test
     void testConfigVersionValidator_NoIndividual() {
+        given:
         RoddyWorkflowConfig roddyWorkflowConfig1 = DomainFactory.createRoddyWorkflowConfig(
                 obsoleteDate: new Date(),
         )
@@ -137,11 +144,12 @@ class RoddyWorkflowConfigUnitTests {
                 programVersion: roddyWorkflowConfig1.programVersion,
         ], false)
 
+        expect:
         TestCase.assertValidateError(roddyWorkflowConfig2, "configVersion", "validator.invalid", roddyWorkflowConfig2.configVersion)
     }
 
-    @Test
     void testConfigVersionValidator_WithIndividualInOneConfig() {
+        given:
         RoddyWorkflowConfig roddyWorkflowConfig1 = DomainFactory.createRoddyWorkflowConfig(
                 individual: DomainFactory.createIndividual(),
                 obsoleteDate: new Date(),
@@ -155,11 +163,12 @@ class RoddyWorkflowConfigUnitTests {
                 programVersion: roddyWorkflowConfig1.programVersion,
         ], false)
 
-        assert roddyWorkflowConfig2.validate()
+        expect:
+        roddyWorkflowConfig2.validate()
     }
 
-    @Test
     void testConfigVersionValidator_WithIndividualInBothConfigs() {
+        given:
         RoddyWorkflowConfig roddyWorkflowConfig1 = DomainFactory.createRoddyWorkflowConfig(
                 individual: DomainFactory.createIndividual(),
                 obsoleteDate: new Date(),
@@ -174,11 +183,12 @@ class RoddyWorkflowConfigUnitTests {
                 individual    : roddyWorkflowConfig1.individual,
         ], false)
 
+        expect:
         TestCase.assertValidateError(roddyWorkflowConfig2, "configVersion", "validator.invalid", roddyWorkflowConfig2.configVersion)
     }
 
-    @Test
     void testConfigVersionValidator_WithDifferentIndividualInBothConfigs() {
+        given:
         RoddyWorkflowConfig roddyWorkflowConfig1 = DomainFactory.createRoddyWorkflowConfig(individual: DomainFactory.createIndividual())
 
         RoddyWorkflowConfig roddyWorkflowConfig2 = DomainFactory.createRoddyWorkflowConfig([
@@ -190,183 +200,198 @@ class RoddyWorkflowConfigUnitTests {
                 individual    : DomainFactory.createIndividual(project: roddyWorkflowConfig1.project),
         ], false)
 
-        assert roddyWorkflowConfig2.validate()
-   }
+        expect:
+        roddyWorkflowConfig2.validate()
+    }
 
-    @Test
     void testObsoleteDateValidator_NoIndividual_invalid() {
+        given:
         RoddyWorkflowConfig roddyWorkflowConfig1 = DomainFactory.createRoddyWorkflowConfig()
 
         RoddyWorkflowConfig roddyWorkflowConfig2 = DomainFactory.createRoddyWorkflowConfig([
-                project: roddyWorkflowConfig1.project,
-                seqType: roddyWorkflowConfig1.seqType,
+                project : roddyWorkflowConfig1.project,
+                seqType : roddyWorkflowConfig1.seqType,
                 pipeline: roddyWorkflowConfig1.pipeline,
         ], false)
 
+        expect:
         TestCase.assertValidateError(roddyWorkflowConfig2, "obsoleteDate", "validator.invalid", null)
     }
 
-    @Test
     void testObsoleteDateValidator_NoIndividual_valid() {
+        given:
         RoddyWorkflowConfig roddyWorkflowConfig1 = DomainFactory.createRoddyWorkflowConfig(obsoleteDate: new Date())
 
         RoddyWorkflowConfig roddyWorkflowConfig2 = DomainFactory.createRoddyWorkflowConfig([
-                project: roddyWorkflowConfig1.project,
-                seqType: roddyWorkflowConfig1.seqType,
+                project : roddyWorkflowConfig1.project,
+                seqType : roddyWorkflowConfig1.seqType,
                 pipeline: roddyWorkflowConfig1.pipeline,
         ], false)
 
-        assert roddyWorkflowConfig2.validate()
+        expect:
+        roddyWorkflowConfig2.validate()
     }
 
-    @Test
     void testObsoleteDateValidator_WithIndividualInOneConfig_valid() {
+        given:
         RoddyWorkflowConfig roddyWorkflowConfig1 = DomainFactory.createRoddyWorkflowConfig(individual: DomainFactory.createIndividual())
 
         RoddyWorkflowConfig roddyWorkflowConfig2 = DomainFactory.createRoddyWorkflowConfig([
-                project: roddyWorkflowConfig1.project,
-                seqType: roddyWorkflowConfig1.seqType,
+                project : roddyWorkflowConfig1.project,
+                seqType : roddyWorkflowConfig1.seqType,
                 pipeline: roddyWorkflowConfig1.pipeline,
         ], false)
 
-        assert roddyWorkflowConfig2.validate()
+        expect:
+        roddyWorkflowConfig2.validate()
     }
 
-    @Test
     void testObsoleteDateValidator_WithIndividualInBothConfigs_invalid() {
+        given:
         RoddyWorkflowConfig roddyWorkflowConfig1 = DomainFactory.createRoddyWorkflowConfig(individual: DomainFactory.createIndividual())
 
         RoddyWorkflowConfig roddyWorkflowConfig2 = DomainFactory.createRoddyWorkflowConfig([
-                project: roddyWorkflowConfig1.project,
-                seqType: roddyWorkflowConfig1.seqType,
-                pipeline: roddyWorkflowConfig1.pipeline,
+                project   : roddyWorkflowConfig1.project,
+                seqType   : roddyWorkflowConfig1.seqType,
+                pipeline  : roddyWorkflowConfig1.pipeline,
                 individual: roddyWorkflowConfig1.individual,
         ], false)
 
+        expect:
         TestCase.assertValidateError(roddyWorkflowConfig2, "obsoleteDate", "validator.invalid", null)
     }
 
-    @Test
     void testObsoleteDateValidator_WithIndividualInBothConfigs_valid() {
+        given:
         RoddyWorkflowConfig roddyWorkflowConfig1 = DomainFactory.createRoddyWorkflowConfig(obsoleteDate: new Date(), individual: DomainFactory.createIndividual())
 
         RoddyWorkflowConfig roddyWorkflowConfig2 = DomainFactory.createRoddyWorkflowConfig([
-                project: roddyWorkflowConfig1.project,
-                seqType: roddyWorkflowConfig1.seqType,
-                pipeline: roddyWorkflowConfig1.pipeline,
+                project   : roddyWorkflowConfig1.project,
+                seqType   : roddyWorkflowConfig1.seqType,
+                pipeline  : roddyWorkflowConfig1.pipeline,
                 individual: roddyWorkflowConfig1.individual,
         ], false)
 
-        assert roddyWorkflowConfig2.validate()
+        expect:
+        roddyWorkflowConfig2.validate()
     }
 
-    @Test
     void testObsoleteDateValidator_WithDifferentIndividualInBothConfigs_valid() {
+        given:
         RoddyWorkflowConfig roddyWorkflowConfig1 = DomainFactory.createRoddyWorkflowConfig(obsoleteDate: new Date(), individual: DomainFactory.createIndividual())
 
         RoddyWorkflowConfig roddyWorkflowConfig2 = DomainFactory.createRoddyWorkflowConfig([
-                project: roddyWorkflowConfig1.project,
-                seqType: roddyWorkflowConfig1.seqType,
-                pipeline: roddyWorkflowConfig1.pipeline,
+                project   : roddyWorkflowConfig1.project,
+                seqType   : roddyWorkflowConfig1.seqType,
+                pipeline  : roddyWorkflowConfig1.pipeline,
                 individual: DomainFactory.createIndividual(project: roddyWorkflowConfig1.project),
         ], false)
 
-        assert roddyWorkflowConfig2.validate()
+        expect:
+        roddyWorkflowConfig2.validate()
     }
 
-    @Test
     void testGetNameUsedInConfig_withConfigVersion_shouldBeCorrect() {
+        given:
         RoddyWorkflowConfig roddyWorkflowConfig = DomainFactory.createRoddyWorkflowConfig()
         String expected = "${roddyWorkflowConfig.pipeline.name}_${roddyWorkflowConfig.seqType.roddyName}_${roddyWorkflowConfig.seqType.libraryLayout}_${roddyWorkflowConfig.programVersion}_${roddyWorkflowConfig.configVersion}"
 
-        assert expected == roddyWorkflowConfig.nameUsedInConfig
+        expect:
+        expected == roddyWorkflowConfig.nameUsedInConfig
     }
 
-    @Test
     void testValidateConfig_shouldBeValid() {
+        given:
         RoddyWorkflowConfig roddyWorkflowConfig = DomainFactory.createRoddyWorkflowConfig()
         createXml(roddyWorkflowConfig, roddyWorkflowConfig.nameUsedInConfig)
         RoddyWorkflowConfigService service = createService()
 
+        expect:
         service.validateConfig(roddyWorkflowConfig)
     }
 
-    @Test
     void testValidateConfig_shouldFailForMissingFile() {
+        given:
         RoddyWorkflowConfig roddyWorkflowConfig = DomainFactory.createRoddyWorkflowConfig()
         RoddyWorkflowConfigService service = createService()
 
+        expect:
         TestCase.shouldFailWithMessageContaining(AssertionError, 'on local filesystem is not accessible or does not exist.') {
             service.validateConfig(roddyWorkflowConfig)
         }
     }
 
-    @Test
     void testValidateConfig_shouldFailForFileName() {
+        given:
         RoddyWorkflowConfig roddyWorkflowConfig = DomainFactory.createRoddyWorkflowConfig()
         File file = new File(configDir, "${HelperUtils.uniqueString}.xml")
         roddyWorkflowConfig.configFilePath = file.path
         CreateFileHelper.createFile(file)
         RoddyWorkflowConfigService service = createService()
 
+        expect:
         TestCase.shouldFailWithMessage(AssertionError, '.*The file name .*does not match the pattern.*') {
             service.validateConfig(roddyWorkflowConfig)
         }
     }
 
-    @Test
     void testValidateConfig_shouldFailForPluginVersionInName() {
+        given:
         RoddyWorkflowConfig roddyWorkflowConfig = DomainFactory.createRoddyWorkflowConfig()
         createXml(roddyWorkflowConfig, roddyWorkflowConfig.nameUsedInConfig)
         roddyWorkflowConfig.programVersion = "plugin:invalid"
         RoddyWorkflowConfigService service = createService()
 
+        expect:
         TestCase.shouldFailWithMessageContaining(AssertionError, 'plugin:invalid') {
             service.validateConfig(roddyWorkflowConfig)
         }
     }
 
-    @Test
     void testValidateConfig_shouldFailForLabelInFile() {
+        given:
         RoddyWorkflowConfig roddyWorkflowConfig = DomainFactory.createRoddyWorkflowConfig()
         createXml(roddyWorkflowConfig, 'label')
         RoddyWorkflowConfigService service = createService()
 
+        expect:
         TestCase.shouldFailWithMessageContaining(AssertionError, 'assert configuration.@name == config.nameUsedInConfig') {
             service.validateConfig(roddyWorkflowConfig)
         }
     }
 
-    @Test
     void testValidateConfig_withIndividual_PidInPath_shouldBeValid() {
+        given:
         Individual individual = DomainFactory.createIndividual()
         RoddyWorkflowConfig roddyWorkflowConfig = DomainFactory.createRoddyWorkflowConfig(individual: individual)
         configDir = new File(configDir, individual.pid)
         createXml(roddyWorkflowConfig, roddyWorkflowConfig.nameUsedInConfig)
         RoddyWorkflowConfigService service = createService()
 
+        expect:
         service.validateConfig(roddyWorkflowConfig)
     }
 
-    @Test
     void testValidateConfig_withIndividual_PidNotInPath_shouldBeInvalid() {
+        given:
         Individual individual = DomainFactory.createIndividual()
         RoddyWorkflowConfig roddyWorkflowConfig = DomainFactory.createRoddyWorkflowConfig(individual: individual)
         createXml(roddyWorkflowConfig, roddyWorkflowConfig.nameUsedInConfig)
         RoddyWorkflowConfigService service = createService()
 
+        expect:
         TestCase.shouldFailWithMessageContaining(AssertionError, "assert config.configFilePath.contains(config.individual.pid)") {
             service.validateConfig(roddyWorkflowConfig)
         }
     }
 
-    static RoddyWorkflowConfigService createService() {
+    private RoddyWorkflowConfigService createService() {
         RoddyWorkflowConfigService service = new RoddyWorkflowConfigService()
         service.fileSystemService = new TestFileSystemService()
         return service
     }
 
-    void createXml(RoddyWorkflowConfig roddyWorkflowConfig, String label) {
+    private void createXml(RoddyWorkflowConfig roddyWorkflowConfig, String label) {
         File file = new File(configDir, new File(roddyWorkflowConfig.configFilePath).name)
         roddyWorkflowConfig.configFilePath = file.path
         CreateFileHelper.createRoddyWorkflowConfig(file, label)

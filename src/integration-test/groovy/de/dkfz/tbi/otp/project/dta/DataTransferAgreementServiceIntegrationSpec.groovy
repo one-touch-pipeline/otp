@@ -22,8 +22,8 @@
 package de.dkfz.tbi.otp.project.dta
 
 import grails.plugin.springsecurity.SpringSecurityUtils
-import grails.test.mixin.integration.Integration
-import grails.transaction.Rollback
+import grails.testing.mixin.integration.Integration
+import grails.gorm.transactions.Rollback
 import grails.validation.ValidationException
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder

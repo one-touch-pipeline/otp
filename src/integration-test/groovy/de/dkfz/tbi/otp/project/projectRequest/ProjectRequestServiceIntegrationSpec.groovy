@@ -23,7 +23,7 @@ package de.dkfz.tbi.otp.project.projectRequest
 
 import grails.gorm.transactions.Rollback
 import grails.plugin.springsecurity.SpringSecurityUtils
-import grails.test.mixin.integration.Integration
+import grails.testing.mixin.integration.Integration
 import grails.web.mapping.LinkGenerator
 import spock.lang.Specification
 import spock.lang.Unroll

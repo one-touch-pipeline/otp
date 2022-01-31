@@ -21,54 +21,57 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.test.mixin.TestFor
-import org.junit.Test
+import grails.testing.gorm.DataTest
+import grails.testing.gorm.DomainUnitTest
+import spock.lang.Specification
 
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 
-import static org.junit.Assert.assertFalse
-import static org.junit.Assert.assertTrue
-
-@TestFor(AntibodyTarget)
-class AntibodyTargetTests implements DomainFactoryCore {
+class AntibodyTargetSpec extends Specification implements DataTest, DomainUnitTest<AntibodyTarget>, DomainFactoryCore {
 
     static final String VALID_NAME = "a1Az2Z"
 
     static final String INVALID_NAME = "a1Az2Z/"
 
-    @Test
     void testValidName() {
-        AntibodyTarget antibodyTarget = new AntibodyTarget(
-            name: VALID_NAME)
-        assertTrue antibodyTarget.validate()
+        given:
+        AntibodyTarget antibodyTarget = new AntibodyTarget(name: VALID_NAME)
+
+        expect:
+        antibodyTarget.validate() == true
     }
 
-    @Test
     void testInvalidName() {
-        AntibodyTarget antibodyTarget = new AntibodyTarget(
-            name: INVALID_NAME)
-        assertFalse antibodyTarget.validate()
+        given:
+        AntibodyTarget antibodyTarget = new AntibodyTarget(name: INVALID_NAME)
+
+        expect:
+        antibodyTarget.validate() == false
     }
 
-    @Test
     void testUniqueName() {
+        given:
         createAntibodyTarget(name: VALID_NAME)
 
-        AntibodyTarget antibodyTarget = new AntibodyTarget(
-            name: VALID_NAME)
-        assertFalse antibodyTarget.validate()
+        AntibodyTarget antibodyTarget = new AntibodyTarget(name: VALID_NAME)
+
+        expect:
+        antibodyTarget.validate() == false
     }
 
-    @Test
     void testBlankName() {
-        AntibodyTarget antibodyTarget = new AntibodyTarget(
-            name: "")
-        assertFalse antibodyTarget.validate()
+        given:
+        AntibodyTarget antibodyTarget = new AntibodyTarget(name: "")
+
+        expect:
+        antibodyTarget.validate() == false
     }
 
-    @Test
     void testNullName() {
+        given:
         AntibodyTarget antibodyTarget = new AntibodyTarget()
-        assertFalse antibodyTarget.validate()
+
+        expect:
+        antibodyTarget.validate() == false
     }
 }

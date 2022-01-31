@@ -23,7 +23,7 @@ package de.dkfz.tbi.otp.project.projectRequest
 
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.plugin.springsecurity.SpringSecurityUtils
-import grails.test.mixin.integration.Integration
+import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
 import org.springframework.security.authentication.AuthenticationTrustResolver
 import spock.lang.Specification

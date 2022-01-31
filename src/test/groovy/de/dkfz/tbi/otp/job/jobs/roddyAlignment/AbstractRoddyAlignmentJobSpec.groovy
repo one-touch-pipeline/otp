@@ -21,7 +21,7 @@
  */
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
-import grails.test.mixin.Mock
+import grails.testing.gorm.DataTest
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
@@ -39,41 +39,45 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
-@Mock([
-        AbstractMergedBamFile,
-        DataFile,
-        FileType,
-        Individual,
-        LibraryPreparationKit,
-        MergingCriteria,
-        MergingWorkPackage,
-        Pipeline,
-        ProcessingOption,
-        ProcessingPriority,
-        Project,
-        Sample,
-        SampleType,
-        SeqCenter,
-        SeqPlatform,
-        SeqPlatformGroup,
-        SeqPlatformModelLabel,
-        SequencingKitLabel,
-        SeqTrack,
-        SeqType,
-        SoftwareTool,
-        ReferenceGenome,
-        ReferenceGenomeProjectSeqType,
-        Realm,
-        RnaRoddyBamFile,
-        RoddyBamFile,
-        RoddyWorkflowConfig,
-        Run,
-        FastqImportInstance,
-])
-class AbstractRoddyAlignmentJobSpec extends Specification implements RoddyRnaFactory {
+class AbstractRoddyAlignmentJobSpec extends Specification implements DataTest, RoddyRnaFactory {
 
     @Rule
     public TemporaryFolder temporaryFolder
+
+    @Override
+    Class<?>[] getDomainClassesToMock() {
+        return [
+                AbstractMergedBamFile,
+                DataFile,
+                FileType,
+                Individual,
+                LibraryPreparationKit,
+                MergingCriteria,
+                MergingWorkPackage,
+                Pipeline,
+                ProcessingOption,
+                ProcessingPriority,
+                Project,
+                Sample,
+                SampleType,
+                SeqCenter,
+                SeqPlatform,
+                SeqPlatformGroup,
+                SeqPlatformModelLabel,
+                SequencingKitLabel,
+                SeqTrack,
+                SeqType,
+                SoftwareTool,
+                ReferenceGenome,
+                ReferenceGenomeProjectSeqType,
+                Realm,
+                RnaRoddyBamFile,
+                RoddyBamFile,
+                RoddyWorkflowConfig,
+                Run,
+                FastqImportInstance,
+        ]
+    }
 
     void "prepareAndReturnAlignmentCValues, when RoddyBamFile is null, throw assert"() {
         given:

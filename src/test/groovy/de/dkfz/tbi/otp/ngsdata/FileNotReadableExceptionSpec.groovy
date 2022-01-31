@@ -21,38 +21,40 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.test.mixin.TestMixin
-import grails.test.mixin.support.GrailsUnitTestMixin
-import org.junit.Test
+import grails.testing.gorm.DataTest
+import spock.lang.Specification
 
-import static org.junit.Assert.assertEquals
+class FileNotReadableExceptionSpec extends Specification implements DataTest {
 
-@TestMixin(GrailsUnitTestMixin)
-class SAMPlatformLabelTest {
+    void testFileNotReadableExceptionString() {
+        given:
+        FileNotReadableException e = new FileNotReadableException("tmp")
 
-    @Test
-    void testExectMatch() {
-        String label = "Illumina"
-        SAMPlatformLabel expectedLabel = SAMPlatformLabel.ILLUMINA
-        assertEquals(expectedLabel, SAMPlatformLabel.map(label))
+        expect:
+        "can not read file: tmp" == e.message
     }
 
-    @Test
-    void testNotExectMatch() {
-        String label = "ABI_SOLiD"
-        SAMPlatformLabel expectedLabel = SAMPlatformLabel.SOLID
-        assertEquals(expectedLabel, SAMPlatformLabel.map(label))
+    void testFileNotReadableExceptionStringParamIsNull() {
+        given:
+        FileNotReadableException e = new FileNotReadableException(null as String)
+
+        expect:
+        "can not read file: null" == e.message
     }
 
-    @Test(expected = IllegalArgumentException)
-    void testNoMatch() {
-        String label = "does-not-match-platform-label"
-        SAMPlatformLabel.map(label)
+    void testFileNotReadableExceptionFile() {
+        given:
+        FileNotReadableException e = new FileNotReadableException(new File("tmp"))
+
+        expect:
+        "can not read file: tmp" == e.message
     }
 
-    @Test(expected = IllegalArgumentException)
-    void testMultipleMatch() {
-        String label = "capillary_solid"
-        SAMPlatformLabel.map(label)
+    void testFileNotReadableExceptionFileParamIsNull() {
+        given:
+        FileNotReadableException e = new FileNotReadableException(null as File)
+
+        expect:
+        "can not read file: null" == e.message
     }
 }

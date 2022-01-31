@@ -21,60 +21,50 @@
  */
 package de.dkfz.tbi.otp.job.processing
 
-import grails.test.mixin.Mock
-import grails.test.mixin.TestMixin
-import grails.test.mixin.support.GrailsUnitTestMixin
-import org.junit.*
+import grails.testing.gorm.DataTest
+import org.junit.Rule
 import org.junit.rules.TemporaryFolder
+import spock.lang.Specification
 
-import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.HelperUtils
 import de.dkfz.tbi.otp.utils.LocalShellHelper
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
-/**
- * Unit tests for the {@link ExecutionHelperService}.
- */
-@TestMixin(GrailsUnitTestMixin)
-@Mock([ProcessingStep, Realm])
-class ExecutionHelperServiceUnitTests {
+class ExecutionHelperServiceSpec extends Specification implements DataTest {
 
     private final static String DUMMY_GROUP = "DUMMY_GROUP"
     private final static String DUMMY_PERMISSION = "DUMMY_PERMISSION"
 
     private ExecutionHelperService service
 
-    @SuppressWarnings('PublicInstanceField') //Rule required public field
+    @SuppressWarnings('PublicInstanceField')
+    //Rule required public field
     @Rule
-    public TemporaryFolder temporaryFolder = new TemporaryFolder()
+    public TemporaryFolder temporaryFolder
 
-    @Before
-    void setUp() {
+    void setup() {
         service = new ExecutionHelperService()
     }
 
-    @After
-    void tearDown() {
-        GroovySystem.metaClassRegistry.removeMetaClass(LocalShellHelper)
-    }
-
-    @Test
     void "test setGroup & getGroup allFine"() {
+        given:
         Realm realmObject = new Realm()
         File tmpFile = temporaryFolder.newFile()
         String group = new TestConfigService().testingGroup
 
+        when:
         service.remoteShellHelper = [
                 executeCommandReturnProcessOutput: { Realm realm, String command ->
                     LocalShellHelper.executeAndWait(command)
                 }
         ] as RemoteShellHelper
 
+        then:
         LogThreadLocal.withThreadLog(System.out) {
             String output = service.getGroup(realmObject, tmpFile)
-            assert group != output : "Cannot test setGroup if OTP property \"otp.testing.group\" is also the user's primary group." +
+            assert group != output: "Cannot test setGroup if OTP property \"otp.testing.group\" is also the user's primary group." +
                     " Please update your .otp.properties to use a different group that is not your primary group!"
             output = service.setGroup(realmObject, tmpFile, group)
             assert output.empty
@@ -83,27 +73,31 @@ class ExecutionHelperServiceUnitTests {
         }
     }
 
-    @Test
     void "test getGroup directory is null should fail"() {
-        TestCase.shouldFailWithMessageContaining(AssertionError, 'directory') {
-            LogThreadLocal.withThreadLog(System.out) {
-                service.getGroup(new Realm(), null)
-            }
+        when:
+        LogThreadLocal.withThreadLog(System.out) {
+            service.getGroup(new Realm(), null)
         }
+
+        then:
+        Throwable e = thrown(AssertionError)
+        e.message.contains('directory')
     }
 
-    @Test
     void "test getGroup realm is null should fail"() {
-        TestCase.shouldFailWithMessageContaining(AssertionError, 'realm') {
-            LogThreadLocal.withThreadLog(System.out) {
-                service.getGroup(null, temporaryFolder.newFile())
-            }
+        when:
+        LogThreadLocal.withThreadLog(System.out) {
+            service.getGroup(null, temporaryFolder.newFile())
         }
+
+        then:
+        Throwable e = thrown(AssertionError)
+        e.message.contains('realm')
     }
 
     @SuppressWarnings('ConstantAssertExpression')
-    @Test
     void "test getGroup remoteShellHelper executeCommand throws exception should fail"() {
+        given:
         final String FAIL_MESSAGE = HelperUtils.uniqueString
         File tmpFile = temporaryFolder.newFile()
         service.remoteShellHelper = [
@@ -112,43 +106,52 @@ class ExecutionHelperServiceUnitTests {
                 }
         ] as RemoteShellHelper
 
-        TestCase.shouldFailWithMessageContaining(AssertionError, FAIL_MESSAGE) {
-            LogThreadLocal.withThreadLog(System.out) {
-                service.getGroup(new Realm(), tmpFile)
-            }
+        when:
+        LogThreadLocal.withThreadLog(System.out) {
+            service.getGroup(new Realm(), tmpFile)
         }
+
+        then:
+        Throwable e = thrown(AssertionError)
+        e.message.contains(FAIL_MESSAGE)
     }
 
-    @Test
     void "test setGroup realm is null should fail"() {
-        TestCase.shouldFailWithMessageContaining(AssertionError, 'realm') {
-            LogThreadLocal.withThreadLog(System.out) {
-                service.setGroup(null, temporaryFolder.newFile(), DUMMY_GROUP)
-            }
+        when:
+        LogThreadLocal.withThreadLog(System.out) {
+            service.setGroup(null, temporaryFolder.newFile(), DUMMY_GROUP)
         }
+
+        then:
+        Throwable e = thrown(AssertionError)
+        e.message.contains('realm')
     }
 
-    @Test
     void "test setGroup directory is null should fail"() {
-        TestCase.shouldFailWithMessageContaining(AssertionError, 'directory') {
-            LogThreadLocal.withThreadLog(System.out) {
-                service.setGroup(new Realm(), null, DUMMY_GROUP)
-            }
+        when:
+        LogThreadLocal.withThreadLog(System.out) {
+            service.setGroup(new Realm(), null, DUMMY_GROUP)
         }
+
+        then:
+        Throwable e = thrown(AssertionError)
+        e.message.contains('directory')
     }
 
-    @Test
     void "test setGroup group is null should fail"() {
-        TestCase.shouldFailWithMessageContaining(AssertionError, 'group') {
-            LogThreadLocal.withThreadLog(System.out) {
-                service.setGroup(new Realm(), temporaryFolder.newFile(), null)
-            }
+        when:
+        LogThreadLocal.withThreadLog(System.out) {
+            service.setGroup(new Realm(), temporaryFolder.newFile(), null)
         }
+
+        then:
+        Throwable e = thrown(AssertionError)
+        e.message.contains('group')
     }
 
     @SuppressWarnings('ConstantAssertExpression')
-    @Test
     void "test setGroup remoteShellHelper executeCommand throws exception should fail"() {
+        given:
         final String FAIL_MESSAGE = HelperUtils.uniqueString
         File tmpFile = temporaryFolder.newFile()
         service.remoteShellHelper = [
@@ -157,15 +160,18 @@ class ExecutionHelperServiceUnitTests {
                 }
         ] as RemoteShellHelper
 
-        TestCase.shouldFailWithMessageContaining(AssertionError, FAIL_MESSAGE) {
-            LogThreadLocal.withThreadLog(System.out) {
-                service.setGroup(new Realm(), tmpFile, DUMMY_GROUP)
-            }
+        when:
+        LogThreadLocal.withThreadLog(System.out) {
+            service.setGroup(new Realm(), tmpFile, DUMMY_GROUP)
         }
+
+        then:
+        Throwable e = thrown(AssertionError)
+        e.message.contains(FAIL_MESSAGE)
     }
 
-    @Test
     void "test setPermission allFine"() {
+        given:
         String PERMISSION = '777'
         File tmpFile = temporaryFolder.newFile()
         service.remoteShellHelper = [
@@ -174,6 +180,7 @@ class ExecutionHelperServiceUnitTests {
                 }
         ] as RemoteShellHelper
 
+        expect:
         LogThreadLocal.withThreadLog(System.out) {
             String output = LocalShellHelper.executeAndAssertExitCodeAndErrorOutAndReturnStdout("stat -c '%a' ${tmpFile}")
             assert PERMISSION != output.trim()
@@ -185,36 +192,42 @@ class ExecutionHelperServiceUnitTests {
         }
     }
 
-    @Test
     void "test setPermission realm is null should fail"() {
-        TestCase.shouldFailWithMessageContaining(AssertionError, 'realm') {
-            LogThreadLocal.withThreadLog(System.out) {
-                service.setPermission(null, temporaryFolder.newFile(), DUMMY_PERMISSION)
-            }
+        when:
+        LogThreadLocal.withThreadLog(System.out) {
+            service.setPermission(null, temporaryFolder.newFile(), DUMMY_PERMISSION)
         }
+
+        then:
+        Throwable e = thrown(AssertionError)
+        e.message.contains('realm')
     }
 
-    @Test
     void "test setPermission directory is null should fail"() {
-        TestCase.shouldFailWithMessageContaining(AssertionError, 'directory') {
-            LogThreadLocal.withThreadLog(System.out) {
-                service.setPermission(new Realm(), null, DUMMY_PERMISSION)
-            }
+        when:
+        LogThreadLocal.withThreadLog(System.out) {
+            service.setPermission(new Realm(), null, DUMMY_PERMISSION)
         }
+
+        then:
+        Throwable e = thrown(AssertionError)
+        e.message.contains('directory')
     }
 
-    @Test
     void "test setPermission permission is null should fail"() {
-        TestCase.shouldFailWithMessageContaining(AssertionError, 'permission') {
-            LogThreadLocal.withThreadLog(System.out) {
-                service.setPermission(new Realm(), temporaryFolder.newFile(), null)
-            }
+        when:
+        LogThreadLocal.withThreadLog(System.out) {
+            service.setPermission(new Realm(), temporaryFolder.newFile(), null)
         }
+
+        then:
+        Throwable e = thrown(AssertionError)
+        e.message.contains('permission')
     }
 
     @SuppressWarnings('ConstantAssertExpression')
-    @Test
     void "test setPermission remoteShellHelper executeCommand throws exception should fail"() {
+        given:
         final String FAIL_MESSAGE = HelperUtils.uniqueString
         File tmpFile = temporaryFolder.newFile()
         service.remoteShellHelper = [
@@ -223,10 +236,13 @@ class ExecutionHelperServiceUnitTests {
                 }
         ] as RemoteShellHelper
 
-        TestCase.shouldFailWithMessageContaining(AssertionError, FAIL_MESSAGE) {
-            LogThreadLocal.withThreadLog(System.out) {
-                service.setPermission(new Realm(), tmpFile, DUMMY_PERMISSION)
-            }
+        when:
+        LogThreadLocal.withThreadLog(System.out) {
+            service.setPermission(new Realm(), tmpFile, DUMMY_PERMISSION)
         }
+
+        then:
+        Throwable e = thrown(AssertionError)
+        e.message.contains(FAIL_MESSAGE)
     }
 }

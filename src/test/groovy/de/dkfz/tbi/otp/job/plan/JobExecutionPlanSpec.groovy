@@ -21,71 +21,106 @@
  */
 package de.dkfz.tbi.otp.job.plan
 
-import grails.test.mixin.TestFor
-import grails.test.mixin.TestMixin
-import grails.test.mixin.web.ControllerUnitTestMixin
-import org.junit.Test
+import grails.testing.gorm.DataTest
+import spock.lang.Specification
 
 import de.dkfz.tbi.otp.job.processing.ProcessParameter
 
-import static org.junit.Assert.*
+class JobExecutionPlanSpec extends Specification implements DataTest {
 
-@TestMixin(ControllerUnitTestMixin)
-@TestFor(JobExecutionPlan)
-class JobExecutionPlanTests {
+    @Override
+    Class<?>[] getDomainClassesToMock() {
+        return [
+                JobExecutionPlan,
+        ]
+    }
 
-    @Test
     void testConstraints() {
+        when:
         JobExecutionPlan jobExecutionPlan = new JobExecutionPlan()
-        assertFalse(jobExecutionPlan.validate())
-        assertEquals("nullable", jobExecutionPlan.errors["name"].code)
 
+        then:
+        jobExecutionPlan.validate() == false
+        jobExecutionPlan.errors["name"].code == "nullable"
+
+        when:
         JobDefinition jobDefinition = new JobDefinition()
         jobExecutionPlan.firstJob = jobDefinition
-        assertFalse(jobExecutionPlan.validate())
 
+        then:
+        jobExecutionPlan.validate() == false
+
+        when:
         StartJobDefinition startJobDefinition = new StartJobDefinition()
         jobExecutionPlan.startJob = startJobDefinition
-        assertFalse(jobExecutionPlan.validate())
 
+        then:
+        jobExecutionPlan.validate() == false
+
+        when:
         JobExecutionPlan previous = new JobExecutionPlan()
         jobExecutionPlan.previousPlan = previous
-        assertFalse(jobExecutionPlan.validate())
-        assertEquals("validator.invalid", jobExecutionPlan.errors["previousPlan"].code)
 
+        then:
+        jobExecutionPlan.validate() == false
+        jobExecutionPlan.errors["previousPlan"].code == "validator.invalid"
+
+        when:
         jobExecutionPlan.name = "testPlan"
         // Assign smallest possible planVersion
         jobExecutionPlan.planVersion = 0
-        assertFalse(jobExecutionPlan.validate())
+
+        then:
+        jobExecutionPlan.validate() == false
+
+        when:
         // Set previousPlan to null to pass validation
         jobExecutionPlan.previousPlan = null
-        assertTrue(jobExecutionPlan.validate())
+
+        then:
+        jobExecutionPlan.validate() == true
+
+        when:
         jobExecutionPlan.previousPlan = previous
         // Assign smallest possible planVersion
         jobExecutionPlan.planVersion = 0
         // Assign higher planVersion value for previousPlan
         jobExecutionPlan.previousPlan.planVersion = 1
-        assertFalse(jobExecutionPlan.validate())
+
+        then:
+        jobExecutionPlan.validate() == false
+
+        when:
         // Assign higher value to planVersion
         jobExecutionPlan.planVersion = 1
         // Assign small planVersion value for previousPlan
         jobExecutionPlan.previousPlan.planVersion = 0
         jobExecutionPlan.previousPlan.name = "testPlan"
-        assertTrue(jobExecutionPlan.validate())
+
+        then:
+        jobExecutionPlan.validate() == true
     }
 
-    @Test
     void testProcessParameters() {
+        when:
         JobExecutionPlan jobExecutionPlan = new JobExecutionPlan()
-        assertFalse(jobExecutionPlan.validate())
 
+        then:
+        jobExecutionPlan.validate() == false
+
+        when:
         jobExecutionPlan.name = "testPlan"
-        assertTrue(jobExecutionPlan.validate())
+
+        then:
+        jobExecutionPlan.validate() == true
+
+        when:
         ProcessParameter processParameter = new ProcessParameter(value: "test")
         jobExecutionPlan.processParameter = processParameter
 
-        assertTrue(jobExecutionPlan.validate())
-        assertTrue(jobExecutionPlan.processParameter.is(processParameter))
-        assertEquals("test", processParameter.value)
+        then:
+        jobExecutionPlan.validate() == true
+        jobExecutionPlan.processParameter.is(processParameter) == true
+        processParameter.value == "test"
     }
 }

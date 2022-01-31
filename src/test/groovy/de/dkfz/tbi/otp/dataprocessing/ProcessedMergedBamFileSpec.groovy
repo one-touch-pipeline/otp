@@ -21,40 +21,16 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
-import grails.test.mixin.Mock
-import org.junit.*
+import grails.testing.gorm.DataTest
+import grails.testing.gorm.DomainUnitTest
+import spock.lang.Specification
 
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
-@Mock([
-        LibraryPreparationKit,
-        MergingWorkPackage,
-        MergingPass,
-        MergingSet,
-        SeqPlatform,
-        SeqPlatformGroup,
-        SeqCenter,
-        SeqType,
-        SeqTrack,
-        SampleType,
-        Pipeline,
-        ProcessingPriority,
-        Project,
-        ProcessedMergedBamFile,
-        Individual,
-        Sample,
-        SoftwareTool,
-        ReferenceGenome,
-        FastqImportInstance,
-        FileType,
-        DataFile,
-        Run,
-        Realm,
-])
-class ProcessedMergedBamFile_PropertiesUnitTest implements DomainFactoryCore {
+class ProcessedMergedBamFileSpec extends Specification implements DataTest, DomainUnitTest<ProcessedMergedBamFile>, DomainFactoryCore {
 
     ProcessingPriority processingPriority
     SampleType sampleType
@@ -66,8 +42,36 @@ class ProcessedMergedBamFile_PropertiesUnitTest implements DomainFactoryCore {
     MergingWorkPackage workPackage
     ProcessedMergedBamFile bamFile
 
-    @Before
-    void setUp() {
+    @Override
+    Class<?>[] getDomainClassesToMock() {
+        return [
+                LibraryPreparationKit,
+                MergingWorkPackage,
+                MergingPass,
+                MergingSet,
+                SeqPlatform,
+                SeqPlatformGroup,
+                SeqCenter,
+                SeqType,
+                SeqTrack,
+                SampleType,
+                Pipeline,
+                ProcessingPriority,
+                Project,
+                ProcessedMergedBamFile,
+                Individual,
+                Sample,
+                SoftwareTool,
+                ReferenceGenome,
+                FastqImportInstance,
+                FileType,
+                DataFile,
+                Run,
+                Realm,
+        ]
+    }
+
+    void setupTest() {
         processingPriority = createProcessingPriority()
         sampleType = DomainFactory.createSampleType()
         project = DomainFactory.createProject(processingPriority: processingPriority)
@@ -81,55 +85,67 @@ class ProcessedMergedBamFile_PropertiesUnitTest implements DomainFactoryCore {
         bamFile = DomainFactory.createProcessedMergedBamFileWithoutProcessedBamFile(mergingPass, [:], false)
     }
 
-    @After
-    void tearDown() {
-        sample = null
-        sampleType = null
-        seqType = null
-        individual = null
-        project = null
-        referenceGenome = null
-        workPackage = null
-        bamFile = null
-    }
-
-    @Test
     void testGetMergingWorkPackage() {
-        assert workPackage == bamFile.mergingWorkPackage
+        given:
+        setupTest()
+
+        expect:
+        workPackage == bamFile.mergingWorkPackage
     }
 
-    @Test
     void testGetProject() {
-        assert project == bamFile.project
+        given:
+        setupTest()
+
+        expect:
+        project == bamFile.project
     }
 
-    @Test
     void testGetProcessingPriority() {
-        assert processingPriority == bamFile.processingPriority
+        given:
+        setupTest()
+
+        expect:
+        processingPriority == bamFile.processingPriority
     }
 
-    @Test
     void testGetIndividual() {
-        assert individual == bamFile.individual
+        given:
+        setupTest()
+
+        expect:
+        individual == bamFile.individual
     }
 
-    @Test
     void testGetSample() {
-        assert sample == bamFile.sample
+        given:
+        setupTest()
+
+        expect:
+        sample == bamFile.sample
     }
 
-    @Test
     void testGetSampleType() {
-        assert sampleType == bamFile.sampleType
+        given:
+        setupTest()
+
+        expect:
+        sampleType == bamFile.sampleType
     }
 
-    @Test
     void testGetSeqType() {
-        assert seqType == bamFile.seqType
+        given:
+        setupTest()
+
+        expect:
+        seqType == bamFile.seqType
     }
 
-    @Test
     void testGetReferenceGenome() {
-        assert referenceGenome == bamFile.referenceGenome
+        given:
+        setupTest()
+
+        expect:
+        referenceGenome == bamFile.referenceGenome
     }
 }

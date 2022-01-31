@@ -21,8 +21,8 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
-import grails.test.mixin.Mock
-import org.junit.*
+import grails.testing.gorm.DataTest
+import spock.lang.Specification
 
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
@@ -30,34 +30,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
-@Mock([
-        AbstractMergedBamFile,
-        DataFile,
-        FileType,
-        Individual,
-        LibraryPreparationKit,
-        MergingCriteria,
-        MergingWorkPackage,
-        Pipeline,
-        ProcessingPriority,
-        Project,
-        Realm,
-        ReferenceGenome,
-        RoddyBamFile,
-        RoddyWorkflowConfig,
-        Run,
-        FastqImportInstance,
-        Sample,
-        SampleType,
-        SeqCenter,
-        SeqPlatform,
-        SeqPlatformGroup,
-        SeqPlatformModelLabel,
-        SeqTrack,
-        SeqType,
-        SoftwareTool,
-])
-class RoddyBamFile_PropertiesUnitTest implements DomainFactoryCore {
+class RoddyBamFile_PropertiesSpec extends Specification implements DataTest, DomainFactoryCore {
 
     ProcessingPriority processingPriority
     SampleType sampleType
@@ -70,8 +43,38 @@ class RoddyBamFile_PropertiesUnitTest implements DomainFactoryCore {
     Pipeline pipeline
     RoddyBamFile bamFile
 
-    @Before
-    void setUp() {
+    @Override
+    Class<?>[] getDomainClassesToMock() {
+        return [
+                AbstractMergedBamFile,
+                DataFile,
+                FileType,
+                Individual,
+                LibraryPreparationKit,
+                MergingCriteria,
+                MergingWorkPackage,
+                Pipeline,
+                ProcessingPriority,
+                Project,
+                Realm,
+                ReferenceGenome,
+                RoddyBamFile,
+                RoddyWorkflowConfig,
+                Run,
+                FastqImportInstance,
+                Sample,
+                SampleType,
+                SeqCenter,
+                SeqPlatform,
+                SeqPlatformGroup,
+                SeqPlatformModelLabel,
+                SeqTrack,
+                SeqType,
+                SoftwareTool,
+        ]
+    }
+
+    void setup() {
         processingPriority = createProcessingPriority()
         sampleType = DomainFactory.createSampleType()
         project = DomainFactory.createProject(processingPriority: processingPriority)
@@ -89,56 +92,43 @@ class RoddyBamFile_PropertiesUnitTest implements DomainFactoryCore {
         bamFile = DomainFactory.createRoddyBamFile(workPackage: workPackage)
     }
 
-    @After
-    void tearDown() {
-        sample = null
-        sampleType = null
-        seqType = null
-        individual = null
-        project = null
-        referenceGenome = null
-        workPackage = null
-        bamFile = null
-        pipeline = null
-    }
-
-    @Test
     void testGetMergingWorkPackage() {
-        assert workPackage == bamFile.mergingWorkPackage
+        expect:
+        workPackage == bamFile.mergingWorkPackage
     }
 
-    @Test
     void testGetProject() {
-        assert project == bamFile.project
+        expect:
+        project == bamFile.project
     }
 
-    @Test
     void testGetProcessingPriority() {
-        assert processingPriority == bamFile.processingPriority
+        expect:
+        processingPriority == bamFile.processingPriority
     }
 
-    @Test
     void testGetIndividual() {
-        assert individual == bamFile.individual
+        expect:
+        individual == bamFile.individual
     }
 
-    @Test
     void testGetSample() {
-        assert sample == bamFile.sample
+        expect:
+        sample == bamFile.sample
     }
 
-    @Test
     void testGetSampleType() {
-        assert sampleType == bamFile.sampleType
+        expect:
+        sampleType == bamFile.sampleType
     }
 
-    @Test
     void testGetSeqType() {
-        assert seqType == bamFile.seqType
+        expect:
+        seqType == bamFile.seqType
     }
 
-    @Test
     void testGetReferenceGenome() {
-        assert referenceGenome == bamFile.referenceGenome
+        expect:
+        referenceGenome == bamFile.referenceGenome
     }
 }

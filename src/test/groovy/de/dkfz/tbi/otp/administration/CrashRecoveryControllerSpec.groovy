@@ -21,16 +21,12 @@
  */
 package de.dkfz.tbi.otp.administration
 
-import grails.test.mixin.TestFor
-import org.junit.Before
-import org.junit.Test
+import grails.testing.web.controllers.ControllerUnitTest
+import spock.lang.Specification
 
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 
-// ignored: will be removed with the old workflow system
-@SuppressWarnings('ThrowRuntimeException')
-@TestFor(CrashRecoveryController)
-class CrashRecoveryControllerUnitTests {
+class CrashRecoveryControllerSpec extends Specification implements ControllerUnitTest<CrashRecoveryController> {
 
     static final String IDS_SINGLE = '1'
     static final String IDS_MULTIPLE = '1,2,3'
@@ -59,8 +55,7 @@ class CrashRecoveryControllerUnitTests {
 
     static final String ERROR_MESSAGE_EXCEPTION_THROWN = '{"success":false,"error":"' + EXCEPTION_MESSAGE + '"}'
 
-    @Before
-    void setUp() {
+    void setupTest() {
         params.ids = IDS_SINGLE
         params.message = SOME_MESSSAGE
         params.parameters = '{}'
@@ -73,330 +68,495 @@ class CrashRecoveryControllerUnitTests {
         ] as CrashRecoveryService
     }
 
-    @Test
     void test_markFailed_ShouldReturnOk_singleId() {
+        given:
+        setupTest()
+
+        when:
         controller.markFailed()
-        assert SUCCESS_MESSAGE == response.text
+
+        then:
+        SUCCESS_MESSAGE == response.text
     }
 
-    @Test
     void test_markFailed_ShouldReturnOk_multipleIds() {
+        given:
+        setupTest()
         params.ids = IDS_MULTIPLE
 
+        when:
         controller.markFailed()
-        assert SUCCESS_MESSAGE == response.text
+
+        then:
+        SUCCESS_MESSAGE == response.text
     }
 
-    @Test
     void test_markFailed_ShouldReturnErrorMessageForMissingMessage_MessageIsNull() {
+        given:
+        setupTest()
         params.message = null
 
+        when:
         controller.markFailed()
-        assert ERROR_MESSAGE_FOR_MISSING_MESSAGE == response.text
+
+        then:
+        ERROR_MESSAGE_FOR_MISSING_MESSAGE == response.text
     }
 
-    @Test
     void test_markFailed_ShouldReturnErrorMessageForMissingIds_IdsIsNull() {
+        given:
+        setupTest()
         params.ids = null
 
+        when:
         controller.markFailed()
-        assert ERROR_MESSAGE_FOR_MISSING_IDS == response.text
+
+        then:
+        ERROR_MESSAGE_FOR_MISSING_IDS == response.text
     }
 
-    @Test
     void test_markFailed_ShouldReturnErrorMessageForMissingIds_IdsIsEmpty() {
+        given:
+        setupTest()
         params.ids = ''
 
+        when:
         controller.markFailed()
-        assert ERROR_MESSAGE_FOR_MISSING_IDS == response.text
+
+        then:
+        ERROR_MESSAGE_FOR_MISSING_IDS == response.text
     }
 
-    @Test
     void test_markFailed_ShouldReturnErrorMessageForIdIsNotALong() {
+        given:
+        setupTest()
         params.ids = IDS_WRONG_FORMAT
 
+        when:
         controller.markFailed()
-        assert ERROR_MESSAGE_FOR_IDS_IS_NOT_A_LONG == response.text
+
+        then:
+        ERROR_MESSAGE_FOR_IDS_IS_NOT_A_LONG == response.text
     }
 
-    @Test
     void test_markFailed_ShouldReturnErrorMessageForServiceThrownException() {
+        given:
+        setupTest()
         controller.crashRecoveryService = [
                 markJobsAsFailed: { List<Long> ids, String reason -> throw new RuntimeException(EXCEPTION_MESSAGE) },
         ] as CrashRecoveryService
 
+        when:
         controller.markFailed()
-        assert ERROR_MESSAGE_EXCEPTION_THROWN == response.text
+
+        then:
+        ERROR_MESSAGE_EXCEPTION_THROWN == response.text
     }
 
-    @Test
     void test_restart_ShouldReturnOk_singleId() {
+        given:
+        setupTest()
+
+        when:
         controller.restart()
-        assert SUCCESS_MESSAGE == response.text
+
+        then:
+        SUCCESS_MESSAGE == response.text
     }
 
-    @Test
     void test_restart_ShouldReturnOk_multipleIds() {
+        given:
+        setupTest()
         params.ids = IDS_MULTIPLE
 
+        when:
         controller.restart()
-        assert SUCCESS_MESSAGE == response.text
+
+        then:
+        SUCCESS_MESSAGE == response.text
     }
 
-    @Test
     void test_restart_ShouldReturnErrorMessageForMissingMessage_MessageIsNull() {
+        given:
+        setupTest()
         params.message = null
 
+        when:
         controller.restart()
-        assert ERROR_MESSAGE_FOR_MISSING_MESSAGE == response.text
+
+        then:
+        ERROR_MESSAGE_FOR_MISSING_MESSAGE == response.text
     }
 
-    @Test
     void test_restart_ShouldReturnErrorMessageForMissingIds_IdsIsNull() {
+        given:
+        setupTest()
         params.ids = null
 
+        when:
         controller.restart()
-        assert ERROR_MESSAGE_FOR_MISSING_IDS == response.text
+
+        then:
+        ERROR_MESSAGE_FOR_MISSING_IDS == response.text
     }
 
-    @Test
     void test_restart_ShouldReturnErrorMessageForMissingIds_IdsIsEmpty() {
+        given:
+        setupTest()
         params.ids = ''
 
+        when:
         controller.restart()
-        assert ERROR_MESSAGE_FOR_MISSING_IDS == response.text
+
+        then:
+        ERROR_MESSAGE_FOR_MISSING_IDS == response.text
     }
 
-    @Test
     void test_restart_ShouldReturnErrorMessageForIdIsNotALong() {
+        given:
+        setupTest()
         params.ids = IDS_WRONG_FORMAT
 
+        when:
         controller.restart()
-        assert ERROR_MESSAGE_FOR_IDS_IS_NOT_A_LONG == response.text
+
+        then:
+        ERROR_MESSAGE_FOR_IDS_IS_NOT_A_LONG == response.text
     }
 
-    @Test
     void test_restart_ShouldReturnErrorMessageForServiceThrownException() {
+        given:
+        setupTest()
         controller.crashRecoveryService = [
                 restartJobs: { List<Long> ids, String reason -> throw new RuntimeException(EXCEPTION_MESSAGE) },
         ] as CrashRecoveryService
 
+        when:
         controller.restart()
-        assert ERROR_MESSAGE_EXCEPTION_THROWN == response.text
+
+        then:
+        ERROR_MESSAGE_EXCEPTION_THROWN == response.text
     }
 
-    @Test
     void test_markFinished_ShouldReturnOk_singleId_NoParameters() {
+        given:
+        setupTest()
+
+        when:
         controller.markFinished()
-        assert SUCCESS_MESSAGE == response.text
+
+        then:
+        SUCCESS_MESSAGE == response.text
     }
 
-    @Test
     void test_markFinished_ShouldReturnOk_multipleIds_NoParameters() {
+        given:
+        setupTest()
         params.ids = IDS_MULTIPLE
 
+        when:
         controller.markFinished()
-        assert SUCCESS_MESSAGE == response.text
+
+        then:
+        SUCCESS_MESSAGE == response.text
     }
 
-    @Test
     void test_markFinished_ShouldReturnOk_singleId_WithParameters() {
+        given:
+        setupTest()
         params.parameters = PARAMETERS_FOR_SINGLE
 
+        when:
         controller.markFinished()
-        assert SUCCESS_MESSAGE == response.text
+
+        then:
+        SUCCESS_MESSAGE == response.text
     }
 
-    @Test
     void test_markFinished_ShouldReturnOk_multipleIds_WithParameters() {
+        given:
+        setupTest()
         params.ids = IDS_MULTIPLE
         params.parameters = PARAMETERS_FOR_MULTIPLE
 
+        when:
         controller.markFinished()
-        assert SUCCESS_MESSAGE == response.text
+
+        then:
+        SUCCESS_MESSAGE == response.text
     }
 
-    @Test
     void test_markFinished_ShouldReturnErrorMessageForMissingIds_IdsIsNull_NoParameters() {
+        given:
+        setupTest()
         params.ids = null
 
+        when:
         controller.markFinished()
-        assert ERROR_MESSAGE_FOR_MISSING_IDS == response.text
+
+        then:
+        ERROR_MESSAGE_FOR_MISSING_IDS == response.text
     }
 
-    @Test
     void test_markFinished_ShouldReturnErrorMessageForMissingIds_IdsIsEmpty_NoParameters() {
+        given:
+        setupTest()
         params.ids = ''
 
+        when:
         controller.markFinished()
-        assert ERROR_MESSAGE_FOR_MISSING_IDS == response.text
+
+        then:
+        ERROR_MESSAGE_FOR_MISSING_IDS == response.text
     }
 
-    @Test
     void test_markFinished_ShouldReturnErrorMessageForIdIsNotALong_NoParameters() {
+        given:
+        setupTest()
         params.ids = IDS_WRONG_FORMAT
 
+        when:
         controller.markFinished()
-        assert ERROR_MESSAGE_FOR_IDS_IS_NOT_A_LONG == response.text
+
+        then:
+        ERROR_MESSAGE_FOR_IDS_IS_NOT_A_LONG == response.text
     }
 
-    @Test
     void test_markFinished_ShouldReturnErrorMessageForServiceThrownException_NoParameters() {
+        given:
+        setupTest()
         controller.crashRecoveryService = [
                 markJobsAsFinished: { List<Long> ids, Map parameters -> throw new RuntimeException(EXCEPTION_MESSAGE) },
         ] as CrashRecoveryService
 
+        when:
         controller.markFinished()
-        assert ERROR_MESSAGE_EXCEPTION_THROWN == response.text
+
+        then:
+        ERROR_MESSAGE_EXCEPTION_THROWN == response.text
     }
 
-    @Test
     void test_markFinished_ShouldReturnErrorMessageForInvalidParameters_ParametersIsNull() {
+        given:
+        setupTest()
         params.parameters = null
 
+        when:
         controller.markFinished()
-        assert ERROR_MESSAGE_FOR_MISSING_PARAMETERS == response.text
+
+        then:
+        ERROR_MESSAGE_FOR_MISSING_PARAMETERS == response.text
     }
 
-    @Test
     void test_markFinished_ShouldReturnErrorMessageForInvalidParameters_ParametersContainsValuesForAdditionalProcessingStep() {
+        given:
+        setupTest()
         params.parameters = PARAMETERS_FOR_MULTIPLE
 
+        when:
         controller.markFinished()
-        assert ERROR_MESSAGE_FOR_PARAMETERS_FOR_UNKNOWN_IDS == response.text
+
+        then:
+        ERROR_MESSAGE_FOR_PARAMETERS_FOR_UNKNOWN_IDS == response.text
     }
 
-    @Test
     void test_markFinished_ShouldReturnErrorMessageForInvalidParameters_ParametersHasInvalidKey_ToLessParts() {
+        given:
+        setupTest()
         params.parameters = PARAMETERS_FOR_TO_LESS_PARTS
 
+        when:
         controller.markFinished()
-        assert ERROR_MESSAGE_FOR_PARAMETERS_WITH_TO_LESS_PARTS_IN_KEY == response.text
+
+        then:
+        ERROR_MESSAGE_FOR_PARAMETERS_WITH_TO_LESS_PARTS_IN_KEY == response.text
     }
 
-    @Test
     void test_markFinished_ShouldReturnErrorMessageForInvalidParameters_ParametersHasInvalidKey_ToManyParts() {
+        given:
+        setupTest()
         params.parameters = PARAMETERS_FOR_TO_MUCH_PARTS
 
+        when:
         controller.markFinished()
-        assert ERROR_MESSAGE_FOR_PARAMETERS_WITH_TO_MUCH_PARTS_IN_KEY == response.text
+
+        then:
+        ERROR_MESSAGE_FOR_PARAMETERS_WITH_TO_MUCH_PARTS_IN_KEY == response.text
     }
 
-    @Test
     void test_markFinished_ShouldReturnErrorMessageForInvalidParameters_ParametersHasInvalidKey_FirstPartIsNotALong() {
+        given:
+        setupTest()
         params.parameters = PARAMETERS_FOR_FIRST_PART_IS_NOT_A_LONG
 
+        when:
         controller.markFinished()
-        assert ERROR_MESSAGE_FOR_PARAMETERS_WITH_FIRST_PART_IS_NOT_A_LONG == response.text
+
+        then:
+        ERROR_MESSAGE_FOR_PARAMETERS_WITH_FIRST_PART_IS_NOT_A_LONG == response.text
     }
 
-    @Test
     void test_markSucceeded_ShouldReturnOk_singleId_NoParameters() {
+        given:
+        setupTest()
+
+        when:
         controller.markSucceeded()
-        assert SUCCESS_MESSAGE == response.text
+
+        then:
+        SUCCESS_MESSAGE == response.text
     }
 
-    @Test
     void test_markSucceeded_ShouldReturnOk_multipleIds_NoParameters() {
+        given:
+        setupTest()
         params.ids = IDS_MULTIPLE
 
+        when:
         controller.markSucceeded()
-        assert SUCCESS_MESSAGE == response.text
+
+        then:
+        SUCCESS_MESSAGE == response.text
     }
 
-    @Test
     void test_markSucceeded_ShouldReturnOk_singleId_WithParameters() {
+        given:
+        setupTest()
         params.parameters = PARAMETERS_FOR_SINGLE
 
+        when:
         controller.markSucceeded()
-        assert SUCCESS_MESSAGE == response.text
+
+        then:
+        SUCCESS_MESSAGE == response.text
     }
 
-    @Test
     void test_markSucceeded_ShouldReturnOk_multipleIds_WithParameters() {
+        given:
+        setupTest()
         params.ids = IDS_MULTIPLE
         params.parameters = PARAMETERS_FOR_MULTIPLE
 
+        when:
         controller.markSucceeded()
-        assert SUCCESS_MESSAGE == response.text
+
+        then:
+        SUCCESS_MESSAGE == response.text
     }
 
-    @Test
     void test_markSucceeded_ShouldReturnErrorMessageForMissingIds_IdsIsNull_NoParameters() {
+        given:
+        setupTest()
         params.ids = null
 
+        when:
         controller.markSucceeded()
-        assert ERROR_MESSAGE_FOR_MISSING_IDS == response.text
+
+        then:
+        ERROR_MESSAGE_FOR_MISSING_IDS == response.text
     }
 
-    @Test
     void test_markSucceeded_ShouldReturnErrorMessageForMissingIds_IdsIsEmpty_NoParameters() {
+        given:
+        setupTest()
         params.ids = ''
 
+        when:
         controller.markSucceeded()
-        assert ERROR_MESSAGE_FOR_MISSING_IDS == response.text
+
+        then:
+        ERROR_MESSAGE_FOR_MISSING_IDS == response.text
     }
 
-    @Test
     void test_markSucceeded_ShouldReturnErrorMessageForIdIsNotALong_NoParameters() {
+        given:
+        setupTest()
         params.ids = IDS_WRONG_FORMAT
 
+        when:
         controller.markSucceeded()
-        assert ERROR_MESSAGE_FOR_IDS_IS_NOT_A_LONG == response.text
+
+        then:
+        ERROR_MESSAGE_FOR_IDS_IS_NOT_A_LONG == response.text
     }
 
-    @Test
     void test_markSucceeded_ShouldReturnErrorMessageForServiceThrownException_NoParameters() {
+        given:
+        setupTest()
         controller.crashRecoveryService = [
                 markJobsAsSucceeded: { List<Long> ids, Map parameters -> throw new RuntimeException(EXCEPTION_MESSAGE) },
         ] as CrashRecoveryService
 
+        when:
         controller.markSucceeded()
-        assert ERROR_MESSAGE_EXCEPTION_THROWN == response.text
+
+        then:
+        ERROR_MESSAGE_EXCEPTION_THROWN == response.text
     }
 
-    @Test
     void test_markSucceeded_ShouldReturnErrorMessageForInvalidParameters_ParametersIsNull() {
+        given:
+        setupTest()
         params.parameters = null
 
+        when:
         controller.markSucceeded()
-        assert ERROR_MESSAGE_FOR_MISSING_PARAMETERS == response.text
+
+        then:
+        ERROR_MESSAGE_FOR_MISSING_PARAMETERS == response.text
     }
 
-    @Test
     void test_markSucceeded_ShouldReturnErrorMessageForInvalidParameters_ParametersContainsValuesForAdditionalProcessingStep() {
+        given:
+        setupTest()
         params.parameters = PARAMETERS_FOR_MULTIPLE
 
+        when:
         controller.markSucceeded()
-        assert ERROR_MESSAGE_FOR_PARAMETERS_FOR_UNKNOWN_IDS == response.text
+
+        then:
+        ERROR_MESSAGE_FOR_PARAMETERS_FOR_UNKNOWN_IDS == response.text
     }
 
-    @Test
     void test_markSucceeded_ShouldReturnErrorMessageForInvalidParameters_ParametersHasInvalidKey_ToLessParts() {
+        given:
+        setupTest()
         params.parameters = PARAMETERS_FOR_TO_LESS_PARTS
 
+        when:
         controller.markSucceeded()
-        assert ERROR_MESSAGE_FOR_PARAMETERS_WITH_TO_LESS_PARTS_IN_KEY == response.text
+
+        then:
+        ERROR_MESSAGE_FOR_PARAMETERS_WITH_TO_LESS_PARTS_IN_KEY == response.text
     }
 
-    @Test
     void test_markSucceeded_ShouldReturnErrorMessageForInvalidParameters_ParametersHasInvalidKey_ToManyParts() {
+        given:
+        setupTest()
         params.parameters = PARAMETERS_FOR_TO_MUCH_PARTS
 
+        when:
         controller.markSucceeded()
-        assert ERROR_MESSAGE_FOR_PARAMETERS_WITH_TO_MUCH_PARTS_IN_KEY == response.text
+
+        then:
+        ERROR_MESSAGE_FOR_PARAMETERS_WITH_TO_MUCH_PARTS_IN_KEY == response.text
     }
 
-    @Test
     void test_markSucceeded_ShouldReturnErrorMessageForInvalidParameters_ParametersHasInvalidKey_FirstPartIsNotALong() {
+        given:
+        setupTest()
         params.parameters = PARAMETERS_FOR_FIRST_PART_IS_NOT_A_LONG
 
+        when:
         controller.markSucceeded()
-        assert ERROR_MESSAGE_FOR_PARAMETERS_WITH_FIRST_PART_IS_NOT_A_LONG == response.text
+
+        then:
+        ERROR_MESSAGE_FOR_PARAMETERS_WITH_FIRST_PART_IS_NOT_A_LONG == response.text
     }
 
-    @Test
     void test_startScheduler_ShouldReturnOk() {
+        given:
+        setupTest()
         final String SUCCESS_MESSAGE = '{"success":true}'
         boolean crashRecovery = true
         controller.crashRecoveryService = [
@@ -406,23 +566,31 @@ class CrashRecoveryControllerUnitTests {
                 startup: { -> crashRecovery = false }
         ] as SchedulerService
 
+        when:
         controller.startScheduler()
-        assert SUCCESS_MESSAGE == response.text
+
+        then:
+        SUCCESS_MESSAGE == response.text
     }
 
-    @Test
     void test_startScheduler_ShouldReturnFailure() {
+        given:
+        setupTest()
         final String ERROR_MESSAGE = '{"success":false,"error":"Not in Crash Recovery"}'
         controller.crashRecoveryService = [
                 isCrashRecovery: { -> return false },
         ] as CrashRecoveryService
 
+        when:
         controller.startScheduler()
-        assert ERROR_MESSAGE == response.text
+
+        then:
+        ERROR_MESSAGE == response.text
     }
 
-    @Test
     void test_parametersOfJob_ShouldReturnModel() {
+        given:
+        setupTest()
         List modelDefiniation = [
                 [
                         id       : 1,
@@ -430,35 +598,52 @@ class CrashRecoveryControllerUnitTests {
                         parameter: [],
                 ],
         ]
+
+        when:
         controller.crashRecoveryService = [
                 getOutputParametersOfJobs: { List<Long> ids ->
-                    assert [1] == ids
+                    [1] == ids
                     return modelDefiniation
                 },
         ] as CrashRecoveryService
 
-        def model = controller.parametersOfJob()
-        assert [parametersPerJobs: modelDefiniation] == model
+        then:
+        [parametersPerJobs: modelDefiniation] == controller.parametersOfJob()
     }
 
-    @Test
     void test_parametersOfJob_ShouldFailForIdsIsNull() {
+        given:
+        setupTest()
         params.ids = null
 
-        shouldFail(NullPointerException) { controller.parametersOfJob() }
+        when:
+        controller.parametersOfJob()
+
+        then:
+        thrown NullPointerException
     }
 
-    @Test
     void test_parametersOfJob_ShouldFailForIdsIsEmpty() {
+        given:
+        setupTest()
         params.ids = ''
 
-        shouldFail(NumberFormatException) { controller.parametersOfJob() }
+        when:
+        controller.parametersOfJob()
+
+        then:
+        thrown NumberFormatException
     }
 
-    @Test
     void test_parametersOfJob_ShouldFailForIdsIsNotALong() {
+        given:
+        setupTest()
         params.ids = IDS_WRONG_FORMAT
 
-        shouldFail(NumberFormatException) { controller.parametersOfJob() }
+        when:
+        controller.parametersOfJob()
+
+        then:
+        thrown NumberFormatException
     }
 }

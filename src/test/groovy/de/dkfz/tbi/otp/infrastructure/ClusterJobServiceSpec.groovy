@@ -21,38 +21,45 @@
  */
 package de.dkfz.tbi.otp.infrastructure
 
-import grails.test.mixin.Mock
-import org.junit.Test
+import grails.testing.gorm.DataTest
+import grails.testing.services.ServiceUnitTest
+import spock.lang.Specification
 
 import de.dkfz.tbi.otp.ngsdata.Realm
 
 import java.time.LocalDate
 import java.time.ZoneId
 
-@Mock([
-        Realm, //It is necessary to mock a class to have the needed configured GORM
-])
-class ClusterJobServiceUnitTests {
+class ClusterJobServiceSpec extends Specification implements DataTest, ServiceUnitTest<ClusterJobService> {
 
     static final LocalDate START_DATE = LocalDate.now()
     static final LocalDate END_DATE = START_DATE.plusDays(1)
 
     ClusterJobService clusterJobService = new ClusterJobService()
 
-    @Test
+    @Override
+    Class<?>[] getDomainClassesToMock() {
+        return [
+                Realm,
+        ]
+    }
+
     void test_DateTimeIntervalWithHourBuckets_hourBuckets_WhenInputIs24_hours_ThenShouldReturnListOfTwentyFiveDates() {
+        given:
         List dates = (0..48).collect {
             START_DATE.atStartOfDay(ZoneId.systemDefault()).plusHours(it)
         }
 
-        assert dates == new ClusterJobService.DateTimeIntervalWithHourBuckets(START_DATE, END_DATE).hourBuckets
+        expect:
+        dates == new ClusterJobService.DateTimeIntervalWithHourBuckets(START_DATE, END_DATE).hourBuckets
     }
 
-    @Test
     void test_getLabels_WhenMaxEqualsThousandAndQuotEqualsTen_ShouldReturnMapWithStringListAndDoubleListEachContainingTenValuesEachValueAQuotHigherThanThePreviousValue() {
+        given:
         List labels = clusterJobService.getLabels(1000, 10)
 
-        assert (1..10).collect { (it * 100.0) as String } == labels.first()
-        assert (1..10).collect { (it * 100.0) as Double } == labels.last()
+        expect:
+        (1..10).collect { (it * 100.0) as String } == labels.first()
+        (1..10).collect { (it * 100.0) as Double } == labels.last()
     }
 }

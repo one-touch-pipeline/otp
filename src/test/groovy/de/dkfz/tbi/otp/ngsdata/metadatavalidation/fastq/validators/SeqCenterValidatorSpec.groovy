@@ -21,7 +21,7 @@
  */
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 
-import grails.test.mixin.Mock
+import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.ngsdata.*
@@ -33,8 +33,14 @@ import de.dkfz.tbi.util.spreadsheet.validation.Problem
 import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
-@Mock(SeqCenter)
-class SeqCenterValidatorSpec extends Specification {
+class SeqCenterValidatorSpec extends Specification implements DataTest {
+
+    @Override
+    Class<?>[] getDomainClassesToMock() {
+        return [
+                SeqCenter
+        ]
+    }
 
     void 'validate adds expected error'() {
         given:

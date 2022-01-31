@@ -21,49 +21,18 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
-import grails.test.mixin.Mock
-import org.junit.*
+import grails.testing.gorm.DomainUnitTest
+import org.junit.Rule
 import org.junit.rules.TemporaryFolder
+import spock.lang.Specification
 
-import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
-import static de.dkfz.tbi.TestCase.shouldFail
-
-@Mock([
-        AbstractMergedBamFile,
-        SoftwareTool,
-        MergingCriteria,
-        MergingWorkPackage,
-        LibraryPreparationKit,
-        SeqPlatform,
-        SeqPlatformGroup,
-        SeqCenter,
-        SeqType,
-        SeqTrack,
-        RoddyBamFile,
-        SampleType,
-        Pipeline,
-        ProcessingPriority,
-        Project,
-        ProcessingPriority,
-        Individual,
-        Sample,
-        SeqPlatformModelLabel,
-        ReferenceGenome,
-        ReferenceGenomeProjectSeqType,
-        FastqImportInstance,
-        FileType,
-        DataFile,
-        Realm,
-        RoddyWorkflowConfig,
-        Run,
-])
-class RoddyBamFileUnitTests {
+class RoddyBamFileDomainSpec extends Specification implements DomainUnitTest<RoddyBamFile> {
 
     TestConfigService configService
 
@@ -73,15 +42,47 @@ class RoddyBamFileUnitTests {
     RoddyBamFile roddyBamFile
     String testDir
 
+    @Override
+    Class<?>[] getDomainClassesToMock() {
+        return [
+                AbstractMergedBamFile,
+                SoftwareTool,
+                MergingCriteria,
+                MergingWorkPackage,
+                LibraryPreparationKit,
+                SeqPlatform,
+                SeqPlatformGroup,
+                SeqCenter,
+                SeqType,
+                SeqTrack,
+                RoddyBamFile,
+                SampleType,
+                Pipeline,
+                ProcessingPriority,
+                Project,
+                ProcessingPriority,
+                Individual,
+                Sample,
+                SeqPlatformModelLabel,
+                ReferenceGenome,
+                ReferenceGenomeProjectSeqType,
+                FastqImportInstance,
+                FileType,
+                DataFile,
+                Realm,
+                RoddyWorkflowConfig,
+                Run,
+        ]
+    }
+
     @Rule
-    public TemporaryFolder tmpDir = new TemporaryFolder()
+    public TemporaryFolder tmpDir
 
     static final String FIRST_DATAFILE_NAME = "4_NoIndex_L004_R1_complete_filtered.fastq.gz"
     static final String SECOND_DATAFILE_NAME = "4_NoIndex_L004_R2_complete_filtered.fastq.gz"
     static final String COMMON_PREFIX = "4_NoIndex_L004"
 
-    @Before
-    void setUp() {
+    void setupTest() {
         roddyBamFile = DomainFactory.createRoddyBamFile([
                 roddyExecutionDirectoryNames: [],
         ])
@@ -91,133 +92,187 @@ class RoddyBamFileUnitTests {
         testDir = "${individual.getViewByPidPath(roddyBamFile.seqType).absoluteDataManagementPath.path}/${sampleType.dirName}/${roddyBamFile.seqType.libraryLayoutDirName}/merged-alignment"
     }
 
-    @After
-    void tearDown() {
-        sampleType = null
-        individual = null
-        roddyBamFile = null
-    }
-
-    @Test
     void testGetRoddyBamFileName() {
-        assert "${sampleType.dirName}_${individual.pid}_merged.mdup.bam" == roddyBamFile.bamFileName
+        given:
+        setupTest()
+
+        expect:
+        "${sampleType.dirName}_${individual.pid}_merged.mdup.bam" == roddyBamFile.bamFileName
     }
 
-    @Test
     void testGetRoddyBaiFileName() {
-        assert "${sampleType.dirName}_${individual.pid}_merged.mdup.bam.bai" == roddyBamFile.baiFileName
+        given:
+        setupTest()
+
+        expect:
+        "${sampleType.dirName}_${individual.pid}_merged.mdup.bam.bai" == roddyBamFile.baiFileName
     }
 
-    @Test
     void testGetRoddyMd5sumFileName() {
-        assert "${sampleType.dirName}_${individual.pid}_merged.mdup.bam.md5" == roddyBamFile.md5sumFileName
+        given:
+        setupTest()
+
+        expect:
+        "${sampleType.dirName}_${individual.pid}_merged.mdup.bam.md5" == roddyBamFile.md5sumFileName
     }
 
-    @Test
     void testGetWorkDirectory_AllFine() {
-        assert "${testDir}/${roddyBamFile.workDirectoryName}" == roddyBamFile.workDirectory.path
+        given:
+        setupTest()
+
+        expect:
+        "${testDir}/${roddyBamFile.workDirectoryName}" == roddyBamFile.workDirectory.path
     }
 
-    @Test
     void testGetWorkQADirectory_AllFine() {
-        assert "${testDir}/${roddyBamFile.workDirectoryName}/${RoddyBamFile.QUALITY_CONTROL_DIR}" ==
+        given:
+        setupTest()
+
+        expect:
+        "${testDir}/${roddyBamFile.workDirectoryName}/${RoddyBamFile.QUALITY_CONTROL_DIR}" ==
                 roddyBamFile.workQADirectory.path
     }
 
-    @Test
     void testGetFinalQADirectory_AllFine() {
-        assert "${testDir}/${RoddyBamFile.QUALITY_CONTROL_DIR}" ==
+        given:
+        setupTest()
+
+        expect:
+        "${testDir}/${RoddyBamFile.QUALITY_CONTROL_DIR}" ==
                 roddyBamFile.finalQADirectory.path
     }
 
-    @Test
     void testGetWorkExecutionStoreDirectory_AllFine() {
-        assert "${testDir}/${roddyBamFile.workDirectoryName}/${RoddyBamFile.RODDY_EXECUTION_STORE_DIR}" ==
+        given:
+        setupTest()
+
+        expect:
+        "${testDir}/${roddyBamFile.workDirectoryName}/${RoddyBamFile.RODDY_EXECUTION_STORE_DIR}" ==
                 roddyBamFile.workExecutionStoreDirectory.path
     }
 
-    @Test
     void testGetFinalRoddyExecutionStoreDirectory_AllFine() {
-        assert "${testDir}/${RoddyBamFile.RODDY_EXECUTION_STORE_DIR}" ==
+        given:
+        setupTest()
+
+        expect:
+        "${testDir}/${RoddyBamFile.RODDY_EXECUTION_STORE_DIR}" ==
                 roddyBamFile.finalExecutionStoreDirectory.path
     }
 
-    @Test
     void testGetWorkBamFile_AllFine() {
-        assert "${testDir}/${roddyBamFile.workDirectoryName}/${roddyBamFile.bamFileName}" ==
+        given:
+        setupTest()
+
+        expect:
+        "${testDir}/${roddyBamFile.workDirectoryName}/${roddyBamFile.bamFileName}" ==
                 roddyBamFile.workBamFile.path
     }
 
-    @Test
     void testGetWorkBaiFile_AllFine() {
-        assert "${testDir}/${roddyBamFile.workDirectoryName}/${roddyBamFile.baiFileName}" ==
+        given:
+        setupTest()
+
+        expect:
+        "${testDir}/${roddyBamFile.workDirectoryName}/${roddyBamFile.baiFileName}" ==
                 roddyBamFile.workBaiFile.path
     }
 
-    @Test
     void testGetWorkMd5sumFile_AllFine() {
-        assert "${testDir}/${roddyBamFile.workDirectoryName}/${roddyBamFile.md5sumFileName}" ==
+        given:
+        setupTest()
+
+        expect:
+        "${testDir}/${roddyBamFile.workDirectoryName}/${roddyBamFile.md5sumFileName}" ==
                 roddyBamFile.workMd5sumFile.path
     }
 
-    @Test
     void testGetFinalBamFile_AllFine() {
-        assert "${testDir}/${roddyBamFile.bamFileName}" ==
+        given:
+        setupTest()
+
+        expect:
+        "${testDir}/${roddyBamFile.bamFileName}" ==
                 roddyBamFile.finalBamFile.path
     }
 
-    @Test
     void testGetFinalBaiFile_AllFine() {
-        assert "${testDir}/${roddyBamFile.baiFileName}" ==
+        given:
+        setupTest()
+
+        expect:
+        "${testDir}/${roddyBamFile.baiFileName}" ==
                 roddyBamFile.finalBaiFile.path
     }
 
-    @Test
     void testGetFinalMd5sumFile_AllFine() {
-        assert "${testDir}/${roddyBamFile.md5sumFileName}" ==
+        given:
+        setupTest()
+
+        expect:
+        "${testDir}/${roddyBamFile.md5sumFileName}" ==
                 roddyBamFile.finalMd5sumFile.path
     }
 
-    @Test
     void testGetWorkMergedQADirectory_AllFine() {
-        assert "${testDir}/${roddyBamFile.workDirectoryName}/${RoddyBamFile.QUALITY_CONTROL_DIR}/${RoddyBamFile.MERGED_DIR}" ==
+        given:
+        setupTest()
+
+        expect:
+        "${testDir}/${roddyBamFile.workDirectoryName}/${RoddyBamFile.QUALITY_CONTROL_DIR}/${RoddyBamFile.MERGED_DIR}" ==
                 roddyBamFile.workMergedQADirectory.path
     }
 
-    @Test
     void testGetWorkMergedQAJsonFile_AllFine() {
-        assert "${testDir}/${roddyBamFile.workDirectoryName}/${RoddyBamFile.QUALITY_CONTROL_DIR}/${RoddyBamFile.MERGED_DIR}/${RoddyBamFile.QUALITY_CONTROL_JSON_FILE_NAME}" ==
+        given:
+        setupTest()
+
+        expect:
+        "${testDir}/${roddyBamFile.workDirectoryName}/${RoddyBamFile.QUALITY_CONTROL_DIR}/${RoddyBamFile.MERGED_DIR}/${RoddyBamFile.QUALITY_CONTROL_JSON_FILE_NAME}" ==
                 roddyBamFile.workMergedQAJsonFile.path
     }
 
-    @Test
     void testGetFinalMergedQADirectory_AllFine() {
-        assert "${testDir}/${RoddyBamFile.QUALITY_CONTROL_DIR}/${RoddyBamFile.MERGED_DIR}" ==
+        given:
+        setupTest()
+
+        expect:
+        "${testDir}/${RoddyBamFile.QUALITY_CONTROL_DIR}/${RoddyBamFile.MERGED_DIR}" ==
                 roddyBamFile.finalMergedQADirectory.path
     }
 
-    @Test
     void testGetFinalRoddyMergedQAJsonFile_AllFine() {
-        assert "${testDir}/${RoddyBamFile.QUALITY_CONTROL_DIR}/${RoddyBamFile.MERGED_DIR}/${RoddyBamFile.QUALITY_CONTROL_JSON_FILE_NAME}" ==
+        given:
+        setupTest()
+
+        expect:
+        "${testDir}/${RoddyBamFile.QUALITY_CONTROL_DIR}/${RoddyBamFile.MERGED_DIR}/${RoddyBamFile.QUALITY_CONTROL_JSON_FILE_NAME}" ==
                 roddyBamFile.finalMergedQAJsonFile.path
     }
 
-    @Test
     void testGetWorkSingleLaneQADirectories_NoSeqTracks() {
+        given:
+        setupTest()
         roddyBamFile.seqTracks = null
-        assert roddyBamFile.workSingleLaneQADirectories.isEmpty()
+
+        expect:
+        roddyBamFile.workSingleLaneQADirectories.isEmpty()
     }
 
-    @Test
     void testGetWorkSingleLaneQADirectories_OneSeqTrack() {
+        given:
+        setupTest()
         SeqTrack seqTrack = roddyBamFile.seqTracks.iterator()[0]
         updateDataFileNames(seqTrack)
         File dir = new File("${testDir}/${roddyBamFile.workDirectoryName}/${RoddyBamFile.QUALITY_CONTROL_DIR}/run${seqTrack.run.name}_${COMMON_PREFIX}")
-        assert [(seqTrack): dir] == roddyBamFile.workSingleLaneQADirectories
+
+        expect:
+        [(seqTrack): dir] == roddyBamFile.workSingleLaneQADirectories
     }
 
-    @Test
     void testGetWorkSingleLaneQADirectories_TwoSeqTracks() {
+        given:
+        setupTest()
         updateDataFileNames(roddyBamFile.seqTracks.iterator()[0])
         SeqTrack seqTrack = DomainFactory.createSeqTrackWithDataFiles(roddyBamFile.workPackage)
         updateDataFileNames(seqTrack)
@@ -229,33 +284,45 @@ class RoddyBamFileUnitTests {
         }
 
         Map<SeqTrack, File> actual = roddyBamFile.workSingleLaneQADirectories
-        assert expected == actual
+
+        expect:
+        expected == actual
     }
 
-    @Test
     void testGetWorkSingleLaneQAJsonFiles_OneSeqTrack() {
+        given:
+        setupTest()
         SeqTrack seqTrack = roddyBamFile.seqTracks.iterator()[0]
         updateDataFileNames(seqTrack)
         File file = new File("${testDir}/${roddyBamFile.workDirectoryName}/${RoddyBamFile.QUALITY_CONTROL_DIR}/run${seqTrack.run.name}_${COMMON_PREFIX}/${RoddyBamFile.QUALITY_CONTROL_JSON_FILE_NAME}")
-        assert [(seqTrack): file] == roddyBamFile.workSingleLaneQAJsonFiles
+
+        expect:
+        [(seqTrack): file] == roddyBamFile.workSingleLaneQAJsonFiles
     }
 
-    @Test
     void testGetFinalRoddySingleLaneQADirectories_NoSeqTracks() {
+        given:
+        setupTest()
         roddyBamFile.seqTracks = null
-        assert roddyBamFile.finalSingleLaneQADirectories.isEmpty()
+
+        expect:
+        roddyBamFile.finalSingleLaneQADirectories.isEmpty()
     }
 
-    @Test
     void testGetFinalRoddySingleLaneQADirectories_OneSeqTrack() {
+        given:
+        setupTest()
         SeqTrack seqTrack = roddyBamFile.seqTracks.iterator()[0]
         updateDataFileNames(seqTrack)
         File dir = new File("${testDir}/${RoddyBamFile.QUALITY_CONTROL_DIR}/run${seqTrack.run.name}_${COMMON_PREFIX}")
-        assert [(seqTrack): dir] == roddyBamFile.finalSingleLaneQADirectories
+
+        expect:
+        [(seqTrack): dir] == roddyBamFile.finalSingleLaneQADirectories
     }
 
-    @Test
     void testGetFinalRoddySingleLaneQADirectories_TwoSeqTracks() {
+        given:
+        setupTest()
         updateDataFileNames(roddyBamFile.seqTracks.iterator()[0])
         SeqTrack seqTrack = DomainFactory.createSeqTrackWithDataFiles(roddyBamFile.workPackage)
         updateDataFileNames(seqTrack)
@@ -267,162 +334,217 @@ class RoddyBamFileUnitTests {
         }
 
         Map<SeqTrack, File> actual = roddyBamFile.finalSingleLaneQADirectories
-        assert expected == actual
+
+        expect:
+        expected == actual
     }
 
-    @Test
     void testGetFinalRoddySingleLaneQAJsonFiles_OneSeqTrack() {
+        given:
+        setupTest()
         SeqTrack seqTrack = roddyBamFile.seqTracks.iterator()[0]
         updateDataFileNames(seqTrack)
         File file = new File("${testDir}/${RoddyBamFile.QUALITY_CONTROL_DIR}/run${seqTrack.run.name}_${COMMON_PREFIX}/${RoddyBamFile.QUALITY_CONTROL_JSON_FILE_NAME}")
-        assert [(seqTrack): file] == roddyBamFile.finalSingleLaneQAJsonFiles
+
+        expect:
+        [(seqTrack): file] == roddyBamFile.finalSingleLaneQAJsonFiles
     }
 
-    @Test
     void testGetRoddySingleLaneQADirectoriesHelper_FinalFolder_OneSeqTrack() {
+        given:
+        setupTest()
         SeqTrack seqTrack = roddyBamFile.seqTracks.iterator()[0]
         updateDataFileNames(seqTrack)
         File dir = new File("${testDir}/${RoddyBamFile.QUALITY_CONTROL_DIR}/run${seqTrack.run.name}_${COMMON_PREFIX}")
-        assert [(seqTrack): dir] == roddyBamFile.getSingleLaneQADirectoriesHelper(roddyBamFile.finalQADirectory)
+
+        expect:
+        [(seqTrack): dir] == roddyBamFile.getSingleLaneQADirectoriesHelper(roddyBamFile.finalQADirectory)
     }
 
-    @Test
     void testGetRoddySingleLaneQADirectoriesHelper_WorkFolder_OneSeqTrack() {
+        given:
+        setupTest()
         SeqTrack seqTrack = roddyBamFile.seqTracks.iterator()[0]
         updateDataFileNames(seqTrack)
         File dir = new File("${testDir}/${roddyBamFile.workDirectoryName}/${RoddyBamFile.QUALITY_CONTROL_DIR}/run${seqTrack.run.name}_${COMMON_PREFIX}")
-        assert [(seqTrack): dir] == roddyBamFile.getSingleLaneQADirectoriesHelper(roddyBamFile.workQADirectory)
+
+        expect:
+        [(seqTrack): dir] == roddyBamFile.getSingleLaneQADirectoriesHelper(roddyBamFile.workQADirectory)
     }
 
-    @Test
     void testGetLatestWorkExecutionDirectory_WhenRoddyExecutionDirectoryNamesEmpty_ShouldFail() {
-        shouldFail(AssertionError) {
-            roddyBamFile.latestWorkExecutionDirectory
-        }
+        given:
+        setupTest()
+
+        when:
+        roddyBamFile.latestWorkExecutionDirectory
+
+        then:
+        thrown AssertionError
     }
 
-    @Test
     void testGetLatestWorkExecutionDirectory_WhenLatestDirectoryNameIsNotLastNameInRoddyExecutionDirectoryNames_ShouldFail() {
+        given:
+        setupTest()
         roddyBamFile.roddyExecutionDirectoryNames.addAll(["exec_100000_000000000_a_a", "exec_000000_000000000_a_a"])
         roddyBamFile.save(flush: true)
 
-        shouldFail(AssertionError) {
-            roddyBamFile.latestWorkExecutionDirectory
-        }
+        when:
+        roddyBamFile.latestWorkExecutionDirectory
+
+        then:
+        thrown AssertionError
     }
 
-    @Test
     void testGetLatestWorkExecutionDirectory_WhenLatestDirectoryNameDoesNotMatch_ShouldFail() {
+        given:
+        setupTest()
         roddyBamFile.roddyExecutionDirectoryNames.add("someName")
 
-        shouldFail(AssertionError) {
-            roddyBamFile.latestWorkExecutionDirectory
-        }
+        when:
+        roddyBamFile.latestWorkExecutionDirectory
+
+        then:
+        thrown AssertionError
     }
 
-    @Test
     void testGetLatestWorkExecutionDirectory_WhenLatestDirectoryNameDoesNotExistOnFileSystem_ShouldFail() {
+        given:
+        setupTest()
         roddyBamFile.roddyExecutionDirectoryNames.add(RODDY_EXECUTION_DIR_NAME)
 
-        shouldFail(AssertionError) {
-            roddyBamFile.latestWorkExecutionDirectory
-        }
+        when:
+        roddyBamFile.latestWorkExecutionDirectory
+
+        then:
+        thrown AssertionError
     }
 
-    @Test
     void testGetLatestWorkExecutionDirectory_WhenLatestDirectoryNameIsNoDirectory_ShouldFail() {
+        given:
+        setupTest()
         String fileName = RODDY_EXECUTION_DIR_NAME
 
         tmpDir.newFile(fileName)
 
+        when:
         roddyBamFile.roddyExecutionDirectoryNames.add(fileName)
+        roddyBamFile.latestWorkExecutionDirectory
 
-        shouldFail(AssertionError) {
-            roddyBamFile.latestWorkExecutionDirectory
-        }
+        then:
+        thrown AssertionError
     }
 
-    @Test
     void testGetLatestWorkExecutionDirectory_WhenAllFineAndTimeStampWith8Digits_ReturnLatestWorkExecutionDirectory() {
+        given:
+        setupTest()
+
+        expect:
         helperTestGetLatestWorkExecutionDirectory_WhenAllFine('exec_000000_00000000_a_a')
     }
 
-    @Test
     void testGetLatestWorkExecutionDirectory_WhenAllFineAndTimeStampWith9Digits_ReturnLatestWorkExecutionDirectory() {
+        given:
+        setupTest()
+
+        expect:
         helperTestGetLatestWorkExecutionDirectory_WhenAllFine(RODDY_EXECUTION_DIR_NAME)
     }
 
-    void helperTestGetLatestWorkExecutionDirectory_WhenAllFine(String roddyExecutionDirName) {
+    private boolean helperTestGetLatestWorkExecutionDirectory_WhenAllFine(String roddyExecutionDirName) {
         roddyBamFile.roddyExecutionDirectoryNames.add(roddyExecutionDirName)
 
         File file = new File(roddyBamFile.workExecutionStoreDirectory, roddyExecutionDirName)
         file.mkdirs()
 
-        assert file == roddyBamFile.latestWorkExecutionDirectory
+        return file == roddyBamFile.latestWorkExecutionDirectory
     }
 
-    @Test
     void testFinalRoddyExecutionDirectories_noRoddyExecutionDirsExist() {
+        given:
+        setupTest()
+
+        expect:
         helperTestFinalRoddyExecutionDirectories([])
     }
 
-    @Test
     void testFinalRoddyExecutionDirectories_allFine() {
+        given:
+        setupTest()
+
+        expect:
         helperTestFinalRoddyExecutionDirectories([
                 'exec_123456_123456789_bla_bla',
                 'exec_654321_987654321_bla_bla',
         ])
     }
 
-    @Test
     void testIsOldStructureUsed_useOldStructure_shouldReturnTrue() {
+        given:
+        setupTest()
         roddyBamFile.workDirectoryName = null
 
-        assert roddyBamFile.oldStructureUsed
+        expect:
+        roddyBamFile.oldStructureUsed
     }
 
-    @Test
     void testIsOldStructureUsed_useLinkStructure_shouldReturnFalse() {
+        given:
+        setupTest()
         roddyBamFile.workDirectoryName = 'someWorkDirectory'
 
-        assert !roddyBamFile.oldStructureUsed
+        expect:
+        !roddyBamFile.oldStructureUsed
     }
 
-    @Test
     void testGetPathForFurtherProcessing_useOldStructure_shouldReturnFinalDir() {
+        given:
+        setupTest()
         roddyBamFile.workDirectoryName = null
-        assert roddyBamFile.save(flush: true)
-        roddyBamFile.mergingWorkPackage.bamFileInProjectFolder = roddyBamFile
-        assert roddyBamFile.mergingWorkPackage.save(flush: true)
 
-        assert roddyBamFile.finalBamFile == roddyBamFile.pathForFurtherProcessing
+        when:
+        roddyBamFile.save(flush: true)
+        roddyBamFile.mergingWorkPackage.save(flush: true)
+        roddyBamFile.mergingWorkPackage.bamFileInProjectFolder = roddyBamFile
+
+        then:
+        roddyBamFile.finalBamFile == roddyBamFile.pathForFurtherProcessing
     }
 
-    @Test
     void testGetPathForFurtherProcessing_useNewStructure_shouldReturnWorkDir() {
+        given:
+        setupTest()
         roddyBamFile.workDirectoryName = 'someDir'
-        assert roddyBamFile.save(flush: true)
+
+        when:
+        roddyBamFile.save(flush: true)
+        roddyBamFile.mergingWorkPackage.save(flush: true)
         roddyBamFile.mergingWorkPackage.bamFileInProjectFolder = roddyBamFile
-        assert roddyBamFile.mergingWorkPackage.save(flush: true)
 
-        assert roddyBamFile.workBamFile == roddyBamFile.pathForFurtherProcessing
+        then:
+        roddyBamFile.workBamFile == roddyBamFile.pathForFurtherProcessing
     }
 
-    @Test
     void testGetPathForFurtherProcessing_useNewStructure_notSetInMergingWorkPackage_shouldThrowException() {
+        given:
+        setupTest()
         roddyBamFile.workDirectoryName = 'someDir'
-        assert roddyBamFile.save(flush: true)
-        TestCase.shouldFail(IllegalStateException) {
-            roddyBamFile.pathForFurtherProcessing
-        }
+
+        when:
+        roddyBamFile.save(flush: true)
+        roddyBamFile.pathForFurtherProcessing
+
+        then:
+        thrown IllegalStateException
     }
 
-    void helperTestFinalRoddyExecutionDirectories(List<String> roddyExecutionDirectoryNames) {
+    private boolean helperTestFinalRoddyExecutionDirectories(List<String> roddyExecutionDirectoryNames) {
         roddyBamFile.roddyExecutionDirectoryNames.addAll(roddyExecutionDirectoryNames)
         List<String> expectedResult = roddyExecutionDirectoryNames.collect {
             "${testDir}/${RoddyBamFile.RODDY_EXECUTION_STORE_DIR}/${it}"
         }
-        assert expectedResult == roddyBamFile.finalExecutionDirectories*.path
+
+        return expectedResult == roddyBamFile.finalExecutionDirectories*.path
     }
 
     private void updateDataFileNames(SeqTrack seqTrack) {

@@ -21,34 +21,48 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.test.mixin.TestMixin
-import grails.test.mixin.support.GrailsUnitTestMixin
-import org.junit.Test
+import grails.testing.gorm.DataTest
+import spock.lang.Specification
 
-@TestMixin(GrailsUnitTestMixin)
-class FileNotReadableExceptionUnitTests {
+class SAMPlatformLabelSpec extends Specification implements DataTest {
 
-    @Test
-    void testFileNotReadableExceptionString() {
-        FileNotReadableException e = new FileNotReadableException("tmp")
-        assert "can not read file: tmp" == e.message
+    void testExectMatch() {
+        given:
+        String label = "Illumina"
+        SAMPlatformLabel expectedLabel = SAMPlatformLabel.ILLUMINA
+
+        expect:
+        expectedLabel == SAMPlatformLabel.map(label)
     }
 
-    @Test
-    void testFileNotReadableExceptionStringParamIsNull() {
-        FileNotReadableException e = new FileNotReadableException(null as String)
-        assert "can not read file: null" == e.message
+    void testNotExectMatch() {
+        given:
+        String label = "ABI_SOLiD"
+        SAMPlatformLabel expectedLabel = SAMPlatformLabel.SOLID
+
+        expect:
+        expectedLabel == SAMPlatformLabel.map(label)
     }
 
-    @Test
-    void testFileNotReadableExceptionFile() {
-        FileNotReadableException e = new FileNotReadableException(new File("tmp"))
-        assert "can not read file: tmp" == e.message
+    void testNoMatch() {
+        given:
+        String label = "does-not-match-platform-label"
+
+        when:
+        SAMPlatformLabel.map(label)
+
+        then:
+        thrown IllegalArgumentException
     }
 
-    @Test
-    void testFileNotReadableExceptionFileParamIsNull() {
-        FileNotReadableException e = new FileNotReadableException(null as File)
-        assert "can not read file: null" == e.message
+    void testMultipleMatch() {
+        given:
+        String label = "capillary_solid"
+
+        when:
+        SAMPlatformLabel.map(label)
+
+        then:
+        thrown IllegalArgumentException
     }
 }

@@ -21,7 +21,7 @@
  */
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 
-import grails.test.mixin.Mock
+import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
@@ -34,8 +34,14 @@ import de.dkfz.tbi.util.spreadsheet.validation.Problem
 import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
-@Mock(SeqType)
-class LibraryLayoutValidatorSpec extends Specification implements DomainFactoryCore {
+class LibraryLayoutValidatorSpec extends Specification implements DataTest, DomainFactoryCore {
+
+    @Override
+    Class<?>[] getDomainClassesToMock() {
+        return [
+                SeqType,
+        ]
+    }
 
     void 'validate, when column is missing, adds error'() {
         given:

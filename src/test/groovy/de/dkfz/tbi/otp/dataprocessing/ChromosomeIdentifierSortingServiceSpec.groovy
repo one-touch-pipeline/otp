@@ -21,25 +21,24 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
-import grails.test.mixin.TestFor
-import grails.test.mixin.TestMixin
-import grails.test.mixin.support.GrailsUnitTestMixin
-import org.junit.Test
+import grails.testing.gorm.DataTest
+import grails.testing.services.ServiceUnitTest
+import spock.lang.Specification
 
-import static org.junit.Assert.assertEquals
-
-@TestFor(ChromosomeIdentifierSortingService)
-@TestMixin(GrailsUnitTestMixin)
-class ChromosomeIdentifierSortingServiceTests {
+class ChromosomeIdentifierSortingServiceSpec extends Specification implements DataTest, ServiceUnitTest<ChromosomeIdentifierSortingService> {
 
     ChromosomeIdentifierSortingService chromosomeIdentifierSortingService
 
-    @Test
     void testSortIdentifiers() {
+        given:
         chromosomeIdentifierSortingService = new ChromosomeIdentifierSortingService()
         List<String> identifierUnsorted = ["1", "10", "14", "X", "GH", "16", "33", "2", "23", "Y"]
         List<String> identifierSortedExp = ["1", "2", "10", "14", "16", "X", "Y", "23", "33", "GH"]
+
+        when:
         List<String> identifierSortedAct = chromosomeIdentifierSortingService.sortIdentifiers(identifierUnsorted)
-        assertEquals(identifierSortedExp, identifierSortedAct)
+
+        then:
+        identifierSortedExp == identifierSortedAct
     }
 }

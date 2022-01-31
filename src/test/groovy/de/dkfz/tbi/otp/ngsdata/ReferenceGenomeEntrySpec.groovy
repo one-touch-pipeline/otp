@@ -21,23 +21,24 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.test.mixin.*
-import grails.test.mixin.support.GrailsUnitTestMixin
-import org.junit.Assert
-import org.junit.Test
+import grails.testing.gorm.DataTest
+import grails.testing.gorm.DomainUnitTest
+import spock.lang.Specification
 
-/**
- * See the API for {@link grails.test.mixin.support.GrailsUnitTestMixin} for usage instructions
- */
-@TestMixin(GrailsUnitTestMixin)
-@TestFor(ReferenceGenomeEntry)
-@Mock([ReferenceGenomeEntry, ReferenceGenome])
-class ReferenceGenomeEntryTests {
+class ReferenceGenomeEntrySpec extends Specification implements DataTest, DomainUnitTest<ReferenceGenomeEntry> {
 
     final static Long ARBITRARY_REFERENCE_GENOME_LENGTH = 100
 
-    @Test
+    @Override
+    Class<?>[] getDomainClassesToMock() {
+        return [
+                ReferenceGenomeEntry,
+                ReferenceGenome,
+        ]
+    }
+
     void testConstraints() {
+        given:
         ReferenceGenome referenceGenome = DomainFactory.createReferenceGenome([
                         name: "refGen",
                         path: "filePath",
@@ -67,20 +68,22 @@ class ReferenceGenomeEntryTests {
                         alias: "3",
                         referenceGenome: referenceGenome
                         )
-        Assert.assertTrue !referenceGenomeEntryAgainName.validate()
 
         ReferenceGenomeEntry referenceGenomeEntryAgainAlias = new ReferenceGenomeEntry(
                         name: "chr3",
                         alias: "1",
                         referenceGenome: referenceGenome
                         )
-        Assert.assertTrue !referenceGenomeEntryAgainAlias.validate()
 
         ReferenceGenomeEntry referenceGenomeEntryAgainBoth = new ReferenceGenomeEntry(
                         name: "chr1",
                         alias: "1",
                         referenceGenome: referenceGenome
                         )
-        Assert.assertTrue !referenceGenomeEntryAgainBoth.validate()
+
+        expect:
+        referenceGenomeEntryAgainName.validate() == false
+        referenceGenomeEntryAgainAlias.validate() == false
+        referenceGenomeEntryAgainBoth.validate() == false
     }
 }

@@ -21,54 +21,56 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
-import grails.test.mixin.Mock
-import grails.test.mixin.TestFor
-import org.junit.*
+import grails.testing.gorm.DataTest
+import grails.testing.gorm.DomainUnitTest
+import spock.lang.Specification
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
-@TestFor(ProcessedMergedBamFile)
-@Mock([
-        AlignmentPass,
-        DataFile,
-        Individual,
-        FileType,
-        LibraryPreparationKit,
-        MergingCriteria,
-        MergingPass,
-        MergingSet,
-        MergingWorkPackage,
-        MergingSetAssignment,
-        Pipeline,
-        ProcessingPriority,
-        Project,
-        ProcessedBamFile,
-        ProcessedMergedBamFile,
-        Realm,
-        ReferenceGenome,
-        Run,
-        FastqImportInstance,
-        Sample,
-        SampleType,
-        SeqCenter,
-        SeqPlatform,
-        SeqPlatformGroup,
-        SeqPlatformModelLabel,
-        SeqTrack,
-        SeqType,
-        SoftwareTool,
-])
-class ProcessedMergedBamFileTests {
+class ProcessedMergedBamFileUnitSpec extends Specification implements DataTest, DomainUnitTest<ProcessedMergedBamFile> {
 
     MergingPass mergingPass = null
     MergingSet mergingSet = null
     MergingWorkPackage workPackage = null
 
-    @Before
-    void setUp() {
+    @Override
+    Class<?>[] getDomainClassesToMock() {
+        return [
+                AlignmentPass,
+                DataFile,
+                Individual,
+                FileType,
+                LibraryPreparationKit,
+                MergingCriteria,
+                MergingPass,
+                MergingSet,
+                MergingWorkPackage,
+                MergingSetAssignment,
+                Pipeline,
+                ProcessingPriority,
+                Project,
+                ProcessedBamFile,
+                ProcessedMergedBamFile,
+                Realm,
+                ReferenceGenome,
+                Run,
+                FastqImportInstance,
+                Sample,
+                SampleType,
+                SeqCenter,
+                SeqPlatform,
+                SeqPlatformGroup,
+                SeqPlatformModelLabel,
+                SeqTrack,
+                SeqType,
+                SoftwareTool,
+        ]
+    }
+
+    void setup() {
         this.workPackage = DomainFactory.createMergingWorkPackage(
                 seqType: DomainFactory.createSeqType(),
                 pipeline: DomainFactory.createDefaultOtpPipeline(),
@@ -86,52 +88,54 @@ class ProcessedMergedBamFileTests {
         this.mergingPass.save(flush: true)
     }
 
-    @After
-    void tearDown() {
-        mergingPass = null
-        mergingSet = null
-        workPackage = null
-    }
-
-    @Test
     void testSave() {
+        given:
         ProcessedMergedBamFile bamFile = DomainFactory.createProcessedMergedBamFile(mergingPass)
-        assert  bamFile.validate()
+
+        expect:
+        bamFile.validate()
         bamFile.save(flush: true)
     }
 
-    @Test
     void testSaveWithNumberOfLanes() {
+        given:
         ProcessedMergedBamFile bamFile = DomainFactory.createProcessedMergedBamFile(mergingPass, [
                 numberOfMergedLanes: 3,
         ])
-        assert  bamFile.validate()
+
+        expect:
+        bamFile.validate()
         bamFile.save(flush: true)
     }
 
-    @Test
     void testConstraints() {
+        given:
         // mergingPass must not be null
         ProcessedMergedBamFile bamFile = new ProcessedMergedBamFile(
                 type: AbstractBamFile.BamType.SORTED)
-        assert  !bamFile.validate()
+
+        expect:
+        !bamFile.validate()
     }
 
-    @Test
     void testMergingWorkPackageConstraint_NoWorkpackage_ShouldFail() {
+        given:
         ProcessedMergedBamFile processedMergedBamFile = DomainFactory.createProcessedMergedBamFileWithoutProcessedBamFile(mergingPass, [
                 type       : AbstractBamFile.BamType.MDUP,
                 workPackage: null,
         ], false)
+
+        expect:
         TestCase.assertValidateError(processedMergedBamFile, "workPackage", "nullable", null)
     }
 
-    @Test
     void testIsMostRecentBamFile() {
+        given:
         ProcessedMergedBamFile bamFile = DomainFactory.createProcessedMergedBamFile(mergingPass)
         bamFile.save(flush: true)
 
-        assert bamFile.mostRecentBamFile
+        expect:
+        bamFile.mostRecentBamFile
 
         MergingPass secondMergingPass = new MergingPass(
                 identifier: 2,
@@ -141,8 +145,8 @@ class ProcessedMergedBamFileTests {
         ProcessedMergedBamFile secondBamFile = DomainFactory.createProcessedMergedBamFile(secondMergingPass)
         secondBamFile.save(flush: true)
 
-        assert !bamFile.mostRecentBamFile
-        assert secondBamFile.mostRecentBamFile
+        !bamFile.mostRecentBamFile
+        secondBamFile.mostRecentBamFile
 
         MergingSet secondMergingSet = new MergingSet(
                 identifier: 2,
@@ -157,20 +161,23 @@ class ProcessedMergedBamFileTests {
         ProcessedMergedBamFile firstBamFileOfSecondMergingSet = DomainFactory.createProcessedMergedBamFile(firstMergingPassOfSecondMergingSet)
         firstBamFileOfSecondMergingSet.save(flush: true)
 
-        assert !secondBamFile.mostRecentBamFile
-        assert firstBamFileOfSecondMergingSet.mostRecentBamFile
+        !secondBamFile.mostRecentBamFile
+        firstBamFileOfSecondMergingSet.mostRecentBamFile
     }
 
-    @Test
     void testGetBamFileName() {
+        given:
         ProcessedMergedBamFile bamFile = DomainFactory.createProcessedMergedBamFile(mergingPass)
 
-        assert "${bamFile.sampleType.name}_${bamFile.individual.pid}_${bamFile.seqType.name}_${bamFile.seqType.libraryLayout}_merged.mdup.bam" == bamFile.bamFileName
+        expect:
+        "${bamFile.sampleType.name}_${bamFile.individual.pid}_${bamFile.seqType.name}_${bamFile.seqType.libraryLayout}_merged.mdup.bam" == bamFile.bamFileName
     }
 
-    @Test
     void testFileNameNoSuffix() {
+        given:
         ProcessedMergedBamFile bamFile = DomainFactory.createProcessedMergedBamFile(mergingPass)
-        assert "${bamFile.sampleType.name}_${bamFile.individual.pid}_${bamFile.seqType.name}_${bamFile.seqType.libraryLayout}_merged.mdup" == bamFile.fileNameNoSuffix()
+
+        expect:
+        "${bamFile.sampleType.name}_${bamFile.individual.pid}_${bamFile.seqType.name}_${bamFile.seqType.libraryLayout}_merged.mdup" == bamFile.fileNameNoSuffix()
     }
 }

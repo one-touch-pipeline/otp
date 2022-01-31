@@ -21,13 +21,13 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.test.mixin.*
-import grails.test.mixin.support.GrailsUnitTestMixin
+import grails.testing.gorm.DataTest
+import grails.testing.services.ServiceUnitTest
 import org.apache.commons.io.FileUtils
-import org.junit.*
+import org.junit.Rule
 import org.junit.rules.TemporaryFolder
+import spock.lang.Specification
 
-import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
@@ -41,20 +41,7 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
-import static org.junit.Assert.*
-
-@TestFor(ReferenceGenomeService)
-@TestMixin(GrailsUnitTestMixin)
-@Mock([
-        ProcessingOption,
-        ProcessingPriority,
-        Project,
-        Realm,
-        ReferenceGenome,
-        ReferenceGenomeEntry,
-        StatSizeFileName,
-])
-class ReferenceGenomeServiceUnitTests {
+class ReferenceGenomeServiceSpec extends Specification implements DataTest, ServiceUnitTest<ReferenceGenomeService> {
 
     final static Long ARBITRARY_REFERENCE_GENOME_LENGTH = 100
 
@@ -67,10 +54,22 @@ class ReferenceGenomeServiceUnitTests {
     File file
 
     @Rule
-    public TemporaryFolder temporaryFolder = new TemporaryFolder()
+    public TemporaryFolder temporaryFolder
 
-    @Before
-    void setUp() {
+    @Override
+    Class<?>[] getDomainClassesToMock() {
+        return [
+                ProcessingOption,
+                ProcessingPriority,
+                Project,
+                Realm,
+                ReferenceGenome,
+                ReferenceGenomeEntry,
+                StatSizeFileName,
+        ]
+    }
+
+    void setupTest() {
         referenceGenomeService = new ReferenceGenomeService()
         referenceGenomeService.configService = new ConfigService()
         referenceGenomeService.processingOptionService = new ProcessingOptionService()
@@ -91,174 +90,269 @@ class ReferenceGenomeServiceUnitTests {
         project.save(flush: true)
 
         referenceGenome = DomainFactory.createReferenceGenome(
-                name                  : "hg19_1_24",
-                path                  : "referenceGenome",
-                fileNamePrefix        : "prefixName",
+                name: "hg19_1_24",
+                path: "referenceGenome",
+                fileNamePrefix: "prefixName",
                 cytosinePositionsIndex: "cytosine_idx.pos.gz",
                 fingerPrintingFileName: 'fingerPrinting.bed',
         )
 
         referenceGenomeEntry = new ReferenceGenomeEntry(
-                name           : "chr1",
-                alias          : "1",
-                classification : Classification.CHROMOSOME,
+                name: "chr1",
+                alias: "1",
+                classification: Classification.CHROMOSOME,
                 referenceGenome: referenceGenome,
         )
         referenceGenomeEntry.save(flush: true)
 
         ReferenceGenomeEntry referenceGenomeEntryTwo = new ReferenceGenomeEntry(
-                name           : "chr2",
-                alias          : "2",
-                classification : Classification.UNDEFINED,
+                name: "chr2",
+                alias: "2",
+                classification: Classification.UNDEFINED,
                 referenceGenome: referenceGenome,
         )
         referenceGenomeEntryTwo.save(flush: true)
     }
 
-    @After
-    void tearDown() {
-        referenceGenomeEntry = null
-        referenceGenome = null
-        project = null
-        referenceGenomeService = null
-    }
-
-    @Test
     void testRealmFilePathToDirectoryCorrect() {
+        given:
+        setupTest()
         File pathExp = directory
+
+        when:
         File pathAct = referenceGenomeService.referenceGenomeDirectory(referenceGenome) as File
-        assertEquals(pathExp, pathAct)
+
+        then:
+        pathExp == pathAct
     }
 
-    @Test(expected = IllegalArgumentException)
     void testRealmFilePathToDirectoryNullRefGen() {
+        given:
+        setupTest()
         referenceGenome = null
+
+        when:
         referenceGenomeService.referenceGenomeDirectory(referenceGenome)
+
+        then:
+        thrown IllegalArgumentException
     }
 
-    @Test(expected = RuntimeException)
     void testRealmFilePathToDirectoryCanNotReadDirectory() {
+        given:
+        setupTest()
         FileUtils.deleteDirectory(directory)
-        assertFalse directory.exists()
+
+        when:
         referenceGenomeService.referenceGenomeDirectory(referenceGenome)
+
+        then:
+        directory.exists() == false
+        thrown RuntimeException
     }
 
-    @Test
     void testRealmFilePathToDirectoryCanNotReadDirectory_NoFileCheck() {
-        assert directory.deleteDir()
+        given:
+        setupTest()
+        boolean deletion = directory.deleteDir()
         File pathExp = directory
+
+        when:
         File pathAct = referenceGenomeService.referenceGenomeDirectory(referenceGenome, false)
-        assertEquals(pathExp, pathAct)
+
+        then:
+        deletion == true
+        pathExp == pathAct
     }
 
-    @Test
     void testFilePathToDirectory() {
+        given:
+        setupTest()
         File pathExp = directory
+
+        when:
         File pathAct = referenceGenomeService.referenceGenomeDirectory(referenceGenome)
-        assertEquals(pathExp, pathAct)
+
+        then:
+        pathExp == pathAct
     }
 
-    @Test
     void testFilePathToDirectoryWrongPath() {
+        given:
+        setupTest()
         File wrongPath = new File("test")
+
+        when:
         File pathAct = referenceGenomeService.referenceGenomeDirectory(referenceGenome)
-        assertNotSame(wrongPath, pathAct)
+
+        then:
+        wrongPath != pathAct
     }
 
-    @Test(expected = IllegalArgumentException)
     void testFilePathToDirectoryRefGenIsNull() {
+        given:
+        setupTest()
         referenceGenome = null
+
+        when:
         referenceGenomeService.referenceGenomeDirectory(referenceGenome)
+
+        then:
+        thrown IllegalArgumentException
     }
 
-    @Test(expected = RuntimeException)
     void testFilePathToDirectoryCanNotReadDirectory() {
-        assert directory.deleteDir()
-        assertFalse directory.exists()
+        given:
+        setupTest()
+        boolean deletion = directory.deleteDir()
+
+        when:
         referenceGenomeService.referenceGenomeDirectory(referenceGenome)
+
+        then:
+        deletion == true
+        directory.exists() == false
+        thrown RuntimeException
     }
 
-    @Test
     void testFilePathToDirectory_FileNotExistButNoFileCheck() {
-        assert directory.deleteDir()
+        given:
+        setupTest()
+        boolean deletion = directory.deleteDir()
         File pathExp = directory
+
+        when:
         File pathAct = referenceGenomeService.referenceGenomeDirectory(referenceGenome, false)
-        assertEquals(pathExp, pathAct)
+
+        then:
+        deletion == true
+        pathExp == pathAct
     }
 
-    @Test
     void testFilePath() {
+        given:
+        setupTest()
         File pathExp = new File(directory, "prefixName.fa")
+
+        when:
         File pathAct = referenceGenomeService.fastaFilePath(referenceGenome)
-        assertEquals(pathExp, pathAct)
+
+        then:
+        pathExp == pathAct
     }
 
-    @Test
     void testFingerPrintingFile() {
+        given:
+        setupTest()
         File pathExp = new File(directory, "fingerPrinting/fingerPrinting.bed")
+
+        when:
         File pathAct = referenceGenomeService.fingerPrintingFile(referenceGenome, false)
-        assertEquals(pathExp, pathAct)
+
+        then:
+        pathExp == pathAct
     }
 
-    @Test(expected = IllegalArgumentException)
     void testFingerPrintingFileReferenceGenomeIsNull() {
+        given:
+        setupTest()
         referenceGenome = null
+
+        when:
         referenceGenomeService.fingerPrintingFile(referenceGenome, false)
+
+        then:
+        thrown IllegalArgumentException
     }
 
-    @Test
     void testChromosomesInReferenceGenome() {
+        given:
+        setupTest()
         List<ReferenceGenomeEntry> referenceGenomeEntriesExp = [referenceGenomeEntry]
+
+        when:
         List<ReferenceGenomeEntry> referenceGenomeEntriesAct = referenceGenomeService.chromosomesInReferenceGenome(referenceGenome)
-        assertEquals(referenceGenomeEntriesExp, referenceGenomeEntriesAct)
+
+        then:
+        referenceGenomeEntriesExp == referenceGenomeEntriesAct
     }
 
-    @Test
     void testPathToChromosomeSizeFilesPerReference_ReferenceGenomeIsNull_ShouldFail() {
-        assert TestCase.shouldFail(IllegalArgumentException) {
-            referenceGenomeService.pathToChromosomeSizeFilesPerReference(null)
-        }.contains('The reference genome is not specified')
+        given:
+        setupTest()
+
+        when:
+        referenceGenomeService.pathToChromosomeSizeFilesPerReference(null)
+
+        then:
+        Exception e = thrown IllegalArgumentException
+        e.message.contains('The reference genome is not specified')
     }
 
-    @Test
     void testPathToChromosomeSizeFilesPerReference_DirectoryDoesNotExist_WithExistCheck_ShouldFail() {
-        assert TestCase.shouldFail(RuntimeException) {
-            referenceGenomeService.pathToChromosomeSizeFilesPerReference(referenceGenome, true)
-        }.contains(ReferenceGenomeService.CHROMOSOME_SIZE_FILES_PREFIX)
+        given:
+        setupTest()
+
+        when:
+        referenceGenomeService.pathToChromosomeSizeFilesPerReference(referenceGenome, true)
+
+        then:
+        Exception e = thrown RuntimeException
+        e.message.contains(ReferenceGenomeService.CHROMOSOME_SIZE_FILES_PREFIX)
     }
 
-    @Test
     void testPathToChromosomeSizeFilesPerReference_DirectoryDoesNotExist_WithoutExistCheck_AllFine() {
+        given:
+        setupTest()
         File pathExp = new File(directory, ReferenceGenomeService.CHROMOSOME_SIZE_FILES_PREFIX)
+
+        when:
         File pathAct = referenceGenomeService.pathToChromosomeSizeFilesPerReference(referenceGenome, false)
-        assertEquals(pathExp, pathAct)
+
+        then:
+        pathExp == pathAct
     }
 
-    @Test
     void testPathToChromosomeSizeFilesPerReference_DirectoryExist_WithExistCheck_AllFine() {
+        given:
+        setupTest()
         File pathExp = new File(directory, ReferenceGenomeService.CHROMOSOME_SIZE_FILES_PREFIX)
         CreateFileHelper.createFile(pathExp)
+
+        when:
         File pathAct = referenceGenomeService.pathToChromosomeSizeFilesPerReference(referenceGenome, true)
-        assertEquals(pathExp, pathAct)
+
+        then:
+        pathExp == pathAct
     }
 
-    @Test
     void test_cytosinePositionIndexFilePath_AllFine() {
+        given:
+        setupTest()
         File pathExp = new File(directory, referenceGenome.cytosinePositionsIndex)
+
+        when:
         CreateFileHelper.createFile(pathExp)
 
-        assertEquals pathExp, referenceGenomeService.cytosinePositionIndexFilePath(referenceGenome)
+        then:
+        pathExp == referenceGenomeService.cytosinePositionIndexFilePath(referenceGenome)
     }
 
-    @Test
     void test_cytosinePositionIndexFilePath_fileDoesntExist_shouldFail() {
-        assert TestCase.shouldFail(RuntimeException) {
-            referenceGenomeService.cytosinePositionIndexFilePath(referenceGenome)
-        }.contains(referenceGenome.cytosinePositionsIndex)
+        given:
+        setupTest()
+
+        when:
+        referenceGenomeService.cytosinePositionIndexFilePath(referenceGenome)
+
+        then:
+        Exception e = thrown RuntimeException
+        e.message.contains(referenceGenome.cytosinePositionsIndex)
     }
 
-    @Test
     void test_loadReferenceGenome() {
+        given:
+        setupTest()
         String name = "my_reference_gnome"
         String path = "bwa06_my_reference_gnome"
         String fileNamePrefix = "my_reference_gnome"
@@ -285,20 +379,23 @@ class ReferenceGenomeServiceUnitTests {
         referenceGenomeService.loadReferenceGenome(name, path, fileNamePrefix, cytosinePositionsIndex, chromosomePrefix, chromosomeSuffix,
                 fastaEntries, fingerPrintingFileName, [statSizeFileName])
 
+        when:
         ReferenceGenome referenceGenome = CollectionUtils.exactlyOneElement(ReferenceGenome.findAllByName(name))
-        assert referenceGenome.path == path
-        assert referenceGenome.fileNamePrefix == fileNamePrefix
-        assert referenceGenome.cytosinePositionsIndex == cytosinePositionsIndex
-        assert referenceGenome.fingerPrintingFileName == fingerPrintingFileName
+
+        then:
+        referenceGenome.path == path
+        referenceGenome.fileNamePrefix == fileNamePrefix
+        referenceGenome.cytosinePositionsIndex == cytosinePositionsIndex
+        referenceGenome.fingerPrintingFileName == fingerPrintingFileName
 
         ReferenceGenomeEntry entry = CollectionUtils.exactlyOneElement(ReferenceGenomeEntry.findAllByName(fastaName))
-        assert entry.referenceGenome == referenceGenome
-        assert entry.alias == fastaAlias
-        assert entry.length == fastaLength
-        assert entry.lengthWithoutN == fastaLengthWithoutN
-        assert entry.classification == fastaClassification
+        entry.referenceGenome == referenceGenome
+        entry.alias == fastaAlias
+        entry.length == fastaLength
+        entry.lengthWithoutN == fastaLengthWithoutN
+        entry.classification == fastaClassification
 
         StatSizeFileName statSizeFileName1 = CollectionUtils.exactlyOneElement(StatSizeFileName.findAllByName(statSizeFileName))
-        assert statSizeFileName1.referenceGenome == referenceGenome
+        statSizeFileName1.referenceGenome == referenceGenome
     }
 }

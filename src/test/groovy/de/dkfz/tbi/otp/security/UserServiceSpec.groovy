@@ -21,7 +21,7 @@
  */
 package de.dkfz.tbi.otp.security
 
-import grails.test.mixin.Mock
+import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.TestCase
@@ -29,12 +29,16 @@ import de.dkfz.tbi.otp.administration.UserService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
-@Mock([
-        Role,
-        User,
-        UserRole,
-])
-class UserServiceSpec extends Specification implements DomainFactoryCore {
+class UserServiceSpec extends Specification implements DataTest, DomainFactoryCore {
+
+    @Override
+    Class<?>[] getDomainClassesToMock() {
+        return [
+                Role,
+                User,
+                UserRole,
+        ]
+    }
 
     void "createFirstAdminUserIfNoUserExists, if no user exists, create one"() {
         given:

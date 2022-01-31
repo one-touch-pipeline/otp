@@ -304,7 +304,8 @@ dependencies {
     testHelperCompile "org.grails:grails-gorm-testing-support"
     testCompile "org.grails:grails-web-testing-support"
 
-    testCompile "org.grails:grails-test-mixins:3.3.0"
+    // TODO: Remove geb plugin dependency with Grails 4
+    testCompile "org.grails.plugins:geb:1.1.2"
 
     // JS and CSS libraries
     compile 'org.webjars:jquery:3.6.0'
