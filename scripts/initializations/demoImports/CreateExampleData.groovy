@@ -30,6 +30,7 @@ import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.HelperUtils
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
@@ -200,6 +201,7 @@ class ExampleData {
         softwareTool = findOrCreateSoftwareTool()
 
         fastqImportInstance = createFastqImportInstance()
+        createMetaDataFile()
         project = findOrCreateProject(projectName)
         diseaseSampleTypes.each { SampleType sampleType ->
             findOrCreateSampleTypePerProject(sampleType, SampleTypePerProject.Category.DISEASE)
@@ -545,9 +547,25 @@ class ExampleData {
         ]).save(flush: true)
     }
 
+    OtrsTicket createOtrsTicket() {
+        return new OtrsTicket([
+                ticketNumber: "${OtrsTicket.count()}"
+        ]).save(flush: true)
+    }
+
     FastqImportInstance createFastqImportInstance() {
         return new FastqImportInstance([
                 importMode: FastqImportInstance.ImportMode.MANUAL,
+                otrsTicket: createOtrsTicket(),
+        ]).save(flush: true)
+    }
+
+    MetaDataFile createMetaDataFile() {
+        return new MetaDataFile([
+                fileName           : "fileName_${MetaDataFile.count()}",
+                filePath           : "/tmp/filePath_${MetaDataFile.count()}",
+                md5sum             : HelperUtils.randomMd5sum,
+                fastqImportInstance: fastqImportInstance,
         ]).save(flush: true)
     }
 
