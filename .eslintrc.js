@@ -39,6 +39,9 @@ const lintRules = {
 if (process.env.CI) {
   Object.assign(lintRules, {
     strict: 'off',
+    'no-promise-executor-return': 'off',
+    'function-paren-newline': 'off',
+    'function-call-argument-newline': 'off',
     'no-alert': 'off'
   });
 }
