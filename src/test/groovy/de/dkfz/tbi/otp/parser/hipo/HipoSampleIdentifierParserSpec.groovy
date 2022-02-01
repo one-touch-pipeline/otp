@@ -101,13 +101,13 @@ class HipoSampleIdentifierParserSpec extends Specification {
         String singleCellWellLabel
 
         when:
-        singleCellWellLabel = parser.tryParseSingleCellWellLabel(identifier)
+        singleCellWellLabel = parser.tryParseSingleCellWellLabel(sampleIdentifier)
 
         then:
         singleCellWellLabel == null
 
         where:
-        identifier << [
+        sampleIdentifier << [
                 'H059-ABCDEF-T0-D1',
                 'H059-ABCDEF-T01-D1',
                 'INVALID_PID',

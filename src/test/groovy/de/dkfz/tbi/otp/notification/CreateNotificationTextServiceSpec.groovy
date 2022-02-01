@@ -1083,20 +1083,20 @@ samplePairsNotProcessed: ${expectedSamplePairsNotProcessed}
     void "notification, when an argument is null, throw assert"() {
         when:
         new CreateNotificationTextService().notification(
-                ticket ? DomainFactory.createOtrsTicket() : null,
-                status ? new ProcessingStatus() : null,
-                processingStep ? SNV : null,
-                project ? DomainFactory.createProject() : null)
+                ticketFlag ? DomainFactory.createOtrsTicket() : null,
+                statusFlag ? new ProcessingStatus() : null,
+                processingStepFlag ? SNV : null,
+                projectFlag ? DomainFactory.createProject() : null)
         then:
         AssertionError e = thrown()
         e.message.contains("assert ${text}")
 
         where:
-        ticket | status | processingStep | project || text
-        true   | true   | true           | false   || 'project'
-        true   | true   | false          | true    || 'processingStep'
-        true   | false  | true           | true    || 'status'
-        false  | true   | true           | true    || 'otrsTicket'
+        ticketFlag | statusFlag | processingStepFlag | projectFlag || text
+        true       | true       | true               | false       || 'project'
+        true       | true       | false              | true        || 'processingStep'
+        true       | false      | true               | true        || 'status'
+        false      | true       | true               | true        || 'otrsTicket'
     }
 
     void "notification, when call for ProcessingStep FASTQC, throw an exception"() {

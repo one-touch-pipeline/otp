@@ -282,10 +282,10 @@ class QcThresholdSpec extends Specification implements DataTest {
         )
 
         expect:
-        threshold.qcPassed(qc, externalValue) == QcThreshold.ThresholdLevel.OKAY
+        threshold.qcPassed(qc, extValue) == QcThreshold.ThresholdLevel.OKAY
 
         where:
-        externalValue << [
+        extValue << [
                 0,
                 null,
         ]

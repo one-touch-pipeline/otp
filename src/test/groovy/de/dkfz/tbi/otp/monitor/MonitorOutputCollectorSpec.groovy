@@ -101,10 +101,10 @@ class MonitorOutputCollectorSpec extends Specification implements DataTest {
         List<String> sortedListOfStrings = collector.objectsToStrings(list, closure)
 
         then:
-        expected == sortedListOfStrings
+        expectedList == sortedListOfStrings
 
         where:
-        list           | closure                             || expected
+        list           | closure                             || expectedList
         [1, 2, 3]      | { it }                              || ['1', '2', '3']
         [3, 2, 1]      | { it }                              || ['1', '2', '3']
         ['abcdef']     | { String it -> it.substring(2, 4) } || ['cd']
