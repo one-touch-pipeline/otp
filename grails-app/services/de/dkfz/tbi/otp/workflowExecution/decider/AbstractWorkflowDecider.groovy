@@ -38,10 +38,14 @@ abstract class AbstractWorkflowDecider implements Decider {
     abstract protected Workflow getWorkflow()
 
     /**
-     * Filters the provided workflow artefacts to the artefact types used by this decider.
-     * WorkflowArtefacts of other types should not appear in the returned list.
-    */
-    abstract protected Collection<WorkflowArtefact> filterForNeededArtefacts(Collection<WorkflowArtefact> artefacts)
+     * Returns the artefact types supported by this decider.
+     */
+    abstract protected Set<ArtefactType> getSupportedInputArtefactTypes()
+
+    /**
+     * Returns the sequencing type of an artefact.
+     */
+    abstract protected SeqType getSeqType(WorkflowArtefact inputArtefact)
 
     /**
      * Search in database for additional required WorkflowArtefacts.
@@ -86,7 +90,11 @@ abstract class AbstractWorkflowDecider implements Decider {
 
     @Override
     final Collection<WorkflowArtefact> decide(Collection<WorkflowArtefact> inputArtefacts, boolean forceRun = false, Map<String, String> userParams = [:]) {
-        Collection<WorkflowArtefact> filteredInputArtefacts = filterForNeededArtefacts(inputArtefacts)
+        Set<ArtefactType> supportedTypes = supportedInputArtefactTypes
+        Set<SeqType> supportedSeqTypes = workflow.supportedSeqTypes
+        Collection<WorkflowArtefact> filteredInputArtefacts = inputArtefacts
+                .findAll { it.artefactType in supportedTypes }
+                .findAll { getSeqType(it) in supportedSeqTypes }
         Map<Pair<Project, SeqType>, Set<WorkflowArtefact>> groupedInputArtefacts = groupInputArtefacts(filteredInputArtefacts)
         return groupedInputArtefacts.collectMany { it ->
             SelectedProjectSeqTypeWorkflowVersion matchingWorkflows = SelectedProjectSeqTypeWorkflowVersion.createCriteria().get {
