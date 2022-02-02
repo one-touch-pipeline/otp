@@ -108,7 +108,7 @@ abstract class AbstractWorkflowDecider implements Decider {
             if (!matchingWorkflows) {
                 return []
             }
-            Collection<WorkflowArtefact> combinedWorkflowArtefacts = findAdditionalRequiredInputArtefacts(filteredInputArtefacts)
+            Collection<WorkflowArtefact> combinedWorkflowArtefacts = (it.value + findAdditionalRequiredInputArtefacts(it.value)).unique()
             Collection<Collection<WorkflowArtefact>> artefactsPerWorkflowRun = groupArtefactsForWorkflowExecution(combinedWorkflowArtefacts)
             return createWorkflowRunsAndOutputArtefacts(artefactsPerWorkflowRun, filteredInputArtefacts)
         }
