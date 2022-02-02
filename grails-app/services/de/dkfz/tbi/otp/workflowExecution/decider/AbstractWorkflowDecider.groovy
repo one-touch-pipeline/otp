@@ -25,9 +25,7 @@ import grails.util.Pair
 
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.otp.workflowExecution.SelectedProjectSeqTypeWorkflowVersion
-import de.dkfz.tbi.otp.workflowExecution.Workflow
-import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
+import de.dkfz.tbi.otp.workflowExecution.*
 
 /**
  * creates workflow runs for one workflow
@@ -37,61 +35,60 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
  */
 abstract class AbstractWorkflowDecider implements Decider {
 
+    abstract protected Workflow getWorkflow()
+
     /**
      * Filters the provided workflow artefacts to the artefact types used by this decider.
      * WorkflowArtefacts of other types should not appear in the returned list.
     */
-    abstract Collection<WorkflowArtefact> filterForNeededArtefacts(Collection<WorkflowArtefact> artefacts)
+    abstract protected Collection<WorkflowArtefact> filterForNeededArtefacts(Collection<WorkflowArtefact> artefacts)
 
     /**
      * Search in database for additional required WorkflowArtefacts.
      * That are workflowArtefacts created by an earlier import and therefore not in the input list.
-     * Will be implemented in concreate Deciders, since the decider per workflows knows what is needed
+     * Will be implemented in concrete Deciders, since the decider per workflows knows what is needed
      * Make sure that in the search for the other required workflow artefacts no artefacts in state FAILED or OMITTED_MISSING_PRECONDITION or
      * withdrawn artefacts are considered)
-    */
-    abstract Collection<WorkflowArtefact> findAdditionalRequiredWorkflowArtefacts(Collection<WorkflowArtefact> artefacts)
+     */
+    abstract protected Collection<WorkflowArtefact> findAdditionalRequiredInputArtefacts(Collection<WorkflowArtefact> inputArtefacts)
 
     /**
      * Group all workflow artefacts based on the fact if they can be processed together within WorkflowRun (e.g. individual, sample type).
      * The inner collection are inputs for one workflow run..
-    */
-    abstract Collection<Collection<WorkflowArtefact>> groupArtefactsForWorkflowExecution(Collection<WorkflowArtefact> artefacts)
-
-    abstract Workflow getWorkflow()
+     */
+    abstract protected Collection<Collection<WorkflowArtefact>> groupArtefactsForWorkflowExecution(Collection<WorkflowArtefact> inputArtefacts)
 
     /**
-    Iterate over the different collections
-    Check if all needed input WorkflowArtefacts are available
-    The input WorkflowArtefacts need to match all constraints, e.g. MergingCriteria, Bam Artefact for ACEseq needs to be the same used for sophia Artefact
-    At least one of the provided artefacts must be „new/changed“ (from the initialArtefacts list)
-    Check if no workflowRun exists for the same input WorkflowArtefacts which is not withdrawn.
-        If there is no other workflowRun -> true
-        If there is already another workflowRun check if the flag forceRun is set
-        If this is not the case -> false
-        If it is set -> check if the configuration used for the workflowRun was already the one which is currently configured for the project
-            If yes -> false
-            If no -> true
-    Create a workflow run if true.
-        Create Workflow run in state PENDING
-        Collect also the configurations and store them to the workflowRun
-        Create all corresponding output WorkflowArtefacts
-    Returns all output WorkflowArtefacts or an empty list
-    */
-    abstract Collection<WorkflowArtefact> createWorkflowRunIfPossible(Collection<Collection< WorkflowArtefact >> groupedArtefacts,
-                                                                      Collection<WorkflowArtefact> initialArtefacts)
+     * Iterate over the different collections
+     * Check if all needed input WorkflowArtefacts are available
+     * The input WorkflowArtefacts need to match all constraints, e.g. MergingCriteria, Bam Artefact for ACEseq needs to be the same used for sophia Artefact
+     * At least one of the provided artefacts must be „new/changed“ (from the initialArtefacts list)
+     * Check if no workflowRun exists for the same input WorkflowArtefacts which is not withdrawn.
+     *     If there is no other workflowRun -> true
+     *     If there is already another workflowRun check if the flag forceRun is set
+     *     If this is not the case -> false
+     *     If it is set -> check if the configuration used for the workflowRun was already the one which is currently configured for the project
+     *         If yes -> false
+     *         If no -> true
+     * Create a workflow run if true.
+     *     Create Workflow run in state PENDING
+     *     Collect also the configurations and store them to the workflowRun
+     *     Create all corresponding output WorkflowArtefacts
+     * Returns all output WorkflowArtefacts or an empty list
+     */
+    abstract protected Collection<WorkflowArtefact> createWorkflowRunsAndOutputArtefacts(Collection<Collection<WorkflowArtefact>> groupedArtefacts,
+                                                                                         Collection<WorkflowArtefact> initialArtefacts)
 
     /**
      * Group the artefacts by project and seqtype.
-    */
-    abstract Map<Pair<Project, SeqType>, Set<WorkflowArtefact>> groupArtefacts(Collection<WorkflowArtefact> toGroup)
+     */
+    abstract protected Map<Pair<Project, SeqType>, List<WorkflowArtefact>> groupInputArtefacts(Collection<WorkflowArtefact> inputArtefacts)
 
     @Override
-    Collection<WorkflowArtefact> decide(Collection<WorkflowArtefact> newArtefacts, boolean forceRun = false, Map<String, String> userParams = [:]) {
-        Collection<WorkflowArtefact> allWorkflowArtefactsOrEmptyList
-        Collection<WorkflowArtefact> filteredArtefacts = filterForNeededArtefacts(newArtefacts)
-        Map<Pair<Project, SeqType>, Set<WorkflowArtefact>> groupedArtefacts = groupArtefacts(filteredArtefacts)
-        groupedArtefacts.each { it ->
+    final Collection<WorkflowArtefact> decide(Collection<WorkflowArtefact> inputArtefacts, boolean forceRun = false, Map<String, String> userParams = [:]) {
+        Collection<WorkflowArtefact> filteredInputArtefacts = filterForNeededArtefacts(inputArtefacts)
+        Map<Pair<Project, SeqType>, Set<WorkflowArtefact>> groupedInputArtefacts = groupInputArtefacts(filteredInputArtefacts)
+        return groupedInputArtefacts.collectMany { it ->
             SelectedProjectSeqTypeWorkflowVersion matchingWorkflows = SelectedProjectSeqTypeWorkflowVersion.createCriteria().get {
                 eq('project', it.project)
                 eq('seqType', it.seqType)
@@ -103,10 +100,9 @@ abstract class AbstractWorkflowDecider implements Decider {
             if (!matchingWorkflows) {
                 return []
             }
-            Collection<WorkflowArtefact> combinedWorkflowArtefacts = findAdditionalRequiredWorkflowArtefacts(filteredArtefacts)
+            Collection<WorkflowArtefact> combinedWorkflowArtefacts = findAdditionalRequiredInputArtefacts(filteredInputArtefacts)
             Collection<Collection<WorkflowArtefact>> artefactsPerWorkflowRun = groupArtefactsForWorkflowExecution(combinedWorkflowArtefacts)
-            allWorkflowArtefactsOrEmptyList += createWorkflowRunIfPossible(artefactsPerWorkflowRun, filteredArtefacts)
+            return createWorkflowRunsAndOutputArtefacts(artefactsPerWorkflowRun, filteredInputArtefacts)
         }
-        return allWorkflowArtefactsOrEmptyList
     }
 }

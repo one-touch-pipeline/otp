@@ -27,10 +27,10 @@ import org.springframework.stereotype.Component
 import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
 
 /**
-knows all deciders and also the order of the deciders based on the input and output  WorkflowArtefacts
-can be called during Fastq or BAM import, realignment, …
-is called with a list of new/changed workflowArtefacts (see method decide in Decider)
-*/
+ * knows all deciders and also the order of the deciders based on the input and output  WorkflowArtefacts
+ * can be called during Fastq or BAM import, realignment, …
+ * is called with a list of new/changed workflowArtefacts (see method decide in Decider)
+ */
 @Component
 class AllDecider implements Decider {
     /** list of Deciders in the correct order */
@@ -39,7 +39,8 @@ class AllDecider implements Decider {
     ]
 
     @Override
-    Collection<WorkflowArtefact> decide(Collection<WorkflowArtefact> allWorkflowArtefacts, boolean forceRun = false, Map<String, String> userParams = [:]) {
+    final Collection<WorkflowArtefact> decide(Collection<WorkflowArtefact> allWorkflowArtefacts, boolean forceRun = false, Map<String,
+            String> userParams = [:]) {
         Collection<WorkflowArtefact> newWorkflowArtefacts = []
 
         deciders.each { it ->

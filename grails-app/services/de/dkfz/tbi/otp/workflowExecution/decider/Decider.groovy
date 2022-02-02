@@ -24,7 +24,7 @@ package de.dkfz.tbi.otp.workflowExecution.decider
 import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
 
 interface Decider {
-    abstract Collection<WorkflowArtefact> decide(Collection<WorkflowArtefact> newArtefacts, boolean forceRun, Map<String, String> userParams)
+    abstract Collection<WorkflowArtefact> decide(Collection<WorkflowArtefact> inputArtefacts, boolean forceRun, Map<String, String> userParams)
 
-    abstract Collection<WorkflowArtefact> decide(Collection<WorkflowArtefact> newArtefacts)
+    abstract Collection<WorkflowArtefact> decide(Collection<WorkflowArtefact> inputArtefacts)
 }
