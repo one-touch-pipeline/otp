@@ -29,8 +29,8 @@
 <body>
     <div class="body">
         <form class="rounded-page-header-box">
-            <span><label for="startDate"><g:message code="search.from.date"/></label><input type="text" class="datePicker" id="startDate" value="${startDate}"></span>
-            <span><label for="endDate"  ><g:message code="search.to.date"  /></label><input type="text" class="datePicker" id="endDate"   value="${endDate}"  ></span>
+            <span><label for="dpFrom"><g:message code="search.from.date"/></label><input type="date" class="datePicker" max="${endDate}" id="dpFrom" value="${startDate}" required="required"></span>
+            <span><label for="dpTo"  ><g:message code="search.to.date"  /></label><input type="date" class="datePicker" max="${endDate}" id="dpTo"   value="${endDate}"   required="required"></span>
             <br>
             <g:select name="projects" class="projectSelectMultiple use-select-2"
                       from="${availableProjects}" placeholder="Select projects"

@@ -40,8 +40,8 @@
             </div>
             <br/>
             <div>
-                <span>From: <input type="text" class="datePicker" id="dpFrom" value="${beginDate}"></span>
-                <span>To: <input type="text" class="datePicker" id="dpTo" value="${latestDate}"></span>
+                <span><label for="dpFrom">From:</label> <input type="date" max="${latestDate}" class="datePicker" id="dpFrom" value="${beginDate}" required="required"></span>
+                <span><label for="dpTo">To:</label> <input type="date" min="${beginDate}" max="${latestDate}" class="datePicker" id="dpTo" value="${latestDate}" required="required"></span>
             </div>
             <br/>
 

@@ -28,17 +28,13 @@ $.otp.clusterJobGeneral = {
     $.otp.clusterJobGeneralGraph.register();
     $.otp.clusterJobGeneralProgress.register();
 
-    $('.datePicker').datepicker(
-      {
-        dateFormat: 'yy-mm-dd',
-        onSelect() {
-          $.otp.clusterJobGeneralGraph.update();
-          $.otp.clusterJobGeneralProgress.update();
-          $.otp.clusterJobGeneralTable.update();
-        },
-        maxDate: $('#dpTo').val()
-      }
-    );
+    $('.datePicker').on('change', () => {
+      $.otp.clusterJobGeneralGraph.update();
+      $.otp.clusterJobGeneralProgress.update();
+      $.otp.clusterJobGeneralTable.update();
+      $('#dpTo').attr('min', $('#dpFrom').val());
+      $('#dpFrom').attr('max', $('#dpTo').val());
+    });
   }
 };
 

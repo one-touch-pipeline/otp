@@ -76,16 +76,12 @@ $.otp.processingTimeStatistics = {
   registerDatePicker() {
     'use strict';
 
-    $('.datePicker').datepicker(
-      {
-        dateFormat: 'yy-mm-dd',
-        onSelect() {
-          $('#processingTimeStatisticsTable').DataTable().destroy();
-          $.otp.processingTimeStatistics.registerDataTable();
-        },
-        maxDate: $('#dpTo').val()
-      }
-    );
+    $('.datePicker').on('change', () => {
+      $('#processingTimeStatisticsTable').DataTable().destroy();
+      $.otp.processingTimeStatistics.registerDataTable();
+      $('#dpTo').attr('min', $('#dpFrom').val());
+      $('#dpFrom').attr('max', $('#dpTo').val());
+    });
   },
 
   registerDataTable() {

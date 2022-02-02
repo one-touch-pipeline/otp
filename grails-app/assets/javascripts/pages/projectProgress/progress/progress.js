@@ -23,10 +23,11 @@
 $(() => {
   'use strict';
 
-  $('.datePicker').datepicker({
-    dateFormat: 'yy-mm-dd',
-    maxDate: $('#endDate').val()
+  $('.datePicker').on('change', () => {
+    $('#dpTo').attr('min', $('#dpFrom').val());
+    $('#dpFrom').attr('max', $('#dpTo').val());
   });
+
   const oTableProgress = $('#progressId').dataTable({
     sDom: '<i> B rt<"clear">',
     buttons: $.otp.getDownloadButton(),
@@ -52,11 +53,11 @@ $(() => {
       });
       aoData.push({
         name: 'startDate',
-        value: $('#startDate').val()
+        value: $('#dpFrom').val()
       });
       aoData.push({
         name: 'endDate',
-        value: $('#endDate').val()
+        value: $('#dpTo').val()
       });
       $.ajax({
         dataType: 'json',

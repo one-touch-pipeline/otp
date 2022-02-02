@@ -27,24 +27,11 @@ $.otp.clusterJobJobTypeSpecific = {
   register() {
     'use strict';
 
-    $('#dpFrom').datepicker({
-      dateFormat: 'yy-mm-dd',
-      onSelect(selected) {
-        $.otp.clusterJobJobTypeSpecificGraph.update();
-        $.otp.clusterJobJobTypeSpecific.updateJobClassSelect();
-        $('#dpTo').datepicker('option', 'minDate', selected);
-      },
-      maxDate: $('#dpTo').val()
-    });
-    $('#dpTo').datepicker({
-      dateFormat: 'yy-mm-dd',
-      onSelect(selected) {
-        $.otp.clusterJobJobTypeSpecificGraph.update();
-        $.otp.clusterJobJobTypeSpecific.updateJobClassSelect();
-        $('#dpFrom').datepicker('option', 'maxDate', selected);
-      },
-      minDate: $('#dpFrom').val(),
-      maxDate: $('#dpTo').val()
+    $('.datePicker').on('change', () => {
+      $.otp.clusterJobJobTypeSpecificGraph.update();
+      $.otp.clusterJobJobTypeSpecific.updateJobClassSelect();
+      $('#dpTo').attr('min', $('#dpFrom').val());
+      $('#dpFrom').attr('max', $('#dpTo').val());
     });
     $('#jobClassSelect').on('change', () => {
       $.otp.clusterJobJobTypeSpecific.updateSeqTypeSelect();
@@ -185,12 +172,6 @@ $.otp.clusterJobJobTypeSpecific = {
     'use strict';
 
     return this.colors.slice(0, elementCount);
-  },
-
-  getToday() {
-    'use strict';
-
-    return $.datepicker.formatDate('yy-mm-dd', new Date());
   },
 
   normalizeLabels(labels) {

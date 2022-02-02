@@ -39,8 +39,8 @@
                 <div class="error-list"></div>
             </div>
             <div class="date-pickers">
-                from: <input type="text" class="datePicker" id="dpFrom" value="${dateFrom}">
-                to: <input type="text" class="datePicker" id="dpTo" value="${dateTo}">
+                <label for="dpFrom">from:</label> <input type="date" max="${dateTo}" class="datePicker" id="dpFrom" value="${dateFrom}" required="required">
+                <label for="dpTo">to:</label> <input type="date" max="${dateTo}" class="datePicker" id="dpTo" value="${dateTo}" required="required">
             </div>
         </div>
         <div class="temp-processing-time-statistics-table-wrapper">
