@@ -49,9 +49,7 @@
        <tr>
             <td class="myKey"><g:message code="run.show.general.dateExecuted"/></td>
             <td class="myValue">
-                <g:if test="${run.dateExecuted != null}">
-                    ${TimeFormats.DATE.getFormattedDate((new Date(run?.dateExecuted?.time)))}
-                </g:if>
+                ${TimeFormats.DATE.getFormattedDate(run?.dateExecuted)}
             </td>
        </tr>
        <tr>
@@ -92,7 +90,7 @@
                             ${file.fullPath}
                         </g:link>
                     </td>
-                    <td>${TimeFormats.DATE.getFormattedDate((new Date(file?.metaDataFile?.dateCreated?.time)))}</td>
+                    <td>${TimeFormats.DATE.getFormattedDate(file?.metaDataFile?.dateCreated)}</td>
                 </tr>
             </tbody>
             </g:each>
@@ -118,7 +116,7 @@
                     <td class="${file.fileExists}">lsdf</td>
                     <td class="${file.fileLinked}">view-by-pid</td>
                     <td>${String.format("%.1f GB", file.fileSize/1e9)}</td>
-                    <td>${TimeFormats.DATE.getFormattedDate(new Date(file?.dateFileSystem?.time))}</td>
+                    <td>${TimeFormats.DATE.getFormattedDate(file?.dateFileSystem)}</td>
                     <td>
                         <g:if test="${fastqcLinks.get(file.id)}">
                             <g:link controller="fastqcResults" action="show" id="${file.id}"><g:message code="run.show.fastqc"/></g:link>
@@ -137,7 +135,7 @@
                         <td class="${file.fileExists}">lsdf</td>
                         <td class="${file.fileLinked}">view-by-pid</td>
                         <td>${String.format("%.1f GB", file.fileSize/1e9)}</td>
-                        <td>${TimeFormats.DATE.getFormattedDate(new Date(file?.dateFileSystem?.time))}</td>
+                        <td>${TimeFormats.DATE.getFormattedDate(file?.dateFileSystem)}</td>
                         <td>&nbsp;</td>
                     </tr>
                 </g:each>
