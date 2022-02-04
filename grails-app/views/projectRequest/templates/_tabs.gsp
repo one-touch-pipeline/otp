@@ -19,20 +19,23 @@
   - OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
   - SOFTWARE.
   --}%
-<html>
-<head>
-    <meta name="layout" content="main"/>
-    <title>${g.message(code: "projectRequest.title")}</title>
-</head>
 
-<body>
-<div class="body">
-    <g:render template="/templates/messages"/>
-
-    <g:render template="tabMenu"/>
-
-    <h2>${g.message(code: "projectRequest.check.header")}:</h2>
-    <g:render template="projectRequestTable" model="[projectRequests: submitted]"/>
+<div>
+    <ul class="nav nav-tabs">
+        <li class="nav-item">
+            <g:link action="index" class="${actionName == "index" ? "active" : ""} nav-link"><g:message code="projectRequest.new.tab"/></g:link>
+        </li>
+        <li class="nav-item">
+            <g:link action="unresolved" class="${actionName == "unresolved" ? "active" : ""} nav-link"><g:message code="projectRequest.unresolved.tab"/></g:link>
+        </li>
+        <li class="nav-item">
+            <g:link action="resolved" class="${actionName == "resolved" ? "active" : ""} nav-link"><g:message code="projectRequest.resolved.tab"/></g:link>
+        </li>
+        <sec:ifAnyGranted roles="ROLE_OPERATOR">
+            <li class="nav-item">
+                <g:link action="all" class="${actionName == "all" ? "active" : ""} nav-link"><g:message code="projectRequest.all.tab"/></g:link>
+            </li>
+        </sec:ifAnyGranted>
+    </ul>
+    <div class="pb-2"></div>
 </div>
-</body>
-</html>

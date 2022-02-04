@@ -27,6 +27,7 @@ import grails.validation.Validateable
 import org.springframework.web.multipart.MultipartFile
 
 import de.dkfz.tbi.otp.*
+import de.dkfz.tbi.otp.project.projectRequest.ProjectRequestService
 import de.dkfz.tbi.otp.utils.StringUtils
 import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
 import de.dkfz.tbi.util.TimeFormats

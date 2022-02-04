@@ -29,14 +29,16 @@ import org.springframework.security.core.Authentication
 import spock.lang.Specification
 import spock.lang.Unroll
 
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.otp.project.ProjectService
+import de.dkfz.tbi.otp.domainFactory.UserDomainFactory
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.ngsdata.UserProjectRole
+import de.dkfz.tbi.otp.project.*
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.Principal
 
 @Rollback
 @Integration
-class OtpPermissionEvaluatorIntegrationSpec extends Specification implements UserAndRoles {
+class OtpPermissionEvaluatorIntegrationSpec extends Specification implements UserAndRoles, UserDomainFactory {
 
     OtpPermissionEvaluator permissionEvaluator
     Authentication authentication
@@ -48,9 +50,9 @@ class OtpPermissionEvaluatorIntegrationSpec extends Specification implements Use
 
     void setupData() {
         createUserAndRoles()
-        user = DomainFactory.createUser()
-        project = DomainFactory.createProject()
-        userProjectRole = DomainFactory.createUserProjectRole(
+        user = createUser()
+        project = createProject()
+        userProjectRole = createUserProjectRole(
                 user: user,
                 project: project,
                 manageUsers: true,
@@ -83,7 +85,7 @@ class OtpPermissionEvaluatorIntegrationSpec extends Specification implements Use
         given:
         setupData()
 
-        user = User.findByUsername(OPERATOR)
+        user = CollectionUtils.exactlyOneElement(User.findAllByUsername(OPERATOR))
 
         when:
         List<Project> resultList = SpringSecurityUtils.doWithAuth(user.username) {
@@ -115,7 +117,7 @@ class OtpPermissionEvaluatorIntegrationSpec extends Specification implements Use
         setupData()
 
         when:
-        boolean access = permissionEvaluator.hasPermission(authentication, DomainFactory.createSeqType(), 'MANAGE_USERS')
+        boolean access = permissionEvaluator.hasPermission(authentication, createSeqType(), 'MANAGE_USERS')
 
         then:
         !access
@@ -129,7 +131,7 @@ class OtpPermissionEvaluatorIntegrationSpec extends Specification implements Use
         authentication = new UsernamePasswordAuthenticationToken(new Principal(username: "unknownUsername"), null, [])
 
         when:
-        boolean checkResult = permissionEvaluator.hasPermission(authentication, DomainFactory.createProject(), "OTP_READ_ACCESS")
+        boolean checkResult = permissionEvaluator.hasPermission(authentication, createProject(), "OTP_READ_ACCESS")
 
         then:
         !checkResult
@@ -141,7 +143,7 @@ class OtpPermissionEvaluatorIntegrationSpec extends Specification implements Use
         setupData()
 
         when:
-        boolean checkResult = permissionEvaluator.hasPermission(authentication, DomainFactory.createProject(), "MANAGE_USERS")
+        boolean checkResult = permissionEvaluator.hasPermission(authentication, createProject(), "MANAGE_USERS")
 
         then:
         !checkResult
@@ -191,6 +193,33 @@ class OtpPermissionEvaluatorIntegrationSpec extends Specification implements Use
         false       | false       | true                   | "MANAGE_USERS"             || false
         true        | false       | true                   | "MANAGE_USERS"             || true
         false       | false       | true                   | "DELEGATE_USER_MANAGEMENT" || true
+    }
+
+    @Unroll
+    void "hasPermission, test conditions for project request role permissions"() {
+        given:
+        setupData()
+        ProjectRequest projectRequest = createProjectRequest([:], [
+                currentOwner            : userIsCurrentOwner ? user : createUser(),
+                usersThatNeedToApprove  : userNeedsToApprove ? [user, createUser()] : [createUser()],
+                usersThatAlreadyApproved: userAlreadyApproved ? [user, createUser()] : [createUser()],
+        ])
+
+        when:
+        boolean checkResult = permissionEvaluator.checkProjectRequestRolePermission(authentication, projectRequest, permission)
+
+        then:
+        checkResult == access
+
+        where:
+        userNeedsToApprove | userAlreadyApproved | userIsCurrentOwner | permission                      || access
+        true               | false               | false              | "PROJECT_REQUEST_NEEDED_PIS"    || true
+        false              | true                | false              | "PROJECT_REQUEST_NEEDED_PIS"    || false
+        true               | true                | false              | "PROJECT_REQUEST_CURRENT_OWNER" || false
+        false              | true                | true               | "PROJECT_REQUEST_CURRENT_OWNER" || true
+        true               | false               | false              | "PROJECT_REQUEST_PI"            || true
+        false              | true                | false              | "PROJECT_REQUEST_PI"            || true
+        false              | false               | false              | "PROJECT_REQUEST_PI"            || false
     }
 
     @Unroll

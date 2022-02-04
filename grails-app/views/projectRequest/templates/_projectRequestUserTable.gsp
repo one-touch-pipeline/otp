@@ -22,9 +22,38 @@
 
 <asset:stylesheet src="pages/projectRequest/styles.less"/>
 
-<div class="user-entry">
-    <strong>${user.user}</strong> as ${user.projectRolesAsSemanticString}<br>
-    OTP access: <span class="icon-${user.accessToOtp}"></span>,
-    File access: <span class="icon-${user.accessToFiles}">,
-    User manager: <span class="icon-${user.manageUsers}"></span> &nbsp
-</div>
+<table class="table table-sm table-striped table-hover mb-0">
+    <thead>
+    <tr>
+        <th>${g.message(code: "projectUser.addMember.username")}</th>
+        <th>${g.message(code: "projectUser.addMember.role")}</th>
+        <th>${g.message(code: "projectUser.addMember.accessToOtp")}</th>
+        <th>${g.message(code: "projectUser.addMember.accessToFiles")}</th>
+        <th>${g.message(code: "projectUser.addMember.manageUsers")}</th>
+    </tr>
+    </thead>
+    <tbody>
+    <g:each var="user" in="${users}" status="i">
+        <g:hiddenField name="projectRequest.user[${i}].id" value="${user?.id}"/>
+        <tr>
+            <td style="text-align: start">
+                <strong>${user.user}</strong>
+            </td>
+            <td style="padding-left: 0.1em">
+                ${user.projectRolesAsSemanticString}
+            </td>
+            <td>
+                <span class="icon-${user.accessToOtp}"></span>
+            </td>
+            <td>
+                <span class="icon-${user.accessToFiles}"></span>
+            </td>
+            <td>
+                <span class="icon-${user.manageUsers}"></span>
+            </td>
+        </tr>
+    </g:each>
+    </tbody>
+</table>
+
+

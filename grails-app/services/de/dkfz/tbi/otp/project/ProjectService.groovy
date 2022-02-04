@@ -45,6 +45,9 @@ import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.notification.CreateNotificationTextService
 import de.dkfz.tbi.otp.project.additionalField.*
 import de.dkfz.tbi.otp.project.exception.unixGroup.*
+import de.dkfz.tbi.otp.project.projectRequest.Created
+import de.dkfz.tbi.otp.project.projectRequest.ProjectRequestService
+import de.dkfz.tbi.otp.project.projectRequest.ProjectRequestStateProvider
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
@@ -85,6 +88,7 @@ class ProjectService {
     ProcessingOptionService processingOptionService
     ProjectInfoService projectInfoService
     ProjectRequestService projectRequestService
+    ProjectRequestStateProvider projectRequestStateProvider
     ReferenceGenomeIndexService referenceGenomeIndexService
     ReferenceGenomeService referenceGenomeService
     RoddyWorkflowConfigService roddyWorkflowConfigService
@@ -208,7 +212,7 @@ class ProjectService {
         }
 
         if (projectParams.projectRequest) {
-            projectRequestService.finish(projectParams.projectRequest, project)
+            projectRequestStateProvider.setState(projectParams.projectRequest, Created)
             if (!projectParams.ignoreUsersFromBaseObjects) {
                 projectRequestService.addProjectRequestUsersToProject(projectParams.projectRequest)
             }
@@ -363,7 +367,7 @@ class ProjectService {
      */
     void sendProjectCreationMail(Project project, List<String> receivers) {
         String subject = messageSourceService.createMessage("notification.projectCreation.subject", [projectName: project.displayName])
-        String content = messageSourceService.createMessage("notification.projectCreation.message",
+        String content = messageSourceService.createMessage('notification.projectCreation.message',
                 [
                         projectName             : project.displayName,
                         linkProjectConfig       : createNotificationTextService.createOtpLinks([project], 'projectConfig', 'index'),

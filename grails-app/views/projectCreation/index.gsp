@@ -99,14 +99,12 @@
                 <tr>
                     <td><g:message code="projectRequest.users"/></td>
                     <td>
-                        <g:each var="user" in="${projectRequest.users}">
-                            <g:render template="/projectRequest/projectRequestUser" model="[user: user]"/>
-                        </g:each>
+                        <g:render template="/projectRequest/templates/projectRequestUserTable" model="[users: projectRequest.users]"/>
                     </td>
                 </tr>
                 <tr>
                     <td><g:message code="projectRequest.sequencingCenter"/></td>
-                    <td>${projectRequest.sequencingCenter}</td>
+                    <td>${projectRequest.sequencingCenters}</td>
                 </tr>
                 <tr>
                     <td><g:message code="projectRequest.approxNoOfSamples"/></td>
@@ -116,17 +114,19 @@
                     <td><g:message code="projectRequest.seqTypes"/></td>
                     <td>${projectRequest.seqTypes?.join(", ")}</td>
                 </tr>
-                <g:if test="${projectRequest.customSpeciesWithStrain}">
-                    <tr>
-                        <td><g:message code="projectRequest.customSpeciesWithStrain"/></td>
-                        <td>
-                            <span style="margin-right: 20px">${projectRequest.customSpeciesWithStrain}</span>
-                            <otp:annotation type="warning" variant="inline">
-                                <g:message code="projectRequest.customSpeciesWithStrain.link"/>
-                                <g:link controller="speciesWithStrain" action="index" params="[helper: projectRequest.customSpeciesWithStrain]">here</g:link>
-                            </otp:annotation>
-                        </td>
-                    </tr>
+                <g:if test="${projectRequest.customSpeciesWithStrains}">
+                    <g:each in="${projectRequest.customSpeciesWithStrains}" var="customSpeciesWithStrain">
+                        <tr>
+                            <td><g:message code="projectRequest.customSpeciesWithStrain"/></td>
+                            <td>
+                                <span style="margin-right: 20px">${customSpeciesWithStrain}</span>
+                                <otp:annotation type="warning" variant="inline">
+                                    <g:message code="projectRequest.customSpeciesWithStrain.link"/>
+                                    <g:link controller="speciesWithStrain" action="index" params="[helper: customSpeciesWithStrain]">here</g:link>
+                                </otp:annotation>
+                            </td>
+                        </tr>
+                    </g:each>
                 </g:if>
                 <tr>
                     <td><g:message code="projectRequest.comments"/></td>

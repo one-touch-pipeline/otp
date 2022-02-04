@@ -23,19 +23,26 @@
 $(() => {
   'use strict';
 
-  $('.clone-add').on('click', (e) => {
+  $('#clone-add').on('click', (e) => {
     e.preventDefault();
     const target = $('.clone-target');
     target.data('highest-index', target.data('highest-index') + 1);
     const index = target.data('highest-index');
 
+    // close all other cards
+    target.find('a, div').each(() => {
+      const oldComponent = this;
+      $(oldComponent).removeClass('show');
+      $(oldComponent).attr('aria-expanded', false);
+    });
+
     const clone = $('.clone-template').clone(true, true);
 
     // replace the template-index with the current index to fulfill the array like indexing
     // prop[0], prop[1], ...
-    clone.find('input, select, label').each(function () {
+    clone.find('input, select, label, div, a').each(function () {
       const component = this;
-      $.each(['name', 'id', 'for', 'data-select2-id'], function () {
+      $.each(['name', 'id', 'for', 'data-target', 'aria-controls', 'data-select2-id', 'aria-labelledby'], function () {
         const attribute = this;
         $.otp.cloneField.replaceTemplateIndexInProperty(component, attribute, index);
       });
@@ -48,13 +55,17 @@ $(() => {
 
     // Remove the clone-template class, as only the actual template should have it
     $('.clone-target > .clone-template').removeClass('clone-template').removeClass('hidden');
-
     return false;
   });
 
+  // Remove user field if remove button is clicked. When the last user form is removed add a new one.
   $('.clone-remove').on('click', function (e) {
+    const numberOfUserForms = $('.clone-target .clone-remove-target').length;
     e.preventDefault();
     $(this).closest('.clone-remove-target').remove();
+    if (numberOfUserForms === 1) {
+      $('#clone-add').click();
+    }
   });
 });
 

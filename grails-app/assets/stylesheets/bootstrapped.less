@@ -23,6 +23,7 @@
 /**
 Global style definitions which are relevant for all bootstrap pages.
 */
+@import "colors";
 
 html {
   // reduce the default font size defined by bootstrap
@@ -31,7 +32,8 @@ html {
 
 .otp-main-container {
   margin-bottom: 60px;
-  margin-top: 60px;
+  margin-top: 20px;
+  display: inline-block;
 }
 
 .quick-navigation-bar {
@@ -84,4 +86,23 @@ option {
     margin-top: 5px;
     margin-bottom: 10px;
     margin-left: 5px;
+}
+
+.select2-container {
+  .select-2-otp-theme.select-2-otp-theme .select2-selection__rendered {
+    .select2-selection__choice {
+      background: #FFFFFF;
+    }
+    .select2-results__option--highlighted[aria-selected] {
+      background: red;
+    }
+    .select2-results__option[aria-selected="true"] {
+      background: #F7F7F7;
+    }
+  }
+}
+
+// made select2 more responsive on bootstrap pages like any other form-group-input
+.select2 {
+  width: 100% !important;
 }

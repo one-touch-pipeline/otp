@@ -27,6 +27,7 @@ import grails.plugin.springsecurity.SpringSecurityUtils
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.ngsdata.LdapUserCreationException
 import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
@@ -41,6 +42,7 @@ class UserService {
 
     SpringSecurityService springSecurityService
     ConfigService configService
+    LdapService ldapService
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void editUser(User user, String email, String realName) {
@@ -243,5 +245,18 @@ No user exists yet, create user ${currentUser} with admin rights.
 
     boolean hasCurrentUserAdministrativeRoles() {
         return checkRolesContainsAdministrativeRole(rolesOfCurrentUser)
+    }
+
+    User findUserByUsername(String username) {
+        LdapUserDetails ldapUserDetails = ldapService.getLdapUserDetailsByUsername(username)
+        if (!ldapUserDetails) {
+            throw new LdapUserCreationException("'${username}' can not be resolved to a user via LDAP")
+        }
+        if (!ldapUserDetails.mail) {
+            throw new LdapUserCreationException("Could not get a mail for '${username}' via LDAP")
+        }
+
+        return CollectionUtils.atMostOneElement(User.findAllByUsername(ldapUserDetails.username)) ?:
+                createUser(ldapUserDetails.username, ldapUserDetails.mail, ldapUserDetails.realName)
     }
 }

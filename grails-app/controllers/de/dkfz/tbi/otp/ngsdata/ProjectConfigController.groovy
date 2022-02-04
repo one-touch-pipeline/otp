@@ -35,6 +35,7 @@ import de.dkfz.tbi.otp.project.*
 import de.dkfz.tbi.otp.project.additionalField.AbstractFieldDefinition
 import de.dkfz.tbi.otp.project.additionalField.ProjectPageType
 import de.dkfz.tbi.otp.project.exception.unixGroup.UnixGroupIsSharedException
+import de.dkfz.tbi.otp.project.projectRequest.ProjectRequestService
 import de.dkfz.tbi.otp.security.Role
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.CommentCommand

@@ -25,6 +25,7 @@ import grails.databinding.BindUsing
 import grails.databinding.SimpleMapDataBindingSource
 import grails.plugin.springsecurity.annotation.Secured
 import grails.validation.Validateable
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.multipart.MultipartFile
 
 import de.dkfz.tbi.otp.FlashMessage
@@ -34,6 +35,7 @@ import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
 import de.dkfz.tbi.otp.project.*
 import de.dkfz.tbi.otp.project.additionalField.AbstractFieldDefinition
 import de.dkfz.tbi.otp.project.additionalField.ProjectPageType
+import de.dkfz.tbi.otp.project.projectRequest.*
 import de.dkfz.tbi.otp.searchability.Keyword
 import de.dkfz.tbi.otp.utils.StringUtils
 import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
@@ -52,9 +54,12 @@ class ProjectCreationController {
     ]
 
     ProjectService projectService
+    ProjectRequestService projectRequestService
     ProjectGroupService projectGroupService
     ProcessingPriorityService processingPriorityService
-    ProjectRequestService projectRequestService
+
+    @Autowired
+    ProjectRequestStateProvider projectRequestStateProvider
 
     private void handleSubmitEvent(ProjectCreationCommand cmd) {
         flash.cmd = cmd
@@ -62,7 +67,11 @@ class ProjectCreationController {
     }
 
     def index(ProjectCreationBasisCommand cmd) {
-        List<ProjectRequest> projectRequests = ProjectRequest.findAllByStatus(ProjectRequest.Status.WAITING_FOR_OPERATOR)
+        List<ProjectRequest> projectRequests = ProjectRequest.createCriteria().list {
+            state {
+                eq("beanName", ProjectRequestStateProvider.getStateBeanName(Approved))
+            }
+        }
 
         List<UserProjectRole> usersToCopyFromBaseProject = []
         Map<String, ?> baseProjectOverride = [:]
@@ -168,6 +177,8 @@ class ProjectCreationController {
             } else {
                 try {
                     Project project = projectService.createProject(cmd)
+                    projectRequestStateProvider.setState(cmd.projectRequest, Created)
+                    projectRequestService.sendCreatedEmail(project, cmd.projectRequest)
                     flash.message = new FlashMessage(g.message(code: "projectCreation.store.success") as String)
                     if (cmd.sendProjectCreationNotification) {
                         projectService.sendProjectCreationMailToUserAndTicketSystem(project)
@@ -346,6 +357,8 @@ class ProjectCreationCommand extends ProjectCreationBasisCommand {
     void setDirectory(String directory) {
         this.dirName = StringUtils.trimAndShortenWhitespace(directory)
     }
+
+    void setKeywords() { }
 
     void setUnixGroup(String unixGroup) {
         this.unixGroup = StringUtils.trimAndShortenWhitespace(unixGroup)

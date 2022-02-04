@@ -61,7 +61,6 @@ import java.nio.file.Path
 import java.time.Duration
 import java.time.ZonedDateTime
 
-import static de.dkfz.tbi.otp.project.ProjectRequest.Status.PROJECT_CREATED
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
 @SuppressWarnings('EmptyClass')
@@ -2517,30 +2516,13 @@ class DomainFactory {
         ], properties)
     }
 
-    static ProjectRequest createProjectRequest(Map properties = [:], Map userProperties = [:]) {
-        return createDomainObject(ProjectRequest, [
-                name              : "name_${counter++}",
-                description       : "description_${counter++}",
-                projectType       : Project.ProjectType.SEQUENCING,
-                requester         : { createUser() },
-                users             : {
-                    [
-                            createProjectRequestUser([
-                                projectRoles: [createOrGetAuthorityProjectRole()] as Set<ProjectRole>,
-                            ] + userProperties),
-                    ]
-                },
-                project           : properties["status"] == PROJECT_CREATED ? { createProject() } : null,
-        ], properties)
-    }
-
+    @Deprecated
     static ProjectRequestUser createProjectRequestUser(Map properties = [:]) {
         return createDomainObject(ProjectRequestUser, [
                 user         : { createUser() },
                 projectRoles : { [createProjectRole()] },
                 accessToFiles: true,
                 manageUsers  : true,
-                approvalState: ProjectRequestUser.ApprovalState.PENDING,
         ], properties)
     }
 

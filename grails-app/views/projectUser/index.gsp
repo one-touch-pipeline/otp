@@ -74,7 +74,7 @@
                 <table class="table table-sm table-striped table-hover">
                     <tr>
                         <td><g:message code="projectUser.addMember.username"/></td>
-                        <td class="user-auto-complete"><input name="searchString" type="text" class="inputField ldapUser autocompleted" autocomplete="off"
+                        <td class="user-auto-complete"><input name="searchString" type="text" class="inputField" autocomplete="off"
                                                               placeholder="${g.message(code: 'projectUser.addMember.ldapSearchValues')}"></td>
                     </tr>
                     <tr>

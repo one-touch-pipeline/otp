@@ -31,6 +31,9 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.ngsdata.UserProjectRole
+import de.dkfz.tbi.otp.project.ProjectRequest
+import de.dkfz.tbi.otp.project.projectRequest.ProjectRequestPersistentStateService
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 @Component
 @GrailsCompileStatic
@@ -38,7 +41,8 @@ class OtpPermissionEvaluator implements PermissionEvaluator {
 
     @Autowired AclPermissionEvaluator aclPermissionEvaluator
 
-    private static final List PERMISSIONS = ["OTP_READ_ACCESS", "MANAGE_USERS", "DELEGATE_USER_MANAGEMENT", "ADD_USER"]
+    private static final List PERMISSIONS = ["OTP_READ_ACCESS", "MANAGE_USERS", "DELEGATE_USER_MANAGEMENT", "ADD_USER",
+                                             "PROJECT_REQUEST_NEEDED_PIS", "PROJECT_REQUEST_CURRENT_OWNER", "PROJECT_REQUEST_PI"]
 
     @Override
     boolean hasPermission(Authentication auth, Object targetDomainObject, Object permission) throws IllegalArgumentException {
@@ -49,6 +53,8 @@ class OtpPermissionEvaluator implements PermissionEvaluator {
             switch (targetDomainObject?.class) {
                 case Project:
                     return checkProjectRolePermission(auth, (Project) targetDomainObject, permission)
+                case ProjectRequest:
+                    return checkProjectRequestRolePermission(auth, (ProjectRequest) targetDomainObject, permission)
                 case null:
                     return checkObjectIndependentPermission(auth, permission)
                 default:
@@ -78,7 +84,7 @@ class OtpPermissionEvaluator implements PermissionEvaluator {
 
     @CompileDynamic
     private boolean checkObjectIndependentPermission(Authentication auth, String permission) {
-        User activeUser = User.findByUsername(auth.principal.username)
+        User activeUser = CollectionUtils.atMostOneElement(User.findAllByUsername(auth.principal.username))
         if (!activeUser) {
             return false
         }
@@ -103,13 +109,31 @@ class OtpPermissionEvaluator implements PermissionEvaluator {
     }
 
     @CompileDynamic
+    private boolean checkProjectRequestRolePermission(Authentication auth, ProjectRequest projectRequest, String permission) {
+        User activeUser = CollectionUtils.atMostOneElement(User.findAllByUsername(auth.principal.username))
+        if (!activeUser) {
+            return false
+        }
+        switch (permission) {
+            case "PROJECT_REQUEST_NEEDED_PIS":
+                return (projectRequest.state.usersThatNeedToApprove).contains(activeUser)
+            case "PROJECT_REQUEST_CURRENT_OWNER":
+                return activeUser == projectRequest.state.currentOwner
+            case "PROJECT_REQUEST_PI":
+                return ProjectRequestPersistentStateService.getAllProjectRequestAuthorities(projectRequest.state).contains(activeUser)
+            default:
+                return false
+        }
+    }
+
+    @CompileDynamic
     private boolean checkProjectRolePermission(Authentication auth, Project project, String permission) {
-        User activeUser = User.findByUsername(auth.principal.username)
+        User activeUser = CollectionUtils.atMostOneElement(User.findAllByUsername(auth.principal.username))
         if (!activeUser) {
             return false
         }
 
-        UserProjectRole userProjectRole = UserProjectRole.findByProjectAndUser(project, activeUser)
+        UserProjectRole userProjectRole = CollectionUtils.atMostOneElement(UserProjectRole.findAllByProjectAndUser(project, activeUser))
         if (!userProjectRole) {
             return false
         }

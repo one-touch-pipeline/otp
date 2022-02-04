@@ -383,6 +383,10 @@ class ProcessingOption implements Entity {
         ),
 
         //email
+        EMAIL_CLUSTER_ADMINISTRATION(
+                "Email address of the entity managing the cluster",
+                Necessity.REQUIRED, null, TypeValidators.MAIL
+        ),
         EMAIL_TICKET_SYSTEM(
                 "Email address to the ticket system. It gets all (!) emails in CC.",
                 Necessity.REQUIRED, null, TypeValidators.MAIL
@@ -402,6 +406,10 @@ class ProcessingOption implements Entity {
         EMAIL_TEXT_REASON_DEACTIVATED_USERS(
                 "A reason which will be printed in an email to the PI, which informs about deactivated users.",
                 Necessity.OPTIONAL, "", TypeValidators.MULTI_LINE_TEXT
+        ),
+        EMAIL_PROJECT_CREATION_FREETEXT(
+                "Additional Information, that is used in the project creation email",
+                Necessity.OPTIONAL, "", TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
         ),
 
         NOTIFICATION_TEMPLATE_SEQ_CENTER_NOTE(
@@ -575,7 +583,7 @@ class ProcessingOption implements Entity {
 
         DESCRIPTION_PROJECT_NAME_NEW_PROJECT_REQUEST(
                 "Description for project name",
-                Necessity.OPTIONAL, "", TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
+                Necessity.OPTIONAL, "The name of the project that is requested.", TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
         ),
 
         NEWS_BANNER(

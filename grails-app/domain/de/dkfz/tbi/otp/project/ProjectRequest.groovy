@@ -21,8 +21,6 @@
  */
 package de.dkfz.tbi.otp.project
 
-import groovy.transform.TupleConstructor
-
 import de.dkfz.tbi.otp.ngsdata.ProjectRoleService
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
@@ -36,38 +34,22 @@ class ProjectRequest implements ProjectPropertiesGivenWithRequest, Entity {
     User requester
 
     Set<ProjectRequestUser> users
-
-    @TupleConstructor
-    enum Status {
-        WAITING_FOR_APPROVER({ Map m -> "${m.left} of ${m.total} left" }, "#000000", true, false),
-        DENIED_BY_APPROVER({ Map m -> "Denied" }, "#DD2B0E", true, true),
-        WAITING_FOR_OPERATOR({ Map m -> "Approved" }, "#108548", false, true),
-        PROJECT_CREATED({ Map m -> "Project created" }, "#108548", false, true),
-        CLOSED({ Map m -> "Closed" }, "#DD2B0E", false, true),
-        SUBMITTED({ Map m -> "${m.left} of ${m.total} left" }, "#000000", true, false),
-
-        final Closure<String> formatter
-        final String color
-        final boolean editableStatus
-        final boolean resolvedStatus
-    }
-    // initial status
-    Status status = Status.SUBMITTED
     Project project
 
+    ProjectRequestPersistentState state
+    Set<String> customSpeciesWithStrains
     Set<String> keywords
-    String customSpeciesWithStrain
-    String sequencingCenter
+    Set<String> sequencingCenters
     Integer approxNoOfSamples
     Set<SeqType> seqTypes
     String comments
 
     static constraints = {
         project nullable: true, validator: { Project val, ProjectRequest obj ->
-            if (!val && obj.status == Status.PROJECT_CREATED) {
+            if (!val && obj.state.beanName == 'created') {
                 return "required"
             }
-            if (val && obj.status != Status.PROJECT_CREATED) {
+            if (val && obj.state.beanName != 'created') {
                 return "illegal"
             }
         }
@@ -83,8 +65,6 @@ class ProjectRequest implements ProjectPropertiesGivenWithRequest, Entity {
         relatedProjects nullable: true
         tumorEntity nullable: true
         speciesWithStrains nullable: true
-        customSpeciesWithStrain nullable: true
-        sequencingCenter nullable: true
         approxNoOfSamples nullable: true
         comments nullable: true
 
@@ -112,14 +92,6 @@ class ProjectRequest implements ProjectPropertiesGivenWithRequest, Entity {
         description type: "text"
         requester index: "project_request_requester_idx"
         users index: "project_request_users_idx"
-        keywords index: "project_request_keywords_idx"
         seqTypes index: "project_request_seqTypes_idx"
-    }
-
-    String getFormattedStatus() {
-        return this.status.formatter([
-                left : users.count { it.approver && !it.voted },
-                total: users.count { it.approver },
-        ])
     }
 }

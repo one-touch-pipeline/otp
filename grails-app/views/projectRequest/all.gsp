@@ -1,5 +1,5 @@
 %{--
-  - Copyright 2011-2020 The OTP authors
+  - Copyright 2011-2021 The OTP authors
   -
   - Permission is hereby granted, free of charge, to any person obtaining a copy
   - of this software and associated documentation files (the "Software"), to deal
@@ -19,20 +19,21 @@
   - OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
   - SOFTWARE.
   --}%
+<%@ page contentType="text/html;charset=UTF-8" %>
 <html>
 <head>
-    <meta name="layout" content="main"/>
     <title>${g.message(code: "projectRequest.title")}</title>
 </head>
 
 <body>
-<div class="body">
+
+<div class="container-fluid otp-main-container">
     <g:render template="/templates/messages"/>
+    <g:render template="templates/tabs"/>
 
-    <g:render template="tabMenu"/>
-
-    <h2>${g.message(code: "projectRequest.all.header")}:</h2>
-    <g:render template="projectRequestTable" model="[projectRequests: all]"/>
+    <h3 class="mb-3">${g.message(code: "projectRequest.all.header")}:</h3>
+    <g:render template="templates/table" model="[projectRequests: all]"/>
 </div>
+
 </body>
 </html>

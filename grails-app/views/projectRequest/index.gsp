@@ -1,5 +1,5 @@
 %{--
-  - Copyright 2011-2019 The OTP authors
+  - Copyright 2011-2021 The OTP authors
   -
   - Permission is hereby granted, free of charge, to any person obtaining a copy
   - of this software and associated documentation files (the "Software"), to deal
@@ -19,34 +19,27 @@
   - OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
   - SOFTWARE.
   --}%
-<%@ page import="de.dkfz.tbi.otp.project.additionalField.ProjectSourceOfData;" %>
-<%@ page import="de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain" %>
-<%@ page import="de.dkfz.tbi.otp.config.GuiAnnotation" %>
-<%@ page import="de.dkfz.tbi.otp.project.Project;" %>
-<%@ page import="de.dkfz.tbi.otp.project.additionalField.FieldExistenceType;" %>
-<%@ page import="de.dkfz.tbi.otp.project.additionalField.TextFieldDefinition;" %>
-<%@ page import="de.dkfz.tbi.otp.config.TypeValidators;" %>
+<%@ page contentType="text/html;charset=UTF-8" %>
+<%@ page import="de.dkfz.tbi.otp.project.projectRequest.StoragePeriod" %>
 <%@ page import="de.dkfz.tbi.otp.project.additionalField.ProjectFieldType;" %>
-<%@ page import="java.time.format.DateTimeFormatter" %>
-
+<%@ page import="de.dkfz.tbi.otp.config.TypeValidators;" %>
+<%@ page import="de.dkfz.tbi.otp.project.additionalField.FieldExistenceType;" %>
 <html>
 <head>
-    <meta name="layout" content="main"/>
     <title>${g.message(code: "projectRequest.title")}</title>
     <asset:javascript src="common/UserAutoComplete.js"/>
-    <asset:javascript src="common/MultiInputField.js"/>
-    <asset:javascript src="common/CloneField.js"/>
     <asset:javascript src="pages/projectRequest/index.js"/>
-    <asset:javascript src="taglib/NoSwitchedUser.js"/>
+    <asset:javascript src="pages/projectRequest/userFormAdd.js"/>
+    <asset:javascript src="common/CloneField.js"/>
+    <asset:stylesheet src="pages/projectRequest/index.less"/>
 </head>
 
 <body>
-<div class="body">
-    <g:render template="/templates/messages"/>
 
-    <g:render template="tabMenu"/>
+<div class="container-fluid otp-main-container">
+    <g:render template="templates/tabs"/>
+    <h3 class="mb-3">${g.message(code: "projectRequest.title")}</h3>
 
-    <h2>${g.message(code: "projectRequest.title")}</h2>
     <otp:annotation type="info">
         <g:if test="${faqLink}">
             ${g.message(code: "projectRequest.new.support.faq", args: [contactDataSupportEmail, faqLink])}
@@ -55,306 +48,263 @@
             ${g.message(code: "projectRequest.new.support", args: [contactDataSupportEmail])}
         </g:else>
     </otp:annotation>
-    <otp:annotationPO option-type="${GuiAnnotation.PROJECT_REQUEST}" type="info"/>
-    <g:if test="${projectRequestToEdit}">
-        <otp:annotation type="warning">
-            ${g.message(code: "projectRequest.edit.warning", args: [projectRequestToEdit.name, projectRequestToEdit.requester])}
-        </otp:annotation>
-    </g:if>
-    <br>
+
+    <g:form method="POST" useToken="true">
+        <g:hiddenField id="projectRequestId" name="projectRequest.id" value="${cmd?.projectRequest?.id}"/>
+
+        <!-- Project Type* -->
+        <div class="form-group row">
+            <div class="col-sm-2">
+                <label class="col-form-label" for="projectType">${g.message(code: "project.projectType")}*</label>
+                <i class="helper-icon bi bi-question-circle-fill" title="${g.message(code: "projectRequest.projectType.detail")}"></i>
+            </div>
+
+            <div class="col-sm-10">
+                <g:select id="projectType" name="projectType" class="use-select-2 form-control"
+                          from="${projectTypes}" value="${cmd?.projectType}"
+                          noSelection="${['':'']}"
+                          data-placeholder="Select a project type"
+                          autocomplete="off"
+                          required="true"/>
+            </div>
+        </div>
+
+        <!-- Project Name* -->
+        <div class="form-group row">
+            <div class="col-sm-2">
+                <label class="col-form-label" for="name">${g.message(code: "project.name")}*</label>
+                <i class="helper-icon bi bi-question-circle-fill" title="${projectNameDescription}"></i>
+            </div>
+
+            <div class="col-sm-10">
+                <g:if test="${projectNamePattern}">
+                    <input name="name"
+                           class="form-control"
+                           id="name"
+                           title="${projectNameDescription}"
+                           value="${cmd?.name}"
+                           pattern=${projectNamePattern} required/>
+                </g:if>
+                <g:else>
+                    <input name="name" class="form-control" id="name" value="${cmd?.name}" required/>
+                </g:else>
+            </div>
+        </div>
+
+        <!-- Description* -->
+        <div class="form-group row">
+            <div class="col-sm-2">
+                <label class="col-form-label" for="description">${g.message(code: "project.description")}*</label>
+                <i class="helper-icon bi bi-question-circle-fill" title="${g.message(code: "projectRequest.description.detail")}"></i>
+            </div>
+
+            <div class="col-sm-10">
+                <textarea class="form-control"
+                          name="description"
+                          id="description"
+                          minlength="50" required>${cmd?.description}</textarea>
+            </div>
+        </div>
+
+        <!-- Keyword(s)* -->
+        <div class="form-group row">
+            <div class="col-sm-2">
+                <label class="col-form-label" for="keywords">${g.message(code: "project.keywords")}*</label>
+                <i class="helper-icon bi bi-question-circle-fill" title="${g.message(code: "projectRequest.keywords.detail")}"></i>
+            </div>
+
+            <div class="col-sm-10">
+                <select class="use-select-2 tag-select form-control"
+                        name="keywords"
+                        name="keywords"
+                        id="keywords"
+                        multiple="multiple"
+                        required>
+                    <g:each in="${keywords}" var="keyword">
+                        <g:set var="selected" value="${keyword in cmd?.keywords ? "selected" : ""}"/>
+                        <option value="${keyword.name}" ${selected}>${keyword.name}</option>
+                    </g:each>
+                </select>
+            </div>
+        </div>
+
+        <!-- End Date -->
+        <div class="form-group row">
+            <div class="col-sm-2">
+                <label class="col-form-label" for="endDate">${g.message(code: "project.endDate")}</label>
+                <i class="helper-icon bi bi-question-circle-fill" title="${g.message(code: "projectRequest.endDate.detail")}"></i>
+            </div>
+
+            <div class="col-sm-10">
+                <input class="form-control" name="endDate" id="endDate" value="${cmd?.endDate}" type="date"/>
+            </div>
+        </div>
+
+        <!-- Storage Until* -->
+        <div class="form-group row">
+            <div class="col-sm-2">
+                <label class="col-form-label" for="storagePeriod">${g.message(code: "project.storageUntil")}*</label>
+                <i class="helper-icon bi bi-question-circle-fill" title="${g.message(code: "projectRequest.storageUntil.detail")}"></i>
+            </div>
+
+            <div class="col-sm-5">
+                <g:select class="use-select-2 form-control"
+                          id="storagePeriod"
+                          name="storagePeriod"
+                          from="${storagePeriod}"
+                          value="${cmd?.storagePeriod}"
+                          noSelection="${['':'']}"
+                          data-placeholder="Select a project type"
+                          optionKey="name"
+                          optionValue="description"
+                          required="true"/>
+            </div>
+
+            <div class="col-sm-5">
+                <g:set var="disabled" value="${cmd?.storagePeriod == StoragePeriod.USER_DEFINED ? "" : "disabled"}"/>
+                <input class="form-control" name="storageUntil" id="storageUntil" value="${cmd?.storageUntil}" type="date" ${disabled}/>
+            </div>
+        </div>
+
+        <!-- Related Projects -->
+        <div class="form-group row">
+            <div class="col-sm-2">
+                <label class="col-form-label" for="relatedProjects">${g.message(code: "project.relatedProjects")}</label>
+                <i class="helper-icon bi bi-question-circle-fill" title="${g.message(code: "projectRequest.relatedProjects.detail")}"></i>
+            </div>
+
+            <div class="col-sm-10">
+                <input class="form-control" name="relatedProjects" id="relatedProjects" value="${cmd?.relatedProjects}"/>
+            </div>
+        </div>
+
+        <!-- Species [with Strain]-->
+        <div class="form-group row">
+            <div class="col-sm-2">
+                <label class="col-form-label" for="speciesWithStrainList">${g.message(code: "project.speciesWithStrain")}</label>
+                <i class="helper-icon bi bi-question-circle-fill" title="${g.message(code: "projectRequest.speciesWithStrain.detail")}"></i>
+            </div>
+
+            <div class="col-sm-10">
+                <select class="use-select-2 tag-select form-control" name="speciesWithStrainList" id="speciesWithStrainList" multiple="multiple" from="speciesWithStrainList">
+                    <g:each in="${speciesWithStrains}" var="species">
+                        <g:set var="selected" value="${species in cmd?.speciesWithStrains ? "selected" : ""}"/>
+                        <option value="${species.id}" ${selected}>${species.displayString}</option>
+                    </g:each>
+                    <g:each in="${cmd?.customSpeciesWithStrains}" var="customSpecies">
+                        <option value="${customSpecies}" selected>${customSpecies}</option>
+                    </g:each>
+                </select>
+            </div>
+        </div>
+
+        <!-- Sequencing Center -->
+        <div class="form-group row">
+            <div class="col-sm-2">
+                <label class="col-form-label" for="sequencingCenters">${g.message(code: "projectRequest.sequencingCenter")}</label>
+                <i class="helper-icon bi bi-question-circle-fill" title="${g.message(code: "projectRequest.sequencingCenter.detail")}"></i>
+            </div>
+
+            <div class="col-sm-10">
+                <select class="use-select-2 form-control tag-select"
+                        name="sequencingCenters"
+                        id="sequencingCenters"
+                        multiple="multiple">
+                    <g:each in="${sequencingCenters}" var="sequencingCenter">
+                        <g:set var="selected" value="${sequencingCenter in cmd?.sequencingCenters ? "selected" : ""}"/>
+                        <option value="${sequencingCenter}" ${selected}>${sequencingCenter}</option>
+                    </g:each>
+                </select>
+            </div>
+        </div>
+
+        <!-- Approximate Number of Samples* -->
+        <div class="form-group row">
+            <div class="col-sm-2">
+                <label class="col-form-label" id="approxNoOfSamplesLabel" for="approxNoOfSamples">${g.message(code: "projectRequest.approxNoOfSamples")}*</label>
+                <i class="helper-icon bi bi-question-circle-fill" title="${g.message(code: "projectRequest.approxNumberOfSamples.detail")}"></i>
+            </div>
+
+            <div class="col-sm-10">
+                <input class="form-control" name="approxNoOfSamples" id="approxNoOfSamples" type="number" min="0" value="${cmd?.approxNoOfSamples}" required/>
+            </div>
+        </div>
+
+        <!-- Sequencing Type(s)* -->
+        <div class="form-group row">
+            <div class="col-sm-2">
+                <label class="col-form-label" for="seqTypes" id="seqTypesLabel">${g.message(code: "projectRequest.seqTypes")}</label>
+                <i class="helper-icon bi bi-question-circle-fill" title="${g.message(code: "projectRequest.seqTypes.detail")}"></i>
+            </div>
+
+            <div class="col-sm-10">
+                <select class="use-select-2 form-control" name="seqTypes" id="seqTypes" multiple="multiple">
+                    <g:each in="${seqTypes}" var="seqType">
+                        <g:set var="selected" value="${seqType in cmd?.seqTypes ? "selected" : ""}"/>
+                        <option value="${seqType.id}" ${selected}>${seqType.displayNameWithLibraryLayout}</option>
+                    </g:each>
+                </select>
+            </div>
+        </div>
+
+        <!-- abstract Fields -->
+        <div class="abstract-fields-container">
+            <!-- logic is implemented in the javascript index file-->
+            <g:each var="abstractValue" in="${cmd?.additionalFieldValue}">
+                <g:hiddenField id="tempAbstractValue_${abstractValue.key}" name="tempAbstractValue_${abstractValue.key}" value="${abstractValue.value}"/>
+            </g:each>
+
+        </div>
+
+        <!-- Comments -->
+        <div class="form-group row">
+            <label class="col-sm-2 col-form-label" for="comments">${g.message(code: "projectRequest.comments")}</label>
+
+            <div class="col-sm-10">
+                <textarea class="form-control" name="comments" id="comments">${cmd?.comments}</textarea>
+            </div>
+        </div>
+
+        <!-- User adding -->
+        <div class="container user-form">
+            <div class="row">
+                <div class="col-sm-9">
+                    <h3>Add user</h3>
+                    <p>${g.message(code: "projectRequest.users.detail")}</p>
+                </div>
+
+                <div class="col-sm-3">
+                    <button class="btn btn-primary user-add-button" id="clone-add">
+                        <i class="bi bi-plus"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="clone-target" id="accordion" data-highest-index="${cmd?.users?.size() ?: 1}">
+                <g:if test="${cmd?.users}">
+                    <g:each in="${cmd?.users}" var="user" status="i">
+                        <g:if test="${user}">
+                            <g:render template="templates/userFormItem" model="[i: i, user: user, availableRoles: availableRoles]"/>
+                        </g:if>
+                    </g:each>
+                </g:if>
+                <g:else>
+                    <g:render template="templates/userFormItem" model="[i: 1, emptyForm: true, availableRoles: availableRoles]"/>
+                </g:else>
+            </div>
+        </div>
+
+        <!-- submit/draft form actions -->
+        <g:render template="templates/submitArea" model="[buttonActions: buttonActions]"/>
+
+    </g:form>
 
     <div class="clone-template hidden">
-        <g:render template="projectRequestUserForm" model="[i: 'template-index', availableRoles: availableRoles]"/>
+        <g:render template="templates/userFormItem" model="[i: 'template-index', availableRoles: availableRoles]"/>
     </div>
-
-    <g:form action="save" method="POST" useToken="true">
-        <table class="key-value-table key-help-input">
-            <g:hiddenField name="request.id" value="${projectRequestToEdit?.id}"/>
-            <tr>
-                <td><label for="projectType">${g.message(code: "project.projectType")}*</label></td>
-                <td class="help" title="${g.message(code: "projectRequest.projectType.detail")}"></td>
-                <td><g:select id="projectType" name="projectType" class="use-select-2"
-                              from="${projectTypes}" value="${source.getByFieldName("projectType")}" onChange="submit();" required="true"/></td>
-            </tr>
-            <tr>
-                <td><label for="name">${g.message(code: "project.name")}*</label></td>
-                <td class="help" title="${projectNameDescription ?: g.message(code: "projectRequest.name.detail")}"></td>
-                <g:if test="${projectNamePattern}">
-                    <td><input name="name" id="name" value="${source.getByFieldName("name")}" title="${projectNameDescription}" pattern=${projectNamePattern} required/></td>
-                </g:if>
-                <g:else>
-                    <td><input name="name" id="name" value="${source.getByFieldName("name")}" required/></td>
-                </g:else>
-            </tr>
-            <tr>
-                <td><label for="description">${g.message(code: "project.description")}*</label></td>
-                <td class="help" title="${g.message(code: "projectRequest.description.detail")}"></td>
-                <td><textarea class="resize-vertical" name="description" id="description" required
-                              minlength="50">${source.getByFieldName("description")}</textarea></td>
-            </tr>
-            <tr>
-                <td><label for="keyword">${g.message(code: "project.keywords")}*</label></td>
-                <td class="help" title="${g.message(code: "projectRequest.keywords.detail")}"></td>
-                <td class="multi-input-field">
-                    <g:each in="${source.getByFieldName("keywords")?.sort() ?: [null]}" var="keyword" status="i">
-                        <div class="field">
-                            <input list="keywordList" name="keywords" id="keyword" type="text" value="${keyword}" required>
-                            <g:if test="${i == 0}">
-                                <button class="add-field">+</button>
-                            </g:if>
-                            <g:else>
-                                <button class="remove-field">-</button>
-                            </g:else>
-                        </div>
-                    </g:each>
-                    <datalist id="keywordList">
-                        <g:each in="${keywords}" var="keyword">
-                            <option value="${keyword.name}">${keyword.name}</option>
-                        </g:each>
-                    </datalist>
-                </td>
-            </tr>
-            <tr>
-                <td><label for="endDate">${g.message(code: "project.endDate")}</label></td>
-                <td class="help" title="${g.message(code: "projectRequest.endDate.detail")}"></td>
-                <td><input name="endDate" id="endDate" value="${source.getByFieldName("endDate")}" type="date"/></td>
-            </tr>
-            <tr>
-                <td><label for="storagePeriod">${g.message(code: "project.storageUntil")}*</label></td>
-                <td class="help" title="${g.message(code: "projectRequest.storageUntil.detail")}"></td>
-                <td>
-                    <g:select name="storagePeriod" class="use-select-2"
-                              value="${source.getByFieldName("storagePeriod")}" from="${storagePeriods}"
-                              optionKey="name" optionValue="description"
-                              noSelection="${["": ""]}" required="true"/>
-                    <br>
-                    <input name="storageUntil" id="storageUntil" value="${source.getByFieldName("storageUntil")}" type="date" style="display: none"/>
-                </td>
-            </tr>
-            <tr>
-                <td><label for="relatedProjects">${g.message(code: "project.relatedProjects")}</label></td>
-                <td class="help" title="${g.message(code: "projectRequest.relatedProjects.detail")}"></td>
-                <td><input name="relatedProjects" id="relatedProjects" value="${source.getByFieldName("relatedProjects")}"/></td>
-            </tr>
-            %{--
-                    <tr>
-                        <td><label for="tumorEntity">${g.message(code: "project.tumorEntity")}</label></td>
-                        <td></td>
-                        <td>
-                            <g:select name="tumorEntity.id" id="tumorEntity" class="use-select-2"
-                                      value="${cmd?.tumorEntity?.id}" from="${tumorEntities}" optionValue="name" optionKey="id"
-                                      noSelection="${[null: ""]}" /></td>
-                    </tr>
-            --}%
-            <tr>
-                <g:set var="customSpeciesWithStrain" value="${source.getByFieldName("customSpeciesWithStrain")}"/>
-                <td>${g.message(code: "project.speciesWithStrain")}</td>
-                <td class="help" title="${g.message(code: "projectRequest.speciesWithStrain.detail")}"></td>
-                <td class="multi-input-field">
-                    <g:each in="${source.getByFieldName("speciesWithStrains") ?: [null]}" var="specie" status="i">
-                        <div class="field">
-                            <g:select id="speciesWithStrains[${i}].id" name="speciesWithStrains.id" class="use-select-2"
-                                      from="${species}"
-                                      value="${customSpeciesWithStrain ? "other" : specie?.id}"
-                                      optionKey="id" optionValue="displayString"
-                                      noSelection="${["": 'Please Select']}" />
-                            <g:if test="${i == 0}">
-                                <button class="add-field">+</button>
-                            </g:if>
-                            <g:else>
-                                <button class="remove-field">-</button>
-                            </g:else>
-                        </div>
-                    </g:each>
-                    <br>
-                    <input name="customSpeciesWithStrain" id="customSpeciesWithStrain" value="${customSpeciesWithStrain}" type="text" disabled style="display:none"/>
-                </td>
-            </tr>
-            <tr>
-                <td><label for="sequencingCenter">${g.message(code: "projectRequest.sequencingCenter")}</label></td>
-                <td class="help" title="${g.message(code: "projectRequest.sequencingCenter.detail")}"></td>
-                <td><input name="sequencingCenter" id="sequencingCenter" value="${source.getByFieldName("sequencingCenter")}"/></td>
-            </tr>
-            <tr>
-                <g:if test="${(source.getByFieldName("projectType") == Project.ProjectType.SEQUENCING)}">
-                    <td><label for="approxNoOfSamples">${g.message(code: "projectRequest.approxNoOfSamples")}*</label></td>
-                    <td class="help" title="${g.message(code: "projectRequest.approxNumberOfSamples.detail")}"></td>
-                    <td><input name="approxNoOfSamplesString" id="approxNoOfSamples" type="number" min="0" required
-                               value="${source.getByFieldName("approxNoOfSamples")}"/>
-                    </td>
-                </g:if>
-                <g:else>
-                    <td><label for="approxNoOfSamples">${g.message(code: "projectRequest.approxNoOfSamples")}</label></td>
-                    <td class="help" title="${g.message(code: "projectRequest.approxNumberOfSamples.detail")}"></td>
-                    <td><input name="approxNoOfSamplesString" id="approxNoOfSamples" type="number" min="0"
-                               value="${source.getByFieldName("approxNoOfSamples")}"/></td>
-                </g:else>
-            </tr>
-            <tr>
-                <g:if test="${(source.getByFieldName("projectType") == Project.ProjectType.SEQUENCING)}">
-                    <td>${g.message(code: "projectRequest.seqTypes")}*</td>
-                    <td class="help" title="${g.message(code: "projectRequest.seqTypes.detail")}"></td>
-                    <td class="multi-input-field">
-                        <g:each in="${source.getByFieldName("seqTypes") ?: [null]}" var="seqType" status="i">
-                            <div class="field">
-                                <g:select id="seqTypes[${i}].id" name="seqTypes.id" class="use-select-2"
-                                          from="${seqTypes}" value="${seqType?.id ?: ""}"
-                                          optionKey="id" optionValue="displayNameWithLibraryLayout"
-                                          noSelection="${["": "None"]}"/>
-                                <g:if test="${i == 0}">
-                                    <button class="add-field">+</button>
-                                </g:if>
-                                <g:else>
-                                    <button class="remove-field">-</button>
-                                </g:else>
-                            </div>
-                        </g:each>
-                    </td>
-                </g:if>
-                <g:else>
-                    <td>${g.message(code: "projectRequest.seqTypes")}</td>
-                    <td class="help" title="${g.message(code: "projectRequest.seqTypes.detail")}"></td>
-                    <td class="multi-input-field">
-                        <g:each in="${source.getByFieldName("seqTypes") ?: [null]}" var="seqType" status="i">
-                            <div class="field">
-                                <g:select id="seqTypes[${i}].id" name="seqTypes.id" class="use-select-2"
-                                          from="${seqTypes}" value="${seqType?.id ?: ""}"
-                                          optionKey="id" optionValue="displayNameWithLibraryLayout"
-                                          noSelection="${["": "None"]}"/>
-                                <g:if test="${i == 0}">
-                                    <button class="add-field">+</button>
-                                </g:if>
-                                <g:else>
-                                    <button class="remove-field">-</button>
-                                </g:else>
-                            </div>
-                        </g:each>
-                    </td>
-                </g:else>
-            </tr>
-            <tr>
-                <td><label for="comments">${g.message(code: "projectRequest.comments")}</label></td>
-                <td></td>
-                <td><textarea class="resize-vertical" name="comments" id="comments">${source.getByFieldName("comments")}</textarea></td>
-            </tr>
-            <g:each in="${abstractFields}" var="abstractField" status="index">
-                <tr>
-                    <g:hiddenField name="additionalFieldName[${index}]" value="${abstractField.name}"/>
-                    <g:if test="${(source.getByFieldName("projectType") == Project.ProjectType.SEQUENCING &&
-                            abstractField.fieldUseForSequencingProjects == FieldExistenceType.REQUIRED) ||
-                            (source.getByFieldName("projectType") == Project.ProjectType.USER_MANAGEMENT &&
-                                    abstractField.fieldUseForDataManagementProjects == FieldExistenceType.REQUIRED)}">
-                        <td><g:message code="${abstractField.name}*"/></td>
-                        <td class="help" title="${g.message(code: "${abstractField.descriptionRequest}")}"></td>
-                        <g:if test="${abstractField.projectFieldType == ProjectFieldType.TEXT}">
-                            <g:if test="${abstractField.typeValidator == TypeValidators.MULTI_LINE_TEXT}">
-                                <td><g:textArea class="resize-vertical" name="additionalFieldValue[${Long.toString(abstractField.id)}]"
-                                                value="${abstractValues?.get(Long.toString(abstractField.id)) ?:
-                                                        (source.getByFieldName('additionalFieldValue')?.get(Long.toString(abstractField.id))
-                                                                ?: abstractField.defaultValue)}"
-                                                required="true"/></td>
-                            </g:if>
-                            <g:else>
-                                <td><g:textField class="resize-vertical" name="additionalFieldValue[${Long.toString(abstractField.id)}]"
-                                                 value="${abstractValues?.get(Long.toString(abstractField.id)) ?:
-                                                         (source.getByFieldName('additionalFieldValue')?.get(Long.toString(abstractField.id))
-                                                                 ?: abstractField.defaultValue)}"
-                                                 required="true"/></td>
-                            </g:else>
-                        </g:if>
-                        <g:elseif test="${abstractField.projectFieldType == ProjectFieldType.INTEGER}">
-                            <td><g:field class="resize-vertical" name="additionalFieldValue[${Long.toString(abstractField.id)}]" type="number"
-                                         value="${abstractValues?.get(Long.toString(abstractField.id)) ?:
-                                                 (source.getByFieldName('additionalFieldValue')?.get(Long.toString(abstractField.id))
-                                                         ?: abstractField.defaultValue)}"
-                                         required="true"/></td>
-                        </g:elseif>
-                    </g:if>
-                    <g:elseif test="${(source.getByFieldName("projectType") == Project.ProjectType.SEQUENCING &&
-                            abstractField.fieldUseForSequencingProjects == FieldExistenceType.OPTIONAL) ||
-                            (source.getByFieldName("projectType") == Project.ProjectType.USER_MANAGEMENT &&
-                                    abstractField.fieldUseForDataManagementProjects == FieldExistenceType.OPTIONAL)}">
-                        <td><g:message code="${abstractField.name}"/></td>
-                        <td class="help" title="${g.message(code: "${abstractField.descriptionRequest}")}"></td>
-                        <g:if test="${abstractField.projectFieldType == ProjectFieldType.TEXT}">
-                            <g:if test="${abstractField.typeValidator == TypeValidators.MULTI_LINE_TEXT}">
-                                <td><g:textArea class="resize-vertical" name="additionalFieldValue[${Long.toString(abstractField.id)}]"
-                                                value="${abstractValues?.get(Long.toString(abstractField.id)) ?:
-                                                        (source.getByFieldName('additionalFieldValue')?.get(Long.toString(abstractField.id))
-                                                                ?: abstractField.defaultValue)}"/>
-                                </td>
-                            </g:if>
-                            <g:else>
-                                <td><g:textField class="resize-vertical" name="additionalFieldValue[${Long.toString(abstractField.id)}]"
-                                                 value="${abstractValues?.get(Long.toString(abstractField.id)) ?:
-                                                         (source.getByFieldName('additionalFieldValue')?.get(abstractField.id)
-                                                                 ?: abstractField.defaultValue)}"/>
-                                </td>
-                            </g:else>
-                        </g:if>
-                        <g:elseif test="${abstractField.projectFieldType == ProjectFieldType.INTEGER}">
-                            <td><g:field class="resize-vertical" name="additionalFieldValue[${Long.toString(abstractField.id)}]" type="number"
-                                         value="${abstractValues?.get(Long.toString(abstractField.id)) ?:
-                                                 (source.getByFieldName('additionalFieldValue')?.get(Long.toString(abstractField.id))
-                                                         ?: abstractField.defaultValue)}"/>
-                            </td>
-                        </g:elseif>
-                    </g:elseif>
-                </tr>
-            </g:each>
-        </table>
-
-        <h3>${g.message(code: "projectRequest.users")}</h3>
-        ${g.message(code: "projectRequest.users.detail")}
-        <br><br>
-
-        <g:set var="users" value="${source.getByFieldName('users').findAll() ?: []}"/>
-        <div class="clone-target" data-highest-index="${users.size()}">
-            <g:each in="${users}" var="user" status="i">
-                <g:render template="projectRequestUserForm" model="[i: i, user: user, availableRoles: availableRoles]"/>
-            </g:each>
-        </div>
-        <button class="clone-add"><g:message code="projectRequest.users.add"/></button>
-
-        <br><br>
-
-        <table class="key-value-table key-help-input">
-            <tr>
-                <td></td>
-                <td></td>
-                <td>${g.message(code: "projectRequest.explain.submitter")}<br></td>
-            </tr>
-            <tr>
-                <td></td>
-                <td></td>
-                <td>
-                    <otpsecurity:noSwitchedUser>
-                        <g:if test="${projectRequestToEdit}">
-                            <div class="element-with-annotation-flex-container">
-                                <div>
-                                    <g:actionSubmit action="saveEdit" name="saveEdit" value="${g.message(code: "projectRequest.submit.edit")}"/>
-                                </div>
-                                <otp:annotation type="warning" variant="inline">
-                                    ${g.message(code: "projectRequest.edit.warning.submit")}
-                                </otp:annotation>
-                            </div>
-                        </g:if>
-                        <g:else>
-                            <g:submitButton action="save" name="save" value="${g.message(code: "projectRequest.submit")}"/>
-                        </g:else>
-                    </otpsecurity:noSwitchedUser>
-                </td>
-            </tr>
-            <tr>
-                <td colspan="3"><br></td>
-            </tr>
-            <tr>
-                <td></td>
-                <td></td>
-                <td>${g.message(code: "projectRequest.explain.requiredFields")}</td>
-            </tr>
-        </table>
-    </g:form>
 </div>
+
+
+
 </body>
 </html>

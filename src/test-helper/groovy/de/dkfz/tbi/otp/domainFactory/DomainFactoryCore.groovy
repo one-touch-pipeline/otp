@@ -28,6 +28,7 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.searchability.Keyword
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.utils.HelperUtils
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
@@ -76,6 +77,12 @@ trait DomainFactoryCore implements DomainFactoryHelper {
                 unixGroup                     : "unixGroup_${nextId}",
                 processingPriority            : { createProcessingPriority() },
         ], properties, saveAndValidate)
+    }
+
+    Keyword createKeyword(Map properties = [:]) {
+        return createDomainObject(Keyword, [
+                name: "keyword_${nextId}",
+        ], properties)
     }
 
     Individual createIndividual(Map properties = [:]) {

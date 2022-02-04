@@ -1,5 +1,5 @@
 %{--
-  - Copyright 2011-2020 The OTP authors
+  - Copyright 2011-2021 The OTP authors
   -
   - Permission is hereby granted, free of charge, to any person obtaining a copy
   - of this software and associated documentation files (the "Software"), to deal
@@ -20,16 +20,15 @@
   - SOFTWARE.
   --}%
 
-<h2><g:message code="projectRequest.approver.overview.header"/></h2>
-<table class="dataTable">
-    <g:each var="projectRequestUser" in="${projectRequestUsers}">
-        <tr>
-            <td>${projectRequestUser.user}</td>
-            <td>
-                <span style="color: ${projectRequestUser.approvalState.color}">
-                    ${projectRequestUser.approvalState.text}
-                </span>
-            </td>
-        </tr>
-    </g:each>
-</table>
+<div class="submit-area">
+    <g:if test="${buttonActions*.text.contains("Submit")}">
+        <otp:annotation type="info">
+            ${g.message(code: "projectRequest.explain.submitter")}
+        </otp:annotation>
+    </g:if>
+    <div class="actions">
+        <g:each var="buttonAction" in="${buttonActions}">
+            <g:actionSubmit action="${buttonAction.action}" name="${buttonAction.action}" class="btn btn-${buttonAction.styling}" value="${buttonAction.text}"/>
+        </g:each>
+    </div>
+</div>

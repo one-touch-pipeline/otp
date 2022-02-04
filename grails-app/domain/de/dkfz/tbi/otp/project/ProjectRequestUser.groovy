@@ -21,8 +21,6 @@
  */
 package de.dkfz.tbi.otp.project
 
-import groovy.transform.TupleConstructor
-
 import de.dkfz.tbi.otp.ngsdata.ProjectRole
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.Entity
@@ -38,19 +36,6 @@ class ProjectRequestUser implements Entity {
     boolean manageUsers
     boolean manageUsersAndDelegate
 
-    @TupleConstructor
-    enum ApprovalState {
-        APPROVED("Approved", "#108548", true),
-        DENIED("Denied", "#DD2B0E", false),
-        PENDING("Pending", "#000000", false),
-        NOT_APPLICABLE("Not expected to approve", "#000000", false),
-
-        final String text
-        final String color
-        final boolean countsAsVoted
-    }
-    ApprovalState approvalState
-
     static hasMany = [
         projectRoles: ProjectRole
     ]
@@ -65,14 +50,6 @@ class ProjectRequestUser implements Entity {
 
     static mapping = {
         projectRoles index: "project_request_user_project_roles_idx"
-    }
-
-    boolean isApprover() {
-        return approvalState != ApprovalState.NOT_APPLICABLE
-    }
-
-    boolean isVoted() {
-        return approvalState.countsAsVoted
     }
 
     /**

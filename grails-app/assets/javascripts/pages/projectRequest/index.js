@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2021 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,38 +20,161 @@
  * SOFTWARE.
  */
 
+// activate the possibility to provide own input for tag-select items
+$(document).ready(() => {
+  $('.tag-select').select2({
+    tags: true,
+    theme: 'bootstrap4'
+  });
+});
+
 $(() => {
-  // hide and show the date picker for storageUntil when defined by a user
+  // disable and enable the date picker for storageUntil when defined by a user
   const storageUntil = $('input#storageUntil');
   $('select#storagePeriod').on('change', (e) => {
     if ($(e.target).val() === 'USER_DEFINED') {
-      storageUntil.show();
+      storageUntil.prop('disabled', false);
     } else {
-      storageUntil.hide();
+      storageUntil.prop('disabled', true);
+      storageUntil.val(' ');
     }
   }).trigger('change');
 
-  // hide and show the textbox to provide a custom SpeciesWithStrain
-  const customSpecies = $('input#customSpeciesWithStrain');
-  $('select#speciesWithStrains').on('change', (e) => {
-    if ($(e.target).val() === 'other') {
-      customSpecies.show();
-      customSpecies.prop('disabled', false);
-    } else {
-      customSpecies.hide();
-      customSpecies.prop('disabled', true);
+  // Functions to handle required assignment
+  const removeAllStars = (element) => {
+    element.html(element.html().replace('*', ''));
+  };
+  const lastCharIsAStar = (element) => {
+    removeAllStars(element);
+    element.html(`${element.html()}*`);
+  };
+  const addRequired = (inputElement, labelElement) => {
+    lastCharIsAStar(labelElement);
+    inputElement.prop('required', true);
+  };
+  const removeRequired = (inputElement, labelElement) => {
+    removeAllStars(labelElement);
+    inputElement.prop('required', false);
+  };
+
+  // Function to set the additional Fields. This is called when projectType changes.
+  const setAdditionalFields = (projectType, projectRequest) => {
+    // first delete all addition Field entries
+    // fetch the data with ajax
+    if (projectType) {
+      $.ajax({
+        url: $.otp.createLink({ controller: 'projectRequest', action: 'getAdditionalFields' }),
+        dataType: 'json',
+        type: 'POST',
+        data: {
+          projectType,
+          projectRequest
+        },
+        success(result) {
+          const abstractFieldContainer = $('.abstract-fields-container');
+          let htmlContent = '';
+          const { abstractFields } = result;
+          abstractFields.forEach((abstractField, index) => {
+            const tempAbstractValue = $(`#tempAbstractValue_${abstractField.id}`).val();
+            const value = tempAbstractValue || abstractField.value;
+            htmlContent += `<div class="form-group row">
+                              <input type="hidden" name="additionalFieldName[${index}]" 
+                                     value="${abstractField.name}"
+                                     id="additionalFieldName[${index}]"/>
+                              <div class="col-sm-2">
+                                <label class="col-form-label" 
+                                       for="additionalFieldValue[${abstractField.id}]">
+                                  ${abstractField.name}${abstractField.required ? '*' : ''}
+                                </label>
+                                <i class="helper-icon bi bi-question-circle-fill" 
+                                   title="${abstractField.descriptionRequest}">
+                                </i>
+                              </div>        
+                              <div class="col-sm-10">
+                                <${abstractField.fieldType} id="additionalFieldValue[${abstractField.id}]"
+                                              class="form-control"
+                                              type="${abstractField.inputType}"
+                                              name="additionalFieldValue[${abstractField.id}]"
+                                              value="${value}"
+                                              required="${abstractField.required}"/>
+                                </div>       
+                            </div>`;
+          });
+          abstractFieldContainer.html(htmlContent);
+        },
+        error(error) {
+          if (error && error.responseJSON && error.responseJSON.message) {
+            $.otp.toaster.showErrorToast('Fetching additional fields failed', error.responseJSON.message);
+          } else {
+            $.otp.toaster.showErrorToast('Fetching additional fields failed', 'Unknown error during fetching.');
+          }
+        }
+      });
+    }
+  };
+
+  // Approximate Number of Samples and SeqTypes is only required when Project Type "Sequencing" is selected
+  // Also check whether the addition abstractFields are required
+  const numberSamples = $('input#approxNoOfSamples');
+  const numberSamplesLabel = $('label#approxNoOfSamplesLabel');
+
+  const seqTypes = $('select#seqTypes');
+  const seqTypesLabel = $('label#seqTypesLabel');
+
+  const numberOfAdditionFields = $('#numberOfAdditionFields').val();
+  const additionFieldRequiredForSequencing = [];
+  const additionFieldRequiredForUserManagement = [];
+  for (let i = 0; i < numberOfAdditionFields; i++) {
+    additionFieldRequiredForSequencing.add($(`additionalField[${i}].requiredForUserManagement`));
+    additionFieldRequiredForUserManagement.add($(`additionalField[${i}].requiredForSequencing`));
+  }
+
+  $('select#projectType').on('change', (e) => {
+    setAdditionalFields($(e.target).val(), $('#projectRequestId').val());
+    if ($(e.target).val() === 'SEQUENCING') {
+      addRequired(numberSamples, numberSamplesLabel);
+      addRequired(seqTypes, seqTypesLabel);
+      additionFieldRequiredForSequencing.forEach((currentValue, index) => {
+        if (currentValue) {
+          addRequired($(`additionalFieldValue[${index}]`), $(`additionalFieldValueLabel[${index}]`));
+        } else {
+          removeRequired($(`additionalFieldValue[${index}]`), $(`additionalFieldValueLabel[${index}]`));
+        }
+      });
+    } else if ($(e.target).val() === 'USER_MANAGEMENT') {
+      removeRequired(numberSamples, numberSamplesLabel);
+      removeRequired(seqTypes, seqTypesLabel);
+      additionFieldRequiredForUserManagement.forEach((currentValue, index) => {
+        if (currentValue) {
+          addRequired($(`additionalFieldValue[${index}]`), $(`additionalFieldValueLabel[${index}]`));
+        } else {
+          removeRequired($(`additionalFieldValue[${index}]`), $(`additionalFieldValueLabel[${index}]`));
+        }
+      });
     }
   }).trigger('change');
 
-  // if the PI role is selected, manage users should be checked
-  $('.project-role-select').on('change', () => {
-    const manageUsersBox = $('.project-request-user-table').find('.set-for-authority');
+  // if the PI role is selected, manage users should be checked and disabled
+  $('.project-role-select').on('change', (e) => {
+    const manageUsersBox = $(e.target).parent().parent().parent()
+      .find('.set-for-authority');
     manageUsersBox.prop('disabled', false);
-    $('.project-role-select option:selected').each(function () {
+    $(e.target).find('option:selected').each(function () {
       if (this.text === 'PI') {
         manageUsersBox.prop('checked', true);
         manageUsersBox.prop('disabled', true);
       }
     });
+  }).trigger('change');
+
+  // If username is changed in userForm also change the headers title
+  $('.username-input').on('change', (e) => {
+    const userNameInput = $(e.target);
+    const usernameInputId = userNameInput.attr('id').replace('].username', '').replace('users[', '');
+    const usernameInputValue = userNameInput.val();
+    const userFormTitle = $('.user-form').find(`#user-form-title-${usernameInputId}`);
+    if (usernameInputValue) {
+      userFormTitle.html(usernameInputValue);
+    }
   }).trigger('change');
 });

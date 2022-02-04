@@ -19,8 +19,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+package de.dkfz.tbi.otp.project.projectRequest
 
-.user-entry {
-  margin-bottom: 5px;
-  margin-top: 5px;
+import org.springframework.beans.factory.annotation.Autowired
+
+import de.dkfz.tbi.otp.project.ProjectRequest
+import de.dkfz.tbi.otp.security.SecurityService
+
+trait ProjectRequestState {
+
+    @Autowired
+    ProjectRequestService projectRequestService
+
+    @Autowired
+    ProjectRequestStateProvider projectRequestStateProvider
+
+    @Autowired
+    SecurityService securityService
+
+    abstract List<ProjectRequestAction> getIndexActions(ProjectRequest projectRequest)
+
+    abstract List<ProjectRequestAction> getViewActions(ProjectRequest projectRequest)
+
+    abstract Long submit(ProjectRequestCreationCommand cmd)
+
+    abstract Long save(ProjectRequestCreationCommand cmd)
+
+    abstract void reject(ProjectRequest projectRequest, String additionalComment)
+
+    abstract void passOn(ProjectRequest projectRequest)
+
+    abstract ProjectRequestCreationCommand edit(ProjectRequest projectRequest)
+
+    abstract void approve(ApprovalCommand cmd)
+
+    abstract void delete(ProjectRequest projectRequest)
+
+    abstract void create()
 }

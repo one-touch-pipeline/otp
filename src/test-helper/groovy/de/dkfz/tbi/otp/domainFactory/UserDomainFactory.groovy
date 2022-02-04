@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.domainFactory
 
 import de.dkfz.tbi.otp.ngsdata.ProjectRole
 import de.dkfz.tbi.otp.ngsdata.UserProjectRole
+import de.dkfz.tbi.otp.project.*
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
@@ -55,6 +56,41 @@ trait UserDomainFactory implements DomainFactoryCore {
                 manageUsersAndDelegate: false,
                 receivesNotifications : true,
         ], properties)
+    }
+
+    ProjectRequestUser createProjectRequestUser(Map properties = [:], boolean saveAndValidate = true) {
+        return createDomainObject(ProjectRequestUser, [
+                user         : { createUser() },
+                projectRoles : { [createProjectRole()] },
+                accessToFiles: true,
+                manageUsers  : true,
+        ], properties, saveAndValidate)
+    }
+
+    ProjectRequestPersistentState createProjectRequestPersistentState(Map properties = [:]) {
+        return createDomainObject(ProjectRequestPersistentState, [
+                beanName              : "check",
+                usersThatNeedToApprove: { [createUser()] },
+        ], properties)
+    }
+
+    ProjectRequest createProjectRequest(Map properties = [:],
+                                        Map stateProperties = [:], boolean saveAndValidate = true) {
+        return createDomainObject(ProjectRequest, [
+                name       : "name_${nextId}",
+                description: "description_${nextId}",
+                projectType: Project.ProjectType.SEQUENCING,
+                requester  : { createUser() },
+                users      : {
+                    [
+                            createProjectRequestUser([
+                                    projectRoles: [createOrGetAuthorityProjectRole()] as Set<ProjectRole>,
+                            ]),
+                    ]
+                },
+                state      : createProjectRequestPersistentState(stateProperties),
+                project    : stateProperties["beanName"] == "created" ? { createProject() } : null,
+        ], properties, saveAndValidate)
     }
 
     ProjectRole createOrGetAuthorityProjectRole(Map properties = [:]) {
