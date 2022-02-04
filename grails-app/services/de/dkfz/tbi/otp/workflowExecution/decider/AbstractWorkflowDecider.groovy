@@ -81,7 +81,7 @@ abstract class AbstractWorkflowDecider implements Decider {
      * Returns all output WorkflowArtefacts or an empty list
      */
     abstract protected Collection<WorkflowArtefact> createWorkflowRunsAndOutputArtefacts(Collection<Collection<WorkflowArtefact>> groupedArtefacts,
-                                                                                         Collection<WorkflowArtefact> initialArtefacts)
+                                                                                         Collection<WorkflowArtefact> initialArtefacts, WorkflowVersion version)
 
     /**
      * Group the artefacts by project and seqtype.
@@ -110,7 +110,7 @@ abstract class AbstractWorkflowDecider implements Decider {
             }
             Collection<WorkflowArtefact> combinedWorkflowArtefacts = (it.value + findAdditionalRequiredInputArtefacts(it.value)).unique()
             Collection<Collection<WorkflowArtefact>> artefactsPerWorkflowRun = groupArtefactsForWorkflowExecution(combinedWorkflowArtefacts)
-            return createWorkflowRunsAndOutputArtefacts(artefactsPerWorkflowRun, filteredInputArtefacts)
+            return createWorkflowRunsAndOutputArtefacts(artefactsPerWorkflowRun, filteredInputArtefacts, matchingWorkflows.workflowVersion)
         }
     }
 }

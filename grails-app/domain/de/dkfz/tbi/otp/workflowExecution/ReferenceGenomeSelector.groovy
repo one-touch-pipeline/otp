@@ -32,6 +32,6 @@ class ReferenceGenomeSelector implements Entity {
     Project project
     ReferenceGenome referenceGenome
     SeqType seqType
-    SpeciesWithStrain species
+    Set<SpeciesWithStrain> species
     Workflow workflow
 }

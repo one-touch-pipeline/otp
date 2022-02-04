@@ -36,6 +36,8 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 class MergingWorkPackage extends AbstractMergingWorkPackage {
 
     SeqPlatformGroup seqPlatformGroup
+
+    @Deprecated
     String statSizeFileName
 
     //reference genome depending options
@@ -93,7 +95,7 @@ class MergingWorkPackage extends AbstractMergingWorkPackage {
                 case Pipeline.Name.EXTERNALLY_PROCESSED:
                     return val == null
                 case Pipeline.Name.PANCAN_ALIGNMENT:
-                    return val != null && OtpPathValidator.isValidPathComponent(val)
+                    return !val || OtpPathValidator.isValidPathComponent(val)
                 case Pipeline.Name.RODDY_RNA_ALIGNMENT:
                     return val == null
                 default:

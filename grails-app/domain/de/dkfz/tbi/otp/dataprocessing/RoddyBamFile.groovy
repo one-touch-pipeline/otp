@@ -121,7 +121,7 @@ class RoddyBamFile extends AbstractMergedBamFile implements Artefact, HasIdentif
                     MergingWorkPackage.isAssignableFrom(Hibernate.getClass(val))
         }
 
-        config validator: { val, obj -> val?.pipeline?.id == obj.workPackage?.pipeline?.id }
+        config nullable: true, validator: { val, obj -> !val || (val.pipeline?.id == obj.workPackage?.pipeline?.id) }
         identifier validator: { val, obj ->
             !RoddyBamFile.findAllByWorkPackageAndIdentifierAndIdNotEqual(obj.workPackage, val, obj.id)
         }
@@ -235,7 +235,7 @@ class RoddyBamFile extends AbstractMergedBamFile implements Artefact, HasIdentif
     String toString() {
         String latest = mergingWorkPackage ? (mostRecentBamFile ? ' (latest)' : '') : '?'
         String withdrawn = withdrawn ? ' (withdrawn)' : ''
-        return "RBF ${id}: ${identifier}${latest}${withdrawn} ${qcTrafficLightStatus} ${mergingWorkPackage.toStringWithoutIdAndPipeline()}"
+        return "RBF ${id}: ${identifier}${latest}${withdrawn} ${qcTrafficLightStatus} ${mergingWorkPackage?.toStringWithoutIdAndPipeline()}"
     }
 
     // Example: blood_somePid_merged.mdup.bam

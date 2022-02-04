@@ -26,9 +26,7 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.FastqcDataFilesService
 import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
-import de.dkfz.tbi.otp.ngsdata.DataFile
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
-import de.dkfz.tbi.otp.ngsdata.SeqTrackService
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.workflow.fastqc.FastqcWorkflow
 import de.dkfz.tbi.otp.workflowExecution.*
 
@@ -87,7 +85,7 @@ class FastqcDecider implements Decider {
 
         WorkflowRun run = workflowRunService.buildWorkflowRun(
                 workflow,
-                inputArtefact.producedBy.priority,
+                seqTrack.project.processingPriority,
                 fastqcDataFilesService.fastqcOutputDirectory(seqTrack).toString(),
                 seqTrack.individual.project,
                 runDisplayName,

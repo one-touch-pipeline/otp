@@ -249,17 +249,6 @@ class MergingWorkPackageSpec extends Specification implements DataTest, DomainFa
         !mergingWorkPackage.errors.hasErrors()
     }
 
-    void "valid on constraint on statSizeFileName and PANCAN pipeline, when name is name, should be invalid"() {
-        given:
-        MergingWorkPackage mergingWorkPackage = DomainFactory.createMergingWorkPackage([
-                statSizeFileName: null,
-                pipeline        : DomainFactory.createPanCanPipeline(),
-        ], false)
-
-        expect:
-        TestCase.assertValidateError(mergingWorkPackage, 'statSizeFileName', 'validator.invalid', null)
-    }
-
     void "valid on constraint on statSizeFileName and PANCAN pipeline, when name is blank, should be invalid"() {
         given:
         MergingWorkPackage mergingWorkPackage = DomainFactory.createMergingWorkPackage([

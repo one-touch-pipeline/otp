@@ -120,7 +120,7 @@ class WorkflowRunService {
      * @return the created, saved but not flushed WorkflowRun
      */
     WorkflowRun buildWorkflowRun(Workflow workflow, ProcessingPriority priority, String workDirectory, Project project, List<String> displayNameLines,
-                                 String shortName, List<ExternalWorkflowConfigFragment> configs = []) {
+                                 String shortName, List<ExternalWorkflowConfigFragment> configs = [], WorkflowVersion workflowVersion = null) {
         String combinedConfig = configFragmentService.mergeSortedFragments(configs)
         String displayName = StringUtils.generateMultiLineDisplayName(displayNameLines)
 
@@ -135,6 +135,7 @@ class WorkflowRunService {
                 omittedMessage  : null,
                 workflowSteps   : [],
                 workflow        : workflow,
+                workflowVersion : workflowVersion,
                 displayName     : displayName,
                 shortDisplayName: shortName,
         ]).save(flush: false)

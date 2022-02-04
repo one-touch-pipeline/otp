@@ -101,13 +101,6 @@ class RoddyBamFileIntegrationTests {
     }
 
     @Test
-    void testConstraints_configIsNull_shouldFail() {
-        RoddyBamFile bamFile = DomainFactory.createRoddyBamFile()
-        bamFile.config = null
-        TestCase.assertAtLeastExpectedValidateError(bamFile, 'config', 'nullable', bamFile.config)
-    }
-
-    @Test
     void testConstraints_workPackageIsNull_shouldFail() {
         RoddyBamFile bamFile = DomainFactory.createRoddyBamFile()
         bamFile.workPackage = null
