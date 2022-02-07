@@ -30,7 +30,6 @@ import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
 import de.dkfz.tbi.otp.ngsdata.HasIdentifier
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.utils.CollectionUtils
-import de.dkfz.tbi.otp.utils.SessionUtils
 import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
 import de.dkfz.tbi.otp.workflowExecution.Artefact
 import de.dkfz.tbi.otp.workflowExecution.ExternalWorkflowConfigFragment
@@ -40,7 +39,7 @@ import de.dkfz.tbi.otp.workflowExecution.ExternalWorkflowConfigFragment
  * The file is based on earlier created bam file (with the same workflow), if exists and
  * new SeqTracks which were not merged into the earlier created bam file (base bam file).
  */
-class RoddyBamFile extends AbstractMergedBamFile implements Artefact, HasIdentifier , ProcessParameterObject, RoddyResult {
+class RoddyBamFile extends AbstractMergedBamFile implements Artefact, HasIdentifier, ProcessParameterObject, RoddyResult {
 
     /**
      * @deprecated use {@link RoddyBamFileService#WORK_DIR_PREFIX} instead
@@ -153,30 +152,28 @@ class RoddyBamFile extends AbstractMergedBamFile implements Artefact, HasIdentif
             }
         }
 
-        SessionUtils.withNewSession { session ->
-            if (baseBamFile) {
-                assertAndTrackOnError !mergingWorkPackage || mergingWorkPackage.satisfiesCriteria(baseBamFile),
-                        "the base bam file does not satisfy work package criteria"
+        if (baseBamFile) {
+            assertAndTrackOnError !mergingWorkPackage || mergingWorkPackage.satisfiesCriteria(baseBamFile),
+                    "the base bam file does not satisfy work package criteria"
 
-                assertAndTrackOnError baseBamFile.md5sum != null,
-                        "the base bam file is not finished"
+            assertAndTrackOnError baseBamFile.md5sum != null,
+                    "the base bam file is not finished"
 
-                assertAndTrackOnError withdrawn || !baseBamFile.withdrawn,
-                        "base bam file is withdrawn for not withdrawn bam file ${this}"
+            assertAndTrackOnError withdrawn || !baseBamFile.withdrawn,
+                    "base bam file is withdrawn for not withdrawn bam file ${this}"
 
-                List<Long> duplicatedSeqTracksIds = baseBamFile.containedSeqTracks*.id.intersect(seqTracks*.id)
-                assertAndTrackOnError duplicatedSeqTracksIds.empty,
-                        "the same seqTrack is going to be merged for the second time: ${seqTracks.findAll { duplicatedSeqTracksIds.contains(it.id) }}"
-            }
-
-            Set<SeqTrack> allContainedSeqTracks = this.containedSeqTracks
-
-            assertAndTrackOnError withdrawn || !allContainedSeqTracks.any { it.withdrawn },
-                    "not withdrawn bam file has withdrawn seq tracks"
-
-            assertAndTrackOnError numberOfMergedLanes == allContainedSeqTracks.size(),
-                    "total number of merged lanes is not equal to number of contained seq tracks: ${numberOfMergedLanes} vs ${allContainedSeqTracks.size()}"
+            List<Long> duplicatedSeqTracksIds = baseBamFile.containedSeqTracks*.id.intersect(seqTracks*.id)
+            assertAndTrackOnError duplicatedSeqTracksIds.empty,
+                    "the same seqTrack is going to be merged for the second time: ${seqTracks.findAll { duplicatedSeqTracksIds.contains(it.id) }}"
         }
+
+        Set<SeqTrack> allContainedSeqTracks = this.containedSeqTracks
+
+        assertAndTrackOnError withdrawn || !allContainedSeqTracks.any { it.withdrawn },
+                "not withdrawn bam file has withdrawn seq tracks"
+
+        assertAndTrackOnError numberOfMergedLanes == allContainedSeqTracks.size(),
+                "total number of merged lanes is not equal to number of contained seq tracks: ${numberOfMergedLanes} vs ${allContainedSeqTracks.size()}"
 
         return errors
     }
@@ -236,7 +233,7 @@ class RoddyBamFile extends AbstractMergedBamFile implements Artefact, HasIdentif
 
     @Override
     String toString() {
-        String latest = mergingWorkPackage ? (isMostRecentBamFile() ? ' (latest)' : '') : '?'
+        String latest = mergingWorkPackage ? (mostRecentBamFile ? ' (latest)' : '') : '?'
         String withdrawn = withdrawn ? ' (withdrawn)' : ''
         return "RBF ${id}: ${identifier}${latest}${withdrawn} ${qcTrafficLightStatus} ${mergingWorkPackage.toStringWithoutIdAndPipeline()}"
     }

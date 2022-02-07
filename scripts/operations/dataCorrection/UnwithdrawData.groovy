@@ -20,14 +20,11 @@
  * SOFTWARE.
  */
 
-import de.dkfz.tbi.otp.config.ConfigService
-import de.dkfz.tbi.otp.dataprocessing.FastqcDataFilesService
-import de.dkfz.tbi.otp.infrastructure.FileService
-import de.dkfz.tbi.otp.job.processing.FileSystemService
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.ngsdata.SeqTrackWithComment
 import de.dkfz.tbi.otp.utils.ScriptInputHelperService
-
-import java.nio.file.*
+import de.dkfz.tbi.otp.withdraw.UnwithdrawService
+import de.dkfz.tbi.otp.withdraw.UnwithdrawStateHolder
 
 /**
  * Script to Unwithdraw data (remove the withdraw flag).
@@ -116,6 +113,20 @@ comment'
 String fileName = ''
 
 /**
+ * Unwithdraw BAM files.
+ * A BAM file can only be unwithdrawn if the processing was finished, the file was not deleted,
+ * and all FastQ files it was generated from are available (neither withdrawn nor deleted)
+ */
+boolean unwithdrawBamFiles = true
+
+/**
+ * Unwithdraw analysis results.
+ * An analysis result can only be unwithdrawn if the processing was finished, the result folder was not deleted,
+ * and all BAM files it was generated from are available (neither withdrawn nor deleted)
+ */
+boolean unwithdrawAnalysis = true
+
+/**
  * flag to allow a try and rollback the changes at the end (true) or do the changes(false)
  */
 boolean tryRun = true
@@ -126,9 +137,7 @@ assert fileName?.trim(): "no file name were given"
 
 //services
 ScriptInputHelperService scriptInputHelperService = ctx.scriptInputHelperService
-FileSystemService fileSystemService = ctx.fileSystemService
-FileService fileService = ctx.fileService
-ConfigService configService = ctx.configService
+UnwithdrawService unwithdrawService = ctx.unwithdrawService
 
 assert (scriptInputHelperService.checkIfExactlyOneMultiLineStringContainsContent(
         [multiColumnInputSample, multiColumnInputSeqTrack, seqTracksIds])): "Please use exactly one multiColumnInput option for input"
@@ -147,66 +156,31 @@ if (!fileName.endsWith(".sh")) {
     fileName = fileName.concat(".sh")
 }
 
-List<String> script = [
+UnwithdrawStateHolder unwithdrawStateHolder = new UnwithdrawStateHolder()
+unwithdrawStateHolder.seqTracksWithComment = seqTracksWithComments
+unwithdrawStateHolder.script = [
         "#!/bin/bash",
         "",
         "set -ev",
         "",
 ]
+unwithdrawStateHolder.scriptFileName = fileName
+
 final String TRIM_LINE = "----------------------------------------"
 
 SeqTrack.withTransaction {
-    UnWithdrawer.ctx = ctx
-    seqTracksWithComments.each { seqTrackWithComment ->
-        UnWithdrawer.unwithdraw(seqTrackWithComment.seqTrack, seqTrackWithComment.comment, script)
+
+    unwithdrawService.unwithdrawSeqTracks(unwithdrawStateHolder)
+    if (unwithdrawBamFiles) {
+        unwithdrawService.unwithdrawBamFiles(unwithdrawStateHolder)
     }
+    if (unwithdrawAnalysis) {
+        unwithdrawService.unwithdrawAnalysis(unwithdrawStateHolder)
+    }
+    unwithdrawService.createBashScript(unwithdrawStateHolder)
+    unwithdrawService.writeBashScript(unwithdrawStateHolder)
 
-    FileSystem fileSystem = fileSystemService.remoteFileSystemOnDefaultRealm
-    Path outputFile = fileService.toPath(configService.scriptOutputPath, fileSystem).resolve('withdrawn').resolve(fileName)
-
-    fileService.deleteDirectoryRecursively(outputFile) //delete file if already exists
-    fileService.createFileWithContentOnDefaultRealm(outputFile, script.join('\n'), FileService.OWNER_READ_WRITE_GROUP_READ_WRITE_FILE_PERMISSION)
-
-    println("\n" + TRIM_LINE + "\n")
-    println "The script is written to: ${outputFile}"
+    println(unwithdrawStateHolder.summary.join("\n"))
 
     assert !tryRun: "Rollback, since only tryRun"
-}
-
-class UnWithdrawer {
-
-    static ctx
-
-    static void unwithdraw(final SeqTrack seqTrack, String comment, List dirsToLink) {
-        println "\n\nUnwithdraw $seqTrack"
-
-        DataFile.findAllBySeqTrack(seqTrack).each { unwithdraw(it, comment, dirsToLink) }
-    }
-
-    static void unwithdraw(final DataFile dataFile, String comment, List dirsToLink) {
-
-        LsdfFilesService lsdfFilesService = ctx.lsdfFilesService
-        FastqcDataFilesService fastqcDataFilesService = ctx.fastqcDataFilesService
-
-        println "Unwithdrawing DataFile: ${dataFile}: ${dataFile.withdrawnComment}"
-        dirsToLink.add("ln -rs ${lsdfFilesService.getFileFinalPath(dataFile)} ${lsdfFilesService.getFileViewByPidPath(dataFile)}")
-        dirsToLink.add("chgrp ${dataFile.project.unixGroup} ${lsdfFilesService.getFileViewByPidPathAsPath(dataFile)}")
-        [
-                lsdfFilesService.getFileFinalPathAsPath(dataFile),
-                lsdfFilesService.getFileMd5sumFinalPathAsPath(dataFile),
-                fastqcDataFilesService.fastqcOutputPath(dataFile),
-                fastqcDataFilesService.fastqcOutputMd5sumPath(dataFile),
-                fastqcDataFilesService.fastqcHtmlPath(dataFile),
-        ].findAll { path ->
-            Files.exists(path)
-        }.collect { filePath ->
-            dirsToLink.add("chgrp ${dataFile.project.unixGroup} ${filePath}")
-        }
-        dataFile.withdrawnDate = null
-        if (!dataFile.withdrawnComment?.contains(comment)) {
-            dataFile.withdrawnComment = "${dataFile.withdrawnComment ? "${dataFile.withdrawnComment}\n" : ""}${comment}"
-        }
-        dataFile.fileWithdrawn = false
-        assert dataFile.save(flush: true)
-    }
 }

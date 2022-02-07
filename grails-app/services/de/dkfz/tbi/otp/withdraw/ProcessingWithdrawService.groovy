@@ -34,5 +34,7 @@ interface ProcessingWithdrawService<E extends Entity, Input extends Entity> {
 
     void withdrawObjects(List<E> entities)
 
+    void unwithdrawObjects(List<E> entities)
+
     void deleteObjects(List<E> entities)
 }

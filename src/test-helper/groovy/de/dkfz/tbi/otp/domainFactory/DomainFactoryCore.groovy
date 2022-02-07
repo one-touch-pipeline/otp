@@ -193,7 +193,7 @@ trait DomainFactoryCore implements DomainFactoryHelper {
     FileType createFileType(Map properties = [:]) {
         return createDomainObject(FileType, [
                 type   : FileType.Type.SEQUENCE,
-                vbpPath: "sequence_${nextId}",
+                vbpPath: "sequence",
         ], properties)
     }
 

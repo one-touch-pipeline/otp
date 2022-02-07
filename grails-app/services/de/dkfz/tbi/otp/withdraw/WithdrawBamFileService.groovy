@@ -80,6 +80,14 @@ abstract class WithdrawBamFileService<E extends AbstractMergedBamFile> implement
     }
 
     @Override
+    void unwithdrawObjects(List<E> entities) {
+        entities.each {
+            it.withdrawn = false
+            it.save(flush: true)
+        }
+    }
+
+    @Override
     void deleteObjects(List<E> entities) {
         entities.collectMany { E bamFile ->
             bamFile.containedSeqTracks

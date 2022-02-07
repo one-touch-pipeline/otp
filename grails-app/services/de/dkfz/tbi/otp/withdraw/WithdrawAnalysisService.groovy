@@ -59,6 +59,14 @@ class WithdrawAnalysisService implements ProcessingWithdrawService<BamFilePairAn
     }
 
     @Override
+    void unwithdrawObjects(List<BamFilePairAnalysis> entities) {
+        entities.each {
+            it.withdrawn = false
+            it.save(flush: true)
+        }
+    }
+
+    @Override
     void deleteObjects(List<BamFilePairAnalysis> entities) {
         entities.each {
             analysisDeletionService.deleteInstance(it)
