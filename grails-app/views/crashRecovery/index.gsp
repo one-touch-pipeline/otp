@@ -24,22 +24,70 @@
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-    <meta name="layout" content="main"/>
     <title>Crash Recovery</title>
     <asset:javascript src="pages/crashRecovery/index/crashRecovery.js"/>
 </head>
 <body>
     <div class="body">
         <g:if test="${crashRecovery}">
-        <div id="dialog-select-job" title="Select a Job" style="display: none">
-            <p>Please select a Job from the List to perform the operation.</p>
-            <p>In case the List is empty, you can restart the Scheduler with the "Start Scheduler" button.</p>
+        <div class="modal" id="dialog-select-job">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="dialog-select-job-label">Select a Job</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Please select a Job from the List to perform the operation.</p>
+                        <p>In case the List is empty, you can restart the Scheduler with the "Start Scheduler" button.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-dismiss="modal">Ok</button>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div id="dialog-error-message-job" title="Enter Error Message for Job" style="display: none">
-            <p>Please provide an error message why the Job has ben set to failed.</p>
-            <input type="text"/>
+        <div class="modal" id="dialog-error-message-job">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="dialog-error-message-job-label">Enter Error Message for Job</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Please provide an error message why the Job has been set to failed.</p>
+                        <input type="text"/>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" id="markAsFailed">Mark Job as Failed</button>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div id="dialog-parameters-of-job" title="Output parameters" style="display: none"></div>
+        <div class="modal" id="dialog-parameters-of-job">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="dialog-parameters-of-job-label">Output parameters</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" id="parameters-ok">OK</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <h1><g:message code="crashRecovery.title"/></h1>
 
         <g:render template="/templates/quickNavigationBar" model="[
@@ -60,7 +108,7 @@
                 <li><strong>Mark as Succeeded:</strong> The Job succeeded. Next Job will be scheduled.</li>
                 <li><strong>Mark as Failed:</strong> The Job failed. No job of the same Process will be scheduled.</li>
                 <li><strong>Restart:</strong> The Job failed and is scheduled for another execution.</li>
-                 <li><strong>Start Scheduler:</strong> Tries to restart the Scheduler. Only use after all Jobs have been triaged.</li>
+                <li><strong>Start Scheduler:</strong> Tries to restart the Scheduler. Only use after all Jobs have been triaged.</li>
             </ul>
         </div>
         <table id="crashRecoveryTable">
@@ -75,11 +123,11 @@
             </thead>
         </table>
         <div>
-            <button id="markFinished">Mark as Finished</button>
-            <button id="markSucceeded">Mark as Succeeded</button>
-            <button id="markFailed">Mark as Failed</button>
-            <button id="restart">Restart</button>
-            <button id="startScheduler">Start Scheduler</button>
+            <button class="btn btn-primary" id="markFinished">Mark as Finished</button>
+            <button class="btn btn-primary" id="markSucceeded">Mark as Succeeded</button>
+            <button class="btn btn-primary" id="markFailed">Mark as Failed</button>
+            <button class="btn btn-primary" id="restart">Restart</button>
+            <button class="btn btn-primary" id="startScheduler">Start Scheduler</button>
         </div>
         </g:if>
         <g:else>

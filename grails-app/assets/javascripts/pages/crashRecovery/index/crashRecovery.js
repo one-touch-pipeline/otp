@@ -28,16 +28,8 @@ $.otp.crashRecovery.processingStepIds = function () {
   $('#crashRecoveryTable input[name=processingStep]:checked').each((index, element) => {
     ids.push($(element).val());
   });
-  if (!ids) {
-    $('#dialog-select-job').dialog({
-      modal: true,
-      buttons: {
-        Ok() {
-          $(this).dialog('close');
-        }
-      }
-    });
-    return null;
+  if (ids.length === 0) {
+    $('#dialog-select-job').modal('show');
   }
   return ids;
 };
@@ -45,42 +37,43 @@ $.otp.crashRecovery.processingStepIds = function () {
 $.otp.crashRecovery.createListView = function () {
   'use strict';
 
-  $.otp.createListView('#crashRecoveryTable', $.otp.createLink({
-    controller: 'crashRecovery',
-    action: 'datatable'
-  }), true, (json) => {
-    let i; let
-      rowData;
-    for (i = 0; i < json.aaData.length; i += 1) {
-      rowData = json.aaData[i];
-      rowData[0] = `<input type="checkbox" 
+  $.otp.createListView('#crashRecoveryTable',
+    $.otp.createLink({
+      controller: 'crashRecovery',
+      action: 'datatable'
+    }), true, (json) => {
+      let i;
+      let rowData;
+      for (i = 0; i < json.aaData.length; i++) {
+        rowData = json.aaData[i];
+        rowData[0] = `<input type="checkbox" 
                            name="processingStep" 
                            value="${rowData[0]}" ${(rowData[5] ? 'checked' : '')} />`;
-      rowData[1] = $.otp.createLinkMarkup({
-        controller: 'processes',
-        action: 'plan',
-        id: rowData[1].id,
-        text: rowData[1].name
-      });
-      rowData[2] = $.otp.createLinkMarkup({
-        controller: 'processes',
-        action: 'process',
-        id: rowData[2],
-        text: rowData[2]
-      });
-      rowData[3] = $.otp.createLinkMarkup({
-        controller: 'processes',
-        action: 'processingStep',
-        id: rowData[3].id,
-        text: rowData[3].name
-      });
-      rowData[4] = rowData[4].class;
-    }
-  },
-  undefined,
-  undefined,
-  140,
-  { bSort: false });
+        rowData[1] = $.otp.createLinkMarkup({
+          controller: 'processes',
+          action: 'plan',
+          id: rowData[1].id,
+          text: rowData[1].name
+        });
+        rowData[2] = $.otp.createLinkMarkup({
+          controller: 'processes',
+          action: 'process',
+          id: rowData[2],
+          text: rowData[2]
+        });
+        rowData[3] = $.otp.createLinkMarkup({
+          controller: 'processes',
+          action: 'processingStep',
+          id: rowData[3].id,
+          text: rowData[3].name
+        });
+        rowData[4] = rowData[4].class;
+      }
+    },
+    undefined,
+    undefined,
+    140,
+    { bSort: false });
 };
 
 $.otp.crashRecovery.showParametersDialog = function (ids, target) {
@@ -92,38 +85,28 @@ $.otp.crashRecovery.showParametersDialog = function (ids, target) {
     parameters: { ids }
   }), (data) => {
     const dialogContainer = $('#dialog-parameters-of-job');
-    dialogContainer.append($('#output-params-wrapper', data));
-    dialogContainer.dialog({
-      width: '500px',
-      buttons: [
-        {
-          text: 'OK',
-          click() {
-            const parameters = [];
-            $('ul li input', $(this)).each(function () {
-              parameters[parameters.length] = {
-                key: $(this).attr('name'),
-                value: $(this).val()
-              };
-            });
-            $.getJSON($.otp.createLink({
-              controller: target.controller,
-              action: target.action,
-              parameters: { ids }
-            }), `parameters=${JSON.stringify(parameters)}`, (response) => {
-              $('#crashRecoveryTable').dataTable().fnDraw();
-              $.otp.infoMessage(response.success);
-            });
-            $(this).dialog('close');
-          }
-        },
-        {
-          text: 'Cancel',
-          click() {
-            $(this).dialog('close');
-          }
+    $('.modal-body', dialogContainer).append($('#output-params-wrapper', data));
+    dialogContainer.modal('show');
+    $('#parameters-ok').on('click', () => {
+      const parameters = [];
+      $('ul li input', $(this)).each(function () {
+        parameters[parameters.length] = {
+          key: $(this).attr('name'),
+          value: $(this).val()
+        };
+      });
+      $.getJSON($.otp.createLink({
+        controller: target.controller,
+        action: target.action,
+        parameters: {
+          ids,
+          parameters: JSON.stringify(parameters)
         }
-      ]
+      }), (response) => {
+        $('#crashRecoveryTable').dataTable().fnDraw();
+        $.otp.toaster.showInfoToast(response.success);
+      });
+      dialogContainer.modal('hide');
     });
   });
 };
@@ -131,29 +114,23 @@ $.otp.crashRecovery.showParametersDialog = function (ids, target) {
 $.otp.crashRecovery.showFailedJobDialog = function (ids, target) {
   'use strict';
 
-  $('#dialog-error-message-job').dialog({
-    modal: true,
-    buttons: {
-      'Mark Job as Failed': function () {
-        let message = $('input', $(this)).val();
-        if (!message || message === '') {
-          message = null;
-          return;
-        }
-        $(this).dialog('close');
-        $.getJSON($.otp.createLink({
-          controller: target.controller,
-          action: target.action,
-          parameters: { ids }
-        }), { message }, (data) => {
-          $('#crashRecoveryTable').dataTable().fnDraw();
-          $.otp.infoMessage(data.success);
-        });
-      },
-      Cancel() {
-        $(this).dialog('close');
-      }
+  const dialog = $('#dialog-error-message-job');
+  dialog.modal('show');
+  $('#markAsFailed').on('click', () => {
+    let message = $('input', dialog).val();
+    if (!message || message === '') {
+      message = null;
+      return;
     }
+    dialog.modal('hide');
+    $.getJSON($.otp.createLink({
+      controller: target.controller,
+      action: target.action,
+      parameters: { ids }
+    }), { message }, (data) => {
+      $('#crashRecoveryTable').dataTable().fnDraw();
+      $.otp.toaster.showInfoToast(data.success);
+    });
   });
 };
 
@@ -161,7 +138,7 @@ $.otp.crashRecovery.finishedButton = function () {
   'use strict';
 
   const ids = $.otp.crashRecovery.processingStepIds();
-  if (!ids) {
+  if (ids.length === 0) {
     return;
   }
   $.otp.crashRecovery.showParametersDialog(ids, {
@@ -174,7 +151,7 @@ $.otp.crashRecovery.succeededButton = function () {
   'use strict';
 
   const ids = $.otp.crashRecovery.processingStepIds();
-  if (!ids) {
+  if (ids.length === 0) {
     return;
   }
   $.otp.crashRecovery.showParametersDialog(ids, {
@@ -187,7 +164,7 @@ $.otp.crashRecovery.failedButton = function () {
   'use strict';
 
   const ids = $.otp.crashRecovery.processingStepIds();
-  if (!ids) {
+  if (ids.length === 0) {
     return;
   }
   $.otp.crashRecovery.showFailedJobDialog(ids, {
@@ -200,7 +177,7 @@ $.otp.crashRecovery.restartButton = function () {
   'use strict';
 
   const ids = $.otp.crashRecovery.processingStepIds();
-  if (!ids) {
+  if (ids.length === 0) {
     return;
   }
   $.otp.crashRecovery.showFailedJobDialog(ids, {
@@ -217,10 +194,10 @@ $.otp.crashRecovery.startSchedulerButton = function () {
     action: 'startScheduler'
   }), (data) => {
     if (data.success) {
-      $.otp.infoMessage('Scheduler successfully restarted');
+      $.otp.toaster.showInfoToast('Scheduler successfully restarted');
     } else {
       $('#crashRecoveryTable').dataTable().fnDraw();
-      $.otp.warningMessage('Scheduler could not be restarted, check that all Jobs have been triaged');
+      $.otp.toaster.showErrorToast('Scheduler could not be restarted', 'check that all Jobs have been triaged');
     }
   });
 };
