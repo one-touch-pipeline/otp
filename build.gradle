@@ -272,7 +272,7 @@ dependencies {
     compile 'org.liquibase:liquibase-core:3.6.1'
 
     // support for java8 time classes
-    compile "org.hibernate:hibernate-java8:5.4.32.Final"
+    compile "org.hibernate:hibernate-java8:5.4.33.Final"
 
     compile "com.bertramlabs.plugins:asset-pipeline-grails:2.14.10"
     compile "com.bertramlabs.plugins:less-asset-pipeline:2.15.1"

@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.tracking
 
 import grails.core.GrailsApplication
+import grails.gorm.transactions.Transactional
 import grails.web.mapping.LinkGenerator
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
@@ -47,6 +48,7 @@ import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus
 
 @Slf4j
 @Component
+@Transactional
 class NotificationCreator {
 
     private static final List<Integer> MERGING_WORK_PACKAGE_NUMBERS = [1, 2].asImmutable()

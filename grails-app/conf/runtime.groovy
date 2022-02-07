@@ -86,7 +86,6 @@ String port = otpProperties.getProperty(OtpProperty.DATABASE_PORT.key)
 String database = otpProperties.getProperty(OtpProperty.DATABASE_SCHEMA.key)
 
 dataSource {
-    pooled = true
     driverClassName = "org.postgresql.Driver"
     dialect = PostgreSQL9Dialect
     username = otpProperties.getProperty(OtpProperty.DATABASE_USERNAME.key)
@@ -145,6 +144,7 @@ environments {
             cache.use_query_cache = false
         }
         dataSource {
+            logSql = false
             jmxExport = true
             String usePostgresDocker = System.properties['usePostgresDocker']
 
@@ -176,8 +176,6 @@ environments {
             cache.use_query_cache = false
         }
         dataSource {
-            pooled = true
-            jmxExport = true
             driverClassName = "org.h2.Driver"
             dialect = H2Dialect
             username = "sa"

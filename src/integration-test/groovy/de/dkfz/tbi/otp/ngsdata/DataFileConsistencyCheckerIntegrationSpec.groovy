@@ -34,7 +34,7 @@ class DataFileConsistencyCheckerIntegrationSpec extends AbstractIntegrationSpecW
     File testFolder
 
     void setupData() {
-        SessionUtils.withNewSession {
+        SessionUtils.withNewTransaction {
             DomainFactory.createAllAlignableSeqTypes()
 
             testFolder = temporaryFolder.newFolder("root")
@@ -54,7 +54,7 @@ class DataFileConsistencyCheckerIntegrationSpec extends AbstractIntegrationSpecW
         DataFile dataFile4
         DataFileConsistencyChecker dataFileConsistencyChecker = new DataFileConsistencyChecker()
 
-        SessionUtils.withNewSession {
+        SessionUtils.withNewTransaction {
             File initialFile1 = temporaryFolder.newFile("root/initial/fileName1")
             File initialFile2 = temporaryFolder.newFile("root/initial/fileName2")
             File initialFile3 = temporaryFolder.newFile("root/initial/fileName3")
@@ -90,7 +90,7 @@ class DataFileConsistencyCheckerIntegrationSpec extends AbstractIntegrationSpecW
         }
 
         when:
-        SessionUtils.withNewSession {
+        SessionUtils.withNewTransaction {
             dataFileConsistencyChecker.setFileExistsForAllDataFiles()
             dataFile1.refresh()
             dataFile2.refresh()
@@ -99,7 +99,7 @@ class DataFileConsistencyCheckerIntegrationSpec extends AbstractIntegrationSpecW
         }
 
         then:
-        SessionUtils.withNewSession {
+        SessionUtils.withNewTransaction {
             return dataFile1.fileExists &&
                     !dataFile2.fileExists &&
                     dataFile3.fileExists &&
@@ -113,7 +113,7 @@ class DataFileConsistencyCheckerIntegrationSpec extends AbstractIntegrationSpecW
 
         DataFileConsistencyChecker dataFileConsistencyChecker = new DataFileConsistencyChecker()
         DataFile dataFile
-        SessionUtils.withNewSession {
+        SessionUtils.withNewTransaction {
             FileType fileType = DomainFactory.createFileType(type: FileType.Type.SEQUENCE, subType: 'fastq', vbpPath: "/sequence/")
             SeqTrack seqTrack = DomainFactory.createSeqTrack(dataInstallationState: SeqTrack.DataProcessingState.FINISHED)
             dataFile = DomainFactory.createDataFile(fileType: fileType, seqTrack: seqTrack, fileLinked: false)
