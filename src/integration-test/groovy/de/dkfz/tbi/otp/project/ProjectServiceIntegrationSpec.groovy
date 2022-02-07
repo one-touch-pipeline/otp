@@ -21,11 +21,13 @@
  */
 package de.dkfz.tbi.otp.project
 
+import grails.gorm.transactions.Rollback
 import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
 import grails.validation.ValidationException
 import grails.web.mapping.LinkGenerator
+import org.grails.datastore.gorm.events.AutoTimestampEventListener
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import org.springframework.mock.web.MockMultipartFile
@@ -56,7 +58,9 @@ import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 import java.nio.file.*
 import java.nio.file.attribute.PosixFileAttributes
 import java.nio.file.attribute.PosixFilePermission
+import java.time.Instant
 import java.time.LocalDate
+import java.time.ZoneOffset
 import java.time.temporal.ChronoUnit
 
 @Rollback
@@ -71,6 +75,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
     ReferenceGenomeService referenceGenomeService
     RoddyWorkflowConfigService roddyWorkflowConfigService
     TestConfigService configService
+    AutoTimestampEventListener autoTimestampEventListener
 
     static final String FILE_NAME = "fileName"
     static final byte[] CONTENT = 0..3
@@ -1673,13 +1678,15 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
     void "test getCountOfProjectsForSpecifiedPeriod for given date"() {
         given:
         setupData()
-        Date baseDate = new Date(0, 0, 10)
-        Date startDate = startDateOffset == null ? null : Date.from(baseDate.toInstant().minus(startDateOffset, ChronoUnit.DAYS))
-        Date endDate = endDateOffset == null ? null : Date.from(baseDate.toInstant().minus(endDateOffset, ChronoUnit.DAYS))
+        Instant baseDate = LocalDate.of(2022, 1, 10).atStartOfDay().toInstant(ZoneOffset.UTC)
+        Date startDate = startDateOffset == null ? null : Date.from(baseDate.minus(startDateOffset, ChronoUnit.DAYS))
+        Date endDate = endDateOffset == null ? null : Date.from(baseDate.minus(endDateOffset, ChronoUnit.DAYS))
 
-        Project project = createProject()
-        project.dateCreated = Date.from(baseDate.toInstant().minus(1, ChronoUnit.DAYS))
-        project.save(flush: true)
+        Project project
+
+        autoTimestampEventListener.withoutDateCreated(Project) {
+            project = createProject(dateCreated: Date.from(baseDate.minus(1, ChronoUnit.DAYS)))
+        }
 
         when:
         int projects = projectService.getCountOfProjectsForSpecifiedPeriod(startDate, endDate, [project])

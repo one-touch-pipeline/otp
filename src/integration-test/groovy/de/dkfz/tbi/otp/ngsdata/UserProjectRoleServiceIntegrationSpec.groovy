@@ -26,6 +26,7 @@ import grails.plugin.springsecurity.SpringSecurityService
 import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
+import org.grails.datastore.gorm.events.AutoTimestampEventListener
 import org.grails.spring.context.support.PluginAwareResourceBundleMessageSource
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
@@ -45,6 +46,9 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.utils.*
 
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneOffset
 import java.time.temporal.ChronoUnit
 
 @Rollback
@@ -69,6 +73,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
     @Autowired
     GrailsApplication grailsApplication
 
+    AutoTimestampEventListener autoTimestampEventListener
     UserProjectRoleService userProjectRoleService
     TestConfigService configService
 
@@ -1205,13 +1210,16 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         given:
         setupData()
 
-        Date baseDate = new Date(0, 0, 10)
-        Date startDate = startDateOffset == null ? null : Date.from(baseDate.toInstant().minus(startDateOffset, ChronoUnit.DAYS))
-        Date endDate = endDateOffset == null ? null : Date.from(baseDate.toInstant().minus(endDateOffset, ChronoUnit.DAYS))
+        Instant baseDate = LocalDate.of(2022, 1, 10).atStartOfDay().toInstant(ZoneOffset.UTC)
+        Date startDate = startDateOffset == null ? null : Date.from(baseDate.minus(startDateOffset, ChronoUnit.DAYS))
+        Date endDate = endDateOffset == null ? null : Date.from(baseDate.minus(endDateOffset, ChronoUnit.DAYS))
 
-        UserProjectRole userProjectRole = createUserProjectRole()
-        userProjectRole.user.dateCreated = Date.from(baseDate.toInstant().minus(1, ChronoUnit.DAYS))
-        userProjectRole.user.save(flush: true)
+        UserProjectRole userProjectRole
+
+        autoTimestampEventListener.withoutDateCreated(User) {
+            User user = createUser(dateCreated: Date.from(baseDate.minus(1, ChronoUnit.DAYS)))
+            userProjectRole = createUserProjectRole(user: user)
+        }
 
         when:
         int users = userProjectRoleService.getNumberOfValidUsersForProjects([userProjectRole.project], startDate, endDate)

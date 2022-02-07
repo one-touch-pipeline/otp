@@ -23,15 +23,21 @@ package de.dkfz.tbi.otp.workflowExecution
 
 import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
+import org.grails.datastore.gorm.events.AutoTimestampEventListener
 import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryProcessingPriority
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 
+import java.time.Instant
+import java.time.temporal.ChronoUnit
+
 @Rollback
 @Integration
 class WorkflowRunServiceIntegrationSpec extends Specification implements WorkflowSystemDomainFactory, DomainFactoryProcessingPriority {
+
+    AutoTimestampEventListener autoTimestampEventListener
 
     void "nextWaitingWorkflow, if more workflows allowed and state is PENDING, then return workflowRun"() {
         given:
@@ -163,10 +169,10 @@ class WorkflowRunServiceIntegrationSpec extends Specification implements Workflo
     void "nextWaitingWorkflow, if multiple workflowRuns ready sharing the highest processingPriority and work priority, return the oldest"() {
         given:
         createWorkflowRunWithPriority(5, 8)
-        WorkflowRun workflowRun = createWorkflowRunWithPriority(5, 8)
         createWorkflowRunWithPriority(5, 8)
-        workflowRun.dateCreated = workflowRun.dateCreated - 5
-        workflowRun.save(flush: true)
+
+        WorkflowRun workflowRun =
+                createWorkflowRunWithPriority(5, 8, createWorkflow(), Date.from(Instant.now().minus(5, ChronoUnit.DAYS)))
 
         WorkflowRunService service = new WorkflowRunService()
 
@@ -194,17 +200,24 @@ class WorkflowRunServiceIntegrationSpec extends Specification implements Workflo
         return workflowRun
     }
 
-    private WorkflowRun createWorkflowRunWithPriority(int runPriority, int workflowPriority, Workflow workflow = createWorkflow()) {
-        workflow.priority = workflowPriority as short
-        workflow.maxParallelWorkflows = 1
-        workflow.save(flush: true)
-        WorkflowRun workflowRun = createWorkflowRun([
-                state   : WorkflowRun.State.PENDING,
-                priority: findOrCreateProcessingPriority([
-                        priority: runPriority,
-                ]),
-                workflow: workflow,
-        ])
+    private WorkflowRun createWorkflowRunWithPriority(int runPriority, int workflowPriority, Workflow wf = createWorkflow(), Date dateCreated = new Date()) {
+        wf.priority = workflowPriority as short
+        wf.maxParallelWorkflows = 1
+        wf.save(flush: true)
+
+        WorkflowRun workflowRun = null
+
+        autoTimestampEventListener.withoutDateCreated(WorkflowRun) {
+            workflowRun = createWorkflowRun([
+                    state   : WorkflowRun.State.PENDING,
+                    priority: findOrCreateProcessingPriority([
+                            priority: runPriority,
+                    ]),
+                    workflow: wf,
+                    dateCreated: dateCreated,
+            ])
+        }
+
         return workflowRun
     }
 }

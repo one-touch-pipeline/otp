@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
+import org.grails.datastore.gorm.events.AutoTimestampEventListener
+
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import grails.testing.mixin.integration.Integration
@@ -30,23 +32,30 @@ import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.project.Project
 
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneOffset
 import java.time.temporal.ChronoUnit
 
 @Rollback
 @Integration
 class SampleServiceIntegrationSpec extends Specification implements DomainFactoryCore {
+
     SampleService sampleService
+    AutoTimestampEventListener autoTimestampEventListener
 
     @Unroll
     void "test getCountOfSamplesForSpecifiedPeriodAndProjects for given date"() {
         given:
-        Date baseDate = new Date(0, 0, 10)
-        Date startDate = startDateOffset  == null ? null : Date.from(baseDate.toInstant().minus(startDateOffset, ChronoUnit.DAYS))
-        Date endDate = endDateOffset == null ? null : Date.from(baseDate.toInstant().minus(endDateOffset, ChronoUnit.DAYS))
+        Instant baseDate = LocalDate.of(2022, 1, 10).atStartOfDay().toInstant(ZoneOffset.UTC)
+        Date startDate = startDateOffset  == null ? null : Date.from(baseDate.minus(startDateOffset, ChronoUnit.DAYS))
+        Date endDate = endDateOffset == null ? null : Date.from(baseDate.minus(endDateOffset, ChronoUnit.DAYS))
 
-        Sample sample = createSample()
-        sample.dateCreated = Date.from(baseDate.toInstant().minus(1, ChronoUnit.DAYS))
-        sample.save(flush: true)
+        Sample sample
+
+        autoTimestampEventListener.withoutDateCreated(Sample) {
+            sample = createSample(dateCreated: Date.from(baseDate.minus(1, ChronoUnit.DAYS)))
+        }
 
         when:
         int samples = sampleService.getCountOfSamplesForSpecifiedPeriodAndProjects(startDate, endDate, [sample.project])

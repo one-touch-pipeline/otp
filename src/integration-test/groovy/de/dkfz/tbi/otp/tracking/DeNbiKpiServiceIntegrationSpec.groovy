@@ -23,11 +23,15 @@ package de.dkfz.tbi.otp.tracking
 
 import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
+import org.grails.datastore.gorm.events.AutoTimestampEventListener
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
+import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
+import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 import de.dkfz.tbi.otp.domainFactory.UserDomainFactory
 import de.dkfz.tbi.otp.domainFactory.pipelines.roddyRna.RoddyRnaFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
@@ -45,6 +49,7 @@ import java.time.temporal.ChronoUnit
 class DeNbiKpiServiceIntegrationSpec extends Specification implements RoddyRnaFactory, WorkflowSystemDomainFactory, UserDomainFactory {
 
     DeNbiKpiService deNbiKpiService
+    AutoTimestampEventListener autoTimestampEventListener
 
     Date startDate
     Date endDate
@@ -65,13 +70,16 @@ class DeNbiKpiServiceIntegrationSpec extends Specification implements RoddyRnaFa
                 seqType: DomainFactory.createWholeGenomeSeqType(),
                 pipeline: DomainFactory.createPanCanPipeline(),
         ])
-        RoddyBamFile roddyBamFile = createBamFile([
-                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
-                workPackage: workPackage,
-        ])
 
-        roddyBamFile.dateCreated = Date.from(startDate.toInstant().plus(1, ChronoUnit.DAYS))
-        roddyBamFile.save(flush: true)
+        RoddyBamFile roddyBamFile
+
+        autoTimestampEventListener.withoutDateCreated(RnaRoddyBamFile) {
+            roddyBamFile = createBamFile([
+                    fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
+                    workPackage: workPackage,
+                    dateCreated: Date.from(startDate.toInstant().plus(1, ChronoUnit.DAYS)),
+            ])
+        }
 
         // create more RoddyBamFiles (where the date criteria doesn't fit)
         createBamFile()
@@ -94,13 +102,16 @@ class DeNbiKpiServiceIntegrationSpec extends Specification implements RoddyRnaFa
                 pipeline: DomainFactory.createRoddyRnaPipeline(),
 
         ])
-        RnaRoddyBamFile rnaRoddyBamFile = createBamFile([
-                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
-                workPackage: workPackage,
-        ])
 
-        rnaRoddyBamFile.dateCreated = Date.from(startDate.toInstant().plus(1, ChronoUnit.DAYS))
-        rnaRoddyBamFile.save(flush: true)
+        RnaRoddyBamFile rnaRoddyBamFile
+
+        autoTimestampEventListener.withoutDateCreated(RnaRoddyBamFile) {
+            rnaRoddyBamFile = createBamFile([
+                    fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
+                    workPackage: workPackage,
+                    dateCreated: Date.from(startDate.toInstant().plus(1, ChronoUnit.DAYS)),
+            ])
+        }
 
         // create more RoddyBamFiles (where the date criteria doesn't fit)
         createBamFile()
@@ -122,13 +133,16 @@ class DeNbiKpiServiceIntegrationSpec extends Specification implements RoddyRnaFa
                 seqType: createSeqType([singleCell: true]),
                 pipeline: DomainFactory.createRoddyRnaPipeline(),
         ])
-        AbstractMergedBamFile singleCellBamFile = createBamFile([
-                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
-                workPackage: workPackage,
-        ])
 
-        singleCellBamFile.dateCreated = Date.from(startDate.toInstant().plus(1, ChronoUnit.DAYS))
-        singleCellBamFile.save(flush: true)
+        AbstractMergedBamFile singleCellBamFile
+
+        autoTimestampEventListener.withoutDateCreated(RnaRoddyBamFile) {
+            singleCellBamFile = createBamFile([
+                    fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
+                    workPackage: workPackage,
+                    dateCreated: Date.from(startDate.toInstant().plus(1, ChronoUnit.DAYS)),
+            ])
+        }
 
         when:
         DeNbiKpi kpi = deNbiKpiService.getCellRangerKpi(startDate, endDate)
@@ -148,13 +162,15 @@ class DeNbiKpiServiceIntegrationSpec extends Specification implements RoddyRnaFa
                 mergingWorkPackage1: workPackage,
         ])
 
-        BamFilePairAnalysis bamFileAnalysis = DomainFactory.createRunYapsaInstanceWithRoddyBamFiles([
-                processingState: AnalysisProcessingStates.FINISHED,
-                samplePair: samplePair,
-        ])
+        BamFilePairAnalysis bamFileAnalysis
 
-        bamFileAnalysis.dateCreated = Date.from(startDate.toInstant().plus(1, ChronoUnit.DAYS))
-        bamFileAnalysis.save(flush: true)
+        autoTimestampEventListener.withoutDateCreated(RunYapsaInstance) {
+            bamFileAnalysis = DomainFactory.createRunYapsaInstanceWithRoddyBamFiles([
+                    processingState: AnalysisProcessingStates.FINISHED,
+                    samplePair: samplePair,
+                    dateCreated: Date.from(startDate.toInstant().plus(1, ChronoUnit.DAYS)),
+            ])
+        }
 
         when:
         DeNbiKpi kpi = deNbiKpiService.getRunYapsaKpi(startDate, endDate)
@@ -174,13 +190,15 @@ class DeNbiKpiServiceIntegrationSpec extends Specification implements RoddyRnaFa
                 mergingWorkPackage1: workPackage,
         ])
 
-        BamFilePairAnalysis bamFileAnalysis = DomainFactory.createSnvInstanceWithRoddyBamFiles([
-                processingState: AnalysisProcessingStates.FINISHED,
-                samplePair: samplePair,
-        ])
+        BamFilePairAnalysis bamFileAnalysis
 
-        bamFileAnalysis.dateCreated = Date.from(startDate.toInstant().plus(1, ChronoUnit.DAYS))
-        bamFileAnalysis.save(flush: true)
+        autoTimestampEventListener.withoutDateCreated(SnvCallingInstance) {
+            bamFileAnalysis = DomainFactory.createSnvInstanceWithRoddyBamFiles([
+                    processingState: AnalysisProcessingStates.FINISHED,
+                    samplePair: samplePair,
+                    dateCreated: Date.from(startDate.toInstant().plus(1, ChronoUnit.DAYS)),
+            ])
+        }
 
         when:
         DeNbiKpi kpi = deNbiKpiService.getSnvCallingKpi(startDate, endDate)
@@ -200,13 +218,15 @@ class DeNbiKpiServiceIntegrationSpec extends Specification implements RoddyRnaFa
                 mergingWorkPackage1: workPackage,
         ])
 
-        BamFilePairAnalysis bamFileAnalysis = DomainFactory.createIndelCallingInstanceWithRoddyBamFiles([
-                processingState: AnalysisProcessingStates.FINISHED,
-                samplePair: samplePair,
-        ])
+        BamFilePairAnalysis bamFileAnalysis
 
-        bamFileAnalysis.dateCreated = Date.from(startDate.toInstant().plus(1, ChronoUnit.DAYS))
-        bamFileAnalysis.save(flush: true)
+        autoTimestampEventListener.withoutDateCreated(IndelCallingInstance) {
+            bamFileAnalysis = DomainFactory.createIndelCallingInstanceWithRoddyBamFiles([
+                    processingState: AnalysisProcessingStates.FINISHED,
+                    samplePair: samplePair,
+                    dateCreated: Date.from(startDate.toInstant().plus(1, ChronoUnit.DAYS)),
+            ])
+        }
 
         when:
         DeNbiKpi kpi = deNbiKpiService.getIndelKpi(startDate, endDate)
@@ -226,13 +246,15 @@ class DeNbiKpiServiceIntegrationSpec extends Specification implements RoddyRnaFa
                 mergingWorkPackage1: workPackage,
         ])
 
-        BamFilePairAnalysis bamFileAnalysis = DomainFactory.createSophiaInstanceWithRoddyBamFiles([
-                processingState: AnalysisProcessingStates.FINISHED,
-                samplePair: samplePair,
-        ])
+        BamFilePairAnalysis bamFileAnalysis
 
-        bamFileAnalysis.dateCreated = Date.from(startDate.toInstant().plus(1, ChronoUnit.DAYS))
-        bamFileAnalysis.save(flush: true)
+        autoTimestampEventListener.withoutDateCreated(SophiaInstance) {
+            bamFileAnalysis = DomainFactory.createSophiaInstanceWithRoddyBamFiles([
+                    processingState: AnalysisProcessingStates.FINISHED,
+                    samplePair: samplePair,
+                    dateCreated: Date.from(startDate.toInstant().plus(1, ChronoUnit.DAYS)),
+            ])
+        }
 
         when:
         DeNbiKpi kpi = deNbiKpiService.getSophiaKpi(startDate, endDate)
@@ -252,13 +274,15 @@ class DeNbiKpiServiceIntegrationSpec extends Specification implements RoddyRnaFa
                 mergingWorkPackage1: workPackage,
         ])
 
-        BamFilePairAnalysis bamFileAnalysis = DomainFactory.createAceseqInstanceWithRoddyBamFiles([
-                processingState: AnalysisProcessingStates.FINISHED,
-                samplePair: samplePair,
-        ])
+        BamFilePairAnalysis bamFileAnalysis
 
-        bamFileAnalysis.dateCreated = Date.from(startDate.toInstant().plus(1, ChronoUnit.DAYS))
-        bamFileAnalysis.save(flush: true)
+        autoTimestampEventListener.withoutDateCreated(AceseqInstance) {
+            bamFileAnalysis = DomainFactory.createAceseqInstanceWithRoddyBamFiles([
+                    processingState: AnalysisProcessingStates.FINISHED,
+                    samplePair: samplePair,
+                    dateCreated: Date.from(startDate.toInstant().plus(1, ChronoUnit.DAYS)),
+            ])
+        }
 
         when:
         DeNbiKpi kpi = deNbiKpiService.getAceseqKpi(startDate, endDate)
@@ -272,21 +296,26 @@ class DeNbiKpiServiceIntegrationSpec extends Specification implements RoddyRnaFa
 
     void "getClusterJobKpi, when cluster job executions are started between the given dates, then return the cluster jobs KPI"() {
         given:
-        ClusterJob oldClusterJob = createClusterJob([
-                workflowStep: null,
-                individual: createIndividual(),
-                oldSystem: true,
-        ])
-        oldClusterJob.dateCreated = Date.from(startDate.toInstant().plus(1, ChronoUnit.DAYS))
-        oldClusterJob.save(flush: true)
+        ClusterJob oldClusterJob
+        ClusterJob newClusterJob
 
-        ClusterJob newClusterJob = createClusterJob([
-                workflowStep: createWorkflowStep(),
-                individual: null,
-                oldSystem: false,
-        ])
-        newClusterJob.dateCreated = Date.from(startDate.toInstant().plus(1, ChronoUnit.DAYS))
-        newClusterJob.save(flush: true)
+        autoTimestampEventListener.withoutDateCreated(ClusterJob) {
+            oldClusterJob = createClusterJob([
+                    workflowStep: null,
+                    individual: createIndividual(),
+                    oldSystem: true,
+                    dateCreated: Date.from(startDate.toInstant().plus(1, ChronoUnit.DAYS)),
+            ])
+        }
+
+        autoTimestampEventListener.withoutDateCreated(ClusterJob) {
+            newClusterJob = createClusterJob([
+                    workflowStep: createWorkflowStep(),
+                    individual: null,
+                    oldSystem: false,
+                    dateCreated: Date.from(startDate.toInstant().plus(1, ChronoUnit.DAYS)),
+            ])
+        }
 
         // create more cluster jobs with newer start date
         createClusterJob()

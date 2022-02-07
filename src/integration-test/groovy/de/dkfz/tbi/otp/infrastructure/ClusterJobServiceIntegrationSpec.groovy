@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.infrastructure
 
 import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
+import org.grails.datastore.gorm.events.AutoTimestampEventListener
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -30,7 +31,6 @@ import de.dkfz.roddy.config.ResourceSet
 import de.dkfz.roddy.execution.jobs.GenericJobInfo
 import de.dkfz.roddy.tools.BufferValue
 import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
@@ -56,7 +56,7 @@ class ClusterJobServiceIntegrationSpec extends Specification implements DomainFa
     static final Long GIB_TO_KIB = 1024 * 1024
 
     ClusterJobService clusterJobService
-    ConfigService configService
+    AutoTimestampEventListener autoTimestampEventListener
 
     SeqType seqType
 
@@ -628,10 +628,11 @@ class ClusterJobServiceIntegrationSpec extends Specification implements DomainFa
         Date endDate = endDateOffset == null ? null : Date.from(baseDate.toInstant().minus(endDateOffset, ChronoUnit.DAYS))
 
         Individual individual = createIndividual()
+        ClusterJob clusterJob
 
-        ClusterJob clusterJob = DomainFactory.createClusterJob('individual': individual)
-        clusterJob.dateCreated = Date.from(baseDate.toInstant().minus(1, ChronoUnit.DAYS))
-        clusterJob.save(flush: true)
+        autoTimestampEventListener.withoutDateCreated(ClusterJob) {
+            clusterJob = DomainFactory.createClusterJob(individual: individual, dateCreated: Date.from(baseDate.toInstant().minus(1, ChronoUnit.DAYS)))
+        }
 
         when:
         int clusterJobs = clusterJobService.getNumberOfClusterJobsForSpecifiedPeriodAndProjects(startDate, endDate, [clusterJob.individual.project])
