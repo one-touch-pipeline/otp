@@ -329,6 +329,7 @@ class DeletionService {
         AlignmentPass.findAllBySeqTrack(seqTrack).each { AlignmentPass alignmentPass ->
             MergingWorkPackage mergingWorkPackage = alignmentPass.workPackage
             mergingWorkPackage.bamFileInProjectFolder = null
+            mergingWorkPackage.seqTracks.remove(seqTrack)
             mergingWorkPackage.save(flush: true)
             ProcessedBamFile.findAllByAlignmentPass(alignmentPass).each { ProcessedBamFile processedBamFile ->
                 deleteQualityAssessmentInfoForAbstractBamFile(processedBamFile)
