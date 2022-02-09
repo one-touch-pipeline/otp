@@ -37,7 +37,7 @@ import de.dkfz.tbi.otp.ngsdata.StatisticService
 class InfoController {
     static allowedMethods = [
             about               : "GET",
-            imprint             : "POST",
+            imprint             : "GET",
             numbers             : "GET",
             faq                 : "GET",
             contact             : "GET",
