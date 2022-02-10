@@ -138,7 +138,7 @@ class JobMailServiceIntegrationSpec extends Specification implements DomainFacto
         ])
 
         when:
-        jobMailService.sendErrorNotification(job, new RuntimeException("RuntimeException"))
+        jobMailService.sendErrorNotification(job, "No Exception message")
 
         then:
         noExceptionThrown()

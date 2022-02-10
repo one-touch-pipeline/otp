@@ -179,7 +179,7 @@ class Scheduler {
             log.debug("doCreateCheck performed for ${job} with ProcessingStep ${job.processingStep.id}")
             job.start()
         } catch (RuntimeException e) {
-            jobMailService.sendErrorNotification(job, e)
+            jobMailService.sendErrorNotification(job, e?.message ?: "No Exception message")
             // removing Job from running
             schedulerService.removeRunningJob(job)
             throw new SchedulerException("doCreateCheck failed for Job of type ${job.class}", e)
@@ -270,7 +270,7 @@ class Scheduler {
             log.debug("doErrorHandling performed for ${job.class} with ProcessingStep ${step.id}")
             restartHandlerService.handleRestart(job)
         } finally {
-            jobMailService.sendErrorNotification(job, exceptionToBeHandled)
+            jobMailService.sendErrorNotification(job, exceptionToBeHandled?.message ?: "No Exception message")
         }
     }
 

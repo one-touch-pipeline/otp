@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.job
 
-import grails.core.GrailsApplication
 import grails.gorm.transactions.Transactional
 
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
@@ -42,17 +41,9 @@ class JobMailService {
 
     ProcessService processService
 
-    GrailsApplication grailsApplication
-
     JobStatusLoggingService jobStatusLoggingService
 
     OtrsTicketService otrsTicketService
-
-    void sendErrorNotification(Job job, Throwable exceptionToBeHandled) {
-        assert job: 'job may not be null'
-        assert exceptionToBeHandled: 'exceptionToBeHandled may not be null'
-        sendErrorNotification(job, exceptionToBeHandled.message)
-    }
 
     void sendErrorNotification(Job job, String errorMessage) {
         assert job: 'job may not be null'

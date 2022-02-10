@@ -527,7 +527,7 @@ class SchedulerService {
                     }
                 }
             } catch (Throwable t) {
-                jobMailService.sendErrorNotification(job, t)
+                jobMailService.sendErrorNotification(job, t?.message ?: "No Exception message")
                 throw t
             }
         }

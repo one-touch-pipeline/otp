@@ -253,7 +253,7 @@ class SchedulerIntegrationTests implements UserAndRoles {
             processingStep: step
         )
         boolean notified = false
-        scheduler.jobMailService.metaClass.sendErrorNotification = { Job job2, Throwable exceptionToBeHandled ->
+        scheduler.jobMailService.metaClass.sendErrorNotification = { Job job2, String errorMessage ->
             if (notified) {
                 assert false: 'called twice'
             } else {
