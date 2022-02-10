@@ -943,27 +943,39 @@ td div {
         margin-right: 30px;
     }
 }
-.ui-autocomplete {
+
+// for typeahead.js
+.tt-menu{
     max-height: 200px;
     overflow-y: auto;
+    width: 100%;
     overflow-x: hidden;
     border: 2px solid #DFDFDF;
-}
-.ui-menu .ui-menu-item {
     float: none;
     clear: none;
-    td {
+    td, div {
         border-right: 1px solid #DFDFDF;
         padding: 0px 5px 0px;
         white-space: nowrap;
     }
-    tr {
+    tr, div {
         background: white;
         color: black;
     }
     tr:hover {
         background: #A5D3FF;
     }
+}
+.tt-dataset {
+    cursor: pointer;
+    display: table;
+    width: 100%;
+    .tt-suggestion {
+        display: table-row;
+    }
+}
+.twitter-typeahead {
+    width: 100%;
 }
 
 .table-with-fixed-header {

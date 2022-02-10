@@ -20,53 +20,6 @@
  * SOFTWARE.
  */
 
-// Override jQuery-UI functions to allow rendering of table
-// eslint-disable-next-line no-underscore-dangle
-$.ui.autocomplete.prototype._renderMenu = function (ul, items) {
-  const self = this;
-  ul.append("<table style='margin-right: 20px'></table>");
-  $.each(items, (index, item) => {
-    // eslint-disable-next-line no-underscore-dangle
-    self._renderItemData(ul, ul.find('table'), item);
-  });
-};
-
-// eslint-disable-next-line no-underscore-dangle
-$.ui.autocomplete.prototype._renderItemData = function (ul, table, item) {
-  // eslint-disable-next-line no-underscore-dangle
-  return this._renderItem(table, item).data('ui-autocomplete-item', item);
-};
-
-// eslint-disable-next-line no-underscore-dangle
-$.ui.autocomplete.prototype._renderItem = function (table, item) {
-  let autocompleteContent = `<td class='ui-state-disabled'>${item.placeholder}</td>`;
-
-  if (item.user) {
-    // the a-tag allows the select callback without destroying the table and serves as a search-column
-    autocompleteContent = `<td style='display: none'><a>${item.value}</a></td>` +
-      `<td>${item.user.realName || '-'}</td>` +
-      `<td>${item.user.username || '-'}</td>` +
-      `<td>${item.user.email || '-'}</td>` +
-      `<td>${item.user.department || '-'}</td>`;
-  }
-
-  return $("<tr class='ui-menu-item'></tr>")
-    .append(autocompleteContent)
-    .appendTo(table);
-};
-
-const renderPlaceholder = function (searchElement, placeholderContent) {
-  searchElement.autocomplete({
-    minLength: 1,
-    delay: 0,
-    source: [{
-      value: searchElement.val(),
-      placeholder: placeholderContent
-    }]
-  });
-  searchElement.data('uiAutocomplete').search(searchElement.val());
-};
-
 $(() => {
   const failure = function (title, message) {
     if ($.otp.toaster) {
@@ -76,72 +29,53 @@ $(() => {
     }
   };
 
-  $('.user-auto-complete').on('input', 'input', (e) => {
-    'use strict';
-
-    const searchElement = $(e.target);
-    const searchLength = searchElement.val().length;
-
-    if (searchLength < 3) {
-      renderPlaceholder(
-        searchElement,
-        `Please enter ${3 - searchLength} more letter${3 - searchLength > 1 ? 's' : ''}...`
-      );
-    } else {
-      renderPlaceholder(searchElement, 'Loading...');
-
-      $.ajax({
-        type: 'GET',
-        url: $.otp.createLink({
-          controller: 'ldap',
-          action: 'getUserSearchSuggestions',
-          parameters: {
-            searchString: searchElement.val()
-          }
-        }),
-        dataType: 'json',
-        success(result) {
-          const suggestionMap = [];
-          let focused = '';
-
-          for (let i = 0; i < result.length; i++) {
-            suggestionMap.push({
-              // autocomplete completes with the 'value' column
-              value: [result[i].username, result[i].realName, result[i].mail].join(';'),
-              user: {
-                username: result[i].username,
-                realName: result[i].realName,
-                email: result[i].mail,
-                department: result[i].department
+  const userAutocomplete = function (elements) {
+    $(elements).typeahead(
+      {
+        highlight: true,
+        hint: false
+      },
+      {
+        display: 'username',
+        limit: 1000,
+        source: (query, syncResults, asyncResults) => {
+          $.ajax({
+            type: 'GET',
+            url: $.otp.createLink({
+              controller: 'ldap',
+              action: 'getUserSearchSuggestions',
+              parameters: {
+                searchString: query
               }
-            });
-          }
-          searchElement.autocomplete({
-            minLength: 3,
-            delay: 0,
-            source: suggestionMap,
-
-            select(event, ui) {
-              event.stopPropagation();
-              if (ui.item && ui.item.user) {
-                $(this).val(ui.item.user.username);
-              } else {
-                $(this).val(focused); // needed to prevent missing focus on first selected item
-              }
-              return false;
+            }),
+            dataType: 'json',
+            success(result) {
+              asyncResults(result);
             },
-            focus(event, ui) {
-              if (ui.item && ui.item.user) {
-                focused = ui.item.user.username;
-              }
+            error(jqXHR, textStatus, errorThrown) {
+              failure(`${textStatus} occurred while processing the data.`, `Reason: ${errorThrown}`);
             }
           });
-          searchElement.data('uiAutocomplete').search(searchElement.val());
         },
-        error(jqXHR, textStatus, errorThrown) {
-          failure(`${textStatus} occurred while processing the data.`, `Reason: ${errorThrown}`);
+        templates: {
+          empty: '<div>Unable to find user matching your query.</div>',
+          pending: '<div>Searching...</div>',
+          suggestion: (result) => (result.minLength ? '<strong>Please type at least three letters</strong>' :
+            `<tr><td>${result.realName}</td><td>${result.username}</td>
+             <td>${result.mail}</td><td>${result.department}</td></tr>`)
+
         }
-      });
+      }
+    );
+  };
+
+  // add autocompletion to inputs inside elements with class user-auto-complete, if it wasn't added yet
+  $('.user-auto-complete').on('input', 'input.autocompleted', (e) => {
+    const target = $(e.target);
+    if (target.parent('.twitter-typeahead').length === 0) {
+      userAutocomplete(target);
+      // adding autocompletion makes the input lose focus
+      target.focus();
     }
   });
 });

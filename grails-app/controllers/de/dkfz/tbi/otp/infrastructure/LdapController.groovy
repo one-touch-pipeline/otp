@@ -44,6 +44,10 @@ class LdapController {
      * @return list of all users from the ldap system which fit the search criteria
      */
     def getUserSearchSuggestions(UserSearchSuggestionsCommand cmd) {
+        if (cmd.searchString.length() < 3) {
+            return render([[minLength: true]] as JSON)
+        }
+
         List<LdapUserDetails> ldapUsers = ldapService.getListOfLdapUserDetailsByUsernameOrMailOrRealName(cmd.searchString)
 
         Set<String> otpUserNames = userService.getAllUserNamesOfOtpUsers(ldapUsers*.username)

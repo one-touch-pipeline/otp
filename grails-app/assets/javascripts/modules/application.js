@@ -33,6 +33,7 @@
 //= require /webjars/datatables.net-scroller/js/dataTables.scroller.js
 //= require /webjars/datatables.net-scroller-bs4/js/scroller.bootstrap4.js
 //= require /webjars/select2/4.0.13/js/select2.full.js
+//= require /webjars/corejs-typeahead/1.3.1/dist/typeahead.jquery.js
 
 //= require otp.js
 //= require banner.js
