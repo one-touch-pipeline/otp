@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2022 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,16 +20,18 @@
  * SOFTWARE.
  */
 
-import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 import java.nio.file.Files
+import java.nio.file.Path
 
 /*
 input area
  */
 // here you can list all Ilse numbers (1, 2, 3, ...) you want to see the fastq files for
-def ilseNumbers = []
+List<Integer> ilseNumbers = []
 // only provides an overview of what will be done per file
 boolean overview = true
 // change to true if you are sure that the changed md5sum is okay
@@ -41,36 +43,38 @@ boolean validateMd5 = false
 script part
  */
 LsdfFilesService lsdfFilesService = ctx.lsdfFilesService
+FileService fileService = ctx.fileService
 
-def transferDataAndCorrectDB(File finalPath, File orginialPathResolved, DataFile df, def script, boolean  validateMd5, def md5Check) {
-    File md5 = new File(orginialPathResolved.parent, "${orginialPathResolved.name}.md5sum")
-    Long size = orginialPathResolved.size().toLong()
-    script << "cp ${orginialPathResolved} ${finalPath}.tmp && mv ${finalPath}.tmp ${finalPath} && chgrp ${df.project.unixGroup} ${finalPath} && chmod 440 ${finalPath}"
-    df.fileSize = size
+static def transferDataAndCorrectDB(Path finalPath, Path originalPathResolved, DataFile df, def script, boolean validateMd5, def md5Check, FileService fileService) {
+    Path md5sumPath = finalPath.parent.resolve("${finalPath.fileName}.md5sum")
+    if (Files.exists(md5sumPath)) {
+        Files.delete(md5sumPath)
+    }
+    String content = "${df.md5sum}  ${finalPath.fileName}"
+    fileService.createFileWithContentOnDefaultRealm(md5sumPath, content)
 
-    if (md5.exists()) {
-        script << "cp ${orginialPathResolved}.md5sum ${finalPath}.md5sum.tmp && mv ${finalPath}.md5sum.tmp ${finalPath}.md5sum && chgrp ${df.project.unixGroup} ${finalPath}.md5sum && chmod 440 ${finalPath}.md5sum"
-        String md5summe = md5.text.split(" ")[0]
-        df.md5sum = md5summe
-        if(validateMd5) {
-            md5Check << "md5sum -c ${finalPath}.md5sum"
-        }
+    script << "rsync -uvL --group=${df.project.unixGroup} --perms=440 ${originalPathResolved} ${finalPath}"
+
+    if (validateMd5) {
+        md5Check << "cd ${md5sumPath.parent} && md5sum -c ${md5sumPath}" //check md5sum from otp
     }
 
-    script << ""
-    assert df.save(flush: true)
+    Long size = originalPathResolved.size().toLong()
+    df.fileSize = size
+    df.save(flush: true)
 }
 
-assert ilseNumbers : "Please provide at least one ilse number"
+assert ilseNumbers: "Please provide at least one ilse number"
 
-def notRegisteredIlseNumbers = []
-def submissions = []
-def script = []
-def md5Check = []
+List<Integer> notRegisteredIlseNumbers = []
+List<IlseSubmission> submissions = []
+List<String> script = []
+List<String> md5Check = []
+
 SeqTrack.withTransaction {
-    ilseNumbers.each { ilseNumber ->
+    ilseNumbers.each { Integer ilseNumber ->
         try {
-            def submission = CollectionUtils.exactlyOneElement(IlseSubmission.findAllByIlseNumber(ilseNumber))
+            IlseSubmission submission = CollectionUtils.exactlyOneElement(IlseSubmission.findAllByIlseNumber(ilseNumber as int))
             submissions << submission
         } catch (AssertionError e) {
             notRegisteredIlseNumbers << ilseNumber
@@ -86,57 +90,58 @@ SeqTrack.withTransaction {
         println "The following files would be copied since the source still exists and the copied file is gone"
     }
 
-    submissions.each { submission ->
-        SeqTrack.findAllByIlseSubmission(submission).each { s ->
-            s.dataFiles.each { df ->
-                File finalPath = new File(lsdfFilesService.getFileFinalPath(df))
-                File initialPath = new File (lsdfFilesService.getFileInitialPath(df))
+    submissions.each { IlseSubmission submission ->
+        SeqTrack.findAllByIlseSubmission(submission).each { SeqTrack seqTrack ->
+            seqTrack.dataFiles.each { DataFile df ->
+                Path finalPath = lsdfFilesService.getFileFinalPathAsPath(df)
+                Path initialPath = lsdfFilesService.getFileInitialPathAsPath(df, finalPath.fileSystem)
 
-                if (!initialPath.exists()) {
+                if (!Files.exists(initialPath)) {
                     if (overview) {
                         println "SKIP SINCE ORIGIN CAN NOT BE RETRIEVED BASED ON: ${initialPath}"
                     }
-                } else if (!(initialPath.toPath().toRealPath().toFile().exists())) {
+                } else if (!(Files.exists(initialPath.toRealPath()))) {
                     if (overview) {
-                        println "SKIP SINCE ORIGIN DOES NOT EXIST: ${initialPath.toPath().toRealPath().toFile()}"
+                        println "SKIP SINCE ORIGIN DOES NOT EXIST: ${initialPath.toRealPath()}"
                     }
                 } else {
-                    File orginialPathResolved = initialPath.toPath().toRealPath().toFile()
-                    boolean isSymbolicLink = Files.isSymbolicLink(finalPath.toPath())
+                    Path originalPathResolved = initialPath.toRealPath()
+                    boolean isSymbolicLink = Files.isSymbolicLink(finalPath)
 
-                    if ((!finalPath.exists() || isSymbolicLink) && orginialPathResolved.exists() && orginialPathResolved.canRead()) {
+                    if ((!Files.exists(finalPath) || isSymbolicLink) && Files.exists(originalPathResolved) && Files.isReadable(originalPathResolved)) {
+
                         if (overview) {
-                            println "copy ${orginialPathResolved}* to ${finalPath.parent}"
+                            println "copy ${originalPathResolved}* to ${finalPath.parent}"
                         } else {
-                            transferDataAndCorrectDB(finalPath, orginialPathResolved, df, script, validateMd5, md5Check)
+                            transferDataAndCorrectDB(finalPath, originalPathResolved, df, script, validateMd5, md5Check, fileService)
                         }
                     } else {
-                        if (finalPath.exists() && orginialPathResolved.exists() && orginialPathResolved.canRead()) {
-                            File md5sum = new File(orginialPathResolved.parent, "${orginialPathResolved.name}.md5sum")
-                            if (!md5sum.exists()) {
+                        if (Files.exists(finalPath) && Files.exists(originalPathResolved) && Files.isReadable(originalPathResolved)) {
+                            Path md5sum = originalPathResolved.resolveSibling("${originalPathResolved.fileName}.md5sum")
+                            if (!Files.exists(md5sum)) {
                                 if (overview) {
-                                    println "SKIP SINCE FILE EXISTS with unknown md5sum: copy ${orginialPathResolved}* to ${finalPath.parent}"
+                                    println "SKIP SINCE FILE EXISTS with unknown md5sum: copy ${originalPathResolved} to ${finalPath.parent}"
                                 }
                             } else if (md5sum.text.contains(df.md5sum)) {
                                 if (overview) {
-                                    println "SKIP SINCE FILE EXISTS with correct md5sum: copy ${orginialPathResolved}* to ${finalPath.parent}"
+                                    println "SKIP SINCE FILE EXISTS with correct md5sum: copy ${originalPathResolved} to ${finalPath.parent}"
                                 }
                             } else {
                                 if (overview) {
-                                    println "FILE EXISTS already but MD5 is different: skip copy ${orginialPathResolved}* to ${finalPath.parent} " +
+                                    println "FILE EXISTS already but MD5 is different: skip copy ${originalPathResolved} to ${finalPath.parent} " +
                                             "(or change the flag to true)"
                                 } else {
                                     if (checked) {
-                                        transferDataAndCorrectDB(finalPath, orginialPathResolved, df, script, validateMd5, md5Check)
+                                        transferDataAndCorrectDB(finalPath, originalPathResolved, df, script, validateMd5, md5Check, fileService)
                                     }
                                 }
                             }
-                        } else if (!orginialPathResolved.canRead()) {
+                        } else if (!Files.isReadable(originalPathResolved)) {
                             if (overview) {
-                                println "SKIP SINCE ORIGIN IS NOT READABLE: copy ${orginialPathResolved}* to ${finalPath.parent}"
+                                println "SKIP SINCE ORIGIN IS NOT READABLE: copy ${originalPathResolved}* to ${finalPath.parent}"
                             }
-                        } else  {
-                            assert false : "This case should not occur -> contact software developer"
+                        } else {
+                            assert false: "This case should not occur -> contact software developer"
                         }
                     }
                 }
@@ -154,10 +159,10 @@ SeqTrack.withTransaction {
         if (md5Check) {
             println md5Check.join("\n")
         }
-    } else if (!overview){
+    } else if (!overview) {
         println "nothing to copy"
     } else {
-        println "only overview modus so no copy script"
+        println "only overview mode so no copy script"
     }
 }
 
