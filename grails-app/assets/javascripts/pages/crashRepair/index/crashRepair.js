@@ -276,7 +276,7 @@ function startWorkflowSystem() {
 
 function restartSelectedSteps() {
   getSelectedSteps((steps) => {
-    steps.forEach((step) => {
+    steps.each((index, step) => {
       restartStep(step);
     });
   });
@@ -284,7 +284,7 @@ function restartSelectedSteps() {
 
 function restartSelectedWorkflowRuns() {
   getSelectedSteps((steps) => {
-    steps.forEach((step) => {
+    steps.each((index, step) => {
       restartWorkflowRun(step);
     });
   });
@@ -292,7 +292,7 @@ function restartSelectedWorkflowRuns() {
 
 function markSelectedStepsAsFailed() {
   getSelectedSteps((steps) => {
-    steps.forEach((step) => {
+    steps.each((index, step) => {
       setWorkflowStepAsFailed(step);
     });
   });
@@ -300,7 +300,7 @@ function markSelectedStepsAsFailed() {
 
 function markSelectedRunsAsFinalFailed() {
   getSelectedSteps((steps) => {
-    steps.forEach((step) => {
+    steps.each((index, step) => {
       setWorkflowRunAsFinalFailed(step);
     });
   });
