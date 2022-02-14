@@ -148,7 +148,7 @@
             </div>
 
             <div class="col-sm-5">
-                <g:select class="use-select-2 form-control"
+                <g:select class="use-select-2 form-control w-100"
                           id="storagePeriod"
                           name="storagePeriod"
                           from="${storagePeriod}"
