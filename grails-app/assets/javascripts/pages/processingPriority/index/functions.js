@@ -61,7 +61,11 @@ $.otp.processingPriority = {
     const entityId = data[this.mapFieldIndex.id];
     const entityName = data[this.mapFieldIndex.name];
     $.ajax({
-      url: `delete/${entityId}`,
+      url: $.otp.createLink({
+        controller: 'ProcessingPriority',
+        action: 'delete',
+        id: entityId
+      }),
       type: 'DELETE',
       success() {
         oTable.row(rowIndex).remove().draw();
@@ -177,15 +181,20 @@ $.otp.processingPriority = {
     const version = $('#pp-version').val();
     const form = $('#processingPriorityForm');
 
-    let type; let
-      url;
+    const type = 'POST';
+    let url;
     if (entityId > 0) {
-      type = 'PUT';
-      url = `update/${entityId}`;
+      url = $.otp.createLink({
+        controller: 'ProcessingPriority',
+        action: 'update',
+        id: entityId
+      });
       $('form input#pp-id').prop('disabled', false);
     } else {
-      type = 'POST';
-      url = 'save';
+      url = $.otp.createLink({
+        controller: 'ProcessingPriority',
+        action: 'save'
+      });
       $('form input#pp-id').prop('disabled', true);
     }
     const data = form.serialize();
@@ -209,12 +218,16 @@ $.otp.processingPriority = {
           oData[1] = 0;
           oTable.row.add(oData).draw();
         }
-        $.otp.toaster.showSuccessToast('Save Processing Priority',
-          `Processing Priority ${oData[$.otp.processingPriority.mapFieldIndex.name]} has been saved.`);
+        $.otp.toaster.showSuccessToast(
+          'Save Processing Priority',
+          `Processing Priority ${oData[$.otp.processingPriority.mapFieldIndex.name]} has been saved.`
+        );
       },
       error() {
-        $.otp.toaster.showErrorToast('Failed Saving Processing Priority',
-          'Make sure that both name and priority are globally unique.');
+        $.otp.toaster.showErrorToast(
+          'Failed Saving Processing Priority',
+          'Make sure that both name and priority are globally unique.'
+        );
       }
     }).always(() => {
       $.otp.processingPriority.closeDialog();
@@ -282,7 +295,11 @@ $(document).ready(() => {
     // call backend to fetch the referring objects if exist
     $.ajax({
       type: 'get',
-      url: `refer/${aData[0]}`,
+      url: $.otp.createLink({
+        controller: 'ProcessingPriority',
+        action: 'refer',
+        id: aData[0]
+      }),
       success(response) {
         if ($.isEmptyObject(response)) {
           const oDialog = $.otp.processingPriority.openDialog();
@@ -303,8 +320,10 @@ $(document).ready(() => {
         }
       },
       error() {
-        $.otp.toaster.showErrorToast('Check Processing Priority References',
-          'Check OTP server logs for detailed information');
+        $.otp.toaster.showErrorToast(
+          'Check Processing Priority References',
+          'Check OTP server logs for detailed information'
+        );
       }
     });
   });

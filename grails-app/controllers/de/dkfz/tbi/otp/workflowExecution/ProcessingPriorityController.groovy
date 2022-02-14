@@ -35,7 +35,7 @@ class ProcessingPriorityController {
             index: "GET",
             refer: "GET",
             save: "POST",
-            update: "PUT",
+            update: "POST",
             delete: "DELETE",
     ]
 
@@ -53,16 +53,19 @@ class ProcessingPriorityController {
             response.contentType = "application/json"
             render savedProcessingPriority as JSON
         } catch (ValidationException e) {
+            log.debug(e.localizedMessage)
             response.sendError(HttpStatus.BAD_REQUEST.value(), g.message(code: "processingPriority.store.failure") as String)
         }
     }
 
+    @SuppressWarnings(['ExplicitFlushForSaveRule'])
     JSON update(ProcessingPriority processingPriority) {
+        log.debug("update: ${processingPriority}")
         if (processingPriority == null) {
             response.sendError(HttpStatus.BAD_REQUEST.value(), g.message(code: "processingPriority.store.failure") as String)
         }
 
-        render save(processingPriority)
+        return save(processingPriority)
     }
 
     def delete(Long id) {
