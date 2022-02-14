@@ -212,6 +212,7 @@ class ProjectService {
         }
 
         if (projectParams.projectRequest) {
+            projectParams.projectRequest.project = project
             projectRequestStateProvider.setState(projectParams.projectRequest, Created)
             if (!projectParams.ignoreUsersFromBaseObjects) {
                 projectRequestService.addProjectRequestUsersToProject(projectParams.projectRequest)

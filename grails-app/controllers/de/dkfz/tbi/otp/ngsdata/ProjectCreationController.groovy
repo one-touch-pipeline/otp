@@ -58,9 +58,6 @@ class ProjectCreationController {
     ProjectGroupService projectGroupService
     ProcessingPriorityService processingPriorityService
 
-    @Autowired
-    ProjectRequestStateProvider projectRequestStateProvider
-
     private void handleSubmitEvent(ProjectCreationCommand cmd) {
         flash.cmd = cmd
         redirect(action: "index")
@@ -177,8 +174,9 @@ class ProjectCreationController {
             } else {
                 try {
                     Project project = projectService.createProject(cmd)
-                    projectRequestStateProvider.setState(cmd.projectRequest, Created)
-                    projectRequestService.sendCreatedEmail(project, cmd.projectRequest)
+                    if (cmd.projectRequest) {
+                        projectRequestService.sendCreatedEmail(project, cmd.projectRequest)
+                    }
                     flash.message = new FlashMessage(g.message(code: "projectCreation.store.success") as String)
                     if (cmd.sendProjectCreationNotification) {
                         projectService.sendProjectCreationMailToUserAndTicketSystem(project)
@@ -192,7 +190,8 @@ class ProjectCreationController {
                     flash.message = new FlashMessage(g.message(code: "projectCreation.fieldstore.failure", args: [cmd?.name ?: '']) as String, e.message)
                 }
                 flash.cmd = cmd
-                redirect(action: "index")
+                redirect(action: "index", params: basisCommandProperties)
+                return
             }
         } else {
             handleSubmitEvent(cmd)
