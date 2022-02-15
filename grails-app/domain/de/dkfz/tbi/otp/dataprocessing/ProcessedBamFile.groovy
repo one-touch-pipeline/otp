@@ -21,10 +21,13 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 
 @Deprecated
+@ManagedEntity
 class ProcessedBamFile extends AbstractFileSystemBamFile implements ProcessParameterObject {
 
     AlignmentPass alignmentPass

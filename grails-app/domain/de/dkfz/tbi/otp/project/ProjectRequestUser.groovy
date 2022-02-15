@@ -21,11 +21,14 @@
  */
 package de.dkfz.tbi.otp.project
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.ngsdata.ProjectRole
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.Entity
 import de.dkfz.tbi.otp.utils.StringUtils
 
+@ManagedEntity
 class ProjectRequestUser implements Entity {
 
     User user

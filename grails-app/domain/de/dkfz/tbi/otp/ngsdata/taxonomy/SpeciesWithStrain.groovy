@@ -21,8 +21,12 @@
  */
 package de.dkfz.tbi.otp.ngsdata.taxonomy
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
+import de.dkfz.tbi.otp.utils.Entity
 import de.dkfz.tbi.otp.utils.*
 
+@ManagedEntity
 class SpeciesWithStrain implements Entity, Legacy {
     Species species
     Strain strain

@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.ngsdata.DataFile
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.Entity
@@ -29,6 +31,7 @@ import de.dkfz.tbi.otp.utils.Entity
  * @deprecated Old otp alignment workflow
  */
 @Deprecated
+@ManagedEntity
 class ProcessedSaiFile implements Entity {
 
     boolean fileExists

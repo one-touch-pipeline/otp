@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.otp.job.processing
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.CommentableWithProject
 import de.dkfz.tbi.otp.job.plan.JobDefinition
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
@@ -48,6 +50,7 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
  * @deprecated class is part of the old workflow system
  */
 @Deprecated
+@ManagedEntity
 class Process implements CommentableWithProject, Serializable, Entity {
     /**
      * The Date when this process was started.

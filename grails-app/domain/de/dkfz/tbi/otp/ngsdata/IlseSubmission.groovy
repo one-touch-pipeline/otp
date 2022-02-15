@@ -21,9 +21,12 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.Commentable
 import de.dkfz.tbi.otp.utils.Entity
 
+@ManagedEntity
 class IlseSubmission implements Commentable, Entity {
 
     static final int MIN_ILSE_VALUE = 1

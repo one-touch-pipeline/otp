@@ -21,11 +21,14 @@
  */
 package de.dkfz.tbi.otp.workflowExecution
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.Withdrawable
 import de.dkfz.tbi.otp.utils.Entity
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
+@ManagedEntity
 class WorkflowArtefact implements Withdrawable, Entity {
 
     /**

@@ -21,10 +21,13 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.Entity
 
+@ManagedEntity
 abstract class AbstractMergingWorkPackage implements Entity {
 
     Sample sample

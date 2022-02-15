@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
 import de.dkfz.tbi.otp.utils.Entity
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
@@ -31,7 +33,7 @@ import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
  * could be submitted in parts from different locations and belonging to different
  * projects. The initial locations are stored in FastqImportInstance objects.
  */
-
+@ManagedEntity
 class Run implements ProcessParameterObject, Entity {
 
     String name                      // run name

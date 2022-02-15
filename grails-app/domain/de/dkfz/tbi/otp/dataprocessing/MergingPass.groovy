@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
@@ -31,6 +33,7 @@ import de.dkfz.tbi.otp.utils.Entity
  * performed on the corresponding {@link MergingSet}.
  */
 @Deprecated
+@ManagedEntity
 class MergingPass implements ProcessParameterObject, Entity {
 
     /**

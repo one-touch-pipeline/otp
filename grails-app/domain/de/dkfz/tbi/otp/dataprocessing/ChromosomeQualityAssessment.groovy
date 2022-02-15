@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.gorm.hibernate.annotation.ManagedEntity
 import org.hibernate.Hibernate
 
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry
@@ -29,6 +30,7 @@ import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry
  * Class to represent chromosomes that will be considered independently (1 to 22, X, Y and M)
  * for single lane
  */
+@ManagedEntity
 class ChromosomeQualityAssessment extends QaJarQualityAssessment {
 
     /**

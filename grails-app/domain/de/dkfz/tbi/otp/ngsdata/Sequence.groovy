@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.project.Project
 
 /**
@@ -42,6 +44,7 @@ import de.dkfz.tbi.otp.project.Project
  * <li>Project</li>
  * </ul>
  */
+@ManagedEntity
 class Sequence implements Serializable {
     /** IDs (primary keys) */
     long seqTrackId

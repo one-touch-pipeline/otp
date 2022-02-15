@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.otp.infrastructure
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.gorm.mapper.PersistentDateTimeAsMillis
@@ -48,6 +50,7 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
  *
  * all timestamps using java-time, e.g. DateTime queued, get saved as UTC-timezone
  */
+@ManagedEntity
 class ClusterJob implements Entity {
 
     static final String NOT_AVAILABLE = "N/A"

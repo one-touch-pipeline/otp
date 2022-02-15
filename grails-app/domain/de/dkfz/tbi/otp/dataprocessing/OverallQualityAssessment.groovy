@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.gorm.hibernate.annotation.ManagedEntity
 import org.hibernate.Hibernate
 
 /**
@@ -28,6 +29,7 @@ import org.hibernate.Hibernate
  * Class to represent the data for the entire set of chromosomes (1 to 22, X, Y and M) as one
  * for single lane
  */
+@ManagedEntity
 class OverallQualityAssessment extends QaJarQualityAssessment {
 
     QualityAssessmentPass qualityAssessmentPass

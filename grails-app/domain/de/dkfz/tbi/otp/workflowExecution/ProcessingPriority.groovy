@@ -21,11 +21,13 @@
  */
 package de.dkfz.tbi.otp.workflowExecution
 
+import grails.gorm.hibernate.annotation.ManagedEntity
 import groovy.transform.ToString
 
 import de.dkfz.tbi.otp.utils.Entity
 
 @ToString(includeNames = true)
+@ManagedEntity
 class ProcessingPriority implements Entity {
 
     //Constant needed for start jobs/tests of old workflow system

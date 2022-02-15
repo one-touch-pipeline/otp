@@ -21,10 +21,12 @@
  */
 package de.dkfz.tbi.otp.administration
 
+import grails.gorm.hibernate.annotation.ManagedEntity
 import groovy.transform.TupleConstructor
 
 import de.dkfz.tbi.otp.utils.Entity
 
+@ManagedEntity
 class Document implements Entity {
 
     @TupleConstructor

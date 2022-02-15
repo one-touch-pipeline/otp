@@ -21,9 +21,12 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
+@ManagedEntity
 class RoddySingleLaneQa extends RoddyQualityAssessment {
 
     SeqTrack seqTrack

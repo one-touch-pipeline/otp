@@ -21,11 +21,14 @@
  */
 package de.dkfz.tbi.otp.job.plan
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 /**
  * Subclass for a {@link JobDefinition} describing a Job which can choose between decisions.
  *
  * @see JobDecision
  */
+@ManagedEntity
 class DecidingJobDefinition extends JobDefinition {
 
     static constraints = {

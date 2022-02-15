@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.otp.workflowExecution
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.Commentable
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 import de.dkfz.tbi.otp.ngsdata.SeqType
@@ -28,6 +30,7 @@ import de.dkfz.tbi.otp.utils.Entity
 
 import java.time.LocalDate
 
+@ManagedEntity
 class Workflow implements Commentable, Entity {
 
     String name

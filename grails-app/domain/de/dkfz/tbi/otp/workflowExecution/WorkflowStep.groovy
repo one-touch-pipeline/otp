@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.otp.workflowExecution
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.Commentable
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.ngsdata.Realm
@@ -29,6 +31,7 @@ import de.dkfz.tbi.otp.utils.Entity
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowError
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowLog
 
+@ManagedEntity
 class WorkflowStep implements Commentable, Entity {
 
     /**

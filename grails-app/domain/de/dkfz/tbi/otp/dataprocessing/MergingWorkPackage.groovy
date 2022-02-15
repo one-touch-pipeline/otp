@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.Entity
@@ -33,6 +35,7 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
  * generation). It specifies the concrete criteria for the {@link SeqTrack}s that are merged into the BAM file, and
  * processing parameters used for alignment and merging.
  */
+@ManagedEntity
 class MergingWorkPackage extends AbstractMergingWorkPackage {
 
     SeqPlatformGroup seqPlatformGroup

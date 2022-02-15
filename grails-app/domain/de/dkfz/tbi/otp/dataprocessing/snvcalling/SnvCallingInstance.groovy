@@ -21,12 +21,14 @@
  */
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
+import grails.gorm.hibernate.annotation.ManagedEntity
 import org.hibernate.Hibernate
 
 /**
  * @deprecated: succeeded by {@link RoddySnvCallingInstance}
  */
 @Deprecated
+@ManagedEntity
 class SnvCallingInstance extends AbstractSnvCallingInstance {
 
     static constraints = {

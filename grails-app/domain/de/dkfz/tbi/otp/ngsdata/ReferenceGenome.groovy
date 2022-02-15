@@ -21,10 +21,13 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.utils.Entity
 import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
 
+@ManagedEntity
 class ReferenceGenome implements Entity {
 
     /**

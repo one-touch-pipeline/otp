@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.workflowExecution
 import com.fasterxml.jackson.databind.ObjectMapper
 import grails.converters.JSON
 import grails.databinding.BindUsing
+import grails.gorm.hibernate.annotation.ManagedEntity
 import groovy.transform.ToString
 import groovy.transform.TupleConstructor
 import org.grails.web.converters.exceptions.ConverterException
@@ -37,6 +38,7 @@ import de.dkfz.tbi.otp.utils.Entity
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
+@ManagedEntity
 @ToString(includeNames = true, includePackage = false)
 class ExternalWorkflowConfigFragment implements Commentable, Deprecateable<ExternalWorkflowConfigFragment>, Entity {
 

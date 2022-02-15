@@ -21,11 +21,14 @@
  */
 package de.dkfz.tbi.otp.project.additionalField
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.config.TypeValidators
 
 import java.util.regex.Pattern
 import java.util.regex.PatternSyntaxException
 
+@ManagedEntity
 class TextFieldDefinition extends AbstractFieldDefinition {
 
     TypeValidators typeValidator

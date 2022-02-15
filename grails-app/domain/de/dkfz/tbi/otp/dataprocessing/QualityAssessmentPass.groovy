@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
@@ -29,6 +31,7 @@ import de.dkfz.tbi.otp.utils.Entity
 /**
  * Each execution of the Quality Assessment Workflow on the particular data file is represented as QualityAssessmentPass.
  */
+@ManagedEntity
 class QualityAssessmentPass implements ProcessParameterObject, Entity {
 
     int identifier

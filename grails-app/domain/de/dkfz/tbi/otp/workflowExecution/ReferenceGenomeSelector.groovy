@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.otp.workflowExecution
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import groovy.transform.ToString
 
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
@@ -29,6 +31,7 @@ import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.Entity
 
+@ManagedEntity
 @ToString(includeNames = true, includePackage = false)
 class ReferenceGenomeSelector implements Entity {
 

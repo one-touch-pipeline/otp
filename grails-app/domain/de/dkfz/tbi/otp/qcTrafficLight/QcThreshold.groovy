@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.qcTrafficLight
 
 import grails.core.GrailsClass
+import grails.gorm.hibernate.annotation.ManagedEntity
 import grails.util.Holders
 import groovy.transform.ToString
 import groovy.transform.TupleConstructor
@@ -36,6 +37,7 @@ import de.dkfz.tbi.otp.utils.validation.ValidatorUtil
 import java.lang.reflect.Member
 
 @ToString(includeNames = true, includePackage = false)
+@ManagedEntity
 class QcThreshold implements Entity {
 
     Project project

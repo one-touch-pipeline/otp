@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.CommentableWithProject
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
@@ -32,6 +34,7 @@ import de.dkfz.tbi.otp.utils.Entity
  * Decided by the OTP Product Owner on 2020-08-20.
  */
 /** This table is used externally. Please discuss a change in the team */
+@ManagedEntity
 class Individual implements CommentableWithProject, Entity {
 
     /**

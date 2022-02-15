@@ -21,10 +21,13 @@
  */
 package de.dkfz.tbi.otp.ngsdata.taxonomy
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.SqlUtil
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.Entity
 
+@ManagedEntity
 class SpeciesCommonName implements Entity {
 
     String name

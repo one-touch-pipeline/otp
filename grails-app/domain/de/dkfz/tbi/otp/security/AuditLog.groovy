@@ -21,11 +21,14 @@
  */
 package de.dkfz.tbi.otp.security
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.utils.Entity
 
 import java.sql.Date
 import java.time.LocalDate
 
+@ManagedEntity
 class AuditLog implements Entity {
 
     enum Action {

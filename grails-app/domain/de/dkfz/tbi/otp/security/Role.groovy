@@ -21,11 +21,14 @@
  */
 package de.dkfz.tbi.otp.security
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.utils.Entity
 
 /**
  * Auto generated class by spring security plugin.
  */
+@ManagedEntity
 class Role implements Entity {
 
     static final String ROLE_ADMIN = 'ROLE_ADMIN'

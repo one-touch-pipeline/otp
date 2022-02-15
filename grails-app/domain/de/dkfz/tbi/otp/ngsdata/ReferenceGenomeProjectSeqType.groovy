@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.Entity
 import de.dkfz.tbi.otp.workflowExecution.ReferenceGenomeSelector
@@ -31,6 +33,7 @@ import de.dkfz.tbi.otp.workflowExecution.ReferenceGenomeSelector
  * @deprecated class is part of the old workflow system, use {@link ReferenceGenomeSelector} instead
  */
 @Deprecated
+@ManagedEntity
 class ReferenceGenomeProjectSeqType implements Entity {
 
     static final String TAB_FILE_PATTERN = /[0-9a-zA-Z-_\.]+\.tab/

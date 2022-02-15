@@ -21,11 +21,14 @@
  */
 package de.dkfz.tbi.otp.workflowExecution.log
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 /**
  * A log class to hold a simple message as string.
  *
  * The objects should be created in a separate transaction to be sure they consist in case a rollback occurs.
  */
+@ManagedEntity
 class WorkflowMessageLog extends WorkflowLog {
 
     String message

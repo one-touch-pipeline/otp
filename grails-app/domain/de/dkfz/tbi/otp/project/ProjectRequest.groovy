@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.project
 
 import de.dkfz.tbi.otp.Comment
 import de.dkfz.tbi.otp.CommentableWithHistory
+import grails.gorm.hibernate.annotation.ManagedEntity
 import de.dkfz.tbi.otp.ngsdata.ProjectRoleService
 import de.dkfz.tbi.otp.ngsdata.SeqCenter
 import de.dkfz.tbi.otp.ngsdata.SeqType
@@ -33,6 +34,7 @@ import de.dkfz.tbi.otp.utils.Entity
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
+@ManagedEntity
 class ProjectRequest implements ProjectPropertiesGivenWithRequest, Entity, CommentableWithHistory {
     User requester
 

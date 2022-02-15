@@ -21,11 +21,14 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyAnalysisResult
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 
+@ManagedEntity
 class AceseqInstance extends BamFilePairAnalysis implements RoddyAnalysisResult, RoddyResult {
 
     static hasMany = [

@@ -21,11 +21,14 @@
  */
 package de.dkfz.tbi.otp.job.plan
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 /**
  * Special JobDefinition for the StartJob.
  *
  * @see StartJob
  */
+@ManagedEntity
 class StartJobDefinition extends JobDefinition implements Serializable {
 
     static constraints = {

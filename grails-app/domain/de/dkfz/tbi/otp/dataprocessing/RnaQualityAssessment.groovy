@@ -21,10 +21,13 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.ngsdata.SequencingReadType
 import de.dkfz.tbi.otp.qcTrafficLight.QcThresholdEvaluated
 import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightValue
 
+@ManagedEntity
 class RnaQualityAssessment extends RoddyQualityAssessment implements QcTrafficLightValue {
 
     @QcThresholdEvaluated

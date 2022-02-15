@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.otp.job.processing
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.job.plan.JobDefinition
 import de.dkfz.tbi.otp.utils.Entity
 
@@ -28,6 +30,7 @@ import de.dkfz.tbi.otp.utils.Entity
  * @deprecated class is part of the old workflow system
  */
 @Deprecated
+@ManagedEntity
 class ProcessingStepUpdate implements Serializable, Entity {
 
     /**

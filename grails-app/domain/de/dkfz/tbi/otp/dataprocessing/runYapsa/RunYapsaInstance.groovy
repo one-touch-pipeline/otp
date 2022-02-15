@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.otp.dataprocessing.runYapsa
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.LibraryPreparationKit
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
@@ -28,6 +30,7 @@ import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 /**
  * An execution of the RunYAPSA workflow.
  */
+@ManagedEntity
 class RunYapsaInstance extends BamFilePairAnalysis {
 
     /**

@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.workflowExecution
 
+import grails.gorm.hibernate.annotation.ManagedEntity
 import grails.util.Holders
 import groovy.transform.ToString
 
@@ -29,6 +30,7 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.Entity
 
 @ToString(includeNames = true, includePackage = false)
+@ManagedEntity
 class ExternalWorkflowConfigSelector implements Comparable<ExternalWorkflowConfigSelector>, Entity {
 
     String name

@@ -21,8 +21,11 @@
  */
 package de.dkfz.tbi.otp.workflowExecution
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.utils.Entity
 
+@ManagedEntity
 class OmittedMessage implements Entity {
 
     enum Category {

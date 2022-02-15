@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.security
 
+import grails.gorm.hibernate.annotation.ManagedEntity
 import org.apache.commons.lang.builder.HashCodeBuilder
 
 import de.dkfz.tbi.otp.utils.Entity
@@ -28,6 +29,7 @@ import de.dkfz.tbi.otp.utils.Entity
 /**
  * Auto generated class by spring security plugin.
  */
+@ManagedEntity
 class UserRole implements Serializable, Entity {
 
     User user

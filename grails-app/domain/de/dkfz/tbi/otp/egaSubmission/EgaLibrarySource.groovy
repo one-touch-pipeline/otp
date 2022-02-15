@@ -21,9 +21,12 @@
  */
 package de.dkfz.tbi.otp.egaSubmission
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.utils.Entity
 
+@ManagedEntity
 class EgaLibrarySource implements Entity {
 
     Set<SeqType> seqTypes

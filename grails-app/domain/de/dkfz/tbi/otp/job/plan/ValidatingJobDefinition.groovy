@@ -21,6 +21,9 @@
  */
 package de.dkfz.tbi.otp.job.plan
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
+@ManagedEntity
 class ValidatingJobDefinition extends JobDefinition {
     JobDefinition validatorFor
 

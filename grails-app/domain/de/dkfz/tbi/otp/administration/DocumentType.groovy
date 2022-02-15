@@ -21,8 +21,11 @@
  */
 package de.dkfz.tbi.otp.administration
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.utils.Entity
 
+@ManagedEntity
 class DocumentType implements Entity {
 
     String title

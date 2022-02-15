@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.otp.dataprocessing.roddyExecution
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
@@ -40,6 +42,7 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
  * @deprecated class is part of the old workflow system, use {@link ExternalWorkflowConfigFragment} instead
  */
 @Deprecated
+@ManagedEntity
 class RoddyWorkflowConfig extends ConfigPerProjectAndSeqType implements AlignmentConfig {
 
     //dot makes problems in roddy config identifiers, therefore an underscore is used

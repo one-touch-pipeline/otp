@@ -21,12 +21,15 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.Entity
 
 /** This table is used externally. Please discuss a change in the team */
+@ManagedEntity
 class UserProjectRole implements Serializable, Entity {
 
     /** This attribute is used externally. Please discuss a change in the team */

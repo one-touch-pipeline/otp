@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.otp.job.processing
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.job.plan.DecidingJobDefinition
 import de.dkfz.tbi.otp.job.plan.JobDecision
 
@@ -34,6 +36,7 @@ import de.dkfz.tbi.otp.job.plan.JobDecision
  * @deprecated class is part of the old workflow system
  */
 @Deprecated
+@ManagedEntity
 class DecisionProcessingStep extends ProcessingStep {
     /**
      * The decision produced by the Job. It is null as long as the Job has not finished.

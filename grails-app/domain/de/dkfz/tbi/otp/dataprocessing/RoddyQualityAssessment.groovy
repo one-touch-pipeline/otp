@@ -21,10 +21,12 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.gorm.hibernate.annotation.ManagedEntity
 import org.hibernate.Hibernate
 
 import de.dkfz.tbi.otp.qcTrafficLight.QcThresholdEvaluated
 
+@ManagedEntity
 abstract class RoddyQualityAssessment extends AbstractQualityAssessment implements QualityAssessmentWithMergedPass {
 
     // We could also link directly to RoddyBamFile, but then Grails fails to start up the application context for an

@@ -21,8 +21,11 @@
  */
 package de.dkfz.tbi.otp.dataprocessing.sophia
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.utils.Entity
 
+@ManagedEntity
 class SophiaQc implements Entity {
 
     SophiaInstance sophiaInstance

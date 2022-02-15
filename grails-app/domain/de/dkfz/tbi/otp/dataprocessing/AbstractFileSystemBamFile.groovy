@@ -21,10 +21,13 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 /**
  * Represents bam files stored on the file system.
  * Keeps file-system related properties of a bam file.
  */
+@ManagedEntity
 abstract class AbstractFileSystemBamFile extends AbstractBamFile {
 
     /**

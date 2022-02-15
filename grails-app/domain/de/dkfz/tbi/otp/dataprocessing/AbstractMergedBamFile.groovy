@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.gorm.hibernate.annotation.ManagedEntity
 import groovy.transform.TupleConstructor
 import org.hibernate.Hibernate
 
@@ -34,6 +35,7 @@ import de.dkfz.tbi.otp.workflowExecution.ExternalWorkflowConfigFragment
  * Represents a single generation of one merged BAM file (whereas a {@link AbstractMergingWorkPackage} represents all
  * generations).
  */
+@ManagedEntity
 abstract class AbstractMergedBamFile extends AbstractFileSystemBamFile {
 
     /**

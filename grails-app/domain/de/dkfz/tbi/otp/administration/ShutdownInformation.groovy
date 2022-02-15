@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.otp.administration
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.Entity
@@ -31,6 +33,7 @@ import de.dkfz.tbi.otp.utils.Entity
  * It stores the when, who and why about the regular shutdown. It is
  * possible to cancel a shutdown process in which case this is stored as well.
  */
+@ManagedEntity
 class ShutdownInformation implements Entity {
     /**
      * The User who initiated the Shutdown process

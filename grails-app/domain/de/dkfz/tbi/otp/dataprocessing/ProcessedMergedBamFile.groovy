@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.gorm.hibernate.annotation.ManagedEntity
 import org.hibernate.Hibernate
 
 import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
@@ -33,6 +34,7 @@ import de.dkfz.tbi.otp.workflowExecution.ExternalWorkflowConfigFragment
  * given {@link MergingPass}
  */
 @Deprecated
+@ManagedEntity
 class ProcessedMergedBamFile extends AbstractMergedBamFile implements ProcessParameterObject {
 
     MergingPass mergingPass

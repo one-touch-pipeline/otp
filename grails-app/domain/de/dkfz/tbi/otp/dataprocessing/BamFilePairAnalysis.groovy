@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.gorm.hibernate.annotation.ManagedEntity
 import org.hibernate.Hibernate
 
 import de.dkfz.tbi.otp.CommentableWithProject
@@ -35,6 +36,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.Entity
 
+@ManagedEntity
 abstract class BamFilePairAnalysis implements CommentableWithProject, ProcessParameterObject, Entity {
     /**
      * Refers to the config file which is stored in the database and is used as a basis for all the files in the filesystem.

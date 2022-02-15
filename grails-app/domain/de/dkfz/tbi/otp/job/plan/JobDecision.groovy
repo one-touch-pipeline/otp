@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.otp.job.plan
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.utils.Entity
 
 /**
@@ -33,6 +35,7 @@ import de.dkfz.tbi.otp.utils.Entity
  * @see DecisionJob
  * @see DecisionMapping
  */
+@ManagedEntity
 class JobDecision implements Entity {
     /**
      * The JobDefinition this decision belongs to. It is not the definition the decision points to!

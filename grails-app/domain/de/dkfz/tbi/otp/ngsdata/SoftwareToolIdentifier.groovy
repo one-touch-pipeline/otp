@@ -21,10 +21,13 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.SqlUtil
 import de.dkfz.tbi.otp.utils.Entity
 
 /** This table is used externally. Please discuss a change in the team */
+@ManagedEntity
 class SoftwareToolIdentifier implements Entity {
 
     /** This attribute is used externally. Please discuss a change in the team */

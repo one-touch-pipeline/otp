@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.gorm.hibernate.annotation.ManagedEntity
 import groovy.transform.TupleConstructor
 
 import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
@@ -31,6 +32,7 @@ import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 /**
  * Represents the state of the import process of the externally processed merged BAM files
  */
+@ManagedEntity
 class ImportProcess implements Entity, ProcessParameterObject {
 
     enum State {

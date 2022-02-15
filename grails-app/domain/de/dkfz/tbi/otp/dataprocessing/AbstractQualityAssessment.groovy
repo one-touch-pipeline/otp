@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.qcTrafficLight.QcThresholdEvaluated
 import de.dkfz.tbi.otp.utils.Entity
 
@@ -28,6 +30,7 @@ import de.dkfz.tbi.otp.utils.Entity
  * Be aware of semantic differences between the values produced by
  * qa.jar and by Roddy QC. See the comments of OTP-1731 for details.
  */
+@ManagedEntity
 abstract class AbstractQualityAssessment implements Entity {
 
     /**

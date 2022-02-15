@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaInstance
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
@@ -36,6 +38,7 @@ import de.dkfz.tbi.otp.utils.validation.ValidatorUtil
  * This is why the properties are not call disease and control.
  * The sample pairs can also be used for other purposes i.e. coverage combination between disease and control
  */
+@ManagedEntity
 class SamplePair implements Entity {
 
     final static String SNV_RESULTS_PATH_PART = 'snv_results'

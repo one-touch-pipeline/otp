@@ -21,11 +21,14 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.qcTrafficLight.QcThresholdEvaluated
 
 /**
  * Keeps all needed QA parameters for external processed merged BAM files at the moment only for Sophia
  */
+@ManagedEntity
 class ExternalProcessedMergedBamFileQualityAssessment extends AbstractQualityAssessment
         implements QualityAssessmentWithMergedPass, SophiaWorkflowQualityAssessment {
 

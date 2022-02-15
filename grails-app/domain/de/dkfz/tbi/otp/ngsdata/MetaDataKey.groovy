@@ -21,8 +21,11 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.utils.Entity
 
+@ManagedEntity
 class MetaDataKey implements Entity {
 
     String name

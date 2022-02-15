@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.gorm.hibernate.annotation.ManagedEntity
 import groovy.transform.TupleConstructor
 
 import de.dkfz.tbi.otp.ngsdata.*
@@ -33,6 +34,7 @@ import de.dkfz.tbi.otp.workflowExecution.Workflow
  * @deprecated class is part of the old workflow system, use {@link Workflow}, {@link OtpWorkflow} instead
  */
 @Deprecated
+@ManagedEntity
 class Pipeline implements Entity {
 
     @TupleConstructor

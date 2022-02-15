@@ -21,8 +21,11 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.utils.Entity
 
+@ManagedEntity
 class IndelSampleSwapDetection implements Entity {
 
     IndelCallingInstance indelCallingInstance

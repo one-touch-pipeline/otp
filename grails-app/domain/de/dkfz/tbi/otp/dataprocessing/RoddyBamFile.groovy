@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.gorm.hibernate.annotation.ManagedEntity
 import org.hibernate.Hibernate
 
 import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
@@ -39,6 +40,7 @@ import de.dkfz.tbi.otp.workflowExecution.ExternalWorkflowConfigFragment
  * The file is based on earlier created bam file (with the same workflow), if exists and
  * new SeqTracks which were not merged into the earlier created bam file (base bam file).
  */
+@ManagedEntity
 class RoddyBamFile extends AbstractMergedBamFile implements Artefact, HasIdentifier, ProcessParameterObject, RoddyResult {
 
     /**

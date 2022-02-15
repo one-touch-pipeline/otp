@@ -21,9 +21,12 @@
  */
 package de.dkfz.tbi.otp.project
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.Entity
 
+@ManagedEntity
 class ProjectRequestPersistentState implements Entity {
 
     /** beanNames are provided by the classes implementing {@link de.dkfz.tbi.otp.project.projectRequest.ProjectRequestState} **/

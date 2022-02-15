@@ -21,9 +21,12 @@
  */
 package de.dkfz.tbi.otp.egaSubmission
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.Entity
 
+@ManagedEntity
 class EgaSubmission implements Entity {
 
     String egaBox

@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.gorm.hibernate.annotation.ManagedEntity
 import org.hibernate.Hibernate
 
 import de.dkfz.tbi.otp.utils.Entity
@@ -30,6 +31,7 @@ import de.dkfz.tbi.otp.utils.Entity
  * {@link MergingSet} and {@link ProcessedBamFile}
  */
 @Deprecated
+@ManagedEntity
 class MergingSetAssignment implements Entity {
 
     MergingSet mergingSet

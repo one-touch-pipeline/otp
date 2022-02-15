@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
 
@@ -28,6 +30,7 @@ import de.dkfz.tbi.otp.dataprocessing.OtpPath
  * For each tumor-control pair the snv pipeline will be called.
  * The AbstractSnvCallingInstance symbolizes one call of the pipeline.
  */
+@ManagedEntity
 abstract class AbstractSnvCallingInstance extends BamFilePairAnalysis {
 
     /**

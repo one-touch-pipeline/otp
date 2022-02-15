@@ -21,11 +21,14 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.utils.Entity
 
 /**
  * This class represents a reference genome entry as found in reference genome fasta file.
  */
+@ManagedEntity
 class ReferenceGenomeEntry implements Entity {
 
     /**

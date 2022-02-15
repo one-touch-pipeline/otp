@@ -21,12 +21,15 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.utils.Entity
 
 /**
  * An import of one or more {@linkplain MetaDataFile}s and {@linkplain DataFile}s.
  */
+@ManagedEntity
 class FastqImportInstance implements Entity {
 
     Set<DataFile> dataFiles

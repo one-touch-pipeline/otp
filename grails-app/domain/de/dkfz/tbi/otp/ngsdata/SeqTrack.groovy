@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.gorm.hibernate.annotation.ManagedEntity
 import groovy.transform.TupleConstructor
 
 import de.dkfz.tbi.otp.InformationReliability
@@ -43,6 +44,7 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
  * lane. An explaining tooltip should be provided. (Decided together with the OTP Product Owner on 2016-07-19.)
  */
 /** This table is used externally. Please discuss a change in the team */
+@ManagedEntity
 class SeqTrack implements ProcessParameterObject, Entity, Artefact {
 
     static final String RUN_PREFIX = "run"

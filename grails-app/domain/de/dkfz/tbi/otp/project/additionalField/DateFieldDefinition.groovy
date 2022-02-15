@@ -21,9 +21,12 @@
  */
 package de.dkfz.tbi.otp.project.additionalField
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
+@ManagedEntity
 class DateFieldDefinition extends AbstractFieldDefinition {
 
     List<LocalDate> allowedDateValues

@@ -21,9 +21,12 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightValue
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
+@ManagedEntity
 class RoddyMergedBamQa extends RoddyQualityAssessment implements QcTrafficLightValue, SophiaWorkflowQualityAssessment {
 
     static constraints = {

@@ -21,11 +21,14 @@
  */
 package de.dkfz.tbi.otp.job.plan
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.utils.Entity
 
 import java.util.regex.Pattern
 import java.util.regex.PatternSyntaxException
 
+@ManagedEntity
 class JobErrorDefinition implements Entity {
     String errorExpression
     Type type

@@ -21,11 +21,14 @@
  */
 package de.dkfz.tbi.otp.dataprocessing.rnaAlignment
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.dataprocessing.bamfiles.RnaRoddyBamFileService
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 
 import java.nio.file.Paths
 
+@ManagedEntity
 class RnaRoddyBamFile extends RoddyBamFile {
 
     /**

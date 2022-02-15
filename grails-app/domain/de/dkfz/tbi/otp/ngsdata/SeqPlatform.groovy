@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.dataprocessing.MergingCriteria
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
@@ -30,6 +32,7 @@ import de.dkfz.tbi.otp.utils.Legacy
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
 /** This table is used externally. Please discuss a change in the team */
+@ManagedEntity
 class SeqPlatform implements Entity, Legacy {
 
     /** This attribute is used externally. Please discuss a change in the team */

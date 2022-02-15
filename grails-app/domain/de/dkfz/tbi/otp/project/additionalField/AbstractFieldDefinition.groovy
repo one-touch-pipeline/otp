@@ -21,9 +21,12 @@
  */
 package de.dkfz.tbi.otp.project.additionalField
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.utils.Entity
 import de.dkfz.tbi.otp.utils.Legacy
 
+@ManagedEntity
 abstract class AbstractFieldDefinition implements Entity, Legacy {
 
     String name

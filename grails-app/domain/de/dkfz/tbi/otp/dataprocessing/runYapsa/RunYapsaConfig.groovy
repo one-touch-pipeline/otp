@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.otp.dataprocessing.runYapsa
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.dataprocessing.ConfigPerProjectAndSeqType
 import de.dkfz.tbi.otp.workflowExecution.ExternalWorkflowConfigFragment
 
@@ -30,6 +32,7 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 /**
  * @deprecated method is part of the old workflow system, use {@link ExternalWorkflowConfigFragment} instead
  */
+@ManagedEntity
 class RunYapsaConfig extends ConfigPerProjectAndSeqType {
 
     static constraints = {

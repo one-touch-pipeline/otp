@@ -21,9 +21,12 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.utils.Entity
 
 @Deprecated
+@ManagedEntity
 class AlignmentParams implements Entity {
 
     SoftwareTool pipeline

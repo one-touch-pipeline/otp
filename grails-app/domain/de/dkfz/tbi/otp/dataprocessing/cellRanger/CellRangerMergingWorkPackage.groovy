@@ -21,11 +21,14 @@
  */
 package de.dkfz.tbi.otp.dataprocessing.cellRanger
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeIndex
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
+@ManagedEntity
 class CellRangerMergingWorkPackage extends MergingWorkPackage {
 
     enum Status {

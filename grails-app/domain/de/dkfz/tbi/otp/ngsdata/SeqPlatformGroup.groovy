@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.Comment
 import de.dkfz.tbi.otp.CommentableWithHistory
 import de.dkfz.tbi.otp.dataprocessing.MergingCriteria
@@ -32,6 +34,7 @@ import de.dkfz.tbi.otp.utils.validation.ValidatorUtil
  * Depending on the value of {@link MergingCriteria#useSeqPlatformGroup}, a SeqPlatformGroup where {@link #mergingCriteria}
  * is null or refers to the project and seqType is used
  */
+@ManagedEntity
 class SeqPlatformGroup implements Entity, CommentableWithHistory {
 
     Set<SeqPlatform> seqPlatforms

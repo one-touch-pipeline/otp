@@ -21,10 +21,13 @@
  */
 package de.dkfz.tbi.otp.job.plan
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.job.processing.Parameter
 import de.dkfz.tbi.otp.job.processing.ParameterMapping
 import de.dkfz.tbi.otp.utils.Entity
 
+@ManagedEntity
 class JobDefinition implements Serializable, Entity {
     /**
      * Mapping of parameters.

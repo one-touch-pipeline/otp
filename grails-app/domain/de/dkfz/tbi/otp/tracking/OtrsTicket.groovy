@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.tracking
 
+import grails.gorm.hibernate.annotation.ManagedEntity
 import groovy.transform.TupleConstructor
 
 import de.dkfz.tbi.otp.Commentable
@@ -29,6 +30,7 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.Entity
 
+@ManagedEntity
 class OtrsTicket implements Commentable, Entity {
 
     @TupleConstructor

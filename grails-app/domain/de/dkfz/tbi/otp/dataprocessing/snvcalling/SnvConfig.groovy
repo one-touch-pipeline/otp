@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.dataprocessing.ConfigPerProjectAndSeqType
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.ngsdata.SeqType
@@ -31,6 +33,7 @@ import de.dkfz.tbi.otp.workflowExecution.ExternalWorkflowConfigFragment
  * @deprecated class is part of the old workflow system, use {@link ExternalWorkflowConfigFragment} instead
  */
 @Deprecated
+@ManagedEntity
 class SnvConfig extends ConfigPerProjectAndSeqType {
 
     /**

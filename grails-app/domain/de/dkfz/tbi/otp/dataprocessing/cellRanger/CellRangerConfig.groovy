@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.otp.dataprocessing.cellRanger
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.workflowExecution.ExternalWorkflowConfigFragment
 
@@ -30,6 +32,7 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
  * @deprecated class is part of the old workflow system, use {@link ExternalWorkflowConfigFragment} instead
  */
 @Deprecated
+@ManagedEntity
 class CellRangerConfig extends ConfigPerProjectAndSeqType implements AlignmentConfig {
 
     static constraints = {

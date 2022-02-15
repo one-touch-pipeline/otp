@@ -21,8 +21,11 @@
  */
 package de.dkfz.tbi.otp.project.additionalField
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.utils.Entity
 
+@ManagedEntity
 abstract class AbstractFieldValue implements Entity {
 
     AbstractFieldDefinition definition

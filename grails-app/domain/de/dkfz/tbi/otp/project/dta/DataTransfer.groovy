@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.project.dta
 
+import grails.gorm.hibernate.annotation.ManagedEntity
 import groovy.transform.TupleConstructor
 
 import de.dkfz.tbi.otp.security.User
@@ -29,6 +30,7 @@ import de.dkfz.tbi.otp.tracking.OtrsTicketService
 import de.dkfz.tbi.otp.utils.Entity
 import de.dkfz.tbi.util.TimeFormats
 
+@ManagedEntity
 class DataTransfer implements Entity {
 
     /**

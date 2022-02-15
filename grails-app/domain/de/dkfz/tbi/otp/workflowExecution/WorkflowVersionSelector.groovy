@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.otp.workflowExecution
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import groovy.transform.ToString
 
 import de.dkfz.tbi.otp.ngsdata.SeqType
@@ -29,6 +31,7 @@ import de.dkfz.tbi.otp.utils.Deprecateable
 import de.dkfz.tbi.otp.utils.Entity
 
 @ToString(includeNames = true, includePackage = false)
+@ManagedEntity
 class WorkflowVersionSelector implements Deprecateable<WorkflowVersionSelector>, Entity {
 
     Project project

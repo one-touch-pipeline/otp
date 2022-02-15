@@ -21,10 +21,13 @@
  */
 package de.dkfz.tbi.otp.project.additionalField
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.util.TimeFormats
 
 import java.time.LocalDate
 
+@ManagedEntity
 class DateFieldValue extends AbstractSingleFieldValue {
 
     LocalDate dateValue

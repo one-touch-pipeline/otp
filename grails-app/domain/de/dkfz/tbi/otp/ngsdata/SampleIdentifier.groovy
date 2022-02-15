@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.parser.SampleIdentifierParser
@@ -41,6 +43,7 @@ import de.dkfz.tbi.otp.utils.SessionUtils
  * It should only need to exist in the database in the brief window between the operator defining it, and
  * the import using it.
  */
+@ManagedEntity
 class SampleIdentifier implements Entity {
 
     String name

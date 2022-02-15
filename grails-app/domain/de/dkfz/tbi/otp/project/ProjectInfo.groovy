@@ -21,8 +21,11 @@
  */
 package de.dkfz.tbi.otp.project
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.utils.Entity
 
+@ManagedEntity
 class ProjectInfo implements Entity {
 
     /** filename of the document represented by this instance */

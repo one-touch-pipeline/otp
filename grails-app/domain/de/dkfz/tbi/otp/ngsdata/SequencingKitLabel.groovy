@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.utils.Entity
 import de.dkfz.tbi.otp.utils.MetadataField
 
@@ -31,6 +33,7 @@ import de.dkfz.tbi.otp.utils.MetadataField
  *
  * This table is used externally. Please discuss a change in the team
  */
+@ManagedEntity
 class SequencingKitLabel implements Entity, MetadataField { // to set legacy refer to SeqPlatform
 
     static hasMany = [importAlias: String]

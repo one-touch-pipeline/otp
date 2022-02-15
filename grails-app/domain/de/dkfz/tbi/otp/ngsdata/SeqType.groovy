@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.project.ProjectFieldReferenceAble
 import de.dkfz.tbi.otp.utils.Entity
 import de.dkfz.tbi.otp.utils.MetadataField
@@ -32,6 +34,7 @@ import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
  * Decided by the OTP Product Owner on 2020-08-20.
  */
 /** This table is used externally. Please discuss a change in the team */
+@ManagedEntity
 class SeqType implements Entity, MetadataField, ProjectFieldReferenceAble {
 
     final static SINGLE_CELL_DNA = "Single-cell DNA"

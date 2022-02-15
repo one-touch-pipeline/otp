@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.gorm.hibernate.annotation.ManagedEntity
 import groovy.transform.ToString
 
 import de.dkfz.tbi.otp.ngsdata.SeqType
@@ -28,6 +29,7 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.Entity
 
 @ToString(includeNames = true, includePackage = false)
+@ManagedEntity
 class MergingCriteria implements Entity {
 
     Project project

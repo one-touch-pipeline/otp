@@ -21,9 +21,12 @@
  */
 package de.dkfz.tbi.otp.egaSubmission
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.ngsdata.LibraryPreparationKit
 import de.dkfz.tbi.otp.utils.Entity
 
+@ManagedEntity
 class EgaLibrarySelection implements Entity {
 
     Set<LibraryPreparationKit> libraryPreparationKits

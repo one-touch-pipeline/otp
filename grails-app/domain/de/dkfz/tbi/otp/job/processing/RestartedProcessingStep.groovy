@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.otp.job.processing
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 /**
  * A RestartedProcessingStep is a special ProcessingStep for keeping track of restarted ProcessingSteps.
  *
@@ -42,6 +44,7 @@ package de.dkfz.tbi.otp.job.processing
  * @deprecated class is part of the old workflow system
  */
 @Deprecated
+@ManagedEntity
 class RestartedProcessingStep extends ProcessingStep {
     /**
      * The original ProcessingStep from which this ProcessingStep had been created as a restart.

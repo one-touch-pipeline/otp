@@ -21,8 +21,11 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.qcTrafficLight.QcThresholdEvaluated
 
+@ManagedEntity
 abstract class QaJarQualityAssessment extends AbstractQualityAssessment {
     /**
      * duplicates count for read 1 and single reads

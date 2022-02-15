@@ -21,6 +21,9 @@
  */
 package de.dkfz.tbi.otp.project.additionalField
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
+@ManagedEntity
 class DecimalNumberFieldDefinition extends AbstractFieldDefinition {
 
     List<Double> allowedDecimalNumberValues

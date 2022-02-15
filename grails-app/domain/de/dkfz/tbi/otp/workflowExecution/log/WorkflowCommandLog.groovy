@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.otp.workflowExecution.log
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 /**
  * A log class to hold the different components of a command.
  *
@@ -32,6 +34,7 @@ package de.dkfz.tbi.otp.workflowExecution.log
  *
  * The objects should be created in a separate transaction to be sure they consist in case a rollback occurs.
  */
+@ManagedEntity
 class WorkflowCommandLog extends WorkflowLog {
 
     String command

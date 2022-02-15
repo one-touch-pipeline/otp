@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.gorm.hibernate.annotation.ManagedEntity
 import org.hibernate.Hibernate
 
 import de.dkfz.tbi.otp.dataprocessing.bamfiles.ExternallyProcessedMergedBamFileService
@@ -34,6 +35,7 @@ import de.dkfz.tbi.otp.workflowExecution.ExternalWorkflowConfigFragment
  * which was processed externally (not in OTP)
  */
 @SuppressWarnings('JavaIoPackageAccess')
+@ManagedEntity
 class ExternallyProcessedMergedBamFile extends AbstractMergedBamFile {
 
     /**

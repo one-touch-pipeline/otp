@@ -21,11 +21,14 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.config.FastqcType
 import de.dkfz.tbi.otp.config.TypeValidators
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.Entity
 
+@ManagedEntity
 class ProcessingOption implements Entity {
 
     enum OptionName {

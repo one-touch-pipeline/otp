@@ -21,8 +21,11 @@
  */
 package de.dkfz.tbi.otp.ngsdata.taxonomy
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.utils.Entity
 
+@ManagedEntity
 class Strain implements Entity {
     String name
 

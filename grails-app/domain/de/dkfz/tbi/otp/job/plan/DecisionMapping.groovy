@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.otp.job.plan
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.utils.Entity
 
 /**
@@ -33,6 +35,7 @@ import de.dkfz.tbi.otp.utils.Entity
  * @see JobDecision
  * @see DecisionJob
  */
+@ManagedEntity
 class DecisionMapping implements Entity {
     /**
      * The Decision which maps to...

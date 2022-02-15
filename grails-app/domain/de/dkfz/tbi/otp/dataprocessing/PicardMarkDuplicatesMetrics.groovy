@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.utils.Entity
 
 /**
@@ -31,6 +33,7 @@ import de.dkfz.tbi.otp.utils.Entity
  * no going to change it, too risky.
  */
 @SuppressWarnings("PropertyName")
+@ManagedEntity
 class PicardMarkDuplicatesMetrics implements Entity {
 
     String metricsClass

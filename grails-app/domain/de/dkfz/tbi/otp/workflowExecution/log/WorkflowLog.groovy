@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.otp.workflowExecution.log
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.utils.Entity
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
@@ -29,6 +31,7 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
  *
  * The objects should be created in a separate transaction to be sure they consist in case a rollback occurs.
  */
+@ManagedEntity
 abstract class WorkflowLog implements Entity {
 
     WorkflowStep workflowStep

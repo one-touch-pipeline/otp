@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.workflowExecution
 
 import grails.converters.JSON
+import grails.gorm.hibernate.annotation.ManagedEntity
 import groovy.transform.TupleConstructor
 import org.grails.web.converters.exceptions.ConverterException
 import org.grails.web.json.JSONObject
@@ -31,6 +32,7 @@ import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.Entity
 
+@ManagedEntity
 class WorkflowRun implements Commentable, Entity {
 
     @TupleConstructor

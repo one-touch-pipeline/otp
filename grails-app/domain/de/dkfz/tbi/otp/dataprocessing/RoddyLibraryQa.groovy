@@ -23,6 +23,9 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
+@ManagedEntity
 class RoddyLibraryQa extends RoddyQualityAssessment {
 
     String libraryDirectoryName

@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.ngsdata.DataFile
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.utils.Entity
@@ -32,7 +34,7 @@ import de.dkfz.tbi.otp.workflowExecution.Artefact
  * original sequence file and keep track of the status: if the file exists
  * and if it content was uploaded to data base.
  */
-
+@ManagedEntity
 class FastqcProcessedFile implements Artefact, Entity {
 
     boolean fileExists = false

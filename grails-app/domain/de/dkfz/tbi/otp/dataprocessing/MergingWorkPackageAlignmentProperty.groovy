@@ -21,8 +21,11 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.utils.Entity
 
+@ManagedEntity
 class MergingWorkPackageAlignmentProperty implements Entity {
 
     MergingWorkPackage mergingWorkPackage

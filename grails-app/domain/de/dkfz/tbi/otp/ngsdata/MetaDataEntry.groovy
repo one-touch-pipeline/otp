@@ -21,8 +21,11 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.utils.Entity
 
+@ManagedEntity
 class MetaDataEntry implements Entity {
 
     // suppressing because changing this would involve refactoring the code as well as the database columns

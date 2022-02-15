@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.otp.project
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.CommentableWithProject
 import de.dkfz.tbi.otp.dataprocessing.AlignmentDeciderBeanName
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
@@ -37,6 +39,7 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowVersionSelector
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
 /** This table is used externally. Please discuss a change in the team */
+@ManagedEntity
 class Project implements CommentableWithProject, ProjectPropertiesGivenWithRequest, Entity {
 
     enum ProjectType {

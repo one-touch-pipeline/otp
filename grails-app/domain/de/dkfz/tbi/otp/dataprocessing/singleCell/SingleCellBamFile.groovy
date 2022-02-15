@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.otp.dataprocessing.singleCell
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.bamfiles.SingleCellBamFileService
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerMergingWorkPackage
@@ -33,6 +35,7 @@ import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
 import de.dkfz.tbi.otp.workflowExecution.ExternalWorkflowConfigFragment
 
 @SuppressWarnings('JavaIoPackageAccess')
+@ManagedEntity
 class SingleCellBamFile extends AbstractMergedBamFile implements HasIdentifier, ProcessParameterObject {
 
     /**

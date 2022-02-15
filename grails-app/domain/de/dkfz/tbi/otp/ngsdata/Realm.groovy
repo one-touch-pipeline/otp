@@ -21,9 +21,12 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.job.processing.ClusterJobSubmissionOptionsService
 import de.dkfz.tbi.otp.utils.Entity
 
+@ManagedEntity
 class Realm implements Entity, Serializable {
 
     enum JobScheduler {

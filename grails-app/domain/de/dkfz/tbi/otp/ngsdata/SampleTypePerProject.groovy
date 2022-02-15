@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.gorm.hibernate.annotation.ManagedEntity
 import groovy.transform.ToString
 
 import de.dkfz.tbi.otp.project.Project
@@ -33,6 +34,7 @@ import de.dkfz.tbi.otp.utils.Entity
  * This information will be requested via the SNV-GUI.
  */
 @ToString(excludes=['dateCreated', 'lastUpdated'], includePackage = false)
+@ManagedEntity
 class SampleTypePerProject implements Entity {
 
     /**

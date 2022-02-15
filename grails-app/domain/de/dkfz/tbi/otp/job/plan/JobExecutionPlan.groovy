@@ -21,9 +21,12 @@
  */
 package de.dkfz.tbi.otp.job.plan
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.job.processing.ProcessParameter
 import de.dkfz.tbi.otp.utils.Entity
 
+@ManagedEntity
 class JobExecutionPlan implements Serializable, Entity {
     /**
      * A descriptive name for this Job Execution Plan

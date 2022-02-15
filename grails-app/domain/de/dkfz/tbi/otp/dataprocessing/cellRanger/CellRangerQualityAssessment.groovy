@@ -21,12 +21,15 @@
  */
 package de.dkfz.tbi.otp.dataprocessing.cellRanger
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.dataprocessing.AbstractQualityAssessment
 import de.dkfz.tbi.otp.dataprocessing.QualityAssessmentWithMergedPass
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.qcTrafficLight.QcThresholdEvaluated
 import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightValue
 
+@ManagedEntity
 class CellRangerQualityAssessment extends AbstractQualityAssessment implements QualityAssessmentWithMergedPass, QcTrafficLightValue {
 
     Integer getExpectedCells() {
