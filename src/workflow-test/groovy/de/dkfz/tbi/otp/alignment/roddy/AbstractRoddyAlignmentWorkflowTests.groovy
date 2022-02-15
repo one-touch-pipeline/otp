@@ -115,7 +115,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
 
     @Override
     void setup() {
-        SessionUtils.withNewSession {
+        SessionUtils.withNewTransaction {
             String group = configService.testingGroup
             executionHelperService.setGroup(realm, configService.rootPath as File, group)
 
@@ -364,7 +364,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
     }
 
     void checkAllAfterSuccessfulExecution_alignBaseBamAndNewLanes() {
-        SessionUtils.withNewSession {
+        SessionUtils.withNewTransaction {
             checkDataBaseState_alignBaseBamAndNewLanes()
             RoddyBamFile latestBamFile = CollectionUtils.atMostOneElement(RoddyBamFile.findAllByIdentifier(1))
             checkFileSystemState(latestBamFile)
@@ -415,7 +415,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
     }
 
     void checkAllAfterRoddyClusterJobsRestartAndSuccessfulExecution_alignBaseBamAndNewLanes() {
-        SessionUtils.withNewSession {
+        SessionUtils.withNewTransaction {
             checkDataBaseState_alignBaseBamAndNewLanes()
             RoddyBamFile latestBamFile = CollectionUtils.atMostOneElement(RoddyBamFile.findAllByIdentifier(1))
             checkFileSystemState(latestBamFile)
@@ -503,7 +503,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
     }
 
     void checkWorkPackageState() {
-        SessionUtils.withNewSession {
+        SessionUtils.withNewTransaction {
             MergingWorkPackage workPackage = exactlyOneElement(MergingWorkPackage.findAll())
             workPackage.refresh()
             assert !workPackage.needsProcessing
@@ -668,7 +668,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
     }
 
     void verify_AlignLanesOnly_AllFine() {
-        SessionUtils.withNewSession {
+        SessionUtils.withNewTransaction {
             checkWorkPackageState()
 
             RoddyBamFile bamFile = exactlyOneElement(RoddyBamFile.findAll())
@@ -688,7 +688,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
     }
 
     protected void check_alignLanesOnly_NoBaseBamExist_TwoLanes(SeqTrack firstSeqTrack, SeqTrack secondSeqTrack) {
-        SessionUtils.withNewSession {
+        SessionUtils.withNewTransaction {
             checkWorkPackageState()
 
             RoddyBamFile bamFile = exactlyOneElement(RoddyBamFile.findAll())

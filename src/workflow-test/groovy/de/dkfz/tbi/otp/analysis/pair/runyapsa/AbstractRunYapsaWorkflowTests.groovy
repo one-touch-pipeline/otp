@@ -42,7 +42,7 @@ abstract class AbstractRunYapsaWorkflowTests extends AbstractRoddyBamFilePairAna
 
     @Override
     void setupData() {
-        SessionUtils.withNewSession {
+        SessionUtils.withNewTransaction {
             createRunYapsaInput()
             super.setupData()
         }

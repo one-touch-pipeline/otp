@@ -48,7 +48,7 @@ abstract class AbstractSophiaWorkflowTests extends AbstractRoddyBamFilePairAnaly
 
     @Override
     void setupData() {
-        SessionUtils.withNewSession {
+        SessionUtils.withNewTransaction {
             linkQualityControlFiles()
             super.setupData()
         }

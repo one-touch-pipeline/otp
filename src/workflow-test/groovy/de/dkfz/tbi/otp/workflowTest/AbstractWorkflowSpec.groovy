@@ -217,7 +217,7 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
     @SuppressWarnings("CatchThrowable")
     void setup() {
         log.debug("Start to setup ${getClass().simpleName}.${methodName.methodName}")
-        SessionUtils.withNewSession {
+        SessionUtils.withTransaction {
             sql = new Sql(dataSource)
             schemaDump = new File(temporaryFolder.newFolder(), "test-database-dump.sql")
             sql.execute("SCRIPT NODATA DROP TO ?", [schemaDump.absolutePath])
@@ -276,7 +276,7 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
     }
 
     private void killRemainingClusterJobs() {
-        SessionUtils.withNewSession {
+        SessionUtils.withTransaction {
             List<ClusterJob> clusterJobs = ClusterJob.findAllByCheckStatusNotEqual(ClusterJob.CheckStatus.FINISHED)
             if (clusterJobs) {
                 log.debug("prepare to kill ${clusterJobs.size()} still running cluster jobs: ${clusterJobs*.clusterJobId}")
@@ -306,7 +306,7 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
      */
     private void showState() {
         List<CharSequence> logEntries = []
-        SessionUtils.withNewSession {
+        SessionUtils.withTransaction {
             logEntries << "Tree of the file structure"
             if (workingDirectory && Files.exists(workingDirectory)) {
                 logEntries << LocalShellHelper.executeAndWait("tree -augp ${workingDirectory}").assertExitCodeZero().stdout
@@ -623,7 +623,7 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
      */
     protected void execute(int requiredWorkflowRunCount = 1, int existingRuns = 0, boolean ensureNoFailure = true) {
         log.debug("starting workflow system")
-        SessionUtils.withNewSession {
+        SessionUtils.withTransaction {
             int newWorkflowCount = WorkflowRun.countByState(WorkflowRun.State.PENDING)
             int oldWorkflowCount = WorkflowRun.count - newWorkflowCount
             if (oldWorkflowCount != existingRuns) {
@@ -634,13 +634,12 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
             }
             updateDomainValuesForTesting()
             workflowSystemService.startWorkflowSystem()
+        }
+        waitUntilWorkflowStarts(requiredWorkflowRunCount, existingRuns)
+        waitUntilWorkflowFinishes(runningTimeout, requiredWorkflowRunCount, existingRuns)
 
-            waitUntilWorkflowStarts(requiredWorkflowRunCount, existingRuns)
-            waitUntilWorkflowFinishes(runningTimeout, requiredWorkflowRunCount, existingRuns)
-
-            if (ensureNoFailure) {
-                ensureThatWorkflowFinishedSuccessfully(existingRuns)
-            }
+        if (ensureNoFailure) {
+            ensureThatWorkflowFinishedSuccessfully(existingRuns)
         }
     }
 
@@ -687,7 +686,9 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
                 log.debug "waiting for workflow starting (${counter += 10} seconds) ... "
                 lastLog = milliSeconds
             }
-            return WorkflowRun.countByStateNotEqual(WorkflowRun.State.PENDING) >= requiredWorkflowRunCount + existingRuns
+            SessionUtils.withTransaction {
+                return WorkflowRun.countByStateNotEqual(WorkflowRun.State.PENDING) >= requiredWorkflowRunCount + existingRuns
+            }
         }, timeout.toMillis(), 1000L)) {
             TimeoutException e = new TimeoutException("Workflow(s) did not started within ${timeout.toString().substring(2)}.")
             log.debug(e.message, e)
@@ -717,7 +718,9 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
                 log.debug "waiting (${counter++} min) ... "
                 lastLog = milliSeconds
             }
-            return WorkflowRun.countByStateNotInList(RUNNING_AND_WAITING_STATES) >= requiredWorkflowRunCount + existingRuns
+            SessionUtils.withTransaction {
+                return WorkflowRun.countByStateNotInList(RUNNING_AND_WAITING_STATES) >= requiredWorkflowRunCount + existingRuns
+            }
         }, timeout.toMillis(), 1000L)) {
             TimeoutException e = new TimeoutException("Workflow did not finish within ${timeout.toString().substring(2)}.")
             log.debug(e.message, e)
@@ -729,12 +732,14 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
      * check, that workflow objects has finished successfully
      */
     protected void ensureThatWorkflowFinishedSuccessfully(int existingRuns) {
-        assert WorkflowRun.findAllByStateNotEqual(WorkflowRun.State.SUCCESS).size() - existingRuns == 0
-        assert WorkflowArtefact.findAllByStateNotEqual(WorkflowArtefact.State.SUCCESS).empty
-        assert ClusterJob.findAllByCheckStatusNotEqual(ClusterJob.CheckStatus.FINISHED).empty
-        assert ClusterJob.findAllByExitStatusIsNull().empty
-        assert ClusterJob.findAllByJobLogIsNull().empty
-        ensureThatFilePermissionsAreCorrect()
+        SessionUtils.withTransaction {
+            assert WorkflowRun.findAllByStateNotEqual(WorkflowRun.State.SUCCESS).size() - existingRuns == 0
+            assert WorkflowArtefact.findAllByStateNotEqual(WorkflowArtefact.State.SUCCESS).empty
+            assert ClusterJob.findAllByCheckStatusNotEqual(ClusterJob.CheckStatus.FINISHED).empty
+            assert ClusterJob.findAllByExitStatusIsNull().empty
+            assert ClusterJob.findAllByJobLogIsNull().empty
+            ensureThatFilePermissionsAreCorrect()
+        }
     }
 
     /**
@@ -816,3 +821,4 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
         abstract void execute()
     }
 }
+

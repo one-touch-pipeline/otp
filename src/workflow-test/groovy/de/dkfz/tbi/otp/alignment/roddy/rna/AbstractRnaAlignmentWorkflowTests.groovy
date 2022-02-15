@@ -46,7 +46,7 @@ abstract class AbstractRnaAlignmentWorkflowTests extends AbstractRoddyAlignmentW
 
     void "testAlignLanesOnly_NoBaseBamExist_OneLane_allFine"() {
         given:
-        SessionUtils.withNewSession {
+        SessionUtils.withNewTransaction {
             createProjectConfigRna(exactlyOneElement(MergingWorkPackage.findAll()), [:])
             createSeqTrack("readGroup1")
         }
@@ -56,7 +56,7 @@ abstract class AbstractRnaAlignmentWorkflowTests extends AbstractRoddyAlignmentW
 
         then:
         checkWorkPackageState()
-        SessionUtils.withNewSession {
+        SessionUtils.withNewTransaction {
             RoddyBamFile bamFile = exactlyOneElement(RnaRoddyBamFile.findAll())
             checkFirstBamFileState(bamFile, true)
             assertBamFileFileSystemPropertiesSet(bamFile)
@@ -71,7 +71,7 @@ abstract class AbstractRnaAlignmentWorkflowTests extends AbstractRoddyAlignmentW
 
     void "testAlignLanesOnly_withoutArribaProcessing_NoBaseBamExist_OneLane_allFine"() {
         given:
-        SessionUtils.withNewSession {
+        SessionUtils.withNewTransaction {
             createProjectConfigRna(exactlyOneElement(MergingWorkPackage.findAll()), [
                     configVersion: "v2_0",
             ], [
@@ -85,7 +85,7 @@ abstract class AbstractRnaAlignmentWorkflowTests extends AbstractRoddyAlignmentW
 
         then:
         checkWorkPackageState()
-        SessionUtils.withNewSession {
+        SessionUtils.withNewTransaction {
             RoddyBamFile bamFile = exactlyOneElement(RnaRoddyBamFile.findAll())
             checkFirstBamFileState(bamFile, true)
             assertBamFileFileSystemPropertiesSet(bamFile)

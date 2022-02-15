@@ -45,7 +45,7 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends AbstractRoddyAlignme
         given:
         RoddyBamFile firstBamFile
         List<SeqTrack> seqTracks
-        SessionUtils.withNewSession {
+        SessionUtils.withNewTransaction {
             firstBamFile = createFirstRoddyBamFile()
             createSeqTrack("readGroup2")
 
@@ -57,12 +57,12 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends AbstractRoddyAlignme
         }
 
         when:
-        SessionUtils.withNewSession {
+        SessionUtils.withNewTransaction {
             panCanStartJob.execute()
         }
 
         then:
-        SessionUtils.withNewSession {
+        SessionUtils.withNewTransaction {
             assert Process.list().size() == 0
             assert RoddyBamFile.findAll().size() == 1
             checkFirstBamFileState(firstBamFile, true, [
@@ -76,7 +76,7 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends AbstractRoddyAlignme
 
     void "test alignLanesOnly, no baseBam exists, one lane, all fine"() {
         given:
-        SessionUtils.withNewSession {
+        SessionUtils.withNewTransaction {
             createSeqTrack("readGroup1")
         }
 
@@ -89,7 +89,7 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends AbstractRoddyAlignme
 
     void "testAlignLanesOnly_NoBaseBamExist_OneLane_bwa_mem_0_7_8_sambamba_0_5_9_allFine"() {
         given:
-        SessionUtils.withNewSession {
+        SessionUtils.withNewTransaction {
             createSeqTrack("readGroup1")
             MergingWorkPackage mergingWorkPackage = exactlyOneElement(MergingWorkPackage.findAll())
             createProjectConfig(mergingWorkPackage, [
@@ -108,7 +108,7 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends AbstractRoddyAlignme
 
     void "test alignLanesOnly, no baseBam exists, one lane, fastTrack, all fine"() {
         given:
-        SessionUtils.withNewSession {
+        SessionUtils.withNewTransaction {
             fastTrackSetup()
         }
 
@@ -121,7 +121,7 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends AbstractRoddyAlignme
 
     void "test alignLanesOnly, no baseBam exists, one lane, with fingerPrinting, all fine"() {
         given:
-        SessionUtils.withNewSession {
+        SessionUtils.withNewTransaction {
             createSeqTrack("readGroup1")
             setUpFingerPrintingFile()
         }
@@ -138,7 +138,7 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends AbstractRoddyAlignme
         SeqTrack firstSeqTrack
         SeqTrack secondSeqTrack
 
-        SessionUtils.withNewSession {
+        SessionUtils.withNewTransaction {
             firstSeqTrack = createSeqTrack("readGroup1")
             secondSeqTrack = createSeqTrack("readGroup2")
         }
@@ -152,7 +152,7 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends AbstractRoddyAlignme
 
     void "test, alignBaseBam and new lanes, all fine"() {
         given:
-        SessionUtils.withNewSession {
+        SessionUtils.withNewTransaction {
             createFirstRoddyBamFile(useOldStructure)
             createSeqTrack("readGroup2")
         }
@@ -172,7 +172,7 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends AbstractRoddyAlignme
     void "test align with withdrawn base, all fine"() {
         given:
         RoddyBamFile roddyBamFile
-        SessionUtils.withNewSession {
+        SessionUtils.withNewTransaction {
             roddyBamFile = createFirstRoddyBamFile()
             roddyBamFile.withdrawn = true
             roddyBamFile.save(flush: true)
@@ -184,7 +184,7 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends AbstractRoddyAlignme
         execute()
 
         then:
-        SessionUtils.withNewSession {
+        SessionUtils.withNewTransaction {
             assert !roddyBamFile.workDirectory.exists()
             checkWorkPackageState()
 

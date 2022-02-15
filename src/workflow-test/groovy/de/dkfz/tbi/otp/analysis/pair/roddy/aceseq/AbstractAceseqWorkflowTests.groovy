@@ -47,7 +47,7 @@ abstract class AbstractAceseqWorkflowTests extends AbstractRoddyBamFilePairAnaly
 
     @Override
     void setupData() {
-        SessionUtils.withNewSession {
+        SessionUtils.withNewTransaction {
             createSophiaInput()
             super.setupData()
         }

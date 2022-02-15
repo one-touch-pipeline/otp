@@ -34,7 +34,7 @@ class PanCanChipSeqAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkflow
 
     void "test align lanes only, no BaseBam exists, one lane, all fine"() {
         given:
-        SessionUtils.withNewSession {
+        SessionUtils.withNewTransaction {
             createSeqTrack("readGroup1")
         }
 
@@ -50,7 +50,7 @@ class PanCanChipSeqAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkflow
         SeqTrack firstSeqTrack
         SeqTrack secondSeqTrack
 
-        SessionUtils.withNewSession {
+        SessionUtils.withNewTransaction {
             firstSeqTrack = createSeqTrack("readGroup1")
             secondSeqTrack = createSeqTrack("readGroup2")
         }
@@ -69,7 +69,7 @@ class PanCanChipSeqAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkflow
         MergingWorkPackage workPackage
         MergingWorkPackage secondMergingWorkPackage
 
-        SessionUtils.withNewSession {
+        SessionUtils.withNewTransaction {
             firstSeqTrack = createSeqTrack("readGroup1")
 
             workPackage = exactlyOneElement(MergingWorkPackage.findAll())
@@ -108,7 +108,7 @@ class PanCanChipSeqAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkflow
         execute(2)
 
         then:
-        SessionUtils.withNewSession {
+        SessionUtils.withNewTransaction {
             workPackage.refresh()
             assert !workPackage.needsProcessing
             secondMergingWorkPackage.refresh()

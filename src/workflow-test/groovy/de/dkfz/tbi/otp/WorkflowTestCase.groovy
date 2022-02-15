@@ -145,7 +145,7 @@ abstract class WorkflowTestCase extends Specification implements UserAndRoles, G
 
     void setup() {
         doCleanup()
-        SessionUtils.withNewSession {
+        SessionUtils.withNewTransaction {
             setupDirectoriesAndRealm()
 
             sql = new Sql(dataSource)
@@ -229,7 +229,7 @@ abstract class WorkflowTestCase extends Specification implements UserAndRoles, G
     }
 
     void doCleanup() {
-        SessionUtils.withNewSession {
+        SessionUtils.withNewTransaction {
             JobExecutionPlan.list()*.startJob*.bean.each {
                 ((AbstractStartJobImpl) Holders.applicationContext.getBean(it)).onApplicationEvent(null)
             }
@@ -507,7 +507,7 @@ echo \$TEMP_DIR
      */
     @SuppressWarnings("CatchThrowable")
     protected void execute(int numberOfProcesses = 1, boolean ensureNoFailure = true) {
-        SessionUtils.withNewSession {
+        SessionUtils.withNewTransaction {
             updateProjectValuesForTestRunning()
             schedulerService.startup()
             assert schedulerService.startupOk

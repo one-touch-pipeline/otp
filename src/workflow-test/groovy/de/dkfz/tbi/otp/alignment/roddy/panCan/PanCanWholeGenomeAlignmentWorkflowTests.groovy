@@ -31,7 +31,7 @@ class PanCanWholeGenomeAlignmentWorkflowTests extends AbstractPanCanAlignmentWor
 
     void "test alignLanesOnly, no baseBam exists, one lane, with adapterTrimming, all fine"() {
         given:
-        SessionUtils.withNewSession {
+        SessionUtils.withNewTransaction {
             SeqTrack seqTrack = createSeqTrack("readGroup1")
 
             RoddyWorkflowConfig config = RoddyWorkflowConfig.getLatestForProject(seqTrack.project, seqTrack.seqType, CollectionUtils.atMostOneElement(Pipeline.findAllByName(Pipeline.Name.PANCAN_ALIGNMENT)))

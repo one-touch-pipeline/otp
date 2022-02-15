@@ -41,7 +41,7 @@ class AbstractRoddyJobIntegrationTests extends AbstractRoddyAlignmentWorkflowTes
         given:
         RoddyWorkflowConfig config
         String programVersion
-        SessionUtils.withNewSession {
+        SessionUtils.withNewTransaction {
             createFirstRoddyBamFile()
             createSeqTrack("readGroup2")
 
@@ -61,7 +61,7 @@ class AbstractRoddyJobIntegrationTests extends AbstractRoddyAlignmentWorkflowTes
         exception.message =~ /Plugin '.*' is not available, available are:/
 
         when:
-        SessionUtils.withNewSession {
+        SessionUtils.withNewTransaction {
             config.refresh()
             config.programVersion = programVersion
             config.save(flush: true)
@@ -77,7 +77,7 @@ class AbstractRoddyJobIntegrationTests extends AbstractRoddyAlignmentWorkflowTes
         String DUMMY_STAT_SIZE_FILE_NAME = "dummy.tab"
         RoddyBamFile firstBamFile
         MergingWorkPackage workPackage
-        SessionUtils.withNewSession {
+        SessionUtils.withNewTransaction {
             firstBamFile = createFirstRoddyBamFile()
             createSeqTrack("readGroup2")
 
@@ -100,7 +100,7 @@ class AbstractRoddyJobIntegrationTests extends AbstractRoddyAlignmentWorkflowTes
         exception.message.contains("Status code: 15")
 
         when:
-        SessionUtils.withNewSession {
+        SessionUtils.withNewTransaction {
             workPackage.refresh()
             workPackage.statSizeFileName = chromosomeStatFileName
             workPackage.save(flush: true)
