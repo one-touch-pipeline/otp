@@ -21,12 +21,20 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.utils.CollectionUtils
+
 class RoddyLibraryQa extends RoddyQualityAssessment {
 
     String libraryDirectoryName
 
     static constraints = {
-        chromosome(unique: ['qualityAssessmentMergedPass', 'libraryDirectoryName'])
+        chromosome validator: { String chromosome, RoddyLibraryQa roddyLibraryQa ->
+            RoddyLibraryQa result = CollectionUtils.atMostOneElement(RoddyLibraryQa.findAllByChromosomeAndQualityAssessmentMergedPassAndLibraryDirectoryName(
+                    chromosome, roddyLibraryQa.qualityAssessmentMergedPass, roddyLibraryQa.libraryDirectoryName))
+            if (result && result.id != roddyLibraryQa.id) {
+                return 'unique'
+            }
+        }
         libraryDirectoryName(blank: false, validator: { val -> !val || val.startsWith("lib") })
     }
 }

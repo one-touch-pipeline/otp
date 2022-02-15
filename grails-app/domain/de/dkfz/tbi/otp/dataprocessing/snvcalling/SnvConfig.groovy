@@ -23,6 +23,8 @@ package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
 import de.dkfz.tbi.otp.dataprocessing.ConfigPerProjectAndSeqType
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
+import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.workflowExecution.ExternalWorkflowConfigFragment
 
 /**
@@ -40,7 +42,13 @@ class SnvConfig extends ConfigPerProjectAndSeqType {
 
     static constraints = {
         configuration blank: false
-        seqType unique: ['project', 'obsoleteDate']  // partial index: WHERE obsolete_date IS NULL
+        seqType validator: { SeqType seqType, SnvConfig snvConfig ->
+            SnvConfig resultSnvConfig =
+                    CollectionUtils.atMostOneElement(SnvConfig.findAllBySeqTypeAndProjectAndObsoleteDate(seqType, snvConfig.project, snvConfig.obsoleteDate))
+            if (resultSnvConfig && resultSnvConfig.id != snvConfig.id) {
+                return 'unique'
+            }
+        }
         pipeline validator: { pipeline ->
             pipeline?.name == Pipeline.Name.OTP_SNV
         }

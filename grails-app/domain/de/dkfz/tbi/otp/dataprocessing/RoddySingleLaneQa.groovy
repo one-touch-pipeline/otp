@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 class RoddySingleLaneQa extends RoddyQualityAssessment {
 
@@ -32,7 +33,13 @@ class RoddySingleLaneQa extends RoddyQualityAssessment {
     ]
 
     static constraints = {
-        chromosome(unique: ['qualityAssessmentMergedPass', 'seqTrack'])
+        chromosome validator: { String chromosome, RoddySingleLaneQa roddySingleLaneQa ->
+            RoddySingleLaneQa result = CollectionUtils.atMostOneElement(RoddySingleLaneQa.findAllByChromosomeAndSeqTrackAndQualityAssessmentMergedPass(
+                    chromosome, roddySingleLaneQa.seqTrack, roddySingleLaneQa.qualityAssessmentMergedPass))
+            if (result && result.id != roddySingleLaneQa.id) {
+                return 'unique'
+            }
+        }
         seqTrack(validator: { SeqTrack val, RoddySingleLaneQa obj ->
             obj.roddyBamFile.seqTracks*.id.contains(val.id)
         })
