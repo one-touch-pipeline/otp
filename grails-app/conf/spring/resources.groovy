@@ -22,7 +22,6 @@
  */
 
 import grails.util.Environment
-import org.springframework.cache.ehcache.EhCacheManagerFactoryBean
 import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler
 import org.springframework.security.acls.AclPermissionEvaluator
 import org.springframework.web.servlet.i18n.FixedLocaleResolver
@@ -66,11 +65,6 @@ beans = {
         portMapper = ref('portMapper')
         portResolver = ref('portResolver')
         redirectStrategy = ref('redirectStrategy')
-    }
-
-    // http://stackoverflow.com/questions/10013288/another-unnamed-cachemanager-already-exists-in-the-same-vm-ehcache-2-5
-    aclCacheManager(EhCacheManagerFactoryBean) {
-        shared = true
     }
 
     // workaround for @PreFilter annotation
