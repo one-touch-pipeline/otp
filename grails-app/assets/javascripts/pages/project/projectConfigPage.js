@@ -86,6 +86,75 @@ function updateUnixGroup(oldUnixGroup, force = false) {
   });
 }
 
+// eslint-disable-next-line no-unused-vars
+function onEditAnalysisDir() {
+  $('#button-edit-analysisDir').hide();
+  $('#button-save-analysisDir').show();
+  $('#analysisDirInput').prop('disabled', false);
+}
+
+// eslint-disable-next-line no-unused-vars
+function onSaveAnalysisDir() {
+  const analysisDirInputField = $('#analysisDirInput');
+  const oldAnalysisDir = analysisDirInputField.attr('data-fixed');
+
+  $('#button-edit-analysisDir').show();
+  $('#button-save-analysisDir').hide();
+  analysisDirInputField.prop('disabled', true);
+
+  updateAnalysisDir(oldAnalysisDir);
+}
+
+function updateAnalysisDir(oldAnalysisDir, force = false) {
+  const analysisDirInputField = $('#analysisDirInput');
+  const newAnalysisDir = analysisDirInputField.val();
+
+  if (oldAnalysisDir === newAnalysisDir) {
+    return;
+  }
+
+  $.ajax({
+    url: $.otp.createLink({
+      controller: 'projectConfig',
+      action: 'updateAnalysisDir'
+    }),
+    dataType: 'json',
+    type: 'POST',
+    data: {
+      force,
+      analysisDir: newAnalysisDir
+    },
+    success(result) {
+      analysisDirInputField.val(result.analysisDir);
+      analysisDirInputField.attr('data-fixed', result.analysisDir);
+      $.otp.toaster.showSuccessToast(
+        'Update was successful',
+        `Analysis directory has successfully been changed to <b>${result.analysisDir}</b>.`
+      );
+    },
+    error(error) {
+      if (error && error.responseJSON && error.responseJSON.message) {
+        if (error.status === 418) {
+          openConfirmationModal(error.responseJSON.message, () => {
+            updateAnalysisDir(oldAnalysisDir, true);
+          }, () => {
+            analysisDirInputField.val(oldAnalysisDir);
+          });
+        } else {
+          analysisDirInputField.val(oldAnalysisDir);
+          $.otp.toaster.showErrorToast('Update analysis directory failed', error.responseJSON.message);
+        }
+      } else {
+        analysisDirInputField.val(oldAnalysisDir);
+        $.otp.toaster.showErrorToast(
+          'Update analysis directory failed',
+          'Unknown error during the analysis directory update.'
+        );
+      }
+    }
+  });
+}
+
 function openConfirmationModal(text, confirmCallback, cancelCallback) {
   const modal = $('#confirmationUserGroupModal');
   const modalBody = $('.modal-body', modal);

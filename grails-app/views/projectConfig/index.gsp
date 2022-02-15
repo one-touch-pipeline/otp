@@ -44,7 +44,7 @@
                         targetAction    : 'saveProjectComment',
                 ]"/>
             </div>
-        </div>
+    </div>
         <br>
 
         <h1><g:message code="projectOverview.title" args="[selectedProject?.name]"/></h1>
@@ -76,10 +76,27 @@
                 <td><g:message code="project.analysisDirectory"/></td>
                 <td></td>
                 <td>
-                    <otp:editorSwitch
-                            roles="ROLE_OPERATOR"
-                            link="${g.createLink(controller: 'projectConfig', action: 'updateProjectField', params: ['fieldName': 'dirAnalysis'])}"
-                            value="${selectedProject.dirAnalysis}"/>
+                    <sec:ifAllGranted roles="ROLE_OPERATOR">
+                        <div class="input-group">
+                            <div class="input-group-append">
+                                <input disabled type="text" id="analysisDirInput" class="form-control form-control-sm"
+                                       data-fixed="${selectedProject.dirAnalysis}" value="${selectedProject.dirAnalysis}">
+                                <button class="btn btn-success btn-sm" type="button" id="button-save-analysisDir"
+                                        onclick="onSaveAnalysisDir()" style="display: none;">
+                                    <i class="bi bi-save"></i>
+                                    <g:message code="default.button.save.label"/>
+                                </button>
+                                <button class="btn btn-outline-secondary btn-sm otp-background-white" type="button" id="button-edit-analysisDir"
+                                        onclick="onEditAnalysisDir()" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                    <g:message code="default.button.edit.label"/>
+                                </button>
+                            </div>
+                        </div>
+                    </sec:ifAllGranted>
+                    <sec:ifNotGranted roles="ROLE_OPERATOR">
+                        ${selectedProject.dirAnalysis}
+                    </sec:ifNotGranted>
                 </td>
             </tr>
             <tr>
@@ -92,11 +109,11 @@
                                 <input disabled type="text" id="unixGroupInput" class="form-control form-control-sm" data-fixed="${selectedProject.unixGroup}" value="${selectedProject.unixGroup}">
                                 <button class="btn btn-success btn-sm" type="button" id="button-save-unixGroup" onclick="onSaveUnixGroup()" style="display: none;">
                                     <i class="bi bi-save"></i>
-                                    Save
+                                    <g:message code="default.button.save.label"/>
                                 </button>
                                 <button class="btn btn-outline-secondary btn-sm otp-background-white" type="button" id="button-edit-unixGroup" onclick="onEditUnixGroup()" title="Edit">
                                     <i class="bi bi-pencil"></i>
-                                    Edit
+                                    <g:message code="default.button.edit.label"/>
                                 </button>
                             </div>
                         </div>

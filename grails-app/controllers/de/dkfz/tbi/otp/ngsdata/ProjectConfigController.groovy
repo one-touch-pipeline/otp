@@ -29,6 +29,7 @@ import org.springframework.http.HttpStatus
 
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.infrastructure.OtpFileSystemException
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
 import de.dkfz.tbi.otp.project.*
@@ -43,6 +44,7 @@ import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriorityService
 import de.dkfz.tbi.util.TimeFormats
 
+import java.nio.file.FileSystemException
 import java.sql.Timestamp
 
 @Secured("hasRole('ROLE_OPERATOR')")
@@ -72,6 +74,7 @@ class ProjectConfigController implements CheckAndCall {
             updateRequestAvailable              : "POST",
             saveProjectComment                  : "POST",
             updateUnixGroup                     : "POST",
+            updateAnalysisDir                   : "POST",
             updateFingerPrinting                : "POST",
             updateProcessingNotification        : "POST",
             updateQcTrafficLightNotification    : "POST",
@@ -113,6 +116,19 @@ class ProjectConfigController implements CheckAndCall {
     def updateProjectField(UpdateProjectCommand cmd) {
         checkErrorAndCallMethod(cmd) {
             projectService.updateProjectField(cmd.value, cmd.fieldName, projectSelectionService.requestedProject)
+        }
+    }
+
+    def updateAnalysisDir(UpdateAnalysisDirCommand cmd) {
+        Project project = projectSelectionService.requestedProject
+        try {
+            projectService.updateAnalysisDirectory(project, cmd.analysisDir, cmd.force)
+            Map map = [analysisDir: project.dirAnalysis]
+            render map as JSON
+        } catch (FileSystemException | OtpFileSystemException e) {
+            return response.sendError(HttpStatus.I_AM_A_TEAPOT.value(), e.message)  // needs a different status for the UI to handle the modal
+        } catch (AssertionError | OtpRuntimeException e) {
+            return response.sendError(HttpStatus.NOT_ACCEPTABLE.value(), e.message)
         }
     }
 
@@ -274,5 +290,10 @@ class UpdateProjectCommand implements Validateable {
 
 class UpdateUnixGroupCommand implements Validateable {
     String unixGroup
+    boolean force = false
+}
+
+class UpdateAnalysisDirCommand implements Validateable {
+    String analysisDir
     boolean force = false
 }

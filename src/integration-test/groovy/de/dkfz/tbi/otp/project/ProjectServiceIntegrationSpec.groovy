@@ -677,24 +677,6 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         e.message.contains("Access is denied")
     }
 
-    void "test updateAnalysisDirectory valid name"() {
-        given:
-        setupData()
-        String analysisDirectory = "${temporaryFolder.newFolder()}/dirA"
-        Project project = Project.findByName("testProject")
-        project.unixGroup = configService.testingGroup
-        project.save(flush: true)
-
-        when:
-        assert !project.dirAnalysis
-        SpringSecurityUtils.doWithAuth(ADMIN) {
-            projectService.updateProjectField(analysisDirectory, "dirAnalysis", project)
-        }
-
-        then:
-        project.dirAnalysis == analysisDirectory
-    }
-
     void "test updateProcessingPriority valid name"() {
         given:
         setupData()
@@ -1833,6 +1815,68 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
         then:
         1 * projectService.mailHelperService.sendEmail('subject', 'body', [userPi.email, userBioinf.email].sort())
+    }
+
+    @Unroll
+    void "updateAnalysisDirectory, should succeed and send no mail, when unix group has permission to create directory and force #force"() {
+        given:
+        setupData()
+        String analysisDirectory = "${temporaryFolder.newFolder()}/dirA"
+        Project project = Project.findByName("testProject")
+        project.unixGroup = configService.testingGroup
+        project.save(flush: true)
+
+        when:
+        SpringSecurityUtils.doWithAuth(ADMIN) {
+            projectService.updateAnalysisDirectory(project, analysisDirectory, force)
+        }
+
+        then:
+        project.dirAnalysis == analysisDirectory
+        0 * projectService.mailHelperService.sendEmailToTicketSystem(*_)
+
+        where:
+        force << [true, false]
+    }
+
+    void "updateAnalysisDirectory, should fail with OtpFileSystemException and send no mail, when unix group has no permission and force mode is false"() {
+        given:
+        setupData()
+        String newDirAnalysis = "/directory/without/permission"
+        String oldDirAnalysis = "/old/directory"
+        Project project = Project.findByName("testProject")
+        project.dirAnalysis = oldDirAnalysis
+        project.save(flush: true)
+        projectService.mailHelperService = Mock(MailHelperService)
+
+        when:
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
+            projectService.updateAnalysisDirectory(project, newDirAnalysis, false)
+        }
+
+        then:
+        0 * projectService.mailHelperService.sendEmailToTicketSystem(*_)
+
+        then:
+        thrown(OtpFileSystemException)
+    }
+
+    void "updateAnalysisDirectory, should send email and update, when unix group has no permission and force mode is true"() {
+        given:
+        setupData()
+        String newDirAnalysis = "/directory/without/permission"
+        String oldDirAnalysis = "/old/directory"
+        Project project = createProject(dirAnalysis: oldDirAnalysis)
+        projectService.mailHelperService = Mock(MailHelperService)
+
+        when:
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
+            projectService.updateAnalysisDirectory(project, newDirAnalysis, true)
+        }
+
+        then:
+        project.dirAnalysis == newDirAnalysis
+        1 * projectService.mailHelperService.sendEmailToTicketSystem(_, _)
     }
 
     void "updateUnixGroup, should fail with UnixGroupIsInvalidException when it contains invalid chars"() {

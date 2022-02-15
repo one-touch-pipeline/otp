@@ -414,7 +414,7 @@ class FileService {
         setPermissionViaBash(path, realm, DEFAULT_DIRECTORY_PERMISSION_STRING)
     }
 
-    void setPermissionViaBash(Path path, Realm realm, String permissions) {
+    void setPermissionViaBash(Path path, Realm realm, String permissions) throws ChangeFilePermissionException {
         try {
             remoteShellHelper.executeCommandReturnProcessOutput(realm, "chmod ${permissions} ${path}").assertExitCodeZeroAndStderrEmpty()
         } catch (ProcessingException | AssertionError e) {
@@ -427,7 +427,7 @@ class FileService {
                 .assertExitCodeZeroAndStderrEmpty().stdout.trim()
     }
 
-    void setGroupViaBash(Path path, Realm realm, String groupString) {
+    void setGroupViaBash(Path path, Realm realm, String groupString) throws ChangeFileGroupException {
         try {
             remoteShellHelper.executeCommandReturnProcessOutput(realm, "chgrp -h ${groupString} ${path}").assertExitCodeZeroAndStderrEmpty()
         } catch (ProcessingException | AssertionError e) {

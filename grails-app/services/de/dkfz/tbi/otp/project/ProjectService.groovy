@@ -208,7 +208,11 @@ class ProjectService {
         createProjectDirectoryIfNeeded(project)
 
         if (project.dirAnalysis) {
-            createAnalysisDirectoryIfPossible(project)
+            try {
+                createAnalysisDirectoryIfPossible(project)
+            } catch (FileSystemException | OtpFileSystemException ignore) { }
+            //ignore exceptions to make creation of projects possible even when the analysis directory can't be created or the unix group has access to it
+            //In this case an email is send
         }
 
         if (projectParams.projectRequest) {
@@ -322,7 +326,8 @@ class ProjectService {
         fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(projectDirectory, realm, project.unixGroup)
     }
 
-    private void createAnalysisDirectoryIfPossible(Project project) {
+    private void createAnalysisDirectoryIfPossible(Project project, Boolean sendMailInErrorCase = true)
+            throws OtpFileSystemException, AssertionError, FileSystemException {
         assert project.dirAnalysis
         Realm realm = project.realm
         FileSystem fs = fileSystemService.getRemoteFileSystem(realm)
@@ -339,13 +344,16 @@ class ProjectService {
                     realm, '', FileService.DIRECTORY_WITH_OTHER_PERMISSION_STRING)
             fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(analysisDirectory, realm, project.unixGroup,
                     FileService.OWNER_AND_GROUP_DIRECTORY_PERMISSION_STRING)
-        } catch (AssertionError | FileSystemException | OtpFileSystemException e) {
-            String header = "Could not automatically create analysisDir '${project.dirAnalysis}' for Project '${project.name}'."
-            mailHelperService.sendEmailToTicketSystem(
-                    header,
-                    "Automatic creation of analysisDir '${project.dirAnalysis}' for Project '${project.name}' failed. " +
-                            "Make sure that the share exists and that OTP has write access to the already existing base directory," +
-                            " so that the new subfolder can be created.\n ${e.localizedMessage}")
+        } catch (FileSystemException | OtpFileSystemException e) {
+            if (sendMailInErrorCase) {
+                String header = "Could not automatically create analysisDir '${project.dirAnalysis}' for Project '${project.name}'."
+                mailHelperService.sendEmailToTicketSystem(
+                        header,
+                        "Automatic creation of analysisDir '${project.dirAnalysis}' for Project '${project.name}' failed. " +
+                                "Make sure that the share exists and that OTP has write access to the already existing base directory," +
+                                " so that the new subfolder can be created.\n ${e.localizedMessage}")
+            }
+            throw e
         }
     }
 
@@ -389,14 +397,12 @@ class ProjectService {
     <T> void updateProjectField(T fieldValue, String fieldName, Project project) {
         assert fieldName && [
                 "description",
-                "dirAnalysis",
                 "nameInMetadataFiles",
                 "processingPriority",
                 "tumorEntity",
                 "projectGroup",
                 "sampleIdentifierParserBeanName",
                 "qcThresholdHandling",
-                "unixGroup",
                 "forceCopyFiles",
                 "speciesWithStrains",
                 "publiclyAvailable",
@@ -422,10 +428,6 @@ class ProjectService {
 
         if (fieldName == 'relatedProjects' && project.relatedProjects) {
             updateAllRelatedProjects(project)
-        }
-
-        if (fieldName == 'dirAnalysis' && project.dirAnalysis) {
-            createAnalysisDirectoryIfPossible(project)
         }
     }
 
@@ -1069,6 +1071,20 @@ echo 'OK'
     void updateFingerPrinting(Project project, boolean value) {
         project.fingerPrinting = value
         assert project.save(flush: true)
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void updateAnalysisDirectory(Project project, String analysisDir, boolean force = false)
+            throws FileSystemException, OtpFileSystemException, AssertionError {
+        project.dirAnalysis = analysisDir
+        project.save(flush: true)
+        try {
+            createAnalysisDirectoryIfPossible(project, force)
+        } catch (FileSystemException | OtpFileSystemException | AssertionError e) {
+            if (!force) {
+                throw e
+            }
+        }
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
