@@ -109,10 +109,10 @@ class MergingSet implements Entity {
     @SuppressWarnings('ThrowRuntimeException')
     Set<SeqTrack> getContainedSeqTracks() {
         final Set<SeqTrack> seqTracks = [] as Set
-        MergingSetAssignment.findAllByMergingSet(this).each {
-            final Set<SeqTrack> seqTracksInIt = it.bamFile.containedSeqTracks
+        MergingSetAssignment.findAllByMergingSet(this).each { MergingSetAssignment ma ->
+            final Set<SeqTrack> seqTracksInIt = ma.bamFile.refresh().containedSeqTracks
             if (!seqTracksInIt) {
-                throw new RuntimeException("BAM file ${it.bamFile} has reported not to contain any SeqTracks.")
+                throw new RuntimeException("BAM file ${ma.bamFile} has reported not to contain any SeqTracks.")
             }
             final Collection intersection = seqTracks*.id.intersect(seqTracksInIt*.id)
             if (!intersection.empty) {
