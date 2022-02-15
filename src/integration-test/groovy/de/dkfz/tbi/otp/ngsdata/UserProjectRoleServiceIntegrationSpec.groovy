@@ -58,6 +58,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
     private final static String AD_GROUP_TOOL_PATH = "path/to/script.sh"
 
+    private final static String EMAIL_CLUSTER_ADMINISTRATION = HelperUtils.randomEmail
     private static final String EMAIL_INTERN = 'intern@de.de'
     private static final String EMAIL_EXTERN = 'extern@de.de'
     private static final String EMAIL_TICKET_SYSTEM = HelperUtils.randomEmail
@@ -112,6 +113,12 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
                 type: null,
                 project: null,
                 value: CLUSTER_NAME,
+        )
+        findOrCreateProcessingOption(
+                name: ProcessingOption.OptionName.EMAIL_CLUSTER_ADMINISTRATION,
+                type: null,
+                project: null,
+                value: EMAIL_CLUSTER_ADMINISTRATION,
         )
         findOrCreateProcessingOption(
                 name: ProcessingOption.OptionName.OTP_SYSTEM_USER,
@@ -787,6 +794,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
                 createUserProjectRole(project: project, manageUsers: true),
                 createUserProjectRole(project: project, projectRoles: [pi]),
         ]
+        String linkProjectDirectory = LsdfFilesService.getPath(configService.rootPath.path, project.dirName)
 
         String projectName = project.name
         String expectedBody = """\
@@ -796,7 +804,8 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
             ${projectName}
             ${project.dirAnalysis}
             ${CLUSTER_NAME}
-            ${EMAIL_TICKET_SYSTEM}
+            ${EMAIL_CLUSTER_ADMINISTRATION}
+            ${linkProjectDirectory}
             ${EMAIL_SENDER_SALUTATION}""".stripIndent()
 
         when:
@@ -1666,7 +1675,8 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
                     |${projectName}
                     |${dirAnalysis}
                     |${clusterName}
-                    |${ticketSystemEmail}
+                    |${clusterAdministrationEmail}
+                    |${linkProjectDirectory}
                     |${supportTeamSalutation}'''.stripMargin()
         }
     }

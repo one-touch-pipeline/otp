@@ -1813,7 +1813,6 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                             projectFolder           : LsdfFilesService.getPath(configService.rootPath.path, project.dirName),
                             analysisFolder          : project.dirAnalysis,
                             linkUserManagementConfig: 'link',
-                            clusterName             : processingOptionService.findOptionAsString(OptionName.CLUSTER_NAME),
                             teamSignature           : processingOptionService.findOptionAsString(OptionName.EMAIL_SENDER_SALUTATION),
                     ]) >> "body"
                 },

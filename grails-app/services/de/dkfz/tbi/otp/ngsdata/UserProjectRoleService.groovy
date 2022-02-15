@@ -175,17 +175,18 @@ class UserProjectRoleService {
                 projectName: project.name,
         ])
 
+        String clusterAdministrationEmail = processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_CLUSTER_ADMINISTRATION)
         String clusterName = processingOptionService.findOptionAsString(ProcessingOption.OptionName.CLUSTER_NAME)
         String supportTeamName = processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_SENDER_SALUTATION)
         String body = messageSourceService.createMessage("projectUser.notification.fileAccessChange.body", [
-                username             : user.realName,
-                requester            : mailHelperService.senderName,
-                projectName          : project.name,
-                dirAnalysis          : project.dirAnalysis ?: "-",
-                clusterName          : clusterName,
-                ticketSystemEmail    : mailHelperService.ticketSystemEmailAddress,
-                supportTeamSalutation: supportTeamName,
-                linkProjectDirectory : LsdfFilesService.getPath(configService.rootPath.path, project.dirName),
+                username                  : user.realName,
+                requester                 : mailHelperService.senderName,
+                projectName               : project.name,
+                dirAnalysis               : project.dirAnalysis ?: "-",
+                clusterName               : clusterName,
+                clusterAdministrationEmail: clusterAdministrationEmail,
+                supportTeamSalutation     : supportTeamName,
+                linkProjectDirectory      : LsdfFilesService.getPath(configService.rootPath.path, project.dirName),
         ])
 
         List<String> ccs = getUniqueProjectAuthoritiesAndUserManagers(project)*.email.sort()

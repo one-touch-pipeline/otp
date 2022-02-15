@@ -375,7 +375,6 @@ class ProjectService {
                         projectFolder           : LsdfFilesService.getPath(configService.rootPath.path, project.dirName),
                         analysisFolder          : project.dirAnalysis,
                         linkUserManagementConfig: createNotificationTextService.createOtpLinks([project], 'projectUser', 'index'),
-                        clusterName             : processingOptionService.findOptionAsString(OptionName.CLUSTER_NAME),
                         teamSignature           : processingOptionService.findOptionAsString(OptionName.EMAIL_SENDER_SALUTATION),
                 ])
 
