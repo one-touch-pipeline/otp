@@ -25,6 +25,7 @@ import grails.util.Holders
 import grails.web.mapping.LinkGenerator
 
 import de.dkfz.tbi.otp.Comment
+import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
@@ -49,6 +50,8 @@ class MonitorOutputCollector {
     final boolean showFinishedEntries
 
     final boolean showNotSupportedSeqTypes
+
+    ConfigService configService
 
     private List<String> output = []
 
@@ -258,7 +261,7 @@ ${prefix(objectsToStrings(objects, valueToShow).join('\n'))}
             output << prefix("An error occured for the object: ${valueToShow(object)}")
             List errorOutput = []
             errorOutput << "\nobject class/id: ${object.class} / ${object.id}" +
-                    "\nthe OTP link: https://otp.dkfz.de/otp/processes/process/${lastProcess.id}" +
+                    "\nthe OTP link: ${configService.configServerUrl}/processes/process/${lastProcess.id}" +
                     "\nthe error: ${ps.latestProcessingStepUpdate?.error?.errorMessage?.replaceAll('\n', "\n${INDENT3}")}"
 
             Comment comment = ps.process.comment

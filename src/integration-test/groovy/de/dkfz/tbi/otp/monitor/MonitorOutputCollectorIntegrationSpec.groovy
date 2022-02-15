@@ -27,6 +27,7 @@ import grails.web.mapping.LinkGenerator
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
@@ -47,7 +48,9 @@ class MonitorOutputCollectorIntegrationSpec extends Specification implements Dom
                 className: SeqTrack.class.name,
         ])
         String workflowName = parameter.process.jobExecutionPlan.name
-        MonitorOutputCollector collector = new MonitorOutputCollector()
+        MonitorOutputCollector collector = new MonitorOutputCollector(
+                configService: Mock(ConfigService)
+        )
         String expected = ''
 
         when:
@@ -94,7 +97,9 @@ class MonitorOutputCollectorIntegrationSpec extends Specification implements Dom
             process.comment = DomainFactory.createComment()
             process.save(flush: true)
         }
-        MonitorOutputCollector collector = new MonitorOutputCollector()
+        MonitorOutputCollector collector = new MonitorOutputCollector(
+                configService: Mock(ConfigService)
+        )
 
         when:
         collector.addInfoAboutProcessErrors(workflowName, [seqTrack], { it.id }, { it })

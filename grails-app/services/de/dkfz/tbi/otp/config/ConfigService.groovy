@@ -229,6 +229,10 @@ class ConfigService implements ApplicationContextAware {
         return otpProperties.get(OtpProperty.WES_AUTH_CLIENT_SECRET)
     }
 
+    String getConfigServerUrl() {
+        return otpProperties.get(OtpProperty.CONFIG_SERVER_URL)
+    }
+
     private File getAndCheckPathFromProperty(OtpProperty property) {
         return new File(otpProperties.get(property) ?: property.defaultValue)
     }
