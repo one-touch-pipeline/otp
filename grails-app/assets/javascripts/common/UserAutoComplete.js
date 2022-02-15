@@ -70,7 +70,7 @@ $(() => {
   };
 
   // add autocompletion to inputs inside elements with class user-auto-complete, if it wasn't added yet
-  $('.user-auto-complete').on('input', 'input.autocompleted', (e) => {
+  $('.user-auto-complete').on('input', (e) => {
     const target = $(e.target);
     if (target.parent('.twitter-typeahead').length === 0) {
       userAutocomplete(target);
