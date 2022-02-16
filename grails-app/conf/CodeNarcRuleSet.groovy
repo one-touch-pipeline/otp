@@ -374,7 +374,7 @@ All the Rules that will be used for OTP
     NoDef {
         priority = MIDDLE
         doNotApplyToFileNames = CONTROLLER
-        excludeRegex = 'hasMany|belongsTo|mappedBy'
+        excludeRegex = /hasMany|belongsTo|mappedBy/
     }
     //NoFloat //Float is fine since we don't use the numbers for calculations
     //NoDouble //Double is fine since we don't use the numbers for calculations
@@ -977,7 +977,8 @@ All the Rules that will be used for OTP
 
     // rulesets/naming.xml
     AbstractClassName {
-        priority = DEFAULT
+        priority = HIGH
+        regex = /Abstract[A-Z]\w+/
     }
     ClassName {
         priority = DEFAULT
