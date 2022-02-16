@@ -295,16 +295,19 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
 
         when:
         SessionUtils.withNewTransaction {
-            notificationCreator.notifyAndSetFinishedTimestamps(ticket)
-            ticket = OtrsTicket.get(ticket.id)
+            OtrsTicket ticketToFinish = OtrsTicket.get(ticket.id)
+            notificationCreator.notifyAndSetFinishedTimestamps(ticketToFinish)
         }
 
         then:
-        ticket.installationFinished != null
-        ticket.fastqcFinished == null
-        ticket.alignmentFinished == null
-        ticket.snvFinished == null
-        !ticket.finalNotificationSent
+        SessionUtils.withNewTransaction {
+            OtrsTicket result = OtrsTicket.get(ticket.id)
+            result.installationFinished != null
+            result.fastqcFinished == null
+            result.alignmentFinished == null
+            result.snvFinished == null
+            !result.finalNotificationSent
+        }
     }
 
     void "setFinishedTimestampsAndNotify, when something just completed and won't do more, sends final notification"() {
@@ -394,22 +397,26 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
                 getLinkGenerator() >> Mock(LinkGenerator)
             }
         }
+
         when:
         SessionUtils.withNewTransaction {
-            notificationCreator.notifyAndSetFinishedTimestamps(ticket)
-            ticket = OtrsTicket.get(ticket.id)
+            OtrsTicket ticketToNotify = OtrsTicket.get(ticket.id)
+            notificationCreator.notifyAndSetFinishedTimestamps(ticketToNotify)
         }
 
         then:
-        ticket.installationFinished != null
-        ticket.fastqcFinished != null
-        ticket.alignmentFinished != null
-        ticket.snvFinished == null
-        ticket.indelFinished == null
-        ticket.sophiaFinished == null
-        ticket.aceseqFinished == null
-        ticket.runYapsaFinished == null
-        ticket.finalNotificationSent
+        SessionUtils.withNewTransaction {
+            OtrsTicket result = OtrsTicket.get(ticket.id)
+            result.installationFinished != null
+            result.fastqcFinished != null
+            result.alignmentFinished != null
+            result.snvFinished == null
+            result.indelFinished == null
+            result.sophiaFinished == null
+            result.aceseqFinished == null
+            result.runYapsaFinished == null
+            result.finalNotificationSent
+        }
     }
 
     void "setFinishedTimestampsAndNotify, when alignment is finished but installation is not, don't send notification"() {
