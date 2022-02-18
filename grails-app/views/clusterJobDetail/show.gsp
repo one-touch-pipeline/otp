@@ -24,8 +24,8 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <title><g:message code="jobstats.detail.title"/></title>
-    <asset:javascript src="modules/multiprogressbar.js"/>
-    <asset:stylesheet src="modules/multiprogressbar.css"/>
+    <asset:javascript src="modules/rGraph.js"/>
+    <asset:javascript src="common/Graphs.js"/>
     <asset:javascript src="pages/clusterJobDetail/show/clusterJobDetail.js"/>
 </head>
 <!--
@@ -164,16 +164,12 @@ on the general cluster job page
             </div>
 
             <g:if test="${job.queued && job.started && job.ended}">
-                <div id="jobTypeSpecificProgressContainer">
-                    <div class="graphDescription">delay</div>
+                <div class="detailContainer">
+                    <div class="detailContainerTitle">Delay</div>
                     <div class="toolTipContainer">
-                       <span class="toolTip"><g:message code="jobstats.detail.graphs.toolTip.progressBar.QueueProcess"/></span>
+                        <span class="toolTip"><g:message code="jobstats.detail.graphs.toolTip.progressBar.QueueProcess"/></span>
                     </div>
-                    <div class="progressLegend">
-                        <div class="progressLegendItem" id="progressLegendItemQueue"></div><div class="progressLegendText">Queue</div>
-                        <div class="progressLegendItem" id="progressLegendItemProcess"></div><div class="progressLegendText">Process</div>
-                    </div>
-                    <div id="jobTypeSpecificGraphProgress" class="multiProgress"></div>
+                    <canvas id="delayPieChart" class="pieChart" width=450px height=225px></canvas>
                 </div>
             </g:if>
 

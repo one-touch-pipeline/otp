@@ -96,9 +96,6 @@ $.otp.clusterJobGeneralTable = {
 };
 
 $.otp.clusterJobGeneralGraph = {
-
-  colors: ['#81BEF7', '#A9BCF5', '#5882FA', '#0431B4', '#00BFFF', '#A9F5F2', '#088A85', '#9F81F7'],
-
   update() {
     'use strict';
 
@@ -110,7 +107,7 @@ $.otp.clusterJobGeneralGraph = {
       action: 'getAllStatesTimeDistribution',
       parameters: { from, to }
     }), function () {
-      $.otp.clusterJobGeneralGraph.generatePieGraphic('delayPieChart', this);
+      $.Graphs.drawPieGraph('delayPieChart', this);
     });
 
     RGraph.AJAX($.otp.createLink({
@@ -118,7 +115,7 @@ $.otp.clusterJobGeneralGraph = {
       action: 'getAllExitCodes',
       parameters: { from, to }
     }), function () {
-      $.otp.clusterJobGeneralGraph.generatePieGraphic('generalGraphExitCode', this);
+      $.Graphs.drawPieGraph('generalGraphExitCode', this);
     });
 
     RGraph.AJAX($.otp.createLink({
@@ -126,7 +123,7 @@ $.otp.clusterJobGeneralGraph = {
       action: 'getAllExitStatuses',
       parameters: { from, to }
     }), function () {
-      $.otp.clusterJobGeneralGraph.generatePieGraphic('generalGraphExitStatus', this);
+      $.Graphs.drawPieGraph('generalGraphExitStatus', this);
     });
 
     RGraph.AJAX($.otp.createLink({
@@ -134,7 +131,7 @@ $.otp.clusterJobGeneralGraph = {
       action: 'getAllFailed',
       parameters: { from, to }
     }), function () {
-      $.otp.clusterJobGeneralGraph.generateLineGraphic('generalGraphFailed', this);
+      $.Graphs.drawLineGraph('generalGraphFailed', this);
     });
 
     RGraph.AJAX($.otp.createLink({
@@ -142,7 +139,7 @@ $.otp.clusterJobGeneralGraph = {
       action: 'getAllStates',
       parameters: { from, to }
     }), function () {
-      $.otp.clusterJobGeneralGraph.generateLineGraphic('generalGraphStates', this);
+      $.Graphs.drawLineGraph('generalGraphStates', this);
     });
 
     RGraph.AJAX($.otp.createLink({
@@ -150,7 +147,7 @@ $.otp.clusterJobGeneralGraph = {
       action: 'getAllAvgCoreUsage',
       parameters: { from, to }
     }), function () {
-      $.otp.clusterJobGeneralGraph.generateLineGraphic('generalGraphCores', this);
+      $.Graphs.drawLineGraph('generalGraphCores', this);
     });
 
     RGraph.AJAX($.otp.createLink({
@@ -158,69 +155,7 @@ $.otp.clusterJobGeneralGraph = {
       action: 'getAllMemoryUsage',
       parameters: { from, to }
     }), function () {
-      $.otp.clusterJobGeneralGraph.generateLineGraphic('generalGraphMemory', this);
+      $.Graphs.drawLineGraph('generalGraphMemory', this);
     });
-  },
-
-  generatePieGraphic(id, data) {
-    'use strict';
-
-    const json = JSON.parse(data.response);
-    RGraph.reset($(`#${id}`).get(0));
-    new RGraph.Pie({
-      id,
-      data: json.data,
-      options: {
-        centerx: 120,
-        colors: $.otp.clusterJobGeneralGraph.getColors(json.data.length),
-        exploded: 3,
-        key: json.keys,
-        keyColors: $.otp.clusterJobGeneralGraph.getColors(json.data.length),
-        keyRounded: false,
-        labels: json.labels,
-        linewidth: 1,
-        radius: 80,
-        shadowBlur: 15,
-        shadowOffsetx: 5,
-        shadowOffsety: 5,
-        textSize: 8
-      }
-    }).draw();
-  },
-
-  generateLineGraphic(id, data) {
-    'use strict';
-
-    const json = JSON.parse(data.response);
-    RGraph.reset($(`#${id}`).get(0));
-    new RGraph.Line({
-      id,
-      data: json.data,
-      options: {
-        backgroundGridAutofitAlign: true,
-        gutterBottom: 100,
-        gutterLeft: 80,
-        key: json.keys,
-        labels: $.otp.clusterJobGeneralGraph.normalizeLabels(json.labels),
-        numxticks: json.labels.length - 1,
-        textAccessible: false,
-        textAngle: 45,
-        textSize: 8
-      }
-    }).draw();
-  },
-
-  getColors(elementCount) {
-    'use strict';
-
-    return this.colors.slice(0, elementCount);
-  },
-
-  normalizeLabels(labels) {
-    'use strict';
-
-    const step = Math.floor(labels.length / 24);
-    const newLabels = labels.filter((ignoredValue, index) => index % step === 0);
-    return newLabels;
   }
 };

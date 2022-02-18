@@ -72,19 +72,16 @@ class ClusterJobDetailController {
     }
 
     def getStatesTimeDistribution() {
-        Map dataToRender = [:]
-
         Map<String, Map<String, Long>> data = clusterJobService.findJobSpecificStatesTimeDistributionByJobId(params.id as Long)
 
-        dataToRender.data = ["queue", "process"].collectEntries {
-            return [it, [
-                    percentage: data."${it}".percentage,
-                    time:       applyPeriodFormat(data."${it}".ms as Long),
-                ],
-            ]
-        }
+        Map result = [
+                keys  : ["Queue", "Process"],
+                labels: ["${data.queue.percentage}% (${applyPeriodFormat(data.queue.ms)})",
+                         "${data.process.percentage}% (${applyPeriodFormat(data.process.ms)})"],
+                data  : [data.queue.percentage, data.process.percentage],
 
-        render dataToRender as JSON
+        ]
+        render result as JSON
     }
 
     private String applyPeriodFormat(Long ms) {

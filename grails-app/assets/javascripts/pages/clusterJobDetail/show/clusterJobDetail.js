@@ -22,39 +22,12 @@
 
 $.otp.clusterJobDetailProgress = {
   register(id) {
-    $.ajax($.otp.createLink({
+    RGraph.AJAX($.otp.createLink({
       controller: 'clusterJobDetail',
       action: 'getStatesTimeDistribution',
       parameters: { id }
-    })).done((data) => {
-      $.otp.clusterJobDetailProgress.getAllStates(data);
-    });
-  },
-
-  getAllStates(data) {
-    'use strict';
-
-    $.otp.clusterJobDetailProgress.generateProgress('jobTypeSpecificGraphProgress', data.data);
-  },
-
-  generateProgress(id, data) {
-    const PERCENT = 'percentage';
-    const TIME = 'time';
-    $(`#${id}`).multiprogressbar({
-      parts: [
-        {
-          value: data.queue[PERCENT],
-          text: `${data.queue[PERCENT]}% (${data.queue[TIME]})`,
-          barClass: 'progressBarQueue',
-          textClass: 'progressTextQueue'
-        },
-        {
-          value: data.process[PERCENT],
-          text: `${data.process[PERCENT]}% (${data.process[TIME]})`,
-          barClass: 'progressBarProcess',
-          textClass: 'progressTextProcess'
-        }
-      ]
+    }), function () {
+      $.Graphs.drawPieGraph('delayPieChart', this);
     });
   }
 };

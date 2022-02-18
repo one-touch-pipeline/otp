@@ -26,6 +26,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <title><g:message code="jobstats.general.title"/></title>
     <asset:javascript src="modules/rGraph.js"/>
+    <asset:javascript src="common/Graphs.js"/>
     <asset:javascript src="pages/clusterJobGeneral/index/clusterJobGeneral.js"/>
 </head>
 
