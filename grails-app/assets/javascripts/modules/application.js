@@ -21,7 +21,6 @@
  */
 
 //= require /webjars/jquery/3.6.0/jquery.js
-//= require /webjars/jquery-ui/1.12.1/jquery-ui.js
 //= require /webjars/bootstrap/4.6.0/js/bootstrap.bundle.js
 //= require /webjars/datatables/1.10.24/js/jquery.dataTables.js
 //= require /webjars/datatables/1.10.24/js/dataTables.bootstrap4.js

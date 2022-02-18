@@ -228,7 +228,6 @@ $(() => {
       bProcessing: true,
       bServerSide: false,
       bSort: true,
-      bJQueryUI: false,
       bAutoWidth: false,
       sScrollY: 'auto',
       sScrollX: 'auto',

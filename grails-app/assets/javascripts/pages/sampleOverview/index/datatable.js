@@ -32,7 +32,6 @@ $(() => {
     bProcessing: true,
     bServerSide: false,
     bSort: true,
-    bJQueryUI: false,
     bAutoWidth: false,
     sAjaxSource: $.otp.createLink({
       controller: 'sampleOverview',

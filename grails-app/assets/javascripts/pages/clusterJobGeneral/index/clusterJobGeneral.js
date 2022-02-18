@@ -44,7 +44,6 @@ $.otp.clusterJobGeneralTable = {
       bProcessing: true,
       bServerSide: true,
       bSort: true,
-      bJQueryUI: false,
       bAutoWidth: false,
       pageLength: 10,
       sAjaxSource: $.otp.createLink({

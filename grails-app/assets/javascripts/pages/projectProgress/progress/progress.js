@@ -35,7 +35,6 @@ $(() => {
     bProcessing: true,
     bServerSide: false,
     bSort: true,
-    bJQueryUI: false,
     bAutoWidth: true,
     sAjaxSource: $.otp.createLink({
       controller: 'projectProgress',

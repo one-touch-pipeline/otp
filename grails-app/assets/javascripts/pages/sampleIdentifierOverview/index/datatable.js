@@ -46,7 +46,6 @@ $.otp.sampleIdentifierOverviewTable = {
       bProcessing: true,
       bServerSide: false,
       bSort: true,
-      bJQueryUI: false,
       bAutoWidth: false,
       sAjaxSource: url,
       bScrollCollapse: true,

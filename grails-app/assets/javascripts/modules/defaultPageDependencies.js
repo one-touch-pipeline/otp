@@ -21,7 +21,6 @@
  */
 
 //= require /webjars/jquery/3.6.0/jquery.js
-//= require /webjars/jquery-ui/1.12.1/jquery-ui.js
 //= require /webjars/datatables/1.10.24/js/jquery.dataTables.js
 //= require /webjars/datatables-fixedcolumns/3.0.2/js/dataTables.fixedColumns.js
 //= require /webjars/datatables-fixedheader/2.1.2/js/dataTables.fixedHeader.js

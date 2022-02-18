@@ -313,7 +313,6 @@ dependencies {
     compile 'org.webjars.npm:bootstrap-icons:1.4.0'
     compile 'org.webjars.npm:ttskch__select2-bootstrap4-theme:1.5.2'
     compile 'org.webjars:rgraph:4.66-stable'
-    compile 'org.webjars:jquery-ui:1.12.1'
     compile 'org.webjars:select2:4.0.13'
     compile 'org.webjars:datatables:1.10.24'
     compile 'org.webjars:datatables-buttons:1.7.0'

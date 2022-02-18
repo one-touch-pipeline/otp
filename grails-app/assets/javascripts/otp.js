@@ -218,7 +218,6 @@ $.otp.createListView = (selector, sourcePath, sortOrder, jsonCallback, columnDef
 
   const config = {
     bFilter: false,
-    bJQueryUI: false,
     bSort: true,
     bProcessing: true,
     bServerSide: true,
@@ -267,7 +266,6 @@ $.otp.createInfinityScrollListView = (selector, sourcePath, sortOrder, jsonCallb
   const config = {
     sDom: '<i> T rt<"clear">S',
     bFilter: false,
-    bJQueryUI: false,
     bSort: true,
     bProcessing: true,
     bServerSide: true,

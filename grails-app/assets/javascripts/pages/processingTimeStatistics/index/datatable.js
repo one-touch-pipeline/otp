@@ -91,7 +91,6 @@ $.otp.processingTimeStatistics = {
       bProcessing: true,
       bServerSide: true,
       bSort: false,
-      bJQueryUI: false,
       bAutoWidth: false,
       sAjaxSource: $.otp.createLink({
         controller: 'processingTimeStatistics',

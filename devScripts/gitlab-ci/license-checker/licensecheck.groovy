@@ -52,10 +52,8 @@ class LicenseCheck {
             "migrations/changelogs",
             "src/docs",
 
-            "grails-app/assets/lib",
             "grails-app/assets/images",
 
-            "misc/fonts",
             "misc/logo",
             "scripts/gitchangelog",
 

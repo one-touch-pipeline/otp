@@ -113,7 +113,6 @@ $.otp.userAdministration.loadUserList = function () {
     bProcessing: true,
     bServerSide: false,
     bSort: true,
-    bJQueryUI: false,
     bPaginate: false,
     bScrollCollapse: true,
     sScrollY: $(window).height(),

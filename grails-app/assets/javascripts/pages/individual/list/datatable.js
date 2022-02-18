@@ -38,7 +38,6 @@ $.otp.individual = {
       bProcessing: true,
       bServerSide: true,
       bSort: true,
-      bJQueryUI: false,
       bAutoWidth: false,
       sAjaxSource: $.otp.createLink({
         controller: 'individual',

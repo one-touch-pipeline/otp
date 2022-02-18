@@ -34,7 +34,6 @@ $.otp.resultsTable = {
       bProcessing: true,
       bServerSide: false,
       bSort: true,
-      bJQueryUI: false,
       bAutoWidth: false,
       sAjaxSource: source,
       bScrollCollapse: true,
