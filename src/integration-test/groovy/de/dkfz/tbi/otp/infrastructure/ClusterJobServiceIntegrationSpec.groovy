@@ -1005,7 +1005,7 @@ class ClusterJobServiceIntegrationSpec extends Specification implements DomainFa
         setupData()
 
         expect:
-        [queue: [0, '0'], process: [0, '0']] == clusterJobService.findAllStatesTimeDistributionByDateBetween(START_DATE, END_DATE)
+        clusterJobService.findAllStatesTimeDistributionByDateBetween(START_DATE, END_DATE) == []
     }
 
     void test_findAllStatesTimeDistributionByDateBetween_WhenJobIsOutOfTimeSpan_ShouldReturnMapInInitialState() {
@@ -1019,7 +1019,7 @@ class ClusterJobServiceIntegrationSpec extends Specification implements DomainFa
         ])
 
         expect:
-        [queue: [0, '0'], process: [0, '0']] == clusterJobService.findAllStatesTimeDistributionByDateBetween(START_DATE, END_DATE)
+        clusterJobService.findAllStatesTimeDistributionByDateBetween(START_DATE, END_DATE) == []
     }
 
     void test_findAllStatesTimeDistributionByDateBetween_WhenSeveralJobsAreFound_ShouldReturnMapContainingPercentagesAndAbsoluteValuesOfStatesTimeDistribution() {
@@ -1039,7 +1039,8 @@ class ClusterJobServiceIntegrationSpec extends Specification implements DomainFa
         ])
 
         expect:
-        [queue: [37, '18'], process: [63, '30']] == clusterJobService.findAllStatesTimeDistributionByDateBetween(START_DATE, END_DATE)
+        clusterJobService.findAllStatesTimeDistributionByDateBetween(START_DATE, END_DATE) ==
+                [["Queue", 37, "37% (18 hours)"], ["Process", 63, "63% (30 hours)"]]
     }
 
     void test_findJobClassSpecificSeqTypesByDateBetween_WhenNoJobsFound_ShouldReturnEmptyList() {

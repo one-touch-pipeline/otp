@@ -1239,11 +1239,6 @@ td div {
     td:nth-child(4) {max-width: 200px;}
 }
 
-#clusterJobGeneralTableContainer {
-    height: 350px;
-    border: 1px solid black;
-}
-
 .detailContainer {
     width: 1080px;
     margin-top: 30px;
@@ -1333,6 +1328,10 @@ td div {
     .transition();
 }
 
+.graphContainer {
+        margin-top: 15px;
+}
+
 .pieGraphContainer {
     float: left;
     width: 575px;
@@ -1342,6 +1341,7 @@ td div {
         float: left;
     }
 }
+
 #pieGraphContainerSecond {
     float: right;
 }
@@ -1390,61 +1390,10 @@ td div {
     }
 }
 
-.progressBarContainer {
-    border: 1px solid black;
-}
-
-#jobTypeSpecificProgressContainer {
-    width: 940px;
-    border: 1px solid black;
-    margin-top: 20px;
-    margin-left: 220px;
-}
-
-.progressLegendItem {
-    margin-top: 10px;
-    width: 15px;
-    height: 15px;
-    margin-left: 20px;
-    float: left;
-}
-
-#progressLegendItemQueue {
-    background-color: @darkblue;
-}
-
-#progressLegendItemProcess {
-    background-color: @babyblue;
-}
-
-#generalGraphQueuedStartedEndedProgress {
-    width: 1120px;
-    border: 1px solid black;
-    margin-left: 20px;
-    margin-bottom: 10px;
-    margin-top: 20px;
-}
-
-#jobTypeSpecificGraphProgress {
-    width: 900px;
-    border: 1px solid black;
-    margin-left: 20px;
-    margin-bottom: 10px;
-    margin-top: 20px;
-}
-
-.progressBarQueue {
-    background: @darkblue;
-}
-
-.progressBarProcess {
-    background: @babyblue;
-}
 
 #clusterJobGeneralTable_filter {
-    display: inline;
-    float: left;
-    margin-left: 10px;
+    display: revert;
+    text-align: revert;
 }
 
 #seqTypeSelect {

@@ -626,7 +626,7 @@ SELECT
      * returns the average time in queue and average processing time, both as absolut and percentage values, for all jobs
      * @return map [queue: [percentageQueue, queuePeriod], process: [percentageProcess, processPeriod]]
      */
-    Map findAllStatesTimeDistributionByDateBetween(LocalDate startDate, LocalDate endDate) {
+    List findAllStatesTimeDistributionByDateBetween(LocalDate startDate, LocalDate endDate) {
         DateTimeInterval startEndDateTime = new DateTimeInterval(startDate, endDate)
 
         Sql sql = new Sql(dataSource)
@@ -640,7 +640,7 @@ SELECT
  ${QUERY_BY_TIMESPAN_NOTFAILED}
 """
 
-        Long queue, process, pQueue, pProcess
+        Long queue, process, percentageQueue, percentageProcess
 
         sql.query(query, startEndDateTime.asMillis()) {
             it.next()
@@ -648,10 +648,13 @@ SELECT
             process = it.getLong('processingTime') ?: 0
         }
 
-        pQueue = queue ? ((FACTOR_100 / (queue + process) * queue) as double).round() : 0
-        pProcess = queue ? FACTOR_100 - pQueue : 0
+        percentageQueue = queue ? ((FACTOR_100 / (queue + process) * queue) as double).round() : 0
+        percentageProcess = queue ? FACTOR_100 - percentageQueue : 0
 
-        return [queue: [pQueue, Duration.ofMillis(queue).toHours().toString()], process: [pProcess, Duration.ofMillis(process).toHours().toString()]]
+        return queue ? [
+                ["Queue", percentageQueue, "${percentageQueue}% (${Duration.ofMillis(queue).toHours()} hours)"],
+                ["Process", percentageProcess, "${percentageProcess}% (${Duration.ofMillis(process).toHours()} hours)"],
+        ] : []
     }
 
     /**

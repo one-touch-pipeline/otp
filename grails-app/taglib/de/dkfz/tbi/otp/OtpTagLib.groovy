@@ -119,7 +119,7 @@ class OtpTagLib {
      * @attr codes REQUIRED List of message codes to be used as table headers
      */
     def dataTable = { attrs ->
-        out << render(template: "/templates/dataTable", model: [id: attrs.id, codes: attrs.codes])
+        out << render(template: "/templates/dataTable", model: [id: attrs.id, codes: attrs.codes, classes: attrs.classes])
     }
 
     private static String editorSwitchTemplate(String template) {

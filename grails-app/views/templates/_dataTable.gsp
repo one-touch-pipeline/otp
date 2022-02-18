@@ -20,7 +20,7 @@
   - SOFTWARE.
   --}%
 
-<table id="${id}">
+<table id="${id}" class="${classes}">
     <thead>
     <tr>
         <g:each in="${codes}">

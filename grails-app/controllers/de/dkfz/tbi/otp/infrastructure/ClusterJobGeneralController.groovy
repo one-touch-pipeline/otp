@@ -107,33 +107,26 @@ class ClusterJobGeneralController {
     }
 
     JSON getAllFailed() {
-        renderDataAsJSON(clusterJobService.&findAllFailedByDateBetween, ['failed'])
+        renderLineDataAsJSON(clusterJobService.&findAllFailedByDateBetween, ['failed'])
     }
 
     JSON getAllStates() {
-        renderDataAsJSON(clusterJobService.&findAllStatesByDateBetween, ['queued', 'started', 'ended'])
+        renderLineDataAsJSON(clusterJobService.&findAllStatesByDateBetween, ['queued', 'started', 'ended'])
     }
 
     JSON getAllStatesTimeDistribution() {
-        Map dataToRender = [:]
-
-        LocalDate startDate = LocalDate.parse(params.from)
-        LocalDate endDate = LocalDate.parse(params.to)
-
-        dataToRender.data = clusterJobService.findAllStatesTimeDistributionByDateBetween(startDate, endDate)
-
-        render dataToRender as JSON
+        renderPieDataAsJSON(clusterJobService.&findAllStatesTimeDistributionByDateBetween)
     }
 
     JSON getAllAvgCoreUsage() {
-        renderDataAsJSON(clusterJobService.&findAllAvgCoreUsageByDateBetween, ['cores'])
+        renderLineDataAsJSON(clusterJobService.&findAllAvgCoreUsageByDateBetween, ['cores'])
     }
 
     JSON getAllMemoryUsage() {
-        renderDataAsJSON(clusterJobService.&findAllMemoryUsageByDateBetween, ['memory'])
+        renderLineDataAsJSON(clusterJobService.&findAllMemoryUsageByDateBetween, ['memory'])
     }
 
-    private JSON renderDataAsJSON(Closure<Map<String, List>> method, List keys) {
+    private JSON renderLineDataAsJSON(Closure<Map<String, List>> method, List keys) {
         Map dataToRender = [data: [], labels: [], keys: []]
 
         LocalDate startDate = LocalDate.parse(params.from)
@@ -154,7 +147,7 @@ class ClusterJobGeneralController {
     }
 
     private JSON renderPieDataAsJSON(Closure<List> method) {
-        Map dataToRender = [data: [], labels: []]
+        Map dataToRender = [data: [], labels: [], keys: []]
 
         LocalDate startDate = LocalDate.parse(params.from)
         LocalDate endDate = LocalDate.parse(params.to)
@@ -162,7 +155,12 @@ class ClusterJobGeneralController {
         List results = method(startDate, endDate)
         results.each {
             dataToRender.data << it[1]
-            dataToRender.labels << it[0].toString().replace("null", "UNKNOWN") + " (" + it[1].toString() + ")"
+            if (it.size() == 3) {
+                dataToRender.keys << it[0].toString().replace("null", "UNKNOWN")
+                dataToRender.labels << it[2]
+            } else {
+                dataToRender.keys << it[0].toString().replace("null", "UNKNOWN") + " (" + it[1].toString() + ")"
+            }
         }
 
         render dataToRender as JSON

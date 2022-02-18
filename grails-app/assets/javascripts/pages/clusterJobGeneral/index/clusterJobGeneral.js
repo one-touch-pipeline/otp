@@ -20,30 +20,26 @@
  * SOFTWARE.
  */
 
-$.otp.clusterJobGeneral = {
-  register() {
-    'use strict';
+$(() => {
+  'use strict';
 
-    $.otp.clusterJobGeneralTable.register();
-    $.otp.clusterJobGeneralGraph.register();
-    $.otp.clusterJobGeneralProgress.register();
+  $.otp.clusterJobGeneralTable.register();
+  $.otp.clusterJobGeneralGraph.update();
 
-    $('.datePicker').on('change', () => {
-      $.otp.clusterJobGeneralGraph.update();
-      $.otp.clusterJobGeneralProgress.update();
-      $.otp.clusterJobGeneralTable.update();
-      $('#dpTo').attr('min', $('#dpFrom').val());
-      $('#dpFrom').attr('max', $('#dpTo').val());
-    });
-  }
-};
+  $('.datePicker').on('change', () => {
+    $.otp.clusterJobGeneralTable.update();
+    $.otp.clusterJobGeneralGraph.update();
+    $('#dpTo').attr('min', $('#dpFrom').val());
+    $('#dpFrom').attr('max', $('#dpTo').val());
+  });
+});
 
 $.otp.clusterJobGeneralTable = {
   register() {
     'use strict';
 
     $('#clusterJobGeneralTable').dataTable({
-      dom: '<"top"filp<"clear">>rt',
+      dom: '<"row"<"col-sm-12"f>><"row"<"col-sm-12"tr>><"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
       bFilter: true,
       bProcessing: true,
       bServerSide: true,
@@ -103,11 +99,19 @@ $.otp.clusterJobGeneralGraph = {
 
   colors: ['#81BEF7', '#A9BCF5', '#5882FA', '#0431B4', '#00BFFF', '#A9F5F2', '#088A85', '#9F81F7'],
 
-  register() {
+  update() {
     'use strict';
 
     const from = $('#dpFrom').val();
     const to = $('#dpTo').val();
+
+    RGraph.AJAX($.otp.createLink({
+      controller: 'clusterJobGeneral',
+      action: 'getAllStatesTimeDistribution',
+      parameters: { from, to }
+    }), function () {
+      $.otp.clusterJobGeneralGraph.generatePieGraphic('delayPieChart', this);
+    });
 
     RGraph.AJAX($.otp.createLink({
       controller: 'clusterJobGeneral',
@@ -158,12 +162,6 @@ $.otp.clusterJobGeneralGraph = {
     });
   },
 
-  update() {
-    'use strict';
-
-    $.otp.clusterJobGeneralGraph.register();
-  },
-
   generatePieGraphic(id, data) {
     'use strict';
 
@@ -176,9 +174,10 @@ $.otp.clusterJobGeneralGraph = {
         centerx: 120,
         colors: $.otp.clusterJobGeneralGraph.getColors(json.data.length),
         exploded: 3,
-        key: json.labels,
+        key: json.keys,
         keyColors: $.otp.clusterJobGeneralGraph.getColors(json.data.length),
         keyRounded: false,
+        labels: json.labels,
         linewidth: 1,
         radius: 80,
         shadowBlur: 15,
@@ -223,49 +222,5 @@ $.otp.clusterJobGeneralGraph = {
     const step = Math.floor(labels.length / 24);
     const newLabels = labels.filter((ignoredValue, index) => index % step === 0);
     return newLabels;
-  }
-};
-
-$.otp.clusterJobGeneralProgress = {
-  register() {
-    'use strict';
-
-    RGraph.AJAX($.otp.createLink({
-      controller: 'clusterJobGeneral',
-      action: 'getAllStatesTimeDistribution',
-      parameters: { from: $('#dpFrom').val(), to: $('#dpTo').val() }
-    }), function () {
-      $.otp.clusterJobGeneralProgress.generateProgress('generalGraphQueuedStartedEndedProgress', this);
-    });
-  },
-
-  update() {
-    'use strict';
-
-    // .multiprogressbar('destroy') does not work properly
-    $('#generalGraphQueuedStartedEndedProgress').remove();
-    $('<div id="generalGraphQueuedStartedEndedProgress" class="multiProgress"></div>')
-      .appendTo('#progressBarContainer_generalGraphQueuedStartedEndedProgress');
-    $.otp.clusterJobGeneralProgress.register();
-  },
-
-  generateProgress(id, data) {
-    'use strict';
-
-    const json = JSON.parse(data.response);
-    $(`#${id}`).multiprogressbar({
-      parts: [{
-        value: json.data.queue[0],
-        text: `${json.data.queue[0]}% (${json.data.queue[1]} hours)`,
-        barClass: 'progressBarQueue',
-        textClass: 'progressTextQueue'
-      },
-      {
-        value: json.data.process[0],
-        text: `${json.data.process[0]}% (${json.data.process[1]} hours)`,
-        barClass: 'progressBarProcess',
-        textClass: 'progressTextProcess'
-      }]
-    });
   }
 };
