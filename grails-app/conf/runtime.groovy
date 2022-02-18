@@ -146,33 +146,11 @@ environments {
         }
         dataSource {
             jmxExport = true  // FIXME: contradicts documentation. do we need that?
-            String phase = System.properties['grails.test.phase']
-            // NOTE: FUNCTIONAL, BUT DISABLED UNTIL ALL TESTS ARE FIXED. ACTIVATE BY DELETING "false &&". (AND REMOVE THIS NOTE.)
-            if (false && phase == 'integration') {
-                // Setup the project name for use by the Continuous Integration server the prevent race conditions.
-                String projectName = System.getenv('BUILD_NUMBER') ?
-                        "--project-name otptest-build-${System.getenv('BUILD_NUMBER')}" : ''
-                // Where is docker-compose?
-                String dockerCompose = '/usr/bin/which docker-compose'.execute()?.text
-                if (!dockerCompose) {
-                    throw new IllegalStateException('Unable to find docker-compose. Is it installed and available via PATH?')
-                }
-                // Construct command string
-                String dc = "${dockerCompose} ${projectName} --file docker/otp-test/docker-compose.yml"
-                // Stop and destroy all remaining containers. Will break if you re-use BUILD_NUMBER. Don't do that!
-                "${dc} stop".execute().waitFor()
-                "${dc} rm -f".execute().waitFor()
-                // Start a fresh container
-                if ("${dc} up -d".execute().waitFor() != 0) {
-                    throw new IllegalStateException('Unable to start new database container.')
-                }
-                // Get the (dynamically assigned local) port
-                def dockerProcess = "${dc} port ${phase} 5432".execute()
-                // If we do not get a reply in time or the return code indicates a failure, fail.
-                if (!dockerProcess.waitFor(5, SECONDS) || dockerProcess.exitValue() != 0) {
-                    throw new IllegalStateException('Unable to get port information from Docker. Is the test database container running?')
-                }
-                String dockerPort = dockerProcess.text.split(':').last().trim() // should work for IPv6 also
+            String usePostgresDocker = System.properties['usePostgresDocker']
+
+            if ("TRUE".equalsIgnoreCase(usePostgresDocker)) {
+                String dockerPort = System.properties['dockerPort']
+
                 driverClassName = 'org.postgresql.Driver'
                 dialect = PostgreSQL9Dialect
                 dbCreate = 'update'

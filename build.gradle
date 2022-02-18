@@ -24,6 +24,8 @@ import com.gradle.scan.plugin.BuildScanPlugin
 import com.gradle.scan.plugin.PublishedBuildScan
 import grails.util.Environment
 
+import static java.util.concurrent.TimeUnit.SECONDS
+
 buildscript {
     repositories {
         mavenLocal()
@@ -135,6 +137,55 @@ swaggerSources {
 compileJava.dependsOn swaggerSources.wes.code
 sourceSets.main.java.srcDir "${swaggerSources.wes.code.outputDir}/src/main/java"
 sourceSets.main.resources.srcDir "${swaggerSources.wes.code.outputDir}/src/main/resources"
+
+integrationTest {
+    boolean usePostgresDocker = "TRUE".equalsIgnoreCase(System.getenv('USE_POSTGRES'))
+    systemProperty "usePostgresDocker", usePostgresDocker.toString()
+
+    if (usePostgresDocker) {
+        String dc = ""
+        doFirst {
+            println "use postgres docker"
+
+            // Setup the project name for use by the Continuous Integration server the prevent race conditions.
+            String projectName = "--project-name otptest-build-${System.getenv('BUILD_NUMBER') ?: 'DEFAULT'}"
+
+            // Where is docker-compose?
+            String dockerCompose = '/usr/bin/which docker-compose'.execute()?.text
+            if (!dockerCompose) {
+                throw new IllegalStateException('Unable to find docker-compose. Is it installed and available via PATH?')
+            }
+
+            // Construct command string
+            dc = "${dockerCompose} ${projectName} --file docker/otp-test/docker-compose.yml"
+
+            //cleanup in case the container still exist
+            "${dc} stop".execute().waitFor()
+            "${dc} rm -f".execute().waitFor()
+
+            // Start a fresh container
+            if ("${dc} up -d".execute().waitFor() != 0) {
+                throw new IllegalStateException('Unable to start new database container.')
+            }
+            // Get the (dynamically assigned local) port
+            def dockerProcess = "${dc} port integration 5432".execute()
+            // If we do not get a reply in time or the return code indicates a failure, fail.
+            if (!dockerProcess.waitFor(5, SECONDS) || dockerProcess.exitValue() != 0) {
+                throw new IllegalStateException('Unable to get port information from Docker. Is the test database container running?')
+            }
+            String dockerPort = dockerProcess.text.split(':').last().trim() // should work for IPv6 also
+            systemProperty "dockerPort", dockerPort
+        }
+
+        doLast {
+            // Stop and destroy the container
+            "${dc} stop".execute().waitFor()
+            "${dc} rm -f".execute().waitFor()
+        }
+    } else {
+        println "use h2 database"
+    }
+}
 
 task workflowTest(type: Test) {
     testClassesDirs = sourceSets.workflowTest.output.classesDirs
