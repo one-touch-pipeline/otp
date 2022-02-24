@@ -128,6 +128,10 @@ class RoddyWorkflowConfig extends ConfigPerProjectAndSeqType implements Alignmen
         md5sum nullable: true, matches: /^[0-9a-f]{32}$/
     }
 
+    static mapping = {
+        configFilePath type: "text"
+    }
+
     @Override
     @Deprecated
     AlignmentInfo getAlignmentInformation() {

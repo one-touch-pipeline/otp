@@ -627,4 +627,8 @@ databaseChangeLog = {
     changeSet(author: "gabkol", id: "otp-1448") {
         sqlFile(path: 'changelogs/2022/otp-1448_add_needsBedFile_flag_to_seqType.sql')
     }
+
+    changeSet(author: "borufka", id: "otp-1556") {
+        sqlFile(path: 'changelogs/2022/otp-1556-extend-column.sql')
+    }
 }
