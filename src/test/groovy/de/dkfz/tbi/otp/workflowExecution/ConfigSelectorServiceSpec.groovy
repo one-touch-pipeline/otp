@@ -21,19 +21,19 @@
  */
 package de.dkfz.tbi.otp.workflowExecution
 
-import grails.testing.gorm.DataTest
+import grails.test.hibernate.HibernateSpec
 import grails.testing.services.ServiceUnitTest
-import spock.lang.Specification
 
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.project.Project
 
-class ConfigSelectorServiceSpec extends Specification implements DataTest, WorkflowSystemDomainFactory, ServiceUnitTest<ConfigSelectorService> {
+class ConfigSelectorServiceSpec extends HibernateSpec implements WorkflowSystemDomainFactory, ServiceUnitTest<ConfigSelectorService> {
 
     @Override
-    Class[] getDomainClassesToMock() {
+    List<Class> getDomainClasses() {
         return [
                 ExternalWorkflowConfigSelector,
+                Project,
         ]
     }
 
@@ -60,4 +60,25 @@ class ConfigSelectorServiceSpec extends Specification implements DataTest, Workf
         multiSelectSelectorExtendedCriteria1.anyValueSet()
         !multiSelectSelectorExtendedCriteria2.anyValueSet()
     }
+
+    void "test findExactSelectors, anyValueSet"() {
+        given:
+        ExternalWorkflowConfigSelector selector  = createExternalWorkflowConfigSelector()
+
+        MultiSelectSelectorExtendedCriteria multiSelectSelectorExtendedCriteria = new MultiSelectSelectorExtendedCriteria(
+                workflows               : selector.workflows,
+                workflowVersions        : selector.workflowVersions,
+                seqTypes                : selector.seqTypes,
+                projects                : selector.projects,
+                referenceGenomes        : selector.referenceGenomes,
+                libraryPreparationKits  : selector.libraryPreparationKits
+        )
+
+        when:
+        List<ExternalWorkflowConfigSelector> foundSelectors = service.findExactSelectors(multiSelectSelectorExtendedCriteria)
+
+        then:
+        foundSelectors.size() == 1
+        foundSelectors[0] == selector
+     }
 }

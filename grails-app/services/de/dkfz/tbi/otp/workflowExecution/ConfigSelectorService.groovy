@@ -130,6 +130,30 @@ class ConfigSelectorService {
 
     /**
      * Used to find all ExternalWorkflowConfigSelectors exactly matching the attributes of an MultiSelectSelectorExtendedCriteria object.
+     */
+    List<ExternalWorkflowConfigSelector> findExactSelectors(MultiSelectSelectorExtendedCriteria multiSelectSelectorExtendedCriteria) {
+        String hql = """
+            select
+                ewcs
+            from
+                ExternalWorkflowConfigSelector as ewcs
+            where
+            """
+
+        Map parameters = [:]
+
+        hql += findExactSelectorQueryHelper(multiSelectSelectorExtendedCriteria, "workflows", parameters, true)
+        hql += findExactSelectorQueryHelper(multiSelectSelectorExtendedCriteria, "workflowVersions", parameters, true)
+        hql += findExactSelectorQueryHelper(multiSelectSelectorExtendedCriteria, "projects", parameters, true)
+        hql += findExactSelectorQueryHelper(multiSelectSelectorExtendedCriteria, "seqTypes", parameters, true)
+        hql += findExactSelectorQueryHelper(multiSelectSelectorExtendedCriteria, "referenceGenomes", parameters, true)
+        hql += findExactSelectorQueryHelper(multiSelectSelectorExtendedCriteria, "libraryPreparationKits", parameters, false)
+
+        return ExternalWorkflowConfigSelector.executeQuery(hql, parameters)
+    }
+
+    /**
+     * Used to find all ExternalWorkflowConfigSelectors exactly matching the attributes of an MultiSelectSelectorExtendedCriteria object.
      * Multi select option. There can only be a single match.
      */
     ExternalWorkflowConfigSelector findExactSelector(MultiSelectSelectorExtendedCriteria multiSelectSelectorExtendedCriteria) {

@@ -60,11 +60,6 @@ class ExternalWorkflowConfigSelector implements Comparable<ExternalWorkflowConfi
                 return "no.default"
             }
         }
-        workflowVersions validator: { val, obj ->
-            if (!validateIsUnique(obj)) {
-                return "unique"
-            }
-        }
         selectorType validator: { val, obj ->
             if (val == SelectorType.DEFAULT_VALUES && (
                     obj.projects ||

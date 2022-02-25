@@ -52,6 +52,30 @@ trait CheckAndCall {
     }
 
     /**
+     * Catch errors for the input command and the method processing. Return the method returns if it is successful,
+     * otherwise return the default detailed error messages and default HTTP status codes.
+     * @param cmd Validateable input command
+     * @param method closure method with the main logic
+     * @return object returned by the method or http error message in case of an error
+     */
+    def checkErrorAndCallMethodReturns(Validateable cmd, Closure method) {
+        if (cmd.hasErrors()) {
+            String errorMessage = createErrorMessageHtmlFromErrors(cmd.errors) ?: g.message(code: "default.message.error.notAcceptable")
+            return response.sendError(HttpStatus.NOT_ACCEPTABLE.value(), errorMessage)
+        }
+
+        try {
+            return method()
+        } catch (ValidationException e) {
+            log.debug(e.localizedMessage)
+            return response.sendError(HttpStatus.BAD_REQUEST.value(), createErrorMessageHtmlFromErrors(e.errors))
+        } catch (NumberFormatException | AssertionError | RuntimeException e) {
+            log.error(e.localizedMessage)
+            return response.sendError(HttpStatus.BAD_REQUEST.value(), e.localizedMessage)
+        }
+    }
+
+    /**
      * @deprecated Is deprecated because it returns on errors a HTTP success status code. Use checkDefaultErrorsAndCallMethod instead.
      */
     @Deprecated
@@ -187,18 +211,34 @@ trait CheckAndCall {
     }
 
     private String createErrorMessageStringFromErrors(Errors errors) {
-        String errorMessages = ""
+        List<String> errorMessages = []
 
-        if (errors.errorCount == 1) {
-            errorMessages << g.message(code: "default.message.error")
-        } else {
-            errorMessages << g.message(code: "default.message.errors", args: errors.errorCount)
-        }
+        errorMessages.add(errors.errorCount == 1 ? g.message(code: "default.message.error") :
+            g.message(code: "default.message.errors", args: errors.errorCount))
 
         errors.allErrors.each {
-            errorMessages << g.message(error: it)
+            errorMessages.add(g.message(error: it))
         }
 
         return errorMessages.join('\n    ')
+    }
+
+    private String createErrorMessageHtmlFromErrors(Errors errors) {
+        if (!errors || errors.errorCount <= 0) {
+            return ""
+        }
+
+        List<String> errorMessages = []
+
+        errorMessages.add(errors.errorCount == 1 ? g.message(code: "default.message.error") :
+                g.message(code: "default.message.errors", args: errors.errorCount))
+
+        errorMessages.add("<ul>")
+        errors.allErrors.each {
+            errorMessages.add("<li>${g.message(error: it)}</li>")
+        }
+        errorMessages.add("</ul>")
+
+        return errorMessages.join('\n')
     }
 }
