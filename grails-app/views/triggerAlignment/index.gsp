@@ -41,7 +41,7 @@
         </div>
 
         <div class="mt-3">
-            <g:render template="./components/warnArea"/>
+            <g:render template="./components/warnArea" model="[warnings: warnings]"/>
         </div>
 
         <nav class="navbar navbar-light bg-light mt-3">

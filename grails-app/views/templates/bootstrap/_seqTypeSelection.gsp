@@ -30,9 +30,9 @@
   --}%
 <div class="input-group mb-3" style="width: 500px;">
     <div class="input-group-prepend">
-        <label class="input-group-text" for="seqType-selection"><g:message code="seqTypeSelection.seqType"/></label>
+        <label class="input-group-text"><g:message code="seqTypeSelection.seqType"/></label>
     </div>
-    <select id="seqType-selection" class="custom-select use-select-2" multiple="multiple">
+    <select class="custom-select use-select-2" multiple="multiple">
         <g:each in="${seqTypes}" var="seqType">
             <option value="${seqType.id}">${seqType.displayNameWithLibraryLayout}</option>
         </g:each>

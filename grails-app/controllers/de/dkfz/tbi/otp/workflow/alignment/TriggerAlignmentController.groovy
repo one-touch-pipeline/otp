@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.workflow.alignment
 
 import grails.plugin.springsecurity.annotation.Secured
 
+import de.dkfz.tbi.otp.ngsdata.Sample
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.project.Project
@@ -34,9 +35,78 @@ class TriggerAlignmentController {
             index: "GET",
     ]
 
+    def index() {
+        return [
+                seqTypes : SeqType.findAllByLegacy(false),
+                seqTracks: findDummySeqTracks(),
+                warnings : generateDummyWarnings(),
+        ]
+    }
+
     // TODO: This is only a dummy impl, which will be replaced by otp-1342
     @SuppressWarnings('AvoidFindWithoutAll')
-    private List<SeqTrack> findSeqTracks() {
+    private Map generateDummyWarnings() {
+        Sample dummySample = Sample.first()
+
+        return [
+                seqTypes              : [
+                        [
+                                seqType  : SeqType.first(sort: 'name'),
+                                project  : Project.first(sort: 'name'),
+                                laneCount: 3
+                        ],
+                        [
+                                seqType  : SeqType.first(),
+                                project  : Project.first(),
+                                laneCount: 2
+                        ],
+                ],
+                seqPlatformGroups     : [
+                        [
+                                project: Project.first(sort: 'name'),
+                                mockPid: dummySample.individual.mockPid,
+                                sampleTypeName: dummySample.sampleType,
+                                seqTypeName: SeqType.first().name,
+                                seqReadType: "PAIRED",
+                                singleCell: "bulk",
+                                seqPlatformGroups: [
+                                        [
+                                                id: 12345,
+                                                count: 2,
+                                        ],
+                                        [
+                                                id: 342532,
+                                                count: 3,
+                                        ]
+                                ]
+                        ]
+                ],
+                libraryPreparationKits: [
+                        [
+                                project: Project.first(sort: 'name'),
+                                mockPid: dummySample.individual.mockPid,
+                                sampleTypeName: dummySample.sampleType,
+                                seqTypeName: SeqType.first().name,
+                                seqReadType: "PAIRED",
+                                singleCell: "bulk",
+                                libraryPrepKits: [
+                                        [
+                                                id: 12345,
+                                                count: 1,
+                                        ],
+                                        [
+                                                id: 342532,
+                                                count: 5,
+                                        ]
+                                ]
+                        ]
+                ],
+        ]
+    }
+
+    // TODO: This is only a dummy impl, which will be replaced by otp-1342
+    @SuppressWarnings('AvoidFindWithoutAll')
+    private List<SeqTrack> findDummySeqTracks() {
         Project project = Project.findByName("ExampleProject")
         return SeqTrack.withCriteria {
             sample {
@@ -46,12 +116,5 @@ class TriggerAlignmentController {
             }
             //    eq('seqType', seqType)
         }
-    }
-
-    def index() {
-        return [
-                seqTypes: SeqType.findAllByLegacy(false),
-                seqTracks: findSeqTracks(),
-        ]
     }
 }
