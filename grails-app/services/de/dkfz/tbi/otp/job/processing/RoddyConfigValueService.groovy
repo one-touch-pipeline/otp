@@ -56,11 +56,6 @@ class RoddyConfigValueService {
         cValues.put("INDEX_PREFIX", referenceGenomeFastaFile) //used for pancan pipeline
         cValues.put("GENOME_FA", referenceGenomeFastaFile) //used for rna pipeline
 
-        if (!roddyBamFile.seqType.isRna()) {
-            String chromosomeStatSizeFile = referenceGenomeService.chromosomeStatSizeFile(roddyBamFile.mergingWorkPackage).absolutePath
-            cValues.put("CHROM_SIZES_FILE", "${chromosomeStatSizeFile}")
-        }
-
         cValues.put("possibleControlSampleNamePrefixes", "${roddyBamFile.sampleType.dirName}")
         cValues.put("possibleTumorSampleNamePrefixes", "")
 
@@ -76,7 +71,7 @@ class RoddyConfigValueService {
         return cValues
     }
 
-    private getAdapterTrimmingFile(RoddyBamFile roddyBamFile, String combinedConfig) {
+    private Map<String, String> getAdapterTrimmingFile(RoddyBamFile roddyBamFile, String combinedConfig) {
         JsonNode combinedConfigJson = MAPPER.readTree(combinedConfig)
         boolean adapterTrimming = combinedConfigJson?.RODDY?.cvalues?.fields()?.find { it.key == "useAdaptorTrimming" }?.value?.value?.asBoolean()
 

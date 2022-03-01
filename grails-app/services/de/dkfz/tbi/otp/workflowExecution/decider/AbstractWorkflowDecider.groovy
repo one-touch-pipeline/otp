@@ -96,12 +96,10 @@ abstract class AbstractWorkflowDecider implements Decider {
                 .findAll { it.artefactType in supportedTypes }
                 .findAll { getSeqType(it) in supportedSeqTypes }
         Map<Pair<Project, SeqType>, Set<WorkflowArtefact>> groupedInputArtefacts = groupInputArtefacts(filteredInputArtefacts)
-        return groupedInputArtefacts.collectMany { it ->
-            Project project = it.key.aValue
-            SeqType seqType = it.key.bValue
+        return groupedInputArtefacts.collectMany { entry ->
             WorkflowVersionSelector matchingWorkflows = WorkflowVersionSelector.createCriteria().get {
-                eq('project', project)
-                eq('seqType', seqType)
+                eq('project', entry.key.aValue)
+                eq('seqType', entry.key.bValue)
                 workflowVersion {
                     eq('workflow', workflow)
                 }
@@ -110,7 +108,7 @@ abstract class AbstractWorkflowDecider implements Decider {
             if (!matchingWorkflows) {
                 return []
             }
-            Collection<WorkflowArtefact> combinedWorkflowArtefacts = (it.value + findAdditionalRequiredInputArtefacts(it.value)).unique()
+            Collection<WorkflowArtefact> combinedWorkflowArtefacts = (entry.value + findAdditionalRequiredInputArtefacts(entry.value)).unique()
             Collection<Collection<WorkflowArtefact>> artefactsPerWorkflowRun = groupArtefactsForWorkflowExecution(combinedWorkflowArtefacts)
             return createWorkflowRunsAndOutputArtefacts(artefactsPerWorkflowRun, filteredInputArtefacts, matchingWorkflows.workflowVersion)
         }

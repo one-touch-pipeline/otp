@@ -33,6 +33,7 @@ import java.nio.file.Path
 class RoddyConfigService {
 
     final static String ANALYSIS_ID = "analysis"
+    final static String CONFIGURATION_DIRECTORY = "config"
     final static String CONFIGURATION_NAME = "config"
 
     private static final String SCHEMA = '''
@@ -214,12 +215,13 @@ class RoddyConfigService {
     private static final JsonSchema SCHEMA_VALIDATOR = JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V201909).getSchema(SCHEMA)
     private static final JsonSchema FILENAMES_SCHEMA_VALIDATOR = JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V201909).getSchema(FILENAMES_SCHEMA)
     private static final ObjectMapper MAPPER = new ObjectMapper()
+    private static final int DROP_CHAR_COUNT = 2
 
     static Set<String> validateRoddyConfig(String value) {
         JsonNode node = MAPPER.readTree(value)
         Set<ValidationMessage> errors = SCHEMA_VALIDATOR.validate(node)
         Set<String> errorsString = errors.collect { error ->
-            return "RODDY." + error.message.drop(2)
+            return "RODDY." + error.message.drop(DROP_CHAR_COUNT)
         }
         return errorsString
     }
@@ -228,12 +230,12 @@ class RoddyConfigService {
         JsonNode node = MAPPER.readTree(value)
         Set<ValidationMessage> errors = FILENAMES_SCHEMA_VALIDATOR.validate(node)
         Set<String> errorsString = errors.collect { error ->
-            return "RODDY_FILENAMES." + error.message.drop(2)
+            return "RODDY_FILENAMES." + error.message.drop(DROP_CHAR_COUNT)
         }
         return errorsString
     }
 
-    @SuppressWarnings("Indentation")
+    @SuppressWarnings(["Indentation"])
     String createRoddyXmlConfig(
             String combinedConfig,
             Map<String, String> specificConfig,
@@ -255,6 +257,15 @@ class RoddyConfigService {
         assert queue
 
         JsonNode combinedConfigJson = MAPPER.readTree(combinedConfig)
+        JsonNode roddy = combinedConfigJson.get("RODDY")
+
+        Map<String, String> cValues = [:]
+        roddy?.get("cvalues")?.fields()?.each {
+            cValues.put(it.key, it.value.get('value').asText())
+        }
+        cValues.putAll(specificConfig)
+        cValues.put("inputBaseDirectory", inputDir)
+        cValues.put("outputBaseDirectory", outputDir)
 
         StringWriter writer = new StringWriter()
         MarkupBuilder xml = new MarkupBuilder(writer)
@@ -269,18 +280,16 @@ class RoddyConfigService {
                 )
             }
             configurationvalues {
-                cvalue(name: "inputBaseDirectory", value: inputDir, type: "path")
-                cvalue(name: "outputBaseDirectory", value: outputDir, type: "path")
-                specificConfig.sort { a, b -> String.CASE_INSENSITIVE_ORDER.compare(a.key, b.key) }.each { conf ->
+                cValues.sort { a, b ->
+                    String.CASE_INSENSITIVE_ORDER.compare(a.key, b.key)
+                }.each { conf ->
                     cvalue(name: conf.key, value: conf.value)
-                }
-                combinedConfigJson.get("RODDY").get("cvalues").fields().sort { a, b -> String.CASE_INSENSITIVE_ORDER.compare(a.key, b.key) }.each { conf ->
-                    cvalue(name: conf.key, value: conf.value.get('value').asText(), type: conf.value.has("type") ? conf.value.get('type').textValue() : null)
                 }
             }
             processingTools {
-                combinedConfigJson.get("RODDY").get("resources").fields()
-                        .sort { a, b -> String.CASE_INSENSITIVE_ORDER.compare(a.key, b.key) }.each { resource ->
+                combinedConfigJson.get("RODDY")?.get("resources")?.fields()?.sort { a, b ->
+                    String.CASE_INSENSITIVE_ORDER.compare(a.key, b.key)
+                }.each { resource ->
                     tool(
                             name: resource.key,
                             value: resource.value.get("value").textValue(),
@@ -301,20 +310,20 @@ class RoddyConfigService {
                 }
             }
             filenames(package: "de.dkfz.b080.co.files", filestagesbase: "de.dkfz.b080.co.files.COFileStage") {
-                combinedConfigJson.get("RODDY_FILENAMES").get("filenames").elements()
-                        .sort { a, b -> String.CASE_INSENSITIVE_ORDER.compare(a.findValue("class").textValue(), b.findValue("class").textValue()) }
-                        .each { fileName ->
-                            filename(
-                                    "class": fileName.findValue("class").textValue(),
-                                    derivedFrom: fileName.has("derivedFrom") ? fileName.get("derivedFrom").textValue() : null,
-                                    fileStage: fileName.has("fileStage") ? fileName.get("fileStage").textValue() : null,
-                                    onMethod: fileName.has("onMethod") ? fileName.get("onMethod").textValue() : null,
-                                    onScriptParameter: fileName.has("onScriptParameter") ? fileName.get("onScriptParameter").textValue() : null,
-                                    onTool: fileName.has("onTool") ? fileName.get("onTool").textValue() : null,
-                                    pattern: fileName.get("pattern").textValue(),
-                                    selectiontag: fileName.has("selectiontag") ? fileName.get("selectiontag").textValue() : null,
-                            )
-                        }
+                combinedConfigJson?.get("RODDY_FILENAMES")?.get("filenames")?.elements()?.sort { a, b ->
+                    String.CASE_INSENSITIVE_ORDER.compare(a.findValue("class").textValue(), b.findValue("class").textValue())
+                }?.each { fileName ->
+                    filename(
+                            "class": fileName.findValue("class").textValue(),
+                            derivedFrom: fileName.has("derivedFrom") ? fileName.get("derivedFrom").textValue() : null,
+                            fileStage: fileName.has("fileStage") ? fileName.get("fileStage").textValue() : null,
+                            onMethod: fileName.has("onMethod") ? fileName.get("onMethod").textValue() : null,
+                            onScriptParameter: fileName.has("onScriptParameter") ? fileName.get("onScriptParameter").textValue() : null,
+                            onTool: fileName.has("onTool") ? fileName.get("onTool").textValue() : null,
+                            pattern: fileName.get("pattern").textValue(),
+                            selectiontag: fileName.has("selectiontag") ? fileName.get("selectiontag").textValue() : null,
+                    )
+                }
             }
         }
         return writer.toString()

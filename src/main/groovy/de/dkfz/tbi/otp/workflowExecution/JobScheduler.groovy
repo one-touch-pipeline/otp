@@ -48,6 +48,9 @@ class JobScheduler {
     ErrorNotificationService errorNotificationService
 
     @Autowired
+    LogService logService
+
+    @Autowired
     JobService jobService
 
     @Autowired
@@ -95,9 +98,13 @@ class JobScheduler {
     private void executeJob(WorkflowStep workflowStep) {
         workflowStep.refresh()
         log.debug("Start job: ${workflowStep.displayInfo()}")
+        logService.addSimpleLogEntry(workflowStep, "Start")
         Job job = applicationContext.getBean(workflowStep.beanName, Job)
-        job.execute(workflowStep)
+        ExecutedCommandLogCallbackThreadLocalHolder.withCommandLogCallback(new WorkflowStepCommandCallback(logService, workflowStep)) {
+            job.execute(workflowStep)
+        }
         log.debug("Finish job: ${workflowStep.displayInfo()}")
+        logService.addSimpleLogEntry(workflowStep, "End")
     }
 
     @Transactional
@@ -122,6 +129,7 @@ class JobScheduler {
             WorkflowStep.withTransaction {
                 workflowStep.refresh()
                 workflowStateChangeService.changeStateToFailed(workflowStep, exceptionInJob)
+                logService.addSimpleLogEntry(workflowStep, "Failed")
             }
             WorkflowStep.withTransaction {
                 workflowStep.refresh()

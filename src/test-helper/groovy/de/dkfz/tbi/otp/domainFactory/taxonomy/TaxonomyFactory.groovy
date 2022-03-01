@@ -28,8 +28,8 @@ trait TaxonomyFactory implements DomainFactoryCore {
 
     Species createSpecies(Map properties = [:], boolean saveAndValidate = true) {
         return createDomainObject(Species, [
-                speciesCommonName    : { createSpeciesCommonName() },
-                scientificName: "scientificName ${nextId}",
+                speciesCommonName: { createSpeciesCommonName() },
+                scientificName   : "scientificName ${nextId}",
         ], properties, saveAndValidate)
     }
 
@@ -50,6 +50,44 @@ trait TaxonomyFactory implements DomainFactoryCore {
                 species: { createSpecies() },
                 strain : { createStrain() },
         ], properties, saveAndValidate)
+    }
+
+    SpeciesCommonName findOrCreateSpeciesCommonName(String name, boolean saveAndValidate = true) {
+        return findOrCreateDomainObject(SpeciesCommonName, [name: name], [:], [:], saveAndValidate)
+    }
+
+    Strain findOrCreateStrain(String name, boolean saveAndValidate = true) {
+        return findOrCreateDomainObject(Strain, [name: name], [:], [:], saveAndValidate)
+    }
+
+    Species findOrCreateSpecies(SpeciesCommonName speciesCommonName, String scientificName, boolean saveAndValidate = true) {
+        return findOrCreateDomainObject(Species, [
+                speciesCommonName: speciesCommonName,
+                scientificName   : scientificName,
+        ], [:], [:], saveAndValidate)
+    }
+
+    SpeciesWithStrain findOrCreateSpeciesWithStrain(Species species, Strain strain, boolean saveAndValidate = true) {
+        return findOrCreateDomainObject(SpeciesWithStrain, [
+                species: species,
+                strain : strain,
+        ], [:], [:], saveAndValidate)
+    }
+
+    SpeciesWithStrain findOrCreateHumanSpecies() {
+        SpeciesCommonName human = findOrCreateSpeciesCommonName("Human")
+        Species homoSapiens = findOrCreateSpecies(human, "homo sapiens")
+        Strain strain = findOrCreateStrain("No strain available")
+
+        return findOrCreateSpeciesWithStrain(homoSapiens, strain)
+    }
+
+    SpeciesWithStrain findOrCreateMouseSpecies() {
+        SpeciesCommonName mouse = findOrCreateSpeciesCommonName("Mouse")
+        Species musMusculus = findOrCreateSpecies(mouse, "mus musculus")
+        Strain strain = findOrCreateStrain("unknown")
+
+        return findOrCreateSpeciesWithStrain(musMusculus, strain)
     }
 }
 

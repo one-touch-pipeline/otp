@@ -22,11 +22,13 @@
 package de.dkfz.tbi.otp.workflowExecution
 
 import grails.util.Holders
+import groovy.transform.ToString
 
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.Entity
 
+@ToString(includeNames = true, includePackage = false)
 class ExternalWorkflowConfigSelector implements Comparable<ExternalWorkflowConfigSelector>, Entity {
 
     String name

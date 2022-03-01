@@ -92,7 +92,13 @@ enum OtpProperty {
     TEST_WORKFLOW_ACCOUNT('otp.testing.workflows.account', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.WORKFLOW_TEST)),
     TEST_WORKFLOW_SCHEDULER('otp.testing.workflows.scheduler', TypeValidators.JOB_SCHEDULER, EnumSet.of(UsedIn.WORKFLOW_TEST)),
     TEST_WORKFLOW_HOST('otp.testing.workflows.host', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.WORKFLOW_TEST)),
+    /**
+     * Directory holding the reference data for workflow tests
+     */
     TEST_WORKFLOW_INPUT_DIR('otp.testing.workflows.input', TypeValidators.ABSOLUTE_PATH, EnumSet.of(UsedIn.WORKFLOW_TEST)),
+    /**
+     * Base Directory for running the workflow test. Each test creates inside its own sub directory.
+     */
     TEST_WORKFLOW_RESULT_DIR('otp.testing.workflows.result', TypeValidators.ABSOLUTE_PATH, EnumSet.of(UsedIn.WORKFLOW_TEST)),
     TEST_WORKFLOW_RODDY_SHARED_FILES_BASE_DIRECTORY('otp.testing.workflows.roddy.sharedFiles', TypeValidators.ABSOLUTE_PATH, EnumSet.of(UsedIn.WORKFLOW_TEST)),
     TEST_WORKFLOW_QUEUE('otp.testing.workflows.queue', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.WORKFLOW_TEST)),

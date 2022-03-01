@@ -29,7 +29,8 @@ import spock.lang.Shared
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.FileType
+import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 @Rollback
@@ -50,14 +51,6 @@ class SeedIntegrationSpec extends Specification {
 
         then:
         unknownPipelines.empty
-    }
-
-    void "seed, ensure that all needed seqTypes are created"() {
-        when:
-        seedService.installSeedData('application.seed-SeqType')
-
-        then:
-        SeqTypeService.allAlignableSeqTypes
     }
 
     void "seed, ensure that all needed FileTypes are created"() {

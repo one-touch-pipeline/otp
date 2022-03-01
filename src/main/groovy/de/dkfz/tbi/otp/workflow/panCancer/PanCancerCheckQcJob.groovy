@@ -23,11 +23,9 @@ package de.dkfz.tbi.otp.workflow.panCancer
 
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightValue
+import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
 import de.dkfz.tbi.otp.workflow.jobs.AbstractCheckQcJob
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
@@ -35,14 +33,6 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 @Slf4j
 @CompileStatic
 class PanCancerCheckQcJob extends AbstractCheckQcJob implements PanCancerShared {
-
-    @Autowired
-    AbstractQualityAssessmentService abstractQualityAssessmentService
-
-    @Override
-    protected QcTrafficLightValue parseQcTrafficLightValue(AbstractMergedBamFile bamFile) {
-        return abstractQualityAssessmentService.parseRoddyMergedBamQaStatistics(bamFile as RoddyBamFile)
-    }
 
     @Override
     protected AbstractMergedBamFile getAbstractMergedBamFile(WorkflowStep workflowStep) {

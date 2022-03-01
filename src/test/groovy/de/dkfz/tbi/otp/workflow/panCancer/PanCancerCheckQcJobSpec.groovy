@@ -26,7 +26,7 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
+import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPancanFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightNotificationService
@@ -34,7 +34,7 @@ import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightService
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflowExecution.*
 
-class PanCancerCheckQcJobSpec extends Specification implements WorkflowSystemDomainFactory, DataTest, IsRoddy {
+class PanCancerCheckQcJobSpec extends Specification implements WorkflowSystemDomainFactory, DataTest, RoddyPancanFactory {
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -57,13 +57,12 @@ class PanCancerCheckQcJobSpec extends Specification implements WorkflowSystemDom
         final String workflow = "PanCancer alignment"
         final WorkflowStep workflowStep = createWorkflowStep()
         final RoddyBamFile bamFile = createRoddyBamFile(RoddyBamFile)
-        final RoddyMergedBamQa qa = new RoddyMergedBamQa()
+        final RoddyMergedBamQa qa = createQa(bamFile)
         final PanCancerCheckQcJob job = new PanCancerCheckQcJob()
 
         job.qcTrafficLightService = Mock(QcTrafficLightService)
         job.workflowStateChangeService = Mock(WorkflowStateChangeService)
         job.concreteArtefactService = Mock(ConcreteArtefactService)
-        job.abstractQualityAssessmentService = Mock(AbstractQualityAssessmentService)
         job.qcTrafficLightNotificationService = Mock(QcTrafficLightNotificationService)
 
         when:
@@ -71,7 +70,6 @@ class PanCancerCheckQcJobSpec extends Specification implements WorkflowSystemDom
 
         then:
         1 * job.concreteArtefactService.getOutputArtefact(workflowStep, inputRoleName, workflow) >> bamFile
-        1 * job.abstractQualityAssessmentService.parseRoddyMergedBamQaStatistics(bamFile) >> qa
         1 * job.qcTrafficLightService.setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling(bamFile, qa) >> {
             // only warning or not blocked are relevant for setting the workflow status
             if (checkSuccessful) {

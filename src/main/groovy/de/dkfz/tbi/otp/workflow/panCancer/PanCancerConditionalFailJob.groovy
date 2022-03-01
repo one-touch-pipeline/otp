@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.workflow.panCancer
 
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.infrastructure.FileService
@@ -38,6 +39,9 @@ import java.nio.file.Path
 @CompileStatic
 class PanCancerConditionalFailJob extends AbstractConditionalFailJob implements PanCancerShared {
 
+    @Autowired
+    FileService fileService
+
     /**
      * Check that:
      *      - input files in viewByPid folders exists and are readable
@@ -51,7 +55,7 @@ class PanCancerConditionalFailJob extends AbstractConditionalFailJob implements 
     protected void check(WorkflowStep workflowStep) {
         List<SeqTrack> seqTracks = getSeqTracks(workflowStep)
         List<String> errorMessages = []
-        List<File> allDataFiles = []
+        List<Path> allDataFiles = []
 
         seqTracks.each { SeqTrack seqTrack ->
             List<DataFile> dataFiles = seqTrack.dataFiles
@@ -67,8 +71,8 @@ class PanCancerConditionalFailJob extends AbstractConditionalFailJob implements 
                         "It has ${nonIndexDataFiles} (index files are ignored)." as String)
             }
 
-            final Collection<Path> paths = dataFiles.collect { DataFile file ->
-                lsdfFilesService.getFileViewByPidPathAsPath(file)
+            final Collection<Path> paths = dataFiles.collect { DataFile dataFile ->
+                lsdfFilesService.getFileViewByPidPathAsPath(dataFile)
             }
 
             final Collection<Path> missingPaths = paths.findAll { Path path ->
@@ -79,7 +83,7 @@ class PanCancerConditionalFailJob extends AbstractConditionalFailJob implements 
                 return errorMessages.push("The following ${missingPaths.size()} files are missing:\n${missingPaths.join("\n")}" as String)
             }
 
-            paths.each { allDataFiles.add(it.toFile()) }
+            allDataFiles.addAll(paths)
 
             try {
                 MetaDataService.ensurePairedSequenceFileNameConsistency(nonIndexDataFiles[0].fileName, nonIndexDataFiles[1].fileName)
@@ -89,7 +93,9 @@ class PanCancerConditionalFailJob extends AbstractConditionalFailJob implements 
         }
 
         try {
-            MetaDataService.ensurePairedSequenceFileNameOrder(allDataFiles)
+            MetaDataService.ensurePairedSequenceFileNameOrder(allDataFiles.collect {
+                fileService.toFile(it)
+            })
         } catch (IllegalFileNameException e) {
             errorMessages.push("File name order of the seqTracks dataFiles is not correct:\n" + e.message)
         }

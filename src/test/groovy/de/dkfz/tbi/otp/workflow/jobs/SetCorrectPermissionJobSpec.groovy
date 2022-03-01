@@ -28,11 +28,10 @@ import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.Realm
+import de.dkfz.tbi.otp.workflowExecution.WorkflowStateChangeService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
-import java.nio.file.FileSystems
-import java.nio.file.Path
-import java.nio.file.Paths
+import java.nio.file.*
 
 class SetCorrectPermissionJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory {
 
@@ -62,6 +61,7 @@ class SetCorrectPermissionJobSpec extends Specification implements DataTest, Wor
         SetCorrectPermissionJob job = Spy(SetCorrectPermissionJob)
         job.fileService = Mock(FileService)
         job.fileSystemService = Mock(FileSystemService)
+        job.workflowStateChangeService = Mock(WorkflowStateChangeService)
 
         when:
         job.execute(workflowStep)
@@ -70,5 +70,6 @@ class SetCorrectPermissionJobSpec extends Specification implements DataTest, Wor
         1 * job.correctPermission(workflowStep) >> _
         1 * job.fileSystemService.getRemoteFileSystem(realm) >> FileSystems.default
         1 * job.fileService.correctPathPermissionAndGroupRecursive(workflowDirectoryPath, realm, unixGroup) >> _
+        1 * job.workflowStateChangeService.changeStateToSuccess(workflowStep)
     }
 }

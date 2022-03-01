@@ -22,23 +22,30 @@
 package de.dkfz.tbi.otp.workflow
 
 import htsjdk.samtools.SamReaderFactory
-import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
+import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.dataprocessing.roddy.JobStateLogFile
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
+import java.nio.file.Path
+import java.nio.file.Paths
+
 class RoddyService {
 
-    @Autowired
     ConcreteArtefactService concreteArtefactService
+
+    RoddyBamFileService roddyBamFileService
 
     static final String OUTPUT_BAM = "BAM"
 
     List<String> getReadGroupsInBam(WorkflowStep workflowStep) {
         final RoddyBamFile roddyBamFile = getRoddyBamFile(workflowStep)
+        Path path = roddyBamFileService.getWorkBamFile(roddyBamFile)
+        //convert to local path, since SamReaderFactory use SeekableByteChannel, which is not supported by the ftp remote file system
+        Path pathLocal = Paths.get(path.toString())
         final SamReaderFactory factory = SamReaderFactory.makeDefault().enable(SamReaderFactory.Option.VALIDATE_CRC_CHECKSUMS)
-        return factory.getFileHeader(roddyBamFile).readGroups*.id.sort()
+        return factory.getFileHeader(pathLocal).readGroups*.id.sort()
     }
 
     List<String> getReadGroupsExpected(WorkflowStep workflowStep) {

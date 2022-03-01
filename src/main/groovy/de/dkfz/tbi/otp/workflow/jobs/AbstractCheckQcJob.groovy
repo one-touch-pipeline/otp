@@ -24,7 +24,8 @@ package de.dkfz.tbi.otp.workflow.jobs
 import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
-import de.dkfz.tbi.otp.qcTrafficLight.*
+import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightNotificationService
+import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 /**
@@ -41,19 +42,17 @@ abstract class AbstractCheckQcJob extends AbstractJob {
     @Override
     void execute(WorkflowStep workflowStep) throws Throwable {
         AbstractMergedBamFile bamFile = getAbstractMergedBamFile(workflowStep)
-        qcTrafficLightService.setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling(bamFile, parseQcTrafficLightValue(bamFile))
-        workflowStateChangeService.changeStateToSuccess(workflowStep)
+        qcTrafficLightService.setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling(bamFile, bamFile.overallQualityAssessment)
         if (bamFile.qcTrafficLightStatus == AbstractMergedBamFile.QcTrafficLightStatus.WARNING) {
             qcTrafficLightNotificationService.createResultsAreWarnedMessage(bamFile)
         }
+        workflowStateChangeService.changeStateToSuccess(workflowStep)
     }
 
     @Override
     final JobStage getJobStage() {
         return JobStage.CHECK_QC
     }
-
-    abstract protected QcTrafficLightValue parseQcTrafficLightValue(AbstractMergedBamFile abstractMergedBamFile)
 
     abstract protected AbstractMergedBamFile getAbstractMergedBamFile(WorkflowStep workflowStep)
 }

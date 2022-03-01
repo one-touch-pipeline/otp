@@ -30,7 +30,6 @@ import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.job.processing.ClusterJobManagerFactoryService
 import de.dkfz.tbi.otp.job.processing.JobSubmissionOption
 import de.dkfz.tbi.otp.ngsdata.Realm
-import de.dkfz.tbi.otp.utils.ExecutedCommandLogCallbackThreadLocalHolder
 import de.dkfz.tbi.otp.workflow.shared.RunningClusterJobException
 import de.dkfz.tbi.otp.workflowExecution.*
 
@@ -70,11 +69,9 @@ class ClusterAccessService {
         //begin of not restartable area
         workflowRunService.markJobAsNotRestartableInSeparateTransaction(workflowStep.workflowRun)
 
-        ExecutedCommandLogCallbackThreadLocalHolder.withCommandLogCallback(new WorkflowStepCommandCallback(logService, workflowStep)) {
-            clusterJobHandlingService.sendJobs(jobManager, workflowStep, beJobs)
+        clusterJobHandlingService.sendJobs(jobManager, workflowStep, beJobs)
 
-            clusterJobHandlingService.startJob(jobManager, workflowStep, beJobs)
-        }
+        clusterJobHandlingService.startJob(jobManager, workflowStep, beJobs)
 
         List<ClusterJob> clusterJobs = clusterJobHandlingService.createAndSaveClusterJobs(realm, workflowStep, beJobs)
 

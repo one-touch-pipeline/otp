@@ -103,8 +103,6 @@ class QcTrafficLightService {
         assert bamFile.save(flush: true)
     }
 
-    //TODO OTP-3097: provide method for handling qc in analsys
-
     void setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling(AbstractMergedBamFile bamFile, QcTrafficLightValue qc) {
         if (bamFile.qcTrafficLightStatus == AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED) {
             return

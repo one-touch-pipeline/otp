@@ -81,7 +81,7 @@ class DataInstallationWorkflowSpec extends AbstractWorkflowSpec {
     }
 
     private Path prepareFileSystemForFile(String fileName, String orgName) {
-        Path path = inputDataDirectory.resolve(DIRECTORY_IN_INPUT).resolve(orgName)
+        Path path = referenceDataDirectory.resolve(DIRECTORY_IN_INPUT).resolve(orgName)
         Path link = additionalDataDirectory.resolve(fileName)
         fileService.createLink(link, path, realm)
         return path

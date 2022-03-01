@@ -26,15 +26,13 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFileService
-import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.utils.Md5SumService
 import de.dkfz.tbi.otp.workflow.jobs.AbstractFinishJob
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
-import java.nio.file.FileSystem
 import java.nio.file.Files
 import java.nio.file.Path
 
@@ -52,19 +50,29 @@ class PanCancerFinishJob extends AbstractFinishJob implements PanCancerShared {
     @Autowired
     AbstractMergedBamFileService abstractMergedBamFileService
 
+    @Autowired
+    RoddyBamFileService roddyBamFileService
+
     @Override
     void updateDomains(WorkflowStep workflowStep) {
         RoddyBamFile roddyBamFile = getRoddyBamFile(workflowStep)
-        FileSystem fs = getFileSystem(workflowStep)
-        Path md5sumFile = fileService.toPath(roddyBamFile.workMd5sumFile, fs)
-        String md5sum = md5SumService.extractMd5Sum(md5sumFile)
 
-        roddyBamFile.fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.PROCESSED
+        Path bamFilePath = roddyBamFileService.getWorkBamFile(roddyBamFile)
+        Path md5sumPath = roddyBamFileService.getWorkMd5sumFile(roddyBamFile)
+
+        String md5sumValue = md5SumService.extractMd5Sum(md5sumPath)
+
+        roddyBamFile.with {
+            fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.PROCESSED
+            md5sum = md5sumValue
+            fileSize = Files.size(bamFilePath)
+            fileExists = true
+            dateFromFileSystem = new Date(Files.getLastModifiedTime(bamFilePath).toMillis())
+            save(flush: true)
+        }
+
         roddyBamFile.workPackage.bamFileInProjectFolder = roddyBamFile
         roddyBamFile.workPackage.save(flush: true)
-        roddyBamFile.fileSize = Files.size(fileService.toPath(roddyBamFile.workBamFile, fs))
-        roddyBamFile.md5sum = md5sum
-        roddyBamFile.save(flush: true)
 
         abstractMergedBamFileService.updateSamplePairStatusToNeedProcessing(roddyBamFile)
     }

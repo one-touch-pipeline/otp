@@ -26,10 +26,7 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
-import de.dkfz.tbi.otp.dataprocessing.AbstractQualityAssessmentService
-import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
-import de.dkfz.tbi.otp.dataprocessing.RoddyQualityAssessment
+import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightService
 import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightValue
 import de.dkfz.tbi.otp.workflow.jobs.AbstractJob
@@ -65,6 +62,8 @@ class PanCancerParseJob extends AbstractJob implements PanCancerShared {
         roddyBamFile.qualityAssessmentStatus = AbstractBamFile.QaProcessingStatus.FINISHED
         qcTrafficLightService.setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling(roddyBamFile, (QcTrafficLightValue) qa)
         roddyBamFile.save(flush: true)
+
+        workflowStateChangeService.changeStateToSuccess(workflowStep)
     }
 
     @Override

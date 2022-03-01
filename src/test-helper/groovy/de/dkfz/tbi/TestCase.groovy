@@ -30,6 +30,7 @@ import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.HelperUtils
+import de.dkfz.tbi.otp.workflowTest.FileAssertHelper
 
 import java.nio.file.Files
 import java.nio.file.Path
@@ -201,6 +202,10 @@ class TestCase {
         assert shouldFail(clazz, code).contains(messagePart)
     }
 
+    /**
+     * @Deprecated use {@link FileAssertHelper} instead
+     */
+    @Deprecated
     static void checkDirectoryContentHelper(Path baseDir, List<Path> expectedDirs, List<Path> expectedFiles = [], List<Path> expectedLinks = []) {
         expectedDirs.each {
             FileService.ensureDirIsReadableAndExecutable(it)

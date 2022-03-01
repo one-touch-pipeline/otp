@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.workflowExecution
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.ToString
 import groovy.transform.TupleConstructor
 import org.grails.datastore.mapping.query.api.BuildableCriteria
 import org.hibernate.sql.JoinType
@@ -250,7 +251,9 @@ class ConfigSelectorService {
     }
 
     List<ExternalWorkflowConfigSelector> getAll() {
-        ExternalWorkflowConfigSelector.all.sort { a, b -> String.CASE_INSENSITIVE_ORDER.compare(a.name, b.name) }
+        return ExternalWorkflowConfigSelector.all.sort { a, b ->
+            String.CASE_INSENSITIVE_ORDER.compare(a.name, b.name)
+        }
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
@@ -326,10 +329,11 @@ class MultiSelectSelectorExtendedCriteria {
     boolean anyValueSet() {
         Map p = this.properties
         p.remove("class")
-        p.any { it.value != null }
+        return p.any { it.value != null }
     }
 }
 
+@ToString
 @TupleConstructor
 class SingleSelectSelectorExtendedCriteria {
     Workflow workflow
@@ -342,6 +346,6 @@ class SingleSelectSelectorExtendedCriteria {
     boolean anyValueSet() {
         Map p = this.properties
         p.remove("class")
-        p.any { it.value != null }
+        return p.any { it.value != null }
     }
 }

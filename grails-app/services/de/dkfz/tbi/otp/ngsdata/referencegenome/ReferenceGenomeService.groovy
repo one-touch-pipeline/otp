@@ -35,6 +35,7 @@ import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
+import de.dkfz.tbi.otp.workflowExecution.ExternalWorkflowConfigFragment
 
 import java.nio.file.FileSystem
 import java.nio.file.Path
@@ -130,6 +131,10 @@ class ReferenceGenomeService {
         return checkFileExistence(file, checkExistence)
     }
 
+    /**
+     * @Deprecated old workflow system, the new use {@link ExternalWorkflowConfigFragment}
+     */
+    @Deprecated
     File chromosomeStatSizeFile(MergingWorkPackage mergingWorkPackage, boolean checkExistence = true) {
         assert mergingWorkPackage, "The mergingWorkPackage is not specified"
         assert mergingWorkPackage.statSizeFileName: "No stat file size name is defined for ${mergingWorkPackage}"

@@ -25,6 +25,7 @@ import grails.testing.gorm.DataTest
 import grails.testing.services.ServiceUnitTest
 import spock.lang.Specification
 
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
@@ -81,15 +82,14 @@ class RoddyConfigValueServiceSpec extends Specification implements ServiceUnitTe
         roddyBamFile.referenceGenome.save(flush: true)
 
         service.referenceGenomeService = Mock(ReferenceGenomeService) {
-            fastaFilePath(roddyBamFile.referenceGenome) >> { new File("/fasta-path") }
-            chromosomeStatSizeFile(roddyBamFile.mergingWorkPackage) >> { new File("/chrom-size-path") }
-            fingerPrintingFile(roddyBamFile.referenceGenome) >> { new File("/fingerprint-path") }
+            _ * fastaFilePath(roddyBamFile.referenceGenome) >> { new File("/fasta-path") }
+            _ * chromosomeStatSizeFile(roddyBamFile.mergingWorkPackage) >> { new File("/chrom-size-path") }
+            _ * fingerPrintingFile(roddyBamFile.referenceGenome) >> { new File("/fingerprint-path") }
         }
 
         Map<String, String> expectedCommand = [
                 "INDEX_PREFIX"                     : "/fasta-path",
                 "GENOME_FA"                        : "/fasta-path",
-                "CHROM_SIZES_FILE"                 : "/chrom-size-path",
                 "possibleControlSampleNamePrefixes": "${roddyBamFile.sampleType.dirName}",
                 "possibleTumorSampleNamePrefixes"  : "",
                 "runFingerprinting"                : "true",
@@ -100,7 +100,7 @@ class RoddyConfigValueServiceSpec extends Specification implements ServiceUnitTe
         Map<String, String> actualCommand = service.getAlignmentValues(roddyBamFile, "{}")
 
         then:
-        new HashMap(expectedCommand) == new HashMap(actualCommand)
+        TestCase.assertContainSame(expectedCommand, actualCommand)
     }
 
     void "test getConfigurationValues, with whole genome seq. type"() {
@@ -115,7 +115,6 @@ class RoddyConfigValueServiceSpec extends Specification implements ServiceUnitTe
         Map<String, String> expectedCommand = [
                 "INDEX_PREFIX"                     : "/fasta-path",
                 "GENOME_FA"                        : "/fasta-path",
-                "CHROM_SIZES_FILE"                 : "/chrom-size-path",
                 "possibleControlSampleNamePrefixes": "${roddyBamFile.sampleType.dirName}",
                 "possibleTumorSampleNamePrefixes"  : "",
                 "runFingerprinting"                : "false",
@@ -125,7 +124,7 @@ class RoddyConfigValueServiceSpec extends Specification implements ServiceUnitTe
         Map<String, String> actualCommand = service.getAlignmentValues(roddyBamFile, "{}")
 
         then:
-        new HashMap(expectedCommand) == new HashMap(actualCommand)
+        TestCase.assertContainSame(expectedCommand, actualCommand)
     }
 
     void "test getConfigurationValues, with RNA seq. type"() {
@@ -149,7 +148,7 @@ class RoddyConfigValueServiceSpec extends Specification implements ServiceUnitTe
         Map<String, String> actualCommand = service.getAlignmentValues(roddyBamFile, "{}")
 
         then:
-        new HashMap(expectedCommand) == new HashMap(actualCommand)
+        TestCase.assertContainSame(expectedCommand, actualCommand)
     }
 
     void "test getAdapterTrimmingFile, adapter trimming disabled"() {

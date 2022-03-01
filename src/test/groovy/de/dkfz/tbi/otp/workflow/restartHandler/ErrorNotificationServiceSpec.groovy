@@ -169,11 +169,11 @@ class ErrorNotificationServiceSpec extends Specification
         String expectedExpression = [
                 "^(?:.*\\n)*Input artefacts",
                 "=+",
-                "${workflowRunInputArtefact.role}: ${workflowRunInputArtefact.workflowArtefact.displayName}",
+                "- ${workflowRunInputArtefact.role}: ${workflowRunInputArtefact.workflowArtefact.displayName}",
                 "",
                 "Output artefacts",
                 "=+",
-                "${outputArtefact.outputRole}: ${outputArtefact.displayName}",
+                "- ${outputArtefact.outputRole}: ${outputArtefact.displayName}",
         ].join('(?:.*\\n)+') + "[.\\n]*\$"
 
         when:

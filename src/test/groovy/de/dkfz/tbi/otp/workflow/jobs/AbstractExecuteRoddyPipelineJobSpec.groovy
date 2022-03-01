@@ -100,6 +100,7 @@ class AbstractExecuteRoddyPipelineJobSpec extends Specification implements DataT
         job.roddyExecutionService = Mock(RoddyExecutionService)
         job.workflowStateChangeService = Mock(WorkflowStateChangeService)
         job.workflowRunService = Mock(WorkflowRunService)
+        job.logService = Mock(LogService)
 
         when:
         job.execute(workflowStep)
@@ -109,7 +110,8 @@ class AbstractExecuteRoddyPipelineJobSpec extends Specification implements DataT
         1 * job.individualService.getViewByPidPathBase(bamFile.individual, bamFile.seqType) >> { Paths.get("/input-dir") }
         1 * job.roddyConfigService.createRoddyXmlConfig(_, [e: "f", a: "b"], "workflow-name", workflowStep.workflowRun.workflowVersion, "analysis-id", _, _, _,
                 true) >> { configText }
-        1 * job.fileService.createFileWithContent(Paths.get(bamFile.workDirectory.absolutePath).resolve("config.xml"), configText, _)
+        1 * job.fileService.createFileWithContent(Paths.get(bamFile.workDirectory.absolutePath).resolve(RoddyConfigService.CONFIGURATION_DIRECTORY).
+                resolve("config.xml"), configText, _)
         1 * job.roddyCommandService.createRoddyCommand(_, _, ["c", "d"]) >> { cmd }
         1 * job.roddyExecutionService.clearRoddyExecutionStoreDirectory(bamFile)
         1 * job.workflowRunService.markJobAsNotRestartableInSeparateTransaction(workflowStep.workflowRun)
@@ -150,6 +152,7 @@ class AbstractExecuteRoddyPipelineJobSpec extends Specification implements DataT
         job.roddyExecutionService = Mock(RoddyExecutionService)
         job.workflowStateChangeService = Mock(WorkflowStateChangeService)
         job.workflowRunService = Mock(WorkflowRunService)
+        job.logService = Mock(LogService)
 
         when:
         job.execute(workflowStep)
@@ -159,7 +162,8 @@ class AbstractExecuteRoddyPipelineJobSpec extends Specification implements DataT
         1 * job.individualService.getViewByPidPathBase(bamFile.individual, bamFile.seqType) >> { Paths.get("/input-dir") }
         1 * job.roddyConfigService.createRoddyXmlConfig(_, [e: "f", a: "b"], "workflow-name", workflowStep.workflowRun.workflowVersion, "analysis-id", _, _, _,
                 true) >> { configText }
-        1 * job.fileService.createFileWithContent(Paths.get(bamFile.workDirectory.absolutePath).resolve("config.xml"), configText, _)
+        1 * job.fileService.createFileWithContent(Paths.get(bamFile.workDirectory.absolutePath).resolve(RoddyConfigService.CONFIGURATION_DIRECTORY).
+                resolve("config.xml"), configText, _)
         1 * job.roddyCommandService.createRoddyCommand(_, _, ["c", "d"]) >> { cmd }
         1 * job.roddyExecutionService.clearRoddyExecutionStoreDirectory(bamFile)
         1 * job.workflowRunService.markJobAsNotRestartableInSeparateTransaction(workflowStep.workflowRun)
@@ -201,6 +205,7 @@ class AbstractExecuteRoddyPipelineJobSpec extends Specification implements DataT
         job.roddyExecutionService = Mock(RoddyExecutionService)
         job.workflowStateChangeService = Mock(WorkflowStateChangeService)
         job.workflowRunService = Mock(WorkflowRunService)
+        job.logService = Mock(LogService)
 
         when:
         job.execute(workflowStep)
@@ -210,7 +215,8 @@ class AbstractExecuteRoddyPipelineJobSpec extends Specification implements DataT
         1 * job.individualService.getViewByPidPathBase(bamFile.individual, bamFile.seqType) >> { Paths.get("/input-dir") }
         1 * job.roddyConfigService.createRoddyXmlConfig(_, [e: "f", a: "b"], "workflow-name", workflowStep.workflowRun.workflowVersion, "analysis-id", _, _, _,
                 true) >> { configText }
-        1 * job.fileService.createFileWithContent(Paths.get(bamFile.workDirectory.absolutePath).resolve("config.xml"), configText, _)
+        1 * job.fileService.createFileWithContent(Paths.get(bamFile.workDirectory.absolutePath).resolve(RoddyConfigService.CONFIGURATION_DIRECTORY).
+                resolve("config.xml"), configText, _)
         1 * job.roddyCommandService.createRoddyCommand(_, _, ["c", "d"]) >> { cmd }
         1 * job.roddyExecutionService.clearRoddyExecutionStoreDirectory(bamFile)
         1 * job.workflowRunService.markJobAsNotRestartableInSeparateTransaction(workflowStep.workflowRun)

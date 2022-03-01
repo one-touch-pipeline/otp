@@ -28,6 +28,7 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.workflow.shared.WorkflowException
@@ -70,6 +71,11 @@ class PanCancerConditionalFailJobSpec extends Specification implements DataTest,
                 Path path = File.createTempFile("${file.fileName}", null, temporaryFolder.root).toPath()
                 path.text = "non-empty"
                 return path
+            }
+        }
+        job.fileService = Mock(FileService) {
+            _ * toFile(_) >> { Path path ->
+                new File(path.toString())
             }
         }
 
@@ -171,6 +177,11 @@ class PanCancerConditionalFailJobSpec extends Specification implements DataTest,
                 Path path = File.createTempFile("${file.fileName}", null, temporaryFolder.root).toPath()
                 path.text = "non-empty"
                 return path
+            }
+        }
+        job.fileService = Mock(FileService) {
+            _ * toFile(_) >> { Path path ->
+                new File(path.toString())
             }
         }
 

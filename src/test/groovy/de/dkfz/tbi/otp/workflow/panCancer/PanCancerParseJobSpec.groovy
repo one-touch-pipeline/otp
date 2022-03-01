@@ -30,6 +30,7 @@ import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPancanFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightService
+import de.dkfz.tbi.otp.workflowExecution.WorkflowStateChangeService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 class PanCancerParseJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory, RoddyPancanFactory {
@@ -61,6 +62,7 @@ class PanCancerParseJobSpec extends Specification implements DataTest, WorkflowS
         }
         job.abstractQualityAssessmentService = Mock(AbstractQualityAssessmentService)
         job.qcTrafficLightService = Mock(QcTrafficLightService)
+        job.workflowStateChangeService = Mock(WorkflowStateChangeService)
 
         when:
         job.execute(workflowStep)
@@ -70,5 +72,6 @@ class PanCancerParseJobSpec extends Specification implements DataTest, WorkflowS
         1 * job.abstractQualityAssessmentService.parseRoddyMergedBamQaStatistics(roddyBamFile)
         1 * job.abstractQualityAssessmentService.saveCoverageToRoddyBamFile(roddyBamFile)
         1 * job.qcTrafficLightService.setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling(roddyBamFile, _)
+        1 * job.workflowStateChangeService.changeStateToSuccess(workflowStep)
     }
 }

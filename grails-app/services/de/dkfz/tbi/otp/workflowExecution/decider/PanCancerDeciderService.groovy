@@ -25,6 +25,7 @@ import grails.gorm.transactions.Transactional
 import grails.util.Pair
 import groovy.transform.Canonical
 
+import de.dkfz.tbi.otp.OtpRuntimeException
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.ngsdata.*
@@ -156,6 +157,7 @@ class PanCancerDeciderService extends AbstractWorkflowDecider {
             SampleType sampleType
             Project project
             SeqType seqType
+            AntibodyTarget antibodyTarget
             SeqPlatformGroup seqPlatformGroup
             LibraryPreparationKit libraryPreparationKit
 
@@ -167,6 +169,7 @@ class PanCancerDeciderService extends AbstractWorkflowDecider {
                     sampleType = seqTrack.sampleType
                     project = seqTrack.project
                     seqType = seqTrack.seqType
+                    antibodyTarget = seqTrack.antibodyTarget
                     seqPlatformGroup = seqTrack.seqPlatformGroup
                     libraryPreparationKit = seqTrack.libraryPreparationKit
                     break
@@ -176,8 +179,9 @@ class PanCancerDeciderService extends AbstractWorkflowDecider {
                     sampleType = fastqcProcessedFile.dataFile.sampleType
                     project = fastqcProcessedFile.dataFile.project
                     seqType = fastqcProcessedFile.dataFile.seqType
-                    seqPlatformGroup = fastqcProcessedFile.containedSeqTracks*.seqPlatformGroup.first()
-                    libraryPreparationKit = fastqcProcessedFile.containedSeqTracks*.libraryPreparationKit.first()
+                    antibodyTarget = fastqcProcessedFile.dataFile.seqTrack.antibodyTarget
+                    seqPlatformGroup = fastqcProcessedFile.dataFile.seqTrack.seqPlatformGroup
+                    libraryPreparationKit = fastqcProcessedFile.dataFile.seqTrack.libraryPreparationKit
                     break
                 case RoddyBamFile:
                     RoddyBamFile bamFile = artefact as RoddyBamFile
@@ -185,8 +189,12 @@ class PanCancerDeciderService extends AbstractWorkflowDecider {
                     sampleType = bamFile.sampleType
                     project = bamFile.project
                     seqType = bamFile.seqType
+                    antibodyTarget = bamFile.workPackage.antibodyTarget
                     seqPlatformGroup = bamFile.mergingWorkPackage.seqPlatformGroup
                     libraryPreparationKit = bamFile.mergingWorkPackage.libraryPreparationKit
+                    break
+                default:
+                    throw new OtpRuntimeException("Unsupported class: ${artefact.class}")
             }
 
             MergingCriteria mergingCriteria = CollectionUtils.atMostOneElement(MergingCriteria.findAllByProjectAndSeqType(project, seqType))
@@ -205,6 +213,7 @@ class PanCancerDeciderService extends AbstractWorkflowDecider {
                     individual,
                     sampleType,
                     seqType,
+                    antibodyTarget,
                     seqPlatformGroup,
                     libraryPreparationKit,
             )
@@ -222,7 +231,7 @@ class PanCancerDeciderService extends AbstractWorkflowDecider {
     private WorkflowArtefact createWorkflowRunIfPossible(Collection<WorkflowArtefact> artefacts, WorkflowVersion version) {
         RoddyBamFile baseBamFile = (artefacts.findAll { it.artefactType == ArtefactType.BAM }*.artefact*.get() as List<RoddyBamFile>)
                 .find { bamFile ->
-                    bamFile.fileOperationStatus == AbstractMergedBamFile.FileOperationStatus.PROCESSED &&
+                    bamFile.fileOperationStatus == AbstractMergedBamFile.FileOperationStatus.PROCESSED && !bamFile.withdrawn &&
                             bamFile.mergingWorkPackage.bamFileInProjectFolder == bamFile
                 }
         List<SeqTrack> seqTracks = artefacts.findAll { it.artefactType == ArtefactType.FASTQ }*.artefact*.get() as List<SeqTrack>
@@ -251,6 +260,7 @@ class PanCancerDeciderService extends AbstractWorkflowDecider {
         SeqTrack seqTrack = seqTracks.first()
         Project project = seqTrack.project
         SeqType seqType = seqTrack.seqType
+        AntibodyTarget antibodyTarget = seqTrack.antibodyTarget
         Set<SpeciesWithStrain> allSpecies = ([seqTrack.individual.species] + (seqTrack.sample.mixedInSpecies ?: [])) as Set
         Individual individual = seqTrack.individual
         SampleType sampleType = seqTrack.sampleType
@@ -265,7 +275,7 @@ class PanCancerDeciderService extends AbstractWorkflowDecider {
                 MergingWorkPackage.findAllWhere(
                         sample: seqTrack.sample,
                         seqType: seqType,
-                        antibodyTarget: seqType.hasAntibodyTarget ? seqTrack.antibodyTarget : null,
+                        antibodyTarget: seqType.hasAntibodyTarget ? antibodyTarget : null,
                 )
         )
         if (workPackage) {
@@ -279,8 +289,8 @@ class PanCancerDeciderService extends AbstractWorkflowDecider {
         } else {
             workPackage = new MergingWorkPackage(
                     MergingWorkPackage.getMergingProperties(seqTrack) + [
-                            referenceGenome : referenceGenome,
-                            pipeline        : CollectionUtils.exactlyOneElement(Pipeline.findAllByName(Pipeline.Name.PANCAN_ALIGNMENT)),
+                            referenceGenome: referenceGenome,
+                            pipeline       : CollectionUtils.exactlyOneElement(Pipeline.findAllByName(Pipeline.Name.PANCAN_ALIGNMENT)),
                     ])
         }
         workPackage.seqTracks = seqTracks
@@ -380,6 +390,7 @@ class PanCancerDeciderService extends AbstractWorkflowDecider {
         Individual individual
         SampleType sampleType
         SeqType seqType
+        AntibodyTarget antibodyTarget
         SeqPlatformGroup seqPlatformGroup
         LibraryPreparationKit libraryPreparationKit
     }

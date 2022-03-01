@@ -39,7 +39,7 @@ trait GroovyScriptAwareTestCase {
      * @param scriptFile the script to run
      * @return the result of the evaluation
      */
-    void runScript(File script, Map<String, String> properties = null) {
+    void runScript(File script, Map<String, String> properties = [:]) {
         assert script.canRead()
         GroovyShell shell = new GroovyShell(
                 grailsApplication.classLoader,
@@ -60,7 +60,7 @@ trait GroovyScriptAwareTestCase {
      * @param pathToScript the path to the script file
      * @return the result of the evaluation
      */
-    void runScript(String pathToScript, Map<String, String> properties = null) {
+    void runScript(String pathToScript, Map<String, String> properties = [:]) {
         File script = new File(pathToScript)
         runScript(script, properties)
     }

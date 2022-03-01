@@ -102,6 +102,7 @@ class JobSchedulerSpec extends Specification implements DataTest, WorkflowSystem
                     }] as Job }
         ] as ApplicationContext
         jobScheduler.jobService = Mock(JobService)
+        jobScheduler.logService = Mock(LogService)
 
         when:
         jobScheduler.executeAndCheckJob(workflowStep)
@@ -123,6 +124,7 @@ class JobSchedulerSpec extends Specification implements DataTest, WorkflowSystem
                             st.workflowRun.save(flush: true)
                     }] as Job }
         ] as ApplicationContext
+        jobScheduler.logService = Mock(LogService)
 
         when:
         jobScheduler.executeAndCheckJob(workflowStep)
@@ -147,6 +149,7 @@ class JobSchedulerSpec extends Specification implements DataTest, WorkflowSystem
         ] as ApplicationContext
         jobScheduler.workflowStateChangeService = Mock(WorkflowStateChangeService)
         jobScheduler.autoRestartHandlerService = Mock(AutoRestartHandlerService)
+        jobScheduler.logService = Mock(LogService)
 
         when:
         jobScheduler.executeAndCheckJob(workflowStep)
@@ -169,6 +172,7 @@ class JobSchedulerSpec extends Specification implements DataTest, WorkflowSystem
         ] as ApplicationContext
         jobScheduler.workflowStateChangeService = Mock(WorkflowStateChangeService)
         jobScheduler.autoRestartHandlerService = Mock(AutoRestartHandlerService)
+        jobScheduler.logService = Mock(LogService)
 
         when:
         jobScheduler.executeAndCheckJob(workflowStep)
@@ -191,6 +195,7 @@ class JobSchedulerSpec extends Specification implements DataTest, WorkflowSystem
         ] as ApplicationContext
         jobScheduler.workflowStateChangeService = Mock(WorkflowStateChangeService)
         jobScheduler.autoRestartHandlerService = Mock(AutoRestartHandlerService)
+        jobScheduler.logService = Mock(LogService)
 
         when:
         jobScheduler.executeAndCheckJob(workflowStep)
@@ -212,6 +217,7 @@ class JobSchedulerSpec extends Specification implements DataTest, WorkflowSystem
         ] as ApplicationContext
         jobScheduler.workflowStateChangeService = Mock(WorkflowStateChangeService)
         jobScheduler.autoRestartHandlerService = Mock(AutoRestartHandlerService)
+        jobScheduler.logService = Mock(LogService)
 
         when:
         jobScheduler.executeAndCheckJob(workflowStep)
@@ -234,6 +240,7 @@ class JobSchedulerSpec extends Specification implements DataTest, WorkflowSystem
         jobScheduler.workflowStateChangeService = Mock(WorkflowStateChangeService)
         jobScheduler.autoRestartHandlerService = Mock(AutoRestartHandlerService)
         jobScheduler.errorNotificationService = Mock(ErrorNotificationService)
+        jobScheduler.logService = Mock(LogService)
 
         when:
         jobScheduler.executeAndCheckJob(workflowStep)

@@ -162,7 +162,7 @@ class ErrorNotificationService {
         message << header("Input artefacts")
         if (workflowStep.workflowRun.inputArtefacts) {
             workflowStep.workflowRun.inputArtefacts.sort { it.key }.each { k, v ->
-                message << "${k}: ${v.displayName}"
+                message << "- ${k}: ${v.displayName.replace('\n', '\n    ')}"
             }
         } else {
             message << "None"
@@ -171,7 +171,7 @@ class ErrorNotificationService {
         message << header("Output artefacts")
         if (workflowStep.workflowRun.outputArtefacts) {
             workflowStep.workflowRun.outputArtefacts.sort { it.key }.each { k, v ->
-                message << "${k}: ${v.displayName}"
+                message << "- ${k}: ${v.displayName.replace('\n', '\n    ')}"
             }
         } else {
             message << "None"
@@ -220,10 +220,10 @@ class ErrorNotificationService {
             prevRunningWorkflowStep.clusterJobs.sort { it.id }.each { ClusterJob clusterJob ->
                 message << "ID: ${clusterJob.clusterJobId}"
                 message << "Name: ${clusterJob.clusterJobName}"
-                message << "Queued time: ${TimeFormats.DATE_TIME.getFormattedZonedDateTime((ZonedDateTime)clusterJob.queued)}"
-                message << "Eligible time: ${TimeFormats.DATE_TIME.getFormattedZonedDateTime((ZonedDateTime)clusterJob.eligible)}"
-                message << "Start time: ${TimeFormats.DATE_TIME.getFormattedZonedDateTime((ZonedDateTime)clusterJob.started)}"
-                message << "End time: ${TimeFormats.DATE_TIME.getFormattedZonedDateTime((ZonedDateTime)clusterJob.ended)}"
+                message << "Queued time: ${TimeFormats.DATE_TIME.getFormattedZonedDateTime((ZonedDateTime) clusterJob.queued)}"
+                message << "Eligible time: ${TimeFormats.DATE_TIME.getFormattedZonedDateTime((ZonedDateTime) clusterJob.eligible)}"
+                message << "Start time: ${TimeFormats.DATE_TIME.getFormattedZonedDateTime((ZonedDateTime) clusterJob.started)}"
+                message << "End time: ${TimeFormats.DATE_TIME.getFormattedZonedDateTime((ZonedDateTime) clusterJob.ended)}"
                 message << "Running hours: ${clusterJob.started && clusterJob.ended ? clusterJob.elapsedWalltime.toHours() : 'na'}"
                 message << "Requested walltime: ${clusterJob.requestedWalltime}"
                 message << "Log file: ${clusterJob.jobLog}"

@@ -27,10 +27,11 @@ import grails.util.Holders
 import groovy.json.JsonOutput
 import groovy.sql.Sql
 import groovy.transform.TupleConstructor
-import groovy.util.logging.Slf4j
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import org.junit.rules.TestName
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import spock.lang.Specification
 
 import de.dkfz.roddy.BEException
@@ -44,7 +45,7 @@ import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.UserAndRoles
@@ -78,10 +79,13 @@ import java.util.concurrent.*
  * - monitor workflows to finish in given time
  * - check, that workflow ends successfully
  */
-@Slf4j
 @Integration
 abstract class AbstractWorkflowSpec extends Specification implements UserAndRoles, GroovyScriptAwareTestCase,
         DomainFactoryCore, WorkflowSystemDomainFactory, UserDomainFactory {
+
+    //@Slf4j does not work with Spock containing tests and produces problems in closures
+    @SuppressWarnings('PropertyName')
+    final static Logger log = LoggerFactory.getLogger(AbstractWorkflowSpec)
 
     /**
      * state considered as running or not started
@@ -96,6 +100,7 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
     DataSource dataSource
     FileSystemService fileSystemService
     FileService fileService
+    LsdfFilesService lsdfFilesService
     RemoteShellHelper remoteShellHelper
     TestConfigService configService
     WorkflowSystemService workflowSystemService
@@ -120,15 +125,15 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
     /**
      * the base directory for the current tests
      */
-    protected Path inputDataDirectory
+    protected Path referenceDataDirectory
 
     /**
      * the base directory for the current tests
      */
-    protected Path workflowResultDirectory
+    protected Path workingDirectory
 
     /**
-     * the directory for reference genomes
+     * the directory for reference genomes in the reference data
      */
     protected Path referenceGenomeDirectory
 
@@ -206,46 +211,40 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
      * Returns the applicationProperties path
      */
     protected Path getRoddyApplicationPropertyFile() {
-        return inputDataDirectory.resolve("applicationProperties-test.ini")
+        return referenceDataDirectory.resolve("applicationProperties-test.ini")
     }
 
     @SuppressWarnings("CatchThrowable")
     void setup() {
         log.debug("Start to setup ${getClass().simpleName}.${methodName.methodName}")
         SessionUtils.withNewSession {
-            try {
-                sql = new Sql(dataSource)
-                schemaDump = new File(temporaryFolder.newFolder(), "test-database-dump.sql")
-                sql.execute("SCRIPT NODATA DROP TO ?", [schemaDump.absolutePath])
-                log.debug("database dump written to ${schemaDump}")
+            sql = new Sql(dataSource)
+            schemaDump = new File(temporaryFolder.newFolder(), "test-database-dump.sql")
+            sql.execute("SCRIPT NODATA DROP TO ?", [schemaDump.absolutePath])
+            log.debug("database dump written to ${schemaDump}")
 
-                preCheck()
+            preCheck()
 
-                loadDefaultValuesScripts()
-                createProcessingPriorityObject()
-                createRealm()
-                initFileSystem()
-                initProcessingOption()
+            loadDefaultValuesScripts()
+            createProcessingPriorityObject()
+            initRealm()
+            initFileSystem()
+            initProcessingOption()
 
-                DomainFactory.createAllAlignableSeqTypes()
-                createUserAndRoles()
+            createUserAndRoles()
 
-                loadInitialisationScripts()
-                initScheduler()
+            loadInitialisationScripts()
+            initScheduler()
 
-                log.debug("Finish setting up base test setup, workflow depending setup will follow")
-            } catch (Throwable t) {
-                //exception in setup was not reported with stacktrace, therefore add own logging
-                log.error("error during initialisation", t)
-                throw t
-            }
+            log.debug("Finish setting up base test setup, workflow depending setup will follow")
         }
     }
 
     @SuppressWarnings("CatchThrowable")
     void cleanup() {
         try {
-            log.info "Starting cleanup after test '${getClass().simpleName}.${methodName.methodName}' for base directory: ${workflowResultDirectory}"
+            log.info("--------------------------------------------------")
+            log.info("Starting cleanup after test '${getClass().simpleName}.${methodName.methodName}' for base directory: ${workingDirectory}")
 
             workflowSystemService.stopWorkflowSystem()
 
@@ -268,7 +267,7 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
             sql.execute("DROP ALL OBJECTS")
             sql.execute("RUNSCRIPT FROM ?", [schemaDump.absolutePath])
 
-            log.info "Finish test '${getClass().simpleName}.${methodName.methodName}' using base directory: ${workflowResultDirectory}"
+            log.info "Finish test '${getClass().simpleName}.${methodName.methodName}' using base directory: ${workingDirectory}"
         } catch (Throwable t) {
             //exception in cleanup was not reported with stacktrace, therefore add own logging
             log.error("cleanup error", t)
@@ -308,6 +307,14 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
     private void showState() {
         List<CharSequence> logEntries = []
         SessionUtils.withNewSession {
+            logEntries << "Tree of the file structure"
+            if (workingDirectory && Files.exists(workingDirectory)) {
+                logEntries << LocalShellHelper.executeAndWait("tree -augp ${workingDirectory}").assertExitCodeZero().stdout
+            } else {
+                logEntries << "workflowResultDirectory doesn't exist yet"
+            }
+
+            logEntries << ""
             logEntries << "State overview of workflowRuns, workflowSteps and workflowLogs"
             logEntries << ""
             List<WorkflowRun> workflowRuns = WorkflowRun.list().sort {
@@ -316,6 +323,7 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
             logEntries << "There are ${workflowRuns.size()} WorkflowRuns"
             workflowRuns.eachWithIndex { WorkflowRun workflowRun, int runIndex ->
                 List<WorkflowStep> workflowSteps = workflowRun.workflowSteps
+                List<ExternalWorkflowConfigFragment> configs = workflowRun.configs
                 logEntries << "- run ${runIndex}:"
                 [
                         id                          : workflowRun.id,
@@ -326,10 +334,13 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
                         "priority queue"            : workflowRun.priority.queue,
                         "priority roddyConfigSuffix": workflowRun.priority.roddyConfigSuffix,
                         "job count"                 : workflowSteps.size(),
+                        "config count"              : configs.size(),
                 ].each { key, value ->
                     logEntries << "  - ${key}: ${value}"
                 }
-
+                configs.eachWithIndex { ExternalWorkflowConfigFragment externalWorkflowConfigFragment, int configIndex ->
+                    logEntries << "  - config ${runIndex}.${configIndex}: ${externalWorkflowConfigFragment.name}"
+                }
                 workflowSteps.eachWithIndex { WorkflowStep workflowStep, int stepIndex ->
                     List<WorkflowLog> workflowLogs = workflowStep.logs
                     WorkflowError workflowError = workflowStep.workflowError
@@ -347,14 +358,8 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
                         logEntries << "    - ${key}: ${value}"
                     }
                     workflowLogs.eachWithIndex { WorkflowLog workflowLog, int logIndex ->
-                        logEntries << "    - log ${runIndex}.${stepIndex}.${logIndex}: ${prefixForOutput(workflowLog.displayLog())}"
-                    }
-                    if (workflowError) {
-                        logEntries << "    - error message: ${prefixForOutput(workflowError.message)}"
-                        if (workflowError.stacktrace) {
-                            logEntries << "      - stacktrace:"
-                        }
-                        logEntries << "        ${prefixForOutput(workflowError.stacktrace)}"
+                        String time = TimeFormats.DATE_TIME_DASHES.getFormattedDate(workflowLog.dateCreated)
+                        logEntries << "    - log ${runIndex}.${stepIndex}.${logIndex}: ${time}: ${prefixForOutput(workflowLog.displayLog())}"
                     }
                     clusterJobs.eachWithIndex { ClusterJob clusterJob, int clusterLogIndex ->
                         logEntries << "    - cluster log ${runIndex}.${stepIndex}.${clusterLogIndex}:"
@@ -371,15 +376,15 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
                             logEntries << "      - ${key}: ${value}"
                         }
                     }
+                    if (workflowError) {
+                        logEntries << "    - error message: ${prefixForOutput(workflowError.message)}"
+                        if (workflowError.stacktrace) {
+                            logEntries << "      - stacktrace:"
+                        }
+                        logEntries << "        ${prefixForOutput(workflowError.stacktrace)}"
+                    }
                 }
             }
-            logEntries << "\nTree of the file structure"
-            if (workflowResultDirectory && Files.exists(workflowResultDirectory)) {
-                logEntries << LocalShellHelper.executeAndWait("tree -ugp ${workflowResultDirectory}").assertExitCodeZero().stdout
-            } else {
-                logEntries << "workflowResultDirectory doesn't exist yet"
-            }
-
             log.debug(logEntries.join('\n'))
         }
     }
@@ -428,32 +433,39 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
                 roddyConfigSuffix          : configService.workflowTestConfigSuffix,
                 allowedParallelWorkflowRuns: 1000,
         ])
-        DomainFactory.createProcessingOptionLazy(name: OptionName.PROCESSING_PRIORITY_DEFAULT_NAME, value: processingPriority.name)
-    }
-
-    @Override
-    Realm createRealm() {
-        return createRealm([:])
+        findOrCreateProcessingOption(name: OptionName.PROCESSING_PRIORITY_DEFAULT_NAME, value: processingPriority.name)
     }
 
     /**
-     * Adapt realm creation to create only one and setup it correctly for the workflow test.
+     * return existing realm instead of new
+     */
+    @Override
+    Realm createRealm() {
+        return realm
+    }
+
+    /**
+     * return existing realm instead of new
      */
     @Override
     Realm createRealm(Map realmProperties) {
-        if (!realm) {
-            log.debug("creating realm and set it to default")
-            realm = DomainFactoryCore.super.createRealm([
-                    name                       : 'WorkflowTest',
-                    jobScheduler               : configService.workflowTestScheduler,
-                    host                       : configService.workflowTestHost,
-                    port                       : 22,
-                    timeout                    : 0,
-                    defaultJobSubmissionOptions: jobSubmissionOptions,
-            ])
-            DomainFactory.createProcessingOptionLazy(name: OptionName.REALM_DEFAULT_VALUE, value: realm.name)
-        }
         return realm
+    }
+
+    /**
+     * Setup realm correctly for the workflow test.
+     */
+    private void initRealm() {
+        log.debug("creating realm and set it to default")
+        realm = DomainFactoryCore.super.createRealm([
+                name                       : 'WorkflowTest',
+                jobScheduler               : configService.workflowTestScheduler,
+                host                       : configService.workflowTestHost,
+                port                       : 22,
+                timeout                    : 0,
+                defaultJobSubmissionOptions: jobSubmissionOptions,
+        ])
+        findOrCreateProcessingOption(name: OptionName.REALM_DEFAULT_VALUE, value: realm.name)
     }
 
     /**
@@ -462,14 +474,14 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
      * - {@link TestConfigService}
      * - {@link #remoteFileSystem}
      * - diverse directories
-     *   - {@link #inputDataDirectory}
-     *   - {@link #workflowResultDirectory}
+     *   - {@link #referenceDataDirectory}
+     *   - {@link #workingDirectory}
      *   - {@link #referenceGenomeDirectory}
      *   - {@link #additionalDataDirectory}
      *
-     * Also the {@link #workflowResultDirectory} is created.
+     * Also the {@link #workingDirectory} is created.
      *
-     * It requires a valid realm {@link #createRealmObject()}.
+     * It requires a valid realm {@link #initRealm()}.
      */
     private void initFileSystem() {
         log.debug("initializing fileSystem and depending options")
@@ -477,29 +489,28 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
 
         remoteFileSystem = fileSystemService.remoteFileSystemOnDefaultRealm
 
-        String workDirectory = [
+        String workSubDirectory = [
                 System.getProperty('user.name'),
                 this.class.simpleName,
-                methodName.methodName.replaceAll('[^a-zA-Z\\-_]', '-'),
                 TimeFormats.DATE_TIME_SECONDS_DASHES.getFormattedLocalDateTime(LocalDateTime.now()),
                 (Math.abs(HelperUtils.random.nextLong()) % 1000000).toString().padLeft(6, '0'),
         ].join('_')
 
-        inputDataDirectory = remoteFileSystem.getPath(configService.workflowTestInputRootDir.absolutePath)
-        workflowResultDirectory = remoteFileSystem.getPath(configService.workflowTestResultRootDir.absolutePath).resolve(workDirectory)
-        referenceGenomeDirectory = workflowResultDirectory.resolve("reference-genomes")
-        additionalDataDirectory = workflowResultDirectory.resolve('additional-data')
+        referenceDataDirectory = remoteFileSystem.getPath(configService.workflowTestInputRootDir.absolutePath)
+        workingDirectory = remoteFileSystem.getPath(configService.workflowTestResultRootDir.absolutePath).resolve(workSubDirectory)
+        referenceGenomeDirectory = workingDirectory.resolve("reference-genomes")
+        additionalDataDirectory = workingDirectory.resolve('additional-data')
 
-        fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(workflowResultDirectory, realm)
+        fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(workingDirectory, realm)
 
         [
-                (OtpProperty.PATH_PROJECT_ROOT)    : "${workflowResultDirectory}/projectPath",
-                (OtpProperty.PATH_CLUSTER_LOGS_OTP): "${workflowResultDirectory}/loggingPath",
+                (OtpProperty.PATH_PROJECT_ROOT)    : "${workingDirectory}/projectPath",
+                (OtpProperty.PATH_CLUSTER_LOGS_OTP): "${workingDirectory}/loggingPath",
         ].each { key, value ->
             configService.addOtpProperty(key, value)
         }
 
-        log.debug "Base directory: ${workflowResultDirectory}"
+        log.debug "Base directory: ${workingDirectory}"
     }
 
     /**
@@ -508,7 +519,7 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
      * It depends on the initialisation of:
      * - {@link #initFileSystem()}
      * - {@link #createProcessingPriorityObject()}
-     * - {@link #createRealmObject()}
+     * - {@link #initRealm()}
      */
     private void initProcessingOption() {
         log.debug("creating processingOptions")
@@ -552,6 +563,7 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
         log.debug("Loading ${scripts.size()} initializing scripts")
         SpringSecurityUtils.doWithAuth(ADMIN) {
             scripts.each { File script ->
+                log.debug("  - Load ${script}")
                 runScript(script)
             }
         }
@@ -564,13 +576,14 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
         log.debug("Loading default values:")
         Path dir = new File(".").toPath().resolve("migrations/changelogs/defaultValues")
         List<Path> files = [
+                dir.resolve("seqTypes.sql"),
                 dir.resolve("workflow.sql"),
                 dir.resolve("workflowVersions.sql"),
         ]
         files.addAll(Files.newDirectoryStream(dir, "ewc-*.sql").toList())
 
         files.each {
-            log.debug("Loading default value from ${it}")
+            log.debug("  - Load ${it}")
             sql.execute(it.text.replaceAll("nextval('hibernate_sequence')", "NEXT VALUE FOR hibernate_sequence").replaceAll("ON CONFLICT DO NOTHING", ""))
         }
     }
@@ -611,8 +624,13 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
     protected void execute(int requiredWorkflowRunCount = 1, int existingRuns = 0, boolean ensureNoFailure = true) {
         log.debug("starting workflow system")
         SessionUtils.withNewSession {
-            if (WorkflowRun.count < requiredWorkflowRunCount) {
-                throw new OtpRuntimeException("Not enough workfowRuns was created: expects at least ${requiredWorkflowRunCount}, found ${WorkflowRun.count}")
+            int newWorkflowCount = WorkflowRun.countByState(WorkflowRun.State.PENDING)
+            int oldWorkflowCount = WorkflowRun.count - newWorkflowCount
+            if (oldWorkflowCount != existingRuns) {
+                throw new OtpRuntimeException("The count of existing workfowRuns is incorrect: found ${oldWorkflowCount}, but expected ${existingRuns}")
+            }
+            if (newWorkflowCount != requiredWorkflowRunCount) {
+                throw new OtpRuntimeException("The count of new workfowRuns is incorrect: found ${newWorkflowCount}, but expected ${existingRuns}")
             }
             updateDomainValuesForTesting()
             workflowSystemService.startWorkflowSystem()
@@ -725,15 +743,15 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
     protected void ensureThatFilePermissionsAreCorrect() {
         log.debug("Checking file permissions")
         Files.walk(configService.rootPath.toPath()).each { Path path ->
-            if (Files.isDirectory(path)) {
+            if (Files.isDirectory(path, LinkOption.NOFOLLOW_LINKS)) {
                 assert fileService.getPermissionViaBash(path, realm, LinkOption.NOFOLLOW_LINKS) == fileService.DEFAULT_DIRECTORY_PERMISSION_STRING
             }
             if (Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS)) {
                 Set<PosixFilePermission> permissions = Files.getPosixFilePermissions(path, LinkOption.NOFOLLOW_LINKS)
-                if (fileService.BAM_FILE_EXTENSIONS.any { path.toString().endsWith(it) }) {
-                    assert permissions == fileService.DEFAULT_BAM_FILE_PERMISSION
+                if (FileService.BAM_FILE_EXTENSIONS.any { path.toString().endsWith(it) }) {
+                    assert permissions == FileService.DEFAULT_BAM_FILE_PERMISSION
                 } else {
-                    assert permissions == fileService.DEFAULT_FILE_PERMISSION
+                    assert permissions == FileService.DEFAULT_FILE_PERMISSION
                 }
             }
         }
@@ -742,6 +760,8 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
     /**
      * enum for defining needed cron jobs
      */
+    //false positive, the enum is not abstract
+    @SuppressWarnings("AbstractClassName")
     @TupleConstructor
     enum TestCronJob {
         WORKFLOW_STARTING("starting workflows", 5, TimeUnit.SECONDS){
@@ -781,10 +801,13 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
         final String name
 
         /**
-         * the delay used for the cron job
+         * the delay used for the cron job in the unit defined by  {@link #timeUnit}
          */
         final int delay
 
+        /**
+         * the time unit used for the {@link #delay} number
+         */
         final TimeUnit timeUnit
 
         /**

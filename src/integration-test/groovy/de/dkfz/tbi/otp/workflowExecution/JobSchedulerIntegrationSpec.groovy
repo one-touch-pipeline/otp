@@ -49,6 +49,7 @@ class JobSchedulerIntegrationSpec extends AbstractIntegrationSpecWithoutRollback
         jobScheduler = new JobScheduler()
         jobScheduler.autoRestartHandlerService = Mock(AutoRestartHandlerService)
         jobScheduler.applicationContext = Mock(ApplicationContext)
+        jobScheduler.logService = Mock(LogService)
         jobScheduler.workflowStateChangeService = workflowStateChangeService
 
         SessionUtils.withNewSession {

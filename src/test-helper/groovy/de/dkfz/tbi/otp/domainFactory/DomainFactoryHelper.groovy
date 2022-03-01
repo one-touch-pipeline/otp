@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.domainFactory
 
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 trait DomainFactoryHelper {
 
@@ -35,5 +36,23 @@ trait DomainFactoryHelper {
 
     def <T> T findOrCreateDomainObject(Class<T> domainClass, Map defaultProperties, Map parameterProperties, boolean saveAndValidate = true) {
         return DomainFactory.findOrCreateDomainObject(domainClass, defaultProperties, parameterProperties, saveAndValidate)
+    }
+
+    /**
+     * Check first for an object and if not exist yet, create it.
+     *
+     * @param domainClass The domain to search for
+     * @param requiredSearchProperties The properties used for searching
+     * @param defaultCreationProperties The default properties needed to create an object
+     * @param additionalCreationProperties Additional properties to use for creation
+     * @param saveAndValidate flag to indicate, if the object should be validated and saved
+     * @return the found or created object
+     */
+    def <T> T findOrCreateDomainObject(Class<T> domainClass, Map<String, ?> requiredSearchProperties, Map<String, ?> defaultCreationProperties,
+                                       Map<String, ?> additionalCreationProperties, boolean saveAndValidate = true) {
+        assert requiredSearchProperties: 'Required search properties are missing.'
+
+        return CollectionUtils.atMostOneElement(domainClass.findAllWhere(requiredSearchProperties)) ?:
+                createDomainObject(domainClass, defaultCreationProperties, requiredSearchProperties + additionalCreationProperties, saveAndValidate)
     }
 }

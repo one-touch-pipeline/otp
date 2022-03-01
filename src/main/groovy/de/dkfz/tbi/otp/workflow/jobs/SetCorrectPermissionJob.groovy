@@ -55,5 +55,6 @@ class SetCorrectPermissionJob extends AbstractJob {
         FileSystem fileSystem = getFileSystem(workflowStep)
         Path workDirectory = fileSystem.getPath(workflowStep.workflowRun.workDirectory)
         fileService.correctPathPermissionAndGroupRecursive(workDirectory, workflowStep.realm, workflowStep.workflowRun.project.unixGroup)
+        workflowStateChangeService.changeStateToSuccess(workflowStep)
     }
 }

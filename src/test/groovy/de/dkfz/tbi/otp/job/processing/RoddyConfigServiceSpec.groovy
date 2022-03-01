@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.job.processing
 import grails.testing.gorm.DataTest
 import grails.testing.services.ServiceUnitTest
 import spock.lang.Specification
+import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.workflowExecution.Workflow
@@ -33,17 +34,7 @@ import java.nio.file.Paths
 
 class RoddyConfigServiceSpec extends Specification implements ServiceUnitTest<RoddyConfigService>, DataTest, WorkflowSystemDomainFactory {
 
-    @Override
-    Class[] getDomainClassesToMock() {
-        return [
-                Workflow,
-                WorkflowVersion,
-        ]
-    }
-
-    void "test createRoddyXmlConfig"() {
-        given:
-        String combinedConfig = """
+    private static final String COMBINED_CONFIG = """
             {
               "RODDY": {
                 "cvalues": {
@@ -109,21 +100,31 @@ class RoddyConfigServiceSpec extends Specification implements ServiceUnitTest<Ro
               }
             }"""
 
+    @Override
+    Class[] getDomainClassesToMock() {
+        return [
+                Workflow,
+                WorkflowVersion,
+        ]
+    }
+
+    void "test createRoddyXmlConfig"() {
+        given:
         String expected = """\
             <configuration name='config' configurationType='project' usedresourcessize='l'>
               <availableAnalyses>
                 <analysis id='analysis' configuration='ACONF' useplugin='WFNAME:1.2.3' killswitches='FilenameSection' />
               </availableAnalyses>
               <configurationvalues>
-                <cvalue name='inputBaseDirectory' value='/i' type='path' />
-                <cvalue name='outputBaseDirectory' value='/o' type='path' />
                 <cvalue name='ADAPTER_SEQ' value='ACGT' />
-                <cvalue name='useSingleEndProcessing' value='true' />
                 <cvalue name='BWA_VERSION' value='0.7.8' />
-                <cvalue name='INSERT_SIZE_LIMIT' value='1' type='integer' />
-                <cvalue name='mergedBamSuffixList' value='asdf' type='string' />
-                <cvalue name='runSlimWorkflow' value='true' type='boolean' />
-                <cvalue name='UseBioBamBamSort' value='false' type='boolean' />
+                <cvalue name='inputBaseDirectory' value='/i' />
+                <cvalue name='INSERT_SIZE_LIMIT' value='1' />
+                <cvalue name='mergedBamSuffixList' value='asdf' />
+                <cvalue name='outputBaseDirectory' value='/o' />
+                <cvalue name='runSlimWorkflow' value='true' />
+                <cvalue name='UseBioBamBamSort' value='false' />
+                <cvalue name='useSingleEndProcessing' value='true' />
               </configurationvalues>
               <processingTools>
                 <tool name='alignAndPair' value='bwaMemSort.sh' basepath='qcPipeline' overrideresourcesets='true'>
@@ -148,11 +149,105 @@ class RoddyConfigServiceSpec extends Specification implements ServiceUnitTest<Ro
               </filenames>
             </configuration>""".stripIndent()
 
-        expect:
-        expected == service.createRoddyXmlConfig(combinedConfig,
+        when:
+        String result = service.createRoddyXmlConfig(COMBINED_CONFIG,
                 [useSingleEndProcessing: "true", "ADAPTER_SEQ": "ACGT"],
                 "WFNAME", createWorkflowVersion(workflowVersion: "1.2.3"), "ACONF",
                 Paths.get("/i"), Paths.get("/o"),
                 "QNAME", true)
+
+        then:
+        result == expected
+    }
+
+    void "test createRoddyXmlConfig with overwriting defaults"() {
+        given:
+        String expected = """\
+            <configuration name='config' configurationType='project' usedresourcessize='l'>
+              <availableAnalyses>
+                <analysis id='analysis' configuration='ACONF' useplugin='WFNAME:1.2.3' killswitches='FilenameSection' />
+              </availableAnalyses>
+              <configurationvalues>
+                <cvalue name='ADAPTER_SEQ' value='NNAAGGAANN' />
+                <cvalue name='BWA_VERSION' value='0.9.9' />
+                <cvalue name='inputBaseDirectory' value='/i' />
+                <cvalue name='INSERT_SIZE_LIMIT' value='5' />
+                <cvalue name='mergedBamSuffixList' value='asdf' />
+                <cvalue name='outputBaseDirectory' value='/o' />
+                <cvalue name='runSlimWorkflow' value='true' />
+                <cvalue name='UseBioBamBamSort' value='false' />
+                <cvalue name='useSingleEndProcessing' value='true' />
+              </configurationvalues>
+              <processingTools>
+                <tool name='alignAndPair' value='bwaMemSort.sh' basepath='qcPipeline' overrideresourcesets='true'>
+                  <resourcesets>
+                    <rset size='l' queue='QNAME' memory='1G' cores='1' nodes='2' walltime='00:10:00' />
+                  </resourcesets>
+                </tool>
+                <tool name='CollectBamMetrics' value='picardCollectMetrics.sh' basepath='qcPipeline' overrideresourcesets='true'>
+                  <resourcesets>
+                    <rset size='l' queue='QNAME' memory='0.1' cores='500' nodes='1' />
+                  </resourcesets>
+                </tool>
+                <tool name='coveragePlot' value='genomeCoveragePlots.sh' basepath='qcPipeline' overrideresourcesets='true'>
+                  <resourcesets>
+                    <rset size='l' queue='QNAME' memory='7T' nodes='3' walltime='01:00:00' />
+                  </resourcesets>
+                </tool>
+              </processingTools>
+              <filenames package='de.dkfz.b080.co.files' filestagesbase='de.dkfz.b080.co.files.COFileStage'>
+                <filename class='a1' fileStage='a3' pattern='a2' />
+                <filename class='B1' derivedFrom='B4' pattern='B2' selectiontag='B3' />
+              </filenames>
+            </configuration>""".stripIndent()
+
+        when:
+        String result = service.createRoddyXmlConfig(COMBINED_CONFIG,
+                [
+                        useSingleEndProcessing: "true",
+                        BWA_VERSION           : "0.9.9",
+                        ADAPTER_SEQ           : "NNAAGGAANN",
+                        INSERT_SIZE_LIMIT     : "5",
+                ],
+                "WFNAME", createWorkflowVersion(workflowVersion: "1.2.3"), "ACONF",
+                Paths.get("/i"), Paths.get("/o"),
+                "QNAME", true)
+
+        then:
+        result == expected
+    }
+
+    @Unroll
+    void "test createRoddyXmlConfig with #name"() {
+        given:
+        String expected = """\
+            <configuration name='config' configurationType='project' usedresourcessize='l'>
+              <availableAnalyses>
+                <analysis id='analysis' configuration='ACONF' useplugin='WFNAME:1.2.3' killswitches='FilenameSection' />
+              </availableAnalyses>
+              <configurationvalues>
+                <cvalue name='inputBaseDirectory' value='/i' />
+                <cvalue name='outputBaseDirectory' value='/o' />
+              </configurationvalues>
+              <processingTools />
+              <filenames package='de.dkfz.b080.co.files' filestagesbase='de.dkfz.b080.co.files.COFileStage' />
+            </configuration>""".stripIndent()
+
+        when:
+        String result = service.createRoddyXmlConfig("{}", [:],
+                "WFNAME", createWorkflowVersion(workflowVersion: "1.2.3"), "ACONF",
+                Paths.get("/i"), Paths.get("/o"),
+                "QNAME", true)
+
+        then:
+        result == expected
+
+        where:
+        name                       | json
+        "complete empty"           | "{}"
+        "RODDY is empty"           | "{RODDY: {}}"
+        "cvalues is empty"         | "{RODDY: {cvalues: {}}}"
+        "resources is empty"       | "{RODDY: {resources: {}}}"
+        "RODDY_FILENAMES is empty" | "{RODDY: {RODDY_FILENAMES: {}}}"
     }
 }

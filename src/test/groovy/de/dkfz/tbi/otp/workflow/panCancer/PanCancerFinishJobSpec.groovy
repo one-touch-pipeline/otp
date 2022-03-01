@@ -28,12 +28,13 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
-import de.dkfz.tbi.otp.ngsdata.FastqImportInstance
-import de.dkfz.tbi.otp.ngsdata.FileType
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.utils.Md5SumService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
@@ -46,11 +47,12 @@ class PanCancerFinishJobSpec extends Specification implements DataTest, Workflow
     @Override
     Class[] getDomainClassesToMock() {
         return [
-                WorkflowStep,
-                MergingWorkPackage,
-                RoddyBamFile,
-                FileType,
                 FastqImportInstance,
+                FileType,
+                MergingWorkPackage,
+                ProcessingOption,
+                RoddyBamFile,
+                WorkflowStep,
         ]
     }
 
@@ -59,7 +61,7 @@ class PanCancerFinishJobSpec extends Specification implements DataTest, Workflow
 
     void "test updateDomain method should update roddyBamFile"() {
         given:
-        new TestConfigService(temporaryFolder.newFolder())
+        TestConfigService testConfigService = new TestConfigService(temporaryFolder.newFolder())
         WorkflowStep workflowStep = createWorkflowStep()
         MergingWorkPackage workPackage = createMergingWorkPackage(bamFileInProjectFolder: null)
         RoddyBamFile roddyBamFile = createBamFile([
@@ -81,6 +83,17 @@ class PanCancerFinishJobSpec extends Specification implements DataTest, Workflow
         job.abstractMergedBamFileService = Mock(AbstractMergedBamFileService) {
             1 * updateSamplePairStatusToNeedProcessing(roddyBamFile)
         }
+
+        job.roddyBamFileService = new RoddyBamFileService([
+                abstractMergedBamFileService: new AbstractMergedBamFileService([
+                        individualService: new IndividualService([
+                                projectService: new ProjectService([
+                                        fileSystemService: new TestFileSystemService(),
+                                        configService: testConfigService,
+                                ]),
+                        ]),
+                ]),
+        ])
 
         job.fileSystemService = new TestFileSystemService()
         job.fileService = new FileService()

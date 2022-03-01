@@ -35,4 +35,9 @@ class WorkflowVersion implements Entity {
     static constraints = {
         workflow unique: 'workflowVersion'
     }
+
+    @Override
+    String toString() {
+        return displayName
+    }
 }

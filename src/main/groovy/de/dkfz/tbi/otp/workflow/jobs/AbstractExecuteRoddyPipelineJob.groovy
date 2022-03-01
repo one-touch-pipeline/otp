@@ -21,14 +21,13 @@
  */
 package de.dkfz.tbi.otp.workflow.jobs
 
+import groovy.json.JsonOutput
 import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.ngsdata.IndividualService
-import de.dkfz.tbi.otp.ngsdata.Realm
-import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.ProcessOutput
 import de.dkfz.tbi.otp.workflowExecution.WorkflowRunService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
@@ -66,6 +65,10 @@ abstract class AbstractExecuteRoddyPipelineJob extends AbstractExecutePipelineJo
         Realm realm = workflowStep.workflowRun.realm
         FileSystem fs = fileSystemService.getRemoteFileSystem(realm)
         Path outputDir = fs.getPath(roddyResult.workDirectory.absolutePath)
+        Path confDir = outputDir.resolve(RoddyConfigService.CONFIGURATION_DIRECTORY)
+
+        logService.addSimpleLogEntry(workflowStep,
+                "The json config (without run specific values):\n${JsonOutput.prettyPrint(workflowStep.workflowRun.combinedConfig)}")
 
         String xmlConfig = roddyConfigService.createRoddyXmlConfig(
                 workflowStep.workflowRun.combinedConfig,
@@ -78,11 +81,12 @@ abstract class AbstractExecuteRoddyPipelineJob extends AbstractExecutePipelineJo
                 workflowStep.workflowRun.priority.queue,
                 filenameSectionKillSwitch,
         )
-        fileService.createFileWithContent(outputDir.resolve("${RoddyConfigService.CONFIGURATION_NAME}.xml"), xmlConfig, realm)
+        logService.addSimpleLogEntry(workflowStep, "The final xml:\n${xmlConfig}")
+        fileService.createFileWithContent(confDir.resolve("${RoddyConfigService.CONFIGURATION_NAME}.xml"), xmlConfig, realm)
 
         String command = roddyCommandService.createRoddyCommand(
                 roddyResult.individual,
-                outputDir,
+                confDir,
                 getAdditionalParameters(workflowStep),
         )
         roddyExecutionService.clearRoddyExecutionStoreDirectory(roddyResult)
@@ -111,9 +115,12 @@ abstract class AbstractExecuteRoddyPipelineJob extends AbstractExecutePipelineJo
     protected abstract RoddyResult getRoddyResult(WorkflowStep workflowStep)
 
     protected abstract String getRoddyWorkflowName()
+
     protected abstract String getAnalysisConfiguration(SeqType seqType)
+
     protected abstract boolean getFilenameSectionKillSwitch()
 
     protected abstract Map<String, String> getConfigurationValues(WorkflowStep workflowStep, String combinedConfig)
+
     protected abstract List<String> getAdditionalParameters(WorkflowStep workflowStep)
 }

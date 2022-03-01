@@ -32,6 +32,7 @@ class SampleType implements Entity, Legacy {
     /**
      * enum to define, if the {@link Project} default or a {@link SampleType}-specific {@link ReferenceGenome} should be used.
      */
+    @Deprecated
     enum SpecificReferenceGenome {
         /**
          * For this {@link SampleType} the {@link Project} {@link SeqType} default {@link ReferenceGenome} should be used.
@@ -51,6 +52,7 @@ class SampleType implements Entity, Legacy {
     /** This attribute is used externally. Please discuss a change in the team */
     String name
 
+    @Deprecated
     SpecificReferenceGenome specificReferenceGenome = SpecificReferenceGenome.UNKNOWN
 
     static constraints = {

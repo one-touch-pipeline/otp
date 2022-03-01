@@ -21,6 +21,10 @@
  */
 
 databaseChangeLog = {
+    changeSet(author: "", id: "seqtype", runOnChange: "true") {
+        sqlFile(path: 'changelogs/defaultValues/seqTypes.sql')
+    }
+
     changeSet(author: "", id: "workflows", runOnChange: "true") {
         sqlFile(path: 'changelogs/defaultValues/workflow.sql')
     }
@@ -35,7 +39,9 @@ databaseChangeLog = {
 
     include file: 'changelogs/defaultValues/createSpeciesAndStrains.groovy'
 
-    include file: 'changelogs/defaultValues/tool-names-of-reference-genome-indexes.sql'
+    changeSet(author: "", id: "tool-names-of-reference-genome-indexes", runOnChange: "true") {
+        include file: 'changelogs/defaultValues/tool-names-of-reference-genome-indexes.sql'
+    }
 
     changeSet(author: "albrecjp", id: "otp-796", runOnChange: "true") {
         sqlFile(path: 'changelogs/defaultValues/roles.sql')

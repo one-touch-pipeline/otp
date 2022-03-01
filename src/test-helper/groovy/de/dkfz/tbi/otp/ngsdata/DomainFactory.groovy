@@ -1621,10 +1621,9 @@ class DomainFactory {
         return proxyCore.createChipSeqSeqTrack(properties)
     }
 
+    @Deprecated
     static FastqcProcessedFile createFastqcProcessedFile(Map properties = [:]) {
-        return createDomainObject(FastqcProcessedFile, [
-                dataFile: { createDataFile() },
-        ], properties)
+        return proxyCore.createFastqcProcessedFile(properties)
     }
 
     static Map<String, ?> baseMergingWorkPackageProperties(Map properties) {

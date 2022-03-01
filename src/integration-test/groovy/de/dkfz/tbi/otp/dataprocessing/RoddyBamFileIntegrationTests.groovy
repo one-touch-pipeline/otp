@@ -113,7 +113,7 @@ class RoddyBamFileIntegrationTests {
         SeqTrack seqTrack = bamFile.seqTracks.iterator().next()
         DomainFactory.createMergingCriteriaLazy(project: seqTrack.project, seqType: seqTrack.seqType)
         seqTrack.seqType = DomainFactory.createSeqType()
-        bamFile.isConsistentAndContainsNoWithdrawnData()
+        assert bamFile.isConsistentAndContainsNoWithdrawnData().empty
     }
 
     @Test
@@ -209,13 +209,13 @@ class RoddyBamFileIntegrationTests {
     @Test
     void testMaxIdentifier_noRoddyBamFileExistsForWorkPackage() {
         MergingWorkPackage workPackage = DomainFactory.createMergingWorkPackage()
-        assert null == RoddyBamFile.maxIdentifier(workPackage)
+        assert RoddyBamFile.maxIdentifier(workPackage) == null
     }
 
     @Test
     void testMaxIdentifier_roddyBamFileExistsForWorkPackage() {
         RoddyBamFile bamFile = createRoddyBamFileWithBaseBamFile()
-        assert 1 == RoddyBamFile.maxIdentifier(bamFile.workPackage)
+        assert RoddyBamFile.maxIdentifier(bamFile.workPackage) == 1
     }
 
     private RoddyBamFile createRoddyBamFileWithBaseBamFile() {

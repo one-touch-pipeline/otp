@@ -44,7 +44,7 @@ class FastqcProcessedFile implements Artefact, Entity {
     DataFile dataFile
 
     static belongsTo = [
-        dataFile: DataFile,
+            dataFile: DataFile,
     ]
 
     static constraints = {
@@ -60,5 +60,10 @@ class FastqcProcessedFile implements Artefact, Entity {
     @Override
     Set<SeqTrack> getContainedSeqTracks() {
         return [dataFile.seqTrack] as Set
+    }
+
+    @Override
+    String toString() {
+        return "Fastqc ${id} for ${dataFile} for ${dataFile.seqTrack}"
     }
 }

@@ -31,6 +31,7 @@ logs/*
 ## Temporary files
 *~
 \#*\#
+*.kate-swp
 ## Stale NFS handles
 .nfs*
 

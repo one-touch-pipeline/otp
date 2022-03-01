@@ -23,11 +23,11 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import groovy.transform.ToString
 
-import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.Entity
 
-@ToString(includeNames=true)
+@ToString(includeNames = true, includePackage = false)
 class MergingCriteria implements Entity {
 
     Project project
@@ -42,7 +42,7 @@ class MergingCriteria implements Entity {
     }
 
     static constraints = {
-        useLibPrepKit validator : { val, obj ->
+        useLibPrepKit validator: { val, obj ->
             if (obj.seqType.isExome() && !val) {
                 return "exome"
             }

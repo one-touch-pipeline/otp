@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.workflowExecution
 import com.fasterxml.jackson.databind.ObjectMapper
 import grails.converters.JSON
 import grails.databinding.BindUsing
+import groovy.transform.ToString
 import groovy.transform.TupleConstructor
 import org.grails.web.converters.exceptions.ConverterException
 import org.grails.web.json.*
@@ -36,6 +37,7 @@ import de.dkfz.tbi.otp.utils.Entity
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
+@ToString(includeNames = true, includePackage = false)
 class ExternalWorkflowConfigFragment implements Commentable, Deprecateable<ExternalWorkflowConfigFragment>, Entity {
 
     String name
@@ -48,6 +50,7 @@ class ExternalWorkflowConfigFragment implements Commentable, Deprecateable<Exter
         JSON.parse(source['configValues'] as String).toString()
     })
     String configValues
+
     ExternalWorkflowConfigFragment previous
 
     static constraints = {

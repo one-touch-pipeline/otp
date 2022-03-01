@@ -54,8 +54,8 @@ class FastqcWorkflowSpec extends AbstractWorkflowSpec {
     private WorkflowArtefact workflowArtefact
 
     void setupWorkflow(String fileExtension) {
-        Path sourceFastq = inputDataDirectory.resolve("${INPUT_FILE}${fileExtension}")
-        expectedFastqc = inputDataDirectory.resolve(EXPECTED_RESULT_FILE)
+        Path sourceFastq = referenceDataDirectory.resolve("${INPUT_FILE}${fileExtension}")
+        expectedFastqc = referenceDataDirectory.resolve(EXPECTED_RESULT_FILE)
 
         Run run = createRun()
 
@@ -81,8 +81,8 @@ class FastqcWorkflowSpec extends AbstractWorkflowSpec {
                 vbpFileName: "asdf.fastq.${fileExtension}",
                 seqTrack: seqTrack,
                 run: run,
-                initialDirectory: workflowResultDirectory.resolve("ftp").resolve(run.name),
-    )
+                initialDirectory: workingDirectory.resolve("ftp").resolve(run.name),
+        )
 
         fileService.createLink(lsdfFilesService.getFileViewByPidPathAsPath(dataFile), sourceFastq, realm)
         fileService.createLink(lsdfFilesService.getFileFinalPathAsPath(dataFile), sourceFastq, realm)

@@ -43,6 +43,15 @@ trait WorkflowSystemDomainFactory implements DomainFactoryCore, TaxonomyFactory 
         ], properties, saveAndValidate)
     }
 
+    Workflow findOrCreateWorkflow(Map searchProperties, Map additionalCreationProperties = [:], boolean saveAndValidate = true) {
+        return findOrCreateDomainObject(Workflow, searchProperties, [
+                name                : "name_${nextId}",
+                beanName            : "beanName_${nextId}",
+                enabled             : true,
+                maxParallelWorkflows: 6,
+        ], additionalCreationProperties, saveAndValidate)
+    }
+
     WorkflowRun createWorkflowRun(Map properties = [:]) {
         Workflow workflow = properties.workflow ?: properties.restartedFrom?.workflow ?: createWorkflow()
         return createDomainObject(WorkflowRun, [

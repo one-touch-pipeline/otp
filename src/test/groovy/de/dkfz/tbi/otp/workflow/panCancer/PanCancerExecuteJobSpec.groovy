@@ -26,6 +26,7 @@ import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
 
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.*
@@ -176,20 +177,19 @@ class PanCancerExecuteJobSpec extends Specification implements DataTest, Workflo
         Map<String, String> expectedCommand = [
                 "INDEX_PREFIX"                     : "/fasta-path",
                 "GENOME_FA"                        : "/fasta-path",
-                "CHROM_SIZES_FILE"                 : "/chrom-size-path",
-                "possibleControlSampleNamePrefixes": "${roddyBamFile.sampleType.dirName}",
+                "possibleControlSampleNamePrefixes": roddyBamFile.sampleType.dirName,
                 "possibleTumorSampleNamePrefixes"  : "",
                 "runFingerprinting"                : "false",
                 "TARGET_REGIONS_FILE"              : "BedFilePath",
                 "TARGETSIZE"                       : "1",
-                "fastq_list"                       : "${fastqFilesAsString(roddyBamFile)}",
+                "fastq_list"                       : fastqFilesAsString(roddyBamFile),
         ]
 
         when:
         Map<String, String> actualCommand = job.getConfigurationValues(workflowStep, "{}")
 
         then:
-        new HashMap(expectedCommand) == new HashMap(actualCommand)
+        TestCase.assertContainSame(expectedCommand, actualCommand)
     }
 
     void "test getConfigurationValues, with whole genome seq. type, without base bam file, with fingerprinting"() {
@@ -204,19 +204,18 @@ class PanCancerExecuteJobSpec extends Specification implements DataTest, Workflo
         Map<String, String> expectedCommand = [
                 "INDEX_PREFIX"                     : "/fasta-path",
                 "GENOME_FA"                        : "/fasta-path",
-                "CHROM_SIZES_FILE"                 : "/chrom-size-path",
-                "possibleControlSampleNamePrefixes": "${roddyBamFile.sampleType.dirName}",
+                "possibleControlSampleNamePrefixes": roddyBamFile.sampleType.dirName,
                 "possibleTumorSampleNamePrefixes"  : "",
                 "runFingerprinting"                : "true",
                 "fingerprintingSitesFile"          : "/fingerprint-path",
-                "fastq_list"                       : "${fastqFilesAsString(roddyBamFile)}",
+                "fastq_list"                       : fastqFilesAsString(roddyBamFile),
         ]
 
         when:
         Map<String, String> actualCommand = job.getConfigurationValues(workflowStep, "{}")
 
         then:
-        new HashMap(expectedCommand) == new HashMap(actualCommand)
+        TestCase.assertContainSame(expectedCommand, actualCommand)
     }
 
     void "test getConfigurationValues, with whole genome seq. type, without base bam file"() {
@@ -226,18 +225,17 @@ class PanCancerExecuteJobSpec extends Specification implements DataTest, Workflo
         Map<String, String> expectedCommand = [
                 "INDEX_PREFIX"                     : "/fasta-path",
                 "GENOME_FA"                        : "/fasta-path",
-                "CHROM_SIZES_FILE"                 : "/chrom-size-path",
-                "possibleControlSampleNamePrefixes": "${roddyBamFile.sampleType.dirName}",
+                "possibleControlSampleNamePrefixes": roddyBamFile.sampleType.dirName,
                 "possibleTumorSampleNamePrefixes"  : "",
                 "runFingerprinting"                : "false",
-                "fastq_list"                       : "${fastqFilesAsString(roddyBamFile)}",
+                "fastq_list"                       : fastqFilesAsString(roddyBamFile),
         ]
 
         when:
         Map<String, String> actualCommand = job.getConfigurationValues(workflowStep, "{}")
 
         then:
-        new HashMap(expectedCommand) == new HashMap(actualCommand)
+        TestCase.assertContainSame(expectedCommand, actualCommand)
     }
 
     void "test getConfigurationValues, with whole genome seq. type, with base bam file"() {
@@ -261,19 +259,18 @@ class PanCancerExecuteJobSpec extends Specification implements DataTest, Workflo
         Map<String, String> expectedCommand = [
                 "INDEX_PREFIX"                     : "/fasta-path",
                 "GENOME_FA"                        : "/fasta-path",
-                "CHROM_SIZES_FILE"                 : "/chrom-size-path",
-                "possibleControlSampleNamePrefixes": "${roddyBamFile2.sampleType.dirName}",
+                "possibleControlSampleNamePrefixes": roddyBamFile2.sampleType.dirName,
                 "possibleTumorSampleNamePrefixes"  : "",
                 "runFingerprinting"                : "false",
-                "fastq_list"                       : "${fastqFilesAsString(roddyBamFile2)}",
-                "bam"                              : "${roddyBamFile.workBamFile.path}",
+                "fastq_list"                       : fastqFilesAsString(roddyBamFile2),
+                "bam"                              : roddyBamFile.workBamFile.path,
         ]
 
         when:
         Map<String, String> actualCommand = job.getConfigurationValues(workflowStep2, "{}")
 
         then:
-        new HashMap(expectedCommand) == new HashMap(actualCommand)
+        TestCase.assertContainSame(expectedCommand, actualCommand)
     }
 
     void "test getAdditionalParameters"() {
