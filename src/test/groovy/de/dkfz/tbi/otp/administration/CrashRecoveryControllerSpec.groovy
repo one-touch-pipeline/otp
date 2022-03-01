@@ -55,7 +55,7 @@ class CrashRecoveryControllerSpec extends Specification implements ControllerUni
 
     static final String ERROR_MESSAGE_EXCEPTION_THROWN = '{"success":false,"error":"' + EXCEPTION_MESSAGE + '"}'
 
-    void setupTest() {
+    void setup() {
         params.ids = IDS_SINGLE
         params.message = SOME_MESSSAGE
         params.parameters = '{}'
@@ -69,9 +69,6 @@ class CrashRecoveryControllerSpec extends Specification implements ControllerUni
     }
 
     void test_markFailed_ShouldReturnOk_singleId() {
-        given:
-        setupTest()
-
         when:
         controller.markFailed()
 
@@ -81,7 +78,6 @@ class CrashRecoveryControllerSpec extends Specification implements ControllerUni
 
     void test_markFailed_ShouldReturnOk_multipleIds() {
         given:
-        setupTest()
         params.ids = IDS_MULTIPLE
 
         when:
@@ -93,7 +89,6 @@ class CrashRecoveryControllerSpec extends Specification implements ControllerUni
 
     void test_markFailed_ShouldReturnErrorMessageForMissingMessage_MessageIsNull() {
         given:
-        setupTest()
         params.message = null
 
         when:
@@ -105,7 +100,6 @@ class CrashRecoveryControllerSpec extends Specification implements ControllerUni
 
     void test_markFailed_ShouldReturnErrorMessageForMissingIds_IdsIsNull() {
         given:
-        setupTest()
         params.ids = null
 
         when:
@@ -117,7 +111,6 @@ class CrashRecoveryControllerSpec extends Specification implements ControllerUni
 
     void test_markFailed_ShouldReturnErrorMessageForMissingIds_IdsIsEmpty() {
         given:
-        setupTest()
         params.ids = ''
 
         when:
@@ -129,7 +122,6 @@ class CrashRecoveryControllerSpec extends Specification implements ControllerUni
 
     void test_markFailed_ShouldReturnErrorMessageForIdIsNotALong() {
         given:
-        setupTest()
         params.ids = IDS_WRONG_FORMAT
 
         when:
@@ -141,7 +133,6 @@ class CrashRecoveryControllerSpec extends Specification implements ControllerUni
 
     void test_markFailed_ShouldReturnErrorMessageForServiceThrownException() {
         given:
-        setupTest()
         controller.crashRecoveryService = [
                 markJobsAsFailed: { List<Long> ids, String reason -> throw new RuntimeException(EXCEPTION_MESSAGE) },
         ] as CrashRecoveryService
@@ -154,9 +145,6 @@ class CrashRecoveryControllerSpec extends Specification implements ControllerUni
     }
 
     void test_restart_ShouldReturnOk_singleId() {
-        given:
-        setupTest()
-
         when:
         controller.restart()
 
@@ -166,7 +154,6 @@ class CrashRecoveryControllerSpec extends Specification implements ControllerUni
 
     void test_restart_ShouldReturnOk_multipleIds() {
         given:
-        setupTest()
         params.ids = IDS_MULTIPLE
 
         when:
@@ -178,7 +165,6 @@ class CrashRecoveryControllerSpec extends Specification implements ControllerUni
 
     void test_restart_ShouldReturnErrorMessageForMissingMessage_MessageIsNull() {
         given:
-        setupTest()
         params.message = null
 
         when:
@@ -190,7 +176,6 @@ class CrashRecoveryControllerSpec extends Specification implements ControllerUni
 
     void test_restart_ShouldReturnErrorMessageForMissingIds_IdsIsNull() {
         given:
-        setupTest()
         params.ids = null
 
         when:
@@ -202,7 +187,6 @@ class CrashRecoveryControllerSpec extends Specification implements ControllerUni
 
     void test_restart_ShouldReturnErrorMessageForMissingIds_IdsIsEmpty() {
         given:
-        setupTest()
         params.ids = ''
 
         when:
@@ -214,7 +198,6 @@ class CrashRecoveryControllerSpec extends Specification implements ControllerUni
 
     void test_restart_ShouldReturnErrorMessageForIdIsNotALong() {
         given:
-        setupTest()
         params.ids = IDS_WRONG_FORMAT
 
         when:
@@ -226,7 +209,6 @@ class CrashRecoveryControllerSpec extends Specification implements ControllerUni
 
     void test_restart_ShouldReturnErrorMessageForServiceThrownException() {
         given:
-        setupTest()
         controller.crashRecoveryService = [
                 restartJobs: { List<Long> ids, String reason -> throw new RuntimeException(EXCEPTION_MESSAGE) },
         ] as CrashRecoveryService
@@ -239,9 +221,6 @@ class CrashRecoveryControllerSpec extends Specification implements ControllerUni
     }
 
     void test_markFinished_ShouldReturnOk_singleId_NoParameters() {
-        given:
-        setupTest()
-
         when:
         controller.markFinished()
 
@@ -251,7 +230,6 @@ class CrashRecoveryControllerSpec extends Specification implements ControllerUni
 
     void test_markFinished_ShouldReturnOk_multipleIds_NoParameters() {
         given:
-        setupTest()
         params.ids = IDS_MULTIPLE
 
         when:
@@ -263,7 +241,6 @@ class CrashRecoveryControllerSpec extends Specification implements ControllerUni
 
     void test_markFinished_ShouldReturnOk_singleId_WithParameters() {
         given:
-        setupTest()
         params.parameters = PARAMETERS_FOR_SINGLE
 
         when:
@@ -275,7 +252,6 @@ class CrashRecoveryControllerSpec extends Specification implements ControllerUni
 
     void test_markFinished_ShouldReturnOk_multipleIds_WithParameters() {
         given:
-        setupTest()
         params.ids = IDS_MULTIPLE
         params.parameters = PARAMETERS_FOR_MULTIPLE
 
@@ -288,7 +264,6 @@ class CrashRecoveryControllerSpec extends Specification implements ControllerUni
 
     void test_markFinished_ShouldReturnErrorMessageForMissingIds_IdsIsNull_NoParameters() {
         given:
-        setupTest()
         params.ids = null
 
         when:
@@ -300,7 +275,6 @@ class CrashRecoveryControllerSpec extends Specification implements ControllerUni
 
     void test_markFinished_ShouldReturnErrorMessageForMissingIds_IdsIsEmpty_NoParameters() {
         given:
-        setupTest()
         params.ids = ''
 
         when:
@@ -312,7 +286,6 @@ class CrashRecoveryControllerSpec extends Specification implements ControllerUni
 
     void test_markFinished_ShouldReturnErrorMessageForIdIsNotALong_NoParameters() {
         given:
-        setupTest()
         params.ids = IDS_WRONG_FORMAT
 
         when:
@@ -324,7 +297,6 @@ class CrashRecoveryControllerSpec extends Specification implements ControllerUni
 
     void test_markFinished_ShouldReturnErrorMessageForServiceThrownException_NoParameters() {
         given:
-        setupTest()
         controller.crashRecoveryService = [
                 markJobsAsFinished: { List<Long> ids, Map parameters -> throw new RuntimeException(EXCEPTION_MESSAGE) },
         ] as CrashRecoveryService
@@ -338,7 +310,6 @@ class CrashRecoveryControllerSpec extends Specification implements ControllerUni
 
     void test_markFinished_ShouldReturnErrorMessageForInvalidParameters_ParametersIsNull() {
         given:
-        setupTest()
         params.parameters = null
 
         when:
@@ -350,7 +321,6 @@ class CrashRecoveryControllerSpec extends Specification implements ControllerUni
 
     void test_markFinished_ShouldReturnErrorMessageForInvalidParameters_ParametersContainsValuesForAdditionalProcessingStep() {
         given:
-        setupTest()
         params.parameters = PARAMETERS_FOR_MULTIPLE
 
         when:
@@ -362,7 +332,6 @@ class CrashRecoveryControllerSpec extends Specification implements ControllerUni
 
     void test_markFinished_ShouldReturnErrorMessageForInvalidParameters_ParametersHasInvalidKey_ToLessParts() {
         given:
-        setupTest()
         params.parameters = PARAMETERS_FOR_TO_LESS_PARTS
 
         when:
@@ -374,7 +343,6 @@ class CrashRecoveryControllerSpec extends Specification implements ControllerUni
 
     void test_markFinished_ShouldReturnErrorMessageForInvalidParameters_ParametersHasInvalidKey_ToManyParts() {
         given:
-        setupTest()
         params.parameters = PARAMETERS_FOR_TO_MUCH_PARTS
 
         when:
@@ -386,7 +354,6 @@ class CrashRecoveryControllerSpec extends Specification implements ControllerUni
 
     void test_markFinished_ShouldReturnErrorMessageForInvalidParameters_ParametersHasInvalidKey_FirstPartIsNotALong() {
         given:
-        setupTest()
         params.parameters = PARAMETERS_FOR_FIRST_PART_IS_NOT_A_LONG
 
         when:
@@ -397,9 +364,6 @@ class CrashRecoveryControllerSpec extends Specification implements ControllerUni
     }
 
     void test_markSucceeded_ShouldReturnOk_singleId_NoParameters() {
-        given:
-        setupTest()
-
         when:
         controller.markSucceeded()
 
@@ -409,7 +373,6 @@ class CrashRecoveryControllerSpec extends Specification implements ControllerUni
 
     void test_markSucceeded_ShouldReturnOk_multipleIds_NoParameters() {
         given:
-        setupTest()
         params.ids = IDS_MULTIPLE
 
         when:
@@ -421,7 +384,6 @@ class CrashRecoveryControllerSpec extends Specification implements ControllerUni
 
     void test_markSucceeded_ShouldReturnOk_singleId_WithParameters() {
         given:
-        setupTest()
         params.parameters = PARAMETERS_FOR_SINGLE
 
         when:
@@ -433,7 +395,6 @@ class CrashRecoveryControllerSpec extends Specification implements ControllerUni
 
     void test_markSucceeded_ShouldReturnOk_multipleIds_WithParameters() {
         given:
-        setupTest()
         params.ids = IDS_MULTIPLE
         params.parameters = PARAMETERS_FOR_MULTIPLE
 
@@ -446,7 +407,6 @@ class CrashRecoveryControllerSpec extends Specification implements ControllerUni
 
     void test_markSucceeded_ShouldReturnErrorMessageForMissingIds_IdsIsNull_NoParameters() {
         given:
-        setupTest()
         params.ids = null
 
         when:
@@ -458,7 +418,6 @@ class CrashRecoveryControllerSpec extends Specification implements ControllerUni
 
     void test_markSucceeded_ShouldReturnErrorMessageForMissingIds_IdsIsEmpty_NoParameters() {
         given:
-        setupTest()
         params.ids = ''
 
         when:
@@ -470,7 +429,6 @@ class CrashRecoveryControllerSpec extends Specification implements ControllerUni
 
     void test_markSucceeded_ShouldReturnErrorMessageForIdIsNotALong_NoParameters() {
         given:
-        setupTest()
         params.ids = IDS_WRONG_FORMAT
 
         when:
@@ -482,7 +440,6 @@ class CrashRecoveryControllerSpec extends Specification implements ControllerUni
 
     void test_markSucceeded_ShouldReturnErrorMessageForServiceThrownException_NoParameters() {
         given:
-        setupTest()
         controller.crashRecoveryService = [
                 markJobsAsSucceeded: { List<Long> ids, Map parameters -> throw new RuntimeException(EXCEPTION_MESSAGE) },
         ] as CrashRecoveryService
@@ -496,7 +453,6 @@ class CrashRecoveryControllerSpec extends Specification implements ControllerUni
 
     void test_markSucceeded_ShouldReturnErrorMessageForInvalidParameters_ParametersIsNull() {
         given:
-        setupTest()
         params.parameters = null
 
         when:
@@ -508,7 +464,6 @@ class CrashRecoveryControllerSpec extends Specification implements ControllerUni
 
     void test_markSucceeded_ShouldReturnErrorMessageForInvalidParameters_ParametersContainsValuesForAdditionalProcessingStep() {
         given:
-        setupTest()
         params.parameters = PARAMETERS_FOR_MULTIPLE
 
         when:
@@ -520,7 +475,6 @@ class CrashRecoveryControllerSpec extends Specification implements ControllerUni
 
     void test_markSucceeded_ShouldReturnErrorMessageForInvalidParameters_ParametersHasInvalidKey_ToLessParts() {
         given:
-        setupTest()
         params.parameters = PARAMETERS_FOR_TO_LESS_PARTS
 
         when:
@@ -532,7 +486,6 @@ class CrashRecoveryControllerSpec extends Specification implements ControllerUni
 
     void test_markSucceeded_ShouldReturnErrorMessageForInvalidParameters_ParametersHasInvalidKey_ToManyParts() {
         given:
-        setupTest()
         params.parameters = PARAMETERS_FOR_TO_MUCH_PARTS
 
         when:
@@ -544,7 +497,6 @@ class CrashRecoveryControllerSpec extends Specification implements ControllerUni
 
     void test_markSucceeded_ShouldReturnErrorMessageForInvalidParameters_ParametersHasInvalidKey_FirstPartIsNotALong() {
         given:
-        setupTest()
         params.parameters = PARAMETERS_FOR_FIRST_PART_IS_NOT_A_LONG
 
         when:
@@ -556,7 +508,6 @@ class CrashRecoveryControllerSpec extends Specification implements ControllerUni
 
     void test_startScheduler_ShouldReturnOk() {
         given:
-        setupTest()
         final String SUCCESS_MESSAGE = '{"success":true}'
         boolean crashRecovery = true
         controller.crashRecoveryService = [
@@ -575,7 +526,6 @@ class CrashRecoveryControllerSpec extends Specification implements ControllerUni
 
     void test_startScheduler_ShouldReturnFailure() {
         given:
-        setupTest()
         final String ERROR_MESSAGE = '{"success":false,"error":"Not in Crash Recovery"}'
         controller.crashRecoveryService = [
                 isCrashRecovery: { -> return false },
@@ -590,7 +540,6 @@ class CrashRecoveryControllerSpec extends Specification implements ControllerUni
 
     void test_parametersOfJob_ShouldReturnModel() {
         given:
-        setupTest()
         List modelDefiniation = [
                 [
                         id       : 1,
@@ -613,7 +562,6 @@ class CrashRecoveryControllerSpec extends Specification implements ControllerUni
 
     void test_parametersOfJob_ShouldFailForIdsIsNull() {
         given:
-        setupTest()
         params.ids = null
 
         when:
@@ -625,7 +573,6 @@ class CrashRecoveryControllerSpec extends Specification implements ControllerUni
 
     void test_parametersOfJob_ShouldFailForIdsIsEmpty() {
         given:
-        setupTest()
         params.ids = ''
 
         when:
@@ -637,7 +584,6 @@ class CrashRecoveryControllerSpec extends Specification implements ControllerUni
 
     void test_parametersOfJob_ShouldFailForIdsIsNotALong() {
         given:
-        setupTest()
         params.ids = IDS_WRONG_FORMAT
 
         when:
