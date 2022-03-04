@@ -77,7 +77,7 @@ class ClusterJobHandlingService {
 
         String logFileName = jobStatusLoggingFileService.constructLogFileLocation(realm, workflowStep)
         String logMessage = jobStatusLoggingFileService.constructMessage(realm, workflowStep)
-        File clusterLogDirectory = clusterLogDirectoryService.createAndGetLogDirectory(workflowStep).toFile()
+        File clusterLogDirectory = fileService.toFile(clusterLogDirectoryService.createAndGetLogDirectory(workflowStep))
 
         List<BEJob> beJobs = scripts.collect {
             new BEJob(

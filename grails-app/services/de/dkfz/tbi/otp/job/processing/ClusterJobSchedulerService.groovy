@@ -25,6 +25,7 @@ import grails.compiler.GrailsCompileStatic
 import grails.gorm.transactions.Transactional
 import grails.util.Environment
 import org.slf4j.event.Level
+import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.roddy.config.JobLog
 import de.dkfz.roddy.config.ResourceSet
@@ -56,15 +57,16 @@ import java.time.format.DateTimeFormatter
  */
 @GrailsCompileStatic
 @Transactional
-@Deprecated
+@Deprecated//replace by a new system ClusterStatisticService
 class ClusterJobSchedulerService {
 
     static final int WAITING_TIME_FOR_SECOND_TRY_IN_MILLISECONDS = (Environment.current == Environment.TEST) ? 0 : 10000
 
-    static final String CLUSTER_JOBS_STATE_LOG_DIRECTORY = "cluster-jobs-state"
+    static final String CLUSTER_JOBS_STATE_LOG_DIRECTORY = "cluster-jobs-state-old"
 
     static final DateTimeFormatter PATH_FORMATTER = DateTimeFormatter.ofPattern("yyyy/MM/dd/HH-mm-ss'.txt'")
 
+    @Autowired
     SchedulerService schedulerService
 
     ClusterJobLoggingService clusterJobLoggingService

@@ -64,9 +64,9 @@ abstract class AbstractLogDirectoryServiceSpec extends Specification implements 
         }
     }
 
-    protected void mockPathDoesNotExist(Path expected) {
+    protected void mockPathDoesNotExist(Path expected, int countRemoteFileSystem = 1) {
         service.fileSystemService = Mock(FileSystemService) {
-            1 * getRemoteFileSystemOnDefaultRealm() >> FileSystems.default
+            countRemoteFileSystem * getRemoteFileSystemOnDefaultRealm() >> FileSystems.default
             0 * _
         }
         service.fileService = Mock(FileService) {
@@ -76,8 +76,9 @@ abstract class AbstractLogDirectoryServiceSpec extends Specification implements 
         }
     }
 
-    protected void mockPathExist() {
+    protected void mockPathExist(int countRemoteFileSystem = 0) {
         service.fileSystemService = Mock(FileSystemService) {
+            countRemoteFileSystem * getRemoteFileSystemOnDefaultRealm() >> FileSystems.default
             0 * _
         }
         service.fileService = Mock(FileService) {

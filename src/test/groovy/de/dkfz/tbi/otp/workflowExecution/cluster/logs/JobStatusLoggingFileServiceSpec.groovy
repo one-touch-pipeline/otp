@@ -67,7 +67,7 @@ class JobStatusLoggingFileServiceSpec extends AbstractLogDirectoryServiceSpec im
         String file = expectedFilePattern(workflowStep)
 
         mockClusterJobManagerFactoryService()
-        mockPathDoesNotExist(expected)
+        mockPathDoesNotExist(expected, 2)
 
         when:
         String path = service.constructLogFileLocation(realm, workflowStep)
@@ -83,7 +83,7 @@ class JobStatusLoggingFileServiceSpec extends AbstractLogDirectoryServiceSpec im
         Files.createDirectories(expected)
 
         mockClusterJobManagerFactoryService()
-        mockPathExist()
+        mockPathExist(1)
 
         when:
         String path = service.constructLogFileLocation(realm, workflowStep)
@@ -99,7 +99,7 @@ class JobStatusLoggingFileServiceSpec extends AbstractLogDirectoryServiceSpec im
         Path expected = expectedPath(workflowStep)
         String file = expectedFileName(workflowStep, clusterId)
 
-        mockPathDoesNotExist(expected)
+        mockPathDoesNotExist(expected, 2)
 
         when:
         String path = service.constructLogFileLocation(realm, workflowStep, clusterId)
@@ -116,7 +116,7 @@ class JobStatusLoggingFileServiceSpec extends AbstractLogDirectoryServiceSpec im
         String file = expectedFileName(workflowStep, clusterId)
         Files.createDirectories(expected)
 
-        mockPathExist()
+        mockPathExist(1)
 
         when:
         String path = service.constructLogFileLocation(realm, workflowStep, clusterId)

@@ -43,7 +43,7 @@ abstract class AbstractLogDirectoryService {
     protected Path createAndGetLogDirectoryHelper(Date date, String logType) {
         assert date
 
-        Path baseLogDirectory = configService.loggingRootPath.toPath()
+        Path baseLogDirectory = fileSystemService.remoteFileSystemOnDefaultRealm.getPath(configService.loggingRootPath.absolutePath)
         String dateDirectory = date.format('yyyy/MM/dd')
 
         Path logPath = baseLogDirectory.resolve(logType).resolve(dateDirectory)

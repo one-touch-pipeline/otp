@@ -26,9 +26,12 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
-
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
+import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
 import de.dkfz.tbi.otp.job.scheduler.AbstractClusterJobMonitor
+import de.dkfz.tbi.otp.job.scheduler.ClusterJobStatus
+import de.dkfz.tbi.otp.ngsdata.Realm
+import de.dkfz.tbi.otp.workflowExecution.cluster.ClusterStatisticService
 
 /**
  * The monitor checks periodically the cluster jobs for ending ones and in case all cluster jbs
@@ -43,6 +46,9 @@ class ClusterJobMonitor extends AbstractClusterJobMonitor {
 
     @Autowired
     JobService jobService
+
+    @Autowired
+    ClusterStatisticService clusterStatisticService
 
     ClusterJobMonitor() {
         super('New system')
@@ -69,5 +75,15 @@ class ClusterJobMonitor extends AbstractClusterJobMonitor {
         if (clusterJob.workflowStep.clusterJobs.every { it.checkStatus == ClusterJob.CheckStatus.FINISHED }) {
             jobService.createNextJob(clusterJob.workflowStep.workflowRun)
         }
+    }
+
+    @Override
+    protected Map<ClusterJobIdentifier, ClusterJobStatus> retrieveKnownJobsWithState(Realm realm) {
+        return clusterStatisticService.retrieveKnownJobsWithState(realm)
+    }
+
+    @Override
+    protected void retrieveAndSaveJobStatisticsAfterJobFinished(ClusterJob clusterJob) {
+        clusterStatisticService.retrieveAndSaveJobStatisticsAfterJobFinished(clusterJob)
     }
 }

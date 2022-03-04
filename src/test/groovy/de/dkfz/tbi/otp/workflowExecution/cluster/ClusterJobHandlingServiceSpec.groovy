@@ -34,8 +34,7 @@ import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.OtpRuntimeException
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
-import de.dkfz.tbi.otp.infrastructure.ClusterJob
-import de.dkfz.tbi.otp.infrastructure.ClusterJobService
+import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.processing.JobSubmissionOption
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.workflowExecution.LogService
@@ -117,6 +116,11 @@ class ClusterJobHandlingServiceSpec extends Specification implements ServiceUnit
         }
         service.logService = Mock(LogService) {
             2 * addSimpleLogEntry(workflowStep, _)
+        }
+        service.fileService = Mock(FileService) {
+            1 * toFile(_) >> { Path path ->
+                path.toFile()
+            }
         }
 
         BatchEuphoriaJobManager jobManager = Mock(BatchEuphoriaJobManager)

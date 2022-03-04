@@ -23,12 +23,10 @@ package de.dkfz.tbi.otp.job.scheduler
 
 import grails.gorm.transactions.Transactional
 import groovy.util.logging.Slf4j
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
-import de.dkfz.tbi.otp.job.processing.ClusterJobSchedulerService
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.LogUsedTimeUtils
 
@@ -37,9 +35,6 @@ import de.dkfz.tbi.otp.utils.LogUsedTimeUtils
 abstract class AbstractClusterJobMonitor {
 
     final String name
-
-    @Autowired
-    ClusterJobSchedulerService clusterJobSchedulerService
 
     protected AbstractClusterJobMonitor(String name) {
         this.name = name
@@ -82,7 +77,7 @@ abstract class AbstractClusterJobMonitor {
         Map<ClusterJobIdentifier, ClusterJobStatus> jobStates
         try {
             LogUsedTimeUtils.logUsedTime("${name}: fetch cluster jobs state from cluster on realm ${realm.name}") {
-                jobStates = clusterJobSchedulerService.retrieveKnownJobsWithState(realm)
+                jobStates = retrieveKnownJobsWithState(realm)
             }
             log.debug("${name}: Retrieving job states for ${realm}: ${jobStates.size()}")
         } catch (Throwable e) {
@@ -134,7 +129,7 @@ abstract class AbstractClusterJobMonitor {
     protected void saveJobFinishedInformation(ClusterJob clusterJob) {
         clusterJob.refresh()
         try {
-            clusterJobSchedulerService.retrieveAndSaveJobStatisticsAfterJobFinished(clusterJob)
+            retrieveAndSaveJobStatisticsAfterJobFinished(clusterJob)
         } catch (Throwable e) {
             log.warn("${name}: Failed to fill in runtime statistics for ${clusterJob}", e)
         }
@@ -152,5 +147,9 @@ abstract class AbstractClusterJobMonitor {
      * callback to handle finished cluster jobs for the workflow system this monitor is for
      */
     abstract protected void handleFinishedClusterJobs(final ClusterJob clusterJob)
+
+    abstract protected Map<ClusterJobIdentifier, ClusterJobStatus> retrieveKnownJobsWithState(Realm realm)
+
+    abstract protected void retrieveAndSaveJobStatisticsAfterJobFinished(ClusterJob clusterJob)
 
 }

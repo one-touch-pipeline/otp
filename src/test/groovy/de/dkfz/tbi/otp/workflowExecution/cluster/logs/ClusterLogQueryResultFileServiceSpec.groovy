@@ -38,7 +38,7 @@ class ClusterLogQueryResultFileServiceSpec extends AbstractLogDirectoryServiceSp
         Path expected = expectedPath()
         Path expectedFile = expectedFile()
 
-        mockPathDoesNotExist(expected)
+        mockPathDoesNotExist(expected, 2)
 
         when:
         Path path = service.logFileWithCreatingDirectory()
@@ -53,7 +53,7 @@ class ClusterLogQueryResultFileServiceSpec extends AbstractLogDirectoryServiceSp
         Path expectedFile = expectedFile()
         Files.createDirectories(expected)
 
-        mockPathExist()
+        mockPathExist(1)
 
         when:
         Path path = service.logFileWithCreatingDirectory()

@@ -42,7 +42,7 @@ class ClusterLogDirectoryServiceSpec extends AbstractLogDirectoryServiceSpec imp
         WorkflowStep workflowStep = createWorkflowStep()
         Path expected = expectedPath(workflowStep)
 
-        mockPathDoesNotExist(expected)
+        mockPathDoesNotExist(expected, 2)
 
         when:
         Path path = service.createAndGetLogDirectory(workflowStep)
@@ -57,7 +57,7 @@ class ClusterLogDirectoryServiceSpec extends AbstractLogDirectoryServiceSpec imp
         Path expected = expectedPath(workflowStep)
         Files.createDirectories(expected)
 
-        mockPathExist()
+        mockPathExist(1)
 
         when:
         Path path = service.createAndGetLogDirectory(workflowStep)
