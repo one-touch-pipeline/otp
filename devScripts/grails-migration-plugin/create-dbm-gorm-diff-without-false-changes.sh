@@ -85,6 +85,23 @@ joinTables="\
 "
 perl -0pi -e "${prefix}((dropPrimaryKey)|(dropNotNullConstraint)|(dropUniqueConstraint)|(dropForeignKeyConstraint)).*ableName: \"(${joinTables})\"${suffix}" $changelogPath
 
+nonJoinTables="\
+(abstract_bam_file)|\
+(abstract_merging_work_package)|\
+(alignment_pass)|\
+(config_per_project_and_seq_type)|\
+(external_workflow_config_selector)|\
+(fastqc_processed_file)|\
+(indel_quality_control)|\
+(project)|\
+(sample_pair)|\
+(sample_type_per_project)|\
+"
+
+perl -0pi -e "${prefix}((addUniqueConstraint)|(addForeignKeyConstraint)|(dropUniqueConstraint)|(dropIndex)).*ableName: \"(${nonJoinTables})\"${suffix}" $changelogPath
+perl -0pi -e "${prefix}createIndex.*tableName: \"(${nonJoinTables})\".*\{(\n\s{12}column.*\n)+\s{8}\}${suffix}" $changelogPath
+perl -0pi -e "${prefix}addUniqueConstraint${suffix}" $changelogPath
+perl -0pi -e "${prefix}alterSequence${suffix}" $changelogPath
 perl -0pi -e "${prefix}dropIndex.*\n\n\s{8}createIndex.*\{(\n\s{12}column.*\n)+\s{8}\}${suffix}" $changelogPath
 perl -0pi -e "${prefix}dropUniqueConstraint.*\n\n\s{8}addUniqueConstraint${suffix}" $changelogPath
 perl -0pi -e "${prefix}addUniqueConstraint.*columnNames: \"((alignment_pass_id)|(merging_pass_id))\".*tableName: \"abstract_bam_file\"${suffix}" $changelogPath
