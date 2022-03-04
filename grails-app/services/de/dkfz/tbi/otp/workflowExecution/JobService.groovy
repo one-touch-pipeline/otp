@@ -88,6 +88,12 @@ class JobService {
         }
     }
 
+    void createRestartedPreviousJobAfterJobFailures(List<WorkflowStep> stepsToRestart) {
+        stepsToRestart.findAll { it.previous }.each {
+            createRestartedJobAfterJobFailure(it.previous)
+        }
+    }
+
     void createRestartedJobAfterJobFailure(WorkflowStep stepToRestart) {
         assert stepToRestart
 

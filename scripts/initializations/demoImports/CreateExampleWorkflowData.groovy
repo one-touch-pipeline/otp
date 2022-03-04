@@ -196,13 +196,13 @@ WorkflowRun.withNewTransaction {
                 }
                 break
             case WorkflowRun.State.FAILED:
-                WorkflowStep step1 = createWorkflowStep(workflowRun, WorkflowStep.State.SUCCESS)
-                WorkflowStep step2 = createWorkflowStep(workflowRun, WorkflowStep.State.SUCCESS, [obsolete: true, previous: step1])
-                WorkflowStep step3 = createWorkflowStep(workflowRun, WorkflowStep.State.FAILED, [workflowError: createWorkflowError(), obsolete: true, previous: step2])
+                WorkflowStep step1 = createWorkflowStep(workflowRun, WorkflowStep.State.SUCCESS, [beanName: "conditionalFailJob"])
+                WorkflowStep step2 = createWorkflowStep(workflowRun, WorkflowStep.State.SUCCESS, [beanName: "copyJob", obsolete: true, previous: step1])
+                WorkflowStep step3 = createWorkflowStep(workflowRun, WorkflowStep.State.FAILED, [beanName: "validateJob",workflowError: createWorkflowError(), obsolete: true, previous: step2])
                 WorkflowStep step4 = createWorkflowStep(workflowRun, WorkflowStep.State.SUCCESS, [restartedFrom: step2, beanName: step2.beanName, previous: step3])
                 createSuccessClusterJob(step4, 1)
                 createFailedClusterJob(step4, 2)
-                createWorkflowStep(workflowRun, WorkflowStep.State.FAILED, [workflowError: createWorkflowError(), previous: step4])
+                createWorkflowStep(workflowRun, WorkflowStep.State.FAILED, [beanName: "linkJob", workflowError: createWorkflowError(), previous: step4])
                 break
             case WorkflowRun.State.FAILED_FINAL:
             case WorkflowRun.State.RESTARTED:

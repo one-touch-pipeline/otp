@@ -288,6 +288,7 @@ $(() => {
   table.on('draw', () => {
     $('[title]').tooltip();
     if (lastStepFailed) {
+      $('#steps tbody tr:nth-child(2) td .details-control').trigger('click');
       $('#steps tbody tr:first-child td .details-control').trigger('click');
     }
   });

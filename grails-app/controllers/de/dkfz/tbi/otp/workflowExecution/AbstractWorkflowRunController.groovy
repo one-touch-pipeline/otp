@@ -57,6 +57,13 @@ abstract class AbstractWorkflowRunController implements CheckAndCall {
         redirect uri: cmd.redirect
     }
 
+    def restartPreviousStep(RunUpdateCommand cmd) {
+        checkErrorAndCallMethodWithFlashMessageWithoutTokenCheck(cmd, "workflowRun.list.restartSteps") {
+            jobService.createRestartedPreviousJobAfterJobFailures(cmd.step.collect { WorkflowStep.get(it) })
+        }
+        redirect uri: cmd.redirect
+    }
+
     def restartRun(RunUpdateCommand cmd) {
         checkErrorAndCallMethodWithFlashMessageWithoutTokenCheck(cmd, "workflowRun.list.restartRuns") {
             workflowService.createRestartedWorkflows(cmd.step.collect { WorkflowStep.get(it) })
