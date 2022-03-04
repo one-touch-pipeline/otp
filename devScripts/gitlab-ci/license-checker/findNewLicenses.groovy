@@ -31,7 +31,6 @@ class FindNewLicenses {
     static final List<String> allowedLicenses = [
             "Apache License 1.1",
             "Apache License 2.0",
-            "Apache Software Licenses",
             "Apache-1.1",
             "Apache-2.0",
             "BSD",
@@ -40,39 +39,46 @@ class FindNewLicenses {
             "BSD licence",
             "BSD-2-Clause",
             "BSD-3-Clause",
+            "CC0-1.0",
+            "CDDL+GPL License",
             "CDDL + GPLv2 with classpath exception",
             "CDDL-1.0",
+            "CDDL-1.1",
             "CDDL/GPLv2+CE",
+            "Common Development and Distribution License",
             "Common Development and Distribution License 1.0",
-            "Do What The F*ck You Want To Public License",
+            "Common Development and Distribution License 1.1",
+            "Creative Commons Zero v1.0 Universal",
+            "Dual license consisting of the CDDL v1.1 and GPL v2",
+            "Eclipse Distribution License v. 1.0",
             "Eclipse Public License (EPL)",
             "Eclipse Public License 1.0",
+            "Eclipse Public License v2.0",
             "EPL-1.0",
+            "GNU General Public License v2.0 w/Classpath exception",
             "GNU General Public License v3.0 only",
             "GNU Lesser General Public License",
+            "GNU General Public License, Version 2 with the Classpath Exception",
             "GNU Lesser General Public License v2.1 only",
-            "GNU Lesser Public License",
+            "GNU Library General Public License v2.1 or later",
+            "GPL-2.0-with-classpath-exception",
             "GPL-3.0",
             "LGPL-2.1",
+            "LGPL-2.1+",
             "MIT",
             "MIT License",
             "Mozilla Public License 1.1",
             "Mozilla Public License 2.0",
             "MPL 2.0 or EPL 1.0",
-            "mpl 2.0 or epl 1.0",
             "MPL-1.1",
             "MPL-2.0",
             "NCBI License",
             "Public Domain",
+            "Public Domain, per Creative Commons CC0",
             "Revised BSD",
-            "Sax Public Domain Notice",
-            "SAX-PD",
             "The Unlicense",
             "unknown",
             "Unlicense",
-            "W3C Software Notice and Document License (2015-05-13)",
-            "W3C-20150513",
-            "WTFPL",
     ]*.toUpperCase()
 
     /**
@@ -119,10 +125,10 @@ class FindNewLicenses {
         List<String> newDirectLicenses = getNewDirectLicenses(parsedReport)
         List<String> newIndirectLicenses = getNewIndirectLicenses(parsedReport)
 
-        println "new direct licenses:"
+        println "${newDirectLicenses.size()} new direct licenses:"
         println newDirectLicenses
-
-        println "new indirect licenses:"
+        println ""
+        println "${newIndirectLicenses.size()} new indirect licenses:"
         println newIndirectLicenses
 
         assert newDirectLicenses == [] && newIndirectLicenses == [] : "New licenses are found. Please check if they are compatible with OTP."
