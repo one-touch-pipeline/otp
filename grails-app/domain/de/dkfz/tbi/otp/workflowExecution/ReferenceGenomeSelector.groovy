@@ -30,8 +30,9 @@ import de.dkfz.tbi.otp.utils.Entity
 class ReferenceGenomeSelector implements Entity {
 
     Project project
-    ReferenceGenome referenceGenome
     SeqType seqType
     Set<SpeciesWithStrain> species
     Workflow workflow
+
+    ReferenceGenome referenceGenome
 }

@@ -32,7 +32,7 @@ import de.dkfz.tbi.otp.project.dta.DataTransferAgreement
 import de.dkfz.tbi.otp.searchability.Keyword
 import de.dkfz.tbi.otp.utils.Entity
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
-import de.dkfz.tbi.otp.workflowExecution.SelectedProjectSeqTypeWorkflowVersion
+import de.dkfz.tbi.otp.workflowExecution.WorkflowVersionSelector
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
@@ -108,7 +108,7 @@ class Project implements CommentableWithProject, ProjectPropertiesGivenWithReque
     boolean projectRequestAvailable = false
 
     /**
-     * @deprecated field is part of the old workflow system, use {@link SelectedProjectSeqTypeWorkflowVersion} instead
+     * @deprecated field is part of the old workflow system, use {@link WorkflowVersionSelector} instead
      */
     @Deprecated
     AlignmentDeciderBeanName alignmentDeciderBeanName = AlignmentDeciderBeanName.NO_ALIGNMENT

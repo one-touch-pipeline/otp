@@ -94,8 +94,8 @@ class WorkflowDeletionService {
         }
     }
 
-    void deleteSelectedProjectSeqTypeWorkflowVersions(Project project) {
-        SelectedProjectSeqTypeWorkflowVersion.findAllByProject(project)
+    void deleteWorkflowVersionSelector(Project project) {
+        WorkflowVersionSelector.findAllByProject(project)
                 .sort { -it.id }
                 .each { it.delete(flush: true) }
     }

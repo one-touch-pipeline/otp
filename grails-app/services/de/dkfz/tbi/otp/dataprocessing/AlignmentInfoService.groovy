@@ -63,8 +63,8 @@ class AlignmentInfoService {
     Map<SeqType, AlignmentInfo> getAlignmentInformationForProject(Project project) {
         assert project: "No project provided"
 
-        return SelectedProjectSeqTypeWorkflowVersion.findAllByProjectAndDeprecationDateIsNull(project)
-                .collectEntries { SelectedProjectSeqTypeWorkflowVersion projectWorkflow ->
+        return WorkflowVersionSelector.findAllByProjectAndDeprecationDateIsNull(project)
+                .collectEntries { WorkflowVersionSelector projectWorkflow ->
                     if (projectWorkflow.workflowVersion.workflow.name == PanCancerWorkflow.WORKFLOW) {
                         Map<String, String> config = extractCValuesMapFromJsonConfigString(
                                 configFragmentService.mergeSortedFragments(configFragmentService.getSortedFragments(

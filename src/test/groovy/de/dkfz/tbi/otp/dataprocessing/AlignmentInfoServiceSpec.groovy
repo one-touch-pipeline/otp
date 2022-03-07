@@ -48,7 +48,7 @@ class AlignmentInfoServiceSpec extends Specification implements DataTest, Workfl
                 ReferenceGenome,
                 ReferenceGenomeProjectSeqType,
                 RoddyWorkflowConfig,
-                SelectedProjectSeqTypeWorkflowVersion,
+                WorkflowVersionSelector,
                 SeqType,
                 Workflow,
                 WorkflowVersion,
@@ -253,7 +253,7 @@ class AlignmentInfoServiceSpec extends Specification implements DataTest, Workfl
         SeqType seqType = DomainFactory.createWholeGenomeSeqType()
         WorkflowVersion version = createWorkflowVersion(workflow: createWorkflow(name: PanCancerWorkflow.WORKFLOW), workflowVersion: roddyPipelineVersion)
         Project project = createProject()
-        createSelectedProjectSeqTypeWorkflowVersion(project: project, seqType: seqType, workflowVersion: version)
+        createWorkflowVersionSelector(project: project, seqType: seqType, workflowVersion: version)
 
         when:
         Map<SeqType, AlignmentInfo> alignmentInfos = service.getAlignmentInformationForProject(project)
@@ -299,7 +299,7 @@ class AlignmentInfoServiceSpec extends Specification implements DataTest, Workfl
         SeqType seqType = DomainFactory.createRnaPairedSeqType()
         WorkflowVersion version = createWorkflowVersion(workflow: createWorkflow(name: PanCancerWorkflow.WORKFLOW))
         Project project = createProject()
-        createSelectedProjectSeqTypeWorkflowVersion(project: project, seqType: seqType, workflowVersion: version)
+        createWorkflowVersionSelector(project: project, seqType: seqType, workflowVersion: version)
 
         when:
         Map<SeqType, AlignmentInfo> alignmentInfos = service.getAlignmentInformationForProject(project)
@@ -326,7 +326,7 @@ class AlignmentInfoServiceSpec extends Specification implements DataTest, Workfl
         SeqType seqType = DomainFactory.createWholeGenomeSeqType()
         WorkflowVersion version = createWorkflowVersion(workflow: createWorkflow(name: PanCancerWorkflow.WORKFLOW))
         Project project = createProject()
-        createSelectedProjectSeqTypeWorkflowVersion(project: project, seqType: seqType, workflowVersion: version)
+        createWorkflowVersionSelector(project: project, seqType: seqType, workflowVersion: version)
 
         when:
         service.getAlignmentInformationForProject(project)

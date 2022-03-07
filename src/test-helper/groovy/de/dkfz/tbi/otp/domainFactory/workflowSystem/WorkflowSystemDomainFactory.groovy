@@ -176,8 +176,8 @@ trait WorkflowSystemDomainFactory implements DomainFactoryCore, TaxonomyFactory 
         ], properties, saveAndValidate)
     }
 
-    SelectedProjectSeqTypeWorkflowVersion createSelectedProjectSeqTypeWorkflowVersion(Map properties = [:], boolean saveAndValidate = true) {
-        return createDomainObject(SelectedProjectSeqTypeWorkflowVersion, [
+    WorkflowVersionSelector createWorkflowVersionSelector(Map properties = [:], boolean saveAndValidate = true) {
+        return createDomainObject(WorkflowVersionSelector, [
                 project        : { createProject() },
                 seqType        : { createSeqType() },
                 workflowVersion: { createWorkflowVersion() },

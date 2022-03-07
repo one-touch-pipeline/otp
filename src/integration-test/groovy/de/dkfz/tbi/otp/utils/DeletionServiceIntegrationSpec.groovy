@@ -123,9 +123,9 @@ class DeletionServiceIntegrationSpec extends Specification implements EgaSubmiss
         createDataFile([seqTrack: seqTrack])
         createDataFile([seqTrack: seqTrack])
         createReferenceGenomeSelector(project: project)
-        createSelectedProjectSeqTypeWorkflowVersion(project: project)
-        createSelectedProjectSeqTypeWorkflowVersion(project: project)
-        createSelectedProjectSeqTypeWorkflowVersion(project: project)
+        createWorkflowVersionSelector(project: project)
+        createWorkflowVersionSelector(project: project)
+        createWorkflowVersionSelector(project: project)
         createExternalWorkflowConfigSelector(projects: [project])
 
         when:
@@ -134,7 +134,7 @@ class DeletionServiceIntegrationSpec extends Specification implements EgaSubmiss
         then:
         DataFile.count() == 0
         Individual.count() == 0
-        SelectedProjectSeqTypeWorkflowVersion.count == 0
+        WorkflowVersionSelector.count == 0
         ReferenceGenomeSelector.count == 0
         ExternalWorkflowConfigSelector.count == 0
         Project.count() == 1

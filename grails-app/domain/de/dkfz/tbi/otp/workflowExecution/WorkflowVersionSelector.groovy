@@ -26,12 +26,13 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.utils.Deprecateable
 
-class SelectedProjectSeqTypeWorkflowVersion implements Deprecateable<SelectedProjectSeqTypeWorkflowVersion>, Entity {
+class WorkflowVersionSelector implements Deprecateable<WorkflowVersionSelector>, Entity {
 
     Project project
     SeqType seqType
+
     WorkflowVersion workflowVersion
-    SelectedProjectSeqTypeWorkflowVersion previous
+    WorkflowVersionSelector previous
 
     static constraints = {
         previous nullable: true

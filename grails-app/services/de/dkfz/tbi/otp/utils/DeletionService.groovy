@@ -82,7 +82,7 @@ class DeletionService {
             deleteDataFile(dataFile)
         }
 
-        workflowDeletionService.deleteSelectedProjectSeqTypeWorkflowVersions(project)
+        workflowDeletionService.deleteWorkflowVersionSelector(project)
 
         workflowDeletionService.deleteReferenceGenomeSelector(project)
 
