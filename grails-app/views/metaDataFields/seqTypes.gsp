@@ -46,6 +46,7 @@
             <th class="export_column"><g:message code="dataFields.seqType.name"/></th>
             <th class="export_column"><g:message code="dataFields.seqType.singleCell"/></th>
             <th class="export_column"><g:message code="dataFields.seqType.usesAntibodyTarget"/></th>
+            <th class="export_column"><g:message code="dataFields.seqType.needsBedFile"/></th>
             <th class="export_column"><g:message code="dataFields.seqType.directory"/></th>
             <th class="export_column"><g:message code="dataFields.seqType.sequencingReadTypes"/></th>
             <th></th>
@@ -76,6 +77,13 @@
                         <asset:image src="error.png" title="${g.message(code: "dataFields.seqType.usesAntibodyTarget.false")}"/>
                     </g:else>
                     <span hidden>${seqType.hasAntibodyTarget}</span>
+                </td>
+                <td>
+                    <otp:editorSwitch
+                            template="toggle"
+                            link="${g.createLink(controller: "metaDataFields", action: "toggleNeedsBedFile", params: ['seqType.id': seqType.id])}"
+                            value="${seqType.needsBedFile}"/>
+                    <span hidden>${seqType.needsBedFile}</span>
                 </td>
                 <td>${seqType.dirName}</td>
                 <td class="keep-whitespace">${seqType.libraryLayouts}</td>
@@ -151,6 +159,10 @@
             <tr>
                 <td><label for="hasAntibodyTarget"><g:message code="dataFields.seqType.create.hasAntibodyTarget"/></label></td>
                 <td><g:checkBox name="hasAntibodyTarget" id="hasAntibodyTarget" value="${cmd?.hasAntibodyTarget ?: false}"/></td>
+            </tr>
+            <tr>
+                <td><label for="hasAntibodyTarget"><g:message code="dataFields.seqType.needsBedFile"/></label></td>
+                <td><g:checkBox name="needsBedFile" id="needsBedFile" value="${cmd?.needsBedFile ?: false}"/></td>
             </tr>
             <tr>
                 <td><g:message code="dataFields.seqType.create.layout"/></td>

@@ -76,6 +76,8 @@ class SeqType implements Entity, MetadataField, ProjectFieldReferenceAble {
      */
     boolean hasAntibodyTarget = false
 
+    boolean needsBedFile = false
+
     static hasMany = [importAlias: String]
 
     static constraints = {

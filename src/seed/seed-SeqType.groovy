@@ -22,18 +22,18 @@
 
 seed = {
     """\
-    WHOLE_GENOME,PAIRED,whole_genome_sequencing,WGS,WGS,false,false
-    EXON,PAIRED,exon_sequencing,EXOME,WES,false,false
-    WHOLE_GENOME_BISULFITE,PAIRED,whole_genome_bisulfite_sequencing,WGBS,WGBS,false,false
-    WHOLE_GENOME_BISULFITE_TAGMENTATION,PAIRED,whole_genome_bisulfite_tagmentation_sequencing,WGBS_TAG,WGBSTAG,false,false
-    RNA,SINGLE,rna_sequencing,RNA,RNA,false,false
-    RNA,PAIRED,rna_sequencing,RNA,RNA,false,false
-    ChIP Seq,SINGLE,chip_seq_sequencing,ChIP,CHIPSEQ,false,true
-    ChIP Seq,PAIRED,chip_seq_sequencing,ChIP,CHIPSEQ,false,true
-    10x_scRNA,PAIRED,10x_scRNA_sequencing,10x_scRNA,,true,false
+    WHOLE_GENOME,PAIRED,whole_genome_sequencing,WGS,WGS,false,false,false
+    EXON,PAIRED,exon_sequencing,EXOME,WES,false,false,true
+    WHOLE_GENOME_BISULFITE,PAIRED,whole_genome_bisulfite_sequencing,WGBS,WGBS,false,false,false
+    WHOLE_GENOME_BISULFITE_TAGMENTATION,PAIRED,whole_genome_bisulfite_tagmentation_sequencing,WGBS_TAG,WGBSTAG,false,false,false
+    RNA,SINGLE,rna_sequencing,RNA,RNA,false,false,false
+    RNA,PAIRED,rna_sequencing,RNA,RNA,false,false,false
+    ChIP Seq,SINGLE,chip_seq_sequencing,ChIP,CHIPSEQ,false,true,false
+    ChIP Seq,PAIRED,chip_seq_sequencing,ChIP,CHIPSEQ,false,true,false
+    10x_scRNA,PAIRED,10x_scRNA_sequencing,10x_scRNA,,true,false,false
     """.split('\n')*.trim().findAll().each { String row ->
         List<String> values = row.split(',')
-        assert values.size() == 7
+        assert values.size() == 8
 
         seqType(
                 meta: [
@@ -49,7 +49,8 @@ seed = {
                 displayName: values[3],
                 roddyName: values[4] ?: null,
                 singleCell: values[5].toBoolean(),
-                hasAntibodyTarget: values[6].toBoolean()
+                hasAntibodyTarget: values[6].toBoolean(),
+                needsBedFile: values[7].toBoolean()
         )
     }
 }

@@ -76,7 +76,7 @@ class PanCancerExecuteJob extends AbstractExecuteRoddyPipelineJob implements Pan
         conf.putAll(roddyConfigValueService.getAlignmentValues(roddyBamFile, combinedConfig))
         conf.putAll(roddyConfigValueService.getFilesToMerge(roddyBamFile))
 
-        if (roddyBamFile.seqType.name == SeqTypeNames.EXOME.seqTypeName) {
+        if (roddyBamFile.seqType.needsBedFile) {
             BedFile bedFile = roddyBamFile.bedFile
             File bedFilePath = bedFileService.filePath(bedFile) as File
             conf.put("TARGET_REGIONS_FILE", bedFilePath.toString())

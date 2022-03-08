@@ -46,6 +46,7 @@ class MetaDataFieldsController implements CheckAndCall {
             changeSeqTypeLegacyState       : "POST",
             changeAntibodyTargetLegacyState: "POST",
             changeSeqPlatformLegacyState   : "POST",
+            toggleNeedsBedFile             : "POST",
     ]
 
     LibraryPreparationKitService libraryPreparationKitService
@@ -231,6 +232,7 @@ class MetaDataFieldsController implements CheckAndCall {
                         displayName      : cmd.displayName,
                         singleCell       : cmd.singleCell,
                         hasAntibodyTarget: cmd.hasAntibodyTarget,
+                        needsBedFile     : cmd.needsBedFile,
                 ], cmd.aliases)
                 flash.cmd = null
                 flash.message = new FlashMessage(g.message(code: "dataFields.seqType.create.success") as String)
@@ -255,6 +257,12 @@ class MetaDataFieldsController implements CheckAndCall {
                     hasAntibodyTarget: seqType.hasAntibodyTarget,
             ], seqType.importAlias.toList())
         }
+    }
+
+    JSON toggleNeedsBedFile(SeqTypeCommand cmd) {
+        checkErrorAndCallMethod(cmd, {
+            seqTypeService.toggleNeedsBedFileFlag(cmd.seqType)
+        })
     }
 
     private void createImportAlias(CreateImportAliasCommand cmd) {
@@ -505,6 +513,7 @@ class CreateSeqTypeCommand extends CreateWithLayoutCommand {
     String dirName
     String displayName
     boolean hasAntibodyTarget
+    boolean needsBedFile
     List<String> aliases
 
     static constraints = {
@@ -625,4 +634,8 @@ class AntibodyTargetLegacyCommand extends LegacyCommand {
 
 class SeqPlatformLegacyCommand extends LegacyCommand {
     SeqPlatform seqPlatform
+}
+
+class SeqTypeCommand implements Validateable {
+    SeqType seqType
 }

@@ -623,4 +623,8 @@ databaseChangeLog = {
     include file: 'changelogs/2021/otp-1180_project_request_workflow_redesign.groovy'
 
     include file: 'changelogs/2021/otp-1256.groovy'
+
+    changeSet(author: "gabkol", id: "otp-1448") {
+        sqlFile(path: 'changelogs/2022/otp-1448_add_needsBedFile_flag_to_seqType.sql')
+    }
 }

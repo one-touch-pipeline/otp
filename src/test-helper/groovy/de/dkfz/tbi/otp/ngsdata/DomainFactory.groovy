@@ -1952,7 +1952,7 @@ class DomainFactory {
     @Deprecated
     private static SeqType createSeqTypeLazy(SeqTypeNames seqTypeNames, String displayName, String dirName,
                                              String roddyName = null, SequencingReadType libraryLayout = SequencingReadType.PAIRED,
-                                             boolean singleCell = false, boolean hasAntibodyTarget = false) {
+                                             boolean singleCell = false, boolean hasAntibodyTarget = false, boolean needsBedFile = false) {
         findOrCreateDomainObject(SeqType, [:], [
                 name             : seqTypeNames.seqTypeName,
                 displayName      : displayName,
@@ -1961,6 +1961,7 @@ class DomainFactory {
                 libraryLayout    : libraryLayout,
                 singleCell       : singleCell,
                 hasAntibodyTarget: hasAntibodyTarget,
+                needsBedFile     : needsBedFile,
         ]).refresh()
     }
 
@@ -1969,7 +1970,7 @@ class DomainFactory {
     }
 
     static SeqType createExomeSeqType(SequencingReadType libraryLayout = SequencingReadType.PAIRED) {
-        createSeqTypeLazy(SeqTypeNames.EXOME, 'EXOME', 'exon_sequencing', 'WES', libraryLayout)
+        createSeqTypeLazy(SeqTypeNames.EXOME, 'EXOME', 'exon_sequencing', 'WES', libraryLayout, false, false, true)
     }
 
     static SeqType createWholeGenomeBisulfiteSeqType() {

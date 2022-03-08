@@ -115,7 +115,7 @@ class PanCancerValidationJobSpec extends Specification implements WorkflowSystem
         final RoddyBamFile bamFile = createRoddyBamFile(RoddyBamFile)
 
         // an extra file is added to the return list if the bamFile's seqType is exome
-        bamFile.seqType.name = isExome ? SeqTypeNames.EXOME.seqTypeName : ''
+        bamFile.seqType.needsBedFile = needsBedFile
 
         List<Path> expectedFiles = [
                 bamFile.workBamFile.toPath(),
@@ -123,7 +123,7 @@ class PanCancerValidationJobSpec extends Specification implements WorkflowSystem
                 bamFile.workMd5sumFile.toPath(),
                 bamFile.workMergedQAJsonFile.toPath(),
         ]
-        if (isExome) {
+        if (needsBedFile) {
             expectedFiles.add(bamFile.workMergedQATargetExtractJsonFile.toPath())
         }
 
@@ -146,7 +146,7 @@ class PanCancerValidationJobSpec extends Specification implements WorkflowSystem
         directories.sort() == expectedDirectories.sort()
 
         where:
-        nExpectedFiles | isExome
+        nExpectedFiles | needsBedFile
         4              | false
         5              | true
     }

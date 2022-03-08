@@ -61,7 +61,7 @@ class PanCancerValidationJob extends AbstractRoddyClusterValidationJob implement
                 fs.getPath(roddyBamFile.workMergedQAJsonFile.toString()),
         ]
 
-        if (roddyBamFile.seqType.exome) {
+        if (roddyBamFile.seqType.needsBedFile) {
             expectedFiles.add(fs.getPath(roddyBamFile.workMergedQATargetExtractJsonFile.toString()))
         }
 

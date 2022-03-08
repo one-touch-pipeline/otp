@@ -39,6 +39,7 @@ class SeqTypeService extends MetadataFieldsService<SeqType> {
                 dirName          : it.dirName,
                 singleCell       : it.singleCell,
                 hasAntibodyTarget: it.hasAntibodyTarget,
+                needsBedFile     : it.needsBedFile,
                 libraryLayouts   : SeqType.findAllByNameAndSingleCell(it.name, it.singleCell)*.libraryLayout.sort().join(MULTILINE_JOIN_STRING),
                 layouts          :
                         [
@@ -100,6 +101,12 @@ class SeqTypeService extends MetadataFieldsService<SeqType> {
             it.legacy = legacy
             assert it.save(flush: true)
         }
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void toggleNeedsBedFileFlag(SeqType seqType) {
+        seqType.needsBedFile = !seqType.needsBedFile
+        seqType.save(flush: true)
     }
 
     @Override
