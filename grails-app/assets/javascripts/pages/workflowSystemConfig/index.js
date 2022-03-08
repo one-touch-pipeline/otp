@@ -68,7 +68,7 @@ const renderWorkflowOverviewTable = (workflowData) => {
               if (seqType.singleCell) {
                 return `${seqType.displayName} ${seqType.libraryLayout} single cell`;
               }
-              return `${seqType.displayName} ${seqType.libraryLayout} bulk}`;
+              return `${seqType.displayName} ${seqType.libraryLayout} bulk`;
             }).join(', ');
           }
           return '';

@@ -20,4 +20,5 @@
   - SOFTWARE.
   --}%
 
-<div><span class='wordBreak keep-whitespace'><otp:getValueWithFallbacks value="${value}" optionValue="${optionValue}" noSelection="${noSelection}"/></span></div>
+<div><span class='wordBreak keep-whitespace'><otp:getValueWithFallbacks value="${value}" values="${values}" optionKey="${optionKey}" optionValue="${optionValue}" noSelection="${noSelection}"/>
+</span></div>

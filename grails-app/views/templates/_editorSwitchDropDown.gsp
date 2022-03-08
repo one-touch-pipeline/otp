@@ -29,13 +29,14 @@
                   noSelection="${noSelection}"
                   from="${values}"
                   value="${value}"
-                  class="use-select-2"/>
+                  class="use-select-2"
+                  autocomplete="off"/>
         <button class="save" data-confirmation="${confirmation}" data-success-handler="${sucessHandler}"><g:message code="default.button.update.label"/></button>
         <button class="cancel"><g:message code="default.button.cancel.label"/></button>
     </p>
     <p class="edit-switch-label">
         <span class="wordBreak">
-            <otp:getValueWithFallbacks value="${value}" optionValue="${optionValue}" noSelection="${noSelection}"/>
+            <otp:getValueWithFallbacks value="${value}" values="${values}" optionKey="${optionKey}" optionValue="${optionValue}" noSelection="${noSelection}"/>
         </span>
         <button class="edit js-edit">&nbsp;</button>
     </p>

@@ -76,7 +76,7 @@ trait CheckAndCall {
     }
 
     /**
-     * @deprecated Is deprecated because it returns on errors a HTTP success status code. Use checkDefaultErrorsAndCallMethod instead.
+     * @deprecated Is deprecated because it returns on errors a HTTP success status code. Use {@link #checkDefaultErrorsAndCallMethod} instead.
      */
     @Deprecated
     JSON checkErrorAndCallMethod(Validateable cmd, Closure method, Closure<Map> additionalSuccessReturnValues = { [:] }) {

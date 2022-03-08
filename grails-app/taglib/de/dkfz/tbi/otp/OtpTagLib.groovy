@@ -178,9 +178,20 @@ class OtpTagLib {
      */
     def getValueWithFallbacks = { attrs ->
         def value = attrs.remove("value")
+        def values = attrs.remove("values")
+        def optionKey = attrs.remove("optionKey")
         def optionValue = attrs.remove("optionValue")
         def noSelection = attrs.remove("noSelection")
-        out << (value != null ? (optionValue ? value[optionValue] : value) : getNoSelectionValueWithFallback(noSelection))
+        if (value != null) {
+            def result = optionKey ? values.find { it[optionKey] == value } : value
+            if (result != null) {
+                out << (optionValue ? result[optionValue] : result)
+            } else {
+                out << getNoSelectionValueWithFallback(noSelection)
+            }
+        } else {
+            out << getNoSelectionValueWithFallback(noSelection)
+        }
     }
 
     /**
