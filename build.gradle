@@ -318,9 +318,6 @@ dependencies {
     testCompile "org.mockito:mockito-core"      // TODO: check, if this is still required
     testCompile "org.grails:grails-web-testing-support"
 
-    // TODO: Remove geb plugin dependency with Grails 4
-    testCompile "org.grails.plugins:geb:1.1.2"
-
     // JS and CSS libraries
     compile 'org.webjars:jquery:3.6.0'
     compile 'org.webjars:bootstrap:4.6.0'
