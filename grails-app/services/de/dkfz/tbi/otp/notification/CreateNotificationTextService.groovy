@@ -38,9 +38,7 @@ import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.tracking.*
 import de.dkfz.tbi.otp.tracking.OtrsTicket.ProcessingStep
 import de.dkfz.tbi.otp.utils.MessageSourceService
-import de.dkfz.tbi.otp.workflowExecution.OtpWorkflow
-import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
-import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
+import de.dkfz.tbi.otp.workflowExecution.*
 
 import static de.dkfz.tbi.otp.tracking.OtrsTicket.ProcessingStep.*
 import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus
@@ -539,8 +537,15 @@ class CreateNotificationTextService {
 
     String getSamplePairRepresentation(List<SamplePair> samplePairs) {
         return samplePairs.collect { SamplePair samplePair ->
-            "${samplePair.individual.displayName} ${samplePair.sampleType1.displayName} ${samplePair.sampleType2.displayName} " +
+            "${samplePair.individual.displayName} " +
+                    "${samplePair.sampleType1.displayName} ${isLowCoverage(samplePair.mergingWorkPackage1) ? "(low coverage) " : ""}" +
+                    "${samplePair.sampleType2.displayName} ${isLowCoverage(samplePair.mergingWorkPackage2) ? "(low coverage) " : ""}" +
                     "${samplePair.seqType.displayNameWithLibraryLayout}"
         }.sort().unique().join('\n')
+    }
+
+    private boolean isLowCoverage(AbstractMergingWorkPackage workPackage) {
+        double threshold = processingOptionService.findOptionAsDouble(OptionName.WHOLE_GENOME_LOW_COVERAGE_THRESHOLD)
+        return workPackage.processableBamFileInProjectFolder?.coverage && workPackage.processableBamFileInProjectFolder?.coverage < threshold
     }
 }

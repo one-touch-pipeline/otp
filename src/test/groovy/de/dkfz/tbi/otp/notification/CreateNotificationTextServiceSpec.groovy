@@ -323,7 +323,7 @@ class CreateNotificationTextServiceSpec extends Specification implements Alignme
 
     void "getSamplePairRepresentation, when empty sample pair list, should return empty string"() {
         when:
-        String samplePairs = new CreateNotificationTextService().getSamplePairRepresentation([])
+        String samplePairs = new CreateNotificationTextService(processingOptionService: new ProcessingOptionService()).getSamplePairRepresentation([])
 
         then:
         '' == samplePairs
@@ -331,16 +331,29 @@ class CreateNotificationTextServiceSpec extends Specification implements Alignme
 
     void "getSamplePairRepresentation, when sample pair list is not empty, should return sample pair representations"() {
         given:
+        CreateNotificationTextService service = new CreateNotificationTextService(processingOptionService: new ProcessingOptionService())
+        findOrCreateProcessingOption(ProcessingOption.OptionName.WHOLE_GENOME_LOW_COVERAGE_THRESHOLD, "20")
+
         SamplePair samplePair1 = DomainFactory.createSamplePair()
         SamplePair samplePair2 = DomainFactory.createSamplePair()
+        SamplePair samplePair3 = DomainFactory.createSamplePair()
+        samplePair3.mergingWorkPackage1.bamFileInProjectFolder = RoddyPancanFactoryInstance.INSTANCE.createBamFile(
+                withdrawn: false,
+                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
+                coverage : 19.0,
+                workPackage: samplePair3.mergingWorkPackage1,
+        )
+        samplePair3.mergingWorkPackage1.save(flush: true)
 
         when:
-        String samplePairs = new CreateNotificationTextService().getSamplePairRepresentation([samplePair1, samplePair2])
+        String samplePairs = service.getSamplePairRepresentation([samplePair1, samplePair2, samplePair3])
         String expectedSamplePair = [
                 "${samplePair1.individual.displayName} ${samplePair1.sampleType1.displayName} " +
                         "${samplePair1.sampleType2.displayName} ${samplePair1.seqType.displayNameWithLibraryLayout}",
                 "${samplePair2.individual.displayName} ${samplePair2.sampleType1.displayName} " +
                         "${samplePair2.sampleType2.displayName} ${samplePair2.seqType.displayNameWithLibraryLayout}",
+                "${samplePair3.individual.displayName} ${samplePair3.sampleType1.displayName} (low coverage) " +
+                        "${samplePair3.sampleType2.displayName} ${samplePair3.seqType.displayNameWithLibraryLayout}",
         ].sort().join('\n')
 
         then:

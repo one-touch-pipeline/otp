@@ -28,6 +28,10 @@ import de.dkfz.tbi.otp.utils.Entity
 class ProcessingOption implements Entity {
 
     enum OptionName {
+        WHOLE_GENOME_LOW_COVERAGE_THRESHOLD(
+                "Threshold for lcWGS",
+                Necessity.OPTIONAL, "20", TypeValidators.FLOAT,
+        ),
         //pipeline
         PIPELINE_MIN_COVERAGE(
                 "Minimum coverage to start a pipeline",
