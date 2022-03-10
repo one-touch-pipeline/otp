@@ -384,7 +384,9 @@ class EgaSubmissionService {
                     pid: it[1],
                     sampleTypeName: it[2],
                     seqTypeId: seqType.id,
-                    seqTypeString: seqType.toString(),
+                    seqTypeName: seqType.displayName,
+                    sequencingReadType: seqType.libraryLayout,
+                    singleCellDisplayName: seqType.singleCellDisplayName
             )
         }
     }
@@ -576,12 +578,16 @@ class SampleAndSeqTypeProjection implements Comparable<SampleAndSeqTypeProjectio
     String pid
     String sampleTypeName
     long seqTypeId
-    String seqTypeString
+    String seqTypeName
+    String sequencingReadType
+    String singleCellDisplayName
 
     @Override
     int compareTo(SampleAndSeqTypeProjection other) {
         return this.pid <=> other.pid ?:
-                this.seqTypeString <=> other.seqTypeString ?:
+                this.seqTypeName <=> other.seqTypeName ?:
+                        this.sequencingReadType <=> other.sequencingReadType ?:
+                                this.singleCellDisplayName <=> other.singleCellDisplayName ?:
                         this.sampleTypeName <=> other.sampleTypeName
     }
 }

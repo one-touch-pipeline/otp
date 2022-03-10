@@ -57,7 +57,9 @@
                         </g:if>
                         <th></th>
                         <th><g:message code="egaSubmission.individual"/></th>
-                        <th><g:message code="egaSubmission.seqType"/></th>
+                        <th><g:message code="egaSubmission.seqTypeDisplayName"/></th>
+                        <th><g:message code="egaSubmission.sequencingReadType"/></th>
+                        <th><g:message code="egaSubmission.singleCellDisplayName"/></th>
                         <th><g:message code="egaSubmission.sampleType"/></th>
                         <th><g:message code="egaSubmission.sampleAlias"/></th>
                         <th><g:message code="egaSubmission.selectFiles.seqCenter"/></th>
@@ -87,7 +89,9 @@
                                     </g:if>
                                 </td>
                                 <td>${it.dataFile.individual.displayName}</td>
-                                <td>${it.dataFile.seqType.toString()}</td>
+                                <td>${it.dataFile.seqType.displayName}</td>
+                                <td>${it.dataFile.seqType.libraryLayout}</td>
+                                <td>${it.dataFile.seqType.singleCellDisplayName}</td>
                                 <td>${it.dataFile.sampleType.displayName}</td>
                                 <td>${it.sampleSubmissionObject.egaAliasName}</td>
                                 <td>${it.dataFile.run.seqCenter}</td>

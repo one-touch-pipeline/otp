@@ -467,5 +467,6 @@ task esLintExportCi(type: NpmTask) {
 
 task esLintAutoFix(type: NpmTask) {
     dependsOn npmInstall
+    environment = ['CI':'true']
     args = ['run', 'lint-fix']
 }

@@ -33,24 +33,40 @@ import static de.dkfz.tbi.otp.egaSubmission.EgaSubmissionFileService.EgaColumnNa
 class EgaMapKey implements Comparable<EgaMapKey> {
     final String individualName
     final String seqTypeName
+    final String sequencingReadType
+    final String singleCell
     final String sampleTypeName
 
     EgaMapKey(Row row) {
         individualName = row.getCellByColumnTitle(INDIVIDUAL.value).text
         sampleTypeName = row.getCellByColumnTitle(SAMPLE_TYPE.value).text
-        seqTypeName = row.getCellByColumnTitle(SEQ_TYPE.value).text
+        seqTypeName = row.getCellByColumnTitle(SEQ_TYPE_NAME.value).text
+        sequencingReadType = row.getCellByColumnTitle(SEQUENCING_READ_TYPE.value).text
+        singleCell = row.getCellByColumnTitle(SINGLE_CELL.value).text
     }
 
     EgaMapKey(SampleSubmissionObject sampleSubmissionObject) {
         individualName = sampleSubmissionObject.sample.individual.displayName
-        seqTypeName = sampleSubmissionObject.seqType.toString()
         sampleTypeName = sampleSubmissionObject.sample.sampleType.displayName
+        seqTypeName = sampleSubmissionObject.seqType.displayName
+        sequencingReadType = sampleSubmissionObject.seqType.libraryLayout
+        singleCell = sampleSubmissionObject.seqType.singleCellDisplayName
+    }
+
+    EgaMapKey(String individualName, String seqTypeName, String sequencingReadType, String singleCell, String sampleTypeName) {
+        this.individualName = individualName
+        this.seqTypeName = seqTypeName
+        this.sequencingReadType = sequencingReadType
+        this.singleCell = singleCell
+        this.sampleTypeName = sampleTypeName
     }
 
     @Override
     int compareTo(EgaMapKey egaMapKey) {
         return individualName <=> egaMapKey.individualName ?:
                 sampleTypeName <=> egaMapKey.sampleTypeName ?:
-                        seqTypeName <=> egaMapKey.seqTypeName
+                        sequencingReadType <=> egaMapKey.sequencingReadType ?:
+                                singleCell <=> egaMapKey.singleCell ?:
+                                        seqTypeName <=> egaMapKey.seqTypeName
     }
 }

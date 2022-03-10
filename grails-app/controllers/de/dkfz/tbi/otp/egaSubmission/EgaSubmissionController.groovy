@@ -23,15 +23,16 @@ package de.dkfz.tbi.otp.egaSubmission
 
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
+import org.springframework.http.HttpStatus
 import org.springframework.validation.Errors
 
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
 import de.dkfz.tbi.otp.ngsdata.DataFile
+import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.utils.DataTableCommand
-import de.dkfz.tbi.util.spreadsheet.Delimiter
 import de.dkfz.tbi.util.spreadsheet.Spreadsheet
 
 import static de.dkfz.tbi.otp.administration.Document.FormatType.CSV
@@ -51,6 +52,8 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
 
             newSubmissionForm          : "POST",
             selectSamplesForm          : "POST",
+            selectSamplesCsvUpload     : "POST",
+            selectSamplesCsvDownload   : "POST",
             sampleInformationUploadForm: "POST",
             sampleInformationForms     : "POST",
             selectFilesDataFilesForm   : "POST",
@@ -112,10 +115,14 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
     }
 
     Map selectSamples(EgaSubmission submission) {
+        List<SeqType> seqTypes = egaSubmissionService.seqTypeByProject(submission.project)
         return [
                 submissionId      : submission.id,
                 project           : submission.project,
-                seqTypes          : egaSubmissionService.seqTypeByProject(submission.project),
+                seqTypes          : seqTypes,
+                seqTypesNames: seqTypes*.displayName.unique(),
+                sequencingReadTypes: seqTypes*.libraryLayout.unique(),
+                singleCellDisplayNames: seqTypes*.singleCellDisplayName.unique(),
                 samplesWithSeqType: flash.samplesWithSeqType ?: [],
         ]
     }
@@ -253,17 +260,53 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
         }
     }
 
+    JSON selectSamplesCsvUpload(UploadCsvFileCommand cmd) {
+        checkDefaultErrorsAndCallMethod(cmd, {
+            Spreadsheet spreadsheet = checkAndReadCsvFile(cmd)
+            if (spreadsheet) {
+                List<EgaSubmissionFileService.EgaColumnName> headers = [
+                        INDIVIDUAL,
+                        SEQ_TYPE_NAME,
+                        SEQUENCING_READ_TYPE,
+                        SINGLE_CELL,
+                        SAMPLE_TYPE,
+                ]
+                Map validateColumns = egaSubmissionValidationService.validateColumns(spreadsheet, headers)
+                if (validateColumns.hasError) {
+                    return response.sendError(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                } else {
+                    List<Map<String, String>> data = spreadsheet.dataRows.collect(({ row ->
+                        spreadsheet.header.cells.collectEntries { headerCell ->
+                            [headerCell.text, row.getCellByColumnTitle(headerCell.text).text]
+                        }
+                    } as Closure<Map<String, String>>))
+                    render data as JSON
+                }
+            }
+        })
+        render [:] as JSON
+    }
+
+    OutputStream selectSamplesCsvDownload(SelectSampleDownloadCommand cmd) {
+        String content = egaSubmissionFileService.generateSampleSelectionCsvFile(cmd.selectedSamples)
+        response.contentType = CSV.mimeType
+        response.setHeader("Content-disposition", "filename=select_samples.csv")
+        response.outputStream << content.bytes
+    }
+
     def sampleInformationUploadForm(UploadFormSubmitCommand cmd) {
         if (cmd.hasErrors()) {
             pushErrors(cmd.errors, cmd.submission)
             return
         }
-        Spreadsheet spreadsheet = readFile(cmd)
+        Spreadsheet spreadsheet = checkAndReadCsvFile(cmd)
         if (spreadsheet) {
             Map validateRows = egaSubmissionValidationService.validateRows(spreadsheet, cmd.submission)
             Map validateColumns = egaSubmissionValidationService.validateColumns(spreadsheet, [
                     INDIVIDUAL,
-                    SEQ_TYPE,
+                    SEQ_TYPE_NAME,
+                    SEQUENCING_READ_TYPE,
+                    SINGLE_CELL,
                     SAMPLE_TYPE,
             ])
             if (!validateRows.valid) {
@@ -288,7 +331,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
         }
 
         if (cmd.csv) {
-            String content = egaSubmissionFileService.generateCsvFile(cmd.sampleObjectId, cmd.egaSampleAlias)
+            String content = egaSubmissionFileService.generateSampleInformationCsvFile(cmd.sampleObjectId, cmd.egaSampleAlias)
             response.contentType = CSV.mimeType
             response.setHeader("Content-disposition", "filename=sample_information.csv")
             response.outputStream << content.bytes
@@ -397,7 +440,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
         }
 
         if (cmd.upload) {
-            Spreadsheet spreadsheet = readFile(cmd)
+            Spreadsheet spreadsheet = checkAndReadCsvFile(cmd)
             if (spreadsheet) {
                 Map validateColumns = egaSubmissionValidationService.validateColumns(spreadsheet, [
                         RUN,
@@ -424,7 +467,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
         }
 
         if (cmd.upload) {
-            Spreadsheet spreadsheet = readFile(cmd)
+            Spreadsheet spreadsheet = checkAndReadCsvFile(cmd)
             if (spreadsheet) {
                 Map validateColumns = egaSubmissionValidationService.validateColumns(spreadsheet, [
                         EGA_SAMPLE_ALIAS,
@@ -444,14 +487,19 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
         }
     }
 
-    Spreadsheet readFile(UploadFormSubmitCommand cmd) {
+    private Spreadsheet checkAndReadCsvFile(UploadFormSubmitCommand cmd) {
         if (cmd.file.empty) {
             pushError("No file selected", cmd.submission)
             return
         }
-        String content = new String(cmd.file.bytes)
-        content = content.replace("\"", "")
-        return new Spreadsheet(content, Delimiter.COMMA)
+        return egaSubmissionFileService.createSpreadsheetFromFileByteArray(cmd.file.bytes)
+    }
+
+    private Spreadsheet checkAndReadCsvFile(UploadCsvFileCommand cmd) {
+        if (cmd.file.empty) {
+            response.sendError(HttpStatus.INTERNAL_SERVER_ERROR.value())
+        }
+        return egaSubmissionFileService.createSpreadsheetFromFileByteArray(cmd.file.bytes)
     }
 
     def selectFilesBamFilesForm(SelectFilesBamFilesFormSubmitCommand cmd) {
@@ -528,11 +576,13 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
 
         samplesWithSeqType.sort().each {
             data.add([
-                    identifier: "${it.sampleId}-${it.seqTypeId}",
-                    sampleId  : "${it.sampleId}",
-                    individual: it.pid,
-                    seqType   : it.seqTypeString,
-                    sampleType: it.sampleTypeName,
+                    identifier           : "${it.sampleId}-${it.seqTypeId}",
+                    sampleId             : "${it.sampleId}",
+                    individual           : it.pid,
+                    seqTypeDisplayName   : it.seqTypeName,
+                    sequencingReadType   : it.sequencingReadType,
+                    singleCellDisplayName: it.singleCellDisplayName,
+                    sampleType           : it.sampleTypeName,
             ])
         }
 

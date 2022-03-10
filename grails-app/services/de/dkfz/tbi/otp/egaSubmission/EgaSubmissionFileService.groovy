@@ -33,6 +33,7 @@ import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.MailHelperService
 import de.dkfz.tbi.otp.utils.MessageSourceService
+import de.dkfz.tbi.util.spreadsheet.Delimiter
 import de.dkfz.tbi.util.spreadsheet.Row
 import de.dkfz.tbi.util.spreadsheet.Spreadsheet
 
@@ -60,7 +61,9 @@ class EgaSubmissionFileService {
     enum EgaColumnName {
         INDIVIDUAL("Individual"),
         SAMPLE_TYPE("Sample Type"),
-        SEQ_TYPE("Sequence Type"),
+        SEQ_TYPE_NAME("Sequence Type Name"),
+        SEQUENCING_READ_TYPE("Sequencing Read Type"),
+        SINGLE_CELL("Single Cell"),
         EGA_SAMPLE_ALIAS("Sample Name at EGA"),
         FILE_TYPE("File Type"),
         SEQ_CENTER("Seq Center"),
@@ -89,6 +92,12 @@ class EgaSubmissionFileService {
         EgaColumnName(String value) {
             this.value = value
         }
+    }
+
+    Spreadsheet createSpreadsheetFromFileByteArray(byte[] fileByteArray) {
+        String content = new String(fileByteArray)
+        content = content.replace("\"", "")
+        return new Spreadsheet(content, Delimiter.COMMA)
     }
 
     Map<EgaMapKey, String> readEgaSampleAliasesFromFile(Spreadsheet spreadsheet) {
@@ -120,7 +129,31 @@ class EgaSubmissionFileService {
         return egaAliases
     }
 
-    String generateCsvFile(List<String> sampleObjectId, List<String> alias) {
+    String generateSampleSelectionCsvFile(List<EgaMapKey> egaMapKeys) {
+        StringBuilder contentBody = new StringBuilder()
+
+        egaMapKeys.each { it ->
+            contentBody.append([
+                    it.individualName,
+                    it.seqTypeName,
+                    it.sequencingReadType,
+                    it.singleCell,
+                    it.sampleTypeName,
+            ].join(",") + "\n")
+        }
+
+        String contentHeader = [
+                INDIVIDUAL,
+                SEQ_TYPE_NAME,
+                SEQUENCING_READ_TYPE,
+                SINGLE_CELL,
+                SAMPLE_TYPE,
+        ]*.value.join(",")
+
+        return "${contentHeader}\n${contentBody}"
+    }
+
+    String generateSampleInformationCsvFile(List<String> sampleObjectId, List<String> alias) {
         StringBuilder contentBody = new StringBuilder()
 
         sampleObjectId.eachWithIndex { it, i ->
@@ -128,7 +161,9 @@ class EgaSubmissionFileService {
 
             contentBody.append([
                     sampleSubmissionObject.sample.individual.displayName,
-                    sampleSubmissionObject.seqType.toString(),
+                    sampleSubmissionObject.seqType.displayName,
+                    sampleSubmissionObject.seqType.libraryLayout,
+                    sampleSubmissionObject.seqType.singleCellDisplayName,
                     sampleSubmissionObject.sample.sampleType.displayName,
                     alias?.getAt(i) ?: "",
             ].join(",") + "\n")
@@ -136,7 +171,9 @@ class EgaSubmissionFileService {
 
         String contentHeader = [
                 INDIVIDUAL,
-                SEQ_TYPE,
+                SEQ_TYPE_NAME,
+                SEQUENCING_READ_TYPE,
+                SINGLE_CELL,
                 SAMPLE_TYPE,
                 EGA_SAMPLE_ALIAS,
         ]*.value.join(",")
@@ -153,7 +190,9 @@ class EgaSubmissionFileService {
         dataFilesAndSampleAliases.each {
             contentBody.append([
                     it.dataFile.individual.displayName,
-                    it.dataFile.seqType.toString(),
+                    it.dataFile.seqType.displayName,
+                    it.dataFile.seqType.libraryLayout,
+                    it.dataFile.seqType.singleCellDisplayName,
                     it.dataFile.sampleType.displayName,
                     it.sampleSubmissionObject.egaAliasName,
                     it.dataFile.run.seqCenter,
@@ -168,7 +207,9 @@ class EgaSubmissionFileService {
 
         String contentHeader = [
                 INDIVIDUAL,
-                SEQ_TYPE,
+                SEQ_TYPE_NAME,
+                SEQUENCING_READ_TYPE,
+                SINGLE_CELL,
                 SAMPLE_TYPE,
                 EGA_SAMPLE_ALIAS,
                 SEQ_CENTER,
@@ -192,7 +233,9 @@ class EgaSubmissionFileService {
         bamFilesAndSampleAliases.each {
             contentBody.append([
                     it.bamFile.individual.displayName,
-                    it.bamFile.seqType.toString(),
+                    it.bamFile.seqType.displayName,
+                    it.bamFile.seqType.libraryLayout,
+                    it.bamFile.seqType.singleCellDisplayName,
                     it.bamFile.sampleType.displayName,
                     it.sampleSubmissionObject.egaAliasName,
                     bamFileFileAliases.get(it.bamFile.bamFileName + it.sampleSubmissionObject.egaAliasName),
@@ -202,7 +245,9 @@ class EgaSubmissionFileService {
 
         String contentHeader = [
                 INDIVIDUAL,
-                SEQ_TYPE,
+                SEQ_TYPE_NAME,
+                SEQUENCING_READ_TYPE,
+                SINGLE_CELL,
                 SAMPLE_TYPE,
                 EGA_SAMPLE_ALIAS,
                 EGA_FILE_ALIAS,

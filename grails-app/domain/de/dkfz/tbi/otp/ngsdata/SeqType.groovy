@@ -40,6 +40,10 @@ class SeqType implements Entity, MetadataField, ProjectFieldReferenceAble {
 
     static final TAGMENTATION_SUFFIX = '_TAGMENTATION'
 
+    static final String SINGLE_CELL_TRUE = "single cell"
+
+    static final String SINGLE_CELL_FALSE = "bulk"
+
     static final Collection<SeqTypeNames> WGBS_SEQ_TYPE_NAMES = [
             SeqTypeNames.WHOLE_GENOME_BISULFITE,
             SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION,
@@ -129,7 +133,11 @@ class SeqType implements Entity, MetadataField, ProjectFieldReferenceAble {
     }
 
     String getDisplayNameWithLibraryLayout() {
-        return "${displayName} ${libraryLayout} ${singleCell ? 'single cell' : 'bulk'}"
+        return "${displayName} ${libraryLayout} ${singleCellDisplayName}"
+    }
+
+    String getSingleCellDisplayName() {
+        return singleCell ? SINGLE_CELL_TRUE : SINGLE_CELL_FALSE
     }
 
     String getLibraryLayoutDirName() {

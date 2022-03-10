@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.egaSubmission
 
+import grails.databinding.BindUsing
 import grails.validation.Validateable
 import org.springframework.web.multipart.MultipartFile
 
@@ -77,14 +78,14 @@ class UpdatePubMedIdSubmitCommand implements Validateable {
 
 class SelectSamplesControllerSubmitCommand implements Validateable {
     EgaSubmission submission
+    String csv
     String next
     List<String> sampleAndSeqType
 }
 
-class UploadFormSubmitCommand implements Validateable {
+class UploadFormSubmitCommand extends MultiPartFileCommand implements Validateable {
     EgaSubmission submission
     String upload
-    MultipartFile file
 
     static constraints = {
         upload matches: "Upload.*"
@@ -149,4 +150,36 @@ class GenerateFilesToUploadFileSubmitCommand implements Validateable {
 class SampleMetadataFormSubmitCommand implements Validateable {
     EgaSubmission submission
     String download
+}
+
+class SelectSampleDownloadCommand implements Validateable {
+    @BindUsing({ obj, source ->
+        source['selectedSamples'].collect {
+            new EgaMapKey(it["individualName"] as String,
+                    it["seqTypeName"] as String,
+                    it["sequencingReadType"] as String,
+                    it["singleCell"] as String,
+                    it["sampleTypeName"] as String,)
+        }
+    })
+    List<EgaMapKey> selectedSamples
+}
+
+class MultiPartFileCommand {
+    MultipartFile file
+}
+
+class UploadCsvFileCommand extends MultiPartFileCommand implements Validateable {
+
+    static constraints = {
+        file validator: { val, obj ->
+            if (val == null) {
+                return false
+            }
+            if (val.empty) {
+                return false
+            }
+            val.originalFilename?.toLowerCase()?.endsWith('csv')
+        }
+    }
 }

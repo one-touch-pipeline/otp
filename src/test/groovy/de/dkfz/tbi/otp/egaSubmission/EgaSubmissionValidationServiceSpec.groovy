@@ -83,7 +83,7 @@ class EgaSubmissionValidationServiceSpec extends Specification implements EgaSub
         List<String> sampleObjectId = [sampleSubmissionObject1.id as String, sampleSubmissionObject2.id as String]
         List<String> egaSampleAlias = ["abc", "dfg"]
         egaSubmissionValidationService.egaSubmissionFileService = new EgaSubmissionFileService()
-        String content = egaSubmissionValidationService.egaSubmissionFileService.generateCsvFile(sampleObjectId, egaSampleAlias)
+        String content = egaSubmissionValidationService.egaSubmissionFileService.generateSampleInformationCsvFile(sampleObjectId, egaSampleAlias)
         Spreadsheet spreadsheet = new Spreadsheet(content, Delimiter.COMMA)
 
         expect:
@@ -99,7 +99,7 @@ class EgaSubmissionValidationServiceSpec extends Specification implements EgaSub
         List<String> sampleObjectId = [sampleSubmissionObject1.id as String]
         List<String> egaSampleAlias = ["abc"]
         egaSubmissionValidationService.egaSubmissionFileService = new EgaSubmissionFileService()
-        String content = egaSubmissionValidationService.egaSubmissionFileService.generateCsvFile(sampleObjectId, egaSampleAlias)
+        String content = egaSubmissionValidationService.egaSubmissionFileService.generateSampleInformationCsvFile(sampleObjectId, egaSampleAlias)
         Spreadsheet spreadsheet = new Spreadsheet(content, Delimiter.COMMA)
 
         expect:
@@ -115,7 +115,7 @@ class EgaSubmissionValidationServiceSpec extends Specification implements EgaSub
         List<String> sampleObjectId = [createSampleSubmissionObject().id as String]
         List<String> egaSampleAlias = ["abc"]
         egaSubmissionValidationService.egaSubmissionFileService = new EgaSubmissionFileService()
-        String content = egaSubmissionValidationService.egaSubmissionFileService.generateCsvFile(sampleObjectId, egaSampleAlias)
+        String content = egaSubmissionValidationService.egaSubmissionFileService.generateSampleInformationCsvFile(sampleObjectId, egaSampleAlias)
         Spreadsheet spreadsheet = new Spreadsheet(content, Delimiter.COMMA)
 
         expect:

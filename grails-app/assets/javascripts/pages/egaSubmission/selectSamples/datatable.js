@@ -23,13 +23,13 @@
 $.otp.selectSamplesTable = {
 
   /**
-     * Gathers all samples of the selected project and displays them with PID, SeqType and SampleType.
-     * It also adds a checkbox for selection in the first column.
-     *
-     * @param header array of additional columns after the selection column
-     * @param preSelectedSamples a list of samples to preselect, defined by "<Sample ID><SampleType Name>"
-     * @returns datatable object
-     */
+   * Gathers all samples of the selected project and displays them with PID, SeqType and SampleType.
+   * It also adds a checkbox for selection in the first column.
+   *
+   * @param header array of additional columns after the selection column
+   * @param preSelectedSamples a list of samples to preselect, defined by "<Sample ID><SampleType Name>"
+   * @returns datatable object
+   */
   selectableSampleList(header, preSelectedSamples) {
     'use strict';
 
@@ -39,6 +39,11 @@ $.otp.selectSamplesTable = {
       bFilter: true,
       bProcessing: true,
       bServerSide: false,
+      columnDefs: [{
+        targets: 'no-sort',
+        orderable: false
+      }],
+      order: [[1, 'asc']],
       bSort: true,
       bAutoWidth: false,
       sAjaxSource: $.otp.createLink({
@@ -61,13 +66,18 @@ $.otp.selectSamplesTable = {
           data: aoData,
           error() {
             // clear the table
-            fnCallback({ aaData: [], iTotalRecords: 0, iTotalDisplayRecords: 0 });
+            fnCallback({
+              aaData: [],
+              iTotalRecords: 0,
+              iTotalDisplayRecords: 0
+            });
           },
           success(json) {
             const result = json;
             for (let i = 0; i < json.aaData.length; i += 1) {
               const entry = json.aaData[i];
-              const checked = preSelectedSamples.includes(entry.sampleId + entry.seqType) ? 'checked' : '';
+              const seqType = `${entry.seqTypeDisplayName} ${entry.sequencingReadType} ${entry.singleCellDisplayName}`;
+              const checked = preSelectedSamples.includes(`${entry.sampleId}${seqType}`) ? 'checked' : '';
               result.aaData[i][0] = `<input type="checkbox" 
                                           name="sampleAndSeqType" 
                                           value="${entry.identifier}" ${checked}/>`;
@@ -83,11 +93,11 @@ $.otp.selectSamplesTable = {
   },
 
   /**
-     * Applies a filter on the SeqType column of the datatable.
-     *
-     * @param table the target datatable
-     * @param seqTypeColumnIndex index of the column containing the SeqType
-     */
+   * Applies a filter on the SeqType column of the datatable.
+   *
+   * @param table the target datatable
+   * @param seqTypeColumnIndex index of the column containing the SeqType
+   */
   applySeqTypeFilter(table, seqTypeColumnIndex) {
     $.otp.dataTableFilter.register($('#searchCriteriaTableSeqType'), () => {
       const select = $('#searchCriteriaTableSeqType').find('select')[0];

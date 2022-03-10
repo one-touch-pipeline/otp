@@ -40,7 +40,9 @@
                     <th><g:message code="egaSubmission.sampleMetadata.egaPid"/></th>
                     <th><g:message code="egaSubmission.sampleType"/></th>
                     <th><g:message code="egaSubmission.sampleAlias"/></th>
-                    <th><g:message code="egaSubmission.seqType"/></th>
+                    <th><g:message code="egaSubmission.seqTypeDisplayName"/></th>
+                    <th><g:message code="egaSubmission.sequencingReadType"/></th>
+                    <th><g:message code="egaSubmission.singleCellDisplayName"/></th>
                     <th><g:message code="egaSubmission.sampleMetadata.gender"/></th>
                     <th><g:message code="egaSubmission.sampleMetadata.phenotype"/></th>
                     <th><g:message code="egaSubmission.sampleMetadata.case"/></th>
@@ -61,7 +63,9 @@
                         <td><g:message code="egaSubmission.egaPid"/> ${it.sample.individual.displayName}</td>
                         <td>${it.sample.displayName}</td>
                         <td>${it.egaAliasName}</td>
-                        <td>${it.seqType.toString()}</td>
+                        <td>${it.seqType.displayName}</td>
+                        <td>${it.seqType.libraryLayout}</td>
+                        <td>${it.seqType.singleCellDisplayName}</td>
                         <td><g:message code="egaSubmission.unknown"/></td>
                         <td><g:message code="egaSubmission.unknown"/></td>
                         <td>${SampleTypePerProject.findByProjectAndSampleType(it.project,it.sample.sampleType)?.category?.toString() ?: g.message(code: "egaSubmission.unknown")}</td>

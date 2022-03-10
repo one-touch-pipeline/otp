@@ -99,19 +99,25 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
         List<String> egaSampleAlias = [HelperUtils.uniqueString, HelperUtils.uniqueString]
 
         when:
-        String content = egaSubmissionFileService.generateCsvFile(sampleObjectId, egaSampleAlias)
+        String content = egaSubmissionFileService.generateSampleInformationCsvFile(sampleObjectId, egaSampleAlias)
 
         then:
         content == "${INDIVIDUAL.value}," +
-                "${SEQ_TYPE.value}," +
+                "${SEQ_TYPE_NAME.value}," +
+                "${SEQUENCING_READ_TYPE.value}," +
+                "${SINGLE_CELL.value}," +
                 "${SAMPLE_TYPE.value}," +
                 "${EGA_SAMPLE_ALIAS.value}\n" +
                 "${sampleSubmissionObject1.sample.individual.displayName}," +
-                "${sampleSubmissionObject1.seqType}," +
+                "${sampleSubmissionObject1.seqType.displayName}," +
+                "${sampleSubmissionObject1.seqType.libraryLayout}," +
+                "${sampleSubmissionObject1.seqType.singleCellDisplayName}," +
                 "${sampleSubmissionObject1.sample.sampleType.displayName}," +
                 "${egaSampleAlias[0]}\n" +
                 "${sampleSubmissionObject2.sample.individual.displayName}," +
-                "${sampleSubmissionObject2.seqType}," +
+                "${sampleSubmissionObject2.seqType.displayName}," +
+                "${sampleSubmissionObject2.seqType.libraryLayout}," +
+                "${sampleSubmissionObject2.seqType.singleCellDisplayName}," +
                 "${sampleSubmissionObject2.sample.sampleType.displayName}," +
                 "${egaSampleAlias[1]}\n"
     }
@@ -122,7 +128,7 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
         SampleSubmissionObject sampleSubmissionObject2 = createSampleSubmissionObject()
         List<String> sampleObjectId = [sampleSubmissionObject1.id as String, sampleSubmissionObject2.id as String]
         List<String> egaSampleAlias = [HelperUtils.uniqueString, HelperUtils.uniqueString]
-        String content = egaSubmissionFileService.generateCsvFile(sampleObjectId, egaSampleAlias)
+        String content = egaSubmissionFileService.generateSampleInformationCsvFile(sampleObjectId, egaSampleAlias)
         Spreadsheet spreadsheet = new Spreadsheet(content, Delimiter.COMMA)
 
         when:
@@ -159,7 +165,9 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
 
         then:
         content == "${INDIVIDUAL.value}," +
-                "${SEQ_TYPE.value}," +
+                "${SEQ_TYPE_NAME.value}," +
+                "${SEQUENCING_READ_TYPE.value}," +
+                "${SINGLE_CELL.value}," +
                 "${SAMPLE_TYPE.value}," +
                 "${EGA_SAMPLE_ALIAS.value}," +
                 "${SEQ_CENTER.value}," +
@@ -170,7 +178,9 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
                 "${EGA_FILE_ALIAS.value}," +
                 "${FILENAME.value}\n" +
                 "${dataFileSubmissionObject.dataFile.individual.displayName}," +
-                "${dataFileSubmissionObject.dataFile.seqType}," +
+                "${dataFileSubmissionObject.dataFile.seqType.displayName}," +
+                "${dataFileSubmissionObject.dataFile.seqType.libraryLayout}," +
+                "${dataFileSubmissionObject.dataFile.seqType.singleCellDisplayName}," +
                 "${dataFileSubmissionObject.dataFile.sampleType}," +
                 "${dataFileSubmissionObject.sampleSubmissionObject.egaAliasName}," +
                 "${dataFileSubmissionObject.dataFile.run.seqCenter}," +
@@ -209,13 +219,17 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
 
         then:
         content == "${INDIVIDUAL.value}," +
-                "${SEQ_TYPE.value}," +
+                "${SEQ_TYPE_NAME.value}," +
+                "${SEQUENCING_READ_TYPE.value}," +
+                "${SINGLE_CELL.value}," +
                 "${SAMPLE_TYPE.value}," +
                 "${EGA_SAMPLE_ALIAS.value}," +
                 "${EGA_FILE_ALIAS.value}," +
                 "${FILENAME.value}\n" +
                 "${bamFileSubmissionObject.bamFile.individual.displayName}," +
-                "${bamFileSubmissionObject.bamFile.seqType}," +
+                "${bamFileSubmissionObject.bamFile.seqType.displayName}," +
+                "${bamFileSubmissionObject.bamFile.seqType.libraryLayout}," +
+                "${bamFileSubmissionObject.bamFile.seqType.singleCellDisplayName}," +
                 "${bamFileSubmissionObject.bamFile.sampleType}," +
                 "${bamFileSubmissionObject.sampleSubmissionObject.egaAliasName}," +
                 "${bamFileAlias}," +

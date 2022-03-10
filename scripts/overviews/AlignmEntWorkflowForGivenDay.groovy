@@ -75,7 +75,7 @@ output << bamFile.collect {
             it.sampleType,
             it.seqType.seqTypeName,
             it.seqType.libraryLayout,
-            it.seqType.singleCell ? 'single cell' : 'bulk',
+            it.seqType.singleCellDisplayName,
             it.mergingWorkPackage.libraryPreparationKit ?: '',
             it.referenceGenome,
             it.processingPriority.name,

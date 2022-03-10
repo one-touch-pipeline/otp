@@ -53,7 +53,9 @@
                 <thead>
                     <tr>
                         <th><g:message code="egaSubmission.individual"/></th>
-                        <th><g:message code="egaSubmission.seqType"/></th>
+                        <th><g:message code="egaSubmission.seqTypeDisplayName"/></th>
+                        <th><g:message code="egaSubmission.sequencingReadType"/></th>
+                        <th><g:message code="egaSubmission.singleCellDisplayName"/></th>
                         <th><g:message code="egaSubmission.sampleType"/></th>
                         <th><g:message code="egaSubmission.sampleAlias"/></th>
                     </tr>
@@ -61,13 +63,17 @@
                 <tbody>
                     <g:each status="i" in="${sampleSubmissionObjects}" var="it">
                         <g:set var="individual" value="${it.sample.individual.displayName}" />
-                        <g:set var="seqType" value="${it.seqType.toString()}" />
+                        <g:set var="seqTypeDisplayName" value="${it.seqType.displayName}" />
+                        <g:set var="sequencingReadType" value="${it.seqType.libraryLayout}" />
+                        <g:set var="singleCellDisplayName" value="${it.seqType.singleCellDisplayName}" />
                         <g:set var="sampleType" value="${it.sample.sampleType.displayName}" />
                         <g:set var="key" value="${new EgaMapKey(it)}" />
                         <tr>
                             <g:hiddenField name="sampleObjectId[${i}]" value="${it.id}"/>
                             <td>${individual}</td>
-                            <td>${seqType}</td>
+                            <td>${seqTypeDisplayName}</td>
+                            <td>${sequencingReadType}</td>
+                            <td>${singleCellDisplayName}</td>
                             <td>${sampleType}</td>
                             <td><g:textField name="egaSampleAlias[${i}]" size="50" value="${egaSampleAliases.get(key)}"/></td>
                             <g:hiddenField name="fileType[${i}]" value="${message(code: 'egaSubmission.fastq')}"/>
