@@ -149,7 +149,10 @@ environments {
             String usePostgresDocker = System.properties['usePostgresDocker']
 
             if ("TRUE".equalsIgnoreCase(usePostgresDocker)) {
-                String dockerPort = System.properties['dockerPort']
+                String workerId = System.properties['org.gradle.test.worker']
+                String dockerPorts = System.properties['dockerPorts']
+                String maxParallelForks = System.properties['maxParallelForks']
+                String dockerPort = dockerPorts.split(',')[(workerId as int) % (maxParallelForks as int)]
 
                 driverClassName = 'org.postgresql.Driver'
                 dialect = PostgreSQL9Dialect

@@ -34,7 +34,7 @@ buildscript {
     }
     dependencies {
         classpath "org.grails:grails-gradle-plugin:$grailsVersion"
-        classpath "org.grails.plugins:hibernate5:${gormVersion-".RELEASE"}"
+        classpath "org.grails.plugins:hibernate5:${gormVersion - ".RELEASE"}"
         classpath "com.bertramlabs.plugins:asset-pipeline-gradle:2.15.1"
         classpath "com.bertramlabs.plugins:less-asset-pipeline:2.15.1"
         classpath 'org.grails.plugins:database-migration:3.0.4'
@@ -59,20 +59,20 @@ buildScan {
         value 'Git Commit ID', commitId
         buildScan.link 'Source', "$gitlabUrl/-/commit/$commitId"
         buildScanPublished { PublishedBuildScan scan ->
-                file("$buildDir/scan-journal.log") << "${new Date()} - ${scan.buildScanId} - ${scan.buildScanUri}\n"
+            file("$buildDir/scan-journal.log") << "${new Date()} - ${scan.buildScanId} - ${scan.buildScanUri}\n"
         }
     }
 }
 
 group "de.dkfz.tbi"
 
-apply plugin:"eclipse"
-apply plugin:"idea"
-apply plugin:"war"
-apply plugin:"org.grails.grails-web"
-apply plugin:"asset-pipeline"
-apply plugin:"org.grails.grails-gsp"
-apply plugin:"codenarc"
+apply plugin: "eclipse"
+apply plugin: "idea"
+apply plugin: "war"
+apply plugin: "org.grails.grails-web"
+apply plugin: "asset-pipeline"
+apply plugin: "org.grails.grails-gsp"
+apply plugin: "codenarc"
 apply plugin: BuildScanPlugin
 
 repositories {
@@ -143,44 +143,53 @@ integrationTest {
     systemProperty "usePostgresDocker", usePostgresDocker.toString()
 
     if (usePostgresDocker) {
-        String dc = ""
+        List<String> dcs = []
         doFirst {
             println "use postgres docker"
 
-            // Setup the project name for use by the Continuous Integration server the prevent race conditions.
-            String projectName = "--project-name otptest-build-${System.getenv('BUILD_NUMBER') ?: 'DEFAULT'}"
-
             // Where is docker-compose?
-            String dockerCompose = '/usr/bin/which docker-compose'.execute()?.text
+            String dockerCompose = '/usr/bin/which docker-compose'.execute()?.text?.trim()
             if (!dockerCompose) {
                 throw new IllegalStateException('Unable to find docker-compose. Is it installed and available via PATH?')
             }
 
-            // Construct command string
-            dc = "${dockerCompose} ${projectName} --file docker/otp-test/docker-compose.yml"
+            List<String> dockerPorts = (0..maxParallelForks - 1).collect {
 
-            //cleanup in case the container still exist
-            "${dc} stop".execute().waitFor()
-            "${dc} rm -f".execute().waitFor()
+                // Setup the project name for use by the Continuous Integration server the prevent race conditions.
+                String projectName = "--project-name otptest-build-${System.getenv('BUILD_NUMBER') ?: 'DEFAULT'}-w-${it}"
 
-            // Start a fresh container
-            if ("${dc} up -d".execute().waitFor() != 0) {
-                throw new IllegalStateException('Unable to start new database container.')
+                // Construct command string
+                String dc = "${dockerCompose} ${projectName} --file docker/otp-test/docker-compose.yml"
+                dcs << dc
+
+                //cleanup in case the container still exist
+                "${dc} stop".execute().waitFor()
+                "${dc} rm -f".execute().waitFor()
+
+                // Start a fresh container
+                if ("${dc} up -d".execute().waitFor() != 0) {
+                    throw new IllegalStateException('Unable to start new database container.')
+                }
+                // Get the (dynamically assigned local) port
+                def dockerProcess = "${dc} port integration 5432".execute()
+                // If we do not get a reply in time or the return code indicates a failure, fail.
+                if (!dockerProcess.waitFor(5, SECONDS) || dockerProcess.exitValue() != 0) {
+                    throw new IllegalStateException('Unable to get port information from Docker. Is the test database container running?')
+                }
+                String dockerPort = dockerProcess.text.split(':').last().trim() // should work for IPv6 also
+                return dockerPort
             }
-            // Get the (dynamically assigned local) port
-            def dockerProcess = "${dc} port integration 5432".execute()
-            // If we do not get a reply in time or the return code indicates a failure, fail.
-            if (!dockerProcess.waitFor(5, SECONDS) || dockerProcess.exitValue() != 0) {
-                throw new IllegalStateException('Unable to get port information from Docker. Is the test database container running?')
-            }
-            String dockerPort = dockerProcess.text.split(':').last().trim() // should work for IPv6 also
-            systemProperty "dockerPort", dockerPort
+
+            systemProperty "maxParallelForks", maxParallelForks
+            systemProperty "dockerPorts", dockerPorts.join(',')
         }
 
         doLast {
             // Stop and destroy the container
-            "${dc} stop".execute().waitFor()
-            "${dc} rm -f".execute().waitFor()
+            dcs.each { dc ->
+                "${dc} stop".execute().waitFor()
+                "${dc} rm -f".execute().waitFor()
+            }
         }
     } else {
         println "use h2 database"
@@ -198,7 +207,7 @@ task workflowTest(type: Test) {
 }
 
 configurations.all {
-    exclude group: 'org.webjars', module:'popper.js'    // exclude popper.js, since the correct version is already imported within bootstrap.bundle
+    exclude group: 'org.webjars', module: 'popper.js'    // exclude popper.js, since the correct version is already imported within bootstrap.bundle
 }
 
 dependencies {
@@ -355,7 +364,7 @@ assets {
     minifyJs = true
     minifyCss = true
     minifyOptions = [
-            languageMode: 'ES6',
+            languageMode  : 'ES6',
             targetLanguage: 'ES5',
     ]
 }
@@ -399,13 +408,12 @@ tasks.withType(CodeNarc) {
 }
 
 processResources {
-    from('src/seed') {into 'seed'}
+    from('src/seed') { into 'seed' }
 }
 
 war {
     archiveName = 'otp.war'
 }
-
 
 /* Documentation Tasks */
 
@@ -461,7 +469,7 @@ task esLintExport(type: NpmTask) {
 
 task esLintExportCi(type: NpmTask) {
     dependsOn npmInstall
-    environment = ['CI':'true']
+    environment = ['CI': 'true']
     args = ['run', 'lint-export']
 }
 
