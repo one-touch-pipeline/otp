@@ -45,7 +45,7 @@ import de.dkfz.tbi.otp.utils.MessageSourceService
 @Scope("singleton")
 @Component
 @Slf4j
-class DeactivateUsersJob extends ScheduledJob {
+class DeactivateUsersJob extends AbstractScheduledJob {
 
     @Autowired
     ProjectService projectService

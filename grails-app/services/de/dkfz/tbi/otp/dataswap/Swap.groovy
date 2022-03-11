@@ -25,7 +25,7 @@ package de.dkfz.tbi.otp.dataswap
  * Simplified Tuple2<T1, T2> where T1 and T2 are always the same Type <T>.
  * A swap represents a swap between an old and a new value of the same type.
  *
- * It is used in the DTOs of {@link DataSwapService} and simplifies the the
+ * It is used in the DTOs of {@link AbstractDataSwapService} and simplifies the the
  * handling of data swaps.
  *
  * @param <T> - Type of the old and corresponding new value

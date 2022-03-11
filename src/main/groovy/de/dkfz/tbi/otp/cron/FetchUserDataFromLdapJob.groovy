@@ -37,7 +37,7 @@ import de.dkfz.tbi.otp.security.User
 @Scope("singleton")
 @Component
 @Slf4j
-class FetchUserDataFromLdapJob extends ScheduledJob {
+class FetchUserDataFromLdapJob extends AbstractScheduledJob {
 
     @Autowired
     LdapService ldapService

@@ -39,7 +39,7 @@ import de.dkfz.tbi.otp.security.User
 @Scope("singleton")
 @Component
 @Slf4j
-class CheckForAdUpdateJob extends ScheduledJob {
+class CheckForAdUpdateJob extends AbstractScheduledJob {
 
     @Autowired
     LdapService ldapService

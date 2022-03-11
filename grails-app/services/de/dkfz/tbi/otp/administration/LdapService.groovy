@@ -297,11 +297,11 @@ class LdapService implements InitializingBean {
 }
 
 @SuppressWarnings('AbstractClassWithoutAbstractMethod')
-abstract class LdapServiceAwareAttributesMapper<T> implements AttributesMapper<T> {
+abstract class AbstractLdapServiceAwareAttributesMapper<T> implements AttributesMapper<T> {
     LdapService ldapService
 }
 
-class LdapUserDetailsAttributesMapper extends LdapServiceAwareAttributesMapper<LdapUserDetails> {
+class LdapUserDetailsAttributesMapper extends AbstractLdapServiceAwareAttributesMapper<LdapUserDetails> {
     @Override
     LdapUserDetails mapFromAttributes(Attributes a) throws NamingException {
         List<String> memberOfList = a.get(LdapKey.MEMBER_OF)?.all?.collect {
@@ -326,7 +326,7 @@ class LdapUserDetailsAttributesMapper extends LdapServiceAwareAttributesMapper<L
     }
 }
 
-class IsUserDeactivatedMapper extends LdapServiceAwareAttributesMapper<Boolean> {
+class IsUserDeactivatedMapper extends AbstractLdapServiceAwareAttributesMapper<Boolean> {
     @Override
     Boolean mapFromAttributes(Attributes a) throws NamingException {
         return ldapService.getIsDeactivatedFromAttributes(a)
@@ -351,7 +351,7 @@ class DistinguishedNameAttributesMapper implements AttributesMapper<String> {
     }
 }
 
-class UsernameAttributesMapper extends LdapServiceAwareAttributesMapper<String> {
+class UsernameAttributesMapper extends AbstractLdapServiceAwareAttributesMapper<String> {
     @Override
     String mapFromAttributes(Attributes a) throws NamingException {
         return a.get(ldapService.configService.ldapSearchAttribute)?.get()?.toString()

@@ -24,7 +24,7 @@ package de.dkfz.tbi.otp.alignment.roddy.panCan
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
-class PanCanExomeAlignmentWorkflowTests extends PanCanAlignmentWorkflowTests {
+class PanCanExomeAlignmentWorkflowTests extends AbstractPanCanAlignmentWorkflowTests {
 
     @Override
     SeqType findSeqType() {

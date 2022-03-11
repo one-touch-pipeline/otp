@@ -40,7 +40,7 @@ import java.time.ZoneId
 @Scope("singleton")
 @Component
 @Slf4j
-class GenerateAndSendKPIsForNBI extends ScheduledJob {
+class GenerateAndSendKPIsForNBI extends AbstractScheduledJob {
 
     @Autowired
     MailHelperService mailHelperService

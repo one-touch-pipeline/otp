@@ -34,7 +34,7 @@ import java.nio.file.Path
 
 @SuppressWarnings("JavaIoPackageAccess")
 @Transactional
-class IndividualSwapService extends DataSwapService<IndividualSwapParameters, IndividualSwapData> {
+class IndividualSwapService extends AbstractDataSwapService<IndividualSwapParameters, IndividualSwapData> {
 
     ProjectService projectService
 

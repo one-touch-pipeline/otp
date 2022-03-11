@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-import de.dkfz.tbi.otp.dataswap.DataSwapService
+import de.dkfz.tbi.otp.dataswap.AbstractDataSwapService
 import de.dkfz.tbi.otp.ngsdata.*
 
 /**
@@ -180,7 +180,7 @@ script << """|
 script << """
           |//scripts to execute
           |/*
-          |${DataSwapService.BASH_HEADER + all_swaps.collect { "bash ${it}.sh" }.join('\n')}
+          |${AbstractDataSwapService.BASH_HEADER + all_swaps.collect { "bash ${it}.sh" }.join('\n')}
           |*/
           |
           |""".stripMargin()

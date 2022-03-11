@@ -43,7 +43,7 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 
 import java.nio.file.*
 
-class DataSwapServiceSpec extends Specification implements DataTest, RoddyPancanFactory {
+class AbstractDataSwapServiceSpec extends Specification implements DataTest, RoddyPancanFactory {
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -71,14 +71,14 @@ class DataSwapServiceSpec extends Specification implements DataTest, RoddyPancan
     TemporaryFolder temporaryFolder
 
     @Shared
-    DataSwapService service
+    AbstractDataSwapService service
 
     void setupSpec() {
-        service = Spy(DataSwapService)
+        service = Spy(AbstractDataSwapService)
     }
 
-    DataSwapService setupServiceWithAbstractMethods() {
-        return Spy(type: new DataSwapService<DataSwapParameters, DataSwapData<DataSwapParameters>>() {
+    AbstractDataSwapService setupServiceWithAbstractMethods() {
+        return Spy(type: new AbstractDataSwapService<DataSwapParameters, DataSwapData<DataSwapParameters>>() {
             @Override
             protected void logSwapParameters(DataSwapParameters params) {
                 // Is not functionally tested here
@@ -114,12 +114,12 @@ class DataSwapServiceSpec extends Specification implements DataTest, RoddyPancan
             protected void cleanupLeftOvers(DataSwapData<DataSwapParameters> data) {
                 // Is not functionally tested here
             }
-        }.class) as DataSwapService
+        }.class) as AbstractDataSwapService
     }
 
     void "swap(P parameters), calls methods in the right order"() {
         given:
-        DataSwapService service = setupServiceWithAbstractMethods()
+        AbstractDataSwapService service = setupServiceWithAbstractMethods()
 
         final DataSwapParameters parameters = new DataSwapParameters()
 
@@ -146,7 +146,7 @@ class DataSwapServiceSpec extends Specification implements DataTest, RoddyPancan
 
     void "swap(D data), calls methods in the right order"() {
         given:
-        DataSwapService service = setupServiceWithAbstractMethods()
+        AbstractDataSwapService service = setupServiceWithAbstractMethods()
 
         final DataSwapData dataSwapData = new DataSwapData<DataSwapParameters>()
 
@@ -234,15 +234,15 @@ class DataSwapServiceSpec extends Specification implements DataTest, RoddyPancan
 
         Map<DataFile, Map<String, ?>> expected = [
                 (dataFile): [
-                        (DataSwapService.DIRECT_FILE_NAME): 'finalFile',
-                        (DataSwapService.VBP_FILE_NAME)   : 'viewByPidFile',
+                        (AbstractDataSwapService.DIRECT_FILE_NAME): 'finalFile',
+                        (AbstractDataSwapService.VBP_FILE_NAME)   : 'viewByPidFile',
                 ],
         ]
         if (wellCount) {
             expected[dataFile] << [
-                    (DataSwapService.WELL_FILE_NAME)              : 'wellFile',
-                    (DataSwapService.WELL_MAPPING_FILE_NAME)      : 'wellMappingFile',
-                    (DataSwapService.WELL_MAPPING_FILE_ENTRY_NAME): 'entry',
+                    (AbstractDataSwapService.WELL_FILE_NAME)              : 'wellFile',
+                    (AbstractDataSwapService.WELL_MAPPING_FILE_NAME)      : 'wellMappingFile',
+                    (AbstractDataSwapService.WELL_MAPPING_FILE_ENTRY_NAME): 'entry',
             ]
         }
 
@@ -319,10 +319,10 @@ class DataSwapServiceSpec extends Specification implements DataTest, RoddyPancan
         }
 
         final Map<String, ?> oldValues = [
-                (DataSwapService.DIRECT_FILE_NAME)            : OLD_FINAL_PATH,
-                (DataSwapService.WELL_FILE_NAME)              : OLD_WELL_PATH,
-                (DataSwapService.WELL_MAPPING_FILE_NAME)      : Paths.get(OLD_MAPPING_PATH),
-                (DataSwapService.WELL_MAPPING_FILE_ENTRY_NAME): OLD_ENTRY,
+                (AbstractDataSwapService.DIRECT_FILE_NAME)            : OLD_FINAL_PATH,
+                (AbstractDataSwapService.WELL_FILE_NAME)              : OLD_WELL_PATH,
+                (AbstractDataSwapService.WELL_MAPPING_FILE_NAME)      : Paths.get(OLD_MAPPING_PATH),
+                (AbstractDataSwapService.WELL_MAPPING_FILE_ENTRY_NAME): OLD_ENTRY,
         ]
 
         final String expectedScript = """
@@ -538,7 +538,7 @@ class DataSwapServiceSpec extends Specification implements DataTest, RoddyPancan
         scriptOutputDirectory.toFile().listFiles().length != 0
         File alignmentScript = scriptOutputDirectory.resolve("restartAli_${bashScriptName}.groovy").toFile()
         alignmentScript.exists()
-        alignmentScript.text == DataSwapService.ALIGNMENT_SCRIPT_HEADER
+        alignmentScript.text == AbstractDataSwapService.ALIGNMENT_SCRIPT_HEADER
     }
 
     void "createGroovyConsoleScriptToRestartAlignments, when seq track given write comment header and seq track comments to script file"() {
@@ -563,7 +563,7 @@ class DataSwapServiceSpec extends Specification implements DataTest, RoddyPancan
 
         final DataSwapData dataSwapData = new DataSwapData<DataSwapParameters>(parameters: parameters, seqTrackList: seqTrackList)
 
-        final String expectedAlignmentScript = DataSwapService.ALIGNMENT_SCRIPT_HEADER + "    ${seqTrackList[0].id},  //${seqTrackList[0]}\n" +
+        final String expectedAlignmentScript = AbstractDataSwapService.ALIGNMENT_SCRIPT_HEADER + "    ${seqTrackList[0].id},  //${seqTrackList[0]}\n" +
                 "    ${seqTrackList[1].id},  //${seqTrackList[1]}\n"
 
         when:
@@ -674,8 +674,8 @@ class DataSwapServiceSpec extends Specification implements DataTest, RoddyPancan
         StringBuilder log = new StringBuilder()
         final Map<DataFile, Map<String, ?>> oldDataFileNameMap = [
                 (dataFile): [
-                        (DataSwapService.DIRECT_FILE_NAME): oldFile.toString(),
-                        (DataSwapService.VBP_FILE_NAME)   : oldFileViewByPid.toString(),
+                        (AbstractDataSwapService.DIRECT_FILE_NAME): oldFile.toString(),
+                        (AbstractDataSwapService.VBP_FILE_NAME)   : oldFileViewByPid.toString(),
                 ],
         ]
 
@@ -728,8 +728,8 @@ class DataSwapServiceSpec extends Specification implements DataTest, RoddyPancan
         StringBuilder log = new StringBuilder()
         final Map<DataFile, Map<String, ?>> oldDataFileNameMap = [
                 (dataFile): [
-                        (DataSwapService.DIRECT_FILE_NAME): oldFile.toString(),
-                        (DataSwapService.VBP_FILE_NAME)   : oldFileViewByPid.toString(),
+                        (AbstractDataSwapService.DIRECT_FILE_NAME): oldFile.toString(),
+                        (AbstractDataSwapService.VBP_FILE_NAME)   : oldFileViewByPid.toString(),
                 ],
         ]
 
@@ -788,8 +788,8 @@ class DataSwapServiceSpec extends Specification implements DataTest, RoddyPancan
         StringBuilder log = new StringBuilder()
         final Map<DataFile, Map<String, String>> oldDataFileNameMap = dataFileList.collectEntries {
             [(it): [
-                    (DataSwapService.DIRECT_FILE_NAME): dataFilePaths[it].oldPath.toString(),
-                    (DataSwapService.VBP_FILE_NAME)   : dataFilePaths[it].oldVbpPath.toString(),
+                    (AbstractDataSwapService.DIRECT_FILE_NAME): dataFilePaths[it].oldPath.toString(),
+                    (AbstractDataSwapService.VBP_FILE_NAME)   : dataFilePaths[it].oldVbpPath.toString(),
             ]]
         }
 
@@ -923,8 +923,8 @@ class DataSwapServiceSpec extends Specification implements DataTest, RoddyPancan
         StringBuilder log = new StringBuilder()
         final Map<DataFile, Map<String, String>> oldDataFileNameMap = dataFileList.collectEntries {
             [(it): [
-                    (DataSwapService.DIRECT_FILE_NAME): dataFilePaths[it].oldPath.toString(),
-                    (DataSwapService.VBP_FILE_NAME)   : dataFilePaths[it].oldVbpPath.toString(),
+                    (AbstractDataSwapService.DIRECT_FILE_NAME): dataFilePaths[it].oldPath.toString(),
+                    (AbstractDataSwapService.VBP_FILE_NAME)   : dataFilePaths[it].oldVbpPath.toString(),
             ]]
         }
 
@@ -1018,11 +1018,11 @@ class DataSwapServiceSpec extends Specification implements DataTest, RoddyPancan
         StringBuilder log = new StringBuilder()
         final Map<DataFile, Map<String, String>> oldDataFileNameMap = dataFileList.collectEntries {
             [(it): [
-                    (DataSwapService.DIRECT_FILE_NAME)            : dataFilePaths[it].oldPath.toString(),
-                    (DataSwapService.VBP_FILE_NAME)               : dataFilePaths[it].oldVbpPath.toString(),
-                    (DataSwapService.WELL_FILE_NAME)              : dataFilePaths[it].oldWellFile.toString(),
-                    (DataSwapService.WELL_MAPPING_FILE_NAME)      : dataFilePaths[it].oldWellMappingFile,
-                    (DataSwapService.WELL_MAPPING_FILE_ENTRY_NAME): dataFilePaths[it].oldWellMappingFileEntryName,
+                    (AbstractDataSwapService.DIRECT_FILE_NAME)            : dataFilePaths[it].oldPath.toString(),
+                    (AbstractDataSwapService.VBP_FILE_NAME)               : dataFilePaths[it].oldVbpPath.toString(),
+                    (AbstractDataSwapService.WELL_FILE_NAME)              : dataFilePaths[it].oldWellFile.toString(),
+                    (AbstractDataSwapService.WELL_MAPPING_FILE_NAME)      : dataFilePaths[it].oldWellMappingFile,
+                    (AbstractDataSwapService.WELL_MAPPING_FILE_ENTRY_NAME): dataFilePaths[it].oldWellMappingFileEntryName,
             ]]
         }
 
@@ -1107,8 +1107,8 @@ class DataSwapServiceSpec extends Specification implements DataTest, RoddyPancan
         StringBuilder log = new StringBuilder()
         final Map<DataFile, Map<String, ?>> oldDataFileNameMap = [
                 (dataFile): [
-                        (DataSwapService.DIRECT_FILE_NAME): dataFile.fileName,
-                        (DataSwapService.VBP_FILE_NAME)   : 'viewByPidFile',
+                        (AbstractDataSwapService.DIRECT_FILE_NAME): dataFile.fileName,
+                        (AbstractDataSwapService.VBP_FILE_NAME)   : 'viewByPidFile',
                 ],
         ]
 

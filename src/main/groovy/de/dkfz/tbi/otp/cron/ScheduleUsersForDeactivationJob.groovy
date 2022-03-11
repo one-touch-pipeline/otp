@@ -55,7 +55,7 @@ import java.time.LocalDateTime
 @Scope("singleton")
 @Component
 @Slf4j
-class ScheduleUsersForDeactivationJob extends ScheduledJob {
+class ScheduleUsersForDeactivationJob extends AbstractScheduledJob {
 
     @Autowired
     LinkGenerator linkGenerator

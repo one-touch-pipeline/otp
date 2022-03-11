@@ -24,7 +24,7 @@ package de.dkfz.tbi.otp.dataswap.data
 import grails.validation.Validateable
 import groovy.transform.TupleConstructor
 
-import de.dkfz.tbi.otp.dataswap.DataSwapService
+import de.dkfz.tbi.otp.dataswap.AbstractDataSwapService
 import de.dkfz.tbi.otp.ngsdata.DataFile
 import de.dkfz.tbi.otp.ngsdata.Individual
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
@@ -69,7 +69,7 @@ class DataSwapData<P extends DataSwapParameters> implements Validateable {
     Map<DataFile, Map<String, String>> oldDataFileNameMap
     List<String> oldFastQcFileNames
     List<File> dirsToDelete = []
-    List<String> moveFilesCommands = [DataSwapService.BASH_HEADER]
+    List<String> moveFilesCommands = [AbstractDataSwapService.BASH_HEADER]
     List<Path> cleanupIndividualPaths
     String cleanupSampleDir
 

@@ -34,7 +34,7 @@ import java.nio.file.Path
 
 @SuppressWarnings("JavaIoPackageAccess")
 @Transactional
-class SampleSwapService extends DataSwapService<SampleSwapParameters, SampleSwapData> {
+class SampleSwapService extends AbstractDataSwapService<SampleSwapParameters, SampleSwapData> {
 
     AbstractMergedBamFileService abstractMergedBamFileService
 

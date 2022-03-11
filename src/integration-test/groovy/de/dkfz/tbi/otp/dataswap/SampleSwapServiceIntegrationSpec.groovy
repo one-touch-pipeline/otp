@@ -124,7 +124,7 @@ class SampleSwapServiceIntegrationSpec extends Specification implements UserAndR
         File copyScript = scriptFolder.resolve("${script}.sh").toFile()
         copyScript.exists()
         String copyScriptContent = copyScript.text
-        copyScriptContent.startsWith(DataSwapService.BASH_HEADER)
+        copyScriptContent.startsWith(AbstractDataSwapService.BASH_HEADER)
         copyScriptContent.contains("rm -rf ${destinationDirectory}")
         DataFile.findAllBySeqTrack(seqTrack).eachWithIndex { DataFile it, int i ->
             assert copyScriptContent.contains("rm -f '${dataFileLinks[i]}'")

@@ -23,8 +23,7 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import groovy.transform.Canonical
 
-@Canonical
-abstract class AlignmentInfo {
+trait AlignmentInfo {
     String alignmentProgram
     String alignmentParameter
     String programVersion
@@ -33,7 +32,7 @@ abstract class AlignmentInfo {
 }
 
 @Canonical
-class RoddyAlignmentInfo extends AlignmentInfo {
+class RoddyAlignmentInfo implements AlignmentInfo {
     String samToolsCommand
     String mergeCommand
     String mergeOptions
@@ -53,7 +52,7 @@ class RoddyAlignmentInfo extends AlignmentInfo {
 }
 
 @Canonical
-class SingleCellAlignmentInfo extends AlignmentInfo {
+class SingleCellAlignmentInfo implements AlignmentInfo {
 
     @Override
     Map<String, Object> getAlignmentSpecificMessageAttributes() {

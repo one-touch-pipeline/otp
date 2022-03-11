@@ -30,6 +30,7 @@ import de.dkfz.tbi.otp.ngsdata.SeqTypeService
  * @deprecated class is part of the old workflow system, use {@link de.dkfz.tbi.otp.workflowExecution.decider.Decider} instead
  */
 @Deprecated
+@SuppressWarnings('AbstractClassName')
 abstract class RoddyAlignmentDecider extends AbstractAlignmentDecider {
 
     // See integration test for explanation in which cases workpackages needs processing

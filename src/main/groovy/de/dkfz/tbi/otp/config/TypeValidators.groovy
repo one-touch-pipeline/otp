@@ -24,7 +24,7 @@ package de.dkfz.tbi.otp.config
 import org.apache.commons.validator.routines.EmailValidator
 import org.springframework.context.ApplicationContext
 
-import de.dkfz.tbi.otp.cron.ScheduledJob
+import de.dkfz.tbi.otp.cron.AbstractScheduledJob
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.AbstractOtpJob
@@ -94,7 +94,7 @@ enum TypeValidators {
 
     GUI_ANNOTATION({ GuiAnnotation.getByName(it) }, { GuiAnnotation.values()*.name() }),
 
-    CRONJOB_CLASS({ it in ScheduledJob.ALL_JOB_CLASSES*.canonicalName }, { ScheduledJob.ALL_JOB_CLASSES*.canonicalName }),
+    CRONJOB_CLASS({ it in AbstractScheduledJob.ALL_JOB_CLASSES*.canonicalName }, { AbstractScheduledJob.ALL_JOB_CLASSES*.canonicalName }),
 
     private final Closure validator
     private final Closure<List<String>> allowedValues

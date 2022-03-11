@@ -51,7 +51,7 @@ import java.nio.file.*
  */
 @SuppressWarnings("JavaIoPackageAccess")
 @Transactional
-abstract class DataSwapService<P extends DataSwapParameters, D extends DataSwapData<P>> {
+abstract class AbstractDataSwapService<P extends DataSwapParameters, D extends DataSwapData<P>> {
 
     static final String DIRECT_FILE_NAME = "directFileName"
     static final String VBP_FILE_NAME = "vbpFileName"

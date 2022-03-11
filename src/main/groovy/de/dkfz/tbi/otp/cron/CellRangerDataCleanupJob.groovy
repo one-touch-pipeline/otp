@@ -46,7 +46,7 @@ import java.time.LocalDate
 @Scope("singleton")
 @Component
 @Slf4j
-class CellRangerDataCleanupJob extends ScheduledJob {
+class CellRangerDataCleanupJob extends AbstractScheduledJob {
 
     static final int DELETE_AFTER_WEEKS = 12
 

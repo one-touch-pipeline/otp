@@ -39,7 +39,7 @@ import de.dkfz.tbi.otp.utils.MailHelperService
 @Scope("singleton")
 @Component
 @Slf4j
-class UnknownLdapUsersJob extends ScheduledJob {
+class UnknownLdapUsersJob extends AbstractScheduledJob {
 
     @Autowired
     MailHelperService mailHelperService

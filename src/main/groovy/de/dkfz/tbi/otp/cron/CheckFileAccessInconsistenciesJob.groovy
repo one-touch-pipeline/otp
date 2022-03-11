@@ -38,7 +38,7 @@ import de.dkfz.tbi.otp.utils.SystemUserUtils
 @Scope("singleton")
 @Component
 @Slf4j
-class CheckFileAccessInconsistenciesJob extends ScheduledJob {
+class CheckFileAccessInconsistenciesJob extends AbstractScheduledJob {
 
     static final String SUBJECT = "User Management Inconsistencies status"
 

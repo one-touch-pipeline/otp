@@ -36,7 +36,7 @@ import java.nio.file.Path
 
 @SuppressWarnings("JavaIoPackageAccess")
 @Transactional
-class LaneSwapService extends DataSwapService<LaneSwapParameters, LaneSwapData> {
+class LaneSwapService extends AbstractDataSwapService<LaneSwapParameters, LaneSwapData> {
 
     ProjectService projectService
 

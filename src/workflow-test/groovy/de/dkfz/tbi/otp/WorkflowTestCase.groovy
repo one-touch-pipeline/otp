@@ -72,6 +72,7 @@ import static de.dkfz.tbi.otp.utils.LocalShellHelper.executeAndAssertExitCodeAnd
 @Deprecated
 @Slf4j
 @Integration
+@SuppressWarnings('AbstractClassName')
 abstract class WorkflowTestCase extends Specification implements UserAndRoles, GroovyScriptAwareTestCase, DomainFactoryCore, UserDomainFactory {
 
     ErrorLogService errorLogService

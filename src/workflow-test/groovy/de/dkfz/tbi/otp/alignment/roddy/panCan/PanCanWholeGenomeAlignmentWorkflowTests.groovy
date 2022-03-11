@@ -27,7 +27,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.SessionUtils
 
-class PanCanWholeGenomeAlignmentWorkflowTests extends PanCanAlignmentWorkflowTests {
+class PanCanWholeGenomeAlignmentWorkflowTests extends AbstractPanCanAlignmentWorkflowTests {
 
     void "test alignLanesOnly, no baseBam exists, one lane, with adapterTrimming, all fine"() {
         given:

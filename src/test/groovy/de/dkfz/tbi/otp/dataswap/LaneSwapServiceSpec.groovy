@@ -180,7 +180,7 @@ class LaneSwapServiceSpec extends Specification implements DataTest, ServiceUnit
         File bashScript = scriptFolder.resolve("${scriptName}.sh").toFile()
         bashScript.exists()
         String bashScriptContent = bashScript.text
-        bashScriptContent.startsWith(DataSwapService.BASH_HEADER)
+        bashScriptContent.startsWith(AbstractDataSwapService.BASH_HEADER)
         bashScriptContent.contains(
                 "rm -rf ${oldIndividual.getViewByPidPath(falsySampleSeqType).absoluteDataManagementPath.toPath().resolve(falsyLabeledSample.sampleType.dirName)}"
         )

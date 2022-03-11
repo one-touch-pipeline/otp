@@ -40,7 +40,7 @@ import java.time.LocalDateTime
 @Scope("singleton")
 @Component
 @Slf4j
-abstract class ScheduledJob {
+abstract class AbstractScheduledJob {
 
     static final List<Class> ALL_JOB_CLASSES = [
             CellRangerDataCleanupJob,

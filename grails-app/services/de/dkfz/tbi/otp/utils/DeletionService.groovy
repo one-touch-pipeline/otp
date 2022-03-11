@@ -32,7 +32,7 @@ import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerQualityAssessment
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.AnalysisDeletionService
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
-import de.dkfz.tbi.otp.dataswap.DataSwapService
+import de.dkfz.tbi.otp.dataswap.AbstractDataSwapService
 import de.dkfz.tbi.otp.egaSubmission.EgaSubmission
 import de.dkfz.tbi.otp.fileSystemConsistency.ConsistencyStatus
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
@@ -279,7 +279,7 @@ class DeletionService {
 
         Realm realm = configService.defaultRealm
         Path bashScriptToMoveFiles = fileService.createOrOverwriteScriptOutputFile(scriptOutputDirectory, "Delete_${projectName}.sh", realm)
-        bashScriptToMoveFiles << DataSwapService.BASH_HEADER
+        bashScriptToMoveFiles << AbstractDataSwapService.BASH_HEADER
 
         (dirsToDelete - externalMergedBamFolders).each {
             bashScriptToMoveFiles << "rm -rf ${it}\n"
