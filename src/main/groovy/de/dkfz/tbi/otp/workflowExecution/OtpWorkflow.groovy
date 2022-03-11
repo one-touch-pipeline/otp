@@ -54,4 +54,14 @@ trait OtpWorkflow {
      * @return message code or null if not available
      */
     abstract String getUserDocumentation()
+
+    /**
+     * Determines whether the workflow is shown on the workflow selection page as alignment workflow
+     */
+    abstract boolean isAlignment()
+
+    /**
+     * Determines whether the workflow is shown on the workflow selection page as analysis workflow
+     */
+    abstract boolean isAnalysis()
 }

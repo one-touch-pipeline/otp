@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.workflowExecution
 
 import grails.gorm.transactions.Transactional
 
+import de.dkfz.tbi.otp.dataprocessing.MergingCriteriaService
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 import de.dkfz.tbi.otp.ngsdata.SeqType
 
@@ -32,6 +33,8 @@ import java.time.LocalDate
 class WorkflowService {
 
     JobService jobService
+
+    MergingCriteriaService mergingCriteriaService
 
     OtpWorkflowService otpWorkflowService
 
@@ -151,6 +154,11 @@ class WorkflowService {
         }
 
         workflow.save(flush: true)
+
+        workflow.supportedSeqTypes.each {
+            mergingCriteriaService.createDefaultMergingCriteria(it)
+        }
+
         return workflow
     }
 }

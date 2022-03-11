@@ -27,6 +27,7 @@ import grails.transaction.Rollback
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.UserAndRoles
@@ -34,7 +35,7 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 
 @Rollback
 @Integration
-class MergingCriteriaServiceIntegrationSpec extends Specification implements UserAndRoles, DomainFactoryCore {
+class MergingCriteriaServiceIntegrationSpec extends Specification implements UserAndRoles, DomainFactoryCore, WorkflowSystemDomainFactory {
     MergingCriteriaService mergingCriteriaService = new MergingCriteriaService()
 
     void setupData() {
@@ -134,6 +135,42 @@ class MergingCriteriaServiceIntegrationSpec extends Specification implements Use
         !CollectionUtils.atMostOneElement(MergingCriteria.findAllByProjectAndSeqType(project, seqType))
     }
 
+    void "test createOrUpdateMergingCriteria, for sequencing platform group"() {
+        given:
+        setupData()
+
+        MergingCriteria mc = createMergingCriteria()
+
+        when:
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
+            mergingCriteriaService.updateMergingCriteria(mc, spg)
+        }
+
+        then:
+        mc.useSeqPlatformGroup == spg
+
+        where:
+        spg << MergingCriteria.SpecificSeqPlatformGroups.values()
+    }
+
+    void "test createOrUpdateMergingCriteria, for library preparation kit"() {
+        given:
+        setupData()
+
+        MergingCriteria mc = createMergingCriteria()
+
+        when:
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
+            mergingCriteriaService.updateMergingCriteria(mc, lpk)
+        }
+
+        then:
+        mc.useLibPrepKit == lpk
+
+        where:
+        lpk << [true, false]
+    }
+
     void "test createDefaultMergingCriteria, creates a MergingCriteria"() {
         given:
         DomainFactory.createAllAlignableSeqTypes()
@@ -171,6 +208,96 @@ class MergingCriteriaServiceIntegrationSpec extends Specification implements Use
 
         when:
         mergingCriteriaService.createDefaultMergingCriteria(project, seqType)
+
+        then:
+        MergingCriteria.all.empty
+    }
+
+    void "test createDefaultMergingCriteria for seq. type, creates a MergingCriteria"() {
+        given:
+        createWorkflow(supportedSeqTypes: DomainFactory.createAllAlignableSeqTypes())
+        Project project = createProject()
+        SeqType seqType = DomainFactory.createWholeGenomeSeqType()
+
+        when:
+        mergingCriteriaService.createDefaultMergingCriteria(seqType)
+
+        then:
+        MergingCriteria mergingCriteria = CollectionUtils.exactlyOneElement(MergingCriteria.findAllByProjectAndSeqType(project, seqType))
+        mergingCriteria.useLibPrepKit
+        mergingCriteria.useSeqPlatformGroup == MergingCriteria.SpecificSeqPlatformGroups.USE_OTP_DEFAULT
+    }
+
+    void "test createDefaultMergingCriteria for seq. type, MergingCriteria already exists, is not changed"() {
+        given:
+        createWorkflow(supportedSeqTypes: DomainFactory.createAllAlignableSeqTypes())
+        Project project = createProject()
+        SeqType seqType = DomainFactory.createWholeGenomeSeqType()
+
+        createMergingCriteria(project: project, seqType: seqType, useLibPrepKit: false, useSeqPlatformGroup: MergingCriteria.SpecificSeqPlatformGroups.IGNORE_FOR_MERGING)
+
+        when:
+        mergingCriteriaService.createDefaultMergingCriteria(seqType)
+
+        then:
+        MergingCriteria mergingCriteria = CollectionUtils.exactlyOneElement(MergingCriteria.findAllByProjectAndSeqType(project, seqType))
+        !mergingCriteria.useLibPrepKit
+        mergingCriteria.useSeqPlatformGroup == MergingCriteria.SpecificSeqPlatformGroups.IGNORE_FOR_MERGING
+    }
+
+    void "test createDefaultMergingCriteria for seq. type, sequencing type cannot be aligned"() {
+        given:
+        createWorkflow(supportedSeqTypes: DomainFactory.createAllAlignableSeqTypes())
+        createProject()
+        SeqType seqType = createSeqType()
+
+        when:
+        mergingCriteriaService.createDefaultMergingCriteria(seqType)
+
+        then:
+        MergingCriteria.all.empty
+    }
+
+    void "test createDefaultMergingCriteria for project, creates a MergingCriteria"() {
+        given:
+        DomainFactory.createAllAlignableSeqTypes()
+        SeqType seqType = DomainFactory.createWholeGenomeSeqType()
+        createWorkflow(supportedSeqTypes: [seqType])
+        Project project = createProject()
+
+        when:
+        mergingCriteriaService.createDefaultMergingCriteria(project)
+
+        then:
+        MergingCriteria mergingCriteria = CollectionUtils.exactlyOneElement(MergingCriteria.findAllByProjectAndSeqType(project, seqType))
+        mergingCriteria.useLibPrepKit
+        mergingCriteria.useSeqPlatformGroup == MergingCriteria.SpecificSeqPlatformGroups.USE_OTP_DEFAULT
+    }
+
+    void "test createDefaultMergingCriteria for project, MergingCriteria already exists, is not changed"() {
+        given:
+        SeqType seqType = DomainFactory.createWholeGenomeSeqType()
+        createWorkflow(supportedSeqTypes: [seqType])
+        Project project = createProject()
+
+        createMergingCriteria(project: project, seqType: seqType, useLibPrepKit: false, useSeqPlatformGroup: MergingCriteria.SpecificSeqPlatformGroups.IGNORE_FOR_MERGING)
+
+        when:
+        mergingCriteriaService.createDefaultMergingCriteria(project)
+
+        then:
+        MergingCriteria mergingCriteria = CollectionUtils.exactlyOneElement(MergingCriteria.findAllByProjectAndSeqType(project, seqType))
+        !mergingCriteria.useLibPrepKit
+        mergingCriteria.useSeqPlatformGroup == MergingCriteria.SpecificSeqPlatformGroups.IGNORE_FOR_MERGING
+    }
+
+    void "test createDefaultMergingCriteria for project, sequencing type cannot be aligned"() {
+        given:
+        DomainFactory.createWholeGenomeSeqType()
+        Project project = createProject()
+
+        when:
+        mergingCriteriaService.createDefaultMergingCriteria(project)
 
         then:
         MergingCriteria.all.empty

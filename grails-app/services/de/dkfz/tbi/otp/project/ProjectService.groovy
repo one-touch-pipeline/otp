@@ -100,6 +100,7 @@ class ProjectService {
     MailHelperService mailHelperService
     MessageSourceService messageSourceService
     CreateNotificationTextService createNotificationTextService
+    MergingCriteriaService mergingCriteriaService
 
     /**
      * @return List of all available Projects
@@ -251,6 +252,8 @@ class ProjectService {
             Path path = projectInfoService.getPath(projectParams.projectInfoToCopy)
             projectInfoService.createProjectInfoByPath(project, path)
         }
+
+        mergingCriteriaService.createDefaultMergingCriteria(project)
 
         return project
     }

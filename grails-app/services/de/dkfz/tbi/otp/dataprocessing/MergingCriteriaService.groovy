@@ -30,6 +30,7 @@ import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.workflowExecution.Workflow
 
 @Transactional
 class MergingCriteriaService {
@@ -61,14 +62,59 @@ class MergingCriteriaService {
         return null
     }
 
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    Errors updateMergingCriteria(MergingCriteria mergingCriteria, boolean useLibPrepKit) {
+        mergingCriteria.useLibPrepKit = useLibPrepKit
+        try {
+            mergingCriteria.save(flush: true)
+        } catch (ValidationException e) {
+            return e.errors
+        }
+        return null
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    Errors updateMergingCriteria(MergingCriteria mergingCriteria, MergingCriteria.SpecificSeqPlatformGroups useSeqPlatformGroups) {
+        mergingCriteria.useSeqPlatformGroup = useSeqPlatformGroups
+        try {
+            mergingCriteria.save(flush: true)
+        } catch (ValidationException e) {
+            return e.errors
+        }
+        return null
+    }
+
     void createDefaultMergingCriteria(Project project, SeqType seqType) {
-        if (seqType in SeqTypeService.allAlignableSeqTypes && !MergingCriteria.findAllByProjectAndSeqType(project, seqType)) {
+        if ((seqType in SeqTypeService.allAlignableSeqTypes || seqType in Workflow.all.collectMany { it.supportedSeqTypes }) &&
+                !MergingCriteria.findAllByProjectAndSeqType(project, seqType)) {
             new MergingCriteria(
                     project: project,
                     seqType: seqType,
                     useLibPrepKit: !seqType.isWgbs(),
                     useSeqPlatformGroup: MergingCriteria.SpecificSeqPlatformGroups.USE_OTP_DEFAULT,
             ).save(flush: true)
+        }
+    }
+
+    void createDefaultMergingCriteria(SeqType seqType) {
+        if (!(seqType in Workflow.all.collectMany { it.supportedSeqTypes })) {
+            return
+        }
+        List<Project> allProjects = Project.all
+        List<Project> projectsWithoutMergingCriteria = allProjects - MergingCriteria.findAllByProjectInListAndSeqType(allProjects, seqType)*.project
+        projectsWithoutMergingCriteria.each {
+            createDefaultMergingCriteria(it, seqType)
+        }
+    }
+
+    void createDefaultMergingCriteria(Project project) {
+        List<SeqType> allSeqTypes = Workflow.all.collectMany { it.supportedSeqTypes }
+        if (!allSeqTypes) {
+            return
+        }
+        List<SeqType> seqTypesWithoutMergingCriteria = allSeqTypes - MergingCriteria.findAllByProjectAndSeqTypeInList(project, allSeqTypes)*.seqType
+        seqTypesWithoutMergingCriteria.each {
+            createDefaultMergingCriteria(project, it)
         }
     }
 

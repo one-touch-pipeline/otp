@@ -90,4 +90,14 @@ class PanCancerWorkflow implements OtpWorkflow {
     }
 
     final String userDocumentation = "notification.template.references.alignment.pancancer"
+
+    @Override
+    boolean isAlignment() {
+        return true
+    }
+
+    @Override
+    boolean isAnalysis() {
+        return false
+    }
 }

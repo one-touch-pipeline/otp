@@ -68,4 +68,14 @@ class DataInstallationWorkflow implements OtpWorkflow {
     }
 
     final String userDocumentation = null
+
+    @Override
+    boolean isAlignment() {
+        return false
+    }
+
+    @Override
+    boolean isAnalysis() {
+        return false
+    }
 }

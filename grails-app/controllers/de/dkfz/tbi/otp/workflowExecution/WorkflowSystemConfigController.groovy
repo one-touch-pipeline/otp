@@ -26,6 +26,7 @@ import grails.plugin.springsecurity.annotation.Secured
 import grails.validation.Validateable
 
 import de.dkfz.tbi.otp.CheckAndCall
+import de.dkfz.tbi.otp.dataprocessing.MergingCriteriaService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 import de.dkfz.tbi.util.TimeFormats
@@ -38,6 +39,8 @@ class WorkflowSystemConfigController implements CheckAndCall {
             getWorkflows  : "GET",
             updateWorkflow: "POST",
     ]
+
+    MergingCriteriaService mergingCriteriaService
 
     ReferenceGenomeService referenceGenomeService
 
