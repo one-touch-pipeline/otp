@@ -41,7 +41,7 @@ $.otp.polling = {
    * in every @param interval (ms) and will stop after calling stopPolling().
    * Keep functions asynchronous so that the js process is not blocked by polling
    * @param promiseFn function to be called
-   * @param interval polling interval in milli second
+   * @param interval polling interval in millisecond
    */
   startPolling: (promiseFn, interval) => promiseFn().then(() => {
     const stopOrContinue = (timeout) => new Promise((resolve) => {
@@ -51,7 +51,9 @@ $.otp.polling = {
       }, timeout);
     });
 
-    const asyncWrapper = (timeout) => new Promise((resolve) => resolve(stopOrContinue(timeout)));
+    const asyncWrapper = (timeout) => new Promise((resolve) => {
+      resolve(stopOrContinue(timeout));
+    });
 
     asyncWrapper(interval).then((res) => {
       if (res) {
