@@ -30,8 +30,7 @@ $.otp.workflows.registerJobExecutionPlan = function (selector) {
   $.otp.createListView(selector, $.otp.createLink({
     controller: 'processes',
     action: 'listData'
-  }), true, undefined,
-  [
+  }), true, undefined, [
     {
       mRender(data, type, row) {
         return $.otp.createLinkMarkup({
@@ -103,9 +102,7 @@ $.otp.workflows.registerJobExecutionPlan = function (selector) {
       },
       aTargets: [5]
     }
-  ],
-  undefined,
-  140, {
+  ], undefined, 140, {
     aaSorting: [[5, 'desc']],
     fnRowCallback(nRow, aData) {
       if (aData.enabled === false) {

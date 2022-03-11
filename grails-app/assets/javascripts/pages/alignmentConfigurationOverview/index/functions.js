@@ -121,8 +121,7 @@ $.otp.projectConfig = {
      */
   displayLoading() {
     $('#alignment_info').css(
-      'display', 'inline',
-      'vertical-alignment', 'top'
+      'display', 'inline', 'vertical-alignment', 'top'
     ).prepend('<div id="loader" class="loader"></div>');
   },
 

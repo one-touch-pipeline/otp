@@ -41,7 +41,9 @@ $.otp.crashRecovery.createListView = function () {
     $.otp.createLink({
       controller: 'crashRecovery',
       action: 'datatable'
-    }), true, (json) => {
+    }),
+    true,
+    (json) => {
       let i;
       let rowData;
       for (i = 0; i < json.aaData.length; i++) {
