@@ -37,7 +37,8 @@ $.otp.crashRecovery.processingStepIds = function () {
 $.otp.crashRecovery.createListView = function () {
   'use strict';
 
-  $.otp.createListView('#crashRecoveryTable',
+  $.otp.createListView(
+    '#crashRecoveryTable',
     $.otp.createLink({
       controller: 'crashRecovery',
       action: 'datatable'
@@ -75,7 +76,8 @@ $.otp.crashRecovery.createListView = function () {
     undefined,
     undefined,
     140,
-    { bSort: false });
+    { bSort: false }
+  );
 };
 
 $.otp.crashRecovery.showParametersDialog = function (ids, target) {

@@ -93,27 +93,33 @@ $(() => {
           const buttonsDisabled = (row.state !== 'FAILED' || row.stepId === null) ? ' disabled ' : '';
           const stepsDisabled = (row.steps.length === 0) ? ' disabled ' : '';
 
-          const failedFinalButton = button($.otp.createLink({
-            controller: 'workflowRunList', action: 'setFailedFinal'
-          }),
-          row.stepId,
-          'Set failed final',
-          buttonsDisabled,
-          'file-earmark-x');
-          const restartStepButton = button($.otp.createLink({
-            controller: 'workflowRunList', action: 'restartStep'
-          }),
-          row.stepId,
-          `Restart "${row.step}" step`,
-          buttonsDisabled,
-          'reply');
-          const restartRunButton = button($.otp.createLink({
-            controller: 'workflowRunList', action: 'restartRun'
-          }),
-          row.stepId,
-          'Restart run',
-          buttonsDisabled,
-          'reply-all');
+          const failedFinalButton = button(
+            $.otp.createLink({
+              controller: 'workflowRunList', action: 'setFailedFinal'
+            }),
+            row.stepId,
+            'Set failed final',
+            buttonsDisabled,
+            'file-earmark-x'
+          );
+          const restartStepButton = button(
+            $.otp.createLink({
+              controller: 'workflowRunList', action: 'restartStep'
+            }),
+            row.stepId,
+            `Restart "${row.step}" step`,
+            buttonsDisabled,
+            'reply'
+          );
+          const restartRunButton = button(
+            $.otp.createLink({
+              controller: 'workflowRunList', action: 'restartRun'
+            }),
+            row.stepId,
+            'Restart run',
+            buttonsDisabled,
+            'reply-all'
+          );
           const workflowRunListPageLink = $.otp.createLink({
             controller: 'workflowRunList',
             action: 'restartStep'
@@ -214,14 +220,18 @@ $(() => {
   });
 
   const addSelection = function (form) {
-    addHiddenField(form, 'redirect', $.otp.createLink({
-      controller: 'workflowRunList',
-      parameters: {
-        'workflow.id': $('#workflow').val(),
-        state: $('#state').val(),
-        name: $('#name').val()
-      }
-    }).slice($.otp.contextPath.length));
+    addHiddenField(
+      form,
+      'redirect',
+      $.otp.createLink({
+        controller: 'workflowRunList',
+        parameters: {
+          'workflow.id': $('#workflow').val(),
+          state: $('#state').val(),
+          name: $('#name').val()
+        }
+      }).slice($.otp.contextPath.length)
+    );
   };
 
   const addHiddenField = function (form, name, value) {

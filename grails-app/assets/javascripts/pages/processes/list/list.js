@@ -27,87 +27,96 @@
 $.otp.workflows.registerJobExecutionPlan = function (selector) {
   'use strict';
 
-  $.otp.createListView(selector, $.otp.createLink({
-    controller: 'processes',
-    action: 'listData'
-  }), true, undefined, [
-    {
-      mRender(data, type, row) {
-        return $.otp.createLinkMarkup({
-          controller: 'processes',
-          action: 'plan',
-          id: row.id,
-          text: row.name
-        });
-      },
-      aTargets: [0]
-    },
-    {
-      mRender(data, type, row) {
-        if (row.allProcessesCount) {
+  $.otp.createListView(
+    selector,
+    $.otp.createLink({
+      controller: 'processes',
+      action: 'listData'
+    }),
+    true,
+    undefined,
+    [
+      {
+        mRender(data, type, row) {
           return $.otp.createLinkMarkup({
             controller: 'processes',
             action: 'plan',
             id: row.id,
-            text: row.allProcessesCount
+            text: row.name
           });
+        },
+        aTargets: [0]
+      },
+      {
+        mRender(data, type, row) {
+          if (row.allProcessesCount) {
+            return $.otp.createLinkMarkup({
+              controller: 'processes',
+              action: 'plan',
+              id: row.id,
+              text: row.allProcessesCount
+            });
+          }
+          return '-';
+        },
+        aTargets: [1]
+      },
+      {
+        mRender(data, type, row) {
+          if (row.failedProcessesCount) {
+            return $.otp.createLinkMarkup({
+              controller: 'processes',
+              action: 'plan',
+              id: row.id,
+              parameters: {
+                state: 'FAILURE'
+              },
+              text: row.failedProcessesCount
+            });
+          }
+          return '-';
+        },
+        aTargets: [2]
+      },
+      {
+        mRender(data, type, row) {
+          if (row.runningProcessesCount) {
+            return $.otp.createLinkMarkup({
+              controller: 'processes',
+              action: 'plan',
+              id: row.id,
+              parameters: {
+                state: 'RUNNING'
+              },
+              text: row.runningProcessesCount
+            });
+          }
+          return '-';
+        },
+        aTargets: [3]
+      },
+      {
+        mRender(data, type, row) {
+          return $.otp.workflows.renderDate(row.lastSuccessfulDate);
+        },
+        aTargets: [4]
+      },
+      {
+        mRender(data, type, row) {
+          return $.otp.workflows.renderDate(row.lastFailureDate);
+        },
+        aTargets: [5]
+      }
+    ],
+    undefined,
+    140,
+    {
+      aaSorting: [[5, 'desc']],
+      fnRowCallback(nRow, aData) {
+        if (aData.enabled === false) {
+          $(nRow).addClass('withdrawn');
         }
-        return '-';
-      },
-      aTargets: [1]
-    },
-    {
-      mRender(data, type, row) {
-        if (row.failedProcessesCount) {
-          return $.otp.createLinkMarkup({
-            controller: 'processes',
-            action: 'plan',
-            id: row.id,
-            parameters: {
-              state: 'FAILURE'
-            },
-            text: row.failedProcessesCount
-          });
-        }
-        return '-';
-      },
-      aTargets: [2]
-    },
-    {
-      mRender(data, type, row) {
-        if (row.runningProcessesCount) {
-          return $.otp.createLinkMarkup({
-            controller: 'processes',
-            action: 'plan',
-            id: row.id,
-            parameters: {
-              state: 'RUNNING'
-            },
-            text: row.runningProcessesCount
-          });
-        }
-        return '-';
-      },
-      aTargets: [3]
-    },
-    {
-      mRender(data, type, row) {
-        return $.otp.workflows.renderDate(row.lastSuccessfulDate);
-      },
-      aTargets: [4]
-    },
-    {
-      mRender(data, type, row) {
-        return $.otp.workflows.renderDate(row.lastFailureDate);
-      },
-      aTargets: [5]
-    }
-  ], undefined, 140, {
-    aaSorting: [[5, 'desc']],
-    fnRowCallback(nRow, aData) {
-      if (aData.enabled === false) {
-        $(nRow).addClass('withdrawn');
       }
     }
-  });
+  );
 };

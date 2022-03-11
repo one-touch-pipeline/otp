@@ -236,9 +236,11 @@ $.otp.workflowConfig = {
 
     // set fields to be readonly in VIEW mode
     // selectorType == DEFAULT_VALUES are not editable
-    thisDialog.find(':input:not(:button):not(select#pp-fragments)').attr('disabled',
+    thisDialog.find(':input:not(:button):not(select#pp-fragments)').attr(
+      'disabled',
       !operation || operation === $.otp.workflowConfig.OPERATION.VIEW ||
-      (rowData.selectorType === 'DEFAULT_VALUES' && operation !== $.otp.workflowConfig.OPERATION.CREATE));
+      (rowData.selectorType === 'DEFAULT_VALUES' && operation !== $.otp.workflowConfig.OPERATION.CREATE)
+    );
 
     // assign fields in the dialog page
     thisDialog.find('.modal-body input[name="selector.id"]').val(operation === $.otp.workflowConfig.OPERATION.CREATE ?

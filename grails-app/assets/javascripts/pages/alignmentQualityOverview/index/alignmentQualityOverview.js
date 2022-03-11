@@ -348,8 +348,10 @@ $(() => {
           },
           success(result) {
             statusCell.html(tableCellFormatter(result));
-            $.otp.toaster.showSuccessToast('QC Status change',
-              `Status successfully changed to ${result.status}.${msgSuffix}`);
+            $.otp.toaster.showSuccessToast(
+              'QC Status change',
+              `Status successfully changed to ${result.status}.${msgSuffix}`
+            );
           }
         });
       }

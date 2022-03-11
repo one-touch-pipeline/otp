@@ -93,8 +93,7 @@ function uploadCsvOfSelectedSamples() {
     }), {
       method: 'POST',
       body: fileData
-    }).then((response) => response.json()
-    ).then((json) => {
+    }).then((response) => response.json()).then((json) => {
       const table = $('#selectSamplesTable').DataTable();
 
       const header = ['Individual', 'Sequence Type Name', 'Sequencing Read Type', 'Single Cell', 'Sample Type'];
