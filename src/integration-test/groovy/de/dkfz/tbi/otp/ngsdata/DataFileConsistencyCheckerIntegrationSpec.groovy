@@ -21,9 +21,6 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
-
 import de.dkfz.tbi.otp.AbstractIntegrationSpecWithoutRollbackAnnotation
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
@@ -34,8 +31,6 @@ import java.nio.file.Files
 
 class DataFileConsistencyCheckerIntegrationSpec extends AbstractIntegrationSpecWithoutRollbackAnnotation {
 
-    @Rule
-    TemporaryFolder temporaryFolder
     File testFolder
 
     void setupData() {

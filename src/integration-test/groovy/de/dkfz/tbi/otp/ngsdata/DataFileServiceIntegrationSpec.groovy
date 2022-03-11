@@ -27,6 +27,7 @@ import grails.transaction.Rollback
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.UserAndRoles
@@ -67,6 +68,6 @@ class DataFileServiceIntegrationSpec extends Specification implements UserAndRol
         }
 
         then:
-        expected == result
+        TestCase.assertContainSame(expected, result)
     }
 }

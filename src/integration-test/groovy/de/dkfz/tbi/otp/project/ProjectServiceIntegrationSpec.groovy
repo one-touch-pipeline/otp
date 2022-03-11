@@ -1722,10 +1722,11 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         result = projectService.allProjectsWithSharedUnixGroup
 
         then:
-        result == [
-                (unixGroupA): [projectA, projectB],
-                (unixGroupB): [projectC, projectD, projectE],
-        ]
+        result.size() == 2
+        result.containsKey(unixGroupA)
+        result.containsKey(unixGroupB)
+        TestCase.assertContainSame(result[unixGroupA], [projectA, projectB])
+        TestCase.assertContainSame(result[unixGroupB], [projectC, projectD, projectE])
     }
 
     @Unroll

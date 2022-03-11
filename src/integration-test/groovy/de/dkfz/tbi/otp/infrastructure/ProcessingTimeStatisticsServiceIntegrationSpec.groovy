@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Ignore
 import spock.lang.Specification
 
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.Comment
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
@@ -150,41 +151,41 @@ class ProcessingTimeStatisticsServiceIntegrationSpec extends Specification {
         SeqTrack seqTrackA = DomainFactory.createSeqTrackWithOneDataFile([run: run, sample: sampleA, ilseSubmission: DomainFactory.createIlseSubmission(ilseNumber: 1234)], [fastqImportInstance: fastqImportInstance])
         SeqTrack seqTrackB = DomainFactory.createSeqTrackWithOneDataFile([run: run, sample: sampleB, ilseSubmission: DomainFactory.createIlseSubmission(ilseNumber: 5678)], [fastqImportInstance: fastqImportInstance])
 
-        expect:
-        List expect = [
-                url,
-                [seqTrackA.ilseId as String, seqTrackB.ilseId as String],
-                [projectA.name, projectB.name].sort(),
-                [seqTrackA.run.name],
-                [sampleA.displayName, sampleB.displayName],
-                ["${seqTrackA.run}, lane: ${seqTrackA.laneId}", "${seqTrackB.run}, lane: ${seqTrackB.laneId}"],
-                TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(ticket.submissionReceivedNotice),
-                TimeUtils.getFormattedDurationWithDays(ticket.submissionReceivedNotice, ticket.ticketCreated),
-                TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(ticket.ticketCreated),
-                TimeUtils.getFormattedDurationWithDays(ticket.ticketCreated, ticket.installationStarted),
-                TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(ticket.installationStarted),
-                TimeUtils.getFormattedDurationWithDays(ticket.installationStarted, ticket.installationFinished),
-                TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(ticket.installationFinished),
-                TimeUtils.getFormattedDurationWithDays(ticket.installationFinished, ticket.fastqcStarted),
-                TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(ticket.fastqcStarted),
-                TimeUtils.getFormattedDurationWithDays(ticket.fastqcStarted, ticket.fastqcFinished),
-                TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(ticket.fastqcFinished),
-                TimeUtils.getFormattedDurationWithDays(ticket.fastqcFinished, ticket.alignmentStarted),
-                TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(ticket.alignmentStarted),
-                TimeUtils.getFormattedDurationWithDays(ticket.alignmentStarted, ticket.alignmentFinished),
-                TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(ticket.alignmentFinished),
-                TimeUtils.getFormattedDurationWithDays(ticket.alignmentFinished, ticket.snvStarted),
-                TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(ticket.snvStarted),
-                TimeUtils.getFormattedDurationWithDays(ticket.snvStarted, ticket.snvFinished),
-                TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(ticket.snvFinished),
-                TimeUtils.getFormattedDurationWithDays(ticket.installationStarted, ticket.snvFinished),
-                comment.comment,
-                ticket.finalNotificationSent,
-                ticket.id,
-                ticket.ticketNumber,
-        ]
+        when:
+        List result = processingTimeStatisticsService.formatData(ticket)
 
-        expect == processingTimeStatisticsService.formatData(ticket)
+        then:
+        result.size() == 30
+        result[0] == url
+        TestCase.assertContainSame(result[1], [seqTrackA.ilseId as String, seqTrackB.ilseId as String])
+        TestCase.assertContainSame(result[2], [projectA.name, projectB.name].sort())
+        TestCase.assertContainSame(result[3], [seqTrackA.run.name])
+        TestCase.assertContainSame(result[4], [sampleA.displayName, sampleB.displayName])
+        TestCase.assertContainSame(result[5], ["${seqTrackA.run}, lane: ${seqTrackA.laneId}", "${seqTrackB.run}, lane: ${seqTrackB.laneId}"])
+        result[6] == TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(ticket.submissionReceivedNotice)
+        result[7] == TimeUtils.getFormattedDurationWithDays(ticket.submissionReceivedNotice, ticket.ticketCreated)
+        result[8] == TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(ticket.ticketCreated)
+        result[9] == TimeUtils.getFormattedDurationWithDays(ticket.ticketCreated, ticket.installationStarted)
+        result[10] == TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(ticket.installationStarted)
+        result[11] == TimeUtils.getFormattedDurationWithDays(ticket.installationStarted, ticket.installationFinished)
+        result[12] == TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(ticket.installationFinished)
+        result[13] == TimeUtils.getFormattedDurationWithDays(ticket.installationFinished, ticket.fastqcStarted)
+        result[14] == TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(ticket.fastqcStarted)
+        result[15] == TimeUtils.getFormattedDurationWithDays(ticket.fastqcStarted, ticket.fastqcFinished)
+        result[16] == TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(ticket.fastqcFinished)
+        result[17] == TimeUtils.getFormattedDurationWithDays(ticket.fastqcFinished, ticket.alignmentStarted)
+        result[18] == TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(ticket.alignmentStarted)
+        result[19] == TimeUtils.getFormattedDurationWithDays(ticket.alignmentStarted, ticket.alignmentFinished)
+        result[20] == TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(ticket.alignmentFinished)
+        result[21] == TimeUtils.getFormattedDurationWithDays(ticket.alignmentFinished, ticket.snvStarted)
+        result[22] == TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(ticket.snvStarted)
+        result[23] == TimeUtils.getFormattedDurationWithDays(ticket.snvStarted, ticket.snvFinished)
+        result[24] == TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(ticket.snvFinished)
+        result[25] == TimeUtils.getFormattedDurationWithDays(ticket.installationStarted, ticket.snvFinished)
+        result[26] == comment.comment
+        result[27] == ticket.finalNotificationSent
+        result[28] == ticket.id
+        result[29] == ticket.ticketNumber
     }
 
     private static List createOtrsTicketWithSeqTrack(Map otrsTicketProperties = [:], Map seqTrackProperties = [:]) {

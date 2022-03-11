@@ -1135,7 +1135,7 @@ class SchedulerServiceIntegrationSpec extends Specification implements UserAndRo
 
         then:
         10 == ProcessingStepUpdate.countByProcessingStep(step)
-        ExecutionState.RESTARTED == ProcessingStepUpdate.findAllByProcessingStep(step).last().state
+        ExecutionState.RESTARTED == ProcessingStepUpdate.findAllByProcessingStep(step, [sort: 'id']).last().state
         !process.finished
         areQueueAndRunningEmpty()
     }
@@ -1176,7 +1176,7 @@ class SchedulerServiceIntegrationSpec extends Specification implements UserAndRo
 
         then:
         5 == ProcessingStepUpdate.countByProcessingStep(step)
-        ExecutionState.RESTARTED == ProcessingStepUpdate.findAllByProcessingStep(step).last().state
+        ExecutionState.RESTARTED == ProcessingStepUpdate.findAllByProcessingStep(step, [sort: 'id']).last().state
         !process.finished
         areQueueAndRunningEmpty()
     }
@@ -1210,7 +1210,7 @@ class SchedulerServiceIntegrationSpec extends Specification implements UserAndRo
 
         then:
         5 == ProcessingStepUpdate.countByProcessingStep(step)
-        ExecutionState.RESTARTED == ProcessingStepUpdate.findAllByProcessingStep(step).last().state
+        ExecutionState.RESTARTED == ProcessingStepUpdate.findAllByProcessingStep(step, [sort: 'id']).last().state
         !process.finished
         areQueueAndRunningEmpty()
     }
@@ -1238,12 +1238,12 @@ class SchedulerServiceIntegrationSpec extends Specification implements UserAndRo
 
         then:
         5 == ProcessingStepUpdate.countByProcessingStep(step)
-        ExecutionState.RESTARTED == ProcessingStepUpdate.findAllByProcessingStep(step).last().state
+        ExecutionState.RESTARTED == ProcessingStepUpdate.findAllByProcessingStep(step, [sort: 'id']).last().state
         !process.finished
         areQueueAndRunningEmpty()
 
         when:
-        ProcessingStepUpdate update = ProcessingStepUpdate.findAllByProcessingStep(step).last()
+        ProcessingStepUpdate update = ProcessingStepUpdate.findAllByProcessingStep(step, [sort: 'id']).last()
         update = DomainFactory.createProcessingStepUpdate(
                 state: ExecutionState.FINISHED,
                 previous: update,
@@ -1265,19 +1265,19 @@ class SchedulerServiceIntegrationSpec extends Specification implements UserAndRo
 
         then:
         8 == ProcessingStepUpdate.countByProcessingStep(step)
-        ExecutionState.RESTARTED == ProcessingStepUpdate.findAllByProcessingStep(step).last().state
+        ExecutionState.RESTARTED == ProcessingStepUpdate.findAllByProcessingStep(step, [sort: 'id']).last().state
         !process.finished
         !schedulerService.queue.isEmpty()
         schedulerService.running.isEmpty()
 
         when:
-        RestartedProcessingStep restartedStep = RestartedProcessingStep.findAllByOriginal(step).last()
+        RestartedProcessingStep restartedStep = RestartedProcessingStep.findAllByOriginal(step, [sort: 'id']).last()
 
         then:
         restartedStep
         step == restartedStep.original
         1 == ProcessingStepUpdate.countByProcessingStep(restartedStep)
-        ExecutionState.CREATED == ProcessingStepUpdate.findAllByProcessingStep(restartedStep).last().state
+        ExecutionState.CREATED == ProcessingStepUpdate.findAllByProcessingStep(restartedStep, [sort: 'id']).last().state
         restartedStep == schedulerService.queue.first()
 
         when:
@@ -1286,7 +1286,7 @@ class SchedulerServiceIntegrationSpec extends Specification implements UserAndRo
         then:
         8 == ProcessingStepUpdate.countByProcessingStep(step)
         3 == ProcessingStepUpdate.countByProcessingStep(restartedStep)
-        ExecutionState.FINISHED == ProcessingStepUpdate.findAllByProcessingStep(restartedStep).last().state
+        ExecutionState.FINISHED == ProcessingStepUpdate.findAllByProcessingStep(restartedStep, [sort: 'id']).last().state
         !process.finished
 
         when:
@@ -1438,7 +1438,7 @@ class SchedulerServiceIntegrationSpec extends Specification implements UserAndRo
         when:
         DomainFactory.createProcessingStepUpdate(
                 state: ExecutionState.FAILURE,
-                previous: ProcessingStepUpdate.findAllByProcessingStep(secondStep).last(),
+                previous: ProcessingStepUpdate.findAllByProcessingStep(secondStep, [sort: 'id']).last(),
                 processingStep: secondStep
         )
 
@@ -1459,7 +1459,7 @@ class SchedulerServiceIntegrationSpec extends Specification implements UserAndRo
         2 == ProcessingStep.countByJobDefinition(jobDefinition4)
 
         when:
-        RestartedProcessingStep restartedStep = RestartedProcessingStep.list().last()
+        RestartedProcessingStep restartedStep = RestartedProcessingStep.list([sort: 'id']).last()
 
         then:
         firstStep.next == restartedStep
@@ -1476,7 +1476,7 @@ class SchedulerServiceIntegrationSpec extends Specification implements UserAndRo
         fourthStep.next == null
 
         when:
-        ProcessingStep thirdStep2 = ProcessingStep.findAllByJobDefinition(jobDefinition3).last()
+        ProcessingStep thirdStep2 = ProcessingStep.findAllByJobDefinition(jobDefinition3, [sort: 'id']).last()
 
         then:
         thirdStep2 != thirdStep
@@ -1484,7 +1484,7 @@ class SchedulerServiceIntegrationSpec extends Specification implements UserAndRo
         thirdStep2.previous == restartedStep
 
         when:
-        ProcessingStep fourthStep2 = ProcessingStep.findAllByJobDefinition(jobDefinition4).last()
+        ProcessingStep fourthStep2 = ProcessingStep.findAllByJobDefinition(jobDefinition4, [sort: 'id']).last()
 
         then:
         fourthStep2 != fourthStep
@@ -1548,7 +1548,7 @@ class SchedulerServiceIntegrationSpec extends Specification implements UserAndRo
 
         when: "restart the failed Processing Step"
         schedulerService.restartProcessingStep(secondStep, false)
-        RestartedProcessingStep restartedStep = RestartedProcessingStep.list().last()
+        RestartedProcessingStep restartedStep = RestartedProcessingStep.list([sort: 'id']).last()
 
         then:
         restartedStep
@@ -1596,7 +1596,7 @@ class SchedulerServiceIntegrationSpec extends Specification implements UserAndRo
 
         then: "no RestartedProcessingSteps should be created"
         5 == ProcessingStepUpdate.countByProcessingStep(step)
-        ExecutionState.SUSPENDED == ProcessingStepUpdate.findAllByProcessingStep(step).last().state
+        ExecutionState.SUSPENDED == ProcessingStepUpdate.findAllByProcessingStep(step, [sort: 'id']).last().state
         [] == RestartedProcessingStep.findAllByOriginal(step)
         !step.process.finished
         areQueueAndRunningEmpty()
@@ -1612,7 +1612,7 @@ class SchedulerServiceIntegrationSpec extends Specification implements UserAndRo
 
         then: "RestartedProcessingStep should be created"
         5 == ProcessingStepUpdate.countByProcessingStep(step)
-        ExecutionState.RESTARTED == ProcessingStepUpdate.findAllByProcessingStep(step).last().state
+        ExecutionState.RESTARTED == ProcessingStepUpdate.findAllByProcessingStep(step, [sort: 'id']).last().state
         1 == RestartedProcessingStep.count()
         !step.process.finished
     }

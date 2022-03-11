@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
@@ -77,6 +78,6 @@ class SampleServiceIntegrationSpec extends Specification implements DomainFactor
         ]
 
         expect:
-        expectedSamples == sampleService.getSamplesOfProject(project2)
+        TestCase.assertContainSame(expectedSamples, sampleService.getSamplesOfProject(project2))
     }
 }

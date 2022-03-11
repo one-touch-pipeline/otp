@@ -29,6 +29,7 @@ import spock.lang.Unroll
 import de.dkfz.roddy.config.ResourceSet
 import de.dkfz.roddy.execution.jobs.GenericJobInfo
 import de.dkfz.roddy.tools.BufferValue
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
@@ -785,8 +786,7 @@ class ClusterJobServiceIntegrationSpec extends Specification implements DomainFa
                           exitStatus: ClusterJob.Status.FAILED,
         ])
 
-        expect:
-        [
+        List<List<String>> expected = [
                 [
                         ClusterJob.Status.COMPLETED,
                         2,
@@ -794,7 +794,10 @@ class ClusterJobServiceIntegrationSpec extends Specification implements DomainFa
                         ClusterJob.Status.FAILED,
                         1,
                 ],
-        ] == clusterJobService.findAllExitStatusesByDateBetween(START_DATE, END_DATE)
+        ]
+
+        expect:
+        TestCase.assertContainSame(clusterJobService.findAllExitStatusesByDateBetween(START_DATE, END_DATE), expected)
     }
 
     void test_findAllFailedByDateBetween_WhenNoJobsFound_ShouldReturnMapWithListInInitialState() {

@@ -23,9 +23,9 @@ package de.dkfz.tbi.otp
 
 import grails.testing.mixin.integration.Integration
 import groovy.sql.Sql
+import org.junit.Rule
+import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
-
-import de.dkfz.tbi.TestCase
 
 import javax.sql.DataSource
 
@@ -33,17 +33,36 @@ import javax.sql.DataSource
 abstract class AbstractIntegrationSpecWithoutRollbackAnnotation extends Specification {
 
     DataSource dataSource
-    File schemaDump
-    Sql sql
 
-    void setup() {
-        sql = new Sql(dataSource)
-        schemaDump = new File(TestCase.createEmptyTestDirectory(), "test-database-dump.sql")
-        sql.execute("SCRIPT NODATA DROP TO ?", [schemaDump.absolutePath])
-    }
+    @Rule
+    TemporaryFolder temporaryFolder
 
     void cleanup() {
-        if (sql) {
+        boolean usePostgresDocker = "TRUE".equalsIgnoreCase(System.properties['usePostgresDocker'])
+        Sql sql = new Sql(dataSource)
+        if (usePostgresDocker) {
+            String query = """
+                SELECT
+                    schemaname,
+                    tablename
+                FROM
+                    pg_tables
+                WHERE
+                    schemaname = 'public';
+                """
+            List<String> tables = []
+
+            sql.eachRow(query) {
+                tables << [
+                        it.getString(1),
+                        it.getString(2),
+                ].join('.')
+            }
+            String truncate = "TRUNCATE TABLE ${tables.join(', ')} CASCADE;"
+            sql.execute(truncate)
+        } else { //h2 database
+            File schemaDump = temporaryFolder.newFile("test-database-dump.sql")
+            sql.execute("SCRIPT NODATA DROP TO ?", [schemaDump.absolutePath])
             sql.execute("DROP ALL OBJECTS")
             sql.execute("RUNSCRIPT FROM ?", [schemaDump.absolutePath])
         }

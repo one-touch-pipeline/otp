@@ -42,7 +42,6 @@ class MovePanCanFilesToFinalDestinationJobIntegrationSpec extends AbstractIntegr
 
     RoddyBamFile roddyBamFile
 
-    @Override
     void setup() {
         SessionUtils.withNewSession {
             roddyBamFile = DomainFactory.createRoddyBamFile()
