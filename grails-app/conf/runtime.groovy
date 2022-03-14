@@ -169,16 +169,19 @@ environments {
     }
     WORKFLOW_TEST {
         hibernate {
+            queries: false
             cache.use_second_level_cache = false
             cache.use_query_cache = false
         }
         dataSource {
+            jmxExport = true
+            pooled: true
             driverClassName = "org.h2.Driver"
             dialect = H2Dialect
             username = "sa"
             password = ""
             dbCreate = "update"
-            url = "jdbc:h2:mem:testDb;MVCC=TRUE;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE"
+            url = "jdbc:h2:mem:testDb;MVCC=TRUE;MODE=PostgreSQL;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE"
         }
     }
 }
