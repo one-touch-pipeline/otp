@@ -29,6 +29,7 @@ import org.springframework.validation.Errors
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerConfigurationService.CellRangerMwpParameter
@@ -146,8 +147,8 @@ class CellRangerConfigurationServiceIntegrationSpec extends Specification implem
         }
 
         then:
-        samples.allSamples == [sampleA, sampleB]
-        samples.selectedSamples == [sampleA]
+        TestCase.assertContainSame(samples.allSamples, [sampleA, sampleB])
+        TestCase.assertContainSame(samples.selectedSamples, [sampleA])
     }
 
     void "test getSamples for whole project"() {
@@ -160,8 +161,8 @@ class CellRangerConfigurationServiceIntegrationSpec extends Specification implem
         }
 
         then:
-        samples.allSamples == [sampleA, sampleB]
-        samples.selectedSamples == [sampleA, sampleB]
+        TestCase.assertContainSame(samples.allSamples, [sampleA, sampleB])
+        TestCase.assertContainSame(samples.selectedSamples, [sampleA, sampleB])
     }
 
     void "test getSeqTracksGroupedByPlatformGroupAndKit properly groups SeqTracks by SeqPlatformGroup and LibPrepKit"() {
