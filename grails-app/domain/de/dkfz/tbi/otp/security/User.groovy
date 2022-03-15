@@ -32,9 +32,6 @@ class User implements Entity {
     String password
     /** This attribute is used externally. Please discuss a change in the team */
     boolean enabled
-    boolean accountExpired
-    boolean accountLocked
-    boolean passwordExpired
     /** This attribute is used externally. Please discuss a change in the team */
     String email
     /** This attribute is used externally. Please discuss a change in the team */
@@ -68,38 +65,6 @@ class User implements Entity {
 
     Set<Role> getAuthorities() {
         return UserRole.findAllByUser(this)*.role as Set
-    }
-
-    def beforeInsert() {
-        encodePassword()
-        return
-    }
-
-    def beforeUpdate() {
-        if (isDirty('password')) {
-            encodePassword()
-        }
-        return
-    }
-
-    protected void encodePassword() {
-        // Password is set to a character which does not map to any character in an SHA sum
-        // Set to invalid as password is in ldap
-        password = "*"
-    }
-
-    /**
-     * @return User without any security relevant information.
-     */
-    User sanitizedUser() {
-        return new User(id: this.id, username: this.username, email: this.email)
-    }
-
-    /**
-     * @return Map with information about User without any security relevant information.
-     */
-    Map sanitizedUserMap() {
-        return [id: this.id, username: this.username, email: this.email]
     }
 
     String getFormattedPlannedDeactivationDate() {

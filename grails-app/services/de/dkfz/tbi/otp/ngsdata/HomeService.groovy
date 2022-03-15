@@ -73,9 +73,6 @@ class HomeService {
                 }
                 user {
                     eq("enabled", true)
-                    eq("accountExpired", false)
-                    eq("accountLocked", false)
-                    eq("passwordExpired", false)
                     property("realName")
                 }
                 property("project.id")

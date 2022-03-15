@@ -635,4 +635,8 @@ databaseChangeLog = {
     changeSet(author: "gabkol", id: "otp-1581") {
         sqlFile(path: 'changelogs/2022/otp-1581_remove_fileSystemConsistencyWorkflow.sql')
     }
+
+    changeSet(author: "", id: "otp-1299") {
+        sqlFile(path: 'changelogs/2022/otp-1299.sql')
+    }
 }

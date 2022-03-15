@@ -73,9 +73,6 @@ class UserService {
                 username: username,
                 email: email,
                 enabled: true,
-                accountExpired: false,
-                accountLocked: false,
-                passwordExpired: false,
                 password: "*",
                 realName: realName,
         ])
@@ -216,9 +213,6 @@ No user exists yet, create user ${currentUser} with admin rights.
                         username       : currentUser,
                         email          : "admin@dummy.de",
                         enabled        : true,
-                        accountExpired : false,
-                        accountLocked  : false,
-                        passwordExpired: false,
                         password       : "*", //need for plugin, but unused in OTP
                         realName       : currentUser,
                 ]).save(flush: true)

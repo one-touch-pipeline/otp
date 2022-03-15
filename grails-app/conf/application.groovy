@@ -99,6 +99,9 @@ grails.plugin.springsecurity.authority.className = 'de.dkfz.tbi.otp.security.Rol
 grails.plugin.springsecurity.userLookup.authorityJoinClassName = 'de.dkfz.tbi.otp.security.UserRole'
 grails.plugin.springsecurity.userLookup.userDomainClassName = 'de.dkfz.tbi.otp.security.User'
 grails.plugin.springsecurity.userLookup.usernameIgnoreCase = true
+grails.plugin.springsecurity.userLookup.accountExpiredPropertyName = null
+grails.plugin.springsecurity.userLookup.accountLockedPropertyName = null
+grails.plugin.springsecurity.userLookup.passwordExpiredPropertyName = null
 
 grails.plugin.springsecurity.controllerAnnotations.staticRules = [
         // restricted access to special pages
