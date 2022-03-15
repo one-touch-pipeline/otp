@@ -27,8 +27,10 @@ import groovy.transform.Canonical
 
 import de.dkfz.tbi.otp.OtpException
 import de.dkfz.tbi.otp.dataprocessing.*
+import groovy.transform.CompileStatic
 
 @Transactional
+@CompileStatic
 class PropertiesValidationService {
     ConfigService configService
     ProcessingOptionService processingOptionService
@@ -38,7 +40,7 @@ class PropertiesValidationService {
 
         Properties properties = configService.parsePropertiesFile()
 
-        List<OtpProperty> used = OtpProperty.values().findAll { it.usedIn.contains(Environment.current.name.toUpperCase() as UsedIn) }
+        Collection<OtpProperty> used = OtpProperty.values().findAll { it.usedIn.contains(Environment.current.name.toUpperCase() as UsedIn) }
         used.each {
             if (!properties[it.key]) {
                 if (it.defaultValue == null) {
@@ -49,11 +51,11 @@ class PropertiesValidationService {
             }
         }
 
-        properties.each { String key, String value ->
-            OtpProperty otpProperty = OtpProperty.getByKey(key)
+        properties.each { key, value ->
+            OtpProperty otpProperty = OtpProperty.getByKey(key as String)
             if (!otpProperty) {
                 log.warn("Found unknown key '${key}' in the otp properties file")
-            } else if (!otpProperty.validator.validate(value)) {
+            } else if (!otpProperty.validator.validate(value as String)) {
                 errorList << new PropertyProblem("The value '${value}' for the key '${key}' is not valid for the check '${otpProperty.validator}'")
             }
         }
@@ -84,12 +86,12 @@ class PropertiesValidationService {
 
     List<OptionProblem> validateProcessingOptions() {
         return ProcessingOption.OptionName.values().sort().collectMany { ProcessingOption.OptionName name ->
-            List<String> types = name.validatorForType?.allowedValues != null ? name.validatorForType.allowedValues : [null]
+            List<String> types = name.validatorForType?.allowedValues != null ? name.validatorForType.allowedValues : []
 
-            return types.collect { String type ->
-                validateProcessingOptionName(name, type)
+            return types.collect { type ->
+                validateProcessingOptionName(name, type as String)
             }.findAll()
-        }
+        } as List<OptionProblem>
     }
 }
 

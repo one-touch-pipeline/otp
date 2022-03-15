@@ -22,10 +22,10 @@
 package de.dkfz.tbi.otp.utils
 
 import grails.util.Environment
+import groovy.transform.CompileStatic
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
-import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.web.context.HttpRequestResponseHolder
@@ -58,6 +58,7 @@ import javax.servlet.http.HttpServletResponse
  * The first one controls whether the filter is enabled at all, the second one the user to use.
  */
 @Component("backdoorFilter")
+@CompileStatic
 class BackdoorFilter extends GenericFilterBean {
 
     @Autowired
@@ -69,7 +70,7 @@ class BackdoorFilter extends GenericFilterBean {
     /**
      * The filter injects a user with the ROLE_ADMIN authority
      */
-    private final List<GrantedAuthority> authorities = [
+    private final List<SimpleGrantedAuthority> authorities = [
             new SimpleGrantedAuthority(Role.ROLE_ADMIN),
     ]
 
