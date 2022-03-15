@@ -69,10 +69,10 @@ abstract class AbstractAlignmentCheckerIntegrationSpec extends Specification {
     List<SeqTrack> createSeqTracksWithConfig(Map configProperties = [:], Map seqTrackProperties = [:]) {
         createSeqTracks(seqTrackProperties).each {
             DomainFactory.createRoddyWorkflowConfig([
-                    seqType: it.seqType,
-                    project: it.project,
+                    seqType : it.seqType,
+                    project : it.project,
                     pipeline: createPipeLine(),
-                    ] +  configProperties)
+            ] + configProperties)
         }
     }
 
@@ -356,31 +356,49 @@ abstract class AbstractAlignmentCheckerIntegrationSpec extends Specification {
 
         then:
         1 * checker.mergingWorkPackageForSeqTracks(_)
-        1 * output.showList(AbstractAlignmentChecker.HEADER_NO_MERGING_WORK_PACKAGE, noMergingWorkPackage)
+        1 * output.showList(AbstractAlignmentChecker.HEADER_NO_MERGING_WORK_PACKAGE, _) >> { String name, List objects ->
+            TestCase.assertContainSame(objects, noMergingWorkPackage)
+        }
 
         then:
         1 * checker.getBamFileForMergingWorkPackage(_, false, false)
-        1 * output.showList(AbstractAlignmentChecker.HEADER_OLD_INSTANCE_RUNNING, oldInstanceRunning)
+        1 * output.showList(AbstractAlignmentChecker.HEADER_OLD_INSTANCE_RUNNING, _) >> { String name, List objects ->
+            TestCase.assertContainSame(objects, oldInstanceRunning)
+        }
 
         then:
-        1 * output.showWaiting(waiting)
+        1 * output.showWaiting(_) >> { List objects ->
+            TestCase.assertContainSame(objects[0], waiting)
+        }
 
         then:
         1 * checker.getBamFileForMergingWorkPackage(_, true, true)
-        1 * output.showList(AbstractAlignmentChecker.HEADER_MWP_WITH_WITHDRAWN_BAM, bamFilesWithdrawn*.mergingWorkPackage)
-        1 * output.showList(AbstractAlignmentChecker.HEADER_MWP_WITHOUT_BAM, mergingWorkPackagesWithoutBam)
+        1 * output.showList(AbstractAlignmentChecker.HEADER_MWP_WITH_WITHDRAWN_BAM, _) >> { String name, List objects ->
+            TestCase.assertContainSame(objects, bamFilesWithdrawn*.mergingWorkPackage)
+        }
+        1 * output.showList(AbstractAlignmentChecker.HEADER_MWP_WITHOUT_BAM, _) >> { String name, List objects ->
+            TestCase.assertContainSame(objects, mergingWorkPackagesWithoutBam)
+        }
 
         then:
-        1 * output.showRunningWithHeader(AbstractAlignmentChecker.HEADER_RUNNING_DECLARED, workflowName, bamFilesDeclared + oldInstanceRunning)
+        1 * output.showRunningWithHeader(AbstractAlignmentChecker.HEADER_RUNNING_DECLARED, workflowName, _) >> { String header, String workflowp, List objects ->
+            TestCase.assertContainSame(objects, bamFilesDeclared + oldInstanceRunning)
+        }
 
         then:
-        1 * output.showRunningWithHeader(AbstractAlignmentChecker.HEADER_RUNNING_NEEDS_PROCESSING, workflowName, bamFilesNeedsProcessing)
+        1 * output.showRunningWithHeader(AbstractAlignmentChecker.HEADER_RUNNING_NEEDS_PROCESSING, workflowName, _) >> { String header, String workflowp, List objects ->
+            TestCase.assertContainSame(objects, bamFilesNeedsProcessing)
+        }
 
         then:
-        1 * output.showRunningWithHeader(AbstractAlignmentChecker.HEADER_RUNNING_IN_PROGRESS, workflowName, bamFilesInProgress)
+        1 * output.showRunningWithHeader(AbstractAlignmentChecker.HEADER_RUNNING_IN_PROGRESS, workflowName, _) >> { String header, String workflowp, List objects ->
+            TestCase.assertContainSame(objects, bamFilesInProgress)
+        }
 
         then:
-        1 * output.showFinished(bamFilesProcessed)
+        1 * output.showFinished(_) >> { List objects ->
+            TestCase.assertContainSame(objects[0], bamFilesProcessed)
+        }
         0 * output._
 
         then:

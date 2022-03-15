@@ -116,8 +116,8 @@ class PlanValidatorServiceIntegrationTests {
         jep = JobExecutionPlan.list().last()
         errors = planValidatorService.validate(jep)
         assertFalse(errors.isEmpty())
-        assertEquals(PlanValidatorService.JOB_BEAN_MISSING + "${JobDefinition.findByNameAndPlan('testJob', jep).id}, thisBeanDoesNotExist12345", errors[0])
-        assertEquals(PlanValidatorService.JOB_BEAN_MISSING + "${JobDefinition.findByNameAndPlan('testJob3', jep).id}, thisBeanDoesNotExist12345", errors[1])
+        assertEquals(PlanValidatorService.JOB_BEAN_MISSING + "${JobDefinition.findByNameAndPlan('testJob', jep)?.id}, thisBeanDoesNotExist12345", errors[0])
+        assertEquals(PlanValidatorService.JOB_BEAN_MISSING + "${JobDefinition.findByNameAndPlan('testJob3', jep)?.id}, thisBeanDoesNotExist12345", errors[1])
     }
 
     @Test
