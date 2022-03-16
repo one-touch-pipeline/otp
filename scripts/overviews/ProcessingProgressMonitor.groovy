@@ -97,6 +97,7 @@ boolean showUnsupportedSeqTypes = false
 
 ProcessingOptionService processingOptionService = ctx.processingOptionService
 MonitorOutputCollector output = new MonitorOutputCollector(showFinishedEntries, showUnsupportedSeqTypes)
+output.configService = ctx.configService
 output.showWorkflowSystemSlots()
 
 SeqType exomePaired = SeqTypeService.exomePairedSeqType
