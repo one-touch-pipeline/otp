@@ -54,7 +54,7 @@ class ReferenceGenomeSelectorServiceSpec extends Specification implements Servic
         SeqType seqType = createSeqType()
         Set<SpeciesWithStrain> species = [createSpeciesWithStrain()] as Set
         Workflow workflow = createWorkflow()
-        ReferenceGenome referenceGenome = createReferenceGenome()
+        ReferenceGenome referenceGenome = createReferenceGenome(species: species)
 
         when:
         service.createOrUpdate(project, seqType, species, workflow, referenceGenome)
@@ -67,21 +67,16 @@ class ReferenceGenomeSelectorServiceSpec extends Specification implements Servic
 
     void "test createOrUpdate, if a matching selector exists"() {
         given:
-        Project project = createProject()
-        SeqType seqType = createSeqType()
-        Set<SpeciesWithStrain> species = [createSpeciesWithStrain()] as Set
-        Workflow workflow = createWorkflow()
-
-        ReferenceGenomeSelector existing = createReferenceGenomeSelector(project: project, seqType: seqType, species: species, workflow: workflow)
-
+        ReferenceGenomeSelector existing = createReferenceGenomeSelector()
         ReferenceGenome referenceGenome = createReferenceGenome()
 
         when:
-        service.createOrUpdate(project, seqType, species, workflow, referenceGenome)
+        service.createOrUpdate(existing.project, existing.seqType, existing.species, existing.workflow, referenceGenome)
 
         then:
-        ReferenceGenomeSelector selector = exactlyOneElement(ReferenceGenomeSelector.findAllByProjectAndSeqTypeAndWorkflow(project, seqType, workflow)
-                .findAll { it.species == species })
+        ReferenceGenomeSelector selector = exactlyOneElement(
+                ReferenceGenomeSelector.findAllByProjectAndSeqTypeAndWorkflow(existing.project, existing.seqType, existing.workflow)
+                        .findAll { it.species == existing.species })
         selector == existing
         selector.referenceGenome == referenceGenome
     }

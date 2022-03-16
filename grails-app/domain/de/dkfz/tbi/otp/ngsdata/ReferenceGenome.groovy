@@ -131,6 +131,11 @@ class ReferenceGenome implements Entity {
      */
     static constraints = {
         name(unique: true, blank: false)
+        species validator:  { val, obj ->
+            if (!val) {
+                return "empty"
+            }
+        }
         path(unique: true, blank: false, shared: "relativePath")
         fileNamePrefix(blank: false, shared: "pathComponent")
         length shared: 'greaterThanZero'

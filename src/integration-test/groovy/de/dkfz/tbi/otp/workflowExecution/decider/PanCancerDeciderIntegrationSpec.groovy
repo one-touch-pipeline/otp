@@ -438,7 +438,7 @@ class PanCancerDeciderIntegrationSpec extends Specification implements WorkflowS
         SeqType seqType = createSeqType()
         Project project = createProject()
         SpeciesWithStrain species = createSpeciesWithStrain()
-        ReferenceGenome referenceGenome = createReferenceGenome()
+        ReferenceGenome referenceGenome = createReferenceGenome(species: [species] as Set)
         Individual individual = createIndividual(species: species, project: project)
 
         WorkflowArtefact inputArtefact1 = createWorkflowArtefact(artefactType: ArtefactType.FASTQ, producedBy: createWorkflowRun())
@@ -472,7 +472,6 @@ class PanCancerDeciderIntegrationSpec extends Specification implements WorkflowS
                 project: project,
                 seqType: seqType,
                 workflow: workflow,
-                species: [species] as Set,
                 referenceGenome: referenceGenome,
         )
 

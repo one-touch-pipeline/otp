@@ -35,4 +35,17 @@ class ReferenceGenomeSelector implements Entity {
     Workflow workflow
 
     ReferenceGenome referenceGenome
+
+    static constraints = {
+        referenceGenome validator: { val, obj ->
+            if (val.species != obj.species) {
+                return "species"
+            }
+        }
+    }
+
+    @Override
+    String toString() {
+        return "RGS: (${project} ${seqType} ${species.sort { it.displayString }.join("+")} ${workflow}) -> (${referenceGenome})"
+    }
 }

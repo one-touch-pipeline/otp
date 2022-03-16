@@ -38,4 +38,9 @@ class WorkflowVersionSelector implements Deprecateable<WorkflowVersionSelector>,
         previous nullable: true
         deprecationDate nullable: true
     }
+
+    @Override
+    String toString() {
+        return "WVS ${deprecationDate ? "[DEPRECATED]" : ""}: (${project} ${seqType}) -> (${workflowVersion})"
+    }
 }

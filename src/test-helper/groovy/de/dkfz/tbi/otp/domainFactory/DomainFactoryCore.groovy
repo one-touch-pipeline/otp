@@ -25,6 +25,7 @@ import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.dataprocessing.MergingCriteria
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.domainFactory.taxonomy.TaxonomyFactoryInstance
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
 import de.dkfz.tbi.otp.project.Project
@@ -285,6 +286,7 @@ trait DomainFactoryCore implements DomainFactoryHelper {
     ReferenceGenome createReferenceGenome(Map properties = [:], boolean saveAndValidate = true) {
         return createDomainObject(ReferenceGenome, [
                 name                        : "referencegenome_name${nextId}",
+                species                     : { [TaxonomyFactoryInstance.INSTANCE.createSpeciesWithStrain()] as Set },
                 path                        : HelperUtils.uniqueString,
                 fileNamePrefix              : "referencegenome-prefix_${nextId}",
                 length                      : 1,

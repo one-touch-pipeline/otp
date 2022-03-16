@@ -25,6 +25,7 @@ import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.taxonomy.TaxonomyFactory
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 import de.dkfz.tbi.otp.workflow.restartHandler.WorkflowJobErrorDefinition
 import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.otp.workflowExecution.log.*
@@ -185,12 +186,13 @@ trait WorkflowSystemDomainFactory implements DomainFactoryCore, TaxonomyFactory 
     }
 
     ReferenceGenomeSelector createReferenceGenomeSelector(Map properties = [:], boolean saveAndValidate = true) {
+        ReferenceGenome referenceGenome = properties.referenceGenome ?: createReferenceGenome()
         return createDomainObject(ReferenceGenomeSelector, [
-                project          : { createProject() },
-                referenceGenome  : { createReferenceGenome() },
-                seqType          : { createSeqType() },
-                species          : { [createSpeciesWithStrain()] as Set },
-                workflow         : { createWorkflow() },
+                project        : { createProject() },
+                referenceGenome: referenceGenome,
+                seqType        : { createSeqType() },
+                species        : { new HashSet(referenceGenome.species) },
+                workflow       : { createWorkflow() },
         ], properties, saveAndValidate)
     }
 }

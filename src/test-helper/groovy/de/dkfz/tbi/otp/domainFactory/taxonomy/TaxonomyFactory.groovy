@@ -52,3 +52,8 @@ trait TaxonomyFactory implements DomainFactoryCore {
         ], properties, saveAndValidate)
     }
 }
+
+class TaxonomyFactoryInstance implements TaxonomyFactory {
+
+    final static TaxonomyFactoryInstance INSTANCE = new TaxonomyFactoryInstance()
+}
