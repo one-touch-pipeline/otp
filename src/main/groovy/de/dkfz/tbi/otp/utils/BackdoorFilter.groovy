@@ -23,7 +23,6 @@ package de.dkfz.tbi.otp.utils
 
 import grails.util.Environment
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.annotation.Scope
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.GrantedAuthority
@@ -59,7 +58,6 @@ import javax.servlet.http.HttpServletResponse
  * The first one controls whether the filter is enabled at all, the second one the user to use.
  */
 @Component("backdoorFilter")
-@Scope("singleton")
 class BackdoorFilter extends GenericFilterBean {
 
     @Autowired

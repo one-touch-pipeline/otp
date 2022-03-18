@@ -22,7 +22,6 @@
 package de.dkfz.tbi.otp.parser.hipo
 
 import groovy.transform.TupleConstructor
-import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.SampleType.SpecificReferenceGenome
@@ -32,7 +31,6 @@ import de.dkfz.tbi.otp.parser.SampleIdentifierParser
 import java.util.regex.Matcher
 
 @Component
-@Scope("singleton")
 class HipoSampleIdentifierParser implements SampleIdentifierParser {
 
     private final static String REGEX = /^(${PIDREGEX})-([${HipoTissueType.values()*.key.join("")}])(\d{1,2})-(([BDRPACWY])(\d{1,2}))$/

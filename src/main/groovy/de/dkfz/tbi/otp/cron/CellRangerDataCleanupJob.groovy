@@ -24,7 +24,6 @@ package de.dkfz.tbi.otp.cron
 import groovy.transform.TupleConstructor
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.OtpRuntimeException
@@ -42,8 +41,6 @@ import de.dkfz.tbi.util.TimeFormats
 import java.sql.Timestamp
 import java.time.LocalDate
 
-@SuppressWarnings("AnnotationsForJobs")
-@Scope("singleton")
 @Component
 @Slf4j
 class CellRangerDataCleanupJob extends AbstractScheduledJob {

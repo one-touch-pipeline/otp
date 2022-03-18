@@ -23,7 +23,6 @@ package de.dkfz.tbi.otp.cron
 
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.administration.LdapService
@@ -34,8 +33,6 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.SystemUserUtils
 
-@SuppressWarnings("AnnotationsForJobs")
-@Scope("singleton")
 @Component
 @Slf4j
 class CheckFileAccessInconsistenciesJob extends AbstractScheduledJob {

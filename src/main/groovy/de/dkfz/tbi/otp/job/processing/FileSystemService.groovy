@@ -29,7 +29,6 @@ import grails.core.GrailsApplication
 import grails.gorm.transactions.Transactional
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.annotation.Scope
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 
@@ -47,7 +46,6 @@ import static com.github.robtimus.filesystems.sftp.Identity.fromFiles
 import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
 
 @Slf4j
-@Scope("singleton")
 @Component
 @Transactional
 class FileSystemService {

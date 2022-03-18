@@ -23,7 +23,6 @@ package de.dkfz.tbi.otp.cron
 
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.config.ConfigService
@@ -37,7 +36,6 @@ import java.time.ZoneId
 /**
  * Scheduled job to report the monthly KPIs for de.NBI Workflows.
  */
-@Scope("singleton")
 @Component
 @Slf4j
 class GenerateAndSendKPIsForNBI extends AbstractScheduledJob {

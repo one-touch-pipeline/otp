@@ -27,7 +27,6 @@ import groovy.transform.Synchronized
 import groovy.util.logging.Slf4j
 import org.slf4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.annotation.Scope
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 
@@ -36,10 +35,8 @@ import de.dkfz.tbi.otp.config.SshAuthMethod
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.ngsdata.Realm
-import de.dkfz.tbi.otp.utils.LocalShellHelper
-import de.dkfz.tbi.otp.utils.ProcessOutput
+import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
-import de.dkfz.tbi.otp.utils.ExecutedCommandLogCallbackThreadLocalHolder
 
 import java.util.concurrent.Semaphore
 
@@ -50,7 +47,6 @@ import java.util.concurrent.Semaphore
  *
  * @see LocalShellHelper
  */
-@Scope("singleton")
 @Component
 @Slf4j
 class RemoteShellHelper {

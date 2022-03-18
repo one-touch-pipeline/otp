@@ -45,6 +45,7 @@ class AnnotationsForJobsVisitor extends AbstractAstVisitor implements IsAnnotati
             return
         }
         boolean isNewWorkflowSystem = node.text =~ /^de.dkfz.tbi.otp.workflow.*$/
+        boolean isScheduledJob = node.text =~ /^de.dkfz.tbi.otp.cron.*$/
 
         boolean hasComponent = false
         boolean hasScope = false
@@ -57,7 +58,7 @@ class AnnotationsForJobsVisitor extends AbstractAstVisitor implements IsAnnotati
                     break
                 case 'Scope':
                     hasScope = true
-                    if (isNewWorkflowSystem) {
+                    if (isNewWorkflowSystem || isScheduledJob) {
                         addViolation(node, "The @Scope annotation should not given for the new job system")
                     } else {
                         if (annotationNode.members['value']?.text != 'prototype') {
@@ -76,7 +77,7 @@ class AnnotationsForJobsVisitor extends AbstractAstVisitor implements IsAnnotati
         if (!hasComponent) {
             addViolation(node, buildErrorString("@Component"))
         }
-        if (!hasScope && !isNewWorkflowSystem) {
+        if (!hasScope && !(isNewWorkflowSystem || isScheduledJob)) {
             addViolation(node, buildErrorString("@Scope"))
         }
         if (!hasLog) {

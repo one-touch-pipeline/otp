@@ -24,7 +24,6 @@ package de.dkfz.tbi.otp.cron
 import grails.web.mapping.LinkGenerator
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.administration.LdapService
@@ -51,8 +50,6 @@ import java.time.LocalDateTime
  * This job works in conjunction with {@link DeactivateUsersJob}, which is responsible
  * for actually disabling the users.
  */
-@SuppressWarnings("AnnotationsForJobs")
-@Scope("singleton")
 @Component
 @Slf4j
 class ScheduleUsersForDeactivationJob extends AbstractScheduledJob {

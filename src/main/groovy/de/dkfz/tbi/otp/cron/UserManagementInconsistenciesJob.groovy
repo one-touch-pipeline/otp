@@ -23,7 +23,6 @@ package de.dkfz.tbi.otp.cron
 
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.annotation.Scope
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 
@@ -39,8 +38,6 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 /**
  * Scheduled job to find and report inconsistencies in the user management.
  */
-@SuppressWarnings("AnnotationsForJobs")
-@Scope("singleton")
 @Component
 @Slf4j
 class UserManagementInconsistenciesJob {

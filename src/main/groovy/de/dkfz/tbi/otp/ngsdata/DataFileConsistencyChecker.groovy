@@ -24,7 +24,6 @@ package de.dkfz.tbi.otp.ngsdata
 import grails.validation.ValidationException
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.annotation.Scope
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 
@@ -36,7 +35,6 @@ import de.dkfz.tbi.otp.utils.MailHelperService
 import de.dkfz.tbi.otp.utils.SessionUtils
 import de.dkfz.tbi.util.TimeUtils
 
-@Scope("singleton")
 @Component
 @Slf4j
 class DataFileConsistencyChecker {

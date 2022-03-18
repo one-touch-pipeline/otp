@@ -23,7 +23,6 @@ package de.dkfz.tbi.otp.cron
 
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.administration.LdapService
@@ -33,8 +32,6 @@ import de.dkfz.tbi.otp.security.User
 /**
  * Scheduled job to update user information from the ldap.
  */
-@SuppressWarnings("AnnotationsForJobs")
-@Scope("singleton")
 @Component
 @Slf4j
 class FetchUserDataFromLdapJob extends AbstractScheduledJob {

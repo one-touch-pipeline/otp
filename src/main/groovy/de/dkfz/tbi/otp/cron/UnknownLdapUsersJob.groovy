@@ -23,7 +23,6 @@ package de.dkfz.tbi.otp.cron
 
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.administration.LdapService
@@ -35,8 +34,6 @@ import de.dkfz.tbi.otp.utils.MailHelperService
  *
  * It only considers enabled users with a username.
  */
-@SuppressWarnings("AnnotationsForJobs")
-@Scope("singleton")
 @Component
 @Slf4j
 class UnknownLdapUsersJob extends AbstractScheduledJob {

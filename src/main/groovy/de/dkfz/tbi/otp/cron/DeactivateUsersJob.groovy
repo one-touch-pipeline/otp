@@ -23,7 +23,6 @@ package de.dkfz.tbi.otp.cron
 
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.administration.LdapService
@@ -41,8 +40,6 @@ import de.dkfz.tbi.otp.utils.MessageSourceService
  * If so, it subsequently deactivates them in all projects and notifies the group administration to
  * remove them from all groups.
  */
-@SuppressWarnings("AnnotationsForJobs")
-@Scope("singleton")
 @Component
 @Slf4j
 class DeactivateUsersJob extends AbstractScheduledJob {
