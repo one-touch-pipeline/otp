@@ -94,6 +94,14 @@ class ExampleData {
     boolean createFilesOnFilesystem = true
 
     /**
+     * Should data files be marked as existing when no files were created?
+     * Only taking effect if createFilesOnFilesystem is false.
+     *
+     * Usually there is no need to set this to false, only if you want to create data with missing files.
+     */
+    boolean markDataFilesAsExisting = true
+
+    /**
      * The SeqTypes for which data is to be created.
      */
     List<SeqType> seqTypes = [
@@ -635,7 +643,7 @@ class ExampleData {
                 run                : seqTrack.run,
                 project            : seqTrack.project,
                 used               : true,
-                fileExists         : true,
+                fileExists         : !createFilesOnFilesystem ? markDataFilesAsExisting : true,
                 fileLinked         : true,
                 fileSize           : 1000000000,
                 nReads             : 185000000,
