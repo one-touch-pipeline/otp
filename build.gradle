@@ -100,8 +100,8 @@ sourceSets {
                 "src/workflow-test/groovy"
             }
         }
-        compileClasspath += main.runtimeClasspath + testHelper.output + integrationTest.runtimeClasspath
-        runtimeClasspath += main.runtimeClasspath + testHelper.output + integrationTest.runtimeClasspath
+        compileClasspath += main.runtimeClasspath + testHelper.output
+        runtimeClasspath += main.runtimeClasspath + testHelper.output
 
         File r = new File(project.projectDir, "grails-app/conf")
         resources.srcDir(r)
@@ -313,6 +313,8 @@ dependencies {
     runtime "org.apache.tomcat:tomcat-jdbc"
     testCompile "org.grails:grails-gorm-testing-support"
     testCompile "org.grails:grails-web-testing-support"
+    workflowTestCompile "org.grails:grails-gorm-testing-support"
+    workflowTestCompile "org.grails:grails-web-testing-support"
 
     // JS and CSS libraries
     compile 'org.webjars:jquery:3.6.0'
