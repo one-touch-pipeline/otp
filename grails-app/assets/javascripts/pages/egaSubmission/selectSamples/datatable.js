@@ -31,8 +31,6 @@ $.otp.selectSamplesTable = {
    * @returns datatable object
    */
   selectableSampleList(header, preSelectedSamples) {
-    'use strict';
-
     return $('#selectSamplesTable').dataTable({
       sDom: '<i> T rt<"clear">',
       oTableTools: $.otp.tableTools,
@@ -76,11 +74,21 @@ $.otp.selectSamplesTable = {
             const result = json;
             for (let i = 0; i < json.aaData.length; i += 1) {
               const entry = json.aaData[i];
-              const seqType = `${entry.seqTypeDisplayName} ${entry.sequencingReadType} ${entry.singleCellDisplayName}`;
-              const checked = preSelectedSamples.includes(`${entry.sampleId}${seqType}`) ? 'checked' : '';
-              result.aaData[i][0] = `<input type="checkbox" 
-                                          name="sampleAndSeqType" 
-                                          value="${entry.identifier}" ${checked}/>`;
+              const checked = preSelectedSamples.includes(`${entry.identifier}`) ? 'checked' : '';
+              let firstColumn = `<input type="checkbox" name="sampleAndSeqType" 
+                                            value="${entry.identifier}" ${checked}/>`;
+
+              if (entry.fileExists !== 'true') {
+                const samplesWithMissingFile = `${entry.sampleId},${entry.individual},${entry.seqTypeDisplayName},` +
+                  `${entry.sequencingReadType},${entry.singleCellDisplayName},${entry.sampleType}`;
+                firstColumn =
+                  `${firstColumn} 
+                   <img src="${$.otp.createAssetLink('warning.png')}" alt="warning" title="No fastq file found!">
+                   <input type="hidden" name="samplesWithMissingFile" value="${samplesWithMissingFile}">
+                   `;
+              }
+
+              result.aaData[i][0] = firstColumn;
               for (let c = 0; c < header.length; c++) {
                 result.aaData[i][c + 1] = entry[header[c]];
               }

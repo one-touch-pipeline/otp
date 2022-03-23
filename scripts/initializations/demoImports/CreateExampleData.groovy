@@ -674,7 +674,7 @@ class ExampleData {
                 seqTracks            : seqTracks as Set,
                 referenceGenome      : referenceGenome,
                 pipeline             : pipeline,
-                statSizeFileName     : pipeline.name == Pipeline.Name.PANCAN_ALIGNMENT ? CollectionUtils.atMostOneElement(StatSizeFileName.findAllByReferenceGenome(referenceGenome)).name : null,
+                statSizeFileName     : pipeline.name == Pipeline.Name.PANCAN_ALIGNMENT ? StatSizeFileName.findAllByReferenceGenome(referenceGenome).first().name : null,
                 seqPlatformGroup     : seqPlatformGroup,
                 libraryPreparationKit: seqTrack.seqType.isWgbs() ? null : libraryPreparationKit,
         ]).save(flush: true)

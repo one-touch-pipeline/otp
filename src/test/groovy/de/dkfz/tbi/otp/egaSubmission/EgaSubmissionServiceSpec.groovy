@@ -348,7 +348,7 @@ class EgaSubmissionServiceSpec extends Specification implements EgaSubmissionFac
 
         then:
         submission.samplesToSubmit.empty
-        l == ["${sampleSubmissionObject.sample.id}${sampleSubmissionObject.seqType}"]
+        l == ["${sampleSubmissionObject.sample.id}-${sampleSubmissionObject.seqType.id}"]
     }
 
     void "test createDataFileSubmissionObjects"() {

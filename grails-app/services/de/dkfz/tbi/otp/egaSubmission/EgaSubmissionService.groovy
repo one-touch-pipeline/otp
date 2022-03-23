@@ -229,7 +229,7 @@ class EgaSubmissionService {
         submission.samplesToSubmit*.seqType.unique()*.refresh()
         submission.samplesToSubmit.toArray().each { SampleSubmissionObject it ->
             submission.samplesToSubmit.remove(it)
-            samplesWithSeqType.add("${it.sample.id}${it.seqType}")
+            samplesWithSeqType.add("${it.sample.id}-${it.seqType.id}")
             it.delete(flush: false)
         }
         submission.selectionState = EgaSubmission.SelectionState.SELECT_SAMPLES
@@ -361,32 +361,27 @@ class EgaSubmissionService {
     }
 
     @CompileDynamic
-    List<SampleAndSeqTypeProjection> getSamplesWithSeqType(Project project) {
-        return SeqTrack.createCriteria().list {
-            projections {
-                sample {
-                    property('id')
-                    individual {
-                        eq('project', project)
-                        property('pid')
-                        order('pid', 'asc')
-                    }
-                    sampleType {
-                        property('name')
-                    }
-                }
-                property('seqType')
-            }
-        }.unique().collect {
+    List<SampleAndSeqTypeAndDataFileProjection> getSamplesWithSeqType(Project project) {
+        String hqlQuery = """SELECT sample.id, individual.pid, sampleType.name, seqType, dataFile.fileExists FROM SeqTrack seqTrack
+           INNER JOIN Sample sample ON sample.id=seqTrack.sample.id
+           INNER JOIN SampleType sampleType ON sampleType.id=sample.sampleType.id
+           INNER JOIN Individual individual ON individual.id=sample.individual.id
+           INNER JOIN SeqType seqType ON seqType.id=seqTrack.seqType.id
+           INNER JOIN DataFile dataFile ON dataFile.seqTrack.id=seqTrack.id
+           WHERE individual.project.id = :projectId
+           ORDER BY individual.pid ASC
+        """
+        return SeqTrack.executeQuery(hqlQuery, [projectId: project.id]).unique().collect {
             SeqType seqType = it[3]
-            return new SampleAndSeqTypeProjection(
+            return new SampleAndSeqTypeAndDataFileProjection(
                     sampleId: it[0],
                     pid: it[1],
                     sampleTypeName: it[2],
                     seqTypeId: seqType.id,
                     seqTypeName: seqType.displayName,
                     sequencingReadType: seqType.libraryLayout,
-                    singleCellDisplayName: seqType.singleCellDisplayName
+                    singleCellDisplayName: seqType.singleCellDisplayName,
+                    fileExists: it[4]
             )
         }
     }
@@ -451,13 +446,13 @@ class EgaSubmissionService {
         }
         experimentalDataRows.unique().each { ExperimentalDataRow experimentalDataRow ->
             metadata << [
-                    libraryLayout             : experimentalDataRow.seqType.libraryLayout,
-                    displayName               : experimentalDataRow.seqType.displayName,
-                    libraryPreparationKit     : experimentalDataRow.libraryPreparationKit,
-                    mappedEgaPlatformModel    : mapEgaPlatformModel(experimentalDataRow.seqPlatformModelLabel),
-                    mappedEgaLibrarySource    : mapEgaLibrarySource(experimentalDataRow.seqType),
-                    mappedEgaLibraryStrategy  : mapEgaLibraryStrategy(experimentalDataRow.seqType),
-                    mappedEgaLibrarySelection : mapEgaLibrarySelection(experimentalDataRow.libraryPreparationKit),
+                    libraryLayout            : experimentalDataRow.seqType.libraryLayout,
+                    displayName              : experimentalDataRow.seqType.displayName,
+                    libraryPreparationKit    : experimentalDataRow.libraryPreparationKit,
+                    mappedEgaPlatformModel   : mapEgaPlatformModel(experimentalDataRow.seqPlatformModelLabel),
+                    mappedEgaLibrarySource   : mapEgaLibrarySource(experimentalDataRow.seqType),
+                    mappedEgaLibraryStrategy : mapEgaLibraryStrategy(experimentalDataRow.seqType),
+                    mappedEgaLibrarySelection: mapEgaLibrarySelection(experimentalDataRow.libraryPreparationKit),
             ]
         }
         return metadata
@@ -573,7 +568,7 @@ class BamFileAndSampleAlias implements Comparable<BamFileAndSampleAlias> {
 
 @CompileStatic
 @Canonical
-class SampleAndSeqTypeProjection implements Comparable<SampleAndSeqTypeProjection> {
+class SampleAndSeqTypeAndDataFileProjection implements Comparable<SampleAndSeqTypeAndDataFileProjection> {
     long sampleId
     String pid
     String sampleTypeName
@@ -581,13 +576,15 @@ class SampleAndSeqTypeProjection implements Comparable<SampleAndSeqTypeProjectio
     String seqTypeName
     String sequencingReadType
     String singleCellDisplayName
+    boolean fileExists
 
     @Override
-    int compareTo(SampleAndSeqTypeProjection other) {
+    int compareTo(SampleAndSeqTypeAndDataFileProjection other) {
         return this.pid <=> other.pid ?:
                 this.seqTypeName <=> other.seqTypeName ?:
                         this.sequencingReadType <=> other.sequencingReadType ?:
                                 this.singleCellDisplayName <=> other.singleCellDisplayName ?:
-                        this.sampleTypeName <=> other.sampleTypeName
+                                        this.sampleTypeName <=> other.sampleTypeName ?:
+                                                this.fileExists <=> other.fileExists
     }
 }

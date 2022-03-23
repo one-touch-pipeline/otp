@@ -123,13 +123,13 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
     Map selectSamples(EgaSubmission submission) {
         List<SeqType> seqTypes = egaSubmissionService.seqTypeByProject(submission.project)
         return [
-                submissionId      : submission.id,
-                project           : submission.project,
-                seqTypes          : seqTypes,
-                seqTypesNames: seqTypes*.displayName.unique(),
-                sequencingReadTypes: seqTypes*.libraryLayout.unique(),
+                submissionId          : submission.id,
+                project               : submission.project,
+                seqTypes              : seqTypes,
+                seqTypesNames         : seqTypes*.displayName.unique(),
+                sequencingReadTypes   : seqTypes*.libraryLayout.unique(),
                 singleCellDisplayNames: seqTypes*.singleCellDisplayName.unique(),
-                samplesWithSeqType: flash.samplesWithSeqType ?: [],
+                samplesWithSeqType    : flash.samplesWithSeqType ?: [],
         ]
     }
 
@@ -253,7 +253,15 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
     }
 
     def selectSamplesForm(SelectSamplesControllerSubmitCommand cmd) {
-        if (cmd.next) {
+        if (cmd.hasErrors()) {
+            flash.samplesWithSeqType = cmd.sampleAndSeqType
+            if (cmd.errors.getFieldError('samplesWithMissingFile')) {
+                flash.message = new FlashMessage("${g.message(code: "egaSubmission.selectSamples.warning.missingFiles")}", cmd.errors)
+            } else {
+                flash.message = new FlashMessage("default.message.errors", cmd.errors)
+            }
+            redirect(action: "editSubmission", params: ['id': cmd.submission.id])
+        } else if (cmd.next) {
             if (cmd.sampleAndSeqType && !cmd.sampleAndSeqType.empty) {
                 egaSubmissionService.createAndSaveSampleSubmissionObjects(cmd.submission, cmd.sampleAndSeqType.findAll())
             } else {
@@ -578,10 +586,11 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
         Map dataToRender = cmd.dataToRender()
 
         List<Map<String, String>> data = []
-        List<SampleAndSeqTypeProjection> samplesWithSeqType = egaSubmissionService.getSamplesWithSeqType(project)
+        List<SampleAndSeqTypeAndDataFileProjection> samplesWithSeqType = egaSubmissionService.getSamplesWithSeqType(project)
 
         samplesWithSeqType.sort().each {
             data.add([
+                    fileExists           : it.fileExists.toString(),
                     identifier           : "${it.sampleId}-${it.seqTypeId}",
                     sampleId             : "${it.sampleId}",
                     individual           : it.pid,

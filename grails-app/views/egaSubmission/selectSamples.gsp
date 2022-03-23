@@ -85,7 +85,7 @@
                     'seqTypeDisplayName',
                     'sequencingReadType',
                     'singleCellDisplayName',
-                    'sampleType'
+                    'sampleType',
             ]}"/>
             <otp:dataTable codes="${[''] + dataTableHeaders.collect { "egaSubmission.${it}" }}" id="selectSamplesTable"/>
         </div>
@@ -105,7 +105,7 @@
                 $.otp.selectSamplesTable.applySeqTypeFilter(table, "${seqTypeColumnIndex}");
 
                 $('#${nextButton}').on("click", function() {
-                    $.otp.selectSamplesTable.removeFilterOnColumn(table, "${seqTypeColumnIndex}");
+                  $.otp.selectSamplesTable.removeFilterOnColumn(table, "${seqTypeColumnIndex}");
                 });
             });
     </asset:script>

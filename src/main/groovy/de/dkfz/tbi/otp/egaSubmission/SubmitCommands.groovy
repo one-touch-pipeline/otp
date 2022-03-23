@@ -81,6 +81,28 @@ class SelectSamplesControllerSubmitCommand implements Validateable {
     String csv
     String next
     List<String> sampleAndSeqType
+    List<String> samplesWithMissingFile
+
+    static constraints = {
+        csv nullable: true
+        samplesWithMissingFile validator: { samplesWithMissingFile, obj, errors ->
+            List<List<String>> tokenizedSamplesWithMissingFile = samplesWithMissingFile*.tokenize(',')
+
+            List<String> selectedSampleIds = obj.sampleAndSeqType
+                    .collect { it.tokenize("-")[0] }
+
+            List<String> intersection = tokenizedSamplesWithMissingFile
+                    .findAll { selectedSampleIds.contains(it[0]) }
+                    .collect { it[1..-1].join(",") }
+
+            if (intersection) {
+                intersection.each {
+                    errors.rejectValue(
+                            "samplesWithMissingFile", "default.message.error.placeholder", [it].toArray(), "missing file")
+                }
+            }
+        }
+    }
 }
 
 class UploadFormSubmitCommand extends MultiPartFileCommand implements Validateable {
