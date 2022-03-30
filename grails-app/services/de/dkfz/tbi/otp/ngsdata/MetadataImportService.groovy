@@ -208,7 +208,13 @@ class MetadataImportService {
             try {
                 String ilse = context.spreadsheet.dataRows[0].getCellByColumnTitle(ILSE_NO.name()).text
                 Path targetDirectory = getIlseFolder(ilse, seqCenter)
-                Path targetFile = targetDirectory.resolve(source.fileName.toString())
+                String oldName = source.fileName
+
+                int position = oldName.lastIndexOf('.')
+                String time = TimeFormats.DATE_TIME_SECONDS_DASHES.getFormattedDate(new Date())
+                String newName = "${oldName.substring(0, position)}-${time}${oldName.substring(position)}"
+
+                Path targetFile = targetDirectory.resolve(newName)
                 if (!Files.exists(targetFile)) {
                     //create the directory and set the permission with owner and group access (setgid bit) explicitly
                     fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(targetDirectory, configService.defaultRealm,
@@ -230,18 +236,20 @@ class MetadataImportService {
         return centerNames ? SeqCenter.findAllByNameInList(centerNames) : []
     }
 
-    List<ValidateAndImportResult> validateAndImportMultiple(String otrsTicketNumber, String ilseNumbers) {
+    List<ValidateAndImportResult> validateAndImportMultiple(String otrsTicketNumber, String ilseNumbers, boolean ignoreAlreadyKnownMd5sum) {
         FileSystem fs = fileSystemService.filesystemForFastqImport
         return validateAndImportMultiple(
                 otrsTicketNumber,
                 parseIlseNumbers(ilseNumbers).collect { getMetadataFilePathForIlseNumber(it, fs) },
-                DirectoryStructureBeanName.GPCF_SPECIFIC
+                DirectoryStructureBeanName.GPCF_SPECIFIC,
+                ignoreAlreadyKnownMd5sum
         )
     }
 
-    List<ValidateAndImportResult> validateAndImportMultiple(String otrsTicketNumber, List<Path> metadataFiles, DirectoryStructureBeanName directoryStructure) {
+    List<ValidateAndImportResult> validateAndImportMultiple(String otrsTicketNumber, List<Path> metadataFiles, DirectoryStructureBeanName directoryStructure,
+                                                            boolean ignoreAlreadyKnownMd5sum) {
         List<MetadataValidationContext> contexts = metadataFiles.collect {
-            return validate(it, directoryStructure)
+            return validate(it, directoryStructure, ignoreAlreadyKnownMd5sum)
         }
         List<ValidateAndImportResult> results = contexts.collect {
             return importHelperMethod(it, true, FastqImportInstance.ImportMode.AUTOMATIC, false, null, otrsTicketNumber, null, true)
@@ -268,7 +276,7 @@ class MetadataImportService {
         return fileSystem.getPath("${configService.seqCenterInboxPath}/${seqCenter.dirName}/${ilse[0..2]}/${ilse}")
     }
 
-    protected static Path getMetadataFilePathForIlseNumber(int ilseNumber, FileSystem fileSystem) {
+    protected Path getMetadataFilePathForIlseNumber(int ilseNumber, FileSystem fileSystem) {
         String ilseNumberString = Integer.toString(ilseNumber)
         SeqCenter seqCenter = exactlyOneElement(SeqCenter.findAllByAutoImportable(true))
         return fileSystem.getPath(
@@ -423,7 +431,7 @@ class MetadataImportService {
     }
 
     private void importRuns(MetadataValidationContext context, FastqImportInstance fastqImportInstance, Collection<Row> metadataFileRows, boolean align) {
-        Map<String, List<Row>> seqTrackPerRun =  metadataFileRows.groupBy {
+        Map<String, List<Row>> seqTrackPerRun = metadataFileRows.groupBy {
             it.getCellByColumnTitle(RUN_ID.name()).text
         }
         int amountOfRows = seqTrackPerRun.size()

@@ -148,7 +148,7 @@ class IlseNumberValidatorSpec extends Specification implements DataTest {
 
         then:
         Collection<Problem> expectedProblems = [
-                new Problem(context.spreadsheet.dataRows[0].cells + context.spreadsheet.dataRows[1].cells as Set, LogLevel.WARNING, "The ILSe number '${ILSE_NO}' already exists.", "At least one ILSe number already exists.")
+                new Problem(context.spreadsheet.dataRows[0].cells + context.spreadsheet.dataRows[1].cells as Set, LogLevel.INFO, "The ILSe number '${ILSE_NO}' already exists.", "At least one ILSe number already exists.")
         ]
         containSame(context.problems, expectedProblems)
     }

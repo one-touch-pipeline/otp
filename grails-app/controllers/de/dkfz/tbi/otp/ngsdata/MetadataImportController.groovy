@@ -264,7 +264,10 @@ class MetadataImportController implements CheckAndCall, PlainResponseExceptionHa
             ]
             UserDetails userDetails = new User('TicketSystem', "", authorities)
             SecurityContextHolder.context.authentication = new UsernamePasswordAuthenticationToken(userDetails, null, authorities)
-            render text: doAutoImport(params.ticketNumber as String, params.ilseNumbers as String), contentType: "text/plain"
+
+            boolean ignoreMd5sumError = "TRUE".equalsIgnoreCase(params.ignoreMd5sumError)
+
+            render text: doAutoImport(params.ticketNumber as String, params.ilseNumbers as String, ignoreMd5sumError), contentType: "text/plain"
         } catch (Throwable t) {
             throw new InternalServerErrorPlainResponseException(t.message, t)
         } finally {
@@ -272,14 +275,15 @@ class MetadataImportController implements CheckAndCall, PlainResponseExceptionHa
         }
     }
 
-    private StringBuilder doAutoImport(String otrsTicketNumber, String ilseNumbers) {
+    private StringBuilder doAutoImport(String otrsTicketNumber, String ilseNumbers, boolean ignoreAlreadyKnownMd5sum) {
         boolean autoImport = processingOptionService.findOptionAsBoolean(OptionName.TICKET_SYSTEM_AUTO_IMPORT_ENABLED)
         if (!autoImport) {
             throw new IllegalStateException('Automatic import is currently disabled. Set processing option autoImportEnabled to "true" to enable it.')
         }
         StringBuilder text = new StringBuilder()
         try {
-            Collection<ValidateAndImportResult> results = metadataImportService.validateAndImportMultiple(otrsTicketNumber, ilseNumbers)
+            Collection<ValidateAndImportResult> results = metadataImportService.validateAndImportMultiple(otrsTicketNumber, ilseNumbers,
+                    ignoreAlreadyKnownMd5sum)
             text.append('Automatic import succeeded :-)')
             results.each {
                 text.append("\n\n${it.context.metadataFile}:\n")

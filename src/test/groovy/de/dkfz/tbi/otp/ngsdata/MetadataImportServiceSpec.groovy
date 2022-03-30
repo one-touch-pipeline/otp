@@ -61,6 +61,7 @@ import de.dkfz.tbi.util.spreadsheet.validation.*
 
 import java.nio.file.*
 import java.time.LocalDate
+import java.util.stream.Collectors
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
@@ -187,7 +188,7 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
         assert runDirectory.mkdir()
         Path metadataFile = testDirectory.toPath().resolve('metadata.tsv')
         metadataFile.bytes = ("${RUN_ID}\t${INSTRUMENT_PLATFORM}\t${INSTRUMENT_MODEL}\t${CENTER_NAME}\n" +
-                        ("run\tplatform\tmodelAlias\t${seqCenter.name}\n" * 2)).getBytes(MetadataValidationContext.CHARSET)
+                ("run\tplatform\tmodelAlias\t${seqCenter.name}\n" * 2)).getBytes(MetadataValidationContext.CHARSET)
 
         MetaDataFile metadataFileObject = new MetaDataFile()
         MetadataImportService service = Spy(MetadataImportService) {
@@ -302,8 +303,8 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
         DomainFactory.createDefaultRealmWithProcessingOption()
 
         MetadataImportService service = Spy(MetadataImportService) {
-            1 * validate(context1.metadataFile, DirectoryStructureBeanName.GPCF_SPECIFIC) >> context1
-            1 * validate(context2.metadataFile, DirectoryStructureBeanName.GPCF_SPECIFIC) >> context2
+            1 * validate(context1.metadataFile, DirectoryStructureBeanName.GPCF_SPECIFIC, _) >> context1
+            1 * validate(context2.metadataFile, DirectoryStructureBeanName.GPCF_SPECIFIC, _) >> context2
             1 * importMetadataFile(context1, true, FastqImportInstance.ImportMode.AUTOMATIC, TICKET_NUMBER, null, true) >> metadataFile1
             1 * importMetadataFile(context2, true, FastqImportInstance.ImportMode.AUTOMATIC, TICKET_NUMBER, null, true) >> metadataFile2
         }
@@ -312,10 +313,172 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
         service.configService.processingOptionService = new ProcessingOptionService()
 
         expect:
-        List<ValidateAndImportResult> validateAndImportResults = service.validateAndImportMultiple(TICKET_NUMBER, '1111+2222')
+        List<ValidateAndImportResult> validateAndImportResults = service.validateAndImportMultiple(TICKET_NUMBER, '1111+2222', false)
 
         validateAndImportResults*.context == [context1, context2]
         validateAndImportResults*.metadataFile == [metadataFile1, metadataFile2]
+    }
+
+    void "validateAndImportMultiple when import first partly and then all, the return correct imports"() {
+        given:
+        String runName = 'run'
+        Date date = TimeUtils.toDate(LocalDate.of(2000, 1, 1))
+        String dateString = TimeFormats.DATE.getFormattedDate(date)
+        String fastq11 = "fastq1_1.gz"
+        String fastq12 = "fastq1_2.gz"
+        String fastq21 = "fastq2_1.gz"
+        String fastq22 = "fastq2_2.gz"
+        String md5sum11 = HelperUtils.randomMd5sum
+        String md5sum12 = HelperUtils.randomMd5sum
+        String md5sum21 = HelperUtils.randomMd5sum
+        String md5sum22 = HelperUtils.randomMd5sum
+
+        DomainFactory.createAllAnalysableSeqTypes()
+
+        SeqCenter seqCenter = createSeqCenter()
+        SeqPlatform seqPlatform = createSeqPlatform()
+        SampleIdentifier sampleIdentifier1 = DomainFactory.createSampleIdentifier()
+        SampleIdentifier sampleIdentifier2 = DomainFactory.createSampleIdentifier()
+        SoftwareToolIdentifier softwareToolIdentifier = createSoftwareToolIdentifier([
+                softwareTool: createSoftwareTool([
+                        type: SoftwareTool.Type.BASECALLING,
+                ]),
+        ])
+        SeqType seqTypeWithAntibodyTarget = createSeqType([
+                libraryLayout    : SequencingReadType.PAIRED,
+                hasAntibodyTarget: true,
+        ])
+        AntibodyTarget antibodyTarget = createAntibodyTarget()
+        createFileType(
+                type: FileType.Type.SEQUENCE,
+                signature: '_',
+        )
+        OtrsTicket otrsTicket = createOtrsTicket()
+
+        String metadata1 = """
+${FASTQ_FILE}                   ${fastq11}                                  ${fastq12}
+${MD5}                          ${md5sum11}                                 ${md5sum12}
+${RUN_ID}                       ${runName}                                  ${runName}
+${CENTER_NAME}                  ${seqCenter}                                ${seqCenter}
+${INSTRUMENT_PLATFORM}          ${seqPlatform.name}                         ${seqPlatform.name}
+${INSTRUMENT_MODEL}             ${seqPlatform.seqPlatformModelLabel.name}   ${seqPlatform.seqPlatformModelLabel.name}
+${RUN_DATE}                     ${dateString}                               ${dateString}
+${LANE_NO}                      1                                           1
+${SEQUENCING_TYPE}              ${seqTypeWithAntibodyTarget.name}           ${seqTypeWithAntibodyTarget.name}
+${SEQUENCING_READ_TYPE}         ${seqTypeWithAntibodyTarget.libraryLayout}  ${seqTypeWithAntibodyTarget.libraryLayout}
+${READ}                         1                                           2
+${SAMPLE_NAME}                  ${sampleIdentifier1.name}                   ${sampleIdentifier1.name}
+${ANTIBODY_TARGET}              ${antibodyTarget.name}                      ${antibodyTarget.name}
+${ANTIBODY}                     -                                           -
+${FASTQ_GENERATOR}              ${softwareToolIdentifier.name}              ${softwareToolIdentifier.name}
+"""
+
+        String metadata2 = """
+${FASTQ_FILE}                   ${fastq11}                                  ${fastq12}                                  ${fastq21}                                  ${fastq22}
+${MD5}                          ${md5sum11}                                 ${md5sum12}                                 ${md5sum21}                                 ${md5sum22}
+${RUN_ID}                       ${runName}                                  ${runName}                                  ${runName}                                  ${runName}
+${CENTER_NAME}                  ${seqCenter}                                ${seqCenter}                                ${seqCenter}                                ${seqCenter}
+${INSTRUMENT_PLATFORM}          ${seqPlatform.name}                         ${seqPlatform.name}                         ${seqPlatform.name}                         ${seqPlatform.name}
+${INSTRUMENT_MODEL}             ${seqPlatform.seqPlatformModelLabel.name}   ${seqPlatform.seqPlatformModelLabel.name}   ${seqPlatform.seqPlatformModelLabel.name}   ${seqPlatform.seqPlatformModelLabel.name}
+${RUN_DATE}                     ${dateString}                               ${dateString}                               ${dateString}                               ${dateString}
+${LANE_NO}                      1                                           1                                           2                                           2
+${SEQUENCING_TYPE}              ${seqTypeWithAntibodyTarget.name}           ${seqTypeWithAntibodyTarget.name}           ${seqTypeWithAntibodyTarget.name}           ${seqTypeWithAntibodyTarget.name}
+${SEQUENCING_READ_TYPE}         ${seqTypeWithAntibodyTarget.libraryLayout}  ${seqTypeWithAntibodyTarget.libraryLayout}  ${seqTypeWithAntibodyTarget.libraryLayout}  ${seqTypeWithAntibodyTarget.libraryLayout}
+${READ}                         1                                           2                                           1                                           2
+${SAMPLE_NAME}                  ${sampleIdentifier1.name}                   ${sampleIdentifier1.name}                   ${sampleIdentifier2.name}                   ${sampleIdentifier2.name}
+${ANTIBODY_TARGET}              ${antibodyTarget.name}                      ${antibodyTarget.name}                      ${antibodyTarget.name}                      ${antibodyTarget.name}
+${ANTIBODY}                     -                                           -                                           -                                           -
+${FASTQ_GENERATOR}              ${softwareToolIdentifier.name}              ${softwareToolIdentifier.name}              ${softwareToolIdentifier.name}              ${softwareToolIdentifier.name}
+"""
+
+        List<List<String>> lines1 = metadata1.readLines().findAll()*.split(/ {2,}/).transpose()
+        List<List<String>> lines2 = metadata2.readLines().findAll()*.split(/ {2,}/).transpose()
+
+        String content1 = lines1.collect { it*.replaceFirst(/^-$/, '').join('\t') }.join('\n')
+        String content2 = lines2.collect { it*.replaceFirst(/^-$/, '').join('\t') }.join('\n')
+
+        Path file1 = temporaryFolder.newFile("metaData1.tsv").toPath()
+        file1.text = content1
+        Path file2 = temporaryFolder.newFile("metaData2.tsv").toPath()
+        file2.text = content2
+
+        DirectoryStructure directoryStructure = Mock(DirectoryStructure) {
+            _ * getRequiredColumnTitles() >> [FASTQ_FILE.name()]
+            _ * getDataFilePath(_, _) >> { MetadataValidationContext context, Row row ->
+                return context.metadataFile.resolveSibling(row.getCellByColumnTitle(FASTQ_FILE.name()).text)
+            }
+        }
+        MetadataImportService service = Spy(MetadataImportService) {
+            2 * getMetadataFilePathForIlseNumber(_, _) >> file1 >> file2
+            _ * notifyAboutUnsetConfig(_, _, _) >> null
+            _ * getDirectoryStructure(_) >> directoryStructure
+        }
+        service.sampleIdentifierService = Mock(SampleIdentifierService) {
+            0 * _
+        }
+        service.seqTrackService = Mock(SeqTrackService) {
+            2 * decideAndPrepareForAlignment(_) >> []
+            2 * determineAndStoreIfFastqFilesHaveToBeLinked(!null, false)
+        }
+        service.seqPlatformService = Mock(SeqPlatformService) {
+            2 * findSeqPlatform(seqPlatform.name, seqPlatform.seqPlatformModelLabel.name, null) >> seqPlatform
+            0 * _
+        }
+        service.seqTypeService = Mock(SeqTypeService) {
+            2 * findByNameOrImportAlias(seqTypeWithAntibodyTarget.name, [
+                    libraryLayout: seqTypeWithAntibodyTarget.libraryLayout,
+                    singleCell   : seqTypeWithAntibodyTarget.singleCell,
+            ]) >> seqTypeWithAntibodyTarget
+            0 * _
+        }
+        service.applicationContext = Mock(ApplicationContext) {
+            4 * getBeansOfType(MetadataValidator) >> [:]
+        }
+        service.otrsTicketService = Mock(OtrsTicketService) {
+            2 * createOrResetOtrsTicket(_, _, _) >> otrsTicket
+        }
+        service.antibodyTargetService = Mock(AntibodyTargetService) {
+            2 * findByNameOrImportAlias(_) >> antibodyTarget
+        }
+        service.samplePairDeciderService = Mock(SamplePairDeciderService) {
+            2 * findOrCreateSamplePairs([]) >> []
+            0 * _
+        }
+        service.mergingCriteriaService = Mock(MergingCriteriaService) {
+            2 * createDefaultMergingCriteria(_, _)
+        }
+        service.dataInstallationInitializationService = Mock(DataInstallationInitializationService) {
+            _ * createWorkflowRuns(_) >> []
+        }
+        service.allDecider = Mock(AllDecider) {
+            _ * decide(_, _) >> []
+        }
+        service.processingThresholdsService = Mock(ProcessingThresholdsService)
+        service.fileSystemService = new TestFileSystemService()
+        service.configService = new TestConfigService()
+        service.configService.processingOptionService = new ProcessingOptionService()
+
+        when:
+        List<ValidateAndImportResult> validateAndImportResults1 = service.validateAndImportMultiple(TICKET_NUMBER, '1111', true)
+
+        then:
+        validateAndImportResults1.size() == 1
+        validateAndImportResults1[0].metadataFile.fileName == file1.fileName.toString()
+        validateAndImportResults1[0].context.spreadsheet.dataRows.size() == 2
+        validateAndImportResults1[0].context.spreadsheet.dataRows[0].cells[0].text == fastq11
+        validateAndImportResults1[0].context.spreadsheet.dataRows[1].cells[0].text == fastq12
+
+        when:
+        List<ValidateAndImportResult> validateAndImportResults2 = service.validateAndImportMultiple(TICKET_NUMBER, '1111', true)
+
+        then:
+        validateAndImportResults2.size() == 1
+        validateAndImportResults2[0].metadataFile.fileName == file2.fileName.toString()
+        validateAndImportResults2[0].context.spreadsheet.dataRows.size() == 2
+        validateAndImportResults2[0].context.spreadsheet.dataRows[0].rowIndex == 3
+        validateAndImportResults2[0].context.spreadsheet.dataRows[1].rowIndex == 4
+        validateAndImportResults2[0].context.spreadsheet.dataRows[0].cells[0].text == fastq21
+        validateAndImportResults2[0].context.spreadsheet.dataRows[1].cells[0].text == fastq22
     }
 
     void "validateAndImportMultiple when some are invalid, throws AutoImportFailedException"() {
@@ -333,9 +496,9 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
                 [metadataFile: Paths.get("${seqCenter.autoImportDir}/003333/data/3333_meta.tsv"), problems: problems])
 
         MetadataImportService service = Spy(MetadataImportService) {
-            1 * validate(context1.metadataFile, DirectoryStructureBeanName.GPCF_SPECIFIC) >> context1
-            1 * validate(context2.metadataFile, DirectoryStructureBeanName.GPCF_SPECIFIC) >> context2
-            1 * validate(context3.metadataFile, DirectoryStructureBeanName.GPCF_SPECIFIC) >> context3
+            1 * validate(context1.metadataFile, DirectoryStructureBeanName.GPCF_SPECIFIC, _) >> context1
+            1 * validate(context2.metadataFile, DirectoryStructureBeanName.GPCF_SPECIFIC, _) >> context2
+            1 * validate(context3.metadataFile, DirectoryStructureBeanName.GPCF_SPECIFIC, _) >> context3
             1 * importMetadataFile(context2, true, FastqImportInstance.ImportMode.AUTOMATIC, TICKET_NUMBER, null, true) >> DomainFactory.createMetaDataFile()
         }
 
@@ -344,7 +507,7 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
         service.configService.processingOptionService = new ProcessingOptionService()
 
         when:
-        service.validateAndImportMultiple(TICKET_NUMBER, '1111+2222+3333')
+        service.validateAndImportMultiple(TICKET_NUMBER, '1111+2222+3333', false)
 
         then:
         MultiImportFailedException e = thrown()
@@ -450,7 +613,7 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
         DomainFactory.createAllAnalysableSeqTypes()
 
         def (fastq1, fastq2, fastq3, fastq4, fastq5, fastq6, fastq7, fastq8, fastq9) =
-            ["fastq_a", "s_1_1_", "s_1_2_", "s_2_1_", "s_2_2_", "s_3_1_", "fastq_g", "fastq_b", "fastq_sc"]
+        ["fastq_a", "s_1_1_", "s_1_2_", "s_2_1_", "s_2_2_", "s_3_1_", "fastq_g", "fastq_b", "fastq_sc"]
 
         def (String runName1, String runName2) = ["run1", "run2"]
         def (String center1, String center2) = ["center1", "center2"]
@@ -874,7 +1037,7 @@ ${ILSE_NO}                      -             1234          1234          -     
         }
     }
 
-    void "importMetadataFile imports correctly data withAntibodyTarget"() {
+    void "importMetadataFile imports correctly data with AntibodyTarget"() {
         given:
         String runName = 'run'
         Date date = TimeUtils.toDate(LocalDate.of(2000, 1, 1))
@@ -1469,12 +1632,11 @@ ${FASTQ_GENERATOR}              ${softwareToolIdentifier.name}              ${so
                 """.stripIndent()
         Path file = temporaryFolder.newFile(fileName).toPath()
         file.text = content
-        Path target = temporaryFolder.newFolder('target').toPath()
-        Path targetFile = target.resolve(fileName)
+        Path targetDirectory = temporaryFolder.newFolder('target').toPath()
         ProcessingOptionService processingOptionService = new ProcessingOptionService()
         DomainFactory.createDefaultRealmWithProcessingOption()
         MetadataImportService service = Spy(MetadataImportService) {
-            1 * getIlseFolder(_, _) >> (returnValidPath ? target : null)
+            1 * getIlseFolder(_, _) >> (returnValidPath ? targetDirectory : null)
         }
         service.configService = new ConfigService()
         service.fileService = new FileService()
@@ -1493,7 +1655,8 @@ ${FASTQ_GENERATOR}              ${softwareToolIdentifier.name}              ${so
         return [
                 context   : context,
                 service   : service,
-                targetFile: targetFile,
+                targetDirectory: targetDirectory,
+                fileName: fileName,
         ]
     }
 
@@ -1514,7 +1677,7 @@ ${FASTQ_GENERATOR}              ${softwareToolIdentifier.name}              ${so
         then:
         RuntimeException e = thrown()
         e.message.contains('Copying of metadata file')
-        e.cause.message.contains('target/metadataFile.tsv')
+        e.cause.message.contains('target/metadataFile')
     }
 
     void "copyMetaDataFileIfRequested, if metadata does not exist and copying fine, all fine"() {
@@ -1525,8 +1688,11 @@ ${FASTQ_GENERATOR}              ${softwareToolIdentifier.name}              ${so
         data.service.copyMetadataFileIfRequested(data.context)
 
         then:
-        Files.exists(data.targetFile)
-        Files.size(data.targetFile)
+        Files.exists(data.targetDirectory)
+        List<Path> paths =  Files.list(data.targetDirectory).collect(Collectors.toList())
+        paths.size() == 1
+        Files.size(paths[0])
+        paths[0][-1].toString() ==~ /metadataFile-.*\.tsv/
     }
 
     void "copyMetaDataFileIfRequested, if metadata does not exist and IlseNumber is wrong, should fail"() {
@@ -1546,36 +1712,6 @@ ${FASTQ_GENERATOR}              ${softwareToolIdentifier.name}              ${so
         e.cause.message.contains('Cannot invoke method resolve() on null object')
     }
 
-    void "copyMetaDataFileIfRequested, if metadata already exist and content differ, should fail"() {
-        given:
-        Map data = setupForCopyMetaDataFileIfRequested(null)
-        data.targetFile.text = 'something'
-
-        data.service.mailHelperService = Mock(MailHelperService) {
-            1 * sendEmailToTicketSystem(_, _)
-        }
-
-        when:
-        data.service.copyMetadataFileIfRequested(data.context)
-
-        then:
-        RuntimeException e = thrown()
-        e.message.contains('Copying of metadata file')
-        e.cause.message.contains('assert Files.readAllBytes(targetFile) == context.content')
-    }
-
-    void "copyMetaDataFileIfRequested, if metadata already exist and content is the same, do nothing"() {
-        given:
-        Map data = setupForCopyMetaDataFileIfRequested(null)
-        data.targetFile.bytes = data.context.content
-
-        when:
-        data.service.copyMetadataFileIfRequested(data.context)
-
-        then:
-        FileService.isFileReadableAndNotEmpty(data.targetFile)
-    }
-
     void "copyMetaDataFileIfRequested, if metadata is copied, check the permission string must be 2770"() {
         given:
         Map data = setupForCopyMetaDataFileIfRequested(null)
@@ -1589,7 +1725,7 @@ ${FASTQ_GENERATOR}              ${softwareToolIdentifier.name}              ${so
 
         //remove the folder where the metadata should be copied (part of the setup)
         //if the directory exists, nothing should be done. Permission won't be changed
-        Path targetDirectory = temporaryFolder.folder.toPath().resolve("target")
+        Path targetDirectory = data.targetDirectory
         if (Files.exists(targetDirectory)) {
             targetDirectory.deleteDir()
         }
@@ -1725,7 +1861,7 @@ ${FASTQ_GENERATOR}              ${softwareToolIdentifier.name}              ${so
         given:
         SeqCenter seqCenter = createSeqCenter()
         DataForGetOrCreateRun data = new DataForGetOrCreateRun([
-                (CENTER_NAME)        : seqCenter.name,
+                (CENTER_NAME): seqCenter.name,
         ])
 
         when:
@@ -1759,7 +1895,7 @@ ${FASTQ_GENERATOR}              ${softwareToolIdentifier.name}              ${so
         given:
         String dateExecutedString = ''
         DataForGetOrCreateRun data = new DataForGetOrCreateRun([
-                (RUN_DATE)    :    dateExecutedString,
+                (RUN_DATE): dateExecutedString,
         ])
 
         when:

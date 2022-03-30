@@ -68,7 +68,7 @@ class IlseNumberValidator extends ValueTuplesValidator<MetadataValidationContext
                     } else if ((ilseNo as int) < IlseSubmission.MIN_ILSE_VALUE || (ilseNo as int) > IlseSubmission.MAX_ILSE_NUMBER) {
                         context.addProblem(tuple.cells, LogLevel.ERROR, "The ILSe number '${ilseNo}' is out of range ${ILSE_RANGE}.", "At least one ILSe number is out of range ${ILSE_RANGE}.")
                     } else if (IlseSubmission.findAllByIlseNumber(ilseNo as int)) {
-                        context.addProblem(tuple.cells, LogLevel.WARNING, "The ILSe number '${ilseNo}' already exists.", "At least one ILSe number already exists.")
+                        context.addProblem(tuple.cells, LogLevel.INFO, "The ILSe number '${ilseNo}' already exists.", "At least one ILSe number already exists.")
                     }
                     if (!context.metadataFile.toString().contains(ilseNo)) {
                         context.addProblem(tuple.cells, LogLevel.WARNING, "The metadata file path '${context.metadataFile}' does not contain the ILSe number '${ilseNo}'.", "At least one metadata file path does not contain the ILSe number.")

@@ -144,11 +144,13 @@ class MetadataImportControllerSpec extends Specification implements ControllerUn
             1 * findOptionAsBoolean(_) >> true
         }
         controller.metadataImportService = Mock(MetadataImportService) {
-            1 * validateAndImportMultiple(ticketNumber, ilseNumbers) >> resultList
+            1 * validateAndImportMultiple(ticketNumber, ilseNumbers, true) >> resultList
+            0 * validateAndImportMultiple(ticketNumber, ilseNumbers, false)
         }
 
         controller.params.ticketNumber = ticketNumber
         controller.params.ilseNumbers = ilseNumbers
+        controller.params.ignoreMd5sumError = "TRUE"
 
         when:
         controller.autoImport(VALID_SECRET)
@@ -173,7 +175,7 @@ class MetadataImportControllerSpec extends Specification implements ControllerUn
             metaDataFiles.add(metadataFile)
             contexts.add(MetadataValidationContextFactory.createContext([
                     metadataFile: Paths.get("${metadataFile.filePath}/${metadataFile.fileName}"),
-                    problems: problems,
+                    problems    : problems,
             ]))
         }
 
@@ -207,13 +209,72 @@ class MetadataImportControllerSpec extends Specification implements ControllerUn
             1 * findOptionAsBoolean(_) >> true
         }
         controller.metadataImportService = Mock(MetadataImportService) {
-            1 * validateAndImportMultiple(ticketNumber, ilseNumbers) >> { throw new MultiImportFailedException(contexts, metaDataFiles) }
+            1 * validateAndImportMultiple(ticketNumber, ilseNumbers, true) >> { throw new MultiImportFailedException(contexts, metaDataFiles) }
+            0 * validateAndImportMultiple(ticketNumber, ilseNumbers, false)
         }
 
         controller.params.ticketNumber = ticketNumber
         controller.params.ilseNumbers = ilseNumbers
+        controller.params.ignoreMd5sumError = "TRUE"
 
         when:
+        controller.autoImport(VALID_SECRET)
+
+        then:
+        response.status == HttpStatus.OK.value()
+        response.text == expected
+        notThrown(Throwable)
+    }
+
+    void "autoImport, if first import contains only some lines and second all, then both should succeeded with 200 and text of each MetadataFile, a Link for manual creation and problems"() {
+        setupData()
+        final String ticketNumber = "426964"
+        final String ilseNumbers = "1111+2222+3333"
+        final List<ValidateAndImportResult> resultList = []
+
+        for (int i : 1..3) {
+            MetaDataFile metadataFile = DomainFactory.createMetaDataFile()
+            resultList.add(new ValidateAndImportResult(
+                    MetadataValidationContextFactory.createContext([metadataFile: Paths.get("${metadataFile.filePath}/${metadataFile.fileName}")]),
+                    metadataFile
+            ))
+        }
+
+        String expected = """\
+                          Automatic import succeeded :-)
+
+                          ${resultList[0].context.metadataFile}:
+                          http://example.com/metadataImport/details/${resultList[0].metadataFile.fastqImportInstance.id}
+
+                          ${resultList[1].context.metadataFile}:
+                          http://example.com/metadataImport/details/${resultList[1].metadataFile.fastqImportInstance.id}
+
+                          ${resultList[2].context.metadataFile}:
+                          http://example.com/metadataImport/details/${resultList[2].metadataFile.fastqImportInstance.id}
+                          """.stripIndent().trim()
+
+        controller.processingOptionService = Mock(ProcessingOptionService) {
+            2 * findOptionAsBoolean(_) >> true
+        }
+        controller.metadataImportService = Mock(MetadataImportService) {
+            2 * validateAndImportMultiple(ticketNumber, ilseNumbers, true) >> resultList
+            0 * validateAndImportMultiple(ticketNumber, ilseNumbers, false)
+        }
+
+        controller.params.ticketNumber = ticketNumber
+        controller.params.ilseNumbers = ilseNumbers
+        controller.params.ignoreMd5sumError = "TRUE"
+
+        when:
+        controller.autoImport(VALID_SECRET)
+
+        then:
+        response.status == HttpStatus.OK.value()
+        response.text == expected
+        notThrown(Throwable)
+
+        when:
+        response.reset()
         controller.autoImport(VALID_SECRET)
 
         then:
