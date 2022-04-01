@@ -21,6 +21,7 @@
  */
 
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 //************ List of Sample Types (one Type per line) ************//
 List sampleTypeNames = """
@@ -37,7 +38,7 @@ boolean legacy = true
 /* work area */
 SampleType.withTransaction {
     sampleTypeNames.each {
-        SampleType sampleType = SampleType.findByName(it)
+        SampleType sampleType = CollectionUtils.atMostOneElement(SampleType.findAllByName(it))
         sampleType.legacy = legacy
         sampleType.save(flush: true)
     }

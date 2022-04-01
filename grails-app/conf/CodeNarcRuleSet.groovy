@@ -52,7 +52,9 @@ All the Rules that will be used for OTP
     rule("file:grails-app/codenarcRules/ExplicitFlushForSaveRule.groovy")
     rule("file:grails-app/codenarcRules/ExplicitFlushForDeleteRule.groovy")
     rule("file:grails-app/codenarcRules/UnusedImportWithoutAutowiredRule.groovy")
-    rule("file:grails-app/codenarcRules/AvoidFindWithoutAllRule.groovy")
+    rule("file:grails-app/codenarcRules/AvoidFindWithoutAllRule.groovy") {
+        doNotApplyToFileNames = TEST
+    }
     rule("file:grails-app/codenarcRules/ControllerMethodNotInAllowedMethodsRule.groovy")
     rule("file:grails-app/codenarcRules/SecureAllControllerRule.groovy")
 

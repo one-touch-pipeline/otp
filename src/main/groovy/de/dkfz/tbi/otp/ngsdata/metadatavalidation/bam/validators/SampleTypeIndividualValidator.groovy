@@ -26,6 +26,7 @@ import org.springframework.stereotype.Component
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidator
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.util.spreadsheet.validation.*
 
 import static de.dkfz.tbi.otp.ngsdata.BamMetadataColumn.INDIVIDUAL
@@ -49,8 +50,8 @@ class SampleTypeIndividualValidator extends ValueTuplesValidator<BamMetadataVali
         valueTuples.each {
             String individual = it.getValue(INDIVIDUAL.name())
             String sampleType = it.getValue(SAMPLE_TYPE.name())
-            if (!Sample.findByIndividualAndSampleType(
-                    Individual.findByPidOrMockPidOrMockFullName(individual, individual, individual), SampleTypeService.findSampleTypeByName(sampleType))) {
+            if (!Sample.findAllByIndividualAndSampleType(
+                    CollectionUtils.atMostOneElement(Individual.findAllByPidOrMockPidOrMockFullName(individual, individual, individual)), SampleTypeService.findSampleTypeByName(sampleType))) {
                 context.addProblem(it.cells, LogLevel.ERROR,
                         "The sample as combination of the individual '${individual}' and the sample type '${sampleType}' is not registered in OTP.", "At least one sample as combination of the individual and the sample type is not registered in OTP.")
             }

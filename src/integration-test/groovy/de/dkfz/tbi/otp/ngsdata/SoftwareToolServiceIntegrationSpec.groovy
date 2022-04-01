@@ -30,6 +30,7 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.security.UserAndRoles
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 @Rollback
 @Integration
@@ -177,7 +178,7 @@ class SoftwareToolServiceIntegrationSpec extends Specification implements UserAn
 
         then:
         result == null
-        SoftwareTool.findByProgramNameAndProgramVersionAndType("Test", "1.0", SoftwareTool.Type.BASECALLING)
+        CollectionUtils.atMostOneElement(SoftwareTool.findAllByProgramNameAndProgramVersionAndType("Test", "1.0", SoftwareTool.Type.BASECALLING))
     }
 
     void "test updateSoftwareToolIdentifier custom validator for case insensitive unique"() {
@@ -214,7 +215,7 @@ class SoftwareToolServiceIntegrationSpec extends Specification implements UserAn
         }
 
         then:
-        result == SoftwareToolIdentifier.findBySoftwareToolAndName(softwareTool, alias)
+        result == CollectionUtils.atMostOneElement(SoftwareToolIdentifier.findAllBySoftwareToolAndName(softwareTool, alias))
     }
 
     void "test createSoftwareToolIdentifier, create a software tool identifier with underscore"() {
@@ -233,6 +234,6 @@ class SoftwareToolServiceIntegrationSpec extends Specification implements UserAn
         }
 
         then:
-        result == SoftwareToolIdentifier.findBySoftwareToolAndName(softwareTool, alias2)
+        result == CollectionUtils.atMostOneElement(SoftwareToolIdentifier.findAllBySoftwareToolAndName(softwareTool, alias2))
     }
 }

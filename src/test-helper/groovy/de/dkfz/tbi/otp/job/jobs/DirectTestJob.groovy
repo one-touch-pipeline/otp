@@ -21,10 +21,12 @@
  */
 package de.dkfz.tbi.otp.job.jobs
 
-import de.dkfz.tbi.otp.job.processing.*
 import groovy.util.logging.Slf4j
-import org.springframework.context.annotation.*
-import org.springframework.stereotype.*
+import org.springframework.context.annotation.Scope
+import org.springframework.stereotype.Component
+
+import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 /**
  * Simple test implementing the Job interface without inheriting
@@ -43,7 +45,7 @@ class DirectTestJob implements Job {
 
     @Override
     Set<Parameter> getOutputParameters() throws InvalidStateException {
-        return [new Parameter(value: "abcd", type: ParameterType.findByJobDefinition(step.jobDefinition))]
+        return [new Parameter(value: "abcd", type: CollectionUtils.atMostOneElement(ParameterType.findAllByJobDefinition(step.jobDefinition)))]
     }
 
     @Override

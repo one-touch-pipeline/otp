@@ -21,13 +21,14 @@
  */
 package de.dkfz.tbi.otp.workflowExecution
 
+import grails.converters.JSON
+import grails.plugin.springsecurity.annotation.Secured
+import grails.validation.Validateable
+
 import de.dkfz.tbi.otp.CheckAndCall
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.util.TimeFormats
-import grails.converters.JSON
-import grails.plugin.springsecurity.annotation.Secured
-import grails.validation.Validateable
 
 import java.time.LocalDate
 
@@ -56,7 +57,7 @@ class WorkflowSystemConfigController implements CheckAndCall {
 
     def updateWorkflow(WorkflowUpdateCommand cmd) {
         checkDefaultErrorsAndCallMethod(cmd) {
-            Workflow workflow = Workflow.findById(cmd.id)
+            Workflow workflow = Workflow.get(cmd.id)
             workflow.priority = cmd.priority
             workflow.enabled = cmd.enabled
             workflow.maxParallelWorkflows = cmd.maxParallelWorkflows

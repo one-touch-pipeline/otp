@@ -36,6 +36,7 @@ import de.dkfz.tbi.otp.job.jobs.AutoRestartableJob
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 import java.nio.file.Path
 
@@ -90,10 +91,10 @@ class ExecuteRunYapsaJob extends AbstractOtpJob implements AutoRestartableJob {
             runYapsaCall << "-s WGS"
         } else if (runYapsaInstance.seqType == SeqTypeService.exomePairedSeqType) {
             runYapsaCall << "-s WES"
-            BedFile bedFile = BedFile.findByReferenceGenomeAndLibraryPreparationKit(
+            BedFile bedFile = CollectionUtils.atMostOneElement(BedFile.findAllByReferenceGenomeAndLibraryPreparationKit(
                     referenceGenome,
                     runYapsaInstance.libraryPreparationKit,
-            )
+            ))
             runYapsaCall << "-t ${bedFileService.filePath(bedFile)}"
         } else {
             throw new UnsupportedOperationException("Sequencing type '${runYapsaInstance.seqType}' not supported by runYapsa")

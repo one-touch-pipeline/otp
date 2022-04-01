@@ -89,7 +89,7 @@ Closure<ScriptOutput> createSamplesAndSampleTypesCreationScript = { List<String>
         Individual individual = CollectionUtils.exactlyOneElement(Individual.findAllByPid(components.pid), "Could not find new individual '${components.pid}")
 
         SampleType sampleType = SampleTypeService.findSampleTypeByName(components.sampleTypeName)
-        Sample sample = Sample.findByIndividualAndSampleType(individual, sampleType)
+        Sample sample = CollectionUtils.atMostOneElement(Sample.findAllByIndividualAndSampleType(individual, sampleType))
 
         if (!sample) {
             scriptOutput.meta << "    - ${components.pid} ${components.sampleTypeName}"

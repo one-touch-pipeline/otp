@@ -27,13 +27,14 @@ import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.Errors
 
 import de.dkfz.tbi.otp.ngsdata.MetadataFieldsService
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 @Transactional
 class SpeciesCommonNameService extends MetadataFieldsService<SpeciesCommonName> {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     SpeciesCommonName findOrSaveSpeciesCommonName(String name) {
-        return SpeciesCommonName.findByNameIlike(name) ?: createAndGetSpeciesCommonName(name)
+        return CollectionUtils.atMostOneElement(SpeciesCommonName.findAllByNameIlike(name)) ?: createAndGetSpeciesCommonName(name)
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")

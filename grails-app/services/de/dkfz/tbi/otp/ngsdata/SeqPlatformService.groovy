@@ -25,6 +25,8 @@ import grails.gorm.transactions.Transactional
 import org.springframework.context.annotation.Scope
 import org.springframework.security.access.prepost.PreAuthorize
 
+import de.dkfz.tbi.otp.utils.CollectionUtils
+
 @Scope("prototype")
 @Transactional
 class SeqPlatformService {
@@ -36,7 +38,8 @@ class SeqPlatformService {
     static SeqPlatform findForNameAndModelAndSequencingKit(
             String platformName, SeqPlatformModelLabel seqPlatformModelLabel, SequencingKitLabel sequencingKitLabel) {
         assert platformName
-        return SeqPlatform.findByNameIlikeAndSeqPlatformModelLabelAndSequencingKitLabel(platformName, seqPlatformModelLabel, sequencingKitLabel)
+        return CollectionUtils.atMostOneElement(
+                SeqPlatform.findAllByNameIlikeAndSeqPlatformModelLabelAndSequencingKitLabel(platformName, seqPlatformModelLabel, sequencingKitLabel))
     }
 
     static SeqPlatform createNewSeqPlatform(String seqPlatformName,

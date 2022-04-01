@@ -29,6 +29,7 @@ import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.*
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 @Secured('isFullyAuthenticated()')
 class CellRangerConfigurationController extends AbstractConfigureNonRoddyPipelineController {
@@ -68,7 +69,7 @@ class CellRangerConfigurationController extends AbstractConfigureNonRoddyPipelin
             a.individual.pid <=> b.individual.pid ?: a.sampleType.name <=> b.sampleType.name
         }
 
-        ToolName toolName = ToolName.findByNameAndType('CELL_RANGER', ToolName.Type.SINGLE_CELL)
+        ToolName toolName = CollectionUtils.atMostOneElement(ToolName.findAllByNameAndType('CELL_RANGER', ToolName.Type.SINGLE_CELL))
 
         return getModelValues(seqType) + [
                 cmd                   : flash.cmd as CellRangerConfigurationCommand,

@@ -32,7 +32,7 @@ enum SequencingReadType {
 
     final int mateCount
 
-    static SequencingReadType findByName(String name) {
+    static SequencingReadType getByName(String name) {
         return values().find {
             it.name().equalsIgnoreCase(name)
         }

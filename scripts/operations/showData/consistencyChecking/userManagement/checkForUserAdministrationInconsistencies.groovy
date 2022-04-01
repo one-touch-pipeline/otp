@@ -57,6 +57,7 @@ import de.dkfz.tbi.otp.administration.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.*
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 List output = []
 
@@ -75,7 +76,7 @@ Project.findAll().each { Project project ->
     List<String> ldapGroupMembers = ldapService.getGroupMembersByDistinguishedName(groupDistinguishedName)
 
     ldapGroupMembers.each { String username ->
-        User user = User.findByUsername(username)
+        User user = CollectionUtils.atMostOneElement(User.findAllByUsername(username))
         if (user) {
             projectUsers.add(user)
         } else {
@@ -88,7 +89,7 @@ Project.findAll().each { Project project ->
 
     List<User> usersWithoutUserProjectRole = []
     projectUsers.each { User user ->
-        UserProjectRole userProjectRole = UserProjectRole.findByUserAndProject(user, project)
+        UserProjectRole userProjectRole = CollectionUtils.atMostOneElement(UserProjectRole.findAllByUserAndProject(user, project))
         if (!userProjectRole) {
             usersWithoutUserProjectRole.add(user)
         }

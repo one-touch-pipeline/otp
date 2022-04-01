@@ -22,6 +22,7 @@
 package operations.dataCorrection
 
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 /**
  * Script to change the attribute projectRequestAvailable for a certain project.
@@ -47,7 +48,7 @@ input.split("\n")*.trim().each {
 
 Project.withTransaction {
     projectValueMap.each { String projectName, Boolean value ->
-        Project project = Project.findByName(projectName)
+        Project project = CollectionUtils.atMostOneElement(Project.findAllByName(projectName))
         project.projectRequestAvailable = value
         project.save(flush: true)
     }

@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.monitor
 import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.AbstractSnvCallingInstance
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 class SnvCallingPipelineChecker extends AbstractVariantCallingPipelineChecker {
 
@@ -39,7 +40,7 @@ class SnvCallingPipelineChecker extends AbstractVariantCallingPipelineChecker {
 
     @Override
     Pipeline getPipeline() {
-        return Pipeline.findByName(Pipeline.Name.RODDY_SNV)
+        return CollectionUtils.atMostOneElement(Pipeline.findAllByName(Pipeline.Name.RODDY_SNV))
     }
 
     @Override

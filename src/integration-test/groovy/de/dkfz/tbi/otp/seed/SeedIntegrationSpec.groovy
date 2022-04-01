@@ -64,7 +64,7 @@ class SeedIntegrationSpec extends Specification {
         when:
         seedService.installSeedData('application.seed-FileType')
 
-        FileType fileType = FileType.findByTypeAndSubTypeAndSignature(type, subType, signature)
+        FileType fileType = CollectionUtils.atMostOneElement(FileType.findAllByTypeAndSubTypeAndSignature(type, subType, signature))
 
         then:
         fileType

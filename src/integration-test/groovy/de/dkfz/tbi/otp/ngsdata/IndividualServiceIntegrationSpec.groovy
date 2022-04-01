@@ -32,6 +32,7 @@ import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.security.UserAndRoles
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.util.TimeFormats
 
 @Rollback
@@ -99,7 +100,7 @@ class IndividualServiceIntegrationSpec extends Specification implements UserAndR
 
         when: "add permission to user and request again"
         SpringSecurityUtils.doWithAuth(ADMIN) {
-            addUserWithReadAccessToProject(User.findByUsername(TESTUSER), individual.project)
+            addUserWithReadAccessToProject(CollectionUtils.atMostOneElement(User.findAllByUsername(TESTUSER)), individual.project)
         }
 
         Individual returnedIndividual

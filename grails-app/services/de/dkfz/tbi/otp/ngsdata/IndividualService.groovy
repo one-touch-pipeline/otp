@@ -29,6 +29,7 @@ import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.util.TimeFormats
 
 import java.nio.file.Path
@@ -60,7 +61,7 @@ class IndividualService {
         if (identifier?.isLong()) {
             individual = Individual.get(identifier as Long)
         }
-        return individual ?: Individual.findByMockFullName(identifier)
+        return individual ?: CollectionUtils.atMostOneElement(Individual.findAllByMockFullName(identifier))
     }
 
     @PostAuthorize("hasRole('ROLE_OPERATOR') or (returnObject == null) or hasPermission(returnObject.project, 'OTP_READ_ACCESS')")
@@ -68,7 +69,7 @@ class IndividualService {
         if (!mockPid) {
             return null
         }
-        Individual individual = Individual.findByMockPid(mockPid)
+        Individual individual = CollectionUtils.atMostOneElement(Individual.findAllByMockPid(mockPid))
         return individual
     }
 
@@ -243,7 +244,7 @@ class IndividualService {
      * @return true if there is already a Individual with the pid, false otherwise
      */
     boolean individualExists(String pid) {
-        return (Individual.findByPid(pid) != null)
+        return (CollectionUtils.atMostOneElement(Individual.findAllByPid(pid)) != null)
     }
 
     /**
@@ -305,7 +306,7 @@ class IndividualService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     Sample createSample(Individual individual, SampleType sampleType) {
-        Sample sample = Sample.findByIndividualAndSampleType(individual, sampleType)
+        Sample sample = CollectionUtils.atMostOneElement(Sample.findAllByIndividualAndSampleType(individual, sampleType))
         if (!sample) {
             sample = new Sample(individual: individual, sampleType: sampleType)
             sample.save(flush: true)

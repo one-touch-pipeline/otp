@@ -23,10 +23,11 @@
 import de.dkfz.tbi.otp.dataprocessing.ExternalMergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.ImportProcess
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 int importId = 0// set it to delete the import process and related wrong metadata
 
-ImportProcess importProcess = ImportProcess.findById(importId)
+ImportProcess importProcess = ImportProcess.get(importId)
 
 if (importProcess) {
     ExternallyProcessedMergedBamFile.withTransaction {

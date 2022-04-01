@@ -46,7 +46,7 @@ class ReferenceGenomeValidator extends SingleValueValidator<BamMetadataValidatio
 
     @Override
     void validateValue(BamMetadataValidationContext context, String refGen, Set<Cell> cells) {
-        if (!ReferenceGenome.findByName(refGen)) {
+        if (!ReferenceGenome.findAllByName(refGen)) {
             context.addProblem(cells, LogLevel.ERROR, "The reference genome '${refGen}' is not registered in OTP.", "At least one reference genome is not registered in OTP.")
         }
     }

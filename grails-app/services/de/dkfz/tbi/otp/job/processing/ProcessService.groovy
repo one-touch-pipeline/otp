@@ -31,6 +31,7 @@ import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.plan.PlanInformation
 import de.dkfz.tbi.otp.job.scheduler.ErrorLogService
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 /**
  * Service providing methods to access information about Processes.
@@ -162,7 +163,7 @@ class ProcessService {
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     ProcessingStep getLatestProcessingStep(Process process) {
-        return ProcessingStep.findByProcessAndNextIsNull(process, [sort: "id", order: "desc"])
+        return CollectionUtils.atMostOneElement(ProcessingStep.findAllByProcessAndNextIsNull(process, [sort: "id", order: "desc", max: 1]))
     }
 
     /**
@@ -242,7 +243,7 @@ class ProcessService {
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     Date getFirstUpdate(ProcessingStep step) {
-        return ProcessingStepUpdate.findByProcessingStep(step, [sort: "id", order: "asc"]).date
+        return CollectionUtils.atMostOneElement(ProcessingStepUpdate.findAllByProcessingStep(step, [sort: "id", order: "asc"])).date
     }
 
     /**

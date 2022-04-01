@@ -26,6 +26,7 @@ import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.project.ProjectRequest
 import de.dkfz.tbi.otp.project.additionalField.AbstractFieldDefinition
 import de.dkfz.tbi.otp.project.additionalField.TextFieldValue
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.util.spreadsheet.Row
 import de.dkfz.tbi.util.spreadsheet.Spreadsheet
 
@@ -56,8 +57,8 @@ ProjectRequest.withTransaction {
         ProjectRequest.createCriteria().list {
             eq('id', projectRequestId as Long)
         }.each { ProjectRequest projectRequest ->
-            AbstractFieldDefinition afdOrganizationalUnit = AbstractFieldDefinition.findByName('Organizational Unit')
-            AbstractFieldDefinition afdCostCenter = AbstractFieldDefinition.findByName('Cost Center')
+            AbstractFieldDefinition afdOrganizationalUnit = CollectionUtils.atMostOneElement(AbstractFieldDefinition.findAllByName('Organizational Unit'))
+            AbstractFieldDefinition afdCostCenter = CollectionUtils.atMostOneElement(AbstractFieldDefinition.findAllByName('Cost Center'))
 
             //import values for Organizational Unit
             TextFieldValue tfvOrganizationalUnit = new TextFieldValue()

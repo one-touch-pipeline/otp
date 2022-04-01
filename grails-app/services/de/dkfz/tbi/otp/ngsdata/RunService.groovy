@@ -27,6 +27,7 @@ import org.springframework.security.access.prepost.PostAuthorize
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.job.processing.ProcessParameter
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 /**
  * Service to retrieve information about Runs.
@@ -172,7 +173,7 @@ class RunService {
         if (identifier?.isLong()) {
             run = Run.get(identifier as Long)
         }
-        return run ?: Run.findByName(identifier)
+        return run ?: CollectionUtils.atMostOneElement(Run.findAllByName(identifier))
     }
 
     /**
@@ -261,6 +262,6 @@ class RunService {
     @SuppressWarnings("AvoidFindWithoutAll")
     boolean isRunEmpty(Run run) {
         assert run: "The input run of the method isRunEmpty is null"
-        return !(DataFile.findByRun(run) || SeqTrack.findByRun(run))
+        return !(CollectionUtils.atMostOneElement(DataFile.findAllByRun(run)) || CollectionUtils.atMostOneElement(SeqTrack.findAllByRun(run)))
     }
 }

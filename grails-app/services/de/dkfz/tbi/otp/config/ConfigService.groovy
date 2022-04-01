@@ -61,7 +61,7 @@ class ConfigService implements ApplicationContextAware {
     ConfigService() {
         Properties properties = parsePropertiesFile()
         this.otpProperties = properties.collectEntries { key, value ->
-            OtpProperty otpProperty = OtpProperty.findByKey(key)
+            OtpProperty otpProperty = OtpProperty.getByKey(key)
             return otpProperty ? [(otpProperty): value] : [:]
         }
     }

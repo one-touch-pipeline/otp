@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.monitor.alignment
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.monitor.MonitorOutputCollector
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 class PanCanAlignmentChecker extends AbstractRoddyAlignmentChecker {
 
@@ -60,7 +61,8 @@ class PanCanAlignmentChecker extends AbstractRoddyAlignmentChecker {
                     return libraryPreperationKitMissing
                 }
                 ReferenceGenome referenceGenome = seqTrack.configuredReferenceGenome
-                BedFile bedFile = BedFile.findByReferenceGenomeAndLibraryPreparationKit(referenceGenome, seqTrack.libraryPreparationKit)
+                BedFile bedFile = CollectionUtils.atMostOneElement(
+                        BedFile.findAllByReferenceGenomeAndLibraryPreparationKit(referenceGenome, seqTrack.libraryPreparationKit))
                 if (!bedFile) {
                     return bedFileMissing
                 }

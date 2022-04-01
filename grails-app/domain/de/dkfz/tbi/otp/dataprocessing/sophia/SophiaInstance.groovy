@@ -26,6 +26,7 @@ import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyAnalysisResult
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 class SophiaInstance extends BamFilePairAnalysis implements RoddyAnalysisResult {
 
@@ -58,7 +59,7 @@ class SophiaInstance extends BamFilePairAnalysis implements RoddyAnalysisResult 
     }
 
     static SophiaInstance getLatestValidSophiaInstanceForSamplePair(SamplePair samplePair) {
-        return SophiaInstance.findBySamplePairAndWithdrawnAndProcessingState(
-                samplePair, false, AnalysisProcessingStates.FINISHED, [max : 1, sort : "id", order : "desc", ])
+        return CollectionUtils.atMostOneElement(SophiaInstance.findAllBySamplePairAndWithdrawnAndProcessingState(
+                samplePair, false, AnalysisProcessingStates.FINISHED, [max : 1, sort : "id", order : "desc", ]))
     }
 }

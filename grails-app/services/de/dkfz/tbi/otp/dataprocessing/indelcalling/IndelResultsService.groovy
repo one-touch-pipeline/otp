@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.dataprocessing.indelcalling
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.AbstractAnalysisResultsService
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.FormatHelper
 
 class IndelResultsService extends AbstractAnalysisResultsService<IndelCallingInstance> {
@@ -34,8 +35,8 @@ class IndelResultsService extends AbstractAnalysisResultsService<IndelCallingIns
 
     @Override
     Map getQcData(IndelCallingInstance analysis) {
-        IndelQualityControl qc = IndelQualityControl.findByIndelCallingInstance(analysis)
-        IndelSampleSwapDetection sampleSwap = IndelSampleSwapDetection.findByIndelCallingInstance(analysis)
+        IndelQualityControl qc = CollectionUtils.atMostOneElement(IndelQualityControl.findAllByIndelCallingInstance(analysis))
+        IndelSampleSwapDetection sampleSwap = CollectionUtils.atMostOneElement(IndelSampleSwapDetection.findAllByIndelCallingInstance(analysis))
         [
                 numIndels: qc?.numIndels ?: "",
                 numIns: qc?.numIns ?: "",

@@ -31,6 +31,7 @@ import org.springframework.validation.ObjectError
 import de.dkfz.tbi.otp.OtpRuntimeException
 import de.dkfz.tbi.otp.parser.*
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.MessageSourceService
 import de.dkfz.tbi.util.spreadsheet.*
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
@@ -170,7 +171,7 @@ class SampleIdentifierService {
         Individual individual = findOrSaveIndividual(identifier)
         SampleType sampleType = findOrSaveSampleType(identifier)
 
-        Sample sample = Sample.findByIndividualAndSampleType(individual, sampleType)
+        Sample sample = CollectionUtils.atMostOneElement(Sample.findAllByIndividualAndSampleType(individual, sampleType))
         if (sample) {
             return sample
         }
@@ -269,7 +270,7 @@ class SampleIdentifierService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     SampleIdentifier getOrCreateSampleIdentifier(String name, Sample sample) {
-        SampleIdentifier sampleIdentifier = SampleIdentifier.findByNameAndSample(name, sample)
+        SampleIdentifier sampleIdentifier = CollectionUtils.atMostOneElement(SampleIdentifier.findAllByNameAndSample(name, sample))
         if (!sampleIdentifier) {
             sampleIdentifier = new SampleIdentifier(name: name, sample: sample)
             sampleIdentifier.save(flush: true)

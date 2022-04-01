@@ -34,6 +34,7 @@ import de.dkfz.tbi.otp.job.jobs.TestSingletonStartJob
 import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.security.UserAndRoles
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 import static org.junit.Assert.*
 
@@ -349,7 +350,7 @@ class JobExecutionPlanServiceIntegrationTests implements UserAndRoles {
         planData = service.getLatestUpdatesForPlan(plan, 10, 0, "id", false, [ExecutionState.CREATED])
         assertTrue(planData.isEmpty())
         // lets create a failure for the processing step
-        ProcessingStepUpdate update = ProcessingStepUpdate.findByState(ExecutionState.FINISHED)
+        ProcessingStepUpdate update = CollectionUtils.atMostOneElement(ProcessingStepUpdate.findAllByState(ExecutionState.FINISHED))
         ProcessingStepUpdate failure = new ProcessingStepUpdate(
             date: new Date(),
             state: ExecutionState.FAILURE,

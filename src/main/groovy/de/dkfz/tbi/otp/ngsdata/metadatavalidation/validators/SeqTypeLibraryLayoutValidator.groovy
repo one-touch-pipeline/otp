@@ -29,6 +29,7 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.AbstractMetadataValidationCont
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidator
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.util.spreadsheet.validation.*
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
@@ -72,12 +73,12 @@ class SeqTypeLibraryLayoutValidator extends ValueTuplesValidator<AbstractMetadat
             String baseMaterial = it.getValue(BASE_MATERIAL.name())
             boolean isSingleCell = SeqTypeService.isSingleCell(baseMaterial)
 
-            SequencingReadType libraryLayout = SequencingReadType.findByName(it.getValue(SEQUENCING_READ_TYPE.name()))
+            SequencingReadType libraryLayout = SequencingReadType.getByName(it.getValue(SEQUENCING_READ_TYPE.name()))
 
             if (seqTypeName &&
                     libraryLayout &&
                     seqTypeService.findByNameOrImportAlias(seqTypeName) &&
-                    SeqType.findByLibraryLayout(libraryLayout)) {
+                    CollectionUtils.notEmpty(SeqType.findAllByLibraryLayout(libraryLayout))) {
                 SeqType seqType = seqTypeService.findByNameOrImportAlias(seqTypeName, [libraryLayout: libraryLayout, singleCell: isSingleCell])
                 if (seqType) {
                     seqTypes << seqType

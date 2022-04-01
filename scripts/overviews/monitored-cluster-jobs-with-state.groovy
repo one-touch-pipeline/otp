@@ -40,13 +40,14 @@ import de.dkfz.tbi.otp.job.processing.ClusterJobManagerFactoryService
 import de.dkfz.tbi.otp.job.processing.Process
 import de.dkfz.tbi.otp.job.scheduler.OldClusterJobMonitor
 import de.dkfz.tbi.otp.ngsdata.Realm
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 ProcessingOptionService processingOptionService = ctx.processingOptionService
 ClusterJobManagerFactoryService clusterJobManagerFactoryService = ctx.clusterJobManagerFactoryService
 OldClusterJobMonitor oldClusterJobMonitor = ctx.oldClusterJobMonitor
 
 String defaultRealmName = processingOptionService.findOptionAsString(ProcessingOption.OptionName.REALM_DEFAULT_VALUE)
-Realm realm = Realm.findByName(defaultRealmName)
+Realm realm = CollectionUtils.atMostOneElement(Realm.findAllByName(defaultRealmName))
 
 BatchEuphoriaJobManager jobManager = clusterJobManagerFactoryService.getJobManager(realm)
 Map<BEJobID, JobState> jobMap = jobManager.queryJobStatusAll()

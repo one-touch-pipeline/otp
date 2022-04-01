@@ -95,7 +95,7 @@ class ProjectRequestService {
     }
 
     void saveAdditionalFieldValuesForProjectRequest(String fieldValue, String fieldId, ProjectRequest projectRequest) {
-        AbstractFieldDefinition afd = CollectionUtils.exactlyOneElement(AbstractFieldDefinition.findAllById(fieldId as Long))
+        AbstractFieldDefinition afd = AbstractFieldDefinition.get(fieldId as Long)
         if (afd.projectFieldType == ProjectFieldType.TEXT) {
             TextFieldValue tfv = new TextFieldValue()
             tfv.definition = afd

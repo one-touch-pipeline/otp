@@ -159,7 +159,8 @@ class ProjectConfigController implements CheckAndCall {
 
     def updateTumorEntity(UpdateProjectCommand cmd) {
         checkErrorAndCallMethod(cmd) {
-            projectService.updateProjectField(TumorEntity.findByName(cmd.value), cmd.fieldName, projectSelectionService.requestedProject)
+            projectService.updateProjectField(CollectionUtils.atMostOneElement(TumorEntity.findAllByName(cmd.value)),
+                    cmd.fieldName, projectSelectionService.requestedProject)
         }
     }
 

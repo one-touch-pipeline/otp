@@ -189,7 +189,7 @@ scriptInputHelperService.parseAndSplitHelper([selectByIndividual, multiColumnInp
 
     SeqType seqType = null
     if (paramsCount > 4) {
-        SequencingReadType libraryLayout = SequencingReadType.findByName(params[3])
+        SequencingReadType libraryLayout = SequencingReadType.getByName(params[3])
         assert libraryLayout: "${params[3]} is no valid sequencingReadType"
         boolean singleCell = Boolean.parseBoolean(params[4])
         seqType = seqTypeService.findByNameOrImportAlias(params[2], [

@@ -238,7 +238,7 @@ List<SeqType> seqTypes = filterBySeqTypeName.split('\n')*.trim().findAll {
     String[] values = it.split('[ ,;\t]+')
     int valueSize = values.size()
     assert valueSize == 3: "A seqtype is defined by three parts"
-    SequencingReadType libraryLayout = SequencingReadType.findByName(values[1])
+    SequencingReadType libraryLayout = SequencingReadType.getByName(values[1])
     assert libraryLayout: "${values[1]} is no valid sequencing read type"
     boolean singleCell = Boolean.parseBoolean(values[2])
 
@@ -261,7 +261,7 @@ List<SeqTrack> seqTrackPerMultiImport = multiColumnInput.split('\n')*.trim().fin
     SampleType sampleType = CollectionUtils.exactlyOneElement(SampleType.findAllByNameIlike(values[1]),
             "Could not find one sampleType with name ${values[1]}")
 
-    SequencingReadType libraryLayout = SequencingReadType.findByName(values[3])
+    SequencingReadType libraryLayout = SequencingReadType.getByName(values[3])
     assert libraryLayout: "${values[3]} is no valid sequencingReadType"
     boolean singleCell = Boolean.parseBoolean(values[4])
 
@@ -505,7 +505,7 @@ class MetaDataExport {
         }
 
         String realmName = fileSystemService.processingOptionService.findOptionAsString(REALM_DEFAULT_VALUE)
-        Realm realm = Realm.findByName(realmName)
+        Realm realm = CollectionUtils.atMostOneElement(Realm.findAllByName(realmName))
 
         fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(outputFile.parent, realm)
 

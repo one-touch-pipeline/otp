@@ -30,6 +30,7 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.security.UserAndRoles
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 @Rollback
 @Integration
@@ -46,7 +47,7 @@ class SeqTypeServiceIntegrationSpec extends Specification implements UserAndRole
         createUserAndRoles()
         alignableSeqTypes = DomainFactory.createAllAlignableSeqTypes()
         seqTrack = DomainFactory.createSeqTrack()
-        addUserWithReadAccessToProject(User.findByUsername(USER), seqTrack.project)
+        addUserWithReadAccessToProject(CollectionUtils.atMostOneElement(User.findAllByUsername(USER)), seqTrack.project)
     }
 
     void "test testAlignableSeqTypesByProject with different users, when no seqType is connected to the project"() {

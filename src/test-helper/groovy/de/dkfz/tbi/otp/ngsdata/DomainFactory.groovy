@@ -48,7 +48,8 @@ import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
 import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.project.*
+import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.project.ProjectRequestUser
 import de.dkfz.tbi.otp.qcTrafficLight.QcThreshold
 import de.dkfz.tbi.otp.security.Role
 import de.dkfz.tbi.otp.security.User
@@ -131,7 +132,7 @@ class DomainFactory {
     static <T> T findOrCreateDomainObject(Class<T> domainClass, Map defaultCreationProperties, Map requiredSearchProperties, boolean saveAndValidate = true) {
         assert requiredSearchProperties: 'Required search properties are missing.'
 
-        return domainClass.findWhere(requiredSearchProperties) ?: createDomainObject(domainClass, defaultCreationProperties, requiredSearchProperties, saveAndValidate)
+        return atMostOneElement(domainClass.findAllWhere(requiredSearchProperties)) ?: createDomainObject(domainClass, defaultCreationProperties, requiredSearchProperties, saveAndValidate)
     }
 
     static <T> T createDomainWithImportAlias(Class<T> domainClass, Map parameterProperties) {
@@ -605,11 +606,11 @@ class DomainFactory {
     static MergingWorkPackage findOrSaveMergingWorkPackage(SeqTrack seqTrack, ReferenceGenome referenceGenome = null, Pipeline pipeline = null) {
         createMergingCriteriaLazy(project: seqTrack.project, seqType: seqTrack.seqType)
         if (referenceGenome == null || pipeline == null) {
-            MergingWorkPackage workPackage = MergingWorkPackage.findWhere(
+            MergingWorkPackage workPackage = atMostOneElement(MergingWorkPackage.findAllWhere(
                     sample: seqTrack.sample,
                     seqType: seqTrack.seqType,
                     seqPlatformGroup: seqTrack.seqPlatformGroup
-            )
+            ))
             if (workPackage != null) {
                 assert workPackage.libraryPreparationKit == seqTrack.libraryPreparationKit
                 return workPackage
@@ -628,7 +629,7 @@ class DomainFactory {
         ]
 
         if (referenceGenome && pipeline) {
-            mergingWorkPackage = MergingWorkPackage.findWhere(mwpProperties)
+            mergingWorkPackage = atMostOneElement(MergingWorkPackage.findAllWhere(mwpProperties))
         }
         return mergingWorkPackage ?: createMergingWorkPackage(mwpProperties)
     }

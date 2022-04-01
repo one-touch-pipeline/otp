@@ -38,7 +38,7 @@ The following sample shall be deleted in case no data is connected ("pid1#sample
 def sampleToDelete = []
 
 def deleteSample(Sample sample) {
-    if (!SampleIdentifier.findBySample(sample) && !SeqTrack.findBySample(sample)) {
+    if (!SampleIdentifier.findAllBySample(sample) && !SeqTrack.findAllBySample(sample)) {
         sample.delete(flush: true)
         println "The following sample was deleted: ${sample}"
     } else {
@@ -53,7 +53,7 @@ SampleIdentifier.withTransaction {
     def notFoundSampleIdentifier = []
     def samplesToDelete = []
     sampleIdentifierToDelete.each { sitd ->
-        def si = SampleIdentifier.findByName(sitd)
+        def si = CollectionUtils.atMostOneElement(SampleIdentifier.findAllByName(sitd))
         if (!si) {
             notFoundSampleIdentifier << sitd
         } else {

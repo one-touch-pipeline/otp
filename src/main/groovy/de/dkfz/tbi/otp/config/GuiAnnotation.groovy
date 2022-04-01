@@ -24,12 +24,12 @@ package de.dkfz.tbi.otp.config
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 
 /**
- * @see ProcessingOption.OptionName.GUI_ANNOTATION
+ * @see ProcessingOption.OptionName#GUI_ANNOTATION
  */
 enum GuiAnnotation {
     PROJECT_REQUEST,
 
-    static GuiAnnotation findByName(String name) {
+    static GuiAnnotation getByName(String name) {
         return values().find {
             it.name() == name
         }

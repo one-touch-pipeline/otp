@@ -77,7 +77,7 @@ AbstractMergedBamFile.withTransaction {
                 "Could not find individual for '${split[0]}'")
         SampleType sampleType = CollectionUtils.exactlyOneElement(SampleType.findAllByName(split[1]), "Could not find sampleType for '${split[1]}'")
         SeqType seqType = seqTypeService.findByNameOrImportAlias(split[2], [
-                libraryLayout: SequencingReadType.findByName(split[3]),
+                libraryLayout: SequencingReadType.getByName(split[3]),
                 singleCell   : false,
         ])
         assert seqType: "Could not find seqType: ${split[2]} ${split[3]} bulk"

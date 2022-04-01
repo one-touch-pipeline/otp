@@ -398,7 +398,7 @@ class ClusterJob implements Entity {
         return TimeUtils.getFormattedDurationForZonedDateTime(started, ended) ?: NOT_AVAILABLE
     }
 
-    static ClusterJob findByClusterJobIdentifier(ClusterJobIdentifier identifier, ProcessingStep processingStep) {
+    static ClusterJob getByClusterJobIdentifier(ClusterJobIdentifier identifier, ProcessingStep processingStep) {
         return exactlyOneElement(findAllWhere(
                 realm: identifier.realm,
                 clusterJobId: identifier.clusterJobId,

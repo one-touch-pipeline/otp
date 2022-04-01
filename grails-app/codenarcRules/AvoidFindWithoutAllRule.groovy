@@ -1,8 +1,3 @@
-import org.codehaus.groovy.ast.expr.*
-import org.codenarc.rule.AbstractAstVisitorRule
-import org.codenarc.rule.AbstractMethodCallExpressionVisitor
-import org.codenarc.util.AstUtil
-
 /*
  * Copyright 2011-2019 The OTP authors
  *
@@ -24,10 +19,14 @@ import org.codenarc.util.AstUtil
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+import org.codehaus.groovy.ast.expr.*
+import org.codenarc.rule.AbstractAstVisitorRule
+import org.codenarc.rule.AbstractMethodCallExpressionVisitor
+import org.codenarc.util.AstUtil
 
 class AvoidFindWithoutAllRule extends AbstractAstVisitorRule {
     String name = 'AvoidFindWithoutAll'
-    int priority = 2
+    int priority = 1
     Class astVisitorClass = AvoidFindWithoutAllRuleAstVisitor
     String description = 'This Rule shows the usage of "findBy" and "findWhere" instead of "findAllBy" and "findAllWhere". ' +
             'Since the former can lead to unforeseen results.'
@@ -43,7 +42,8 @@ class AvoidFindWithoutAllRuleAstVisitor extends AbstractMethodCallExpressionVisi
         if (method instanceof ConstantExpression) {
             if (((ConstantExpression) method).value instanceof String) {
                 if (!AstUtil.isSafe(call) && !AstUtil.isSpreadSafe(call)) {
-                    if (!call.objectExpression.text.endsWith("Service")) {
+                    if (!call.objectExpression.text.toLowerCase().endsWith("service") &&
+                            !(call.objectExpression.text in ["this", "super"] && currentClassNode.name.toLowerCase().endsWith("service"))) {
                         if (((String) ((ConstantExpression) method).value).startsWith('findBy')) {
                             addViolation(call, "Avoid using findBy, instead use findAllBy. Expression: ${call.text}")
                         } else if (((String) ((ConstantExpression) method).value).startsWith('findWhere')) {

@@ -152,7 +152,7 @@ class ScriptInputHelperService {
                     "Could not find any sample for ${values[INPUT_INDEX_SAMPLE_DEFINITION_PID]}" +
                             " ${values[INPUT_INDEX_SAMPLE_DEFINITION_SAMPLE_TYPE]}")
 
-            SequencingReadType sequencingReadType = SequencingReadType.findByName(values[INPUT_INDEX_SAMPLE_DEFINITION_SEQUENCING_READ_TYPE])
+            SequencingReadType sequencingReadType = SequencingReadType.getByName(values[INPUT_INDEX_SAMPLE_DEFINITION_SEQUENCING_READ_TYPE])
             assert sequencingReadType: "${values[INPUT_INDEX_SAMPLE_DEFINITION_SEQUENCING_READ_TYPE]} is no valid sequencingReadType"
 
             assert values[INPUT_INDEX_SAMPLE_DEFINITION_SINGLE_CELL_FLAG]

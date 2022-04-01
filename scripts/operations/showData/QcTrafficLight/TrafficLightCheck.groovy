@@ -69,8 +69,8 @@ println qa
 println "\n\nfailed thresholds"
 QcThreshold.getValidQcPropertyForQcClass(qa.class.name).findAll { String property ->
     QcThreshold qcThreshold =
-            QcThreshold.findByQcClassAndSeqTypeAndQcProperty1AndProject(qa.class.name, bamFile.seqType, property, bamFile.project) ?:
-                    QcThreshold.findByQcClassAndSeqTypeAndQcProperty1AndProjectIsNull(qa.class.name, bamFile.seqType, property)
+            CollectionUtils.atMostOneElement(QcThreshold.findAllByQcClassAndSeqTypeAndQcProperty1AndProject(qa.class.name, bamFile.seqType, property, bamFile.project)) ?:
+                    CollectionUtils.atMostOneElement(QcThreshold.findAllByQcClassAndSeqTypeAndQcProperty1AndProjectIsNull(qa.class.name, bamFile.seqType, property))
     return qcThreshold?.qcPassed(qa) == QcThreshold.ThresholdLevel.ERROR
 }.each {
     println "    ${it} = ${qa[it]}"

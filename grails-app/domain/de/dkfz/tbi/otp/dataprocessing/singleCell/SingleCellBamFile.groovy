@@ -28,6 +28,7 @@ import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerQualityAssessment
 import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
 import de.dkfz.tbi.otp.ngsdata.HasIdentifier
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
 import de.dkfz.tbi.otp.workflowExecution.ExternalWorkflowConfigFragment
 
@@ -323,10 +324,10 @@ class SingleCellBamFile extends AbstractMergedBamFile implements HasIdentifier, 
     }
 
     QualityAssessmentMergedPass findOrSaveQaPass() {
-        QualityAssessmentMergedPass assessmentMergedPass = QualityAssessmentMergedPass.findWhere(
+        QualityAssessmentMergedPass assessmentMergedPass = CollectionUtils.atMostOneElement(QualityAssessmentMergedPass.findAllWhere(
                 abstractMergedBamFile: this,
                 identifier: 0,
-        )
+        ))
         if (!assessmentMergedPass) {
             assessmentMergedPass = new QualityAssessmentMergedPass(
                     abstractMergedBamFile: this,

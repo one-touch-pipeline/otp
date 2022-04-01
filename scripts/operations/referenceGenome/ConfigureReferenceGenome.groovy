@@ -20,13 +20,14 @@
  * SOFTWARE.
  */
 
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
-import de.dkfz.tbi.otp.ngsdata.*
+import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
+import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
-Project project = Project.findByName('')
-assert project: "no project given"
+String projectName = ''
+assert projectName: "no project given"
 
 Collection<SeqType> seqTypes = [
         //SeqTypeService.wholeGenomePairedSeqType,
@@ -122,6 +123,8 @@ List<SeqType> blackListedSeqTypes = [
         SeqTypeService.rnaPairedSeqType,
         SeqTypeService.rnaSingleSeqType,
 ]
+
+Project project = atMostOneElement(Project.findAllByName(projectName))
 
 assert !(seqTypes.any { it in blackListedSeqTypes }): "Blacklisted seqTypes selected, cant continue!"
 

@@ -76,7 +76,7 @@ IlseSubmission.withTransaction {
         SampleType sampleType = CollectionUtils.exactlyOneElement(SampleType.findAllByNameIlike(values[1]),
                 "Could not find one sampleType with name ${values[1]}")
 
-        SequencingReadType sequencingReadType = SequencingReadType.findByName(values[3])
+        SequencingReadType sequencingReadType = SequencingReadType.getByName(values[3])
         assert sequencingReadType: "${values[3]} is no valid sequencingReadType"
         boolean singleCell = Boolean.parseBoolean(values[4])
 

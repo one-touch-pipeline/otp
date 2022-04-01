@@ -45,11 +45,10 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.tracking.OtrsTicketService
-import de.dkfz.tbi.otp.utils.MailHelperService
+import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.workflow.datainstallation.DataInstallationInitializationService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 import de.dkfz.tbi.otp.workflowExecution.decider.AllDecider
-import de.dkfz.tbi.otp.utils.TransactionUtils
 import de.dkfz.tbi.util.TimeFormats
 import de.dkfz.tbi.util.spreadsheet.*
 import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
@@ -481,7 +480,7 @@ class MetadataImportService {
             String seqTypeRaw = uniqueColumnValue(rows, SEQUENCING_TYPE)
             String baseMaterial = uniqueColumnValue(rows, BASE_MATERIAL)
             boolean isSingleCell = SeqTypeService.isSingleCell(baseMaterial)
-            SequencingReadType libLayout = SequencingReadType.findByName(uniqueColumnValue(rows, SEQUENCING_READ_TYPE))
+            SequencingReadType libLayout = SequencingReadType.getByName(uniqueColumnValue(rows, SEQUENCING_READ_TYPE))
 
             SeqType seqType = seqTypeService.findByNameOrImportAlias(seqTypeRaw,
                     [libraryLayout: libLayout, singleCell: isSingleCell],
@@ -505,7 +504,7 @@ class MetadataImportService {
             String normalizedLibraryName = SeqTrack.normalizeLibraryName(libraryName)
             IlseSubmission ilseSubmission
             if (ilseNumber) {
-                ilseSubmission = IlseSubmission.findWhere(ilseNumber: Integer.parseInt(ilseNumber))
+                ilseSubmission = CollectionUtils.atMostOneElement(IlseSubmission.findAllWhere(ilseNumber: Integer.parseInt(ilseNumber)))
                 if (!ilseSubmission) {
                     ilseSubmission = new IlseSubmission(ilseNumber: Integer.parseInt(ilseNumber))
                     ilseSubmission.save(flush: true)
@@ -605,7 +604,7 @@ class MetadataImportService {
 
     private static void importMetadataEntries(MetadataValidationContext context, DataFile dataFile, Row row) {
         for (Cell it : context.spreadsheet.header.cells) {
-            MetaDataKey metaDataKey = MetaDataKey.findWhere(name: it.text)
+            MetaDataKey metaDataKey = CollectionUtils.atMostOneElement(MetaDataKey.findAllWhere(name: it.text))
             if (!metaDataKey) {
                 metaDataKey = new MetaDataKey(name: it.text)
                 metaDataKey.save(flush: true)
@@ -690,7 +689,7 @@ class MetadataImportService {
 
     SeqType getSeqTypeFromMetadata(ValueTuple tuple) {
         boolean isSingleCell = seqTypeService.isSingleCell(tuple.getValue(BASE_MATERIAL.name()))
-        SequencingReadType libLayout = SequencingReadType.findByName(tuple.getValue(SEQUENCING_READ_TYPE.name()))
+        SequencingReadType libLayout = SequencingReadType.getByName(tuple.getValue(SEQUENCING_READ_TYPE.name()))
         if (!libLayout) {
             return null
         }

@@ -28,6 +28,7 @@ import spock.lang.Unroll
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeProjectSeqTypeService
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 class ReferenceGenomeProjectSeqTypeSpec extends Specification implements DataTest {
 
@@ -162,9 +163,9 @@ class ReferenceGenomeProjectSeqTypeSpec extends Specification implements DataTes
         when:
         ReferenceGenomeProjectSeqType referenceGenomeProjectSeqType =
                 ReferenceGenomeProjectSeqTypeService.getConfiguredReferenceGenomeProjectSeqType(
-                        Project.findByName(projectName),
-                        SeqType.findByName(seqTypeName),
-                        SampleType.findByName(sampleTypeName)
+                        CollectionUtils.atMostOneElement(Project.findAllByName(projectName)),
+                        CollectionUtils.atMostOneElement(SeqType.findAllByName(seqTypeName)),
+                        CollectionUtils.atMostOneElement(SampleType.findAllByName(sampleTypeName))
                 )
 
         then:

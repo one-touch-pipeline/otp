@@ -47,7 +47,7 @@ class LibraryLayoutValidator extends SingleValueValidator<AbstractMetadataValida
 
     @Override
     void validateValue(AbstractMetadataValidationContext context, String libraryLayoutName, Set<Cell> cells) {
-        SequencingReadType libraryLayout = SequencingReadType.findByName(libraryLayoutName)
+        SequencingReadType libraryLayout = SequencingReadType.getByName(libraryLayoutName)
         if (!libraryLayout) {
             context.addProblem(cells, LogLevel.ERROR, "sequencing read type '${libraryLayoutName}' is not registered in OTP.", "At least one sequencing read type is not registered in OTP.")
         }

@@ -80,7 +80,7 @@ class BedFileValidator extends ValueTuplesValidator<MetadataValidationContext> i
 
         boolean singleCell = SeqTypeService.isSingleCell(valueTuple.getValue(BASE_MATERIAL.name()))
 
-        SequencingReadType libraryLayout = SequencingReadType.findByName(valueTuple.getValue(SEQUENCING_READ_TYPE.name()))
+        SequencingReadType libraryLayout = SequencingReadType.getByName(valueTuple.getValue(SEQUENCING_READ_TYPE.name()))
 
         if (seqType != SeqTypeNames.EXOME.seqTypeName || libraryLayout != SequencingReadType.PAIRED || singleCell) {
             return

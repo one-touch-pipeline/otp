@@ -27,6 +27,7 @@ import groovy.json.JsonSlurper
 import groovy.transform.TupleConstructor
 
 import de.dkfz.tbi.otp.ngsqc.FastqcResultsService
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.DataTableCommand
 import de.dkfz.tbi.util.TimeFormats
 
@@ -52,8 +53,8 @@ class RunController {
         }
         //This page requires using SAMPLE_NAME, since the DataFile has no connection to a SeqTrack. Its only used for legacy objects
         List<MetaDataKey> keys = []
-        keys[0] = MetaDataKey.findByName(MetaDataColumn.SAMPLE_NAME.name())
-        keys[1] = MetaDataKey.findByName(MetaDataColumn.WITHDRAWN.name())
+        keys[0] = CollectionUtils.atMostOneElement(MetaDataKey.findAllByName(MetaDataColumn.SAMPLE_NAME.name()))
+        keys[1] = CollectionUtils.atMostOneElement(MetaDataKey.findAllByName(MetaDataColumn.WITHDRAWN.name()))
 
         List<Map<String, Object>> wrappedMetaDataFiles = runService.retrieveMetaDataFiles(run).collect {
             [

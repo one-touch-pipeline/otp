@@ -33,6 +33,7 @@ import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeProjectSeqTypeServ
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.project.RnaAlignmentReferenceGenomeConfiguration
 import de.dkfz.tbi.otp.project.RoddyConfiguration
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.SessionUtils
 
 import java.nio.file.Files
@@ -129,13 +130,13 @@ abstract class AbstractRnaAlignmentWorkflowTests extends AbstractRoddyAlignmentW
     }
 
     static void checkQcRna(RnaRoddyBamFile bamFile) {
-        QualityAssessmentMergedPass qaPass = QualityAssessmentMergedPass.findWhere(
+        QualityAssessmentMergedPass qaPass = CollectionUtils.atMostOneElement(QualityAssessmentMergedPass.findAllWhere(
                 abstractMergedBamFile: bamFile,
                 identifier: 0,
-        )
+        ))
         assert qaPass
 
-        RnaQualityAssessment rnaQa = RnaQualityAssessment.findByQualityAssessmentMergedPass(qaPass)
+        RnaQualityAssessment rnaQa = CollectionUtils.atMostOneElement(RnaQualityAssessment.findAllByQualityAssessmentMergedPass(qaPass))
         assert rnaQa
 
         JSON.parse(bamFile.finalMergedQAJsonFile.text)

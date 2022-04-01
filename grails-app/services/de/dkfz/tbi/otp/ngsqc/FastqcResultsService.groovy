@@ -25,6 +25,7 @@ import grails.gorm.transactions.Transactional
 
 import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 @Transactional
 class FastqcResultsService {
@@ -32,7 +33,7 @@ class FastqcResultsService {
     SeqTrackService seqTrackService
 
     boolean isFastqcAvailable(DataFile dataFile) {
-        return FastqcProcessedFile.findByDataFileAndContentUploaded(dataFile, true)
+        return CollectionUtils.atMostOneElement(FastqcProcessedFile.findAllByDataFileAndContentUploaded(dataFile, true))
     }
 
     Map<Long, Boolean> fastqcLinkMap(Run run) {

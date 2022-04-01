@@ -1564,7 +1564,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         User projectAuthority1 = createUser()
         User projectAuthority2 = createUser()
         List<Project> projects = [createProject(), createProject(), createProject()]
-        ProjectRole projectRolePI = ProjectRole.findByName(ProjectRole.Basic.PI.name())
+        ProjectRole projectRolePI = CollectionUtils.atMostOneElement(ProjectRole.findAllByName(ProjectRole.Basic.PI.name()))
         projects.each { project -> createUserProjectRole([project: project, user: user]) }
         createUserProjectRole([
                 project     : projects[0],

@@ -32,6 +32,7 @@ import org.springframework.security.access.AccessDeniedException
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.security.UserAndRoles
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 import static org.junit.Assert.*
 
@@ -165,7 +166,7 @@ class MetaDataServiceTests implements UserAndRoles {
             assertNull(metaDataService.getMetaDataEntryById(entry.id + 1))
         }
 
-        addUserWithReadAccessToProject(User.findByUsername(TESTUSER), entry.dataFile.project)
+        addUserWithReadAccessToProject(CollectionUtils.atMostOneElement(User.findAllByUsername(TESTUSER)), entry.dataFile.project)
         SpringSecurityUtils.doWithAuth(TESTUSER) {
             // now our test user should have access
             assertSame(entry, metaDataService.getMetaDataEntryById(entry.id))

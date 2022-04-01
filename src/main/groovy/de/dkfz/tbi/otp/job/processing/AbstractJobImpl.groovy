@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
@@ -99,7 +100,7 @@ abstract class AbstractJobImpl implements Job {
             }
         }
         // find the ParameterType
-        ParameterType type = ParameterType.findByNameAndJobDefinition(name, processingStep.jobDefinition)
+        ParameterType type = CollectionUtils.atMostOneElement(ParameterType.findAllByNameAndJobDefinition(name, processingStep.jobDefinition))
         if (!type) {
             throw new ProcessingException("ParameterType missing")
         }
@@ -228,7 +229,7 @@ abstract class AbstractJobImpl implements Job {
                 sendStep,
                 ClusterJobIdentifier.asClusterJobIdentifierList(clusterJobs)
         ).collect { ClusterJobIdentifier identifier ->
-            return ClusterJob.findByClusterJobIdentifier(identifier, sendStep)
+            return ClusterJob.getByClusterJobIdentifier(identifier, sendStep)
         }
     }
 }

@@ -23,6 +23,8 @@ package de.dkfz.tbi.otp.ngsdata
 
 import grails.gorm.transactions.Transactional
 
+import de.dkfz.tbi.otp.utils.CollectionUtils
+
 @Transactional
 class BamHeaderParsingService {
 
@@ -146,8 +148,8 @@ class BamHeaderParsingService {
         if (runName.startsWith("run")) {
             runString = runName.substring(3)
         }
-        Run run = Run.findByName(runString)
-        SeqTrack seqTrack = SeqTrack.findByRunAndLaneId(run, lane)
+        Run run = CollectionUtils.atMostOneElement(Run.findAllByName(runString))
+        SeqTrack seqTrack = CollectionUtils.atMostOneElement(SeqTrack.findAllByRunAndLaneId(run, lane))
         return seqTrack
     }
 }

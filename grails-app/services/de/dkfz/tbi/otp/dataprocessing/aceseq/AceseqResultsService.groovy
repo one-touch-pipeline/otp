@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.dataprocessing.aceseq
 import de.dkfz.tbi.otp.dataprocessing.AceseqInstance
 import de.dkfz.tbi.otp.dataprocessing.AceseqQc
 import de.dkfz.tbi.otp.ngsdata.AbstractAnalysisResultsService
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.FormatHelper
 
 class AceseqResultsService extends AbstractAnalysisResultsService<AceseqInstance> {
@@ -35,7 +36,7 @@ class AceseqResultsService extends AbstractAnalysisResultsService<AceseqInstance
 
     @Override
     Map getQcData(AceseqInstance analysis) {
-        AceseqQc qc = AceseqQc.findByAceseqInstanceAndNumber(analysis, 1)
+        AceseqQc qc = CollectionUtils.atMostOneElement(AceseqQc.findAllByAceseqInstanceAndNumber(analysis, 1))
         [
                 tcc             : FormatHelper.formatNumber(qc?.tcc),
                 ploidy          : FormatHelper.formatNumber(qc?.ploidy),

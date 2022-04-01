@@ -77,13 +77,14 @@ class ConfigurePipelineController implements ConfigurePipelineHelper {
         assert allBwaMemVersions.contains(defaultBwaMemVersion)
         assert defaultMergeTool in MergeTool.ALL_MERGE_TOOLS*.name
         assert MergeTool.ALL_MERGE_TOOLS*.name.containsAll(allMergeTools)
-        assert ReferenceGenome.findByName(defaultReferenceGenome)
+        assert CollectionUtils.atMostOneElement(ReferenceGenome.findAllByName(defaultReferenceGenome))
 
         Map result = [:]
         result << getValues(project, cmd.seqType, pipeline)
 
-        String referenceGenome = ReferenceGenomeProjectSeqType.findByProjectAndSeqTypeAndSampleTypeIsNullAndDeprecatedDateIsNull(
-                project, cmd.seqType)?.referenceGenome?.name ?: defaultReferenceGenome
+        String referenceGenome = CollectionUtils.atMostOneElement(
+                ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndSampleTypeIsNullAndDeprecatedDateIsNull(project, cmd.seqType))?.referenceGenome?.name
+                ?: defaultReferenceGenome
         List<String> referenceGenomes = ReferenceGenome.list(sort: "name", order: "asc")*.name
 
         result << [
@@ -188,12 +189,14 @@ class ConfigurePipelineController implements ConfigurePipelineHelper {
         String defaultReferenceGenome = getOption(OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_REFERENCE_GENOME_NAME, cmd.seqType.roddyName)
         String defaultGenomeStarIndex = getOption(OptionName.PIPELINE_RODDY_ALIGNMENT_RNA_DEFAULT_GENOME_STAR_INDEX)
 
-        assert ReferenceGenome.findByName(defaultReferenceGenome)
+        assert CollectionUtils.atMostOneElement(ReferenceGenome.findAllByName(defaultReferenceGenome))
 
-        String referenceGenome = ReferenceGenomeProjectSeqType.findByProjectAndSeqTypeAndSampleTypeIsNullAndDeprecatedDateIsNull(
-                project, cmd.seqType)?.referenceGenome?.name ?: defaultReferenceGenome
+        String referenceGenome = CollectionUtils.atMostOneElement(
+                ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndSampleTypeIsNullAndDeprecatedDateIsNull(project, cmd.seqType))?.referenceGenome?.name
+                ?: defaultReferenceGenome
         List<String> referenceGenomes = ReferenceGenome.list(sort: "name", order: "asc").findAll {
-            ReferenceGenomeIndex.findByReferenceGenome(it) && GeneModel.findByReferenceGenome(it)
+            CollectionUtils.atMostOneElement(ReferenceGenomeIndex.findAllByReferenceGenome(it)) &&
+                    CollectionUtils.atMostOneElement(GeneModel.findAllByReferenceGenome(it))
         }*.name
 
         List<SampleType> configuredSampleTypes = ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndSampleTypeIsNotNullAndDeprecatedDateIsNull(
@@ -311,7 +314,7 @@ class ConfigurePipelineController implements ConfigurePipelineHelper {
                 mouseData              : cmd.mouseData,
                 deprecateConfigurations: cmd.deprecateConfigurations,
                 sampleTypes            : cmd.sampleTypeIds.collect {
-                    return CollectionUtils.exactlyOneElement(SampleType.findAllById(it))
+                    return SampleType.get(it)
                 },
         ])
         projectService.configureRnaAlignmentReferenceGenome(rnaConfiguration)
@@ -320,7 +323,7 @@ class ConfigurePipelineController implements ConfigurePipelineHelper {
     }
 
     JSON getStatSizeFileNames(String referenceGenomeName) {
-        ReferenceGenome referenceGenome = ReferenceGenome.findByName(referenceGenomeName)
+        ReferenceGenome referenceGenome = CollectionUtils.atMostOneElement(ReferenceGenome.findAllByName(referenceGenomeName))
         Map data = [:]
 
         if (referenceGenome) {
@@ -334,14 +337,14 @@ class ConfigurePipelineController implements ConfigurePipelineHelper {
 
     JSON getGeneModels(String referenceGenome) {
         Map data = [
-                data: GeneModel.findAllByReferenceGenome(ReferenceGenome.findByName(referenceGenome))
+                data: GeneModel.findAllByReferenceGenome(CollectionUtils.atMostOneElement(ReferenceGenome.findAllByName(referenceGenome)))
         ]
         render data as JSON
     }
 
     JSON getToolVersions(String referenceGenome) {
         List<ToolName> toolNames = ToolName.findAllByType(ToolName.Type.RNA)
-        ReferenceGenome refGenome = ReferenceGenome.findByName(referenceGenome)
+        ReferenceGenome refGenome = CollectionUtils.atMostOneElement(ReferenceGenome.findAllByName(referenceGenome))
         Map data = [:]
         Map toolNamesData = [:]
         toolNames.each {
@@ -425,7 +428,7 @@ class ConfigureRnaAlignmentSubmitCommand extends BaseConfigurePipelineSubmitComm
         if (toolVersionValue) {
             toolVersionValue.each {
                 if (it) {
-                    referenceGenomeIndex.add(ReferenceGenomeIndex.findById(it as long))
+                    referenceGenomeIndex.add(ReferenceGenomeIndex.get(it as long))
                 }
             }
         }

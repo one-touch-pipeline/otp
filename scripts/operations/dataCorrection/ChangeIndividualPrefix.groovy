@@ -21,6 +21,7 @@
  */
 
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 //---------------------------
 //input
@@ -43,10 +44,10 @@ boolean overwrite = false
 assert projectName : "No project name given"
 
 Project.withTransaction {
-    Project project = Project.findByName(projectName)
+    Project project = CollectionUtils.atMostOneElement(Project.findAllByName(projectName))
     Project project1 = null
     if (newPrefix) {
-        project1 = Project.findByIndividualPrefix(newPrefix)
+        project1 = CollectionUtils.atMostOneElement(Project.findAllByIndividualPrefix(newPrefix))
     } else {
         newPrefix = null
     }

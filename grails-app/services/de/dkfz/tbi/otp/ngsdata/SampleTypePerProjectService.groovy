@@ -25,6 +25,7 @@ import grails.gorm.transactions.Transactional
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 @Transactional
 class SampleTypePerProjectService {
@@ -39,7 +40,7 @@ class SampleTypePerProjectService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     SampleTypePerProject createOrUpdate(Project project, SampleType sampleType, SampleTypePerProject.Category category) {
-        SampleTypePerProject sampleTypePerProject = SampleTypePerProject.findByProjectAndSampleType(project, sampleType)
+        SampleTypePerProject sampleTypePerProject = CollectionUtils.atMostOneElement(SampleTypePerProject.findAllByProjectAndSampleType(project, sampleType))
         if (sampleTypePerProject) {
             sampleTypePerProject.category = category
         } else {

@@ -31,6 +31,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.util.spreadsheet.validation.*
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
@@ -74,7 +75,7 @@ class LibPrepKitAdapterValidator extends ValueTuplesValidator<MetadataValidation
             if (seqTypeName.isEmpty()) {
                 return
             }
-            SequencingReadType libraryLayout = SequencingReadType.findByName(valueTuple.getValue(SEQUENCING_READ_TYPE.name()))
+            SequencingReadType libraryLayout = SequencingReadType.getByName(valueTuple.getValue(SEQUENCING_READ_TYPE.name()))
             if (!libraryLayout) {
                 return
             }
@@ -86,7 +87,7 @@ class LibPrepKitAdapterValidator extends ValueTuplesValidator<MetadataValidation
             if (!seqType || !kit) {
                 return
             }
-            Pipeline pipeline = seqType.isRna() ? Pipeline.findByName(Pipeline.Name.RODDY_RNA_ALIGNMENT) : Pipeline.findByName(Pipeline.Name.PANCAN_ALIGNMENT)
+            Pipeline pipeline = seqType.isRna() ? CollectionUtils.atMostOneElement(Pipeline.findAllByName(Pipeline.Name.RODDY_RNA_ALIGNMENT)) : CollectionUtils.atMostOneElement(Pipeline.findAllByName(Pipeline.Name.PANCAN_ALIGNMENT))
             String projectName = valueTuple.getValue(PROJECT.name())
             Project project = Project.getByNameOrNameInMetadataFiles(projectName)
             if (!project) {

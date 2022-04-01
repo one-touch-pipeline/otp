@@ -95,11 +95,11 @@ class SeqType implements Entity, MetadataField, ProjectFieldReferenceAble {
             if (!OtpPathValidator.isValidPathComponent(val)) {
                 return "validator.path.component"
             }
-            if (SeqType.findByDirNameAndSingleCell(obj.dirName, !obj.singleCell)) {
+            if (SeqType.findAllByDirNameAndSingleCell(obj.dirName, !obj.singleCell)) {
                 return "unique"
             }
-            if (SeqType.findByNameAndSingleCell(obj.name, obj.singleCell)) {
-                if (SeqType.findByNameAndSingleCell(obj.name, obj.singleCell).dirName != obj.dirName) {
+            if (SeqType.findAllByNameAndSingleCell(obj.name, obj.singleCell)) {
+                if (SeqType.findAllByNameAndSingleCell(obj.name, obj.singleCell).any { it.dirName != obj.dirName }) {
                     return "same"
                 }
             }

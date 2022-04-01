@@ -213,7 +213,7 @@ class ProcessesController {
             def actions = []
             ExecutionState latestState = latest.state
             if (latestState == ExecutionState.FAILURE) {
-                if (Process.findByRestarted(process)) {
+                if (Process.findAllByRestarted(process)) {
                     latestState = ExecutionState.RESTARTED
                 } else {
                     actions << "restart"
@@ -262,11 +262,11 @@ class ProcessesController {
     @SuppressWarnings("ClassForName")
     boolean showRestartButton(Process process) {
         return (RestartableStartJob.isAssignableFrom(Class.forName(process.startJobClass)) &&
-                !Process.findByRestarted(process))
+                !CollectionUtils.atMostOneElement(Process.findAllByRestarted(process)))
     }
 
     Process getRestartedProcess(Process process) {
-        return Process.findByRestarted(process)
+        return CollectionUtils.atMostOneElement(Process.findAllByRestarted(process))
     }
 
     def updateOperatorIsAwareOfFailure(OperatorIsAwareOfFailureSubmitCommand cmd) {
@@ -294,7 +294,7 @@ class ProcessesController {
                         ExecutionState state = update?.state
 
                         List<String> actions = []
-                        if (state == ExecutionState.FAILURE && !Process.findByRestarted(process)) {
+                        if (state == ExecutionState.FAILURE && !Process.findAllByRestarted(process)) {
                             actions << "restart"
                         }
                         data << [
@@ -434,7 +434,7 @@ class ProcessesController {
     }
 
     private Map<String,String> processParameterData(Process process) {
-        ProcessParameter parameter = ProcessParameter.findByProcess(process)
+        ProcessParameter parameter = CollectionUtils.atMostOneElement(ProcessParameter.findAllByProcess(process))
         if (parameter) {
             return parameter.className ? [
                 controller: GrailsNameUtils.getShortName(parameter.className),

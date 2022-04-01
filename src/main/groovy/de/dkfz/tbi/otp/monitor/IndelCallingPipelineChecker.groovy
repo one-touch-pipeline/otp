@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.monitor
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 class IndelCallingPipelineChecker extends AbstractVariantCallingPipelineChecker {
 
@@ -37,7 +38,7 @@ class IndelCallingPipelineChecker extends AbstractVariantCallingPipelineChecker 
 
     @Override
     Pipeline getPipeline() {
-        return Pipeline.findByName(Pipeline.Name.RODDY_INDEL)
+        return CollectionUtils.atMostOneElement(Pipeline.findAllByName(Pipeline.Name.RODDY_INDEL))
     }
 
     @Override

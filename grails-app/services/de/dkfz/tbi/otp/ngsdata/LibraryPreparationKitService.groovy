@@ -91,7 +91,7 @@ class LibraryPreparationKitService extends MetadataFieldsService<LibraryPreparat
     @Override
     protected void checkProperties(Map properties) {
         assert properties.shortDisplayName: "the input shortDisplayName '${properties.shortDisplayName}' must not be null"
-        assert !LibraryPreparationKit.findByShortDisplayName(properties.shortDisplayName):
+        assert !CollectionUtils.atMostOneElement(LibraryPreparationKit.findAllByShortDisplayName(properties.shortDisplayName)):
                 "The shortdisplayname '${properties.shortDisplayName}' exists already"
     }
 

@@ -28,6 +28,7 @@ import spock.lang.Unroll
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.util.spreadsheet.Cell
 import de.dkfz.tbi.util.spreadsheet.Column
 import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
@@ -110,7 +111,7 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
 
     private static void createSeqTrack(String runName, String laneNumber, String barcode = null) {
         DomainFactory.createSeqTrack(
-                run: Run.findByName(runName) ?: DomainFactory.createRun(name: runName),
+                run: CollectionUtils.atMostOneElement(Run.findAllByName(runName)) ?: DomainFactory.createRun(name: runName),
                 laneId: combineLaneNumberAndBarcode(laneNumber, barcode),
         )
     }

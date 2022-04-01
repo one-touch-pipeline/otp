@@ -280,7 +280,7 @@ class SeqTrack implements ProcessParameterObject, Entity, Artefact {
      * (see {@link DataFile#fileWithdrawn})
      */
     boolean isWithdrawn() {
-        return DataFile.findBySeqTrackAndFileWithdrawn(this, true)
+        return DataFile.findAllBySeqTrackAndFileWithdrawn(this, true)
     }
 
     Integer getIlseId() {

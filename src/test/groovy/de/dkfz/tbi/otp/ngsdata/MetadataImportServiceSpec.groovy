@@ -608,37 +608,37 @@ ${ILSE_NO}                      -             1234          1234          -     
 
         // runs
         Run.count == (includeOptional ? 2 : 1)
-        Run run1 = Run.findWhere(
+        Run run1 = CollectionUtils.atMostOneElement(Run.findAllWhere(
                 name: runName1,
                 dateExecuted: run1Date,
                 seqCenter: seqCenter,
                 seqPlatform: seqPlatform,
-        )
+        ))
         run1 != null
-        Run run2 = Run.findWhere(
+        Run run2 = CollectionUtils.atMostOneElement(Run.findAllWhere(
                 name: runName2,
                 dateExecuted: run2Date,
                 seqCenter: seqCenter2,
                 seqPlatform: seqPlatform2,
-        )
+        ))
         (run2 != null) == includeOptional
 
         // fastqImportInstance
         FastqImportInstance.count == 1
-        FastqImportInstance fastqImportInstance = FastqImportInstance.findWhere(
+        FastqImportInstance fastqImportInstance = CollectionUtils.atMostOneElement(FastqImportInstance.findAllWhere(
                 otrsTicket: otrsTicket,
                 importMode: importMode,
-        )
+        ))
         fastqImportInstance != null
 
         // metadataFile
         MetaDataFile.count == 1
-        MetaDataFile metadataFile = MetaDataFile.findWhere(
+        MetaDataFile metadataFile = CollectionUtils.atMostOneElement(MetaDataFile.findAllWhere(
                 fileName           : file.name,
                 filePath           : file.parent,
                 md5sum             : context.metadataFileMd5sum,
                 fastqImportInstance: fastqImportInstance,
-        )
+        ))
         result == metadataFile
 
         SeqTrack.count == seqTrackCount
@@ -662,7 +662,7 @@ ${ILSE_NO}                      -             1234          1234          -     
         ]
 
         // seqTrack1
-        SeqTrack seqTrack1 = SeqTrack.findWhere(
+        SeqTrack seqTrack1 = CollectionUtils.atMostOneElement(SeqTrack.findAllWhere(
                 laneId: '4',
                 insertSize: 0,
                 run: run1,
@@ -671,9 +671,9 @@ ${ILSE_NO}                      -             1234          1234          -     
                 pipelineVersion: unknownPipeline,
                 kitInfoReliability: InformationReliability.UNKNOWN_UNVERIFIED,
                 libraryPreparationKit: null,
-        )
+        ))
         seqTrack1.ilseId == null
-        DataFile dataFile1 = DataFile.findWhere(commonRun1DataFileProperties + [
+        DataFile dataFile1 = CollectionUtils.atMostOneElement(DataFile.findAllWhere(commonRun1DataFileProperties + [
                 fileName   : fastq1,
                 vbpFileName: fastq1,
                 md5sum     : md5a,
@@ -681,19 +681,19 @@ ${ILSE_NO}                      -             1234          1234          -     
                 mateNumber : 1,
                 indexFile  : false,
                 seqTrack   : seqTrack1,
-        ])
+        ]))
         dataFile1 != null
-        MetaDataKey key = MetaDataKey.findWhere(name: MD5.name())
+        MetaDataKey key = CollectionUtils.atMostOneElement(MetaDataKey.findAllWhere(name: MD5.name()))
         key != null
-        MetaDataEntry.findWhere(
+        CollectionUtils.atMostOneElement(MetaDataEntry.findAllWhere(
                 dataFile: dataFile1,
                 key: key,
                 value: md5a,
-        )
+        ))
 
         if (includeOptional) {
             // seqTrack2
-            SeqTrack seqTrack2 = SeqTrack.findWhere(
+            SeqTrack seqTrack2 = CollectionUtils.atMostOneElement(SeqTrack.findAllWhere(
                     laneId: '1_barcode8',
                     insertSize: 0,
                     run: run1,
@@ -702,9 +702,9 @@ ${ILSE_NO}                      -             1234          1234          -     
                     pipelineVersion: pipeline1,
                     kitInfoReliability: InformationReliability.KNOWN,
                     libraryPreparationKit: libraryPreparationKit1,
-            )
+            ))
             assert seqTrack2.ilseId == 1234
-            assert DataFile.findWhere(commonRun1DataFileProperties + [
+            assert CollectionUtils.atMostOneElement(DataFile.findAllWhere(commonRun1DataFileProperties + [
                     fileName   : fastq2,
                     vbpFileName: fastq2,
                     md5sum     : md5b,
@@ -712,8 +712,8 @@ ${ILSE_NO}                      -             1234          1234          -     
                     mateNumber : 1,
                     indexFile  : false,
                     seqTrack   : seqTrack2,
-            ])
-            assert DataFile.findWhere(commonRun1DataFileProperties + [
+            ]))
+            assert CollectionUtils.atMostOneElement(DataFile.findAllWhere(commonRun1DataFileProperties + [
                     fileName   : fastq3,
                     vbpFileName: fastq3,
                     md5sum     : md5c,
@@ -721,10 +721,10 @@ ${ILSE_NO}                      -             1234          1234          -     
                     mateNumber : 2,
                     indexFile  : false,
                     seqTrack   : seqTrack2,
-            ])
+            ]))
 
             // seqTrack3
-            SeqTrack seqTrack3 = SeqTrack.findWhere(
+            SeqTrack seqTrack3 = CollectionUtils.atMostOneElement(SeqTrack.findAllWhere(
                     laneId: '2_barcode7',
                     insertSize: 234,
                     run: run1,
@@ -735,9 +735,9 @@ ${ILSE_NO}                      -             1234          1234          -     
                     libraryPreparationKit: libraryPreparationKit2,
                     antibodyTarget: antibodyTarget1,
                     antibody: 'antibody1',
-            )
+            ))
             assert seqTrack3.ilseId == null
-            assert DataFile.findWhere(commonRun1DataFileProperties + [
+            assert CollectionUtils.atMostOneElement(DataFile.findAllWhere(commonRun1DataFileProperties + [
                     fileName   : fastq4,
                     vbpFileName: fastq4,
                     md5sum     : md5d,
@@ -745,8 +745,8 @@ ${ILSE_NO}                      -             1234          1234          -     
                     mateNumber : 1,
                     indexFile  : false,
                     seqTrack   : seqTrack3,
-            ])
-            assert DataFile.findWhere(commonRun1DataFileProperties + [
+            ]))
+            assert CollectionUtils.atMostOneElement(DataFile.findAllWhere(commonRun1DataFileProperties + [
                     fileName   : fastq5,
                     vbpFileName: fastq5,
                     md5sum     : md5e,
@@ -754,10 +754,10 @@ ${ILSE_NO}                      -             1234          1234          -     
                     mateNumber : 2,
                     indexFile  : false,
                     seqTrack   : seqTrack3,
-            ])
+            ]))
 
             // seqTrack4
-            SeqTrack seqTrack4 = SeqTrack.findWhere(
+            SeqTrack seqTrack4 = CollectionUtils.atMostOneElement(SeqTrack.findAllWhere(
                     laneId: '2_barcode6',
                     insertSize: 0,
                     run: run1,
@@ -768,9 +768,9 @@ ${ILSE_NO}                      -             1234          1234          -     
                     libraryPreparationKit: null,
                     antibodyTarget: antibodyTarget2,
                     antibody: null,
-            )
+            ))
             assert seqTrack4.ilseId == 2345
-            assert DataFile.findWhere(commonRun1DataFileProperties + [
+            assert CollectionUtils.atMostOneElement(DataFile.findAllWhere(commonRun1DataFileProperties + [
                     fileName   : fastq6,
                     vbpFileName: fastq6,
                     md5sum     : md5f,
@@ -778,10 +778,10 @@ ${ILSE_NO}                      -             1234          1234          -     
                     mateNumber : 1,
                     indexFile  : false,
                     seqTrack   : seqTrack4,
-            ])
+            ]))
 
             // seqTrack5
-            SeqTrack seqTrack5 = SeqTrack.findWhere(
+            SeqTrack seqTrack5 = CollectionUtils.atMostOneElement(SeqTrack.findAllWhere(
                     laneId: '3',
                     insertSize: 456,
                     run: run1,
@@ -790,9 +790,9 @@ ${ILSE_NO}                      -             1234          1234          -     
                     pipelineVersion: pipeline2,
                     kitInfoReliability: InformationReliability.UNKNOWN_VERIFIED,
                     libraryPreparationKit: null,
-            )
+            ))
             assert seqTrack5.ilseId == null
-            assert DataFile.findWhere(commonRun1DataFileProperties + [
+            assert CollectionUtils.atMostOneElement(DataFile.findAllWhere(commonRun1DataFileProperties + [
                     fileName   : fastq7,
                     vbpFileName: fastq7,
                     md5sum     : md5g,
@@ -800,10 +800,10 @@ ${ILSE_NO}                      -             1234          1234          -     
                     mateNumber : 1,
                     indexFile  : false,
                     seqTrack   : seqTrack5,
-            ])
+            ]))
 
             // seqTrack6
-            SeqTrack seqTrack6 = SeqTrack.findWhere(
+            SeqTrack seqTrack6 = CollectionUtils.atMostOneElement(SeqTrack.findAllWhere(
                     laneId: '5',
                     insertSize: 0,
                     run: run2,
@@ -812,9 +812,9 @@ ${ILSE_NO}                      -             1234          1234          -     
                     pipelineVersion: unknownPipeline,
                     kitInfoReliability: InformationReliability.UNKNOWN_UNVERIFIED,
                     libraryPreparationKit: null,
-            )
+            ))
             assert seqTrack6.ilseId == null
-            assert DataFile.findWhere(commonRun2DataFileProperties + [
+            assert CollectionUtils.atMostOneElement(DataFile.findAllWhere(commonRun2DataFileProperties + [
                     fileName   : fastq8,
                     vbpFileName: fastq8,
                     md5sum     : md5h,
@@ -822,10 +822,10 @@ ${ILSE_NO}                      -             1234          1234          -     
                     mateNumber : 1,
                     indexFile  : false,
                     seqTrack   : seqTrack6,
-            ])
+            ]))
 
             // seqTrack7
-            SeqTrack seqTrack7 = SeqTrack.findWhere(
+            SeqTrack seqTrack7 = CollectionUtils.atMostOneElement(SeqTrack.findAllWhere(
                     laneId: '1',
                     insertSize: 0,
                     run: run1,
@@ -834,9 +834,9 @@ ${ILSE_NO}                      -             1234          1234          -     
                     pipelineVersion: unknownPipeline,
                     kitInfoReliability: InformationReliability.KNOWN,
                     libraryPreparationKit: libraryPreparationKit2,
-            )
+            ))
             assert seqTrack7.ilseId == null
-            assert DataFile.findWhere(commonRun1DataFileProperties + [
+            assert CollectionUtils.atMostOneElement(DataFile.findAllWhere(commonRun1DataFileProperties + [
                     fileName   : fastq9,
                     vbpFileName: fastq9,
                     md5sum     : md5i,
@@ -844,7 +844,7 @@ ${ILSE_NO}                      -             1234          1234          -     
                     mateNumber : 1,
                     indexFile  : false,
                     seqTrack   : seqTrack7,
-            ])
+            ]))
         }
 
         (align ? 1 : 0 * seqTrackCount) * service.seqTrackService.decideAndPrepareForAlignment(!null) >> []
@@ -972,30 +972,30 @@ ${FASTQ_GENERATOR}              ${softwareToolIdentifier.name}              ${so
         then:
         // runs
         Run.count == 1
-        Run run = Run.findWhere(
+        Run run = CollectionUtils.atMostOneElement(Run.findAllWhere(
                 name: runName,
                 seqCenter: seqCenter,
                 seqPlatform: seqPlatform,
-        )
+        ))
         run != null
         run.dateExecuted == date
 
         // fastqImportInstance
         FastqImportInstance.count == 1
-        FastqImportInstance fastqImportInstance = FastqImportInstance.findWhere(
+        FastqImportInstance fastqImportInstance = CollectionUtils.atMostOneElement(FastqImportInstance.findAllWhere(
                 otrsTicket: null,
                 importMode: FastqImportInstance.ImportMode.MANUAL
-        )
+        ))
         fastqImportInstance != null
 
         // metadataFile
         MetaDataFile.count == 1
-        MetaDataFile metadataFile = MetaDataFile.findWhere(
+        MetaDataFile metadataFile = CollectionUtils.atMostOneElement(MetaDataFile.findAllWhere(
                 fileName           : file.name,
                 filePath           : file.parent,
                 md5sum             : context.metadataFileMd5sum,
                 fastqImportInstance: fastqImportInstance,
-        )
+        ))
         result == metadataFile
 
         SeqTrack.count == 1
@@ -1004,7 +1004,7 @@ ${FASTQ_GENERATOR}              ${softwareToolIdentifier.name}              ${so
         MetaDataEntry.count == context.spreadsheet.header.cells.size() * 2
 
         // seqTrack1
-        SeqTrack seqTrack = SeqTrack.findWhere(
+        SeqTrack seqTrack = CollectionUtils.atMostOneElement(SeqTrack.findAllWhere(
                 laneId: '1',
                 insertSize: 0,
                 run: run,
@@ -1013,7 +1013,7 @@ ${FASTQ_GENERATOR}              ${softwareToolIdentifier.name}              ${so
                 pipelineVersion: softwareToolIdentifier.softwareTool,
                 kitInfoReliability: InformationReliability.UNKNOWN_UNVERIFIED,
                 libraryPreparationKit: null,
-        )
+        ))
         seqTrack.ilseId == null
         seqTrack.antibodyTarget == antibodyTarget
 
@@ -1028,22 +1028,22 @@ ${FASTQ_GENERATOR}              ${softwareToolIdentifier.name}              ${so
                 seqTrack           : seqTrack,
         ]
 
-        DataFile dataFile1 = DataFile.findWhere(commonRunDataFileProperties + [
+        DataFile dataFile1 = CollectionUtils.atMostOneElement(DataFile.findAllWhere(commonRunDataFileProperties + [
                 fileName   : fastq1,
                 vbpFileName: fastq1,
                 md5sum     : md5sum1,
                 mateNumber : 1,
                 indexFile  : false,
-        ])
+        ]))
         dataFile1 != null
 
-        DataFile dataFile2 = DataFile.findWhere(commonRunDataFileProperties + [
+        DataFile dataFile2 = CollectionUtils.atMostOneElement(DataFile.findAllWhere(commonRunDataFileProperties + [
                 fileName   : fastq2,
                 vbpFileName: fastq2,
                 md5sum     : md5sum2,
                 mateNumber : 2,
                 indexFile  : false,
-        ])
+        ]))
         dataFile2 != null
     }
 
@@ -1173,30 +1173,30 @@ ${FASTQ_GENERATOR}              ${softwareToolIdentifier.name}              ${so
         then:
         // runs
         Run.count == 1
-        Run run = Run.findWhere(
+        Run run = CollectionUtils.atMostOneElement(Run.findAllWhere(
                 name: runName,
                 seqCenter: seqCenter,
                 seqPlatform: seqPlatform,
-        )
+        ))
         run != null
         run.dateExecuted == date
 
         // fastqImportInstance
         FastqImportInstance.count == 1
-        FastqImportInstance fastqImportInstance = FastqImportInstance.findWhere(
+        FastqImportInstance fastqImportInstance = CollectionUtils.atMostOneElement(FastqImportInstance.findAllWhere(
                 otrsTicket: null,
                 importMode: FastqImportInstance.ImportMode.MANUAL
-        )
+        ))
         fastqImportInstance != null
 
         // metadataFile
         MetaDataFile.count == 1
-        MetaDataFile metadataFile = MetaDataFile.findWhere(
+        MetaDataFile metadataFile = CollectionUtils.atMostOneElement(MetaDataFile.findAllWhere(
                 fileName           : file.name,
                 filePath           : file.parent,
                 md5sum             : context.metadataFileMd5sum,
                 fastqImportInstance: fastqImportInstance,
-        )
+        ))
         result == metadataFile
 
         SeqTrack.count == 1
@@ -1205,7 +1205,7 @@ ${FASTQ_GENERATOR}              ${softwareToolIdentifier.name}              ${so
         MetaDataEntry.count == context.spreadsheet.header.cells.size() * DataFile.count
 
         // seqTrack1
-        SeqTrack seqTrack = SeqTrack.findWhere(
+        SeqTrack seqTrack = CollectionUtils.atMostOneElement(SeqTrack.findAllWhere(
                 laneId: '1',
                 insertSize: 0,
                 run: run,
@@ -1214,7 +1214,7 @@ ${FASTQ_GENERATOR}              ${softwareToolIdentifier.name}              ${so
                 pipelineVersion: softwareToolIdentifier.softwareTool,
                 kitInfoReliability: InformationReliability.UNKNOWN_UNVERIFIED,
                 libraryPreparationKit: null,
-        )
+        ))
         seqTrack.ilseId == null
         seqTrack.class == SeqTrack
 
@@ -1229,40 +1229,40 @@ ${FASTQ_GENERATOR}              ${softwareToolIdentifier.name}              ${so
                 seqTrack           : seqTrack,
         ]
 
-        DataFile dataFile1 = DataFile.findWhere(commonRunDataFileProperties + [
+        DataFile dataFile1 = CollectionUtils.atMostOneElement(DataFile.findAllWhere(commonRunDataFileProperties + [
                 fileName   : fastq1,
                 vbpFileName: fastq1,
                 md5sum     : md5sum1,
                 mateNumber : 1,
                 indexFile  : false,
-        ])
+        ]))
         dataFile1 != null
 
-        DataFile dataFile2 = DataFile.findWhere(commonRunDataFileProperties + [
+        DataFile dataFile2 = CollectionUtils.atMostOneElement(DataFile.findAllWhere(commonRunDataFileProperties + [
                 fileName   : fastq2,
                 vbpFileName: fastq2,
                 md5sum     : md5sum2,
                 mateNumber : 2,
                 indexFile  : false,
-        ])
+        ]))
         dataFile2 != null
 
-        DataFile dataFileIndex1 = DataFile.findWhere(commonRunDataFileProperties + [
+        DataFile dataFileIndex1 = CollectionUtils.atMostOneElement(DataFile.findAllWhere(commonRunDataFileProperties + [
                 fileName   : fastqIndex1,
                 vbpFileName: fastqIndex1,
                 md5sum     : md5sumIndex1,
                 mateNumber : 1,
                 indexFile  : true,
-        ])
+        ]))
         dataFileIndex1 != null
 
-        DataFile dataFileIndex2 = DataFile.findWhere(commonRunDataFileProperties + [
+        DataFile dataFileIndex2 = CollectionUtils.atMostOneElement(DataFile.findAllWhere(commonRunDataFileProperties + [
                 fileName   : fastqIndex2,
                 vbpFileName: fastqIndex2,
                 md5sum     : md5sumIndex2,
                 mateNumber : 2,
                 indexFile  : true,
-        ])
+        ]))
         dataFileIndex2 != null
     }
 

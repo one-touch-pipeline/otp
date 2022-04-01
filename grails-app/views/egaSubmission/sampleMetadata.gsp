@@ -20,7 +20,7 @@
   - SOFTWARE.
   --}%
 
-<%@ page import="de.dkfz.tbi.otp.ngsdata.SampleTypePerProject;" contentType="text/html;charset=UTF-8"%>
+<%@ page import="de.dkfz.tbi.otp.utils.CollectionUtils; de.dkfz.tbi.otp.ngsdata.SampleTypePerProject;" contentType="text/html;charset=UTF-8"%>
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -68,7 +68,8 @@
                         <td>${it.seqType.singleCellDisplayName}</td>
                         <td><g:message code="egaSubmission.unknown"/></td>
                         <td><g:message code="egaSubmission.unknown"/></td>
-                        <td>${SampleTypePerProject.findByProjectAndSampleType(it.project,it.sample.sampleType)?.category?.toString() ?: g.message(code: "egaSubmission.unknown")}</td>
+                        <td>${CollectionUtils.atMostOneElement(SampleTypePerProject.findAllByProjectAndSampleType(it.project,it.sample.sampleType))?.category?.toString()
+                                ?: g.message(code: "egaSubmission.unknown")}</td>
                         <td>${it.project.speciesWithStrains ?: g.message(code: "egaSubmission.unknown")}</td>
                         <td>${it.egaAliasName}</td>
                         <td><g:message code="egaSubmission.unknown"/></td>

@@ -22,6 +22,7 @@
 
 import de.dkfz.tbi.ngstools.bedUtils.*
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 import static org.springframework.util.Assert.*
 
@@ -51,11 +52,11 @@ assert bedFileName: 'Please provide a bed file name.'
 assert libPrepKitName: 'Please provide a libPrepKit.'
 assert refGenomeNames: 'At least one reference genome have to be provided'
 
-LibraryPreparationKit libraryPreparationKit = LibraryPreparationKit.findByName(libPrepKitName)
+LibraryPreparationKit libraryPreparationKit = CollectionUtils.atMostOneElement(LibraryPreparationKit.findAllByName(libPrepKitName))
 assert libraryPreparationKit: "The LibraryPreparationKit '${libPrepKitName} could not found in OTP"
 
 List<ReferenceGenome> referenceGenomes = refGenomeNames.collect {
-    ReferenceGenome referenceGenome = ReferenceGenome.findByName(it)
+    ReferenceGenome referenceGenome = CollectionUtils.atMostOneElement(ReferenceGenome.findAllByName(it))
     assert referenceGenome: "The ReferenceGenome '${it} could not found in OTP"
     return referenceGenome
 }
@@ -67,7 +68,7 @@ BedFileService bedFileService = ctx.bedFileService
 
 BedFile.withTransaction {
     referenceGenomes.each { ReferenceGenome referenceGenome ->
-        BedFile existingBedFile = BedFile.findByFileNameAndReferenceGenome(bedFileName, referenceGenome)
+        BedFile existingBedFile = CollectionUtils.atMostOneElement(BedFile.findAllByFileNameAndReferenceGenome(bedFileName, referenceGenome))
         if (existingBedFile) {
             println "bedFile with name ${bedFileName} and reference genome ${referenceGenome.name} already exists in the db and will be skipped."
             return

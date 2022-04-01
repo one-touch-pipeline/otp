@@ -33,6 +33,7 @@ import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.tracking.OtrsTicketService
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 import static de.dkfz.tbi.otp.qcTrafficLight.QcThreshold.ThresholdLevel.ERROR
 
@@ -130,9 +131,10 @@ class QcTrafficLightService {
 
     private boolean qcValuesExceedErrorThreshold(AbstractMergedBamFile bamFile, QcTrafficLightValue qc) {
         return QcThreshold.getValidQcPropertyForQcClass(qc.class.name).any { String property ->
-            QcThreshold qcThreshold =
-                    QcThreshold.findByQcClassAndSeqTypeAndQcProperty1AndProject(qc.class.name, bamFile.seqType, property, bamFile.project) ?:
-                            QcThreshold.findByQcClassAndSeqTypeAndQcProperty1AndProjectIsNull(qc.class.name, bamFile.seqType, property)
+            QcThreshold qcThreshold = CollectionUtils.atMostOneElement(
+                    QcThreshold.findAllByQcClassAndSeqTypeAndQcProperty1AndProject(qc.class.name, bamFile.seqType, property, bamFile.project)) ?:
+                            CollectionUtils.atMostOneElement(
+                                    QcThreshold.findAllByQcClassAndSeqTypeAndQcProperty1AndProjectIsNull(qc.class.name, bamFile.seqType, property))
             return qcThreshold?.qcPassed(qc) == ERROR
         }
     }

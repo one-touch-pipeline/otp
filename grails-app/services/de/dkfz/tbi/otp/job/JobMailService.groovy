@@ -29,6 +29,7 @@ import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.tracking.OtrsTicketService
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.MailHelperService
 import de.dkfz.tbi.util.TimeFormats
 
@@ -66,7 +67,7 @@ class JobMailService {
         List<ClusterJobIdentifier> clusterJobIdentifiers = ClusterJobIdentifier.asClusterJobIdentifierList(clusterJobs)
         Collection<ClusterJobIdentifier> clusterJobIdentifiersToCheck = jobStatusLoggingService.failedOrNotFinishedClusterJobs(step, clusterJobIdentifiers)
         Collection<ClusterJob> clusterJobsToCheck = clusterJobIdentifiersToCheck.collect {
-            ClusterJob.findByClusterJobIdentifier(it, step)
+            ClusterJob.getByClusterJobIdentifier(it, step)
         }
 
         int restartedStepCount = restartCount(step)
@@ -79,7 +80,7 @@ class JobMailService {
                 otpWorkflowStarted    : dateString(step.process.started),
                 otpWorkflowName       : step.jobExecutionPlan.name,
                 otpLink               : processService.processUrl(step.process),
-                restartedWorkflowJobId: Process.findByRestarted(step.process)?.id,
+                restartedWorkflowJobId: CollectionUtils.atMostOneElement(Process.findAllByRestarted(step.process))?.id,
                 originWorkflowJobId   : firstWorkflow.id,
                 originWorkflowStart   : dateString(firstWorkflow.started),
                 objectInformation     : object.toString().replaceAll(/ ?<br> ?/, ' ').replaceAll(/\n/, ' '),
@@ -154,7 +155,7 @@ ${data.collect { key, value -> "  ${key}: ${value}" }.join('\n')}
     }
 
     private Process firstWorkflowJobId(Process process) {
-        Process previous = Process.findByRestarted(process)
+        Process previous = CollectionUtils.atMostOneElement(Process.findAllByRestarted(process))
         if (previous) {
             return firstWorkflowJobId(previous)
         }

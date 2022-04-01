@@ -295,7 +295,8 @@ abstract class AbstractVariantCallingPipelineChecker extends PipelinesChecker<Sa
                 disease: samplePair.mergingWorkPackage1,
                 control: samplePair.mergingWorkPackage2,
         ].each { String key, AbstractMergingWorkPackage mergingWorkPackage ->
-            AbstractMergedBamFile bamFile = AbstractMergedBamFile.findByWorkPackage(mergingWorkPackage, [sort: 'id', order: 'desc'])
+            AbstractMergedBamFile bamFile = CollectionUtils.atMostOneElement(
+                    AbstractMergedBamFile.findAllByWorkPackage(mergingWorkPackage, [sort: 'id', order: 'desc']))
             if (bamFile == null) {
                 ret << "${key} ${PROBLEMS_NO_BAM_FILE}"
             } else if (!(bamFile instanceof ExternallyProcessedMergedBamFile)) {

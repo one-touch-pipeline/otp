@@ -28,6 +28,8 @@ import de.dkfz.tbi.otp.job.plan.JobDefinition
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.utils.Entity
 
+import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
+
 /**
  * A ProcessingStep represents one execution of a Job for a JobDefinition.
  *
@@ -171,7 +173,7 @@ class ProcessingStep implements Serializable, Entity {
      * <code>null</code> if this {@link ProcessingStep} has no {@link ProcessingStepUpdate}s.
      */
     ProcessingStepUpdate getLatestProcessingStepUpdate() {
-        return ProcessingStepUpdate.findByProcessingStep(this, [sort: "id", order: "desc"])
+        return atMostOneElement(ProcessingStepUpdate.findAllByProcessingStep(this, [sort: "id", order: "desc", max: 1]))
     }
 
     /**
@@ -179,7 +181,7 @@ class ProcessingStep implements Serializable, Entity {
      * <code>null</code> if this {@link ProcessingStep} has no {@link ProcessingStepUpdate}s.
      */
     ProcessingStepUpdate getFirstProcessingStepUpdate() {
-        return ProcessingStepUpdate.findByProcessingStep(this, [sort: "id", order: "asc"])
+        return atMostOneElement(ProcessingStepUpdate.findAllByProcessingStep(this, [sort: "id", order: "asc", max: 1]))
     }
 
     /**

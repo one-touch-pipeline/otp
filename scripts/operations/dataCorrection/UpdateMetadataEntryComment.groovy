@@ -22,6 +22,7 @@
 package operations.dataCorrection
 
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.util.spreadsheet.Row
 import de.dkfz.tbi.util.spreadsheet.Spreadsheet
 
@@ -42,7 +43,7 @@ Spreadsheet s = new Spreadsheet(input.text)
     assert it in s.header.cells*.text : "Input file doesn't contain column ${it}."
 }
 
-MetaDataKey commentKey = MetaDataKey.findByName(MetaDataColumn.COMMENT.name())
+MetaDataKey commentKey = CollectionUtils.atMostOneElement(MetaDataKey.findAllByName(MetaDataColumn.COMMENT.name()))
 
 MetaDataEntry.withTransaction {
     s.dataRows.each { Row row ->

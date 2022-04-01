@@ -25,6 +25,7 @@ import grails.gorm.transactions.Transactional
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.CommentService
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 @Transactional
 class IlseSubmissionService {
@@ -38,7 +39,7 @@ class IlseSubmissionService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     boolean checkIfIlseNumberDoesNotExist(int ilseNumber) {
-        return !IlseSubmission.findByIlseNumber(ilseNumber)
+        return !CollectionUtils.atMostOneElement(IlseSubmission.findAllByIlseNumber(ilseNumber))
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")

@@ -34,6 +34,7 @@ import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidator
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.util.spreadsheet.Row
 import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 
@@ -135,18 +136,18 @@ class BamMetadataImportService {
                 }
                 assert sample: "No sample found for ${_individual} and ${_sampleType} in ${_project}"
 
-                SeqType seqType = seqTypeService.findByNameOrImportAlias(_seqType, [libraryLayout: SequencingReadType.findByName(libraryLayout),
+                SeqType seqType = seqTypeService.findByNameOrImportAlias(_seqType, [libraryLayout: SequencingReadType.getByName(libraryLayout),
                                                                                     singleCell: false,])
                 assert seqType: "No seqtype found for ${_seqType}, ${libraryLayout} and bulk"
 
-                ReferenceGenome referenceGenome = ReferenceGenome.findByName(_referenceGenome)
+                ReferenceGenome referenceGenome = CollectionUtils.atMostOneElement(ReferenceGenome.findAllByName(_referenceGenome))
                 assert referenceGenome: "no reference genom found for ${_referenceGenome}"
 
                 ExternalMergingWorkPackage emwp = new ExternalMergingWorkPackage(
                         referenceGenome: referenceGenome,
                         sample: sample,
                         seqType: seqType,
-                        pipeline: Pipeline.findByNameAndType(Pipeline.Name.EXTERNALLY_PROCESSED, Pipeline.Type.ALIGNMENT),
+                        pipeline: CollectionUtils.atMostOneElement(Pipeline.findAllByNameAndType(Pipeline.Name.EXTERNALLY_PROCESSED, Pipeline.Type.ALIGNMENT)),
                         libraryPreparationKit: libraryPreparationKit ? libraryPreparationKitService.findByNameOrImportAlias(libraryPreparationKit) : null,
                 )
                 assert emwp.save(flush: true)

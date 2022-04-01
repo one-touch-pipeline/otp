@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.monitor
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 class AceseqCallingPipelineChecker extends AbstractVariantCallingPipelineChecker {
 
@@ -37,7 +38,7 @@ class AceseqCallingPipelineChecker extends AbstractVariantCallingPipelineChecker
 
     @Override
     Pipeline getPipeline() {
-        return Pipeline.findByName(Pipeline.Name.RODDY_ACESEQ)
+        return CollectionUtils.atMostOneElement(Pipeline.findAllByName(Pipeline.Name.RODDY_ACESEQ))
     }
 
     @Override

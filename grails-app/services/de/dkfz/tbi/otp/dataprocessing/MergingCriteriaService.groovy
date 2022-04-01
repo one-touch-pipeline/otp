@@ -29,6 +29,7 @@ import org.springframework.validation.Errors
 import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 @Transactional
 class MergingCriteriaService {
@@ -37,7 +38,7 @@ class MergingCriteriaService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'OTP_READ_ACCESS')")
     MergingCriteria findMergingCriteria(Project project, SeqType seqType) {
-        return MergingCriteria.findByProjectAndSeqType(project, seqType) ?: new MergingCriteria()
+        return CollectionUtils.atMostOneElement(MergingCriteria.findAllByProjectAndSeqType(project, seqType)) ?: new MergingCriteria()
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")

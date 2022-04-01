@@ -110,7 +110,7 @@ class DataTransferAgreementService {
             throw new DataTransferAgreementNotFoundException("DTA not found.")
         }
 
-        if (DataTransferAgreement.findAllById(dta.id).empty) {
+        if (!DataTransferAgreement.get(dta.id)) {
             throw new DataTransferAgreementNotFoundException("DTA not found.")
         }
 
@@ -132,7 +132,7 @@ class DataTransferAgreementService {
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     byte[] getDataTransferAgreementDocumentContent(DataTransferAgreementDocument dtaDocument) throws FileNotFoundException {
-        if (!dtaDocument || DataTransferAgreementDocument.findAllById(dtaDocument.id).empty) {
+        if (!dtaDocument || !DataTransferAgreementDocument.get(dtaDocument.id)) {
             throw new FileNotFoundException("The DTA document ${dtaDocument?.fileName} was not found.")
         }
 

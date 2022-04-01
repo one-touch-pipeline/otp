@@ -26,6 +26,7 @@ import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.ngsdata.Individual
 import de.dkfz.tbi.otp.ngsdata.SeqTypeNames
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 /*
 Input area
@@ -41,13 +42,13 @@ Input checks
  */
 assert (projectName || !pids.empty) : "Please provide either a project name or pids"
 if (projectName) {
-    assert Project.findByName(projectName) : "No project with name ${projectName} could be found"
+    assert CollectionUtils.atMostOneElement(Project.findAllByName(projectName)) : "No project with name ${projectName} could be found"
 }
 
 if (pids) {
     def noPids = []
     pids.each { pid ->
-        if (!Individual.findByPid(pid)) {
+        if (!Individual.findAllByPid(pid)) {
             noPids << pid
         }
     }

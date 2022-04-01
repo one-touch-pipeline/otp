@@ -49,7 +49,7 @@ String projectName = ""
 
 assert projectName: 'No Project name given'
 
-Project project = Project.findByName(projectName)
+Project project = CollectionUtils.atMostOneElement(Project.findAllByName(projectName))
 assert project: "Project ${projectName} not found"
 
 //K20K-JRJ7D2 und K20K-ZFA224
@@ -90,8 +90,8 @@ bamFiles.each { AbstractBamFile bamFile ->
     )
 
     List<QcThreshold> qcThresholds = QcThreshold.getValidQcPropertyForQcClass(qc.class.name).collect { String property ->
-        QcThreshold.findByQcClassAndSeqTypeAndQcProperty1AndProject(qc.class.name, bamFile.seqType, property, bamFile.project) ?:
-                QcThreshold.findByQcClassAndSeqTypeAndQcProperty1AndProjectIsNull(qc.class.name, bamFile.seqType, property)
+        CollectionUtils.atMostOneElement(QcThreshold.findAllByQcClassAndSeqTypeAndQcProperty1AndProject(qc.class.name, bamFile.seqType, property, bamFile.project)) ?:
+                CollectionUtils.atMostOneElement(QcThreshold.findAllByQcClassAndSeqTypeAndQcProperty1AndProjectIsNull(qc.class.name, bamFile.seqType, property))
     }.findAll { QcThreshold qcThreshold ->
         return qcThreshold?.qcPassed(qc) == QcThreshold.ThresholdLevel.ERROR
     }

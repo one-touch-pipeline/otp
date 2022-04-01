@@ -61,27 +61,28 @@ class JobExecutionPlanDSL {
         inputType.save(flush: true)
         if (!previous) {
             // first job - get it from StartJob
-            ParameterType outputType = ParameterType.findByJobDefinitionAndName(jep.startJob, fromParameter)
+            ParameterType outputType = CollectionUtils.atMostOneElement(ParameterType.findAllByJobDefinitionAndName(jep.startJob, fromParameter))
             assert(outputType)
             assert(outputType.parameterUsage == ParameterUsage.OUTPUT)
             ParameterMapping mapping = new ParameterMapping(from: outputType, to: inputType, job: jobDefinition)
             mapping.save(flush: true)
         } else if (previous.name == fromJob) {
             // simple case: direct mapping
-            ParameterType outputType = ParameterType.findByJobDefinitionAndName(previous, fromParameter)
+            ParameterType outputType = CollectionUtils.atMostOneElement(ParameterType.findAllByJobDefinitionAndName(previous, fromParameter))
             assert(outputType)
             assert(outputType.parameterUsage == ParameterUsage.OUTPUT)
             ParameterMapping mapping = new ParameterMapping(from: outputType, to: inputType, job: jobDefinition)
             mapping.save(flush: true)
         } else {
             // need to add passthrough parameters
-            JobDefinition mappingJob = JobDefinition.findByNameAndPlan(fromJob, jep)
+            JobDefinition mappingJob = CollectionUtils.atMostOneElement(JobDefinition.findAllByNameAndPlan(fromJob, jep))
             assert(mappingJob)
-            ParameterType outputType = ParameterType.findByJobDefinitionAndName(mappingJob, fromParameter)
+            ParameterType outputType = CollectionUtils.atMostOneElement(ParameterType.findAllByJobDefinitionAndName(mappingJob, fromParameter))
             assert(outputType)
             assert(outputType.parameterUsage == ParameterUsage.OUTPUT)
             while (mappingJob.next != jobDefinition) {
-                ParameterType passThroughType = ParameterType.findByJobDefinitionAndName(mappingJob.next, fromParameter + "Passthrough")
+                ParameterType passThroughType = CollectionUtils.atMostOneElement(
+                        ParameterType.findAllByJobDefinitionAndName(mappingJob.next, fromParameter + "Passthrough"))
                 if (!passThroughType) {
                     passThroughType = new ParameterType(
                             name: fromParameter + "Passthrough",
@@ -89,7 +90,7 @@ class JobExecutionPlanDSL {
                             parameterUsage: ParameterUsage.PASSTHROUGH)
                     passThroughType.save(flush: true)
                 }
-                ParameterMapping mapping = ParameterMapping.findByFromAndTo(outputType, passThroughType)
+                ParameterMapping mapping = CollectionUtils.atMostOneElement(ParameterMapping.findAllByFromAndTo(outputType, passThroughType))
                 if (!mapping) {
                     mapping = new ParameterMapping(from: outputType, to: passThroughType, job: mappingJob.next ? mappingJob.next : firstJob)
                     mapping.save(flush: true)
@@ -194,7 +195,7 @@ class JobExecutionPlanDSL {
                                                     String bean,
                                                     String validatorForName,
                                                     closure = null ->
-        JobDefinition validatorFor = JobDefinition.findByNameAndPlan(validatorForName, jep)
+        JobDefinition validatorFor = CollectionUtils.atMostOneElement(JobDefinition.findAllByNameAndPlan(validatorForName, jep))
         assert(validatorFor)
         ValidatingJobDefinition jobDefinition = new ValidatingJobDefinition(
                 name: jobName, bean: bean, plan: jep, previous: helper.previous, validatorFor: validatorFor

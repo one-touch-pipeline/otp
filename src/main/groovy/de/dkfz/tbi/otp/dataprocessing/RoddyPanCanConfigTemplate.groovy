@@ -54,7 +54,7 @@ class RoddyPanCanConfigTemplate {
 
         final String additionalProperties
 
-        static SeqTypeOptions findByRoddyName(String roddyName) {
+        static SeqTypeOptions getByRoddyName(String roddyName) {
             SeqTypeOptions template = values().find {
                 it.name().compareToIgnoreCase(roddyName) == 0
             }
@@ -64,7 +64,7 @@ class RoddyPanCanConfigTemplate {
     }
 
     static String createConfig(PanCanAlignmentConfiguration panCanAlignmentConfiguration) {
-        SeqTypeOptions template = SeqTypeOptions.findByRoddyName(panCanAlignmentConfiguration.seqType.roddyName)
+        SeqTypeOptions template = SeqTypeOptions.getByRoddyName(panCanAlignmentConfiguration.seqType.roddyName)
         String additional = ""
 
         if (panCanAlignmentConfiguration.seqType.isWgbs()) {

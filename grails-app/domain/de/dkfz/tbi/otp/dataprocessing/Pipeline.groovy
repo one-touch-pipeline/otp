@@ -130,7 +130,7 @@ class Pipeline implements Entity {
         SOPHIA,
 
         @Deprecated
-        static Pipeline.Type findByName(String name) {
+        static Pipeline.Type getByName(String name) {
             return values().find {
                 it.name() == name
             }

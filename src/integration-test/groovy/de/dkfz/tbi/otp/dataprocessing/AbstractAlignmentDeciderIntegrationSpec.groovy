@@ -32,6 +32,7 @@ import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.tracking.OtrsTicketService
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.Entity
 import de.dkfz.tbi.otp.utils.MailHelperService
 
@@ -451,6 +452,6 @@ class AbstractAlignmentDeciderIntegrationSpec extends Specification {
     }
 
     private static Pipeline findOrSaveByNameAndType(Pipeline.Name name, Pipeline.Type type) {
-        return Pipeline.findByNameAndType(name, type) ?: DomainFactory.createPipeline(name, type)
+        return CollectionUtils.atMostOneElement(Pipeline.findAllByNameAndType(name, type)) ?: DomainFactory.createPipeline(name, type)
     }
 }

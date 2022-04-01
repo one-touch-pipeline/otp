@@ -134,7 +134,7 @@ void migrateToNewWorkflow(
                     displayName : artefactDisplayName,
             ])
 
-            FastqcProcessedFile fastqcProcessedFile = FastqcProcessedFile.findWhere(dataFile: dataFile)
+            FastqcProcessedFile fastqcProcessedFile = CollectionUtils.atMostOneElement(FastqcProcessedFile.findAllWhere(dataFile: dataFile))
             fastqcProcessedFile.workflowArtefact = workflowArtefact
             fastqcProcessedFile.save()
         }

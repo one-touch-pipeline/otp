@@ -36,6 +36,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.qcTrafficLight.QcThreshold
 import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightService
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.utils.NumberConverter
 
@@ -131,14 +132,14 @@ class ParseAceseqQcJobSpec extends Specification implements DataTest {
         then:
         AceseqQc.findAllByAceseqInstance(instance).size() == 2
         TestCase.containSame(AceseqQc.findAllByAceseqInstance(instance)*.number, [1, 2])
-        def qc1 = AceseqQc.findByAceseqInstanceAndNumber(instance, 1)
+        def qc1 = CollectionUtils.atMostOneElement(AceseqQc.findAllByAceseqInstanceAndNumber(instance, 1))
         qc1.tcc == 0.5d
         qc1.ploidyFactor == "2.27"
         qc1.ploidy == 2
         qc1.goodnessOfFit == 0.904231625835189d
         qc1.gender == "male"
         qc1.solutionPossible == 3
-        def qc2 = AceseqQc.findByAceseqInstanceAndNumber(instance, 2)
+        def qc2 = CollectionUtils.atMostOneElement(AceseqQc.findAllByAceseqInstanceAndNumber(instance, 2))
         qc2.tcc == 0.7d
         qc2.ploidyFactor == "1.27"
         qc2.ploidy == 5

@@ -37,6 +37,7 @@ import de.dkfz.tbi.otp.config.PropertiesValidationService
 import de.dkfz.tbi.otp.job.JobMailService
 import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.ExceptionUtils
 import de.dkfz.tbi.otp.utils.SessionUtils
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
@@ -158,7 +159,7 @@ class SchedulerService {
                         processesToResume << step
                     } else if (last.state == ExecutionState.RESTARTED) {
                         // look whether there is a RestartedProcessingStep which has a link to step
-                        RestartedProcessingStep restarted = RestartedProcessingStep.findByOriginal(step)
+                        RestartedProcessingStep restarted = CollectionUtils.atMostOneElement(RestartedProcessingStep.findAllByOriginal(step))
                         if (!restarted) {
                             status.setRollbackOnly()
                             valid = false
@@ -242,7 +243,7 @@ class SchedulerService {
         }
         JobDefinition nextJob = previous.jobDefinition.next
         if (!nextJob && (previous.jobDefinition instanceof DecidingJobDefinition)) {
-            nextJob = DecisionMapping.findByDecision(((DecisionProcessingStep) previous).decision).definition
+            nextJob = CollectionUtils.atMostOneElement(DecisionMapping.findAllByDecision(((DecisionProcessingStep) previous).decision)).definition
         }
         ProcessingStep next = createProcessingStep(previous.process, nextJob, previous.output, previous)
         lock.lock()
@@ -389,7 +390,7 @@ class SchedulerService {
         job.end()
         removeRunningJob(job)
         ProcessingStep step = ProcessingStep.get(job.processingStep.id)
-        if (ProcessingStepUpdate.findByProcessingStepAndState(step, ExecutionState.FAILURE)) {
+        if (ProcessingStepUpdate.findAllByProcessingStepAndState(step, ExecutionState.FAILURE)) {
             job.log.info "SchedulerService.doEndCheck was called for this job, but the job has already failed. A FINISHED ProcessingStepUpdate will NOT " +
                     "be created."
         } else {
@@ -454,7 +455,8 @@ class SchedulerService {
                     throw new RuntimeException("Job ${job} has endState ${endState}, but only SUCCESS and FAILURE are allowed.")
                 }
                 ProcessingStepUpdate endStateUpdate
-                if (endState == ExecutionState.FAILURE || !ProcessingStepUpdate.findByProcessingStepAndState(step, ExecutionState.FAILURE)) {
+                if (endState == ExecutionState.FAILURE ||
+                        !CollectionUtils.atMostOneElement(ProcessingStepUpdate.findAllByProcessingStepAndState(step, ExecutionState.FAILURE))) {
                     processService.setOperatorIsAwareOfFailure(step.process, false)
                     endStateUpdate = new ProcessingStepUpdate(
                             date: new Date(),

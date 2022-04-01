@@ -143,7 +143,7 @@ class ProjectService {
 
     @PostAuthorize("hasRole('ROLE_OPERATOR') or returnObject == null or hasPermission(returnObject, 'OTP_READ_ACCESS')")
     Project getProjectByName(String name) {
-        return Project.findByName(name)
+        return CollectionUtils.atMostOneElement(Project.findAllByName(name))
     }
 
     @PostFilter("hasRole('ROLE_OPERATOR') or hasPermission(filterObject, 'OTP_READ_ACCESS')")
@@ -178,7 +178,7 @@ class ProjectService {
                 qcThresholdHandling           : projectParams.qcThresholdHandling,
                 projectType                   : projectParams.projectType,
                 storageUntil                  : projectParams.storageUntil,
-                projectGroup                  : ProjectGroup.findByName(projectParams.projectGroup),
+                projectGroup                  : CollectionUtils.atMostOneElement(ProjectGroup.findAllByName(projectParams.projectGroup)),
                 dirAnalysis                   : projectParams.dirAnalysis,
                 processingPriority            : projectParams.processingPriority,
                 forceCopyFiles                : projectParams.forceCopyFiles,
@@ -264,7 +264,7 @@ class ProjectService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void saveAdditionalFieldValuesForProject(String fieldValue, String fieldId, Project project) {
-        AbstractFieldDefinition afd = AbstractFieldDefinition.findById(fieldId as Long)
+        AbstractFieldDefinition afd = AbstractFieldDefinition.get(fieldId as Long)
         if (afd.projectFieldType == ProjectFieldType.TEXT) {
             TextFieldValue tfv = new TextFieldValue()
             tfv.definition = afd
@@ -576,7 +576,7 @@ class ProjectService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     Errors createOrUpdateRunYapsaConfig(Project project, SeqType seqType, String programVersion) {
-        Pipeline pipeline = Pipeline.findByName(Pipeline.Name.RUN_YAPSA)
+        Pipeline pipeline = CollectionUtils.atMostOneElement(Pipeline.findAllByName(Pipeline.Name.RUN_YAPSA))
         ConfigPerProjectAndSeqType latest = getLatestRunYapsaConfig(project, seqType)
 
         if (latest?.programVersion != programVersion) {
@@ -609,7 +609,7 @@ class ProjectService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'OTP_READ_ACCESS')")
     Errors createOrUpdateCellRangerConfig(Project project, SeqType seqType, String programVersion, ReferenceGenomeIndex referenceGenomeIndex) {
-        Pipeline pipeline = Pipeline.findByName(Pipeline.Name.CELL_RANGER)
+        Pipeline pipeline = CollectionUtils.atMostOneElement(Pipeline.findAllByName(Pipeline.Name.CELL_RANGER))
         ConfigPerProjectAndSeqType latest = getLatestCellRangerConfig(project, seqType)
 
         workflowConfigService.makeObsolete(latest)
@@ -630,12 +630,12 @@ class ProjectService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'OTP_READ_ACCESS')")
     RunYapsaConfig getLatestRunYapsaConfig(Project project, SeqType seqType) {
-        return RunYapsaConfig.findByProjectAndSeqTypeAndObsoleteDateIsNull(project, seqType)
+        return CollectionUtils.atMostOneElement(RunYapsaConfig.findAllByProjectAndSeqTypeAndObsoleteDateIsNull(project, seqType))
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'OTP_READ_ACCESS')")
     CellRangerConfig getLatestCellRangerConfig(Project project, SeqType seqType) {
-        return CellRangerConfig.findByProjectAndSeqTypeAndObsoleteDateIsNull(project, seqType)
+        return CollectionUtils.atMostOneElement(CellRangerConfig.findAllByProjectAndSeqTypeAndObsoleteDateIsNull(project, seqType))
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
@@ -1033,8 +1033,8 @@ echo 'OK'
     }
 
     private void deprecateReferenceGenomeByProjectAndSeqTypeAndNoSampleType(Project project, SeqType seqType) {
-        ReferenceGenomeProjectSeqType referenceGenomeProjectSeqType =
-                ReferenceGenomeProjectSeqType.findByProjectAndSeqTypeAndSampleTypeIsNullAndDeprecatedDateIsNull(project, seqType)
+        ReferenceGenomeProjectSeqType referenceGenomeProjectSeqType = CollectionUtils.atMostOneElement(
+                ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndSampleTypeIsNullAndDeprecatedDateIsNull(project, seqType))
         referenceGenomeProjectSeqType?.deprecatedDate = new Date()
         referenceGenomeProjectSeqType?.save(flush: true)
     }

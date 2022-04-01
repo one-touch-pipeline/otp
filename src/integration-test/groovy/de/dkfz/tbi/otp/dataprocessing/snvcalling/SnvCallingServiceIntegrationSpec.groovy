@@ -36,6 +36,7 @@ import de.dkfz.tbi.otp.domainFactory.DomainFactoryProcessingPriority
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
 import java.nio.file.Files
@@ -242,7 +243,7 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
         setupData()
 
         AbstractMergedBamFile problematicBamFile = (number == 1) ? bamFile1 : bamFile2
-        ProcessingThresholds thresholds = ProcessingThresholds.findBySeqType(problematicBamFile.seqType)
+        ProcessingThresholds thresholds = CollectionUtils.atMostOneElement(ProcessingThresholds.findAllBySampleType(problematicBamFile.sampleType))
         thresholds.numberOfLanes = 5
         assert thresholds.save(flush: true)
 
@@ -257,7 +258,7 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
         given:
         setupData()
 
-        ProcessingThresholds.findByProject(samplePair1.project).each {
+        ProcessingThresholds.findAllByProject(samplePair1.project).each {
             it.numberOfLanes = 5
             it.save(flush: true)
         }
@@ -286,7 +287,7 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
 
         Project otherProject = DomainFactory.createProject()
         AbstractMergedBamFile problematicBamFile = (number == 1) ? bamFile1 : bamFile2
-        ProcessingThresholds thresholds = ProcessingThresholds.findBySeqType(problematicBamFile.seqType)
+        ProcessingThresholds thresholds = CollectionUtils.atMostOneElement(ProcessingThresholds.findAllBySampleType(problematicBamFile.sampleType))
         thresholds.project = otherProject
         assert thresholds.save(flush: true)
 
@@ -303,7 +304,7 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
         setupData()
 
         AbstractMergedBamFile bamFile = (number == 1) ? bamFile1 : bamFile2
-        ProcessingThresholds thresholds = ProcessingThresholds.findBySeqType(bamFile.seqType)
+        ProcessingThresholds thresholds = CollectionUtils.atMostOneElement(ProcessingThresholds.findAllBySampleType(bamFile.sampleType))
         thresholds[property] = null
         if (property == "coverage") {
             thresholds.numberOfLanes = 1

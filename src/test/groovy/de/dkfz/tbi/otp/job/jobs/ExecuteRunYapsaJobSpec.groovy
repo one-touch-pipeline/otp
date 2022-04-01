@@ -41,6 +41,7 @@ import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -111,8 +112,8 @@ class ExecuteRunYapsaJobSpec extends Specification implements DataTest {
         RunYapsaInstance instance = DomainFactory.createRunYapsaInstanceWithRoddyBamFiles()
 
         DomainFactory.createRoddySnvCallingInstance(instance.samplePair, [
-                sampleType1BamFile: RoddyBamFile.findByWorkPackage(instance.samplePair.mergingWorkPackage1),
-                sampleType2BamFile: RoddyBamFile.findByWorkPackage(instance.samplePair.mergingWorkPackage2),
+                sampleType1BamFile: CollectionUtils.atMostOneElement(RoddyBamFile.findAllByWorkPackage(instance.samplePair.mergingWorkPackage1)),
+                sampleType2BamFile: CollectionUtils.atMostOneElement(RoddyBamFile.findAllByWorkPackage(instance.samplePair.mergingWorkPackage2)),
         ])
 
         return instance

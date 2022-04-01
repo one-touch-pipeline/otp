@@ -93,7 +93,7 @@ class DataTransferAgreementServiceIntegrationSpec extends Specification implemen
 
         then:
         noExceptionThrown()
-        DataTransferAgreement.findAllById(dataTransferAgreement.id)[0] == dataTransferAgreement
+        DataTransferAgreement.get(dataTransferAgreement.id) == dataTransferAgreement
         dataTransferAgreement.dataTransferAgreementDocuments.size() == 1
     }
 
@@ -130,7 +130,7 @@ class DataTransferAgreementServiceIntegrationSpec extends Specification implemen
         then:
         noExceptionThrown()
         dta.dataTransferAgreementDocuments.size() > 0
-        DataTransferAgreement.findAllById(dta.id)[0].dataTransferAgreementDocuments[0].fileName.contains(fileName)
+        DataTransferAgreement.get(dta.id).dataTransferAgreementDocuments[0].fileName.contains(fileName)
     }
 
     void "addFileToDta, should fail when file is empty"() {
@@ -274,8 +274,8 @@ class DataTransferAgreementServiceIntegrationSpec extends Specification implemen
 
         then:
         noExceptionThrown()
-        DataTransferAgreement.findAllById(dta.id).isEmpty()
-        DataTransferAgreementDocument.findAllById(dta.dataTransferAgreementDocuments[0].id).isEmpty()
+        !DataTransferAgreement.get(dta.id)
+        !DataTransferAgreementDocument.get(dta.dataTransferAgreementDocuments[0].id)
         DataTransfer.findAllByDataTransferAgreement(dta).isEmpty()
     }
 

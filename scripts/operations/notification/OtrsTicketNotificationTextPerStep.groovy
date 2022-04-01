@@ -24,6 +24,7 @@ import de.dkfz.tbi.otp.notification.CreateNotificationTextService
 import de.dkfz.tbi.otp.tracking.NotificationCreator
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.tracking.ProcessingStatus
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
@@ -55,7 +56,7 @@ CreateNotificationTextService notificationTextService = ctx.createNotificationTe
 
 OtrsTicket otrsTicket = exactlyOneElement(OtrsTicket.findAllByTicketNumber(ticketNumber))
 
-Project project = Project.findByName(projectName)
+Project project = CollectionUtils.atMostOneElement(Project.findAllByName(projectName))
 
 println "Emails:"
 println ctx.userProjectRoleService.getEmailsForNotification(project)

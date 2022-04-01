@@ -32,6 +32,7 @@ import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.*
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 import static javax.servlet.http.HttpServletResponse.*
 
@@ -87,7 +88,7 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         then:
         controller.response.status == SC_OK
         controller.response.json.success
-        LibraryPreparationKit.findByName('LibraryPreparationKit')
+        CollectionUtils.atMostOneElement(LibraryPreparationKit.findAllByName('LibraryPreparationKit'))
     }
 
     @Unroll
@@ -168,7 +169,7 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         then:
         controller.response.status == SC_OK
         controller.response.json.success
-        AntibodyTarget.findByName('AntibodyTarget')
+        CollectionUtils.atMostOneElement(AntibodyTarget.findAllByName('AntibodyTarget'))
     }
 
     @Unroll
@@ -204,7 +205,7 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         then:
         controller.response.status == SC_OK
         controller.response.json.success
-        SeqCenter.findByNameAndDirName('SEQCENTER', 'seqcenter')
+        CollectionUtils.atMostOneElement(SeqCenter.findAllByNameAndDirName('SEQCENTER', 'seqcenter'))
     }
 
     @Unroll
@@ -252,11 +253,11 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         then:
         controller.response.status == SC_OK
         controller.response.json.success
-        SeqPlatform.findByNameAndSeqPlatformModelLabelAndSequencingKitLabel(
+        CollectionUtils.atMostOneElement(SeqPlatform.findAllByNameAndSeqPlatformModelLabelAndSequencingKitLabel(
                 platform,
                 controller.params.model ? seqPlatformModelLabel : null,
                 controller.params.kit ? sequencingKitLabel : null,
-        )
+        ))
 
         where:
         platform      | model                   | kit
@@ -290,11 +291,11 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         then:
         controller.response.status == SC_OK
         controller.response.json.success
-        SeqPlatform.findByNameAndSeqPlatformModelLabelAndSequencingKitLabel(
+        CollectionUtils.atMostOneElement(SeqPlatform.findAllByNameAndSeqPlatformModelLabelAndSequencingKitLabel(
                 platform,
-                controller.params.model ? SeqPlatformModelLabel.findByName(model) : null,
-                controller.params.kit ? SequencingKitLabel.findByName(kit) : null,
-        )
+                controller.params.model ? CollectionUtils.atMostOneElement(SeqPlatformModelLabel.findAllByName(model)) : null,
+                controller.params.kit ? CollectionUtils.atMostOneElement(SequencingKitLabel.findAllByName(kit)) : null,
+        ))
 
         where:
         platform       | model                    | kit
@@ -441,9 +442,9 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         then:
         controller.response.status == SC_MOVED_TEMPORARILY
         controller.response.redirectedUrl == "/metaDataFields/seqTypes"
-        !single || SeqType.findByNameAndDirNameAndLibraryLayoutAndSingleCell('SEQTYPE', 'seqtype', SequencingReadType.SINGLE, singleCell)
-        !paired || SeqType.findByNameAndDirNameAndLibraryLayoutAndSingleCell('SEQTYPE', 'seqtype', SequencingReadType.PAIRED, singleCell)
-        !mate_pair || SeqType.findByNameAndDirNameAndLibraryLayoutAndSingleCell('SEQTYPE', 'seqtype', SequencingReadType.MATE_PAIR, singleCell)
+        !single || CollectionUtils.atMostOneElement(SeqType.findAllByNameAndDirNameAndLibraryLayoutAndSingleCell('SEQTYPE', 'seqtype', SequencingReadType.SINGLE, singleCell))
+        !paired || CollectionUtils.atMostOneElement(SeqType.findAllByNameAndDirNameAndLibraryLayoutAndSingleCell('SEQTYPE', 'seqtype', SequencingReadType.PAIRED, singleCell))
+        !mate_pair || CollectionUtils.atMostOneElement(SeqType.findAllByNameAndDirNameAndLibraryLayoutAndSingleCell('SEQTYPE', 'seqtype', SequencingReadType.MATE_PAIR, singleCell))
 
         where:
         single | paired | mate_pair | singleCell
@@ -562,9 +563,9 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         then:
         controller.response.status == SC_OK
         controller.response.json.success
-        !single || SeqType.findByNameAndLibraryLayoutAndSingleCell(name, SequencingReadType.SINGLE, singleCell)
-        !paired || SeqType.findByNameAndLibraryLayoutAndSingleCell(name, SequencingReadType.PAIRED, singleCell)
-        !mate_pair || SeqType.findByNameAndLibraryLayoutAndSingleCell(name, SequencingReadType.MATE_PAIR, singleCell)
+        !single || CollectionUtils.atMostOneElement(SeqType.findAllByNameAndLibraryLayoutAndSingleCell(name, SequencingReadType.SINGLE, singleCell))
+        !paired || CollectionUtils.atMostOneElement(SeqType.findAllByNameAndLibraryLayoutAndSingleCell(name, SequencingReadType.PAIRED, singleCell))
+        !mate_pair || CollectionUtils.atMostOneElement(SeqType.findAllByNameAndLibraryLayoutAndSingleCell(name, SequencingReadType.MATE_PAIR, singleCell))
 
         where:
         name       | single | paired | mate_pair | singleCell

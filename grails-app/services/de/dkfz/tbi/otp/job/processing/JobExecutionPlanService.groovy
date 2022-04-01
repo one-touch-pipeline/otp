@@ -25,6 +25,7 @@ import grails.gorm.transactions.Transactional
 import org.springframework.security.access.prepost.*
 
 import de.dkfz.tbi.otp.job.plan.*
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 @Transactional
 class JobExecutionPlanService {
@@ -200,7 +201,7 @@ class JobExecutionPlanService {
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     boolean isProcessRunning(JobExecutionPlan plan) {
         final List<JobExecutionPlan> plans = withParents(plan)
-        final Process process = plans ? Process.findByFinishedAndJobExecutionPlanInList(false, plans) : null
+        final Process process = plans ? CollectionUtils.atMostOneElement(Process.findAllByFinishedAndJobExecutionPlanInList(false, plans)) : null
         return (process != null)
     }
 

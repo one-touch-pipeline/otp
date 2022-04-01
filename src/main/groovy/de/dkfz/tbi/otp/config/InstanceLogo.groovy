@@ -31,7 +31,7 @@ enum InstanceLogo {
 
     final String fileName
 
-    static InstanceLogo findByName(String name) {
+    static InstanceLogo getByName(String name) {
         return values().find {
             it.name() == name
         }

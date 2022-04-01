@@ -86,7 +86,7 @@ class AnalysisDeletionService {
             if (!AbstractSnvCallingInstance.findAllBySamplePair(samplePair)) {
                 directoriesToDelete << snvCallingService.getSamplePairPath(samplePair)
             }
-            if (!IndelCallingInstance.findBySamplePair(samplePair)) {
+            if (!IndelCallingInstance.findAllBySamplePair(samplePair)) {
                 directoriesToDelete << indelCallingService.getSamplePairPath(samplePair)
             }
             if (!AceseqInstance.findAllBySamplePair(samplePair)) {

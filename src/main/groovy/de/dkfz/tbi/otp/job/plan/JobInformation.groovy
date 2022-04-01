@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.job.plan
 import grails.util.Holders
 
 import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 /**
  * Class representing a serialized form of a JobDefinition and a
@@ -67,14 +68,15 @@ class JobInformation implements Serializable {
             )
         }
         ParameterType.findAllByJobDefinitionAndParameterUsage(job, ParameterUsage.INPUT).each {
-            ret.inputParameters << new ParameterInformation(type: new ParameterTypeInformation(it), mapping: ParameterMapping.findByJobAndTo(job, it)?.from?.id)
+            ret.inputParameters << new ParameterInformation(type: new ParameterTypeInformation(it),
+                    mapping: CollectionUtils.atMostOneElement(ParameterMapping.findAllByJobAndTo(job, it))?.from?.id)
         }
         ParameterType.findAllByJobDefinitionAndParameterUsage(job, ParameterUsage.OUTPUT).each {
             ret.outputParameters << new ParameterInformation(type: new ParameterTypeInformation(it))
         }
         ParameterType.findAllByJobDefinitionAndParameterUsage(job, ParameterUsage.PASSTHROUGH).each {
             ret.passthroughParameters << new ParameterInformation(
-                    type: new ParameterTypeInformation(it), mapping: ParameterMapping.findByJobAndTo(job, it)?.from?.id
+                    type: new ParameterTypeInformation(it), mapping: CollectionUtils.atMostOneElement(ParameterMapping.findAllByJobAndTo(job, it))?.from?.id
             )
         }
         return ret

@@ -25,6 +25,7 @@ import grails.gorm.transactions.Transactional
 
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 @Transactional
 class ProjectGroupService {
@@ -37,6 +38,6 @@ class ProjectGroupService {
     }
 
     ProjectGroup projectGroupByName(String projectGroupName) {
-        return ProjectGroup.findByName(projectGroupName)
+        return CollectionUtils.atMostOneElement(ProjectGroup.findAllByName(projectGroupName))
     }
 }

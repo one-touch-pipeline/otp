@@ -90,7 +90,7 @@ List<SeqTrack> seqTrackPerMultiImport = multiColumnInput.split('\n')*.trim().fin
     SampleType sampleType = CollectionUtils.exactlyOneElement(SampleType.findAllByNameIlike(values[1]),
             "Could not find one sampleType with name ${values[1]}")
 
-    SequencingReadType libraryLayout = SequencingReadType.findByName(values[3])
+    SequencingReadType libraryLayout = SequencingReadType.getByName(values[3])
     assert libraryLayout: "${values[3]} is no valid sequencingReadType"
     boolean singleCell = Boolean.parseBoolean(values[4])
 

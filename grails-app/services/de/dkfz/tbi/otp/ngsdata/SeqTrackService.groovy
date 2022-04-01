@@ -276,8 +276,8 @@ class SeqTrackService {
         boolean seqTypeAllowsLinking = seqTrack.seqType.seqTypeAllowsLinking()
         boolean hasIndexFiles = hasIndexFiles(seqTrack)
         boolean adapterTrimming = RoddyWorkflowConfig.getLatestForIndividual(seqTrack.individual, seqTrack.seqType,
-                Pipeline.findByName(seqTrack.seqType.isRna() ?
-                        Pipeline.Name.RODDY_RNA_ALIGNMENT : Pipeline.Name.PANCAN_ALIGNMENT))?.adapterTrimmingNeeded ?: false
+                CollectionUtils.atMostOneElement(Pipeline.findAllByName(seqTrack.seqType.isRna() ?
+                        Pipeline.Name.RODDY_RNA_ALIGNMENT : Pipeline.Name.PANCAN_ALIGNMENT)))?.adapterTrimmingNeeded ?: false
         boolean link = willBeAligned && importDirAllowsLinking && projectAllowsLinking && seqTypeAllowsLinking && !hasIndexFiles && !adapterTrimming
         seqTrack.log("Fastq files{0} will be ${link ? "linked" : "copied"}, because " +
                 "willBeAligned=${willBeAligned}, importDirAllowsLinking=${importDirAllowsLinking}, projectAllowsLinking=${projectAllowsLinking}, " +

@@ -32,6 +32,7 @@ import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.domainFactory.taxonomy.TaxonomyFactory
 import de.dkfz.tbi.otp.security.UserAndRoles
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 @Rollback
 @Integration
@@ -123,7 +124,7 @@ class SpeciesCommonNameServiceSpec extends Specification implements UserAndRoles
         setupData()
 
         expect:
-        !SpeciesCommonName.findByNameIlike(NAME)
+        !CollectionUtils.atMostOneElement(SpeciesCommonName.findAllByNameIlike(NAME))
 
         SpeciesCommonName speciesCommonName
         when:
@@ -140,7 +141,7 @@ class SpeciesCommonNameServiceSpec extends Specification implements UserAndRoles
         setupData()
 
         expect:
-        !SpeciesCommonName.findByNameIlike(NAME)
+        !CollectionUtils.atMostOneElement(SpeciesCommonName.findAllByNameIlike(NAME))
 
         SpeciesCommonName speciesCommonName
         when:
@@ -157,7 +158,7 @@ class SpeciesCommonNameServiceSpec extends Specification implements UserAndRoles
         setupData()
 
         expect:
-        !SpeciesCommonName.findByNameIlike(NAME)
+        !CollectionUtils.atMostOneElement(SpeciesCommonName.findAllByNameIlike(NAME))
 
         when:
         SpringSecurityUtils.doWithAuth(OPERATOR) {

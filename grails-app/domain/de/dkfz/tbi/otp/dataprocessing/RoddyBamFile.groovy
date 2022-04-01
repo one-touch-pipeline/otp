@@ -196,10 +196,10 @@ class RoddyBamFile extends AbstractMergedBamFile implements Artefact, HasIdentif
     }
 
     QualityAssessmentMergedPass findOrSaveQaPass() {
-        QualityAssessmentMergedPass assessmentMergedPass = QualityAssessmentMergedPass.findWhere(
+        QualityAssessmentMergedPass assessmentMergedPass = CollectionUtils.atMostOneElement(QualityAssessmentMergedPass.findAllWhere(
                 abstractMergedBamFile: this,
                 identifier: 0,
-        )
+        ))
         if (!assessmentMergedPass) {
             assessmentMergedPass = new QualityAssessmentMergedPass(
                     abstractMergedBamFile: this,

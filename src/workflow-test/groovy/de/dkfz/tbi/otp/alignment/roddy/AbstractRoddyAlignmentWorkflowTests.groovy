@@ -366,7 +366,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
     void checkAllAfterSuccessfulExecution_alignBaseBamAndNewLanes() {
         SessionUtils.withNewSession {
             checkDataBaseState_alignBaseBamAndNewLanes()
-            RoddyBamFile latestBamFile = RoddyBamFile.findByIdentifier(1)
+            RoddyBamFile latestBamFile = CollectionUtils.atMostOneElement(RoddyBamFile.findAllByIdentifier(1))
             checkFileSystemState(latestBamFile)
 
             checkQC(latestBamFile)
@@ -374,10 +374,10 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
     }
 
     void checkQC(RoddyBamFile bamFile) {
-        QualityAssessmentMergedPass qaPass = QualityAssessmentMergedPass.findWhere(
+        QualityAssessmentMergedPass qaPass = CollectionUtils.atMostOneElement(QualityAssessmentMergedPass.findAllWhere(
                 abstractMergedBamFile: bamFile,
                 identifier: 0,
-        )
+        ))
         assert qaPass
 
         bamFile.seqTracks.each {
@@ -392,14 +392,14 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
             JSONObject json = JSON.parse(qaFile.text)
             Iterator chromosomes = json.keys()
             chromosomes.each { String chromosome ->
-                assert RoddySingleLaneQa.findByChromosomeAndSeqTrack(chromosome, seqTrack)
+                assert CollectionUtils.atMostOneElement(RoddySingleLaneQa.findAllByChromosomeAndSeqTrack(chromosome, seqTrack))
             }
         }
-        RoddyMergedBamQa mergedQa = RoddyMergedBamQa.findByQualityAssessmentMergedPassAndChromosome(qaPass, RoddyQualityAssessment.ALL)
+        RoddyMergedBamQa mergedQa = CollectionUtils.atMostOneElement(RoddyMergedBamQa.findAllByQualityAssessmentMergedPassAndChromosome(qaPass, RoddyQualityAssessment.ALL))
         assert mergedQa
         JSONObject json = JSON.parse(bamFile.finalMergedQAJsonFile.text)
         json.keys().each { String chromosome ->
-            assert RoddyMergedBamQa.findByChromosomeAndQualityAssessmentMergedPass(chromosome, qaPass)
+            assert CollectionUtils.atMostOneElement(RoddyMergedBamQa.findAllByChromosomeAndQualityAssessmentMergedPass(chromosome, qaPass))
         }
         assert bamFile.coverage == mergedQa.genomeWithoutNCoverageQcBases
         assert bamFile.coverageWithN == abstractBamFileService.calculateCoverageWithN(bamFile)
@@ -417,7 +417,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
     void checkAllAfterRoddyClusterJobsRestartAndSuccessfulExecution_alignBaseBamAndNewLanes() {
         SessionUtils.withNewSession {
             checkDataBaseState_alignBaseBamAndNewLanes()
-            RoddyBamFile latestBamFile = RoddyBamFile.findByIdentifier(1)
+            RoddyBamFile latestBamFile = CollectionUtils.atMostOneElement(RoddyBamFile.findAllByIdentifier(1))
             checkFileSystemState(latestBamFile)
         }
     }
@@ -426,8 +426,8 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
         checkWorkPackageState()
 
         assert RoddyBamFile.findAll().size() == 2
-        RoddyBamFile firstBamFile = RoddyBamFile.findByIdentifier(0)
-        RoddyBamFile latestBamFile = RoddyBamFile.findByIdentifier(1)
+        RoddyBamFile firstBamFile = CollectionUtils.atMostOneElement(RoddyBamFile.findAllByIdentifier(0))
+        RoddyBamFile latestBamFile = CollectionUtils.atMostOneElement(RoddyBamFile.findAllByIdentifier(1))
 
         List<SeqTrack> seqTrackOfFirstBamFile = SeqTrack.findAllByLaneIdInList(["readGroup1"])
 
@@ -455,8 +455,8 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
     }
 
     void checkLatestBamFileState(RoddyBamFile latestBamFile, RoddyBamFile firstbamFile, Map latestBamFileProperties = [:]) {
-        SeqTrack firstSeqTrack = SeqTrack.findByLaneId("readGroup1")
-        SeqTrack secondSeqTrack = SeqTrack.findByLaneId("readGroup2")
+        SeqTrack firstSeqTrack = CollectionUtils.atMostOneElement(SeqTrack.findAllByLaneId("readGroup1"))
+        SeqTrack secondSeqTrack = CollectionUtils.atMostOneElement(SeqTrack.findAllByLaneId("readGroup2"))
         checkBamFileState(latestBamFile, [
                 identifier         : 1,
                 mostResentBamFile  : true,

@@ -289,7 +289,7 @@ class CreateLibraryPreparationKitCommand implements Validateable {
             }
         })
         shortDisplayName(blank: false, validator: { val, obj ->
-            if (LibraryPreparationKit.findByShortDisplayName(val)) {
+            if (LibraryPreparationKit.findAllByShortDisplayName(val)) {
                 return 'default.not.unique.message'
             }
         })
@@ -361,12 +361,12 @@ class CreateSeqCenterCommand implements Validateable {
     String dirName
     static constraints = {
         name(blank: false, validator: { val, obj ->
-            if (SeqCenter.findByName(val)) {
+            if (SeqCenter.findAllByName(val)) {
                 return 'default.not.unique.message'
             }
         })
         dirName(blank: false, validator: { val, obj ->
-            if (SeqCenter.findByDirName(val)) {
+            if (SeqCenter.findAllByDirName(val)) {
                 return 'default.not.unique.message'
             }
         })
@@ -525,7 +525,7 @@ class CreateSeqTypeCommand extends CreateWithLayoutCommand {
             }
         })
         dirName(blank: false, validator: { val, obj ->
-            if (SeqType.findByDirName(val)) {
+            if (SeqType.findAllByDirName(val)) {
                 return 'default.not.unique.message'
             }
         })

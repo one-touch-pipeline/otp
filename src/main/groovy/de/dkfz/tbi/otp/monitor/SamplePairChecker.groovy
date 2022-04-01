@@ -27,6 +27,7 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.QcTrafficLightStatus
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 class SamplePairChecker extends PipelinesChecker<AbstractMergedBamFile> {
 
@@ -108,7 +109,7 @@ class SamplePairChecker extends PipelinesChecker<AbstractMergedBamFile> {
 
         List<SamplePair> samplePairWithoutBamFile = samplePairWithMissingBamFile(allSamplePairs)
         Map diseaseBamFileMissed = samplePairWithoutBamFile.groupBy {
-            AbstractMergedBamFile.findByWorkPackage(it.mergingWorkPackage1) == null
+            CollectionUtils.atMostOneElement(AbstractMergedBamFile.findAllByWorkPackage(it.mergingWorkPackage1)) == null
         }
         output.showList(HEADER_SAMPLE_PAIR_WITHOUT_DISEASE_BAM_FILE, diseaseBamFileMissed[true])
         output.showList(HEADER_SAMPLE_PAIR_WITHOUT_CONTROL_BAM_FILE, diseaseBamFileMissed[false])

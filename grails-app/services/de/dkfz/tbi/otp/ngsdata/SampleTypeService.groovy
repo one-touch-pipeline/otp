@@ -75,7 +75,7 @@ class SampleTypeService {
                     seqTrack.sampleType,
             ]
         }.findAll { Map.Entry<List, List> entry ->
-            SampleTypePerProject stp = SampleTypePerProject.findWhere(project: entry.key[0], sampleType: entry.key[1])
+            SampleTypePerProject stp = atMostOneElement(SampleTypePerProject.findAllWhere(project: entry.key[0], sampleType: entry.key[1]))
             (stp == null || stp.category == SampleTypePerProject.Category.UNDEFINED)
         }.values().flatten()
     }

@@ -30,6 +30,7 @@ import spock.lang.Specification
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.security.UserAndRoles
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 @Rollback
 @Integration
@@ -85,7 +86,7 @@ abstract class AbstractOverallQualityAssessmentMergedServiceIntegrationSpec exte
                 qualityAssessment,
         ]
         List<OverallQualityAssessmentMerged> result
-        addUserWithReadAccessToProject(User.findByUsername(TESTUSER), qualityAssessment.project)
+        addUserWithReadAccessToProject(CollectionUtils.atMostOneElement(User.findAllByUsername(TESTUSER)), qualityAssessment.project)
 
         when:
         SpringSecurityUtils.doWithAuth(TESTUSER) {

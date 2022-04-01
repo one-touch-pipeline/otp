@@ -22,6 +22,7 @@
 
 import de.dkfz.tbi.otp.ngsdata.UserProjectRole
 import de.dkfz.tbi.otp.security.User
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 //************ Username of user  ************//
 String username = ""
@@ -39,7 +40,7 @@ List projectNames = """
 }
 
 User.withTransaction {
-    User user = User.findByUsername(username)
+    User user = CollectionUtils.atMostOneElement(User.findAllByUsername(username))
     List<UserProjectRole> userProjectRoles = []
 
     if (projectNames) {

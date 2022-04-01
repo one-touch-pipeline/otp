@@ -171,7 +171,7 @@ Closure<String> createScript = { String swapLabel ->
         script << "\n\t//swap '${key}' to '${value}'"
         def (Individual oldIndividual, String newIndividualName, SampleType oldSampleType, SampleType newSampleType) = parseSwapMapEntry(key, value)
 
-        Individual newIndividual = Individual.findByPid(newIndividualName)
+        Individual newIndividual = CollectionUtils.atMostOneElement(Individual.findAllByPid(newIndividualName))
 
         Project newProject = newProjectName ? CollectionUtils.exactlyOneElement(Project.findAllByName(newProjectName)) : oldIndividual.project
 
@@ -205,7 +205,7 @@ Closure<String> createScript = { String swapLabel ->
                 )
                 if (seqTypeFilterList.empty) {
                     // if we moved _everything_ out of a patient, delete the leftover empty patient
-                    script << "\n\tIndividual.findByPid('${oldIndividual.pid}').delete(flush: true)\n"
+                    script << "\n\tCollectionUtils.atMostOneElement(Individual.findAllByPid('${oldIndividual.pid}')).delete(flush: true)\n"
                 }
             }
         }
@@ -258,17 +258,17 @@ private Tuple parseSwapMapEntry(String from, String to) {
         newIndividualName = to
     }
 
-    Individual oldIndividual = Individual.findByPid(oldIndividualName)
+    Individual oldIndividual = CollectionUtils.atMostOneElement(Individual.findAllByPid(oldIndividualName))
     assert oldIndividual: "probable error in input: couldn't find Individual \"${oldIndividualName}\" in database"
 
     SampleType oldSampleType
     if (oldSampleTypeName) {
-        oldSampleType = SampleType.findByName(oldSampleTypeName)
+        oldSampleType = CollectionUtils.atMostOneElement(SampleType.findAllByName(oldSampleTypeName))
         assert oldSampleType: "probable error in input: couldn't find old SampleType \"${oldSampleTypeName}\" in database"
     }
     SampleType newSampleType
     if (newSampleTypeName) {
-        newSampleType = SampleType.findByName(newSampleTypeName)
+        newSampleType = CollectionUtils.atMostOneElement(SampleType.findAllByName(newSampleTypeName))
         assert newSampleType: "probable error in input: couldn't find new SampleType \"${newSampleTypeName}\" in database"
     }
 
@@ -447,7 +447,7 @@ class Snippets {
                \tmockPid: '${newIndividualName}',
                \tmockFullName: '${newIndividualName}',
                \ttype: Individual.Type.REAL,
-               \tproject: Project.findByName('${newProjectName}'),
+               \tproject: CollectionUtils.atMostOneElement(Project.findAllByName('${newProjectName}')),
                ).save(flush: true, failOnError: true) : "Error creating new Individual '${newIndividualName}'"
                """.stripIndent()
     }

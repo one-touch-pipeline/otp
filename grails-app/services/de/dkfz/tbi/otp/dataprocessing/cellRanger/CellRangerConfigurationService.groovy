@@ -77,7 +77,7 @@ class CellRangerConfigurationService {
     }
 
     Pipeline getPipeline() {
-        Pipeline.findByName(Pipeline.Name.CELL_RANGER)
+        CollectionUtils.atMostOneElement(Pipeline.findAllByName(Pipeline.Name.CELL_RANGER))
     }
 
     MergingCriteria getMergingCriteria(Project project) {

@@ -25,6 +25,7 @@ import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 class SeqCenterServiceSpec extends Specification implements DataTest, DomainFactoryCore {
 
@@ -52,7 +53,7 @@ class SeqCenterServiceSpec extends Specification implements DataTest, DomainFact
     void "test createSeqCenter"() {
         expect:
         seqCenterService.createSeqCenter(SEQ_CENTER, SEQ_CENTER_DIR) ==
-                SeqCenter.findByNameAndDirName(SEQ_CENTER, SEQ_CENTER_DIR)
+                CollectionUtils.atMostOneElement(SeqCenter.findAllByNameAndDirName(SEQ_CENTER, SEQ_CENTER_DIR))
     }
 
     void "test createSeqCenter, with existing name, should fail"() {

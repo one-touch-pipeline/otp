@@ -78,8 +78,8 @@ class UserServiceIntegrationSpec extends Specification implements UserAndRoles {
         }
 
         then:
-        user == User.findByRealName("newName")
-        !User.findByRealName("testuser name")
+        user == CollectionUtils.atMostOneElement(User.findAllByRealName("newName"))
+        !CollectionUtils.atMostOneElement(User.findAllByRealName("testuser name"))
     }
 
     void "test updateRealName invalid input no name"() {

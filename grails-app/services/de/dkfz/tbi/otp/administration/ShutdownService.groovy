@@ -34,10 +34,8 @@ import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.security.User
-import de.dkfz.tbi.otp.workflowExecution.LogService
-import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
-import de.dkfz.tbi.otp.workflowExecution.WorkflowStepService
-import de.dkfz.tbi.otp.workflowExecution.WorkflowSystemService
+import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.workflowExecution.*
 
 import java.util.concurrent.locks.ReentrantLock
 
@@ -124,7 +122,7 @@ class ShutdownService implements DisposableBean {
         lock.lock()
         try {
             ShutdownInformation.withTransaction {
-                User user = User.findByUsername(springSecurityService.authentication.principal.username)
+                User user = CollectionUtils.atMostOneElement(User.findAllByUsername(springSecurityService.authentication.principal.username))
                 ShutdownInformation info = new ShutdownInformation(initiatedBy: user, initiated: new Date(), reason: reason)
                 info.save(flush: true)
                 schedulerService.suspendScheduler()
@@ -150,7 +148,7 @@ class ShutdownService implements DisposableBean {
                 if (!info) {
                     throw new OtpException('Canceling Shutdown failed since there is no shutdown in progress')
                 }
-                info.canceledBy = User.findByUsername(springSecurityService.authentication.principal.username)
+                info.canceledBy = CollectionUtils.atMostOneElement(User.findAllByUsername(springSecurityService.authentication.principal.username))
                 info.canceled = new Date()
                 info.save(flush: true)
                 schedulerService.resumeScheduler()
@@ -169,7 +167,7 @@ class ShutdownService implements DisposableBean {
      */
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     ShutdownInformation getCurrentPlannedShutdown() {
-        return ShutdownInformation.findBySucceededIsNullAndCanceledIsNull()
+        return CollectionUtils.atMostOneElement(ShutdownInformation.findAllBySucceededIsNullAndCanceledIsNull())
     }
 
     /**

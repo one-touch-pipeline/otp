@@ -30,11 +30,12 @@
 
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 String pid = ''
 assert pid: "Enter the PID of the individual"
 
-Individual individual = Individual.findByPid(pid)
+Individual individual = CollectionUtils.atMostOneElement(Individual.findAllByPid(pid))
 assert individual: "Could not find an Individual for PID ${pid}"
 
 List<String> output = []

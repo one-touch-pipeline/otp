@@ -23,6 +23,7 @@
 import de.dkfz.tbi.otp.ngsdata.BedFile
 import de.dkfz.tbi.otp.ngsdata.BedFileService
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 /**
  * Script to show for selected bam files the bed files together with the library preparation kit.
@@ -50,7 +51,7 @@ List<String> refGenomeNames = [
 assert refGenomeNames: 'At least one reference genome must be specified'
 
 List<ReferenceGenome> referenceGenomes = refGenomeNames.collect {
-    ReferenceGenome referenceGenome = ReferenceGenome.findByName(it)
+    ReferenceGenome referenceGenome = CollectionUtils.atMostOneElement(ReferenceGenome.findAllByName(it))
     assert referenceGenome: "The ReferenceGenome '${it}' could not be found in OTP"
     return referenceGenome
 }

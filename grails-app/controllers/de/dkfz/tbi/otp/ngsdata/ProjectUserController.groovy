@@ -161,7 +161,7 @@ class ProjectUserController implements CheckAndCall {
         checkErrorAndCallMethod(cmd, {
             userProjectRoleService.addProjectRolesToProjectUserRole(cmd.userProjectRole, ProjectRole.findAllByNameInList(cmd.newRoles))
         }) {
-            UserProjectRole currentUserProjectRole = CollectionUtils.exactlyOneElement(UserProjectRole.findAllById(cmd.userProjectRole.id))
+            UserProjectRole currentUserProjectRole = UserProjectRole.get(cmd.userProjectRole.id)
             List<Project> projectsOfUnixGroup = Project.findAllByUnixGroup(currentUserProjectRole.project.unixGroup)
             List<String> currentProjectRoles = (currentUserProjectRole.projectRoles)*.name.sort()
             List<String> newProjectRolesNodes = []

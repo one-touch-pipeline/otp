@@ -162,7 +162,7 @@ class DeletionService {
     @SuppressWarnings('JavaIoPackageAccess')
     List<SeqTrack> deleteProcessingFilesOfProject(String projectName, Path scriptOutputDirectory, boolean everythingVerified = false,
                                                   boolean ignoreWithdrawn = false, List<SeqTrack> explicitSeqTracks = []) throws FileNotFoundException {
-        Project project = Project.findByName(projectName)
+        Project project = CollectionUtils.atMostOneElement(Project.findAllByName(projectName))
         assert project: "Project does not exist"
 
         Set<String> dirsToDelete = [] as Set
@@ -256,7 +256,8 @@ class DeletionService {
                 dirsToDelete.add(processingDir.path)
             }
 
-            AbstractBamFile latestBamFile = MergingWorkPackage.findBySampleAndSeqType(seqTrack.sample, seqTrack.seqType)?.bamFileInProjectFolder
+            AbstractBamFile latestBamFile = CollectionUtils.atMostOneElement(
+                    MergingWorkPackage.findAllBySampleAndSeqType(seqTrack.sample, seqTrack.seqType))?.bamFileInProjectFolder
             if (latestBamFile) {
                 Path mergingDir = abstractMergedBamFileService.getBaseDirectory(latestBamFile)
                 if (Files.exists(mergingDir)) {
@@ -340,7 +341,8 @@ class DeletionService {
             }
             alignmentPass.delete(flush: true)
             // The MergingWorkPackage can only be deleted if all corresponding MergingSets and AlignmentPasses are already removed
-            if (!MergingSet.findByMergingWorkPackage(mergingWorkPackage) && !AlignmentPass.findByWorkPackage(mergingWorkPackage)) {
+            if (!MergingSet.findAllByMergingWorkPackage(mergingWorkPackage) &&
+                    !AlignmentPass.findAllByWorkPackage(mergingWorkPackage)) {
                 dirsToDelete << analysisDeletionService.deleteSamplePairsWithoutAnalysisInstances(
                         SamplePair.findAllByMergingWorkPackage1OrMergingWorkPackage2(mergingWorkPackage, mergingWorkPackage))
                 mergingWorkPackage.delete(flush: true)
@@ -379,7 +381,7 @@ class DeletionService {
             bamFile.baseBamFile = null
             bamFile.delete(flush: true)
             // The MerginWorkPackage can only be deleted if all corresponding RoddyBamFiles are removed already
-            if (!RoddyBamFile.findByWorkPackage(mergingWorkPackage)) {
+            if (!RoddyBamFile.findAllByWorkPackage(mergingWorkPackage)) {
                 mergingWorkPackage.delete(flush: true)
             }
         }
@@ -401,7 +403,7 @@ class DeletionService {
             deleteProcessParameters(ProcessParameter.findAllByValueAndClassName(bamFile.id.toString(), bamFile.class.name))
             dirsToDelete << bamFile.workDirectory
             bamFile.delete(flush: true)
-            if (!SingleCellBamFile.findByWorkPackage(crmwp)) {
+            if (!SingleCellBamFile.findAllByWorkPackage(crmwp)) {
                 crmwp.delete(flush: true)
             }
         }
@@ -670,12 +672,13 @@ class DeletionService {
 
             mergingSets.each { MergingSet mergingSet ->
                 // The MergingSet can only be deleted if all corresponding AbstractBamFiles are removed already
-                if (!MergingSetAssignment.findByMergingSet(mergingSet)) {
+                if (!MergingSetAssignment.findAllByMergingSet(mergingSet)) {
                     mergingSet.delete(flush: true)
                 }
             }
             // The MerginWorkPackage can only be deleted if all corresponding MergingSets and AlignmentPasses are removed already
-            if (!MergingSet.findByMergingWorkPackage(mergingWorkPackage) && !AlignmentPass.findByWorkPackage(mergingWorkPackage)) {
+            if (!MergingSet.findAllByMergingWorkPackage(mergingWorkPackage) &&
+                    !AlignmentPass.findAllByWorkPackage(mergingWorkPackage)) {
                 mergingWorkPackage.delete(flush: true)
             }
         }

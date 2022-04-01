@@ -30,7 +30,7 @@ class Realm implements Entity, Serializable {
         LSF,
         PBS,
 
-        static Realm.JobScheduler findByName(String name) {
+        static Realm.JobScheduler getByName(String name) {
             return values().find {
                 it.name() == name
             }

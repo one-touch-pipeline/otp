@@ -36,8 +36,7 @@ import de.dkfz.tbi.otp.job.restarting.RestartCheckerService
 import de.dkfz.tbi.otp.job.scheduler.*
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.security.UserAndRoles
-import de.dkfz.tbi.otp.utils.HelperUtils
-import de.dkfz.tbi.otp.utils.SessionUtils
+import de.dkfz.tbi.otp.utils.*
 
 import java.util.concurrent.Semaphore
 import java.util.concurrent.TimeUnit
@@ -229,7 +228,7 @@ class AbstractMultiJobTests implements UserAndRoles {
             }
 
             //first cluster job of phase 1 finished
-            ClusterJob clusterJob = ClusterJob.findByClusterJobId(CLUSTER_JOB_2_ID)
+            ClusterJob clusterJob = CollectionUtils.atMostOneElement(ClusterJob.findAllByClusterJobId(CLUSTER_JOB_2_ID))
             clusterJob.checkStatus = ClusterJob.CheckStatus.FINISHED
             clusterJob.save(flush: true)
 
@@ -254,7 +253,7 @@ class AbstractMultiJobTests implements UserAndRoles {
             }
 
             //second cluster job of phase 1 finished
-            clusterJob = ClusterJob.findByClusterJobId(CLUSTER_JOB_1_ID)
+            clusterJob = CollectionUtils.atMostOneElement(ClusterJob.findAllByClusterJobId(CLUSTER_JOB_1_ID))
             clusterJob.checkStatus = ClusterJob.CheckStatus.FINISHED
             clusterJob.save(flush: true)
 
@@ -300,7 +299,7 @@ class AbstractMultiJobTests implements UserAndRoles {
             }
 
             //cluster job of phase 2 finished
-            clusterJob = ClusterJob.findByClusterJobId(CLUSTER_JOB_3_ID)
+            clusterJob = CollectionUtils.atMostOneElement(ClusterJob.findAllByClusterJobId(CLUSTER_JOB_3_ID))
             clusterJob.checkStatus = ClusterJob.CheckStatus.FINISHED
             clusterJob.save(flush: true)
 
@@ -383,7 +382,7 @@ class AbstractMultiJobTests implements UserAndRoles {
             assert step.latestProcessingStepUpdate.state == ExecutionState.STARTED
 
             //first cluster job of phase 1 finished
-            ClusterJob clusterJob = ClusterJob.findByClusterJobId(CLUSTER_JOB_1_ID)
+            ClusterJob clusterJob = CollectionUtils.atMostOneElement(ClusterJob.findAllByClusterJobId(CLUSTER_JOB_1_ID))
             clusterJob.checkStatus = ClusterJob.CheckStatus.FINISHED
             clusterJob.save(flush: true)
 
@@ -393,7 +392,7 @@ class AbstractMultiJobTests implements UserAndRoles {
             assert step.latestProcessingStepUpdate.state == ExecutionState.STARTED
 
             //second cluster job of phase 1 finished
-            clusterJob = ClusterJob.findByClusterJobId(CLUSTER_JOB_2_ID)
+            clusterJob = CollectionUtils.atMostOneElement(ClusterJob.findAllByClusterJobId(CLUSTER_JOB_2_ID))
             clusterJob.checkStatus = ClusterJob.CheckStatus.FINISHED
             clusterJob.save(flush: true)
 

@@ -124,7 +124,7 @@ enum OtpProperty {
         this.defaultValue = defaultValue
     }
 
-    static OtpProperty findByKey(String key) {
+    static OtpProperty getByKey(String key) {
         return values().find {
             it.key == key
         }

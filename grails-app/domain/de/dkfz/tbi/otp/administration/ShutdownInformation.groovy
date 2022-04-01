@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.administration
 
 import de.dkfz.tbi.otp.security.User
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.Entity
 
 /**
@@ -74,7 +75,8 @@ class ShutdownInformation implements Entity {
                 // initiated has to be before succeeded date
                 return false
             }
-            return !(info.succeeded == null && info.canceled == null && ShutdownInformation.findBySucceededIsNullAndCanceledIsNull() != info)
+            return !(info.succeeded == null && info.canceled == null &&
+                    CollectionUtils.atMostOneElement(ShutdownInformation.findAllBySucceededIsNullAndCanceledIsNull()) != info)
         })
         canceledBy(nullable: true, validator: { User user, ShutdownInformation info ->
             if (!user) {

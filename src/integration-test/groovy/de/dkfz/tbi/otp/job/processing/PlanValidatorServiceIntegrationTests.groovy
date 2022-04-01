@@ -26,6 +26,7 @@ import grails.transaction.Rollback
 import org.junit.Test
 
 import de.dkfz.tbi.otp.job.plan.*
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 import static de.dkfz.tbi.otp.utils.JobExecutionPlanDSL.plan
 import static org.junit.Assert.*
@@ -95,7 +96,8 @@ class PlanValidatorServiceIntegrationTests {
         JobExecutionPlan jep = JobExecutionPlan.list().last()
         List<String> errors = planValidatorService.validate(jep)
         assertFalse(errors.isEmpty())
-        assertEquals(PlanValidatorService.JOB_BEAN_MISSING + "${JobDefinition.findByNameAndPlan('testJob', jep).id}, thisBeanDoesNotExist12345", errors[0])
+        assertEquals(PlanValidatorService.JOB_BEAN_MISSING +
+                "${CollectionUtils.atMostOneElement(JobDefinition.findAllByNameAndPlan('testJob', jep)).id}, thisBeanDoesNotExist12345", errors[0])
         // creating a second Job which exist should not change anything
         plan("test2") {
             start("test", "testStartJob")
@@ -105,7 +107,8 @@ class PlanValidatorServiceIntegrationTests {
         jep = JobExecutionPlan.list().last()
         errors = planValidatorService.validate(jep)
         assertFalse(errors.isEmpty())
-        assertEquals(PlanValidatorService.JOB_BEAN_MISSING + "${JobDefinition.findByNameAndPlan('testJob', jep).id}, thisBeanDoesNotExist12345", errors[0])
+        assertEquals(PlanValidatorService.JOB_BEAN_MISSING +
+                "${CollectionUtils.atMostOneElement(JobDefinition.findAllByNameAndPlan('testJob', jep)).id}, thisBeanDoesNotExist12345", errors[0])
         plan("test3") {
             start("test", "testStartJob")
             job("testJob", "thisBeanDoesNotExist12345")
@@ -116,8 +119,10 @@ class PlanValidatorServiceIntegrationTests {
         jep = JobExecutionPlan.list().last()
         errors = planValidatorService.validate(jep)
         assertFalse(errors.isEmpty())
-        assertEquals(PlanValidatorService.JOB_BEAN_MISSING + "${JobDefinition.findByNameAndPlan('testJob', jep)?.id}, thisBeanDoesNotExist12345", errors[0])
-        assertEquals(PlanValidatorService.JOB_BEAN_MISSING + "${JobDefinition.findByNameAndPlan('testJob3', jep)?.id}, thisBeanDoesNotExist12345", errors[1])
+        assertEquals(PlanValidatorService.JOB_BEAN_MISSING +
+                "${CollectionUtils.atMostOneElement(JobDefinition.findAllByNameAndPlan('testJob', jep))?.id}, thisBeanDoesNotExist12345", errors[0])
+        assertEquals(PlanValidatorService.JOB_BEAN_MISSING +
+                "${CollectionUtils.atMostOneElement(JobDefinition.findAllByNameAndPlan('testJob3', jep))?.id}, thisBeanDoesNotExist12345", errors[1])
     }
 
     @Test
@@ -132,8 +137,10 @@ class PlanValidatorServiceIntegrationTests {
         JobExecutionPlan jep = JobExecutionPlan.list().last()
         List<String> errors = planValidatorService.validate(jep)
         assertFalse(errors.isEmpty())
-        assertEquals(PlanValidatorService.JOB_BEAN_NOT_IMPLEMENTING_JOB + "${JobDefinition.findByNameAndPlan('testJob', jep).id}, planValidatorService", errors[0])
-        assertEquals(PlanValidatorService.JOB_BEAN_NOT_IMPLEMENTING_JOB + "${JobDefinition.findByNameAndPlan('testJob3', jep).id}, testStartJob", errors[1])
+        assertEquals(PlanValidatorService.JOB_BEAN_NOT_IMPLEMENTING_JOB +
+                "${CollectionUtils.atMostOneElement(JobDefinition.findAllByNameAndPlan('testJob', jep)).id}, planValidatorService", errors[0])
+        assertEquals(PlanValidatorService.JOB_BEAN_NOT_IMPLEMENTING_JOB +
+                "${CollectionUtils.atMostOneElement(JobDefinition.findAllByNameAndPlan('testJob3', jep)).id}, testStartJob", errors[1])
     }
 
     @Test
@@ -168,8 +175,8 @@ class PlanValidatorServiceIntegrationTests {
             job("testJob2", "testJob")
         }
         JobExecutionPlan jep = JobExecutionPlan.list().last()
-        JobDefinition jobDefinition = JobDefinition.findByNameAndPlan('testJob', jep)
-        JobDefinition jobDefinition2 = JobDefinition.findByNameAndPlan('testJob2', jep)
+        JobDefinition jobDefinition = CollectionUtils.atMostOneElement(JobDefinition.findAllByNameAndPlan('testJob', jep))
+        JobDefinition jobDefinition2 = CollectionUtils.atMostOneElement(JobDefinition.findAllByNameAndPlan('testJob2', jep))
         jobDefinition2.next = jobDefinition
         assertNotNull(jobDefinition2.save(flush: true))
         List<String> errors = planValidatorService.validate(jep)
@@ -185,7 +192,7 @@ class PlanValidatorServiceIntegrationTests {
             job("testJob2", "testJob")
         }
         JobExecutionPlan jep = JobExecutionPlan.list().last()
-        JobDefinition jobDefinition = JobDefinition.findByNameAndPlan('testJob', jep)
+        JobDefinition jobDefinition = CollectionUtils.atMostOneElement(JobDefinition.findAllByNameAndPlan('testJob', jep))
         jobDefinition.next = null
         assertNotNull(jobDefinition.save(flush: true))
         List<String> errors = planValidatorService.validate(jep)

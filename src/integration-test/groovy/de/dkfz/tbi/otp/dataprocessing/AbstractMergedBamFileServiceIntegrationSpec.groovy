@@ -31,6 +31,7 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair.ProcessingStatus
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 @Rollback
 @Integration
@@ -69,7 +70,7 @@ class AbstractMergedBamFileServiceIntegrationSpec extends Specification implemen
     void "set #analysisName samplePairStatus to need processing while samplePair is in state needs processing"() {
         given:
         SamplePair samplePair = setSamplePairStatusToNeedProcessing_setup(ProcessingStatus.NEEDS_PROCESSING, analysisName)
-        AbstractMergedBamFile bamFile = AbstractMergedBamFile.findByWorkPackage(samplePair.mergingWorkPackage2)
+        AbstractMergedBamFile bamFile = CollectionUtils.atMostOneElement(AbstractMergedBamFile.findAllByWorkPackage(samplePair.mergingWorkPackage2))
 
         when:
         abstractMergedBamFileService.updateSamplePairStatusToNeedProcessing(bamFile)
@@ -86,7 +87,7 @@ class AbstractMergedBamFileServiceIntegrationSpec extends Specification implemen
         given:
         DomainFactory.createAllAnalysableSeqTypes()
         SamplePair samplePair = setSamplePairStatusToNeedProcessing_setup(ProcessingStatus.NO_PROCESSING_NEEDED, analysisName)
-        AbstractMergedBamFile bamFile = AbstractMergedBamFile.findByWorkPackage(samplePair.mergingWorkPackage2)
+        AbstractMergedBamFile bamFile = CollectionUtils.atMostOneElement(AbstractMergedBamFile.findAllByWorkPackage(samplePair.mergingWorkPackage2))
 
         when:
         abstractMergedBamFileService.updateSamplePairStatusToNeedProcessing(bamFile)
@@ -103,7 +104,7 @@ class AbstractMergedBamFileServiceIntegrationSpec extends Specification implemen
         given:
         SamplePair samplePair1 = setSamplePairStatusToNeedProcessing_setup(ProcessingStatus.NO_PROCESSING_NEEDED, analysisName)
         SamplePair samplePair2 = setSamplePairStatusToNeedProcessing_setup(ProcessingStatus.NEEDS_PROCESSING, analysisName)
-        AbstractMergedBamFile bamFile = AbstractMergedBamFile.findByWorkPackage(samplePair2.mergingWorkPackage2)
+        AbstractMergedBamFile bamFile = CollectionUtils.atMostOneElement(AbstractMergedBamFile.findAllByWorkPackage(samplePair2.mergingWorkPackage2))
 
         when:
         abstractMergedBamFileService.updateSamplePairStatusToNeedProcessing(bamFile)

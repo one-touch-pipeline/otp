@@ -24,6 +24,8 @@ package de.dkfz.tbi.otp.ngsdata
 import grails.gorm.transactions.Transactional
 import org.springframework.security.access.prepost.PreAuthorize
 
+import de.dkfz.tbi.otp.utils.CollectionUtils
+
 @Transactional
 class SeqCenterService {
 
@@ -73,8 +75,8 @@ class SeqCenterService {
     SeqCenter createSeqCenter(String name, String dirName) {
         assert name : "the input name '${name}' must not be null"
         assert dirName : "the input dirname '${dirName}' must not be null"
-        assert !SeqCenter.findByName(name) : "The SeqCenter '${name}' exists already"
-        assert !SeqCenter.findByDirName(dirName) : "The SeqCenter dirname '${dirName}' exists already"
+        assert !CollectionUtils.atMostOneElement(SeqCenter.findAllByName(name)) : "The SeqCenter '${name}' exists already"
+        assert !CollectionUtils.atMostOneElement(SeqCenter.findAllByDirName(dirName)) : "The SeqCenter dirname '${dirName}' exists already"
         SeqCenter seqCenter = new SeqCenter(
             name: name,
             dirName: dirName

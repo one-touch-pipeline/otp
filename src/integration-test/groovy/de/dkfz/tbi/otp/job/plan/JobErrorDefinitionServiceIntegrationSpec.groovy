@@ -27,6 +27,7 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 @Rollback
 @Integration
@@ -105,7 +106,7 @@ class JobErrorDefinitionServiceIntegrationSpec extends Specification {
         service.addErrorExpressionFirstLevel(type, action, errorExpression)
 
         then:
-        service.allJobErrorDefinition.get(JobErrorDefinition.findByErrorExpression(errorExpression)) == errorExpression
+        service.allJobErrorDefinition.get(CollectionUtils.atMostOneElement(JobErrorDefinition.findAllByErrorExpression(errorExpression))) == errorExpression
 
         where:
         type                            | action        | errorExpression
@@ -127,7 +128,8 @@ class JobErrorDefinitionServiceIntegrationSpec extends Specification {
         service.addErrorExpression(type, action, errorExpression, jobErrorDefinition)
 
         then:
-        service.allJobErrorDefinition.get(jobErrorDefinition).get(JobErrorDefinition.findByErrorExpression(errorExpression)) == errorExpression
+        service.allJobErrorDefinition.get(jobErrorDefinition).
+                get(CollectionUtils.atMostOneElement(JobErrorDefinition.findAllByErrorExpression(errorExpression))) == errorExpression
 
         where:
         type          | action        | errorExpression

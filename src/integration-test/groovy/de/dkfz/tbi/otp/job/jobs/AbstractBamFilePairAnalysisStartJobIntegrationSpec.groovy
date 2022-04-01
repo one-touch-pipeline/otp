@@ -33,6 +33,7 @@ import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.OtrsTicket
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
@@ -170,7 +171,7 @@ abstract class AbstractBamFilePairAnalysisStartJobIntegrationSpec extends Specif
         LogThreadLocal.withThreadLog(System.out) {
             process = service.restart(failedProcess)
         }
-        BamFilePairAnalysis restartedInstance = BamFilePairAnalysis.get(ProcessParameter.findByProcess(process).value)
+        BamFilePairAnalysis restartedInstance = BamFilePairAnalysis.get(CollectionUtils.atMostOneElement(ProcessParameter.findAllByProcess(process)).value)
 
         then:
         BamFilePairAnalysis.list().size() == 2

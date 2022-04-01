@@ -205,7 +205,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         project.sampleIdentifierParserBeanName == sampleIdentifierParserBeanName
         project.qcThresholdHandling == qcThresholdHandling
         project.unixGroup == unixGroup
-        project.projectGroup == ProjectGroup.findByName(projectGroup)
+        project.projectGroup == CollectionUtils.atMostOneElement(ProjectGroup.findAllByName(projectGroup))
         project.nameInMetadataFiles == nameInMetadataFiles
         project.forceCopyFiles == forceCopyFiles
         project.description == description
@@ -552,7 +552,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
     void "test updateNameInMetadata valid input"() {
         when:
         setupData()
-        Project project = Project.findByName("testProject")
+        Project project = CollectionUtils.atMostOneElement(Project.findAllByName("testProject"))
         SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService.updateProjectField(name, "nameInMetadataFiles", project)
         }
@@ -571,7 +571,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
     void "test updateNameInMetadata invalid input"() {
         when:
         setupData()
-        Project project = Project.findByName("testProject3")
+        Project project = CollectionUtils.atMostOneElement(Project.findAllByName("testProject3"))
         SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService.updateProjectField(name, "nameInMetadataFiles", project)
         }
@@ -622,8 +622,8 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         createAllBasicProjectRoles()
 
         Project project = createProject()
-        ProjectRole pi = ProjectRole.findByName(ProjectRole.Basic.PI.name())
-        ProjectRole bi = ProjectRole.findByName(ProjectRole.Basic.BIOINFORMATICIAN.name())
+        ProjectRole pi = CollectionUtils.atMostOneElement(ProjectRole.findAllByName(ProjectRole.Basic.PI.name()))
+        ProjectRole bi = CollectionUtils.atMostOneElement(ProjectRole.findAllByName(ProjectRole.Basic.BIOINFORMATICIAN.name()))
 
         Closure<UserProjectRole> createUserProjectRoleHelper = { ProjectRole projectRole, boolean enabled ->
             return DomainFactory.createUserProjectRole(project: project, projectRoles: [projectRole], enabled: enabled)
@@ -645,8 +645,8 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         given:
         setupData()
         String individualPrefix = "prefix"
-        Project project = Project.findByName("testProject")
-        addUserWithReadAccessToProject(User.findByUsername(USER), project)
+        Project project = CollectionUtils.atMostOneElement(Project.findAllByName("testProject"))
+        addUserWithReadAccessToProject(CollectionUtils.atMostOneElement(User.findAllByUsername(USER)), project)
 
         when:
         SpringSecurityUtils.doWithAuth(username) {
@@ -666,7 +666,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         given:
         setupData()
         String individualPrefix = "prefix"
-        Project project = Project.findByName("testProject")
+        Project project = CollectionUtils.atMostOneElement(Project.findAllByName("testProject"))
 
         when:
         SpringSecurityUtils.doWithAuth(TESTUSER) {
@@ -681,7 +681,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
     void "test updateProcessingPriority valid name"() {
         given:
         setupData()
-        Project project = Project.findByName("testProject")
+        Project project = CollectionUtils.atMostOneElement(Project.findAllByName("testProject"))
         ProcessingPriority fastTrackProcessingPriority = findOrCreateProcessingPriorityFastrack()
 
         when:
@@ -697,7 +697,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
     void "test updateTumor valid name"() {
         given:
         setupData()
-        Project project = Project.findByName("testProject")
+        Project project = CollectionUtils.atMostOneElement(Project.findAllByName("testProject"))
         TumorEntity tumorEntity = DomainFactory.createTumorEntity()
 
         when:
@@ -712,7 +712,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
     void "test updateRelatedProjects valid name"() {
         given:
         setupData()
-        Project project = Project.findByName("testProject")
+        Project project = CollectionUtils.atMostOneElement(Project.findAllByName("testProject"))
         String relatedProjects = "testProject3"
 
         when:
@@ -727,7 +727,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
     void "test updateInternalNotes valid name"() {
         given:
         setupData()
-        Project project = Project.findByName("testProject")
+        Project project = CollectionUtils.atMostOneElement(Project.findAllByName("testProject"))
         String internalNotes = "internalNotes"
 
         when:
@@ -742,7 +742,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
     void "test configureNoAlignmentDeciderProject"() {
         given:
         setupData()
-        Project project = Project.findByName("testProjectAlignment")
+        Project project = CollectionUtils.atMostOneElement(Project.findAllByName("testProjectAlignment"))
 
         when:
         SpringSecurityUtils.doWithAuth(ADMIN) {
@@ -757,8 +757,8 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
     void "test configureDefaultOtpAlignmentDecider valid input"() {
         given:
         setupData()
-        Project project = Project.findByName("testProjectAlignment")
-        ReferenceGenome referenceGenome = ReferenceGenome.findByName("testReferenceGenome")
+        Project project = CollectionUtils.atMostOneElement(Project.findAllByName("testProjectAlignment"))
+        ReferenceGenome referenceGenome = CollectionUtils.atMostOneElement(ReferenceGenome.findAllByName("testReferenceGenome"))
 
         when:
         SpringSecurityUtils.doWithAuth(ADMIN) {
@@ -775,9 +775,9 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
     void "test configureDefaultOtpAlignmentDecider valid input, twice"() {
         given:
         setupData()
-        Project project = Project.findByName("testProjectAlignment")
-        ReferenceGenome referenceGenome = ReferenceGenome.findByName("testReferenceGenome")
-        ReferenceGenome referenceGenome2 = ReferenceGenome.findByName("testReferenceGenome2")
+        Project project = CollectionUtils.atMostOneElement(Project.findAllByName("testProjectAlignment"))
+        ReferenceGenome referenceGenome = CollectionUtils.atMostOneElement(ReferenceGenome.findAllByName("testReferenceGenome"))
+        ReferenceGenome referenceGenome2 = CollectionUtils.atMostOneElement(ReferenceGenome.findAllByName("testReferenceGenome2"))
 
         when:
         SpringSecurityUtils.doWithAuth(ADMIN) {
@@ -795,8 +795,8 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
     void "test configureDefaultOtpAlignmentDecider invalid input"() {
         given:
         setupData()
-        Project project = Project.findByName("testProjectAlignment")
-        ReferenceGenome.findByName("testReferenceGenome")
+        Project project = CollectionUtils.atMostOneElement(Project.findAllByName("testProjectAlignment"))
+        CollectionUtils.atMostOneElement(ReferenceGenome.findAllByName("testReferenceGenome"))
 
         when:
         SpringSecurityUtils.doWithAuth(ADMIN) {
@@ -1103,7 +1103,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         given:
         setupData()
         RoddyConfiguration configuration = new RoddyConfiguration(
-                project: Project.findByName("testProjectAlignment"),
+                project: CollectionUtils.atMostOneElement(Project.findAllByName("testProjectAlignment")),
                 seqType: SeqTypeService.wholeGenomePairedSeqType,
                 pluginName: 'plugin',
                 programVersion: '1.2.3',
@@ -1363,7 +1363,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         File baseXmlConfigFile = temporaryFolder.newFile("PANCAN_ALIGNMENT_WES_PAIRED_${programVersion}_${configVersion}.xml")
         CreateFileHelper.createRoddyWorkflowConfig(baseXmlConfigFile, "PANCAN_ALIGNMENT_WES_PAIRED_${pluginName}:${programVersion}_${configVersion}")
 
-        Pipeline pipeline = Pipeline.findByTypeAndName(Pipeline.Type.ALIGNMENT, Pipeline.Name.PANCAN_ALIGNMENT)
+        Pipeline pipeline = CollectionUtils.atMostOneElement(Pipeline.findAllByTypeAndName(Pipeline.Type.ALIGNMENT, Pipeline.Name.PANCAN_ALIGNMENT))
         assert pipeline: "Pipeline could not be found"
 
         DomainFactory.createRoddyWorkflowConfig(
@@ -1397,8 +1397,8 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
     void "test configureDefaultOtpAlignmentDecider to configureNoAlignmentDeciderProject"() {
         given:
         setupData()
-        Project project = Project.findByName("testProjectAlignment")
-        ReferenceGenome referenceGenome = ReferenceGenome.findByName("testReferenceGenome")
+        Project project = CollectionUtils.atMostOneElement(Project.findAllByName("testProjectAlignment"))
+        ReferenceGenome referenceGenome = CollectionUtils.atMostOneElement(ReferenceGenome.findAllByName("testReferenceGenome"))
 
         when:
         SpringSecurityUtils.doWithAuth(ADMIN) {
@@ -1507,7 +1507,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         given:
         setupData()
         SnvConfig configuration = DomainFactory.createSnvConfig([
-                project: Project.findByName("testProjectAlignment"),
+                project: CollectionUtils.atMostOneElement(Project.findAllByName("testProjectAlignment")),
                 seqType: SeqTypeService.exomePairedSeqType,
         ])
         File projectDirectory = LsdfFilesService.getPath(
@@ -1761,8 +1761,8 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         User userBioinfNoNotification = DomainFactory.createUser()
 
         createAllBasicProjectRoles()
-        ProjectRole pi = ProjectRole.findByName(ProjectRole.Basic.PI.name())
-        ProjectRole bioinf = ProjectRole.findByName(ProjectRole.Basic.BIOINFORMATICIAN.name())
+        ProjectRole pi = CollectionUtils.atMostOneElement(ProjectRole.findAllByName(ProjectRole.Basic.PI.name()))
+        ProjectRole bioinf = CollectionUtils.atMostOneElement(ProjectRole.findAllByName(ProjectRole.Basic.BIOINFORMATICIAN.name()))
 
         Project project = createProject()
 
@@ -1824,7 +1824,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         given:
         setupData()
         String analysisDirectory = "${temporaryFolder.newFolder()}/dirA"
-        Project project = Project.findByName("testProject")
+        Project project = CollectionUtils.atMostOneElement(Project.findAllByName("testProject"))
         project.unixGroup = configService.testingGroup
         project.save(flush: true)
 
@@ -1846,7 +1846,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         setupData()
         String newDirAnalysis = "/directory/without/permission"
         String oldDirAnalysis = "/old/directory"
-        Project project = Project.findByName("testProject")
+        Project project = CollectionUtils.atMostOneElement(Project.findAllByName("testProject"))
         project.dirAnalysis = oldDirAnalysis
         project.save(flush: true)
         projectService.mailHelperService = Mock(MailHelperService)
@@ -1966,7 +1966,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
     private PanCanAlignmentConfiguration createPanCanAlignmentConfiguration(Map properties = [:]) {
         PanCanAlignmentConfiguration configuration = new PanCanAlignmentConfiguration([
-                project              : Project.findByName("testProjectAlignment"),
+                project              : CollectionUtils.atMostOneElement(Project.findAllByName("testProjectAlignment")),
                 seqType              : SeqTypeService.wholeGenomePairedSeqType,
                 referenceGenome      : "testReferenceGenome",
                 statSizeFileName     : 'testStatSizeFileName.tab',
@@ -1985,13 +1985,13 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         )
         assert projectDirectory.exists() || projectDirectory.mkdirs()
 
-        makeStatFile(ReferenceGenome.findByName(configuration.referenceGenome), configuration.statSizeFileName)
+        makeStatFile(CollectionUtils.atMostOneElement(ReferenceGenome.findAllByName(configuration.referenceGenome)), configuration.statSizeFileName)
         return configuration
     }
 
     private RnaAlignmentReferenceGenomeConfiguration createRnaAlignmentConfiguration(Map properties = [:]) {
         RnaAlignmentReferenceGenomeConfiguration configuration = new RnaAlignmentReferenceGenomeConfiguration([
-                project             : Project.findByName("testProjectAlignment"),
+                project             : CollectionUtils.atMostOneElement(Project.findAllByName("testProjectAlignment")),
                 seqType             : SeqTypeService.rnaPairedSeqType,
                 referenceGenome     : "testReferenceGenome",
                 referenceGenomeIndex: [
@@ -2015,7 +2015,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
     private RoddyConfiguration createRoddySnvConfiguration(Map properties = [:]) {
         RoddyConfiguration configuration = new RoddyConfiguration([
-                project          : Project.findByName("testProjectAlignment"),
+                project          : CollectionUtils.atMostOneElement(Project.findAllByName("testProjectAlignment")),
                 seqType          : SeqTypeService.exomePairedSeqType,
                 pluginName       : 'SNVCallingWorkflow',
                 programVersion   : '1.0.166-1',
@@ -2030,7 +2030,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
     //method name is constructed at runtime
     private RoddyConfiguration createRoddyIndelConfiguration(Map properties = [:]) {
         RoddyConfiguration configuration = new RoddyConfiguration([
-                project          : Project.findByName("testProjectAlignment"),
+                project          : CollectionUtils.atMostOneElement(Project.findAllByName("testProjectAlignment")),
                 seqType          : SeqTypeService.exomePairedSeqType,
                 pluginName       : 'IndelCallingWorkflow',
                 programVersion   : '1.0.166-1',
@@ -2045,7 +2045,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
     //method name is constructed at runtime
     private RoddyConfiguration createRoddySophiaConfiguration(Map properties = [:]) {
         RoddyConfiguration configuration = new RoddyConfiguration([
-                project          : Project.findByName("testProjectAlignment"),
+                project          : CollectionUtils.atMostOneElement(Project.findAllByName("testProjectAlignment")),
                 seqType          : SeqTypeService.wholeGenomePairedSeqType,
                 pluginName       : 'SophiaWorkflow',
                 programVersion   : '1.0.14',
@@ -2060,7 +2060,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
     //method name is constructed at runtime
     private RoddyConfiguration createRoddyAceseqConfiguration(Map properties = [:]) {
         RoddyConfiguration configuration = new RoddyConfiguration([
-                project          : Project.findByName("testProjectAlignment"),
+                project          : CollectionUtils.atMostOneElement(Project.findAllByName("testProjectAlignment")),
                 seqType          : SeqTypeService.wholeGenomePairedSeqType,
                 pluginName       : 'ACEseqWorkflow',
                 programVersion   : '1.2.6',

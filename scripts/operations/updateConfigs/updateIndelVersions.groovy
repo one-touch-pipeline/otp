@@ -31,7 +31,7 @@ import de.dkfz.tbi.otp.ngsdata.SeqType
 List<String> errors = []
 
 Project.withTransaction {
-    Pipeline pipeline = Pipeline.findByName(Pipeline.Name.RODDY_INDEL)
+    Pipeline pipeline = CollectionUtils.atMostOneElement(Pipeline.findAllByName(Pipeline.Name.RODDY_INDEL))
 
     [ctx.seqTypeService.wholeGenomePairedSeqType, ctx.seqTypeService.exomePairedSeqType].each { SeqType seqType ->
 

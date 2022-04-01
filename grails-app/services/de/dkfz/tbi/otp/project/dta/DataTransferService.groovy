@@ -110,7 +110,7 @@ class DataTransferService {
             throw new DataTransferNotFoundException("Data transfer not found.")
         }
 
-        if (DataTransfer.findAllById(dataTransfer.id).empty) {
+        if (!DataTransfer.get(dataTransfer.id)) {
             throw new DataTransferNotFoundException("Data transfer not found.")
         }
 
@@ -165,7 +165,7 @@ class DataTransferService {
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     byte[] getDataTransferDocumentContent(DataTransferDocument transferDocument) throws FileNotFoundException {
-        if (!transferDocument || DataTransferDocument.findAllById(transferDocument.id).empty) {
+        if (!transferDocument || !DataTransferDocument.get(transferDocument.id)) {
             throw new FileNotFoundException("The transfer document ${transferDocument?.fileName} was not found.")
         }
 

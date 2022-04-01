@@ -96,7 +96,7 @@ class DataTransferServiceIntegrationSpec extends Specification implements Docume
 
         then:
         noExceptionThrown()
-        DataTransfer.findAllById(returnedTransfer.id)[0] == returnedTransfer
+        DataTransfer.get(returnedTransfer.id) == returnedTransfer
         returnedTransfer.dataTransferDocuments.size() == 2
     }
 
@@ -115,7 +115,7 @@ class DataTransferServiceIntegrationSpec extends Specification implements Docume
 
         then:
         resultTransfer.dataTransferDocuments.size() == 1
-        DataTransfer.findAllById(transfer.id)[0].dataTransferDocuments[0].fileName.contains(file.originalFilename)
+        DataTransfer.get(transfer.id).dataTransferDocuments[0].fileName.contains(file.originalFilename)
     }
 
     void "addFileToDataTransfer, should fail when file is empty"() {
@@ -197,6 +197,6 @@ class DataTransferServiceIntegrationSpec extends Specification implements Docume
 
         then:
         noExceptionThrown()
-        DataTransfer.findAllById(transfer.id)[0].comment == newComment
+        DataTransfer.get(transfer.id).comment == newComment
     }
 }

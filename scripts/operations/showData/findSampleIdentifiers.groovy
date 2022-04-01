@@ -22,6 +22,7 @@
 
 import de.dkfz.tbi.otp.ngsdata.SampleIdentifier
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 /**
  * Script checks if the given sample names are known to OTP.
@@ -48,7 +49,7 @@ String input = """
 input.split('\n')*.trim().findAll {
     it && !it.startsWith('#')
 }.each {
-    SampleIdentifier sampleIdentifier = SampleIdentifier.findByName(it)
+    SampleIdentifier sampleIdentifier = CollectionUtils.atMostOneElement(SampleIdentifier.findAllByName(it))
     List<SeqTrack> seqTracks = SeqTrack.findAllBySampleIdentifier(it)
 
     if (sampleIdentifier) {

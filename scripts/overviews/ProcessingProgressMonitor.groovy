@@ -55,6 +55,7 @@ import de.dkfz.tbi.otp.monitor.*
 import de.dkfz.tbi.otp.monitor.alignment.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 //name of runs
 String runString = """
@@ -103,9 +104,9 @@ output.showWorkflowSystemSlots()
 SeqType exomePaired = SeqTypeService.exomePairedSeqType
 List<SeqType> alignableSeqtypes = SeqTypeService.allAlignableSeqTypes
 
-MetaDataKey libPrepKitKey = MetaDataKey.findByName(MetaDataColumn.LIB_PREP_KIT.name())
-MetaDataKey enrichmentKitKey = MetaDataKey.findByName("ENRICHMENT_KIT") // old name for LIB_PREP_KIT, keep as-is!
-MetaDataKey commentKey = MetaDataKey.findByName(MetaDataColumn.COMMENT.name())
+MetaDataKey libPrepKitKey = CollectionUtils.atMostOneElement(MetaDataKey.findAllByName(MetaDataColumn.LIB_PREP_KIT.name()))
+MetaDataKey enrichmentKitKey = CollectionUtils.atMostOneElement(MetaDataKey.findAllByName("ENRICHMENT_KIT")) // old name for LIB_PREP_KIT, keep as-is!
+MetaDataKey commentKey = CollectionUtils.atMostOneElement(MetaDataKey.findAllByName(MetaDataColumn.COMMENT.name()))
 
 // Heidelberg SeqTracksIDs for which Merging is broken
 List blackList_MergingSetId = ([12174511] as long[]) as List
@@ -249,7 +250,7 @@ Closure showSeqTracks = { Collection<SeqTrack> seqTracks ->
 nameStringToList(runString).each { String runName ->
     output << "\n\n\n==============================\nrunNames = ${runName}\n==============================\n"
 
-    Run run = Run.findByName(runName)
+    Run run = CollectionUtils.atMostOneElement(Run.findAllByName(runName))
     if (!run) {
         output << "No run with name ${runName} could be found"
         return
@@ -266,7 +267,7 @@ nameStringToList(runString).each { String runName ->
 nameStringToList(individualString).each { String individualName ->
     output << "\n\n\n==============================\nindividual name = ${individualName}\n==============================\n"
 
-    Individual individual = Individual.findByPid(individualName)
+    Individual individual = CollectionUtils.atMostOneElement(Individual.findAllByPid(individualName))
     if (!individual) {
         output << "No individual with pid ${individualName} could be found"
         return
@@ -301,7 +302,7 @@ nameStringToList(ilseIdString).each { String ilseId ->
 nameStringToList(projectString).each { String projectName ->
     output << "\n\n\n==============================\nproject name = ${projectName}\n==============================\n"
 
-    Project project = Project.findByName(projectName)
+    Project project = CollectionUtils.atMostOneElement(Project.findAllByName(projectName))
     if (!project) {
         output << "No project with name ${projectName} could be found"
         return

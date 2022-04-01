@@ -27,6 +27,7 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.domainFactory.taxonomy.TaxonomyFactory
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 import static javax.servlet.http.HttpServletResponse.SC_MOVED_TEMPORARILY
 
@@ -228,7 +229,7 @@ class SpeciesWithStrainControllerSpec extends Specification implements Controlle
 
         controller.flash.message.message == "speciesWithStrain.succ"
 
-        SpeciesWithStrain.findBySpeciesAndStrain(species, strain)
+        CollectionUtils.atMostOneElement(SpeciesWithStrain.findAllBySpeciesAndStrain(species, strain))
     }
 
     @Unroll
@@ -281,10 +282,10 @@ class SpeciesWithStrainControllerSpec extends Specification implements Controlle
 
         controller.flash.message.message == "speciesWithStrain.succ"
 
-        SpeciesCommonName speciesCommonName = SpeciesCommonName.findByName(inputSpeciesCommonName)
+        SpeciesCommonName speciesCommonName = CollectionUtils.atMostOneElement(SpeciesCommonName.findAllByName(inputSpeciesCommonName))
         speciesCommonName != null
 
-        Species.findBySpeciesCommonNameAndScientificName(speciesCommonName, inputScientificName)
+        CollectionUtils.atMostOneElement(Species.findAllBySpeciesCommonNameAndScientificName(speciesCommonName, inputScientificName))
     }
 
     @Unroll
@@ -311,7 +312,8 @@ class SpeciesWithStrainControllerSpec extends Specification implements Controlle
         controller.flash.message.message == "speciesWithStrain.succ"
 
         SpeciesCommonName.list().size() == expectedNumberOfSpeciesCommonNames
-        Species.findBySpeciesCommonNameAndScientificName(SpeciesCommonName.findByNameIlike(inputCN), scientificName)
+        CollectionUtils.atMostOneElement(Species.findAllBySpeciesCommonNameAndScientificName(
+                CollectionUtils.atMostOneElement(SpeciesCommonName.findAllByNameIlike(inputCN)), scientificName))
 
         where:
         inputCN || expectedNumberOfSpeciesCommonNames
@@ -360,7 +362,7 @@ class SpeciesWithStrainControllerSpec extends Specification implements Controlle
 
         controller.flash.message.message == "speciesWithStrain.succ"
 
-        Strain.findByName(name)
+        CollectionUtils.atMostOneElement(Strain.findAllByName(name))
 
         where:
         name              | _

@@ -103,7 +103,7 @@ enum DataFileColumns {
         return dataFile.sequenceLength
     }),
     FASTQC_ID("FastQC ID", { DataFile dataFile, Map properties = [:] ->
-        return FastqcProcessedFile.findByDataFile(dataFile)?.id
+        return CollectionUtils.atMostOneElement(FastqcProcessedFile.findAllByDataFile(dataFile))?.id
     }),
     FASTQC_PATH("FastQC Path", { DataFile dataFile, Map properties = [:] ->
         return (properties["fastqcDataFilesService"] as FastqcDataFilesService).fastqcOutputFile(dataFile)

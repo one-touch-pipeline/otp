@@ -30,6 +30,7 @@ import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.UserAndRoles
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 @Rollback
 @Integration
@@ -86,7 +87,7 @@ class MergingCriteriaServiceIntegrationSpec extends Specification implements Use
 
         then:
         !errors
-        MergingCriteria mergingCriteria = MergingCriteria.findByProjectAndSeqType(project, seqType)
+        MergingCriteria mergingCriteria = CollectionUtils.atMostOneElement(MergingCriteria.findAllByProjectAndSeqType(project, seqType))
         mergingCriteria
         mergingCriteria.project == project
         mergingCriteria.seqType == seqType
@@ -130,7 +131,7 @@ class MergingCriteriaServiceIntegrationSpec extends Specification implements Use
 
         then:
         errors
-        !MergingCriteria.findByProjectAndSeqType(project, seqType)
+        !CollectionUtils.atMostOneElement(MergingCriteria.findAllByProjectAndSeqType(project, seqType))
     }
 
     void "test createDefaultMergingCriteria, creates a MergingCriteria"() {
@@ -353,7 +354,7 @@ class MergingCriteriaServiceIntegrationSpec extends Specification implements Use
 
         then:
         SeqPlatformGroup.findAllByMergingCriteria(mergingCriteria).size() == 1
-        SeqPlatformGroup.findByMergingCriteria(mergingCriteria).seqPlatforms == [seqPlatform] as Set
+        CollectionUtils.atMostOneElement(SeqPlatformGroup.findAllByMergingCriteria(mergingCriteria)).seqPlatforms == [seqPlatform] as Set
     }
 
     void "test copySeqPlatformGroups"() {

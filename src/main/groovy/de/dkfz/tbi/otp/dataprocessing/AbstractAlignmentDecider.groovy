@@ -102,10 +102,10 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
 
         if (seqTrack.seqType.exome) {
             return seqTrack.libraryPreparationKit && seqTrack.configuredReferenceGenome &&
-                    BedFile.findWhere(
+                    atMostOneElement(BedFile.findAllWhere(
                             libraryPreparationKit: seqTrack.libraryPreparationKit,
                             referenceGenome: seqTrack.configuredReferenceGenome,
-                    )
+                    ))
         }
         return true
     }

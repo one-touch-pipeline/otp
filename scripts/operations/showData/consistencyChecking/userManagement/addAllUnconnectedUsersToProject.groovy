@@ -39,7 +39,7 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
  */
 
 // ProjectRole to use for the new UserProjectRoles
-Set<ProjectRole> projectRoles = ProjectRole.findByName(ProjectRole.Basic.BIOINFORMATICIAN.name()) as Set<ProjectRole>
+Set<ProjectRole> projectRoles = CollectionUtils.atMostOneElement(ProjectRole.findAllByName(ProjectRole.Basic.BIOINFORMATICIAN.name())) as Set<ProjectRole>
 // UserProjectRole flags
 boolean enabled = true
 boolean accessToFiles = true

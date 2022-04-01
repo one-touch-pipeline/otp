@@ -26,6 +26,7 @@ import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.StackTraceUtils
 import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowError
@@ -60,7 +61,7 @@ WorkflowRun.withNewTransaction {
 
     println "worklow name: ${workflowName}"
 
-    Workflow workflow = Workflow.findByName(workflowName) ?: new Workflow([
+    Workflow workflow = CollectionUtils.atMostOneElement(Workflow.findAllByName(workflowName)) ?: new Workflow([
             name    : workflowName,
             beanName: "dataInstallationWorkflow",
             enabled : true

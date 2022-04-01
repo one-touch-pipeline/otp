@@ -25,9 +25,10 @@
 //Show for a run all samples with SeqType and creation date grouped by FastqImportInstance
 
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.util.TimeFormats
 
-Run run = Run.findByName("140819_SN7001149_0212_BC4H1BACXX")
+Run run = CollectionUtils.atMostOneElement(Run.findAllByName("140819_SN7001149_0212_BC4H1BACXX"))
 
 List output = []
 List<FastqImportInstance> fastqImportInstances = FastqImportInstance.findAllByRun(run).sort{it.id}

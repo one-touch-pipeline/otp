@@ -43,9 +43,12 @@ class SeqTypeService extends MetadataFieldsService<SeqType> {
                 libraryLayouts   : SeqType.findAllByNameAndSingleCell(it.name, it.singleCell)*.libraryLayout.sort().join(MULTILINE_JOIN_STRING),
                 layouts          :
                         [
-                            SINGLE   : SeqType.findByNameAndLibraryLayoutAndSingleCell(it.name, SequencingReadType.SINGLE, it.singleCell) ? true : false,
-                            PAIRED   : SeqType.findByNameAndLibraryLayoutAndSingleCell(it.name, SequencingReadType.PAIRED, it.singleCell) ? true : false,
-                            MATE_PAIR: SeqType.findByNameAndLibraryLayoutAndSingleCell(it.name, SequencingReadType.MATE_PAIR, it.singleCell) ? true : false,
+                            SINGLE   : CollectionUtils.atMostOneElement(
+                                    SeqType.findAllByNameAndLibraryLayoutAndSingleCell(it.name, SequencingReadType.SINGLE, it.singleCell)) ? true : false,
+                            PAIRED   : CollectionUtils.atMostOneElement(
+                                    SeqType.findAllByNameAndLibraryLayoutAndSingleCell(it.name, SequencingReadType.PAIRED, it.singleCell)) ? true : false,
+                            MATE_PAIR: CollectionUtils.atMostOneElement(
+                                    SeqType.findAllByNameAndLibraryLayoutAndSingleCell(it.name, SequencingReadType.MATE_PAIR, it.singleCell)) ? true : false,
                         ],
                 displayName      : it.displayName,
                 importAliases    : SeqType.findAllByName(it.name)*.importAlias?.flatten()?.unique()?.sort()?.join(MULTILINE_JOIN_STRING),
@@ -70,7 +73,7 @@ class SeqTypeService extends MetadataFieldsService<SeqType> {
 
     static boolean hasSeqTypeByNameOrDisplayName(String nameOrDisplayName) {
         assert nameOrDisplayName: "the input nameOrDisplayName '${nameOrDisplayName}' is null"
-        return SeqType.findByNameOrDisplayName(nameOrDisplayName, nameOrDisplayName)
+        return CollectionUtils.atMostOneElement(SeqType.findAllByNameOrDisplayName(nameOrDisplayName, nameOrDisplayName))
     }
 
     static boolean isSingleCell(String baseMaterial) {
@@ -137,10 +140,10 @@ class SeqTypeService extends MetadataFieldsService<SeqType> {
                     CollectionUtils.<SeqType> atMostOneElement(
                             clazz.findAllByDisplayNameIlikeAndLibraryLayoutAndSingleCell(name, properties.libraryLayout, properties.singleCell))
         } else if (!properties.libraryLayout && properties.singleCell != null) {
-            return clazz.findByNameIlikeAndSingleCell(name, properties.singleCell) ?:
-                    clazz.findByDisplayNameIlikeAndSingleCell(name, properties.singleCell)
+            return CollectionUtils.atMostOneElement(clazz.findAllByNameIlikeAndSingleCell(name, properties.singleCell)) ?:
+                    CollectionUtils.atMostOneElement(clazz.findAllByDisplayNameIlikeAndSingleCell(name, properties.singleCell))
         } else {
-            return clazz.findByName(name) ?: clazz.findByDisplayName(name)
+            return CollectionUtils.atMostOneElement(clazz.findAllByName(name)) ?: CollectionUtils.atMostOneElement(clazz.findAllByDisplayName(name))
         }
     }
 

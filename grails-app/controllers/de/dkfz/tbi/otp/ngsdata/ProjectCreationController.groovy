@@ -25,7 +25,6 @@ import grails.databinding.BindUsing
 import grails.databinding.SimpleMapDataBindingSource
 import grails.plugin.springsecurity.annotation.Secured
 import grails.validation.Validateable
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.multipart.MultipartFile
 
 import de.dkfz.tbi.otp.FlashMessage
@@ -291,20 +290,20 @@ class ProjectCreationCommand extends ProjectCreationBasisCommand {
 
     static constraints = {
         name(blank: false, validator: { val, obj ->
-            if (Project.findByName(val)) {
+            if (Project.findAllByName(val)) {
                 return "duplicate"
             }
-            if (Project.findByNameInMetadataFiles(val)) {
+            if (Project.findAllByNameInMetadataFiles(val)) {
                 return "duplicate.metadataFilesName"
             }
         })
         individualPrefix(blank: false, validator: { val, obj ->
-            if (Project.findByIndividualPrefix(val)) {
+            if (Project.findAllByIndividualPrefix(val)) {
                 return "duplicate"
             }
         })
         dirName(blank: false, validator: { val, obj ->
-            if (Project.findByDirName(val)) {
+            if (Project.findAllByDirName(val)) {
                 return "default.not.unique.message"
             }
             if (val && !OtpPathValidator.isValidRelativePath(val)) {
@@ -321,10 +320,10 @@ class ProjectCreationCommand extends ProjectCreationBasisCommand {
             }
         })
         nameInMetadataFiles(nullable: true, validator: { val, obj ->
-            if (val && Project.findByNameInMetadataFiles(val)) {
+            if (val && Project.findAllByNameInMetadataFiles(val)) {
                 return "duplicate"
             }
-            if (Project.findByName(val)) {
+            if (Project.findAllByName(val)) {
                 return "duplicate.name"
             }
         })

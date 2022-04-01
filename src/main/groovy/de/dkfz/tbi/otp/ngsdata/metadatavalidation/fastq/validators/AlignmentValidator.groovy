@@ -31,6 +31,7 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContex
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.util.spreadsheet.validation.*
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
@@ -75,7 +76,7 @@ class AlignmentValidator extends ValueTuplesValidator<MetadataValidationContext>
                 valueTuplesSameSeqType.groupBy { MetadataImportService.getProjectFromMetadata(it) }.each { Project project, List<ValueTuple> valueTuplesSameProject ->
                     if (project) {
                         if (seqType in SeqTypeService.roddyAlignableSeqTypes) {
-                            Pipeline pipeline = Pipeline.findByNameAndType(Pipeline.Name.forSeqType(seqType), Pipeline.Type.ALIGNMENT)
+                            Pipeline pipeline = CollectionUtils.atMostOneElement(Pipeline.findAllByNameAndType(Pipeline.Name.forSeqType(seqType), Pipeline.Type.ALIGNMENT))
                             if (!RoddyWorkflowConfig.getLatestForProject(project, seqType, pipeline)) {
                                 context.addProblem(Collections.emptySet(), LogLevel.WARNING, "${pipeline.name.name()} is not configured for Project '${project}' and SeqType '${seqType}'", "At least one Alignment is not configured.")
                             }

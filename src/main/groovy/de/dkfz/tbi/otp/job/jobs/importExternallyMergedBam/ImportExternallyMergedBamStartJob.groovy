@@ -28,6 +28,7 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.ImportProcess
 import de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.SessionUtils
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
@@ -46,7 +47,7 @@ class ImportExternallyMergedBamStartJob extends AbstractStartJobImpl {
             }
 
             ImportProcess.withTransaction {
-                ImportProcess importProcess = ImportProcess.findByState(ImportProcess.State.NOT_STARTED)
+                ImportProcess importProcess = CollectionUtils.atMostOneElement(ImportProcess.findAllByState(ImportProcess.State.NOT_STARTED))
                 if (importProcess) {
                     importProcess.state = ImportProcess.State.STARTED
                     assert importProcess.save(flush: true)

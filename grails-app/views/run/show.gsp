@@ -20,7 +20,7 @@
   - SOFTWARE.
   --}%
 
-<%@ page import="de.dkfz.tbi.otp.ngsdata.MetaDataEntry; de.dkfz.tbi.util.TimeFormats" contentType="text/html;charset=UTF-8" %>
+<%@ page import="de.dkfz.tbi.otp.utils.CollectionUtils; de.dkfz.tbi.otp.ngsdata.MetaDataEntry; de.dkfz.tbi.util.TimeFormats" contentType="text/html;charset=UTF-8" %>
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
@@ -154,7 +154,7 @@
                 <tr>
                     %{--This code require metadata fields, since there is no connection to a SeqTrack--}%
                     <td><g:link controller="dataFile" action="showDetails" id="${file.id}">${file.fileName}</g:link></td>
-                    <td>${MetaDataEntry.findByDataFileAndKey(file, keys[0])?.value}</td>
+                    <td>${CollectionUtils.atMostOneElement(MetaDataEntry.findAllByDataFileAndKey(file, keys[0]))?.value}</td>
                     <td>${MetaDataEntry.findAllByDataFileAndKey(file, keys[1])}</td>
                     <td class="true"><g:message code="run.show.metaData"/></td>
                 </tr>

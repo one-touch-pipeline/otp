@@ -68,23 +68,23 @@ enum TypeValidators {
 
     SSH_AUTH_METHOD({ SshAuthMethod.getByConfigName(it) }, { SshAuthMethod.values()*.name() }),
 
-    PIPELINE_TYPE({ Pipeline.Type.findByName(it) }, { Pipeline.Type.values()*.name() }),
+    PIPELINE_TYPE({ Pipeline.Type.getByName(it) }, { Pipeline.Type.values()*.name() }),
 
-    JOB_SCHEDULER({ Realm.JobScheduler.findByName(it) }, { Realm.JobScheduler.values()*.name() }),
+    JOB_SCHEDULER({ Realm.JobScheduler.getByName(it) }, { Realm.JobScheduler.values()*.name() }),
 
-    INSTANCE_LOGO({ InstanceLogo.findByName(it) }, { InstanceLogo.values()*.name() }),
+    INSTANCE_LOGO({ InstanceLogo.getByName(it) }, { InstanceLogo.values()*.name() }),
 
-    SEQ_CENTER_NAME({ SeqCenter.findByName(it) }, { SeqCenter.all*.name }),
+    SEQ_CENTER_NAME({ CollectionUtils.atMostOneElement(SeqCenter.findAllByName(it)) }, { SeqCenter.all*.name }),
 
-    SEQ_TYPE_RODDY_NAME({ SeqType.findByRoddyName(it) }, { SeqType.all*.roddyName.findAll().unique() }),
-    SEQ_TYPE_RODDY_NAME_SNV({ SeqType.findByRoddyName(it) }, { SeqTypeService.snvPipelineSeqTypes*.roddyName.findAll().unique() }),
-    SEQ_TYPE_RODDY_NAME_INDEL({ SeqType.findByRoddyName(it) }, { SeqTypeService.indelPipelineSeqTypes*.roddyName.findAll().unique() }),
-    SEQ_TYPE_RODDY_NAME_SOPHIA({ SeqType.findByRoddyName(it) }, { SeqTypeService.sophiaPipelineSeqTypes*.roddyName.findAll().unique() }),
-    SEQ_TYPE_RODDY_NAME_ACESEQ({ SeqType.findByRoddyName(it) }, { SeqTypeService.aceseqPipelineSeqTypes*.roddyName.findAll().unique() }),
+    SEQ_TYPE_RODDY_NAME({ CollectionUtils.atMostOneElement(SeqType.findAllByRoddyName(it)) }, { SeqType.all*.roddyName.findAll().unique() }),
+    SEQ_TYPE_RODDY_NAME_SNV({ CollectionUtils.atMostOneElement(SeqType.findAllByRoddyName(it)) }, { SeqTypeService.snvPipelineSeqTypes*.roddyName.findAll().unique() }),
+    SEQ_TYPE_RODDY_NAME_INDEL({ CollectionUtils.atMostOneElement(SeqType.findAllByRoddyName(it)) }, { SeqTypeService.indelPipelineSeqTypes*.roddyName.findAll().unique() }),
+    SEQ_TYPE_RODDY_NAME_SOPHIA({ CollectionUtils.atMostOneElement(SeqType.findAllByRoddyName(it)) }, { SeqTypeService.sophiaPipelineSeqTypes*.roddyName.findAll().unique() }),
+    SEQ_TYPE_RODDY_NAME_ACESEQ({ CollectionUtils.atMostOneElement(SeqType.findAllByRoddyName(it)) }, { SeqTypeService.aceseqPipelineSeqTypes*.roddyName.findAll().unique() }),
 
-    SEQ_TYPE_PROCESSING_NAME({ SeqType.findByDisplayName(it) }, { SeqType.all*.displayName.unique() }),
+    SEQ_TYPE_PROCESSING_NAME({ CollectionUtils.atMostOneElement(SeqType.findAllByDisplayName(it)) }, { SeqType.all*.displayName.unique() }),
 
-    WORKFLOW_NAME({ JobExecutionPlan.findByName(it) }, { JobExecutionPlan.findAllByObsoleted(false)*.name }),
+    WORKFLOW_NAME({ CollectionUtils.atMostOneElement(JobExecutionPlan.findAllByName(it)) }, { JobExecutionPlan.findAllByObsoleted(false)*.name }),
 
     PROCESSING_PRIORITY_NAME({ CollectionUtils.atMostOneElement(ProcessingPriority.findAllByName(it)) }, { ProcessingPriority.list([sort: 'name'])*.name }),
 
@@ -92,7 +92,7 @@ enum TypeValidators {
 
     TIME_ZONE({ try { ZoneId.of(it); return true } catch (DateTimeException ignored) { return false } }, { ZoneId.availableZoneIds.sort() }),
 
-    GUI_ANNOTATION({ GuiAnnotation.findByName(it) }, { GuiAnnotation.values()*.name() }),
+    GUI_ANNOTATION({ GuiAnnotation.getByName(it) }, { GuiAnnotation.values()*.name() }),
 
     CRONJOB_CLASS({ it in ScheduledJob.ALL_JOB_CLASSES*.canonicalName }, { ScheduledJob.ALL_JOB_CLASSES*.canonicalName }),
 

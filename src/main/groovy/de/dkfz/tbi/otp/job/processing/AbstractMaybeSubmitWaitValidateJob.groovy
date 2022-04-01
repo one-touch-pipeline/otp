@@ -59,7 +59,7 @@ abstract class AbstractMaybeSubmitWaitValidateJob extends AbstractMultiJob {
         List<String> failedClusterJobsDetails = []
         failedClusterJobs.sort(sortByClusterJobId).collect { ClusterJobIdentifier clusterJobIdentifier, String reason ->
             failedClusterJobsDetails.add("${clusterJobIdentifier}: " +
-                    "${reason}\n${"Log file: ${ClusterJob.findByClusterJobIdentifier(clusterJobIdentifier, processingStep).jobLog}"}\n")
+                    "${reason}\n${"Log file: ${ClusterJob.getByClusterJobIdentifier(clusterJobIdentifier, processingStep).jobLog}"}\n")
         }
 
         return "\n${failedJobsOfTotalJobs}\n\n${failedClusterJobsDetails.join("\n")}"
@@ -75,7 +75,7 @@ abstract class AbstractMaybeSubmitWaitValidateJob extends AbstractMultiJob {
         return failedOrNotFinishedClusterJobs(
                 ClusterJobIdentifier.asClusterJobIdentifierList(clusterJobs)
         ).collect { ClusterJobIdentifier identifier, String error ->
-            return ClusterJob.findByClusterJobIdentifier(identifier, processingStep)
+            return ClusterJob.getByClusterJobIdentifier(identifier, processingStep)
         }
     }
 

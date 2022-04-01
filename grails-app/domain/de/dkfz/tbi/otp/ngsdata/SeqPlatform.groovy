@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.dataprocessing.MergingCriteria
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.Entity
 import de.dkfz.tbi.otp.utils.Legacy
 
@@ -47,8 +48,8 @@ class SeqPlatform implements Entity, Legacy {
         Because of this we implemented the same constraint in a custom validator:
          */
         name(blank: false, validator: { val, obj ->
-            SeqPlatform seqPlatform =
-                    SeqPlatform.findByNameAndSeqPlatformModelLabelAndSequencingKitLabel(val, obj.seqPlatformModelLabel, obj.sequencingKitLabel)
+            SeqPlatform seqPlatform = CollectionUtils.atMostOneElement(
+                    SeqPlatform.findAllByNameAndSeqPlatformModelLabelAndSequencingKitLabel(val, obj.seqPlatformModelLabel, obj.sequencingKitLabel))
             return !seqPlatform || seqPlatform == obj
         })
         seqPlatformModelLabel(nullable: true)
@@ -65,7 +66,7 @@ class SeqPlatform implements Entity, Legacy {
             return null
         }
 
-        MergingCriteria mergingCriteria = MergingCriteria.findByProjectAndSeqType(project, seqType)
+        MergingCriteria mergingCriteria = CollectionUtils.atMostOneElement(MergingCriteria.findAllByProjectAndSeqType(project, seqType))
 
         List<SeqPlatformGroup> seqPlatformGroups = SeqPlatformGroup.withCriteria {
             seqPlatforms {

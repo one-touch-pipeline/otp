@@ -35,6 +35,7 @@ import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.pipelines.AlignmentPipelineFactory
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.QcThresholdHandling
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.Principal
 
 import static de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.QcTrafficLightStatus.*
@@ -141,7 +142,7 @@ class QcTrafficLightServiceIntegrationSpec extends Specification implements Doma
         cellRangerQualityAssessment.qcBasesMapped = qcBasesMapped
         cellRangerQualityAssessment.onTargetMappedBases = 5
 
-        QcThreshold qcThreshold = QcThreshold.findByQcProperty1('qcBasesMapped')
+        QcThreshold qcThreshold = CollectionUtils.atMostOneElement(QcThreshold.findAllByQcProperty1('qcBasesMapped'))
         qcThreshold.project = createProject()
         qcThreshold.save(flush: true)
 

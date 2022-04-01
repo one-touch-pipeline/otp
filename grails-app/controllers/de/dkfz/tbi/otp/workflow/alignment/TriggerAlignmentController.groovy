@@ -23,10 +23,9 @@ package de.dkfz.tbi.otp.workflow.alignment
 
 import grails.plugin.springsecurity.annotation.Secured
 
-import de.dkfz.tbi.otp.ngsdata.Sample
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
-import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 @Secured("hasRole('ROLE_OPERATOR')")
 class TriggerAlignmentController {
@@ -107,7 +106,7 @@ class TriggerAlignmentController {
     // TODO: This is only a dummy impl, which will be replaced by otp-1342
     @SuppressWarnings('AvoidFindWithoutAll')
     private List<SeqTrack> findDummySeqTracks() {
-        Project project = Project.findByName("ExampleProject")
+        Project project = CollectionUtils.atMostOneElement(Project.findAllByName("ExampleProject"))
         return SeqTrack.withCriteria {
             sample {
                 individual {

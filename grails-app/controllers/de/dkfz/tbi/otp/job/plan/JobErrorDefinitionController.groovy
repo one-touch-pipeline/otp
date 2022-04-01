@@ -26,6 +26,7 @@ import grails.plugin.springsecurity.annotation.Secured
 import grails.validation.Validateable
 
 import de.dkfz.tbi.otp.CheckAndCall
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 @Secured("hasRole('ROLE_ADMIN')")
 class JobErrorDefinitionController implements CheckAndCall {
@@ -35,7 +36,7 @@ class JobErrorDefinitionController implements CheckAndCall {
     def index() {
         Map jobErrorDefinitions = jobErrorDefinitionService.allJobErrorDefinition
         List<JobDefinition> jobDefinitions = jobErrorDefinitionService.getJobDefinition(jobErrorDefinitions)
-        JobDefinition jobDefinition = JobDefinition.findByName(params.job) ?: null
+        JobDefinition jobDefinition = CollectionUtils.atMostOneElement(JobDefinition.findAllByName(params.job)) ?: null
         [
                 jobErrorDefinition: jobErrorDefinitions.findAll {
                     ((JobErrorDefinition) it.key).jobDefinitions*.name.contains(jobDefinition?.name)
@@ -115,6 +116,7 @@ class UpdateAddNewJobCommand implements Validateable {
         String jobDefinitionName = jobDefinitionString.substring(0, jobDefinitionString.indexOf('-') - 1)
         String jobExecutionPlanName = jobDefinitionString.substring(jobDefinitionString.indexOf('-') + 2)
 
-        this.jobDefinition = JobDefinition.findByNameAndPlan(jobDefinitionName, JobExecutionPlan.findByNameAndObsoleted(jobExecutionPlanName, false))
+        this.jobDefinition = CollectionUtils.atMostOneElement(JobDefinition.findAllByNameAndPlan(jobDefinitionName,
+                CollectionUtils.atMostOneElement(JobExecutionPlan.findAllByNameAndObsoleted(jobExecutionPlanName, false))))
     }
 }

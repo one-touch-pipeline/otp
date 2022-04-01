@@ -91,7 +91,7 @@ class ProjectRequestController implements CheckAndCall {
         ProjectRequestCreationCommand cmd = flash.cmd as ProjectRequestCreationCommand
         // This is required cause sometimes the projectRequest state is not processed right by the command object from flash
         if (flash.cmd && flash.cmd.projectRequest) {
-            cmd.projectRequest = CollectionUtils.exactlyOneElement(ProjectRequest.findAllById(flash.cmd.projectRequest.id))
+            cmd.projectRequest = ProjectRequest.get(flash.cmd.projectRequest.id)
         }
         List<String> sequencingCenters = SeqCenter.findAll()*.name
         if (cmd?.sequencingCenters) {
@@ -423,7 +423,7 @@ class ProjectRequestCreationCommand implements Validateable {
         speciesWithStrainList = stringList
         stringList.each {
             if (it.isNumber()) {
-                SpeciesWithStrain foundSpeciesWithStrain = CollectionUtils.atMostOneElement(SpeciesWithStrain.findAllById(it as Long))
+                SpeciesWithStrain foundSpeciesWithStrain = SpeciesWithStrain.get(it as Long)
                 if (foundSpeciesWithStrain) {
                     speciesWithStrains.add(foundSpeciesWithStrain)
                 } else {

@@ -50,7 +50,7 @@ class PropertiesValidationService {
         }
 
         properties.each { String key, String value ->
-            OtpProperty otpProperty = OtpProperty.findByKey(key)
+            OtpProperty otpProperty = OtpProperty.getByKey(key)
             if (!otpProperty) {
                 log.warn("Found unknown key '${key}' in the otp properties file")
             } else if (!otpProperty.validator.validate(value)) {

@@ -37,7 +37,7 @@ class SoftwareToolIdentifier implements Entity {
 
     static constraints = {
         name blank: false, validator: { val, obj ->
-            if (SoftwareToolIdentifier.findByNameIlike(SqlUtil.replaceWildcardCharactersInLikeExpression(val))) {
+            if (SoftwareToolIdentifier.findAllByNameIlike(SqlUtil.replaceWildcardCharactersInLikeExpression(val))) {
                 return 'default.not.unique.message'
             }
         }

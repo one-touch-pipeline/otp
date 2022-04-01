@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.dataprocessing.sophia
 
 import de.dkfz.tbi.otp.ngsdata.AbstractAnalysisResultsService
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 class SophiaResultsService extends AbstractAnalysisResultsService<SophiaInstance> {
 
@@ -32,7 +33,7 @@ class SophiaResultsService extends AbstractAnalysisResultsService<SophiaInstance
 
     @Override
     Map getQcData(SophiaInstance analysis) {
-        SophiaQc qc = SophiaQc.findBySophiaInstance(analysis)
+        SophiaQc qc = CollectionUtils.atMostOneElement(SophiaQc.findAllBySophiaInstance(analysis))
         [
                 controlMassiveInvPrefilteringLevel: qc?.controlMassiveInvPrefilteringLevel,
                 tumorMassiveInvFilteringLevel: qc?.tumorMassiveInvFilteringLevel,

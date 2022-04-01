@@ -22,6 +22,7 @@
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeIndexService
 import de.dkfz.tbi.otp.project.ProjectService
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 GeneModelService geneModelService = ctx.geneModelService
 ReferenceGenomeIndexService referenceGenomeIndexService = ctx.referenceGenomeIndexService
@@ -43,19 +44,19 @@ def saveAndCheckReferenceGenomeIndex = { ReferenceGenomeIndex index ->
     assert referenceGenomeIndexService.getFile(index).exists()
 }
 
-ToolName arribaBlacklist     = ToolName.findByName(ProjectService.ARRIBA_BLACKLIST)
-ToolName arribaKnownFusions  = ToolName.findByName(ProjectService.ARRIBA_KNOWN_FUSIONS)
-ToolName genomeGatk          = ToolName.findByName(ProjectService.GENOME_GATK_INDEX)
-ToolName genomeKallistoIndex = ToolName.findByName(ProjectService.GENOME_KALLISTO_INDEX)
-ToolName genomeStarIndex_100 = ToolName.findByName("${ProjectService.GENOME_STAR_INDEX}_100")
-ToolName genomeStarIndex_200 = ToolName.findByName("${ProjectService.GENOME_STAR_INDEX}_200")
-ToolName genomeStarIndex_50  = ToolName.findByName("${ProjectService.GENOME_STAR_INDEX}_50")
+ToolName arribaBlacklist     = CollectionUtils.atMostOneElement(ToolName.findAllByName(ProjectService.ARRIBA_BLACKLIST))
+ToolName arribaKnownFusions  = CollectionUtils.atMostOneElement(ToolName.findAllByName(ProjectService.ARRIBA_KNOWN_FUSIONS))
+ToolName genomeGatk          = CollectionUtils.atMostOneElement(ToolName.findAllByName(ProjectService.GENOME_GATK_INDEX))
+ToolName genomeKallistoIndex = CollectionUtils.atMostOneElement(ToolName.findAllByName(ProjectService.GENOME_KALLISTO_INDEX))
+ToolName genomeStarIndex_100 = CollectionUtils.atMostOneElement(ToolName.findAllByName("${ProjectService.GENOME_STAR_INDEX}_100"))
+ToolName genomeStarIndex_200 = CollectionUtils.atMostOneElement(ToolName.findAllByName("${ProjectService.GENOME_STAR_INDEX}_200"))
+ToolName genomeStarIndex_50  = CollectionUtils.atMostOneElement(ToolName.findAllByName("${ProjectService.GENOME_STAR_INDEX}_50"))
 
 ReferenceGenome.withTransaction {
     //#################################################################################
     //###############  human reference genome hs37d5 + PhiX            ################
     //#################################################################################
-    ReferenceGenome referenceGenome_1KGRef_PhiX = ReferenceGenome.findByName("1KGRef_PhiX")
+    ReferenceGenome referenceGenome_1KGRef_PhiX = CollectionUtils.atMostOneElement(ReferenceGenome.findAllByName("1KGRef_PhiX"))
 
     saveAndCheckGeneModel(new GeneModel(
             referenceGenome: referenceGenome_1KGRef_PhiX,
@@ -118,7 +119,7 @@ ReferenceGenome.withTransaction {
     //#################################################################################
     //###############  xenograft reference genome  mm10 + PhiX         ################
     //#################################################################################
-    ReferenceGenome referenceGenome_GRCm38mm10_PhiX = ReferenceGenome.findByName("GRCm38mm10_PhiX")
+    ReferenceGenome referenceGenome_GRCm38mm10_PhiX = CollectionUtils.atMostOneElement(ReferenceGenome.findAllByName("GRCm38mm10_PhiX"))
 
     saveAndCheckGeneModel(new GeneModel(
             referenceGenome: referenceGenome_GRCm38mm10_PhiX,
@@ -153,7 +154,7 @@ ReferenceGenome.withTransaction {
     //#################################################################################
     //###############  xenograft reference genome hs37d5 + PhiX + mm10 ################
     //#################################################################################
-    ReferenceGenome referenceGenome_hs37d5_GRCm38mm_PhiX = ReferenceGenome.findByName("hs37d5_GRCm38mm_PhiX")
+    ReferenceGenome referenceGenome_hs37d5_GRCm38mm_PhiX = CollectionUtils.atMostOneElement(ReferenceGenome.findAllByName("hs37d5_GRCm38mm_PhiX"))
 
     saveAndCheckGeneModel(new GeneModel(
             referenceGenome: referenceGenome_hs37d5_GRCm38mm_PhiX,

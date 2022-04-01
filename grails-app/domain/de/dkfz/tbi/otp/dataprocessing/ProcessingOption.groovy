@@ -546,7 +546,7 @@ class ProcessingOption implements Entity {
                         " which will not be found under the 'Unregistered OTP user found' section of project members page",
                 Necessity.OPTIONAL, "", TypeValidators.SINGLE_WORD_TEXT_OPTIONAL
         ),
-        /** @see GuiAnnotation */
+        /** @see de.dkfz.tbi.otp.config.GuiAnnotation */
         GUI_ANNOTATION(
                 "This is the category for site-specific, configurable, GUI annotations. The contents" +
                         " of specific annotations will be interpreted as HTML, and must handle being unset gracefully",

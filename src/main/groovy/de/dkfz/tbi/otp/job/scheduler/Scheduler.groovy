@@ -30,6 +30,7 @@ import de.dkfz.tbi.otp.job.JobMailService
 import de.dkfz.tbi.otp.job.plan.ValidatingJobDefinition
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.job.restarting.RestartHandlerService
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.ExceptionUtils
 
 import java.security.SecureRandom
@@ -161,7 +162,8 @@ class Scheduler {
             }
             if (job instanceof ValidatingJob) {
                 ValidatingJobDefinition validator = step.jobDefinition as ValidatingJobDefinition
-                ProcessingStep validatedStep = ProcessingStep.findByProcessAndJobDefinition(step.process, validator.validatorFor)
+                ProcessingStep validatedStep = CollectionUtils.atMostOneElement(
+                        ProcessingStep.findAllByProcessAndJobDefinition(step.process, validator.validatorFor))
                 (job as ValidatingJob).validatorFor = validatedStep
             }
             // add a ProcessingStepUpdate to the ProcessingStep

@@ -108,7 +108,7 @@ class RestartActionService {
         StartJob startJob = getStartJob(process)
         ProcessingStepUpdate processingStepUpdate = processService.getLatestProcessingStepUpdate(processService.getLatestProcessingStep(process))
 
-        if (processingStepUpdate.state == ExecutionState.FAILURE && !Process.findByRestarted(process)) {
+        if (processingStepUpdate.state == ExecutionState.FAILURE && !Process.findAllByRestarted(process)) {
             restart(startJob, process)
             logInComment(process, WORKFLOW_RESTARTED)
         } else {

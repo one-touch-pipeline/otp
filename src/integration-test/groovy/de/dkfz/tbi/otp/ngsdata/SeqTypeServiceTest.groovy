@@ -31,6 +31,7 @@ import org.springframework.security.access.AccessDeniedException
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.security.UserAndRoles
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 @Rollback
 @Integration
@@ -73,7 +74,7 @@ class SeqTypeServiceTest implements UserAndRoles {
         setupData()
         DomainFactory.createAllAlignableSeqTypes()
         SeqTrack seqTrack = DomainFactory.createSeqTrack()
-        addUserWithReadAccessToProject(User.findByUsername(USER), seqTrack.project)
+        addUserWithReadAccessToProject(CollectionUtils.atMostOneElement(User.findAllByUsername(USER)), seqTrack.project)
         SpringSecurityUtils.doWithAuth(USER) {
             List<SeqType> seqtypes = seqTypeService.alignableSeqTypesByProject(seqTrack.project)
             assert 0 == seqtypes.size()

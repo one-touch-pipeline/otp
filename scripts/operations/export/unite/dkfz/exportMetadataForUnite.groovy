@@ -216,7 +216,7 @@ projectNames.each { projectName ->
     Path outputFolderPerProject = outputFolder.resolve(projectName)
     fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(outputFolderPerProject, realm)
 
-    Project project = Project.findByName(projectName)
+    Project project = CollectionUtils.atMostOneElement(Project.findAllByName(projectName))
     assert project : "There is not project with the name ${projectName}"
 
     file << "\n${projectName}\n"

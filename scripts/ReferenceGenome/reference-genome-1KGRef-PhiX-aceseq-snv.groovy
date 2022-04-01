@@ -22,10 +22,11 @@
 
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 ReferenceGenomeService referenceGenomeService = ctx.referenceGenomeService
 
-ReferenceGenome referenceGenome = ReferenceGenome.findByName('1KGRef_PhiX')
+ReferenceGenome referenceGenome = CollectionUtils.atMostOneElement(ReferenceGenome.findAllByName('1KGRef_PhiX'))
 println  referenceGenome.knownHaplotypesLegendFileX
 println  referenceGenome.knownHaplotypesLegendFile
 println  referenceGenome.knownHaplotypesFileX

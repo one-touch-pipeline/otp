@@ -28,6 +28,7 @@ import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.DataTableCommand
 
 @Secured('isFullyAuthenticated()')
@@ -91,7 +92,7 @@ class AlignmentConfigurationOverviewController {
                         RoddyWorkflowConfig.getLatestForProject(
                                 project,
                                 it.seqType,
-                                Pipeline.findByName(Pipeline.Name.PANCAN_ALIGNMENT)
+                                CollectionUtils.atMostOneElement(Pipeline.findAllByName(Pipeline.Name.PANCAN_ALIGNMENT))
                         )?.adapterTrimmingNeeded
             }
             return [

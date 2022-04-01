@@ -31,6 +31,7 @@ import de.dkfz.tbi.otp.Comment
 import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.HelperUtils
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
@@ -164,7 +165,8 @@ class IlseSubmissionServiceSpec extends Specification implements DataTest, Domai
     }
 
     private SeqTrack createSeqTrackWithIlseNumber(Integer ilseNumber) {
-        IlseSubmission ilseSubmission = ilseNumber ? (IlseSubmission.findByIlseNumber(ilseNumber) ?: createIlseSubmission(ilseNumber: ilseNumber)) : null
+        IlseSubmission ilseSubmission = ilseNumber ?
+                (CollectionUtils.atMostOneElement(IlseSubmission.findAllByIlseNumber(ilseNumber)) ?: createIlseSubmission(ilseNumber: ilseNumber)) : null
         return createSeqTrack(ilseSubmission: ilseSubmission)
     }
 

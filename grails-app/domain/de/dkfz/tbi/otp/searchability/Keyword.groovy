@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.searchability
 
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.Entity
 
 class Keyword implements Entity {
@@ -38,7 +39,7 @@ class Keyword implements Entity {
     }
 
     static Keyword findOrSaveByName(String name) {
-        return findByName(name) ?: new Keyword(name: name).save(flush: true)
+        return CollectionUtils.atMostOneElement(findAllByName(name)) ?: new Keyword(name: name).save(flush: true)
     }
 
     @Override

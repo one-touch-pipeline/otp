@@ -235,8 +235,8 @@ class LaneSwapService extends DataSwapService<LaneSwapParameters, LaneSwapData> 
     @SuppressWarnings('AvoidFindWithoutAll')
     private Swap<SequencingReadType> getSequencingReadTypeSwaps(LaneSwapParameters parameters) {
         return new Swap<SequencingReadType>(
-                SequencingReadType.findByName(parameters.sequencingReadTypeSwap.old),
-                SequencingReadType.findByName(parameters.sequencingReadTypeSwap.new)
+                SequencingReadType.getByName(parameters.sequencingReadTypeSwap.old),
+                SequencingReadType.getByName(parameters.sequencingReadTypeSwap.new)
         )
     }
 

@@ -143,12 +143,12 @@ class ConfigSelectorServiceIntegrationSpec extends Specification implements Work
 
         where:
         x | projects                     | workflowVersions                                | workflows                     | seqTypes                     | referenceGenomes                     | libraryPreparationKits                     | result
-        1 | { Project.findByName("p1") } | { WorkflowVersion.findByWorkflowVersion("v1") } | { Workflow.findByName("w1") } | { SeqType.findByName("s1") } | { ReferenceGenome.findByName("r1") } | { LibraryPreparationKit.findByName("l1") } | ["ewcs1", "ewcs3", "ewcs5"]
-        2 | { null }                     | { null }                                        | { Workflow.findByName("w2") } | { null }                     | { null }                             | { null }                                   | ["ewcs2", "ewcs3", "ewcs4", "ewcs5"]
-        3 | { Project.findByName("p1") } | { null }                                        | { null }                      | { null }                     | { null }                             | { null }                                   | ["ewcs1", "ewcs3", "ewcs5"]
-        4 | { Project.findByName("p1") } | { null }                                        | { null }                      | { SeqType.findByName("s2") } | { null }                             | { null }                                   | ["ewcs3", "ewcs5"]
-        5 | { null }                     | { null }                                        | { Workflow.findByName("w3") } | { null }                     | { null }                             | { null }                                   | ["ewcs5"]
-        6 | { Project.findByName("p3") } | { null }                                        | { null }                      | { null }                     | { null }                             | { null }                                   | ["ewcs5"]
+        1 | { CollectionUtils.atMostOneElement(Project.findAllByName("p1")) } | { CollectionUtils.atMostOneElement(WorkflowVersion.findAllByWorkflowVersion("v1")) } | { CollectionUtils.atMostOneElement(Workflow.findAllByName("w1")) } | { CollectionUtils.atMostOneElement(SeqType.findAllByName("s1")) } | { CollectionUtils.atMostOneElement(ReferenceGenome.findAllByName("r1")) } | { CollectionUtils.atMostOneElement(LibraryPreparationKit.findAllByName("l1")) } | ["ewcs1", "ewcs3", "ewcs5"]
+        2 | { null }                     | { null }                                        | { CollectionUtils.atMostOneElement(Workflow.findAllByName("w2")) } | { null }                     | { null }                             | { null }                                   | ["ewcs2", "ewcs3", "ewcs4", "ewcs5"]
+        3 | { CollectionUtils.atMostOneElement(Project.findAllByName("p1")) } | { null }                                        | { null }                      | { null }                     | { null }                             | { null }                                   | ["ewcs1", "ewcs3", "ewcs5"]
+        4 | { CollectionUtils.atMostOneElement(Project.findAllByName("p1")) } | { null }                                        | { null }                      | { CollectionUtils.atMostOneElement(SeqType.findAllByName("s2")) } | { null }                             | { null }                                   | ["ewcs3", "ewcs5"]
+        5 | { null }                     | { null }                                        | { CollectionUtils.atMostOneElement(Workflow.findAllByName("w3")) } | { null }                     | { null }                             | { null }                                   | ["ewcs5"]
+        6 | { CollectionUtils.atMostOneElement(Project.findAllByName("p3")) } | { null }                                        | { null }                      | { null }                     | { null }                             | { null }                                   | ["ewcs5"]
         7 | { null }                     | { null }                                        | { null }                      | { null }                     | { null }                             | { null }                                   | []
     }
 
@@ -217,19 +217,19 @@ class ConfigSelectorServiceIntegrationSpec extends Specification implements Work
         ConfigSelectorService service = new ConfigSelectorService()
         setupData()
 
-        ExternalWorkflowConfigSelector ewcs1 = ExternalWorkflowConfigSelector.findByName("ewcs1")
+        ExternalWorkflowConfigSelector ewcs1 = CollectionUtils.atMostOneElement(ExternalWorkflowConfigSelector.findAllByName("ewcs1"))
         ewcs1.customPriority = 2
         ewcs1.save(flush: true)
 
-        ExternalWorkflowConfigSelector ewcs3 = ExternalWorkflowConfigSelector.findByName("ewcs3")
+        ExternalWorkflowConfigSelector ewcs3 = CollectionUtils.atMostOneElement(ExternalWorkflowConfigSelector.findAllByName("ewcs3"))
         ewcs3.customPriority = 5
         ewcs3.save(flush: true)
 
-        ExternalWorkflowConfigSelector ewcs4 = ExternalWorkflowConfigSelector.findByName("ewcs4")
+        ExternalWorkflowConfigSelector ewcs4 = CollectionUtils.atMostOneElement(ExternalWorkflowConfigSelector.findAllByName("ewcs4"))
         ewcs4.customPriority = 1
         ewcs4.save(flush: true)
 
-        ExternalWorkflowConfigSelector ewcs5 = ExternalWorkflowConfigSelector.findByName("ewcs5")
+        ExternalWorkflowConfigSelector ewcs5 = CollectionUtils.atMostOneElement(ExternalWorkflowConfigSelector.findAllByName("ewcs5"))
         ewcs5.customPriority = 3
         ewcs5.save(flush: true)
 

@@ -30,7 +30,8 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingThresholds
 import de.dkfz.tbi.otp.dataprocessing.ProcessingThresholdsService
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePairDeciderService
 import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.otp.security.*
+import de.dkfz.tbi.otp.security.RolesService
+import de.dkfz.tbi.otp.security.SecurityService
 
 @Secured('isFullyAuthenticated()')
 class ProcessingThresholdController {

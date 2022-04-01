@@ -32,6 +32,7 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.HelperUtils
 import de.dkfz.tbi.util.spreadsheet.Delimiter
 
@@ -527,7 +528,7 @@ class SampleIdentifierServiceSpec extends Specification implements DataTest, Ser
 
         then:
         output == []
-        SampleIdentifier identifier = SampleIdentifier.findByName("identifier")
+        SampleIdentifier identifier = CollectionUtils.atMostOneElement(SampleIdentifier.findAllByName("identifier"))
         identifier.sample.individual.pid == "pid"
         identifier.sample.individual.project == project
         identifier.sample.sampleType.name == "type"

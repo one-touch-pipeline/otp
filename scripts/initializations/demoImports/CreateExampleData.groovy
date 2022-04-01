@@ -400,14 +400,14 @@ class ExampleData {
     }
 
     SampleType findOrCreateSampleType(String name) {
-        return SampleType.findByName(name) ?: new SampleType([
+        return CollectionUtils.atMostOneElement(SampleType.findAllByName(name)) ?: new SampleType([
                 name                   : name,
                 specificReferenceGenome: SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT,
         ]).save(flush: true)
     }
 
     SampleTypePerProject findOrCreateSampleTypePerProject(SampleType sampleType, SampleTypePerProject.Category category) {
-        return SampleTypePerProject.findByProjectAndSampleType(project, sampleType) ?: new SampleTypePerProject([
+        return CollectionUtils.atMostOneElement(SampleTypePerProject.findAllByProjectAndSampleType(project, sampleType)) ?: new SampleTypePerProject([
                 project   : project,
                 sampleType: sampleType,
                 category  : category,
@@ -420,7 +420,7 @@ class ExampleData {
                 controlSampleTypes,
         ].flatten().each { SampleType sampleType ->
             analyseAbleSeqType.each { SeqType seqType ->
-                return ProcessingThresholds.findByProjectAndSampleTypeAndSeqType(project, sampleType, seqType) ?:
+                return CollectionUtils.atMostOneElement(ProcessingThresholds.findAllByProjectAndSampleTypeAndSeqType(project, sampleType, seqType)) ?:
                         new ProcessingThresholds([
                                 project      : project,
                                 seqType      : seqType,
@@ -434,7 +434,7 @@ class ExampleData {
 
     ProcessingPriority findOrCreateProcessingPriority() {
         String name = "queue"
-        return ProcessingPriority.findByName(name) ?: new ProcessingPriority([
+        return CollectionUtils.atMostOneElement(ProcessingPriority.findAllByName(name)) ?: new ProcessingPriority([
                 name                       : name,
                 queue                      : name,
                 priority                   : ProcessingPriority.count,
@@ -461,7 +461,7 @@ class ExampleData {
     }
 
     Realm findOrCreateRealm() {
-        return Realm.findByName(realmName) ?: new Realm([
+        return CollectionUtils.atMostOneElement(Realm.findAllByName(realmName)) ?: new Realm([
                 name                       : realmName,
                 jobScheduler               : Realm.JobScheduler.LSF,
                 host                       : "localhost",
@@ -473,7 +473,7 @@ class ExampleData {
 
     ReferenceGenome findOrCreateReferenceGenome() {
         String name = "1KGRef_PhiX"
-        ReferenceGenome referenceGenome = ReferenceGenome.findByName(name)
+        ReferenceGenome referenceGenome = CollectionUtils.atMostOneElement(ReferenceGenome.findAllByName(name))
         if (referenceGenome) {
             return referenceGenome
         }
@@ -498,7 +498,7 @@ class ExampleData {
 
     SeqCenter findOrCreateSeqCenter() {
         String name = "ExampleCenter"
-        return SeqCenter.findByName(name) ?: new SeqCenter([
+        return CollectionUtils.atMostOneElement(SeqCenter.findAllByName(name)) ?: new SeqCenter([
                 name   : name,
                 dirName: "center",
         ]).save(flush: true)
@@ -506,7 +506,7 @@ class ExampleData {
 
     SeqPlatform findOrCreateSeqPlatform() {
         String name = "ExampleSeqPlatform"
-        return SeqPlatform.findByName(name) ?: new SeqPlatform([
+        return CollectionUtils.atMostOneElement(SeqPlatform.findAllByName(name)) ?: new SeqPlatform([
                 name                 : name,
                 seqPlatformModelLabel: new SeqPlatformModelLabel([
                         name: "ExampleModel",
@@ -530,7 +530,7 @@ class ExampleData {
 
     SoftwareTool findOrCreateSoftwareTool() {
         String name = "ExampleSoftwareTool"
-        return SoftwareTool.findByProgramName(name) ?: new SoftwareTool([
+        return CollectionUtils.atMostOneElement(SoftwareTool.findAllByProgramName(name)) ?: new SoftwareTool([
                 programName   : "ExampleSoftwareTool",
                 programVersion: "1.2.3",
                 type          : SoftwareTool.Type.BASECALLING,
@@ -544,7 +544,7 @@ class ExampleData {
     }
 
     Project findOrCreateProject(String projectName) {
-        return Project.findByName(projectName) ?: new Project([
+        return CollectionUtils.atMostOneElement(Project.findAllByName(projectName)) ?: new Project([
                 name               : projectName,
                 dirName            : projectName,
                 individualPrefix   : "prefix_${Project.count()}",
@@ -666,7 +666,7 @@ class ExampleData {
                 seqTracks            : seqTracks as Set,
                 referenceGenome      : referenceGenome,
                 pipeline             : pipeline,
-                statSizeFileName     : pipeline.name == Pipeline.Name.PANCAN_ALIGNMENT ? StatSizeFileName.findByReferenceGenome(referenceGenome).name : null,
+                statSizeFileName     : pipeline.name == Pipeline.Name.PANCAN_ALIGNMENT ? CollectionUtils.atMostOneElement(StatSizeFileName.findAllByReferenceGenome(referenceGenome)).name : null,
                 seqPlatformGroup     : seqPlatformGroup,
                 libraryPreparationKit: seqTrack.seqType.isWgbs() ? null : libraryPreparationKit,
         ]).save(flush: true)
@@ -709,8 +709,8 @@ class ExampleData {
     }
 
     RoddyWorkflowConfig findOrCreateRoddyWorkflowConfig(MergingWorkPackage mergingWorkPackage) {
-        return RoddyWorkflowConfig.findByProjectAndSeqTypeAndPipelineAndObsoleteDateIsNull(
-                mergingWorkPackage.project, mergingWorkPackage.seqType, mergingWorkPackage.pipeline) ?:
+        return atMostOneElement(RoddyWorkflowConfig.findAllByProjectAndSeqTypeAndPipelineAndObsoleteDateIsNull(
+                mergingWorkPackage.project, mergingWorkPackage.seqType, mergingWorkPackage.pipeline)) ?:
                 new RoddyWorkflowConfig([
                         project              : mergingWorkPackage.project,
                         seqType              : mergingWorkPackage.seqType,
