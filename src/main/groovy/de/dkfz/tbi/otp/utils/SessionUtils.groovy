@@ -25,10 +25,12 @@ import de.dkfz.tbi.otp.ngsdata.Realm
 
 class SessionUtils {
     static <T> T withNewSession(Closure<T> closure) {
-        Realm.withNewSession closure
+        Realm.withNewSession {
+            closure()
+        }
     }
 
-    static <T> T withNewTransaction(Closure<T> closure) {
+    static <T> T withTransaction(Closure<T> closure) {
         Realm.withTransaction {
             closure()
         }

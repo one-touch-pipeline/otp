@@ -821,4 +821,3 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
         abstract void execute()
     }
 }
-

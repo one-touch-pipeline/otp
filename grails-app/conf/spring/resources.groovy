@@ -1,4 +1,3 @@
-
 /*
  * Copyright 2011-2019 The OTP authors
  *
@@ -34,7 +33,7 @@ import static grails.plugin.springsecurity.SpringSecurityUtils.getSecurityConfig
 
 beans = {
     // include Spring Beans with @Component annotation
-    xmlns context:"http://www.springframework.org/schema/context"
+    xmlns context: "http://www.springframework.org/schema/context"
     context.'component-scan'('base-package': "de.dkfz.tbi.otp")
 
     if (Environment.current == Environment.TEST) {
@@ -45,6 +44,12 @@ beans = {
         configService(Class.forName("de.dkfz.tbi.otp.TestConfigService")) {
             processingOptionService = ref('processingOptionService')
         }
+    } else {
+        // proper thread pool
+        xmlns task: "http://www.springframework.org/schema/task"
+        task.executor(id: "taskExecutor", "pool-size": 10)
+        task.scheduler(id: "taskScheduler", "pool-size": 10)
+        task.'annotation-driven'(executor: "taskExecutor", scheduler: "taskScheduler")
     }
 
     userDetailsService(UserCreatingUserDetailsService)

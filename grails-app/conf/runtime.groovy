@@ -169,13 +169,13 @@ environments {
     }
     WORKFLOW_TEST {
         hibernate {
-            queries: false
+            //queries = false
             cache.use_second_level_cache = false
             cache.use_query_cache = false
         }
         dataSource {
-            jmxExport = true
-            pooled: true
+            //jmxExport = true
+            //pooled = true
             driverClassName = "org.h2.Driver"
             dialect = H2Dialect
             username = "sa"

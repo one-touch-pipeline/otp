@@ -33,7 +33,7 @@ class PanCanWgbsAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkflowTes
 
     void "test AlignLanesOnly, no baseBam exist, one lane, all fine"() {
         given:
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             createSeqTrack("readGroup1")
         }
 
@@ -49,7 +49,7 @@ class PanCanWgbsAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkflowTes
         given:
         SeqTrack firstSeqTrack
         SeqTrack secondSeqTrack
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             if (setLibrary) {
                 firstSeqTrack = createSeqTrack("readGroup1", [libraryName: "lib1"])
                 secondSeqTrack = createSeqTrack("readGroup2", [libraryName: "lib5"])

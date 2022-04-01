@@ -54,7 +54,7 @@ abstract class AbstractRoddyBamFilePairAnalysisWorkflowTests<Instance extends Ba
     void "testWholeWorkflowWithRoddyBamFile"() {
         given:
         Assume.assumeFalse(ignoreRoddyBamFileTest)
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             setupRoddyBamFile()
             setupData()
         }
@@ -69,7 +69,7 @@ abstract class AbstractRoddyBamFilePairAnalysisWorkflowTests<Instance extends Ba
     void "testWholeWorkflowWithExternalBamFile"() {
         given:
         Assume.assumeFalse(ignoreExternalBamFileTest)
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             setupExternalBamFile()
             setupData()
         }
@@ -87,7 +87,7 @@ abstract class AbstractRoddyBamFilePairAnalysisWorkflowTests<Instance extends Ba
     }
 
     void checkInstance() {
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             Instance createdInstance = BamFilePairAnalysis.listOrderById().last()
             assert createdInstance.processingState == AnalysisProcessingStates.FINISHED
             assert createdInstance.config == config

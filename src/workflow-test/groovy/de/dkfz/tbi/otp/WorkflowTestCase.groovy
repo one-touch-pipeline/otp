@@ -145,7 +145,7 @@ abstract class WorkflowTestCase extends Specification implements UserAndRoles, G
 
     void setup() {
         doCleanup()
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             setupDirectoriesAndRealm()
 
             sql = new Sql(dataSource)
@@ -229,7 +229,7 @@ abstract class WorkflowTestCase extends Specification implements UserAndRoles, G
     }
 
     void doCleanup() {
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             JobExecutionPlan.list()*.startJob*.bean.each {
                 ((AbstractStartJobImpl) Holders.applicationContext.getBean(it)).onApplicationEvent(null)
             }
@@ -341,7 +341,9 @@ abstract class WorkflowTestCase extends Specification implements UserAndRoles, G
                 log.debug "waiting (${counter++} min) ... "
                 lastLog = System.currentTimeMillis()
             }
-            return areAllProcessesFinished(numberOfProcesses)
+            SessionUtils.withTransaction {
+                return areAllProcessesFinished(numberOfProcesses)
+            }
         }, timeout.toMillis(), 1000L)) {
             throw new TimeoutException("Workflow did not finish within ${timeout.toString().substring(2)}.")
         }
@@ -377,11 +379,13 @@ abstract class WorkflowTestCase extends Specification implements UserAndRoles, G
     }
 
     protected void ensureThatWorkflowHasNotFailed(List<ProcessingStepUpdate> existingFailureProcessingStepUpdate = []) {
-        Collection<ProcessingStepUpdate> allFailureProcessingStepUpdates = ProcessingStepUpdate.findAllByState(ExecutionState.FAILURE)
-        Collection<ProcessingStepUpdate> failureProcessingStepUpdatesAfterRestart = allFailureProcessingStepUpdates - existingFailureProcessingStepUpdate
-        outputFailureInfoAndThrowException(failureProcessingStepUpdatesAfterRestart)
+        SessionUtils.withTransaction {
+            Collection<ProcessingStepUpdate> allFailureProcessingStepUpdates = ProcessingStepUpdate.findAllByState(ExecutionState.FAILURE)
+            Collection<ProcessingStepUpdate> failureProcessingStepUpdatesAfterRestart = allFailureProcessingStepUpdates - existingFailureProcessingStepUpdate
+            outputFailureInfoAndThrowException(failureProcessingStepUpdatesAfterRestart)
 
-        checkForFailedClusterJobs()
+            checkForFailedClusterJobs()
+        }
     }
 
     void checkForFailedClusterJobs() {
@@ -507,7 +511,7 @@ echo \$TEMP_DIR
      */
     @SuppressWarnings("CatchThrowable")
     protected void execute(int numberOfProcesses = 1, boolean ensureNoFailure = true) {
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             updateProjectValuesForTestRunning()
             schedulerService.startup()
             assert schedulerService.startupOk
@@ -526,11 +530,10 @@ echo \$TEMP_DIR
                 } as Runnable, 0, 5, TimeUnit.SECONDS)
                 startJobRunning = true
             }
-
-            waitUntilWorkflowFinishes(timeout, numberOfProcesses)
-            if (ensureNoFailure) {
-                ensureThatWorkflowHasNotFailed()
-            }
+        }
+        waitUntilWorkflowFinishes(timeout, numberOfProcesses)
+        if (ensureNoFailure) {
+            ensureThatWorkflowHasNotFailed()
         }
     }
 

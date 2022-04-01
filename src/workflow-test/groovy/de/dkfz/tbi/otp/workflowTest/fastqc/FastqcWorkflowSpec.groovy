@@ -91,7 +91,7 @@ class FastqcWorkflowSpec extends AbstractWorkflowSpec {
 
     void "test FastQcWorkflow, when FastQC result file is available"() {
         given:
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             setupWorkflow('gz')
             Path initialPath = lsdfFilesService.getFileInitialPathAsPath(dataFile).parent
             fileService.createLink(initialPath.resolve("${BASE_NAME}.zip"), expectedFastqc, realm)
@@ -110,7 +110,7 @@ class FastqcWorkflowSpec extends AbstractWorkflowSpec {
     @Unroll
     void "test FastQcWorkflow, when FastQC result file is not available and extension is #extension"() {
         given:
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             setupWorkflow(extension)
             fastqcDecider.decide([workflowArtefact])
         }
@@ -132,7 +132,7 @@ class FastqcWorkflowSpec extends AbstractWorkflowSpec {
     }
 
     private void checkExistenceOfResultsFiles() {
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             FastqcProcessedFile fastqcProcessedFile = CollectionUtils.atMostOneElement(FastqcProcessedFile.findAllByDataFile(dataFile))
             ZipFile expectedResult = new ZipFile(fileService.toFile(expectedFastqc))
             ZipFile actualResult = new ZipFile(fastqcDataFilesService.fastqcOutputPath(fastqcProcessedFile).toString())
@@ -151,7 +151,7 @@ class FastqcWorkflowSpec extends AbstractWorkflowSpec {
     }
 
     private void validateFastqcProcessedFile() {
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             FastqcProcessedFile fastqcProcessedFile = CollectionUtils.exactlyOneElement(FastqcProcessedFile.all)
 
             assert fastqcProcessedFile.fileExists
@@ -161,7 +161,7 @@ class FastqcWorkflowSpec extends AbstractWorkflowSpec {
     }
 
     private void validateFastQcFileContent() {
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             dataFile.refresh()
             assert null != dataFile.sequenceLength
             assert null != dataFile.nReads

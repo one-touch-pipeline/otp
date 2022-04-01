@@ -52,13 +52,13 @@ class JobSchedulerIntegrationSpec extends AbstractIntegrationSpecWithoutRollback
         jobScheduler.logService = Mock(LogService)
         jobScheduler.workflowStateChangeService = workflowStateChangeService
 
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             createWorkflowStep(beanName: BEAN_NAME, state: WorkflowStep.State.CREATED)
         }
 
         when:
         WorkflowStep step = null
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             step = CollectionUtils.exactlyOneElement(WorkflowStep.findAllByBeanName(BEAN_NAME))
         }
         jobScheduler.executeAndCheckJob(step)
@@ -72,7 +72,7 @@ class JobSchedulerIntegrationSpec extends AbstractIntegrationSpecWithoutRollback
         }
 
         and:
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             WorkflowStep workflowStep = CollectionUtils.exactlyOneElement(WorkflowStep.findAllByBeanName(BEAN_NAME))
             assert workflowStep.workflowRun.state == WorkflowRun.State.FAILED
             assert workflowStep.state == WorkflowStep.State.FAILED

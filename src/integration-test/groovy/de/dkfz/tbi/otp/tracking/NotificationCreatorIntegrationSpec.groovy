@@ -108,7 +108,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
                 otrsTicketService: otrsTicketService,
                 grailsApplication: grailsApplication,
         )
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             DomainFactory.createAllAnalysableSeqTypes()
 
             referenceGenomeProcessingOptions = DomainFactory.createReferenceGenomeAndAnalysisProcessingOptions()
@@ -140,7 +140,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         OtrsTicket ticketA, ticketB
         SeqTrack seqTrackA, seqTrackB
         setupData()
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             ticketA = createOtrsTicket()
             seqTrackA = createSeqTrackWithOneDataFile(
                     [
@@ -166,7 +166,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         }
 
         when: "running our tracking update"
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             notificationCreator.processFinished([seqTrackA, seqTrackB] as Set)
             ticketA = OtrsTicket.get(ticketA.id)
             ticketB = OtrsTicket.get(ticketA.id)
@@ -183,7 +183,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         OtrsTicket ticket
         Date installationFinished = new Date()
         setupData()
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             // Installation: finished timestamp set,     all done,     won't do more
             // FastQC:       finished timestamp not set, all done,     won't do more
             // Alignment:    finished timestamp not set, nothing done, won't do more
@@ -203,7 +203,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         }
 
         when:
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             notificationCreator.notifyAndSetFinishedTimestamps(ticket)
         }
 
@@ -220,7 +220,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         OtrsTicket ticket
         Date installationFinished = new Date()
         setupData()
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             // Installation: finished timestamp set,     all done,     won't do more
             // FastQC:       finished timestamp not set, partly done,  might do more
             // Alignment:    finished timestamp not set, nothing done, won't do more
@@ -242,7 +242,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         }
 
         when:
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             notificationCreator.notifyAndSetFinishedTimestamps(ticket)
         }
 
@@ -258,7 +258,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         given:
         OtrsTicket ticket
         setupData()
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             // Installation: finished timestamp not set, all done,     won't do more
             // FastQC:       finished timestamp not set, nothing done, might do more
             // Alignment:    finished timestamp not set, nothing done, won't do more
@@ -294,13 +294,13 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         }
 
         when:
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             OtrsTicket ticketToFinish = OtrsTicket.get(ticket.id)
             notificationCreator.notifyAndSetFinishedTimestamps(ticketToFinish)
         }
 
         then:
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             OtrsTicket result = OtrsTicket.get(ticket.id)
             result.installationFinished != null
             result.fastqcFinished == null
@@ -314,7 +314,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         given:
         OtrsTicket ticket
         setupData()
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             // Installation: finished timestamp not set, all done,     won't do more
             // FastQC:       finished timestamp not set, all done,     won't do more
             // Alignment:    finished timestamp not set, partly done,  won't do more
@@ -399,13 +399,13 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         }
 
         when:
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             OtrsTicket ticketToNotify = OtrsTicket.get(ticket.id)
             notificationCreator.notifyAndSetFinishedTimestamps(ticketToNotify)
         }
 
         then:
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             OtrsTicket result = OtrsTicket.get(ticket.id)
             result.installationFinished != null
             result.fastqcFinished != null
@@ -423,7 +423,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         given:
         OtrsTicket ticket
         setupData()
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             // Installation: finished timestamp not set, all done,     won't do more
             // FastQC:       finished timestamp not set, all done,     won't do more
             // Alignment:    finished timestamp not set, partly done,  won't do more
@@ -479,7 +479,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         }
 
         when:
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             notificationCreator.notifyAndSetFinishedTimestamps(ticket)
         }
 
@@ -503,7 +503,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         OtrsTicket ticket
         ProcessingStatus status
         setupData()
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             UserProjectRole userProjectRole = DomainFactory.createUserProjectRole(
                     project: createProject(name: 'Project1', processingNotification: processingNotification),
                     user: DomainFactory.createUser(email: EMAIL),
@@ -606,7 +606,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         }
 
         expect:
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             notificationCreator.sendCustomerNotification(ticket, status, notificationStep)
             return true
         }
@@ -627,7 +627,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         OtrsTicket ticket
         ProcessingStatus status
         setupData()
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             ticket = createOtrsTicket()
             status = new ProcessingStatus([1, 2].collect { int index ->
                 UserProjectRole userProjectRole = DomainFactory.createUserProjectRole(
@@ -661,7 +661,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         }
 
         expect:
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             notificationCreator.sendCustomerNotification(ticket, status, OtrsTicket.ProcessingStep.INSTALLATION)
             return true
         }
@@ -672,7 +672,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         OtrsTicket ticket
         ProcessingStatus status
         setupData()
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             ticket = createOtrsTicket()
             status = new ProcessingStatus([1, 2].collect { int index ->
                 UserProjectRole userProjectRole = DomainFactory.createUserProjectRole(
@@ -697,7 +697,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         }
 
         expect:
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             notificationCreator.sendCustomerNotification(ticket, status, OtrsTicket.ProcessingStep.INSTALLATION)
             return true
         }
@@ -716,7 +716,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         setupData()
 
         expect:
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             assert notificationCreator.fillInMergingWorkPackageProcessingStatuses([]).empty
             return true
         }
@@ -727,13 +727,13 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         SeqTrackProcessingStatus seqTrackStatus
         ProcessingStatus processingStatus
         setupData()
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             seqTrackStatus = createSeqTrackProcessingStatus(createSeqTrackWithOneDataFile([:], [fileWithdrawn: true]))
             processingStatus = createProcessingStatus(seqTrackStatus)
         }
 
         when:
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             notificationCreator.fillInMergingWorkPackageProcessingStatuses([seqTrackStatus])
         }
 
@@ -750,18 +750,18 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         AbstractMergedBamFile bamFile
         SeqTrackProcessingStatus seqTrackStatus
         setupData()
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             bamFile = createBamFileInProjectFolder(DomainFactory.randomProcessedBamFileProperties)
             seqTrackStatus = createSeqTrackProcessingStatus(bamFile.containedSeqTracks.first())
         }
 
         when:
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             notificationCreator.fillInMergingWorkPackageProcessingStatuses([seqTrackStatus])
         }
 
         then:
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             MergingWorkPackageProcessingStatus mwpStatus = exactlyOneElement(seqTrackStatus.mergingWorkPackageProcessingStatuses)
             assert mwpStatus.mergingWorkPackage == bamFile.mergingWorkPackage
             assert mwpStatus.completeProcessableBamFileInProjectFolder == bamFile
@@ -777,18 +777,18 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         AbstractMergedBamFile bamFile
         SeqTrackProcessingStatus seqTrackStatus
         setupData()
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             bamFile = createBamFileInProjectFolder(DomainFactory.randomProcessedBamFileProperties)
             seqTrackStatus = createSeqTrackProcessingStatus(DomainFactory.createSeqTrackWithDataFiles(bamFile.mergingWorkPackage))
         }
 
         when:
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             notificationCreator.fillInMergingWorkPackageProcessingStatuses([seqTrackStatus])
         }
 
         then:
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             MergingWorkPackageProcessingStatus mwpStatus = exactlyOneElement(seqTrackStatus.mergingWorkPackageProcessingStatuses)
             assert mwpStatus.mergingWorkPackage == bamFile.mergingWorkPackage
             assert mwpStatus.completeProcessableBamFileInProjectFolder == null
@@ -805,7 +805,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         SeqTrackProcessingStatus seqTrack2Status
         AbstractMergedBamFile bamFile
         setupData()
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             bamFile = createBamFileInProjectFolder(DomainFactory.randomProcessedBamFileProperties)
             Set<SeqTrack> seqTracks = new HashSet<SeqTrack>(((MergingWorkPackage) (bamFile.workPackage)).seqTracks)
             seqTrack1Status = createSeqTrackProcessingStatus(DomainFactory.createSeqTrackWithDataFiles(bamFile.mergingWorkPackage, [:], [fileWithdrawn: true]))
@@ -815,12 +815,12 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         }
 
         when:
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             notificationCreator.fillInMergingWorkPackageProcessingStatuses([seqTrack1Status, seqTrack2Status])
         }
 
         then:
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             MergingWorkPackageProcessingStatus mwpStatus = exactlyOneElement(seqTrack2Status.mergingWorkPackageProcessingStatuses)
             assert seqTrack1Status.mergingWorkPackageProcessingStatuses.isEmpty()
             assert seqTrack1Status.alignmentProcessingStatus == NOTHING_DONE_WONT_DO
@@ -838,13 +838,13 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         SeqTrackProcessingStatus seqTrackStatus
         ProcessingStatus processingStatus
         setupData()
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             seqTrackStatus = createSeqTrackProcessingStatus(createSeqTrackWithOneDataFile())
             processingStatus = createProcessingStatus(seqTrackStatus)
         }
 
         when:
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             notificationCreator.fillInMergingWorkPackageProcessingStatuses([seqTrackStatus])
         }
 
@@ -861,18 +861,18 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         ProcessedMergedBamFile bamFile
         SeqTrackProcessingStatus seqTrackStatus
         setupData()
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             bamFile = DomainFactory.createProcessedMergedBamFile()
             seqTrackStatus = createSeqTrackProcessingStatus(bamFile.containedSeqTracks.first())
         }
 
         when:
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             notificationCreator.fillInMergingWorkPackageProcessingStatuses([seqTrackStatus])
         }
 
         then:
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             MergingWorkPackageProcessingStatus mwpStatus = exactlyOneElement(seqTrackStatus.mergingWorkPackageProcessingStatuses)
             assert mwpStatus.mergingWorkPackage == bamFile.mergingWorkPackage
             assert mwpStatus.completeProcessableBamFileInProjectFolder == null
@@ -889,19 +889,19 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         SeqTrackProcessingStatus seqTrack1Status, seqTrack2Status
         setupData()
 
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             bamFile = createBamFileInProjectFolder(DomainFactory.randomProcessedBamFileProperties)
             seqTrack1Status = createSeqTrackProcessingStatus(bamFile.containedSeqTracks.first())
             seqTrack2Status = createSeqTrackProcessingStatus(createSeqTrackWithOneDataFile())
         }
 
         when:
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             notificationCreator.fillInMergingWorkPackageProcessingStatuses([seqTrack1Status, seqTrack2Status])
         }
 
         then:
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             MergingWorkPackageProcessingStatus mwpStatus = exactlyOneElement(seqTrack1Status.mergingWorkPackageProcessingStatuses)
             assert mwpStatus.mergingWorkPackage == bamFile.mergingWorkPackage
             assert mwpStatus.completeProcessableBamFileInProjectFolder == bamFile
@@ -919,19 +919,19 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         AbstractMergedBamFile bamFile
         SeqTrackProcessingStatus seqTrack1Status, seqTrack2Status
         setupData()
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             bamFile = DomainFactory.createProcessedMergedBamFile()
             seqTrack1Status = createSeqTrackProcessingStatus(bamFile.containedSeqTracks.first())
             seqTrack2Status = createSeqTrackProcessingStatus(createSeqTrackWithOneDataFile())
         }
 
         when:
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             notificationCreator.fillInMergingWorkPackageProcessingStatuses([seqTrack1Status, seqTrack2Status])
         }
 
         then:
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             MergingWorkPackageProcessingStatus mwpStatus = exactlyOneElement(seqTrack1Status.mergingWorkPackageProcessingStatuses)
             assert mwpStatus.mergingWorkPackage == bamFile.mergingWorkPackage
             assert mwpStatus.completeProcessableBamFileInProjectFolder == null
@@ -951,7 +951,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         AbstractMergedBamFile bamFile1, bamFile2
         SeqTrackProcessingStatus seqTrack1Status, seqTrack2Status, seqTrack3Status
 
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             bamFile1 = createBamFileInProjectFolder(DomainFactory.randomProcessedBamFileProperties)
             bamFile2 = createBamFileInProjectFolder(DomainFactory.randomProcessedBamFileProperties)
             seqTrack1Status = createSeqTrackProcessingStatus(bamFile1.containedSeqTracks.first())
@@ -960,12 +960,12 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         }
 
         when:
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             notificationCreator.fillInMergingWorkPackageProcessingStatuses([seqTrack1Status, seqTrack2Status, seqTrack3Status])
         }
 
         then:
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             MergingWorkPackageProcessingStatus mwp1Status = exactlyOneElement(seqTrack1Status.mergingWorkPackageProcessingStatuses)
             MergingWorkPackageProcessingStatus mwp2Status = exactlyOneElement(seqTrack2Status.mergingWorkPackageProcessingStatuses)
 
@@ -1010,17 +1010,17 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         setupData()
 
         MergingWorkPackageProcessingStatus mwpStatus
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             mwpStatus = createMergingWorkPackageProcessingStatus(DomainFactory.createMergingWorkPackage(), NOTHING_DONE_MIGHT_DO)
         }
 
         when:
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             notificationCreator.fillInSamplePairStatuses([mwpStatus])
         }
 
         then:
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             assert mwpStatus.samplePairProcessingStatuses.isEmpty()
             assert mwpStatus.snvProcessingStatus == NOTHING_DONE_WONT_DO
             assert mwpStatus.indelProcessingStatus == NOTHING_DONE_WONT_DO
@@ -1040,7 +1040,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         BamFilePairAnalysis analysisInstance
         MergingWorkPackageProcessingStatus mwpStatus
 
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             analysisInstance = DomainFactory."${pairAnalysis.createRoddyBamFile}"(processingState: AnalysisProcessingStates.FINISHED)
             mwpStatus = createMergingWorkPackageProcessingStatus(analysisInstance.sampleType1BamFile)
             [1, 2].each {
@@ -1049,7 +1049,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         }
 
         when:
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             analysisInstance = BamFilePairAnalysis.get(analysisInstance.id)
             analysisInstance.withdrawn = true
             analysisInstance.save(flush: true)
@@ -1057,7 +1057,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         }
 
         then:
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwpStatus.samplePairProcessingStatuses)
             assert analysisInstance.withdrawn
             assert samplePairStatus."${pairAnalysis.completeCallingInstance}" == null
@@ -1078,7 +1078,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         BamFilePairAnalysis analysisInstance
         MergingWorkPackageProcessingStatus mwpStatus
 
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             analysisInstance = DomainFactory."${pairAnalysis.createRoddyBamFile}"()
             mwpStatus = createMergingWorkPackageProcessingStatus(analysisInstance.sampleType1BamFile)
             [1, 2].each {
@@ -1088,12 +1088,12 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         }
 
         when:
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             notificationCreator.fillInSamplePairStatuses([mwpStatus])
         }
 
         then:
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwpStatus.samplePairProcessingStatuses)
             assert samplePairStatus.samplePair == analysisInstance.samplePair
             assert samplePairStatus."${pairAnalysis.completeCallingInstance}" == null
@@ -1115,7 +1115,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         BamFilePairAnalysis analysisInstance
         MergingWorkPackageProcessingStatus mwpStatus
 
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             analysisInstance = DomainFactory."${pairAnalysis.createRoddyBamFile}"([:], [coverage: 2], [coverage: 2])
             mwpStatus = createMergingWorkPackageProcessingStatus(analysisInstance.sampleType1BamFile)
             [1, 2].each {
@@ -1145,12 +1145,12 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         }
 
         when:
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             notificationCreator.fillInSamplePairStatuses([mwpStatus])
         }
 
         then:
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwpStatus.samplePairProcessingStatuses)
             assert samplePairStatus.samplePair == analysisInstance.samplePair
             assert samplePairStatus."${pairAnalysis.completeCallingInstance}" == null
@@ -1171,7 +1171,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         BamFilePairAnalysis analysisInstance
         MergingWorkPackageProcessingStatus mwpStatus
 
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             analysisInstance = DomainFactory.createAceseqInstanceWithRoddyBamFiles([:], [coverage: 2], [coverage: 2])
             mwpStatus = createMergingWorkPackageProcessingStatus(analysisInstance.sampleType1BamFile)
 
@@ -1189,12 +1189,12 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         }
 
         when:
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             notificationCreator.fillInSamplePairStatuses([mwpStatus])
         }
 
         then:
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwpStatus.samplePairProcessingStatuses)
             assert samplePairStatus.samplePair == analysisInstance.samplePair
             assert samplePairStatus.completeAceseqInstance == null
@@ -1213,19 +1213,19 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         BamFilePairAnalysis analysisInstance
         MergingWorkPackageProcessingStatus mwpStatus
 
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             analysisInstance = DomainFactory."${pairAnalysis.createRoddyBamFile}"()
             mwpStatus = createMergingWorkPackageProcessingStatus(analysisInstance.sampleType1BamFile.mergingWorkPackage, NOTHING_DONE_MIGHT_DO)
             analysisInstance.delete(flush: true)
         }
 
         when:
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             notificationCreator.fillInSamplePairStatuses([mwpStatus])
         }
 
         then:
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwpStatus.samplePairProcessingStatuses)
             assert samplePairStatus.samplePair == analysisInstance.samplePair
             assert samplePairStatus."${pairAnalysis.completeCallingInstance}" == null
@@ -1247,7 +1247,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         BamFilePairAnalysis analysisInstance
         MergingWorkPackageProcessingStatus mwpStatus
 
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             analysisInstance = DomainFactory."${pairAnalysis.createRoddyBamFile}"(processingState: AnalysisProcessingStates.FINISHED)
             mwpStatus = createMergingWorkPackageProcessingStatus(analysisInstance.sampleType1BamFile)
             [1, 2].each {
@@ -1256,12 +1256,12 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         }
 
         when:
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             notificationCreator.fillInSamplePairStatuses([mwpStatus])
         }
 
         then:
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwpStatus.samplePairProcessingStatuses)
             assert samplePairStatus.samplePair == analysisInstance.samplePair
             assert samplePairStatus."${pairAnalysis.completeCallingInstance}" == analysisInstance
@@ -1283,18 +1283,18 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         BamFilePairAnalysis analysisInstance
         MergingWorkPackageProcessingStatus mwpStatus
 
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             analysisInstance = DomainFactory."${pairAnalysis.createRoddyBamFile}"(processingState: AnalysisProcessingStates.FINISHED)
             mwpStatus = createMergingWorkPackageProcessingStatus(analysisInstance.sampleType1BamFile.mergingWorkPackage, NOTHING_DONE_MIGHT_DO)
         }
 
         when:
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             notificationCreator.fillInSamplePairStatuses([mwpStatus])
         }
 
         then:
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwpStatus.samplePairProcessingStatuses)
             assert samplePairStatus.samplePair == analysisInstance.samplePair
             assert samplePairStatus."${pairAnalysis.completeCallingInstance}" == null
@@ -1316,7 +1316,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         BamFilePairAnalysis analysisInstance
         MergingWorkPackageProcessingStatus mwpStatus
 
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             analysisInstance = DomainFactory."${pairAnalysis.createRoddyBamFile}"()
             mwpStatus = createMergingWorkPackageProcessingStatus(analysisInstance.sampleType1BamFile)
             [1, 2].each {
@@ -1325,12 +1325,12 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         }
 
         when:
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             notificationCreator.fillInSamplePairStatuses([mwpStatus])
         }
 
         then:
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwpStatus.samplePairProcessingStatuses)
             assert samplePairStatus.samplePair == analysisInstance.samplePair
             assert samplePairStatus."${pairAnalysis.completeCallingInstance}" == null
@@ -1353,7 +1353,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         MergingWorkPackageProcessingStatus mwp1Status
         MergingWorkPackageProcessingStatus mwp2Status
 
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             analysisInstance = DomainFactory."${pairAnalysis.createRoddyBamFile}"(processingState: AnalysisProcessingStates.FINISHED)
             mwp1Status = createMergingWorkPackageProcessingStatus(analysisInstance.sampleType1BamFile)
             mwp2Status = createMergingWorkPackageProcessingStatus(DomainFactory.createMergingWorkPackage(), NOTHING_DONE_MIGHT_DO)
@@ -1363,12 +1363,12 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         }
 
         when:
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             notificationCreator.fillInSamplePairStatuses([mwp1Status, mwp2Status])
         }
 
         then:
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwp1Status.samplePairProcessingStatuses)
             assert samplePairStatus.samplePair == analysisInstance.samplePair
             assert samplePairStatus."${pairAnalysis.completeCallingInstance}" == analysisInstance
@@ -1393,19 +1393,19 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         MergingWorkPackageProcessingStatus mwp1Status
         MergingWorkPackageProcessingStatus mwp2Status
 
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             analysisInstance = DomainFactory."${pairAnalysis.createRoddyBamFile}"(processingState: AnalysisProcessingStates.FINISHED)
             mwp1Status = createMergingWorkPackageProcessingStatus(DomainFactory.createMergingWorkPackage(), NOTHING_DONE_MIGHT_DO)
             mwp2Status = createMergingWorkPackageProcessingStatus(analysisInstance.sampleType1BamFile)
         }
 
         when:
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             notificationCreator.fillInSamplePairStatuses([mwp1Status, mwp2Status])
         }
 
         then:
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwp2Status.samplePairProcessingStatuses)
 
             assert mwp1Status.samplePairProcessingStatuses.isEmpty()
@@ -1432,7 +1432,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         MergingWorkPackageProcessingStatus mwp1Status
         MergingWorkPackageProcessingStatus mwp2Status
 
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             analysisInstance = DomainFactory."${pairAnalysis.createRoddyBamFile}"(processingState: AnalysisProcessingStates.FINISHED)
             analysisInstance2 = DomainFactory."${pairAnalysis.createRoddyBamFile}"(processingState: AnalysisProcessingStates.FINISHED)
             mwp1Status = createMergingWorkPackageProcessingStatus(analysisInstance.sampleType1BamFile)
@@ -1443,12 +1443,12 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         }
 
         when:
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             notificationCreator.fillInSamplePairStatuses([mwp1Status, mwp2Status])
         }
 
         then:
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             SamplePairProcessingStatus samplePair1Status = exactlyOneElement(mwp1Status.samplePairProcessingStatuses)
             SamplePairProcessingStatus samplePair2Status = exactlyOneElement(mwp2Status.samplePairProcessingStatuses)
 
@@ -1488,7 +1488,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         SeqTrackProcessingStatus statusB
         MergingWorkPackage mergePackageA
 
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             // shared
             Sample sharedSample = createSample()
             SeqType sharedSeqType = createSeqType()
@@ -1526,12 +1526,12 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
 
         when: "looking for B"
         List<MergingWorkPackageProcessingStatus> statuses
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             statuses = notificationCreator.fillInMergingWorkPackageProcessingStatuses([statusB])
         }
 
         then: "we should find A's merging package"
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             assert statuses*.mergingWorkPackage == [mergePackageA]
             return true
         }
@@ -1543,7 +1543,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
 
         SeqTrackProcessingStatus statusB
 
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             // shared
             Sample sharedSample = createSample()
             SeqType sharedSeqType = createSeqType()
@@ -1580,12 +1580,12 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
 
         when: "looking for B"
         List<MergingWorkPackageProcessingStatus> statuses
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             statuses = notificationCreator.fillInMergingWorkPackageProcessingStatuses([statusB])
         }
 
         then: "we should not find a merging package"
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             assert statuses.empty
             return true
         }
@@ -1612,7 +1612,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         UserProjectRole userProjectRole
         SeqTrack seqTrack
 
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             ticket = createOtrsTicket()
             userProjectRole = DomainFactory.createUserProjectRole(project: createProject(customFinalNotification: true))
             seqTrack = createSeqTrackWithOneDataFile(
@@ -1633,7 +1633,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         }
 
         expect:
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             notificationCreator.sendProcessingStatusOperatorNotification(ticket, [seqTrack] as Set, new ProcessingStatus(), true)
             return true
         }
@@ -1654,7 +1654,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
 
         OtrsTicket otrsTicket
 
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             DomainFactory.createProcessingOptionForOtrsTicketPrefix(PREFIX)
             setupBlacklistImportSourceNotificationProcessingOption("")
 
@@ -1677,7 +1677,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         }
 
         expect:
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             notificationCreator.sendImportSourceOperatorNotification(otrsTicket)
             return true
         }
@@ -1689,7 +1689,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
 
         OtrsTicket otrsTicket
 
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             DomainFactory.createProcessingOptionForOtrsTicketPrefix(PREFIX)
 
             String blacklisted = setupBlacklistImportSourceNotificationProcessingOption("/blacklisted").value
@@ -1707,7 +1707,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         }
 
         expect:
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             notificationCreator.sendImportSourceOperatorNotification(otrsTicket)
             return true
         }
@@ -1718,7 +1718,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         OtrsTicket otrsTicket
         List<String> expected = []
 
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             otrsTicket = createOtrsTicket()
 
             List<DataFile> dataFilesA = [createDataFile(), createDataFile()]
@@ -1735,7 +1735,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         }
 
         expect:
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             assert notificationCreator.getPathsToDelete(otrsTicket).sort() == expected.sort()
             return true
         }
@@ -1746,7 +1746,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         OtrsTicket otrsTicket
         List<String> expected = []
 
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             String blacklisted = setupBlacklistImportSourceNotificationProcessingOption("/blacklisted").value
 
             otrsTicket = createOtrsTicket()
@@ -1769,7 +1769,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         }
 
         expect:
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             assert notificationCreator.getPathsToDelete(otrsTicket).sort() == expected.sort()
             return true
         }
@@ -1779,7 +1779,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         given:
         OtrsTicket otrsTicket
 
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             String blacklisted = setupBlacklistImportSourceNotificationProcessingOption("/blacklisted").value
 
             otrsTicket = createOtrsTicket()
@@ -1802,7 +1802,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         }
 
         expect:
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             assert notificationCreator.getPathsToDelete(otrsTicket).sort() == []
             return true
         }

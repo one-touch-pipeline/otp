@@ -67,7 +67,7 @@ abstract class AbstractCellRangerAlignmentWorkflowTests extends AbstractAlignmen
 
     @Override
     void setup() {
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             Project project = createProject(realm: realm)
             Individual individual = DomainFactory.createIndividual(project: project)
             sample = createSample(individual: individual)
@@ -133,7 +133,7 @@ abstract class AbstractCellRangerAlignmentWorkflowTests extends AbstractAlignmen
     }
 
     void checkResults() {
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             SingleCellBamFile singleCellBamFile = CollectionUtils.exactlyOneElement(SingleCellBamFile.all)
 
             assert singleCellBamFile.fileOperationStatus == AbstractMergedBamFile.FileOperationStatus.PROCESSED
@@ -147,7 +147,7 @@ abstract class AbstractCellRangerAlignmentWorkflowTests extends AbstractAlignmen
     @Unroll
     void "test CellRanger with #p.nLanes lanes, with expectedCells #p.expected and enforcedCells #p.enforced"() {
         given:
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             CellRangerMergingWorkPackage crmwp = CellRangerMergingWorkPackage.get(mwp.id)
             crmwp.seqTracks = createNSeqTracks(p.nLanes)
             mwp.expectedCells = p.expected
@@ -162,7 +162,7 @@ abstract class AbstractCellRangerAlignmentWorkflowTests extends AbstractAlignmen
         checkResults()
 
         when: //check also setting mwp as final
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             Authentication authentication = SecurityContextHolder.context.authentication
             try {
                 List<GrantedAuthority> authorities = [
@@ -177,7 +177,7 @@ abstract class AbstractCellRangerAlignmentWorkflowTests extends AbstractAlignmen
         }
 
         then:
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             SingleCellBamFile singleCellBamFile = CollectionUtils.exactlyOneElement(SingleCellBamFile.all)
 
             assert singleCellBamFile.mergingWorkPackage.status == CellRangerMergingWorkPackage.Status.FINAL

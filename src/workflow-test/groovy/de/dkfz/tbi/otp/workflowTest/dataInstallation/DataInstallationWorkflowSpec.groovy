@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.workflowTest.dataInstallation
 
+import spock.lang.IgnoreRest
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellService
@@ -72,7 +73,7 @@ class DataInstallationWorkflowSpec extends AbstractWorkflowSpec {
 
     @Override
     void setup() {
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             fileType = createFileType()
 
             fastqR1Filepath = prepareFileSystemForFile(FASTQ_R1_FILENAME, FASTQ_R1_ORIGINAL_FILENAME)
@@ -124,7 +125,7 @@ class DataInstallationWorkflowSpec extends AbstractWorkflowSpec {
     }
 
     protected void prepareAndExecute(int expectedWorkflows = 1) {
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             FastqImportInstance fastqImportInstance = createFastqImportInstance([
                     dataFiles: DataFile.list(),
             ])
@@ -137,7 +138,7 @@ class DataInstallationWorkflowSpec extends AbstractWorkflowSpec {
     @Unroll
     void "test DataInstallation, files have to be linkedExternally #linkedExternally"() {
         given:
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             createWholeGenomeSetup(linkedExternally)
         }
 
@@ -153,10 +154,11 @@ class DataInstallationWorkflowSpec extends AbstractWorkflowSpec {
         false            | _
     }
 
+    @IgnoreRest
     void "test ChipSeq DataInstallation"() {
         given:
         SeqTrack seqTrack
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             seqTrack = createChipSeqSeqTrack()
             createDataFiles(seqTrack)
         }
@@ -171,7 +173,7 @@ class DataInstallationWorkflowSpec extends AbstractWorkflowSpec {
     void "test single cell import without well"() {
         given:
         SeqTrack seqTrack
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             seqTrack = createSeqTrack([
                     seqType            : createSeqType([
                             libraryLayout: SequencingReadType.PAIRED,
@@ -192,7 +194,7 @@ class DataInstallationWorkflowSpec extends AbstractWorkflowSpec {
     void "test single cell import with well"() {
         given:
         List<SeqTrack> seqTracks
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             SeqType seqType = createSeqType([
                     libraryLayout: SequencingReadType.PAIRED,
                     singleCell   : true,
@@ -234,7 +236,7 @@ class DataInstallationWorkflowSpec extends AbstractWorkflowSpec {
      * check that DataFiles are copied and completed successfully.
      */
     protected void checkThatWorkflowWasSuccessful() {
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             SeqTrack.list().each { SeqTrack seqTrack ->
                 assert seqTrack.dataInstallationState == SeqTrack.DataProcessingState.FINISHED
                 assert SeqTrack.DataProcessingState.NOT_STARTED == seqTrack.fastqcState
@@ -258,7 +260,7 @@ class DataInstallationWorkflowSpec extends AbstractWorkflowSpec {
      * check that links in the well structure was created successfully
      */
     protected void checkWellBasedLinksAreCreatedSuccessful() {
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             DataFile.list().collect {
                 lsdfFilesService.getWellAllFileViewByPidPath(it)
             }.each {
@@ -271,7 +273,7 @@ class DataInstallationWorkflowSpec extends AbstractWorkflowSpec {
      * check that well mapping file was created successfully with correct content
      */
     protected void checkMappingFileAreCreatedSuccessful() {
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             List<DataFile> dataFiles = DataFile.list()
 
             //check mapping file exists

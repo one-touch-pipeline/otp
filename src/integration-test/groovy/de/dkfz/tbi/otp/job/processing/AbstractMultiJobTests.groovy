@@ -77,7 +77,7 @@ class AbstractMultiJobTests implements UserAndRoles {
     Collection<ClusterJobIdentifier> monitoredJobs
 
     void setupData() {
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             step = createAndSaveProcessingStep()
             realm = createRealm()
             clusterJob1 = new ClusterJobIdentifier(realm, CLUSTER_JOB_1_ID)
@@ -94,7 +94,7 @@ class AbstractMultiJobTests implements UserAndRoles {
 
     @After
     void tearDown() {
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             TestCase.removeMetaClass(RestartCheckerService, restartCheckerService)
             scheduler.schedulerService.running.clear()
 
@@ -174,7 +174,7 @@ class AbstractMultiJobTests implements UserAndRoles {
     }
 
     void succeedingJob(final boolean withResuming) {
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             final Closure mainLogic = { final int phase, final Collection<? extends ClusterJob> finishedClusterJobs ->
                 List<ClusterJobIdentifier> clusterJobIdentifiers = ClusterJobIdentifier.asClusterJobIdentifierList(finishedClusterJobs)
                 switch (phase) {
@@ -339,7 +339,7 @@ class AbstractMultiJobTests implements UserAndRoles {
     @Test
     void testFailingJobInPhase1() {
         setupData()
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             String message = HelperUtils.uniqueString
             job = createJob { final int phase, final Collection<? extends ClusterJob> finishedClusterJobs ->
                 assert phase == 1
@@ -358,7 +358,7 @@ class AbstractMultiJobTests implements UserAndRoles {
     @Test
     void testFailingJobInPhase2() {
         setupData()
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             String message = HelperUtils.uniqueString
             job = createJob { final int phase, final Collection<? extends ClusterJob> finishedClusterJobs ->
                 switch (phase) {
@@ -419,7 +419,7 @@ class TestThread extends Thread {
     void run() {
         Thread.sleep(200)
         suspendCancelled.set(true)
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             job.cancelSuspend()
         }
     }

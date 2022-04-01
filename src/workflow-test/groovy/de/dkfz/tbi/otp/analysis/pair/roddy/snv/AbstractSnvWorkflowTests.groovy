@@ -44,7 +44,7 @@ abstract class AbstractSnvWorkflowTests extends AbstractRoddyBamFilePairAnalysis
 
     void "testWholeWorkflowWithProcessedMergedBamFile"() {
         given:
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             setupProcessedMergedBamFile()
             setupData()
         }

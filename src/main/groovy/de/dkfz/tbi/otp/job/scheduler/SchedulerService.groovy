@@ -320,7 +320,7 @@ class SchedulerService {
             return
         }
         Job job = null
-        SessionUtils.withNewSession {
+        SessionUtils.withTransaction {
             job = doSchedule()
         }
 

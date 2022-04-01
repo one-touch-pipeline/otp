@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.importExternallyMergedBam
 
+import spock.lang.IgnoreRest
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.WorkflowTestCase
@@ -122,7 +123,7 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase implements
 
     @Override
     void setup() {
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             DomainFactory.createProcessingOptionLazy(
                     name: COMMAND_LOAD_MODULE_LOADER,
                     type: null,
@@ -157,7 +158,7 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase implements
     }
 
     void setupFiles(boolean furtherFiles) {
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             Project project = createProject(realm: realm)
             createDirectories([new File(ftpDir), new File(projectService.getProjectDirectory(project).toString())])
             ExternallyProcessedMergedBamFile epmbf01 = createFile(project, '1', furtherFiles, false)
@@ -171,11 +172,12 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase implements
         }
     }
 
+    @IgnoreRest
     @Unroll
     void "testImportProcess_FilesHaveToBeCopied"() {
         given:
         setupFiles(furtherFiles)
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             importProcess.refresh()
             importProcess.linkOperation = ImportProcess.LinkOperation.COPY_AND_KEEP
             importProcess.save(flush: true)
@@ -188,7 +190,7 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase implements
         checkThatFileCopyingWasSuccessful(importProcess, furtherFiles)
 
         Thread.sleep(1000) //needs a sleep, otherwise the file system cache has not yet the new value
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             FileSystem fs = fileSystemService.filesystemForBamImport
             importProcess.externallyProcessedMergedBamFiles.each {
                 it.refresh()
@@ -218,7 +220,7 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase implements
     void "testImportProcess_FilesHaveToBeCopiedLinkedAndDeleted"() {
         given:
         setupFiles(furtherFiles)
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             importProcess.refresh()
             importProcess.linkOperation = ImportProcess.LinkOperation.COPY_AND_LINK
             importProcess.save(flush: true)
@@ -232,7 +234,7 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase implements
 
         Thread.sleep(1000) //needs a sleep, otherwise the file system cache has not yet the new value
 
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             importProcess.externallyProcessedMergedBamFiles.each {
                 it.refresh()
                 Path baseDirSource = Paths.get(it.importedFrom).parent
@@ -263,7 +265,7 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase implements
     void "testImportProcess_FilesHaveToBeLink"() {
         given:
         setupFiles(furtherFiles)
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             importProcess.refresh()
             importProcess.linkOperation = ImportProcess.LinkOperation.LINK_SOURCE
             importProcess.save(flush: true)
@@ -280,7 +282,7 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase implements
         then:
         Thread.sleep(1000) //needs a sleep, otherwise the file system cache has not yet the new value
 
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             FileSystem fs = fileSystemService.filesystemForBamImport
             importProcess.externallyProcessedMergedBamFiles.each {
                 it.refresh()
@@ -312,7 +314,7 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase implements
     }
 
     protected void checkThatFileCopyingWasSuccessful(ImportProcess impPro, boolean furtherFiles) {
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             FileSystem fs = fileSystemService.filesystemForBamImport
             importProcess = ImportProcess.get(impPro.id)
             assert importProcess.state == ImportProcess.State.FINISHED

@@ -43,7 +43,7 @@ class MovePanCanFilesToFinalDestinationJobIntegrationSpec extends AbstractIntegr
     RoddyBamFile roddyBamFile
 
     void setup() {
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             roddyBamFile = DomainFactory.createRoddyBamFile()
             DomainFactory.createRoddyMergedBamQa(roddyBamFile, [
                     pairedRead1: READ_COUNTS,
@@ -65,7 +65,7 @@ class MovePanCanFilesToFinalDestinationJobIntegrationSpec extends AbstractIntegr
         FileOperationStatus originalFileOperationStatus
         String exceptionMessage = HelperUtils.uniqueString
         Long id
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             id = roddyBamFile.id
             movePanCanFilesToFinalDestinationJob.metaClass.getProcessParameterObject = {
                 RoddyBamFile roddyBamFile1 = RoddyBamFile.get(id)
@@ -81,7 +81,7 @@ class MovePanCanFilesToFinalDestinationJobIntegrationSpec extends AbstractIntegr
         }
 
         when:
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             movePanCanFilesToFinalDestinationJob.execute()
         }
 
@@ -89,7 +89,7 @@ class MovePanCanFilesToFinalDestinationJobIntegrationSpec extends AbstractIntegr
         RuntimeException exception = thrown(RuntimeException)
         exception.message == exceptionMessage
 
-        SessionUtils.withNewTransaction {
+        SessionUtils.withTransaction {
             assert RoddyBamFile.get(id).fileOperationStatus == originalFileOperationStatus
             assert RoddyBamFile.get(id).mergingWorkPackage.bamFileInProjectFolder == null
             return true
