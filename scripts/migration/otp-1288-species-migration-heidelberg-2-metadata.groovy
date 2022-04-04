@@ -64,9 +64,16 @@ class SpeciesMigrationByMetaData {
         Homo sapiens | Human (Homo sapiens) [No strain available] |
         Human | Human (Homo sapiens) [No strain available] |
         Human (Homo sapiens) | Human (Homo sapiens) [No strain available] |
+        Human (Homo sapiens)[No strain available] | Human (Homo sapiens) [No strain available] |
         Human (Homo sapiens) + Mouse (Mus musculus) | Human (Homo sapiens) [No strain available] | Mouse (Mus musculus) [Unknown]
+        Human (Homo sapiens)[No strain available]+Mouse (Mus musculus)[Unknown] | Human (Homo sapiens) [No strain available] | Mouse (Mus musculus) [Unknown]
         Human Genome (hg19, GRCh37) | Human (Homo sapiens) [No strain available] |
         Mouse (Mus musculus) | Mouse (Mus musculus) [Unknown] |
+        Mouse (Mus musculus)[Unknown] | Mouse (Mus musculus) [Unknown] |
+        Mouse (Mus musculus)[[C57BL/6NRj]] | Mouse (Mus musculus) [[C57BL/6NRj]] |
+        Mouse (Mus musculus)[[C57Bl/6J x HBV1.3tg]] | Mouse (Mus musculus) [[C57Bl/6J x HBV1.3tg]] |
+        Mouse (Mus musculus)[[C57Bl/6J x HBVxfs]] | Mouse (Mus musculus) [[C57Bl/6J x HBVxfs]] |
+        Mouse (Mus musculus)[[CAST/Ei x C57BL/6-Ly5.1]F1] | Mouse (Mus musculus) [[CAST/Ei x C57BL/6-Ly5.1]F1] |
         Mouse Genome | Mouse (Mus musculus) [Unknown] |
         Mouse Genome (mm10) | Mouse (Mus musculus) [Unknown] |
         Mus C57BL/6:Castaneus | Mouse (Mus musculus) [C57BL/6:Castaneus] |
@@ -260,7 +267,7 @@ class SpeciesMigrationByMetaData {
                     return
                 }
                 if (speciesForSample[0]) {
-                    sample.mixedInSpecies = speciesForSample as Set
+                    sample.mixedInSpecies.addAll(speciesForSample)
                     sample.save(flush: false)
                 }
             }

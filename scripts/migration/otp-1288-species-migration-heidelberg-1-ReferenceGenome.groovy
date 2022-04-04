@@ -251,7 +251,7 @@ void updateSpecies(List<AbstractMergedBamFile> abstractMergedBamFiles, Map<Strin
                 return
             }
             if (speciesForSample[0]) {
-                sample.mixedInSpecies = speciesForSample as Set
+                sample.mixedInSpecies.addAll(speciesForSample)
                 sample.save(flush: false)
             }
         }
