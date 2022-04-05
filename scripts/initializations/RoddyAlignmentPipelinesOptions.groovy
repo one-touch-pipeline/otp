@@ -160,7 +160,7 @@ processingOptionService.createOrUpdate(
 
 processingOptionService.createOrUpdate(
         OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_BASE_PROJECT_CONFIG,
-        "otpRnaAlignment-1.2",
+        "otpRnaAlignment-1.4",
         SeqTypeService.rnaPairedSeqType.roddyName,
 )
 
