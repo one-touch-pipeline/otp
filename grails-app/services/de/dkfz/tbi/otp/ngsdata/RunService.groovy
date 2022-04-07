@@ -255,13 +255,12 @@ class RunService {
     }
 
     /**
-     * Checkes if an run is empty.
+     * Checks if a run is empty.
      * @param run to check.
      * @return boolean false or true.
      * */
-    @SuppressWarnings("AvoidFindWithoutAll")
     boolean isRunEmpty(Run run) {
         assert run: "The input run of the method isRunEmpty is null"
-        return !(CollectionUtils.atMostOneElement(DataFile.findAllByRun(run)) || CollectionUtils.atMostOneElement(SeqTrack.findAllByRun(run)))
+        return !(DataFile.findAllByRun(run) || SeqTrack.findAllByRun(run))
     }
 }

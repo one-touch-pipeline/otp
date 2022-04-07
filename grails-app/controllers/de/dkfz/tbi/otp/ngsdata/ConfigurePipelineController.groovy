@@ -195,8 +195,7 @@ class ConfigurePipelineController implements ConfigurePipelineHelper {
                 ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndSampleTypeIsNullAndDeprecatedDateIsNull(project, cmd.seqType))?.referenceGenome?.name
                 ?: defaultReferenceGenome
         List<String> referenceGenomes = ReferenceGenome.list(sort: "name", order: "asc").findAll {
-            CollectionUtils.atMostOneElement(ReferenceGenomeIndex.findAllByReferenceGenome(it)) &&
-                    CollectionUtils.atMostOneElement(GeneModel.findAllByReferenceGenome(it))
+            ReferenceGenomeIndex.findAllByReferenceGenome(it) && GeneModel.findAllByReferenceGenome(it)
         }*.name
 
         List<SampleType> configuredSampleTypes = ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndSampleTypeIsNotNullAndDeprecatedDateIsNull(
@@ -314,7 +313,7 @@ class ConfigurePipelineController implements ConfigurePipelineHelper {
                 mouseData              : cmd.mouseData,
                 deprecateConfigurations: cmd.deprecateConfigurations,
                 sampleTypes            : cmd.sampleTypeIds.collect {
-                    return SampleType.get(it)
+                    return CollectionUtils.exactlyOneElement(SampleType.findAllById(it))
                 },
         ])
         projectService.configureRnaAlignmentReferenceGenome(rnaConfiguration)

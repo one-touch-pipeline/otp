@@ -76,15 +76,15 @@ enum TypeValidators {
 
     SEQ_CENTER_NAME({ CollectionUtils.atMostOneElement(SeqCenter.findAllByName(it)) }, { SeqCenter.all*.name }),
 
-    SEQ_TYPE_RODDY_NAME({ CollectionUtils.atMostOneElement(SeqType.findAllByRoddyName(it)) }, { SeqType.all*.roddyName.findAll().unique() }),
-    SEQ_TYPE_RODDY_NAME_SNV({ CollectionUtils.atMostOneElement(SeqType.findAllByRoddyName(it)) }, { SeqTypeService.snvPipelineSeqTypes*.roddyName.findAll().unique() }),
-    SEQ_TYPE_RODDY_NAME_INDEL({ CollectionUtils.atMostOneElement(SeqType.findAllByRoddyName(it)) }, { SeqTypeService.indelPipelineSeqTypes*.roddyName.findAll().unique() }),
-    SEQ_TYPE_RODDY_NAME_SOPHIA({ CollectionUtils.atMostOneElement(SeqType.findAllByRoddyName(it)) }, { SeqTypeService.sophiaPipelineSeqTypes*.roddyName.findAll().unique() }),
-    SEQ_TYPE_RODDY_NAME_ACESEQ({ CollectionUtils.atMostOneElement(SeqType.findAllByRoddyName(it)) }, { SeqTypeService.aceseqPipelineSeqTypes*.roddyName.findAll().unique() }),
+    SEQ_TYPE_RODDY_NAME({ SeqType.findAllByRoddyName(it) }, { SeqType.all*.roddyName.findAll().unique() }),
+    SEQ_TYPE_RODDY_NAME_SNV({ SeqType.findAllByRoddyName(it) }, { SeqTypeService.snvPipelineSeqTypes*.roddyName.findAll().unique() }),
+    SEQ_TYPE_RODDY_NAME_INDEL({ SeqType.findAllByRoddyName(it) }, { SeqTypeService.indelPipelineSeqTypes*.roddyName.findAll().unique() }),
+    SEQ_TYPE_RODDY_NAME_SOPHIA({ SeqType.findAllByRoddyName(it) }, { SeqTypeService.sophiaPipelineSeqTypes*.roddyName.findAll().unique() }),
+    SEQ_TYPE_RODDY_NAME_ACESEQ({ SeqType.findAllByRoddyName(it) }, { SeqTypeService.aceseqPipelineSeqTypes*.roddyName.findAll().unique() }),
 
-    SEQ_TYPE_PROCESSING_NAME({ CollectionUtils.atMostOneElement(SeqType.findAllByDisplayName(it)) }, { SeqType.all*.displayName.unique() }),
+    SEQ_TYPE_PROCESSING_NAME({ SeqType.findAllByDisplayName(it) }, { SeqType.all*.displayName.unique() }),
 
-    WORKFLOW_NAME({ CollectionUtils.atMostOneElement(JobExecutionPlan.findAllByName(it)) }, { JobExecutionPlan.findAllByObsoleted(false)*.name }),
+    WORKFLOW_NAME({ JobExecutionPlan.findAllByName(it) }, { JobExecutionPlan.findAllByObsoleted(false)*.name }),
 
     PROCESSING_PRIORITY_NAME({ CollectionUtils.atMostOneElement(ProcessingPriority.findAllByName(it)) }, { ProcessingPriority.list([sort: 'name'])*.name }),
 

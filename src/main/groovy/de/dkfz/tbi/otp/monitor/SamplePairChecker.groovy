@@ -109,7 +109,7 @@ class SamplePairChecker extends PipelinesChecker<AbstractMergedBamFile> {
 
         List<SamplePair> samplePairWithoutBamFile = samplePairWithMissingBamFile(allSamplePairs)
         Map diseaseBamFileMissed = samplePairWithoutBamFile.groupBy {
-            CollectionUtils.atMostOneElement(AbstractMergedBamFile.findAllByWorkPackage(it.mergingWorkPackage1)) == null
+            CollectionUtils.atMostOneElement(AbstractMergedBamFile.findAllByWorkPackage(it.mergingWorkPackage1, [max: 1])) == null
         }
         output.showList(HEADER_SAMPLE_PAIR_WITHOUT_DISEASE_BAM_FILE, diseaseBamFileMissed[true])
         output.showList(HEADER_SAMPLE_PAIR_WITHOUT_CONTROL_BAM_FILE, diseaseBamFileMissed[false])

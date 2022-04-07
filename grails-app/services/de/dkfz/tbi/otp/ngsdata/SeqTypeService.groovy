@@ -73,7 +73,7 @@ class SeqTypeService extends MetadataFieldsService<SeqType> {
 
     static boolean hasSeqTypeByNameOrDisplayName(String nameOrDisplayName) {
         assert nameOrDisplayName: "the input nameOrDisplayName '${nameOrDisplayName}' is null"
-        return CollectionUtils.atMostOneElement(SeqType.findAllByNameOrDisplayName(nameOrDisplayName, nameOrDisplayName))
+        return SeqType.findAllByNameOrDisplayName(nameOrDisplayName, nameOrDisplayName).size() > 0
     }
 
     static boolean isSingleCell(String baseMaterial) {
@@ -135,15 +135,16 @@ class SeqTypeService extends MetadataFieldsService<SeqType> {
     @Override
     protected SeqType findByName(String name, Map properties = [:]) {
         if (properties.libraryLayout && properties.singleCell != null) {
-            return CollectionUtils.<SeqType> atMostOneElement(
-                    clazz.findAllByNameIlikeAndLibraryLayoutAndSingleCell(name, properties.libraryLayout, properties.singleCell)) ?:
-                    CollectionUtils.<SeqType> atMostOneElement(
-                            clazz.findAllByDisplayNameIlikeAndLibraryLayoutAndSingleCell(name, properties.libraryLayout, properties.singleCell))
+            return CollectionUtils.atMostOneElement(clazz.findAllByNameIlikeAndLibraryLayoutAndSingleCell(name, properties.libraryLayout as SequencingReadType,
+                    properties.singleCell as boolean, [max: 1])) ?:
+                    CollectionUtils.atMostOneElement(clazz.findAllByDisplayNameIlikeAndLibraryLayoutAndSingleCell(name,
+                    properties.libraryLayout as SequencingReadType, properties.singleCell as boolean, [max: 1])) as SeqType
         } else if (!properties.libraryLayout && properties.singleCell != null) {
-            return CollectionUtils.atMostOneElement(clazz.findAllByNameIlikeAndSingleCell(name, properties.singleCell)) ?:
-                    CollectionUtils.atMostOneElement(clazz.findAllByDisplayNameIlikeAndSingleCell(name, properties.singleCell))
+            return CollectionUtils.atMostOneElement(clazz.findAllByNameIlikeAndSingleCell(name, properties.singleCell as boolean, [max: 1])) ?:
+                    CollectionUtils.atMostOneElement(clazz.findAllByDisplayNameIlikeAndSingleCell(name, properties.singleCell as boolean, [max: 1]))
         } else {
-            return CollectionUtils.atMostOneElement(clazz.findAllByName(name)) ?: CollectionUtils.atMostOneElement(clazz.findAllByDisplayName(name))
+            return CollectionUtils.atMostOneElement(clazz.findAllByName(name, [max: 1])) ?: CollectionUtils.atMostOneElement(clazz.findAllByDisplayName(name,
+                    [max: 1]))
         }
     }
 

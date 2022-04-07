@@ -30,7 +30,6 @@ import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
 import de.dkfz.tbi.otp.project.additionalField.AbstractFieldValue
 import de.dkfz.tbi.otp.project.dta.DataTransferAgreement
 import de.dkfz.tbi.otp.searchability.Keyword
-import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.Entity
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 import de.dkfz.tbi.otp.workflowExecution.SelectedProjectSeqTypeWorkflowVersion
@@ -146,11 +145,14 @@ class Project implements CommentableWithProject, ProjectPropertiesGivenWithReque
         })
 
         individualPrefix(nullable: true, blank: false, validator: { val, obj ->
-            Project project = CollectionUtils.atMostOneElement(Project.findAllByIndividualPrefixAndIdNotEqual(val, obj.id))
-            if (obj.uniqueIndividualPrefix && project && project.id != obj.id) {
-                return 'duplicate'
-            } else if (obj.uniqueIndividualPrefix && !val) {
-                return 'default.blank.message'
+            if (obj.uniqueIndividualPrefix) {
+                List<Project> list = Project.findAllByIndividualPrefixAndIdNotEqual(val, obj.id)
+                if (list && ((list.size() == 1 && !list*.id.contains(obj.id)) || (list.size() > 1))) { // true if list contains other projects than itself
+                    return 'duplicate'
+                }
+                if (!val) {
+                    return 'default.blank.message'
+                }
             }
         })
 

@@ -456,7 +456,7 @@ class SchedulerService {
                 }
                 ProcessingStepUpdate endStateUpdate
                 if (endState == ExecutionState.FAILURE ||
-                        !CollectionUtils.atMostOneElement(ProcessingStepUpdate.findAllByProcessingStepAndState(step, ExecutionState.FAILURE))) {
+                        !CollectionUtils.atMostOneElement(ProcessingStepUpdate.findAllByProcessingStepAndState(step, ExecutionState.FAILURE, [max: 1]))) {
                     processService.setOperatorIsAwareOfFailure(step.process, false)
                     endStateUpdate = new ProcessingStepUpdate(
                             date: new Date(),

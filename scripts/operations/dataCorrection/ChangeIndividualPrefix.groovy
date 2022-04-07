@@ -44,15 +44,15 @@ boolean overwrite = false
 assert projectName : "No project name given"
 
 Project.withTransaction {
-    Project project = CollectionUtils.atMostOneElement(Project.findAllByName(projectName))
-    Project project1 = null
+    Project project = CollectionUtils.exactlyOneElement(Project.findAllByName(projectName), "There is more than one project with the same name")
+    List<Project> projectList = null
     if (newPrefix) {
-        project1 = CollectionUtils.atMostOneElement(Project.findAllByIndividualPrefix(newPrefix))
+        projectList = Project.findAllByIndividualPrefix(newPrefix)
     } else {
         newPrefix = null
     }
 
-    if (project1 && !oldProject) {
+    if (projectList && !oldProject) {
         println "A project with this individual prefix ${newPrefix} already exists. " +
                 "Set oldProject to true if you want to reuse this prefix."
         return

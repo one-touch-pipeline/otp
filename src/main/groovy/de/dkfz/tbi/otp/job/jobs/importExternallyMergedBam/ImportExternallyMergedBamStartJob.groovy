@@ -47,7 +47,7 @@ class ImportExternallyMergedBamStartJob extends AbstractStartJobImpl {
             }
 
             ImportProcess.withTransaction {
-                ImportProcess importProcess = CollectionUtils.atMostOneElement(ImportProcess.findAllByState(ImportProcess.State.NOT_STARTED))
+                ImportProcess importProcess = CollectionUtils.atMostOneElement(ImportProcess.findAllByState(ImportProcess.State.NOT_STARTED, [max: 1]))
                 if (importProcess) {
                     importProcess.state = ImportProcess.State.STARTED
                     assert importProcess.save(flush: true)
