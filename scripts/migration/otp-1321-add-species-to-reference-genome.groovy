@@ -60,13 +60,16 @@ methylCtools_hg38p13_lambda_phix_herpes | Homo sapiens
 refdata-gex-GRCh38 | Homo sapiens
 """
 
+Map speciesMap = [
+        "Homo sapiens": CollectionUtils.exactlyOneElement(SpeciesWithStrain.where { species.scientificName == "Homo sapiens" && strain.name == "No strain available" }.list()),
+        "Mus musculus": CollectionUtils.exactlyOneElement(SpeciesWithStrain.where { species.scientificName == "Mus musculus" && strain.name == "Unknown" }.list()),
+]
+
 List<List<String>> rgs = referenceGenomeSpecies.split("\n").collect { it.split("\\|")*.trim() }
 rgs.each {
     ReferenceGenome referenceGenome = CollectionUtils.atMostOneElement(ReferenceGenome.findAllByName(it[0].trim()))
     if (referenceGenome) {
-        Set<SpeciesWithStrain> species = it[1].split(" \\+ ").collect { String speciesName ->
-            CollectionUtils.exactlyOneElement(SpeciesWithStrain.where { species.scientificName == speciesName && strain.name == "No strain available" }.list())
-        }
+        Set<SpeciesWithStrain> species = it[1].split(" \\+ ").collect { String speciesName -> speciesMap[speciesName] }
         referenceGenome.species = species as Set
         referenceGenome.save(flush: true)
     }

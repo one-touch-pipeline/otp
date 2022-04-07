@@ -38,7 +38,7 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 
 String name = "methylCtools_mm10_UCSC_PhiX_Lambda"
 Set<SpeciesWithStrain> species = [
-        CollectionUtils.exactlyOneElement(SpeciesWithStrain.where { species.scientificName == "Mus musculus" && strain.name == "No strain available" }.list()),
+        CollectionUtils.exactlyOneElement(SpeciesWithStrain.where { species.scientificName == "Mus musculus" && strain.name == "Unknown" }.list()),
 ] as Set
 @Field
 String path = "bwa06_methylCtools_mm10_UCSC_PhiX_Lambda"

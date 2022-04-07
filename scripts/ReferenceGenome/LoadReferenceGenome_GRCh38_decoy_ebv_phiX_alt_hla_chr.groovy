@@ -40,7 +40,7 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 
 String name = "GRCh38_decoy_ebv_phiX_alt_hla_chr"
 Set<SpeciesWithStrain> species = [
-        CollectionUtils.exactlyOneElement(SpeciesWithStrain.where { species.scientificName == "Mus musculus" && strain.name == "No strain available" }.list()),
+        CollectionUtils.exactlyOneElement(SpeciesWithStrain.where { species.scientificName == "Mus musculus" && strain.name == "Unknown" }.list()),
 ] as Set
 @Field
 String path = "GRCh38_decoy_ebv_phiX_alt_hla_chr"

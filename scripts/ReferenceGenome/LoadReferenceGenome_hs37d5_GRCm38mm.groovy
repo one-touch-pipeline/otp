@@ -39,7 +39,7 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 String name = "hs37d5_GRCm38mm"
 Set<SpeciesWithStrain> species = [
         CollectionUtils.exactlyOneElement(SpeciesWithStrain.where { species.scientificName == "Homo sapiens" && strain.name == "No strain available" }.list()),
-        CollectionUtils.exactlyOneElement(SpeciesWithStrain.where { species.scientificName == "Mus musculus" && strain.name == "No strain available" }.list()),
+        CollectionUtils.exactlyOneElement(SpeciesWithStrain.where { species.scientificName == "Mus musculus" && strain.name == "Unknown" }.list()),
 ] as Set
 @Field
 String path = "bwa06_hs37d5_GRCm38mm"
