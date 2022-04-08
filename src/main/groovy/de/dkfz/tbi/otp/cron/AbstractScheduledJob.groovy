@@ -43,6 +43,7 @@ abstract class AbstractScheduledJob {
             CellRangerDataCleanupJob,
             CheckForAdUpdateJob,
             DeactivateUsersJob,
+            DeleteConcreteArtefactsOfOmittedWorkflowArtefactsJob,
             ScheduleUsersForDeactivationJob,
             UnknownLdapUsersJob,
             GenerateAndSendKPIsForNBI,
