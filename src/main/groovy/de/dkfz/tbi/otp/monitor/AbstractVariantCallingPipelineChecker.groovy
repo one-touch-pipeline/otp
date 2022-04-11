@@ -289,7 +289,7 @@ abstract class AbstractVariantCallingPipelineChecker extends PipelinesChecker<Sa
         output.showRunning(workflowName, bamFilePairAnalysis)
     }
 
-    private Closure displayWaitingWithInfos = { SamplePair samplePair ->
+    private final Closure displayWaitingWithInfos = { SamplePair samplePair ->
         List<String> ret = []
         [
                 disease: samplePair.mergingWorkPackage1,

@@ -36,7 +36,7 @@ class CreateClusterScriptService {
         RECURSIVE("rm -r"),
         EMPTY("rmdir"),
 
-        private String command
+        private final String command
         private RemoveOption(String command) {
             this.command = command
         }

@@ -23,12 +23,9 @@ package de.dkfz.tbi.otp.ngsdata
 
 import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
-import org.junit.After
 import org.junit.Test
 
 import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.utils.CheckedLogger
-import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
 @Rollback
 @Integration
@@ -37,20 +34,6 @@ class SeqPlatformServiceTests {
     static final String PLATFORM_NAME = 'Some platform name'
 
     SeqPlatformService seqPlatformService
-
-    CheckedLogger checkedLogger
-
-    void setupData() {
-        checkedLogger = new CheckedLogger()
-        LogThreadLocal.threadLog = checkedLogger
-    }
-
-    @After
-    void tearDown() {
-        LogThreadLocal.removeThreadLog()
-        checkedLogger.assertAllMessagesConsumed()
-        checkedLogger = null
-    }
 
     private static List createDataFor_findForNameAndModelAndSequencingKit() {
         final String OTHER_PLATFORM_NAME = 'Some other platform name'
@@ -88,7 +71,6 @@ class SeqPlatformServiceTests {
 
     @Test
     void test_findForNameAndModelAndSequencingKit_shouldReturnSeqplatform_PlatformNameAndModelAndKitGiven() {
-        setupData()
         def (model, kit) = createDataFor_findForNameAndModelAndSequencingKit()
 
         SeqPlatform seqPlatform = seqPlatformService.findForNameAndModelAndSequencingKit(PLATFORM_NAME, model, kit)
@@ -100,7 +82,6 @@ class SeqPlatformServiceTests {
 
     @Test
     void test_findForNameAndModelAndSequencingKit_shouldReturnSeqplatform_PlatformNameAndModelGivenAndKitIsNull() {
-        setupData()
         SeqPlatformModelLabel model = createDataFor_findForNameAndModelAndSequencingKit()[0] as SeqPlatformModelLabel
 
         SeqPlatform seqPlatform = seqPlatformService.findForNameAndModelAndSequencingKit(PLATFORM_NAME, model, null)
@@ -112,7 +93,6 @@ class SeqPlatformServiceTests {
 
     @Test
     void test_findForNameAndModelAndSequencingKit_shouldReturnSeqplatform_PlatformNameAndKitGivenAndModelIsNull() {
-        setupData()
         SequencingKitLabel kit = createDataFor_findForNameAndModelAndSequencingKit()[1] as SequencingKitLabel
 
         SeqPlatform seqPlatform = seqPlatformService.findForNameAndModelAndSequencingKit(PLATFORM_NAME, null, kit)
@@ -124,7 +104,6 @@ class SeqPlatformServiceTests {
 
     @Test
     void test_findForNameAndModelAndSequencingKit_shouldReturnSeqplatform_PlatformNameGivenAndModelAndKitIsNull() {
-        setupData()
         createDataFor_findForNameAndModelAndSequencingKit()
 
         SeqPlatform seqPlatform = seqPlatformService.findForNameAndModelAndSequencingKit(PLATFORM_NAME, null, null)
@@ -136,7 +115,6 @@ class SeqPlatformServiceTests {
 
     @Test
     void test_findForNameAndModelAndSequencingKit_shouldReturnSeqplatform_PlatformNameInOtherCaseAndModelAndKitGiven() {
-        setupData()
         def (model, kit) = createDataFor_findForNameAndModelAndSequencingKit()
 
         SeqPlatform seqPlatform = seqPlatformService.findForNameAndModelAndSequencingKit(PLATFORM_NAME, model, kit)
@@ -148,7 +126,6 @@ class SeqPlatformServiceTests {
 
     @Test
     void test_findForNameAndModelAndSequencingKit_shouldReturnNull_UnknownPlatformNameGiven() {
-        setupData()
         def (model, kit) = createDataFor_findForNameAndModelAndSequencingKit()
 
         SeqPlatform seqPlatform = seqPlatformService.findForNameAndModelAndSequencingKit('Some other name', model, kit)
@@ -157,7 +134,6 @@ class SeqPlatformServiceTests {
 
     @Test
     void test_findForNameAndModelAndSequencingKit_shouldReturnNull_UnknownModelGiven() {
-        setupData()
         SequencingKitLabel kit = createDataFor_findForNameAndModelAndSequencingKit()[1] as SequencingKitLabel
 
         SeqPlatform seqPlatform = seqPlatformService.findForNameAndModelAndSequencingKit(PLATFORM_NAME, DomainFactory.createSeqPlatformModelLabel(), kit)
@@ -166,7 +142,6 @@ class SeqPlatformServiceTests {
 
     @Test
     void test_findForNameAndModelAndSequencingKit_shouldReturnNull_UnknownKitGiven() {
-        setupData()
         SeqPlatformModelLabel model = createDataFor_findForNameAndModelAndSequencingKit()[0] as SeqPlatformModelLabel
 
         SeqPlatform seqPlatform = seqPlatformService.findForNameAndModelAndSequencingKit(PLATFORM_NAME, model, DomainFactory.createSequencingKitLabel())
@@ -175,7 +150,6 @@ class SeqPlatformServiceTests {
 
     @Test
     void test_findForNameAndModelAndSequencingKit_shouldFail_PlatformNameIsNull() {
-        setupData()
         def (model, kit) = createDataFor_findForNameAndModelAndSequencingKit()
 
         TestCase.shouldFail(AssertionError) {
@@ -185,7 +159,6 @@ class SeqPlatformServiceTests {
 
     @Test
     void test_findForNameAndModelAndSequencingKit_shouldFail_PlatformNameIsEmpty() {
-        setupData()
         def (model, kit) = createDataFor_findForNameAndModelAndSequencingKit()
 
         TestCase.shouldFail(AssertionError) {
@@ -195,7 +168,6 @@ class SeqPlatformServiceTests {
 
     @Test
     void testCreateNewSeqPlatform_SeqPlatformExistsAlready_shouldFail() {
-        setupData()
         DomainFactory.createSeqPlatformWithSeqPlatformGroup(
                 name: PLATFORM_NAME,
                 seqPlatformGroups: null,

@@ -42,7 +42,7 @@ class ClusterJobManagerFactoryService {
     RemoteShellHelper remoteShellHelper
     ConfigService configService
 
-    private Map<Realm, BatchEuphoriaJobManager> managerPerRealm = [:]
+    private final Map<Realm, BatchEuphoriaJobManager> managerPerRealm = [:]
 
     BatchEuphoriaJobManager getJobManager(Realm realm) {
         BatchEuphoriaJobManager manager = managerPerRealm[realm]

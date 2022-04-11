@@ -39,8 +39,8 @@ class QcThresholdService {
     }
 
     static class ThresholdColorizer<T extends QcTrafficLightValue> {
-        private Map<String, QcThreshold> thresholdList
-        private Class<QcTrafficLightValue> qcClass
+        private final Map<String, QcThreshold> thresholdList
+        private final Class<QcTrafficLightValue> qcClass
 
         ThresholdColorizer(Project project, SeqType seqType, Class<T> qcClass) {
             this.thresholdList = QcThreshold.createCriteria().list {

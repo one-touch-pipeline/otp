@@ -37,7 +37,7 @@ class Helper {
 @Slf4j
 class JobExecutionPlanDSL {
 
-    private static Closure constantParameterClosure = { JobDefinition jobDefinition, String typeName, String value ->
+    private final static Closure CONSTANT_PARAMETER_CLOSURE = { JobDefinition jobDefinition, String typeName, String value ->
         ParameterType type = new ParameterType(name: typeName, jobDefinition: jobDefinition, parameterUsage: ParameterUsage.INPUT)
         type.save(flush: true)
         Parameter parameter = new Parameter(type: type, value: value)
@@ -46,17 +46,17 @@ class JobExecutionPlanDSL {
         jobDefinition.save(flush: true)
     }
 
-    private static Closure outputParameterClosure = { JobDefinition jobDefinition, String typeName ->
+    private final static Closure OUTPUT_PARAMETER_CLOSURE = { JobDefinition jobDefinition, String typeName ->
         ParameterType type = new ParameterType(name: typeName, jobDefinition: jobDefinition, parameterUsage: ParameterUsage.OUTPUT)
         type.save(flush: true)
     }
 
-    private static Closure inputParameterClosure = { JobDefinition jobDefinition,
-                                                     JobDefinition previous,
-                                                     JobExecutionPlan jep,
-                                                     String typeName,
-                                                     String fromJob,
-                                                     String fromParameter ->
+    private final static Closure INPUT_PARAMETER_CLOSURE = { JobDefinition jobDefinition,
+                                                             JobDefinition previous,
+                                                             JobExecutionPlan jep,
+                                                             String typeName,
+                                                             String fromJob,
+                                                             String fromParameter ->
         ParameterType inputType = new ParameterType(name: typeName, jobDefinition: jobDefinition, parameterUsage: ParameterUsage.INPUT)
         inputType.save(flush: true)
         if (!previous) {
@@ -105,7 +105,7 @@ class JobExecutionPlanDSL {
     }
 
     @SuppressWarnings('ParameterReassignment')
-    private static Closure startJobClosure = { JobExecutionPlan jep, Boolean startJobDefined, String startName, String bean, closure = null ->
+    private final static Closure START_JOB_CLOSURE = { JobExecutionPlan jep, Boolean startJobDefined, String startName, String bean, closure = null ->
         assert !startJobDefined, "Only one Start Job Definition can be defined per Job Execution Plan"
         StartJobDefinition startJobDefinition = new StartJobDefinition(name: startName, bean: bean, plan: jep)
         startJobDefinition.save(flush: true)
@@ -114,10 +114,10 @@ class JobExecutionPlanDSL {
         if (closure) {
             closure.metaClass = new ExpandoMetaClass(closure.class)
             closure.metaClass.constantParameter = { String typeName, String value ->
-                JobExecutionPlanDSL.constantParameterClosure(startJobDefinition, typeName, value)
+                JobExecutionPlanDSL.CONSTANT_PARAMETER_CLOSURE(startJobDefinition, typeName, value)
             }
             closure.metaClass.outputParameter = { String typeName ->
-                JobExecutionPlanDSL.outputParameterClosure(startJobDefinition, typeName)
+                JobExecutionPlanDSL.OUTPUT_PARAMETER_CLOSURE(startJobDefinition, typeName)
             }
             closure.metaClass.initialize()
             closure()
@@ -125,7 +125,7 @@ class JobExecutionPlanDSL {
         startJobDefined = true
     }
 
-    private static Closure watchdogClosure = { JobDefinition jobDefinition, JobExecutionPlan jep, Helper helper, String watchdogBean ->
+    private final static Closure WATCHDOG_CLOSURE = { JobDefinition jobDefinition, JobExecutionPlan jep, Helper helper, String watchdogBean ->
         ParameterType type = new ParameterType(
                 name: JobParameterKeys.JOB_ID_LIST, jobDefinition: jobDefinition, parameterUsage: ParameterUsage.OUTPUT
         )
@@ -159,7 +159,7 @@ class JobExecutionPlanDSL {
         helper.watchdogJobDefinition = watchdogJobDefinition
     }
 
-    private static Closure jobClosure = { JobExecutionPlan jep, Helper helper, String jobName, String bean, closure = null ->
+    private final static Closure JOB_CLOSURE = { JobExecutionPlan jep, Helper helper, String jobName, String bean, closure = null ->
         log.debug("In job Closure with " + jobName)
         JobDefinition jobDefinition = new JobDefinition(name: jobName, bean: bean, plan: jep, previous: helper.previous)
         jobDefinition.save(flush: true)
@@ -171,17 +171,17 @@ class JobExecutionPlanDSL {
         if (closure) {
             closure.metaClass = new ExpandoMetaClass(closure.class)
             closure.metaClass.constantParameter = { String typeName, String value ->
-                JobExecutionPlanDSL.constantParameterClosure(jobDefinition, typeName, value)
+                JobExecutionPlanDSL.CONSTANT_PARAMETER_CLOSURE(jobDefinition, typeName, value)
             }
             closure.metaClass.outputParameter = { String typeName ->
-                JobExecutionPlanDSL.outputParameterClosure(jobDefinition, typeName)
+                JobExecutionPlanDSL.OUTPUT_PARAMETER_CLOSURE(jobDefinition, typeName)
             }
             closure.metaClass.inputParameter = { String typeName, String fromJob, String fromParameter ->
-                JobExecutionPlanDSL.inputParameterClosure(jobDefinition, helper.previous, jep, typeName, fromJob, fromParameter)
+                JobExecutionPlanDSL.INPUT_PARAMETER_CLOSURE(jobDefinition, helper.previous, jep, typeName, fromJob, fromParameter)
             }
             // TODO: in future have a generic watchdog which obsoletes the watchdogBean
             closure.metaClass.watchdog = { String watchdogBean ->
-                JobExecutionPlanDSL.watchdogClosure(jobDefinition, jep, helper, watchdogBean)
+                JobExecutionPlanDSL.WATCHDOG_CLOSURE(jobDefinition, jep, helper, watchdogBean)
             }
             closure.metaClass.initialize()
             closure()
@@ -189,12 +189,12 @@ class JobExecutionPlanDSL {
         helper.previous = jobDefinition
     }
 
-    private static Closure validatingJobClosure = { JobExecutionPlan jep,
-                                                    Helper helper,
-                                                    String jobName,
-                                                    String bean,
-                                                    String validatorForName,
-                                                    closure = null ->
+    private final static Closure VALIDATING_JOB_CLOSURE = { JobExecutionPlan jep,
+                                                            Helper helper,
+                                                            String jobName,
+                                                            String bean,
+                                                            String validatorForName,
+                                                            closure = null ->
         JobDefinition validatorFor = CollectionUtils.atMostOneElement(JobDefinition.findAllByNameAndPlan(validatorForName, jep))
         assert(validatorFor)
         ValidatingJobDefinition jobDefinition = new ValidatingJobDefinition(
@@ -209,17 +209,17 @@ class JobExecutionPlanDSL {
         if (closure) {
             closure.metaClass = new ExpandoMetaClass(closure.class)
             closure.metaClass.constantParameter = { String typeName, String value ->
-                JobExecutionPlanDSL.constantParameterClosure(jobDefinition, typeName, value)
+                JobExecutionPlanDSL.CONSTANT_PARAMETER_CLOSURE(jobDefinition, typeName, value)
             }
             closure.metaClass.outputParameter = { String typeName ->
-                JobExecutionPlanDSL.outputParameterClosure(jobDefinition, typeName)
+                JobExecutionPlanDSL.OUTPUT_PARAMETER_CLOSURE(jobDefinition, typeName)
             }
             closure.metaClass.inputParameter = { String typeName, String fromJob, String fromParameter ->
-                JobExecutionPlanDSL.inputParameterClosure(jobDefinition, helper.previous, jep, typeName, fromJob, fromParameter)
+                JobExecutionPlanDSL.INPUT_PARAMETER_CLOSURE(jobDefinition, helper.previous, jep, typeName, fromJob, fromParameter)
             }
             // TODO: in future have a generic watchdog which obsoletes the watchdogBean
             closure.metaClass.watchdog = { String watchdogBean ->
-                JobExecutionPlanDSL.watchdogClosure(jobDefinition, jep, helper, watchdogBean)
+                JobExecutionPlanDSL.WATCHDOG_CLOSURE(jobDefinition, jep, helper, watchdogBean)
             }
             closure.metaClass.initialize()
             closure()
@@ -244,13 +244,13 @@ class JobExecutionPlanDSL {
             // need to create our own meta class to be able to add properties
             c.metaClass = new ExpandoMetaClass(c.class)
             c.metaClass.start = { String n, String bean, closure = null ->
-                JobExecutionPlanDSL.startJobClosure(jep, startJobDefined, n, bean, closure)
+                JobExecutionPlanDSL.START_JOB_CLOSURE(jep, startJobDefined, n, bean, closure)
             }
             c.metaClass.job = { String n, String bean, closure = null ->
-                JobExecutionPlanDSL.jobClosure(jep, helper, n, bean, closure)
+                JobExecutionPlanDSL.JOB_CLOSURE(jep, helper, n, bean, closure)
             }
             c.metaClass.validatingJob = { String jobName, String bean, String validatorForName, closure = null ->
-                JobExecutionPlanDSL.validatingJobClosure(jep, helper, jobName, bean, validatorForName, closure)
+                JobExecutionPlanDSL.VALIDATING_JOB_CLOSURE(jep, helper, jobName, bean, validatorForName, closure)
             }
             c.metaClass.initialize()
             c()

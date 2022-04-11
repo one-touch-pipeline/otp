@@ -210,7 +210,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
         }
     }
 
-    private Closure<Map> getEgaSubmission = { Long id, Closure<Map> additionalReturns = { EgaSubmission egaSubmission -> return [:] } ->
+    private final Closure<Map> getEgaSubmission = { Long id, Closure<Map> additionalReturns = { EgaSubmission egaSubmission -> return [:] } ->
         EgaSubmission egaSubmission = egaSubmissionService.getEgaSubmission(id)
         if (!egaSubmission) {
             redirect(action: "overview")

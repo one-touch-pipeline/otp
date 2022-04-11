@@ -57,7 +57,7 @@ class DataExportService {
         exportFilesWrapper(dataExportInput, exportAnalysisFilesClosure)
     }
 
-    private Closure exportHeaderInfoClosure = { dataExportInput, scriptFileBuilder, scriptListBuilder, consoleBuilder,
+    private final Closure exportHeaderInfoClosure = { dataExportInput, scriptFileBuilder, scriptListBuilder, consoleBuilder,
                                                 rsyncChmod, copyConnection, copyTargetBase ->
         String umask = dataExportInput.external ? "027" : "022"
 
@@ -76,7 +76,7 @@ class DataExportService {
         }
     }
 
-    private Closure exportDataFilesClosure = { dataExportInput, scriptFileBuilder, scriptListBuilder, consoleBuilder,
+    private final Closure exportDataFilesClosure = { dataExportInput, scriptFileBuilder, scriptListBuilder, consoleBuilder,
                                                rsyncChmod, copyConnection, copyTargetBase ->
         if (dataExportInput.checkFileStatus) {
             consoleBuilder.append("\n************************************ FASTQ ************************************\n")
@@ -119,7 +119,7 @@ class DataExportService {
         }
     }
 
-    private Closure exportBamFilesClosure = { dataExportInput, scriptFileBuilder, scriptListBuilder, consoleBuilder,
+    private final Closure exportBamFilesClosure = { dataExportInput, scriptFileBuilder, scriptListBuilder, consoleBuilder,
                                               rsyncChmod, copyConnection, copyTargetBase ->
         if (dataExportInput.checkFileStatus) {
             consoleBuilder.append("\n************************************ BAM ************************************\n")
@@ -184,7 +184,7 @@ class DataExportService {
         }
     }
 
-    private Closure exportAnalysisFilesClosure = { dataExportInput, scriptFileBuilder, scriptListBuilder, consoleBuilder,
+    private final Closure exportAnalysisFilesClosure = { dataExportInput, scriptFileBuilder, scriptListBuilder, consoleBuilder,
                                                    rsyncChmod, copyConnection, copyTargetBase ->
         if (dataExportInput.checkFileStatus) {
             consoleBuilder.append("\n************************************ Analyses ************************************\n")

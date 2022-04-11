@@ -461,7 +461,7 @@ All the Rules that will be used for OTP
         priority = CRITICAL
     }
     PrivateFieldCouldBeFinal {
-        priority = MIDDLE
+        priority = CRITICAL
     }
     PublicInstanceField {
         priority = MIDDLE

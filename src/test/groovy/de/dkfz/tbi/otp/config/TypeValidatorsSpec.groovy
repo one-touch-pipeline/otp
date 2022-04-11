@@ -63,207 +63,207 @@ class TypeValidatorsSpec extends Specification implements DataTest {
 
         where:
         validator                                    | value                             | initClosure                 || ret
-        TypeValidators.BOOLEAN                       | 'true'                            | emptyInit                   || true
-        TypeValidators.BOOLEAN                       | 'false'                           | emptyInit                   || true
-        TypeValidators.BOOLEAN                       | 'True'                            | emptyInit                   || false
-        TypeValidators.BOOLEAN                       | 'False'                           | emptyInit                   || false
-        TypeValidators.BOOLEAN                       | 'TRUE'                            | emptyInit                   || false
-        TypeValidators.BOOLEAN                       | 'FALSE'                           | emptyInit                   || false
-        TypeValidators.BOOLEAN                       | 't'                               | emptyInit                   || false
-        TypeValidators.BOOLEAN                       | 'f'                               | emptyInit                   || false
-        TypeValidators.BOOLEAN                       | 'T'                               | emptyInit                   || false
-        TypeValidators.BOOLEAN                       | 'F'                               | emptyInit                   || false
-        TypeValidators.BOOLEAN                       | null                              | emptyInit                   || false
-        TypeValidators.BOOLEAN                       | ''                                | emptyInit                   || false
-        TypeValidators.BOOLEAN                       | '0'                               | emptyInit                   || false
-        TypeValidators.BOOLEAN                       | '1'                               | emptyInit                   || false
-        TypeValidators.BOOLEAN                       | 'text'                            | emptyInit                   || false
+        TypeValidators.BOOLEAN                       | 'true'                            | EMPTY_INIT || true
+        TypeValidators.BOOLEAN                       | 'false'                           | EMPTY_INIT || true
+        TypeValidators.BOOLEAN                       | 'True'                            | EMPTY_INIT || false
+        TypeValidators.BOOLEAN                       | 'False'                           | EMPTY_INIT || false
+        TypeValidators.BOOLEAN                       | 'TRUE'                            | EMPTY_INIT || false
+        TypeValidators.BOOLEAN                       | 'FALSE'                           | EMPTY_INIT || false
+        TypeValidators.BOOLEAN                       | 't'                               | EMPTY_INIT || false
+        TypeValidators.BOOLEAN                       | 'f'                               | EMPTY_INIT || false
+        TypeValidators.BOOLEAN                       | 'T'                               | EMPTY_INIT || false
+        TypeValidators.BOOLEAN                       | 'F'                               | EMPTY_INIT || false
+        TypeValidators.BOOLEAN                       | null                              | EMPTY_INIT || false
+        TypeValidators.BOOLEAN                       | ''                                | EMPTY_INIT || false
+        TypeValidators.BOOLEAN                       | '0'                               | EMPTY_INIT || false
+        TypeValidators.BOOLEAN                       | '1'                               | EMPTY_INIT || false
+        TypeValidators.BOOLEAN                       | 'text'                            | EMPTY_INIT || false
 
-        TypeValidators.POSITIVE_NUMBER               | '1'                               | emptyInit                   || true
-        TypeValidators.POSITIVE_NUMBER               | '2'                               | emptyInit                   || true
-        TypeValidators.POSITIVE_NUMBER               | '10'                              | emptyInit                   || true
-        TypeValidators.POSITIVE_NUMBER               | '0'                               | emptyInit                   || true
-        TypeValidators.POSITIVE_NUMBER               | '+1'                              | emptyInit                   || true
-        TypeValidators.POSITIVE_NUMBER               | '-1'                              | emptyInit                   || false
-        TypeValidators.POSITIVE_NUMBER               | null                              | emptyInit                   || false
-        TypeValidators.POSITIVE_NUMBER               | ''                                | emptyInit                   || false
-        TypeValidators.POSITIVE_NUMBER               | 'text'                            | emptyInit                   || false
-        TypeValidators.POSITIVE_NUMBER               | '1.0'                             | emptyInit                   || false
-        TypeValidators.POSITIVE_NUMBER               | '1e3'                             | emptyInit                   || false
+        TypeValidators.POSITIVE_NUMBER               | '1'                               | EMPTY_INIT || true
+        TypeValidators.POSITIVE_NUMBER               | '2'                               | EMPTY_INIT || true
+        TypeValidators.POSITIVE_NUMBER               | '10'                              | EMPTY_INIT || true
+        TypeValidators.POSITIVE_NUMBER               | '0'                               | EMPTY_INIT || true
+        TypeValidators.POSITIVE_NUMBER               | '+1'                              | EMPTY_INIT || true
+        TypeValidators.POSITIVE_NUMBER               | '-1'                              | EMPTY_INIT || false
+        TypeValidators.POSITIVE_NUMBER               | null                              | EMPTY_INIT || false
+        TypeValidators.POSITIVE_NUMBER               | ''                                | EMPTY_INIT || false
+        TypeValidators.POSITIVE_NUMBER               | 'text'                            | EMPTY_INIT || false
+        TypeValidators.POSITIVE_NUMBER               | '1.0'                             | EMPTY_INIT || false
+        TypeValidators.POSITIVE_NUMBER               | '1e3'                             | EMPTY_INIT || false
 
-        TypeValidators.FLOAT                         | '0'                               | emptyInit                   || true
-        TypeValidators.FLOAT                         | '1'                               | emptyInit                   || true
-        TypeValidators.FLOAT                         | '2'                               | emptyInit                   || true
-        TypeValidators.FLOAT                         | '+1'                              | emptyInit                   || true
-        TypeValidators.FLOAT                         | '-1'                              | emptyInit                   || true
-        TypeValidators.FLOAT                         | '1.'                              | emptyInit                   || true
-        TypeValidators.FLOAT                         | '+1.'                             | emptyInit                   || true
-        TypeValidators.FLOAT                         | '-1.'                             | emptyInit                   || true
-        TypeValidators.FLOAT                         | '1.234'                           | emptyInit                   || true
-        TypeValidators.FLOAT                         | '+1.234'                          | emptyInit                   || true
-        TypeValidators.FLOAT                         | '-1.234'                          | emptyInit                   || true
-        TypeValidators.FLOAT                         | '1e3'                             | emptyInit                   || false
-        TypeValidators.FLOAT                         | null                              | emptyInit                   || false
-        TypeValidators.FLOAT                         | ''                                | emptyInit                   || false
-        TypeValidators.FLOAT                         | 'text'                            | emptyInit                   || false
+        TypeValidators.FLOAT                         | '0'                               | EMPTY_INIT || true
+        TypeValidators.FLOAT                         | '1'                               | EMPTY_INIT || true
+        TypeValidators.FLOAT                         | '2'                               | EMPTY_INIT || true
+        TypeValidators.FLOAT                         | '+1'                              | EMPTY_INIT || true
+        TypeValidators.FLOAT                         | '-1'                              | EMPTY_INIT || true
+        TypeValidators.FLOAT                         | '1.'                              | EMPTY_INIT || true
+        TypeValidators.FLOAT                         | '+1.'                             | EMPTY_INIT || true
+        TypeValidators.FLOAT                         | '-1.'                             | EMPTY_INIT || true
+        TypeValidators.FLOAT                         | '1.234'                           | EMPTY_INIT || true
+        TypeValidators.FLOAT                         | '+1.234'                          | EMPTY_INIT || true
+        TypeValidators.FLOAT                         | '-1.234'                          | EMPTY_INIT || true
+        TypeValidators.FLOAT                         | '1e3'                             | EMPTY_INIT || false
+        TypeValidators.FLOAT                         | null                              | EMPTY_INIT || false
+        TypeValidators.FLOAT                         | ''                                | EMPTY_INIT || false
+        TypeValidators.FLOAT                         | 'text'                            | EMPTY_INIT || false
 
-        TypeValidators.SINGLE_WORD_TEXT              | 'one_word'                        | emptyInit                   || true
-        TypeValidators.SINGLE_WORD_TEXT              | 'long_word_' * 10                 | emptyInit                   || true
-        TypeValidators.SINGLE_WORD_TEXT              | null                              | emptyInit                   || false
-        TypeValidators.SINGLE_WORD_TEXT              | ''                                | emptyInit                   || false
-        TypeValidators.SINGLE_WORD_TEXT              | 'multi word'                      | emptyInit                   || false
-        TypeValidators.SINGLE_WORD_TEXT              | 'multi\nline\ntext '              | emptyInit                   || false
+        TypeValidators.SINGLE_WORD_TEXT              | 'one_word'                        | EMPTY_INIT || true
+        TypeValidators.SINGLE_WORD_TEXT              | 'long_word_' * 10                 | EMPTY_INIT || true
+        TypeValidators.SINGLE_WORD_TEXT              | null                              | EMPTY_INIT || false
+        TypeValidators.SINGLE_WORD_TEXT              | ''                                | EMPTY_INIT || false
+        TypeValidators.SINGLE_WORD_TEXT              | 'multi word'                      | EMPTY_INIT || false
+        TypeValidators.SINGLE_WORD_TEXT              | 'multi\nline\ntext '              | EMPTY_INIT || false
 
-        TypeValidators.SINGLE_WORD_TEXT_OPTIONAL     | 'one_word'                        | emptyInit                   || true
-        TypeValidators.SINGLE_WORD_TEXT_OPTIONAL     | 'long_word_' * 10                 | emptyInit                   || true
-        TypeValidators.SINGLE_WORD_TEXT_OPTIONAL     | ''                                | emptyInit                   || true
-        TypeValidators.SINGLE_WORD_TEXT_OPTIONAL     | null                              | emptyInit                   || false
-        TypeValidators.SINGLE_WORD_TEXT_OPTIONAL     | 'multi word'                      | emptyInit                   || false
-        TypeValidators.SINGLE_WORD_TEXT_OPTIONAL     | 'multi\nline\ntext '              | emptyInit                   || false
+        TypeValidators.SINGLE_WORD_TEXT_OPTIONAL     | 'one_word'                        | EMPTY_INIT || true
+        TypeValidators.SINGLE_WORD_TEXT_OPTIONAL     | 'long_word_' * 10                 | EMPTY_INIT || true
+        TypeValidators.SINGLE_WORD_TEXT_OPTIONAL     | ''                                | EMPTY_INIT || true
+        TypeValidators.SINGLE_WORD_TEXT_OPTIONAL     | null                              | EMPTY_INIT || false
+        TypeValidators.SINGLE_WORD_TEXT_OPTIONAL     | 'multi word'                      | EMPTY_INIT || false
+        TypeValidators.SINGLE_WORD_TEXT_OPTIONAL     | 'multi\nline\ntext '              | EMPTY_INIT || false
 
-        TypeValidators.SINGLE_LINE_TEXT              | 'some text'                       | emptyInit                   || true
-        TypeValidators.SINGLE_LINE_TEXT              | 'long text ' * 10                 | emptyInit                   || true
-        TypeValidators.SINGLE_LINE_TEXT              | ''                                | emptyInit                   || false
-        TypeValidators.SINGLE_LINE_TEXT              | null                              | emptyInit                   || false
-        TypeValidators.SINGLE_LINE_TEXT              | 'multi\nline\ntext '              | emptyInit                   || false
+        TypeValidators.SINGLE_LINE_TEXT              | 'some text'                       | EMPTY_INIT || true
+        TypeValidators.SINGLE_LINE_TEXT              | 'long text ' * 10                 | EMPTY_INIT || true
+        TypeValidators.SINGLE_LINE_TEXT              | ''                                | EMPTY_INIT || false
+        TypeValidators.SINGLE_LINE_TEXT              | null                              | EMPTY_INIT || false
+        TypeValidators.SINGLE_LINE_TEXT              | 'multi\nline\ntext '              | EMPTY_INIT || false
 
-        TypeValidators.SINGLE_LINE_TEXT_OPTIONAL     | 'some text'                       | emptyInit                   || true
-        TypeValidators.SINGLE_LINE_TEXT_OPTIONAL     | 'long text ' * 10                 | emptyInit                   || true
-        TypeValidators.SINGLE_LINE_TEXT_OPTIONAL     | ''                                | emptyInit                   || true
-        TypeValidators.SINGLE_LINE_TEXT_OPTIONAL     | null                              | emptyInit                   || false
-        TypeValidators.SINGLE_LINE_TEXT_OPTIONAL     | 'multi\nline\ntext '              | emptyInit                   || false
+        TypeValidators.SINGLE_LINE_TEXT_OPTIONAL     | 'some text'                       | EMPTY_INIT || true
+        TypeValidators.SINGLE_LINE_TEXT_OPTIONAL     | 'long text ' * 10                 | EMPTY_INIT || true
+        TypeValidators.SINGLE_LINE_TEXT_OPTIONAL     | ''                                | EMPTY_INIT || true
+        TypeValidators.SINGLE_LINE_TEXT_OPTIONAL     | null                              | EMPTY_INIT || false
+        TypeValidators.SINGLE_LINE_TEXT_OPTIONAL     | 'multi\nline\ntext '              | EMPTY_INIT || false
 
-        TypeValidators.MULTI_LINE_TEXT               | ''                                | emptyInit                   || true
-        TypeValidators.MULTI_LINE_TEXT               | 'some text'                       | emptyInit                   || true
-        TypeValidators.MULTI_LINE_TEXT               | 'long text ' * 10                 | emptyInit                   || true
-        TypeValidators.MULTI_LINE_TEXT               | 'multi\nline\ntext '              | emptyInit                   || true
-        TypeValidators.MULTI_LINE_TEXT               | 'long\nmulti\nline\ntext ' * 10   | emptyInit                   || true
-        TypeValidators.MULTI_LINE_TEXT               | null                              | emptyInit                   || false
+        TypeValidators.MULTI_LINE_TEXT               | ''                                | EMPTY_INIT || true
+        TypeValidators.MULTI_LINE_TEXT               | 'some text'                       | EMPTY_INIT || true
+        TypeValidators.MULTI_LINE_TEXT               | 'long text ' * 10                 | EMPTY_INIT || true
+        TypeValidators.MULTI_LINE_TEXT               | 'multi\nline\ntext '              | EMPTY_INIT || true
+        TypeValidators.MULTI_LINE_TEXT               | 'long\nmulti\nline\ntext ' * 10   | EMPTY_INIT || true
+        TypeValidators.MULTI_LINE_TEXT               | null                              | EMPTY_INIT || false
 
-        TypeValidators.MAIL                          | 'a.b@c.de'                        | emptyInit                   || true
-        TypeValidators.MAIL                          | 'a@b.cd'                          | emptyInit                   || true
-        TypeValidators.MAIL                          | null                              | emptyInit                   || false
-        TypeValidators.MAIL                          | ''                                | emptyInit                   || false
-        TypeValidators.MAIL                          | 'text'                            | emptyInit                   || false
-        TypeValidators.MAIL                          | 'a.b@c'                           | emptyInit                   || false
-        TypeValidators.MAIL                          | 'a.b@cde'                         | emptyInit                   || false
+        TypeValidators.MAIL                          | 'a.b@c.de'                        | EMPTY_INIT || true
+        TypeValidators.MAIL                          | 'a@b.cd'                          | EMPTY_INIT || true
+        TypeValidators.MAIL                          | null                              | EMPTY_INIT || false
+        TypeValidators.MAIL                          | ''                                | EMPTY_INIT || false
+        TypeValidators.MAIL                          | 'text'                            | EMPTY_INIT || false
+        TypeValidators.MAIL                          | 'a.b@c'                           | EMPTY_INIT || false
+        TypeValidators.MAIL                          | 'a.b@cde'                         | EMPTY_INIT || false
 
-        TypeValidators.PATH_COMPONENT                | 'valid'                           | emptyInit                   || true
-        TypeValidators.PATH_COMPONENT                | null                              | emptyInit                   || false
-        TypeValidators.PATH_COMPONENT                | ''                                | emptyInit                   || false
-        TypeValidators.PATH_COMPONENT                | 'not valid'                       | emptyInit                   || false
-        TypeValidators.PATH_COMPONENT                | 'not/valid'                       | emptyInit                   || false
-        TypeValidators.PATH_COMPONENT                | '.'                               | emptyInit                   || false
-        TypeValidators.PATH_COMPONENT                | '..'                              | emptyInit                   || false
+        TypeValidators.PATH_COMPONENT                | 'valid'                           | EMPTY_INIT || true
+        TypeValidators.PATH_COMPONENT                | null                              | EMPTY_INIT || false
+        TypeValidators.PATH_COMPONENT                | ''                                | EMPTY_INIT || false
+        TypeValidators.PATH_COMPONENT                | 'not valid'                       | EMPTY_INIT || false
+        TypeValidators.PATH_COMPONENT                | 'not/valid'                       | EMPTY_INIT || false
+        TypeValidators.PATH_COMPONENT                | '.'                               | EMPTY_INIT || false
+        TypeValidators.PATH_COMPONENT                | '..'                              | EMPTY_INIT || false
 
-        TypeValidators.ABSOLUTE_PATH                 | '/valid'                          | emptyInit                   || true
-        TypeValidators.ABSOLUTE_PATH                 | '/valid/long/path'                | emptyInit                   || true
-        TypeValidators.ABSOLUTE_PATH                 | null                              | emptyInit                   || false
-        TypeValidators.ABSOLUTE_PATH                 | ''                                | emptyInit                   || false
-        TypeValidators.ABSOLUTE_PATH                 | '/not valid'                      | emptyInit                   || false
-        TypeValidators.ABSOLUTE_PATH                 | 'notvalid'                        | emptyInit                   || false
-        TypeValidators.ABSOLUTE_PATH                 | '/notValid//abc'                  | emptyInit                   || false
-        TypeValidators.ABSOLUTE_PATH                 | '/notValid/./abc'                 | emptyInit                   || false
-        TypeValidators.ABSOLUTE_PATH                 | '/notValid/../abc'                | emptyInit                   || false
+        TypeValidators.ABSOLUTE_PATH                 | '/valid'                          | EMPTY_INIT || true
+        TypeValidators.ABSOLUTE_PATH                 | '/valid/long/path'                | EMPTY_INIT || true
+        TypeValidators.ABSOLUTE_PATH                 | null                              | EMPTY_INIT || false
+        TypeValidators.ABSOLUTE_PATH                 | ''                                | EMPTY_INIT || false
+        TypeValidators.ABSOLUTE_PATH                 | '/not valid'                      | EMPTY_INIT || false
+        TypeValidators.ABSOLUTE_PATH                 | 'notvalid'                        | EMPTY_INIT || false
+        TypeValidators.ABSOLUTE_PATH                 | '/notValid//abc'                  | EMPTY_INIT || false
+        TypeValidators.ABSOLUTE_PATH                 | '/notValid/./abc'                 | EMPTY_INIT || false
+        TypeValidators.ABSOLUTE_PATH                 | '/notValid/../abc'                | EMPTY_INIT || false
 
-        TypeValidators.PLUGIN                        | '1.2.3'                           | emptyInit                   || true
-        TypeValidators.PLUGIN                        | '1.2.3-4'                         | emptyInit                   || true
-        TypeValidators.PLUGIN                        | '1.2.345'                         | emptyInit                   || true
-        TypeValidators.PLUGIN                        | '1.2345.3'                        | emptyInit                   || true
-        TypeValidators.PLUGIN                        | '12345.2.3'                       | emptyInit                   || true
-        TypeValidators.PLUGIN                        | '1.2'                             | emptyInit                   || false
-        TypeValidators.PLUGIN                        | '1.2.3.4'                         | emptyInit                   || false
-        TypeValidators.PLUGIN                        | 'a.2.3'                           | emptyInit                   || false
-        TypeValidators.PLUGIN                        | '1.b.3'                           | emptyInit                   || false
-        TypeValidators.PLUGIN                        | '1.2.c'                           | emptyInit                   || false
-        TypeValidators.PLUGIN                        | '1.2.3-d'                         | emptyInit                   || false
-        TypeValidators.PLUGIN                        | ''                                | emptyInit                   || false
-        TypeValidators.PLUGIN                        | null                              | emptyInit                   || false
+        TypeValidators.PLUGIN                        | '1.2.3'                           | EMPTY_INIT || true
+        TypeValidators.PLUGIN                        | '1.2.3-4'                         | EMPTY_INIT || true
+        TypeValidators.PLUGIN                        | '1.2.345'                         | EMPTY_INIT || true
+        TypeValidators.PLUGIN                        | '1.2345.3'                        | EMPTY_INIT || true
+        TypeValidators.PLUGIN                        | '12345.2.3'                       | EMPTY_INIT || true
+        TypeValidators.PLUGIN                        | '1.2'                             | EMPTY_INIT || false
+        TypeValidators.PLUGIN                        | '1.2.3.4'                         | EMPTY_INIT || false
+        TypeValidators.PLUGIN                        | 'a.2.3'                           | EMPTY_INIT || false
+        TypeValidators.PLUGIN                        | '1.b.3'                           | EMPTY_INIT || false
+        TypeValidators.PLUGIN                        | '1.2.c'                           | EMPTY_INIT || false
+        TypeValidators.PLUGIN                        | '1.2.3-d'                         | EMPTY_INIT || false
+        TypeValidators.PLUGIN                        | ''                                | EMPTY_INIT || false
+        TypeValidators.PLUGIN                        | null                              | EMPTY_INIT || false
 
-        TypeValidators.CLUSTER_JOB_SUBMISSION_OPTION | ''                                | emptyInit                   || true
-        TypeValidators.CLUSTER_JOB_SUBMISSION_OPTION | '{CORES: \'3\'}'                  | emptyInit                   || true
-        TypeValidators.CLUSTER_JOB_SUBMISSION_OPTION | '{CORES: \'3\', MEMORY: \'100\'}' | emptyInit                   || true
-        TypeValidators.CLUSTER_JOB_SUBMISSION_OPTION | null                              | emptyInit                   || false
-        TypeValidators.CLUSTER_JOB_SUBMISSION_OPTION | '{}'                              | emptyInit                   || false
-        TypeValidators.CLUSTER_JOB_SUBMISSION_OPTION | '[\'1\', \'2\']'                  | emptyInit                   || false
-        TypeValidators.CLUSTER_JOB_SUBMISSION_OPTION | 'text'                            | emptyInit                   || false
-        TypeValidators.CLUSTER_JOB_SUBMISSION_OPTION | '{nojson}'                        | emptyInit                   || false
-        TypeValidators.CLUSTER_JOB_SUBMISSION_OPTION | '{noKey: \'3\'}'                  | emptyInit                   || false
+        TypeValidators.CLUSTER_JOB_SUBMISSION_OPTION | ''                                | EMPTY_INIT || true
+        TypeValidators.CLUSTER_JOB_SUBMISSION_OPTION | '{CORES: \'3\'}'                  | EMPTY_INIT || true
+        TypeValidators.CLUSTER_JOB_SUBMISSION_OPTION | '{CORES: \'3\', MEMORY: \'100\'}' | EMPTY_INIT || true
+        TypeValidators.CLUSTER_JOB_SUBMISSION_OPTION | null                              | EMPTY_INIT || false
+        TypeValidators.CLUSTER_JOB_SUBMISSION_OPTION | '{}'                              | EMPTY_INIT || false
+        TypeValidators.CLUSTER_JOB_SUBMISSION_OPTION | '[\'1\', \'2\']'                  | EMPTY_INIT || false
+        TypeValidators.CLUSTER_JOB_SUBMISSION_OPTION | 'text'                            | EMPTY_INIT || false
+        TypeValidators.CLUSTER_JOB_SUBMISSION_OPTION | '{nojson}'                        | EMPTY_INIT || false
+        TypeValidators.CLUSTER_JOB_SUBMISSION_OPTION | '{noKey: \'3\'}'                  | EMPTY_INIT || false
 
-        TypeValidators.SSH_AUTH_METHOD               | 'sshagent'                        | emptyInit                   || true
-        TypeValidators.SSH_AUTH_METHOD               | 'keyfile'                         | emptyInit                   || true
-        TypeValidators.SSH_AUTH_METHOD               | 'password'                        | emptyInit                   || true
-        TypeValidators.SSH_AUTH_METHOD               | ''                                | emptyInit                   || false
-        TypeValidators.SSH_AUTH_METHOD               | null                              | emptyInit                   || false
-        TypeValidators.SSH_AUTH_METHOD               | 'Sshagent'                        | emptyInit                   || false
-        TypeValidators.SSH_AUTH_METHOD               | 'Keyfile'                         | emptyInit                   || false
-        TypeValidators.SSH_AUTH_METHOD               | 'Password'                        | emptyInit                   || false
-        TypeValidators.SSH_AUTH_METHOD               | 'SSHAGENT'                        | emptyInit                   || false
-        TypeValidators.SSH_AUTH_METHOD               | 'KEYFILE'                         | emptyInit                   || false
-        TypeValidators.SSH_AUTH_METHOD               | 'PASSWORD'                        | emptyInit                   || false
-        TypeValidators.SSH_AUTH_METHOD               | 'unknown'                         | emptyInit                   || false
+        TypeValidators.SSH_AUTH_METHOD               | 'sshagent'                        | EMPTY_INIT || true
+        TypeValidators.SSH_AUTH_METHOD               | 'keyfile'                         | EMPTY_INIT || true
+        TypeValidators.SSH_AUTH_METHOD               | 'password'                        | EMPTY_INIT || true
+        TypeValidators.SSH_AUTH_METHOD               | ''                                | EMPTY_INIT || false
+        TypeValidators.SSH_AUTH_METHOD               | null                              | EMPTY_INIT || false
+        TypeValidators.SSH_AUTH_METHOD               | 'Sshagent'                        | EMPTY_INIT || false
+        TypeValidators.SSH_AUTH_METHOD               | 'Keyfile'                         | EMPTY_INIT || false
+        TypeValidators.SSH_AUTH_METHOD               | 'Password'                        | EMPTY_INIT || false
+        TypeValidators.SSH_AUTH_METHOD               | 'SSHAGENT'                        | EMPTY_INIT || false
+        TypeValidators.SSH_AUTH_METHOD               | 'KEYFILE'                         | EMPTY_INIT || false
+        TypeValidators.SSH_AUTH_METHOD               | 'PASSWORD'                        | EMPTY_INIT || false
+        TypeValidators.SSH_AUTH_METHOD               | 'unknown'                         | EMPTY_INIT || false
 
-        TypeValidators.PIPELINE_TYPE                 | 'ACESEQ'                          | emptyInit                   || true
-        TypeValidators.PIPELINE_TYPE                 | 'ALIGNMENT'                       | emptyInit                   || true
-        TypeValidators.PIPELINE_TYPE                 | 'INDEL'                           | emptyInit                   || true
-        TypeValidators.PIPELINE_TYPE                 | 'MUTATIONAL_SIGNATURE'            | emptyInit                   || true
-        TypeValidators.PIPELINE_TYPE                 | 'SNV'                             | emptyInit                   || true
-        TypeValidators.PIPELINE_TYPE                 | 'SOPHIA'                          | emptyInit                   || true
-        TypeValidators.PIPELINE_TYPE                 | ''                                | emptyInit                   || false
-        TypeValidators.PIPELINE_TYPE                 | null                              | emptyInit                   || false
-        TypeValidators.PIPELINE_TYPE                 | 'UNKNOWN'                         | emptyInit                   || false
-        TypeValidators.PIPELINE_TYPE                 | 'aceseq'                          | emptyInit                   || false
-        TypeValidators.PIPELINE_TYPE                 | 'alignment'                       | emptyInit                   || false
-        TypeValidators.PIPELINE_TYPE                 | 'indel'                           | emptyInit                   || false
-        TypeValidators.PIPELINE_TYPE                 | 'mutation_signature'              | emptyInit                   || false
-        TypeValidators.PIPELINE_TYPE                 | 'snv'                             | emptyInit                   || false
-        TypeValidators.PIPELINE_TYPE                 | 'sophia'                          | emptyInit                   || false
+        TypeValidators.PIPELINE_TYPE                 | 'ACESEQ'                          | EMPTY_INIT || true
+        TypeValidators.PIPELINE_TYPE                 | 'ALIGNMENT'                       | EMPTY_INIT || true
+        TypeValidators.PIPELINE_TYPE                 | 'INDEL'                           | EMPTY_INIT || true
+        TypeValidators.PIPELINE_TYPE                 | 'MUTATIONAL_SIGNATURE'            | EMPTY_INIT || true
+        TypeValidators.PIPELINE_TYPE                 | 'SNV'                             | EMPTY_INIT || true
+        TypeValidators.PIPELINE_TYPE                 | 'SOPHIA'                          | EMPTY_INIT || true
+        TypeValidators.PIPELINE_TYPE                 | ''                                | EMPTY_INIT || false
+        TypeValidators.PIPELINE_TYPE                 | null                              | EMPTY_INIT || false
+        TypeValidators.PIPELINE_TYPE                 | 'UNKNOWN'                         | EMPTY_INIT || false
+        TypeValidators.PIPELINE_TYPE                 | 'aceseq'                          | EMPTY_INIT || false
+        TypeValidators.PIPELINE_TYPE                 | 'alignment'                       | EMPTY_INIT || false
+        TypeValidators.PIPELINE_TYPE                 | 'indel'                           | EMPTY_INIT || false
+        TypeValidators.PIPELINE_TYPE                 | 'mutation_signature'              | EMPTY_INIT || false
+        TypeValidators.PIPELINE_TYPE                 | 'snv'                             | EMPTY_INIT || false
+        TypeValidators.PIPELINE_TYPE                 | 'sophia'                          | EMPTY_INIT || false
 
-        TypeValidators.INSTANCE_LOGO                 | 'NONE'                            | emptyInit                   || true
-        TypeValidators.INSTANCE_LOGO                 | 'CHARITE'                         | emptyInit                   || true
-        TypeValidators.INSTANCE_LOGO                 | 'DKFZ'                            | emptyInit                   || true
-        TypeValidators.INSTANCE_LOGO                 | ''                                | emptyInit                   || false
-        TypeValidators.INSTANCE_LOGO                 | null                              | emptyInit                   || false
-        TypeValidators.INSTANCE_LOGO                 | 'UNKNOWN'                         | emptyInit                   || false
-        TypeValidators.INSTANCE_LOGO                 | 'None'                            | emptyInit                   || false
-        TypeValidators.INSTANCE_LOGO                 | 'none'                            | emptyInit                   || false
+        TypeValidators.INSTANCE_LOGO                 | 'NONE'                            | EMPTY_INIT || true
+        TypeValidators.INSTANCE_LOGO                 | 'CHARITE'                         | EMPTY_INIT || true
+        TypeValidators.INSTANCE_LOGO                 | 'DKFZ'                            | EMPTY_INIT || true
+        TypeValidators.INSTANCE_LOGO                 | ''                                | EMPTY_INIT || false
+        TypeValidators.INSTANCE_LOGO                 | null                              | EMPTY_INIT || false
+        TypeValidators.INSTANCE_LOGO                 | 'UNKNOWN'                         | EMPTY_INIT || false
+        TypeValidators.INSTANCE_LOGO                 | 'None'                            | EMPTY_INIT || false
+        TypeValidators.INSTANCE_LOGO                 | 'none'                            | EMPTY_INIT || false
 
-        TypeValidators.JOB_SCHEDULER                 | 'PBS'                             | emptyInit                   || true
-        TypeValidators.JOB_SCHEDULER                 | 'LSF'                             | emptyInit                   || true
-        TypeValidators.JOB_SCHEDULER                 | ''                                | emptyInit                   || false
-        TypeValidators.JOB_SCHEDULER                 | null                              | emptyInit                   || false
-        TypeValidators.JOB_SCHEDULER                 | 'pbs'                             | emptyInit                   || false
-        TypeValidators.JOB_SCHEDULER                 | 'lsf'                             | emptyInit                   || false
-        TypeValidators.JOB_SCHEDULER                 | 'text'                            | emptyInit                   || false
+        TypeValidators.JOB_SCHEDULER                 | 'PBS'                             | EMPTY_INIT || true
+        TypeValidators.JOB_SCHEDULER                 | 'LSF'                             | EMPTY_INIT || true
+        TypeValidators.JOB_SCHEDULER                 | ''                                | EMPTY_INIT || false
+        TypeValidators.JOB_SCHEDULER                 | null                              | EMPTY_INIT || false
+        TypeValidators.JOB_SCHEDULER                 | 'pbs'                             | EMPTY_INIT || false
+        TypeValidators.JOB_SCHEDULER                 | 'lsf'                             | EMPTY_INIT || false
+        TypeValidators.JOB_SCHEDULER                 | 'text'                            | EMPTY_INIT || false
 
-        TypeValidators.SEQ_CENTER_NAME               | CENTER_A                          | initSeqCenter               || true
-        TypeValidators.SEQ_CENTER_NAME               | CENTER_B                          | initSeqCenter               || true
-        TypeValidators.SEQ_CENTER_NAME               | ''                                | initSeqCenter               || false
-        TypeValidators.SEQ_CENTER_NAME               | null                              | initSeqCenter               || false
-        TypeValidators.SEQ_CENTER_NAME               | 'OtherCenterName'                 | initSeqCenter               || false
+        TypeValidators.SEQ_CENTER_NAME               | CENTER_A                          | INIT_SEQ_CENTER || true
+        TypeValidators.SEQ_CENTER_NAME               | CENTER_B                          | INIT_SEQ_CENTER || true
+        TypeValidators.SEQ_CENTER_NAME               | ''                                | INIT_SEQ_CENTER || false
+        TypeValidators.SEQ_CENTER_NAME               | null                              | INIT_SEQ_CENTER || false
+        TypeValidators.SEQ_CENTER_NAME               | 'OtherCenterName'                 | INIT_SEQ_CENTER || false
 
-        TypeValidators.SEQ_TYPE_RODDY_NAME           | SEQ_TYPE_RODDY_NAME_A             | initSeqTypes                || true
-        TypeValidators.SEQ_TYPE_RODDY_NAME           | SEQ_TYPE_RODDY_NAME_B             | initSeqTypes                || true
-        TypeValidators.SEQ_TYPE_RODDY_NAME           | ''                                | initSeqTypes                || false
-        TypeValidators.SEQ_TYPE_RODDY_NAME           | null                              | initSeqTypes                || false
-        TypeValidators.SEQ_TYPE_RODDY_NAME           | 'OtherSeqTypeName'                | initSeqTypes                || false
+        TypeValidators.SEQ_TYPE_RODDY_NAME           | SEQ_TYPE_RODDY_NAME_A             | INIT_SEQ_TYPES || true
+        TypeValidators.SEQ_TYPE_RODDY_NAME           | SEQ_TYPE_RODDY_NAME_B             | INIT_SEQ_TYPES || true
+        TypeValidators.SEQ_TYPE_RODDY_NAME           | ''                                | INIT_SEQ_TYPES || false
+        TypeValidators.SEQ_TYPE_RODDY_NAME           | null                              | INIT_SEQ_TYPES || false
+        TypeValidators.SEQ_TYPE_RODDY_NAME           | 'OtherSeqTypeName'                | INIT_SEQ_TYPES || false
 
-        TypeValidators.SEQ_TYPE_PROCESSING_NAME      | SEQ_TYPE_DISPLAY_NAME_A           | initSeqTypesProcessingNames || true
-        TypeValidators.SEQ_TYPE_PROCESSING_NAME      | SEQ_TYPE_DISPLAY_NAME_B           | initSeqTypesProcessingNames || true
-        TypeValidators.SEQ_TYPE_PROCESSING_NAME      | ''                                | initSeqTypesProcessingNames || false
-        TypeValidators.SEQ_TYPE_PROCESSING_NAME      | null                              | initSeqTypesProcessingNames || false
-        TypeValidators.SEQ_TYPE_PROCESSING_NAME      | 'OtherSeqTypeName'                | initSeqTypesProcessingNames || false
+        TypeValidators.SEQ_TYPE_PROCESSING_NAME      | SEQ_TYPE_DISPLAY_NAME_A           | INIT_SEQ_TYPES_PROCESSING_NAMES || true
+        TypeValidators.SEQ_TYPE_PROCESSING_NAME      | SEQ_TYPE_DISPLAY_NAME_B           | INIT_SEQ_TYPES_PROCESSING_NAMES || true
+        TypeValidators.SEQ_TYPE_PROCESSING_NAME      | ''                                | INIT_SEQ_TYPES_PROCESSING_NAMES || false
+        TypeValidators.SEQ_TYPE_PROCESSING_NAME      | null                              | INIT_SEQ_TYPES_PROCESSING_NAMES || false
+        TypeValidators.SEQ_TYPE_PROCESSING_NAME      | 'OtherSeqTypeName'                | INIT_SEQ_TYPES_PROCESSING_NAMES || false
 
-        TypeValidators.WORKFLOW_NAME                 | WORKFLOW_NAME_A                   | initJobExecutionPlans       || true
-        TypeValidators.WORKFLOW_NAME                 | WORKFLOW_NAME_B                   | initJobExecutionPlans       || true
-        TypeValidators.WORKFLOW_NAME                 | ''                                | initJobExecutionPlans       || false
-        TypeValidators.WORKFLOW_NAME                 | null                              | initJobExecutionPlans       || false
-        TypeValidators.WORKFLOW_NAME                 | 'OtherWorkflowName'               | initJobExecutionPlans       || false
+        TypeValidators.WORKFLOW_NAME                 | WORKFLOW_NAME_A                   | INIT_JOB_EXECUTION_PLANS || true
+        TypeValidators.WORKFLOW_NAME                 | WORKFLOW_NAME_B                   | INIT_JOB_EXECUTION_PLANS || true
+        TypeValidators.WORKFLOW_NAME                 | ''                                | INIT_JOB_EXECUTION_PLANS || false
+        TypeValidators.WORKFLOW_NAME                 | null                              | INIT_JOB_EXECUTION_PLANS || false
+        TypeValidators.WORKFLOW_NAME                 | 'OtherWorkflowName'               | INIT_JOB_EXECUTION_PLANS || false
     }
 
-    private static Closure emptyInit = { }
+    private final static Closure EMPTY_INIT = { }
 
-    private static Closure initSeqCenter = { ->
+    private final static Closure INIT_SEQ_CENTER = { ->
         [
                 CENTER_A,
                 CENTER_B,
@@ -274,7 +274,7 @@ class TypeValidatorsSpec extends Specification implements DataTest {
         }
     }
 
-    private static Closure initSeqTypes = { ->
+    private final static Closure INIT_SEQ_TYPES = { ->
         [
                 SEQ_TYPE_RODDY_NAME_A,
                 SEQ_TYPE_RODDY_NAME_B,
@@ -285,7 +285,7 @@ class TypeValidatorsSpec extends Specification implements DataTest {
         }
     }
 
-    private static Closure initSeqTypesProcessingNames = { ->
+    private final static Closure INIT_SEQ_TYPES_PROCESSING_NAMES = { ->
         [
                 SEQ_TYPE_DISPLAY_NAME_A,
                 SEQ_TYPE_DISPLAY_NAME_B,
@@ -296,7 +296,7 @@ class TypeValidatorsSpec extends Specification implements DataTest {
         }
     }
 
-    private static Closure initJobExecutionPlans = { ->
+    private final static Closure INIT_JOB_EXECUTION_PLANS = { ->
         [
                 WORKFLOW_NAME_A,
                 WORKFLOW_NAME_B,

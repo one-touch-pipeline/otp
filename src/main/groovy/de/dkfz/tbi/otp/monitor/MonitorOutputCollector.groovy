@@ -53,7 +53,7 @@ class MonitorOutputCollector {
 
     ConfigService configService
 
-    private List<String> output = []
+    private final List<String> output = []
 
     MonitorOutputCollector(boolean showFinishedEntries = false, boolean showNotSupportedSeqTypes = false) {
         this.showFinishedEntries = showFinishedEntries

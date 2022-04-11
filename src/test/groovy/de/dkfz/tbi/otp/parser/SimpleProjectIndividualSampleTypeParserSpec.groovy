@@ -28,7 +28,7 @@ import de.dkfz.tbi.otp.ngsdata.SampleType
 
 class SimpleProjectIndividualSampleTypeParserSpec extends Specification {
 
-    private SimpleProjectIndividualSampleTypeParser simpleProjectIndividualSampleTypeParser = new SimpleProjectIndividualSampleTypeParser()
+    private final SimpleProjectIndividualSampleTypeParser simpleProjectIndividualSampleTypeParser = new SimpleProjectIndividualSampleTypeParser()
 
     @Unroll('identifier #input is parsed to PID #pid, #sampleType, #project and #identifier')
     void "test parse valid input"() {

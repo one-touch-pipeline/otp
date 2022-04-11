@@ -82,7 +82,7 @@ class MailHelperService {
         assert recipients
 
         [recipients, ccs].each {
-            assert it.every(isValidMail)
+            assert it.every { isEmailValid(it) }
         }
 
         if (!recipients.contains(ticketSystemEmailAddress)) {
@@ -120,7 +120,7 @@ class MailHelperService {
         return processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_TICKET_SYSTEM)
     }
 
-    private static Closure<Boolean> isValidMail = { String mail ->
+    private boolean isEmailValid(String mail) {
         return mail.contains("@")
     }
 
