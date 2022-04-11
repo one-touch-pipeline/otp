@@ -120,7 +120,7 @@
             <g:link controller="run" action="show" id="${run.run.id}">${run.run.name}</g:link>,
             ${[
                     run.run.seqCenter.name,
-                    run.run.seqPlatform.fullName(),
+                    run.run.seqPlatform.fullName,
                     TimeFormats.DATE.getFormattedDate(run.run.dateExecuted),
             ].findAll().join(', ')}
         </h3>

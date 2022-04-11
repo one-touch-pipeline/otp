@@ -117,7 +117,7 @@ class SamplePairChecker extends PipelinesChecker<AbstractMergedBamFile> {
         List<BlockedSamplePair> waitingSamplePairs = blockedSamplePairs(allSamplePairs)
         output.showList(HEADER_BLOCKED_SAMPLE_PAIRS, waitingSamplePairs)
 
-        return allSamplePairs - samplePairWithoutBamFile - waitingSamplePairs.collect { it.samplePair }
+        return allSamplePairs - samplePairWithoutBamFile - waitingSamplePairs*.samplePair
     }
 
     List<AbstractMergedBamFile> bamFilesWithoutCategory(List<AbstractMergedBamFile> bamFiles) {

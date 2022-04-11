@@ -1138,7 +1138,7 @@ All the Rules that will be used for OTP
         priority = DEFAULT
     }
     UnnecessaryCollectCall {
-        priority = LOW
+        priority = CRITICAL
     }
     UnnecessaryCollectionCall {
         priority = CRITICAL

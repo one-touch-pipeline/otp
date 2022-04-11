@@ -117,7 +117,7 @@ chmod 0444 ${metadataFile.path}
     protected void workflowSpecificValidation(RoddyBamFile roddyBamFile) {
         LsdfFilesService.ensureDirIsReadableAndNotEmpty(new File(roddyBamFile.workMethylationDirectory, "merged"))
         if (roddyBamFile.hasMultipleLibraries()) {
-            roddyBamFile.seqTracks.collect { it.libraryDirectoryName }.unique().each {
+            roddyBamFile.seqTracks*.libraryDirectoryName.unique().each {
                 LsdfFilesService.ensureDirIsReadableAndNotEmpty(new File(roddyBamFile.workMethylationDirectory, it))
             }
         }

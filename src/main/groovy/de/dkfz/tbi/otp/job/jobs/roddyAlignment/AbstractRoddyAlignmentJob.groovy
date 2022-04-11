@@ -124,9 +124,9 @@ abstract class AbstractRoddyAlignmentJob extends AbstractExecutePanCanJob<RoddyB
 
         final SamReaderFactory factory = SamReaderFactory.makeDefault()
                 .enable(SamReaderFactory.Option.VALIDATE_CRC_CHECKSUMS)
-        List<String> readGroupsInBam = factory.getFileHeader(bamFilePath).readGroups.collect { it.id }.sort()
+        List<String> readGroupsInBam = factory.getFileHeader(bamFilePath).readGroups*.id.sort()
 
-        List<String> expectedReadGroups = bamFile.containedSeqTracks.collect { it.readGroupName }.sort()
+        List<String> expectedReadGroups = bamFile.containedSeqTracks*.readGroupName.sort()
 
         if (readGroupsInBam != expectedReadGroups) {
             throw new RuntimeException("""Read groups in BAM file are not as expected.

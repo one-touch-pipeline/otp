@@ -162,15 +162,12 @@ class QcThreshold implements Entity {
     static List<String> getValidQcPropertyForQcClass(String cl) {
         Class clasz = validQcClass.find { it.name == cl }
         if (clasz) {
-            List<String> propertiesWithAnnotations = getAnnotatedMembers(clasz)
-                    .collect { it.name }
+            List<String> propertiesWithAnnotations = getAnnotatedMembers(clasz)*.name
 
             clasz.metaClass.properties.findAll {
                 it.name in propertiesWithAnnotations ||
                         MetaProperty.getGetterName(it.name, it.type) in propertiesWithAnnotations
-            }.collect {
-                it.name
-            }.sort()
+            }*.name.sort()
         } else {
             []
         }

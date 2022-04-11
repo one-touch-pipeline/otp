@@ -1566,7 +1566,7 @@ class SchedulerServiceIntegrationSpec extends Specification implements UserAndRo
         !restartedStep.input.empty
 
         when:
-        List<String> values = restartedStep.input.collect { it.value }.sort()
+        List<String> values = restartedStep.input*.value.sort()
 
         then:
         2 == values.size()

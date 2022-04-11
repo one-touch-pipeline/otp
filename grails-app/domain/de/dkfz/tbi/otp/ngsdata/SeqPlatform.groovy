@@ -58,7 +58,7 @@ class SeqPlatform implements Entity, Legacy {
 
     @Override
     String toString() {
-        return fullName()
+        return fullName
     }
 
     SeqPlatformGroup getSeqPlatformGroupForMergingCriteria(Project project, SeqType seqType) {
@@ -81,7 +81,7 @@ class SeqPlatform implements Entity, Legacy {
         return atMostOneElement(seqPlatformGroups)
     }
 
-    String fullName() {
+    String getFullName() {
         return [
                 name,
                 seqPlatformModelLabel?.name,

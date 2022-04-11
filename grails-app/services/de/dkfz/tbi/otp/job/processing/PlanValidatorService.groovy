@@ -181,7 +181,7 @@ class PlanValidatorService {
         if (!plan.firstJob) {
             return true
         }
-        List<Long> jobDefinitions = JobDefinition.findAllByPlan(plan).findAll { !(it instanceof StartJobDefinition) }.collect { it.id }
+        List<Long> jobDefinitions = JobDefinition.findAllByPlan(plan).findAll { !(it instanceof StartJobDefinition) }*.id
         List<Long> linkedDefinition = []
         JobDefinition lastJob = plan.firstJob
         while (lastJob) {

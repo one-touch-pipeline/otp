@@ -41,11 +41,11 @@ class SequenceController {
 
     def index() {
         List<SeqType> seqTypes = SeqType.list(sort: "name", order: "asc")
-        [
+        return [
             tableHeader: (SequenceColumn.values() - SequenceColumn.WITHDRAWN)*.message,
             sampleTypes: SampleType.list(sort: "name", order: "asc"),
-            seqTypes: new TreeSet(seqTypes.collect { it.displayName }),
-            libraryLayouts: new TreeSet(seqTypes.collect { it.libraryLayout }),
+            seqTypes: seqTypes*.displayName.unique(),
+            libraryLayouts: seqTypes*.libraryLayout.unique(),
             seqCenters: SeqCenter.list(sort: "name", order: "asc"),
             libraryPreparationKits: LibraryPreparationKit.list(sort: "shortDisplayName", order: "asc").shortDisplayName,
             antibodyTargets: AntibodyTarget.list(sort: "name", order: "asc"),
@@ -60,11 +60,11 @@ class SequenceController {
                      type : 'LIST', from: SampleType.list(sort: "name", order: "asc"),
                      value: 'name', key: 'id'],
                     [name: 'seqTypeSelection', msgcode: 'sequence.search.seqType',
-                     type: 'LIST', from: seqTypes.collect { it.displayName }.unique()],
+                     type: 'LIST', from: seqTypes*.displayName.unique()],
                     [name: 'ilseIdSearch', msgcode: 'sequence.search.ilse',
                      type: 'TEXT'],
                     [name: 'libraryLayoutSelection', msgcode: 'sequence.search.sequencingReadType',
-                     type: 'LIST', from: seqTypes.collect { it.libraryLayout }.unique()],
+                     type: 'LIST', from: seqTypes*.libraryLayout .unique()],
                     [name: 'singleCell', msgcode: 'sequence.search.singleCell',
                      type: 'LIST', from: [true, false]],
                     [name: 'libraryPreparationKitSelection', msgcode: 'sequence.search.libPrepKit',

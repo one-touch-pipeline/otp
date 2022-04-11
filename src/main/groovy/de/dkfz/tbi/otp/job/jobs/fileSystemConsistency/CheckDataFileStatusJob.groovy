@@ -72,9 +72,7 @@ class CheckDataFileStatusJob extends AbstractEndStateAwareJobImpl {
      * @return A list of DataFiles without inconsistencies
      */
     private List<DataFile> dataFilesWithConsistentStatus() {
-        List<Long> dataFileIdsWithInconsistencies = ConsistencyStatus.findAllByResolvedDateIsNull().collect {
-            it.dataFileId
-        }
+        List<Long> dataFileIdsWithInconsistencies = ConsistencyStatus.findAllByResolvedDateIsNull()*.dataFileId
         // if the list is empty, the query throws a nullPointerException
         if (dataFileIdsWithInconsistencies.size() > 0) {
             return DataFile.findAllByIdNotInList(dataFileIdsWithInconsistencies)

@@ -66,9 +66,7 @@ class DataExportService {
             scriptListBuilder.append("#!/bin/bash\n\nset -e\numask ${umask}\n")
         }
 
-        dataExportInput.seqTrackList.collect { SeqTrack seqTrack ->
-            seqTrack.individual
-        }.unique().each { Individual individual ->
+        dataExportInput.seqTrackList*.individual.unique().each { Individual individual ->
             Path targetFolderWithPid = dataExportInput.targetFolder.resolve(individual.mockPid)
             if (dataExportInput.checkFileStatus) {
                 consoleBuilder.append("${individual.mockPid}\n")

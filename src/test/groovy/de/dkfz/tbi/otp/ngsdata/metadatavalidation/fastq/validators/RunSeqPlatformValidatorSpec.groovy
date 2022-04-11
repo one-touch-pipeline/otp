@@ -73,7 +73,7 @@ class RunSeqPlatformValidatorSpec extends Specification implements DataTest {
 
     static String getAlreadyKnownError(String propertyName, SeqPlatform known, SeqPlatform conflicting) {
         return "Run '${propertyName}' is already registered in the OTP database with sequencing " +
-                "platform '${known.fullName()}', not with '${conflicting.fullName()}'."
+                "platform '${known.fullName}', not with '${conflicting.fullName}'."
     }
 
     private void createPlatforms() {

@@ -139,7 +139,7 @@ class JobExecutionPlanService {
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     Map<Process, ProcessingStepUpdate> getLatestUpdatesForPlan(
             JobExecutionPlan plan, int max = 10, int offset = 0, String column = "id", boolean order = false, List<ExecutionState> states = []) {
-        final List<Long> plans = withParents(plan).collect { it.id }
+        final List<Long> plans = withParents(plan)*.id
         String query = """
         SELECT
             p, max(u.id)
@@ -215,7 +215,7 @@ class JobExecutionPlanService {
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     Process getLastExecutedProcess(JobExecutionPlan plan) {
-        final List<Long> plans = withParents(plan).collect { it.id }
+        final List<Long> plans = withParents(plan)*.id
         String query = """
         SELECT
             p
@@ -274,7 +274,7 @@ class JobExecutionPlanService {
                     u2.previous = u
             )
         """
-        return Process.executeQuery(query.toString(), [planIds: plans.collect { it.id }, states: states])[0] as int
+        return Process.executeQuery(query.toString(), [planIds: plans*.id, states: states])[0] as int
     }
 
     /**

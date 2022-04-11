@@ -631,9 +631,7 @@ class RoddyBamFile extends AbstractMergedBamFile implements Artefact, HasIdentif
             seqTrack.fastqcState == SeqTrack.DataProcessingState.FINISHED
         }: "Not all Fastqc workflows of all seqtracks are finished"
 
-        List<Integer> numberOfReads = seqTracks.collect { SeqTrack seqTrack ->
-            seqTrack.NReads
-        }
+        List<Integer> numberOfReads = seqTracks*.NReads
 
         assert !numberOfReads.contains(null): 'At least one seqTrack has no value for number of reads'
 

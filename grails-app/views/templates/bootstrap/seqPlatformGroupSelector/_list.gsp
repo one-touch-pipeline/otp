@@ -30,7 +30,7 @@ parameter to set:
 --}%
 
 <div class="list-group list-group-flush">
-    <g:each in="${seqPlatformGroup.seqPlatforms.sort { it.fullName() }}" var="seqPlatform">
+    <g:each in="${seqPlatformGroup.seqPlatforms.sort { it.fullName }}" var="seqPlatform">
         <div class="list-group-item">
             <div class="row">
                 <div class="col-10">

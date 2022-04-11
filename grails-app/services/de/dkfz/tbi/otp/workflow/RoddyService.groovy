@@ -38,12 +38,12 @@ class RoddyService {
     List<String> getReadGroupsInBam(WorkflowStep workflowStep) {
         final RoddyBamFile roddyBamFile = getRoddyBamFile(workflowStep)
         final SamReaderFactory factory = SamReaderFactory.makeDefault().enable(SamReaderFactory.Option.VALIDATE_CRC_CHECKSUMS)
-        return factory.getFileHeader(roddyBamFile).readGroups.collect { it.id }.sort()
+        return factory.getFileHeader(roddyBamFile).readGroups*.id.sort()
     }
 
     List<String> getReadGroupsExpected(WorkflowStep workflowStep) {
         final RoddyBamFile roddyBamFile = getRoddyBamFile(workflowStep)
-        return roddyBamFile.containedSeqTracks.collect { it.readGroupName }.sort()
+        return roddyBamFile.containedSeqTracks*.readGroupName.sort()
     }
 
     JobStateLogFile getJobStateLogFile(WorkflowStep workflowStep) {

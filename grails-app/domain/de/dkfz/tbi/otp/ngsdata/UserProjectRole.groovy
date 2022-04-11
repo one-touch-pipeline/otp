@@ -94,6 +94,6 @@ class UserProjectRole implements Serializable, Entity {
                 ["manageUsersAndDelegate", manageUsersAndDelegate],
                 ["receivesNotifications", receivesNotifications],
                 ["fileAccessChangeRequested", fileAccessChangeRequested],
-        ].collect { it.join(": ") }.join("; ")
+        ]*.join(": ").join("; ")
     }
 }

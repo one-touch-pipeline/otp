@@ -79,7 +79,7 @@ class QcTrafficLightNotificationService {
     }
 
     String buildContentForMultipleBamsWarningMessage(List<AbstractMergedBamFile> bamFiles) {
-        Project project = CollectionUtils.exactlyOneElement(bamFiles.collect { it.project }.unique())
+        Project project = CollectionUtils.exactlyOneElement(bamFiles*.project.unique())
 
         String bamListing = bamFiles.groupBy { it.seqType }.collect { SeqType seqType, List<AbstractMergedBamFile> bams ->
             return buildSeqTypeBlockForNotification(seqType, bams)
@@ -93,7 +93,7 @@ class QcTrafficLightNotificationService {
     }
 
     String buildSeqTypeBlockForNotification(SeqType seqType, List<AbstractMergedBamFile> bamFiles) {
-        Project project = CollectionUtils.exactlyOneElement(bamFiles.collect { it.project }.unique())
+        Project project = CollectionUtils.exactlyOneElement(bamFiles*.project.unique())
         return """\
             |${seqType}
             |Quality overview: ${getAlignmentQualityOverviewLink(project, seqType)}

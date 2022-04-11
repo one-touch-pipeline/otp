@@ -71,7 +71,7 @@ class MergingCriteriaService {
         return SeqPlatformGroup.createCriteria().list {
             isNull("mergingCriteria")
             isNotEmpty("seqPlatforms")
-        }.sort { it.seqPlatforms.sort { it.fullName() }.first().fullName() }
+        }.sort { it.seqPlatforms.sort { it.fullName }.first().fullName }
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
@@ -93,14 +93,14 @@ class MergingCriteriaService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void removePlatformFromSeqPlatformGroup(SeqPlatformGroup group, SeqPlatform platform) {
-        commentService.saveComment(group, group.seqPlatforms.collect { it.fullName() }.join("\n"))
+        commentService.saveComment(group, group.seqPlatforms*.fullName.join("\n"))
         group.removeFromSeqPlatforms(platform)
         assert group.save(flush: true)
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void addPlatformToExistingSeqPlatformGroup(SeqPlatformGroup group, SeqPlatform platform) {
-        commentService.saveComment(group, group.seqPlatforms.collect { it.fullName() }.join("\n"))
+        commentService.saveComment(group, group.seqPlatforms*.fullName.join("\n"))
         group.addToSeqPlatforms(platform)
         assert group.save(flush: true)
     }
@@ -119,7 +119,7 @@ class MergingCriteriaService {
     void emptySeqPlatformGroup(SeqPlatformGroup group) {
         // code necessary because of grails behaviour with many-to-many relationships
         Set<SeqPlatform> seqPlatforms = new HashSet<SeqPlatform>(group.seqPlatforms ?: [])
-        commentService.saveComment(group, seqPlatforms.collect { it.fullName() }.join("\n"))
+        commentService.saveComment(group, seqPlatforms*.fullName.join("\n"))
         seqPlatforms.each {
             group.removeFromSeqPlatforms(it)
         }
