@@ -26,97 +26,86 @@ import grails.plugin.springsecurity.annotation.Secured
 
 import de.dkfz.tbi.otp.SearchSeqTrackService
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.ngsdata.SeqTypeService
 
 @Secured("hasRole('ROLE_OPERATOR')")
 class TriggerAlignmentController {
 
+    static final String PARAM_KEY_SEQ_TRACKS = 'seqTracks[]'
+
     TriggerAlignmentService triggerAlignmentService
     SearchSeqTrackService searchSeqTrackService
+    SeqTypeService seqTypeService
 
     static allowedMethods = [
             index           : "GET",
+            generateWarnings: "GET",
             triggerAlignment: "POST",
     ]
 
+    final static Map EMPTY_WARNINGS = [
+            missingConfigs        : [].asImmutable(),
+            seqPlatformGroups     : [].asImmutable(),
+            libraryPreparationKits: [].asImmutable(),
+            referenceGenomes      : [].asImmutable(),
+    ].asImmutable()
+
     def index() {
         return [
-                seqTypes: SeqType.findAllByLegacy(false).sort {
-                    SeqType a, SeqType b -> a.displayNameWithLibraryLayout <=> b.displayNameWithLibraryLayout
-                },
-                warnings: generateDummyWarnings(),
+                seqTypes: seqTypeService.findAlignAbleSeqTypes(),
+                warnings: EMPTY_WARNINGS,
         ]
     }
 
-    // TODO: This is only a dummy impl, which will be replaced by otp-1342
-    @SuppressWarnings('AvoidFindWithoutAll')
-    private Map generateDummyWarnings() {
-        Sample dummySample = Sample.first()
+    /**
+     * Generate Warnings in preparation for triggering workflows
+     */
+    JSON generateWarnings() {
+        List<SeqTrack> seqTracks = SeqTrack.getAll(flash.seqTrackIds)
+        String message = flash.message
 
-        return [
-                seqTypes              : [
-                        [
-                                seqType  : SeqType.first(sort: 'name'),
-                                project  : Project.first(sort: 'name'),
-                                laneCount: 3
-                        ],
-                        [
-                                seqType  : SeqType.first(),
-                                project  : Project.first(),
-                                laneCount: 2
-                        ],
+        if (!seqTracks || !seqTracks.size()) {
+            return render([
+                    data    : [],
+                    warnings: EMPTY_WARNINGS,
+            ] as JSON)
+        }
+
+        List<Map<String, String>> warningsForWithdrawnSeqTracks = triggerAlignmentService.createWarningsForWithdrawnSeqTracks(seqTracks)
+        List<Map<String, String>> warningsForMissingAlignmentConfig = triggerAlignmentService.createWarningsForMissingAlignmentConfig(seqTracks)
+        List<Map<String, String>> warningsForMissingReferenceGenomeConfiguration =
+                triggerAlignmentService.createWarningsForMissingReferenceGenomeConfiguration(seqTracks)
+        List<Map<String, String>> warningsForSamplesHavingMultipleSeqPlatformGroups =
+                triggerAlignmentService.createWarningsForSamplesHavingMultipleSeqPlatformGroups(seqTracks)
+        List<Map<String, String>> warningsForSamplesHavingMultipleLibPrepKits =
+                triggerAlignmentService.createWarningsForSamplesHavingMultipleLibPrepKits(seqTracks)
+
+        return render([
+                data    : seqTracks.collect { SeqTrack seqTrack ->
+                    searchSeqTrackService.projectSeqTrack(seqTrack)
+                },
+                warnings: [
+                        withdrawnSeqTracks     : warningsForWithdrawnSeqTracks,
+                        missingAlignmentConfigs: warningsForMissingAlignmentConfig,
+                        missingReferenceGenomes: warningsForMissingReferenceGenomeConfiguration,
+                        seqPlatformGroups      : warningsForSamplesHavingMultipleSeqPlatformGroups,
+                        libraryPreparationKits : warningsForSamplesHavingMultipleLibPrepKits,
+                        message                : message
                 ],
-                seqPlatformGroups     : [
-                        [
-                                project          : Project.first(sort: 'name'),
-                                mockPid          : dummySample.individual.mockPid,
-                                sampleTypeName   : dummySample.sampleType,
-                                seqTypeName      : SeqType.first().name,
-                                seqReadType      : "PAIRED",
-                                singleCell       : "bulk",
-                                seqPlatformGroups: [
-                                        [
-                                                id   : 12345,
-                                                count: 2,
-                                        ],
-                                        [
-                                                id   : 342532,
-                                                count: 3,
-                                        ]
-                                ]
-                        ]
-                ],
-                libraryPreparationKits: [
-                        [
-                                project        : Project.first(sort: 'name'),
-                                mockPid        : dummySample.individual.mockPid,
-                                sampleTypeName : dummySample.sampleType,
-                                seqTypeName    : SeqType.first().name,
-                                seqReadType    : "PAIRED",
-                                singleCell     : "bulk",
-                                libraryPrepKits: [
-                                        [
-                                                id   : 12345,
-                                                count: 1,
-                                        ],
-                                        [
-                                                id   : 342532,
-                                                count: 5,
-                                        ]
-                                ]
-                        ]
-                ],
-        ]
+        ] as JSON)
     }
 
     /**
      * Trigger the alignment workflow
      */
     JSON triggerAlignment() {
+        Set<Long> seqTracksIds = (params[PARAM_KEY_SEQ_TRACKS].getClass().isArray() ? params[PARAM_KEY_SEQ_TRACKS] :
+                [params[PARAM_KEY_SEQ_TRACKS]]).collect { it as long }
+
         Set<SeqTrack> seqTracks = SeqTrack.findAll {
-            id in params['seqTracks[]'].collect { it as long }
-        }.unique()
+            id in seqTracksIds
+        }
 
         boolean withdrawBamFiles = params['withdraw'].toBoolean()
         Collection<MergingWorkPackage> workPackages = triggerAlignmentService.triggerAlignment(seqTracks, withdrawBamFiles)

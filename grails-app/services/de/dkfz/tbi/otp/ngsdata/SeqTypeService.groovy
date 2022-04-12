@@ -21,16 +21,22 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.ApplicationContext
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.workflowExecution.OtpWorkflow
 import de.dkfz.tbi.otp.workflowExecution.Workflow
 
 class SeqTypeService extends MetadataFieldsService<SeqType> {
 
+    @Autowired
+    ApplicationContext context
+
     SeqType findById(long id) {
-        SeqType.get(id)
+        return SeqType.get(id)
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
@@ -94,9 +100,9 @@ class SeqTypeService extends MetadataFieldsService<SeqType> {
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void createMultiple(String name, List<SequencingReadType> libraryLayouts, Map properties = [:], List<String> importAliases = []) {
         assert libraryLayouts: "the input libraryLayout must not be empty"
-        assert !libraryLayouts.findAll({
+        assert !libraryLayouts.findAll {
             it != SequencingReadType.SINGLE && it != SequencingReadType.PAIRED && it != SequencingReadType.MATE_PAIR
-        }): "the input libraryLayout has invalid values"
+        }: "the input libraryLayout has invalid values"
 
         if (libraryLayouts.contains(SequencingReadType.SINGLE)) {
             create(name, properties + [libraryLayout: SequencingReadType.SINGLE], importAliases)
@@ -150,7 +156,8 @@ class SeqTypeService extends MetadataFieldsService<SeqType> {
                     properties.singleCell as boolean, [max: 1])) ?:
                     CollectionUtils.atMostOneElement(clazz.findAllByDisplayNameIlikeAndLibraryLayoutAndSingleCell(name,
                             properties.libraryLayout as SequencingReadType, properties.singleCell as boolean, [max: 1])) as SeqType
-        } else if (!properties.libraryLayout && properties.singleCell != null) {
+        }
+        if (!properties.libraryLayout && properties.singleCell != null) {
             return CollectionUtils.atMostOneElement(clazz.findAllByNameIlikeAndSingleCell(name, properties.singleCell as boolean, [max: 1])) ?:
                     CollectionUtils.atMostOneElement(clazz.findAllByDisplayNameIlikeAndSingleCell(name, properties.singleCell as boolean, [max: 1]))
         }
@@ -226,7 +233,7 @@ class SeqTypeService extends MetadataFieldsService<SeqType> {
     }
 
     private static SeqType getSingleSeqType(String seqTypeName, SequencingReadType layout, boolean singleCell = false, String customErrorMessage) {
-        CollectionUtils.exactlyOneElement(SeqType.findAllByNameAndLibraryLayoutAndSingleCell(seqTypeName, layout, singleCell), customErrorMessage)
+        return CollectionUtils.exactlyOneElement(SeqType.findAllByNameAndLibraryLayoutAndSingleCell(seqTypeName, layout, singleCell), customErrorMessage)
     }
 
     /**
@@ -307,6 +314,21 @@ class SeqTypeService extends MetadataFieldsService<SeqType> {
                 rnaPairedSeqType,
                 rnaSingleSeqType,
         ]
+    }
+
+    /**
+     * search for seqTypes usable for trigger alignment and return them sorted
+     */
+    List<SeqType> findAlignAbleSeqTypes() {
+        List<SeqType> seqTypes = SeqTypeService.roddyAlignableSeqTypes
+        Workflow.list().findAll {
+            it.beanName && !it.deprecatedDate && context.getBean(it.beanName, OtpWorkflow)?.isAlignment()
+        }.each {
+            seqTypes.addAll(it.supportedSeqTypes)
+        }
+        return seqTypes.unique().sort {
+            SeqType a, SeqType b -> a.displayNameWithLibraryLayout <=> b.displayNameWithLibraryLayout
+        }
     }
 
     /**

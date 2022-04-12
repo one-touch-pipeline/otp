@@ -37,7 +37,7 @@ import de.dkfz.tbi.otp.project.Project
  * 3. List of Lane IDs
  * 4. List of ILSe numbers
  * The URL parameters from client should conform the following protocol:
- * project=TestProjectAbc&type=project-tab&seqType[]=35&seqType[]=45
+ * project=ProjectAbc&type=project-tab&seqType[]=35&seqType[]=45
  * type=pids-tab&pids[]=ABCD-SXYZ&pids[]=BCDE-UVST&seqType[]=35&seqType[]=45
  * type=lanes-tab&lanes[]=6&lanes[]=7
  * type=ilseNumbers-tab&ilseNumbers[]=12345&ilseNumbers[]=23456
@@ -65,15 +65,14 @@ class SearchSeqTrackController {
     JSON searchSeqTrackByProjectSeqType() {
         Project project = projectSelectionService.selectedProject
 
-        Set<SeqType> seqTypes = SeqType.findAll {
-            id in (params[PARAM_KEY_SEQTYPES].getClass().isArray() ? params[PARAM_KEY_SEQTYPES] : [params[PARAM_KEY_SEQTYPES]]).collect { it as long }
-        }
+        Set<Long> seqTypeIds = (params[PARAM_KEY_SEQTYPES].getClass().isArray() ? params[PARAM_KEY_SEQTYPES] :
+                [params[PARAM_KEY_SEQTYPES]]).collect { it as long }
 
-        return render([
-                data: searchSeqTrackService.getAllSeqTracksByProjectAndSeqTypes(project, seqTypes).collect { SeqTrack seqTrack ->
-                    searchSeqTrackService.projectSeqTrack(seqTrack)
-                }
-        ] as JSON)
+        Set<SeqType> seqTypes = SeqType.getAll(seqTypeIds)
+
+        Set<SeqTrack> seqTracks = searchSeqTrackService.getAllSeqTracksByProjectAndSeqTypes(project, seqTypes)
+
+        return redirectHelper(params, seqTracks, null)
     }
 
     JSON searchSeqTrackByPidSeqType() {
@@ -88,22 +87,22 @@ class SearchSeqTrackController {
             return render([error: HttpStatus.NOT_FOUND.reasonPhrase, message: g.message(code: "triggerAlignment.error.noIndividuals") as String] as JSON)
         }
 
-        Set<SeqType> seqTypes = SeqType.findAll {
-            id in (params[PARAM_KEY_SEQTYPES].getClass().isArray() ? params[PARAM_KEY_SEQTYPES] : [params[PARAM_KEY_SEQTYPES]]).collect { it as long }
-        }
+        Set<Long> seqTypeIds = (params[PARAM_KEY_SEQTYPES].getClass().isArray() ? params[PARAM_KEY_SEQTYPES] :
+                [params[PARAM_KEY_SEQTYPES]]).collect { it as long }
 
-        return render([
-                data: searchSeqTrackService.getAllSeqTracksByIndividualsAndSeqTypes(individuals, seqTypes).collect { SeqTrack seqTrack ->
-                    searchSeqTrackService.projectSeqTrack(seqTrack)
-                }
-        ] as JSON)
+        Set<SeqType> seqTypes = SeqType.getAll(seqTypeIds)
+
+        Set<SeqTrack> seqTracks = searchSeqTrackService.getAllSeqTracksByIndividualsAndSeqTypes(individuals, seqTypes)
+
+        Set<String> missingItems = (pids as Set) - individuals*.pid
+        return redirectHelper(params, seqTracks, missingItems ? "Could not found: ${missingItems.join(' ,')}" : null)
     }
 
     JSON searchSeqTrackByLaneId() {
         Set<Long> laneIds
         try {
             laneIds = (params[PARAM_KEY_LANES].getClass().isArray() ? params[PARAM_KEY_LANES] :
-                                                            [params[PARAM_KEY_LANES]]).collect { it as long }
+                    [params[PARAM_KEY_LANES]]).collect { it as long }
         } catch (NumberFormatException ex) {
             response.status = HttpStatus.BAD_REQUEST.value()
             return render([error: HttpStatus.BAD_REQUEST.reasonPhrase, message: ex.message] as JSON)
@@ -114,18 +113,17 @@ class SearchSeqTrackController {
             return render([error: HttpStatus.NOT_FOUND.reasonPhrase, message: g.message(code: "triggerAlignment.error.noLanes") as String] as JSON)
         }
 
-        return render([
-                data: searchSeqTrackService.getAllSeqTracksByLaneIds(laneIds).collect { SeqTrack seqTrack ->
-                    searchSeqTrackService.projectSeqTrack(seqTrack)
-                }
-        ] as JSON)
+        Set<SeqTrack> seqTracks = SeqTrack.getAll(laneIds)
+
+        Set<String> missingItems = laneIds - seqTracks*.id
+        return redirectHelper(params, seqTracks, missingItems ? "Could not found Lane: ${missingItems.join(' ,')}" : null)
     }
 
     JSON searchSeqTrackByIlseNumber() {
         Set<Long> ilseNumbers
         try {
             ilseNumbers = (params[PARAM_KEY_ILSE_NUMBERS].getClass().isArray() ? params[PARAM_KEY_ILSE_NUMBERS] :
-                                                            [params[PARAM_KEY_ILSE_NUMBERS]]).collect { it as int }
+                    [params[PARAM_KEY_ILSE_NUMBERS]]).collect { it as int }
         } catch (NumberFormatException ex) {
             response.status = HttpStatus.BAD_REQUEST.value()
             return render([error: HttpStatus.BAD_REQUEST.reasonPhrase, message: ex.message] as JSON)
@@ -140,10 +138,19 @@ class SearchSeqTrackController {
             return render([error: HttpStatus.NOT_FOUND.reasonPhrase, message: g.message(code: "triggerAlignment.error.noIlseSubmissions") as String] as JSON)
         }
 
-        return render([
-                data: searchSeqTrackService.getAllSeqTracksByIlseSubmissions(ilseSubmissions).collect { SeqTrack seqTrack ->
-                    searchSeqTrackService.projectSeqTrack(seqTrack)
-                }
-        ] as JSON)
+        Set<SeqTrack> seqTracks = searchSeqTrackService.getAllSeqTracksByIlseSubmissions(ilseSubmissions)
+
+        Set<Long> missingItems = ilseNumbers - ilseSubmissions*.ilseNumber
+        return redirectHelper(params, seqTracks, missingItems ? "Could not found: ${missingItems.join(' ,')}" : null)
+    }
+
+    private def redirectHelper(Map params, Collection<SeqTrack> seqTracks, String message) {
+        flash.seqTrackIds = seqTracks*.id
+        flash.message = message
+
+        redirect(
+                controller: params['redirect[controller]'],
+                action: params['redirect[action]'],
+        )
     }
 }

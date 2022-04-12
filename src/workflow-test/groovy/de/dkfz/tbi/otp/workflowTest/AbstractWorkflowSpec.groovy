@@ -760,7 +760,7 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
     /**
      * enum for defining needed cron jobs
      */
-    //false positive, the enum is not abstract
+    //the nested enum is not abstracts itself, its only inside an abstract class
     @SuppressWarnings("AbstractClassName")
     @TupleConstructor
     enum TestCronJob {

@@ -57,9 +57,9 @@ class AllDecider implements Decider {
     }
 
     Collection<SeqTrack> findAllSeqTracksInNewWorkflowSystem(Collection<SeqTrack> seqTracks) {
-        Collection<SeqType> supportedSeqTypes = Workflow.getExactlyOneWorkflow(PanCancerWorkflow.WORKFLOW).supportedSeqTypes
+        Set<SeqType> supportedSeqTypes = Workflow.getExactlyOneWorkflow(PanCancerWorkflow.WORKFLOW).supportedSeqTypes
         return deciders.contains(PanCancerDeciderService) ? seqTracks.findAll {
             supportedSeqTypes.contains(it.seqType)
-        } : [] as Collection
+        } : [] as Collection<SeqTrack>
     }
 }

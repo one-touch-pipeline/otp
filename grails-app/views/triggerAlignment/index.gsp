@@ -37,11 +37,11 @@
         </div>
 
         <div class="mt-3">
-            <g:render template="./components/checkArea" model="[seqTracks: seqTracks]"/>
+            <g:render template="./components/warnArea" model="[warnings: warnings]"/>
         </div>
 
         <div class="mt-3">
-            <g:render template="./components/warnArea" model="[warnings: warnings]"/>
+            <g:render template="./components/checkArea" model="[seqTracks: seqTracks]"/>
         </div>
 
         <nav class="navbar navbar-light bg-light mt-3">

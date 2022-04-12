@@ -217,6 +217,7 @@ class RoddyConfigService {
     private static final ObjectMapper MAPPER = new ObjectMapper()
     private static final int DROP_CHAR_COUNT = 2
 
+    @SuppressWarnings("DuplicateNumberLiteral")
     static Set<String> validateRoddyConfig(String value) {
         JsonNode node = MAPPER.readTree(value)
         Set<ValidationMessage> errors = SCHEMA_VALIDATOR.validate(node)
@@ -226,6 +227,7 @@ class RoddyConfigService {
         return errorsString
     }
 
+    @SuppressWarnings("DuplicateNumberLiteral")
     static Set<String> validateRoddyFilenamesConfig(String value) {
         JsonNode node = MAPPER.readTree(value)
         Set<ValidationMessage> errors = FILENAMES_SCHEMA_VALIDATOR.validate(node)

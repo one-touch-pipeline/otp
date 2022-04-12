@@ -23,11 +23,13 @@ package de.dkfz.tbi.otp.errors
 
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.plugin.springsecurity.annotation.Secured
+import groovy.util.logging.Slf4j
 
 import de.dkfz.tbi.otp.utils.ExceptionUtils
 
 import javax.servlet.http.HttpServletResponse
 
+@Slf4j
 @Secured('isFullyAuthenticated()')
 class ErrorsController {
     SpringSecurityService springSecurityService

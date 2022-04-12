@@ -55,7 +55,8 @@ class PanCancerExecuteJob extends AbstractExecuteRoddyPipelineJob implements Pan
     protected final String getAnalysisConfiguration(SeqType seqType) {
         if (seqType == SeqTypeService.exomePairedSeqType) {
             return "exomeAnalysis"
-        } else if (seqType in [SeqTypeService.wholeGenomePairedSeqType, SeqTypeService.chipSeqPairedSeqType]) {
+        }
+        if (seqType in [SeqTypeService.wholeGenomePairedSeqType, SeqTypeService.chipSeqPairedSeqType]) {
             return "qcAnalysis"
         }
         throw new NotSupportedException("Unsupported sequencing type")

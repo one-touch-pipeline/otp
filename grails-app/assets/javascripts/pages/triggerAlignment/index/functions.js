@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 The OTP authors
+ * Copyright 2011-2022 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -43,6 +43,7 @@ $.otp.triggerAlignment = {
     TRIGGER_FAILED: 'Failed triggering alignment workflows',
     TRIGGER_CANNOT: 'Cannot trigger alignment workflow',
 
+    SEARCH_INFO: 'Some inputs seem to be wrong',
     SEARCH_WARNING: 'No SeqTracks found',
     SEARCH_ERROR: 'Failed to search for SeqTrack'
   },
@@ -59,7 +60,7 @@ $.otp.triggerAlignment = {
       seqTracks: []
     };
     inputdata.withdraw = $('#withdrawBamFiles').prop('checked');
-    inputdata.seqTracks = $.otp.triggerAlignment.getDataTable().column(0).data().toArray();
+    inputdata.seqTracks = $.otp.triggerAlignment.getSeqTrackTable().column(0).data().toArray();
 
     if (inputdata.seqTracks.length) {
       $('#triggerAlignmentButton').prop('disabled', true);
@@ -120,6 +121,10 @@ $.otp.triggerAlignment = {
     $.otp.triggerAlignment.searchQuery = {};
     // fetch the active search tab
     $.otp.triggerAlignment.searchQuery.type = $('#myTab .nav-link.active').attr('id');
+    $.otp.triggerAlignment.searchQuery.redirect = {
+      controller: 'TriggerAlignment',
+      action: 'generateWarnings'
+    };
 
     // eslint-disable-next-line default-case
     switch ($.otp.triggerAlignment.searchQuery.type) {
@@ -176,7 +181,7 @@ $.otp.triggerAlignment = {
     }
 
     // reload the datatable by fetching data from backend
-    $.otp.triggerAlignment.getDataTable().ajax.reload();
+    $.otp.triggerAlignment.getSeqTrackTable().ajax.reload();
   },
 
   /**
@@ -190,7 +195,7 @@ $.otp.triggerAlignment = {
       }),
       data: inputdata,
       success: (response) => (resolve({
-        data: response.data
+        data: response
       })),
       error: (err) => {
         $('#searchSeqTrackButton').prop('disabled', false);
@@ -212,7 +217,17 @@ $.otp.triggerAlignment = {
   /**
    * Helper function to get the datatable
    */
-  getDataTable: () => $.fn.dataTable.tables({ api: true })
+  getWithdrawnWarningsTable: () => $('#withdrawnWarnings').DataTable(),
+
+  getMissingAlignmentConfigsWarningsTable: () => $('#missingAlignmentConfigsWarnings').DataTable(),
+
+  getReferenceGenomeWarningsTable: () => $('#missingReferenceGenomeWarnings').DataTable(),
+
+  getSeqPlatformWarningsTable: () => $('#seqPlatformWarnings').DataTable(),
+
+  getLibPrepKitWarningsTable: () => $('#libraryPrepKitWarnings').DataTable(),
+
+  getSeqTrackTable: () => $('#seqTrackTable').DataTable()
 };
 
 $(document).ready(() => {
@@ -225,11 +240,14 @@ $(document).ready(() => {
     deferRender: true,
     processing: true,
     dom: '<"toolbar">frtip',
-    scrollY: '200px',
+    scrollY: '500px',
     scrollCollapse: true,
     paging: false,
     columns: [
-      { data: 'id', width: '3em' },
+      {
+        data: 'id',
+        width: '3em'
+      },
       { data: 'project' },
       { data: 'individual' },
       { data: 'sampleType' },
@@ -237,7 +255,10 @@ $(document).ready(() => {
       { data: 'lane' },
       { data: 'run' },
       { data: 'ilseId' },
-      { data: 'withdrawn', width: '5em' },
+      {
+        data: 'withdrawn',
+        width: '5em'
+      },
       { data: 'libPrepKit' },
       { data: 'seqPlatform' },
       { data: 'seqPlatformGroup' }
@@ -251,9 +272,139 @@ $(document).ready(() => {
         // eslint-disable-next-line no-param-reassign
         inputdata = $.otp.triggerAlignment.searchQuery;
         $.otp.triggerAlignment.fetchData(inputdata).then((outputdata) => {
-          callback(outputdata);
-          if (!outputdata.data.length) {
-            $.otp.toaster.showWarningToast(
+          callback(outputdata.data);
+
+          // withdrawnData
+          if (outputdata.data.warnings.withdrawnSeqTracks.length) {
+            $('#withdrawnSeqTracksWarningsCard').removeClass('d-none');
+            $.otp.triggerAlignment.getWithdrawnWarningsTable().clear().rows.add(
+              outputdata.data.warnings.withdrawnSeqTracks.map((o) => [
+                o.project,
+                o.individual,
+                o.seqType,
+                o.sampleType,
+                o.count
+              ])
+            ).draw();
+          } else {
+            $('#withdrawnSeqTracksWarningsCard').addClass('d-none');
+            $.otp.triggerAlignment.getWithdrawnWarningsTable().clear().draw();
+          }
+
+          // alignment config missing
+          if (outputdata.data.warnings.missingAlignmentConfigs.length) {
+            $('#missingAlignmentConfigWarningsCard').removeClass('d-none');
+            $.otp.triggerAlignment.getMissingAlignmentConfigsWarningsTable().clear().rows.add(
+              outputdata.data.warnings.missingAlignmentConfigs.map((o) => [o.project, o.seqType, o.count])
+            ).draw();
+          } else {
+            $('#missingAlignmentConfigWarningsCard').addClass('d-none');
+            $.otp.triggerAlignment.getMissingAlignmentConfigsWarningsTable().clear().draw();
+          }
+
+          // reference genome config missing
+          if (outputdata.data.warnings.missingReferenceGenomes.length) {
+            $('#missingReferenceGenomeWarningsCard').removeClass('d-none');
+            $.otp.triggerAlignment.getReferenceGenomeWarningsTable().clear().rows.add(
+              outputdata.data.warnings.missingReferenceGenomes.map((o) => [
+                o.project,
+                o.seqType,
+                o.species,
+                o.count
+              ])
+            ).draw();
+          } else {
+            $('#missingReferenceGenomeWarningsCard').addClass('d-none');
+            $.otp.triggerAlignment.getReferenceGenomeWarningsTable().clear().draw();
+          }
+
+          // seqPlatformGroup missmatch
+          if (outputdata.data.warnings.seqPlatformGroups.length) {
+            $('#seqPlatformWarningsCard').removeClass('d-none');
+            $.otp.triggerAlignment.getSeqPlatformWarningsTable().clear().rows.add(
+              outputdata.data.warnings.seqPlatformGroups.map((o) => [
+                o.project,
+                o.individual,
+                o.seqType,
+                o.sampleType,
+                `
+                  <table class="table table-bordered">
+                    <thead>
+                      <tr>
+                          <th>Seq. Platform Group Id</th>
+                          <th>Count</th>
+                          <th>Containing Seq. Platforms</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                    ${o.seqPlatformGroupTable.map((subTableElement) => [`
+                        <tr>
+                            <td>${subTableElement.seqPlatformGroupId}</td>
+                            <td>${subTableElement.count}</td>
+                            <td>
+                              <ul style="list-style-type: disc; padding-left: 20px;">
+                                ${subTableElement.seqPlatforms.map((listElement) => [`
+                                  <li>${listElement}</li>
+                                `]).join('')}
+                              </ul>
+                          </td>
+                        </tr>
+                      `]).join('')}
+                    </tbody>
+                  </table>
+                `
+              ])
+            ).draw();
+          } else {
+            $('#seqPlatformWarningsCard').addClass('d-none');
+            $.otp.triggerAlignment.getSeqPlatformWarningsTable().clear().draw();
+          }
+
+          // library preparation kit missmatch
+          if (outputdata.data.warnings.libraryPreparationKits.length) {
+            $('#libraryPrepKitWarningsCard').removeClass('d-none');
+            $.otp.triggerAlignment.getLibPrepKitWarningsTable().clear().rows.add(
+              outputdata.data.warnings.libraryPreparationKits.map((o) => [
+                o.project,
+                o.individual,
+                o.seqType,
+                o.sampleType,
+                `
+                  <table class="table table-bordered">
+                    <thead>
+                      <tr>
+                          <th>Library Preperation Kit</th>
+                          <th>Count</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${o.libraryPreparationKitTable.map((subTableElement) => [`
+                        <tr>
+                          <td>${subTableElement.libraryPreparationKit}</td>
+                          <td>${subTableElement.count}</td>
+                        </tr>
+                      `]).join('')}
+                    </tbody>
+                  </table>
+                `
+              ])
+            ).draw();
+          } else {
+            $('#libraryPrepKitWarningsCard').addClass('d-none');
+            $.otp.triggerAlignment.getLibPrepKitWarningsTable().clear().draw();
+          }
+
+          // message
+          // eslint-disable-next-line no-extra-boolean-cast
+          if (!!outputdata.data.warnings.message) {
+            $.otp.toaster.showErrorToast(
+              $.otp.triggerAlignment.TOAST_TITLE.SEARCH_INFO,
+              outputdata.data.warnings.message
+            );
+          }
+
+          if (!outputdata.data.data.length) {
+            $.otp.toaster.showErrorToast(
               $.otp.triggerAlignment.TOAST_TITLE.SEARCH_WARNING,
               'No SeqTracks can be found. Make sure the search inputs are correct'
             );
@@ -268,5 +419,35 @@ $(document).ready(() => {
     $('#searchSeqTrackButton').prop('disabled', false);
   }).on('preXhr.dt', () => {
     $('#searchSeqTrackButton').prop('disabled', true);
+  });
+
+  $('#withdrawnWarnings').DataTable({
+    dom: '<"toolbar">frtip',
+    scrollCollapse: true,
+    paging: false
+  });
+
+  $('#missingAlignmentConfigsWarnings').DataTable({
+    dom: '<"toolbar">frtip',
+    scrollCollapse: true,
+    paging: false
+  });
+
+  $('#missingReferenceGenomeWarnings').DataTable({
+    dom: '<"toolbar">frtip',
+    scrollCollapse: true,
+    paging: false
+  });
+
+  $('#seqPlatformWarnings').DataTable({
+    dom: '<"toolbar">frtip',
+    scrollCollapse: true,
+    paging: false
+  });
+
+  $('#libraryPrepKitWarnings').DataTable({
+    dom: '<"toolbar">frtip',
+    scrollCollapse: true,
+    paging: false
   });
 });
