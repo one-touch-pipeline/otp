@@ -21,8 +21,8 @@
  */
 
 /**
-Global style definitions which are relevant for all bootstrap pages.
-*/
+ * Global style definitions which are relevant for all bootstrap pages.
+ */
 @import "colors";
 
 html {
@@ -67,7 +67,7 @@ html {
 }
 
 /**
-Override unnecessary styles of otp.less
+ * Override unnecessary styles of otp.less
  */
 .input-group {
   z-index: 0;
@@ -100,4 +100,12 @@ option {
       background: #F7F7F7;
     }
   }
+}
+
+/**
+ * Datatables: Make the processing message box non-transparent
+ */
+.dataTables_wrapper .dataTables_processing {
+  background: white;
+  z-index: 1;
 }

@@ -24,6 +24,10 @@ package de.dkfz.tbi.otp.workflowExecution.decider
 import grails.util.Holders
 import org.springframework.stereotype.Component
 
+import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.workflow.panCancer.PanCancerWorkflow
+import de.dkfz.tbi.otp.workflowExecution.Workflow
 import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
 
 /**
@@ -39,7 +43,7 @@ class AllDecider implements Decider {
     ]
 
     @Override
-    final Collection<WorkflowArtefact> decide(Collection<WorkflowArtefact> allWorkflowArtefacts, boolean forceRun = false, Map<String,
+    Collection<WorkflowArtefact> decide(Collection<WorkflowArtefact> allWorkflowArtefacts, boolean forceRun = false, Map<String,
             String> userParams = [:]) {
         Collection<WorkflowArtefact> newWorkflowArtefacts = []
 
@@ -50,5 +54,12 @@ class AllDecider implements Decider {
             newWorkflowArtefacts += workflowArtefacts
         }
         return newWorkflowArtefacts
+    }
+
+    Collection<SeqTrack> findAllSeqTracksInNewWorkflowSystem(Collection<SeqTrack> seqTracks) {
+        Collection<SeqType> supportedSeqTypes = Workflow.getExactlyOneWorkflow(PanCancerWorkflow.WORKFLOW).supportedSeqTypes
+        return deciders.contains(PanCancerDeciderService) ? seqTracks.findAll {
+            supportedSeqTypes.contains(it.seqType)
+        } : [] as Collection
     }
 }

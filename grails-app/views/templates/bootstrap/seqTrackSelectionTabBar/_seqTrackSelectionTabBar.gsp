@@ -66,12 +66,12 @@
 <div class="tab-content" id="inputTabsContent">
     <g:if test="${tabs.contains('project')}">
         <div class="tab-pane fade show active mt-2" id="project" role="tabpanel" aria-labelledby="project-tab">
-            <g:render template="/templates/bootstrap/seqTrackSelectionTabBar/tabs/projectAndSeqTypeTab" model="[seqTypes: seqTypes]"/>
+            <g:render template="/templates/bootstrap/seqTrackSelectionTabBar/tabs/projectAndSeqTypeTab" model="[seqTypes: seqTypes, id: 'seqTypeProject']"/>
         </div>
     </g:if>
     <g:if test="${tabs.contains('pid')}">
         <div class="tab-pane fade mt-2" id="pid" role="tabpanel" aria-labelledby="pid-tab">
-            <g:render template="/templates/bootstrap/seqTrackSelectionTabBar/tabs/pidAndSeqTypeTab" model="[seqTypes: seqTypes]"/>
+            <g:render template="/templates/bootstrap/seqTrackSelectionTabBar/tabs/pidAndSeqTypeTab" model="[seqTypes: seqTypes, id: 'seqTypePid']"/>
         </div>
     </g:if>
     <g:if test="${tabs.contains('lane')}">

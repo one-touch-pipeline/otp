@@ -537,6 +537,12 @@ $.otp.applySelect2 = function (jqSelection) {
   });
 };
 
+/**
+ * Parse the input string delimited with whitespace ([ \t\r\n\f]), comma or semicolon to an array
+ *
+ */
+$.otp.parseDelimitedStringToArray = (input) => input.trim().split(/[\s,;]+/).filter((o) => o);
+
 $(document).ready(() => {
   'use strict';
 

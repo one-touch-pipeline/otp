@@ -33,13 +33,6 @@
 
         <p class="card-text"></p>
 
-        <ul class="list-group">
-            <li class="list-group-item"><input type="checkbox" id="withdrawn"> <label for="withdrawn"><g:message code="triggerAlignment.input.checkbox.withdrawn"/></label></li>
-            <li class="list-group-item"><input type="checkbox" id="ignoreSeqPlatform"> <label for="ignoreSeqPlatform"><g:message code="triggerAlignment.input.checkbox.ignoreSeqPlatform"/></label></li>
-        </ul>
-
-        <p class="card-text"></p>
-
-        <button class="btn btn-primary"><g:message code="triggerAlignment.input.searchButton"/></button>
+        <button id="searchSeqTrackButton" class="btn btn-primary" onclick="$.otp.triggerAlignment.search(this)"><g:message code="triggerAlignment.input.searchButton"/></button>
     </div>
 </div>

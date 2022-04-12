@@ -45,7 +45,13 @@
         </div>
 
         <nav class="navbar navbar-light bg-light mt-3">
-            <button class="btn btn-primary"><g:message code="triggerAlignment.triggerButton"/></button>
+            <div class="nav-item">
+                <button id="triggerAlignmentButton" class="btn btn-primary nav-item mr-2" onclick="$.otp.triggerAlignment.trigger(this)">
+                    <g:message code="triggerAlignment.triggerButton"/>
+                </button>
+                <input type="checkbox" id="withdrawBamFiles">
+                <label for="withdrawBamFiles"><g:message code="triggerAlignment.input.checkbox.withdrawn"/></label>
+            </div>
         </nav>
 
         <div class="mt-3">

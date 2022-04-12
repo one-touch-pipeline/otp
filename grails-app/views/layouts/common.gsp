@@ -169,6 +169,7 @@
                                             <li><g:link controller="workflowConfigViewer" action="index"><g:message code="otp.menu.workflowConfigViewer"/></g:link></li>
                                             <li><g:link controller="crashRepair" action="index"><g:message code="otp.menu.workflowCrashRepair"/></g:link></li>
                                             <li><g:link controller="workflowJobErrorDefinition" action="index"><g:message code="otp.menu.workflowRestartHandler"/></g:link></li>
+                                            <li><g:link controller="triggerAlignment" action="index"><g:message code="otp.menu.triggerAlignment"/></g:link></li>
                                             <li><g:link controller="processingPriority" action="index"><g:message code="otp.menu.processingPriority"/></g:link></li>
                                         </ul>
                                     </li>

@@ -26,7 +26,7 @@
     </div>
     <div class="card-body">
         <p class="card-text"><g:message code="triggerAlignment.check.body"/></p>
-        <table id="seqTrackTable" class="table table-sm table-striped table-hover table-bordered">
+        <table id="seqTrackTable" class="table table-sm table-striped table-hover table-bordered w-100">
             <thead>
             <tr>
                 <th><g:message code="triggerAlignment.check.header.seqTrack"/></th>
@@ -34,8 +34,6 @@
                 <th><g:message code="triggerAlignment.check.header.individual"/></th>
                 <th><g:message code="triggerAlignment.check.header.sampleType"/></th>
                 <th><g:message code="triggerAlignment.check.header.seqType"/></th>
-                <th><g:message code="triggerAlignment.check.header.sequencingReadType"/></th>
-                <th><g:message code="triggerAlignment.check.header.singleCell"/></th>
                 <th><g:message code="triggerAlignment.check.header.lane"/></th>
                 <th><g:message code="triggerAlignment.check.header.run"/></th>
                 <th><g:message code="triggerAlignment.check.header.ilseId"/></th>
@@ -46,24 +44,6 @@
             </tr>
             </thead>
             <tbody>
-            <g:each status="rowIndex" in="${seqTracks}" var="seqTrack">
-                <tr>
-                    <td>${seqTrack.id}</td>
-                    <td>${seqTrack.project}</td>
-                    <td>${seqTrack.individual}</td>
-                    <td>${seqTrack.sampleType}</td>
-                    <td>${seqTrack.seqType}</td>
-                    <td>${seqTrack.seqType.libraryLayout}</td>
-                    <td>${seqTrack.seqType.singleCell}</td>
-                    <td>${seqTrack.laneId}</td>
-                    <td>${seqTrack.run}</td>
-                    <td>${seqTrack.ilseId}</td>
-                    <td>${seqTrack.isWithdrawn()}</td>
-                    <td>${seqTrack.libraryPreparationKit}</td>
-                    <td>${seqTrack.seqPlatform}</td>
-                    <td>${seqTrack.seqPlatformGroup}</td>
-                </tr>
-            </g:each>
             </tbody>
         </table>
     </div>

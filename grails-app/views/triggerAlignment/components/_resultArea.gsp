@@ -25,7 +25,8 @@
         <i class="bi bi-list"></i> <g:message code="triggerAlignment.result.title"/>
     </div>
     <div class="card-body">
-        <p class="card-text">TODO: otp-1342</p>
+        <ul id="workPackageList" class="list-group">
+        </ul>
     </div>
 </div>
 

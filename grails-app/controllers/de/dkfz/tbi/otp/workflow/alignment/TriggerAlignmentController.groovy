@@ -21,24 +21,31 @@
  */
 package de.dkfz.tbi.otp.workflow.alignment
 
+import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 
+import de.dkfz.tbi.otp.SearchSeqTrackService
+import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.otp.utils.CollectionUtils
 
 @Secured("hasRole('ROLE_OPERATOR')")
 class TriggerAlignmentController {
 
+    TriggerAlignmentService triggerAlignmentService
+    SearchSeqTrackService searchSeqTrackService
+
     static allowedMethods = [
-            index: "GET",
+            index           : "GET",
+            triggerAlignment: "POST",
     ]
 
     def index() {
         return [
-                seqTypes : SeqType.findAllByLegacy(false),
-                seqTracks: findDummySeqTracks(),
-                warnings : generateDummyWarnings(),
+                seqTypes: SeqType.findAllByLegacy(false).sort {
+                    SeqType a, SeqType b -> a.displayNameWithLibraryLayout <=> b.displayNameWithLibraryLayout
+                },
+                warnings: generateDummyWarnings(),
         ]
     }
 
@@ -62,19 +69,19 @@ class TriggerAlignmentController {
                 ],
                 seqPlatformGroups     : [
                         [
-                                project: Project.first(sort: 'name'),
-                                mockPid: dummySample.individual.mockPid,
-                                sampleTypeName: dummySample.sampleType,
-                                seqTypeName: SeqType.first().name,
-                                seqReadType: "PAIRED",
-                                singleCell: "bulk",
+                                project          : Project.first(sort: 'name'),
+                                mockPid          : dummySample.individual.mockPid,
+                                sampleTypeName   : dummySample.sampleType,
+                                seqTypeName      : SeqType.first().name,
+                                seqReadType      : "PAIRED",
+                                singleCell       : "bulk",
                                 seqPlatformGroups: [
                                         [
-                                                id: 12345,
+                                                id   : 12345,
                                                 count: 2,
                                         ],
                                         [
-                                                id: 342532,
+                                                id   : 342532,
                                                 count: 3,
                                         ]
                                 ]
@@ -82,19 +89,19 @@ class TriggerAlignmentController {
                 ],
                 libraryPreparationKits: [
                         [
-                                project: Project.first(sort: 'name'),
-                                mockPid: dummySample.individual.mockPid,
-                                sampleTypeName: dummySample.sampleType,
-                                seqTypeName: SeqType.first().name,
-                                seqReadType: "PAIRED",
-                                singleCell: "bulk",
+                                project        : Project.first(sort: 'name'),
+                                mockPid        : dummySample.individual.mockPid,
+                                sampleTypeName : dummySample.sampleType,
+                                seqTypeName    : SeqType.first().name,
+                                seqReadType    : "PAIRED",
+                                singleCell     : "bulk",
                                 libraryPrepKits: [
                                         [
-                                                id: 12345,
+                                                id   : 12345,
                                                 count: 1,
                                         ],
                                         [
-                                                id: 342532,
+                                                id   : 342532,
                                                 count: 5,
                                         ]
                                 ]
@@ -103,17 +110,17 @@ class TriggerAlignmentController {
         ]
     }
 
-    // TODO: This is only a dummy impl, which will be replaced by otp-1342
-    @SuppressWarnings('AvoidFindWithoutAll')
-    private List<SeqTrack> findDummySeqTracks() {
-        Project project = CollectionUtils.atMostOneElement(Project.findAllByName("ExampleProject"))
-        return SeqTrack.withCriteria {
-            sample {
-                individual {
-                    eq('project', project)
-                }
-            }
-            //    eq('seqType', seqType)
-        }
+    /**
+     * Trigger the alignment workflow
+     */
+    JSON triggerAlignment() {
+        Set<SeqTrack> seqTracks = SeqTrack.findAll {
+            id in params['seqTracks[]'].collect { it as long }
+        }.unique()
+
+        boolean withdrawBamFiles = params['withdraw'].toBoolean()
+        Collection<MergingWorkPackage> workPackages = triggerAlignmentService.triggerAlignment(seqTracks, withdrawBamFiles)
+
+        return render(workPackages*.toString() as JSON)
     }
 }

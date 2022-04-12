@@ -30,4 +30,4 @@
   --}%
 <g:render template="/templates/bootstrap/pidSelection"/>
 
-<g:render template="/templates/bootstrap/seqTypeSelection" model="[seqTypes: seqTypes]"/>
+<g:render template="/templates/bootstrap/seqTypeSelection" model="[seqTypes: seqTypes, id: id]"/>
