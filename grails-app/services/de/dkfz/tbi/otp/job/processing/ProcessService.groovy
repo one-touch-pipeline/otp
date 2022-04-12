@@ -243,7 +243,7 @@ class ProcessService {
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     Date getFirstUpdate(ProcessingStep step) {
-        return CollectionUtils.atMostOneElement(ProcessingStepUpdate.findAllByProcessingStep(step, [sort: "id", order: "asc"])).date
+        return CollectionUtils.atMostOneElement(ProcessingStepUpdate.findAllByProcessingStep(step, [sort: "id", order: "asc", max: 1])).date
     }
 
     /**
