@@ -45,6 +45,18 @@ class IndividualController {
     CommentService commentService
     SampleIdentifierService sampleIdentifierService
 
+    static allowedMethods = [
+            show                   : "GET",
+            list                   : "GET",
+            dataTableSource        : "POST",
+            insert                 : "GET",
+            save                   : "POST",
+            updateField            : "POST",
+            newSampleType          : "POST",
+            saveIndividualComment  : "POST",
+            editNewSampleIdentifier: "POST",
+    ]
+
     @Secured('isFullyAuthenticated()')
     def show() {
         Individual individual

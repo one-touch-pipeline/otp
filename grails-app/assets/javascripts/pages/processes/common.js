@@ -121,7 +121,7 @@ $.otp.workflows = {
   restartProcessingStep(id, selector) {
     'use strict';
 
-    $.get($.otp.createLink({
+    $.post($.otp.createLink({
       controller: 'processes',
       action: 'restartStep',
       id

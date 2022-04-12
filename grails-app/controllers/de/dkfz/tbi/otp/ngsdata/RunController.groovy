@@ -41,11 +41,18 @@ class RunController {
     FastqcResultsService fastqcResultsService
     SeqCenterService seqCenterService
 
-    def display = {
+    static allowedMethods = [
+            display        : "GET",
+            show           : "GET",
+            list           : "GET",
+            dataTableSource: "POST",
+    ]
+
+    def display() {
         redirect(action: "show", id: params.id)
     }
 
-    def show = {
+    def show() {
         params.id = params.id ?: "0"
         Run run = runService.getRun(params.id)
         if (!run) {
@@ -75,7 +82,7 @@ class RunController {
         ]
     }
 
-    def list = {
+    def list() {
         return [
                 seqCenters: seqCenterService.allSeqCenters(),
                 tableHeader: RunColumn.values()*.message,

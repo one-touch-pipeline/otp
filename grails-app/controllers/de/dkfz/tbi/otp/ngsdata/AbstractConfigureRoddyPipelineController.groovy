@@ -87,8 +87,8 @@ abstract class AbstractConfigureRoddyPipelineController extends AbstractConfigur
         redirect(controller: "analysisConfigurationOverview")
     }
 
-    abstract String getDefaultPluginName(String roddyName)
-    abstract String getDefaultProgramVersion(String roddyName)
-    abstract String getDefaultBaseProjectConfig(String roddyName)
-    abstract void configure(RoddyConfiguration configuration)
+    protected abstract String getDefaultPluginName(String roddyName)
+    protected abstract String getDefaultProgramVersion(String roddyName)
+    protected abstract String getDefaultBaseProjectConfig(String roddyName)
+    protected abstract void configure(RoddyConfiguration configuration)
 }

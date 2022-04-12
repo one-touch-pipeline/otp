@@ -47,7 +47,7 @@ $.otp.userAdministration.editUser = {
     };
 
     $.ajax({
-      type: 'GET',
+      type: 'POST',
       url: $.otp.createLink({
         controller: 'userAdministration',
         action: `${action}Role`,

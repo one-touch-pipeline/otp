@@ -31,6 +31,11 @@ import grails.plugin.springsecurity.annotation.Secured
 @Secured('isFullyAuthenticated()')
 class RefreshController {
 
+    static allowedMethods = [
+            enable : "GET",
+            disable: "GET",
+    ]
+
     /**
      * Enables auto-refresh.
      *

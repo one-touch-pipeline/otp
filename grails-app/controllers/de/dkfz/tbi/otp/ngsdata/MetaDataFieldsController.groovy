@@ -35,18 +35,36 @@ import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
 class MetaDataFieldsController implements CheckAndCall {
 
     static allowedMethods = [
-            index                          : "GET",
-            libraryPreparationKits         : "GET",
-            antibodyTargets                : "GET",
-            seqCenters                     : "GET",
-            seqPlatforms                   : "GET",
-            seqTypes                       : "GET",
-            createSeqType                  : "POST",
-            changeLibPrepKitLegacyState    : "POST",
-            changeSeqTypeLegacyState       : "POST",
-            changeAntibodyTargetLegacyState: "POST",
-            changeSeqPlatformLegacyState   : "POST",
-            toggleNeedsBedFile             : "POST",
+            index                                    : "GET",
+            libraryPreparationKits                   : "GET",
+            antibodyTargets                          : "GET",
+            seqCenters                               : "GET",
+            seqPlatforms                             : "GET",
+            seqTypes                                 : "GET",
+            createSeqType                            : "POST",
+            changeLibPrepKitLegacyState              : "POST",
+            changeSeqTypeLegacyState                 : "POST",
+            changeAntibodyTargetLegacyState          : "POST",
+            changeSeqPlatformLegacyState             : "POST",
+            toggleNeedsBedFile                       : "POST",
+            showAdapterFile                          : "GET",
+            updateAutoImportDirectory                : "POST",
+            updateAutoImportable                     : "POST",
+            updateCopyMetadataFile                   : "POST",
+            updateImportDirsAllowLinking             : "POST",
+            createImportDirsAllowLinking             : "POST",
+            createLibraryPreparationKit              : "POST",
+            addAdapterFileToLibraryPreparationKit    : "POST",
+            addAdapterSequenceToLibraryPreparationKit: "POST",
+            createAntibodyTarget                     : "POST",
+            createSeqCenter                          : "POST",
+            createSeqPlatform                        : "POST",
+            createSeqPlatformModelLabelImportAlias   : "POST",
+            createSequencingKitLabelImportAlias      : "POST",
+            createSeqTypeImportAlias                 : "POST",
+            createAntibodyTargetImportAlias          : "POST",
+            createLibraryPreparationKitImportAlias   : "POST",
+            createLayout                             : "POST",
     ]
 
     LibraryPreparationKitService libraryPreparationKitService
@@ -183,10 +201,6 @@ class MetaDataFieldsController implements CheckAndCall {
     }
 
     JSON createAntibodyTargetImportAlias(CreateAntibodyTargetImportAliasCommand cmd) {
-        createImportAlias(cmd)
-    }
-
-    JSON createSpeciesCommonImportAlias(CreateAntibodyTargetImportAliasCommand cmd) {
         createImportAlias(cmd)
     }
 

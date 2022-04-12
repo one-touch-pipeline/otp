@@ -44,8 +44,14 @@ import de.dkfz.tbi.util.TimeFormats
 class UserAdministrationController implements CheckAndCall {
 
     static allowedMethods = [
-            index: "GET",
-            enable: "POST",
+            index          : "GET",
+            dataTableSource: "POST",
+            enable         : "POST",
+            show           : "GET",
+            ldapProperties : "GET",
+            editUser       : "POST",
+            addRole        : "POST",
+            removeRole     : "POST",
     ]
 
     /**

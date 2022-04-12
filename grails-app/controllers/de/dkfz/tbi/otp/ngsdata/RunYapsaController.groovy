@@ -35,6 +35,10 @@ class RunYapsaController extends AbstractAnalysisController {
     RunYapsaResultsService runYapsaResultsService
     ProjectSelectionService projectSelectionService
 
+    static allowedMethods = [
+            dataTableResults: "POST",
+    ]
+
     JSON dataTableResults(DataTableCommand cmd) {
         Map dataToRender = cmd.dataToRender()
         Project project = projectSelectionService.requestedProject

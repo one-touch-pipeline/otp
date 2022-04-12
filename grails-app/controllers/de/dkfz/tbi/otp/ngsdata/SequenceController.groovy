@@ -39,6 +39,12 @@ class SequenceController {
     FastqcResultsService fastqcResultsService
     UserService userService
 
+    static allowedMethods = [
+            index          : "GET",
+            dataTableSource: "POST",
+            exportAll      : "GET",
+    ]
+
     def index() {
         List<SeqType> seqTypes = SeqType.list(sort: "name", order: "asc")
         return [

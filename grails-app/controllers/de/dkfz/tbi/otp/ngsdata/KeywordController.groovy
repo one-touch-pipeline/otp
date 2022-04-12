@@ -37,6 +37,13 @@ class KeywordController implements CheckAndCall {
     KeywordService keywordService
     ProjectSelectionService projectSelectionService
 
+    static allowedMethods = [
+            index      : "GET",
+            createOrAdd: "POST",
+            add        : "POST",
+            remove     : "POST",
+    ]
+
     Map index() {
         Project project = projectSelectionService.selectedProject
         project = atMostOneElement(Project.findAllByName(project?.name, [fetch: [keywords: 'join']]))

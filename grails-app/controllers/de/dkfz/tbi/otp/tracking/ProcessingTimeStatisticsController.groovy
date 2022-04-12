@@ -36,6 +36,12 @@ class ProcessingTimeStatisticsController {
     ProcessingTimeStatisticsService processingTimeStatisticsService
     CommentService commentService
 
+    static allowedMethods = [
+            index          : "GET",
+            dataTableSource: "POST",
+            editValue      : "POST",
+    ]
+
     def index() {
         return [
                 dateFrom: TimeFormats.DATE.getFormattedLocalDate(LocalDate.now() - 6),

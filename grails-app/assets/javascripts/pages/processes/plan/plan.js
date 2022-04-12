@@ -97,7 +97,7 @@ $.otp.workflows.registerProcesses = function (selector, planId, state) {
     sDom: '<i>prtp<"clear">'
   });
   $('#enable-workflow-button').on('click', () => {
-    $.get($.otp.createLink({
+    $.post($.otp.createLink({
       controller: 'processes',
       action: 'enablePlan',
       id: planId
@@ -113,7 +113,7 @@ $.otp.workflows.registerProcesses = function (selector, planId, state) {
     });
   });
   $('#disable-workflow-button').on('click', () => {
-    $.get($.otp.createLink({
+    $.post($.otp.createLink({
       controller: 'processes',
       action: 'disablePlan',
       id: planId

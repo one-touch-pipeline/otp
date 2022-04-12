@@ -37,6 +37,11 @@ class SampleOverviewController {
     SampleOverviewService sampleOverviewService
     SampleService sampleService
 
+    static allowedMethods = [
+            index                      : "GET",
+            dataTableSourceLaneOverview: "POST",
+    ]
+
     /**
      * The basic data for the page projectOverview/laneOverview.
      * The table content are retrieved asynchronously from {@link #dataTableSourceLaneOverview} via JavaScript.

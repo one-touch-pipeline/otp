@@ -29,6 +29,10 @@ import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
 @Secured('isFullyAuthenticated()')
 abstract class AbstractAnalysisController {
 
+    static allowedMethods = [
+            results: "GET",
+    ]
+
     Map results() {
         return [:]
     }

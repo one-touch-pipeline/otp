@@ -38,9 +38,10 @@ abstract class AbstractWorkflowRunController implements CheckAndCall {
     WorkflowStateChangeService workflowStateChangeService
 
     static allowedMethods = [
-            setFailedFinal: "POST",
-            restartStep   : "POST",
-            restartRun    : "POST",
+            setFailedFinal     : "POST",
+            restartStep        : "POST",
+            restartPreviousStep: "POST",
+            restartRun         : "POST",
     ]
 
     def setFailedFinal(RunUpdateCommand cmd) {

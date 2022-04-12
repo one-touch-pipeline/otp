@@ -36,6 +36,12 @@ class SnvController extends AbstractAnalysisController {
     SnvResultsService snvResultsService
     ProjectSelectionService projectSelectionService
 
+    static allowedMethods = [
+            plots           : "GET",
+            renderPDF       : "GET",
+            dataTableResults: "POST",
+    ]
+
     Map plots(BamFilePairAnalysisCommand cmd) {
         if (cmd.hasErrors()) {
             return response.sendError(404)

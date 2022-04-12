@@ -31,6 +31,13 @@ import javax.servlet.http.HttpServletResponse
 class ErrorsController {
     SpringSecurityService springSecurityService
 
+    static allowedMethods = [
+            error403                   : "GET",
+            error404                   : "GET",
+            noProject                  : "GET",
+            switchedUserDeniedException: "GET",
+    ]
+
     def error403 = {
         response.status = HttpServletResponse.SC_FORBIDDEN
         if (springSecurityService.isAjax(request)) {
@@ -48,10 +55,12 @@ class ErrorsController {
         }
     }
 
+    @SuppressWarnings("ControllerMethodNotInAllowedMethods")
     def error405 = {
         return [method: request.method]
     }
 
+    @SuppressWarnings("ControllerMethodNotInAllowedMethods")
     def error500() {
         Throwable throwable = request.exception
         String stackTrace = ''

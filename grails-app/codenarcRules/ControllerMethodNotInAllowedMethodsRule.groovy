@@ -28,7 +28,7 @@ import org.codenarc.rule.AbstractAstVisitorRule
 @CompileStatic
 class ControllerMethodNotInAllowedMethodsRule extends AbstractAstVisitorRule {
     String applyToFileNames = "*/*grails-app/controllers*/*"
-    int priority = 2
+    int priority = 1
     String name = 'ControllerMethodNotInAllowedMethods'
     String description = 'Public methods in controller must be listed in allowedMethods'
     Class astVisitorClass = ControllerMethodNotInAllowedMethodsVisitor

@@ -36,6 +36,15 @@ class ProjectOverviewController {
     CommentService commentService
     ProjectSelectionService projectSelectionService
 
+    static allowedMethods = [
+            index                                             : "GET",
+            individualCountByProject                          : "GET",
+            dataTableSource                                   : "POST",
+            dataTableSourcePatientsAndSamplesGBCountPerProject: "POST",
+            dataTableSourceSampleTypeNameCountBySample        : "POST",
+            dataTableSourceCenterNameRunId                    : "POST",
+    ]
+
     Map index() {
         return [:]
     }

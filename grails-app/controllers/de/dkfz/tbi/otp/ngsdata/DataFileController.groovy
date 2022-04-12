@@ -37,6 +37,11 @@ class DataFileController {
     CommentService commentService
     FastqcResultsService fastqcResultsService
 
+    static allowedMethods = [
+            showDetails        : "GET",
+            saveDataFileComment: "POST",
+    ]
+
     def showDetails(ShowDetailsCommand cmd) {
         if (cmd.hasErrors()) {
             return response.sendError(404)

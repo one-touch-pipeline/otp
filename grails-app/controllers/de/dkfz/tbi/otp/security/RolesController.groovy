@@ -28,6 +28,10 @@ class RolesController {
 
     RolesService rolesService
 
+    static allowedMethods = [
+            index: "GET",
+    ]
+
     def index() {
         List<RolesWithUsers> allRoles = rolesService.rolesAndUsers
         List<RolesWithUsers> rolesAndUsers = allRoles.findAll { it.role.authority.startsWith("ROLE_") }

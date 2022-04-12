@@ -29,6 +29,10 @@ class HomeController {
     HomeService homeService
     ProjectGroupService projectGroupService
 
+    static allowedMethods = [
+            index: "GET",
+    ]
+
     Map index() {
         return [
                 userProjects  : homeService.allProjects,

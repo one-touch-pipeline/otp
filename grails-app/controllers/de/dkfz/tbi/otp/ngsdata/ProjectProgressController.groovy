@@ -58,6 +58,11 @@ class ProjectProgressController {
     ProjectService projectService
     ProjectProgressService projectProgressService
 
+    static allowedMethods = [
+            progress       : "GET",
+            dataTableSource: "POST",
+    ]
+
     def progress() {
         return [
             startDate: TimeFormats.DATE.getFormattedDate(Date.from(Instant.now().minus(8, ChronoUnit.DAYS))),

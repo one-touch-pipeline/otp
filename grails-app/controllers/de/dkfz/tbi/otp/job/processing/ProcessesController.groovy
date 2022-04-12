@@ -44,8 +44,26 @@ import static grails.async.Promises.waitAll
 
 @Secured("hasRole('ROLE_OPERATOR')")
 class ProcessesController {
+
     static allowedMethods = [
-            restartWithProcess : "POST",
+            index                         : "GET",
+            list                          : "GET",
+            listData                      : "POST",
+            plan                          : "GET",
+            planData                      : "POST",
+            enablePlan                    : "POST",
+            disablePlan                   : "POST",
+            process                       : "GET",
+            updateOperatorIsAwareOfFailure: "POST",
+            processData                   : "POST",
+            restartWithProcess            : "POST",
+            processingStep                : "GET",
+            processingStepLog             : "GET",
+            restartStep                   : "POST",
+            processingStepDate            : "POST",
+            parameterData                 : "POST",
+            getProcessingErrorStackTrace  : "GET",
+            saveProcessComment            : "POST",
     ]
 
     private enum PlanStatus {
@@ -260,12 +278,12 @@ class ProcessesController {
 
     // suppressing because this controller will be removed within the old workflow system
     @SuppressWarnings("ClassForName")
-    boolean showRestartButton(Process process) {
+    private boolean showRestartButton(Process process) {
         return (RestartableStartJob.isAssignableFrom(Class.forName(process.startJobClass)) &&
                 !CollectionUtils.atMostOneElement(Process.findAllByRestarted(process)))
     }
 
-    Process getRestartedProcess(Process process) {
+    private Process getRestartedProcess(Process process) {
         return CollectionUtils.atMostOneElement(Process.findAllByRestarted(process))
     }
 
@@ -421,7 +439,7 @@ class ProcessesController {
         render dataToRender as JSON
     }
 
-    String formatParamValue(Parameter param) {
+    private String formatParamValue(Parameter param) {
         if (param.type.name == JobParameterKeys.SCRIPT) {
             return "<pre>${param.value?.encodeAsHTML()}</pre>"
         } else {

@@ -143,22 +143,22 @@ class CellRangerConfigurationController extends AbstractConfigureNonRoddyPipelin
     }
 
     @Override
-    Pipeline getPipeline() {
+    protected Pipeline getPipeline() {
         Pipeline.Name.CELL_RANGER.pipeline
     }
 
     @SuppressWarnings('MissingOverrideAnnotation') //for an unknown reason the groovy compiler doesnt work with @Override in this case
-    CellRangerConfig getLatestConfig(Project project, SeqType seqType) {
+    protected CellRangerConfig getLatestConfig(Project project, SeqType seqType) {
         return projectService.getLatestCellRangerConfig(project, seqType)
     }
 
     @Override
-    String getDefaultVersion() {
+    protected String getDefaultVersion() {
         return processingOptionService.findOptionAsString(ProcessingOption.OptionName.PIPELINE_CELLRANGER_DEFAULT_VERSION)
     }
 
     @Override
-    List<String> getAvailableVersions() {
+    protected List<String> getAvailableVersions() {
         return processingOptionService.findOptionAsList(ProcessingOption.OptionName.PIPELINE_CELLRANGER_AVAILABLE_VERSIONS)
     }
 }

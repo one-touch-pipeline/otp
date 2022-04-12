@@ -56,6 +56,18 @@ class ClusterJobGeneralController {
 
     ClusterJobService clusterJobService
 
+    static allowedMethods = [
+            index                          : "GET",
+            findAllClusterJobsByDateBetween: "POST",
+            getAllExitCodes                : "GET",
+            getAllExitStatuses             : "GET",
+            getAllFailed                   : "GET",
+            getAllStates                   : "GET",
+            getAllStatesTimeDistribution   : "GET",
+            getAllAvgCoreUsage             : "GET",
+            getAllMemoryUsage              : "GET",
+    ]
+
     Map index() {
         LocalDate date = (clusterJobService.latestJobDate ?: ZonedDateTime.now()).toLocalDate()
         return [

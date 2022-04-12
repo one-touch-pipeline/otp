@@ -33,6 +33,14 @@ class JobErrorDefinitionController implements CheckAndCall {
 
     JobErrorDefinitionService jobErrorDefinitionService
 
+    static allowedMethods = [
+            index                   : "GET",
+            addJobErrorDefinition   : "POST",
+            addNewJobErrorDefinition: "POST",
+            updateErrorExpression   : "POST",
+            addNewJob               : "POST",
+    ]
+
     def index() {
         Map jobErrorDefinitions = jobErrorDefinitionService.allJobErrorDefinition
         List<JobDefinition> jobDefinitions = jobErrorDefinitionService.getJobDefinition(jobErrorDefinitions)

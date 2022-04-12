@@ -31,27 +31,27 @@ import de.dkfz.tbi.otp.project.RoddyConfiguration
 class ConfigureSnvPipelineController extends AbstractConfigureRoddyPipelineController {
 
     @Override
-    Pipeline getPipeline() {
+    protected Pipeline getPipeline() {
         Pipeline.Name.RODDY_SNV.pipeline
     }
 
     @SuppressWarnings('MissingOverrideAnnotation') //for an unknown reason the groovy compiler doesnt work with @Override in this case
-    String getDefaultPluginName(String roddyName) {
+    protected String getDefaultPluginName(String roddyName) {
         return processingOptionService.findOptionAsString(ProcessingOption.OptionName.PIPELINE_RODDY_SNV_DEFAULT_PLUGIN_NAME, roddyName)
     }
 
     @SuppressWarnings('MissingOverrideAnnotation') //for an unknown reason the groovy compiler doesnt work with @Override in this case
-    String getDefaultProgramVersion(String roddyName) {
+    protected String getDefaultProgramVersion(String roddyName) {
         return processingOptionService.findOptionAsString(ProcessingOption.OptionName.PIPELINE_RODDY_SNV_DEFAULT_PLUGIN_VERSION, roddyName)
     }
 
     @SuppressWarnings('MissingOverrideAnnotation') //for an unknown reason the groovy compiler doesnt work with @Override in this case
-    String getDefaultBaseProjectConfig(String roddyName) {
+    protected String getDefaultBaseProjectConfig(String roddyName) {
         return processingOptionService.findOptionAsString(ProcessingOption.OptionName.PIPELINE_RODDY_SNV_DEFAULT_BASE_PROJECT_CONFIG, roddyName)
     }
 
     @Override
-    void configure(RoddyConfiguration configuration) {
+    protected void configure(RoddyConfiguration configuration) {
         projectService.configureSnvPipelineProject(configuration)
     }
 }

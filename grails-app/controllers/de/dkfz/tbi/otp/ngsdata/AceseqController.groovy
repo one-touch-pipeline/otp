@@ -36,6 +36,12 @@ class AceseqController extends AbstractAnalysisController {
     AceseqResultsService aceseqResultsService
     ProjectSelectionService projectSelectionService
 
+    static allowedMethods = [
+            dataTableResults: "POST",
+            plots           : "GET",
+            plotImages      : "GET",
+    ]
+
     JSON dataTableResults(DataTableCommand cmd) {
         Map dataToRender = cmd.dataToRender()
         Project project = projectSelectionService.requestedProject

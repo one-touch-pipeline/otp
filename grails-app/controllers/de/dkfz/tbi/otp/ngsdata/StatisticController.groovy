@@ -39,6 +39,18 @@ class StatisticController {
     ProjectService projectService
     StatisticService statisticService
 
+    static allowedMethods = [
+            projectCountPerDate         : "GET",
+            laneCountPerDate            : "GET",
+            gigaBasesPerDay             : "GET",
+            sampleCountPerSequenceType  : "GET",
+            patientsCountPerSequenceType: "GET",
+            projectCountPerSequenceType : "GET",
+            sampleTypeCountBySeqType    : "GET",
+            sampleTypeCountByPatient    : "GET",
+            laneCountPerDateByProject   : "GET",
+    ]
+
     private static long getRoundedPercentage(long numerator, long denominator) {
         return Math.round(numerator * 100 / denominator)
     }

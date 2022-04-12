@@ -30,6 +30,11 @@ import de.dkfz.tbi.otp.utils.DataTableCommand
 class MmmlController {
     MmmlService mmmlService
 
+    static allowedMethods = [
+            mmmlIdentifierMapping: "GET",
+            dataTableMMMLMapping : "POST",
+    ]
+
     Map mmmlIdentifierMapping() {
         return [:]
     }

@@ -38,6 +38,20 @@ class ClusterJobJobTypeSpecificController {
 
     ClusterJobService clusterJobService
 
+    static allowedMethods = [
+            index                                   : "GET",
+            getJobTypeSpecificAvgCoreUsage          : "GET",
+            getJobTypeSpecificAvgMemory             : "GET",
+            getJobTypeSpecificStatesTimeDistribution: "GET",
+            getJobTypeSpecificCoverageStatistics    : "GET",
+            getJobClassesByDate                     : "GET",
+            getSeqTypesByJobClass                   : "GET",
+            getJobTypeSpecificExitCodes             : "GET",
+            getJobTypeSpecificExitStatuses          : "GET",
+            getJobTypeSpecificStates                : "GET",
+            getJobTypeSpecificWalltimes             : "GET",
+    ]
+
     def index() {
         LocalDate date = clusterJobService.latestJobDate?.toLocalDate() ?: LocalDate.now()
         def jobClasses = clusterJobService.findAllJobClassesByDateBetween(date, date)

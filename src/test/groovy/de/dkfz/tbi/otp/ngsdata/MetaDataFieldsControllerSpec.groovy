@@ -78,6 +78,7 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         setupData()
 
         when:
+        request.method = 'POST'
         controller.params.name = 'LibraryPreparationKit'
         controller.params.shortDisplayName = 'LPK'
         controller.params.adapterFile = '/asdf'
@@ -99,6 +100,7 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         DomainFactory.createLibraryPreparationKit(name: 'LibraryPreparationKit', shortDisplayName: 'LPK', importAlias: ['LibraryPreparationKitImportAlias'])
 
         when:
+        request.method = 'POST'
         controller.params.name = name
         controller.params.shortDisplayName = shortDisplayName
         controller.params.libraryPreparationKitService = controller.libraryPreparationKitService
@@ -124,6 +126,7 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         LibraryPreparationKit libraryPreparationKit = DomainFactory.createLibraryPreparationKit(name: 'LibraryPreparationKit', shortDisplayName: 'LPK')
 
         when:
+        request.method = 'POST'
         controller.params.id = libraryPreparationKit.id
         controller.params.importAlias = 'LibraryPreparationKitImportAlias'
         controller.params.libraryPreparationKitService = controller.libraryPreparationKitService
@@ -144,6 +147,7 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
                 name: 'LibraryPreparationKit', shortDisplayName: 'LPK', importAlias: ['LibraryPreparationKitImportAlias'])
 
         when:
+        request.method = 'POST'
         controller.params.id = libraryPreparationKit.id
         controller.params.importAlias = importAlias
         controller.params.libraryPreparationKitService = controller.libraryPreparationKitService
@@ -162,6 +166,7 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         setupData()
 
         when:
+        request.method = 'POST'
         controller.params.name = 'AntibodyTarget'
         controller.params.antibodyTargetService = controller.antibodyTargetService
         controller.createAntibodyTarget()
@@ -180,6 +185,7 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         DomainFactory.createAntibodyTarget(name: 'AntibodyTarget')
 
         when:
+        request.method = 'POST'
         controller.params.name = name
         controller.params.antibodyTargetService = controller.antibodyTargetService
         controller.createAntibodyTarget()
@@ -197,6 +203,7 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         setupData()
 
         when:
+        request.method = 'POST'
         controller.params.name = 'SEQCENTER'
         controller.params.dirName = 'seqcenter'
         controller.params.seqPlatformService = controller.seqPlatformService
@@ -216,6 +223,7 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         DomainFactory.createSeqCenter(name: 'SEQCENTER', dirName: 'seqcenter')
 
         when:
+        request.method = 'POST'
         controller.params.name = name
         controller.params.dirName = dirName
         controller.params.seqPlatformService = controller.seqPlatformService
@@ -244,6 +252,7 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         SequencingKitLabel sequencingKitLabel = DomainFactory.createSequencingKitLabel(name: "SequencingKitLabel")
 
         when:
+        request.method = 'POST'
         controller.params.platform = platform
         controller.params.model = model
         controller.params.kit = kit
@@ -281,6 +290,7 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         )
 
         when:
+        request.method = 'POST'
         controller.params.platform = platform
         controller.params.model = model
         controller.params.kit = kit
@@ -318,6 +328,7 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         )
 
         when:
+        request.method = 'POST'
         controller.params.platform = platform
         controller.params.model = model
         controller.params.kit = kit
@@ -345,6 +356,7 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         controller.params.id = seqPlatformModelLabel.id
 
         when:
+        request.method = 'POST'
         controller.params.importAlias = 'SeqPlatformModelLabelAlias'
         controller.params.seqPlatformModelLabelService = controller.seqPlatformService.seqPlatformModelLabelService
         controller.createSeqPlatformModelLabelImportAlias()
@@ -364,6 +376,7 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         controller.params.name = "SeqPlatformModelLabel"
 
         when:
+        request.method = 'POST'
         controller.params.importAlias = importAlias
         controller.params.seqPlatformModelLabelService = controller.seqPlatformService.seqPlatformModelLabelService
         controller.createSeqPlatformModelLabelImportAlias()
@@ -384,6 +397,7 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         controller.params.id = sequencingKitLabel.id
 
         when:
+        request.method = 'POST'
         controller.params.importAlias = 'SequencingKitLabelAlias'
         controller.params.sequencingKitLabelService = controller.seqPlatformService.sequencingKitLabelService
         controller.createSequencingKitLabelImportAlias()
@@ -403,6 +417,7 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         controller.params.name = "SequencingKitLabel"
 
         when:
+        request.method = 'POST'
         controller.params.importAlias = importAlias
         controller.params.sequencingKitLabelService = controller.seqPlatformService.sequencingKitLabelService
         controller.createSequencingKitLabelImportAlias()
@@ -551,6 +566,7 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         DomainFactory.createSeqType(name: 'SEQTYPE', dirName: 'SEQTYPE_SC', libraryLayout: SequencingReadType.PAIRED, singleCell: true)
 
         when:
+        request.method = 'POST'
         controller.params.name = name
         controller.params.single = single
         controller.params.paired = paired
@@ -594,6 +610,7 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         DomainFactory.createSeqType(name: 'SEQTYPE', dirName: 'SEQTYPE_SC', libraryLayout: SequencingReadType.PAIRED, singleCell: true)
 
         when:
+        request.method = 'POST'
         controller.params.name = name
         controller.params.single = single
         controller.params.paired = paired
@@ -631,6 +648,7 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         SeqType seqTypePaired = DomainFactory.createSeqType(name: 'SEQTYPE', dirName: 'SEQTYPE', libraryLayout: SequencingReadType.PAIRED)
 
         when:
+        request.method = 'POST'
         controller.params.id = seqTypeSingle.id
         controller.params.importAlias = importAlias
         controller.params.seqTypeService = controller.seqTypeService
@@ -657,6 +675,7 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         SeqType seqType = seqTypes[suffix]
 
         when:
+        request.method = 'POST'
         controller.params.id = seqType.id
         controller.params.importAlias = importAlias
         controller.params.seqTypeService = controller.seqTypeService
@@ -681,6 +700,7 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         AntibodyTarget antibodyTarget = DomainFactory.createAntibodyTarget()
 
         when:
+        request.method = 'POST'
         controller.params.id = antibodyTarget.id
         controller.params.importAlias = importAlias
         controller.params.antibodyTargetService = controller.antibodyTargetService
@@ -702,6 +722,7 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         AntibodyTarget antibodyTarget = DomainFactory.createAntibodyTarget(name: 'ANTIBODYTARGET', importAlias: importAliases)
 
         when:
+        request.method = 'POST'
         controller.params.id = antibodyTarget.id
         controller.params.importAlias = newAlias
         controller.params.antibodyTargetService = controller.antibodyTargetService

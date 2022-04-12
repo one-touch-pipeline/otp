@@ -49,6 +49,10 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
             selectFastqFiles           : "GET",
             selectBamFiles             : "GET",
             sampleMetadata             : "GET",
+            editSubmission             : "GET",
+            studyMetadata              : "GET",
+            experimentalMetadata       : "GET",
+            helpPage                   : "GET",
 
             newSubmissionForm          : "POST",
             selectSamplesForm          : "POST",
@@ -62,6 +66,8 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
             selectFilesBamFilesForm    : "POST",
             sampleMetadataForm         : "POST",
             updatePubMedId             : "POST",
+            updateSubmissionState      : "POST",
+            dataTableSelectSamples     : "POST",
     ]
 
     EgaSubmissionService egaSubmissionService
@@ -409,7 +415,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
         }
     }
 
-    def saveDataFileSelection(SelectFilesDataFilesFormSubmitCommand cmd) {
+    private void saveDataFileSelection(SelectFilesDataFilesFormSubmitCommand cmd) {
         if (cmd.selectBox) {
             EgaSubmission submission = cmd.submission
             Set<SampleSubmissionObject> fastqSamples = submission.samplesToSubmit.findAll { it.useFastqFile }
@@ -600,7 +606,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
         }
     }
 
-    EgaMapKey getIdentifierKeyFromSampleSubmissionObject(SampleSubmissionObject sampleSubmissionObject) {
+    private EgaMapKey getIdentifierKeyFromSampleSubmissionObject(SampleSubmissionObject sampleSubmissionObject) {
         return new EgaMapKey(sampleSubmissionObject)
     }
 }

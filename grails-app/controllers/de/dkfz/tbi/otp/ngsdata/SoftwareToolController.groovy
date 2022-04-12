@@ -34,6 +34,9 @@ class SoftwareToolController {
     static allowedMethods = [
             list                        : "GET",
             createSoftwareTool          : "POST",
+            updateSoftwareTool          : "POST",
+            updateSoftwareToolIdentifier: "POST",
+            createSoftwareToolIdentifier: "POST",
     ]
 
     SoftwareToolService softwareToolService

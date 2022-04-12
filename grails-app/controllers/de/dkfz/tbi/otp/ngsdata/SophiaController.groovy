@@ -36,6 +36,12 @@ class SophiaController extends AbstractAnalysisController {
     SophiaResultsService sophiaResultsService
     ProjectSelectionService projectSelectionService
 
+    static allowedMethods = [
+            dataTableResults: "POST",
+            plots           : "GET",
+            renderPDF       : "GET",
+    ]
+
     JSON dataTableResults(DataTableCommand cmd) {
         Map dataToRender = cmd.dataToRender()
         Project project = projectSelectionService.requestedProject

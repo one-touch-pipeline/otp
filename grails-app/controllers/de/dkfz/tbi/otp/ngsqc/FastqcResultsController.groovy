@@ -47,6 +47,11 @@ class FastqcResultsController {
     LsdfFilesService lsdfFilesService
     MetaDataService metaDataService
 
+    static allowedMethods = [
+            show      : "GET",
+            renderFile: "GET",
+    ]
+
     def show() {
         DataFile dataFile = metaDataService.getDataFile(params.id as long)
         if (!dataFile) {

@@ -42,6 +42,17 @@ class CrashRecoveryController {
     PropertiesValidationService propertiesValidationService
     SchedulerService schedulerService
 
+    static allowedMethods = [
+            index          : "GET",
+            datatable      : "POST",
+            markFailed     : "GET",
+            restart        : "GET",
+            markFinished   : "GET",
+            markSucceeded  : "GET",
+            startScheduler : "GET",
+            parametersOfJob: "GET",
+    ]
+
     def index() {
         boolean crashRecovery = crashRecoveryService.crashRecovery
         boolean processingOptionsValid = propertiesValidationService.validateProcessingOptions().isEmpty()

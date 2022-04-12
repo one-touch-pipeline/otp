@@ -36,6 +36,12 @@ class IndelController extends AbstractAnalysisController {
     IndelResultsService indelResultsService
     ProjectSelectionService projectSelectionService
 
+    static allowedMethods = [
+            plots           : "GET",
+            renderPlot      : "GET",
+            dataTableResults: "POST",
+    ]
+
     Map plots(BamFilePairAnalysisCommand cmd) {
         if (cmd.hasErrors()) {
             return response.sendError(404)

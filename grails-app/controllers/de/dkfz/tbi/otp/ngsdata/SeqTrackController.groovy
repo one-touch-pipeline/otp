@@ -32,6 +32,11 @@ class SeqTrackController {
     SeqTrackService seqTrackService
     ProcessParameterService processParameterService
 
+    static allowedMethods = [
+            show       : "GET",
+            seqTrackSet: "GET",
+    ]
+
     def show() {
         params.id = params.id ?: "0"
         SeqTrack seqTrack = seqTrackService.getSeqTrack(params.id)

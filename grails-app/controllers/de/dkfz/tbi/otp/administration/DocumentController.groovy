@@ -32,6 +32,7 @@ class DocumentController {
     static allowedMethods = [
             manage            : "GET",
             upload            : "POST",
+            updateSortOrder   : "POST",
             updateDescription : "POST",
             download          : "GET",
             delete            : "POST",
