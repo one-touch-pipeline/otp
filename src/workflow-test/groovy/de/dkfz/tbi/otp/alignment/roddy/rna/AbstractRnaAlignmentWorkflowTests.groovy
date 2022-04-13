@@ -270,7 +270,7 @@ abstract class AbstractRnaAlignmentWorkflowTests extends AbstractRoddyAlignmentW
     }
 
     @Override
-    String getRefGenFileNamePrefix() {
+    protected String getRefGenFileNamePrefix() {
         return 'hs37d5_PhiX'
     }
 

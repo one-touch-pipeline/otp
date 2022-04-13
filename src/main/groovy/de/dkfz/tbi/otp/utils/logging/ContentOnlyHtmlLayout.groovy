@@ -25,13 +25,7 @@ import ch.qos.logback.classic.html.HTMLLayout
 
 class ContentOnlyHtmlLayout extends HTMLLayout {
 
-    @Override
-    String getFileHeader() {
-        return ""
-    }
+    final String fileHeader = ""
 
-    @Override
-    String getFileFooter() {
-        return ""
-    }
+    final String fileFooter = ""
 }

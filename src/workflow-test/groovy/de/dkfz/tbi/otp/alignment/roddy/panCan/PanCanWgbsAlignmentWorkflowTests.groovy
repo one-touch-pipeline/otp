@@ -72,7 +72,7 @@ class PanCanWgbsAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkflowTes
     }
 
     @Override
-    String getRefGenFileNamePrefix() {
+    protected String getRefGenFileNamePrefix() {
         return 'hs37d5_PhiX_Lambda.conv'
     }
 

@@ -26,15 +26,9 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 
 class IndelCallingPipelineChecker extends AbstractVariantCallingPipelineChecker {
 
-    @Override
-    String getWorkflowName() {
-        return "IndelWorkflow"
-    }
+    final String workflowName = "IndelWorkflow"
 
-    @Override
-    String getProcessingStateMember() {
-        return 'indelProcessingStatus'
-    }
+    final String processingStateMember = 'indelProcessingStatus'
 
     @Override
     Pipeline getPipeline() {

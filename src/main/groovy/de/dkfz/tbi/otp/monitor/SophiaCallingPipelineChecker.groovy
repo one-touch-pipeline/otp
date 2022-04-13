@@ -28,15 +28,9 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 
 class SophiaCallingPipelineChecker extends AbstractVariantCallingPipelineChecker {
 
-    @Override
-    String getWorkflowName() {
-        return "SophiaWorkflow"
-    }
+    final String workflowName = "SophiaWorkflow"
 
-    @Override
-    String getProcessingStateMember() {
-        return 'sophiaProcessingStatus'
-    }
+    final String processingStateMember = 'sophiaProcessingStatus'
 
     @Override
     Pipeline getPipeline() {

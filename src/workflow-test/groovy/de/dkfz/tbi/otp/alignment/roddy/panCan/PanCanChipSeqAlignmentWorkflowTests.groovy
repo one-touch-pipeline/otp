@@ -131,7 +131,7 @@ class PanCanChipSeqAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkflow
     }
 
     @Override
-    String getRefGenFileNamePrefix() {
+    protected String getRefGenFileNamePrefix() {
         return 'hg_GRCh38'
     }
 

@@ -27,13 +27,10 @@ import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
 class IndelServiceSpec extends AbstractBamFileAnalysisServiceSpec implements ServiceUnitTest<IndelCallingService> {
 
+    final String pathPart = 'indel_results'
+
     @Override
     BamFilePairAnalysis getNewInstance() {
         return DomainFactory.createIndelCallingInstanceWithRoddyBamFiles()
-    }
-
-    @Override
-    String getPathPart() {
-        return 'indel_results'
     }
 }

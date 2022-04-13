@@ -63,33 +63,29 @@ class AbstractMergingWorkPackageSpec extends Specification implements DataTest {
     @Artefact(DomainClassArtefactHandler.TYPE)
     class TestAbstractMergingWorkPackage extends AbstractMergingWorkPackage implements DomainClass, GormEntity<TestAbstractMergingWorkPackage>, Validateable {
 
-        @Override
-        AbstractMergedBamFile getBamFileThatIsReadyForFurtherAnalysis() {
-            return null
-        }
+        final AbstractMergedBamFile bamFileThatIsReadyForFurtherAnalysis = null
     }
 
     @Artefact(DomainClassArtefactHandler.TYPE)
     class TestAbstractMergedBamFile extends AbstractMergedBamFile implements DomainClass, GormEntity<TestAbstractMergedBamFile>, Validateable {
 
+        final String bamFileName = null
+
+        final String baiFileName = null
+
+        final AlignmentConfig alignmentConfig = null
+
+        final Set<SeqTrack> containedSeqTracks = []
+
+        final AbstractQualityAssessment overallQualityAssessment = null
+
+        final File finalInsertSizeFile = null
+
+        final Integer maximalReadLength = null
+
         @Override
         boolean isMostRecentBamFile() {
             return false
-        }
-
-        @Override
-        String getBamFileName() {
-            return null
-        }
-
-        @Override
-        String getBaiFileName() {
-            return null
-        }
-
-        @Override
-        AlignmentConfig getAlignmentConfig() {
-            return null
         }
 
         @Override
@@ -104,26 +100,6 @@ class AbstractMergingWorkPackageSpec extends Specification implements DataTest {
         @Override
         AbstractMergingWorkPackage getMergingWorkPackage() {
             return TestAbstractMergingWorkPackage.get(workPackage.id)
-        }
-
-        @Override
-        Set<SeqTrack> getContainedSeqTracks() {
-            return []
-        }
-
-        @Override
-        AbstractQualityAssessment getOverallQualityAssessment() {
-            return null
-        }
-
-        @Override
-        File getFinalInsertSizeFile() {
-            return null
-        }
-
-        @Override
-        Integer getMaximalReadLength() {
-            return null
         }
     }
 

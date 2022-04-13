@@ -26,15 +26,9 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 
 class AceseqCallingPipelineChecker extends AbstractVariantCallingPipelineChecker {
 
-    @Override
-    String getWorkflowName() {
-        return "ACEseqWorkflow"
-    }
+    final String workflowName = "ACEseqWorkflow"
 
-    @Override
-    String getProcessingStateMember() {
-        return 'aceseqProcessingStatus'
-    }
+    final String processingStateMember = 'aceseqProcessingStatus'
 
     @Override
     Pipeline getPipeline() {

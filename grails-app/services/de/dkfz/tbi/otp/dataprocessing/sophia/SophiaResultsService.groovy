@@ -26,10 +26,7 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 
 class SophiaResultsService extends AbstractAnalysisResultsService<SophiaInstance> {
 
-    @Override
-    Class<SophiaInstance> getInstanceClass() {
-        SophiaInstance
-    }
+    final Class<SophiaInstance> instanceClass = SophiaInstance
 
     @Override
     Map getQcData(SophiaInstance analysis) {

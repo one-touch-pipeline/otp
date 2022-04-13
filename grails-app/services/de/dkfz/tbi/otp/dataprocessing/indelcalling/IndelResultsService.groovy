@@ -28,10 +28,7 @@ import de.dkfz.tbi.otp.utils.FormatHelper
 
 class IndelResultsService extends AbstractAnalysisResultsService<IndelCallingInstance> {
 
-    @Override
-    Class<IndelCallingInstance> getInstanceClass() {
-        IndelCallingInstance
-    }
+    final Class<IndelCallingInstance> instanceClass = IndelCallingInstance
 
     @Override
     Map getQcData(IndelCallingInstance analysis) {

@@ -29,10 +29,7 @@ import de.dkfz.tbi.otp.utils.FormatHelper
 
 class AceseqResultsService extends AbstractAnalysisResultsService<AceseqInstance> {
 
-    @Override
-    Class<AceseqInstance> getInstanceClass() {
-        AceseqInstance
-    }
+    final Class<AceseqInstance> instanceClass = AceseqInstance
 
     @Override
     Map getQcData(AceseqInstance analysis) {

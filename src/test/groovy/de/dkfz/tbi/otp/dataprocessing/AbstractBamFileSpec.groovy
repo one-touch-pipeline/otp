@@ -85,18 +85,11 @@ class AbstractBamFileSpec extends Specification implements DataTest {
 @Artefact(DomainClassArtefactHandler.TYPE)
 class MockAbstractBamFile extends AbstractBamFile implements DomainClass, GormEntity<MockAbstractBamFile>, Validateable {
 
-    @Override
-    MergingWorkPackage getMergingWorkPackage() {
-        return null
-    }
+    final MergingWorkPackage mergingWorkPackage = null
+    final AbstractQualityAssessment overallQualityAssessment = null
 
     @Override
     Set<SeqTrack> getContainedSeqTracks() {
         return [] as Set
-    }
-
-    @Override
-    AbstractQualityAssessment getOverallQualityAssessment() {
-        return null
     }
 }

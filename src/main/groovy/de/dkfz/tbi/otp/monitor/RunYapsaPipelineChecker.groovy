@@ -28,15 +28,9 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 
 class RunYapsaPipelineChecker extends AbstractVariantCallingPipelineChecker {
 
-    @Override
-    String getWorkflowName() {
-        return "RunYapsaWorkflow"
-    }
+    final String workflowName = "RunYapsaWorkflow"
 
-    @Override
-    String getProcessingStateMember() {
-        return 'runYapsaProcessingStatus'
-    }
+    final String processingStateMember = 'runYapsaProcessingStatus'
 
     @Override
     Pipeline getPipeline() {

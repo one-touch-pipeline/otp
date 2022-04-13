@@ -33,6 +33,8 @@ import java.nio.file.Path
 
 class AceseqServiceSpec extends AbstractBamFileAnalysisServiceSpec implements ServiceUnitTest<AceseqService> {
 
+    final String pathPart = 'cnv_results'
+
     @Rule
     TemporaryFolder temporaryFolder
 
@@ -59,11 +61,6 @@ class AceseqServiceSpec extends AbstractBamFileAnalysisServiceSpec implements Se
     @Override
     BamFilePairAnalysis getNewInstance() {
         return DomainFactory.createAceseqInstanceWithRoddyBamFiles()
-    }
-
-    @Override
-    String getPathPart() {
-        return 'cnv_results'
     }
 
     @Unroll()

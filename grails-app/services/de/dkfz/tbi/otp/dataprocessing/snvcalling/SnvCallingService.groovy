@@ -38,10 +38,7 @@ class SnvCallingService extends AbstractBamFileAnalysisService<AbstractSnvCallin
         return "sp.snvProcessingStatus = :needsProcessing "
     }
 
-    @Override
-    Class<RoddySnvCallingInstance> getAnalysisClass() {
-        return RoddySnvCallingInstance
-    }
+    final Class<RoddySnvCallingInstance> analysisClass = RoddySnvCallingInstance
 
     @Override
     protected Pipeline.Type getAnalysisType() {

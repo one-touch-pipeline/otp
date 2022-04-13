@@ -25,10 +25,7 @@ import de.dkfz.tbi.otp.ngsdata.AbstractAnalysisResultsService
 
 class SnvResultsService extends AbstractAnalysisResultsService<AbstractSnvCallingInstance> {
 
-    @Override
-    Class<AbstractSnvCallingInstance> getInstanceClass() {
-        AbstractSnvCallingInstance
-    }
+    final Class<AbstractSnvCallingInstance> instanceClass = AbstractSnvCallingInstance
 
     @Override
     Map getQcData(AbstractSnvCallingInstance analysis) {

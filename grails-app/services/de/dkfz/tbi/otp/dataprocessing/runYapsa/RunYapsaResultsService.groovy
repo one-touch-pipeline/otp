@@ -25,10 +25,7 @@ import de.dkfz.tbi.otp.ngsdata.AbstractAnalysisResultsService
 
 class RunYapsaResultsService extends AbstractAnalysisResultsService<RunYapsaInstance> {
 
-    @Override
-    Class<RunYapsaInstance> getInstanceClass() {
-        RunYapsaInstance
-    }
+    final Class<RunYapsaInstance> instanceClass = RunYapsaInstance
 
     @Override
     Map getQcData(RunYapsaInstance analysis) {

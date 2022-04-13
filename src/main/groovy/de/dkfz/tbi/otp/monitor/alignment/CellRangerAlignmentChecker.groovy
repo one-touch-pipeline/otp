@@ -26,10 +26,8 @@ import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.ngsdata.SeqTypeService
 
 class CellRangerAlignmentChecker extends AbstractAlignmentChecker {
-    @Override
-    String getWorkflowName() {
-        return "CellRangerWorkflow"
-    }
+
+    final String workflowName = "CellRangerWorkflow"
 
     @Override
     Pipeline.Name getPipeLineName() {

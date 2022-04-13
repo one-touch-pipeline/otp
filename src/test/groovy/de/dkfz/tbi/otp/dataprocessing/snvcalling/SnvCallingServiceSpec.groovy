@@ -29,13 +29,10 @@ import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
 class SnvCallingServiceSpec extends AbstractBamFileAnalysisServiceSpec implements ServiceUnitTest<SnvCallingService> {
 
+    final String pathPart = 'snv_results'
+
     @Override
     BamFilePairAnalysis getNewInstance() {
         return DomainFactory.createRoddySnvInstanceWithRoddyBamFiles()
-    }
-
-    @Override
-    String getPathPart() {
-        return 'snv_results'
     }
 }

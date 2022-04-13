@@ -836,7 +836,7 @@ All the Rules that will be used for OTP
         priority = CRITICAL
     }
     GetterMethodCouldBeProperty {
-        priority = LOW
+        priority = CRITICAL
     }
     GroovyLangImmutable {
         priority = CRITICAL

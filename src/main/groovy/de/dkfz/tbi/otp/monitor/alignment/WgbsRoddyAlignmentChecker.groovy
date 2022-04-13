@@ -27,10 +27,7 @@ import de.dkfz.tbi.otp.ngsdata.SeqTypeService
 
 class WgbsRoddyAlignmentChecker extends AbstractRoddyAlignmentChecker {
 
-    @Override
-    String getWorkflowName() {
-        return 'WgbsAlignmentWorkflow'
-    }
+    final String workflowName = 'WgbsAlignmentWorkflow'
 
     @Override
     Pipeline.Name getPipeLineName() {

@@ -28,15 +28,9 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 
 class SnvCallingPipelineChecker extends AbstractVariantCallingPipelineChecker {
 
-    @Override
-    String getWorkflowName() {
-        return "RoddySnvWorkflow"
-    }
+    final String workflowName = "RoddySnvWorkflow"
 
-    @Override
-    String getProcessingStateMember() {
-        return 'snvProcessingStatus'
-    }
+    final String processingStateMember = 'snvProcessingStatus'
 
     @Override
     Pipeline getPipeline() {

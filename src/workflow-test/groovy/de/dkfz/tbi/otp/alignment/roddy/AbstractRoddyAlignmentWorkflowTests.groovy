@@ -50,7 +50,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
     //The number of reads of the example fastqc files
     protected static final int NUMBER_OF_READS = 1000
 
-    String getRefGenFileNamePrefix() {
+    protected String getRefGenFileNamePrefix() {
         return 'hs37d5'
     }
 

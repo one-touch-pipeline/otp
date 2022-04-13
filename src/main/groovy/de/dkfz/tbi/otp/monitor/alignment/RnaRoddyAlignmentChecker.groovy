@@ -27,10 +27,7 @@ import de.dkfz.tbi.otp.ngsdata.SeqTypeService
 
 class RnaRoddyAlignmentChecker extends AbstractRoddyAlignmentChecker {
 
-    @Override
-    String getWorkflowName() {
-        return 'RnaAlignmentWorkflow'
-    }
+    final String workflowName = 'RnaAlignmentWorkflow'
 
     @Override
     Pipeline.Name getPipeLineName() {

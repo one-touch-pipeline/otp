@@ -23,6 +23,8 @@ package de.dkfz.tbi.otp.project.additionalField
 
 class SetValueField extends AbstractFieldValue {
 
+    final String displayValue = null
+
     Set<AbstractSingleFieldValue> values = [] as Set<AbstractSingleFieldValue>
 
     static hasMany = [
@@ -33,10 +35,5 @@ class SetValueField extends AbstractFieldValue {
         values validator: { val, obj ->
             return val?.any { it?.definition != obj.definition } ? 'projectFieldDefinition.do.not.match' : true
         }
-    }
-
-    @Override
-    String getDisplayValue() {
-        return null
     }
 }
