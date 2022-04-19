@@ -28,8 +28,6 @@ import org.springframework.security.core.userdetails.UserDetails
 @Immutable
 class Principal implements UserDetails {
 
-    final String password = "*"
-
     String username
     String displayName = "OTP Developer"
     Collection<? extends GrantedAuthority> authorities
@@ -37,6 +35,12 @@ class Principal implements UserDetails {
     @Override
     String toString() {
         return username
+    }
+
+    @SuppressWarnings("GetterMethodCouldBeProperty")
+    @Override
+    String getPassword() {
+        return "*"
     }
 
     @Override
