@@ -102,12 +102,13 @@ class ProjectRequestController implements CheckAndCall {
                 keywords              : Keyword.listOrderByName(),
                 projectNameDescription: projectNameDescription,
                 projectNamePattern    : projectNamePattern,
-                projectTypes          : Project.ProjectType.values(),
+                projectTypes          : ProjectType.values(),
                 seqTypes              : SeqType.all.sort { it.displayNameWithLibraryLayout },
                 speciesWithStrains    : SpeciesWithStrain.all.sort { it.displayString },
                 storagePeriod         : StoragePeriod.values(),
                 availableRoles        : ProjectRole.findAll(),
-                sequencingCenters     : sequencingCenters.unique(),
+                sequencingCenters     : sequencingCenters.unique().sort(),
+                faqProjectTypeLink    : processingOptionService.findOptionAsString(ProcessingOption.OptionName.NOTIFICATION_TEMPLATE_FAQ_PROJECT_TYPE_LINK),
                 cmd                   : cmd,
         ]
     }
@@ -116,8 +117,8 @@ class ProjectRequestController implements CheckAndCall {
         List<ProjectRequest> requestsUserIsInvolved = projectRequestService.getRequestsUserIsInvolved(false)
         List<ProjectRequest> requestsToBeCheckedByUser = projectRequestService.sortRequestToBeHandledByUser(requestsUserIsInvolved)
         return [
-                check     : ProjectRequestTableCommand.fromProjectRequest(requestsToBeCheckedByUser),
-                unresolved: ProjectRequestTableCommand.fromProjectRequest(requestsUserIsInvolved - requestsToBeCheckedByUser),
+                check     : ProjectRequestTableCommand.fromProjectRequest(requestsToBeCheckedByUser, projectRequestService),
+                unresolved: ProjectRequestTableCommand.fromProjectRequest(requestsUserIsInvolved - requestsToBeCheckedByUser, projectRequestService),
         ]
     }
 
@@ -125,14 +126,14 @@ class ProjectRequestController implements CheckAndCall {
     def all() {
         List<ProjectRequest> allProjectRequests = ProjectRequest.list().sort { it.dateCreated }.reverse()
         return [
-                all: ProjectRequestTableCommand.fromProjectRequest(allProjectRequests)
+                all: ProjectRequestTableCommand.fromProjectRequest(allProjectRequests, projectRequestService)
         ]
     }
 
     def resolved() {
         List<ProjectRequest> resolvedProjectRequests = projectRequestService.getRequestsUserIsInvolved(true)
         return [
-                resolved: ProjectRequestTableCommand.fromProjectRequest(resolvedProjectRequests),
+                resolved: ProjectRequestTableCommand.fromProjectRequest(resolvedProjectRequests, projectRequestService),
         ]
     }
 
@@ -152,6 +153,7 @@ class ProjectRequestController implements CheckAndCall {
                 abstractFields               : fieldDefinitions,
                 abstractValues               : abstractValues,
                 projectRequest               : projectRequest,
+                stateDisplayName             : projectRequestStateProvider.getCurrentState(projectRequest).displayName,
         ]
     }
 
@@ -168,7 +170,7 @@ class ProjectRequestController implements CheckAndCall {
         try {
             saveProjectRequest({ it.save(cmd) }, cmd, true)
         } catch (ProjectRequestBeingEditedException e) {
-            flash.message = new FlashMessage(g.message(code: "projectRequest.edit.already") as String, e.message)
+            flash.message =  new FlashMessage(g.message(code: "projectRequest.store.failure") as String, e.message)
         }
     }
 
@@ -177,7 +179,7 @@ class ProjectRequestController implements CheckAndCall {
             ProjectRequestCreationCommand cmdFromProjectRequest = ProjectRequestCreationCommand.fromProjectRequest(cmd.projectRequest)
             saveProjectRequest({ it.save(cmdFromProjectRequest) }, cmdFromProjectRequest, true)
         } catch (ProjectRequestBeingEditedException e) {
-            flash.message = new FlashMessage(g.message(code: "projectRequest.edit.already") as String, e.message)
+            flash.message =  new FlashMessage(g.message(code: "projectRequest.store.failure") as String, e.message)
         }
     }
 
@@ -200,10 +202,11 @@ class ProjectRequestController implements CheckAndCall {
     def edit(ProjectRequest projectRequest) {
         try {
             flash.cmd = projectRequestStateProvider.getCurrentState(projectRequest).edit(projectRequest)
+            redirect(action: ACTION_INDEX)
         } catch (ProjectRequestBeingEditedException e) {
-            flash.message = new FlashMessage(g.message(code: "projectRequest.edit.already") as String, e.message)
+            flash.message =  new FlashMessage(g.message(code: "projectRequest.edit.failure") as String, e.message)
+            redirect(action: ACTION_VIEW, id: projectRequest.id)
         }
-        redirect(action: ACTION_INDEX)
     }
 
     def approve(ApprovalCommand cmd) {
@@ -301,9 +304,9 @@ class ProjectRequestController implements CheckAndCall {
             return
         }
         try {
-            closure(projectRequestStateProvider.getCurrentState(cmd.projectRequest))
+            Long projectRequestId = closure(projectRequestStateProvider.getCurrentState(cmd.projectRequest))
             flash.message = new FlashMessage(g.message(code: "projectRequest.store.success") as String)
-            redirect(redirectView ? [action: ACTION_VIEW, id: cmd.projectRequest.id] : [action: ACTION_UNRESOLVED])
+            redirect(redirectView ? [action: ACTION_VIEW, id: projectRequestId] : [action: ACTION_UNRESOLVED])
             return
         } catch (ValidationException e) {
             flash.message = new FlashMessage(g.message(code: "projectRequest.store.failure") as String, e.errors)
@@ -319,7 +322,7 @@ class ProjectRequestController implements CheckAndCall {
 }
 
 class AbstractFieldCommand implements Validateable {
-    Project.ProjectType projectType
+    ProjectType projectType
     ProjectRequest projectRequest
 
     static constraints = {
@@ -343,7 +346,7 @@ enum StoragePeriod {
 class ProjectRequestCreationCommand implements Validateable {
     ProjectRequest projectRequest
     String name
-    Project.ProjectType projectType
+    ProjectType projectType
     String description
 
     @BindUsing({ ProjectRequestCreationCommand obj, SimpleMapDataBindingSource source ->
@@ -386,7 +389,16 @@ class ProjectRequestCreationCommand implements Validateable {
         }
         endDate nullable: true
         storageUntil nullable: true, validator: { val, obj ->
-            if (obj.storagePeriod == StoragePeriod.USER_DEFINED && !val) {
+            if (obj.storagePeriod == StoragePeriod.USER_DEFINED) {
+                if (!val) {
+                    return "empty"
+                } else if (val < LocalDate.now()) {
+                    return "projectRequest.storageUntil.past"
+                }
+            }
+        }
+        speciesWithStrainList nullable: true, validator: { val, obj ->
+            if (obj.projectType == ProjectType.SEQUENCING && !val) {
                 return "empty"
             }
         }
@@ -396,7 +408,7 @@ class ProjectRequestCreationCommand implements Validateable {
         seqTypes nullable: true
         requesterComment nullable: true, blank: false
         approxNoOfSamples nullable: true, validator: { val, obj ->
-            if (obj.projectType == Project.ProjectType.SEQUENCING && !val) {
+            if (obj.projectType == ProjectType.SEQUENCING && !val) {
                 return "projectRequest.approxNoOfSamples.null"
             }
         }
@@ -510,18 +522,20 @@ class ProjectRequestTableCommand {
     User requester
     Set<ProjectRequestUser> users
     Project project
-    ProjectRequestPersistentState state
+    String currentOwner
+    String stateDisplayName
     String dateCreated
     String lastUpdated
     String name
     Long id
 
-    static List<ProjectRequestTableCommand> fromProjectRequest(List<ProjectRequest> projectRequests) {
+    static List<ProjectRequestTableCommand> fromProjectRequest(List<ProjectRequest> projectRequests, ProjectRequestService service) {
         return projectRequests.collect { ProjectRequest projectRequest ->
             return new ProjectRequestTableCommand(
                     requester: projectRequest.requester,
                     users: projectRequest.users,
-                    state: projectRequest.state,
+                    stateDisplayName: service.projectRequestStateProvider.getCurrentState(projectRequest).displayName,
+                    currentOwner: service.getCurrentOwnerDisplayName(projectRequest),
                     dateCreated: TimeFormats.DATE.getFormattedDate(projectRequest.dateCreated as Date),
                     lastUpdated: TimeFormats.DATE.getFormattedDate(projectRequest.lastUpdated as Date),
                     name: projectRequest.name,

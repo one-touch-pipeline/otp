@@ -86,7 +86,7 @@ class CreateNotificationTextService {
         return messageSourceService.createMessage('notification.template.base', [
                 stepInformation      : stepInformation,
                 seqCenterComment     : buildSeqCenterComment(otrsTicket),
-                emailSenderSalutation: processingOptionService.findOptionAsString(OptionName.EMAIL_SENDER_SALUTATION),
+                emailSenderSalutation: processingOptionService.findOptionAsString(OptionName.HELP_DESK_TEAM_NAME),
                 faq                  : faq,
         ])
     }
@@ -273,7 +273,7 @@ class CreateNotificationTextService {
         }
         if (samplePairs[false]) {
             message += '\n' + messageSourceService.createMessage("notification.template.alignment.noFurtherProcessing", [
-                    emailSenderSalutation : processingOptionService.findOptionAsString(OptionName.EMAIL_SENDER_SALUTATION),
+                    emailSenderSalutation : processingOptionService.findOptionAsString(OptionName.HELP_DESK_TEAM_NAME),
                     samplePairsWontProcess: getSamplePairRepresentation(samplePairs[false]*.samplePair.findAll {
                         !it.processingDisabled
                     }),
@@ -460,7 +460,7 @@ class CreateNotificationTextService {
             message += '\n' + messageSourceService.createMessage("notification.template.step.notProcessed", [
                     notificationSubject    : notificationStep.notificationSubject,
                     samplePairsNotProcessed: getSamplePairRepresentation(samplePairsNotProcessed),
-                    emailSenderSalutation  : processingOptionService.findOptionAsString(OptionName.EMAIL_SENDER_SALUTATION),
+                    emailSenderSalutation  : processingOptionService.findOptionAsString(OptionName.HELP_DESK_TEAM_NAME),
             ])
         }
 

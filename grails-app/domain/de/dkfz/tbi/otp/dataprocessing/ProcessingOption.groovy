@@ -403,10 +403,6 @@ class ProcessingOption implements Entity {
                 "Email address that is used to send emails",
                 Necessity.REQUIRED, null, TypeValidators.MAIL
         ),
-        EMAIL_SENDER_SALUTATION(
-                "The name and optionally email of the helpdesk team, to be used in the middle of sentences",
-                Necessity.OPTIONAL, "OTP team", TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
-        ),
         EMAIL_TEXT_REASON_DEACTIVATED_USERS(
                 "A reason which will be printed in an email to the PI, which informs about deactivated users.",
                 Necessity.OPTIONAL, "", TypeValidators.MULTI_LINE_TEXT
@@ -425,7 +421,14 @@ class ProcessingOption implements Entity {
                 "Link to FAQs",
                 Necessity.OPTIONAL, "", TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
         ),
-
+        NOTIFICATION_TEMPLATE_FAQ_PROJECT_TYPE_LINK(
+                "Link to FAQ explaining the project types",
+                Necessity.OPTIONAL, "", TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
+        ),
+        HELP_DESK_TEAM_NAME(
+                "The name and optionally email of the helpdesk team, to be used in the middle of sentences",
+                Necessity.OPTIONAL, "OTP team", TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
+        ),
         BLACKLIST_IMPORT_SOURCE_NOTIFICATION(
                 "Comma separated list of path prefixes which are ignored in the import source notification",
                 Necessity.OPTIONAL, "", TypeValidators.SINGLE_LINE_TEXT_OPTIONAL

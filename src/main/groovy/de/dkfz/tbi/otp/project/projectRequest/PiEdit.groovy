@@ -36,6 +36,8 @@ class PiEdit implements ProjectRequestState {
     @Autowired
     ProjectRequestPersistentStateService projectRequestPersistentStateService
 
+    String displayName = "projectRequestState.displayName.piEdit"
+
     @Override
     List<ProjectRequestAction> getIndexActions(ProjectRequest projectRequest) {
         User currentUser = securityService.currentUserAsUser

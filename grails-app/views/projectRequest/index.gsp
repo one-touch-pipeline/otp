@@ -56,7 +56,14 @@
         <div class="form-group row">
             <div class="col-sm-2">
                 <label class="col-form-label" for="projectType">${g.message(code: "project.projectType")}*</label>
-                <i class="helper-icon bi bi-question-circle-fill" title="${g.message(code: "projectRequest.projectType.detail")}"></i>
+                <g:if test="${faqProjectTypeLink}">
+                    <a href="${faqProjectTypeLink}" target="_blank">
+                        <i class="helper-icon bi bi-question-circle-fill" title="${g.message(code: "projectRequest.projectType.detail.FAQ.exists")}"></i>
+                    </a>
+                </g:if>
+                <g:else>
+                    <i class="helper-icon bi bi-question-circle-fill" title="${g.message(code: "projectRequest.projectType.detail")}"></i>
+                </g:else>
             </div>
 
             <div class="col-sm-10">
@@ -181,7 +188,7 @@
         <!-- Species [with Strain]-->
         <div class="form-group row">
             <div class="col-sm-2">
-                <label class="col-form-label" for="speciesWithStrainList">${g.message(code: "project.speciesWithStrain")}</label>
+                <label class="col-form-label" for="speciesWithStrainList" id="speciesWithStrainLabel">${g.message(code: "project.speciesWithStrain")}</label>
                 <i class="helper-icon bi bi-question-circle-fill" title="${g.message(code: "projectRequest.speciesWithStrain.detail")}"></i>
             </div>
 

@@ -30,6 +30,7 @@ import de.dkfz.tbi.otp.domainFactory.UserDomainFactory
 import de.dkfz.tbi.otp.project.*
 import de.dkfz.tbi.otp.security.SecurityService
 import de.dkfz.tbi.otp.security.User
+import de.dkfz.tbi.otp.utils.MessageSourceService
 
 @SuppressWarnings('ExplicitFlushForDeleteRule')
 @SuppressWarnings('ExplicitFlushForSaveRule')
@@ -45,6 +46,7 @@ class ApprovedSpec extends Specification implements UserDomainFactory, DataTest 
         ]
     }
 
+    MessageSourceService messageSourceService
     SecurityService securityService
     ProjectRequestService projectRequestService
     ProjectRequestStateProvider projectRequestStateProvider
@@ -53,14 +55,15 @@ class ApprovedSpec extends Specification implements UserDomainFactory, DataTest 
     CommentService commentService
 
     void setup() {
+        messageSourceService = Mock(MessageSourceService)
         securityService = Mock(SecurityService)
         projectRequestService = Mock(ProjectRequestService)
         projectRequestStateProvider = Mock(ProjectRequestStateProvider)
         projectRequestPersistentStateService = Mock(ProjectRequestPersistentStateService)
         commentService = Mock(CommentService)
         state = new Approved(securityService: securityService, projectRequestService: projectRequestService,
-                projectRequestStateProvider: projectRequestStateProvider, projectRequestPersistentStateService: projectRequestPersistentStateService,
-                commentService: commentService)
+                projectRequestStateProvider: projectRequestStateProvider, commentService: commentService,
+                messageSourceService: messageSourceService, projectRequestPersistentStateService: projectRequestPersistentStateService)
     }
 
     void "reject"() {
@@ -92,6 +95,7 @@ class ApprovedSpec extends Specification implements UserDomainFactory, DataTest 
         state.edit(projectRequest)
 
         then:
+        1 * messageSourceService.createMessage(_) >> "error"
         1 * securityService.currentUserAsUser >> requester
 
         and:
@@ -128,9 +132,12 @@ class ApprovedSpec extends Specification implements UserDomainFactory, DataTest 
         state.save(cmd)
 
         then:
-        thrown ProjectRequestBeingEditedException
+        1 * messageSourceService.createMessage(_) >> "error"
         1 * securityService.currentUserAsUser >> requester
         0 * _
+
+        and:
+        thrown ProjectRequestBeingEditedException
     }
 
     void "save should proceed if user is current owner"() {

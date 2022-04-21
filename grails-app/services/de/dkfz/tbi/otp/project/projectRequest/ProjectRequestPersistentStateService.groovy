@@ -36,15 +36,15 @@ class ProjectRequestPersistentStateService {
     @Autowired
     ProjectRequestStateProvider projectRequestStateProvider
 
-    void setCurrentOwner(ProjectRequestPersistentState projectRequestPersistentState, User user) {
-        if (projectRequestPersistentState.currentOwner != user) {
-            projectRequestPersistentState.currentOwner = user
-            saveProjectRequestPersistentState(projectRequestPersistentState)
+    void setCurrentOwner(ProjectRequestPersistentState state, User user) {
+        if (state.currentOwner != user) {
+            state.currentOwner = user
+            saveProjectRequestPersistentState(state)
         }
     }
 
-    void removeCurrentOwner(ProjectRequestPersistentState projectRequestPersistentState) {
-        setCurrentOwner(projectRequestPersistentState, null)
+    void removeCurrentOwner(ProjectRequestPersistentState state) {
+        setCurrentOwner(state, null)
     }
 
     ProjectRequestPersistentState saveProjectRequestPersistentStateForProjectRequest(
@@ -58,42 +58,42 @@ class ProjectRequestPersistentStateService {
                 usersThatAlreadyApproved: [] as Set,
                 usersThatNeedToApprove  : usersThatNeedToApprove as Set,
         ]
-        ProjectRequestPersistentState projectRequestPersistentState
+        ProjectRequestPersistentState state
         if (projectRequest?.state) {
             InvokerHelper.setProperties(projectRequest.state, projectRequestStateParameters)
-            projectRequestPersistentState = projectRequest.state
+            state = projectRequest.state
         } else {
-            projectRequestPersistentState = new ProjectRequestPersistentState(projectRequestStateParameters)
-            saveProjectRequestPersistentState(projectRequestPersistentState)
+            state = new ProjectRequestPersistentState(projectRequestStateParameters)
+            saveProjectRequestPersistentState(state)
         }
-        return projectRequestPersistentState
+        return state
     }
 
-    ProjectRequestPersistentState saveProjectRequestPersistentState(ProjectRequestPersistentState projectRequestPersistentState) {
-        return projectRequestPersistentState.save(flush: true)
+    ProjectRequestPersistentState saveProjectRequestPersistentState(ProjectRequestPersistentState state) {
+        return state.save(flush: true)
     }
 
-    void approveUser(ProjectRequestPersistentState projectRequestPersistentState, User user) {
-        User userThatApproves = CollectionUtils.atMostOneElement(projectRequestPersistentState.usersThatNeedToApprove.findAll { it == user })
+    void approveUser(ProjectRequestPersistentState state, User user) {
+        User userThatApproves = CollectionUtils.atMostOneElement(state.usersThatNeedToApprove.findAll { it == user })
         assert userThatApproves: "User doesn't need to approve this request."
-        projectRequestPersistentState.usersThatNeedToApprove.remove(userThatApproves)
-        projectRequestPersistentState.usersThatAlreadyApproved.add(userThatApproves)
-        saveProjectRequestPersistentState(projectRequestPersistentState)
+        state.usersThatNeedToApprove.remove(userThatApproves)
+        state.usersThatAlreadyApproved.add(userThatApproves)
+        saveProjectRequestPersistentState(state)
     }
 
-    static List<User> getAllProjectRequestAuthorities(ProjectRequestPersistentState projectRequestPersistentState) {
-        List<User> allAuthorities = (projectRequestPersistentState.usersThatNeedToApprove as List) ?: []
-        if (projectRequestPersistentState.usersThatAlreadyApproved) {
-            allAuthorities.addAll(projectRequestPersistentState.usersThatAlreadyApproved)
+    static List<User> getAllProjectRequestAuthorities(ProjectRequestPersistentState state) {
+        List<User> allAuthorities = (state.usersThatNeedToApprove as List) ?: []
+        if (state.usersThatAlreadyApproved) {
+            allAuthorities.addAll(state.usersThatAlreadyApproved)
         }
         return allAuthorities
     }
 
-    boolean allProjectRequestUsersApproved(ProjectRequestPersistentState projectRequestPersistentState) {
-        return projectRequestPersistentState.usersThatNeedToApprove.empty
+    boolean allProjectRequestUsersApproved(ProjectRequestPersistentState state) {
+        return state.usersThatNeedToApprove.empty
     }
 
-    void deleteProjectRequestState(ProjectRequestPersistentState projectRequestPersistentState) {
-        projectRequestPersistentState.delete(flush: true)
+    void deleteProjectRequestState(ProjectRequestPersistentState state) {
+        state.delete(flush: true)
     }
 }

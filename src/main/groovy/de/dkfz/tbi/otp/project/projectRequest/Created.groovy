@@ -30,6 +30,8 @@ import javax.naming.OperationNotSupportedException
 @Component
 class Created implements ProjectRequestState {
 
+    String displayName = "projectRequestState.displayName.created"
+
     @Override
     List<ProjectRequestAction> getIndexActions(ProjectRequest projectRequest) {
         return []

@@ -175,7 +175,7 @@ class ProjectRequestService {
         String body = messageSourceService.createMessage("notification.projectRequest.submit.body", [
                 link         : getProjectRequestLink(projectRequest),
                 requester    : "${requester.username} (${requester.realName})",
-                teamSignature: processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_SENDER_SALUTATION),
+                teamSignature: processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME),
         ])
         mailHelperService.sendEmail(subject, body, recipient, ccs)
     }
@@ -196,7 +196,7 @@ class ProjectRequestService {
                 requester    : "${requester.username} (${requester.realName})",
                 comment      : rejectComment,
                 link         : getProjectRequestLink(projectRequest),
-                teamSignature: processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_SENDER_SALUTATION),
+                teamSignature: processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME),
         ])
         mailHelperService.sendEmail(subject, body, recipient, ccs)
     }
@@ -212,7 +212,7 @@ class ProjectRequestService {
                 requester         : "${requester.username} (${requester.realName})",
                 projectName       : projectRequest.name,
                 link              : getProjectRequestLink(projectRequest),
-                teamSignature     : processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_SENDER_SALUTATION),
+                teamSignature     : processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME),
         ])
         mailHelperService.sendEmail(subject, body, recipient, ccs)
     }
@@ -228,7 +228,7 @@ class ProjectRequestService {
                 projectAuthority: securityService.currentUserAsUser.username,
                 comment         : rejectComment,
                 link            : getProjectRequestLink(projectRequest),
-                teamSignature   : processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_SENDER_SALUTATION),
+                teamSignature   : processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME),
         ])
         mailHelperService.sendEmail(subject, body, recipient, ccs)
     }
@@ -240,7 +240,7 @@ class ProjectRequestService {
         String body = messageSourceService.createMessage("notification.projectRequest.approved.body", [
                 requester    : "${requester.username} (${requester.realName})",
                 projectName  : projectRequest.name,
-                teamSignature: processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_SENDER_SALUTATION),
+                teamSignature: processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME),
         ])
         mailHelperService.sendEmail(subject, body, recipient)
     }
@@ -255,7 +255,7 @@ class ProjectRequestService {
                 requester       : "${requester.username} (${requester.realName})",
                 projectName     : projectRequest.name,
                 projectAuthority: securityService.currentUserAsUser.username,
-                teamSignature   : processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_SENDER_SALUTATION),
+                teamSignature   : processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME),
         ])
         mailHelperService.sendEmail(subject, body, recipient, ccs)
     }
@@ -271,7 +271,7 @@ class ProjectRequestService {
                 projectAuthorities: allProjectAuthorities*.username.join(", "),
                 projectName       : projectRequest.name,
                 deletingUser      : securityService.currentUserAsUser,
-                teamSignature     : processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_SENDER_SALUTATION),
+                teamSignature     : processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME),
         ])
         mailHelperService.sendEmail(subject, body, recipient)
     }
@@ -283,7 +283,7 @@ class ProjectRequestService {
         String body = messageSourceService.createMessage("notification.projectRequest.draft.body", [
                 requester    : "${requester.username} (${requester.realName})",
                 link         : getProjectRequestLink(projectRequest),
-                teamSignature: processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_SENDER_SALUTATION),
+                teamSignature: processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME),
         ])
         mailHelperService.sendEmail(subject, body, recipient)
     }
@@ -295,7 +295,7 @@ class ProjectRequestService {
         String body = messageSourceService.createMessage("notification.projectRequest.draftDelete.body", [
                 requester    : "${requester.username} (${requester.realName})",
                 projectName  : projectRequest.name,
-                teamSignature: processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_SENDER_SALUTATION),
+                teamSignature: processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME),
         ])
         mailHelperService.sendEmail(subject, body, recipient)
     }
@@ -310,7 +310,7 @@ class ProjectRequestService {
                 projectAuthority  : securityService.currentUserAsUser.username,
                 projectName       : projectRequest.name,
                 link              : getProjectRequestLink(projectRequest),
-                teamSignature     : processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_SENDER_SALUTATION),
+                teamSignature     : processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME),
         ])
         mailHelperService.sendEmail(subject, body, recipient, ccs)
     }
@@ -342,7 +342,7 @@ class ProjectRequestService {
                 userManagementLink        : userManagementLink,
                 clusterTicketingSystemMail: processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_CLUSTER_ADMINISTRATION),
                 ticketingSystemMail       : processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_TICKET_SYSTEM),
-                teamSignature             : processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_SENDER_SALUTATION),
+                teamSignature             : processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME),
         ])
         mailHelperService.sendEmail(subject, body, recipient, ccs)
     }
@@ -354,6 +354,18 @@ class ProjectRequestService {
                 absolute: true,
                 id: projectRequest.id,
         )
+    }
+
+    String getCurrentOwnerDisplayName(ProjectRequest projectRequest) {
+        if (projectRequest?.state?.currentOwner) {
+            User currentOwner = projectRequest.state.currentOwner
+            List<String> currentOwnerAuthorities = currentOwner.authorities*.authority
+            List<String> containedAdministrativeRoles = Role.ADMINISTRATIVE_ROLES.findAll { currentOwnerAuthorities.contains(it) }
+            return containedAdministrativeRoles ?
+                    processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME) :
+                    projectRequest.state.currentOwner.username
+        }
+        return "-"
     }
 
     private static LocalDate resolveStoragePeriodToLocalDate(StoragePeriod storagePeriod, LocalDate given) {

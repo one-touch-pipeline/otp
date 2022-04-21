@@ -87,7 +87,7 @@ class NotificationDigestService {
 
         return messageSourceService.createMessage('notification.template.digest', [
                 content              : content.join("\n\n"),
-                emailSenderSalutation: processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_SENDER_SALUTATION),
+                emailSenderSalutation: processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME),
                 faq                  : createNotificationTextService.faq,
         ])
     }

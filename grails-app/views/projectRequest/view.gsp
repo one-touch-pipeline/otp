@@ -36,7 +36,9 @@
 <body>
 <div class="container-fluid otp-main-container">
     <g:render template="templates/tabs"/>
-    <h3 class="mb-3">${g.message(code: "projectRequest.view.title", args: [projectRequest.name])} (${projectRequest.state.beanName})</h3>
+    <h3 class="mb-3">${g.message(code: "projectRequest.view.title", args: [projectRequest.name])}
+        <span class="h4">(${g.message(code: stateDisplayName)})</span>
+    </h3>
 
     <g:form method="POST" useToken="true">
         <g:hiddenField name="projectRequest.id" value="${projectRequest.id}"/>
@@ -44,7 +46,7 @@
             <otp:annotation type="info">
                 <g:message code="projectRequest.view.completed"/>:
                 <strong>
-                    ${projectRequest.state.beanName}
+                    ${g.message(code: stateDisplayName)}
                 </strong>
             </otp:annotation>
         </g:if>

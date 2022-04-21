@@ -72,7 +72,7 @@ class QcTrafficLightNotificationService {
         return messageSourceService.createMessage("notification.template.alignment.qcTrafficWarningMessage", [
                 bamFile              : bamFile,
                 link                 : getAlignmentQualityOverviewLink(bamFile.project, bamFile.seqType),
-                emailSenderSalutation: processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_SENDER_SALUTATION),
+                emailSenderSalutation: processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME),
                 thresholdPage        : getThresholdPageLink(bamFile.project),
                 faq                  : createNotificationTextService.faq,
         ])

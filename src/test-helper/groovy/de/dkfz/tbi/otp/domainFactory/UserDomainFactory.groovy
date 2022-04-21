@@ -21,10 +21,11 @@
  */
 package de.dkfz.tbi.otp.domainFactory
 
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.ProjectRole
 import de.dkfz.tbi.otp.ngsdata.UserProjectRole
 import de.dkfz.tbi.otp.project.*
-import de.dkfz.tbi.otp.security.User
+import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 trait UserDomainFactory implements DomainFactoryCore {
@@ -42,6 +43,13 @@ trait UserDomainFactory implements DomainFactoryCore {
     ProjectRole createProjectRole(Map properties = [:]) {
         return createDomainObject(ProjectRole, [
                 name: "roleName_${nextId}",
+        ], properties)
+    }
+
+    UserRole createUserRole(Map properties = [:]) {
+        return createDomainObject(UserRole, [
+                user: createUser(),
+                role: DomainFactory.createRoleLazy(authority: "Role_${nextId}"),
         ], properties)
     }
 

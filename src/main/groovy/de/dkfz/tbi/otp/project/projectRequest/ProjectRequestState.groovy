@@ -26,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.project.ProjectRequest
 import de.dkfz.tbi.otp.security.SecurityService
+import de.dkfz.tbi.otp.utils.MessageSourceService
 
 trait ProjectRequestState {
 
@@ -39,7 +40,12 @@ trait ProjectRequestState {
     SecurityService securityService
 
     @Autowired
+    MessageSourceService messageSourceService
+
+    @Autowired
     CommentService commentService
+
+    abstract String getDisplayName()
 
     abstract List<ProjectRequestAction> getIndexActions(ProjectRequest projectRequest)
 

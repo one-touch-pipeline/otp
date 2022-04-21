@@ -431,7 +431,7 @@ class DomainFactory {
 
     static ProcessingOption createProcessingOptionForEmailSenderSalutation(String message = "the service team${counter++}") {
         createProcessingOptionLazy(
-                name: OptionName.EMAIL_SENDER_SALUTATION,
+                name: OptionName.HELP_DESK_TEAM_NAME,
                 type: null,
                 project: null,
                 value: message,

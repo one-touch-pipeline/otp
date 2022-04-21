@@ -37,6 +37,8 @@ class Approved implements ProjectRequestState {
     @Autowired
     ProjectRequestPersistentStateService projectRequestPersistentStateService
 
+    String displayName = "projectRequestState.displayName.approved"
+
     @Override
     List<ProjectRequestAction> getIndexActions(ProjectRequest projectRequest) {
         User currentUser = securityService.currentUserAsUser
@@ -75,7 +77,7 @@ class Approved implements ProjectRequestState {
             projectRequestPersistentStateService.setCurrentOwner(projectRequest.state, currentUser)
             return ProjectRequestCreationCommand.fromProjectRequest(projectRequest)
         }
-        throw new ProjectRequestBeingEditedException()
+        throw new ProjectRequestBeingEditedException(messageSourceService.createMessage("projectRequest.edit.already"))
     }
 
     @Override
@@ -88,7 +90,7 @@ class Approved implements ProjectRequestState {
         if (cmd.projectRequest.state.currentOwner == securityService.currentUserAsUser) {
             return projectRequestService.saveProjectRequestFromCommand(cmd).id
         }
-        throw new ProjectRequestBeingEditedException()
+        throw new ProjectRequestBeingEditedException(messageSourceService.createMessage("projectRequest.edit.already"))
     }
 
     @Override

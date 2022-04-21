@@ -110,7 +110,7 @@ class MailHelperService {
         User currentUser = securityService.currentUserAsUser
 
         if (rolesService.isAdministrativeUser(currentUser)) {
-            return processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_SENDER_SALUTATION)
+            return processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME)
         }
 
         return currentUser.realName

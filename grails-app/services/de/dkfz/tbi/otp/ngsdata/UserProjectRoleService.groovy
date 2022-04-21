@@ -181,7 +181,7 @@ class UserProjectRoleService {
 
         String clusterAdministrationEmail = processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_CLUSTER_ADMINISTRATION)
         String clusterName = processingOptionService.findOptionAsString(ProcessingOption.OptionName.CLUSTER_NAME)
-        String supportTeamName = processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_SENDER_SALUTATION)
+        String supportTeamName = processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME)
         String body = messageSourceService.createMessage("projectUser.notification.fileAccessChange.body", [
                 username                  : user.realName,
                 requester                 : mailHelperService.senderName,
@@ -260,7 +260,7 @@ class UserProjectRoleService {
         String body
 
         if (userIsSubmitter && executingUserIsAdministrativeUser) {
-            String supportTeamName = processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_SENDER_SALUTATION)
+            String supportTeamName = processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME)
             body = messageSourceService.createMessage("projectUser.notification.newProjectMember.body.administrativeUserAddedSubmitter", [
                     userIdentifier       : userProjectRole.user.realName ?: userProjectRole.user.username,
                     projectRole          : projectRoleNames.join(", "),

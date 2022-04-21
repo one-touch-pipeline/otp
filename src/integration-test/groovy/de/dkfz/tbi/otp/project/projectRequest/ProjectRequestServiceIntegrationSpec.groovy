@@ -33,6 +33,7 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.ProjectFieldsDomainFactory
 import de.dkfz.tbi.otp.domainFactory.UserDomainFactory
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.project.*
 import de.dkfz.tbi.otp.project.additionalField.*
 import de.dkfz.tbi.otp.searchability.Keyword
@@ -56,7 +57,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
     String emailSenderSalutation
 
     void setup() {
-        emailSenderSalutation = processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_SENDER_SALUTATION)
+        emailSenderSalutation = processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME)
     }
 
     void "sendSubmitEmail"() {
@@ -390,7 +391,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         1 * projectRequestService.processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_TICKET_SYSTEM) >> ticketingSystemMail
         1 * projectRequestService.processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_CLUSTER_ADMINISTRATION) >> clusterTicketingSystemMail
         1 * projectRequestService.processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_PROJECT_CREATION_FREETEXT) >> additionalText
-        1 * projectRequestService.processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_SENDER_SALUTATION) >> emailSenderSalutation
+        1 * projectRequestService.processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME) >> emailSenderSalutation
         2 * projectRequestService.linkGenerator.link(_) >> link
         1 * projectRequestService.messageSourceService.createMessage(_, [projectName: project.name]) >> subject
         1 * projectRequestService.messageSourceService.createMessage(_, [
@@ -772,5 +773,30 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         10         | false      | Project.ProjectType.USER_MANAGEMENT | ProjectPageType.PROJECT_CREATION
         11         | false      | Project.ProjectType.SEQUENCING      | ProjectPageType.PROJECT_CONFIG
         12         | false      | Project.ProjectType.USER_MANAGEMENT | ProjectPageType.PROJECT_CONFIG
+    }
+
+    void "getCurrentOwnerDisplayName, should return real name if user is not an admin user"() {
+        when:
+        User user = createUser()
+        createUserRole()
+        ProjectRequest projectRequest = createProjectRequest([state: createProjectRequestPersistentState([currentOwner: user])])
+
+        then:
+        projectRequestService.getCurrentOwnerDisplayName(projectRequest) == user.username
+    }
+
+    @Unroll
+    void "getCurrentOwnerDisplayName, should return masked name if user is admin"() {
+        when:
+        User user = createUser()
+        createUserRole([user: user, role: DomainFactory.createRoleLazy([authority: authority])])
+        ProjectRequest projectRequest = createProjectRequest([state: createProjectRequestPersistentState([currentOwner: user])])
+
+        then:
+        projectRequestService.getCurrentOwnerDisplayName(projectRequest) != user.username
+        projectRequestService.getCurrentOwnerDisplayName(projectRequest) != user.realName
+
+        where:
+        authority << Role.ADMINISTRATIVE_ROLES
     }
 }

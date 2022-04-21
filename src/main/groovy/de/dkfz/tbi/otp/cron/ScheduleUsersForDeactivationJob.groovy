@@ -102,7 +102,7 @@ class ScheduleUsersForDeactivationJob extends AbstractScheduledJob {
     }
 
     String getOtpServiceSalutation() {
-        return processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_SENDER_SALUTATION)
+        return processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME)
     }
 
     Date getPlannedDeactivationDate() {
@@ -198,7 +198,7 @@ class ScheduleUsersForDeactivationJob extends AbstractScheduledJob {
         String body = messageSourceService.createMessage("scheduledUsersForDeactivationJob.notification.userReactivated.body", [
                 addressedUser        : "${projectAuthority.realName}",
                 reactivatedUser      : "${reactivatedUser.realName} (${reactivatedUser.username})",
-                supportTeamSalutation: processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_SENDER_SALUTATION),
+                supportTeamSalutation: processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME),
                 projects             : projects*.name.sort().join('\n\t- '),
         ])
         mailHelperService.sendEmail(subject, body, recipient, ccs)

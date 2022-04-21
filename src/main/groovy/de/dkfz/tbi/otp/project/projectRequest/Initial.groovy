@@ -34,6 +34,8 @@ class Initial implements ProjectRequestState {
     @Autowired
     ProjectRequestPersistentStateService projectRequestPersistentStateService
 
+    String displayName = "projectRequestState.displayName.initial"
+
     @Override
     List<ProjectRequestAction> getIndexActions(ProjectRequest projectRequest) {
         return [ProjectRequestAction.SUBMIT_INDEX, ProjectRequestAction.SAVE_DRAFT]

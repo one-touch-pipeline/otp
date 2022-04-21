@@ -46,11 +46,11 @@
                     <g:link action="view" id="${projectRequest.id}">${projectRequest.name}</g:link>
                 </td>
                 <td>
-                    ${projectRequest.state.beanName}
+                    ${g.message(code: projectRequest.stateDisplayName)}
                 </td>
                 <td>
-                    <g:if test="${projectRequest.state.currentOwner}">
-                        ${projectRequest.state.currentOwner}
+                    <g:if test="${projectRequest.currentOwner}">
+                        ${projectRequest.currentOwner}
                     </g:if>
                     <g:else>
                         -

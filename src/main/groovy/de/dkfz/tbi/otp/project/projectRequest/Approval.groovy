@@ -44,6 +44,8 @@ class Approval implements ProjectRequestState {
     @Autowired
     ProjectRequestPersistentStateService projectRequestPersistentStateService
 
+    String displayName = "projectRequestState.displayName.approval"
+
     @Override
     List<ProjectRequestAction> getIndexActions(ProjectRequest projectRequest) {
         return []

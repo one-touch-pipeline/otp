@@ -110,7 +110,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         }
 
         findOrCreateProcessingOption(
-                name: ProcessingOption.OptionName.EMAIL_SENDER_SALUTATION,
+                name: ProcessingOption.OptionName.HELP_DESK_TEAM_NAME,
                 type: null,
                 project: null,
                 value: EMAIL_SENDER_SALUTATION,

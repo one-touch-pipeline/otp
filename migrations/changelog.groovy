@@ -645,4 +645,8 @@ databaseChangeLog = {
     }
 
     include file: 'changelogs/2022/otp-1493_project_request_comments.groovy'
+
+    changeSet(author: "jrausch", id: "otp-1497") {
+        sqlFile(path: 'changelogs/2022/otp-1497.sql')
+    }
 }

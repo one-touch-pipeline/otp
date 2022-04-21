@@ -53,7 +53,7 @@ class MailHelperServiceIntegrationSpec extends Specification implements DomainFa
 
     void setupData() {
         findOrCreateProcessingOption(name: ProcessingOption.OptionName.EMAIL_TICKET_SYSTEM, value: TICKET_EMAIL)
-        findOrCreateProcessingOption(name: ProcessingOption.OptionName.EMAIL_SENDER_SALUTATION, value: SENDER_SALUTATION)
+        findOrCreateProcessingOption(name: ProcessingOption.OptionName.HELP_DESK_TEAM_NAME, value: SENDER_SALUTATION)
 
         mailHelperService = new MailHelperService()
         mailHelperService.processingOptionService = new ProcessingOptionService()

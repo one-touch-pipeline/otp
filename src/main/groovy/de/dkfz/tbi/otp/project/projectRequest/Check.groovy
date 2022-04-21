@@ -42,6 +42,8 @@ class Check implements ProjectRequestState {
     @Autowired
     ProjectRequestPersistentStateService projectRequestPersistentStateService
 
+    String displayName = "projectRequestState.displayName.check"
+
     @Override
     List<ProjectRequestAction> getIndexActions(ProjectRequest projectRequest) {
         User currentUser = securityService.currentUserAsUser
@@ -76,7 +78,7 @@ class Check implements ProjectRequestState {
             projectRequestPersistentStateService.setCurrentOwner(projectRequest.state, currentUser)
             return ProjectRequestCreationCommand.fromProjectRequest(projectRequest)
         }
-        throw new ProjectRequestBeingEditedException()
+        throw new ProjectRequestBeingEditedException(messageSourceService.createMessage("projectRequest.edit.already"))
     }
 
     @Override
@@ -89,7 +91,7 @@ class Check implements ProjectRequestState {
         if (securityService.currentUserAsUser == cmd.projectRequest.state.currentOwner) {
             return projectRequestService.saveProjectRequestFromCommand(cmd).id
         }
-        throw new ProjectRequestBeingEditedException()
+        throw new ProjectRequestBeingEditedException(messageSourceService.createMessage("projectRequest.edit.already"))
     }
 
     @Override

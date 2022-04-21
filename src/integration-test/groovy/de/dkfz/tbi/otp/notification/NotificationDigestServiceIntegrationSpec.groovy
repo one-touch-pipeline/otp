@@ -54,7 +54,7 @@ class NotificationDigestServiceIntegrationSpec extends Specification implements 
 
     void setupData() {
         DomainFactory.createProcessingOptionLazy(name: ProcessingOption.OptionName.TICKET_SYSTEM_NUMBER_PREFIX, value: "prefix")
-        DomainFactory.createProcessingOptionLazy(name: ProcessingOption.OptionName.EMAIL_SENDER_SALUTATION, value: SALUTATION)
+        DomainFactory.createProcessingOptionLazy(name: ProcessingOption.OptionName.HELP_DESK_TEAM_NAME, value: SALUTATION)
     }
 
     NotificationCommand createNotificationCommand(Map properties = [:]) {

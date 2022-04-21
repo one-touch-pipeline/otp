@@ -125,6 +125,9 @@ $(() => {
   const seqTypes = $('select#seqTypes');
   const seqTypesLabel = $('label#seqTypesLabel');
 
+  const speciesWithStrain = $('select#speciesWithStrainList');
+  const speciesWithStrainLabel = $('label#speciesWithStrainLabel');
+
   const numberOfAdditionFields = $('#numberOfAdditionFields').val();
   const additionFieldRequiredForSequencing = [];
   const additionFieldRequiredForUserManagement = [];
@@ -136,6 +139,7 @@ $(() => {
   $('select#projectType').on('change', (e) => {
     setAdditionalFields($(e.target).val(), $('#projectRequestId').val());
     if ($(e.target).val() === 'SEQUENCING') {
+      addRequired(speciesWithStrain, speciesWithStrainLabel);
       addRequired(numberSamples, numberSamplesLabel);
       addRequired(seqTypes, seqTypesLabel);
       additionFieldRequiredForSequencing.forEach((currentValue, index) => {
@@ -146,6 +150,7 @@ $(() => {
         }
       });
     } else if ($(e.target).val() === 'USER_MANAGEMENT') {
+      removeRequired(speciesWithStrain, speciesWithStrainLabel);
       removeRequired(numberSamples, numberSamplesLabel);
       removeRequired(seqTypes, seqTypesLabel);
       additionFieldRequiredForUserManagement.forEach((currentValue, index) => {

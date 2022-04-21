@@ -108,7 +108,7 @@ class DeactivateUsersJob extends AbstractScheduledJob {
                 addressedUser          : "${projectAuthority.realName}",
                 deactivatedUser        : "${deactivatedUser.realName} (${deactivatedUser.username})",
                 deactivationGracePeriod: processingOptionService.findOptionAsString(ProcessingOption.OptionName.LDAP_ACCOUNT_DEACTIVATION_GRACE_PERIOD),
-                supportTeamSalutation  : processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_SENDER_SALUTATION),
+                supportTeamSalutation  : processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME),
                 projects               : projects*.name.sort().join('\n\t- '),
         ])
         mailHelperService.sendEmail(subject, body, recipient, ccs)

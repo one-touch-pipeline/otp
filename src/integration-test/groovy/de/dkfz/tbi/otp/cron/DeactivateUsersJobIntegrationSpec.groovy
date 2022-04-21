@@ -117,7 +117,7 @@ class DeactivateUsersJobIntegrationSpec extends Specification implements DomainF
         User user = createUser()
         List<Project> projects = [createProject(), createProject(), createProject()]
         findOrCreateProcessingOption(name: ProcessingOption.OptionName.LDAP_ACCOUNT_DEACTIVATION_GRACE_PERIOD, value: "30")
-        findOrCreateProcessingOption(name: ProcessingOption.OptionName.EMAIL_SENDER_SALUTATION, value: "OTP team")
+        findOrCreateProcessingOption(name: ProcessingOption.OptionName.HELP_DESK_TEAM_NAME, value: "OTP team")
 
         when:
         job.notifyProjectAuthoritiesOfUsersProjects(user)

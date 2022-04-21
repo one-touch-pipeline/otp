@@ -36,6 +36,8 @@ class RequesterEdit implements ProjectRequestState {
     @Autowired
     ProjectRequestPersistentStateService projectRequestPersistentStateService
 
+    String displayName = "projectRequestState.displayName.requesterEdit"
+
     @Override
     List<ProjectRequestAction> getIndexActions(ProjectRequest projectRequest) {
         if (securityService.currentUserAsUser == projectRequest.requester) {
