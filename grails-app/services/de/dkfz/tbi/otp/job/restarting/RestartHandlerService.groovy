@@ -38,6 +38,7 @@ class RestartHandlerService {
 
     void handleRestart(Job job) {
         ProcessingStep step = job.processingStep
+        step.attach()
 
         job.log.debug("Starting auto-restart handler.")
 

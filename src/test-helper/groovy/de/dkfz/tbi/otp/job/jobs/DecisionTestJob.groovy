@@ -32,6 +32,7 @@ import org.springframework.stereotype.*
 @Component
 @Scope("prototype")
 @Slf4j
+@Deprecated
 class DecisionTestJob extends AbstractDecisionJobImpl {
 
     @Override

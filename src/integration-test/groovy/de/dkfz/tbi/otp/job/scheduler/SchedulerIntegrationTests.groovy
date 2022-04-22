@@ -22,8 +22,8 @@
 package de.dkfz.tbi.otp.job.scheduler
 
 import grails.core.GrailsApplication
-import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import org.junit.After
 import org.junit.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -276,6 +276,8 @@ class SchedulerIntegrationTests implements UserAndRoles {
     void testMissingOutputParameter() {
         setupData()
         JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0, startJobBean: "someBean")
+        assertNotNull(jep.save(flush: true))
+        jep.startJob = new StartJobDefinition(name: "start", bean: "testStartJob", plan: jep).save(flush: true)
         assertNotNull(jep.save(flush: true))
         JobDefinition jobDefinition = createTestJob("test", jep)
         jep.firstJob = jobDefinition

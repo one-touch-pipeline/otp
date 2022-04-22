@@ -35,4 +35,10 @@ class SessionUtils {
             closure()
         }
     }
+
+    static <T> T withNewTransaction(Closure<T> closure) {
+        Realm.withNewTransaction {
+            closure()
+        }
+    }
 }

@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.job.jobs.rnaAlignment
 
+import grails.gorm.transactions.NotTransactional
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Scope
@@ -33,6 +34,7 @@ import de.dkfz.tbi.otp.job.jobs.AutoRestartableJob
 import de.dkfz.tbi.otp.job.processing.AbstractEndStateAwareJobImpl
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.ExecuteRoddyCommandService
+import de.dkfz.tbi.otp.utils.SessionUtils
 
 @Component
 @Scope("prototype")
@@ -48,15 +50,18 @@ class LinkRnaAlignmentFilesToFinalDestinationJob extends AbstractEndStateAwareJo
     @Autowired
     LinkFilesToFinalDestinationService linkFilesToFinalDestinationService
 
+    @NotTransactional
     @Override
     void execute() throws Exception {
-        final RnaRoddyBamFile roddyBamFile = processParameterObject
+        SessionUtils.withNewSession {
+            final RnaRoddyBamFile roddyBamFile = processParameterObject
 
-        Realm realm = roddyBamFile.project.realm
-        assert realm : "Realm should not be null"
+            Realm realm = roddyBamFile.project.realm
+            assert realm: "Realm should not be null"
 
-        linkFilesToFinalDestinationService.prepareRoddyBamFile(roddyBamFile)
-        linkFilesToFinalDestinationService.linkToFinalDestinationAndCleanupRna(roddyBamFile, realm)
-        succeed()
+            linkFilesToFinalDestinationService.prepareRoddyBamFile(roddyBamFile)
+            linkFilesToFinalDestinationService.linkToFinalDestinationAndCleanupRna(roddyBamFile, realm)
+            succeed()
+        }
     }
 }

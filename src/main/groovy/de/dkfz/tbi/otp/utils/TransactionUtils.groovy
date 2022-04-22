@@ -23,7 +23,13 @@ package de.dkfz.tbi.otp.utils
 
 import de.dkfz.tbi.otp.ngsdata.Realm
 
+@Deprecated
 class TransactionUtils {
+
+    /**
+     * @Deprecated Use instead {@link SessionUtils#withNewTransaction(Closure)}
+     */
+    @Deprecated
     static <T> T withNewTransaction(Closure<T> closure) {
         Realm.withNewTransaction closure
     }

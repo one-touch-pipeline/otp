@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.job.processing
 
+import grails.gorm.transactions.NotTransactional
 import groovy.util.logging.Slf4j
 
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
@@ -32,6 +33,7 @@ import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
 @Slf4j
 abstract class AbstractMaybeSubmitWaitValidateJob extends AbstractMultiJob {
 
+    @NotTransactional
     @Override
     protected final NextAction execute(final Collection<? extends ClusterJobIdentifier> finishedClusterJobs) throws Throwable {
         if (finishedClusterJobs) {

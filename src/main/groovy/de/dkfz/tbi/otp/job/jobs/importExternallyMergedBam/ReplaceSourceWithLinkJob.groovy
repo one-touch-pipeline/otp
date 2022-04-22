@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.job.jobs.importExternallyMergedBam
 
+import grails.gorm.transactions.NotTransactional
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Scope
@@ -33,6 +34,7 @@ import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.LinkFileUtils
+import de.dkfz.tbi.otp.utils.SessionUtils
 
 import java.nio.file.*
 
@@ -56,48 +58,51 @@ class ReplaceSourceWithLinkJob extends AbstractEndStateAwareJobImpl {
     @Autowired
     FileService fileService
 
+    @NotTransactional
     @Override
     void execute() throws Exception {
-        final ImportProcess importProcess = processParameterObject
-        if (importProcess.linkOperation.replaceSourceWithLink) {
-            importProcess.externallyProcessedMergedBamFiles.each { ExternallyProcessedMergedBamFile epmbf ->
-                Realm realm = epmbf.project.realm
+        SessionUtils.withNewSession {
+            final ImportProcess importProcess = processParameterObject
+            if (importProcess.linkOperation.replaceSourceWithLink) {
+                importProcess.externallyProcessedMergedBamFiles.each { ExternallyProcessedMergedBamFile epmbf ->
+                    Realm realm = epmbf.project.realm
 
-                File sourceBam = new File(epmbf.importedFrom)
-                File sourceBaseDir = sourceBam.parentFile
-                File sourceBai = new File(sourceBaseDir, epmbf.baiFileName)
+                    File sourceBam = new File(epmbf.importedFrom)
+                    File sourceBaseDir = sourceBam.parentFile
+                    File sourceBai = new File(sourceBaseDir, epmbf.baiFileName)
 
-                File targetBam = epmbf.bamFile
-                File targetBai = epmbf.baiFile
-                File targetBaseDir = epmbf.importFolder
+                    File targetBam = epmbf.bamFile
+                    File targetBai = epmbf.baiFile
+                    File targetBaseDir = epmbf.importFolder
 
-                Map linkMap = [:]
-                createLinkMap(sourceBam, targetBam, linkMap)
-                createLinkMap(sourceBai, targetBai, linkMap)
+                    Map linkMap = [:]
+                    createLinkMap(sourceBam, targetBam, linkMap)
+                    createLinkMap(sourceBai, targetBai, linkMap)
 
-                epmbf.furtherFiles.each { String relativePath ->
-                    File sourceFurtherFile = new File(sourceBaseDir, relativePath)
-                    File targetFurtherFile = new File(targetBaseDir, relativePath)
-                    createLinkMap(sourceFurtherFile, targetFurtherFile, linkMap)
-                }
+                    epmbf.furtherFiles.each { String relativePath ->
+                        File sourceFurtherFile = new File(sourceBaseDir, relativePath)
+                        File targetFurtherFile = new File(targetBaseDir, relativePath)
+                        createLinkMap(sourceFurtherFile, targetFurtherFile, linkMap)
+                    }
 
-                Map filteredMap = linkMap.findAll { Path link, Path target ->
-                    link != target
-                }.collectEntries { Path link, Path target ->
-                    [(fileService.toFile(link)): fileService.toFile(target)]
-                }
+                    Map filteredMap = linkMap.findAll { Path link, Path target ->
+                        link != target
+                    }.collectEntries { Path link, Path target ->
+                        [(fileService.toFile(link)): fileService.toFile(target)]
+                    }
 
-                if (filteredMap) {
-                    linkFileUtils.createAndValidateLinks(filteredMap, realm, epmbf.project.unixGroup)
+                    if (filteredMap) {
+                        linkFileUtils.createAndValidateLinks(filteredMap, realm, epmbf.project.unixGroup)
+                    }
                 }
             }
-        }
 
-        ImportProcess.withTransaction {
-            importProcess.state = ImportProcess.State.FINISHED
-            importProcess.save(flush: true)
+            ImportProcess.withTransaction {
+                importProcess.state = ImportProcess.State.FINISHED
+                importProcess.save(flush: true)
+            }
+            succeed()
         }
-        succeed()
     }
 
     protected void createLinkMap(File source, File target, Map linkMap) {

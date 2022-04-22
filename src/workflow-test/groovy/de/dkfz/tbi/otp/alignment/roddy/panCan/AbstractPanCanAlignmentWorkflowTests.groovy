@@ -32,7 +32,6 @@ import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.utils.SessionUtils
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
-
 /**
  * test for PanCanAlignment workflow
  */

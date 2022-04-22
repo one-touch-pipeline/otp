@@ -28,6 +28,7 @@ import de.dkfz.tbi.otp.job.plan.JobDecision
  *
  * @see DecisionJob
  */
+@Deprecated
 abstract class AbstractDecisionJobImpl extends AbstractEndStateAwareJobImpl implements DecisionJob {
     private JobDecision decision
 

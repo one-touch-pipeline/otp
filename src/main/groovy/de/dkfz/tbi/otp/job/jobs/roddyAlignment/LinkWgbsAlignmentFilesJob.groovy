@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
+import grails.gorm.transactions.NotTransactional
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Scope
@@ -31,6 +32,7 @@ import de.dkfz.tbi.otp.dataprocessing.LinkFilesToFinalDestinationService
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.job.processing.AbstractEndStateAwareJobImpl
 import de.dkfz.tbi.otp.ngsdata.Realm
+import de.dkfz.tbi.otp.utils.SessionUtils
 
 /**
  * This is the last job of the PanCan workflow.
@@ -49,16 +51,19 @@ class LinkWgbsAlignmentFilesJob extends AbstractEndStateAwareJobImpl {
     @Autowired
     ConfigService configService
 
+    @NotTransactional
     @Override
     void execute() throws Exception {
-        final RoddyBamFile roddyBamFile = processParameterObject
+        SessionUtils.withNewSession {
+            final RoddyBamFile roddyBamFile = processParameterObject
 
-        Realm realm = roddyBamFile.project.realm
-        assert realm : "Realm should not be null"
+            Realm realm = roddyBamFile.project.realm
+            assert realm: "Realm should not be null"
 
-        linkFilesToFinalDestinationService.prepareRoddyBamFile(roddyBamFile)
-        linkFilesToFinalDestinationService.linkToFinalDestinationAndCleanup(roddyBamFile, realm)
+            linkFilesToFinalDestinationService.prepareRoddyBamFile(roddyBamFile)
+            linkFilesToFinalDestinationService.linkToFinalDestinationAndCleanup(roddyBamFile, realm)
 
-        succeed()
+            succeed()
+        }
     }
 }

@@ -32,6 +32,7 @@ import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.job.restarting.RestartHandlerService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.ExceptionUtils
+import de.dkfz.tbi.otp.utils.SessionUtils
 
 import java.security.SecureRandom
 
@@ -147,38 +148,47 @@ class Scheduler {
                 log.error("Job of type ${job.class} executed without a ProcessingStep being set")
                 throw new ProcessingException("Job executed without a ProcessingStep being set")
             }
-            ProcessingStep step = ProcessingStep.getInstance(job.processingStep.id)
-            // get the last ProcessingStepUpdate
-            List<ProcessingStepUpdate> existingUpdates = ProcessingStepUpdate.findAllByProcessingStep(step)
-            if (existingUpdates.isEmpty()) {
-                log.error("Job of type ${job.class} executed before entering the CREATED state")
-                throw new ProcessingException("Job executed before entering the CREATED state")
-            } else if (existingUpdates.size() > 1) {
-                if (existingUpdates.sort { it.id }.last().state == ExecutionState.FAILURE ||
-                        existingUpdates.sort { it.id }.last().state == ExecutionState.RESTARTED) {
-                    // scheduler is already in failed state - no reason to process
-                    throw new ProcessingException("Job already in failed condition before execution")
+            SessionUtils.withTransaction {
+                ProcessingStep step = ProcessingStep.getInstance(job.processingStep.id)
+                // get the last ProcessingStepUpdate
+                List<ProcessingStepUpdate> existingUpdates = ProcessingStepUpdate.findAllByProcessingStep(step)
+                if (existingUpdates.isEmpty()) {
+                    log.error("Job of type ${job.class} executed before entering the CREATED state")
+                    throw new ProcessingException("Job executed before entering the CREATED state")
+                } else if (existingUpdates.size() > 1) {
+                    if (existingUpdates.sort { it.id }.last().state == ExecutionState.FAILURE ||
+                            existingUpdates.sort { it.id }.last().state == ExecutionState.RESTARTED) {
+                        // scheduler is already in failed state - no reason to process
+                        throw new ProcessingException("Job already in failed condition before execution")
+                    }
+                }
+                if (job instanceof ValidatingJob) {
+                    ValidatingJobDefinition validator = step.jobDefinition as ValidatingJobDefinition
+                    ProcessingStep validatedStep = CollectionUtils.atMostOneElement(
+                            ProcessingStep.findAllByProcessAndJobDefinition(step.process, validator.validatorFor))
+                    (job as ValidatingJob).validatorFor = validatedStep
                 }
             }
-            if (job instanceof ValidatingJob) {
-                ValidatingJobDefinition validator = step.jobDefinition as ValidatingJobDefinition
-                ProcessingStep validatedStep = CollectionUtils.atMostOneElement(
-                        ProcessingStep.findAllByProcessAndJobDefinition(step.process, validator.validatorFor))
-                (job as ValidatingJob).validatorFor = validatedStep
-            }
             // add a ProcessingStepUpdate to the ProcessingStep
-            processService.setOperatorIsAwareOfFailure(step.process, false)
-            ProcessingStepUpdate update = new ProcessingStepUpdate(
-                    date: new Date(),
-                    state: ExecutionState.STARTED,
-                    previous: existingUpdates.sort { it.date }.last(),
-                    processingStep: step
-            )
-            if (!update.save(flush: true)) {
-                log.error("Could not create a STARTED Update for Job of type ${job.class}")
-                throw new ProcessingException("Could not create a STARTED Update for Job")
+            SessionUtils.withTransaction {
+                ProcessingStep step = ProcessingStep.getInstance(job.processingStep.id)
+                processService.setOperatorIsAwareOfFailure(step.process, false)
             }
-            log.debug("doCreateCheck performed for ${job} with ProcessingStep ${job.processingStep.id}")
+            SessionUtils.withTransaction {
+                ProcessingStep step = ProcessingStep.getInstance(job.processingStep.id)
+                List<ProcessingStepUpdate> existingUpdates = ProcessingStepUpdate.findAllByProcessingStep(step)
+                ProcessingStepUpdate update = new ProcessingStepUpdate(
+                        date: new Date(),
+                        state: ExecutionState.STARTED,
+                        previous: existingUpdates.sort { it.date }.last(),
+                        processingStep: step
+                )
+                if (!update.save(flush: true)) {
+                    log.error("Could not create a STARTED Update for Job of type ${job.class}")
+                    throw new ProcessingException("Could not create a STARTED Update for Job")
+                }
+                log.debug("doCreateCheck performed for ${job} with ProcessingStep ${job.processingStep.id}")
+            }
             job.start()
         } catch (RuntimeException e) {
             jobMailService.sendErrorNotification(job, e?.message ?: "No Exception message")

@@ -54,6 +54,7 @@ class LinkFilesToFinalDestinationService {
         assert roddyBamFile: "roddyBamFile must not be null"
         if (!roddyBamFile.withdrawn) {
             RoddyBamFile.withTransaction {
+                roddyBamFile.refresh()
                 assert roddyBamFile.isMostRecentBamFile(): "The BamFile ${roddyBamFile} is not the most recent one. This must not happen!"
                 if (!roddyBamFile.config.adapterTrimmingNeeded) {
                     assert roddyBamFile.numberOfReadsFromQa >= roddyBamFile.numberOfReadsFromFastQc: "bam file (${roddyBamFile.numberOfReadsFromQa}) " +

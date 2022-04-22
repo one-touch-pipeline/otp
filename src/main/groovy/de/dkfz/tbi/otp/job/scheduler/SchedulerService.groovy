@@ -38,9 +38,7 @@ import de.dkfz.tbi.otp.config.PropertiesValidationService
 import de.dkfz.tbi.otp.job.JobMailService
 import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.utils.CollectionUtils
-import de.dkfz.tbi.otp.utils.ExceptionUtils
-import de.dkfz.tbi.otp.utils.SessionUtils
+import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
 import java.util.concurrent.locks.Lock
@@ -236,6 +234,7 @@ class SchedulerService {
         return startupOk
     }
 
+    @Transactional
     void createNextProcessingStep(ProcessingStep previous) {
         // test whether the Process ended
         if (!previous.jobDefinition.next && !(previous.jobDefinition instanceof DecidingJobDefinition)) {
@@ -342,7 +341,11 @@ class SchedulerService {
     }
 
     void withLoggingContext(Job job, Closure closure) {
-        MDC.put("PROCESS_AND_JOB_ID", "${job.processingStep.process.id}${File.separator}${job.processingStep.id}")
+        SessionUtils.withTransaction {
+            ProcessingStep processingStep = job.processingStep
+            processingStep.refresh()
+            MDC.put("PROCESS_AND_JOB_ID", "${processingStep.process.id}${File.separator}${processingStep.id}")
+        }
         try {
             job.log.info("SchedulerService: starting job")
             closure()
@@ -389,58 +392,69 @@ class SchedulerService {
     void doEndCheck(Job job) {
         job.end()
         removeRunningJob(job)
-        ProcessingStep step = ProcessingStep.get(job.processingStep.id)
-        if (ProcessingStepUpdate.findAllByProcessingStepAndState(step, ExecutionState.FAILURE)) {
-            job.log.info "SchedulerService.doEndCheck was called for this job, but the job has already failed. A FINISHED ProcessingStepUpdate will NOT " +
-                    "be created."
-        } else {
-            // add a ProcessingStepUpdate to the ProcessingStep
-            processService.setOperatorIsAwareOfFailure(step.process, false)
-            ProcessingStepUpdate update = new ProcessingStepUpdate(
-                    date: new Date(),
-                    state: ExecutionState.FINISHED,
-                    previous: step.latestProcessingStepUpdate,
-                    processingStep: step
-            )
-            if (!update.save(flush: true)) {
+        SessionUtils.withTransaction {
+            ProcessingStep step = ProcessingStep.get(job.processingStep.id)
+            if (ProcessingStepUpdate.findAllByProcessingStepAndState(step, ExecutionState.FAILURE)) {
+                job.log.info "SchedulerService.doEndCheck was called for this job, but the job has already failed. A FINISHED ProcessingStepUpdate will NOT " +
+                        "be created."
+            } else {
+                // add a ProcessingStepUpdate to the ProcessingStep
+                processService.setOperatorIsAwareOfFailure(step.process, false)
+                ProcessingStepUpdate update = new ProcessingStepUpdate(
+                        date: new Date(),
+                        state: ExecutionState.FINISHED,
+                        previous: step.latestProcessingStepUpdate,
+                        processingStep: step
+                )
+                if (!update.save(flush: true)) {
+                    log.error("Could not create a FINISHED Update for Job of type ${job.class}")
+                    throw new ProcessingException("Could not create a FINISHED Update for Job")
+                }
+            }
+        }
+        boolean exit = false
+        SessionUtils.withTransaction {
+            ProcessingStep step = ProcessingStep.get(job.processingStep.id)
+            Parameter failedOutputParameter
+            job.outputParameters.each { Parameter param ->
+                if (param.type.parameterUsage != ParameterUsage.OUTPUT) {
+                    failedOutputParameter = param
+                    return // continue
+                }
+                if (param.type.jobDefinition != step.jobDefinition) {
+                    failedOutputParameter = param
+                    return // continue
+                }
+                step.addToOutput(param)
+            }
+            if (!step.save(flush: true)) {
                 log.error("Could not create a FINISHED Update for Job of type ${job.class}")
                 throw new ProcessingException("Could not create a FINISHED Update for Job")
             }
-        }
-        Parameter failedOutputParameter
-        job.outputParameters.each { Parameter param ->
-            if (param.type.parameterUsage != ParameterUsage.OUTPUT) {
-                failedOutputParameter = param
-                return // continue
-            }
-            if (param.type.jobDefinition != step.jobDefinition) {
-                failedOutputParameter = param
-                return // continue
-            }
-            step.addToOutput(param)
-        }
-        if (!step.save(flush: true)) {
-            log.error("Could not create a FINISHED Update for Job of type ${job.class}")
-            throw new ProcessingException("Could not create a FINISHED Update for Job")
-        }
-        if (failedOutputParameter) {
-            // at least one output parameter is wrong - set to failure
-            createError(step, "Parameter ${failedOutputParameter.value} is either not defined for JobDefintion ${step.jobDefinition.id} or not of " +
-                    "type Output.", job.class)
-            log.error("Parameter ${failedOutputParameter.value} is either not defined for JobDefintion ${step.jobDefinition.id} or not of type Output.")
-            markProcessAsFailed(step)
-            return
-        }
-        // check that all Output Parameters are set
-        List<ParameterType> parameterTypes = ParameterType.findAllByJobDefinitionAndParameterUsage(step.jobDefinition, ParameterUsage.OUTPUT)
-        for (ParameterType parameterType in parameterTypes) {
-            if (!step.output.any { Parameter param -> param.type == parameterType }) {
-                // a required output parameter has not been generated
-                createError(step, "Required Output Parameter of type ${parameterType.id} is not set.", job.class)
-                log.error("Required Output Parameter of type ${parameterType.id} is not set.")
+            if (failedOutputParameter) {
+                // at least one output parameter is wrong - set to failure
+                createError(step, "Parameter ${failedOutputParameter.value} is either not defined for JobDefintion ${step.jobDefinition.id} or not of " +
+                        "type Output.", job.class)
+                log.error("Parameter ${failedOutputParameter.value} is either not defined for JobDefintion ${step.jobDefinition.id} or not of type Output.")
                 markProcessAsFailed(step)
+                exit = true
                 return
             }
+            // check that all Output Parameters are set
+            List<ParameterType> parameterTypes = ParameterType.findAllByJobDefinitionAndParameterUsage(step.jobDefinition, ParameterUsage.OUTPUT)
+            for (ParameterType parameterType in parameterTypes) {
+                if (!step.output.any { Parameter param -> param.type == parameterType }) {
+                    // a required output parameter has not been generated
+                    createError(step, "Required Output Parameter of type ${parameterType.id} is not set.", job.class)
+                    log.error("Required Output Parameter of type ${parameterType.id} is not set.")
+                    markProcessAsFailed(step)
+                    exit = true
+                    return
+                }
+            }
+        }
+        if (exit) {
+            return
         }
 
         // test whether the Job knows if it ended
@@ -455,75 +469,99 @@ class SchedulerService {
                     throw new RuntimeException("Job ${job} has endState ${endState}, but only SUCCESS and FAILURE are allowed.")
                 }
                 ProcessingStepUpdate endStateUpdate
-                if (endState == ExecutionState.FAILURE ||
-                        !CollectionUtils.atMostOneElement(ProcessingStepUpdate.findAllByProcessingStepAndState(step, ExecutionState.FAILURE, [max: 1]))) {
-                    processService.setOperatorIsAwareOfFailure(step.process, false)
-                    endStateUpdate = new ProcessingStepUpdate(
-                            date: new Date(),
-                            state: endState,
-                            previous: step.latestProcessingStepUpdate,
-                            processingStep: step
-                    )
-                    endStateUpdate.save(flush: true)
+                if (endState == ExecutionState.FAILURE || !hasFailureState(job.processingStep)) {
+                    SessionUtils.withTransaction {
+                        ProcessingStep step = ProcessingStep.get(job.processingStep.id)
+                        processService.setOperatorIsAwareOfFailure(step.process, false)
+                    }
+                    SessionUtils.withTransaction {
+                        ProcessingStep step = ProcessingStep.get(job.processingStep.id)
+                        endStateUpdate = new ProcessingStepUpdate(
+                                date: new Date(),
+                                state: endState,
+                                previous: step.latestProcessingStepUpdate,
+                                processingStep: step
+                        )
+                        endStateUpdate.save(flush: true)
+                    }
                 } else {
                     job.log.info "SchedulerService.doEndCheck was called for this job, but the job has already failed. A SUCCESS ProcessingStepUpdate " +
                             "will NOT be created."
                 }
-                if (job instanceof DecisionJob && endStateUpdate.state == ExecutionState.SUCCESS) {
-                    ((DecisionProcessingStep) step).decision = (job as DecisionJob).decision
-                }
-                if (!step.save(flush: true)) {
-                    log.error("Could not create a ERROR/SUCCESS Update for Job of type ${job.class}")
-                    throw new JobExcecutionException("Could not create a ERROR/SUCCESS Update for Job")
+                SessionUtils.withTransaction {
+                    ProcessingStep step = ProcessingStep.get(job.processingStep.id)
+                    if (job instanceof DecisionJob && endStateUpdate.state == ExecutionState.SUCCESS) {
+                        ((DecisionProcessingStep) step).decision = (job as DecisionJob).decision
+                    }
+                    if (!step.save(flush: true)) {
+                        log.error("Could not create a ERROR/SUCCESS Update for Job of type ${job.class}")
+                        throw new JobExcecutionException("Could not create a ERROR/SUCCESS Update for Job")
+                    }
                 }
                 if (endState == ExecutionState.FAILURE) {
-                    log.debug("Something went wrong in endStateAwareJob of type ${job.class}, execution state set to FAILURE")
-                    ProcessingError error = new ProcessingError(errorMessage: "Something went wrong in endStateAwareJob of type ${job.class}, execution " +
-                            "state set to FAILURE", processingStepUpdate: endStateUpdate)
-                    endStateUpdate.error = error
-                    if (!error.save(flush: true)) {
-                        log.error("Could not create a FAILURE Update for Job of type ${jobClass}")
-                        throw new ProcessingException("Could not create a FAILURE Update for Job of type ${jobClass}")
+                    SessionUtils.withTransaction {
+                        ProcessingStep step = ProcessingStep.get(job.processingStep.id)
+                        log.debug("Something went wrong in endStateAwareJob of type ${job.class}, execution state set to FAILURE")
+                        ProcessingError error = new ProcessingError(errorMessage: "Something went wrong in endStateAwareJob of type ${job.class}, execution " +
+                                "state set to FAILURE", processingStepUpdate: endStateUpdate)
+                        endStateUpdate.error = error
+                        if (!error.save(flush: true)) {
+                            log.error("Could not create a FAILURE Update for Job of type ${jobClass}")
+                            throw new ProcessingException("Could not create a FAILURE Update for Job of type ${jobClass}")
+                        }
+                        markProcessAsFailed(step)
+                        log.debug("doEndCheck performed for ${job.class} with ProcessingStep ${step.id}")
                     }
-                    markProcessAsFailed(step)
-                    log.debug("doEndCheck performed for ${job.class} with ProcessingStep ${step.id}")
                     return
                 }
                 if (job instanceof ValidatingJob) {
-                    ValidatingJob validatingJob = job as ValidatingJob
-                    // get the last ProcessingStepUpdate
-                    ProcessingStep validatedStep = ProcessingStep.get(validatingJob.validatorFor.id)
-                    boolean succeeded = validatingJob.hasValidatedJobSucceeded()
+                    boolean succeeded
+                    ProcessingStepUpdate validatedUpdate
+                    SessionUtils.withTransaction {
+                        ProcessingStep step = ProcessingStep.get(job.processingStep.id)
+                        ValidatingJob validatingJob = job as ValidatingJob
+                        // get the last ProcessingStepUpdate
+                        ProcessingStep validatedStep = ProcessingStep.get(validatingJob.validatorFor.id)
+                        succeeded = validatingJob.hasValidatedJobSucceeded()
 
-                    processService.setOperatorIsAwareOfFailure(step.process, false)
-                    ProcessingStepUpdate validatedUpdate = new ProcessingStepUpdate(
-                            date: new Date(),
-                            state: succeeded ? ExecutionState.SUCCESS : ExecutionState.FAILURE,
-                            previous: validatedStep.latestProcessingStepUpdate,
-                            processingStep: validatedStep
-                    )
-                    validatedUpdate.save(flush: true)
-                    if (!succeeded) {
-                        // create error
-                        ProcessingError validatedError = new ProcessingError(
-                                errorMessage: "Marked as failed by validating job", processingStepUpdate: validatedUpdate
+                        processService.setOperatorIsAwareOfFailure(step.process, false)
+                        validatedUpdate = new ProcessingStepUpdate(
+                                date: new Date(),
+                                state: succeeded ? ExecutionState.SUCCESS : ExecutionState.FAILURE,
+                                previous: validatedStep.latestProcessingStepUpdate,
+                                processingStep: validatedStep
                         )
-                        validatedError.save(flush: true)
-                        validatedUpdate.error = validatedError
+                        validatedUpdate.save(flush: true)
                     }
-                    if (!validatedUpdate.save(flush: true)) {
-                        log.error("Could not create a FAILED/SUCCEEDED Update for validated job processed by ${job.class}")
-                        throw new ProcessingException("Could not create a FAILED/SUCCEEDED Update for validated job")
+                    SessionUtils.withTransaction {
+                        validatedUpdate.attach()
+                        if (!succeeded) {
+                            // create error
+                            ProcessingError validatedError = new ProcessingError(
+                                    errorMessage: "Marked as failed by validating job", processingStepUpdate: validatedUpdate
+                            )
+                            validatedError.save(flush: true)
+                            validatedUpdate.error = validatedError
+                        }
+                        if (!validatedUpdate.save(flush: true)) {
+                            log.error("Could not create a FAILED/SUCCEEDED Update for validated job processed by ${job.class}")
+                            throw new ProcessingException("Could not create a FAILED/SUCCEEDED Update for validated job")
+                        }
+                    }
+                    SessionUtils.withTransaction {
+                        ProcessingStep step = ProcessingStep.get(job.processingStep.id)
+                        if (!succeeded) {
+                            Process process = Process.get(step.process.id)
+                            process.finished = true
+                            if (!process.save(flush: true)) {
+                                log.error("Could not set Process to finished")
+                                throw new ProcessingException("Could not set Process to finished")
+                            }
+                            // do not trigger next generation of Processing Step
+                            log.debug("doEndCheck performed for ${job.class} with ProcessingStep ${step.id}")
+                        }
                     }
                     if (!succeeded) {
-                        Process process = Process.get(step.process.id)
-                        process.finished = true
-                        if (!process.save(flush: true)) {
-                            log.error("Could not set Process to finished")
-                            throw new ProcessingException("Could not set Process to finished")
-                        }
-                        // do not trigger next generation of Processing Step
-                        log.debug("doEndCheck performed for ${job.class} with ProcessingStep ${step.id}")
                         return
                     }
                 }
@@ -532,13 +570,20 @@ class SchedulerService {
                 throw t
             }
         }
-        try {
-            createNextProcessingStep(step)
-        } catch (Exception se) {
-            log.error("Could not create new ProcessingStep for Process ${step.process}")
-            throw new SchedulerException("Could not create new ProcessingStep", se)
+        SessionUtils.withTransaction {
+            ProcessingStep step = ProcessingStep.get(job.processingStep.id)
+            try {
+                createNextProcessingStep(step)
+            } catch (Exception se) {
+                log.error("Could not create new ProcessingStep for Process ${step.process}")
+                throw new SchedulerException("Could not create new ProcessingStep", se)
+            }
+            log.debug("doEndCheck performed for ${job.class} with ProcessingStep ${step.id}")
         }
-        log.debug("doEndCheck performed for ${job.class} with ProcessingStep ${step.id}")
+    }
+
+    private ProcessingStepUpdate hasFailureState(ProcessingStep step) {
+        return CollectionUtils.atMostOneElement(ProcessingStepUpdate.findAllByProcessingStepAndState(step, ExecutionState.FAILURE, [max: 1]))
     }
 
     /**

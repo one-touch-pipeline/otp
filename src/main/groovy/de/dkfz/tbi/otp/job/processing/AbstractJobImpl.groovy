@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.job.processing
 
+import grails.gorm.transactions.Transactional
 import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
@@ -43,6 +44,7 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
  *
  * @see Job
  */
+@Transactional
 abstract class AbstractJobImpl implements Job {
 
     @Autowired
