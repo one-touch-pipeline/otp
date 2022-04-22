@@ -103,6 +103,8 @@ $.otp.toaster = {
      * @returns {*|Window.jQuery|HTMLElement}
      */
   getToastBox() {
+    'use strict';
+
     const toastBoxId = 'otpToastBox';
     const toastBox = `<div id="${toastBoxId}" class="otpToastBox"></div>`;
     const getToastBoxFromDOM = () => $(`#${toastBoxId}`);
@@ -121,6 +123,8 @@ $.otp.toaster = {
      * @returns {string}: css class
      */
   getStateProps(state) {
+    'use strict';
+
     switch (state) {
       case 'info': return {
         toastClass: 'otpInfoToast',

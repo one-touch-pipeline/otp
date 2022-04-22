@@ -57,6 +57,8 @@ const statusToClassName = function (status) {
 
 // eslint-disable-next-line no-unused-vars
 const button = function (action, value, title, buttonsDisabled, icon) {
+  'use strict';
+
   return `<button class="btn btn-xs btn-primary" formaction="${action}"
                   name="step" value="${value}" title="${title}" ${buttonsDisabled}>
             <i class="bi-${icon}"></i>
@@ -64,6 +66,8 @@ const button = function (action, value, title, buttonsDisabled, icon) {
 };
 
 $(() => {
+  'use strict';
+
   const statusDot = $('#statusDot');
   statusDot.addClass(statusToClassName(statusDot.data('status')));
   statusDot.tooltip();

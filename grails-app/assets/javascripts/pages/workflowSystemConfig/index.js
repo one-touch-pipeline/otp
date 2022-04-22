@@ -24,6 +24,8 @@
  * Load workflows from backend.
  */
 const loadWorkflowOverviewData = () => {
+  'use strict';
+
   fetch($.otp.createLink({ controller: 'workflowSystemConfig', action: 'getWorkflows' }))
     .then((response) => response.json())
     .then((data) => renderWorkflowOverviewTable(data))
@@ -38,6 +40,8 @@ const loadWorkflowOverviewData = () => {
  * @param workflowData data set for the table rows
  */
 const renderWorkflowOverviewTable = (workflowData) => {
+  'use strict';
+
   $('#workflowOverview').DataTable({
     data: workflowData,
     pageLength: 100,
@@ -97,6 +101,8 @@ const renderWorkflowOverviewTable = (workflowData) => {
  */
 // eslint-disable-next-line no-unused-vars
 const openAndRenderEditModal = (workflow) => {
+  'use strict';
+
   const modal = $('#editWorkflowModal');
   const confirmButton = modal.find('#confirmModal');
   const cancelButtons = modal.find('.closeModal');
@@ -124,6 +130,8 @@ const openAndRenderEditModal = (workflow) => {
  * @param modal
  */
 const updateModalWithCurrentWorkflow = (workflow, modal) => {
+  'use strict';
+
   $('.modal-title', modal).html(workflow.name);
   $('#modal-priority', modal).val(workflow.priority);
   $('#modal-max-runs', modal).val(workflow.maxParallelWorkflows);
@@ -152,6 +160,8 @@ const updateModalWithCurrentWorkflow = (workflow, modal) => {
  * @param modal
  */
 const updateWorkflow = (workflow, modal) => {
+  'use strict';
+
   const workflowToUpdate = {
     id: workflow.id,
     priority: $('#modal-priority', modal).val(),
@@ -195,6 +205,8 @@ const updateWorkflow = (workflow, modal) => {
 };
 
 $(document).ready(() => {
+  'use strict';
+
   loadWorkflowOverviewData();
   $('[title]').tooltip({
     placement: 'bottom'

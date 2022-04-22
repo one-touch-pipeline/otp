@@ -21,5 +21,7 @@
  */
 
 $(() => {
+  'use strict';
+
   $('.no-switched-user').find('input , button , select , textarea').prop('disabled', true);
 });

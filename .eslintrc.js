@@ -33,7 +33,8 @@ const lintRules = {
   'no-plusplus': ['error', { allowForLoopAfterthoughts: true }],
   'no-undef': 'off',
   'func-names': 'off',
-  'no-use-before-define': 'off'
+  'no-use-before-define': 'off',
+  strict: ['error', 'function']
 };
 
 if (process.env.CI) {
@@ -53,7 +54,8 @@ module.exports = {
     'airbnb-base'
   ],
   parserOptions: {
-    ecmaVersion: 6
+    ecmaVersion: 6,
+    sourceType: 'script'
   },
   rules: lintRules,
   overrides: [

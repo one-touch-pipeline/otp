@@ -21,6 +21,8 @@
  */
 
 $(document).ready(() => {
+  'use strict';
+
   $('select.use-select-2').select2({
     theme: 'bootstrap4',
     minimumResultsForSearch: 7

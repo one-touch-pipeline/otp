@@ -21,6 +21,8 @@
  */
 
 function syncWorkflowStepData() {
+  'use strict';
+
   const table = $('#jobTable');
   const noDataAlert = $('#noDataAlert');
   const loadingSpinner = $('#tableLoadingSpinner');
@@ -56,6 +58,8 @@ function syncWorkflowStepData() {
 }
 
 function renderStepDataTable(steps) {
+  'use strict';
+
   const table = $('#jobTable');
   const dataTable = table.DataTable();
 
@@ -129,6 +133,8 @@ function renderStepDataTable(steps) {
  * @param stepId which should be restarted
  */
 function restartStep(stepId) {
+  'use strict';
+
   $.ajax({
     url: $.otp.createLink({
       controller: 'crashRepair',
@@ -161,6 +167,8 @@ function restartStep(stepId) {
  * @param stepId referring to the workflow run
  */
 function restartWorkflowRun(stepId) {
+  'use strict';
+
   $.ajax({
     url: $.otp.createLink({
       controller: 'crashRepair',
@@ -193,6 +201,8 @@ function restartWorkflowRun(stepId) {
  * @param stepId
  */
 function setWorkflowStepAsFailed(stepId) {
+  'use strict';
+
   $.ajax({
     url: $.otp.createLink({
       controller: 'crashRepair',
@@ -222,6 +232,8 @@ function setWorkflowStepAsFailed(stepId) {
  * @param stepId which is part of the final failed workflow run
  */
 function setWorkflowRunAsFinalFailed(stepId) {
+  'use strict';
+
   $.ajax({
     url: $.otp.createLink({
       controller: 'crashRepair',
@@ -251,6 +263,8 @@ function setWorkflowRunAsFinalFailed(stepId) {
 
 /* eslint-disable no-unused-vars */
 function startWorkflowSystem() {
+  'use strict';
+
   $.ajax({
     url: $.otp.createLink({
       controller: 'crashRepair',
@@ -275,6 +289,8 @@ function startWorkflowSystem() {
 }
 
 function restartSelectedSteps() {
+  'use strict';
+
   getSelectedSteps((steps) => {
     steps.each((index, step) => {
       restartStep(step);
@@ -283,6 +299,8 @@ function restartSelectedSteps() {
 }
 
 function restartSelectedWorkflowRuns() {
+  'use strict';
+
   getSelectedSteps((steps) => {
     steps.each((index, step) => {
       restartWorkflowRun(step);
@@ -291,6 +309,8 @@ function restartSelectedWorkflowRuns() {
 }
 
 function markSelectedStepsAsFailed() {
+  'use strict';
+
   getSelectedSteps((steps) => {
     steps.each((index, step) => {
       setWorkflowStepAsFailed(step);
@@ -299,6 +319,8 @@ function markSelectedStepsAsFailed() {
 }
 
 function markSelectedRunsAsFinalFailed() {
+  'use strict';
+
   getSelectedSteps((steps) => {
     steps.each((index, step) => {
       setWorkflowRunAsFinalFailed(step);
@@ -308,12 +330,16 @@ function markSelectedRunsAsFinalFailed() {
 /* eslint-enable no-unused-vars */
 
 function getSelectedSteps(callback) {
+  'use strict';
+
   const selectedSteps = $('.tableCheckbox:checked');
   const selectedStepIds = selectedSteps.map((step) => selectedSteps[step].value);
   callback(selectedStepIds);
 }
 
 function initializeDataTable() {
+  'use strict';
+
   const table = $('#jobTable');
   table.DataTable({
     paging: false
@@ -321,6 +347,8 @@ function initializeDataTable() {
 }
 
 $(document).ready(() => {
+  'use strict';
+
   initializeDataTable();
   syncWorkflowStepData();
 });

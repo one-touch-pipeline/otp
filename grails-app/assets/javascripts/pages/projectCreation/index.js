@@ -21,6 +21,8 @@
  */
 
 $(() => {
+  'use strict';
+
   const form = $('form.projectCreationBasisSelection');
 
   $(form).find('select').on('change', () => {

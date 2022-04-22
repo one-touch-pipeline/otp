@@ -21,6 +21,8 @@
  */
 
 $(() => {
+  'use strict';
+
   const update = function () {
     const val = $('#restartAction').val();
     if (val === 'RESTART_JOB') {

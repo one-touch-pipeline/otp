@@ -22,6 +22,8 @@
 
 // eslint-disable-next-line no-unused-vars
 function confirmDataTransferDeletion(event) {
+  'use strict';
+
   if (!window.confirm(`Are you sure that you want to permanently
    delete this document and any transfers based on it?`)) {
     event.preventDefault();
@@ -34,6 +36,8 @@ function confirmDataTransferDeletion(event) {
 
 // eslint-disable-next-line no-unused-vars
 function confirmCompleteTransfer(event) {
+  'use strict';
+
   if (!window.confirm(`Are you sure that this transfer is completed?
    (receipt acknowledged? files deleted? disks wiped? etc..)`)) {
     event.preventDefault();
@@ -47,6 +51,8 @@ function confirmCompleteTransfer(event) {
  */
 // eslint-disable-next-line no-unused-vars
 function updateFileNameOfFileInput(fileInputFieldId) {
+  'use strict';
+
   const inputField = $(fileInputFieldId);
   const fileName = Array.from(inputField.prop('files')).map((val) => val.name).reduce((acc, val) => `${acc}, ${val}`);
   inputField.next('.custom-file-label').html(fileName);
@@ -60,6 +66,8 @@ function updateFileNameOfFileInput(fileInputFieldId) {
  * @param id to find the correct input field
  */
 function updateFileNameOfFileInputToDefaultPlaceholder(id) {
+  'use strict';
+
   const fileInputField = $(`#dtaFileInput-${id}`);
   const defaultPlaceholder = 'Choose one or more files';
 
@@ -77,6 +85,8 @@ function updateFileNameOfFileInputToDefaultPlaceholder(id) {
  */
 // eslint-disable-next-line no-unused-vars
 function onUploadFiles(submitBtn, id, action) {
+  'use strict';
+
   const uploadForm = submitBtn.closest('form');
   const data = new FormData(uploadForm);
   const loadingContent = $(submitBtn).children('.loading-content');
@@ -135,6 +145,8 @@ function onUploadFiles(submitBtn, id, action) {
  * @param domPositionId position in the DOM of the file list
  */
 function rerenderDtaFiles(dtaDocuments, domPositionId) {
+  'use strict';
+
   const dtaFilesList = $(`#dtaDocuments-${domPositionId}`);
 
   dtaFilesList.html(dtaDocuments.map((document) => `<li>
@@ -152,6 +164,8 @@ function rerenderDtaFiles(dtaDocuments, domPositionId) {
  * @param domPositionId position in the DOM of the file list
  */
 function rerenderDataTransferFiles(transferDocuments, domPositionId) {
+  'use strict';
+
   const dtaFilesList = $(`#transferDocuments-${domPositionId}`);
 
   dtaFilesList.html(transferDocuments.map((document) => `<li><a href="${$.otp.createLink({

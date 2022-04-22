@@ -41,6 +41,8 @@ workflowJobErrorDefinitionActionChangeSuccessHandler = function (container, addi
 };
 
 $(() => {
+  'use strict';
+
   const rows = $('.errorDefinitions tr');
   rows.each(function () {
     const row = $(this);

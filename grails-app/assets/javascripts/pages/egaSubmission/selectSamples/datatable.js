@@ -31,6 +31,8 @@ $.otp.selectSamplesTable = {
    * @returns datatable object
    */
   selectableSampleList(header, preSelectedSamples) {
+    'use strict';
+
     return $('#selectSamplesTable').dataTable({
       sDom: '<i> T rt<"clear">',
       oTableTools: $.otp.tableTools,
@@ -107,6 +109,8 @@ $.otp.selectSamplesTable = {
    * @param seqTypeColumnIndex index of the column containing the SeqType
    */
   applySeqTypeFilter(table, seqTypeColumnIndex) {
+    'use strict';
+
     $.otp.dataTableFilter.register($('#searchCriteriaTableSeqType'), () => {
       const select = $('#searchCriteriaTableSeqType').find('select')[0];
       if (select.selectedIndex !== 0) {
@@ -118,6 +122,8 @@ $.otp.selectSamplesTable = {
   },
 
   removeFilterOnColumn(table, seqTypeColumnIndex) {
+    'use strict';
+
     table.fnFilter('', seqTypeColumnIndex);
   }
 };

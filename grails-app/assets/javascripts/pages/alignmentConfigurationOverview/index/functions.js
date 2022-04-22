@@ -23,6 +23,8 @@
 $.otp.projectConfig = {
 
   returnParameterUnchanged(json) {
+    'use strict';
+
     return json;
   },
 
@@ -106,6 +108,8 @@ $.otp.projectConfig = {
      * @deprecated method is part of the old workflow system
      */
   initialiseAlignmentInfo(data) {
+    'use strict';
+
     $('#loader').remove();
     if (data.alignmentInfo.length > 0) {
       $('#alignment_info_table').css('visibility', 'visible');
@@ -120,6 +124,8 @@ $.otp.projectConfig = {
      * @deprecated method is part of the old workflow system
      */
   displayLoading() {
+    'use strict';
+
     $('#alignment_info').css(
       'display',
       'inline',
@@ -135,6 +141,8 @@ $.otp.projectConfig = {
      * @deprecated method is part of the old workflow system
      */
   createAlignmentTable(data) {
+    'use strict';
+
     $.each(data.alignmentInfo, (key, value) => {
       $('#alignment_info_table tr:last').after(
         `<tr>
@@ -168,6 +176,8 @@ $.otp.projectConfig = {
 };
 
 $(() => {
+  'use strict';
+
   $.otp.projectConfig.referenceGenome();
   $.otp.projectConfig.asynchronousCallAlignmentInfo();
 });

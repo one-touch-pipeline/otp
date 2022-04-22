@@ -20,6 +20,8 @@
  * SOFTWARE.
  */
 $(() => {
+  'use strict';
+
   const addUserFormItem = () => {
     const userFormItemTemplate = $('#user-form-item-template');
     $('#accordion').append(userFormItemTemplate.html());

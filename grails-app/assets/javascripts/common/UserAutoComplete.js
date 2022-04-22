@@ -21,6 +21,8 @@
  */
 
 $(() => {
+  'use strict';
+
   const failure = function (title, message) {
     if ($.otp.toaster) {
       $.otp.toaster.showErrorToast(title, message);

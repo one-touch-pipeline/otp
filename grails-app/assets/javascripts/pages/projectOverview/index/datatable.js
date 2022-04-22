@@ -21,6 +21,8 @@
  */
 
 $(() => {
+  'use strict';
+
   $.otp.projectOverviewTable.register();
   $.otp.graph.project.init();
 });
@@ -31,6 +33,8 @@ $.otp.projectOverviewTable = {
      * It can be used for not modified output.
      */
   returnParameterUnchanged(json) {
+    'use strict';
+
     return json;
   },
 

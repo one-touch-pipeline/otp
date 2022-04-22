@@ -92,5 +92,7 @@ $.otp.run = {
 };
 
 $(() => {
+  'use strict';
+
   $.otp.run.register();
 });

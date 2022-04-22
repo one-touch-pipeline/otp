@@ -78,12 +78,16 @@ $.otp.workflowConfig = {
    * Client side validation
    */
   validatePriority: (input) => {
+    'use strict';
+
     const priority = input.value;
     input.setCustomValidity((Number.isNaN(priority) || parseInt(priority, 10) <= 0) ?
       `"${priority}" must be a positive integer.` : '');
   },
 
   validateName: (input) => {
+    'use strict';
+
     const selectorList = $.map($('div a.dropdown-item'), (n) => n.text);
     input.setCustomValidity(selectorList.includes(input.value) ? 'Selector name must be unique' : '');
   },
@@ -92,6 +96,8 @@ $.otp.workflowConfig = {
    * Clear the query fields
    */
   clear: () => {
+    'use strict';
+
     $.otp.workflowConfig.findAllQuerySelections().each((idx, queryField) => $(queryField).val(null).trigger('change'));
   },
 
@@ -101,6 +107,8 @@ $.otp.workflowConfig = {
    * create a new selector, update or deprecate the current selector
    */
   save: () => {
+    'use strict';
+
     const form = $('#workflowConfigModalForm');
     const operation = form.find('input#pp-operation').val();
 
@@ -165,6 +173,8 @@ $.otp.workflowConfig = {
    * By selecting a selector the search query fields can be prefilled.
    */
   prefill: (id) => {
+    'use strict';
+
     $.otp.workflowConfig.findQuerySelection('type').val(null).trigger('change');
     // get all workflows from the selector id
     $.ajax({
@@ -202,6 +212,8 @@ $.otp.workflowConfig = {
    * Search query must be updated first
    */
   search: () => {
+    'use strict';
+
     // clear first
     $.otp.workflowConfig.selectedOptions = {};
     $.otp.workflowConfig.findAllQuerySelections().each((idx, queryField) => {
@@ -214,6 +226,8 @@ $.otp.workflowConfig = {
   },
 
   initDialogWithData: (rowData, operation) => {
+    'use strict';
+
     const thisDialog = $.otp.workflowConfig.getDialog();
 
     const capitalizedOperation = operation.replace(/^\w/, (c) => c.toUpperCase());
@@ -261,28 +275,40 @@ $.otp.workflowConfig = {
   /**
    * Fetch table data from backend by calling the data() method of controller
    */
-  fetchData: (inputdata) => new Promise((resolve) => {
-    $.ajax({
-      url: $.otp.createLink({
-        controller: $.otp.workflowConfig.CONTROLLER,
-        action: 'data'
-      }),
-      data: inputdata,
-      success: (response) => (resolve({
-        data: response.data
-      }))
+  fetchData: (inputdata) => {
+    'use strict';
+
+    return new Promise((resolve) => {
+      $.ajax({
+        url: $.otp.createLink({
+          controller: $.otp.workflowConfig.CONTROLLER,
+          action: 'data'
+        }),
+        data: inputdata,
+        success: (response) => (resolve({
+          data: response.data
+        }))
+      });
     });
-  }),
+  },
 
   /**
    * Helper function to get the datatable
    */
-  getDataTable: () => $.fn.dataTable.tables({ api: true }),
+  getDataTable: () => {
+    'use strict';
+
+    return $.fn.dataTable.tables({ api: true });
+  },
 
   /**
    * Helper function to get the dialog
    */
-  getDialog: () => $('#workflowConfigModal'),
+  getDialog: () => {
+    'use strict';
+
+    return $('#workflowConfigModal');
+  },
 
   /**
    * Helper function to return the query selection, which is
@@ -290,21 +316,35 @@ $.otp.workflowConfig = {
    *
    * @param name is the name attribute value of the select2 field
    */
-  findQuerySelection: (name) => $(`.search-query select.custom-select[name="${name}"]`),
+  findQuerySelection: (name) => {
+    'use strict';
+
+    return $(`.search-query select.custom-select[name="${name}"]`);
+  },
 
   /**
    * Helper function to return the correct query selections
    */
-  findAllQuerySelections: () => $('.search-query select.custom-select'),
+  findAllQuerySelections: () => {
+    'use strict';
+
+    return $('.search-query select.custom-select');
+  },
 
   /**
    * Helper function to convert localDate to ISO string
    */
-  localDateToString: (localDate) => `${localDate.year}-${localDate.monthValue.toString()
-    .padStart(2, '0')}-${localDate.dayOfMonth.toString().padStart(2, '0')}`
+  localDateToString: (localDate) => {
+    'use strict';
+
+    return `${localDate.year}-${localDate.monthValue.toString()
+      .padStart(2, '0')}-${localDate.dayOfMonth.toString().padStart(2, '0')}`;
+  }
 };
 
 $(document).ready(() => {
+  'use strict';
+
   /**
    * Datatables shown a list of selectors that match the search query.
    * Selectors contain exact matches and related matches. The exact matches are marked

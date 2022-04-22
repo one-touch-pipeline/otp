@@ -23,6 +23,8 @@
 //= require ../shared/workflowConfigBase
 
 $(() => {
+  'use strict';
+
   $('select').select2({
     allowClear: true,
     theme: 'bootstrap4'

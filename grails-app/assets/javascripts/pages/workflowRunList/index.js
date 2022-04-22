@@ -20,6 +20,8 @@
  * SOFTWARE.
  */
 $(() => {
+  'use strict';
+
   const runsTable = $('#runs');
   const table = runsTable.DataTable({
     columns: [

@@ -21,6 +21,8 @@
  */
 
 $(() => {
+  'use strict';
+
   $('form').on('submit', (e) => {
     $(e.target).find('input:submit').addClass('submitting');
   });

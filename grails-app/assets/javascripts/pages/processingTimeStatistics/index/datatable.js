@@ -21,6 +21,8 @@
  */
 
 $(() => {
+  'use strict';
+
   $.otp.processingTimeStatistics.registerDataTable();
   $.otp.processingTimeStatistics.registerDatePicker();
 });
@@ -198,6 +200,8 @@ $.otp.processingTimeStatistics = {
   },
 
   createIsFinished(finished, row) {
+    'use strict';
+
     return `<span class="${(finished ? 'finalProcessingStatusSent' : 'finalProcessingStatusNotSent')}">
                 ${row}
             </span>`;

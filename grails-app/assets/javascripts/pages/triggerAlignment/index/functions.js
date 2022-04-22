@@ -21,6 +21,8 @@
  */
 
 $(document).ready(() => {
+  'use strict';
+
   /*
    * Initialization of a DataTable for SeqTrack table in TriggerAlignment page
    */

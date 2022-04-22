@@ -21,6 +21,8 @@
  */
 
 $(() => {
+  'use strict';
+
   const success = function (title = 'Operation completed', message = 'The change was successful.') {
     if ($.otp.toaster) {
       $.otp.toaster.showSuccessToast(title, message);
@@ -38,8 +40,6 @@ $(() => {
   };
 
   $('td.add-table-buttons button.add').on('click', function (event) {
-    'use strict';
-
     event.preventDefault();
     const p = $(this).parent();
     $('.save', p).show();
@@ -49,8 +49,6 @@ $(() => {
   });
 
   $('td.add-table-buttons button.cancel').on('click', function (event) {
-    'use strict';
-
     event.preventDefault();
     const p = $(this).parent();
     $('.save', p).hide();
@@ -60,8 +58,6 @@ $(() => {
   });
 
   $('tr.edit-table-buttons button.button-edit').on('click', function (event) {
-    'use strict';
-
     event.preventDefault();
     const p = $(this).parent();
     $('.save', p).show();
@@ -72,8 +68,6 @@ $(() => {
   });
 
   $('tr.edit-table-buttons button.cancel').on('click', function (event) {
-    'use strict';
-
     event.preventDefault();
     const p = $(this).parent();
     $('.save', p).hide();
@@ -89,8 +83,6 @@ $(() => {
   $('div.edit-switch .edit-switch-label button.js-remove').on('click', function () { outerContainerSwitch($(this)); });
 
   function outerContainerSwitch(that) {
-    'use strict';
-
     const outerContainer = that.parent().parent();
     $('.edit-switch-editor', outerContainer).show();
     $('.edit-switch-label', outerContainer).hide();
@@ -98,8 +90,6 @@ $(() => {
 
   // eslint-disable-next-line max-len
   $('div.edit-switch-text .edit-switch-editor button.save, div.edit-switch-integer .edit-switch-editor button.save').on('click', function () {
-    'use strict';
-
     const container = $(this).parent();
     const outerContainer = container.parent();
     const inputField = $('input[name=value]', container);
@@ -135,8 +125,6 @@ $(() => {
   });
 
   $('div.edit-switch-text-area p.edit-switch-editor button.save').on('click', function () {
-    'use strict';
-
     const container = $(this).parent();
     const outerContainer = container.parent();
     $.ajax({
@@ -173,8 +161,6 @@ $(() => {
   });
 
   $('div.edit-switch-url p.edit-switch-editor button.save').on('click', function () {
-    'use strict';
-
     const container = $(this).parent();
     const outerContainer = container.parent();
     $.ajax({
@@ -206,8 +192,6 @@ $(() => {
   $('div.edit-switch-drop-down p.edit-switch-editor button.delete').on('click', function () { deleteRole($(this)); });
 
   function deleteRole(that) {
-    'use strict';
-
     const container = that.parent();
     const outerContainer = container.parent();
     const outerOuterContainer = outerContainer.parent();
@@ -250,8 +234,6 @@ $(() => {
   }
 
   $('div.submit-container button.addRole').on('click', function () {
-    'use strict';
-
     const container = $(this).parent();
     const outerContainer = container.parent();
 
@@ -320,8 +302,6 @@ $(() => {
   $('div.edit-switch-drop-down p.edit-switch-editor button.save').on('click', function () { saveRole($(this)); });
 
   function saveRole(that) {
-    'use strict';
-
     const container = that.parent();
     const outerContainer = container.parent();
 
@@ -370,8 +350,6 @@ $(() => {
      * Save data of multi drop down editor switch.
      */
   function saveMultiDropDownOptions(that) {
-    'use strict';
-
     const container = that.parent();
     const outerContainer = container.parent();
 
@@ -415,8 +393,6 @@ $(() => {
   }
 
   $('div.edit-switch-date p.edit-switch-editor button.save').on('click', function () {
-    'use strict';
-
     const container = $(this).parent();
     const outerContainer = container.parent();
     $.ajax({
@@ -445,8 +421,6 @@ $(() => {
   });
 
   $('div.edit-switch-checkboxes p.edit-switch-editor button.save').on('click', function () {
-    'use strict';
-
     const container = $(this).parent();
     const outerContainer = container.parent();
     const value = {};
@@ -496,8 +470,6 @@ $(() => {
   }
 
   $('div.edit-switch-new-value p.edit-switch-editor button.save').on('click', function () {
-    'use strict';
-
     const container = $(this).parent();
     const outerContainer = container.parent();
     $.ajax({
@@ -529,8 +501,6 @@ $(() => {
   });
 
   $('div.edit-switch-new-free-text-value p.edit-switch-editor button.save').on('click', function () {
-    'use strict';
-
     const container = $(this).parent();
     const outerContainer = container.parent();
     $.ajax({
@@ -562,8 +532,6 @@ $(() => {
   });
 
   $('div.edit-switch-new-free-text-values span.edit-switch-editor button.save').on('click', function () {
-    'use strict';
-
     const data = {};
     const container = $(this).parent();
     const outerContainer = container.parent();
@@ -602,8 +570,6 @@ $(() => {
   });
 
   $('div.edit-switch-toggle p.edit-switch-editor button.toggle').on('click', function () {
-    'use strict';
-
     const container = $(this).parent();
     const outerContainer = container.parent();
     const confirmationText = $('button[data-confirmation]', container).attr('data-confirmation');
@@ -656,8 +622,6 @@ $(() => {
   $('div.edit-switch .edit-switch-editor button.cancel').on('click', function () { cancelAddRoleCommand($(this)); });
 
   function cancelAddRoleCommand(that) {
-    'use strict';
-
     const outerContainer = that.parent().parent();
     $('.edit-switch-editor', outerContainer).hide();
     $('.edit-switch-label', outerContainer).show();
@@ -668,8 +632,6 @@ $(() => {
   }
 
   $('div.multi-edit-switch .edit-switch-label button.js-edit').on('click', function () {
-    'use strict';
-
     const outerContainer = $(this).parent().parent();
     const multiInputField = $('.multi-input-field', outerContainer);
     const template = $('.inputTemplate', outerContainer);
@@ -697,8 +659,6 @@ $(() => {
   });
 
   $('div.multi-edit-switch .edit-switch-editor button.cancel').on('click', function () {
-    'use strict';
-
     const outerContainer = $(this).parent().parent();
     $('.edit-switch-editor', outerContainer).hide();
     $('.edit-switch-label', outerContainer).show();
@@ -706,8 +666,6 @@ $(() => {
   });
 
   $('div.edit-switch-multi-input .edit-switch-editor button.save').on('click', function () {
-    'use strict';
-
     const dataValues = {};
     let i = 0;
     let displayValue = '';

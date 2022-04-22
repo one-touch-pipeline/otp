@@ -32,5 +32,7 @@ $.otp.exportableMetaDataFieldsTable = function () {
 };
 
 $(() => {
+  'use strict';
+
   $.otp.exportableMetaDataFieldsTable();
 });

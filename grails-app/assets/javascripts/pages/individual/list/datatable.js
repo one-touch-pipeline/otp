@@ -108,5 +108,7 @@ $.otp.individual = {
 };
 
 $(() => {
+  'use strict';
+
   $.otp.individual.register();
 });

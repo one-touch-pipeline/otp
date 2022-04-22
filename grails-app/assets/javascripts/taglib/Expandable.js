@@ -21,6 +21,8 @@
  */
 
 $(() => {
+  'use strict';
+
   $('.expandable-button').on('click', function () {
     $(this).siblings('.expandable-container').toggleClass('collapsed');
     $(this).siblings('.expandable-container').toggleClass('expanded');

@@ -20,5 +20,7 @@
  * SOFTWARE.
  */
 $(() => {
+  'use strict';
+
   $('#loginForm').find('#account').focus();
 });

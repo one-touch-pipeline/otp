@@ -20,6 +20,8 @@
  * SOFTWARE.
  */
 $(() => {
+  'use strict';
+
   const tableElement = $('table#runs');
   const buttonElements = $('.toggleButton');
 

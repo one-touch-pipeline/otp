@@ -22,6 +22,8 @@
 
 // eslint-disable-next-line no-unused-vars
 function onObsolete(rowIndex, name, type, specificProject) {
+  'use strict';
+
   const inputField = $(`#value-${rowIndex}`);
   const optionNumber = parseInt(rowIndex, 10) + 1;
 
@@ -62,6 +64,8 @@ function onObsolete(rowIndex, name, type, specificProject) {
 
 // eslint-disable-next-line no-unused-vars
 function onEdit(rowIndex) {
+  'use strict';
+
   $(`#button-save-${rowIndex}`).show();
   $(`#button-edit-${rowIndex}`).hide();
   $(`#value-${rowIndex}`).prop('disabled', false);
@@ -69,6 +73,8 @@ function onEdit(rowIndex) {
 
 // eslint-disable-next-line no-unused-vars
 function onSave(rowIndex, name, oldValue, type, specificProject) {
+  'use strict';
+
   const optionNumber = parseInt(rowIndex, 10) + 1;
   const inputField = $(`#value-${rowIndex}`);
   const newValue = inputField.val();
@@ -120,6 +126,8 @@ function onSave(rowIndex, name, oldValue, type, specificProject) {
 }
 
 function switchErrorColorOnValueCell(rowIndex, warnColorType) {
+  'use strict';
+
   const valueCell = $(`#value-cell-${rowIndex}`);
 
   if (warnColorType === 'ERROR') {

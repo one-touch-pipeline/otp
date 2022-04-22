@@ -22,6 +22,8 @@
 
 // eslint-disable-next-line no-unused-vars
 function disableNotification() {
+  'use strict';
+
   const otpcheckbox = $('input[type = checkbox][name=accessToOtp]');
   const notificationcheckbox = $('input[type=checkbox][name=receivesNotifications]');
 
@@ -32,6 +34,8 @@ function disableNotification() {
 }
 
 function onToggleAccessToFiles(context) {
+  'use strict';
+
   const modalText = $('input:hidden[name=confirmationTextHtml]').val();
 
   if (modalText) {
@@ -46,6 +50,8 @@ function onToggleAccessToFiles(context) {
 }
 
 function postFileAccessChange(context) {
+  'use strict';
+
   const container = $(context).closest('.modal-editor-switch');
   const orgVal = $('input:hidden[name=hasFileAccess]', container).val();
   const invVal = (orgVal === 'true' ? 'false' : 'true');
@@ -81,6 +87,8 @@ function postFileAccessChange(context) {
 
 // eslint-disable-next-line no-unused-vars
 function onFileAccessEditClick(context) {
+  'use strict';
+
   const outerContainer = $(context).closest('.modal-editor-switch');
   const permissionState = $('input:hidden[name=permissionState]', outerContainer).val();
   const modalText = `A change has been made recently and the admin was notified.
@@ -99,6 +107,8 @@ function onFileAccessEditClick(context) {
 }
 
 function openConfirmationModal(text, confirmCallback, cancelCallback) {
+  'use strict';
+
   const modal = $('#confirmationModal');
   const modalBody = $('.modal-body', modal);
   const confirmButton = modal.find('#confirmModal');
@@ -124,18 +134,24 @@ function openConfirmationModal(text, confirmCallback, cancelCallback) {
 }
 
 function hideLabelAndShowEditor(context) {
+  'use strict';
+
   const outerContainer = $(context).closest('.modal-editor-switch');
   $('.modal-editor-switch-editor', outerContainer).show();
   $('.modal-editor-switch-label', outerContainer).hide();
 }
 
 function hideEditorAndShowLabel(context) {
+  'use strict';
+
   const outerContainer = $(context).closest('.modal-editor-switch');
   $('.modal-editor-switch-editor', outerContainer).hide();
   $('.modal-editor-switch-label', outerContainer).show();
 }
 
 $(() => {
+  'use strict';
+
   $('input[type=radio][name=addViaLdap]').on('change', function () {
     const ldapUserChecked = (this.value === 'true');
     $('.inputField.ldapUser').prop('disabled', !ldapUserChecked);
@@ -167,8 +183,6 @@ $(() => {
   });
 
   $('div.submit-container button.changeProjectAccess').on('click', function () {
-    'use strict';
-
     const container = $(this).parent();
     const postUrl = $('input:hidden[name=changeProjectAccessButton]', container).val();
     const modalText = $('button[data-confirmation]', container).attr('data-confirmation');
@@ -184,6 +198,8 @@ $(() => {
 });
 
 function submitChangeProjectAccess(postUrl) {
+  'use strict';
+
   $.ajax({
     url: postUrl,
     dataType: 'json',
@@ -202,6 +218,8 @@ function submitChangeProjectAccess(postUrl) {
 }
 
 $(document).ready(() => {
+  'use strict';
+
   $('.loaded-content').show();
   $('.loader').hide();
   $('[data-toggle="tooltip"]').tooltip();

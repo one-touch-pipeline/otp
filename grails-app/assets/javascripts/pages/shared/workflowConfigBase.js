@@ -21,6 +21,8 @@
  */
 
 $(() => {
+  'use strict';
+
   const selectorTypeSelector = $('#relatedSelectorType');
   selectorTypeSelector.on('change', (e) => {
     const types = $(e.target).val();

@@ -55,6 +55,8 @@ $.otp.processingPriority = {
      * Delete the priority from backend, if successful remove the row also from the data table
      */
   remove() {
+    'use strict';
+
     const oTable = this.getDataTable();
     const rowIndex = $('#pp-row').val();
     const data = oTable.row(rowIndex).data();
@@ -86,6 +88,8 @@ $.otp.processingPriority = {
   },
 
   validateName(input) {
+    'use strict';
+
     const rowIndex = $('#pp-row').val();
 
     const sValue = $('#pp-name').val();
@@ -113,6 +117,8 @@ $.otp.processingPriority = {
   },
 
   validatePriority(input) {
+    'use strict';
+
     const rowIndex = $('#pp-row').val();
 
     const sValue = $('#pp-priority').val();
@@ -140,6 +146,8 @@ $.otp.processingPriority = {
   },
 
   validateAllowedParallelWorkflowRuns(input) {
+    'use strict';
+
     const sValue = $('#pp-allowedParallelWorkflowRuns').val();
     const vFeedback = $('#vf-allowedParallelWorkflowRuns');
 
@@ -156,6 +164,8 @@ $.otp.processingPriority = {
   },
 
   validateString() {
+    'use strict';
+
     // nothing to do for custom validation
     this.toggleSaveButton();
   },
@@ -164,6 +174,8 @@ $.otp.processingPriority = {
      * Activate the save button only if all fields are valid
      */
   toggleSaveButton() {
+    'use strict';
+
     $('#processingPriorityForm')[0].checkValidity();
 
     $('#processingPriorityForm').addClass('was-validated');
@@ -176,6 +188,8 @@ $.otp.processingPriority = {
      * Save the processing priority if a new object is created or existing one to be modified
      */
   save() {
+    'use strict';
+
     const entityId = $('#pp-id').val();
     const rowIndex = $('#pp-row').val();
     const version = $('#pp-version').val();
@@ -238,23 +252,33 @@ $.otp.processingPriority = {
      * Helper functions
      */
   getDataTable() {
+    'use strict';
+
     return $.fn.dataTable.tables({ api: true });
   },
 
   getDialogObj() {
+    'use strict';
+
     return $('#processingPriorityModal');
   },
 
   openDialog() {
+    'use strict';
+
     return $('#processingPriorityModal').modal();
   },
 
   closeDialog() {
+    'use strict';
+
     $('#processingPriorityModal').modal('hide');
   }
 };
 
 $(document).ready(() => {
+  'use strict';
+
   /*
      * Initialization of a DataTable for Processing Priority List
      * ordered by priority

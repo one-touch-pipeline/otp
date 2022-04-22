@@ -158,6 +158,8 @@ $.otp = {
   },
 
   createAssetLink(path) {
+    'use strict';
+
     return $.otp.createLink({ controller: 'assets', action: path });
   }
 };
@@ -444,6 +446,8 @@ $.otp.getDownloadButton = (columnSelector, fileName, beforeDownload = (callback)
 };
 
 $.otp.getDownloadButtonServerSide = function (downloadLink) {
+  'use strict';
+
   return [{
     extend: 'csv',
     text: 'Download CSV',
@@ -463,6 +467,8 @@ $.otp.getDownloadButtonServerSide = function (downloadLink) {
  * Copies a given text to the clipboard.
  */
 $.otp.copyToClipboard = function (text) {
+  'use strict';
+
   const body = document.getElementsByTagName('body')[0];
   const $tempInput = document.createElement('INPUT');
   $.otp.toaster.showInfoToast('Info', 'Copied to clipboard.');
@@ -487,6 +493,8 @@ $.otp.copyToClipboard = function (text) {
  *        If other tags are in there, strange things will happen.
  */
 $.otp.applySelect2 = function (jqSelection) {
+  'use strict';
+
   /** Syncs the HTML5 validity styling between the 'real' select, and its Select2 imitation */
   function syncValidity(realSelect) {
     // voodoo to go from the 'real' select to its select2 imitation input-field.
@@ -529,6 +537,8 @@ $.otp.applySelect2 = function (jqSelection) {
 };
 
 $(document).ready(() => {
+  'use strict';
+
   $.otp.highlight(window.location.pathname);
 
   // apply select2 fancy search-box to all select-boxes that want it.

@@ -22,6 +22,8 @@
 
 $.otp.clusterJobDetailProgress = {
   register(id) {
+    'use strict';
+
     RGraph.AJAX($.otp.createLink({
       controller: 'clusterJobDetail',
       action: 'getStatesTimeDistribution',

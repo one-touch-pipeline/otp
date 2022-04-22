@@ -20,6 +20,8 @@
  * SOFTWARE.
  */
 $(document).ready(() => {
+  'use strict';
+
   $('#select-bulk').change(function () {
     const table = $('#selectSamplesTable').DataTable();
     const { checked } = this;
@@ -31,6 +33,8 @@ $(document).ready(() => {
 
 // eslint-disable-next-line no-unused-vars
 function downloadCsvOfSelectedSamples() {
+  'use strict';
+
   const table = $('#selectSamplesTable').DataTable();
 
   const selectedRows = table.rows().data();
@@ -81,6 +85,8 @@ function downloadCsvOfSelectedSamples() {
 
 // eslint-disable-next-line no-unused-vars
 function uploadCsvOfSelectedSamples() {
+  'use strict';
+
   const { files } = $('#file').get(0);
 
   if (files.length) {

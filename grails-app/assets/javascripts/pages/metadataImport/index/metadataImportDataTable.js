@@ -21,6 +21,8 @@
  */
 
 $(() => {
+  'use strict';
+
   let cell = $('.anchor:target').parent();
   cell.css('border', '2px solid black');
   $(window).on('hashchange', () => {
@@ -34,6 +36,8 @@ $(() => {
 
 // sticky header
 $(() => {
+  'use strict';
+
   $('table').each(function () {
     if ($(this).find('thead').length > 0 && $(this).find('th').length > 0) {
       // Clone <thead>
@@ -209,6 +213,8 @@ $(() => {
 
 // fixed horizontal scrollbar
 $(($) => {
+  'use strict';
+
   const fixedBarTemplate = '<div class="fixed-scrollbar"><div></div></div>';
   const fixedBarCSS = {
     display: 'none', overflowX: 'scroll', position: 'fixed', width: '100%', bottom: 0

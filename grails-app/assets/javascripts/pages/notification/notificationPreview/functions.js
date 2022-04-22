@@ -21,6 +21,8 @@
  */
 
 $(() => {
+  'use strict';
+
   const sendButton = $('#send-button');
 
   sendButton.on('click', () => window.confirm('Really send the notification?'));

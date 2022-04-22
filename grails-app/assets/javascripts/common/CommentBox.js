@@ -21,11 +21,15 @@
  */
 
 $.setDisableForControls = function (value) {
+  'use strict';
+
   $('#button-save').prop('disabled', value);
   $('#button-cancel').prop('disabled', value);
 };
 
 $(() => {
+  'use strict';
+
   const container = $('#comment-box-container');
   const commentContent = container.find('#comment-content');
   let lastSavedComment = commentContent.val();
@@ -54,8 +58,6 @@ $(() => {
     });
   });
   $('#button-cancel').on('click', () => {
-    'use strict';
-
     $.setDisableForControls(true);
     commentContent.val(lastSavedComment);
   });

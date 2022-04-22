@@ -113,6 +113,8 @@ $.otp.workflows.processingStep = {
     $.otp.workflows.processingStep.parameters(outputParamSelector, false);
   },
   promptClusterJobIds(clusterJobIds) {
+    'use strict';
+
     prompt('All cluster job IDs', clusterJobIds);
   }
 };

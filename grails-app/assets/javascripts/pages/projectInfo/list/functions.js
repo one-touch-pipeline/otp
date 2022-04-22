@@ -22,6 +22,8 @@
 
 $.otp.projectInfo = {
   confirmCompleteTransfer(event) {
+    'use strict';
+
     if (!window.confirm(`Are you sure that this transfer is completed?
      (receipt acknowledged? files deleted? disks wiped? etc..)`)) {
       event.preventDefault();
@@ -29,6 +31,8 @@ $.otp.projectInfo = {
   },
 
   confirmProjectInfoDelete(event) {
+    'use strict';
+
     if (!window.confirm(`Are you sure that you want to permanently
      delete this document and any transfers based on it?`)) {
       event.preventDefault();

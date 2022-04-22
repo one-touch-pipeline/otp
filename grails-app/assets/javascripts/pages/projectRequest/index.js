@@ -22,6 +22,8 @@
 
 // activate the possibility to provide own input for tag-select items
 $(document).ready(() => {
+  'use strict';
+
   $('.tag-select').select2({
     tags: true,
     theme: 'bootstrap4'
@@ -29,6 +31,8 @@ $(document).ready(() => {
 });
 
 $(() => {
+  'use strict';
+
   // disable and enable the date picker for storageUntil when defined by a user
   const storageUntil = $('input#storageUntil');
   $('select#storagePeriod').on('change', (e) => {

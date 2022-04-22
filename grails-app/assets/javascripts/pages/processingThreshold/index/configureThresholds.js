@@ -21,6 +21,8 @@
  */
 
 $(() => {
+  'use strict';
+
   $('form.confirm').on('submit', (e) => {
     if (!window.confirm('Are you sure you want to create these thresholds?')) {
       e.preventDefault();

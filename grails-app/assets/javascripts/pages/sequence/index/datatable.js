@@ -23,6 +23,8 @@
 $.otp.sequence = {
 
   register() {
+    'use strict';
+
     const searchCriteria = $.otp.dataTableFilter.register($('#searchCriteriaTable'), () => {
       $('#sequenceTable').dataTable().fnDraw();
     });
@@ -185,5 +187,7 @@ $.otp.sequence = {
 };
 
 $(() => {
+  'use strict';
+
   $.otp.sequence.register();
 });

@@ -22,6 +22,8 @@
 
 // eslint-disable-next-line no-unused-vars
 function onEditUnixGroup() {
+  'use strict';
+
   $('#button-edit-unixGroup').hide();
   $('#button-save-unixGroup').show();
   $('#unixGroupInput').prop('disabled', false);
@@ -29,6 +31,8 @@ function onEditUnixGroup() {
 
 // eslint-disable-next-line no-unused-vars
 function onSaveUnixGroup() {
+  'use strict';
+
   const unixGroupInputField = $('#unixGroupInput');
   const oldUnixGroup = unixGroupInputField.attr('data-fixed');
 
@@ -88,6 +92,8 @@ function updateUnixGroup(oldUnixGroup, force = false) {
 
 // eslint-disable-next-line no-unused-vars
 function onEditAnalysisDir() {
+  'use strict';
+
   $('#button-edit-analysisDir').hide();
   $('#button-save-analysisDir').show();
   $('#analysisDirInput').prop('disabled', false);
@@ -95,6 +101,8 @@ function onEditAnalysisDir() {
 
 // eslint-disable-next-line no-unused-vars
 function onSaveAnalysisDir() {
+  'use strict';
+
   const analysisDirInputField = $('#analysisDirInput');
   const oldAnalysisDir = analysisDirInputField.attr('data-fixed');
 
@@ -156,6 +164,8 @@ function updateAnalysisDir(oldAnalysisDir, force = false) {
 }
 
 function openConfirmationModal(text, confirmCallback, cancelCallback) {
+  'use strict';
+
   const modal = $('#confirmationUserGroupModal');
   const modalBody = $('.modal-body', modal);
   const confirmButton = modal.find('#confirmModal');

@@ -21,6 +21,8 @@
  */
 
 $(() => {
+  'use strict';
+
   $('button.workflow').on('click', () => {
     $('.workflow').toggle();
   });

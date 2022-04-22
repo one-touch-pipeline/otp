@@ -101,6 +101,8 @@ $.otp.sampleIdentifierOverviewTable = {
   },
 
   formatSampleIdentifier(data) {
+    'use strict';
+
     return $.map(data, (it) => `<span class="${(it.withdrawn ? 'withdrawn' : '')}" title="${it.comments}">
                                   ${it.text}
                                 </span>`).join(', ');

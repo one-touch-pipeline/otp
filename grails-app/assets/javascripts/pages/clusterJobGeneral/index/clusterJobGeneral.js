@@ -89,6 +89,8 @@ $.otp.clusterJobGeneralTable = {
   },
 
   update() {
+    'use strict';
+
     $('#clusterJobGeneralTable').DataTable().destroy();
     $.otp.clusterJobGeneralTable.register();
   }

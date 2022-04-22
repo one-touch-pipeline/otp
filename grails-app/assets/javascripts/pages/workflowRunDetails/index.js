@@ -20,6 +20,8 @@
  * SOFTWARE.
  */
 $(() => {
+  'use strict';
+
   /**
      * Generate the child tables which can be opened by the show/hide button inside the steps table.
      *
