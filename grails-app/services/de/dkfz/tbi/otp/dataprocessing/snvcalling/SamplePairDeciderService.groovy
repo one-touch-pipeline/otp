@@ -40,7 +40,7 @@ class SamplePairDeciderService {
     List<SamplePair> findOrCreateSamplePairsForProject(Project project) {
         assert project != null
 
-        final String HQL = """
+        final String hql = """
             select
                 mwp
             from
@@ -54,7 +54,7 @@ class SamplePairDeciderService {
                 and sampleTypePerProject.sampleType = mwp.sample.sampleType
             """
 
-        List<AbstractMergingWorkPackage> mergingWorkPackages = AbstractMergingWorkPackage.executeQuery(HQL, [
+        List<AbstractMergingWorkPackage> mergingWorkPackages = AbstractMergingWorkPackage.executeQuery(hql, [
                 project   : project,
                 seqTypes  : SeqTypeService.allAnalysableSeqTypes,
                 categories: SampleTypePerProject.Category.values().findAll { it.correspondingCategory() },

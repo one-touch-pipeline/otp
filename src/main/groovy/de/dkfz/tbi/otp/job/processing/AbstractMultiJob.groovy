@@ -55,15 +55,15 @@ abstract class AbstractMultiJob extends AbstractEndStateAwareJobImpl implements 
     final void execute() throws Exception {
         synchronized (lockForJobCollections) {
             Collection<ClusterJob> monitoredClusterJobs = ClusterJob.findAllByProcessingStepAndValidated(processingStep, false)
-            final List<ProcessingStepUpdate> UPDATES = ProcessingStepUpdate.findAllByProcessingStep(
+            final List<ProcessingStepUpdate> updates = ProcessingStepUpdate.findAllByProcessingStep(
                     processingStep, [sort: "id", order: "desc", max: 2])
-            assert UPDATES[0].state == ExecutionState.STARTED
+            assert updates[0].state == ExecutionState.STARTED
             if (monitoredClusterJobs.empty) {
-                assert UPDATES[1].state == ExecutionState.CREATED
+                assert updates[1].state == ExecutionState.CREATED
                 assert ClusterJob.findAllByProcessingStep(processingStep).empty
                 callExecute()
             } else {
-                assert UPDATES[1].state == ExecutionState.RESUMED
+                assert updates[1].state == ExecutionState.RESUMED
                 log.info "The job has been resumed."
             }
         }
@@ -80,11 +80,11 @@ abstract class AbstractMultiJob extends AbstractEndStateAwareJobImpl implements 
 
     @Override
     void finished(final ClusterJob finishedClusterJob) {
-        final boolean ALL_FINISHED = ClusterJob.countByProcessingStepAndCheckStatus(processingStep, ClusterJob.CheckStatus.CHECKING) == 0
+        final boolean allFinished = ClusterJob.countByProcessingStepAndCheckStatus(processingStep, ClusterJob.CheckStatus.CHECKING) == 0
 
-        if (ALL_FINISHED) {
-            final int FINISHED_COUNT = ClusterJob.countByProcessingStepAndCheckStatus(processingStep, ClusterJob.CheckStatus.FINISHED)
-            log.info "All ${FINISHED_COUNT} cluster jobs have finished."
+        if (allFinished) {
+            final int finishedCount = ClusterJob.countByProcessingStepAndCheckStatus(processingStep, ClusterJob.CheckStatus.FINISHED)
+            log.info "All ${finishedCount} cluster jobs have finished."
             /* The specification of {@link MonitoringJob#finished(String, Realm)} says that this
              * finished() method shall return quickly. So call callExecute() asynchronously.
              */
@@ -122,7 +122,7 @@ abstract class AbstractMultiJob extends AbstractEndStateAwareJobImpl implements 
                     ClusterJob.CheckStatus.FINISHED,
                     false)
 
-            final NextAction ACTION = execute(ClusterJobIdentifier.asClusterJobIdentifierList(clusterJobs))
+            final NextAction action = execute(ClusterJobIdentifier.asClusterJobIdentifierList(clusterJobs))
             ClusterJob.withTransaction {
                 clusterJobs*.refresh().each { ClusterJob finishedClusterJob ->
                     assert finishedClusterJob.processingStep.id == processingStep.id
@@ -130,7 +130,7 @@ abstract class AbstractMultiJob extends AbstractEndStateAwareJobImpl implements 
                     finishedClusterJob.validated = true
                     assert finishedClusterJob.save(flush: true)
                 }
-                performAction(ACTION)
+                performAction(action)
             }
         } finally {
             synchronized (lockForResumable) {

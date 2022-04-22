@@ -46,9 +46,9 @@ class WorkflowConfigService {
     String getNextConfigVersion(String configVersion) {
         if (configVersion) {
             List<String> versions = configVersion.split("_")
-            final int MAIN_CONFIG_VERSION_INDEX = 0
-            final int SUB_CONFIG_VERSION_INDEX = 1
-            return versions[MAIN_CONFIG_VERSION_INDEX] + "_" + (versions[SUB_CONFIG_VERSION_INDEX].toInteger() + 1)
+            final int mainConfigVersionIndex = 0
+            final int subConfigVersionIndex = 1
+            return versions[mainConfigVersionIndex] + "_" + (versions[subConfigVersionIndex].toInteger() + 1)
         } else {
             return "v1_0"
         }

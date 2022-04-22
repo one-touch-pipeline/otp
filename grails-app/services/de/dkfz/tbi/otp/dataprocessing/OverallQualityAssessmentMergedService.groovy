@@ -44,7 +44,7 @@ where
 
         String selectSample = sample ? "and mergingWorkPackage.sample = :sample" : ""
 
-        final String HQL = """
+        final String hql = """
             select
                 abstractQualityAssessment
             from
@@ -85,7 +85,7 @@ where
             parameters.put("sample", sample)
         }
 
-        List<AbstractQualityAssessment> qas = AbstractQualityAssessment.executeQuery(HQL.toString(), parameters, [readOnly: true])
+        List<AbstractQualityAssessment> qas = AbstractQualityAssessment.executeQuery(hql.toString(), parameters, [readOnly: true])
         return qas
     }
 
@@ -94,7 +94,7 @@ where
         if (!abstractQualityAssessments) {
             return []
         }
-        final String HQL = """
+        final String hql = """
             select distinct
                 referenceGenomeEntry
             from
@@ -110,7 +110,7 @@ where
                 chromosomeAliases: chromosomeAliases,
         ]
 
-        List<ReferenceGenomeEntry> result = ReferenceGenomeEntry.executeQuery(HQL.toString(), parameters, [readOnly: true])
+        List<ReferenceGenomeEntry> result = ReferenceGenomeEntry.executeQuery(hql.toString(), parameters, [readOnly: true])
         return result
     }
 }

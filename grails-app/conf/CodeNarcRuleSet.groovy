@@ -1023,7 +1023,8 @@ All the Rules that will be used for OTP
         priority = CRITICAL
     }
     VariableName {
-        priority = MIDDLE
+        priority = DEFAULT
+        regex = /_?[a-z][a-zA-Z0-9]*/
         doNotApplyToFileNames = TEST
     }
 

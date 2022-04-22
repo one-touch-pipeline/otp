@@ -33,11 +33,11 @@ class FileNameGenerator {
      * @return unique filename with timestamp
      */
     static String getUniqueFileNameWithTimestamp(String filename) {
-        final int SPLITS = 2
+        final int splits = 2
         String dateString = TimeFormats.DATE_TIME_SECONDS.getFormattedDate(new Date())
-        String[] splittedFileName = filename.split("\\.", SPLITS)
+        String[] splittedFileName = filename.split("\\.", splits)
 
-        if (splittedFileName.size() == SPLITS) {
+        if (splittedFileName.size() == splits) {
             return splittedFileName[0] + "_" + dateString + "." + splittedFileName[1]
         }
         return filename + "_" + dateString

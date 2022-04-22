@@ -75,7 +75,7 @@ class ExecuteRunYapsaJob extends AbstractOtpJob implements AutoRestartableJob {
 
     @SuppressWarnings("LineLength") // suppressed because breaking the line would break the commands
     private String createScript(RunYapsaInstance runYapsaInstance) {
-        final RunYapsaConfig CONFIG = runYapsaInstance.config
+        final RunYapsaConfig config = runYapsaInstance.config
         Path outputDirectory = runYapsaService.getWorkDirectory(runYapsaInstance)
         ReferenceGenome referenceGenome = runYapsaInstance.referenceGenome
 
@@ -105,7 +105,7 @@ class ExecuteRunYapsaJob extends AbstractOtpJob implements AutoRestartableJob {
         return """\
             ${moduleLoader}
             ${rActivation}
-            ${runYapsaActivationPrefix} ${CONFIG.programVersion}
+            ${runYapsaActivationPrefix} ${config.programVersion}
 
             ${runYapsaCall.join(" ")}
 

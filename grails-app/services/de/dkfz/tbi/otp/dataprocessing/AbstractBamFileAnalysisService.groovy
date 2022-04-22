@@ -59,11 +59,11 @@ abstract class AbstractBamFileAnalysisService<T extends BamFilePairAnalysis> imp
      */
     @SuppressWarnings('SpaceInsideParentheses')
     SamplePair samplePairForProcessing(int minPriority, SamplePair sp = null) {
-        final String WORKPACKAGE = "workPackage"
-        final String SAMPLE = "${WORKPACKAGE}.sample"
-        final String SAMPLE_TYPE = "${SAMPLE}.sampleType"
-        final String SEQ_TYPE = "${WORKPACKAGE}.seqType"
-        final String INDIVIDUAL = "${SAMPLE}.individual"
+        final String workPackage = "workPackage"
+        final String sample = "${workPackage}.sample"
+        final String sampleType = "${sample}.sampleType"
+        final String seqType = "${workPackage}.seqType"
+        final String individual = "${sample}.individual"
 
         double threshold = processingOptionService.findOptionAsDouble(ProcessingOption.OptionName.PIPELINE_MIN_COVERAGE, analysisType.toString())
 
@@ -72,7 +72,7 @@ abstract class AbstractBamFileAnalysisService<T extends BamFilePairAnalysis> imp
             // check that the file is not withdrawn
             "       WHERE ambf${number}.withdrawn = false " +
             //check that the bam file belongs to the SamplePair
-            "       AND ambf${number}.${WORKPACKAGE} = sp.mergingWorkPackage${number} " +
+            "       AND ambf${number}.${workPackage} = sp.mergingWorkPackage${number} " +
             //check that transfer workflow is finished
             "       AND ambf${number}.md5sum IS NOT NULL " +
                     pipelineSpecificBamFileChecks(number) +
@@ -81,15 +81,15 @@ abstract class AbstractBamFileAnalysisService<T extends BamFilePairAnalysis> imp
 
             //check that coverage is high enough & number of lanes are enough
             "       AND EXISTS ( FROM ProcessingThresholds pt " +
-            "           WHERE pt.project = ambf${number}.${INDIVIDUAL}.project " +
-            "           AND pt.seqType = ambf${number}.${SEQ_TYPE} " +
-            "           AND pt.sampleType = ambf${number}.${SAMPLE_TYPE} " +
+            "           WHERE pt.project = ambf${number}.${individual}.project " +
+            "           AND pt.seqType = ambf${number}.${seqType} " +
+            "           AND pt.sampleType = ambf${number}.${sampleType} " +
             "           AND (pt.coverage is null OR ambf${number}.coverage IS NULL OR pt.coverage <= ambf${number}.coverage) " +
             "           AND (:threshold <= ambf${number}.coverage OR ambf${number}.coverage IS NULL) " +
             "           AND (pt.numberOfLanes is null OR ambf${number}.numberOfMergedLanes IS NULL OR pt.numberOfLanes <= ambf${number}.numberOfMergedLanes) " +
             "           ) " +
             //check that the file is in the workpackage
-            "       AND ambf${number}.${WORKPACKAGE}.bamFileInProjectFolder = ambf${number} " +
+            "       AND ambf${number}.${workPackage}.bamFileInProjectFolder = ambf${number} " +
             //check that the file file operation status ist processed
             "       AND ambf${number}.fileOperationStatus = '${AbstractMergedBamFile.FileOperationStatus.PROCESSED}' " +
             //check that the id is the last for that MergingWorkPackage

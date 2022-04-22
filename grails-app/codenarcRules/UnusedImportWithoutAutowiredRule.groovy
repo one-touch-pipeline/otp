@@ -71,13 +71,13 @@ class UnusedImportWithoutAutowiredRule extends AbstractRule {
     }
 
     private boolean isImportStatementForAlias(String line, String pattern) {
-        final IMPORT_PATTERN = /import\s+.*/ + pattern
-        line =~ IMPORT_PATTERN
+        final importPattern = /import\s+.*/ + pattern
+        line =~ importPattern
     }
 
     private int countUsage(String line, String pattern) {
-        final INVALID = '[^a-zA-Z0-9_\\$]'
-        def regexp = /($INVALID|^|\$)${pattern}($INVALID|$)/
+        final String invalid = '[^a-zA-Z0-9_\\$]'
+        String regexp = /($invalid|^|\$)${pattern}($invalid|$)/
         return (line =~ regexp).count
     }
 }
