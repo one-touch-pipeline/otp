@@ -47,6 +47,7 @@ class LinkFilesToFinalDestinationServiceIntegrationTests implements DomainFactor
     Realm realm
     TestConfigService configService
 
+    @SuppressWarnings("PublicInstanceField") // must be public in JUnit tests
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder()
 

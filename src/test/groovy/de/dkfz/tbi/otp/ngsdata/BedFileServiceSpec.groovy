@@ -42,7 +42,7 @@ class BedFileServiceSpec extends Specification implements DataTest, ServiceUnitT
     }
 
     @Rule
-    public TemporaryFolder temporaryFolder = new TemporaryFolder()
+    TemporaryFolder temporaryFolder = new TemporaryFolder()
 
     BedFile bedFile
     File referenceGenomesBaseDirectory

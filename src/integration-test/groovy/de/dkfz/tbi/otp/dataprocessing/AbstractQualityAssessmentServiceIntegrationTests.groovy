@@ -49,6 +49,7 @@ class AbstractQualityAssessmentServiceIntegrationTests {
 
     TestData data = new TestData()
 
+    @SuppressWarnings("PublicInstanceField") // must be public in JUnit tests
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder()
 

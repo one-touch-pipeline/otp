@@ -62,7 +62,7 @@ class AbstractRoddyJobIntegrationSpec extends Specification {
     String stderr
 
     @Rule
-    public TemporaryFolder tmpDir = new TemporaryFolder()
+    TemporaryFolder tmpDir = new TemporaryFolder()
 
     void setupData() {
         executeCommandCounter = 0

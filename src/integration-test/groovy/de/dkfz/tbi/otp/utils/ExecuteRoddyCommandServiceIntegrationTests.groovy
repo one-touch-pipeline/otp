@@ -53,6 +53,7 @@ class ExecuteRoddyCommandServiceIntegrationTests {
     RemoteShellHelper remoteShellHelper
     ProcessingOptionService processingOptionService
 
+    @SuppressWarnings("PublicInstanceField") // must be public in JUnit tests
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder()
 

@@ -76,7 +76,7 @@ class RoddyBamFileDomainSpec extends Specification implements DomainUnitTest<Rod
     }
 
     @Rule
-    public TemporaryFolder tmpDir
+    TemporaryFolder tmpDir
 
     static final String FIRST_DATAFILE_NAME = "4_NoIndex_L004_R1_complete_filtered.fastq.gz"
     static final String SECOND_DATAFILE_NAME = "4_NoIndex_L004_R2_complete_filtered.fastq.gz"

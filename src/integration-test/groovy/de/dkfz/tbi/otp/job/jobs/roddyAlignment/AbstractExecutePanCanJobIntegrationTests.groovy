@@ -60,6 +60,7 @@ class AbstractExecutePanCanJobIntegrationTests implements DomainFactoryCore, Dom
 
     String workflowSpecificCValues = "workflowSpecificCValues"
 
+    @SuppressWarnings("PublicInstanceField") // must be public in JUnit tests
     @Rule
     public TemporaryFolder tmpDir = new TemporaryFolder()
 

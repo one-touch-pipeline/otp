@@ -83,7 +83,7 @@ class ExecuteRoddyIndelJobSpec extends Specification implements DataTest {
     }
 
     @Rule
-    public TemporaryFolder temporaryFolder
+    TemporaryFolder temporaryFolder
 
     void "prepareAndReturnWorkflowSpecificCValues, when roddyIndelCallingInstance is null, throw assert"() {
         when:

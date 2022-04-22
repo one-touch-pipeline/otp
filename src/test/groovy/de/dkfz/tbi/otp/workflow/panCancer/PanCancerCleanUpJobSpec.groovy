@@ -40,7 +40,7 @@ import java.nio.file.Path
 class PanCancerCleanUpJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory, RoddyPancanFactory {
 
     @Rule
-    public TemporaryFolder temporaryFolder
+    TemporaryFolder temporaryFolder
 
     @Override
     Class[] getDomainClassesToMock() {

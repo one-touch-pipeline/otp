@@ -40,7 +40,7 @@ import de.dkfz.tbi.otp.security.UserAndRoles
 class ReferenceGenomeServiceIntegrationSpec extends Specification implements UserAndRoles, DomainFactoryCore {
 
     @Rule
-    public TemporaryFolder temporaryFolder = new TemporaryFolder()
+    TemporaryFolder temporaryFolder = new TemporaryFolder()
 
     ReferenceGenomeService referenceGenomeService
     TestConfigService configService

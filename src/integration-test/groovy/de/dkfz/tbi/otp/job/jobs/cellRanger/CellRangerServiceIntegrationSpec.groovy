@@ -49,7 +49,7 @@ import java.nio.file.NoSuchFileException
 class CellRangerServiceIntegrationSpec extends Specification implements UserAndRoles, CellRangerFactory {
 
     @Rule
-    public TemporaryFolder temporaryFolder
+    TemporaryFolder temporaryFolder
 
     @Autowired
     CellRangerService cellRangerService

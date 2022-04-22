@@ -47,7 +47,7 @@ import java.nio.file.Path
 class SnvCallingServiceIntegrationSpec extends Specification implements DomainFactoryCore, DomainFactoryProcessingPriority {
 
     @Rule
-    public TemporaryFolder temporaryFolder
+    TemporaryFolder temporaryFolder
 
     final static String ARBITRARY_INSTANCE_NAME = '2014-08-25_15h32'
     final static double COVERAGE_TOO_LOW = 20.0

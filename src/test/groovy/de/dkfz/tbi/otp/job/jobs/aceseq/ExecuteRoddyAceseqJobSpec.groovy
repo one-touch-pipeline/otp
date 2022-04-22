@@ -84,7 +84,7 @@ class ExecuteRoddyAceseqJobSpec extends Specification implements DataTest {
     }
 
     @Rule
-    public TemporaryFolder temporaryFolder
+    TemporaryFolder temporaryFolder
 
     AceseqInstance aceseqInstance
 

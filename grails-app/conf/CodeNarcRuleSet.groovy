@@ -464,7 +464,7 @@ All the Rules that will be used for OTP
         priority = CRITICAL
     }
     PublicInstanceField {
-        priority = MIDDLE
+        priority = DEFAULT
     }
     ReturnsNullInsteadOfEmptyArray {
         priority = CRITICAL

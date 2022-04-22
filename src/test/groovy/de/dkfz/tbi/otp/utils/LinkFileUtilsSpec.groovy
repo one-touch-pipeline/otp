@@ -49,7 +49,7 @@ class LinkFileUtilsSpec extends Specification implements DataTest {
     Realm realm
 
     @Rule
-    public TemporaryFolder tmpDir = new TemporaryFolder()
+    TemporaryFolder tmpDir = new TemporaryFolder()
 
     void setup() {
         testDirectory = tmpDir.newFolder()

@@ -61,7 +61,7 @@ class LsdfFileServiceSpec extends Specification implements DataTest, DomainFacto
     }
 
     @Rule
-    public TemporaryFolder tempFolder = new TemporaryFolder()
+    TemporaryFolder tempFolder = new TemporaryFolder()
 
     void "test ensureFileIsReadableAndNotEmpty"() {
         given:

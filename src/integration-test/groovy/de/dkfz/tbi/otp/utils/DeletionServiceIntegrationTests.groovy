@@ -51,6 +51,7 @@ class DeletionServiceIntegrationTests implements UserAndRoles {
     SnvCallingService snvCallingService
     FileService fileService
 
+    @SuppressWarnings("PublicInstanceField") // must be public in JUnit tests
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder()
 

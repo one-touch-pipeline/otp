@@ -76,7 +76,7 @@ class RoddyBamFileServiceSpec extends Specification implements ServiceUnitTest<R
     static final String COMMON_PREFIX = "4_NoIndex_L004"
 
     @Rule
-    public TemporaryFolder temporaryFolder
+    TemporaryFolder temporaryFolder
 
     RoddyBamFile roddyBamFile
     String baseDir = "/base-dir"

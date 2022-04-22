@@ -44,7 +44,7 @@ class JobStateLogFileSpec extends Specification implements DataTest {
     ClusterJobIdentifier clusterJobIdentifier
 
     @Rule
-    public TemporaryFolder tmpDir
+    TemporaryFolder tmpDir
 
     @Override
     Class<?>[] getDomainClassesToMock() {

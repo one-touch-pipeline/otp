@@ -84,7 +84,7 @@ class ExecuteRoddySnvJobSpec extends Specification implements DataTest {
     static final int MIN_CONFIDENCE_SCORE = 8
 
     @Rule
-    public TemporaryFolder temporaryFolder
+    TemporaryFolder temporaryFolder
 
     void "prepareAndReturnWorkflowSpecificCValues, when roddySnvCallingInstance is null, throw assert"() {
         when:

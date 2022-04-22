@@ -68,7 +68,7 @@ class AbstractRoddyJobSpec extends Specification implements DataTest {
     TestConfigService testConfigService
 
     @Rule
-    public TemporaryFolder tmpDir = new TemporaryFolder()
+    TemporaryFolder tmpDir = new TemporaryFolder()
 
     void setup() {
         roddyBamFile = DomainFactory.createRoddyBamFile(

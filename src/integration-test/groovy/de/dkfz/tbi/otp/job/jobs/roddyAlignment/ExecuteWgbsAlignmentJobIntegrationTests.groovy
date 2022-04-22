@@ -47,6 +47,7 @@ class ExecuteWgbsAlignmentJobIntegrationTests {
     ReferenceGenomeService referenceGenomeService
     ChromosomeIdentifierSortingService chromosomeIdentifierSortingService
 
+    @SuppressWarnings("PublicInstanceField") // must be public in JUnit tests
     @Rule
     public TemporaryFolder tmpDir = new TemporaryFolder()
 

@@ -54,7 +54,7 @@ class ReferenceGenomeServiceSpec extends Specification implements DataTest, Serv
     File file
 
     @Rule
-    public TemporaryFolder temporaryFolder
+    TemporaryFolder temporaryFolder
 
     @Override
     Class<?>[] getDomainClassesToMock() {

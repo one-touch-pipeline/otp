@@ -45,6 +45,7 @@ class ReferenceGenomeServiceTests {
     File statFile
     File chromosomeLengthFile
 
+    @SuppressWarnings("PublicInstanceField") // must be public in JUnit tests
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder()
 

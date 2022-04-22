@@ -50,6 +50,7 @@ class ExecutePanCanJobIntegrationTests implements RoddyRnaFactory {
     FileSystemService fileSystemService
     BedFileService bedFileService
 
+    @SuppressWarnings("PublicInstanceField") // must be public in JUnit tests
     @Rule
     public TemporaryFolder tmpDir = new TemporaryFolder()
 

@@ -32,7 +32,7 @@ import de.dkfz.tbi.otp.TestConfigService
 class ErrorLogServiceSpec extends Specification implements DataTest {
 
     @Rule
-    public TemporaryFolder tmpDir = new TemporaryFolder()
+    TemporaryFolder tmpDir = new TemporaryFolder()
 
     ErrorLogService errorLogService
 

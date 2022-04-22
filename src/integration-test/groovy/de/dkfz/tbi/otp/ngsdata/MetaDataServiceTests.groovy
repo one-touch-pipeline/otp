@@ -42,6 +42,7 @@ class MetaDataServiceTests implements UserAndRoles {
     MetaDataService metaDataService
     AclUtilService aclUtilService
 
+    @SuppressWarnings("PublicInstanceField") // must be public in JUnit tests
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder()
 

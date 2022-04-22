@@ -42,7 +42,7 @@ import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 class AbstractRoddyAlignmentJobSpec extends Specification implements DataTest, RoddyRnaFactory {
 
     @Rule
-    public TemporaryFolder temporaryFolder
+    TemporaryFolder temporaryFolder
 
     @Override
     Class<?>[] getDomainClassesToMock() {
