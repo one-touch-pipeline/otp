@@ -33,7 +33,10 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.ProjectFieldsDomainFactory
 import de.dkfz.tbi.otp.domainFactory.UserDomainFactory
+import de.dkfz.tbi.otp.domainFactory.taxonomy.TaxonomyFactory
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.ngsdata.SeqCenter
+import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.project.*
 import de.dkfz.tbi.otp.project.additionalField.*
 import de.dkfz.tbi.otp.searchability.Keyword
@@ -45,7 +48,7 @@ import java.time.LocalDate
 
 @Integration
 @Rollback
-class ProjectRequestServiceIntegrationSpec extends Specification implements UserDomainFactory, UserAndRoles, ProjectFieldsDomainFactory {
+class ProjectRequestServiceIntegrationSpec extends Specification implements UserDomainFactory, UserAndRoles, ProjectFieldsDomainFactory, TaxonomyFactory {
 
     ProjectRequestService projectRequestService
     ProcessingOptionService processingOptionService
@@ -423,6 +426,8 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         given:
         createAllBasicProjectRoles()
         User currentUser = createUser()
+        SeqCenter seqCenter = createSeqCenter()
+        SpeciesWithStrain speciesWithStrain = createSpeciesWithStrain()
         List<Keyword> keywords = [createKeyword(), createKeyword()]
         Set<ProjectRequestUser> users = [createProjectRequestUser([projectRoles: [pi]]), createProjectRequestUser()]
         ProjectRequestPersistentState projectRequestPersistentState = createProjectRequestPersistentState()
@@ -431,11 +436,14 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
                 name                    : "projectRequest_${nextId}",
                 description             : "A description, that is long enough to fulfill the required length of the command object.",
                 seqTypes                : [createSeqType(), createSeqType()],
+                customSeqTypes          : ["TestSeqType", "TestSeqType2"],
                 approxNoOfSamples       : 12,
                 storagePeriod           : storagePeriod,
                 storageUntil            : storageUntil,
+                speciesWithStrains      : [speciesWithStrain],
                 customSpeciesWithStrains: ["customSpeciesWithStrains1", "customSpeciesWithStrains2"],
-                sequencingCenters       : ["TestCenter", "TestCenter2"],
+                sequencingCenters       : [seqCenter],
+                customSequencingCenters : ["TestCenter", "TestCenter2"],
                 projectRequest          : projectRequest,
                 keywords                : keywords,
                 requesterComment        : "Comments for the request.",

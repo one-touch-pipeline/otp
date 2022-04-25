@@ -30,6 +30,7 @@
 <head>
     <title>${g.message(code: "projectRequest.view.title", args: [projectRequest.name])}</title>
     <asset:javascript src="taglib/NoSwitchedUser.js"/>
+    <asset:javascript src="pages/projectRequest/view.js"/>
     <asset:stylesheet src="pages/projectRequest/index.less"/>
 </head>
 
@@ -104,7 +105,7 @@
                     <g:if test="${projectRequest.customSpeciesWithStrains}">
                         <tr>
                             <td>${g.message(code: "project.customSpeciesWithStrain")}</td>
-                            <td>${projectRequest.customSpeciesWithStrains}</td>
+                            <td>${projectRequest.customSpeciesWithStrains?.join(", ")}</td>
                         </tr>
                     </g:if>
 
@@ -112,6 +113,13 @@
                         <td>${g.message(code: "projectRequest.sequencingCenter")}</td>
                         <td>${projectRequest.sequencingCenters?.join(", ")}</td>
                     </tr>
+                    <g:if test="${projectRequest.customSequencingCenters}">
+                        <tr>
+                            <td>${g.message(code: "projectRequest.customSequencingCenter")}</td>
+                            <td>${projectRequest.customSequencingCenters?.join(", ")}</td>
+                        </tr>
+                    </g:if>
+
                     <tr>
                         <td>${g.message(code: "projectRequest.approxNoOfSamples")}</td>
                         <td>${projectRequest.approxNoOfSamples}</td>
@@ -120,6 +128,12 @@
                         <td>${g.message(code: "projectRequest.seqTypes")}</td>
                         <td>${projectRequest.seqTypes?.join(", ")}</td>
                     </tr>
+                    <g:if test="${projectRequest.customSeqTypes}">
+                        <tr>
+                            <td>${g.message(code: "projectRequest.customSeqTypes")}</td>
+                            <td>${projectRequest.customSeqTypes?.join(", ")}</td>
+                        </tr>
+                    </g:if>
                     <g:each in="${abstractFields}" var="abstractField" status="index">
                         <tr>
                             <td><g:message code="${abstractField.name}"/></td>

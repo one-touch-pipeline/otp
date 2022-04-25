@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.project
 import de.dkfz.tbi.otp.Comment
 import de.dkfz.tbi.otp.CommentableWithHistory
 import de.dkfz.tbi.otp.ngsdata.ProjectRoleService
+import de.dkfz.tbi.otp.ngsdata.SeqCenter
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.project.additionalField.AbstractFieldValue
@@ -41,9 +42,11 @@ class ProjectRequest implements ProjectPropertiesGivenWithRequest, Entity, Comme
     ProjectRequestPersistentState state
     Set<String> customSpeciesWithStrains
     Set<String> keywords
-    Set<String> sequencingCenters
+    Set<SeqCenter> sequencingCenters
+    Set<String> customSequencingCenters
     Integer approxNoOfSamples
     Set<SeqType> seqTypes
+    Set<String> customSeqTypes
     String requesterComment
     List<Comment> comments
 
@@ -89,6 +92,7 @@ class ProjectRequest implements ProjectPropertiesGivenWithRequest, Entity, Comme
             users             : ProjectRequestUser,
             projectFields     : AbstractFieldValue,
             speciesWithStrains: SpeciesWithStrain,
+            sequencingCenters : SeqCenter,
     ]
 
     static mapping = {

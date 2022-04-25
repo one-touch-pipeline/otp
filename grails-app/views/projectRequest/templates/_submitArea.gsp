@@ -28,7 +28,14 @@
     </g:if>
     <div class="actions">
         <g:each var="buttonAction" in="${buttonActions}">
-            <g:actionSubmit action="${buttonAction.action}" name="${buttonAction.action}" class="btn btn-${buttonAction.styling}" value="${buttonAction.text}"/>
+            <g:if test="${buttonAction.text == 'Delete'}">
+                <a id="delete-request-btn" data-project-request-id="projectRequestId" class="btn btn-${buttonAction.styling}" data-req-id="${projectRequestId}">Delete</a>
+            </g:if>
+            <g:else>
+                <g:actionSubmit action="${buttonAction.action}" name="${buttonAction.action}" class="btn btn-${buttonAction.styling}" value="${buttonAction.text}"/>
+            </g:else>
         </g:each>
     </div>
 </div>
+<otp:otpModal modalId="confirmationModal" title="Delete Project Request" type="dialog" closeText="Cancel" confirmText="Delete" closable="false">
+</otp:otpModal>

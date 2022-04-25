@@ -93,10 +93,6 @@ class ProjectRequestController implements CheckAndCall {
         if (flash.cmd && flash.cmd.projectRequest) {
             cmd.projectRequest = CollectionUtils.exactlyOneElement(ProjectRequest.findAllById(flash.cmd.projectRequest.id))
         }
-        List<String> sequencingCenters = SeqCenter.findAll()*.name
-        if (cmd?.sequencingCenters) {
-            sequencingCenters.addAll(cmd?.sequencingCenters)
-        }
         return [
                 buttonActions         : projectRequestStateProvider.getCurrentState(cmd?.projectRequest).getIndexActions(cmd?.projectRequest),
                 keywords              : Keyword.listOrderByName(),
@@ -107,7 +103,7 @@ class ProjectRequestController implements CheckAndCall {
                 speciesWithStrains    : SpeciesWithStrain.all.sort { it.displayString },
                 storagePeriod         : StoragePeriod.values(),
                 availableRoles        : ProjectRole.findAll(),
-                sequencingCenters     : sequencingCenters.unique().sort(),
+                sequencingCenters     : SeqCenter.all.unique().sort(),
                 faqProjectTypeLink    : processingOptionService.findOptionAsString(ProcessingOption.OptionName.NOTIFICATION_TEMPLATE_FAQ_PROJECT_TYPE_LINK),
                 cmd                   : cmd,
         ]
@@ -154,6 +150,7 @@ class ProjectRequestController implements CheckAndCall {
                 abstractValues               : abstractValues,
                 projectRequest               : projectRequest,
                 stateDisplayName             : projectRequestStateProvider.getCurrentState(projectRequest).displayName,
+                projectRequestId             : projectRequest.id,
         ]
     }
 
@@ -170,7 +167,7 @@ class ProjectRequestController implements CheckAndCall {
         try {
             saveProjectRequest({ it.save(cmd) }, cmd, true)
         } catch (ProjectRequestBeingEditedException e) {
-            flash.message =  new FlashMessage(g.message(code: "projectRequest.store.failure") as String, e.message)
+            flash.message = new FlashMessage(g.message(code: "projectRequest.store.failure") as String, e.message)
         }
     }
 
@@ -179,7 +176,7 @@ class ProjectRequestController implements CheckAndCall {
             ProjectRequestCreationCommand cmdFromProjectRequest = ProjectRequestCreationCommand.fromProjectRequest(cmd.projectRequest)
             saveProjectRequest({ it.save(cmdFromProjectRequest) }, cmdFromProjectRequest, true)
         } catch (ProjectRequestBeingEditedException e) {
-            flash.message =  new FlashMessage(g.message(code: "projectRequest.store.failure") as String, e.message)
+            flash.message = new FlashMessage(g.message(code: "projectRequest.store.failure") as String, e.message)
         }
     }
 
@@ -225,9 +222,9 @@ class ProjectRequestController implements CheckAndCall {
     }
 
     @SuppressWarnings('ExplicitFlushForDeleteRule')
-    def delete(ProjectRequest projectRequest) {
+    JSON delete(ProjectRequest projectRequest) {
         projectRequestStateProvider.getCurrentState(projectRequest).delete(projectRequest)
-        redirect(action: ACTION_UNRESOLVED)
+        render [:] as JSON
     }
 
     def create(ProjectRequest projectRequest) {
@@ -369,9 +366,13 @@ class ProjectRequestCreationCommand implements Validateable {
     List<String> speciesWithStrainList
     List<SpeciesWithStrain> speciesWithStrains = []
     List<String> customSpeciesWithStrains = []
-    List<String> sequencingCenters = []
+    List<String> sequencingCenterList
+    List<SeqCenter> sequencingCenters = []
+    List<String> customSequencingCenters = []
     Integer approxNoOfSamples
-    List<SeqType> seqTypes
+    List<String> seqTypesList
+    List<SeqType> seqTypes = []
+    List<String> customSeqTypes = []
     String requesterComment
     List<ProjectRequestUserCommand> users
 
@@ -403,9 +404,11 @@ class ProjectRequestCreationCommand implements Validateable {
             }
         }
         customSpeciesWithStrains nullable: true
+        customSequencingCenters nullable: true
         sequencingCenters nullable: true
         relatedProjects nullable: true, blank: false
         seqTypes nullable: true
+        customSeqTypes nullable: true
         requesterComment nullable: true, blank: false
         approxNoOfSamples nullable: true, validator: { val, obj ->
             if (obj.projectType == ProjectType.SEQUENCING && !val) {
@@ -467,6 +470,40 @@ class ProjectRequestCreationCommand implements Validateable {
         }
     }
 
+    // assigns existing sequencingCenter to the according list and the remaining strings are assigned to customSequencingCenter
+    void setSequencingCenterList(List<String> stringList) {
+        sequencingCenterList = stringList
+        stringList.each {
+            if (it.isNumber()) {
+                SeqCenter foundSeqCenter = SeqCenter.get(it as Long)
+                if (foundSeqCenter) {
+                    sequencingCenters.add(foundSeqCenter)
+                } else {
+                    customSequencingCenters.add(it)
+                }
+            } else {
+                customSequencingCenters.add(it)
+            }
+        }
+    }
+
+    // assigns existing seqTypes to the list and the remaining strings are assigned to customSeqTypes
+    void setSeqTypesList(List<String> stringList) {
+        seqTypesList = stringList
+        stringList.each {
+            if (it.isNumber()) {
+                SeqType foundSeqType = SeqType.get(it as Long)
+                if (foundSeqType) {
+                    seqTypes.add(foundSeqType)
+                } else {
+                    customSeqTypes.add(it)
+                }
+            } else {
+                customSeqTypes.add(it)
+            }
+        }
+    }
+
     void setRelatedProjects(String s) {
         relatedProjects = StringUtils.blankToNull(s)
     }
@@ -481,8 +518,16 @@ class ProjectRequestCreationCommand implements Validateable {
 
         List<Keyword> keywords = projectRequest.keywords.collect { CollectionUtils.atMostOneElement(Keyword.findAllByName(it)) }
         List<String> speciesWithStrainList = projectRequest.customSpeciesWithStrains as List ?: []
+        List<String> seqTypesList = projectRequest.customSeqTypes as List ?: []
+        List<String> sequencingCenterList = projectRequest.customSequencingCenters as List ?: []
         projectRequest.speciesWithStrains.each {
             speciesWithStrainList.add(it.id as String)
+        }
+        projectRequest.seqTypes.each {
+            seqTypesList.add(it.id as String)
+        }
+        projectRequest.sequencingCenters.each {
+            sequencingCenterList.add(it.id as String)
         }
 
         return new ProjectRequestCreationCommand(
@@ -498,9 +543,13 @@ class ProjectRequestCreationCommand implements Validateable {
                 speciesWithStrainList: speciesWithStrainList,
                 speciesWithStrains: projectRequest.speciesWithStrains as List ?: [],
                 customSpeciesWithStrains: projectRequest.customSpeciesWithStrains as List ?: [],
+                sequencingCenterList: sequencingCenterList,
                 sequencingCenters: projectRequest.sequencingCenters as List ?: [],
+                customSequencingCenters: projectRequest.customSequencingCenters as List ?: [],
                 approxNoOfSamples: projectRequest.approxNoOfSamples,
+                seqTypesList: seqTypesList,
                 seqTypes: projectRequest.seqTypes as List ?: [],
+                customSeqTypes: projectRequest.customSeqTypes as List ?: [],
                 requesterComment: projectRequest.requesterComment,
                 users: ProjectRequestUserCommand.fromProjectRequestUsers(projectRequest.users),
         )

@@ -208,18 +208,22 @@
         <!-- Sequencing Center -->
         <div class="form-group row">
             <div class="col-sm-2">
-                <label class="col-form-label" for="sequencingCenters">${g.message(code: "projectRequest.sequencingCenter")}</label>
+                <label class="col-form-label" for="sequencingCenterList">${g.message(code: "projectRequest.sequencingCenter")}</label>
                 <i class="helper-icon bi bi-question-circle-fill" title="${g.message(code: "projectRequest.sequencingCenter.detail")}"></i>
             </div>
 
             <div class="col-sm-10">
                 <select class="use-select-2 form-control tag-select"
-                        name="sequencingCenters"
-                        id="sequencingCenters"
-                        multiple="multiple">
+                        name="sequencingCenterList"
+                        id="sequencingCenterList"
+                        multiple="multiple"
+                        from="sequencingCenterList">
                     <g:each in="${sequencingCenters}" var="sequencingCenter">
                         <g:set var="selected" value="${sequencingCenter in cmd?.sequencingCenters ? "selected" : ""}"/>
-                        <option value="${sequencingCenter}" ${selected}>${sequencingCenter}</option>
+                        <option value="${sequencingCenter.id}" ${selected}>${sequencingCenter}</option>
+                    </g:each>
+                    <g:each in="${cmd?.customSequencingCenters}" var="customSequencingCenters">
+                        <option value="${customSequencingCenters}" selected>${customSequencingCenters}</option>
                     </g:each>
                 </select>
             </div>
@@ -241,15 +245,18 @@
         <!-- Sequencing Type(s)* -->
         <div class="form-group row">
             <div class="col-sm-2">
-                <label class="col-form-label" for="seqTypes" id="seqTypesLabel">${g.message(code: "projectRequest.seqTypes")}</label>
+                <label class="col-form-label" for="seqTypesList" id="seqTypesLabel">${g.message(code: "projectRequest.seqTypes")}</label>
                 <i class="helper-icon bi bi-question-circle-fill" title="${g.message(code: "projectRequest.seqTypes.detail")}"></i>
             </div>
 
             <div class="col-sm-10">
-                <select class="use-select-2 form-control" name="seqTypes" id="seqTypes" multiple="multiple">
+                <select class="use-select-2 form-control tag-select" name="seqTypesList" id="seqTypesList" multiple="multiple" from="seqTypes">
                     <g:each in="${seqTypes}" var="seqType">
                         <g:set var="selected" value="${seqType in cmd?.seqTypes ? "selected" : ""}"/>
                         <option value="${seqType.id}" ${selected}>${seqType.displayNameWithLibraryLayout}</option>
+                    </g:each>
+                    <g:each in="${cmd?.customSeqTypes}" var="customSeqTypes">
+                        <option value="${customSeqTypes}" selected>${customSeqTypes}</option>
                     </g:each>
                 </select>
             </div>
