@@ -415,7 +415,7 @@ class ProjectRequestCreationCommand implements Validateable {
                 return "projectRequest.users.unique"
             }
         }
-        additionalFieldValue validator: {additionalFieldValueMap ->
+        additionalFieldValue validator: { additionalFieldValueMap ->
             List<String> errors = []
             additionalFieldValueMap.each {
                 AbstractFieldDefinition afd = AbstractFieldDefinition.get(it.key as Long)
