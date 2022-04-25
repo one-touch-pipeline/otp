@@ -63,24 +63,11 @@ class TextFieldValueSpec extends AbstractSingleFieldValueSpec {
         TestCase.assertValidateError(fieldValue, "textValue", 'textFieldValue.textValue.wrongType', 'invalidValue')
     }
 
-    void "test constraint, regular expression validation fails"() {
-        given:
-        AbstractFieldValue fieldValue = createValue()
-        fieldValue.definition.regularExpression = "asdf"
-
-        when:
-        fieldValue.textValue = 'invalidValue'
-
-        then:
-        TestCase.assertValidateError(fieldValue, "textValue", 'textFieldValue.textValue.regex', 'invalidValue')
-    }
-
     void "test constraint, validation succeeds"() {
         given:
         AbstractFieldValue fieldValue = createValue()
         fieldValue.definition.allowedTextValues = ["true", "untrue"]
         fieldValue.definition.typeValidator = TypeValidators.BOOLEAN
-        fieldValue.definition.regularExpression = /^true|unknown$/
 
         when:
         fieldValue.textValue = 'true'

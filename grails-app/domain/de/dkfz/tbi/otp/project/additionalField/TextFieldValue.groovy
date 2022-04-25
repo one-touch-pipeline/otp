@@ -35,8 +35,6 @@ class TextFieldValue extends AbstractSingleFieldValue {
                 if (obj.definition.typeValidator && !obj.definition.typeValidator.validate(val)) {
                     return ["textFieldValue.textValue.wrongType", obj.definition.typeValidator, obj.definition.name]
                 }
-                return obj.definition.regularExpression && !(val ==~ obj.definition.regularExpression) ?
-                        ["textFieldValue.textValue.regex", obj.definition.regularExpression, obj.definition.name, obj.definition.regularExpressionError] : true
             }
         }
     }

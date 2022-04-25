@@ -415,6 +415,16 @@ class ProjectRequestCreationCommand implements Validateable {
                 return "projectRequest.users.unique"
             }
         }
+        additionalFieldValue validator: {additionalFieldValueMap ->
+            List<String> errors = []
+            additionalFieldValueMap.each {
+                AbstractFieldDefinition afd = AbstractFieldDefinition.get(it.key as Long)
+                if (afd.regularExpression && !(it.value ==~ afd.regularExpression)) {
+                    errors << "Field " + afd.name + " " + afd.regularExpressionError
+                }
+            }
+            return ["projectRequest.regexError", errors.join(" & ")]
+        }
     }
 
     // assigns existing speciesWithStrains to the according list and the remaining strings are assigned to customSpeciesWithStrains
