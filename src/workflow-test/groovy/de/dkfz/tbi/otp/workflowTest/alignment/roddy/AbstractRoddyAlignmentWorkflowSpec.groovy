@@ -250,20 +250,6 @@ abstract class AbstractRoddyAlignmentWorkflowSpec extends AbstractAlignmentWorkf
             ])
             log.info("Create bedfile ${bedFile}")
         }
-
-        //TODO: workaround for bug otp-1562, since selection do not work correctly
-        [
-                "Default values for Roddy",
-                "Default values for PanCancer workflow",
-                "Default values for PanCancer alignment WHOLE_GENOME",
-                "Default values for PanCancer alignment EXON",
-                "Default values for PanCancer alignment ChIP Seq",
-
-        ].each {
-            ExternalWorkflowConfigSelector selector = CollectionUtils.exactlyOneElement(ExternalWorkflowConfigSelector.findAllByName(it))
-            selector.workflowVersions.add(workflowVersionAlignment)
-            selector.save(flush: true)
-        }
     }
 
     private void createFragments() {
