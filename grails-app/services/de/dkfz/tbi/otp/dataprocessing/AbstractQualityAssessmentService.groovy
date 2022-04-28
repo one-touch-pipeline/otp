@@ -51,10 +51,9 @@ class AbstractQualityAssessmentService {
     private Map<String, Map> parseRoddyQaStatistics(RoddyBamFile roddyBamFile, File qualityControlJsonFile, Closure qualityControlTargetExtractJsonFile) {
         Map<String, Map> chromosomeInformation = [:]
 
-        boolean isExome = roddyBamFile.seqType.seqTypeName == SeqTypeNames.EXOME
         JSONObject qualityControlJson = JSON.parse(qualityControlJsonFile.text)
         JSONObject qualityControlTargetExtractJson
-        if (isExome && qualityControlTargetExtractJsonFile != null) {
+        if (roddyBamFile.seqType.needsBedFile && qualityControlTargetExtractJsonFile != null) {
             qualityControlTargetExtractJson = JSON.parse(qualityControlTargetExtractJsonFile().text)
         }
         List<String> chromosomeNames = ReferenceGenomeEntry.findAllByReferenceGenomeAndClassificationInList(
@@ -64,7 +63,7 @@ class AbstractQualityAssessmentService {
         chromosomes.findAll { !chromosomeNames.contains(it) } .each { String chromosome ->
             allChromosomeNames.add(chromosome)
             Map chromosomeValues = qualityControlJson.get(chromosome)
-            if (isExome) {
+            if (roddyBamFile.seqType.needsBedFile) {
                 chromosomeValues = new HashMap(chromosomeValues)
                 Object allBasesMapped = chromosomeValues.remove('qcBasesMapped')
                 assert allBasesMapped != null

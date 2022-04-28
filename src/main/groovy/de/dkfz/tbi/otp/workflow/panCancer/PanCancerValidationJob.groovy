@@ -46,7 +46,7 @@ class PanCancerValidationJob extends AbstractRoddyClusterValidationJob implement
      *     <li>workBaiFile
      *     <li>workMd5sumFile
      *     <li>workMergedQAJsonFile
-     *     <li>workMergedQATargetExtractJsonFile (if bam file has exome seqtype)
+     *     <li>workMergedQATargetExtractJsonFile (if seq type needs BED file)
      * </ul>
      */
     @Override

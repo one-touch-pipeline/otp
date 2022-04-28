@@ -26,7 +26,6 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.dataprocessing.NotSupportedException
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
 import de.dkfz.tbi.otp.ngsdata.*
@@ -53,13 +52,7 @@ class PanCancerExecuteJob extends AbstractExecuteRoddyPipelineJob implements Pan
 
     @Override
     protected final String getAnalysisConfiguration(SeqType seqType) {
-        if (seqType == SeqTypeService.exomePairedSeqType) {
-            return "exomeAnalysis"
-        }
-        if (seqType in [SeqTypeService.wholeGenomePairedSeqType, SeqTypeService.chipSeqPairedSeqType]) {
-            return "qcAnalysis"
-        }
-        throw new NotSupportedException("Unsupported sequencing type")
+        return seqType.needsBedFile ? 'exomeAnalysis' : 'qcAnalysis'
     }
 
     @Override

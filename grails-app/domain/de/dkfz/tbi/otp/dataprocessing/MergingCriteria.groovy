@@ -43,7 +43,7 @@ class MergingCriteria implements Entity {
 
     static constraints = {
         useLibPrepKit validator: { val, obj ->
-            if (obj.seqType.isExome() && !val) {
+            if (obj.seqType.needsBedFile && !val) {
                 return "exome"
             }
             if (obj.seqType.isWgbs() && val) {

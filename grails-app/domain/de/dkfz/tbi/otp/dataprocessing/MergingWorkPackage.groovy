@@ -74,10 +74,9 @@ class MergingWorkPackage extends AbstractMergingWorkPackage {
         })
 
         libraryPreparationKit validator: { val, obj ->
-            SeqTypeNames seqTypeName = obj.seqType?.seqTypeName
-            if (seqTypeName == SeqTypeNames.EXOME) {
+            if (obj.seqType?.needsBedFile) {
                 return val != null
-            } else if (seqTypeName?.isWgbs()) {
+            } else if (obj.seqType?.seqTypeName?.isWgbs()) {
                 /*
                     WGBS can, for experimental reasons, have lanes with different libPrepKits, that still need to be
                     merged. This is OK as long as they all end up using the same Adapter File. The WGBS-alignment for

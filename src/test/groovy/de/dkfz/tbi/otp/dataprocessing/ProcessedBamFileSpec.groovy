@@ -87,7 +87,7 @@ class ProcessedBamFileSpec extends Specification implements DataTest, DomainFact
 
         then:
         AssertionError e = thrown()
-        e.message.contains("A BedFile is only available when the sequencing type is exome")
+        e.message.contains("A BED file is only available when needed")
     }
 
     void "withdraw, when it call, then bam file and depending bam file are marked as withdrawn"() {

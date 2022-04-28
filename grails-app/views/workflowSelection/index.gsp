@@ -157,7 +157,7 @@
             <tr>
                 <td><g:link controller="projectSeqPlatformGroup" action="index" params='["seqType.id": m.key.id]'>${m.key}</g:link></td>
                 <td>
-                    <g:if test="${m.key.isExome()}">
+                    <g:if test="${m.key.needsBedFile}">
                         ${g.message(code: 'workflowSelection.yes')}
                     </g:if>
                     <g:elseif test="${m.key.isWgbs()}">

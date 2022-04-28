@@ -50,7 +50,7 @@
                     ${seqType}
                 </td>
                 <td>
-                    <g:if test="${seqType.isExome()}">
+                    <g:if test="${seqType.needsBedFile}">
                         true
                         <g:hiddenField name="useLibPrepKit" value="on"/>
                     </g:if>

@@ -139,7 +139,7 @@ abstract class AbstractBamFile implements CommentableWithProject, Entity {
     }
 
     BedFile getBedFile() {
-        assert seqType.name == SeqTypeNames.EXOME.seqTypeName : "A BedFile is only available when the sequencing type is exome."
+        assert seqType.needsBedFile : "A BED file is only available when needed."
 
         List<BedFile> bedFiles = BedFile.findAllWhere(
                 referenceGenome: referenceGenome,

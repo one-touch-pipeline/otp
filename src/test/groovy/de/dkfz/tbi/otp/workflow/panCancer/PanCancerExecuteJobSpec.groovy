@@ -147,17 +147,6 @@ class PanCancerExecuteJobSpec extends Specification implements DataTest, Workflo
         { -> DomainFactory.createExomeSeqType() }       || "exomeAnalysis"
     }
 
-    void "test getAnalysisConfiguration, unsupported seq type"() {
-        given:
-        DomainFactory.createRoddyAlignableSeqTypes()
-
-        when:
-        new PanCancerExecuteJob().getAnalysisConfiguration(DomainFactory.createWholeGenomeBisulfiteSeqType())
-
-        then:
-        thrown(NotSupportedException)
-    }
-
     void "test getFileNamesKillSwitch"() {
         expect:
         new PanCancerExecuteJob().filenameSectionKillSwitch

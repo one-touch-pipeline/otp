@@ -58,7 +58,7 @@ abstract class AbstractAlignmentCheckerIntegrationSpec extends Specification {
             SeqTrack seqTrack = DomainFactory.createSeqTrack([
                     seqType              : it,
                     libraryPreparationKit: properties.hasProperty('libraryPreparationKit') ? properties.libraryPreparationKit :
-                            it.isExome() ? DomainFactory.createLibraryPreparationKit() : null,
+                            it.needsBedFile ? DomainFactory.createLibraryPreparationKit() : null,
                     antibodyTarget       : it.hasAntibodyTarget ? DomainFactory.createAntibodyTarget() : null,
             ])
             DomainFactory.createMergingCriteriaLazy(project: seqTrack.project, seqType: seqTrack.seqType)

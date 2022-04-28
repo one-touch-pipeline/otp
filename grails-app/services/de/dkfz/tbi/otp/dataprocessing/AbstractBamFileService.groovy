@@ -31,9 +31,9 @@ class AbstractBamFileService {
     Double calculateCoverageWithN(AbstractBamFile bamFile) {
         assert bamFile : 'Parameter bamFile must not be null'
 
-        if (bamFile.seqType.name == SeqTypeNames.WHOLE_GENOME.seqTypeName || bamFile.seqType.isWgbs() || bamFile.seqType.isChipSeq()) {
+        if (!bamFile.seqType.needsBedFile) {
             calculateCoverage(bamFile, 'length')
-        } else if (bamFile.seqType.name == SeqTypeNames.EXOME.seqTypeName) {
+        } else if (bamFile.seqType.needsBedFile) {
             //In case of Exome sequencing this value stays 'null' since there is no differentiation between 'with N' and 'without N'
             return null
         } else {
@@ -47,7 +47,7 @@ class AbstractBamFileService {
         Long length
         Long basesMapped
 
-        if (bamFile.seqType.name == SeqTypeNames.WHOLE_GENOME.seqTypeName || bamFile.seqType.isWgbs() || bamFile.seqType.isChipSeq()) {
+        if (!bamFile.seqType.needsBedFile) {
             ReferenceGenome referenceGenome = bamFile.referenceGenome
             assert referenceGenome : "Unable to find a reference genome for the BAM file ${bamFile}"
 
@@ -55,7 +55,7 @@ class AbstractBamFileService {
             assert length > 0 : "The property '${property}' of the reference genome '${referenceGenome}' is 0 or negative."
 
             basesMapped = bamFile.overallQualityAssessment.qcBasesMapped
-        } else if (bamFile.seqType.name == SeqTypeNames.EXOME.seqTypeName) {
+        } else if (bamFile.seqType.needsBedFile) {
             BedFile bedFile = bamFile.bedFile
             assert bedFile : "Unable to find a bed file for the BAM file ${bamFile}"
 

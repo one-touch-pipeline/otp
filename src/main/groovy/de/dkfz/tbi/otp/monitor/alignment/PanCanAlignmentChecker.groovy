@@ -53,7 +53,7 @@ class PanCanAlignmentChecker extends AbstractRoddyAlignmentChecker {
         String ok = 'ok'
 
         Map groupedSeqTracks = seqTracks.groupBy { SeqTrack seqTrack ->
-            if (seqTrack.seqType.isExome()) {
+            if (seqTrack.seqType.needsBedFile) {
                 if (!seqTrack.libraryPreparationKit) {
                     return libraryPreperationKitMissing
                 }
