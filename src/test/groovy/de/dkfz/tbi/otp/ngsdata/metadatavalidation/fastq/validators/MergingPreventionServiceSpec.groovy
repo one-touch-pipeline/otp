@@ -249,7 +249,7 @@ class MergingPreventionServiceSpec extends Specification implements DataTest, Do
         ])
 
         Set<Problem> problems = [
-                new Problem([] as Set, LogLevel.ERROR,
+                new Problem([] as Set, LogLevel.WARNING,
                         "For sample ${sample.displayName} with sequencing type ${seqType.displayNameWithLibraryLayout} already data are registered in OTP.",
                         MergingPreventionService.ALREADY_DATA_EXIST),
         ] as Set
@@ -525,7 +525,7 @@ class MergingPreventionServiceSpec extends Specification implements DataTest, Do
     }
 
     @Unroll
-    void "checkForMergingWorkPackage, when seqTracks are found and seqType is single and #name, then add expected error"() {
+    void "checkForMergingWorkPackage, when seqTracks are found and seqType is single and #name, then add expected warning"() {
         given:
         setupDataWithMergingWorkPackage(true, useAntibodyTarget, true, false)
         MetadataValidationContext context = MetadataValidationContextFactory.createContext()
@@ -540,7 +540,7 @@ class MergingPreventionServiceSpec extends Specification implements DataTest, Do
         ])
 
         Set<Problem> problems = [
-                new Problem([] as Set, LogLevel.ERROR,
+                new Problem([] as Set, LogLevel.WARNING,
                         "Sample ${sample.displayName} with sequencing type ${seqType.displayNameWithLibraryLayout} would be automatically merged with existing samples.",
                         MergingPreventionService.MERGING_WORK_PACKAGE_EXISTS_COMPATIBLE),
         ] as Set

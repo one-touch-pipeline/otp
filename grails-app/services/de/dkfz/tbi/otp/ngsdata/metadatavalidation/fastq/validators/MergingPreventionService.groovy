@@ -121,7 +121,7 @@ class MergingPreventionService {
             SeqPlatformGroup seqPlatformGroup = seqTrack.seqPlatformGroup
 
             if (data.seqType.singleCell) {
-                context.addProblem(valueTuple.cells, LogLevel.ERROR,
+                context.addProblem(valueTuple.cells, LogLevel.WARNING,
                         "For ${data.createMessagePrefix(true)} already data are registered in OTP.",
                         ALREADY_DATA_EXIST)
             } else {
@@ -162,7 +162,7 @@ class MergingPreventionService {
 
         if (data.seqType.singleCell) {
             if (mergingWorkPackages.any { hasNonWithdrawnSeqTracks(it) }) {
-                context.addProblem(valueTuple.cells, LogLevel.ERROR,
+                context.addProblem(valueTuple.cells, LogLevel.WARNING,
                         "${data.createMessagePrefix(false)} would be automatically merged with existing samples.",
                         MERGING_WORK_PACKAGE_EXISTS_COMPATIBLE)
             }
