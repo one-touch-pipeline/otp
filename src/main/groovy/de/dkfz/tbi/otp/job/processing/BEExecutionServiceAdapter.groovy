@@ -27,6 +27,8 @@ import de.dkfz.roddy.execution.jobs.Command
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.ProcessOutput
 
+import java.time.Duration
+
 class BEExecutionServiceAdapter implements BEExecutionService {
 
     private final RemoteShellHelper remoteShellHelper
@@ -40,7 +42,7 @@ class BEExecutionServiceAdapter implements BEExecutionService {
     @Override
     ExecutionResult execute(String command) {
         ProcessOutput p = remoteShellHelper.executeCommandReturnProcessOutput(realm, command)
-        new ExecutionResult((p.exitCode == 0), p.exitCode, p.stdout.split("\n") as List, null)
+        return new ExecutionResult([command], (p.exitCode == 0), p.exitCode, p.stdout.split("\n") as List, p.stderr.split("\n") as List)
     }
 
     @Override
@@ -49,7 +51,12 @@ class BEExecutionServiceAdapter implements BEExecutionService {
     }
 
     @Override
-    ExecutionResult execute(String command, boolean b, OutputStream outputStream) {
+    ExecutionResult execute(String command, Duration duration) {
+        return execute(command)
+    }
+
+    @Override
+    ExecutionResult execute(String command, boolean b, Duration duration) {
         return execute(command)
     }
 
@@ -60,6 +67,16 @@ class BEExecutionServiceAdapter implements BEExecutionService {
 
     @Override
     ExecutionResult execute(Command command, boolean b) {
+        return execute(command.toBashCommandString())
+    }
+
+    @Override
+    ExecutionResult execute(Command command, Duration duration) {
+        return execute(command.toBashCommandString())
+    }
+
+    @Override
+    ExecutionResult execute(Command command, boolean b, Duration duration) {
         return execute(command.toBashCommandString())
     }
 

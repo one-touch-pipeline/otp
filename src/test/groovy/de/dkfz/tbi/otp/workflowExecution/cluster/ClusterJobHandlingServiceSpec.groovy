@@ -429,7 +429,7 @@ class ClusterJobHandlingServiceSpec extends Specification implements ServiceUnit
     }
 
     private BEJobResult createBEJobResult(BEJob job, boolean success = true) {
-        BEJobResult jobResult = new BEJobResult(null, job, new ExecutionResult(success, success ? 0 : 1, [], ''), null, [:], [])
+        BEJobResult jobResult = new BEJobResult(null, job, new ExecutionResult([], success, success ? 0 : 1, [], [], ''), null, [:], [])
         job.runResult = jobResult
         return jobResult
     }
