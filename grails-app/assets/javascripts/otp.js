@@ -423,6 +423,7 @@ $.otp.resizeBodyInit = function (table, margin) {
  * @returns {[{extend: string, exportOptions: {columns: string}, footer: boolean,
  * action: action, text: string, title: string}]}
  */
+// eslint-disable-next-line strict
 $.otp.getDownloadButton = (columnSelector, fileName, beforeDownload = (callback) => { callback(); }) => {
   const defaultFileName = document.title.replaceAll(' ', '_');
   const date = new Date();

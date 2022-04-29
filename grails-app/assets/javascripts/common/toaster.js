@@ -31,6 +31,7 @@ $.otp.toaster = {
      * @param title: title of the toast
      * @param message: the toasts message
      */
+  // eslint-disable-next-line strict
   showInfoToast(title = 'Info', message = '') {
     this.showToast(title, message, 'info');
   },
@@ -40,6 +41,7 @@ $.otp.toaster = {
      * @param title: title of the toast
      * @param message: the toasts message
      */
+  // eslint-disable-next-line strict
   showSuccessToast(title = 'Success', message = 'Operation has been successful.') {
     this.showToast(title, message, 'success');
   },
@@ -49,6 +51,7 @@ $.otp.toaster = {
      * @param title: title of the toast
      * @param message: the toasts message
      */
+  // eslint-disable-next-line strict
   showWarningToast(title = 'Warning', message = 'A warning occurred during the operation.') {
     this.showToast(title, message, 'warning');
   },
@@ -58,6 +61,7 @@ $.otp.toaster = {
      * @param title: title of the toast
      * @param message: the toasts message
      */
+  // eslint-disable-next-line strict
   showErrorToast(title = 'Error', message = 'Unknown error. Please try again.') {
     this.showToast(title, message, 'danger');
   },
@@ -68,6 +72,7 @@ $.otp.toaster = {
      * @param message: the toasts message
      * @param state: allowed states: info, success, warning, danger. default is info
      */
+  // eslint-disable-next-line strict
   showToast(title, message, state = 'info') {
     const stateProps = this.getStateProps(state);
     const date = new Date().toLocaleTimeString('en-US', { hour12: false, hour: 'numeric', minute: 'numeric' });
