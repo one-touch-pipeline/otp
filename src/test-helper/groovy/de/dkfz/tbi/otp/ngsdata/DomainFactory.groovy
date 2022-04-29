@@ -42,8 +42,6 @@ import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.CellRangerFactory
 import de.dkfz.tbi.otp.domainFactory.pipelines.externalBam.ExternalBamFactoryInstance
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactoryInstance
-import de.dkfz.tbi.otp.fileSystemConsistency.ConsistencyCheck
-import de.dkfz.tbi.otp.fileSystemConsistency.ConsistencyStatus
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
 import de.dkfz.tbi.otp.job.plan.*
@@ -529,21 +527,6 @@ class DomainFactory {
                 pipeline: createSoftwareTool(),
                 genome  : "genome_${counter++}",
                 params  : "params_${counter++}",
-        ], properties)
-    }
-
-    static ConsistencyCheck createConsistencyCheck(Map properties = [:]) {
-        return createDomainObject(ConsistencyCheck, [
-                date: { new Date() },
-        ], properties)
-    }
-
-    static ConsistencyStatus createConsistencyStatus(Map properties = [:]) {
-        return createDomainObject(ConsistencyStatus, [
-                status          : ConsistencyStatus.Status.NO_FILE,
-                resolvedDate    : { new Date() },
-                consistencyCheck: { createConsistencyCheck() },
-                dataFile        : { createDataFile() },
         ], properties)
     }
 

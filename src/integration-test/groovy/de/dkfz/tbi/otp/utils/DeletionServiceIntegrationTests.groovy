@@ -32,7 +32,6 @@ import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
-import de.dkfz.tbi.otp.fileSystemConsistency.ConsistencyStatus
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
@@ -89,17 +88,6 @@ class DeletionServiceIntegrationTests implements UserAndRoles {
         deletionService.deleteMetaDataEntryForDataFile(dataFile)
 
         assert !MetaDataEntry.get(metaDataEntry.id)
-    }
-
-    @Test
-    void testDeleteConsistencyStatusInformationForDataFile() {
-        setupData()
-        DataFile dataFile = DomainFactory.createDataFile()
-        ConsistencyStatus consistencyStatus = DomainFactory.createConsistencyStatus(dataFile: dataFile)
-
-        deletionService.deleteConsistencyStatusInformationForDataFile(dataFile)
-
-        assert !ConsistencyStatus.get(consistencyStatus.id)
     }
 
     @Test
@@ -208,7 +196,6 @@ class DeletionServiceIntegrationTests implements UserAndRoles {
         FastqcProcessedFile fastqcProcessedFile = DomainFactory.createFastqcProcessedFile(dataFile: dataFile)
 
         DomainFactory.createMetaDataEntry(dataFile: dataFile)
-        DomainFactory.createConsistencyStatus(dataFile: dataFile)
 
         String fileFinalPath = lsdfFilesService.getFileFinalPath(dataFile)
         String fastqFile = fastqcDataFilesService.fastqcOutputFile(dataFile)

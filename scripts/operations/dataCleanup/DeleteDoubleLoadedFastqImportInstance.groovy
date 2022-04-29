@@ -22,7 +22,6 @@
 
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.fileSystemConsistency.ConsistencyStatus
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
@@ -58,8 +57,6 @@ FastqImportInstance.withTransaction {
         CollectionUtils.atMostOneElement(FastqcProcessedFile.findAllByDataFile(dataFile))?.delete(flush: true)
         SeqTrack seqTrack = dataFile.seqTrack
         deletionService.deleteProcessingFilesOfProject(seqTrack.individual.project.name, baseOutputDir, false, false, [seqTrack])
-
-        ConsistencyStatus.findAllByDataFile(dataFile)*.delete(flush: true)
 
         dataFile.delete(flush: true)
         if (!seqTrack.dataFiles) {

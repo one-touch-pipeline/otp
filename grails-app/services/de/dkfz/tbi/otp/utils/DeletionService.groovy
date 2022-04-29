@@ -34,7 +34,6 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.AnalysisDeletionService
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.dataswap.AbstractDataSwapService
 import de.dkfz.tbi.otp.egaSubmission.EgaSubmission
-import de.dkfz.tbi.otp.fileSystemConsistency.ConsistencyStatus
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.*
@@ -564,16 +563,6 @@ class DeletionService {
     }
 
     /**
-     * Removes all information about the consistency checks of the input dataFile
-     *
-     * The function should be called inside a transaction (DOMAIN.withTransaction{}) to roll back changes if an exception occurs or a check fails.
-     */
-    private void deleteConsistencyStatusInformationForDataFile(DataFile dataFile) {
-        notNull(dataFile, "The input dataFiles is null")
-        ConsistencyStatus.findAllByDataFile(dataFile)*.delete(flush: true)
-    }
-
-    /**
      * Removes all QA-Information & the MarkDuplicate-metrics for an AbstractBamFile.
      * As input the AbstractBamFile is chosen, so that the method can be used for ProcessedBamFiles and ProcessedMergedBamFiles.
      *
@@ -701,7 +690,6 @@ class DeletionService {
 
         dirs.addAll(deleteFastQCInformationFromDataFile(dataFile))
         deleteMetaDataEntryForDataFile(dataFile)
-        deleteConsistencyStatusInformationForDataFile(dataFile)
         dataFile.delete(flush: true)
         return dirs
     }

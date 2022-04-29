@@ -45,8 +45,6 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
  */
 abstract class AbstractJobImpl implements Job {
 
-    def grailsApplication
-
     @Autowired
     JobStatusLoggingService jobStatusLoggingService
 
@@ -163,27 +161,6 @@ abstract class AbstractJobImpl implements Job {
     @Override
     ProcessingStep getProcessingStep() {
         return ProcessingStep.getInstance(processingStepId)
-    }
-
-    /**
-     * Returns the parameter value or the associated class.
-     *
-     * The parameter value is the value of the instance the job has an instance of.
-     * If the associated parameter type has the className value set this one is returned
-     * instead of the parameter value. Therefore the return type of the method is generic.
-     * @param typeName The type name of the type to be returned a value of
-     * @return The parameter value or the class of the instance.
-     * @throws RuntimeException In case the parameter could not be found.
-     */
-    def <T> T getParameterValueOrClass(String typeName) {
-        Parameter parameter = processingStep.input.find { it.type.name == typeName }
-        if (!parameter) {
-            throw new RuntimeException("Required parameter not found")
-        }
-        if (parameter.type.className) {
-            return grailsApplication.getClassForName(parameter.type.className).get(parameter.value.toLong())
-        }
-        return parameter.value
     }
 
     /**

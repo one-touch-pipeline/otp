@@ -631,4 +631,8 @@ databaseChangeLog = {
     changeSet(author: "borufka", id: "otp-1556") {
         sqlFile(path: 'changelogs/2022/otp-1556-extend-column.sql')
     }
+
+    changeSet(author: "gabkol", id: "otp-1581") {
+        sqlFile(path: 'changelogs/2022/otp-1581_remove_fileSystemConsistencyWorkflow.sql')
+    }
 }
