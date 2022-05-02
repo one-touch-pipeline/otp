@@ -19,6 +19,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
+import de.dkfz.tbi.otp.ngsdata.UserProjectRoleService
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.notification.CreateNotificationTextService
 import de.dkfz.tbi.otp.tracking.NotificationCreator
@@ -53,13 +55,14 @@ boolean all = false
 // work area
 NotificationCreator notificationCreator = ctx.notificationCreator
 CreateNotificationTextService notificationTextService = ctx.createNotificationTextService
+UserProjectRoleService userProjectRoleService = ctx.userProjectRoleService
 
 OtrsTicket otrsTicket = exactlyOneElement(OtrsTicket.findAllByTicketNumber(ticketNumber))
 
 Project project = CollectionUtils.atMostOneElement(Project.findAllByName(projectName))
 
 println "Emails:"
-println ctx.userProjectRoleService.getEmailsForNotification(project)
+println userProjectRoleService.getEmailsOfToBeNotifiedProjectUsers([project]).sort().join(',')
 println ""
 
 try {

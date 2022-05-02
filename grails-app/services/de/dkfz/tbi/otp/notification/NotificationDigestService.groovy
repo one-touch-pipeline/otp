@@ -53,7 +53,7 @@ class NotificationDigestService {
                     project                 : project,
                     seqTracks               : seqTracksOfProject,
                     bams                    : blockedBams,
-                    toBeNotifiedProjectUsers: userProjectRoleService.getProjectUsersToBeNotified(project).sort { it.user.username },
+                    toBeNotifiedProjectUsers: userProjectRoleService.getProjectUsersToBeNotified([project]).sort { it.user.username },
                     processingStatus        : status,
                     subject                 : buildNotificationSubject(cmd.otrsTicket, seqTracksOfProject, project),
                     notification            : buildNotificationDigest(cmd, status, blockedBams),
@@ -103,7 +103,7 @@ class NotificationDigestService {
     }
 
     void sendPreparedNotification(PreparedNotification preparedNotification) {
-        List<String> recipients = userProjectRoleService.getMails(preparedNotification.toBeNotifiedProjectUsers) ?: []
+        List<String> recipients = preparedNotification.toBeNotifiedProjectUsers*.user*.email ?: []
         mailHelperService.sendEmail(preparedNotification.subject, preparedNotification.notification, recipients)
     }
 }

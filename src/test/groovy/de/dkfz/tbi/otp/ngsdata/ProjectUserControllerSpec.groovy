@@ -77,7 +77,7 @@ class ProjectUserControllerSpec extends Specification implements ControllerUnitT
         addUserWithReadAccessToProject(disabledUser, project, false)
 
         controller.userProjectRoleService = Mock(UserProjectRoleService) {
-            getEmailsForNotification(_) >> "emails"
+            getEmailsOfToBeNotifiedProjectUsers(_) >> ["emails"]
         }
         controller.projectSelectionService = Mock(ProjectSelectionService) {
             getSelectedProject() >> project

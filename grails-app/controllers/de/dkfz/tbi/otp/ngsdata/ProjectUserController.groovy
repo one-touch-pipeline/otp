@@ -117,7 +117,7 @@ class ProjectUserController implements CheckAndCall {
                 availableRoles             : projectRoleService.listAvailableProjectRolesAuthenticatedByCurrentUser(),
                 hasErrors                  : params.hasErrors,
                 message                    : params.message,
-                emails                     : userProjectRoleService.getEmailsForNotification(project),
+                emails                     : userProjectRoleService.getEmailsOfToBeNotifiedProjectUsers([project]).sort().join(','),
                 currentUser                : springSecurityService.currentUser as User,
         ]
     }

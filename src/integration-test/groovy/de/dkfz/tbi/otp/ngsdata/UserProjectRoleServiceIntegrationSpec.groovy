@@ -1163,61 +1163,12 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         "enabled" | true     | ProjectRole.Basic.PI | USER
     }
 
-    void "getEmailsOfToBeNotifiedProjectUsers, only return emails of users that receive notification and are enabled"() {
-        given:
-        setupData()
-
-        Project project = createProject()
-        List<String> expectedEmails = []
-        int numberOfUsers = 12
-        numberOfUsers.times { int i ->
-            boolean notification = (i <= numberOfUsers / 2)
-            boolean enabled = (i % 2 == 0)
-            UserProjectRole userProjectRole = createUserProjectRole(
-                    user: createUser(),
-                    project: project,
-                    receivesNotifications: notification,
-                    enabled: enabled,
-            )
-            if (notification && enabled) {
-                expectedEmails << userProjectRole.user.email
-            }
-        }
-
-        when:
-        List<String> emails = userProjectRoleService.getEmailsOfToBeNotifiedProjectUsers(project)
-
-        then:
-        emails.sort() == expectedEmails.sort()
-    }
-
-    void "getEmailsOfToBeNotifiedProjectUsers, do not return email of disabled user"() {
-        given:
-        setupData()
-
-        Project project = createProject()
-        createUserProjectRole(
-                user: createUser([
-                        enabled: false
-                ]),
-                project: project,
-                receivesNotifications: true,
-                enabled: true,
-        )
-
-        when:
-        List<String> emails = userProjectRoleService.getEmailsOfToBeNotifiedProjectUsers(project)
-
-        then:
-        emails.empty
-    }
-
     @Unroll
-    void "test getEmailsForNotification with receivesNotifications #receivesNotifications roleEnabled #roleEnabled userEnabled #userEnabled result #result"() {
+    void "test getEmailsOfToBeNotifiedProjectUsers with receivesNotifications #receivesNotifications roleEnabled #roleEnabled userEnabled #userEnabled result #result"() {
         given:
         setupData()
 
-        String output
+        List<String> output
         Project project = createProject()
         createUserProjectRole(
                 user: createUser([
@@ -1231,7 +1182,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
         when:
         SpringSecurityUtils.doWithAuth(OPERATOR) {
-            output = userProjectRoleService.getEmailsForNotification(project)
+            output = userProjectRoleService.getEmailsOfToBeNotifiedProjectUsers([project])
         }
 
         then:
@@ -1239,14 +1190,14 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
         where:
         receivesNotifications | roleEnabled | userEnabled || result
-        true                  | true        | true        || EMAIL_INTERN
-        true                  | true        | false       || ''
-        true                  | false       | true        || ''
-        true                  | false       | false       || ''
-        false                 | true        | true        || ''
-        false                 | true        | false       || ''
-        false                 | false       | true        || ''
-        false                 | false       | false       || ''
+        true                  | true        | true        || [EMAIL_INTERN]
+        true                  | true        | false       || []
+        true                  | false       | true        || []
+        true                  | false       | false       || []
+        false                 | true        | true        || []
+        false                 | true        | false       || []
+        false                 | false       | true        || []
+        false                 | false       | false       || []
     }
 
     @Unroll
@@ -1506,27 +1457,12 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         return projectUsers
     }
 
-    void "getEmailsForNotification, mails of all to be notified users, sorted and concatenated with ','"() {
-        given:
-        setupData()
-
-        Project project = createProject()
-        List<UserProjectRole> projectUsers = setupProjectUserForAllNotificationCombinations(project)
-
-        String expected = projectUsers.findAll { UserProjectRole projectUser ->
-            projectUser.enabled && projectUser.user.enabled && projectUser.receivesNotifications
-        }*.user*.email.sort().join(",")
-
-        expect:
-        userProjectRoleService.getEmailsForNotification(project) == expected
-    }
-
-    void "getEmailsForNotification, returns empty string for project without users"() {
+    void "getEmailsOfToBeNotifiedProjectUsers, returns empty string for project without users"() {
         given:
         setupData()
 
         expect:
-        userProjectRoleService.getEmailsForNotification(createProject()) == ""
+        userProjectRoleService.getEmailsOfToBeNotifiedProjectUsers([createProject()]) == []
     }
 
     void "getProjectUsersToBeNotified, only fully enabled project users with notification true of given project"() {
@@ -1543,7 +1479,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         }
 
         when:
-        List<UserProjectRole> projectUsersToBeNotified = userProjectRoleService.getProjectUsersToBeNotified(project)
+        List<UserProjectRole> projectUsersToBeNotified = userProjectRoleService.getProjectUsersToBeNotified([project])
 
         then:
         TestCase.assertContainSame(projectUsersToBeNotified, expected)
@@ -1554,7 +1490,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         setupData()
 
         expect:
-        userProjectRoleService.getProjectUsersToBeNotified(createProject()) == []
+        userProjectRoleService.getProjectUsersToBeNotified([createProject()]) == []
     }
 
     void "projectsAssociatedToProjectAuthority, returns all projects associated to project Authorities inside a users project"() {
@@ -1592,28 +1528,6 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
                 (projectAuthority1): [projects[0], projects[1]],
                 (projectAuthority2): [projects[1], projects[2]]
         ]
-    }
-
-    void "getMails, converts all objects, regardless of notification status"() {
-        given:
-        setupData()
-
-        List<UserProjectRole> projectUsers = setupProjectUserForAllNotificationCombinations()
-        List<String> expected = projectUsers*.user*.email
-
-        when:
-        List<String> mails = userProjectRoleService.getMails(projectUsers)
-
-        then:
-        TestCase.assertContainSame(mails, expected)
-    }
-
-    void "getMails, on empty list, returns empty string list"() {
-        given:
-        setupData()
-
-        expect:
-        userProjectRoleService.getMails([]) == []
     }
 
     MessageSourceService getMessageSourceServiceWithMockedMessageSource() {

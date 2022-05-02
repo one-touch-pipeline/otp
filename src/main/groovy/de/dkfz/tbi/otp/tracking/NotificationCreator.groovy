@@ -158,7 +158,7 @@ class NotificationCreator {
 
             List<String> recipients = []
             if (ticket.automaticNotification && project.processingNotification) {
-                recipients = userProjectRoleService.getEmailsOfToBeNotifiedProjectUsers(project)
+                recipients = userProjectRoleService.getEmailsOfToBeNotifiedProjectUsers([project])
             }
             StringBuilder subject = new StringBuilder("[${ticket.prefixedTicketNumber}] ")
             if (!recipients) {

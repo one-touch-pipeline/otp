@@ -368,7 +368,7 @@ class ProjectService {
      * @param project which was just created
      */
     void sendProjectCreationMailToUserAndTicketSystem(Project project) {
-        List<String> userMails = userProjectRoleService.getEmailsOfToBeNotifiedProjectUsers(project).sort().unique()
+        List<String> userMails = userProjectRoleService.getEmailsOfToBeNotifiedProjectUsers([project]).sort().unique()
         sendProjectCreationMail(project, userMails)
     }
 

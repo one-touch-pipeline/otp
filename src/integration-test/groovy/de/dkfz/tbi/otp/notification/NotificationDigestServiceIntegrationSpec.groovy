@@ -117,7 +117,6 @@ class NotificationDigestServiceIntegrationSpec extends Specification implements 
                 messageSourceService: Mock(MessageSourceService),
                 userProjectRoleService: Mock(UserProjectRoleService) {
                     buildCalls * getProjectUsersToBeNotified(_) >> projectUsers
-                    sendCalls * getMails(_) >> ["mail1", "mail2"]
                 },
                 processingOptionService: new ProcessingOptionService(),
                 mailHelperService: Mock(MailHelperService) {

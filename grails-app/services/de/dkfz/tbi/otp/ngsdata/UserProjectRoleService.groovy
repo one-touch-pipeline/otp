@@ -546,14 +546,9 @@ class UserProjectRoleService {
         applyUserProjectRolesOntoProject(UserProjectRole.findAllByProject(sourceProject), targetProject)
     }
 
-    String getEmailsForNotification(Project project) {
-        assert project: 'No project given'
-        return getMails(getProjectUsersToBeNotified(project)).sort().join(',')
-    }
-
-    List<UserProjectRole> getProjectUsersToBeNotified(Project project) {
+    List<UserProjectRole> getProjectUsersToBeNotified(List<Project> projects) {
         return UserProjectRole.withCriteria {
-            eq("project", project)
+            'in'('project', projects)
             eq("receivesNotifications", true)
             eq("enabled", true)
             user {
@@ -562,8 +557,8 @@ class UserProjectRoleService {
         } as List<UserProjectRole>
     }
 
-    List<String> getMails(List<UserProjectRole> projectUser) {
-        return projectUser*.user*.email
+    List<String> getEmailsOfToBeNotifiedProjectUsers(List<Project> projects) {
+        return getProjectUsersToBeNotified(projects)*.user*.email
     }
 
     /**
@@ -584,28 +579,6 @@ class UserProjectRoleService {
                 }
             }
         } as int
-    }
-
-    List<String> getEmailsOfToBeNotifiedProjectUsers(Project project) {
-        return getEmailsOfToBeNotifiedProjectUsers([project])
-    }
-
-    List<String> getEmailsOfToBeNotifiedProjectUsers(List<Project> projects) {
-        return UserProjectRole.createCriteria().list {
-            and {
-                'in'('project', projects)
-                eq('receivesNotifications', true)
-                eq('enabled', true)
-                user {
-                    eq('enabled', true)
-                }
-            }
-            projections {
-                user {
-                    distinct("email")
-                }
-            }
-        } ?: []
     }
 
     private static List<User> getUniqueProjectAuthoritiesAndUserManagers(Project project) {

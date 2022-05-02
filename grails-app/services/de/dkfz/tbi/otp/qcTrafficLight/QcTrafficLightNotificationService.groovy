@@ -115,7 +115,7 @@ class QcTrafficLightNotificationService {
             !it.finalNotificationSent && it.automaticNotification
         } as boolean
         boolean shouldSendEmailToProjectReceiver = projectNotification && ticketNotification
-        List<String> recipients = shouldSendEmailToProjectReceiver ? userProjectRoleService.getEmailsOfToBeNotifiedProjectUsers(bamFile.project) : []
+        List<String> recipients = shouldSendEmailToProjectReceiver ? userProjectRoleService.getEmailsOfToBeNotifiedProjectUsers([bamFile.project]) : []
         String subject = createResultsAreWarnedSubject(bamFile, recipients.empty)
         String content = createResultsAreWarnedMessage(bamFile)
 

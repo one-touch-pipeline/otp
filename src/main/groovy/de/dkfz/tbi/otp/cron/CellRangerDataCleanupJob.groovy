@@ -161,7 +161,7 @@ class CellRangerDataCleanupJob extends AbstractScheduledJob {
             default:
                 throw new OtpRuntimeException("Invalid state ${informationType} for informationType")
         }
-        mailHelperService.sendEmail(subject, content, (userProjectRoleService.getEmailsOfToBeNotifiedProjectUsers(project) +
+        mailHelperService.sendEmail(subject, content, (userProjectRoleService.getEmailsOfToBeNotifiedProjectUsers([project]) +
                 cellRangerMwps*.requester*.email).unique())
     }
 
