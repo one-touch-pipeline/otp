@@ -509,7 +509,7 @@ class MetadataImportService {
             InformationReliability kitInfoReliability
             LibraryPreparationKit libraryPreparationKit = null
             if (!libPrepKitString) {
-                assert !seqType.isExome()
+                assert !seqType.needsBedFile
                 kitInfoReliability = InformationReliability.UNKNOWN_UNVERIFIED
             } else if (libPrepKitString == InformationReliability.UNKNOWN_VERIFIED.rawValue) {
                 kitInfoReliability = InformationReliability.UNKNOWN_VERIFIED

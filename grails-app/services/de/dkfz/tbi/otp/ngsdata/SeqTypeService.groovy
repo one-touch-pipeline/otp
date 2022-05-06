@@ -307,13 +307,12 @@ class SeqTypeService extends MetadataFieldsService<SeqType> {
 
     static List<SeqType> getSeqTypesRequiredLibPrepKit() {
         return [
-                exomePairedSeqType,
                 wholeGenomeBisulfitePairedSeqType,
                 wholeGenomeBisulfiteTagmentationPairedSeqType,
                 chipSeqPairedSeqType,
                 rnaPairedSeqType,
                 rnaSingleSeqType,
-        ]
+        ] + SeqType.findAllByNeedsBedFile(true)
     }
 
     /**

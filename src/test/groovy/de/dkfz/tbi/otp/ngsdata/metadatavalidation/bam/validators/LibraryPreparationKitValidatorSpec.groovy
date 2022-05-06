@@ -30,8 +30,7 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationConte
 import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
-import static de.dkfz.tbi.otp.ngsdata.BamMetadataColumn.LIBRARY_PREPARATION_KIT
-import static de.dkfz.tbi.otp.ngsdata.BamMetadataColumn.SEQUENCING_TYPE
+import static de.dkfz.tbi.otp.ngsdata.BamMetadataColumn.*
 import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
 
 class LibraryPreparationKitValidatorSpec extends Specification implements DataTest {
@@ -40,6 +39,7 @@ class LibraryPreparationKitValidatorSpec extends Specification implements DataTe
     Class[] getDomainClassesToMock() {
         [
                 LibraryPreparationKit,
+                SeqType,
         ]
     }
 
@@ -48,6 +48,7 @@ class LibraryPreparationKitValidatorSpec extends Specification implements DataTe
     void setup() {
         libraryPreparationKitValidator = new LibraryPreparationKitValidator()
         libraryPreparationKitValidator.libraryPreparationKitService = new LibraryPreparationKitService()
+        libraryPreparationKitValidator.validatorHelperService = new ValidatorHelperService(seqTypeService: new SeqTypeService())
     }
 
     void 'validate, when library preparation kit is not registered in OTP, then add expected problem'() {
@@ -103,15 +104,16 @@ EXON\tIndividual1\t
 
     void 'validate, without library preparation kit but EXOME, adds problems'() {
         given:
+        SeqType seqType = DomainFactory.createExomeSeqType()
         BamMetadataValidationContext context = BamMetadataValidationContextFactory.createContext(
-                "${SEQUENCING_TYPE.name()}\n" +
-                        "EXON\n"
+                "${SEQUENCING_TYPE.name()}\t${SEQUENCING_READ_TYPE.name()}\n" +
+                        "${seqType.name}\t${seqType.libraryLayout}\n"
         )
 
         Collection<Problem> expectedProblems = [
                 new Problem(context.spreadsheet.dataRows[0].cells as Set, LogLevel.WARNING,
-                        "The ${SEQUENCING_TYPE} is 'EXON' but no ${LIBRARY_PREPARATION_KIT} is given. The ${LIBRARY_PREPARATION_KIT} is needed for Indel.",
-                        "If the ${SEQUENCING_TYPE} is '${SeqTypeNames.EXOME.seqTypeName}' the ${LIBRARY_PREPARATION_KIT} should be given. The ${LIBRARY_PREPARATION_KIT} is needed for Indel.")
+                        "The ${SEQUENCING_TYPE} is 'EXOME PAIRED bulk' but no ${LIBRARY_PREPARATION_KIT} is given. The ${LIBRARY_PREPARATION_KIT} is needed for Indel.",
+                        "If the ${SEQUENCING_TYPE} is one of 'EXOME PAIRED bulk' the ${LIBRARY_PREPARATION_KIT} should be given. The ${LIBRARY_PREPARATION_KIT} is needed for Indel.")
         ]
 
         when:

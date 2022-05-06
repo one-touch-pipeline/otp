@@ -29,14 +29,16 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationConte
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidator
 import de.dkfz.tbi.util.spreadsheet.validation.*
 
-import static de.dkfz.tbi.otp.ngsdata.BamMetadataColumn.LIBRARY_PREPARATION_KIT
-import static de.dkfz.tbi.otp.ngsdata.BamMetadataColumn.SEQUENCING_TYPE
+import static de.dkfz.tbi.otp.ngsdata.BamMetadataColumn.*
 
 @Component
 class LibraryPreparationKitValidator extends ValueTuplesValidator<BamMetadataValidationContext> implements BamMetadataValidator {
 
     @Autowired
     LibraryPreparationKitService libraryPreparationKitService
+
+    @Autowired
+    ValidatorHelperService validatorHelperService
 
     @Override
     Collection<String> getDescriptions() {
@@ -50,7 +52,7 @@ class LibraryPreparationKitValidator extends ValueTuplesValidator<BamMetadataVal
 
     @Override
     List<String> getOptionalColumnTitles(BamMetadataValidationContext context) {
-        return [LIBRARY_PREPARATION_KIT, SEQUENCING_TYPE]*.name()
+        return [LIBRARY_PREPARATION_KIT, SEQUENCING_TYPE, SEQUENCING_READ_TYPE]*.name()
     }
 
     @Override
@@ -60,15 +62,18 @@ class LibraryPreparationKitValidator extends ValueTuplesValidator<BamMetadataVal
     void validateValueTuples(BamMetadataValidationContext context, Collection<ValueTuple> valueTuples) {
         valueTuples.each {
             String libraryPreparationKit = it.getValue(LIBRARY_PREPARATION_KIT.name())
-            String seqType = it.getValue(SEQUENCING_TYPE.name())
 
             if (libraryPreparationKit) {
                 if (!libraryPreparationKitService.findByNameOrImportAlias(libraryPreparationKit)) {
                     context.addProblem(it.cells, LogLevel.ERROR, "The ${LIBRARY_PREPARATION_KIT} '${libraryPreparationKit}' is not registered in OTP.", "At least one ${LIBRARY_PREPARATION_KIT} is not registered in OTP.")
                 }
             } else {
-                if (seqType.toUpperCase() == SeqTypeNames.EXOME.seqTypeName) {
-                    context.addProblem(it.cells, LogLevel.WARNING, "The ${SEQUENCING_TYPE} is '${seqType}' but no ${LIBRARY_PREPARATION_KIT} is given. The ${LIBRARY_PREPARATION_KIT} is needed for Indel.", "If the ${SEQUENCING_TYPE} is '${SeqTypeNames.EXOME.seqTypeName}' the ${LIBRARY_PREPARATION_KIT} should be given. The ${LIBRARY_PREPARATION_KIT} is needed for Indel.")
+                SeqType seqType = validatorHelperService.getSeqTypeFromMetadata(it)
+                if (!seqType) {
+                    return
+                }
+                if (seqType.needsBedFile) {
+                    context.addProblem(it.cells, LogLevel.WARNING, "The ${SEQUENCING_TYPE} is '${seqType}' but no ${LIBRARY_PREPARATION_KIT} is given. The ${LIBRARY_PREPARATION_KIT} is needed for Indel.", "If the ${SEQUENCING_TYPE} is one of '${SeqType.findAllByNeedsBedFile(true).join(", ")}' the ${LIBRARY_PREPARATION_KIT} should be given. The ${LIBRARY_PREPARATION_KIT} is needed for Indel.")
                 }
             }
         }

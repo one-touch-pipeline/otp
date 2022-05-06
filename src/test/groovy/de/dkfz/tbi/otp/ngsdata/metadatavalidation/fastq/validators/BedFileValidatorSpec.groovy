@@ -81,6 +81,7 @@ class BedFileValidatorSpec extends Specification implements DataTest, DomainFact
     @Unroll
     void 'validate with seqType = #seqTypeName, libraryLayout = #libraryLayout, liPrepKit = #libPrepKitName, sampleName = #sampleName, createSample = #createSample, decider = #alignmentDeciderBeanName, connectProjectReferenceGenome = #connectProjectToReferenceGenome, createBedFile = #createBedFile, tagmentationBasedLibrary = #tagmentationBasedLibrary expect error: #expectError'() {
         SeqType seqType = DomainFactory.createExomeSeqType()
+        //createSeqType(name: seqTypeName, libraryLayout: libraryLayout)
         LibraryPreparationKit libraryPreparationKit = createLibraryPreparationKit(name: LIB_PREP_KIT_NAME)
         Project project
         if (createSample) {
@@ -121,7 +122,7 @@ class BedFileValidatorSpec extends Specification implements DataTest, DomainFact
         when:
         new BedFileValidator(
                 libraryPreparationKitService: new LibraryPreparationKitService(),
-                validatorHelperService: new ValidatorHelperService(),
+                validatorHelperService: new ValidatorHelperService(seqTypeService: new SeqTypeService()),
                 sampleIdentifierService: [
                         getSampleIdentifierParser: { SampleIdentifierParserBeanName sampleIdentifierParserBeanName ->
                             new TestSampleIdentifierParser()

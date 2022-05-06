@@ -61,8 +61,6 @@ class ValidatorHelperService {
         return null
     }
 
-    //this findBy is no query
-    @SuppressWarnings("AvoidFindWithoutAll")
     SeqType getSeqTypeFromMetadata(ValueTuple tuple) {
         assert tuple
 

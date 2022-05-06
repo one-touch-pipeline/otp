@@ -41,6 +41,9 @@ import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 class BedFileValidator extends ValueTuplesValidator<MetadataValidationContext> implements MetadataValidator, ExtractProjectSampleType {
 
     @Autowired
+    MetadataImportService metadataImportService
+
+    @Autowired
     LibraryPreparationKitService libraryPreparationKitService
 
     @Autowired
@@ -48,7 +51,7 @@ class BedFileValidator extends ValueTuplesValidator<MetadataValidationContext> i
 
     @Override
     Collection<String> getDescriptions() {
-        return ["If the sequencing type is '${SeqTypeNames.EXOME.seqTypeName}' and the sequencing layout is '${SequencingReadType.PAIRED}', the correct BED file for the used library preparation kit should be configured in OTP."]
+        return ["If the sequencing type needs a BED file, the correct BED file for the used library preparation kit should be configured in OTP."]
     }
 
     @Override
@@ -76,16 +79,10 @@ class BedFileValidator extends ValueTuplesValidator<MetadataValidationContext> i
         }
     }
 
-    //LibraryLayout.findByName is not a gorm find, so no findAll available
-    @SuppressWarnings("AvoidFindWithoutAll")
     void validateValueTuple(MetadataValidationContext context, ValueTuple valueTuple) {
-        String seqType = validatorHelperService.getSeqTypeNameFromMetadata(valueTuple)
+        SeqType seqType = validatorHelperService.getSeqTypeFromMetadata(valueTuple)
 
-        boolean singleCell = SeqTypeService.isSingleCell(valueTuple.getValue(BASE_MATERIAL.name()))
-
-        SequencingReadType libraryLayout = SequencingReadType.getByName(valueTuple.getValue(SEQUENCING_READ_TYPE.name()))
-
-        if (seqType != SeqTypeNames.EXOME.seqTypeName || libraryLayout != SequencingReadType.PAIRED || singleCell) {
+        if (!seqType || !seqType.needsBedFile) {
             return
         }
 
@@ -112,7 +109,7 @@ class BedFileValidator extends ValueTuplesValidator<MetadataValidationContext> i
 
         ReferenceGenome referenceGenome = ReferenceGenomeProjectSeqTypeService.getConfiguredReferenceGenomeProjectSeqType(
                 project,
-                SeqTypeService.exomePairedSeqType,
+                seqType,
                 sampleType,
         )?.referenceGenome
         if (!referenceGenome) {
