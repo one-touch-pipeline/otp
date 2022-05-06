@@ -26,7 +26,6 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.dataprocessing.FastqcDataFilesService
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.ngsdata.SeqTrackService
 import de.dkfz.tbi.otp.workflow.jobs.AbstractFinishJob
@@ -38,18 +37,12 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 class FastqcFinishJob extends AbstractFinishJob implements FastqcShared {
 
     @Autowired
-    FastqcDataFilesService fastqcDataFilesService
-
-    @Autowired
     SeqTrackService seqTrackService
 
     @Override
     void updateDomains(WorkflowStep workflowStep) {
         SeqTrack seqTrack = getSeqTrack(workflowStep)
 
-        fastqcDataFilesService.updateFastqcProcessedFiles(getFastqcProcessedFiles(workflowStep))
-
-        seqTrackService.fillBaseCount(seqTrack)
         seqTrackService.markFastqcFinished(seqTrack)
     }
 }

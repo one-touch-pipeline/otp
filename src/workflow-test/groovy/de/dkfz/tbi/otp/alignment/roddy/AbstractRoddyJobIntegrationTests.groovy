@@ -26,9 +26,7 @@ import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.CollectionUtils
-import de.dkfz.tbi.otp.utils.HelperUtils
-import de.dkfz.tbi.otp.utils.SessionUtils
+import de.dkfz.tbi.otp.utils.*
 
 import java.time.Duration
 
@@ -65,8 +63,8 @@ class AbstractRoddyJobIntegrationTests extends AbstractRoddyAlignmentWorkflowTes
             config.refresh()
             config.programVersion = programVersion
             config.save(flush: true)
-            restartWorkflowFromFailedStep()
         }
+        restartWorkflowFromFailedStep()
 
         then:
         checkAllAfterSuccessfulExecution_alignBaseBamAndNewLanes()
@@ -104,9 +102,8 @@ class AbstractRoddyJobIntegrationTests extends AbstractRoddyAlignmentWorkflowTes
             workPackage.refresh()
             workPackage.statSizeFileName = chromosomeStatFileName
             workPackage.save(flush: true)
-
-            restartWorkflowFromFailedStep()
         }
+        restartWorkflowFromFailedStep()
 
         then:
         checkAllAfterRoddyClusterJobsRestartAndSuccessfulExecution_alignBaseBamAndNewLanes()

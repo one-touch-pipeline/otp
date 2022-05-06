@@ -69,16 +69,19 @@ class JobScheduler {
     @Scheduled(fixedDelay = 1000L)
     void scheduleJob() {
         if (workflowSystemService.enabled) {
-            SessionUtils.withNewSession {
-                WorkflowStep step = CollectionUtils.atMostOneElement(
+            WorkflowStep step = SessionUtils.withTransaction {
+                CollectionUtils.atMostOneElement(
                         WorkflowStep.findAllByState(WorkflowStep.State.CREATED, [sort: 'id', order: 'asc', max: 1])
                 )
-                if (step) {
+            }
+            if (step) {
+                SessionUtils.withTransaction {
+                    step.refresh()
                     log.debug("Found job to starting asyncron: ${step.displayInfo()}")
                     workflowStateChangeService.changeStateToRunning(step)
-                    task {
-                        executeAndCheckJob(step)
-                    }
+                }
+                task {
+                    executeAndCheckJob(step)
                 }
             }
         }

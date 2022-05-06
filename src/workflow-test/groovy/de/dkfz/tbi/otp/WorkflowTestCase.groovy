@@ -370,6 +370,7 @@ abstract class WorkflowTestCase extends Specification implements UserAndRoles, G
     protected void outputFailureInfoAndThrowException(Collection<ProcessingStepUpdate> failureProcessingStepUpdates) {
         List<String> combinedErrorMessage = []
         failureProcessingStepUpdates.each {
+            it.refresh()
             log.error "ProcessingStep ${it.processingStep.id} failed."
             if (it.error) {
                 log.error 'Error message:'
@@ -564,10 +565,13 @@ echo \$TEMP_DIR
     }
 
     protected void restartWorkflowFromFailedStep(boolean ensureNoFailure = true) {
-        ProcessingStepUpdate failureStepUpdate = exactlyOneElement(ProcessingStepUpdate.findAllByState(ExecutionState.FAILURE))
-        ProcessingStep step = failureStepUpdate.processingStep
-        schedulerService.restartProcessingStep(step)
-        log.debug "RESTARTED THE WORKFLOW FROM THE FAILED JOB"
+        ProcessingStepUpdate failureStepUpdate
+        SessionUtils.withTransaction {
+            failureStepUpdate = exactlyOneElement(ProcessingStepUpdate.findAllByState(ExecutionState.FAILURE))
+            ProcessingStep step = failureStepUpdate.processingStep
+            schedulerService.restartProcessingStep(step)
+            log.debug "RESTARTED THE WORKFLOW FROM THE FAILED JOB"
+        }
         waitUntilWorkflowFinishes(timeout)
         if (ensureNoFailure) {
             ensureThatWorkflowHasNotFailed([failureStepUpdate])

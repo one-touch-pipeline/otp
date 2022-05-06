@@ -148,11 +148,11 @@ abstract class AbstractCellRangerAlignmentWorkflowTests extends AbstractAlignmen
     void "test CellRanger with #p.nLanes lanes, with expectedCells #p.expected and enforcedCells #p.enforced"() {
         given:
         SessionUtils.withTransaction {
-            CellRangerMergingWorkPackage crmwp = CellRangerMergingWorkPackage.get(mwp.id)
-            crmwp.seqTracks = createNSeqTracks(p.nLanes)
+            mwp.refresh()
+            mwp.seqTracks = createNSeqTracks(p.nLanes)
             mwp.expectedCells = p.expected
             mwp.enforcedCells = p.enforced
-            crmwp.save(flush: true)
+            mwp.save(flush: true)
         }
 
         when:

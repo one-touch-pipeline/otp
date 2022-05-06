@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.job.processing
 
+import grails.gorm.transactions.Transactional
 import grails.util.Environment
 import org.hibernate.Hibernate
 import org.springframework.beans.factory.BeanNameAware
@@ -79,6 +80,7 @@ abstract class AbstractStartJobImpl implements StartJob, ApplicationListener<Job
      * If looks for the start job definition based on the bean name of the current start job class,
      * then for the job execution plan by that job definition.
      */
+    @Transactional(readOnly = true)
     private void initializeJobExecutionPlan() {
         if (!schedulerService.active) {
             return

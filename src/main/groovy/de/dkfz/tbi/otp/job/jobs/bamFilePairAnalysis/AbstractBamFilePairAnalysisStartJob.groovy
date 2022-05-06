@@ -53,34 +53,32 @@ abstract class AbstractBamFilePairAnalysisStartJob extends AbstractStartJobImpl 
     @Scheduled(fixedDelay = 60000L)
     @Override
     void execute() {
-        SessionUtils.withNewSession {
+        SessionUtils.withTransaction {
             int minPriority = minimumProcessingPriorityForOccupyingASlot
             if (minPriority == ProcessingPriority.SUPREMUM) {
                 return
             }
-            SamplePair.withTransaction {
-                SamplePair samplePair = findSamplePairToProcess(minPriority)
-                if (samplePair) {
-                    samplePair.lock()
-                    samplePair.refresh()
+            SamplePair samplePair = findSamplePairToProcess(minPriority)
+            if (samplePair) {
+                samplePair.lock()
+                samplePair.refresh()
 
-                    ConfigPerProjectAndSeqType config = getConfig(samplePair)
+                ConfigPerProjectAndSeqType config = getConfig(samplePair)
 
-                    AbstractMergedBamFile sampleType1BamFile = samplePair.mergingWorkPackage1.processableBamFileInProjectFolder
-                    AbstractMergedBamFile sampleType2BamFile = samplePair.mergingWorkPackage2.processableBamFileInProjectFolder
+                AbstractMergedBamFile sampleType1BamFile = samplePair.mergingWorkPackage1.processableBamFileInProjectFolder
+                AbstractMergedBamFile sampleType2BamFile = samplePair.mergingWorkPackage2.processableBamFileInProjectFolder
 
-                    BamFilePairAnalysis analysis = bamFileAnalysisService.analysisClass.newInstance(
-                            samplePair: samplePair,
-                            instanceName: getInstanceName(config),
-                            config: config,
-                            sampleType1BamFile: sampleType1BamFile,
-                            sampleType2BamFile: sampleType2BamFile,
-                    )
-                    analysis.save(flush: true)
-                    prepareCreatingTheProcessAndTriggerTracking(analysis)
-                    createProcess(analysis)
-                    log.debug "Analysis started for: ${analysis}"
-                }
+                BamFilePairAnalysis analysis = bamFileAnalysisService.analysisClass.newInstance(
+                        samplePair: samplePair,
+                        instanceName: getInstanceName(config),
+                        config: config,
+                        sampleType1BamFile: sampleType1BamFile,
+                        sampleType2BamFile: sampleType2BamFile,
+                )
+                analysis.save(flush: true)
+                prepareCreatingTheProcessAndTriggerTracking(analysis)
+                createProcess(analysis)
+                log.debug "Analysis started for: ${analysis}"
             }
         }
     }

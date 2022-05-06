@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.job.jobs.importExternallyMergedBam
 
+import grails.gorm.transactions.Transactional
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Scope
@@ -200,6 +201,7 @@ touch ${checkpoint}
     }
 
     @Override
+    @Transactional
     protected void validate() throws Throwable {
         final ImportProcess importProcess = processParameterObject
         importProcess.linkOperation.linkSource ? validateLink(importProcess) : validateCopy(importProcess)

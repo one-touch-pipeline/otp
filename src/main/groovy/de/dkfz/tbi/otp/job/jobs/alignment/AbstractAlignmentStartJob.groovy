@@ -40,7 +40,7 @@ abstract class AbstractAlignmentStartJob extends AbstractStartJobImpl implements
     @Override
     @Scheduled(fixedDelay = 60000L)
     void execute() {
-        SessionUtils.withNewSession {
+        SessionUtils.withTransaction {
             startAlignment()
         }
     }
@@ -51,15 +51,13 @@ abstract class AbstractAlignmentStartJob extends AbstractStartJobImpl implements
             return
         }
 
-        AbstractMergedBamFile.withTransaction {
-            MergingWorkPackage mergingWorkPackage = findProcessableMergingWorkPackages(minPriority).find { !isDataInstallationWFInProgress(it) }
-            if (mergingWorkPackage) {
-                mergingWorkPackage.needsProcessing = false
-                assert mergingWorkPackage.save(flush: true)
-                AbstractMergedBamFile bamFile = createBamFile(mergingWorkPackage, findUsableBaseBamFile(mergingWorkPackage))
-                notificationCreator.setStartedForSeqTracks(bamFile.containedSeqTracks, OtrsTicket.ProcessingStep.ALIGNMENT)
-                createProcess(bamFile)
-            }
+        MergingWorkPackage mergingWorkPackage = findProcessableMergingWorkPackages(minPriority).find { !isDataInstallationWFInProgress(it) }
+        if (mergingWorkPackage) {
+            mergingWorkPackage.needsProcessing = false
+            assert mergingWorkPackage.save(flush: true)
+            AbstractMergedBamFile bamFile = createBamFile(mergingWorkPackage, findUsableBaseBamFile(mergingWorkPackage))
+            notificationCreator.setStartedForSeqTracks(bamFile.containedSeqTracks, OtrsTicket.ProcessingStep.ALIGNMENT)
+            createProcess(bamFile)
         }
     }
 

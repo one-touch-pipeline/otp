@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.workflowTest.dataInstallation
 
-import spock.lang.IgnoreRest
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellService
@@ -154,7 +153,6 @@ class DataInstallationWorkflowSpec extends AbstractWorkflowSpec {
         false            | _
     }
 
-    @IgnoreRest
     void "test ChipSeq DataInstallation"() {
         given:
         SeqTrack seqTrack

@@ -154,6 +154,7 @@ class FastqcWorkflowSpec extends AbstractWorkflowSpec {
         SessionUtils.withTransaction {
             FastqcProcessedFile fastqcProcessedFile = CollectionUtils.exactlyOneElement(FastqcProcessedFile.all)
 
+            assert fastqcProcessedFile.workflowArtefact
             assert fastqcProcessedFile.fileExists
             assert fastqcProcessedFile.contentUploaded
             assert fastqcProcessedFile.dataFile == dataFile
@@ -163,9 +164,9 @@ class FastqcWorkflowSpec extends AbstractWorkflowSpec {
     private void validateFastQcFileContent() {
         SessionUtils.withTransaction {
             dataFile.refresh()
-            assert null != dataFile.sequenceLength
-            assert null != dataFile.nReads
-            seqTrack.refresh()
+            assert dataFile.sequenceLength
+            assert dataFile.nReads
+            seqTrack = SeqTrack.get(seqTrack.id) //.refresh() does not work
             assert seqTrack.nBasePairs
         }
     }

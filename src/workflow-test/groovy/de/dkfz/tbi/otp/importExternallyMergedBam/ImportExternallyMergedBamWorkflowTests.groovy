@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.importExternallyMergedBam
 
-import spock.lang.IgnoreRest
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.WorkflowTestCase
@@ -172,7 +171,6 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase implements
         }
     }
 
-    @IgnoreRest
     @Unroll
     void "testImportProcess_FilesHaveToBeCopied"() {
         given:

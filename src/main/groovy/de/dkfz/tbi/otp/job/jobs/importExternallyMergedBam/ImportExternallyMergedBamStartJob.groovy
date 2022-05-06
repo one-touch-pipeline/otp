@@ -40,20 +40,18 @@ class ImportExternallyMergedBamStartJob extends AbstractStartJobImpl {
     @Scheduled(fixedDelay = 60000L)
     @Override
     void execute() {
-        SessionUtils.withNewSession {
+        SessionUtils.withTransaction {
             int minPriority = minimumProcessingPriorityForOccupyingASlot
             if (minPriority == ProcessingPriority.SUPREMUM) {
                 return
             }
 
-            ImportProcess.withTransaction {
-                ImportProcess importProcess = CollectionUtils.atMostOneElement(ImportProcess.findAllByState(ImportProcess.State.NOT_STARTED, [max: 1]))
-                if (importProcess) {
-                    importProcess.state = ImportProcess.State.STARTED
-                    assert importProcess.save(flush: true)
-                    createProcess(importProcess)
-                    log.debug "Creating process for import ${importProcess}"
-                }
+            ImportProcess importProcess = CollectionUtils.atMostOneElement(ImportProcess.findAllByState(ImportProcess.State.NOT_STARTED, [max: 1]))
+            if (importProcess) {
+                importProcess.state = ImportProcess.State.STARTED
+                assert importProcess.save(flush: true)
+                createProcess(importProcess)
+                log.debug "Creating process for import ${importProcess}"
             }
         }
     }

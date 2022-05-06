@@ -244,18 +244,28 @@ class Scheduler {
      * handling, use {@link #doErrorHandling(Job, Throwable)} instead.
      */
     private void doUnsafeErrorHandling(Job job, Throwable exceptionToBeHandled) {
-        ProcessingStep step = ProcessingStep.getInstance(job.processingStep.id)
+        ProcessingStep step
+        SessionUtils.withTransaction {
+            step = ProcessingStep.getInstance(job.processingStep.id)
+        }
         try {
             schedulerService.removeRunningJob(job)
             // add a ProcessingStepUpdate to the ProcessingStep
-            processService.setOperatorIsAwareOfFailure(step.process, false)
-            ProcessingStepUpdate update = new ProcessingStepUpdate(
-                    date: new Date(),
-                    state: ExecutionState.FAILURE,
-                    previous: step.latestProcessingStepUpdate,
-                    processingStep: step
-            )
-            update.save(flush: true)
+            SessionUtils.withTransaction {
+                step.refresh()
+                processService.setOperatorIsAwareOfFailure(step.process, false)
+            }
+            ProcessingStepUpdate update
+            SessionUtils.withTransaction {
+                step.refresh()
+                update = new ProcessingStepUpdate(
+                        date: new Date(),
+                        state: ExecutionState.FAILURE,
+                        previous: step.latestProcessingStepUpdate,
+                        processingStep: step
+                )
+                update.save(flush: true)
+            }
             String errorHash = null
             try {
                 errorHash = errorLogService.log(exceptionToBeHandled)
@@ -266,22 +276,34 @@ class Scheduler {
                         "exception during exception logging:\n" +
                         "${ExceptionUtils.getStackTrace(exceptionDuringLogging)}", exceptionDuringLogging
             }
-            ProcessingError error = new ProcessingError(
-                    errorMessage: exceptionToBeHandled.message ?: "No Exception message",
-                    processingStepUpdate: update,
-                    stackTraceIdentifier: errorHash
-            )
-            error.save(flush: true)
-            update.error = error
-            if (!update.save(flush: true)) {
-                log.error("Could not create a FAILURE Update for Job of type ${job.class}")
-                throw new ProcessingException("Could not create a FAILURE Update for Job")
+            ProcessingError error
+            SessionUtils.withTransaction {
+                error = new ProcessingError(
+                        errorMessage: exceptionToBeHandled.message ?: "No Exception message",
+                        processingStepUpdate: update,
+                        stackTraceIdentifier: errorHash
+                )
+                error.save(flush: true)
             }
-            markProcessAsFailed(step)
+            SessionUtils.withTransaction {
+                update.error = error
+                if (!update.save(flush: true)) {
+                    log.error("Could not create a FAILURE Update for Job of type ${job.class}")
+                    throw new ProcessingException("Could not create a FAILURE Update for Job")
+                }
+            }
+            SessionUtils.withTransaction {
+                step.refresh()
+                markProcessAsFailed(step)
+            }
             log.debug("doErrorHandling performed for ${job.class} with ProcessingStep ${step.id}")
-            restartHandlerService.handleRestart(job)
+            SessionUtils.withTransaction {
+                restartHandlerService.handleRestart(job)
+            }
         } finally {
-            jobMailService.sendErrorNotification(job, exceptionToBeHandled?.message ?: "No Exception message")
+            SessionUtils.withTransaction {
+                jobMailService.sendErrorNotification(job, exceptionToBeHandled?.message ?: "No Exception message")
+            }
         }
     }
 

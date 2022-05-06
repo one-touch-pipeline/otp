@@ -128,12 +128,6 @@ class FastqcDataFilesService {
         }
     }
 
-    void updateFastqcProcessedFiles(List<FastqcProcessedFile> fastqcList) {
-        fastqcList.each {
-            updateFastqcProcessedFile(it)
-        }
-    }
-
     void updateFastqcProcessedFile(FastqcProcessedFile fastqc) {
         Path path = fastqcOutputPath(fastqc)
         if (Files.isReadable(path)) {
