@@ -52,42 +52,9 @@ class LsdfFilesService {
     ProjectService projectService
 
     /**
-     * Similar to {@link java.nio.file.Paths#get(String, String ...)} from Java 7.
-     * @deprecated use Path
-     */
-    @Deprecated
-    static File getPath(final String first, final String... more) {
-        validatePathSegment(first, "first")
-        File file = new File(first)
-        for (int i = 0; i < more.length; i++) {
-            validatePathSegment(more[i], "more[${i}]")
-            file = new File(file, more[i])
-        }
-        return file
-    }
-
-    private static void validatePathSegment(final String segment, final String segmentPosition) {
-        if (!segment) {
-            throw new IllegalArgumentException("${segmentPosition} is blank")
-        }
-        if (segment =~ /(?:^|${Pattern.quote(File.separator)})\.{1,2}(?:${Pattern.quote(File.separator)}|$)/) {
-            throw new IllegalArgumentException("${segmentPosition} contains '.' or '..': ${segment}")
-        }
-        if (!(segment ==~ OtpPathValidator.PATH_CHARACTERS_REGEX)) {
-            throw new IllegalArgumentException("${segmentPosition} contains at least one illegal character: ${segment}")
-        }
-    }
-
-    /**
      * This function return path to the initial location
      * of the given dataFile
-     * @deprecated use {@link #getFileInitialPathAsPath}
      */
-    @Deprecated
-    static String getFileInitialPath(DataFile dataFile) {
-        return "${dataFile.initialDirectory}/${dataFile.fileName}"
-    }
-
     Path getFileInitialPathAsPath(DataFile dataFile, FileSystem fileSystem) {
         return fileSystem.getPath(getFileInitialPath(dataFile))
     }
@@ -111,28 +78,15 @@ class LsdfFilesService {
         return basePath.resolve(seqTypeDir).resolve(centerDir).resolve(dataFile.run.dirName).resolve(dataFile.pathName).resolve(dataFile?.fileName)
     }
 
-    /**
-     * @deprecated use {@link #getFileFinalPathAsPath}
-     */
-    @Deprecated
-    String getFileFinalPath(DataFile dataFile) {
-        return getFileFinalPathAsPath(dataFile)?.toString()
+    Path getFileMd5sumFinalPathAsPath(DataFile dataFile) {
+        return getFileFinalPathAsPath(dataFile)?.resolveSibling(dataFile.fileName.concat(".md5sum"))
     }
 
-    boolean checkFinalPathDefined(DataFile dataFile) {
+    private boolean checkFinalPathDefined(DataFile dataFile) {
         if (!dataFile) {
             return false
         }
         return dataFile.used
-    }
-
-    @Deprecated
-    String getFileMd5sumFinalPath(DataFile dataFile) {
-        return getFileMd5sumFinalPathAsPath(dataFile)?.toString()
-    }
-
-    Path getFileMd5sumFinalPathAsPath(DataFile dataFile) {
-        return getFileFinalPathAsPath(dataFile)?.resolveSibling(dataFile.fileName.concat(".md5sum"))
     }
 
     String seqTypeDirectory(DataFile file) {
@@ -164,26 +118,6 @@ class LsdfFilesService {
         return sb.toString()
     }
 
-    /**
-     * @deprecated use {@link #getFileViewByPidPathAsPath}
-     */
-    @Deprecated
-    String getFileViewByPidPath(long fileId) {
-        DataFile file = DataFile.get(fileId)
-        if (!file) {
-            return null
-        }
-        return getFileViewByPidPath(file)
-    }
-
-    /**
-     * @deprecated use {@link #getFileViewByPidPathAsPath}
-     */
-    @Deprecated
-    String getFileViewByPidPath(DataFile file) {
-        return getFileViewByPidPathAsPath(file)
-    }
-
     Path getFileViewByPidPathAsPath(DataFile file) {
         return createFinalPathHelper(file, false)
     }
@@ -191,13 +125,7 @@ class LsdfFilesService {
     /**
      * for single cell data with well identifier, the path in the all directory is returned.
      * For all other data the same as {@link #getFileViewByPidPath} is returned
-     * @deprecated use {@link #getWellAllFileViewByPidPathAsPath}
      */
-    @Deprecated
-    String getWellAllFileViewByPidPath(DataFile file) {
-        return getWellAllFileViewByPidPathAsPath(file)
-    }
-
     Path getWellAllFileViewByPidPathAsPath(DataFile file) {
         return createFinalPathHelper(file, true)
     }
@@ -238,30 +166,6 @@ class LsdfFilesService {
         return CollectionUtils.exactlyOneElement(paths.unique()).parent
     }
 
-    /**
-     * @deprecated use {@link FileService#ensureFileIsReadableAndNotEmpty}
-     */
-    @Deprecated
-    static void ensureFileIsReadableAndNotEmpty(final File file) {
-        FileService.ensureFileIsReadableAndNotEmpty(file.toPath())
-    }
-
-    /**
-     * @deprecated use {@link FileService#ensureDirIsReadableAndNotEmpty}
-     */
-    @Deprecated
-    static void ensureDirIsReadableAndNotEmpty(final File dir) {
-        FileService.ensureDirIsReadableAndNotEmpty(dir.toPath())
-    }
-
-    /**
-     * @deprecated use {@link FileService#ensureDirIsReadable}
-     */
-    @Deprecated
-    static void ensureDirIsReadable(final File dir) {
-        FileService.ensureDirIsReadable(dir.toPath())
-    }
-
     String[] getAllPathsForRun(Run run, boolean fullPath = false) {
         assert run: "No run given"
 
@@ -291,6 +195,111 @@ class LsdfFilesService {
             return pathWithRunName
         }
         return path
+    }
+
+    /**
+     * Similar to {@link java.nio.file.Paths#get(String, String ...)} from Java 7.
+     * @deprecated use Path
+     */
+    @Deprecated
+    static File getPath(final String first, final String... more) {
+        validatePathSegment(first, "first")
+        File file = new File(first)
+        for (int i = 0; i < more.length; i++) {
+            validatePathSegment(more[i], "more[${i}]")
+            file = new File(file, more[i])
+        }
+        return file
+    }
+
+    @Deprecated
+    private static void validatePathSegment(final String segment, final String segmentPosition) {
+        if (!segment) {
+            throw new IllegalArgumentException("${segmentPosition} is blank")
+        }
+        if (segment =~ /(?:^|${Pattern.quote(File.separator)})\.{1,2}(?:${Pattern.quote(File.separator)}|$)/) {
+            throw new IllegalArgumentException("${segmentPosition} contains '.' or '..': ${segment}")
+        }
+        if (!(segment ==~ OtpPathValidator.PATH_CHARACTERS_REGEX)) {
+            throw new IllegalArgumentException("${segmentPosition} contains at least one illegal character: ${segment}")
+        }
+    }
+
+    /**
+     * This function return path to the initial location
+     * of the given dataFile
+     * @deprecated use {@link #getFileInitialPathAsPath}
+     */
+    @Deprecated
+    static String getFileInitialPath(DataFile dataFile) {
+        return "${dataFile.initialDirectory}/${dataFile.fileName}"
+    }
+
+    /**
+     * @deprecated use {@link #getFileFinalPathAsPath}
+     */
+    @Deprecated
+    String getFileFinalPath(DataFile dataFile) {
+        return getFileFinalPathAsPath(dataFile)?.toString()
+    }
+
+    @Deprecated
+    String getFileMd5sumFinalPath(DataFile dataFile) {
+        return getFileMd5sumFinalPathAsPath(dataFile)?.toString()
+    }
+
+    /**
+     * @deprecated use {@link #getFileViewByPidPathAsPath}
+     */
+    @Deprecated
+    String getFileViewByPidPath(long fileId) {
+        DataFile file = DataFile.get(fileId)
+        if (!file) {
+            return null
+        }
+        return getFileViewByPidPath(file)
+    }
+
+    /**
+     * @deprecated use {@link #getFileViewByPidPathAsPath}
+     */
+    @Deprecated
+    String getFileViewByPidPath(DataFile file) {
+        return getFileViewByPidPathAsPath(file)
+    }
+
+    /**
+     * for single cell data with well identifier, the path in the all directory is returned.
+     * For all other data the same as {@link #getFileViewByPidPath} is returned
+     * @deprecated use {@link #getWellAllFileViewByPidPathAsPath}
+     */
+    @Deprecated
+    String getWellAllFileViewByPidPath(DataFile file) {
+        return getWellAllFileViewByPidPathAsPath(file)
+    }
+
+    /**
+     * @deprecated use {@link FileService#ensureFileIsReadableAndNotEmpty}
+     */
+    @Deprecated
+    static void ensureFileIsReadableAndNotEmpty(final File file) {
+        FileService.ensureFileIsReadableAndNotEmpty(file.toPath())
+    }
+
+    /**
+     * @deprecated use {@link FileService#ensureDirIsReadableAndNotEmpty}
+     */
+    @Deprecated
+    static void ensureDirIsReadableAndNotEmpty(final File dir) {
+        FileService.ensureDirIsReadableAndNotEmpty(dir.toPath())
+    }
+
+    /**
+     * @deprecated use {@link FileService#ensureDirIsReadable}
+     */
+    @Deprecated
+    static void ensureDirIsReadable(final File dir) {
+        FileService.ensureDirIsReadable(dir.toPath())
     }
 
     /**
