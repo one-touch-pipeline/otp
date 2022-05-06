@@ -127,18 +127,14 @@ class LsdfFilesService {
         return createFinalPathHelper(file, true)
     }
 
-    private Path createViewByPidPath(DataFile dataFile) {
-        return individualService.getViewByPidPath(dataFile.individual, dataFile.seqType)
-    }
-
     Path createSingleCellAllWellDirectoryPath(DataFile file) {
-        Path vbpPath = createViewByPidPath(file)
+        Path vbpPath = individualService.getViewByPidPath(file.individual, file.seqType)
         String sampleTypeDir = combinedDirectoryNameForSampleTypePlusAntibodyPlusSingleCellWell(file, true)
         return vbpPath.resolve(sampleTypeDir)
     }
 
     private Path createFinalPathHelper(DataFile file, boolean useAllWellDirectory = false) {
-        Path vbpPath = createViewByPidPath(file)
+        Path vbpPath = individualService.getViewByPidPath(file.individual, file.seqType)
         return vbpPath.resolve(getFilePathInViewByPid(file, useAllWellDirectory))
     }
 
