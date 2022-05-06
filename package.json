@@ -2,9 +2,12 @@
   "scripts": {
     "lint": "eslint ./grails-app/assets/javascripts",
     "lint-fix": "npm run lint -- --fix --rule \"prefer-template: 0\" --rule \"strict: 0\"",
-    "lint-export": "npm run lint -- -f html -o ./build/reports/eslint/lint.html"
+    "lint-export": "npm run lint -- -f html -o ./build/reports/eslint/lint.html",
+    "cy:run":  "cypress run",
+    "cy:open": "cypress open"
   },
   "devDependencies": {
+    "cypress": "^9.6.0",
     "eslint": "~8.8.0",
     "eslint-config-airbnb-base": "~15.0.0",
     "eslint-plugin-import": "~2.25.4"

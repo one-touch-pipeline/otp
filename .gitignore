@@ -80,3 +80,9 @@ response.json
 
 ### Node ###
 node_modules/
+
+### Cypress ###
+/cypress/screenshots/*
+/cypress/videos/*
+cypress.env.json
+
