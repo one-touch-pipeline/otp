@@ -196,7 +196,6 @@ class DeletionServiceIntegrationSpec extends Specification implements EgaSubmiss
         deletionService.deleteSeqTrack(seqTrack)
 
         then:
-        seqTrack.ilseSubmission == null
         IlseSubmission.count() == 0
     }
 
@@ -211,7 +210,6 @@ class DeletionServiceIntegrationSpec extends Specification implements EgaSubmiss
         deletionService.deleteSeqTrack(seqTrack)
 
         then:
-        seqTrack.ilseSubmission == null
         IlseSubmission.count() == 1
     }
 
@@ -229,7 +227,6 @@ class DeletionServiceIntegrationSpec extends Specification implements EgaSubmiss
         deletionService.deleteSeqTrack(seqTrack)
 
         then:
-        seqTrack.ilseSubmission == null
         IlseSubmission.count() == 1
     }
 
@@ -248,7 +245,6 @@ class DeletionServiceIntegrationSpec extends Specification implements EgaSubmiss
         deletionService.deleteSeqTrack(seqTrack)
 
         then:
-        seqTrack.ilseSubmission == null
         IlseSubmission.count() == 1
     }
 

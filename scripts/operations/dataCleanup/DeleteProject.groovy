@@ -21,11 +21,18 @@
  */
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
+import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.job.processing.FileSystemService
+import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
-import de.dkfz.tbi.otp.utils.CollectionUtils
-import de.dkfz.tbi.otp.utils.DeletionService
+import de.dkfz.tbi.otp.utils.*
+
+import java.nio.file.FileSystem
+import java.nio.file.Path
+
+import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.REALM_DEFAULT_VALUE
 
 /**
  * Delete of a project or only parts.
@@ -52,6 +59,11 @@ import de.dkfz.tbi.otp.utils.DeletionService
 String projectName = ""
 
 /**
+ * the absolute file name for the created script
+ */
+String pathName = ''
+
+/**
  * The deletion mode: complete project or only the data inside the project
  */
 ProjectDeletionMode mode =
@@ -65,7 +77,7 @@ ProjectDeletionMode mode =
 boolean assertProjectEmpty = true
 
 /**
- * Should the delete bash script also contain the analysis directory?
+ * Should the delete bash script also contain code to delete analysis directory of the project?
  */
 boolean deleteAnalysisDirectory = true
 
@@ -78,47 +90,69 @@ enum ProjectDeletionMode {
 
 DeletionService deletionService = ctx.deletionService
 ProjectService projectService = ctx.projectService
+FileSystemService fileSystemService = ctx.fileSystemService
+FileService fileService = ctx.fileService
 
-Project.withTransaction {
-    Project project = CollectionUtils.exactlyOneElement(Project.findAllByName(projectName), "No project with the provided name could be found")
-    String absoluteProjectDirectory = projectService.getProjectDirectory(project)
+FileSystem fileSystem = fileSystemService.remoteFileSystemOnDefaultRealm
+Path outputFile = fileSystem.getPath(pathName)
 
-    if (assertProjectEmpty) {
-        assert !projectHasDataDependencies(project): "The project contains data, disable `assertProjectEmpty` to override this check"
-    }
+String realmName = fileSystemService.processingOptionService.findOptionAsString(REALM_DEFAULT_VALUE)
+Realm realm = CollectionUtils.atMostOneElement(Realm.findAllByName(realmName))
+fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(outputFile.parent, realm)
 
-    List<String> output = []
+List<String> output = []
 
-    if (deleteAnalysisDirectory) {
-        output << """\
+try {
+    Project.withTransaction {
+        Project project = CollectionUtils.exactlyOneElement(Project.findAllByName(projectName), "No project with the provided name could be found")
+        String absoluteProjectDirectory = projectService.getProjectDirectory(project)
+
+        if (assertProjectEmpty) {
+            assert !projectHasDataDependencies(project): "The project contains data, disable `assertProjectEmpty` to override this check"
+        }
+
+        if (deleteAnalysisDirectory) {
+            output << """\
             |# Analysis Directory
             |${getDeletePotentialLinkAndTargetCommand(project.dirAnalysis)}""".stripMargin()
-    }
+        }
 
-    switch (mode) {
-        case ProjectDeletionMode.DELETE_ALL:
-            output << """\
+        switch (mode) {
+            case ProjectDeletionMode.DELETE_ALL:
+                output << """\
                 |# Project Directory:"
                 |## Content:
                 |rm -rf ${absoluteProjectDirectory}/*
                 |
                 |## Directory:
                 |${getDeletePotentialLinkAndTargetCommand(absoluteProjectDirectory)}""".stripMargin()
-            deletionService.deleteProject(project)
-            break
-        case ProjectDeletionMode.DELETE_SEQUENCING_ONLY:
-            output << """\
+                deletionService.deleteProject(project)
+                break
+            case ProjectDeletionMode.DELETE_SEQUENCING_ONLY:
+                output << """\
                 |# Sequence Directory:"
                 |rm -rf ${absoluteProjectDirectory}/sequencing/""".stripMargin()
-            deletionService.deleteProjectContent(project)
-            break
-        default:
-            assert false: "no mode selected"
-    }
+                deletionService.deleteProjectContent(project)
+                break
+            default:
+                assert false: "no mode selected"
+        }
 
-    println "Execute the following line:"
+        println "Execute the following line:"
+        println output.join("\n\n")
+
+        outputFile.text = output.join('\n\n')
+
+        assert false: "DEBUG: transaction intentionally failed to rollback changes"
+    }
+} catch (Throwable t) {
+    output << 'Execution failed'
+    output << t.message
+    output << StackTraceUtils.getStackTrace(t)
+
     println output.join("\n\n")
-    assert false : "DEBUG: transaction intentionally failed to rollback changes"
+    outputFile.text = output.join('\n\n')
+    throw t
 }
 
 String getDeletePotentialLinkAndTargetCommand(String path) {
@@ -151,3 +185,5 @@ boolean projectHasDataDependencies(Project project) {
 
     return lanesFound || bamsFound
 }
+
+''

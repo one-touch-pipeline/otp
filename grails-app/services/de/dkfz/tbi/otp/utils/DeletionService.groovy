@@ -348,11 +348,13 @@ class DeletionService {
 
         // for RoddyBamFiles
         MergingWorkPackage mergingWorkPackage = null
-        List<RoddyBamFile> bamFiles = RoddyBamFile.createCriteria().list {
+        List<RoddyBamFile> bamFilesFetch = RoddyBamFile.createCriteria().listDistinct {
             seqTracks {
                 eq("id", seqTrack.id)
             }
-            order("id", "desc")
+        }
+        List<RoddyBamFile> bamFiles = addRoddyBamFilesRecursively(bamFilesFetch).unique().sort {
+            -it.id
         }
 
         if (bamFiles) {
@@ -368,14 +370,22 @@ class DeletionService {
             dirsToDelete.addAll(analysisDeletionService.deleteSamplePairsWithoutAnalysisInstances(samplePairs))
         }
 
+        //Disconnect bam files from base bam files before starting with deleting of the list
+        bamFiles.each { RoddyBamFile bamFile ->
+            if (bamFile.baseBamFile) {
+                bamFile.baseBamFile = null
+                bamFile.save(flush: true, validate: false) //since object is deleted in next loop, no validation is necessary here
+            }
+        }
+
+        //delete bam files
         bamFiles.each { RoddyBamFile bamFile ->
             mergingWorkPackage = bamFile.mergingWorkPackage
             mergingWorkPackage.bamFileInProjectFolder = null
-            mergingWorkPackage.save(flush: true)
+            mergingWorkPackage.save(flush: true, validate: false) //since object is deleted later, no validation is necessary
             deleteQualityAssessmentInfoForAbstractBamFile(bamFile)
             deleteProcessParameters(ProcessParameter.findAllByValueAndClassName(bamFile.id.toString(), bamFile.class.name))
             dirsToDelete << new File(abstractMergedBamFileService.getBaseDirectory(bamFile).toString())
-            bamFile.baseBamFile = null
             bamFile.delete(flush: true)
             // The MerginWorkPackage can only be deleted if all corresponding RoddyBamFiles are removed already
             if (!RoddyBamFile.findAllByWorkPackage(mergingWorkPackage)) {
@@ -411,11 +421,23 @@ class DeletionService {
             }
         }
         mergingWorkPackages.each {
-            SamplePair.findAllByMergingWorkPackage1OrMergingWorkPackage2(it, it)*.delete(flush: true)
-            it.delete(flush: true)
+            if (AbstractMergedBamFile.countByWorkPackage(it)) {
+                it.seqTracks.remove(seqTrack)
+                it.save(flush: true, validate: false)
+            } else {
+                SamplePair.findAllByMergingWorkPackage1OrMergingWorkPackage2(it, it)*.delete(flush: true)
+                it.delete(flush: true)
+            }
         }
 
         return dirsToDelete
+    }
+
+    /**
+     * helper to include all bam files based on any given BamFiles recursively.
+     */
+    protected List<RoddyBamFile> addRoddyBamFilesRecursively(List<RoddyBamFile> roddyBamFiles) {
+        return roddyBamFiles ? roddyBamFiles + addRoddyBamFilesRecursively(RoddyBamFile.findAllByBaseBamFileInList(roddyBamFiles)) : []
     }
 
     void deleteProcessParameters(List<ProcessParameter> processParameters) {
@@ -533,16 +555,9 @@ class DeletionService {
             seqTrackService.throwExceptionInCaseOfExternalMergedBamFileIsAttached([seqTrack])
             seqTrackService.throwExceptionInCaseOfSeqTracksAreOnlyLinked([seqTrack])
         }
-        //delete ilseSubmission if it is not used by other seqTracks and is not blacklisted
+
+        //keep ilse reference for later deletion
         IlseSubmission ilseSubmission = seqTrack.ilseSubmission
-        List<SeqTrack> otherSeqTracks = SeqTrack.findAllByIlseSubmission(ilseSubmission)
-        seqTrack.ilseSubmission = null
-        seqTrack.save(flush: true)
-        if (otherSeqTracks.size() == 1 && ilseSubmission) {
-            if (!ilseSubmission.warning) {
-                ilseSubmission.delete(flush: true)
-            }
-        }
 
         List<File> dirsToDelete = []
         List<File> seqTrackDelete = deleteAllProcessingInformationAndResultOfOneSeqTrack(seqTrack, check)
@@ -553,6 +568,11 @@ class DeletionService {
         }
 
         seqTrack.delete(flush: true)
+
+        //delete ilseSubmission if it is not used by other seqTracks and is not blacklisted
+        if (ilseSubmission && !ilseSubmission.warning && SeqTrack.countByIlseSubmission(ilseSubmission) == 0) {
+            ilseSubmission.delete(flush: true)
+        }
 
         if (runService.isRunEmpty(seqTrack.run)) {
             deleteEmptyRun(seqTrack.run)
