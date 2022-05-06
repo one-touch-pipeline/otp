@@ -113,7 +113,7 @@ $(() => {
      *
      */
   const getDataTableColumns = function () {
-    const seqType = $('#seqType').data('columns');
+    const workflow = $('#seqType').data('columns');
 
     let columnNames = [
       { data: 'rowId', visible: false, className: 'no_csv_export' },
@@ -127,18 +127,18 @@ $(() => {
     ];
 
     // coverage
-    if (seqType === 'WHOLE_GENOME') {
+    if (workflow === 'PANCANCER_AND_WGBS') {
       columnNames = columnNames.concat([
         { data: 'coverageWithoutN' },
         { data: 'coverageX' },
         { data: 'coverageY' }
       ]);
-    } else if (seqType === 'EXOME') {
+    } else if (workflow === 'PANCANCER_BED') {
       columnNames = columnNames.concat([
         { data: 'onTargetRatio' },
         { data: 'targetCoverage' }
       ]);
-    } else if (seqType === 'RNA') {
+    } else if (workflow === 'RNA') {
       columnNames = columnNames.concat([
         { data: 'arribaPlots' },
         { data: 'totalReadCounter' },
@@ -167,12 +167,12 @@ $(() => {
     }
 
     // general information
-    if (seqType === 'RNA') {
+    if (workflow === 'RNA') {
       columnNames = columnNames.concat([
         { data: 'kit' },
         { data: 'dateFromFileSystem' }
       ]);
-    } else if (seqType === 'CELL_RANGER') {
+    } else if (workflow === 'CELL_RANGER') {
       columnNames = columnNames.concat([
         { data: 'summary' },
         { data: 'cellRangerVersion' },

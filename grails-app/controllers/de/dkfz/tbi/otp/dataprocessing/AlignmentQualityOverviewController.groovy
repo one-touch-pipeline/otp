@@ -37,6 +37,8 @@ import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.qcTrafficLight.*
 import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.otp.workflow.panCancer.PanCancerWorkflow
+import de.dkfz.tbi.otp.workflowExecution.Workflow
 import de.dkfz.tbi.util.TimeFormats
 
 import java.nio.file.*
@@ -70,7 +72,7 @@ class AlignmentQualityOverviewController implements CheckAndCall {
             'alignment.quality.dbVersion',
     ].asImmutable()
 
-    private static final List<String> HEADER_WHOLE_GENOME = HEADER_COMMON + [
+    private static final List<String> HEADER_PANCANCER_AND_WGBS = HEADER_COMMON + [
             'alignment.quality.coverageWithoutN',
             'alignment.quality.coverageX',
             'alignment.quality.coverageY',
@@ -113,7 +115,7 @@ class AlignmentQualityOverviewController implements CheckAndCall {
             'alignment.quality.date',
     ].asImmutable()
 
-    private static final List<String> HEADER_EXOME = HEADER_COMMON + [
+    private static final List<String> HEADER_PANCANCER_BED = HEADER_COMMON + [
             'alignment.quality.onTargetRatio',
             'alignment.quality.targetCoverage',
             'alignment.quality.kit',
@@ -153,16 +155,6 @@ class AlignmentQualityOverviewController implements CheckAndCall {
             'alignment.quality.date',
     ].asImmutable()
 
-    private static final List<String> SUPPORTED_SEQ_TYPES = [
-            SeqTypeNames.WHOLE_GENOME.seqTypeName,
-            SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName,
-            SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName,
-            SeqTypeNames.CHIP_SEQ.seqTypeName,
-            SeqTypeNames.EXOME.seqTypeName,
-            SeqTypeNames.RNA.seqTypeName,
-            SeqTypeNames._10X_SCRNA.seqTypeName,
-    ].asImmutable()
-
     OverallQualityAssessmentMergedService overallQualityAssessmentMergedService
     ChromosomeQualityAssessmentMergedService chromosomeQualityAssessmentMergedService
     ReferenceGenomeService referenceGenomeService
@@ -183,34 +175,33 @@ class AlignmentQualityOverviewController implements CheckAndCall {
             return response.sendError(HttpStatus.NOT_FOUND.value())
         }
 
+        List<String> suppSeqTypes = supportedSeqTypes
         List<SeqType> seqTypes = seqTypeService.alignableSeqTypesByProject(project).findAll {
-            it.name in SUPPORTED_SEQ_TYPES
+            it.name in suppSeqTypes
         }
 
         SeqType seqType = (cmd.seqType && seqTypes.contains(cmd.seqType)) ? cmd.seqType : seqTypes[0]
 
         List<String> header
         String columnsSelectionKey = ""
-        switch (seqType?.name) {
+        switch (seqType) {
             case null:
                 header = ['alignment.quality.noSeqType']
                 break
-            case SeqTypeNames.WHOLE_GENOME.seqTypeName:
-            case SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName:
-            case SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName:
-            case SeqTypeNames.CHIP_SEQ.seqTypeName:
-                header = HEADER_WHOLE_GENOME
-                columnsSelectionKey = "WHOLE_GENOME"
+            case exactlyOneElement(Workflow.findAllByName(PanCancerWorkflow.WORKFLOW)).supportedSeqTypes.findAll { !it.needsBedFile }:
+            case { it.name in [SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName, SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName] }:
+                header = HEADER_PANCANCER_AND_WGBS
+                columnsSelectionKey = "PANCANCER_AND_WGBS"
                 break
-            case SeqTypeNames.EXOME.seqTypeName:
-                header = HEADER_EXOME
-                columnsSelectionKey = "EXOME"
+            case exactlyOneElement(Workflow.findAllByName(PanCancerWorkflow.WORKFLOW)).supportedSeqTypes.findAll { it.needsBedFile }:
+                header = HEADER_PANCANCER_BED
+                columnsSelectionKey = "PANCANCER_BED"
                 break
-            case SeqTypeNames.RNA.seqTypeName:
+            case { it.name == SeqTypeNames.RNA.seqTypeName }:
                 header = HEADER_RNA
                 columnsSelectionKey = "RNA"
                 break
-            case SeqTypeNames._10X_SCRNA.seqTypeName:
+            case { it.name == SeqTypeNames._10X_SCRNA.seqTypeName }:
                 header = HEADER_CELL_RANGER
                 columnsSelectionKey = "CELL_RANGER"
                 break
@@ -387,11 +378,9 @@ class AlignmentQualityOverviewController implements CheckAndCall {
                     "percentSingletons",
             ]
 
-            switch (seqType.name) {
-                case SeqTypeNames.WHOLE_GENOME.seqTypeName:
-                case SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName:
-                case SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName:
-                case SeqTypeNames.CHIP_SEQ.seqTypeName:
+            switch (seqType) {
+                case exactlyOneElement(Workflow.findAllByName(PanCancerWorkflow.WORKFLOW)).supportedSeqTypes.findAll { !it.needsBedFile }:
+                case { it.name in [SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName, SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName] }:
                     Double coverageX
                     Double coverageY
                     if (chromosomeLengthForChromosome[it.referenceGenome.id]) {
@@ -413,7 +402,7 @@ class AlignmentQualityOverviewController implements CheckAndCall {
                     ]
                     break
 
-                case SeqTypeNames.EXOME.seqTypeName:
+                case exactlyOneElement(Workflow.findAllByName(PanCancerWorkflow.WORKFLOW)).supportedSeqTypes.findAll { it.needsBedFile }:
                     qcTableRow << [
                             targetCoverage: FormatHelper.formatNumber(abstractMergedBamFile.coverage),
                     ]
@@ -422,7 +411,7 @@ class AlignmentQualityOverviewController implements CheckAndCall {
                     ]
                     break
 
-                case SeqTypeNames.RNA.seqTypeName:
+                case { it.name == SeqTypeNames.RNA.seqTypeName }:
                     qcTableRow << [
                             arribaPlots: new TableCellValue(
                                     value: "PDF",
@@ -457,7 +446,7 @@ class AlignmentQualityOverviewController implements CheckAndCall {
                     ]
                     break
 
-                case SeqTypeNames._10X_SCRNA.seqTypeName:
+                case { it.name == SeqTypeNames._10X_SCRNA.seqTypeName }:
                     qcTableRow << [
                             summary          : new TableCellValue(
                                     value: "Summary",
@@ -532,6 +521,15 @@ class AlignmentQualityOverviewController implements CheckAndCall {
     private static AbstractQualityAssessment getQualityAssessmentForFirstMatchingChromosomeName(Map<String,
             List<AbstractQualityAssessment>> qualityAssessmentMergedPassGroupedByChromosome, List<String> chromosomeNames) {
         return exactlyOneElement(chromosomeNames.findResult { qualityAssessmentMergedPassGroupedByChromosome.get(it) })
+    }
+
+    private List<String> getSupportedSeqTypes() {
+        return [
+                SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName,
+                SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName,
+                SeqTypeNames.RNA.seqTypeName,
+                SeqTypeNames._10X_SCRNA.seqTypeName,
+        ] + exactlyOneElement(Workflow.findAllByName(PanCancerWorkflow.WORKFLOW)).supportedSeqTypes*.name
     }
 }
 
