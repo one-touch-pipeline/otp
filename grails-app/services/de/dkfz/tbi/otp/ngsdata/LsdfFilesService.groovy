@@ -71,6 +71,15 @@ class LsdfFilesService {
         return basePath.resolve(seqTypeDirName)
     }
 
+    Path getRunDirectory(DataFile dataFile) {
+        if (!checkFinalPathDefined(dataFile)) {
+            return null
+        }
+        Path basePath = getSeqTypeDirectory(dataFile)
+        String centerDir = dataFile.run.seqCenter.dirName
+        return basePath?.resolve(centerDir)?.resolve(dataFile.run.dirName)
+    }
+
     /**
      * Important function.
      * This function knows all naming conventions and data organization
@@ -78,12 +87,7 @@ class LsdfFilesService {
      * @return String with path or null if path can not be established
      */
     Path getFileFinalPathAsPath(DataFile dataFile) {
-        if (!checkFinalPathDefined(dataFile)) {
-            return null
-        }
-        Path basePath = getSeqTypeDirectory(dataFile)
-        String centerDir = dataFile.run.seqCenter.dirName
-        return basePath?.resolve(centerDir)?.resolve(dataFile.run.dirName)?.resolve(dataFile.pathName)?.resolve(dataFile?.fileName)
+        return getRunDirectory(dataFile)?.resolve(dataFile.pathName)?.resolve(dataFile?.fileName)
     }
 
     Path getFileMd5sumFinalPathAsPath(DataFile dataFile) {
@@ -158,36 +162,6 @@ class LsdfFilesService {
             getFileViewByPidPathAsPath(file).parent
         }
         return CollectionUtils.exactlyOneElement(paths.unique()).parent
-    }
-
-    String[] getAllPathsForRun(Run run, boolean fullPath = false) {
-        assert run: "No run given"
-
-        Set<String> paths = [] as Set
-        DataFile.findAllByRun(run).each { DataFile file ->
-            String path = getPathToRun(file, fullPath)
-            if (path) {
-                paths << path
-            } else {
-                paths << file.initialDirectory
-            }
-        }
-        return (String[]) paths.toArray()
-    }
-
-    private Path getPathToRun(DataFile file, boolean fullPath = false) {
-        if (!checkFinalPathDefined(file)) {
-            return null
-        }
-        Path basePath = getSeqTypeDirectory(file)
-        String centerDir = file.run.seqCenter.dirName
-        Path path = basePath.resolve(centerDir)
-        if (fullPath) {
-            String runName = file.run.name
-            Path pathWithRunName = path.resolve("run${runName}")
-            return pathWithRunName
-        }
-        return path
     }
 
     /**

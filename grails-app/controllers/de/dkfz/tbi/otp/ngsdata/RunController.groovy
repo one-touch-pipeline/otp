@@ -70,9 +70,12 @@ class RunController {
             ]
         }
 
+        List<String> finalPaths = DataFile.findAllByRun(run).collect { DataFile dataFile ->
+            lsdfFilesService.getRunDirectory(dataFile) as String ?: dataFile.initialDirectory }.unique().sort()
+
         return [
                 run                : run,
-                finalPaths         : lsdfFilesService.getAllPathsForRun(run, true),
+                finalPaths         : finalPaths,
                 keys               : keys,
                 processParameters  : runService.retrieveProcessParameters(run),
                 metaDataFileWrapper: wrappedMetaDataFiles,
