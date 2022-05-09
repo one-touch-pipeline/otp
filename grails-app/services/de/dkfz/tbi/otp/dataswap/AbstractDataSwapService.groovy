@@ -283,7 +283,7 @@ abstract class AbstractDataSwapService<P extends DataSwapParameters, D extends D
             String vbpFileName = lsdfFilesService.getFileViewByPidPathAsPath(dataFile)
             map[dataFile] = [(DIRECT_FILE_NAME): directFileName, (VBP_FILE_NAME): vbpFileName]
             if (dataFile.seqType.singleCell && dataFile.seqTrack.singleCellWellLabel) {
-                map[dataFile][WELL_FILE_NAME] = lsdfFilesService.getWellAllFileViewByPidPathAsPath(dataFile).toString()
+                map[dataFile][WELL_FILE_NAME] = lsdfFilesService.getFileViewByPidPathAsPath(dataFile, WellDirectory.ALL_WELL).toString()
                 map[dataFile][WELL_MAPPING_FILE_NAME] = singleCellService.singleCellMappingFile(dataFile).toString()
                 map[dataFile][WELL_MAPPING_FILE_ENTRY_NAME] = singleCellService.mappingEntry(dataFile)
             }
@@ -296,7 +296,7 @@ abstract class AbstractDataSwapService<P extends DataSwapParameters, D extends D
             return ''
         }
         String newDirectFileName = lsdfFilesService.getFileFinalPathAsPath(dataFile)
-        String newWellFileName = lsdfFilesService.getWellAllFileViewByPidPathAsPath(dataFile)
+        String newWellFileName = lsdfFilesService.getFileViewByPidPathAsPath(dataFile, WellDirectory.ALL_WELL)
         File wellFile = new File(newWellFileName)
 
         Path mappingFile = singleCellService.singleCellMappingFile(dataFile)

@@ -223,7 +223,7 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
         service.lsdfFilesService = Mock(LsdfFilesService) {
             1 * getFileFinalPathAsPath(dataFile) >> Paths.get('finalFile')
             1 * getFileViewByPidPathAsPath(dataFile) >> Paths.get('viewByPidFile')
-            wellCount * getWellAllFileViewByPidPathAsPath(dataFile) >> Paths.get('wellFile')
+            wellCount * getFileViewByPidPathAsPath(dataFile, WellDirectory.ALL_WELL) >> Paths.get('wellFile')
             0 * _
         }
         service.singleCellService = Mock(SingleCellService) {
@@ -308,7 +308,7 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
 
         service.lsdfFilesService = Mock(LsdfFilesService) {
             1 * getFileFinalPathAsPath(dataFile) >> NEW_FINAL_PATH
-            1 * getWellAllFileViewByPidPathAsPath(dataFile) >> NEW_WELL_PATH
+            1 * getFileViewByPidPathAsPath(dataFile, WellDirectory.ALL_WELL) >> NEW_WELL_PATH
             0 * _
         }
 
@@ -1003,7 +1003,7 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
         service.lsdfFilesService = Mock(LsdfFilesService) {
             _ * getFileFinalPathAsPath(_) >> { DataFile dataFile -> Paths.get(dataFilePaths[dataFile].newPath.toString()) }
             _ * getFileViewByPidPathAsPath(_) >> { DataFile dataFile -> Paths.get(dataFilePaths[dataFile].newVbpPath.toString()) }
-            _ * getWellAllFileViewByPidPathAsPath(_) >> { DataFile dataFile -> Paths.get(dataFilePaths[dataFile].newVbpPath.toString()) }
+            _ * getFileViewByPidPathAsPath(_, WellDirectory.ALL_WELL) >> { DataFile dataFile, _ -> Paths.get(dataFilePaths[dataFile].newVbpPath.toString()) }
         }
 
         service.singleCellService = Mock(SingleCellService) {

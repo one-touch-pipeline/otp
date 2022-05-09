@@ -28,6 +28,7 @@ import org.springframework.stereotype.Component
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellMappingFileService
 import de.dkfz.tbi.otp.ngsdata.DataFile
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.ngsdata.WellDirectory
 import de.dkfz.tbi.otp.utils.LinkEntry
 import de.dkfz.tbi.otp.workflow.jobs.AbstractLinkJob
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
@@ -48,7 +49,7 @@ class DataInstallationSingleCellLinkJob extends AbstractLinkJob implements DataI
         if (seqTrack.seqType.singleCell && seqTrack.singleCellWellLabel) {
             return seqTrack.dataFiles.collect { DataFile dataFile ->
                 Path target = lsdfFilesService.getFileFinalPathAsPath(dataFile)
-                Path link = lsdfFilesService.getWellAllFileViewByPidPathAsPath(dataFile)
+                Path link = lsdfFilesService.getFileViewByPidPathAsPath(dataFile, WellDirectory.ALL_WELL)
                 return new LinkEntry(target: target, link: link)
             }
         }

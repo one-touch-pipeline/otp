@@ -73,7 +73,7 @@ class DataInstallationSingleCellLinkJobSpec extends Specification implements Dat
         }
         job.lsdfFilesService = Mock(LsdfFilesService) {
             (isSingleCell ? 2 : 0) * getFileFinalPathAsPath(_) >>> [target1, target2]
-            (isSingleCell ? 2 : 0) * getWellAllFileViewByPidPathAsPath(_) >>> [link1, link2]
+            (isSingleCell ? 2 : 0) * getFileViewByPidPathAsPath(_, WellDirectory.ALL_WELL) >>> [link1, link2]
         }
 
         expect:

@@ -30,6 +30,7 @@ import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.ngsdata.DataFile
 import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
+import de.dkfz.tbi.otp.ngsdata.WellDirectory
 
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -91,7 +92,7 @@ class SingleCellServiceSpec extends Specification implements DataTest, DomainFac
 
         SingleCellService service = new SingleCellService([
                 lsdfFilesService: Mock(LsdfFilesService) {
-                    1 * getSingleCellWellDirectory(dataFile) >> allWellDir
+                    1 * getSingleCellWellDirectory(dataFile, WellDirectory.ALL_WELL) >> allWellDir
                     0 * _
                 },
         ])

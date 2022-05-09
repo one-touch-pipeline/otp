@@ -38,7 +38,7 @@ import static de.dkfz.tbi.otp.utils.WaitingFileUtils.waitUntilDoesNotExist
 @Transactional
 class LsdfFilesService {
 
-    static final String SINGLE_CELL_ALL_WELL = '0_all'
+    private static final String SINGLE_CELL_ALL_WELL = '0_all'
 
     @Autowired
     RemoteShellHelper remoteShellHelper
@@ -107,35 +107,23 @@ class LsdfFilesService {
         return basePath.resolve("${seqTrack.sample.sampleType.dirName}${antiBodyTarget}")
     }
 
-    Path getFileViewByPidPathAsPath(DataFile file) {
-        return createFinalPathHelper(file, false)
-    }
-
-    /**
-     * for single cell data with well identifier, the path in the all directory is returned.
-     * For all other data the same as {@link #getFileViewByPidPathAsPath} is returned
-     */
-    Path getWellAllFileViewByPidPathAsPath(DataFile file) {
-        return createFinalPathHelper(file, true)
-    }
-
-    Path getSingleCellWellDirectory(DataFile dataFile, boolean useAllWellDirectory = true) {
+    Path getSingleCellWellDirectory(DataFile dataFile, WellDirectory wellDirectory = null) {
         Path basePath = getSampleTypeDirectory(dataFile)
         SeqTrack seqTrack = dataFile.seqTrack ?: dataFile.alignmentLog.seqTrack
         if (seqTrack.singleCellWellLabel && seqTrack.seqType.singleCell) {
-            return basePath.resolve(useAllWellDirectory ? SINGLE_CELL_ALL_WELL : seqTrack.singleCellWellLabel)
+            return basePath.resolve(wellDirectory == WellDirectory.ALL_WELL ? SINGLE_CELL_ALL_WELL : seqTrack.singleCellWellLabel)
         }
         return basePath
     }
 
-    Path getFileViewByPidDirectory(DataFile dataFile, boolean useAllWellDirectory = false) {
-        Path basePath = getSingleCellWellDirectory(dataFile, useAllWellDirectory)
+    Path getFileViewByPidDirectory(DataFile dataFile, WellDirectory wellDirectory = null) {
+        Path basePath = getSingleCellWellDirectory(dataFile, wellDirectory)
         SeqTrack seqTrack = dataFile.seqTrack ?: dataFile.alignmentLog.seqTrack
         return basePath.resolve(seqTrack.seqType.libraryLayoutDirName).resolve(seqTrack.run.dirName)
     }
 
-    private Path createFinalPathHelper(DataFile dataFile, boolean useAllWellDirectory = false) {
-        Path basePath = getFileViewByPidDirectory(dataFile, useAllWellDirectory)
+    Path getFileViewByPidPathAsPath(DataFile dataFile, WellDirectory wellDirectory = null) {
+        Path basePath = getFileViewByPidDirectory(dataFile, wellDirectory)
         // For historic reasons, vbpPath starts and ends with a slash.
         // Remove the slashes here, otherwise it would be interpreted as an absolute path by resolve():
         String vbpPath = Paths.get(dataFile.fileType.vbpPath).getName(0)
@@ -211,11 +199,11 @@ class LsdfFilesService {
     /**
      * for single cell data with well identifier, the path in the all directory is returned.
      * For all other data the same as {@link #getFileViewByPidPath} is returned
-     * @deprecated use {@link #getWellAllFileViewByPidPathAsPath}
+     * @deprecated use {@link #getFileViewByPidPathAsPath(DataFile, WellDirectory#ALL_WELL)}
      */
     @Deprecated
     String getWellAllFileViewByPidPath(DataFile file) {
-        return getWellAllFileViewByPidPathAsPath(file)
+        return getFileViewByPidPathAsPath(file, WellDirectory.ALL_WELL)
     }
 
     /**
@@ -258,4 +246,8 @@ class LsdfFilesService {
             waitUntilDoesNotExist(it)
         }
     }
+}
+
+enum WellDirectory {
+    ALL_WELL,
 }
