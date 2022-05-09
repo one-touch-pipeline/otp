@@ -91,7 +91,7 @@ class SingleCellServiceSpec extends Specification implements DataTest, DomainFac
 
         SingleCellService service = new SingleCellService([
                 lsdfFilesService: Mock(LsdfFilesService) {
-                    1 * createSingleCellAllWellDirectoryPath(dataFile) >> allWellDir
+                    1 * getSingleCellWellDirectory(dataFile) >> allWellDir
                     0 * _
                 },
         ])

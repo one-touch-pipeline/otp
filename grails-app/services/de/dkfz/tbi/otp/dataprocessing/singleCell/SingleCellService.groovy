@@ -44,7 +44,7 @@ class SingleCellService {
     }
 
     Path singleCellMappingFile(DataFile dataFile) {
-        return lsdfFilesService.createSingleCellAllWellDirectoryPath(dataFile).resolve(buildMappingFileName(dataFile))
+        return lsdfFilesService.getSingleCellWellDirectory(dataFile).resolve(buildMappingFileName(dataFile))
     }
 
     /**
