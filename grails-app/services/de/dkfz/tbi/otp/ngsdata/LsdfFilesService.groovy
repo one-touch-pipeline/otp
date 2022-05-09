@@ -56,6 +56,21 @@ class LsdfFilesService {
         return fileSystem.getPath(getFileInitialPath(dataFile))
     }
 
+    Path getSeqTypeDirectory(DataFile dataFile) {
+        Path basePath = projectService.getSequencingDirectory(dataFile.project)
+        String seqTypeDirName
+        if (dataFile.seqTrack) {
+            seqTypeDirName = dataFile.seqTrack.seqType?.dirName
+        }
+        if (dataFile.alignmentLog) {
+            seqTypeDirName = dataFile.alignmentLog.seqTrack.seqType?.dirName
+        }
+        if (!seqTypeDirName) {
+            return null
+        }
+        return basePath.resolve(seqTypeDirName)
+    }
+
     /**
      * Important function.
      * This function knows all naming conventions and data organization
@@ -66,13 +81,9 @@ class LsdfFilesService {
         if (!checkFinalPathDefined(dataFile)) {
             return null
         }
-        String seqTypeDir = seqTypeDirectory(dataFile)
-        if (seqTypeDir == null) {
-            return null
-        }
+        Path basePath = getSeqTypeDirectory(dataFile)
         String centerDir = dataFile.run.seqCenter.dirName
-        Path basePath = projectService.getSequencingDirectory(dataFile.project)
-        return basePath.resolve(seqTypeDir).resolve(centerDir).resolve(dataFile.run.dirName).resolve(dataFile.pathName).resolve(dataFile?.fileName)
+        return basePath?.resolve(centerDir)?.resolve(dataFile.run.dirName)?.resolve(dataFile.pathName)?.resolve(dataFile?.fileName)
     }
 
     Path getFileMd5sumFinalPathAsPath(DataFile dataFile) {
@@ -84,16 +95,6 @@ class LsdfFilesService {
             return false
         }
         return dataFile.used
-    }
-
-    String seqTypeDirectory(DataFile file) {
-        if (file.seqTrack) {
-            return file.seqTrack.seqType?.dirName
-        }
-        if (file.alignmentLog) {
-            return file.alignmentLog.seqTrack.seqType?.dirName
-        }
-        return null
     }
 
     private String combinedDirectoryNameForSampleTypePlusAntibodyPlusSingleCellWell(DataFile dataFile, boolean useAllWellDirectory = false) {
@@ -178,10 +179,9 @@ class LsdfFilesService {
         if (!checkFinalPathDefined(file)) {
             return null
         }
-        Path basePath = projectService.getSequencingDirectory(file.project)
-        String seqTypeDir = seqTypeDirectory(file)
+        Path basePath = getSeqTypeDirectory(file)
         String centerDir = file.run.seqCenter.dirName
-        Path path = basePath.resolve(seqTypeDir).resolve(centerDir)
+        Path path = basePath.resolve(centerDir)
         if (fullPath) {
             String runName = file.run.name
             Path pathWithRunName = path.resolve("run${runName}")

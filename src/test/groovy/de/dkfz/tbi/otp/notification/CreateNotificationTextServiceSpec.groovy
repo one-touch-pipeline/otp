@@ -204,9 +204,9 @@ class CreateNotificationTextServiceSpec extends Specification implements Alignme
         SeqTrack seqTrack1 = DomainFactory.createSeqTrackWithTwoDataFiles()
         SeqTrack seqTrack2 = DomainFactory.createSeqTrackWithTwoDataFiles()
         CreateNotificationTextService createNotificationTextService = new CreateNotificationTextService(lsdfFilesService: new LsdfFilesService())
-        createNotificationTextService.projectService = new ProjectService()
-        createNotificationTextService.projectService.configService = configService
-        createNotificationTextService.projectService.fileSystemService = new TestFileSystemService()
+        createNotificationTextService.lsdfFilesService.projectService = new ProjectService()
+        createNotificationTextService.lsdfFilesService.projectService.configService = configService
+        createNotificationTextService.lsdfFilesService.projectService.fileSystemService = new TestFileSystemService()
 
         when:
         String fileNameString = createNotificationTextService.getSeqTypeDirectories([seqTrack1, seqTrack2])
@@ -409,9 +409,9 @@ class CreateNotificationTextServiceSpec extends Specification implements Alignme
                 messageSourceService: messageSourceServiceWithMockedMessageSource,
                 processingOptionService: new ProcessingOptionService(),
         )
-        createNotificationTextService.projectService = new ProjectService()
-        createNotificationTextService.projectService.configService = configService
-        createNotificationTextService.projectService.fileSystemService = new TestFileSystemService()
+        createNotificationTextService.lsdfFilesService.projectService = new ProjectService()
+        createNotificationTextService.lsdfFilesService.projectService.configService = configService
+        createNotificationTextService.lsdfFilesService.projectService.fileSystemService = new TestFileSystemService()
 
         List<SeqTrack> seqTracks = [data1.seqTrack]
         List<String> samples = ["[-] ${createNotificationTextService.getSampleName(data1.seqTrack)} (${data1.seqTrack.sampleIdentifier})"]

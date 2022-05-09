@@ -498,15 +498,12 @@ class CreateNotificationTextService {
         return "${seqTrack.individual.displayName} ${seqTrack.sampleType.displayName} ${seqTrack.seqType.displayNameWithLibraryLayout}"
     }
 
-    @SuppressWarnings('JavaIoPackageAccess')
     String getSeqTypeDirectories(List<SeqTrack> seqTracks) {
         assert seqTracks
 
         return DataFile.findAllBySeqTrackInList(seqTracks).collect { DataFile file ->
-            String basePath = projectService.getSequencingDirectory(file.project)
-            String seqTypeDir = lsdfFilesService.seqTypeDirectory(file)
-            new File("${basePath}/${seqTypeDir}/")
-        }.unique().sort()*.path.join('\n')
+            lsdfFilesService.getSeqTypeDirectory(file)
+        }.unique().sort().join('\n')
     }
 
     @SuppressWarnings('GStringExpressionWithinString')
