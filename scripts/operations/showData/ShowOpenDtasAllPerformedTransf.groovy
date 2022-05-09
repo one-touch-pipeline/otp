@@ -48,9 +48,9 @@ String header = [
         "institution",
         "direction",
         "transfer mode"
-].join('|\t')
+].join('\t')
 
-String content = DataTransfer.findAll(max:25).collect { DataTransfer dataTransfer ->
+String content = DataTransfer.findAll().collect { DataTransfer dataTransfer ->
     DataTransferAgreement dataTransferAgreement = dataTransfer.dataTransferAgreement
     [
             TimeFormats.DATE.getFormattedDate(dataTransferAgreement.dateCreated),
@@ -60,7 +60,7 @@ String content = DataTransfer.findAll(max:25).collect { DataTransfer dataTransfe
             dataTransfer.ticketID ?: '',
             dataTransferAgreement.comment?.replaceAll('[\t\n\r]+', ' ') ?: '',
             dataTransfer.completionDate ? 'complete' : 'incomplete',
-            dataTransfer.completionDate ?: '',
+            TimeFormats.DATE.getFormattedDate(dataTransfer.completionDate),
             dataTransferAgreement.peerInstitution ?: '',
             dataTransfer.direction,
             dataTransfer.transferMode,
