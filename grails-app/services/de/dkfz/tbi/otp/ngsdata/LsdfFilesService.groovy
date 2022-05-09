@@ -108,16 +108,6 @@ class LsdfFilesService {
         return basePath.resolve("${seqTrack.sample.sampleType.dirName}${antiBodyTarget}")
     }
 
-    private String directoryNameForSingleCellWell(DataFile dataFile, boolean useAllWellDirectory = false) {
-        SeqTrack seqTrack = dataFile.seqTrack ?: dataFile.alignmentLog.seqTrack
-        StringBuilder sb = new StringBuilder()
-        if (seqTrack.singleCellWellLabel && seqTrack.seqType.singleCell) {
-            sb << "/"
-            sb << (useAllWellDirectory ? SINGLE_CELL_ALL_WELL : seqTrack.singleCellWellLabel)
-        }
-        return sb.toString()
-    }
-
     Path getFileViewByPidPathAsPath(DataFile file) {
         return createFinalPathHelper(file, false)
     }
@@ -130,10 +120,13 @@ class LsdfFilesService {
         return createFinalPathHelper(file, true)
     }
 
-    Path getSingleCellWellDirectory(DataFile file, boolean useAllWellDirectory = true) {
-        Path basePath = getSampleTypeDirectory(file)
-        String wellDir = directoryNameForSingleCellWell(file, useAllWellDirectory)
-        return basePath.resolve(wellDir)
+    Path getSingleCellWellDirectory(DataFile dataFile, boolean useAllWellDirectory = true) {
+        Path basePath = getSampleTypeDirectory(dataFile)
+        SeqTrack seqTrack = dataFile.seqTrack ?: dataFile.alignmentLog.seqTrack
+        if (seqTrack.singleCellWellLabel && seqTrack.seqType.singleCell) {
+            return basePath.resolve(useAllWellDirectory ? SINGLE_CELL_ALL_WELL : seqTrack.singleCellWellLabel)
+        }
+        return basePath
     }
 
     private Path createFinalPathHelper(DataFile file, boolean useAllWellDirectory = false) {
