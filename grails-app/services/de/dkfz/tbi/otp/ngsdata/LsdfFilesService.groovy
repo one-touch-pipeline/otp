@@ -121,7 +121,7 @@ class LsdfFilesService {
 
     /**
      * for single cell data with well identifier, the path in the all directory is returned.
-     * For all other data the same as {@link #getFileViewByPidPath} is returned
+     * For all other data the same as {@link #getFileViewByPidPathAsPath} is returned
      */
     Path getWellAllFileViewByPidPathAsPath(DataFile file) {
         return createFinalPathHelper(file, true)
