@@ -101,15 +101,16 @@ class LsdfFilesService {
         return dataFile.used
     }
 
-    private String combinedDirectoryNameForSampleTypePlusAntibodyPlusSingleCellWell(DataFile dataFile, boolean useAllWellDirectory = false) {
+    Path getSampleTypeDirectory(DataFile dataFile) {
+        Path basePath = individualService.getViewByPidPath(dataFile.individual, dataFile.seqType)
+        SeqTrack seqTrack = dataFile.seqTrack ?: dataFile.alignmentLog.seqTrack
+        String antiBodyTarget = seqTrack.seqType.hasAntibodyTarget ? "-${seqTrack.antibodyTarget.name}" : ""
+        return basePath.resolve("${seqTrack.sample.sampleType.dirName}${antiBodyTarget}")
+    }
+
+    private String directoryNameForSingleCellWell(DataFile dataFile, boolean useAllWellDirectory = false) {
         SeqTrack seqTrack = dataFile.seqTrack ?: dataFile.alignmentLog.seqTrack
         StringBuilder sb = new StringBuilder()
-        sb << seqTrack.sample.sampleType.dirName
-        if (seqTrack.seqType.hasAntibodyTarget) {
-            AntibodyTarget antibodyTarget = seqTrack.antibodyTarget
-            String antibodyDirNamePart = antibodyTarget.name
-            sb << "-${antibodyDirNamePart}"
-        }
         if (seqTrack.singleCellWellLabel && seqTrack.seqType.singleCell) {
             sb << "/"
             sb << (useAllWellDirectory ? SINGLE_CELL_ALL_WELL : seqTrack.singleCellWellLabel)
@@ -130,9 +131,9 @@ class LsdfFilesService {
     }
 
     Path getSingleCellWellDirectory(DataFile file, boolean useAllWellDirectory = true) {
-        Path vbpPath = individualService.getViewByPidPath(file.individual, file.seqType)
-        String sampleTypeDir = combinedDirectoryNameForSampleTypePlusAntibodyPlusSingleCellWell(file, useAllWellDirectory)
-        return vbpPath.resolve(sampleTypeDir)
+        Path basePath = getSampleTypeDirectory(file)
+        String wellDir = directoryNameForSingleCellWell(file, useAllWellDirectory)
+        return basePath.resolve(wellDir)
     }
 
     private Path createFinalPathHelper(DataFile file, boolean useAllWellDirectory = false) {
