@@ -55,7 +55,7 @@ class FastqcDataFilesService {
     Path fastqcOutputDirectory(SeqTrack seqTrack) {
         DataProcessingFilesService.OutputDirectories type = DataProcessingFilesService.OutputDirectories.FASTX_QC
 
-        Path baseString = lsdfFilesService.getFileViewByPidDirectory(seqTrack)
+        Path baseString = lsdfFilesService.getFileViewByPidDirectory(seqTrack.dataFiles.first())
         return baseString.resolve(type.toString().toLowerCase())
     }
 

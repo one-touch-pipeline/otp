@@ -28,7 +28,6 @@ import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.CreateClusterScriptService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.project.ProjectService
-import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
 
 import java.nio.file.*
@@ -129,21 +128,18 @@ class LsdfFilesService {
         return basePath
     }
 
-    private Path createFinalPathHelper(DataFile file, boolean useAllWellDirectory = false) {
-        Path basePath = getSingleCellWellDirectory(file, useAllWellDirectory)
-        SeqTrack seqTrack = file.seqTrack ?: file.alignmentLog.seqTrack
-        // For historic reasons, vbpPath starts and ends with a slash.
-        // Remove the slashes here, otherwise it would be interpreted as an absolute path by resolve():
-        String vbpPath = Paths.get(file.fileType.vbpPath).getName(0)
-        return basePath.resolve(seqTrack.seqType.libraryLayoutDirName).resolve("run${seqTrack.run.name}").resolve(vbpPath).resolve(file.vbpFileName)
+    Path getFileViewByPidDirectory(DataFile dataFile, boolean useAllWellDirectory = false) {
+        Path basePath = getSingleCellWellDirectory(dataFile, useAllWellDirectory)
+        SeqTrack seqTrack = dataFile.seqTrack ?: dataFile.alignmentLog.seqTrack
+        return basePath.resolve(seqTrack.seqType.libraryLayoutDirName).resolve(seqTrack.run.dirName)
     }
 
-    Path getFileViewByPidDirectory(SeqTrack seqTrack) {
-        List<DataFile> files = DataFile.findAllBySeqTrack(seqTrack)
-        List<Path> paths = files.collect { DataFile file ->
-            getFileViewByPidPathAsPath(file).parent
-        }
-        return CollectionUtils.exactlyOneElement(paths.unique()).parent
+    private Path createFinalPathHelper(DataFile dataFile, boolean useAllWellDirectory = false) {
+        Path basePath = getFileViewByPidDirectory(dataFile, useAllWellDirectory)
+        // For historic reasons, vbpPath starts and ends with a slash.
+        // Remove the slashes here, otherwise it would be interpreted as an absolute path by resolve():
+        String vbpPath = Paths.get(dataFile.fileType.vbpPath).getName(0)
+        return basePath.resolve(vbpPath).resolve(dataFile.vbpFileName)
     }
 
     /**
