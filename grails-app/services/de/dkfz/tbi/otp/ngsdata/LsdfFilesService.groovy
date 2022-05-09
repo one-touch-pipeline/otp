@@ -102,10 +102,7 @@ class LsdfFilesService {
     }
 
     private String combinedDirectoryNameForSampleTypePlusAntibodyPlusSingleCellWell(DataFile dataFile, boolean useAllWellDirectory = false) {
-        return combinedDirectoryNameForSampleTypePlusAntibodyPlusSingleCellWell(dataFile.seqTrack ?: dataFile.alignmentLog.seqTrack, useAllWellDirectory)
-    }
-
-    private String combinedDirectoryNameForSampleTypePlusAntibodyPlusSingleCellWell(SeqTrack seqTrack, boolean useAllWellDirectory = false) {
+        SeqTrack seqTrack = dataFile.seqTrack ?: dataFile.alignmentLog.seqTrack
         StringBuilder sb = new StringBuilder()
         sb << seqTrack.sample.sampleType.dirName
         if (seqTrack.seqType.hasAntibodyTarget) {
