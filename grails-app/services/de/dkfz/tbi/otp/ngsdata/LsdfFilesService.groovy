@@ -136,21 +136,13 @@ class LsdfFilesService {
     }
 
     private Path createFinalPathHelper(DataFile file, boolean useAllWellDirectory = false) {
-        Path vbpPath = individualService.getViewByPidPath(file.individual, file.seqType)
-        return vbpPath.resolve(getFilePathInViewByPid(file, useAllWellDirectory))
-    }
-
-    String getFilePathInViewByPid(DataFile file, boolean useAllWellDirectory = false) {
+        Path basePath = individualService.getViewByPidPath(file.individual, file.seqType)
         String sampleTypeDir = combinedDirectoryNameForSampleTypePlusAntibodyPlusSingleCellWell(file, useAllWellDirectory)
-
         SeqTrack seqTrack = file.seqTrack ?: file.alignmentLog.seqTrack
-        return Paths.get(
-                sampleTypeDir,
-                seqTrack.seqType.libraryLayoutDirName,
-                "run${seqTrack.run.name}",
-                file.fileType.vbpPath,
-                file.vbpFileName
-        )
+        // For historic reasons, vbpPath starts and ends with a slash.
+        // Remove the slashes here, otherwise it would be interpreted as an absolute path by resolve():
+        String vbpPath = Paths.get(file.fileType.vbpPath).getName(0)
+        return basePath.resolve(sampleTypeDir).resolve(seqTrack.seqType.libraryLayoutDirName).resolve("run${seqTrack.run.name}").resolve(vbpPath).resolve(file.vbpFileName)
     }
 
     Path getFileViewByPidDirectory(SeqTrack seqTrack) {

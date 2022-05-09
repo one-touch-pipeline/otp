@@ -135,8 +135,11 @@ class DataExportServiceSpec extends Specification implements DataTest, DomainFac
         Files.exists(_) >> true
 
         service.lsdfFilesService = Mock(LsdfFilesService) {
-            getFileFinalPathCount       * getFileFinalPath(_)       >> 'finalFile'
-            getFilePathInViewByPidCount * getFilePathInViewByPid(_) >> 'somePid'
+            getFileFinalPathCount       * getFileFinalPath(_)           >> 'finalFile'
+            getFilePathInViewByPidCount * getFileViewByPidPathAsPath(_) >> Paths.get('/vbp/path/somePid')
+        }
+        service.individualService = Mock(IndividualService) {
+            getFilePathInViewByPidCount * getViewByPidPath(_, _)        >> Paths.get('/vbp/')
         }
         service.fileSystemService = Mock(FileSystemService) {
             getRemoteFileSystemOnDefaultRealm() >> new TestFileSystemService().remoteFileSystemOnDefaultRealm

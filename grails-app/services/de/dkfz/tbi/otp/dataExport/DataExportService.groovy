@@ -40,6 +40,7 @@ class DataExportService {
     FileService fileService
     FileSystemService fileSystemService
     BamFileAnalysisServiceFactoryService bamFileAnalysisServiceFactoryService
+    IndividualService individualService
 
     DataExportOutput exportHeaderInfo(DataExportInput dataExportInput) {
         exportFilesWrapper(dataExportInput, exportHeaderInfoClosure,)
@@ -98,7 +99,8 @@ class DataExportService {
                     if (!dataExportInput.checkFileStatus) {
                         Path targetFolderWithPid = dataExportInput.targetFolder.resolve(dataFile.individual.mockPid)
                         Path targetFastqFolder = targetFolderWithPid.resolve(seqTrack.seqType.dirName).
-                                resolve(lsdfFilesService.getFilePathInViewByPid(dataFile)).parent
+                                resolve(individualService.getViewByPidPath(dataFile.individual, dataFile.seqType)
+                                        .relativize(lsdfFilesService.getFileViewByPidPathAsPath(dataFile)).parent)
                         scriptFileBuilder.append("echo ${currentFile}\n")
                         scriptFileBuilder.append("mkdir -p ${copyTargetBase}${targetFastqFolder}\n")
                         String search = "${currentFile.toString().replaceAll("(_|.)R([1,2])(_|.)", "\$1*\$2\$3")}*"
