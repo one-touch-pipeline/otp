@@ -29,7 +29,6 @@ import de.dkfz.tbi.otp.dataswap.parameters.SampleSwapParameters
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
-import java.nio.file.FileSystem
 import java.nio.file.Path
 
 @SuppressWarnings("JavaIoPackageAccess")
@@ -62,11 +61,11 @@ class SampleSwapService extends AbstractDataSwapService<SampleSwapParameters, Sa
         List<DataFile> bamDataFiles = getBAMDataFilesBySeqTrackInList(seqTrackList, parameters)
         List<DataFile> dataFiles = [fastqDataFiles, bamDataFiles].flatten() as List<DataFile>
 
-        FileSystem fileSystem = fileSystemService.remoteFileSystemOnDefaultRealm
         List<Path> individualPaths = seqTrackList*.seqType.unique().collect {
-            fileSystem.getPath(individualSwap.old
-                    .getViewByPidPath(it).absoluteDataManagementPath
-                    .toString())
+            individualService.getViewByPidPath(individualSwap.old, it)
+        }
+        List<Path> sampleDirs = dataFiles.collect {
+            lsdfFilesService.getSampleTypeDirectory(it)
         }
 
         return new SampleSwapData(
@@ -82,7 +81,7 @@ class SampleSwapService extends AbstractDataSwapService<SampleSwapParameters, Sa
                 oldFastQcFileNames: getFastQcOutputFileNamesByDataFilesInList(dataFiles),
                 seqTrackService: seqTrackService,
                 cleanupIndividualPaths: individualPaths,
-                cleanupSampleDir: sampleTypeSwap.old.dirName
+                cleanupSampleTypePaths: sampleDirs,
         )
     }
 

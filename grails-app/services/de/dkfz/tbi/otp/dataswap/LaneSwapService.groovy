@@ -23,21 +23,20 @@ package de.dkfz.tbi.otp.dataswap
 
 import grails.gorm.transactions.Transactional
 
-import de.dkfz.tbi.otp.dataprocessing.AlignmentPass
-import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedMergedBamFile
+import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataswap.data.LaneSwapData
 import de.dkfz.tbi.otp.dataswap.parameters.LaneSwapParameters
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
-import java.nio.file.FileSystem
 import java.nio.file.Path
 
 @SuppressWarnings("JavaIoPackageAccess")
 @Transactional
 class LaneSwapService extends AbstractDataSwapService<LaneSwapParameters, LaneSwapData> {
 
+    AbstractMergedBamFileService abstractMergedBamFileService
     ProjectService projectService
 
     @Override
@@ -63,10 +62,10 @@ class LaneSwapService extends AbstractDataSwapService<LaneSwapParameters, LaneSw
         List<SeqTrack> seqTrackList = getSeqTracksBySampleAndRunAndLaneIdInList(parameters, sampleSwap, run)
         List<DataFile> dataFiles = getFastQDataFilesBySeqTrackInList(seqTrackList, parameters)
 
-        FileSystem fileSystem = fileSystemService.remoteFileSystemOnDefaultRealm
-        Path individualPath = fileSystem.getPath(individualSwap.old
-                .getViewByPidPath(seqTypeSwap.old).absoluteDataManagementPath
-                .toString())
+        Path individualPath = individualService.getViewByPidPath(individualSwap.old, seqTypeSwap.old)
+        List<Path> sampleDirs = dataFiles.collect {
+            lsdfFilesService.getSampleTypeDirectory(it)
+        }
 
         return new LaneSwapData(
                 parameters: parameters,
@@ -82,7 +81,7 @@ class LaneSwapService extends AbstractDataSwapService<LaneSwapParameters, LaneSw
                 oldDataFileNameMap: collectFileNamesOfDataFiles(dataFiles),
                 oldFastQcFileNames: getFastQcOutputFileNamesByDataFilesInList(dataFiles),
                 cleanupIndividualPaths: [individualPath],
-                cleanupSampleDir: sampleTypeSwap.old.dirName
+                cleanupSampleTypePaths: sampleDirs,
         )
     }
 
@@ -203,11 +202,14 @@ class LaneSwapService extends AbstractDataSwapService<LaneSwapParameters, LaneSw
      * @param data DTO containing all entities necessary to perform a swap.
      */
     private void checkForRemainingSeqTracks(LaneSwapData data) {
-        if (SeqTrack.findAllBySampleAndSeqType(data.sampleSwap.old, data.seqTypeSwap.old).empty) {
-            String basePath = projectService.getSequencingDirectory(data.projectSwap.old)
-            data.moveFilesCommands << "rm -rf '${basePath}/${data.seqTypeSwap.old.dirName}/" +
-                    "view-by-pid/${data.individualSwap.old.pid}/${data.sampleTypeSwap.old.dirName}/" +
-                    "${data.seqTypeSwap.old.libraryLayoutDirName}'"
+        String basePath = projectService.getSequencingDirectory(data.projectSwap.old)
+        data.seqTrackList*.antibodyTarget.unique().each { AntibodyTarget antibodyTarget ->
+            if (antibodyTarget ? SeqTrack.findAllBySampleAndSeqTypeAndAntibodyTarget(data.sampleSwap.old, data.seqTypeSwap.old, antibodyTarget).empty :
+                    SeqTrack.findAllBySampleAndSeqType(data.sampleSwap.old, data.seqTypeSwap.old).empty) {
+                data.moveFilesCommands << "rm -rf '${basePath}/${data.seqTypeSwap.old.dirName}/" +
+                        "view-by-pid/${data.individualSwap.old.pid}/${data.sampleTypeSwap.old.dirName}${antibodyTarget ? "-${antibodyTarget.name}" : ''}/" +
+                        "${data.seqTypeSwap.old.libraryLayoutDirName}'"
+            }
         }
     }
 

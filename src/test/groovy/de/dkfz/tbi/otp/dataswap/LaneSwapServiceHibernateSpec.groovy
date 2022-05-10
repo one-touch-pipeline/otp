@@ -103,13 +103,13 @@ class LaneSwapServiceHibernateSpec extends HibernateSpec implements ServiceUnitT
         final Sample sample = createSample(individual: individual)
         createSample(individual: individual)
         final Path vbpPath = Paths.get("/vbpPath/")
-        final String sampleDir = "samplePath"
+        final Path sampleDir = Paths.get("/samplePath")
 
         final LaneSwapData data = new LaneSwapData([
-                individualSwap: new Swap(individual, null),
-                sampleSwap    : new Swap(sample, null),
+                individualSwap        : new Swap(individual, null),
+                sampleSwap            : new Swap(sample, null),
                 cleanupIndividualPaths: [vbpPath],
-                cleanupSampleDir: sampleDir,
+                cleanupSampleTypePaths: [sampleDir],
         ])
 
         when:
@@ -121,7 +121,7 @@ class LaneSwapServiceHibernateSpec extends HibernateSpec implements ServiceUnitT
 
         String bashScriptSnippet = data.moveFilesCommands.join("\n")
         bashScriptSnippet.contains("################ cleanup empty sample and pid directories ################")
-        bashScriptSnippet.contains("rm -rf ${vbpPath.resolve(sampleDir)}")
+        bashScriptSnippet.contains("rm -rf ${sampleDir}")
         !bashScriptSnippet.contains("rm -rf ${vbpPath}\n")
     }
 
@@ -132,13 +132,13 @@ class LaneSwapServiceHibernateSpec extends HibernateSpec implements ServiceUnitT
         final Individual individual = createIndividual()
         final Sample sample = createSample(individual: individual)
         final Path vbpPath = Paths.get("/vbpPath/")
-        final String sampleDir = "samplePath"
+        final Path sampleDir = Paths.get("/samplePath")
 
         final LaneSwapData data = new LaneSwapData([
-                individualSwap: new Swap(individual, null),
-                sampleSwap    : new Swap(sample, null),
+                individualSwap        : new Swap(individual, null),
+                sampleSwap            : new Swap(sample, null),
                 cleanupIndividualPaths: [vbpPath],
-                cleanupSampleDir: sampleDir,
+                cleanupSampleTypePaths: [sampleDir],
         ])
 
         when:
@@ -150,7 +150,7 @@ class LaneSwapServiceHibernateSpec extends HibernateSpec implements ServiceUnitT
 
         String bashScriptSnippet = data.moveFilesCommands.join("\n")
         bashScriptSnippet.contains("################ cleanup empty sample and pid directories ################")
-        bashScriptSnippet.contains("rm -rf ${vbpPath.resolve(sampleDir)}")
+        bashScriptSnippet.contains("rm -rf ${sampleDir}")
         bashScriptSnippet.contains("rm -rf ${vbpPath}")
     }
 }

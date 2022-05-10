@@ -78,11 +78,6 @@ class LaneSwapServiceSpec extends Specification implements DataTest, ServiceUnit
         service.fastqcDataFilesService = Mock(FastqcDataFilesService) {
             _ * fastqcOutputPath(_) >> path
         }
-        service.lsdfFilesService = Mock(LsdfFilesService) {
-            _ * getFileFinalPathAsPath(_) >> path
-            _ * getFileViewByPidPathAsPath(_) >> path
-            _ * getWellAllFileViewByPidPathAsPAth(_) >> path
-        }
         service.seqTrackService = new SeqTrackService()
 
         Realm realm = createRealm()
@@ -100,18 +95,23 @@ class LaneSwapServiceSpec extends Specification implements DataTest, ServiceUnit
             _ * saveComment(_, _) >> null
         }
         service.commentService = mockedCommendService
+        service.projectService = new ProjectService()
+        service.projectService.configService = service.configService
+        service.projectService.fileSystemService = new TestFileSystemService()
         service.individualService = new IndividualService([
                 commentService: mockedCommendService,
                 configService : service.configService,
+                projectService: service.projectService,
+        ])
+        service.lsdfFilesService = new LsdfFilesService([
+                projectService   : service.projectService,
+                individualService: service.individualService,
         ])
 
         service.fileSystemService = Mock(FileSystemService) {
             _ * getRemoteFileSystemOnDefaultRealm() >> FileSystems.default
         }
         service.deletionService = Mock(DeletionService)
-        service.projectService = new ProjectService()
-        service.projectService.configService = service.configService
-        service.projectService.fileSystemService = new TestFileSystemService()
 
         // Domain
         SampleType newSampleType = createSampleType()
@@ -147,7 +147,10 @@ class LaneSwapServiceSpec extends Specification implements DataTest, ServiceUnit
 
         // prepare input
         DataFile seqTrack1File = DataFile.findAllBySeqTrack(seqTrackWithFalsySample1).first()
+        Files.createDirectories(service.lsdfFilesService.getFileFinalPathAsPath(seqTrack1File).parent)
+        Files.createFile(service.lsdfFilesService.getFileFinalPathAsPath(seqTrack1File))
         DataFile seqTrack2File = DataFile.findAllBySeqTrack(seqTrackWithFalsySample2).first()
+        Files.createFile(service.lsdfFilesService.getFileFinalPathAsPath(seqTrack2File))
 
         LaneSwapParameters parameters = new LaneSwapParameters(
                 projectNameSwap: new Swap(falsyLabeledSample.individual.project.name, newIndividual.project.name),

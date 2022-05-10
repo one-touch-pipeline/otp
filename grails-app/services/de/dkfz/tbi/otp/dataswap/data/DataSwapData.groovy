@@ -25,11 +25,9 @@ import grails.validation.Validateable
 import groovy.transform.TupleConstructor
 
 import de.dkfz.tbi.otp.dataswap.AbstractDataSwapService
-import de.dkfz.tbi.otp.ngsdata.DataFile
-import de.dkfz.tbi.otp.ngsdata.Individual
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.dataswap.Swap
 import de.dkfz.tbi.otp.dataswap.parameters.DataSwapParameters
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 
 import java.nio.file.Path
@@ -57,7 +55,7 @@ class DataSwapData<P extends DataSwapParameters> implements Validateable {
                 return "DataFiles: ${difference} not found in database, and ${dataFilesFound} were missed in map"
             }
         }
-        cleanupSampleDir nullable: true
+        cleanupSampleTypePaths nullable: true
     }
 
     P parameters
@@ -71,7 +69,7 @@ class DataSwapData<P extends DataSwapParameters> implements Validateable {
     List<File> dirsToDelete = []
     List<String> moveFilesCommands = [AbstractDataSwapService.BASH_HEADER]
     List<Path> cleanupIndividualPaths
-    String cleanupSampleDir
+    List<Path> cleanupSampleTypePaths
 
     Swap<String> getPidSwap() {
         return parameters.pidSwap

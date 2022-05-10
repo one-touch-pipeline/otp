@@ -470,7 +470,7 @@ abstract class AbstractDataSwapService<P extends DataSwapParameters, D extends D
      */
     void cleanupLeftOverSamples(D data) {
         data.moveFilesCommands << "\n\n"
-        data.moveFilesCommands << data.cleanupIndividualPaths*.resolve(data.cleanupSampleDir).collect { "rm -rf ${it}" }.join("\n")
+        data.moveFilesCommands << data.cleanupSampleTypePaths.collect { "rm -rf ${it}" }.join("\n")
 
         if (!data.individualSwap.old.samples) {
             data.moveFilesCommands << "\n\n"

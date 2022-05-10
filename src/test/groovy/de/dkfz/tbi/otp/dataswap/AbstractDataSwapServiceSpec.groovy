@@ -32,12 +32,12 @@ import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellService
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.AnalysisDeletionService
+import de.dkfz.tbi.otp.dataswap.data.DataSwapData
+import de.dkfz.tbi.otp.dataswap.parameters.DataSwapParameters
 import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPancanFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.dataswap.data.DataSwapData
-import de.dkfz.tbi.otp.dataswap.parameters.DataSwapParameters
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
@@ -1139,12 +1139,12 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
             createSample(individual: individual)
         }
         final Path vbpPath = Paths.get("/vbpPath/")
-        final String sampleDir = "samplePath"
+        final Path sampleDir = Paths.get("/samplePath")
 
         final DataSwapData dataSwapData = new DataSwapData(
                 individualSwap: new Swap(individual, null),
                 cleanupIndividualPaths: [vbpPath],
-                cleanupSampleDir: sampleDir,
+                cleanupSampleTypePaths: [sampleDir],
         )
 
         when:
@@ -1153,7 +1153,7 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
         then:
         futherSample && Individual.count || !Individual.count
         String bashScriptSnippet = dataSwapData.moveFilesCommands.join("\n")
-        bashScriptSnippet.contains("rm -rf ${vbpPath.resolve(sampleDir)}")
+        bashScriptSnippet.contains("rm -rf ${sampleDir}")
 
         String cleanupIndividualCommand = "rm -rf ${vbpPath}\n"
         futherSample && !cleanupIndividualCommand || cleanupIndividualCommand
