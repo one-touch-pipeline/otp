@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-Cypress.Commands.add('login', () => {
+Cypress.Commands.add('loginAsOperator', () => {
   'use strict';
 
   cy.visit('/');
