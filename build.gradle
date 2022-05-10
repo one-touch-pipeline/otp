@@ -433,6 +433,7 @@ tasks.withType(CodeNarc) {
 
 war {
     archiveName = 'otp.war'
+    enabled = true
 }
 
 /* Documentation Tasks */
