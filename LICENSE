@@ -27,6 +27,7 @@ technical reasons, however they are also licensed under this license.
  - src/docs/
  - package.json
  - package-lock.json
+ - cypress.json
 
 Different licenses may apply to the following folders and files therein,
  - grails-app/assets/lib

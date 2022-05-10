@@ -87,6 +87,8 @@ class LicenseCheck {
 
             "package-lock.json",
             "package.json",
+
+            "cypress.json",
     ].collect { Paths.get(it) }
 
     static void checkLicense(Path path, List<String> problems) {
