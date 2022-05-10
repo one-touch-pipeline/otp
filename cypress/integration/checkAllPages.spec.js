@@ -25,7 +25,7 @@ describe('Test clicking and visiting through all pages', () => {
 
   it('checks all anker links', () => {
     cy.visit('/');
-    cy.login();
+    cy.loginAsOperator();
     cy.checkAllAnkerElements();
   });
 });
