@@ -20,6 +20,26 @@
  * SOFTWARE.
  */
 
-module.exports = () => {
+describe('Check workflow artefact page', () => {
   'use strict';
-};
+
+  context('when user is an operator', () => {
+    beforeEach(() => {
+      cy.loginAsOperator();
+    });
+
+    it('should visit different workflow artefacts index pages for the second workflow', () => {
+      cy.visit('/workflowRunList');
+
+      cy.get('table#runs tbody').find('tr')
+        .should('have.length', 13).eq(2)
+        .find('a')
+        .click();
+
+      cy.get('a:contains(artefact)').each((artefactAnkerElement) => {
+        cy.visit(artefactAnkerElement.prop('href'));
+        cy.checkPage('/workflowArtefact/index/');
+      });
+    });
+  });
+});

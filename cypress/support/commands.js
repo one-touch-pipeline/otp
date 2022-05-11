@@ -20,47 +20,46 @@
  * SOFTWARE.
  */
 
+const path = require('path');
+
 Cypress.Commands.add('loginAsOperator', () => {
   'use strict';
 
-  cy.visit('/');
-  cy.get('body')
-    .then(($body) => {
-      const loginButtonId = '#loginButton';
-      if ($body.find(loginButtonId).length > 0) {
-        cy.get('input[name=username]')
-          .type(Cypress.env('operator_username'));
-        cy.get('input[name=password]')
-          .type(Cypress.env('operator_password'), { log: false });
-        cy.get(loginButtonId)
-          .click();
-      }
-    });
-  cy.get('body')
-    .then(($body) => {
-      const acceptPrivacyPolicy = 'input#accept';
-      if ($body.find(acceptPrivacyPolicy).length > 0) {
-        cy.get(acceptPrivacyPolicy)
-          .click();
-        cy.get('button')
-          .contains('Continue')
-          .click();
-      }
-    });
+  const username = Cypress.env('operator_username');
+  const password = Cypress.env('operator_password');
+
+  cy.session(username, () => {
+    cy.visit('/login/auth');
+    cy.get('body')
+      .then(($body) => {
+        const loginButtonId = '#loginButton';
+        if ($body.find(loginButtonId).length > 0) {
+          cy.get('input[name=username]')
+            .type(username);
+          cy.get('input[name=password]')
+            .type(password, { log: false });
+          cy.get(loginButtonId)
+            .click();
+        }
+      });
+    cy.get('body')
+      .then(($body) => {
+        const acceptPrivacyPolicy = 'input#accept';
+        if ($body.find(acceptPrivacyPolicy).length > 0) {
+          cy.get(acceptPrivacyPolicy)
+            .click();
+          cy.get('button')
+            .contains('Continue')
+            .click();
+        }
+      });
+  });
 });
 
 Cypress.Commands.add('logout', () => {
   'use strict';
 
-  cy.visit('/');
-  cy.get('body')
-    .then((body) => {
-      if (body.find('#loginButton').length === 0) {
-        cy.get('a')
-          .contains('Logout')
-          .click();
-      }
-    });
+  cy.visit('/logout');
 });
 
 let checkedHrefList = [];
@@ -90,4 +89,44 @@ Cypress.Commands.add('checkAllAnkerElements', (initial = true) => {
         cy.checkAllAnkerElements(false);
       }
     });
+});
+
+Cypress.Commands.add('checkPage', (url) => {
+  'use strict';
+
+  if (url) {
+    cy.url().should('contain', url).then((currentUrl) => {
+      cy.request(currentUrl);
+    });
+  } else {
+    cy.url().then((currentUrl) => {
+      cy.request(currentUrl);
+    });
+  }
+});
+
+// eslint-disable-next-line strict
+Cypress.Commands.add('checkDownloadByByteSize', (filename, fileEnding, fileByteSize) => {
+  const downloadsFolder = Cypress.config('downloadsFolder');
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const day = String(today.getDate()).padStart(2, '0');
+  const date = `${year}-${month}-${day}`;
+
+  const filepath = path.join(downloadsFolder, `${filename}_${date}${fileEnding}`);
+
+  cy.readFile(filepath, 'binary', { timeout: 15000 })
+    .should((buffer) => expect(buffer.length).to.be.equal(fileByteSize));
+});
+
+Cypress.Commands.add('clearDownloadsFolder', () => {
+  'use strict';
+
+  const downloadsFolder = Cypress.config('downloadsFolder');
+
+  cy.exec(`rm ${downloadsFolder}/*`, {
+    log: true,
+    failOnNonZeroExit: false
+  });
 });

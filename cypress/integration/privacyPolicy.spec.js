@@ -20,6 +20,13 @@
  * SOFTWARE.
  */
 
-module.exports = () => {
+describe('Check privacy policy page', () => {
   'use strict';
-};
+
+  context('when user is not logged in', () => {
+    it('should visit the index page', () => {
+      cy.visit('/privacyPolicy/index');
+      cy.get('h3').should('have.length', 22);
+    });
+  });
+});

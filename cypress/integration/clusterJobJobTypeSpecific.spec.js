@@ -20,6 +20,16 @@
  * SOFTWARE.
  */
 
-module.exports = () => {
+describe('Check cluster job job type specific page', () => {
   'use strict';
-};
+
+  context('when user is an operator', () => {
+    beforeEach(() => {
+      cy.loginAsOperator();
+    });
+
+    it('should visit the index page', () => {
+      cy.visit('/clusterJobJobTypeSpecific/index');
+    });
+  });
+});

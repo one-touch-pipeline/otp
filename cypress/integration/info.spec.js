@@ -20,6 +20,32 @@
  * SOFTWARE.
  */
 
-module.exports = () => {
+describe('Check info pages', () => {
   'use strict';
-};
+
+  context('when user is not logged in', () => {
+    it('should visit the about page', () => {
+      cy.visit('/info/about');
+    });
+
+    it('should visit the contact page', () => {
+      cy.visit('/info/contact');
+    });
+
+    it('should visit the imprint page', () => {
+      cy.visit('/info/imprint');
+    });
+
+    it('should visit the numbers page', () => {
+      cy.visit('/info/numbers');
+    });
+
+    it('should visit the partners page', () => {
+      cy.visit('/info/partners');
+    });
+
+    it('should visit the templates page', () => {
+      cy.visit('/info/templates');
+    });
+  });
+});

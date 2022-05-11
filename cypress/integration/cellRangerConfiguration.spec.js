@@ -20,6 +20,29 @@
  * SOFTWARE.
  */
 
-module.exports = () => {
+describe('Check cell ranger configuration page', () => {
   'use strict';
-};
+
+  context('when user is an operator', () => {
+    beforeEach(() => {
+      cy.loginAsOperator();
+    });
+
+    it('should visit the index page', () => {
+      cy.visit('/cellRangerConfiguration/index');
+    });
+
+    it('should select cell ranger version submit it and afterwards invalidate it', () => {
+      cy.visit('/cellRangerConfiguration/index');
+
+      cy.get('#select2-programVersion-container').click();
+      cy.get('li').contains('cellranger/4.0.0').click();
+
+      cy.get('input#submit').click();
+      cy.checkPage('/cellRangerConfiguration/index');
+
+      cy.get('#invalidateConfig').click();
+      cy.checkPage('/cellRangerConfiguration/index');
+    });
+  });
+});

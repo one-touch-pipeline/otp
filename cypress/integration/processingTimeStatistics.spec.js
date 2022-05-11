@@ -20,6 +20,22 @@
  * SOFTWARE.
  */
 
-module.exports = () => {
+describe('Check processing time statistics page', () => {
   'use strict';
-};
+
+  context('when user is an operator', () => {
+    beforeEach(() => {
+      cy.loginAsOperator();
+    });
+
+    it('should visit the index page', () => {
+      cy.visit('/processingTimeStatistics/index');
+    });
+
+    it('should enter from and to dates for filtering', () => {
+      cy.visit('/processingTimeStatistics/index');
+      cy.get('input#dpFrom').type('2021-06-07');
+      cy.get('input#dpTo').type('2022-03-09');
+    });
+  });
+});

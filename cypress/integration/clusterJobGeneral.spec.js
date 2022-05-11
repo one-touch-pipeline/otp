@@ -20,6 +20,29 @@
  * SOFTWARE.
  */
 
-module.exports = () => {
+describe('Check cluster job general page', () => {
   'use strict';
-};
+
+  context('when user is an operator', () => {
+    beforeEach(() => {
+      cy.loginAsOperator();
+    });
+
+    it('should click through the pages of the table', () => {
+      cy.visit('/clusterJobGeneral/index');
+
+      cy.get('a.page-link').contains('2').click();
+      cy.get('div#clusterJobGeneralTable_processing').should('not.be.visible');
+      cy.get('a.page-link').contains('Next').click();
+      cy.get('div#clusterJobGeneralTable_processing').should('not.be.visible');
+      cy.get('a.page-link').contains('1').click();
+    });
+
+    it('should enter from and to date for filtering', () => {
+      cy.visit('/clusterJobGeneral/index');
+
+      cy.get('input#dpFrom').type('2021-06-07');
+      cy.get('input#dpTo').type('2022-03-09');
+    });
+  });
+});

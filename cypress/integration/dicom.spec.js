@@ -20,6 +20,16 @@
  * SOFTWARE.
  */
 
-module.exports = () => {
+describe('Check dicom page', () => {
   'use strict';
-};
+
+  context('when user is an operator', () => {
+    beforeEach(() => {
+      cy.loginAsOperator();
+    });
+
+    it('should visit the dictionary page', () => {
+      cy.visit('/dicom/dictionary');
+    });
+  });
+});

@@ -20,6 +20,16 @@
  * SOFTWARE.
  */
 
-module.exports = () => {
+describe('Check run yapsa page', () => {
   'use strict';
-};
+
+  context('when user is an operator', () => {
+    beforeEach(() => {
+      cy.loginAsOperator();
+    });
+
+    it('should visit the results page', () => {
+      cy.visit('/runYapsa/results');
+    });
+  });
+});

@@ -20,6 +20,21 @@
  * SOFTWARE.
  */
 
-module.exports = () => {
+describe('Check cluster job detail page', () => {
   'use strict';
-};
+
+  context('when user is an operator', () => {
+    beforeEach(() => {
+      cy.loginAsOperator();
+    });
+
+    it('should visit the cluster job detail page via the cluster job general page', () => {
+      cy.visit('/clusterJobGeneral/index');
+
+      cy.get('table tbody').find('tr a').each((clusterJobDetailAnkerLink) => {
+        cy.visit(clusterJobDetailAnkerLink.prop('href'));
+        cy.checkPage('/clusterJobDetail/show');
+      });
+    });
+  });
+});

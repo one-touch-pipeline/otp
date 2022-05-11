@@ -20,6 +20,16 @@
  * SOFTWARE.
  */
 
-module.exports = () => {
+describe('Check alignment quality overview page', () => {
   'use strict';
-};
+
+  context('when user is an operator', () => {
+    beforeEach(() => {
+      cy.loginAsOperator();
+    });
+
+    it('should visit the index page', () => {
+      cy.visit('/alignmentQualityOverview/index');
+    });
+  });
+});

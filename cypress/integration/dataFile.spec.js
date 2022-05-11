@@ -20,6 +20,39 @@
  * SOFTWARE.
  */
 
-module.exports = () => {
+describe('Check dataFile pages', () => {
   'use strict';
-};
+
+  context('when user is an operator', () => {
+    beforeEach(() => {
+      cy.loginAsOperator();
+    });
+
+    it('should visit show details page by starting on project overview page and save a comment there', () => {
+      cy.visit('/projectOverview/index');
+      cy.get('table#projectOverviewTable td.dataTables_empty').contains('Loading...').should('not.exist');
+      cy.get('table#projectOverviewTable tbody').find('tr').eq(6)
+        .find('td')
+        .eq(0)
+        .find('a')
+        .click();
+
+      cy.get('table tbody tr').find('a').eq(2)
+        .click();
+      cy.checkPage('seqTrack/seqTrackSet');
+
+      cy.get('div.identifier.dataFile a').eq(2).click();
+      cy.checkPage('dataFile/showDetails');
+
+      const comment = 'This is a test comment';
+      cy.get('span#authorSpan').should('not.be.empty');
+      cy.get('textarea#comment-content').clear().type(comment);
+      cy.get('button#button-save').click();
+
+      cy.url().then((url) => {
+        cy.visit(url);
+        cy.get('textarea#comment-content').should('have.text', comment);
+      });
+    });
+  });
+});

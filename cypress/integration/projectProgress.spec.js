@@ -20,6 +20,23 @@
  * SOFTWARE.
  */
 
-module.exports = () => {
+describe('Check projectProgress page', () => {
   'use strict';
-};
+
+  context('when user is an operator', () => {
+    beforeEach(() => {
+      cy.loginAsOperator();
+    });
+
+    it('should visit the progress page, enter from and to date and a project for filtering', () => {
+      cy.visit('/projectProgress/progress');
+
+      cy.get('input#dpFrom').type('2021-06-07');
+      cy.get('input#dpTo').type('2022-03-09');
+      cy.get('select#projects').parent().find('span.select2-container').click();
+      cy.get('span.select2-results').find('li').contains('ExampleProject').click();
+      cy.get('li.select2-selection__choice').contains('ExampleProject').should('exist');
+      cy.get('input#display').click();
+    });
+  });
+});

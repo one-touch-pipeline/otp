@@ -20,6 +20,16 @@
  * SOFTWARE.
  */
 
-module.exports = () => {
+describe('Check alignment configuration overview page', () => {
   'use strict';
-};
+
+  context('when user is an operator', () => {
+    beforeEach(() => {
+      cy.loginAsOperator();
+    });
+
+    it('should visit the index page', () => {
+      cy.visit('/alignmentConfigurationOverview/index');
+    });
+  });
+});

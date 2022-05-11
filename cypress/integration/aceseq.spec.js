@@ -20,6 +20,23 @@
  * SOFTWARE.
  */
 
-module.exports = () => {
+describe('Check Aceseq pages', () => {
   'use strict';
-};
+
+  context('when user is an operator', () => {
+    beforeEach(() => {
+      cy.loginAsOperator();
+    });
+
+    it('should visit the plots page when clicking on Plots on index page', () => {
+      cy.visit('/aceseq/results');
+
+      cy.log('Waiting until loading is done.');
+      cy.get('table tbody tr').contains('Loading...').should('not.exist');
+
+      cy.get('table tbody tr').eq(2).find('a').contains('Plots')
+        .click();
+      cy.checkPage('/aceseq/plots');
+    });
+  });
+});

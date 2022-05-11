@@ -20,14 +20,38 @@
  * SOFTWARE.
  */
 
-describe('Test clicking and visiting through all pages', () => {
+describe('Check sampleOverview page', () => {
   'use strict';
 
   context('when user is an operator', () => {
-    it('should check all available anker links', () => {
-      cy.visit('/');
+    beforeEach(() => {
       cy.loginAsOperator();
-      cy.checkAllAnkerElements();
+    });
+
+    it('should filter the table by Sample Type', () => {
+      cy.visit('/sampleOverview/index');
+
+      const sampleTypeName = 'tumor01';
+      cy.get('span#select2--container').contains('Sample Type').click();
+      cy.get('li').contains(sampleTypeName).click();
+
+      cy.get('table#laneOverviewId tbody').find('tr').each((tableRow) => {
+        cy.wrap(tableRow).find('td').eq(1).should('contain', 'tumor01');
+      });
+    });
+
+    it.skip('should add and remove filters for Seq Type', () => {
+      cy.visit('/sampleOverview/index');
+
+      const seqTypeName = 'WGS PAIRED bulk';
+      cy.get('span#select2--container').contains('Seq. Type').click();
+      cy.get('li').contains(seqTypeName).click();
+      cy.get('td.add input').click();
+      cy.get('span#select2--container').contains(seqTypeName).should('have.length', 1);
+
+      cy.get('table#searchCriteriaTableSeqType').find('tr').eq(0).find('td.remove input')
+        .click({ force: true });
+      cy.get('span#select2--container').contains('WGS PAIRED bulk').should('not.exist');
     });
   });
 });

@@ -20,6 +20,23 @@
  * SOFTWARE.
  */
 
-module.exports = () => {
+describe('Check statistics page', () => {
   'use strict';
-};
+
+  context('when user is an operator', () => {
+    before(() => {
+      cy.clearDownloadsFolder();
+    });
+
+    beforeEach(() => {
+      cy.loginAsOperator();
+      cy.visit('/mmml/mmmlIdentifierMapping');
+    });
+
+    // Skipped since right now, the downloaded files don't have leading zeros.
+    it.skip('should download csv file by clicking the button and verify the download', () => {
+      cy.get('button').contains('Download').click();
+      cy.checkDownloadByByteSize('OTP_-_project_overview', '.csv', 67);
+    });
+  });
+});

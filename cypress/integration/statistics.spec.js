@@ -20,6 +20,31 @@
  * SOFTWARE.
  */
 
-module.exports = () => {
+describe('Check statistics page', () => {
   'use strict';
-};
+
+  context('when user is an operator', () => {
+    beforeEach(() => {
+      cy.loginAsOperator();
+    });
+
+    it('should download the csv file', () => {
+      cy.visit('/statistics/kpi');
+
+      cy.get('div').contains('directories.csv').then((downloadElement) => {
+        cy.request(downloadElement.prop('href'))
+          .then((response) => {
+            expect(response.headers['content-type']).to.include('csv');
+          });
+      });
+    });
+
+    it('should select start and end dates to show KPIs', () => {
+      cy.visit('/statistics/kpi');
+
+      cy.get('input#start').type('2021-06-02');
+      cy.get('input#end').type('2022-04-02');
+      cy.get('button#button-addon2').click();
+    });
+  });
+});

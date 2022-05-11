@@ -20,6 +20,17 @@
  * SOFTWARE.
  */
 
-module.exports = () => {
+describe('Check home page', () => {
   'use strict';
-};
+
+  context('when user is an operator', () => {
+    beforeEach(() => {
+      cy.loginAsOperator();
+    });
+
+    it('should visit the index page', () => {
+      cy.visit('/home/index');
+      cy.checkPage('/home/index');
+    });
+  });
+});

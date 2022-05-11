@@ -20,6 +20,50 @@
  * SOFTWARE.
  */
 
-module.exports = () => {
+describe('Check statistics page', () => {
   'use strict';
-};
+
+  context('when user is an operator', () => {
+    before(() => {
+      cy.clearDownloadsFolder();
+    });
+
+    beforeEach(() => {
+      cy.loginAsOperator();
+    });
+
+    it.skip('should download csv files and check if the files exist', () => {
+      cy.visit('/run/list');
+
+      cy.get('button').contains('Download').click();
+      cy.checkDownloadByByteSize('list_of_runs', '.csv', 2484);
+    });
+
+    it('visits some show pages by clicking on runs', () => {
+      cy.visit('/run/list');
+
+      cy.get('table#runTable tbody').find('tr').eq(3)
+        .find('td')
+        .eq(0)
+        .find('a')
+        .click();
+      cy.checkPage('/run/show');
+
+      cy.visit('/run/list');
+      cy.get('table#runTable tbody').find('tr').eq(12)
+        .find('td')
+        .eq(0)
+        .find('a')
+        .click();
+      cy.checkPage('/run/show');
+
+      cy.visit('/run/list');
+      cy.get('table#runTable tbody').find('tr').eq(47)
+        .find('td')
+        .eq(0)
+        .find('a')
+        .click();
+      cy.checkPage('/run/show');
+    });
+  });
+});
