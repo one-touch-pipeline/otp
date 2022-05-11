@@ -25,7 +25,7 @@ import de.dkfz.tbi.otp.project.dta.DataTransferAgreement
 import de.dkfz.tbi.util.TimeFormats
 
 /**
- * scripts show details to last 25 listed DataTransfer
+ * scripts show details to all listed DataTransfer
  */
 
 //---------------------------------------------------------------------
