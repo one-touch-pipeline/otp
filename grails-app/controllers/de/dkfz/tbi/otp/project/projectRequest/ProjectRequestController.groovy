@@ -415,15 +415,14 @@ class ProjectRequestCreationCommand implements Validateable {
                 return "projectRequest.users.unique"
             }
         }
-        additionalFieldValue validator: { additionalFieldValueMap ->
-            List<String> errors = []
+        additionalFieldValue validator: { additionalFieldValueMap, obj, errors ->
             additionalFieldValueMap.each {
                 AbstractFieldDefinition afd = AbstractFieldDefinition.get(it.key as Long)
                 if (afd.regularExpression && !(it.value ==~ afd.regularExpression)) {
-                    errors << "Field " + afd.name + " " + afd.regularExpressionError
+                    String errorMessage = "Field " + afd.name + " : " + afd.regularExpressionError
+                    errors.reject("${errorMessage}", null, "${errorMessage}")
                 }
             }
-            return ["projectRequest.regexError", errors.join(" & ")]
         }
     }
 
