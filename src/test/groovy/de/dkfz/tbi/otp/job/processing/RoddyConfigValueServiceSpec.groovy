@@ -30,7 +30,6 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
-import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 
@@ -178,7 +177,6 @@ class RoddyConfigValueServiceSpec extends Specification implements ServiceUnitTe
     void "test getFilesToMerge"() {
         given:
         service.lsdfFilesService = new LsdfFilesService()
-        service.lsdfFilesService.fileService = new FileService()
         service.lsdfFilesService.individualService = Mock(IndividualService) {
             getViewByPidPath(_, _) >> { Paths.get("/viewbypidpath") }
         }

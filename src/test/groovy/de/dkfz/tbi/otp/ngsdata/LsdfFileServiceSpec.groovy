@@ -28,7 +28,6 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
-import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.CreateClusterScriptService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.project.ProjectService
@@ -269,7 +268,6 @@ class LsdfFileServiceSpec extends Specification implements DataTest, DomainFacto
     @Unroll
     void "getFileViewByPidPath, when antibody is '#antiBody' and single cell well is '#well', then path part is '#sampleTypePart'"() {
         given:
-        service.fileService = new FileService()
         Map<String, ?> data = setUpViewByPidTests(antiBody, well, sampleType, sampleTypePart)
 
         when:
@@ -291,7 +289,6 @@ class LsdfFileServiceSpec extends Specification implements DataTest, DomainFacto
     @Unroll
     void "getWellAllFileViewByPidPath, when antibody is '#antiBody' and single cell well is '#well', then path part is '#sampleTypePart'"() {
         given:
-        service.fileService = new FileService()
         Map<String, ?> data = setUpViewByPidTests(antiBody, well, sampleType, sampleTypePart)
 
         when:
@@ -310,8 +307,6 @@ class LsdfFileServiceSpec extends Specification implements DataTest, DomainFacto
 
     void "getFileViewByPidPath, when datafile is an unaligned single cell bam file, then return expected path"() {
         given:
-        service.fileService = new FileService()
-
         SeqTrack seqTrack = createSeqTrack()
 
         DataFile dataFile = createDataFile([

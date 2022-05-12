@@ -66,7 +66,6 @@ class DeletionServiceIntegrationSpec extends Specification implements EgaSubmiss
         deletionService = new DeletionService()
         deletionService.individualService = individualService
         deletionService.lsdfFilesService = new LsdfFilesService()
-        deletionService.lsdfFilesService.fileService = new FileService()
         deletionService.lsdfFilesService.projectService = Mock(ProjectService) {
             getSequencingDirectory(_) >> Paths.get(seqDir)
         }

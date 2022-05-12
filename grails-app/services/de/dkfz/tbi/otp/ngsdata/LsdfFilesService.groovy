@@ -25,7 +25,8 @@ import grails.gorm.transactions.Transactional
 import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.infrastructure.FileService
-import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.job.processing.CreateClusterScriptService
+import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
@@ -43,10 +44,6 @@ class LsdfFilesService {
     @Autowired
     RemoteShellHelper remoteShellHelper
     CreateClusterScriptService createClusterScriptService
-
-    FileService fileService
-
-    FileSystemService fileSystemService
 
     IndividualService individualService
     ProjectService projectService
@@ -241,11 +238,6 @@ class LsdfFilesService {
     @Deprecated
     String getFileFinalPath(DataFile dataFile) {
         return getFileFinalPathAsPath(dataFile)?.toString()
-    }
-
-    @Deprecated
-    String getFileMd5sumFinalPath(DataFile dataFile) {
-        return getFileMd5sumFinalPathAsPath(dataFile)?.toString()
     }
 
     /**
