@@ -32,8 +32,9 @@ include:
   - template: License-Scanning.gitlab-ci.yml
 
 variables:
-  #Default is: DS_DEFAULT_ANALYZERS: "gemnasium, retire.js, gemnasium-python, gemnasium-maven, bundler-audit"`
-  DS_DEFAULT_ANALYZERS: "retire.js, gemnasium-maven, bundler-audit"
+  #Default is: DS_DEFAULT_ANALYZERS: "gemnasium, gemnasium-python, gemnasium-maven, bundler-audit"`
+  DS_DEFAULT_ANALYZERS: "gemnasium, gemnasium-maven, bundler-audit"
+  DS_EXCLUDED_ANALYZERS: "gemnasium-python"
 
 stages:
   - create merge request
@@ -48,9 +49,15 @@ stages:
 # ------------------------------------------------------
 # jobs stage scanning
 # ------------------------------------------------------
+gemnasium-dependency_scanning:
+  stage: scanning
+  script:
+    - /analyzer run
 
 gemnasium-maven-dependency_scanning:
   stage: scanning
+  script:
+    - /analyzer run
 
 license_scanning:
   stage: scanning
@@ -59,9 +66,6 @@ license_scanning:
       - gl-license-scanning-report.json
     reports:
       license_scanning: gl-license-scanning-report.json
-
-retire-js-dependency_scanning:
-  stage: scanning
 
 new licenses:
   image: groovy:3.0-jdk11-alpine
