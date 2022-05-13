@@ -29,6 +29,10 @@ import de.dkfz.tbi.otp.workflowExecution.Workflow
 
 class SeqTypeService extends MetadataFieldsService<SeqType> {
 
+    SeqType findById(long id) {
+        SeqType.get(id)
+    }
+
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     List<Map> getDisplayableMetadata() {
         return SeqType.list(sort: "name", order: "asc").collect {

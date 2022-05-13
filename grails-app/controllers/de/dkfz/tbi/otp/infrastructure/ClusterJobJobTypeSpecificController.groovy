@@ -25,6 +25,7 @@ import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 
 import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.ngsdata.SeqTypeService
 import de.dkfz.tbi.util.TimeFormats
 import de.dkfz.tbi.util.TimeUtils
 
@@ -37,6 +38,7 @@ class ClusterJobJobTypeSpecificController {
     static final int GIGABASES_TO_BASES = 1000000000
 
     ClusterJobService clusterJobService
+    SeqTypeService seqTypeService
 
     static allowedMethods = [
             index                                   : "GET",
@@ -195,7 +197,7 @@ class ClusterJobJobTypeSpecificController {
     private List parseParams() {
         LocalDate startDate = LocalDate.parse(params.from)
         LocalDate endDate = LocalDate.parse(params.to)
-        SeqType seqType = (params.seqType == "null") ? null : SeqType.get(Long.parseLong(params.seqType))
+        SeqType seqType = (params.seqType == "null") ? null : seqTypeService.findById(Long.parseLong(params.seqType))
 
         return [startDate, endDate, seqType]
     }
