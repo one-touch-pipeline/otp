@@ -26,11 +26,9 @@ import grails.plugin.springsecurity.annotation.Secured
 import grails.validation.Validateable
 
 import de.dkfz.tbi.otp.CheckAndCall
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
-import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 import de.dkfz.tbi.util.TimeFormats
-
-import java.time.LocalDate
 
 @Secured("hasRole('ROLE_ADMIN')")
 class WorkflowSystemConfigController implements CheckAndCall {
@@ -41,15 +39,27 @@ class WorkflowSystemConfigController implements CheckAndCall {
             updateWorkflow: "POST",
     ]
 
+    ReferenceGenomeService referenceGenomeService
+
+    SeqTypeService seqTypeService
+
+    WorkflowService workflowService
+
     def index() {
         return [
-                refGenomes: ReferenceGenome.findAll().sort { it.name },
-                seqTypes  : SeqType.findAll().sort { it.displayNameWithLibraryLayout },
+                refGenomes: referenceGenomeService.list().sort { a, b ->
+                    String.CASE_INSENSITIVE_ORDER.compare(a.name, b.name)
+                },
+                seqTypes  : seqTypeService.list().sort {
+                    it.displayNameWithLibraryLayout
+                },
         ]
     }
 
     def getWorkflows() {
-        List<Map> workflows = Workflow.findAll().collect { Workflow wf ->
+        List<Map> workflows = workflowService.list().sort { a, b ->
+            !a.enabled <=> !b.enabled ?: String.CASE_INSENSITIVE_ORDER.compare(a.toString(), b.toString())
+        }.collect { Workflow wf ->
             buildWorkflowOutputObject(wf)
         }
         render workflows as JSON
@@ -57,32 +67,17 @@ class WorkflowSystemConfigController implements CheckAndCall {
 
     def updateWorkflow(WorkflowUpdateCommand cmd) {
         checkDefaultErrorsAndCallMethod(cmd) {
-            Workflow workflow = Workflow.get(cmd.id)
-            workflow.priority = cmd.priority
-            workflow.enabled = cmd.enabled
-            workflow.maxParallelWorkflows = cmd.maxParallelWorkflows
+            UpdateWorkflowDto updateWorkflowDto = new UpdateWorkflowDto(
+                    cmd.id,
+                    cmd.priority,
+                    cmd.maxParallelWorkflows,
+                    cmd.enabled,
+                    cmd.deprecated,
+                    cmd.allowedRefGenomes,
+                    cmd.supportedSeqTypes,
+            )
 
-            if (cmd.supportedSeqTypes) {
-                workflow.supportedSeqTypes = SeqType.findAll { id in cmd.supportedSeqTypes }
-            } else {
-                workflow.supportedSeqTypes = null
-            }
-
-            if (cmd.allowedRefGenomes) {
-                workflow.allowedReferenceGenomes = ReferenceGenome.findAll {
-                    id in cmd.allowedRefGenomes
-                }
-            } else {
-                workflow.allowedReferenceGenomes = null
-            }
-
-            if (cmd.deprecated && !workflow.deprecatedDate) {
-                workflow.deprecatedDate = LocalDate.now()
-            } else if (!cmd.deprecated) {
-                workflow.deprecatedDate = null
-            }
-
-            workflow.save(flush: true)
+            Workflow workflow = workflowService.updateWorkflow(updateWorkflowDto)
             Map output = buildWorkflowOutputObject(workflow)
             render output as JSON
         }
@@ -123,12 +118,5 @@ class WorkflowSystemConfigController implements CheckAndCall {
     }
 }
 
-class WorkflowUpdateCommand implements Validateable {
-    int id
-    short priority
-    short maxParallelWorkflows
-    boolean enabled
-    boolean deprecated
-    List<Long> allowedRefGenomes
-    List<Long> supportedSeqTypes
+class WorkflowUpdateCommand extends UpdateWorkflowDto implements Validateable {
 }

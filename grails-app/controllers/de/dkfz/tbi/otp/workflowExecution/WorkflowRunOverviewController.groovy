@@ -35,8 +35,6 @@ class WorkflowRunOverviewController {
             index: "GET",
     ]
 
-    WorkflowRunOverviewService workflowRunOverviewService
-
     static final Map<String, List<WorkflowRun.State>> STATES = [
             ("Input required"): [
                     WorkflowRun.State.WAITING_FOR_USER,
@@ -56,8 +54,11 @@ class WorkflowRunOverviewController {
             ].asImmutable(),
     ].asImmutable()
 
+    WorkflowService workflowService
+    WorkflowRunOverviewService workflowRunOverviewService
+
     def index() {
-        List<Workflow> workflows = Workflow.list().sort { a, b ->
+        List<Workflow> workflows = workflowService.list().sort { a, b ->
             !a.enabled <=> !b.enabled ?: String.CASE_INSENSITIVE_ORDER.compare(a.toString(), b.toString())
         }
 

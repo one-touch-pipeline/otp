@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2022 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,29 +21,12 @@
  */
 package de.dkfz.tbi.otp.workflowExecution
 
-import grails.plugin.springsecurity.annotation.Secured
+import grails.gorm.transactions.Transactional
 
-@Secured("hasRole('ROLE_OPERATOR')")
-class WorkflowArtefactController {
+@Transactional
+class WorkflowRunInputArtefactService {
 
-    static allowedMethods = [
-            index: "GET"
-    ]
-
-    WorkflowRunInputArtefactService workflowRunInputArtefactService
-
-    def index(WorkflowArtefact workflowArtefact) {
-        if (!workflowArtefact) {
-            return response.sendError(404)
-        }
-
-        List<WorkflowRunInputArtefact> workflowRunInputArtefact = workflowRunInputArtefactService.findAllByWorkflowArtefact(workflowArtefact).sort { a, b ->
-            String.CASE_INSENSITIVE_ORDER.compare(a.role, b.role)
-        }
-
-        return [
-                artefact: workflowArtefact,
-                artefactUsedBy: workflowRunInputArtefact,
-        ]
+    List<WorkflowRunInputArtefact> findAllByWorkflowArtefact(WorkflowArtefact workflowArtefact) {
+        return WorkflowRunInputArtefact.findAllByWorkflowArtefact(workflowArtefact)
     }
 }

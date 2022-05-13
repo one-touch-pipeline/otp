@@ -54,8 +54,8 @@ class LibraryPreparationKitService extends MetadataFieldsService<LibraryPreparat
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     LibraryPreparationKit addAdapterFileToLibraryPreparationKit(LibraryPreparationKit libraryPreparationKit, String adapterFile) {
-        assert libraryPreparationKit : "libraryPreparationKit must not be null"
-        assert adapterFile : "adapterFile must not be null"
+        assert libraryPreparationKit: "libraryPreparationKit must not be null"
+        assert adapterFile: "adapterFile must not be null"
         libraryPreparationKit.adapterFile = adapterFile
         assert libraryPreparationKit.save(flush: true)
         return libraryPreparationKit
@@ -63,8 +63,8 @@ class LibraryPreparationKitService extends MetadataFieldsService<LibraryPreparat
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     LibraryPreparationKit addAdapterSequenceToLibraryPreparationKit(LibraryPreparationKit libraryPreparationKit, String reverseComplementAdapterSequence) {
-        assert libraryPreparationKit : "libraryPreparationKit must not be null"
-        assert reverseComplementAdapterSequence : "reverseComplementAdapterSequence must not be null"
+        assert libraryPreparationKit: "libraryPreparationKit must not be null"
+        assert reverseComplementAdapterSequence: "reverseComplementAdapterSequence must not be null"
         libraryPreparationKit.reverseComplementAdapterSequence = reverseComplementAdapterSequence
         assert libraryPreparationKit.save(flush: true)
         return libraryPreparationKit
@@ -98,5 +98,9 @@ class LibraryPreparationKitService extends MetadataFieldsService<LibraryPreparat
     @Override
     protected Class getClazz() {
         return LibraryPreparationKit
+    }
+
+    List<LibraryPreparationKit> list() {
+        return LibraryPreparationKit.list()
     }
 }

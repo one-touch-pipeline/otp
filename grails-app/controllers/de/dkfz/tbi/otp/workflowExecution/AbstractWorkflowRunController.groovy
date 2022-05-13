@@ -24,7 +24,6 @@ package de.dkfz.tbi.otp.workflowExecution
 import grails.validation.Validateable
 
 import de.dkfz.tbi.otp.CheckAndCall
-import de.dkfz.tbi.otp.SqlUtil
 import de.dkfz.tbi.otp.config.ConfigService
 
 import java.time.Duration
@@ -70,21 +69,6 @@ abstract class AbstractWorkflowRunController implements CheckAndCall {
             workflowService.createRestartedWorkflows(cmd.step.collect { WorkflowStep.get(it) })
         }
         redirect uri: cmd.redirect
-    }
-
-    protected Closure getCriteria(Workflow workflow, List<WorkflowRun.State> states, String name) {
-        return {
-            if (name) {
-                ilike("displayName", "%${SqlUtil.replaceWildcardCharactersInLikeExpression(name)}%")
-            }
-            if (states) {
-                'in'("state", states)
-            }
-            if (workflow) {
-                eq("workflow", workflow)
-            }
-            ne("state", WorkflowRun.State.LEGACY)
-        }
     }
 
     protected LocalDateTime convertDateToLocalDateTime(Date date) {

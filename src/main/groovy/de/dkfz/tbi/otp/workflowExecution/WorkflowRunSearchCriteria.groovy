@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2022 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,29 +21,21 @@
  */
 package de.dkfz.tbi.otp.workflowExecution
 
-import grails.plugin.springsecurity.annotation.Secured
+import groovy.transform.TupleConstructor
+import org.hibernate.criterion.Order
 
-@Secured("hasRole('ROLE_OPERATOR')")
-class WorkflowArtefactController {
+@TupleConstructor
+class WorkflowRunSearchCriteria {
+    Workflow workflow
+    List<WorkflowRun.State> states
+    String name
 
-    static allowedMethods = [
-            index: "GET"
-    ]
+    List<Order> orderList
 
-    WorkflowRunInputArtefactService workflowRunInputArtefactService
+    int start
+    int length
 
-    def index(WorkflowArtefact workflowArtefact) {
-        if (!workflowArtefact) {
-            return response.sendError(404)
-        }
-
-        List<WorkflowRunInputArtefact> workflowRunInputArtefact = workflowRunInputArtefactService.findAllByWorkflowArtefact(workflowArtefact).sort { a, b ->
-            String.CASE_INSENSITIVE_ORDER.compare(a.role, b.role)
-        }
-
-        return [
-                artefact: workflowArtefact,
-                artefactUsedBy: workflowRunInputArtefact,
-        ]
+    boolean isPagingEnabled() {
+        return length != -1
     }
 }

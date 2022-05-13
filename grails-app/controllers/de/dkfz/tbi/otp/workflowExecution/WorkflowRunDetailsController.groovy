@@ -25,20 +25,20 @@ import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 
 import de.dkfz.tbi.otp.CommentService
-import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.ClusterJobService
-import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.otp.utils.CommentCommand
+import de.dkfz.tbi.otp.utils.DataTablesCommand
 import de.dkfz.tbi.util.TimeFormats
 
 import javax.servlet.http.HttpServletResponse
-
-import static de.dkfz.tbi.otp.infrastructure.ClusterJob.CheckStatus.FINISHED
 
 @Secured("hasRole('ROLE_OPERATOR')")
 class WorkflowRunDetailsController extends AbstractWorkflowRunController {
 
     ClusterJobService clusterJobService
     CommentService commentService
+    WorkflowLogService workflowLogService
+    WorkflowRunService workflowRunService
     WorkflowStepService workflowStepService
 
     static allowedMethods = [
@@ -54,17 +54,14 @@ class WorkflowRunDetailsController extends AbstractWorkflowRunController {
             response.sendError(HttpServletResponse.SC_NOT_FOUND)
             return []
         }
-        WorkflowRun restartedAs = CollectionUtils.atMostOneElement(WorkflowRun.findAllByRestartedFrom(cmd.id))
 
-        Closure criteria = getCriteria(cmd.workflow, cmd.states, cmd.name,)
-        List<WorkflowRun> data = WorkflowRun.createCriteria().list {
-            criteria.delegate = delegate
-            criteria()
-        } as List<WorkflowRun>
-        data.sort { -it.id }
-        int index = data.findIndexOf { cmd.id.id == it.id }
-        WorkflowRun previous = (index <= 0) ? null : data[index - 1]
-        WorkflowRun next = (index in [-1, data.size() - 1]) ? null : data[index + 1]
+        WorkflowRun restartedAs = workflowRunService.findAllByRestartedFrom(cmd.id)
+
+        List<WorkflowRun> workflowRuns = workflowRunService.workflowRunList(cmd.workflow, cmd.states, cmd.name)
+
+        int index = workflowRuns.findIndexOf { cmd.id == it.id }
+        WorkflowRun previous = (index <= 0) ? null : workflowRuns[index - 1]
+        WorkflowRun next = (index in [-1, workflowRuns.size() - 1]) ? null : workflowRuns[index + 1]
 
         return [
                 workflowRun: cmd.id,
@@ -78,53 +75,19 @@ class WorkflowRunDetailsController extends AbstractWorkflowRunController {
     def data(DataCommand cmd) {
         assert cmd.validate()
 
-        List<WorkflowStep> workflowSteps = cmd.workflowRun.workflowSteps.reverse()
+        List<Map<String, Object>> data = workflowRunService.workflowRunDetails(cmd.workflowRun)
 
-        List<LinkedHashMap<String, Object>> result = workflowSteps.collect { step ->
-            boolean isPreviousOfFailedStep = !workflowSteps.findAll {
-                workflowStepService.getPreviousRunningWorkflowStep(it)?.id == step.id && it.state == WorkflowStep.State.FAILED
-            }.empty
-
-            return [
-                    state      : step.state,
-                    id         : step.id,
-                    name       : step.beanName,
-                    dateCreated: TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(step.dateCreated),
-                    lastUpdated: TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(step.lastUpdated),
-                    duration   : getFormattedDuration(convertDateToLocalDateTime(step.dateCreated), convertDateToLocalDateTime(step.lastUpdated)),
-
-                    error                 : step.workflowError,
-                    clusterJobs           : (step.clusterJobs as List<ClusterJob>).sort { it.dateCreated }.collect { ClusterJob clusterJob ->
-                        [
-                                state   : "${clusterJob.checkStatus}${clusterJob.checkStatus == FINISHED ? "/${clusterJob.exitStatus}" : ""}",
-                                id      : clusterJob.id,
-                                name    : clusterJob.clusterJobName,
-                                jobId   : clusterJob.clusterJobId,
-                                hasLog  : clusterJobService.doesClusterJobLogExist(clusterJob),
-                                node    : clusterJob.node ?: "-",
-                                wallTime: clusterJob.elapsedWalltimeAsHhMmSs,
-                                exitCode: clusterJob.exitCode ?: "-",
-                        ]
-                    },
-                    wes                   : step.wesIdentifier,
-                    hasLogs               : !step.logs.empty,
-                    obsolete              : step.obsolete,
-                    previousStepId        : workflowStepService.getPreviousRunningWorkflowStep(step)?.id,
-                    isPreviousOfFailedStep: isPreviousOfFailedStep,
-            ]
-        }
-        render cmd.getDataToRender(result) as JSON
+        render cmd.getDataToRender(data) as JSON
     }
 
     def saveComment(CommentCommand cmd) {
-        WorkflowRun workflowRun = WorkflowRun.get(cmd.id)
+        WorkflowRun workflowRun = workflowRunService.getById(cmd.id)
         commentService.saveComment(workflowRun, cmd.comment)
         Map dataToRender = [date: TimeFormats.WEEKDAY_DATE_TIME.getFormattedDate(workflowRun.comment.modificationDate), author: workflowRun.comment.author]
         render dataToRender as JSON
     }
 
-    def showError(RunShowDetailsCommand navParams) {
-        WorkflowStep step = WorkflowStep.get(params.id as long)
+    def showError(RunShowDetailsCommand navParams, WorkflowStep step) {
         if (!step?.workflowError) {
             response.sendError(HttpServletResponse.SC_NOT_FOUND)
             return []
@@ -136,8 +99,7 @@ class WorkflowRunDetailsController extends AbstractWorkflowRunController {
         ]
     }
 
-    def showLogs(RunShowDetailsCommand navParams) {
-        WorkflowStep step = WorkflowStep.get(params.id as long)
+    def showLogs(RunShowDetailsCommand navParams, WorkflowStep step) {
         if (!step) {
             response.sendError(HttpServletResponse.SC_NOT_FOUND)
             return []
@@ -146,12 +108,12 @@ class WorkflowRunDetailsController extends AbstractWorkflowRunController {
         return [
                 nav : navParams,
                 step: step,
-                logs: step.logs.collect {
+                logs: workflowLogService.findAllByWorkflowStepInCorrectOrder(step).collect {
                     return [
-                            type: it.class.simpleName,
-                            message: it.displayLog(),
+                            type       : it.class.simpleName,
+                            message    : it.displayLog(),
                             dateCreated: TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(it.dateCreated),
-                            id: it.id,
+                            id         : it.id,
                     ]
                 },
         ]

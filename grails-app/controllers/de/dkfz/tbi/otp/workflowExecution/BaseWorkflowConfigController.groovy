@@ -1,5 +1,3 @@
-package de.dkfz.tbi.otp.workflowExecution
-
 /*
  * Copyright 2011-2021 The OTP authors
  *
@@ -21,12 +19,13 @@ package de.dkfz.tbi.otp.workflowExecution
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+package de.dkfz.tbi.otp.workflowExecution
 
 import de.dkfz.tbi.otp.CheckAndCall
-import de.dkfz.tbi.otp.ngsdata.LibraryPreparationKit
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
-import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.project.ProjectService
 
 /**
  * The BaseWorkflowConfigController contains common methods used
@@ -35,44 +34,58 @@ import de.dkfz.tbi.otp.project.Project
 @SuppressWarnings('ControllerMethodNotInAllowedMethods')
 trait BaseWorkflowConfigController extends CheckAndCall {
 
-    Set<Workflow> getWorkflows() {
-        return Workflow.findAllByDeprecatedDateIsNull().sort {
-            a, b -> String.CASE_INSENSITIVE_ORDER.compare(a.toString(), b.toString())
+    LibraryPreparationKitService libraryPreparationKitService
+
+    ProjectService projectService
+
+    ReferenceGenomeService referenceGenomeService
+
+    SeqTypeService seqTypeService
+
+    WorkflowService workflowService
+
+    WorkflowVersionService workflowVersionService
+
+    List<Workflow> getWorkflows() {
+        return workflowService.findAllByDeprecatedDateIsNull().sort { a, b ->
+            !a.enabled <=> !b.enabled ?: String.CASE_INSENSITIVE_ORDER.compare(a.toString(), b.toString())
         }
     }
 
-    Set<WorkflowVersion> getWorkflowVersions() {
-        return WorkflowVersion.all.sort { a, b ->
+    List<WorkflowVersion> getWorkflowVersions() {
+        return workflowVersionService.list().sort { a, b ->
             String.CASE_INSENSITIVE_ORDER.compare(a.workflow.toString(), b.workflow.toString()) ?:
                     String.CASE_INSENSITIVE_ORDER.compare(a.workflowVersion, b.workflowVersion)
         }
     }
 
-    Set<Project> getProjects() {
-        return Project.all.sort { a, b -> String.CASE_INSENSITIVE_ORDER.compare(a.name, b.name) }
-    }
-
-    Set<SeqType> getSeqTypes() {
-        return SeqType.all.sort {
-            a, b -> String.CASE_INSENSITIVE_ORDER.compare(a.displayNameWithLibraryLayout,
-             b.displayNameWithLibraryLayout)
+    List<Project> getProjects() {
+        return projectService.allProjects.sort { a, b ->
+            String.CASE_INSENSITIVE_ORDER.compare(a.name, b.name)
         }
     }
 
-    Set<ReferenceGenome> getReferenceGenomes() {
-        return ReferenceGenome.all.sort {
-            a, b -> String.CASE_INSENSITIVE_ORDER.compare(a.name, b.name)
+    List<SeqType> getSeqTypes() {
+        return seqTypeService.list().sort {
+            it.displayNameWithLibraryLayout
         }
     }
 
-    Set<LibraryPreparationKit> getLibraryPreparationKits() {
-        return LibraryPreparationKit.all.sort {
-            a, b -> String.CASE_INSENSITIVE_ORDER.compare(a.name, b.name)
+    List<ReferenceGenome> getReferenceGenomes() {
+        return referenceGenomeService.list().sort { a, b ->
+            String.CASE_INSENSITIVE_ORDER.compare(a.name, b.name)
         }
     }
 
-    Set<SelectorType> getSelectorTypes() {
-        return SelectorType.values().sort { a, b -> String.CASE_INSENSITIVE_ORDER.compare(a.name(), b.name()) }
+    List<LibraryPreparationKit> getLibraryPreparationKits() {
+        return libraryPreparationKitService.list().sort { a, b ->
+            String.CASE_INSENSITIVE_ORDER.compare(a.name, b.name)
+        }
     }
 
+    List<SelectorType> getSelectorTypes() {
+        return SelectorType.values().sort { a, b ->
+            String.CASE_INSENSITIVE_ORDER.compare(a.name(), b.name())
+        }
+    }
 }

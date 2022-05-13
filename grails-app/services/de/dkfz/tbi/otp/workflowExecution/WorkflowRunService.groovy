@@ -22,15 +22,25 @@
 package de.dkfz.tbi.otp.workflowExecution
 
 import grails.gorm.transactions.Transactional
+import org.hibernate.NullPrecedence
+import org.hibernate.criterion.Order
+import org.hibernate.sql.JoinType
 
+import de.dkfz.tbi.otp.SqlUtil
+import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.infrastructure.ClusterJob
+import de.dkfz.tbi.otp.infrastructure.ClusterJobService
 import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.otp.utils.StringUtils
-import de.dkfz.tbi.otp.utils.TransactionUtils
+import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.util.TimeFormats
+import de.dkfz.tbi.util.TimeUtils
+
+import java.time.LocalDateTime
+
+import static de.dkfz.tbi.otp.infrastructure.ClusterJob.CheckStatus.FINISHED
 
 @Transactional
 class WorkflowRunService {
-
-    ConfigFragmentService configFragmentService
 
     final static List<WorkflowRun.State> STATES_COUNTING_AS_RUNNING = [
             WorkflowRun.State.RUNNING_OTP,
@@ -72,6 +82,14 @@ class WorkflowRunService {
             wr.dateCreated
         """
 
+    ClusterJobService clusterJobService
+
+    ConfigFragmentService configFragmentService
+
+    ConfigService configService
+
+    WorkflowStepService workflowStepService
+
     int countOfRunningWorkflows() {
         return WorkflowRun.countByStateInList(STATES_COUNTING_AS_RUNNING)
     }
@@ -80,6 +98,10 @@ class WorkflowRunService {
         return WorkflowRun.find(WAITING_WORKFLOW_QUERY, [
                 workflowCount: workflowCount,
         ])
+    }
+
+    WorkflowRun getById(long id) {
+        return WorkflowRun.get(id)
     }
 
     /**
@@ -131,5 +153,150 @@ class WorkflowRunService {
             workflowRun2.save(flush: true)
         }
         workflowRun.refresh()
+    }
+
+    private Closure getCriteria(Workflow workflow, List<WorkflowRun.State> states, String name) {
+        return {
+            if (name) {
+                ilike("displayName", "%${SqlUtil.replaceWildcardCharactersInLikeExpression(name)}%")
+            }
+            if (states) {
+                'in'("state", states)
+            }
+            if (workflow) {
+                eq("workflow", workflow)
+            }
+            ne("state", WorkflowRun.State.LEGACY)
+        }
+    }
+
+    @SuppressWarnings('AbcMetric')
+    WorkflowRunSearchResult workflowOverview(WorkflowRunSearchCriteria workflowRunSearchCriteria) {
+        Closure criteria = getCriteria(workflowRunSearchCriteria.workflow, workflowRunSearchCriteria.states, workflowRunSearchCriteria.name)
+        WorkflowRunSearchResult result = new WorkflowRunSearchResult()
+
+        result.data = WorkflowRun.createCriteria().list {
+            criteria.delegate = delegate
+            criteria()
+            workflowRunSearchCriteria.orderList.each { DataTablesCommand.Order dtOrder ->
+                WorkflowRunListColumn column = WorkflowRunListColumn.fromDataTable(dtOrder.column)
+                if (column == WorkflowRunListColumn.COMMENT) {
+                    createAlias("comment", "comment", JoinType.LEFT_OUTER_JOIN)
+                    if (dtOrder.direction == DataTablesCommand.Order.Dir.asc) {
+                        addOrder(Order.asc("comment.modificationDate").nulls(NullPrecedence.LAST))
+                    } else {
+                        addOrder(Order.desc("comment.modificationDate").nulls(NullPrecedence.LAST))
+                    }
+                } else {
+                    order(column.orderColumn, dtOrder.direction.name())
+                }
+            }
+            firstResult(workflowRunSearchCriteria.start)
+            if (workflowRunSearchCriteria.pagingEnabled) {
+                maxResults(workflowRunSearchCriteria.length)
+            }
+        }.collect { WorkflowRun r ->
+            String duration = r.workflowSteps.empty ? "-" :
+                    r.state in [WorkflowRun.State.PENDING,
+                                WorkflowRun.State.RUNNING_WES,
+                                WorkflowRun.State.RUNNING_OTP,] ?
+                            TimeUtils.getFormattedDuration(convertDateToLocalDateTime(r.workflowSteps.first().dateCreated),
+                                    convertDateToLocalDateTime(new Date())) :
+                            TimeUtils.getFormattedDuration(convertDateToLocalDateTime(r.workflowSteps.first().dateCreated),
+                                    convertDateToLocalDateTime(r.workflowSteps.last().lastUpdated))
+
+            List<WorkflowStep> steps = r.workflowSteps.findAll { !it.obsolete }
+            WorkflowStep lastStep = steps ? steps.last() : null
+            return [
+                    state      : r.state,
+                    stateDesc  : r.state.description,
+                    comment    : r.comment?.displayString()?.replaceAll("\n", ", ") ?: "",
+                    workflow   : r.workflow.toString(),
+                    displayName: r.displayName,
+                    shortName  : r.shortDisplayName,
+                    dateCreated: TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(r.dateCreated),
+                    lastUpdated: lastStep?.lastUpdated ? TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(lastStep.lastUpdated) : "",
+                    duration   : duration,
+                    id         : r.id,
+                    step       : lastStep?.beanName,
+                    stepId     : lastStep?.id,
+                    steps      : (steps - lastStep).reverse()*.beanName,
+                    stepIds    : (steps - lastStep).reverse()*.id,
+            ]
+        }
+        result.workflowsFiltered = WorkflowRun.createCriteria().count {
+            criteria.delegate = delegate
+            criteria()
+        }
+        result.running = WorkflowRun.createCriteria().count {
+            criteria.delegate = delegate
+            criteria()
+            "in"("state", [WorkflowRun.State.RUNNING_OTP, WorkflowRun.State.RUNNING_WES])
+        }
+        result.failed = WorkflowRun.createCriteria().count {
+            criteria.delegate = delegate
+            criteria()
+            eq("state", WorkflowRun.State.FAILED)
+        }
+        result.workflowsTotal = WorkflowRun.countByStateNotEqual(WorkflowRun.State.LEGACY)
+
+        return result
+    }
+
+    private LocalDateTime convertDateToLocalDateTime(Date date) {
+        return date.toInstant().atZone(configService.timeZoneId).toLocalDateTime()
+    }
+
+    WorkflowRun findAllByRestartedFrom(WorkflowRun workflowRun) {
+        return CollectionUtils.atMostOneElement(WorkflowRun.findAllByRestartedFrom(workflowRun))
+    }
+
+    List<WorkflowRun> workflowRunList(Workflow workflow, List<WorkflowRun.State> states, String name) {
+        Closure criteria = getCriteria(workflow, states, name,)
+        List<WorkflowRun> data = WorkflowRun.createCriteria().list {
+            criteria.delegate = delegate
+            criteria()
+        } as List<WorkflowRun>
+        data.sort { -it.id }
+        return data
+    }
+
+    List<Map<String, Object>> workflowRunDetails(WorkflowRun workflowRun) {
+        List<WorkflowStep> workflowSteps = workflowRun.workflowSteps.reverse()
+
+        return workflowSteps.collect { step ->
+            boolean isPreviousOfFailedStep = !workflowSteps.findAll {
+                workflowStepService.getPreviousRunningWorkflowStep(it)?.id == step.id && it.state == WorkflowStep.State.FAILED
+            }.empty
+
+            return [
+                    state                 : step.state,
+                    id                    : step.id,
+                    name                  : step.beanName,
+                    dateCreated           : TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(step.dateCreated),
+                    lastUpdated           : TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(step.lastUpdated),
+                    duration              : TimeUtils.getFormattedDuration(convertDateToLocalDateTime(step.dateCreated),
+                            convertDateToLocalDateTime(step.lastUpdated)),
+
+                    error                 : step.workflowError,
+                    clusterJobs           : (step.clusterJobs as List<ClusterJob>).sort { it.dateCreated }.collect { ClusterJob clusterJob ->
+                        [
+                                state   : "${clusterJob.checkStatus}${clusterJob.checkStatus == FINISHED ? "/${clusterJob.exitStatus}" : ""}",
+                                id      : clusterJob.id,
+                                name    : clusterJob.clusterJobName,
+                                jobId   : clusterJob.clusterJobId,
+                                hasLog  : clusterJobService.doesClusterJobLogExist(clusterJob),
+                                node    : clusterJob.node ?: "-",
+                                wallTime: clusterJob.elapsedWalltimeAsHhMmSs,
+                                exitCode: clusterJob.exitCode ?: "-",
+                        ]
+                    },
+                    wes                   : step.wesIdentifier,
+                    hasLogs               : !step.logs.empty,
+                    obsolete              : step.obsolete,
+                    previousStepId        : workflowStepService.getPreviousRunningWorkflowStep(step)?.id,
+                    isPreviousOfFailedStep: isPreviousOfFailedStep,
+            ]
+        }
     }
 }

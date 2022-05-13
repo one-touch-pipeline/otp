@@ -23,16 +23,15 @@ package de.dkfz.tbi.otp.workflowExecution
 
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
-import groovy.transform.TupleConstructor
-import org.hibernate.NullPrecedence
-import org.hibernate.criterion.Order
-import org.hibernate.sql.JoinType
 
 import de.dkfz.tbi.otp.utils.DataTablesCommand
-import de.dkfz.tbi.util.TimeFormats
 
 @Secured("hasRole('ROLE_OPERATOR')")
 class WorkflowRunListController extends AbstractWorkflowRunController {
+
+    WorkflowService workflowService
+
+    WorkflowRunService workflowRunService
 
     static allowedMethods = [
             index: "GET",
@@ -40,7 +39,7 @@ class WorkflowRunListController extends AbstractWorkflowRunController {
     ]
 
     Map index(RunShowCommand cmd) {
-        List<Workflow> workflows = Workflow.list().sort { a, b ->
+        List<Workflow> workflows = workflowService.list().sort { a, b ->
             !a.enabled <=> !b.enabled ?: String.CASE_INSENSITIVE_ORDER.compare(a.toString(), b.toString())
         }
 
@@ -48,105 +47,27 @@ class WorkflowRunListController extends AbstractWorkflowRunController {
                 cmd      : cmd,
                 workflows: workflows,
                 states   : WorkflowRunOverviewController.STATES,
-                columns  : Column.values(),
+                columns  : WorkflowRunListColumn.values(),
         ]
     }
 
-    @SuppressWarnings("AbcMetric")
     def data(RunDataShowCommand cmd) {
         cmd.processParams(params)
 
-        Closure criteria = getCriteria(cmd.workflow, cmd.states, cmd.name)
+        WorkflowRunSearchCriteria workflowRunSearchCriteria = new WorkflowRunSearchCriteria(
+                cmd.workflow,
+                cmd.states,
+                cmd.name,
+                cmd.orderList,
+                cmd.start,
+                cmd.length
+        )
 
-        List data = WorkflowRun.createCriteria().list {
-            criteria.delegate = delegate
-            criteria()
-            cmd.orderList.each { DataTablesCommand.Order dtOrder ->
-                if (Column.fromDataTable(dtOrder.column) == Column.COMMENT) {
-                    createAlias("comment", "comment", JoinType.LEFT_OUTER_JOIN)
-                    if (dtOrder.direction == DataTablesCommand.Order.Dir.asc) {
-                        addOrder(Order.asc("comment.modificationDate").nulls(NullPrecedence.LAST))
-                    } else {
-                        addOrder(Order.desc("comment.modificationDate").nulls(NullPrecedence.LAST))
-                    }
-                } else {
-                    order(Column.fromDataTable(dtOrder.column).orderColumn, dtOrder.direction.name())
-                }
-            }
-            firstResult(cmd.start)
-            if (cmd.pagingEnabled) {
-                maxResults(cmd.length)
-            }
-        }.collect { WorkflowRun r ->
-            String duration = r.workflowSteps.empty ? "-" :
-                    r.state in [WorkflowRun.State.PENDING,
-                                WorkflowRun.State.RUNNING_WES,
-                                WorkflowRun.State.RUNNING_OTP,] ?
-                            getFormattedDuration(convertDateToLocalDateTime(r.workflowSteps.first().dateCreated), convertDateToLocalDateTime(new Date())) :
-                            getFormattedDuration(convertDateToLocalDateTime(r.workflowSteps.first().dateCreated),
-                                    convertDateToLocalDateTime(r.workflowSteps.last().lastUpdated))
+        WorkflowRunSearchResult result = workflowRunService.workflowOverview(workflowRunSearchCriteria)
 
-            List<WorkflowStep> steps = r.workflowSteps.findAll { !it.obsolete }
-            WorkflowStep lastStep = steps ? steps.last() : null
-            return [
-                    state      : r.state,
-                    stateDesc  : r.state.description,
-                    comment    : r.comment?.displayString()?.replaceAll("\n", ", ") ?: "",
-                    workflow   : r.workflow.toString(),
-                    displayName: r.displayName,
-                    shortName  : r.shortDisplayName,
-                    dateCreated: TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(r.dateCreated),
-                    lastUpdated: lastStep?.lastUpdated ? TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(lastStep.lastUpdated) : "",
-                    duration   : duration,
-                    id         : r.id,
-                    step       : lastStep?.beanName,
-                    stepId     : lastStep?.id,
-                    steps      : (steps - lastStep).reverse()*.beanName,
-                    stepIds    : (steps - lastStep).reverse()*.id,
-            ]
-        }
-        int workflowsFiltered = WorkflowRun.createCriteria().count {
-            criteria.delegate = delegate
-            criteria()
-        }
-        int running = WorkflowRun.createCriteria().count {
-            criteria.delegate = delegate
-            criteria()
-            "in"("state", [WorkflowRun.State.RUNNING_OTP, WorkflowRun.State.RUNNING_WES])
-        }
-        int failed = WorkflowRun.createCriteria().count {
-            criteria.delegate = delegate
-            criteria()
-            eq("state", WorkflowRun.State.FAILED)
-        }
-        int workflowsTotal = WorkflowRun.countByStateNotEqual(WorkflowRun.State.LEGACY)
-
-        render cmd.getDataToRender(data, workflowsTotal, workflowsFiltered, [count: [workflowsFiltered, running, failed]]) as JSON
-    }
-
-    @TupleConstructor
-    enum Column {
-        CHECKBOX("", ""),
-        STATUS("workflowRun.list.state", "state"),
-        COMMENT("workflowRun.list.comment", "modificationDate"),
-        WORKFLOW("workflowRun.list.workflow", ""),
-        NAME("workflowRun.list.name", "displayName"),
-        STEP("workflowRun.list.step", ""),
-        CREATED("workflowRun.list.created", "dateCreated"),
-        UPDATED("workflowRun.list.updated", "lastUpdated"),
-        DURATION("workflowRun.list.duration", ""),
-        ID("workflowRun.list.id", "id"),
-        BUTTONS("", ""),
-
-        final String message
-        final String orderColumn
-
-        static Column fromDataTable(int column) {
-            if (column >= values().size() || column < 0) {
-                return UPDATED
-            }
-            return values()[column]
-        }
+        render cmd.getDataToRender(result.data, result.workflowsTotal, result.workflowsFiltered, [
+                count: [result.workflowsFiltered, result.running, result.failed]
+        ]) as JSON
     }
 }
 

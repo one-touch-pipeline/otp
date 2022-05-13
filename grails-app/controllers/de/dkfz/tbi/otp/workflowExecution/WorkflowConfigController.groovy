@@ -25,13 +25,14 @@ import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 import grails.validation.Validateable
 import groovy.transform.TupleConstructor
+import groovy.util.logging.Slf4j
 import org.hibernate.ObjectNotFoundException
 import org.springframework.http.HttpStatus
 
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.otp.utils.CollectionUtils
 
+@Slf4j
 @Secured("hasRole('ROLE_ADMIN')")
 class WorkflowConfigController implements BaseWorkflowConfigController {
 
@@ -47,66 +48,23 @@ class WorkflowConfigController implements BaseWorkflowConfigController {
 
     ConfigSelectorService configSelectorService
 
+    ExternalWorkflowConfigSelectorService externalWorkflowConfigSelectorService
+
     JSON data() {
-        Map searchQuery = [:]
-        params.findAll { it.key.startsWith('query') }.each { String key, String value ->
-            String mapKey = key.replace('query[', '').replace(']', '')
-            searchQuery[mapKey] = value ? value.split(',') : null
-        }
-        log.debug("searchQuery: ${searchQuery}")
+        ExternalWorkflowConfigSelectorSearchParameter searchParameter = new ExternalWorkflowConfigSelectorSearchParameter([
+                workflowIds             : queryParameterToLongList("workflows", params),
+                workflowVersionIds      : queryParameterToLongList("workflowVersions", params),
+                projectIds              : queryParameterToLongList("projects", params),
+                seqTypeIds              : queryParameterToLongList("seqTypes", params),
+                referenceGenomeIds      : queryParameterToLongList("referenceGenomes", params),
+                libraryPreparationKitIds: queryParameterToLongList("libraryPreparationKits", params),
+                type                    : queryParameterToStringList("type", params),
+        ])
 
-        List<ExternalWorkflowConfigSelector> relatedSelectors, exactlyMatchingSelectors
-        if (searchQuery) {
-            Set<Workflow> selectedWorkflows = searchQuery['workflows'].collect {
-                CollectionUtils.exactlyOneElement(Workflow.findAllById(it))
-            } as Set
-            Set<WorkflowVersion> selectedWorkflowVersions = searchQuery['workflowVersions'].collect {
-                CollectionUtils.exactlyOneElement(WorkflowVersion.findAllById(it))
-            } as Set
-            Set<Project> selectedProjects = searchQuery['projects'].collect {
-                CollectionUtils.exactlyOneElement(Project.findAllById(it))
-            } as Set
-            Set<SeqType> selectedSeqTypes = searchQuery['seqTypes'].collect {
-                CollectionUtils.exactlyOneElement(SeqType.findAllById(it))
-            } as Set
-            Set<ReferenceGenome> selectedReferenceGenomes = searchQuery['referenceGenomes'].collect {
-                CollectionUtils.exactlyOneElement(ReferenceGenome.findAllById(it))
-            } as Set
-            Set<LibraryPreparationKit> selectedLibraryPreparationKits = searchQuery['libraryPreparationKits'].collect {
-                CollectionUtils.exactlyOneElement(LibraryPreparationKit.findAllById(it))
-            } as Set
+        ExternalWorkflowConfigSelectorLists selectors = externalWorkflowConfigSelectorService.searchExternalWorkflowConfigSelectors(searchParameter)
 
-            MultiSelectSelectorExtendedCriteria criteria = new MultiSelectSelectorExtendedCriteria(
-                    selectedWorkflows,
-                    selectedWorkflowVersions,
-                    selectedProjects,
-                    selectedSeqTypes,
-                    selectedReferenceGenomes,
-                    selectedLibraryPreparationKits
-            )
-
-            exactlyMatchingSelectors = configSelectorService.findExactSelectors(criteria)
-            log.debug("Exact matches: ${exactlyMatchingSelectors.size()}")
-
-            relatedSelectors = configSelectorService.findAllRelatedSelectors(criteria).sort()
-            if (searchQuery['type']) {
-                relatedSelectors = relatedSelectors.findAll { ExternalWorkflowConfigSelector sel ->
-                    searchQuery['type'].any {
-                        it == sel.selectorType.toString()
-                    }
-                }
-            }
-
-            log.debug("Related matches: ${relatedSelectors.size()}")
-        } else {
-            relatedSelectors = ExternalWorkflowConfigSelector.findAllBySelectorType(
-                    SelectorType.DEFAULT_VALUES
-            ).sort()
-            log.debug("index: ${relatedSelectors.size()} selectors found")
-        }
-
-        List<Map<String, Object>> selectorData = relatedSelectors.collect { ExternalWorkflowConfigSelector selector ->
-            transformToMap(selector, exactlyMatchingSelectors)
+        List<Map<String, Object>> selectorData = selectors.relatedSelectors.sort().collect { ExternalWorkflowConfigSelector selector ->
+            transformToMap(selector, selectors.exactMatchSelectors)
         }
 
         render([data: selectorData] as JSON)
@@ -117,7 +75,8 @@ class WorkflowConfigController implements BaseWorkflowConfigController {
             response.sendError(HttpStatus.BAD_REQUEST.value(), g.message(code: "workflowConfig.backend.failed") as String)
         }
         try {
-            ExternalWorkflowConfigSelector selector = CollectionUtils.exactlyOneElement(ExternalWorkflowConfigSelector.findAllById(id))
+            ExternalWorkflowConfigSelector selector = externalWorkflowConfigSelectorService.getById(id)
+            assert selector
             render selector?.fragments as JSON
         } catch (ObjectNotFoundException ex) {
             response.sendError(HttpStatus.NOT_FOUND.value(), "${g.message(code: "workflowConfig.backend.failed")}: ${ex.message}")
@@ -131,7 +90,8 @@ class WorkflowConfigController implements BaseWorkflowConfigController {
             response.sendError(HttpStatus.BAD_REQUEST.value(), g.message(code: "workflowConfig.backend.failed") as String)
         }
         try {
-            ExternalWorkflowConfigSelector selector = CollectionUtils.exactlyOneElement(ExternalWorkflowConfigSelector.findAllById(id))
+            ExternalWorkflowConfigSelector selector = externalWorkflowConfigSelectorService.getById(id)
+            assert selector
             render transformToMap(selector) as JSON
         } catch (ObjectNotFoundException ex) {
             response.sendError(HttpStatus.NOT_FOUND.value(), "${g.message(code: "workflowConfig.backend.failed")}: ${ex.message}")
@@ -144,16 +104,16 @@ class WorkflowConfigController implements BaseWorkflowConfigController {
         List<ExternalWorkflowConfigSelector> allSelectors = configSelectorService.all
 
         return [
-                allSelectors            : allSelectors,
-                selectorTypes           : SelectorType.values(),
-                columns                 : Column.values(),
+                allSelectors          : allSelectors,
+                selectorTypes         : SelectorType.values(),
+                columns               : Column.values(),
 
-                workflows               : workflows,
-                workflowVersions        : workflowVersions,
-                projects                : projects,
-                seqTypes                : seqTypes,
-                referenceGenomes        : referenceGenomes,
-                libraryPreparationKits  : libraryPreparationKits,
+                workflows             : workflows,
+                workflowVersions      : workflowVersions,
+                projects              : projects,
+                seqTypes              : seqTypes,
+                referenceGenomes      : referenceGenomes,
+                libraryPreparationKits: libraryPreparationKits,
         ]
     }
 
@@ -178,8 +138,7 @@ class WorkflowConfigController implements BaseWorkflowConfigController {
     JSON deprecate(ExternalWorkflowConfigFragment fragment) {
         log.debug("selector deprecating: ${fragment.name}")
         try {
-            ExternalWorkflowConfigSelector selector = CollectionUtils.exactlyOneElement(
-                    ExternalWorkflowConfigSelector.findAllByExternalWorkflowConfigFragment(fragment))
+            ExternalWorkflowConfigSelector selector = externalWorkflowConfigSelectorService.findExactlyOneByExternalWorkflowConfigFragment(fragment)
 
             Map<String, Object> deprecatedSelector = transformToMap(selector)
             configSelectorService.deprecate(fragment)
@@ -194,57 +153,67 @@ class WorkflowConfigController implements BaseWorkflowConfigController {
         try {
             return selector.externalWorkflowConfigFragment.id
         } catch (ObjectNotFoundException ex) {
-            return  -1
+            return -1
         }
     }
 
     private Map<String, Object> transformToMap(ExternalWorkflowConfigSelector selector, List<ExternalWorkflowConfigSelector> exactlyMatchingSelectors = null) {
         return [
-                id: selector.id,
-                fid: fetchFragmentId(selector),
-                exactMatch: exactlyMatchingSelectors ? exactlyMatchingSelectors.any {
+                id                    : selector.id,
+                fid                   : fetchFragmentId(selector),
+                exactMatch            : exactlyMatchingSelectors ? exactlyMatchingSelectors.any {
                     it.id == selector.id
                 } : false,
-                name: selector.name,
-                selectorType: selector.selectorType,
-                customPriority: selector.customPriority,
-                workflows: selector.workflows.collect {
+                name                  : selector.name,
+                selectorType          : selector.selectorType,
+                customPriority        : selector.customPriority,
+                workflows             : selector.workflows.collect {
                     [
-                            id: it.id,
+                            id  : it.id,
                             name: it.displayName
                     ]
                 },
-                workflowVersions: selector.workflowVersions.collect {
+                workflowVersions      : selector.workflowVersions.collect {
                     [
-                            id: it.id,
+                            id  : it.id,
                             name: it.displayName
                     ]
                 },
-                projects: selector.projects.collect {
+                projects              : selector.projects.collect {
                     [
-                            id: it.id,
+                            id  : it.id,
                             name: it.displayName
                     ]
                 },
-                seqTypes: selector.seqTypes.collect {
+                seqTypes              : selector.seqTypes.collect {
                     [
-                            id: it.id,
+                            id  : it.id,
                             name: it.displayNameWithLibraryLayout
                     ]
                 },
-                referenceGenomes: selector.referenceGenomes.collect {
+                referenceGenomes      : selector.referenceGenomes.collect {
                     [
-                            id: it.id,
+                            id  : it.id,
                             name: it.name
                     ]
                 },
                 libraryPreparationKits: selector.libraryPreparationKits.collect {
                     [
-                            id: it.id,
+                            id  : it.id,
                             name: it.name
                     ]
                 },
         ]
+    }
+
+    private List<String> queryParameterToStringList(String parameterName, Map params) {
+        String key = "query[${parameterName}]"
+        String value = params[key]
+        return value ? value.split(',')*.trim() : []
+    }
+
+    private List<Long> queryParameterToLongList(String parameterName, Map params) {
+        return queryParameterToStringList(parameterName, params)*.toLong()
     }
 
     @TupleConstructor

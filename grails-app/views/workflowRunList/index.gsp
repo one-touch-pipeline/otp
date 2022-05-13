@@ -108,13 +108,13 @@
         <thead>
         <tr>
             <g:each in="${columns}" var="column" status="i">
-                <g:if test="${column == de.dkfz.tbi.otp.workflowExecution.WorkflowRunListController.Column.CHECKBOX}">
+                <g:if test="${column == de.dkfz.tbi.otp.workflowExecution.WorkflowRunListColumn.CHECKBOX}">
                     <th><input type='checkbox' name='selectAll' id="selectAll"></th>
                 </g:if>
-                <g:elseif test="${column == de.dkfz.tbi.otp.workflowExecution.WorkflowRunListController.Column.STATUS}">
+                <g:elseif test="${column == de.dkfz.tbi.otp.workflowExecution.WorkflowRunListColumn.STATUS}">
                     <th><i class="bi-circle-fill" title="${g.message(code: column.message)}"></i></th>
                 </g:elseif>
-                <g:elseif test="${column == de.dkfz.tbi.otp.workflowExecution.WorkflowRunListController.Column.COMMENT}">
+                <g:elseif test="${column == de.dkfz.tbi.otp.workflowExecution.WorkflowRunListColumn.COMMENT}">
                     <th><i class="bi-info-circle" title="${g.message(code: column.message)}"></i></th>
                 </g:elseif>
                 <g:else>

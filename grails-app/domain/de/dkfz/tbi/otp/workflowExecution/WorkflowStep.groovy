@@ -127,6 +127,10 @@ class WorkflowStep implements Commentable, Entity {
         return workflowRun.priority
     }
 
+    /**
+     * @Deprecated Use {@link WorkflowLogService#findAllByWorkflowStepInCorrectOrder(WorkflowStep)} instead
+     */
+    @Deprecated
     List<WorkflowLog> getLogs() {
         return WorkflowLog.findAllByWorkflowStep(this).sort {
             it.dateCreated

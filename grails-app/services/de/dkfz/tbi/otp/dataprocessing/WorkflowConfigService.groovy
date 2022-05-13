@@ -25,6 +25,10 @@ import grails.gorm.transactions.Transactional
 
 import de.dkfz.tbi.otp.project.Project
 
+/**
+ * @Deprecated Old workflow system
+ */
+@Deprecated
 @Transactional
 class WorkflowConfigService {
 

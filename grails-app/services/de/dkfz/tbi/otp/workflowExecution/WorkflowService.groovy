@@ -23,6 +23,11 @@ package de.dkfz.tbi.otp.workflowExecution
 
 import grails.gorm.transactions.Transactional
 
+import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
+import de.dkfz.tbi.otp.ngsdata.SeqType
+
+import java.time.LocalDate
+
 @Transactional
 class WorkflowService {
 
@@ -111,5 +116,41 @@ class WorkflowService {
         assert workflow
         workflow.enabled = false
         workflow.save(flush: true)
+    }
+
+    List<Workflow> list() {
+        return Workflow.list()
+    }
+
+    List<Workflow> findAllByDeprecatedDateIsNull() {
+        return Workflow.findAllByDeprecatedDateIsNull()
+    }
+
+    Workflow updateWorkflow(UpdateWorkflowDto updateWorkflowDto) {
+        Workflow workflow = Workflow.get(updateWorkflowDto.id)
+        workflow.priority = updateWorkflowDto.priority
+        workflow.enabled = updateWorkflowDto.enabled
+        workflow.maxParallelWorkflows = updateWorkflowDto.maxParallelWorkflows
+
+        if (updateWorkflowDto.supportedSeqTypes) {
+            workflow.supportedSeqTypes = SeqType.getAll(updateWorkflowDto.supportedSeqTypes)
+        } else {
+            workflow.supportedSeqTypes = null
+        }
+
+        if (updateWorkflowDto.allowedRefGenomes) {
+            workflow.allowedReferenceGenomes = ReferenceGenome.getAll(updateWorkflowDto.allowedRefGenomes)
+        } else {
+            workflow.allowedReferenceGenomes = null
+        }
+
+        if (updateWorkflowDto.deprecated && !workflow.deprecatedDate) {
+            workflow.deprecatedDate = LocalDate.now()
+        } else if (!updateWorkflowDto.deprecated) {
+            workflow.deprecatedDate = null
+        }
+
+        workflow.save(flush: true)
+        return workflow
     }
 }

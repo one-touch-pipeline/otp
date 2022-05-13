@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2022 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,29 +21,29 @@
  */
 package de.dkfz.tbi.otp.workflowExecution
 
-import grails.plugin.springsecurity.annotation.Secured
+import groovy.transform.TupleConstructor
 
-@Secured("hasRole('ROLE_OPERATOR')")
-class WorkflowArtefactController {
+@TupleConstructor
+enum WorkflowRunListColumn {
+    CHECKBOX("", ""),
+    STATUS("workflowRun.list.state", "state"),
+    COMMENT("workflowRun.list.comment", "modificationDate"),
+    WORKFLOW("workflowRun.list.workflow", ""),
+    NAME("workflowRun.list.name", "displayName"),
+    STEP("workflowRun.list.step", ""),
+    CREATED("workflowRun.list.created", "dateCreated"),
+    UPDATED("workflowRun.list.updated", "lastUpdated"),
+    DURATION("workflowRun.list.duration", ""),
+    ID("workflowRun.list.id", "id"),
+    BUTTONS("", ""),
 
-    static allowedMethods = [
-            index: "GET"
-    ]
+    final String message
+    final String orderColumn
 
-    WorkflowRunInputArtefactService workflowRunInputArtefactService
-
-    def index(WorkflowArtefact workflowArtefact) {
-        if (!workflowArtefact) {
-            return response.sendError(404)
+    static WorkflowRunListColumn fromDataTable(int column) {
+        if (column >= values().size() || column < 0) {
+            return UPDATED
         }
-
-        List<WorkflowRunInputArtefact> workflowRunInputArtefact = workflowRunInputArtefactService.findAllByWorkflowArtefact(workflowArtefact).sort { a, b ->
-            String.CASE_INSENSITIVE_ORDER.compare(a.role, b.role)
-        }
-
-        return [
-                artefact: workflowArtefact,
-                artefactUsedBy: workflowRunInputArtefact,
-        ]
+        return values()[column]
     }
 }

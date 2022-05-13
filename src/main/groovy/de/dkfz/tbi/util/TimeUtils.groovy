@@ -49,6 +49,13 @@ class TimeUtils {
                         TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(absMillis)))
     }
 
+    static String getFormattedDuration(LocalDateTime start, LocalDateTime end) {
+        if (!start || !end) {
+            return ""
+        }
+        return getFormattedDuration(Duration.between(start, end))
+    }
+
     /**
      * Convert a Duration into a String with the format "hh:mm:ss".
      *

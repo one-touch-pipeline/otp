@@ -63,6 +63,10 @@ class SeqTypeService extends MetadataFieldsService<SeqType> {
         }.unique().sort { it.name.toLowerCase() + it.id }
     }
 
+    List<SeqType> list() {
+        return SeqType.list()
+    }
+
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'OTP_READ_ACCESS')")
     List<SeqType> alignableSeqTypesByProject(Project project) {
         return SeqTrack.createCriteria().listDistinct {

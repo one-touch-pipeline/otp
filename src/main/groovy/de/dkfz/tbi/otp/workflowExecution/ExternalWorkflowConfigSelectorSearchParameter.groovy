@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2022 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,29 +21,21 @@
  */
 package de.dkfz.tbi.otp.workflowExecution
 
-import grails.plugin.springsecurity.annotation.Secured
+import groovy.transform.CompileStatic
+import groovy.transform.ToString
 
-@Secured("hasRole('ROLE_OPERATOR')")
-class WorkflowArtefactController {
+@ToString(includeNames = true, includePackage = false)
+@CompileStatic
+class ExternalWorkflowConfigSelectorSearchParameter {
+    List<Long> workflowIds = []
+    List<Long> workflowVersionIds = []
+    List<Long> projectIds = []
+    List<Long> seqTypeIds = []
+    List<Long> referenceGenomeIds = []
+    List<Long> libraryPreparationKitIds = []
+    List<String> type = []
 
-    static allowedMethods = [
-            index: "GET"
-    ]
-
-    WorkflowRunInputArtefactService workflowRunInputArtefactService
-
-    def index(WorkflowArtefact workflowArtefact) {
-        if (!workflowArtefact) {
-            return response.sendError(404)
-        }
-
-        List<WorkflowRunInputArtefact> workflowRunInputArtefact = workflowRunInputArtefactService.findAllByWorkflowArtefact(workflowArtefact).sort { a, b ->
-            String.CASE_INSENSITIVE_ORDER.compare(a.role, b.role)
-        }
-
-        return [
-                artefact: workflowArtefact,
-                artefactUsedBy: workflowRunInputArtefact,
-        ]
+    boolean hasIds() {
+        return workflowIds || workflowVersionIds || projectIds || seqTypeIds || referenceGenomeIds || libraryPreparationKitIds
     }
 }
