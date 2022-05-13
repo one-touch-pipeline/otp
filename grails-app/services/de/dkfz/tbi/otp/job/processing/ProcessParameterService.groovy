@@ -28,6 +28,10 @@ import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 @Transactional
 class ProcessParameterService {
 
+    List<ProcessParameter> findAllByProcess(Process process) {
+        return ProcessParameter.findAllByProcess(process)
+    }
+
     List<JobExecutionPlan> getAllJobExecutionPlansBySeqTrackAndClass(String seqTrackId, String className) {
         List<ProcessParameter> processParameters = ProcessParameter.findAllByValueAndClassName(seqTrackId, className)
         List<JobExecutionPlan> jobExecutionPlans = []

@@ -30,7 +30,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 
 import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.FlashMessage
-import de.dkfz.tbi.otp.infrastructure.ClusterJob
+import de.dkfz.tbi.otp.infrastructure.ClusterJobService
 import de.dkfz.tbi.otp.job.jobs.RestartableStartJob
 import de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
@@ -99,6 +99,8 @@ class ProcessesController {
     ProcessService processService
     CommentService commentService
     RestartActionService restartActionService
+    ClusterJobService clusterJobService
+    ProcessParameterService processParameterService
 
     def index() {
         redirect(action: 'list')
@@ -231,7 +233,7 @@ class ProcessesController {
             def actions = []
             ExecutionState latestState = latest.state
             if (latestState == ExecutionState.FAILURE) {
-                if (Process.findAllByRestarted(process)) {
+                if (processService.findAllByRestarted(process)) {
                     latestState = ExecutionState.RESTARTED
                 } else {
                     actions << "restart"
@@ -280,11 +282,11 @@ class ProcessesController {
     @SuppressWarnings("ClassForName")
     private boolean showRestartButton(Process process) {
         return (RestartableStartJob.isAssignableFrom(Class.forName(process.startJobClass)) &&
-                !CollectionUtils.atMostOneElement(Process.findAllByRestarted(process)))
+                !CollectionUtils.atMostOneElement(processService.findAllByRestarted(process)))
     }
 
     private Process getRestartedProcess(Process process) {
-        return CollectionUtils.atMostOneElement(Process.findAllByRestarted(process))
+        return CollectionUtils.atMostOneElement(processService.findAllByRestarted(process))
     }
 
     def updateOperatorIsAwareOfFailure(OperatorIsAwareOfFailureSubmitCommand cmd) {
@@ -312,7 +314,7 @@ class ProcessesController {
                         ExecutionState state = update?.state
 
                         List<String> actions = []
-                        if (state == ExecutionState.FAILURE && !Process.findAllByRestarted(process)) {
+                        if (state == ExecutionState.FAILURE && !processService.findAllByRestarted(process)) {
                             actions << "restart"
                         }
                         data << [
@@ -365,7 +367,7 @@ class ProcessesController {
         return [
                 step: step,
                 hasLog: processService.processingStepLogExists(step),
-                clusterJobs: ClusterJob.findAllByProcessingStep(step).sort { it.clusterJobId },
+                clusterJobs: clusterJobService.findAllByProcessingStep(step).sort { it.clusterJobId },
         ]
     }
 
@@ -452,7 +454,7 @@ class ProcessesController {
     }
 
     private Map<String,String> processParameterData(Process process) {
-        ProcessParameter parameter = CollectionUtils.atMostOneElement(ProcessParameter.findAllByProcess(process))
+        ProcessParameter parameter = CollectionUtils.atMostOneElement(processParameterService.findAllByProcess(process))
         if (parameter) {
             return parameter.className ? [
                 controller: GrailsNameUtils.getShortName(parameter.className),

@@ -26,7 +26,6 @@ import grails.plugin.springsecurity.annotation.Secured
 import grails.validation.Validateable
 
 import de.dkfz.tbi.otp.CheckAndCall
-import de.dkfz.tbi.otp.utils.CollectionUtils
 
 @Secured("hasRole('ROLE_ADMIN')")
 class JobErrorDefinitionController implements CheckAndCall {
@@ -44,7 +43,7 @@ class JobErrorDefinitionController implements CheckAndCall {
     def index() {
         Map jobErrorDefinitions = jobErrorDefinitionService.allJobErrorDefinition
         List<JobDefinition> jobDefinitions = jobErrorDefinitionService.getJobDefinition(jobErrorDefinitions)
-        JobDefinition jobDefinition = CollectionUtils.atMostOneElement(JobDefinition.findAllByName(params.job)) ?: null
+        JobDefinition jobDefinition = jobErrorDefinitionService.findByName(params.job)
         [
                 jobErrorDefinition: jobErrorDefinitions.findAll {
                     ((JobErrorDefinition) it.key).jobDefinitions*.name.contains(jobDefinition?.name)
@@ -77,12 +76,15 @@ class JobErrorDefinitionController implements CheckAndCall {
 
     JSON addNewJob(UpdateAddNewJobCommand cmd) {
         checkErrorAndCallMethod(cmd) {
-            jobErrorDefinitionService.addNewJob(cmd.jobErrorDefinition, cmd.jobDefinition)
+            String jobDefinitionName = cmd.jobDefinitionString.substring(0, cmd.jobDefinitionString.indexOf('-') - 1)
+            String jobExecutionPlanName = cmd.jobDefinitionString.substring(cmd.jobDefinitionString.indexOf('-') + 2)
+            JobDefinition jobDefinition = jobErrorDefinitionService.findByjobDefinitionNameAndjobExecutionPlanName(jobDefinitionName, jobExecutionPlanName)
+            jobErrorDefinitionService.addNewJob(cmd.jobErrorDefinition, jobDefinition)
         }
     }
 
     private List getAllJobDefinitions() {
-        List allJobDefinition = JobDefinition.findAll()
+        List<JobDefinition> allJobDefinition = jobErrorDefinitionService.findAll()
         List jobNames = []
 
         allJobDefinition.each {
@@ -118,13 +120,5 @@ class UpdateErrorExpressionCommand implements Validateable {
 
 class UpdateAddNewJobCommand implements Validateable {
     JobErrorDefinition jobErrorDefinition
-    JobDefinition jobDefinition
-
-    void setJobDefinitionString(String jobDefinitionString) {
-        String jobDefinitionName = jobDefinitionString.substring(0, jobDefinitionString.indexOf('-') - 1)
-        String jobExecutionPlanName = jobDefinitionString.substring(jobDefinitionString.indexOf('-') + 2)
-
-        this.jobDefinition = CollectionUtils.atMostOneElement(JobDefinition.findAllByNameAndPlan(jobDefinitionName,
-                CollectionUtils.atMostOneElement(JobExecutionPlan.findAllByNameAndObsoleted(jobExecutionPlanName, false))))
-    }
+    String jobDefinitionString
 }

@@ -80,6 +80,10 @@ class ClusterJobService {
  AND job.exit_status != 'FAILED'
 """
 
+    List<ClusterJob> findAllByProcessingStep(ProcessingStep processingStep) {
+        return ClusterJob.findAllByProcessingStep(processingStep)
+    }
+
     ClusterJob findById(long id) {
         return ClusterJob.get(id)
     }

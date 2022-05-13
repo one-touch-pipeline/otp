@@ -22,13 +22,25 @@
 package de.dkfz.tbi.otp.job.plan
 
 import grails.gorm.transactions.Transactional
-import grails.plugin.springsecurity.acl.AclUtilService
 import org.springframework.security.access.prepost.PreAuthorize
+
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 @Transactional
 class JobErrorDefinitionService {
 
-    AclUtilService aclUtilService
+    JobDefinition findByName(String name) {
+        return CollectionUtils.atMostOneElement(JobDefinition.findAllByName(name)) ?: null
+    }
+
+    List<JobDefinition> findAll() {
+        return JobDefinition.findAll()
+    }
+
+    JobDefinition findByjobDefinitionNameAndjobExecutionPlanName(String jobDefinitionName, String jobExecutionPlanName) {
+        return CollectionUtils.atMostOneElement(JobDefinition.findAllByNameAndPlan(jobDefinitionName,
+                CollectionUtils.atMostOneElement(JobExecutionPlan.findAllByNameAndObsoleted(jobExecutionPlanName, false))))
+    }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     Map<Object, Object> getAllJobErrorDefinition() {

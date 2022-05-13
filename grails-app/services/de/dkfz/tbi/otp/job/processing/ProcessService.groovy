@@ -51,6 +51,10 @@ class ProcessService {
 
     ConfigService configService
 
+    List<Process> findAllByRestarted(Process process) {
+        return Process.findAllByRestarted(process)
+    }
+
     /**
      * Security aware way to access a Process.
      * @param id The Process's id
