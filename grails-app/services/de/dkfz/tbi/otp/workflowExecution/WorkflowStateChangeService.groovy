@@ -135,6 +135,15 @@ class WorkflowStateChangeService {
     }
 
     /**
+     * Change the state of a workflow step to failed and then to final failed and save it with a default workflow error message.
+     * @param step which should be changed to final failed
+     */
+    void changeRunToFinalFailed(WorkflowStep step) {
+        changeStateToFailedWithManualChangedError(step)
+        changeStateToFinalFailed(step)
+    }
+
+    /**
      * Change the state of a workflow step to failed and save it with a default workflow error message.
      * @param step which should be changed to failed
      */

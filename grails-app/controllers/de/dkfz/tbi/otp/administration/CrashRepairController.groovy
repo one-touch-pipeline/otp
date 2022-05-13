@@ -22,11 +22,8 @@
 package de.dkfz.tbi.otp.administration
 
 import grails.converters.JSON
-import grails.gorm.transactions.Transactional
 import grails.plugin.springsecurity.annotation.Secured
 import grails.validation.Validateable
-import org.hibernate.criterion.CriteriaSpecification
-import org.hibernate.sql.JoinType
 import org.springframework.http.HttpStatus
 
 import de.dkfz.tbi.otp.CheckAndCall
@@ -53,6 +50,7 @@ class CrashRepairController implements CheckAndCall {
     WorkflowService workflowService
     WorkflowSystemService workflowSystemService
     PropertiesValidationService propertiesValidationService
+    CrashRepairService crashRepairService
 
     def index() {
         boolean processingOptionsValid = propertiesValidationService.validateProcessingOptions().isEmpty()
@@ -64,32 +62,12 @@ class CrashRepairController implements CheckAndCall {
     }
 
     /**
-     * GET all running workflow steps.
+     * GET all still running workflow steps after crash.
      * @return JSON list of failed workflow steps
      */
     def runningWorkflowSteps() {
-        List<WorkflowStep> workflowSteps = WorkflowStep.createCriteria().list {
-            eq("state", WorkflowStep.State.RUNNING)
-
-            resultTransformer(CriteriaSpecification.ALIAS_TO_ENTITY_MAP)
-            createAlias("workflowRun", "run", JoinType.INNER_JOIN)
-            createAlias("run.workflow", "wf", JoinType.INNER_JOIN)
-
-            projections {
-                property("id", "id")
-                property("beanName", "beanName")
-                property("lastUpdated", "lastUpdated")
-                property("run.id", "workflowRunId")
-                property("run.displayName", "workflowRunName")
-                property("run.shortDisplayName", "workflowRunShortName")
-                property("run.jobCanBeRestarted", "workflowRunJobCanBeRestarted")
-                property("wf.id", "workflowId")
-                property("wf.name", "workflowName")
-            }
-        } as List<WorkflowStep>
-
+        List<WorkflowStep> workflowSteps = crashRepairService.findStillRunningWorkflowStepsAfterCrash()
         workflowSteps.each { it.lastUpdated = TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(it.lastUpdated) }
-
         render workflowSteps as JSON
     }
 
@@ -115,12 +93,10 @@ class CrashRepairController implements CheckAndCall {
      * @param cmd WorkflowStepCommand
      * @return error/success msg
      */
-    @Transactional
     def restartWorkflowRun(WorkflowStepCommand cmd) {
         checkDefaultErrorsAndCallMethod(cmd) {
             try {
-                workflowStateChangeService.changeStateToFailedWithManualChangedError(cmd.workflowStep)
-                workflowService.createRestartedWorkflow(cmd.workflowStep)
+                crashRepairService.restartWorkflowRun(cmd.workflowStep)
                 render [:] as JSON
             } catch (WorkflowException workflowException) {
                 log.error(workflowException.message)
@@ -150,12 +126,10 @@ class CrashRepairController implements CheckAndCall {
      * @param cmd WorkflowStepCommand
      * @return error/success msg
      */
-    @Transactional
     def markWorkflowRunAsFinalFailed(WorkflowStepCommand cmd) {
         checkDefaultErrorsAndCallMethod(cmd) {
             try {
-                workflowStateChangeService.changeStateToFailedWithManualChangedError(cmd.workflowStep)
-                workflowStateChangeService.changeStateToFinalFailed(cmd.workflowStep)
+                workflowStateChangeService.changeRunToFinalFailed(cmd.workflowStep)
                 render [:] as JSON
             } catch (WorkflowException workflowException) {
                 log.error(workflowException.message)
