@@ -37,20 +37,14 @@ class CellRangerController {
     SeqTypeService seqTypeService
 
     static allowedMethods = [
-            finalRunSelection: "GET",
+            finalRunSelection    : "GET",
             saveFinalRunSelection: "POST",
     ]
 
     def finalRunSelection() {
         Project project = projectSelectionService.selectedProject
 
-        List<CellRangerMergingWorkPackage> mwps = CellRangerMergingWorkPackage.createCriteria().list {
-            sample {
-                individual {
-                    eq("project", project)
-                }
-            }
-        } as List<CellRangerMergingWorkPackage>
+        List<CellRangerMergingWorkPackage> mwps = cellRangerConfigurationService.findCellRangerMergingWorkPackageByProject(project)
 
         Map<GroupedMwp, List<CellRangerMergingWorkPackage>> grouped = mwps.groupBy({
             new GroupedMwp(it.sample, it.seqType, it.config.programVersion, it.referenceGenomeIndex)

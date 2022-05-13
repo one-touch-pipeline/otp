@@ -86,6 +86,16 @@ class CellRangerConfigurationService {
         )
     }
 
+    List<CellRangerMergingWorkPackage> findCellRangerMergingWorkPackageByProject(Project project) {
+        return CellRangerMergingWorkPackage.createCriteria().list {
+            sample {
+                individual {
+                    eq("project", project)
+                }
+            }
+        }
+    }
+
     CellRangerConfig getWorkflowConfig(Project project) {
         CollectionUtils.atMostOneElement(
                 CellRangerConfig.findAllWhere(
