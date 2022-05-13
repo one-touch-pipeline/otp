@@ -111,6 +111,10 @@ class UserProjectRoleService {
         return projectAuthoritiesWithProjects
     }
 
+    List<UserProjectRole> findAllByUser(User user) {
+        return UserProjectRole.findAllByUser(user)
+    }
+
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'MANAGE_USERS')")
     void addUserToProjectAndNotifyGroupManagementAuthority(Project project, Set<ProjectRole> projectRolesSet, String username, Map flags = [:])
             throws AssertionError {

@@ -28,6 +28,7 @@ import grails.validation.Validateable
 import de.dkfz.tbi.otp.CheckAndCall
 import de.dkfz.tbi.otp.FlashMessage
 import de.dkfz.tbi.otp.ngsdata.UserProjectRole
+import de.dkfz.tbi.otp.ngsdata.UserProjectRoleService
 import de.dkfz.tbi.otp.security.Role
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.DataTableCommand
@@ -58,7 +59,7 @@ class UserAdministrationController implements CheckAndCall {
      * Dependency Injection of RemoteUserService
      */
     UserService userService
-
+    UserProjectRoleService userProjectRoleService
     LdapService ldapService
 
     /**
@@ -116,7 +117,7 @@ class UserAdministrationController implements CheckAndCall {
         roleLists['availableGroup'] = userService.allGroups - roleLists['userGroup']
 
         return [
-                userProjectRoles       : UserProjectRole.findAllByUser(user).sort { it.project.name },
+                userProjectRoles       : userProjectRoleService.findAllByUser(user).sort { it.project.name },
                 user                   : user,
                 ldapGroups             : ldapService.getGroupsOfUser(user) ?: [],
                 roleLists              : roleLists,
