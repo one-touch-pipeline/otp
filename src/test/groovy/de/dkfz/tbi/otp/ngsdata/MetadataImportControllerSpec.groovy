@@ -32,8 +32,8 @@ import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
-import de.dkfz.tbi.otp.errors.ForbiddenErrorPlainResponseException
-import de.dkfz.tbi.otp.errors.InternalServerErrorPlainResponseException
+import de.dkfz.tbi.otp.utils.error.ForbiddenErrorPlainResponseException
+import de.dkfz.tbi.otp.utils.error.InternalServerErrorPlainResponseException
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.DirectoryStructureBeanName
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
