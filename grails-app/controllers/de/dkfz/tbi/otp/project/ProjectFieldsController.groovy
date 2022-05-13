@@ -21,16 +21,14 @@
  */
 package de.dkfz.tbi.otp.project
 
-import grails.core.GrailsApplication
 import grails.plugin.springsecurity.annotation.Secured
 import grails.validation.Validateable
 import grails.validation.ValidationException
 import groovy.transform.ToString
-import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.FlashMessage
 import de.dkfz.tbi.otp.config.TypeValidators
-import de.dkfz.tbi.otp.project.additionalField.*
+import de.dkfz.tbi.otp.project.additionalField.AbstractFieldDefinition
 import de.dkfz.tbi.otp.utils.AbstractGeneralDomainPropertyUpdateController
 
 @Secured("hasRole('ROLE_OPERATOR')")
@@ -57,25 +55,13 @@ class ProjectFieldsController extends AbstractGeneralDomainPropertyUpdateControl
 
     ProjectFieldsService projectFieldsService
 
-    @Autowired
-    GrailsApplication grailsApplication
-
     final Class<AbstractFieldDefinition> entityClass = AbstractFieldDefinition
 
     def index() {
         List<AbstractFieldDefinition> fieldDefinitions = projectFieldsService.listAndFetchValueLists()
         List<AbstractFieldDefinition> usedFieldDefinitions = projectFieldsService.usedDefinitions()
-        List<ProjectFieldReferenceAble> referenceAbles = referenceAbleDomains
-        Map<String, List<ProjectFieldReferenceAble>> data = fieldDefinitions.findAll {
-            it.projectFieldType == ProjectFieldType.DOMAIN_REFERENCE
-        }*.domainClassName.unique().collectEntries {
-            Class<? extends ProjectFieldReferenceAble> clazz = DomainReferenceFieldValue.classLoader.loadClass(it)
-            List<ProjectFieldReferenceAble> projectFieldReferenceAbles = clazz.list()
-            projectFieldReferenceAbles.sort {
-                it.stringForProjectFieldDomainReference
-            }
-            [(it): projectFieldReferenceAbles]
-        }
+        List<ProjectFieldReferenceAble> referenceAbles = projectFieldsService.findReferenceAbleDomains()
+        Map<String, List<ProjectFieldReferenceAble>> data = projectFieldsService.fetchProjectFieldReferenceAble()
         Map<AbstractFieldDefinition, Boolean> usedFieldDefinitionMap = fieldDefinitions.collectEntries {
             [(it): usedFieldDefinitions.contains(it)]
         }
@@ -96,14 +82,8 @@ class ProjectFieldsController extends AbstractGeneralDomainPropertyUpdateControl
         return [
                 cmd                 : cmd,
                 validators          : VALIDATORS,
-                referenceAbleDomains: referenceAbleDomains,
+                referenceAbleDomains: projectFieldsService.findReferenceAbleDomains(),
         ]
-    }
-
-    private List<ProjectFieldReferenceAble> getReferenceAbleDomains() {
-        return grailsApplication.domainClasses.findAll {
-            ProjectFieldReferenceAble.isAssignableFrom(it.clazz)
-        }*.clazz*.name
     }
 
     def createText(ProjectFieldsCreateTextCommand cmd) {
@@ -196,4 +176,3 @@ class ProjectFieldsController extends AbstractGeneralDomainPropertyUpdateControl
 class DeleteFieldDefinitionCommand implements Validateable {
     AbstractFieldDefinition fieldDefinition
 }
-

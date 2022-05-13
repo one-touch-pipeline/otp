@@ -21,7 +21,9 @@
  */
 package de.dkfz.tbi.otp.project
 
+import grails.core.GrailsApplication
 import grails.gorm.transactions.Transactional
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.OtpRuntimeException
@@ -29,6 +31,9 @@ import de.dkfz.tbi.otp.project.additionalField.*
 
 @Transactional
 class ProjectFieldsService {
+
+    @Autowired
+    GrailsApplication grailsApplication
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     List<AbstractFieldDefinition> listAndFetchValueLists() {
@@ -97,5 +102,22 @@ class ProjectFieldsService {
         }
         definition.delete(flush: true)
     }
-}
 
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    Map<String, List<ProjectFieldReferenceAble>> fetchProjectFieldReferenceAble() {
+        return DomainReferenceFieldDefinition.list()*.domainClassName.unique().collectEntries {
+            Class<? extends ProjectFieldReferenceAble> clazz = DomainReferenceFieldValue.classLoader.loadClass(it)
+            List<ProjectFieldReferenceAble> projectFieldReferenceAbles = clazz.list()
+            projectFieldReferenceAbles.sort {
+                it.stringForProjectFieldDomainReference
+            }
+            [(it): projectFieldReferenceAbles]
+        }
+    }
+
+    List<ProjectFieldReferenceAble> findReferenceAbleDomains() {
+        return grailsApplication.domainClasses.findAll {
+            ProjectFieldReferenceAble.isAssignableFrom(it.clazz)
+        }*.clazz*.name
+    }
+}
