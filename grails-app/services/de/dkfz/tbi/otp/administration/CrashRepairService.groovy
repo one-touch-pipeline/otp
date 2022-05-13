@@ -19,7 +19,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 package de.dkfz.tbi.otp.administration
 
 import grails.gorm.transactions.Transactional
@@ -61,6 +60,5 @@ class CrashRepairService {
     void restartWorkflowRun(WorkflowStep step) {
         workflowStateChangeService.changeStateToFailedWithManualChangedError(step)
         workflowService.createRestartedWorkflow(step)
-
     }
 }
