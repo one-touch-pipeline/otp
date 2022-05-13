@@ -97,6 +97,10 @@ class AbstractMergedBamFileService {
         } as List<AbstractMergedBamFile> : []
     }
 
+    AbstractMergedBamFile findById(long id) {
+        return AbstractMergedBamFile.get(id)
+    }
+
     /**
      * Returns all the AbstractMergedBamFiles given by individual, sampleType and seqType.
      * Only individual is required, others are optional. Missing parameters or null values means without these condition/constrains.

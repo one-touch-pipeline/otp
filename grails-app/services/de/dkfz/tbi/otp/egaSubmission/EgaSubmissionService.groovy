@@ -36,6 +36,7 @@ import de.dkfz.tbi.otp.project.Project
 class EgaSubmissionService {
 
     SeqTrackService seqTrackService
+    EgaSubmissionFileService egaSubmissionFileService
 
     static protected final String RAW_PREFIX = "UNMAPPED:"
 
@@ -89,6 +90,11 @@ class EgaSubmissionService {
             }
         }
         return seqTypes
+    }
+
+    @CompileDynamic
+    List<EgaSubmission> findAllByProject(Project project) {
+        return EgaSubmission.findAllByProject(project)
     }
 
     void createAndSaveSampleSubmissionObjects(EgaSubmission submission, List<String> sampleIdSeqTypeIdList) {
@@ -255,6 +261,18 @@ class EgaSubmissionService {
             submission.selectionState = EgaSubmission.SelectionState.SELECT_BAM_FILES
         }
         submission.save(flush: true)
+    }
+
+    void updateDataFileAndPrepareSubmissionForUpload(SelectFilesDataFilesFormSubmitCommand cmd) {
+        updateDataFileSubmissionObjects(cmd)
+        if (cmd.submission.selectionState != EgaSubmission.SelectionState.SELECT_BAM_FILES) {
+            egaSubmissionFileService.prepareSubmissionForUpload(cmd.submission)
+        }
+    }
+
+    void updateBamFileAndPrepareSubmissionForUpload(List<String> fileIds, List<String> egaFileAliases, EgaSubmission submission) {
+        updateBamFileSubmissionObjects(fileIds, egaFileAliases, submission)
+        egaSubmissionFileService.prepareSubmissionForUpload(submission)
     }
 
     List<DataFileAndSampleAlias> getDataFilesAndAlias(EgaSubmission egaSubmission) {

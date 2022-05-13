@@ -27,7 +27,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.validation.Errors
 
 import de.dkfz.tbi.otp.*
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
+import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFileService
 import de.dkfz.tbi.otp.ngsdata.DataFile
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.project.Project
@@ -75,12 +75,13 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
     EgaSubmissionFileService egaSubmissionFileService
     ProjectSelectionService projectSelectionService
     ProjectService projectService
+    AbstractMergedBamFileService abstractMergedBamFileService
 
     final private static String ERROR_TITLE = "Some errors occurred"
 
     Map overview() {
         Project project = projectSelectionService.selectedProject
-        List<EgaSubmission> submissions = EgaSubmission.findAllByProject(project).sort { it.submissionName.toLowerCase() }
+        List<EgaSubmission> submissions = egaSubmissionService.findAllByProject(project).sort { it.submissionName.toLowerCase() }
 
         return [
                 submissions     : submissions,
@@ -88,8 +89,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
         ]
     }
 
-    def editSubmission() {
-        EgaSubmission submission = EgaSubmission.get(params.id)
+    def editSubmission(EgaSubmission submission) {
         if (submission.state != EgaSubmission.State.SELECTION) {
             redirect(action: "overview")
             return
@@ -410,12 +410,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
                     flash.egaFileAliases = egaFileAliases
                     pushErrors(errors.errors, cmd.submission)
                 } else {
-                    EgaSubmission.withTransaction {
-                        egaSubmissionService.updateDataFileSubmissionObjects(cmd)
-                        if (cmd.submission.selectionState != EgaSubmission.SelectionState.SELECT_BAM_FILES) {
-                            egaSubmissionFileService.prepareSubmissionForUpload(cmd.submission)
-                        }
-                    }
+                    egaSubmissionService.updateDataFileAndPrepareSubmissionForUpload(cmd)
                     flash.message = new FlashMessage("SAVED")
                     redirect(action: "editSubmission", params: ['id': cmd.submission.id])
                 }
@@ -535,14 +530,11 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
                     pushErrors(errors.errors, cmd.submission)
                     Map egaFileAliases = [:]
                     cmd.egaFileAlias.eachWithIndex { it, i ->
-                        egaFileAliases.put(AbstractMergedBamFile.get(cmd.fileId[i] as long).bamFileName + cmd.egaSampleAlias[i], it)
+                        egaFileAliases.put(abstractMergedBamFileService.findById(cmd.fileId[i] as long).bamFileName + cmd.egaSampleAlias[i], it)
                     }
                     flash.egaFileAliases = egaFileAliases
                 } else {
-                    EgaSubmission.withTransaction {
-                        egaSubmissionService.updateBamFileSubmissionObjects(cmd.fileId, cmd.egaFileAlias, cmd.submission)
-                        egaSubmissionFileService.prepareSubmissionForUpload(cmd.submission)
-                    }
+                    egaSubmissionService.updateBamFileAndPrepareSubmissionForUpload(cmd.fileId, cmd.egaFileAlias, cmd.submission)
                     redirect(action: "editSubmission", params: ['id': cmd.submission.id])
                 }
             } else {
