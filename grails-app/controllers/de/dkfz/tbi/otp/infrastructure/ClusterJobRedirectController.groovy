@@ -25,8 +25,6 @@ import grails.plugin.springsecurity.annotation.Secured
 import grails.validation.Validateable
 import org.springframework.http.HttpStatus
 
-import de.dkfz.tbi.otp.utils.CollectionUtils
-
 @Secured("hasRole('ROLE_OPERATOR')")
 class ClusterJobRedirectController {
 
