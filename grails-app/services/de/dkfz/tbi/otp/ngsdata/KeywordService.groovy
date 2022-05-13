@@ -46,4 +46,8 @@ class KeywordService {
         keyword.removeFromProjects(project)
         keyword.save(flush: true)
     }
+
+    List<Keyword> list() {
+        return Keyword.list()
+    }
 }

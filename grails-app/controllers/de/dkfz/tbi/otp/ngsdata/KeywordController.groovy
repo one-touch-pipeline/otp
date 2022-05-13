@@ -26,16 +26,16 @@ import grails.validation.Validateable
 
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.searchability.Keyword
 import de.dkfz.tbi.otp.utils.StringUtils
-
-import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
 @Secured("hasRole('ROLE_OPERATOR')")
 class KeywordController implements CheckAndCall {
 
     KeywordService keywordService
     ProjectSelectionService projectSelectionService
+    ProjectService projectService
 
     static allowedMethods = [
             index      : "GET",
@@ -46,13 +46,13 @@ class KeywordController implements CheckAndCall {
 
     Map index() {
         Project project = projectSelectionService.selectedProject
-        project = atMostOneElement(Project.findAllByName(project?.name, [fetch: [keywords: 'join']]))
+        project = projectService.findByProjectWithFetchedKeywords(project)
 
         Closure keywordSorting = { Keyword keyword ->
             keyword.name.toLowerCase()
         }
 
-        List<Keyword> otherAvailableKeywords = Keyword.list() - project.keywords
+        List<Keyword> otherAvailableKeywords = keywordService.list() - project.keywords
         return [
                 availableKeywords: otherAvailableKeywords.sort(keywordSorting) ?: [],
                 projectKeywords  : project.keywords.sort(keywordSorting),

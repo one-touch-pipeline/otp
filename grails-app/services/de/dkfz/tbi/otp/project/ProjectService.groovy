@@ -51,8 +51,10 @@ import de.dkfz.tbi.otp.project.projectRequest.ProjectRequestStateProvider
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
+import de.dkfz.tbi.util.TimeFormats
 
 import java.nio.file.*
+import java.sql.Timestamp
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -1134,6 +1136,24 @@ echo 'OK'
 
     Path getSequencingDirectory(Project project) {
         return getProjectDirectory(project).resolve('sequencing')
+    }
+
+    String getLastReceivedDate(Project project) {
+        Timestamp[] timestamps = SeqTrack.createCriteria().get {
+            sample {
+                individual {
+                    eq("project", project)
+                }
+            }
+            projections {
+                max("dateCreated")
+            }
+        }
+        return timestamps ? TimeFormats.DATE_TIME.getFormattedDate(timestamps[0] as Date) : ''
+    }
+
+    Project findByProjectWithFetchedKeywords(Project project) {
+        return atMostOneElement(Project.findAllByName(project?.name, [ fetch: [ keywords: 'join']]))
     }
 }
 

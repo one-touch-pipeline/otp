@@ -24,12 +24,21 @@ package de.dkfz.tbi.otp.ngsdata
 import grails.gorm.transactions.Transactional
 
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 @Transactional
 class GeneModelService {
     ReferenceGenomeService referenceGenomeService
 
     static final String GENE_MODEL_PATH_COMPONENT = "gencode"
+
+    List<GeneModel> findAllByReferenceGenome(ReferenceGenome referenceGenome) {
+        return GeneModel.findAllByReferenceGenome(referenceGenome)
+    }
+
+    List<GeneModel> findAllByReferenceGenomeName(String name) {
+        return GeneModel.findAllByReferenceGenome(CollectionUtils.atMostOneElement(ReferenceGenome.findAllByName(name)))
+    }
 
     File getFile(GeneModel geneModel) {
         new File(getBasePath(geneModel), geneModel.fileName)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2022 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,41 +19,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.ngsdata
+package de.dkfz.tbi.otp.ngsdata.referencegenome
 
 import grails.gorm.transactions.Transactional
-import org.springframework.security.access.prepost.PreAuthorize
 
-import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.ngsdata.ToolName
+import de.dkfz.tbi.otp.project.ProjectService
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 @Transactional
-class DataFileService {
+class ToolNameService {
 
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'OTP_READ_ACCESS')")
-    List<DataFile> getAllDataFilesOfProject(Project project) {
-        return DataFile.withCriteria {
-            seqTrack {
-                sample {
-                    individual {
-                        eq("project", project)
-                    }
-                }
-            }
-        } as List<DataFile>
+    List<ToolName> findAllToolNamesByType(ToolName.Type type) {
+        return ToolName.findAllByType(type)
     }
 
-    List<DataFile> findAllBySeqTrack(SeqTrack seqTrack) {
-        return DataFile.findAllBySeqTrack(seqTrack)
+    List<String> findAllToolNamesForRNA() {
+        List<String> toolNames = ToolName.findAllByTypeAndNameNotIlike(ToolName.Type.RNA, "GENOME_STAR_INDEX%")*.name
+        toolNames.add(ProjectService.GENOME_STAR_INDEX)
+        return toolNames.sort()
     }
 
-    List<DataFile> findAllByFastqImportInstance(FastqImportInstance importInstance) {
-        return DataFile.createCriteria().list {
-            createAlias('run', 'r')
-            createAlias('seqTrack', 'st')
-            eq('fastqImportInstance', importInstance)
-            order('r.name', 'asc')
-            order('st.laneId', 'asc')
-            order('mateNumber', 'asc')
-        } as List<DataFile>
+    ToolName findToolNameByNameAndType(String name, ToolName.Type type) {
+        return CollectionUtils.atMostOneElement(ToolName.findAllByNameAndType(name, type))
     }
 }

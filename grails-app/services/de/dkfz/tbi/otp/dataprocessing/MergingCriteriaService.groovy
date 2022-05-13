@@ -41,6 +41,11 @@ class MergingCriteriaService {
         return CollectionUtils.atMostOneElement(MergingCriteria.findAllByProjectAndSeqType(project, seqType)) ?: new MergingCriteria()
     }
 
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'OTP_READ_ACCESS')")
+    List<MergingCriteria> findAllByProject(Project project) {
+        return MergingCriteria.findAllByProject(project)
+    }
+
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     Errors createOrUpdateMergingCriteria(
             Project project, SeqType seqType, boolean useLibPrepKit, MergingCriteria.SpecificSeqPlatformGroups useSeqPlatformGroups

@@ -28,7 +28,6 @@ import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.DataTableCommand
 
 @Secured('isFullyAuthenticated()')
@@ -41,12 +40,14 @@ class AlignmentConfigurationOverviewController {
     ]
 
     AlignmentInfoService alignmentInfoService
+    MergingCriteriaService mergingCriteriaService
+    PipelineService pipelineService
     ProjectSelectionService projectSelectionService
 
     Map index() {
         Project project = projectSelectionService.selectedProject
 
-        List<MergingCriteria> mergingCriteria = MergingCriteria.findAllByProject(project)
+        List<MergingCriteria> mergingCriteria = mergingCriteriaService.findAllByProject(project)
         Map<SeqType, MergingCriteria> seqTypeMergingCriteria = SeqTypeService.allAlignableSeqTypes.collectEntries { SeqType seqType ->
             [(seqType): mergingCriteria.find { it.seqType == seqType }]
         }.sort { Map.Entry<SeqType, MergingCriteria> it -> it.key.displayNameWithLibraryLayout }
@@ -92,7 +93,7 @@ class AlignmentConfigurationOverviewController {
                         RoddyWorkflowConfig.getLatestForProject(
                                 project,
                                 it.seqType,
-                                CollectionUtils.atMostOneElement(Pipeline.findAllByName(Pipeline.Name.PANCAN_ALIGNMENT))
+                                pipelineService.findByPipelineName(Pipeline.Name.PANCAN_ALIGNMENT)
                         )?.adapterTrimmingNeeded
             }
             return [

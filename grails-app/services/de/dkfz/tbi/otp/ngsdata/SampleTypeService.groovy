@@ -33,6 +33,10 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 @Transactional
 class SampleTypeService {
 
+    SampleType findById(long it) {
+        return SampleType.get(it)
+    }
+
     /**
      * return the used sample types of the project
      */
@@ -90,6 +94,29 @@ class SampleTypeService {
     static SampleTypePerProject.Category getCategory(final Project project, SampleType sampleType) {
         assert project
         return atMostOneElement(SampleTypePerProject.findAllWhere(project: project, sampleType: sampleType))?.category
+    }
+
+    List<SampleType> findAllBySpecificReferenceGenome(SampleType.SpecificReferenceGenome specificReferenceGenome) {
+        return SampleType.findAllBySpecificReferenceGenome(specificReferenceGenome)
+    }
+
+    List<SampleType> findAllUsedOnceByProjectAndSeqType(Project project, SeqType seqType) {
+        return SeqTrack.createCriteria().list {
+            projections {
+                sample {
+                    property('sampleType')
+                }
+            }
+            sample {
+                sampleType {
+                    eq('specificReferenceGenome', SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC)
+                }
+                individual {
+                    eq('project', project)
+                }
+            }
+            eq('seqType', seqType)
+        }.unique()
     }
 }
 

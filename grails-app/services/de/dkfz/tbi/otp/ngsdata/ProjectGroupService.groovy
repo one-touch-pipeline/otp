@@ -32,6 +32,14 @@ class ProjectGroupService {
 
     ProjectService projectService
 
+    List<ProjectGroup> list() {
+        return ProjectGroup.list()
+    }
+
+    ProjectGroup findByName(String name) {
+        return CollectionUtils.atMostOneElement(ProjectGroup.findAllByName(name))
+    }
+
     List<ProjectGroup> availableProjectGroups() {
         List<Project> projects = projectService.allProjects
         return projects*.projectGroup.unique().findAll { it != null }.sort { it.name }

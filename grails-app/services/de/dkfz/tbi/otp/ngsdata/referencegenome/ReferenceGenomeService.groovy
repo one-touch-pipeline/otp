@@ -35,6 +35,7 @@ import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
 import de.dkfz.tbi.otp.ngsdata.StatSizeFileName
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
 
 import java.nio.file.FileSystem
@@ -61,6 +62,14 @@ class ReferenceGenomeService {
      */
     ReferenceGenome referenceGenome(long id) {
         return ReferenceGenome.get(id)
+    }
+
+    ReferenceGenome findByName(String name) {
+        return CollectionUtils.atMostOneElement(ReferenceGenome.findAllByName(name))
+    }
+
+    List<ReferenceGenome> list() {
+        return ReferenceGenome.list(sort: "name", order: "asc")
     }
 
     /**

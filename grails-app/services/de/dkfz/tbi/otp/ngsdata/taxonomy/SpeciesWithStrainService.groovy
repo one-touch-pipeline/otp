@@ -29,6 +29,10 @@ import org.springframework.validation.Errors
 @Transactional
 class SpeciesWithStrainService {
 
+    List<SpeciesWithStrain> list() {
+        return SpeciesWithStrain.list()
+    }
+
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     List<Species> getAllSpecies() {
         return Species.list()

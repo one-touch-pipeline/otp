@@ -55,7 +55,7 @@
                             <otp:editorSwitch
                                     roles="ROLE_OPERATOR"
                                     template="dropDown"
-                                    link="${g.createLink(controller: "metadataImport", action: "updateAutomaticNotificationFlag", id: fastqImportInstance.otrsTicket.id)}"
+                                    link="${g.createLink(controller: "metadataImport", action: "updateAutomaticNotificationFlag", params: ["otrsTicket.id": fastqImportInstance.otrsTicket.id])}"
                                     values="${["true", "false"]}"
                                     value="${fastqImportInstance.otrsTicket.automaticNotification}"/>
                         </td>
@@ -66,7 +66,7 @@
                             <otp:editorSwitch
                                     roles="ROLE_OPERATOR"
                                     template="dropDown"
-                                    link="${g.createLink(controller: "metadataImport", action: "updateFinalNotificationFlag", id: fastqImportInstance.otrsTicket.id)}"
+                                    link="${g.createLink(controller: "metadataImport", action: "updateFinalNotificationFlag", params: ["otrsTicket.id": fastqImportInstance.otrsTicket.id])}"
                                     values="${["true", "false"]}"
                                     value="${fastqImportInstance.otrsTicket.finalNotificationSent}"/>
                         </td>
@@ -77,7 +77,7 @@
                             <otp:editorSwitch
                                     roles="ROLE_OPERATOR"
                                     template="textArea"
-                                    link="${g.createLink(controller: "metadataImport", action: "updateSeqCenterComment", id: fastqImportInstance.otrsTicket.id)}"
+                                    link="${g.createLink(controller: "metadataImport", action: "updateSeqCenterComment", params: ["otrsTicket.id": fastqImportInstance.otrsTicket.id])}"
                                     value="${fastqImportInstance.otrsTicket.seqCenterComment}"/>
                         </td>
                     </tr>

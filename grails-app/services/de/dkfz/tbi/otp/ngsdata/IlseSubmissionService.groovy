@@ -32,6 +32,10 @@ class IlseSubmissionService {
 
     CommentService commentService
 
+    IlseSubmission findById(long id) {
+        return IlseSubmission.get(id)
+    }
+
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     List<IlseSubmission> getSortedBlacklistedIlseSubmissions() {
         return IlseSubmission.findAllByWarning(true, [sort: 'ilseNumber', order: 'desc'])

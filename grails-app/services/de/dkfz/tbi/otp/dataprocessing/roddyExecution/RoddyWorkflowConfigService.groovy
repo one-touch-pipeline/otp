@@ -27,8 +27,10 @@ import groovy.transform.TupleConstructor
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.Individual
+import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 import java.nio.file.FileSystem
 import java.nio.file.Path
@@ -164,5 +166,22 @@ class RoddyWorkflowConfigService {
     static class ConfigState {
         String content
         boolean changed
+    }
+
+    List<RoddyWorkflowConfig> findAllByProjectAndSeqTypeAndPipelineAndProgramVersionAndConfigVersion(Project project, SeqType seqType, Pipeline pipeline,
+                                                                                                     String programVersion, String configVersion) {
+        return RoddyWorkflowConfig.findAllWhere([
+                project       : project,
+                seqType       : seqType,
+                pipeline      : pipeline,
+                programVersion: programVersion,
+                configVersion : configVersion,
+        ])
+    }
+
+    RoddyWorkflowConfig findLatestConfigByProjectAndSeqTypeAndPipeline(Project project, SeqType seqType, Pipeline pipeline) {
+        return CollectionUtils.atMostOneElement(RoddyWorkflowConfig.findAllByProjectAndSeqTypeAndPipelineAndIndividualIsNull(
+                project, seqType, pipeline, [sort: 'id', order: 'desc', max: 1,]
+        ))
     }
 }

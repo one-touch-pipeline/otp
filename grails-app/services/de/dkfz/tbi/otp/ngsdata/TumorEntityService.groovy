@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2022 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,38 +22,17 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.gorm.transactions.Transactional
-import org.springframework.security.access.prepost.PreAuthorize
 
-import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 @Transactional
-class DataFileService {
+class TumorEntityService {
 
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'OTP_READ_ACCESS')")
-    List<DataFile> getAllDataFilesOfProject(Project project) {
-        return DataFile.withCriteria {
-            seqTrack {
-                sample {
-                    individual {
-                        eq("project", project)
-                    }
-                }
-            }
-        } as List<DataFile>
+    List<TumorEntity> list() {
+        return TumorEntity.list()
     }
 
-    List<DataFile> findAllBySeqTrack(SeqTrack seqTrack) {
-        return DataFile.findAllBySeqTrack(seqTrack)
-    }
-
-    List<DataFile> findAllByFastqImportInstance(FastqImportInstance importInstance) {
-        return DataFile.createCriteria().list {
-            createAlias('run', 'r')
-            createAlias('seqTrack', 'st')
-            eq('fastqImportInstance', importInstance)
-            order('r.name', 'asc')
-            order('st.laneId', 'asc')
-            order('mateNumber', 'asc')
-        } as List<DataFile>
+    TumorEntity findByName(String name) {
+        return CollectionUtils.atMostOneElement(TumorEntity.findAllByName(name))
     }
 }

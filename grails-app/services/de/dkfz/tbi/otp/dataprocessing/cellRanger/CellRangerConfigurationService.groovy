@@ -189,13 +189,17 @@ class CellRangerConfigurationService {
         ticket.save(flush: true)
     }
 
+    List<CellRangerMergingWorkPackage> findMergingWorkPackage(List<Sample> samples, Pipeline pipeline) {
+        return samples ? CellRangerMergingWorkPackage.findAllBySampleInListAndPipeline(samples, pipeline) : []
+    }
+
     List<CellRangerMergingWorkPackage> createMergingWorkPackagesForSamples(List<Sample> samples, CellRangerMwpParameter parameter, User requester) {
         return samples.collectMany { Sample sample ->
-            return createMergingWorkPackagesForSample(sample, parameter, requester)
+            return findAllMergingWorkPackagesBySamplesAndPipeline(sample, parameter, requester)
         }
     }
 
-    List<CellRangerMergingWorkPackage> createMergingWorkPackagesForSample(Sample sample, CellRangerMwpParameter parameter, User requester) {
+    List<CellRangerMergingWorkPackage> findAllMergingWorkPackagesBySamplesAndPipeline(Sample sample, CellRangerMwpParameter parameter, User requester) {
         Map<PlatformGroupAndKit, List<SeqTrack>> map = getSeqTracksGroupedByPlatformGroupAndKit(sample.seqTracks.findAll { it.seqType == parameter.seqType })
         constrainSeqTracksGroupedByPlatformGroupAndKit(map)
         return map.collect { PlatformGroupAndKit platformGroupAndKit, List<SeqTrack> seqTracks ->

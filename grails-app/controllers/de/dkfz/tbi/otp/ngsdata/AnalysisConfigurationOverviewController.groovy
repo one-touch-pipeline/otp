@@ -24,15 +24,12 @@ package de.dkfz.tbi.otp.ngsdata
 import grails.plugin.springsecurity.annotation.Secured
 
 import de.dkfz.tbi.otp.ProjectSelectionService
-import de.dkfz.tbi.otp.dataprocessing.Pipeline
+import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaConfig
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvConfig
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
-
-import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
-import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 @Secured('isFullyAuthenticated()')
 class AnalysisConfigurationOverviewController {
@@ -41,17 +38,19 @@ class AnalysisConfigurationOverviewController {
             index: "GET",
     ]
 
+    ConfigPerProjectAndSeqTypeService configPerProjectAndSeqTypeService
+    PipelineService pipelineService
     ProjectSelectionService projectSelectionService
     ProjectService projectService
 
     def index() {
         Project project = projectSelectionService.selectedProject
 
-        Pipeline snv = exactlyOneElement(Pipeline.findAllByName(Pipeline.Name.RODDY_SNV))
-        Pipeline indel = exactlyOneElement(Pipeline.findAllByName(Pipeline.Name.RODDY_INDEL))
-        Pipeline sophia = exactlyOneElement(Pipeline.findAllByName(Pipeline.Name.RODDY_SOPHIA))
-        Pipeline aceseq = exactlyOneElement(Pipeline.findAllByName(Pipeline.Name.RODDY_ACESEQ))
-        Pipeline runYapsa = exactlyOneElement(Pipeline.findAllByName(Pipeline.Name.RUN_YAPSA))
+        Pipeline snv = pipelineService.findByPipelineName(Pipeline.Name.RODDY_SNV)
+        Pipeline indel = pipelineService.findByPipelineName(Pipeline.Name.RODDY_INDEL)
+        Pipeline sophia = pipelineService.findByPipelineName(Pipeline.Name.RODDY_SOPHIA)
+        Pipeline aceseq = pipelineService.findByPipelineName(Pipeline.Name.RODDY_ACESEQ)
+        Pipeline runYapsa = pipelineService.findByPipelineName(Pipeline.Name.RUN_YAPSA)
 
         List snvConfigTable = createAnalysisConfigTable(project, snv)
         List indelConfigTable = createAnalysisConfigTable(project, indel)
@@ -82,17 +81,16 @@ class AnalysisConfigurationOverviewController {
         ]
     }
 
-    private
-    static List<List<String>> createAnalysisConfigTable(Project project, Pipeline pipeline) {
+    private List<List<String>> createAnalysisConfigTable(Project project, Pipeline pipeline) {
         List<List<String>> table = []
         table.add(["", "Config created", "Version"])
         pipeline.seqTypes.each { SeqType seqType ->
             List<String> row = []
             row.add(seqType.displayNameWithLibraryLayout)
-            SnvConfig snvConfig = atMostOneElement(SnvConfig.findAllByProjectAndSeqTypeAndObsoleteDateIsNull(project, seqType))
-            RunYapsaConfig runYapsaConfig = atMostOneElement(RunYapsaConfig.findAllByProjectAndSeqTypeAndObsoleteDateIsNull(project, seqType))
-            RoddyWorkflowConfig roddyWorkflowConfig = atMostOneElement(
-                    RoddyWorkflowConfig.findAllByProjectAndSeqTypeAndPipelineAndObsoleteDateIsNull(project, seqType, pipeline))
+            SnvConfig snvConfig = configPerProjectAndSeqTypeService.findSnvConfigByProjectAndSeqType(project, seqType)
+            RunYapsaConfig runYapsaConfig = configPerProjectAndSeqTypeService.findRunYapsaConfigByProjectAndSeqType(project, seqType)
+            RoddyWorkflowConfig roddyWorkflowConfig = configPerProjectAndSeqTypeService.findRoddyWorkflowConfigByProjectAndSeqTypeAndPipeline(project,
+                    seqType, pipeline)
             if (pipeline.type == Pipeline.Type.SNV && snvConfig) {
                 row.add("Yes")
                 row.add(snvConfig.programVersion)

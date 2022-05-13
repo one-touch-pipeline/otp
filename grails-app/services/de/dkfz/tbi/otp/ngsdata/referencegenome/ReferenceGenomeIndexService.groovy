@@ -23,7 +23,7 @@ package de.dkfz.tbi.otp.ngsdata.referencegenome
 
 import grails.gorm.transactions.Transactional
 
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeIndex
+import de.dkfz.tbi.otp.ngsdata.*
 
 @Transactional
 class ReferenceGenomeIndexService {
@@ -39,5 +39,17 @@ class ReferenceGenomeIndexService {
     private File getBasePath(ReferenceGenomeIndex referenceGenomeIndex) {
         new File(new File(referenceGenomeService.referenceGenomeDirectory(referenceGenomeIndex.referenceGenome, false),
                 REFERENCE_GENOME_INDEX_PATH_COMPONENT), referenceGenomeIndex.toolName.path)
+    }
+
+    ReferenceGenomeIndex findById(long id) {
+        return ReferenceGenomeIndex.get(id)
+    }
+
+    List<ReferenceGenomeIndex> findAllByReferenceGenome(ReferenceGenome referenceGenome) {
+        return ReferenceGenomeIndex.findAllByReferenceGenome(referenceGenome)
+    }
+
+    List<ReferenceGenomeIndex> findAllByReferenceGenomeAndToolName(ReferenceGenome refGenome, ToolName toolName) {
+        return ReferenceGenomeIndex.findAllByReferenceGenomeAndToolName(refGenome, toolName)
     }
 }

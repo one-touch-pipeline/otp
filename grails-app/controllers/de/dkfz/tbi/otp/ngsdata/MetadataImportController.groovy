@@ -76,17 +76,15 @@ class MetadataImportController implements CheckAndCall, PlainResponseExceptionHa
             updateFinalNotificationFlag          : "POST",
     ]
 
+    CommentService commentService
+    ConfigService configService
+    DataFileService dataFileService
+    FileSystemService fileSystemService
+    IlseSubmissionService ilseSubmissionService
     MetadataImportService metadataImportService
+    OtrsTicketService otrsTicketService
     ProcessingOptionService processingOptionService
     RunService runService
-    OtrsTicketService otrsTicketService
-    IlseSubmissionService ilseSubmissionService
-
-    FileSystemService fileSystemService
-
-    ConfigService configService
-
-    CommentService commentService
 
     @SuppressWarnings("UnnecessaryGetter")
     def index(MetadataImportControllerSubmitCommand cmd) {
@@ -169,8 +167,7 @@ class MetadataImportController implements CheckAndCall, PlainResponseExceptionHa
         }
     }
 
-    def details() {
-        FastqImportInstance fastqImportInstance = FastqImportInstance.get(params.id)
+    def details(FastqImportInstance fastqImportInstance) {
         return [
                 metaDataDetails    : getMetadataDetails(fastqImportInstance),
                 fastqImportInstance: fastqImportInstance,
@@ -179,7 +176,7 @@ class MetadataImportController implements CheckAndCall, PlainResponseExceptionHa
 
     def multiDetails() {
         List<MetaDataFileWrapper> metaDataFiles = params.metaDataFiles.collect {
-            MetaDataFile file = MetaDataFile.get(it)
+            MetaDataFile file = metadataImportService.findById(it)
 
             new MetaDataFileWrapper(
                     metaDataFile: file,
@@ -195,7 +192,7 @@ class MetadataImportController implements CheckAndCall, PlainResponseExceptionHa
     private MetadataDetails getMetadataDetails(FastqImportInstance importInstance) {
         List<DataFile> dataFilesNotAssignedToSeqTrack = []
 
-        List<MetaDataFileWrapper> metaDataFiles = MetaDataFile.findAllByFastqImportInstance(importInstance, [sort: "dateCreated", order: "desc"]).collect {
+        List<MetaDataFileWrapper> metaDataFiles = metadataImportService.findAllByFastqImportInstance(importInstance).collect {
             new MetaDataFileWrapper(
                     metaDataFile: it,
                     fullPath    : metadataImportService.getMetaDataFileFullPath(it),
@@ -203,14 +200,7 @@ class MetadataImportController implements CheckAndCall, PlainResponseExceptionHa
             )
         }
 
-        List<DataFile> dataFiles = DataFile.createCriteria().list {
-            createAlias('run', 'r')
-            createAlias('seqTrack', 'st')
-            eq('fastqImportInstance', importInstance)
-            order('r.name', 'asc')
-            order('st.laneId', 'asc')
-            order('mateNumber', 'asc')
-        }
+        List<DataFile> dataFiles = dataFileService.findAllByFastqImportInstance(importInstance)
 
         List<RunWithSeqTracks> runs = []
         dataFiles.each { DataFile dataFile ->
@@ -338,7 +328,7 @@ class MetadataImportController implements CheckAndCall, PlainResponseExceptionHa
     JSON saveComment(CommentCommand cmd) {
         Map retMap = [:]
         checkErrorAndCallMethod(cmd, {
-            IlseSubmission ilseSubmission = IlseSubmission.get(cmd.id)
+            IlseSubmission ilseSubmission = ilseSubmissionService.findById(cmd.id)
             commentService.saveComment(ilseSubmission, cmd.comment)
             retMap << [
                     updateMap: [
@@ -358,22 +348,21 @@ class MetadataImportController implements CheckAndCall, PlainResponseExceptionHa
         redirect action: 'blacklistedIlseNumbers'
     }
 
-    JSON updateSeqCenterComment(Long id, String value) {
-        OtrsTicket otrsTicket = OtrsTicket.get(id)
+    JSON updateSeqCenterComment(OtrsTicket otrsTicket, String value) {
         otrsTicket.seqCenterComment = value
         assert otrsTicket.save(flush: true)
         Map map = [success: true]
         render map as JSON
     }
 
-    JSON updateAutomaticNotificationFlag(Long id, String value) {
-        metadataImportService.updateAutomaticNotificationFlag(OtrsTicket.get(id), value.toBoolean())
+    JSON updateAutomaticNotificationFlag(OtrsTicket otrsTicket, String value) {
+        metadataImportService.updateAutomaticNotificationFlag(otrsTicket, value.toBoolean())
         Map map = [success: true]
         render map as JSON
     }
 
-    JSON updateFinalNotificationFlag(Long id, String value) {
-        metadataImportService.updateFinalNotificationFlag(OtrsTicket.get(id), value.toBoolean())
+    JSON updateFinalNotificationFlag(OtrsTicket otrsTicket, String value) {
+        metadataImportService.updateFinalNotificationFlag(otrsTicket, value.toBoolean())
         Map map = [success: true]
         render map as JSON
     }

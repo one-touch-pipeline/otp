@@ -28,13 +28,8 @@ import groovy.transform.ToString
 import de.dkfz.tbi.otp.FlashMessage
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
-import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
-import de.dkfz.tbi.otp.project.PanCanAlignmentConfiguration
-import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.otp.project.ProjectService
-import de.dkfz.tbi.otp.project.RnaAlignmentReferenceGenomeConfiguration
-import de.dkfz.tbi.otp.project.RoddyConfiguration
-import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.ngsdata.referencegenome.*
+import de.dkfz.tbi.otp.project.*
 import de.dkfz.tbi.otp.utils.StringUtils
 
 @Secured("hasRole('ROLE_OPERATOR')")
@@ -42,6 +37,12 @@ class ConfigurePipelineController implements ConfigurePipelineHelper {
 
     ProcessingOptionService processingOptionService
     ProjectService projectService
+    ReferenceGenomeService referenceGenomeService
+    ReferenceGenomeProjectSeqTypeService referenceGenomeProjectSeqTypeService
+    ReferenceGenomeIndexService referenceGenomeIndexService
+    GeneModelService geneModelService
+    SampleTypeService sampleTypeService
+    ToolNameService toolNameService
 
     static allowedMethods = [
             alignment                  : "GET",
@@ -77,14 +78,14 @@ class ConfigurePipelineController implements ConfigurePipelineHelper {
         assert allBwaMemVersions.contains(defaultBwaMemVersion)
         assert defaultMergeTool in MergeTool.ALL_MERGE_TOOLS*.name
         assert MergeTool.ALL_MERGE_TOOLS*.name.containsAll(allMergeTools)
-        assert CollectionUtils.atMostOneElement(ReferenceGenome.findAllByName(defaultReferenceGenome))
+        assert referenceGenomeService.findByName(defaultReferenceGenome)
 
         Map result = [:]
         result << getValues(project, cmd.seqType, pipeline)
 
-        String referenceGenome = CollectionUtils.atMostOneElement(
-                ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndSampleTypeIsNullAndDeprecatedDateIsNull(project, cmd.seqType))?.referenceGenome?.name
-                ?: defaultReferenceGenome
+        String referenceGenome =
+                referenceGenomeProjectSeqTypeService.findReferenceGenomeProjectSeqTypeNoSampleType(project, cmd.seqType)?.referenceGenome?.name ?:
+                        defaultReferenceGenome
         List<String> referenceGenomes = ReferenceGenome.list(sort: "name", order: "asc")*.name
 
         result << [
@@ -189,41 +190,27 @@ class ConfigurePipelineController implements ConfigurePipelineHelper {
         String defaultReferenceGenome = getOption(OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_REFERENCE_GENOME_NAME, cmd.seqType.roddyName)
         String defaultGenomeStarIndex = getOption(OptionName.PIPELINE_RODDY_ALIGNMENT_RNA_DEFAULT_GENOME_STAR_INDEX)
 
-        assert CollectionUtils.atMostOneElement(ReferenceGenome.findAllByName(defaultReferenceGenome))
+        assert referenceGenomeService.findByName(defaultReferenceGenome)
 
-        String referenceGenome = CollectionUtils.atMostOneElement(
-                ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndSampleTypeIsNullAndDeprecatedDateIsNull(project, cmd.seqType))?.referenceGenome?.name
+        String referenceGenome = referenceGenomeProjectSeqTypeService.findReferenceGenomeProjectSeqTypeNoSampleType(project, cmd.seqType)?.referenceGenome?.name
                 ?: defaultReferenceGenome
-        List<String> referenceGenomes = ReferenceGenome.list(sort: "name", order: "asc").findAll {
-            ReferenceGenomeIndex.findAllByReferenceGenome(it) && GeneModel.findAllByReferenceGenome(it)
+        List<String> referenceGenomes = referenceGenomeService.list().findAll {
+            referenceGenomeIndexService.findAllByReferenceGenome(it) && geneModelService.findAllByReferenceGenome(it)
         }*.name
 
-        List<SampleType> configuredSampleTypes = ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndSampleTypeIsNotNullAndDeprecatedDateIsNull(
+        List<SampleType> configuredSampleTypes = referenceGenomeProjectSeqTypeService.findReferenceGenomeProjectSeqTypesWithSampleType(
                 project, cmd.seqType)*.sampleType.unique().sort(sampleTypeSort)
 
-        List<SampleType> additionalUsedSampleTypes = (SeqTrack.createCriteria().list {
-            projections {
-                sample {
-                    property('sampleType')
-                }
-            }
-            sample {
-                sampleType {
-                    eq('specificReferenceGenome', SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC)
-                }
-                individual {
-                    eq('project', project)
-                }
-            }
-            eq('seqType', cmd.seqType)
-        }.unique() - configuredSampleTypes).sort(sampleTypeSort)
+        List<SampleType> additionalUsedSampleTypes = (sampleTypeService.findAllUsedOnceByProjectAndSeqType(project, cmd.seqType) -
+                configuredSampleTypes).sort(sampleTypeSort)
 
-        List<SampleType> additionalPossibleSampleTypes = (SampleType.findAllBySpecificReferenceGenome(
-                SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC) - configuredSampleTypes - additionalUsedSampleTypes).sort(sampleTypeSort)
+        List<SampleType> additionalPossibleSampleTypes = (
+                sampleTypeService.findAllBySpecificReferenceGenome(SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC) -
+                        configuredSampleTypes - additionalUsedSampleTypes).sort(sampleTypeSort)
 
         result << [
                 projects                : projects,
-                toolNames               : toolNames,
+                toolNames               : toolNameService.findAllToolNamesForRNA(),
 
                 referenceGenome         : referenceGenome,
                 referenceGenomes        : referenceGenomes,
@@ -296,8 +283,13 @@ class ConfigurePipelineController implements ConfigurePipelineHelper {
 
     def rnaAlignmentReferenceGenome(ConfigureRnaAlignmentSubmitCommand cmd) {
         Project project = projectSelectionService.requestedProject
+
+        List<ReferenceGenomeIndex> referenceGenomeIndex = cmd.toolVersionValue.collect {
+            it ? referenceGenomeIndexService.findById(it as long) : null
+        }.findAll()
+
         if (!cmd.validate()) {
-            log.error(errors)
+            log.error("{}", errors)
             flash.message = new FlashMessage(g.message(code: "configurePipeline.store.failure") as String, cmd.errors)
             flash.cmd = cmd
             redirect(action: "rnaAlignment", params: ["seqType.id": cmd.seqType.id])
@@ -309,12 +301,10 @@ class ConfigurePipelineController implements ConfigurePipelineHelper {
                 seqType                : cmd.seqType,
                 referenceGenome        : cmd.referenceGenome,
                 geneModel              : cmd.geneModel,
-                referenceGenomeIndex   : cmd.referenceGenomeIndex,
+                referenceGenomeIndex   : referenceGenomeIndex,
                 mouseData              : cmd.mouseData,
                 deprecateConfigurations: cmd.deprecateConfigurations,
-                sampleTypes            : cmd.sampleTypeIds.collect {
-                    return CollectionUtils.exactlyOneElement(SampleType.findAllById(it))
-                },
+                sampleTypes            : cmd.sampleTypeIds.collect { return sampleTypeService.findById(it as long) },
         ])
         projectService.configureRnaAlignmentReferenceGenome(rnaConfiguration)
         flash.message = new FlashMessage(g.message(code: "configurePipeline.store.success") as String)
@@ -322,7 +312,7 @@ class ConfigurePipelineController implements ConfigurePipelineHelper {
     }
 
     JSON getStatSizeFileNames(String referenceGenomeName) {
-        ReferenceGenome referenceGenome = CollectionUtils.atMostOneElement(ReferenceGenome.findAllByName(referenceGenomeName))
+        ReferenceGenome referenceGenome = referenceGenomeService.findByName(referenceGenomeName)
         Map data = [:]
 
         if (referenceGenome) {
@@ -336,19 +326,19 @@ class ConfigurePipelineController implements ConfigurePipelineHelper {
 
     JSON getGeneModels(String referenceGenome) {
         Map data = [
-                data: GeneModel.findAllByReferenceGenome(CollectionUtils.atMostOneElement(ReferenceGenome.findAllByName(referenceGenome)))
+                data: geneModelService.findAllByReferenceGenomeName(referenceGenome)
         ]
         render data as JSON
     }
 
     JSON getToolVersions(String referenceGenome) {
-        List<ToolName> toolNames = ToolName.findAllByType(ToolName.Type.RNA)
-        ReferenceGenome refGenome = CollectionUtils.atMostOneElement(ReferenceGenome.findAllByName(referenceGenome))
+        List<ToolName> toolNames = toolNameService.findAllToolNamesByType(ToolName.Type.RNA)
+        ReferenceGenome refGenome = referenceGenomeService.findByName(referenceGenome)
         Map data = [:]
         Map toolNamesData = [:]
         toolNames.each {
             toolNamesData << [
-                    (it.name): ReferenceGenomeIndex.findAllByReferenceGenomeAndToolName(refGenome, it)
+                    (it.name): referenceGenomeIndexService.findAllByReferenceGenomeAndToolName(refGenome, it)
             ]
         }
         data << ["defaultGenomeStarIndex": getOption(OptionName.PIPELINE_RODDY_ALIGNMENT_RNA_DEFAULT_GENOME_STAR_INDEX)]
@@ -367,12 +357,6 @@ class ConfigurePipelineController implements ConfigurePipelineHelper {
             flash.message = new FlashMessage(g.message(code: "configurePipeline.invalidate.success") as String)
             redirect(controller: cmd.overviewController)
         }
-    }
-
-    private List getToolNames() {
-        List<String> toolNames = ToolName.findAllByTypeAndNameNotIlike(ToolName.Type.RNA, "GENOME_STAR_INDEX%")*.name
-        toolNames.add(ProjectService.GENOME_STAR_INDEX)
-        return toolNames.sort()
     }
 
     private String getOption(OptionName name, String type = null) {
@@ -412,25 +396,13 @@ class ConfigureRnaAlignmentSubmitCommand extends BaseConfigurePipelineSubmitComm
     boolean deprecateConfigurations
 
     GeneModel geneModel
-    List<ReferenceGenomeIndex> referenceGenomeIndex = []
+    List toolVersionValue = []
 
     List<String> sampleTypeIds = []
 
     static constraints = {
         referenceGenome(nullable: false)
         geneModel(nullable: false)
-        referenceGenomeIndex(nullable: false)
-    }
-
-    //used by gui to set referenceGenomeIndex
-    void setToolVersionValue(List toolVersionValue) {
-        if (toolVersionValue) {
-            toolVersionValue.each {
-                if (it) {
-                    referenceGenomeIndex.add(ReferenceGenomeIndex.get(it as long))
-                }
-            }
-        }
     }
 }
 

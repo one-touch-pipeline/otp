@@ -28,14 +28,17 @@ import de.dkfz.tbi.otp.FlashMessage
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.*
+import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeIndexService
+import de.dkfz.tbi.otp.ngsdata.referencegenome.ToolNameService
 import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.otp.utils.CollectionUtils
 
 @Secured('isFullyAuthenticated()')
 class CellRangerConfigurationController extends AbstractConfigureNonRoddyPipelineController {
 
     CellRangerConfigurationService cellRangerConfigurationService
+    ReferenceGenomeIndexService referenceGenomeIndexService
     SeqTypeService seqTypeService
+    ToolNameService toolNameService
 
     static allowedMethods = [
             index        : "GET",
@@ -62,14 +65,13 @@ class CellRangerConfigurationController extends AbstractConfigureNonRoddyPipelin
         List<Individual> selectedIndividuals = samples.selectedSamples*.individual.unique()
         List<SampleType> selectedSampleTypes = samples.selectedSamples*.sampleType.unique()
 
-        List<CellRangerMergingWorkPackage> mwps = samples.selectedSamples ?
-                CellRangerMergingWorkPackage.findAllBySampleInListAndPipeline(samples.selectedSamples, pipeline) : []
+        List<CellRangerMergingWorkPackage> mwps = cellRangerConfigurationService.findMergingWorkPackage(samples.selectedSamples, pipeline)
 
         mwps.sort { a, b ->
             a.individual.pid <=> b.individual.pid ?: a.sampleType.name <=> b.sampleType.name
         }
 
-        ToolName toolName = CollectionUtils.atMostOneElement(ToolName.findAllByNameAndType('CELL_RANGER', ToolName.Type.SINGLE_CELL))
+        ToolName toolName = toolNameService.findToolNameByNameAndType('CELL_RANGER', ToolName.Type.SINGLE_CELL)
 
         return getModelValues(seqType) + [
                 cmd                   : flash.cmd as CellRangerConfigurationCommand,

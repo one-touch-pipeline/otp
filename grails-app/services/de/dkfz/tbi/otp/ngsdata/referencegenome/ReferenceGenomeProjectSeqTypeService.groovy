@@ -29,6 +29,16 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 class ReferenceGenomeProjectSeqTypeService {
+
+    ReferenceGenomeProjectSeqType findReferenceGenomeProjectSeqTypeNoSampleType(Project project, SeqType seqType) {
+        return CollectionUtils.atMostOneElement(
+                ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndSampleTypeIsNullAndDeprecatedDateIsNull(project, seqType))
+    }
+
+    List<ReferenceGenomeProjectSeqType> findReferenceGenomeProjectSeqTypesWithSampleType(Project project, SeqType seqType) {
+        return ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndSampleTypeIsNotNullAndDeprecatedDateIsNull(project, seqType)
+    }
+
     static ReferenceGenomeProjectSeqType getConfiguredReferenceGenomeProjectSeqType(SeqTrack seqTrack) {
         assert seqTrack
         getConfiguredReferenceGenomeProjectSeqType(seqTrack.project, seqTrack.seqType, seqTrack.sampleType)

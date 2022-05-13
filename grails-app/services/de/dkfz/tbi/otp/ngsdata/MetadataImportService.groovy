@@ -715,6 +715,14 @@ class MetadataImportService {
     static Path getMetaDataFileFullPath(MetaDataFile metaDataFile) {
         return Paths.get("${metaDataFile.filePath}/${metaDataFile.fileName}")
     }
+
+    MetaDataFile findById(long id) {
+        return MetaDataFile.get(id)
+    }
+
+    List<MetaDataFile> findAllByFastqImportInstance(FastqImportInstance importInstance) {
+        return MetaDataFile.findAllByFastqImportInstance(importInstance, [sort: "dateCreated", order: "desc"])
+    }
 }
 
 @TupleConstructor

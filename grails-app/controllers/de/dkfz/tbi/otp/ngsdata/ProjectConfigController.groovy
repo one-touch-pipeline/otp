@@ -30,22 +30,21 @@ import org.springframework.http.HttpStatus
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.infrastructure.OtpFileSystemException
-import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
+import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrainService
 import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
-import de.dkfz.tbi.otp.project.*
+import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.project.additionalField.AbstractFieldDefinition
 import de.dkfz.tbi.otp.project.additionalField.ProjectPageType
 import de.dkfz.tbi.otp.project.exception.unixGroup.UnixGroupIsSharedException
 import de.dkfz.tbi.otp.project.projectRequest.ProjectRequestService
 import de.dkfz.tbi.otp.security.Role
-import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.CommentCommand
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriorityService
 import de.dkfz.tbi.util.TimeFormats
 
 import java.nio.file.FileSystemException
-import java.sql.Timestamp
 
 @Secured("hasRole('ROLE_OPERATOR')")
 class ProjectConfigController implements CheckAndCall {
@@ -53,9 +52,12 @@ class ProjectConfigController implements CheckAndCall {
     CommentService commentService
     ConfigService configService
     ProcessingPriorityService processingPriorityService
+    ProjectGroupService projectGroupService
     ProjectRequestService projectRequestService
     ProjectSelectionService projectSelectionService
     ProjectService projectService
+    SpeciesWithStrainService speciesWithStrainService
+    TumorEntityService tumorEntityService
 
     static allowedMethods = [
             index                               : "GET",
@@ -94,17 +96,17 @@ class ProjectConfigController implements CheckAndCall {
 
         return [
                 creationDate                   : TimeFormats.DATE_TIME.getFormattedDate(project.dateCreated),
-                lastReceivedDate               : getLastReceivedDate(project),
+                lastReceivedDate               : projectService.getLastReceivedDate(project),
                 projectRequestComment          : projectRequestComment,
                 directory                      : project ? LsdfFilesService.getPath(configService.rootPath.path, project.dirName) : "",
                 sampleIdentifierParserBeanNames: SampleIdentifierParserBeanName.values()*.name(),
-                tumorEntities                  : TumorEntity.list().sort(),
+                tumorEntities                  : tumorEntityService.list().sort(),
                 projectTypes                   : Project.ProjectType.values(),
                 processingPriority             : project?.processingPriority,
                 processingPriorities           : processingPriorityService.allSortedByPriority(),
                 qcThresholdHandlingDropdown    : QcThresholdHandling.values(),
-                allSpeciesWithStrain           : SpeciesWithStrain.list().sort { it.toString() } ?: [],
-                allProjectGroups               : ProjectGroup.list(),
+                allSpeciesWithStrain           : speciesWithStrainService.list().sort { it.toString() } ?: [],
+                allProjectGroups               : projectGroupService.list(),
                 publiclyAvailable              : project?.publiclyAvailable,
                 closed                         : project?.closed,
                 projectRequestAvailable        : project?.projectRequestAvailable,
@@ -159,16 +161,13 @@ class ProjectConfigController implements CheckAndCall {
 
     def updateTumorEntity(UpdateProjectCommand cmd) {
         checkErrorAndCallMethod(cmd) {
-            projectService.updateProjectField(CollectionUtils.atMostOneElement(TumorEntity.findAllByName(cmd.value)),
-                    cmd.fieldName, projectSelectionService.requestedProject)
+            projectService.updateProjectField(tumorEntityService.findByName(cmd.value), cmd.fieldName, projectSelectionService.requestedProject)
         }
     }
 
     def updateProjectGroup(UpdateProjectCommand cmd) {
         checkErrorAndCallMethod(cmd) {
-            projectService.updateProjectField(
-                    CollectionUtils.atMostOneElement(ProjectGroup.findAllByName(cmd.value)), cmd.fieldName, projectSelectionService.requestedProject
-            )
+            projectService.updateProjectField(projectGroupService.findByName(cmd.value), cmd.fieldName, projectSelectionService.requestedProject)
         }
     }
 
@@ -250,20 +249,6 @@ class ProjectConfigController implements CheckAndCall {
         projectService.updateCustomFinalNotification(projectSelectionService.requestedProject, value.toBoolean())
         Map map = [success: true]
         render map as JSON
-    }
-
-    private String getLastReceivedDate(Project project) {
-        Timestamp[] timestamps = SeqTrack.createCriteria().get {
-            sample {
-                individual {
-                    eq("project", project)
-                }
-            }
-            projections {
-                max("dateCreated")
-            }
-        }
-        return timestamps ? TimeFormats.DATE_TIME.getFormattedDate(timestamps[0] as Date) : ''
     }
 }
 

@@ -302,7 +302,7 @@ class CellRangerConfigurationServiceIntegrationSpec extends Specification implem
         CellRangerMwpParameter parameter = createCellRangerMwpParameter(expectedCells: expectedCells, enforcedCells: enforcedCells)
 
         when:
-        cellRangerConfigurationService.createMergingWorkPackagesForSample(sampleA, parameter, requester)
+        cellRangerConfigurationService.findAllMergingWorkPackagesBySamplesAndPipeline(sampleA, parameter, requester)
 
         then:
         CellRangerMergingWorkPackage mwp = CollectionUtils.exactlyOneElement(CellRangerMergingWorkPackage.all)
@@ -331,7 +331,7 @@ class CellRangerConfigurationServiceIntegrationSpec extends Specification implem
         ])
 
         expect:
-        cellRangerConfigurationService.createMergingWorkPackagesForSample(oldMWP.sample, parameter, requester)
+        cellRangerConfigurationService.findAllMergingWorkPackagesBySamplesAndPipeline(oldMWP.sample, parameter, requester)
     }
 
     @Unroll
@@ -347,7 +347,7 @@ class CellRangerConfigurationServiceIntegrationSpec extends Specification implem
         ])
 
         when:
-        cellRangerConfigurationService.createMergingWorkPackagesForSample(oldMWP.sample, parameter, requester)
+        cellRangerConfigurationService.findAllMergingWorkPackagesBySamplesAndPipeline(oldMWP.sample, parameter, requester)
 
         then:
         thrown(ValidationException)
@@ -365,7 +365,7 @@ class CellRangerConfigurationServiceIntegrationSpec extends Specification implem
         List<SeqTrack> seqTracks = setupMultipleSeqTracksOfDifferentSeqPlatformGroupsAndLibPrepKits()
 
         when:
-        cellRangerConfigurationService.createMergingWorkPackagesForSample(sampleA, parameter, requester)
+        cellRangerConfigurationService.findAllMergingWorkPackagesBySamplesAndPipeline(sampleA, parameter, requester)
 
         then:
         seqTracks.size() == 8
@@ -404,7 +404,7 @@ class CellRangerConfigurationServiceIntegrationSpec extends Specification implem
         sampleA.refresh()
 
         when:
-        cellRangerConfigurationService.createMergingWorkPackagesForSample(sampleA, parameter, requester)
+        cellRangerConfigurationService.findAllMergingWorkPackagesBySamplesAndPipeline(sampleA, parameter, requester)
 
         then:
         CellRangerMergingWorkPackage mwp = CollectionUtils.exactlyOneElement(CellRangerMergingWorkPackage.all)

@@ -27,7 +27,6 @@ import de.dkfz.tbi.otp.dataprocessing.WorkflowConfigService
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfigService
 import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.otp.utils.CollectionUtils
 
 trait ConfigurePipelineHelper {
 
@@ -36,19 +35,17 @@ trait ConfigurePipelineHelper {
     WorkflowConfigService workflowConfigService
 
     boolean validateUniqueness(ConfigurePipelineSubmitCommand cmd, Project project, Pipeline pipeline) {
-        return RoddyWorkflowConfig.findAllWhere([
-                project       : project,
-                seqType       : cmd.seqType,
-                pipeline      : pipeline,
-                programVersion: "${cmd.pluginName}:${cmd.programVersion}",
-                configVersion : cmd.config,
-        ]).empty
+        return roddyWorkflowConfigService.findAllByProjectAndSeqTypeAndPipelineAndProgramVersionAndConfigVersion(
+                project,
+                cmd.seqType,
+                pipeline,
+                "${cmd.pluginName}:${cmd.programVersion}",
+                cmd.config,
+        ).empty
     }
 
     Map getValues(Project project, SeqType seqType, Pipeline pipeline) {
-        RoddyWorkflowConfig latestConfig = CollectionUtils.atMostOneElement(RoddyWorkflowConfig.findAllByProjectAndSeqTypeAndPipelineAndIndividualIsNull(
-                project, seqType, pipeline, [sort: 'id', order: 'desc', max: 1,]
-        ))
+        RoddyWorkflowConfig latestConfig = roddyWorkflowConfigService.findLatestConfigByProjectAndSeqTypeAndPipeline(project, seqType, pipeline)
         String nextConfigVersion = workflowConfigService.getNextConfigVersion(latestConfig?.configVersion)
 
         RoddyWorkflowConfigService.ConfigState configState = roddyWorkflowConfigService.getCurrentFilesystemState(project, seqType, pipeline)
