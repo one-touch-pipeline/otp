@@ -174,6 +174,7 @@ class AlignmentQualityOverviewController implements CheckAndCall {
     QcTrafficLightService qcTrafficLightService
     ProcessingOptionService processingOptionService
     CellRangerConfigurationService cellRangerConfigurationService
+    DataFileService dataFileService
 
     def index(AlignmentQcCommand cmd) {
         Project project = projectSelectionService.selectedProject
@@ -335,7 +336,7 @@ class AlignmentQualityOverviewController implements CheckAndCall {
             */
             Double readLength = null
             if (seqTracks) {
-                DataFile dataFile = DataFile.findAllBySeqTrack(seqTracks.first()).first()
+                DataFile dataFile = dataFileService.findAllBySeqTrack(seqTracks.first()).first()
                 String readLengthString = dataFile.sequenceLength
                 if (readLengthString) {
                     readLength = readLengthString.contains('-') ? (readLengthString.split('-').sum {

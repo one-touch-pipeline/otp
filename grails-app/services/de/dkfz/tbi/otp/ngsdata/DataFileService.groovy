@@ -41,4 +41,8 @@ class DataFileService {
             }
         } as List<DataFile>
     }
+
+    List<DataFile> findAllBySeqTrack(SeqTrack seqTrack) {
+        return DataFile.findAllBySeqTrack(seqTrack)
+    }
 }
