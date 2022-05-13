@@ -34,14 +34,15 @@ class ClusterJobRedirectController {
             redirect: "GET",
     ]
 
+    ClusterJobService clusterJobService
+
     def redirect(ClusterJobCommand cmd) {
         if (cmd.hasErrors()) {
             return response.sendError(HttpStatus.NOT_FOUND.value())
         }
 
         // The clusterJobId is not unique. Therefore the newest clusterJobId is fetched and used here.
-        ClusterJob dbClusterJob = CollectionUtils.atMostOneElement(ClusterJob.findAllByClusterJobId(cmd.clusterJob.clusterJobId,
-                [max: 1, sort: "dateCreated", order: "desc"]))
+        ClusterJob dbClusterJob = clusterJobService.findNewestClusterJobByClusterJobId(cmd.clusterJob.clusterJobId)
 
         if (!dbClusterJob) {
             return response.sendError(HttpStatus.NOT_FOUND.value())
