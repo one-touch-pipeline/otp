@@ -80,6 +80,10 @@ class ClusterJobService {
  AND job.exit_status != 'FAILED'
 """
 
+    ClusterJob findById(long id) {
+        return ClusterJob.get(id)
+    }
+
     /**
      * creates a cluster job object with at this time known attributes
      */

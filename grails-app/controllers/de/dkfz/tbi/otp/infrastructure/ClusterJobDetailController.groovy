@@ -45,7 +45,7 @@ class ClusterJobDetailController {
     ]
 
     def show(NavigationCommand navigationCommand) {
-        ClusterJob clusterJob = ClusterJob.get(params.id as long)
+        ClusterJob clusterJob = clusterJobService.findById(params.id as long)
         Individual individual = clusterJob ? clusterJobService.findProcessParameterObjectByClusterJob(clusterJob)?.individual : null
         Project project = clusterJob.oldSystem ? individual?.project : clusterJob.workflowStep.workflowRun.project
 
@@ -62,7 +62,7 @@ class ClusterJobDetailController {
     }
 
     def showLog(NavigationCommand navigationCommand) {
-        ClusterJob clusterJob = ClusterJob.get(params.id as long)
+        ClusterJob clusterJob = clusterJobService.findById(params.id as long)
         String content = clusterJobService.getClusterJobLog(clusterJob)
         return [
                 job    : clusterJob,
