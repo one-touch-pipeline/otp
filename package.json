@@ -3,7 +3,7 @@
     "lint": "eslint ./grails-app/assets/javascripts",
     "lint-fix": "npm run lint -- --fix --rule \"prefer-template: 0\" --rule \"strict: 0\"",
     "lint-export": "npm run lint -- -f html -o ./build/reports/eslint/lint.html",
-    "cy:run":  "cypress run",
+    "cy:run": "cypress run",
     "cy:open": "cypress open"
   },
   "devDependencies": {
