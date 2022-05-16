@@ -28,7 +28,9 @@ import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.utils.DataTableCommand
 import de.dkfz.tbi.util.TimeFormats
 
+import java.time.Instant
 import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 
 @Secured("hasRole('ROLE_OPERATOR')")
 class ProcessingTimeStatisticsController {
@@ -44,7 +46,7 @@ class ProcessingTimeStatisticsController {
 
     def index() {
         return [
-                dateFrom: TimeFormats.DATE.getFormattedLocalDate(LocalDate.now() - 6),
+                dateFrom: TimeFormats.DATE.getFormattedDate(Date.from(Instant.now().minus(6, ChronoUnit.DAYS))),
                 dateTo  : TimeFormats.DATE.getFormattedLocalDate(LocalDate.now()),
         ]
     }
