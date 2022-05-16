@@ -492,3 +492,20 @@ task esLintAutoFix(type: NpmTask) {
     environment = ['CI':'true']
     args = ['run', 'lint-fix']
 }
+
+task runCypressTests(type: NpmTask) {
+    doFirst {
+        println "Make sure that OTP is running and the connection is configured in cypress.env.json"
+    }
+    dependsOn npmInstall
+    environment = ['CI':'true']
+    args = ['run', 'cy:run']
+}
+
+task runCypressTestsInWindow(type: NpmTask) {
+    doFirst {
+        println "Make sure that OTP is running and the connection is configured in cypress.env.json"
+    }
+    dependsOn npmInstall
+    args = ['run', 'cy:open']
+}
