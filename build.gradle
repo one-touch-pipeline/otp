@@ -191,7 +191,9 @@ integrationTest {
             }
         }
     } else {
-        println "use h2 database"
+        doFirst {
+            println "use h2 database"
+        }
     }
 }
 
