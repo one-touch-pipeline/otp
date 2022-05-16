@@ -27,7 +27,6 @@ import grails.validation.Validateable
 
 import de.dkfz.tbi.otp.CheckAndCall
 import de.dkfz.tbi.otp.FlashMessage
-import de.dkfz.tbi.otp.ngsdata.UserProjectRole
 import de.dkfz.tbi.otp.ngsdata.UserProjectRoleService
 import de.dkfz.tbi.otp.security.Role
 import de.dkfz.tbi.otp.security.User
