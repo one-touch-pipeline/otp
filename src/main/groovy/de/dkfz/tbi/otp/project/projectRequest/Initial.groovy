@@ -81,6 +81,7 @@ class Initial implements ProjectRequestState {
     }
 
     @Override
-    void create() {
+    void create(ProjectRequest projectRequest) {
+        assert("Project can not created in Initial state")
     }
 }

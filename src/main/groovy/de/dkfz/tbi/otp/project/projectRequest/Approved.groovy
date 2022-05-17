@@ -92,7 +92,9 @@ class Approved implements ProjectRequestState {
 
     @Override
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    void create() { }
+    void create(ProjectRequest projectRequest) {
+        projectRequestStateProvider.setState(projectRequest, Created)
+    }
 
     @Override
     @Secured("hasRole('ROLE_OPERATOR')")

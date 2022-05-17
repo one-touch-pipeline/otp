@@ -55,5 +55,5 @@ trait ProjectRequestState {
 
     abstract void delete(ProjectRequest projectRequest)
 
-    abstract void create()
+    abstract void create(ProjectRequest projectRequest)
 }
