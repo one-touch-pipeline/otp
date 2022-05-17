@@ -87,7 +87,7 @@ class ClusterJobService {
     /**
      * The clusterJobId is not unique. Therefore the newest clusterJobId is fetched.
      */
-    ClusterJob findNewestClusterJobByClusterJobId(long id) {
+    ClusterJob findNewestClusterJobByClusterJobId(String id) {
         return CollectionUtils.atMostOneElement(ClusterJob.findAllByClusterJobId(id, [max: 1, sort: "dateCreated", order: "desc"]))
     }
 
