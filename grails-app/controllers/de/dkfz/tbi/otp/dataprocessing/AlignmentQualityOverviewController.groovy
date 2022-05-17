@@ -470,7 +470,7 @@ class AlignmentQualityOverviewController implements CheckAndCall {
                                     ).toString()
                             ),
                             referenceGenome  : abstractMergedBamFile.workPackage.referenceGenomeIndex.toString(),
-                            cellRangerVersion: cellRangerConfigurationService.getWorkflowConfig(project).programVersion,
+                            cellRangerVersion: ((SingleCellBamFile)abstractMergedBamFile).mergingWorkPackage.config.programVersion,
                     ]
                     qcKeys += [
                             'expectedCells',
