@@ -182,7 +182,9 @@ class ProjectRequestController implements CheckAndCall {
     }
 
     def reject(ProjectRequestRejectCommand cmd) {
-        if (!commandIsValid(cmd)) {
+        if (cmd.hasErrors()) {
+            flash.cmd = cmd
+            flash.message = new FlashMessage(g.message(code: "projectRequest.store.failure") as String, cmd.errors)
             redirect(action: ACTION_VIEW, id: cmd.projectRequest.id)
             return
         }
@@ -205,7 +207,9 @@ class ProjectRequestController implements CheckAndCall {
     }
 
     def approve(ApprovalCommand cmd) {
-        if (!commandIsValid(cmd)) {
+        if (cmd.hasErrors()) {
+            flash.cmd = cmd
+            flash.message = new FlashMessage(g.message(code: "projectRequest.store.failure") as String, cmd.errors)
             redirect(action: ACTION_VIEW, id: cmd.projectRequest.id)
             return
         }
@@ -290,8 +294,9 @@ class ProjectRequestController implements CheckAndCall {
     }
 
     private void saveProjectRequest(Closure<Long> closure, ProjectRequestCreationCommand cmd, boolean redirectView) {
-        if (!commandIsValid(cmd)) {
+        if (cmd.hasErrors()) {
             flash.cmd = cmd
+            flash.message = new FlashMessage(g.message(code: "projectRequest.store.failure") as String, cmd.errors)
             redirect(action: ACTION_INDEX)
             return
         }
@@ -310,15 +315,6 @@ class ProjectRequestController implements CheckAndCall {
             flash.message = new FlashMessage(g.message(code: "error.switchedUserDeniedException.header") as String, e.message)
         }
         redirect(action: ACTION_INDEX)
-    }
-
-    private boolean commandIsValid(Validateable cmd) {
-        if (!cmd.validate()) {
-            flash.message = new FlashMessage(g.message(code: "projectRequest.store.failure") as String, cmd.errors)
-            flash.cmd = cmd
-            return false
-        }
-        return true
     }
 }
 
