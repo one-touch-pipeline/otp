@@ -69,6 +69,8 @@ class LicenseCheck {
             "logs",
             "out",
             "target",
+
+            "cypress/fixtures",
     ].collect { Paths.get(it) }
 
     static List<Path> ignoredFiles = [
