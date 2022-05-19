@@ -32,9 +32,13 @@ import javax.servlet.http.HttpServletResponse
 class ErrorsController {
     SpringSecurityService springSecurityService
 
+    static List<String> allHttpMethods = ["GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "TRACE", "PATCH"]
+
     static allowedMethods = [
             error403                   : "GET",
             error404                   : "GET",
+            error405                   : allHttpMethods,
+            error500                   : allHttpMethods,
             noProject                  : "GET",
             switchedUserDeniedException: "GET",
     ]
@@ -49,6 +53,7 @@ class ErrorsController {
     }
 
     def error404 = {
+        response.status = HttpServletResponse.SC_NOT_FOUND
         if (springSecurityService.isAjax(request)) {
             return render(request.forwardURI)
         } else {
@@ -56,13 +61,12 @@ class ErrorsController {
         }
     }
 
-    @SuppressWarnings("ControllerMethodNotInAllowedMethods")
     def error405 = {
+        response.status = HttpServletResponse.SC_METHOD_NOT_ALLOWED
         return [method: request.method]
     }
 
-    @SuppressWarnings("ControllerMethodNotInAllowedMethods")
-    def error500() {
+    def error500 = {
         Throwable throwable = request.exception
         String stackTrace = ''
         if (throwable) {
@@ -70,6 +74,7 @@ class ErrorsController {
         }
         String digest = stackTrace.encodeAsMD5()
         log.error("Displaying exception with digest ${digest}.")
+        response.status = HttpServletResponse.SC_INTERNAL_SERVER_ERROR
         if (springSecurityService.isAjax(request)) {
             render digest
         } else {
@@ -81,9 +86,13 @@ class ErrorsController {
         }
     }
 
-    def noProject() { }
+    def noProject() {
+        response.status = HttpServletResponse.SC_NOT_FOUND
+        return [:]
+    }
 
     def switchedUserDeniedException() {
+        response.status = HttpServletResponse.SC_UNAUTHORIZED
         return [
                 exception: request.getAttribute('exception')
         ]
