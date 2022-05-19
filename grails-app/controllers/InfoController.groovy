@@ -80,6 +80,7 @@ class InfoController {
     @GrailsCompileStatic
     def partners() { }
 
+    @Secured('isFullyAuthenticated()')
     def templates() {
         return [
                 availableTemplates: documentService.listDocuments().collect {
