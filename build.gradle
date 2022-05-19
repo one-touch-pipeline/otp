@@ -497,7 +497,7 @@ task esLintAutoFix(type: NpmTask) {
 
 task runCypressTests(type: NpmTask) {
     doFirst {
-        println "Make sure that OTP is running and the connection is configured in cypress.env.json"
+        println "Make sure that OTP is running, the connection is configured via environment variable CYPRESS_BASE_URL and credentials are set in cypress.env.json"
     }
     dependsOn npmInstall
     environment = ['CI':'true']
@@ -506,7 +506,7 @@ task runCypressTests(type: NpmTask) {
 
 task runCypressTestsInWindow(type: NpmTask) {
     doFirst {
-        println "Make sure that OTP is running and the connection is configured in cypress.env.json"
+        println "Make sure that OTP is running, the connection is configured via environment variable CYPRESS_BASE_URL and credentials are set in cypress.env.json"
     }
     dependsOn npmInstall
     args = ['run', 'cy:open']
