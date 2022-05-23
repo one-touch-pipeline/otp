@@ -24,7 +24,8 @@
 To be used in conjunction with: common/DataTableFilter.js
 --}%
 <%@ page import="de.dkfz.tbi.util.TimeFormats" %>
-<%@ page import="java.time.LocalDate" %>
+<%@ page import="java.time.Instant" %>
+<%@ page import="java.time.temporal.ChronoUnit" %>
 <div id="data-table-filter-container" class="rounded-page-header-box" style="display: table">
     <h3 style="display: table-cell; vertical-align: middle"><g:message code="search.extended.header"/>:</h3>
     <table style="display: table-cell" id="searchCriteriaTable">
@@ -61,10 +62,10 @@ To be used in conjunction with: common/DataTableFilter.js
                         <span id="${column.name}" class="dateSelection">
                             <g:message code="search.from.date"/>:
                             <input type="date" name="${column.name}_start" autocomplete="off"
-                                   value="${TimeFormats.DATE.getFormattedLocalDate((LocalDate.now() - 7))}"/>
+                                   value="${TimeFormats.DATE.getFormattedDate(Date.from(Instant.now().minus(7, ChronoUnit.DAYS)))}"/>
                             <g:message code="search.to.date"/>:
                             <input type="date" name="${column.name}_end" autocomplete="off"
-                                   value="${TimeFormats.DATE.getFormattedLocalDate(LocalDate.now())}"/>
+                                   value="${TimeFormats.DATE.getFormattedDate(Date.from(Instant.now()))}"/>
                         </span>
                     </g:elseif>
                     <g:elseif test="${column.type == "NUMBER"}">
