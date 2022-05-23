@@ -129,8 +129,8 @@
                     </g:each>
                 </g:if>
                 <tr>
-                    <td><g:message code="projectRequest.comments"/></td>
-                    <td><div class="project-multiline-wrapper">${projectRequest.comments}</div></td>
+                    <td><g:message code="projectRequest.requesterComment"/></td>
+                    <td><div class="project-multiline-wrapper">${projectRequest.requesterComment}</div></td>
                 </tr>
             </table>
         </g:if>

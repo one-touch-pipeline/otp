@@ -64,6 +64,7 @@ class Check implements ProjectRequestState {
     void reject(ProjectRequest projectRequest, String rejectComment) {
         projectRequestStateProvider.setState(projectRequest, RequesterEdit)
         projectRequestPersistentStateService.setCurrentOwner(projectRequest.state, projectRequest.requester)
+        commentService.saveComment(projectRequest, rejectComment)
         projectRequestService.sendOperatorRejectEmail(projectRequest, rejectComment)
     }
 

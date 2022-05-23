@@ -23,12 +23,14 @@
 <%@ page import="de.dkfz.tbi.otp.project.projectRequest.StoragePeriod" %>
 <%@ page import="de.dkfz.tbi.otp.project.projectRequest.ProjectRequestStateProvider" %>
 <%@ page import="de.dkfz.tbi.otp.project.projectRequest.Approval" %>
+<%@ page import="de.dkfz.tbi.util.TimeFormats" %>
 
 
 <html>
 <head>
     <title>${g.message(code: "projectRequest.view.title", args: [projectRequest.name])}</title>
     <asset:javascript src="taglib/NoSwitchedUser.js"/>
+    <asset:stylesheet src="pages/projectRequest/index.less"/>
 </head>
 
 <body>
@@ -123,27 +125,52 @@
                         </tr>
                     </g:each>
                     <tr>
-                        <td>${g.message(code: "projectRequest.comments")}</td>
+                        <td>${g.message(code: "projectRequest.requesterComment")}</td>
                         <td>
-                            <div style="white-space: pre-line" id="comments">${projectRequest.comments}</div>
+                            <div style="white-space: pre-line" id="comments">${projectRequest.requesterComment}</div>
                         </td>
                     </tr>
 
+                    <g:set var="enableAdditionalCommentField" value="${false}"/>
                     <g:if test="${["check", "approval", "approved"].contains(projectRequest.state.beanName)}">
-                        <g:set var="showAdditionalCommentField" value="${false}"/>
+                        <g:set var="enableAdditionalCommentField" value="${currentUserIsProjectAuthority}"/>
                         <sec:ifAnyGranted roles="ROLE_OPERATOR">
-                            <g:set var="showAdditionalCommentField" value="${true}"/>
+                            <g:set var="enableAdditionalCommentField" value="${true}"/>
                         </sec:ifAnyGranted>
-                        <g:if test="${currentUserIsProjectAuthority || showAdditionalCommentField}">
-                            <tr>
-                                <td>${g.message(code: "projectRequest.additionalComments")}</td>
-                                <td>
-                                    <textarea class="form-control" name="additionalComment" id="additionalComment"></textarea>
-                                </td>
-                            </tr>
-                        </g:if>
                     </g:if>
 
+                    <g:if test="${enableAdditionalCommentField || projectRequest.comments}">
+                        <tr>
+                            <td>${g.message(code: "projectRequest.additionalComments")}</td>
+                            <td>
+                            <!-- Table containing the existing comments -->
+                                <g:if test="${projectRequest.comments}">
+                                    <table class="table table-sm table-striped table-hover">
+                                        <thead>
+                                        <tr>
+                                            <td>${g.message(code: "comment.author")}</td>
+                                            <td>${g.message(code: "comment.comment")}</td>
+                                            <td>${g.message(code: "comment.lastModified")}</td>
+                                        </tr>
+
+                                        </thead>
+                                        <tbody>
+                                        <g:each in="${projectRequest.comments}" var="comment">
+                                            <tr>
+                                                <td>${comment.author}</td>
+                                                <td class="wrap-line-breaks">${comment.comment}</td>
+                                                <td>${TimeFormats.DATE.getFormattedDate(comment.modificationDate)}</td>
+                                            </tr>
+                                        </g:each>
+                                    </table>
+                                </g:if>
+                                <g:if test="${enableAdditionalCommentField}">
+                                    <textarea class="form-control"
+                                              name="additionalComment" id="additionalComment"></textarea>
+                                </g:if>
+                            </td>
+                        </tr>
+                    </g:if>
 
                     <tr>
                         <td>${g.message(code: "projectRequest.users")}</td>
@@ -169,7 +196,7 @@
                     </div>
                 </g:if>
 
-                <!-- form actions -->
+            <!-- form actions -->
                 <g:render template="templates/submitArea" model="[buttonActions: buttonActions]"/>
             </div>
 

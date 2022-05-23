@@ -437,7 +437,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
                 sequencingCenters       : ["TestCenter", "TestCenter2"],
                 projectRequest          : projectRequest,
                 keywords                : keywords,
-                comments                : "Comments for the request.",
+                requesterComment        : "Comments for the request.",
                 projectType             : Project.ProjectType.SEQUENCING,
 
         ])
@@ -466,7 +466,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         result.sequencingCenters == cmd.sequencingCenters as Set
         result.approxNoOfSamples == cmd.approxNoOfSamples
         result.seqTypes == cmd.seqTypes as Set
-        result.comments == cmd.comments
+        result.requesterComment == cmd.requesterComment
         result.storageUntil == resultStorageUntil
         result.projectType == cmd.projectType
 

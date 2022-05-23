@@ -25,6 +25,7 @@ import grails.testing.gorm.DataTest
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.domainFactory.UserDomainFactory
 import de.dkfz.tbi.otp.project.*
 import de.dkfz.tbi.otp.security.SecurityService
@@ -51,14 +52,18 @@ class CheckSpec extends Specification implements UserDomainFactory, DataTest {
     ProjectRequestStateProvider projectRequestStateProvider
     ProjectRequestState state
     ProjectRequestPersistentStateService projectRequestPersistentStateService
+    CommentService commentService
 
     void setup() {
         securityService = Mock(SecurityService)
         projectRequestService = Mock(ProjectRequestService)
         projectRequestStateProvider = Mock(ProjectRequestStateProvider)
         projectRequestPersistentStateService = Mock(ProjectRequestPersistentStateService)
+        commentService = Mock(CommentService)
+
         state = new Check(securityService: securityService, projectRequestService: projectRequestService,
-                projectRequestStateProvider: projectRequestStateProvider, projectRequestPersistentStateService: projectRequestPersistentStateService)
+                projectRequestStateProvider: projectRequestStateProvider, projectRequestPersistentStateService: projectRequestPersistentStateService,
+                commentService: commentService)
     }
 
     void "reject"() {
@@ -76,6 +81,7 @@ class CheckSpec extends Specification implements UserDomainFactory, DataTest {
         1 * projectRequestStateProvider.setState(projectRequest, RequesterEdit) >> _
         1 * projectRequestPersistentStateService.setCurrentOwner(projectRequest.state, requester)
         1 * projectRequestService.sendOperatorRejectEmail(projectRequest, rejectComment)
+        1 * commentService.saveComment(projectRequest, rejectComment)
         0 * _
     }
 

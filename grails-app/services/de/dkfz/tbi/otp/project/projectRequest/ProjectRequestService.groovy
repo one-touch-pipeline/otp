@@ -73,7 +73,8 @@ class ProjectRequestService {
                 sequencingCenters       : cmd.sequencingCenters,
                 approxNoOfSamples       : cmd.approxNoOfSamples,
                 seqTypes                : cmd.seqTypes as Set,
-                comments                : cmd.comments,
+                requesterComment        : cmd.requesterComment,
+                comments                : cmd.projectRequest?.comments ?: [],
                 requester               : cmd.projectRequest?.requester ?: securityService.currentUserAsUser,
                 users                   : users,
         ]

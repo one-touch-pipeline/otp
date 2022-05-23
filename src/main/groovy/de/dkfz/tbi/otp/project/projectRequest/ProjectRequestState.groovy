@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.project.projectRequest
 
 import org.springframework.beans.factory.annotation.Autowired
 
+import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.project.ProjectRequest
 import de.dkfz.tbi.otp.security.SecurityService
 
@@ -36,6 +37,9 @@ trait ProjectRequestState {
 
     @Autowired
     SecurityService securityService
+
+    @Autowired
+    CommentService commentService
 
     abstract List<ProjectRequestAction> getIndexActions(ProjectRequest projectRequest)
 

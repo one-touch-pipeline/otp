@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.project.projectRequest
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
+import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.domainFactory.UserDomainFactory
 import de.dkfz.tbi.otp.project.*
 import de.dkfz.tbi.otp.security.SecurityService
@@ -49,14 +50,18 @@ class ApprovalSpec extends Specification implements UserDomainFactory, DataTest 
     ProjectRequestStateProvider projectRequestStateProvider
     ProjectRequestState state
     ProjectRequestPersistentStateService projectRequestPersistentStateService
+    CommentService commentService
 
     void setup() {
         securityService = Mock(SecurityService)
         projectRequestService = Mock(ProjectRequestService)
         projectRequestStateProvider = Mock(ProjectRequestStateProvider)
         projectRequestPersistentStateService = Mock(ProjectRequestPersistentStateService)
+        commentService = Mock(CommentService)
+
         state = new Approval(securityService: securityService, projectRequestService: projectRequestService,
-                projectRequestStateProvider: projectRequestStateProvider, projectRequestPersistentStateService: projectRequestPersistentStateService)
+                projectRequestStateProvider: projectRequestStateProvider, projectRequestPersistentStateService: projectRequestPersistentStateService,
+                commentService: commentService)
     }
 
     void "reject"() {
@@ -71,9 +76,11 @@ class ApprovalSpec extends Specification implements UserDomainFactory, DataTest 
         state.reject(projectRequest, rejectComment)
 
         then:
+        1 * securityService.currentUserAsUser >> requester
         1 * projectRequestStateProvider.setState(projectRequest, RequesterEdit) >> _
         1 * projectRequestPersistentStateService.setCurrentOwner(projectRequest.state, requester)
         1 * projectRequestService.sendPiRejectEmail(projectRequest, rejectComment)
+        1 * commentService.addCommentToList(projectRequest, rejectComment, requester.username)
         0 * _
     }
 

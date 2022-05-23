@@ -84,8 +84,8 @@ class ProjectConfigController implements CheckAndCall {
     @Secured('isFullyAuthenticated()')
     Map index() {
         Project project = projectSelectionService.selectedProject
-        String projectRequestComments = (SpringSecurityUtils.ifAllGranted(Role.ROLE_OPERATOR) ?
-                projectRequestService.findProjectRequestByProject(project)?.comments : '')
+        String projectRequestComment = (SpringSecurityUtils.ifAllGranted(Role.ROLE_OPERATOR) ?
+                projectRequestService.findProjectRequestByProject(project)?.requesterComment : '')
 
         Map<String, String> abstractValues = projectRequestService.listAdditionalFieldValues(project)
 
@@ -95,7 +95,7 @@ class ProjectConfigController implements CheckAndCall {
         return [
                 creationDate                   : TimeFormats.DATE_TIME.getFormattedDate(project.dateCreated),
                 lastReceivedDate               : getLastReceivedDate(project),
-                projectRequestComments         : projectRequestComments,
+                projectRequestComment          : projectRequestComment,
                 directory                      : project ? LsdfFilesService.getPath(configService.rootPath.path, project.dirName) : "",
                 sampleIdentifierParserBeanNames: SampleIdentifierParserBeanName.values()*.name(),
                 tumorEntities                  : TumorEntity.list().sort(),

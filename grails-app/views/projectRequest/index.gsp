@@ -258,10 +258,10 @@
 
         <!-- Comments -->
         <div class="form-group row">
-            <label class="col-sm-2 col-form-label" for="comments">${g.message(code: "projectRequest.comments")}</label>
+            <label class="col-sm-2 col-form-label" for="requesterComment">${g.message(code: "projectRequest.requesterComment")}</label>
 
             <div class="col-sm-10">
-                <textarea class="form-control" name="comments" id="comments">${cmd?.comments}</textarea>
+                <textarea class="form-control" name="requesterComment" id="requesterComment">${cmd?.requesterComment}</textarea>
             </div>
         </div>
 

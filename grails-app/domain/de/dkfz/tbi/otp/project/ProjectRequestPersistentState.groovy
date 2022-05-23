@@ -26,6 +26,7 @@ import de.dkfz.tbi.otp.utils.Entity
 
 class ProjectRequestPersistentState implements Entity {
 
+    /** beanNames are provided by the classes implementing {@link de.dkfz.tbi.otp.project.projectRequest.ProjectRequestState} **/
     String beanName
     User currentOwner
 

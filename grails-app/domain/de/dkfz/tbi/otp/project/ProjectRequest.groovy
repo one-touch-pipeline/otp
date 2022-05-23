@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.otp.project
 
+import de.dkfz.tbi.otp.Comment
+import de.dkfz.tbi.otp.CommentableWithHistory
 import de.dkfz.tbi.otp.ngsdata.ProjectRoleService
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
@@ -30,7 +32,7 @@ import de.dkfz.tbi.otp.utils.Entity
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
-class ProjectRequest implements ProjectPropertiesGivenWithRequest, Entity {
+class ProjectRequest implements ProjectPropertiesGivenWithRequest, Entity, CommentableWithHistory {
     User requester
 
     Set<ProjectRequestUser> users
@@ -42,7 +44,8 @@ class ProjectRequest implements ProjectPropertiesGivenWithRequest, Entity {
     Set<String> sequencingCenters
     Integer approxNoOfSamples
     Set<SeqType> seqTypes
-    String comments
+    String requesterComment
+    List<Comment> comments
 
     static constraints = {
         project nullable: true, validator: { Project val, ProjectRequest obj ->
@@ -66,7 +69,7 @@ class ProjectRequest implements ProjectPropertiesGivenWithRequest, Entity {
         tumorEntity nullable: true
         speciesWithStrains nullable: true
         approxNoOfSamples nullable: true
-        comments nullable: true
+        requesterComment nullable: true
 
         users validator: { val, obj ->
             List<ProjectRequestUser> value = val?.toList()?.findAll() ?: []

@@ -358,7 +358,7 @@
                 <tr>
                     <td style="padding-top: 1em; padding-bottom: 1em; vertical-align: 1em"><g:message code="project.requestComment"/></td>
                     <td></td>
-                    <td><div class="project-multiline-wrapper" style="max-height: 20em; max-width: none">${projectRequestComments}</div></td>
+                    <td><div class="project-multiline-wrapper" style="max-height: 20em; max-width: none">${projectRequestComment}</div></td>
                 </tr>
             </sec:ifAllGranted>
             <tr>

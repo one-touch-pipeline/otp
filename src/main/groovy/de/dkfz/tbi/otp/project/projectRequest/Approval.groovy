@@ -79,8 +79,10 @@ class Approval implements ProjectRequestState {
     @Override
     @PreAuthorize("hasPermission(#projectRequest, 'PROJECT_REQUEST_NEEDED_PIS')")
     void reject(ProjectRequest projectRequest, String rejectComment) {
+        User currentUser = securityService.currentUserAsUser
         projectRequestStateProvider.setState(projectRequest, RequesterEdit)
         projectRequestPersistentStateService.setCurrentOwner(projectRequest.state, projectRequest.requester)
+        commentService.addCommentToList(projectRequest, rejectComment, currentUser.username)
         projectRequestService.sendPiRejectEmail(projectRequest, rejectComment)
     }
 

@@ -373,7 +373,7 @@ class ProjectRequestCreationCommand implements Validateable {
     List<String> sequencingCenters = []
     Integer approxNoOfSamples
     List<SeqType> seqTypes
-    String comments
+    String requesterComment
     List<ProjectRequestUserCommand> users
 
     List<String> additionalFieldName = []
@@ -398,7 +398,7 @@ class ProjectRequestCreationCommand implements Validateable {
         sequencingCenters nullable: true
         relatedProjects nullable: true, blank: false
         seqTypes nullable: true
-        comments nullable: true, blank: false
+        requesterComment nullable: true, blank: false
         approxNoOfSamples nullable: true, validator: { val, obj ->
             if (obj.projectType == Project.ProjectType.SEQUENCING && !val) {
                 return "projectRequest.approxNoOfSamples.null"
@@ -438,8 +438,8 @@ class ProjectRequestCreationCommand implements Validateable {
         relatedProjects = StringUtils.blankToNull(s)
     }
 
-    void setComments(String s) {
-        comments = StringUtils.blankToNull(s)
+    void setRequesterComment(String s) {
+        requesterComment = StringUtils.blankToNull(s)
     }
 
     static ProjectRequestCreationCommand fromProjectRequest(ProjectRequest projectRequest) {
@@ -468,7 +468,7 @@ class ProjectRequestCreationCommand implements Validateable {
                 sequencingCenters: projectRequest.sequencingCenters as List ?: [],
                 approxNoOfSamples: projectRequest.approxNoOfSamples,
                 seqTypes: projectRequest.seqTypes as List ?: [],
-                comments: projectRequest.comments,
+                requesterComment: projectRequest.requesterComment,
                 users: ProjectRequestUserCommand.fromProjectRequestUsers(projectRequest.users),
         )
     }
