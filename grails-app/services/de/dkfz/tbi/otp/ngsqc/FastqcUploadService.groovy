@@ -90,6 +90,6 @@ class FastqcUploadService {
     }
 
     String getFastQCFileContent(FastqcProcessedFile fastqc) {
-        return fastqcDataFilesService.getInputStreamFromZipFile(fastqc.dataFile, DATA_FILE_NAME).text
+        return fastqcDataFilesService.getInputStreamFromZipFile(fastqc, DATA_FILE_NAME).text
     }
 }

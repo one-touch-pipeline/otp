@@ -717,7 +717,7 @@ class DeletionService {
         notNull(dataFile, "The input dataFile is null")
         List<FastqcProcessedFile> fastqcProcessedFiles = FastqcProcessedFile.findAllByDataFile(dataFile)
         if (fastqcProcessedFiles) {
-            String fastqFile = fastqcDataFilesService.fastqcOutputFile(dataFile)
+            String fastqFile = fastqcDataFilesService.fastqcOutputPath(fastqcProcessedFiles.first())
             List<File> files = [
                     fastqFile,
                     "${fastqFile}.md5sum",

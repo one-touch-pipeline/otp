@@ -30,6 +30,7 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.DeletionService
 
 import java.nio.file.*
@@ -153,6 +154,8 @@ class WithdrawHelperService {
             [(it.seqTrack): it.comment]
         }
         dataFiles.each { DataFile dataFile ->
+            FastqcProcessedFile fastqcProcessedFile = CollectionUtils.atMostOneElement(FastqcProcessedFile.findAllByDataFile(dataFile))
+
             dataFile.fileWithdrawn = true
             dataFile.withdrawnDate = new Date()
             dataFile.withdrawnComment = commentBySeqTrack[dataFile.seqTrack]
@@ -161,9 +164,11 @@ class WithdrawHelperService {
             List<Path> filePaths = []
             filePaths.add(lsdfFilesService.getFileFinalPathAsPath(dataFile))
             filePaths.add(lsdfFilesService.getFileMd5sumFinalPathAsPath(dataFile))
-            filePaths.add(fastqcDataFilesService.fastqcOutputPath(dataFile))
-            filePaths.add(fastqcDataFilesService.fastqcHtmlPath(dataFile))
-            filePaths.add(fastqcDataFilesService.fastqcOutputMd5sumPath(dataFile))
+            if (fastqcProcessedFile) {
+                filePaths.add(fastqcDataFilesService.fastqcOutputPath(fastqcProcessedFile))
+                filePaths.add(fastqcDataFilesService.fastqcHtmlPath(fastqcProcessedFile))
+                filePaths.add(fastqcDataFilesService.fastqcOutputMd5sumPath(fastqcProcessedFile))
+            }
 
             filePaths.findAll { path ->
                 return Files.exists(path)

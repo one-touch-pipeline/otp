@@ -24,7 +24,6 @@ package de.dkfz.tbi.otp.workflowExecution
 import de.dkfz.tbi.otp.Commentable
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 import de.dkfz.tbi.otp.ngsdata.SeqType
-import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.Entity
 
 import java.time.LocalDate
@@ -79,8 +78,4 @@ class Workflow implements Commentable, Entity {
             allowedReferenceGenomes: ReferenceGenome,
             supportedSeqTypes      : SeqType,
     ]
-
-    static Workflow getExactlyOneWorkflow(String name) {
-        return CollectionUtils.exactlyOneElement(Workflow.findAllByNameAndDeprecatedDateIsNull(name))
-    }
 }

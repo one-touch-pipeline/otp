@@ -25,6 +25,7 @@ import grails.testing.gorm.DataTest
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
@@ -34,6 +35,7 @@ import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+import de.dkfz.tbi.otp.domainFactory.FastqcDomainFactory
 import de.dkfz.tbi.otp.domainFactory.pipelines.AlignmentPipelineFactory
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.job.processing.FileSystemService
@@ -46,13 +48,14 @@ import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
 import java.nio.file.Path
 
-class UnwithdrawServiceSpec extends Specification implements DomainFactoryCore, IsRoddy, DataTest {
+class UnwithdrawServiceSpec extends Specification implements DomainFactoryCore, IsRoddy, DataTest, FastqcDomainFactory {
 
     @Override
     Class[] getDomainClassesToMock() {
         return [
                 CellRangerConfig,
                 CellRangerMergingWorkPackage,
+                FastqcProcessedFile,
                 FastqImportInstance,
                 FileType,
                 IndelCallingInstance,
@@ -86,7 +89,8 @@ class UnwithdrawServiceSpec extends Specification implements DomainFactoryCore, 
         configService.clean()
     }
 
-    void "test unwithdrawSeqTracks, unwithdraws successfully"() {
+    @Unroll
+    void "test unwithdrawSeqTracks (fastqcAvailable: #fastqcAvailable), unwithdraws successfully"() {
         given:
         UnwithdrawStateHolder state = new UnwithdrawStateHolder()
 
@@ -109,20 +113,29 @@ class UnwithdrawServiceSpec extends Specification implements DomainFactoryCore, 
         ])
 
         SeqTrack seqTrack = createSeqTrackWithTwoDataFile([:], [fileWithdrawn: true])
+        List<FastqcProcessedFile> fastqcProcessedFiles = []
+        if (fastqcAvailable) {
+            seqTrack.dataFiles.each {
+                fastqcProcessedFiles << createFastqcProcessedFile([dataFile: it,])
+            }
+        }
         state.seqTracksWithComment = [new SeqTrackWithComment(seqTrack, "comment")]
 
-        List<Path> files = [
-                lsdfFilesService.getFileFinalPathAsPath(seqTrack.dataFiles.first()),
-                lsdfFilesService.getFileMd5sumFinalPathAsPath(seqTrack.dataFiles.first()),
-                fastqcDataFilesService.fastqcOutputPath(seqTrack.dataFiles.first()),
-                fastqcDataFilesService.fastqcOutputMd5sumPath(seqTrack.dataFiles.first()),
-                fastqcDataFilesService.fastqcHtmlPath(seqTrack.dataFiles.first()),
-                lsdfFilesService.getFileFinalPathAsPath(seqTrack.dataFiles.last()),
-                lsdfFilesService.getFileMd5sumFinalPathAsPath(seqTrack.dataFiles.last()),
-                fastqcDataFilesService.fastqcOutputPath(seqTrack.dataFiles.last()),
-                fastqcDataFilesService.fastqcOutputMd5sumPath(seqTrack.dataFiles.last()),
-                fastqcDataFilesService.fastqcHtmlPath(seqTrack.dataFiles.last()),
-        ]
+        List<Path> files = []
+        seqTrack.dataFiles.each {
+            files.addAll([
+                    lsdfFilesService.getFileFinalPathAsPath(it),
+                    lsdfFilesService.getFileMd5sumFinalPathAsPath(it),
+            ])
+        }
+        fastqcProcessedFiles.each {
+            files.addAll([
+                    fastqcDataFilesService.fastqcOutputPath(it),
+                    fastqcDataFilesService.fastqcOutputMd5sumPath(it),
+                    fastqcDataFilesService.fastqcHtmlPath(it),
+            ])
+        }
+
         files.each {
             CreateFileHelper.createFile(it)
         }
@@ -132,14 +145,17 @@ class UnwithdrawServiceSpec extends Specification implements DomainFactoryCore, 
 
         then:
         state.linksToCreate == [
-                (lsdfFilesService.getFileFinalPathAsPath(seqTrack.dataFiles.first())):
-                lsdfFilesService.getFileViewByPidPathAsPath(seqTrack.dataFiles.first()),
-                (lsdfFilesService.getFileFinalPathAsPath(seqTrack.dataFiles.last())) :
-                lsdfFilesService.getFileViewByPidPathAsPath(seqTrack.dataFiles.last()),
+                (lsdfFilesService.getFileFinalPathAsPath(seqTrack.dataFiles.first())): lsdfFilesService.getFileViewByPidPathAsPath(seqTrack.dataFiles.first()),
+                (lsdfFilesService.getFileFinalPathAsPath(seqTrack.dataFiles.last())) : lsdfFilesService.getFileViewByPidPathAsPath(seqTrack.dataFiles.last()),
         ]
-        state.pathsToChangeGroup.size() == 12
+        state.pathsToChangeGroup.size() == pathsToChangeGroup
         state.mergedBamFiles == []
         seqTrack.dataFiles.every { !it.isFileWithdrawn() }
+
+        where:
+        fastqcAvailable | pathsToChangeGroup
+        true            | 12
+        false           | 6
     }
 
     void "test unwithdrawBamFiles, unwithdraws successfully"() {
@@ -156,8 +172,8 @@ class UnwithdrawServiceSpec extends Specification implements DomainFactoryCore, 
                 fileSystemService: fileSystemService, abstractMergedBamFileService: abstractMergedBamFileService)
         UnwithdrawService service = new UnwithdrawService([
                 abstractMergedBamFileService: abstractMergedBamFileService,
-                fileSystemService      : fileSystemService,
-                withdrawBamFileServices: [
+                fileSystemService           : fileSystemService,
+                withdrawBamFileServices     : [
                         roddyBamFileWithdrawService,
                         cellRangerBamFileWithdrawService,
                 ],
@@ -197,8 +213,8 @@ class UnwithdrawServiceSpec extends Specification implements DomainFactoryCore, 
                 fileSystemService: fileSystemService, abstractMergedBamFileService: abstractMergedBamFileService)
         UnwithdrawService service = new UnwithdrawService([
                 abstractMergedBamFileService: abstractMergedBamFileService,
-                fileSystemService      : fileSystemService,
-                withdrawBamFileServices: [
+                fileSystemService           : fileSystemService,
+                withdrawBamFileServices     : [
                         roddyBamFileWithdrawService,
                         cellRangerBamFileWithdrawService,
                 ],

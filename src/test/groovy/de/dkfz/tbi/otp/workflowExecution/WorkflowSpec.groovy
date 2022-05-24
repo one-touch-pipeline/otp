@@ -27,8 +27,6 @@ import spock.lang.Specification
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 
-import java.time.LocalDate
-
 class WorkflowSpec extends Specification implements WorkflowSystemDomainFactory, DataTest {
 
     static final String WORKFLOW_NAME = "WORKFLOW"
@@ -38,43 +36,6 @@ class WorkflowSpec extends Specification implements WorkflowSystemDomainFactory,
         return [
                 Workflow,
         ]
-    }
-
-    void "getExactlyOneWorkflow, when a non deprecated workflow of the name exist, then return that workflow"() {
-        given:
-        createWorkflow()
-        Workflow workflow = createWorkflow([
-                name: WORKFLOW_NAME,
-        ])
-
-        when:
-        Workflow returnedWorkflow = Workflow.getExactlyOneWorkflow(WORKFLOW_NAME)
-
-        then:
-        returnedWorkflow == workflow
-    }
-
-    void "getExactlyOneWorkflow, when no workflow of the name exists, then throw an exception"() {
-        createWorkflow()
-
-        when:
-        Workflow.getExactlyOneWorkflow(WORKFLOW_NAME)
-
-        then:
-        thrown(AssertionError)
-    }
-
-    void "getExactlyOneWorkflow, when the only workflow with this name is deprecated, then throw an exception"() {
-        createWorkflow([
-                name          : WORKFLOW_NAME,
-                deprecatedDate: LocalDate.now(),
-        ])
-
-        when:
-        Workflow.getExactlyOneWorkflow(WORKFLOW_NAME)
-
-        then:
-        thrown(AssertionError)
     }
 
     void "validate, when workflow name not exist yet, then object is valid"() {

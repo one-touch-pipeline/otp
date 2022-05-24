@@ -28,11 +28,10 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.FastqcDataFilesService
 import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.SeqTrackService
 import de.dkfz.tbi.otp.ngsqc.FastqcUploadService
 import de.dkfz.tbi.otp.workflow.jobs.AbstractJob
 import de.dkfz.tbi.otp.workflow.jobs.JobStage
-import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 @Component
@@ -51,17 +50,8 @@ class FastqcParseJob extends AbstractJob implements FastqcShared {
 
     @Override
     void execute(WorkflowStep workflowStep) throws Throwable {
-        final SeqTrack seqTrack = getSeqTrack(workflowStep)
-
-        final List<WorkflowArtefact> workflowArtefacts = workflowStep.workflowRun.outputArtefacts.findAll {
-            it.key.startsWith(FastqcWorkflow.OUTPUT_FASTQC)
-        }*.value
-
-        SeqTrack.withTransaction {
-            seqTrackService.getSequenceFilesForSeqTrack(seqTrack).sort { it.mateNumber }.eachWithIndex { DataFile file, int i ->
-                FastqcProcessedFile fastqc = fastqcDataFilesService.getAndUpdateFastqcProcessedFile(file, workflowArtefacts[i])
-                fastqcUploadService.uploadFastQCFileContentsToDataBase(fastqc)
-            }
+        getFastqcProcessedFiles(workflowStep).each { FastqcProcessedFile fastqcProcessedFile ->
+            fastqcUploadService.uploadFastQCFileContentsToDataBase(fastqcProcessedFile)
         }
         workflowStateChangeService.changeStateToSuccess(workflowStep)
     }

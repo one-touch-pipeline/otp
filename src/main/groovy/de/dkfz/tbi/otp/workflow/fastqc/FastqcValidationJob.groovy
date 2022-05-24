@@ -27,8 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.FastqcDataFilesService
-import de.dkfz.tbi.otp.ngsdata.DataFile
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
 import de.dkfz.tbi.otp.workflow.jobs.AbstractOtpClusterValidationJob
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
@@ -38,15 +37,14 @@ import java.nio.file.Path
 @Slf4j
 @CompileStatic
 class FastqcValidationJob extends AbstractOtpClusterValidationJob implements FastqcShared {
+
     @Autowired
     FastqcDataFilesService fastqcDataFilesService
 
     @Override
     protected List<Path> getExpectedFiles(WorkflowStep workflowStep) {
-        SeqTrack seqTrack = getSeqTrack(workflowStep)
-
-        return seqTrack.dataFiles.collect { DataFile dataFile ->
-            fastqcDataFilesService.fastqcOutputPath(dataFile)
+        return getFastqcProcessedFiles(workflowStep).collect { FastqcProcessedFile fastqcProcessedFile ->
+            fastqcDataFilesService.fastqcOutputPath(fastqcProcessedFile)
         }
     }
 

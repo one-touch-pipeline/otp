@@ -505,9 +505,9 @@ class PanCancerDeciderServiceIntegrationSpec extends Specification implements Wo
         WorkflowArtefact artefact1 = createWorkflowArtefact(artefactType: ArtefactType.FASTQ)
         SeqTrack seqTrack = createSeqTrackWithTwoDataFile(workflowArtefact: artefact1)
         WorkflowArtefact artefact2 = createWorkflowArtefact(artefactType: ArtefactType.FASTQC)
-        DomainFactory.createFastqcProcessedFile(workflowArtefact: artefact2, dataFile: seqTrack.dataFiles.first())
+        DomainFactory.createFastqcProcessedFile(workflowArtefact: artefact2, dataFile: seqTrack.dataFiles.first(), workDirectoryName: 'workdir')
         WorkflowArtefact artefact3 = createWorkflowArtefact(artefactType: ArtefactType.FASTQC)
-        DomainFactory.createFastqcProcessedFile(workflowArtefact: artefact3, dataFile: seqTrack.dataFiles.last())
+        DomainFactory.createFastqcProcessedFile(workflowArtefact: artefact3, dataFile: seqTrack.dataFiles.last(), workDirectoryName: 'workdir')
 
         WorkflowArtefact artefact4 = createWorkflowArtefact(artefactType: ArtefactType.BAM)
         RoddyBamFile bamFile = createBamFile(workflowArtefact: artefact4, baseBamFile: createBamFile(seqTracks: [seqTrack]),
@@ -540,7 +540,7 @@ class PanCancerDeciderServiceIntegrationSpec extends Specification implements Wo
                 libraryPreparationKit: libraryPreparationKit)
         List<WorkflowArtefact> fastqcInputArtefacts = seqTrack1.dataFiles.collect {
             WorkflowArtefact inputArtefact = createWorkflowArtefact(artefactType: ArtefactType.FASTQC)
-            DomainFactory.createFastqcProcessedFile(workflowArtefact: inputArtefact, dataFile: it)
+            DomainFactory.createFastqcProcessedFile(workflowArtefact: inputArtefact, dataFile: it, workDirectoryName: 'workdir')
             return inputArtefact
         }
 
@@ -549,7 +549,7 @@ class PanCancerDeciderServiceIntegrationSpec extends Specification implements Wo
                 libraryPreparationKit: libraryPreparationKit)
         fastqcInputArtefacts += seqTrack2.dataFiles.collect {
             WorkflowArtefact inputArtefact = createWorkflowArtefact(artefactType: ArtefactType.FASTQC)
-            DomainFactory.createFastqcProcessedFile(workflowArtefact: inputArtefact, dataFile: it)
+            DomainFactory.createFastqcProcessedFile(workflowArtefact: inputArtefact, dataFile: it, workDirectoryName: 'workdir')
             return inputArtefact
         }
 

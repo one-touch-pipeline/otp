@@ -25,6 +25,7 @@ import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.DataFile
 import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 import java.nio.file.*
 
@@ -92,6 +93,8 @@ String md5sumDataFile = DataFile.findAllByFileWithdrawn(true).collect {
 }.sort().join('\n')
 
 String zipFiles = DataFile.findAllBySeqTrackIsNotNullAndFileWithdrawn(true).collect {
+    CollectionUtils.atMostOneElement(FastqcProcessedFile.findAllByDataFile(it))
+}.findAll().collect {
     fastqcDataFilesService.fastqcOutputPath(it)
 }.findAll { path ->
     path && Files.exists(path)
@@ -100,6 +103,8 @@ String zipFiles = DataFile.findAllBySeqTrackIsNotNullAndFileWithdrawn(true).coll
 }.sort().join('\n')
 
 String htmlFiles = DataFile.findAllBySeqTrackIsNotNullAndFileWithdrawn(true).collect {
+    CollectionUtils.atMostOneElement(FastqcProcessedFile.findAllByDataFile(it))
+}.findAll().collect {
     fastqcDataFilesService.fastqcHtmlPath(it)
 }.findAll { path ->
     path && Files.exists(path)
@@ -108,6 +113,8 @@ String htmlFiles = DataFile.findAllBySeqTrackIsNotNullAndFileWithdrawn(true).col
 }.sort().join('\n')
 
 String md5sumFiles = DataFile.findAllBySeqTrackIsNotNullAndFileWithdrawn(true).collect {
+    CollectionUtils.atMostOneElement(FastqcProcessedFile.findAllByDataFile(it))
+}.findAll().collect {
     fastqcDataFilesService.fastqcOutputMd5sumPath(it)
 }.findAll { path ->
     path && Files.exists(path)

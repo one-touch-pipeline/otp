@@ -43,6 +43,8 @@ class FastqcProcessedFile implements Artefact, Entity {
 
     DataFile dataFile
 
+    String workDirectoryName
+
     static belongsTo = [
             dataFile: DataFile,
     ]
@@ -51,6 +53,16 @@ class FastqcProcessedFile implements Artefact, Entity {
         dateFromFileSystem(nullable: true)
         dataFile(unique: true)
         workflowArtefact nullable: true
+        workDirectoryName validator: { String value, FastqcProcessedFile obj ->
+            if (value && obj.dataFile && FastqcProcessedFile.withCriteria {
+                dataFile {
+                    eq('seqTrack', obj.dataFile.seqTrack)
+                }
+                ne('workDirectoryName', value)
+            }) {
+                return "fastqcProcessedFile.workDirectoryName.differ"
+            }
+        }
     }
 
     static mapping = {

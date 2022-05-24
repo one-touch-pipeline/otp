@@ -30,6 +30,7 @@ import de.dkfz.tbi.otp.utils.TransactionUtils
 import de.dkfz.tbi.otp.workflowExecution.*
 
 import static groovyx.gpars.GParsPool.withPool
+
 /**
  * Creates new WorkflowRuns and WorkflowArtefacts based on the current SeqTrack data
  * @param BATCH_SIZE to process of seqTracks in trunks
@@ -66,11 +67,14 @@ assert batchSize > 1
 
 @Field final LsdfFilesService lsdfFilesService = ctx.lsdfFilesService
 
-@Field final List errorlist=[].asSynchronized()
+@Field final List errorlist = [].asSynchronized()
+
+WorkflowService workflowService = ctx.workflowService
 
 /*
  *main function to create WF runs and artefacts
  */
+
 void migrateToNewWorkflow(List<SeqTrack> seqTracks, Workflow workflow, ProcessingPriority priority, String outputRole, LsdfFilesService lsdfFilesService) {
     seqTracks.each { SeqTrack seqTrack ->
         if (!seqTrack.workflowArtefact) { // only process if the workflowArtefact is null
@@ -148,7 +152,7 @@ if (numSeqTracks != 0) {
     println "${numBatches} batches will be processed"
 
     //fetch the FastQ Installation Workflow
-    Workflow workflow = Workflow.getExactlyOneWorkflow(WORKFLOW_NAME)
+    Workflow workflow = workflowService.getExactlyOneWorkflow(WORKFLOW_NAME)
     assert workflow
     println "Migrate seqTracks to new workflow systems for Workflow \"${WORKFLOW_NAME}\""
 

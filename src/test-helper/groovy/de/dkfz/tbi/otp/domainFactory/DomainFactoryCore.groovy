@@ -23,7 +23,6 @@ package de.dkfz.tbi.otp.domainFactory
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.InformationReliability
-import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
 import de.dkfz.tbi.otp.dataprocessing.MergingCriteria
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.domainFactory.taxonomy.TaxonomyFactoryInstance
@@ -282,12 +281,6 @@ trait DomainFactoryCore implements DomainFactoryHelper {
                 kitInfoReliability   : { properties.libraryPreparationKit ? InformationReliability.KNOWN : InformationReliability.UNKNOWN_UNVERIFIED },
                 normalizedLibraryName: { SeqTrack.normalizeLibraryName(properties.libraryName) },
         ]
-    }
-
-    FastqcProcessedFile createFastqcProcessedFile(Map properties = [:]) {
-        return createDomainObject(FastqcProcessedFile, [
-                dataFile: { createDataFile() },
-        ], properties)
     }
 
     ReferenceGenome createReferenceGenome(Map properties = [:], boolean saveAndValidate = true) {

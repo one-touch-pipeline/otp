@@ -199,7 +199,7 @@ class DeletionServiceIntegrationTests implements UserAndRoles {
         DomainFactory.createMetaDataEntry(dataFile: dataFile)
 
         String fileFinalPath = lsdfFilesService.getFileFinalPath(dataFile)
-        String fastqFile = fastqcDataFilesService.fastqcOutputFile(dataFile)
+        String fastqFile = fastqcDataFilesService.fastqcOutputPath(fastqcProcessedFile)
         List<File> expected = [
                 fileFinalPath,
                 "${fileFinalPath}.md5sum",

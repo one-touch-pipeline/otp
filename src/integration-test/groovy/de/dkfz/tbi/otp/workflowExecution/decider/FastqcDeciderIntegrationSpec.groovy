@@ -26,8 +26,8 @@ import grails.transaction.Rollback
 import spock.lang.Specification
 
 import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.dataprocessing.FastqcDataFilesService
-import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.domainFactory.workflowSystem.FastqcWorkflowDomainFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.workflow.fastqc.FastqcWorkflow
@@ -37,16 +37,17 @@ import java.nio.file.Paths
 
 @Rollback
 @Integration
-class FastqcDeciderIntegrationSpec extends Specification implements WorkflowSystemDomainFactory {
+class FastqcDeciderIntegrationSpec extends Specification implements FastqcWorkflowDomainFactory {
 
     void "test decide"() {
         given:
-        Workflow workflow = createWorkflow(name: FastqcWorkflow.WORKFLOW)
+        WorkflowVersion workflowVersion = createFastqcWorkflowVersion()
+        Workflow workflow = workflowVersion.workflow
 
-        WorkflowArtefact wa1 = createWorkflowArtefact(artefactType: ArtefactType.FASTQ, producedBy: createWorkflowRun())
+        WorkflowArtefact wa1 = createWorkflowArtefact(artefactType: ArtefactType.FASTQ, producedBy: createWorkflowRun([workflowVersion: workflowVersion]))
         SeqTrack seqTrack = createSeqTrackWithTwoDataFile(workflowArtefact: wa1)
-        WorkflowArtefact wa12 = createWorkflowArtefact(artefactType: ArtefactType.FASTQ, producedBy: createWorkflowRun()) // already run
-        createWorkflowRunInputArtefact(workflowArtefact: wa12, workflowRun: createWorkflowRun(workflow: workflow))
+        WorkflowArtefact wa12 = createWorkflowArtefact(artefactType: ArtefactType.FASTQ, producedBy: createWorkflowRun([workflowVersion: workflowVersion])) // run finished already
+        createWorkflowRunInputArtefact(workflowArtefact: wa12, workflowRun: createWorkflowRun([workflowVersion: workflowVersion]))
         WorkflowArtefact wa2 = createWorkflowArtefact(artefactType: ArtefactType.FASTQ) // without artefact
         WorkflowArtefact wa3 = createWorkflowArtefact(artefactType: ArtefactType.FASTQC) // wrong type
         List<DataFile> dataFiles = DataFile.findAllBySeqTrack(seqTrack)
@@ -54,12 +55,23 @@ class FastqcDeciderIntegrationSpec extends Specification implements WorkflowSyst
         FastqcDecider decider = new FastqcDecider()
         decider.seqTrackService = Mock(SeqTrackService) {
             1 * getSequenceFilesForSeqTrack(seqTrack) >> dataFiles
+            0 * _
         }
         decider.fastqcDataFilesService = Mock(FastqcDataFilesService) {
-            1 * fastqcOutputDirectory(seqTrack) >> Paths.get("/output-dir-fastqc")
+            1 * fastqcOutputDirectory(_ as FastqcProcessedFile) >> Paths.get("/output-dir-fastqc")
+            0 * _
         }
         decider.configFragmentService = Mock(ConfigFragmentService) {
             1 * getSortedFragments(_) >> [new ExternalWorkflowConfigFragment(name: "xyz", configValues: '{"WORKFLOWS":{"resource":"1"}}')]
+            0 * _
+        }
+        decider.workflowService = Mock(WorkflowService) {
+            1 * getExactlyOneWorkflow(FastqcWorkflow.WORKFLOW) >> workflow
+            0 * _
+        }
+        decider.fastQcProcessedFileService = Mock(FastQcProcessedFileService) {
+            1 * buildWorkingPath(workflowVersion) >> "buildPath"
+            0 * _
         }
         decider.workflowRunService = new WorkflowRunService()
         decider.workflowRunService.configFragmentService = new ConfigFragmentService()
@@ -79,6 +91,6 @@ class FastqcDeciderIntegrationSpec extends Specification implements WorkflowSyst
         inputArtefact.workflowRun.workflow == workflow
         inputArtefact.workflowRun.combinedConfig == '{"WORKFLOWS":{"resource":"1"}}'
         inputArtefact.workflowRun.workDirectory == "/output-dir-fastqc"
-        TestCase.assertContainSame(result*.artefact*.get()*.dataFile , dataFiles)
+        TestCase.assertContainSame(result*.artefact*.get()*.dataFile, dataFiles)
     }
 }

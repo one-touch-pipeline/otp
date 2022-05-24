@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2022 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,30 +19,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+package de.dkfz.tbi.otp.domainFactory
 
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
 
-SeqTrack.withTransaction {
-    final List<SeqTrack> seqTracks = SeqTrack.withCriteria {
-        'in'("id", [
-                // the ids
-        ] as long[])
+trait FastqcDomainFactory extends DomainFactoryCore {
+
+    FastqcProcessedFile createFastqcProcessedFile(Map properties = [:], boolean saveAndValidate = true) {
+        return createDomainObject(FastqcProcessedFile, [
+                dataFile         : { createDataFile() },
+                workDirectoryName: { "workDirectoryName_${nextId}" },
+        ], properties, saveAndValidate)
     }
-    seqTracks.each {SeqTrack seqTrack ->
-        assert seqTrack
-        assert seqTrack.fastqcState == SeqTrack.DataProcessingState.IN_PROGRESS
-        println "Seqtrack: ${seqTrack}"
-        DataFile.findAllBySeqTrack(seqTrack).each {
-            File file = ctx.fastqcDataFilesService.fastqcOutputFile(it) as File
-            println "fastqc file: ${file}  ${file.exists()}"
-
-            final List<FastqcProcessedFile> fastqcProcessedFiles = FastqcProcessedFile.findAllByDataFile(it)
-            fastqcProcessedFiles*.delete(flush: true)
-        }
-        seqTrack.fastqcState = SeqTrack.DataProcessingState.NOT_STARTED
-        seqTrack.save(flush: true)
-    }
-    assert false
 }
-println ''
+
+enum FastqcDomainFactoryInstance implements FastqcDomainFactory {
+    INSTANCE
+}

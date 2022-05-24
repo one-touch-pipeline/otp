@@ -43,6 +43,7 @@ class FastqcWorkflowSpec extends AbstractWorkflowSpec {
 
     private static final String INPUT_FILE = "fastqFiles/fastqc/input_fastqc.fastq."
     private static final String EXPECTED_RESULT_FILE = "fastqFiles/fastqc/asdf_fastqc.zip"
+    private static final String BASE_NAME = "asdf.fastq"
 
     FastqcDataFilesService fastqcDataFilesService
     FastqcDecider fastqcDecider
@@ -77,8 +78,8 @@ class FastqcWorkflowSpec extends AbstractWorkflowSpec {
         dataFile = createSequenceDataFile(
                 fileExists: true,
                 fileSize: 1,
-                fileName: "asdf.fastq.${fileExtension}",
-                vbpFileName: "asdf.fastq.${fileExtension}",
+                fileName: "${BASE_NAME}.${fileExtension}",
+                vbpFileName: "${BASE_NAME}.${fileExtension}",
                 seqTrack: seqTrack,
                 run: run,
                 initialDirectory: workingDirectory.resolve("ftp").resolve(run.name),
@@ -92,9 +93,8 @@ class FastqcWorkflowSpec extends AbstractWorkflowSpec {
         given:
         SessionUtils.withNewSession {
             setupWorkflow('gz')
-            Path initialPath = lsdfFilesService.getFileInitialPathAsPath(dataFile, remoteFileSystem).parent
-            String fastqcFileName = fastqcDataFilesService.fastqcFileName(dataFile)
-            fileService.createLink(initialPath.resolve(fastqcFileName), expectedFastqc, realm)
+            Path initialPath = lsdfFilesService.getFileInitialPathAsPath(dataFile).parent
+            fileService.createLink(initialPath.resolve("${BASE_NAME}.zip"), expectedFastqc, realm)
             fastqcDecider.decide([workflowArtefact])
         }
 
@@ -133,8 +133,10 @@ class FastqcWorkflowSpec extends AbstractWorkflowSpec {
 
     private void checkExistenceOfResultsFiles() {
         SessionUtils.withNewSession {
+            FastqcProcessedFile fastqcProcessedFile = CollectionUtils.atMostOneElement(FastqcProcessedFile.findAllByDataFile(dataFile))
+
             ZipFile expectedResult = new ZipFile(fileService.toFile(expectedFastqc))
-            ZipFile actualResult = new ZipFile(fastqcDataFilesService.fastqcOutputFile(dataFile))
+            ZipFile actualResult = new ZipFile(fastqcDataFilesService.fastqcOutputPath(fastqcProcessedFile).toString())
 
             List<String> actualFiles = []
             actualResult.entries().each { ZipEntry entry ->

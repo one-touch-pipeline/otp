@@ -24,9 +24,9 @@ package de.dkfz.tbi.otp.workflowExecution.decider
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.dataprocessing.FastqcDataFilesService
-import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
+import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.workflow.fastqc.FastqcWorkflow
 import de.dkfz.tbi.otp.workflowExecution.*
 
@@ -40,6 +40,9 @@ class FastqcDecider implements Decider {
     FastqcDataFilesService fastqcDataFilesService
 
     @Autowired
+    FastQcProcessedFileService fastQcProcessedFileService
+
+    @Autowired
     ProcessingPriorityService processingPriorityService
 
     @Autowired
@@ -49,24 +52,32 @@ class FastqcDecider implements Decider {
     WorkflowRunService workflowRunService
 
     @Autowired
+    WorkflowService workflowService
+
+    @Autowired
     SeqTrackService seqTrackService
 
     @Override
     Collection<WorkflowArtefact> decide(Collection<WorkflowArtefact> inputArtefacts, boolean forceRun = false, Map<String, String> userParams = [:]) {
-        final Workflow workflow = Workflow.getExactlyOneWorkflow(FastqcWorkflow.WORKFLOW)
+        final Workflow workflow = workflowService.getExactlyOneWorkflow(FastqcWorkflow.WORKFLOW)
+
+        //currently fixed to one supported version, will be changed later
+        final WorkflowVersion workflowVersion = CollectionUtils.exactlyOneElement(WorkflowVersion.findAllByWorkflow(workflow))
 
         return inputArtefacts.collectMany {
-            decideEach(it, workflow)
+            decideEach(it, workflowVersion)
         }.findAll()
     }
 
-    private List<WorkflowArtefact> decideEach(WorkflowArtefact inputArtefact, Workflow workflow, boolean forceRun = false) {
+    private List<WorkflowArtefact> decideEach(WorkflowArtefact inputArtefact, WorkflowVersion workflowVersion, boolean forceRun = false) {
         if (inputArtefact.artefactType != ArtefactType.FASTQ) {
             return []
         }
 
         if (!forceRun &&
-                WorkflowRunInputArtefact.findAllByWorkflowArtefact(inputArtefact).any { it.workflowRun.workflow == workflow }) {
+                WorkflowRunInputArtefact.findAllByWorkflowArtefact(inputArtefact).any {
+                    it.workflowRun.workflow == workflowVersion.workflow
+                }) {
             return []
         }
 
@@ -76,21 +87,31 @@ class FastqcDecider implements Decider {
         }
 
         SeqTrack seqTrack = optionalArtefact.get() as SeqTrack
+        String workDirectory = fastQcProcessedFileService.buildWorkingPath(workflowVersion)
+        List<DataFile> dataFiles = seqTrackService.getSequenceFilesForSeqTrack(seqTrack)
+        Map<DataFile, FastqcProcessedFile> fastqcProcessedFiles = dataFiles.collectEntries {
+            FastqcProcessedFile fastqcProcessedFile = CollectionUtils.atMostOneElement(FastqcProcessedFile.findAllByDataFile(it)) ?:
+                    new FastqcProcessedFile([
+                            dataFile         : it,
+                            workDirectoryName: workDirectory,
+                    ]).save(flush: true)
+            [(it): fastqcProcessedFile]
+        }
 
         List<String> runDisplayName = generateWorkflowRunDisplayName(seqTrack)
-        List<String> artefactDisplayName = runDisplayName
+        List<String> artefactDisplayName = runDisplayName.clone()
         artefactDisplayName.remove(0)
         String shortName = "${FastqcWorkflow.WORKFLOW}: ${seqTrack.individual.pid} " +
                 "${seqTrack.sampleType.displayName} ${seqTrack.seqType.displayNameWithLibraryLayout}"
 
         WorkflowRun run = workflowRunService.buildWorkflowRun(
-                workflow,
+                workflowVersion.workflow,
                 seqTrack.project.processingPriority,
-                fastqcDataFilesService.fastqcOutputDirectory(seqTrack).toString(),
+                fastqcDataFilesService.fastqcOutputDirectory(fastqcProcessedFiles.values().first()).toString(),
                 seqTrack.individual.project,
                 runDisplayName,
                 shortName,
-                getConfigFragments(seqTrack, workflow),
+                getConfigFragments(seqTrack, workflowVersion),
         )
 
         new WorkflowRunInputArtefact(
@@ -101,7 +122,7 @@ class FastqcDecider implements Decider {
 
         List<WorkflowArtefact> result = []
 
-        seqTrackService.getSequenceFilesForSeqTrack(seqTrack).eachWithIndex { DataFile it, int i ->
+        dataFiles.eachWithIndex { DataFile it, int i ->
             WorkflowArtefact workflowArtefact = workflowArtefactService.buildWorkflowArtefact(new WorkflowArtefactValues(
                     run,
                     "${FastqcWorkflow.OUTPUT_FASTQC}_${i + 1}",
@@ -109,7 +130,7 @@ class FastqcDecider implements Decider {
                     artefactDisplayName,
             )).save(flush: true)
 
-            FastqcProcessedFile fastqcProcessedFile = FastqcProcessedFile.findOrCreateWhere(dataFile: it)
+            FastqcProcessedFile fastqcProcessedFile = fastqcProcessedFiles[it]
             fastqcProcessedFile.workflowArtefact = workflowArtefact
             fastqcProcessedFile.save(flush: true)
             result << workflowArtefact
@@ -117,10 +138,10 @@ class FastqcDecider implements Decider {
         return result
     }
 
-    List<ExternalWorkflowConfigFragment> getConfigFragments(SeqTrack seqTrack, Workflow workflow) {
+    List<ExternalWorkflowConfigFragment> getConfigFragments(SeqTrack seqTrack, WorkflowVersion workflowVersion) {
         return configFragmentService.getSortedFragments(new SingleSelectSelectorExtendedCriteria(
-                workflow,
-                null, //workflowVersion, FastQC is not versioned
+                workflowVersion.workflow,
+                workflowVersion,
                 seqTrack.project,
                 seqTrack.seqType,
                 null, //referenceGenome, not used for FastQC

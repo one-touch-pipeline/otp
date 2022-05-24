@@ -23,55 +23,49 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import grails.testing.gorm.DataTest
 import grails.testing.services.ServiceUnitTest
+import org.junit.Rule
+import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.TestConfigService
-import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+import de.dkfz.tbi.otp.domainFactory.FastqcDomainFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
-import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
-import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
+import de.dkfz.tbi.otp.utils.CreateFileHelper
 
 import java.nio.file.Path
 import java.nio.file.Paths
 
-class FastqcDataFilesServiceSpec extends Specification implements ServiceUnitTest<FastqcDataFilesService>, DataTest, DomainFactoryCore,
+class FastqcDataFilesServiceSpec extends Specification implements ServiceUnitTest<FastqcDataFilesService>, DataTest, FastqcDomainFactory,
         WorkflowSystemDomainFactory {
 
     @Override
     Class[] getDomainClassesToMock() {
         return [
-                DataFile,
                 FastqcProcessedFile,
-                FileType,
-                Individual,
-                Project,
-                Realm,
-                Run,
                 FastqImportInstance,
-                Sample,
-                SampleType,
-                SeqCenter,
                 SeqPlatform,
                 SeqPlatformGroup,
-                SeqPlatformModelLabel,
-                SeqTrack,
-                SeqType,
-                SoftwareTool,
         ]
     }
 
     TestConfigService configService
 
+    @Rule
+    TemporaryFolder temporaryFolder
+
+    private static final String FAST_QC = FastqcDataFilesService.FAST_QC_DIRECTORY_PART
+
     SeqTrack seqTrack
     DataFile dataFile
+    FastqcProcessedFile fastqcProcessedFile
     Realm realm
 
     void setup() {
-        configService = new TestConfigService()
+        configService = new TestConfigService(temporaryFolder.newFolder())
         service.lsdfFilesService = new LsdfFilesService()
         service.lsdfFilesService.individualService = new IndividualService()
         service.lsdfFilesService.individualService.projectService = new ProjectService()
@@ -79,22 +73,25 @@ class FastqcDataFilesServiceSpec extends Specification implements ServiceUnitTes
         service.lsdfFilesService.individualService.projectService.configService = configService
         service.fileSystemService = new TestFileSystemService()
 
-        realm = DomainFactory.createRealm()
+        seqTrack = createSeqTrack()
+        realm = seqTrack.project.realm
 
-        seqTrack = DomainFactory.createSeqTrack()
-        seqTrack.project.realm = realm
-        assert seqTrack.project.save(flush: true)
-
-        dataFile = DomainFactory.createDataFile([seqTrack: seqTrack, project: seqTrack.project, run: seqTrack.run])
+        dataFile = createDataFile([seqTrack: seqTrack, project: seqTrack.project, run: seqTrack.run])
+        fastqcProcessedFile = createFastqcProcessedFile([dataFile: dataFile])
     }
 
-    void "test fastqcFileName"() {
+    @Unroll
+    void "fastqcFileName, when fastq name is #input, then fastqc name is #output"() {
         given:
         DataFile dataFile = new DataFile()
         dataFile.fileName = input
+        FastqcProcessedFile fastqcProcessedFile = new FastqcProcessedFile([
+                dataFile         : dataFile,
+                workDirectoryName: "workDirectoryName",
+        ])
 
         expect:
-        service.fastqcFileName(dataFile) == output + service.FASTQC_FILE_SUFFIX + service.FASTQC_ZIP_SUFFIX
+        service.fastqcFileName(fastqcProcessedFile) == output + service.FAST_QC_FILE_SUFFIX + service.FAST_QC_ZIP_SUFFIX
 
         where:
         input                 || output
@@ -190,7 +187,8 @@ class FastqcDataFilesServiceSpec extends Specification implements ServiceUnitTes
         "123.tar.gz"          || "123"
     }
 
-    void "test inputFileNameAdaption"() {
+    @Unroll
+    void "inputFileNameAdaption, when original fastq name is #input, then adapted fastq name is #output"() {
         expect:
         service.inputFileNameAdaption(input) == output
 
@@ -204,26 +202,95 @@ class FastqcDataFilesServiceSpec extends Specification implements ServiceUnitTes
         "asdf.bz2.tar" || "asdf.bz2.tar"
     }
 
-    void "test fastqcOutputDirectory"() {
+    void "fastqcOutputDirectory, when called, then return correct path"() {
         given:
-        String fastqc = DataProcessingFilesService.OutputDirectories.FASTX_QC.toString().toLowerCase()
-
-        String viewByPidPath = "${configService.rootPath}/${seqTrack.project.dirName}/sequencing/${seqTrack.seqType.dirName}/view-by-pid"
-        Path expectedPath = Paths.get("${viewByPidPath}/${seqTrack.individual.pid}/${seqTrack.sampleType.dirName}/" +
-                "${seqTrack.seqType.libraryLayoutDirName}/run${seqTrack.run.name}/${fastqc}")
+        Path expectedPath = fastqcPath()
 
         expect:
-        service.fastqcOutputDirectory(seqTrack) == expectedPath
+        service.fastqcOutputDirectory(fastqcProcessedFile) == expectedPath
     }
 
-    void "test updateFastqcProcessedFile, with existing FastqcProcessedFile"() {
+    void "fastqcOutputPath, when called, then return correct path"() {
         given:
-        service.fileService = new FileService()
-        WorkflowArtefact workflowArtefact = createWorkflowArtefact()
-        FastqcProcessedFile fastqcProcessedFile = DomainFactory.createFastqcProcessedFile(dataFile: dataFile)
+        String fastqcName = service.fastqcFileName(fastqcProcessedFile)
+
+        Path expectedPath = fastqcPath().resolve(fastqcName)
 
         expect:
-        service.getAndUpdateFastqcProcessedFile(fastqcProcessedFile.dataFile, workflowArtefact) == fastqcProcessedFile
-        fastqcProcessedFile.workflowArtefact == workflowArtefact
+        service.fastqcOutputPath(fastqcProcessedFile) == expectedPath
+    }
+
+    void "fastqcHtmlPath, when called, then return correct path"() {
+        given:
+        String fastqcName = service.fastqcFileName(fastqcProcessedFile).replaceAll(/\.zip$/, '')
+
+        Path expectedPath = fastqcPath().resolve("${fastqcName}.html")
+
+        expect:
+        service.fastqcHtmlPath(fastqcProcessedFile) == expectedPath
+    }
+
+    void "fastqcOutputMd5sumPath, when called, then return correct path"() {
+        given:
+        String fastqcName = service.fastqcFileName(fastqcProcessedFile)
+
+        Path expectedPath = fastqcPath().resolve("${fastqcName}.md5sum")
+
+        expect:
+        service.fastqcOutputMd5sumPath(fastqcProcessedFile) == expectedPath
+    }
+
+    void "updateFastqcProcessedFile, when file exist, then update fastqcProcessedFile"() {
+        given:
+        Path path = service.fastqcOutputPath(fastqcProcessedFile)
+        CreateFileHelper.createFile(path)
+
+        when:
+        service.updateFastqcProcessedFile(fastqcProcessedFile)
+
+        then:
+        fastqcProcessedFile.fileExists
+        fastqcProcessedFile.fileSize > 0
+        fastqcProcessedFile.dateFromFileSystem
+    }
+
+    void "updateFastqcProcessedFile, when file not exist, then do not update fastqcProcessedFile"() {
+        when:
+        service.updateFastqcProcessedFile(fastqcProcessedFile)
+
+        then:
+        !fastqcProcessedFile.fileExists
+        fastqcProcessedFile.fileSize == -1
+        !fastqcProcessedFile.dateFromFileSystem
+    }
+
+    void "pathToFastQcResultFromSeqCenter, when called, then return correct path"() {
+        given:
+        String fastqcName = service.fastqcFileName(fastqcProcessedFile)
+        Path expected = Paths.get(dataFile.initialDirectory, fastqcName)
+
+        when:
+        Path path = service.pathToFastQcResultFromSeqCenter(fastqcProcessedFile)
+
+        then:
+        path == expected
+    }
+
+    void "pathToFastQcResultMd5SumFromSeqCenter, when called, then return correct path"() {
+        given:
+        String fastqcName = service.fastqcFileName(fastqcProcessedFile).concat('.md5sum')
+        Path expected = Paths.get(dataFile.initialDirectory, fastqcName)
+
+        when:
+        Path path = service.pathToFastQcResultMd5SumFromSeqCenter(fastqcProcessedFile)
+
+        then:
+        path == expected
+    }
+
+    private Path fastqcPath() {
+        String viewByPidPath = "${configService.rootPath}/${seqTrack.project.dirName}/sequencing/${seqTrack.seqType.dirName}/view-by-pid"
+        return Paths.get("${viewByPidPath}/${seqTrack.individual.pid}/${seqTrack.sampleType.dirName}/" +
+                "${seqTrack.seqType.libraryLayoutDirName}/run${seqTrack.run.name}/${FAST_QC}/${fastqcProcessedFile.workDirectoryName}")
     }
 }

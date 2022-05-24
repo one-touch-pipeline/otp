@@ -26,6 +26,7 @@ import grails.gorm.transactions.Transactional
 import de.dkfz.tbi.otp.dataprocessing.MergingCriteriaService
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 import java.time.LocalDate
 
@@ -37,6 +38,10 @@ class WorkflowService {
     MergingCriteriaService mergingCriteriaService
 
     OtpWorkflowService otpWorkflowService
+
+    Workflow getExactlyOneWorkflow(String name) {
+        return CollectionUtils.exactlyOneElement(Workflow.findAllByNameAndDeprecatedDateIsNull(name))
+    }
 
     void createRestartedWorkflows(List<WorkflowStep> steps, boolean startDirectly = true) {
         steps.each {
@@ -80,9 +85,9 @@ class WorkflowService {
                     artefactType: oldWorkflowArtefact.artefactType,
             ).save(flush: true)
 
-            Artefact oldArtefact = oldWorkflowArtefact.artefact.orElseThrow({
+            Artefact oldArtefact = oldWorkflowArtefact.artefact.orElseThrow {
                 new AssertionError("The old WorkflowArtefact ${oldWorkflowArtefact} of WorkflowRun ${oldRun} must have an concrete artefact" as Object)
-            })
+            }
 
             Artefact newArtefact = otpWorkflow.createCopyOfArtefact(oldArtefact)
             newArtefact.workflowArtefact = newWorkflowArtefact

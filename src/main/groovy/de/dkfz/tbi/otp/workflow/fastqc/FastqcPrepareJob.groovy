@@ -57,8 +57,7 @@ class FastqcPrepareJob extends AbstractPrepareJob implements FastqcShared {
 
     @Override
     protected Path buildWorkDirectoryPath(WorkflowStep workflowStep) {
-        SeqTrack seqTrack = getSeqTrack(workflowStep)
-        return fastqcDataFilesService.fastqcOutputDirectory(seqTrack)
+        return getFileSystem(workflowStep).getPath(workflowStep.workflowRun.workDirectory)
     }
 
     @Override

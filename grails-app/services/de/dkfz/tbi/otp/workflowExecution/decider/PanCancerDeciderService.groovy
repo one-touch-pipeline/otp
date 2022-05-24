@@ -44,10 +44,11 @@ class PanCancerDeciderService extends AbstractWorkflowDecider {
     RoddyBamFileService roddyBamFileService
     WorkflowArtefactService workflowArtefactService
     WorkflowRunService workflowRunService
+    WorkflowService workflowService
 
     @Override
     final protected Workflow getWorkflow() {
-        return Workflow.getExactlyOneWorkflow(PanCancerWorkflow.WORKFLOW)
+        return workflowService.getExactlyOneWorkflow(PanCancerWorkflow.WORKFLOW)
     }
 
     @Override

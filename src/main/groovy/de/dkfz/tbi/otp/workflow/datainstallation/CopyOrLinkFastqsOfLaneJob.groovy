@@ -31,7 +31,6 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.workflow.jobs.AbstractExecuteClusterPipelineJob
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
-import java.nio.file.FileSystem
 import java.nio.file.Path
 
 @Component
@@ -56,9 +55,8 @@ class CopyOrLinkFastqsOfLaneJob extends AbstractExecuteClusterPipelineJob implem
 
     private void createLinks(WorkflowStep workflowStep, SeqTrack seqTrack) {
         Realm realm = seqTrack.project.realm
-        FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
         seqTrack.dataFiles.each { DataFile dataFile ->
-            Path target = lsdfFilesService.getFileInitialPathAsPath(dataFile, fileSystem)
+            Path target = lsdfFilesService.getFileInitialPathAsPath(dataFile)
             Path link = lsdfFilesService.getFileFinalPathAsPath(dataFile)
             logService.addSimpleLogEntry(workflowStep, "Creating link ${link} to ${target}")
             fileService.createLink(link, target, realm, CreateLinkOption.DELETE_EXISTING_FILE)
@@ -66,11 +64,8 @@ class CopyOrLinkFastqsOfLaneJob extends AbstractExecuteClusterPipelineJob implem
     }
 
     private List<String> createCopyJob(SeqTrack seqTrack) {
-        Realm realm = seqTrack.project.realm
-        FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
-
         return seqTrack.dataFiles.collect { DataFile dataFile ->
-            Path source = lsdfFilesService.getFileInitialPathAsPath(dataFile, fileSystem)
+            Path source = lsdfFilesService.getFileInitialPathAsPath(dataFile)
             Path destination = lsdfFilesService.getFileFinalPathAsPath(dataFile)
 
             String md5SumFileName = checksumFileService.md5FileName(dataFile)

@@ -25,18 +25,21 @@ import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.dataprocessing.FastqcDataFilesService
+import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
+import de.dkfz.tbi.otp.domainFactory.FastqcDomainFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsqc.FastqcUploadService
+import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStateChangeService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
-class FastqcParseJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory {
+class FastqcParseJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory, FastqcDomainFactory {
 
     @Override
     Class[] getDomainClassesToMock() {
         return [
-                DataFile,
+                FastqcProcessedFile,
                 Realm,
                 SeqTrack,
                 WorkflowStep,
@@ -46,14 +49,19 @@ class FastqcParseJobSpec extends Specification implements DataTest, WorkflowSyst
     void "test execute"() {
         given:
         SeqTrack seqTrack = createSeqTrackWithTwoDataFile()
+        List<FastqcProcessedFile> fastqcProcessedFiles = seqTrack.dataFiles.collect {
+            createFastqcProcessedFile([
+                    dataFile: it,
+            ])
+        }
         WorkflowStep workflowStep = createWorkflowStep()
 
-        FastqcParseJob job = Spy(FastqcParseJob) {
-            1 * getSeqTrack(workflowStep) >> seqTrack
-        }
+        FastqcParseJob job = new FastqcParseJob()
+
         job.fastqcDataFilesService = Mock(FastqcDataFilesService)
         job.fastqcUploadService = Mock(FastqcUploadService)
         job.workflowStateChangeService = Mock(WorkflowStateChangeService)
+        job.concreteArtefactService = Mock(ConcreteArtefactService)
 
         job.seqTrackService = new SeqTrackService()
         job.seqTrackService.fileTypeService = new FileTypeService()
@@ -62,9 +70,12 @@ class FastqcParseJobSpec extends Specification implements DataTest, WorkflowSyst
         job.execute(workflowStep)
 
         then:
-        1 * job.fastqcDataFilesService.getAndUpdateFastqcProcessedFile(seqTrack.dataFiles.first(), _)
-        1 * job.fastqcDataFilesService.getAndUpdateFastqcProcessedFile(seqTrack.dataFiles.last(), _)
-        2 * job.fastqcUploadService.uploadFastQCFileContentsToDataBase(_)
+        1 * job.concreteArtefactService.getOutputArtefacts(workflowStep, FastqcWorkflow.OUTPUT_FASTQC, FastqcWorkflow.WORKFLOW) >> fastqcProcessedFiles
+        0 * job.concreteArtefactService._
+        1 * job.fastqcUploadService.uploadFastQCFileContentsToDataBase(fastqcProcessedFiles.first())
+        1 * job.fastqcUploadService.uploadFastQCFileContentsToDataBase(fastqcProcessedFiles.last())
+        0 * job.fastqcUploadService._
         1 * job.workflowStateChangeService.changeStateToSuccess(workflowStep)
+        0 * job.workflowStateChangeService._
     }
 }

@@ -69,6 +69,9 @@ class DataInstallationInitializationServiceSpec extends Specification
             mergeSortedFragments(_) >> "{}"
         }
         service.workflowArtefactService = new WorkflowArtefactService()
+        service.workflowService = Mock(WorkflowService) {
+            1 * getExactlyOneWorkflow(DataInstallationWorkflow.WORKFLOW) >> workflow
+        }
 
         when:
         List<WorkflowRun> runs = service.createWorkflowRuns(instance)

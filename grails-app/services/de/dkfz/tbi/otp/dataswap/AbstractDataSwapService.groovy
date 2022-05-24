@@ -652,7 +652,9 @@ abstract class AbstractDataSwapService<P extends DataSwapParameters, D extends D
      * @param seqTrackList as parameters for searching for corresponding data filenames.
      * @return found list of fastq data filenames
      */
-    protected List<String> getFastQcOutputFileNamesByDataFilesInList(List<DataFile> dataFiles) {
-        return dataFiles.collect { fastqcDataFilesService.fastqcOutputPath(it).toString() }
+    protected Map<FastqcProcessedFile, String> getFastQcOutputFileNamesByDataFilesInList(List<DataFile> dataFiles) {
+        return dataFiles ? FastqcProcessedFile.findAllByDataFileInList(dataFiles).collectEntries {
+            [(it.dataFile): fastqcDataFilesService.fastqcOutputPath(it).toString()]
+        } : [:]
     }
 }

@@ -281,10 +281,8 @@ class ExampleData {
 
     void createFastqcFilesOnFilesystem() {
         println "creating dummy fastqc reports on file system"
-        FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
-
         fastqcProcessedFiles.each { FastqcProcessedFile fastqcProcessedFile ->
-            Path fastqcPath = fileSystem.getPath(fastqcDataFilesService.fastqcOutputFile(fastqcProcessedFile.dataFile))
+            Path fastqcPath = fastqcDataFilesService.fastqcOutputPath(fastqcProcessedFile)
             Path fastqcMd5Path = fastqcPath.resolveSibling("${fastqcPath.getFileName()}.md5sum")
             [
                     fastqcPath,
@@ -724,7 +722,8 @@ class ExampleData {
 
     FastqcProcessedFile createFastqcProcessedFiles(DataFile dataFile) {
         FastqcProcessedFile fastqcProcessedFile = new FastqcProcessedFile([
-                dataFile: dataFile,
+                dataFile         : dataFile,
+                workDirectoryName: "bash-unknown-version-2000-01-01-00-00-00"
         ]).save(flush: true)
 
         fastqcProcessedFiles << fastqcProcessedFile

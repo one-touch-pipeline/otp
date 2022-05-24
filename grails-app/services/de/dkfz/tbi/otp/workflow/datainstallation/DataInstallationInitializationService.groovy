@@ -38,13 +38,14 @@ class DataInstallationInitializationService {
     LsdfFilesService lsdfFilesService
     WorkflowArtefactService workflowArtefactService
     WorkflowRunService workflowRunService
+    WorkflowService workflowService
 
     /**
      * Create for all {@link SeqTrack}s of the {@link FastqImportInstance} a {@link WorkflowRun} and an output {@link WorkflowArtefact}
      * with role {@link #{DataInstallationWorkflow.WORKFLOW}} connecting the {@link WorkflowRun} with the {@link SeqTrack}.
      */
     List<WorkflowRun> createWorkflowRuns(FastqImportInstance instance, ProcessingPriority priority = null) {
-        Workflow workflow = Workflow.getExactlyOneWorkflow(DataInstallationWorkflow.WORKFLOW)
+        Workflow workflow = workflowService.getExactlyOneWorkflow(DataInstallationWorkflow.WORKFLOW)
         List<WorkflowRun> workflowRuns = instance.dataFiles.groupBy {
             it.seqTrack
         }.collect { SeqTrack seqTrack, List<DataFile> dataFiles ->

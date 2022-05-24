@@ -32,7 +32,6 @@ import de.dkfz.tbi.otp.workflow.jobs.AbstractConditionalFailJob
 import de.dkfz.tbi.otp.workflow.shared.WorkflowException
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
-import java.nio.file.FileSystem
 import java.nio.file.Path
 
 @Component
@@ -48,10 +47,8 @@ class DataInstallationConditionalFailJob extends AbstractConditionalFailJob impl
             throw new WorkflowException("SeqTrack '${seqTrack}' has no dataFiles")
         }
 
-        FileSystem fs = getFileSystem(workflowStep)
-
         final Collection<Path> missingPaths = dataFiles.collect { DataFile file ->
-            lsdfFilesService.getFileInitialPathAsPath(file, fs)
+            lsdfFilesService.getFileInitialPathAsPath(file)
         }.findAll { Path path ->
             !FileService.isFileReadableAndNotEmpty(path)
         }

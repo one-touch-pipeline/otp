@@ -31,7 +31,7 @@ import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
-import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+import de.dkfz.tbi.otp.domainFactory.FastqcDomainFactory
 import de.dkfz.tbi.otp.domainFactory.pipelines.AlignmentPipelineFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.ngsdata.*
@@ -39,7 +39,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import java.nio.file.*
 import java.nio.file.attribute.PosixFilePermission
 
-class WithdrawHelperServiceSpec extends HibernateSpec implements DomainFactoryCore {
+class WithdrawHelperServiceSpec extends HibernateSpec implements FastqcDomainFactory {
 
     private static final List<String> PATH_LIST1 = ['/tmp'].asImmutable()
     private static final List<String> PATH_LIST2 = ['/tmp2'].asImmutable()
@@ -55,6 +55,7 @@ class WithdrawHelperServiceSpec extends HibernateSpec implements DomainFactoryCo
     List<Class> getDomainClasses() {
         return [
                 DataFile,
+                FastqcProcessedFile,
                 MergingWorkPackage,
         ]
     }
@@ -406,6 +407,7 @@ class WithdrawHelperServiceSpec extends HibernateSpec implements DomainFactoryCo
         final Path fastqcHtmlPathSingleCell = temporaryFolder.newFile("htmlSingleCell").toPath()
 
         DataFile dataFile = createDataFile()
+        FastqcProcessedFile fastqcProcessedFile = createFastqcProcessedFile([dataFile: dataFile])
         DataFile withdrawnDataFile = createDataFile([fileWithdrawn: true])
         DataFile singleCellDataFile = createDataFile([
                 seqTrack: createSeqTrack([
@@ -415,6 +417,7 @@ class WithdrawHelperServiceSpec extends HibernateSpec implements DomainFactoryCo
                         singleCellWellLabel: 'someLabel',
                 ])
         ])
+        FastqcProcessedFile singleCellFastqcProcessedFile = createFastqcProcessedFile([dataFile: singleCellDataFile])
         MergingWorkPackage mergingWorkPackage = AlignmentPipelineFactory.RoddyPancanFactoryInstance.INSTANCE.createMergingWorkPackage([
                 seqTracks: [dataFile.seqTrack] as Set,
                 seqType  : dataFile.seqTrack.seqType,
@@ -464,12 +467,12 @@ class WithdrawHelperServiceSpec extends HibernateSpec implements DomainFactoryCo
         1 * service.lsdfFilesService.getWellAllFileViewByPidPath(singleCellDataFile) >> wellPathSingleCell
         0 * service.lsdfFilesService._
 
-        1 * service.fastqcDataFilesService.fastqcOutputPath(dataFile) >> fastqcPathNormal
-        1 * service.fastqcDataFilesService.fastqcOutputMd5sumPath(dataFile) >> fastqcOutputMd5sumPath
-        1 * service.fastqcDataFilesService.fastqcHtmlPath(dataFile) >> fastqcHtmlPath
-        1 * service.fastqcDataFilesService.fastqcOutputPath(singleCellDataFile) >> fastqcPathSingleCell
-        1 * service.fastqcDataFilesService.fastqcOutputMd5sumPath(singleCellDataFile) >> fastqcOutputMd5sumPathSingleCell
-        1 * service.fastqcDataFilesService.fastqcHtmlPath(singleCellDataFile) >> fastqcHtmlPathSingleCell
+        1 * service.fastqcDataFilesService.fastqcOutputPath(fastqcProcessedFile) >> fastqcPathNormal
+        1 * service.fastqcDataFilesService.fastqcOutputMd5sumPath(fastqcProcessedFile) >> fastqcOutputMd5sumPath
+        1 * service.fastqcDataFilesService.fastqcHtmlPath(fastqcProcessedFile) >> fastqcHtmlPath
+        1 * service.fastqcDataFilesService.fastqcOutputPath(singleCellFastqcProcessedFile) >> fastqcPathSingleCell
+        1 * service.fastqcDataFilesService.fastqcOutputMd5sumPath(singleCellFastqcProcessedFile) >> fastqcOutputMd5sumPathSingleCell
+        1 * service.fastqcDataFilesService.fastqcHtmlPath(singleCellFastqcProcessedFile) >> fastqcHtmlPathSingleCell
         0 * service.fastqcDataFilesService._
 
         and:

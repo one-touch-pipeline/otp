@@ -29,6 +29,7 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 import java.nio.file.*
 
@@ -57,13 +58,19 @@ class UnwithdrawService {
         unwithdrawStateHolder.summary << "Unwithdrawing DataFile: ${dataFile}: ${dataFile.withdrawnComment}"
         unwithdrawStateHolder.linksToCreate.put(lsdfFilesService.getFileFinalPathAsPath(dataFile), lsdfFilesService.getFileViewByPidPathAsPath(dataFile))
         unwithdrawStateHolder.pathsToChangeGroup.put(lsdfFilesService.getFileViewByPidPathAsPath(dataFile).toString(), dataFile.project.unixGroup)
-        [
+        FastqcProcessedFile fastqcProcessedFile = CollectionUtils.atMostOneElement(FastqcProcessedFile.findAllByDataFile(dataFile))
+        List<Path> files = [
                 lsdfFilesService.getFileFinalPathAsPath(dataFile),
                 lsdfFilesService.getFileMd5sumFinalPathAsPath(dataFile),
-                fastqcDataFilesService.fastqcOutputPath(dataFile),
-                fastqcDataFilesService.fastqcOutputMd5sumPath(dataFile),
-                fastqcDataFilesService.fastqcHtmlPath(dataFile),
-        ].findAll { path ->
+        ]
+        if (fastqcProcessedFile) {
+            files.addAll([
+                    fastqcDataFilesService.fastqcOutputPath(fastqcProcessedFile),
+                    fastqcDataFilesService.fastqcOutputMd5sumPath(fastqcProcessedFile),
+                    fastqcDataFilesService.fastqcHtmlPath(fastqcProcessedFile),
+            ])
+        }
+        files.findAll { path ->
             Files.exists(path)
         }.collect { filePath ->
             unwithdrawStateHolder.pathsToChangeGroup.put(filePath.toString(), dataFile.project.unixGroup)

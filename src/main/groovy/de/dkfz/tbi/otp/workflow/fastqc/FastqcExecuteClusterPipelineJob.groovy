@@ -29,11 +29,13 @@ import org.springframework.stereotype.Component
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.Realm
+import de.dkfz.tbi.otp.ngsdata.SeqTrackService
 import de.dkfz.tbi.otp.workflow.jobs.AbstractExecuteClusterPipelineJob
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
-import java.nio.file.*
+import java.nio.file.Files
+import java.nio.file.Path
 
 @Component
 @Slf4j
@@ -54,17 +56,14 @@ class FastqcExecuteClusterPipelineJob extends AbstractExecuteClusterPipelineJob 
 
     @Override
     protected List<String> createScripts(WorkflowStep workflowStep) {
-        SeqTrack seqTrack = getSeqTrack(workflowStep)
         Realm realm = workflowStep.realm
-        FileSystem fileSystem = getFileSystem(workflowStep)
-        Path outputDir = fastqcDataFilesService.fastqcOutputDirectory(seqTrack)
+        Path outputDir = getFileSystem(workflowStep).getPath(workflowStep.workflowRun.workDirectory)
 
-        //get data files to be used
-        List<DataFile> dataFiles = seqTrackService.getSequenceFilesForSeqTrack(seqTrack)
+        List<FastqcProcessedFile> fastqcProcessedFiles = getFastqcProcessedFiles(workflowStep)
 
         //delete existing file in case of restart
-        dataFiles.each { DataFile dataFile ->
-            Path resultFilePath = fastqcDataFilesService.fastqcOutputPath(dataFile)
+        fastqcProcessedFiles.each { FastqcProcessedFile fastqcProcessedFile ->
+            Path resultFilePath = fastqcDataFilesService.fastqcOutputPath(fastqcProcessedFile)
             if (Files.exists(resultFilePath)) {
                 logService.addSimpleLogEntry(workflowStep, "Delete result file ${resultFilePath}")
                 fileService.deleteDirectoryRecursively(resultFilePath)
@@ -72,28 +71,30 @@ class FastqcExecuteClusterPipelineJob extends AbstractExecuteClusterPipelineJob 
         }
 
         //check if fastqc reports are provided and can be copied
-        if (canFastQcReportsBeCopied(fileSystem, dataFiles)) {
+        if (canFastQcReportsBeCopied(fastqcProcessedFiles)) {
             //remotely run a script to copy the existing result files
             logService.addSimpleLogEntry(workflowStep, "Copying fastqc reports")
-            copyExistingFastqReports(realm, fileSystem, dataFiles, outputDir)
+            copyExistingFastqReports(realm, fastqcProcessedFiles, outputDir)
             return []
         }
         //create and return the shell script only (w/o running it)
         logService.addSimpleLogEntry(workflowStep, "Creating cluster scripts")
-        return createFastQcClusterScript(dataFiles, outputDir)
+        return createFastQcClusterScript(fastqcProcessedFiles, outputDir)
     }
 
-    private boolean canFastQcReportsBeCopied(FileSystem fileSystem, List<DataFile> dataFiles) {
-        return dataFiles.every { DataFile dataFile ->
-            Files.isReadable(fastqcDataFilesService.pathToFastQcResultFromSeqCenter(fileSystem, dataFile))
+    private boolean canFastQcReportsBeCopied(List<FastqcProcessedFile> fastqcProcessedFiles) {
+        return fastqcProcessedFiles.every { FastqcProcessedFile fastqcProcessedFile ->
+            Files.isReadable(fastqcDataFilesService.pathToFastQcResultFromSeqCenter(fastqcProcessedFile))
         }
     }
 
-    private void copyExistingFastqReports(Realm realm, FileSystem fileSystem, List<DataFile> dataFiles, Path outDir) {
-        dataFiles.each { dataFile ->
-            Path seqCenterFastQcFile = fastqcDataFilesService.pathToFastQcResultFromSeqCenter(fileSystem, dataFile)
-            Path seqCenterFastQcFileMd5Sum = fastqcDataFilesService.pathToFastQcResultMd5SumFromSeqCenter(fileSystem, dataFile)
+    private void copyExistingFastqReports(Realm realm, List<FastqcProcessedFile> fastqcProcessedFiles, Path outDir) {
+        fastqcProcessedFiles.each { FastqcProcessedFile fastqcProcessedFile ->
+            Path seqCenterFastQcFile = fastqcDataFilesService.pathToFastQcResultFromSeqCenter(fastqcProcessedFile)
+            Path seqCenterFastQcFileMd5Sum = fastqcDataFilesService.pathToFastQcResultMd5SumFromSeqCenter(fastqcProcessedFile)
             fileService.ensureFileIsReadableAndNotEmpty(seqCenterFastQcFile)
+
+            String permission = fileService.convertPermissionsToOctalString(FileService.DEFAULT_FILE_PERMISSION)
 
             String copyAndMd5sumCommand = """|
                 |set -e
@@ -101,9 +102,9 @@ class FastqcExecuteClusterPipelineJob extends AbstractExecuteClusterPipelineJob 
                 |#copy file
                 |cd ${seqCenterFastQcFile.parent}
                 |md5sum ${seqCenterFastQcFile.fileName} > ${outDir}/${seqCenterFastQcFileMd5Sum.fileName}
-                |chmod ${fileService.convertPermissionsToOctalString(fileService.DEFAULT_FILE_PERMISSION)} ${outDir}/${seqCenterFastQcFileMd5Sum.fileName}
+                |chmod ${permission} ${outDir}/${seqCenterFastQcFileMd5Sum.fileName}
                 |cp ${seqCenterFastQcFile} ${outDir}
-                |chmod ${fileService.convertPermissionsToOctalString(fileService.DEFAULT_FILE_PERMISSION)} ${fastqcDataFilesService.fastqcOutputPath(dataFile)}
+                |chmod ${permission} ${fastqcDataFilesService.fastqcOutputPath(fastqcProcessedFile)}
                 |
                 |#check md5sum
                 |cd ${outDir}
@@ -115,9 +116,11 @@ class FastqcExecuteClusterPipelineJob extends AbstractExecuteClusterPipelineJob 
         }
     }
 
-    private List<String> createFastQcClusterScript(List<DataFile> dataFiles, Path outDir) {
-        return dataFiles.collect { dataFile ->
-            String inputFileName = lsdfFilesService.getFileFinalPath(dataFile)
+    private List<String> createFastQcClusterScript(List<FastqcProcessedFile> fastqcProcessedFiles, Path outDir) {
+        String permission = fileService.convertPermissionsToOctalString(FileService.DEFAULT_FILE_PERMISSION)
+
+        return fastqcProcessedFiles.collect { FastqcProcessedFile fastqcProcessedFile ->
+            String inputFileName = lsdfFilesService.getFileFinalPath(fastqcProcessedFile.dataFile)
 
             String decompressFileCommand = ""
             String deleteDecompressedFileCommand = ""
@@ -139,8 +142,8 @@ class FastqcExecuteClusterPipelineJob extends AbstractExecuteClusterPipelineJob 
                 |${fastqcActivation}
                 |${decompressFileCommand}
                 |${fastqcCommand} ${inputFileName} --noextract --nogroup -o ${outDir}
-                |chmod ${fileService.convertPermissionsToOctalString(fileService.DEFAULT_FILE_PERMISSION)} ${fastqcDataFilesService.fastqcOutputPath(dataFile)}
-                |chmod ${fileService.convertPermissionsToOctalString(fileService.DEFAULT_FILE_PERMISSION)} ${fastqcDataFilesService.fastqcHtmlPath(dataFile)}
+                |chmod ${permission} ${fastqcDataFilesService.fastqcOutputPath(fastqcProcessedFile)}
+                |chmod ${permission} ${fastqcDataFilesService.fastqcHtmlPath(fastqcProcessedFile)}
                 |${deleteDecompressedFileCommand}
                 |""".stripMargin()
         }

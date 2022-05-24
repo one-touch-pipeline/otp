@@ -51,6 +51,7 @@ class LaneSwapServiceSpec extends Specification implements DataTest, ServiceUnit
     Class[] getDomainClassesToMock() {
         return [
                 DataFile,
+                FastqcProcessedFile,
                 Project,
                 SampleType,
                 SeqType,

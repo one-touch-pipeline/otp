@@ -28,7 +28,7 @@ import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.infrastructure.CreateLinkOption
 import de.dkfz.tbi.otp.infrastructure.FileService
-import de.dkfz.tbi.otp.job.processing.FileSystemService
+import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflowExecution.*
@@ -97,13 +97,10 @@ class CopyOrLinkFastqsOfLaneJobSpec extends Specification implements DataTest, W
             _ * getOutputArtefact(step, OUTPUT_ROLE, WORKFLOW) >> seqTrack
             0 * _
         }
-        job.fileSystemService = Mock(FileSystemService) {
-            _ * getRemoteFileSystem(_) >> fileSystem
-            0 * _
-        }
+        job.fileSystemService = new TestFileSystemService()
         job.lsdfFilesService = Mock(LsdfFilesService) {
-            1 * getFileInitialPathAsPath(dataFile1, fileSystem) >> source1
-            1 * getFileInitialPathAsPath(dataFile2, fileSystem) >> source2
+            1 * getFileInitialPathAsPath(dataFile1) >> source1
+            1 * getFileInitialPathAsPath(dataFile2) >> source2
             1 * getFileFinalPathAsPath(dataFile1) >> target1
             1 * getFileFinalPathAsPath(dataFile2) >> target2
             0 * _

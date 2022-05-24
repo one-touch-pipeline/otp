@@ -19,6 +19,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
+--fastqc versions
+INSERT INTO workflow_version(id, version, workflow_id, workflow_version, date_created, last_updated)
+VALUES (nextval('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'FastQC'), '0.11.5', now(), now())
+ON CONFLICT DO NOTHING;
+
+--pancan versions
 INSERT INTO workflow_version(id, version, workflow_id, workflow_version, date_created, last_updated)
 VALUES (nextval('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'PanCancer alignment'), '1.2.182', now(), now())
 ON CONFLICT DO NOTHING;
@@ -47,34 +54,42 @@ INSERT INTO workflow_version(id, version, workflow_id, workflow_version, date_cr
 VALUES (nextval('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'PanCancer alignment'), '1.2.73-204', now(), now())
 ON CONFLICT DO NOTHING;
 
+--wgbs pancan versions
 INSERT INTO workflow_version(id, version, workflow_id, workflow_version, date_created, last_updated)
 VALUES (nextval('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'WGBS alignment'), '1.2.73-201', now(), now())
 ON CONFLICT DO NOTHING;
 
+--rna versions
 INSERT INTO workflow_version(id, version, workflow_id, workflow_version, date_created, last_updated)
 VALUES (nextval('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'RNA alignment'), '1.3.0-1', now(), now())
 ON CONFLICT DO NOTHING;
 
+--cell ranger versions
 INSERT INTO workflow_version(id, version, workflow_id, workflow_version, date_created, last_updated)
 VALUES (nextval('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'Cell Ranger'), 'cellranger/6.1.1', now(), now())
 ON CONFLICT DO NOTHING;
 
+--SNV versions
 INSERT INTO workflow_version(id, version, workflow_id, workflow_version, date_created, last_updated)
 VALUES (nextval('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'Roddy SNV calling'), '1.2.166-3', now(), now())
 ON CONFLICT DO NOTHING;
 
+--Indel versions
 INSERT INTO workflow_version(id, version, workflow_id, workflow_version, date_created, last_updated)
 VALUES (nextval('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'Roddy Indel calling'), '2.4.1', now(), now())
 ON CONFLICT DO NOTHING;
 
+--sophia versions
 INSERT INTO workflow_version(id, version, workflow_id, workflow_version, date_created, last_updated)
 VALUES (nextval('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'Roddy Sophia (structural variation calling)'), '2.2.3', now(), now())
 ON CONFLICT DO NOTHING;
 
+--aceseq versions
 INSERT INTO workflow_version(id, version, workflow_id, workflow_version, date_created, last_updated)
 VALUES (nextval('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'Roddy ACEseq (CNV calling)'), '1.2.8-4', now(), now())
 ON CONFLICT DO NOTHING;
 
+--runYapsa versions
 INSERT INTO workflow_version(id, version, workflow_id, workflow_version, date_created, last_updated)
 VALUES (nextval('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'runYapsa (mutational signature analysis)'),
         'yapsa-devel/b765fa8', now(), now())

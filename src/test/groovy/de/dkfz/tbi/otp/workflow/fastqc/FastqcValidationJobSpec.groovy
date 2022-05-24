@@ -24,43 +24,55 @@ package de.dkfz.tbi.otp.workflow.fastqc
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.FastqcDataFilesService
+import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
+import de.dkfz.tbi.otp.domainFactory.FastqcDomainFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 import java.nio.file.Path
 import java.nio.file.Paths
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
+class FastqcValidationJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory, FastqcDomainFactory {
 
-class FastqcValidationJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory {
     @Override
     Class[] getDomainClassesToMock() {
         return [
-                FastqImportInstance,
-                SampleType,
-                Sample,
+                FastqcProcessedFile,
                 WorkflowStep,
         ]
     }
 
     void "test getExpectedFiles"() {
         given:
-        SeqTrack seqTrack = createSeqTrackWithOneDataFile()
-        WorkflowStep workflowStep = createWorkflowStep()
-        FastqcValidationJob job = Spy(FastqcValidationJob) {
-            1 * getSeqTrack(workflowStep) >> seqTrack
+        Path file1 = Paths.get('/file1')
+        Path file2 = Paths.get('/file2')
+        SeqTrack seqTrack = createSeqTrackWithTwoDataFile()
+        List<FastqcProcessedFile> fastqcProcessedFiles = seqTrack.dataFiles.collect {
+            createFastqcProcessedFile([
+                    dataFile: it,
+            ])
         }
+        WorkflowStep workflowStep = createWorkflowStep()
+
+        FastqcValidationJob job = new FastqcValidationJob()
+
         job.fastqcDataFilesService = Mock(FastqcDataFilesService) {
-            1 * fastqcOutputPath(_) >> { DataFile dataFile -> Paths.get(dataFile.fileName) }
+            1 * fastqcOutputPath(fastqcProcessedFiles.first()) >> file1
+            1 * fastqcOutputPath(fastqcProcessedFiles.last()) >> file2
+        }
+        job.concreteArtefactService = Mock(ConcreteArtefactService) {
+            1 * getOutputArtefacts(workflowStep, FastqcWorkflow.OUTPUT_FASTQC, FastqcWorkflow.WORKFLOW) >> fastqcProcessedFiles
         }
 
         when:
         List<Path> result = job.getExpectedFiles(workflowStep)
 
         then:
-        containSame(result*.fileName*.toString(), seqTrack.dataFiles*.fileName)
+        TestCase.assertContainSame(result, [file1, file2])
     }
 
     void "test getExpectedDirectories"() {

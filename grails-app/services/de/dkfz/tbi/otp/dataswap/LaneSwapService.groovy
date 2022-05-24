@@ -101,12 +101,12 @@ class LaneSwapService extends AbstractDataSwapService<LaneSwapParameters, LaneSw
         createMoveDataFilesCommands(data)
 
         // files need to be already renamed at this point
-        List<String> newFastQcFileNames = getFastQcOutputFileNamesByDataFilesInList(
-                getFastQDataFilesBySeqTrackInList(data.seqTrackList, data.parameters).sort { it.id }
+        Map<FastqcProcessedFile, String> newFastqcFileNames = getFastQcOutputFileNamesByDataFilesInList(
+                getFastQDataFilesBySeqTrackInList(data.seqTrackList, data.parameters)
         )
         data.moveFilesCommands << "\n\n################ move fastqc files ################\n\n"
-        data.oldFastQcFileNames.eachWithIndex { oldFastQcFileName, i ->
-            data.moveFilesCommands << copyAndRemoveFastQcFile(oldFastQcFileName, newFastQcFileNames.get(i), data)
+        data.oldFastQcFileNames.each { fastqcProcessedFile, oldFastQcFileName ->
+            data.moveFilesCommands << copyAndRemoveFastQcFile(oldFastQcFileName, newFastqcFileNames[fastqcProcessedFile], data)
         }
 
         checkForRemainingSeqTracks(data)

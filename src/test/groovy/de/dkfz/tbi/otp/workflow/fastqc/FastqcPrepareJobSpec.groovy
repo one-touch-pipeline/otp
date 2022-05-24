@@ -24,12 +24,13 @@ package de.dkfz.tbi.otp.workflow.fastqc
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
-import de.dkfz.tbi.otp.dataprocessing.FastqcDataFilesService
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.DataFile
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.tracking.NotificationCreator
 import de.dkfz.tbi.otp.tracking.OtrsTicket
+import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 import java.nio.file.Path
@@ -50,8 +51,9 @@ class FastqcPrepareJobSpec extends Specification implements DataTest, WorkflowSy
         WorkflowStep workflowStep = createWorkflowStep()
         SeqTrack seqTrack = createSeqTrackWithTwoDataFile()
 
-        FastqcPrepareJob job = Spy(FastqcPrepareJob) {
-            1 * getSeqTrack(workflowStep) >> seqTrack
+        FastqcPrepareJob job = new FastqcPrepareJob()
+        job.concreteArtefactService = Mock(ConcreteArtefactService) {
+            1 * getInputArtefact(workflowStep, FastqcWorkflow.INPUT_FASTQ, FastqcWorkflow.WORKFLOW) >> seqTrack
         }
         job.notificationCreator = Mock(NotificationCreator)
 
@@ -65,18 +67,18 @@ class FastqcPrepareJobSpec extends Specification implements DataTest, WorkflowSy
 
     void "test buildWorkDirectoryPath"() {
         given:
-        WorkflowStep workflowStep = createWorkflowStep()
-        SeqTrack seqTrack = createSeqTrackWithTwoDataFile()
-        Path workDirectory = Paths.get('/workDirectory')
+        String workDirectory = '/workDirectory'
+        Path workDirectoryPath = Paths.get(workDirectory)
+        WorkflowStep workflowStep = createWorkflowStep([
+                workflowRun: createWorkflowRun([
+                        workDirectory: workDirectory,
+                ]),
+        ])
 
-        FastqcPrepareJob job = Spy(FastqcPrepareJob) {
-            1 * getSeqTrack(workflowStep) >> seqTrack
-        }
-        job.fastqcDataFilesService = Mock(FastqcDataFilesService) {
-            1 * fastqcOutputDirectory(_) >> workDirectory
-        }
+        FastqcPrepareJob job = new FastqcPrepareJob()
+        job.fileSystemService = new TestFileSystemService()
 
         expect:
-        workDirectory == job.buildWorkDirectoryPath(workflowStep)
+        workDirectoryPath == job.buildWorkDirectoryPath(workflowStep)
     }
 }

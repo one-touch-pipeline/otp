@@ -34,6 +34,10 @@ trait DomainFactoryHelper {
         return DomainFactory.createDomainObject(domainClass, defaultProperties, parameterProperties, saveAndValidate)
     }
 
+    /**
+     * @Deprecated please use {@link #findOrCreateDomainObject(Class, Map, Map, Map, boolean)} instead
+     */
+    @Deprecated
     def <T> T findOrCreateDomainObject(Class<T> domainClass, Map defaultProperties, Map parameterProperties, boolean saveAndValidate = true) {
         return DomainFactory.findOrCreateDomainObject(domainClass, defaultProperties, parameterProperties, saveAndValidate)
     }

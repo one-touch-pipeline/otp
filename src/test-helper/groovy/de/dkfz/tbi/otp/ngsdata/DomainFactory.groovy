@@ -36,8 +36,7 @@ import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaQc
-import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
-import de.dkfz.tbi.otp.domainFactory.UserDomainFactoryInstance
+import de.dkfz.tbi.otp.domainFactory.*
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.CellRangerFactory
 import de.dkfz.tbi.otp.domainFactory.pipelines.externalBam.ExternalBamFactoryInstance
@@ -63,11 +62,16 @@ import java.time.ZonedDateTime
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
 @SuppressWarnings('EmptyClass')
-class DomainFactoryProxyCore implements DomainFactoryCore { }
+class DomainFactoryProxyCore implements DomainFactoryCore {
+}
+
 @SuppressWarnings('EmptyClass')
-class DomainFactoryProxyRoddy implements IsRoddy { }
+class DomainFactoryProxyRoddy implements IsRoddy {
+}
+
 @SuppressWarnings('EmptyClass')
-class DomainFactoryProxyCellRanger implements CellRangerFactory { }
+class DomainFactoryProxyCellRanger implements CellRangerFactory {
+}
 
 class DomainFactory {
 
@@ -377,7 +381,7 @@ class DomainFactory {
 
     static ProcessingError createProcessingError(Map properties = [:]) {
         return createDomainObject(ProcessingError, [
-                errorMessage        : "errorMessage_${counter++}",
+                errorMessage: "errorMessage_${counter++}",
         ], properties)
     }
 
@@ -603,12 +607,12 @@ class DomainFactory {
         MergingWorkPackage mergingWorkPackage
 
         Map<String, Object> mwpProperties = [
-                sample: seqTrack.sample,
-                seqType: seqTrack.seqType,
-                seqPlatformGroup: seqTrack.seqPlatformGroup,
+                sample               : seqTrack.sample,
+                seqType              : seqTrack.seqType,
+                seqPlatformGroup     : seqTrack.seqPlatformGroup,
                 libraryPreparationKit: seqTrack.libraryPreparationKit,
-                referenceGenome: referenceGenome ?: createReferenceGenomeLazy(),
-                pipeline: pipeline ?: createDefaultOtpPipeline(),
+                referenceGenome      : referenceGenome ?: createReferenceGenomeLazy(),
+                pipeline             : pipeline ?: createDefaultOtpPipeline(),
         ]
 
         if (referenceGenome && pipeline) {
@@ -1621,9 +1625,12 @@ class DomainFactory {
         return proxyCore.createChipSeqSeqTrack(properties)
     }
 
+    /**
+     * @Deprecated use {@link FastqcDomainFactory#createFastqcProcessedFile()} instead
+     */
     @Deprecated
     static FastqcProcessedFile createFastqcProcessedFile(Map properties = [:]) {
-        return proxyCore.createFastqcProcessedFile(properties)
+        return FastqcDomainFactoryInstance.INSTANCE.createFastqcProcessedFile(properties)
     }
 
     static Map<String, ?> baseMergingWorkPackageProperties(Map properties) {
@@ -1898,7 +1905,7 @@ class DomainFactory {
 
     static Parameter createParameter(Map properties = [:]) {
         return createDomainObject(Parameter, [
-                type : { createParameterType() },
+                type: { createParameterType() },
         ], properties)
     }
 
@@ -2100,8 +2107,8 @@ class DomainFactory {
 
     static MetaDataFile createMetaDataFile(Map properties = [:]) {
         return createDomainObject(MetaDataFile, [
-                fileName  : "MetaDataFileName_${counter++}",
-                filePath  : TestCase.uniqueNonExistentPath.path,
+                fileName           : "MetaDataFileName_${counter++}",
+                filePath           : TestCase.uniqueNonExistentPath.path,
                 fastqImportInstance: { createFastqImportInstance() },
         ], properties)
     }
@@ -2292,7 +2299,7 @@ class DomainFactory {
         qaFile.parentFile.mkdirs()
         // the values are from the documentation on the Wiki: https://wiki.local/NGS/OTP-Roddy+Interface#HTheQCData
         qaFile <<
-        """
+                """
 {
   "8": {
     "genomeWithoutNCoverageQcBases": 0.011,

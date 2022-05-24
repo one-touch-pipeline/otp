@@ -94,7 +94,7 @@ SeqTrack.withTransaction {
         SeqTrack.findAllByIlseSubmission(submission).each { SeqTrack seqTrack ->
             seqTrack.dataFiles.each { DataFile df ->
                 Path finalPath = lsdfFilesService.getFileFinalPathAsPath(df)
-                Path initialPath = lsdfFilesService.getFileInitialPathAsPath(df, finalPath.fileSystem)
+                Path initialPath = lsdfFilesService.getFileInitialPathAsPath(df)
 
                 if (!Files.exists(initialPath)) {
                     if (overview) {

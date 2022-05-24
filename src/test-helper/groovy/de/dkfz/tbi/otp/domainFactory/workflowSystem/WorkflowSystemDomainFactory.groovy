@@ -35,26 +35,29 @@ import java.time.ZonedDateTime
 
 trait WorkflowSystemDomainFactory implements DomainFactoryCore, TaxonomyFactory {
 
+    final static int MAX_PARALLEL_WORKFLOWS = 5
+
     Workflow createWorkflow(Map properties = [:], boolean saveAndValidate = true) {
         return createDomainObject(Workflow, [
                 name                : "name_${nextId}",
                 beanName            : "beanName_${nextId}",
                 enabled             : true,
-                maxParallelWorkflows: 5,
+                maxParallelWorkflows: MAX_PARALLEL_WORKFLOWS,
         ], properties, saveAndValidate)
     }
 
-    Workflow findOrCreateWorkflow(Map searchProperties, Map additionalCreationProperties = [:], boolean saveAndValidate = true) {
-        return findOrCreateDomainObject(Workflow, searchProperties, [
-                name                : "name_${nextId}",
+    Workflow findOrCreateWorkflow(String workflow, Map properties = [:]) {
+        return findOrCreateDomainObject(Workflow, [
+                name: workflow,
+        ], [
                 beanName            : "beanName_${nextId}",
                 enabled             : true,
-                maxParallelWorkflows: 6,
-        ], additionalCreationProperties, saveAndValidate)
+                maxParallelWorkflows: MAX_PARALLEL_WORKFLOWS,
+        ], properties)
     }
 
     WorkflowRun createWorkflowRun(Map properties = [:]) {
-        Workflow workflow = properties.workflow ?: properties.restartedFrom?.workflow ?: createWorkflow()
+        Workflow workflow = properties.workflow ?: properties.restartedFrom?.workflow ?: properties.workflowVersion?.workflow ?: createWorkflow()
         return createDomainObject(WorkflowRun, [
                 workflow        : { workflow },
                 workflowVersion : { properties.restartedFrom?.workflowVersion ?: createWorkflowVersion(workflow: workflow) },

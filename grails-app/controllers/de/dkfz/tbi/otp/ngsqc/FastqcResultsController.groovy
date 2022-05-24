@@ -26,7 +26,7 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
 import org.jsoup.select.Elements
 
-import de.dkfz.tbi.otp.dataprocessing.FastqcDataFilesService
+import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
 
 class RenderFileCommand {
@@ -43,6 +43,7 @@ class RenderFileCommand {
 class FastqcResultsController {
 
     FastqcDataFilesService fastqcDataFilesService
+    FastQcProcessedFileService fastQcProcessedFileService
     FastqcResultsService fastqcResultsService
     LsdfFilesService lsdfFilesService
     MetaDataService metaDataService
@@ -61,7 +62,8 @@ class FastqcResultsController {
         String result
 
         if (fastqcResultsService.isFastqcAvailable(dataFile)) {
-            String html = fastqcDataFilesService.getInputStreamFromZipFile(dataFile, "fastqc_report.html").text
+            FastqcProcessedFile fastqcProcessedFile = fastQcProcessedFileService.findSingleByDataFile(dataFile)
+            String html = fastqcDataFilesService.getInputStreamFromZipFile(fastqcProcessedFile, "fastqc_report.html").text
 
             Elements elements = Jsoup.parse(html).select("div.summary, div.main, div.footer")
 
@@ -102,7 +104,8 @@ class FastqcResultsController {
         InputStream stream
         try {
             DataFile dataFile = metaDataService.getDataFile(cmd.dataFile.id as long)
-            stream = fastqcDataFilesService.getInputStreamFromZipFile(dataFile, cmd.path)
+            FastqcProcessedFile fastqcProcessedFile = fastQcProcessedFileService.findSingleByDataFile(dataFile)
+            stream = fastqcDataFilesService.getInputStreamFromZipFile(fastqcProcessedFile, cmd.path)
         } catch (FileNotReadableException e) {
             render status: 404
             return void

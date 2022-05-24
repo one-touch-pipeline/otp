@@ -71,6 +71,8 @@ assert batchSize > 1
 
 @Field final LsdfFilesService lsdfFilesService = ctx.lsdfFilesService
 
+WorkflowService workflowService = ctx.workflowService
+
 /*
  *main function to create WF runs and artefacts
  */
@@ -163,7 +165,7 @@ if (seqTrackIdsWithDataFileCount) {
     println "${numBatches} batches will be processed"
 
     //fetch the FastQC Workflow
-    Workflow workflow = Workflow.getExactlyOneWorkflow(WORKFLOW_NAME)
+    Workflow workflow = workflowService.getExactlyOneWorkflow(WORKFLOW_NAME)
     assert workflow: "configured workflow ${WORKFLOW_NAME} does not exists"
     println "Migrate fastqcProcessedFiles to new workflow systems for Workflow \"${WORKFLOW_NAME}\""
 

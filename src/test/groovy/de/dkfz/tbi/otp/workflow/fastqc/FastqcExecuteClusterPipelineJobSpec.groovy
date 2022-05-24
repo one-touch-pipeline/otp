@@ -25,21 +25,27 @@ import grails.testing.gorm.DataTest
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+import spock.lang.Unroll
 
-import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.domainFactory.FastqcDomainFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
-import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
+import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.utils.ProcessOutput
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflowExecution.*
 
 import java.nio.file.*
 
-class FastqcExecuteClusterPipelineJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory {
+class FastqcExecuteClusterPipelineJobSpec extends Specification implements DataTest, FastqcDomainFactory, WorkflowSystemDomainFactory {
+
+    static final String WORKFLOW = FastqcWorkflow.WORKFLOW
+    static final String INPUT_ROLE = FastqcWorkflow.INPUT_FASTQ
+    static final String OUTPUT_ROLE = FastqcWorkflow.OUTPUT_FASTQC
 
     private FastqcExecuteClusterPipelineJob job
     private WorkflowRun run
@@ -49,42 +55,42 @@ class FastqcExecuteClusterPipelineJobSpec extends Specification implements DataT
     private FileSystem fileSystem = FileSystems.default
     private DataFile dataFile1
     private DataFile dataFile2
-    private Path source1
-    private Path source2
-    private Path target1
-    private Path target2
+    private FastqcProcessedFile fastqcProcessedFile1
+    private FastqcProcessedFile fastqcProcessedFile2
+
     private Path sourceDir
     private Path targetDir
+    private Path sourceFastqc1
+    private Path sourceFastqc2
+    private Path sourceFastqcMd5sum1
+    private Path sourceFastqcMd5sum2
+    private Path targetFastqc1
+    private Path targetFastqc2
+    private Path targetFastqcHtml1
+    private Path targetFastqcHtml2
 
-    static final String WORKFLOW = FastqcWorkflow.WORKFLOW
-    static final String INPUT_ROLE = FastqcWorkflow.INPUT_FASTQ
+    @Rule
+    TemporaryFolder temporaryFolder
 
-    private void createData() {
+    private void createData(boolean targetAlreadyExist) {
         fileSystem = FileSystems.default
         sourceDir = temporaryFolder.newFolder("src").toPath()
         targetDir = temporaryFolder.newFolder("tgt").toPath()
+        sourceFastqc1 = sourceDir.resolve('fastq1')
+        sourceFastqc2 = sourceDir.resolve('fastq2')
+        sourceFastqcMd5sum1 = sourceDir.resolve('md5sum1')
+        sourceFastqcMd5sum2 = sourceDir.resolve('md5sum2')
+        targetFastqc1 = targetDir.resolve('fastq1')
+        targetFastqc2 = targetDir.resolve('fastq2')
+        targetFastqcHtml1 = targetDir.resolve('html1')
+        targetFastqcHtml2 = targetDir.resolve('html2')
 
-        Path tmp
-
-        tmp = temporaryFolder.newFile().toPath()
-        tmp.write("bla")
-        source1 = sourceDir.resolve(tmp)
-        Files.move(tmp, source1)
-
-        tmp = temporaryFolder.newFile().toPath()
-        tmp.write("bla")
-        source2 = sourceDir.resolve(tmp)
-        Files.move(tmp, source2)
-
-        tmp = temporaryFolder.newFile().toPath()
-        tmp.write("bla")
-        target1 = targetDir.resolve(tmp)
-        Files.move(tmp, target1)
-
-        tmp = temporaryFolder.newFile().toPath()
-        tmp.write("bla")
-        target2 = targetDir.resolve(tmp)
-        Files.move(tmp, target2)
+        if (targetAlreadyExist) {
+            CreateFileHelper.createFile(targetFastqc1)
+            CreateFileHelper.createFile(targetFastqc2)
+        }
+        int callOfDelete = targetAlreadyExist ? 1 : 0
+        int logEntryCount = targetAlreadyExist ? 3 : 1
 
         run = createWorkflowRun([
                 workflow: createWorkflow([
@@ -108,51 +114,59 @@ class FastqcExecuteClusterPipelineJobSpec extends Specification implements DataT
         dataFile2 = createDataFile([
                 seqTrack: seqTrack,
         ])
+        fastqcProcessedFile1 = createFastqcProcessedFile([
+                dataFile: dataFile1,
+        ])
+        fastqcProcessedFile2 = createFastqcProcessedFile([
+                dataFile         : dataFile2,
+                workDirectoryName: fastqcProcessedFile1.workDirectoryName,
+        ])
 
         job = new FastqcExecuteClusterPipelineJob()
         job.concreteArtefactService = Mock(ConcreteArtefactService) {
             _ * getInputArtefact(step, INPUT_ROLE, WORKFLOW) >> seqTrack
+            _ * getOutputArtefacts(step, OUTPUT_ROLE, WORKFLOW) >> [fastqcProcessedFile1, fastqcProcessedFile2]
             0 * _
         }
-        job.fileSystemService = Mock(FileSystemService) {
-            _ * getRemoteFileSystem(_) >> fileSystem
+        job.fileSystemService = new TestFileSystemService()
+        job.fileService = Mock(FileService) {
+            callOfDelete * deleteDirectoryRecursively(targetFastqc1)
+            callOfDelete * deleteDirectoryRecursively(targetFastqc2)
+            _ * ensureFileIsReadableAndNotEmpty(_)
+            _ * convertPermissionsToOctalString(_)
             0 * _
+        }
+        job.logService = Mock(LogService) {
+            logEntryCount * addSimpleLogEntry(_, _)
         }
     }
 
     @Override
     Class[] getDomainClassesToMock() {
         return [
-                SeqTrack,
-                DataFile,
+                FastqcProcessedFile,
                 WorkflowArtefact,
                 WorkflowStep,
         ]
     }
 
-    @Rule
-    TemporaryFolder temporaryFolder
-
-    void "test, if fastqc reports can be copied. no scripts are created"() {
+    @Unroll
+    void "test, when fastqc reports can be copied #m1, then #m2 copy fastqc"() {
         given:
-        createData()
+        createData(targetAlreadyExist)
+
+        CreateFileHelper.createFile(sourceFastqc1)
+        CreateFileHelper.createFile(sourceFastqc2)
+        CreateFileHelper.createFile(sourceFastqcMd5sum1)
+        CreateFileHelper.createFile(sourceFastqcMd5sum2)
 
         job.fastqcDataFilesService = Mock(FastqcDataFilesService) {
-            1 * fastqcOutputDirectory(_) >> targetDir
-            1 * pathToFastQcResultMd5SumFromSeqCenter(_, dataFile1) >> target1
-            1 * pathToFastQcResultMd5SumFromSeqCenter(_, dataFile2) >> target2
-            2 * fastqcOutputPath(dataFile1) >> target1
-            2 * fastqcOutputPath(dataFile2) >> target2
-            0 * _
-        }
-        job.seqTrackService = Mock(SeqTrackService) {
-            1 * getSequenceFilesForSeqTrack(seqTrack) >> [dataFile1, dataFile2]
-            0 * _
-        }
-        job.fileService = Mock(FileService) {
-            2 * deleteDirectoryRecursively(_)
-            _ * ensureFileIsReadableAndNotEmpty(_)
-            _ * convertPermissionsToOctalString(_)
+            2 * pathToFastQcResultFromSeqCenter(fastqcProcessedFile1) >> sourceFastqc1
+            2 * pathToFastQcResultFromSeqCenter(fastqcProcessedFile2) >> sourceFastqc2
+            1 * pathToFastQcResultMd5SumFromSeqCenter(fastqcProcessedFile1) >> sourceFastqcMd5sum1
+            1 * pathToFastQcResultMd5SumFromSeqCenter(fastqcProcessedFile2) >> sourceFastqcMd5sum2
+            2 * fastqcOutputPath(fastqcProcessedFile1) >> targetFastqc1
+            2 * fastqcOutputPath(fastqcProcessedFile2) >> targetFastqc2
             0 * _
         }
         job.remoteShellHelper = Mock(RemoteShellHelper) {
@@ -163,54 +177,43 @@ class FastqcExecuteClusterPipelineJobSpec extends Specification implements DataT
             }
             0 * _
         }
-        job.logService = Mock(LogService) {
-            3 * addSimpleLogEntry(_, _)
-        }
 
         when:
         List<String> scripts = job.createScripts(step)
 
         then:
-        2 * job.fastqcDataFilesService.pathToFastQcResultFromSeqCenter(fileSystem as FileSystem, dataFile1) >> target1
-        2 * job.fastqcDataFilesService.pathToFastQcResultFromSeqCenter(fileSystem as FileSystem, dataFile2) >> target2
-
         scripts.size() == 0
+
+        where:
+        m1                          | m2                     | targetAlreadyExist
+        ""                          | ""                     | false
+        " and target exist already" | "delete existing and " | true
     }
 
-    void "test, if fastqc reports can not be copied. correct scripts are created for each data file"() {
+    @Unroll
+    void "test, if fastqc reports can not be copied #m1, then #m2 create copy fastqc scripts"() {
         given:
-        createData()
+        createData(targetAlreadyExist)
 
         final String cmd_module_loader = "cmd load module loader"
         final String cmd_activation_fastqc = "cmd activate fastqc"
         final String cmd_fastqc = "cmd fastqc"
 
         job.fastqcDataFilesService = Mock(FastqcDataFilesService) {
-            1 * fastqcOutputDirectory(_) >> targetDir
-            2 * fastqcOutputPath(dataFile1) >> target1
-            2 * fastqcOutputPath(dataFile2) >> target2
-            1 * fastqcHtmlPath(dataFile1) >> target1
-            1 * fastqcHtmlPath(dataFile2) >> target2
-            0 * _
-        }
-        job.seqTrackService = Mock(SeqTrackService) {
-            1 * getSequenceFilesForSeqTrack(seqTrack) >> [dataFile1, dataFile2]
-            0 * _
-        }
-        job.fileService = Mock(FileService) {
-            2 * deleteDirectoryRecursively(_)
-            _ * ensureFileIsReadableAndNotEmpty(_)
-            _ * convertPermissionsToOctalString(_)
+            1 * pathToFastQcResultFromSeqCenter(fastqcProcessedFile1) >> sourceFastqc1
+            0 * pathToFastQcResultFromSeqCenter(fastqcProcessedFile2) >> sourceFastqc2
+            2 * fastqcOutputPath(fastqcProcessedFile1) >> targetFastqc1
+            2 * fastqcOutputPath(fastqcProcessedFile2) >> targetFastqc2
+            1 * fastqcHtmlPath(fastqcProcessedFile1) >> targetFastqcHtml1
+            1 * fastqcHtmlPath(fastqcProcessedFile2) >> targetFastqcHtml2
             0 * _
         }
         job.lsdfFilesService = Mock(LsdfFilesService) {
-            1 * getFileFinalPath(dataFile1) >> target1.toString()
-            1 * getFileFinalPath(dataFile2) >> target2.toString()
+            1 * getFileFinalPath(dataFile1) >> Paths.get('fastq1')
+            1 * getFileFinalPath(dataFile2) >> Paths.get('fastq2')
             0 * _
         }
-        job.logService = Mock(LogService) {
-            3 * addSimpleLogEntry(_, _)
-        }
+
         job.processingOptionService = Mock(ProcessingOptionService) {
             _ * findOptionAsString(ProcessingOption.OptionName.COMMAND_LOAD_MODULE_LOADER) >> cmd_module_loader
             _ * findOptionAsString(ProcessingOption.OptionName.COMMAND_ACTIVATION_FASTQC) >> cmd_activation_fastqc
@@ -221,75 +224,16 @@ class FastqcExecuteClusterPipelineJobSpec extends Specification implements DataT
         List<String> scripts = job.createScripts(step)
 
         then:
-        1 * job.fastqcDataFilesService.pathToFastQcResultFromSeqCenter(fileSystem as FileSystem, dataFile1) >> TestCase.uniqueNonExistentPath.toPath()
-
         scripts.size() == 2
         scripts.each { String it ->
             assert it.contains(cmd_module_loader)
             assert it.contains(cmd_activation_fastqc)
             assert it.contains(cmd_fastqc)
         }
-    }
 
-    //false positives, since rule can not recognize calling class
-    @SuppressWarnings('ExplicitFlushForDeleteRule')
-    void "test, if no result files exist and fastqc reports can not be copied. correct scripts are created for each data file"() {
-        given:
-        createData()
-
-        //remove the seqTrack result files, so that no deletion needed
-        Files.delete(target1)
-        Files.delete(target2)
-
-        final String cmd_module_loader = "cmd load module loader"
-        final String cmd_activation_fastqc = "cmd activate fastqc"
-        final String cmd_fastqc = "cmd fastqc"
-
-        job.fastqcDataFilesService = Mock(FastqcDataFilesService) {
-            1 * fastqcOutputDirectory(_) >> targetDir
-            2 * fastqcOutputPath(dataFile1) >> target1
-            2 * fastqcOutputPath(dataFile2) >> target2
-            1 * fastqcHtmlPath(dataFile1) >> target1
-            1 * fastqcHtmlPath(dataFile2) >> target2
-            0 * _
-        }
-        job.seqTrackService = Mock(SeqTrackService) {
-            1 * getSequenceFilesForSeqTrack(seqTrack) >> [dataFile1, dataFile2]
-            0 * _
-        }
-        job.fileService = Mock(FileService) {
-            0 * deleteDirectoryRecursively(_)
-            _ * ensureFileIsReadableAndNotEmpty(_)
-            _ * convertPermissionsToOctalString(_)
-            0 * _
-        }
-        job.lsdfFilesService = Mock(LsdfFilesService) {
-            1 * getFileFinalPath(dataFile1) >> target1.toString()
-            1 * getFileFinalPath(dataFile2) >> target2.toString()
-            0 * _
-        }
-        job.logService = Mock(LogService) {
-            1 * addSimpleLogEntry(_, "Creating cluster scripts")
-        }
-        job.processingOptionService = Mock(ProcessingOptionService) {
-            _ * findOptionAsString(ProcessingOption.OptionName.COMMAND_LOAD_MODULE_LOADER) >> cmd_module_loader
-            _ * findOptionAsString(ProcessingOption.OptionName.COMMAND_ACTIVATION_FASTQC) >> cmd_activation_fastqc
-            _ * findOptionAsString(ProcessingOption.OptionName.COMMAND_FASTQC) >> cmd_fastqc
-        }
-
-        when:
-        List<String> scripts = job.createScripts(step)
-
-        then:
-        // @see FastqcExecuteClusterPipelineJob.canFastQcReportsBeCopied
-        // In every() loop the first returns false will end the loop
-        1 * job.fastqcDataFilesService.pathToFastQcResultFromSeqCenter(fileSystem as FileSystem, dataFile1) >> TestCase.uniqueNonExistentPath.toPath()
-
-        scripts.size() == 2
-        scripts.each { String it ->
-            assert it.contains(cmd_module_loader)
-            assert it.contains(cmd_activation_fastqc)
-            assert it.contains(cmd_fastqc)
-        }
+        where:
+        m1                          | m2                     | targetAlreadyExist
+        ""                          | ""                     | false
+        " and target exist already" | "delete existing and " | true
     }
 }

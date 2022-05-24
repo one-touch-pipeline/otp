@@ -116,7 +116,8 @@ enum DataFileColumns {
         return CollectionUtils.atMostOneElement(FastqcProcessedFile.findAllByDataFile(dataFile))?.id
     }),
     FASTQC_PATH("FastQC Path", { DataFile dataFile, Map properties = [:] ->
-        return (properties["fastqcDataFilesService"] as FastqcDataFilesService).fastqcOutputFile(dataFile)
+        FastqcProcessedFile fastqcProcessedFile = CollectionUtils.atMostOneElement(FastqcProcessedFile.findAllByDataFile(dataFile))
+        return fastqcProcessedFile ? (properties["fastqcDataFilesService"] as FastqcDataFilesService).fastqcOutputPath(fastqcProcessedFile).toString() : ""
     }),
     RUN_ID("Run ID", { DataFile dataFile, Map properties = [:] ->
         return dataFile.seqTrack.run.id

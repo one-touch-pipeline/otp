@@ -133,10 +133,10 @@ class SampleSwapService extends AbstractDataSwapService<SampleSwapParameters, Sa
 
         SampleIdentifier.findAllBySample(data.sample)*.delete(flush: true)
 
-        List<String> newFastQcFileNames = data.fastqDataFiles.collect { fastqcDataFilesService.fastqcOutputFile(it) }
+        Map<FastqcProcessedFile, String> newFastQcFileNames = getFastQcOutputFileNamesByDataFilesInList(data.fastqDataFiles)
         data.moveFilesCommands << "\n\n\n################ move fastqc files ################\n"
-        data.oldFastQcFileNames.eachWithIndex { oldFastQcFileName, i ->
-            data.moveFilesCommands << copyAndRemoveFastQcFile(oldFastQcFileName, newFastQcFileNames.get(i), data)
+        data.oldFastQcFileNames.each { fastqcProcessedFile, oldFastQcFileName ->
+            data.moveFilesCommands << copyAndRemoveFastQcFile(oldFastQcFileName, newFastQcFileNames[fastqcProcessedFile], data)
         }
 
         createRemoveAnalysisAndAlignmentsCommands(data)

@@ -28,12 +28,11 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
-import de.dkfz.tbi.otp.job.processing.FileSystemService
+import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.workflow.shared.WorkflowException
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
-import java.nio.file.FileSystems
 import java.nio.file.Path
 
 class DataInstallationConditionalFailJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory {
@@ -62,11 +61,9 @@ class DataInstallationConditionalFailJobSpec extends Specification implements Da
         DataInstallationConditionalFailJob job = Spy(DataInstallationConditionalFailJob) {
             getSeqTrack(workflowStep) >> seqTrack
         }
-        job.fileSystemService = Mock(FileSystemService) {
-            getRemoteFileSystem(_) >> FileSystems.default
-        }
+        job.fileSystemService = new TestFileSystemService()
         job.lsdfFilesService = Mock(LsdfFilesService) {
-            getFileInitialPathAsPath(_, _) >> path
+            getFileInitialPathAsPath(_) >> path
         }
 
         when:
@@ -101,11 +98,10 @@ class DataInstallationConditionalFailJobSpec extends Specification implements Da
         DataInstallationConditionalFailJob job = Spy(DataInstallationConditionalFailJob) {
             getSeqTrack(workflowStep) >> seqTrack
         }
-        job.fileSystemService = Mock(FileSystemService) {
-            getRemoteFileSystem(_) >> FileSystems.default
-        }
+        job.fileSystemService = new TestFileSystemService()
         job.lsdfFilesService = Mock(LsdfFilesService) {
-            getFileInitialPathAsPath(_, _) >> TestCase.uniqueNonExistentPath.toPath()
+            getFileInitialPathAsPath(_) >> TestCase.uniqueNonExistentPath.toPath()
+            0 * _
         }
 
         when:

@@ -41,8 +41,8 @@ class FastqcConditionalFailJobSpec extends Specification implements DataTest, Wo
     @Override
     Class[] getDomainClassesToMock() {
         return [
-            DataFile,
-            WorkflowStep,
+                DataFile,
+                WorkflowStep,
         ]
     }
 

@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.dataswap
 
 import grails.gorm.transactions.Transactional
 
+import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
 import de.dkfz.tbi.otp.dataswap.data.IndividualSwapData
 import de.dkfz.tbi.otp.dataswap.parameters.IndividualSwapParameters
 import de.dkfz.tbi.otp.ngsdata.*
@@ -105,9 +106,9 @@ class IndividualSwapService extends AbstractDataSwapService<IndividualSwapParame
         data.samples = Sample.findAllByIndividual(data.individualSwap.old)
         data.seqTrackList = data.samples ? SeqTrack.findAllBySampleInList(data.samples) : []
         List<DataFile> newDataFiles = data.seqTrackList ? DataFile.findAllBySeqTrackInList(data.seqTrackList) : []
-        List<String> newFastqcFileNames = newDataFiles.collect { fastqcDataFilesService.fastqcOutputFile(it) }
-        data.oldFastQcFileNames.eachWithIndex { oldFastQcFileName, i ->
-            data.moveFilesCommands << copyAndRemoveFastQcFile(oldFastQcFileName, newFastqcFileNames.get(i), data)
+        Map<FastqcProcessedFile, String> newFastqcFileNames = getFastQcOutputFileNamesByDataFilesInList(newDataFiles)
+        data.oldFastQcFileNames.each { fastqcProcessedFile, oldFastQcFileName ->
+            data.moveFilesCommands << copyAndRemoveFastQcFile(oldFastQcFileName, newFastqcFileNames[fastqcProcessedFile], data)
         }
 
         createRemoveAnalysisAndAlignmentsCommands(data)

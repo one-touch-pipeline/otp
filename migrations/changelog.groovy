@@ -665,4 +665,6 @@ databaseChangeLog = {
     changeSet(author: "", id: "otp-246") {
         sqlFile(path: 'changelogs/2022/otp-246.sql')
     }
+
+    include file: 'changelogs/2022/otp-1594-fastqc-working-directory.groovy'
 }

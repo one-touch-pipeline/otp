@@ -26,18 +26,17 @@ import grails.testing.services.ServiceUnitTest
 import grails.transaction.Rollback
 import spock.lang.Specification
 
-import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
-import de.dkfz.tbi.otp.workflow.fastqc.FastqcWorkflow
+import de.dkfz.tbi.otp.domainFactory.workflowSystem.FastqcWorkflowDomainFactory
 import de.dkfz.tbi.otp.workflowExecution.decider.AllDecider
 
 @Rollback
 @Integration
-class AllDeciderIntegrationSpec extends Specification implements ServiceUnitTest<AllDecider>,  WorkflowSystemDomainFactory {
+class AllDeciderIntegrationSpec extends Specification implements ServiceUnitTest<AllDecider>, FastqcWorkflowDomainFactory {
 
     void "test decide for Decider"() {
         given:
         AllDecider allDecider = new AllDecider()
-        createWorkflow(name: FastqcWorkflow.WORKFLOW)
+        createFastqcWorkflowVersion()
         WorkflowStep workflowStep = createWorkflowStep()
         WorkflowArtefact wa1 = createWorkflowArtefact(state: WorkflowArtefact.State.SUCCESS, producedBy: workflowStep.workflowRun)
         WorkflowArtefact wa2 = createWorkflowArtefact(state: WorkflowArtefact.State.SUCCESS, producedBy: workflowStep.workflowRun)

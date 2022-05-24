@@ -19,20 +19,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflowExecution.decider
+package de.dkfz.tbi.otp.workflowExecution
 
 import grails.testing.gorm.DataTest
 import grails.testing.services.ServiceUnitTest
 import spock.lang.Specification
 
-import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
-import de.dkfz.tbi.otp.workflow.panCancer.PanCancerWorkflow
-import de.dkfz.tbi.otp.workflowExecution.ArtefactType
-import de.dkfz.tbi.otp.workflowExecution.Workflow
-import de.dkfz.tbi.otp.workflowExecution.WorkflowService
 
-class PanCancerDeciderServiceSpec extends Specification implements ServiceUnitTest<PanCancerDeciderService>, DataTest, WorkflowSystemDomainFactory, IsRoddy {
+import java.time.LocalDate
+
+class WorkflowServiceSpec extends Specification implements ServiceUnitTest<WorkflowService>, WorkflowSystemDomainFactory, DataTest {
+
+    static final String WORKFLOW_NAME = "WORKFLOW"
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -41,21 +40,40 @@ class PanCancerDeciderServiceSpec extends Specification implements ServiceUnitTe
         ]
     }
 
-    void "test getWorkflow"() {
+    void "getExactlyOneWorkflow, when a non deprecated workflow of the name exist, then return that workflow"() {
         given:
-        service.workflowService = new WorkflowService()
-        createWorkflow(name: PanCancerWorkflow.WORKFLOW)
+        createWorkflow()
+        Workflow workflow = createWorkflow([
+                name: WORKFLOW_NAME,
+        ])
 
-        expect:
-        service.workflow.name == PanCancerWorkflow.WORKFLOW
+        when:
+        Workflow returnedWorkflow = service.getExactlyOneWorkflow(WORKFLOW_NAME)
+
+        then:
+        returnedWorkflow == workflow
     }
 
-    void "test getSupportedInputArtefactTypes"() {
-        expect:
-        service.supportedInputArtefactTypes == [
-                ArtefactType.FASTQ,
-                ArtefactType.FASTQC,
-                ArtefactType.BAM,
-        ] as Set
+    void "getExactlyOneWorkflow, when no workflow of the name exists, then throw an exception"() {
+        createWorkflow()
+
+        when:
+        service.getExactlyOneWorkflow(WORKFLOW_NAME)
+
+        then:
+        thrown(AssertionError)
+    }
+
+    void "getExactlyOneWorkflow, when the only workflow with this name is deprecated, then throw an exception"() {
+        createWorkflow([
+                name          : WORKFLOW_NAME,
+                deprecatedDate: LocalDate.now(),
+        ])
+
+        when:
+        service.getExactlyOneWorkflow(WORKFLOW_NAME)
+
+        then:
+        thrown(AssertionError)
     }
 }

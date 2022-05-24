@@ -26,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.CreateClusterScriptService
+import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
@@ -47,11 +48,14 @@ class LsdfFilesService {
     IndividualService individualService
     ProjectService projectService
 
+    FileSystemService fileSystemService
+
     /**
      * This function return path to the initial location
      * of the given dataFile
      */
-    Path getFileInitialPathAsPath(DataFile dataFile, FileSystem fileSystem) {
+    Path getFileInitialPathAsPath(DataFile dataFile) {
+        FileSystem fileSystem = fileSystemService.remoteFileSystemOnDefaultRealm
         return fileSystem.getPath(getFileInitialPath(dataFile))
     }
 
@@ -100,6 +104,9 @@ class LsdfFilesService {
         return dataFile.used
     }
 
+    /**
+     * Attention: In most cases the method {@link #getSingleCellWellDirectory(DataFile)} is to use instead of this one to include the well label level.
+     */
     Path getSampleTypeDirectory(DataFile dataFile) {
         Path basePath = individualService.getViewByPidPath(dataFile.individual, dataFile.seqType)
         SeqTrack seqTrack = dataFile.seqTrack ?: dataFile.alignmentLog.seqTrack
@@ -195,7 +202,6 @@ class LsdfFilesService {
     String getFileViewByPidPath(DataFile file) {
         return getFileViewByPidPathAsPath(file)
     }
-
     /**
      * for single cell data with well identifier, the path in the all directory is returned.
      * For all other data the same as {@link #getFileViewByPidPath} is returned
