@@ -21,9 +21,6 @@
  */
 package de.dkfz.tbi.otp.project.additionalField
 
-import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.config.TypeValidators
-
 class TextFieldValueSpec extends AbstractSingleFieldValueSpec {
 
     @Override
