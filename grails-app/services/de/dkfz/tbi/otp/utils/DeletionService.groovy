@@ -255,17 +255,18 @@ class DeletionService {
                 dirsToDelete.add(processingDir.path)
             }
 
-            AbstractBamFile latestBamFile = CollectionUtils.atMostOneElement(
-                    MergingWorkPackage.findAllBySampleAndSeqType(seqTrack.sample, seqTrack.seqType))?.bamFileInProjectFolder
-            if (latestBamFile) {
-                Path mergingDir = abstractMergedBamFileService.getBaseDirectory(latestBamFile)
-                if (Files.exists(mergingDir)) {
-                    List<ExternallyProcessedMergedBamFile> files = seqTrackService.returnExternallyProcessedMergedBamFiles([seqTrack])
-                    files.each {
-                        externalMergedBamFolders.add(it.nonOtpFolder.absoluteDataManagementPath.path)
-                    }
-                    Files.list(mergingDir).each {
-                        dirsToDelete.add(it)
+            Set<AbstractBamFile> bamFiles = MergingWorkPackage.findAllBySampleAndSeqType(seqTrack.sample, seqTrack.seqType)*.bamFileInProjectFolder
+            bamFiles.each { AbstractBamFile bamfile ->
+                if (bamfile) {
+                    Path mergingDir = abstractMergedBamFileService.getBaseDirectory(bamfile)
+                    if (Files.exists(mergingDir)) {
+                        List<ExternallyProcessedMergedBamFile> files = seqTrackService.returnExternallyProcessedMergedBamFiles([seqTrack])
+                        files.each {
+                            externalMergedBamFolders.add(it.nonOtpFolder.absoluteDataManagementPath.path)
+                        }
+                        Files.list(mergingDir).each {
+                            dirsToDelete.add(it)
+                        }
                     }
                 }
             }
