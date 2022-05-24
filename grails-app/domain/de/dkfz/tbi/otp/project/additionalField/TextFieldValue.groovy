@@ -25,18 +25,8 @@ class TextFieldValue extends AbstractSingleFieldValue {
 
     String textValue
 
-    @SuppressWarnings("Instanceof")
     static constraints = {
-        textValue nullable: true, validator: { val, obj ->
-            if (val && obj.definition instanceof TextFieldDefinition) {
-                if (obj.definition.allowedTextValues && !(val in obj.definition.allowedTextValues)) {
-                    return ["textFieldValue.textValue.notInList", obj.definition.allowedTextValues, obj.definition.name]
-                }
-                if (obj.definition.typeValidator && !obj.definition.typeValidator.validate(val)) {
-                    return ["textFieldValue.textValue.wrongType", obj.definition.typeValidator, obj.definition.name]
-                }
-            }
-        }
+        textValue nullable: true
     }
 
     static mapping = {

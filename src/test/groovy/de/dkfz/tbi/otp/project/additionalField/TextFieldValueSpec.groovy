@@ -39,40 +39,4 @@ class TextFieldValueSpec extends AbstractSingleFieldValueSpec {
         return createTextFieldValue()
     }
 
-    void "test constraint, allowed text values validation fails"() {
-        given:
-        AbstractFieldValue fieldValue = createValue()
-        fieldValue.definition.allowedTextValues = ["asdf", "xyz", "abc"]
-
-        when:
-        fieldValue.textValue = 'invalidValue'
-
-        then:
-        TestCase.assertValidateError(fieldValue, "textValue", 'textFieldValue.textValue.notInList', 'invalidValue')
-    }
-
-    void "test constraint, type validation fails"() {
-        given:
-        AbstractFieldValue fieldValue = createValue()
-        fieldValue.definition.typeValidator = TypeValidators.BOOLEAN
-
-        when:
-        fieldValue.textValue = 'invalidValue'
-
-        then:
-        TestCase.assertValidateError(fieldValue, "textValue", 'textFieldValue.textValue.wrongType', 'invalidValue')
-    }
-
-    void "test constraint, validation succeeds"() {
-        given:
-        AbstractFieldValue fieldValue = createValue()
-        fieldValue.definition.allowedTextValues = ["true", "untrue"]
-        fieldValue.definition.typeValidator = TypeValidators.BOOLEAN
-
-        when:
-        fieldValue.textValue = 'true'
-
-        then:
-        fieldValue.validate()
-    }
 }

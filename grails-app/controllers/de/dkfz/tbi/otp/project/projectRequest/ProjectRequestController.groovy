@@ -414,9 +414,25 @@ class ProjectRequestCreationCommand implements Validateable {
         additionalFieldValue validator: { additionalFieldValueMap, obj, errors ->
             additionalFieldValueMap.each {
                 AbstractFieldDefinition afd = AbstractFieldDefinition.get(it.key as Long)
-                if (afd.regularExpression && !(it.value ==~ afd.regularExpression)) {
-                    String errorMessage = "Field " + afd.name + " : " + afd.regularExpressionError
-                    errors.reject("${errorMessage}", null, "${errorMessage}")
+                if (it.value && afd instanceof TextFieldDefinition) {
+                    if (afd.allowedTextValues && !(it.value in afd.allowedTextValues)) {
+                        String errorMessage = "Field ${afd.name} with value ${it.value} is not valid, it should be one of ${afd.allowedTextValues}"
+                        errors.reject("${errorMessage}", null, "${errorMessage}")
+                    }
+                    if (afd.typeValidator && !afd.typeValidator.validate(it.value)) {
+                        String errorMessage = "Field ${afd.name} with type ${it.value} is not valid, it should be of type ${afd.typeValidator}"
+                        errors.reject("${errorMessage}", null, "${errorMessage}")
+                    }
+                    if (afd.regularExpression && !(it.value ==~ afd.regularExpression)) {
+                        String errorMessage = "Field ${afd.name} : ${afd.regularExpressionError}"
+                        errors.reject("${errorMessage}", null, "${errorMessage}")
+                    }
+                }
+                else if (it.value && afd instanceof IntegerFieldDefinition) {
+                    if (afd.allowedIntegerValues && !(afd.allowedIntegerValues.contains(it.value.toInteger()))) {
+                        String errorMessage = "Field ${afd.name} with value ${it.value} is not valid, it should be one of ${afd.allowedIntegerValues}"
+                        errors.reject("${errorMessage}", null, "${errorMessage}")
+                    }
                 }
             }
         }
