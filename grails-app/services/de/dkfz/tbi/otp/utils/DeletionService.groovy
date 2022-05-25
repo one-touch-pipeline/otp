@@ -315,17 +315,6 @@ class DeletionService {
             ProcessedSaiFile.findAllByDataFileInList(dataFiles)*.delete(flush: true)
         }
 
-        //delete ilseSubmission if it is not used by other seqTracks and is not blacklisted
-        IlseSubmission ilseSubmission = seqTrack.ilseSubmission
-        List<SeqTrack> otherSeqTracks = SeqTrack.findAllByIlseSubmission(ilseSubmission)
-        seqTrack.ilseSubmission = null
-        seqTrack.save(flush: true)
-        if (otherSeqTracks.size() == 1 && ilseSubmission) {
-            if (!ilseSubmission.warning) {
-                ilseSubmission.delete(flush: true)
-            }
-        }
-
         // for ProcessedMergedBamFiles
         AlignmentPass.findAllBySeqTrack(seqTrack).each { AlignmentPass alignmentPass ->
             MergingWorkPackage mergingWorkPackage = alignmentPass.workPackage
@@ -534,6 +523,16 @@ class DeletionService {
         if (check) {
             seqTrackService.throwExceptionInCaseOfExternalMergedBamFileIsAttached([seqTrack])
             seqTrackService.throwExceptionInCaseOfSeqTracksAreOnlyLinked([seqTrack])
+        }
+        //delete ilseSubmission if it is not used by other seqTracks and is not blacklisted
+        IlseSubmission ilseSubmission = seqTrack.ilseSubmission
+        List<SeqTrack> otherSeqTracks = SeqTrack.findAllByIlseSubmission(ilseSubmission)
+        seqTrack.ilseSubmission = null
+        seqTrack.save(flush: true)
+        if (otherSeqTracks.size() == 1 && ilseSubmission) {
+            if (!ilseSubmission.warning) {
+                ilseSubmission.delete(flush: true)
+            }
         }
 
         List<File> dirsToDelete = []
