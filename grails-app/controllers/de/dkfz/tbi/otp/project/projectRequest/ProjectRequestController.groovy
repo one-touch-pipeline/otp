@@ -224,7 +224,6 @@ class ProjectRequestController implements CheckAndCall {
     }
 
     def create(ProjectRequest projectRequest) {
-        projectRequestStateProvider.getCurrentState(projectRequest).create()
         redirect(controller: "projectCreation", action: "index", params: [
                 "projectRequest.id": projectRequest.id
         ])
