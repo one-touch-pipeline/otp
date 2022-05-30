@@ -239,7 +239,6 @@ class ProjectCreationBasisCommand implements Validateable {
     String getBaseProjectAddProperty(String propertyId) {
         return getAddPropertyValue(baseProject, propertyId)
     }
-
 }
 
 class ProjectCreationCommand extends ProjectCreationBasisCommand {
@@ -395,5 +394,4 @@ class ProjectCreationCommand extends ProjectCreationBasisCommand {
     void setStorageUntilInput(String storageUntil) {
         this.storageUntil = LocalDate.from(DateTimeFormatter.ISO_LOCAL_DATE.parse(storageUntil))
     }
-
 }

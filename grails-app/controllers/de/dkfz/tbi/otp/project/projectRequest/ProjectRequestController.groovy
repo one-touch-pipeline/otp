@@ -116,7 +116,7 @@ class ProjectRequestController implements CheckAndCall {
         List<ProjectRequest> requestsUserIsInvolved = projectRequestService.getRequestsUserIsInvolved(false)
         List<ProjectRequest> requestsToBeCheckedByUser = projectRequestService.sortRequestToBeHandledByUser(requestsUserIsInvolved)
         return [
-                check: ProjectRequestTableCommand.fromProjectRequest(requestsToBeCheckedByUser),
+                check     : ProjectRequestTableCommand.fromProjectRequest(requestsToBeCheckedByUser),
                 unresolved: ProjectRequestTableCommand.fromProjectRequest(requestsUserIsInvolved - requestsToBeCheckedByUser),
         ]
     }
@@ -168,7 +168,7 @@ class ProjectRequestController implements CheckAndCall {
         try {
             saveProjectRequest({ it.save(cmd) }, cmd, true)
         } catch (ProjectRequestBeingEditedException e) {
-            flash.message =  new FlashMessage(g.message(code: "projectRequest.edit.already") as String, e.message)
+            flash.message = new FlashMessage(g.message(code: "projectRequest.edit.already") as String, e.message)
         }
     }
 
@@ -177,7 +177,7 @@ class ProjectRequestController implements CheckAndCall {
             ProjectRequestCreationCommand cmdFromProjectRequest = ProjectRequestCreationCommand.fromProjectRequest(cmd.projectRequest)
             saveProjectRequest({ it.save(cmdFromProjectRequest) }, cmdFromProjectRequest, true)
         } catch (ProjectRequestBeingEditedException e) {
-            flash.message =  new FlashMessage(g.message(code: "projectRequest.edit.already") as String, e.message)
+            flash.message = new FlashMessage(g.message(code: "projectRequest.edit.already") as String, e.message)
         }
     }
 
@@ -199,7 +199,7 @@ class ProjectRequestController implements CheckAndCall {
         try {
             flash.cmd = projectRequestStateProvider.getCurrentState(projectRequest).edit(projectRequest)
         } catch (ProjectRequestBeingEditedException e) {
-            flash.message =  new FlashMessage(g.message(code: "projectRequest.edit.already") as String, e.message)
+            flash.message = new FlashMessage(g.message(code: "projectRequest.edit.already") as String, e.message)
         }
         redirect(action: ACTION_INDEX)
     }
@@ -363,7 +363,7 @@ class ProjectRequestCreationCommand implements Validateable {
     LocalDate storageUntil
     String relatedProjects
 
-    @BindUsing({  ProjectRequestCreationCommand obj, SimpleMapDataBindingSource source ->
+    @BindUsing({ ProjectRequestCreationCommand obj, SimpleMapDataBindingSource source ->
         Object input = source['speciesWithStrainList']
         return (input instanceof String ? [input] : input) as List<String>
     })

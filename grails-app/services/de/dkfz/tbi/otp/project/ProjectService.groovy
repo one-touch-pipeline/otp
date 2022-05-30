@@ -216,7 +216,8 @@ class ProjectService {
             if (project.dirAnalysis) {
                 try {
                     createAnalysisDirectoryIfPossible(project)
-                } catch (FileSystemException | OtpFileSystemException ignore) {}
+                } catch (FileSystemException | OtpFileSystemException ignore) {
+                }
             }
         }
 
