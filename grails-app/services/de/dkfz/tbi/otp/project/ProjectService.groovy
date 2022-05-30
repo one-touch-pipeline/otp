@@ -46,7 +46,6 @@ import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.notification.CreateNotificationTextService
 import de.dkfz.tbi.otp.project.additionalField.*
 import de.dkfz.tbi.otp.project.exception.unixGroup.*
-import de.dkfz.tbi.otp.project.projectRequest.Created
 import de.dkfz.tbi.otp.project.projectRequest.ProjectRequestService
 import de.dkfz.tbi.otp.project.projectRequest.ProjectRequestStateProvider
 import de.dkfz.tbi.otp.utils.*
@@ -211,12 +210,14 @@ class ProjectService {
 
         createProjectDirectoryIfNeeded(project)
 
-        if (project.dirAnalysis) {
-            try {
-                createAnalysisDirectoryIfPossible(project)
-            } catch (FileSystemException | OtpFileSystemException ignore) { }
-            //ignore exceptions to make creation of projects possible even when the analysis directory can't be created or the unix group has access to it
-            //In this case an email is send
+        SessionUtils.withNewSession {
+            // open new session to prevent project creation from rollback on failing creation of analysis dir
+            // In this case an email is send
+            if (project.dirAnalysis) {
+                try {
+                    createAnalysisDirectoryIfPossible(project)
+                } catch (FileSystemException | OtpFileSystemException ignore) {}
+            }
         }
 
         if (projectParams.projectRequest) {
