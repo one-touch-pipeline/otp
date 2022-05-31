@@ -23,6 +23,21 @@
 $(() => {
   'use strict';
 
+  const parseCoverageFromCellData = function (rowData) {
+    // remove html tags
+    const htmlRe = /(<([^>]+)>)/ig;
+    const rowDataNoHtml = rowData.replace(htmlRe, '');
+    // remove parentheses
+    const parenthesesRe = /\s\(.*\)/;
+    const cleanedRowData = rowDataNoHtml.replace(parenthesesRe, '');
+    // find first coverage and return
+    const result = cleanedRowData.split('|')[1];
+    if (result) {
+      return result.trim();
+    }
+    return result;
+  };
+
   const fileName = `Sample_Overview-${$('.selected-project-value strong').text()}`;
 
   const oTableLaneOverview = $('#laneOverviewId').dataTable({
@@ -42,6 +57,35 @@ $(() => {
     bScrollCollapse: false,
     bPaginate: false,
     bDeferRender: true,
+    createdRow(row) {
+      $.each($('td', row), function () {
+        const coverage = parseCoverageFromCellData($(this).html());
+        if (coverage) {
+          $(this).attr('data-sort', coverage);
+        }
+      });
+    },
+    columnDefs: [{
+      targets: 'custom-sort',
+      type: 'num',
+      render(data, type, full, meta) {
+        let result = data;
+        if (type === 'sort') {
+          const api = new $.fn.dataTable.Api(meta.settings);
+          const td = api.cell({
+            row: meta.row,
+            column: meta.col
+          }).node();
+          const attr = $(td).attr('data-sort');
+          if (typeof attr !== 'undefined' && attr !== false) {
+            result = attr;
+          } else {
+            result = Infinity;
+          }
+        }
+        return result;
+      }
+    }],
     fnServerData(sSource, aoData, fnCallback) {
       $.ajax({
         dataType: 'json',
@@ -50,7 +94,11 @@ $(() => {
         data: aoData,
         error() {
           // clear the table
-          fnCallback({ aaData: [], iTotalRecords: 0, iTotalDisplayRecords: 0 });
+          fnCallback({
+            aaData: [],
+            iTotalRecords: 0,
+            iTotalDisplayRecords: 0
+          });
           oTableLaneOverview.fnSettings().oFeatures.bServerSide = false;
         },
         success(json) {

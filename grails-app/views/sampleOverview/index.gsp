@@ -93,11 +93,11 @@
                             <th title="<g:message code="sampleOverview.registeredLanes.tooltip"/>"><span hidden>${seqType.displayNameWithLibraryLayout}: </span><g:message code="sampleOverview.registeredLanes"/></th>
                             <g:if test="${seqType.name == SeqTypeNames.RNA.seqTypeName}">
                                 <g:each var="workflow" in="${pipelines}">
-                                    <th><span hidden>${seqType.displayNameWithLibraryLayout}: </span>${workflow.displayName}<br><g:message code="sampleOverview.alignedAndAllLanes"/></th>
+                                    <th class="custom-sort"><span hidden>${seqType.displayNameWithLibraryLayout}: </span>${workflow.displayName}<br><g:message code="sampleOverview.alignedAndAllLanes"/></th>
                                 </g:each>
                             </g:if><g:else>
                                 <g:each var="workflow" in="${pipelines}">
-                                    <th><span hidden>${seqType.displayNameWithLibraryLayout}: </span>${workflow.displayName}<g:if test="${workflow.displayName == 'external'}"><g:message code="sampleOverview.existsAndCoverage"/></g:if><g:else><g:message code="sampleOverview.lanesAndCoverage"/></g:else></th>
+                                    <th class="custom-sort"><span hidden>${seqType.displayNameWithLibraryLayout}: </span>${workflow.displayName}<g:if test="${workflow.displayName == 'external'}"><g:message code="sampleOverview.existsAndCoverage"/></g:if><g:else><g:message code="sampleOverview.lanesAndCoverage"/></g:else></th>
                                 </g:each>
                             </g:else>
                         </g:each>

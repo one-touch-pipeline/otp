@@ -54,7 +54,7 @@ module.exports = {
     'airbnb-base'
   ],
   parserOptions: {
-    ecmaVersion: 6,
+    ecmaVersion: 2018,
     sourceType: 'script'
   },
   rules: lintRules,
