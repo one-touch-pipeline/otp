@@ -25,6 +25,8 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.project.ProjectRequest
 
+import javax.naming.OperationNotSupportedException
+
 @Component
 class Created implements ProjectRequestState {
 
@@ -70,6 +72,6 @@ class Created implements ProjectRequestState {
 
     @Override
     void create(ProjectRequest projectRequest) {
-        assert("Project can not be created in Created state")
+        throw new OperationNotSupportedException("Project can not be created in Created state")
     }
 }

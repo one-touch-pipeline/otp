@@ -29,6 +29,8 @@ import de.dkfz.tbi.otp.project.*
 import de.dkfz.tbi.otp.security.SecurityService
 import de.dkfz.tbi.otp.security.User
 
+import javax.naming.OperationNotSupportedException
+
 @SuppressWarnings('ExplicitFlushForDeleteRule')
 @SuppressWarnings('ExplicitFlushForSaveRule')
 class InitialSpec extends Specification implements UserDomainFactory, DataTest {
@@ -108,5 +110,19 @@ class InitialSpec extends Specification implements UserDomainFactory, DataTest {
 
         expect:
         state.delete(projectRequest)
+    }
+
+    void "create should fail with OperationNotSupportedException"() {
+        given:
+        User requester = createUser()
+        ProjectRequest projectRequest = createProjectRequest([
+                requester: requester
+        ])
+
+        when:
+        state.create(projectRequest)
+
+        then:
+        thrown(OperationNotSupportedException)
     }
 }

@@ -30,6 +30,8 @@ import org.springframework.stereotype.Component
 import de.dkfz.tbi.otp.project.ProjectRequest
 import de.dkfz.tbi.otp.security.*
 
+import javax.naming.OperationNotSupportedException
+
 @Component
 class Approval implements ProjectRequestState {
 
@@ -117,6 +119,6 @@ class Approval implements ProjectRequestState {
 
     @Override
     void create(ProjectRequest projectRequest) {
-        assert ("Project can not be created in Approval state")
+        throw new OperationNotSupportedException("Project can not be created in Approval state")
     }
 }

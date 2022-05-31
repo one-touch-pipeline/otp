@@ -30,6 +30,8 @@ import de.dkfz.tbi.otp.project.*
 import de.dkfz.tbi.otp.security.SecurityService
 import de.dkfz.tbi.otp.security.User
 
+import javax.naming.OperationNotSupportedException
+
 @SuppressWarnings('ExplicitFlushForDeleteRule')
 @SuppressWarnings('ExplicitFlushForSaveRule')
 class ApprovedSpec extends Specification implements UserDomainFactory, DataTest {
@@ -147,8 +149,18 @@ class ApprovedSpec extends Specification implements UserDomainFactory, DataTest 
     }
 
     void "create"() {
-        expect:
-        state.create()
+        given:
+        User requester = createUser()
+        ProjectRequest projectRequest = createProjectRequest([
+                requester: requester
+        ])
+
+        when:
+        state.create(projectRequest)
+
+        then:
+        1 * projectRequestStateProvider.setState(projectRequest, Created)
+        0 * _
     }
 
     void "delete"() {

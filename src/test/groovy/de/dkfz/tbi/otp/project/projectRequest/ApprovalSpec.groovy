@@ -29,6 +29,8 @@ import de.dkfz.tbi.otp.project.*
 import de.dkfz.tbi.otp.security.SecurityService
 import de.dkfz.tbi.otp.security.User
 
+import javax.naming.OperationNotSupportedException
+
 @SuppressWarnings('ExplicitFlushForDeleteRule')
 class ApprovalSpec extends Specification implements UserDomainFactory, DataTest {
 
@@ -155,6 +157,20 @@ class ApprovalSpec extends Specification implements UserDomainFactory, DataTest 
         1 * projectRequestPersistentStateService.setCurrentOwner(projectRequest.state, requester)
         1 * projectRequestStateProvider.setState(projectRequest, PiEdit)
         0 * _
+    }
+
+    void "create should fail with OperationNotSupportedException"() {
+        given:
+        User requester = createUser()
+        ProjectRequest projectRequest = createProjectRequest([
+                requester: requester
+        ])
+
+        when:
+        state.create(projectRequest)
+
+        then:
+        thrown(OperationNotSupportedException)
     }
 
 }

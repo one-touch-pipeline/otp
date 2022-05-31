@@ -31,6 +31,8 @@ import de.dkfz.tbi.otp.project.ProjectRequest
 import de.dkfz.tbi.otp.security.Role
 import de.dkfz.tbi.otp.security.User
 
+import javax.naming.OperationNotSupportedException
+
 @Component
 class Check implements ProjectRequestState {
 
@@ -106,6 +108,6 @@ class Check implements ProjectRequestState {
 
     @Override
     void create(ProjectRequest projectRequest) {
-        assert("Project can not be created in Check state")
+        throw new OperationNotSupportedException("Project can not be created in Check state")
     }
 }
