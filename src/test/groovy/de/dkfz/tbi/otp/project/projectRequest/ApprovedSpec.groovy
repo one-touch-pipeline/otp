@@ -30,8 +30,6 @@ import de.dkfz.tbi.otp.project.*
 import de.dkfz.tbi.otp.security.SecurityService
 import de.dkfz.tbi.otp.security.User
 
-import javax.naming.OperationNotSupportedException
-
 @SuppressWarnings('ExplicitFlushForDeleteRule')
 @SuppressWarnings('ExplicitFlushForSaveRule')
 class ApprovedSpec extends Specification implements UserDomainFactory, DataTest {
