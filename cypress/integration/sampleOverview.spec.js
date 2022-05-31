@@ -40,7 +40,7 @@ describe('Check sampleOverview page', () => {
       });
     });
 
-    it.skip('should add and remove filters for Seq Type', () => {
+    it('should add and remove filters for Seq Type', () => {
       cy.visit('/sampleOverview/index');
 
       const seqTypeName = 'WGS PAIRED bulk';

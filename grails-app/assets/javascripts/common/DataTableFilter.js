@@ -62,7 +62,7 @@ $.otp.dataTableFilter = {
 
     const removeRowOrHideInputs = function (tr) {
       // if there's more than one filter row, remove it, otherwise reset it
-      if (tr.siblings('tr').size() > 0) {
+      if (tr.siblings('tr').length > 0) {
         // remove row and determine whether to show an add button
         let lastTr;
         if (tr.is(':last-child')) {
