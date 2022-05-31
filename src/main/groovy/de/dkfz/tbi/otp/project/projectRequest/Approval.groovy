@@ -117,6 +117,6 @@ class Approval implements ProjectRequestState {
 
     @Override
     void create(ProjectRequest projectRequest) {
-        assert ("Project can not created in Approval state")
+        assert ("Project can not be created in Approval state")
     }
 }

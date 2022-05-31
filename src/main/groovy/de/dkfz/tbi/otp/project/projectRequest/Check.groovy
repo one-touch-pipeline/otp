@@ -106,6 +106,6 @@ class Check implements ProjectRequestState {
 
     @Override
     void create(ProjectRequest projectRequest) {
-        assert("Project can not created in Check state")
+        assert("Project can not be created in Check state")
     }
 }

@@ -91,6 +91,6 @@ class RequesterEdit implements ProjectRequestState {
 
     @Override
     void create(ProjectRequest projectRequest) {
-        assert("Project can not created in RequestEdit state")
+        assert("Project can not be created in RequestEdit state")
     }
 }
