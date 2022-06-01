@@ -60,7 +60,8 @@ abstract class AbstractWorkflowDecider implements Decider {
      * Group all workflow artefacts based on the fact if they can be processed together within WorkflowRun (e.g. individual, sample type).
      * The inner collection are inputs for one workflow run..
      */
-    abstract protected Collection<Collection<WorkflowArtefact>> groupArtefactsForWorkflowExecution(Collection<WorkflowArtefact> inputArtefacts)
+    abstract protected Collection<Collection<WorkflowArtefact>> groupArtefactsForWorkflowExecution(Collection<WorkflowArtefact> inputArtefacts,
+                                                                                                   Map<String, String> userParams)
 
     /**
      * Iterate over the different collections
@@ -109,7 +110,7 @@ abstract class AbstractWorkflowDecider implements Decider {
                 return []
             }
             Collection<WorkflowArtefact> combinedWorkflowArtefacts = (entry.value + findAdditionalRequiredInputArtefacts(entry.value)).unique()
-            Collection<Collection<WorkflowArtefact>> artefactsPerWorkflowRun = groupArtefactsForWorkflowExecution(combinedWorkflowArtefacts)
+            Collection<Collection<WorkflowArtefact>> artefactsPerWorkflowRun = groupArtefactsForWorkflowExecution(combinedWorkflowArtefacts, userParams)
             return createWorkflowRunsAndOutputArtefacts(artefactsPerWorkflowRun, filteredInputArtefacts, matchingWorkflows.workflowVersion)
         }
     }

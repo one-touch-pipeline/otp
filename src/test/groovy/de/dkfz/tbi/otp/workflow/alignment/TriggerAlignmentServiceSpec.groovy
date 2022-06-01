@@ -124,7 +124,7 @@ class TriggerAlignmentServiceSpec extends HibernateSpec implements ServiceUnitTe
 
         // Mock service for new workflow system
         service.allDecider = Mock(AllDecider) {
-            1 * decide(_) >> [outputArtefact]
+            1 * decide(_, _, _) >> [outputArtefact]
             1 * findAllSeqTracksInNewWorkflowSystem(_) >> [seqTrack1, seqTrack2]
             0 * _
         }
@@ -153,7 +153,7 @@ class TriggerAlignmentServiceSpec extends HibernateSpec implements ServiceUnitTe
         }
 
         when:
-        Collection<MergingWorkPackage> mergingWorkPackages = service.triggerAlignment([seqTrack1, seqTrack2, seqTrack3] as Set, true)
+        Collection<MergingWorkPackage> mergingWorkPackages = service.triggerAlignment([seqTrack1, seqTrack2, seqTrack3] as Set, true, true)
 
         then:
         mergingWorkPackages.size() == 2

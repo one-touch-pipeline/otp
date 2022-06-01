@@ -151,7 +151,9 @@ class PanCancerDeciderService extends AbstractWorkflowDecider {
     }
 
     @Override
-    final protected Collection<Collection<WorkflowArtefact>> groupArtefactsForWorkflowExecution(Collection<WorkflowArtefact> inputArtefacts) {
+    final protected Collection<Collection<WorkflowArtefact>> groupArtefactsForWorkflowExecution(Collection<WorkflowArtefact> inputArtefacts,
+                                                                                                Map<String, String> userParams = [:]) {
+        boolean ignoreSeqPlatformGroup = "TRUE".equalsIgnoreCase(userParams['ignoreSeqPlatformGroup'].toString())
         return inputArtefacts.groupBy { WorkflowArtefact inputArtefact ->
             Individual individual
             SampleType sampleType
@@ -202,7 +204,7 @@ class PanCancerDeciderService extends AbstractWorkflowDecider {
                 assert mergingCriteria?.useSeqPlatformGroup == MergingCriteria.SpecificSeqPlatformGroups.IGNORE_FOR_MERGING
             }
 
-            if (mergingCriteria?.useSeqPlatformGroup == MergingCriteria.SpecificSeqPlatformGroups.IGNORE_FOR_MERGING) {
+            if (mergingCriteria?.useSeqPlatformGroup == MergingCriteria.SpecificSeqPlatformGroups.IGNORE_FOR_MERGING || ignoreSeqPlatformGroup) {
                 seqPlatformGroup = null
             }
             if (!mergingCriteria.useLibPrepKit) {

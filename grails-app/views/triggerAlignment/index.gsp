@@ -32,7 +32,7 @@
             <span class="navbar-brand mb-0 h1"><g:message code="triggerAlignment.title"/></span>
         </nav>
 
-        <div class="mt-3">
+        <div
             <g:render template="./components/inputArea" model="[tabs: ['project', 'pid', 'lane', 'ilse'], seqTypes: seqTypes]"/>
         </div>
 
@@ -45,12 +45,19 @@
         </div>
 
         <nav class="navbar navbar-light bg-light mt-3">
+            <div>
+                <input type="checkbox" id="ignoreSeqPlatformGroup">
+                <label for="ignoreSeqPlatformGroup"><g:message code="triggerAlignment.input.checkbox.ignoreSeqPlatformGroup"/></label>
+                <br>
+                <input type="checkbox" id="withdrawBamFiles">
+                <label for="withdrawBamFiles"><g:message code="triggerAlignment.input.checkbox.withdrawn"/></label>
+            </div>
+        </nav>
+        <nav class="navbar navbar-light bg-light mt-3">
             <div class="nav-item">
                 <button id="triggerAlignmentButton" class="btn btn-primary nav-item mr-2" onclick="$.otp.triggerAlignment.trigger(this)">
                     <g:message code="triggerAlignment.triggerButton"/>
                 </button>
-                <input type="checkbox" id="withdrawBamFiles">
-                <label for="withdrawBamFiles"><g:message code="triggerAlignment.input.checkbox.withdrawn"/></label>
             </div>
         </nav>
 

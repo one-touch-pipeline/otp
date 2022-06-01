@@ -40,7 +40,7 @@ import java.time.LocalDate
 
 @Rollback
 @Integration
-class PanCancerDeciderIntegrationSpec extends Specification implements WorkflowSystemDomainFactory, IsRoddy {
+class PanCancerDeciderServiceIntegrationSpec extends Specification implements WorkflowSystemDomainFactory, IsRoddy {
 
     PanCancerDeciderService panCancerDeciderService
 
@@ -310,6 +310,99 @@ class PanCancerDeciderIntegrationSpec extends Specification implements WorkflowS
                 [wa12],
                 [wa21],
                 [wa22],
+                [wa31, wa32],
+        ])
+    }
+
+    void "test groupArtefactsForWorkflowExecution with ignoreSeqPlatformGroups"() {
+        given:
+        Project project1 = createProject()
+        SeqType seqType1 = createSeqType()
+        Individual individual = createIndividual(project: project1)
+        SampleType sampleType = createSampleType()
+        Sample sample = createSample(individual: individual, sampleType: sampleType)
+        LibraryPreparationKit libraryPreparationKit = createLibraryPreparationKit()
+
+        createMergingCriteria(project: project1, seqType: seqType1,
+                useSeqPlatformGroup: MergingCriteria.SpecificSeqPlatformGroups.USE_OTP_DEFAULT)
+        SeqPlatformGroup seqPlatformGroup11 = createSeqPlatformGroup()
+        SeqPlatform seqPlatform11 = createSeqPlatform(seqPlatformGroups: [seqPlatformGroup11])
+        SeqPlatformGroup seqPlatformGroup12 = createSeqPlatformGroup()
+        SeqPlatform seqPlatform12 = createSeqPlatform(seqPlatformGroups: [seqPlatformGroup12])
+
+        WorkflowArtefact wa11 = createWorkflowArtefact()
+        createSeqTrack(workflowArtefact: wa11, sample: sample,
+                seqType: seqType1,
+                run: createRun(seqPlatform: seqPlatform11),
+                libraryPreparationKit: libraryPreparationKit,
+        )
+        WorkflowArtefact wa12 = createWorkflowArtefact()
+        createSeqTrack(workflowArtefact: wa12, sample: sample,
+                seqType: seqType1,
+                run: createRun(seqPlatform: seqPlatform12),
+                libraryPreparationKit: libraryPreparationKit,
+        )
+
+        Project project2 = createProject()
+        SeqType seqType2 = createSeqType()
+        Individual individual2 = createIndividual(project: project2)
+        SampleType sampleType2 = createSampleType()
+        Sample sample2 = createSample(individual: individual2, sampleType: sampleType2)
+
+        MergingCriteria mergingCriteria2 = createMergingCriteria(project: project2, seqType: seqType2,
+                useSeqPlatformGroup: MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC)
+        SeqPlatformGroup seqPlatformGroup21 = createSeqPlatformGroup(mergingCriteria: mergingCriteria2)
+        SeqPlatform seqPlatform21 = createSeqPlatform(seqPlatformGroups: [seqPlatformGroup21])
+        SeqPlatformGroup seqPlatformGroup22 = createSeqPlatformGroup(mergingCriteria: mergingCriteria2)
+        SeqPlatform seqPlatform22 = createSeqPlatform(seqPlatformGroups: [seqPlatformGroup22])
+
+        WorkflowArtefact wa21 = createWorkflowArtefact()
+        createSeqTrack(workflowArtefact: wa21, sample: sample2,
+                seqType: seqType2,
+                run: createRun(seqPlatform: seqPlatform21),
+                libraryPreparationKit: libraryPreparationKit,
+        )
+        WorkflowArtefact wa22 = createWorkflowArtefact()
+        createSeqTrack(workflowArtefact: wa22, sample: sample2,
+                seqType: seqType2,
+                run: createRun(seqPlatform: seqPlatform22),
+                libraryPreparationKit: libraryPreparationKit,
+        )
+
+        Project project3 = createProject()
+        SeqType seqType3 = createSeqType()
+        Individual individual3 = createIndividual(project: project3)
+        SampleType sampleType3 = createSampleType()
+        Sample sample3 = createSample(individual: individual3, sampleType: sampleType3)
+
+        createMergingCriteria(project: project3, seqType: seqType3,
+                useSeqPlatformGroup: MergingCriteria.SpecificSeqPlatformGroups.IGNORE_FOR_MERGING)
+        SeqPlatformGroup seqPlatformGroup31 = createSeqPlatformGroup()
+        SeqPlatform seqPlatform31 = createSeqPlatform(seqPlatformGroups: [seqPlatformGroup31])
+        SeqPlatformGroup seqPlatformGroup32 = createSeqPlatformGroup()
+        SeqPlatform seqPlatform32 = createSeqPlatform(seqPlatformGroups: [seqPlatformGroup32])
+
+        WorkflowArtefact wa31 = createWorkflowArtefact()
+        createSeqTrack(workflowArtefact: wa31, sample: sample3,
+                seqType: seqType3,
+                run: createRun(seqPlatform: seqPlatform31),
+                libraryPreparationKit: libraryPreparationKit,
+        )
+        WorkflowArtefact wa32 = createWorkflowArtefact()
+        createSeqTrack(workflowArtefact: wa32, sample: sample3,
+                seqType: seqType3,
+                run: createRun(seqPlatform: seqPlatform32),
+                libraryPreparationKit: libraryPreparationKit,
+        )
+
+        when:
+        Collection<Collection<WorkflowArtefact>> result = panCancerDeciderService.groupArtefactsForWorkflowExecution(
+                [wa11, wa12, wa21, wa22, wa31, wa32], [ignoreSeqPlatformGroup: 'TRUE'])
+
+        then:
+        CollectionUtils.containSame(result, [
+                [wa11, wa12],
+                [wa21, wa22],
                 [wa31, wa32],
         ])
     }

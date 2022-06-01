@@ -47,7 +47,7 @@ class TriggerAlignmentService {
 
     @Transactional(readOnly = false)
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    Collection<MergingWorkPackage> triggerAlignment(Collection<SeqTrack> seqTracks, boolean withdrawBamFiles = false) {
+    Collection<MergingWorkPackage> triggerAlignment(Collection<SeqTrack> seqTracks, boolean withdrawBamFiles = false, boolean ignoreSeqPlatformGroup = false) {
         // Mark the bam files as withdrawn
         if (withdrawBamFiles) {
             roddyBamFileWithdrawService.collectObjects(seqTracks as List<SeqTrack>).each { RoddyBamFile bamFile ->
@@ -63,7 +63,9 @@ class TriggerAlignmentService {
 
         // Start alignment workflows
         Collection<SeqTrack> seqTracksInNewWorkflowSystem = allDecider.findAllSeqTracksInNewWorkflowSystem(seqTracks)
-        Collection<MergingWorkPackage> mergingWorkPackages = allDecider.decide(seqTracksInNewWorkflowSystem*.workflowArtefact).findAll {
+        Collection<MergingWorkPackage> mergingWorkPackages = allDecider.decide(seqTracksInNewWorkflowSystem*.workflowArtefact, false, [
+                ignoreSeqPlatformGroup: ignoreSeqPlatformGroup.toString()
+        ]).findAll {
             it.artefactType == ArtefactType.BAM
         }*.artefact*.get()*.workPackage + (seqTracks - seqTracksInNewWorkflowSystem).collectMany {
             seqTrackService.decideAndPrepareForAlignment(it)

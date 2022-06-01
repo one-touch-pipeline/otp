@@ -59,6 +59,7 @@ $.otp.triggerAlignment = {
       withdraw: false,
       seqTracks: []
     };
+    inputdata.ignoreSeqPlatformGroup = $('#ignoreSeqPlatformGroup').prop('checked');
     inputdata.withdraw = $('#withdrawBamFiles').prop('checked');
     inputdata.seqTracks = $.otp.triggerAlignment.getSeqTrackTable().column(0).data().toArray();
 

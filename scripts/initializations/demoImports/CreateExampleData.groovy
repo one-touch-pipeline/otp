@@ -21,6 +21,7 @@
  */
 
 import de.dkfz.tbi.otp.Comment
+import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
@@ -29,6 +30,7 @@ import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaQc
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.taxonomy.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.utils.CollectionUtils
@@ -161,6 +163,7 @@ class ExampleData {
     LibraryPreparationKit libraryPreparationKit
     ProcessingPriority processingPriority
     Realm realm
+    SpeciesWithStrain speciesWithStrain
     ReferenceGenome referenceGenome
     SeqCenter seqCenter
     SeqPlatform seqPlatform
@@ -194,6 +197,7 @@ class ExampleData {
         fileType = findOrCreateFileType()
         libraryPreparationKit = findOrCreateLibraryPreparationKit()
         realm = findOrCreateRealm()
+        speciesWithStrain = findOrCreateSpeciesWithStrain()
         referenceGenome = findOrCreateReferenceGenome()
         seqCenter = findOrCreateSeqCenter()
         seqPlatform = findOrCreateSeqPlatform()
@@ -207,7 +211,10 @@ class ExampleData {
             findOrCreateSampleTypePerProject(sampleType, SampleTypePerProject.Category.DISEASE)
         }
         controlSampleTypes.each { SampleType sampleType ->
-            findOrCreateSampleTypePerProject(sampleType, SampleTypePerProject.Category.DISEASE)
+            findOrCreateSampleTypePerProject(sampleType, SampleTypePerProject.Category.CONTROL)
+        }
+        seqTypes.each {
+            findOrCreateMergingCriteria(it)
         }
         findOrCreateProcessingThresholds()
     }
@@ -470,6 +477,26 @@ class ExampleData {
         ]).save(flush: true)
     }
 
+    SpeciesWithStrain findOrCreateSpeciesWithStrain() {
+        SpeciesCommonName speciesCommonName = SpeciesCommonName.findByName('Human') ?: new SpeciesCommonName([
+                name: 'Human',
+        ]).save(flush: true)
+
+        Species species = Species.findBySpeciesCommonNameAndScientificName(speciesCommonName, 'Homo sapiens') ?: new Species([
+                speciesCommonName: speciesCommonName,
+                scientificName   : 'Homo sapiens',
+        ]).save(flush: true)
+
+        Strain strain = Strain.findByName('No strain available') ?: new SpeciesCommonName([
+                name: 'No strain available',
+        ]).save(flush: true)
+
+        return SpeciesWithStrain.findBySpeciesAndStrain(species, strain) ?: new SpeciesWithStrain([
+                species: species,
+                strain : strain,
+        ]).save(flush: true)
+    }
+
     Realm findOrCreateRealm() {
         return CollectionUtils.atMostOneElement(Realm.findAllByName(realmName)) ?: new Realm([
                 name                       : realmName,
@@ -497,6 +524,7 @@ class ExampleData {
                 lengthRefChromosomes        : 100,
                 lengthRefChromosomesWithoutN: 100,
                 length                      : 100,
+                species                     : [speciesWithStrain] as Set,
         ]).save(flush: true)
 
         new StatSizeFileName([
@@ -527,15 +555,31 @@ class ExampleData {
         ]).save(flush: true)
     }
 
+    MergingCriteria findOrCreateMergingCriteria(SeqType seqType) {
+        return CollectionUtils.atMostOneElement(MergingCriteria.findAllByProjectAndSeqType(project, seqType)) ?: new MergingCriteria([
+                project            : project,
+                seqType            : seqType,
+                useLibPrepKit      : !seqType.isWgbs(),
+                useSeqPlatformGroup: MergingCriteria.SpecificSeqPlatformGroups.USE_OTP_DEFAULT,
+        ]).save(flush: true)
+    }
+
     SeqPlatformGroup findOrCreateSeqPlatformGroup() {
-        return SeqPlatformGroup.createCriteria().get {
+        SeqPlatformGroup findSeqPlatformGroup = SeqPlatformGroup.createCriteria().get {
             seqPlatforms {
                 eq('id', seqPlatform.id)
             }
             isNull('mergingCriteria')
-        } ?: new SeqPlatformGroup([
-                seqPlatforms: [seqPlatform] as Set
-        ]).save(flush: true)
+        }
+
+        if (findSeqPlatformGroup) {
+            return findSeqPlatformGroup
+        }
+        SeqPlatformGroup newSeqPlatformGroup = new SeqPlatformGroup().save(flush: true)
+        newSeqPlatformGroup.addToSeqPlatforms(seqPlatform)
+        newSeqPlatformGroup.save(flush: true)
+
+        return newSeqPlatformGroup
     }
 
     SoftwareTool findOrCreateSoftwareTool() {
@@ -579,6 +623,7 @@ class ExampleData {
                 projectType        : Project.ProjectType.SEQUENCING,
                 qcThresholdHandling: QcThresholdHandling.CHECK_AND_NOTIFY,
                 unixGroup          : "developer",
+                speciesWithStrains : [speciesWithStrain] as Set,
         ]).save(flush: true)
     }
 
@@ -589,6 +634,7 @@ class ExampleData {
                 mockPid     : pid,
                 mockFullName: pid,
                 type        : Individual.Type.REAL,
+                species     : speciesWithStrain,
         ]).save(flush: true)
     }
 
@@ -627,6 +673,8 @@ class ExampleData {
                 pipelineVersion      : softwareTool,
                 dataInstallationState: SeqTrack.DataProcessingState.FINISHED,
                 fastqcState          : SeqTrack.DataProcessingState.FINISHED,
+                libraryPreparationKit: libraryPreparationKit,
+                kitInfoReliability   : InformationReliability.KNOWN,
         ]).save(flush: true)
 
         (1..2).each {
@@ -692,7 +740,8 @@ class ExampleData {
                 seqTracks            : seqTracks as Set,
                 referenceGenome      : referenceGenome,
                 pipeline             : pipeline,
-                statSizeFileName     : pipeline.name == Pipeline.Name.PANCAN_ALIGNMENT ? StatSizeFileName.findAllByReferenceGenome(referenceGenome).first().name : null,
+                statSizeFileName     : pipeline.name == Pipeline.Name.PANCAN_ALIGNMENT ?
+                        CollectionUtils.exactlyOneElement(StatSizeFileName.findAllByReferenceGenome(referenceGenome, [max: 1, order: 'id'])).name : null,
                 seqPlatformGroup     : seqPlatformGroup,
                 libraryPreparationKit: seqTrack.seqType.isWgbs() ? null : libraryPreparationKit,
         ]).save(flush: true)
@@ -735,19 +784,27 @@ class ExampleData {
     }
 
     RoddyWorkflowConfig findOrCreateRoddyWorkflowConfig(MergingWorkPackage mergingWorkPackage) {
-        return atMostOneElement(RoddyWorkflowConfig.findAllByProjectAndSeqTypeAndPipelineAndObsoleteDateIsNull(
-                mergingWorkPackage.project, mergingWorkPackage.seqType, mergingWorkPackage.pipeline)) ?:
-                new RoddyWorkflowConfig([
-                        project              : mergingWorkPackage.project,
-                        seqType              : mergingWorkPackage.seqType,
-                        pipeline             : mergingWorkPackage.pipeline,
-                        programVersion       : "PanCan:1.2.3-4",
-                        configFilePath       : "/tmp/file_${RoddyWorkflowConfig.count()}.xml",
-                        configVersion        : "v1_0",
-                        nameUsedInConfig     : "name",
-                        md5sum               : "0" * 32,
-                        adapterTrimmingNeeded: mergingWorkPackage.seqType.isWgbs(),
-                ]).save(flush: true)
+        RoddyWorkflowConfig searchRoddyWorkflowConfig = atMostOneElement(RoddyWorkflowConfig.findAllByProjectAndSeqTypeAndPipelineAndObsoleteDateIsNull(
+                mergingWorkPackage.project, mergingWorkPackage.seqType, mergingWorkPackage.pipeline))
+        if (searchRoddyWorkflowConfig) {
+            return searchRoddyWorkflowConfig
+        }
+        String file = "/tmp/file_${RoddyWorkflowConfig.count()}.xml"
+        if (createFilesOnFilesystem) {
+            Path path = fileSystemService.remoteFileSystemOnDefaultRealm.getPath(file)
+            path.text = "someDummyContent"
+        }
+        return new RoddyWorkflowConfig([
+                project              : mergingWorkPackage.project,
+                seqType              : mergingWorkPackage.seqType,
+                pipeline             : mergingWorkPackage.pipeline,
+                programVersion       : "PanCan:1.2.3-4",
+                configFilePath       : file,
+                configVersion        : "v1_0",
+                nameUsedInConfig     : "name",
+                md5sum               : "0" * 32,
+                adapterTrimmingNeeded: mergingWorkPackage.seqType.isWgbs(),
+        ]).save(flush: true)
     }
 
     Comment createComment() {
