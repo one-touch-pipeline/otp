@@ -74,7 +74,6 @@ class DataTransferController implements CheckAndCall {
                 selectedLegalBasis    : (flash.docDtaCmd as AddDataTransferAgreementCommand)?.legalBasis ?: DataTransferAgreement.LegalBasis.DTA,
                 docDtaCmd             : flash.docDtaCmd as AddDataTransferAgreementCommand,
                 cachedTransferCmd     : flash.transferCmd as AddTransferCommand,
-                dateFormat            : TimeFormats.DATE.format,
         ]
     }
 

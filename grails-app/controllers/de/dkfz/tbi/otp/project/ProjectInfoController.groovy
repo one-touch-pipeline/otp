@@ -30,7 +30,6 @@ import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.project.projectRequest.ProjectRequestService
 import de.dkfz.tbi.otp.utils.StringUtils
 import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
-import de.dkfz.tbi.util.TimeFormats
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
@@ -56,7 +55,6 @@ class ProjectInfoController implements CheckAndCall {
 
         return [
                 project       : project,
-                dateFormat    : TimeFormats.DATE.format,
                 projectInfos  : projectInfoService.getAllProjectInfosSortedByDateDesc(project),
                 projectRequest: projectRequest,
                 docCmd        : flash.docCmd as AddProjectInfoCommand,

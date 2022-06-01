@@ -73,7 +73,7 @@
                     <g:link action="downloadProjectInfoDocument" params='["projectInfo.id": doc.id]'>${doc.fileName}</g:link>
                     <br>
                     <g:message code="dataTransfer.dta.transfer.created"/>
-                    <g:formatDate date="${doc.dateCreated}" format="${dateFormat}"/>
+                    ${TimeFormats.DATE.getFormattedDate(doc.dateCreated)}
                     <g:form action="deleteProjectInfo" useToken="true" style="display: inline"
                             onSubmit="\$.otp.projectInfo.confirmProjectInfoDelete(event);">
                         <input type="hidden" name="projectInfo.id" value="${doc.id}"/>
