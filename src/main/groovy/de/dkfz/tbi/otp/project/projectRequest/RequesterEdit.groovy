@@ -28,6 +28,8 @@ import org.springframework.stereotype.Component
 import de.dkfz.tbi.otp.project.ProjectRequest
 import de.dkfz.tbi.otp.security.User
 
+import javax.naming.OperationNotSupportedException
+
 @Component
 class RequesterEdit implements ProjectRequestState {
 
@@ -91,6 +93,6 @@ class RequesterEdit implements ProjectRequestState {
 
     @Override
     void create(ProjectRequest projectRequest) {
-        assert("Project can not be created in RequestEdit state")
+        throw new OperationNotSupportedException("Project can not be created in RequestEdit state")
     }
 }
