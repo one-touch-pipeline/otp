@@ -20,6 +20,7 @@
   - SOFTWARE.
   --}%
 
+<%@ page import="de.dkfz.tbi.util.TimeFormats" %>
 <ul class="transfer-listing">
     <hr>
     <g:each var="transfer" in="${dta.transfersSortedByDateCreatedDesc}">
@@ -52,9 +53,9 @@
                 <g:render template="templates/uploadFiles" model="[id: transfer.id, parentName: 'dataTransfer.id', parentValue: transfer.id, formAction: 'addFilesToTransfer']"/>
             </div>
             <br>
-            <g:message code="dataTransfer.dta.transfer.started"/> ${transfer.transferDate}
+            <g:message code="dataTransfer.dta.transfer.started"/> ${TimeFormats.DATE.getFormattedDate(transfer.transferDate)}
             <g:if test="${transfer.completionDate}">
-                <g:message code="dataTransfer.dta.transfer.completionDate"/> ${transfer.completionDate}
+                <g:message code="dataTransfer.dta.transfer.completionDate"/> ${TimeFormats.DATE.getFormattedDate(transfer.completionDate)}
             </g:if>
             <g:else>
                 <g:message code="dataTransfer.dta.transfer.completionDate.none"/>
