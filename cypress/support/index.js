@@ -21,10 +21,3 @@
  */
 
 require('./commands');
-
-// Prevents Cypress from failing on javaScript errors
-Cypress.on('uncaught:exception', () => {
-  'use strict';
-
-  return false;
-});

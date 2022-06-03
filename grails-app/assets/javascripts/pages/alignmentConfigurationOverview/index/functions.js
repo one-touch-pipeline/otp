@@ -111,7 +111,7 @@ $.otp.projectConfig = {
     'use strict';
 
     $('#loader').remove();
-    if (data.alignmentInfo.length > 0) {
+    if (data.alignmentInfo ? (data.alignmentInfo.length > 0) : false) {
       $('#alignment_info_table').css('visibility', 'visible');
       $.otp.projectConfig.createAlignmentTable(data);
     } else {

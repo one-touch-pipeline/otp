@@ -65,7 +65,10 @@ $.otp.clusterJobJobTypeSpecific = {
       controller: 'clusterJobJobTypeSpecific',
       action: 'getJobTypeSpecificAvgMemory',
       parameters: {
-        jobClass: jobClassSelect, seqType: seqTypeSelect, from: startDate, to: endDate
+        jobClass: jobClassSelect,
+        seqType: seqTypeSelect,
+        from: startDate,
+        to: endDate
       }
     }), function () {
       const json = JSON.parse(this.response);
@@ -76,7 +79,10 @@ $.otp.clusterJobJobTypeSpecific = {
       controller: 'clusterJobJobTypeSpecific',
       action: 'getJobTypeSpecificAvgCoreUsage',
       parameters: {
-        jobClass: jobClassSelect, seqType: seqTypeSelect, from: startDate, to: endDate
+        jobClass: jobClassSelect,
+        seqType: seqTypeSelect,
+        from: startDate,
+        to: endDate
       }
     }), function () {
       const json = JSON.parse(this.response);
@@ -104,7 +110,11 @@ $.otp.clusterJobJobTypeSpecific = {
       controller: 'clusterJobJobTypeSpecific',
       action: 'getJobTypeSpecificCoverageStatistics',
       parameters: {
-        jobClass: jobClassSelect, seqType: seqTypeSelect, bases: basesInput, from: startDate, to: endDate
+        jobClass: jobClassSelect,
+        seqType: seqTypeSelect,
+        bases: basesInput,
+        from: startDate,
+        to: endDate
       }
     }), function () {
       const json = JSON.parse(this.response);
@@ -124,7 +134,10 @@ $.otp.clusterJobJobTypeSpecific = {
     RGraph.AJAX($.otp.createLink({
       controller: 'clusterJobJobTypeSpecific',
       action: 'getJobClassesByDate',
-      parameters: { from: $('#dpFrom').val(), to: $('#dpTo').val() }
+      parameters: {
+        from: $('#dpFrom').val(),
+        to: $('#dpTo').val()
+      }
     }), function () {
       const json = JSON.parse(this.response);
       $.each(json.data, function () {
@@ -150,7 +163,11 @@ $.otp.clusterJobJobTypeSpecific = {
     RGraph.AJAX($.otp.createLink({
       controller: 'clusterJobJobTypeSpecific',
       action: 'getSeqTypesByJobClass',
-      parameters: { jobClass: $('#jobClassSelect').val(), from: $('#dpFrom').val(), to: $('#dpTo').val() }
+      parameters: {
+        jobClass: $('#jobClassSelect').val(),
+        from: $('#dpFrom').val(),
+        to: $('#dpTo').val()
+      }
     }), function () {
       const json = JSON.parse(this.response);
       $.each(json.data, function () {
@@ -196,7 +213,10 @@ $.otp.clusterJobJobTypeSpecificGraph = {
       controller: 'clusterJobJobTypeSpecific',
       action: 'getJobTypeSpecificExitCodes',
       parameters: {
-        jobClass: jobClassSelect, seqType: seqTypeSelect, from: startDate, to: endDate
+        jobClass: jobClassSelect,
+        seqType: seqTypeSelect,
+        from: startDate,
+        to: endDate
       }
     }), function () {
       $.otp.clusterJobJobTypeSpecificGraph.getJobTypeSpecificExitCodes(this);
@@ -206,7 +226,10 @@ $.otp.clusterJobJobTypeSpecificGraph = {
       controller: 'clusterJobJobTypeSpecific',
       action: 'getJobTypeSpecificExitStatuses',
       parameters: {
-        jobClass: jobClassSelect, seqType: seqTypeSelect, from: startDate, to: endDate
+        jobClass: jobClassSelect,
+        seqType: seqTypeSelect,
+        from: startDate,
+        to: endDate
       }
     }), function () {
       $.otp.clusterJobJobTypeSpecificGraph.getJobTypeSpecificExitStatuses(this);
@@ -216,7 +239,10 @@ $.otp.clusterJobJobTypeSpecificGraph = {
       controller: 'clusterJobJobTypeSpecific',
       action: 'getJobTypeSpecificStates',
       parameters: {
-        jobClass: jobClassSelect, seqType: seqTypeSelect, from: startDate, to: endDate
+        jobClass: jobClassSelect,
+        seqType: seqTypeSelect,
+        from: startDate,
+        to: endDate
       }
     }), function () {
       $.otp.clusterJobJobTypeSpecificGraph.getJobTypeSpecificStates(this);
@@ -226,7 +252,10 @@ $.otp.clusterJobJobTypeSpecificGraph = {
       controller: 'clusterJobJobTypeSpecific',
       action: 'getJobTypeSpecificWalltimes',
       parameters: {
-        jobClass: jobClassSelect, seqType: seqTypeSelect, from: startDate, to: endDate
+        jobClass: jobClassSelect,
+        seqType: seqTypeSelect,
+        from: startDate,
+        to: endDate
       }
     }), function () {
       $.otp.clusterJobJobTypeSpecificGraph.getJobTypeSpecificWalltimes(this);
@@ -315,36 +344,38 @@ $.otp.clusterJobJobTypeSpecificGraph = {
 
     const json = JSON.parse(data.response);
     RGraph.reset($(`#${id}`).get(0));
-    new RGraph.Scatter({
-      id,
-      data: json.data,
-      options: {
-        gutterBottom: 100,
-        gutterLeft: 120,
-        labels: json.labels[0],
-        textAccessible: false,
-        textAngle: 45,
-        textSize: 8,
-        tickmarks: 'circle',
-        ticksize: 10,
-        titleXaxis: 'Million Reads',
-        titleXaxisPos: 0.3,
-        titleYaxis: 'Walltime in Minutes',
-        titleYaxisPos: 0.1,
-        xmax: json.xMax,
-        eventsClick(e, shape) {
-          const index = shape[4];
-          const jobId = shape.object.data[0][index][3];
-          window.location.href = $.otp.createLink({
-            controller: 'clusterJobDetail',
-            action: 'show',
-            id: jobId
-          });
-        },
-        eventsMousemove() {
-          return true;
+    if (json.data && json.data.length > 0) {
+      new RGraph.Scatter({
+        id,
+        data: json.data,
+        options: {
+          gutterBottom: 100,
+          gutterLeft: 120,
+          labels: json.labels[0],
+          textAccessible: false,
+          textAngle: 45,
+          textSize: 8,
+          tickmarks: 'circle',
+          ticksize: 10,
+          titleXaxis: 'Million Reads',
+          titleXaxisPos: 0.3,
+          titleYaxis: 'Walltime in Minutes',
+          titleYaxisPos: 0.1,
+          xmax: json.xMax,
+          eventsClick(e, shape) {
+            const index = shape[4];
+            const jobId = shape.object.data[0][index][3];
+            window.location.href = $.otp.createLink({
+              controller: 'clusterJobDetail',
+              action: 'show',
+              id: jobId
+            });
+          },
+          eventsMousemove() {
+            return true;
+          }
         }
-      }
-    }).draw();
+      }).draw();
+    }
   }
 };

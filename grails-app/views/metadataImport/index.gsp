@@ -25,29 +25,32 @@
 <%@ page import="de.dkfz.tbi.util.spreadsheet.validation.LogLevel" %>
 <html>
 <head>
-    <meta name="layout" content="metadataLayout" />
+    <meta name="layout" content="metadataLayout"/>
+    <meta name="contextPath" content="${request.contextPath}">
     <title>
-        <g:message code="metadataImport.title"/>
-        <sec:ifAllGranted roles="ROLE_OPERATOR">
-            <g:message code="metadataImport.titleOperator"/>
-        </sec:ifAllGranted>
+    <g:message code="metadataImport.title"/>
+    <sec:ifAllGranted roles="ROLE_OPERATOR">
+        <g:message code="metadataImport.titleOperator"/>
+    </sec:ifAllGranted>
     </title>
+    <asset:javascript src="modules/defaultPageDependencies.js"/>
     <asset:javascript src="pages/metadataImport/index/metadataImportDataTable.js"/>
     <asset:javascript src="common/MultiInputField.js"/>
     <asset:javascript src="common/DisableOnSubmit.js"/>
 </head>
+
 <body>
 <g:if test="${contexts}">
     <g:each var="context" in="${contexts}">
-        <div id= "border" class="borderMetadataImport${de.dkfz.tbi.util.spreadsheet.validation.LogLevel.normalize(context.maximumProblemLevel).name}">
+        <div id="border" class="borderMetadataImport${de.dkfz.tbi.util.spreadsheet.validation.LogLevel.normalize(context.maximumProblemLevel).name}">
             <g:if test="${context.problems.isEmpty()}">
                 No problems found :)
             </g:if>
             <g:else>
                 <ul>
-                    <g:each var="problem" in="${context.problems}" >
-                        <li class="${LogLevel.normalize(problem.level).name}"><span style="white-space: pre-wrap"> ${problem.levelAndMessage}</span>
-                            <g:each var="cell" in="${problem.affectedCells}" >
+                    <g:each var="problem" in="${context.problems}">
+                        <li class="${LogLevel.normalize(problem.level).name}"><span style="white-space: pre-wrap">${problem.levelAndMessage}</span>
+                            <g:each var="cell" in="${problem.affectedCells}">
                                 <a href="#${cell.cellAddress}">${cell.cellAddress}</a>
                             </g:each>
                         </li>
@@ -55,8 +58,8 @@
                 </ul>
                 <h4><g:message code="metadataImport.summary"/></h4>
                 <ul>
-                    <g:each var="problemType" in="${context.summary}" >
-                        <li> <span style="white-space: pre">${problemType} </span></li>
+                    <g:each var="problemType" in="${context.summary}">
+                        <li><span style="white-space: pre">${problemType}</span></li>
                     </g:each>
                 </ul>
             </g:else>
@@ -66,7 +69,7 @@
                         <thead>
                         <tr>
                             <th></th>
-                            <g:each var="cell" in="${context.spreadsheet.header.cells}" >
+                            <g:each var="cell" in="${context.spreadsheet.header.cells}">
                                 <th>
                                     ${cell.columnAddress}
                                 </th>
@@ -76,12 +79,10 @@
                             <th>
                                 ${context.spreadsheet.header.cells.first().rowAddress}
                             </th>
-                            <g:each var="cell" in="${context.spreadsheet.header.cells}" >
-                                <g:set var="cellProblems" value ="${context.getProblems(cell)}"/>
-                                <th
-                                        class="${LogLevel.normalize(Problems.getMaximumProblemLevel(cellProblems)).name}"
-                                        title="${cellProblems*.levelAndMessage.join('\n\n')}"
-                                >
+                            <g:each var="cell" in="${context.spreadsheet.header.cells}">
+                                <g:set var="cellProblems" value="${context.getProblems(cell)}"/>
+                                <th class="${LogLevel.normalize(Problems.getMaximumProblemLevel(cellProblems)).name}"
+                                    title="${cellProblems*.levelAndMessage.join('\n\n')}">
                                     <span class="anchor" id="${cell.cellAddress}"></span>
                                     ${cell.text}
                                 </th>
@@ -89,17 +90,15 @@
                         </tr>
                         </thead>
                         <tbody>
-                        <g:each var="row" in="${context.spreadsheet.dataRows}" >
+                        <g:each var="row" in="${context.spreadsheet.dataRows}">
                             <tr>
                                 <th>
                                     ${row.cells.first().rowAddress}
                                 </th>
-                                <g:each var="cell" in="${row.cells}" >
-                                    <g:set var="cellProblems" value ="${context.getProblems(cell)}"/>
-                                    <td
-                                            class="${LogLevel.normalize(Problems.getMaximumProblemLevel(cellProblems)).name}"
-                                            title="${cellProblems*.levelAndMessage.join('\n\n')}"
-                                    >
+                                <g:each var="cell" in="${row.cells}">
+                                    <g:set var="cellProblems" value="${context.getProblems(cell)}"/>
+                                    <td class="${LogLevel.normalize(Problems.getMaximumProblemLevel(cellProblems)).name}"
+                                        title="${cellProblems*.levelAndMessage.join('\n\n')}">
                                         <span class="anchor" id="${cell.cellAddress}"></span>
                                         ${cell.text}
                                     </td>
@@ -113,8 +112,8 @@
         </div>
     </g:each>
 </g:if>
-    <g:render template="/templates/messages"/>
-    <div>
+<g:render template="/templates/messages"/>
+<div>
     <g:form useToken="true" controller="metadataImport" action="validateOrImport">
         <table class="options">
             <sec:ifAllGranted roles="ROLE_OPERATOR">
@@ -152,11 +151,12 @@
                 <td><g:message code="metadataImport.directoryStructure"/></td>
                 <td>
                     <g:set var="active" value="${cmd.directoryStructure ?: directoryStructures.first().name()}"/>
-                    <g:radioGroup name="directoryStructure" labels="${directoryStructures*.displayName}" values="${directoryStructures*.name()}" value="${active}">
+                    <g:radioGroup name="directoryStructure" labels="${directoryStructures*.displayName}" values="${directoryStructures*.name()}"
+                                  value="${active}">
                         <label>
                             ${it.radio}
                             <g:message code="${it.label}"/>
-                         </label>
+                        </label>
                     </g:radioGroup>
                 </td>
             </tr>
@@ -190,11 +190,11 @@
         </sec:ifAllGranted>
     </g:form>
     <h3><g:message code="metadataImport.implementedValidations"/></h3>
-        <ul>
-            <g:each var="implementedValidation" in="${implementedValidations}" >
-                <li>${implementedValidation}</li>
-            </g:each>
-        </ul>
-    </div>
+    <ul>
+        <g:each var="implementedValidation" in="${implementedValidations}">
+            <li>${implementedValidation}</li>
+        </g:each>
+    </ul>
+</div>
 </body>
 </html>

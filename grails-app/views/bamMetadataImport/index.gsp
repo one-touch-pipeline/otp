@@ -26,12 +26,14 @@
 <html>
 <head>
     <meta name="layout" content="metadataLayout"/>
+    <meta name="contextPath" content="${request.contextPath}">
     <title>
         <g:message code="bamMetadataImport.title"/>
         <sec:ifAllGranted roles="ROLE_OPERATOR">
             <g:message code="bamMetadataImport.titleOperator"/>
         </sec:ifAllGranted>
     </title>
+    <asset:javascript src="modules/defaultPageDependencies.js"/>
     <asset:javascript src="pages/metadataImport/index/metadataImportDataTable.js"/>
     <asset:javascript src="common/MultiInputField.js"/>
     <asset:javascript src="common/DisableOnSubmit.js"/>
