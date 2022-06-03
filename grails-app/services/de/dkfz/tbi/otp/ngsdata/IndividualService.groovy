@@ -209,11 +209,10 @@ class IndividualService {
                     count('mockPid')
                 }
             }
-        } else {
-            // shortcut for unfiltered results
-            List<Project> projects = projectService.allProjects
-            return projects ? Individual.countByProjectInList(projects) : 0
         }
+        // shortcut for unfiltered results
+        List<Project> projects = projectService.allProjects
+        return projects ? Individual.countByProjectInList(projects) : 0
     }
 
     /**
@@ -330,7 +329,7 @@ class IndividualService {
 
     /**
      * Checks for missing values, as well as input maps with different key-sets and calls
-     * {@link IndividualService#saveComment(de.dkfz.tbi.otp.ngsdata.Individual, java.lang.String, java.util.Date)}}
+     * {@link IndividualService#saveComment(de.dkfz.tbi.otp.ngsdata.Individual, java.lang.String, java.util.Date)}
      * to finally store the comment for the specific individual in the DB
      * Both input-maps have to contain an {@link Individual}, e.g. Map[individual: individual, ...]
      * @param operation a String that describes the specific operation, e.g. "sample-swap"
@@ -406,8 +405,7 @@ class IndividualService {
 
     /**
      * returns the folder viewByPid with the pid
-     * Example: ${project}/sequencing/exon_sequencing/view-by-pid/${pid}
-     */
+     * Example: ${project}/sequencing/exon_sequencing/view-by-pid/${pid}*/
     Path getViewByPidPath(Individual individual, final SeqType seqType) {
         return getViewByPidPathBase(individual, seqType).resolve(individual.pid)
     }

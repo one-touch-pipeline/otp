@@ -41,37 +41,36 @@ class SchedulingConfiguration {
             threadPoolTaskScheduler.poolSize = 10
             threadPoolTaskScheduler.initialize()
             return threadPoolTaskScheduler
-        } else {
-            return new TaskScheduler() {
-                @Override
-                ScheduledFuture<?> schedule(Runnable task, Trigger trigger) {
-                    return null
-                }
+        }
+        return new TaskScheduler() {
+            @Override
+            ScheduledFuture<?> schedule(Runnable task, Trigger trigger) {
+                return null
+            }
 
-                @Override
-                ScheduledFuture<?> schedule(Runnable task, Date startTime) {
-                    return null
-                }
+            @Override
+            ScheduledFuture<?> schedule(Runnable task, Date startTime) {
+                return null
+            }
 
-                @Override
-                ScheduledFuture<?> scheduleAtFixedRate(Runnable task, Date startTime, long period) {
-                    return null
-                }
+            @Override
+            ScheduledFuture<?> scheduleAtFixedRate(Runnable task, Date startTime, long period) {
+                return null
+            }
 
-                @Override
-                ScheduledFuture<?> scheduleAtFixedRate(Runnable task, long period) {
-                    return null
-                }
+            @Override
+            ScheduledFuture<?> scheduleAtFixedRate(Runnable task, long period) {
+                return null
+            }
 
-                @Override
-                ScheduledFuture<?> scheduleWithFixedDelay(Runnable task, Date startTime, long delay) {
-                    return null
-                }
+            @Override
+            ScheduledFuture<?> scheduleWithFixedDelay(Runnable task, Date startTime, long delay) {
+                return null
+            }
 
-                @Override
-                ScheduledFuture<?> scheduleWithFixedDelay(Runnable task, long delay) {
-                    return null
-                }
+            @Override
+            ScheduledFuture<?> scheduleWithFixedDelay(Runnable task, long delay) {
+                return null
             }
         }
     }

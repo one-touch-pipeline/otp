@@ -62,9 +62,8 @@ class DataFilesInGpcfSpecificStructure implements DirectoryStructure {
                     "Cannot construct a valid GPCF midterm storage path for all rows."
             )
             return null
-        } else {
-            String dir = matcher.group(1)
-            return context.metadataFile.resolveSibling("${runId}/${dir}/fastq/${fileName}")
         }
+        String dir = matcher.group(1)
+        return context.metadataFile.resolveSibling("${runId}/${dir}/fastq/${fileName}")
     }
 }

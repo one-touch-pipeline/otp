@@ -49,8 +49,7 @@ class WorkflowConfigService {
             final int mainConfigVersionIndex = 0
             final int subConfigVersionIndex = 1
             return versions[mainConfigVersionIndex] + "_" + (versions[subConfigVersionIndex].toInteger() + 1)
-        } else {
-            return "v1_0"
         }
+        return "v1_0"
     }
 }

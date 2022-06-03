@@ -27,9 +27,10 @@ import groovy.transform.ToString
 import groovy.transform.TupleConstructor
 import org.springframework.validation.Errors
 
-import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.ngsdata.SeqType
-import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.utils.Entity
 import de.dkfz.tbi.otp.utils.validation.ValidatorUtil
 
 import java.lang.reflect.Member
@@ -232,8 +233,7 @@ class QcThreshold implements Entity {
             return ThresholdLevel.ERROR
         } else if (conditionForWarning) {
             return ThresholdLevel.WARNING
-        } else {
-            return ThresholdLevel.OKAY
         }
+        return ThresholdLevel.OKAY
     }
 }

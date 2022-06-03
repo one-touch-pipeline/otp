@@ -83,7 +83,8 @@ class ConfigService implements ApplicationContextAware {
         return new File(otpProperties.get(OtpProperty.PATH_SCRIPTS_OUTPUT) ?: "")
     }
 
-    @Deprecated // legacy data
+    @Deprecated
+    // legacy data
     File getProcessingRootPath() {
         return new File(otpProperties.get(OtpProperty.PATH_PROCESSING_ROOT) ?: "")
     }
@@ -142,9 +143,8 @@ class ConfigService implements ApplicationContextAware {
         String zoneName = processingOptionService.findOptionAsString(ProcessingOption.OptionName.TIME_ZONE)
         if (zoneName) {
             return ZoneId.of(zoneName)
-        } else {
-            return ZoneId.systemDefault()
         }
+        return ZoneId.systemDefault()
     }
 
     Clock getClock() {
@@ -200,9 +200,8 @@ class ConfigService implements ApplicationContextAware {
     String getEnvironmentName() {
         if (otpProperties.get(OtpProperty.CONFIG_ENVIRONMENT_NAME)) {
             return otpProperties.get(OtpProperty.CONFIG_ENVIRONMENT_NAME)
-        } else {
-            return Environment.current.name
         }
+        return Environment.current.name
     }
 
     PseudoEnvironment getPseudoEnvironment() {

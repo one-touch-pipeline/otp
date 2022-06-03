@@ -34,8 +34,7 @@ class FormatHelper {
             return ""
         } else if (number instanceof Float || number instanceof Double || number instanceof BigDecimal) {
             return String.format(Locale.ENGLISH, '%.2f', number)
-        } else {
-            return String.format(Locale.ENGLISH, '%,d', number)
         }
+        return String.format(Locale.ENGLISH, '%,d', number)
     }
 }

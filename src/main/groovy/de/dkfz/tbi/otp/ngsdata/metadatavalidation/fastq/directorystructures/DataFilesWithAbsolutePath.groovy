@@ -46,13 +46,12 @@ class DataFilesWithAbsolutePath implements DirectoryStructure {
         String fileName = valueTuple.getValue(FASTQ_FILE.name())
         if (OtpPathValidator.isValidAbsolutePath(fileName)) {
             return fileSystem.getPath(fileName)
-        } else {
-            context.addProblem(
-                    valueTuple.cells,
-                    LogLevel.ERROR,
-                    "'${fileName}' is not a valid absolute path.", "At least one file path is not a valid absolute path."
-            )
-            return null
         }
+        context.addProblem(
+                valueTuple.cells,
+                LogLevel.ERROR,
+                "'${fileName}' is not a valid absolute path.", "At least one file path is not a valid absolute path."
+        )
+        return null
     }
 }

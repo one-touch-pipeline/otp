@@ -113,9 +113,8 @@ class FastqcDataFilesService {
         Integer suffixLength = CompressionFormat.getUsedFormat(fileName)?.suffix?.length()
         if (suffixLength) {
             return fileName[0..<-suffixLength]
-        } else {
-            return fileName
         }
+        return fileName
     }
 
     private String fastqcFileNameWithoutZipSuffix(String fileName) {

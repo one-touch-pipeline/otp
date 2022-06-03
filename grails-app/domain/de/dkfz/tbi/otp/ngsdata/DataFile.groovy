@@ -45,7 +45,7 @@ class DataFile implements CommentableWithProject, Entity {
      */
     Project project = null
 
-    /** @deprecated OTP-2311: Redundant with run.dateExecuted  */
+    /** @deprecated OTP-2311: Redundant with run.dateExecuted   */
     @Deprecated
     Date dateExecuted = null       // when the file was originally produced
     Date dateFileSystem = null     // when the file was created on LSDF
@@ -90,7 +90,7 @@ class DataFile implements CommentableWithProject, Entity {
 
     boolean indexFile = false
 
-    /** @deprecated OTP-2311: Redundant with seqTrack.run  */
+    /** @deprecated OTP-2311: Redundant with seqTrack.run   */
     @Deprecated
     Run run
     /* OTP-2311: fastqImportInstance shall be the same for all DataFiles belonging to the same
@@ -151,9 +151,8 @@ class DataFile implements CommentableWithProject, Entity {
             }
             if (obj.fileType && obj.fileType.type == FileType.Type.SEQUENCE && obj.fileType.vbpPath == "/sequence/") {
                 return (val == 1 || val == 2)
-            } else {
-                return true
             }
+            return true
         }
         dateLastChecked(nullable: true, validator: { val, obj ->
             if (!val && obj.seqTrack?.dataInstallationState == SeqTrack.DataProcessingState.FINISHED) {

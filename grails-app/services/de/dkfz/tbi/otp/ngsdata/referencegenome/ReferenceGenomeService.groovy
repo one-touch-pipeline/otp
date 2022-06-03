@@ -30,11 +30,8 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
-import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
-import de.dkfz.tbi.otp.ngsdata.StatSizeFileName
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
 
@@ -100,7 +97,7 @@ class ReferenceGenomeService {
 
     /**
      * returns the entries in the reference genome, which belong to a chromosome
-     * @param referenceGenome, the reference genome, for which the chromosomes shall be returned
+     * @param referenceGenome , the reference genome, for which the chromosomes shall be returned
      */
     List<ReferenceGenomeEntry> chromosomesInReferenceGenome(ReferenceGenome referenceGenome) {
         notNull(referenceGenome, "the referenceGenome in method chromosomesInReferenceGenome is null")
@@ -113,7 +110,7 @@ class ReferenceGenomeService {
      * @param the reference genome for which the file path is created and the belonging project
      */
     File cytosinePositionIndexFilePath(ReferenceGenome referenceGenome) {
-        assert referenceGenome.cytosinePositionsIndex : "cytosinePositionsIndex is not set"
+        assert referenceGenome.cytosinePositionsIndex: "cytosinePositionsIndex is not set"
         File file = new File(referenceGenomeDirectory(referenceGenome), referenceGenome.cytosinePositionsIndex)
         return checkFileExistence(file, true)
     }
@@ -134,14 +131,14 @@ class ReferenceGenomeService {
 
     File chromosomeStatSizeFile(MergingWorkPackage mergingWorkPackage, boolean checkExistence = true) {
         assert mergingWorkPackage, "The mergingWorkPackage is not specified"
-        assert mergingWorkPackage.statSizeFileName : "No stat file size name is defined for ${mergingWorkPackage}"
+        assert mergingWorkPackage.statSizeFileName: "No stat file size name is defined for ${mergingWorkPackage}"
         File file = new File(pathToChromosomeSizeFilesPerReference(mergingWorkPackage.referenceGenome, checkExistence), mergingWorkPackage.statSizeFileName)
         return checkFileExistence(file, checkExistence)
     }
 
     File chromosomeLengthFile(AbstractMergingWorkPackage mergingWorkPackage, boolean checkExistence = true) {
         assert mergingWorkPackage, "The mergingWorkPackage is not specified"
-        assert mergingWorkPackage.referenceGenome.chromosomeLengthFilePath : "No chromosome length file path is defined for ${mergingWorkPackage}"
+        assert mergingWorkPackage.referenceGenome.chromosomeLengthFilePath: "No chromosome length file path is defined for ${mergingWorkPackage}"
         File file = new File(pathToChromosomeSizeFilesPerReference(mergingWorkPackage.referenceGenome, checkExistence),
                 mergingWorkPackage.referenceGenome.chromosomeLengthFilePath)
         return checkFileExistence(file, checkExistence)
@@ -149,7 +146,7 @@ class ReferenceGenomeService {
 
     File gcContentFile(AbstractMergingWorkPackage mergingWorkPackage, boolean checkExistence = true) {
         assert mergingWorkPackage, "The mergingWorkPackage is not specified"
-        assert mergingWorkPackage.referenceGenome.gcContentFile : "No gc content file path is defined for ${mergingWorkPackage}"
+        assert mergingWorkPackage.referenceGenome.gcContentFile: "No gc content file path is defined for ${mergingWorkPackage}"
         File file = new File(pathToChromosomeSizeFilesPerReference(mergingWorkPackage.referenceGenome, checkExistence),
                 mergingWorkPackage.referenceGenome.gcContentFile)
         return checkFileExistence(file, checkExistence)
@@ -158,9 +155,8 @@ class ReferenceGenomeService {
     private File checkFileExistence(File file, boolean checkExistence) {
         if (!checkExistence || file.canRead()) {
             return file
-        } else {
-            throw new RuntimeException("${file} can not be read")
         }
+        throw new RuntimeException("${file} can not be read")
     }
 
     /**
@@ -172,7 +168,7 @@ class ReferenceGenomeService {
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void loadReferenceGenome(String name, String path, String fileNamePrefix, String cytosinePositionsIndex, String chromosomePrefix, String chromosomeSuffix,
-                                    List<FastaEntry> fastaEntries, String fingerPrintingFileName, List<String> statSizeFileNames) {
+                             List<FastaEntry> fastaEntries, String fingerPrintingFileName, List<String> statSizeFileNames) {
         // get list of all standard chromosomes (1...22, X, Y)
         List<String> standardChromosomes = Chromosomes.allLabels()
         standardChromosomes.remove("M")

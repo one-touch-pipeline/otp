@@ -82,9 +82,8 @@ class MergingWorkPackage extends AbstractMergingWorkPackage {
                     unique(MWP*.seqTracks*.libraryPreparationKit*.adapterfile)
                 */
                 return val == null
-            } else {
-                return true
             }
+            return true
         }
 
         statSizeFileName nullable: true, blank: false, matches: ReferenceGenomeProjectSeqType.TAB_FILE_PATTERN, validator: { val, obj ->
@@ -98,7 +97,7 @@ class MergingWorkPackage extends AbstractMergingWorkPackage {
                 case Pipeline.Name.RODDY_RNA_ALIGNMENT:
                     return val == null
                 default:
-                    return ["unknown.pipeline",  obj.pipeline?.name]
+                    return ["unknown.pipeline", obj.pipeline?.name]
             }
         }
 
@@ -140,9 +139,8 @@ class MergingWorkPackage extends AbstractMergingWorkPackage {
         AbstractMergedBamFile bamFile = processableBamFileInProjectFolder
         if (bamFile && bamFile.containedSeqTracks == seqTracks) {
             return bamFile
-        } else {
-            return null
         }
+        return null
     }
 
     static mapping = {

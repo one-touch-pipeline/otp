@@ -331,10 +331,9 @@ class MetadataImportService {
         } else if (maxLevel == LogLevel.WARNING && ignoreWarnings) {
             if (context.metadataFileMd5sum.equalsIgnoreCase(previousValidationMd5sum)) {
                 return true
-            } else {
-                context.addProblem(Collections.emptySet(), LogLevel.INFO,
-                        'Not ignoring warnings, because the metadata file has changed since the previous validation.')
             }
+            context.addProblem(Collections.emptySet(), LogLevel.INFO,
+                    'Not ignoring warnings, because the metadata file has changed since the previous validation.')
         }
         return false
     }
@@ -663,9 +662,8 @@ class MetadataImportService {
 
         if (cells) {
             return new ExtractedValue(barcode, cells)
-        } else {
-            return null
         }
+        return null
     }
 
     static ExtractedValue extractMateNumber(Row row) {
@@ -686,11 +684,10 @@ class MetadataImportService {
         SampleIdentifier sampleIdentifier = atMostOneElement(SampleIdentifier.findAllByName(sampleName))
         if (sampleIdentifier) {
             return sampleIdentifier.project
-        } else {
-            Project projectFromProjectColumn = Project.getByNameOrNameInMetadataFiles(projectName)
-            if (projectFromProjectColumn) {
-                return projectFromProjectColumn
-            }
+        }
+        Project projectFromProjectColumn = Project.getByNameOrNameInMetadataFiles(projectName)
+        if (projectFromProjectColumn) {
+            return projectFromProjectColumn
         }
         return null
     }

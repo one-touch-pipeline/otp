@@ -78,13 +78,10 @@ enum TimeFormats {
         boolean same24hours = ((now.time - date.time) <= 86400000) // 86.400.000 = 24h * 60m * 60s * 1000ms
         if (same24hours) {
             return TIME.getFormattedDate(date)
-        } else {
-            if (now.year == date.year) {
-                TIME_SHORT_DATE.getFormattedDate(date)
-            } else {
-                TIME_DATE.getFormattedDate(date)
-            }
+        } else if (now.year == date.year) {
+            return TIME_SHORT_DATE.getFormattedDate(date)
         }
+        return TIME_DATE.getFormattedDate(date)
     }
 
     /**

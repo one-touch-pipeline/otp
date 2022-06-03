@@ -40,8 +40,7 @@ class LogLevel extends Level {
             return ERROR
         } else if (level.intValue() < WARNING.intValue()) {
             return ALL
-        } else {
-            return WARNING
         }
+        return WARNING
     }
 }

@@ -43,9 +43,8 @@ abstract class AbstractMaybeSubmitWaitValidateJob extends AbstractMultiJob {
             }
             validate()
             return NextAction.SUCCEED
-        } else {
-            return maybeSubmit()
         }
+        return maybeSubmit()
     }
 
     protected String createExceptionString(Map<ClusterJobIdentifier, String> failedClusterJobs,

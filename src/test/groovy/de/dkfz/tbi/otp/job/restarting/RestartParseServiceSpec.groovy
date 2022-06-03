@@ -202,18 +202,16 @@ class RestartParseServiceSpec extends Specification implements DataTest {
             1 * failedOrNotFinishedClusterJobs() >> {
                 if (text.empty) {
                     return []
-                } else {
-                    return text.collect { String content ->
-                        new ClusterJob(
-                                jobLog: {
-                                    if (content) {
-                                        return CreateFileHelper.createFile(temporaryFolder.newFile(), content).absolutePath
-                                    } else {
-                                        return TestCase.uniqueNonExistentPath.absolutePath
-                                    }
-                                } ()
-                        )
-                    }
+                }
+                return text.collect { String content ->
+                    new ClusterJob(
+                            jobLog: {
+                                if (content) {
+                                    return CreateFileHelper.createFile(temporaryFolder.newFile(), content).absolutePath
+                                }
+                                return TestCase.uniqueNonExistentPath.absolutePath
+                            }()
+                    )
                 }
             }
             _ * getLog() >> Mock(Logger) {

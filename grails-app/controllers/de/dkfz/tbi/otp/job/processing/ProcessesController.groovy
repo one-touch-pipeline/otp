@@ -75,7 +75,7 @@ class ProcessesController {
          * The plan is disabled
          */
         DISABLED,
-         /**
+        /**
          * At least one Process is running
          */
         RUNNING,
@@ -240,15 +240,15 @@ class ProcessesController {
                 }
             }
             dataToRender.aaData << [
-                process.id,
-                latestState,
-                parameterData,
-                TimeFormats.asTimestamp(process.started),
-                TimeFormats.asTimestamp(latest.date),
-                latest.processingStep.jobDefinition.name,
-                [state: latestState, error: latest.error ? latest.error.errorMessage : null, id: latest.processingStep.id],
-                process.comment?.comment?.encodeAsHTML(),
-                [actions: actions],
+                    process.id,
+                    latestState,
+                    parameterData,
+                    TimeFormats.asTimestamp(process.started),
+                    TimeFormats.asTimestamp(latest.date),
+                    latest.processingStep.jobDefinition.name,
+                    [state: latestState, error: latest.error ? latest.error.errorMessage : null, id: latest.processingStep.id],
+                    process.comment?.comment?.encodeAsHTML(),
+                    [actions: actions],
             ]
         }
         render dataToRender as JSON
@@ -323,15 +323,15 @@ class ProcessesController {
                                         jobName : processingStep.jobDefinition.name,
                                         jobClass: processingStep.jobClass,
                                 ],
-                                times: [
-                                    creation  : TimeFormats.asTimestamp(processService.getFirstUpdate(processingStep)),
-                                    lastUpdate: TimeFormats.asTimestamp(update?.date),
-                                    duration  : processService.getProcessingStepDuration(processingStep),
+                                times         : [
+                                        creation  : TimeFormats.asTimestamp(processService.getFirstUpdate(processingStep)),
+                                        lastUpdate: TimeFormats.asTimestamp(update?.date),
+                                        duration  : processService.getProcessingStepDuration(processingStep),
                                 ],
-                                lastUpdate: [
+                                lastUpdate    : [
                                         state: state,
                                 ],
-                                actions: actions,
+                                actions       : actions,
                         ]
                     }
                 } finally {
@@ -365,8 +365,8 @@ class ProcessesController {
     def processingStep() {
         ProcessingStep step = processService.getProcessingStep(params.id as long)
         return [
-                step: step,
-                hasLog: processService.processingStepLogExists(step),
+                step       : step,
+                hasLog     : processService.processingStepLogExists(step),
                 clusterJobs: clusterJobService.findAllByProcessingStep(step).sort { it.clusterJobId },
         ]
     }
@@ -374,7 +374,7 @@ class ProcessesController {
     def processingStepLog(ProcessingStep step) {
         String log = processService.processingStepLog(step)
         return [
-                log: log,
+                log : log,
                 step: step,
         ]
     }
@@ -401,10 +401,10 @@ class ProcessesController {
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
         updates.each { ProcessingStepUpdate update ->
             dataToRender.aaData << [
-                update.id,
-                TimeFormats.asTimestamp(update.date),
-                update.state,
-                update.error,
+                    update.id,
+                    TimeFormats.asTimestamp(update.date),
+                    update.state,
+                    update.error,
             ]
         }
         render dataToRender as JSON
@@ -431,11 +431,11 @@ class ProcessesController {
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
         parameters.each { Parameter param ->
             dataToRender.aaData << [
-                param.id,
-                param.type.name,
-                param.type.description,
-                formatParamValue(param),
-                jobName,
+                    param.id,
+                    param.type.name,
+                    param.type.description,
+                    formatParamValue(param),
+                    jobName,
             ]
         }
         render dataToRender as JSON
@@ -444,23 +444,22 @@ class ProcessesController {
     private String formatParamValue(Parameter param) {
         if (param.type.name == JobParameterKeys.SCRIPT) {
             return "<pre>${param.value?.encodeAsHTML()}</pre>"
-        } else {
-            return param.value?.encodeAsHTML()
         }
+        return param.value?.encodeAsHTML()
     }
 
     def getProcessingErrorStackTrace() {
         render text: processService.getProcessingErrorStackTrace(params.id as long), contentType: "text/plain"
     }
 
-    private Map<String,String> processParameterData(Process process) {
+    private Map<String, String> processParameterData(Process process) {
         ProcessParameter parameter = CollectionUtils.atMostOneElement(processParameterService.findAllByProcess(process))
         if (parameter) {
             return parameter.className ? [
-                controller: GrailsNameUtils.getShortName(parameter.className),
-                action: "show",
-                id: parameter.value,
-                text: parameter.toObject().toString(),
+                    controller: GrailsNameUtils.getShortName(parameter.className),
+                    action    : "show",
+                    id        : parameter.value,
+                    text      : parameter.toObject().toString(),
             ] : [text: parameter.value] // not a class, just use the value
         }
         return [:]

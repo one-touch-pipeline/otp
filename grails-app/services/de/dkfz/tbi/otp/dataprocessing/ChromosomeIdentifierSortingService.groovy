@@ -41,9 +41,8 @@ class ChromosomeIdentifierSortingService {
             return compareIntegerWithNotInteger(identifier1, identifier2)
         } else if (!(identifier1.isInteger()) && identifier2.isInteger()) {
             return compareNotIntegerWithInteger(identifier1, identifier2)
-        } else {
-            return compareTwoNotInteger(identifier1, identifier2)
         }
+        return compareTwoNotInteger(identifier1, identifier2)
     }
 
     private int compareTwoInteger(Object identifier1, Object identifier2) {
@@ -81,9 +80,8 @@ class ChromosomeIdentifierSortingService {
             return -1
         } else if (identifierAsString2 == Chromosomes.CHR_M.chr) {
             return 1
-        } else {
-            return identifierAsString1 <=> identifierAsString2
         }
+        return identifierAsString1 <=> identifierAsString2
     }
 
     /**

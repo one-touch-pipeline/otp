@@ -46,9 +46,8 @@ class DataFilesInSameDirectory implements DirectoryStructure {
         String fileName = valueTuple.getValue(FASTQ_FILE.name())
         if (OtpPathValidator.isValidPathComponent(fileName)) {
             return context.metadataFile.resolveSibling(fileName)
-        } else {
-            context.addProblem(valueTuple.cells, LogLevel.ERROR, "'${fileName}' is not a valid file name.", "At least one file name is not a valid file name.")
-            return null
         }
+        context.addProblem(valueTuple.cells, LogLevel.ERROR, "'${fileName}' is not a valid file name.", "At least one file name is not a valid file name.")
+        return null
     }
 }

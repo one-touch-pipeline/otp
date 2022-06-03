@@ -153,8 +153,7 @@ class RoddyExecutionService {
             Path directory = fileSystem.getPath(m.group(1))
             assert !m.find()
             return directory
-        } else {
-            throw new RoddyException("Roddy output contains no information about output directories")
         }
+        throw new RoddyException("Roddy output contains no information about output directories")
     }
 }

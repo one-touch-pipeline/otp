@@ -77,9 +77,8 @@ class QualityAssessmentPass implements ProcessParameterObject, Entity {
         final Integer maxIdentifier = maxIdentifier(processedBamFile)
         if (maxIdentifier == null) {
             return 0
-        } else {
-            return maxIdentifier + 1
         }
+        return maxIdentifier + 1
     }
 
     AlignmentPass getAlignmentPass() {

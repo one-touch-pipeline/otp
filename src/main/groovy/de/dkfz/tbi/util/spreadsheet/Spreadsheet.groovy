@@ -143,9 +143,8 @@ class Row {
         if (column != null) {
             assert column.spreadsheet == spreadsheet
             return cells.get(column.headerCell.columnIndex)
-        } else {
-            return null
         }
+        return null
     }
 
     /**

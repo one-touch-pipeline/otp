@@ -94,9 +94,8 @@ abstract class AbstractMergingWorkPackage implements Entity {
         if (bamFileInProjectFolder && !bamFileInProjectFolder.withdrawn &&
                 bamFileInProjectFolder.fileOperationStatus == AbstractMergedBamFile.FileOperationStatus.PROCESSED) {
             return bamFileInProjectFolder
-        } else {
-            return null
         }
+        return null
     }
 
     abstract AbstractMergedBamFile getBamFileThatIsReadyForFurtherAnalysis()
@@ -113,7 +112,8 @@ abstract class AbstractMergingWorkPackage implements Entity {
         return sample.sampleType
     }
 
-    @SuppressWarnings("GrailsDuplicateMapping") //this is needed due to grails not supporting indices on multiple columns
+    @SuppressWarnings("GrailsDuplicateMapping")
+    //this is needed due to grails not supporting indices on multiple columns
     static mapping = {
         'class' index: "abstract_merging_work_package_class_idx"
         seqType index: "abstract_merging_work_package_seq_type_idx"

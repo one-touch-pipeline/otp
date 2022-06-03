@@ -47,18 +47,16 @@ class ErrorsController {
         response.status = HttpServletResponse.SC_FORBIDDEN
         if (springSecurityService.isAjax(request)) {
             return render(springSecurityService.isLoggedIn().toString())
-        } else {
-            return [authenticated: springSecurityService.isLoggedIn()]
         }
+        return [authenticated: springSecurityService.isLoggedIn()]
     }
 
     def error404 = {
         response.status = HttpServletResponse.SC_NOT_FOUND
         if (springSecurityService.isAjax(request)) {
             return render(request.forwardURI)
-        } else {
-            return [notFound: request.forwardURI]
         }
+        return [notFound: request.forwardURI]
     }
 
     def error405 = {

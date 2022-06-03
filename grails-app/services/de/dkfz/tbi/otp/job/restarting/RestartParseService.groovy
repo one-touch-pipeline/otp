@@ -126,12 +126,10 @@ class RestartParseService {
                     if (definition.checkFurtherJobErrors.isEmpty()) {
                         job.log.debug("Action of ${definition} is \"CHECK_FURTHER\" but \"checkFurtherJobErrors\" is empty")
                         return JobErrorDefinition.Action.STOP
-                    } else {
-                        return detectAndHandleType(job, definition.checkFurtherJobErrors)
                     }
-                } else {
-                    return definition.action
+                    return detectAndHandleType(job, definition.checkFurtherJobErrors)
                 }
+                return definition.action
             default:
                 job.log.debug("Stopping, because multiple rules match ${it}: \n- ${jobErrorDefinitions.join('\n- ')}")
                 return JobErrorDefinition.Action.STOP

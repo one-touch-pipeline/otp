@@ -73,15 +73,14 @@ abstract class AbstractRoddyJob<R extends RoddyResult> extends AbstractMaybeSubm
                     threadLog?.info("Log file: ${it.jobLog}")
                 }
                 return NextAction.WAIT_FOR_CLUSTER_JOBS
-            } else {
-                threadLog?.info 'Roddy has not submitted any cluster jobs. Running validate().'
-                try {
-                    validate()
-                } catch (Throwable t) {
-                    throw new RuntimeException('validate() failed after Roddy has not submitted any cluster jobs.', t)
-                }
-                return NextAction.SUCCEED
             }
+            threadLog?.info 'Roddy has not submitted any cluster jobs. Running validate().'
+            try {
+                validate()
+            } catch (Throwable t) {
+                throw new RuntimeException('validate() failed after Roddy has not submitted any cluster jobs.', t)
+            }
+            return NextAction.SUCCEED
         }
     }
 

@@ -98,16 +98,15 @@ class FastqcResultsController {
     def renderFile(RenderFileCommand cmd) {
         if (cmd.hasErrors()) {
             return response.sendError(404)
-        } else {
-            InputStream stream
-            try {
-                DataFile dataFile = metaDataService.getDataFile(cmd.dataFile.id as long)
-                stream = fastqcDataFilesService.getInputStreamFromZipFile(dataFile, cmd.path)
-            } catch (FileNotReadableException e) {
-                render status: 404
-                return void
-            }
-            render file: stream, contentType: "image/png"
         }
+        InputStream stream
+        try {
+            DataFile dataFile = metaDataService.getDataFile(cmd.dataFile.id as long)
+            stream = fastqcDataFilesService.getInputStreamFromZipFile(dataFile, cmd.path)
+        } catch (FileNotReadableException e) {
+            render status: 404
+            return void
+        }
+        render file: stream, contentType: "image/png"
     }
 }

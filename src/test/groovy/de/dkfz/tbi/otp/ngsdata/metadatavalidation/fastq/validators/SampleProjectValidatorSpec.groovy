@@ -79,9 +79,8 @@ class SampleProjectValidatorSpec extends Specification implements DataTest {
                     final String prefix = 'project_'
                     if (sampleIdentifier.startsWith(prefix)) {
                         return new DefaultParsedSampleIdentifier(sampleIdentifier.substring(prefix.length()), "don't care", "don't care", sampleIdentifier, null)
-                    } else {
-                        return null
                     }
+                    return null
                 }
         ] as SampleIdentifierService
         Collection<Problem> expectedProblems = [

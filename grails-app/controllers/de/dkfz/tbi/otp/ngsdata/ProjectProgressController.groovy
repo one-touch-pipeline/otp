@@ -22,8 +22,8 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.converters.JSON
-import grails.plugin.springsecurity.annotation.Secured
 import grails.databinding.BindingFormat
+import grails.plugin.springsecurity.annotation.Secured
 
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
@@ -46,9 +46,8 @@ class ProjectProgressDataTableCommand extends DataTableCommand {
     List<String> getProjectNames() {
         if (projects) {
             return projects.split(",") as List
-        } else {
-            null
         }
+        return []
     }
 }
 
@@ -65,8 +64,8 @@ class ProjectProgressController {
 
     def progress() {
         return [
-            startDate: TimeFormats.DATE.getFormattedDate(Date.from(Instant.now().minus(8, ChronoUnit.DAYS))),
-            endDate: TimeFormats.DATE.getFormattedDate(new Date()),
+                startDate: TimeFormats.DATE.getFormattedDate(Date.from(Instant.now().minus(8, ChronoUnit.DAYS))),
+                endDate  : TimeFormats.DATE.getFormattedDate(new Date()),
         ]
     }
 
@@ -90,7 +89,7 @@ class ProjectProgressController {
             line << run.id
             line << run.name
             line << run.seqCenter.toString().toLowerCase()
-            line << samples.sort { it.project.name + " "  + it.displayName }.collect { [it.individual.id, it.displayName] }
+            line << samples.sort { it.project.name + " " + it.displayName }.collect { [it.individual.id, it.displayName] }
             return line
         }
     }

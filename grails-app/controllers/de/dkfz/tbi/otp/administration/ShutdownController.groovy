@@ -35,9 +35,9 @@ class ShutdownController {
     ShutdownService shutdownService
 
     static allowedMethods = [
-            index: "GET",
-            planShutdown: "POST",
-            cancelShutdown: "POST",
+            index           : "GET",
+            planShutdown    : "POST",
+            cancelShutdown  : "POST",
             closeApplication: "POST",
     ]
 
@@ -47,30 +47,29 @@ class ShutdownController {
             return [
                     shutdownSucceeded: shutdownService.shutdownSuccessful
             ]
-        } else {
-            List<ProcessingStep> runningJobs = shutdownService.runningJobs
-            List<ProcessingStep> resumableJobs = []
-            List<ProcessingStep> notResumableJobs = []
-            runningJobs.each {
-                if (shutdownService.isJobResumable(it)) {
-                    resumableJobs << it
-                } else {
-                    notResumableJobs << it
-                }
-            }
-
-            List<WorkflowStep> restartableRunningWorkflowSteps = shutdownService.restartableRunningWorkflowSteps
-            List<WorkflowStep> notRestartableRunningWorkflowSteps = shutdownService.nonRestartableRunningWorkflowSteps
-
-            render(view: "status", model: [
-                    shutdown: shutdownInformation,
-                    shutdownInititated: TimeFormats.DATE_TIME.getFormattedDate(shutdownInformation.initiated),
-                    resumableJobs: resumableJobs,
-                    notResumableJobs: notResumableJobs,
-                    restartableRunningWorkflowSteps: restartableRunningWorkflowSteps,
-                    notRestartableRunningWorkflowSteps: notRestartableRunningWorkflowSteps,
-            ])
         }
+        List<ProcessingStep> runningJobs = shutdownService.runningJobs
+        List<ProcessingStep> resumableJobs = []
+        List<ProcessingStep> notResumableJobs = []
+        runningJobs.each {
+            if (shutdownService.isJobResumable(it)) {
+                resumableJobs << it
+            } else {
+                notResumableJobs << it
+            }
+        }
+
+        List<WorkflowStep> restartableRunningWorkflowSteps = shutdownService.restartableRunningWorkflowSteps
+        List<WorkflowStep> notRestartableRunningWorkflowSteps = shutdownService.nonRestartableRunningWorkflowSteps
+
+        render(view: "status", model: [
+                shutdown                          : shutdownInformation,
+                shutdownInititated                : TimeFormats.DATE_TIME.getFormattedDate(shutdownInformation.initiated),
+                resumableJobs                     : resumableJobs,
+                notResumableJobs                  : notResumableJobs,
+                restartableRunningWorkflowSteps   : restartableRunningWorkflowSteps,
+                notRestartableRunningWorkflowSteps: notRestartableRunningWorkflowSteps,
+        ])
     }
 
     def planShutdown(ShutdownCommand cmd) {

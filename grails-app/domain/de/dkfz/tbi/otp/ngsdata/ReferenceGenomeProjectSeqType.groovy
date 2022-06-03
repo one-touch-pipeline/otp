@@ -75,8 +75,8 @@ class ReferenceGenomeProjectSeqType implements Entity {
     ]
 
     static belongsTo = [
-            project: Project,
-            seqType: SeqType,
+            project   : Project,
+            seqType   : SeqType,
             sampleType: SampleType,
     ]
 
@@ -86,12 +86,8 @@ class ReferenceGenomeProjectSeqType implements Entity {
         referenceGenome validator: { val, obj ->
             if (!obj.deprecatedDate) {
                 List<ReferenceGenomeProjectSeqType> existingObjects = ReferenceGenomeProjectSeqType
-                            .findAllByProjectAndSeqTypeAndSampleTypeAndDeprecatedDateIsNull(obj.project, obj.seqType, obj.sampleType)
-                if (existingObjects.isEmpty()) {
-                    return true
-                } else {
-                    return existingObjects.size() == 1 && existingObjects.contains(obj)
-                }
+                        .findAllByProjectAndSeqTypeAndSampleTypeAndDeprecatedDateIsNull(obj.project, obj.seqType, obj.sampleType)
+                return existingObjects.isEmpty() || existingObjects.size() == 1 && existingObjects.contains(obj)
             }
         }
         sampleType(nullable: true)

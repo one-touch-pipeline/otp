@@ -101,9 +101,8 @@ enum Delimiter {
 
             if (bestCandidate) {
                 return bestCandidate
-            } else {
-                return TAB // if we didn't find anything, it's probably a single-column TSV, do the lazy thing.
             }
+            return TAB // if we didn't find anything, it's probably a single-column TSV, do the lazy thing.
         } finally {
             context.reset() // return reader to start, so CSV-reader starts from the beginning again and doesn't skip lines used for auto-detection.
         }

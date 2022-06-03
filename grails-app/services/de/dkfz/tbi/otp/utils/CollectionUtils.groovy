@@ -58,11 +58,10 @@ class CollectionUtils {
             return collection.iterator().next()
         } else if (size == 0 && allowNone) {
             return null
-        } else {
-            String defaultMessage = "Collection contains ${size} elements. Expected 1"
-            String message = (customErrorMessage ? "${customErrorMessage}\n${defaultMessage}" : defaultMessage)
-            throw new AssertionError(message)
         }
+        String defaultMessage = "Collection contains ${size} elements. Expected 1"
+        String message = (customErrorMessage ? "${customErrorMessage}\n${defaultMessage}" : defaultMessage)
+        throw new AssertionError(message)
     }
 
     /**
@@ -71,7 +70,7 @@ class CollectionUtils {
      * @throws AssertionError if the collection does not contain any elements.
      */
     static <T> Collection<T> notEmpty(final Collection<T> collection, String customErrorMessage = null) throws AssertionError {
-        assert !collection.isEmpty() : (customErrorMessage ?: "Collection contains 0 elements. Expected 1 or more")
+        assert !collection.isEmpty(): (customErrorMessage ?: "Collection contains 0 elements. Expected 1 or more")
         return collection
     }
 
@@ -81,9 +80,9 @@ class CollectionUtils {
      */
     static <T> boolean containSame(final Collection<? extends T> c1, final Collection<? extends T> c2) {
         final c1Set = c1.toSet()
-        assert c1Set.size() == c1.size() : "c1 contains elements which are equal."
+        assert c1Set.size() == c1.size(): "c1 contains elements which are equal."
         final c2Set = c2.toSet()
-        assert c2Set.size() == c2.size() : "c2 contains elements which are equal."
+        assert c2Set.size() == c2.size(): "c2 contains elements which are equal."
         return c1Set == c2Set
     }
 
@@ -96,9 +95,8 @@ class CollectionUtils {
         V value = map.get(key)
         if (value != null || map.containsKey(key)) {
             return value
-        } else {
-            map.put(key, d)
-            return d
         }
+        map.put(key, d)
+        return d
     }
 }

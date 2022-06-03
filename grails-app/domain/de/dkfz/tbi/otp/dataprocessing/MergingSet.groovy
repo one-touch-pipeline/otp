@@ -146,9 +146,8 @@ class MergingSet implements Entity {
         final Integer maxIdentifier = maxIdentifier(mergingWorkPackage)
         if (maxIdentifier == null) {
             return 0
-        } else {
-            return maxIdentifier + 1
         }
+        return maxIdentifier + 1
     }
 
     static constraints = {

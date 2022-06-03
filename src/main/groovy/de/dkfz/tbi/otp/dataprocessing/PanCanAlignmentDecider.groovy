@@ -37,10 +37,6 @@ class PanCanAlignmentDecider extends RoddyAlignmentDecider {
     @Override
     @Deprecated
     Pipeline.Name pipelineName(SeqTrack seqTrack) {
-        if (seqTrack.seqType.isRna()) {
-            return Pipeline.Name.RODDY_RNA_ALIGNMENT
-        } else {
-            return Pipeline.Name.PANCAN_ALIGNMENT
-        }
+        return seqTrack.seqType.isRna() ? Pipeline.Name.RODDY_RNA_ALIGNMENT : Pipeline.Name.PANCAN_ALIGNMENT
     }
 }

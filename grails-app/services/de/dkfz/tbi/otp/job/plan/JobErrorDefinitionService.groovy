@@ -70,14 +70,13 @@ class JobErrorDefinitionService {
     Map<Object, Object> getValues(JobErrorDefinition value) {
         if (value.action != JobErrorDefinition.Action.CHECK_FURTHER) {
             return [(value): value.errorExpression]
-        } else {
-            Map newValueMap = [:]
-            value.checkFurtherJobErrors.each { JobErrorDefinition newValue ->
-                Map jed = getValues(newValue)
-                newValueMap.putAll(jed)
-            }
-            return [(value): newValueMap]
         }
+        Map newValueMap = [:]
+        value.checkFurtherJobErrors.each { JobErrorDefinition newValue ->
+            Map jed = getValues(newValue)
+            newValueMap.putAll(jed)
+        }
+        return [(value): newValueMap]
     }
 
     Map<Object, Object> findDuplicates(Map jobErrorDefinition) {

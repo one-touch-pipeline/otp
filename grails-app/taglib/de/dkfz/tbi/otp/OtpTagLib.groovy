@@ -169,9 +169,8 @@ class OtpTagLib {
             model.dropDowns = model.dropDowns ?: [:]
 
             return render(template: template, model: model)
-        } else {
-            return render(template: "/templates/readonly", model: model)
         }
+        return render(template: "/templates/readonly", model: model)
     }
 
     /**

@@ -1157,7 +1157,7 @@ All the Rules that will be used for OTP
         priority = DEFAULT
     }
     UnnecessaryElseStatement {
-        priority = LOW
+        priority = DEFAULT
     }
     UnnecessaryFinalOnPrivateMethod {
         priority = DEFAULT

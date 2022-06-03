@@ -46,7 +46,7 @@ class AlignmentPass implements ProcessParameterObject, Entity {
 
     static belongsTo = [
             workPackage: MergingWorkPackage,
-            seqTrack: SeqTrack,
+            seqTrack   : SeqTrack,
     ]
 
     static constraints = {
@@ -108,9 +108,8 @@ class AlignmentPass implements ProcessParameterObject, Entity {
         final Integer maxIdentifier = maxIdentifier(seqTrack)
         if (maxIdentifier == null) {
             return 0
-        } else {
-            return maxIdentifier + 1
         }
+        return maxIdentifier + 1
     }
 
     @Override

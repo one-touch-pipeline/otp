@@ -288,14 +288,13 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
                 Map validateColumns = egaSubmissionValidationService.validateColumns(spreadsheet, headers)
                 if (validateColumns.hasError) {
                     return response.sendError(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                } else {
-                    List<Map<String, String>> data = spreadsheet.dataRows.collect(({ row ->
-                        spreadsheet.header.cells.collectEntries { headerCell ->
-                            [headerCell.text, row.getCellByColumnTitle(headerCell.text).text]
-                        }
-                    } as Closure<Map<String, String>>))
-                    render data as JSON
                 }
+                List<Map<String, String>> data = spreadsheet.dataRows.collect(({ row ->
+                    spreadsheet.header.cells.collectEntries { headerCell ->
+                        [headerCell.text, row.getCellByColumnTitle(headerCell.text).text]
+                    }
+                } as Closure<Map<String, String>>))
+                render data as JSON
             }
         })
         render [:] as JSON

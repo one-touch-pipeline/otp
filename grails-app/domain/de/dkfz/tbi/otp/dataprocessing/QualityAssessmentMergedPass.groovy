@@ -77,9 +77,8 @@ class QualityAssessmentMergedPass implements ProcessParameterObject, Entity {
         final Integer maxIdentifier = maxIdentifier(abstractMergedBamFile)
         if (maxIdentifier == null) {
             return 0
-        } else {
-            return maxIdentifier + 1
         }
+        return maxIdentifier + 1
     }
 
     static mapping = {
@@ -107,9 +106,8 @@ class QualityAssessmentMergedPass implements ProcessParameterObject, Entity {
     MergingSet getMergingSet() {
         if (ProcessedMergedBamFile.isAssignableFrom(Hibernate.getClass(abstractMergedBamFile))) {
             return abstractMergedBamFile.mergingSet
-        } else {
-            throw new NotSupportedException("MergingSet exists only for ProcessedMergedBamFiles")
         }
+        throw new NotSupportedException("MergingSet exists only for ProcessedMergedBamFiles")
     }
 
     MergingWorkPackage getMergingWorkPackage() {
@@ -119,9 +117,8 @@ class QualityAssessmentMergedPass implements ProcessParameterObject, Entity {
     MergingPass getMergingPass() {
         if (ProcessedMergedBamFile.isAssignableFrom(Hibernate.getClass(abstractMergedBamFile))) {
             return abstractMergedBamFile.mergingPass
-        } else {
-            throw new NotSupportedException("MergingPass exists only for ProcessedMergedBamFiles")
         }
+        throw new NotSupportedException("MergingPass exists only for ProcessedMergedBamFiles")
     }
 
     @Override

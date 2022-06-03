@@ -87,9 +87,8 @@ class RoddyConfigValueService {
             )
             assert adapterFile: "There is exactly one adapter available for BAM file ${roddyBamFile}, but it is null"
             return ["CLIP_INDEX": "${adapterFile}"]
-        } else {
-            return [:]
         }
+        return [:]
     }
 
     Map<String, String> getFilesToMerge(RoddyBamFile roddyBamFile) {

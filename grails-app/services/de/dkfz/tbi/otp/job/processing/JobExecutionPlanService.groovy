@@ -313,9 +313,8 @@ class JobExecutionPlanService {
     protected List<JobExecutionPlan> withParents(JobExecutionPlan plan) {
         if (plan.previousPlan) {
             return withParents(plan.previousPlan) << plan
-        } else {
-            return [plan]
         }
+        return [plan]
     }
 
     /**

@@ -143,8 +143,7 @@ class RestartActionService {
         Comment comment = process.comment ?: new Comment()
         if (comment.comment) {
             return "${comment.comment}\n\n${message}"
-        } else {
-            return message
         }
+        return message
     }
 }

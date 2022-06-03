@@ -66,9 +66,8 @@ class JobExecutionPlan implements Serializable, Entity {
         previousPlan(nullable: true, validator: { JobExecutionPlan value, JobExecutionPlan current ->
             if (value) {
                 return current.planVersion > 0 && value.name == current.name
-            } else {
-                return current.planVersion == 0
             }
+            return current.planVersion == 0
         })
         // firstJob needs to be nullable as JobDefinition has a dependency on JobExecutionPlan and this circle could not be solved in the database
         firstJob(nullable: true)

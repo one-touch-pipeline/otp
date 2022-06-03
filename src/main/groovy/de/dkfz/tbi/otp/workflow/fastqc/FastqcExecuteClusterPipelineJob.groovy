@@ -75,11 +75,10 @@ class FastqcExecuteClusterPipelineJob extends AbstractExecuteClusterPipelineJob 
             logService.addSimpleLogEntry(workflowStep, "Copying fastqc reports")
             copyExistingFastqReports(realm, fileSystem, dataFiles, outputDir)
             return []
-        } else {
-            //create and return the shell script only (w/o running it)
-            logService.addSimpleLogEntry(workflowStep, "Creating cluster scripts")
-            return createFastQcClusterScript(dataFiles, outputDir)
         }
+        //create and return the shell script only (w/o running it)
+        logService.addSimpleLogEntry(workflowStep, "Creating cluster scripts")
+        return createFastQcClusterScript(dataFiles, outputDir)
     }
 
     private boolean canFastQcReportsBeCopied(FileSystem fileSystem, List<DataFile> dataFiles) {

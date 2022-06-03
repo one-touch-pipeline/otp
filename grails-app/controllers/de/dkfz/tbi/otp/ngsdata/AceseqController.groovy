@@ -28,6 +28,7 @@ import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqResultsService
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.DataTableCommand
+
 import java.nio.file.Path
 
 @Secured('isFullyAuthenticated()')
@@ -90,12 +91,10 @@ class AceseqController extends AbstractAnalysisController {
         List<Path> files = aceseqResultsService.getFiles(cmd.bamFilePairAnalysis, cmd.plotType)
         if (files.isEmpty()) {
             return response.sendError(404)
+        } else if (cmd.plotType in [PlotType.ACESEQ_EXTRA, PlotType.ACESEQ_ALL]) {
+            render file: files[cmd.index].bytes, contentType: "image/png"
         } else {
-            if (cmd.plotType in [PlotType.ACESEQ_EXTRA, PlotType.ACESEQ_ALL]) {
-                render file: files[cmd.index].bytes, contentType: "image/png"
-            } else {
-                render file: files.first().bytes, contentType: "image/png"
-            }
+            render file: files.first().bytes, contentType: "image/png"
         }
     }
 }

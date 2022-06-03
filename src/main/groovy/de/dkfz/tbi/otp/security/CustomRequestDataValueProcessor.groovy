@@ -31,7 +31,7 @@ import java.util.regex.Pattern
  * This is a copy of {@link org.springframework.security.web.servlet.support.csrf.CsrfRequestDataValueProcessor}
  * but the GET was removed from the DISABLE_CSRF_TOKEN_PATTERN. Otherwise the form do not get the token.
  */
-@SuppressWarnings(['UnnecessarySemicolon','UnnecessaryPublicModifier','UnusedMethodParameter',
+@SuppressWarnings(['UnnecessarySemicolon', 'UnnecessaryPublicModifier', 'UnusedMethodParameter',
         'SpaceAfterComma', 'MissingOverrideAnnotation', 'ExplicitCallToEqualsMethod', 'FieldName',
         'PrivateFieldCouldBeFinal', 'EmptyMethod', 'NoDef', 'MethodName', 'MethodReturnTypeRequired'])
 class CustomRequestDataValueProcessor implements RequestDataValueProcessor {
@@ -63,16 +63,14 @@ class CustomRequestDataValueProcessor implements RequestDataValueProcessor {
         if (Boolean.TRUE.equals(request.getAttribute(this.DISABLE_CSRF_TOKEN_ATTR))) {
             request.removeAttribute(this.DISABLE_CSRF_TOKEN_ATTR);
             return Collections.emptyMap();
-        } else {
-            CsrfToken token = (CsrfToken)request.getAttribute(CsrfToken.class.name);
-            if (token == null) {
-                return Collections.emptyMap();
-            } else {
-                Map<String, String> hiddenFields = new HashMap(1);
-                hiddenFields.put(token.parameterName, token.token);
-                return hiddenFields;
-            }
         }
+        CsrfToken token = (CsrfToken) request.getAttribute(CsrfToken.class.name);
+        if (token == null) {
+            return Collections.emptyMap();
+        }
+        Map<String, String> hiddenFields = new HashMap(1);
+        hiddenFields.put(token.parameterName, token.token);
+        return hiddenFields;
     }
 
     public String processUrl(HttpServletRequest request, String url) {

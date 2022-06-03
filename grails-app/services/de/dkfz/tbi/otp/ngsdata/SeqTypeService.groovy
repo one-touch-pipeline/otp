@@ -37,25 +37,28 @@ class SeqTypeService extends MetadataFieldsService<SeqType> {
     List<Map> getDisplayableMetadata() {
         return SeqType.list(sort: "name", order: "asc").collect {
             [
-                id               : SeqType.findAllByNameAndSingleCell(it.name, it.singleCell)*.id?.sort()?.first(),
-                name             : it.name,
-                legacy           : it.legacy,
-                dirName          : it.dirName,
-                singleCell       : it.singleCell,
-                hasAntibodyTarget: it.hasAntibodyTarget,
-                needsBedFile     : it.needsBedFile,
-                libraryLayouts   : SeqType.findAllByNameAndSingleCell(it.name, it.singleCell)*.libraryLayout.sort().join(MULTILINE_JOIN_STRING),
-                layouts          :
-                        [
-                            SINGLE   : CollectionUtils.atMostOneElement(
-                                    SeqType.findAllByNameAndLibraryLayoutAndSingleCell(it.name, SequencingReadType.SINGLE, it.singleCell)) ? true : false,
-                            PAIRED   : CollectionUtils.atMostOneElement(
-                                    SeqType.findAllByNameAndLibraryLayoutAndSingleCell(it.name, SequencingReadType.PAIRED, it.singleCell)) ? true : false,
-                            MATE_PAIR: CollectionUtils.atMostOneElement(
-                                    SeqType.findAllByNameAndLibraryLayoutAndSingleCell(it.name, SequencingReadType.MATE_PAIR, it.singleCell)) ? true : false,
-                        ],
-                displayName      : it.displayName,
-                importAliases    : SeqType.findAllByName(it.name)*.importAlias?.flatten()?.unique()?.sort()?.join(MULTILINE_JOIN_STRING),
+                    id               : SeqType.findAllByNameAndSingleCell(it.name, it.singleCell)*.id?.sort()?.first(),
+                    name             : it.name,
+                    legacy           : it.legacy,
+                    dirName          : it.dirName,
+                    singleCell       : it.singleCell,
+                    hasAntibodyTarget: it.hasAntibodyTarget,
+                    needsBedFile     : it.needsBedFile,
+                    libraryLayouts   : SeqType.findAllByNameAndSingleCell(it.name, it.singleCell)*.libraryLayout.sort().join(MULTILINE_JOIN_STRING),
+                    layouts          :
+                            [
+                                    SINGLE   : CollectionUtils.atMostOneElement(
+                                            SeqType.findAllByNameAndLibraryLayoutAndSingleCell(it.name, SequencingReadType.SINGLE, it.singleCell)) ?
+                                            true : false,
+                                    PAIRED   : CollectionUtils.atMostOneElement(
+                                            SeqType.findAllByNameAndLibraryLayoutAndSingleCell(it.name, SequencingReadType.PAIRED, it.singleCell)) ?
+                                            true : false,
+                                    MATE_PAIR: CollectionUtils.atMostOneElement(
+                                            SeqType.findAllByNameAndLibraryLayoutAndSingleCell(it.name, SequencingReadType.MATE_PAIR, it.singleCell)) ?
+                                            true : false,
+                            ],
+                    displayName      : it.displayName,
+                    importAliases    : SeqType.findAllByName(it.name)*.importAlias?.flatten()?.unique()?.sort()?.join(MULTILINE_JOIN_STRING),
             ]
         }.unique().sort { it.name.toLowerCase() + it.id }
     }
@@ -142,14 +145,13 @@ class SeqTypeService extends MetadataFieldsService<SeqType> {
             return CollectionUtils.atMostOneElement(clazz.findAllByNameIlikeAndLibraryLayoutAndSingleCell(name, properties.libraryLayout as SequencingReadType,
                     properties.singleCell as boolean, [max: 1])) ?:
                     CollectionUtils.atMostOneElement(clazz.findAllByDisplayNameIlikeAndLibraryLayoutAndSingleCell(name,
-                    properties.libraryLayout as SequencingReadType, properties.singleCell as boolean, [max: 1])) as SeqType
+                            properties.libraryLayout as SequencingReadType, properties.singleCell as boolean, [max: 1])) as SeqType
         } else if (!properties.libraryLayout && properties.singleCell != null) {
             return CollectionUtils.atMostOneElement(clazz.findAllByNameIlikeAndSingleCell(name, properties.singleCell as boolean, [max: 1])) ?:
                     CollectionUtils.atMostOneElement(clazz.findAllByDisplayNameIlikeAndSingleCell(name, properties.singleCell as boolean, [max: 1]))
-        } else {
-            return CollectionUtils.atMostOneElement(clazz.findAllByName(name, [max: 1])) ?: CollectionUtils.atMostOneElement(clazz.findAllByDisplayName(name,
-                    [max: 1]))
         }
+        return CollectionUtils.atMostOneElement(clazz.findAllByName(name, [max: 1])) ?: CollectionUtils.atMostOneElement(clazz.findAllByDisplayName(name,
+                [max: 1]))
     }
 
     @Override
@@ -160,10 +162,9 @@ class SeqTypeService extends MetadataFieldsService<SeqType> {
                         it.libraryLayout == properties.libraryLayout &&
                         it.singleCell == properties.singleCell
             })
-        } else {
-            return clazz.list().find {
-                it.importAlias*.toLowerCase()?.contains(importAlias.toLowerCase())
-            }
+        }
+        return clazz.list().find {
+            it.importAlias*.toLowerCase()?.contains(importAlias.toLowerCase())
         }
     }
 
