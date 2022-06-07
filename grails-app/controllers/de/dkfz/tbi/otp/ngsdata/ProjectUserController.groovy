@@ -28,6 +28,7 @@ import grails.validation.Validateable
 import groovy.transform.TupleConstructor
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang.WordUtils
+import org.springframework.security.access.AccessDeniedException
 
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.administration.*
@@ -131,8 +132,8 @@ class ProjectUserController implements CheckAndCall {
                 if (cmd.addViaLdap) {
                     userProjectRoleService.addUserToProjectAndNotifyGroupManagementAuthority(
                             project,
-                            ProjectRole.findAllByNameInList(cmd.projectRoleNameList) as Set<ProjectRole>,
-                            cmd.searchString,
+                            cmd.projectRoles,
+                            cmd.username,
                             [
                                     accessToOtp           : cmd.accessToOtp,
                                     accessToFiles         : cmd.accessToFiles,
@@ -146,11 +147,11 @@ class ProjectUserController implements CheckAndCall {
                             project,
                             cmd.realName,
                             cmd.email,
-                            ProjectRole.findAllByNameInList(cmd.projectRoleNameList) as Set<ProjectRole>,
+                            cmd.projectRoles,
                     )
                 }
                 flash.message = new FlashMessage("Data stored successfully")
-            } catch (LdapUserCreationException | AssertionError e) {
+            } catch (LdapUserCreationException | AssertionError | AccessDeniedException e) {
                 flash.message = new FlashMessage("An error occurred", e.message)
             }
         }
@@ -417,8 +418,8 @@ class DeleteProjectRoleCommand implements Validateable {
 class AddUserToProjectCommand implements Serializable {
     boolean addViaLdap = true
 
-    String searchString
-    List<String> projectRoleNameList
+    String username
+    Set<ProjectRole> projectRoles
     boolean accessToOtp = true
     boolean accessToFiles = false
     boolean manageUsers = false
@@ -428,19 +429,15 @@ class AddUserToProjectCommand implements Serializable {
     String realName
     String email
 
-    void setProjectRoleNames(String value) {
-        this.projectRoleNameList = value.split(',')*.trim()
-    }
-
     static constraints = {
         addViaLdap(blank: false)
-        searchString(nullable: true, validator: { val, obj ->
-            if (obj.addViaLdap && !obj.searchString?.trim()) {
+        username(nullable: true, validator: { val, obj ->
+            if (obj.addViaLdap && !obj.username?.trim()) {
                 return "empty"
             }
         })
-        projectRoleNameList(nullable: true, validator: { val, obj ->
-            if (!obj.projectRoleNameList) {
+        projectRoles(nullable: true, validator: { val, obj ->
+            if (!obj.projectRoles) {
                 return "empty"
             }
         })
@@ -465,8 +462,8 @@ class AddUserToProjectCommand implements Serializable {
         this.addViaLdap = (selectedMethod == 'true')
     }
 
-    void setSearchString(String searchString) {
-        this.searchString = StringUtils.trimAndShortenWhitespace(searchString)
+    void setUsername(String username) {
+        this.username = StringUtils.trimAndShortenWhitespace(username)
     }
 
     void setRealName(String realName) {

@@ -25,9 +25,9 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <title><g:message code="projectUser.title" args="[selectedProject?.name]"/></title>
-    <asset:javascript src="common/UserAutoComplete.js"/>
     <asset:javascript src="pages/projectUser/index/functions.js"/>
     <asset:javascript src="taglib/EditorSwitch.js"/>
+    <asset:stylesheet src="pages/projectUser/index.less"/>
 </head>
 
 <body>
@@ -46,6 +46,7 @@
         <div class="grid-element">
             <g:render template="/templates/bootstrap/projectSelection"/>
         </div>
+
         <div class="grid-element">
             <g:if test="${sharesUnixGroup}">
                 <otp:annotation type="info">
@@ -70,95 +71,74 @@
                     <g:message code="projectUser.addMember.nonLdapUser"/>
                 </label>
             </sec:access>
-            <div class="form internal">
-                <table class="table table-sm table-striped table-hover">
-                    <tr>
-                        <td><g:message code="projectUser.addMember.username"/></td>
-                        <td class="user-auto-complete"><input name="searchString" type="text" class="inputField" autocomplete="off"
-                                                              placeholder="${g.message(code: 'projectUser.addMember.ldapSearchValues')}"></td>
-                    </tr>
-                    <tr>
-                        <td><g:message code="projectUser.addMember.role"/></td>
-                        <td>
-                            <div class="loader"></div>
-                            <div class="loaded-content" style="display: none">
-                                <g:select id="selectorProjectRoleNamesLdap"
-                                          name="projectRoleNames"
-                                          class="inputField ldapUser use-select-2"
-                                          multiple="true"
-                                          value="${selectedProjectRoleNames}"
-                                          from="${availableRoles}"
-                                          optionKey="name"
-                                          optionValue="name"
-                                          data-placeholder="${g.message(code: "projectUser.addMember.roleSelection")}"/>
-                            </div>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td><g:message code="projectUser.addMember.accessToOtp"/></td>
-                        <td><g:checkBox name="accessToOtp" onclick ="disableNotification(this)" class="inputField ldapUser" value="true" checked ="true" /></td>
-                    </tr>
-                    <tr>
-                        <td><g:message code="projectUser.addMember.accessToFiles"/></td>
-                        <td><g:checkBox name="accessToFiles" class="inputField ldapUser" value="true" checked="false"/></td>
-                    </tr>
-                    <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'DELEGATE_USER_MANAGEMENT')">
-                        <tr>
-                            <td><g:message code="projectUser.addMember.manageUsers"/></td>
-                            <td><g:checkBox name="manageUsers" class="inputField ldapUser" value="true" checked="false"/></td>
-                        </tr>
+            <div class="ldap-user">
+                   <sec:access
+                        expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'MANAGE_USERS')">
+                    <g:set var="checkboxes" value="['otpAccess', 'fileAccess', 'receivesNotifications']"/>
+                    <sec:access
+                            expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'DELEGATE_USER_MANAGEMENT')">
+                        <g:set var="checkboxes" value="${checkboxes + 'manageUsers'}"/>
                     </sec:access>
                     <sec:access expression="hasRole('ROLE_OPERATOR')">
-                        <tr>
-                            <td><g:message code="projectUser.addMember.manageUsersAndDelegate"/></td>
-                            <td><g:checkBox name="manageUsersAndDelegate" class="inputField ldapUser" value="true" checked="false"/></td>
-                        </tr>
+                        <g:set var="checkboxes" value="${checkboxes + 'manageUsersAndDelegate'}"/>
                     </sec:access>
-                    <tr>
-                        <td><g:message code="projectUser.addMember.receivesNotification"/></td>
-                        <td><g:checkBox name="receivesNotifications" class="inputField ldapUser" value="true" checked="true"/></td>
-                    </tr>
-                </table>
+                    <g:render template="/templates/userFormItem"
+                              model="[emptyForm: true, availableRoles: availableRoles, checkboxes: checkboxes]"/>
+                </sec:access>
             </div>
             <sec:access expression="hasRole('ROLE_OPERATOR')">
-                <div class="form external">
-                    <table class="table table-sm table-striped table-hover">
-                        <tr>
-                            <td><g:message code="projectUser.addMember.name"/></td>
-                            <td><input name="realName" type="text" class="inputField nonLdapUser" placeholder="${g.message(code: 'projectUser.addMember.realNameDescription')}"></td>
-                        </tr>
-                        <tr>
-                            <td><g:message code="projectUser.addMember.email"/></td>
-                            <td><input name="email" type="text" class="inputField nonLdapUser"></td>
-                        </tr>
-                        <tr>
-                            <td><g:message code="projectUser.addMember.role"/></td>
-                            <td>
-                                <div class="loader"></div>
-                                <div class="loaded-content" style="display: none">
-                                    <g:select id="selectorProjectRoleNamesNonLdap"
-                                              name="projectRoleNames"
-                                              class="inputField nonLdapUser use-select-2"
-                                              multiple="true"
-                                              value="${selectedProjectRoleNames}"
-                                              from="${availableRoles}"
-                                              optionKey="name"
-                                              optionValue="name"
-                                              data-placeholder="${g.message(code: "projectUser.addMember.roleSelection")}"/>
+                <div class="form external non-ldap-user">
+                    <div class="card">
+                        <div class="card-body pb-1">
+                            <div class="form-group row">
+                                <label class="col-sm-2 col-form-label" for="realName">${g.message(code: "projectUser.addMember.name")}</label>
+
+                                <div class="col-sm-10">
+                                    <input name="realName" type="text" class="input-field form-control" id="realName"
+                                           placeholder="${g.message(code: 'projectUser.addMember.realNameDescription')}">
                                 </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td colspan="2"><otp:annotation type="info" variant="inline"><g:message code="projectUser.addMember.externalUserRestrictions"/></otp:annotation></td>
-                        </tr>
-                    </table>
+                            </div>
+
+                            <div class="form-group row">
+                                <label class="col-sm-2 col-form-label" for="email">${g.message(code: "projectUser.addMember.email")}</label>
+
+                                <div class="col-sm-10">
+                                    <input name="email" type="text" id="email" class="input-field form-control">
+                                </div>
+                            </div>
+
+                            <div class="form-group row">
+                                <label class="col-sm-2 col-form-label" for="projectRolesRealName">${g.message(code: "projectUser.addMember.role")}</label>
+
+                                <div class="col-sm-10">
+                                    <select class="form-control input-field use-select-2" name="projectRoles"
+                                            id="projectRolesRealName"
+                                            multiple="multiple">
+                                        <g:each in="${availableRoles}" var="role">
+                                            <option value="${role.id}">${role.name}</option>
+                                        </g:each>
+                                    </select>
+                                </div>
+
+                            </div>
+
+                            <div class="form-group row">
+                                <div class="col-sm-2"></div>
+
+                                <div class="col-sm-10">
+                                    <otp:annotation type="info" variant="inline"><g:message
+                                            code="projectUser.addMember.externalUserRestrictions"/></otp:annotation>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </sec:access>
             <div class="submit-container">
                 <div style="padding-right: 10px;">
                     <input type="submit" class="btn btn-primary" value="${g.message(code: 'projectUser.addMember.action', args: [selectedProject?.name])}"/>
                 </div>
+
                 <div>
                     <otp:annotation type="info" variant="inline"><g:message code="projectUser.annotation.legalNotice"/></otp:annotation>
                 </div>
@@ -208,6 +188,7 @@
                     </td>
                     <td>
                         <div class="loader"></div>
+
                         <div class="loaded-content bootstrapped" style="display: none">
                             <sec:access
                                     expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'MANAGE_USERS')">
@@ -226,8 +207,7 @@
                                               multiple="true"
                                               from="${userEntry.availableRoles}"
                                               style="width: 200px"
-                                              data-placeholder="${g.message(code: "projectUser.addMember.roleSelection")}"
-                                    />
+                                              data-placeholder="${g.message(code: "projectUser.addMember.roleSelection")}"/>
                                     <input type="hidden" name="targetAddRole"
                                            value="${g.createLink(controller: "projectUser", action: "addRoleToUserProjectRole", params: ['userProjectRole.id': userEntry.userProjectRole.id, 'currentRole': null])}"/>
                                     <button class="btn btn-primary addRole js-add" data-confirmation="${confirmationText}"><g:message
@@ -244,14 +224,16 @@
                     </td>
                     <td>
                         <g:if test="${userEntry.inLdap}">
-                            <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'MANAGE_USERS')">
-                            <otp:editorSwitch
-                                    template="toggle"
-                                    link="${g.createLink(controller: "projectUser", action: "setAccessToOtp", params: ['userProjectRole.id': userEntry.userProjectRole.id])}"
-                                    value="${userEntry.otpAccess.toBoolean()}"
-                                    confirmation="${confirmationText}"/>
+                            <sec:access
+                                    expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'MANAGE_USERS')">
+                                <otp:editorSwitch
+                                        template="toggle"
+                                        link="${g.createLink(controller: "projectUser", action: "setAccessToOtp", params: ['userProjectRole.id': userEntry.userProjectRole.id])}"
+                                        value="${userEntry.otpAccess.toBoolean()}"
+                                        confirmation="${confirmationText}"/>
                             </sec:access>
-                            <sec:noAccess expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'MANAGE_USERS')">
+                            <sec:noAccess
+                                    expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'MANAGE_USERS')">
                                 <span class="icon-${userEntry.otpAccess}"></span>
                             </sec:noAccess>
                         </g:if>
@@ -271,8 +253,10 @@
                                             <input type="hidden" name="hasFileAccess" value="${userEntry.fileAccess.toBoolean()}">
                                             <input type="hidden" name="permissionState" value="${userEntry.fileAccess}">
                                             <span class="icon-${userEntry.fileAccess}"></span><br>
-                                            <button class="btn btn-primary" onclick="onToggleAccessToFiles(this)"><g:message code="default.button.toggle.label"/></button><br>
-                                            <button class="btn btn-primary" onclick="hideEditorAndShowLabel(this)"><g:message code="default.button.cancel.label"/></button>
+                                            <button class="btn btn-primary" onclick="onToggleAccessToFiles(this)"><g:message
+                                                    code="default.button.toggle.label"/></button><br>
+                                            <button class="btn btn-primary" onclick="hideEditorAndShowLabel(this)"><g:message
+                                                    code="default.button.cancel.label"/></button>
                                         </div>
 
                                         <p class="modal-editor-switch-label" data-toggle="tooltip" data-placement="top"
@@ -282,7 +266,8 @@
                                         </p>
                                     </div>
                                 </sec:access>
-                                <sec:noAccess expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'MANAGE_USERS')">
+                                <sec:noAccess
+                                        expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'MANAGE_USERS')">
                                     <span></span>
                                 </sec:noAccess>
                             </div>
@@ -347,6 +332,7 @@
                 </tr>
             </g:each>
         </table>
+
         <p><span class="icon-asterisk"></span>${g.message(code: 'projectUser.table.fileAccess.legend')}</p>
     </div>
     <sec:access expression="hasRole('ROLE_OPERATOR')">

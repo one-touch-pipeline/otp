@@ -27,7 +27,6 @@
 <html>
 <head>
     <title>${g.message(code: "projectRequest.title")}</title>
-    <asset:javascript src="common/UserAutoComplete.js"/>
     <asset:javascript src="pages/projectRequest/index.js"/>
     <asset:javascript src="pages/projectRequest/userFormAdd.js"/>
     <asset:javascript src="common/CloneField.js"/>
@@ -291,12 +290,12 @@
                 <g:if test="${cmd?.users}">
                     <g:each in="${cmd?.users}" var="user" status="i">
                         <g:if test="${user}">
-                            <g:render template="templates/userFormItem" model="[i: i, user: user, availableRoles: availableRoles]"/>
+                            <g:render template="templates/userFormAccordion" model="[i: i, user: user, availableRoles: availableRoles]"/>
                         </g:if>
                     </g:each>
                 </g:if>
                 <g:else>
-                    <g:render template="templates/userFormItem" model="[i: 1, emptyForm: true, availableRoles: availableRoles]"/>
+                    <g:render template="templates/userFormAccordion" model="[i: 1, emptyForm: true, availableRoles: availableRoles]"/>
                 </g:else>
             </div>
         </div>
@@ -307,7 +306,7 @@
     </g:form>
 
     <div class="clone-template hidden">
-        <g:render template="templates/userFormItem" model="[i: 'template-index', availableRoles: availableRoles]"/>
+        <g:render template="templates/userFormAccordion" model="[i: 'template-index', availableRoles: availableRoles]"/>
     </div>
 </div>
 

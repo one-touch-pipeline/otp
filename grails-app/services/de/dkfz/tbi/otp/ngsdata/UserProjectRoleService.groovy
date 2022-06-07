@@ -54,8 +54,9 @@ class UserProjectRoleService {
     ProcessingOptionService processingOptionService
     UserService userService
     ConfigService configService
+    UserProjectRoleService userProjectRoleService
 
-    UserProjectRole createUserProjectRole(User user, Project project, Set<ProjectRole> projectRoles, Map flags = [:]) {
+    UserProjectRole createUserProjectRole(User user, Project project, Set<ProjectRole> projectRoles, Map<String, Boolean> flags = [:]) {
         assert user: "the user must not be null"
         assert project: "the project must not be null"
         assert !UserProjectRole.findAllByUserAndProject(user, project): "User '${user.username ?: user.realName}' is already part of project '${project.name}'"
@@ -64,14 +65,23 @@ class UserProjectRoleService {
                 springSecurityService.principal.username : springSecurityService?.principal
 
         UserProjectRole userProjectRole = new UserProjectRole([
-                user                     : user,
-                project                  : project,
-                fileAccessChangeRequested: flags.accessToFiles ?: false,
-        ] + flags)
+                user   : user,
+                project: project,
+        ])
+
         projectRoles.each {
             userProjectRole.addToProjectRoles(it)
         }
+
         userProjectRole.save(flush: true)
+
+        flags.accessToOtp ? userProjectRoleService.setAccessToOtp(userProjectRole, flags.accessToOtp) : null
+        flags.accessToFiles ? userProjectRoleService.setAccessToFiles(userProjectRole, flags.accessToFiles) : null
+        flags.manageUsers ? userProjectRoleService.setManageUsers(userProjectRole, flags.manageUsers) : null
+        flags.manageUsersAndDelegate ? userProjectRoleService.setManageUsersAndDelegate(userProjectRole, flags.manageUsersAndDelegate) : null
+        (flags.receivesNotifications || flags.receivesNotifications == null) ? null :
+                userProjectRoleService.setReceivesNotifications(userProjectRole, flags.receivesNotifications)
+
         auditLogService.logAction(
                 AuditLog.Action.PROJECT_USER_CREATED_PROJECT_USER,
                 "Created Project User: ${userProjectRole.toStringWithAllProperties()}"
@@ -116,7 +126,7 @@ class UserProjectRoleService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'MANAGE_USERS')")
-    void addUserToProjectAndNotifyGroupManagementAuthority(Project project, Set<ProjectRole> projectRolesSet, String username, Map flags = [:])
+    void addUserToProjectAndNotifyGroupManagementAuthority(Project project, Set<ProjectRole> projectRolesSet, String username, Map<String, Boolean> flags = [:])
             throws AssertionError {
         assert project: "project must not be null"
         User user = createUserWithLdapData(username)
@@ -127,7 +137,7 @@ class UserProjectRoleService {
 
         UserProjectRole userProjectRole = CollectionUtils.exactlyOneElement(UserProjectRole.findAllByProjectAndUser(project, user))
         if (userProjectRole.accessToFiles) {
-            sendFileAccessNotifications(userProjectRole)
+            notifyUsersAboutFileAccessChange(userProjectRole)
         }
 
         notifyProjectAuthoritiesAndUser(userProjectRole)
@@ -164,11 +174,6 @@ class UserProjectRoleService {
         UserProjectRole userProjectRole = CollectionUtils.exactlyOneElement(UserProjectRole.findAllByProjectAndUser(project, user))
 
         notifyProjectAuthoritiesAndUser(userProjectRole)
-    }
-
-    private void sendFileAccessNotifications(UserProjectRole userProjectRole) {
-        notifyUsersAboutFileAccessChange(userProjectRole)
-        notifyAdministration(userProjectRole, OperatorAction.ADD)
     }
 
     private void notifyUsersAboutFileAccessChange(UserProjectRole userProjectRole) {

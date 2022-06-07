@@ -152,10 +152,13 @@ function hideEditorAndShowLabel(context) {
 $(() => {
   'use strict';
 
+  // Enable selected input and disable not selected input for adding users
   $('input[type=radio][name=addViaLdap]').on('change', function () {
     const ldapUserChecked = (this.value === 'true');
-    $('.inputField.ldapUser').prop('disabled', !ldapUserChecked);
-    $('.inputField.nonLdapUser').prop('disabled', ldapUserChecked);
+    $('.ldap-user .input-field').prop('disabled', !ldapUserChecked);
+    $('.non-ldap-user .input-field').prop('disabled', ldapUserChecked);
+    // Trigger change Event for the projectRoles to set disabled and enabled checkboxes
+    $('.ldap-user .project-role-select').trigger('change');
   }).filter(':checked').trigger('change');
 
   $('#listEmails').on('click', function () {

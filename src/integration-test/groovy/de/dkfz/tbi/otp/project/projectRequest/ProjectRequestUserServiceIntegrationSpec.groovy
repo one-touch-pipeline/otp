@@ -160,7 +160,8 @@ class ProjectRequestUserServiceIntegrationSpec extends Specification implements 
                 },
                 ldapService: Mock(LdapService) {
                     isUserInLdapAndActivated(_) >> true
-                }
+                },
+                userProjectRoleService: projectRequestUserService.userProjectRoleService
         )
 
         Project project = createProject()

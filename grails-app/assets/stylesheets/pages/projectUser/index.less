@@ -1,0 +1,74 @@
+/*
+ * Copyright 2011-2022 The OTP authors
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+.add-user-grid-wrapper {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto auto auto;
+  grid-template-areas:
+            "select-int select-ext"
+            "form-int form-ext"
+            "submit submit";
+  grid-gap: 8px;
+
+  max-width: 100%;
+  padding-top: 10px;
+
+  .select {
+    &.internal {
+      grid-area: select-int;
+    }
+    &.external {
+      grid-area: select-ext;
+    }
+  }
+  .form {
+    input[type=text], select {
+      width: 90%;
+    }
+    td:first-child {
+      width: 1%;
+      white-space: nowrap;
+    }
+    &.internal {
+      grid-area: form-int;
+    }
+    &.external {
+      grid-area: form-ext;
+    }
+  }
+  .submit-container {
+    grid-area: submit;
+
+    display: grid;
+    grid-template-columns: min-content 1fr;
+
+    div {
+      grid-row: 1;
+    }
+  }
+  #add-button {
+    width: auto;
+    height: 100%;
+    margin-right: 10px;
+  }
+}

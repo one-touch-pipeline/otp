@@ -175,15 +175,4 @@ $(() => {
       }
     });
   }).trigger('change');
-
-  // If username is changed in userForm also change the headers title
-  $('.username-input').on('change', (e) => {
-    const userNameInput = $(e.target);
-    const usernameInputId = userNameInput.attr('id').replace('].username', '').replace('users[', '');
-    const usernameInputValue = userNameInput.val();
-    const userFormTitle = $('.user-form').find(`#user-form-title-${usernameInputId}`);
-    if (usernameInputValue) {
-      userFormTitle.html(usernameInputValue);
-    }
-  }).trigger('change');
 });

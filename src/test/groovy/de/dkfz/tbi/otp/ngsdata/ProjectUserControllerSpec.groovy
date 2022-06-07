@@ -33,6 +33,7 @@ import de.dkfz.tbi.otp.administration.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+import de.dkfz.tbi.otp.domainFactory.UserDomainFactory
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
@@ -40,7 +41,7 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 import static javax.servlet.http.HttpServletResponse.SC_MOVED_TEMPORARILY
 import static javax.servlet.http.HttpServletResponse.SC_OK
 
-class ProjectUserControllerSpec extends Specification implements ControllerUnitTest<ProjectUserController>, DataTest, UserAndRoles, DomainFactoryCore {
+class ProjectUserControllerSpec extends Specification implements ControllerUnitTest<ProjectUserController>, DataTest, UserAndRoles, DomainFactoryCore, UserDomainFactory {
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -124,12 +125,13 @@ class ProjectUserControllerSpec extends Specification implements ControllerUnitT
         controller.projectSelectionService = Mock(ProjectSelectionService) {
             getRequestedProject() >> DomainFactory.createProject()
         }
+        Set<ProjectRole> projectRoles = [createProjectRole(), createProjectRole()]
 
         when:
         controller.request.method = 'POST'
         controller.params.addViaLdap = addViaLdap
-        controller.params.searchString = "searchString"
-        controller.params.projectRoleNames = ["projectRole"]
+        controller.params.username = "username"
+        controller.params.projectRoles = projectRoles
         controller.params.realName = "realName"
         controller.params.email = "email@dummy.de"
         controller.params.accessToFiles = true
@@ -161,12 +163,13 @@ class ProjectUserControllerSpec extends Specification implements ControllerUnitT
         controller.projectSelectionService = Mock(ProjectSelectionService) {
             getRequestedProject() >> DomainFactory.createProject()
         }
+        Set<ProjectRole> projectRoles = [createProjectRole(), createProjectRole()]
 
         when:
         controller.request.method = 'POST'
         controller.params.addViaLdap = addViaLdap
-        controller.params.searchString = "searchString"
-        controller.params.projectRoleNames = ["projectRole"]
+        controller.params.username = "username"
+        controller.params.projectRoles = projectRoles
         controller.params.realName = "realName"
         controller.params.email = "email@dummy.de"
         controller.params.accessToFiles = true

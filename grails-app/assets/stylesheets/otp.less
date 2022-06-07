@@ -52,6 +52,9 @@
     background-image: url(../images/document-edit.png);
     width: 16px;
 }
+.pointer {
+    cursor: pointer;
+}
 .rounded-page-header-box {
     padding: 4px;
 
@@ -882,58 +885,6 @@ td div {
     }
 }
 
-.add-user-grid-wrapper {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: auto auto auto;
-    grid-template-areas:
-            "select-int select-ext"
-            "form-int form-ext"
-            "submit submit";
-    grid-gap: 8px;
-
-    max-width: 1300px;
-    padding-top: 10px;
-
-    .select {
-        &.internal {
-            grid-area: select-int;
-        }
-        &.external {
-            grid-area: select-ext;
-        }
-    }
-    .form {
-        input[type=text], select {
-            width: 90%;
-        }
-        td:first-child {
-            width: 1%;
-            white-space: nowrap;
-        }
-        &.internal {
-            grid-area: form-int;
-        }
-        &.external {
-            grid-area: form-ext;
-        }
-    }
-    .submit-container {
-        grid-area: submit;
-
-        display: grid;
-        grid-template-columns: min-content 1fr;
-
-        div {
-            grid-row: 1;
-        }
-    }
-    #add-button {
-        width: auto;
-        height: 100%;
-        margin-right: 10px;
-    }
-}
 .project-user-header-grid-wrapper {
     display: grid;
     grid-template-columns: min-content 1fr;

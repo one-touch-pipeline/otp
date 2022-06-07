@@ -103,6 +103,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         userProjectRoleService.processingOptionService = new ProcessingOptionService()
         userProjectRoleService.configService = configService
         userProjectRoleService.userService = new UserService()
+        userProjectRoleService.userProjectRoleService = userProjectRoleService
 
         userProjectRoleService.mailHelperService = Mock(MailHelperService) {
             getTicketSystemEmailAddress() >> EMAIL_TICKET_SYSTEM
@@ -481,6 +482,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
     void "addUserToProjectAndNotifyGroupManagementAuthority, send mail only for users with access to files (accessToFiles=#accessToFiles)"() {
         given:
         setupData()
+        createUser(username: SYSTEM_USER)
 
         User user = createUser()
         LdapUserDetails ldapUserDetails = new LdapUserDetails(
@@ -506,7 +508,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
             userProjectRoleService.addUserToProjectAndNotifyGroupManagementAuthority(
                     project,
                     createProjectRole() as Set<ProjectRole>,
-                    SEARCH,
+                    user.username,
                     [accessToFiles: accessToFiles]
             )
         }
