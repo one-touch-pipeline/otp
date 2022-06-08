@@ -164,7 +164,7 @@
                     <td>
                         ${fieldDefinition.cardinalityType}
                     </td>
-                    <td>
+                    <td class="descriptionConfig">
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
                                 template="textArea"
@@ -174,7 +174,7 @@
                                 ])}"
                                 value="${fieldDefinition.descriptionConfig}"/>
                     </td>
-                    <td>
+                    <td class="descriptionRequest">
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
                                 template="textArea"
@@ -184,7 +184,7 @@
                                 ])}"
                                 value="${fieldDefinition.descriptionRequest}"/>
                     </td>
-                    <td class="fieldExistenceType">
+                    <td class="fieldExistenceType seqProject">
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
                                 template="dropDown"
@@ -195,7 +195,7 @@
                                 ])}"
                                 value="${fieldDefinition.fieldUseForSequencingProjects}"/>
                     </td>
-                    <td class="fieldExistenceType">
+                    <td class="fieldExistenceType usrManagementProject">
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
                                 template="dropDown"
@@ -228,7 +228,7 @@
                                 ])}"
                                 value="${fieldDefinition.projectDisplayOnConfigPage}"/>
                     </td>
-                    <td>
+                    <td class="sortingNumber">
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
                                 template="integer"
@@ -238,7 +238,7 @@
                                 ])}"
                                 value="${fieldDefinition.sortNumber}"/>
                     </td>
-                    <td>
+                    <td class="changeableByOperator">
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
                                 template="toggle"
@@ -248,7 +248,7 @@
                                 ])}"
                                 value="${fieldDefinition.changeOnlyByOperator}"/>
                     </td>
-                    <td>
+                    <td class="usedExternally">
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
                                 template="toggle"
@@ -289,7 +289,7 @@
                             NA
                         </g:else>
                     </td>
-                    <td>
+                    <td class="allowedValues">
                         <g:if test="${fieldDefinition.projectFieldType.templateAllowedValue}">
                             <otp:editorSwitch
                                     roles="ROLE_OPERATOR"
@@ -304,7 +304,7 @@
                             NA
                         </g:else>
                     </td>
-                    <td>
+                    <td class="predefinedVerifier">
                         <g:if test="${fieldDefinition.projectFieldType == ProjectFieldType.TEXT}">
                             <div class="typeValidator">
                                 <otp:editorSwitch
@@ -320,7 +320,7 @@
                             </div>
                         </g:if>
                     </td>
-                    <td>
+                    <td class="regularExpression">
                         <g:if test="${fieldDefinition.projectFieldType == ProjectFieldType.TEXT}">
                             <otp:editorSwitch
                                     roles="ROLE_OPERATOR"
@@ -331,7 +331,7 @@
                                     value="${((TextFieldDefinition) fieldDefinition).regularExpression}"/>
                         </g:if>
                     </td>
-                    <td>
+                    <td class="regularExpressionErrorMsg">
                         <g:if test="${fieldDefinition.projectFieldType == ProjectFieldType.TEXT}">
                             <otp:editorSwitch
                                     roles="ROLE_OPERATOR"
@@ -361,7 +361,7 @@
                                     value="${((DomainReferenceFieldDefinition) fieldDefinition).allowCustomValue}"/>
                         </g:if>
                     </td>
-                    <td>
+                    <td class="legacy">
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
                                 template="toggle"

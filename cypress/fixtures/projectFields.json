@@ -1,0 +1,17 @@
+[
+  {
+    "name": "my-new-demo-project-field",
+    "descriptionConfig": "my-config-description: hello world",
+    "descriptionRequest": "my-request-description: hello world"
+  },
+  {
+    "name": "modified-demo-project-field",
+    "descriptionConfig": "modified-config-description: hello world",
+    "descriptionRequest": "modified-request-description: hello world",
+    "defaultValue": "modified default value",
+    "sortingNumber": "10",
+    "allowedValues": "allowed-abc",
+    "regularExpression": "[a-c]",
+    "regularExpressionErrorMsg": "does not match the regular expression"
+  }
+]
