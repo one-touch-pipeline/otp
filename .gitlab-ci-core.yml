@@ -151,9 +151,7 @@ create war:
   extends: .abstract_base_template
   stage: war
   script:
-    - set -e
-    - ./gradlew war
-
+    - devScripts/gitlab-ci/createWar.sh
 
 create doc:
   extends: .abstract_base_template
