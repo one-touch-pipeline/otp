@@ -77,7 +77,7 @@
                     <g:form action="deleteProjectInfo" useToken="true" style="display: inline"
                             onSubmit="\$.otp.projectInfo.confirmProjectInfoDelete(event);">
                         <input type="hidden" name="projectInfo.id" value="${doc.id}"/>
-                        <g:submitButton name="${g.message(code: "projectInfo.document.delete")}"/>
+                        <g:submitButton name="permanentlyDelete" value="${g.message(code: "projectInfo.document.delete")}"/>
                     </g:form>
                     <br>
                     <g:message code="projectInfo.upload.comment"/>:
