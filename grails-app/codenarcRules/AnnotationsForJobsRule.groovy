@@ -50,6 +50,7 @@ class AnnotationsForJobsVisitor extends AbstractAstVisitor implements IsAnnotati
         boolean hasComponent = false
         boolean hasScope = false
         boolean hasLog = false
+        boolean hasCompileStatic = false
 
         node.annotations.each { AnnotationNode annotationNode ->
             switch (annotationNode.classNode.text) {
@@ -69,6 +70,9 @@ class AnnotationsForJobsVisitor extends AbstractAstVisitor implements IsAnnotati
                 case 'Slf4j':
                     hasLog = true
                     break
+                case 'CompileStatic':
+                    hasCompileStatic = true
+                    break
                 default:
                     return
             }
@@ -82,6 +86,9 @@ class AnnotationsForJobsVisitor extends AbstractAstVisitor implements IsAnnotati
         }
         if (!hasLog) {
             addViolation(node, buildErrorString("@Slf4j"))
+        }
+        if (!hasCompileStatic && isNewWorkflowSystem) {
+            addViolation(node, buildErrorString("@CompileStatic"))
         }
     }
 }

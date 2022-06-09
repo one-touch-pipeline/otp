@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.workflow.datainstallation
 
+import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
@@ -31,8 +32,9 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 import java.nio.file.*
 
-@Slf4j
 @Component
+@Slf4j
+@CompileStatic
 class DataInstallationValidationJob extends AbstractOtpClusterValidationJob implements DataInstallationShared {
 
     @Autowired
@@ -59,7 +61,7 @@ class DataInstallationValidationJob extends AbstractOtpClusterValidationJob impl
         SeqTrack seqTrack = getSeqTrack(workflowStep)
         seqTrack.dataFiles.each { DataFile dataFile ->
             if (!seqTrack.linkedExternally && !checksumFileService.compareMd5(dataFile)) {
-                problems.add("The md5sum of file ${dataFile.fileName} is not the expected ${dataFile.md5sum}")
+                problems.add("The md5sum of file ${dataFile.fileName} is not the expected ${dataFile.md5sum}" as String)
             }
         }
         return problems

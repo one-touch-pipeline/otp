@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2022 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,19 +19,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflowExecution
+package de.dkfz.tbi.otp.workflow.jobs
 
+import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.workflow.jobs.Job
-import de.dkfz.tbi.otp.workflow.jobs.JobStage
+import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 /**
  * Checks the QC, if available for the workflow and seq type, and enabled for the project
  */
 @Component
 @Slf4j
+@CompileStatic
 class CheckQcJob implements Job {
     @Override
     void execute(WorkflowStep workflowStep) {

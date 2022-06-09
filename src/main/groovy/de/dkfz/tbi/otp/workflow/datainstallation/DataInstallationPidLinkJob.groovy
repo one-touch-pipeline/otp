@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.workflow.datainstallation
 
+import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.stereotype.Component
 
@@ -34,6 +35,7 @@ import java.nio.file.Path
 
 @Component
 @Slf4j
+@CompileStatic
 class DataInstallationPidLinkJob extends AbstractLinkJob implements DataInstallationShared {
 
     @Override

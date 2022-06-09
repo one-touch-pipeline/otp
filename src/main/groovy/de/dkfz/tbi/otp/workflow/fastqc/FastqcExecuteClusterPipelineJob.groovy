@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.workflow.fastqc
 
+import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
@@ -36,6 +37,7 @@ import java.nio.file.*
 
 @Component
 @Slf4j
+@CompileStatic
 class FastqcExecuteClusterPipelineJob extends AbstractExecuteClusterPipelineJob implements FastqcShared {
 
     @Autowired
