@@ -37,5 +37,6 @@
         </g:each>
     </div>
 </div>
+
 <otp:otpModal modalId="confirmationModal" title="Delete Project Request" type="dialog" closeText="Cancel" confirmText="Delete" closable="false">
 </otp:otpModal>

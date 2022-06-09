@@ -22,11 +22,8 @@
 
 const path = require('path');
 
-Cypress.Commands.add('loginAsOperator', () => {
+const login = (username, password) => {
   'use strict';
-
-  const username = Cypress.env('operator_username');
-  const password = Cypress.env('operator_password');
 
   cy.session(username, () => {
     cy.visit('/login/auth');
@@ -54,6 +51,24 @@ Cypress.Commands.add('loginAsOperator', () => {
         }
       });
   });
+};
+
+Cypress.Commands.add('loginAsUser', () => {
+  'use strict';
+
+  const username = Cypress.env('user_username');
+  const password = Cypress.env('user_password');
+
+  login(username, password);
+});
+
+Cypress.Commands.add('loginAsOperator', () => {
+  'use strict';
+
+  const username = Cypress.env('operator_username');
+  const password = Cypress.env('operator_password');
+
+  login(username, password);
 });
 
 Cypress.Commands.add('logout', () => {

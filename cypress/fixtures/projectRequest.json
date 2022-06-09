@@ -1,0 +1,8 @@
+{
+  "projectName": "my-demo-project",
+  "description": "my-description: hello world, this ist description is longer than 50 chars.",
+  "approximateNumberOfSamples": "100",
+  "projectType": "SEQUENCING",
+  "storagePeriod": "Store data for ten years",
+  "speciesWithStrainList": "Mouse (Mus caroli) [Unknown]"
+}
