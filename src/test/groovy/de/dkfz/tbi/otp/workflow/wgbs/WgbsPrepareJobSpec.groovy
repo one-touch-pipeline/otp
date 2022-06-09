@@ -19,29 +19,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflow.panCancer
+package de.dkfz.tbi.otp.workflow.wgbs
 
 import grails.testing.gorm.DataTest
+import org.junit.Rule
+import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
+import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
-import de.dkfz.tbi.otp.ngsdata.FastqImportInstance
-import de.dkfz.tbi.otp.ngsdata.FileType
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeProjectSeqType
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.job.processing.RoddyConfigValueService
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.NotificationCreator
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.utils.LinkEntry
+import de.dkfz.tbi.otp.workflow.panCancer.PanCancerPreparationService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
-import java.nio.file.FileSystems
+import java.nio.file.*
 
-class PanCancerPrepareJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory, IsRoddy {
+class WgbsPrepareJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory, IsRoddy {
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -56,10 +59,13 @@ class PanCancerPrepareJobSpec extends Specification implements DataTest, Workflo
         ]
     }
 
+    @Rule
+    TemporaryFolder temporaryFolder
+
     void "test buildWorkDirectoryPath should return workflowRun workDirectory"() {
         given:
         WorkflowStep workflowStep = createWorkflowStep()
-        PanCancerPrepareJob job = new PanCancerPrepareJob()
+        WgbsPrepareJob job = new WgbsPrepareJob()
 
         job.fileSystemService = Mock(FileSystemService) {
             1 * getRemoteFileSystem(_) >> FileSystems.default
@@ -72,7 +78,7 @@ class PanCancerPrepareJobSpec extends Specification implements DataTest, Workflo
     void "test generateMapForLinking should return empty list"() {
         given:
         WorkflowStep workflowStep = createWorkflowStep()
-        PanCancerPrepareJob job = new PanCancerPrepareJob()
+        WgbsPrepareJob job = new WgbsPrepareJob()
 
         when:
         Collection<LinkEntry> result = job.generateMapForLinking(workflowStep)
@@ -87,13 +93,18 @@ class PanCancerPrepareJobSpec extends Specification implements DataTest, Workflo
         List<SeqTrack> seqTracks = [createSeqTrack(), createSeqTrack()]
         RoddyBamFile roddyBamFile = createBamFile()
 
-        PanCancerPrepareJob job = Spy(PanCancerPrepareJob) {
+        WgbsPrepareJob job = Spy(WgbsPrepareJob) {
             1 * getSeqTracks(workflowStep) >> seqTracks
             1 * getRoddyBamFile(workflowStep) >> roddyBamFile
         }
 
         job.panCancerPreparationService = new PanCancerPreparationService()
         job.panCancerPreparationService.notificationCreator = Mock(NotificationCreator)
+        job.roddyConfigValueService = Mock(RoddyConfigValueService)
+        job.fileService = Mock(FileService)
+        job.roddyBamFileService = Mock(RoddyBamFileService) {
+            getWorkMetadataTableFile(_) >> Paths.get("/tmp/non-existent-dir")
+        }
 
         when:
         job.doFurtherPreparation(workflowStep)
@@ -109,18 +120,53 @@ class PanCancerPrepareJobSpec extends Specification implements DataTest, Workflo
         MergingWorkPackage mergingWorkPackage = createMergingWorkPackage([seqTracks: seqTracks, needsProcessing: true])
         RoddyBamFile roddyBamFile = createBamFile(workPackage: mergingWorkPackage)
 
-        PanCancerPrepareJob job = Spy(PanCancerPrepareJob) {
+        WgbsPrepareJob job = Spy(WgbsPrepareJob) {
             1 * getSeqTracks(workflowStep) >> seqTracks
             1 * getRoddyBamFile(workflowStep) >> roddyBamFile
         }
 
         job.panCancerPreparationService = new PanCancerPreparationService()
         job.panCancerPreparationService.notificationCreator = Mock(NotificationCreator)
+        job.roddyConfigValueService = Mock(RoddyConfigValueService)
+        job.fileService = Mock(FileService)
+        job.roddyBamFileService = Mock(RoddyBamFileService) {
+            getWorkMetadataTableFile(_) >> Paths.get("/tmp/non-existent-dir")
+        }
 
         when:
         job.doFurtherPreparation(workflowStep)
 
         then:
         !MergingWorkPackage.findAll(seqTracks: seqTracks).first().needsProcessing
+    }
+
+    void "test doFurtherPreparation should create metadata table file"() {
+        given:
+        Path metadataFile = temporaryFolder.newFolder().toPath().resolve("file.tsv")
+
+        WorkflowStep workflowStep = createWorkflowStep()
+        List<SeqTrack> seqTracks = [createSeqTrackWithTwoDataFile(), createSeqTrackWithTwoDataFile()]
+        MergingWorkPackage mergingWorkPackage = createMergingWorkPackage([seqTracks: seqTracks, needsProcessing: true])
+        RoddyBamFile roddyBamFile = createBamFile(workPackage: mergingWorkPackage)
+
+        WgbsPrepareJob job = Spy(WgbsPrepareJob) {
+            1 * getSeqTracks(workflowStep) >> seqTracks
+            1 * getRoddyBamFile(workflowStep) >> roddyBamFile
+        }
+
+        job.panCancerPreparationService = Mock(PanCancerPreparationService)
+        job.roddyConfigValueService = new RoddyConfigValueService()
+        job.roddyConfigValueService.lsdfFilesService = Mock(LsdfFilesService)
+        job.fileService = new FileService()
+        job.roddyBamFileService = Mock(RoddyBamFileService) {
+            getWorkMetadataTableFile(_) >> metadataFile
+        }
+
+        when:
+        job.doFurtherPreparation(workflowStep)
+
+        then:
+        Files.exists(metadataFile)
+        metadataFile.readLines().size() == 5
     }
 }

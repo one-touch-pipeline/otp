@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 The OTP authors
+ * Copyright 2011-2022 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,32 +19,43 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflow.panCancer
+package de.dkfz.tbi.otp.workflow.wgbs
 
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
+import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
+import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
+import de.dkfz.tbi.otp.job.processing.RoddyConfigValueService
+import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.utils.LinkEntry
 import de.dkfz.tbi.otp.workflow.jobs.AbstractPrepareJob
+import de.dkfz.tbi.otp.workflow.panCancer.PanCancerPreparationService
+import de.dkfz.tbi.otp.workflow.panCancer.PanCancerShared
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
-import java.nio.file.FileSystem
+import java.nio.file.Files
 import java.nio.file.Path
 
 @Component
 @Slf4j
 @CompileStatic
-class PanCancerPrepareJob extends AbstractPrepareJob implements PanCancerShared {
+class WgbsPrepareJob extends AbstractPrepareJob implements PanCancerShared {
+
+    @Autowired
+    RoddyBamFileService roddyBamFileService
+
+    @Autowired
+    RoddyConfigValueService roddyConfigValueService
 
     @Autowired
     PanCancerPreparationService panCancerPreparationService
 
     @Override
     protected Path buildWorkDirectoryPath(WorkflowStep workflowStep) {
-        FileSystem fileSystem = getFileSystem(workflowStep)
-        return fileSystem.getPath(workflowStep.workflowRun.workDirectory)
+        return getFileSystem(workflowStep).getPath(workflowStep.workflowRun.workDirectory)
     }
 
     @Override
@@ -54,6 +65,14 @@ class PanCancerPrepareJob extends AbstractPrepareJob implements PanCancerShared 
 
     @Override
     protected void doFurtherPreparation(WorkflowStep workflowStep) {
-        panCancerPreparationService.prepare(getRoddyBamFile(workflowStep), getSeqTracks(workflowStep))
+        RoddyBamFile roddyBamFile = getRoddyBamFile(workflowStep)
+        List<SeqTrack> seqTracks = getSeqTracks(workflowStep)
+
+        panCancerPreparationService.prepare(roddyBamFile, seqTracks)
+
+        Path metadataFile = roddyBamFileService.getWorkMetadataTableFile(roddyBamFile)
+        String content = roddyConfigValueService.createMetadataTable(seqTracks)
+        Files.deleteIfExists(metadataFile)
+        fileService.createFileWithContent(metadataFile, content, roddyBamFile.realm, fileService.DEFAULT_BAM_FILE_PERMISSION)
     }
 }

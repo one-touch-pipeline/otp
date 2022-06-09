@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 The OTP authors
+ * Copyright 2011-2022 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,39 +21,25 @@
  */
 package de.dkfz.tbi.otp.workflow.panCancer
 
-import groovy.transform.CompileStatic
-import groovy.util.logging.Slf4j
+import grails.gorm.transactions.Transactional
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.utils.LinkEntry
-import de.dkfz.tbi.otp.workflow.jobs.AbstractPrepareJob
-import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
+import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
+import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
+import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.tracking.NotificationCreator
+import de.dkfz.tbi.otp.tracking.OtrsTicket
 
-import java.nio.file.FileSystem
-import java.nio.file.Path
-
-@Component
-@Slf4j
-@CompileStatic
-class PanCancerPrepareJob extends AbstractPrepareJob implements PanCancerShared {
+@Transactional
+class PanCancerPreparationService {
 
     @Autowired
-    PanCancerPreparationService panCancerPreparationService
+    NotificationCreator notificationCreator
 
-    @Override
-    protected Path buildWorkDirectoryPath(WorkflowStep workflowStep) {
-        FileSystem fileSystem = getFileSystem(workflowStep)
-        return fileSystem.getPath(workflowStep.workflowRun.workDirectory)
-    }
-
-    @Override
-    protected Collection<LinkEntry> generateMapForLinking(WorkflowStep workflowStep) {
-        return []
-    }
-
-    @Override
-    protected void doFurtherPreparation(WorkflowStep workflowStep) {
-        panCancerPreparationService.prepare(getRoddyBamFile(workflowStep), getSeqTracks(workflowStep))
+    void prepare(RoddyBamFile roddyBamFile, List<SeqTrack> seqTracks) {
+        notificationCreator.setStartedForSeqTracks(seqTracks, OtrsTicket.ProcessingStep.ALIGNMENT)
+        MergingWorkPackage mergingWorkPackage = roddyBamFile.mergingWorkPackage
+        mergingWorkPackage.needsProcessing = false
+        mergingWorkPackage.save(flush: true)
     }
 }

@@ -112,4 +112,21 @@ class RoddyConfigValueService {
 
         return ["CHROMOSOME_INDICES": "( ${sortedList.join(' ')} )"]
     }
+
+    String createMetadataTable(List<SeqTrack> seqTracks) {
+        StringBuilder builder = new StringBuilder()
+        builder << "Sample\tLibrary\tPID\tReadLayout\tRun\tMate\tSequenceFile\n"
+        builder << DataFile.findAllBySeqTrackInListAndIndexFile(seqTracks, false).sort { it.mateNumber }.collect { DataFile dataFile ->
+            [
+                    dataFile.sampleType.dirName, // it is correct that the header is 'Sample', this is because of the different names for the same things
+                    dataFile.seqTrack.libraryDirectoryName,
+                    dataFile.individual.pid,
+                    dataFile.seqType.libraryLayoutDirName,
+                    dataFile.run.dirName,
+                    dataFile.mateNumber,
+                    lsdfFilesService.getFileViewByPidPathAsPath(dataFile),
+            ].join("\t")
+        }.join("\n")
+        return builder.toString()
+    }
 }
