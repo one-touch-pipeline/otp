@@ -34,6 +34,7 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 @Transactional
 class RoddyConfigValueService {
 
+    ChromosomeIdentifierSortingService chromosomeIdentifierSortingService
     LsdfFilesService lsdfFilesService
     ProcessingOptionService processingOptionService
     ReferenceGenomeService referenceGenomeService
@@ -53,8 +54,8 @@ class RoddyConfigValueService {
         Map<String, String> cValues = [:]
 
         String referenceGenomeFastaFile = referenceGenomeService.fastaFilePath(roddyBamFile.referenceGenome).absolutePath
-        cValues.put("INDEX_PREFIX", referenceGenomeFastaFile) //used for pancan pipeline
-        cValues.put("GENOME_FA", referenceGenomeFastaFile) //used for rna pipeline
+        cValues.put("INDEX_PREFIX", referenceGenomeFastaFile) //used for PanCancer pipeline
+        cValues.put("GENOME_FA", referenceGenomeFastaFile) //used for RNA pipeline
 
         cValues.put("possibleControlSampleNamePrefixes", "${roddyBamFile.sampleType.dirName}")
         cValues.put("possibleTumorSampleNamePrefixes", "")
@@ -98,5 +99,17 @@ class RoddyConfigValueService {
             }
         }
         return ["fastq_list": vbpDataFiles.join(";")]
+    }
+
+    Map<String, String> getChromosomeIndexParameterWithMitochondrion(ReferenceGenome referenceGenome) {
+        assert referenceGenome
+
+        List<String> chromosomeNames = ReferenceGenomeEntry.findAllByReferenceGenomeAndClassificationInList(referenceGenome,
+                [ReferenceGenomeEntry.Classification.CHROMOSOME, ReferenceGenomeEntry.Classification.MITOCHONDRIAL])*.name
+        assert chromosomeNames: "No chromosome names could be found for reference genome ${referenceGenome}"
+
+        List<String> sortedList = chromosomeIdentifierSortingService.sortIdentifiers(chromosomeNames)
+
+        return ["CHROMOSOME_INDICES": "( ${sortedList.join(' ')} )"]
     }
 }

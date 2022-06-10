@@ -46,7 +46,7 @@ class ReferenceGenomeEntry implements Entity {
          */
         CONTIG,
         /**
-         * DNA, which is neither chromosomal nor mitochrondrial DNA, e.g. viral DNA
+         * DNA, which is neither chromosomal nor mitochondrial DNA, e.g. viral DNA
          */
         UNDEFINED
     }
