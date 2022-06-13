@@ -88,8 +88,7 @@ class SelectSamplesControllerSubmitCommand implements Validateable {
         samplesWithMissingFile validator: { samplesWithMissingFile, obj, errors ->
             List<List<String>> tokenizedSamplesWithMissingFile = samplesWithMissingFile*.tokenize(',')
 
-            List<String> selectedSampleIds = obj.sampleAndSeqType
-                    .collect { it.tokenize("-")[0] }
+            Set<String> selectedSampleIds = obj.sampleAndSeqType.toSet()
 
             List<String> intersection = tokenizedSamplesWithMissingFile
                     .findAll { selectedSampleIds.contains(it[0]) }

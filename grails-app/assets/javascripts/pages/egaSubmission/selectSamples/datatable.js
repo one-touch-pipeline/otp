@@ -81,7 +81,7 @@ $.otp.selectSamplesTable = {
                                             value="${entry.identifier}" ${checked}/>`;
 
               if (entry.fileExists !== 'true') {
-                const samplesWithMissingFile = `${entry.sampleId},${entry.individual},${entry.seqTypeDisplayName},` +
+                const samplesWithMissingFile = `${entry.identifier},${entry.individual},${entry.seqTypeDisplayName},` +
                   `${entry.sequencingReadType},${entry.singleCellDisplayName},${entry.sampleType}`;
                 firstColumn =
                   `${firstColumn} 
