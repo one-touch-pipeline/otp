@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflow.panCancer
+package de.dkfz.tbi.otp.workflow.wgbs
 
 import grails.testing.gorm.DataTest
 import org.junit.Rule
@@ -46,7 +46,7 @@ import de.dkfz.tbi.otp.workflowExecution.*
 import java.nio.file.Path
 import java.nio.file.Paths
 
-class PanCancerValidationJobSpec extends Specification implements WorkflowSystemDomainFactory, DataTest, IsRoddy {
+class WgbsValidationJobSpec extends Specification implements WorkflowSystemDomainFactory, DataTest, IsRoddy {
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -83,7 +83,7 @@ class PanCancerValidationJobSpec extends Specification implements WorkflowSystem
     @Unroll
     void "test doFurtherValidationAndReturnProblems, when called the readGroups are checked for errors"() {
         given:
-        final PanCancerValidationJob job = new PanCancerValidationJob()
+        final WgbsValidationJob job = new WgbsValidationJob()
         final RoddyBamFile bamFile = createRoddyBamFile(RoddyBamFile)
 
         job.fileSystemService = new TestFileSystemService()
@@ -112,15 +112,20 @@ class PanCancerValidationJobSpec extends Specification implements WorkflowSystem
     @Unroll
     void "test getExpectedFiles() and getExpectedDirectories, when called the correct paths (files or directories) should be returned"() {
         given:
-        final PanCancerValidationJob job = new PanCancerValidationJob()
+        final WgbsValidationJob job = new WgbsValidationJob()
         final RoddyBamFile bamFile = createRoddyBamFile(RoddyBamFile)
         RoddyBamFileService roddyBamFileService = new RoddyBamFileService()
         roddyBamFileService.abstractMergedBamFileService = Mock(AbstractMergedBamFileService) {
             getBaseDirectory(_) >> Paths.get("/")
         }
 
-        // an extra file is added to the return list if the bamFile's seqType is exome
-        bamFile.seqType.needsBedFile = needsBedFile
+        if (multipleLibraries) {
+            bamFile.seqTracks.first().libraryName = "2"
+            bamFile.seqTracks.first().normalizedLibraryName = "2"
+            bamFile.seqTracks.add(createSeqTrack(libraryName: "1"))
+            bamFile.numberOfMergedLanes = 2
+            bamFile.save(flush: true)
+        }
 
         List<Path> expectedFiles = [
                 roddyBamFileService.getWorkBamFile(bamFile),
@@ -128,14 +133,15 @@ class PanCancerValidationJobSpec extends Specification implements WorkflowSystem
                 roddyBamFileService.getWorkMd5sumFile(bamFile),
                 roddyBamFileService.getWorkMergedQAJsonFile(bamFile),
         ]
-        if (needsBedFile) {
-            expectedFiles.add(roddyBamFileService.getWorkMergedQATargetExtractJsonFile(bamFile))
-        }
-
         List<Path> expectedDirectories = [
                 roddyBamFileService.getWorkDirectory(bamFile),
                 roddyBamFileService.getWorkExecutionStoreDirectory(bamFile),
+                roddyBamFileService.getWorkMergedMethylationDirectory(bamFile),
         ]
+
+        if (multipleLibraries) {
+            expectedDirectories.addAll(roddyBamFileService.getWorkLibraryMethylationDirectories(bamFile).values().unique(false))
+        }
 
         job.concreteArtefactService = Mock(ConcreteArtefactService) {
             _ * getOutputArtefact(_, _, _) >> bamFile
@@ -152,12 +158,12 @@ class PanCancerValidationJobSpec extends Specification implements WorkflowSystem
         directories.sort() == expectedDirectories.sort()
 
         where:
-        needsBedFile << [true, false]
+        multipleLibraries << [true, false]
     }
 
     void "test ensureExternalJobsRunThrough, when all jobs run through successfully, then log that all run successfully"() {
         given:
-        final PanCancerValidationJob job = new PanCancerValidationJob()
+        final WgbsValidationJob job = new WgbsValidationJob()
         final WorkflowStep workflowStepCurrent = createWorkflowStep([previous: workflowStep])
 
         final String testJobId = "cluster_job_id"
@@ -188,7 +194,7 @@ class PanCancerValidationJobSpec extends Specification implements WorkflowSystem
 
     void "test ensureExternalJobsRunThrough, when not all jobs run through, then throw a ValidationJobFailedException"() {
         given:
-        final PanCancerValidationJob job = new PanCancerValidationJob()
+        final WgbsValidationJob job = new WgbsValidationJob()
         final WorkflowStep workflowStepCurrent = createWorkflowStep([previous: workflowStep])
 
         final String testJobId = "cluster_job_id"

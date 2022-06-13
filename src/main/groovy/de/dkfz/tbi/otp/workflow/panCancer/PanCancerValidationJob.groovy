@@ -26,16 +26,18 @@ import groovy.util.logging.Slf4j
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
+import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.workflow.jobs.AbstractRoddyClusterValidationJob
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
-import java.nio.file.FileSystem
 import java.nio.file.Path
 
 @Component
 @Slf4j
 @CompileStatic
 class PanCancerValidationJob extends AbstractRoddyClusterValidationJob implements PanCancerShared {
+
+    RoddyBamFileService roddyBamFileService
 
     /**
      * Returns the expected files for validation
@@ -52,17 +54,16 @@ class PanCancerValidationJob extends AbstractRoddyClusterValidationJob implement
     @Override
     protected List<Path> getExpectedFiles(WorkflowStep workflowStep) {
         RoddyBamFile roddyBamFile = getRoddyBamFile(workflowStep)
-        FileSystem fs = getFileSystem(workflowStep)
 
         List<Path> expectedFiles = [
-                fs.getPath(roddyBamFile.workBamFile.toString()),
-                fs.getPath(roddyBamFile.workBaiFile.toString()),
-                fs.getPath(roddyBamFile.workMd5sumFile.toString()),
-                fs.getPath(roddyBamFile.workMergedQAJsonFile.toString()),
+                roddyBamFileService.getWorkBamFile(roddyBamFile),
+                roddyBamFileService.getWorkBaiFile(roddyBamFile),
+                roddyBamFileService.getWorkMd5sumFile(roddyBamFile),
+                roddyBamFileService.getWorkMergedQAJsonFile(roddyBamFile),
         ]
 
         if (roddyBamFile.seqType.needsBedFile) {
-            expectedFiles.add(fs.getPath(roddyBamFile.workMergedQATargetExtractJsonFile.toString()))
+            expectedFiles.add(roddyBamFileService.getWorkMergedQATargetExtractJsonFile(roddyBamFile))
         }
 
         return expectedFiles
@@ -81,10 +82,9 @@ class PanCancerValidationJob extends AbstractRoddyClusterValidationJob implement
     protected List<Path> getExpectedDirectories(WorkflowStep workflowStep) {
         RoddyBamFile roddyBamFile = getRoddyBamFile(workflowStep)
 
-        FileSystem fs = getFileSystem(workflowStep)
         return [
-                fs.getPath(roddyBamFile.workDirectory.toString()),
-                fs.getPath(roddyBamFile.workExecutionStoreDirectory.toString()),
+                roddyBamFileService.getWorkDirectory(roddyBamFile),
+                roddyBamFileService.getWorkExecutionStoreDirectory(roddyBamFile),
         ]
     }
 
@@ -96,12 +96,13 @@ class PanCancerValidationJob extends AbstractRoddyClusterValidationJob implement
      */
     @Override
     protected List<String> doFurtherValidationAndReturnProblems(WorkflowStep workflowStep) {
+        RoddyBamFile roddyBamFile = getRoddyBamFile(workflowStep)
         final List<String> readGroupsInBam    = roddyService.getReadGroupsInBam(workflowStep)
         final List<String> expectedReadGroups = roddyService.getReadGroupsExpected(workflowStep)
 
         return (readGroupsInBam == expectedReadGroups) ? Collections.<String> emptyList() : [
                 """Read groups in BAM file are not as expected.
-                |Read groups in ${getRoddyBamFile(workflowStep).workBamFile}:
+                |Read groups in ${roddyBamFileService.getWorkBamFile(roddyBamFile)}:
                 |${readGroupsInBam.join('\n')}
                 |Expected read groups:
                 |${expectedReadGroups.join('\n')}
