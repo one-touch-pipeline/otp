@@ -112,7 +112,7 @@
 
         <div class="fixed-table-header">
             <h2>${g.message(code: 'projectOverview.mergingCriteria')}</h2>
-            <table>
+            <table class="merging-criteria-table">
                 <tr>
                     <th>${g.message(code: 'projectOverview.mergingCriteria.seqType')}</th>
                     <th>${g.message(code: 'projectOverview.mergingCriteria.libPrepKit')}</th>

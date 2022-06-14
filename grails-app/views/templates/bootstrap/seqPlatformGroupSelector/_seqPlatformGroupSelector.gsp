@@ -33,7 +33,7 @@ parameter to set:
     selectedSeqTypeToCopyFrom:                  a search parameter to keep with every request
 --}%
 
-<div class="card mb-2">
+<div class="card mb-2 seqPlatformGroupSelector">
     <g:if test="${selectorState == SelectorViewState.EDIT}">
         <g:render template="/templates/bootstrap/seqPlatformGroupSelector/header/edit" model="${[
                 mergingCriteria            : mergingCriteria,
