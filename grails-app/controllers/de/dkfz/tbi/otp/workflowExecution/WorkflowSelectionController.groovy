@@ -56,10 +56,10 @@ class WorkflowSelectionController implements CheckAndCall {
     @Secured('isFullyAuthenticated()')
     def index() {
         Map<String, OtpWorkflow> workflowBeans = applicationContext.getBeansOfType(OtpWorkflow)
-        List<String> alignmentWorkflowNames = workflowBeans.findAll { it.value.isAlignment() }.collect { it.key }
+        List<String> alignmentWorkflowNames = workflowBeans.findAll { it.value.isAlignment() }*.key
         List<Workflow> alignmentWorkflows = alignmentWorkflowNames ?
                 Workflow.findAllByBeanNameInListAndDeprecatedDateIsNull(alignmentWorkflowNames).sort { it.name } : []
-        List<String> analysisWorkflowNames = workflowBeans.findAll { it.value.isAnalysis() }.collect { it.key }
+        List<String> analysisWorkflowNames = workflowBeans.findAll { it.value.isAnalysis() }*.key
         List<Workflow> analysisWorkflows = analysisWorkflowNames ?
                 Workflow.findAllByBeanNameInListAndDeprecatedDateIsNull(analysisWorkflowNames).sort { it.name } : []
 

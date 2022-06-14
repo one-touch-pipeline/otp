@@ -161,7 +161,7 @@ class TriggerAlignmentService {
                             [
                                     seqPlatformGroupId: seqPlatformGroup.id,
                                     count             : seqTrackList.size(),
-                                    seqPlatforms      : seqPlatformGroup.seqPlatforms*.fullName().sort(),
+                                    seqPlatforms      : seqPlatformGroup.seqPlatforms*.fullName.sort(),
                             ]
                         }.sort {
                             it.seqPlatformGroupId

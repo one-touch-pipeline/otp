@@ -37,7 +37,7 @@ class WorkflowVersionSelector implements Deprecateable<WorkflowVersionSelector>,
     WorkflowVersion workflowVersion
     WorkflowVersionSelector previous
 
-    static constraints = {
+    static Closure constraints = {
         previous nullable: true
         deprecationDate nullable: true
     }

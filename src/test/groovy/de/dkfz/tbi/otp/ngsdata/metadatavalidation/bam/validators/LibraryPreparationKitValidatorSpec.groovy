@@ -37,7 +37,7 @@ class LibraryPreparationKitValidatorSpec extends Specification implements DataTe
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 LibraryPreparationKit,
                 SeqType,
         ]

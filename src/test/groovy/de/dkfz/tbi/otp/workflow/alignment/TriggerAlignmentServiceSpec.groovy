@@ -403,7 +403,7 @@ class TriggerAlignmentServiceSpec extends HibernateSpec implements ServiceUnitTe
                         [
                                 seqPlatformGroupId: seqTrack.seqPlatformGroup.id,
                                 count             : 1,
-                                seqPlatforms      : seqTrack.seqPlatformGroup.seqPlatforms*.fullName().sort(),
+                                seqPlatforms      : seqTrack.seqPlatformGroup.seqPlatforms*.fullName.sort(),
                         ]
                     }.sort {
                         it.seqPlatformGroupId

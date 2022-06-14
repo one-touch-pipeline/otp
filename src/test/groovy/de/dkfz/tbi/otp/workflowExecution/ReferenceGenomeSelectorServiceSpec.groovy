@@ -38,7 +38,7 @@ class ReferenceGenomeSelectorServiceSpec extends Specification implements Servic
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 ProcessingPriority,
                 Project,
                 Realm,

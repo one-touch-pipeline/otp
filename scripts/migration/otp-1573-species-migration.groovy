@@ -42,18 +42,17 @@ import java.nio.file.Paths
 Path pathToTsvFile = Paths.get("")
 
 Map speciesMap = [
-        "Homo sapiens": CollectionUtils.exactlyOneElement(SpeciesWithStrain.where { species.scientificName == "Homo sapiens" && strain.name == "No strain available" }.list()),
-        "Mus musculus": CollectionUtils.exactlyOneElement(SpeciesWithStrain.where { species.scientificName == "Mus musculus" && strain.name == "Unknown" }.list()),
-        "Bos taurus"  : CollectionUtils.exactlyOneElement(SpeciesWithStrain.where { species.scientificName == "Bos taurus" && strain.name == "No strain available" }.list()),
+        "Human (Homo sapiens) [No strain available]": CollectionUtils.exactlyOneElement(SpeciesWithStrain.where { species.scientificName == "Homo sapiens" && strain.name == "No strain available" }.list()),
+        "[Mouse (Mus musculus) [Unknown]]"          : CollectionUtils.exactlyOneElement(SpeciesWithStrain.where { species.scientificName == "Mus musculus" && strain.name == "Unknown" }.list()),
+        "Bos taurus"                                : CollectionUtils.exactlyOneElement(SpeciesWithStrain.where { species.scientificName == "Bos taurus" && strain.name == "No strain available" }.list()),
 ]
-
 
 TransactionUtils.withNewTransaction { session ->
     pathToTsvFile.readLines().each { line ->
         String[] fields = line.split(/\t/)
 
-        String pid = fields[0].trim()
-        String sampleType1 = fields[1].trim()
+        String pid = fields[1].trim()
+        String sampleType1 = fields[2].trim()
         Sample sample = CollectionUtils.atMostOneElement(Sample.createCriteria().list {
             individual {
                 eq("pid", pid)
@@ -66,8 +65,12 @@ TransactionUtils.withNewTransaction { session ->
             println "Unknown sample with PID '${pid}' and sample type '${sampleType1}'."
             return
         }
+        if (fields.size() < 6 || !fields[5].trim()) {
+            println "No update for sample with PID '${pid}' and sample type '${sampleType1}'."
+            return
+        }
 
-        List<String> species = fields[4].split(/\+/).collect { it.trim() }
+        List<String> species = fields[5].split(/\+/).collect { it.trim() }
         boolean unknownSpecies = false
         species.each {
             if (!(it in speciesMap.keySet())) {
@@ -83,8 +86,9 @@ TransactionUtils.withNewTransaction { session ->
 
         sample.individual.species = speciesMap[mainSpecies]
         sample.individual.save(flush: false)
-        sample.mixedInSpecies.addAll(mixedInSpecies.collect { speciesMap[it] })
+        sample.mixedInSpecies = mixedInSpecies.collect { speciesMap[it] } as Set
         sample.save(flush: false)
+        println "update for sample with PID '${pid}' and sample type '${sampleType1}'."
     }
     session.flush()
 }

@@ -32,7 +32,7 @@ class WorkflowVersion implements Entity {
         return "${workflow.name} ${workflowVersion}"
     }
 
-    static constraints = {
+    static Closure constraints = {
         workflow unique: 'workflowVersion'
     }
 

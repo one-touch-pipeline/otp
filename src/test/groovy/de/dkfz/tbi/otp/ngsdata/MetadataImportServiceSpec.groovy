@@ -49,7 +49,8 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.DirectoryS
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.directorystructures.DataFilesInGpcfSpecificStructure
-import de.dkfz.tbi.otp.ngsdata.taxonomy.*
+import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
+import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrainService
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.tracking.OtrsTicketService
@@ -339,6 +340,8 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
 
         SeqCenter seqCenter = createSeqCenter()
         SeqPlatform seqPlatform = createSeqPlatform()
+        String speciesImportAlias = "SpeciesImportAlias"
+        SpeciesWithStrain speciesWithStrain = createSpeciesWithStrain([importAlias: [speciesImportAlias] as Set])
         SampleIdentifier sampleIdentifier1 = DomainFactory.createSampleIdentifier()
         SampleIdentifier sampleIdentifier2 = DomainFactory.createSampleIdentifier()
         SoftwareToolIdentifier softwareToolIdentifier = createSoftwareToolIdentifier([
@@ -373,6 +376,7 @@ ${SAMPLE_NAME}                  ${sampleIdentifier1.name}                   ${sa
 ${ANTIBODY_TARGET}              ${antibodyTarget.name}                      ${antibodyTarget.name}
 ${ANTIBODY}                     -                                           -
 ${FASTQ_GENERATOR}              ${softwareToolIdentifier.name}              ${softwareToolIdentifier.name}
+${SPECIES}                      ${speciesImportAlias}                       ${speciesImportAlias}
 """
 
         String metadata2 = """
@@ -391,6 +395,7 @@ ${SAMPLE_NAME}                  ${sampleIdentifier1.name}                   ${sa
 ${ANTIBODY_TARGET}              ${antibodyTarget.name}                      ${antibodyTarget.name}                      ${antibodyTarget.name}                      ${antibodyTarget.name}
 ${ANTIBODY}                     -                                           -                                           -                                           -
 ${FASTQ_GENERATOR}              ${softwareToolIdentifier.name}              ${softwareToolIdentifier.name}              ${softwareToolIdentifier.name}              ${softwareToolIdentifier.name}
+${SPECIES}                      ${speciesImportAlias}                       ${speciesImportAlias}                       ${speciesImportAlias}                       ${speciesImportAlias}
 """
 
         List<List<String>> lines1 = metadata1.readLines().findAll()*.split(/ {2,}/).transpose()
@@ -425,6 +430,9 @@ ${FASTQ_GENERATOR}              ${softwareToolIdentifier.name}              ${so
         service.seqPlatformService = Mock(SeqPlatformService) {
             2 * findSeqPlatform(seqPlatform.name, seqPlatform.seqPlatformModelLabel.name, null) >> seqPlatform
             0 * _
+        }
+        service.speciesWithStrainService = Mock(SpeciesWithStrainService) {
+            2 * getByAlias(speciesImportAlias) >> speciesWithStrain
         }
         service.seqTypeService = Mock(SeqTypeService) {
             2 * findByNameOrImportAlias(seqTypeWithAntibodyTarget.name, [
@@ -809,9 +817,9 @@ ${ILSE_NO}                      -                           1234          1234  
         // metadataFile
         MetaDataFile.count == 1
         MetaDataFile metadataFile = CollectionUtils.atMostOneElement(MetaDataFile.findAllWhere(
-                fileName           : file.name,
-                filePath           : file.parent,
-                md5sum             : context.metadataFileMd5sum,
+                fileName: file.name,
+                filePath: file.parent,
+                md5sum: context.metadataFileMd5sum,
                 fastqImportInstance: fastqImportInstance,
         ))
         result == metadataFile
@@ -1195,9 +1203,9 @@ ${SPECIES}                      ${human}+${mouse}+${chicken}                ${hu
         // metadataFile
         MetaDataFile.count == 1
         MetaDataFile metadataFile = CollectionUtils.atMostOneElement(MetaDataFile.findAllWhere(
-                fileName           : file.name,
-                filePath           : file.parent,
-                md5sum             : context.metadataFileMd5sum,
+                fileName: file.name,
+                filePath: file.parent,
+                md5sum: context.metadataFileMd5sum,
                 fastqImportInstance: fastqImportInstance,
         ))
         result == metadataFile
@@ -1405,9 +1413,9 @@ ${SPECIES}                      ${human}+${mouse}+${chicken}                ${hu
         // metadataFile
         MetaDataFile.count == 1
         MetaDataFile metadataFile = CollectionUtils.atMostOneElement(MetaDataFile.findAllWhere(
-                fileName           : file.name,
-                filePath           : file.parent,
-                md5sum             : context.metadataFileMd5sum,
+                fileName: file.name,
+                filePath: file.parent,
+                md5sum: context.metadataFileMd5sum,
                 fastqImportInstance: fastqImportInstance,
         ))
         result == metadataFile
@@ -1706,10 +1714,10 @@ ${SPECIES}                      ${human}+${mouse}+${chicken}                ${hu
                 ]
         )
         return [
-                context   : context,
-                service   : service,
+                context        : context,
+                service        : service,
                 targetDirectory: targetDirectory,
-                fileName: fileName,
+                fileName       : fileName,
         ]
     }
 
@@ -1742,7 +1750,7 @@ ${SPECIES}                      ${human}+${mouse}+${chicken}                ${hu
 
         then:
         Files.exists(data.targetDirectory)
-        List<Path> paths =  Files.list(data.targetDirectory).collect(Collectors.toList())
+        List<Path> paths = Files.list(data.targetDirectory).collect(Collectors.toList())
         paths.size() == 1
         Files.size(paths[0])
         paths[0][-1].toString() ==~ /metadataFile-.*\.tsv/
