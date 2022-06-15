@@ -222,7 +222,7 @@
                             </g:each>
                         </sec:noAccess>
                     </td>
-                    <td>
+                    <td class="accessToOtp">
                         <g:if test="${userEntry.inLdap}">
                             <sec:access
                                     expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'MANAGE_USERS')">
@@ -242,7 +242,7 @@
                         </g:else>
                     </td>
                     <g:if test="${userEntry.inLdap}">
-                        <td class="bootstrapped">
+                        <td class="bootstrapped accessToFiles">
                             <div class="filesAccessHandler-${userEntry.fileAccess}">
                                 <sec:access
                                         expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'MANAGE_USERS')">
@@ -272,7 +272,7 @@
                                 </sec:noAccess>
                             </div>
                         </td>
-                        <td class="bootstrapped">
+                        <td class="bootstrapped manageUsers">
                             <sec:access
                                     expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'DELEGATE_USER_MANAGEMENT')">
                                 <otp:editorSwitch
@@ -287,7 +287,7 @@
                             </sec:noAccess>
                         </td>
                         <sec:access expression="hasRole('ROLE_OPERATOR')">
-                            <td class="bootstrapped">
+                            <td class="bootstrapped delegateManagement">
                                 <otp:editorSwitch
                                         roles="ROLE_OPERATOR"
                                         template="toggle"
@@ -304,7 +304,7 @@
                             <td><span class="icon-${userEntry.manageUsersAndDelegate}"></span></td>
                         </sec:access>
                     </g:else>
-                    <td class="bootstrapped">
+                    <td class="bootstrapped receivesNotifications">
                         <sec:access
                                 expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'MANAGE_USERS') or ${userEntry.user.username == currentUser.username}">
                             <otp:editorSwitch
