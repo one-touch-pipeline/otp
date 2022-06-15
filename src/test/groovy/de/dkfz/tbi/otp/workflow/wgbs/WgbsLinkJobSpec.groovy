@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 The OTP authors
+ * Copyright 2011-2022 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflow.panCancer
+package de.dkfz.tbi.otp.workflow.wgbs
 
 import grails.testing.gorm.DataTest
 import org.junit.Rule
@@ -41,7 +41,7 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 import java.nio.file.Path
 import java.nio.file.Paths
 
-class PanCancerLinkJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory, RoddyPancanFactory {
+class WgbsLinkJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory, RoddyPancanFactory {
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -60,7 +60,7 @@ class PanCancerLinkJobSpec extends Specification implements DataTest, WorkflowSy
         ]
     }
 
-    PanCancerLinkJob job
+    WgbsLinkJob job
     RoddyBamFile roddyBamFile
     WorkflowStep workflowStep
     RoddyBamFileService roddyBamFileService
@@ -72,7 +72,7 @@ class PanCancerLinkJobSpec extends Specification implements DataTest, WorkflowSy
         roddyBamFile = createBamFile(roddyExecutionDirectoryNames: ["exec_123456_123456789_test_test"])
         workflowStep = createWorkflowStep()
 
-        job = Spy(PanCancerLinkJob) {
+        job = Spy(WgbsLinkJob) {
             getRoddyBamFile(workflowStep) >> roddyBamFile
         }
         job.fileSystemService = new TestFileSystemService()
@@ -88,7 +88,15 @@ class PanCancerLinkJobSpec extends Specification implements DataTest, WorkflowSy
     void "test getLinkMap"() {
         given:
         setupData()
-        List<Path> linkedFiles = createLinkedFilesList(roddyBamFile)
+
+        if (multipleLibraries) {
+            roddyBamFile.seqTracks.first().libraryName = "2"
+            roddyBamFile.seqTracks.first().normalizedLibraryName = "2"
+            roddyBamFile.seqTracks.add(createSeqTrackWithTwoDataFile(libraryName: "1"))
+            roddyBamFile.numberOfMergedLanes = 2
+            roddyBamFile.save(flush: true)
+        }
+        List<Path> linkedFiles = createLinkedFilesList(roddyBamFile, multipleLibraries)
 
         when:
         List<LinkEntry> result = job.getLinkMap(workflowStep)
@@ -97,16 +105,26 @@ class PanCancerLinkJobSpec extends Specification implements DataTest, WorkflowSy
         linkedFiles.every {
             it in result*.link
         }
+
+        where:
+        multipleLibraries << [true, false]
     }
 
-    private List<Path> createLinkedFilesList(RoddyBamFile roddyBamFile) {
-        return [
+    private List<Path> createLinkedFilesList(RoddyBamFile roddyBamFile, boolean multipleLibraries) {
+        List list = [
                 roddyBamFileService.getFinalBamFile(roddyBamFile),
                 roddyBamFileService.getFinalBaiFile(roddyBamFile),
                 roddyBamFileService.getFinalMd5sumFile(roddyBamFile),
                 roddyBamFileService.getFinalMergedQADirectory(roddyBamFile),
                 roddyBamFileService.getFinalExecutionDirectories(roddyBamFile),
                 roddyBamFileService.getFinalSingleLaneQADirectories(roddyBamFile).values(),
-        ].flatten()
+                roddyBamFileService.getFinalMergedMethylationDirectory(roddyBamFile),
+                roddyBamFileService.getFinalMetadataTableFile(roddyBamFile),
+        ]
+        if (multipleLibraries) {
+            list.addAll(roddyBamFileService.getFinalLibraryQADirectories(roddyBamFile).values())
+            list.addAll(roddyBamFileService.getFinalLibraryMethylationDirectories(roddyBamFile).values())
+        }
+        return list.flatten()
     }
 }

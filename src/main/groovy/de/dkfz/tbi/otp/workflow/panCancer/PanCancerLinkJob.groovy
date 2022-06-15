@@ -23,48 +23,52 @@ package de.dkfz.tbi.otp.workflow.panCancer
 
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
+import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.utils.LinkEntry
 import de.dkfz.tbi.otp.workflow.jobs.AbstractLinkJob
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
-import java.nio.file.FileSystem
+import java.nio.file.Path
 
 @Component
 @Slf4j
 @CompileStatic
 class PanCancerLinkJob extends AbstractLinkJob implements PanCancerShared {
 
+    @Autowired
+    RoddyBamFileService roddyBamFileService
+
     @Override
     protected List<LinkEntry> getLinkMap(WorkflowStep workflowStep) {
         RoddyBamFile roddyBamFile = getRoddyBamFile(workflowStep)
-        FileSystem fs = getFileSystem(workflowStep)
 
         List<LinkEntry> links = []
 
-        links.add(new LinkEntry(link: fileService.toPath(roddyBamFile.finalBamFile, fs), target: fileService.toPath(roddyBamFile.workBamFile, fs)))
-        links.add(new LinkEntry(link: fileService.toPath(roddyBamFile.finalBaiFile, fs), target: fileService.toPath(roddyBamFile.workBaiFile, fs)))
-        links.add(new LinkEntry(link: fileService.toPath(roddyBamFile.finalMd5sumFile, fs), target: fileService.toPath(roddyBamFile.workMd5sumFile, fs)))
-        links.add(new LinkEntry(link: fileService.toPath(roddyBamFile.finalMergedQADirectory, fs),
-                target: fileService.toPath(roddyBamFile.workMergedQADirectory, fs)))
+        links.add(new LinkEntry(link: roddyBamFileService.getFinalBamFile(roddyBamFile), target: roddyBamFileService.getWorkBamFile(roddyBamFile)))
+        links.add(new LinkEntry(link: roddyBamFileService.getFinalBaiFile(roddyBamFile), target: roddyBamFileService.getWorkBaiFile(roddyBamFile)))
+        links.add(new LinkEntry(link: roddyBamFileService.getFinalMd5sumFile(roddyBamFile), target: roddyBamFileService.getWorkMd5sumFile(roddyBamFile)))
+        links.add(new LinkEntry(link: roddyBamFileService.getFinalMergedQADirectory(roddyBamFile),
+                target: roddyBamFileService.getWorkMergedQADirectory(roddyBamFile)))
 
         //collect links for every execution store
         ([
-                roddyBamFile.finalExecutionDirectories,
-                roddyBamFile.workExecutionDirectories,
-        ].transpose() as List<List<File>>).each {
-            links.add(new LinkEntry(link: fileService.toPath(it[0], fs), target: fileService.toPath(it[1], fs)))
+                roddyBamFileService.getFinalExecutionDirectories(roddyBamFile),
+                roddyBamFileService.getWorkExecutionDirectories(roddyBamFile),
+        ].transpose() as List<List<Path>>).each {
+            links.add(new LinkEntry(link: it[0], target: it[1]))
         }
 
         //collect links for the single lane qa
-        Map<SeqTrack, File> finalSingleLaneQADirectories = roddyBamFile.finalSingleLaneQADirectories
-        Map<SeqTrack, File> workSingleLaneQADirectories = roddyBamFile.workSingleLaneQADirectories
+        Map<SeqTrack, Path> finalSingleLaneQADirectories = roddyBamFileService.getFinalSingleLaneQADirectories(roddyBamFile)
+        Map<SeqTrack, Path> workSingleLaneQADirectories = roddyBamFileService.getWorkSingleLaneQADirectories(roddyBamFile)
         workSingleLaneQADirectories.each { seqTrack, singleLaneQaWorkDir ->
-            File singleLaneQaFinalDir = finalSingleLaneQADirectories.get(seqTrack)
-            links.add(new LinkEntry(link: fileService.toPath(singleLaneQaFinalDir, fs), target: fileService.toPath(singleLaneQaWorkDir, fs)))
+            Path singleLaneQaFinalDir = finalSingleLaneQADirectories.get(seqTrack)
+            links.add(new LinkEntry(link: singleLaneQaFinalDir, target: singleLaneQaWorkDir))
         }
 
         return links
