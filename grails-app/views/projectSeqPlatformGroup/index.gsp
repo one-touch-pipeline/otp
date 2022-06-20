@@ -196,7 +196,7 @@
     %{-- fourth row: project specific and found SeqPlatformGroup lists --}%
 
         <div class="row">
-            <div class="col-6">
+            <div class="col-6 seqPlatformGroups">
         <g:if test="${selectedSeqPlatformGroups != null && !selectedSeqPlatformGroups.empty}">
             <g:each in="${selectedSeqPlatformGroups}" var="seqPlatformGroup">
                 <g:render template="/templates/bootstrap/seqPlatformGroupSelector/seqPlatformGroupSelector"

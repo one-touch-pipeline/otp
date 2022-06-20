@@ -35,7 +35,7 @@ describe('Check projectSeqPlatformGroup page', () => {
       cy.location('pathname').should('match', /^\/projectSeqPlatformGroup\/index/);
     });
 
-    it.skip('should update Seq. Type', () => {
+    it('should update Seq. Type', () => {
       cy.get('input#libPrepKit').should('not.be.checked');
       cy.get('input#libPrepKit').check();
 
@@ -46,7 +46,7 @@ describe('Check projectSeqPlatformGroup page', () => {
       });
     });
 
-    it.skip('should update Library Prep. Kit Seq. Platform/Chemical Version', () => {
+    it('should update Library Prep. Kit Seq. Platform/Chemical Version', () => {
       cy.get('select#useSeqPlatformGroup').should('have.value', 'USE_OTP_DEFAULT');
       cy.get('select#useSeqPlatformGroup').select('USE_PROJECT_SEQ_TYPE_SPECIFIC', { force: true });
 
@@ -67,6 +67,34 @@ describe('Check projectSeqPlatformGroup page', () => {
         expect(interception.response.statusCode).to.eq(302);
         cy.location('pathname').should('match', /^\/projectSeqPlatformGroup\/index/);
         cy.get('.list-group.list-group-flush').should('contain', 'Illumina HiSeq 2000 v1');
+      });
+    });
+
+    it('should add seq. platform to the seq. platform group', () => {
+      cy.intercept('/projectSeqPlatformGroup/addPlatformToExistingSeqPlatformGroup*')
+        .as('addPlatformToExistingSeqPlatformGroup');
+      cy.get('.seqPlatformGroups').find('select').select('Illumina HiSeq 2000 v2', { force: true });
+      cy.get('.seqPlatformGroups').find('button[type=submit].btn-outline-primary').click();
+
+      cy.wait('@addPlatformToExistingSeqPlatformGroup').then((interception) => {
+        expect(interception.response.statusCode).to.eq(302);
+        cy.location('pathname').should('match', /^\/projectSeqPlatformGroup\/index/);
+        cy.get('.list-group.list-group-flush').should('contain', 'Illumina HiSeq 2000 v1');
+        cy.get('.list-group.list-group-flush').should('contain', 'Illumina HiSeq 2000 v2');
+      });
+    });
+
+    it('should remove the seq. platform from the seq. platform group', () => {
+      cy.intercept('/projectSeqPlatformGroup/removePlatformFromSeqPlatformGroup*')
+        .as('removePlatformFromSeqPlatformGroup');
+      cy.get('.seqPlatformGroups div').contains('Illumina HiSeq 2000 v1').next().find('button.close')
+        .click();
+
+      cy.wait('@removePlatformFromSeqPlatformGroup').then((interception) => {
+        expect(interception.response.statusCode).to.eq(302);
+        cy.location('pathname').should('match', /^\/projectSeqPlatformGroup\/index/);
+        cy.get('.list-group.list-group-flush').should('not.contain', 'Illumina HiSeq 2000 v1');
+        cy.get('.list-group.list-group-flush').should('contain', 'Illumina HiSeq 2000 v2');
       });
     });
 
