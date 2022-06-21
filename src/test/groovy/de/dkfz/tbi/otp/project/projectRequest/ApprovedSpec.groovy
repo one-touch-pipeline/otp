@@ -81,7 +81,7 @@ class ApprovedSpec extends Specification implements UserDomainFactory, DataTest 
         1 * projectRequestStateProvider.setState(projectRequest, RequesterEdit) >> _
         1 * projectRequestPersistentStateService.setCurrentOwner(projectRequest.state, requester)
         1 * projectRequestService.sendOperatorRejectEmail(projectRequest, rejectComment)
-        1 * commentService.saveComment(projectRequest, rejectComment)
+        1 * commentService.saveCommentWithMaskedUsername(projectRequest, rejectComment)
         0 * _
     }
 
