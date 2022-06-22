@@ -35,7 +35,7 @@ describe('Check projectSeqPlatformGroup page', () => {
       cy.location('pathname').should('match', /^\/projectSeqPlatformGroup\/index/);
     });
 
-    it('should update Seq. Type', () => {
+    it('should update Library Prep. Kit', () => {
       cy.get('input#libPrepKit').should('not.be.checked');
       cy.get('input#libPrepKit').check();
 
@@ -46,7 +46,7 @@ describe('Check projectSeqPlatformGroup page', () => {
       });
     });
 
-    it('should update Library Prep. Kit Seq. Platform/Chemical Version', () => {
+    it('should update Seq. Platform/Chemical Version', () => {
       cy.get('select#useSeqPlatformGroup').should('have.value', 'USE_OTP_DEFAULT');
       cy.get('select#useSeqPlatformGroup').select('USE_PROJECT_SEQ_TYPE_SPECIFIC', { force: true });
 
