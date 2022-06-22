@@ -254,7 +254,7 @@ ${prefix(objectsToStrings(objects, valueToShow).join('\n'))}
                     "That can cause problems."
         }
         Process lastProcess = processes.max { it.id }
-        ProcessingStep ps = CollectionUtils.atMostOneElement(ProcessingStep.findAllByProcessAndNextIsNull(lastProcess))
+        ProcessingStep ps = CollectionUtils.atMostOneElement(ProcessingStep.findAllByProcess(lastProcess, [sort: "id", order: 'desc', max: 1]))
         ProcessingStepUpdate update = ps.latestProcessingStepUpdate
         def state = update?.state
         if (state == ExecutionState.FAILURE || update == null) {

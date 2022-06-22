@@ -120,6 +120,54 @@ class MonitorOutputCollectorIntegrationSpec extends Specification implements Dom
         'process has failure and comment'    | 1           | false           | true       | true
     }
 
+    void "addInfoAboutProcessErrors, when process has multiple failed steps with next is null, then create output and do not fail"() {
+        given:
+        SeqTrack seqTrack = DomainFactory.createSeqTrack()
+        JobExecutionPlan jobExecutionPlan = DomainFactory.createJobExecutionPlan()
+
+        Process process = DomainFactory.createProcess([
+                jobExecutionPlan: jobExecutionPlan,
+        ])
+        DomainFactory.createProcessingStep([
+                process: process,
+        ])
+        DomainFactory.createProcessingStep([
+                process: process,
+        ])
+        ProcessingStep processingStep3 = DomainFactory.createProcessingStep([
+                process: process,
+        ])
+        DomainFactory.createProcessingStepUpdate([
+                processingStep: processingStep3,
+                state         : ExecutionState.CREATED,
+        ])
+        DomainFactory.createProcessingStepUpdate([
+                processingStep: processingStep3,
+                state         : ExecutionState.FAILURE,
+        ])
+        DomainFactory.createProcessParameter([
+                value    : seqTrack.id.longValue(),
+                className: SeqTrack.name,
+                process  : process,
+        ])
+
+        String workflowName = jobExecutionPlan.name
+
+        MonitorOutputCollector collector = new MonitorOutputCollector(
+                configService: Mock(ConfigService)
+        )
+
+        when:
+        collector.addInfoAboutProcessErrors(workflowName, [seqTrack], { it.id }) {
+            it
+        }
+        String output = collector.output.split('\n')*.trim().join('\n')
+
+        then:
+        !output.empty
+        output.contains(process.id.toString())
+    }
+
     @Unroll
     void "addInfoAboutProcessErrors, when object is from new workflow system and #errorCase, then create error output"() {
         given:
