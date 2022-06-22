@@ -45,14 +45,17 @@ describe('Check projectInfo page', () => {
     });
 
     it('should add a comment to the file', () => {
+      const comment = 'my-custom-comment';
+
       cy.intercept('/projectInfo/updateProjectInfoComment*').as('updateProjectInfoComment');
 
       cy.get('button.js-edit').first().click();
-      cy.get('textarea[name=value]').type('my-custom-comment');
+      cy.get('textarea[name=value]').type(comment);
       cy.get('button.save').click();
 
       cy.wait('@updateProjectInfoComment').then((interception) => {
         expect(interception.response.statusCode).to.eq(200);
+        cy.get('.comment-box-wrapper').should('contain', comment);
       });
     });
 
