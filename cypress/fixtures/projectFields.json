@@ -10,8 +10,8 @@
     "descriptionRequest": "modified-request-description: hello world",
     "defaultValue": "modified default value",
     "sortingNumber": "10",
-    "allowedValues": "allowed-abc",
-    "regularExpression": "[a-c]",
+    "allowedValues": "modified default value abc",
+    "regularExpression": ".*",
     "regularExpressionErrorMsg": "does not match the regular expression"
   }
 ]

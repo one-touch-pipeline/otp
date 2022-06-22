@@ -68,7 +68,10 @@ describe('Check projectFields page', () => {
         });
         cy.get('td.name').first().find('button.save').click();
 
-        cy.wait('@updateProjectField').its('response.statusCode').should('eq', 200);
+        cy.wait('@updateProjectField').then((interception) => {
+          expect(interception.response.statusCode).to.eq(200);
+          expect(interception.response.body.success).to.eq(true);
+        });
       });
 
       it('should update the config page tooltip', () => {
@@ -78,7 +81,10 @@ describe('Check projectFields page', () => {
         });
         cy.get('td.descriptionConfig').first().find('button.save').click();
 
-        cy.wait('@updateProjectField').its('response.statusCode').should('eq', 200);
+        cy.wait('@updateProjectField').then((interception) => {
+          expect(interception.response.statusCode).to.eq(200);
+          expect(interception.response.body.success).to.eq(true);
+        });
       });
 
       it('should update the creation request page tooltip', () => {
@@ -89,7 +95,10 @@ describe('Check projectFields page', () => {
         });
         cy.get('td.descriptionRequest').first().find('button.save').click();
 
-        cy.wait('@updateProjectField').its('response.statusCode').should('eq', 200);
+        cy.wait('@updateProjectField').then((interception) => {
+          expect(interception.response.statusCode).to.eq(200);
+          expect(interception.response.body.success).to.eq(true);
+        });
       });
 
       it('should update the sequencing project', () => {
@@ -98,7 +107,10 @@ describe('Check projectFields page', () => {
         cy.get('td.seqProject').first().find('select').select(1, { force: true });
         cy.get('td.seqProject').first().find('button.save').click();
 
-        cy.wait('@updateProjectField').its('response.statusCode').should('eq', 200);
+        cy.wait('@updateProjectField').then((interception) => {
+          expect(interception.response.statusCode).to.eq(200);
+          expect(interception.response.body.success).to.eq(true);
+        });
       });
 
       it('should update the user management project', () => {
@@ -107,7 +119,10 @@ describe('Check projectFields page', () => {
         cy.get('td.usrManagementProject').first().find('select').select(1, { force: true });
         cy.get('td.usrManagementProject').first().find('button.save').click();
 
-        cy.wait('@updateProjectField').its('response.statusCode').should('eq', 200);
+        cy.wait('@updateProjectField').then((interception) => {
+          expect(interception.response.statusCode).to.eq(200);
+          expect(interception.response.body.success).to.eq(true);
+        });
       });
 
       it('should update the information provider', () => {
@@ -116,7 +131,10 @@ describe('Check projectFields page', () => {
         cy.get('td.sourceOfData').first().find('select').select(1, { force: true });
         cy.get('td.sourceOfData').first().find('button.save').click();
 
-        cy.wait('@updateProjectField').its('response.statusCode').should('eq', 200);
+        cy.wait('@updateProjectField').then((interception) => {
+          expect(interception.response.statusCode).to.eq(200);
+          expect(interception.response.body.success).to.eq(true);
+        });
       });
 
       it('should update the display on project config flag', () => {
@@ -125,7 +143,10 @@ describe('Check projectFields page', () => {
         cy.get('td.projectDisplayOnConfigPage').first().find('select').select(1, { force: true });
         cy.get('td.projectDisplayOnConfigPage').first().find('button.save').click();
 
-        cy.wait('@updateProjectField').its('response.statusCode').should('eq', 200);
+        cy.wait('@updateProjectField').then((interception) => {
+          expect(interception.response.statusCode).to.eq(200);
+          expect(interception.response.body.success).to.eq(true);
+        });
       });
 
       it('should update the sorting number', () => {
@@ -137,7 +158,10 @@ describe('Check projectFields page', () => {
         });
         cy.get('td.sortingNumber').first().find('button.save').click();
 
-        cy.wait('@updateProjectField').its('response.statusCode').should('eq', 200);
+        cy.wait('@updateProjectField').then((interception) => {
+          expect(interception.response.statusCode).to.eq(200);
+          expect(interception.response.body.success).to.eq(true);
+        });
       });
 
       it('should update the only changeable by operator flag', () => {
@@ -145,7 +169,10 @@ describe('Check projectFields page', () => {
         cy.get('td.changeableByOperator').first().find('button.edit').click();
         cy.get('td.changeableByOperator').first().find('button.toggle').click();
 
-        cy.wait('@updateProjectField').its('response.statusCode').should('eq', 200);
+        cy.wait('@updateProjectField').then((interception) => {
+          expect(interception.response.statusCode).to.eq(200);
+          expect(interception.response.body.success).to.eq(true);
+        });
       });
 
       it('should update the used externally flag', () => {
@@ -153,7 +180,10 @@ describe('Check projectFields page', () => {
         cy.get('td.usedExternally').first().find('button.edit').click();
         cy.get('td.usedExternally').first().find('button.toggle').click();
 
-        cy.wait('@updateProjectField').its('response.statusCode').should('eq', 200);
+        cy.wait('@updateProjectField').then((interception) => {
+          expect(interception.response.statusCode).to.eq(200);
+          expect(interception.response.body.success).to.eq(true);
+        });
       });
 
       it('should update the default value', () => {
@@ -163,7 +193,10 @@ describe('Check projectFields page', () => {
         });
         cy.get('td.defaultValue').first().find('button.save').click();
 
-        cy.wait('@updateProjectField').its('response.statusCode').should('eq', 200);
+        cy.wait('@updateProjectField').then((interception) => {
+          expect(interception.response.statusCode).to.eq(200);
+          expect(interception.response.body.success).to.eq(true);
+        });
       });
 
       it('should update the allowed values', () => {
@@ -172,20 +205,27 @@ describe('Check projectFields page', () => {
         cy.get('td.allowedValues').first().find('button.js-edit').click();
         cy.get('@projectFields').then((fields) => {
           cy.get('td.allowedValues').first().find('.field input[type=text]').focus()
-            .type(fields[1].allowedValues);
+            .clear()
+            .type(fields[1].defaultValue);
         });
         cy.get('td.allowedValues').first().find('button.save').click();
 
-        cy.wait('@updateMultiField').its('response.statusCode').should('eq', 200);
+        cy.wait('@updateMultiField').then((interception) => {
+          expect(interception.response.statusCode).to.eq(200);
+          expect(interception.response.body.success).to.eq(true);
+        });
       });
 
       it('should update the predefined verifier', () => {
         cy.get('td.predefinedVerifier').first().scrollIntoView();
         cy.get('td.predefinedVerifier').first().find('button.edit').click();
-        cy.get('td.predefinedVerifier').first().find('select').select(1, { force: true });
+        cy.get('td.predefinedVerifier').first().find('select').select('MULTI_LINE_TEXT', { force: true });
         cy.get('td.predefinedVerifier').first().find('button.save').click();
 
-        cy.wait('@updateProjectField').its('response.statusCode').should('eq', 200);
+        cy.wait('@updateProjectField').then((interception) => {
+          expect(interception.response.statusCode).to.eq(200);
+          expect(interception.response.body.success).to.eq(true);
+        });
       });
 
       it('should update the regular expression', () => {
@@ -195,7 +235,10 @@ describe('Check projectFields page', () => {
         });
         cy.get('td.regularExpression').first().find('button.save').click();
 
-        cy.wait('@updateProjectField').its('response.statusCode').should('eq', 200);
+        cy.wait('@updateProjectField').then((interception) => {
+          expect(interception.response.statusCode).to.eq(200);
+          expect(interception.response.body.success).to.eq(true);
+        });
       });
 
       it('should update the regular expression error message', () => {
@@ -206,7 +249,10 @@ describe('Check projectFields page', () => {
         });
         cy.get('td.regularExpressionErrorMsg').first().find('button.save').click();
 
-        cy.wait('@updateProjectField').its('response.statusCode').should('eq', 200);
+        cy.wait('@updateProjectField').then((interception) => {
+          expect(interception.response.statusCode).to.eq(200);
+          expect(interception.response.body.success).to.eq(true);
+        });
       });
 
       it('should update the legacy flag', () => {
@@ -214,7 +260,10 @@ describe('Check projectFields page', () => {
         cy.get('td.legacy').first().find('button.edit').click();
         cy.get('td.legacy').first().find('button.toggle').click();
 
-        cy.wait('@updateProjectField').its('response.statusCode').should('eq', 200);
+        cy.wait('@updateProjectField').then((interception) => {
+          expect(interception.response.statusCode).to.eq(200);
+          expect(interception.response.body.success).to.eq(true);
+        });
       });
 
       it('should delete project field definition', () => {
