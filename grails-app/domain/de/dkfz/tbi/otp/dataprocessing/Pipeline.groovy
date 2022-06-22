@@ -162,7 +162,7 @@ class Pipeline implements Entity {
     }
 
     @Deprecated
-    final List<SeqType> getSeqTypes() {
+    List<SeqType> getSeqTypes() {
         return name.seqTypes
     }
 }
