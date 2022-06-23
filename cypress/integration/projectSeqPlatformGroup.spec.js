@@ -31,18 +31,26 @@ describe('Check projectSeqPlatformGroup page', () => {
       cy.get('.merging-criteria-table tr td').find('a').first().click();
     });
 
+    after(() => {
+      cy.get('select#useSeqPlatformGroup').select('USE_OTP_DEFAULT', { force: true });
+
+      cy.wait('@updateProjectSeqPlatformGroup').then(() => {
+        cy.get('input#libPrepKit').check();
+      });
+    });
+
     it('should visit the index page', () => {
       cy.location('pathname').should('match', /^\/projectSeqPlatformGroup\/index/);
     });
 
     it('should update Library Prep. Kit', () => {
-      cy.get('input#libPrepKit').should('not.be.checked');
-      cy.get('input#libPrepKit').check();
+      cy.get('input#libPrepKit').should('be.checked');
+      cy.get('input#libPrepKit').uncheck();
 
       cy.wait('@updateProjectSeqPlatformGroup').then((interception) => {
         expect(interception.response.statusCode).to.eq(302);
         cy.location('pathname').should('match', /^\/projectSeqPlatformGroup\/index/);
-        cy.get('input#libPrepKit').should('be.checked');
+        cy.get('input#libPrepKit').should('not.be.checked');
       });
     });
 
