@@ -240,16 +240,20 @@ class MetaDataFieldsController implements CheckAndCall {
         withForm {
             flash.cmd = cmd
             try {
-                assert !cmd.hasErrors()
-                seqTypeService.createMultiple(cmd.seqTypeName, cmd.libraryLayouts, [
-                        dirName          : cmd.dirName,
-                        displayName      : cmd.displayName,
-                        singleCell       : cmd.singleCell,
-                        hasAntibodyTarget: cmd.hasAntibodyTarget,
-                        needsBedFile     : cmd.needsBedFile,
-                ], cmd.aliases)
-                flash.cmd = null
-                flash.message = new FlashMessage(g.message(code: "dataFields.seqType.create.success") as String)
+                if (cmd.hasErrors()) {
+                    flash.message = new FlashMessage(g.message(code: "dataFields.seqType.create.failed") as String, cmd.errors)
+                    flash.cmd = cmd
+                } else {
+                    seqTypeService.createMultiple(cmd.seqTypeName, cmd.libraryLayouts, [
+                            dirName          : cmd.dirName,
+                            displayName      : cmd.displayName,
+                            singleCell       : cmd.singleCell,
+                            hasAntibodyTarget: cmd.hasAntibodyTarget,
+                            needsBedFile     : cmd.needsBedFile,
+                    ], cmd.aliases)
+                    flash.cmd = null
+                    flash.message = new FlashMessage(g.message(code: "dataFields.seqType.create.success") as String)
+                }
             } catch (ValidationException e) {
                 flash.message = new FlashMessage(g.message(code: "dataFields.seqType.create.failed") as String, e.errors)
             } catch (AssertionError e) {
