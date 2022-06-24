@@ -233,10 +233,10 @@ class EgaSubmissionService {
     List deleteSampleSubmissionObjects(EgaSubmission submission) {
         List samplesWithSeqType = []
         submission.samplesToSubmit*.seqType.unique()*.refresh()
-        submission.samplesToSubmit.each { SampleSubmissionObject it ->
-            submission.samplesToSubmit.remove(it)
+        submission.samplesToSubmit = submission.samplesToSubmit.findAll { SampleSubmissionObject it ->
             samplesWithSeqType.add("${it.sample.id}-${it.seqType.id}")
             it.delete(flush: false)
+            return !it
         }
         submission.selectionState = EgaSubmission.SelectionState.SELECT_SAMPLES
         submission.save(flush: true)
