@@ -290,7 +290,7 @@ class AlignmentInfoService {
                     }
                     return result
                 case AlignmentDeciderBeanName.NO_ALIGNMENT:
-                    return []
+                    return [:]
                 default:
                     throw new IllegalArgumentException("Unknown Alignment configured: \"${project.alignmentDeciderBeanName}\"")
             }

@@ -32,10 +32,19 @@ describe('Check projectSeqPlatformGroup page', () => {
     });
 
     after(() => {
+      cy.intercept('/projectSeqPlatformGroup/index*').as('projectSeqPlatformGroupIndex');
       cy.get('select#useSeqPlatformGroup').select('USE_OTP_DEFAULT', { force: true });
 
       cy.wait('@updateProjectSeqPlatformGroup').then(() => {
         cy.get('input#libPrepKit').check();
+
+        cy.visit('/alignmentConfigurationOverview/index');
+        cy.get('.merging-criteria-table').contains('td', 'ChIP PAIRED bulk').find('a').click();
+
+        cy.wait('@projectSeqPlatformGroupIndex').then(() => {
+          cy.get('.seqPlatformGroupSelector button[type=submit].btn-danger').click();
+          cy.get('select#useSeqPlatformGroup').select('USE_OTP_DEFAULT', { force: true });
+        });
       });
     });
 
@@ -75,6 +84,33 @@ describe('Check projectSeqPlatformGroup page', () => {
         expect(interception.response.statusCode).to.eq(302);
         cy.location('pathname').should('match', /^\/projectSeqPlatformGroup\/index/);
         cy.get('.list-group.list-group-flush').should('contain', 'Illumina HiSeq 2000 v1');
+      });
+    });
+
+    it('should copy seq. platform group into another merging criteria', () => {
+      cy.intercept('/projectSeqPlatformGroup/index*').as('projectSeqPlatformGroupIndex');
+      cy.intercept('/projectSeqPlatformGroup/searchForSeqPlatformGroups*').as('searchForSeqPlatformGroups');
+      cy.intercept('/projectSeqPlatformGroup/copySeqPlatformGroup*').as('copySeqPlatformGroup');
+      cy.visit('/alignmentConfigurationOverview/index');
+      cy.get('.merging-criteria-table').contains('td', 'ChIP PAIRED bulk').find('a').click();
+
+      cy.wait('@projectSeqPlatformGroupIndex').then(() => {
+        cy.get('select#useSeqPlatformGroup').select('USE_PROJECT_SEQ_TYPE_SPECIFIC', { force: true });
+
+        cy.get('select#selectedProjectToCopyFrom').select('ExampleProject', { force: true });
+        cy.get('select#selectedSeqTypeToCopyFrom').select('10x_scRNA PAIRED single cell', { force: true });
+
+        cy.wait('@searchForSeqPlatformGroups').then((interception) => {
+          expect(interception.response.statusCode).to.eq(302);
+          cy.location('pathname').should('match', /^\/projectSeqPlatformGroup\/index/);
+          cy.get('button.copySeqPlatformGroup').first().click();
+
+          cy.wait('@copySeqPlatformGroup').then((intc) => {
+            expect(intc.response.statusCode).to.eq(302);
+            cy.location('pathname').should('match', /^\/projectSeqPlatformGroup\/index/);
+            cy.get('.list-group.list-group-flush').should('contain', 'Illumina HiSeq 2000 v1');
+          });
+        });
       });
     });
 

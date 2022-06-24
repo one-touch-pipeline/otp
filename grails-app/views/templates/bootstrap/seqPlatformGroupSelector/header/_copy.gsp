@@ -40,7 +40,7 @@ parameter to set:
             <g:hiddenField name="mergingCriteria.id" value="${mergingCriteria?.id}"/>
             <g:hiddenField name="seqPlatformGroup.id" value="${seqPlatformGroup?.id}"/>
             <div class="row justify-content-start pl-3">
-                <button class="btn btn-outline-secondary" type="submit" ${(seqPlatformGroupAlreadyInUse) ? "disabled" : ""}>
+                <button class="btn btn-outline-secondary copySeqPlatformGroup" type="submit" ${(seqPlatformGroupAlreadyInUse) ? "disabled" : ""}>
                     <i class="bi bi-arrow-left"></i> <i class="bi bi-clipboard"></i>
                 </button>
             </div>
