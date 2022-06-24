@@ -105,6 +105,8 @@ perl -0pi -e "${prefix}alterSequence${suffix}" $changelogPath
 perl -0pi -e "${prefix}dropIndex.*\n\n\s{8}createIndex.*\{(\n\s{12}column.*\n)+\s{8}\}${suffix}" $changelogPath
 perl -0pi -e "${prefix}dropUniqueConstraint.*\n\n\s{8}addUniqueConstraint${suffix}" $changelogPath
 perl -0pi -e "${prefix}addUniqueConstraint.*columnNames: \"((alignment_pass_id)|(merging_pass_id))\".*tableName: \"abstract_bam_file\"${suffix}" $changelogPath
+#exclude the wrong listed dropUniqueConstraint for UC_EXTERNAL_WORKFLOW_CONFIG_FRAGMENTNAME_COL
+perl -0pi -e "${prefix}dropUniqueConstraint.*constraintName.*\"UC_EXTERNAL_WORKFLOW_CONFIG_FRAGMENTNAME_COL\", tableName: \"external_workflow_config_fragment\"${suffix}"  $changelogPath
 perl -0pi -e "s/databaseChangeLog = \{\n\}\n//g" $changelogPath
 # delete local usernames
 perl -0pi -e "s/author: \".*?\"/author: \"\"/g" $changelogPath

@@ -65,7 +65,7 @@ class ExternalWorkflowConfigFragment implements Commentable, Deprecateable<Exter
     }
 
     static mapping = {
-        name index: "external_workflow_config_fragment_name_idx" // It is an unique constraints where 'deprecation_date IS NULL'
+        name index: "external_workflow_config_fragment_name_idx", unique: true // It is an unique constraints where 'deprecation_date IS NULL'
         configValues type: "text"
         comment cascade: "all-delete-orphan"
     }
