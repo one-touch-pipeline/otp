@@ -30,6 +30,7 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContex
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrainService
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.util.spreadsheet.Cell
 import de.dkfz.tbi.util.spreadsheet.validation.*
@@ -58,6 +59,7 @@ class SpeciesValidator extends ValueTuplesValidator<MetadataValidationContext> i
                 "If the PID already exists, the main species has to match.",
                 "All entries of a sample must have the same mixed-in species.",
                 "If the sample already exists, the mixed-in species have to match.",
+                "The main species must match the species set for the project.",
         ]
     }
 
@@ -119,6 +121,8 @@ class SpeciesValidator extends ValueTuplesValidator<MetadataValidationContext> i
             Sample sample = validatorHelperService.findExistingSampleForValueTuple(it)
             Individual individual = CollectionUtils.atMostOneElement(Individual.findAllByPid(pid))
 
+            Project project = Project.getByNameOrNameInMetadataFiles(it.getValue(PROJECT.name()))
+
             new Value(
                     sampleType,
                     sample,
@@ -126,6 +130,7 @@ class SpeciesValidator extends ValueTuplesValidator<MetadataValidationContext> i
                     individual,
                     species,
                     mixedInSpecies,
+                    project,
                     it,
             )
         }
@@ -179,6 +184,22 @@ class SpeciesValidator extends ValueTuplesValidator<MetadataValidationContext> i
                 )
             }
         }
+
+        values.groupBy { [it.species, it.project] }.each { List list, List<Value> value ->
+            SpeciesWithStrain species = list.first()
+            Project project = list.last()
+
+            if (project && species && !(species in project.speciesWithStrains)) {
+                String message = project.speciesWithStrains ?
+                        "The main species '${species}' doesn't match the species '${(project.speciesWithStrains).join(", ")}' " +
+                                "set for the project '${project}'." :
+                        "No allowed species are set for project '${project}'."
+                context.addProblem(value.collectMany { it.valueTuple.cells } as Set, LogLevel.ERROR,
+                        message,
+                        "The main species must match the species set for the project."
+                )
+            }
+        }
     }
 }
 
@@ -190,5 +211,6 @@ class Value {
     Individual individual
     SpeciesWithStrain species
     Set<SpeciesWithStrain> mixedInSpecies
+    Project project
     ValueTuple valueTuple
 }

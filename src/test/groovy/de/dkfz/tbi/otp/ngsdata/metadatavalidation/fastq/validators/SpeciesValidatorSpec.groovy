@@ -32,6 +32,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.taxonomy.*
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
@@ -144,6 +145,46 @@ unknownSampleName\tMOUSE\t
                 new Problem(context.spreadsheet.dataRows[18].cells as Set, LogLevel.ERROR,
                         "Mixed-in species 'Dolphin (Delphinus delphis) [No strain available],Mouse (Mus musculus) [No strain available]' for sample '7 d' doesn't match with existing sample with mixed-in species 'Human (Homo sapiens) [No strain available],Mouse (Mus musculus) [No strain available]'.",
                         "If the sample already exists, the mixed-in species have to match."),
+        ]
+        TestCase.assertContainSame(context.problems, expectedProblems)
+    }
+
+    void "test validate that species is set for project"() {
+        given:
+        SpeciesValidator validator = new SpeciesValidator()
+        validator.speciesWithStrainService = new SpeciesWithStrainService()
+        validator.sampleIdentifierService = new SampleIdentifierService()
+        validator.validatorHelperService = new ValidatorHelperService()
+
+        Strain strain = createStrain(name: "No strain available")
+        SpeciesWithStrain human = createSpeciesWithStrain(importAlias: ["human"] as Set,
+                species: createSpecies(scientificName: "Homo sapiens", speciesCommonName: createSpeciesCommonName(name: "Human")), strain: strain)
+        SpeciesWithStrain mouse = createSpeciesWithStrain(importAlias: ["mouse"] as Set,
+                species: createSpecies(scientificName: "Mus musculus", speciesCommonName: createSpeciesCommonName(name: "Mouse")), strain: strain)
+
+        createSampleIdentifier(name: "sampleHuman", sample: createSample(individual: createIndividual(species: human), mixedInSpecies: []))
+        createSampleIdentifier(name: "sampleMouse", sample: createSample(individual: createIndividual(species: mouse), mixedInSpecies: []))
+
+        Project projectForSpeciesHuman = createProject(name: 'projectForSpeciesHuman', speciesWithStrains: [human] as Set)
+        Project projectWithoutSpecies = createProject(name: 'projectWithoutSpecies')
+
+        MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
+${SAMPLE_NAME}\t${SPECIES}\t${PROJECT}
+sampleHuman\tHUMAN\t${projectForSpeciesHuman.name}
+sampleHuman\tHUMAN\t${projectWithoutSpecies.name}
+sampleMouse\tmouse\t${projectForSpeciesHuman.name}
+""")
+        when:
+        validator.validate(context)
+
+        then:
+        Collection<Problem> expectedProblems = [
+                new Problem(context.spreadsheet.dataRows[1].cells as Set, LogLevel.ERROR,
+                        "No allowed species are set for project 'projectWithoutSpecies'.",
+                        "The main species must match the species set for the project."),
+                new Problem(context.spreadsheet.dataRows[2].cells as Set, LogLevel.ERROR,
+                        "The main species 'Mouse (Mus musculus) [No strain available]' doesn't match the species 'Human (Homo sapiens) [No strain available]' set for the project 'projectForSpeciesHuman'.",
+                        "The main species must match the species set for the project."),
         ]
         TestCase.assertContainSame(context.problems, expectedProblems)
     }
