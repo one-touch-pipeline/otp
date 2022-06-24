@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.job.scheduler
 
 import grails.core.GrailsApplication
+import grails.gorm.transactions.Transactional
 import groovy.util.logging.Slf4j
 import org.slf4j.Logger
 import org.slf4j.MDC
@@ -748,6 +749,7 @@ class SchedulerService {
     /**
      * Creates a Job for one ProcessingStep.
      */
+    @Transactional
     private Job createJob(ProcessingStep step) {
         Job job = grailsApplication.mainContext.getBean(step.jobDefinition.bean) as Job
         job.processingStep = step

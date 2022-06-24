@@ -65,13 +65,15 @@ Map speciesMap = [
         "Mus musculus": CollectionUtils.exactlyOneElement(SpeciesWithStrain.where { species.scientificName == "Mus musculus" && strain.name == "Unknown" }.list()),
 ]
 
-List<List<String>> rgs = referenceGenomeSpecies.split("\n").collect { it.split("\\|")*.trim() }
-rgs.each {
-    ReferenceGenome referenceGenome = CollectionUtils.atMostOneElement(ReferenceGenome.findAllByName(it[0].trim()))
-    if (referenceGenome) {
-        Set<SpeciesWithStrain> species = it[1].split(" \\+ ").collect { String speciesName -> speciesMap[speciesName] }
-        referenceGenome.species = species as Set
-        referenceGenome.save(flush: true)
+ReferenceGenome.withTransaction {
+    List<List<String>> rgs = referenceGenomeSpecies.split("\n").collect { it.split("\\|")*.trim() }
+    rgs.each {
+        ReferenceGenome referenceGenome = CollectionUtils.atMostOneElement(ReferenceGenome.findAllByName(it[0].trim()))
+        if (referenceGenome) {
+            Set<SpeciesWithStrain> species = it[1].split(" \\+ ").collect { String speciesName -> speciesMap[speciesName] }
+            referenceGenome.species = species as Set
+            referenceGenome.save(flush: true)
+        }
     }
 }
 []

@@ -20,6 +20,7 @@
  * SOFTWARE.
  */
 
+import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.OtpRuntimeException
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.FileService
@@ -28,6 +29,8 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.StackTraceUtils
+import de.dkfz.tbi.otp.workflow.datainstallation.DataInstallationConditionalFailJob
+import de.dkfz.tbi.otp.workflow.datainstallation.DataInstallationWorkflow
 import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowError
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowMessageLog
@@ -63,12 +66,12 @@ WorkflowRun.withNewTransaction {
 
     Workflow workflow = CollectionUtils.atMostOneElement(Workflow.findAllByName(workflowName)) ?: new Workflow([
             name    : workflowName,
-            beanName: "dataInstallationWorkflow",
+            beanName: DataInstallationWorkflow.simpleName.uncapitalize(),
             enabled : true
     ]).save(flush: true)
 
     Closure createArtefact = { WorkflowRun producedBy, String outputRole ->
-        return new WorkflowArtefact([
+        WorkflowArtefact workflowArtefact = new WorkflowArtefact([
                 state       : WorkflowArtefact.State.SUCCESS,
                 producedBy  : producedBy,
                 outputRole  : outputRole,
@@ -77,6 +80,21 @@ WorkflowRun.withNewTransaction {
                 artefactType: ArtefactType.FASTQ,
                 displayName : "artefact ${WorkflowArtefact.count() + 1}\n${displayText}",
         ]).save(flush: true)
+
+        new SeqTrack([
+                sample               : seqTrack.sample,
+                seqType              : seqTrack.seqType,
+                run                  : seqTrack.run,
+                laneId               : SeqTrack.count() + 1,
+                sampleIdentifier     : "sample_${SeqTrack.count()}",
+                pipelineVersion      : seqTrack.pipelineVersion,
+                dataInstallationState: SeqTrack.DataProcessingState.FINISHED,
+                fastqcState          : SeqTrack.DataProcessingState.FINISHED,
+                libraryPreparationKit: seqTrack.libraryPreparationKit,
+                kitInfoReliability   : InformationReliability.KNOWN,
+                workflowArtefact     : workflowArtefact,
+        ]).save(flush: true)
+        return workflowArtefact
     }
 
     Closure createInputArtefact = { WorkflowRun input, String inputRole ->
@@ -103,7 +121,7 @@ WorkflowRun.withNewTransaction {
     Closure createWorkflowStep = { WorkflowRun workflowRun, WorkflowStep.State state, Map map = [:] ->
         WorkflowStep workflowStep = new WorkflowStep([
                 workflowRun: workflowRun,
-                beanName   : "copyOrLinkFastqsOfLaneJob",
+                beanName   : DataInstallationConditionalFailJob.simpleName.uncapitalize(),
                 state      : state,
                 clusterJobs: [] as Set,
         ] + map).save(flush: true)
@@ -199,7 +217,7 @@ WorkflowRun.withNewTransaction {
             case WorkflowRun.State.FAILED:
                 WorkflowStep step1 = createWorkflowStep(workflowRun, WorkflowStep.State.SUCCESS, [beanName: "conditionalFailJob"])
                 WorkflowStep step2 = createWorkflowStep(workflowRun, WorkflowStep.State.SUCCESS, [beanName: "copyJob", obsolete: true, previous: step1])
-                WorkflowStep step3 = createWorkflowStep(workflowRun, WorkflowStep.State.FAILED, [beanName: "validateJob",workflowError: createWorkflowError(), obsolete: true, previous: step2])
+                WorkflowStep step3 = createWorkflowStep(workflowRun, WorkflowStep.State.FAILED, [beanName: "validateJob", workflowError: createWorkflowError(), obsolete: true, previous: step2])
                 WorkflowStep step4 = createWorkflowStep(workflowRun, WorkflowStep.State.SUCCESS, [restartedFrom: step2, beanName: step2.beanName, previous: step3])
                 createSuccessClusterJob(step4, 1)
                 createFailedClusterJob(step4, 2)
