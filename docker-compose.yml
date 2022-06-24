@@ -86,7 +86,6 @@ networks:
   otp:
 
 volumes:
-  gradle_dependencies:
   db_data:
   ldap_data:
   ldap_config:
