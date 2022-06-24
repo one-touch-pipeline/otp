@@ -198,7 +198,7 @@ $(() => {
       });
 
       $w
-        .load(() => {
+        .on('load', () => {
           setPositionAndSize();
           repositionStickyHead();
         })

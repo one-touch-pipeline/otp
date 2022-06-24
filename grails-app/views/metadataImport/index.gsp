@@ -173,13 +173,13 @@
                 </tr>
             </g:if>
         </table>
-        <g:submitButton name="submit" value="Validate"/>
+        <g:submitButton id="validate" name="submit" value="Validate"/>
         <g:each var="context" in="${contexts}">
             <g:hiddenField name="md5" value="${context?.metadataFileMd5sum}"/>
         </g:each>
         <sec:ifAllGranted roles="ROLE_OPERATOR">
             <g:if test="${isValidated && !(problems > LogLevel.WARNING.intValue())}">
-                <g:submitButton name="submit" value="Import"/>
+                <g:submitButton id="import" name="submit" value="Import"/>
             </g:if>
             <g:if test="${problems == LogLevel.WARNING.intValue()}">
                 <label>
