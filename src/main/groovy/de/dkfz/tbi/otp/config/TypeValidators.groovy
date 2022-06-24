@@ -94,6 +94,8 @@ enum TypeValidators {
 
     GUI_ANNOTATION({ GuiAnnotation.getByName(it) }, { GuiAnnotation.values()*.name() }),
 
+    DEFAULT_FASTQC_TYPE({FastqcType.getByname(it)}, {FastqcType.values()*.name() }),
+
     CRONJOB_CLASS({ it in AbstractScheduledJob.ALL_JOB_CLASSES*.canonicalName }, { AbstractScheduledJob.ALL_JOB_CLASSES*.canonicalName }),
 
     private final Closure validator

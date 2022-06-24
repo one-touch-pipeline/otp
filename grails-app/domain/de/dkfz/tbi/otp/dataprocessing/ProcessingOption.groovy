@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.config.FastqcType
 import de.dkfz.tbi.otp.config.TypeValidators
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.Entity
@@ -234,6 +235,10 @@ class ProcessingOption implements Entity {
         COMMAND_FASTQC(
                 "command for fastqc",
                 Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
+        ),
+        DEFAULT_FASTQC_TYPE(
+                "default fastqc type",
+                Necessity.REQUIRED, FastqcType.BASH.name(), TypeValidators.SINGLE_WORD_TEXT, TypeValidators.DEFAULT_FASTQC_TYPE
         ),
         COMMAND_ACTIVATION_SAMTOOLS(
                 "command to enable the module containing samtools (executed in Bash, may be empty if not required)",

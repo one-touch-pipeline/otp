@@ -19,32 +19,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflowExecution
+package de.dkfz.tbi.otp.config
 
-import groovy.transform.ToString
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 
-import de.dkfz.tbi.otp.ngsdata.SeqType
-import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.otp.utils.Deprecateable
-import de.dkfz.tbi.otp.utils.Entity
+/**
+ * @see ProcessingOption.OptionName#DEFAULT_FASTQC_TYPE
+ */
+enum FastqcType {
+    BASH, WES,
 
-@ToString(includeNames = true, includePackage = false)
-class WorkflowVersionSelector implements Deprecateable<WorkflowVersionSelector>, Entity {
-
-    Project project
-    SeqType seqType
-
-    WorkflowVersion workflowVersion
-    WorkflowVersionSelector previous
-
-    static Closure constraints = {
-        previous nullable: true
-        deprecationDate nullable: true
-        seqType nullable: true
-    }
-
-    @Override
-    String toString() {
-        return "WVS ${deprecationDate ? "[DEPRECATED]" : ""}: (${project} ${seqType}) -> (${workflowVersion})"
+    static FastqcType getByName(String name) {
+        return values().find {
+            it.name() == name
+        }
     }
 }
