@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2022 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,28 +20,4 @@
  * SOFTWARE.
  */
 
-import de.dkfz.tbi.otp.ngsdata.FileType
-
-seed = {
-    [
-            '.fastq',
-            '_fastq',
-    ].each { String pattern ->
-        fileType(
-                meta: [
-                        key   : [
-                                'type',
-                                'subType',
-                                'vbpPath',
-                                'signature',
-                        ],
-                        update: 'false',
-                ],
-
-                type: FileType.Type.SEQUENCE,
-                subType: 'fastq',
-                vbpPath: '/sequence/',
-                signature: pattern,
-        )
-    }
-}
+DROP TABLE seed_me_checksum;

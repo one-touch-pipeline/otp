@@ -25,7 +25,6 @@ import grails.core.GrailsApplication
 import grails.plugin.springsecurity.acl.*
 import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
-import seedme.SeedMeChecksum
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.ngsdata.*
@@ -180,7 +179,7 @@ class EntityIntegrationSpec extends Specification {
     void "test that all domain classes implement Entity"() {
         setup:
         List<Class> dbViews = [AggregateSequences, Sequence]
-        List<Class> nonOtpDomains = [AclClass, AclEntry, AclObjectIdentity, AclSid, SeedMeChecksum]
+        List<Class> nonOtpDomains = [AclClass, AclEntry, AclObjectIdentity, AclSid]
 
         when:
         List<String> domainsWithoutEntity = grailsApplication.domainClasses.findAll {

@@ -165,7 +165,6 @@ configurator.doConfigure(new ByteArrayInputStream(jobLogConfig.getBytes(Standard
 
 logger("de.dkfz.tbi.otp.infrastructure.FileService.WAITING", DEBUG, ['WAIT_TO_FILE_SYSTEM'], false)
 logger("de.dkfz.tbi.otp", DEBUG, appenderToUse, false)
-logger("seedme", DEBUG, appenderToUse, false)
 logger("liquibase", INFO, appenderToUse, false)
 logger("grails.plugin.databasemigration", INFO, appenderToUse, false)
 logger("org.hibernate.SQL", ERROR, appenderToUse, false)

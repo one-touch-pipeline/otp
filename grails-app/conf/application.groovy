@@ -162,7 +162,6 @@ grails.plugin.databasemigration.excludeObjects = [
         'aggregate_sequences',
         'meta_data_key',
         'sequences',
-        'seed_me_checksum',
 ]
 environments {
     WORKFLOW_TEST {
@@ -219,16 +218,6 @@ environments {
     }
     test {
         grails.mail.disabled=true
-    }
-}
-
-//configure seed
-grails.plugin.seed.skipPlugins=true
-grails.plugin.seed.autoSeed=false
-environments {
-    production {
-        //since the check if it is deployed in a war fail, the plugin needs the path relative to the working directory
-        grails.plugin.seed.root="webapps/otp/WEB-INF/classes/seed"
     }
 }
 

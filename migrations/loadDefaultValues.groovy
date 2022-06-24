@@ -54,4 +54,12 @@ databaseChangeLog = {
     changeSet(author: "", id: "ewc-roddy-pancancer", runOnChange: "true") {
         sqlFile(path: 'changelogs/defaultValues/ewc-roddy-pancancer.sql')
     }
+
+    changeSet(author: "", id: "file-types", runOnChange: "true") {
+        sqlFile(path: 'changelogs/defaultValues/file-types.sql')
+    }
+
+    changeSet(author: "", id: "pipeline", runOnChange: "true") {
+        sqlFile(path: 'changelogs/defaultValues/pipeline.sql')
+    }
 }

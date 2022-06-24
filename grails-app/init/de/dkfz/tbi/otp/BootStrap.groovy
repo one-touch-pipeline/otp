@@ -26,7 +26,6 @@ import grails.core.GrailsApplication
 import grails.plugin.springsecurity.SecurityFilterPosition
 import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.util.Environment
-import seedme.SeedService
 
 import de.dkfz.odcf.audit.impl.DicomAuditLogger
 import de.dkfz.odcf.audit.xml.layer.EventIdentification.EventOutcomeIndicator
@@ -43,7 +42,6 @@ class BootStrap {
     PropertiesValidationService propertiesValidationService
     SchedulerService schedulerService
     WorkflowSystemService workflowSystemService
-    SeedService seedService
 
     def init = { servletContext ->
         // load the shutdown service
@@ -52,7 +50,6 @@ class BootStrap {
         propertiesValidationService.validateStartUpProperties()
 
         if ([Environment.PRODUCTION, Environment.DEVELOPMENT].contains(Environment.current)) {
-            seedService.installSeedData()
             UserService.createFirstAdminUserIfNoUserExists()
         }
 
