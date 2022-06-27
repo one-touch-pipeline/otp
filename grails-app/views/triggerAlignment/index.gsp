@@ -33,15 +33,15 @@
         </nav>
 
         <div
-            <g:render template="./components/inputArea" model="[tabs: ['project', 'pid', 'lane', 'ilse'], seqTypes: seqTypes]"/>
+            <g:render template="/triggerAlignment/components/inputArea" model="[tabs: ['project', 'pid', 'lane', 'ilse'], seqTypes: seqTypes]"/>
         </div>
 
         <div class="mt-3">
-            <g:render template="./components/warnArea" model="[warnings: warnings]"/>
+            <g:render template="/triggerAlignment/components/warnArea" model="[warnings: warnings]"/>
         </div>
 
         <div class="mt-3">
-            <g:render template="./components/checkArea" model="[seqTracks: seqTracks]"/>
+            <g:render template="/triggerAlignment/components/checkArea" model="[seqTracks: seqTracks]"/>
         </div>
 
         <nav class="navbar navbar-light bg-light mt-3">
@@ -62,7 +62,7 @@
         </nav>
 
         <div class="mt-3">
-            <g:render template="./components/resultArea"/>
+            <g:render template="/triggerAlignment/components/resultArea"/>
         </div>
     </div>
 </body>
