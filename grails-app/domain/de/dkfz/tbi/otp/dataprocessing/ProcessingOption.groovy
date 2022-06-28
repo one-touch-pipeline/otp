@@ -236,10 +236,7 @@ class ProcessingOption implements Entity {
                 "command for fastqc",
                 Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
         ),
-        DEFAULT_FASTQC_TYPE(
-                "default fastqc type",
-                Necessity.REQUIRED, FastqcType.BASH.name(), TypeValidators.SINGLE_WORD_TEXT, TypeValidators.DEFAULT_FASTQC_TYPE
-        ),
+
         COMMAND_ACTIVATION_SAMTOOLS(
                 "command to enable the module containing samtools (executed in Bash, may be empty if not required)",
                 Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
@@ -601,6 +598,10 @@ class ProcessingOption implements Entity {
         NEWS_BANNER(
                 "Text showing in the news banner",
                 Necessity.OPTIONAL, "", TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
+        ),
+        DEFAULT_FASTQC_TYPE(
+                "default fastqc workflow type",
+                Necessity.OPTIONAL, FastqcType.BASH.name(), TypeValidators.SINGLE_WORD_TEXT_OPTIONAL, TypeValidators.DEFAULT_FASTQC_TYPE
         ),
 
         private final String description
