@@ -55,7 +55,7 @@ SampleType sampleType = CollectionUtils.exactlyOneElement(SampleType.findAllByNa
 Sample sample = CollectionUtils.exactlyOneElement(Sample.findAllByIndividualAndSampleType(individual, sampleType))
 MergingWorkPackage mergingWorkPackage = CollectionUtils.exactlyOneElement(MergingWorkPackage.findAllBySampleAndSeqType(sample, seqType))
 
-SeqTrack.withTransaction {
+MergingWorkPackage.withTransaction {
     mergingWorkPackage.referenceGenome = referenceGenome
     mergingWorkPackage.statSizeFileName = statSizeFileName
     mergingWorkPackage.save(flush: true)

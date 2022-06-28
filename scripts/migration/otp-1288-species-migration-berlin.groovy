@@ -45,7 +45,7 @@ SpeciesWithStrain speciesWithStrain = de.dkfz.tbi.otp.utils.CollectionUtils.exac
     }
 })
 
-TransactionUtils.withNewTransaction { session ->
+Individual.withTransaction { session ->
     Individual.list().each { Individual individual ->
         individual.species = speciesWithStrain
         individual.save(flush: false)

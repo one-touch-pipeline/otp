@@ -22,11 +22,7 @@
 package migration
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
-import de.dkfz.tbi.otp.ngsdata.DataFile
-import de.dkfz.tbi.otp.ngsdata.Individual
-import de.dkfz.tbi.otp.ngsdata.MetaDataColumn
-import de.dkfz.tbi.otp.ngsdata.MetaDataEntry
-import de.dkfz.tbi.otp.ngsdata.Sample
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.TransactionUtils
@@ -198,7 +194,7 @@ String createString(Object entity, boolean isSample, List<SpeciesWithStrain> spe
     }
     value << "- imported at:"
     List<DataFile> dataFiles = DataFile.withCriteria {
-            'in'('seqTrack', bamFiles*.containedSeqTracks.flatten())
+        'in'('seqTrack', bamFiles*.containedSeqTracks.flatten())
     }
     dataFiles*.dateCreated.collect {
         TimeFormats.DATE.getFormattedDate(it)

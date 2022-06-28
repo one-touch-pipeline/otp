@@ -43,55 +43,58 @@ MergingCriteriaService mergingCriteriaService = ctx.mergingCriteriaService
 Pipeline pipeline = exactlyOneElement(Pipeline.findAllByName(oldPipelineName))
 Workflow workflow = exactlyOneElement(Workflow.findAllByName(newWorkflowName))
 List<WorkflowVersion> workflowVersions = WorkflowVersion.findAllByWorkflow(workflow)
+WorkflowVersionSelector.withTransaction {
+    RoddyWorkflowConfig.findAllWhere(
+            pipeline: pipeline,
+            obsoleteDate: null,
+            individual: null,
+    ).each { RoddyWorkflowConfig rwc ->
 
-RoddyWorkflowConfig.findAllWhere(
-        pipeline: pipeline,
-        obsoleteDate: null,
-        individual: null,
-).each { RoddyWorkflowConfig rwc ->
+        String version = rwc.programVersion.split(":").last()
+        WorkflowVersion workflowVersion = workflowVersions.find { it.workflowVersion == version }
+        if (!workflowVersion) {
+            println "WARNING: Workflow version '${version}' for '${rwc.project} ${rwc.seqType}' could not be found, skipping."
+            return
+        }
 
-    String version = rwc.programVersion.split(":").last()
-    WorkflowVersion workflowVersion = workflowVersions.find { it.workflowVersion == version }
-    if (!workflowVersion) {
-        println "WARNING: Workflow version '${version}' for '${rwc.project} ${rwc.seqType}' could not be found, skipping."
-        return
+        new WorkflowVersionSelector(
+                project: rwc.project,
+                seqType: rwc.seqType,
+                workflowVersion: workflowVersion,
+        ).save(flush: true)
     }
-
-    new WorkflowVersionSelector(
-            project: rwc.project,
-            seqType: rwc.seqType,
-            workflowVersion: workflowVersion,
-    ).save(flush: true)
 }
 
 List<ReferenceGenome> allUsedReferenceGenomes = []
+ReferenceGenomeSelector.withTransaction {
+    ReferenceGenomeProjectSeqType.findAllBySeqTypeInListAndDeprecatedDateIsNull(seqTypes)
+            .groupBy { [it.project, it.seqType, it.referenceGenome.species] }
+            .each { _, List<ReferenceGenomeProjectSeqType> rgpsts ->
 
-ReferenceGenomeProjectSeqType.findAllBySeqTypeInListAndDeprecatedDateIsNull(seqTypes)
-        .groupBy { [it.project, it.seqType, it.referenceGenome.species] }
-        .each { _, List<ReferenceGenomeProjectSeqType> rgpsts ->
-
-            ReferenceGenomeProjectSeqType rgpst = rgpsts.first()
-            if (rgpsts*.referenceGenome.unique().size() > 1) {
-                println "WARNING: multiple refernce genomes found for '${rgpst.project} ${rgpst.seqType} ${rgpst.referenceGenome.species.join("+")}', using first one:"
-                rgpsts*.referenceGenome.each {
-                    println "    ${it}"
+                ReferenceGenomeProjectSeqType rgpst = rgpsts.first()
+                if (rgpsts*.referenceGenome.unique().size() > 1) {
+                    println "WARNING: multiple refernce genomes found for '${rgpst.project} ${rgpst.seqType} ${rgpst.referenceGenome.species.join("+")}', using first one:"
+                    rgpsts*.referenceGenome.each {
+                        println "    ${it}"
+                    }
                 }
+
+                new ReferenceGenomeSelector(
+                        project: rgpst.project,
+                        seqType: rgpst.seqType,
+                        species: new HashSet(rgpst.referenceGenome.species),
+                        workflow: workflow,
+                        referenceGenome: rgpst.referenceGenome,
+                ).save(flush: true)
+
+                allUsedReferenceGenomes.add(rgpst.referenceGenome)
             }
-
-            new ReferenceGenomeSelector(
-                    project: rgpst.project,
-                    seqType: rgpst.seqType,
-                    species: new HashSet(rgpst.referenceGenome.species),
-                    workflow: workflow,
-                    referenceGenome: rgpst.referenceGenome,
-            ).save(flush: true)
-
-            allUsedReferenceGenomes.add(rgpst.referenceGenome)
-        }
-
-workflow.supportedSeqTypes = seqTypes
-workflow.allowedReferenceGenomes = allUsedReferenceGenomes as Set
-workflow.save(flush: true)
+}
+Workflow.withTransaction {
+    workflow.supportedSeqTypes = seqTypes
+    workflow.allowedReferenceGenomes = allUsedReferenceGenomes as Set
+    workflow.save(flush: true)
+}
 seqTypes.each {
     mergingCriteriaService.createDefaultMergingCriteria(it)
 }

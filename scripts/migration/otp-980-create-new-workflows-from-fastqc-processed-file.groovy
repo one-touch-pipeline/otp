@@ -142,7 +142,6 @@ void migrateToNewWorkflow(
         }
     }
 }
-
 //=================================================
 
 List<List<Long>> seqTrackIdsWithDataFileCount = SeqTrack.executeQuery(

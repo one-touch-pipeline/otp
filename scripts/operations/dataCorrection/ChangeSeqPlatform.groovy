@@ -50,5 +50,5 @@ Run.withTransaction {
     }
 
     run.seqPlatform = newSeqPlatform
-    assert run.save(flush: true)
+    run.save(flush: true)
 }

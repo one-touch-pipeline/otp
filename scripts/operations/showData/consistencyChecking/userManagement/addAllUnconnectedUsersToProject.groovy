@@ -62,53 +62,54 @@ List<String> allUsernames = User.list()*.username
 
 List<UserProjectRole> newUPRs = []
 
-Project.list().sort { it.name }.each { Project project ->
-    println("Project: ${project.name}")
+UserProjectRole.withTransaction {
+    Project.list().sort { it.name }.each { Project project ->
+        println("Project: ${project.name}")
 
-    List<String> usernamesInProject = UserProjectRole.createCriteria().list {
-        eq("project", project)
-        user {
-            isNotNull("username")
-        }
-    }*.user.username
-    println(getSortedListInfo("Usernames of project:", usernamesInProject ?: []))
+        List<String> usernamesInProject = UserProjectRole.createCriteria().list {
+            eq("project", project)
+            user {
+                isNotNull("username")
+            }
+        }*.user.username
+        println(getSortedListInfo("Usernames of project:", usernamesInProject ?: []))
 
-    String groupDistinguishedName = ldapService.getDistinguishedNameOfGroupByGroupName(project.unixGroup)
-    List<String> usernamesInLdapGroup = ldapService.getGroupMembersByDistinguishedName(groupDistinguishedName)
-    println(getSortedListInfo("Username in LDAP group:", usernamesInLdapGroup ?: []))
+        String groupDistinguishedName = ldapService.getDistinguishedNameOfGroupByGroupName(project.unixGroup)
+        List<String> usernamesInLdapGroup = ldapService.getGroupMembersByDistinguishedName(groupDistinguishedName)
+        println(getSortedListInfo("Username in LDAP group:", usernamesInLdapGroup ?: []))
 
-    List<String> unconnectedUsernames = usernamesInLdapGroup - usernamesInProject
-    println(getSortedListInfo("Unconnected usernames:", unconnectedUsernames ?: []))
+        List<String> unconnectedUsernames = usernamesInLdapGroup - usernamesInProject
+        println(getSortedListInfo("Unconnected usernames:", unconnectedUsernames ?: []))
 
-    List<String> usersToConnect = unconnectedUsernames.intersect(allUsernames)
-    println(getSortedListInfo("Unconnected usernames with an OTP User:", usersToConnect ?: []))
-    println("\n")
-    usersToConnect.each { String username ->
-        if (!(username in blacklistedUsernames)) {
-            User user = CollectionUtils.exactlyOneElement(User.findAllByUsername(username))
-            newUPRs << new UserProjectRole(
-                    user: user,
-                    project: project,
-                    projectRoles: projectRoles,
-                    enabled: enabled,
-                    accessToOtp: ldapService.isUserInLdapAndActivated(user),
-                    accessToFiles: accessToFiles,
-                    manageUsers: manageUsers,
-                    manageUsersAndDelegate: manageUsersAndDelegate,
-                    receivesNotifications: receivesNotifications,
-            )
+        List<String> usersToConnect = unconnectedUsernames.intersect(allUsernames)
+        println(getSortedListInfo("Unconnected usernames with an OTP User:", usersToConnect ?: []))
+        println("\n")
+        usersToConnect.each { String username ->
+            if (!(username in blacklistedUsernames)) {
+                User user = CollectionUtils.exactlyOneElement(User.findAllByUsername(username))
+                newUPRs << new UserProjectRole(
+                        user: user,
+                        project: project,
+                        projectRoles: projectRoles,
+                        enabled: enabled,
+                        accessToOtp: ldapService.isUserInLdapAndActivated(user),
+                        accessToFiles: accessToFiles,
+                        manageUsers: manageUsers,
+                        manageUsersAndDelegate: manageUsersAndDelegate,
+                        receivesNotifications: receivesNotifications,
+                )
+            }
         }
     }
+
+    println("UserProjectRoles to be created:")
+    println("username,project_name,project_role_name")
+    newUPRs.each { UserProjectRole userProjectRole ->
+        println("${userProjectRole.user.username},${userProjectRole.project.name},${userProjectRole.projectRoles.name.join(", ")}")
+    }
+
+    assert false: "Assert for debug, remove to continue"
+
+    newUPRs*.save(flush: true)
 }
-
-println("UserProjectRoles to be created:")
-println("username,project_name,project_role_name")
-newUPRs.each { UserProjectRole userProjectRole ->
-    println("${userProjectRole.user.username},${userProjectRole.project.name},${userProjectRole.projectRoles.name.join(", ")}")
-}
-
-assert false: "Assert for debug, remove to continue"
-
-newUPRs*.save(flush: true)
-
 ''
