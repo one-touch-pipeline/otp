@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.workflow.panCancer
 
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
@@ -37,6 +38,7 @@ import java.nio.file.Path
 @CompileStatic
 class PanCancerValidationJob extends AbstractRoddyClusterValidationJob implements PanCancerShared {
 
+    @Autowired
     RoddyBamFileService roddyBamFileService
 
     /**

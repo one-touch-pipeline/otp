@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
+import de.dkfz.tbi.otp.domainFactory.FastqcDomainFactory
 import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPancanFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
@@ -50,7 +51,8 @@ import java.time.Duration
 /**
  * Base class for roddy alignment workflows
  */
-abstract class AbstractRoddyAlignmentWorkflowSpec extends AbstractAlignmentWorkflowSpec implements UsingReferenceGenome, RoddyReferences, RoddyPancanFactory {
+abstract class AbstractRoddyAlignmentWorkflowSpec extends AbstractAlignmentWorkflowSpec implements UsingReferenceGenome, RoddyReferences, RoddyPancanFactory,
+        FastqcDomainFactory {
 
     //@Slf4j does not work with Spock containing tests and produces problems in closures
     @SuppressWarnings('PropertyName')
@@ -381,7 +383,8 @@ abstract class AbstractRoddyAlignmentWorkflowSpec extends AbstractAlignmentWorkf
 
         List<FastqcProcessedFile> fastqcProcessedFiles = dataFiles.collect { DataFile dataFile ->
             createFastqcProcessedFile([
-                    dataFile: dataFile
+                    dataFile         : dataFile,
+                    workDirectoryName: "workDirectoryName",
             ])
         }
 

@@ -23,8 +23,8 @@ package de.dkfz.tbi.otp.workflowExecution
 
 import grails.gorm.transactions.Transactional
 
-import de.dkfz.tbi.otp.workflowExecution.log.WorkflowError
 import de.dkfz.tbi.otp.utils.StackTraceUtils
+import de.dkfz.tbi.otp.workflowExecution.log.WorkflowError
 
 @Transactional
 class WorkflowStateChangeService {
@@ -119,7 +119,7 @@ class WorkflowStateChangeService {
         step.workflowRun.state = WorkflowRun.State.FAILED
         step.workflowRun.save(flush: true)
 
-        step.workflowError = new WorkflowError(message: throwable.message, stacktrace: StackTraceUtils.getStackTrace(throwable))
+        step.workflowError = new WorkflowError(message: throwable.message ?: '-', stacktrace: StackTraceUtils.getStackTrace(throwable))
         step.state = WorkflowStep.State.FAILED
         step.save(flush: true)
     }
