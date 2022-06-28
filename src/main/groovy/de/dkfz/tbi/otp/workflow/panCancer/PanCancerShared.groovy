@@ -28,9 +28,13 @@ import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
+import de.dkfz.tbi.otp.workflow.WorkflowShared
+import de.dkfz.tbi.otp.workflow.wgbs.WgbsWorkflow
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
-trait PanCancerShared {
+trait PanCancerShared extends WorkflowShared {
+
+    static final List<String> WORKFLOWS = [PanCancerWorkflow.WORKFLOW, WgbsWorkflow.WORKFLOW]
 
     @Autowired
     LsdfFilesService lsdfFilesService
@@ -39,19 +43,23 @@ trait PanCancerShared {
     ConcreteArtefactService concreteArtefactService
 
     List<SeqTrack> getSeqTracks(WorkflowStep workflowStep) {
-        return concreteArtefactService.<SeqTrack> getInputArtefacts(workflowStep, PanCancerWorkflow.INPUT_FASTQ, PanCancerWorkflow.WORKFLOW)
+        checkWorkflowName(workflowStep, WORKFLOWS)
+        return concreteArtefactService.<SeqTrack> getInputArtefacts(workflowStep, PanCancerWorkflow.INPUT_FASTQ)
     }
 
     List<FastqcProcessedFile> getFastqcProcessedFiles(WorkflowStep workflowStep) {
-        return concreteArtefactService.<FastqcProcessedFile> getInputArtefacts(workflowStep, PanCancerWorkflow.INPUT_FASTQC, PanCancerWorkflow.WORKFLOW)
+        checkWorkflowName(workflowStep, WORKFLOWS)
+        return concreteArtefactService.<FastqcProcessedFile> getInputArtefacts(workflowStep, PanCancerWorkflow.INPUT_FASTQC)
     }
 
     RoddyBamFile getBaseRoddyBamFile(WorkflowStep workflowStep) {
+        checkWorkflowName(workflowStep, WORKFLOWS)
         return concreteArtefactService.<RoddyBamFile> getInputArtefact(workflowStep,
-                PanCancerWorkflow.INPUT_BASE_BAM_FILE, PanCancerWorkflow.WORKFLOW, false)
+                PanCancerWorkflow.INPUT_BASE_BAM_FILE, false)
     }
 
     RoddyBamFile getRoddyBamFile(WorkflowStep workflowStep) {
-        return concreteArtefactService.<RoddyBamFile> getOutputArtefact(workflowStep, PanCancerWorkflow.OUTPUT_BAM, PanCancerWorkflow.WORKFLOW)
+        checkWorkflowName(workflowStep, WORKFLOWS)
+        return concreteArtefactService.<RoddyBamFile> getOutputArtefact(workflowStep, PanCancerWorkflow.OUTPUT_BAM)
     }
 }

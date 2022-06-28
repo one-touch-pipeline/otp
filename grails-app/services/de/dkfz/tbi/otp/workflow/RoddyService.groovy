@@ -31,7 +31,7 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 import java.nio.file.Path
 import java.nio.file.Paths
 
-class RoddyService {
+class RoddyService implements WorkflowShared {
 
     ConcreteArtefactService concreteArtefactService
 
@@ -59,6 +59,6 @@ class RoddyService {
     }
 
     RoddyBamFile getRoddyBamFile(WorkflowStep workflowStep) {
-        return concreteArtefactService.getOutputArtefact(workflowStep, OUTPUT_BAM, workflowStep.workflowRun.workflow.name)
+        return concreteArtefactService.getOutputArtefact(workflowStep, OUTPUT_BAM)
     }
 }

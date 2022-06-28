@@ -124,8 +124,8 @@ class FastqcExecuteClusterPipelineJobSpec extends Specification implements DataT
 
         job = new FastqcExecuteClusterPipelineJob()
         job.concreteArtefactService = Mock(ConcreteArtefactService) {
-            _ * getInputArtefact(step, INPUT_ROLE, WORKFLOW) >> seqTrack
-            _ * getOutputArtefacts(step, OUTPUT_ROLE, WORKFLOW) >> [fastqcProcessedFile1, fastqcProcessedFile2]
+            _ * getInputArtefact(step, INPUT_ROLE) >> seqTrack
+            _ * getOutputArtefacts(step, OUTPUT_ROLE) >> [fastqcProcessedFile1, fastqcProcessedFile2]
             0 * _
         }
         job.fileSystemService = new TestFileSystemService()

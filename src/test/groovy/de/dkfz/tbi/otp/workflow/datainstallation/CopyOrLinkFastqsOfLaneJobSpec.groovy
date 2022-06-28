@@ -50,7 +50,6 @@ class CopyOrLinkFastqsOfLaneJobSpec extends Specification implements DataTest, W
     private Path target1
     private Path target2
 
-    static final String WORKFLOW = DataInstallationWorkflow.WORKFLOW
     static final String OUTPUT_ROLE = DataInstallationWorkflow.OUTPUT_FASTQ
 
     @Override
@@ -66,7 +65,7 @@ class CopyOrLinkFastqsOfLaneJobSpec extends Specification implements DataTest, W
         fileSystem = FileSystems.default
         run = createWorkflowRun([
                 workflow: createWorkflow([
-                        name: WORKFLOW,
+                        name: DataInstallationWorkflow.WORKFLOW,
                 ]),
         ])
         step = createWorkflowStep([
@@ -94,7 +93,7 @@ class CopyOrLinkFastqsOfLaneJobSpec extends Specification implements DataTest, W
 
         job = new CopyOrLinkFastqsOfLaneJob()
         job.concreteArtefactService = Mock(ConcreteArtefactService) {
-            _ * getOutputArtefact(step, OUTPUT_ROLE, WORKFLOW) >> seqTrack
+            _ * getOutputArtefact(step, OUTPUT_ROLE) >> seqTrack
             0 * _
         }
         job.fileSystemService = new TestFileSystemService()

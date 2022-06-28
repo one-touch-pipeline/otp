@@ -27,9 +27,10 @@ import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
 import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
+import de.dkfz.tbi.otp.workflow.WorkflowShared
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
-trait FastqcShared {
+trait FastqcShared extends WorkflowShared{
 
     static final String WORKFLOW = FastqcWorkflow.WORKFLOW
     static final String INPUT_ROLE = FastqcWorkflow.INPUT_FASTQ
@@ -42,10 +43,12 @@ trait FastqcShared {
     ConcreteArtefactService concreteArtefactService
 
     SeqTrack getSeqTrack(WorkflowStep workflowStep) {
-        return concreteArtefactService.<SeqTrack> getInputArtefact(workflowStep, INPUT_ROLE, WORKFLOW)
+        checkWorkflowName(workflowStep, WORKFLOW)
+        return concreteArtefactService.<SeqTrack> getInputArtefact(workflowStep, INPUT_ROLE)
     }
 
     List<FastqcProcessedFile> getFastqcProcessedFiles(WorkflowStep workflowStep) {
-        return concreteArtefactService.<FastqcProcessedFile> getOutputArtefacts(workflowStep, OUTPUT_ROLE, WORKFLOW)
+        checkWorkflowName(workflowStep, WORKFLOW)
+        return concreteArtefactService.<FastqcProcessedFile> getOutputArtefacts(workflowStep, OUTPUT_ROLE)
     }
 }

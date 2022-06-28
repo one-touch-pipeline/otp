@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2022 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,29 +19,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflow.datainstallation
 
-import org.springframework.beans.factory.annotation.Autowired
+package de.dkfz.tbi.otp.workflow.wgbs
 
-import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
-import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
-import de.dkfz.tbi.otp.workflow.WorkflowShared
-import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
-
-trait DataInstallationShared extends WorkflowShared {
-
-    static final String WORKFLOW = DataInstallationWorkflow.WORKFLOW
-    static final String OUTPUT_ROLE = DataInstallationWorkflow.OUTPUT_FASTQ
-
-    @Autowired
-    LsdfFilesService lsdfFilesService
-
-    @Autowired
-    ConcreteArtefactService concreteArtefactService
-
-    SeqTrack getSeqTrack(WorkflowStep workflowStep) {
-        checkWorkflowName(workflowStep, WORKFLOW)
-        return concreteArtefactService.getOutputArtefact(workflowStep, OUTPUT_ROLE)
-    }
+// TODO: implement in otp-1640
+class WgbsWorkflow {
+    static final String WORKFLOW = "WGBS alignment"
+    static final String OUTPUT_FASTQ = "WGBS"
 }

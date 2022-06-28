@@ -47,7 +47,6 @@ class ConcreteArtefactServiceIntegrationSpec extends Specification implements Ro
     @Autowired
     ConcreteArtefactService service
 
-    static final String WORKFLOW = "WORKFLOW"
     static final String INPUT_ROLE = "INPUT_ROLE"
     static final String INPUT_ROLE1 = "INPUT_ROLE1"
     static final String INPUT_ROLE2 = "INPUT_ROLE2"
@@ -70,42 +69,8 @@ class ConcreteArtefactServiceIntegrationSpec extends Specification implements Ro
     static final String OUTPUT_ROLE3_2 = "OUTPUT_ROLE3_2"
 
     @Unroll
-    void "getInputArtefacts, when called for a workflow and an other workflow step with required = #required, should throw WrongWorkflowException"() {
-        given:
-        WorkflowStep step = createWorkflowStep()
-
-        when:
-        service.getInputArtefacts(step, INPUT_ROLE, WORKFLOW, required)
-
-        then:
-        thrown(WrongWorkflowException)
-
-        where:
-        required << [true, false]
-    }
-
-    @Unroll
-    void "getOutputArtefacts, when called for a workflow and an other workflow step with required = #required, should throw WrongWorkflowException"() {
-        given:
-        WorkflowStep step = createWorkflowStep()
-
-        when:
-        service.getOutputArtefacts(step, OUTPUT_ROLE, WORKFLOW, required)
-
-        then:
-        thrown(WrongWorkflowException)
-
-        where:
-        required << [true, false]
-    }
-
-    @Unroll
     void "getInputArtefact, when called for right workflow and right step with required = #required, should return right artefact"() {
-        WorkflowRun run = createWorkflowRun([
-                workflow: createWorkflow([
-                        name: WORKFLOW,
-                ]),
-        ])
+        WorkflowRun run = createWorkflowRun()
         WorkflowStep step = createWorkflowStep([
                 workflowRun: run,
         ])
@@ -120,7 +85,7 @@ class ConcreteArtefactServiceIntegrationSpec extends Specification implements Ro
         ])
 
         when:
-        SeqTrack returned = service.getInputArtefact(step, INPUT_ROLE, WORKFLOW, required)
+        SeqTrack returned = service.getInputArtefact(step, INPUT_ROLE, required)
 
         then:
         returned == seqTrack
@@ -132,11 +97,7 @@ class ConcreteArtefactServiceIntegrationSpec extends Specification implements Ro
     void "getInputArtefact, when called for workflow with step without expected role and artefact required, then throw NoArtefactOfRoleException"() {
         given:
         boolean required = true
-        WorkflowRun run = createWorkflowRun([
-                workflow: createWorkflow([
-                        name: WORKFLOW,
-                ]),
-        ])
+        WorkflowRun run = createWorkflowRun()
         WorkflowStep step = createWorkflowStep([
                 workflowRun: run,
         ])
@@ -151,7 +112,7 @@ class ConcreteArtefactServiceIntegrationSpec extends Specification implements Ro
         ])
 
         when:
-        service.getInputArtefact(step, INPUT_ROLE, WORKFLOW, required)
+        service.getInputArtefact(step, INPUT_ROLE, required)
 
         then:
         thrown(NoArtefactOfRoleException)
@@ -160,11 +121,7 @@ class ConcreteArtefactServiceIntegrationSpec extends Specification implements Ro
     void "getInputArtefact, when called for workflow with step without expected role and artefact not required, then return null"() {
         given:
         boolean required = false
-        WorkflowRun run = createWorkflowRun([
-                workflow: createWorkflow([
-                        name: WORKFLOW,
-                ]),
-        ])
+        WorkflowRun run = createWorkflowRun()
         WorkflowStep step = createWorkflowStep([
                 workflowRun: run,
         ])
@@ -179,7 +136,7 @@ class ConcreteArtefactServiceIntegrationSpec extends Specification implements Ro
         ])
 
         when:
-        SeqTrack receivedArtefact = service.getInputArtefact(step, INPUT_ROLE, WORKFLOW, required)
+        SeqTrack receivedArtefact = service.getInputArtefact(step, INPUT_ROLE, required)
 
         then:
         receivedArtefact == null
@@ -188,11 +145,7 @@ class ConcreteArtefactServiceIntegrationSpec extends Specification implements Ro
     void "getInputArtefacts, when called for workflow with step without expected role and artefact not required, then return empty list"() {
         given:
         boolean required = false
-        WorkflowRun run = createWorkflowRun([
-                workflow: createWorkflow([
-                        name: WORKFLOW,
-                ]),
-        ])
+        WorkflowRun run = createWorkflowRun()
         WorkflowStep step = createWorkflowStep([
                 workflowRun: run,
         ])
@@ -207,7 +160,7 @@ class ConcreteArtefactServiceIntegrationSpec extends Specification implements Ro
         ])
 
         when:
-        List<SeqTrack> receivedArtefacts = service.getInputArtefacts(step, INPUT_ROLE, WORKFLOW, required)
+        List<SeqTrack> receivedArtefacts = service.getInputArtefacts(step, INPUT_ROLE, required)
 
         then:
         receivedArtefacts == []
@@ -216,11 +169,7 @@ class ConcreteArtefactServiceIntegrationSpec extends Specification implements Ro
     @Unroll
     void "getInputArtefact, when called for workflow with step without expected role with required = #required, but without concrete artefact, then throw NoConcreteArtefactException"() {
         given:
-        WorkflowRun run = createWorkflowRun([
-                workflow: createWorkflow([
-                        name: WORKFLOW,
-                ]),
-        ])
+        WorkflowRun run = createWorkflowRun()
         WorkflowStep step = createWorkflowStep([
                 workflowRun: run,
         ])
@@ -231,7 +180,7 @@ class ConcreteArtefactServiceIntegrationSpec extends Specification implements Ro
         )
 
         when:
-        service.getInputArtefact(step, INPUT_ROLE, WORKFLOW)
+        service.getInputArtefact(step, INPUT_ROLE)
 
         then:
         thrown(NoConcreteArtefactException)
@@ -245,11 +194,7 @@ class ConcreteArtefactServiceIntegrationSpec extends Specification implements Ro
         given:
         ConcreteArtefactService service = new ConcreteArtefactService()
 
-        WorkflowRun run = createWorkflowRun([
-                workflow: createWorkflow([
-                        name: WORKFLOW,
-                ]),
-        ])
+        WorkflowRun run = createWorkflowRun()
         WorkflowStep step = createWorkflowStep([
                 workflowRun: run,
         ])
@@ -262,7 +207,7 @@ class ConcreteArtefactServiceIntegrationSpec extends Specification implements Ro
         ])
 
         when:
-        service.getOutputArtefact(step, OUTPUT_ROLE, WORKFLOW)
+        service.getOutputArtefact(step, OUTPUT_ROLE)
 
         then:
         thrown(NoArtefactOfRoleException)
@@ -273,11 +218,7 @@ class ConcreteArtefactServiceIntegrationSpec extends Specification implements Ro
 
     void "getOutputArtefact, when called for workflow and a step with expected role, but without concrete artefact, then throw NoConcreteArtefactException"() {
         given:
-        WorkflowRun run = createWorkflowRun([
-                workflow: createWorkflow([
-                        name: WORKFLOW,
-                ]),
-        ])
+        WorkflowRun run = createWorkflowRun()
         WorkflowStep step = createWorkflowStep([
                 workflowRun: run,
         ])
@@ -287,7 +228,7 @@ class ConcreteArtefactServiceIntegrationSpec extends Specification implements Ro
         ])
 
         when:
-        service.getOutputArtefact(step, OUTPUT_ROLE, WORKFLOW)
+        service.getOutputArtefact(step, OUTPUT_ROLE)
 
         then:
         thrown(NoConcreteArtefactException)
@@ -296,11 +237,7 @@ class ConcreteArtefactServiceIntegrationSpec extends Specification implements Ro
     @Unroll
     void "getInputArtefact, when called for Workflow and step with required = #required, should return the artefact"() {
         given:
-        WorkflowRun run = createWorkflowRun([
-                workflow: createWorkflow([
-                        name: WORKFLOW,
-                ]),
-        ])
+        WorkflowRun run = createWorkflowRun()
         WorkflowStep step = createWorkflowStep([
                 workflowRun: run,
         ])
@@ -333,9 +270,9 @@ class ConcreteArtefactServiceIntegrationSpec extends Specification implements Ro
         ])
 
         when:
-        SeqTrack returned1 = service.getInputArtefact(step, INPUT_ROLE1, WORKFLOW, required)
-        FastqcProcessedFile returned2 = service.getInputArtefact(step, INPUT_ROLE2, WORKFLOW, required)
-        RoddyBamFile returned3 = service.getInputArtefact(step, INPUT_ROLE3, WORKFLOW, required)
+        SeqTrack returned1 = service.getInputArtefact(step, INPUT_ROLE1, required)
+        FastqcProcessedFile returned2 = service.getInputArtefact(step, INPUT_ROLE2, required)
+        RoddyBamFile returned3 = service.getInputArtefact(step, INPUT_ROLE3, required)
 
         then:
         returned1 == seqTrack
@@ -349,11 +286,7 @@ class ConcreteArtefactServiceIntegrationSpec extends Specification implements Ro
     @Unroll
     void "getInputArtefacts, when called for Workflow and steps with required = #required, should return list of artefacts"() {
         given:
-        WorkflowRun run = createWorkflowRun([
-                workflow: createWorkflow([
-                        name: WORKFLOW,
-                ]),
-        ])
+        WorkflowRun run = createWorkflowRun()
         WorkflowStep step = createWorkflowStep([
                 workflowRun: run,
         ])
@@ -414,9 +347,9 @@ class ConcreteArtefactServiceIntegrationSpec extends Specification implements Ro
         ])
 
         when:
-        List<SeqTrack> returnedList1 = service.getInputArtefacts(step, INPUT_ROLE1, WORKFLOW, required)
-        List<FastqcProcessedFile> returnedList2 = service.getInputArtefacts(step, INPUT_ROLE2, WORKFLOW, required)
-        List<RoddyBamFile> returnedList3 = service.getInputArtefacts(step, INPUT_ROLE3, WORKFLOW, required)
+        List<SeqTrack> returnedList1 = service.getInputArtefacts(step, INPUT_ROLE1, required)
+        List<FastqcProcessedFile> returnedList2 = service.getInputArtefacts(step, INPUT_ROLE2, required)
+        List<RoddyBamFile> returnedList3 = service.getInputArtefacts(step, INPUT_ROLE3, required)
 
         then:
         returnedList1 == [seqTrack1, seqTrack2]
@@ -430,11 +363,7 @@ class ConcreteArtefactServiceIntegrationSpec extends Specification implements Ro
     @Unroll
     void "getOutputArtefacts, when called for Workflow and steps with required = #required, should return list of artefacts"() {
         given:
-        WorkflowRun run = createWorkflowRun([
-                workflow: createWorkflow([
-                        name: WORKFLOW,
-                ]),
-        ])
+        WorkflowRun run = createWorkflowRun()
         WorkflowStep step = createWorkflowStep([
                 workflowRun: run,
         ])
@@ -485,9 +414,9 @@ class ConcreteArtefactServiceIntegrationSpec extends Specification implements Ro
         ])
 
         when:
-        List<SeqTrack> returnedList1 = service.getOutputArtefacts(step, OUTPUT_ROLE1, WORKFLOW, required)
-        List<FastqcProcessedFile> returnedList2 = service.getOutputArtefacts(step, OUTPUT_ROLE2, WORKFLOW, required)
-        List<RoddyBamFile> returnedList3 = service.getOutputArtefacts(step, OUTPUT_ROLE3, WORKFLOW, required)
+        List<SeqTrack> returnedList1 = service.getOutputArtefacts(step, OUTPUT_ROLE1, required)
+        List<FastqcProcessedFile> returnedList2 = service.getOutputArtefacts(step, OUTPUT_ROLE2, required)
+        List<RoddyBamFile> returnedList3 = service.getOutputArtefacts(step, OUTPUT_ROLE3, required)
 
         then:
         returnedList1 == [seqTrack1, seqTrack2]

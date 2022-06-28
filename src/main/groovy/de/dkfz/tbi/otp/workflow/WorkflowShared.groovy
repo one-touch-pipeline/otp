@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2022 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,29 +19,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflow.datainstallation
 
-import org.springframework.beans.factory.annotation.Autowired
+package de.dkfz.tbi.otp.workflow
 
-import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
-import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
-import de.dkfz.tbi.otp.workflow.WorkflowShared
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
-trait DataInstallationShared extends WorkflowShared {
+trait WorkflowShared {
 
-    static final String WORKFLOW = DataInstallationWorkflow.WORKFLOW
-    static final String OUTPUT_ROLE = DataInstallationWorkflow.OUTPUT_FASTQ
+    void checkWorkflowName(WorkflowStep workflowStep, String allowedWorkflowName) {
+        checkWorkflowName(workflowStep, [allowedWorkflowName])
+    }
 
-    @Autowired
-    LsdfFilesService lsdfFilesService
-
-    @Autowired
-    ConcreteArtefactService concreteArtefactService
-
-    SeqTrack getSeqTrack(WorkflowStep workflowStep) {
-        checkWorkflowName(workflowStep, WORKFLOW)
-        return concreteArtefactService.getOutputArtefact(workflowStep, OUTPUT_ROLE)
+    void checkWorkflowName(WorkflowStep workflowStep, List<String> allowedWorkflowNames) {
+        assert allowedWorkflowNames.contains(workflowStep.workflowRun.workflow.name):
+                "expected one of ${allowedWorkflowNames} but got ${workflowStep.workflowRun.workflow.name}"
     }
 }

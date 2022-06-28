@@ -34,15 +34,12 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 @Transactional
 class ConcreteArtefactService {
 
-    def <T> T getOutputArtefact(WorkflowStep workflowStep, String outputRoleName, String workflowName, boolean required = true) {
-        return CollectionUtils.atMostOneElement(getOutputArtefacts(workflowStep, outputRoleName, workflowName, required))
+    def <T> T getOutputArtefact(WorkflowStep workflowStep, String outputRoleName, boolean required = true) {
+        return CollectionUtils.atMostOneElement(getOutputArtefacts(workflowStep, outputRoleName, required))
     }
 
-    def <T> List<T> getOutputArtefacts(WorkflowStep workflowStep, String outputRoleName, String workflowName, boolean required = true) {
+    def <T> List<T> getOutputArtefacts(WorkflowStep workflowStep, String outputRoleName, boolean required = true) {
         WorkflowRun workflowRun = workflowStep.workflowRun
-        if (workflowRun.workflow.name != workflowName) {
-            throw new WrongWorkflowException("The step is from workflow ${workflowRun.workflow.name}, but expected is ${workflowName}")
-        }
         List<WorkflowArtefact> workflowArtefacts = workflowRun.outputArtefacts.findAll {
             it.key ==~ /^${outputRoleName}(_\d+)?$/
         }*.value
@@ -64,15 +61,12 @@ class ConcreteArtefactService {
         }
     }
 
-    def <T> T getInputArtefact(WorkflowStep workflowStep, String inputRoleName, String workflowName, boolean required = true) {
-        return CollectionUtils.atMostOneElement(getInputArtefacts(workflowStep, inputRoleName, workflowName, required))
+    def <T> T getInputArtefact(WorkflowStep workflowStep, String inputRoleName, boolean required = true) {
+        return CollectionUtils.atMostOneElement(getInputArtefacts(workflowStep, inputRoleName, required))
     }
 
-    def <T> List<T> getInputArtefacts(WorkflowStep workflowStep, String inputRoleName, String workflowName, boolean required = true) {
+    def <T> List<T> getInputArtefacts(WorkflowStep workflowStep, String inputRoleName, boolean required = true) {
         WorkflowRun workflowRun = workflowStep.workflowRun
-        if (workflowRun.workflow.name != workflowName) {
-            throw new WrongWorkflowException("The step is from workflow ${workflowRun.workflow.name}, but expected is ${workflowName}")
-        }
         List<WorkflowArtefact> workflowArtefacts = workflowRun.inputArtefacts.findAll {
             it.key ==~ /^${inputRoleName}(_\d+)?$/
         }*.value

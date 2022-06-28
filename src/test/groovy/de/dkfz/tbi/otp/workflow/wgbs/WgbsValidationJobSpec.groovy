@@ -65,7 +65,12 @@ class WgbsValidationJobSpec extends Specification implements WorkflowSystemDomai
     @Rule
     TemporaryFolder temporaryFolder
 
-    final WorkflowStep workflowStep = createWorkflowStep()
+    final WorkflowRun run = createWorkflowRun([
+            workflow: createWorkflow([
+                    name: WgbsWorkflow.WORKFLOW
+            ]),
+    ])
+    final WorkflowStep workflowStep = createWorkflowStep([workflowRun: run])
 
     TestConfigService configService
 
@@ -92,7 +97,7 @@ class WgbsValidationJobSpec extends Specification implements WorkflowSystemDomai
             1 * getReadGroupsExpected(_) >> readGroupsExpected
         }
         job.concreteArtefactService = Mock(ConcreteArtefactService) {
-            _ * getOutputArtefact(_, _, _) >> bamFile
+            _ * getOutputArtefact(_, _) >> bamFile
         }
         job.roddyBamFileService = Mock(RoddyBamFileService)
 
@@ -144,7 +149,7 @@ class WgbsValidationJobSpec extends Specification implements WorkflowSystemDomai
         }
 
         job.concreteArtefactService = Mock(ConcreteArtefactService) {
-            _ * getOutputArtefact(_, _, _) >> bamFile
+            _ * getOutputArtefact(_, _) >> bamFile
         }
         job.fileSystemService = new TestFileSystemService()
         job.roddyBamFileService = roddyBamFileService

@@ -54,8 +54,12 @@ class PanCancerCheckQcJobSpec extends Specification implements WorkflowSystemDom
     void "execute, when result of threshold check is #checkSuccessful change workflow status to corresponding state, if false send mail"() {
         given:
         final String inputRoleName = "BAM"
-        final String workflow = "PanCancer alignment"
-        final WorkflowStep workflowStep = createWorkflowStep()
+        final WorkflowRun run = createWorkflowRun([
+                workflow: createWorkflow([
+                        name: PanCancerWorkflow.WORKFLOW
+                ]),
+        ])
+        final WorkflowStep workflowStep = createWorkflowStep([workflowRun: run])
         final RoddyBamFile bamFile = createRoddyBamFile(RoddyBamFile)
         final RoddyMergedBamQa qa = createQa(bamFile)
         final PanCancerCheckQcJob job = new PanCancerCheckQcJob()
@@ -69,7 +73,7 @@ class PanCancerCheckQcJobSpec extends Specification implements WorkflowSystemDom
         job.execute(workflowStep)
 
         then:
-        1 * job.concreteArtefactService.getOutputArtefact(workflowStep, inputRoleName, workflow) >> bamFile
+        1 * job.concreteArtefactService.getOutputArtefact(workflowStep, inputRoleName) >> bamFile
         1 * job.qcTrafficLightService.setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling(bamFile, qa) >> {
             // only warning or not blocked are relevant for setting the workflow status
             if (checkSuccessful) {
