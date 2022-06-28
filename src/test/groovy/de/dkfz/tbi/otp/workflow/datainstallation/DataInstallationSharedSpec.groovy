@@ -19,7 +19,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 package de.dkfz.tbi.otp.workflow.datainstallation
 
 import grails.testing.gorm.DataTest
@@ -61,5 +60,6 @@ class DataInstallationSharedSpec extends Specification implements WorkflowSystem
         1 * dataInstallationSharedInstance.concreteArtefactService.getOutputArtefact(workflowStep, DataInstallationWorkflow.OUTPUT_FASTQ) >> _
     }
 
-    class DataInstallationSharedInstance implements DataInstallationShared {}
+    @SuppressWarnings('EmptyClass')
+    class DataInstallationSharedInstance implements DataInstallationShared { }
 }

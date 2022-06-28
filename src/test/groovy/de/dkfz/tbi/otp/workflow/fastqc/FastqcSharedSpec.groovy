@@ -19,7 +19,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 package de.dkfz.tbi.otp.workflow.fastqc
 
 import grails.testing.gorm.DataTest
@@ -27,8 +26,6 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
-import de.dkfz.tbi.otp.workflow.datainstallation.DataInstallationShared
-import de.dkfz.tbi.otp.workflow.datainstallation.DataInstallationWorkflow
 import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
@@ -83,5 +80,6 @@ class FastqcSharedSpec extends Specification implements WorkflowSystemDomainFact
         1 * fastqcSharedInstance.concreteArtefactService.getOutputArtefacts(workflowStep, FastqcWorkflow.OUTPUT_FASTQC) >> _
     }
 
-    class FastqcSharedInstance implements FastqcShared {}
+    @SuppressWarnings('EmptyClass')
+    class FastqcSharedInstance implements FastqcShared { }
 }

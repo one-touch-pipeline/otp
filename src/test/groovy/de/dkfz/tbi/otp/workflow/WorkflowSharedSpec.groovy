@@ -19,7 +19,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 package de.dkfz.tbi.otp.workflow
 
 import grails.testing.gorm.DataTest
@@ -33,8 +32,8 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 class WorkflowSharedSpec extends Specification implements WorkflowSystemDomainFactory, DataTest {
 
-    final static String falselyWorkFlowName = "falselyWorkFlowName"
-    final static String testWorkflowName = "testWorkflowName"
+    final static String FALSELY_WORK_FLOW_NAME = "falselyWorkFlowName"
+    final static String TEST_WORKFLOW_NAME = "testWorkflowName"
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -52,23 +51,23 @@ class WorkflowSharedSpec extends Specification implements WorkflowSystemDomainFa
         given:
         final WorkflowRun run = createWorkflowRun([
                 workflow: createWorkflow([
-                        name: testWorkflowName
+                        name: TEST_WORKFLOW_NAME
                 ]),
         ])
         final WorkflowStep workflowStep = createWorkflowStep([workflowRun: run])
 
         when:
-        if(isList) {
-            workflowSharedInstance.checkWorkflowName(workflowStep, [testWorkflowName])
+        if (isList) {
+            workflowSharedInstance.checkWorkflowName(workflowStep, [TEST_WORKFLOW_NAME])
         } else {
-            workflowSharedInstance.checkWorkflowName(workflowStep, testWorkflowName)
+            workflowSharedInstance.checkWorkflowName(workflowStep, TEST_WORKFLOW_NAME)
         }
 
         then:
         _
 
         where:
-        isList <<  [true, false]
+        isList << [true, false]
     }
 
     @Unroll
@@ -76,23 +75,22 @@ class WorkflowSharedSpec extends Specification implements WorkflowSystemDomainFa
         given:
         final WorkflowRun run = createWorkflowRun([
                 workflow: createWorkflow([
-                        name: falselyWorkFlowName
+                        name: FALSELY_WORK_FLOW_NAME
                 ]),
         ])
         final WorkflowStep workflowStep = createWorkflowStep([workflowRun: run])
 
         when:
-        if(isList) {
-            workflowSharedInstance.checkWorkflowName(workflowStep, [testWorkflowName])
+        if (isList) {
+            workflowSharedInstance.checkWorkflowName(workflowStep, [TEST_WORKFLOW_NAME])
         } else {
-            workflowSharedInstance.checkWorkflowName(workflowStep, testWorkflowName)
+            workflowSharedInstance.checkWorkflowName(workflowStep, TEST_WORKFLOW_NAME)
         }
 
         then:
         thrown(AssertionError)
 
-
         where:
-        isList <<  [true, false]
+        isList << [true, false]
     }
 }

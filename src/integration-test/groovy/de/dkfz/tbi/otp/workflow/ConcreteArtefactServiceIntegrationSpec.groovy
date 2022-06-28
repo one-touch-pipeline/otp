@@ -35,7 +35,6 @@ import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.workflow.shared.NoArtefactOfRoleException
 import de.dkfz.tbi.otp.workflow.shared.NoConcreteArtefactException
-import de.dkfz.tbi.otp.workflow.shared.WrongWorkflowException
 import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
 import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep

@@ -30,7 +30,7 @@ import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflow.WorkflowShared
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
-trait FastqcShared extends WorkflowShared{
+trait FastqcShared extends WorkflowShared {
 
     static final String WORKFLOW = FastqcWorkflow.WORKFLOW
     static final String INPUT_ROLE = FastqcWorkflow.INPUT_FASTQ

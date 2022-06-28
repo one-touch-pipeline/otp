@@ -19,7 +19,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 package de.dkfz.tbi.otp.workflow.panCancer
 
 import grails.testing.gorm.DataTest
@@ -27,7 +26,6 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
-import de.dkfz.tbi.otp.workflow.fastqc.FastqcWorkflow
 import de.dkfz.tbi.otp.workflow.wgbs.WgbsWorkflow
 import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
@@ -108,8 +106,9 @@ class PanCancerSharedSpec extends Specification implements WorkflowSystemDomainF
         1 * panCancerSharedInstance.checkWorkflowName(workflowStep, [PanCancerWorkflow.WORKFLOW, WgbsWorkflow.WORKFLOW]) >> _
 
         then:
-        1 * panCancerSharedInstance.concreteArtefactService.getOutputArtefact(workflowStep,  PanCancerWorkflow.OUTPUT_BAM) >> _
+        1 * panCancerSharedInstance.concreteArtefactService.getOutputArtefact(workflowStep, PanCancerWorkflow.OUTPUT_BAM) >> _
     }
 
-    class PanCancerSharedInstance implements PanCancerShared {}
+    @SuppressWarnings('EmptyClass')
+    class PanCancerSharedInstance implements PanCancerShared { }
 }
