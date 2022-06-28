@@ -44,7 +44,7 @@ class ProjectRequestUserService {
                     projectRoles          : cmd.projectRoles,
                     accessToOtp           : cmd.accessToOtp,
                     accessToFiles         : cmd.accessToFiles,
-                    manageUsers           : ProjectRoleService.projectRolesContainAuthoritativeRole(cmd.projectRoles) ? true : cmd.manageUsers,
+                    manageUsers           : forceManageUsers(cmd.projectRoles) ? true : cmd.manageUsers,
                     manageUsersAndDelegate: ableToDelegateManagement(cmd.projectRoles),
             ]
             ProjectRequestUser projectRequestUser
@@ -78,6 +78,10 @@ class ProjectRequestUserService {
 
     boolean ableToDelegateManagement(Set<ProjectRole> projectRoles) {
         return ProjectRoleService.projectRolesContainAuthoritativeRole(projectRoles)
+    }
+
+    boolean forceManageUsers(Set<ProjectRole> projectRoles) {
+        return ProjectRoleService.projectRolesContainAuthoritativeRole(projectRoles) || ProjectRoleService.projectRolesContainCoordinator(projectRoles)
     }
 
     UserProjectRole toUserProjectRole(Project project, ProjectRequestUser projectRequestUser) {

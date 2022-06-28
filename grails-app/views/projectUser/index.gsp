@@ -296,13 +296,14 @@
                                         confirmation="${confirmationText}"/>
                             </td>
                         </sec:access>
+                        <sec:noAccess expression="hasRole('ROLE_OPERATOR')">
+                            <td><span class="icon-${userEntry.manageUsersAndDelegate}"></span></td>
+                        </sec:noAccess>
                     </g:if>
                     <g:else>
                         <td><span class="icon-${userEntry.fileAccess}" title="${g.message(code: "${userEntry.fileAccess.toolTipKey}")}"></span></td>
                         <td><span class="icon-${userEntry.manageUsers}"></span></td>
-                        <sec:access expression="hasRole('ROLE_OPERATOR')">
-                            <td><span class="icon-${userEntry.manageUsersAndDelegate}"></span></td>
-                        </sec:access>
+                        <td><span class="icon-${userEntry.manageUsersAndDelegate}"></span></td>
                     </g:else>
                     <td class="bootstrapped receivesNotifications">
                         <sec:access

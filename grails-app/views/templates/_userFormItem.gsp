@@ -81,7 +81,7 @@
             <g:if test="${checkboxes.contains('fileAccess')}">
                 <g:set var="description" value="${i != '' ? "users[${i}].accessToFiles" : "accessToFiles"}"/>
                 <div class="col-sm-2">
-                    <g:checkBox class="set-for-bioinformatic set-for-lead-bioinformatic input-field" name="${description}"
+                    <g:checkBox class="set-for-BIOINFORMATICIAN set-for-LEAD_BIOINFORMATICIAN input-field" name="${description}"
                                 id="${description}_checkbox"
                                 value="${user?.accessToFiles}"/>
                     <label class="col-form-label"
@@ -93,7 +93,7 @@
                 <g:set var="description" value="${i != '' ? "users[${i}].manageUsers" : "manageUsers"}"/>
                 <g:hiddenField class="hidden-manage-users-field" id="${description}_hiddenField" name="${description}" value="true" disabled="true"/>
                 <div class="col-sm-2">
-                    <g:checkBox class="set-for-authority input-field"
+                    <g:checkBox class="set-and-block-for-PI set-and-block-for-COORDINATOR input-field"
                                 name="${description}"
                                 id="${description}_checkbox"
                                 value="${user?.manageUsers}"/>
@@ -105,7 +105,7 @@
             <g:if test="${checkboxes.contains('manageUsersAndDelegate')}">
                 <g:set var="description" value="${i != '' ? "users[${i}].manageUsersAndDelegate" : "manageUsersAndDelegate"}"/>
                 <div class="col-sm-3">
-                    <g:checkBox class="input-field" name="${description}"
+                    <g:checkBox class="set-and-block-for-PI input-field" name="${description}"
                                 id="${description}_checkbox"
                                 value="${user?.manageUsersAndDelegate}"/>
                     <label class="col-form-label"

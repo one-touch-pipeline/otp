@@ -34,6 +34,10 @@ class ProjectRoleService {
         return (projectRoles*.name)?.intersect(ProjectRole.AUTHORITY_PROJECT_ROLES)
     }
 
+    static boolean projectRolesContainCoordinator(Set<ProjectRole> projectRoles) {
+        return (projectRoles*.name)?.contains(ProjectRole.Basic.COORDINATOR.name())
+    }
+
     List<ProjectRole> listAvailableProjectRolesAuthenticatedByCurrentUser() {
         return ProjectRole.all.findAll {
             if (userService.hasCurrentUserAdministrativeRoles()) {

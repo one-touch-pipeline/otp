@@ -67,7 +67,10 @@ $(() => {
     // fetch the data with ajax
     if (projectType) {
       $.ajax({
-        url: $.otp.createLink({ controller: 'projectRequest', action: 'getAdditionalFields' }),
+        url: $.otp.createLink({
+          controller: 'projectRequest',
+          action: 'getAdditionalFields'
+        }),
         dataType: 'json',
         type: 'POST',
         data: {
@@ -161,18 +164,5 @@ $(() => {
         }
       });
     }
-  }).trigger('change');
-
-  // if the PI role is selected, manage users should be checked and disabled
-  $('.project-role-select').on('change', (e) => {
-    const manageUsersBox = $(e.target).parent().parent().parent()
-      .find('.set-for-authority');
-    manageUsersBox.prop('disabled', false);
-    $(e.target).find('option:selected').each(function () {
-      if (this.text === 'PI') {
-        manageUsersBox.prop('checked', true);
-        manageUsersBox.prop('disabled', true);
-      }
-    });
   }).trigger('change');
 });

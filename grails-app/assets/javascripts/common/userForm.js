@@ -23,18 +23,43 @@
 $(() => {
   'use strict';
 
-  // if the bioinformatic or lead bioinformatic role is selected, file access should be checked
+  // Automatically check boxes with class set-for-ROLE and
+  // auto check and disable boxes with class set-and-block-for-ROLE
   $('.project-role-select').on('change', (e) => {
-    const leadBioinformaticBox = $(e.target).parent().parent().parent()
-      .find('.set-for-lead-bioinformatic');
-    const bioinformaticBox = $(e.target).parent().parent().parent()
-      .find('.set-for-bioinformatic');
+    const roles = ['PI', 'BIOINFORMATICIAN', 'LEAD_BIOINFORMATICIAN', 'COORDINATOR'];
+
+    const setForMap =
+      roles.map((role) => ({
+        role,
+        cssClass: `.set-for-${role}`,
+        boxes: $(e.target).parent().parent().parent()
+          .find(`.set-for-${role}`)
+      }));
+    const setAndBlockMap = roles.map((role) => ({
+      role,
+      cssClass: `.set-and-block-for-${role}`,
+      boxes: $(e.target).parent().parent().parent()
+        .find(`.set-and-block-for-${role}`)
+    }));
+
+    // remove disabled from checkboxes
+    setAndBlockMap.forEach((map) => {
+      map.boxes.prop('disabled', false);
+    });
+
     $(e.target).find('option:selected').each(function () {
-      if (this.text === 'BIOINFORMATICIAN') {
-        bioinformaticBox.prop('checked', true);
-      } else if (this.text === 'LEAD_BIOINFORMATICIAN') {
-        leadBioinformaticBox.prop('checked', true);
-      }
+      setForMap.forEach((map) => {
+        if (this.text === map.role) {
+          map.boxes.prop('checked', true);
+        }
+      });
+
+      setAndBlockMap.forEach((map) => {
+        if (this.text === map.role) {
+          map.boxes.prop('checked', true);
+          map.boxes.prop('disabled', true);
+        }
+      });
     });
   }).trigger('change');
 });
