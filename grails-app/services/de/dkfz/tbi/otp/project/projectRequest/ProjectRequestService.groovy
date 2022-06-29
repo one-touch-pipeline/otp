@@ -52,6 +52,7 @@ class ProjectRequestService {
     ProjectRequestPersistentStateService projectRequestPersistentStateService
     ProjectRequestStateProvider projectRequestStateProvider
     ProcessingOptionService processingOptionService
+    RolesService rolesService
 
     ProjectRequest saveProjectRequestFromCommand(ProjectRequestCreationCommand cmd) throws SwitchedUserDeniedException {
         securityService.ensureNotSwitchedUser()
@@ -359,11 +360,14 @@ class ProjectRequestService {
     String getCurrentOwnerDisplayName(ProjectRequest projectRequest) {
         if (projectRequest?.state?.currentOwner) {
             User currentOwner = projectRequest.state.currentOwner
+            if (rolesService.isAdministrativeUser(securityService.currentUserAsUser)) {
+                return currentOwner.username
+            }
             List<String> currentOwnerAuthorities = currentOwner.authorities*.authority
             List<String> containedAdministrativeRoles = Role.ADMINISTRATIVE_ROLES.findAll { currentOwnerAuthorities.contains(it) }
             return containedAdministrativeRoles ?
                     processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME) :
-                    projectRequest.state.currentOwner.username
+                    currentOwner.username
         }
         return "-"
     }
