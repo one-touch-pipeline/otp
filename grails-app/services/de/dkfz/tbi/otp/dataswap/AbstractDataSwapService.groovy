@@ -291,7 +291,7 @@ abstract class AbstractDataSwapService<P extends DataSwapParameters, D extends D
         return map
     }
 
-    String createSingeCellScript(DataFile dataFile, Map<String, ?> oldValues) {
+    String createSingeCellScript(DataFile dataFile, Map<String, String> oldValues) {
         if (!dataFile.seqType.singleCell || !dataFile.seqTrack.singleCellWellLabel) {
             return ''
         }
@@ -302,7 +302,7 @@ abstract class AbstractDataSwapService<P extends DataSwapParameters, D extends D
         Path mappingFile = singleCellService.singleCellMappingFile(dataFile)
         String mappingEntry = singleCellService.mappingEntry(dataFile)
 
-        Path oldMappingFile = oldValues[WELL_MAPPING_FILE_NAME]
+        String oldMappingFile = oldValues[WELL_MAPPING_FILE_NAME]
 
         return """
                |# Single Cell structure

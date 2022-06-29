@@ -318,10 +318,10 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
             0 * _
         }
 
-        final Map<String, ?> oldValues = [
+        final Map<String, String> oldValues = [
                 (AbstractDataSwapService.DIRECT_FILE_NAME)            : OLD_FINAL_PATH,
                 (AbstractDataSwapService.WELL_FILE_NAME)              : OLD_WELL_PATH,
-                (AbstractDataSwapService.WELL_MAPPING_FILE_NAME)      : Paths.get(OLD_MAPPING_PATH),
+                (AbstractDataSwapService.WELL_MAPPING_FILE_NAME)      : OLD_MAPPING_PATH,
                 (AbstractDataSwapService.WELL_MAPPING_FILE_ENTRY_NAME): OLD_ENTRY,
         ]
 
