@@ -31,6 +31,7 @@ import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.tracking.NotificationCreator
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
+import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 import java.nio.file.Path
@@ -43,17 +44,23 @@ class FastqcPrepareJobSpec extends Specification implements DataTest, WorkflowSy
         return [
                 DataFile,
                 WorkflowStep,
+                WorkflowRun,
         ]
     }
 
     void "test doFurtherPreparation"() {
         given:
-        WorkflowStep workflowStep = createWorkflowStep()
+        final WorkflowRun run = createWorkflowRun([workflow:
+                                                           createWorkflow([
+                                                                   name: FastqcWorkflow.WORKFLOW
+                                                           ])
+        ])
+        WorkflowStep workflowStep = createWorkflowStep([workflowRun: run])
         SeqTrack seqTrack = createSeqTrackWithTwoDataFile()
 
         FastqcPrepareJob job = new FastqcPrepareJob()
         job.concreteArtefactService = Mock(ConcreteArtefactService) {
-            1 * getInputArtefact(workflowStep, FastqcWorkflow.INPUT_FASTQ, FastqcWorkflow.WORKFLOW) >> seqTrack
+            1 * getInputArtefact(workflowStep, FastqcWorkflow.INPUT_FASTQ) >> seqTrack
         }
         job.notificationCreator = Mock(NotificationCreator)
 
@@ -69,11 +76,14 @@ class FastqcPrepareJobSpec extends Specification implements DataTest, WorkflowSy
         given:
         String workDirectory = '/workDirectory'
         Path workDirectoryPath = Paths.get(workDirectory)
-        WorkflowStep workflowStep = createWorkflowStep([
-                workflowRun: createWorkflowRun([
-                        workDirectory: workDirectory,
-                ]),
+        final WorkflowRun run = createWorkflowRun([
+                workDirectory: workDirectory,
+                workflow:
+                        createWorkflow([
+                                name: FastqcWorkflow.WORKFLOW
+                        ])
         ])
+        WorkflowStep workflowStep = createWorkflowStep([workflowRun: run])
 
         FastqcPrepareJob job = new FastqcPrepareJob()
         job.fileSystemService = new TestFileSystemService()

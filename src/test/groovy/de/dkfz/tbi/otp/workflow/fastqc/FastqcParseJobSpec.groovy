@@ -31,6 +31,7 @@ import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsqc.FastqcUploadService
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
+import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStateChangeService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
@@ -43,6 +44,7 @@ class FastqcParseJobSpec extends Specification implements DataTest, WorkflowSyst
                 Realm,
                 SeqTrack,
                 WorkflowStep,
+                WorkflowRun,
         ]
     }
 
@@ -54,7 +56,12 @@ class FastqcParseJobSpec extends Specification implements DataTest, WorkflowSyst
                     dataFile: it,
             ])
         }
-        WorkflowStep workflowStep = createWorkflowStep()
+        final WorkflowRun run = createWorkflowRun([
+                workflow: createWorkflow([
+                        name: FastqcWorkflow.WORKFLOW
+                ])
+        ])
+        WorkflowStep workflowStep = createWorkflowStep([workflowRun: run])
 
         FastqcParseJob job = new FastqcParseJob()
 
@@ -70,7 +77,7 @@ class FastqcParseJobSpec extends Specification implements DataTest, WorkflowSyst
         job.execute(workflowStep)
 
         then:
-        1 * job.concreteArtefactService.getOutputArtefacts(workflowStep, FastqcWorkflow.OUTPUT_FASTQC, FastqcWorkflow.WORKFLOW) >> fastqcProcessedFiles
+        1 * job.concreteArtefactService.getOutputArtefacts(workflowStep, FastqcWorkflow.OUTPUT_FASTQC) >> fastqcProcessedFiles
         0 * job.concreteArtefactService._
         1 * job.fastqcUploadService.uploadFastQCFileContentsToDataBase(fastqcProcessedFiles.first())
         1 * job.fastqcUploadService.uploadFastQCFileContentsToDataBase(fastqcProcessedFiles.last())

@@ -31,6 +31,7 @@ import de.dkfz.tbi.otp.domainFactory.FastqcDomainFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
+import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 import java.nio.file.Path
@@ -43,6 +44,7 @@ class FastqcValidationJobSpec extends Specification implements DataTest, Workflo
         return [
                 FastqcProcessedFile,
                 WorkflowStep,
+                WorkflowRun,
         ]
     }
 
@@ -56,7 +58,12 @@ class FastqcValidationJobSpec extends Specification implements DataTest, Workflo
                     dataFile: it,
             ])
         }
-        WorkflowStep workflowStep = createWorkflowStep()
+        WorkflowRun run = createWorkflowRun([
+                workflow: createWorkflow([
+                        name: FastqcWorkflow.WORKFLOW
+                ])
+        ])
+        WorkflowStep workflowStep = createWorkflowStep([workflowRun: run])
 
         FastqcValidationJob job = new FastqcValidationJob()
 
@@ -65,7 +72,7 @@ class FastqcValidationJobSpec extends Specification implements DataTest, Workflo
             1 * fastqcOutputPath(fastqcProcessedFiles.last()) >> file2
         }
         job.concreteArtefactService = Mock(ConcreteArtefactService) {
-            1 * getOutputArtefacts(workflowStep, FastqcWorkflow.OUTPUT_FASTQC, FastqcWorkflow.WORKFLOW) >> fastqcProcessedFiles
+            1 * getOutputArtefacts(workflowStep, FastqcWorkflow.OUTPUT_FASTQC) >> fastqcProcessedFiles
         }
 
         when:
