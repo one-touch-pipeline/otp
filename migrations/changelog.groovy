@@ -669,4 +669,6 @@ databaseChangeLog = {
     }
 
     include file: 'changelogs/2022/otp-1594-fastqc-working-directory.groovy'
+
+    include file: 'changelogs/2022/otp-1595.groovy'
 }
