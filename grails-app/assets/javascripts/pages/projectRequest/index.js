@@ -88,7 +88,7 @@ $(() => {
                               <div class="col-sm-2">
                                 <label class="col-form-label" 
                                        for="additionalFieldValue[${abstractField.id}]">
-                                  ${abstractField.name}${abstractField.required ? '*' : ''}
+                                  ${abstractField.name}${(abstractField.required === 'true') ? '*' : ''}
                                 </label>
                                 <i class="helper-icon bi bi-question-circle-fill" 
                                    title="${abstractField.descriptionRequest}">
@@ -100,7 +100,7 @@ $(() => {
                                               type="${abstractField.inputType}"
                                               name="additionalFieldValue[${abstractField.id}]"
                                               value="${value}"
-                                              required="${abstractField.required}"/>
+                                              ${(abstractField.required === 'true') ? 'required="required"' : ''}/>
                                 </div>       
                             </div>`;
           });
