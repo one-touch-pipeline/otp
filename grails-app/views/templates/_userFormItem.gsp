@@ -35,25 +35,28 @@
 <div class="${accordionItem ? '' : 'card'}">
     <div class="card-body pb-1">
         <div class="form-group row">
-            <label class="col-sm-2 col-form-label" for="${i ? "users[${i}].username" : "username"}">${g.message(code: "projectUser.addMember.username")}</label>
+            <g:set var="description" value="${i != '' ? "users[${i}].username" : "username"}"/>
+            <label class="col-sm-2 col-form-label"
+                   for="${description}">${g.message(code: "projectUser.addMember.username")}</label>
 
             <div class="user-auto-complete col-sm-10">
                 <input class="username-input input-field autocompleted form-control"
-                       name="${i ? "users[${i}].username" : "username"}"
-                       id="${i ? "users[${i}].username" : "username"}"
+                       name="${description}"
+                       id="${description}"
                        value="${user?.username}"
                        autocomplete="off"/>
             </div>
         </div>
 
         <div class="form-group row">
+            <g:set var="description" value="${i != '' ? "users[${i}].projectRoles" : "projectRoles"}"/>
             <label class="col-sm-2 col-form-label"
-                   for="${i ? "users[${i}].projectRoles" : "projectRoles"}">${g.message(code: "projectUser.addMember.role")}</label>
+                   for="${description}">${g.message(code: "projectUser.addMember.role")}</label>
 
             <div class="col-sm-10">
                 <g:set var="select2Variant" value="${(user || emptyForm) ? "use-select-2" : "use-select-2-after-clone"}"/>
-                <select class="project-role-select input-field form-control ${select2Variant}" name="${i ? "users[${i}].projectRoles" : "projectRoles"}"
-                        id="${i ? "users[${i}].projectRoles" : "projectRoles"}"
+                <select class="project-role-select input-field form-control ${select2Variant}" name="${description}"
+                        id="${description}"
                         multiple="multiple">
                     <g:each in="${availableRoles}" var="role">
                         <g:set var="selected" value="${role in user?.projectRoles ? "selected" : ""}"/>
@@ -65,7 +68,7 @@
 
         <div class="form-group row">
             <g:if test="${checkboxes.contains('otpAccess')}">
-                <g:set var="description" value="${i ? "users[${i}].accessToOtp" : "accessToOtp"}"/>
+                <g:set var="description" value="${i != '' ? "users[${i}].accessToOtp" : "accessToOtp"}"/>
                 <div class="col-sm-2">
                     <g:checkBox class="input-field" name="${description}"
                                 id="${description}_checkbox"
@@ -76,7 +79,7 @@
             </g:if>
 
             <g:if test="${checkboxes.contains('fileAccess')}">
-                <g:set var="description" value="${i ? "users[${i}].accessToFiles" : "accessToFiles"}"/>
+                <g:set var="description" value="${i != '' ? "users[${i}].accessToFiles" : "accessToFiles"}"/>
                 <div class="col-sm-2">
                     <g:checkBox class="set-for-bioinformatic set-for-lead-bioinformatic input-field" name="${description}"
                                 id="${description}_checkbox"
@@ -87,7 +90,7 @@
             </g:if>
 
             <g:if test="${checkboxes.contains('manageUsers')}">
-                <g:set var="description" value="${i ? "users[${i}].manageUsers" : "manageUsers"}"/>
+                <g:set var="description" value="${i != '' ? "users[${i}].manageUsers" : "manageUsers"}"/>
                 <g:hiddenField class="hidden-manage-users-field" id="${description}_hiddenField" name="${description}" value="true" disabled="true"/>
                 <div class="col-sm-2">
                     <g:checkBox class="set-for-authority input-field"
@@ -100,7 +103,7 @@
             </g:if>
 
             <g:if test="${checkboxes.contains('manageUsersAndDelegate')}">
-                <g:set var="description" value="${i ? "users[${i}].manageUsersAndDelegate" : "manageUsersAndDelegate"}"/>
+                <g:set var="description" value="${i != '' ? "users[${i}].manageUsersAndDelegate" : "manageUsersAndDelegate"}"/>
                 <div class="col-sm-3">
                     <g:checkBox class="input-field" name="${description}"
                                 id="${description}_checkbox"
@@ -111,7 +114,7 @@
             </g:if>
 
             <g:if test="${checkboxes.contains('receivesNotifications')}">
-                <g:set var="description" value="${i ? "users[${i}].receivesNotifications" : "receivesNotifications"}"/>
+                <g:set var="description" value="${i != '' ? "users[${i}].receivesNotifications" : "receivesNotifications"}"/>
                 <div class="col-sm-3">
                     <g:checkBox class="input-field" name="${description}"
                                 id="${description}_checkbox"
