@@ -38,7 +38,7 @@ import java.nio.file.Path
 class DataInstallationConditionalFailJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory {
 
     @Rule
-    TemporaryFolder temporaryFolder = new TemporaryFolder()
+    TemporaryFolder temporaryFolder
 
     @Override
     Class[] getDomainClassesToMock() {
