@@ -601,7 +601,7 @@ class ProcessingOption implements Entity {
         ),
         DEFAULT_FASTQC_TYPE(
                 "default fastqc workflow type",
-                Necessity.OPTIONAL, FastqcType.BASH.name(), TypeValidators.SINGLE_WORD_TEXT_OPTIONAL, TypeValidators.DEFAULT_FASTQC_TYPE
+                Necessity.OPTIONAL, FastqcType.BASH.name(), TypeValidators.DEFAULT_FASTQC_TYPE
         ),
 
         private final String description

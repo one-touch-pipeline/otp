@@ -24,5 +24,5 @@ package de.dkfz.tbi.otp.workflow.wgbs
 // TODO: implement in otp-1640
 class WgbsWorkflow {
     static final String WORKFLOW = "WGBS alignment"
-    static final String OUTPUT_FASTQ = "WGBS"
+    static final String OUTPUT_BAM = "BAM"
 }
