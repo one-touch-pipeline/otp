@@ -96,11 +96,11 @@ boolean copyWithdrawnData = false
 //************ Select whether analyses should be copied (true/false) ************//
 Map<PipelineType, Boolean> copyAnalyses = [:]
 
-copyAnalyses.put(PipelineType.INDEL,        false)
-copyAnalyses.put(PipelineType.SOPHIA,       false)
-copyAnalyses.put(PipelineType.ACESEQ,       false)
-copyAnalyses.put(PipelineType.SNV,          false)
-copyAnalyses.put(PipelineType.RUN_YAPSA,    false)
+copyAnalyses.put(PipelineType.INDEL, false)
+copyAnalyses.put(PipelineType.SOPHIA, false)
+copyAnalyses.put(PipelineType.ACESEQ, false)
+copyAnalyses.put(PipelineType.SNV, false)
+copyAnalyses.put(PipelineType.RUN_YAPSA, false)
 
 //! Note: RNA_ANALYSIS will be exported only if copyBamFile is also set to be true !//
 copyAnalyses.put(PipelineType.RNA_ANALYSIS, false)
@@ -121,9 +121,11 @@ boolean external = true
 boolean copyExternal = false
 
 // work area
-assert scriptOutputFile  : "scriptOutputPath should not be empty"
-assert targetOutputFolder: "targetOutputFolder should not be empty"
-assert unixGroup         : "no group given"
+assert scriptOutputFile: "scriptOutputPath should not be empty"
+if(!copyExternal) {
+    assert targetOutputFolder: "targetOutputFolder should not be empty"
+    assert unixGroup         : "no group given"
+}
 
 ScriptInputHelperService scriptInputHelperService = ctx.scriptInputHelperService
 ConfigService configService = ctx.configService
@@ -151,7 +153,7 @@ fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(outputDirPath, re
 Path outputFile = fileService.createOrOverwriteScriptOutputFile(outputDirPath, outputFileName, realm)
 
 assert scriptOutputPath.absolute: "scriptOutputPath is not an absolute path"
-assert targetFolder.absolute    : "targetOutputFolder is not an absolute path"
+assert targetFolder.absolute: "targetOutputFolder is not an absolute path"
 
 // Data structure for processing
 List<SeqTrack> seqTrackList = []
@@ -176,7 +178,7 @@ class DataExportOverviewItem {
 List<DataExportOverviewItem> dataExportOverview = []
 
 // parse the input
-scriptInputHelperService.parseAndSplitHelper([selectByIndividual, multiColumnInput].join("\n")).each {List<String> params ->
+scriptInputHelperService.parseAndSplitHelper([selectByIndividual, multiColumnInput].join("\n")).each { List<String> params ->
     int paramsCount = params.size()
     assert paramsCount > 0: "Input must contain at least one column of PID"
     assert paramsCount in [1, 2, 5, 6, 7]: "Missing input data for seqType determination"
@@ -241,16 +243,16 @@ scriptInputHelperService.parseAndSplitHelper([selectByIndividual, multiColumnInp
                     it[0], it[1], it[2]
             )
             dataExportOverview.add(new DataExportOverviewItem(
-                    pipelineType    : PipelineType.FASTQ,
-                    individual      : it[0],
-                    sampleType      : it[1],
-                    seqType         : it[2],
+                    pipelineType: PipelineType.FASTQ,
+                    individual: it[0],
+                    sampleType: it[1],
+                    seqType: it[2],
                     sampleIdentifier: sampleName ? sampleName : "",
-                    allFastQs       : lanes,
-                    swappedFastQs   : lanes.findAll { SeqTrack st ->
+                    allFastQs: lanes,
+                    swappedFastQs: lanes.findAll { SeqTrack st ->
                         st.swapped
                     },
-                    withdrawnFastQs : lanes.findAll { SeqTrack st ->
+                    withdrawnFastQs: lanes.findAll { SeqTrack st ->
                         st.isWithdrawn()
                     },
             ))
@@ -266,9 +268,9 @@ scriptInputHelperService.parseAndSplitHelper([selectByIndividual, multiColumnInp
             }.unique().each {
                 dataExportOverview.add(new DataExportOverviewItem(
                         pipelineType: PipelineType.BAM,
-                        individual  : it[0],
-                        sampleType  : it[1],
-                        seqType     : it[2],
+                        individual: it[0],
+                        sampleType: it[1],
+                        seqType: it[2],
                         externalBamFiles: bamFiles.findAll { AbstractMergedBamFile bamFile ->
                             bamFile.workPackage.pipeline.name == Pipeline.Name.EXTERNALLY_PROCESSED
                         },
@@ -307,11 +309,11 @@ scriptInputHelperService.parseAndSplitHelper([selectByIndividual, multiColumnInp
                         analysisListMap.put(instance.key, [analysis])
                     }
                     dataExportOverview.add(new DataExportOverviewItem(
-                            pipelineType    : instance.key,
-                            individual      : analysis.individual,
-                            sampleType      : analysis.sampleType1BamFile.sampleType,
-                            sampleType2     : analysis.sampleType2BamFile.sampleType,
-                            seqType         : analysis.sampleType1BamFile.seqType,
+                            pipelineType: instance.key,
+                            individual: analysis.individual,
+                            sampleType: analysis.sampleType1BamFile.sampleType,
+                            sampleType2: analysis.sampleType2BamFile.sampleType,
+                            seqType: analysis.sampleType1BamFile.seqType,
                     ))
                 }
             }
@@ -330,9 +332,9 @@ DataExportInput dataExportParameters = new DataExportInput([
         copyExternal        : copyExternal,
         copyAnalyses        : copyAnalyses,
         //preprocessed data for export
-        seqTrackList        : seqTrackList,
-        bamFileList         : bamFileList,
-        analysisListMap     : analysisListMap,
+        seqTrackList   : seqTrackList,
+        bamFileList    : bamFileList,
+        analysisListMap: analysisListMap,
 ])
 
 DataExportOutput emptyOutput = new DataExportOutput(
@@ -340,14 +342,14 @@ DataExportOutput emptyOutput = new DataExportOutput(
         listScript: "",
         consoleLog: "")
 List<DataExportOutput> outputList = [
-    //Output header information
-    headerInfoOutput = dataExportService.exportHeaderInfo(dataExportParameters),
-    //Processing FASTQ Files
-    seqTrackOutput = copyFastqFiles ? dataExportService.exportDataFiles(dataExportParameters) : emptyOutput,
-    //Processing BAM Files
-    bamFileOutput = copyBamFiles ? dataExportService.exportBamFiles(dataExportParameters) : emptyOutput,
-    //Processing Analysis Files
-    analysisOutput = dataExportService.exportAnalysisFiles(dataExportParameters),
+        //Output header information
+        headerInfoOutput = dataExportService.exportHeaderInfo(dataExportParameters),
+        //Processing FASTQ Files
+        seqTrackOutput = copyFastqFiles ? dataExportService.exportDataFiles(dataExportParameters) : emptyOutput,
+        //Processing BAM Files
+        bamFileOutput = copyBamFiles ? dataExportService.exportBamFiles(dataExportParameters) : emptyOutput,
+        //Processing Analysis Files
+        analysisOutput = dataExportService.exportAnalysisFiles(dataExportParameters),
 ]
 
 String getConsoleLog(List<DataExportOutput> outputList) {
@@ -373,24 +375,24 @@ StringBuilder summaryString = new StringBuilder()
 summaryString.append("PID\tSAMPLE-TPYE-1\tSAMPLE-TPYE-2\tSEQ-TPYE\tFILE-TPYE\tMORE INFOS\n")
 dataExportOverview.findAll { DataExportOverviewItem dataExportOverviewItem ->
     dataExportOverviewItem.pipelineType == PipelineType.BAM &&
-    (dataExportOverviewItem.seqType == SeqTypeService.rnaSingleSeqType || dataExportOverviewItem.seqType == SeqTypeService.rnaPairedSeqType)
+            (dataExportOverviewItem.seqType == SeqTypeService.rnaSingleSeqType || dataExportOverviewItem.seqType == SeqTypeService.rnaPairedSeqType)
 }.each { DataExportOverviewItem dataExportOverviewItem ->
-    int idx = dataExportOverview.findLastIndexOf { it.individual == dataExportOverviewItem.individual}
+    int idx = dataExportOverview.findLastIndexOf { it.individual == dataExportOverviewItem.individual }
     dataExportOverview.add(idx + 1, new DataExportOverviewItem(
-            pipelineType    : PipelineType.RNA_ANALYSIS,
-            individual      : dataExportOverviewItem.individual,
-            sampleType      : dataExportOverviewItem.sampleType,
-            sampleType2     : null,
-            seqType         : dataExportOverviewItem.seqType,
+            pipelineType: PipelineType.RNA_ANALYSIS,
+            individual: dataExportOverviewItem.individual,
+            sampleType: dataExportOverviewItem.sampleType,
+            sampleType2: null,
+            seqType: dataExportOverviewItem.seqType,
     ))
 }
 dataExportOverview.each {
     summaryString.append("${it.individual.mockPid}")
 
-    summaryString.append("\t" + (it.sampleType   ? "${it.sampleType.name}"     : "-"))
-    summaryString.append("\t" + (it.sampleType2  ? "${it.sampleType2.name}"    : "-"))
-    summaryString.append("\t" + (it.seqType      ? "${it.seqType.displayNameWithLibraryLayout}" : "-"))
-    summaryString.append("\t" + (it.pipelineType ? "${it.pipelineType}"        : "-"))
+    summaryString.append("\t" + (it.sampleType ? "${it.sampleType.name}" : "-"))
+    summaryString.append("\t" + (it.sampleType2 ? "${it.sampleType2.name}" : "-"))
+    summaryString.append("\t" + (it.seqType ? "${it.seqType.displayNameWithLibraryLayout}" : "-"))
+    summaryString.append("\t" + (it.pipelineType ? "${it.pipelineType}" : "-"))
 
     summaryString.append("\t")
     int count = it.swappedFastQs.size()

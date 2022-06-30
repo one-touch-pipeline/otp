@@ -81,9 +81,9 @@ class DataExportServiceSpec extends Specification implements DataTest, DomainFac
     @Shared
     DataExportService service = new DataExportService()
 
-    final static List<String> TEST_PID_LIST    = ["pid_1", "pid_2"]
-    final static String       TEST_UNIX_GROUP  = "test"
-    final static String       TEST_BASE_FOLDER = "/tmp/target"
+    final static List<String> TEST_PID_LIST = ["pid_1", "pid_2"]
+    final static String TEST_UNIX_GROUP = "test"
+    final static String TEST_BASE_FOLDER = "/tmp/target"
 
     @Shared
     Path targetFolder = Paths.get(TEST_BASE_FOLDER)
@@ -109,7 +109,7 @@ class DataExportServiceSpec extends Specification implements DataTest, DomainFac
                             pid: it,
                             mockPid: "mock_${it}",
                     )
-                )
+            )
             )
         }
 
@@ -135,11 +135,11 @@ class DataExportServiceSpec extends Specification implements DataTest, DomainFac
         Files.exists(_) >> true
 
         service.lsdfFilesService = Mock(LsdfFilesService) {
-            getFileFinalPathCount       * getFileFinalPath(_)           >> 'finalFile'
+            getFileFinalPathCount * getFileFinalPath(_) >> 'finalFile'
             getFilePathInViewByPidCount * getFileViewByPidPathAsPath(_) >> Paths.get('/vbp/path/somePid')
         }
         service.individualService = Mock(IndividualService) {
-            getFilePathInViewByPidCount * getViewByPidPath(_, _)        >> Paths.get('/vbp/')
+            getFilePathInViewByPidCount * getViewByPidPath(_, _) >> Paths.get('/vbp/')
         }
         service.fileSystemService = Mock(FileSystemService) {
             getRemoteFileSystemOnDefaultRealm() >> new TestFileSystemService().remoteFileSystemOnDefaultRealm
@@ -152,7 +152,7 @@ class DataExportServiceSpec extends Specification implements DataTest, DomainFac
         switch (cases) {
             case 1:
                 assert output.bashScript.contains("mkdir -p")
-                assert output.bashScript.contains("rsync -uvpL --chmod=")
+                assert output.bashScript.contains('rsync ${RSYNC_LOG} -upL') /* codenarc-disable-line GStringExpressionWithinString */
 
                 assert output.listScript.contains("ls -l")
 
@@ -160,14 +160,14 @@ class DataExportServiceSpec extends Specification implements DataTest, DomainFac
                 break
             case 2:
                 assert output.bashScript.contains("mkdir -p")
-                assert output.bashScript.contains("rsync -uvpL --chmod=")
+                assert output.bashScript.contains('rsync ${RSYNC_LOG} -upL') /* codenarc-disable-line GStringExpressionWithinString */
 
                 assert output.listScript.empty
 
                 assert output.consoleLog.empty
                 break
             case 3:
-                assert output.bashScript.empty
+                assert !["echo", "mkdir", "rsync"].every { output.bashScript.contains(it) }
 
                 assert output.listScript.empty
 
@@ -177,7 +177,7 @@ class DataExportServiceSpec extends Specification implements DataTest, DomainFac
                 }
                 break
             case 4:
-                assert output.bashScript.empty
+                assert !["echo", "mkdir", "rsync"].every { output.bashScript.contains(it) }
                 assert output.listScript.empty
 
                 assert output.consoleLog.contains('** FASTQ **')
@@ -197,27 +197,27 @@ class DataExportServiceSpec extends Specification implements DataTest, DomainFac
 
     private DataExportInput createBamFileInput(boolean checkFileStatus, boolean getFileList, boolean external = false, boolean copyExternal = false) {
         List<AbstractMergedBamFile> bamFileList = [
-            //RoddyBamFile:
-            DomainFactory.createRoddyBamFile([
-                    workPackage: DomainFactory.createMergingWorkPackage([
-                            pipeline: DomainFactory.createPanCanPipeline(),
-                            seqType : DomainFactory.createWholeGenomeSeqType(),
-                    ])
-            ]),
-            //ProcessedMergedBamFile:
-            DomainFactory.createProcessedMergedBamFile([
-                    workPackage: DomainFactory.createMergingWorkPackage([
-                            pipeline: DomainFactory.createDefaultOtpPipeline(),
-                            seqType : DomainFactory.createWholeGenomeSeqType(),
-                    ])
-            ]),
-            //ExternallyProcessedMergedBamFile:
-            DomainFactory.createExternallyProcessedMergedBamFile([
-                    workPackage: DomainFactory.createExternalMergingWorkPackage([
-                            pipeline: DomainFactory.createExternallyProcessedPipelineLazy(),
-                            seqType : DomainFactory.createRnaSingleSeqType(),
-                    ])
-            ]),
+                //RoddyBamFile:
+                DomainFactory.createRoddyBamFile([
+                        workPackage: DomainFactory.createMergingWorkPackage([
+                                pipeline: DomainFactory.createPanCanPipeline(),
+                                seqType : DomainFactory.createWholeGenomeSeqType(),
+                        ])
+                ]),
+                //ProcessedMergedBamFile:
+                DomainFactory.createProcessedMergedBamFile([
+                        workPackage: DomainFactory.createMergingWorkPackage([
+                                pipeline: DomainFactory.createDefaultOtpPipeline(),
+                                seqType : DomainFactory.createWholeGenomeSeqType(),
+                        ])
+                ]),
+                //ExternallyProcessedMergedBamFile:
+                DomainFactory.createExternallyProcessedMergedBamFile([
+                        workPackage: DomainFactory.createExternalMergingWorkPackage([
+                                pipeline: DomainFactory.createExternallyProcessedPipelineLazy(),
+                                seqType : DomainFactory.createRnaSingleSeqType(),
+                        ])
+                ]),
         ]
 
         return new DataExportInput([
@@ -247,11 +247,10 @@ class DataExportServiceSpec extends Specification implements DataTest, DomainFac
             getRemoteFileSystemOnDefaultRealm() >> new TestFileSystemService().remoteFileSystemOnDefaultRealm
         }
 
-        String rsyncChmod     = external     ? "Du=rwx,Dg=rx,Fu=rw,Fg=r" : "Du=rwx,Dgo=rx,Fu=rw,Fog=r"
-        String copyConnection = copyExternal ? /\$\{COPY_CONNECTION\}/     : ""
-        String copyTargetBase = copyExternal ? /\$\{COPY_TARGET_BASE\}/    : ""
+        String copyConnection = copyExternal ? /\$\{COPY_CONNECTION\}/ : ""
+        String copyTargetBase = copyExternal ? /\$\{COPY_TARGET_BASE\}/ : ""
 
-        Pattern bashScriptPattern = ~/echo (\/[a-zA-Z0-9\-+_.]*)*\n(mkdir -p (\/[a-zA-Z0-9\-+_.]*)*\n)?rsync -uv(r)?pL --chmod=${rsyncChmod} ${copyConnection}(\/[a-zA-Z0-9\-+_.*]*)* ${copyTargetBase}(\/[a-zA-Z0-9\-+_.*]*)*\nchgrp -R test (\/[a-zA-Z0-9\-+_.]*)*/
+        Pattern bashScriptPattern = ~/\[\[ -n "(.{2}ECHO_LOG.)" \]\] && echo (\/[a-zA-Z0-9\-+_.]*)*\n(mkdir -p (.{2}COPY_TARGET_BASE.)?(\/[a-zA-Z0-9\-+_.]*)*\n)?rsync (.{2}RSYNC_LOG.) -u(r)?pL ${copyConnection}(\/[a-zA-Z0-9\-+_.*]*)* ${copyTargetBase}(\/[a-zA-Z0-9\-+_.*]*)*/
         Pattern listScriptPattern = ~/ls -l (\/[a-zA-Z0-9\-+_.]*)*/
         Pattern consoleLogPattern = fileExists ?
                 ~/Found BAM files \d\n\n([a-zA-Z0-9\(\)-_ ]*){${dataExportInput.bamFileList.size()}}/ :
@@ -268,7 +267,7 @@ class DataExportServiceSpec extends Specification implements DataTest, DomainFac
         switch (cases) {
             case 1:
                 assert bashScriptMatcher.find()
-                assert bashScriptMatcher.size() == dataExportInput.bamFileList.size()
+                assert bashScriptMatcher.size() == dataExportInput.bamFileList.size() * 2
 
                 assert listScriptMatcher.find()
                 assert listScriptMatcher.size() == dataExportInput.bamFileList.size() * 2
@@ -277,13 +276,13 @@ class DataExportServiceSpec extends Specification implements DataTest, DomainFac
                 break
             case 2:
                 assert bashScriptMatcher.find()
-                assert bashScriptMatcher.size() == dataExportInput.bamFileList.size()
+                assert bashScriptMatcher.size() == dataExportInput.bamFileList.size() * 2
 
                 assert output.listScript.empty
                 assert output.consoleLog.empty
                 break
             case 3:
-                assert output.bashScript.empty
+                assert !bashScriptMatcher.find()
 
                 assert output.listScript.empty
 
@@ -291,7 +290,7 @@ class DataExportServiceSpec extends Specification implements DataTest, DomainFac
                 assert consoleLogMatcher.size() == fileExists ? 1 : dataExportInput.bamFileList.size()
                 break
             case 4:
-                assert output.bashScript.empty
+                assert !bashScriptMatcher.find()
 
                 assert output.listScript.empty
 
@@ -331,7 +330,7 @@ class DataExportServiceSpec extends Specification implements DataTest, DomainFac
 
         then:
         output.bashScript.contains("mkdir -p")
-        output.bashScript.contains("rsync -uvrpL --exclude=*roddyExec* --exclude=.* --chmod=")
+        output.bashScript.contains('rsync ${RSYNC_LOG} -urpL --exclude=*roddyExec* --exclude=.*') /* codenarc-disable-line GStringExpressionWithinString */
 
         output.listScript.contains("ls -l")
 
@@ -355,7 +354,7 @@ class DataExportServiceSpec extends Specification implements DataTest, DomainFac
 
         then:
         output.bashScript.contains("mkdir -p")
-        output.bashScript.contains("rsync -uvrpL --exclude=*roddyExec* --exclude=.* --chmod=")
+        output.bashScript.contains('rsync ${RSYNC_LOG} -urpL --exclude=*roddyExec* --exclude=.*') /* codenarc-disable-line GStringExpressionWithinString */
 
         output.listScript.contains("ls -l")
 
@@ -364,19 +363,19 @@ class DataExportServiceSpec extends Specification implements DataTest, DomainFac
 
     private DataExportInput createAnalysisInput(boolean checkFileStatus, boolean getFileList) {
         Map<PipelineType, List<BamFilePairAnalysis>> analysisListMap = [
-                (PipelineType.INDEL) : [
+                (PipelineType.INDEL)    : [
                         DomainFactory.createIndelCallingInstanceWithRoddyBamFiles(),
                         DomainFactory.createIndelCallingInstanceWithRoddyBamFiles(),
                 ],
-                (PipelineType.SOPHIA): [
+                (PipelineType.SOPHIA)   : [
                         DomainFactory.createSophiaInstanceWithRoddyBamFiles(),
                         DomainFactory.createSophiaInstanceWithRoddyBamFiles(),
                 ],
-                (PipelineType.SNV)   : [
+                (PipelineType.SNV)      : [
                         DomainFactory.createSnvInstanceWithRoddyBamFiles(),
                         DomainFactory.createSnvInstanceWithRoddyBamFiles(),
                 ],
-                (PipelineType.ACESEQ): [
+                (PipelineType.ACESEQ)   : [
                         DomainFactory.createAceseqInstanceWithRoddyBamFiles(),
                         DomainFactory.createAceseqInstanceWithRoddyBamFiles(),
                 ],
@@ -424,7 +423,7 @@ class DataExportServiceSpec extends Specification implements DataTest, DomainFac
         service.bamFileAnalysisServiceFactoryService = Mock(BamFileAnalysisServiceFactoryService)
         service.bamFileAnalysisServiceFactoryService.getService(_) >> abstractBamFileAnalysisService
 
-        Pattern bashScriptPattern = ~/echo ${instancePath}\nmkdir -p [a-zA-Z0-9-_\/]*\nrsync -uvrpL --exclude=\*roddyExec\* --exclude=\*bam\* --chmod=[a-zA-Z0-9=\-,\/ _]*\nchgrp -R [a-zA-Z0-9-_\/ ]*\n/
+        Pattern bashScriptPattern = ~/\[\[ -n "(.{2}ECHO_LOG.)" \]\] && echo ${instancePath}\nmkdir -p (.{2}COPY_TARGET_BASE.)?[a-zA-Z0-9-_\/]*\nrsync (.{2}RSYNC_LOG.) -urpL --exclude=\*roddyExec\* --exclude=\*bam\*/
         Pattern listScriptPattern = ~/ls -l --ignore=\"\*roddyExec\*\" ${instancePath}\n/
         Pattern consoleLogPattern = ~/Found following [a-zA-Z]* analyses:\n(\s*mockPid_\d\s*[a-zA-Z0-9-\s]*:\s*instance-\d*\n){2}/
 
@@ -455,7 +454,7 @@ class DataExportServiceSpec extends Specification implements DataTest, DomainFac
                 assert output.consoleLog.empty
                 break
             case 3:
-                assert output.bashScript.empty
+                assert !["echo", "mkdir", "rsync"].every { output.bashScript.contains(it) }
 
                 assert output.listScript.empty
 
@@ -463,7 +462,7 @@ class DataExportServiceSpec extends Specification implements DataTest, DomainFac
                 assert consoleLogMatcher.size() == dataExportInput.analysisListMap.size()
                 break
             case 4:
-                assert output.bashScript.empty
+                assert !["echo", "mkdir", "rsync"].every { output.bashScript.contains(it) }
 
                 assert output.listScript.empty
 

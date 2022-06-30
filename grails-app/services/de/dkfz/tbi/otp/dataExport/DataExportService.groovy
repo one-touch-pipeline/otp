@@ -58,9 +58,14 @@ class DataExportService {
         return exportFilesWrapper(dataExportInput, exportAnalysisFilesClosure)
     }
 
-    private final Closure exportHeaderInfoClosure = { dataExportInput, scriptFileBuilder, scriptListBuilder, consoleBuilder,
-                                                      rsyncChmod, copyConnection, copyTargetBase ->
+    private final Closure exportHeaderInfoClosure = { dataExportInput, scriptFileBuilder, scriptListBuilder, consoleBuilder, copyConnection, copyTargetBase ->
         String umask = dataExportInput.external ? "027" : "022"
+
+        if (dataExportInput.copyExternal) {
+            scriptFileBuilder.append('[[ -z "${COPY_CONNECTION}" ]] && echo "COPY_CONNECTION must be set" && exit 1\n')
+            scriptFileBuilder.append('[[ -z "${COPY_TARGET_BASE}" ]] && echo "COPY_TARGET_BASE must be set" && exit 1\n')
+        }
+        scriptFileBuilder.append(': "${RSYNC_LOG:=--info=NAME}"\n') // RSYNC_LOG can be set to -v to get detailed logs
 
         if (!dataExportInput.checkFileStatus) {
             scriptFileBuilder.append("#!/bin/bash\n\nset -e\numask ${umask}\n")
@@ -77,8 +82,7 @@ class DataExportService {
         }
     }
 
-    private final Closure exportDataFilesClosure = { dataExportInput, scriptFileBuilder, scriptListBuilder, consoleBuilder,
-                                                     rsyncChmod, copyConnection, copyTargetBase ->
+    private final Closure exportDataFilesClosure = { dataExportInput, scriptFileBuilder, scriptListBuilder, consoleBuilder, copyConnection, copyTargetBase ->
         if (dataExportInput.checkFileStatus) {
             consoleBuilder.append("\n************************************ FASTQ ************************************\n")
             consoleBuilder.append("Found ${dataExportInput.seqTrackList.size()} lanes:\n")
@@ -101,16 +105,14 @@ class DataExportService {
                         Path targetFastqFolder = targetFolderWithPid.resolve(seqTrack.seqType.dirName).
                                 resolve(individualService.getViewByPidPath(dataFile.individual, dataFile.seqType)
                                         .relativize(lsdfFilesService.getFileViewByPidPathAsPath(dataFile)).parent)
-                        scriptFileBuilder.append("echo ${currentFile}\n")
+                        scriptFileBuilder.append("[[ -n \"\${ECHO_LOG}\" ]] && echo ${currentFile}\n")
                         scriptFileBuilder.append("mkdir -p ${copyTargetBase}${targetFastqFolder}\n")
                         String search = "${currentFile.toString().replaceAll("(_|.)R([1,2])(_|.)", "\$1*\$2\$3")}*"
-                        scriptFileBuilder.append("rsync -uvpL --chmod=${rsyncChmod} ${copyConnection}${search} ${copyTargetBase}${targetFastqFolder}\n")
+                        scriptFileBuilder.append("rsync \${RSYNC_LOG} -upL ${copyConnection}${search} ${copyTargetBase}${targetFastqFolder}\n")
 
                         if (dataExportInput.getFileList) {
                             scriptListBuilder.append("ls -l ${search}\n")
                         }
-
-                        scriptFileBuilder.append("chgrp -R ${dataExportInput.unixGroup} ${targetFolderWithPid}\n")
                     }
                 } else {
                     if (dataExportInput.checkFileStatus) {
@@ -121,8 +123,7 @@ class DataExportService {
         }
     }
 
-    private final Closure exportBamFilesClosure = { dataExportInput, scriptFileBuilder, scriptListBuilder, consoleBuilder,
-                                                    rsyncChmod, copyConnection, copyTargetBase ->
+    private final Closure exportBamFilesClosure = { dataExportInput, scriptFileBuilder, scriptListBuilder, consoleBuilder, copyConnection, copyTargetBase ->
         if (dataExportInput.checkFileStatus) {
             consoleBuilder.append("\n************************************ BAM ************************************\n")
             consoleBuilder.append("Found BAM files ${dataExportInput.bamFileList.size()}\n")
@@ -151,31 +152,28 @@ class DataExportService {
                 if (!dataExportInput.checkFileStatus) {
                     if ((bamFile.seqType == SeqTypeService.rnaSingleSeqType || bamFile.seqType == SeqTypeService.rnaPairedSeqType) &&
                             dataExportInput.copyAnalyses.get(PipelineType.RNA_ANALYSIS)) {
-                        scriptFileBuilder.append("echo ${basePath}\n")
+                        scriptFileBuilder.append("[[ -n \"\${ECHO_LOG}\" ]] && echo ${basePath}\n")
                         scriptFileBuilder.append("mkdir -p ${copyTargetBase}${targetBamFolder}\n")
-                        scriptFileBuilder.append("rsync -uvrpL --exclude=*roddyExec* --exclude=.* --chmod=${rsyncChmod} ${copyConnection}${basePath} ")
+                        scriptFileBuilder.append("rsync \${RSYNC_LOG} -urpL --exclude=*roddyExec* --exclude=.* ${copyConnection}${basePath} ")
                         scriptFileBuilder.append("${copyTargetBase}${targetBamFolder}\n")
                         if (dataExportInput.getFileList) {
                             scriptListBuilder.append("ls -l --ignore=\"*roddyExec*\" ${basePath}\n")
                         }
                     } else {
-                        scriptFileBuilder.append("echo ${sourceBam}\n")
+                        scriptFileBuilder.append("[[ -n \"\${ECHO_LOG}\" ]] && echo ${sourceBam}\n")
                         scriptFileBuilder.append("mkdir -p ${copyTargetBase}${targetBamFolder}\n")
-                        scriptFileBuilder.append("rsync -uvpL --chmod=${rsyncChmod} ${copyConnection}${sourceBam}* ${copyTargetBase}${targetBamFolder}\n")
+                        scriptFileBuilder.append("rsync \${RSYNC_LOG} -upL ${copyConnection}${sourceBam}* ${copyTargetBase}${targetBamFolder}\n")
                         if (dataExportInput.getFileList) {
                             scriptListBuilder.append("ls -l ${sourceBam}*\n")
                         }
                     }
                     if (Files.exists(qcFolder)) {
-                        scriptFileBuilder.append("echo ${qcFolder}\n")
-                        scriptFileBuilder.append("rsync -uvrpL --chmod=${rsyncChmod} ${copyConnection}${qcFolder}* ${copyTargetBase}${targetBamFolder}\n")
+                        scriptFileBuilder.append("[[ -n \"\${ECHO_LOG}\" ]] && echo ${qcFolder}\n")
+                        scriptFileBuilder.append("rsync \${RSYNC_LOG} -urpL ${copyConnection}${qcFolder}* ${copyTargetBase}${targetBamFolder}\n")
                         if (dataExportInput.getFileList) {
                             scriptListBuilder.append("ls -l ${qcFolder}*\n")
                         }
                     }
-
-                    Path targetFolderWithPid = dataExportInput.targetFolder.resolve(bamFile.sample.individual.mockPid)
-                    scriptFileBuilder.append("chgrp -R ${dataExportInput.unixGroup} ${targetFolderWithPid}\n")
                 }
             } else {
                 if (dataExportInput.checkFileStatus) {
@@ -186,8 +184,8 @@ class DataExportService {
         }
     }
 
-    private final Closure exportAnalysisFilesClosure = { dataExportInput, scriptFileBuilder, scriptListBuilder, consoleBuilder,
-                                                         rsyncChmod, copyConnection, copyTargetBase ->
+    private final Closure exportAnalysisFilesClosure = { dataExportInput, scriptFileBuilder, scriptListBuilder,
+                                                         consoleBuilder, copyConnection, copyTargetBase ->
         if (dataExportInput.checkFileStatus) {
             consoleBuilder.append("\n************************************ Analyses ************************************\n")
         }
@@ -210,16 +208,12 @@ class DataExportService {
                                 resolve("${it.samplePair.sampleType1.dirName}_${it.samplePair.sampleType2.dirName}")
 
                         File instancePath = fileService.toFile(bamFileAnalysisServiceFactoryService.getService(it).getWorkDirectory(it))
-                        scriptFileBuilder.append("echo ${instancePath}\n")
+                        scriptFileBuilder.append("[[ -n \"\${ECHO_LOG}\" ]] && echo ${instancePath}\n")
                         scriptFileBuilder.append("mkdir -p ${copyTargetBase}${resultFolder}\n")
-                        scriptFileBuilder.append("rsync -uvrpL --exclude=*roddyExec* --exclude=*bam* --chmod=${rsyncChmod} ${copyConnection}${instancePath} ")
+                        scriptFileBuilder.append("rsync \${RSYNC_LOG} -urpL --exclude=*roddyExec* --exclude=*bam* ${copyConnection}${instancePath} ")
                         scriptFileBuilder.append("${copyTargetBase}${resultFolder}\n")
                         if (dataExportInput.getFileList) {
                             scriptListBuilder.append("ls -l --ignore=\"*roddyExec*\" ${instancePath}\n")
-                        }
-
-                        if (!dataExportInput.checkFileStatus && !scriptListBuilder.contains(targetFolderWithPid.toString())) {
-                            scriptFileBuilder.append("chgrp -R ${dataExportInput.unixGroup} ${targetFolderWithPid}\n")
                         }
                     }
                 }
@@ -231,11 +225,11 @@ class DataExportService {
         StringBuilder bashScriptBuilder = new StringBuilder()
         StringBuilder listScriptBuilder = new StringBuilder()
         StringBuilder consoleLogBuilder = new StringBuilder()
-        String rsyncChmod = dataExportInput.external ? "Du=rwx,Dg=rx,Fu=rw,Fg=r" : "Du=rwx,Dgo=rx,Fu=rw,Fog=r"
+
         String copyConnection = dataExportInput.copyExternal ? "\${COPY_CONNECTION}" : ""
         String copyTargetBase = dataExportInput.copyExternal ? "\${COPY_TARGET_BASE}" : ""
 
-        closure(dataExportInput, bashScriptBuilder, listScriptBuilder, consoleLogBuilder, rsyncChmod, copyConnection, copyTargetBase)
+        closure(dataExportInput, bashScriptBuilder, listScriptBuilder, consoleLogBuilder, copyConnection, copyTargetBase)
 
         return new DataExportOutput(
                 bashScript: bashScriptBuilder.toString(),
