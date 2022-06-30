@@ -80,7 +80,7 @@ class FastqcPrepareJobSpec extends Specification implements DataTest, WorkflowSy
                 workDirectory: workDirectory,
                 workflow:
                         createWorkflow([
-                                name: FastqcWorkflow.WORKFLOW
+                                name: FastqcWorkflow.WORKFLOW,
                         ])
         ])
         WorkflowStep workflowStep = createWorkflowStep([workflowRun: run])
