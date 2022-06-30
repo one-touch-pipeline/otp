@@ -31,6 +31,9 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 class FastqcSharedSpec extends Specification implements WorkflowSystemDomainFactory, DataTest {
 
+    private WorkflowStep workflowStep
+    private FastqcShared fastqcSharedInstance
+
     @Override
     Class[] getDomainClassesToMock() {
         return [
@@ -38,8 +41,6 @@ class FastqcSharedSpec extends Specification implements WorkflowSystemDomainFact
                 WorkflowStep,
         ]
     }
-    private WorkflowStep workflowStep
-    private FastqcShared fastqcSharedInstance
 
     private void createData() {
         fastqcSharedInstance = Spy(FastqcSharedInstance)
@@ -52,7 +53,7 @@ class FastqcSharedSpec extends Specification implements WorkflowSystemDomainFact
         workflowStep = createWorkflowStep([workflowRun: run])
     }
 
-    void "getSeqTrack, should call checkWorkflowName and getInputArtefact with correct arguments and in order)"() {
+    void "getSeqTrack, should call checkWorkflowName and getInputArtefact with correct arguments and in order"() {
         given:
         createData()
 
@@ -66,7 +67,7 @@ class FastqcSharedSpec extends Specification implements WorkflowSystemDomainFact
         1 * fastqcSharedInstance.concreteArtefactService.getInputArtefact(workflowStep, FastqcWorkflow.INPUT_FASTQ) >> _
     }
 
-    void "getFastqcProcessedFiles, should call checkWorkflowName and getOutputArtefacts with correct arguments and in order)"() {
+    void "getFastqcProcessedFiles, should call checkWorkflowName and getOutputArtefacts with correct arguments and in order"() {
         given:
         createData()
 

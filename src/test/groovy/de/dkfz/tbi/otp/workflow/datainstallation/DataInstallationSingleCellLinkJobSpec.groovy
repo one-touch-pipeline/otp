@@ -36,6 +36,9 @@ import java.nio.file.Paths
 
 class DataInstallationSingleCellLinkJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory {
 
+    WorkflowStep workflowStep
+    SeqTrack seqTrack
+
     @Override
     Class[] getDomainClassesToMock() {
         return [
@@ -45,9 +48,6 @@ class DataInstallationSingleCellLinkJobSpec extends Specification implements Dat
                 WorkflowStep,
         ]
     }
-
-    WorkflowStep workflowStep
-    SeqTrack seqTrack
 
     void setupData(boolean isSingleCell) {
         workflowStep = createWorkflowStep()

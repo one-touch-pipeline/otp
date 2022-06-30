@@ -44,6 +44,9 @@ import java.nio.file.Path
 
 class PanCancerFinishJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory, IsRoddy {
 
+    @Rule
+    TemporaryFolder temporaryFolder
+
     @Override
     Class[] getDomainClassesToMock() {
         return [
@@ -56,9 +59,6 @@ class PanCancerFinishJobSpec extends Specification implements DataTest, Workflow
         ]
     }
 
-    @Rule
-    TemporaryFolder temporaryFolder
-
     void "test updateDomain method should update roddyBamFile"() {
         given:
         TestConfigService testConfigService = new TestConfigService(temporaryFolder.newFolder())
@@ -66,7 +66,7 @@ class PanCancerFinishJobSpec extends Specification implements DataTest, Workflow
         MergingWorkPackage workPackage = createMergingWorkPackage(bamFileInProjectFolder: null)
         RoddyBamFile roddyBamFile = createBamFile([
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.INPROGRESS,
-                workPackage: workPackage,
+                workPackage        : workPackage,
         ])
 
         Path testWorkBamFile = CreateFileHelper.createFile(roddyBamFile.workBamFile.toPath())
@@ -89,7 +89,7 @@ class PanCancerFinishJobSpec extends Specification implements DataTest, Workflow
                         individualService: new IndividualService([
                                 projectService: new ProjectService([
                                         fileSystemService: new TestFileSystemService(),
-                                        configService: testConfigService,
+                                        configService    : testConfigService,
                                 ]),
                         ]),
                 ]),

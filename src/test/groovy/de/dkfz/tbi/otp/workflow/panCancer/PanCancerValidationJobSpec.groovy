@@ -48,20 +48,6 @@ import java.nio.file.Paths
 
 class PanCancerValidationJobSpec extends Specification implements WorkflowSystemDomainFactory, DataTest, IsRoddy {
 
-    @Override
-    Class[] getDomainClassesToMock() {
-        return [
-                WorkflowStep,
-                RoddyBamFile,
-                RoddyMergedBamQa,
-                MergingWorkPackage,
-                ReferenceGenomeProjectSeqType,
-                FileType,
-                FastqImportInstance,
-                ClusterJob,
-        ]
-    }
-
     @Rule
     TemporaryFolder temporaryFolder
 
@@ -76,6 +62,20 @@ class PanCancerValidationJobSpec extends Specification implements WorkflowSystem
 
     static final String STATUS_CODE_FAILED = "1"
     static final String STATUS_CODE_FINISHED = "0"
+
+    @Override
+    Class[] getDomainClassesToMock() {
+        return [
+                WorkflowStep,
+                RoddyBamFile,
+                RoddyMergedBamQa,
+                MergingWorkPackage,
+                ReferenceGenomeProjectSeqType,
+                FileType,
+                FastqImportInstance,
+                ClusterJob,
+        ]
+    }
 
     void setup() {
         configService = new TestConfigService([(OtpProperty.PATH_CLUSTER_LOGS_OTP): temporaryFolder.newFolder().path])
@@ -153,7 +153,7 @@ class PanCancerValidationJobSpec extends Specification implements WorkflowSystem
         List<Path> directories = job.getExpectedDirectories(workflowStep)
 
         then:
-        files.sort()       == expectedFiles.sort()
+        files.sort() == expectedFiles.sort()
         directories.sort() == expectedDirectories.sort()
 
         where:
@@ -170,7 +170,7 @@ class PanCancerValidationJobSpec extends Specification implements WorkflowSystem
                 workflowStep: workflowStep,
                 clusterJobId: testJobId,
                 checkStatus : ClusterJob.CheckStatus.FINISHED,
-                jobLog: CreateFileHelper.createFile(temporaryFolder.newFile()).absolutePath,
+                jobLog      : CreateFileHelper.createFile(temporaryFolder.newFile()).absolutePath,
         ])
 
         job.roddyService = Mock(RoddyService) {
@@ -201,7 +201,7 @@ class PanCancerValidationJobSpec extends Specification implements WorkflowSystem
                 workflowStep: workflowStep,
                 clusterJobId: testJobId,
                 checkStatus : ClusterJob.CheckStatus.FINISHED,
-                jobLog: CreateFileHelper.createFile(temporaryFolder.newFile()).absolutePath,
+                jobLog      : CreateFileHelper.createFile(temporaryFolder.newFile()).absolutePath,
         ])
 
         job.roddyService = Mock(RoddyService) {

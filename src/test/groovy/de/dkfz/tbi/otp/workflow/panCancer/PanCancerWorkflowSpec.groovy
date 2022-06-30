@@ -29,6 +29,8 @@ import de.dkfz.tbi.otp.ngsdata.*
 
 class PanCancerWorkflowSpec extends Specification implements RoddyPancanFactory, DataTest {
 
+    PanCancerWorkflow panCancerWorkflow
+
     @Override
     Class[] getDomainClassesToMock() {
         return [
@@ -41,8 +43,6 @@ class PanCancerWorkflowSpec extends Specification implements RoddyPancanFactory,
                 ReferenceGenomeProjectSeqType,
         ]
     }
-
-    PanCancerWorkflow panCancerWorkflow
 
     void setup() {
         panCancerWorkflow = new PanCancerWorkflow()

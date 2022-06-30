@@ -33,14 +33,6 @@ import de.dkfz.tbi.otp.workflowExecution.*
 
 class FastqcFinishJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory {
 
-    @Override
-    Class[] getDomainClassesToMock() {
-        return [
-                DataFile,
-                WorkflowStep,
-        ]
-    }
-
     DataFile dataFile1
     DataFile dataFile2
 
@@ -55,6 +47,14 @@ class FastqcFinishJobSpec extends Specification implements DataTest, WorkflowSys
             fastqcProcessedFile1,
             fastqcProcessedFile2,
     ]
+
+    @Override
+    Class[] getDomainClassesToMock() {
+        return [
+                DataFile,
+                WorkflowStep,
+        ]
+    }
 
     void "test updateDomain method"() {
         given:

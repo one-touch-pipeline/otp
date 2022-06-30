@@ -43,6 +43,14 @@ import java.nio.file.Paths
 
 class PanCancerLinkJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory, RoddyPancanFactory {
 
+    PanCancerLinkJob job
+    RoddyBamFile roddyBamFile
+    WorkflowStep workflowStep
+    RoddyBamFileService roddyBamFileService
+
+    @Rule
+    TemporaryFolder temporaryFolder
+
     @Override
     Class[] getDomainClassesToMock() {
         return [
@@ -59,14 +67,6 @@ class PanCancerLinkJobSpec extends Specification implements DataTest, WorkflowSy
                 WorkflowStep,
         ]
     }
-
-    PanCancerLinkJob job
-    RoddyBamFile roddyBamFile
-    WorkflowStep workflowStep
-    RoddyBamFileService roddyBamFileService
-
-    @Rule
-    TemporaryFolder temporaryFolder
 
     void setupData() {
         roddyBamFile = createBamFile(roddyExecutionDirectoryNames: ["exec_123456_123456789_test_test"])

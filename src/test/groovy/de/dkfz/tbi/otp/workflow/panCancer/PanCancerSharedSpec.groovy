@@ -32,6 +32,9 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 class PanCancerSharedSpec extends Specification implements WorkflowSystemDomainFactory, DataTest {
 
+    private WorkflowStep workflowStep
+    private PanCancerShared panCancerSharedInstance
+
     @Override
     Class[] getDomainClassesToMock() {
         return [
@@ -39,8 +42,6 @@ class PanCancerSharedSpec extends Specification implements WorkflowSystemDomainF
                 WorkflowStep,
         ]
     }
-    private WorkflowStep workflowStep
-    private PanCancerShared panCancerSharedInstance
 
     private void createData() {
         panCancerSharedInstance = Spy(PanCancerSharedInstance)
@@ -53,7 +54,7 @@ class PanCancerSharedSpec extends Specification implements WorkflowSystemDomainF
         workflowStep = createWorkflowStep([workflowRun: run])
     }
 
-    void "getSeqTracks, should call checkWorkflowName and getInputArtefacts with correct arguments and in order)"() {
+    void "getSeqTracks, should call checkWorkflowName and getInputArtefacts with correct arguments and in order"() {
         given:
         createData()
 
@@ -67,7 +68,7 @@ class PanCancerSharedSpec extends Specification implements WorkflowSystemDomainF
         1 * panCancerSharedInstance.concreteArtefactService.getInputArtefacts(workflowStep, PanCancerWorkflow.INPUT_FASTQ) >> _
     }
 
-    void "getFastqcProcessedFiles, should call checkWorkflowName and getInputArtefacts with correct arguments and in order)"() {
+    void "getFastqcProcessedFiles, should call checkWorkflowName and getInputArtefacts with correct arguments and in order"() {
         given:
         createData()
 
@@ -81,7 +82,7 @@ class PanCancerSharedSpec extends Specification implements WorkflowSystemDomainF
         1 * panCancerSharedInstance.concreteArtefactService.getInputArtefacts(workflowStep, PanCancerWorkflow.INPUT_FASTQC) >> _
     }
 
-    void "getBaseRoddyBamFile, should call checkWorkflowName and getInputArtefact with correct arguments and in order)"() {
+    void "getBaseRoddyBamFile, should call checkWorkflowName and getInputArtefact with correct arguments and in order"() {
         given:
         createData()
 
@@ -95,7 +96,7 @@ class PanCancerSharedSpec extends Specification implements WorkflowSystemDomainF
         1 * panCancerSharedInstance.concreteArtefactService.getInputArtefact(workflowStep, PanCancerWorkflow.INPUT_BASE_BAM_FILE, false) >> _
     }
 
-    void "getRoddyBamFile, should call checkWorkflowName and getInputArtefact with correct arguments and in order)"() {
+    void "getRoddyBamFile, should call checkWorkflowName and getInputArtefact with correct arguments and in order"() {
         given:
         createData()
 

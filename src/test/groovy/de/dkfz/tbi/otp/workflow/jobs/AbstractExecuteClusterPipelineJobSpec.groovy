@@ -32,6 +32,9 @@ import de.dkfz.tbi.otp.workflowExecution.cluster.ClusterAccessService
 
 class AbstractExecuteClusterPipelineJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory {
 
+    private WorkflowStep workflowStep
+    private AbstractExecuteClusterPipelineJob job
+
     @Override
     Class[] getDomainClassesToMock() {
         return [
@@ -50,9 +53,6 @@ class AbstractExecuteClusterPipelineJobSpec extends Specification implements Dat
             return scripts
         }
     }
-
-    private WorkflowStep workflowStep
-    private AbstractExecuteClusterPipelineJob job
 
     private void setupData(List<String> scripts) {
         workflowStep = createWorkflowStep()

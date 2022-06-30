@@ -40,13 +40,6 @@ import java.nio.file.FileSystems
 
 class AbstractOtpClusterValidationJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory {
 
-    @Override
-    Class[] getDomainClassesToMock() {
-        return [
-                WorkflowStep,
-        ]
-    }
-
     @Rule
     TemporaryFolder temporaryFolder
 
@@ -55,6 +48,13 @@ class AbstractOtpClusterValidationJobSpec extends Specification implements DataT
     private WorkflowStep workflowStepSendingClusterJob
 
     private WorkflowStep workflowStepValidatingClusterJob
+
+    @Override
+    Class[] getDomainClassesToMock() {
+        return [
+                WorkflowStep,
+        ]
+    }
 
     private void setupData() {
         job = Spy(AbstractOtpClusterValidationJob)

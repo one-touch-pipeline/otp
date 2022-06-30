@@ -30,14 +30,14 @@ import de.dkfz.tbi.otp.workflowExecution.Artefact
 
 class FastqcWorkflowSpec extends Specification implements DataTest, DomainFactoryCore {
 
+    FastqcWorkflow fastqcWorkflow
+
     @Override
     Class[] getDomainClassesToMock() {
         return [
                 SeqTrack
         ]
     }
-
-    FastqcWorkflow fastqcWorkflow
 
     void setup() {
         fastqcWorkflow = new FastqcWorkflow()

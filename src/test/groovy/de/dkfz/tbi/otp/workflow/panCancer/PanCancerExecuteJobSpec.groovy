@@ -45,6 +45,15 @@ import java.nio.file.Paths
 
 class PanCancerExecuteJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory, IsRoddy {
 
+    @Rule
+    TemporaryFolder tmpDir
+
+    PanCancerExecuteJob job
+    RoddyBamFile roddyBamFile
+    WorkflowStep workflowStep
+
+    TestConfigService configService
+
     @Override
     Class[] getDomainClassesToMock() {
         return [
@@ -68,15 +77,6 @@ class PanCancerExecuteJobSpec extends Specification implements DataTest, Workflo
                 Workflow,
         ]
     }
-
-    @Rule
-    TemporaryFolder tmpDir
-
-    PanCancerExecuteJob job
-    RoddyBamFile roddyBamFile
-    WorkflowStep workflowStep
-
-    TestConfigService configService
 
     void setupDataForGetConfigurationValues() {
         roddyBamFile = createBamFile([

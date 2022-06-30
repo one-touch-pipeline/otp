@@ -30,14 +30,14 @@ import de.dkfz.tbi.otp.workflowExecution.Artefact
 
 class DataInstallationWorkflowSpec extends Specification implements DataTest, DomainFactoryCore {
 
+    DataInstallationWorkflow dataInstallationWorkflow
+
     @Override
     Class[] getDomainClassesToMock() {
         return [
                 SeqTrack
         ]
     }
-
-    DataInstallationWorkflow dataInstallationWorkflow
 
     void setup() {
         dataInstallationWorkflow = new DataInstallationWorkflow()

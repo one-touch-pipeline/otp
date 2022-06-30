@@ -39,6 +39,9 @@ import java.nio.file.Path
 
 class PanCancerConditionalFailJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory {
 
+    @Rule
+    TemporaryFolder temporaryFolder
+
     @Override
     Class[] getDomainClassesToMock() {
         return [
@@ -46,9 +49,6 @@ class PanCancerConditionalFailJobSpec extends Specification implements DataTest,
                 WorkflowStep,
         ]
     }
-
-    @Rule
-    TemporaryFolder temporaryFolder
 
     void "test check, succeeds"() {
         given:

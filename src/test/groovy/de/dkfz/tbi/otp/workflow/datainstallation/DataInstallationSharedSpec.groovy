@@ -39,7 +39,7 @@ class DataInstallationSharedSpec extends Specification implements WorkflowSystem
         ]
     }
 
-    void "getSeqTrack, should call checkWorkflowName and getOutputArtefact with correct arguments and in order)"() {
+    void "getSeqTrack, should call checkWorkflowName and getOutputArtefact with correct arguments and in order"() {
         given:
         final DataInstallationShared dataInstallationSharedInstance = Spy(DataInstallationSharedInstance)
         dataInstallationSharedInstance.concreteArtefactService = Mock(ConcreteArtefactService)
