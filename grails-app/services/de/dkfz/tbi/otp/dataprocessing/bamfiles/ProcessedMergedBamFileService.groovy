@@ -21,10 +21,13 @@
  */
 package de.dkfz.tbi.otp.dataprocessing.bamfiles
 
+import grails.gorm.transactions.Transactional
+
 import de.dkfz.tbi.otp.dataprocessing.*
 
 import java.nio.file.Path
 
+@Transactional
 class ProcessedMergedBamFileService<T extends AbstractMergedBamFile> extends AbstractAbstractMergedBamFileService<ProcessedMergedBamFile> {
 
     AbstractMergedBamFileService abstractMergedBamFileService

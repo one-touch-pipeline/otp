@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.gorm.transactions.Transactional
+
 import de.dkfz.tbi.otp.ngsdata.PlotType
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
@@ -30,6 +32,7 @@ import java.text.DecimalFormat
 import java.text.NumberFormat
 import java.util.stream.Collectors
 
+@Transactional
 class AceseqService extends AbstractBamFileAnalysisService<AceseqInstance> implements RoddyBamFileAnalysis, WithReferenceGenomeRestriction {
 
     private final static String ACESEQ_RESULTS_PATH_PART = 'cnv_results'

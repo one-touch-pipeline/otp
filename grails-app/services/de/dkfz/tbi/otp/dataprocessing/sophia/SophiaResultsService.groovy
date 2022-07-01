@@ -21,9 +21,12 @@
  */
 package de.dkfz.tbi.otp.dataprocessing.sophia
 
+import grails.gorm.transactions.Transactional
+
 import de.dkfz.tbi.otp.ngsdata.AbstractAnalysisResultsService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
+@Transactional
 class SophiaResultsService extends AbstractAnalysisResultsService<SophiaInstance> {
 
     final Class<SophiaInstance> instanceClass = SophiaInstance

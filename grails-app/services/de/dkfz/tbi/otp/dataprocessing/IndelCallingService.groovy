@@ -21,8 +21,11 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.gorm.transactions.Transactional
+
 import java.nio.file.Path
 
+@Transactional
 class IndelCallingService extends AbstractBamFileAnalysisService<IndelCallingInstance> implements RoddyBamFileAnalysis {
 
     private final static String INDEL_RESULTS_PATH_PART = 'indel_results'

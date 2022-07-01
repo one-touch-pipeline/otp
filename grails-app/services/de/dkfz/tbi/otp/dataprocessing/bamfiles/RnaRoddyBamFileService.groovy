@@ -21,11 +21,14 @@
  */
 package de.dkfz.tbi.otp.dataprocessing.bamfiles
 
+import grails.gorm.transactions.Transactional
+
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 
 import java.nio.file.Path
 
+@Transactional
 class RnaRoddyBamFileService extends RoddyBamFileService {
 
     static final String CHIMERIC_BAM_SUFFIX = "chimeric_merged.mdup.bam"

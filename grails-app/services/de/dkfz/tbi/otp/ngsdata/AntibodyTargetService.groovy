@@ -21,10 +21,12 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.gorm.transactions.Transactional
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.utils.StringUtils
 
+@Transactional
 class AntibodyTargetService extends MetadataFieldsService<AntibodyTarget> {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")

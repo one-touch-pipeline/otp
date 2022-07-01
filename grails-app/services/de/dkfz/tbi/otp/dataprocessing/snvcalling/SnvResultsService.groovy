@@ -21,8 +21,11 @@
  */
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
+import grails.gorm.transactions.Transactional
+
 import de.dkfz.tbi.otp.ngsdata.AbstractAnalysisResultsService
 
+@Transactional
 class SnvResultsService extends AbstractAnalysisResultsService<AbstractSnvCallingInstance> {
 
     final Class<AbstractSnvCallingInstance> instanceClass = AbstractSnvCallingInstance

@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.administration
 
+import grails.gorm.transactions.Transactional
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.validation.ValidationException
 import org.springframework.beans.factory.DisposableBean
@@ -47,6 +48,7 @@ import java.util.concurrent.locks.ReentrantLock
  * running but resumable jobs. In case of non-resumable Jobs the service will log a warning
  * message.
  */
+@Transactional
 class ShutdownService implements DisposableBean {
     // service is not transactional as the database access has to be locked
     static transactional = false

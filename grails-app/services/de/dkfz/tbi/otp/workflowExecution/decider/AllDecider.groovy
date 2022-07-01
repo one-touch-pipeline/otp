@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.workflowExecution.decider
 
+import grails.gorm.transactions.Transactional
 import grails.util.Holders
 import org.springframework.stereotype.Component
 
@@ -36,6 +37,7 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
  * is called with a list of new/changed workflowArtefacts (see method decide in Decider)
  */
 @Component
+@Transactional
 class AllDecider implements Decider {
     /** list of Deciders in the correct order */
     List<Class<Decider>> deciders = [

@@ -21,11 +21,14 @@
  */
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
+import grails.gorm.transactions.Transactional
+
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.infrastructure.FileService
 
 import java.nio.file.Path
 
+@Transactional
 class SnvCallingService extends AbstractBamFileAnalysisService<AbstractSnvCallingInstance> implements RoddyBamFileAnalysis {
 
     private final static String SNV_RESULTS_PATH_PART = 'snv_results'

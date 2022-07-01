@@ -21,9 +21,12 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.gorm.transactions.Transactional
+
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaConfig
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaInstance
 
+@Transactional
 class RunYapsaService extends AbstractBamFileAnalysisService<RunYapsaInstance> implements WithReferenceGenomeRestriction {
 
     private final static String RUN_YAPSA_RESULTS_PATH_PART = 'mutational_signatures_results'

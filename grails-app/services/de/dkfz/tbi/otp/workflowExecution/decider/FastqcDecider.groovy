@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.workflowExecution.decider
 
+import grails.gorm.transactions.Transactional
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
@@ -31,6 +32,7 @@ import de.dkfz.tbi.otp.workflow.fastqc.FastqcWorkflow
 import de.dkfz.tbi.otp.workflowExecution.*
 
 @Component
+@Transactional
 class FastqcDecider implements Decider {
 
     @Autowired

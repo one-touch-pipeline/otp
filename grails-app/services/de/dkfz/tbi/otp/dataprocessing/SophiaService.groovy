@@ -21,10 +21,13 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.gorm.transactions.Transactional
+
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 
 import java.nio.file.Path
 
+@Transactional
 class SophiaService extends AbstractBamFileAnalysisService<SophiaInstance> implements RoddyBamFileAnalysis, WithReferenceGenomeRestriction {
 
     private final static String SOPHIA_RESULTS_PATH_PART = 'sv_results'
