@@ -29,29 +29,32 @@ describe('Check dataFile pages', () => {
     });
 
     it('should visit show details page by starting on project overview page and save a comment there', () => {
+      cy.intercept('/projectOverview/dataTableSource?*').as('dataTableSource');
+      cy.intercept('/dataFile/saveDataFileComment*').as('saveDataFileComment');
       cy.visit('/projectOverview/index');
-      cy.get('table#projectOverviewTable td.dataTables_empty').contains('Loading...').should('not.exist');
-      cy.get('table#projectOverviewTable tbody').find('tr').eq(6)
-        .find('td')
-        .eq(0)
-        .find('a')
-        .click();
+      cy.wait('@dataTableSource').then((interception) => {
+        expect(interception.response.statusCode).to.be.eq(200);
 
-      cy.get('table tbody tr').find('a').eq(2)
-        .click();
-      cy.checkPage('seqTrack/seqTrackSet');
+        cy.get('table#projectOverviewTable tbody tr').first()
+          .find('td')
+          .first()
+          .click();
 
-      cy.get('div.identifier.dataFile a').eq(2).click();
-      cy.checkPage('dataFile/showDetails');
+        cy.get('table tbody tr').find('a').eq(2)
+          .click();
+        cy.checkPage('seqTrack/seqTrackSet');
 
-      const comment = 'This is a test comment';
-      cy.get('span#authorSpan').should('not.be.empty');
-      cy.get('textarea#comment-content').clear().type(comment);
-      cy.get('button#button-save').click();
+        cy.get('div.identifier.dataFile a').eq(2).click();
+        cy.checkPage('dataFile/showDetails');
 
-      cy.url().then((url) => {
-        cy.visit(url);
-        cy.get('textarea#comment-content').should('have.text', comment);
+        const comment = `This is a random ${Cypress._.random(0, 1e6)} comment.`;
+        cy.get('textarea#comment-content').clear().type(comment);
+        cy.get('button#button-save').click();
+
+        cy.wait('@saveDataFileComment').then((intcpt) => {
+          expect(intcpt.response.statusCode).to.be.eq(200);
+          cy.get('span#authorSpan').should('not.be.empty');
+        });
       });
     });
   });
