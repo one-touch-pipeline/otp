@@ -27,6 +27,9 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.searchability.Keyword
 import de.dkfz.tbi.otp.utils.StringUtils
 
+import grails.gorm.transactions.Transactional
+
+@Transactional
 class KeywordService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
