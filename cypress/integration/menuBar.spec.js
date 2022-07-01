@@ -33,7 +33,7 @@ describe('Click all menu items in the menu bar', () => {
       const menuBar = 'div.menuContainer';
       const menuBarItem = 'li:not(.nav_container)';
       cy.get(menuBar).find(menuBarItem)
-        .should('have.length', 69).and('contain', 'a');
+        .should('have.length', 71).and('contain', 'a');
     });
 
     it('should click the Overview menu item', () => {
@@ -178,7 +178,7 @@ describe('Click all menu items in the menu bar', () => {
 
     it('should check the number of menu items and click all Workflow System menu items', () => {
       cy.get('li.navigation').contains('Workflow System').parent().find('li')
-        .should('have.length', 9);
+        .should('have.length', 11);
       cy.get('.navigation li').contains('Status').click({ force: true });
       cy.checkPage('/systemStatus/index');
 
