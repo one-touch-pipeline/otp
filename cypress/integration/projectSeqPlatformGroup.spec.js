@@ -78,7 +78,7 @@ describe('Check projectSeqPlatformGroup page', () => {
       cy.intercept('/projectSeqPlatformGroup/createNewGroupAndAddPlatform*').as('createNewGroupAndAddPlatform');
       cy.get('select#new_select_seqPlat').should('have.value', 'null');
       cy.get('select#new_select_seqPlat').select('Illumina HiSeq 2000 v1', { force: true });
-      cy.get('.seqPlatformGroupSelector button[type=submit]').click();
+      cy.get('#addSeqPlatformGroup').click();
 
       cy.wait('@createNewGroupAndAddPlatform').then((interception) => {
         expect(interception.response.statusCode).to.eq(302);
@@ -144,12 +144,15 @@ describe('Check projectSeqPlatformGroup page', () => {
 
     it('should delete the seq. platform group', () => {
       cy.intercept('/projectSeqPlatformGroup/emptySeqPlatformGroup*').as('emptySeqPlatformGroup');
-      cy.get('.seqPlatformGroupSelector button[type=submit].btn-danger').click();
+      cy.get('.seqPlatformGroupSelector').find('button[type=submit].btn-danger').click();
 
       cy.wait('@emptySeqPlatformGroup').then((interception) => {
         expect(interception.response.statusCode).to.eq(302);
         cy.location('pathname').should('match', /^\/projectSeqPlatformGroup\/index/);
-        cy.get('.list-group.list-group-flush').should('not.exist');
+        cy.get('.seqPlatformGroups').should('not.contain', 'Illumina HiSeq 2000 v2');
+        cy.get('.alert.alert-info')
+          .contains('No group configured for ExampleProject and 10x_scRNA PAIRED single cell!')
+          .should('exist');
       });
     });
   });
