@@ -41,7 +41,7 @@ describe('Check statistics page', () => {
 
       cy.get('div').contains('Processing...').should('not.be.visible');
       cy.get('div#sequenceTable_wrapper button').contains('Download').click();
-      cy.checkDownloadByByteSize('Sequence_Export', '.csv', 4694);
+      cy.checkDownloadByByteSize('Sequence_Export', '.csv', 11271);
     });
 
     it('should filter the table by sample type', () => {
