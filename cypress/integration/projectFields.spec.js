@@ -34,8 +34,6 @@ describe('Check projectFields page', () => {
         cy.visit('/projectFields/create');
       });
 
-      it('should visit the create page', () => {});
-
       it('should create additional project field, when required values are set', () => {
         cy.intercept('/projectFields/createText*').as('createProjectField');
         cy.get('@projectFields').then((fields) => {
@@ -57,8 +55,6 @@ describe('Check projectFields page', () => {
         cy.intercept('/projectFields/updateField*').as('updateProjectField');
         cy.visit('/projectFields/index');
       });
-
-      it('should visit the index page', () => {});
 
       it('should update the name', () => {
         cy.get('td.name').first().find('button.edit').click();

@@ -29,8 +29,6 @@ describe('Check projectCreation page', () => {
       cy.visit('/projectCreation/index');
     });
 
-    it('should visit the index page', () => {});
-
     it('should create project, when required values are set', () => {
       const randomString = Cypress._.random(0, 1e6);
 

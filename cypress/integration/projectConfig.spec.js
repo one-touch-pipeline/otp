@@ -30,8 +30,6 @@ describe('Check projectConfig page', () => {
       cy.visit('/projectConfig/index');
     });
 
-    it('should visit the index page', () => {});
-
     it('should add a comment', () => {
       cy.intercept('/projectConfig/saveProjectComment*').as('saveProjectComment');
 

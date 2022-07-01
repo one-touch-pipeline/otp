@@ -29,8 +29,6 @@ describe('Check projectInfo page', () => {
       cy.visit('/projectInfo/list');
     });
 
-    it('should visit the project info page', () => {});
-
     it('should add project info document', () => {
       cy.intercept('/projectInfo/addProjectInfo*').as('addProjectInfo');
 
