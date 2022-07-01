@@ -71,11 +71,11 @@
                         <div class="col">
                             <div class="input-group mb-3">
                                 <div class="input-group-prepend">
-                                    <label class="input-group-text"><g:message code="workflowConfig.selector.customPriority"/></label>
+                                    <label class="input-group-text"><g:message code="workflowConfig.selector.priority"/></label>
                                 </div>
-                                <input type="number" class="form-control"  name="customPriority" required
-                                       title='<g:message code="workflowConfig.selector.customPriority.tooltip"/>'
-                                       placeholder='<g:message code="workflowConfig.selector.customPriority.tooltip"/>'
+                                <input type="number" class="form-control"  name="priority" required
+                                       title='<g:message code="workflowConfig.selector.priority.tooltip"/>'
+                                       placeholder='<g:message code="workflowConfig.selector.priority.tooltip"/>'
                                        oninput="$.otp.workflowConfig.validatePriority(this)"/>
                                 <div class="invalid-feedback d-none" id="vf-priority">
                                     <g:message code="workflowConfig.validation.notValid"/>

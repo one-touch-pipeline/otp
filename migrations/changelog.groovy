@@ -667,4 +667,8 @@ databaseChangeLog = {
     }
 
     include file: 'changelogs/2022/otp-1594-fastqc-working-directory.groovy'
+
+    changeSet(author: "wei-guo.peng", id: "otp-1665") {
+        sqlFile(path: 'changelogs/2022/otp-1665.sql')
+    }
 }

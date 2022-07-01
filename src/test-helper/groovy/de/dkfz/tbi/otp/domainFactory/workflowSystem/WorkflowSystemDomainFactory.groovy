@@ -152,7 +152,6 @@ trait WorkflowSystemDomainFactory implements DomainFactoryCore, TaxonomyFactory 
                 projects                      : { [createProject()] },
                 externalWorkflowConfigFragment: { createExternalWorkflowConfigFragment() },
                 selectorType                  : { SelectorType.GENERIC },
-                customPriority                : nextId,
         ], properties)
     }
 

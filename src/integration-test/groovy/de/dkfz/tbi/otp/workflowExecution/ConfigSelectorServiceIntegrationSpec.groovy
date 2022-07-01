@@ -76,6 +76,7 @@ class ConfigSelectorServiceIntegrationSpec extends Specification implements Work
         LibraryPreparationKit libraryPreparationKit1 = createLibraryPreparationKit(name: "l1")
         LibraryPreparationKit libraryPreparationKit2 = createLibraryPreparationKit(name: "l2")
 
+        //priority : 0b01111111 = 127
         createEWCSHelperExtendedCriteria(
                 "ewcs1",
                 [project1] as Set<Project>,
@@ -85,6 +86,7 @@ class ConfigSelectorServiceIntegrationSpec extends Specification implements Work
                 [referenceGenome1] as Set<ReferenceGenome>,
                 [libraryPreparationKit1] as Set<LibraryPreparationKit>
         )
+        //priority : 0b01011011 = 91
         createEWCSHelperExtendedCriteria(
                 "ewcs2",
                 [project2] as Set<Project>,
@@ -94,6 +96,7 @@ class ConfigSelectorServiceIntegrationSpec extends Specification implements Work
                 [referenceGenome2] as Set<ReferenceGenome>,
                 [] as Set<LibraryPreparationKit>
         )
+        //priority : 0b01111111 = 127
         createEWCSHelperExtendedCriteria(
                 "ewcs3",
                 [project1, project2] as Set<Project>,
@@ -103,6 +106,7 @@ class ConfigSelectorServiceIntegrationSpec extends Specification implements Work
                 [referenceGenome1, referenceGenome2] as Set<ReferenceGenome>,
                 [libraryPreparationKit1, libraryPreparationKit2] as Set<LibraryPreparationKit>
         )
+        //priority : 0b01110111 = 119
         createEWCSHelperExtendedCriteria(
                 "ewcs4",
                 [project2] as Set<Project>,
@@ -112,6 +116,7 @@ class ConfigSelectorServiceIntegrationSpec extends Specification implements Work
                 [] as Set<ReferenceGenome>,
                 [libraryPreparationKit1] as Set<LibraryPreparationKit>
         )
+        //priority : 0b00000001 = 1
         createEWCSHelperExtendedCriteria(
                 "ewcs5",
                 [] as Set<Project>,
@@ -218,31 +223,26 @@ class ConfigSelectorServiceIntegrationSpec extends Specification implements Work
         setupData()
 
         ExternalWorkflowConfigSelector ewcs1 = CollectionUtils.atMostOneElement(ExternalWorkflowConfigSelector.findAllByName("ewcs1"))
-        ewcs1.customPriority = 2
         ewcs1.save(flush: true)
 
         ExternalWorkflowConfigSelector ewcs3 = CollectionUtils.atMostOneElement(ExternalWorkflowConfigSelector.findAllByName("ewcs3"))
-        ewcs3.customPriority = 5
         ewcs3.save(flush: true)
 
         ExternalWorkflowConfigSelector ewcs4 = CollectionUtils.atMostOneElement(ExternalWorkflowConfigSelector.findAllByName("ewcs4"))
-        ewcs4.customPriority = 1
         ewcs4.save(flush: true)
 
         ExternalWorkflowConfigSelector ewcs5 = CollectionUtils.atMostOneElement(ExternalWorkflowConfigSelector.findAllByName("ewcs5"))
-        ewcs5.customPriority = 3
         ewcs5.save(flush: true)
 
         expect:
         service.findAllSelectorsSortedByPriority(
                 new SingleSelectSelectorExtendedCriteria(seqType: SeqType.findAllByName("s1").first())
-        )*.name == [ewcs3.name, ewcs5.name, ewcs1.name, ewcs4.name]
+        )*.name == [ewcs1.name, ewcs3.name, ewcs4.name, ewcs5.name]
     }
 
-    ExternalWorkflowConfigSelector createEWCSHelperBaseCriteria(String name, int customPriority) {
+    ExternalWorkflowConfigSelector createEWCSHelperBaseCriteria(String name) {
         return createExternalWorkflowConfigSelector([
                 name        : name,
-                customPriority: customPriority,
         ])
     }
 
@@ -250,10 +250,10 @@ class ConfigSelectorServiceIntegrationSpec extends Specification implements Work
     void "test findRelatedSelectorsByName #x"() {
         given:
         ConfigSelectorService service = new ConfigSelectorService()
-        createEWCSHelperBaseCriteria("ewcs1", 1)
-        createEWCSHelperBaseCriteria("ewcs2", 3)
-        createEWCSHelperBaseCriteria("ewcs3", 2)
-        createEWCSHelperBaseCriteria("ewcs4", 7)
+        createEWCSHelperBaseCriteria("ewcs1")
+        createEWCSHelperBaseCriteria("ewcs2")
+        createEWCSHelperBaseCriteria("ewcs3")
+        createEWCSHelperBaseCriteria("ewcs4")
 
         expect:
         CollectionUtils.containSame(result, service.findRelatedSelectorsByName(name())*.name)
@@ -279,8 +279,6 @@ class ConfigSelectorServiceIntegrationSpec extends Specification implements Work
 
                 selectorName: "selectorName",
                 type: SelectorType.GENERIC,
-                fragmentName: "fragmentName",
-                customPriority: 1,
                 value: '{"OTP_CLUSTER": {"MEMORY": "1"}}',
         )
 
@@ -290,7 +288,7 @@ class ConfigSelectorServiceIntegrationSpec extends Specification implements Work
         then:
         ExternalWorkflowConfigFragment.all.size() == 1
         ExternalWorkflowConfigFragment fragment = ExternalWorkflowConfigFragment.all.first()
-        fragment.name == "fragmentName"
+        fragment.name == "selectorName"
 
         ExternalWorkflowConfigSelector.all.size() == 1
         ExternalWorkflowConfigSelector selector = ExternalWorkflowConfigSelector.all.first()
@@ -314,8 +312,6 @@ class ConfigSelectorServiceIntegrationSpec extends Specification implements Work
 
                 selectorName: selector.name,
                 type: selector.selectorType,
-                fragmentName: selector.externalWorkflowConfigFragment.name,
-                customPriority: selector.customPriority,
                 value: selector.externalWorkflowConfigFragment.configValues,
         )
     }
@@ -334,8 +330,11 @@ class ConfigSelectorServiceIntegrationSpec extends Specification implements Work
         then:
         ExternalWorkflowConfigSelector.all.size() == 1
         selector.name == "new name"
-        ExternalWorkflowConfigFragment.all.size() == 1
-        selector.externalWorkflowConfigFragment == fragment
+        // original fragment is now deprecated
+        ExternalWorkflowConfigFragment.all.size() == 2
+        selector.externalWorkflowConfigFragment.previous == fragment
+        selector.externalWorkflowConfigFragment.deprecationDate == null
+        selector.externalWorkflowConfigFragment.previous.deprecationDate != null
     }
 
     void "test update fragment"() {
@@ -344,7 +343,7 @@ class ConfigSelectorServiceIntegrationSpec extends Specification implements Work
         UpdateCommand cmd = updateCommand
         ExternalWorkflowConfigSelector selector = cmd.selector
         ExternalWorkflowConfigFragment fragment = cmd.selector.externalWorkflowConfigFragment
-        cmd.fragmentName = "new name"
+        cmd.selectorName = "new name"
 
         when:
         service.update(cmd)
