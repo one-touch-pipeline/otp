@@ -110,9 +110,9 @@ class ConfigSelectorServiceSpec extends HibernateSpec implements WorkflowSystemD
 
         where:
         count | p_workflows
-        1     | { [ createWorkflow() ] }
-        2     | { [ createWorkflow(), createWorkflow() ] }
-        3     | { [ createWorkflow(), createWorkflow(), createWorkflow() ] }
+        1     | {[createWorkflow()]}
+        2     | {[createWorkflow(), createWorkflow()]}
+        3     | {[createWorkflow(), createWorkflow(), createWorkflow()]}
     }
 
     @SuppressWarnings('BitwiseOperatorInConditional')

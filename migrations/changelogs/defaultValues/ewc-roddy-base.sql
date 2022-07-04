@@ -409,8 +409,8 @@ VALUES(nextval('hibernate_sequence'), 0, now(), now(), 0, 'Default values for Ro
       )
 ON CONFLICT DO NOTHING;
 
-INSERT INTO external_workflow_config_selector(id, version, date_created, last_updated, name, selector_type, priority, external_workflow_config_fragment_id)
-VALUES(nextval('hibernate_sequence'), 0, now(), now(), 'Default values for Roddy', 'DEFAULT_VALUES', 64, (
+INSERT INTO external_workflow_config_selector(id, version, date_created, last_updated, name, custom_priority, selector_type, external_workflow_config_fragment_id)
+VALUES(nextval('hibernate_sequence'), 0, now(), now(), 'Default values for Roddy', 0, 'DEFAULT_VALUES', (
     SELECT id FROM external_workflow_config_fragment WHERE name = 'Default values for Roddy'))
 ON CONFLICT DO NOTHING;
 
