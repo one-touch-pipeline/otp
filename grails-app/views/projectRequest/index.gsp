@@ -192,7 +192,8 @@
             </div>
 
             <div class="col-sm-10">
-                <select class="use-select-2 tag-select form-control" name="speciesWithStrainList" id="speciesWithStrainList" multiple="multiple" from="speciesWithStrainList">
+                <select class="use-select-2 tag-select form-control" name="speciesWithStrainList" id="speciesWithStrainList" multiple="multiple"
+                        from="speciesWithStrainList">
                     <g:each in="${speciesWithStrains}" var="species">
                         <g:set var="selected" value="${species in cmd?.speciesWithStrains ? "selected" : ""}"/>
                         <option value="${species.id}" ${selected}>${species.displayString}</option>
@@ -227,7 +228,8 @@
         <!-- Approximate Number of Samples* -->
         <div class="form-group row">
             <div class="col-sm-2">
-                <label class="col-form-label" id="approxNoOfSamplesLabel" for="approxNoOfSamples">${g.message(code: "projectRequest.approxNoOfSamples")}*</label>
+                <label class="col-form-label" id="approxNoOfSamplesLabel"
+                       for="approxNoOfSamples">${g.message(code: "projectRequest.approxNoOfSamples")}*</label>
                 <i class="helper-icon bi bi-question-circle-fill" title="${g.message(code: "projectRequest.approxNumberOfSamples.detail")}"></i>
             </div>
 
@@ -290,12 +292,16 @@
                 <g:if test="${cmd?.users}">
                     <g:each in="${cmd?.users}" var="user" status="i">
                         <g:if test="${user}">
-                            <g:render template="templates/userFormAccordion" model="[i: i, user: user, availableRoles: availableRoles]"/>
+                            <div class="clone-remove-target">
+                                <g:render template="templates/userFormAccordion" model="[i: i, user: user, availableRoles: availableRoles]"/>
+                            </div>
                         </g:if>
                     </g:each>
                 </g:if>
                 <g:else>
-                    <g:render template="templates/userFormAccordion" model="[i: 1, emptyForm: true, availableRoles: availableRoles]"/>
+                    <div class="clone-remove-target">
+                        <g:render template="templates/userFormAccordion" model="[i: 1, emptyForm: true, availableRoles: availableRoles]"/>
+                    </div>
                 </g:else>
             </div>
         </div>
@@ -305,12 +311,10 @@
 
     </g:form>
 
-    <div class="clone-template hidden">
+    <div class="clone-remove-target clone-template hidden">
         <g:render template="templates/userFormAccordion" model="[i: 'template-index', availableRoles: availableRoles]"/>
     </div>
 </div>
-
-
 
 </body>
 </html>

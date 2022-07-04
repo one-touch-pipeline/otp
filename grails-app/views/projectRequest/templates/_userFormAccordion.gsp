@@ -20,8 +20,6 @@
   - SOFTWARE.
   --}%
 
-<asset:javascript src="pages/projectRequest/userForm.js"/>
-
 <div class="card">
     <div class="card-header pt-1 pb-1 pointer">
         <g:hiddenField name="users[${i}].projectRequestUser.id" value="${user?.projectRequestUser?.id}"/>
