@@ -260,7 +260,7 @@ class ConfigSelectorService {
     ExternalWorkflowConfigSelector create(CreateCommand cmd) {
         assert cmd.type != SelectorType.DEFAULT_VALUES
         ExternalWorkflowConfigFragment fragment = new ExternalWorkflowConfigFragment(
-                name: cmd.selectorName,
+                name: cmd.fragmentName,
                 configValues: cmd.value,
         ).save(flush: true)
 
@@ -274,6 +274,7 @@ class ConfigSelectorService {
                 libraryPreparationKits: cmd.libraryPreparationKits as Set,
                 externalWorkflowConfigFragment: fragment,
                 selectorType: cmd.type,
+                customPriority: cmd.customPriority,
         ).save(flush: true)
         return selector
     }
@@ -289,14 +290,14 @@ class ConfigSelectorService {
         cmd.selector.libraryPreparationKits = cmd.libraryPreparationKits as Set
 
         cmd.selector.name = cmd.selectorName
+        cmd.selector.customPriority = cmd.customPriority
         cmd.selector.selectorType = cmd.type
 
-        if (cmd.fragment.name != cmd.selectorName ||
+        if (cmd.fragment.name != cmd.fragmentName ||
                 cmd.fragment.configValues != cmd.value) {
             cmd.fragment.deprecationDate = LocalDate.now()
-            cmd.fragment.save(flush: true)
             ExternalWorkflowConfigFragment fragment = new ExternalWorkflowConfigFragment(
-                    name: cmd.selectorName,
+                    name: cmd.fragmentName,
                     configValues: cmd.value,
                     previous: cmd.fragment,
             ).save(flush: true)

@@ -166,7 +166,7 @@ class WorkflowConfigController implements BaseWorkflowConfigController {
                 } : false,
                 name                  : selector.name,
                 selectorType          : selector.selectorType,
-                priority              : selector.priority,
+                customPriority        : selector.customPriority,
                 workflows             : selector.workflows.collect {
                     [
                             id  : it.id,
@@ -223,7 +223,7 @@ class WorkflowConfigController implements BaseWorkflowConfigController {
         EXACT_MATCH("", "exactMatch", "Boolean"),
         SELECTOR_NAME("workflowConfig.selector.name", "selectorName", "Text"),
         SELECTOR_TYPE("workflowConfig.selector.type", "selectorType", "Text"),
-        PRIORITY("workflowConfig.selector.priority", "priority", "Number"),
+        CUSTOM_PRIORITY("workflowConfig.selector.customPriority", "customPriority", "Number"),
         WORKFLOWS("workflowConfig.selector.workflows", "workflows", "MultiSelect"),
         WORKFLOW_VERSIONS("workflowConfig.selector.versions", "workflowVersions", "MultiSelect"),
         PROJECTS("workflowConfig.selector.projects", "projects", "MultiSelect"),
@@ -241,6 +241,8 @@ class WorkflowConfigController implements BaseWorkflowConfigController {
 class CreateCommand extends SelectorCommand {
     String selectorName
     SelectorType type
+    String fragmentName
+    Integer customPriority
     String value
 
     Set<ExternalWorkflowConfigSelector> matchingSelectors

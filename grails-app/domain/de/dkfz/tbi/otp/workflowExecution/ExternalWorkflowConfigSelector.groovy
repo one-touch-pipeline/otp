@@ -42,39 +42,7 @@ class ExternalWorkflowConfigSelector implements Comparable<ExternalWorkflowConfi
 
     ExternalWorkflowConfigFragment externalWorkflowConfigFragment
     SelectorType selectorType
-
-    // priority is calculated right before save() is called
-    // see @calculatePriority()
-    int priority
-
-    def beforeInsert() {
-        calculatePriority()
-    }
-
-    def beforeUpdate() {
-        calculatePriority()
-    }
-
-    final private Map<String, Integer> propsPriorityCalculation = [
-            workflows             : 0b01000000,
-            workflowVersions      : 0b00100000,
-            seqTypes              : 0b00010000,
-            referenceGenomes      : 0b00001000,
-            libraryPreparationKits: 0b00000100,
-            projects              : 0b00000010,
-    ]
-
-    private void calculatePriority() {
-        priority = 0
-        propsPriorityCalculation.each { String key, Integer value ->
-            if (this[key] && !this[key].isEmpty()) {
-                priority |= value
-            }
-        }
-        if (selectorType != SelectorType.DEFAULT_VALUES) {
-            priority |= 0b00000001
-        }
-    }
+    int customPriority
 
     static hasMany = [
             workflows             : Workflow,
@@ -102,11 +70,23 @@ class ExternalWorkflowConfigSelector implements Comparable<ExternalWorkflowConfi
                 return "default"
             }
         }
+        customPriority min: 0, validator: { val, obj ->
+            if (obj.selectorType == SelectorType.DEFAULT_VALUES && val != 0) {
+                return "default"
+            }
+            if (obj.selectorType != SelectorType.DEFAULT_VALUES && val == 0) {
+                return "min"
+            }
+        }
+    }
+
+    int calculateSuggestedPriority() {
+        return 0
     }
 
     @Override
     int compareTo(ExternalWorkflowConfigSelector externalWorkflowConfigSelector) {
-        return externalWorkflowConfigSelector.priority <=> priority
+        return externalWorkflowConfigSelector.customPriority <=> customPriority
     }
 
     List<ExternalWorkflowConfigFragment> getFragments() {
