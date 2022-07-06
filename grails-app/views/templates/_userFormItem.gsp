@@ -35,7 +35,7 @@
 <div class="${accordionItem ? '' : 'card'}">
     <div class="card-body pb-1">
         <div class="form-group row">
-            <g:set var="description" value="${i != '' ? "users[${i}].username" : "username"}"/>
+            <g:set var="description" value="${i ? "users[${i}].username" : "username"}"/>
             <label class="col-sm-2 col-form-label"
                    for="${description}">${g.message(code: "projectUser.addMember.username")}</label>
 
@@ -49,7 +49,7 @@
         </div>
 
         <div class="form-group row">
-            <g:set var="description" value="${i != '' ? "users[${i}].projectRoles" : "projectRoles"}"/>
+            <g:set var="description" value="${i ? "users[${i}].projectRoles" : "projectRoles"}"/>
             <label class="col-sm-2 col-form-label"
                    for="${description}">${g.message(code: "projectUser.addMember.role")}</label>
 
@@ -68,7 +68,7 @@
 
         <div class="form-group row">
             <g:if test="${checkboxes.contains('otpAccess')}">
-                <g:set var="description" value="${i != '' ? "users[${i}].accessToOtp" : "accessToOtp"}"/>
+                <g:set var="description" value="${i ? "users[${i}].accessToOtp" : "accessToOtp"}"/>
                 <div class="col-sm-2">
                     <g:checkBox class="input-field" name="${description}"
                                 id="${description}_checkbox"
@@ -79,7 +79,7 @@
             </g:if>
 
             <g:if test="${checkboxes.contains('fileAccess')}">
-                <g:set var="description" value="${i != '' ? "users[${i}].accessToFiles" : "accessToFiles"}"/>
+                <g:set var="description" value="${i ? "users[${i}].accessToFiles" : "accessToFiles"}"/>
                 <div class="col-sm-2">
                     <g:checkBox class="set-for-BIOINFORMATICIAN set-for-LEAD_BIOINFORMATICIAN input-field" name="${description}"
                                 id="${description}_checkbox"
@@ -90,7 +90,7 @@
             </g:if>
 
             <g:if test="${checkboxes.contains('manageUsers')}">
-                <g:set var="description" value="${i != '' ? "users[${i}].manageUsers" : "manageUsers"}"/>
+                <g:set var="description" value="${i ? "users[${i}].manageUsers" : "manageUsers"}"/>
                 <g:hiddenField class="hidden-manage-users-field" id="${description}_hiddenField" name="${description}" value="true" disabled="true"/>
                 <div class="col-sm-2">
                     <g:checkBox class="set-and-block-for-PI set-and-block-for-COORDINATOR input-field"
@@ -103,7 +103,7 @@
             </g:if>
 
             <g:if test="${checkboxes.contains('manageUsersAndDelegate')}">
-                <g:set var="description" value="${i != '' ? "users[${i}].manageUsersAndDelegate" : "manageUsersAndDelegate"}"/>
+                <g:set var="description" value="${i ? "users[${i}].manageUsersAndDelegate" : "manageUsersAndDelegate"}"/>
                 <div class="col-sm-3">
                     <g:checkBox class="set-and-block-for-PI input-field" name="${description}"
                                 id="${description}_checkbox"
@@ -114,7 +114,7 @@
             </g:if>
 
             <g:if test="${checkboxes.contains('receivesNotifications')}">
-                <g:set var="description" value="${i != '' ? "users[${i}].receivesNotifications" : "receivesNotifications"}"/>
+                <g:set var="description" value="${i ? "users[${i}].receivesNotifications" : "receivesNotifications"}"/>
                 <div class="col-sm-3">
                     <g:checkBox class="input-field" name="${description}"
                                 id="${description}_checkbox"
