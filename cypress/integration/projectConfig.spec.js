@@ -30,6 +30,30 @@ describe('Check projectConfig page', () => {
       cy.visit('/projectConfig/index');
     });
 
+    /**
+     * Should
+     *  - change the unix group back to developer
+     */
+    after(() => {
+      cy.intercept('/projectConfig/updateUnixGroup*').as('updateUnixGroup');
+
+      const cellKey = 'Unix Group';
+      const unixGroup = 'developer';
+
+      cy.get('td').contains(cellKey).siblings().last()
+        .find('#button-edit-unixGroup')
+        .click();
+      cy.get('td').contains(cellKey).siblings().last()
+        .find('#unixGroupInput')
+        .clear()
+        .type(unixGroup);
+      cy.get('td').contains(cellKey).siblings().last()
+        .find('#button-save-unixGroup')
+        .click();
+
+      cy.wait('@updateUnixGroup').its('response.statusCode').should('eq', 200);
+    });
+
     it('should add a comment', () => {
       cy.intercept('/projectConfig/saveProjectComment*').as('saveProjectComment');
 
