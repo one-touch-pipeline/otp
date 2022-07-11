@@ -27,13 +27,12 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.workflow.panCancer.PanCancerParseJob
-import de.dkfz.tbi.otp.workflow.panCancer.PanCancerShared
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 @Component
 @Slf4j
 @CompileStatic
-class WgbsParseJob extends PanCancerParseJob implements PanCancerShared {
+class WgbsParseJob extends PanCancerParseJob {
 
     @Override
     void execute(WorkflowStep workflowStep) throws Throwable {

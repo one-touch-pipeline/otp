@@ -26,7 +26,6 @@ import groovy.util.logging.Slf4j
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
-import de.dkfz.tbi.otp.workflow.panCancer.PanCancerShared
 import de.dkfz.tbi.otp.workflow.panCancer.PanCancerValidationJob
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
@@ -35,7 +34,7 @@ import java.nio.file.Path
 @Component
 @Slf4j
 @CompileStatic
-class WgbsValidationJob extends PanCancerValidationJob implements PanCancerShared {
+class WgbsValidationJob extends PanCancerValidationJob {
 
     @Override
     protected List<Path> getExpectedDirectories(WorkflowStep workflowStep) {
