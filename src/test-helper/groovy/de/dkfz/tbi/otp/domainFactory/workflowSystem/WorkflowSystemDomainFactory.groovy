@@ -141,7 +141,7 @@ trait WorkflowSystemDomainFactory implements DomainFactoryCore, TaxonomyFactory 
         ], properties)
     }
 
-    ExternalWorkflowConfigSelector createExternalWorkflowConfigSelector(Map properties = [:]) {
+    ExternalWorkflowConfigSelector createExternalWorkflowConfigSelector(Map properties = [:], boolean saveAndValidate = true) {
         return createDomainObject(ExternalWorkflowConfigSelector, [
                 name                          : "externalWorkflowConfigSelectorName_${nextId}",
                 workflowVersions              : { [createWorkflowVersion()] },
@@ -152,13 +152,13 @@ trait WorkflowSystemDomainFactory implements DomainFactoryCore, TaxonomyFactory 
                 projects                      : { [createProject()] },
                 externalWorkflowConfigFragment: { createExternalWorkflowConfigFragment() },
                 selectorType                  : { SelectorType.GENERIC },
-        ], properties)
+        ], properties, saveAndValidate)
     }
 
     ExternalWorkflowConfigFragment createExternalWorkflowConfigFragment(Map properties = [:], boolean saveAndValidate = true) {
         return createDomainObject(ExternalWorkflowConfigFragment, [
                 name        : "externalWorkflowConfigFragmentName_${nextId}",
-                configValues: '{ "OTP_CLUSTER": { "MEMORY": "1" } }',
+                configValues: "{ \"WORKFLOWS\": { \"MEMORY_${nextId}\": \"1\" } }",
                 previous    : null,
         ], properties, saveAndValidate)
     }

@@ -121,6 +121,12 @@ class ExternalWorkflowConfigSelector implements Comparable<ExternalWorkflowConfi
                 return "default"
             }
         }
+        externalWorkflowConfigFragment validator: { val, obj ->
+            List<String> duplicateKeys = validateUniqueKeys(val, obj)
+            if (duplicateKeys) {
+                return ["duplicate.key", duplicateKeys.join(", ")]
+            }
+        }
     }
 
     @Override
@@ -150,5 +156,45 @@ class ExternalWorkflowConfigSelector implements Comparable<ExternalWorkflowConfi
                 )
         )
         return !(other && other.id != externalWorkflowConfigSelector.id)
+    }
+
+    static List<String> validateUniqueKeys(ExternalWorkflowConfigFragment fragment, ExternalWorkflowConfigSelector selector) {
+        ConfigSelectorService configSelectorService = Holders.applicationContext.getBean(ConfigSelectorService)
+
+        List<ExternalWorkflowConfigSelector> otherSelectors = configSelectorService.findExactSelectors(new MultiSelectSelectorExtendedCriteria(
+                selector.workflows,
+                selector.workflowVersions,
+                selector.projects,
+                selector.seqTypes,
+                selector.referenceGenomes,
+                selector.libraryPreparationKits,
+        )) - selector
+
+        List<String> duplicatedKeys = []
+        if (otherSelectors) {
+            List<List<String>> keys = []
+            keysToList(fragment.configValuesToMap(), keys)
+            otherSelectors.each { otherSelector ->
+                List<List<String>> otherKeys = []
+                keysToList(otherSelector.externalWorkflowConfigFragment.configValuesToMap(), otherKeys)
+                keys.each {
+                    if (it in otherKeys) {
+                        duplicatedKeys.add(it.join("."))
+                    }
+                }
+            }
+        }
+        return duplicatedKeys
+    }
+
+    private static void keysToList(Map conf, List<List<String>> keys, List<String> key = []) {
+        conf.entrySet().each { Map.Entry entry ->
+            List<String> currentKey = key + [entry.key as String]
+            if (entry.value instanceof Map) {
+                keysToList(entry.value as Map, keys, currentKey)
+            } else {
+                keys.add(currentKey)
+            }
+        }
     }
 }

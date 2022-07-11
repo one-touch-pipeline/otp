@@ -128,6 +128,28 @@ class ConfigSelectorServiceIntegrationSpec extends Specification implements Work
         )
     }
 
+    void "test findExactSelectors, anyValueSet"() {
+        given:
+        ConfigSelectorService service = new ConfigSelectorService()
+        ExternalWorkflowConfigSelector selector = createExternalWorkflowConfigSelector()
+
+        MultiSelectSelectorExtendedCriteria multiSelectSelectorExtendedCriteria = new MultiSelectSelectorExtendedCriteria(
+                workflows: selector.workflows,
+                workflowVersions: selector.workflowVersions,
+                seqTypes: selector.seqTypes,
+                projects: selector.projects,
+                referenceGenomes: selector.referenceGenomes,
+                libraryPreparationKits: selector.libraryPreparationKits
+        )
+
+        when:
+        List<ExternalWorkflowConfigSelector> foundSelectors = service.findExactSelectors(multiSelectSelectorExtendedCriteria)
+
+        then:
+        foundSelectors.size() == 1
+        foundSelectors[0] == selector
+    }
+
     @Unroll
     @SuppressWarnings(["AvoidFindWithoutAll", "LineLength"])
     void "findAllSelectors #x"() {
