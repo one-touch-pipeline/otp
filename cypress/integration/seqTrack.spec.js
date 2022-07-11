@@ -48,7 +48,7 @@ describe('Check seq track pages', () => {
         .eq(0)
         .find('a')
         .click();
-      cy.get('table tbody tr').find('a').eq(12).click();
+      cy.get('table tbody tr').find('a').eq(10).click();
       cy.checkPage('seqTrack/seqTrackSet');
     });
 
