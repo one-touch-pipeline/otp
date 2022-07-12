@@ -300,14 +300,14 @@
                     <g:each in="${cmd?.users}" var="user" status="i">
                         <g:if test="${user}">
                             <div class="clone-remove-target">
-                                <g:render template="templates/userFormAccordion" model="[i: i, user: user, availableRoles: availableRoles]"/>
+                                <g:render template="templates/userFormAccordion" model="[index: i, user: user, availableRoles: availableRoles]"/>
                             </div>
                         </g:if>
                     </g:each>
                 </g:if>
                 <g:else>
                     <div class="clone-remove-target">
-                        <g:render template="templates/userFormAccordion" model="[i: 1, emptyForm: true, availableRoles: availableRoles]"/>
+                        <g:render template="templates/userFormAccordion" model="[index: 1, emptyForm: true, availableRoles: availableRoles]"/>
                     </div>
                 </g:else>
             </div>
@@ -319,7 +319,7 @@
     </g:form>
 
     <div class="clone-remove-target clone-template hidden">
-        <g:render template="templates/userFormAccordion" model="[i: 'template-index', availableRoles: availableRoles]"/>
+        <g:render template="templates/userFormAccordion" model="[index: 'template-index', availableRoles: availableRoles]"/>
     </div>
 </div>
 

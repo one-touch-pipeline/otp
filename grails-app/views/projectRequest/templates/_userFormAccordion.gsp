@@ -22,11 +22,11 @@
 
 <div class="card">
     <div class="card-header pt-1 pb-1 pointer">
-        <g:hiddenField name="users[${i}].projectRequestUser.id" value="${user?.projectRequestUser?.id}"/>
+        <g:hiddenField name="users[${index}].projectRequestUser.id" value="${user?.projectRequestUser?.id}"/>
 
         <div class="row align-items-center">
-            <a class="col-sm-9" id="user-form-title-${i}" data-toggle="collapse" data-target="#collapse-${i}" aria-expanded="true"
-               aria-controls="collapse-${i}">
+            <a class="col-sm-9" id="user-form-title-${index}" data-toggle="collapse" data-target="#collapse-${index}" aria-expanded="true"
+               aria-controls="collapse-${index}">
                 New User
             </a>
 
@@ -38,8 +38,8 @@
         </div>
     </div>
 
-    <div id="collapse-${i}" class="collapse show" aria-labelledby="heading-${i}" data-parent="#accordion">
+    <div id="collapse-${index}" class="collapse show" aria-labelledby="heading-${index}" data-parent="#accordion">
         <g:render template="/templates/userFormItem"
-                  model="[i: i, user: user, availableRoles: availableRoles, checkboxes: ['otpAccess', 'fileAccess', 'manageUsers'], accordionItem: true]"/>
+                  model="[index: index, user: user, availableRoles: availableRoles, checkboxes: ['otpAccess', 'fileAccess', 'manageUsers'], accordionItem: true]"/>
     </div>
 </div>

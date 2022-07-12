@@ -76,7 +76,6 @@ class ProjectRequestController implements CheckAndCall {
             resolved           : "GET",
             getAdditionalFields: "POST",
             submitIndex        : "POST",
-            saveEdit           : "POST",
             reject             : "POST",
             passOn             : "POST",
             edit               : "POST",

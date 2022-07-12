@@ -161,7 +161,7 @@ describe('Check projectRequest page', () => {
     });
 
     it('should delete the project request', () => {
-      cy.intercept('/projectRequest/index*').as('projectRequestIndex');
+      cy.intercept('/projectRequest/delete*').as('deleteProjectRequest');
       cy.visit('/projectRequest/unresolved');
 
       // select the project request in the table
@@ -170,10 +170,11 @@ describe('Check projectRequest page', () => {
         .click();
 
       cy.location('pathname').should('match', /^\/projectRequest\/view\//);
-      cy.get('input[name=_action_delete]').click();
+      cy.get('#delete-request-btn').click();
+      cy.get('#confirmModal').click();
 
-      cy.wait('@projectRequestIndex').then((interception) => {
-        expect(interception.response.statusCode).to.eq(302);
+      cy.wait('@deleteProjectRequest').then((interception) => {
+        expect(interception.response.statusCode).to.eq(200);
         cy.location('pathname').should('eq', '/projectRequest/unresolved');
         cy.fixture('projectRequest.json').then((request) => {
           cy.get('body').should('not.contain', request.projectName);
