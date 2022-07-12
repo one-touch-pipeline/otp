@@ -176,7 +176,7 @@ class MetadataImportController implements CheckAndCall, PlainResponseExceptionHa
 
     def multiDetails() {
         List<MetaDataFileWrapper> metaDataFiles = params.metaDataFiles.collect {
-            MetaDataFile file = metadataImportService.findById(it)
+            MetaDataFile file = metadataImportService.findById(it as long)
 
             new MetaDataFileWrapper(
                     metaDataFile: file,
