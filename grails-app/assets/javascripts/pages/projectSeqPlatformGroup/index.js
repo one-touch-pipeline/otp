@@ -60,4 +60,8 @@ $(() => {
       copyFromSeqTypeSelector.addClass('is-invalid');
     }
   });
+
+  $('.seqPlatformGroupSelector select').on('change', (event) => {
+    $(event.target.parentElement).find('button[type=submit]').prop('disabled', event.target.value === 'null');
+  });
 });

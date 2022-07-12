@@ -48,7 +48,7 @@ parameter to set:
                                   noSelection="${[null: 'Select to add new group']}"
                                   disabled="${disabled}"/>
                         <div class="input-group-append">
-                            <button class="btn btn-outline-primary select2-appended-btn" id="addSeqPlatformGroup" type="submit" ${(disabled) ? "disabled" : ""}>
+                            <button class="btn btn-outline-primary select2-appended-btn" id="addSeqPlatformGroup" type="submit" disabled>
                                 <i class="bi bi-plus"></i>
                             </button>
                         </div>

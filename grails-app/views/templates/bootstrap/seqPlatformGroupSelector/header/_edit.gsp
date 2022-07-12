@@ -48,7 +48,7 @@ parameter to set:
                                       from="${allSeqPlatformsWithoutGroup}" optionKey="id"
                                       noSelection="${[null: 'Select to add to group']}"/>
                             <div class="input-group-append">
-                                <button class="btn btn-outline-primary select2-appended-btn" type="submit">
+                                <button class="btn btn-outline-primary select2-appended-btn" type="submit" disabled>
                                     <i class="bi bi-plus"></i>
                                 </button>
                             </div>
