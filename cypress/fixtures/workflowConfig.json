@@ -1,0 +1,79 @@
+[
+  {
+    "selectorName": "test-selector",
+    "workflows": [
+      "FASTQ installation",
+      "FastQC"
+    ],
+    "projects": [
+      "Example project 1"
+    ],
+    "referenceGenomes": [
+      "1KGRef_PhiX"
+    ],
+    "versions": [
+      "FastQC 0.11.5",
+      "PanCancer alignment 1.2.51-2"
+    ],
+    "seqType": [
+      "ChIP SINGLE bulk",
+      "RNA PAIRED bulk"
+    ],
+    "libraryPreparationKits": [
+      "Agilent SureSelect V4",
+      "NEBNext Methyl-seq Kit"
+    ],
+    "type": "GENERIC",
+    "customPriority": 12,
+    "value": "{\"RODDY\": {\"cvalues\": {\"sampleDirectory\": {\"value\": \"${inputBaseDirectory}/175/${sample}/${SEQUENCER_PROTOCOL}\"}}},\"RODDY_FILENAMES\": {}}"
+  },
+  {
+    "projects": [
+      "Example project 1",
+      "Example project 3"
+    ],
+    "types": [
+      "GENERIC",
+      "DEFAULT_VALUES"
+    ]
+  },
+  {
+    "selectorName": "modified-test-selector",
+    "workflows": [
+      "Cell Ranger"
+    ],
+    "projects": [
+      "Example project 2"
+    ],
+    "referenceGenomes": [
+      "1KGRef_PhiX"
+    ],
+    "versions": [
+      "Roddy SNV calling 1.2.166-3"
+    ],
+    "seqType": [
+      "ChIP SINGLE bulk",
+      "RNA PAIRED bulk",
+      "10x_scRNA PAIRED single cell",
+      "RNA SINGLE bulk"
+    ],
+    "libraryPreparationKits": [
+      "NEBNext Methyl-seq Kit"
+    ],
+    "type": "BED_FILE",
+    "customPriority": 3,
+    "value": "{}"
+  },
+  {
+    "selectorName": "based-on-modified-selector",
+    "projects": [
+      "Example project 2",
+      "Example project 3"
+    ],
+    "versions": [
+      "Roddy SNV calling 1.2.166-3",
+      "PanCancer alignment 1.2.51-1"
+    ],
+    "customPriority": 5
+  }
+]

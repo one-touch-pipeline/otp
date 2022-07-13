@@ -44,11 +44,11 @@
                         data-toggle="tooltip" onclick="$.otp.workflowConfig.search()">
                     <g:message code="workflowConfig.button.search"/>
                 </button>
-                <button type="button" class="btn btn-primary" data-toggle="modal" title="${g.message(code: "workflowConfig.button.create.title")}"
+                <button id="create-button" type="button" class="btn btn-primary" data-toggle="modal" title="${g.message(code: "workflowConfig.button.create.title")}"
                         data-toggle="tooltip" data-target="#workflowConfigModal" data-operation="create">
                     <g:message code="workflowConfig.button.create"/>
                 </button>
-                <button type="button" class="btn btn-primary" title="${g.message(code: "workflowConfig.button.clear.title")}"
+                <button id="clear-button" type="button" class="btn btn-primary" title="${g.message(code: "workflowConfig.button.clear.title")}"
                         data-toggle="tooltip" onclick="$.otp.workflowConfig.clear()">
                     <g:message code="workflowConfig.button.clear"/>
                 </button>
@@ -78,7 +78,7 @@
                 </div>
             </div>
         </div>
-    </div>`
+    </div>
 
     <table id="workflowConfigResult" class="table table-sm table-striped table-hover table-bordered w-100" data-page-length='50'>
         <thead>

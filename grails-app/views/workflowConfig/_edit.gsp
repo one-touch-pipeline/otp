@@ -91,7 +91,8 @@
                                 </div>
                                 <select id="pp-fragments" name="fragment.id" class="form-control use-select-2"></select>
                                 <div class="input-group-append">
-                                    <button class="btn btn-outline-primary format" type="button"><g:message code="workflowConfig.button.format"/></button>
+                                    <button id="format-button" class="btn btn-outline-primary format"
+                                            type="button"><g:message code="workflowConfig.button.format"/></button>
                                 </div>
                             </div>
                         </div>
@@ -112,7 +113,7 @@
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">
                     <g:message code="default.button.cancel.label"/>
                 </button>
-                <button type="button" class="btn btn-primary" id="save-button" onclick="$.otp.workflowConfig.save()">
+                <button type="button" class="btn btn-primary" id="save-button">
                     <g:message code="default.button.ok.label"/>
                 </button>
             </div>

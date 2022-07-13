@@ -102,74 +102,6 @@ $.otp.workflowConfig = {
   },
 
   /**
-   * Called after the OK button in the modal dialog is pressed,
-   * which collects the modifications and send to the backend to either
-   * create a new selector, update or deprecate the current selector
-   */
-  save: () => {
-    'use strict';
-
-    const form = $('#workflowConfigModalForm');
-    const operation = form.find('input#pp-operation').val();
-
-    if (operation === 'Create') {
-      // remove the fragment.id and selector.id
-      form.find('#pp-fragments').val('');
-      form.find('#pp-id').val('');
-    }
-
-    // convert to string
-    const data = form.serialize();
-
-    // send modifying ajax operation (create, update or deprecate) to backend controller
-    $.ajax({
-      url: $.otp.createLink({
-        controller: $.otp.workflowConfig.CONTROLLER,
-        action: operation.toLowerCase()
-      }),
-      type: 'POST',
-      data,
-      success(response) {
-        let newSelector = response;
-        let op = operation.toLowerCase();
-        const row = $.otp.workflowConfig.getDataTable().row(`#${response.id}`);
-        response.exactMatch = false;
-        if (op === $.otp.workflowConfig.OPERATION.UPDATE) {
-          response.exactMatch = row.data().exactMatch;
-          newSelector = JSON.parse(JSON.stringify(response)
-            .replace(/"workflowVersion"/g, '"name"'));
-          row.data(newSelector)
-            .draw();
-        } else if (op === $.otp.workflowConfig.OPERATION.DEPRECATE) {
-          row.remove().draw();
-        } else if (op === $.otp.workflowConfig.OPERATION.CREATE) {
-          $.otp.workflowConfig.getDataTable().row.add(response).draw();
-        }
-
-        op = `${op}d`;
-        $.otp.toaster.showSuccessToast('Workflow Config', `Selector ${newSelector.name} has been ${op} successfully`);
-
-        // close the dialog
-        $.otp.workflowConfig.getDialog().modal('hide');
-      },
-      error(err) {
-        if (err && err.status && err.responseJSON) {
-          $.otp.toaster.showErrorToast(
-            `Failed with HTTP ${err.status}: ${err.responseJSON.error}`,
-            err.responseJSON.message
-          );
-        } else {
-          $.otp.toaster.showErrorToast(
-            'Failed with operation on Workflow Config Selector',
-            'Failed to create/update/deprecate a selector.'
-          );
-        }
-      }
-    }).always(() => {
-    });
-  },
-
-  /**
    * By selecting a selector the search query fields can be prefilled.
    */
   prefill: (id) => {
@@ -557,5 +489,77 @@ $(document).ready(() => {
     } catch (err) {
       $.otp.toaster.showErrorToast('Syntax Error in JSON', err);
     }
+  });
+
+  /**
+   * Called after the OK button in the modal dialog is pressed,
+   * which collects the modifications and send to the backend to either
+   * create a new selector, update or deprecate the current selector
+   */
+  $('button#save-button').on('click', (e) => {
+    e.preventDefault();
+
+    console.log('save method called');
+    const form = $('#workflowConfigModalForm');
+    const operation = form.find('input#pp-operation').val();
+
+    if (operation === 'Create') {
+      // remove the fragment.id and selector.id
+      form.find('#pp-fragments').val('');
+      form.find('#pp-id').val('');
+    }
+
+    // convert to string
+    const data = form.serialize();
+
+    // send modifying ajax operation (create, update or deprecate) to backend controller
+    $.ajax({
+      url: $.otp.createLink({
+        controller: $.otp.workflowConfig.CONTROLLER,
+        action: operation.toLowerCase()
+      }),
+      type: 'POST',
+      data,
+      success(response) {
+        console.log('ajax success: ', response);
+
+        let newSelector = response;
+        let op = operation.toLowerCase();
+        const row = $.otp.workflowConfig.getDataTable().row(`#${response.id}`);
+        response.exactMatch = false;
+        if (op === $.otp.workflowConfig.OPERATION.UPDATE) {
+          response.exactMatch = row.data().exactMatch;
+          newSelector = JSON.parse(JSON.stringify(response)
+            .replace(/"workflowVersion"/g, '"name"'));
+          row.data(newSelector)
+            .draw();
+        } else if (op === $.otp.workflowConfig.OPERATION.DEPRECATE) {
+          row.remove().draw();
+        } else if (op === $.otp.workflowConfig.OPERATION.CREATE) {
+          $.otp.workflowConfig.getDataTable().row.add(response).draw();
+        }
+
+        op = `${op}d`;
+        $.otp.toaster.showSuccessToast('Workflow Config', `Selector ${newSelector.name} has been ${op} successfully`);
+
+        // close the dialog
+        $.otp.workflowConfig.getDialog().modal('hide');
+      },
+      error(err) {
+        console.log('ajax error: ', err);
+
+        if (err && err.status && err.responseJSON) {
+          $.otp.toaster.showErrorToast(
+            `Failed with HTTP ${err.status}: ${err.responseJSON.error}`,
+            err.responseJSON.message
+          );
+        } else {
+          $.otp.toaster.showErrorToast(
+            'Failed with operation on Workflow Config Selector',
+            'Failed to create/update/deprecate a selector.'
+          );
+        }
+      }
+    });
   });
 });
