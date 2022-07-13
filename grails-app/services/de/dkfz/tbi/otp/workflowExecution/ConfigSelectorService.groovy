@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.workflowExecution
 
 import grails.gorm.transactions.Transactional
+import groovy.json.JsonSlurper
 import groovy.transform.ToString
 import groovy.transform.TupleConstructor
 import org.grails.datastore.mapping.query.api.BuildableCriteria
@@ -260,7 +261,7 @@ class ConfigSelectorService {
     ExternalWorkflowConfigSelector create(CreateCommand cmd) {
         assert cmd.type != SelectorType.DEFAULT_VALUES
         ExternalWorkflowConfigFragment fragment = new ExternalWorkflowConfigFragment(
-                name: cmd.fragmentName,
+                name: cmd.fragmentName ?: "${cmd.selectorName}-fragment",
                 configValues: cmd.value,
         ).save(flush: true)
 
@@ -293,9 +294,14 @@ class ConfigSelectorService {
         cmd.selector.customPriority = cmd.customPriority
         cmd.selector.selectorType = cmd.type
 
+        cmd.fragmentName = cmd.fragmentName ?: cmd.fragment.name
+        String formattedNewValue = new JsonSlurper().parseText(cmd.fragment.configValues)
+        String formattedOldValue = new JsonSlurper().parseText(cmd.value)
+
         if (cmd.fragment.name != cmd.fragmentName ||
-                cmd.fragment.configValues != cmd.value) {
+                formattedNewValue != formattedOldValue) {
             cmd.fragment.deprecationDate = LocalDate.now()
+            cmd.fragment.save(flush: true)
             ExternalWorkflowConfigFragment fragment = new ExternalWorkflowConfigFragment(
                     name: cmd.fragmentName,
                     configValues: cmd.value,
