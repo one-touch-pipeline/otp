@@ -226,11 +226,9 @@
                     <otp:editorSwitch
                             roles="ROLE_OPERATOR"
                             template="dropDown"
-                            optionKey="id"
-                            optionValue="name"
                             link="${g.createLink(controller: 'projectConfig', action: 'updateProcessingPriority', params: ['fieldName': 'processingPriority'])}"
-                            values="${processingPriorities}"
-                            value="${processingPriority}"/>
+                            values="${processingPriorities*.name}"
+                            value="${processingPriority.name}"/>
                 </td>
             </tr>
             <tr>

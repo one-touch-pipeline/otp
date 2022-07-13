@@ -50,6 +50,10 @@ class ProcessingPriorityService {
         return ProcessingPriority.get(id)
     }
 
+    ProcessingPriority findByName(String name) {
+        return CollectionUtils.atMostOneElement(ProcessingPriority.findAllByName(name))
+    }
+
     int getPriorityListCount() {
         return ProcessingPriority.count()
     }
