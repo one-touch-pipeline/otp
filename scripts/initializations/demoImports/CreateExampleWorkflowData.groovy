@@ -39,6 +39,11 @@ import java.nio.file.*
 import java.time.Duration
 import java.time.ZonedDateTime
 
+/**
+ * Change it to generate more or less data sets of workflow runs.
+ */
+int numberOfDemoSets = 6;
+
 WorkflowRun.withNewTransaction {
     SeqTrack seqTrack = SeqTrack.last()
     SeqType seqType = seqTrack.seqType
@@ -190,57 +195,59 @@ WorkflowRun.withNewTransaction {
         ])
     }
 
-    WorkflowRun.State.values().each { WorkflowRun.State workflowState ->
-        println "create worklow with state: ${workflowState}"
-        WorkflowRun workflowRun = createWorkflowRun(workflowState)
-        createArtefact(workflowRun, "output artefact")
-        createInputArtefact(workflowRun, "input artefact")
+    for (int i in 1..numberOfDemoSets) {
+        WorkflowRun.State.values().each { WorkflowRun.State workflowState ->
+            println "create worklow with state: ${workflowState}"
+            WorkflowRun workflowRun = createWorkflowRun(workflowState)
+            createArtefact(workflowRun, "output artefact")
+            createInputArtefact(workflowRun, "input artefact")
 
-        switch (workflowState) {
-            case WorkflowRun.State.OMITTED_MISSING_PRECONDITION:
-                createWorkflowStep(workflowRun, WorkflowStep.State.OMITTED)
-                workflowRun.omittedMessage = new OmittedMessage(
-                        category: OmittedMessage.Category.PREREQUISITE_WORKFLOW_RUN_NOT_SUCCESSFUL,
-                        message: "omitted info",
-                )
-                break
-            case WorkflowRun.State.RUNNING_OTP:
-                WorkflowStep step1 = createWorkflowStep(workflowRun, WorkflowStep.State.SUCCESS)
-                createWorkflowStep(workflowRun, WorkflowStep.State.RUNNING, [previous: step1])
-                break
-            case WorkflowRun.State.SUCCESS:
-                WorkflowStep lastStep = null
-                (1..10).each {
-                    lastStep = createWorkflowStep(workflowRun, WorkflowStep.State.SUCCESS, [previous: lastStep])
-                }
-                break
-            case WorkflowRun.State.FAILED:
-                WorkflowStep step1 = createWorkflowStep(workflowRun, WorkflowStep.State.SUCCESS, [beanName: "conditionalFailJob"])
-                WorkflowStep step2 = createWorkflowStep(workflowRun, WorkflowStep.State.SUCCESS, [beanName: "copyJob", obsolete: true, previous: step1])
-                WorkflowStep step3 = createWorkflowStep(workflowRun, WorkflowStep.State.FAILED, [beanName: "validateJob", workflowError: createWorkflowError(), obsolete: true, previous: step2])
-                WorkflowStep step4 = createWorkflowStep(workflowRun, WorkflowStep.State.SUCCESS, [restartedFrom: step2, beanName: step2.beanName, previous: step3])
-                createSuccessClusterJob(step4, 1)
-                createFailedClusterJob(step4, 2)
-                createWorkflowStep(workflowRun, WorkflowStep.State.FAILED, [beanName: "linkJob", workflowError: createWorkflowError(), previous: step4])
-                break
-            case WorkflowRun.State.FAILED_FINAL:
-            case WorkflowRun.State.RESTARTED:
-                WorkflowStep step1 = createWorkflowStep(workflowRun, WorkflowStep.State.SUCCESS)
-                createWorkflowStep(workflowRun, WorkflowStep.State.FAILED, [workflowError: createWorkflowError(), previous: step1])
-                break
-            case WorkflowRun.State.RUNNING_WES:
-                WorkflowStep workflowStep = createWorkflowStep(workflowRun, WorkflowStep.State.SUCCESS)
-                (0..3).each {
-                    createClusterJob(workflowStep, it * 3 + 1)
-                    createSuccessClusterJob(workflowStep, it * 3 + 2)
-                    createFailedClusterJob(workflowStep, it * 3 + 3)
-                }
-                break
-            case WorkflowRun.State.WAITING_FOR_USER:
-                createWorkflowStep(workflowRun, WorkflowStep.State.SUCCESS)
-                break
+            switch (workflowState) {
+                case WorkflowRun.State.OMITTED_MISSING_PRECONDITION:
+                    createWorkflowStep(workflowRun, WorkflowStep.State.OMITTED)
+                    workflowRun.omittedMessage = new OmittedMessage(
+                            category: OmittedMessage.Category.PREREQUISITE_WORKFLOW_RUN_NOT_SUCCESSFUL,
+                            message: "omitted info",
+                    )
+                    break
+                case WorkflowRun.State.RUNNING_OTP:
+                    WorkflowStep step1 = createWorkflowStep(workflowRun, WorkflowStep.State.SUCCESS)
+                    createWorkflowStep(workflowRun, WorkflowStep.State.RUNNING, [previous: step1])
+                    break
+                case WorkflowRun.State.SUCCESS:
+                    WorkflowStep lastStep = null
+                    (1..10).each {
+                        lastStep = createWorkflowStep(workflowRun, WorkflowStep.State.SUCCESS, [previous: lastStep])
+                    }
+                    break
+                case WorkflowRun.State.FAILED:
+                    WorkflowStep step1 = createWorkflowStep(workflowRun, WorkflowStep.State.SUCCESS, [beanName: "conditionalFailJob"])
+                    WorkflowStep step2 = createWorkflowStep(workflowRun, WorkflowStep.State.SUCCESS, [beanName: "copyJob", obsolete: true, previous: step1])
+                    WorkflowStep step3 = createWorkflowStep(workflowRun, WorkflowStep.State.FAILED, [beanName: "validateJob", workflowError: createWorkflowError(), obsolete: true, previous: step2])
+                    WorkflowStep step4 = createWorkflowStep(workflowRun, WorkflowStep.State.SUCCESS, [restartedFrom: step2, beanName: step2.beanName, previous: step3])
+                    createSuccessClusterJob(step4, 1)
+                    createFailedClusterJob(step4, 2)
+                    createWorkflowStep(workflowRun, WorkflowStep.State.FAILED, [beanName: "linkJob", workflowError: createWorkflowError(), previous: step4])
+                    break
+                case WorkflowRun.State.FAILED_FINAL:
+                case WorkflowRun.State.RESTARTED:
+                    WorkflowStep step1 = createWorkflowStep(workflowRun, WorkflowStep.State.SUCCESS)
+                    createWorkflowStep(workflowRun, WorkflowStep.State.FAILED, [workflowError: createWorkflowError(), previous: step1])
+                    break
+                case WorkflowRun.State.RUNNING_WES:
+                    WorkflowStep workflowStep = createWorkflowStep(workflowRun, WorkflowStep.State.SUCCESS)
+                    (0..3).each {
+                        createClusterJob(workflowStep, it * 3 + 1)
+                        createSuccessClusterJob(workflowStep, it * 3 + 2)
+                        createFailedClusterJob(workflowStep, it * 3 + 3)
+                    }
+                    break
+                case WorkflowRun.State.WAITING_FOR_USER:
+                    createWorkflowStep(workflowRun, WorkflowStep.State.SUCCESS)
+                    break
+            }
+            workflowRun.save(flush: true)
         }
-        workflowRun.save(flush: true)
     }
 
     println "create worklow with restart"
