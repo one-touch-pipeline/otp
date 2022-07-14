@@ -255,13 +255,18 @@ $.otp.workflowConfig = {
       !operation || operation === $.otp.workflowConfig.OPERATION.VIEW ||
       (rowData.selectorType === 'DEFAULT_VALUES' && operation !== $.otp.workflowConfig.OPERATION.CREATE)
     );
+    // Priority is readonly field
+    thisDialog.find(':input[name="priority"]').attr('disabled', true);
 
     // assign fields in the dialog page
     thisDialog.find('.modal-body input[name="selector.id"]').val(operation === $.otp.workflowConfig.OPERATION.CREATE ?
       -1 : rowData.id);
     thisDialog.find('.modal-body input[name="selectorName"]').val(rowData.name);
-    thisDialog.find('.modal-body input[name="customPriority"]').val(rowData.customPriority);
     thisDialog.find('.modal-body select[name="type"]').val(rowData.selectorType).trigger('change');
+    // Priority is assigned to the value only in view mode
+    thisDialog.find('.modal-body input[name="priority"]').val(
+      !operation || operation === $.otp.workflowConfig.OPERATION.VIEW ? rowData.priority : null
+    );
 
     // confirmation dialog of deprecation
     thisDialog.find('.modal-body #confirmContent .fragmentName').text(rowData.name);
@@ -359,7 +364,7 @@ $(document).ready(() => {
       { data: 'exactMatch' },
       { data: 'name' },
       { data: 'selectorType' },
-      { data: 'customPriority' },
+      { data: 'priority' },
       { data: 'workflows' },
       { data: 'workflowVersions' },
       { data: 'projects' },
@@ -398,7 +403,8 @@ $(document).ready(() => {
       },
       {
         targets: [4],
-        render: (data) => (typeof (data) === 'string' ? data : data.name)
+        // eslint-disable-next-line no-nested-ternary
+        render: (data) => (typeof (data) === 'string' ? data : data ? data.name : '')
       },
       {
         targets: [6, 7, 8, 9, 10, 11],
@@ -480,7 +486,7 @@ $(document).ready(() => {
       rowData.id = -1;
       rowData.name = null;
       rowData.fid = null;
-      rowData.customPriority = null;
+      rowData.priority = null;
 
       $('.modal-body textarea').val('');
       const oFragment = $('select#pp-fragments');

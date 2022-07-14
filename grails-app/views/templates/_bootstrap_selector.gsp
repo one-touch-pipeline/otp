@@ -29,7 +29,7 @@
                 <a class="stretched-link plain-link" data-toggle="collapse" href="#collapse${selector.id}" role="button" aria-expanded="true"
                    data-target="#collapse${selector.id}" aria-controls="collapse${selector.id}">
                     <i class="bi bi-chevron-down float-right"></i>
-                    ${selector.customPriority}
+                    ${selector.priority}
                     <g:link class="above-stretched-link" controller="workflowConfig" action="index"
                             params="${['selector.id': selector.id]}">${selector.name}</g:link>
                 </a>

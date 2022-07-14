@@ -42,7 +42,58 @@ class ExternalWorkflowConfigSelector implements Comparable<ExternalWorkflowConfi
 
     ExternalWorkflowConfigFragment externalWorkflowConfigFragment
     SelectorType selectorType
-    int customPriority
+
+    /**
+     * This is a calculated property to represent the suggested priority of this selector.
+     * Property priority is calculated and stored into database when the selector is created or modified, to optimise the reading speed.
+     * <p>
+     * Calculation is done with this method (@link #calculatePriority()), which ia called right before {#save()} is called
+     */
+    int priority
+
+    def beforeInsert() {
+        priority = calculatePriority()
+    }
+
+    def beforeUpdate() {
+        priority = calculatePriority()
+    }
+
+    /**
+     * Global bit/flag definition for the priority calculation.
+     * <p>
+     * The lowest bit is reserved for the property {@link #selectorType}, which needs special treatment.
+     * All others are array types and will be checked if they contain any value.
+     * In total there are 7 properties with 7 bits. The highest bit is unused and remains 0.
+     * Integer is used to hold the bits and to be stored in database
+     * <p>
+     * @see: <a href="https://one-touch-pipeline.myjetbrains.com/youtrack/issue/otp-913">otp-913</a>
+     */
+    static final Map<String, Integer> PROPS_PRIORITY_MAP = [
+            workflows             : 0b01000000,
+            workflowVersions      : 0b00100000,
+            seqTypes              : 0b00010000,
+            referenceGenomes      : 0b00001000,
+            libraryPreparationKits: 0b00000100,
+            projects              : 0b00000010,
+            selectorType          : 0b00000001,
+    ].asImmutable()
+
+    /**
+     * Calculate the priority by checking the given bit defined in the map {@link #PROPS_PRIORITY_MAP}
+     * is occupied. The algorithms distinguishes if the property (e.g. workflows) has value (bit = 1) or not (bit = 0).
+     * The values themself don't change the bit.
+     */
+    private int calculatePriority() {
+        int prio = 0b00000000
+        PROPS_PRIORITY_MAP.each { String key, Integer value ->
+            // checks 1. if the array contains elements, 2. if the value is default values
+            if (value > 1 ? this[key] && !this[key].isEmpty() : this[key] != SelectorType.DEFAULT_VALUES) {
+                prio |= value
+            }
+        }
+        return prio
+    }
 
     static hasMany = [
             workflows             : Workflow,
@@ -70,23 +121,11 @@ class ExternalWorkflowConfigSelector implements Comparable<ExternalWorkflowConfi
                 return "default"
             }
         }
-        customPriority min: 0, validator: { val, obj ->
-            if (obj.selectorType == SelectorType.DEFAULT_VALUES && val != 0) {
-                return "default"
-            }
-            if (obj.selectorType != SelectorType.DEFAULT_VALUES && val == 0) {
-                return "min"
-            }
-        }
-    }
-
-    int calculateSuggestedPriority() {
-        return 0
     }
 
     @Override
     int compareTo(ExternalWorkflowConfigSelector externalWorkflowConfigSelector) {
-        return externalWorkflowConfigSelector.customPriority <=> customPriority
+        return externalWorkflowConfigSelector.priority <=> priority
     }
 
     List<ExternalWorkflowConfigFragment> getFragments() {
