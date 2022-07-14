@@ -30,7 +30,7 @@ ON CONFLICT DO NOTHING;
 
 
 INSERT INTO workflow(id, version, name, bean_name, enabled, priority, date_created, last_updated, max_parallel_workflows)
-VALUES(nextval('hibernate_sequence'), 0, 'FastQC', 'fastqcWorkflow', TRUE, 0, now(), now(), 10)
+VALUES(nextval('hibernate_sequence'), 0, 'Bash Fastqc', 'bashFastqcWorkflow', TRUE, 0, now(), now(), 10)
 ON CONFLICT DO NOTHING;
 
 

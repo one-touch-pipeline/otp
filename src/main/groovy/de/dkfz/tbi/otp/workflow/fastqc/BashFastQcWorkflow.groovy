@@ -23,42 +23,58 @@ package de.dkfz.tbi.otp.workflow.fastqc
 
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.dataprocessing.FastqcDataFilesService
-import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
-import de.dkfz.tbi.otp.workflow.jobs.AbstractOtpClusterValidationJob
-import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
+import de.dkfz.tbi.otp.workflowExecution.*
 
-import java.nio.file.Path
-
+/**
+ * Represents the fastqc workflow, which calculates or copies the fastqc reports.
+ */
 @Component
 @Slf4j
 @CompileStatic
-class FastqcValidationJob extends AbstractOtpClusterValidationJob implements FastqcShared {
+class BashFastQcWorkflow implements OtpWorkflow {
 
-    @Autowired
-    FastqcDataFilesService fastqcDataFilesService
+    static final String WORKFLOW = "Bash Fastqc"
+    static final String INPUT_FASTQ = "FASTQ"
+    static final String OUTPUT_FASTQC = "FASTQC"
 
     @Override
-    protected List<Path> getExpectedFiles(WorkflowStep workflowStep) {
-        return getFastqcProcessedFiles(workflowStep).collect { FastqcProcessedFile fastqcProcessedFile ->
-            fastqcDataFilesService.fastqcOutputPath(fastqcProcessedFile)
-        }
+    List<String> getJobBeanNames() {
+        return [
+                FastqcPrepareJob.simpleName.uncapitalize(),
+                FastqcConditionalFailJob.simpleName.uncapitalize(),
+                FastqcExecuteClusterPipelineJob.simpleName.uncapitalize(),
+                FastqcClusterValidationJob.simpleName.uncapitalize(),
+                FastqcParseJob.simpleName.uncapitalize(),
+                FastqcFinishJob.simpleName.uncapitalize(),
+        ]
+    }
+
+    /**
+     * Since it is designed for one run, it passes the artefact as it is.
+     */
+    @Override
+    Artefact createCopyOfArtefact(Artefact artefact) {
+        return artefact
+    }
+
+    /**
+     * There is nothing to do in a single run workflow.
+     */
+    @Override
+    void reconnectDependencies(Artefact artefact, WorkflowArtefact newWorkflowArtefact) {
+    }
+
+    final String userDocumentation = null
+
+    @Override
+    boolean isAlignment() {
+        return false
     }
 
     @Override
-    protected List<Path> getExpectedDirectories(WorkflowStep workflowStep) {
-        return []
-    }
-
-    @Override
-    protected void saveResult(WorkflowStep workflowStep) {
-    }
-
-    @Override
-    protected List<String> doFurtherValidationAndReturnProblems(WorkflowStep workflowStep) {
-        return []
+    boolean isAnalysis() {
+        return false
     }
 }

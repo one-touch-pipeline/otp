@@ -52,7 +52,7 @@ class FastqcPrepareJobSpec extends Specification implements DataTest, WorkflowSy
         given:
         final WorkflowRun run = createWorkflowRun([workflow:
                                                            createWorkflow([
-                                                                   name: FastqcWorkflow.WORKFLOW
+                                                                   name: BashFastQcWorkflow.WORKFLOW
                                                            ])
         ])
         WorkflowStep workflowStep = createWorkflowStep([workflowRun: run])
@@ -60,7 +60,7 @@ class FastqcPrepareJobSpec extends Specification implements DataTest, WorkflowSy
 
         FastqcPrepareJob job = new FastqcPrepareJob()
         job.concreteArtefactService = Mock(ConcreteArtefactService) {
-            1 * getInputArtefact(workflowStep, FastqcWorkflow.INPUT_FASTQ) >> seqTrack
+            1 * getInputArtefact(workflowStep, BashFastQcWorkflow.INPUT_FASTQ) >> seqTrack
         }
         job.notificationCreator = Mock(NotificationCreator)
 
@@ -80,7 +80,7 @@ class FastqcPrepareJobSpec extends Specification implements DataTest, WorkflowSy
                 workDirectory: workDirectory,
                 workflow:
                         createWorkflow([
-                                name: FastqcWorkflow.WORKFLOW,
+                                name: BashFastQcWorkflow.WORKFLOW,
                         ])
         ])
         WorkflowStep workflowStep = createWorkflowStep([workflowRun: run])

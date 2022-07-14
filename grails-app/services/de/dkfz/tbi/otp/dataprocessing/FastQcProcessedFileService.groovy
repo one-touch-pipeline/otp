@@ -28,7 +28,7 @@ import groovy.transform.CompileStatic
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.ngsdata.DataFile
 import de.dkfz.tbi.otp.utils.CollectionUtils
-import de.dkfz.tbi.otp.workflow.fastqc.FastqcWorkflow
+import de.dkfz.tbi.otp.workflow.fastqc.BashFastQcWorkflow
 import de.dkfz.tbi.otp.workflowExecution.WorkflowVersion
 import de.dkfz.tbi.util.TimeFormats
 
@@ -56,7 +56,7 @@ class FastQcProcessedFileService {
      * Repeated calls create different values, so keep the result if needed multiple times.
      */
     String buildWorkingPath(WorkflowVersion workflowVersion) {
-        assert workflowVersion.workflow.name == FastqcWorkflow.WORKFLOW
+        assert workflowVersion.workflow.name == BashFastQcWorkflow.WORKFLOW
         ZonedDateTime zonedDateTime = configService.zonedDateTime
         return "bash-${workflowVersion.workflowVersion}-${TimeFormats.DATE_TIME_SECONDS_DASHES.getFormattedZonedDateTime(zonedDateTime)}"
     }

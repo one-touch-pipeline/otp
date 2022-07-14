@@ -36,7 +36,7 @@ import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 import de.dkfz.tbi.otp.workflow.datainstallation.DataInstallationWorkflow
-import de.dkfz.tbi.otp.workflow.fastqc.FastqcWorkflow
+import de.dkfz.tbi.otp.workflow.fastqc.BashFastQcWorkflow
 import de.dkfz.tbi.otp.workflow.panCancer.PanCancerWorkflow
 import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.otp.workflowTest.FileAssertHelper
@@ -153,7 +153,7 @@ abstract class AbstractRoddyAlignmentWorkflowSpec extends AbstractAlignmentWorkf
         workflowDataInstallation = CollectionUtils.exactlyOneElement(Workflow.findAllByName(DataInstallationWorkflow.WORKFLOW))
         log.info("Fetch workflow DataInstallation ${workflowDataInstallation}")
 
-        workflowFastqc = CollectionUtils.exactlyOneElement(Workflow.findAllByName(FastqcWorkflow.WORKFLOW))
+        workflowFastqc = CollectionUtils.exactlyOneElement(Workflow.findAllByName(BashFastQcWorkflow.WORKFLOW))
         log.info("Fetch workflow Fastqc ${workflowFastqc}")
 
         workflowAlignment = CollectionUtils.exactlyOneElement(Workflow.findAllByName(workflowName))

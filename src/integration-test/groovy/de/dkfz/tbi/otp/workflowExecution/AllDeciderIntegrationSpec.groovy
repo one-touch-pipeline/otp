@@ -36,7 +36,7 @@ class AllDeciderIntegrationSpec extends Specification implements ServiceUnitTest
     void "test decide for Decider"() {
         given:
         AllDecider allDecider = new AllDecider()
-        createFastqcWorkflowVersion()
+        createBashFastqcWorkflowVersion()
         WorkflowStep workflowStep = createWorkflowStep()
         WorkflowArtefact wa1 = createWorkflowArtefact(state: WorkflowArtefact.State.SUCCESS, producedBy: workflowStep.workflowRun)
         WorkflowArtefact wa2 = createWorkflowArtefact(state: WorkflowArtefact.State.SUCCESS, producedBy: workflowStep.workflowRun)

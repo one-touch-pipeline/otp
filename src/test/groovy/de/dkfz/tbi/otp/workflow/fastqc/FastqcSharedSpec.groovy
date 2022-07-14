@@ -47,7 +47,7 @@ class FastqcSharedSpec extends Specification implements WorkflowSystemDomainFact
         fastqcSharedInstance.concreteArtefactService = Mock(ConcreteArtefactService)
         final WorkflowRun run = createWorkflowRun([
                 workflow: createWorkflow([
-                        name: FastqcWorkflow.WORKFLOW
+                        name: BashFastQcWorkflow.WORKFLOW
                 ]),
         ])
         workflowStep = createWorkflowStep([workflowRun: run])
@@ -61,10 +61,10 @@ class FastqcSharedSpec extends Specification implements WorkflowSystemDomainFact
         fastqcSharedInstance.getSeqTrack(workflowStep)
 
         then:
-        1 * fastqcSharedInstance.checkWorkflowName(workflowStep, FastqcWorkflow.WORKFLOW) >> _
+        1 * fastqcSharedInstance.checkWorkflowName(workflowStep, BashFastQcWorkflow.WORKFLOW) >> _
 
         then:
-        1 * fastqcSharedInstance.concreteArtefactService.getInputArtefact(workflowStep, FastqcWorkflow.INPUT_FASTQ) >> _
+        1 * fastqcSharedInstance.concreteArtefactService.getInputArtefact(workflowStep, BashFastQcWorkflow.INPUT_FASTQ) >> _
     }
 
     void "getFastqcProcessedFiles, should call checkWorkflowName and getOutputArtefacts with correct arguments and in order"() {
@@ -75,10 +75,10 @@ class FastqcSharedSpec extends Specification implements WorkflowSystemDomainFact
         fastqcSharedInstance.getFastqcProcessedFiles(workflowStep)
 
         then:
-        1 * fastqcSharedInstance.checkWorkflowName(workflowStep, FastqcWorkflow.WORKFLOW) >> _
+        1 * fastqcSharedInstance.checkWorkflowName(workflowStep, BashFastQcWorkflow.WORKFLOW) >> _
 
         then:
-        1 * fastqcSharedInstance.concreteArtefactService.getOutputArtefacts(workflowStep, FastqcWorkflow.OUTPUT_FASTQC) >> _
+        1 * fastqcSharedInstance.concreteArtefactService.getOutputArtefacts(workflowStep, BashFastQcWorkflow.OUTPUT_FASTQC) >> _
     }
 
     @SuppressWarnings('EmptyClass')

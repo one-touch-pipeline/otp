@@ -43,9 +43,9 @@ import java.nio.file.*
 
 class FastqcExecuteClusterPipelineJobSpec extends Specification implements DataTest, FastqcDomainFactory, WorkflowSystemDomainFactory {
 
-    static final String WORKFLOW = FastqcWorkflow.WORKFLOW
-    static final String INPUT_ROLE = FastqcWorkflow.INPUT_FASTQ
-    static final String OUTPUT_ROLE = FastqcWorkflow.OUTPUT_FASTQC
+    static final String WORKFLOW = BashFastQcWorkflow.WORKFLOW
+    static final String INPUT_ROLE = BashFastQcWorkflow.INPUT_FASTQ
+    static final String OUTPUT_ROLE = BashFastQcWorkflow.OUTPUT_FASTQC
 
     private FastqcExecuteClusterPipelineJob job
     private WorkflowRun run

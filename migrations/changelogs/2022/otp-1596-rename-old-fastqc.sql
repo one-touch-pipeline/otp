@@ -19,22 +19,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.domainFactory.workflowSystem
 
-import de.dkfz.tbi.otp.workflow.fastqc.BashFastQcWorkflow
-import de.dkfz.tbi.otp.workflowExecution.Workflow
-import de.dkfz.tbi.otp.workflowExecution.WorkflowVersion
+UPDATE workflow
+SET NAME = 'Bash Fastqc',
+    bean_name = 'bashFastqcWorkflow'
+WHERE name = 'FastQC';
 
-trait FastqcWorkflowDomainFactory extends WorkflowSystemDomainFactory {
+UPDATE workflow_step
+SET bean_name = 'fastqcClusterValidationJob'
+WHERE bean_name = 'fastqcValidationJob';
 
-    Workflow findOrCreateBashFastqcWorkflow() {
-        return findOrCreateWorkflow(BashFastQcWorkflow.WORKFLOW, [beanName: BashFastQcWorkflow.simpleName.uncapitalize()])
-    }
-
-    WorkflowVersion createBashFastqcWorkflowVersion(String version = "0.11.15") {
-        return createWorkflowVersion([
-                workflow       : findOrCreateBashFastqcWorkflow(),
-                workflowVersion: version,
-        ])
-    }
-}
+UPDATE job_execution_plan
+SET name = 'BashFastQcWorkflow'
+WHERE name = 'FastqcWorkflow';

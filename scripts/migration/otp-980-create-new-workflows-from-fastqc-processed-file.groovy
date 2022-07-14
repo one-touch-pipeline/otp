@@ -27,7 +27,7 @@ import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.TransactionUtils
-import de.dkfz.tbi.otp.workflow.fastqc.FastqcWorkflow
+import de.dkfz.tbi.otp.workflow.fastqc.BashFastQcWorkflow
 import de.dkfz.tbi.otp.workflowExecution.*
 
 import static groovyx.gpars.GParsPool.withPool
@@ -91,7 +91,7 @@ void migrateToNewWorkflow(
 
         assert inputArtefact: "input artefact of ${seqTrack} can't be null. Was migration script otp-592 called before to create missing input artifacts?"
 
-        String shortName = "${FastqcWorkflow.WORKFLOW}: ${seqTrack.individual.pid} " +
+        String shortName = "${BashFastQcWorkflow.WORKFLOW}: ${seqTrack.individual.pid} " +
                 "${seqTrack.sampleType.displayName} ${seqTrack.seqType.displayNameWithLibraryLayout}"
         List<String> runDisplayName = []
         runDisplayName.with {
@@ -120,7 +120,7 @@ void migrateToNewWorkflow(
 
         new WorkflowRunInputArtefact([
                 workflowRun     : workflowRun,
-                role            : FastqcWorkflow.INPUT_FASTQ,
+                role            : BashFastQcWorkflow.INPUT_FASTQ,
                 workflowArtefact: inputArtefact,
         ]).save()
 

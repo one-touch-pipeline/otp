@@ -30,7 +30,7 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.FastqcWorkflowDomainFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
-import de.dkfz.tbi.otp.workflow.fastqc.FastqcWorkflow
+import de.dkfz.tbi.otp.workflow.fastqc.BashFastQcWorkflow
 import de.dkfz.tbi.otp.workflowExecution.*
 
 import java.nio.file.Paths
@@ -41,7 +41,7 @@ class FastqcDeciderIntegrationSpec extends Specification implements FastqcWorkfl
 
     void "test decide"() {
         given:
-        WorkflowVersion workflowVersion = createFastqcWorkflowVersion()
+        WorkflowVersion workflowVersion = createBashFastqcWorkflowVersion()
         Workflow workflow = workflowVersion.workflow
 
         WorkflowArtefact wa1 = createWorkflowArtefact(artefactType: ArtefactType.FASTQ, producedBy: createWorkflowRun([workflowVersion: workflowVersion]))
@@ -66,7 +66,7 @@ class FastqcDeciderIntegrationSpec extends Specification implements FastqcWorkfl
             0 * _
         }
         decider.workflowService = Mock(WorkflowService) {
-            1 * getExactlyOneWorkflow(FastqcWorkflow.WORKFLOW) >> workflow
+            1 * getExactlyOneWorkflow(BashFastQcWorkflow.WORKFLOW) >> workflow
             0 * _
         }
         decider.fastQcProcessedFileService = Mock(FastQcProcessedFileService) {

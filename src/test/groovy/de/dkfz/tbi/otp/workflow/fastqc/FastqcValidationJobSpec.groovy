@@ -60,19 +60,19 @@ class FastqcValidationJobSpec extends Specification implements DataTest, Workflo
         }
         WorkflowRun run = createWorkflowRun([
                 workflow: createWorkflow([
-                        name: FastqcWorkflow.WORKFLOW
+                        name: BashFastQcWorkflow.WORKFLOW
                 ])
         ])
         WorkflowStep workflowStep = createWorkflowStep([workflowRun: run])
 
-        FastqcValidationJob job = new FastqcValidationJob()
+        FastqcClusterValidationJob job = new FastqcClusterValidationJob()
 
         job.fastqcDataFilesService = Mock(FastqcDataFilesService) {
             1 * fastqcOutputPath(fastqcProcessedFiles.first()) >> file1
             1 * fastqcOutputPath(fastqcProcessedFiles.last()) >> file2
         }
         job.concreteArtefactService = Mock(ConcreteArtefactService) {
-            1 * getOutputArtefacts(workflowStep, FastqcWorkflow.OUTPUT_FASTQC) >> fastqcProcessedFiles
+            1 * getOutputArtefacts(workflowStep, BashFastQcWorkflow.OUTPUT_FASTQC) >> fastqcProcessedFiles
         }
 
         when:
@@ -84,7 +84,7 @@ class FastqcValidationJobSpec extends Specification implements DataTest, Workflo
 
     void "test getExpectedDirectories"() {
         given:
-        FastqcValidationJob job = new FastqcValidationJob()
+        FastqcClusterValidationJob job = new FastqcClusterValidationJob()
         WorkflowStep workflowStep = createWorkflowStep()
 
         expect:
@@ -93,7 +93,7 @@ class FastqcValidationJobSpec extends Specification implements DataTest, Workflo
 
     void "test doFurtherValidationAndReturnProblems"() {
         given:
-        FastqcValidationJob job = new FastqcValidationJob()
+        FastqcClusterValidationJob job = new FastqcClusterValidationJob()
         WorkflowStep workflowStep = createWorkflowStep()
 
         expect:

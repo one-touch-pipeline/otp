@@ -28,9 +28,9 @@ import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.workflowExecution.Artefact
 
-class FastqcWorkflowSpec extends Specification implements DataTest, DomainFactoryCore {
+class BashFastqcWorkflowSpec extends Specification implements DataTest, DomainFactoryCore {
 
-    FastqcWorkflow fastqcWorkflow
+    BashFastQcWorkflow fastqcWorkflow
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -40,7 +40,7 @@ class FastqcWorkflowSpec extends Specification implements DataTest, DomainFactor
     }
 
     void setup() {
-        fastqcWorkflow = new FastqcWorkflow()
+        fastqcWorkflow = new BashFastQcWorkflow()
     }
 
     void "getJobBeanNames, should return all FastqcJob bean names in correct order"() {
@@ -49,7 +49,7 @@ class FastqcWorkflowSpec extends Specification implements DataTest, DomainFactor
                 "fastqcPrepareJob",
                 "fastqcConditionalFailJob",
                 "fastqcExecuteClusterPipelineJob",
-                "fastqcValidationJob",
+                "fastqcClusterValidationJob",
                 "fastqcParseJob",
                 "fastqcFinishJob",
         ]

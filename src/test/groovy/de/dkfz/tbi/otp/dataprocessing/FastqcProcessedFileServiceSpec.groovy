@@ -56,7 +56,7 @@ class FastqcProcessedFileServiceSpec extends Specification implements ServiceUni
 
     void "buildWorkingPath, when called for bash fastqc workflow, then return expected value"() {
         given:
-        WorkflowVersion workflowVersion = createFastqcWorkflowVersion()
+        WorkflowVersion workflowVersion = createBashFastqcWorkflowVersion()
         String expected = [
                 "bash",
                 workflowVersion.workflowVersion,

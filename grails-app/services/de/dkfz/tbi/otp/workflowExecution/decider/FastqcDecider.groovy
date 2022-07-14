@@ -28,7 +28,7 @@ import org.springframework.stereotype.Component
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
-import de.dkfz.tbi.otp.workflow.fastqc.FastqcWorkflow
+import de.dkfz.tbi.otp.workflow.fastqc.BashFastQcWorkflow
 import de.dkfz.tbi.otp.workflowExecution.*
 
 @Component
@@ -61,7 +61,7 @@ class FastqcDecider implements Decider {
 
     @Override
     Collection<WorkflowArtefact> decide(Collection<WorkflowArtefact> inputArtefacts, boolean forceRun = false, Map<String, String> userParams = [:]) {
-        final Workflow workflow = workflowService.getExactlyOneWorkflow(FastqcWorkflow.WORKFLOW)
+        final Workflow workflow = workflowService.getExactlyOneWorkflow(BashFastQcWorkflow.WORKFLOW)
 
         //currently fixed to one supported version, will be changed later
         final WorkflowVersion workflowVersion = CollectionUtils.exactlyOneElement(WorkflowVersion.findAllByWorkflow(workflow))
@@ -103,7 +103,7 @@ class FastqcDecider implements Decider {
         List<String> runDisplayName = generateWorkflowRunDisplayName(seqTrack)
         List<String> artefactDisplayName = runDisplayName.clone()
         artefactDisplayName.remove(0)
-        String shortName = "${FastqcWorkflow.WORKFLOW}: ${seqTrack.individual.pid} " +
+        String shortName = "${BashFastQcWorkflow.WORKFLOW}: ${seqTrack.individual.pid} " +
                 "${seqTrack.sampleType.displayName} ${seqTrack.seqType.displayNameWithLibraryLayout}"
 
         WorkflowRun run = workflowRunService.buildWorkflowRun(
@@ -118,7 +118,7 @@ class FastqcDecider implements Decider {
 
         new WorkflowRunInputArtefact(
                 workflowRun: run,
-                role: FastqcWorkflow.INPUT_FASTQ,
+                role: BashFastQcWorkflow.INPUT_FASTQ,
                 workflowArtefact: inputArtefact,
         ).save(flush: true)
 
@@ -127,7 +127,7 @@ class FastqcDecider implements Decider {
         dataFiles.eachWithIndex { DataFile it, int i ->
             WorkflowArtefact workflowArtefact = workflowArtefactService.buildWorkflowArtefact(new WorkflowArtefactValues(
                     run,
-                    "${FastqcWorkflow.OUTPUT_FASTQC}_${i + 1}",
+                    "${BashFastQcWorkflow.OUTPUT_FASTQC}_${i + 1}",
                     ArtefactType.FASTQC,
                     artefactDisplayName,
             )).save(flush: true)

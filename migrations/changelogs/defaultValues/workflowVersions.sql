@@ -22,7 +22,7 @@
 
 --fastqc versions
 INSERT INTO workflow_version(id, version, workflow_id, workflow_version, date_created, last_updated)
-VALUES (nextval('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'FastQC'), '0.11.5', now(), now())
+VALUES (nextval('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'Bash Fastqc'), '0.11.5', now(), now())
 ON CONFLICT DO NOTHING;
 
 --WES fastqc versions

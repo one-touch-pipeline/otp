@@ -58,7 +58,7 @@ class FastqcParseJobSpec extends Specification implements DataTest, WorkflowSyst
         }
         final WorkflowRun run = createWorkflowRun([
                 workflow: createWorkflow([
-                        name: FastqcWorkflow.WORKFLOW
+                        name: BashFastQcWorkflow.WORKFLOW
                 ])
         ])
         WorkflowStep workflowStep = createWorkflowStep([workflowRun: run])
@@ -77,7 +77,7 @@ class FastqcParseJobSpec extends Specification implements DataTest, WorkflowSyst
         job.execute(workflowStep)
 
         then:
-        1 * job.concreteArtefactService.getOutputArtefacts(workflowStep, FastqcWorkflow.OUTPUT_FASTQC) >> fastqcProcessedFiles
+        1 * job.concreteArtefactService.getOutputArtefacts(workflowStep, BashFastQcWorkflow.OUTPUT_FASTQC) >> fastqcProcessedFiles
         0 * job.concreteArtefactService._
         1 * job.fastqcUploadService.uploadFastQCFileContentsToDataBase(fastqcProcessedFiles.first())
         1 * job.fastqcUploadService.uploadFastQCFileContentsToDataBase(fastqcProcessedFiles.last())
