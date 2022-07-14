@@ -60,7 +60,7 @@ const button = function (action, value, title, buttonsDisabled, icon) {
   'use strict';
 
   return `<button class="btn btn-xs btn-primary" formaction="${action}"
-                  name="step" value="${value}" title="${title}" ${buttonsDisabled}>
+                  name="${title.replaceAll(' ', '')}" value="${value}" title="${title}" ${buttonsDisabled}>
             <i class="bi-${icon}"></i>
           </button>`;
 };
