@@ -427,7 +427,9 @@ $.otp.resizeBodyInit = function (table, margin) {
 $.otp.getDownloadButton = (columnSelector, fileName, beforeDownload = (callback) => { callback(); }) => {
   const defaultFileName = document.title.replaceAll(' ', '_');
   const date = new Date();
-  const formattedDate = `${date.getUTCFullYear()}-${(date.getUTCMonth() + 1)}-${date.getUTCDate()}`;
+  const formattedDate = `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1)
+    .padStart(2, '0')}-${String(date.getUTCDate())
+    .padStart(2, '0')}`;
 
   return [{
     extend: 'csvHtml5',

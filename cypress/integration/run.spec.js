@@ -32,7 +32,8 @@ describe('Check statistics page', () => {
       cy.loginAsOperator();
     });
 
-    it.skip('should download csv files and check if the files exist', () => {
+    // checks for download files
+    it('should download csv files and check if the files exist', () => {
       cy.visit('/run/list');
 
       cy.get('button').contains('Download').click();

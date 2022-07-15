@@ -36,8 +36,8 @@ describe('Check statistics page', () => {
       cy.visit('/projectOverview/index');
     });
 
-    // Skipped since right now, the downloaded files don't have leading zeros.
-    it.skip('should download all csv files by clicking the buttons and verify the downloads', () => {
+    // checks for download files
+    it('should download all csv files by clicking the buttons and verify the downloads', () => {
       cy.visit('/projectOverview/index');
 
       cy.get('div#sampleTypeNameCountBySample_wrapper button')
