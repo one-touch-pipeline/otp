@@ -38,7 +38,7 @@ RUN unzip -q /home/otp/otp_example_data.zip && rm /home/otp/otp_example_data.zip
 
 WORKDIR $APP_HOME
 
-COPY --chown=otp:otp . .
+COPY . .
 
 RUN if [ "$GRADLE_PROXY_ENABLED" = "true" ] ; then \
     echo "systemProp.http.proxyHost=${GRADLE_PROXY_HOST}" >> ./gradle.properties && \
