@@ -26,10 +26,27 @@ describe('Check bam metadata import page', () => {
   context('when user is an operator', () => {
     beforeEach(() => {
       cy.loginAsOperator();
+      cy.visit('/bamMetadataImport/index');
     });
 
     it('should visit the index page', () => {
-      cy.visit('/bamMetadataImport/index');
+      cy.intercept('/bamMetadataImport/validateOrImport*').as('validateOrImport');
+
+      cy.get('#path').clear().type('/home/otp/bam-import/import.tsv');
+      cy.get('input#validate').click();
+
+      cy.wait('@validateOrImport').then((interception) => {
+        expect(interception.response.statusCode).to.eq(302);
+        cy.location('pathname').should('match', /\/\/?bamMetadataImport\/index/);
+      });
+
+      cy.get('#ignoreWarnings').check();
+      cy.get('input#import').click();
+
+      cy.wait('@validateOrImport').then((interception) => {
+        expect(interception.response.statusCode).to.eq(302);
+        cy.location('pathname').should('match', /\/\/?sampleOverview\/index/);
+      });
     });
   });
 });

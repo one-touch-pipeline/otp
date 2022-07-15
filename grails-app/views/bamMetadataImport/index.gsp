@@ -167,9 +167,9 @@
             </tr>
         </table>
         <br>
-        <g:submitButton name="submit" value="Validate"/>
+        <g:submitButton id="validate" name="submit" value="Validate"/>
         <sec:ifAllGranted roles="ROLE_OPERATOR">
-            <g:submitButton name="submit" value="Import"/>
+            <g:submitButton id="import" name="submit" value="Import"/>
             <g:if test="${context?.maximumProblemLevel == LogLevel.WARNING}">
                 <label>
                     <g:checkBox name="ignoreWarnings" checked="false" value="true"/>
