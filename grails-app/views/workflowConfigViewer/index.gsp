@@ -130,7 +130,7 @@
             </g:form>
         </div>
 
-        <div class="col-4">
+        <div class="col-4" id="right-side">
             <h6><strong>${g.message(code: "workflowConfig.config.related")}</strong></h6>
 
             ${g.message(code: "workflowConfig.selector.type")}
