@@ -69,7 +69,6 @@
                 <tr>
                     <th><g:message code="user.administration.projectOverview.projectName"/></th>
                     <th><g:message code="user.administration.projectOverview.unixGroup"/></th>
-                    <th><g:message code="user.administration.projectOverview.department"/></th>
                     <th><g:message code="user.administration.projectOverview.role"/></th>
                     <th><g:message code="user.administration.projectOverview.otpAccess"/></th>
                     <th><g:message code="user.administration.projectOverview.fileAccess"/></th>
@@ -91,7 +90,6 @@
                             </g:link>
                         </td>
                         <td>${userProjectRole.project.unixGroup}</td>
-                        <td>${userProjectRole.project.projectFields?.find { it.definition.name == 'Cost Center'}?.displayValue ?: "Not Set"}</td>
                         <td>
                             <g:each var="projectRoles" in="${userProjectRole.projectRoles}">
                                 ${projectRoles.name} <br />
