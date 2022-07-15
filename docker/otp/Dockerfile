@@ -42,7 +42,7 @@ RUN unzip -q /home/otp/bam-import.zip && rm /home/otp/bam-import.zip
 
 WORKDIR $APP_HOME
 
-COPY . .
+COPY --chown=otp:otp . .
 
 RUN if [ "$GRADLE_PROXY_ENABLED" = "true" ] ; then \
     echo "systemProp.http.proxyHost=${GRADLE_PROXY_HOST}" >> ./gradle.properties && \
