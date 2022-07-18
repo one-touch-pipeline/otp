@@ -1,0 +1,22 @@
+[
+  {
+    "name": "workflow job error definition",
+    "jobBeanName": "panCancerCheckQcJob",
+    "sourceType": "MESSAGE",
+    "restartAction": "RESTART_JOB",
+    "beanToRestart": "checkQcJob",
+    "errorExpression": "error",
+    "allowRestartingCount": 3,
+    "mailText": "This is the mail text send."
+  },
+  {
+    "name": "edited workflow job error definition",
+    "jobBeanName": "wgbsParseJob",
+    "sourceType": "CLUSTER_JOB",
+    "restartAction": "STOP",
+    "beanToRestart": "fastqcFinishJob",
+    "errorExpression": "error",
+    "allowRestartingCount": 3,
+    "mailText": "This is the edited mail text."
+  }
+]
