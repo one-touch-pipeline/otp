@@ -68,10 +68,8 @@
                                         <li><g:link controller="alignmentConfigurationOverview" action="index"><g:message
                                                 code="otp.menu.alignmenAndAnalysis"/></g:link></li>
                                         <li><g:link controller="projectUser" action="index"><g:message code="otp.menu.userManagement"/></g:link></li>
-                                        <sec:ifAnyGranted roles="ROLE_OPERATOR">
                                         <li><g:link controller="projectRequest" action="index"><g:message
                                                 code="otp.menu.projectRequest"/></g:link></li>
-                                        </sec:ifAnyGranted>
                                         <li><g:link controller="sampleIdentifierOverview" action="index"><g:message
                                                 code="otp.menu.sampleNameOverview"/></g:link></li>
                                         <sec:ifAnyGranted roles="ROLE_OPERATOR">
