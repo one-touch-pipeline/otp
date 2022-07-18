@@ -139,7 +139,7 @@ $(() => {
         id: rowData.id,
         parameters: createLinkParametersForNavigation()
       });
-      childTable += `<tr>
+      childTable += `<tr class="log-row">
                       <td>Workflow logs:</td>
                       <td></td>
                       <td>${logLink}</td>
@@ -154,7 +154,7 @@ $(() => {
         id: rowData.id,
         parameters: createLinkParametersForNavigation()
       });
-      childTable += `<tr> 
+      childTable += `<tr class="error-row"> 
                        <td>Workflow error: </td> 
                        <td class="break-text-line">${rowData.error.message}</td> 
                        <td>${errorLink}</td>
@@ -232,7 +232,7 @@ $(() => {
             action: 'restartStep',
             parameters: { redirect: $.otp.uriWithParams }
           }), row.id, 'Restart step', buttonsDisabled, 'reply');
-          return `<form method="POST" class="single">
+          return `<form class="restart-step-form" method="POST" class="single">
                     ${restartStepButton}
                  </form>`;
         },

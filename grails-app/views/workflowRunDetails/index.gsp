@@ -75,11 +75,11 @@
                 <input type="hidden" name="step" value="${workflowRun.workflowSteps ? workflowRun.workflowSteps.last().id : null}">
                 <input type="hidden" name="redirect" value="${uriWithParams}"/>
                 <div class="btn-group">
-                    <button class="btn btn-sm btn-primary" ${workflowRun.state != WorkflowRun.State.FAILED ? "disabled" : ""}
+                    <button class="btn btn-sm btn-primary failed-final-btn" ${workflowRun.state != WorkflowRun.State.FAILED ? "disabled" : ""}
                             formaction="${g.createLink(action: "setFailedFinal")}" title="${g.message(code: "workflowRun.details.setFailed")}">
                         <i class="bi-file-earmark-x"></i> ${g.message(code: "workflowRun.details.setFailed")}
                     </button>
-                    <button class="btn btn-sm btn-primary" ${workflowRun.state != WorkflowRun.State.FAILED ? "disabled" : ""}
+                    <button class="btn btn-sm btn-primary restart-run-btn" ${workflowRun.state != WorkflowRun.State.FAILED ? "disabled" : ""}
                             formaction="${g.createLink(action: "restartRun")}" title="${g.message(code: "workflowRun.details.restartRun")}">
                         <i class="bi-reply-all"></i> ${g.message(code: "workflowRun.details.restartRun")}
                     </button>
