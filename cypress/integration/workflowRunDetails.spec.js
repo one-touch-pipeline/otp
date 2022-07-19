@@ -99,7 +99,7 @@ describe('Check workflow run details page', () => {
         expect(interception.response.statusCode).to.eq(302);
         cy.location('pathname').should('contain', '/workflowRunDetails/index');
         cy.get('table#steps tbody').should('not.be.empty');
-        cy.get('table#steps tbody tr').first().find('div[data-original-title="CREATED"]').should('exist');
+        cy.get('.otpSuccessToast').should('exist');
       });
     });
 

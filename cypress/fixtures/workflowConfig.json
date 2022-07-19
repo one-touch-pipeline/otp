@@ -24,7 +24,6 @@
       "NEBNext Methyl-seq Kit"
     ],
     "type": "GENERIC",
-    "customPriority": 12,
     "value": "{\"RODDY\": {\"cvalues\": {\"sampleDirectory\": {\"value\": \"${inputBaseDirectory}/175/${sample}/${SEQUENCER_PROTOCOL}\"}}},\"RODDY_FILENAMES\": {}}"
   },
   {
@@ -61,7 +60,6 @@
       "NEBNext Methyl-seq Kit"
     ],
     "type": "BED_FILE",
-    "customPriority": 3,
     "value": "{}"
   },
   {
@@ -73,7 +71,6 @@
     "versions": [
       "Roddy SNV calling 1.2.166-3",
       "PanCancer alignment 1.2.51-1"
-    ],
-    "customPriority": 5
+    ]
   }
 ]

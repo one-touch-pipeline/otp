@@ -40,14 +40,14 @@ describe('Check metadata import page', () => {
       cy.wait('@validateOrImport').then((interception) => {
         expect(interception.response.statusCode).to.eq(302);
         cy.location('pathname').should('match', /\/\/?metadataImport\/index/);
-      });
 
-      cy.get('#ignoreWarnings').check();
-      cy.get('input#import').click();
+        cy.get('#ignoreWarnings').check();
+        cy.get('input#import').click();
 
-      cy.wait('@validateOrImport').then((interception) => {
-        expect(interception.response.statusCode).to.eq(302);
-        cy.location('pathname').should('match', /\/\/?metadataImport\/details\/\d+/);
+        cy.wait('@validateOrImport').then((interception2) => {
+          expect(interception2.response.statusCode).to.eq(302);
+          cy.location('pathname').should('match', /\/\/?metadataImport\/details\/\d+/);
+        });
       });
     });
   });

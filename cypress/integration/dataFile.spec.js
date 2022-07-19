@@ -29,7 +29,7 @@ describe('Check dataFile pages', () => {
     });
 
     it('should visit show details page by starting on project overview page and save a comment there', () => {
-      cy.intercept('/projectOverview/dataTableSource?*').as('dataTableSource');
+      cy.intercept('/projectOverview/dataTableSource?project=*').as('dataTableSource');
       cy.intercept('/dataFile/saveDataFileComment*').as('saveDataFileComment');
       cy.visit('/projectOverview/index');
       cy.wait('@dataTableSource').then((interception) => {

@@ -36,7 +36,7 @@ describe('Check statistics page', () => {
     // Skipped since right now, the downloaded files don't have leading zeros.
     it.skip('should download csv file by clicking the button and verify the download', () => {
       cy.get('button').contains('Download').click();
-      cy.checkDownloadByByteSize('OTP_-_project_overview', '.csv', 67);
+      cy.checkDownloadByMd5Sum('OTP_-_project_overview', '.csv', 'b896abf476f067e44e7db54ceb4f225a');
     });
   });
 });

@@ -21,6 +21,7 @@
  */
 
 const path = require('path');
+const md5 = require('md5');
 
 const login = (username, password) => {
   'use strict';
@@ -121,7 +122,7 @@ Cypress.Commands.add('checkPage', (url) => {
 });
 
 // eslint-disable-next-line strict
-Cypress.Commands.add('checkDownloadByByteSize', (filename, fileEnding, fileByteSize) => {
+Cypress.Commands.add('checkDownloadByMd5Sum', (filename, fileEnding, md5Sum) => {
   const downloadsFolder = Cypress.config('downloadsFolder');
   const today = new Date();
   const year = today.getFullYear();
@@ -132,7 +133,7 @@ Cypress.Commands.add('checkDownloadByByteSize', (filename, fileEnding, fileByteS
   const filepath = path.join(downloadsFolder, `${filename}_${date}${fileEnding}`);
 
   cy.readFile(filepath, 'binary', { timeout: 15000 })
-    .should((buffer) => expect(buffer.length).to.be.equal(fileByteSize));
+    .should((buffer) => expect(md5(buffer)).to.be.equal(md5Sum));
 });
 
 Cypress.Commands.add('clearDownloadsFolder', () => {

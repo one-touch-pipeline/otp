@@ -36,7 +36,7 @@ describe('Check statistics page', () => {
       cy.visit('/run/list');
 
       cy.get('button').contains('Download').click();
-      cy.checkDownloadByByteSize('list_of_runs', '.csv', 2484);
+      cy.checkDownloadByMd5Sum('list_of_runs', '.csv', 'e2a183962414f4e19ce74f2c31034ff0');
     });
 
     it('visits some show pages by clicking on runs', () => {

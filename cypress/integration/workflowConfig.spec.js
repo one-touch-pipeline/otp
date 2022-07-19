@@ -37,7 +37,7 @@ describe('Check workflow config page', () => {
       cy.fixture('workflowConfig.json').then((config) => {
         cy.get('div.modal-content').should('be.visible');
 
-fix        // Dummy input, to prevent flaky typing
+        // Dummy input, to prevent flaky typing
         cy.get('div.modal-content').find('input[name="selectorName"]').type('x');
 
         cy.get('div.modal-content').find('input[name="selectorName"]').clear().type(config[0].selectorName);
@@ -49,7 +49,6 @@ fix        // Dummy input, to prevent flaky typing
         cy.get('div.modal-content').find('select[name="seqTypes"]').select(config[0].seqType, { force: true });
         cy.get('div.modal-content').find('select[name="libraryPreparationKits"]')
           .select(config[0].libraryPreparationKits, { force: true });
-        cy.get('div.modal-content').find('input[name="customPriority"]').type(config[0].customPriority);
         cy.get('div.modal-content').find('select[name="type"]').select(config[0].type, { force: true });
         cy.get('div.modal-content').find('textarea[name="value"]')
           .type(config[0].value, { parseSpecialCharSequences: false });
@@ -95,7 +94,6 @@ fix        // Dummy input, to prevent flaky typing
         cy.get('div.modal-content').find('select[name="seqTypes"]').select(config[2].seqType, { force: true });
         cy.get('div.modal-content').find('select[name="libraryPreparationKits"]')
           .select(config[2].libraryPreparationKits, { force: true });
-        cy.get('div.modal-content').find('input[name="customPriority"]').clear().type(config[2].customPriority);
         cy.get('div.modal-content').find('select[name="type"]').select(config[2].type, { force: true });
         cy.get('div.modal-content').find('textarea[name="value"]').clear().type(config[2].value);
 
@@ -134,7 +132,6 @@ fix        // Dummy input, to prevent flaky typing
           .type(config[3].selectorName);
         cy.get('div.modal-content').find('select[name="projects"]').select(config[3].projects, { force: true });
         cy.get('div.modal-content').find('select[name="workflowVersions"]').select(config[3].versions, { force: true });
-        cy.get('div.modal-content').find('input[name="customPriority"]').clear().type(config[3].customPriority);
 
         cy.get('div.modal-content').find('#save-button').click();
 
@@ -154,34 +151,36 @@ fix        // Dummy input, to prevent flaky typing
 
         cy.get('div.search-query').find('#search-button').click();
 
-        cy.wait('@searchWorkflowConfig').then((interception) => {
-          expect(interception.response.statusCode).to.eq(200);
-          expect(interception.response.body.data.length).to.eq(2);
-          cy.get('table#workflowConfigResult').contains(config[2].selectorName).should('exist');
-          cy.get('table#workflowConfigResult').contains(config[3].selectorName).should('exist');
+        cy.wait('@searchWorkflowConfig').then((outerInterception) => {
+          expect(outerInterception.response.statusCode).to.eq(200);
+          expect(outerInterception.response.body.data.length).to.eq(2);
         });
+
+        cy.get('table#workflowConfigResult').contains(config[2].selectorName).should('exist');
+        cy.get('table#workflowConfigResult').contains(config[3].selectorName).should('exist');
 
         cy.get('table#workflowConfigResult tr').contains(config[2].selectorName).parent()
           .parent()
           .find('#deprecate-row')
-          .click();
+          .click({ force: true });
         cy.get('div#workflowConfigModal').should('be.visible');
-        cy.get('div#workflowConfigModal').find('#save-button').click();
+        cy.get('div#workflowConfigModal').find('#save-button').click({ force: true });
+
         cy.wait('@deprecateWorkflowConfig').then((interception) => {
           expect(interception.response.statusCode).to.eq(200);
           expect(interception.response.body.name).to.eq(config[2].selectorName);
+          cy.get('div#workflowConfigModal').should('not.be.visible');
         });
 
-        cy.get('#workflowConfigModal').should('not.be.visible');
         cy.get('table#workflowConfigResult tr').contains(config[3].selectorName).parent()
           .parent()
           .find('#deprecate-row')
           .click();
         cy.get('div#workflowConfigModal').should('be.visible');
-        cy.get('div#workflowConfigModal').find('#save-button').click();
-        cy.wait('@deprecateWorkflowConfig').then((interception) => {
-          expect(interception.response.statusCode).to.eq(200);
-          expect(interception.response.body.name).to.eq(config[3].selectorName);
+        cy.get('div#workflowConfigModal').find('#save-button').click({ force: true });
+        cy.wait('@deprecateWorkflowConfig').then((interception2) => {
+          expect(interception2.response.statusCode).to.eq(200);
+          expect(interception2.response.body.name).to.eq(config[3].selectorName);
         });
       });
     });

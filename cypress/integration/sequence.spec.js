@@ -41,7 +41,7 @@ describe('Check statistics page', () => {
 
       cy.get('div').contains('Processing...').should('not.be.visible');
       cy.get('div#sequenceTable_wrapper button').contains('Download').click();
-      cy.checkDownloadByByteSize('Sequence_Export', '.csv', 11271);
+      cy.checkDownloadByMd5Sum('Sequence_Export', '.csv', '360650d86b1c6f459d1e2dfd51a9e48b');
     });
 
     it('should filter the table by sample type', () => {
@@ -59,9 +59,7 @@ describe('Check statistics page', () => {
       cy.get('li.select2-results__option').contains(filterToSelect).click();
 
       cy.get('table#sequenceTable tbody tr td').contains('control01').should('not.exist');
-      cy.get('table#sequenceTable tbody tr').each((tableRow) => {
-        cy.wrap(tableRow).find('td').eq(2).should('contain', filterToSelect);
-      });
+      cy.get('table#sequenceTable tbody tr td').should('contain', filterToSelect);
     });
   });
 });

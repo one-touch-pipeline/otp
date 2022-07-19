@@ -37,7 +37,7 @@ describe('Check workflow config viewer page', () => {
       cy.wait('@buildConfig').then((interception) => {
         expect(interception.response.statusCode).to.eq(200);
         cy.get('#configValue').invoke('val').should('not.be.empty');
-        cy.get('#relatedSelectors').find('div .card').should('have.length', 9).then(
+        cy.get('#relatedSelectors').find('div .card').should('have.length', 10).then(
           (relatedSelectors) => {
             cy.wrap(relatedSelectors['0']).find('pre').should('not.be.visible');
             cy.wrap(relatedSelectors['0']).find('.code > a').click({ force: true });
@@ -46,10 +46,10 @@ describe('Check workflow config viewer page', () => {
           }
         );
         cy.get('#relatedSelectorType').select('BED_FILE', { force: true });
-        cy.get('#relatedSelectors').find('div .card').filter(':visible').should('have.length', 3);
+        cy.get('#relatedSelectors').find('div .card').filter(':visible').should('have.length', 4);
         cy.get('#relatedSelectorType').invoke('val', ''); // to override selected elements
         cy.get('#relatedSelectorType').select(['BED_FILE', 'REVERSE_SEQUENCE'], { force: true });
-        cy.get('#relatedSelectors').find('div .card').filter(':visible').should('have.length', 6);
+        cy.get('#relatedSelectors').find('div .card').filter(':visible').should('have.length', 7);
       });
     });
 
