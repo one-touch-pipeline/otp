@@ -30,17 +30,20 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
+
             <div class="modal-body container-fluid">
                 <p id="confirmContent" class="d-none">
                     <em class="fragmentName"></em>
                     <g:message code="workflowConfig.fragment.deprecate.info"/>
                 </p>
+
                 <form id="workflowConfigModalForm" class="needs-validation" novalidate>
                     <div class="form-group d-none">
                         <input type="number" class="form-control" id="pp-id" name="selector.id"/>
                         <input type="text" class="form-control" id="pp-operation"/>
                         <input type="text" class="form-control" id="pp-fragmentName" name="fragmentName"/>
                     </div>
+
                     <div class="row">
                         <div class="col">
                             <div class="input-group mb-3">
@@ -48,7 +51,7 @@
                                     <label class="input-group-text"><g:message code="workflowConfig.selector.name"/></label>
                                 </div>
                                 <input id="pp-selector" type="text" class="form-control" name="selectorName"
-                                    oninput="$.otp.workflowConfig.validateName(this)"/>
+                                       oninput="$.otp.workflowConfig.validateName(this)"/>
                             </div>
                         </div>
                     </div>
@@ -68,6 +71,7 @@
                                 </select>
                             </div>
                         </div>
+
                         <div class="col">
                             <div class="input-group mb-3">
                                 <div class="input-group-prepend">
@@ -77,12 +81,14 @@
                                        title='<g:message code="workflowConfig.selector.priority.tooltip"/>'
                                        placeholder='<g:message code="workflowConfig.selector.priority.tooltip"/>'
                                        oninput="$.otp.workflowConfig.validatePriority(this)"/>
+
                                 <div class="invalid-feedback d-none" id="vf-priority">
                                     <g:message code="workflowConfig.validation.notValid"/>
                                 </div>
                             </div>
                         </div>
                     </div>
+
                     <div class="row">
                         <div class="col-sm">
                             <div class="input-group-prepend">
@@ -90,6 +96,7 @@
                                     <label class="input-group-text"><g:message code="workflowConfig.fragment.version"/></label>
                                 </div>
                                 <select id="pp-fragments" name="fragment.id" class="form-control use-select-2"></select>
+
                                 <div class="input-group-append">
                                     <button id="format-button" class="btn btn-outline-primary format"
                                             type="button"><g:message code="workflowConfig.button.format"/></button>
@@ -97,6 +104,7 @@
                             </div>
                         </div>
                     </div>
+
                     <div class="row">
                         <div class="col-sm">
                             <div class="input-group mb-3">
@@ -109,9 +117,13 @@
                     </div>
                 </form>
             </div>
+
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">
                     <g:message code="default.button.cancel.label"/>
+                </button>
+                <button class="btn btn-warning check" title="${g.message(code: "workflowConfig.button.check.title")}" type="button">
+                    <g:message code="workflowConfig.button.check"/>
                 </button>
                 <button type="button" class="btn btn-primary" id="save-button">
                     <g:message code="default.button.ok.label"/>

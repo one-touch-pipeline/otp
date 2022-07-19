@@ -492,6 +492,74 @@ $(document).ready(() => {
   });
 
   /**
+   * Check for conflicting more specific workflow configurations
+   */
+  $('button.check').on('click', (e) => {
+    e.preventDefault();
+
+    const value = $('.modal-body textarea');
+    try {
+      value.val(JSON.stringify(JSON.parse(value.val()), null, 2));
+    } catch (err) {
+      $.otp.toaster.showErrorToast('Syntax Error in JSON', err);
+      return;
+    }
+
+    const getIdsOfSelect2 = (jQueryObject) => jQueryObject.select2('data').map((select) => select.id);
+    const workflows = getIdsOfSelect2($('select[name="workflows"]'));
+    const workflowVersions = getIdsOfSelect2($('select[name="workflowVersions"]'));
+    const projects = getIdsOfSelect2($('select[name="projects"]'));
+    const seqTypes = getIdsOfSelect2($('select[name="seqTypes"]'));
+    const referenceGenomes = getIdsOfSelect2($('select[name="referenceGenomes"]'));
+    const libraryPreparationKits = getIdsOfSelect2($('select[name="libraryPreparationKits"]'));
+    const fragmentValue = $('textarea[name="value"]').val();
+
+    $.ajax({
+      url: $.otp.createLink({
+        controller: 'workflowConfig',
+        action: 'check',
+        parameters: {
+          workflows,
+          workflowVersions,
+          projects,
+          seqTypes,
+          referenceGenomes,
+          libraryPreparationKits,
+          fragmentValue
+        }
+      }),
+      type: 'GET',
+      success(response) {
+        const { conflictingSelectors } = response;
+        if (conflictingSelectors.length > 0) {
+          let responseMessage = 'The following selectors overwrite Keys in the mentioned projects<br><ul>';
+          conflictingSelectors.forEach((selector) => {
+            responseMessage += `<li>${selector.name} [${selector.projectNames.join(', ')}]</li>`;
+            responseMessage += '<ul>';
+            selector.conflictingKeys.forEach((key) => {
+              responseMessage += `<li>${key}</li>`;
+            });
+            responseMessage += '</ul>';
+          });
+          responseMessage += '</ul>';
+          $.otp.toaster.showWarningToast(
+            'Found conflicting selectors',
+            responseMessage
+          );
+        } else {
+          const message = 'There are no other selectors overwriting these values.';
+          $.otp.toaster.showSuccessToast('No conflicting selectors found.', message);
+        }
+      },
+      error(err) {
+        const defaultErrorMessage = 'Failed checking for conflicting selectors.';
+        const message = (err && err.responseJSON) ? err.responseJSON.message : defaultErrorMessage;
+        $.otp.toaster.showErrorToast(message);
+      }
+    });
+  });
+
+  /**
    * Called after the OK button in the modal dialog is pressed,
    * which collects the modifications and send to the backend to either
    * create a new selector, update or deprecate the current selector

@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.workflowExecution
 
 import grails.gorm.transactions.Transactional
+import groovy.json.JsonSlurper
 import groovy.util.logging.Slf4j
 
 import de.dkfz.tbi.otp.ngsdata.*
@@ -41,6 +42,100 @@ class ExternalWorkflowConfigSelectorService {
     ExternalWorkflowConfigSelector findExactlyOneByExternalWorkflowConfigFragment(ExternalWorkflowConfigFragment fragment) {
         return CollectionUtils.exactlyOneElement(
                 ExternalWorkflowConfigSelector.findAllByExternalWorkflowConfigFragment(fragment))
+    }
+
+    List<String> getAllConflictingConfigValues(String configValue1, String configValue2) {
+        if (!configValue1 || !configValue2) {
+            return []
+        }
+        Object json1 = new JsonSlurper().parseText(configValue1)
+        Object json2 = new JsonSlurper().parseText(configValue2)
+        return getConflictingKeysForJson(json1, json2)
+    }
+
+    List<String> getConflictingKeysForJson(Object json1, Object json2, String completeKey = '') {
+        List<String> conflictingKeys = []
+
+        json1.each { key, value ->
+            String newCompleteKey = completeKey ? "${completeKey}.${key}" : key
+            if (!json2[key]) {
+                return
+            }
+            if (json1[key] instanceof String && json2[key] instanceof String) {
+                if (json1[key] != json2[key]) {
+                    conflictingKeys.add(newCompleteKey)
+                }
+                return
+            }
+            if (json1[key] instanceof String || json2[key] instanceof String) {
+                conflictingKeys.add(newCompleteKey)
+                return
+            }
+            conflictingKeys.addAll(getConflictingKeysForJson(json1[key], json2[key], newCompleteKey))
+        }
+        return conflictingKeys
+    }
+
+    List<NameValueAndConflictingKeysExternalWorkflowConfigSelector> getNameAndConfigValueOfMoreSpecificSelectors(
+            List<Long> workflowIds, List<Long> workflowVersionIds, List<Long> projectIds, List<Long> referenceGenomeIds,
+            List<Long> seqTypeIds, List<Long> libraryPreparationKitIds) {
+        return ExternalWorkflowConfigSelector.createCriteria().list {
+            and {
+                if (workflowIds) {
+                    or {
+                        workflows {
+                            'in'('id', workflowIds)
+                        }
+                        isEmpty('workflows')
+                    }
+                }
+                if (workflowVersionIds) {
+                    or {
+                        workflowVersions {
+                            'in'('id', workflowVersionIds)
+                        }
+                        isEmpty('workflowVersions')
+                    }
+                }
+                if (projectIds) {
+                    or {
+                        projects {
+                            'in'('id', projectIds)
+                        }
+                        isEmpty('projects')
+                    }
+                }
+                if (seqTypeIds) {
+                    or {
+                        seqTypes {
+                            'in'('id', seqTypeIds)
+                        }
+                        isEmpty('seqTypes')
+                    }
+                }
+                if (referenceGenomeIds) {
+                    or {
+                        referenceGenomes {
+                            'in'('id', referenceGenomeIds)
+                        }
+                        isEmpty('referenceGenomes')
+                    }
+                }
+                if (libraryPreparationKitIds) {
+                    or {
+                        libraryPreparationKits {
+                            'in'('id', libraryPreparationKitIds)
+                        }
+                        isEmpty('libraryPreparationKits')
+                    }
+                }
+            }
+        }.collect { ExternalWorkflowConfigSelector selector ->
+            new NameValueAndConflictingKeysExternalWorkflowConfigSelector(
+                    selector.name,
+                    selector.externalWorkflowConfigFragment.configValues,
+                    selector.projects*.name)
+        }
     }
 
     ExternalWorkflowConfigSelectorLists searchExternalWorkflowConfigSelectors(ExternalWorkflowConfigSelectorSearchParameter searchParameter) {
@@ -91,3 +186,18 @@ class ExternalWorkflowConfigSelectorService {
         return new ExternalWorkflowConfigSelectorLists(relatedSelectors, exactlyMatchingSelectors)
     }
 }
+
+class NameValueAndConflictingKeysExternalWorkflowConfigSelector {
+
+    NameValueAndConflictingKeysExternalWorkflowConfigSelector(String selectorName, String configFragmentValue, List<String> projectNames) {
+        this.selectorName = selectorName
+        this.configFragmentValue = configFragmentValue
+        this.projectNames = projectNames
+    }
+
+    List<String> conflictingKeys
+    String selectorName
+    String configFragmentValue
+    List<String> projectNames
+}
+

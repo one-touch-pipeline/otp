@@ -44,6 +44,7 @@ class WorkflowConfigController implements BaseWorkflowConfigController {
             data     : "GET",
             selector : "GET",
             fragments: "GET",
+            check    : "GET",
     ]
 
     ConfigSelectorService configSelectorService
@@ -52,13 +53,13 @@ class WorkflowConfigController implements BaseWorkflowConfigController {
 
     JSON data() {
         ExternalWorkflowConfigSelectorSearchParameter searchParameter = new ExternalWorkflowConfigSelectorSearchParameter([
-                workflowIds             : queryParameterToLongList("workflows", params),
-                workflowVersionIds      : queryParameterToLongList("workflowVersions", params),
-                projectIds              : queryParameterToLongList("projects", params),
-                seqTypeIds              : queryParameterToLongList("seqTypes", params),
-                referenceGenomeIds      : queryParameterToLongList("referenceGenomes", params),
-                libraryPreparationKitIds: queryParameterToLongList("libraryPreparationKits", params),
-                type                    : queryParameterToStringList("type", params),
+                workflowIds             : queryParameterToLongList("query[workflows]", params as Map),
+                workflowVersionIds      : queryParameterToLongList("query[workflowVersions]", params as Map),
+                projectIds              : queryParameterToLongList("query[projects]", params as Map),
+                seqTypeIds              : queryParameterToLongList("query[seqTypes]", params as Map),
+                referenceGenomeIds      : queryParameterToLongList("query[referenceGenomes]", params as Map),
+                libraryPreparationKitIds: queryParameterToLongList("query[libraryPreparationKits]", params as Map),
+                type                    : queryParameterToStringList("query[type]", params as Map),
         ])
 
         ExternalWorkflowConfigSelectorLists selectors = externalWorkflowConfigSelectorService.searchExternalWorkflowConfigSelectors(searchParameter)
@@ -98,6 +99,35 @@ class WorkflowConfigController implements BaseWorkflowConfigController {
         } catch (AssertionError ex) {
             response.sendError(HttpStatus.INTERNAL_SERVER_ERROR.value(), "${g.message(code: "workflowConfig.backend.failed")}: ${ex.message}")
         }
+    }
+
+    def check() {
+        List<Long> workflowIds = queryParameterToLongList("workflows", params as Map)
+        List<Long> workflowVersionIds = queryParameterToLongList("workflowVersions", params as Map)
+        List<Long> projectIds = queryParameterToLongList("projects", params as Map)
+        List<Long> seqTypeIds = queryParameterToLongList("seqTypes", params as Map)
+        List<Long> referenceGenomeIds = queryParameterToLongList("referenceGenomes", params as Map)
+        List<Long> libraryPreparationKitIds = queryParameterToLongList("libraryPreparationKits", params as Map)
+        String fragmentValue = params.fragmentValue
+
+        List<NameValueAndConflictingKeysExternalWorkflowConfigSelector> moreSpecificSelectors =
+                externalWorkflowConfigSelectorService.getNameAndConfigValueOfMoreSpecificSelectors(
+                        workflowIds, workflowVersionIds, projectIds, referenceGenomeIds, seqTypeIds, libraryPreparationKitIds
+                )
+
+        moreSpecificSelectors.each { selector ->
+            selector.conflictingKeys = externalWorkflowConfigSelectorService.getAllConflictingConfigValues(fragmentValue, selector.configFragmentValue)
+        }
+
+        List<NameValueAndConflictingKeysExternalWorkflowConfigSelector> conflictingSelectors = moreSpecificSelectors.findAll { selector ->
+            return selector.conflictingKeys.size() > 0
+        }
+
+        render([
+                conflictingSelectors: conflictingSelectors.collect { selector ->
+                    [name: selector.selectorName, projectNames: selector.projectNames, conflictingKeys: selector.conflictingKeys]
+                },
+        ] as JSON)
     }
 
     def index() {
@@ -207,7 +237,7 @@ class WorkflowConfigController implements BaseWorkflowConfigController {
     }
 
     private List<String> queryParameterToStringList(String parameterName, Map params) {
-        String key = "query[${parameterName}]"
+        String key = "${parameterName}"
         String value = params[key]
         return value ? value.split(',')*.trim() : []
     }
