@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.util.spreadsheet.validation
 
+import groovy.transform.InheritConstructors
+
 import de.dkfz.tbi.otp.OtpRuntimeException
 import de.dkfz.tbi.util.spreadsheet.Column
 
@@ -59,7 +61,7 @@ abstract class ColumnSetValidator<C extends ValidationContext> implements Valida
             }
         }
         if (!missingColumns.empty) {
-            throw new ColumnsMissingException()
+            throw new ColumnsMissingException("Can't continue because of missing columns")
         }
         getOptionalColumnTitles(context).each {
             Column column = context.spreadsheet.getColumn(it)
@@ -100,5 +102,6 @@ abstract class ColumnSetValidator<C extends ValidationContext> implements Valida
     }
 }
 
+@InheritConstructors
 class ColumnsMissingException extends OtpRuntimeException {
 }

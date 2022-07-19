@@ -78,7 +78,7 @@ class CrashRepairControllerSpec extends Specification implements ControllerUnitT
     void "test restartWorkflowStep_shouldSendBadRequest_whenServiceFails"() {
         given:
         controller.jobService  = Mock(JobService) {
-            _ * createRestartedJobAfterSystemRestart(_) >> { throw new WorkflowException() }
+            _ * createRestartedJobAfterSystemRestart(_) >> { throw new WorkflowException("") }
         }
 
         WorkflowRun run = createWorkflowRun([
@@ -127,7 +127,7 @@ class CrashRepairControllerSpec extends Specification implements ControllerUnitT
     void "test restartWorkflowRun_ShouldReturnBadRequest_whenServiceFails"() {
         given:
         controller.crashRepairService = Mock(CrashRepairService) {
-            _ * restartWorkflowRun(_) >> { throw new WorkflowException() }
+            _ * restartWorkflowRun(_) >> { throw new WorkflowException("") }
         }
 
         WorkflowRun run = createWorkflowRun([
@@ -176,7 +176,7 @@ class CrashRepairControllerSpec extends Specification implements ControllerUnitT
     void "test markWorkflowStepAsFailed_ShouldReturnBadRequest_whenServiceFails"() {
         given:
         controller.workflowStateChangeService = Mock(WorkflowStateChangeService) {
-            _ * changeStateToFailedWithManualChangedError(_) >> { throw new OtpRuntimeException() }
+            _ * changeStateToFailedWithManualChangedError(_) >> { throw new OtpRuntimeException("") }
         }
 
         WorkflowRun run = createWorkflowRun([
@@ -225,7 +225,7 @@ class CrashRepairControllerSpec extends Specification implements ControllerUnitT
     void "test markWorkflowRunAsFinalFailed_ShouldReturnBadRequest_whenServiceFails"() {
         given:
         controller.workflowStateChangeService = Mock(WorkflowStateChangeService) {
-            _ * changeRunToFinalFailed(_) >> { throw new OtpRuntimeException() }
+            _ * changeRunToFinalFailed(_) >> { throw new OtpRuntimeException("") }
         }
 
         WorkflowRun run = createWorkflowRun([

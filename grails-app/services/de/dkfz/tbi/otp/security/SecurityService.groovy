@@ -63,7 +63,7 @@ class SecurityService {
 
     void ensureNotSwitchedUser() throws SwitchedUserDeniedException {
         if (isToBeBlockedBecauseOfSwitchedUser()) {
-            throw new SwitchedUserDeniedException()
+            throw new SwitchedUserDeniedException("User switching is not allowed for switched users")
         }
     }
 }

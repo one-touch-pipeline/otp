@@ -220,7 +220,7 @@ class AbstractExecuteRoddyPipelineJobSpec extends Specification implements DataT
         1 * job.roddyCommandService.createRoddyCommand(_, _, ["c", "d"]) >> { cmd }
         1 * job.roddyExecutionService.clearRoddyExecutionStoreDirectory(bamFile)
         1 * job.workflowRunService.markJobAsNotRestartableInSeparateTransaction(workflowStep.workflowRun)
-        1 * job.roddyExecutionService.execute(cmd, _) >> { throw new RoddyException() }
+        1 * job.roddyExecutionService.execute(cmd, _) >> { throw new RoddyException("") }
         0 * job.roddyExecutionService.createClusterJobObjects(bamFile, processOutput, workflowStep) >> { clusterJobs }
         0 * job.roddyExecutionService.saveRoddyExecutionStoreDirectory(_, processOutput.stderr, _)
         0 * job.clusterJobHandlingService.collectJobStatistics(workflowStep, clusterJobs)

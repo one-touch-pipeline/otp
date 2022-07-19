@@ -59,7 +59,7 @@ class SystemUserUtils {
     static <T> T useUser(String userName, Closure<T> closure) {
         Authentication authentication = SecurityContextHolder.context.authentication
         if (authentication) {
-            throw new SecurityContextAlreadyExistsException()
+            throw new SecurityContextAlreadyExistsException("Security context can't be created multiple times")
         }
 
         try {

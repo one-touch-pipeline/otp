@@ -27,10 +27,6 @@ package de.dkfz.tbi.otp
  */
 @Deprecated
 class OtpException extends Exception {
-    OtpException() {
-        this("unknown")
-    }
-
     OtpException(String message) {
         super(message)
     }

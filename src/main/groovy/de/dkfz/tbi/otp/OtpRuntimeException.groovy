@@ -21,11 +21,19 @@
  */
 package de.dkfz.tbi.otp
 
-import groovy.transform.InheritConstructors
-
 /**
  * Base runtime exception for all runtime exceptions thrown in OTP
  */
-@InheritConstructors
 class OtpRuntimeException extends RuntimeException {
+    OtpRuntimeException(String message) {
+        super(message)
+    }
+
+    OtpRuntimeException(String message, Throwable cause) {
+        super(message, cause)
+    }
+
+    OtpRuntimeException(Throwable cause) {
+        super(cause)
+    }
 }

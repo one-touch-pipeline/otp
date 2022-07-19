@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.workflowExecution
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.InheritConstructors
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
@@ -161,9 +162,6 @@ class JobScheduler {
         notificationCreator.processFinished(errorNotificationService.getSeqTracks(workflowStep))
     }
 }
-
+@InheritConstructors
 class JobSchedulerException extends WorkflowException {
-    JobSchedulerException(String message) {
-        super(message)
-    }
 }

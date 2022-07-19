@@ -51,14 +51,3 @@ class MultipleDelimitersDetectedException extends SpreadsheetParseException {
         super("detected multiple delimiter candidates, can't make a choice: ${delimiters}")
     }
 }
-
-/**
- * Thrown when delimiters couldn't be identified, but {@link Delimiter#AUTO_DETECT} was passed.
- *
- * @see Delimiter#detectDelimiter(BufferedReader)
- */
-class DelimiterDetectionFailedException extends SpreadsheetParseException {
-    DelimiterDetectionFailedException(String headerLine) {
-        super("Well darn, our autodetect-Fu is not yet strong enough to handle the following content:\n\t${headerLine}")
-    }
-}

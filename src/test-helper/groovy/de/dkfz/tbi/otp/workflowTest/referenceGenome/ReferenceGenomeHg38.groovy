@@ -37,6 +37,6 @@ trait ReferenceGenomeHg38 extends UsingReferenceGenome {
 
     @Override
     String getFingerPrintingFileName() {
-        throw new NotSupportedException()
+        throw new NotSupportedException("No fingerprinting file name exists")
     }
 }

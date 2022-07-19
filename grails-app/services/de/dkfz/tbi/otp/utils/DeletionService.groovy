@@ -243,7 +243,7 @@ class DeletionService {
 
         if (throwException) {
             println output
-            throw new FileNotFoundException()
+            throw new FileNotFoundException("Files not found")
         }
 
         output << "delete content in db...\n\n"
