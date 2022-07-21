@@ -261,7 +261,7 @@ class ConfigSelectorService {
     ExternalWorkflowConfigSelector create(CreateCommand cmd) {
         assert cmd.type != SelectorType.DEFAULT_VALUES
         ExternalWorkflowConfigFragment fragment = new ExternalWorkflowConfigFragment(
-                name: cmd.fragmentName ?: "${cmd.selectorName}-fragment",
+                name: "${cmd.selectorName}-fragment",
                 configValues: cmd.value,
         ).save(flush: true)
 
@@ -282,6 +282,8 @@ class ConfigSelectorService {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     ExternalWorkflowConfigSelector update(UpdateCommand cmd) {
         assert cmd.type != SelectorType.DEFAULT_VALUES
+        ExternalWorkflowConfigFragment currentFragment = cmd.selector.externalWorkflowConfigFragment
+
         cmd.selector.workflows = cmd.workflows as Set
         cmd.selector.workflowVersions = cmd.workflowVersions as Set
         cmd.selector.projects = cmd.projects as Set
@@ -292,18 +294,16 @@ class ConfigSelectorService {
         cmd.selector.name = cmd.selectorName
         cmd.selector.selectorType = cmd.type
 
-        cmd.fragmentName = cmd.fragmentName ?: cmd.fragment.name
-        String formattedNewValue = new JsonSlurper().parseText(cmd.fragment.configValues)
-        String formattedOldValue = new JsonSlurper().parseText(cmd.value)
+        String formattedNewValue = new JsonSlurper().parseText(cmd.value)
+        String formattedOldValue = new JsonSlurper().parseText(currentFragment.configValues)
 
-        if (cmd.fragment.name != cmd.fragmentName ||
-                formattedNewValue != formattedOldValue) {
-            cmd.fragment.deprecationDate = LocalDate.now()
-            cmd.fragment.save(flush: true)
+        if (formattedNewValue != formattedOldValue) {
+            currentFragment.deprecationDate = LocalDate.now()
+            currentFragment.save(flush: true)
             ExternalWorkflowConfigFragment fragment = new ExternalWorkflowConfigFragment(
-                    name: cmd.fragmentName,
+                    name: currentFragment.name,
                     configValues: cmd.value,
-                    previous: cmd.fragment,
+                    previous: currentFragment,
             ).save(flush: true)
             cmd.selector.externalWorkflowConfigFragment = fragment
         }

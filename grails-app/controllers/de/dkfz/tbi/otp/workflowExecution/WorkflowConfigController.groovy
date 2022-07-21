@@ -271,7 +271,6 @@ class WorkflowConfigController implements BaseWorkflowConfigController {
 class CreateCommand extends SelectorCommand {
     String selectorName
     SelectorType type
-    String fragmentName
     String value
 
     Set<ExternalWorkflowConfigSelector> matchingSelectors
@@ -279,7 +278,6 @@ class CreateCommand extends SelectorCommand {
 
 class UpdateCommand extends CreateCommand {
     ExternalWorkflowConfigSelector selector
-    ExternalWorkflowConfigFragment fragment
 }
 
 class SelectorCommand implements Validateable {

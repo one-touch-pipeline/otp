@@ -21,8 +21,10 @@
  */
 package de.dkfz.tbi.otp.workflowExecution
 
+import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
+import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -30,11 +32,12 @@ import de.dkfz.tbi.otp.domainFactory.DomainFactoryProcessingPriority
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 @Rollback
 @Integration
-class ConfigSelectorServiceIntegrationSpec extends Specification implements WorkflowSystemDomainFactory, DomainFactoryProcessingPriority {
+class ConfigSelectorServiceIntegrationSpec extends Specification implements WorkflowSystemDomainFactory, DomainFactoryProcessingPriority, UserAndRoles {
 
     @SuppressWarnings("ParameterCount")
     ExternalWorkflowConfigSelector createEWCSHelperExtendedCriteria(String name,
@@ -54,6 +57,9 @@ class ConfigSelectorServiceIntegrationSpec extends Specification implements Work
                 libraryPreparationKits: libraryPreparationKits,
         ])
     }
+
+    @Autowired
+    ConfigSelectorService service
 
     void setupData() {
         Project project1 = createProject(name: "p1")
@@ -130,7 +136,6 @@ class ConfigSelectorServiceIntegrationSpec extends Specification implements Work
 
     void "test findExactSelectors, anyValueSet"() {
         given:
-        ConfigSelectorService service = new ConfigSelectorService()
         ExternalWorkflowConfigSelector selector = createExternalWorkflowConfigSelector()
 
         MultiSelectSelectorExtendedCriteria multiSelectSelectorExtendedCriteria = new MultiSelectSelectorExtendedCriteria(
@@ -153,7 +158,6 @@ class ConfigSelectorServiceIntegrationSpec extends Specification implements Work
     @Unroll
     @SuppressWarnings(["AvoidFindWithoutAll", "LineLength"])
     void "findAllSelectors #x"() {
-        ConfigSelectorService service = new ConfigSelectorService()
         setupData()
 
         SingleSelectSelectorExtendedCriteria selectSelectorExtendedCriteria = new SingleSelectSelectorExtendedCriteria([
@@ -169,21 +173,20 @@ class ConfigSelectorServiceIntegrationSpec extends Specification implements Work
         CollectionUtils.containSame(result, service.findAllSelectors(selectSelectorExtendedCriteria)*.name)
 
         where:
-        x | projects                     | workflowVersions                                | workflows                     | seqTypes                     | referenceGenomes                     | libraryPreparationKits                     | result
+        x | projects                                                          | workflowVersions                                                                     | workflows                                                          | seqTypes                                                          | referenceGenomes                                                          | libraryPreparationKits                                                          | result
         1 | { CollectionUtils.atMostOneElement(Project.findAllByName("p1")) } | { CollectionUtils.atMostOneElement(WorkflowVersion.findAllByWorkflowVersion("v1")) } | { CollectionUtils.atMostOneElement(Workflow.findAllByName("w1")) } | { CollectionUtils.atMostOneElement(SeqType.findAllByName("s1")) } | { CollectionUtils.atMostOneElement(ReferenceGenome.findAllByName("r1")) } | { CollectionUtils.atMostOneElement(LibraryPreparationKit.findAllByName("l1")) } | ["ewcs1", "ewcs3", "ewcs5"]
-        2 | { null }                     | { null }                                        | { CollectionUtils.atMostOneElement(Workflow.findAllByName("w2")) } | { null }                     | { null }                             | { null }                                   | ["ewcs2", "ewcs3", "ewcs4", "ewcs5"]
-        3 | { CollectionUtils.atMostOneElement(Project.findAllByName("p1")) } | { null }                                        | { null }                      | { null }                     | { null }                             | { null }                                   | ["ewcs1", "ewcs3", "ewcs5"]
-        4 | { CollectionUtils.atMostOneElement(Project.findAllByName("p1")) } | { null }                                        | { null }                      | { CollectionUtils.atMostOneElement(SeqType.findAllByName("s2")) } | { null }                             | { null }                                   | ["ewcs3", "ewcs5"]
-        5 | { null }                     | { null }                                        | { CollectionUtils.atMostOneElement(Workflow.findAllByName("w3")) } | { null }                     | { null }                             | { null }                                   | ["ewcs5"]
-        6 | { CollectionUtils.atMostOneElement(Project.findAllByName("p3")) } | { null }                                        | { null }                      | { null }                     | { null }                             | { null }                                   | ["ewcs5"]
-        7 | { null }                     | { null }                                        | { null }                      | { null }                     | { null }                             | { null }                                   | []
+        2 | { null }                                                          | { null }                                                                             | { CollectionUtils.atMostOneElement(Workflow.findAllByName("w2")) } | { null }                                                          | { null }                                                                  | { null }                                                                        | ["ewcs2", "ewcs3", "ewcs4", "ewcs5"]
+        3 | { CollectionUtils.atMostOneElement(Project.findAllByName("p1")) } | { null }                                                                             | { null }                                                           | { null }                                                          | { null }                                                                  | { null }                                                                        | ["ewcs1", "ewcs3", "ewcs5"]
+        4 | { CollectionUtils.atMostOneElement(Project.findAllByName("p1")) } | { null }                                                                             | { null }                                                           | { CollectionUtils.atMostOneElement(SeqType.findAllByName("s2")) } | { null }                                                                  | { null }                                                                        | ["ewcs3", "ewcs5"]
+        5 | { null }                                                          | { null }                                                                             | { CollectionUtils.atMostOneElement(Workflow.findAllByName("w3")) } | { null }                                                          | { null }                                                                  | { null }                                                                        | ["ewcs5"]
+        6 | { CollectionUtils.atMostOneElement(Project.findAllByName("p3")) } | { null }                                                                             | { null }                                                           | { null }                                                          | { null }                                                                  | { null }                                                                        | ["ewcs5"]
+        7 | { null }                                                          | { null }                                                                             | { null }                                                           | { null }                                                          | { null }                                                                  | { null }                                                                        | []
     }
 
     @Unroll
     @SuppressWarnings("LineLength")
     void "test findAllRelatedSelectors #x"() {
         given:
-        ConfigSelectorService service = new ConfigSelectorService()
         setupData()
 
         MultiSelectSelectorExtendedCriteria selectorExtendedCriteria = new MultiSelectSelectorExtendedCriteria([
@@ -213,7 +216,6 @@ class ConfigSelectorServiceIntegrationSpec extends Specification implements Work
     @SuppressWarnings("LineLength")
     void "test findExactSelector #x"() {
         given:
-        ConfigSelectorService service = new ConfigSelectorService()
         setupData()
 
         MultiSelectSelectorExtendedCriteria multiSelectSelectorExtendedCriteria = new MultiSelectSelectorExtendedCriteria([
@@ -241,7 +243,6 @@ class ConfigSelectorServiceIntegrationSpec extends Specification implements Work
 
     void "findAllRelatedSelectorsSortedByPriority, assure correct sorting"() {
         given:
-        ConfigSelectorService service = new ConfigSelectorService()
         setupData()
 
         ExternalWorkflowConfigSelector ewcs1 = CollectionUtils.atMostOneElement(ExternalWorkflowConfigSelector.findAllByName("ewcs1"))
@@ -264,14 +265,13 @@ class ConfigSelectorServiceIntegrationSpec extends Specification implements Work
 
     ExternalWorkflowConfigSelector createEWCSHelperBaseCriteria(String name) {
         return createExternalWorkflowConfigSelector([
-                name        : name,
+                name: name,
         ])
     }
 
     @Unroll
     void "test findRelatedSelectorsByName #x"() {
         given:
-        ConfigSelectorService service = new ConfigSelectorService()
         createEWCSHelperBaseCriteria("ewcs1")
         createEWCSHelperBaseCriteria("ewcs2")
         createEWCSHelperBaseCriteria("ewcs3")
@@ -288,9 +288,9 @@ class ConfigSelectorServiceIntegrationSpec extends Specification implements Work
         4 | { null }    | []
     }
 
-    void "test create"() {
+    void "create, should create a new selector and a new fragment"() {
         given:
-        ConfigSelectorService service = new ConfigSelectorService()
+        createUserAndRoles()
         CreateCommand cmd = new CreateCommand(
                 workflows: [],
                 workflowVersions: [],
@@ -301,21 +301,24 @@ class ConfigSelectorServiceIntegrationSpec extends Specification implements Work
 
                 selectorName: "selectorName",
                 type: SelectorType.GENERIC,
-                fragmentName: "fragmentName",
                 value: '{"OTP_CLUSTER": {"MEMORY": "1"}}',
         )
 
         when:
-        service.create(cmd)
+        SpringSecurityUtils.doWithAuth(ADMIN) {
+            service.create(cmd)
+        }
 
         then:
-        ExternalWorkflowConfigFragment.all.size() == 1
-        ExternalWorkflowConfigFragment fragment = ExternalWorkflowConfigFragment.all.first()
-        fragment.name == "fragmentName"
-
         ExternalWorkflowConfigSelector.all.size() == 1
         ExternalWorkflowConfigSelector selector = ExternalWorkflowConfigSelector.all.first()
         selector.name == "selectorName"
+
+        ExternalWorkflowConfigFragment.all.size() == 1
+        ExternalWorkflowConfigFragment fragment = ExternalWorkflowConfigFragment.all.first()
+        fragment.name.contains(selector.name)
+        fragment.deprecationDate == null
+
         selector.externalWorkflowConfigFragment == fragment
         fragment.selector.get() == selector
     }
@@ -324,7 +327,6 @@ class ConfigSelectorServiceIntegrationSpec extends Specification implements Work
         ExternalWorkflowConfigSelector selector = createExternalWorkflowConfigSelector()
         return new UpdateCommand(
                 selector: selector,
-                fragment: selector.externalWorkflowConfigFragment,
 
                 workflows: selector.workflows.toList(),
                 workflowVersions: selector.workflowVersions.toList(),
@@ -335,21 +337,22 @@ class ConfigSelectorServiceIntegrationSpec extends Specification implements Work
 
                 selectorName: selector.name,
                 type: selector.selectorType,
-                fragmentName: selector.externalWorkflowConfigFragment.name,
                 value: selector.externalWorkflowConfigFragment.configValues,
         )
     }
 
-    void "test update selector"() {
+    void "update, should update the selector when values are changed"() {
         given:
-        ConfigSelectorService service = new ConfigSelectorService()
+        createUserAndRoles()
         UpdateCommand cmd = updateCommand
         ExternalWorkflowConfigSelector selector = cmd.selector
         ExternalWorkflowConfigFragment fragment = cmd.selector.externalWorkflowConfigFragment
         cmd.selectorName = "new name"
 
         when:
-        service.update(cmd)
+        SpringSecurityUtils.doWithAuth(ADMIN) {
+            service.update(cmd)
+        }
 
         then:
         ExternalWorkflowConfigSelector.all.size() == 1
@@ -358,33 +361,56 @@ class ConfigSelectorServiceIntegrationSpec extends Specification implements Work
         selector.externalWorkflowConfigFragment == fragment
     }
 
-    void "test update fragment"() {
+    void "update, should create a new fragment with the same name, when the value is changed"() {
         given:
-        ConfigSelectorService service = new ConfigSelectorService()
+        createUserAndRoles()
         UpdateCommand cmd = updateCommand
+
+        String newConfigValue = '{"RODDY":{"cvalues":{"mergedBamSuffixList":{"type":"string","value":"newValue"}}}}'
+        cmd.value = newConfigValue
         ExternalWorkflowConfigSelector selector = cmd.selector
-        ExternalWorkflowConfigFragment fragment = cmd.selector.externalWorkflowConfigFragment
-        cmd.fragmentName = "new name"
+        ExternalWorkflowConfigFragment oldFragment = cmd.selector.externalWorkflowConfigFragment
 
         when:
-        service.update(cmd)
+        SpringSecurityUtils.doWithAuth(ADMIN) {
+            service.update(cmd)
+        }
 
         then:
         ExternalWorkflowConfigSelector.all.size() == 1
         ExternalWorkflowConfigFragment.all.size() == 2
-        fragment.deprecationDate != null
-        selector.externalWorkflowConfigFragment != fragment
-        selector.externalWorkflowConfigFragment.name == "new name"
+        oldFragment.deprecationDate != null
+        oldFragment.name == selector.externalWorkflowConfigFragment.name
+        selector.externalWorkflowConfigFragment.deprecationDate == null
+        selector.externalWorkflowConfigFragment != oldFragment
+        selector.externalWorkflowConfigFragment.configValues == newConfigValue
+    }
+
+    void "update, should not change the fragment or create a new one when no values are changed"() {
+        given:
+        createUserAndRoles()
+        UpdateCommand cmd = updateCommand
+
+        when:
+        SpringSecurityUtils.doWithAuth(ADMIN) {
+            service.update(cmd)
+        }
+
+        then:
+        ExternalWorkflowConfigSelector.all.size() == 1
+        ExternalWorkflowConfigFragment.all.size() == 1
     }
 
     void "test deprecate"() {
         given:
-        ConfigSelectorService service = new ConfigSelectorService()
+        createUserAndRoles()
         ExternalWorkflowConfigFragment fragment = createExternalWorkflowConfigFragment()
         createExternalWorkflowConfigSelector(externalWorkflowConfigFragment: fragment)
 
         when:
-        service.deprecate(fragment)
+        SpringSecurityUtils.doWithAuth(ADMIN) {
+            service.deprecate(fragment)
+        }
 
         then:
         fragment.deprecationDate != null
