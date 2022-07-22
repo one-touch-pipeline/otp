@@ -191,7 +191,7 @@ WorkflowRun.withNewTransaction {
     Closure createWorkflowError = {
         return new WorkflowError([
                 message   : "some error message",
-                stacktrace: StackTraceUtils.getStackTrace(new OtpRuntimeException()),
+                stacktrace: StackTraceUtils.getStackTrace(new OtpRuntimeException("Some Error")),
         ])
     }
 
