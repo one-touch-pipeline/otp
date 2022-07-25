@@ -35,15 +35,17 @@ on the general cluster job page
 -->
 <body>
     <div class="container-fluid otp-main-container">
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><g:link controller="workflowRunList" action="index" params="['workflow.id': nav.workflow?.id, state: nav.states?.join(','), name: nav.name]">${g.message(code: "workflow.navigation.list")}</g:link></li>
-                <li class="breadcrumb-item"><g:link controller="workflowRunDetails" action="index" params="['workflow.id': nav.workflow?.id, state: nav.states?.join(','), name: nav.name]" id="${nav.workflowRun?.id}">
-                    ${g.message(code: "workflow.navigation.details")} (${nav.workflowRun?.id})</g:link>
-                </li>
-                <li class="breadcrumb-item active" aria-current="page">${g.message(code: "workflow.navigation.error")}</li>
-            </ol>
-        </nav>
+        <g:if test="${nav.workflowRun?.id}">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><g:link controller="workflowRunList" action="index" params="['workflow.id': nav.workflow?.id, state: nav.states?.join(','), name: nav.name]">${g.message(code: "workflow.navigation.list")}</g:link></li>
+                    <li class="breadcrumb-item"><g:link controller="workflowRunDetails" action="index" params="['workflow.id': nav.workflow?.id, state: nav.states?.join(','), name: nav.name]" id="${nav.workflowRun?.id}">
+                        ${g.message(code: "workflow.navigation.details")} (${nav.workflowRun?.id})</g:link>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">${g.message(code: "workflow.navigation.clusterJob")}</li>
+                </ol>
+            </nav>
+        </g:if>
 
         <h1><g:message code="jobstats.jobSpecific.detail.title"/></h1>
         <g:if test="${job}">
