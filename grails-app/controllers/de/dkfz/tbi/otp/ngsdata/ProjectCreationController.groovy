@@ -56,6 +56,7 @@ class ProjectCreationController {
     ProjectRequestService projectRequestService
     ProjectGroupService projectGroupService
     ProcessingPriorityService processingPriorityService
+    UserProjectRoleService userProjectRoleService
 
     private void handleSubmitEvent(ProjectCreationCommand cmd) {
         flash.cmd = cmd
@@ -173,14 +174,13 @@ class ProjectCreationController {
             } else {
                 try {
                     Project project = projectService.createProject(cmd)
-                    if (cmd.projectRequest) {
-                        projectRequestService.sendCreatedEmail(project, cmd.projectRequest)
-                    }
                     flash.message = new FlashMessage(g.message(code: "projectCreation.store.success") as String)
                     if (cmd.sendProjectCreationNotification) {
-                        projectService.sendProjectCreationMailToUserAndTicketSystem(project)
+                        List<String> copiedUsers = cmd.projectRequest ? [cmd.projectRequest.requester.email] : []
+                        List<String> notifiedUsers = userProjectRoleService.getEmailsOfToBeNotifiedProjectUsers([project]).sort().unique()
+                        projectRequestService.sendCreatedEmail(project, notifiedUsers, copiedUsers)
                     } else {
-                        projectService.sendProjectCreationMail(project, [])
+                        projectRequestService.sendCreatedEmail(project, [], [])
                     }
                     redirect(controller: "projectConfig", params: [(ProjectSelectionService.PROJECT_SELECTION_PARAMETER): project.name])
                     return

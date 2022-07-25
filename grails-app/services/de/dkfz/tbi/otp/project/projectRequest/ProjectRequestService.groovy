@@ -319,10 +319,7 @@ class ProjectRequestService {
         mailHelperService.sendEmail(subject, body, recipient, ccs)
     }
 
-    void sendCreatedEmail(Project project, ProjectRequest projectRequest) {
-        List<User> allProjectAuthorities = ProjectRequestPersistentStateService.getAllProjectRequestAuthorities(projectRequest.state)
-        List<String> recipient = allProjectAuthorities*.email
-        List<String> ccs = [projectRequest.requester.email]
+    void sendCreatedEmail(Project project, List<String> recipient, List<String> ccs) {
         String projectOverviewLink = linkGenerator.link(
                 controller: "projectOverview",
                 action: "index",
@@ -338,12 +335,13 @@ class ProjectRequestService {
                 projectName: project.name,
         ])
         String body = messageSourceService.createMessage("notification.projectRequest.created.body", [
-                projectName               : project.name,
+                projectName               : project.displayName,
                 projectLink               : projectOverviewLink,
                 projectDirectoryPath      : project.dirName,
                 analysisDirectoryPath     : project.dirAnalysis,
                 additionalText            : processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_PROJECT_CREATION_FREETEXT),
                 userManagementLink        : userManagementLink,
+                clusterName               : processingOptionService.findOptionAsString(ProcessingOption.OptionName.CLUSTER_NAME),
                 clusterTicketingSystemMail: processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_CLUSTER_ADMINISTRATION),
                 ticketingSystemMail       : processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_TICKET_SYSTEM),
                 teamSignature             : processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME),

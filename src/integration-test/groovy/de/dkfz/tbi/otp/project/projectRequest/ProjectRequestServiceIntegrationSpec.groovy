@@ -358,21 +358,8 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         1 * projectRequestService.mailHelperService.sendEmail(subject, body, users*.email, [requester.email])
     }
 
-    void "sendCreatedEmail"() {
+    void "sendCreatedEmail, should send a mail only to the ticketsystem when recipient and ccs are empty"() {
         given:
-        final User requester = createUser()
-        final User pi1 = createUser()
-        final User pi2 = createUser()
-        final List<User> users = [pi1, pi2]
-        final List<User> usersThatNeedToApprove = users[0..0]
-        final List<User> usersThatAlreadyApproved = users[1..1]
-        final ProjectRequest request = createProjectRequest([
-                requester: requester,
-        ], [
-                usersThatNeedToApprove  : usersThatNeedToApprove,
-                usersThatAlreadyApproved: usersThatAlreadyApproved,
-        ])
-
         final String dirAnalysis = "/dirAnalysis"
         final String dirName = "dirName"
         final Project project = createProject([
@@ -382,6 +369,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         final String ticketingSystemMail = "ticketingSystemMail"
         final String clusterTicketingSystemMail = "clusterTicketingSystemMail"
         final String additionalText = "additionalText"
+        final String clusterName = "clusterName"
 
         projectRequestService.messageSourceService = Mock(MessageSourceService)
         projectRequestService.mailHelperService = Mock(MailHelperService)
@@ -389,12 +377,13 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         projectRequestService.linkGenerator = Mock(LinkGenerator)
 
         when:
-        projectRequestService.sendCreatedEmail(project, request)
+        projectRequestService.sendCreatedEmail(project, [], [])
 
         then:
         1 * projectRequestService.processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_TICKET_SYSTEM) >> ticketingSystemMail
         1 * projectRequestService.processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_CLUSTER_ADMINISTRATION) >> clusterTicketingSystemMail
         1 * projectRequestService.processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_PROJECT_CREATION_FREETEXT) >> additionalText
+        1 * projectRequestService.processingOptionService.findOptionAsString(ProcessingOption.OptionName.CLUSTER_NAME) >> clusterName
         1 * projectRequestService.processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME) >> emailSenderSalutation
         2 * projectRequestService.linkGenerator.link(_) >> link
         1 * projectRequestService.messageSourceService.createMessage(_, [projectName: project.name]) >> subject
@@ -405,11 +394,58 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
                 analysisDirectoryPath     : dirAnalysis,
                 additionalText            : additionalText,
                 userManagementLink        : link,
+                clusterName               : clusterName,
                 clusterTicketingSystemMail: clusterTicketingSystemMail,
                 ticketingSystemMail       : ticketingSystemMail,
                 teamSignature             : emailSenderSalutation,
         ]) >> body
-        1 * projectRequestService.mailHelperService.sendEmail(subject, body, (usersThatNeedToApprove + usersThatAlreadyApproved)*.email, [requester.email])
+        1 * projectRequestService.mailHelperService.sendEmail(subject, body, [], [])
+    }
+
+    void "sendCreatedEmail, should send a mail for project to all recipients and ccs"() {
+        given:
+        final List<String> recipients = ['requester1', 'requester2']
+        final List<String> ccs = ['ccUser1', 'ccUser2']
+        final String dirAnalysis = "/dirAnalysis"
+        final String dirName = "dirName"
+        final Project project = createProject([
+                dirAnalysis: dirAnalysis,
+                dirName    : dirName,
+        ])
+        final String ticketingSystemMail = "ticketingSystemMail"
+        final String clusterTicketingSystemMail = "clusterTicketingSystemMail"
+        final String additionalText = "additionalText"
+        final String clusterName = "clusterName"
+
+        projectRequestService.messageSourceService = Mock(MessageSourceService)
+        projectRequestService.mailHelperService = Mock(MailHelperService)
+        projectRequestService.processingOptionService = Mock(ProcessingOptionService)
+        projectRequestService.linkGenerator = Mock(LinkGenerator)
+
+        when:
+        projectRequestService.sendCreatedEmail(project, recipients, ccs)
+
+        then:
+        1 * projectRequestService.processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_TICKET_SYSTEM) >> ticketingSystemMail
+        1 * projectRequestService.processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_CLUSTER_ADMINISTRATION) >> clusterTicketingSystemMail
+        1 * projectRequestService.processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_PROJECT_CREATION_FREETEXT) >> additionalText
+        1 * projectRequestService.processingOptionService.findOptionAsString(ProcessingOption.OptionName.CLUSTER_NAME) >> clusterName
+        1 * projectRequestService.processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME) >> emailSenderSalutation
+        2 * projectRequestService.linkGenerator.link(_) >> link
+        1 * projectRequestService.messageSourceService.createMessage(_, [projectName: project.name]) >> subject
+        1 * projectRequestService.messageSourceService.createMessage(_, [
+                projectName               : project.name,
+                projectLink               : link,
+                projectDirectoryPath      : dirName,
+                analysisDirectoryPath     : dirAnalysis,
+                additionalText            : additionalText,
+                userManagementLink        : link,
+                clusterName               : clusterName,
+                clusterTicketingSystemMail: clusterTicketingSystemMail,
+                ticketingSystemMail       : ticketingSystemMail,
+                teamSignature             : emailSenderSalutation,
+        ]) >> body
+        1 * projectRequestService.mailHelperService.sendEmail(subject, body, recipients, ccs)
     }
 
     ProjectRequestCreationCommand createProjectRequestCreationCommand(Map properties = [:]) {
