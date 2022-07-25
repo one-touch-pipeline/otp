@@ -71,6 +71,9 @@ INSERT INTO workflow(id, version, name, enabled, priority, date_created, last_up
 VALUES(nextval('hibernate_sequence'), 0, 'runYapsa (mutational signature analysis)', TRUE, 0, now(), now(), 10)
 ON CONFLICT DO NOTHING;
 
+INSERT INTO workflow(id, version, name, bean_name, enabled, priority, date_created, last_updated, max_parallel_workflows)
+VALUES(nextval('hibernate_sequence'), 0, 'WES FastQC', 'wesFastQcWorkflow', TRUE, 0, now(), now(), 10)
+ON CONFLICT DO NOTHING;
 
 -- deprecated workflows
 INSERT INTO workflow(id, version, name, enabled, priority, date_created, last_updated, deprecated_date, max_parallel_workflows)

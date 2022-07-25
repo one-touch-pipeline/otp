@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 The OTP authors
+ * Copyright 2011-2022 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,17 +25,20 @@ import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.workflowExecution.*
+import de.dkfz.tbi.otp.workflow.jobs.SetCorrectPermissionJob
+import de.dkfz.tbi.otp.workflowExecution.Artefact
+import de.dkfz.tbi.otp.workflowExecution.OtpWorkflow
+import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
 
 /**
- * Represents the fastqc workflow, which calculates or copies the fastqc reports.
+ * Represents the fastqc workflow for WES, which calculates or copies the fastqc reports.
  */
 @Component
 @Slf4j
 @CompileStatic
-class FastqcWorkflow implements OtpWorkflow {
+class WesFastQcWorkflow implements OtpWorkflow {
 
-    static final String WORKFLOW = "FastQC"
+    static final String WORKFLOW = "WES FastQC"
     static final String INPUT_FASTQ = "FASTQ"
     static final String OUTPUT_FASTQC = "FASTQC"
 
@@ -44,10 +47,9 @@ class FastqcWorkflow implements OtpWorkflow {
         return [
                 FastqcPrepareJob.simpleName.uncapitalize(),
                 FastqcConditionalFailJob.simpleName.uncapitalize(),
-                FastqcExecuteClusterPipelineJob.simpleName.uncapitalize(),
-                FastqcValidationJob.simpleName.uncapitalize(),
                 FastqcParseJob.simpleName.uncapitalize(),
                 FastqcFinishJob.simpleName.uncapitalize(),
+                SetCorrectPermissionJob.simpleName.uncapitalize(),
         ]
     }
 

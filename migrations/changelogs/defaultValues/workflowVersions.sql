@@ -25,6 +25,11 @@ INSERT INTO workflow_version(id, version, workflow_id, workflow_version, date_cr
 VALUES (nextval('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'FastQC'), '0.11.5', now(), now())
 ON CONFLICT DO NOTHING;
 
+--WES fastqc versions
+INSERT INTO workflow_version(id, version, workflow_id, workflow_version, date_created, last_updated)
+VALUES (nextval('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'WES FastQC'), '0.11.5', now(), now())
+ON CONFLICT DO NOTHING;
+
 --pancan versions
 INSERT INTO workflow_version(id, version, workflow_id, workflow_version, date_created, last_updated)
 VALUES (nextval('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'PanCancer alignment'), '1.2.182', now(), now())
