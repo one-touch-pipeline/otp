@@ -251,36 +251,16 @@ class UserProjectRoleService {
     }
 
     private void notifyProjectAuthoritiesAndUser(UserProjectRole userProjectRole) {
-        User executingUser = CollectionUtils.exactlyOneElement(User.findAllByUsername(springSecurityService.authentication.principal.username as String))
-
         List<String> projectRoleNames = userProjectRole.projectRoles*.name
         String projectName = userProjectRole.project.name
 
-        List<Role> administrativeRoles = Role.findAllByAuthorityInList(Role.ADMINISTRATIVE_ROLES)
-
-        boolean userIsSubmitter = projectRoleNames.any { it == ProjectRole.Basic.SUBMITTER.name() }
-        boolean executingUserIsAdministrativeUser = UserRole.findAllByUserAndRoleInList(executingUser, administrativeRoles)
-
         String subject = messageSourceService.createMessage("projectUser.notification.newProjectMember.subject", [projectName: projectName])
-        String body
-
-        if (userIsSubmitter && executingUserIsAdministrativeUser) {
-            String supportTeamName = processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME)
-            body = messageSourceService.createMessage("projectUser.notification.newProjectMember.body.administrativeUserAddedSubmitter", [
-                    userIdentifier       : userProjectRole.user.realName ?: userProjectRole.user.username,
-                    projectRole          : projectRoleNames.join(", "),
-                    projectName          : projectName,
-                    supportTeamName      : supportTeamName,
-                    supportTeamSalutation: supportTeamName,
-            ])
-        } else {
-            body = messageSourceService.createMessage("projectUser.notification.newProjectMember.body.userManagerAddedMember", [
-                    userIdentifier: userProjectRole.user.realName ?: userProjectRole.user.username,
-                    projectRole   : projectRoleNames.join(", "),
-                    projectName   : projectName,
-                    executingUser : mailHelperService.senderName,
-            ])
-        }
+        String body = messageSourceService.createMessage("projectUser.notification.newProjectMember.body.userManagerAddedMember", [
+                userIdentifier: userProjectRole.user.realName ?: userProjectRole.user.username,
+                projectRole   : projectRoleNames.join(", "),
+                projectName   : projectName,
+                executingUser : mailHelperService.senderName,
+        ])
 
         List<User> projectAuthoritiesAndUserManagers = getUniqueProjectAuthoritiesAndUserManagers(userProjectRole.project)
         List<String> recipients = projectAuthoritiesAndUserManagers*.email.unique().sort() + [userProjectRole.user.email]

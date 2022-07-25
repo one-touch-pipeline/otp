@@ -765,10 +765,6 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
         String expectedSubject = "newProjectMember\n${newUPR.project.name}"
         String expectedContent = "newProjectMember\n${EMAIL_SENDER_NAME}\n${newUPR.user.realName}\n${newUPR.projectRoles.name.join(",")}\n${newUPR.project.name}"
-        if (authoritative && projectRole == submitter) {
-            String nameAndSalutation = EMAIL_SENDER_SALUTATION
-            expectedContent = "administrativeUserAddedSubmitter\n${newUPR.user.realName}\n${newUPR.projectRoles.name.join(",")}\n${newUPR.project.name}\n${nameAndSalutation}\n${nameAndSalutation}"
-        }
 
         when:
         SpringSecurityUtils.doWithAuth(executingUPR.user.username) {
@@ -1581,14 +1577,6 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
                     |${userIdentifier}
                     |${projectRole}
                     |${projectName}'''.stripMargin()
-
-            _ * getMessageInternal("projectUser.notification.newProjectMember.body.administrativeUserAddedSubmitter", [], _) >>
-                    '''administrativeUserAddedSubmitter
-                    |${userIdentifier}
-                    |${projectRole}
-                    |${projectName}
-                    |${supportTeamName}
-                    |${supportTeamSalutation}'''.stripMargin()
 
             _ * getMessageInternal("projectUser.notification.fileAccessChange.subject", [], _) >>
                     '''fileAccessChange
