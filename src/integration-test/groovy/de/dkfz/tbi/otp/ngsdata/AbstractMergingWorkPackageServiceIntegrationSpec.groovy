@@ -117,65 +117,6 @@ class AbstractMergingWorkPackageServiceIntegrationSpec extends Specification imp
     }
 
     @Unroll
-    void "findAllBySampleAndSeqTypeAndAntibodyTarget, when no workPackage exist and #name, then return empty list"() {
-        given:
-        SeqType seqType = createSeqType([
-                hasAntibodyTarget: hasAntibodyTarget,
-        ])
-        Sample sample = createSample()
-        DomainFactory.proxyRoddy.createMergingWorkPackage([seqType: seqType])
-        DomainFactory.proxyRoddy.createMergingWorkPackage([sample: sample])
-        AntibodyTarget antibodyTarget = hasAntibodyTarget ? createAntibodyTarget() : null
-
-        AbstractMergingWorkPackageService service = new AbstractMergingWorkPackageService()
-
-        when:
-        List<AbstractMergingWorkPackage> mergingWorkPackages = service.findAllBySampleAndSeqTypeAndAntibodyTarget(
-                sample, seqType, antibodyTarget)
-
-        then:
-        mergingWorkPackages.empty
-
-        where:
-        hasAntibodyTarget | _
-        true              | _
-        false             | _
-
-        name = "hasAntibodyTarget: ${hasAntibodyTarget}"
-    }
-
-    @Unroll
-    void "findAllBySampleAndSeqTypeAndAntibodyTarget, when mergingWorkPackage exist and #name, then return the correct one"() {
-        given:
-        SeqType seqType = createSeqType([
-                hasAntibodyTarget: hasAntibodyTarget
-        ])
-        AbstractMergingWorkPackage mergingWorkPackage = DomainFactory.createMergingWorkPackageForPipeline(pipeline, [seqType: seqType])
-        DomainFactory.createMergingWorkPackageForPipeline(pipeline, [seqType: seqType])
-        DomainFactory.createMergingWorkPackageForPipeline(pipeline, [sample: mergingWorkPackage.sample])
-
-        AbstractMergingWorkPackageService service = new AbstractMergingWorkPackageService()
-
-        when:
-        List<AbstractMergingWorkPackage> mergingWorkPackages = service.findAllBySampleAndSeqTypeAndAntibodyTarget(
-                mergingWorkPackage.sample, mergingWorkPackage.seqType, mergingWorkPackage.antibodyTarget)
-
-        then:
-        mergingWorkPackages == [mergingWorkPackage]
-
-        where:
-        hasAntibodyTarget | pipeline
-        true              | Pipeline.Name.PANCAN_ALIGNMENT
-        true              | Pipeline.Name.DEFAULT_OTP
-        true              | Pipeline.Name.EXTERNALLY_PROCESSED
-        false             | Pipeline.Name.PANCAN_ALIGNMENT
-        false             | Pipeline.Name.DEFAULT_OTP
-        false             | Pipeline.Name.EXTERNALLY_PROCESSED
-
-        name = "hasAntibodyTarget: ${hasAntibodyTarget}, pipeline is ${pipeline}"
-    }
-
-    @Unroll
     void "filterByCategory, if a list is given, return only the AbstractMergingWorkPackage for the Category #categoryToFilter"() {
         given:
         Map<SampleTypePerProject.Category, AbstractMergingWorkPackage> bamsPerCategory = SampleTypePerProject.Category.values().collectEntries { SampleTypePerProject.Category category ->

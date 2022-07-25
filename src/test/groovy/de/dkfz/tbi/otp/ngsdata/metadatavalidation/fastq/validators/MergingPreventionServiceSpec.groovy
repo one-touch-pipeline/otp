@@ -503,7 +503,7 @@ class MergingPreventionServiceSpec extends Specification implements DataTest, Do
         MergingPreventionDataDto data = createMergingPreventionDataDto()
 
         MergingPreventionService service = new MergingPreventionService([
-                abstractMergingWorkPackageService: Mock(AbstractMergingWorkPackageService) {
+                mergingWorkPackageService: Mock(MergingWorkPackageService) {
                     1 * findAllBySampleAndSeqTypeAndAntibodyTarget(sample, seqType, antibodyTarget) >> []
                     0 * _
                 },
@@ -533,7 +533,7 @@ class MergingPreventionServiceSpec extends Specification implements DataTest, Do
         MergingPreventionDataDto data = createMergingPreventionDataDto()
 
         MergingPreventionService service = new MergingPreventionService([
-                abstractMergingWorkPackageService: Mock(AbstractMergingWorkPackageService) {
+                mergingWorkPackageService: Mock(MergingWorkPackageService) {
                     1 * findAllBySampleAndSeqTypeAndAntibodyTarget(sample, seqType, antibodyTarget) >> [mergingWorkPackage]
                     0 * _
                 },
@@ -624,7 +624,7 @@ class MergingPreventionServiceSpec extends Specification implements DataTest, Do
         MergingPreventionDataDto data = createMergingPreventionDataDto()
 
         MergingPreventionService service = new MergingPreventionService([
-                abstractMergingWorkPackageService: Mock(AbstractMergingWorkPackageService) {
+                mergingWorkPackageService: Mock(MergingWorkPackageService) {
                     1 * findAllBySampleAndSeqTypeAndAntibodyTarget(sample, seqType, antibodyTarget) >> [mergingWorkPackage]
                     0 * _
                 },

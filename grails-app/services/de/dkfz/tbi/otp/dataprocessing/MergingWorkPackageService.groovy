@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2022 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -30,32 +30,16 @@ import org.springframework.security.access.prepost.PreAuthorize
 import de.dkfz.tbi.otp.ngsdata.*
 
 @Transactional
-@GrailsCompileStatic
-class AbstractMergingWorkPackageService {
+class MergingWorkPackageService {
 
     @GrailsCompileStatic(TypeCheckingMode.SKIP)
     @GrailsTypeChecked
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    List<AbstractMergingWorkPackage> findMergingWorkPackage(Individual individual, SeqType seqType, AntibodyTarget antibodyTarget = null) {
-        assert individual
-        assert seqType
-        return AbstractMergingWorkPackage.createCriteria().list {
-            sample {
-                eq('individual', individual)
-            }
-            eq('seqType', seqType)
-            if (antibodyTarget) {
-                eq('antibodyTarget', antibodyTarget)
-            } else {
-                isNull('antibodyTarget')
-            }
-        }
-    }
-
-    @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    List<AbstractMergingWorkPackage> filterByCategory(List<AbstractMergingWorkPackage> mergingWorkPackages, SampleTypePerProject.Category category) {
-        return mergingWorkPackages.findAll {
-            SampleTypeService.getCategory(it.project, it.sampleType) == category
-        }
+    List<MergingWorkPackage> findAllBySampleAndSeqTypeAndAntibodyTarget(Sample sample, SeqType seqType, AntibodyTarget antibodyTarget = null) {
+        return MergingWorkPackage.findAllWhere(
+                sample: sample,
+                seqType: seqType,
+                antibodyTarget: antibodyTarget,
+        )
     }
 }

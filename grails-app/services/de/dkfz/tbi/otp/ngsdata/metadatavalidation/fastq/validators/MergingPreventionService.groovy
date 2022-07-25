@@ -23,8 +23,8 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 
 import grails.gorm.transactions.Transactional
 
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergingWorkPackageService
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
+import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackageService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
@@ -42,7 +42,7 @@ class MergingPreventionService {
     static final String MERGING_WORK_PACKAGE_EXISTS_COMPATIBLE = "Sample would be automatically merged with existing samples."
     static final String MERGING_WORK_PACKAGE_EXISTS_INCOMPATIBLE = "Sample can not be merged with existing data, because merging criteria is incompatible."
 
-    AbstractMergingWorkPackageService abstractMergingWorkPackageService
+    MergingWorkPackageService mergingWorkPackageService
 
     SeqTrackService seqTrackService
 
@@ -128,7 +128,7 @@ class MergingPreventionService {
      * helper for {@link MergingPreventionValidator} to check, whether new data corresponds to existing {@link MergingWorkPackage}
      */
     void checkForMergingWorkPackage(MetadataValidationContext context, ValueTuple valueTuple, MergingPreventionDataDto data) {
-        List<MergingWorkPackage> mergingWorkPackages = abstractMergingWorkPackageService.findAllBySampleAndSeqTypeAndAntibodyTarget(
+        List<MergingWorkPackage> mergingWorkPackages = mergingWorkPackageService.findAllBySampleAndSeqTypeAndAntibodyTarget(
                 data.sample, data.seqType, data.antibodyTarget)
 
         if (!mergingWorkPackages) {
