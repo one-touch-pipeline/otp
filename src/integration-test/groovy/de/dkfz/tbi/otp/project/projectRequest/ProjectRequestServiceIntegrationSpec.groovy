@@ -125,6 +125,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         final User pi2 = createUser()
         final List<User> users = [pi1, pi2]
         final ProjectRequest request = createProjectRequest([requester: requester], [usersThatNeedToApprove: users])
+        final String expectedAuthorityUsernames = users*.username.join(", ")
 
         projectRequestService.messageSourceService = Mock(MessageSourceService)
         projectRequestService.mailHelperService = Mock(MailHelperService)
@@ -137,8 +138,8 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         1 * projectRequestService.messageSourceService.createMessage(_) >> subject
         1 * projectRequestService.linkGenerator.link(_) >> link
         1 * projectRequestService.messageSourceService.createMessage(_, [
-                projectAuthorities: users*.username.join(", "),
-                requester         : "${requester.username} (${requester.realName})",
+                projectAuthorities: expectedAuthorityUsernames,
+                recipients        :  "$expectedAuthorityUsernames, $requester.username",
                 projectName       : request.name,
                 link              : link,
                 teamSignature     : emailSenderSalutation,
@@ -247,6 +248,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         final User pi2 = createUser()
         final List<User> users = [pi1, pi2]
         final ProjectRequest request = createProjectRequest([requester: requester], [usersThatNeedToApprove: users])
+        final List<User> expectedRecipients = users + [requester]
 
         projectRequestService.messageSourceService = Mock(MessageSourceService)
         projectRequestService.mailHelperService = Mock(MailHelperService)
@@ -260,13 +262,12 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         1 * projectRequestService.messageSourceService.createMessage(_) >> subject
         1 * projectRequestService.securityService.currentUserAsUser >> pi1
         1 * projectRequestService.messageSourceService.createMessage(_, [
-                requester         : "${requester.username} (${requester.realName})",
-                projectAuthorities: users*.username.join(", "),
+                recipients        : expectedRecipients*.username.join(", "),
                 projectName       : request.name,
                 deletingUser      : pi1,
                 teamSignature     : emailSenderSalutation,
         ]) >> body
-        1 * projectRequestService.mailHelperService.sendEmail(subject, body, users*.email + [requester.email])
+        1 * projectRequestService.mailHelperService.sendEmail(subject, body, expectedRecipients*.email)
     }
 
     void "sendDraftCreateEmail"() {

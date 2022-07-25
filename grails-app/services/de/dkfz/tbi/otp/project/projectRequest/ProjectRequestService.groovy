@@ -207,17 +207,18 @@ class ProjectRequestService {
     void sendPassOnEmail(ProjectRequest projectRequest) {
         User requester = projectRequest.requester
         List<User> projectAuthorities = projectRequest.state.usersThatNeedToApprove as List
-        List<String> recipient = projectAuthorities*.email
+        List<String> recipients = projectAuthorities*.email
         List<String> ccs = [requester.email]
+        String projectAuthoritiesUsernames = projectAuthorities*.username.join(', ')
         String subject = messageSourceService.createMessage("notification.projectRequest.passOn.subject")
         String body = messageSourceService.createMessage("notification.projectRequest.passOn.body", [
-                projectAuthorities: projectAuthorities*.username.join(", "),
-                requester         : "${requester.username} (${requester.realName})",
+                recipients        :  "$projectAuthoritiesUsernames, $requester.username",
+                projectAuthorities: projectAuthoritiesUsernames,
                 projectName       : projectRequest.name,
                 link              : getProjectRequestLink(projectRequest),
                 teamSignature     : processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME),
         ])
-        mailHelperService.sendEmail(subject, body, recipient, ccs)
+        mailHelperService.sendEmail(subject, body, recipients, ccs)
     }
 
     void sendPiRejectEmail(ProjectRequest projectRequest, String rejectComment) {
@@ -266,17 +267,17 @@ class ProjectRequestService {
     void sendDeleteEmail(ProjectRequest projectRequest) {
         List<User> allProjectAuthorities = ProjectRequestPersistentStateService.getAllProjectRequestAuthorities(projectRequest.state)
         User requester = projectRequest.requester
-        List<String> recipient = allProjectAuthorities*.email
-        recipient?.add(requester.email)
+        List<User> recipients = allProjectAuthorities
+        recipients?.add(requester)
+        recipients.unique()
         String subject = messageSourceService.createMessage("notification.projectRequest.deleted.subject")
         String body = messageSourceService.createMessage("notification.projectRequest.deleted.body", [
-                requester         : "${requester.username} (${requester.realName})",
-                projectAuthorities: allProjectAuthorities*.username.join(", "),
+                recipients        : recipients*.username.join(", "),
                 projectName       : projectRequest.name,
                 deletingUser      : securityService.currentUserAsUser,
                 teamSignature     : processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME),
         ])
-        mailHelperService.sendEmail(subject, body, recipient)
+        mailHelperService.sendEmail(subject, body, recipients*.email)
     }
 
     void sendDraftCreateEmail(ProjectRequest projectRequest) {
