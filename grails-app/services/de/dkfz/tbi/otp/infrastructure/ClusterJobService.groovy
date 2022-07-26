@@ -1069,7 +1069,7 @@ SELECT
     }
 
     /**
-     * returns an amount of labels aligned for scatter RGraphs in dependence to a given maximum value
+     * returns an amount of labels aligned for scatter charts in dependence to a given maximum value
      * @return List of dates as Strings and Integer-values
      * e.g. max = 8000 and quot = 10, return = [["800", "1600", "2400", ... , "8000"], [800, 1600, 2400, ... , 8000] ]
      */

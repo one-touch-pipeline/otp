@@ -26,7 +26,6 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="layout" content="main"/>
     <title><g:message code="jobstats.jobTypeSpecific.title"/></title>
-    <asset:javascript src="modules/rGraph.js"/>
     <asset:javascript src="pages/clusterJobJobTypeSpecific/index/clusterJobJobTypeSpecific.js"/>
 </head>
 <body>
@@ -125,20 +124,24 @@
 
             </table>
         </div>
-        <div id="pieGraphicContainer">
+        <div id="pieGraphicContainer" style="display: inline-flex">
             <div class="pieGraphContainer">
                 <div class="graphDescription"><g:message code="jobstats.jobTypeSpecific.graphs.exitCodes"/></div>
                 <div class="toolTipContainer">
                    <span class="toolTip"><g:message code="jobstats.jobTypeSpecific.graphs.toolTip.exitCodes"/></span>
                 </div>
-                <canvas id="jobTypeSpecificGraphExitCode" class="pieChart" width=450px height=225px></canvas>
+                <div style="width: 250px;">
+                    <canvas id="jobTypeSpecificGraphExitCode" class="pieChart"></canvas>
+                </div>
             </div>
             <div class="pieGraphContainer" id="pieGraphContainerSecond">
                 <div class="graphDescription"><g:message code="jobstats.jobTypeSpecific.graphs.exitStatuses"/></div>
                 <div class="toolTipContainer">
                    <span class="toolTip"><g:message code="jobstats.jobTypeSpecific.graphs.toolTip.exitStatuses"/></span>
                 </div>
-                <canvas id="jobTypeSpecificGraphExitStatus" class="pieChart" width=450px height=225px></canvas>
+                <div style="width: 250px;">
+                    <canvas id="jobTypeSpecificGraphExitStatus" class="pieChart"></canvas>
+                </div>
             </div>
         </div>
         <div id="lineGraphicContainer">
@@ -148,7 +151,7 @@
                     <span class="toolTip"><g:message code="jobstats.jobTypeSpecific.graphs.toolTip.queuedStartedEnded"/></span>
                 </div>
                 <br>
-                <canvas id="jobTypeSpecificGraphStates" class="lineChart" width=1000px height=300px></canvas>
+                <canvas id="jobTypeSpecificGraphStates" class="lineChart"></canvas>
             </div>
         </div>
         <div id="scatterGraphicContainer">
@@ -158,7 +161,7 @@
                     <span class="toolTip"><g:message code="jobstats.jobTypeSpecific.graphs.toolTip.wallTimes"/></span>
                 </div>
                 <br>
-                <canvas id="jobTypeSpecificGraphWalltimes" class="scatterChart" width=1000px height=500px></canvas>
+                <canvas id="jobTypeSpecificGraphWalltimes" class="scatterChart"></canvas>
             </div>
         </div>
         <br>
@@ -166,7 +169,6 @@
     <asset:script>
         $(function() {
             $.otp.clusterJobJobTypeSpecific.register();
-            $.otp.clusterJobJobTypeSpecific.updateSeqTypeSelect();
         });
     </asset:script>
 </body>

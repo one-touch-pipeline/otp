@@ -25,10 +25,10 @@
 <head>
     <meta name="layout" content="main"/>
     <title><g:message code="otp.welcome.title"/></title>
-    <asset:javascript src="modules/rGraph.js"/>
-    <asset:javascript src="graph.js"/>
-    <asset:javascript src="pages/home/index/projectOverview.js"/>
+    <asset:javascript src="common/sharedCharts.js"/>
+    <asset:javascript src="pages/home/index/index.js"/>
     <asset:javascript src="taglib/ExpandableText.js"/>
+    <asset:stylesheet src="pages/home/index.less"/>
 </head>
 <body>
     <div class="body home">
@@ -54,19 +54,27 @@
                       from='${projectGroups}' value='projectGroup' />
         </form>
         <div style="clear: both; text-align: center">
-            <div>
-                <canvas id="sampleCountPerSequenceTypePie" width="1250" height="400">[No canvas support]</canvas>
+            <div class="sampleCountPerSequenceTypePieChart">
+                <canvas id="sampleCountPerSequenceTypePie">[No canvas support]</canvas>
             </div>
-            <div>
-                <canvas id="projectCountPerDate" width="1250" height="400">[No canvas support]</canvas>
+            <div class="projectCountPerDateChart">
+                <canvas id="projectCountPerDate">[No canvas support]</canvas>
             </div>
-            <div>
-                <canvas id="laneCountPerDate" width="625" height="400">[No canvas support]</canvas>
-                <canvas id="gigaBasesPerDay" width="625" height="400">[No canvas support]</canvas>
+            <div style="display: inline-flex">
+                <div>
+                    <canvas id="laneCountPerDate" width="625px">[No canvas support]</canvas>
+                </div>
+                <div>
+                    <canvas id="gigaBasesPerDay" width="625px">[No canvas support]</canvas>
+                </div>
             </div>
-            <div>
-                <canvas id="patientsCountPerSequenceType" width="625" height="400">[No canvas support]</canvas>
-                <canvas id="projectCountPerSequenceTypeBar" width="625" height="400">[No canvas support]</canvas>
+            <div style="display: inline-flex">
+                <div>
+                    <canvas id="patientsCountPerSequenceType" width="625" height="400">[No canvas support]</canvas>
+                </div>
+                <div>
+                    <canvas id="projectCountPerSequenceType" width="625" height="400">[No canvas support]</canvas>
+                </div>
             </div>
         </div>
     </div>

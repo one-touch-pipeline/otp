@@ -103,60 +103,245 @@ $.otp.clusterJobGeneralGraph = {
     const from = $('#dpFrom').val();
     const to = $('#dpTo').val();
 
-    RGraph.AJAX($.otp.createLink({
+    const delayPieChartDataUrl = $.otp.createLink({
       controller: 'clusterJobGeneral',
       action: 'getAllStatesTimeDistribution',
       parameters: { from, to }
-    }), function () {
-      $.Graphs.drawPieGraph('delayPieChart', this);
     });
 
-    RGraph.AJAX($.otp.createLink({
+    $.otp.chart.renderChartOnElement(
+      'delayPieChart',
+      delayPieChartDataUrl,
+      (domContext, chartData) => {
+        // eslint-disable-next-line no-new
+        new Chart(domContext, {
+          type: 'pie',
+          data: {
+            labels: chartData.keys,
+            datasets: [{
+              data: chartData.data,
+              backgroundColor: $.otp.chart.colorList
+            }]
+          },
+          options: $.otp.chart.defaultChartOptions('', {
+            scales: {
+              y: {
+                display: false
+              }
+            }
+          })
+        });
+      }
+    );
+
+    const allExitCodesUrl = $.otp.createLink({
       controller: 'clusterJobGeneral',
       action: 'getAllExitCodes',
       parameters: { from, to }
-    }), function () {
-      $.Graphs.drawPieGraph('generalGraphExitCode', this);
     });
 
-    RGraph.AJAX($.otp.createLink({
+    $.otp.chart.renderChartOnElement(
+      'generalGraphExitCode',
+      allExitCodesUrl,
+      (domContext, chartData) => {
+        // eslint-disable-next-line no-new
+        new Chart(domContext, {
+          type: 'pie',
+          data: {
+            labels: chartData.keys,
+            datasets: [{
+              data: chartData.data,
+              backgroundColor: $.otp.chart.colorList
+            }]
+          },
+          options: $.otp.chart.defaultChartOptions('', {
+            scales: {
+              y: {
+                display: false
+              }
+            }
+          })
+        });
+      }
+    );
+
+    const allExitStatusesUrl = $.otp.createLink({
       controller: 'clusterJobGeneral',
       action: 'getAllExitStatuses',
       parameters: { from, to }
-    }), function () {
-      $.Graphs.drawPieGraph('generalGraphExitStatus', this);
     });
 
-    RGraph.AJAX($.otp.createLink({
-      controller: 'clusterJobGeneral',
-      action: 'getAllFailed',
-      parameters: { from, to }
-    }), function () {
-      $.Graphs.drawLineGraph('generalGraphFailed', this);
-    });
+    $.otp.chart.renderChartOnElement(
+      'generalGraphExitStatus',
+      allExitStatusesUrl,
+      (domContext, chartData) => {
+        // eslint-disable-next-line no-new
+        new Chart(domContext, {
+          type: 'pie',
+          data: {
+            labels: chartData.keys,
+            datasets: [{
+              data: chartData.data,
+              backgroundColor: $.otp.chart.colorList
+            }]
+          },
+          options: $.otp.chart.defaultChartOptions('', {
+            scales: {
+              y: {
+                display: false
+              }
+            }
+          })
+        });
+      }
+    );
 
-    RGraph.AJAX($.otp.createLink({
+    const allStatesUrl = $.otp.createLink({
       controller: 'clusterJobGeneral',
       action: 'getAllStates',
       parameters: { from, to }
-    }), function () {
-      $.Graphs.drawLineGraph('generalGraphStates', this);
     });
 
-    RGraph.AJAX($.otp.createLink({
+    $.otp.chart.renderChartOnElement(
+      'generalGraphStates',
+      allStatesUrl,
+      (domContext, chartData) => {
+        // eslint-disable-next-line no-new
+        new Chart(domContext, {
+          type: 'line',
+          data: {
+            labels: chartData.labels,
+            datasets: [{
+              data: chartData.data[0],
+              label: chartData.keys[0],
+              backgroundColor: $.otp.chart.colorList[0],
+              borderColor: $.otp.chart.colorList[0]
+            },
+            {
+              data: chartData.data[1],
+              label: chartData.keys[1],
+              backgroundColor: $.otp.chart.colorList[1],
+              borderColor: $.otp.chart.colorList[1]
+            },
+            {
+              data: chartData.data[2],
+              label: chartData.keys[2],
+              backgroundColor: $.otp.chart.colorList[2],
+              borderColor: $.otp.chart.colorList[2]
+            }]
+          },
+          options: $.otp.chart.defaultChartOptions('', {
+            showLine: true
+          })
+        });
+      }
+    );
+
+    const allFailedUrl = $.otp.createLink({
+      controller: 'clusterJobGeneral',
+      action: 'getAllFailed',
+      parameters: { from, to }
+    });
+
+    $.otp.chart.renderChartOnElement(
+      'generalGraphFailed',
+      allFailedUrl,
+      (domContext, chartData) => {
+        // eslint-disable-next-line no-new
+        new Chart(domContext, {
+          type: 'line',
+          data: {
+            labels: chartData.labels,
+            datasets: [{
+              data: chartData.data,
+              label: chartData.keys,
+              backgroundColor: $.otp.chart.colorList[0],
+              borderColor: $.otp.chart.colorList[0]
+            }]
+          },
+          options: $.otp.chart.defaultChartOptions('', {
+            showLine: true
+          })
+        });
+      }
+    );
+
+    const allAvgCoreUsageUrl = $.otp.createLink({
       controller: 'clusterJobGeneral',
       action: 'getAllAvgCoreUsage',
       parameters: { from, to }
-    }), function () {
-      $.Graphs.drawLineGraph('generalGraphCores', this);
     });
 
-    RGraph.AJAX($.otp.createLink({
+    $.otp.chart.renderChartOnElement(
+      'generalGraphCores',
+      allAvgCoreUsageUrl,
+      (domContext, chartData) => {
+        // eslint-disable-next-line no-new
+        new Chart(domContext, {
+          type: 'line',
+          data: {
+            labels: chartData.labels,
+            datasets: [{
+              label: chartData.keys,
+              data: chartData.data,
+              backgroundColor: $.otp.chart.colorList[0],
+              borderColor: $.otp.chart.colorList[0]
+            }]
+          },
+          options: {
+            scales: {
+              y: {
+                min: 0
+              }
+            },
+            showLine: true,
+            plugins: {
+              legend: {
+                position: 'bottom'
+              }
+            }
+          }
+        });
+      }
+    );
+
+    const allMemoryUsage = $.otp.createLink({
       controller: 'clusterJobGeneral',
       action: 'getAllMemoryUsage',
       parameters: { from, to }
-    }), function () {
-      $.Graphs.drawLineGraph('generalGraphMemory', this);
     });
+
+    $.otp.chart.renderChartOnElement(
+      'generalGraphMemory',
+      allMemoryUsage,
+      (domContext, chartData) => {
+        // eslint-disable-next-line no-new
+        new Chart(domContext, {
+          type: 'line',
+          data: {
+            labels: chartData.labels,
+            datasets: [{
+              label: chartData.keys,
+              data: chartData.data,
+              backgroundColor: $.otp.chart.colorList[0],
+              borderColor: $.otp.chart.colorList[0]
+            }]
+          },
+          options: {
+            scales: {
+              y: {
+                min: 0
+              }
+            },
+            showLine: true,
+            plugins: {
+              legend: {
+                position: 'bottom'
+              }
+            }
+          }
+        });
+      }
+    );
   }
 };

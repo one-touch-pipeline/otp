@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2022 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,16 +20,9 @@
  * SOFTWARE.
  */
 
-//= require /webjars/rgraph/4.66-stable/RGraph.common.core.js
-//= require /webjars/rgraph/4.66-stable/RGraph.common.annotate.js
-//= require /webjars/rgraph/4.66-stable/RGraph.common.dynamic.js
-//= require /webjars/rgraph/4.66-stable/RGraph.common.effects.js
-//= require /webjars/rgraph/4.66-stable/RGraph.common.key.js
-//= require /webjars/rgraph/4.66-stable/RGraph.common.resizing.js
-//= require /webjars/rgraph/4.66-stable/RGraph.common.tooltips.js
-//= require /webjars/rgraph/4.66-stable/RGraph.common.zoom.js
-//= require /webjars/rgraph/4.66-stable/RGraph.bar.js
-//= require /webjars/rgraph/4.66-stable/RGraph.hbar.js
-//= require /webjars/rgraph/4.66-stable/RGraph.line.js
-//= require /webjars/rgraph/4.66-stable/RGraph.pie.js
-//= require /webjars/rgraph/4.66-stable/RGraph.scatter.js
+$(() => {
+  'use strict';
+
+  $.otp.sharedCharts.renderProjectCountPerDate();
+  $.otp.sharedCharts.renderLaneCountPerDate();
+});

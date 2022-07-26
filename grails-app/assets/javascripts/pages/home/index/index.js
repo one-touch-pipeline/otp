@@ -20,39 +20,18 @@
  * SOFTWARE.
  */
 
-$.otp.clusterJobDetailProgress = {
-  register(id) {
-    'use strict';
+$(() => {
+  'use strict';
 
-    const dataUrl = $.otp.createLink({
-      controller: 'clusterJobDetail',
-      action: 'getStatesTimeDistribution',
-      parameters: { id }
-    });
+  const projectGroupSelector = $('#projectGroup_select');
+  const projectGroup = projectGroupSelector.val();
 
-    $.otp.chart.renderChartOnElement(
-      'delayPieChart',
-      dataUrl,
-      (domContext, chartData) => {
-        // eslint-disable-next-line no-new
-        new Chart(domContext, {
-          type: 'pie',
-          data: {
-            labels: chartData.keys,
-            datasets: [{
-              data: chartData.data,
-              backgroundColor: $.otp.chart.colorList
-            }]
-          },
-          options: $.otp.chart.defaultChartOptions('', {
-            scales: {
-              y: {
-                display: false
-              }
-            }
-          })
-        });
-      }
-    );
-  }
-};
+  projectGroupSelector.on('change', () => {
+    $.otp.sharedCharts.renderSampleCountPerSeqType(projectGroup);
+    $.otp.sharedCharts.renderProjectCountPerDate(projectGroup);
+    $.otp.sharedCharts.renderLaneCountPerDate(projectGroup);
+    $.otp.sharedCharts.renderGigaBasesPerDay(projectGroup);
+    $.otp.sharedCharts.renderPatientsCountPerSequenceType(projectGroup);
+    $.otp.sharedCharts.renderProjectCountPerSequenceType(projectGroup);
+  }).trigger('change');
+});

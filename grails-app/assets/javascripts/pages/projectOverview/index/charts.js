@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2022 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,39 +20,44 @@
  * SOFTWARE.
  */
 
-$.otp.clusterJobDetailProgress = {
-  register(id) {
-    'use strict';
+$(() => {
+  'use strict';
 
-    const dataUrl = $.otp.createLink({
-      controller: 'clusterJobDetail',
-      action: 'getStatesTimeDistribution',
-      parameters: { id }
-    });
+  $.otp.sharedCharts.renderSampleCountPerSeqTypeBySelectedProject();
+  $.otp.sharedCharts.renderLaneCountPerDateBySelectedProject();
 
-    $.otp.chart.renderChartOnElement(
-      'delayPieChart',
-      dataUrl,
-      (domContext, chartData) => {
-        // eslint-disable-next-line no-new
-        new Chart(domContext, {
-          type: 'pie',
-          data: {
-            labels: chartData.keys,
-            datasets: [{
-              data: chartData.data,
-              backgroundColor: $.otp.chart.colorList
-            }]
-          },
-          options: $.otp.chart.defaultChartOptions('', {
-            scales: {
-              y: {
-                display: false
-              }
+  const sampleTypeCountBySeqTypeUrl = $.otp.createLink({
+    controller: 'statistic',
+    action: 'sampleTypeCountByPatient'
+  });
+
+  $.otp.chart.renderChartOnElement(
+    'sampleTypeCountByPatient',
+    sampleTypeCountBySeqTypeUrl,
+    (domContext, chartData) => {
+      // eslint-disable-next-line no-new
+      new Chart(domContext, {
+        type: 'bar',
+        data: {
+          labels: chartData.labels,
+          datasets: [{
+            data: chartData.data,
+            backgroundColor: $.otp.chart.colorList
+          }]
+        },
+        options: $.otp.chart.defaultChartOptions('', {
+          plugins: {
+            title: {
+              display: true,
+              font: { size: '14px' },
+              text: 'Sample Type Count by Seq. Type'
+            },
+            legend: {
+              display: false
             }
-          })
-        });
-      }
-    );
-  }
-};
+          }
+        })
+      });
+    }
+  );
+});

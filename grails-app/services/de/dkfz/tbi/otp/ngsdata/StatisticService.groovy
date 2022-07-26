@@ -171,7 +171,7 @@ class StatisticService {
      * @param data A list containing lists with two elements, where the first element is a date and the second element is an integer
      */
     Map dataPerDate(List data) {
-        return getCountPerDate(data, true)
+        return getCountPerDate(data)
     }
 
     /**
@@ -179,33 +179,29 @@ class StatisticService {
      * @param data A list containing lists with one element which is a date
      */
     Map projectCountPerDate(List data) {
-        return getCountPerDate(data, true)
+        return getCountPerDate(data)
     }
 
-    private Map getCountPerDate(List data, boolean multiple = false) {
-        List<Integer> values = []
-
+    private Map getCountPerDate(List data) {
         LocalDate firstDate = LocalDate.parse(data[0][0])
         LocalDate lastDate = LocalDate.parse(data[-1][0]).plusMonths(1)
 
-        LocalDateTime firstDateTime = firstDate.atStartOfDay()
-        LocalDateTime lastDateTime = lastDate.atStartOfDay()
+        List<Map<String, String>> initialLabels = monthLabels(firstDate, lastDate).collect { [x: it, y: 0] }
 
-        Duration daysCount = Duration.between(firstDateTime, lastDateTime)
-
-        int count = 0
-        data.each {
-            values << [
-                    Duration.between(firstDateTime, LocalDate.parse(it[0]).atStartOfDay()).toDays(),
-                    count += multiple ? (it[1] ?: 0) : 1,
-            ]
-        }
+        List<Map<String, String>> result = data
+                .collect { [x: TimeFormats.MONTH_YEAR.getFormattedLocalDate(LocalDate.parse(it[0])), y: it[1] ?: 0] }
+                .inject(initialLabels) { List<Map<String, String>> acc, Map<String, String> element ->
+                    Map<String, String> duplicateEntry = acc.find({ el -> el?.x == element.x })
+                    if (duplicateEntry) {
+                    duplicateEntry.y += element.y
+                    } else {
+                    acc += element
+                    }
+                    return acc
+                }
 
         Map dataToRender = [
-                labels   : monthLabels(firstDate, lastDate),
-                data     : values,
-                count    : count,
-                daysCount: daysCount.toDays(),
+                data  : result,
         ]
         return dataToRender
     }

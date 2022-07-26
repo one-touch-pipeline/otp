@@ -26,9 +26,9 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="layout" content="main" />
     <title>${g.message(code: "projectOverview.index.title")}</title>
-    <asset:javascript src="modules/rGraph.js"/>
-    <asset:javascript src="graph.js"/>
+    <asset:javascript src="common/sharedCharts.js"/>
     <asset:javascript src="pages/projectOverview/index/datatable.js"/>
+    <asset:javascript src="pages/projectOverview/index/charts.js"/>
 </head>
 <body>
     <div class="body">
@@ -89,12 +89,16 @@
                 id="patientsAndSamplesGBCountPerProject" />
         </div>
         <br>
-        <div style="display: flex; justify-content: space-evenly">
-            <canvas id="sampleTypeCountBySeqType" width="550" height="400">[No canvas support]</canvas>
-            <canvas id="laneCountPerDateByProject" width="550" height="400">[No canvas support]</canvas>
+        <div style="display: inline-flex;">
+            <div style="width: 300px;">
+                <canvas id="sampleCountPerSequenceTypePie">[No canvas support]</canvas>
+            </div>
+            <div style="width: 550px;">
+                <canvas id="laneCountPerDate">[No canvas support]</canvas>
+            </div>
         </div>
-        <div style="display: flex; justify-content: space-evenly">
-            <canvas id="sampleTypeCountByPatient" width="550">[No canvas support]</canvas>
+        <div style="width: 550px;">
+            <canvas id="sampleTypeCountByPatient">[No canvas support]</canvas>
         </div>
     </div>
 </body>

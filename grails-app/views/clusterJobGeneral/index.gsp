@@ -25,8 +25,6 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <title><g:message code="jobstats.general.title"/></title>
-    <asset:javascript src="modules/rGraph.js"/>
-    <asset:javascript src="common/Graphs.js"/>
     <asset:javascript src="pages/clusterJobGeneral/index/clusterJobGeneral.js"/>
 </head>
 
@@ -51,39 +49,45 @@
         </div>
     </div>
 
-    <div class="row">
-        <div class="col-12 d-flex justify-content-center">
+    <div class="row pieChartRowContainer">
+        <div class="col-4 d-flex justify-content-center">
             <div class="pieGraphContainer graphContainer">
                 <div class="graphDescription">Delay</div>
 
                 <div class="toolTipContainer">
                     <span class="toolTip"><g:message code="jobstats.general.graphs.toolTip.progressBar.QueueProcess"/></span>
                 </div>
-                <canvas id="delayPieChart" class="pieChart" width=450px height=225px></canvas>
+
+                <div class="pieChartBox">
+                    <canvas id="delayPieChart"></canvas>
+                </div>
             </div>
         </div>
-    </div>
 
-    <div class="row">
-        <div class="col-6 d-flex justify-content-center">
+        <div class="col-4 d-flex justify-content-center">
             <div class="pieGraphContainer graphContainer">
                 <div class="graphDescription">exit codes</div>
 
                 <div class="toolTipContainer">
                     <span class="toolTip"><g:message code="jobstats.general.graphs.toolTip.exitCodes"/></span>
                 </div>
-                <canvas id="generalGraphExitCode" class="pieChart" width=450px height=225px></canvas>
+
+                <div class="pieChartBox">
+                    <canvas id="generalGraphExitCode" class="pieChart" width=450px height=225px></canvas>
+                </div>
             </div>
         </div>
 
-        <div class="col-6 d-flex justify-content-center">
+        <div class="col-4 d-flex justify-content-center">
             <div class="pieGraphContainer graphContainer">
                 <div class="graphDescription">exit statuses</div>
 
                 <div class="toolTipContainer">
                     <span class="toolTip"><g:message code="jobstats.general.graphs.toolTip.exitStatuses"/></span>
                 </div>
-                <canvas id="generalGraphExitStatus" class="pieChart" width=450px height=225px></canvas>
+                <div class="pieChartBox">
+                    <canvas id="generalGraphExitStatus" class="pieChart" width=450px height=225px></canvas>
+                </div>
             </div>
         </div>
     </div>

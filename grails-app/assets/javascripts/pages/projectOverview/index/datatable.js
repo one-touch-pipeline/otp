@@ -24,7 +24,6 @@ $(() => {
   'use strict';
 
   $.otp.projectOverviewTable.register();
-  $.otp.graph.project.init();
 });
 
 $.otp.projectOverviewTable = {

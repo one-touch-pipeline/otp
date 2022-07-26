@@ -22,27 +22,22 @@
 
 <html>
 <head>
-    <meta name="layout" content="info"/>
-    <title><g:message code="info.numbers.title" /></title>
-    <asset:javascript src="modules/rGraph.js"/>
-    <asset:javascript src="graph.js"/>
+    <title><g:message code="info.numbers.title"/></title>
+    <asset:javascript src="common/sharedCharts.js"/>
+    <asset:javascript src="pages/info/numbers/index.js"/>
 </head>
 
 <body>
-    <h1><g:message code="info.numbers.title" /></h1>
-    <g:message code="info.numbers.text"/>
-    <div class="homeGraph" style="clear: both; text-align: center" >
-        <span>
-            <canvas id="projectCountPerDate" width="625" height="400">[No canvas support]</canvas>
-        </span>
-        <span>
-            <canvas id="laneCountPerDate" width="625" height="400">[No canvas support]</canvas>
-        </span>
-    </div>
-<asset:script type="text/javascript">
-    $(function() {
-        $.otp.graph.info.init();
-    });
-</asset:script>
+<h1><g:message code="info.numbers.title"/></h1>
+<h3><g:message code="info.numbers.text"/></h3>
+
+<div class="container-fluid otp-main-container" style="display: inline-flex">
+    <span>
+        <canvas id="projectCountPerDate" width="625" height="400">[No canvas support]</canvas>
+    </span>
+    <span>
+        <canvas id="laneCountPerDate" width="625" height="400">[No canvas support]</canvas>
+    </span>
+</div>
 </body>
 </html>

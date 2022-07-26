@@ -24,8 +24,6 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <title><g:message code="jobstats.detail.title"/></title>
-    <asset:javascript src="modules/rGraph.js"/>
-    <asset:javascript src="common/Graphs.js"/>
     <asset:javascript src="pages/clusterJobDetail/show/clusterJobDetail.js"/>
 </head>
 <!--
@@ -171,7 +169,9 @@ on the general cluster job page
                     <div class="toolTipContainer">
                         <span class="toolTip"><g:message code="jobstats.detail.graphs.toolTip.progressBar.QueueProcess"/></span>
                     </div>
-                    <canvas id="delayPieChart" class="pieChart" width=450px height=225px></canvas>
+                    <div style="width: 300px;">
+                        <canvas id="delayPieChart" class="pieChart"></canvas>
+                    </div>
                 </div>
             </g:if>
 

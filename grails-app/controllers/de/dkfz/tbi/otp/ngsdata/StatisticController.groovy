@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.ngsdata
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 import grails.validation.Validateable
+import org.springframework.http.HttpStatus
 
 import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.project.Project
@@ -274,7 +275,12 @@ class StatisticController {
     JSON laneCountPerDateByProject() {
         Project project = projectSelectionService.requestedProject
         List data = statisticService.laneCountPerDay([project])
-        render statisticService.dataPerDate(data) as JSON
+
+        if (data.isEmpty()) {
+            render status: HttpStatus.NO_CONTENT
+        } else {
+            render statisticService.dataPerDate(data) as JSON
+        }
     }
 }
 
