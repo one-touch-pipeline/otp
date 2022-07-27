@@ -34,7 +34,7 @@ class PanCancerWholeGenomeAlignmentWorkflowSpec extends AbstractPanCancerWorkflo
 
     void "test alignLanesOnly, no base bam file exists, one lane, with adapterTrimming, all fine"() {
         given:
-        SessionUtils.withNewSession {
+        SessionUtils.withTransaction {
             createSeqTrack("readGroup1")
             setupUseAdapterTrimming()
 

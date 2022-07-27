@@ -56,7 +56,7 @@ abstract class AbstractPanCancerWorkflowSpec extends AbstractRoddyAlignmentWorkf
 
     void "test align lanes only, no base bam file exists, one lane, all fine"() {
         given:
-        SessionUtils.withNewSession {
+        SessionUtils.withTransaction {
             createSeqTrack("readGroup1")
             decide(3, 1)
         }

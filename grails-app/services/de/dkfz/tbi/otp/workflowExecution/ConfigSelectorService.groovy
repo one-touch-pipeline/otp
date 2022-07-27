@@ -314,10 +314,10 @@ class ConfigSelectorService {
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     void deprecate(ExternalWorkflowConfigFragment fragment) {
-        fragment.selector.ifPresent { assert it.selectorType != SelectorType.DEFAULT_VALUES }
+        fragment.findSelector().ifPresent { assert it.selectorType != SelectorType.DEFAULT_VALUES }
         fragment.deprecationDate = LocalDate.now()
         fragment.save(flush: true)
-        fragment.selector.ifPresent { it.delete(flush: true) }
+        fragment.findSelector().ifPresent { it.delete(flush: true) }
     }
 }
 

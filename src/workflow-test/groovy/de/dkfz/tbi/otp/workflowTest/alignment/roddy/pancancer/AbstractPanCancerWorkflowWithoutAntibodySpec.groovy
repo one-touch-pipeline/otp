@@ -51,7 +51,7 @@ abstract class AbstractPanCancerWorkflowWithoutAntibodySpec extends AbstractPanC
     @Override
     void setup() {
         log.debug("Start setup ${this.class.simpleName}")
-        SessionUtils.withNewSession {
+        SessionUtils.withTransaction {
             firstBamFilePath = referenceDataDirectory.resolve('bamFiles/wgs/first-bam-file/control_merged.mdup.bam')
         }
         log.debug("Finish setup ${this.class.simpleName}")
@@ -59,7 +59,7 @@ abstract class AbstractPanCancerWorkflowWithoutAntibodySpec extends AbstractPanC
 
     void "test align lanes only, no base bam file exists, one lane, with fingerPrinting, all fine"() {
         given:
-        SessionUtils.withNewSession {
+        SessionUtils.withTransaction {
             createSeqTrack("readGroup1")
             setUpFingerPrintingFile()
             decide(3, 1)
@@ -77,7 +77,7 @@ abstract class AbstractPanCancerWorkflowWithoutAntibodySpec extends AbstractPanC
         SeqTrack firstSeqTrack
         SeqTrack secondSeqTrack
 
-        SessionUtils.withNewSession {
+        SessionUtils.withTransaction {
             firstSeqTrack = createSeqTrack("readGroup1")
             secondSeqTrack = createSeqTrack("readGroup2")
             decide(6, 1)
@@ -92,7 +92,7 @@ abstract class AbstractPanCancerWorkflowWithoutAntibodySpec extends AbstractPanC
 
     void "test, align with base bam file and new lanes, all fine"() {
         given:
-        SessionUtils.withNewSession {
+        SessionUtils.withTransaction {
             createFirstRoddyBamFile()
             createSeqTrack("readGroup2")
             decide(7, 1)
@@ -108,7 +108,7 @@ abstract class AbstractPanCancerWorkflowWithoutAntibodySpec extends AbstractPanC
     void "test align with withdrawn base bam file, all fine"() {
         given:
         RoddyBamFile roddyBamFile
-        SessionUtils.withNewSession {
+        SessionUtils.withTransaction {
             roddyBamFile = createFirstRoddyBamFile()
             roddyBamFile.withdrawn = true
             roddyBamFile.save(flush: true)
@@ -120,7 +120,7 @@ abstract class AbstractPanCancerWorkflowWithoutAntibodySpec extends AbstractPanC
         execute(1, 3)
 
         then:
-        SessionUtils.withNewSession {
+        SessionUtils.withTransaction {
             assert !roddyBamFile.workDirectory.exists()
             checkWorkPackageState()
 

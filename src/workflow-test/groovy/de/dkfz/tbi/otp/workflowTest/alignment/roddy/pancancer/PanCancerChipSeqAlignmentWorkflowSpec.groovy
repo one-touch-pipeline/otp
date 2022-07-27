@@ -43,7 +43,7 @@ class PanCancerChipSeqAlignmentWorkflowSpec extends AbstractPanCancerWorkflowSpe
     @Override
     void setup() {
         log.debug("Start setup ${this.class.simpleName}")
-        SessionUtils.withNewSession {
+        SessionUtils.withTransaction {
             antibodyTarget = createAntibodyTarget()
         }
         log.debug("Finish setup ${this.class.simpleName}")
@@ -54,7 +54,7 @@ class PanCancerChipSeqAlignmentWorkflowSpec extends AbstractPanCancerWorkflowSpe
         SeqTrack firstSeqTrack
         SeqTrack secondSeqTrack
 
-        SessionUtils.withNewSession {
+        SessionUtils.withTransaction {
             firstSeqTrack = createSeqTrack("readGroup1")
             secondSeqTrack = createSeqTrack("readGroup2")
             decide(6, 1)
@@ -72,7 +72,7 @@ class PanCancerChipSeqAlignmentWorkflowSpec extends AbstractPanCancerWorkflowSpe
         SeqTrack firstSeqTrack
         SeqTrack secondSeqTrack
 
-        SessionUtils.withNewSession {
+        SessionUtils.withTransaction {
             firstSeqTrack = createSeqTrack("readGroup1")
             secondSeqTrack = createSeqTrack("readGroup2", [
                     antibodyTarget: createAntibodyTarget()
@@ -85,7 +85,7 @@ class PanCancerChipSeqAlignmentWorkflowSpec extends AbstractPanCancerWorkflowSpe
         execute(2, 4)
 
         then:
-        SessionUtils.withNewSession {
+        SessionUtils.withTransaction {
             List<RoddyBamFile> bamFiles = RoddyBamFile.list([sort: 'id'])
             assert bamFiles.size() == 2
 

@@ -78,7 +78,7 @@ class ExternalWorkflowConfigFragment implements Commentable, Deprecateable<Exter
         return mapper.readValue(configValues, HashMap)
     }
 
-    Optional<ExternalWorkflowConfigSelector> getSelector() {
+    Optional<ExternalWorkflowConfigSelector> findSelector() {
         ExternalWorkflowConfigFragment f = this
         while (true) {
             ExternalWorkflowConfigFragment previous = atMostOneElement(ExternalWorkflowConfigFragment.findAllByPrevious(f))

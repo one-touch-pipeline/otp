@@ -320,7 +320,7 @@ class ConfigSelectorServiceIntegrationSpec extends Specification implements Work
         fragment.deprecationDate == null
 
         selector.externalWorkflowConfigFragment == fragment
-        fragment.selector.get() == selector
+        fragment.findSelector().get() == selector
     }
 
     private UpdateCommand getUpdateCommand() {

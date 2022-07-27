@@ -123,7 +123,7 @@ abstract class AbstractRoddyAlignmentWorkflowSpec extends AbstractAlignmentWorkf
     @Override
     void setup() {
         log.debug("Start setup ${this.class.simpleName}")
-        SessionUtils.withNewSession {
+        SessionUtils.withTransaction {
             setUpFilesVariables()
 
             setUpDomainVariables()
@@ -419,7 +419,7 @@ abstract class AbstractRoddyAlignmentWorkflowSpec extends AbstractAlignmentWorkf
     }
 
     protected void checkAllAfterSuccessfulExecution_alignBaseBamAndNewLanes() {
-        SessionUtils.withNewSession {
+        SessionUtils.withTransaction {
             checkDataBaseState_alignBaseBamAndNewLanes()
             RoddyBamFile latestBamFile = CollectionUtils.exactlyOneElement(RoddyBamFile.findAllByIdentifier(1))
             assertBaseFileSystemState(latestBamFile)
@@ -608,7 +608,7 @@ abstract class AbstractRoddyAlignmentWorkflowSpec extends AbstractAlignmentWorkf
     }
 
     protected void verify_AlignLanesOnly_AllFine() {
-        SessionUtils.withNewSession {
+        SessionUtils.withTransaction {
             checkWorkPackageState()
 
             RoddyBamFile bamFile = CollectionUtils.exactlyOneElement(RoddyBamFile.list())
@@ -622,7 +622,7 @@ abstract class AbstractRoddyAlignmentWorkflowSpec extends AbstractAlignmentWorkf
     }
 
     protected void verify_alignLanesOnly_NoBaseBamExist_TwoLanes(SeqTrack firstSeqTrack, SeqTrack secondSeqTrack) {
-        SessionUtils.withNewSession {
+        SessionUtils.withTransaction {
             checkWorkPackageState()
 
             RoddyBamFile bamFile = CollectionUtils.exactlyOneElement(RoddyBamFile.list())
