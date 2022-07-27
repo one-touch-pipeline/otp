@@ -28,8 +28,6 @@ import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
-import java.time.LocalDate
-
 @Transactional
 class WorkflowService {
 
@@ -150,12 +148,6 @@ class WorkflowService {
             workflow.allowedReferenceGenomes = ReferenceGenome.getAll(updateWorkflowDto.allowedRefGenomes)
         } else {
             workflow.allowedReferenceGenomes = null
-        }
-
-        if (updateWorkflowDto.deprecated && !workflow.deprecatedDate) {
-            workflow.deprecatedDate = LocalDate.now()
-        } else if (!updateWorkflowDto.deprecated) {
-            workflow.deprecatedDate = null
         }
 
         workflow.save(flush: true)

@@ -75,7 +75,6 @@ class WorkflowSystemConfigController implements CheckAndCall {
                     cmd.priority,
                     cmd.maxParallelWorkflows,
                     cmd.enabled,
-                    cmd.deprecated,
                     cmd.allowedRefGenomes,
                     cmd.supportedSeqTypes,
             )

@@ -90,10 +90,6 @@
                 <input type="checkbox" class="custom-control-input" id="modal-enabled">
                 <label class="custom-control-label" for="modal-enabled"><g:message code="workflowSystemConfig.modal.enabled"/></label>
             </div>
-            <div class="form-group form-check custom-control custom-switch">
-                <input type="checkbox" class="custom-control-input" id="modal-deprecated">
-                <label class="custom-control-label" for="modal-deprecated"><g:message code="workflowSystemConfig.modal.deprecated"/></label>
-            </div>
         </form>
     </otp:otpModal>
 </body>

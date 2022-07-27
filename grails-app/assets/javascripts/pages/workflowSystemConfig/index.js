@@ -80,7 +80,7 @@ const renderWorkflowOverviewTable = (workflowData) => {
       },
       {
         data: 'deprecationDate',
-        render: (date) => (date !== 'na' ? date : '')
+        render: (date) => (date !== 'na' ? `Yes (since ${date})` : '')
       },
       {
         data: '',
@@ -136,7 +136,6 @@ const updateModalWithCurrentWorkflow = (workflow, modal) => {
   $('#modal-priority', modal).val(workflow.priority);
   $('#modal-max-runs', modal).val(workflow.maxParallelWorkflows);
   $('#modal-enabled', modal).prop('checked', workflow.enabled);
-  $('#modal-deprecated', modal).prop('checked', workflow.deprecationDate !== 'na');
   $('#modal-seqTypes', modal).trigger('change');
   $('#modal-refGenomes', modal).trigger('change');
 
@@ -145,12 +144,14 @@ const updateModalWithCurrentWorkflow = (workflow, modal) => {
   } else {
     $('#modal-seqTypes', modal).val();
   }
+  $('#modal-seqTypes', modal).trigger('change');
 
   if (workflow.allowedRefGenomes) {
     $('#modal-refGenomes', modal).val(workflow.allowedRefGenomes.map((rg) => rg.id));
   } else {
     $('#modal-refGenomes', modal).val();
   }
+  $('#modal-refGenomes', modal).trigger('change');
 };
 
 /**
@@ -167,7 +168,6 @@ const updateWorkflow = (workflow, modal) => {
     priority: $('#modal-priority', modal).val(),
     enabled: $('#modal-enabled', modal).prop('checked'),
     maxParallelWorkflows: $('#modal-max-runs', modal).val(),
-    deprecated: $('#modal-deprecated', modal).prop('checked'),
     supportedSeqTypes: $('#modal-seqTypes', modal).select2('data').map((s) => s.id),
     allowedRefGenomes: $('#modal-refGenomes', modal).select2('data').map((rg) => rg.id)
   };
