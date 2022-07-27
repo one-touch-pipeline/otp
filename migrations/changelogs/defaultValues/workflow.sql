@@ -42,8 +42,8 @@ INSERT INTO workflow(id, version, name, enabled, priority, date_created, last_up
 VALUES(nextval('hibernate_sequence'), 0, 'RNA alignment', TRUE,  0, now(), now(), 10)
 ON CONFLICT DO NOTHING;
 
-INSERT INTO workflow(id, version, name, enabled, priority, date_created, last_updated, max_parallel_workflows)
-VALUES(nextval('hibernate_sequence'), 0, 'WGBS alignment', TRUE, 0, now(), now(), 10)
+INSERT INTO workflow(id, version, name, bean_name, enabled, priority, date_created, last_updated, max_parallel_workflows)
+VALUES(nextval('hibernate_sequence'), 0, 'WGBS alignment', 'wgbsWorkflow', TRUE, 0, now(), now(), 10)
 ON CONFLICT DO NOTHING;
 
 INSERT INTO workflow(id, version, name, enabled, priority, date_created, last_updated, max_parallel_workflows)
