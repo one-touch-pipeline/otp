@@ -23,7 +23,13 @@
 import de.dkfz.tbi.otp.Comment
 import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.bamfiles.SingleCellBamFileService
+import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerConfig
+import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerConfigurationService
+import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerMergingWorkPackage
+import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerWorkflowService
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
+import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaQc
@@ -32,6 +38,7 @@ import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.taxonomy.*
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.HelperUtils
@@ -112,6 +119,14 @@ class ExampleData {
             SeqTypeService.wholeGenomePairedSeqType,
             SeqTypeService.wholeGenomeBisulfitePairedSeqType,
             SeqTypeService.wholeGenomeBisulfiteTagmentationPairedSeqType,
+
+    ]
+
+    /**
+     * The SeqTypes for which single cell data is to be created.
+     */
+    List<SeqType> singleCellSeqTypes = [
+            SeqTypeService.'10xSingleCellRnaSeqType'
     ]
 
     /**
@@ -152,6 +167,12 @@ class ExampleData {
 
     AceseqService aceseqService
 
+    CellRangerConfigurationService cellRangerConfigurationService
+
+    SingleCellBamFileService singleCellBamFileService
+
+    CellRangerWorkflowService cellRangerWorkflowService
+
     static final List<String> chromosomeXY = [
             "X",
             "Y",
@@ -165,6 +186,7 @@ class ExampleData {
     Realm realm
     SpeciesWithStrain speciesWithStrain
     ReferenceGenome referenceGenome
+    ReferenceGenome singleCellReferenceGenome
     SeqCenter seqCenter
     SeqPlatform seqPlatform
     SeqPlatformGroup seqPlatformGroup
@@ -173,6 +195,7 @@ class ExampleData {
     List<SampleType> diseaseSampleTypes = []
     List<SampleType> controlSampleTypes = []
     List<RoddyBamFile> roddyBamFiles = []
+    List<SingleCellBamFile> singleCellBamFiles = []
     List<RoddySnvCallingInstance> roddySnvCallingInstances = []
     List<IndelCallingInstance> indelCallingInstances = []
     List<SophiaInstance> sophiaInstances = []
@@ -198,7 +221,8 @@ class ExampleData {
         libraryPreparationKit = findOrCreateLibraryPreparationKit()
         realm = findOrCreateRealm()
         speciesWithStrain = findOrCreateSpeciesWithStrain()
-        referenceGenome = findOrCreateReferenceGenome()
+        referenceGenome = findOrCreateReferenceGenome("1KGRef_PhiX")
+        singleCellReferenceGenome = findOrCreateReferenceGenome("hg_GRCh38")
         seqCenter = findOrCreateSeqCenter()
         seqPlatform = findOrCreateSeqPlatform()
         seqPlatformGroup = findOrCreateSeqPlatformGroup()
@@ -235,6 +259,12 @@ class ExampleData {
             }.groupBy {
                 it.seqType
             }
+            diseaseSampleTypes.collectMany { SampleType sampleType ->
+                createSingleCellSampleWithSeqTracksAndBamFile(individual, sampleType)
+            }
+            controlSampleTypes.collectMany { SampleType sampleType ->
+                createSingleCellSampleWithSeqTracksAndBamFile(individual, sampleType)
+            }
             analyseAbleSeqType.each { SeqType seqType ->
                 diseaseBamFiles[seqType].each { AbstractMergedBamFile diseaseBamFile ->
                     controlBamFiles[seqType].each { AbstractMergedBamFile controlBamFile ->
@@ -258,8 +288,9 @@ class ExampleData {
             createIndelFilesOnFilesystem()
             createSophiaFilesOnFilesystem()
             createAceseqFilesOnFilesystem()
+            createCellRangerFilesOnFilesystem()
         } else {
-            println "Skipp creating dummy files/directories on file system"
+            println "Skip creating dummy files/directories on file system"
         }
     }
 
@@ -414,6 +445,35 @@ class ExampleData {
         }
     }
 
+    void createCellRangerFilesOnFilesystem() {
+        println "creating dummy cell ranger files on file system"
+
+        singleCellBamFiles.each { SingleCellBamFile bam ->
+            Path workdir = singleCellBamFileService.getWorkDirectory(bam)
+            fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(workdir, realm)
+
+            Path resultsPath = singleCellBamFileService.getResultDirectory(bam)
+
+            [singleCellBamFileService.getSampleDirectory(bam),
+             singleCellBamFileService.getOutputDirectory(bam),
+             resultsPath,].each {
+                fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(it, realm)
+            }
+
+            SingleCellBamFileService.CREATED_RESULT_DIRS.each {
+                Path path = resultsPath.resolve(it)
+                fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(path, realm)
+            }
+
+            SingleCellBamFileService.CREATED_RESULT_FILES.each {
+                Path path = resultsPath.resolve(it)
+                fileService.createFileWithContent(path, path.toString(), realm)
+            }
+
+            cellRangerWorkflowService.linkResultFiles(bam)
+        }
+    }
+
     SampleType findOrCreateSampleType(String name) {
         return CollectionUtils.atMostOneElement(SampleType.findAllByName(name)) ?: new SampleType([
                 name                   : name,
@@ -506,16 +566,15 @@ class ExampleData {
         ]).save(flush: true)
     }
 
-    ReferenceGenome findOrCreateReferenceGenome() {
-        String name = "1KGRef_PhiX"
+    ReferenceGenome findOrCreateReferenceGenome(String name) {
         ReferenceGenome referenceGenome = CollectionUtils.atMostOneElement(ReferenceGenome.findAllByName(name))
         if (referenceGenome) {
             return referenceGenome
         }
         referenceGenome = new ReferenceGenome([
                 name                        : name,
-                path                        : "ExampleReferenceGenome",
-                fileNamePrefix              : "ExampleReferenceGenome",
+                path                        : name,
+                fileNamePrefix              : name,
                 chromosomePrefix            : "",
                 chromosomeSuffix            : "",
                 lengthWithoutN              : 100,
@@ -637,12 +696,12 @@ class ExampleData {
     }
 
     List<AbstractMergedBamFile> createSampleWithSeqTracksAndBamFile(Individual individual, SampleType sampleType) {
-        Sample sample = createSample(individual, sampleType)
+        Sample sample = findOrCreateSample(individual, sampleType)
         println "  - sample: ${sample}"
         return seqTypes.collect { SeqType seqType ->
             println "    - for: ${seqType}"
             List<SeqTrack> seqTracks = (1..lanesPerSampleAndSeqType).collect {
-                SeqTrack seqTrack = createSeqTrack(fastqImportInstance, sample, seqType)
+                SeqTrack seqTrack = createSeqTrack(sample, seqType)
                 println "      - seqtrack: ${seqTrack}"
                 return seqTrack
             }
@@ -654,14 +713,40 @@ class ExampleData {
         }
     }
 
-    Sample createSample(Individual individual, SampleType sampleType) {
+    List<AbstractMergedBamFile> createSingleCellSampleWithSeqTracksAndBamFile(Individual individual, SampleType sampleType) {
+        Sample sample = findOrCreateSample(individual, sampleType)
+        println "  - sample: ${sample}"
+        return singleCellSeqTypes.collect { SeqType seqType ->
+            println "    - for: ${seqType}"
+            List<SeqTrack> seqTracks = (1..lanesPerSampleAndSeqType).collect {
+                SeqTrack seqTrack = createSeqTrack(sample, seqType)
+                println "      - seqtrack: ${seqTrack}"
+                return seqTrack
+            }
+
+            Pipeline pipeline = Pipeline.Name.CELL_RANGER.pipeline
+
+            CellRangerConfig config = findOrCreateCellRangerConfig(seqType, pipeline)
+            CellRangerMergingWorkPackage cellRangerMergingWorkPackage = createCellRangerMergingWorkPackage(seqTracks, config, pipeline)
+            println "      - crmwp: ${cellRangerMergingWorkPackage}"
+            SingleCellBamFile singleCellBamFile = createSingleCellBamFile(cellRangerMergingWorkPackage)
+            println "      - cell ranger bam file: ${singleCellBamFile}"
+            return singleCellBamFile
+        }
+    }
+
+    Sample findOrCreateSample(Individual individual, SampleType sampleType) {
+        Sample foundSample = atMostOneElement(Sample.findAllByIndividualAndSampleType(individual, sampleType))
+        if (foundSample) {
+            return foundSample
+        }
         return new Sample([
                 sampleType: sampleType,
                 individual: individual,
         ]).save(flush: true)
     }
 
-    SeqTrack createSeqTrack(FastqImportInstance fastqImportInstance, Sample sample, SeqType seqType) {
+    SeqTrack createSeqTrack(Sample sample, SeqType seqType) {
         SeqTrack seqTrack = new SeqTrack([
                 sample               : sample,
                 seqType              : seqType,
@@ -746,6 +831,50 @@ class ExampleData {
         ]).save(flush: true)
     }
 
+    CellRangerMergingWorkPackage createCellRangerMergingWorkPackage(List<SeqTrack> seqTracks, CellRangerConfig config, Pipeline pipeline) {
+        SeqTrack seqTrack = seqTracks.first()
+
+        CellRangerMergingWorkPackage cellRangerMergingWorkPackage = new CellRangerMergingWorkPackage([
+                config               : config,
+                sample               : seqTrack.sample,
+                seqType              : seqTrack.seqType,
+                seqTracks            : seqTracks as Set,
+                referenceGenome      : singleCellReferenceGenome,
+                pipeline             : pipeline,
+                seqPlatformGroup     : seqPlatformGroup,
+                libraryPreparationKit: libraryPreparationKit,
+                referenceGenomeIndex : findOrCreateCellRangerReferenceGenomeIndex(),
+                requester            : User.findByUsername("otp")
+        ]).save(flush: true)
+
+        return cellRangerMergingWorkPackage
+    }
+
+    SingleCellBamFile createSingleCellBamFile(CellRangerMergingWorkPackage cellRangerMergingWorkPackage) {
+        SingleCellBamFile singleCellBamFile = new SingleCellBamFile([
+                workPackage            : cellRangerMergingWorkPackage,
+                seqTracks              : cellRangerMergingWorkPackage.seqTracks.collect() as Set,
+                numberOfMergedLanes    : cellRangerMergingWorkPackage.seqTracks.size(),
+                coverage               : 35,
+                coverageWithN          : 35,
+                dateFromFileSystem     : new Date(),
+                workDirectoryName      : singleCellBamFileService.buildWorkDirectoryName(cellRangerMergingWorkPackage, 0),
+                md5sum                 : "0" * 32,
+                fileExists             : true,
+                fileSize               : 100,
+                fileOperationStatus    : AbstractMergedBamFile.FileOperationStatus.PROCESSED,
+                qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
+                qcTrafficLightStatus   : AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED,
+                comment                : createComment(),
+        ]).save(flush: true)
+
+        cellRangerMergingWorkPackage.bamFileInProjectFolder = singleCellBamFile
+        cellRangerMergingWorkPackage.save(flush: true)
+
+        singleCellBamFiles << singleCellBamFile
+        return singleCellBamFile
+    }
+
     RoddyBamFile createRoddyBamFile(MergingWorkPackage mergingWorkPackage) {
         RoddyWorkflowConfig config = findOrCreateRoddyWorkflowConfig(mergingWorkPackage)
         RoddyBamFile roddyBamFile = new RoddyBamFile([
@@ -780,6 +909,36 @@ class ExampleData {
         }
         roddyBamFiles << roddyBamFile
         return roddyBamFile
+    }
+
+    ReferenceGenomeIndex findOrCreateCellRangerReferenceGenomeIndex() {
+        ReferenceGenomeIndex foundIndex = atMostOneElement(ReferenceGenomeIndex.findAllByReferenceGenome(singleCellReferenceGenome))
+        if (foundIndex) {
+            return foundIndex
+        }
+        ToolName tool = atMostOneElement(ToolName.findAllByName("CELL_RANGER"))
+        return new ReferenceGenomeIndex(
+                toolName: tool,
+                referenceGenome: singleCellReferenceGenome,
+                path: '1.2.0',
+                indexToolVersion: '1.2.0',
+        ).save(flush: true)
+    }
+
+    CellRangerConfig findOrCreateCellRangerConfig(SeqType seqType, Pipeline pipeline) {
+
+        CellRangerConfig foundCellRangerConfig = atMostOneElement(CellRangerConfig.findAllByProjectAndSeqTypeAndPipelineAndObsoleteDateIsNull(
+                project, seqType, pipeline
+        ))
+        if (foundCellRangerConfig) {
+            return foundCellRangerConfig
+        }
+        return new CellRangerConfig([
+                project       : project,
+                seqType       : seqType,
+                pipeline      : pipeline,
+                programVersion: "1.2.3-4",
+        ]).save(flush: true)
     }
 
     RoddyWorkflowConfig findOrCreateRoddyWorkflowConfig(MergingWorkPackage mergingWorkPackage) {
@@ -1029,14 +1188,17 @@ class ExampleData {
 
 Project.withTransaction {
     ExampleData exampleData = new ExampleData([
-            fastqcDataFilesService: ctx.fastqcDataFilesService,
-            fileService           : ctx.fileService,
-            fileSystemService     : ctx.fileSystemService,
-            lsdfFilesService      : ctx.lsdfFilesService,
-            snvCallingService     : ctx.snvCallingService,
-            indelCallingService   : ctx.indelCallingService,
-            sophiaService         : ctx.sophiaService,
-            aceseqService         : ctx.aceseqService,
+            fastqcDataFilesService        : ctx.fastqcDataFilesService,
+            fileService                   : ctx.fileService,
+            fileSystemService             : ctx.fileSystemService,
+            lsdfFilesService              : ctx.lsdfFilesService,
+            snvCallingService             : ctx.snvCallingService,
+            indelCallingService           : ctx.indelCallingService,
+            sophiaService                 : ctx.sophiaService,
+            aceseqService                 : ctx.aceseqService,
+            cellRangerConfigurationService: ctx.cellRangerConfigurationService,
+            singleCellBamFileService      : ctx.singleCellBamFileService,
+            cellRangerWorkflowService     : ctx.cellRangerWorkflowService,
     ])
 
     exampleData.init()
