@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.workflow.fastqc
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
+import de.dkfz.tbi.otp.dataprocessing.FastqcDataFilesService
 import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.ngsdata.*
@@ -65,11 +66,19 @@ class FastqcFinishJobSpec extends Specification implements DataTest, WorkflowSys
             getFastqcProcessedFiles(_) >> fastqcProcessedFileList
         }
 
+        job.fastqcDataFilesService = Mock(FastqcDataFilesService) {
+            1 * updateFastqcProcessedFiles(fastqcProcessedFileList) >> { params ->
+                List<FastqcProcessedFile> fileList = params.flatten()
+                assert fileList == fastqcProcessedFileList
+            }
+        }
+
         when:
         job.updateDomains(workflowStep)
 
         then:
         job.seqTrackService = Mock(SeqTrackService) {
+            1 * fillBaseCount(seqTrack)
             1 * markFastqcFinished(seqTrack)
         }
         job.jobStage == JobStage.FINISH
@@ -84,6 +93,12 @@ class FastqcFinishJobSpec extends Specification implements DataTest, WorkflowSys
             getSeqTrack(workflowStep) >> seqTrack
             getFastqcProcessedFiles(workflowStep) >> fastqcProcessedFileList
         }
+        job.fastqcDataFilesService = Mock(FastqcDataFilesService) {
+            1 * updateFastqcProcessedFiles(_) >> { param ->
+                List<FastqcProcessedFile> fileList = param.flatten()
+                assert fileList == fastqcProcessedFileList
+            }
+        }
 
         when:
         job.execute(workflowStep)
@@ -95,6 +110,7 @@ class FastqcFinishJobSpec extends Specification implements DataTest, WorkflowSys
             }
         }
         job.seqTrackService = Mock(SeqTrackService) {
+            1 * fillBaseCount(seqTrack)
             1 * markFastqcFinished(seqTrack)
         }
         job.jobStage == JobStage.FINISH
