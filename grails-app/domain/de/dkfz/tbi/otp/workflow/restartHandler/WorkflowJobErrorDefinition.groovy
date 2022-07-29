@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.workflow.restartHandler
 
+import grails.gorm.hibernate.annotation.ManagedEntity
 import groovy.transform.ToString
 
 import de.dkfz.tbi.otp.utils.Entity
@@ -32,6 +33,7 @@ import java.util.regex.PatternSyntaxException
  * Defines a job error for the new system.
  */
 @ToString(includes = ['name', 'jobBeanName', 'sourceType'])
+@ManagedEntity
 class WorkflowJobErrorDefinition implements Entity {
     /** The type of log to use for checking the expression */
     String jobBeanName
