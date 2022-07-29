@@ -302,11 +302,12 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         then:
         SessionUtils.withTransaction {
             OtrsTicket result = OtrsTicket.get(ticket.id)
-            result.installationFinished != null
-            result.fastqcFinished == null
-            result.alignmentFinished == null
-            result.snvFinished == null
-            !result.finalNotificationSent
+            assert result.installationFinished != null
+            assert result.fastqcFinished == null
+            assert result.alignmentFinished == null
+            assert result.snvFinished == null
+            assert !result.finalNotificationSent
+            return true
         }
     }
 
@@ -407,15 +408,16 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         then:
         SessionUtils.withTransaction {
             OtrsTicket result = OtrsTicket.get(ticket.id)
-            result.installationFinished != null
-            result.fastqcFinished != null
-            result.alignmentFinished != null
-            result.snvFinished == null
-            result.indelFinished == null
-            result.sophiaFinished == null
-            result.aceseqFinished == null
-            result.runYapsaFinished == null
-            result.finalNotificationSent
+            assert result.installationFinished != null
+            assert result.fastqcFinished != null
+            assert result.alignmentFinished != null
+            assert result.snvFinished == null
+            assert result.indelFinished == null
+            assert result.sophiaFinished == null
+            assert result.aceseqFinished == null
+            assert result.runYapsaFinished == null
+            assert result.finalNotificationSent
+            return true
         }
     }
 
