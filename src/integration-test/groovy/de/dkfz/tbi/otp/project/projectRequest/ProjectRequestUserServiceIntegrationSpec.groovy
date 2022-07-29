@@ -21,26 +21,16 @@
  */
 package de.dkfz.tbi.otp.project.projectRequest
 
-import grails.plugin.springsecurity.SpringSecurityService
-import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
-import org.springframework.security.authentication.AuthenticationTrustResolver
 import spock.lang.Specification
 import spock.lang.Unroll
 
-import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.administration.LdapService
 import de.dkfz.tbi.otp.administration.UserService
-import de.dkfz.tbi.otp.config.ConfigService
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.UserDomainFactory
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectRequestUser
 import de.dkfz.tbi.otp.security.*
-import de.dkfz.tbi.otp.utils.MailHelperService
-import de.dkfz.tbi.otp.utils.MessageSourceService
 
 @Rollback
 @Integration
@@ -137,65 +127,5 @@ class ProjectRequestUserServiceIntegrationSpec extends Specification implements 
         projectRequestUserService.ableToDelegateManagement([pi, other] as Set<ProjectRole>)
         !projectRequestUserService.ableToDelegateManagement([other, bioinformatician] as Set<ProjectRole>)
         !projectRequestUserService.ableToDelegateManagement([] as Set<ProjectRole>)
-    }
-
-    void "toUserProjectRole"() {
-        given:
-        createAllBasicProjectRoles()
-        createUserAndRoles()
-        projectRequestUserService.userProjectRoleService = new UserProjectRoleService(
-                auditLogService: Mock(AuditLogService),
-                configService: Mock(ConfigService) {
-                    _ * getRootPath() >> TestCase.uniqueNonExistentPath
-                },
-                springSecurityService: new SpringSecurityService(
-                        authenticationTrustResolver: Mock(AuthenticationTrustResolver) {
-                            isAnonymous(_) >> false
-                        }
-                ),
-                mailHelperService: Mock(MailHelperService),
-                messageSourceService: Mock(MessageSourceService),
-                processingOptionService: Mock(ProcessingOptionService) {
-                    _ * findOptionAsString(_) >> "option"
-                },
-                ldapService: Mock(LdapService) {
-                    isUserInLdapAndActivated(_) >> true
-                },
-                userProjectRoleService: projectRequestUserService.userProjectRoleService
-        )
-
-        Project project = createProject()
-        ProjectRequestUser projectRequestUser = createProjectRequestUser(
-                projectRoles: [other, pi],
-                accessToOtp: accessToOtp,
-                accessToFiles: accessToFiles,
-                manageUsers: manageUsers,
-                manageUsersAndDelegate: manageUsersAndDelegate,
-        )
-
-        when:
-        // doWithAuth is required until the UserProjectRole service has been rewritten to use SecurityService
-        UserProjectRole result = SpringSecurityUtils.doWithAuth(OPERATOR) {
-            projectRequestUserService.toUserProjectRole(project, projectRequestUser)
-        } as UserProjectRole
-
-        then:
-        result.project == project
-        result.user == projectRequestUser.user
-        TestCase.assertContainSame(result.projectRoles, projectRequestUser.projectRoles)
-
-        result.accessToFiles == accessToFiles
-        result.manageUsers == manageUsers
-        result.manageUsersAndDelegate == manageUsersAndDelegate
-        result.fileAccessChangeRequested == accessToFiles
-
-        result.accessToOtp == accessToOtp
-        result.receivesNotifications
-        result.enabled
-
-        where:
-        accessToOtp | accessToFiles | manageUsers | manageUsersAndDelegate
-        true        | true          | true        | true
-        false       | false         | false       | false
     }
 }

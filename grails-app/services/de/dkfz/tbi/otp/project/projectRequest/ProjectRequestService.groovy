@@ -31,6 +31,7 @@ import org.springframework.security.access.prepost.PreAuthorize
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.ngsdata.ProjectRole
+import de.dkfz.tbi.otp.ngsdata.UserProjectRoleService
 import de.dkfz.tbi.otp.project.*
 import de.dkfz.tbi.otp.project.additionalField.*
 import de.dkfz.tbi.otp.security.*
@@ -53,6 +54,7 @@ class ProjectRequestService {
     ProjectRequestStateProvider projectRequestStateProvider
     ProcessingOptionService processingOptionService
     RolesService rolesService
+    UserProjectRoleService userProjectRoleService
 
     ProjectRequest saveProjectRequestFromCommand(ProjectRequestCreationCommand cmd) throws SwitchedUserDeniedException {
         securityService.ensureNotSwitchedUser()
@@ -186,7 +188,18 @@ class ProjectRequestService {
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void addProjectRequestUsersToProject(ProjectRequest projectRequest) {
         projectRequest.users.each { ProjectRequestUser projectRequestUser ->
-            projectRequestUserService.toUserProjectRole(projectRequest.project, projectRequestUser)
+            userProjectRoleService.createUserProjectRole(
+                    projectRequestUser.user,
+                    projectRequest.project,
+                    projectRequestUser.projectRoles,
+                    [
+                            accessToOtp           : projectRequestUser.accessToOtp,
+                            accessToFiles         : projectRequestUser.accessToFiles,
+                            manageUsers           : projectRequestUser.manageUsers,
+                            manageUsersAndDelegate: projectRequestUser.manageUsersAndDelegate,
+                            receivesNotifications : true,
+                    ]
+            )
         }
     }
 
@@ -272,10 +285,10 @@ class ProjectRequestService {
         recipients.unique()
         String subject = messageSourceService.createMessage("notification.projectRequest.deleted.subject")
         String body = messageSourceService.createMessage("notification.projectRequest.deleted.body", [
-                recipients        : recipients*.username.join(", "),
-                projectName       : projectRequest.name,
-                deletingUser      : securityService.currentUserAsUser,
-                teamSignature     : processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME),
+                recipients   : recipients*.username.join(", "),
+                projectName  : projectRequest.name,
+                deletingUser : securityService.currentUserAsUser,
+                teamSignature: processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME),
         ])
         mailHelperService.sendEmail(subject, body, recipients*.email)
     }

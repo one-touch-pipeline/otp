@@ -26,7 +26,6 @@ import org.codehaus.groovy.runtime.InvokerHelper
 
 import de.dkfz.tbi.otp.administration.UserService
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectRequestUser
 import de.dkfz.tbi.otp.security.User
 
@@ -82,21 +81,5 @@ class ProjectRequestUserService {
 
     boolean forceManageUsers(Set<ProjectRole> projectRoles) {
         return ProjectRoleService.projectRolesContainAuthoritativeRole(projectRoles) || ProjectRoleService.projectRolesContainCoordinator(projectRoles)
-    }
-
-    UserProjectRole toUserProjectRole(Project project, ProjectRequestUser projectRequestUser) {
-        UserProjectRole userProjectRole = userProjectRoleService.createUserProjectRole(
-                projectRequestUser.user,
-                project,
-                projectRequestUser.projectRoles,
-        )
-        userProjectRoleService.with {
-            setAccessToOtp(userProjectRole, projectRequestUser.accessToOtp)
-            setAccessToFiles(userProjectRole, projectRequestUser.accessToFiles)
-            setManageUsers(userProjectRole, projectRequestUser.manageUsers)
-            setManageUsersAndDelegate(userProjectRole, projectRequestUser.manageUsersAndDelegate)
-            setReceivesNotifications(userProjectRole, true)
-        }
-        return userProjectRole
     }
 }

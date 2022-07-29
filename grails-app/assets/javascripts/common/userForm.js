@@ -27,6 +27,7 @@ $(() => {
   // auto check and disable boxes with class set-and-block-for-ROLE
   $('.project-role-select').on('change', (e) => {
     const roles = ['PI', 'BIOINFORMATICIAN', 'LEAD_BIOINFORMATICIAN', 'COORDINATOR'];
+    const hiddenCheckboxPrefix = 'hidden-checkbox';
 
     const setForMap =
       roles.map((role) => ({
@@ -35,6 +36,7 @@ $(() => {
         boxes: $(e.target).parent().parent().parent()
           .find(`.set-for-${role}`)
       }));
+
     const setAndBlockMap = roles.map((role) => ({
       role,
       cssClass: `.set-and-block-for-${role}`,
@@ -45,6 +47,16 @@ $(() => {
     // remove disabled from checkboxes
     setAndBlockMap.forEach((map) => {
       map.boxes.prop('disabled', false);
+    });
+
+    // remove hidden checkboxes
+    setAndBlockMap.forEach((map) => {
+      map.boxes.each((index, box) => {
+        const hiddenCheckbox = $(box).parent().find(`#${hiddenCheckboxPrefix}-${box.name}`);
+        if (hiddenCheckbox) {
+          hiddenCheckbox.remove();
+        }
+      });
     });
 
     $(e.target).find('option:selected').each(function () {
@@ -58,6 +70,19 @@ $(() => {
         if (this.text === map.role) {
           map.boxes.prop('checked', true);
           map.boxes.prop('disabled', true);
+          // create hidden element if it doesn't exist already
+          map.boxes.each((index, box) => {
+            let hiddenCheckbox = $(box).parent().find(`#${hiddenCheckboxPrefix}-${box.name}`);
+            if (hiddenCheckbox.length === 0) {
+              hiddenCheckbox = document.createElement('input');
+              hiddenCheckbox.hidden = true;
+              hiddenCheckbox.type = 'checkbox';
+              hiddenCheckbox.name = box.name;
+              hiddenCheckbox.checked = box.checked;
+              hiddenCheckbox.id = `${hiddenCheckboxPrefix}-${box.name}`;
+              box.parentNode.appendChild(hiddenCheckbox);
+            }
+          });
         }
       });
     });

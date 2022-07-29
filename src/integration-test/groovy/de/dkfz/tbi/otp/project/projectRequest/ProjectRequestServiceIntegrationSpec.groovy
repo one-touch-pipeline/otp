@@ -34,8 +34,8 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.ProjectFieldsDomainFactory
 import de.dkfz.tbi.otp.domainFactory.UserDomainFactory
 import de.dkfz.tbi.otp.domainFactory.taxonomy.TaxonomyFactory
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.SeqCenter
+import de.dkfz.tbi.otp.ngsdata.UserProjectRoleService
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.project.*
 import de.dkfz.tbi.otp.project.additionalField.*
@@ -51,16 +51,31 @@ import java.time.LocalDate
 class ProjectRequestServiceIntegrationSpec extends Specification implements UserDomainFactory, UserAndRoles, ProjectFieldsDomainFactory, TaxonomyFactory {
 
     ProjectRequestService projectRequestService
-    ProcessingOptionService processingOptionService
+    ProjectRequestStateProvider projectRequestStateProvider
 
     final String subject = "subject"
     final String body = "body"
     final String link = "link"
     final String comment = "comment"
+
     String emailSenderSalutation
 
     void setup() {
-        emailSenderSalutation = processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME)
+        projectRequestService = new ProjectRequestService([
+                messageSourceService                : Mock(MessageSourceService),
+                mailHelperService                   : Mock(MailHelperService),
+                linkGenerator                       : Mock(LinkGenerator),
+                securityService                     : Mock(SecurityService),
+                auditLogService                     : Mock(AuditLogService),
+                projectRequestUserService           : Mock(ProjectRequestUserService),
+                processingOptionService             : Mock(ProcessingOptionService),
+                rolesService                        : Mock(RolesService),
+                projectRequestStateProvider         : Mock(ProjectRequestStateProvider),
+                userProjectRoleService              : Mock(UserProjectRoleService),
+                projectRequestPersistentStateService: new ProjectRequestPersistentStateService([
+                        projectRequestStateProvider: Mock(ProjectRequestStateProvider)
+                ]),
+        ])
     }
 
     void "sendSubmitEmail"() {
@@ -70,10 +85,6 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         final User pi2 = createUser()
         final List<User> users = [pi1, pi2]
         final ProjectRequest request = createProjectRequest([requester: requester], [usersThatNeedToApprove: users])
-
-        projectRequestService.messageSourceService = Mock(MessageSourceService)
-        projectRequestService.mailHelperService = Mock(MailHelperService)
-        projectRequestService.linkGenerator = Mock(LinkGenerator)
 
         when:
         projectRequestService.sendSubmitEmail(request)
@@ -87,6 +98,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
                 teamSignature: emailSenderSalutation,
         ]) >> body
         1 * projectRequestService.mailHelperService.sendEmail(subject, body, [requester.email], users*.email)
+        1 * projectRequestService.processingOptionService.findOptionAsString(_) >> emailSenderSalutation
         0 * _
     }
 
@@ -97,10 +109,6 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         final User pi2 = createUser()
         final List<User> users = [pi1, pi2]
         final ProjectRequest request = createProjectRequest([requester: requester], [usersThatNeedToApprove: users])
-
-        projectRequestService.messageSourceService = Mock(MessageSourceService)
-        projectRequestService.mailHelperService = Mock(MailHelperService)
-        projectRequestService.linkGenerator = Mock(LinkGenerator)
 
         when:
         projectRequestService.sendOperatorRejectEmail(request, comment)
@@ -115,6 +123,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
                 teamSignature: emailSenderSalutation,
         ]) >> body
         1 * projectRequestService.mailHelperService.sendEmail(subject, body, [requester.email], users*.email)
+        1 * projectRequestService.processingOptionService.findOptionAsString(_) >> emailSenderSalutation
         0 * _
     }
 
@@ -127,10 +136,6 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         final ProjectRequest request = createProjectRequest([requester: requester], [usersThatNeedToApprove: users])
         final String expectedAuthorityUsernames = users*.username.join(", ")
 
-        projectRequestService.messageSourceService = Mock(MessageSourceService)
-        projectRequestService.mailHelperService = Mock(MailHelperService)
-        projectRequestService.linkGenerator = Mock(LinkGenerator)
-
         when:
         projectRequestService.sendPassOnEmail(request)
 
@@ -139,12 +144,13 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         1 * projectRequestService.linkGenerator.link(_) >> link
         1 * projectRequestService.messageSourceService.createMessage(_, [
                 projectAuthorities: expectedAuthorityUsernames,
-                recipients        :  "$expectedAuthorityUsernames, $requester.username",
+                recipients        : "$expectedAuthorityUsernames, $requester.username",
                 projectName       : request.name,
                 link              : link,
                 teamSignature     : emailSenderSalutation,
         ]) >> body
         1 * projectRequestService.mailHelperService.sendEmail(subject, body, users*.email, [requester.email])
+        1 * projectRequestService.processingOptionService.findOptionAsString(_) >> emailSenderSalutation
         0 * _
     }
 
@@ -155,11 +161,6 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         final User pi2 = createUser()
         final List<User> users = [pi1, pi2]
         final ProjectRequest request = createProjectRequest([requester: requester], [usersThatNeedToApprove: users])
-
-        projectRequestService.messageSourceService = Mock(MessageSourceService)
-        projectRequestService.mailHelperService = Mock(MailHelperService)
-        projectRequestService.linkGenerator = Mock(LinkGenerator)
-        projectRequestService.securityService = Mock(SecurityService)
 
         when:
         projectRequestService.sendPiRejectEmail(request, comment)
@@ -177,6 +178,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
                 teamSignature   : emailSenderSalutation,
         ]) >> body
         1 * projectRequestService.mailHelperService.sendEmail(subject, body, [requester.email], users*.email)
+        1 * projectRequestService.processingOptionService.findOptionAsString(_) >> emailSenderSalutation
         0 * _
     }
 
@@ -187,10 +189,6 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         final User pi2 = createUser()
         final List<User> users = [pi1, pi2]
         final ProjectRequest request = createProjectRequest([requester: requester], [usersThatNeedToApprove: users])
-
-        projectRequestService.messageSourceService = Mock(MessageSourceService)
-        projectRequestService.mailHelperService = Mock(MailHelperService)
-        projectRequestService.linkGenerator = Mock(LinkGenerator)
 
         when:
         projectRequestService.sendApprovedEmail(request)
@@ -203,6 +201,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
                 teamSignature: emailSenderSalutation,
         ]) >> body
         1 * projectRequestService.mailHelperService.sendEmail(subject, body, (users*.email + [requester.email]))
+        1 * projectRequestService.processingOptionService.findOptionAsString(_) >> emailSenderSalutation
         0 * _
     }
 
@@ -221,11 +220,6 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
                 usersThatAlreadyApproved: usersThatAlreadyApproved,
         ])
 
-        projectRequestService.messageSourceService = Mock(MessageSourceService)
-        projectRequestService.mailHelperService = Mock(MailHelperService)
-        projectRequestService.linkGenerator = Mock(LinkGenerator)
-        projectRequestService.securityService = Mock(SecurityService)
-
         when:
         projectRequestService.sendPartiallyApprovedEmail(request)
 
@@ -238,7 +232,9 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
                 projectAuthority: pi1.username,
                 teamSignature   : emailSenderSalutation,
         ]) >> body
+        1 * projectRequestService.processingOptionService.findOptionAsString(_) >> emailSenderSalutation
         1 * projectRequestService.mailHelperService.sendEmail(subject, body, [requester.email], (usersThatNeedToApprove + usersThatAlreadyApproved)*.email)
+        0 * _
     }
 
     void "sendDeleteEmail"() {
@@ -250,11 +246,6 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         final ProjectRequest request = createProjectRequest([requester: requester], [usersThatNeedToApprove: users])
         final List<User> expectedRecipients = users + [requester]
 
-        projectRequestService.messageSourceService = Mock(MessageSourceService)
-        projectRequestService.mailHelperService = Mock(MailHelperService)
-        projectRequestService.linkGenerator = Mock(LinkGenerator)
-        projectRequestService.securityService = Mock(SecurityService)
-
         when:
         projectRequestService.sendDeleteEmail(request)
 
@@ -262,12 +253,14 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         1 * projectRequestService.messageSourceService.createMessage(_) >> subject
         1 * projectRequestService.securityService.currentUserAsUser >> pi1
         1 * projectRequestService.messageSourceService.createMessage(_, [
-                recipients        : expectedRecipients*.username.join(", "),
-                projectName       : request.name,
-                deletingUser      : pi1,
-                teamSignature     : emailSenderSalutation,
+                recipients   : expectedRecipients*.username.join(", "),
+                projectName  : request.name,
+                deletingUser : pi1,
+                teamSignature: emailSenderSalutation,
         ]) >> body
+        1 * projectRequestService.processingOptionService.findOptionAsString(_) >> emailSenderSalutation
         1 * projectRequestService.mailHelperService.sendEmail(subject, body, expectedRecipients*.email)
+        0 * _
     }
 
     void "sendDraftCreateEmail"() {
@@ -277,10 +270,6 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         final ProjectRequest request = createProjectRequest([
                 requester: requester,
         ])
-
-        projectRequestService.messageSourceService = Mock(MessageSourceService)
-        projectRequestService.mailHelperService = Mock(MailHelperService)
-        projectRequestService.linkGenerator = Mock(LinkGenerator)
 
         when:
         projectRequestService.sendDraftCreateEmail(request)
@@ -294,6 +283,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
                 teamSignature: emailSenderSalutation,
         ]) >> body
         1 * projectRequestService.mailHelperService.sendEmail(subject, body, [requester.email])
+        1 * projectRequestService.processingOptionService.findOptionAsString(_) >> emailSenderSalutation
         0 * _
     }
 
@@ -303,9 +293,6 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         final ProjectRequest request = createProjectRequest([
                 requester: requester,
         ])
-
-        projectRequestService.messageSourceService = Mock(MessageSourceService)
-        projectRequestService.mailHelperService = Mock(MailHelperService)
 
         when:
         projectRequestService.sendDraftDeleteEmail(request)
@@ -318,6 +305,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
                 teamSignature: emailSenderSalutation,
         ]) >> body
         1 * projectRequestService.mailHelperService.sendEmail(subject, body, [requester.email])
+        1 * projectRequestService.processingOptionService.findOptionAsString(_) >> emailSenderSalutation
         0 * _
     }
 
@@ -336,11 +324,6 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
                 usersThatAlreadyApproved: usersThatAlreadyApproved,
         ])
 
-        projectRequestService.messageSourceService = Mock(MessageSourceService)
-        projectRequestService.mailHelperService = Mock(MailHelperService)
-        projectRequestService.linkGenerator = Mock(LinkGenerator)
-        projectRequestService.securityService = Mock(SecurityService)
-
         when:
         projectRequestService.sendPiEditedEmail(request)
 
@@ -355,7 +338,9 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
                 link              : link,
                 teamSignature     : emailSenderSalutation,
         ]) >> body
+        1 * projectRequestService.processingOptionService.findOptionAsString(_) >> emailSenderSalutation
         1 * projectRequestService.mailHelperService.sendEmail(subject, body, users*.email, [requester.email])
+        0 * _
     }
 
     void "sendCreatedEmail, should send a mail only to the ticketsystem when recipient and ccs are empty"() {
@@ -417,11 +402,6 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         final String additionalText = "additionalText"
         final String clusterName = "clusterName"
 
-        projectRequestService.messageSourceService = Mock(MessageSourceService)
-        projectRequestService.mailHelperService = Mock(MailHelperService)
-        projectRequestService.processingOptionService = Mock(ProcessingOptionService)
-        projectRequestService.linkGenerator = Mock(LinkGenerator)
-
         when:
         projectRequestService.sendCreatedEmail(project, recipients, ccs)
 
@@ -446,6 +426,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
                 teamSignature             : emailSenderSalutation,
         ]) >> body
         1 * projectRequestService.mailHelperService.sendEmail(subject, body, recipients, ccs)
+        0 * _
     }
 
     ProjectRequestCreationCommand createProjectRequestCreationCommand(Map properties = [:]) {
@@ -462,6 +443,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
     void "saveProjectRequestFromCommand, should save projectRequest and translate all parameters"() {
         given:
         createAllBasicProjectRoles()
+
         User currentUser = createUser()
         SeqCenter seqCenter = createSeqCenter()
         SpeciesWithStrain speciesWithStrain = createSpeciesWithStrain()
@@ -485,12 +467,9 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
                 keywords                : keywords,
                 requesterComment        : "Comments for the request.",
                 projectType             : Project.ProjectType.SEQUENCING,
-
         ])
-        projectRequestService.securityService = Mock(SecurityService)
-        projectRequestService.projectRequestUserService = Mock(ProjectRequestUserService)
-        projectRequestService.securityService = Mock(SecurityService)
-        projectRequestService.auditLogService.securityService = Mock(SecurityService)
+        projectRequestService.projectRequestStateProvider = projectRequestStateProvider
+        projectRequestService.projectRequestPersistentStateService.projectRequestStateProvider = projectRequestStateProvider
 
         when:
         ProjectRequest result = projectRequestService.saveProjectRequestFromCommand(cmd)
@@ -499,8 +478,10 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         1 * projectRequestService.securityService.ensureNotSwitchedUser()
         1 * projectRequestService.projectRequestUserService.saveProjectRequestUsersFromCommands(_) >> users
         (projectRequestExists ? 0 : 1) * projectRequestService.securityService.currentUserAsUser >> currentUser
-        1 * projectRequestService.auditLogService.securityService.trueCurrentUserAsUser >> currentUser
+        1 * projectRequestService.auditLogService.logAction(_, _) >> _
         0 * _
+
+        then:
         ProjectRequest.count == 1
         result.name == cmd.name
         result.requester == (projectRequestExists ? projectRequest.requester : currentUser)
@@ -537,15 +518,16 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         String role = isOperator ? OPERATOR : USER
         List<ProjectRequest> result = []
 
-        projectRequestService.securityService = Mock(SecurityService)
-
         when:
         SpringSecurityUtils.doWithAuth(role) {
             result = projectRequestService.getRequestsUserIsInvolved(resolved)
         }
 
         then:
-        projectRequestService.securityService.currentUserAsUser >> currentUser
+        1 * projectRequestService.securityService.currentUserAsUser >> currentUser
+        0 * _
+
+        then:
         (isOperator && resolved) ? TestCase.assertContainSame(result, [prCreatedByOtherUser, prCreatedByUser]) : true
         (isOperator && !resolved) ? TestCase.assertContainSame(result, [prRequestedByUser, prDraftByOtherUser, prDraftByUser]) : true
         (!isOperator && resolved) ? TestCase.assertContainSame(result, [prCreatedByUser]) : true
@@ -563,7 +545,9 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
     void "sortRequestToBeHandledByUser, should return the requests user has to do something when user is operator is #isOperator"() {
         given:
         createUserAndRoles()
-        User currentUser = createUser()
+        String userName = isOperator ? OPERATOR : USER
+        User currentUser = getUser(userName)
+
         ProjectRequest prCheckOwnedByUser = createProjectRequest([:], [beanName: "check", currentOwner: currentUser])
         ProjectRequest prCreated = createProjectRequest([:], [beanName: "created"])
         ProjectRequest prApprovalUserNeedsToApprove = createProjectRequest([:], [beanName: "approval", usersThatNeedToApprove: [currentUser]])
@@ -571,35 +555,28 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         ProjectRequest prApproved = createProjectRequest([:], [beanName: "approved"])
         ProjectRequest prApprovedOwnedByUser = createProjectRequest([:], [beanName: "approved", currentOwner: currentUser])
         ProjectRequest prDraft = createProjectRequest([:], [beanName: "draft"])
-        ProjectRequest prDraftRequestedByUser = createProjectRequest([requester: currentUser], [beanName: "draft", currentOwner: currentUser])
+        ProjectRequest prDraftRequestedByUser = createProjectRequest([requester: currentUser], [beanName: "draft"])
         ProjectRequest prPiEdit = createProjectRequest([:], [beanName: "piEdit"])
         ProjectRequest prPiEditOwnedByUser = createProjectRequest([:], [beanName: "piEdit", currentOwner: currentUser])
         ProjectRequest prRequesterEdit = createProjectRequest([:], [beanName: "requesterEdit"])
         ProjectRequest prRequesterEditRequestedByUser = createProjectRequest([requester: currentUser], [beanName: "requesterEdit"])
         List<ProjectRequest> projectRequests = [prCheckOwnedByUser, prCreated, prApprovalUserNeedsToApprove, prApproval, prApproved, prApprovedOwnedByUser,
                                                 prDraft, prDraftRequestedByUser, prPiEdit, prPiEditOwnedByUser, prRequesterEdit, prRequesterEditRequestedByUser]
-        String role = isOperator ? OPERATOR : USER
-        List<ProjectRequest> result = []
 
-        projectRequestService.projectRequestStateProvider.projectRequestStates.each {
-            it.securityService = Mock(SecurityService) {
-                getCurrentUserAsUser() >> currentUser
-            }
-        }
+        projectRequestService.projectRequestStateProvider = projectRequestStateProvider
+        projectRequestService.projectRequestPersistentStateService.projectRequestStateProvider = projectRequestStateProvider
 
         when:
-        SpringSecurityUtils.doWithAuth(role) {
-            result = projectRequestService.sortRequestToBeHandledByUser(projectRequests)
+        List<ProjectRequest> requestsToBeHandledByUser = SpringSecurityUtils.doWithAuth(userName) {
+            projectRequestService.sortRequestToBeHandledByUser(projectRequests)
         }
 
         then:
-        if (isOperator) {
-            TestCase.assertContainSame(result, [prCheckOwnedByUser, prApprovalUserNeedsToApprove, prApproved, prApprovedOwnedByUser,
-                                                prDraftRequestedByUser, prPiEditOwnedByUser, prRequesterEditRequestedByUser])
-        } else {
-            TestCase.assertContainSame(result, [prApprovalUserNeedsToApprove, prDraftRequestedByUser, prPiEditOwnedByUser,
-                                                prRequesterEditRequestedByUser])
-        }
+        List<ProjectRequest> expectedRequestToHandle = isOperator
+                ? [prApprovalUserNeedsToApprove, prDraftRequestedByUser, prPiEditOwnedByUser, prRequesterEditRequestedByUser,
+                   prCheckOwnedByUser, prApproved, prApprovedOwnedByUser]
+                : [prApprovalUserNeedsToApprove, prDraftRequestedByUser, prPiEditOwnedByUser, prRequesterEditRequestedByUser]
+        TestCase.assertContainSame(requestsToBeHandledByUser, expectedRequestToHandle)
 
         where:
         isOperator << [true, false]
@@ -619,20 +596,36 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         ProjectRequest.count == 1
     }
 
-    void "addProjectRequestUsersToProject, should add project request Users to the project"() {
+    void "addProjectRequestUsersToProject, should add project request Users to the project with required rights"() {
         given:
         createUserAndRoles()
         createAllBasicProjectRoles()
+
         Project project = createProject()
-        ProjectRequestUser prUser1 = createProjectRequestUser([projectRoles: [pi]])
-        ProjectRequestUser prUser2 = createProjectRequestUser([projectRoles: [coordinator]])
-        ProjectRequestUser prUser3 = createProjectRequestUser([projectRoles: [bioinformatician, other]])
+        List<ProjectRequestUser> prUserList = [createProjectRequestUser(
+                projectRoles: [other, pi],
+                accessToOtp: accessToOtp,
+                accessToFiles: accessToFiles,
+                manageUsers: manageUsers,
+                manageUsersAndDelegate: manageUsersAndDelegate,
+        ), createProjectRequestUser(
+                projectRoles: [coordinator],
+                accessToOtp: accessToOtp,
+                accessToFiles: accessToFiles,
+                manageUsers: manageUsers,
+                manageUsersAndDelegate: manageUsersAndDelegate,
+        ), createProjectRequestUser(
+                projectRoles: [bioinformatician, other],
+                accessToOtp: accessToOtp,
+                accessToFiles: accessToFiles,
+                manageUsers: manageUsers,
+                manageUsersAndDelegate: manageUsersAndDelegate,
+        ),]
         ProjectRequest projectRequest = createProjectRequest([
                 state  : createProjectRequestPersistentState([beanName: "created"]),
                 project: project,
-                users  : [prUser1, prUser2, prUser3],
+                users  : prUserList,
         ])
-        projectRequestService.projectRequestUserService = Mock(ProjectRequestUserService)
 
         when:
         SpringSecurityUtils.doWithAuth(OPERATOR) {
@@ -640,9 +633,34 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         }
 
         then:
-        1 * projectRequestService.projectRequestUserService.toUserProjectRole(project, prUser1)
-        1 * projectRequestService.projectRequestUserService.toUserProjectRole(project, prUser2)
-        1 * projectRequestService.projectRequestUserService.toUserProjectRole(project, prUser3)
+        1 * projectRequestService.userProjectRoleService.createUserProjectRole(prUserList[0].user, projectRequest.project, prUserList[0].projectRoles, [
+                accessToOtp           : prUserList[0].accessToOtp,
+                accessToFiles         : prUserList[0].accessToFiles,
+                manageUsers           : prUserList[0].manageUsers,
+                manageUsersAndDelegate: prUserList[0].manageUsersAndDelegate,
+                receivesNotifications : true,
+        ])
+        1 * projectRequestService.userProjectRoleService.createUserProjectRole(prUserList[1].user, projectRequest.project, prUserList[1].projectRoles, [
+                accessToOtp           : prUserList[1].accessToOtp,
+                accessToFiles         : prUserList[1].accessToFiles,
+                manageUsers           : prUserList[1].manageUsers,
+                manageUsersAndDelegate: prUserList[1].manageUsersAndDelegate,
+                receivesNotifications : true,
+        ])
+        1 * projectRequestService.userProjectRoleService.createUserProjectRole(prUserList[2].user, projectRequest.project, prUserList[2].projectRoles, [
+                accessToOtp           : prUserList[2].accessToOtp,
+                accessToFiles         : prUserList[2].accessToFiles,
+                manageUsers           : prUserList[2].manageUsers,
+                manageUsersAndDelegate: prUserList[2].manageUsersAndDelegate,
+                receivesNotifications : true,
+        ])
+        0 * _
+
+        where:
+        accessToOtp | accessToFiles | manageUsers | manageUsersAndDelegate
+        true        | true          | true        | true
+        false       | false         | false       | false
+        true        | false         | true        | false
     }
 
     void "approveProjectRequest, should add user to list of usersThatAlreadyApproved and remove from list of usersThatNeedToApprove"() {
@@ -737,6 +755,8 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
     void "listAndFetchAbstractFields, should return right fields for operator #isOperator, projectType #projectType and page #projectPageType"() {
         given:
         createUserAndRoles()
+        String role = isOperator ? OPERATOR : USER
+
         TextFieldDefinition textFdSourceIsOperator = createTextFieldDefinition([
                 sourceOfData: ProjectSourceOfData.OPERATOR,
         ])
@@ -756,12 +776,9 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
                 projectDisplayOnConfigPage: ProjectDisplayOnConfigPage.HIDE,
         ])
 
-        String role = isOperator ? OPERATOR : USER
-        List<AbstractFieldDefinition> result = []
-
         when:
-        SpringSecurityUtils.doWithAuth(role) {
-            result = projectRequestService.listAndFetchAbstractFields(projectType, projectPageType)
+        List<AbstractFieldDefinition> result = SpringSecurityUtils.doWithAuth(role) {
+            projectRequestService.listAndFetchAbstractFields(projectType, projectPageType)
         }
 
         then:
@@ -821,25 +838,62 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
     }
 
     void "getCurrentOwnerDisplayName, should return real name if user is not an admin user"() {
+        given:
+        User nonAdminUser = createUser()
+        User currentUser = createUser()
+        ProjectRequest projectRequest = createProjectRequest([state: createProjectRequestPersistentState([currentOwner: nonAdminUser])])
+
         when:
-        User user = createUser()
-        createUserRole()
-        ProjectRequest projectRequest = createProjectRequest([state: createProjectRequestPersistentState([currentOwner: user])])
+        String currentUsername = projectRequestService.getCurrentOwnerDisplayName(projectRequest)
 
         then:
-        projectRequestService.getCurrentOwnerDisplayName(projectRequest) == user.username
+        1 * projectRequestService.rolesService.isAdministrativeUser(_) >> false
+        1 * projectRequestService.securityService.currentUserAsUser >> currentUser
+        0 * _
+
+        then:
+        currentUsername == nonAdminUser.username
     }
 
-    @Unroll
-    void "getCurrentOwnerDisplayName, should return masked name if user is admin"() {
+    void "getCurrentOwnerDisplayName, should return masked of admins for non admin users"() {
+        given:
+        createUserAndRoles()
+        User adminUser = getUser(ADMIN)
+        ProjectRequest projectRequest = createProjectRequest([state: createProjectRequestPersistentState([currentOwner: adminUser])])
+
+        User currentUser = createUser()
+
         when:
-        User user = createUser()
-        createUserRole([user: user, role: DomainFactory.createRoleLazy([authority: authority])])
-        ProjectRequest projectRequest = createProjectRequest([state: createProjectRequestPersistentState([currentOwner: user])])
+        String username = projectRequestService.getCurrentOwnerDisplayName(projectRequest)
 
         then:
-        projectRequestService.getCurrentOwnerDisplayName(projectRequest) != user.username
-        projectRequestService.getCurrentOwnerDisplayName(projectRequest) != user.realName
+        1 * projectRequestService.rolesService.isAdministrativeUser(_) >> false
+        1 * projectRequestService.securityService.currentUserAsUser >> currentUser
+        1 * projectRequestService.processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME) >> emailSenderSalutation
+        0 * _
+
+        then:
+        username != adminUser.username
+        username != adminUser.realName
+    }
+
+    void "getCurrentOwnerDisplayName, should return not masked username of admins for for admin users"() {
+        given:
+        createUserAndRoles()
+        User adminUser = getUser(ADMIN)
+        User currentUser = getUser(OPERATOR)
+        ProjectRequest projectRequest = createProjectRequest([state: createProjectRequestPersistentState([currentOwner: adminUser])])
+
+        when:
+        String username = projectRequestService.getCurrentOwnerDisplayName(projectRequest)
+
+        then:
+        1 * projectRequestService.rolesService.isAdministrativeUser(_) >> true
+        1 * projectRequestService.securityService.currentUserAsUser >> currentUser
+        0 * _
+
+        then:
+        username == adminUser.username
 
         where:
         authority << Role.ADMINISTRATIVE_ROLES

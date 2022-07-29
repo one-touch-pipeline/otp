@@ -184,6 +184,44 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
     }
 
     @Unroll
+    void "createUserProjectRole, sets manageUsers and delegate users true for #projectRoles when manageUsers #manageUsers and delegateUser #delegateUsers"() {
+        given:
+        setupData()
+
+        Project project = createProject()
+        User user = createUser()
+        Map<String, Boolean> flags = [
+                accessToOtp           : true,
+                accessToFiles         : true,
+                manageUsers           : manageUsers,
+                manageUsersAndDelegate: delegateUsers,
+                receivesNotifications : true,
+        ]
+        Set<ProjectRole> projectRoles = projectRoleNames.collect({ roleName -> ProjectRole.findByName(roleName.name()) })
+
+        when:
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
+            userProjectRoleService.createUserProjectRole(user, project, projectRoles as Set, flags)
+        }
+
+        then:
+        UserProjectRole.count == 1
+        UserProjectRole createUserProjectRole = UserProjectRole.findAll()[0]
+        createUserProjectRole.accessToOtp
+        createUserProjectRole.manageUsers
+        createUserProjectRole.accessToFiles
+        createUserProjectRole.manageUsersAndDelegate
+        createUserProjectRole.receivesNotifications
+        createUserProjectRole.projectRoles == projectRoles
+
+        where:
+        manageUsers | delegateUsers | projectRoleNames
+        true        | true          | [ProjectRole.Basic.BIOINFORMATICIAN]
+        false       | false         | [ProjectRole.Basic.PI]
+        false       | true          | [ProjectRole.Basic.COORDINATOR]
+    }
+
+    @Unroll
     void "notifyAdministration sends email with correct content (action=#operatorAction)"() {
         given:
         setupData()

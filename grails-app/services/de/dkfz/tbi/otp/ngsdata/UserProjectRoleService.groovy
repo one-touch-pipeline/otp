@@ -75,6 +75,14 @@ class UserProjectRoleService {
 
         userProjectRole.save(flush: true)
 
+        if (ProjectRoleService.projectRolesContainAuthoritativeRole(projectRoles)) {
+            flags.manageUsersAndDelegate = true
+            flags.manageUsers = true
+        }
+        if (ProjectRoleService.projectRolesContainCoordinator(projectRoles)) {
+            flags.manageUsers = true
+        }
+
         flags.accessToOtp ? userProjectRoleService.setAccessToOtp(userProjectRole, flags.accessToOtp) : null
         flags.accessToFiles ? userProjectRoleService.setAccessToFiles(userProjectRole, flags.accessToFiles) : null
         flags.manageUsers ? userProjectRoleService.setManageUsers(userProjectRole, flags.manageUsers) : null
