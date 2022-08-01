@@ -324,6 +324,7 @@ DataExportInput dataExportParameters = new DataExportInput([
         targetFolder        : targetFolder,
         checkFileStatus     : checkFileStatus,
         getFileList         : getFileList,
+        copyWithdrawnData   : copyWithdrawnData,
         unixGroup           : unixGroup,
         external            : external,
         copyExternal        : copyExternal,
