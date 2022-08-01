@@ -32,11 +32,20 @@
 </head>
 <body>
     <div class="body">
+        <g:set var="archived" value="${selectedProject.archived ? 'archived' : ''}"/>
+
         <g:render template="/templates/projectSelection"/>
+
+        <g:if test="${archived}">
+            <otp:annotation type="warning">
+                <g:message code="configurePipeline.info.projectArchived.noChange" args="[selectedProject.name]"/>
+            </otp:annotation>
+        </g:if>
+
         <g:link style="float: right" action="helpPage" fragment="overview" target="_blank">
             <g:img file="info.png"/>
         </g:link>
-        <div class="buttons">
+        <div class="buttons ${archived}">
             <g:link action="newSubmission"><g:message code="egaSubmission.overview.newSubmission"/></g:link>
         </div>
         <h1><g:message code="egaSubmission.overview.header"/></h1>
@@ -63,7 +72,7 @@
                                 value="${it.state}"/></td>
                         <td>
                             <g:if test="${it.state == de.dkfz.tbi.otp.egaSubmission.EgaSubmission.State.SELECTION}">
-                                <g:link action="editSubmission" params="['id': it.id]"><g:message code="egaSubmission.overview.continue"/></g:link>
+                                <g:link class="${archived}" action="editSubmission" params="['id': it.id]"><g:message code="egaSubmission.overview.continue"/></g:link>
                             </g:if><g:else>
                                 <g:link action="studyMetadata" params="['id': it.id]"><g:message code="egaSubmission.overview.studyMetadata"/></g:link>
                                 <br>

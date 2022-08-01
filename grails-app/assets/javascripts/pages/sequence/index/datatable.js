@@ -78,7 +78,7 @@ $.otp.sequence = {
             for (i = 0; i < json.aaData.length; i += 1) {
               row = json.aaData[i];
               if (row.fastQCFiles !== undefined) {
-                fastQC = '';
+                fastQC = row.fileArchived ? '<span>&#128451;</span>' : '';
                 for (j = 0; j < row.fastQCFiles.length; j += 1) {
                   fastQC += $.otp.createLinkMarkup({
                     controller: 'fastqcResults',
@@ -138,6 +138,7 @@ $.otp.sequence = {
                 row.problem ?
                   `<span title="${row.problemDescription}">${row.problem}</span>` : '',
                 row.fileExists,
+                row.fileArchived,
                 row.dateCreated
               ];
 
@@ -160,6 +161,9 @@ $.otp.sequence = {
         const fastqc = $('td:eq(13)', nRow);
         if ($('a', fastqc).length > 0) {
           fastqc.addClass('true');
+          if ($('span', fastqc).length > 0) {
+            fastqc.addClass('archived');
+          }
         } else {
           fastqc.attr('title', fastqc.text());
           fastqc.addClass('false');
@@ -181,6 +185,15 @@ $.otp.sequence = {
         }
         fileExists.attr('title', fileExists.text());
         fileExists.text('');
+
+        const fileArchived = $('td:eq(17)', nRow);
+        if (fileArchived.text() === 'true') {
+          fileArchived.addClass('VALID');
+        } else {
+          fileArchived.addClass('false');
+        }
+        fileArchived.attr('title', fileArchived.text());
+        fileArchived.text('');
       }
     });
   }

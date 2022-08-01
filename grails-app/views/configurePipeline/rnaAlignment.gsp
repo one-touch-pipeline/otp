@@ -32,6 +32,8 @@
 </head>
 <body>
 <div class="body">
+    <g:set var="archived" value="${selectedProject.archived ? 'archived' : ''}"/>
+
     <g:render template="/templates/messages"/>
 
     <h1><g:message code="configurePipeline.rnaAlignment.title" args="[selectedProject.name, seqType.displayName]"/></h1>
@@ -39,6 +41,13 @@
     <h2><g:message code="configurePipeline.alignment.configFile"/></h2>
 
     <otp:annotation type="info"><g:message code="configurePipeline.info.defaultValues"/></otp:annotation>
+
+    <g:if test="${archived}">
+        <otp:annotation type="warning">
+            <g:message code="configurePipeline.info.projectArchived.noPlot" args="[selectedProject.name]"/>
+        </otp:annotation>
+    </g:if>
+
 
     <g:form controller="configurePipeline" action="rnaAlignmentConfig" method="POST"
             params='["seqType.id": seqType.id]'>
@@ -79,7 +88,7 @@
             <tr>
                 <td class="myKey"></td>
                 <td>
-                    <g:submitButton name="submit" value="Submit"/>
+                    <g:submitButton class="${archived}" name="submit" value="Submit"/>
                     <g:link controller="alignmentConfigurationOverview" class="btn">${g.message(code: "default.button.cancel.label")}</g:link>
                 </td>
             </tr>
@@ -178,7 +187,7 @@
             <tr>
                 <td class="myKey"></td>
                 <td>
-                    <g:submitButton name="submit" value="Submit"/>
+                    <g:submitButton class="${archived}" name="submit" value="Submit"/>
                     <g:link controller="alignmentConfigurationOverview" class="btn">${g.message(code: "default.button.cancel.label")}</g:link>
                 </td>
                 <td>&nbsp;</td>
@@ -190,7 +199,7 @@
         <h2><g:message code="configurePipeline.current.config"/></h2>
         <g:form controller="configurePipeline" action="invalidateConfig" method="POST"
                 params='["seqType.id": seqType.id, "pipeline.id": pipeline.id, "originAction": actionName, overviewController: "alignmentConfigurationOverview"]'>
-            <g:submitButton name="invalidateConfig" value="Invalidate Config"/>
+            <g:submitButton class="${archived}" name="invalidateConfig" value="Invalidate Config"/>
         </g:form>
         <g:if test="${configState.changed}">
             <otp:annotation type="warning"><g:message code="configurePipeline.current.config.changed"/></otp:annotation>

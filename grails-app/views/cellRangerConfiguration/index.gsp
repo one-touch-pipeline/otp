@@ -31,6 +31,8 @@
 </head>
 <body>
 <div class="body">
+    <g:set var="archived" value="${selectedProject.archived ? 'archived' : ''}"/>
+
     <g:render template="/templates/messages"/>
     <div class="project-selection-header-container">
         <div class="grid-element">
@@ -56,6 +58,12 @@
             tooltip : g.message(code: 'cellRanger.linkTo.runSelectionPage.tooltip')
     ]"/>
 
+    <g:if test="${archived}">
+        <otp:annotation type="warning">
+            <g:message code="configurePipeline.info.projectArchived.noChange" args="[selectedProject.name]"/>
+        </otp:annotation>
+    </g:if>
+
     <h2>Configure version</h2>
     <g:form action="updateVersion" params='["seqType.id": seqType.id, overviewController: controllerName]' method='POST'>
         <table class="pipelineTable">
@@ -76,7 +84,7 @@
             </tr>
             <tr>
                 <td class="myKey"></td>
-                <td><g:submitButton name="submit" value="Submit"/></td>
+                <td><g:submitButton class="${archived}" name="submit" value="Submit"/></td>
             </tr>
         </table>
     </g:form>
@@ -84,7 +92,7 @@
         <sec:ifAllGranted roles="ROLE_OPERATOR">
             <g:form controller="configurePipeline" action="invalidateConfig" method="POST"
                     params='["seqType.id": seqType.id, "pipeline.id": pipeline.id, "originAction": actionName, overviewController: "cellRangerConfiguration"]'>
-                <g:submitButton name="invalidateConfig" value="Invalidate Config"/>
+                <g:submitButton class="${archived}" name="invalidateConfig" value="Invalidate Config"/>
             </g:form>
         </sec:ifAllGranted>
     </g:if>
@@ -171,7 +179,7 @@
                             </label>
                         </div>
                     </div>
-                    <div class="row three">
+                    <div class="row three ${archived}">
                         <g:submitButton name="Execute CellRanger"/>
                     </div>
                 </div>

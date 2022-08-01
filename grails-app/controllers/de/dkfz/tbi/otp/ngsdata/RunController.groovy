@@ -55,7 +55,7 @@ class RunController {
     def show() {
         params.id = params.id ?: "0"
         Run run = runService.getRun(params.id)
-        if (!run) {
+        if (!run || run.project?.archived) {
             return response.sendError(404)
         }
         //This page requires using SAMPLE_NAME, since the DataFile has no connection to a SeqTrack. Its only used for legacy objects
@@ -114,6 +114,7 @@ class RunController {
                     seqCenters  : run.seqCenter?.toString()?.toLowerCase(),
                     dateCreated : TimeFormats.DATE.getFormattedDate(run.dateCreated),
                     dateExecuted: TimeFormats.DATE.getFormattedDate(run.dateExecuted),
+                    archived    : run.project?.archived,
             ]
         }
         render dataToRender as JSON

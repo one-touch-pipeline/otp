@@ -29,7 +29,9 @@
 </head>
 <body>
   <div class="body">
-    <h1><g:message code="run.show.title"/></h1>
+      <g:set var="archived" value="${selectedProject.archived ? 'archived' : ''}"/>
+
+      <h1><g:message code="run.show.title"/></h1>
 
     <h2><g:message code="run.show.general"/></h2>
 
@@ -110,7 +112,11 @@
                 <tr>
                     <td>-</td>
                     <td>s</td>
-                    <td><g:link controller="dataFile" action="showDetails" id="${file.id}">${file.fileName}</g:link></td>
+                    <td><g:link controller="dataFile" action="showDetails" id="${file.id}" class="${archivedClickable}">${file.fileName}
+                        <g:if test="${archived}">
+                            <span title="${selectedProject} is archived">&#128451;</span>
+                        </g:if>
+                    </g:link></td>
                     <td><b><g:link controller="projectOverview" action="index" params="[(projectParameter): file.project.name]">${file.project}</g:link></b></td>
                     <td class="true">metadata</td>
                     <td class="${file.fileExists}">lsdf</td>

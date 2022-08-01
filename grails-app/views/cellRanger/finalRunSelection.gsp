@@ -30,6 +30,8 @@
 
 <body>
 <div class="body">
+    <g:set var="archived" value="${selectedProject.archived ? 'archived' : ''}"/>
+
     <g:render template="/templates/projectSelection"/>
     <g:render template="/templates/messages"/>
 
@@ -42,6 +44,12 @@
     <h1>${g.message(code: "otp.menu.cellRanger.finalRunSelection")}</h1>
 
     <otp:annotation type="info">${g.message(code: "cellRanger.selection.info")}</otp:annotation>
+
+    <g:if test="${selectedProject.archived}">
+        <otp:annotation type="warning">
+            <g:message code="configurePipeline.info.projectArchived.noPlot" args="[selectedProject.name]"/>
+        </otp:annotation>
+    </g:if>
 
     <g:set var="labelId" value="${0}"/>
 
@@ -77,7 +85,7 @@
                         <g:else>
                             &nbsp;● <g:render template="mwp" model="[mwp: mwp]"/>
                         </g:else>
-                        <g:if test="${mwp.bamFileInProjectFolder && mwp.status != Status.DELETED}">
+                        <g:if test="${mwp.bamFileInProjectFolder && mwp.status != Status.DELETED && !archived}">
                             <g:link controller="alignmentQualityOverview" action="viewCellRangerSummary"
                                     params="['singleCellBamFile.id': mwp.bamFileInProjectFolder.id]"
                                     target="_blank">${g.message(code: "cellRanger.selection.plot")}</g:link>
@@ -99,7 +107,7 @@
                     </g:if>
                 </g:form>
                 </td>
-                <td>
+                <td class="${archived}">
                     <g:link controller="cellRangerConfiguration" params="${["individual.id": mwps.sample.individual.id, "sampleType.id": mwps.sample.sampleType.id, "seqType.id": mwps.seqType.id, "reference.id": mwps.reference.id]}">
                         ${g.message(code: "cellRanger.selection.rerun")}
                     </g:link>

@@ -74,6 +74,8 @@ class SnvController extends AbstractAnalysisController {
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
         dataToRender.aaData = data
 
+        dataToRender.archived = project.archived
+
         render dataToRender as JSON
     }
 }

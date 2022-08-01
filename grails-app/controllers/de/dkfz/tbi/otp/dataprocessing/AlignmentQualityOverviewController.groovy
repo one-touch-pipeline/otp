@@ -266,7 +266,8 @@ class AlignmentQualityOverviewController implements CheckAndCall {
 
     def viewCellRangerSummary(ViewCellRangerSummaryCommand cmd) {
         try {
-            String content = cellRangerService.getWebSummaryResultFileContent(cmd.singleCellBamFile)
+            String content = cmd.singleCellBamFile.project.archived ? g.message(code: "alignment.quality.projectArchived.warning") :
+                    cellRangerService.getWebSummaryResultFileContent(cmd.singleCellBamFile)
             render text: content, contentType: "text/html", encoding: "UTF-8"
         } catch (NoSuchFileException e) {
             flash.message = new FlashMessage(g.message(code: "alignment.quality.exception.noSuchFile") as String, e.message)
@@ -284,6 +285,10 @@ class AlignmentQualityOverviewController implements CheckAndCall {
 
         if (!(cmd.abstractMergedBamFile instanceof RnaRoddyBamFile)) {
             return response.sendError(HttpStatus.NOT_FOUND.value())
+        }
+
+        if (cmd.singleCellBamFile.project.archived) {
+            return render(g.message(code: "alignment.quality.projectArchived.warning"))
         }
 
         // This page is semi-generic over AbstractMergedBamFile, with lots of SeqType-specific handling sprinkled all over.
@@ -414,6 +419,7 @@ class AlignmentQualityOverviewController implements CheckAndCall {
                 case { it.name == SeqTypeNames.RNA.seqTypeName }:
                     qcTableRow << [
                             arribaPlots: new TableCellValue(
+                                    archived: project.archived,
                                     value: "PDF",
                                     linkTarget: "_blank",
                                     link: g.createLink(
@@ -449,6 +455,7 @@ class AlignmentQualityOverviewController implements CheckAndCall {
                 case { it.name == SeqTypeNames._10X_SCRNA.seqTypeName }:
                     qcTableRow << [
                             summary          : new TableCellValue(
+                                    archived: project.archived,
                                     value: "Summary",
                                     linkTarget: "_blank",
                                     link: g.createLink(

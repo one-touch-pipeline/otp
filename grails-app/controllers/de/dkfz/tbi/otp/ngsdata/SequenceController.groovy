@@ -154,6 +154,7 @@ class SequenceController {
                     row.ilseId,
                     row.problem?.name() ?: "",
                     row.fileExists,
+                    row.fileArchived,
                     TimeFormats.DATE.getFormattedDate(row.dateCreated),
                     SeqTrack.get(row.seqTrackId).isWithdrawn(),
             ].collect { it ?: "" }.join(",")
@@ -187,6 +188,7 @@ enum SequenceColumn {
     ILSEID("sequence.list.headers.ilseId", "ilseId"),
     KNOWN_ISSUES("sequence.list.headers.warning", "problem"),
     FILE_EXISTS("sequence.list.headers.fileExists", "fileExists"),
+    FILE_ARCHIVED("sequence.list.headers.fileArchived", "fileArchived"),
     DATE("sequence.list.headers.date", "dateCreated"),
     WITHDRAWN("sequence.list.headers.withdrawn", "withdrawn"),
 

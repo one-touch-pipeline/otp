@@ -34,6 +34,12 @@
         <g:render template="/templates/projectSelection"/>
         <h1><g:message code="snv.results.title"/></h1>
 
+        <g:if test="${selectedProject.archived}">
+            <otp:annotation type="warning">
+                <g:message code="configurePipeline.info.projectArchived.noPlot" args="[selectedProject.name]"/>
+            </otp:annotation>
+        </g:if>
+
         <div class="table">
             <div class="otpDataTables">
                 <otp:dataTable

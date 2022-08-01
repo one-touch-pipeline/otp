@@ -28,6 +28,7 @@
 <title><g:message code="seqTrack.seqTrackSet.title" args="[individual.pid]"/></title>
 </head>
 <body>
+    <g:set var="archived" value="${individual.project.archived ? 'archived' : ''}"/>
     <div class="body">
         <h1><g:message code="seqTrack.seqTrackSet.header"/></h1>
         <h2><g:message code="seqTrack.seqTrackSet.selectionCriteria.header"/></h2>
@@ -77,7 +78,7 @@
             <g:set var="run" value="${entry.key}" />
             <div class="color-left-border run slim">
                 <div class="run-information">
-                    <div class="grid-element">
+                    <div class="grid-element ${archivedClickable}" title="Its project ${selectedProject} is archived">
                         <strong>
                             <sec:access expression="hasRole('ROLE_OPERATOR')">
                                 <g:link controller="run" action="show" id="${run.id}">${run.name}</g:link>
@@ -135,12 +136,15 @@
                             <g:set var="exists" value="${dataFile.fileExists ? '' : 'nonexistent'}"/>
                             <g:set var="nBasePairs" value="${dataFile.NBasePairsOrNull}"/>
                             <g:set var="fileType" value="${dataFile.indexFile ? "index" : "fastq"}"/>
-                            <div class="grid-element identifier dataFile color-left-border ${fileType} ${withdrawn} ${exists} trim-text-with-ellipsis"
+                            <div class="grid-element identifier dataFile color-left-border ${fileType} ${withdrawn} ${exists} ${archivedClickable} trim-text-with-ellipsis"
                                  style="grid-row: ${row};"
                                  title="${dataFile.fileName}">
                                 <g:link controller="dataFile" action="showDetails" id="${dataFile.id}">${dataFile.fileName}</g:link>
                                 <g:if test="${dataFile.fileWithdrawn}">
                                     <img src="/assets/warning.png" title="${withdrawnComment}&#013;${withdrawnDate}">
+                                </g:if>
+                                <g:if test="${archived}">
+                                    <span title="${selectedProject} is archivedClickable">&#128451;</span>
                                 </g:if>
                             </div>
                             <div class="grid-element dataFile bases" style="grid-row: ${row}" title="${UnitHelper.asNucleobases(nBasePairs)}">

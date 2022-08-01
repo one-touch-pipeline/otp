@@ -22,6 +22,9 @@
 
 $.otp.resultsTable = {
 
+  // Global flag for archived project
+  projectArchived: false,
+
   registerDataTable(tableElement, source, columnDefs, convertRowData) {
     'use strict';
 
@@ -53,6 +56,7 @@ $.otp.resultsTable = {
             oTable.fnSettings().oFeatures.bServerSide = false;
           },
           success(json) {
+            $.otp.resultsTable.projectArchived = json.archived;
             const result = json;
             let i;
             for (i = 0; i < json.aaData.length; i += 1) {
@@ -97,6 +101,10 @@ $.otp.resultsTable = {
      */
   plotLinkHelper(instanceId, controller, plotType) {
     'use strict';
+
+    if ($.otp.resultsTable.projectArchived) {
+      return 'Plots archived';
+    }
 
     return instanceId ? $.otp.createLinkMarkup({
       controller,

@@ -27,6 +27,7 @@ import de.dkfz.tbi.otp.dataprocessing.MergingCriteriaService
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.utils.exceptions.FileAccessForArchivedProjectNotAllowedException
 
 @Transactional
 class WorkflowService {
@@ -50,6 +51,12 @@ class WorkflowService {
     WorkflowRun createRestartedWorkflow(WorkflowStep step, boolean startDirectly = true) {
         assert step
         assert step.workflowRun.state == WorkflowRun.State.FAILED
+
+        if (step.workflowRun.project.archived) {
+            throw new FileAccessForArchivedProjectNotAllowedException(
+                    "${step.workflowRun.project} is archived and ${step.workflowRun} cannot be restarted"
+            )
+        }
 
         WorkflowRun oldRun = step.workflowRun
         OtpWorkflow otpWorkflow = otpWorkflowService.lookupOtpWorkflowBean(oldRun)

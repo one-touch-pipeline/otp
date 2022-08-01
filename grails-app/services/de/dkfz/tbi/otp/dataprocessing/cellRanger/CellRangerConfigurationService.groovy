@@ -38,6 +38,7 @@ import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.tracking.OtrsTicketService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.Entity
+import de.dkfz.tbi.otp.utils.exceptions.FileAccessForArchivedProjectNotAllowedException
 
 @Transactional
 class CellRangerConfigurationService {
@@ -254,6 +255,9 @@ class CellRangerConfigurationService {
     void deleteMwps(List<CellRangerMergingWorkPackage> mwpToDelete) {
         mwpToDelete.each {
             assert it.status != CellRangerMergingWorkPackage.Status.FINAL
+            if (it.project.archived) {
+                throw new FileAccessForArchivedProjectNotAllowedException("Cannot delete Mwp ${it} since project ${it.project} is archived.")
+            }
         }
         mwpToDelete.each {
             it.status = CellRangerMergingWorkPackage.Status.DELETED

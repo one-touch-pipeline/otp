@@ -214,7 +214,7 @@ class Project implements CommentableWithProject, ProjectPropertiesGivenWithReque
     }
 
     String getDisplayName() {
-        return "${name}${closed ? " (closed)" : ""}"
+        return "${name}${closed ? " (closed)" : ""}${archived ? " (archived)" : ""}"
     }
 
     /**

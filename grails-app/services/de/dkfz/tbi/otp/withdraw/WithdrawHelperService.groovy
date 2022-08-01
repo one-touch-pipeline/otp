@@ -32,6 +32,7 @@ import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.DeletionService
+import de.dkfz.tbi.otp.utils.exceptions.FileAccessForArchivedProjectNotAllowedException
 
 import java.nio.file.*
 
@@ -86,6 +87,12 @@ class WithdrawHelperService {
         }
         summary << "\n"
         summary << TRIM_LINE
+    }
+
+    void checkArchivedProject(WithdrawStateHolder withdrawStateHolder) {
+        if (withdrawStateHolder.seqTracks.any { it.project.archived }) {
+            throw new FileAccessForArchivedProjectNotAllowedException("Project is archived, withdraw is not allowed")
+        }
     }
 
     void checkNonExistingDataFiles(WithdrawStateHolder withdrawStateHolder) {

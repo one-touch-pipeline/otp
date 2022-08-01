@@ -30,10 +30,18 @@
 </head>
 <body>
 <div class="body">
+    <g:set var="archived" value="${selectedProject.archived ? 'archived' : ''}"/>
+
     <g:render template="/templates/messages"/>
 
     <h1><g:message code="configurePipeline.runyapsa.title" args="[selectedProject.name, seqType.displayName]"/></h1>
 
+    <g:if test="${archived}">
+        <otp:annotation type="warning">
+            <g:message code="configurePipeline.info.projectArchived.noChange" args="[selectedProject.name]"/>
+        </otp:annotation>
+    </g:if>
+    
     <g:form action="update" params='["seqType.id": seqType.id, overviewController: "analysisConfigurationOverview"]' method="POST">
         <table class="pipelineTable">
             <tr>
@@ -56,7 +64,7 @@
             <tr>
                 <td class="myKey"></td>
                 <td>
-                    <g:submitButton name="submit" value="Submit"/>
+                    <g:submitButton class="${archived}" name="submit" value="Submit"/>
                     <g:link controller="analysisConfigurationOverview" class="btn">${g.message(code: "default.button.cancel.label")}</g:link>
                 </td>
             </tr>
@@ -65,7 +73,7 @@
     <g:if test="${currentVersion}">
         <g:form controller="configurePipeline" action="invalidateConfig" method="POST"
                 params='["seqType.id": seqType.id, "pipeline.id": pipeline.id, "originAction": actionName, overviewController: "analysisConfigurationOverview"]'>
-            <g:submitButton name="invalidateConfig" value="Invalidate Config"/>
+            <g:submitButton class="${archived}" name="invalidateConfig" value="Invalidate Config"/>
         </g:form>
     </g:if>
 </div>

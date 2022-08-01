@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.workflowExecution
 
 import grails.gorm.transactions.Transactional
 
+import de.dkfz.tbi.otp.utils.exceptions.FileAccessForArchivedProjectNotAllowedException
 import de.dkfz.tbi.otp.workflow.restartHandler.BeanToRestartNotFoundInWorkflowRunException
 import de.dkfz.tbi.otp.workflow.shared.WorkflowJobIsNotRestartableException
 
@@ -57,6 +58,12 @@ class JobService {
 
     private void createRestartedJob(WorkflowStep stepToRestart) {
         assert stepToRestart
+
+        if (stepToRestart.workflowRun.project.archived) {
+            throw new FileAccessForArchivedProjectNotAllowedException(
+                    "${stepToRestart.workflowRun.project} is archived and ${stepToRestart.workflowRun} cannot be restarted"
+            )
+        }
 
         if (!stepToRestart.workflowRun.jobCanBeRestarted) {
             throw new WorkflowJobIsNotRestartableException(

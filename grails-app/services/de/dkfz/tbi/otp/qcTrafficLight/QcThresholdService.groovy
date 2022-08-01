@@ -213,6 +213,7 @@ class TableCellValue implements Serializable {
     String status
     long id
     String linkTarget
+    boolean archived
 
     enum WarnColor {
         OKAY,

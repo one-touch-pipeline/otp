@@ -52,6 +52,7 @@ class WithdrawService {
         withdrawStateHolder.analysis = withdrawAnalysisService.collectObjects(withdrawStateHolder.mergedBamFiles)
 
         withdrawHelperService.with {
+            checkArchivedProject(withdrawStateHolder)
             createOverviewSummary(withdrawStateHolder)
             checkNonExistingDataFiles(withdrawStateHolder)
             checkForAlreadyWithdrawnDatafiles(withdrawStateHolder)

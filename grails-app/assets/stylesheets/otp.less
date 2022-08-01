@@ -1401,9 +1401,15 @@ td div {
 .configure {
     text-decoration: none;
 }
-.withdrawn, .deleted {
+
+.withdrawn, .deleted, .archivedClickable {
     color: grey;
     > * {color: grey;}
+}
+
+.archived {
+    .archivedClickable;
+    pointer-events: none;
 }
 
 .obsoleteMessage {

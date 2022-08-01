@@ -71,7 +71,7 @@ $.otp.run = {
             for (i = 0; i < json.aaData.length; i += 1) {
               row = json.aaData[i];
               rowData = [
-                $.otp.createLinkMarkup({
+                row.archived ? row.name : $.otp.createLinkMarkup({
                   controller: 'run',
                   action: 'show',
                   id: row.id,

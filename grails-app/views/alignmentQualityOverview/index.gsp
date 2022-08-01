@@ -63,6 +63,11 @@
         ${g.message(code: "alignment.quality.qcTrafficLightStatus.warning", args: [supportEmail])}
     </div>
 
+    <g:if test="${selectedProject.archived}">
+        <otp:annotation type="warning">
+            <g:message code="alignment.quality.projectArchived.warning" args="[selectedProject.name]"/>
+        </otp:annotation>
+    </g:if>
 
     <table id="overviewTableProcessedMergedBMF" class="table table-sm table-striped">
         <thead>

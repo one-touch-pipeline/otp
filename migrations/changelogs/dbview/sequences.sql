@@ -55,7 +55,8 @@ p.dir_name AS project_dir_name,
 sc.name AS seq_center_name,
 sc.dir_name AS seq_center_dir_name,
 COALESCE((select bool_and(file_exists) from data_file df where df.seq_track_id = st.id), false) as file_exists,
-COALESCE((select bool_and(file_withdrawn) from data_file df where df.seq_track_id = st.id), false) as file_withdrawn
+COALESCE((select bool_and(file_withdrawn) from data_file df where df.seq_track_id = st.id), false) as file_withdrawn,
+p.archived as file_archived
 
 FROM seq_track AS st
 INNER JOIN run AS r
