@@ -102,8 +102,8 @@ perl -0pi -e "${prefix}((addUniqueConstraint)|(addForeignKeyConstraint)|(dropUni
 perl -0pi -e "${prefix}createIndex.*tableName: \"(${nonJoinTables})\".*\{(\n\s{12}column.*\n)+\s{8}\}${suffix}" $changelogPath
 perl -0pi -e "${prefix}addUniqueConstraint${suffix}" $changelogPath
 perl -0pi -e "${prefix}alterSequence${suffix}" $changelogPath
-perl -0pi -e "${prefix}dropIndex.*\n\n\s{8}createIndex.*\{(\n\s{12}column.*\n)+\s{8}\}${suffix}" $changelogPath
-perl -0pi -e "${prefix}dropUniqueConstraint.*\n\n\s{8}addUniqueConstraint${suffix}" $changelogPath
+perl -0pi -e "${prefix}dropIndex.*\n.*\}\n\n\s{4}changeSet.*\{\n\s{8}createIndex.*\{(\n\s{12}column.*\n)+\s{8}\}${suffix}" $changelogPath
+perl -0pi -e "${prefix}dropUniqueConstraint.*\n.*\}\n\n\s{4}changeSet.*\{\n\s{8}addUniqueConstraint${suffix}" $changelogPath
 perl -0pi -e "${prefix}addUniqueConstraint.*columnNames: \"((alignment_pass_id)|(merging_pass_id))\".*tableName: \"abstract_bam_file\"${suffix}" $changelogPath
 #exclude the wrong listed dropUniqueConstraint for UC_EXTERNAL_WORKFLOW_CONFIG_FRAGMENTNAME_COL
 perl -0pi -e "${prefix}dropUniqueConstraint.*constraintName.*\"UC_EXTERNAL_WORKFLOW_CONFIG_FRAGMENTNAME_COL\", tableName: \"external_workflow_config_fragment\"${suffix}"  $changelogPath
