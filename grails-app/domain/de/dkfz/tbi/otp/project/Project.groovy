@@ -191,6 +191,7 @@ class Project implements CommentableWithProject, ProjectPropertiesGivenWithReque
         relatedProjects nullable: true
         internalNotes nullable: true
         storageUntil nullable: true
+        archived nullable: false
     }
 
     @Override
