@@ -448,6 +448,18 @@
                             value="${projectRequestAvailable}"/>
                 </td>
             </tr>
+            <tr>
+                <td><g:message code="project.archived.message"/></td>
+                <td class="help" title="${g.message(code: "project.archived.message.detail")}"></td>
+                <td>
+                    <otp:editorSwitch
+                            roles="ROLE_OPERATOR"
+                            template="dropDown"
+                            link="${g.createLink(controller: 'projectConfig', action: 'updateArchived')}"
+                            values="${["true", "false"]}"
+                            value="${selectedProject.archived}"/>
+                </td>
+            </tr>
         </table>
     </div>
 <otp:otpModal modalId="confirmationUserGroupModal" title="Warning" type="dialog" closeText="Cancel" confirmText="Update" closable="false">

@@ -1130,6 +1130,12 @@ echo 'OK'
         baseProject.save(flush: true)
     }
 
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void updateArchived(Project project, boolean value) {
+        project.archived = value
+        assert project.save(flush: true)
+    }
+
     Path getProjectDirectory(Project project) {
         return fileSystemService.getRemoteFileSystem(project.realm).getPath(
                 configService.rootPath.absolutePath,

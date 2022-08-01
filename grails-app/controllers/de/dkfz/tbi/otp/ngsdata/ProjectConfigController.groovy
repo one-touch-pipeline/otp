@@ -72,6 +72,7 @@ class ProjectConfigController implements CheckAndCall {
             updateCopyFiles                     : "POST",
             updatePubliclyAvailable             : "POST",
             updateClosed                        : "POST",
+            updateArchived                      : "POST",
             updateRequestAvailable              : "POST",
             saveProjectComment                  : "POST",
             updateUnixGroup                     : "POST",
@@ -246,6 +247,12 @@ class ProjectConfigController implements CheckAndCall {
 
     def updateCustomFinalNotification(String value) {
         projectService.updateCustomFinalNotification(projectSelectionService.requestedProject, value.toBoolean())
+        Map map = [success: true]
+        render map as JSON
+    }
+
+    def updateArchived(String value) {
+        projectService.updateArchived(projectSelectionService.requestedProject, value.toBoolean())
         Map map = [success: true]
         render map as JSON
     }

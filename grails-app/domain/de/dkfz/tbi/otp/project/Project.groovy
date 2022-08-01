@@ -108,6 +108,13 @@ class Project implements CommentableWithProject, ProjectPropertiesGivenWithReque
     boolean projectRequestAvailable = false
 
     /**
+     * flag for archived project.
+     *
+     * Data in archived project cannot be accessed.
+     */
+    boolean archived = false
+
+    /**
      * @deprecated field is part of the old workflow system, use {@link WorkflowVersionSelector} instead
      */
     @Deprecated
