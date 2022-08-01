@@ -91,6 +91,8 @@ class LicenseCheck {
             "package.json",
 
             "cypress.json",
+
+            "docker/keycloak/realm-export.json",
     ].collect { Paths.get(it) }
 
     static void checkLicense(Path path, List<String> problems) {

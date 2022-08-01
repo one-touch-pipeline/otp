@@ -24,6 +24,8 @@ package de.dkfz.tbi.otp.config
 import grails.util.Environment
 
 enum OtpProperty {
+    OIDC_ENABLED('otp.security.oidc.enabled', TypeValidators.BOOLEAN, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT), 'false'),
+
     LDAP_ENABLED('otp.security.ldap.enabled', TypeValidators.BOOLEAN, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT), 'true'),
     LDAP_SERVER('otp.security.ldap.server', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT)),
     LDAP_MANAGER_DN('otp.security.ldap.managerDn', TypeValidators.SINGLE_LINE_TEXT_OPTIONAL, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT)),

@@ -29,6 +29,7 @@ technical reasons, however they are also licensed under this license.
  - package-lock.json
  - cypress.json
  - cypress/fixtures
+ - docker/keycloak/realm-export.json
 
 Different licenses may apply to the following folders and files therein,
  - grails-app/assets/lib
