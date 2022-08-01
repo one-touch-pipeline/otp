@@ -38,6 +38,16 @@ services:
     networks:
       otp:
 
+  keycloak:
+    build: docker/keycloak
+    container_name: otp-dev-keycloak
+    env_file:
+      - .env
+    ports:
+      - 8100:8080
+    networks:
+      otp:
+
   open-ldap:
     container_name: otp-dev-ldap
     build: docker/ldap
