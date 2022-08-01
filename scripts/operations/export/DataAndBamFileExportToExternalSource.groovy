@@ -66,13 +66,15 @@ String selectByIndividual = """
  * - sequencingReadType (LibraryLayout): PAIRED, SINGLE, MATE_PAIRED
  * - single cell flag: true = single cell, false = bulk
  * - sampleName
+ * - md5sum: optional
  *
  * The columns can be separated by comma, semicolon or tab. Each value is trimmed
  */
 String multiColumnInput = """
-#pid1,tumor,WGS,PAIRED,false,sampleName1
+#pid1,tumor,WGS,PAIRED,false,sampleName1, md5sum
+#pid2,tumor,WES,SINGLE,true,,md5sum
 #pid3,control,WES,PAIRED,false,
-#pid5,control,RNA,SINGLE,true,sampleName2
+#pid5,control,RNA,SINGLE,true,sampleName2,
 
 """
 
@@ -87,6 +89,9 @@ boolean copyFastqFiles = false
 
 //************ Select whether BAM files should be copied (true/false) ************//
 boolean copyBamFiles = false
+
+//************ Select whether withdrawn data should be copied (true/false) ************//
+boolean copyWithdrawnData = false
 
 //************ Select whether analyses should be copied (true/false) ************//
 Map<PipelineType, Boolean> copyAnalyses = [:]
@@ -174,7 +179,7 @@ List<DataExportOverviewItem> dataExportOverview = []
 scriptInputHelperService.parseAndSplitHelper([selectByIndividual, multiColumnInput].join("\n")).each {List<String> params ->
     int paramsCount = params.size()
     assert paramsCount > 0: "Input must contain at least one column of PID"
-    assert paramsCount in [1,2,5,6]: "Missing input data for seqType determination"
+    assert paramsCount in [1, 2, 5, 6, 7]: "Missing input data for seqType determination"
 
     //required column
     Individual individual = CollectionUtils.exactlyOneElement(Individual.findAllByPidOrMockPidOrMockFullName(params[0], params[0], params[0]),
@@ -204,12 +209,18 @@ scriptInputHelperService.parseAndSplitHelper([selectByIndividual, multiColumnInp
         sampleName = params[5]
     }
 
+    String md5sum = null
+    if (paramsCount > 6) {
+        md5sum = params[6]
+    }
+
     //find the seqTracks, which might be used for analysis
-    List<SeqTrack> seqTracks = seqTrackService.findAllByIndividualSampleTypeSeqTypeSampleName(
+    List<SeqTrack> seqTracks = seqTrackService.findAllByIndividualSampleTypeSeqTypeSampleNameMd5sum(
             individual,
             sampleType,
             seqType,
-            sampleName
+            sampleName,
+            md5sum
     )
     assert seqTracks: "Could not find any seqtracks for ${params.join(' ')}"
     seqTrackList.addAll(seqTracks)
@@ -226,8 +237,8 @@ scriptInputHelperService.parseAndSplitHelper([selectByIndividual, multiColumnInp
         seqTracks.collect { SeqTrack seqTrack ->
             [seqTrack.individual, seqTrack.sampleType, seqTrack.seqType]
         }.unique().each {
-            List<SeqTrack> lanes = seqTrackService.findAllByIndividualSampleTypeSeqTypeSampleName(
-                    it[0],it[1],it[2]
+            List<SeqTrack> lanes = seqTrackService.findAllByIndividualSampleTypeSeqTypeSampleNameMd5sum(
+                    it[0], it[1], it[2]
             )
             dataExportOverview.add(new DataExportOverviewItem(
                     pipelineType    : PipelineType.FASTQ,

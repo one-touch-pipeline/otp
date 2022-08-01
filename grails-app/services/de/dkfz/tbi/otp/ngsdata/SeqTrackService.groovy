@@ -333,22 +333,28 @@ class SeqTrackService {
      * @param sampleName all samples if missing
      * @return all the SamplePairs
      */
-    List<SeqTrack> findAllByIndividualSampleTypeSeqTypeSampleName(Individual individual,
-                                                                  SampleType sampleType = null, SeqType seqType = null, String sampleName = null) {
-        return SeqTrack.withCriteria {
-            sample {
-                eq('individual', individual)
-                if (sampleType) {
-                    eq('sampleType', sampleType)
+    List<SeqTrack> findAllByIndividualSampleTypeSeqTypeSampleNameMd5sum(Individual individual,
+                                                                        SampleType sampleType = null, SeqType seqType = null, String sampleName = null,
+                                                                        String md5sum = null) {
+        return DataFile.withCriteria {
+            seqTrack {
+                sample {
+                    eq('individual', individual)
+                    if (sampleType) {
+                        eq('sampleType', sampleType)
+                    }
+                }
+                if (seqType) {
+                    eq('seqType', seqType)
+                }
+                if (sampleName) {
+                    eq('sampleIdentifier', sampleName)
                 }
             }
-            if (seqType) {
-                eq('seqType', seqType)
+            if (md5sum) {
+                eq('md5sum', md5sum)
             }
-            if (sampleName) {
-                eq('sampleIdentifier', sampleName)
-            }
-        }
+        }*.seqTrack.unique()
     }
 
     static void logToSeqTrack(SeqTrack seqTrack, String message, boolean saveInSeqTrack = true) {

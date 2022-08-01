@@ -43,23 +43,23 @@ class DataExportService {
     IndividualService individualService
 
     DataExportOutput exportHeaderInfo(DataExportInput dataExportInput) {
-        exportFilesWrapper(dataExportInput, exportHeaderInfoClosure,)
+        return exportFilesWrapper(dataExportInput, exportHeaderInfoClosure,)
     }
 
     DataExportOutput exportDataFiles(DataExportInput dataExportInput) {
-        exportFilesWrapper(dataExportInput, exportDataFilesClosure)
+        return exportFilesWrapper(dataExportInput, exportDataFilesClosure)
     }
 
     DataExportOutput exportBamFiles(DataExportInput dataExportInput) {
-        exportFilesWrapper(dataExportInput, exportBamFilesClosure)
+        return exportFilesWrapper(dataExportInput, exportBamFilesClosure)
     }
 
     DataExportOutput exportAnalysisFiles(DataExportInput dataExportInput) {
-        exportFilesWrapper(dataExportInput, exportAnalysisFilesClosure)
+        return exportFilesWrapper(dataExportInput, exportAnalysisFilesClosure)
     }
 
     private final Closure exportHeaderInfoClosure = { dataExportInput, scriptFileBuilder, scriptListBuilder, consoleBuilder,
-                                                rsyncChmod, copyConnection, copyTargetBase ->
+                                                      rsyncChmod, copyConnection, copyTargetBase ->
         String umask = dataExportInput.external ? "027" : "022"
 
         if (!dataExportInput.checkFileStatus) {
@@ -78,7 +78,7 @@ class DataExportService {
     }
 
     private final Closure exportDataFilesClosure = { dataExportInput, scriptFileBuilder, scriptListBuilder, consoleBuilder,
-                                               rsyncChmod, copyConnection, copyTargetBase ->
+                                                     rsyncChmod, copyConnection, copyTargetBase ->
         if (dataExportInput.checkFileStatus) {
             consoleBuilder.append("\n************************************ FASTQ ************************************\n")
             consoleBuilder.append("Found ${dataExportInput.seqTrackList.size()} lanes:\n")
@@ -93,7 +93,7 @@ class DataExportService {
             if (dataExportInput.checkFileStatus) {
                 consoleBuilder.append("\n${seqTrack.individual}\t${seqTrack.seqType}\t${seqTrack.sampleType.name}\n")
             }
-            seqTrack.dataFiles.findAll { !it.fileWithdrawn }.each { DataFile dataFile ->
+            seqTrack.dataFiles.findAll { dataExportInput.copyWithdrawnData ? true : !it.fileWithdrawn }.each { DataFile dataFile ->
                 Path currentFile = fileSystem.getPath(lsdfFilesService.getFileFinalPath(dataFile))
                 if (Files.exists(currentFile)) {
                     if (!dataExportInput.checkFileStatus) {
@@ -122,7 +122,7 @@ class DataExportService {
     }
 
     private final Closure exportBamFilesClosure = { dataExportInput, scriptFileBuilder, scriptListBuilder, consoleBuilder,
-                                              rsyncChmod, copyConnection, copyTargetBase ->
+                                                    rsyncChmod, copyConnection, copyTargetBase ->
         if (dataExportInput.checkFileStatus) {
             consoleBuilder.append("\n************************************ BAM ************************************\n")
             consoleBuilder.append("Found BAM files ${dataExportInput.bamFileList.size()}\n")
@@ -187,7 +187,7 @@ class DataExportService {
     }
 
     private final Closure exportAnalysisFilesClosure = { dataExportInput, scriptFileBuilder, scriptListBuilder, consoleBuilder,
-                                                   rsyncChmod, copyConnection, copyTargetBase ->
+                                                         rsyncChmod, copyConnection, copyTargetBase ->
         if (dataExportInput.checkFileStatus) {
             consoleBuilder.append("\n************************************ Analyses ************************************\n")
         }

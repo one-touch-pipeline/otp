@@ -54,6 +54,9 @@ class DataExportInput implements Validateable {
     //************ Generate a script for file list (true/false) [checkFileStatus must be false] ************//
     boolean getFileList = false
 
+    //************ Copy withdrawn Data ************//
+    boolean copyWithdrawnData = false
+
     //************ Select new unix group ************//
     String unixGroup
 
