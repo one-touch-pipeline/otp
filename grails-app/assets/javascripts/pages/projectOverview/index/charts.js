@@ -46,11 +46,20 @@ $(() => {
           }]
         },
         options: $.otp.chart.defaultChartOptions('', {
+          indexAxis: 'y',
+          scales: {
+            x: {
+              min: 0,
+              ticks: {
+                stepSize: 1
+              }
+            }
+          },
           plugins: {
             title: {
               display: true,
               font: { size: '14px' },
-              text: 'Sample Type Count by Seq. Type'
+              text: 'Patients and the Number of Samples (non-redundant)'
             },
             legend: {
               display: false
