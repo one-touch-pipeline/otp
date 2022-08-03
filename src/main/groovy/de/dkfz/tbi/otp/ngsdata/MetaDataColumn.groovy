@@ -28,7 +28,7 @@ import groovy.transform.TupleConstructor
  */
 @TupleConstructor
 enum MetaDataColumn {
-    FASTQ_FILE,
+    FASTQ_FILE(["DATA_FILE"]),
     READ(["MATE"]),
     MD5,
     CENTER_NAME,
