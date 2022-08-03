@@ -46,6 +46,6 @@ class ClusterLogQueryResultFileService extends AbstractLogDirectoryService {
 
     Path logFileWithCreatingDirectory() {
         Date date = configService.currentDate
-        return createAndGetLogDirectory(date).resolve("${TimeFormats.TIME_DASHED.getFormattedDate(date)}\'.txt\'")
+        return createAndGetLogDirectory(date).resolve("${TimeFormats.TIME_DASHED.getFormattedDate(date)}.txt")
     }
 }

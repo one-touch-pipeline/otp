@@ -70,6 +70,6 @@ class ClusterLogQueryResultFileServiceSpec extends AbstractLogDirectoryServiceSp
 
     private Path expectedFile() {
         Date date = service.configService.currentDate
-        return expectedPath().resolve("${TimeFormats.TIME_DASHED.getFormattedDate(date)}\'.txt\'")
+        return expectedPath().resolve("${TimeFormats.TIME_DASHED.getFormattedDate(date)}.txt")
     }
 }
