@@ -158,7 +158,7 @@ assert targetFolder.absolute: "targetOutputFolder is not an absolute path"
 // Data structure for processing
 List<SeqTrack> seqTrackList = []
 List<AbstractMergedBamFile> bamFileList = []
-Map<PipelineType, List<BamFilePairAnalysis>> analysisListMap = [:]
+Map<PipelineType, List<BamFilePairAnalysis>> analysisListMap = [:].withDefault {[]}
 
 class DataExportOverviewItem {
     PipelineType pipelineType
@@ -283,7 +283,6 @@ scriptInputHelperService.parseAndSplitHelper([selectByIndividual, multiColumnInp
     copyAnalyses.findAll { Map.Entry<PipelineType, Boolean> entry ->
         entry.value
     }.each { Map.Entry<PipelineType, Boolean> instance ->
-        List<BamFilePairAnalysis> analysisPerMultiImport = analysisListMap.get(instance.key)
         samplePairService.findAllByIndividualSampleTypeSeqType(
                 individual,
                 sampleType,
@@ -303,11 +302,7 @@ scriptInputHelperService.parseAndSplitHelper([selectByIndividual, multiColumnInp
                 }
                 if (!bamFilePairAnalyses.isEmpty()) {
                     BamFilePairAnalysis analysis = bamFilePairAnalyses.first()
-                    if (analysisPerMultiImport) {
-                        analysisPerMultiImport.add(analysis)
-                    } else {
-                        analysisListMap.put(instance.key, [analysis])
-                    }
+                    analysisListMap[instance.key].add(analysis)
                     dataExportOverview.add(new DataExportOverviewItem(
                             pipelineType: instance.key,
                             individual: analysis.individual,
