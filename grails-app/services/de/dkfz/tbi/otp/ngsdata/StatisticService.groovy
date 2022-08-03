@@ -200,6 +200,12 @@ class StatisticService {
                     return acc
                 }
 
+        List<Map<String, String>> injectLabels2 = [[x: result.first().x, y: 0]]
+        result = result.inject(injectLabels2) { List<Map<String, String>> acc, Map<String, String> element ->
+            element.y = acc.last().y + element.y
+            return acc + element
+        }
+
         Map dataToRender = [
                 data  : result,
         ]
