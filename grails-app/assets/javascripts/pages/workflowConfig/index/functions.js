@@ -329,8 +329,8 @@ $(document).ready(() => {
         // selector name
         targets: [3],
         orderData: [2, 3, 4],
-        render: (data, type, row, meta) => `${row.exactMatch ? '<strong>' : ''}
-            <a href="#" data-toggle="modal" data-target="#workflowConfigModal" data-rowidx="${meta.row}">${data}</a>
+        render: (data, type, row) => `${row.exactMatch ? '<strong>' : ''}
+            <a href="#" data-toggle="modal" data-target="#workflowConfigModal">${data}</a>
             ${row.exactMatch ? '</strong>' : ''}`
       },
       {
@@ -352,18 +352,18 @@ $(document).ready(() => {
         className: 'text-nowrap',
         data: null,
         orderable: false,
-        render: (data, type, row, meta) => {
+        render: (data, type, row) => {
           const disabled = row.selectorType === 'DEFAULT_VALUES' ? 'disabled' : '';
           return `<button id="new-row" class="btn btn-sm btn-primary" type="button" data-toggle="modal" 
-            data-target="#workflowConfigModal" data-rowidx="${meta.row}" data-toggle="tooltip" 
+            data-target="#workflowConfigModal" data-toggle="tooltip"
             title="${$.otp.workflowConfig.TOOLTIPS.createButton}" data-operation="create">
             <i class="bi bi-plus-square"></i></button>
             <button id="edit-row" class="btn btn-sm btn-primary" type="button" data-toggle="modal" 
-            data-target="#workflowConfigModal" data-rowidx="${meta.row}" data-toggle="tooltip" 
+            data-target="#workflowConfigModal" data-toggle="tooltip"
             title="${$.otp.workflowConfig.TOOLTIPS.editButton}" data-operation="update" ${disabled}>
             <i class="bi bi-pencil"></i></button>
             <button id="deprecate-row" class="btn btn-sm btn-danger" type="button" data-toggle="modal"
-            data-target="#workflowConfigModal" data-rowidx="${meta.row}" data-toggle="tooltip" 
+            data-target="#workflowConfigModal" data-toggle="tooltip"
             title="${$.otp.workflowConfig.TOOLTIPS.deprecateButton}" data-operation="deprecate" ${disabled}>
             <i class="bi bi-journal-code"></i></button>`;
         }
@@ -407,7 +407,7 @@ $(document).ready(() => {
     }
     operation = operation || $.otp.workflowConfig.OPERATION.VIEW;
 
-    const rowIdx = $(event.relatedTarget).data('rowidx');
+    const rowIdx = workflowConfigTable.row($(event.relatedTarget).parents('tr').first()).index();
     const rowData = workflowConfigTable.row(rowIdx).data() || {};
     if (rowIdx === undefined) { // create a select without reference
       $.otp.workflowConfig.QUERY_FIELDS.forEach((f) => {
@@ -567,7 +567,6 @@ $(document).ready(() => {
   $('button#save-button').on('click', (e) => {
     e.preventDefault();
 
-    console.log('save method called');
     const form = $('#workflowConfigModalForm');
     const operation = form.find('input#pp-operation').val();
 
@@ -589,8 +588,6 @@ $(document).ready(() => {
       type: 'POST',
       data,
       success(response) {
-        console.log('ajax success: ', response);
-
         let newSelector = response;
         let op = operation.toLowerCase();
         const row = $.otp.workflowConfig.getDataTable().row(`#${response.id}`);
@@ -614,8 +611,6 @@ $(document).ready(() => {
         $.otp.workflowConfig.getDialog().modal('hide');
       },
       error(err) {
-        console.log('ajax error: ', err);
-
         if (err && err.status && err.responseJSON) {
           $.otp.toaster.showErrorToast(
             `Failed with HTTP ${err.status}: ${err.responseJSON.error}`,
