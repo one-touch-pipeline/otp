@@ -80,6 +80,7 @@ $.otp.chart = {
    */
   // eslint-disable-next-line strict
   renderChartOnElement(elementId, dataUrl, chartFunction) {
+    $.otp.chart.destroyChartOnElementIfExists(elementId);
     fetch(dataUrl)
       .then((response) => response.json())
       .then((chartData) => {
@@ -87,5 +88,12 @@ $.otp.chart = {
         chartFunction(ctx, chartData);
       })
       .catch((error) => $.otp.toaster.showErrorToast(`Loading data for ${elementId} failed`, error));
+  },
+
+  destroyChartOnElementIfExists(elementId) {
+    const chart = Chart.getChart(elementId);
+    if (chart) {
+      chart.destroy();
+    }
   }
 };

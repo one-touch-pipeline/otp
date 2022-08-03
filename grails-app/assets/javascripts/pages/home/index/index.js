@@ -24,9 +24,9 @@ $(() => {
   'use strict';
 
   const projectGroupSelector = $('#projectGroup_select');
-  const projectGroup = projectGroupSelector.val();
 
   projectGroupSelector.on('change', () => {
+    const projectGroup = projectGroupSelector.val();
     $.otp.sharedCharts.renderSampleCountPerSeqType(projectGroup);
     $.otp.sharedCharts.renderProjectCountPerDate(projectGroup);
     $.otp.sharedCharts.renderLaneCountPerDate(projectGroup);
