@@ -183,6 +183,10 @@ class StatisticService {
     }
 
     private Map getCountPerDate(List data) {
+        if (!data) {
+            return [data: []]
+        }
+
         LocalDate firstDate = LocalDate.parse(data[0][0])
         LocalDate lastDate = LocalDate.parse(data[-1][0]).plusMonths(1)
 
