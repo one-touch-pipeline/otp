@@ -26,6 +26,7 @@ import groovy.transform.CompileStatic
 import groovy.transform.Synchronized
 import org.springframework.beans.factory.annotation.Autowired
 
+import de.dkfz.roddy.execution.BEExecutionService
 import de.dkfz.roddy.execution.jobs.BatchEuphoriaJobManager
 import de.dkfz.roddy.execution.jobs.JobManagerOptions
 import de.dkfz.roddy.execution.jobs.cluster.lsf.LSFJobManager
@@ -67,15 +68,20 @@ class ClusterJobManagerFactoryService {
                     .setPassEnvironment(true) // module system
                     .setTimeZoneId(configService.timeZoneId)
                     .build()
+            BEExecutionServiceAdapter bEExecutionServiceAdapter = new BEExecutionServiceAdapter(remoteShellHelper, realm)
 
-            if (realm.jobScheduler == Realm.JobScheduler.PBS) {
-                manager = new PBSJobManager(new BEExecutionServiceAdapter(remoteShellHelper, realm), jobManagerParameters)
-            } else if (realm.jobScheduler == Realm.JobScheduler.LSF) {
-                manager = new LSFJobManager(new BEExecutionServiceAdapter(remoteShellHelper, realm), jobManagerParameters)
-            } else if (realm.jobScheduler == Realm.JobScheduler.SLURM) {
-                manager = new SlurmJobManager(new BEExecutionServiceAdapter(remoteShellHelper, realm), jobManagerParameters)
-            } else {
-                throw new IllegalArgumentException("Unsupported cluster job scheduler \"${realm.jobScheduler}\"")
+            switch (realm.jobScheduler) {
+                case Realm.JobScheduler.PBS:
+                    manager = new PBSJobManager(bEExecutionServiceAdapter, jobManagerParameters)
+                    break
+                case Realm.JobScheduler.LSF:
+                    manager = new LSFJobManager(bEExecutionServiceAdapter, jobManagerParameters)
+                    break
+                case Realm.JobScheduler.SLURM:
+                    manager = new SlurmJobManager(bEExecutionServiceAdapter, jobManagerParameters)
+                    break
+                default:
+                    throw new IllegalArgumentException("Unsupported cluster job scheduler \"${realm.jobScheduler}\"")
             }
             managerPerRealm[realm] = manager
         }
