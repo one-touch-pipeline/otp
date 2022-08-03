@@ -26,7 +26,6 @@ import groovy.transform.CompileStatic
 import groovy.transform.Synchronized
 import org.springframework.beans.factory.annotation.Autowired
 
-import de.dkfz.roddy.execution.BEExecutionService
 import de.dkfz.roddy.execution.jobs.BatchEuphoriaJobManager
 import de.dkfz.roddy.execution.jobs.JobManagerOptions
 import de.dkfz.roddy.execution.jobs.cluster.lsf.LSFJobManager
