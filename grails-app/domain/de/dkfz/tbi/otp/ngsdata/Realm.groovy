@@ -29,6 +29,7 @@ class Realm implements Entity, Serializable {
     enum JobScheduler {
         LSF,
         PBS,
+        SLURM,
 
         static Realm.JobScheduler getByName(String name) {
             return values().find {

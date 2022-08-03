@@ -30,6 +30,7 @@ import de.dkfz.roddy.execution.jobs.BatchEuphoriaJobManager
 import de.dkfz.roddy.execution.jobs.JobManagerOptions
 import de.dkfz.roddy.execution.jobs.cluster.lsf.LSFJobManager
 import de.dkfz.roddy.execution.jobs.cluster.pbs.PBSJobManager
+import de.dkfz.roddy.execution.jobs.cluster.slurm.SlurmJobManager
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.ngsdata.Realm
 
@@ -71,6 +72,8 @@ class ClusterJobManagerFactoryService {
                 manager = new PBSJobManager(new BEExecutionServiceAdapter(remoteShellHelper, realm), jobManagerParameters)
             } else if (realm.jobScheduler == Realm.JobScheduler.LSF) {
                 manager = new LSFJobManager(new BEExecutionServiceAdapter(remoteShellHelper, realm), jobManagerParameters)
+            } else if (realm.jobScheduler == Realm.JobScheduler.SLURM) {
+                manager = new SlurmJobManager(new BEExecutionServiceAdapter(remoteShellHelper, realm), jobManagerParameters)
             } else {
                 throw new IllegalArgumentException("Unsupported cluster job scheduler \"${realm.jobScheduler}\"")
             }
