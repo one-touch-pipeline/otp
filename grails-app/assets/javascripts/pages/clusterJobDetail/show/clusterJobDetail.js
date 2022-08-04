@@ -30,6 +30,8 @@ $.otp.clusterJobDetailProgress = {
       parameters: { id }
     });
 
+    Chart.register(ChartDataLabels);
+
     $.otp.chart.renderChartOnElement(
       'delayPieChart',
       dataUrl,
@@ -41,7 +43,13 @@ $.otp.clusterJobDetailProgress = {
             labels: chartData.keys,
             datasets: [{
               data: chartData.data,
-              backgroundColor: $.otp.chart.colorList
+              backgroundColor: $.otp.chart.colorList,
+              datalabels: {
+                display: true,
+                color: '#fff',
+                // eslint-disable-next-line no-mixed-operators
+                formatter: (value, context) => `${Math.round(value / context.chart.getDatasetMeta(0).total * 100)}%`
+              }
             }]
           },
           options: $.otp.chart.defaultChartOptions('', {

@@ -24,6 +24,8 @@ $.otp.sharedCharts = {
 
   // eslint-disable-next-line strict
   renderSampleCountPerSeqType(projectGroup = 'All projects') {
+    Chart.register(ChartDataLabels);
+
     const dataUrl = $.otp.createLink({
       controller: 'statistic',
       action: 'sampleCountPerSequenceType',
@@ -38,7 +40,13 @@ $.otp.sharedCharts = {
           labels: chartData.labels,
           datasets: [{
             data: chartData.data,
-            backgroundColor: $.otp.chart.colorList
+            backgroundColor: $.otp.chart.colorList,
+            datalabels: {
+              display: true,
+              color: '#fff',
+              // eslint-disable-next-line no-mixed-operators
+              formatter: (value, context) => `${Math.round(value / context.chart.getDatasetMeta(0).total * 100)}%`
+            }
           }]
         },
         options: $.otp.chart.defaultChartOptions('Samples by Sequencing Technologies', {
@@ -54,6 +62,8 @@ $.otp.sharedCharts = {
 
   // eslint-disable-next-line strict
   renderSampleCountPerSeqTypeBySelectedProject() {
+    Chart.register(ChartDataLabels);
+
     const dataUrl = $.otp.createLink({
       controller: 'statistic',
       action: 'sampleTypeCountBySeqType'
@@ -67,7 +77,13 @@ $.otp.sharedCharts = {
           labels: chartData.labels,
           datasets: [{
             data: chartData.data,
-            backgroundColor: $.otp.chart.colorList
+            backgroundColor: $.otp.chart.colorList,
+            datalabels: {
+              display: true,
+              color: '#fff',
+              // eslint-disable-next-line no-mixed-operators
+              formatter: (value, context) => `${Math.round(value / context.chart.getDatasetMeta(0).total * 100)}%`
+            }
           }]
         },
         options: $.otp.chart.defaultChartOptions('Samples by Sequencing Technologies', {
@@ -94,6 +110,7 @@ $.otp.sharedCharts = {
       new Chart(domContext, {
         type: 'line',
         data: {
+          labels: chartData.labels,
           datasets: [{
             label: 'Number of Projects',
             data: chartData.data,

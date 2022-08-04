@@ -60,6 +60,9 @@ $.otp.chart = {
         }
       },
       plugins: {
+        datalabels: {
+          display: false
+        },
         title: {
           display: !!title,
           font: { size: '14px' },
