@@ -137,7 +137,7 @@ VALUES(nextval('hibernate_sequence'), 0, now(), now(), 0, 'Default values for Pa
 ON CONFLICT DO NOTHING;
 
 INSERT INTO external_workflow_config_selector(id, version, date_created, last_updated, name, selector_type, priority, external_workflow_config_fragment_id)
-VALUES(nextval('hibernate_sequence'), 0, now(), now(), 'Default values for PanCancer alignment WHOLE_GENOME test', 'DEFAULT_VALUES', 160, (
+VALUES(nextval('hibernate_sequence'), 0, now(), now(), 'Default values for PanCancer alignment WHOLE_GENOME test', 'DEFAULT_VALUES', 18, (
     SELECT id FROM external_workflow_config_fragment WHERE name = 'Default values for PanCancer alignment WHOLE_GENOME test'))
 ON CONFLICT DO NOTHING;
 
@@ -265,7 +265,7 @@ VALUES(nextval('hibernate_sequence'), 0, now(), now(), 0, 'Default values for Pa
 ON CONFLICT DO NOTHING;
 
 INSERT INTO external_workflow_config_selector(id, version, date_created, last_updated, name, selector_type, priority, external_workflow_config_fragment_id)
-VALUES(nextval('hibernate_sequence'), 0, now(), now(), 'Default values for PanCancer alignment ChIP Seq test', 'DEFAULT_VALUES', 160, (
+VALUES(nextval('hibernate_sequence'), 0, now(), now(), 'Default values for PanCancer alignment ChIP Seq test', 'DEFAULT_VALUES', 18, (
     SELECT id FROM external_workflow_config_fragment WHERE name = 'Default values for PanCancer alignment ChIP Seq test'))
 ON CONFLICT DO NOTHING;
 
@@ -401,7 +401,7 @@ VALUES(nextval('hibernate_sequence'), 0, now(), now(), 0, 'Default values for Pa
 ON CONFLICT DO NOTHING;
 
 INSERT INTO external_workflow_config_selector(id, version, date_created, last_updated, name, selector_type, priority, external_workflow_config_fragment_id)
-VALUES(nextval('hibernate_sequence'), 0, now(), now(), 'Default values for PanCancer alignment EXON test', 'DEFAULT_VALUES', 80, (
+VALUES(nextval('hibernate_sequence'), 0, now(), now(), 'Default values for PanCancer alignment EXON test', 'DEFAULT_VALUES', 18, (
     SELECT id FROM external_workflow_config_fragment WHERE name = 'Default values for PanCancer alignment EXON test'))
 ON CONFLICT DO NOTHING;
 

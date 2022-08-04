@@ -284,7 +284,6 @@ abstract class AbstractRoddyAlignmentWorkflowSpec extends AbstractAlignmentWorkf
                 """, [
                 workflows       : [workflowAlignment],
                 referenceGenomes: [referenceGenome],
-                customPriority  : 20,
         ])
 
         createFragmentAndSelector("toolVersionFragment", """
@@ -325,7 +324,6 @@ abstract class AbstractRoddyAlignmentWorkflowSpec extends AbstractAlignmentWorkf
                 projects                      : [],
                 externalWorkflowConfigFragment: fragment,
                 selectorType                  : SelectorType.GENERIC,
-                customPriority                : 10,
         ] + selectors)
         log.info("Create selector ${name} ${selector}")
     }

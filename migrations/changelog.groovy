@@ -680,5 +680,9 @@ databaseChangeLog = {
         sqlFile(path: 'changelogs/2022/otp-1613-archive-project.sql')
     }
 
+    changeSet(author: "wei-guo.peng", id: "otp-1751") {
+        sqlFile(path: 'changelogs/2022/otp-1751.sql')
+    }
+
     include file: 'changelogs/2022/otp-1596-rename-old-fastqc.sql'
 }

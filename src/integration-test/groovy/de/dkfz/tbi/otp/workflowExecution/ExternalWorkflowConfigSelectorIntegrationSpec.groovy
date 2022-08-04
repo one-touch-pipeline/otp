@@ -105,12 +105,12 @@ class ExternalWorkflowConfigSelectorIntegrationSpec extends Specification implem
         TestCase.assertValidateError(selector2, 'externalWorkflowConfigFragment', 'duplicate.key')
     }
 
-    void "test the calculated priority if all fields are selected - highest priority is 127"() {
+    void "test the calculated priority if all fields are selected - highest priority is 4726"() {
         when:
         ExternalWorkflowConfigSelector selector  = createExternalWorkflowConfigSelector()
 
         then:
-        selector.priority == 127
+        selector.priority == 4726
     }
 
     @Unroll
@@ -128,7 +128,7 @@ class ExternalWorkflowConfigSelectorIntegrationSpec extends Specification implem
         ])
 
         expect:
-        selector.priority == 64
+        selector.priority == 2
 
         where:
         count | p_workflows
@@ -156,15 +156,15 @@ class ExternalWorkflowConfigSelectorIntegrationSpec extends Specification implem
 
         where:
         p_name              | p_selectorType                | c_workflows            | c_workflowVersions            | c_seqTypes            | c_referenceGenomes            | c_libraryPreparationKits            | c_projects             || p_priority
-        "Default values 64" | SelectorType.DEFAULT_VALUES   | { [createWorkflow()] } | { [] }                        | { [] }                | { [] }                        | { [] }                              | { [] }                 || 0b01000000
-        "Default values 96" | SelectorType.DEFAULT_VALUES   | { [createWorkflow()] } | { [createWorkflowVersion()] } | { [] }                | { [] }                        | { [] }                              | { [] }                 || 0b01100000
-        "Default values 80" | SelectorType.DEFAULT_VALUES   | { [createWorkflow()] } | { [] }                        | { [createSeqType()] } | { [] }                        | { [] }                              | { [] }                 || 0b01010000
-        "Not Default 65"    | SelectorType.ADAPTER_FILE     | { [createWorkflow()] } | { [] }                        | { [] }                | { [] }                        | { [] }                              | { [] }                 || 0b01000001
-        "Not Default 33"    | SelectorType.BED_FILE         | { [] }                 | { [createWorkflowVersion()] } | { [] }                | { [] }                        | { [] }                              | { [] }                 || 0b00100001
-        "Not Default 17"    | SelectorType.GENERIC          | { [] }                 | { [] }                        | { [createSeqType()] } | { [] }                        | { [] }                              | { [] }                 || 0b00010001
-        "Not Default 41"    | SelectorType.REVERSE_SEQUENCE | { [] }                 | { [createWorkflowVersion()] } | { [] }                | { [createReferenceGenome()] } | { [] }                              | { [] }                 || 0b00101001
-        "Not Default 13"    | SelectorType.GENERIC          | { [] }                 | { [] }                        | { [] }                | { [createReferenceGenome()] } | { [createLibraryPreparationKit()] } | { [] }                 || 0b00001101
-        "Not Default 73"    | SelectorType.ADAPTER_FILE     | { [createWorkflow()] } | { [] }                        | { [] }                | { [createReferenceGenome()] } | { [] }                              | { [] }                 || 0b01001001
-        "Not Default 127"   | SelectorType.ADAPTER_FILE     | { [createWorkflow()] } | { [createWorkflowVersion()] } | { [createSeqType()] } | { [createReferenceGenome()] } | { [createLibraryPreparationKit()] } | { [createProject() ] } || 0b01111111
+        "Default values 2"  | SelectorType.DEFAULT_VALUES   | { [createWorkflow()] } | { [] }                        | { [] }                | { [] }                        | { [] }                              | { [] }                 || 0b0000000000000010
+        "Default values 6"  | SelectorType.DEFAULT_VALUES   | { [createWorkflow()] } | { [createWorkflowVersion()] } | { [] }                | { [] }                        | { [] }                              | { [] }                 || 0b0000000000000110
+        "Default values 18" | SelectorType.DEFAULT_VALUES   | { [createWorkflow()] } | { [] }                        | { [createSeqType()] } | { [] }                        | { [] }                              | { [] }                 || 0b0000000000010010
+        "Not Default 4098"  | SelectorType.ADAPTER_FILE     | { [createWorkflow()] } | { [] }                        | { [] }                | { [] }                        | { [] }                              | { [] }                 || 0b0001000000000010
+        "Not Default 4100"  | SelectorType.BED_FILE         | { [] }                 | { [createWorkflowVersion()] } | { [] }                | { [] }                        | { [] }                              | { [] }                 || 0b0001000000000100
+        "Not Default 4112"  | SelectorType.GENERIC          | { [] }                 | { [] }                        | { [createSeqType()] } | { [] }                        | { [] }                              | { [] }                 || 0b0001000000010000
+        "Not Default 4132"  | SelectorType.REVERSE_SEQUENCE | { [] }                 | { [createWorkflowVersion()] } | { [] }                | { [createReferenceGenome()] } | { [] }                              | { [] }                 || 0b0001000000100100
+        "Not Default 4192"  | SelectorType.GENERIC          | { [] }                 | { [] }                        | { [] }                | { [createReferenceGenome()] } | { [createLibraryPreparationKit()] } | { [] }                 || 0b0001000001100000
+        "Not Default 4130"  | SelectorType.ADAPTER_FILE     | { [createWorkflow()] } | { [] }                        | { [] }                | { [createReferenceGenome()] } | { [] }                              | { [] }                 || 0b0001000000100010
+        "Not Default 4726"  | SelectorType.ADAPTER_FILE     | { [createWorkflow()] } | { [createWorkflowVersion()] } | { [createSeqType()] } | { [createReferenceGenome()] } | { [createLibraryPreparationKit()] } | { [createProject() ] } || 0b0001001001110110
     }
 }

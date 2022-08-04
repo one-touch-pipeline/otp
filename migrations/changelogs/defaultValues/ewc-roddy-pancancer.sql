@@ -35,7 +35,7 @@ INSERT INTO external_workflow_config_fragment(id, version, date_created, last_up
 ON CONFLICT DO NOTHING;
 
 INSERT INTO external_workflow_config_selector(id, version, date_created, last_updated, name, selector_type, priority, external_workflow_config_fragment_id)
-VALUES(nextval('hibernate_sequence'), 0, now(), now(), 'Default values for PanCancer workflow', 'DEFAULT_VALUES', 64, (
+VALUES(nextval('hibernate_sequence'), 0, now(), now(), 'Default values for PanCancer workflow', 'DEFAULT_VALUES',2, (
     SELECT id FROM external_workflow_config_fragment WHERE name = 'Default values for PanCancer workflow'
 ))
 ON CONFLICT DO NOTHING;
@@ -227,7 +227,7 @@ VALUES(nextval('hibernate_sequence'), 0, now(), now(), 0, 'Default values for Pa
 ON CONFLICT DO NOTHING;
 
 INSERT INTO external_workflow_config_selector(id, version, date_created, last_updated, name, selector_type, priority, external_workflow_config_fragment_id)
-VALUES(nextval('hibernate_sequence'), 0, now(), now(), 'Default values for PanCancer alignment 1.2.73-1, 1.2.73-3, 1.2.73-201, 1.2.73-2 EXON', 'DEFAULT_VALUES', 112, (
+VALUES(nextval('hibernate_sequence'), 0, now(), now(), 'Default values for PanCancer alignment 1.2.73-1, 1.2.73-3, 1.2.73-201, 1.2.73-2 EXON', 'DEFAULT_VALUES', 22, (
     SELECT id FROM external_workflow_config_fragment WHERE name = 'Default values for PanCancer alignment 1.2.73-1, 1.2.73-3, 1.2.73-201, 1.2.73-2 EXON'))
 ON CONFLICT DO NOTHING;
 
@@ -427,7 +427,7 @@ VALUES(nextval('hibernate_sequence'), 0, now(), now(), 0, 'Default values for Pa
 ON CONFLICT DO NOTHING;
 
 INSERT INTO external_workflow_config_selector(id, version, date_created, last_updated, name, selector_type, priority, external_workflow_config_fragment_id)
-VALUES(nextval('hibernate_sequence'), 0, now(), now(), 'Default values for PanCancer alignment 1.2.51-2, 1.2.51-1 WHOLE_GENOME', 'DEFAULT_VALUES', 112, (
+VALUES(nextval('hibernate_sequence'), 0, now(), now(), 'Default values for PanCancer alignment 1.2.51-2, 1.2.51-1 WHOLE_GENOME', 'DEFAULT_VALUES', 22, (
     SELECT id FROM external_workflow_config_fragment WHERE name = 'Default values for PanCancer alignment 1.2.51-2, 1.2.51-1 WHOLE_GENOME'))
 ON CONFLICT DO NOTHING;
 
@@ -619,7 +619,7 @@ VALUES(nextval('hibernate_sequence'), 0, now(), now(), 0, 'Default values for Pa
 ON CONFLICT DO NOTHING;
 
 INSERT INTO external_workflow_config_selector(id, version, date_created, last_updated, name, selector_type, priority, external_workflow_config_fragment_id)
-VALUES(nextval('hibernate_sequence'), 0, now(), now(), 'Default values for PanCancer alignment 1.2.73-2, 1.2.73-3, 1.2.73-201, 1.2.73-1 WHOLE_GENOME', 'DEFAULT_VALUES', 112, (
+VALUES(nextval('hibernate_sequence'), 0, now(), now(), 'Default values for PanCancer alignment 1.2.73-2, 1.2.73-3, 1.2.73-201, 1.2.73-1 WHOLE_GENOME', 'DEFAULT_VALUES', 22, (
     SELECT id FROM external_workflow_config_fragment WHERE name = 'Default values for PanCancer alignment 1.2.73-2, 1.2.73-3, 1.2.73-201, 1.2.73-1 WHOLE_GENOME'))
 ON CONFLICT DO NOTHING;
 
@@ -1447,7 +1447,7 @@ VALUES(nextval('hibernate_sequence'), 0, now(), now(), 0, 'Default values for Pa
 ON CONFLICT DO NOTHING;
 
 INSERT INTO external_workflow_config_selector(id, version, date_created, last_updated, name, selector_type, priority, external_workflow_config_fragment_id)
-VALUES(nextval('hibernate_sequence'), 0, now(), now(), 'Default values for PanCancer alignment WHOLE_GENOME', 'DEFAULT_VALUES', 112, (
+VALUES(nextval('hibernate_sequence'), 0, now(), now(), 'Default values for PanCancer alignment WHOLE_GENOME', 'DEFAULT_VALUES', 22, (
     SELECT id FROM external_workflow_config_fragment WHERE name = 'Default values for PanCancer alignment WHOLE_GENOME'))
 ON CONFLICT DO NOTHING;
 
@@ -1623,7 +1623,7 @@ VALUES(nextval('hibernate_sequence'), 0, now(), now(), 0, 'Default values for Pa
 ON CONFLICT DO NOTHING;
 
 INSERT INTO external_workflow_config_selector(id, version, date_created, last_updated, name, selector_type, priority, external_workflow_config_fragment_id)
-VALUES(nextval('hibernate_sequence'), 0, now(), now(), 'Default values for PanCancer alignment 1.2.182 WHOLE_GENOME', 'DEFAULT_VALUES', 112, (
+VALUES(nextval('hibernate_sequence'), 0, now(), now(), 'Default values for PanCancer alignment 1.2.182 WHOLE_GENOME', 'DEFAULT_VALUES', 22, (
     SELECT id FROM external_workflow_config_fragment WHERE name = 'Default values for PanCancer alignment 1.2.182 WHOLE_GENOME'))
 ON CONFLICT DO NOTHING;
 
@@ -1811,7 +1811,7 @@ VALUES(nextval('hibernate_sequence'), 0, now(), now(), 0, 'Default values for Pa
 ON CONFLICT DO NOTHING;
 
 INSERT INTO external_workflow_config_selector(id, version, date_created, last_updated, name, selector_type, priority, external_workflow_config_fragment_id)
-VALUES(nextval('hibernate_sequence'), 0, now(), now(), 'Default values for PanCancer alignment 1.2.73-201, 1.2.73-3, 1.2.51-2, 1.2.51-1, 1.2.73-2, 1.2.73-1 ChIP Seq', 'DEFAULT_VALUES', 112, (
+VALUES(nextval('hibernate_sequence'), 0, now(), now(), 'Default values for PanCancer alignment 1.2.73-201, 1.2.73-3, 1.2.51-2, 1.2.51-1, 1.2.73-2, 1.2.73-1 ChIP Seq', 'DEFAULT_VALUES', 22, (
     SELECT id FROM external_workflow_config_fragment WHERE name = 'Default values for PanCancer alignment 1.2.73-201, 1.2.73-3, 1.2.51-2, 1.2.51-1, 1.2.73-2, 1.2.73-1 ChIP Seq'))
 ON CONFLICT DO NOTHING;
 
@@ -2027,7 +2027,7 @@ VALUES(nextval('hibernate_sequence'), 0, now(), now(), 0, 'Default values for Pa
 ON CONFLICT DO NOTHING;
 
 INSERT INTO external_workflow_config_selector(id, version, date_created, last_updated, name, selector_type, priority, external_workflow_config_fragment_id)
-VALUES(nextval('hibernate_sequence'), 0, now(), now(), 'Default values for PanCancer alignment 1.2.51-1, 1.2.51-2 EXON', 'DEFAULT_VALUES', 112, (
+VALUES(nextval('hibernate_sequence'), 0, now(), now(), 'Default values for PanCancer alignment 1.2.51-1, 1.2.51-2 EXON', 'DEFAULT_VALUES', 22, (
     SELECT id FROM external_workflow_config_fragment WHERE name = 'Default values for PanCancer alignment 1.2.51-1, 1.2.51-2 EXON'))
 ON CONFLICT DO NOTHING;
 
@@ -2797,7 +2797,7 @@ VALUES(nextval('hibernate_sequence'), 0, now(), now(), 0, 'Default values for Pa
 ON CONFLICT DO NOTHING;
 
 INSERT INTO external_workflow_config_selector(id, version, date_created, last_updated, name, selector_type, priority, external_workflow_config_fragment_id)
-VALUES(nextval('hibernate_sequence'), 0, now(), now(), 'Default values for PanCancer alignment ChIP Seq', 'DEFAULT_VALUES', 112, (
+VALUES(nextval('hibernate_sequence'), 0, now(), now(), 'Default values for PanCancer alignment ChIP Seq', 'DEFAULT_VALUES', 22, (
     SELECT id FROM external_workflow_config_fragment WHERE name = 'Default values for PanCancer alignment ChIP Seq'))
 ON CONFLICT DO NOTHING;
 
@@ -2974,7 +2974,7 @@ VALUES(nextval('hibernate_sequence'), 0, now(), now(), 0, 'Default values for Pa
 ON CONFLICT DO NOTHING;
 
 INSERT INTO external_workflow_config_selector(id, version, date_created, last_updated, name, selector_type, priority, external_workflow_config_fragment_id)
-VALUES(nextval('hibernate_sequence'), 0, now(), now(), 'Default values for PanCancer alignment 1.2.182 EXON', 'DEFAULT_VALUES', 112, (
+VALUES(nextval('hibernate_sequence'), 0, now(), now(), 'Default values for PanCancer alignment 1.2.182 EXON', 'DEFAULT_VALUES', 22, (
     SELECT id FROM external_workflow_config_fragment WHERE name = 'Default values for PanCancer alignment 1.2.182 EXON'))
 ON CONFLICT DO NOTHING;
 
@@ -3871,7 +3871,7 @@ VALUES(nextval('hibernate_sequence'), 0, now(), now(), 0, 'Default values for Pa
 ON CONFLICT DO NOTHING;
 
 INSERT INTO external_workflow_config_selector(id, version, date_created, last_updated, name, selector_type, priority, external_workflow_config_fragment_id)
-VALUES(nextval('hibernate_sequence'), 0, now(), now(), 'Default values for PanCancer alignment EXON', 'DEFAULT_VALUES', 112, (
+VALUES(nextval('hibernate_sequence'), 0, now(), now(), 'Default values for PanCancer alignment EXON', 'DEFAULT_VALUES', 22, (
     SELECT id FROM external_workflow_config_fragment WHERE name = 'Default values for PanCancer alignment EXON'))
 ON CONFLICT DO NOTHING;
 

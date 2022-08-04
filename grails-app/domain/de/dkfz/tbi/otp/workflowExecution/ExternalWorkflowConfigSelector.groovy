@@ -70,25 +70,30 @@ class ExternalWorkflowConfigSelector implements Comparable<ExternalWorkflowConfi
      * @see: <a href="https://one-touch-pipeline.myjetbrains.com/youtrack/issue/otp-913">otp-913</a>
      */
     static final Map<String, Integer> PROPS_PRIORITY_MAP = [
-            workflows             : 0b01000000,
-            workflowVersions      : 0b00100000,
-            seqTypes              : 0b00010000,
-            referenceGenomes      : 0b00001000,
-            libraryPreparationKits: 0b00000100,
-            projects              : 0b00000010,
-            selectorType          : 0b00000001,
+            selectorType          : 0b0001000000000000,
+            // reserved bit
+            // reserved bit
+            projects              : 0b0000001000000000,
+            // reserved bit
+            // reserved bit
+            libraryPreparationKits: 0b0000000001000000,
+            referenceGenomes      : 0b0000000000100000,
+            seqTypes              : 0b0000000000010000,
+            // reserved bit
+            workflowVersions      : 0b0000000000000100,
+            workflows             : 0b0000000000000010,
     ].asImmutable()
 
     /**
-     * Calculate the priority by checking the given bit defined in the map {@link #PROPS_PRIORITY_MAP}
-     * is occupied. The algorithms distinguishes if the property (e.g. workflows) has value (bit = 1) or not (bit = 0).
+     * Calculate the priority by adding the given bit defined in the map {@link #PROPS_PRIORITY_MAP}
+     * The algorithms distinguishes only if the property (e.g. workflows) has value (bit = 1) or not (bit = 0).
      * The values themself don't change the bit.
      */
     private int calculatePriority() {
-        int prio = 0b00000000
+        int prio = 0b0000000000000000
         PROPS_PRIORITY_MAP.each { String key, Integer value ->
-            // checks 1. if the array contains elements, 2. if the value is default values
-            if (value > 1 ? this[key] && !this[key].isEmpty() : this[key] != SelectorType.DEFAULT_VALUES) {
+            // checks 1. if the array property contains elements, 2. if the selectorType value is DEFAULT_VALUES
+            if (key == "selectorType" ? this[key] != SelectorType.DEFAULT_VALUES : this[key] && !this[key].isEmpty()) {
                 prio |= value
             }
         }
