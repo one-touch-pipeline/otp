@@ -198,8 +198,6 @@ class StatisticService {
                     Map<String, String> duplicateEntry = acc.find({ el -> el?.x == element.x })
                     if (duplicateEntry) {
                     duplicateEntry.y += element.y
-                    } else {
-                    acc += element
                     }
                     return acc
                 }
@@ -218,32 +216,9 @@ class StatisticService {
 
     @SuppressWarnings('DuplicateNumberLiteral')
     private List<String> monthLabels(LocalDate firstDate, LocalDate lastDate) {
-        List<Integer> validMonths
-        Period period = Period.between(firstDate, lastDate)
-        int months = period.toTotalMonths()
-
-        switch (months) {
-            case 0..20:
-                validMonths = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
-                break
-            case 21..50:
-                validMonths = [1, 4, 7, 10]
-                break
-            case 51..100:
-                validMonths = [1, 7]
-                break
-            default:
-                validMonths = [1]
-                break
-        }
-
         List<String> labels = []
         for (LocalDate currentDate = firstDate; currentDate < lastDate; currentDate = currentDate.plusMonths(1)) {
-            if (validMonths.contains(currentDate.month.value)) {
-                labels << TimeFormats.MONTH_YEAR.getFormattedLocalDate(currentDate)
-            } else {
-                labels << ""
-            }
+            labels << TimeFormats.MONTH_YEAR.getFormattedLocalDate(currentDate)
         }
         return labels
     }

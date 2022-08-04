@@ -100,7 +100,13 @@ $.otp.sharedCharts = {
             backgroundColor: $.otp.chart.colorList[0]
           }]
         },
-        options: $.otp.chart.defaultChartOptions('Number of Projects')
+        options: $.otp.chart.defaultChartOptions('Number of Projects', {
+          scales: {
+            x: {
+              offset: true
+            }
+          }
+        })
       });
     });
   },
