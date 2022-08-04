@@ -22,7 +22,7 @@
 
 UPDATE workflow
 SET NAME = 'Bash Fastqc',
-    bean_name = 'bashFastqcWorkflow'
+    bean_name = 'bashFastQcWorkflow'
 WHERE name = 'FastQC';
 
 UPDATE workflow_step
