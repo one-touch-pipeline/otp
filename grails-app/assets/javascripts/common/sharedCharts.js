@@ -84,7 +84,7 @@ $.otp.sharedCharts = {
   // eslint-disable-next-line strict
   renderProjectCountPerDate(projectGroup = 'All projects') {
     const dataUrl = $.otp.createLink({
-      controller: 'info',
+      controller: 'statistic',
       action: 'projectCountPerDate',
       parameters: { projectGroupName: projectGroup }
     });
@@ -100,13 +100,7 @@ $.otp.sharedCharts = {
             backgroundColor: $.otp.chart.colorList[0]
           }]
         },
-        options: $.otp.chart.defaultChartOptions('Number of Projects', {
-          scales: {
-            x: {
-              offset: true
-            }
-          }
-        })
+        options: $.otp.chart.defaultChartOptions('Number of Projects')
       });
     });
   },
@@ -114,7 +108,7 @@ $.otp.sharedCharts = {
   // eslint-disable-next-line strict
   renderLaneCountPerDate(projectGroup = 'All projects') {
     const dataUrl = $.otp.createLink({
-      controller: 'info',
+      controller: 'statistic',
       action: 'laneCountPerDate',
       parameters: { projectGroupName: projectGroup }
     });

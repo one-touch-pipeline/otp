@@ -21,14 +21,12 @@
  */
 
 import grails.compiler.GrailsCompileStatic
-import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 
 import de.dkfz.tbi.otp.administration.DocumentService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
-import de.dkfz.tbi.otp.ngsdata.StatisticService
 
 /*
  * show information about OTP
@@ -43,13 +41,10 @@ class InfoController {
             contact             : "GET",
             partners            : "GET",
             templates           : "GET",
-            projectCountPerDate : "GET",
-            laneCountPerDate    : "GET",
             newsBanner          : "GET",
     ]
 
     DocumentService documentService
-    StatisticService statisticService
     ProcessingOptionService processingOptionService
 
     @GrailsCompileStatic
@@ -90,16 +85,6 @@ class InfoController {
                     ]
                 },
         ]
-    }
-
-    JSON projectCountPerDate() {
-        List data = statisticService.projectCountPerDay(null)
-        render statisticService.projectCountPerDate(data) as JSON
-    }
-
-    JSON laneCountPerDate() {
-        List data = statisticService.laneCountPerDay(null)
-        render statisticService.dataPerDate(data) as JSON
     }
 
     String newsBanner() {

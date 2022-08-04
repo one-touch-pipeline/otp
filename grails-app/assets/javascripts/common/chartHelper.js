@@ -54,6 +54,9 @@ $.otp.chart = {
           ticks: {
             stepSize: 1
           }
+        },
+        x: {
+          offset: true
         }
       },
       plugins: {
