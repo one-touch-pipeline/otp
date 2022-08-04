@@ -97,9 +97,6 @@
                 <canvas id="laneCountPerDate">[No canvas support]</canvas>
             </div>
         </div>
-        <div style="width: 550px;">
-            <canvas id="sampleTypeCountByPatient">[No canvas support]</canvas>
-        </div>
     </div>
 </body>
 </html>

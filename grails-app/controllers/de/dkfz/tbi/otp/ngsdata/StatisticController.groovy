@@ -48,7 +48,6 @@ class StatisticController {
             patientsCountPerSequenceType: "GET",
             projectCountPerSequenceType : "GET",
             sampleTypeCountBySeqType    : "GET",
-            sampleTypeCountByPatient    : "GET",
             laneCountPerDateByProject   : "GET",
     ]
 
@@ -247,27 +246,6 @@ class StatisticController {
                 labelsPercentage: labelsPercentage,
                 data            : values,
                 count           : values.size(),
-        ]
-        render dataToRender as JSON
-    }
-
-    JSON sampleTypeCountByPatient() {
-        Project project = projectSelectionService.requestedProject
-
-        List<String> labels = []
-        List<Integer> values = []
-
-        statisticService.sampleTypeCountByPatient(project).each {
-            labels << it[0]
-            values << it[1]
-        }
-
-        Map dataToRender = [
-                projectId: project?.id,
-                project  : project?.name,
-                labels   : labels,
-                data     : values,
-                count    : values.size(),
         ]
         render dataToRender as JSON
     }

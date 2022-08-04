@@ -25,48 +25,4 @@ $(() => {
 
   $.otp.sharedCharts.renderSampleCountPerSeqTypeBySelectedProject();
   $.otp.sharedCharts.renderLaneCountPerDateBySelectedProject();
-
-  const sampleTypeCountBySeqTypeUrl = $.otp.createLink({
-    controller: 'statistic',
-    action: 'sampleTypeCountByPatient'
-  });
-
-  $.otp.chart.renderChartOnElement(
-    'sampleTypeCountByPatient',
-    sampleTypeCountBySeqTypeUrl,
-    (domContext, chartData) => {
-      // eslint-disable-next-line no-new
-      new Chart(domContext, {
-        type: 'bar',
-        data: {
-          labels: chartData.labels,
-          datasets: [{
-            data: chartData.data,
-            backgroundColor: $.otp.chart.colorList
-          }]
-        },
-        options: $.otp.chart.defaultChartOptions('', {
-          indexAxis: 'y',
-          scales: {
-            x: {
-              min: 0,
-              ticks: {
-                stepSize: 1
-              }
-            }
-          },
-          plugins: {
-            title: {
-              display: true,
-              font: { size: '14px' },
-              text: 'Patients and the Number of Samples (non-redundant)'
-            },
-            legend: {
-              display: false
-            }
-          }
-        })
-      });
-    }
-  );
 });

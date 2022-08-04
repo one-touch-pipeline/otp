@@ -154,18 +154,6 @@ class StatisticService {
         return seq
     }
 
-    List sampleTypeCountByPatient(Project project) {
-        List seq = Sequence.withCriteria {
-            eq("projectId", project?.id)
-            projections {
-                groupProperty("mockPid")
-                countDistinct("sampleId")
-            }
-            order("mockPid")
-        }
-        return seq
-    }
-
     /**
      * Convert creation date of data to a format to be used for scatter plots
      * @param data A list containing lists with two elements, where the first element is a date and the second element is an integer
