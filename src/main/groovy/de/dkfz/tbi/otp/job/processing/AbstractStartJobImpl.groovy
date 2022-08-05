@@ -81,6 +81,7 @@ abstract class AbstractStartJobImpl implements StartJob, ApplicationListener<Job
      * then for the job execution plan by that job definition.
      */
     @Transactional(readOnly = true)
+    @SuppressWarnings("ThrowRuntimeException") // ignored: will be removed with the old workflow system
     private void initializeJobExecutionPlan() {
         if (!schedulerService.active) {
             return

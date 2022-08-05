@@ -110,6 +110,7 @@ class ReplaceSourceWithLinkJob extends AbstractEndStateAwareJobImpl {
         createLinkMap(fs.getPath(source.absolutePath).toRealPath(), fs.getPath(target.absolutePath).toRealPath(), linkMap)
     }
 
+    @SuppressWarnings("ThrowRuntimeException") // ignored: will be removed with the old workflow system
     protected void createLinkMap(Path source, Path target, Map linkMap) {
         if (Files.isSymbolicLink(source)) {
             createLinkMap(source.toRealPath(), target, linkMap)

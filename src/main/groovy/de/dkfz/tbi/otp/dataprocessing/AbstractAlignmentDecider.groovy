@@ -86,7 +86,7 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
     }
 
     // ignore: in case of an adaptation to the new workflow system
-    @SuppressWarnings('ThrowRuntimeException ')
+    @SuppressWarnings('ThrowRuntimeException')
     @Deprecated
     void ensureConfigurationIsComplete(SeqTrack seqTrack) {
         if (seqTrack.configuredReferenceGenome == null) {

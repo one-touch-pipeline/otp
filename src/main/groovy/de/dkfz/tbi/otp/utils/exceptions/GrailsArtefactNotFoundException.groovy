@@ -23,8 +23,6 @@ package de.dkfz.tbi.otp.utils.exceptions
 
 import groovy.transform.InheritConstructors
 
-import de.dkfz.tbi.otp.OtpRuntimeException
-
 @InheritConstructors
 class GrailsArtefactNotFoundException extends OtpRuntimeException {
 }

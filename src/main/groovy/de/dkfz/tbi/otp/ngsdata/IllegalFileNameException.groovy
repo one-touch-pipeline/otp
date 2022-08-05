@@ -23,7 +23,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import groovy.transform.InheritConstructors
 
-import de.dkfz.tbi.otp.OtpRuntimeException
+import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 
 @InheritConstructors
 class IllegalFileNameException extends OtpRuntimeException {

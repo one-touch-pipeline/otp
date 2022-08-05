@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.ngsdata
 import grails.gorm.hibernate.annotation.ManagedEntity
 
 import de.dkfz.tbi.otp.CommentableWithProject
+import de.dkfz.tbi.otp.dataprocessing.ParsingException
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.Entity
 
@@ -233,7 +234,7 @@ class DataFile implements CommentableWithProject, Entity {
     int getMeanSequenceLength() {
         int length
         if (!this.sequenceLength) {
-            throw new RuntimeException("No meanSequenceLength could be extracted since sequenceLength of ${this} is null")
+            throw new ParsingException("No meanSequenceLength could be extracted since sequenceLength of ${this} is null")
         }
         try {
             length = this.sequenceLength.toInteger()

@@ -25,7 +25,7 @@ import grails.gorm.transactions.Transactional
 import grails.validation.Validateable
 
 import de.dkfz.tbi.otp.CommentService
-import de.dkfz.tbi.otp.FileNotFoundException
+import de.dkfz.tbi.otp.utils.exceptions.FileNotFoundException
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellService

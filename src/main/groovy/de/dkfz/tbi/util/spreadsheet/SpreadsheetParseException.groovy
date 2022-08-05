@@ -23,7 +23,7 @@ package de.dkfz.tbi.util.spreadsheet
 
 import groovy.transform.InheritConstructors
 
-import de.dkfz.tbi.otp.OtpRuntimeException
+import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 
 /**
  * Base exception for when spreadsheet parsing is impossible.

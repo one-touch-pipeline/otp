@@ -23,7 +23,7 @@ package de.dkfz.tbi.otp.workflow.jobs
 
 import org.springframework.beans.factory.annotation.Autowired
 
-import de.dkfz.tbi.otp.OtpRuntimeException
+import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.workflow.shared.ValidationJobFailedException
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep

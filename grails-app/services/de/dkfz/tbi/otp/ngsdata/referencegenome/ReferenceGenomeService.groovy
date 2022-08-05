@@ -162,7 +162,7 @@ class ReferenceGenomeService {
         if (!checkExistence || file.canRead()) {
             return file
         }
-        throw new RuntimeException("${file} can not be read")
+        throw new FileNotReadableException("${file} can not be read")
     }
 
     /**

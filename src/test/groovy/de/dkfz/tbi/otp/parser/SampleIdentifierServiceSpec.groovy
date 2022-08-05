@@ -27,13 +27,14 @@ import org.springframework.context.ApplicationContext
 import spock.lang.Specification
 import spock.lang.Unroll
 
-import de.dkfz.tbi.otp.OtpRuntimeException
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.HelperUtils
+import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
+import de.dkfz.tbi.otp.utils.exceptions.SampleTypeDoesNotExistException
 import de.dkfz.tbi.util.spreadsheet.Delimiter
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
@@ -326,8 +327,8 @@ class SampleIdentifierServiceSpec extends Specification implements DataTest, Ser
         service.findOrSaveSampleType(identifier)
 
         then:
-        RuntimeException e = thrown()
-        e.message == "SampleType \'${sampleTypeName}\' does not exist and useSpecificReferenceGenome is not defined"
+        SampleTypeDoesNotExistException e = thrown()
+        e.message == "Sample type \'${sampleTypeName}\' does not exist and useSpecificReferenceGenome is not defined"
     }
 
     @Unroll

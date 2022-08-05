@@ -38,8 +38,8 @@ import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.utils.ProcessOutput
-import de.dkfz.tbi.otp.utils.exceptions.FileIsEmptyException
-import de.dkfz.tbi.otp.utils.exceptions.FileNotFoundException
+import de.dkfz.tbi.otp.FileIsEmptyException
+import de.dkfz.tbi.otp.FileNotFoundException
 
 import java.nio.file.FileSystems
 

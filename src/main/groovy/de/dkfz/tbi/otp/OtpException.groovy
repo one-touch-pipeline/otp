@@ -27,10 +27,12 @@ package de.dkfz.tbi.otp
  */
 @Deprecated
 class OtpException extends Exception {
+    @Deprecated
     OtpException(String message) {
         super(message)
     }
 
+    @Deprecated
     OtpException(String message, Throwable cause) {
         super(message, cause)
     }

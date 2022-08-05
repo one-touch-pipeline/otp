@@ -28,6 +28,8 @@ import groovy.util.logging.Slf4j
 import org.springframework.http.HttpStatus
 import org.springframework.validation.Errors
 
+import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
+
 @Slf4j
 trait CheckAndCall {
 
@@ -58,6 +60,7 @@ trait CheckAndCall {
      * @param method closure method with the main logic
      * @return object returned by the method or http error message in case of an error
      */
+    @SuppressWarnings("CatchRuntimeException") // ignored: will be removed with the old workflow system
     def checkErrorAndCallMethodReturns(Validateable cmd, Closure method) {
         if (cmd.hasErrors()) {
             String errorMessage = createErrorMessageHtmlFromErrors(cmd.errors) ?: g.message(code: "default.message.error.notAcceptable")
@@ -69,7 +72,7 @@ trait CheckAndCall {
         } catch (ValidationException e) {
             log.debug(e.localizedMessage)
             return response.sendError(HttpStatus.BAD_REQUEST.value(), createErrorMessageHtmlFromErrors(e.errors))
-        } catch (NumberFormatException | AssertionError | RuntimeException e) {
+        } catch (AssertionError | RuntimeException e) {
             log.error(e.localizedMessage)
             return response.sendError(HttpStatus.BAD_REQUEST.value(), e.localizedMessage)
         }

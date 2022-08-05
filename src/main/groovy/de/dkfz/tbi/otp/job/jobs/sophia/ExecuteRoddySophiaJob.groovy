@@ -45,6 +45,7 @@ class ExecuteRoddySophiaJob extends AbstractExecutePanCanJob<SophiaInstance> imp
     SophiaService sophiaService
 
     @SuppressWarnings('JavaIoPackageAccess')
+    @SuppressWarnings("ThrowRuntimeException") // ignored: will be removed with the old workflow system
     @Override
     protected List<String> prepareAndReturnWorkflowSpecificCValues(SophiaInstance sophiaInstance) {
         assert sophiaInstance

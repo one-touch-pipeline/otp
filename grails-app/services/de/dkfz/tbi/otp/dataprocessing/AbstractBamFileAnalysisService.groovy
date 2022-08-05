@@ -23,7 +23,7 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import grails.gorm.transactions.Transactional
 
-import de.dkfz.tbi.otp.FileInconsistencyException
+import de.dkfz.tbi.otp.utils.exceptions.FileInconsistencyException
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair.ProcessingStatus
 import de.dkfz.tbi.otp.ngsdata.IndividualService

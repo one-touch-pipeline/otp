@@ -225,6 +225,7 @@ ${jobId}.host.long-doma  someUser    fast     r160224_18005293    --      1     
     }
 
     @Unroll
+    @SuppressWarnings("ThrowRuntimeException") // ignored: will be removed with the old workflow system
     void "retrieveAndSaveJobInformationAfterJobStarted, #name"() {
         given:
         String clusterId = 1234

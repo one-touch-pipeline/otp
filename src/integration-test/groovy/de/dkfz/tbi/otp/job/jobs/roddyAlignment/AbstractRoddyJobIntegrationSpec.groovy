@@ -189,6 +189,7 @@ newLine"""
         validateCounter == 1
     }
 
+    @SuppressWarnings("ThrowRuntimeException") // ignored: will be removed with the old workflow system
     void "test maybeSubmit, no cluster jobs submitted, validate fails"() {
         given:
         setupData()
@@ -221,6 +222,7 @@ newLine"""
         validateCounter == 1
     }
 
+    @SuppressWarnings("ThrowRuntimeException") // ignored: will be removed with the old workflow system
     void "test execute, finishedClusterJobs is null"() {
         given:
         setupData()
@@ -262,6 +264,7 @@ newLine"""
         "An uncaught error occurred during a run. SEVERE" || "An unexpected error occurred when executing Roddy."
     }
 
+    @SuppressWarnings("ThrowRuntimeException") // ignored: will be removed with the old workflow system
     void "test execute"() {
         given:
         setupData()

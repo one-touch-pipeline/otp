@@ -78,6 +78,7 @@ class ErrorLogService {
      * @param identifier The stacktrace's identifier
      * @return The stacktrace if found otherwise an exception is thrown with the reason why the stacktrace can not be returned
      */
+    @SuppressWarnings("ThrowRuntimeException") // ignored: will be removed with the old workflow system
     String loggedError(String identifier) {
         File stacktraceFile = getStackTracesFile(identifier)
         if (!stacktraceFile.isFile()) {

@@ -35,6 +35,7 @@ abstract class AbstractMaybeSubmitWaitValidateJob extends AbstractMultiJob {
 
     @NotTransactional
     @Override
+    @SuppressWarnings("ThrowRuntimeException") // ignored: will be removed with the old workflow system
     protected final NextAction execute(final Collection<? extends ClusterJobIdentifier> finishedClusterJobs) throws Throwable {
         if (finishedClusterJobs) {
             Map<ClusterJobIdentifier, String> failedClusterJobs = failedOrNotFinishedClusterJobs(finishedClusterJobs)
@@ -67,6 +68,7 @@ abstract class AbstractMaybeSubmitWaitValidateJob extends AbstractMultiJob {
     }
 
     @Override
+    @SuppressWarnings("ThrowRuntimeException") // ignored: will be removed with the old workflow system
     Collection<ClusterJob> failedOrNotFinishedClusterJobs() {
         Collection<ClusterJob> clusterJobs = ClusterJob.findAllByProcessingStep(processingStep)
         if (!clusterJobs) {

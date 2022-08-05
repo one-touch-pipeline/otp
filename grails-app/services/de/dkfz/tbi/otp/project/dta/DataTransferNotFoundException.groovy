@@ -26,5 +26,6 @@ import groovy.transform.InheritConstructors
 import de.dkfz.tbi.otp.OtpException
 
 @InheritConstructors
+@Deprecated
 class DataTransferNotFoundException extends OtpException {
 }

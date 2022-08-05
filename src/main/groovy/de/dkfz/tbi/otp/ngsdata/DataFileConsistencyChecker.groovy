@@ -33,6 +33,7 @@ import de.dkfz.tbi.otp.ngsdata.FileType.Type
 import de.dkfz.tbi.otp.ngsdata.SeqTrack.DataProcessingState
 import de.dkfz.tbi.otp.utils.MailHelperService
 import de.dkfz.tbi.otp.utils.SessionUtils
+import de.dkfz.tbi.otp.utils.exceptions.OtpValidationException
 import de.dkfz.tbi.util.TimeUtils
 
 @Component
@@ -72,13 +73,14 @@ class DataFileConsistencyChecker {
                                 try {
                                     assert it.save(flush: true, deepValidate: false)
                                 } catch (ValidationException e) {
-                                    throw new RuntimeException("Error while saving datafile with id: ${it.id}", e)
+                                    // rethrow so that the message contains the id
+                                    throw new OtpValidationException("Error while saving datafile with id: ${it.id}", e)
                                 }
                             }
                         }
                     }
                 }
-            } catch (RuntimeException e) {
+            } catch (OtpValidationException e) {
                 log.error("error ${e.localizedMessage}", e)
                 SessionUtils.withNewSession {
                     mailHelperService.sendEmailToTicketSystem(

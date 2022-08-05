@@ -23,7 +23,7 @@ package de.dkfz.tbi.otp.utils
 
 import spock.lang.Specification
 
-import de.dkfz.tbi.otp.OtpRuntimeException
+import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 
 class StackTraceUtilsSpec extends Specification {
 
@@ -33,9 +33,9 @@ class StackTraceUtilsSpec extends Specification {
         String innerTrace = "inner Trace"
         OtpRuntimeException e = new OtpRuntimeException(outerTrace, new OtpRuntimeException(innerTrace))
         String expected = """\
-^de\\.dkfz\\.tbi\\.otp\\.OtpRuntimeException: ${outerTrace}
+^de\\.dkfz\\.tbi\\.otp\\.utils\\.exceptions\\.OtpRuntimeException: ${outerTrace}
 (\\tat .*\\(.*\\)\\n)*\
-Caused by: de\\.dkfz\\.tbi\\.otp\\.OtpRuntimeException: ${innerTrace}
+Caused by: de\\.dkfz\\.tbi\\.otp\\.utils\\.exceptions\\.OtpRuntimeException: ${innerTrace}
 (\\tat .*\\(.*\\)\\n)*\
 \t\\.+ \\d+ more\
 \$"""

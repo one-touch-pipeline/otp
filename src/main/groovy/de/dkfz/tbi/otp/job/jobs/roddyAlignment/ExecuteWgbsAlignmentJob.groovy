@@ -47,6 +47,7 @@ class ExecuteWgbsAlignmentJob extends AbstractRoddyAlignmentJob implements AutoR
     static final String HEADER = "Sample\tLibrary\tPID\tReadLayout\tRun\tMate\tSequenceFile\n"
 
     @Override
+    @SuppressWarnings("ThrowRuntimeException") // ignored: will be removed with the old workflow system
     protected List<String> prepareAndReturnWorkflowSpecificCValues(RoddyBamFile roddyBamFile) {
         assert roddyBamFile : "roddyBamFile must not be null"
 

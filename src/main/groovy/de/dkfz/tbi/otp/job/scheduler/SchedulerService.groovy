@@ -275,6 +275,7 @@ class SchedulerService {
      * @param processParameter ProcessParameter provided by the StartJob for this Process.
      * @return the new created process
      */
+    @SuppressWarnings("ThrowRuntimeException") // ignored: will be removed with the old workflow system
     Process createProcess(StartJob startJob, List<Parameter> input, ProcessParameter processParameter = null) {
         if (!schedulerActive) {
             throw new RuntimeException("Scheduler is disabled")
@@ -389,6 +390,7 @@ class SchedulerService {
      *
      * @param job The Job which ended
      */
+    @SuppressWarnings("ThrowRuntimeException") // ignored: will be removed with the old workflow system
     void doEndCheck(Job job) {
         job.end()
         removeRunningJob(job)
@@ -767,6 +769,7 @@ class SchedulerService {
      * implements {@link SometimesResumableJob} and its {@link SometimesResumableJob#isResumable()}
      * method returns <code>true</code>. Otherwise <code>false</code>.
      */
+    @SuppressWarnings("ThrowRuntimeException") // ignored: will be removed with the old workflow system
     boolean isJobResumable(ProcessingStep step) {
         Class jobClass = grailsApplication.classLoader.loadClass(step.jobClass)
         if (jobClass.isAnnotationPresent(ResumableJob)) {

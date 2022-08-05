@@ -55,6 +55,7 @@ abstract class AbstractRoddyJob<R extends RoddyResult> extends AbstractMaybeSubm
     RoddyExecutionService roddyExecutionService
 
     @Override
+    @SuppressWarnings("ThrowRuntimeException") // ignored: will be removed with the old workflow system
     protected final NextAction maybeSubmit() throws Throwable {
         Realm.withTransaction {
             final RoddyResult roddyResult = refreshedProcessParameterObject

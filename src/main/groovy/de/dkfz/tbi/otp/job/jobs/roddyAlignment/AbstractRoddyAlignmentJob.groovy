@@ -82,6 +82,7 @@ abstract class AbstractRoddyAlignmentJob extends AbstractExecutePanCanJob<RoddyB
     }
 
     @Override
+    @SuppressWarnings("ThrowRuntimeException") // ignored: will be removed with the old workflow system
     protected void validate(RoddyBamFile roddyBamFile) throws Throwable {
         assert roddyBamFile: "Input roddyBamFile must not be null"
 
@@ -119,6 +120,7 @@ abstract class AbstractRoddyAlignmentJob extends AbstractExecutePanCanJob<RoddyB
         assert roddyBamFile.save(flush: true)
     }
 
+    @SuppressWarnings("ThrowRuntimeException") // ignored: will be removed with the old workflow system
     void validateReadGroups(RoddyBamFile bamFile) {
         File bamFilePath = bamFile.workBamFile
 

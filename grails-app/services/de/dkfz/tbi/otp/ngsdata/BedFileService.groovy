@@ -45,6 +45,6 @@ class BedFileService {
         if (!checkExistence || file.canRead()) {
             return bedFilePath
         }
-        throw new RuntimeException("the bedFile can not be read: ${bedFilePath}")
+        throw new FileNotReadableException("the bedFile can not be read: ${bedFilePath}")
     }
 }

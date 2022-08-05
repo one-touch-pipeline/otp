@@ -23,12 +23,12 @@ package de.dkfz.tbi.otp.ngsdata
 
 import grails.gorm.transactions.Transactional
 
+import de.dkfz.tbi.otp.dataprocessing.ParsingException
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
+import de.dkfz.tbi.otp.utils.exceptions.FileIsEmptyException
 
-import java.nio.file.FileSystem
-import java.nio.file.Files
-import java.nio.file.Path
+import java.nio.file.*
 
 import static org.springframework.util.Assert.notNull
 
@@ -62,13 +62,9 @@ class ChecksumFileService {
 
         FileService.ensureFileIsReadableAndNotEmpty(md5File)
         String md5sum
-        try {
-            List<String> lines = md5File.readLines()
-            List<String> tokens = lines.get(0).tokenize()
-            md5sum = tokens.get(0)
-        } catch (final Exception e) {
-            throw new RuntimeException("Failed to parse MD5 file ${path}", e)
-        }
+        List<String> lines = md5File.readLines()
+        List<String> tokens = lines.get(0).tokenize()
+        md5sum = tokens.get(0)
         return (md5sum.trim().toLowerCase(Locale.ENGLISH) == file.md5sum)
     }
 
@@ -79,14 +75,14 @@ class ChecksumFileService {
     String firstMD5ChecksumFromFile(Path file) {
         notNull(file, "the input file for the method firstMD5ChecksumFromFile is null")
         if (!Files.isReadable(file)) {
-            throw new RuntimeException("MD5 file \"${file}\" is not readable or does not exist")
+            throw new FileNotReadableException("MD5 file \"${file}\" is not readable or does not exist")
         }
         if (Files.size(file) == 0) {
-            throw new RuntimeException("MD5 file \"${file}\" is empty")
+            throw new FileIsEmptyException("MD5 file \"${file}\" is empty")
         }
         String md5sum = file.readLines().get(0).tokenize().get(0)
         if (!(md5sum ==~ /^[0-9a-fA-F]{32}$/)) {
-            throw new RuntimeException("The format of the MD5sum of the MD5 file \"${file}\" is wrong: value=${md5sum}")
+            throw new ParsingException("The format of the MD5sum of the MD5 file \"${file}\" is wrong: value=${md5sum}")
         }
         return md5sum
     }

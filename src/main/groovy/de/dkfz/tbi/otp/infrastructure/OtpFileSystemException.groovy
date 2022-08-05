@@ -23,7 +23,7 @@ package de.dkfz.tbi.otp.infrastructure
 
 import groovy.transform.InheritConstructors
 
-import de.dkfz.tbi.otp.OtpRuntimeException
+import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 
 /**
  * An exception for failed file system operations

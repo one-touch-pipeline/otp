@@ -23,7 +23,7 @@ package de.dkfz.tbi.otp.security
 
 import groovy.transform.InheritConstructors
 
-import de.dkfz.tbi.otp.OtpRuntimeException
+import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 
 @InheritConstructors
 class SwitchedUserDeniedException extends OtpRuntimeException {

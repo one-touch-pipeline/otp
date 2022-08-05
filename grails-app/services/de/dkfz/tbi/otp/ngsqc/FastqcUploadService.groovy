@@ -23,8 +23,7 @@ package de.dkfz.tbi.otp.ngsqc
 
 import grails.gorm.transactions.Transactional
 
-import de.dkfz.tbi.otp.dataprocessing.FastqcDataFilesService
-import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
+import de.dkfz.tbi.otp.dataprocessing.*
 
 import java.util.regex.Matcher
 
@@ -47,16 +46,12 @@ class FastqcUploadService {
      */
     void uploadFastQCFileContentsToDataBase(FastqcProcessedFile fastqc) {
         assert fastqc : "No FastQC file defined"
-        try {
-            Map parsedFastqcFile = parseFastQCFile(fastqc, PROPERTIES_REGEX_TO_BE_PARSED)
-            fastqc.dataFile.nReads = parsedFastqcFile["nReads"] as long
-            fastqc.dataFile.sequenceLength = parsedFastqcFile["sequenceLength"]
-            fastqc.dataFile.save(flush: true)
-            fastqc.contentUploaded = true
-            fastqc.save(flush: true)
-        } catch (final Throwable t) {
-            throw new RuntimeException("Failed to load data from ${DATA_FILE_NAME} of ${fastqc} into the database.", t)
-        }
+        Map parsedFastqcFile = parseFastQCFile(fastqc, PROPERTIES_REGEX_TO_BE_PARSED)
+        fastqc.dataFile.nReads = parsedFastqcFile["nReads"] as long
+        fastqc.dataFile.sequenceLength = parsedFastqcFile["sequenceLength"]
+        fastqc.dataFile.save(flush: true)
+        fastqc.contentUploaded = true
+        fastqc.save(flush: true)
     }
 
     /**
@@ -72,21 +67,14 @@ class FastqcUploadService {
         Map<String, String> parsedProperties = [:]
 
         propertiesToBeParsedWithRegEx.each { String key, String regex ->
-            String value = parsePropertyFromFastQC(fastqcFileContent, regex) {
-                throw new RuntimeException("FastQC file ${fastqc} contains no information about ${key} with regular expression ${regex}")
+            Matcher matcher = fastqcFileContent =~ regex
+            if (matcher) {
+                parsedProperties << [(key): matcher.group(1) as String]
+            } else {
+                throw new ParsingException("FastQC file ${fastqc} contains no information about ${key} with regular expression ${regex}")
             }
-            parsedProperties << [(key): value]
         }
-
         return parsedProperties
-    }
-
-    private static String parsePropertyFromFastQC(String fastqcFileContent, String regex, Closure exception) {
-        Matcher matcher = fastqcFileContent =~ regex
-        if (matcher) {
-            return matcher.group(1) as String
-        }
-        return exception()
     }
 
     String getFastQCFileContent(FastqcProcessedFile fastqc) {

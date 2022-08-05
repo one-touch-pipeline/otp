@@ -347,6 +347,7 @@ class ProcessesController {
         render dataToRender as JSON
     }
 
+    @SuppressWarnings("CatchRuntimeException")
     def restartWithProcess(Process process) {
         StringBuilder stringBuilder = new StringBuilder()
         LogThreadLocal.withThreadLog(stringBuilder) {
@@ -379,6 +380,7 @@ class ProcessesController {
         ]
     }
 
+    @SuppressWarnings("CatchRuntimeException")
     def restartStep() {
         boolean ok = true
         String error = null

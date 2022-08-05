@@ -27,7 +27,7 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.roddy.execution.jobs.*
-import de.dkfz.tbi.otp.OtpRuntimeException
+import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.processing.ClusterJobManagerFactoryService

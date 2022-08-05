@@ -28,11 +28,11 @@ import org.springframework.context.ApplicationContext
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.ObjectError
 
-import de.dkfz.tbi.otp.OtpRuntimeException
 import de.dkfz.tbi.otp.parser.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.MessageSourceService
+import de.dkfz.tbi.otp.utils.exceptions.*
 import de.dkfz.tbi.util.spreadsheet.*
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
 import de.dkfz.tbi.util.spreadsheet.validation.ValidationContext
@@ -122,7 +122,7 @@ class SampleIdentifierService {
                 e.errors.allErrors.each { ObjectError err ->
                     output << messageSourceService.createError(err)
                 }
-            } catch (RuntimeException e) {
+            } catch (OtpRuntimeException e) {
                 output << e.message
             }
         }
@@ -193,7 +193,8 @@ class SampleIdentifierService {
             return sanitizedSampleType
         }
         if (identifier.useSpecificReferenceGenome == null) {
-            throw new RuntimeException("SampleType '${identifier.sampleTypeDbName}' does not exist and useSpecificReferenceGenome is not defined")
+            throw new SampleTypeDoesNotExistException("Sample type '${identifier.sampleTypeDbName}' " +
+                    "does not exist and useSpecificReferenceGenome is not defined")
         }
         return new SampleType(
                 name: sanitizedSampleTypeDbName,
@@ -205,7 +206,7 @@ class SampleIdentifierService {
         Individual individual = atMostOneElement(Individual.findAllByPid(identifier.pid))
         if (individual) {
             if (individual.project.name != identifier.projectName) {
-                throw new RuntimeException(
+                throw new WrongProjectException(
                         "An individual with PID ${individual.pid} already exists, but belongs " +
                                 "to project ${individual.project.name} instead of ${identifier.projectName}"
                 )
@@ -228,7 +229,7 @@ class SampleIdentifierService {
         if (result) {
             return result
         }
-        throw new RuntimeException("Project ${identifier.projectName} does not exist.")
+        throw new WrongProjectException("Project ${identifier.projectName} does not exist.")
     }
 
     /**

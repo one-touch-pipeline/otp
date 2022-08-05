@@ -175,6 +175,7 @@ class ExecuteRoddyCommandService {
      * Returns the analysis id which has to be used in this roddy workflow
      * @deprecated use {@link RoddyCommandService} for the new WF system
      */
+    @SuppressWarnings("ThrowRuntimeException") // ignored: will be removed with the old workflow system
     @Deprecated
     String getAnalysisIDinConfigFile(RoddyResult roddyResult) {
         assert roddyResult: "The input roddyResult must not be null"

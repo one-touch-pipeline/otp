@@ -25,7 +25,7 @@ import grails.gorm.transactions.Transactional
 import grails.util.Pair
 import groovy.transform.Canonical
 
-import de.dkfz.tbi.otp.OtpRuntimeException
+import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.ngsdata.*

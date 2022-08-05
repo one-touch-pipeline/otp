@@ -23,7 +23,7 @@ package de.dkfz.tbi.otp.project.exception.unixGroup
 
 import groovy.transform.InheritConstructors
 
-import de.dkfz.tbi.otp.OtpRuntimeException
+import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 
 @InheritConstructors
 class UnixGroupException extends OtpRuntimeException {

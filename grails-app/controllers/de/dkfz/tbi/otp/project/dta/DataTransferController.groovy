@@ -33,7 +33,7 @@ import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.utils.StringUtils
-import de.dkfz.tbi.otp.utils.exceptions.FileNotFoundException
+import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
 import de.dkfz.tbi.util.TimeFormats
 

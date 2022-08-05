@@ -26,9 +26,11 @@ import de.dkfz.tbi.otp.OtpException
 /**
  * Exception to indicate that updating an Individual failed.
  */
+@Deprecated
 class IndividualUpdateException extends OtpException {
     Individual individual
 
+    @Deprecated
     IndividualUpdateException(Individual individual) {
         super("Updating the Individual with id ${individual.id} failed")
         this.individual = individual

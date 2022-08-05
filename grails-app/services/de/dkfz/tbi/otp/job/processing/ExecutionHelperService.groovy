@@ -24,7 +24,7 @@ package de.dkfz.tbi.otp.job.processing
 import grails.gorm.transactions.Transactional
 import org.springframework.beans.factory.annotation.Autowired
 
-import de.dkfz.tbi.otp.OtpRuntimeException
+import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.project.Project

@@ -1660,7 +1660,7 @@ class DomainFactory {
             case ExternalMergingWorkPackage:
                 return createExternalMergingWorkPackage(properties)
             default:
-                throw new RuntimeException("Unknown subclass of AbstractMergingWorkPackage: ${clazz}")
+                throw new NotSupportedException("Unknown subclass of AbstractMergingWorkPackage: ${clazz}")
         }
     }
 
@@ -1677,7 +1677,7 @@ class DomainFactory {
             case Pipeline.Name.EXTERNALLY_PROCESSED:
                 return createExternalMergingWorkPackage(properties)
             default:
-                throw new RuntimeException("Unknown alignment pipeline: ${pipelineName}")
+                throw new NotSupportedException("Unknown alignment pipeline: ${pipelineName}")
         }
     }
 

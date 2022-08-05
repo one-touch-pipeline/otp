@@ -21,7 +21,7 @@
  */
 package de.dkfz.tbi.otp.domainFactory.pipelines.externalBam
 
-import de.dkfz.tbi.otp.OtpRuntimeException
+import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsAlignment
 import de.dkfz.tbi.otp.ngsdata.SequencingReadType

@@ -92,6 +92,7 @@ class RestartParseService {
         }
     }
 
+    @SuppressWarnings("ThrowRuntimeException") // ignored: will be removed with the old workflow system
     JobErrorDefinition.Action detectAndHandleType(Job job, Collection<JobErrorDefinition> jobErrorDefinitions) {
         JobErrorDefinition.Type type = CollectionUtils.exactlyOneElement(jobErrorDefinitions*.type.unique())
 

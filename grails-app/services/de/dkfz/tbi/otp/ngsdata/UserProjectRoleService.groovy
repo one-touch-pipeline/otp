@@ -32,7 +32,7 @@ import de.dkfz.odcf.audit.impl.DicomAuditLogger
 import de.dkfz.odcf.audit.impl.OtpDicomAuditFactory
 import de.dkfz.odcf.audit.impl.OtpDicomAuditFactory.UniqueIdentifierType
 import de.dkfz.odcf.audit.xml.layer.EventIdentification.EventOutcomeIndicator
-import de.dkfz.tbi.otp.OtpRuntimeException
+import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 import de.dkfz.tbi.otp.administration.*
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption

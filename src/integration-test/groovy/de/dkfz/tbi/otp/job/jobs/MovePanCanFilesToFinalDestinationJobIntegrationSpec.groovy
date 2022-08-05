@@ -60,6 +60,7 @@ class MovePanCanFilesToFinalDestinationJobIntegrationSpec extends AbstractIntegr
         }
     }
 
+    @SuppressWarnings("ThrowRuntimeException") // ignored: will be removed with the old workflow system
     void "test transaction-rollback when linking files fails"() {
         given:
         FileOperationStatus originalFileOperationStatus

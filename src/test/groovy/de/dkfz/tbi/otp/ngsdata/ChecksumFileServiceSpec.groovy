@@ -27,6 +27,8 @@ import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import de.dkfz.tbi.otp.utils.exceptions.FileIsEmptyException
+
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.attribute.PosixFilePermissions
@@ -82,7 +84,7 @@ class ChecksumFileServiceSpec extends Specification implements DataTest {
         checksumFileService.firstMD5ChecksumFromFile(file)
 
         then:
-        thrown(RuntimeException)
+        thrown(FileNotReadableException)
     }
 
     void "test firstMD5ChecksumFromFile with unreadable file"() {
@@ -94,7 +96,7 @@ class ChecksumFileServiceSpec extends Specification implements DataTest {
         checksumFileService.firstMD5ChecksumFromFile(file)
 
         then:
-        thrown(RuntimeException)
+        thrown(FileNotReadableException)
     }
 
     void "test firstMD5ChecksumFromFile with empty file"() {
@@ -103,7 +105,7 @@ class ChecksumFileServiceSpec extends Specification implements DataTest {
         checksumFileService.firstMD5ChecksumFromFile(file)
 
         then:
-        thrown(RuntimeException)
+        thrown(FileIsEmptyException)
     }
 
     @Unroll

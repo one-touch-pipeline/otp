@@ -347,6 +347,7 @@ class ProcessService {
      * @return The stacktrace or throws an exception if not found
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @SuppressWarnings("ThrowRuntimeException") // ignored: will be removed with the old workflow system
     String getProcessingErrorStackTrace(long id) {
         ProcessingError error = ProcessingError.get(id)
         if (!error) {

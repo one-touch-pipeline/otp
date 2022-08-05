@@ -50,6 +50,7 @@ class ReferenceGenomeProjectSeqTypeService {
         )
     }
 
+    @SuppressWarnings("ThrowRuntimeException") // ignored: will be removed with the old workflow system
     static ReferenceGenomeProjectSeqType getConfiguredReferenceGenomeProjectSeqType(Project project, SeqType seqType, SampleType sampleType) {
         assert project
         assert seqType
@@ -66,6 +67,7 @@ class ReferenceGenomeProjectSeqTypeService {
         }
     }
 
+    @SuppressWarnings("ThrowRuntimeException") // ignored: will be removed with the old workflow system
     static private ReferenceGenomeProjectSeqType getConfiguredReferenceGenomeProjectSeqTypeUsingProjectDefault(
             Project project, SeqType seqType, SampleType sampleType) {
         assert SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT == sampleType.specificReferenceGenome
@@ -78,6 +80,7 @@ class ReferenceGenomeProjectSeqTypeService {
         }
     }
 
+    @SuppressWarnings("ThrowRuntimeException") // ignored: will be removed with the old workflow system
     static private ReferenceGenomeProjectSeqType getConfiguredReferenceGenomeProjectSeqTypeUsingSampleTypeSpecific(
             Project project, SeqType seqType, SampleType sampleType) {
         assert SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC == sampleType.specificReferenceGenome

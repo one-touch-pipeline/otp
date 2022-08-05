@@ -32,8 +32,8 @@ import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.FileNameGenerator
-import de.dkfz.tbi.otp.utils.exceptions.FileIsEmptyException
-import de.dkfz.tbi.otp.utils.exceptions.FileNotFoundException
+import de.dkfz.tbi.otp.FileIsEmptyException
+import de.dkfz.tbi.otp.FileNotFoundException
 
 import java.nio.file.Files
 import java.nio.file.Path

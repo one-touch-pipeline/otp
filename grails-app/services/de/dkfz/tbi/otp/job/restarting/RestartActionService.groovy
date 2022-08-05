@@ -80,6 +80,7 @@ class RestartActionService {
         }
     }
 
+    @SuppressWarnings("ThrowRuntimeException") // ignored: will be removed with the old workflow system
     private void restartJob(Job job) {
         ProcessingStep step = job.processingStep
 
@@ -91,6 +92,7 @@ class RestartActionService {
         }
     }
 
+    @SuppressWarnings("ThrowRuntimeException") // ignored: will be removed with the old workflow system
     private void restartWorkflow(Job job) {
         ProcessingStep step = job.processingStep
         StartJob startJob = getStartJob(step.process)
@@ -103,6 +105,7 @@ class RestartActionService {
         }
     }
 
+    @SuppressWarnings("ThrowRuntimeException") // ignored: will be removed with the old workflow system
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     void restartWorkflowWithProcess(Process process) {
         StartJob startJob = getStartJob(process)

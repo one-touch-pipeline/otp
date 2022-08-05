@@ -23,7 +23,7 @@ package de.dkfz.tbi.otp.workflow.restartHandler
 
 import grails.gorm.transactions.Transactional
 
-import de.dkfz.tbi.otp.OtpRuntimeException
+import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 import de.dkfz.tbi.otp.workflowExecution.*
 
 /**

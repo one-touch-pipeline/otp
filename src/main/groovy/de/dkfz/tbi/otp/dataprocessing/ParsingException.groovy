@@ -24,7 +24,7 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import groovy.transform.InheritConstructors
 
-import de.dkfz.tbi.otp.OtpRuntimeException
+import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 
 @InheritConstructors
 class ParsingException extends OtpRuntimeException {

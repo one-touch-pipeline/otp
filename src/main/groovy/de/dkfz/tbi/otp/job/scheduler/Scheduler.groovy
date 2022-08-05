@@ -141,6 +141,7 @@ class Scheduler {
      * This method is also responsible for persisting the input parameters passed to the Job at the time
      * of execution.
      */
+    @SuppressWarnings("CatchRuntimeException") // ignored: will be removed with the old workflow system
     private void doCreateCheck(final Job job) {
         try {
             // verify that the Job has a processing Step
@@ -223,6 +224,7 @@ class Scheduler {
      * This method logs the exception, and stores a failure update for the ProcessingStep. As well it triggers the error
      * handling process for the Job's JobExecutionPlan.
      */
+    @SuppressWarnings("ThrowRuntimeException") // ignored: will be removed with the old workflow system
     private void doErrorHandling(Job job, Throwable exceptionToBeHandled) {
         try {
             doUnsafeErrorHandling(job, exceptionToBeHandled)

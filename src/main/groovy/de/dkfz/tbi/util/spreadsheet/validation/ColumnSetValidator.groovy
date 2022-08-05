@@ -23,7 +23,7 @@ package de.dkfz.tbi.util.spreadsheet.validation
 
 import groovy.transform.InheritConstructors
 
-import de.dkfz.tbi.otp.OtpRuntimeException
+import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 import de.dkfz.tbi.util.spreadsheet.Column
 
 /**

@@ -24,7 +24,7 @@ package de.dkfz.tbi.otp.utils
 import grails.gorm.transactions.Transactional
 
 import de.dkfz.tbi.otp.CommentService
-import de.dkfz.tbi.otp.FileNotFoundException
+import de.dkfz.tbi.otp.utils.exceptions.FileNotFoundException
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerMergingWorkPackage
@@ -635,7 +635,7 @@ class DeletionService {
             }
             qualityAssessmentMergedPasses*.delete(flush: true)
         } else {
-            throw new RuntimeException("This BamFile type " + abstractBamFile + " is not supported")
+            throw new NotSupportedException("This BamFile type " + abstractBamFile + " is not supported")
         }
 
         PicardMarkDuplicatesMetrics.findAllByAbstractBamFile(abstractBamFile)*.delete(flush: true)
@@ -657,7 +657,7 @@ class DeletionService {
         if (mergingWorkPackages.empty) {
             println "there is no merging for processedBamFile " + processedBamFile
         } else if (mergingWorkPackages.unique().size() > 1) {
-            throw new RuntimeException("There is not one unique mergingWorkPackage for ProcessedBamFile " + processedBamFile)
+            throw new NotSupportedException("There is not one unique mergingWorkPackage for ProcessedBamFile " + processedBamFile)
         } else {
             MergingWorkPackage mergingWorkPackage = mergingWorkPackages.first()
             List<MergingPass> mergingPasses = mergingSets ? MergingPass.findAllByMergingSetInList(mergingSets).unique() : []

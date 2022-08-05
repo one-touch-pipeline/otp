@@ -21,7 +21,7 @@
  */
 package de.dkfz.tbi.otp.workflow.jobs
 
-import de.dkfz.tbi.otp.OtpRuntimeException
+import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 /**

@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.tracking
 import grails.gorm.transactions.Transactional
 import org.springframework.security.access.prepost.PreAuthorize
 
+import de.dkfz.tbi.otp.dataprocessing.NotSupportedException
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.utils.StringUtils
 import de.dkfz.tbi.util.TimeFormats
@@ -44,7 +45,7 @@ class ProcessingTimeStatisticsService {
         assert dateTo: "No date 'to' is defined."
 
         if (search?.length() > 0 && search?.length() < 3) {
-            throw new RuntimeException("String to search for is too short - at least three characters are required.")
+            throw new NotSupportedException("String to search for is too short - at least three characters are required.")
         }
 
         String query = """

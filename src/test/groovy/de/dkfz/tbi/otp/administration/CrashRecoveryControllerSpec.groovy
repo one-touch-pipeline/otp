@@ -131,6 +131,7 @@ class CrashRecoveryControllerSpec extends Specification implements ControllerUni
         ERROR_MESSAGE_FOR_IDS_IS_NOT_A_LONG == response.text
     }
 
+    @SuppressWarnings("ThrowRuntimeException") // ignored: will be removed with the old workflow system
     void test_markFailed_ShouldReturnErrorMessageForServiceThrownException() {
         given:
         controller.crashRecoveryService = [
@@ -207,6 +208,7 @@ class CrashRecoveryControllerSpec extends Specification implements ControllerUni
         ERROR_MESSAGE_FOR_IDS_IS_NOT_A_LONG == response.text
     }
 
+    @SuppressWarnings("ThrowRuntimeException") // ignored: will be removed with the old workflow system
     void test_restart_ShouldReturnErrorMessageForServiceThrownException() {
         given:
         controller.crashRecoveryService = [
@@ -295,6 +297,7 @@ class CrashRecoveryControllerSpec extends Specification implements ControllerUni
         ERROR_MESSAGE_FOR_IDS_IS_NOT_A_LONG == response.text
     }
 
+    @SuppressWarnings("ThrowRuntimeException") // ignored: will be removed with the old workflow system
     void test_markFinished_ShouldReturnErrorMessageForServiceThrownException_NoParameters() {
         given:
         controller.crashRecoveryService = [
@@ -438,6 +441,7 @@ class CrashRecoveryControllerSpec extends Specification implements ControllerUni
         ERROR_MESSAGE_FOR_IDS_IS_NOT_A_LONG == response.text
     }
 
+    @SuppressWarnings("ThrowRuntimeException") // ignored: will be removed with the old workflow system
     void test_markSucceeded_ShouldReturnErrorMessageForServiceThrownException_NoParameters() {
         given:
         controller.crashRecoveryService = [

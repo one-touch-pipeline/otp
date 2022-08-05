@@ -169,6 +169,7 @@ abstract class AbstractJobImpl implements Job {
      * Returns the object which is referenced by the {@link ProcessParameter} for the {@link Process} that this job
      * belongs to. If there is no such process parameter or object, this method will throw an exception.
      */
+    @SuppressWarnings("ThrowRuntimeException") // ignored: will be removed with the old workflow system
     ProcessParameterObject getProcessParameterObject() {
         ProcessParameterObject object = processParameter.toObject()
         if (object == null) {
@@ -191,6 +192,7 @@ abstract class AbstractJobImpl implements Job {
         return exactlyOneElement(ProcessParameter.findAllByProcess(processingStep.process))
     }
 
+    @SuppressWarnings("ThrowRuntimeException") // ignored: will be removed with the old workflow system
     Collection<ClusterJob> failedOrNotFinishedClusterJobs() {
         // For none multi jobs the LogFiles belong to the otp job sending the cluster job and not to the job validating the cluster job, which can fail.
         // The sending cluster job is two steps before the validating one.

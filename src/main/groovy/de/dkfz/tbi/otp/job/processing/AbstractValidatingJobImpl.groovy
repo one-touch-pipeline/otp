@@ -39,6 +39,7 @@ abstract class AbstractValidatingJobImpl extends AbstractEndStateAwareJobImpl im
     }
 
     @Override
+    @SuppressWarnings("ThrowRuntimeException") // ignored: will be removed with the old workflow system
     ProcessingStep getValidatorFor() {
         if (!validatedStep) {
             throw new RuntimeException("Validated Step accessed before set")
@@ -52,6 +53,7 @@ abstract class AbstractValidatingJobImpl extends AbstractEndStateAwareJobImpl im
     }
 
     @Override
+    @SuppressWarnings("ThrowRuntimeException") // ignored: will be removed with the old workflow system
     boolean hasValidatedJobSucceeded() {
         if (validatedStepSucceeded == null) {
             throw new RuntimeException("Step not yet marked as validated")

@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.job.processing
 
+@Deprecated
 class InvalidStateException extends Exception {
     private static final long serialVersionUID = 5694021186759169444L
 

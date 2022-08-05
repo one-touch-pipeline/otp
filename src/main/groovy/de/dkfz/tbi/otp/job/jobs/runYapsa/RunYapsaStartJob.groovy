@@ -65,6 +65,7 @@ class RunYapsaStartJob extends AbstractBamFilePairAnalysisStartJob {
     }
 
     @SuppressWarnings("LineLength") // suppressed because breaking the line would break the commands
+    @SuppressWarnings("ThrowRuntimeException") // ignored: will be removed with the old workflow system
     @Override
     ConfigPerProjectAndSeqType getConfig(SamplePair samplePair) {
         Pipeline pipeline = bamFileAnalysisService.pipeline

@@ -26,7 +26,7 @@ import grails.testing.web.controllers.ControllerUnitTest
 import org.springframework.http.*
 import spock.lang.Specification
 
-import de.dkfz.tbi.otp.OtpRuntimeException
+import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.workflow.shared.WorkflowException

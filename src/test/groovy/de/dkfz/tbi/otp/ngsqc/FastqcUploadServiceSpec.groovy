@@ -243,8 +243,8 @@ Sequences flagged as poor quality\t0\t
         fastqcUploadService.uploadFastQCFileContentsToDataBase(fastqcProcessedFile)
 
         then:
-        RuntimeException e = thrown()
-        e.message.contains("Failed to load data from")
+        NullPointerException e = thrown()
+        e.message.contains("Cannot invoke method getInputStreamFromZipFile() on null object")
     }
 
     void "uploadFastQCFileContentsToDataBase, fills DataFile for fine data"() {

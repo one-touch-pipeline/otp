@@ -24,7 +24,7 @@ package de.dkfz.tbi.otp.withdraw
 import grails.gorm.transactions.Transactional
 import org.springframework.security.access.prepost.PreAuthorize
 
-import de.dkfz.tbi.otp.OtpRuntimeException
+import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFileService

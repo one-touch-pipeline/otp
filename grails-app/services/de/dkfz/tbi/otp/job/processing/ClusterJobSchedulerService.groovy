@@ -89,6 +89,7 @@ class ClusterJobSchedulerService {
      * @return the cluster job ID
      */
     @Deprecated
+    @SuppressWarnings("ThrowRuntimeException") // ignored: will be removed with the old workflow system
     String executeJob(Realm realm, String script, Map<String, String> environmentVariables = [:],
                       Map<JobSubmissionOption, String> jobSubmissionOptions = [:]) throws Throwable {
         if (!script) {

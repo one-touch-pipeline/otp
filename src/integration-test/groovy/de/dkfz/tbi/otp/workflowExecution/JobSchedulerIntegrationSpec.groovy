@@ -26,7 +26,7 @@ import org.springframework.context.ApplicationContext
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.AbstractIntegrationSpecWithoutRollbackAnnotation
-import de.dkfz.tbi.otp.FileNotFoundException
+import de.dkfz.tbi.otp.utils.exceptions.FileNotFoundException
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.SessionUtils

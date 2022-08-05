@@ -23,7 +23,7 @@ package de.dkfz.tbi.otp.job.processing
 
 import groovy.transform.InheritConstructors
 
-import de.dkfz.tbi.otp.OtpRuntimeException
+import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 
 @InheritConstructors
 class RoddyException extends OtpRuntimeException { }

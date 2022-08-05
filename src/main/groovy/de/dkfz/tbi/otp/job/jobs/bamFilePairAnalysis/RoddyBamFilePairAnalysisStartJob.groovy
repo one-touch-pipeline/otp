@@ -40,6 +40,7 @@ trait RoddyBamFilePairAnalysisStartJob implements BamFilePairAnalysisStartJobTra
     }
 
     @Override
+    @SuppressWarnings("ThrowRuntimeException") // ignored: will be removed with the old workflow system
     ConfigPerProjectAndSeqType getConfig(SamplePair samplePair) {
         Pipeline pipeline = bamFileAnalysisService.pipeline
         RoddyWorkflowConfig config = (RoddyWorkflowConfig)RoddyWorkflowConfig.getLatestForIndividual(

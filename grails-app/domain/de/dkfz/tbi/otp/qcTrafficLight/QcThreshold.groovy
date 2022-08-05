@@ -28,6 +28,7 @@ import groovy.transform.ToString
 import groovy.transform.TupleConstructor
 import org.springframework.validation.Errors
 
+import de.dkfz.tbi.otp.dataprocessing.NotSupportedException
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
@@ -196,7 +197,7 @@ class QcThreshold implements Entity {
             case ThresholdStrategy.RATIO_TO_EXTERNAL_VALUE:
                 compareThresholdToRatioWithExternalValue(qc, externalValue)
                 break
-            default: throw new RuntimeException("No other comparison is defined yet")
+            default: throw new NotSupportedException("No other comparison is defined yet")
         }
     }
 

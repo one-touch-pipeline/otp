@@ -30,7 +30,8 @@ import org.springframework.context.ApplicationContext
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.InformationReliability
-import de.dkfz.tbi.otp.OtpRuntimeException
+import de.dkfz.tbi.otp.utils.exceptions.CopyingOfFileFailedException
+import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePairDeciderService
@@ -227,7 +228,7 @@ class MetadataImportService {
             } catch (Throwable t) {
                 mailHelperService.sendEmailToTicketSystem("Error: Copying of metadatafile ${source} failed",
                         "${t.localizedMessage}\n${t.cause}")
-                throw new RuntimeException("Copying of metadata file ${source} failed", t)
+                throw new CopyingOfFileFailedException("Copying of metadata file ${source} failed", t)
             }
         }
     }

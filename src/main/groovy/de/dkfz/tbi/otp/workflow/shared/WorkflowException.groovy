@@ -23,7 +23,7 @@ package de.dkfz.tbi.otp.workflow.shared
 
 import groovy.transform.InheritConstructors
 
-import de.dkfz.tbi.otp.OtpRuntimeException
+import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 
 @InheritConstructors
 class WorkflowException extends OtpRuntimeException {

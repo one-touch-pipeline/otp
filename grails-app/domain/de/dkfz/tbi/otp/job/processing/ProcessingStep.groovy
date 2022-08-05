@@ -198,6 +198,7 @@ class ProcessingStep implements Serializable, Entity {
     /**
      * Returns the object with the specified ID or throws an exception if no such object exists.
      */
+    @SuppressWarnings("ThrowRuntimeException") // ignored: will be removed with the old workflow system
     static ProcessingStep getInstance(final long id) {
         final ProcessingStep instance = ProcessingStep.get(id)
         if (instance == null) {

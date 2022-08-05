@@ -40,6 +40,7 @@ import de.dkfz.tbi.otp.project.exception.unixGroup.UnixGroupIsSharedException
 import de.dkfz.tbi.otp.project.projectRequest.ProjectRequestService
 import de.dkfz.tbi.otp.security.Role
 import de.dkfz.tbi.otp.utils.CommentCommand
+import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriorityService
 import de.dkfz.tbi.util.TimeFormats
 

@@ -564,7 +564,7 @@ All the Rules that will be used for OTP
         priority = CRITICAL
     }
     ThrowRuntimeException {
-        priority = HIGH
+        priority = CRITICAL
     }
     ThrowThrowable {
         priority = CRITICAL

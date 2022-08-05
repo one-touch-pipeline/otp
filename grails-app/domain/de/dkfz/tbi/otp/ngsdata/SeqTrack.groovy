@@ -240,36 +240,20 @@ class SeqTrack implements ProcessParameterObject, Entity, Artefact {
         return (libraryName ? "lib${normalizedLibraryName}" : "libNA")
     }
 
-    /**
-     * @deprecated This method fails if a SeqTrack is aligned by multiple workflows or with different parameters.
-     */
-    @Deprecated
     DataProcessingState getAlignmentState() {
         Collection<AlignmentPass> allPasses = AlignmentPass.findAllBySeqTrack(this)
         Collection<AlignmentPass> latestPasses = allPasses.findAll { it.latestPass }
         assert allPasses.empty == latestPasses.empty
         switch (latestPasses.size()) {
-            case 0:
-                return DataProcessingState.UNKNOWN
             case 1:
                 return DataProcessingState.valueOf(exactlyOneElement(latestPasses).alignmentState.name())
             default:
-                throw new RuntimeException(
-                        "${this} is aligned by multiple workflows or with different parameters, therefore it does not have a single alignmentState.")
+                return DataProcessingState.UNKNOWN
         }
     }
 
     String nBaseString() {
         return nBasePairs ? String.format("%.1f G", (nBasePairs / 1e9)) : "N/A"
-    }
-
-    String alignmentLogString() {
-        String text = ""
-        AlignmentLog.findAllBySeqTrack(this).each {
-            text += it.alignmentParams
-            text += it.executedBy
-        }
-        return text
     }
 
     @Override

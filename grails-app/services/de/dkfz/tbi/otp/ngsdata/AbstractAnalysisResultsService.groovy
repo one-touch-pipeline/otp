@@ -169,7 +169,7 @@ abstract class AbstractAnalysisResultsService<T extends BamFilePairAnalysis> {
                 filePaths.add(indelCallingService.getCombinedPlotPathTiNDA(callingInstance as IndelCallingInstance))
                 break
             default:
-                throw new RuntimeException("${callingInstance.class.name} is not a valid calling instance")
+                throw new NotSupportedException("${callingInstance.class.name} is not a valid calling instance")
         }
         return filePaths.findAll { Path file ->
             Files.exists(file) && Files.isReadable(file)

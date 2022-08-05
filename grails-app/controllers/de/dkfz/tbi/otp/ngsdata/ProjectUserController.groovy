@@ -38,6 +38,7 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.StringUtils
+import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 
 @Secured('isFullyAuthenticated()')
 class ProjectUserController implements CheckAndCall {
