@@ -316,6 +316,9 @@ $.otp.clusterJobGeneralGraph = {
             },
             showLine: true,
             plugins: {
+              datalabels: {
+                display: false
+              },
               legend: {
                 position: 'bottom'
               }
@@ -355,6 +358,9 @@ $.otp.clusterJobGeneralGraph = {
             },
             showLine: true,
             plugins: {
+              datalabels: {
+                display: false
+              },
               legend: {
                 position: 'bottom'
               }
