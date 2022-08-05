@@ -25,29 +25,186 @@ $.otp.clusterJobJobTypeSpecific = {
   register() {
     'use strict';
 
-    $.otp.clusterJobJobTypeSpecificCharts.renderCharts();
+    $.otp.clusterJobJobTypeSpecific.renderCharts();
 
     $('.datePicker').on('change', () => {
+      $.otp.clusterJobJobTypeSpecific.updateJobClassSelect();
       $('#dpTo').attr('min', $('#dpFrom').val());
       $('#dpFrom').attr('max', $('#dpTo').val());
-      $.otp.clusterJobJobTypeSpecificCharts.renderCharts();
+      $.otp.clusterJobJobTypeSpecific.renderCharts();
     });
     $('#jobClassSelect').on('change', () => {
-      $.otp.clusterJobJobTypeSpecificCharts.renderCharts();
+      $.otp.clusterJobJobTypeSpecific.updateSeqTypeSelect();
     });
     $('#seqTypeSelect').on('change', () => {
-      $.otp.clusterJobJobTypeSpecificCharts.renderCharts();
+      $.otp.clusterJobJobTypeSpecific.updateAvgValues();
+      $.otp.clusterJobJobTypeSpecific.renderCharts();
     });
     $('#basesInput').on('change', () => {
-      $.otp.clusterJobJobTypeSpecificCharts.renderCharts();
+      $.otp.clusterJobJobTypeSpecific.updateAvgValues();
+      $.otp.clusterJobJobTypeSpecific.renderCharts();
     });
     $('#coverageInput').on('change', () => {
-      $.otp.clusterJobJobTypeSpecificCharts.renderCharts();
+      $.otp.clusterJobJobTypeSpecific.updateAvgValues();
+      $.otp.clusterJobJobTypeSpecific.renderCharts();
     });
-  }
-};
+  },
 
-$.otp.clusterJobJobTypeSpecificCharts = {
+  updateJobClassSelect() {
+    'use strict';
+
+    const jobClassSelect = $('#jobClassSelect');
+    const currentJobClass = jobClassSelect.val();
+    jobClassSelect.find('option').remove();
+
+    const dataUrl = $.otp.createLink({
+      controller: 'clusterJobJobTypeSpecific',
+      action: 'getJobClassesByDate',
+      parameters: {
+        from: $('#dpFrom').val(),
+        to: $('#dpTo').val()
+      }
+    });
+
+    fetch(dataUrl)
+      .then((response) => response.json())
+      .then((json) => {
+        $.each(json.data, function () {
+          const cOption = $('<option>', {
+            value: this,
+            text: this
+          });
+          jobClassSelect.append(cOption);
+          if (currentJobClass === this) {
+            cOption.attr('selected', 'selected');
+          }
+        });
+        $.otp.clusterJobJobTypeSpecific.updateSeqTypeSelect();
+      });
+  },
+
+  updateSeqTypeSelect() {
+    'use strict';
+
+    const seqTypeSelect = $('#seqTypeSelect');
+    const currentSeqType = seqTypeSelect.val();
+    seqTypeSelect.find('option').remove();
+
+    const dataUrl = $.otp.createLink({
+      controller: 'clusterJobJobTypeSpecific',
+      action: 'getSeqTypesByJobClass',
+      parameters: {
+        jobClass: $('#jobClassSelect').val(),
+        from: $('#dpFrom').val(),
+        to: $('#dpTo').val()
+      }
+    });
+
+    fetch(dataUrl)
+      .then((response) => response.json())
+      .then((json) => {
+        $.each(json.data, function () {
+          const cOption = $('<option>', {
+            value: this.id,
+            text: `${this.name}`
+          });
+          seqTypeSelect.append(cOption);
+          if (currentSeqType === this.id) {
+            cOption.attr('selected', 'selected');
+          }
+        });
+        $.otp.clusterJobJobTypeSpecific.renderCharts();
+        $.otp.clusterJobJobTypeSpecific.updateAvgValues();
+      });
+  },
+
+  updateAvgValues() {
+    'use strict';
+
+    const startDate = $('#dpFrom').val();
+    const endDate = $('#dpTo').val();
+
+    const jobClassSelect = $('#jobClassSelect').val();
+    const seqTypeSelect = $('#seqTypeSelect').val();
+    const basesInput = $('#basesInput').val();
+    const coverageInput = $('#coverageInput').val();
+
+    const avgMemoryDataUrl = $.otp.createLink({
+      controller: 'clusterJobJobTypeSpecific',
+      action: 'getJobTypeSpecificAvgMemory',
+      parameters: {
+        jobClass: jobClassSelect,
+        seqType: seqTypeSelect,
+        from: startDate,
+        to: endDate
+      }
+    });
+
+    fetch(avgMemoryDataUrl)
+      .then((response) => response.json())
+      .then((json) => {
+        $('#jobTypeSpecificAvgMemory').html(json.data);
+      });
+
+    const avgCoreUsageDataUrl = $.otp.createLink({
+      controller: 'clusterJobJobTypeSpecific',
+      action: 'getJobTypeSpecificAvgCoreUsage',
+      parameters: {
+        jobClass: jobClassSelect,
+        seqType: seqTypeSelect,
+        from: startDate,
+        to: endDate
+      }
+    });
+
+    fetch(avgCoreUsageDataUrl)
+      .then((response) => response.json())
+      .then((json) => {
+        $('#jobTypeSpecificAvgCPU').html(json.data);
+      });
+
+    const avgSpecificStatesDataUrl = $.otp.createLink({
+      controller: 'clusterJobJobTypeSpecific',
+      action: 'getJobTypeSpecificStatesTimeDistribution',
+      parameters: {
+        jobClass: jobClassSelect,
+        seqType: seqTypeSelect,
+        bases: basesInput,
+        coverage: coverageInput,
+        from: startDate,
+        to: endDate
+      }
+    });
+
+    fetch(avgSpecificStatesDataUrl)
+      .then((response) => response.json())
+      .then((json) => {
+        $('#jobTypeSpecificAvgDelay').html(json.data.avgQueue);
+        $('#jobTypeSpecificAvgProcessing').html(json.data.avgProcess);
+      });
+
+    const coverageStatsDataUrl = $.otp.createLink({
+      controller: 'clusterJobJobTypeSpecific',
+      action: 'getJobTypeSpecificCoverageStatistics',
+      parameters: {
+        jobClass: jobClassSelect,
+        seqType: seqTypeSelect,
+        bases: basesInput,
+        from: startDate,
+        to: endDate
+      }
+    });
+
+    fetch(coverageStatsDataUrl)
+      .then((response) => response.json())
+      .then((json) => {
+        $('#jobTypeSpecificMinCov').html(json.data.minCov);
+        $('#jobTypeSpecificAvgCov').html(json.data.avgCov);
+        $('#jobTypeSpecificMaxCov').html(json.data.maxCov);
+        $('#jobTypeSpecificMedianCov').html(json.data.medianCov);
+      });
+  },
+
   renderCharts() {
     'use strict';
 
@@ -193,6 +350,9 @@ $.otp.clusterJobJobTypeSpecificCharts = {
             },
             showLine: true,
             plugins: {
+              datalabels: {
+                display: false
+              },
               legend: {
                 position: 'bottom'
               }
@@ -243,6 +403,9 @@ $.otp.clusterJobJobTypeSpecificCharts = {
           },
           options: {
             plugins: {
+              datalabels: {
+                display: false
+              },
               legend: {
                 position: 'bottom'
               }
