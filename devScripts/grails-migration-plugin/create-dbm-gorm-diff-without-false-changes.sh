@@ -20,6 +20,12 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+
+# This scripts creates a database migration script from the gorm to defined database
+# since the tool generates much false positives, they are removed afterwards
+# see the comments on the regular expression for more details
+# for simpler debugging, the result of each step is kept in a tmp directory
+
 set -e
 
 if [ ! "$1" ]; then
@@ -29,14 +35,18 @@ fi
 
 # see http://grails-plugins.github.io/grails-database-migration/1.4.0/ref/Diff%20Scripts/dbm-gorm-diff.html for reference
 # $1 is the filename
-year=`date +'%Y'`
-#dbm-gorm-diff adds automatically the directory 'migrations', but mkdir does not
-mkdir -p migrations/changelogs/${year}
-bash gradlew dbmGormDiff -q > migrations/changelogs/${year}/${1}.groovy
 
-prefix="s/\n\s{4}changeSet.*\n\s{8}"
-suffix=".*\n\s{4}\}\n//g"
+#variables
+year=`date +'%Y'`
 changelogPath="migrations/changelogs/${year}/${1}.groovy"
+tmpDir="tmp"
+
+prefixChangeSet="\n\s{4}changeSet.*\n\s{8}"
+suffixChangeSet=".*\n\s{4}\}\n"
+
+infixChangeSet="${suffixChangeSet}${prefixChangeSet}"
+prefix="s/${prefixChangeSet}"
+suffix="${suffixChangeSet}//g"
 
 joinTables="\
 (aceseq_instance_roddy_execution_directory_names)|\
@@ -83,29 +93,16 @@ joinTables="\
 (workflow_run_workflow_config)|\
 (workflow_step_workflow_log)|\
 "
-perl -0pi -e "${prefix}((dropPrimaryKey)|(dropNotNullConstraint)|(dropUniqueConstraint)|(dropForeignKeyConstraint)).*ableName: \"(${joinTables})\"${suffix}" $changelogPath
 
-nonJoinTables="\
-(abstract_bam_file)|\
-(abstract_merging_work_package)|\
-(alignment_pass)|\
-(config_per_project_and_seq_type)|\
-(external_workflow_config_selector)|\
-(fastqc_processed_file)|\
-(indel_quality_control)|\
-(project)|\
-(sample_pair)|\
-(sample_type_per_project)|\
-"
-
-perl -0pi -e "${prefix}((addUniqueConstraint)|(addForeignKeyConstraint)|(dropUniqueConstraint)|(dropIndex)).*ableName: \"(${nonJoinTables})\"${suffix}" $changelogPath
-perl -0pi -e "${prefix}createIndex.*tableName: \"(${nonJoinTables})\".*\{(\n\s{12}column.*\n)+\s{8}\}${suffix}" $changelogPath
-
+#contains false positive unique constraint
 uniqueConstraints="\
+(UC_ABSTRACT_BAM_FILEALIGNMENT_PASS_ID_COL)|\
+(UC_ABSTRACT_BAM_FILEMERGING_PASS_ID_COL)|\
 (UC_ABSTRACT_FIELD_DEFINITIONNAME_COL)|\
 (UC_ACL_CLASSCLASS_COL)|\
 (UC_ANTIBODY_TARGETNAME_COL)|\
 (UC_BAM_FILE_SUBMISSION_OBJECTEGA_ALIAS_NAME_COL)|\
+(UC_CONFIG_PER_PROJECT_AND_SEQ_TYPECONFIG_FILE_PATH_COL)|\
 (UC_DATA_FILE_SUBMISSION_OBJECTEGA_ALIAS_NAME_COL)|\
 (UC_DECISION_MAPPINGDECISION_ID_COL)|\
 (UC_DOCUMENT_TYPETITLE_COL)|\
@@ -113,7 +110,10 @@ uniqueConstraints="\
 (UC_EGA_LIBRARY_STRATEGYLIBRARY_STRATEGY_EGA_NAME_COL)|\
 (UC_EGA_PLATFORM_MODELPLATFORM_MODEL_EGA_NAME_COL)|\
 (UC_EXTERNAL_WORKFLOW_CONFIG_FRAGMENTNAME_COL)|\
+(UC_EXTERNAL_WORKFLOW_CONFIG_SELECTORNAME_COL)|\
+(UC_FASTQC_PROCESSED_FILEDATA_FILE_ID_COL)|\
 (UC_ILSE_SUBMISSIONILSE_NUMBER_COL)|\
+(UC_INDEL_QUALITY_CONTROLINDEL_CALLING_INSTANCE_ID_COL)|\
 (UC_INDEL_SAMPLE_SWAP_DETECTIONINDEL_CALLING_INSTANCE_ID_COL)|\
 (UC_INDIVIDUALPID_COL)|\
 (UC_KEYWORDNAME_COL)|\
@@ -124,10 +124,12 @@ uniqueConstraints="\
 (UC_PROCESSING_PRIORITYNAME_COL)|\
 (UC_PROCESSING_PRIORITYPRIORITY_COL)|\
 (UC_PROCESSRESTARTED_ID_COL)|\
+(UC_PROJECTDIR_NAME_COL)|\
 (UC_PROCESS_PARAMETERPROCESS_ID_COL)|\
 (UC_PROJECT_GROUPNAME_COL)|\
 (UC_PROJECT_REQUESTNAME_COL)|\
 (UC_PROJECT_ROLENAME_COL)|\
+(UC_PROJECTNAME_COL)|\
 (UC_REALMNAME_COL)|\
 (UC_REFERENCE_GENOMENAME_COL)|\
 (UC_REFERENCE_GENOMEPATH_COL)|\
@@ -170,9 +172,12 @@ uniqueConstraints="\
 (UK6615f9e2cd25d67dcf418f344e6b)|\
 (UK6cb454c8bcac6b4d804f975198d6)|\
 (UK79e9db6b093294dfe0036ab264a4)|\
+(UK8f99bb491b7d0b82687c43f660f3)|\
 (UK90f1dddc247b084bf6ea7df25813)|\
 (UK986b4059d08cedff89f0f334bb5f)|\
+(UK9f522e63c97479850e5d9b81286f)|\
 (UKa1bacb088b69505ab70013e79694)|\
+(UKa74a5644b48ab8b66ceb6d552ff2)|\
 (UKb7a01d2be3fdbf83d79c75252adb)|\
 (UKc1f0d44a5da068a763bc37f8fa69)|\
 (UKc8144e05783d99c4c427a2106888)|\
@@ -189,18 +194,45 @@ uniqueConstraints="\
 (UKfe31b46979536931e6054227f749)|\
 "
 
-perl -0pi -e "${prefix}addUniqueConstraint.*constraintName.*\"(${uniqueConstraints})\"${suffix}" $changelogPath
-perl -0pi -e "${prefix}alterSequence${suffix}" $changelogPath
-perl -0pi -e "${prefix}dropIndex.*\n.*\}\n\n\s{4}changeSet.*\{\n\s{8}createIndex.*\{(\n\s{12}column.*\n)+\s{8}\}${suffix}" $changelogPath
-perl -0pi -e "${prefix}dropUniqueConstraint.*\n.*\}\n\n\s{4}changeSet.*\{\n\s{8}addUniqueConstraint${suffix}" $changelogPath
-perl -0pi -e "${prefix}addUniqueConstraint.*columnNames: \"((alignment_pass_id)|(merging_pass_id))\".*tableName: \"abstract_bam_file\"${suffix}" $changelogPath
-#exclude the wrong listed dropUniqueConstraint for UC_EXTERNAL_WORKFLOW_CONFIG_FRAGMENTNAME_COL
-perl -0pi -e "${prefix}dropUniqueConstraint.*constraintName.*\"UC_EXTERNAL_WORKFLOW_CONFIG_FRAGMENTNAME_COL\", tableName: \"external_workflow_config_fragment\"${suffix}"  $changelogPath
-perl -0pi -e "s/databaseChangeLog = \{\n\}\n//g" $changelogPath
-# delete local usernames
-perl -0pi -e "s/author: \".*?\"/author: \"\"/g" $changelogPath
-# delete anything before the line with "databaseChangeLog = {"
-sed -i -e/databaseChangeLog\ \=\ \{/\{ -e:1 -en\;b1 -e\} -ed $changelogPath
+#create directories
+mkdir -p migrations/changelogs/${year} ${tmpDir}
+
+#create diff and cleanup false positives
+bash gradlew dbmGormDiff -q | \
+  tee ${tmpDir}/migration-step01.groovy | \
+
+  # delete anything before the line with "databaseChangeLog = {"
+  # thats mostly logger output, which make the file invalid
+  sed -e/databaseChangeLog\ \=\ \{/\{ -e:1 -en\;b1 -e\} -ed | \
+  tee ${tmpDir}/migration-step02.groovy | \
+
+  # there is a sequence adaption, which shouldn't be there
+  perl -0p -e "${prefix}alterSequence${suffix}" | \
+  tee ${tmpDir}/migration-step03.groovy | \
+
+  # on the m2m tables we add some index and foreign keys, which should stay
+  perl -0p -e "${prefix}((dropPrimaryKey)|(dropNotNullConstraint)|(dropUniqueConstraint)|(dropForeignKeyConstraint)).*ableName: \"(${joinTables})\"${suffix}"  | \
+  tee ${tmpDir}/migration-step04.groovy | \
+
+  #for many index the migration creates a droped follow by an create, that will be removed
+  perl -0p -e "${prefix}dropIndex${infixChangeSet}createIndex.*\{(\n\s{12}column.*\n)+\s{8}\}${suffix}" | \
+  tee ${tmpDir}/migration-step05.groovy | \
+
+  #for many uniqueConstraint the migration creates a droped follow by an create, that will be removed
+  perl -0p -e "${prefix}dropUniqueConstraint${infixChangeSet}addUniqueConstraint${suffix}" | \
+  tee ${tmpDir}/migration-step06.groovy | \
+
+  #the migration creates adding of unique constraints already exist. They are removed by an explicit false positive list
+  perl -0p -e "${prefix}addUniqueConstraint.*constraintName.*\"(${uniqueConstraints})\"${suffix}" | \
+  tee ${tmpDir}/migration-step07.groovy | \
+
+  #delete local usernames
+  perl -0p -e "s/author: \".*?\"/author: \"\"/g"  | \
+  tee ${tmpDir}/migration-step08.groovy | \
+
+  #delete empty changelog
+  perl -0p -e "s/databaseChangeLog = \{\n\}\n//g" | \
+  tee ${tmpDir}/migration-step09.groovy $changelogPath
 
 if [ ! -s $changelogPath ]; then
     rm $changelogPath

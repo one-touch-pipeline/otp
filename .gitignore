@@ -78,6 +78,8 @@ out
 /otp_local_setup.sh
 ##gitlab ci
 response.json
+## tmp folder
+/tmp/
 
 ### Node ###
 node_modules/
