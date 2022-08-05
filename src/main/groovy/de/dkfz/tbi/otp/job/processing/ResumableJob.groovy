@@ -42,6 +42,7 @@ import java.lang.annotation.*
  *
  * @see SometimesResumableJob
  */
+//Produce false of UnnecessaryPackageReference and suppress warning is not allowed for annotation
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 @interface ResumableJob {

@@ -1202,7 +1202,9 @@ All the Rules that will be used for OTP
         priority = DEFAULT
     }
     UnnecessaryPackageReference {
-        priority = MIDDLE
+        //Produces false positives for the following two annotations. Additionally '@SuppressWarnings' can't be used for annotations
+        doNotApplyToFilesMatching = ".*/(ResumableJob|QcThresholdEvaluated).groovy"
+        priority = CRITICAL
     }
     UnnecessaryParenthesesForMethodCallWithClosure {
         priority = CRITICAL
