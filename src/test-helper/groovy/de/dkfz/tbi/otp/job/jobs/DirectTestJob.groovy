@@ -40,7 +40,6 @@ class DirectTestJob implements Job {
 
     @Override
     void execute() throws Exception {
-        // TODO Auto-generated method stub
     }
 
     @Override
@@ -60,11 +59,9 @@ class DirectTestJob implements Job {
 
     @Override
     void start() throws InvalidStateException {
-        // TODO Auto-generated method stub
     }
 
     @Override
     void end() throws InvalidStateException {
-        // TODO Auto-generated method stub
     }
 }

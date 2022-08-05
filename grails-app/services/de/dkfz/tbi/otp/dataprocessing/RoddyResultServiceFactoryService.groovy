@@ -35,7 +35,6 @@ class RoddyResultServiceFactoryService {
     RoddyBamFileService roddyBamFileService
 
     RoddyResultServiceTrait<? extends RoddyResult> getService(RoddyResult rr) {
-        // TODO: add all missing services here (otp-1174)
         Map<Class<? extends RoddyResult>, RoddyResultServiceTrait<? extends RoddyResult>> map = [
                 (RnaRoddyBamFile)        : rnaRoddyBamFileService,
                 (RoddyBamFile)           : roddyBamFileService,

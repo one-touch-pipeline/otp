@@ -84,7 +84,6 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
     }
 
     // ignore: in case of an adaptation to the new workflow system
-    // TODO: if this class will be adapt in the future, it should not throw RuntimeException
     @SuppressWarnings('ThrowRuntimeException ')
     @Deprecated
     void ensureConfigurationIsComplete(SeqTrack seqTrack) {
@@ -114,7 +113,6 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
     Collection<MergingWorkPackage> findOrSaveWorkPackages(SeqTrack seqTrack,
                                                           ReferenceGenomeProjectSeqType referenceGenomeProjectSeqType,
                                                           Pipeline pipeline) {
-        // TODO OTP-1401: In the future there may be more than one MWP for the sample and seqType.
         MergingWorkPackage workPackage = atMostOneElement(
                 MergingWorkPackage.findAllWhere(
                         sample        : seqTrack.sample,

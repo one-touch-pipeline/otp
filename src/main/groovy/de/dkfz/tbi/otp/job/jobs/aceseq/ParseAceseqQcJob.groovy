@@ -65,7 +65,6 @@ class ParseAceseqQcJob extends AbstractEndStateAwareJobImpl implements AutoResta
             }
 
             qcOne //the instance to used for qc
-            // TODO OTP-3097: triger qc handling here
 
             List<Path> files = aceseqService.getAllFiles(aceseqInstance)
             files.each {

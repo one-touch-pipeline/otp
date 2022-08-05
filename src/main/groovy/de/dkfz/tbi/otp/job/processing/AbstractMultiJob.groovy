@@ -88,12 +88,7 @@ abstract class AbstractMultiJob extends AbstractEndStateAwareJobImpl implements 
             /* The specification of {@link MonitoringJob#finished(String, Realm)} says that this
              * finished() method shall return quickly. So call callExecute() asynchronously.
              */
-            // if (OTP-1136 is resolved) {
-            //     TODO: scheduler.doOnOtherThread(this, { callExecute() } )
-            // } else {
-            //     // Workaround: Hope. Hope that this job does not perform any time-consuming operation.
             callExecute()
-            // }
         }
     }
 
@@ -197,10 +192,6 @@ abstract class AbstractMultiJob extends AbstractEndStateAwareJobImpl implements 
      *     <li>Do not share domain objects between invocations of this method.</li>
      *     <li>Do not rely on instance variables for sharing information between invocations of this method.</li>
      * </ul>
-     *
-     * <p>
-     * <strong>TODO: As long as OTP-1026 is not resolved, this method must return quickly if the finishedClusterJobs
-     * argument is not null.</strong>
      *
      * @param finishedClusterJobs <code>null</code> if the job has just been started, i.e. the
      * method is called the first time for the job. Otherwise a collection of the cluster

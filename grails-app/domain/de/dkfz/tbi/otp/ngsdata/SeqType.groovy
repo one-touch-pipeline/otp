@@ -50,7 +50,6 @@ class SeqType implements Entity, MetadataField, ProjectFieldReferenceAble {
     ].asImmutable()
 
     // files with these seqTypes must be copied because the corresponding workflows don't support incremental merging
-    // TODO OTP-2726
     static final Collection<SeqTypeNames> SEQTYPES_MUST_BE_COPIED = WGBS_SEQ_TYPE_NAMES + [
             SeqTypeNames.RNA,
             SeqTypeNames.CHIP_SEQ,
@@ -104,7 +103,6 @@ class SeqType implements Entity, MetadataField, ProjectFieldReferenceAble {
                 }
             }
         })
-        // TODO: OTP-1124: unique constraint for (dirName, libraryLayoutDirName)
         displayName(blank: false)
         roddyName(nullable: true, blank: false, validator: {
             !it?.contains('_')  // Roddy has problems with underscores

@@ -122,7 +122,6 @@ class MetadataImportService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    // TODO: OTP-1908: Relax this restriction
     MetadataValidationContext validateWithAuth(File metadataFile, DirectoryStructureBeanName directoryStructure, boolean ignoreAlreadyKnownMd5sum = false) {
         FileSystem fs = fileSystemService.filesystemForFastqImport
         return validate(fs.getPath(metadataFile.path), directoryStructure, ignoreAlreadyKnownMd5sum)

@@ -241,14 +241,12 @@ class CrashRecoveryService {
         error.save(flush: true)
         update.error = error
         if (!update.save(flush: true)) {
-            // TODO: trigger error handling
             log.error("Could not create a FAILURE Update for ProcessingStep ${step.id}")
             throw new ProcessingException("Could not create a FAILURE Update for ProcessingStep ${step.id}")
         }
         Process process = Process.get(step.process.id)
         process.finished = true
         if (!process.save(flush: true)) {
-            // TODO: trigger error handling
             log.error("Could not set Process ${step.process.id} to finished")
             throw new ProcessingException("Could not set Process ${step.process.id} to finished")
         }

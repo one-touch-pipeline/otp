@@ -264,7 +264,6 @@ class Scheduler {
             error.save(flush: true)
             update.error = error
             if (!update.save(flush: true)) {
-                // TODO: trigger error handling
                 log.error("Could not create a FAILURE Update for Job of type ${job.class}")
                 throw new ProcessingException("Could not create a FAILURE Update for Job")
             }

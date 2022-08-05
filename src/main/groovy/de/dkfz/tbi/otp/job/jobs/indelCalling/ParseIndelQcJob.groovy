@@ -68,8 +68,6 @@ class ParseIndelQcJob extends AbstractEndStateAwareJobImpl implements AutoRestar
             sampleSwap.indelCallingInstance = instance
             assert sampleSwap.save(flush: true)
 
-            //TODO OTP-3097: triger qc handling here, please consider both qc class: indelQc, sampleSwap
-
             instance.processingState = AnalysisProcessingStates.FINISHED
             instance.save(flush: true)
 

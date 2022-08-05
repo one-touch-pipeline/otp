@@ -415,7 +415,6 @@ class ProcessesController {
         boolean input = Boolean.parseBoolean(params.input)
         ProcessingStep step = processService.getProcessingStep(params.id as long)
         String jobName
-        // TODO: move into service
         List<Parameter> parameters = []
         if (input) {
             parameters = step.input.toList().sort { it.id }

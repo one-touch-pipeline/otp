@@ -62,12 +62,12 @@ work('post') {
     String workflowParams = """
 {
 }
-""" //TODO
+"""
     String workflowType = "snakemake"
     String workflowTypeVersion = "5.8.2"
     String tags = ""
     String workflowEngineParameters = ""
-    String workflowUrl = "" //TODO
+    String workflowUrl = ""
     List<byte[]> workflowAttachment = null
 
     apiInstance.runWorkflow(workflowParams, workflowType, workflowTypeVersion, tags, workflowEngineParameters, workflowUrl, workflowAttachment)

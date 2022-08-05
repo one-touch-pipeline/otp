@@ -179,7 +179,6 @@ class JobExecutionPlanDSL {
             closure.metaClass.inputParameter = { String typeName, String fromJob, String fromParameter ->
                 JobExecutionPlanDSL.INPUT_PARAMETER_CLOSURE(jobDefinition, helper.previous, jep, typeName, fromJob, fromParameter)
             }
-            // TODO: in future have a generic watchdog which obsoletes the watchdogBean
             closure.metaClass.watchdog = { String watchdogBean ->
                 JobExecutionPlanDSL.WATCHDOG_CLOSURE(jobDefinition, jep, helper, watchdogBean)
             }
@@ -217,7 +216,6 @@ class JobExecutionPlanDSL {
             closure.metaClass.inputParameter = { String typeName, String fromJob, String fromParameter ->
                 JobExecutionPlanDSL.INPUT_PARAMETER_CLOSURE(jobDefinition, helper.previous, jep, typeName, fromJob, fromParameter)
             }
-            // TODO: in future have a generic watchdog which obsoletes the watchdogBean
             closure.metaClass.watchdog = { String watchdogBean ->
                 JobExecutionPlanDSL.WATCHDOG_CLOSURE(jobDefinition, jep, helper, watchdogBean)
             }

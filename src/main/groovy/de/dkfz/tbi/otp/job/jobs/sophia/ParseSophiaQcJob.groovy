@@ -59,8 +59,6 @@ class ParseSophiaQcJob extends AbstractEndStateAwareJobImpl implements AutoResta
             sophiaQc.sophiaInstance = sophiaInstance
             assert sophiaQc.save(flush: true)
 
-            //TODO OTP-3097: triger qc handling here
-
             sophiaInstance.processingState = AnalysisProcessingStates.FINISHED
             assert sophiaInstance.save(flush: true)
 

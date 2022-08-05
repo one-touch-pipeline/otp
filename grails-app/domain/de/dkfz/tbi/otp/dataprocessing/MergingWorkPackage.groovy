@@ -53,7 +53,6 @@ class MergingWorkPackage extends AbstractMergingWorkPackage {
     ]
 
     static constraints = {
-        // TODO OTP-1401: In the future there may be more than one MWP for one sample and seqType.
         // As soon as you loosen this constraint, un-ignore:
         // - AlignmentPassUnitTests.testIsLatestPass_2PassesDifferentWorkPackages
         sample(validator: { val, obj ->

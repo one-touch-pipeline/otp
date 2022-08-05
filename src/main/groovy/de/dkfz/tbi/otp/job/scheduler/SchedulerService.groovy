@@ -359,7 +359,6 @@ class SchedulerService {
     private Job doSchedule() {
         lock.lock()
         try {
-            // TODO: add a proper scheduling method
             // simple scheduler: run a new Job if something is in the queue
             if (queue.isEmpty()) {
                 return
@@ -520,7 +519,6 @@ class SchedulerService {
                         Process process = Process.get(step.process.id)
                         process.finished = true
                         if (!process.save(flush: true)) {
-                            // TODO: trigger error handling
                             log.error("Could not set Process to finished")
                             throw new ProcessingException("Could not set Process to finished")
                         }
@@ -552,7 +550,6 @@ class SchedulerService {
         Process process = Process.get(step.process.id)
         process.finished = true
         if (!process.save(flush: true)) {
-            // TODO: trigger error handling
             log.error("Could not set Process to finished")
             throw new ProcessingException("Could not set Process to finished")
         }
@@ -763,7 +760,6 @@ class SchedulerService {
      * @param last The last executed ProcessingStep
      */
     private void endProcess(ProcessingStep last) {
-        // TODO: directly sort
         lock.lock()
         try {
             // updating the JobExecutionPlan information has to be thread save due to multiple processes ending in the same time is possible
@@ -779,7 +775,6 @@ class SchedulerService {
         }
     }
 
-    // TODO: comment me
     private ProcessingStep createProcessingStep(Process process, JobDefinition jobDefinition, Collection<Parameter> input, ProcessingStep previous = null) {
         ProcessingStep step = null
         ProcessingStep.withTransaction {

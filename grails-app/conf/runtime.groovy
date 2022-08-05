@@ -145,7 +145,7 @@ environments {
             cache.use_query_cache = false
         }
         dataSource {
-            jmxExport = true  // FIXME: contradicts documentation. do we need that?
+            jmxExport = true
             String usePostgresDocker = System.properties['usePostgresDocker']
 
             if ("TRUE".equalsIgnoreCase(usePostgresDocker)) {

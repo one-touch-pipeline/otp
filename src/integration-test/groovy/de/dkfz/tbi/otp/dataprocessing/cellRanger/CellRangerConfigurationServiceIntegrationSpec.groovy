@@ -371,14 +371,6 @@ class CellRangerConfigurationServiceIntegrationSpec extends Specification implem
         seqTracks.size() == 8
         AssertionError e = thrown(AssertionError)
         e.message =~ "Can not handle SeqTracks processed over multiple platforms or with different library preparation kits."
-
-        // TODO: when splitting of platforms and kits is implemented, this should be the expected behaviour:
-        /*
-        List<CellRangerMergingWorkPackage> all = CellRangerMergingWorkPackage.all
-        all.size() == 6
-        all*.sample.unique() == [sampleA]
-        (seqTracks + seqTrackA) as Set == all*.seqTracks.flatten() as Set
-        */
     }
 
     void "test createMergingWorkPackagesForSample, only considers SeqTracks of the given SeqType"() {

@@ -108,9 +108,6 @@ abstract class AbstractMaybeSubmitWaitValidateJob extends AbstractMultiJob {
      * directly.
      *
      * <p>
-     * <strong>TODO: As long as OTP-1026 is not resolved, this method must return quickly.</strong>
-     *
-     * <p>
      * <strong>This method may be called on a different thread, with a different persistence context and on another
      * instance of the implementing class than the {@link #maybeSubmit()} method.</strong> So:
      * <ul>

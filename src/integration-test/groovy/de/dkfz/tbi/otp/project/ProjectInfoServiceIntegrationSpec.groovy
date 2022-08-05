@@ -285,7 +285,7 @@ class ProjectInfoServiceIntegrationSpec extends Specification implements UserAnd
         project.projectInfos.size() == 1
     }
 
-    @Ignore("TODO: otp-163, cannot test this until we have a postgres DB instead of H2") // TODO otp-163
+    @Ignore("TODO: otp-1541, cannot test this until we have a postgres DB instead of H2") // TODO otp-1541
     void "deleteProjectInfo, properly removes entries from project and project info"() {
         expect:
         assert false

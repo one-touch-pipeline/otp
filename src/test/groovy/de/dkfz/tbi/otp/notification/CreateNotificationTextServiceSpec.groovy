@@ -50,7 +50,6 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 
 import static de.dkfz.tbi.otp.tracking.OtrsTicket.ProcessingStep.*
 
-//TODO refactor classes SNV INDEL ACESEQSpec abstract from BamFilePairAnalyses abstract
 class CreateNotificationTextServiceSpec extends Specification implements AlignmentPipelineFactory, WorkflowSystemDomainFactory, DataTest {
 
     @Override
