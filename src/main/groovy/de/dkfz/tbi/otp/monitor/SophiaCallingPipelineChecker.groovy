@@ -37,8 +37,5 @@ class SophiaCallingPipelineChecker extends AbstractVariantCallingPipelineChecker
         return CollectionUtils.atMostOneElement(Pipeline.findAllByName(Pipeline.Name.RODDY_SOPHIA))
     }
 
-    @Override
-    Class<? extends BamFilePairAnalysis> getBamFilePairAnalysisClass() {
-        return SophiaInstance.class
-    }
+    final Class<? extends BamFilePairAnalysis> bamFilePairAnalysisClass = SophiaInstance
 }

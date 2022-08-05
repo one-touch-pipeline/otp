@@ -53,10 +53,7 @@ class AceseqService extends AbstractBamFileAnalysisService<AceseqInstance> imple
                 ") "
     }
 
-    @Override
-    Class<AceseqInstance> getAnalysisClass() {
-        return AceseqInstance.class
-    }
+    final Class<AceseqInstance> analysisClass = AceseqInstance
 
     @Override
     protected Pipeline.Type getAnalysisType() {

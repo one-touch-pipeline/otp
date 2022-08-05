@@ -140,13 +140,13 @@ class QcThreshold implements Entity {
 
     static void validateProperty(String val, String cls, Errors errors, String propertyName) {
         if (!(val in getValidQcPropertyForQcClass(cls))) {
-            ValidatorUtil.rejectValue(propertyName, QcThreshold.class, val, errors, "invalid")
+            ValidatorUtil.rejectValue(propertyName, QcThreshold, val, errors, "invalid")
         }
     }
 
     static void validateClass(String val, Errors errors, String propertyName) {
         if (!(val in validQcClass*.name)) {
-            ValidatorUtil.rejectValue(propertyName, QcThreshold.class, val, errors, "invalid")
+            ValidatorUtil.rejectValue(propertyName, QcThreshold, val, errors, "invalid")
         }
     }
 
@@ -180,7 +180,7 @@ class QcThreshold implements Entity {
 
     static List<Class> getValidQcClass() {
         GrailsClass[] classes = Holders.grailsApplication.getArtefacts('Domain')
-        classes*.clazz.findAll { QcTrafficLightValue.class.isAssignableFrom(it) }
+        classes*.clazz.findAll { QcTrafficLightValue.isAssignableFrom(it) }
     }
 
     ThresholdLevel qcPassed(QcTrafficLightValue qc, Double externalValue = 0) {

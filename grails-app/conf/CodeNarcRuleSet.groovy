@@ -1151,7 +1151,7 @@ All the Rules that will be used for OTP
     //UnnecessaryDefInMethodDeclaration
     //UnnecessaryDefInVariableDeclaration
     UnnecessaryDotClass {
-        priority = LOW
+        priority = CRITICAL
     }
     UnnecessaryDoubleInstantiation {
         priority = DEFAULT

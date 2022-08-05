@@ -70,7 +70,7 @@ class CellRangerStartJob extends AbstractAlignmentStartJob implements Restartabl
                         null,
                 )
         )
-        assert config: "Could not find a ${CellRangerConfig.class.simpleName} for ${mwp.project}, ${mwp.seqType} and ${mwp.pipeline}"
+        assert config: "Could not find a ${CellRangerConfig.simpleName} for ${mwp.project}, ${mwp.seqType} and ${mwp.pipeline}"
         return config
     }
 

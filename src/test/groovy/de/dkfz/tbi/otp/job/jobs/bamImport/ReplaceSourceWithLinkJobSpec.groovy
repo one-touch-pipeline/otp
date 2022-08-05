@@ -163,7 +163,7 @@ class ReplaceSourceWithLinkJobSpec extends Specification implements DataTest {
         DomainFactory.createProcessParameter([
                 process  : step.process,
                 value    : importProcess.id.toString(),
-                className: ImportProcess.class.name,
+                className: ImportProcess.name,
         ])
 
         linkingJob.configService = configService

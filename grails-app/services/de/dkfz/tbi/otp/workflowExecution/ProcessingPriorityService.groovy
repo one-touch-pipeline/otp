@@ -76,7 +76,7 @@ class ProcessingPriorityService {
         //if it is defined in ProcessingOption as default
         String defaultName = processingOptionService.findOptionAsString(ProcessingOption.OptionName.PROCESSING_PRIORITY_DEFAULT_NAME)
         if (processingPriority.name == defaultName) {
-            references.put(ProcessingOption.OptionName.PROCESSING_PRIORITY_DEFAULT_NAME, ProcessingOption.class.simpleName)
+            references.put(ProcessingOption.OptionName.PROCESSING_PRIORITY_DEFAULT_NAME, ProcessingOption.simpleName)
         }
 
         //if it is used by WorkflowRun, WorkflowRunStep, Project

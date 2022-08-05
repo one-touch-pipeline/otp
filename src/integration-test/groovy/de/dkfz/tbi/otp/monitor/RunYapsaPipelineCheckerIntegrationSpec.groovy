@@ -49,9 +49,9 @@ class RunYapsaPipelineCheckerIntegrationSpec extends AbstractVariantCallingPipel
         Pipeline.Type.MUTATIONAL_SIGNATURE == createVariantCallingPipelineChecker().pipeline.type
     }
 
-    void "bamFilePairAnalysisClass, should return RunYapsaInstance.class"() {
+    void "bamFilePairAnalysisClass, should return RunYapsaInstance"() {
         expect:
-        RunYapsaInstance.class == createVariantCallingPipelineChecker().bamFilePairAnalysisClass
+        RunYapsaInstance == createVariantCallingPipelineChecker().bamFilePairAnalysisClass
     }
 
     @Override

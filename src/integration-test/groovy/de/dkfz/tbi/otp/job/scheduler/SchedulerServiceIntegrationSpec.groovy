@@ -98,7 +98,7 @@ class SchedulerServiceIntegrationSpec extends Specification implements UserAndRo
         then:
         process.finished
         step.jobClass
-        TestEndStateAwareJob.class.name == step.jobClass
+        TestEndStateAwareJob.name == step.jobClass
         areQueueAndRunningEmpty()
     }
 
@@ -130,7 +130,7 @@ class SchedulerServiceIntegrationSpec extends Specification implements UserAndRo
         then:
         !process.finished
         step.jobClass
-        de.dkfz.tbi.otp.job.jobs.TestJob.class.name == step.jobClass
+        de.dkfz.tbi.otp.job.jobs.TestJob.name == step.jobClass
         step.next
         step.previous == null
         step.id != step.next.id
@@ -1637,10 +1637,10 @@ class SchedulerServiceIntegrationSpec extends Specification implements UserAndRo
         schedulerService.isJobResumable(processingStep) == result
 
         where:
-        jobClass                                      || result
-        TestJob.class.name                            || false
-        ResumableTestJob.class.name                   || true
-        ResumableSometimesResumableTestJob.class.name || true
+        jobClass                                || result
+        TestJob.name                            || false
+        ResumableTestJob.name                   || true
+        ResumableSometimesResumableTestJob.name || true
     }
 
     @Unroll
@@ -1649,7 +1649,7 @@ class SchedulerServiceIntegrationSpec extends Specification implements UserAndRo
         setupData()
 
         when:
-        final ProcessingStep processingStep = DomainFactory.createAndSaveProcessingStep(SometimesResumableTestJob.class.name)
+        final ProcessingStep processingStep = DomainFactory.createAndSaveProcessingStep(SometimesResumableTestJob.name)
         final SometimesResumableTestJob job = new SometimesResumableTestJob()
         job.processingStep = processingStep
         job.resumable = resumable
@@ -1665,7 +1665,7 @@ class SchedulerServiceIntegrationSpec extends Specification implements UserAndRo
     void "testIsJobResumable_sometimesResumable_noRunningJob"() {
         given:
         setupData()
-        final ProcessingStep processingStep = DomainFactory.createProcessingStep(jobClass: SometimesResumableTestJob.class.name)
+        final ProcessingStep processingStep = DomainFactory.createProcessingStep(jobClass: SometimesResumableTestJob.name)
 
         when:
         schedulerService.isJobResumable(processingStep)

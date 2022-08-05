@@ -43,7 +43,7 @@ class SeqTrackController {
         if (!seqTrack) {
             return response.sendError(404)
         }
-        List<JobExecutionPlan> jobExecutionPlans = processParameterService.getAllJobExecutionPlansBySeqTrackAndClass(seqTrack.id as String, SeqTrack.class.name)
+        List<JobExecutionPlan> jobExecutionPlans = processParameterService.getAllJobExecutionPlansBySeqTrackAndClass(seqTrack.id as String, SeqTrack.name)
 
         return [
             seqTrack: seqTrack,

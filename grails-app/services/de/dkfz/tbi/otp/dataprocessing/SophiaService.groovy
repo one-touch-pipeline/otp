@@ -40,10 +40,7 @@ class SophiaService extends AbstractBamFileAnalysisService<SophiaInstance> imple
         return "sp.sophiaProcessingStatus = :needsProcessing "
     }
 
-    @Override
-    Class<SophiaInstance> getAnalysisClass() {
-        return SophiaInstance.class
-    }
+    final Class<SophiaInstance> analysisClass = SophiaInstance
 
     @Override
     protected Pipeline.Type getAnalysisType() {

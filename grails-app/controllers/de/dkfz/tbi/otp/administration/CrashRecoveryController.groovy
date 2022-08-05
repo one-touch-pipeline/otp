@@ -85,7 +85,7 @@ class CrashRecoveryController {
 
     private boolean isJobResumable(ProcessingStep step) {
         Class jobClass = grailsApplication.classLoader.loadClass(step.jobClass)
-        return jobClass.isAnnotationPresent(ResumableJob) || SometimesResumableJob.class.isAssignableFrom(jobClass)
+        return jobClass.isAnnotationPresent(ResumableJob) || SometimesResumableJob.isAssignableFrom(jobClass)
     }
 
     def markFailed() {

@@ -35,8 +35,5 @@ class AceseqCallingPipelineChecker extends AbstractVariantCallingPipelineChecker
         return CollectionUtils.atMostOneElement(Pipeline.findAllByName(Pipeline.Name.RODDY_ACESEQ))
     }
 
-    @Override
-    Class<? extends BamFilePairAnalysis> getBamFilePairAnalysisClass() {
-        return AceseqInstance.class
-    }
+    final Class<? extends BamFilePairAnalysis> bamFilePairAnalysisClass = AceseqInstance
 }

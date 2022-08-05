@@ -45,7 +45,7 @@ class MonitorOutputCollectorIntegrationSpec extends Specification implements Dom
         SeqTrack seqTrack = DomainFactory.createSeqTrack()
         ProcessParameter parameter = DomainFactory.createProcessParameter([
                 value    : seqTrack.id.longValue(),
-                className: SeqTrack.class.name,
+                className: SeqTrack.name,
         ])
         String workflowName = parameter.process.jobExecutionPlan.name
         MonitorOutputCollector collector = new MonitorOutputCollector(
@@ -88,7 +88,7 @@ class MonitorOutputCollectorIntegrationSpec extends Specification implements Dom
             }
             DomainFactory.createProcessParameter([
                     value    : seqTrack.id.longValue(),
-                    className: SeqTrack.class.name,
+                    className: SeqTrack.name,
                     process  : processingStep.process,
             ])
         }

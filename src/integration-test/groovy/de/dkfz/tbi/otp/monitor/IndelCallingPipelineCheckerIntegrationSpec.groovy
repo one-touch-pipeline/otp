@@ -47,9 +47,9 @@ class IndelCallingPipelineCheckerIntegrationSpec extends AbstractVariantCallingP
         Pipeline.Type.INDEL == new IndelCallingPipelineChecker().pipeline.type
     }
 
-    void "bamFilePairAnalysisClass, should return IndelCallingInstance.class"() {
+    void "bamFilePairAnalysisClass, should return IndelCallingInstance"() {
         expect:
-        IndelCallingInstance.class == new IndelCallingPipelineChecker().bamFilePairAnalysisClass
+        IndelCallingInstance == new IndelCallingPipelineChecker().bamFilePairAnalysisClass
     }
 
     @Override

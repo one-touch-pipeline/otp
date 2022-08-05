@@ -727,7 +727,7 @@ class SchedulerService {
         if (jobClass.isAnnotationPresent(ResumableJob)) {
             return true
         }
-        if (SometimesResumableJob.class.isAssignableFrom(jobClass)) {
+        if (SometimesResumableJob.isAssignableFrom(jobClass)) {
             final SometimesResumableJob job
             lock.lock()
             try {

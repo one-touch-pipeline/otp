@@ -128,7 +128,7 @@ class AbstractAlignmentDeciderIntegrationSpec extends Specification {
         )
 
         expect:
-        shouldFail(AssertionError.class, {
+        shouldFail(AssertionError, {
             decider.decideAndPrepareForAlignment(seqTrack, true)
         })
     }
@@ -147,7 +147,7 @@ class AbstractAlignmentDeciderIntegrationSpec extends Specification {
         )
 
         expect:
-        shouldFail(AssertionError.class, {
+        shouldFail(AssertionError, {
             decider.decideAndPrepareForAlignment(seqTrack, true)
         })
     }

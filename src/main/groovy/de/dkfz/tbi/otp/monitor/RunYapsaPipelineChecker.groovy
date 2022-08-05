@@ -37,8 +37,5 @@ class RunYapsaPipelineChecker extends AbstractVariantCallingPipelineChecker {
         return CollectionUtils.atMostOneElement(Pipeline.findAllByName(Pipeline.Name.RUN_YAPSA))
     }
 
-    @Override
-    Class<? extends BamFilePairAnalysis> getBamFilePairAnalysisClass() {
-        return RunYapsaInstance.class
-    }
+    final Class<? extends BamFilePairAnalysis> bamFilePairAnalysisClass = RunYapsaInstance
 }

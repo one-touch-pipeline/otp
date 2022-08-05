@@ -47,10 +47,7 @@ class RunYapsaService extends AbstractBamFileAnalysisService<RunYapsaInstance> i
                 ") "
     }
 
-    @Override
-    Class<RunYapsaInstance> getAnalysisClass() {
-        return RunYapsaInstance.class
-    }
+    final Class<RunYapsaInstance> analysisClass = RunYapsaInstance
 
     @Override
     protected Pipeline.Type getAnalysisType() {

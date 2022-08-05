@@ -35,8 +35,5 @@ class IndelCallingPipelineChecker extends AbstractVariantCallingPipelineChecker 
         return CollectionUtils.atMostOneElement(Pipeline.findAllByName(Pipeline.Name.RODDY_INDEL))
     }
 
-    @Override
-    Class<? extends BamFilePairAnalysis> getBamFilePairAnalysisClass() {
-        return IndelCallingInstance.class
-    }
+    final Class<? extends BamFilePairAnalysis> bamFilePairAnalysisClass = IndelCallingInstance
 }

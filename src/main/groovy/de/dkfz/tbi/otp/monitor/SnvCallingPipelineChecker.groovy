@@ -37,8 +37,5 @@ class SnvCallingPipelineChecker extends AbstractVariantCallingPipelineChecker {
         return CollectionUtils.atMostOneElement(Pipeline.findAllByName(Pipeline.Name.RODDY_SNV))
     }
 
-    @Override
-    Class<? extends BamFilePairAnalysis> getBamFilePairAnalysisClass() {
-        return AbstractSnvCallingInstance.class
-    }
+    final Class<? extends BamFilePairAnalysis> bamFilePairAnalysisClass = AbstractSnvCallingInstance
 }

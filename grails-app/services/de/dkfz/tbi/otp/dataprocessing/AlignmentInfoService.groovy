@@ -264,7 +264,7 @@ class AlignmentInfoService {
     @Deprecated
     AlignmentInfo getAlignmentInformationFromConfig(AlignmentConfig config) {
         assert config
-        if (config.class == RoddyWorkflowConfig.class) {
+        if (config.class == RoddyWorkflowConfig) {
             return getRoddyAlignmentInformation((RoddyWorkflowConfig) config)
         }
         return config.alignmentInformation

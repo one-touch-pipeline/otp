@@ -36,10 +36,7 @@ class IndelCallingService extends AbstractBamFileAnalysisService<IndelCallingIns
         return "sp.indelProcessingStatus = :needsProcessing "
     }
 
-    @Override
-    Class<IndelCallingInstance> getAnalysisClass() {
-        return IndelCallingInstance.class
-    }
+    final Class<IndelCallingInstance> analysisClass = IndelCallingInstance
 
     @Override
     protected Pipeline.Type getAnalysisType() {

@@ -47,9 +47,9 @@ class AceseqCallingPipelineCheckerIntegrationSpec extends AbstractVariantCalling
         Pipeline.Type.ACESEQ == createVariantCallingPipelineChecker().pipeline.type
     }
 
-    void "bamFilePairAnalysisClass, should return AceseqInstance.class"() {
+    void "bamFilePairAnalysisClass, should return AceseqInstance"() {
         expect:
-        AceseqInstance.class == createVariantCallingPipelineChecker().bamFilePairAnalysisClass
+        AceseqInstance == createVariantCallingPipelineChecker().bamFilePairAnalysisClass
     }
 
     @Override

@@ -78,7 +78,7 @@ class ParseWgbsAlignmentQcJobIntegrationSpec extends Specification {
         seqTrack.normalizedLibraryName = NORMALIZED_LIBRARY_NAME
         assert seqTrack.save(flush: true)
 
-        ProcessingStep step = DomainFactory.createAndSaveProcessingStep(ParseWgbsAlignmentQcJob.class.toString(), roddyBamFile)
+        ProcessingStep step = DomainFactory.createAndSaveProcessingStep(ParseWgbsAlignmentQcJob.toString(), roddyBamFile)
         parseWgbsAlignmentQcJob = grailsApplication.mainContext.getBean('parseWgbsAlignmentQcJob')
         parseWgbsAlignmentQcJob.processingStep = step
     }

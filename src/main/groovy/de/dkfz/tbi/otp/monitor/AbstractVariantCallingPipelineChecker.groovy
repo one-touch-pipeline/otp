@@ -196,7 +196,7 @@ abstract class AbstractVariantCallingPipelineChecker extends PipelinesChecker<Sa
 
         return SamplePair.executeQuery("""
                 select
-                    new ${ToLittleCoverageSamplePair.class.name} (
+                    new ${ToLittleCoverageSamplePair.name} (
                         samplePair,
                         bamFile1.coverage,
                         bamFile2.coverage,

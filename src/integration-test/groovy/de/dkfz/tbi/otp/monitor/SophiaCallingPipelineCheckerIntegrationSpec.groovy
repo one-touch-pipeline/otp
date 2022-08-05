@@ -49,9 +49,9 @@ class SophiaCallingPipelineCheckerIntegrationSpec extends AbstractVariantCalling
         Pipeline.Type.SOPHIA == createVariantCallingPipelineChecker().pipeline.type
     }
 
-    void "bamFilePairAnalysisClass, should return SophiaInstance.class"() {
+    void "bamFilePairAnalysisClass, should return SophiaInstance"() {
         expect:
-        SophiaInstance.class == createVariantCallingPipelineChecker().bamFilePairAnalysisClass
+        SophiaInstance == createVariantCallingPipelineChecker().bamFilePairAnalysisClass
     }
 
     @Override
