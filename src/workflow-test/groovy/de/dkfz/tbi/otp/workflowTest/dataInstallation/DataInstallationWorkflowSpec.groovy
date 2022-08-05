@@ -29,6 +29,8 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.SessionUtils
 import de.dkfz.tbi.otp.workflow.datainstallation.DataInstallationInitializationService
 import de.dkfz.tbi.otp.workflow.datainstallation.DataInstallationWorkflow
+import de.dkfz.tbi.otp.workflow.panCancer.PanCancerWorkflow
+import de.dkfz.tbi.otp.workflowExecution.OtpWorkflow
 import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 import de.dkfz.tbi.otp.workflowTest.AbstractWorkflowSpec
 
@@ -68,7 +70,10 @@ class DataInstallationWorkflowSpec extends AbstractWorkflowSpec {
         return DataInstallationWorkflow.WORKFLOW
     }
 
-    final Class<DataInstallationWorkflow> workflowComponentClass = DataInstallationWorkflow
+    @Override
+    Class<? extends OtpWorkflow> getWorkflowComponentClass() {
+        return DataInstallationWorkflow
+    }
 
     @Override
     void setup() {

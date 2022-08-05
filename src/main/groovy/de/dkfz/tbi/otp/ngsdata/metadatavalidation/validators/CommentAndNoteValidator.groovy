@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidator
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.util.spreadsheet.*
 import de.dkfz.tbi.util.spreadsheet.validation.*
@@ -41,7 +42,7 @@ class CommentAndNoteValidator<C extends ValidationContext> implements MetadataVa
     }
 
     @Override
-    void validate(C context) {
+    void validate(MetadataValidationContext context) {
         List<Column> columns = []
         context.spreadsheet.header.cells.each { Cell cell ->
             if (COMMENT_OR_NOTE.matcher(cell.text).find()) {

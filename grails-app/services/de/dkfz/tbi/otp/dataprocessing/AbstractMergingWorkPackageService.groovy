@@ -30,11 +30,9 @@ import org.springframework.security.access.prepost.PreAuthorize
 import de.dkfz.tbi.otp.ngsdata.*
 
 @Transactional
-@GrailsCompileStatic
+@GrailsCompileStatic(TypeCheckingMode.SKIP)
 class AbstractMergingWorkPackageService {
 
-    @GrailsCompileStatic(TypeCheckingMode.SKIP)
-    @GrailsTypeChecked
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     List<AbstractMergingWorkPackage> findMergingWorkPackage(Individual individual, SeqType seqType, AntibodyTarget antibodyTarget = null) {
         assert individual

@@ -95,14 +95,14 @@ class BamMetadataImportServiceSpec extends Specification implements DomainFactor
             getBeansOfType(BamMetadataValidator) >>
                     [
                             'validator1': [
-                                    validate: { BamMetadataValidationContext context ->
-                                        context.addProblem(Collections.emptySet(), LogLevel.ERROR, 'message1')
-                                        context.addProblem(Collections.emptySet(), LogLevel.ERROR, 'message2')
+                                    validate: { BamMetadataValidationContext ctx ->
+                                        ctx.addProblem(Collections.emptySet(), LogLevel.ERROR, 'message1')
+                                        ctx.addProblem(Collections.emptySet(), LogLevel.ERROR, 'message2')
                                     }
                             ] as BamMetadataValidator,
                             'validator2': [
-                                    validate: { BamMetadataValidationContext context ->
-                                        context.addProblem(Collections.emptySet(), LogLevel.ERROR, 'message3')
+                                    validate: { BamMetadataValidationContext ctx ->
+                                        ctx.addProblem(Collections.emptySet(), LogLevel.ERROR, 'message3')
                                     }
                             ] as BamMetadataValidator,
                     ]

@@ -1,5 +1,6 @@
 basePath: '/ga4gh/wes/v1'
 swagger: '2.0'
+host: localhost
 info:
   title: Workflow Execution Service
   version: 1.0.0
@@ -421,7 +422,7 @@ definitions:
         type: string
         description: >-
           A web page URL with human-readable instructions on how to get an
-          authorization token for use with a specific WES endpoint.          
+          authorization token for use with a specific WES endpoint.
       contact_info_url:
         type: string
         description: >-
@@ -491,7 +492,7 @@ definitions:
        - CANCELED: The task was canceled by the user.
 
 
-        - CANCELING: The task was canceled by the user, and is in the process of stopping.       
+        - CANCELING: The task was canceled by the user, and is in the process of stopping.
   RunListResponse:
     type: object
     properties:

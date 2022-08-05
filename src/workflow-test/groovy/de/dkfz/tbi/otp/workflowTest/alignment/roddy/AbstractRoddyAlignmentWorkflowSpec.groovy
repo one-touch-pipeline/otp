@@ -118,7 +118,10 @@ abstract class AbstractRoddyAlignmentWorkflowSpec extends AbstractAlignmentWorkf
         return Duration.ofHours(24)
     }
 
-    final Class<PanCancerWorkflow> workflowComponentClass = PanCancerWorkflow
+    @Override
+    Class<? extends OtpWorkflow> getWorkflowComponentClass() {
+        return PanCancerWorkflow
+    }
 
     @Override
     void setup() {

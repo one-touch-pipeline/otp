@@ -164,7 +164,7 @@ environments {
                 username = 'sa'
                 password = ''
                 dbCreate = 'update'
-                url = 'jdbc:h2:mem:testDb;MVCC=TRUE;MODE=PostgreSQL;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE'
+                url = 'jdbc:h2:mem:testDb;MODE=PostgreSQL;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE'
             }
         }
     }
@@ -182,7 +182,7 @@ environments {
             username = "sa"
             password = ""
             dbCreate = "update"
-            url = "jdbc:h2:mem:testDb;MVCC=TRUE;MODE=PostgreSQL;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE"
+            url = "jdbc:h2:mem:testDb;MODE=PostgreSQL;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE"
         }
     }
 }

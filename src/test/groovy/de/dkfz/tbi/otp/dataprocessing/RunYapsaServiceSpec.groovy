@@ -27,7 +27,10 @@ import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
 class RunYapsaServiceSpec extends AbstractBamFileAnalysisServiceSpec implements ServiceUnitTest<RunYapsaService> {
 
-    final String pathPart = 'mutational_signatures_results'
+    @Override
+    String getPathPart() {
+        return 'mutational_signatures_results'
+    }
 
     @Override
     BamFilePairAnalysis getNewInstance() {

@@ -138,13 +138,13 @@ class PanCancerExecuteJobSpec extends Specification implements DataTest, Workflo
         DomainFactory.createRoddyAlignableSeqTypes()
 
         expect:
-        new PanCancerExecuteJob().getAnalysisConfiguration(seqType()) == result
+        new PanCancerExecuteJob().getAnalysisConfiguration(seqType) == result
 
         where:
-        seqType                                         || result
-        { -> DomainFactory.createChipSeqType() }        || "qcAnalysis"
-        { -> DomainFactory.createWholeGenomeSeqType() } || "qcAnalysis"
-        { -> DomainFactory.createExomeSeqType() }       || "exomeAnalysis"
+        seqType                                || result
+        DomainFactory.createChipSeqType        || "qcAnalysis"
+        DomainFactory.createWholeGenomeSeqType || "qcAnalysis"
+        DomainFactory.createExomeSeqType       || "exomeAnalysis"
     }
 
     void "test getFileNamesKillSwitch"() {

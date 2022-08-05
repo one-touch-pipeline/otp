@@ -130,7 +130,7 @@ class UpdateDomainPropertyService {
 
     private Class getGenericTypeOfCollection(MetaProperty property) {
         MetaBeanProperty metaBeanProperty = (MetaBeanProperty) property
-        ParameterizedType parameterizedType = (ParameterizedType) metaBeanProperty.field.field.genericType
+        ParameterizedType parameterizedType = (ParameterizedType) metaBeanProperty.field.getProperty("field.genericType")
         return parameterizedType.actualTypeArguments[0]
     }
 

@@ -20,7 +20,6 @@
  * SOFTWARE.
  */
 
-import com.gradle.scan.plugin.BuildScanPlugin
 import com.gradle.scan.plugin.PublishedBuildScan
 import grails.util.Environment
 
@@ -33,18 +32,17 @@ buildscript {
         maven { url "https://repo.grails.org/grails/core" }
     }
     dependencies {
-        classpath "org.grails:grails-gradle-plugin:$grailsVersion"
-        classpath "org.grails.plugins:hibernate5:7.0.6"
-        classpath "com.bertramlabs.plugins:asset-pipeline-gradle:3.0.11"
-        classpath "com.bertramlabs.plugins:less-asset-pipeline:3.0.11"
-        classpath 'org.grails.plugins:database-migration:3.1.0'
+        classpath "org.grails:grails-gradle-plugin:$grailsGradlePluginVersion"
+        classpath "org.grails.plugins:hibernate5:7.2.1"
+        classpath "com.bertramlabs.plugins:asset-pipeline-gradle:3.4.6"
+        classpath "com.bertramlabs.plugins:less-asset-pipeline:3.4.6"
+        classpath 'org.grails.plugins:database-migration:4.1.0'
     }
 }
 
 plugins {
     id "com.github.monosoul.markdown.page.generator" version "2.1.0.1"
-    id "com.gradle.build-scan" version "2.0.2"
-    id 'org.hidetake.swagger.generator' version '2.18.1'
+    id 'org.hidetake.swagger.generator' version '2.19.2'
     id "com.github.node-gradle.node" version "2.2.4"
 }
 
@@ -65,13 +63,12 @@ buildScan {
 
 group "de.dkfz.tbi"
 
-apply plugin: "idea"
-apply plugin: "war"
-apply plugin: "org.grails.grails-web"
-apply plugin: "asset-pipeline"
-apply plugin: "org.grails.grails-gsp"
-apply plugin: "codenarc"
-apply plugin: BuildScanPlugin
+apply plugin:"idea"
+apply plugin:"war"
+apply plugin:"org.grails.grails-web"
+apply plugin:"com.bertramlabs.asset-pipeline"
+apply plugin:"org.grails.grails-gsp"
+apply plugin:"codenarc"
 
 repositories {
     mavenLocal()
@@ -133,10 +130,16 @@ swaggerSources {
     }
 }
 compileJava.dependsOn swaggerSources.wes.code
+processResources.dependsOn swaggerSources.wes.code
 sourceSets.main.java.srcDir "${swaggerSources.wes.code.outputDir}/src/main/java"
 sourceSets.main.resources.srcDir "${swaggerSources.wes.code.outputDir}/src/main/resources"
 
+test {
+    useJUnitPlatform()
+}
+
 integrationTest {
+    useJUnitPlatform()
     boolean usePostgresDocker = "TRUE".equalsIgnoreCase(System.getenv('USE_POSTGRES'))
     systemProperty "usePostgresDocker", usePostgresDocker.toString()
 
@@ -197,6 +200,7 @@ integrationTest {
 }
 
 task workflowTest(type: Test) {
+    useJUnitPlatform()
     testClassesDirs = sourceSets.workflowTest.output.classesDirs
     classpath = sourceSets.workflowTest.runtimeClasspath
     reports.html.enabled = true
@@ -218,125 +222,127 @@ configurations {
 }
 
 dependencies {
-    swaggerCodegen 'io.swagger:swagger-codegen-cli:2.4.3' // swagger 2.x codegen
-    implementation 'io.swagger:swagger-annotations:1.6.0'
-
-    compile group: 'commons-io', name: 'commons-io', version: '2.11.0'
-
-    integrationTestCompile sourceSets.testHelper.output
-    integrationTestRuntime sourceSets.testHelper.output
+    // Grails Defaults
+    developmentOnly("org.springframework.boot:spring-boot-devtools")
+    console "org.grails:grails-console"
+    implementation "org.springframework.boot:spring-boot-starter-logging"
+    implementation "org.springframework.boot:spring-boot-starter-validation"
+    implementation "org.springframework.boot:spring-boot-autoconfigure"
+    implementation "org.grails:grails-core"
+    implementation "org.springframework.boot:spring-boot-starter-actuator"
+    implementation "org.springframework.boot:spring-boot-starter-tomcat"
+    implementation "org.grails:grails-web-boot"
+    implementation "org.grails:grails-logging"
+    implementation "org.grails:grails-plugin-rest"
+    implementation "org.grails:grails-plugin-databinding"
+    implementation "org.grails:grails-plugin-i18n"
+    implementation "org.grails:grails-plugin-services"
+    implementation "org.grails:grails-plugin-url-mappings"
+    implementation "org.grails:grails-plugin-interceptors"
+    implementation "org.grails.plugins:cache"
+    implementation "org.grails.plugins:async"
+    implementation "org.grails.plugins:scaffolding"
+    implementation "org.grails.plugins:events"
+    implementation "org.grails.plugins:hibernate5"
+    implementation "org.hibernate:hibernate-core:5.6.10.Final"
+    implementation "org.grails.plugins:gsp"
+    profile "org.grails.profiles:web"
+    runtimeOnly "org.glassfish.web:el-impl:2.2.1-b05"
+    runtimeOnly "com.h2database:h2"
+    runtimeOnly "org.apache.tomcat:tomcat-jdbc"
+    runtimeOnly "javax.xml.bind:jaxb-api:2.3.1"
+    runtimeOnly "com.bertramlabs.plugins:asset-pipeline-grails:3.4.6"
+    runtimeOnly "com.bertramlabs.plugins:less-asset-pipeline:3.4.6"
+    testImplementation "org.grails:grails-gorm-testing-support"
+    testImplementation "org.grails:grails-web-testing-support"
+    testRuntimeOnly "org.junit.vintage:junit-vintage-engine:5.8.2"
+    workflowTestImplementation "org.grails:grails-gorm-testing-support"
+    workflowTestImplementation "org.grails:grails-web-testing-support"
+    workflowTestRuntimeOnly "org.junit.vintage:junit-vintage-engine:5.8.2"
 
     // JDBC
-    runtime 'org.postgresql:postgresql:42.3.3'
+    runtimeOnly 'org.postgresql:postgresql:42.3.6'
+
+    implementation 'org.grails.plugins:spring-security-core:5.1.0'
+    implementation "org.grails.plugins:spring-security-ldap:4.0.0.M1"
+    implementation "org.grails.plugins:spring-security-acl:4.0.0.M2"
+    implementation 'org.grails.plugins:spring-security-oauth2-provider:4.0.0-RC1'
+
+    swaggerCodegen 'io.swagger:swagger-codegen-cli:2.4.27'
+    implementation 'io.swagger:swagger-annotations:1.6.6'
+
+    implementation group: 'commons-io', name: 'commons-io', version: '2.11.0'
+
+    integrationTestImplementation sourceSets.testHelper.output
+    integrationTestRuntimeOnly sourceSets.testHelper.output
 
     // Conditional processing in logback configuration files
     implementation 'org.codehaus.janino:janino:3.0.6'
     // required for Grails 4
-    compile 'org.codehaus.janino:janino:3.0.6'
+    implementation 'org.codehaus.janino:janino:3.0.6'
 
     // Dicom Audit Logging
     if (Environment.isDevelopmentMode()) {
-        compile "com.gitlab.one-touch-pipeline:dicom-audit-trail-impl:v1.1.0-NOP"
+        implementation "com.gitlab.one-touch-pipeline:dicom-audit-trail-impl:v1.1.0-NOP"
     } else {
-        compile "com.gitlab.one-touch-pipeline:dicom-audit-trail-impl:1.1.0"
+        implementation "com.gitlab.one-touch-pipeline:dicom-audit-trail-impl:1.1.0"
     }
-    compile "com.gitlab.one-touch-pipeline:dicom-audit-trail:1.2.0"
+    implementation "com.gitlab.one-touch-pipeline:dicom-audit-trail:1.2.0"
 
-    compile "com.google.code.gson:gson:2.8.9"
+    implementation 'com.google.code.gson:gson:2.9.0'
+
+    implementation "org.jadira.usertype:usertype.core:7.0.0.CR1"
+    implementation "com.opencsv:opencsv:4.4"
+
+    implementation "org.grails:grails-async-gpars:3.3.2"
 
     // bioinformatics tools
-    compile "com.gitlab.one-touch-pipeline:bedutils:0.0.8"
-    compile "com.github.samtools:htsjdk:2.24.1"
-
-    // general dependencies
-    compile "org.jadira.usertype:usertype.core:7.0.0.CR1"
-    compile "com.opencsv:opencsv:4.4"
-
-    compile "org.grails:grails-async-gpars:3.3.2"
+    implementation "com.gitlab.one-touch-pipeline:bedutils:0.0.8"
+    implementation "com.github.samtools:htsjdk:2.24.1"
 
     // library for interacting with cluster job schedulers
-    compile('com.github.theroddywms:BatchEuphoria:ae89a31') {
+    implementation('com.github.theroddywms:BatchEuphoria:ae89a31') {
         exclude group: 'org.apache.commons', module: 'commons-io'
     }
 
     // ssh, ssh-agent proxy, and sftp libraries
-    compile 'com.jcraft:jsch:0.1.55'
-    compile "com.jcraft:jsch.agentproxy.jsch:0.0.9"
-    compile "com.jcraft:jsch.agentproxy.connector-factory:0.0.9"
-    compile 'com.github.robtimus:sftp-fs:1.2.1'
+    implementation 'com.jcraft:jsch:0.1.55'
+    implementation "com.jcraft:jsch.agentproxy.jsch:0.0.9"
+    implementation "com.jcraft:jsch.agentproxy.connector-factory:0.0.9"
+    implementation 'com.github.robtimus:sftp-fs:1.2.1'
 
     // library for easy HTML editing
-    compile "org.jsoup:jsoup:1.9.2"
+    implementation 'org.jsoup:jsoup:1.15.2'
 
-    compile 'com.networknt:json-schema-validator:1.0.65'
+    implementation 'com.networknt:json-schema-validator:1.0.72'
 
-    compile "org.grails.plugins:grails-console:2.1.1"
-    compile "org.grails.plugins:mail:2.0.0"
+    implementation "org.grails.plugins:grails-console:2.1.1"
+    implementation "org.grails.plugins:mail:2.0.0"
 
-    compile "org.grails.plugins:database-migration:3.1.0"
-    compile 'org.liquibase:liquibase-core:3.10.3'
+    implementation "org.grails.plugins:database-migration:4.1.0"
+    implementation 'org.liquibase:liquibase-core:4.8.0'
 
     // support for java8 time classes
-    compile "org.hibernate:hibernate-java8:5.4.33.Final"
+    implementation 'org.hibernate:hibernate-java8:5.6.10.Final'
 
-    compile "com.bertramlabs.plugins:asset-pipeline-grails:2.14.10"
-    compile "com.bertramlabs.plugins:less-asset-pipeline:2.15.1"
-
-    compile 'org.codenarc:CodeNarc:2.2.0'
-
-    compile 'org.grails.plugins:spring-security-core:4.0.4'
-    compile "org.grails.plugins:spring-security-ldap:4.0.0.M1"
-    compile "org.grails.plugins:spring-security-acl:4.0.0.M2"
-    compile 'org.grails.plugins:spring-security-oauth2-provider:4.0.0-RC1'
-
-    // Grails Defaults
-    compile "org.springframework.boot:spring-boot-starter-logging"
-    compile "org.springframework.boot:spring-boot-autoconfigure"
-    compile "org.grails:grails-core"
-    compile "org.springframework.boot:spring-boot-starter-actuator"
-    compile "org.springframework.boot:spring-boot-starter-tomcat"
-    developmentOnly("org.springframework.boot:spring-boot-devtools")
-    compile "org.grails:grails-web-boot"
-    compile "org.grails:grails-logging"
-    compile "org.grails:grails-plugin-rest"
-    compile "org.grails:grails-plugin-databinding"
-    compile "org.grails:grails-plugin-i18n"
-    compile "org.grails:grails-plugin-services"
-    compile "org.grails:grails-plugin-url-mappings"
-    compile "org.grails:grails-plugin-interceptors"
-    compile "org.grails.plugins:cache:5.0.1"
-    compile "org.grails.plugins:async"
-    compile "org.grails.plugins:scaffolding"
-    compile "org.grails.plugins:events"
-    compile "org.grails.plugins:hibernate5:7.0.6"
-    compile "org.hibernate:hibernate-core:5.4.33.Final"
-    compile "org.grails.plugins:gsp"
-    console "org.grails:grails-console"
-    profile "org.grails.profiles:web"
-    runtime "org.glassfish.web:el-impl:2.1.2-b03"
-    runtime "com.h2database:h2"
-    runtime "org.apache.tomcat:tomcat-jdbc"
-    testCompile "org.grails:grails-gorm-testing-support"
-    testCompile "org.grails:grails-web-testing-support"
-    workflowTestCompile "org.grails:grails-gorm-testing-support"
-    workflowTestCompile "org.grails:grails-web-testing-support"
+    implementation 'org.codenarc:CodeNarc:3.1.0'
 
     // JS and CSS libraries
-    compile 'org.webjars:jquery:3.6.0'
-    compile 'org.webjars:bootstrap:4.6.0'
-    compile 'org.webjars.npm:bootstrap-icons:1.4.0'
-    compile 'org.webjars.npm:ttskch__select2-bootstrap4-theme:1.5.2'
-    compile 'org.webjars:select2:4.0.13'
-    compile 'org.webjars:datatables:1.10.24'
-    compile 'org.webjars:datatables-buttons:1.7.0'
-    compile 'org.webjars:datatables-fixedcolumns:3.0.2'
-    compile 'org.webjars:datatables-fixedheader:2.1.2-1'
-    compile 'org.webjars.bowergithub.datatables:dist-datatables-scroller:2.0.1'
-    compile 'org.webjars.bowergithub.datatables:dist-datatables-scroller-bootstrap4:2.0.1'
-    compile 'org.webjars:datatables-plugins:1.10.24'
-    compile 'org.webjars.npm:corejs-typeahead:1.3.1'
-    compile 'org.webjars.npm:chartjs-plugin-datalabels:2.1.0'
-    compile 'org.webjars:chartjs:3.7.1'
+    implementation 'org.webjars:jquery:3.6.0'
+    implementation 'org.webjars:bootstrap:4.6.0'
+    implementation 'org.webjars.npm:bootstrap-icons:1.4.0'
+    implementation 'org.webjars.npm:ttskch__select2-bootstrap4-theme:1.5.2'
+    implementation 'org.webjars:select2:4.0.13'
+    implementation 'org.webjars:datatables:1.10.24'
+    implementation 'org.webjars:datatables-buttons:1.7.0'
+    implementation 'org.webjars:datatables-fixedcolumns:3.0.2'
+    implementation 'org.webjars:datatables-fixedheader:2.1.2-1'
+    implementation 'org.webjars.bowergithub.datatables:dist-datatables-scroller:2.0.1'
+    implementation 'org.webjars.bowergithub.datatables:dist-datatables-scroller-bootstrap4:2.0.1'
+    implementation 'org.webjars:datatables-plugins:1.10.24'
+    implementation 'org.webjars.npm:corejs-typeahead:1.3.1'
+    implementation 'org.webjars.npm:chartjs-plugin-datalabels:2.1.0'
+    implementation 'org.webjars:chartjs:3.7.1'
 }
 
 task buildInfo {
@@ -356,7 +362,10 @@ classes.dependsOn buildInfo
 
 bootRun {
     ignoreExitValue true
-    jvmArgs('-Dspring.output.ansi.enabled=always')
+    jvmArgs(
+            '-Dspring.output.ansi.enabled=always',
+            '-noverify',
+            '-XX:TieredStopAtLevel=1')
     sourceResources sourceSets.main
     String springProfilesActive = 'spring.profiles.active'
     systemProperty springProfilesActive, System.getProperty(springProfilesActive)
@@ -393,7 +402,7 @@ assets {
 }
 
 codenarc {
-    toolVersion = '2.2.0'
+    toolVersion = '3.1.0'
     configFile file('grails-app/conf/CodeNarcRuleSet.groovy')
     maxPriority1Violations = 0
     maxPriority2Violations = 119

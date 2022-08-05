@@ -29,11 +29,7 @@ import spock.lang.Unroll
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 
-import java.nio.file.Path
-
 class AceseqServiceSpec extends AbstractBamFileAnalysisServiceSpec implements ServiceUnitTest<AceseqService> {
-
-    final String pathPart = 'cnv_results'
 
     @Rule
     TemporaryFolder temporaryFolder
@@ -56,6 +52,11 @@ class AceseqServiceSpec extends AbstractBamFileAnalysisServiceSpec implements Se
                 "${instance.sampleType1BamFile.sampleType.dirName}_${instance.sampleType2BamFile.sampleType.dirName}/" +
                 "${instance.instanceName}"
         )
+    }
+
+    @Override
+    String getPathPart() {
+        return 'cnv_results'
     }
 
     @Override
@@ -109,3 +110,5 @@ class AceseqServiceSpec extends AbstractBamFileAnalysisServiceSpec implements Se
         service.getQcJsonFile(instance) == instancePath.resolve("cnv_${instance.individual.pid}_parameter.json")
     }
 }
+
+import java.nio.file.Path

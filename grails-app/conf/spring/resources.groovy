@@ -102,7 +102,7 @@ beans = {
         }
     }
 
-    grailsLinkGenerator(ProjectLinkGenerator, grailsApplication.config.grails.serverURL) { bean ->
+    grailsLinkGenerator(ProjectLinkGenerator, grailsApplication.config.getProperty("grails.serverURL", String.class)) { bean ->
         bean.autowire = true
     }
 

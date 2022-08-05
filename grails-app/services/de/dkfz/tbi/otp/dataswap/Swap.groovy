@@ -30,18 +30,20 @@ package de.dkfz.tbi.otp.dataswap
  *
  * @param <T> - Type of the old and corresponding new value
  */
-class Swap<T> extends Tuple2<T, T> {
+class Swap<T> {
+
+    private Tuple2<T, T> tuple2
 
     Swap(T current, T substitute) {
-        super(current, substitute)
+        tuple2 = new Tuple2<T, T> (current, substitute)
     }
 
     T getOld() {
-        return first
+        return tuple2.first
     }
 
     T getNew() {
-        return second
+        return tuple2.second
     }
 }
 

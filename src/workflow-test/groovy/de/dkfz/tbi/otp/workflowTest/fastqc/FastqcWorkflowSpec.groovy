@@ -182,5 +182,8 @@ class FastqcWorkflowSpec extends AbstractWorkflowSpec {
         return BashFastQcWorkflow.WORKFLOW
     }
 
-    final Class<BashFastQcWorkflow> workflowComponentClass = BashFastQcWorkflow
+    @Override
+    Class<BashFastQcWorkflow> getWorkflowComponentClass() {
+        return BashFastQcWorkflow
+    }
 }

@@ -149,14 +149,14 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
             getBeansOfType(MetadataValidator) >>
                     [
                             'validator1': [
-                                    validate: { MetadataValidationContext context ->
-                                        context.addProblem(Collections.emptySet(), LogLevel.ERROR, 'message1')
-                                        context.addProblem(Collections.emptySet(), LogLevel.ERROR, 'message2')
+                                    validate: { MetadataValidationContext ctx ->
+                                        ctx.addProblem(Collections.emptySet(), LogLevel.ERROR, 'message1')
+                                        ctx.addProblem(Collections.emptySet(), LogLevel.ERROR, 'message2')
                                     }
                             ] as MetadataValidator,
                             'validator2': [
-                                    validate: { MetadataValidationContext context ->
-                                        context.addProblem(Collections.emptySet(), LogLevel.ERROR, 'message3')
+                                    validate: { MetadataValidationContext ctx ->
+                                        ctx.addProblem(Collections.emptySet(), LogLevel.ERROR, 'message3')
                                     }
                             ] as MetadataValidator,
                     ]

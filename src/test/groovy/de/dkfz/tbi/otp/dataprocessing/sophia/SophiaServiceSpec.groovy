@@ -33,7 +33,10 @@ import java.nio.file.Path
 
 class SophiaServiceSpec extends AbstractBamFileAnalysisServiceSpec implements ServiceUnitTest<SophiaService> {
 
-    final String pathPart = 'sv_results'
+    @Override
+    String getPathPart() {
+        return 'sv_results'
+    }
 
     @Override
     BamFilePairAnalysis getNewInstance() {
