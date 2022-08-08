@@ -377,28 +377,28 @@ $.otp.clusterJobJobTypeSpecific = {
       'jobTypeSpecificGraphWalltimes',
       jobTypeSpecificWalltimes,
       (domContext, chartData) => {
+        const formattedData = {
+          data: chartData.data.map((dataSet) => ({
+            x: dataSet[0],
+            y: dataSet[1]
+          }
+          ))
+        };
+
+        const colorList = chartData.data.reduce((acc, val) => {
+          acc.push(val[2]);
+          return acc;
+        }, []);
+
         // eslint-disable-next-line no-new
         new Chart(domContext, {
           type: 'scatter',
           data: {
-            labels: chartData.labels,
             datasets: [{
-              data: chartData.data[0],
-              label: chartData.keys[0],
-              backgroundColor: $.otp.chart.colorList[0],
-              borderColor: $.otp.chart.colorList[0]
-            },
-            {
-              data: chartData.data[1],
-              label: chartData.keys[1],
-              backgroundColor: $.otp.chart.colorList[1],
-              borderColor: $.otp.chart.colorList[1]
-            },
-            {
-              data: chartData.data[2],
-              label: chartData.keys[2],
-              backgroundColor: $.otp.chart.colorList[2],
-              borderColor: $.otp.chart.colorList[2]
+              data: formattedData.data,
+              label: 'Walltime',
+              backgroundColor: colorList,
+              borderColor: colorList
             }]
           },
           options: {
@@ -407,7 +407,24 @@ $.otp.clusterJobJobTypeSpecific = {
                 display: false
               },
               legend: {
-                position: 'bottom'
+                display: false
+              }
+            },
+            scales: {
+              yAxes: {
+                title: {
+                  display: true,
+                  font: { size: '14px' },
+                  text: 'Walltime in Minutes'
+                },
+                min: 0
+              },
+              xAxes: {
+                title: {
+                  display: true,
+                  font: { size: '14px' },
+                  text: 'Million Reads'
+                }
               }
             }
           }
