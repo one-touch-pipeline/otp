@@ -139,16 +139,17 @@ class AbstractOtpClusterValidationJobSpec extends Specification implements DataT
 
         then:
         ValidationJobFailedException e = thrown()
-        e.message.contains('can not be read')
+        e.message.contains('assert Files.isReadable(file)')
     }
 
     void "ensureExternalJobsRunThrough, when the job status do not contain the expected message, then fail"() {
         given:
         File file = temporaryFolder.newFile()
+        file.text = 'wrong message'
 
         setupDataWithClusterJob()
         1 * job.jobStatusLoggingFileService.constructLogFileLocation(_, _, _) >> file.path
-        1 * job.jobStatusLoggingFileService.constructMessage(_, _, _) >> 'wrong message'
+        1 * job.jobStatusLoggingFileService.constructMessage(_, _, _) >> 'right message'
 
         when:
         job.ensureExternalJobsRunThrough(workflowStepValidatingClusterJob)

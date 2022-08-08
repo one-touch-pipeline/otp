@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.workflow.jobs
 import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
+import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.workflow.shared.ValidationJobFailedException
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
@@ -74,11 +75,10 @@ abstract class AbstractOtpClusterValidationJob extends AbstractValidationJob {
         }
 
         Path logFile = fileSystem.getPath(jobStatusLoggingFileService.constructLogFileLocation(realm, clusterJob.workflowStep, clusterJob.clusterJobId))
-        if (!Files.exists(logFile)) {
-            return "Cluster job ${clusterJob.clusterJobId} status log file ${logFile} does not exist."
-        }
-        if (!Files.isReadable(logFile)) {
-            return "Cluster job ${clusterJob.clusterJobId} status log file ${logFile} can not be read."
+        try {
+            FileService.ensureFileIsReadableAndNotEmpty(logFile)
+        } catch (AssertionError e) {
+            return "Cluster job ${clusterJob.clusterJobId} status log file ${logFile} has the following problem: ${e.message}"
         }
 
         String expectedLogMessage = jobStatusLoggingFileService.constructMessage(realm, clusterJob.workflowStep, clusterJob.clusterJobId)
