@@ -64,9 +64,9 @@ class IndelController extends AbstractAnalysisController {
         List<Path> filePaths = indelResultsService.getFiles(cmd.bamFilePairAnalysis, cmd.plotType)
         Path file = filePaths.first()
         if (cmd.plotType == PlotType.INDEL) {
-            render file: file.bytes, contentType: "application/pdf"
+            render(file: file.bytes, contentType: "application/pdf")
         } else {
-            render file: file.bytes, contentType: "image/png"
+            render(file: file.bytes, contentType: "image/png")
         }
     }
 
@@ -80,6 +80,6 @@ class IndelController extends AbstractAnalysisController {
 
         dataToRender.archived = project.archived
 
-        render dataToRender as JSON
+        render(dataToRender as JSON)
     }
 }

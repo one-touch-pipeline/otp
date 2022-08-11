@@ -76,25 +76,25 @@ class ConfigService implements ApplicationContextAware {
     }
 
     File getRootPath() {
-        return new File(otpProperties.get(OtpProperty.PATH_PROJECT_ROOT) ?: "")
+        return new File(otpProperties.get(OtpProperty.PATH_PROJECT_ROOT).toString() ?: "")
     }
 
     File getScriptOutputPath() {
-        return new File(otpProperties.get(OtpProperty.PATH_SCRIPTS_OUTPUT) ?: "")
+        return new File(otpProperties.get(OtpProperty.PATH_SCRIPTS_OUTPUT).toString() ?: "")
     }
 
     @Deprecated
     // legacy data
     File getProcessingRootPath() {
-        return new File(otpProperties.get(OtpProperty.PATH_PROCESSING_ROOT) ?: "")
+        return new File(otpProperties.get(OtpProperty.PATH_PROCESSING_ROOT).toString() ?: "")
     }
 
     File getToolsPath() {
-        return new File(otpProperties.get(OtpProperty.PATH_TOOLS) ?: "")
+        return new File(otpProperties.get(OtpProperty.PATH_TOOLS).toString() ?: "")
     }
 
     File getLoggingRootPath() {
-        return new File(otpProperties.get(OtpProperty.PATH_CLUSTER_LOGS_OTP) ?: "")
+        return new File(otpProperties.get(OtpProperty.PATH_CLUSTER_LOGS_OTP).toString() ?: "")
     }
 
     File getJobLogDirectory() {
@@ -106,12 +106,12 @@ class ConfigService implements ApplicationContextAware {
     }
 
     File getRoddyPath() {
-        return new File(otpProperties.get(OtpProperty.PATH_RODDY) ?: "")
+        return new File(otpProperties.get(OtpProperty.PATH_RODDY).toString() ?: "")
     }
 
     // this path is where the metadata file is copied
     File getSeqCenterInboxPath() {
-        return new File(otpProperties.get(OtpProperty.PATH_SEQ_CENTER_INBOX) ?: "")
+        return new File(otpProperties.get(OtpProperty.PATH_SEQ_CENTER_INBOX).toString() ?: "")
     }
 
     String getSshUser() {
@@ -128,7 +128,7 @@ class ConfigService implements ApplicationContextAware {
     }
 
     File getSshKeyFile() {
-        return new File(otpProperties.get(OtpProperty.SSH_KEY_FILE) ?: OtpProperty.SSH_KEY_FILE.defaultValue)
+        return new File(otpProperties.get(OtpProperty.SSH_KEY_FILE).toString() ?: OtpProperty.SSH_KEY_FILE.defaultValue.toString())
     }
 
     boolean otpSendsMails() {
@@ -235,7 +235,7 @@ class ConfigService implements ApplicationContextAware {
     }
 
     private File getAndCheckPathFromProperty(OtpProperty property) {
-        return new File(otpProperties.get(property) ?: property.defaultValue)
+        return new File(otpProperties.get(property).toString() ?: property.defaultValue.toString())
     }
 
     private boolean getBooleanValue(OtpProperty otpPropertiesValue) {

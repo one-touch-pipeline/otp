@@ -181,7 +181,7 @@ class ProjectUserController implements CheckAndCall {
                         confirmation: projectsOfUnixGroup.size() > 1 ? g.message(
                                 code: "projectUser.sharedUnixGroupConfirmation",
                                 args: [projectsOfUnixGroup.sort { it.name }.collect { "\n  - " + it }.join("")]
-                        ) : ''
+                        ) : '',
                 ]) as String)
             }
             return [

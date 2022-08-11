@@ -22,9 +22,8 @@
 package de.dkfz.tbi.otp.workflow.panCancer
 
 import grails.testing.gorm.DataTest
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+import spock.lang.TempDir
 import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
@@ -32,6 +31,7 @@ import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.workflow.shared.WorkflowException
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
@@ -40,8 +40,8 @@ import java.nio.file.Path
 
 class PanCancerConditionalFailJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory {
 
-    @Rule
-    TemporaryFolder temporaryFolder
+    @TempDir
+    Path tempDir
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -70,9 +70,7 @@ class PanCancerConditionalFailJobSpec extends Specification implements DataTest,
 
         job.lsdfFilesService = Mock(LsdfFilesService) {
             getFileViewByPidPathAsPath(_) >> { DataFile file ->
-                Path path = File.createTempFile("${file.fileName}", null, temporaryFolder.root).toPath()
-                path.text = "non-empty"
-                return path
+                return CreateFileHelper.createFile(tempDir.resolve(file.fileName))
             }
         }
         job.fileService = Mock(FileService) {
@@ -181,9 +179,7 @@ class PanCancerConditionalFailJobSpec extends Specification implements DataTest,
 
         job.lsdfFilesService = Mock(LsdfFilesService) {
             getFileViewByPidPathAsPath(_) >> { DataFile file ->
-                Path path = File.createTempFile("${file.fileName}", null, temporaryFolder.root).toPath()
-                path.text = "non-empty"
-                return path
+                return CreateFileHelper.createFile(tempDir.resolve(file.fileName))
             }
         }
         job.fileService = Mock(FileService) {
@@ -220,8 +216,7 @@ class PanCancerConditionalFailJobSpec extends Specification implements DataTest,
 
         job.lsdfFilesService = Mock(LsdfFilesService) {
             getFileViewByPidPathAsPath(_) >> { DataFile file ->
-                Path path = File.createTempFile("${file.fileName}", null, temporaryFolder.root).toPath()
-                return path
+                return CreateFileHelper.createFile(tempDir.resolve(file.fileName), "")
             }
         }
 

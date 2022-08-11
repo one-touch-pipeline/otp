@@ -22,15 +22,16 @@
 package de.dkfz.tbi.otp.job.processing
 
 import grails.testing.gorm.DataTest
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+import spock.lang.TempDir
 
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.HelperUtils
 import de.dkfz.tbi.otp.utils.LocalShellHelper
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
+
+import java.nio.file.Path
 
 class ExecutionHelperServiceSpec extends Specification implements DataTest {
 
@@ -39,10 +40,8 @@ class ExecutionHelperServiceSpec extends Specification implements DataTest {
 
     private ExecutionHelperService service
 
-    @SuppressWarnings('PublicInstanceField')
-    //Rule required public field
-    @Rule
-    public TemporaryFolder temporaryFolder
+    @TempDir
+    Path tempDir
 
     void setup() {
         service = new ExecutionHelperService()
@@ -51,7 +50,7 @@ class ExecutionHelperServiceSpec extends Specification implements DataTest {
     void "test setGroup & getGroup allFine"() {
         given:
         Realm realmObject = new Realm()
-        File tmpFile = temporaryFolder.newFile()
+        File tmpFile = tempDir.toFile()
         String group = new TestConfigService().testingGroup
 
         when:
@@ -87,7 +86,7 @@ class ExecutionHelperServiceSpec extends Specification implements DataTest {
     void "test getGroup realm is null should fail"() {
         when:
         LogThreadLocal.withThreadLog(System.out) {
-            service.getGroup(null, temporaryFolder.newFile())
+            service.getGroup(null, tempDir.toFile())
         }
 
         then:
@@ -99,7 +98,7 @@ class ExecutionHelperServiceSpec extends Specification implements DataTest {
     void "test getGroup remoteShellHelper executeCommand throws exception should fail"() {
         given:
         final String FAIL_MESSAGE = HelperUtils.uniqueString
-        File tmpFile = temporaryFolder.newFile()
+        File tmpFile = tempDir.toFile()
         service.remoteShellHelper = [
                 executeCommandReturnProcessOutput: { Realm realm, String command ->
                     assert false: FAIL_MESSAGE
@@ -119,7 +118,7 @@ class ExecutionHelperServiceSpec extends Specification implements DataTest {
     void "test setGroup realm is null should fail"() {
         when:
         LogThreadLocal.withThreadLog(System.out) {
-            service.setGroup(null, temporaryFolder.newFile(), DUMMY_GROUP)
+            service.setGroup(null, tempDir.toFile(), DUMMY_GROUP)
         }
 
         then:
@@ -141,7 +140,7 @@ class ExecutionHelperServiceSpec extends Specification implements DataTest {
     void "test setGroup group is null should fail"() {
         when:
         LogThreadLocal.withThreadLog(System.out) {
-            service.setGroup(new Realm(), temporaryFolder.newFile(), null)
+            service.setGroup(new Realm(), tempDir.toFile(), null)
         }
 
         then:
@@ -153,7 +152,7 @@ class ExecutionHelperServiceSpec extends Specification implements DataTest {
     void "test setGroup remoteShellHelper executeCommand throws exception should fail"() {
         given:
         final String FAIL_MESSAGE = HelperUtils.uniqueString
-        File tmpFile = temporaryFolder.newFile()
+        File tmpFile = tempDir.toFile()
         service.remoteShellHelper = [
                 executeCommandReturnProcessOutput: { Realm realm, String command ->
                     assert false: FAIL_MESSAGE
@@ -173,7 +172,7 @@ class ExecutionHelperServiceSpec extends Specification implements DataTest {
     void "test setPermission allFine"() {
         given:
         String PERMISSION = '777'
-        File tmpFile = temporaryFolder.newFile()
+        File tmpFile = tempDir.toFile()
         service.remoteShellHelper = [
                 executeCommandReturnProcessOutput: { Realm realm, String command ->
                     LocalShellHelper.executeAndWait(command)
@@ -195,7 +194,7 @@ class ExecutionHelperServiceSpec extends Specification implements DataTest {
     void "test setPermission realm is null should fail"() {
         when:
         LogThreadLocal.withThreadLog(System.out) {
-            service.setPermission(null, temporaryFolder.newFile(), DUMMY_PERMISSION)
+            service.setPermission(null, tempDir.toFile(), DUMMY_PERMISSION)
         }
 
         then:
@@ -217,7 +216,7 @@ class ExecutionHelperServiceSpec extends Specification implements DataTest {
     void "test setPermission permission is null should fail"() {
         when:
         LogThreadLocal.withThreadLog(System.out) {
-            service.setPermission(new Realm(), temporaryFolder.newFile(), null)
+            service.setPermission(new Realm(), tempDir.toFile(), null)
         }
 
         then:
@@ -229,7 +228,7 @@ class ExecutionHelperServiceSpec extends Specification implements DataTest {
     void "test setPermission remoteShellHelper executeCommand throws exception should fail"() {
         given:
         final String FAIL_MESSAGE = HelperUtils.uniqueString
-        File tmpFile = temporaryFolder.newFile()
+        File tmpFile = tempDir.toFile()
         service.remoteShellHelper = [
                 executeCommandReturnProcessOutput: { Realm realm, String command ->
                     assert false: FAIL_MESSAGE

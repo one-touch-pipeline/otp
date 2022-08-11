@@ -22,9 +22,8 @@
 package de.dkfz.tbi.otp.workflow.panCancer
 
 import grails.testing.gorm.DataTest
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+import spock.lang.TempDir
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.TestConfigService
@@ -41,12 +40,13 @@ import de.dkfz.tbi.otp.utils.CreateRoddyFileHelper
 import de.dkfz.tbi.otp.utils.HelperUtils
 import de.dkfz.tbi.otp.workflowExecution.*
 
+import java.nio.file.Path
 import java.nio.file.Paths
 
 class PanCancerExecuteJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory, IsRoddy {
 
-    @Rule
-    TemporaryFolder tmpDir
+    @TempDir
+    Path tempDir
 
     PanCancerExecuteJob job
     RoddyBamFile roddyBamFile
@@ -104,10 +104,10 @@ class PanCancerExecuteJobSpec extends Specification implements DataTest, Workflo
         DomainFactory.createRoddyAlignableSeqTypes()
 
         configService = new TestConfigService([
-                (OtpProperty.PATH_PROJECT_ROOT): tmpDir.root.path,
+                (OtpProperty.PATH_PROJECT_ROOT): tempDir.toString(),
         ])
 
-        DomainFactory.createProcessingOptionBasePathReferenceGenome(new File(tmpDir.root, "reference_genomes").path)
+        DomainFactory.createProcessingOptionBasePathReferenceGenome(tempDir.resolve("reference_genomes").toString())
 
         DomainFactory.createBedFile([referenceGenome: roddyBamFile.referenceGenome, libraryPreparationKit: roddyBamFile.mergingWorkPackage.libraryPreparationKit])
     }
@@ -138,13 +138,14 @@ class PanCancerExecuteJobSpec extends Specification implements DataTest, Workflo
         DomainFactory.createRoddyAlignableSeqTypes()
 
         expect:
-        new PanCancerExecuteJob().getAnalysisConfiguration(seqType) == result
+        new PanCancerExecuteJob().getAnalysisConfiguration(seqTypeClosure()) == result
 
         where:
-        seqType                                || result
-        DomainFactory.createChipSeqType        || "qcAnalysis"
-        DomainFactory.createWholeGenomeSeqType || "qcAnalysis"
-        DomainFactory.createExomeSeqType       || "exomeAnalysis"
+        // created objects in where part are not deleted during cleanup (in integration tests), hence we use closures for consistency also in unit test
+        result          || seqTypeClosure
+        "qcAnalysis"    || { DomainFactory.createChipSeqType() }
+        "qcAnalysis"    || { DomainFactory.createWholeGenomeSeqType() }
+        "exomeAnalysis" || { DomainFactory.createExomeSeqType() }
     }
 
     void "test getFileNamesKillSwitch"() {

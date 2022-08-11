@@ -22,9 +22,8 @@
 package de.dkfz.tbi.otp.workflow.fastqc
 
 import grails.testing.gorm.DataTest
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+import spock.lang.TempDir
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.dataprocessing.*
@@ -69,13 +68,13 @@ class FastqcExecuteClusterPipelineJobSpec extends Specification implements DataT
     private Path targetFastqcHtml1
     private Path targetFastqcHtml2
 
-    @Rule
-    TemporaryFolder temporaryFolder
+    @TempDir
+    Path tempDir
 
     private void createData(boolean targetAlreadyExist) {
         fileSystem = FileSystems.default
-        sourceDir = temporaryFolder.newFolder("src").toPath()
-        targetDir = temporaryFolder.newFolder("tgt").toPath()
+        sourceDir = tempDir.resolve("src")
+        targetDir = tempDir.resolve("tgt")
         sourceFastqc1 = sourceDir.resolve('fastq1')
         sourceFastqc2 = sourceDir.resolve('fastq2')
         sourceFastqcMd5sum1 = sourceDir.resolve('md5sum1')

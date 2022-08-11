@@ -25,7 +25,6 @@ import grails.gorm.transactions.Rollback
 import grails.testing.mixin.integration.Integration
 import grails.validation.ValidationException
 import org.grails.datastore.gorm.events.AutoTimestampEventListener
-import org.springframework.lang.Nullable
 import org.springframework.mock.web.MockMultipartFile
 import spock.lang.Specification
 import spock.lang.TempDir
@@ -543,7 +542,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         projectService.projectInfoService = Mock(ProjectInfoService) {
             1 * createProjectInfoAndUploadFile(_, _)
         }
-        MockMultipartFile mockMultipartFile = new MockMultipartFile(FILE_NAME, FILE_NAME, null,CONTENT)
+        MockMultipartFile mockMultipartFile = new MockMultipartFile(FILE_NAME, FILE_NAME, null, CONTENT)
 
         when:
         ProjectCreationCommand projectParams = new ProjectCreationCommand(

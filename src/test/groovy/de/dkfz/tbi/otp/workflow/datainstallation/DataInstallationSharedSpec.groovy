@@ -25,6 +25,8 @@ import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.ngsdata.AntibodyTarget
+import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
@@ -36,6 +38,8 @@ class DataInstallationSharedSpec extends Specification implements WorkflowSystem
         return [
                 WorkflowRun,
                 WorkflowStep,
+                SeqTrack,
+                AntibodyTarget,
         ]
     }
 
@@ -49,6 +53,7 @@ class DataInstallationSharedSpec extends Specification implements WorkflowSystem
                 ]),
         ])
         final WorkflowStep workflowStep = createWorkflowStep([workflowRun: run])
+        SeqTrack seqTrack = createSeqTrack()
 
         when:
         dataInstallationSharedInstance.getSeqTrack(workflowStep)
@@ -57,7 +62,7 @@ class DataInstallationSharedSpec extends Specification implements WorkflowSystem
         1 * dataInstallationSharedInstance.checkWorkflowName(workflowStep, DataInstallationWorkflow.WORKFLOW) >> _
 
         then:
-        1 * dataInstallationSharedInstance.concreteArtefactService.getOutputArtefact(workflowStep, DataInstallationWorkflow.OUTPUT_FASTQ) >> _
+        1 * dataInstallationSharedInstance.concreteArtefactService.getOutputArtefact(workflowStep, DataInstallationWorkflow.OUTPUT_FASTQ) >> seqTrack
     }
 
     @SuppressWarnings('EmptyClass')

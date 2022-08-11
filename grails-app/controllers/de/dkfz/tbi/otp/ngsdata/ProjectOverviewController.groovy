@@ -52,7 +52,7 @@ class ProjectOverviewController {
     JSON individualCountByProject() {
         Project project = projectSelectionService.requestedProject
         Map dataToRender = [individualCount: projectOverviewService.individualCountByProject(project)]
-        render dataToRender as JSON
+        render(dataToRender as JSON)
     }
 
     JSON dataTableSource(DataTableCommand cmd) {
@@ -62,7 +62,7 @@ class ProjectOverviewController {
         dataToRender.iTotalRecords = data.size()
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
         dataToRender.aaData = data
-        render dataToRender as JSON
+        render(dataToRender as JSON)
     }
 
     JSON dataTableSourcePatientsAndSamplesGBCountPerProject(DataTableCommand cmd) {
@@ -72,7 +72,7 @@ class ProjectOverviewController {
         dataToRender.iTotalRecords = data.size()
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
         dataToRender.aaData = data
-        render dataToRender as JSON
+        render(dataToRender as JSON)
     }
 
     JSON dataTableSourceSampleTypeNameCountBySample(DataTableCommand cmd) {
@@ -82,7 +82,7 @@ class ProjectOverviewController {
         dataToRender.iTotalRecords = data.size()
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
         dataToRender.aaData = data
-        render dataToRender as JSON
+        render(dataToRender as JSON)
     }
 
     JSON dataTableSourceCenterNameRunId(DataTableCommand cmd) {
@@ -110,6 +110,6 @@ class ProjectOverviewController {
             }
             dataToRender.aaData << line
         }
-        render dataToRender as JSON
+        render(dataToRender as JSON)
     }
 }

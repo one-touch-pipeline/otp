@@ -22,8 +22,6 @@
 package de.dkfz.tbi.otp.workflow.panCancer
 
 import grails.testing.gorm.DataTest
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.dataprocessing.*
@@ -47,9 +45,6 @@ class PanCancerLinkJobSpec extends Specification implements DataTest, WorkflowSy
     RoddyBamFile roddyBamFile
     WorkflowStep workflowStep
     RoddyBamFileService roddyBamFileService
-
-    @Rule
-    TemporaryFolder temporaryFolder
 
     @Override
     Class[] getDomainClassesToMock() {

@@ -22,9 +22,8 @@
 package de.dkfz.tbi.otp.workflow.panCancer
 
 import grails.testing.gorm.DataTest
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+import spock.lang.TempDir
 
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
@@ -44,8 +43,8 @@ import java.nio.file.Path
 
 class PanCancerFinishJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory, IsRoddy {
 
-    @Rule
-    TemporaryFolder temporaryFolder
+    @TempDir
+    Path tempDir
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -61,7 +60,7 @@ class PanCancerFinishJobSpec extends Specification implements DataTest, Workflow
 
     void "test updateDomain method should update roddyBamFile"() {
         given:
-        TestConfigService testConfigService = new TestConfigService(temporaryFolder.newFolder())
+        TestConfigService testConfigService = new TestConfigService(tempDir)
         WorkflowStep workflowStep = createWorkflowStep()
         MergingWorkPackage workPackage = createMergingWorkPackage(bamFileInProjectFolder: null)
         RoddyBamFile roddyBamFile = createBamFile([

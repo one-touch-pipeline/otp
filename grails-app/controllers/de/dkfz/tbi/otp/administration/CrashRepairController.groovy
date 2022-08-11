@@ -68,7 +68,7 @@ class CrashRepairController implements CheckAndCall {
     def runningWorkflowSteps() {
         List<WorkflowStep> workflowSteps = crashRepairService.findStillRunningWorkflowStepsAfterCrash()
         workflowSteps.each { it.lastUpdated = TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(it.lastUpdated) }
-        render workflowSteps as JSON
+        render(workflowSteps as JSON)
     }
 
     /**
@@ -80,7 +80,7 @@ class CrashRepairController implements CheckAndCall {
         checkDefaultErrorsAndCallMethod(cmd) {
             try {
                 jobService.createRestartedJobAfterSystemRestart(cmd.workflowStep)
-                render [:] as JSON
+                render([:] as JSON)
             } catch (WorkflowException workflowException) {
                 log.error(workflowException.message)
                 return response.sendError(HttpStatus.BAD_REQUEST.value(), workflowException.message)
@@ -97,7 +97,7 @@ class CrashRepairController implements CheckAndCall {
         checkDefaultErrorsAndCallMethod(cmd) {
             try {
                 crashRepairService.restartWorkflowRun(cmd.workflowStep)
-                render [:] as JSON
+                render([:] as JSON)
             } catch (WorkflowException workflowException) {
                 log.error(workflowException.message)
                 return response.sendError(HttpStatus.BAD_REQUEST.value(), workflowException.message)
@@ -113,7 +113,7 @@ class CrashRepairController implements CheckAndCall {
         checkDefaultErrorsAndCallMethod(cmd) {
             try {
                 workflowStateChangeService.changeStateToFailedWithManualChangedError(cmd.workflowStep)
-                render [:] as JSON
+                render([:] as JSON)
             } catch (WorkflowException workflowException) {
                 log.error(workflowException.message)
                 return response.sendError(HttpStatus.BAD_REQUEST.value(), workflowException.message)
@@ -130,7 +130,7 @@ class CrashRepairController implements CheckAndCall {
         checkDefaultErrorsAndCallMethod(cmd) {
             try {
                 workflowStateChangeService.changeRunToFinalFailed(cmd.workflowStep)
-                render [:] as JSON
+                render([:] as JSON)
             } catch (WorkflowException workflowException) {
                 log.error(workflowException.message)
                 return response.sendError(HttpStatus.BAD_REQUEST.value(), workflowException.message)
@@ -145,7 +145,7 @@ class CrashRepairController implements CheckAndCall {
     def startWorkflowSystem() {
         try {
             workflowSystemService.startWorkflowSystem()
-            render [:] as JSON
+            render([:] as JSON)
         } catch (WorkflowException workflowException) {
             return response.sendError(HttpStatus.BAD_REQUEST.value(), workflowException.message)
         }

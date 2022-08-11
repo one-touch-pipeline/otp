@@ -57,50 +57,50 @@ class SoftwareToolController {
         } else {
             flash.message = new FlashMessage(g.message(code:  "softwareTool.list.success") as String)
         }
-        redirect (action: 'list')
+        redirect(action: 'list')
     }
 
     JSON updateSoftwareTool(UpdateCommand cmd) {
         if (cmd.hasErrors()) {
-            render cmd.errors as JSON
+            render(cmd.errors as JSON)
             return
         }
         if (softwareToolService.getSoftwareTool(cmd.id) == null) {
             Map data = [error: "requested software tool with id of ${cmd.id} could not be found"]
-            render data as JSON
+            render(data as JSON)
             return
         }
         Map data = [success: true, softwareTool: softwareToolService.updateSoftwareTool(cmd.id, cmd.value.trim())]
-        render data as JSON
+        render(data as JSON)
     }
 
     JSON updateSoftwareToolIdentifier(UpdateCommand cmd) {
         if (cmd.hasErrors()) {
-            render cmd.errors as JSON
+            render(cmd.errors as JSON)
             return
         }
         if (softwareToolService.getSoftwareToolIdentifier(cmd.id) == null) {
             Map data = [error: "requested software tool identifier with id of ${cmd.id} could not be found"]
-            render data as JSON
+            render(data as JSON)
             return
         }
         Map data = [success: true, softwareToolIdentifier: softwareToolService.updateSoftwareToolIdentifier(cmd.id, cmd.value.trim())]
-        render data as JSON
+        render(data as JSON)
     }
 
     JSON createSoftwareToolIdentifier(UpdateCommand cmd) {
         if (cmd.hasErrors()) {
-            render cmd.errors as JSON
+            render(cmd.errors as JSON)
             return
         }
         if (softwareToolService.getSoftwareTool(cmd.id) == null) {
             Map data = [error: "requested software tool with id of ${cmd.id} could not be found"]
-            render data as JSON
+            render(data as JSON)
             return
         }
         SoftwareTool softwareTool = softwareToolService.getSoftwareTool(cmd.id)
         Map data = [success: true, softwareToolIdentifier: softwareToolService.createSoftwareToolIdentifier(softwareTool, cmd.value.trim())]
-        render data as JSON
+        render(data as JSON)
     }
 }
 

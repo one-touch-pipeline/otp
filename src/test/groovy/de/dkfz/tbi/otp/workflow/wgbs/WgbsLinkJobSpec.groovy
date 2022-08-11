@@ -22,8 +22,6 @@
 package de.dkfz.tbi.otp.workflow.wgbs
 
 import grails.testing.gorm.DataTest
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.dataprocessing.*
@@ -64,9 +62,6 @@ class WgbsLinkJobSpec extends Specification implements DataTest, WorkflowSystemD
     RoddyBamFile roddyBamFile
     WorkflowStep workflowStep
     RoddyBamFileService roddyBamFileService
-
-    @Rule
-    TemporaryFolder temporaryFolder
 
     void setupData() {
         roddyBamFile = createBamFile(roddyExecutionDirectoryNames: ["exec_123456_123456789_test_test"])

@@ -23,16 +23,17 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.validators
 
 import grails.testing.gorm.DataTest
 import org.junit.ClassRule
-import org.junit.rules.TemporaryFolder
 import spock.lang.*
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.ngsdata.FileType
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.BamMetadataValidationContextFactory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
-import de.dkfz.tbi.otp.utils.LocalShellHelper
 import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
+
+import java.nio.file.Files
+import java.nio.file.Path
 
 import static de.dkfz.tbi.otp.ngsdata.BamMetadataColumn.*
 import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
@@ -48,17 +49,18 @@ class BamFilePathValidatorSpec extends Specification implements DataTest {
 
     @Shared
     @ClassRule
-    TemporaryFolder temporaryFolder
+    @TempDir
+    Path tempDir
 
     @Unroll
     void 'validate context with errors'() {
         given:
-        File wrongFormatFile = temporaryFolder.newFile('test.xls')
-        File file = temporaryFolder.newFile('abc.bam')
-        File dir = temporaryFolder.newFolder('folder.bam')
-        File notReadAble = temporaryFolder.newFile('abcde.bam')
-        assert LocalShellHelper.executeAndAssertExitCodeAndErrorOutAndReturnStdout("chmod a-r ${notReadAble.absolutePath} && echo OK").trim() == 'OK'
-        assert !notReadAble.canRead()
+        File wrongFormatFile = Files.createFile(tempDir.resolve('test.xls')).toFile()
+        File file = Files.createFile(tempDir.resolve('abc.bam')).toFile()
+        File dir = Files.createDirectory(tempDir.resolve('folder.bam')).toFile()
+        File notReadableFile = Files.createFile(tempDir.resolve('abcde.bam')).toFile()
+        notReadableFile.readable = false
+        assert !notReadableFile.canRead()
 
         BamMetadataValidationContext context = BamMetadataValidationContextFactory.createContext(
                 "${BAM_FILE_PATH}\n" +
@@ -69,7 +71,7 @@ class BamFilePathValidatorSpec extends Specification implements DataTest {
                         "${wrongFormatFile}\n" +
                         "/tmp/test.bam\n" +
                         "${dir.absolutePath}\n" +
-                        "${notReadAble.absolutePath}\n" +
+                        "${notReadableFile.absolutePath}\n" +
                         "${file.absolutePath}\n" // valid
 
         )
@@ -89,7 +91,7 @@ class BamFilePathValidatorSpec extends Specification implements DataTest {
                 new Problem(context.spreadsheet.dataRows[6].cells as Set, LogLevel.ERROR,
                          "'${dir.absolutePath}' is not a file.", "At least one file is not a file."),
                 new Problem(context.spreadsheet.dataRows[7].cells as Set, LogLevel.ERROR,
-                          "'${notReadAble.absolutePath}' is not readable.", "At least one file is not readable."),
+                          "'${notReadableFile.absolutePath}' is not readable.", "At least one file is not readable."),
         ]
 
         when:

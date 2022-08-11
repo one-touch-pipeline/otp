@@ -22,8 +22,7 @@
 package de.dkfz.tbi.otp.dataprocessing.sophia
 
 import grails.testing.services.ServiceUnitTest
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
+import spock.lang.TempDir
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
@@ -32,19 +31,15 @@ import de.dkfz.tbi.otp.ngsdata.IndividualService
 import java.nio.file.Path
 
 class SophiaServiceSpec extends AbstractBamFileAnalysisServiceSpec implements ServiceUnitTest<SophiaService> {
-
-    @Override
-    String getPathPart() {
-        return 'sv_results'
-    }
+    String pathPart = 'sv_results'
 
     @Override
     BamFilePairAnalysis getNewInstance() {
         return DomainFactory.createSophiaInstanceWithRoddyBamFiles()
     }
 
-    @Rule
-    TemporaryFolder temporaryFolder
+    @TempDir
+    Path tempDir
 
     SophiaInstance instance
     Path instancePath
@@ -54,11 +49,9 @@ class SophiaServiceSpec extends AbstractBamFileAnalysisServiceSpec implements Se
      * so later on temp files can be generated and paths tested
      */
     void setup() {
-        Path temporaryFile = temporaryFolder.newFolder().toPath()
-
         this.instance = DomainFactory.createSophiaInstanceWithRoddyBamFiles()
 
-        Path vbpPath = temporaryFile.resolve("${instance.project.dirName}/sequencing/${instance.seqType.dirName}/view-by-pid/${instance.individual.pid}")
+        Path vbpPath = tempDir.resolve("${instance.project.dirName}/sequencing/${instance.seqType.dirName}/view-by-pid/${instance.individual.pid}")
 
         service.individualService = Mock(IndividualService) {
             getViewByPidPath(_, _) >> vbpPath

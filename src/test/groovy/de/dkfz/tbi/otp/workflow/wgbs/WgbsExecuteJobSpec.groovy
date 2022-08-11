@@ -22,9 +22,8 @@
 package de.dkfz.tbi.otp.workflow.wgbs
 
 import grails.testing.gorm.DataTest
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+import spock.lang.TempDir
 
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.config.OtpProperty
@@ -39,6 +38,7 @@ import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.workflowExecution.*
 
+import java.nio.file.Path
 import java.nio.file.Paths
 
 class WgbsExecuteJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory, IsRoddy {
@@ -68,8 +68,8 @@ class WgbsExecuteJobSpec extends Specification implements DataTest, WorkflowSyst
         ]
     }
 
-    @Rule
-    TemporaryFolder tmpDir
+    @TempDir
+    Path tempDir
 
     WgbsExecuteJob job
     RoddyBamFile roddyBamFile
@@ -101,10 +101,10 @@ class WgbsExecuteJobSpec extends Specification implements DataTest, WorkflowSyst
         DomainFactory.createRoddyAlignableSeqTypes()
 
         configService = new TestConfigService([
-                (OtpProperty.PATH_PROJECT_ROOT): tmpDir.root.path,
+                (OtpProperty.PATH_PROJECT_ROOT): tempDir.toString(),
         ])
 
-        DomainFactory.createProcessingOptionBasePathReferenceGenome(new File(tmpDir.root, "reference_genomes").path)
+        DomainFactory.createProcessingOptionBasePathReferenceGenome(new File(tempDir.toString(), "reference_genomes").path)
     }
 
     void cleanup() {

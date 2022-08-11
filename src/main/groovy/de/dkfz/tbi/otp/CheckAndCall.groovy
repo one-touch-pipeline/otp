@@ -98,7 +98,7 @@ trait CheckAndCall {
                 data = [success: false, error: e.localizedMessage]
             }
         }
-        render data as JSON
+        render(data as JSON)
         return data as JSON
     }
 
@@ -189,7 +189,7 @@ trait CheckAndCall {
                 ]
             }
         }
-        render data as JSON
+        render(data as JSON)
         return data
     }
 

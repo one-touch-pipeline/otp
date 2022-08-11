@@ -77,14 +77,14 @@ class WorkflowRunDetailsController extends AbstractWorkflowRunController {
 
         List<Map<String, Object>> data = workflowRunService.workflowRunDetails(cmd.workflowRun)
 
-        render cmd.getDataToRender(data) as JSON
+        render(cmd.getDataToRender(data) as JSON)
     }
 
     def saveComment(CommentCommand cmd) {
         WorkflowRun workflowRun = workflowRunService.getById(cmd.id)
         commentService.saveComment(workflowRun, cmd.comment)
         Map dataToRender = [date: TimeFormats.WEEKDAY_DATE_TIME.getFormattedDate(workflowRun.comment.modificationDate), author: workflowRun.comment.author]
-        render dataToRender as JSON
+        render(dataToRender as JSON)
     }
 
     def showError(RunShowDetailsCommand navParams, WorkflowStep step) {

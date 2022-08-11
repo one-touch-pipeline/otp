@@ -53,7 +53,7 @@ class AceseqController extends AbstractAnalysisController {
 
         dataToRender.archived = project.archived
 
-        render dataToRender as JSON
+        render(dataToRender as JSON)
     }
 
     Map plots(BamFilePairAnalysisCommand cmd) {
@@ -94,9 +94,9 @@ class AceseqController extends AbstractAnalysisController {
         if (files.isEmpty()) {
             return response.sendError(404)
         } else if (cmd.plotType in [PlotType.ACESEQ_EXTRA, PlotType.ACESEQ_ALL]) {
-            render file: files[cmd.index].bytes, contentType: "image/png"
+            render(file: files[cmd.index].bytes, contentType: "image/png")
         } else {
-            render file: files.first().bytes, contentType: "image/png"
+            render(file: files.first().bytes, contentType: "image/png")
         }
     }
 }

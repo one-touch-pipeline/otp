@@ -22,9 +22,8 @@
 package de.dkfz.tbi.otp.job.jobs.aceseq
 
 import grails.testing.gorm.DataTest
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+import spock.lang.TempDir
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.TestConfigService
@@ -100,20 +99,19 @@ class ParseAceseqQcJobSpec extends Specification implements DataTest {
         }
     }
 
-    @Rule
-    TemporaryFolder temporaryFolder
+    @TempDir
+    Path tempDir
 
     void "test execute"() {
         given:
-        Path temporaryFile = temporaryFolder.newFolder().toPath()
-        Path aceseqOutputFile = temporaryFile.resolve("aceseqOutputFile.txt")
+        Path aceseqOutputFile = tempDir.resolve("aceseqOutputFile.txt")
         CreateFileHelper.createFile(aceseqOutputFile)
 
-        Path qcJson = temporaryFile.resolve("qc_json_file")
+        Path qcJson = tempDir.resolve("qc_json_file")
 
         AceseqInstance instance = DomainFactory.createAceseqInstanceWithRoddyBamFiles()
 
-        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFile.toString()])
+        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): tempDir.toString()])
 
         DomainFactory.createAceseqQaFileOnFileSystem(qcJson)
 

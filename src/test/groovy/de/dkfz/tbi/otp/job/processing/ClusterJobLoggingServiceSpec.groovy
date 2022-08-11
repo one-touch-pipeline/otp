@@ -22,8 +22,7 @@
 package de.dkfz.tbi.otp.job.processing
 
 import grails.testing.gorm.DataTest
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
+import spock.lang.TempDir
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.TestConfigService
@@ -53,15 +52,15 @@ class ClusterJobLoggingServiceSpec extends Specification implements DataTest {
 
     TestConfigService configService
 
-    @Rule
-    TemporaryFolder temporaryFolder = new TemporaryFolder()
+    @TempDir
+    Path tempDir
 
     Realm realm
     ProcessingStepUpdate processingStepUpdate
     ClusterJobLoggingService service
 
     void setup() {
-        configService = new TestConfigService([(OtpProperty.PATH_CLUSTER_LOGS_OTP): temporaryFolder.newFolder().path])
+        configService = new TestConfigService([(OtpProperty.PATH_CLUSTER_LOGS_OTP): tempDir.toString()])
         realm = DomainFactory.createRealm()
         processingStepUpdate = DomainFactory.createProcessingStepUpdate()
         service = new ClusterJobLoggingService()

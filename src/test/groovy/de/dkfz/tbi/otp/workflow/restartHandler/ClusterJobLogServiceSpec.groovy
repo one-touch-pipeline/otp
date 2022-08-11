@@ -23,9 +23,8 @@ package de.dkfz.tbi.otp.workflow.restartHandler
 
 import grails.testing.gorm.DataTest
 import grails.testing.services.ServiceUnitTest
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+import spock.lang.TempDir
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
@@ -44,8 +43,8 @@ import java.nio.file.Path
 
 class ClusterJobLogServiceSpec extends Specification implements ServiceUnitTest<ClusterJobLogService>, DataTest, WorkflowSystemDomainFactory {
 
-    @Rule
-    TemporaryFolder temporaryFolder
+    @TempDir
+    Path tempDir
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -67,8 +66,8 @@ class ClusterJobLogServiceSpec extends Specification implements ServiceUnitTest<
         given:
         setupData()
 
-        Path file = CreateFileHelper.createFile(temporaryFolder.newFile().toPath())
-        Path file2 = CreateFileHelper.createFile(temporaryFolder.newFile().toPath())
+        Path file = CreateFileHelper.createFile(tempDir.resolve("test.txt"))
+        Path file2 = CreateFileHelper.createFile(tempDir.resolve("test2.txt"))
 
         Set<ClusterJob> clusterJobs = [
                 createClusterJob([
@@ -136,7 +135,7 @@ class ClusterJobLogServiceSpec extends Specification implements ServiceUnitTest<
 
     void "test createLogsWithIdentifier when threshold exceeded"() {
         given:
-        Path file = CreateFileHelper.createFile(temporaryFolder.newFile().toPath())
+        Path file = CreateFileHelper.createFile(tempDir.resolve("test.txt"))
 
         setupData()
         service.fileService = Spy(FileService) {

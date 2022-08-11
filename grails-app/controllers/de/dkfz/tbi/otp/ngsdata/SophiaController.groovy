@@ -52,7 +52,7 @@ class SophiaController extends AbstractAnalysisController {
 
         dataToRender.archived = project.archived
 
-        render dataToRender as JSON
+        render(dataToRender as JSON)
     }
 
     Map plots(BamFilePairAnalysisCommand cmd) {
@@ -76,6 +76,6 @@ class SophiaController extends AbstractAnalysisController {
         }
         List<Path> filePaths = sophiaResultsService.getFiles(cmd.bamFilePairAnalysis, cmd.plotType)
         Path file = filePaths.first()
-        render file: file.bytes, contentType: "application/pdf"
+        render(file: file.bytes, contentType: "application/pdf")
     }
 }

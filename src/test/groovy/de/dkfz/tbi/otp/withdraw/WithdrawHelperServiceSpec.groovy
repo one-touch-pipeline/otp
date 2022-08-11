@@ -22,8 +22,7 @@
 package de.dkfz.tbi.otp.withdraw
 
 import grails.test.hibernate.HibernateSpec
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
+import spock.lang.TempDir
 import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
@@ -35,6 +34,7 @@ import de.dkfz.tbi.otp.domainFactory.FastqcDomainFactory
 import de.dkfz.tbi.otp.domainFactory.pipelines.AlignmentPipelineFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.CreateFileHelper
 
 import java.nio.file.*
 import java.nio.file.attribute.PosixFilePermission
@@ -48,8 +48,8 @@ class WithdrawHelperServiceSpec extends HibernateSpec implements FastqcDomainFac
             PATH_LIST2,
     ].flatten().asImmutable()
 
-    @Rule
-    TemporaryFolder temporaryFolder
+    @TempDir
+    Path tempDir
 
     @Override
     List<Class> getDomainClasses() {
@@ -392,19 +392,19 @@ class WithdrawHelperServiceSpec extends HibernateSpec implements FastqcDomainFac
         String withdrawnCommentNormal = "withdrawnComment \nover\nmultiple lines"
         String withdrawnCommentWithdrawn = "withdrawnComment\nfor withdrawnDataFile"
         String withdrawnCommentSingleCell = "withdrawnComment\nfor singleCellDataFile"
-        final Path finalPathNormal = temporaryFolder.newFile("finalNormal").toPath()
-        final Path finalPathSingleCell = temporaryFolder.newFile("finalSingleCell").toPath()
+        final Path finalPathNormal = CreateFileHelper.createFile(tempDir.resolve("finalNormal"))
+        final Path finalPathSingleCell = CreateFileHelper.createFile(tempDir.resolve("finalSingleCell"))
         final String viewByPidPathNormal = "/tmp/viewByPidNormal"
         final String viewByPidPathSingleCell = "/tmp/viewByPidSingleCell"
         final String wellPathSingleCell = "/tmp/wellSingleCell"
-        final Path fastqcPathNormal = temporaryFolder.newFile("fastqcNormal").toPath()
-        final Path fastqcPathSingleCell = temporaryFolder.newFile("fastqcSingleCell").toPath()
-        final Path fastqcOutputMd5sumPath = temporaryFolder.newFile("fastqcOutputMd5sum").toPath()
-        final Path fastqcOutputMd5sumPathSingleCell = temporaryFolder.newFile("fastqcOutputMd5sumSingleCell").toPath()
-        final Path finalMd5sumNormal = temporaryFolder.newFile("finalMd5sum").toPath()
-        final Path finalMd5sumSingleCell = temporaryFolder.newFile("finalMd5sumSingleCell").toPath()
-        final Path fastqcHtmlPath = temporaryFolder.newFile("html").toPath()
-        final Path fastqcHtmlPathSingleCell = temporaryFolder.newFile("htmlSingleCell").toPath()
+        final Path fastqcPathNormal = CreateFileHelper.createFile(tempDir.resolve("fastqcNormal"))
+        final Path fastqcPathSingleCell = CreateFileHelper.createFile(tempDir.resolve("fastqcSingleCell"))
+        final Path fastqcOutputMd5sumPath = CreateFileHelper.createFile(tempDir.resolve("fastqcOutputMd5sum"))
+        final Path fastqcOutputMd5sumPathSingleCell = CreateFileHelper.createFile(tempDir.resolve("fastqcOutputMd5sumSingleCell"))
+        final Path finalMd5sumNormal = CreateFileHelper.createFile(tempDir.resolve("finalMd5sum"))
+        final Path finalMd5sumSingleCell = CreateFileHelper.createFile(tempDir.resolve("finalMd5sumSingleCell"))
+        final Path fastqcHtmlPath = CreateFileHelper.createFile(tempDir.resolve("html"))
+        final Path fastqcHtmlPathSingleCell = CreateFileHelper.createFile(tempDir.resolve("htmlSingleCell"))
 
         DataFile dataFile = createDataFile()
         FastqcProcessedFile fastqcProcessedFile = createFastqcProcessedFile([dataFile: dataFile])

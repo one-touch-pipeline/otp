@@ -22,9 +22,8 @@
 package de.dkfz.tbi.otp.job.jobs.aceseq
 
 import grails.testing.gorm.DataTest
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+import spock.lang.TempDir
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.TestConfigService
@@ -39,6 +38,7 @@ import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.*
 
+import java.nio.file.Path
 import java.nio.file.Paths
 
 class ExecuteRoddyAceseqJobSpec extends Specification implements DataTest {
@@ -83,8 +83,8 @@ class ExecuteRoddyAceseqJobSpec extends Specification implements DataTest {
         ]
     }
 
-    @Rule
-    TemporaryFolder temporaryFolder
+    @TempDir
+    Path tempDir
 
     AceseqInstance aceseqInstance
 
@@ -98,10 +98,9 @@ class ExecuteRoddyAceseqJobSpec extends Specification implements DataTest {
         aceseqInstance.samplePair.mergingWorkPackage2.bamFileInProjectFolder = aceseqInstance.sampleType2BamFile
         assert aceseqInstance.samplePair.mergingWorkPackage2.save(flush: true)
 
-        String path = temporaryFolder.newFolder().path
-        configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): path])
+        configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): tempDir.toString()])
         individualService = Mock(IndividualService) {
-            getViewByPidPath(_, _) >> Paths.get(path)
+            getViewByPidPath(_, _) >> tempDir
         }
     }
 
@@ -120,9 +119,9 @@ class ExecuteRoddyAceseqJobSpec extends Specification implements DataTest {
 
     void "prepareAndReturnWorkflowSpecificCValues, when all fine, return correct value list"() {
         given:
-        File fasta = CreateFileHelper.createFile(new File(temporaryFolder.newFolder(), "fasta.fa"))
-        File chromosomeLength = CreateFileHelper.createFile(new File(temporaryFolder.newFolder(), "chrTotalLength.tsv"))
-        File gcContent = CreateFileHelper.createFile(new File(temporaryFolder.newFolder(), "gcContentFile.tsv"))
+        File fasta = CreateFileHelper.createFile(tempDir.resolve("fasta.fa").toFile())
+        File chromosomeLength = CreateFileHelper.createFile(tempDir.resolve("chrTotalLength.tsv").toFile())
+        File gcContent = CreateFileHelper.createFile(tempDir.resolve("gcContentFile.tsv").toFile())
 
         SophiaInstance sophiaInstance = DomainFactory.createSophiaInstance(aceseqInstance.samplePair)
         CreateRoddyFileHelper.createSophiaResultFiles(sophiaInstance, individualService)

@@ -22,11 +22,11 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.testing.gorm.DataTest
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+import spock.lang.TempDir
 import spock.lang.Unroll
 
+import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.utils.exceptions.FileIsEmptyException
 
 import java.nio.file.Files
@@ -37,8 +37,8 @@ class ChecksumFileServiceSpec extends Specification implements DataTest {
 
     static final String BAM_FILE_NAME = "bamFileName.merged.mdup.bam"
 
-    @Rule
-    TemporaryFolder tempFolder = new TemporaryFolder()
+    @TempDir
+    Path tempDir
 
     ChecksumFileService checksumFileService
     Path file
@@ -57,7 +57,7 @@ class ChecksumFileServiceSpec extends Specification implements DataTest {
 
     private void setupFirstMD5ChecksumFromFile() {
         checksumFileService = new ChecksumFileService()
-        file = tempFolder.newFile("asdf.md5").toPath()
+        file = CreateFileHelper.createFile(tempDir.resolve("asdf.md5"), "")
     }
 
     void "test firstMD5ChecksumFromFile"() {

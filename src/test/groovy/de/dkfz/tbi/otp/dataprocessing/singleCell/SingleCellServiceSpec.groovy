@@ -22,8 +22,6 @@
 package de.dkfz.tbi.otp.dataprocessing.singleCell
 
 import grails.testing.gorm.DataTest
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.TestConfigService
@@ -45,10 +43,6 @@ class SingleCellServiceSpec extends Specification implements DataTest, DomainFac
                 DataFile,
         ]
     }
-
-    @SuppressWarnings('PublicInstanceField')
-    @Rule
-    public TemporaryFolder temporaryFolder
 
     private DataFile createDataFileHelper(String wellLabel = WELL, boolean singleCell = true, Map properties = [:]) {
         return createDataFile([

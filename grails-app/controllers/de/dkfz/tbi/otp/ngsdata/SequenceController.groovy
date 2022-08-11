@@ -95,7 +95,7 @@ class SequenceController {
                     [name: 'strainSearch', msgcode: 'sequence.search.strain',
                      type : 'LIST', from: Strain.list().sort { it.name },
                      value: 'name', key: 'name'],
-            ]
+            ],
         ]
     }
 
@@ -139,7 +139,7 @@ class SequenceController {
             }
             dataToRender.aaData << data
         }
-        render dataToRender as JSON
+        render(dataToRender as JSON)
     }
 
     def exportAll(DataTableCommand cmd) {

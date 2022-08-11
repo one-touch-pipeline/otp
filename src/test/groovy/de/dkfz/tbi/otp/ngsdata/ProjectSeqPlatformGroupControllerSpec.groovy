@@ -266,7 +266,7 @@ class ProjectSeqPlatformGroupControllerSpec extends Specification implements Con
         response.status == 200
         model.mergingCriteria == mergingCriteria
         model.seqType == seqType
-        model.seqPlatformGroupsPerProjectAndSeqType == null
+        model.seqPlatformGroupsPerProjectAndSeqType == []
     }
 
     void "update, when mergingCriteriaService.createOrUpdateMergingCriteria does not return errors it should redirect to index"() {
@@ -289,7 +289,7 @@ class ProjectSeqPlatformGroupControllerSpec extends Specification implements Con
         1 * controller.projectSelectionService.requestedProject >> project
         1 * controller.mergingCriteriaService.createOrUpdateMergingCriteria(
                 project, seqType, useLibPrepKit, useSeqPlatformGroup
-        ) >> _
+        ) >> null
 
         and:
         response.status == 302

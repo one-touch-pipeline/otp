@@ -22,8 +22,6 @@
 package de.dkfz.tbi.otp.job.jobs
 
 import grails.testing.gorm.DataTest
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.TestConfigService
@@ -91,9 +89,6 @@ class ExecuteRunYapsaJobSpec extends Specification implements DataTest {
     }
 
     static final int MIN_CONFIDENCE_SCORE = 8
-
-    @Rule
-    TemporaryFolder temporaryFolder
 
     RunYapsaInstance setupData() {
         DomainFactory.createProcessingOptionLazy(

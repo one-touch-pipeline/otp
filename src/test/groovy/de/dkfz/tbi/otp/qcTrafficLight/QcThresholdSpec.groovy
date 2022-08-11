@@ -265,7 +265,7 @@ class QcThresholdSpec extends Specification implements DataTest {
     }
 
     @Unroll
-    void "test qcPassed method with compare mode toThresholdFactorExternalValue if factor is #externalValue"() {
+    void "test qcPassed method with compare mode toThresholdFactorExternalValue if factor is #extValue"() {
         given:
         CellRangerQualityAssessment qc = AlignmentPipelineFactory.CellRangerFactoryInstance.INSTANCE.createQa(null, [
                 estimatedNumberOfCells: 50,

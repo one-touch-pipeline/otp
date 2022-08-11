@@ -90,7 +90,7 @@ class DeactivateUsersJobIntegrationSpec extends Specification implements DomainF
                 },
                 userProjectRoleService: Mock(UserProjectRoleService) {
                     _ * commandTemplate(_, _) >> "removal command"
-                }
+                },
         ])
 
         expect:
@@ -125,7 +125,7 @@ class DeactivateUsersJobIntegrationSpec extends Specification implements DomainF
         then:
         1 * job.userProjectRoleService.projectsAssociatedToProjectAuthority(_) >> [
                 (projectAuthority1): [projects[0], projects[1]],
-                (projectAuthority2): [projects[1], projects[2]]
+                (projectAuthority2): [projects[1], projects[2]],
         ]
         2 * job.messageSourceService.createMessage("deactivateUsersJob.notification.userDeactivated.subject" , _) >> subject
         2 * job.messageSourceService.createMessage("deactivateUsersJob.notification.userDeactivated.body", _) >> body

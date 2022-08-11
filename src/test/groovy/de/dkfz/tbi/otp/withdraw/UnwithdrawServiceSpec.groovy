@@ -22,9 +22,8 @@
 package de.dkfz.tbi.otp.withdraw
 
 import grails.testing.gorm.DataTest
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+import spock.lang.TempDir
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.TestConfigService
@@ -76,13 +75,13 @@ class UnwithdrawServiceSpec extends Specification implements DomainFactoryCore, 
         ]
     }
 
-    @Rule
-    TemporaryFolder temporaryFolder
+    @TempDir
+    Path tempDir
 
     TestConfigService configService
 
     void setup() {
-        configService = new TestConfigService(temporaryFolder.newFolder())
+        configService = new TestConfigService(tempDir)
     }
 
     void cleanup() {

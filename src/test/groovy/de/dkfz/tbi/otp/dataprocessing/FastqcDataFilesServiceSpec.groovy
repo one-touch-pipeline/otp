@@ -23,9 +23,8 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import grails.testing.gorm.DataTest
 import grails.testing.services.ServiceUnitTest
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+import spock.lang.TempDir
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.TestConfigService
@@ -54,8 +53,8 @@ class FastqcDataFilesServiceSpec extends Specification implements ServiceUnitTes
 
     TestConfigService configService
 
-    @Rule
-    TemporaryFolder temporaryFolder
+    @TempDir
+    Path tempDir
 
     private static final String FAST_QC = FastqcDataFilesService.FAST_QC_DIRECTORY_PART
 
@@ -65,7 +64,7 @@ class FastqcDataFilesServiceSpec extends Specification implements ServiceUnitTes
     Realm realm
 
     void setup() {
-        configService = new TestConfigService(temporaryFolder.newFolder())
+        configService = new TestConfigService(tempDir)
         service.lsdfFilesService = new LsdfFilesService()
         service.lsdfFilesService.individualService = new IndividualService()
         service.lsdfFilesService.individualService.projectService = new ProjectService()

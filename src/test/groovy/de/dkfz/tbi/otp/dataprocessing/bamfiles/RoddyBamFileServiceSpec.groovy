@@ -23,9 +23,8 @@ package de.dkfz.tbi.otp.dataprocessing.bamfiles
 
 import grails.testing.gorm.DataTest
 import grails.testing.services.ServiceUnitTest
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+import spock.lang.TempDir
 
 import de.dkfz.tbi.otp.Comment
 import de.dkfz.tbi.otp.dataprocessing.*
@@ -33,6 +32,7 @@ import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.utils.CreateFileHelper
 
 import java.nio.file.*
 
@@ -75,8 +75,8 @@ class RoddyBamFileServiceSpec extends Specification implements ServiceUnitTest<R
     static final String SECOND_DATAFILE_NAME = "4_NoIndex_L004_R2_complete_filtered.fastq.gz"
     static final String COMMON_PREFIX = "4_NoIndex_L004"
 
-    @Rule
-    TemporaryFolder temporaryFolder
+    @TempDir
+    Path tempDir
 
     RoddyBamFile roddyBamFile
     String baseDir = "/base-dir"
@@ -359,7 +359,7 @@ class RoddyBamFileServiceSpec extends Specification implements ServiceUnitTest<R
         given:
         String fileName = RODDY_EXECUTION_DIR_NAME
 
-        temporaryFolder.newFile(fileName)
+        CreateFileHelper.createFile(tempDir.resolve(fileName))
 
         roddyBamFile.roddyExecutionDirectoryNames.add(fileName)
 
@@ -373,7 +373,7 @@ class RoddyBamFileServiceSpec extends Specification implements ServiceUnitTest<R
     void "test getLatestWorkExecutionDirectory, all fine"(String roddyExecutionDirName) {
         given:
         service.abstractMergedBamFileService = Mock(AbstractMergedBamFileService) {
-            getBaseDirectory(_) >> temporaryFolder.newFolder("base-dir").toPath()
+            getBaseDirectory(_) >> tempDir.resolve("base-dir")
         }
 
         roddyBamFile.roddyExecutionDirectoryNames.add(roddyExecutionDirName)

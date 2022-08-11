@@ -75,8 +75,7 @@ class LaneSwapServiceHibernateSpec extends HibernateSpec implements ServiceUnitT
         final LaneSwapData data = new LaneSwapData([
                 individualSwap: new Swap(individual, null),
                 sampleSwap    : new Swap(sample, null),
-                seqTypeSwap   : new Swap(seqType, null
-                )
+                seqTypeSwap   : new Swap(seqType, null),
         ])
 
         when:

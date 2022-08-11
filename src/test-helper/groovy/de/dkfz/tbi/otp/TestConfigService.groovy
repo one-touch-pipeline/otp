@@ -108,13 +108,13 @@ class TestConfigService extends ConfigService {
     }
 
     /**
-     * Do no use the constructor in integration and workflow tests, but use the autowired config service instead
+     * Do not use the constructor in integration and workflow tests, but use the autowired config service instead
      */
-    TestConfigService(File baseFolder, Map<OtpProperty, String> properties = [:]) {
+    TestConfigService(Path basePath, Map<OtpProperty, String> properties = [:]) {
         this([
-                (OtpProperty.PATH_PROJECT_ROOT)    : new File(baseFolder, 'root').path,
-                (OtpProperty.PATH_PROCESSING_ROOT) : new File(baseFolder, 'processing').path,
-                (OtpProperty.PATH_CLUSTER_LOGS_OTP): new File(baseFolder, 'logging').path,
+                (OtpProperty.PATH_PROJECT_ROOT)    : basePath.resolve('root').toString(),
+                (OtpProperty.PATH_PROCESSING_ROOT) : basePath.resolve('processing').toString(),
+                (OtpProperty.PATH_CLUSTER_LOGS_OTP): basePath.resolve('logging').toString(),
         ] + properties)
     }
 

@@ -22,9 +22,8 @@
 package de.dkfz.tbi.otp.job.jobs.bamImport
 
 import grails.testing.gorm.DataTest
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+import spock.lang.TempDir
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.TestConfigService
@@ -41,6 +40,7 @@ import de.dkfz.tbi.otp.utils.*
 
 import java.nio.file.FileSystems
 import java.nio.file.Files
+import java.nio.file.Path
 
 class ReplaceSourceWithLinkJobSpec extends Specification implements DataTest {
 
@@ -77,12 +77,12 @@ class ReplaceSourceWithLinkJobSpec extends Specification implements DataTest {
 
     File mainDirectory
 
-    @Rule
-    TemporaryFolder temporaryFolder
+    @TempDir
+    Path tempDir
 
     def setup() {
         String bamFileName = "epmbfWithMd5sum.bam"
-        File importedFile = new File(temporaryFolder.newFolder().absolutePath, bamFileName)
+        File importedFile = new File(tempDir.toString(), bamFileName)
         step = DomainFactory.createProcessingStep(id: PROCESSING_STEP_ID)
 
         mainDirectory = importedFile.parentFile
@@ -158,7 +158,7 @@ class ReplaceSourceWithLinkJobSpec extends Specification implements DataTest {
 
         CreateFileHelper.createFile(new File("${importProcess.externallyProcessedMergedBamFiles[0].importedFrom}"))
 
-        configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder("root").path])
+        configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): tempDir.resolve("root")])
 
         DomainFactory.createProcessParameter([
                 process  : step.process,

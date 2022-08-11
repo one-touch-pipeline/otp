@@ -22,9 +22,8 @@
 package de.dkfz.tbi.otp.egaSubmission
 
 import grails.testing.gorm.DataTest
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+import spock.lang.TempDir
 
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.config.OtpProperty
@@ -88,8 +87,8 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
 
     private final EgaSubmissionFileService egaSubmissionFileService = new EgaSubmissionFileService()
 
-    @Rule
-    TemporaryFolder temporaryFolder
+    @TempDir
+    Path tempDir
 
     void "test generate csv content file"() {
         given:
@@ -300,7 +299,7 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
 
     void "createFilesForUpload, when submission is given, then create all expected files"() {
         given:
-        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
+        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): tempDir.toString()])
 
         egaSubmissionFileService.projectService = new ProjectService()
         egaSubmissionFileService.projectService.configService = configService
@@ -351,7 +350,6 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
         given:
         TestConfigService configService = new TestConfigService()
 
-        Path basePath = temporaryFolder.newFolder().toPath()
         EgaSubmission egaSubmission = createEgaSubmission()
 
         String emailSubject = "New ${egaSubmission}"
@@ -363,7 +361,7 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
 
         egaSubmissionFileService.fileSystemService = Mock(FileSystemService) {
             1 * getRemoteFileSystem(_) >> Mock(FileSystem) {
-                1 * getPath(*_) >> basePath
+                1 * getPath(*_) >> tempDir
             }
         }
         egaSubmissionFileService.securityService = Mock(SecurityService) {
@@ -391,7 +389,6 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
         given:
         TestConfigService configService = new TestConfigService()
 
-        Path basePath = temporaryFolder.newFolder().toPath()
         EgaSubmission egaSubmission = createEgaSubmission([
                 samplesToSubmit : [createSampleSubmissionObject()] as Set,
                 bamFilesToSubmit: [createBamFileSubmissionObject()] as Set,
@@ -406,7 +403,7 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
 
         egaSubmissionFileService.fileSystemService = Mock(FileSystemService) {
             2 * getRemoteFileSystem(_) >> Mock(FileSystem) {
-                2 * getPath(*_) >> basePath
+                2 * getPath(*_) >> tempDir
             }
         }
         egaSubmissionFileService.egaFileContentService = Mock(EgaFileContentService) {

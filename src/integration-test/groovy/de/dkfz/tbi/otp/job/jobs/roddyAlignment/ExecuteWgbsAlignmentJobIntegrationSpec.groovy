@@ -63,7 +63,7 @@ class ExecuteWgbsAlignmentJobIntegrationSpec extends Specification {
 
         roddyBamFile.referenceGenome.cytosinePositionsIndex = "cytosine_idx.pos.gz"
         roddyBamFile.referenceGenome.save(flush: true)
-        File referenceGenomeDirectory = new File("${tempDir.toString()}/processing/reference_genomes")
+        File referenceGenomeDirectory = new File("${tempDir}/processing/reference_genomes")
         DomainFactory.createProcessingOptionBasePathReferenceGenome(referenceGenomeDirectory.path)
         cpiFile = CreateFileHelper.createFile(
                 new File("${referenceGenomeDirectory}/${roddyBamFile.referenceGenome.path}",

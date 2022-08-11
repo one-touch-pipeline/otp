@@ -69,6 +69,6 @@ trait PlainResponseExceptionHandler {
      */
     void handlePlainResponseException(String stacktrace, HttpStatus httpStatus) {
         log.error("Responding with exception stacktrace:\n $stacktrace.")
-        render text: stacktrace, status: httpStatus.value(), contentType: MediaType.TEXT_PLAIN_VALUE
+        render(text: stacktrace, status: httpStatus.value(), contentType: MediaType.TEXT_PLAIN_VALUE)
     }
 }

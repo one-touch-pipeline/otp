@@ -57,7 +57,7 @@ class AbstractMergingWorkPackageServiceIntegrationSpec extends Specification imp
                             seqType: seqType,
                             sample : DomainFactory.createSample([
                                     individual: individual,
-                            ])
+                            ]),
                     ])
                 }
             }

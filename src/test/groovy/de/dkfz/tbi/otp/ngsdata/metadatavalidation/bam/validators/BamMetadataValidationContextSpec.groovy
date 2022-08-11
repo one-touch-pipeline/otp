@@ -21,14 +21,14 @@
  */
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.validators
 
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+import spock.lang.TempDir
 
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.AbstractMetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.BamMetadataValidationContextFactory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
+import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.utils.HelperUtils
 import de.dkfz.tbi.otp.utils.LocalShellHelper
 import de.dkfz.tbi.util.spreadsheet.validation.*
@@ -41,8 +41,8 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 class BamMetadataValidationContextSpec extends Specification {
 
-    @Rule
-    TemporaryFolder temporaryFolder
+    @TempDir
+    Path tempDir
 
     BamMetadataValidationContext context
     Problems problems
@@ -54,7 +54,7 @@ class BamMetadataValidationContextSpec extends Specification {
 
     void 'createFromFile, when file header contains alias, replace it'() {
         given:
-        Path file = temporaryFolder.newFile("${HelperUtils.uniqueString}.tsv").toPath()
+        Path file = tempDir.resolve("${HelperUtils.uniqueString}.tsv")
         file.bytes = ("UNKNOWN ${BAM_FILE_PATH} ${SEQUENCING_READ_TYPE.importAliases.first()}\n" +
                 "1 2 3"
         ).replaceAll(' ', '\t').getBytes(MetadataValidationContext.CHARSET)
@@ -70,7 +70,8 @@ class BamMetadataValidationContextSpec extends Specification {
 
     void "checkFilesInDirectory, when a folder is empty, add a warning"() {
         given:
-        Path emptyFolder = temporaryFolder.newFolder().toPath()
+        Path emptyFolder = tempDir.resolve("emptyFolder")
+        Files.createDirectory(emptyFolder)
 
         when:
         context.checkFilesInDirectory(emptyFolder, problems)
@@ -83,7 +84,7 @@ class BamMetadataValidationContextSpec extends Specification {
 
     void "checkFilesInDirectory, when find a subfolder, check the content"() {
         given:
-        Path folder = temporaryFolder.newFolder().toPath()
+        Path folder = tempDir.resolve("folder")
         Path subfolder = folder.resolve("subfolder")
         assert Files.createDirectories(subfolder)
         Path file2 = subfolder.resolve("file2.txt")
@@ -98,7 +99,7 @@ class BamMetadataValidationContextSpec extends Specification {
 
     void "checkFile, when is not readable, add the corresponding problem"() {
         given:
-        Path notReadAble = temporaryFolder.newFile('notReadable.txt').toPath()
+        Path notReadAble = CreateFileHelper.createFile(tempDir.resolve('notReadable.txt'))
         assert LocalShellHelper.executeAndAssertExitCodeAndErrorOutAndReturnStdout("chmod a-r ${notReadAble.toAbsolutePath()} && echo OK").trim() == 'OK'
         assert !Files.isReadable(notReadAble)
 
@@ -113,7 +114,7 @@ class BamMetadataValidationContextSpec extends Specification {
 
     void "checkFile, when is empty, add the corresponding problem"() {
         given:
-        Path emptyFile = temporaryFolder.newFile('emptyFile.txt').toPath()
+        Path emptyFile = CreateFileHelper.createFile(tempDir.resolve('emptyFile.txt'), "")
 
         when:
         context.checkFile(emptyFile, problems)
@@ -129,7 +130,7 @@ class BamMetadataValidationContextSpec extends Specification {
         Files.metaClass.static.size = { Path path ->
             return AbstractMetadataValidationContext.MAX_ADDITIONAL_FILE_SIZE_IN_GIB * 1024L * 1024L * 1024L + 1
         }
-        Path bigFile = temporaryFolder.newFile('bigFile.txt').toPath()
+        Path bigFile = CreateFileHelper.createFile(tempDir.resolve('bigFile.txt'))
 
         when:
         context.checkFile(bigFile, problems)

@@ -85,7 +85,7 @@ class CrashRecoveryServiceSpec extends Specification implements ServiceUnitTest<
                     jobDefinition: jobDefinition,
                     process      : DomainFactory.createProcess([
                             jobExecutionPlan: jobDefinition.plan,
-                    ])
+                    ]),
             ])
             DomainFactory.createProcessingStepUpdate([
                     processingStep: processingStep,
@@ -238,7 +238,7 @@ class CrashRecoveryServiceSpec extends Specification implements ServiceUnitTest<
                 process      : step1.process,
                 jobDefinition: DomainFactory.createJobDefinition([
                         plan: step1.jobDefinition.plan,
-                ])
+                ]),
         ])
         step1.next = step2
         step2.previous = step1
@@ -445,7 +445,7 @@ class CrashRecoveryServiceSpec extends Specification implements ServiceUnitTest<
                 process      : step1.process,
                 jobDefinition: DomainFactory.createJobDefinition([
                         plan: step1.jobDefinition.plan,
-                ])
+                ]),
         ])
         step1.next = step2
         step2.previous = step1
@@ -622,7 +622,7 @@ class CrashRecoveryServiceSpec extends Specification implements ServiceUnitTest<
                 process      : step1.process,
                 jobDefinition: DomainFactory.createJobDefinition([
                         plan: step1.jobDefinition.plan,
-                ])
+                ]),
         ])
         step1.next = step2
         step2.previous = step1
@@ -729,7 +729,7 @@ class CrashRecoveryServiceSpec extends Specification implements ServiceUnitTest<
                 process      : step1.process,
                 jobDefinition: DomainFactory.createJobDefinition([
                         plan: step1.jobDefinition.plan,
-                ])
+                ]),
         ])
         step1.next = step2
         step2.previous = step1

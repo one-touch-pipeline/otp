@@ -23,10 +23,9 @@ package de.dkfz.tbi.otp.ngsdata
 
 import grails.testing.gorm.DataTest
 import groovy.transform.TupleConstructor
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import org.springframework.context.ApplicationContext
 import spock.lang.Specification
+import spock.lang.TempDir
 import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
@@ -113,8 +112,8 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
     final static String CHIP_SEQ = SeqTypeNames.CHIP_SEQ.seqTypeName
     final static String SC_EXON = "SC_" + SeqTypeNames.EXOME.seqTypeName
 
-    @Rule
-    TemporaryFolder temporaryFolder
+    @TempDir
+    Path tempDir
 
     void "getImplementedValidations returns descriptions of validations"() {
         given:
@@ -140,8 +139,7 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
         DirectoryStructure directoryStructure = [:] as DirectoryStructure
         DirectoryStructureBeanName directoryStructureName = DirectoryStructureBeanName.SAME_DIRECTORY
 
-        File testDirectory = TestCase.createEmptyTestDirectory()
-        Path metadataFile = testDirectory.toPath().resolve('metadata.tsv')
+        Path metadataFile = Files.createFile(tempDir.resolve('metadata.tsv'))
         metadataFile.bytes = 'Header\nI am metadata!'.getBytes(MetadataValidationContext.CHARSET)
 
         MetadataImportService service = new MetadataImportService()
@@ -172,9 +170,6 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
         context.metadataFile == metadataFile
         context.spreadsheet.header.cells[0].text == 'Header'
         context.spreadsheet.dataRows[0].cells[0].text == 'I am metadata!'
-
-        cleanup:
-        testDirectory.deleteDir()
     }
 
     @Unroll
@@ -186,10 +181,8 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
 
         DomainFactory.createDefaultRealmWithProcessingOption()
 
-        File testDirectory = TestCase.createEmptyTestDirectory()
-        File runDirectory = new File(testDirectory, 'run')
-        assert runDirectory.mkdir()
-        Path metadataFile = testDirectory.toPath().resolve('metadata.tsv')
+        Path runDir = Files.createDirectory(tempDir.resolve("run"))
+        Path metadataFile = Files.createFile(runDir.resolve("metadata.tsv"))
         metadataFile.bytes = ("${RUN_ID}\t${INSTRUMENT_PLATFORM}\t${INSTRUMENT_MODEL}\t${CENTER_NAME}\n" +
                 ("run\tplatform\tmodelAlias\t${seqCenter.name}\n" * 2)).getBytes(MetadataValidationContext.CHARSET)
 
@@ -213,9 +206,6 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
         then:
         results[0].context.metadataFile == metadataFile
         results[0].metadataFile == metadataFileObject
-
-        cleanup:
-        testDirectory.deleteDir()
 
         where:
         align << [true, false]
@@ -404,9 +394,9 @@ ${SPECIES}                      ${speciesImportAlias}                       ${sp
         String content1 = lines1.collect { it*.replaceFirst(/^-$/, '').join('\t') }.join('\n')
         String content2 = lines2.collect { it*.replaceFirst(/^-$/, '').join('\t') }.join('\n')
 
-        Path file1 = temporaryFolder.newFile("metaData1.tsv").toPath()
+        Path file1 = tempDir.resolve("metaData1.tsv")
         file1.text = content1
-        Path file2 = temporaryFolder.newFile("metaData2.tsv").toPath()
+        Path file2 = tempDir.resolve("metaData2.tsv")
         file2.text = content2
 
         DirectoryStructure directoryStructure = Mock(DirectoryStructure) {
@@ -1691,9 +1681,9 @@ ${SPECIES}                      ${human}+${mouse}+${chicken}                ${hu
                 ${ILSE_NO.name()}\t${CENTER_NAME.name()}
                 ${ilseId}\t${seqCenter.name}
                 """.stripIndent()
-        Path file = temporaryFolder.newFile(fileName).toPath()
+        Path file = Files.createFile(tempDir.resolve(fileName))
         file.text = content
-        Path targetDirectory = temporaryFolder.newFolder('target').toPath()
+        Path targetDirectory = Files.createDirectory(tempDir.resolve('target'))
         ProcessingOptionService processingOptionService = new ProcessingOptionService()
         DomainFactory.createDefaultRealmWithProcessingOption()
         MetadataImportService service = Spy(MetadataImportService) {

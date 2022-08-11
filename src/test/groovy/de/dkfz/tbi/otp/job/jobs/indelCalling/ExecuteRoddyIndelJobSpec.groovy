@@ -22,9 +22,8 @@
 package de.dkfz.tbi.otp.job.jobs.indelCalling
 
 import grails.testing.gorm.DataTest
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+import spock.lang.TempDir
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.TestConfigService
@@ -82,8 +81,8 @@ class ExecuteRoddyIndelJobSpec extends Specification implements DataTest {
         ]
     }
 
-    @Rule
-    TemporaryFolder temporaryFolder
+    @TempDir
+    Path tempDir
 
     void "prepareAndReturnWorkflowSpecificCValues, when roddyIndelCallingInstance is null, throw assert"() {
         when:
@@ -96,12 +95,11 @@ class ExecuteRoddyIndelJobSpec extends Specification implements DataTest {
 
     void "prepareAndReturnWorkflowSpecificCValues, when all fine and WGS, return correct value list"() {
         given:
-        File fasta = CreateFileHelper.createFile(new File(temporaryFolder.newFolder(), "fasta.fa"))
+        File fasta = CreateFileHelper.createFile(tempDir.resolve("fasta.fa").toFile())
 
-        String path = temporaryFolder.newFolder().path
-        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): path])
+        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): tempDir.toString()])
         IndividualService individualService = Mock(IndividualService) {
-            getViewByPidPath(_, _) >> Paths.get(path)
+            getViewByPidPath(_, _) >> tempDir
         }
 
         ExecuteRoddyIndelJob job = new ExecuteRoddyIndelJob([
@@ -178,13 +176,12 @@ class ExecuteRoddyIndelJobSpec extends Specification implements DataTest {
 
     void "prepareAndReturnWorkflowSpecificCValues, when all fine and WES, return correct value list"() {
         given:
-        File fasta = CreateFileHelper.createFile(new File(temporaryFolder.newFolder(), "fasta.fa"))
-        File bedFile = CreateFileHelper.createFile(new File(temporaryFolder.newFolder(), "bed.txt"))
+        File fasta = CreateFileHelper.createFile(tempDir.resolve("fasta.fa").toFile())
+        File bedFile = CreateFileHelper.createFile(tempDir.resolve("bed.txt").toFile())
 
-        String path = temporaryFolder.newFolder().path
-        new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): path])
+        new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): tempDir.toString()])
         IndividualService individualService = Mock(IndividualService) {
-            getViewByPidPath(_, _) >> Paths.get(path)
+            getViewByPidPath(_, _) >> tempDir
         }
 
         ExecuteRoddyIndelJob job = new ExecuteRoddyIndelJob([
@@ -296,10 +293,9 @@ class ExecuteRoddyIndelJobSpec extends Specification implements DataTest {
 
     void "validate, when all fine, set processing state to finished"() {
         given:
-        String path = temporaryFolder.newFolder().path
-        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): path])
+        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): tempDir.toString()])
         IndividualService individualService = Mock(IndividualService) {
-            getViewByPidPath(_, _) >> Paths.get(path)
+            getViewByPidPath(_, _) >> tempDir
         }
 
         ExecuteRoddyIndelJob job = new ExecuteRoddyIndelJob([
@@ -332,10 +328,9 @@ class ExecuteRoddyIndelJobSpec extends Specification implements DataTest {
 
     void "validate, when correctPermissionsAndGroups fail, throw assert"() {
         given:
-        String path = temporaryFolder.newFolder().path
-        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): path])
+        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): tempDir.toString()])
         IndividualService individualService = Mock(IndividualService) {
-            getViewByPidPath(_, _) >> Paths.get(path)
+            getViewByPidPath(_, _) >> tempDir
         }
 
         String md5sum = HelperUtils.uniqueString
@@ -363,10 +358,9 @@ class ExecuteRoddyIndelJobSpec extends Specification implements DataTest {
     @Unroll
     void "validate, when file not exists, throw assert"() {
         given:
-        String path = temporaryFolder.newFolder().path
-        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): path])
+        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): tempDir.toString()])
         IndividualService individualService = Mock(IndividualService) {
-            getViewByPidPath(_, _) >> Paths.get(path)
+            getViewByPidPath(_, _) >> tempDir
         }
 
         ExecuteRoddyIndelJob job = new ExecuteRoddyIndelJob([

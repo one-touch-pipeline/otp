@@ -22,9 +22,8 @@
 package de.dkfz.tbi.otp.job.jobs.sophia
 
 import grails.testing.gorm.DataTest
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+import spock.lang.TempDir
 
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.config.OtpProperty
@@ -77,14 +76,13 @@ class ParseSophiaQcJobSpec extends Specification implements DataTest {
         ]
     }
 
-    @Rule
-    TemporaryFolder temporaryFolder
+    @TempDir
+    Path tempDir
 
     void "test execute"() {
         given:
-        Path temporaryFile = temporaryFolder.newFolder().toPath()
-        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFile.toString()])
-        Path jsonQCFile = temporaryFile.resolve("jsonQCFile")
+        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): tempDir.toString()])
+        Path jsonQCFile = tempDir.resolve("jsonQCFile")
 
         SophiaInstance instance = DomainFactory.createSophiaInstanceWithRoddyBamFiles()
 

@@ -52,6 +52,8 @@ class ProjectServiceSpec extends Specification implements DataTest, DomainFactor
         ]
     }
 
+    // Codenarc fails on the string "contains (partial)" and interprets the contains string like a method
+    @SuppressWarnings("SpaceAfterMethodCallName")
     void "createProject: dirName shouldn't overlap with root path"() {
         given:
         ProjectService projectService = new ProjectService([

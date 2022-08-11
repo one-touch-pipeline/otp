@@ -87,7 +87,7 @@ class ClusterJobJobTypeSpecificController {
                 'avgProcess': TimeUtils.getFormattedDuration(Duration.ofMillis(data.avgProcess)),
         ]
 
-        render dataToRender as JSON
+        render(dataToRender as JSON)
     }
 
     def getJobTypeSpecificCoverageStatistics() {
@@ -105,7 +105,7 @@ class ClusterJobJobTypeSpecificController {
                 'medianCov': data.medianCov ? "${data.medianCov?.round(2)} (median)" : "",
         ]
 
-        render dataToRender as JSON
+        render(dataToRender as JSON)
     }
 
     def getJobClassesByDate() {
@@ -113,7 +113,7 @@ class ClusterJobJobTypeSpecificController {
 
         dataToRender.data = clusterJobService.findAllJobClassesByDateBetween(LocalDate.parse(params.from), LocalDate.parse(params.to))
 
-        render dataToRender as JSON
+        render(dataToRender as JSON)
     }
 
     def getSeqTypesByJobClass() {
@@ -125,7 +125,7 @@ class ClusterJobJobTypeSpecificController {
 
         dataToRender.data = clusterJobService.findJobClassSpecificSeqTypesByDateBetween(jobClass, startDate, endDate)
 
-        render dataToRender as JSON
+        render(dataToRender as JSON)
     }
 
     def getJobTypeSpecificExitCodes() {
@@ -149,7 +149,7 @@ class ClusterJobJobTypeSpecificController {
         dataToRender.labels = result.get("days")
         dataToRender.keys = keys
 
-        render dataToRender as JSON
+        render(dataToRender as JSON)
     }
 
     def getJobTypeSpecificWalltimes() {
@@ -163,7 +163,7 @@ class ClusterJobJobTypeSpecificController {
 
         dataToRender.data = method(params.jobClass, seqType, startDate, endDate)
 
-        render dataToRender as JSON
+        render(dataToRender as JSON)
     }
 
     private renderPieDataAsJSON(Closure method) {
@@ -178,7 +178,7 @@ class ClusterJobJobTypeSpecificController {
             dataToRender.data << data
         }
 
-        render dataToRender as JSON
+        render(dataToRender as JSON)
     }
 
     private renderDiagramDataAsJSON(Closure method) {
@@ -191,7 +191,7 @@ class ClusterJobJobTypeSpecificController {
         dataToRender.xMax = results.xMax
         dataToRender.labels = results.labels
 
-        render dataToRender as JSON
+        render(dataToRender as JSON)
     }
 
     private List parseParams() {

@@ -67,7 +67,6 @@ class SetCorrectPermissionJobSpec extends Specification implements DataTest, Wor
         job.execute(workflowStep)
 
         then:
-        1 * job.correctPermission(workflowStep) >> _
         1 * job.fileSystemService.getRemoteFileSystem(realm) >> FileSystems.default
         1 * job.fileService.correctPathPermissionAndGroupRecursive(workflowDirectoryPath, realm, unixGroup) >> _
         1 * job.workflowStateChangeService.changeStateToSuccess(workflowStep)

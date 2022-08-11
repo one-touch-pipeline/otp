@@ -100,7 +100,7 @@ class IndividualController {
                         [name: 'mockPidSearch', msgcode: 'individual.search.mockPid', type: 'TEXT'],
                         [name: 'typeSelection', msgcode: 'individual.search.type',
                          type: 'LIST', from: Individual.Type.values()],
-                ]
+                ],
         ]
     }
 
@@ -123,7 +123,7 @@ class IndividualController {
                     type        : individual.type.toString(),
             ]
         }
-        render dataToRender as JSON
+        render(dataToRender as JSON)
     }
 
     @Secured("hasRole('ROLE_OPERATOR')")
@@ -159,7 +159,7 @@ class IndividualController {
         Individual individual = individualService.getIndividual(cmd.id)
         if (!individual) {
             Map data = [error: g.message(code: "individual.update.notFound", args: [cmd.id])]
-            render data as JSON
+            render(data as JSON)
             return
         }
         Map data = [:]
@@ -169,14 +169,14 @@ class IndividualController {
         } catch (IndividualUpdateException e) {
             data.put("error", g.message(code: "individual.update.error"))
         }
-        render data as JSON
+        render(data as JSON)
     }
 
     def newSampleType(UpdateFieldCommand cmd) {
         Individual individual = individualService.getIndividual(cmd.id)
         if (!individual) {
             Map data = [error: g.message(code: "individual.update.notFound", args: [cmd.id])]
-            render data as JSON
+            render(data as JSON)
             return
         }
         Map data = [:]
@@ -186,14 +186,14 @@ class IndividualController {
         } catch (Exception e) {
             data = [error: e.message]
         }
-        render data as JSON
+        render(data as JSON)
     }
 
     def saveIndividualComment(CommentCommand cmd) {
         Individual individual = individualService.getIndividual(cmd.id)
         commentService.saveComment(individual, cmd.comment)
         def dataToRender = [date: TimeFormats.WEEKDAY_DATE_TIME.getFormattedDate(individual.comment.modificationDate), author: individual.comment.author]
-        render dataToRender as JSON
+        render(dataToRender as JSON)
     }
 
     def editNewSampleIdentifier(UpdateSampleCommand cmd) {

@@ -22,9 +22,8 @@
 package de.dkfz.tbi.otp.utils
 
 import grails.testing.gorm.DataTest
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+import spock.lang.TempDir
 
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
@@ -32,6 +31,7 @@ import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.Realm
 
+import java.nio.file.Path
 import java.nio.file.Paths
 
 class LinkFileUtilsSpec extends Specification implements DataTest {
@@ -48,11 +48,11 @@ class LinkFileUtilsSpec extends Specification implements DataTest {
     File testDirectory
     Realm realm
 
-    @Rule
-    TemporaryFolder tmpDir = new TemporaryFolder()
+    @TempDir
+    Path tempDir
 
     void setup() {
-        testDirectory = tmpDir.newFolder()
+        testDirectory = tempDir.toFile()
         if (!testDirectory.exists()) {
             assert testDirectory.mkdirs()
         }

@@ -1660,7 +1660,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         expect:
         userProjectRoleService.projectsAssociatedToProjectAuthority(user) == [
                 (projectAuthority1): [projects[0], projects[1]],
-                (projectAuthority2): [projects[1], projects[2]]
+                (projectAuthority2): [projects[1], projects[2]],
         ]
     }
 

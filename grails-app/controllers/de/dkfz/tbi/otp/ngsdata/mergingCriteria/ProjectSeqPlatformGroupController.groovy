@@ -89,7 +89,7 @@ class ProjectSeqPlatformGroupController {
 
     def update(UpdateMergingCriteriaCommand cmd) {
         if (!cmd.validate()) {
-            render status: 403
+            render(status: 403)
             return
         }
         Errors errors = mergingCriteriaService.createOrUpdateMergingCriteria(

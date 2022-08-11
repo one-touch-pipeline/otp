@@ -65,7 +65,7 @@ class WorkflowSystemConfigController implements CheckAndCall {
         }.collect { Workflow wf ->
             buildWorkflowOutputObject(wf)
         }
-        render workflows as JSON
+        render(workflows as JSON)
     }
 
     def updateWorkflow(WorkflowUpdateCommand cmd) {
@@ -81,7 +81,7 @@ class WorkflowSystemConfigController implements CheckAndCall {
 
             Workflow workflow = workflowService.updateWorkflow(updateWorkflowDto)
             Map output = buildWorkflowOutputObject(workflow)
-            render output as JSON
+            render(output as JSON)
         }
     }
 

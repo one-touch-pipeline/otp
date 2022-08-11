@@ -29,7 +29,6 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.SessionUtils
 import de.dkfz.tbi.otp.workflow.datainstallation.DataInstallationInitializationService
 import de.dkfz.tbi.otp.workflow.datainstallation.DataInstallationWorkflow
-import de.dkfz.tbi.otp.workflow.panCancer.PanCancerWorkflow
 import de.dkfz.tbi.otp.workflowExecution.OtpWorkflow
 import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 import de.dkfz.tbi.otp.workflowTest.AbstractWorkflowSpec
@@ -51,6 +50,8 @@ class DataInstallationWorkflowSpec extends AbstractWorkflowSpec {
     static final private String FASTQ_R2_FILENAME = "example_fileR2.fastq.gz"
     static final private String DIRECTORY_IN_INPUT = "fastqFiles/wgs/normal/paired/run1/sequence"
 
+    Class<? extends OtpWorkflow> workflowComponentClass = DataInstallationWorkflow
+
     DataInstallationInitializationService dataInstallationInitializationService
     LsdfFilesService lsdfFilesService
     SingleCellService singleCellService
@@ -68,11 +69,6 @@ class DataInstallationWorkflowSpec extends AbstractWorkflowSpec {
     @Override
     String getWorkflowName() {
         return DataInstallationWorkflow.WORKFLOW
-    }
-
-    @Override
-    Class<? extends OtpWorkflow> getWorkflowComponentClass() {
-        return DataInstallationWorkflow
     }
 
     @Override

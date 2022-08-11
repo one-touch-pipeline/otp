@@ -54,7 +54,7 @@ class StatisticsController {
             output << "\n"
         }
 
-        render file: new ByteArrayInputStream(output.toString().getBytes("UTF-8")), fileName: 'directories.csv', contentType: 'text/csv'
+        render(file: new ByteArrayInputStream(output.toString().getBytes("UTF-8")), fileName: 'directories.csv', contentType: 'text/csv')
     }
 
     def kpi() {

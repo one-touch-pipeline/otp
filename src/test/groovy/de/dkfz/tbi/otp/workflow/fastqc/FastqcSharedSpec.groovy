@@ -25,6 +25,8 @@ import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
@@ -39,6 +41,7 @@ class FastqcSharedSpec extends Specification implements WorkflowSystemDomainFact
         return [
                 WorkflowRun,
                 WorkflowStep,
+                SeqTrack,
         ]
     }
 
@@ -56,6 +59,7 @@ class FastqcSharedSpec extends Specification implements WorkflowSystemDomainFact
     void "getSeqTrack, should call checkWorkflowName and getInputArtefact with correct arguments and in order"() {
         given:
         createData()
+        SeqTrack seqTrack = DomainFactory.createSeqTrack()
 
         when:
         fastqcSharedInstance.getSeqTrack(workflowStep)
@@ -64,7 +68,7 @@ class FastqcSharedSpec extends Specification implements WorkflowSystemDomainFact
         1 * fastqcSharedInstance.checkWorkflowName(workflowStep, BashFastQcWorkflow.WORKFLOW) >> _
 
         then:
-        1 * fastqcSharedInstance.concreteArtefactService.getInputArtefact(workflowStep, BashFastQcWorkflow.INPUT_FASTQ) >> _
+        1 * fastqcSharedInstance.concreteArtefactService.getInputArtefact(workflowStep, BashFastQcWorkflow.INPUT_FASTQ) >> seqTrack
     }
 
     void "getFastqcProcessedFiles, should call checkWorkflowName and getOutputArtefacts with correct arguments and in order"() {

@@ -239,7 +239,7 @@ class MetadataImportController implements CheckAndCall, PlainResponseExceptionHa
             dataToRender.put("error", e.toString())
         }
 
-        render dataToRender as JSON
+        render(dataToRender as JSON)
     }
 
     @Secured('permitAll')
@@ -259,7 +259,7 @@ class MetadataImportController implements CheckAndCall, PlainResponseExceptionHa
 
             boolean ignoreMd5sumError = "TRUE".equalsIgnoreCase(params.ignoreMd5sumError)
 
-            render text: doAutoImport(params.ticketNumber as String, params.ilseNumbers as String, ignoreMd5sumError), contentType: "text/plain"
+            render(text: doAutoImport(params.ticketNumber as String, params.ilseNumbers as String, ignoreMd5sumError), contentType: "text/plain")
         } catch (Throwable t) {
             throw new InternalServerErrorPlainResponseException(t.message, t)
         } finally {
@@ -352,19 +352,19 @@ class MetadataImportController implements CheckAndCall, PlainResponseExceptionHa
         otrsTicket.seqCenterComment = value
         assert otrsTicket.save(flush: true)
         Map map = [success: true]
-        render map as JSON
+        render(map as JSON)
     }
 
     JSON updateAutomaticNotificationFlag(OtrsTicket otrsTicket, String value) {
         metadataImportService.updateAutomaticNotificationFlag(otrsTicket, value.toBoolean())
         Map map = [success: true]
-        render map as JSON
+        render(map as JSON)
     }
 
     JSON updateFinalNotificationFlag(OtrsTicket otrsTicket, String value) {
         metadataImportService.updateFinalNotificationFlag(otrsTicket, value.toBoolean())
         Map map = [success: true]
-        render map as JSON
+        render(map as JSON)
     }
 }
 

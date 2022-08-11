@@ -185,7 +185,7 @@ class ProcessesController {
         if (!cmd.sortOrder) {
             dataToRender.aaData = dataToRender.aaData.reverse()
         }
-        render dataToRender as JSON
+        render(dataToRender as JSON)
     }
 
     def plan() {
@@ -251,15 +251,15 @@ class ProcessesController {
                     [actions: actions],
             ]
         }
-        render dataToRender as JSON
+        render(dataToRender as JSON)
     }
 
     def enablePlan() {
-        render jobExecutionPlanService.enablePlan(jobExecutionPlanService.getPlan(params.id as long))
+        render(jobExecutionPlanService.enablePlan(jobExecutionPlanService.getPlan(params.id as long)))
     }
 
     def disablePlan() {
-        render jobExecutionPlanService.disablePlan(jobExecutionPlanService.getPlan(params.id as long))
+        render(jobExecutionPlanService.disablePlan(jobExecutionPlanService.getPlan(params.id as long)))
     }
 
     def process() {
@@ -344,7 +344,7 @@ class ProcessesController {
 
         dataToRender.aaData = data.sort { -it.processingStep.id }
 
-        render dataToRender as JSON
+        render(dataToRender as JSON)
     }
 
     @SuppressWarnings("CatchRuntimeException")
@@ -391,7 +391,7 @@ class ProcessesController {
             error = e.message
         }
         Map data = [success: ok, error: error]
-        render data as JSON
+        render(data as JSON)
     }
 
     def processingStepDate(DataTableCommand cmd) {
@@ -409,7 +409,7 @@ class ProcessesController {
                     update.error,
             ]
         }
-        render dataToRender as JSON
+        render(dataToRender as JSON)
     }
 
     def parameterData(DataTableCommand cmd) {
@@ -439,7 +439,7 @@ class ProcessesController {
                     jobName,
             ]
         }
-        render dataToRender as JSON
+        render(dataToRender as JSON)
     }
 
     private String formatParamValue(Parameter param) {
@@ -450,7 +450,7 @@ class ProcessesController {
     }
 
     def getProcessingErrorStackTrace() {
-        render text: processService.getProcessingErrorStackTrace(params.id as long), contentType: "text/plain"
+        render(text: processService.getProcessingErrorStackTrace(params.id as long), contentType: "text/plain")
     }
 
     private Map<String, String> processParameterData(Process process) {
@@ -471,7 +471,7 @@ class ProcessesController {
         Process process = processService.getProcess(cmd.id)
         commentService.saveComment(process, cmd.comment)
         def dataToRender = [date: TimeFormats.WEEKDAY_DATE_TIME.getFormattedDate(process.comment.modificationDate), author: process.comment.author]
-        render dataToRender as JSON
+        render(dataToRender as JSON)
     }
 }
 

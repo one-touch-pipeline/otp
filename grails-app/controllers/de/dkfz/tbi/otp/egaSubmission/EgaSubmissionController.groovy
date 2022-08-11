@@ -294,10 +294,10 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
                         [headerCell.text, row.getCellByColumnTitle(headerCell.text).text]
                     }
                 } as Closure<Map<String, String>>))
-                render data as JSON
+                render(data as JSON)
             }
         })
-        render [:] as JSON
+        render([:] as JSON)
     }
 
     OutputStream selectSamplesCsvDownload(SelectSampleDownloadCommand cmd) {
@@ -595,14 +595,14 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
         dataToRender.iTotalRecords = data.size()
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
         dataToRender.aaData = data
-        render dataToRender as JSON
+        render(dataToRender as JSON)
     }
 
     def updatePubMedId(UpdatePubMedIdSubmitCommand cmd) {
         checkDefaultErrorsAndCallMethod(cmd) {
             egaSubmissionService.updatePubMedId(cmd.submission, cmd.pubMedId)
             Map map = [success: true]
-            render map as JSON
+            render(map as JSON)
         }
     }
 

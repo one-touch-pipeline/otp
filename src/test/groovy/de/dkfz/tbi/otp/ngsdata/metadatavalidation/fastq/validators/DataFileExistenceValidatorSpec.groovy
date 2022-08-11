@@ -22,17 +22,17 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 
 import grails.testing.gorm.DataTest
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+import spock.lang.TempDir
 
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.DirectoryStructure
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
-import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.util.spreadsheet.Cell
 import de.dkfz.tbi.util.spreadsheet.validation.*
 
+import java.nio.file.Files
+import java.nio.file.Path
 import java.nio.file.Paths
 import java.util.regex.Matcher
 
@@ -48,16 +48,17 @@ class DataFileExistenceValidatorSpec extends Specification implements DataTest {
         ]
     }
 
-    @Rule
-    TemporaryFolder temporaryFolder
+    @TempDir
+    Path tempDir
 
     void 'validate adds expected problems'() {
         given:
-        File dir = temporaryFolder.root
-        temporaryFolder.newFolder('not_a_file')
-        temporaryFolder.newFile('empty')
-        CreateFileHelper.createFile(new File(dir, 'not_empty'))
-        File nonReadableFile = CreateFileHelper.createFile(new File(dir, 'not_readable'))
+        File dir = tempDir.toFile()
+        Files.createDirectory(tempDir.resolve('dir_instead_of_file'))
+        Files.createFile(tempDir.resolve('empty_file'))
+        File nonEmptyFile = Files.createFile(tempDir.resolve('not_empty_file')).toFile()
+        nonEmptyFile.text = "not empty"
+        File nonReadableFile = Files.createFile(tempDir.resolve('not_readable_file')).toFile()
         nonReadableFile.readable = false
         DirectoryStructure directoryStructure = Mock(DirectoryStructure) {
             getRequiredColumnTitles() >> ['FILENAME']
@@ -72,10 +73,10 @@ class DataFileExistenceValidatorSpec extends Specification implements DataTest {
         MetadataValidationContext context = createContext(
                 "FILENAME\n" +
                         "invalid\n" +
-                        "not_empty A\n" +
-                        "not_empty A\n" +
-                        "not_a_file A\n" +
-                        "empty A\n" +
+                        "not_empty_file A\n" +
+                        "not_empty_file A\n" +
+                        "dir_instead_of_file A\n" +
+                        "empty_file A\n" +
                         "not_found1 A\n" +
                         "not_found1 A\n" +
                         "not_found2 A\n" +
@@ -84,18 +85,18 @@ class DataFileExistenceValidatorSpec extends Specification implements DataTest {
                         "not_found3 A\n" +
                         "not_found3 B\n" +
                         "not_found3 B\n" +
-                        "not_readable A\n",
+                        "not_readable_file A\n",
                 [directoryStructure: directoryStructure, directoryStructureDescription: 'test directory structure',]
         )
         Collection<Problem> expectedProblems = [
                 new Problem(Collections.emptySet(),
                         LogLevel.INFO, "Using directory structure 'test directory structure'. If this is incorrect, please select the correct one."),
                 new Problem((context.spreadsheet.dataRows[1].cells + context.spreadsheet.dataRows[2].cells) as Set<Cell>,
-                        LogLevel.WARNING, "Multiple rows reference the same file '${new File(dir, 'not_empty')}'.", "Multiple rows reference the same file."),
+                        LogLevel.WARNING, "Multiple rows reference the same file '${new File(dir, 'not_empty_file')}'.", "Multiple rows reference the same file."),
                 new Problem(context.spreadsheet.dataRows[3].cells as Set<Cell>,
-                        LogLevel.ERROR, "'${new File(dir, 'not_a_file')}' is not a file.", "At least one file can not be accessed by OTP, does not exist, is empty or is not a file."),
+                        LogLevel.ERROR, "'${new File(dir, 'dir_instead_of_file')}' is not a file.", "At least one file can not be accessed by OTP, does not exist, is empty or is not a file."),
                 new Problem(context.spreadsheet.dataRows[4].cells as Set<Cell>,
-                        LogLevel.ERROR, "'${new File(dir, 'empty')}' is empty.", "At least one file can not be accessed by OTP, does not exist, is empty or is not a file."),
+                        LogLevel.ERROR, "'${new File(dir, 'empty_file')}' is empty.", "At least one file can not be accessed by OTP, does not exist, is empty or is not a file."),
                 new Problem((context.spreadsheet.dataRows[5].cells + context.spreadsheet.dataRows[6].cells) as Set<Cell>,
                         LogLevel.WARNING, "Multiple rows reference the same file '${new File(dir, 'not_found1')}'.", "Multiple rows reference the same file."),
                 new Problem((context.spreadsheet.dataRows[5].cells + context.spreadsheet.dataRows[6].cells) as Set<Cell>,
@@ -111,7 +112,7 @@ class DataFileExistenceValidatorSpec extends Specification implements DataTest {
                         context.spreadsheet.dataRows[11].cells + context.spreadsheet.dataRows[12].cells) as Set<Cell>,
                         LogLevel.ERROR, "'${new File(dir, 'not_found3')}' does not exist or cannot be accessed by OTP.", "At least one file can not be accessed by OTP, does not exist, is empty or is not a file."),
                 new Problem((context.spreadsheet.dataRows[13].cells) as Set<Cell>,
-                        LogLevel.ERROR, "File '${new File(dir, 'not_readable')}' is not readable by OTP.", "At least one file can not be accessed by OTP, does not exist, is empty or is not a file."),
+                        LogLevel.ERROR, "File '${new File(dir, 'not_readable_file')}' is not readable by OTP.", "At least one file can not be accessed by OTP, does not exist, is empty or is not a file."),
         ]
         DataFileExistenceValidator validator = new DataFileExistenceValidator()
 

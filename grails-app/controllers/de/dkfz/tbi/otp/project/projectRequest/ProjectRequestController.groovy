@@ -225,7 +225,7 @@ class ProjectRequestController implements CheckAndCall {
     @SuppressWarnings('ExplicitFlushForDeleteRule')
     JSON delete(ProjectRequest projectRequest) {
         projectRequestStateProvider.getCurrentState(projectRequest).delete(projectRequest)
-        render [:] as JSON
+        render([:] as JSON)
     }
 
     def create(ProjectRequest projectRequest) {
@@ -247,7 +247,7 @@ class ProjectRequestController implements CheckAndCall {
                         abstractFields: abstractFields,
                         abstractValues: abstractValues,
                 ]
-                render map as JSON
+                render(map as JSON)
             } catch (WorkflowException workflowException) {
                 log.error(workflowException.message)
                 return response.sendError(HttpStatus.BAD_REQUEST.value(), workflowException.message)

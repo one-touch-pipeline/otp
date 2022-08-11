@@ -22,9 +22,8 @@
 package de.dkfz.tbi.otp.dataprocessing.roddy
 
 import grails.testing.gorm.DataTest
-import org.junit.*
-import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+import spock.lang.TempDir
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.utils.exceptions.FileNotFoundException
@@ -32,6 +31,8 @@ import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.utils.CreateJobStateLogFileHelper
+
+import java.nio.file.Path
 
 import static de.dkfz.tbi.TestCase.shouldFailWithMessage
 import static de.dkfz.tbi.otp.dataprocessing.roddy.JobStateLogFile.JOB_STATE_LOG_FILE_NAME
@@ -43,8 +44,8 @@ class JobStateLogFileSpec extends Specification implements DataTest {
 
     ClusterJobIdentifier clusterJobIdentifier
 
-    @Rule
-    TemporaryFolder tmpDir
+    @TempDir
+    Path tempDir
 
     @Override
     Class<?>[] getDomainClassesToMock() {
@@ -59,10 +60,10 @@ class JobStateLogFileSpec extends Specification implements DataTest {
 
     void testCreate_WhenInputIsCorrect_ShouldSetFileProperty() {
         given:
-        JobStateLogFile jobStateLogFile = CreateJobStateLogFileHelper.createJobStateLogFile(tmpDir.root, [])
+        JobStateLogFile jobStateLogFile = CreateJobStateLogFileHelper.createJobStateLogFile(tempDir.toFile(), [])
 
         expect:
-        new File(tmpDir.root, JOB_STATE_LOG_FILE_NAME) == jobStateLogFile.file
+        new File(tempDir.toFile(), JOB_STATE_LOG_FILE_NAME) == jobStateLogFile.file
     }
 
     void testValidateFile_WhenFileDoesNotExist_ShouldThrowException() {
@@ -79,12 +80,12 @@ class JobStateLogFileSpec extends Specification implements DataTest {
     void testValidateFile_WhenFileExistsButIsNotReadable_ShouldThrowException() {
         given:
         JobStateLogFile.metaClass.parseJobStateLogFile = { -> [:] }
-        File file = tmpDir.newFile(JOB_STATE_LOG_FILE_NAME)
+        File file = tempDir.resolve(JOB_STATE_LOG_FILE_NAME).toFile()
         file.createNewFile()
         file.readable = false
 
         when:
-        JobStateLogFile.getInstance(tmpDir.root)
+        JobStateLogFile.getInstance(tempDir.toFile())
 
         then:
         thrown FileNotReadableException
@@ -101,10 +102,10 @@ class JobStateLogFileSpec extends Specification implements DataTest {
             ${CreateJobStateLogFileHelper.convertLogFileEntryToString(logFileEntry2)}
             ${CreateJobStateLogFileHelper.convertLogFileEntryToStringIncludingHost(logFileEntry3)}""".stripIndent()
 
-        CreateFileHelper.createFile(tmpDir.newFile(JOB_STATE_LOG_FILE_NAME), content)
+        CreateFileHelper.createFile(tempDir.resolve(JOB_STATE_LOG_FILE_NAME), content)
 
         when:
-        JobStateLogFile jobStateLogFile = JobStateLogFile.getInstance(tmpDir.root)
+        JobStateLogFile jobStateLogFile = JobStateLogFile.getInstance(tempDir.toFile())
 
         then:
         jobStateLogFile.logFileEntries.get(logFileEntry.clusterJobId).clusterJobId == logFileEntry.clusterJobId
@@ -135,11 +136,11 @@ class JobStateLogFileSpec extends Specification implements DataTest {
             ${modifiedLogFileEntry}""".stripIndent()
 
         when:
-        File file = CreateFileHelper.createFile(tmpDir.newFile(JOB_STATE_LOG_FILE_NAME), content)
+        File file = CreateFileHelper.createFile(tempDir.resolve(JOB_STATE_LOG_FILE_NAME), content).toFile()
 
         then:
         shouldFailWithMessage(RuntimeException, "${file} contains non-matching entry: ${modifiedLogFileEntry}") {
-            JobStateLogFile.getInstance(tmpDir.root)
+            JobStateLogFile.getInstance(tempDir.toFile())
         }
     }
 
@@ -152,10 +153,10 @@ class JobStateLogFileSpec extends Specification implements DataTest {
             ${CreateJobStateLogFileHelper.convertLogFileEntryToString(logFileEntry)}
             ${CreateJobStateLogFileHelper.convertLogFileEntryToString(logFileEntry2)}""".stripIndent()
 
-        CreateFileHelper.createFile(tmpDir.newFile(JOB_STATE_LOG_FILE_NAME), content)
+        CreateFileHelper.createFile(tempDir.resolve(JOB_STATE_LOG_FILE_NAME), content)
 
         when:
-        JobStateLogFile jobStateLogFile = JobStateLogFile.getInstance(tmpDir.root)
+        JobStateLogFile jobStateLogFile = JobStateLogFile.getInstance(tempDir.toFile())
 
         then:
         jobStateLogFile.logFileEntries.get(logFileEntry.clusterJobId).clusterJobId == logFileEntry.clusterJobId
@@ -173,10 +174,10 @@ class JobStateLogFileSpec extends Specification implements DataTest {
             ${CreateJobStateLogFileHelper.convertLogFileEntryToString(logFileEntry)}
             ${CreateJobStateLogFileHelper.convertLogFileEntryToString(logFileEntry2)}""".stripIndent()
 
-        CreateFileHelper.createFile(tmpDir.newFile(JOB_STATE_LOG_FILE_NAME), content)
+        CreateFileHelper.createFile(tempDir.resolve(JOB_STATE_LOG_FILE_NAME), content)
 
         when:
-        JobStateLogFile jobStateLogFile = JobStateLogFile.getInstance(tmpDir.root)
+        JobStateLogFile jobStateLogFile = JobStateLogFile.getInstance(tempDir.toFile())
 
         then:
         jobStateLogFile.logFileEntries.get(logFileEntry.clusterJobId).clusterJobId == logFileEntry2.clusterJobId
@@ -188,7 +189,7 @@ class JobStateLogFileSpec extends Specification implements DataTest {
     void testContainsClusterJobId_WhenJobStateLogFileContainsClusterJobId_ShouldReturnTrue() {
         given:
         JobStateLogFile JobStateLogFile = CreateJobStateLogFileHelper.createJobStateLogFile(
-                tmpDir.root, [
+                tempDir.toFile(), [
                 CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: clusterJobIdentifier.clusterJobId])
         ]
         )
@@ -200,7 +201,7 @@ class JobStateLogFileSpec extends Specification implements DataTest {
     void testContainsClusterJobId_WhenJobStateLogFileDoesNotContainClusterJobId_ShouldReturnFalse() {
         given:
         JobStateLogFile JobStateLogFile = CreateJobStateLogFileHelper.createJobStateLogFile(
-                tmpDir.root, [
+                tempDir.toFile(), [
                 CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: clusterJobIdentifier.clusterJobId])
         ]
         )
@@ -212,7 +213,7 @@ class JobStateLogFileSpec extends Specification implements DataTest {
     void testIsClusterJobFinishedSuccessfully_WhenStatusCodeIsNull_ReturnTrue() {
         given:
         JobStateLogFile JobStateLogFile = CreateJobStateLogFileHelper.createJobStateLogFile(
-                tmpDir.root, [
+                tempDir.toFile(), [
                 CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: clusterJobIdentifier.clusterJobId])
         ]
         )
@@ -224,7 +225,7 @@ class JobStateLogFileSpec extends Specification implements DataTest {
     void testIsClusterJobFinishedSuccessfully_WhenStatusCodeIsNotNull_ReturnFalse() {
         given:
         JobStateLogFile JobStateLogFile = CreateJobStateLogFileHelper.createJobStateLogFile(
-                tmpDir.root, [
+                tempDir.toFile(), [
                 CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: clusterJobIdentifier.clusterJobId, statusCode: STATUS_CODE_FAILED])
         ]
         )
@@ -236,7 +237,7 @@ class JobStateLogFileSpec extends Specification implements DataTest {
     void testGetPropertyFromLatestLogFileEntry_WhenClusterJobIdNotFound_ShouldReturnNull() {
         given:
         JobStateLogFile JobStateLogFile = CreateJobStateLogFileHelper.createJobStateLogFile(
-                tmpDir.root, [
+                tempDir.toFile(), [
                 CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: clusterJobIdentifier.clusterJobId])
         ]
         )
@@ -248,7 +249,7 @@ class JobStateLogFileSpec extends Specification implements DataTest {
     void testGetPropertyFromLatestLogFileEntry_WhenSeveralLogFileEntriesWithSameClusterJobId_ShouldReturnLatest() {
         given:
         JobStateLogFile JobStateLogFile = CreateJobStateLogFileHelper.createJobStateLogFile(
-                tmpDir.root, [
+                tempDir.toFile(), [
                 CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: clusterJobIdentifier.clusterJobId, statusCode: "10"]),
                 CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: clusterJobIdentifier.clusterJobId, statusCode: STATUS_CODE_FINISHED, timeStamp: 10L]),
         ]
@@ -260,7 +261,7 @@ class JobStateLogFileSpec extends Specification implements DataTest {
 
     void testIsEmpty_WhenFileIsEmpty_ShouldReturnTrue() {
         given:
-        JobStateLogFile jobStateLogFile = CreateJobStateLogFileHelper.createJobStateLogFile(tmpDir.root, [])
+        JobStateLogFile jobStateLogFile = CreateJobStateLogFileHelper.createJobStateLogFile(tempDir.toFile(), [])
 
         expect:
         jobStateLogFile.file.length() == 0
@@ -269,7 +270,7 @@ class JobStateLogFileSpec extends Specification implements DataTest {
     void testIsEmpty_WhenFileIsNotEmpty_ShouldReturnFalse() {
         given:
         JobStateLogFile jobStateLogFile = CreateJobStateLogFileHelper.createJobStateLogFile(
-                tmpDir.root, [
+                tempDir.toFile(), [
                 CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: clusterJobIdentifier.clusterJobId])
         ]
         )

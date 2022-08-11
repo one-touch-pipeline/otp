@@ -26,11 +26,7 @@ import grails.testing.services.ServiceUnitTest
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
 class RunYapsaServiceSpec extends AbstractBamFileAnalysisServiceSpec implements ServiceUnitTest<RunYapsaService> {
-
-    @Override
-    String getPathPart() {
-        return 'mutational_signatures_results'
-    }
+    String pathPart = 'mutational_signatures_results'
 
     @Override
     BamFilePairAnalysis getNewInstance() {

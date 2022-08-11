@@ -108,7 +108,7 @@ class DataTransferController implements CheckAndCall {
         checkDefaultErrorsAndCallMethod(cmd) {
             try {
                 DataTransferAgreement dta = dataTransferAgreementService.addFilesToDta(cmd.dataTransferAgreement, cmd.files)
-                render dta.dataTransferAgreementDocuments as JSON
+                render(dta.dataTransferAgreementDocuments as JSON)
             } catch (OtpException otpException) {
                 response.sendError(HttpStatus.BAD_REQUEST.value(), otpException.message)
             }
@@ -119,7 +119,7 @@ class DataTransferController implements CheckAndCall {
         checkDefaultErrorsAndCallMethod(cmd) {
             try {
                 DataTransfer transfer = dataTransferService.addFilesToDataTransfer(cmd.dataTransfer, cmd.files)
-                render transfer.dataTransferDocuments as JSON
+                render(transfer.dataTransferDocuments as JSON)
             } catch (OtpException otpException) {
                 response.sendError(HttpStatus.BAD_REQUEST.value(), otpException.message)
             }

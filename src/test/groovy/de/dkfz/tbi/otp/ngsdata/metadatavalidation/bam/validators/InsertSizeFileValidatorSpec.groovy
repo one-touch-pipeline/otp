@@ -22,7 +22,6 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.validators
 
 import org.junit.ClassRule
-import org.junit.rules.TemporaryFolder
 import spock.lang.*
 
 import de.dkfz.tbi.TestCase
@@ -32,6 +31,9 @@ import de.dkfz.tbi.otp.utils.LocalShellHelper
 import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
+import java.nio.file.Files
+import java.nio.file.Path
+
 import static de.dkfz.tbi.otp.ngsdata.BamMetadataColumn.*
 import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
 
@@ -39,15 +41,16 @@ class InsertSizeFileValidatorSpec extends Specification {
 
     @Shared
     @ClassRule
-    TemporaryFolder temporaryFolder
+    @TempDir
+    Path tempDir
 
     @Unroll
     void 'validate context with errors'() {
         given:
-        File bamFile = temporaryFolder.newFile('abc')
-        File insertFile = temporaryFolder.newFile('insertFile')
-        File dir = temporaryFolder.newFolder('folder')
-        File notReadAble = temporaryFolder.newFile('abcde')
+        File bamFile = Files.createFile(tempDir.resolve('abc')).toFile()
+        File insertFile = Files.createFile(tempDir.resolve('insertFile')).toFile()
+        File dir = Files.createDirectory(tempDir.resolve('folder')).toFile()
+        File notReadAble = Files.createFile(tempDir.resolve('abcde')).toFile()
         assert LocalShellHelper.executeAndAssertExitCodeAndErrorOutAndReturnStdout("chmod a-r ${notReadAble.absolutePath} && echo OK").trim() == 'OK'
         assert !notReadAble.canRead()
 

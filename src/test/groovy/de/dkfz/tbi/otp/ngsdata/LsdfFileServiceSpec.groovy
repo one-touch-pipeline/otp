@@ -22,18 +22,20 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.testing.gorm.DataTest
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+import spock.lang.TempDir
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.job.processing.CreateClusterScriptService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.project.ProjectService
+import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.utils.HelperUtils
 import de.dkfz.tbi.otp.utils.LocalShellHelper
 
+import java.nio.file.Files
+import java.nio.file.Path
 import java.nio.file.Paths
 
 class LsdfFileServiceSpec extends Specification implements DataTest, DomainFactoryCore {
@@ -59,12 +61,12 @@ class LsdfFileServiceSpec extends Specification implements DataTest, DomainFacto
         }
     }
 
-    @Rule
-    TemporaryFolder tempFolder = new TemporaryFolder()
+    @TempDir
+    Path tempDir
 
     void "test ensureFileIsReadableAndNotEmpty"() {
         given:
-        File file = tempFolder.newFile()
+        File file = tempDir.resolve("test.txt").toFile()
         file << "content"
 
         when:
@@ -89,7 +91,7 @@ class LsdfFileServiceSpec extends Specification implements DataTest, DomainFacto
     void "test ensureFileIsReadableAndNotEmpty, when does not exist, should fail"() {
         given:
         //file must be absolute to make sure that the test fails the 'exists?' assertion
-        File file = new File(tempFolder.newFolder(), "testFile.txt")
+        File file = tempDir.resolve("testFile.txt").toFile()
 
         when:
         LsdfFilesService.ensureFileIsReadableAndNotEmpty(file)
@@ -100,11 +102,8 @@ class LsdfFileServiceSpec extends Specification implements DataTest, DomainFacto
     }
 
     void "test ensureFileIsReadableAndNotEmpty, when file is not a regular file, should fail"() {
-        given:
-        File file = tempFolder.newFolder()
-
         when:
-        LsdfFilesService.ensureFileIsReadableAndNotEmpty(file)
+        LsdfFilesService.ensureFileIsReadableAndNotEmpty(tempDir.toFile())
 
         then:
         def e = thrown(AssertionError)
@@ -113,7 +112,7 @@ class LsdfFileServiceSpec extends Specification implements DataTest, DomainFacto
 
     void "test ensureFileIsReadableAndNotEmpty, when file isn't readable, should fail"() {
         given:
-        File file = tempFolder.newFile()
+        File file = tempDir.resolve("test.txt").toFile()
         file << "content"
         file.readable = false
 
@@ -130,7 +129,7 @@ class LsdfFileServiceSpec extends Specification implements DataTest, DomainFacto
 
     void "test ensureFileIsReadableAndNotEmpty, when file is empty, should fail"() {
         given:
-        File file = tempFolder.newFile()
+        File file = CreateFileHelper.createFile(tempDir.resolve("test.txt").toFile(), "")
 
         when:
         LsdfFilesService.ensureFileIsReadableAndNotEmpty(file)
@@ -151,8 +150,8 @@ class LsdfFileServiceSpec extends Specification implements DataTest, DomainFacto
         service.createClusterScriptService = new CreateClusterScriptService()
 
         List<File> files = [
-                tempFolder.newFolder(),
-                tempFolder.newFile(),
+                tempDir.toFile(),
+                tempDir.resolve("test.txt").toFile(),
         ]
 
         when:
@@ -180,7 +179,7 @@ class LsdfFileServiceSpec extends Specification implements DataTest, DomainFacto
 
     void "test deleteFilesRecursive, when realm is null, should fail"() {
         when:
-        service.deleteFilesRecursive(null, [tempFolder.newFolder()])
+        service.deleteFilesRecursive(null, [tempDir])
 
         then:
         def e = thrown(AssertionError)
@@ -199,7 +198,7 @@ class LsdfFileServiceSpec extends Specification implements DataTest, DomainFacto
         e.message.contains('filesOrDirectories may not be null.')
     }
 
-    void "test deleteFilesRecursive, when deletion fails, should fail"() {
+    void "test deleteFilesRecursive, when deletion fails, should not delete files"() {
         given:
         final String MESSAGE = HelperUtils.uniqueString
         Realm realm = DomainFactory.createRealm()
@@ -209,10 +208,11 @@ class LsdfFileServiceSpec extends Specification implements DataTest, DomainFacto
                 }
         ] as RemoteShellHelper
         service.createClusterScriptService = new CreateClusterScriptService()
+        Path file = Files.createFile(tempDir.resolve("test.txt"))
 
         List<File> files = [
-                tempFolder.newFolder(),
-                tempFolder.newFile(),
+                tempDir.toFile(),
+                file.toFile(),
         ]
 
         when:

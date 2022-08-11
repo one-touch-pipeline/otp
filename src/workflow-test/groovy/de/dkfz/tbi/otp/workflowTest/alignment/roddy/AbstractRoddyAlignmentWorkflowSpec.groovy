@@ -113,15 +113,9 @@ abstract class AbstractRoddyAlignmentWorkflowSpec extends AbstractAlignmentWorkf
 
     protected WorkflowVersion workflowVersionAlignment
 
-    @Override
-    Duration getRunningTimeout() {
-        return Duration.ofHours(24)
-    }
+    Duration runningTimeout = Duration.ofHours(24)
 
-    @Override
-    Class<? extends OtpWorkflow> getWorkflowComponentClass() {
-        return PanCancerWorkflow
-    }
+    Class<? extends OtpWorkflow> workflowComponentClass = PanCancerWorkflow
 
     @Override
     void setup() {

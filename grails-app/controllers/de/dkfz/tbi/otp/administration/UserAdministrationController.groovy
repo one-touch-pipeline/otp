@@ -99,7 +99,7 @@ class UserAdministrationController implements CheckAndCall {
                     acceptedPrivacyPolicy: user.acceptedPrivacyPolicy,
             ]
         }
-        render dataToRender as JSON
+        render(dataToRender as JSON)
     }
 
     JSON enable(UpdateUserFlagCommand cmd) {

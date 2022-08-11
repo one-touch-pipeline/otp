@@ -61,7 +61,7 @@ class LdapController {
         idpUsers.removeAll(otpIdpUsers)
         idpUsers.addAll(0, otpIdpUsers)
 
-        render idpUsers as JSON
+        render(idpUsers as JSON)
     }
 }
 

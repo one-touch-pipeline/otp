@@ -78,7 +78,7 @@ class WorkflowConfigController implements BaseWorkflowConfigController {
         try {
             ExternalWorkflowConfigSelector selector = externalWorkflowConfigSelectorService.getById(id)
             assert selector
-            render selector?.fragments as JSON
+            render(selector?.fragments as JSON)
         } catch (ObjectNotFoundException ex) {
             response.sendError(HttpStatus.NOT_FOUND.value(), "${g.message(code: "workflowConfig.backend.failed")}: ${ex.message}")
         } catch (AssertionError ex) {
@@ -93,7 +93,7 @@ class WorkflowConfigController implements BaseWorkflowConfigController {
         try {
             ExternalWorkflowConfigSelector selector = externalWorkflowConfigSelectorService.getById(id)
             assert selector
-            render transformToMap(selector) as JSON
+            render(transformToMap(selector) as JSON)
         } catch (ObjectNotFoundException ex) {
             response.sendError(HttpStatus.NOT_FOUND.value(), "${g.message(code: "workflowConfig.backend.failed")}: ${ex.message}")
         } catch (AssertionError ex) {
@@ -189,7 +189,7 @@ class WorkflowConfigController implements BaseWorkflowConfigController {
             Map<String, Object> deprecatedSelector = transformToMap(selector)
             configSelectorService.deprecate(selector)
 
-            render deprecatedSelector as JSON
+            render(deprecatedSelector as JSON)
         } catch (AssertionError ex) {
             response.sendError(HttpStatus.INTERNAL_SERVER_ERROR.value(), "${g.message(code: "workflowConfig.deprecated.failed")}: ${ex.message}")
         }

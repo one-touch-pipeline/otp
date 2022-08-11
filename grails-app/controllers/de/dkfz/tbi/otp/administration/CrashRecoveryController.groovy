@@ -80,7 +80,7 @@ class CrashRecoveryController {
                     resumable,
             ]
         }
-        render dataToRender as JSON
+        render(dataToRender as JSON)
     }
 
     private boolean isJobResumable(ProcessingStep step) {
@@ -101,7 +101,7 @@ class CrashRecoveryController {
             error = e.message
         }
         Map data = [success: success, error: error]
-        render data as JSON
+        render(data as JSON)
     }
 
     def restart() {
@@ -117,28 +117,28 @@ class CrashRecoveryController {
             error = e.message
         }
         Map data = [success: success, error: error]
-        render data as JSON
+        render(data as JSON)
     }
 
     def markFinished() {
         def data = performMarkAsFinished(false, params)
-        render data as JSON
+        render(data as JSON)
     }
 
     def markSucceeded() {
         def data = performMarkAsFinished(true, params)
-        render data as JSON
+        render(data as JSON)
     }
 
     def startScheduler() {
         if (!crashRecoveryService.crashRecovery) {
             Map data = [success: false, error: "Not in Crash Recovery"]
-            render data as JSON
+            render(data as JSON)
             return
         }
         schedulerService.startup()
         Map data = [success: !crashRecoveryService.crashRecovery]
-        render data as JSON
+        render(data as JSON)
     }
 
     def parametersOfJob() {

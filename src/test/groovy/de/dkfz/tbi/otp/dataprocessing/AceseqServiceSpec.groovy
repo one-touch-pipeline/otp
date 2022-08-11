@@ -22,27 +22,26 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import grails.testing.services.ServiceUnitTest
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
+import spock.lang.TempDir
 import spock.lang.Unroll
+import java.nio.file.Path
 
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 
 class AceseqServiceSpec extends AbstractBamFileAnalysisServiceSpec implements ServiceUnitTest<AceseqService> {
 
-    @Rule
-    TemporaryFolder temporaryFolder
+    @TempDir
+    Path tempDir
 
+    String pathPart = 'cnv_results'
     AceseqInstance instance
     Path instancePath
 
     void setup() {
-        Path temporaryFile = temporaryFolder.newFolder().toPath()
-
         this.instance = DomainFactory.createAceseqInstanceWithRoddyBamFiles()
 
-        Path vbpPath = temporaryFile.resolve("${instance.project.dirName}/sequencing/${instance.seqType.dirName}/view-by-pid/${instance.individual.pid}")
+        Path vbpPath = tempDir.resolve("${instance.project.dirName}/sequencing/${instance.seqType.dirName}/view-by-pid/${instance.individual.pid}")
 
         service.individualService = Mock(IndividualService) {
             getViewByPidPath(_, _) >> vbpPath
@@ -52,11 +51,6 @@ class AceseqServiceSpec extends AbstractBamFileAnalysisServiceSpec implements Se
                 "${instance.sampleType1BamFile.sampleType.dirName}_${instance.sampleType2BamFile.sampleType.dirName}/" +
                 "${instance.instanceName}"
         )
-    }
-
-    @Override
-    String getPathPart() {
-        return 'cnv_results'
     }
 
     @Override
@@ -110,5 +104,3 @@ class AceseqServiceSpec extends AbstractBamFileAnalysisServiceSpec implements Se
         service.getQcJsonFile(instance) == instancePath.resolve("cnv_${instance.individual.pid}_parameter.json")
     }
 }
-
-import java.nio.file.Path

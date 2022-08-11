@@ -144,7 +144,7 @@ class UpdateDomainPropertyServiceSpec extends Specification implements ServiceUn
     }
 
     @Unroll
-    void "updateProperties, when property '#property' set to value '#value', then the property is updated"() {
+    void "updateProperties, when property '#property' set to value '#values', then the property is updated"() {
         given:
         TestDomain testDomain = new TestDomain().save(flush: true)
 

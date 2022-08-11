@@ -23,7 +23,6 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq
 
 import grails.testing.gorm.DataTest
 import org.junit.ClassRule
-import org.junit.rules.TemporaryFolder
 import spock.lang.*
 
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
@@ -31,6 +30,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.DirectoryStructure
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators.SampleLibraryValidator
+import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.utils.HelperUtils
 
 import java.nio.file.Path
@@ -52,7 +52,8 @@ class MetadataValidationContextSpec extends Specification implements DomainFacto
 
     @Shared
     @ClassRule
-    TemporaryFolder temporaryFolder
+    @TempDir
+    Path tempDir
 
     @Unroll
     void 'createFromFile, when file contains undetermined entries, or with ignoreMd5sum flag, ignores them'() {
@@ -62,7 +63,7 @@ class MetadataValidationContextSpec extends Specification implements DomainFacto
                 fileName: 'fastq',
                 md5sum: md5sum,
         )
-        Path file = temporaryFolder.newFile("${HelperUtils.uniqueString}.tsv").toPath()
+        Path file = CreateFileHelper.createFile(tempDir.resolve("${HelperUtils.uniqueString}.tsv"))
         file.bytes = ("c ${FASTQ_FILE} ${SAMPLE_NAME} ${INDEX} ${MD5}\n" +
                 "0 Undetermined_1.fastq.gz x x x\n" +
                 "1 Undetermined_1.fastq.gz x Undetermined x\n" +
@@ -96,7 +97,7 @@ class MetadataValidationContextSpec extends Specification implements DomainFacto
 
     void 'createFromFile, when file header contains alias, replace it'() {
         given:
-        Path file = temporaryFolder.newFile("${HelperUtils.uniqueString}.tsv").toPath()
+        Path file = CreateFileHelper.createFile(tempDir.resolve("${HelperUtils.uniqueString}.tsv"))
         file.bytes = ("UNKNOWN ${ALIGN_TOOL} ${SEQUENCING_READ_TYPE.importAliases.first()}\n" +
                 "1 2 3"
         ).replaceAll(' ', '\t').getBytes(MetadataValidationContext.CHARSET)

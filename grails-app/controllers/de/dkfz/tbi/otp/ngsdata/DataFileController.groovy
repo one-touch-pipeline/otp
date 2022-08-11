@@ -69,7 +69,7 @@ class DataFileController {
         DataFile dataFile = metaDataService.getDataFile(cmd.id)
         commentService.saveComment(dataFile, cmd.comment)
         Map dataToRender = [date: TimeFormats.WEEKDAY_DATE_TIME.getFormattedDate(dataFile.comment.modificationDate), author: dataFile.comment.author]
-        render dataToRender as JSON
+        render(dataToRender as JSON)
     }
 }
 

@@ -65,9 +65,9 @@ class WorkflowRunListController extends AbstractWorkflowRunController {
 
         WorkflowRunSearchResult result = workflowRunService.workflowOverview(workflowRunSearchCriteria)
 
-        render cmd.getDataToRender(result.data, result.workflowsTotal, result.workflowsFiltered, [
+        render(cmd.getDataToRender(result.data, result.workflowsTotal, result.workflowsFiltered, [
                 count: [result.workflowsFiltered, result.running, result.failed]
-        ]) as JSON
+        ]) as JSON)
     }
 }
 

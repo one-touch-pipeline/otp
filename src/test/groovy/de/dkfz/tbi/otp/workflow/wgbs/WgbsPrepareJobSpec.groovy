@@ -22,9 +22,8 @@
 package de.dkfz.tbi.otp.workflow.wgbs
 
 import grails.testing.gorm.DataTest
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+import spock.lang.TempDir
 
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
@@ -62,8 +61,8 @@ class WgbsPrepareJobSpec extends Specification implements DataTest, WgbsAlignmen
 
     static private final String DIRECTORY = "/tmp"
 
-    @Rule
-    TemporaryFolder temporaryFolder
+    @TempDir
+    Path tempDir
 
     private WorkflowStep workflowStep
     private WorkflowRun workflowRun
@@ -154,7 +153,7 @@ class WgbsPrepareJobSpec extends Specification implements DataTest, WgbsAlignmen
 
     void "test doFurtherPreparation should create metadata table file"() {
         given:
-        Path metadataFile = temporaryFolder.newFolder().toPath().resolve("file.tsv")
+        Path metadataFile = tempDir.resolve("file.tsv")
 
         setupData()
         List<SeqTrack> seqTracks = [createSeqTrackWithTwoDataFile(), createSeqTrackWithTwoDataFile()]

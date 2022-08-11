@@ -22,9 +22,8 @@
 package de.dkfz.tbi.otp.workflowExecution.cluster.logs
 
 import grails.testing.gorm.DataTest
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+import spock.lang.TempDir
 
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
@@ -40,8 +39,8 @@ import java.nio.file.Path
 
 abstract class AbstractLogDirectoryServiceSpec extends Specification implements DataTest, WorkflowSystemDomainFactory {
 
-    @Rule
-    TemporaryFolder temporaryFolder = new TemporaryFolder()
+    @TempDir
+    Path tempDir
 
     protected TestConfigService configService
 
@@ -59,7 +58,7 @@ abstract class AbstractLogDirectoryServiceSpec extends Specification implements 
     void setup() {
         realm = createRealm()
 
-        service.configService = configService = new TestConfigService(temporaryFolder.newFolder())
+        service.configService = configService = new TestConfigService(tempDir)
         configService.processingOptionService = Mock(ProcessingOptionService) {
             _ * findOptionAsString(ProcessingOption.OptionName.REALM_DEFAULT_VALUE) >> realm.name
         }

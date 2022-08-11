@@ -23,7 +23,6 @@ package de.dkfz.tbi.otp.job
 
 import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
-import org.junit.Rule
 import spock.lang.Specification
 import spock.lang.TempDir
 import spock.lang.Unroll
@@ -68,7 +67,7 @@ class JobMailServiceIntegrationSpec extends Specification implements DomainFacto
                 seqTrack: seqTrack,
                 fastqImportInstance: createFastqImportInstance([
                         otrsTicket: otrsTicket,
-                ])
+                ]),
         ])
 
         Realm realm = DomainFactory.createRealm()

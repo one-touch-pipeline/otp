@@ -43,10 +43,7 @@ abstract class AbstractPanCancerWorkflowSpec extends AbstractRoddyAlignmentWorkf
 
     PanCancerDecider panCancerDecider
 
-    @Override
-    Class<? extends OtpWorkflow> getWorkflowComponentClass() {
-        return PanCancerWorkflow
-    }
+    Class<? extends OtpWorkflow> workflowComponentClass = PanCancerWorkflow
 
     @Override
     protected AbstractWorkflowDecider getDecider() {

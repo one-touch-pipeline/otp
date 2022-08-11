@@ -162,7 +162,7 @@ class SampleOverviewController {
         dataToRender.anythingWithdrawn = anythingWithdrawn
         dataToRender.columnsToHide = columnsToHide
 
-        render dataToRender as JSON
+        render(dataToRender as JSON)
     }
 
     private List<Pipeline> findPipelines() {

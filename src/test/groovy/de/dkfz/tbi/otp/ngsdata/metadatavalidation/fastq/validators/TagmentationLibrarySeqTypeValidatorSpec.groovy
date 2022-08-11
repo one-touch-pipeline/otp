@@ -90,7 +90,7 @@ class TagmentationLibrarySeqTypeValidatorSpec extends Specification {
     }
 
     @Unroll
-    void 'validate, invalid CUSTOMER_LIBRARY SEQUENCING_TYPE combinations (#seqTypeName, #tagmentation, #library), show warning'() {
+    void 'validate, invalid CUSTOMER_LIBRARY SEQUENCING_TYPE combinations (#seqTypeName, #library), show warning'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${TAGMENTATION_LIBRARY}\t${SEQUENCING_TYPE}\n" +
@@ -109,7 +109,7 @@ class TagmentationLibrarySeqTypeValidatorSpec extends Specification {
         assertContainSame(context.problems, expectedProblems)
 
         where:
-        seqTypeName                             | library | level         || message1                                                                                                                                           || message2
+        seqTypeName                             | library | level            || message1                                                                                                                                           || message2
         "seqtype"                               | "5"     | LogLevel.WARNING || "The tagmentation library '5' in column ${TAGMENTATION_LIBRARY} indicates tagmentation, but the sequencing type 'seqtype' is without tagmentation" || TagmentationLibrarySeqTypeValidator.LIBRARY_WITHOUT_TAGMENTATION
         "seqtype${SeqType.TAGMENTATION_SUFFIX}" | ""      | LogLevel.ERROR   || "For the tagmentation sequencing type 'seqtype${SeqType.TAGMENTATION_SUFFIX}' there should be a value in the ${TAGMENTATION_LIBRARY} column."      || TagmentationLibrarySeqTypeValidator.TAGMENTATION_WITHOUT_LIBRARY
     }

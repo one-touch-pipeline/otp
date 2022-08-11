@@ -26,11 +26,7 @@ import grails.testing.services.ServiceUnitTest
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
 class IndelServiceSpec extends AbstractBamFileAnalysisServiceSpec implements ServiceUnitTest<IndelCallingService> {
-
-    @Override
-    String getPathPart() {
-        return 'indel_results'
-    }
+    String pathPart = 'indel_results'
 
     @Override
     BamFilePairAnalysis getNewInstance() {

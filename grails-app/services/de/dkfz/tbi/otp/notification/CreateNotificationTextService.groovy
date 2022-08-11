@@ -489,7 +489,7 @@ class CreateNotificationTextService {
                     absolute  : true,
                     params    : [
                             (ProjectSelectionService.PROJECT_SELECTION_PARAMETER): it,
-                    ] + params
+                    ] + params,
             ])
         }.join('\n')
     }

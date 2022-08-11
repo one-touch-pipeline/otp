@@ -209,7 +209,7 @@ class WorkflowRunServiceIntegrationSpec extends Specification implements Workflo
                 workflowRun     : workflowRun,
                 workflowArtefact: createWorkflowArtefact([
                         state: artefactState,
-                ])
+                ]),
         ])
         return workflowRun
     }

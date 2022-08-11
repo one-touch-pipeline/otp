@@ -22,14 +22,14 @@
 package de.dkfz.tbi.otp.workflow.datainstallation
 
 import grails.testing.gorm.DataTest
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+import spock.lang.TempDir
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.workflow.shared.WorkflowException
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
@@ -37,8 +37,8 @@ import java.nio.file.Path
 
 class DataInstallationConditionalFailJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory {
 
-    @Rule
-    TemporaryFolder temporaryFolder
+    @TempDir
+    Path tempDir
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -55,15 +55,12 @@ class DataInstallationConditionalFailJobSpec extends Specification implements Da
         WorkflowStep workflowStep = createWorkflowStep()
         SeqTrack seqTrack = createSeqTrackWithTwoDataFile()
 
-        Path path = temporaryFolder.newFile().toPath()
-        path.text = "non-empty"
-
         DataInstallationConditionalFailJob job = Spy(DataInstallationConditionalFailJob) {
             getSeqTrack(workflowStep) >> seqTrack
         }
         job.fileSystemService = new TestFileSystemService()
         job.lsdfFilesService = Mock(LsdfFilesService) {
-            getFileInitialPathAsPath(_) >> path
+            getFileInitialPathAsPath(_) >> CreateFileHelper.createFile(tempDir.resolve("test.txt"))
         }
 
         when:

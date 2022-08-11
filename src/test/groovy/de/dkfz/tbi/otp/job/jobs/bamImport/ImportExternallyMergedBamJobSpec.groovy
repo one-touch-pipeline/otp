@@ -22,9 +22,8 @@
 package de.dkfz.tbi.otp.job.jobs.bamImport
 
 import grails.testing.gorm.DataTest
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+import spock.lang.TempDir
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.TestConfigService
@@ -88,13 +87,13 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
 
     private TestConfigService configService
 
-    @Rule
-    TemporaryFolder temporaryFolder
+    @TempDir
+    Path tempDir
 
     void setup() {
         String bamFileNameWithMd5sum = "epmbfWithMd5sum.bam"
         String bamFileNameWithoutMd5sum = "epmbfWithoutMd5sum.bam"
-        mainDirectory = temporaryFolder.newFolder()
+        mainDirectory = tempDir.toFile()
         subDirectory = new File(mainDirectory.path, SUB_DIRECTORY)
         assert subDirectory.mkdirs()
         file = new File(subDirectory, "something.txt")
@@ -572,7 +571,7 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
         }
 
         configService = new TestConfigService([
-                (OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder("root").path,
+                (OtpProperty.PATH_PROJECT_ROOT): tempDir.resolve("root").toString(),
                 (OtpProperty.PATH_TOOLS)       : "/asdf",
         ])
 

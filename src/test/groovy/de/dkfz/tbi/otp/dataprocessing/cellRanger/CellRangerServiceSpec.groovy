@@ -22,9 +22,8 @@
 package de.dkfz.tbi.otp.dataprocessing.cellRanger
 
 import grails.testing.gorm.DataTest
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+import spock.lang.TempDir
 import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
@@ -79,8 +78,8 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
         ]
     }
 
-    @Rule
-    TemporaryFolder temporaryFolder
+    @TempDir
+    Path tempDir
 
     void "createInputDirectoryStructure, if singleCellBamFile, then recreate the input structure"() {
         given:
@@ -185,7 +184,7 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
 
     void "validateFilesExistsInResultDirectory, if singleCellBamFile given and all files exist, then throw no exception"() {
         given:
-        new TestConfigService(temporaryFolder.newFolder())
+        new TestConfigService(tempDir)
 
         SingleCellBamFile singleCellBamFile = createBamFile()
         File result = singleCellBamFile.resultDirectory
@@ -216,7 +215,7 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
     @Unroll
     void "validateFilesExistsInResultDirectory, if singleCellBamFile given and file/directory '#missingFile' does not exist, then throw an assert"() {
         given:
-        new TestConfigService(temporaryFolder.newFolder())
+        new TestConfigService(tempDir)
 
         SingleCellBamFile singleCellBamFile = createBamFile()
         File result = singleCellBamFile.resultDirectory
@@ -249,7 +248,7 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
     }
 
     @Unroll
-    void "createCellRangerParameters, adds EXPECT_CELLS and FORCE_CELLS parameters depending on respective fields in singleCellBamFile (expect=#expectedKey)"() {
+    void "createCellRangerParameters, adds expectedCells=#expectedCells and enforcedCells=#enforcedCells parameters depending on respective fields in singleCellBamFile"() {
         given:
         new TestConfigService()
 
@@ -298,7 +297,7 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
     @Unroll
     void "finishCellRangerWorkflow, if bam state is #state, then do necessary work and update database"() {
         given:
-        new TestConfigService(temporaryFolder.newFolder())
+        new TestConfigService(tempDir)
 
         String md5sum = HelperUtils.randomMd5sum
         SingleCellBamFile singleCellBamFile = createBamFile([
@@ -352,7 +351,7 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
 
     void "finishCellRangerWorkflow, if bam state is DECLARED, then throw assertion and do not change database"() {
         given:
-        new TestConfigService(temporaryFolder.newFolder())
+        new TestConfigService(tempDir)
 
         String md5sum = HelperUtils.randomMd5sum
         SingleCellBamFile singleCellBamFile = createBamFile([

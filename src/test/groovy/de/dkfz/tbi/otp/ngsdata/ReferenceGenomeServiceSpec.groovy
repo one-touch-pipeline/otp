@@ -24,9 +24,8 @@ package de.dkfz.tbi.otp.ngsdata
 import grails.testing.gorm.DataTest
 import grails.testing.services.ServiceUnitTest
 import org.apache.commons.io.FileUtils
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+import spock.lang.TempDir
 
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
@@ -39,6 +38,8 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
+import java.nio.file.Path
+
 class ReferenceGenomeServiceSpec extends Specification implements DataTest, ServiceUnitTest<ReferenceGenomeService> {
 
     ReferenceGenome referenceGenome
@@ -49,8 +50,8 @@ class ReferenceGenomeServiceSpec extends Specification implements DataTest, Serv
     File directory
     File file
 
-    @Rule
-    TemporaryFolder temporaryFolder
+    @TempDir
+    Path tempDir
 
     @Override
     Class<?>[] getDomainClassesToMock() {
@@ -75,12 +76,10 @@ class ReferenceGenomeServiceSpec extends Specification implements DataTest, Serv
         ])
         referenceGenomeService.configService.processingOptionService = referenceGenomeService.processingOptionService
 
-        directory = temporaryFolder.newFolder("reference_genomes", "referenceGenome")
+        directory = tempDir.resolve("reference_genomes/referenceGenome").toFile()
         DomainFactory.createProcessingOptionBasePathReferenceGenome(directory.parent)
 
-        file = new File(directory, "prefixName.fa")
-        assert file.createNewFile()
-        file << "test"
+        file = CreateFileHelper.createFile(directory.toPath().resolve("prefixName.fa"), "test").toFile()
 
         project = DomainFactory.createProject()
         project.save(flush: true)

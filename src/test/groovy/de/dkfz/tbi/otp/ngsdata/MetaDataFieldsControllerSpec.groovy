@@ -25,8 +25,6 @@ import grails.plugin.springsecurity.acl.AclSid
 import grails.testing.gorm.DataTest
 import grails.testing.web.controllers.ControllerUnitTest
 import org.grails.web.servlet.mvc.SynchronizerTokensHolder
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -58,9 +56,6 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
                 UserRole,
         ]
     }
-
-    @Rule
-    TemporaryFolder temporaryFolder
 
     void setupData() {
         createUserAndRoles()
@@ -527,7 +522,6 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         'SEQTYPE2' | 'seqtype2' | 'SEQTYPE'   | true   | false  | false     | false
         'SEQTYPE2' | 'seqtype2' | 'SEQ TYPE'  | true   | false  | false     | false
         'SEQTYPE2' | 'seqtype2' | 'SEQTYPE'   | true   | false  | false     | false
-        'SEQTYPE2' | 'seqtype2' | 'SEQTYPE2'  | true   | false  | false     | null
     }
 
     void "createSeqType, has invalid token"() {

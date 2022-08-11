@@ -81,7 +81,7 @@ class ClusterJobDetailController {
                 data  : [data.queue.percentage, data.process.percentage],
 
         ]
-        render result as JSON
+        render(result as JSON)
     }
 
     private String applyPeriodFormat(Long ms) {

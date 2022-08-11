@@ -107,7 +107,7 @@ class ClusterJobGeneralController {
         dataToRender.iTotalRecords = clusterJobService.countAllClusterJobsByDateBetween(startDate, endDate, cmd.sSearch)
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
         dataToRender.aaData = data
-        render dataToRender as JSON
+        render(dataToRender as JSON)
     }
 
     JSON getAllExitCodes() {
@@ -155,7 +155,7 @@ class ClusterJobGeneralController {
         dataToRender.labels = results.days
         dataToRender.keys = keys
 
-        render dataToRender as JSON
+        render(dataToRender as JSON)
     }
 
     private JSON renderPieDataAsJSON(Closure<List> method) {
@@ -175,6 +175,6 @@ class ClusterJobGeneralController {
             }
         }
 
-        render dataToRender as JSON
+        render(dataToRender as JSON)
     }
 }

@@ -22,9 +22,8 @@
 package de.dkfz.tbi.otp.dataprocessing.sophia
 
 import grails.testing.gorm.DataTest
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+import spock.lang.TempDir
 
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.config.OtpProperty
@@ -33,6 +32,8 @@ import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
+
+import java.nio.file.Path
 
 class SophiaInstanceSpec extends Specification implements DataTest {
 
@@ -70,8 +71,8 @@ class SophiaInstanceSpec extends Specification implements DataTest {
         ]
     }
 
-    @Rule
-    TemporaryFolder temporaryFolder
+    @TempDir
+    Path tempDir
 
     TestConfigService configService
 
@@ -82,9 +83,8 @@ class SophiaInstanceSpec extends Specification implements DataTest {
      * so later on temp files can be generated and paths tested
      */
     void setup() {
-        File temporaryFile = temporaryFolder.newFolder()
         DomainFactory.createRealm()
-        configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFile.path])
+        configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): tempDir.toString()])
 
         this.instance = DomainFactory.createSophiaInstanceWithRoddyBamFiles()
         instance.processingState = AnalysisProcessingStates.FINISHED

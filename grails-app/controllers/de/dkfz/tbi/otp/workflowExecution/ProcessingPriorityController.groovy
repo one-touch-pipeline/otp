@@ -51,7 +51,7 @@ class ProcessingPriorityController {
         try {
             ProcessingPriority savedProcessingPriority = processingPriorityService.savePriority(processingPriority)
             response.contentType = "application/json"
-            render savedProcessingPriority as JSON
+            render(savedProcessingPriority as JSON)
         } catch (ValidationException e) {
             log.debug(e.localizedMessage)
             response.sendError(HttpStatus.BAD_REQUEST.value(), g.message(code: "processingPriority.store.failure") as String)
@@ -82,6 +82,6 @@ class ProcessingPriorityController {
             response.sendError(HttpStatus.BAD_REQUEST.value(), g.message(code: "processingPriority.fetch.failure") as String)
         }
 
-        render processingPriorityService.getReferences(processingPriorityService.getPriority(id)) as JSON
+        render(processingPriorityService.getReferences(processingPriorityService.getPriority(id)) as JSON)
     }
 }

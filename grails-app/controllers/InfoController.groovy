@@ -88,6 +88,6 @@ class InfoController {
     }
 
     String newsBanner() {
-        render processingOptionService.findOptionAsString(ProcessingOption.OptionName.NEWS_BANNER)
+        render(processingOptionService.findOptionAsString(ProcessingOption.OptionName.NEWS_BANNER))
     }
 }

@@ -23,9 +23,8 @@ package de.dkfz.tbi.otp.withdraw
 
 import grails.testing.gorm.DataTest
 import grails.testing.services.ServiceUnitTest
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+import spock.lang.TempDir
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.*
@@ -37,8 +36,8 @@ import java.nio.file.Path
 
 abstract class WithdrawBamFileServiceSpec<T extends WithdrawBamFileService> extends Specification implements ServiceUnitTest<T>, DataTest {
 
-    @Rule
-    TemporaryFolder temporaryFolder
+    @TempDir
+    Path tempDir
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -50,11 +49,9 @@ abstract class WithdrawBamFileServiceSpec<T extends WithdrawBamFileService> exte
 
     void "collectPaths, when called for bamFiles, then return paths in workDir, except nonOTP paths"() {
         given:
-        Path vbpPath = temporaryFolder.newFolder().toPath()
-
         service.abstractMergedBamFileService = new AbstractMergedBamFileService()
         service.abstractMergedBamFileService.individualService = Mock(IndividualService) {
-            getViewByPidPath(_, _) >> vbpPath
+            getViewByPidPath(_, _) >> tempDir
         }
 
         List<AbstractMergedBamFile> bamFiles = (1..3).collect {

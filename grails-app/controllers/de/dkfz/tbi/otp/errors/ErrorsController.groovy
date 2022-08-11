@@ -79,7 +79,7 @@ class ErrorsController {
         log.error("Displaying exception with digest ${digest}.")
         response.status = HttpServletResponse.SC_INTERNAL_SERVER_ERROR
         if (requestUtilService.isAjax(request)) {
-            render digest
+            render(digest)
         } else {
             return [
                     code      : digest,

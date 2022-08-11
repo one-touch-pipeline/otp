@@ -164,7 +164,7 @@ class WorkflowDeletionServiceIntegrationSpec extends Specification implements Wo
                 workflowArtefact: workflowArtefact,
                 workflowRun     : createWorkflowRun([
                         project: project,
-                ])
+                ]),
         ])
 
         createWorkflowSteps(createWorkflowRun([

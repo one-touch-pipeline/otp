@@ -74,7 +74,7 @@ class ProcessingOptionController {
     JSON update(ProcessingOptionCommand cmd) {
         try {
             ProcessingOption processingOption = processingOptionService.createOrUpdate(cmd.optionName, cmd.value, cmd.type, cmd.specificProject)
-            render generateOptionRow(processingOption) as JSON
+            render(generateOptionRow(processingOption) as JSON)
         } catch (ValidationException ignored) {
             response.sendError(HttpStatus.BAD_REQUEST.value(), g.message(code: "processingOption.store.failure") as String)
         }
@@ -88,7 +88,7 @@ class ProcessingOptionController {
             response.sendError(HttpStatus.BAD_REQUEST.value(), g.message(code: "processingOption.obsolete.failure") as String)
         }
         Map data = [obsoleted: true]
-        render data as JSON
+        render(data as JSON)
     }
 
     /**

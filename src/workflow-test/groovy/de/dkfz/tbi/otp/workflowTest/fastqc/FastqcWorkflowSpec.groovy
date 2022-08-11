@@ -45,6 +45,8 @@ class FastqcWorkflowSpec extends AbstractWorkflowSpec {
     private static final String EXPECTED_RESULT_FILE = "fastqFiles/fastqc/asdf_fastqc.zip"
     private static final String BASE_NAME = "asdf.fastq"
 
+    Class<BashFastQcWorkflow> workflowComponentClass = BashFastQcWorkflow
+
     FastqcDataFilesService fastqcDataFilesService
     FastqcDecider fastqcDecider
     LsdfFilesService lsdfFilesService
@@ -180,10 +182,5 @@ class FastqcWorkflowSpec extends AbstractWorkflowSpec {
     @Override
     String getWorkflowName() {
         return BashFastQcWorkflow.WORKFLOW
-    }
-
-    @Override
-    Class<BashFastQcWorkflow> getWorkflowComponentClass() {
-        return BashFastQcWorkflow
     }
 }

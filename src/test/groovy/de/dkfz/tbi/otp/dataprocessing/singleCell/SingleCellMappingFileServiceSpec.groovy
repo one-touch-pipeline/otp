@@ -22,14 +22,14 @@
 package de.dkfz.tbi.otp.dataprocessing.singleCell
 
 import grails.testing.gorm.DataTest
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+import spock.lang.TempDir
 
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.DataFile
+import de.dkfz.tbi.otp.utils.CreateFileHelper
 
 import java.nio.file.*
 
@@ -45,8 +45,8 @@ class SingleCellMappingFileServiceSpec extends Specification implements DataTest
         ]
     }
 
-    @Rule
-    TemporaryFolder temporaryFolder
+    @TempDir
+    Path tempDir
 
     class AddMappingFileEntryIfMissing implements DomainFactoryCore {
 
@@ -57,7 +57,7 @@ class SingleCellMappingFileServiceSpec extends Specification implements DataTest
         AddMappingFileEntryIfMissing(List<DataFile> dataFiles) {
             this.dataFiles = dataFiles
             this.mappingFileOfDataFile = dataFiles.collectEntries { DataFile dataFile ->
-                return [(dataFile): temporaryFolder.newFile().toPath()]
+                return [(dataFile): CreateFileHelper.createFile(tempDir.resolve("test.txt"))]
             }
         }
     }

@@ -78,10 +78,9 @@ class FastqcPrepareJobSpec extends Specification implements DataTest, WorkflowSy
         Path workDirectoryPath = Paths.get(workDirectory)
         final WorkflowRun run = createWorkflowRun([
                 workDirectory: workDirectory,
-                workflow:
-                        createWorkflow([
-                                name: BashFastQcWorkflow.WORKFLOW,
-                        ])
+                workflow     : createWorkflow([
+                        name: BashFastQcWorkflow.WORKFLOW,
+                ]),
         ])
         WorkflowStep workflowStep = createWorkflowStep([workflowRun: run])
 

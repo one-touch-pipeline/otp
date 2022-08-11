@@ -22,9 +22,8 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import grails.testing.gorm.DataTest
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+import spock.lang.TempDir
 import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
@@ -36,6 +35,7 @@ import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.utils.HelperUtils
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
+import java.nio.file.Path
 import java.nio.file.Paths
 
 class AbstractMergedBamFileServiceSpec extends Specification implements DataTest, IsRoddy {
@@ -60,8 +60,8 @@ class AbstractMergedBamFileServiceSpec extends Specification implements DataTest
         ]
     }
 
-    @Rule
-    TemporaryFolder temporaryFolder
+    @TempDir
+    Path tempDir
 
     void "test getBaseDirectory"() {
         given:
@@ -95,12 +95,12 @@ class AbstractMergedBamFileServiceSpec extends Specification implements DataTest
 
     void "getExistingBamFilePath, when all fine, return the file"() {
         given:
-        File file = CreateFileHelper.createFile(temporaryFolder.newFile())
+        File file = CreateFileHelper.createFile(tempDir.resolve("test.txt")).toFile()
         AbstractMergedBamFileService service = new AbstractMergedBamFileService()
         AbstractMergedBamFile bamFile = Mock(AbstractMergedBamFile) {
-            1 * getProperty('pathForFurtherProcessing') >> file
-            1 * getProperty('md5sum') >> HelperUtils.randomMd5sum
-            2 * getProperty('fileSize') >> file.size()
+            1 * pathForFurtherProcessing >> file
+            1 * md5sum >> HelperUtils.randomMd5sum
+            2 * fileSize >> file.size()
             0 * _
         }
 
@@ -114,10 +114,10 @@ class AbstractMergedBamFileServiceSpec extends Specification implements DataTest
     @Unroll
     void "getExistingBamFilePath, when fail for #failCase, throw an exception"() {
         given:
-        File file = CreateFileHelper.createFile(temporaryFolder.newFile())
+        File file = CreateFileHelper.createFile(tempDir.resolve("test.txt")).toFile()
         AbstractMergedBamFileService service = new AbstractMergedBamFileService()
         AbstractMergedBamFile bamFile = Mock(AbstractMergedBamFile) {
-            _ * getProperty('pathForFurtherProcessing') >> {
+            _ * pathForFurtherProcessing >> {
                 if (failCase == 'exceptionInFurtherProcessingPath') {
                     throw new AssertionError('pathForFurtherProcessing fail')
                 } else if (failCase == 'fileNotExist') {
@@ -126,10 +126,10 @@ class AbstractMergedBamFileServiceSpec extends Specification implements DataTest
                     file
                 }
             }
-            _ * getProperty('md5sum') >> {
+            _ * md5sum >> {
                 failCase == 'invalidMd5sum' ? 'invalid' : HelperUtils.randomMd5sum
             }
-            _ * getProperty('fileSize') >> {
+            _ * fileSize >> {
                 failCase == 'fileSizeZero' ? 0 :
                         failCase == 'fileSizeWrong' ? 1234 : file.length()
             }

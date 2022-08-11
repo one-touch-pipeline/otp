@@ -22,9 +22,8 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import grails.testing.gorm.DataTest
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+import spock.lang.TempDir
 
 import de.dkfz.tbi.otp.Comment
 import de.dkfz.tbi.otp.TestConfigService
@@ -76,12 +75,12 @@ class LinkFilesToFinalDestinationServiceSpec extends Specification implements Is
         ]
     }
 
-    @Rule
-    TemporaryFolder temporaryFolder = new TemporaryFolder()
+    @TempDir
+    Path tempDir
 
     void "linkToFinalDestinationAndCleanup, all Fine"() {
         given:
-        new TestConfigService(temporaryFolder.newFolder())
+        new TestConfigService(tempDir)
         final String md5sum = HelperUtils.randomMd5sum
 
         RoddyBamFile roddyBamFile = createBamFile([
@@ -91,7 +90,7 @@ class LinkFilesToFinalDestinationServiceSpec extends Specification implements Is
         ])
         Realm realm = roddyBamFile.realm
 
-        DomainFactory.createRoddyProcessingOptions(temporaryFolder.newFolder())
+        DomainFactory.createRoddyProcessingOptions(tempDir.toFile())
 
         LinkFilesToFinalDestinationService linkFilesToFinalDestinationService = new LinkFilesToFinalDestinationService([
                 lsdfFilesService            : Mock(LsdfFilesService) {

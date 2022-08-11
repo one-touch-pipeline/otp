@@ -23,13 +23,14 @@ package de.dkfz.tbi.otp.ngsdata
 
 import grails.testing.gorm.DataTest
 import grails.testing.services.ServiceUnitTest
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+import spock.lang.TempDir
 
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
+
+import java.nio.file.Path
 
 class BedFileServiceSpec extends Specification implements DataTest, ServiceUnitTest<BedFileService> {
 
@@ -41,8 +42,8 @@ class BedFileServiceSpec extends Specification implements DataTest, ServiceUnitT
         ]
     }
 
-    @Rule
-    TemporaryFolder temporaryFolder = new TemporaryFolder()
+    @TempDir
+    Path tempDir
 
     BedFile bedFile
     File referenceGenomesBaseDirectory
@@ -50,7 +51,7 @@ class BedFileServiceSpec extends Specification implements DataTest, ServiceUnitT
     void setup() {
         bedFile = DomainFactory.createBedFile([fileName: 'bedFileName'])
 
-        referenceGenomesBaseDirectory = temporaryFolder.newFolder("reference_genomes", bedFile.referenceGenome.path, "targetRegions")
+        referenceGenomesBaseDirectory = tempDir.resolve("reference_genomes/${bedFile.referenceGenome.path}/targetRegions").toFile()
         referenceGenomesBaseDirectory.mkdirs()
 
         DomainFactory.createProcessingOptionBasePathReferenceGenome(referenceGenomesBaseDirectory.parentFile.parent)

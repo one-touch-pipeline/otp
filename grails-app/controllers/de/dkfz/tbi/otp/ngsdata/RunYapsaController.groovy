@@ -49,6 +49,6 @@ class RunYapsaController extends AbstractAnalysisController {
 
         dataToRender.archived = project.archived
 
-        render dataToRender as JSON
+        render(dataToRender as JSON)
     }
 }

@@ -55,6 +55,6 @@ class SampleIdentifierOverviewController {
             sampleIdentifierOverviewService.handleSampleIdentifierEntry(entry)
         }
 
-        render dataToRender as JSON
+        render(dataToRender as JSON)
     }
 }

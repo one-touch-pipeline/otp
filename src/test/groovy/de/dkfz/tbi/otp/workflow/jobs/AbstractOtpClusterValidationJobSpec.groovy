@@ -22,14 +22,14 @@
 package de.dkfz.tbi.otp.workflow.jobs
 
 import grails.testing.gorm.DataTest
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+import spock.lang.TempDir
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.job.processing.FileSystemService
+import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.workflow.shared.ValidationJobFailedException
 import de.dkfz.tbi.otp.workflowExecution.LogService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
@@ -37,11 +37,12 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowStepService
 import de.dkfz.tbi.otp.workflowExecution.cluster.logs.JobStatusLoggingFileService
 
 import java.nio.file.FileSystems
+import java.nio.file.Path
 
 class AbstractOtpClusterValidationJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory {
 
-    @Rule
-    TemporaryFolder temporaryFolder
+    @TempDir
+    Path tempDir
 
     private AbstractOtpClusterValidationJob job
 
@@ -114,7 +115,7 @@ class AbstractOtpClusterValidationJobSpec extends Specification implements DataT
 
     void "ensureExternalJobsRunThrough, when the job status log file does not exist, then fail"() {
         given:
-        File file = new File(temporaryFolder.newFile(), 'NonExistingFile.txt')
+        File file = tempDir.resolve("NonExistingFile.txt").toFile()
         setupDataWithClusterJob()
         1 * job.jobStatusLoggingFileService.constructLogFileLocation(_, _, _) >> file.path
 
@@ -128,7 +129,7 @@ class AbstractOtpClusterValidationJobSpec extends Specification implements DataT
 
     void "ensureExternalJobsRunThrough, when the job status log file is not readable, then fail"() {
         given:
-        File file = temporaryFolder.newFile()
+        File file = CreateFileHelper.createFile(tempDir.resolve("test.txt")).toFile()
         file.readable = false
 
         setupDataWithClusterJob()
@@ -144,7 +145,7 @@ class AbstractOtpClusterValidationJobSpec extends Specification implements DataT
 
     void "ensureExternalJobsRunThrough, when the job status do not contain the expected message, then fail"() {
         given:
-        File file = temporaryFolder.newFile()
+        File file = CreateFileHelper.createFile(tempDir.resolve("test.txt")).toFile()
         file.text = 'wrong message'
 
         setupDataWithClusterJob()
@@ -162,7 +163,7 @@ class AbstractOtpClusterValidationJobSpec extends Specification implements DataT
     void "ensureExternalJobsRunThrough, when the job status log file contain the expected message, then success"() {
         given:
         String message = "message ${nextId}"
-        File file = temporaryFolder.newFile()
+        File file = CreateFileHelper.createFile(tempDir.resolve("test.txt")).toFile()
         file.text = message
 
         setupDataWithClusterJob()

@@ -22,7 +22,6 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.validators
 
 import org.junit.ClassRule
-import org.junit.rules.TemporaryFolder
 import spock.lang.*
 
 import de.dkfz.tbi.TestCase
@@ -32,6 +31,9 @@ import de.dkfz.tbi.otp.utils.LocalShellHelper
 import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
+import java.nio.file.Files
+import java.nio.file.Path
+
 import static de.dkfz.tbi.otp.ngsdata.BamMetadataColumn.*
 import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
 
@@ -39,35 +41,36 @@ class QualityControlFileValidatorSpec extends Specification {
 
     @Shared
     @ClassRule
-    TemporaryFolder temporaryFolder
+    @TempDir
+    Path tempDir
 
     @Unroll
     void 'validate context with errors'() {
         given:
-        File bamFile = temporaryFolder.newFile('abc')
-        File dir = temporaryFolder.newFolder('folder')
-        File notReadAble = temporaryFolder.newFile('abcde')
-        assert LocalShellHelper.executeAndAssertExitCodeAndErrorOutAndReturnStdout("chmod a-r ${notReadAble.absolutePath} && echo OK").trim() == 'OK'
-        assert !notReadAble.canRead()
+        File bamFile = Files.createFile(tempDir.resolve('bam')).toFile()
+        File dir = Files.createDirectory(tempDir.resolve('folder')).toFile()
+        File notReadable = Files.createFile(tempDir.resolve('notReadable')).toFile()
+        assert LocalShellHelper.executeAndAssertExitCodeAndErrorOutAndReturnStdout("chmod a-r ${notReadable.absolutePath} && echo OK").trim() == 'OK'
+        assert !notReadable.canRead()
 
-        File qualityControl = temporaryFolder.newFile("qualityControl.json")
+        File qualityControl = Files.createFile(tempDir.resolve("qualityControl.json")).toFile()
         qualityControl.toPath().bytes = ("""\
         { "all":{"insertSizeCV": 23, "insertSizeMedian": 425, "pairedInSequencing": 2134421157, "properlyPaired": 2050531101 }}
         """).getBytes(BamMetadataValidationContext.CHARSET)
 
-        File qualityControlInvalid = temporaryFolder.newFile("qualityControlInvalid.json")
+        File qualityControlInvalid = Files.createFile(tempDir.resolve("qualityControlInvalid.json")).toFile()
         qualityControlInvalid.toPath().bytes = ("""\
         { "all":{"insertSizeCV": 23, "insertSizeMedian": 425, "pairedInSequencing": 2134421157}}
         """).getBytes(BamMetadataValidationContext.CHARSET)
 
-        File qualityControlInvalidJson = temporaryFolder.newFile("qualityControlInvalidJson")
+        File qualityControlInvalidJson = Files.createFile(tempDir.resolve("qualityControlInvalidJson")).toFile()
         qualityControlInvalidJson.toPath().bytes = ("""\
         {{"insertSizeCV": 23, "insertSizeMedian": 425, "pairedInSequencing": 2134421157, 12:34
         """).getBytes(BamMetadataValidationContext.CHARSET)
 
-        BamMetadataValidationContext context = contextForTestValidateContextWithErrors(bamFile, dir, notReadAble, qualityControl, qualityControlInvalid, qualityControlInvalidJson)
+        BamMetadataValidationContext context = contextForTestValidateContextWithErrors(bamFile, dir, notReadable, qualityControl, qualityControlInvalid, qualityControlInvalidJson)
 
-        Collection<Problem> expectedProblems = expectedProblemsForTestValidateContextWithErrors(context, dir, notReadAble, qualityControlInvalid, qualityControlInvalidJson)
+        Collection<Problem> expectedProblems = expectedProblemsForTestValidateContextWithErrors(context, dir, notReadable, qualityControlInvalid, qualityControlInvalidJson)
 
         when:
         new QualityControlFileValidator().validate(context)

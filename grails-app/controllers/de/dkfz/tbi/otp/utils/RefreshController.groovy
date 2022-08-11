@@ -44,7 +44,7 @@ class RefreshController {
     def enable() {
         session["auto-refresh"] = true
         def result = [enabled: session["auto-refresh"]]
-        render result as JSON
+        render(result as JSON)
     }
 
     /**
@@ -55,6 +55,6 @@ class RefreshController {
     def disable() {
         session["auto-refresh"] = false
         def result = [enabled: session["auto-refresh"]]
-        render result as JSON
+        render(result as JSON)
     }
 }

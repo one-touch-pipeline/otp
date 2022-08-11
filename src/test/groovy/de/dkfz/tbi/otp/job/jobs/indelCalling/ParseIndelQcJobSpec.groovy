@@ -22,9 +22,8 @@
 package de.dkfz.tbi.otp.job.jobs.indelCalling
 
 import grails.testing.gorm.DataTest
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+import spock.lang.TempDir
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.TestConfigService
@@ -86,8 +85,8 @@ class ParseIndelQcJobSpec extends Specification implements DataTest {
 
     TestConfigService configService
 
-    @Rule
-    TemporaryFolder temporaryFolder
+    @TempDir
+    Path tempDir
 
     ParseIndelQcJob job
 
@@ -96,15 +95,14 @@ class ParseIndelQcJobSpec extends Specification implements DataTest {
     Path indelQcJsonFile
 
     void setup() {
-        Path temporaryFile = temporaryFolder.newFolder().toPath()
-        configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFile.toString()])
+        configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): tempDir.toString()])
         indelCallingInstance = DomainFactory.createIndelCallingInstanceWithRoddyBamFiles()
         job = [
                 getProcessParameterObject: { -> indelCallingInstance },
         ] as ParseIndelQcJob
 
-        sampleSwapJsonFile = temporaryFile.resolve("sampleSwapJsonFile")
-        indelQcJsonFile = temporaryFile.resolve("indelQcJsonFile")
+        sampleSwapJsonFile = tempDir.resolve("sampleSwapJsonFile")
+        indelQcJsonFile = tempDir.resolve("indelQcJsonFile")
 
         job.indelCallingService = Mock(IndelCallingService) {
             getSampleSwapJsonFile(_) >> sampleSwapJsonFile
@@ -119,15 +117,16 @@ class ParseIndelQcJobSpec extends Specification implements DataTest {
     }
 
     @Unroll
-    void "test execute method, throw error since #notAvailable does not exist"() {
+    void "test execute method, throw error since #notAvailable does not exist on filesystem"() {
         given:
-        Path notAvailable
-        if (available == "sampleSwapJsonFile") {
+        Path notAvailablePath
+
+        if (notAvailable == "indelQcJsonFile") {
             DomainFactory.createIndelSampleSwapDetectionFileOnFileSystem(sampleSwapJsonFile, indelCallingInstance.individual)
-            notAvailable = indelQcJsonFile
-        } else {
+            notAvailablePath = indelQcJsonFile
+        } else if (notAvailable == "sampleSwapJsonFile") {
             DomainFactory.createIndelQcFileOnFileSystem(indelQcJsonFile)
-            notAvailable = sampleSwapJsonFile
+            notAvailablePath = sampleSwapJsonFile
         }
 
         when:
@@ -135,10 +134,10 @@ class ParseIndelQcJobSpec extends Specification implements DataTest {
 
         then:
         AssertionError e = thrown()
-        e.message.contains("${notAvailable} on local filesystem is not accessible or does not exist.")
+        e.message.contains("${notAvailablePath} on local filesystem is not accessible or does not exist.")
 
         where:
-        available            | _
+        notAvailable | _
         "sampleSwapJsonFile" | _
         "indelQcJsonFile"    | _
     }

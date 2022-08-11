@@ -22,9 +22,8 @@
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
 import grails.testing.gorm.DataTest
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+import spock.lang.TempDir
 
 import de.dkfz.tbi.otp.utils.exceptions.FileNotFoundException
 import de.dkfz.tbi.otp.TestConfigService
@@ -35,6 +34,8 @@ import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CreateJobStateLogFileHelper
+
+import java.nio.file.Path
 
 class AbstractRoddyJobSpec extends Specification implements DataTest {
 
@@ -67,14 +68,14 @@ class AbstractRoddyJobSpec extends Specification implements DataTest {
     ClusterJobIdentifier clusterJobIdentifier
     TestConfigService testConfigService
 
-    @Rule
-    TemporaryFolder tmpDir = new TemporaryFolder()
+    @TempDir
+    Path tempDir
 
     void setup() {
         roddyBamFile = DomainFactory.createRoddyBamFile(
                 roddyExecutionDirectoryNames: [],
         )
-        abstractRoddyJob = [processingStepId: 123456789, getProcessParameterObject: { roddyBamFile }] as AbstractRoddyJob
+        abstractRoddyJob = Spy(AbstractRoddyJob)
         clusterJobIdentifier = new ClusterJobIdentifier(DomainFactory.createRealm(), "clusterJobId")
 
         testConfigService = new TestConfigService()
@@ -93,13 +94,16 @@ class AbstractRoddyJobSpec extends Specification implements DataTest {
         abstractRoddyJob.failedOrNotFinishedClusterJobs([])
 
         then:
+        _ * abstractRoddyJob.processParameterObject >> roddyBamFile
+
+        then:
         def e = thrown(AssertionError)
         e.message.contains("on local filesystem is not accessible or does not exist.")
     }
 
     void "test failedOrNotFinishedClusterJobs, when job state log file does not exist, should fail"() {
         given:
-        testConfigService.addOtpProperty(OtpProperty.PATH_PROJECT_ROOT, tmpDir.newFolder().absolutePath)
+        testConfigService.addOtpProperty(OtpProperty.PATH_PROJECT_ROOT, tempDir.toString())
 
         String execDirName = "exec_890420_133730004_user_analysis"
         File roddyExecDir = new File(roddyBamFile.workExecutionStoreDirectory, execDirName)
@@ -112,13 +116,16 @@ class AbstractRoddyJobSpec extends Specification implements DataTest {
         abstractRoddyJob.failedOrNotFinishedClusterJobs([])
 
         then:
+        1 * abstractRoddyJob.processParameterObject >> roddyBamFile
+
+        then:
         def e = thrown(FileNotFoundException)
         e.message.contains("is not found in")
     }
 
     void "test failedOrNotFinishedClusterJobs, with correct job state log file"() {
         given:
-        testConfigService.addOtpProperty(OtpProperty.PATH_PROJECT_ROOT, tmpDir.newFolder().absolutePath)
+        testConfigService.addOtpProperty(OtpProperty.PATH_PROJECT_ROOT, tempDir.toString())
 
         String execDirName = "exec_890420_133730004_user_analysis"
         File roddyExecDir = new File(roddyBamFile.workExecutionStoreDirectory, execDirName)
@@ -130,23 +137,28 @@ class AbstractRoddyJobSpec extends Specification implements DataTest {
         roddyBamFile.roddyExecutionDirectoryNames.add(execDirName)
         roddyBamFile.save(flush: true)
 
-        expect:
-        [(clusterJobIdentifier): "Status code: ${STATUS_CODE_STARTED}"] ==
-                abstractRoddyJob.failedOrNotFinishedClusterJobs([clusterJobIdentifier])
+        when:
+        Map<ClusterJobIdentifier, String> resultMap = abstractRoddyJob.failedOrNotFinishedClusterJobs([clusterJobIdentifier])
+
+        then:
+        1 * abstractRoddyJob.processParameterObject >> roddyBamFile
+
+        then:
+        [(clusterJobIdentifier): "Status code: ${STATUS_CODE_STARTED}" as String] == resultMap
     }
 
     void "test failedOrNotFinishedClusterJobs, with multiple job state log files"() {
         given:
-        testConfigService.addOtpProperty(OtpProperty.PATH_PROJECT_ROOT, tmpDir.newFolder().absolutePath)
+        testConfigService.addOtpProperty(OtpProperty.PATH_PROJECT_ROOT, tempDir.toString())
         Realm realm = DomainFactory.createRealm()
         ClusterJobIdentifier identifierA = new ClusterJobIdentifier(realm, "pbsId1")
         ClusterJobIdentifier identifierB = new ClusterJobIdentifier(realm, "pbsId2")
         ClusterJobIdentifier identifierC = new ClusterJobIdentifier(realm, "pbsId3")
         ClusterJobIdentifier identifierD = new ClusterJobIdentifier(realm, "pbsId4")
 
-        // JOB A, 2 entries, statusCode = 0 => sucessfully finished job, no output,
+        // JOB A, 2 entries, statusCode = 0 => successfully finished job, no output,
         //                                   same identifier in older executionStore marked as failed, should be ignored
-        // JOB B, 3 entires, statusCode != 0 => failed job
+        // JOB B, 3 entries, statusCode != 0 => failed job
         // JOB C, 1 entry, statusCode = "57427" => still in progress
         // JOB D, 0 entries => no information found
 
@@ -177,22 +189,23 @@ class AbstractRoddyJobSpec extends Specification implements DataTest {
 
         assert new File(roddyBamFile.workExecutionStoreDirectory, "exec_890420_133730004_user_analysis").mkdirs()
 
-        expect:
-        [
+        when:
+        Map<ClusterJobIdentifier, String> resultMap = abstractRoddyJob.failedOrNotFinishedClusterJobs([identifierA, identifierB, identifierC, identifierD,])
+
+        then:
+        1 * abstractRoddyJob.processParameterObject >> roddyBamFile
+
+        then:
+        resultMap == [
                 (identifierB): "Status code: ${STATUS_CODE_FAILED}",
                 (identifierC): "Status code: ${STATUS_CODE_STARTED}",
                 (identifierD): "JobStateLogFile contains no information for this cluster job.",
-        ] == abstractRoddyJob.failedOrNotFinishedClusterJobs([
-                identifierA,
-                identifierB,
-                identifierC,
-                identifierD,
-        ])
+        ]
     }
 
     void "test test analyseFinishedClusterJobs, when job state log file contains no information about job ID, should return empty map"() {
         given:
-        JobStateLogFile jobStateLogFile = CreateJobStateLogFileHelper.createJobStateLogFile(tmpDir.root, [])
+        JobStateLogFile jobStateLogFile = CreateJobStateLogFileHelper.createJobStateLogFile(tempDir.toFile(), [])
 
         expect:
         [(clusterJobIdentifier): "JobStateLogFile contains no information for this cluster job."] ==
@@ -201,7 +214,7 @@ class AbstractRoddyJobSpec extends Specification implements DataTest {
 
     void "test test analyseFinishedClusterJobs, when cluster job is in progress, should return empty map"() {
         given:
-        JobStateLogFile jobStateLogFile = CreateJobStateLogFileHelper.createJobStateLogFile(tmpDir.root, [
+        JobStateLogFile jobStateLogFile = CreateJobStateLogFileHelper.createJobStateLogFile(tempDir.toFile(), [
                 CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: clusterJobIdentifier.clusterJobId, statusCode: STATUS_CODE_STARTED])
         ])
 
@@ -212,7 +225,7 @@ class AbstractRoddyJobSpec extends Specification implements DataTest {
 
     void "test analyseFinishedClusterJobs, when cluster job failed processing, should return specific error message"() {
         given:
-        JobStateLogFile jobStateLogFile = CreateJobStateLogFileHelper.createJobStateLogFile(tmpDir.root, [
+        JobStateLogFile jobStateLogFile = CreateJobStateLogFileHelper.createJobStateLogFile(tempDir.toFile(), [
                 CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: clusterJobIdentifier.clusterJobId, timeStamp: 0L]),
                 CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: clusterJobIdentifier.clusterJobId, timeStamp: 10L, statusCode: STATUS_CODE_FAILED]),
         ])
@@ -224,7 +237,7 @@ class AbstractRoddyJobSpec extends Specification implements DataTest {
 
     void "test analyseFinishedClusterJobs, when cluster job finished successfully, should return empty map"() {
         given:
-        JobStateLogFile jobStateLogFile = CreateJobStateLogFileHelper.createJobStateLogFile(tmpDir.root, [
+        JobStateLogFile jobStateLogFile = CreateJobStateLogFileHelper.createJobStateLogFile(tempDir.toFile(), [
                 CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: clusterJobIdentifier.clusterJobId, statusCode: STATUS_CODE_FAILED]),
                 CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: clusterJobIdentifier.clusterJobId, statusCode: STATUS_CODE_FAILED, timeStamp: 5L]),
                 CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: clusterJobIdentifier.clusterJobId, timeStamp: 10L]),
@@ -236,7 +249,7 @@ class AbstractRoddyJobSpec extends Specification implements DataTest {
 
     void "test analyseFinishedClusterJobs, when no finished cluster job, should return empty map"() {
         given:
-        JobStateLogFile jobStateLogFile = CreateJobStateLogFileHelper.createJobStateLogFile(tmpDir.root, [
+        JobStateLogFile jobStateLogFile = CreateJobStateLogFileHelper.createJobStateLogFile(tempDir.toFile(), [
                 CreateJobStateLogFileHelper.createJobStateLogFileEntry()
         ])
 

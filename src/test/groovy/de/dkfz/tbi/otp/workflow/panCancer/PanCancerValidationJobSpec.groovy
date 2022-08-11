@@ -22,9 +22,8 @@
 package de.dkfz.tbi.otp.workflow.panCancer
 
 import grails.testing.gorm.DataTest
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+import spock.lang.TempDir
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.TestConfigService
@@ -48,8 +47,8 @@ import java.nio.file.Paths
 
 class PanCancerValidationJobSpec extends Specification implements WorkflowSystemDomainFactory, DataTest, IsRoddy {
 
-    @Rule
-    TemporaryFolder temporaryFolder
+    @TempDir
+    Path tempDir
 
     final WorkflowRun run = createWorkflowRun([
             workflow: createWorkflow([
@@ -78,7 +77,7 @@ class PanCancerValidationJobSpec extends Specification implements WorkflowSystem
     }
 
     void setup() {
-        configService = new TestConfigService([(OtpProperty.PATH_CLUSTER_LOGS_OTP): temporaryFolder.newFolder().path])
+        configService = new TestConfigService([(OtpProperty.PATH_CLUSTER_LOGS_OTP): tempDir.toString()])
     }
 
     void cleanup() {
@@ -170,11 +169,11 @@ class PanCancerValidationJobSpec extends Specification implements WorkflowSystem
                 workflowStep: workflowStep,
                 clusterJobId: testJobId,
                 checkStatus : ClusterJob.CheckStatus.FINISHED,
-                jobLog      : CreateFileHelper.createFile(temporaryFolder.newFile()).absolutePath,
+                jobLog      : CreateFileHelper.createFile(tempDir.resolve("test.txt")).toString(),
         ])
 
         job.roddyService = Mock(RoddyService) {
-            1 * getJobStateLogFile(_) >> CreateJobStateLogFileHelper.createJobStateLogFile(temporaryFolder.root, [
+            1 * getJobStateLogFile(_) >> CreateJobStateLogFileHelper.createJobStateLogFile(tempDir.toFile(), [
                     CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: testJobId, statusCode: STATUS_CODE_FINISHED]),
             ])
         }
@@ -201,11 +200,11 @@ class PanCancerValidationJobSpec extends Specification implements WorkflowSystem
                 workflowStep: workflowStep,
                 clusterJobId: testJobId,
                 checkStatus : ClusterJob.CheckStatus.FINISHED,
-                jobLog      : CreateFileHelper.createFile(temporaryFolder.newFile()).absolutePath,
+                jobLog      : CreateFileHelper.createFile(tempDir.resolve("test.txt")).toString(),
         ])
 
         job.roddyService = Mock(RoddyService) {
-            1 * getJobStateLogFile(_) >> CreateJobStateLogFileHelper.createJobStateLogFile(temporaryFolder.root, [
+            1 * getJobStateLogFile(_) >> CreateJobStateLogFileHelper.createJobStateLogFile(tempDir.toFile(), [
                     CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: testJobId, statusCode: STATUS_CODE_FAILED]),
             ])
         }

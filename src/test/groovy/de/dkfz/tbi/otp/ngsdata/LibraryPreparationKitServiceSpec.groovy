@@ -22,8 +22,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.testing.gorm.DataTest
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
+import spock.lang.TempDir
 
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.infrastructure.FileService
@@ -43,8 +42,8 @@ class LibraryPreparationKitServiceSpec extends MetadataFieldsServiceSpec<Library
         ]
     }
 
-    @Rule
-    TemporaryFolder temporaryFolder
+    @TempDir
+    Path tempDir
 
     LibraryPreparationKitService libraryPreparationKitService = new LibraryPreparationKitService()
 
@@ -221,7 +220,7 @@ class LibraryPreparationKitServiceSpec extends MetadataFieldsServiceSpec<Library
         given:
         setupServiceForAdapterFileReading()
 
-        Path adapterFile = temporaryFolder.newFile("${HelperUtils.uniqueString}_adapterfile.fa").toPath()
+        Path adapterFile = tempDir.resolve("${HelperUtils.uniqueString}_adapterfile.fa")
         adapterFile.text = content
 
         LibraryPreparationKit kit = createLibraryPreparationKit(adapterFile: adapterFile.toAbsolutePath())
@@ -237,7 +236,7 @@ class LibraryPreparationKitServiceSpec extends MetadataFieldsServiceSpec<Library
         given:
         setupServiceForAdapterFileReading()
 
-        Path adapterFile = temporaryFolder.newFile("${HelperUtils.uniqueString}_adapterfile.fa").toPath()
+        Path adapterFile = tempDir.resolve("${HelperUtils.uniqueString}_adapterfile.fa")
         new RandomAccessFile(adapterFile.toFile(), "rw").length = 5242880L + 1L
 
         LibraryPreparationKit kit = createLibraryPreparationKit(adapterFile: adapterFile.toAbsolutePath())
@@ -255,7 +254,7 @@ class LibraryPreparationKitServiceSpec extends MetadataFieldsServiceSpec<Library
         setupServiceForAdapterFileReading()
 
         String content = "some content"
-        Path adapterFile = temporaryFolder.newFile("${HelperUtils.uniqueString}_adapterfile.fa").toPath()
+        Path adapterFile = tempDir.resolve("${HelperUtils.uniqueString}_adapterfile.fa")
         adapterFile.text = content
         Files.setPosixFilePermissions(adapterFile, [] as Set)
 

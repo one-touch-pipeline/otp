@@ -63,7 +63,7 @@ class SnvController extends AbstractAnalysisController {
         }
         List<Path> filePaths = snvResultsService.getFiles(cmd.bamFilePairAnalysis, cmd.plotType)
         Path file = filePaths.first()
-        render file: file.bytes, contentType: "application/pdf"
+        render(file: file.bytes, contentType: "application/pdf")
     }
 
     JSON dataTableResults(DataTableCommand cmd) {
@@ -76,6 +76,6 @@ class SnvController extends AbstractAnalysisController {
 
         dataToRender.archived = project.archived
 
-        render dataToRender as JSON
+        render(dataToRender as JSON)
     }
 }

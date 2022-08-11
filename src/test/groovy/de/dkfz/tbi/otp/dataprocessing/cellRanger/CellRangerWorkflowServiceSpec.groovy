@@ -22,9 +22,8 @@
 package de.dkfz.tbi.otp.dataprocessing.cellRanger
 
 import grails.testing.gorm.DataTest
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+import spock.lang.TempDir
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.TestConfigService
@@ -74,12 +73,12 @@ class CellRangerWorkflowServiceSpec extends Specification implements CellRangerF
         ]
     }
 
-    @Rule
-    TemporaryFolder temporaryFolder
+    @TempDir
+    Path tempDir
 
     void "linkResultFiles, if all target files exist, then create link for each"() {
         given:
-        new TestConfigService(temporaryFolder.newFolder())
+        new TestConfigService(tempDir)
 
         SingleCellBamFile singleCellBamFile = createBamFile()
         createResultFiles(singleCellBamFile)
@@ -108,7 +107,7 @@ class CellRangerWorkflowServiceSpec extends Specification implements CellRangerF
     @Unroll
     void "linkResultFiles, if file/directory '#missingFile' does not exist, then throw an assert"() {
         given:
-        new TestConfigService(temporaryFolder.newFolder())
+        new TestConfigService(tempDir)
 
         SingleCellBamFile singleCellBamFile = createBamFile()
         createResultFiles(singleCellBamFile)
@@ -138,7 +137,7 @@ class CellRangerWorkflowServiceSpec extends Specification implements CellRangerF
 
     void "cleanupOutputDirectory, when other files/directories exists in the result directory, delete them, but not the results"() {
         given:
-        new TestConfigService(temporaryFolder.newFolder())
+        new TestConfigService(tempDir)
 
         SingleCellBamFile singleCellBamFile = createBamFile()
 
@@ -180,7 +179,7 @@ class CellRangerWorkflowServiceSpec extends Specification implements CellRangerF
 
     void "deleteOutputDirectory, call deleteDirectoryRecursively for the work directory"() {
         given:
-        new TestConfigService(temporaryFolder.newFolder())
+        new TestConfigService(tempDir)
 
         SingleCellBamFile singleCellBamFile = createBamFile()
         Path workDirectory = singleCellBamFile.workDirectory.toPath()
@@ -205,7 +204,7 @@ class CellRangerWorkflowServiceSpec extends Specification implements CellRangerF
 
     void "correctFilePermissions, call correctPathPermissionRecursive for the work directory"() {
         given:
-        new TestConfigService(temporaryFolder.newFolder())
+        new TestConfigService(tempDir)
 
         SingleCellBamFile singleCellBamFile = createBamFile()
         Path workDirectory = singleCellBamFile.workDirectory.toPath()

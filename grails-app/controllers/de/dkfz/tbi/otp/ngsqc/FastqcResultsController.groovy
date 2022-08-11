@@ -107,9 +107,9 @@ class FastqcResultsController {
             FastqcProcessedFile fastqcProcessedFile = fastQcProcessedFileService.findSingleByDataFile(dataFile)
             stream = fastqcDataFilesService.getInputStreamFromZipFile(fastqcProcessedFile, cmd.path)
         } catch (FileNotReadableException e) {
-            render status: 404
+            render(status: 404)
             return void
         }
-        render file: stream, contentType: "image/png"
+        render(file: stream, contentType: "image/png")
     }
 }

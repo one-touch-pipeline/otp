@@ -128,7 +128,7 @@ class ProjectConfigController implements CheckAndCall {
         try {
             projectService.updateAnalysisDirectory(project, cmd.analysisDir, cmd.force)
             Map map = [analysisDir: project.dirAnalysis]
-            render map as JSON
+            render(map as JSON)
         } catch (FileSystemException | OtpFileSystemException e) {
             return response.sendError(HttpStatus.I_AM_A_TEAPOT.value(), e.message)  // needs a different status for the UI to handle the modal
         } catch (AssertionError | OtpRuntimeException e) {
@@ -157,7 +157,7 @@ class ProjectConfigController implements CheckAndCall {
     def updateSpeciesWithStrains(UpdateProjectSpeciesCommand cmd) {
         checkDefaultErrorsAndCallMethod(cmd) {
             projectService.updateProjectField(cmd.selectedValuesList, cmd.fieldName, projectSelectionService.requestedProject)
-            render [:] as JSON
+            render([:] as JSON)
         }
     }
 
@@ -214,14 +214,14 @@ class ProjectConfigController implements CheckAndCall {
         Project project = projectService.getProject(cmd.id)
         commentService.saveComment(project, cmd.comment)
         Map dataToRender = [date: TimeFormats.WEEKDAY_DATE_TIME.getFormattedDate(project.comment.modificationDate), author: project.comment.author]
-        render dataToRender as JSON
+        render(dataToRender as JSON)
     }
 
     def updateUnixGroup(UpdateUnixGroupCommand cmd) {
         try {
             projectService.updateUnixGroup(projectSelectionService.requestedProject, cmd.unixGroup, cmd.force)
             Map map = [unixGroup: cmd.unixGroup]
-            render map as JSON
+            render(map as JSON)
         } catch (UnixGroupIsSharedException sharedException) {
             return response.sendError(HttpStatus.CONFLICT.value(), sharedException.message)  // needs a different status for the UI to handle the modal
         } catch (OtpRuntimeException e) {
@@ -232,31 +232,31 @@ class ProjectConfigController implements CheckAndCall {
     def updateFingerPrinting(String value) {
         projectService.updateFingerPrinting(projectSelectionService.requestedProject, value.toBoolean())
         Map map = [success: true]
-        render map as JSON
+        render(map as JSON)
     }
 
     def updateProcessingNotification(String value) {
         projectService.updateProcessingNotification(projectSelectionService.requestedProject, value.toBoolean())
         Map map = [success: true]
-        render map as JSON
+        render(map as JSON)
     }
 
     def updateQcTrafficLightNotification(String value) {
         projectService.updateQcTrafficLightNotification(projectSelectionService.requestedProject, value.toBoolean())
         Map map = [success: true]
-        render map as JSON
+        render(map as JSON)
     }
 
     def updateCustomFinalNotification(String value) {
         projectService.updateCustomFinalNotification(projectSelectionService.requestedProject, value.toBoolean())
         Map map = [success: true]
-        render map as JSON
+        render(map as JSON)
     }
 
     def updateArchived(String value) {
         projectService.updateArchived(projectSelectionService.requestedProject, value.toBoolean())
         Map map = [success: true]
-        render map as JSON
+        render(map as JSON)
     }
 }
 

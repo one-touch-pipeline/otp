@@ -55,11 +55,11 @@ class AbstractJobImplSpec extends Specification implements DataTest {
         processingStepHierarchy = createProcessingStepWithHierarchy()
     }
 
-    void "test failedOrNotFinishedClusterJobs, no send step, throws RunTimeException"() {
+    void "failedOrNotFinishedClusterJobs, with no send step, should throw RuntimeException"() {
         given:
-        abstractJobImpl = [
-                getProcessingStep : { return DomainFactory.createProcessingStep() },
-        ] as AbstractJobImpl
+        abstractJobImpl = Spy(AbstractJobImpl) {
+            2 * processingStep >> DomainFactory.createProcessingStep()
+        }
 
         when:
         abstractJobImpl.failedOrNotFinishedClusterJobs()
@@ -71,9 +71,9 @@ class AbstractJobImplSpec extends Specification implements DataTest {
 
     void "test failedOrNotFinishedClusterJobs, no ClusterJob for send step, throws RunTimeException"() {
         given:
-        abstractJobImpl = [
-                getProcessingStep : { return processingStepHierarchy.validate },
-        ] as AbstractJobImpl
+        abstractJobImpl = Spy(AbstractJobImpl) {
+            1 * processingStep >> processingStepHierarchy.validate
+        }
         abstractJobImpl.jobStatusLoggingService = new JobStatusLoggingService()
 
         DomainFactory.createClusterJob(processingStep: processingStepHierarchy.validate)
@@ -89,9 +89,9 @@ class AbstractJobImplSpec extends Specification implements DataTest {
     void "test failedOrNotFinishedClusterJobs return list of failed or not finished jobs"() {
         given:
         configService = new TestConfigService()
-        abstractJobImpl = [
-                getProcessingStep : { return processingStepHierarchy.validate },
-        ] as AbstractJobImpl
+        abstractJobImpl = Spy(AbstractJobImpl) {
+            1 * processingStep >> processingStepHierarchy.validate
+        }
         abstractJobImpl.jobStatusLoggingService = new JobStatusLoggingService()
         abstractJobImpl.jobStatusLoggingService.configService = configService
 

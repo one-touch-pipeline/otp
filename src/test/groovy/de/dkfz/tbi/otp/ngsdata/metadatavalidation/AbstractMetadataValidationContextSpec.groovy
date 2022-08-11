@@ -22,7 +22,6 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation
 
 import org.junit.ClassRule
-import org.junit.rules.TemporaryFolder
 import spock.lang.*
 
 import de.dkfz.tbi.TestCase
@@ -41,7 +40,8 @@ class AbstractMetadataValidationContextSpec extends Specification {
 
     @Shared
     @ClassRule
-    TemporaryFolder temporaryFolder
+    @TempDir
+    Path tempDir
 
     @Unroll
     void 'readAndCheckFile, when file cannot be opened, adds an error'() {
@@ -57,20 +57,20 @@ class AbstractMetadataValidationContextSpec extends Specification {
         infoMetadata.spreadsheet == null
 
         where:
-        file                                                                                 || problemMessage
-        Paths.get('metadata.tsv')                                                            || 'not a valid absolute path'
-        Paths.get(TestCase.uniqueNonExistentPath.path, 'metadata.tsv')                       || 'does not exist'
-        temporaryFolder.newFolder('folder.tsv').toPath()                                     || 'is not a file'
-        temporaryFolder.newFile("${HelperUtils.uniqueString}.xls").toPath()                  || "does not end with an accepted extension"
-        makeNotReadable(temporaryFolder.newFile("${HelperUtils.uniqueString}.tsv").toPath()) || 'is not readable'
-        temporaryFolder.newFile("${HelperUtils.uniqueString}.tsv").toPath()                  || 'is empty'
-        createTooLargeMetadataFile()                                                         || 'is larger than'
+        file                                                                                  || problemMessage
+        Paths.get('metadata.tsv')                                                             || 'not a valid absolute path'
+        Paths.get(TestCase.uniqueNonExistentPath.path, 'metadata.tsv')                        || 'does not exist'
+        Files.createDirectory(tempDir.resolve('folder.tsv'))                                  || 'is not a file'
+        Files.createFile(tempDir.resolve("${HelperUtils.uniqueString}.xls"))                  || 'does not end with an accepted extension'
+        makeNotReadable(Files.createFile(tempDir.resolve("${HelperUtils.uniqueString}.tsv"))) || 'is not readable'
+        Files.createFile(tempDir.resolve("${HelperUtils.uniqueString}.tsv"))                  || 'is empty'
+        createTooLargeMetadataFile()                                                          || 'is larger than'
     }
 
     @SuppressWarnings('Indentation')
     void 'readAndCheckFile, when there is a parsing problem, adds a warning'() {
         given:
-        Path file = temporaryFolder.newFile("${HelperUtils.uniqueString}.tsv").toPath()
+        Path file = tempDir.resolve("${HelperUtils.uniqueString}.tsv")
         file.bytes = bytes
 
         when:
@@ -92,7 +92,7 @@ class AbstractMetadataValidationContextSpec extends Specification {
     @Unroll
     void 'readAndCheckFile, when there is a parsing problem, adds an error'() {
         given:
-        Path file = temporaryFolder.newFile("${HelperUtils.uniqueString}.tsv").toPath()
+        Path file = tempDir.resolve("${HelperUtils.uniqueString}.tsv")
         file.bytes = bytes
 
         when:
@@ -114,7 +114,7 @@ class AbstractMetadataValidationContextSpec extends Specification {
 
     void 'readAndCheckFile, when file can be parsed successfully, does not add problems'() {
         given:
-        Path file = temporaryFolder.newFile("${HelperUtils.uniqueString}.tsv").toPath()
+        Path file = tempDir.resolve("${HelperUtils.uniqueString}.tsv")
         file.bytes = 'x\nM\u00e4use'.getBytes(MetadataValidationContext.CHARSET)
 
         when:
@@ -128,7 +128,7 @@ class AbstractMetadataValidationContextSpec extends Specification {
 
     void 'readAndCheckFile, removes tabs and newlines at end of file'() {
         given:
-        Path file = temporaryFolder.newFile("${HelperUtils.uniqueString}.tsv").toPath()
+        Path file = tempDir.resolve("${HelperUtils.uniqueString}.tsv")
         file.bytes = 'a\nb\t\r\n\t\t\r\n'.getBytes(MetadataValidationContext.CHARSET)
 
         when:
@@ -141,7 +141,7 @@ class AbstractMetadataValidationContextSpec extends Specification {
 
     void 'readAndCheckFile, when file contains only one line, adds error'() {
         given:
-        Path file = temporaryFolder.newFile("${HelperUtils.uniqueString}.tsv").toPath()
+        Path file = tempDir.resolve("${HelperUtils.uniqueString}.tsv")
         file.bytes = 'a\n\n'.getBytes(MetadataValidationContext.CHARSET)
 
         when:
@@ -169,7 +169,7 @@ class AbstractMetadataValidationContextSpec extends Specification {
 
     void 'pathForMessage, when path points to a symlink, returns path of symlink and path of target'() {
         given:
-        Path linkPath = temporaryFolder.newFolder().toPath().resolve('i_am_a_symlink')
+        Path linkPath = tempDir.resolve('i_am_a_symlink')
         Path targetPath = TestCase.uniqueNonExistentPath.toPath()
         Files.createSymbolicLink(linkPath, targetPath)
         String expected = "'${targetPath}' (linked from '${linkPath}')"
@@ -183,9 +183,8 @@ class AbstractMetadataValidationContextSpec extends Specification {
 
     void 'pathForMessage, when path points to a symlink to a symlink, returns path of symlink and path of final target'() {
         given:
-        Path folder = temporaryFolder.newFolder().toPath()
-        Path sourceSymlink = folder.resolve('source_symlink')
-        Path middleSymlink = folder.resolve('middle_symlink')
+        Path sourceSymlink = tempDir.resolve('source_symlink')
+        Path middleSymlink = tempDir.resolve('middle_symlink')
         Path targetPath = TestCase.uniqueNonExistentPath.toPath()
         Files.createSymbolicLink(sourceSymlink, middleSymlink)
         Files.createSymbolicLink(middleSymlink, targetPath)
@@ -204,7 +203,7 @@ class AbstractMetadataValidationContextSpec extends Specification {
     }
 
     private Path createTooLargeMetadataFile() {
-        return CreateFileHelper.createFile(temporaryFolder.newFile("${HelperUtils.uniqueString}.tsv"),
-                'x' * (MetadataValidationContext.MAX_METADATA_FILE_SIZE_IN_MIB * 1024L * 1024L + 1L)).toPath()
+        return CreateFileHelper.createFile(tempDir.resolve("${HelperUtils.uniqueString}.tsv"),
+                'x' * (MetadataValidationContext.MAX_METADATA_FILE_SIZE_IN_MIB * 1024L * 1024L + 1L))
     }
 }

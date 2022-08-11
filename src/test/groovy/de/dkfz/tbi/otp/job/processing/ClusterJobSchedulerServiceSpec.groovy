@@ -255,7 +255,7 @@ ${jobId}.host.long-doma  someUser    fast     r160224_18005293    --      1     
                 },
                 clusterJobService              : Mock(ClusterJobService) {
                     amendClusterJobCallCount * amendClusterJob(_, _)
-                }
+                },
         ])
 
         expect:

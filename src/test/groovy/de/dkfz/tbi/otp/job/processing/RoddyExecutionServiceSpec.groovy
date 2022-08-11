@@ -23,9 +23,8 @@ package de.dkfz.tbi.otp.job.processing
 
 import grails.testing.gorm.DataTest
 import grails.testing.services.ServiceUnitTest
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+import spock.lang.TempDir
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.TestConfigService
@@ -44,6 +43,7 @@ import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 import java.nio.file.FileSystems
+import java.nio.file.Path
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
 
@@ -107,8 +107,8 @@ class RoddyExecutionServiceSpec extends Specification implements ServiceUnitTest
 
     String stderr
 
-    @Rule
-    TemporaryFolder tmpDir
+    @TempDir
+    Path tempDir
 
     void setupData() {
         executeCommandCounter = 0
@@ -286,7 +286,7 @@ class RoddyExecutionServiceSpec extends Specification implements ServiceUnitTest
         setUpWorkDirAndMockProcessOutput()
 
         roddyBamFile.metaClass.getWorkExecutionStoreDirectory = {
-            return tmpDir.newFolder("Folder")
+            return tempDir.resolve("Folder").toFile()
         }
 
         when:
@@ -324,7 +324,7 @@ class RoddyExecutionServiceSpec extends Specification implements ServiceUnitTest
         roddyBamFile.roddyExecutionDirectoryNames.add(RODDY_EXECUTION_STORE_DIRECTORY_NAME)
 
         workRoddyExecutionDir.delete()
-        tmpDir.newFile(RODDY_EXECUTION_STORE_DIRECTORY_NAME)
+        tempDir.resolve(RODDY_EXECUTION_STORE_DIRECTORY_NAME)
 
         when:
         roddyExecutionService.saveRoddyExecutionStoreDirectory(roddyBamFile as RoddyResult, stderr, FileSystems.default)
@@ -407,7 +407,7 @@ class RoddyExecutionServiceSpec extends Specification implements ServiceUnitTest
     }
 
     private File setRootPathAndCreateWorkExecutionStoreDirectory() {
-        configService.addOtpProperty((OtpProperty.PATH_PROJECT_ROOT), tmpDir.newFolder().path)
+        configService.addOtpProperty((OtpProperty.PATH_PROJECT_ROOT), tempDir.toString())
         File workRoddyExecutionDir = new File(roddyBamFile.workExecutionStoreDirectory, RODDY_EXECUTION_STORE_DIRECTORY_NAME)
         assert workRoddyExecutionDir.mkdirs()
         return workRoddyExecutionDir

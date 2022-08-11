@@ -22,15 +22,17 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import grails.testing.gorm.DomainUnitTest
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+import spock.lang.TempDir
 
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
+
+import java.nio.file.Path
 
 class RoddyBamFileDomainSpec extends Specification implements DomainUnitTest<RoddyBamFile> {
 
@@ -75,8 +77,8 @@ class RoddyBamFileDomainSpec extends Specification implements DomainUnitTest<Rod
         ]
     }
 
-    @Rule
-    TemporaryFolder tmpDir
+    @TempDir
+    Path tempDir
 
     static final String FIRST_DATAFILE_NAME = "4_NoIndex_L004_R1_complete_filtered.fastq.gz"
     static final String SECOND_DATAFILE_NAME = "4_NoIndex_L004_R2_complete_filtered.fastq.gz"
@@ -88,7 +90,7 @@ class RoddyBamFileDomainSpec extends Specification implements DomainUnitTest<Rod
         ])
         sampleType = roddyBamFile.sampleType
         individual = roddyBamFile.individual
-        configService = new TestConfigService(tmpDir.newFolder())
+        configService = new TestConfigService(tempDir)
         testDir = "${individual.getViewByPidPath(roddyBamFile.seqType).absoluteDataManagementPath.path}/${sampleType.dirName}/${roddyBamFile.seqType.libraryLayoutDirName}/merged-alignment"
     }
 
@@ -425,7 +427,7 @@ class RoddyBamFileDomainSpec extends Specification implements DomainUnitTest<Rod
         setupTest()
         String fileName = RODDY_EXECUTION_DIR_NAME
 
-        tmpDir.newFile(fileName)
+        CreateFileHelper.createFile(tempDir.resolve(fileName))
 
         when:
         roddyBamFile.roddyExecutionDirectoryNames.add(fileName)

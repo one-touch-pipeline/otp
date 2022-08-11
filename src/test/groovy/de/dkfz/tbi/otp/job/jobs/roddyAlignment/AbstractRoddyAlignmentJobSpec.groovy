@@ -22,9 +22,8 @@
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
 import grails.testing.gorm.DataTest
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+import spock.lang.TempDir
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.TestConfigService
@@ -39,10 +38,12 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
+import java.nio.file.Path
+
 class AbstractRoddyAlignmentJobSpec extends Specification implements DataTest, RoddyRnaFactory {
 
-    @Rule
-    TemporaryFolder temporaryFolder
+    @TempDir
+    Path tempDir
 
     @Override
     Class<?>[] getDomainClassesToMock() {
@@ -95,8 +96,8 @@ class AbstractRoddyAlignmentJobSpec extends Specification implements DataTest, R
     void "prepareAndReturnAlignmentCValues, when all fine, return list of cvalues"() {
         given:
         AbstractRoddyAlignmentJob job = Spy(AbstractRoddyAlignmentJob)
-        File referenceGenomeFilePath = CreateFileHelper.createFile(temporaryFolder.newFile())
-        File chromosomeStatSizeFilePath = CreateFileHelper.createFile(temporaryFolder.newFile())
+        File referenceGenomeFilePath = CreateFileHelper.createFile(tempDir.resolve("test.txt").toFile())
+        File chromosomeStatSizeFilePath = CreateFileHelper.createFile(tempDir.resolve("test2.txt").toFile())
 
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
 
@@ -114,7 +115,7 @@ class AbstractRoddyAlignmentJobSpec extends Specification implements DataTest, R
         ]
 
         if (adapterTrimming) {
-            File adapterFilePath = CreateFileHelper.createFile(temporaryFolder.newFile())
+            File adapterFilePath = CreateFileHelper.createFile(tempDir.resolve("test3.txt").toFile())
             roddyBamFile.config.adapterTrimmingNeeded = true
             roddyBamFile.config.save(flush: true)
 
@@ -196,7 +197,7 @@ class AbstractRoddyAlignmentJobSpec extends Specification implements DataTest, R
     @Unroll
     void "validate, when #file not exist, throw assert"() {
         given:
-        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
+        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): tempDir.toString()])
         AbstractRoddyAlignmentJob abstractRoddyAlignmentJob = Spy(AbstractRoddyAlignmentJob) {
             getExecuteRoddyCommandService() >> Mock(ExecuteRoddyCommandService) {
                 1 * correctPermissions(_, _) >> { }
@@ -244,7 +245,7 @@ class AbstractRoddyAlignmentJobSpec extends Specification implements DataTest, R
 
     void "validate, when wrong operation status, throw assert"() {
         given:
-        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
+        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): tempDir.toString()])
         AbstractRoddyAlignmentJob abstractRoddyAlignmentJob = Spy(AbstractRoddyAlignmentJob) {
             getExecuteRoddyCommandService() >> Mock(ExecuteRoddyCommandService) {
                 1 * correctPermissions(_, _) >> { }
@@ -274,7 +275,7 @@ class AbstractRoddyAlignmentJobSpec extends Specification implements DataTest, R
 
     void "validate, when all fine, return without exception"() {
         given:
-        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
+        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): tempDir.toString()])
         AbstractRoddyAlignmentJob abstractRoddyAlignmentJob = Spy(AbstractRoddyAlignmentJob) {
             getExecuteRoddyCommandService() >> Mock(ExecuteRoddyCommandService) {
                 1 * correctPermissions(_, _) >> { }
@@ -305,7 +306,7 @@ class AbstractRoddyAlignmentJobSpec extends Specification implements DataTest, R
     @SuppressWarnings('ExplicitFlushForDeleteRule')
     void "validate, when all fine and seqtype is RNA, return without exception"() {
         given:
-        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
+        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): tempDir.toString()])
         AbstractRoddyAlignmentJob abstractRoddyAlignmentJob = Spy(AbstractRoddyAlignmentJob) {
             getExecuteRoddyCommandService() >> Mock(ExecuteRoddyCommandService) {
                 1 * correctPermissions(_, _) >> { }
@@ -350,7 +351,7 @@ class AbstractRoddyAlignmentJobSpec extends Specification implements DataTest, R
 
     void "validateReadGroups, when read groups are not as expected, throw an exception"() {
         given:
-        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
+        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): tempDir.toString()])
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
 
         roddyBamFile.workBamFile.parentFile.mkdirs()
@@ -386,7 +387,7 @@ class AbstractRoddyAlignmentJobSpec extends Specification implements DataTest, R
 
     void "validateReadGroups, when read groups are fine, return without exception"() {
         given:
-        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
+        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): tempDir.toString()])
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
 
         SeqTrack seqTrack = DomainFactory.createSeqTrackWithTwoDataFiles(roddyBamFile.mergingWorkPackage)
@@ -438,7 +439,7 @@ class AbstractRoddyAlignmentJobSpec extends Specification implements DataTest, R
 
     void "ensureCorrectBaseBamFileIsOnFileSystem, base bam file exist and is correct, return without exception"() {
         given:
-        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
+        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): tempDir.toString()])
         RoddyBamFile baseRoddyBamFile = DomainFactory.createRoddyBamFile()
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(baseRoddyBamFile)
 

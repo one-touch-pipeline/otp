@@ -1622,7 +1622,7 @@ class ClusterJobServiceIntegrationSpec extends Specification implements DomainFa
                 'process': [
                         'percentage': 25,
                         'ms'        : 6 * HOURS_TO_MILLIS,
-                ]
+                ],
         ] == clusterJobService.findJobSpecificStatesTimeDistributionByJobId(job1.id)
     }
 

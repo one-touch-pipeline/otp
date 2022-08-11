@@ -22,9 +22,8 @@
 package de.dkfz.tbi.otp.utils
 
 import grails.testing.gorm.DataTest
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+import spock.lang.TempDir
 import spock.lang.Unroll
 
 import java.nio.file.Path
@@ -32,13 +31,13 @@ import java.nio.file.Paths
 
 class Md5SumServiceSpec extends Specification implements DataTest {
 
-    @Rule
-    TemporaryFolder temporaryFolder
+    @TempDir
+    Path tempDir
 
     @Unroll
     void "extractMd5Sum, if valid md5sum, return md5sum value"() {
         given:
-        Path md5sumFile = temporaryFolder.newFile().toPath()
+        Path md5sumFile = tempDir.resolve("md5sum.txt")
         md5sumFile.text = prefix + md5sum + postfix
 
         when:
@@ -79,7 +78,7 @@ class Md5SumServiceSpec extends Specification implements DataTest {
     @SuppressWarnings('ExplicitFlushForDeleteRule')
     void "extractMd5Sum, if md5sum file does not exist, then throw an assertion"() {
         given:
-        File file = temporaryFolder.newFile()
+        File file = tempDir.resolve("md5sum.txt").toFile()
         file.delete()
 
         when:
@@ -91,11 +90,8 @@ class Md5SumServiceSpec extends Specification implements DataTest {
     }
 
     void "extractMd5Sum, if md5sum file is not a regular file, then throw an assertion"() {
-        given:
-        File file = temporaryFolder.newFolder()
-
         when:
-        new Md5SumService().extractMd5Sum(file.toPath())
+        new Md5SumService().extractMd5Sum(tempDir)
 
         then:
         AssertionError e = thrown()
@@ -104,7 +100,7 @@ class Md5SumServiceSpec extends Specification implements DataTest {
 
     void "extractMd5Sum, if md5sum file is not readable, then throw an assertion"() {
         given:
-        File file = temporaryFolder.newFile()
+        File file = tempDir.resolve("md5sum.txt").toFile()
         file.text = HelperUtils.randomMd5sum
         file.readable = false
 
@@ -118,7 +114,7 @@ class Md5SumServiceSpec extends Specification implements DataTest {
 
     void "extractMd5Sum, if md5sum file is empty, then throw an assertion"() {
         given:
-        File file = temporaryFolder.newFile()
+        File file = tempDir.resolve("md5sum.txt").toFile()
         file.text = ''
 
         when:
@@ -132,7 +128,7 @@ class Md5SumServiceSpec extends Specification implements DataTest {
     @Unroll
     void "extractMd5Sum, if md5sum file is #name (#input), then throw an assertion"() {
         given:
-        File file = temporaryFolder.newFile()
+        File file = tempDir.resolve("md5sum.txt").toFile()
         file.text = input
 
         when:

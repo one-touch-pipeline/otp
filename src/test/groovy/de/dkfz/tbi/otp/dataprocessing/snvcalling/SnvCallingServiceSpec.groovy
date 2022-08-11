@@ -28,11 +28,7 @@ import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
 class SnvCallingServiceSpec extends AbstractBamFileAnalysisServiceSpec implements ServiceUnitTest<SnvCallingService> {
-
-    @Override
-    String getPathPart() {
-        return 'snv_results'
-    }
+    String pathPart = 'snv_results'
 
     @Override
     BamFilePairAnalysis getNewInstance() {

@@ -242,7 +242,7 @@ class AlignmentQualityOverviewController implements CheckAndCall {
                     cmd.comment
             )
 
-            render generateQcStatusCell(cmd.abstractBamFile as AbstractMergedBamFile) as JSON
+            render(generateQcStatusCell(cmd.abstractBamFile as AbstractMergedBamFile) as JSON)
         }
     }
 
@@ -254,7 +254,7 @@ class AlignmentQualityOverviewController implements CheckAndCall {
             dataToRender.iTotalRecords = 0
             dataToRender.iTotalDisplayRecords = 0
             dataToRender.aaData = []
-            render dataToRender as JSON
+            render(dataToRender as JSON)
             return
         }
 
@@ -263,14 +263,14 @@ class AlignmentQualityOverviewController implements CheckAndCall {
         dataToRender.iTotalRecords = dataOverall.size()
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
         dataToRender.aaData = generateAlignmentQcTableRows(dataOverall, project, cmd.seqType)
-        render dataToRender as JSON
+        render(dataToRender as JSON)
     }
 
     def viewCellRangerSummary(ViewCellRangerSummaryCommand cmd) {
         try {
             String content = cmd.singleCellBamFile.project.archived ? g.message(code: "alignment.quality.projectArchived.warning") :
                     cellRangerService.getWebSummaryResultFileContent(cmd.singleCellBamFile)
-            render text: content, contentType: "text/html", encoding: "UTF-8"
+            render(text: content, contentType: "text/html", encoding: "UTF-8")
         } catch (NoSuchFileException e) {
             flash.message = new FlashMessage(g.message(code: "alignment.quality.exception.noSuchFile") as String, e.message)
             redirect(action: "index")
@@ -300,9 +300,9 @@ class AlignmentQualityOverviewController implements CheckAndCall {
         Path file = fileSystem.getPath(rrbf.workArribaFusionPlotPdf)
 
         if (Files.isReadable(file)) {
-            render file: file.bytes, contentType: "application/pdf"
+            render(file: file.bytes, contentType: "application/pdf")
         } else {
-            render text: "no plot available", contentType: "text/plain"
+            render(text: "no plot available", contentType: "text/plain")
         }
     }
 

@@ -86,7 +86,7 @@ class WorkflowConfigViewerController implements BaseWorkflowConfigController {
                     selectors: g.render(template: '/templates/bootstrap_selector', model: [relatedSelectors: selectors]),
                     config   : fragmentJson,
             ]
-            render data as JSON
+            render(data as JSON)
         } catch (JsonParseException ignored) {
             response.sendError(HttpStatus.BAD_REQUEST.value(),
                     g.message(code: 'workflowConfigViewer.json.parsing.error') as String)

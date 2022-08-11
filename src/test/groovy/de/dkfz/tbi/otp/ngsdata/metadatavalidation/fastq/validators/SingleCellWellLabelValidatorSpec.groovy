@@ -61,7 +61,7 @@ class SingleCellWellLabelValidatorSpec extends Specification {
     }
 
     @Unroll
-    void 'validate invalid single cell well label "#validValue", adds problems'() {
+    void 'validate invalid single cell well label "#invalidValue", adds problems'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 [

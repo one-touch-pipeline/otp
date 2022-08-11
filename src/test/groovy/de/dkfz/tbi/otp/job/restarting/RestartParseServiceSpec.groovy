@@ -22,10 +22,9 @@
 package de.dkfz.tbi.otp.job.restarting
 
 import grails.testing.gorm.DataTest
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import org.slf4j.Logger
 import spock.lang.Specification
+import spock.lang.TempDir
 import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
@@ -36,11 +35,13 @@ import de.dkfz.tbi.otp.job.scheduler.ErrorLogService
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.utils.HelperUtils
 
+import java.nio.file.Path
+
 @SuppressWarnings("UnnecessaryGetter")
 class RestartParseServiceSpec extends Specification implements DataTest {
 
-    @Rule
-    TemporaryFolder temporaryFolder
+    @TempDir
+    Path tempDir
 
     @Unroll
     void "extractMatchingAction, when text is '#text', matches (#match) JobErrorDefinition with errorExpression '#errorExpression'"() {
@@ -136,7 +137,7 @@ class RestartParseServiceSpec extends Specification implements DataTest {
         RestartParseService service = new RestartParseService(
                 errorLogService: Mock(ErrorLogService) {
                     1 * getStackTracesFile(_) >> {
-                        File file = temporaryFolder.newFile()
+                        File file = tempDir.resolve("test.txt").toFile()
                         file.text = text
                         return file
                     }
@@ -207,7 +208,9 @@ class RestartParseServiceSpec extends Specification implements DataTest {
                     new ClusterJob(
                             jobLog: {
                                 if (content) {
-                                    return CreateFileHelper.createFile(temporaryFolder.newFile(), content).absolutePath
+                                    Path fileName = tempDir.resolve(HelperUtils.randomMd5sum)
+                                    Path file = CreateFileHelper.createFile(fileName, content)
+                                    return file.toString()
                                 }
                                 return TestCase.uniqueNonExistentPath.absolutePath
                             }()
@@ -354,7 +357,7 @@ class RestartParseServiceSpec extends Specification implements DataTest {
         RestartParseService service = new RestartParseService(
                 errorLogService: Mock(ErrorLogService) {
                     getStackTracesFile(_) >> {
-                        File file = temporaryFolder.newFile()
+                        File file = tempDir.resolve("test.txt").toFile()
                         file.text = stacktrace
                         return file
                     }
@@ -364,7 +367,7 @@ class RestartParseServiceSpec extends Specification implements DataTest {
         Job job = GroovyMock(Job) {
             _ * failedOrNotFinishedClusterJobs() >> [
                     new ClusterJob([
-                            jobLog: CreateFileHelper.createFile(temporaryFolder.newFile(), cluster).absolutePath,
+                            jobLog: CreateFileHelper.createFile(tempDir.resolve("text2.txt").toFile(), cluster).absolutePath,
                     ])
             ]
             _ * getLog() >> Mock(Logger) {

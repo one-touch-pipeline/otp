@@ -22,14 +22,14 @@
 package de.dkfz.tbi.otp.workflow.fastqc
 
 import grails.testing.gorm.DataTest
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+import spock.lang.TempDir
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.workflow.shared.WorkflowException
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
@@ -46,15 +46,15 @@ class FastqcConditionalFailJobSpec extends Specification implements DataTest, Wo
         ]
     }
 
-    @Rule
-    TemporaryFolder temporaryFolder
+    @TempDir
+    Path tempDir
 
     void "test check, succeeds"() {
         given:
         WorkflowStep workflowStep = createWorkflowStep()
         SeqTrack seqTrack = createSeqTrackWithTwoDataFile()
 
-        Path path = temporaryFolder.newFile().toPath()
+        Path path = CreateFileHelper.createFile(tempDir.resolve("test.txt"))
         path.text = "non-empty"
 
         FastqcConditionalFailJob job = Spy(FastqcConditionalFailJob) {

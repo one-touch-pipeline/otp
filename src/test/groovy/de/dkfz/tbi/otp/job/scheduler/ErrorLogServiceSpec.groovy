@@ -23,16 +23,17 @@ package de.dkfz.tbi.otp.job.scheduler
 
 import grails.testing.gorm.DataTest
 import org.apache.commons.io.FileUtils
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+import spock.lang.TempDir
 
 import de.dkfz.tbi.otp.TestConfigService
 
+import java.nio.file.Path
+
 class ErrorLogServiceSpec extends Specification implements DataTest {
 
-    @Rule
-    TemporaryFolder tmpDir = new TemporaryFolder()
+    @TempDir
+    Path tempDir
 
     ErrorLogService errorLogService
 
@@ -58,14 +59,14 @@ class ErrorLogServiceSpec extends Specification implements DataTest {
         given:
         setupData()
 
-        File testDirectory = tmpDir.newFolder("otp-test", "stacktraces")
+        Path testDirectory = tempDir.resolve("otp-test/stacktraces")
         errorLogService.configService = Mock(TestConfigService) {
-            getStackTracesDirectory() >> { new File(testDirectory.absolutePath) }
+            getStackTracesDirectory() >> { testDirectory.toFile() }
         }
 
         when:
         String md5SumCalculatedInMethod = errorLogService.log(new Exception(ERROR_MESSAGE))
-        exceptionStoringFile = new File(testDirectory, md5SumCalculatedInMethod + ".xml")
+        exceptionStoringFile = testDirectory.resolve(md5SumCalculatedInMethod + ".xml").toFile()
         def contentOfFile = new XmlParser().parse(exceptionStoringFile)
 
         then:

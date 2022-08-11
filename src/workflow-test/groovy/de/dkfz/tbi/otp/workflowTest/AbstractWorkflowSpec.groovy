@@ -53,9 +53,7 @@ import de.dkfz.tbi.otp.workflowExecution.log.WorkflowError
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowLog
 import de.dkfz.tbi.util.TimeFormats
 
-import javax.inject.Inject
 import javax.sql.DataSource
-import java.lang.reflect.Method
 import java.nio.file.*
 import java.nio.file.attribute.PosixFilePermission
 import java.time.Duration

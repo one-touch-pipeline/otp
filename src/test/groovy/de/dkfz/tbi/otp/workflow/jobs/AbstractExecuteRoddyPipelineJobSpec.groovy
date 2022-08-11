@@ -22,9 +22,8 @@
 package de.dkfz.tbi.otp.workflow.jobs
 
 import grails.testing.gorm.DataTest
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+import spock.lang.TempDir
 
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.config.OtpProperty
@@ -40,12 +39,13 @@ import de.dkfz.tbi.otp.utils.ProcessOutput
 import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.otp.workflowExecution.cluster.ClusterJobHandlingService
 
+import java.nio.file.Path
 import java.nio.file.Paths
 
 class AbstractExecuteRoddyPipelineJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory, IsRoddy {
 
-    @Rule
-    TemporaryFolder temporaryFolder
+    @TempDir
+    Path tempDir
 
     TestConfigService configService
 
@@ -73,7 +73,7 @@ class AbstractExecuteRoddyPipelineJobSpec extends Specification implements DataT
 
     void "test execute, successfully"() {
         given:
-        configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
+        configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): tempDir.toString()])
         WorkflowStep workflowStep = createWorkflowStep()
 
         String configText = "<config/>"
@@ -125,7 +125,7 @@ class AbstractExecuteRoddyPipelineJobSpec extends Specification implements DataT
 
     void "test execute, successfully, without cluster jobs"() {
         given:
-        configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
+        configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): tempDir.toString()])
         WorkflowStep workflowStep = createWorkflowStep()
         workflowStep.workflowRun.workflowVersion = createWorkflowVersion(workflow: workflowStep.workflowRun.workflow)
 
@@ -177,7 +177,7 @@ class AbstractExecuteRoddyPipelineJobSpec extends Specification implements DataT
 
     void "test execute, execution fails"() {
         given:
-        configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
+        configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): tempDir.toString()])
         WorkflowStep workflowStep = createWorkflowStep()
         workflowStep.workflowRun.workflowVersion = createWorkflowVersion(workflow: workflowStep.workflowRun.workflow)
 

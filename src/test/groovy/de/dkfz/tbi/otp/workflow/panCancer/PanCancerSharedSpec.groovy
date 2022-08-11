@@ -24,7 +24,13 @@ package de.dkfz.tbi.otp.workflow.panCancer
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
+import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
+import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.ngsdata.FastqImportInstance
+import de.dkfz.tbi.otp.ngsdata.FileType
+import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeProjectSeqType
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflow.wgbs.WgbsWorkflow
 import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
@@ -40,6 +46,11 @@ class PanCancerSharedSpec extends Specification implements WorkflowSystemDomainF
         return [
                 WorkflowRun,
                 WorkflowStep,
+                RoddyBamFile,
+                MergingWorkPackage,
+                ReferenceGenomeProjectSeqType,
+                FileType,
+                FastqImportInstance,
         ]
     }
 
@@ -85,6 +96,7 @@ class PanCancerSharedSpec extends Specification implements WorkflowSystemDomainF
     void "getBaseRoddyBamFile, should call checkWorkflowName and getInputArtefact with correct arguments and in order"() {
         given:
         createData()
+        RoddyBamFile bamFile = DomainFactory.createRoddyBamFile()
 
         when:
         panCancerSharedInstance.getBaseRoddyBamFile(workflowStep)
@@ -93,12 +105,13 @@ class PanCancerSharedSpec extends Specification implements WorkflowSystemDomainF
         1 * panCancerSharedInstance.checkWorkflowName(workflowStep, [PanCancerWorkflow.WORKFLOW, WgbsWorkflow.WORKFLOW]) >> _
 
         then:
-        1 * panCancerSharedInstance.concreteArtefactService.getInputArtefact(workflowStep, PanCancerWorkflow.INPUT_BASE_BAM_FILE, false) >> _
+        1 * panCancerSharedInstance.concreteArtefactService.getInputArtefact(workflowStep, PanCancerWorkflow.INPUT_BASE_BAM_FILE, false) >> bamFile
     }
 
     void "getRoddyBamFile, should call checkWorkflowName and getInputArtefact with correct arguments and in order"() {
         given:
         createData()
+        RoddyBamFile bamFile = DomainFactory.createRoddyBamFile()
 
         when:
         panCancerSharedInstance.getRoddyBamFile(workflowStep)
@@ -107,7 +120,7 @@ class PanCancerSharedSpec extends Specification implements WorkflowSystemDomainF
         1 * panCancerSharedInstance.checkWorkflowName(workflowStep, [PanCancerWorkflow.WORKFLOW, WgbsWorkflow.WORKFLOW]) >> _
 
         then:
-        1 * panCancerSharedInstance.concreteArtefactService.getOutputArtefact(workflowStep, PanCancerWorkflow.OUTPUT_BAM) >> _
+        1 * panCancerSharedInstance.concreteArtefactService.getOutputArtefact(workflowStep, PanCancerWorkflow.OUTPUT_BAM) >> bamFile
     }
 
     @SuppressWarnings('EmptyClass')

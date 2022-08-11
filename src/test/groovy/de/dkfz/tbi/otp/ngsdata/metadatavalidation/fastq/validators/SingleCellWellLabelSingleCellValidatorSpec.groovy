@@ -127,7 +127,7 @@ class SingleCellWellLabelSingleCellValidatorSpec extends Specification implement
     }
 
     @Unroll
-    void "validate, when base material is '#baseMaterial' and well is '#well' and project is '#project' and sampleName is '#sampleName', then create warning"() {
+    void "validate, when base material is '#baseMaterial' and well is '#well' and project is '#projectName' and sampleName is '#sampleName', then create warning"() {
         given:
         createProject([
                 name: PROJECT_NAME,

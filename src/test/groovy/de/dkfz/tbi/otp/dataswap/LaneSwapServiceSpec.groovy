@@ -24,9 +24,8 @@ package de.dkfz.tbi.otp.dataswap
 import grails.testing.gorm.DataTest
 import grails.testing.services.ServiceUnitTest
 import grails.testing.web.GrailsWebUnitTest
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+import spock.lang.TempDir
 
 import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.TestConfigService
@@ -42,6 +41,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.utils.DeletionService
 
 import java.nio.file.*
@@ -65,18 +65,18 @@ class LaneSwapServiceSpec extends Specification implements DataTest, ServiceUnit
         ]
     }
 
-    @Rule
-    TemporaryFolder temporaryFolder
+    @TempDir
+    Path tempDir
 
     void "swap, succeed if parameters match existing entities and data files"() {
         given:
-        final Path scriptFolder = temporaryFolder.newFolder("files").toPath()
+        final Path scriptFolder = tempDir.resolve("files")
         final String scriptName = "TEST-Swap-Lane"
         Files.createDirectories(scriptFolder)
         Path bashScriptPath = Files.createFile(scriptFolder.resolve("${scriptName}.sh"))
 
         // Services
-        Path path = temporaryFolder.newFile().toPath()
+        Path path = CreateFileHelper.createFile(tempDir.resolve("test.txt"))
         service.fastqcDataFilesService = Mock(FastqcDataFilesService) {
             _ * fastqcOutputPath(_) >> path
         }
@@ -84,14 +84,14 @@ class LaneSwapServiceSpec extends Specification implements DataTest, ServiceUnit
 
         Realm realm = createRealm()
         service.configService = new TestConfigService([
-                (OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.root.toString(),
+                (OtpProperty.PATH_PROJECT_ROOT): tempDir.toString(),
         ])
         service.configService.processingOptionService = Mock(ProcessingOptionService) {
             _ * findOptionAsString(ProcessingOption.OptionName.REALM_DEFAULT_VALUE) >> realm.name
         }
         service.fileService = Mock(FileService) {
             1 * createOrOverwriteScriptOutputFile(scriptFolder, "${scriptName}.sh", realm) >> bashScriptPath
-            _ * createOrOverwriteScriptOutputFile(_, _, _) >> temporaryFolder.newFile().toPath()
+            _ * createOrOverwriteScriptOutputFile(_, _, _) >> CreateFileHelper.createFile(tempDir.resolve("test2.txt"))
         }
         CommentService mockedCommendService = Mock(CommentService) {
             _ * saveComment(_, _) >> null

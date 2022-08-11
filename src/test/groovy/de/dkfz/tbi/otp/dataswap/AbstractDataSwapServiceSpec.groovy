@@ -23,8 +23,6 @@ package de.dkfz.tbi.otp.dataswap
 
 import grails.testing.gorm.DataTest
 import grails.validation.Validateable
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import spock.lang.*
 
 import de.dkfz.tbi.otp.*
@@ -41,6 +39,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.exceptions.FileNotFoundException
+import de.dkfz.tbi.otp.utils.CreateFileHelper
 
 import java.nio.file.*
 
@@ -68,8 +67,8 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
         ]
     }
 
-    @Rule
-    TemporaryFolder temporaryFolder
+    @TempDir
+    Path tempDir
 
     @Shared
     AbstractDataSwapService service
@@ -369,12 +368,6 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
                 new Swap(oldValue, omittedEmpty),
         ]
 
-        final List<Swap<String>> completedSwapList = [
-                new Swap(oldValue, newValue),
-                new Swap(oldValue, oldValue),
-                new Swap(oldValue, oldValue),
-        ]
-
         final String filledLog = "\n    - ${oldValue} --> ${newValue}" +
                 "\n    - ${oldValue} --> ${oldValue}" +
                 "\n    - ${oldValue} --> ${oldValue}"
@@ -383,7 +376,12 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
         List<Swap<String>> resultList = service.completeOmittedNewSwapValuesAndLog(swapList, log)
 
         then:
-        resultList == completedSwapList
+        resultList[0].old == oldValue
+        resultList[0].new == newValue
+        resultList[1].old == oldValue
+        resultList[1].new == oldValue
+        resultList[2].old == oldValue
+        resultList[2].new == oldValue
         filledLog == log.toString()
     }
 
@@ -453,7 +451,7 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
 
     void "generateMaybeMoveBashCommand, when old file exists and new file not create file move bash command"() {
         given:
-        final Path oldPath = temporaryFolder.newFile().toPath()
+        final Path oldPath = CreateFileHelper.createFile(tempDir.resolve("old"))
         final Path newPath = Paths.get("/parent/not_existing_new_file")
 
         final String fileMoveCommand = """
@@ -472,8 +470,8 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
 
     void "generateMaybeMoveBashCommand, when new file exists and it is not the same as the old one create comment to remove it"() {
         given:
-        final Path oldPath = temporaryFolder.newFile().toPath()
-        final Path newPath = temporaryFolder.newFile().toPath()
+        final Path oldPath = CreateFileHelper.createFile(tempDir.resolve("old"))
+        final Path newPath = CreateFileHelper.createFile(tempDir.resolve("new"))
 
         final String fileExistsComment = "# new file already exists: '${newPath}'; delete old file\n rm -f '${oldPath}'\n"
 
@@ -486,7 +484,7 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
 
     void "generateMaybeMoveBashCommand, when new file exists and it is the same as the old one create comment"() {
         given:
-        final Path oldPath = temporaryFolder.newFile().toPath()
+        final Path oldPath = CreateFileHelper.createFile(tempDir.resolve("old"))
 
         final String fileExistsComment = "# the old and the new data file ('${oldPath}') are the same, no move needed.\n"
 
@@ -500,7 +498,7 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
     void "generateMaybeMoveBashCommand, when old file not exists but new file do create move manually comment"() {
         given:
         final Path oldPath = Paths.get("not_existing_old_file")
-        final Path newPath = temporaryFolder.newFile().toPath()
+        final Path newPath = CreateFileHelper.createFile(tempDir.resolve("new"))
 
         final String fileExistsComment = "# no old file, and ${newPath} is already at the correct position (apparently put there manually?)\n"
 
@@ -516,7 +514,9 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
         final Realm realm = createRealm()
 
         final String bashScriptName = "TEST-SCRIPT"
-        final Path scriptOutputDirectory = temporaryFolder.newFolder("files").toPath()
+        final Path scriptOutputDirectory = tempDir.resolve("files")
+
+        Files.createDirectory(scriptOutputDirectory)
 
         service.configService = Mock(ConfigService) {
             1 * getDefaultRealm() >> realm
@@ -548,7 +548,9 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
         final List<SeqTrack> seqTrackList = (0..1).collect { createSeqTrack() }
 
         final String bashScriptName = "TEST-SCRIPT"
-        final Path scriptOutputDirectory = temporaryFolder.newFolder("files").toPath()
+        final Path scriptOutputDirectory = tempDir.resolve("files")
+
+        Files.createDirectory(scriptOutputDirectory)
 
         service.configService = Mock(ConfigService) {
             1 * getDefaultRealm() >> realm
@@ -579,7 +581,7 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
 
     void "copyAndRemoveFastQcFile, when no checksum files exists create just one command"() {
         given:
-        final String oldFilePath = temporaryFolder.newFile()
+        final String oldFilePath = Files.createFile(tempDir.resolve("test.txt"))
         final String fileMoveCommand = "# the old and the new data file ('${oldFilePath}') are the same, no move needed.\n\n"
 
         when:
@@ -592,8 +594,8 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
 
     void "copyAndRemoveFastQcFile, when checksum files exists create one for data files and one for checksum files"() {
         given:
-        final Path oldFilePath = temporaryFolder.newFile().toPath()
-        final Path checksum = temporaryFolder.newFile(oldFilePath.fileName.toString() + ".md5sum").toPath()
+        final Path oldFilePath = CreateFileHelper.createFile(tempDir.resolve("old.txt"))
+        final Path checksum = CreateFileHelper.createFile(tempDir.resolve(oldFilePath.fileName.toString() + ".md5sum"))
         final String fileMoveCommand = "# the old and the new data file ('${oldFilePath}') are the same, no move needed.\n\n" +
                 "# the old and the new data file ('${checksum}') are the same, no move needed.\n"
 
@@ -659,8 +661,8 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
         dataFile.fileType.vbpPath = "/sequence/"
         dataFile.mateNumber = null
         dataFile.fileWithdrawn = true
-        final Path oldFile = temporaryFolder.newFile(dataFile.fileName).toPath()
-        final Path oldFileViewByPid = temporaryFolder.newFile('oldViewByPidFile').toPath()
+        final Path oldFile = tempDir.resolve(dataFile.fileName)
+        final Path oldFileViewByPid = tempDir.resolve('oldViewByPidFile')
         final Path newFile = Paths.get('somePath').resolve(Paths.get(newDataFileName))
         final Path newFileViewByPid = Paths.get('linking').resolve(Paths.get('newViewByPidFile'))
 
@@ -710,8 +712,8 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
         dataFile.mateNumber = null
         dataFile.fileWithdrawn = true
         final String oldDataFileName = dataFile.fileName
-        final Path oldFile = temporaryFolder.newFile(dataFile.fileName).toPath()
-        final Path oldFileViewByPid = temporaryFolder.newFile('oldViewByPidFile').toPath()
+        final Path oldFile = CreateFileHelper.createFile(tempDir.resolve(dataFile.fileName))
+        final Path oldFileViewByPid = CreateFileHelper.createFile(tempDir.resolve('oldViewByPidFile'))
         final Path newFile = Paths.get('somePath').resolve(Paths.get(newDataFileName))
         final Path newFileViewByPid = Paths.get('linking').resolve(Paths.get('newViewByPidFile'))
 
@@ -993,10 +995,10 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
 
         final Map<DataFile, Map<String, ?>> dataFilePaths = createPathsForDataFiles(dataFileList)
         dataFilePaths.each {
-            it.value.put('oldWellFile', temporaryFolder.newFile("${it.key.fileName}_wellFile").toPath())
-            it.value.put('wellMappingFile', temporaryFolder.newFile("${it.key.fileName}_oldWellMappingFile").toPath())
+            it.value.put('oldWellFile', tempDir.resolve("${it.key.fileName}_wellFile"))
+            it.value.put('wellMappingFile', tempDir.resolve("${it.key.fileName}_oldWellMappingFile"))
             it.value.put('oldWellMappingEntry', "${it.key.fileName}_oldWellMappingEntry")
-            it.value.put('newWellMappingFile', temporaryFolder.newFile("${it.key.fileName}_newWellMappingFile").toPath())
+            it.value.put('newWellMappingFile', tempDir.resolve("${it.key.fileName}_newWellMappingFile"))
             it.value.put('newWellMappingEntry', "${it.key.fileName}_newWellMappingEntry")
         }
 
@@ -1191,7 +1193,7 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
     }
 
     private Path createExistingFilePath(String fileName) {
-        return temporaryFolder.newFile(fileName).toPath()
+        return CreateFileHelper.createFile(tempDir.resolve(fileName))
     }
 
     private Map<DataFile, Map<String, ?>> createPathsForDataFiles(List<DataFile> dataFileList, boolean oldFilesExists = true, boolean newFilesExists = true) {

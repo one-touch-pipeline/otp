@@ -22,9 +22,8 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
 import grails.testing.gorm.DataTest
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+import spock.lang.TempDir
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.TestConfigService
@@ -40,7 +39,6 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.*
 
 import java.nio.file.Path
-import java.nio.file.Paths
 
 class ExecuteRoddySnvJobSpec extends Specification implements DataTest {
 
@@ -81,10 +79,8 @@ class ExecuteRoddySnvJobSpec extends Specification implements DataTest {
         ]
     }
 
-    static final int MIN_CONFIDENCE_SCORE = 8
-
-    @Rule
-    TemporaryFolder temporaryFolder
+    @TempDir
+    Path tempDir
 
     void "prepareAndReturnWorkflowSpecificCValues, when roddySnvCallingInstance is null, throw assert"() {
         when:
@@ -97,13 +93,12 @@ class ExecuteRoddySnvJobSpec extends Specification implements DataTest {
 
     void "prepareAndReturnWorkflowSpecificCValues, when all fine, return correct value list"() {
         given:
-        File fasta = CreateFileHelper.createFile(new File(temporaryFolder.newFolder(), "fasta.fa"))
-        File chromosomeLength = temporaryFolder.newFile()
+        File fasta = CreateFileHelper.createFile(tempDir.resolve("fasta.fa").toFile())
+        File chromosomeLength = tempDir.toFile()
 
-        String path = temporaryFolder.newFolder().path
-        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): path])
+        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): tempDir.toString()])
         IndividualService individualService = Mock(IndividualService) {
-            getViewByPidPath(_, _) >> Paths.get(path)
+            getViewByPidPath(_, _) >> tempDir
         }
 
         ExecuteRoddySnvJob job = new ExecuteRoddySnvJob([
@@ -183,10 +178,9 @@ class ExecuteRoddySnvJobSpec extends Specification implements DataTest {
 
     void "validate, when all fine, set processing state to finished"() {
         given:
-        String path = temporaryFolder.newFolder().path
-        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): path])
+        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): tempDir.toString()])
         IndividualService individualService = Mock(IndividualService) {
-            getViewByPidPath(_, _) >> Paths.get(path)
+            getViewByPidPath(_, _) >> tempDir
         }
 
         ExecuteRoddySnvJob job = new ExecuteRoddySnvJob([
@@ -231,10 +225,9 @@ class ExecuteRoddySnvJobSpec extends Specification implements DataTest {
         given:
         String md5sum = HelperUtils.uniqueString
 
-        String path = temporaryFolder.newFolder().path
-        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): path])
+        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): tempDir.toString()])
         IndividualService individualService = Mock(IndividualService) {
-            getViewByPidPath(_, _) >> Paths.get(path)
+            getViewByPidPath(_, _) >> tempDir
         }
 
         ExecuteRoddySnvJob job = new ExecuteRoddySnvJob([
@@ -264,10 +257,9 @@ class ExecuteRoddySnvJobSpec extends Specification implements DataTest {
     @Unroll
     void "validate, when file not exists, throw assert"() {
         given:
-        String path = temporaryFolder.newFolder().path
-        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): path])
+        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): tempDir.toString()])
         IndividualService individualService = Mock(IndividualService) {
-            getViewByPidPath(_, _) >> Paths.get(path)
+            getViewByPidPath(_, _) >> tempDir
         }
 
         ExecuteRoddySnvJob job = new ExecuteRoddySnvJob([

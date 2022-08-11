@@ -28,14 +28,14 @@ package de.dkfz.tbi.otp.dataswap
  * It is used in the DTOs of {@link AbstractDataSwapService} and simplifies the the
  * handling of data swaps.
  *
- * @param <T> - Type of the old and corresponding new value
+ * @param <T>  - Type of the old and corresponding new value
  */
 class Swap<T> {
 
-    private Tuple2<T, T> tuple2
+    private final Tuple2<T, T> tuple2
 
     Swap(T current, T substitute) {
-        tuple2 = new Tuple2<T, T> (current, substitute)
+        tuple2 = new Tuple2<T, T>(current, substitute)
     }
 
     T getOld() {

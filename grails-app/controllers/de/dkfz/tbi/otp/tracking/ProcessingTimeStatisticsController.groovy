@@ -65,7 +65,7 @@ class ProcessingTimeStatisticsController {
             return processingTimeStatisticsService.formatData(ticket)
         }
 
-        render dataToRender as JSON
+        render(dataToRender as JSON)
     }
 
     def editValue() {
@@ -85,6 +85,6 @@ class ProcessingTimeStatisticsController {
         }
 
         data.value = params.value
-        render data as JSON
+        render(data as JSON)
     }
 }
