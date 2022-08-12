@@ -23,16 +23,17 @@ package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
 import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
+import spock.lang.TempDir
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightService
 import de.dkfz.tbi.otp.utils.CollectionUtils
+
+import java.nio.file.Path
 
 @Rollback
 @Integration
@@ -41,13 +42,13 @@ class ParsePanCanQcJobIntegrationSpec extends Specification {
     @Autowired
     AbstractQualityAssessmentService abstractQualityAssessmentService
 
-    @Rule
-    TemporaryFolder temporaryFolder
+    @TempDir
+    Path tempDir
 
     @Unroll
     void "test execute ParsePanCanQcJob (percentageMatesOnDifferentChr: #percentageMatesOnDifferentChr"() {
         given:
-        File qaFile = temporaryFolder.newFile(RoddyBamFile.QUALITY_CONTROL_JSON_FILE_NAME)
+        File qaFile = tempDir.resolve(RoddyBamFile.QUALITY_CONTROL_JSON_FILE_NAME).toFile()
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
         SeqTrack seqTrack = CollectionUtils.exactlyOneElement(roddyBamFile.seqTracks)
         roddyBamFile.metaClass.getWorkMergedQAJsonFile = { -> qaFile }
@@ -57,9 +58,7 @@ class ParsePanCanQcJobIntegrationSpec extends Specification {
         DomainFactory.createReferenceGenomeEntries(referenceGenome, ['7', '8'])
         DomainFactory.createQaFileOnFileSystem(qaFile, [percentageMatesOnDifferentChr: percentageMatesOnDifferentChr])
 
-        ParsePanCanQcJob job = [
-                getProcessParameterObject: { -> roddyBamFile },
-        ] as ParsePanCanQcJob
+        ParsePanCanQcJob job = Spy(ParsePanCanQcJob)
         job.abstractQualityAssessmentService = abstractQualityAssessmentService
         job.qcTrafficLightService = new QcTrafficLightService()
 
@@ -74,6 +73,9 @@ class ParsePanCanQcJobIntegrationSpec extends Specification {
         roddyBamFile.qualityAssessmentStatus == AbstractBamFile.QaProcessingStatus.FINISHED
         roddyBamFile.qcTrafficLightStatus == AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED
         roddyBamFile.qcTrafficLightStatus == AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED
+
+        and:
+        1 * job.processParameterObject >> roddyBamFile
 
         where:
         percentageMatesOnDifferentChr << [

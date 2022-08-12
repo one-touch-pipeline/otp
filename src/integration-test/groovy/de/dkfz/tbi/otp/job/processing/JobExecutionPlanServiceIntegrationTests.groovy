@@ -135,18 +135,23 @@ class JobExecutionPlanServiceIntegrationTests implements UserAndRoles {
         assertSame(otherPlan, plans[0])
     }
 
+    /**
+     * SuppressWarnings: UnnecessaryGetter
+     * Because otherwise the @PreFilter would not be invoked. This is only the case in tests.
+     */
+    @SuppressWarnings("UnnecessaryGetter")
     @Test
     void testGetAllJobExecutionPlans() {
         setupData()
         JobExecutionPlanService service = new JobExecutionPlanService()
-        assertTrue(service.jobExecutionPlans.isEmpty())
+        assertTrue(service.getJobExecutionPlans().isEmpty())
 
         JobExecutionPlan plan = new JobExecutionPlan(name: "test", obsoleted: true)
         assertNotNull(plan.save(flush: true))
-        assertTrue(service.jobExecutionPlans.isEmpty())
+        assertTrue(service.getJobExecutionPlans().isEmpty())
         JobExecutionPlan plan2 = new JobExecutionPlan(name: "test", previousPlan: plan, obsoleted: false, planVersion: 1)
         assertNotNull(plan2.save(flush: true))
-        List<JobExecutionPlan> plans = service.jobExecutionPlans
+        List<JobExecutionPlan> plans = service.getJobExecutionPlans()
         assertEquals(1, plans.size())
         assertSame(plan2, plans[0])
 
@@ -534,6 +539,11 @@ class JobExecutionPlanServiceIntegrationTests implements UserAndRoles {
         }
     }
 
+    /**
+     * SuppressWarnings: UnnecessaryGetter
+     * Because otherwise the @PreFilter would not be invoked. This is only the case in tests.
+     */
+    @SuppressWarnings("UnnecessaryGetter")
     @Test
     void testGetAllPlansPermission() {
         setupData()
@@ -545,10 +555,10 @@ class JobExecutionPlanServiceIntegrationTests implements UserAndRoles {
         }
 
         doWithAuth(OPERATOR) {
-            assertEquals(numberOfPlans, jobExecutionPlanService.jobExecutionPlans.size())
+            assertEquals(numberOfPlans, jobExecutionPlanService.getJobExecutionPlans().size())
         }
         doWithAuth(TESTUSER) {
-            assertTrue(jobExecutionPlanService.jobExecutionPlans.empty)
+            assertTrue(jobExecutionPlanService.getJobExecutionPlans().empty)
         }
     }
 

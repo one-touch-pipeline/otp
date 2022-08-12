@@ -59,6 +59,11 @@ class OtpPermissionEvaluatorIntegrationSpec extends Specification implements Use
         authentication = new UsernamePasswordAuthenticationToken(new Principal(username: user.username), null, [])
     }
 
+    /**
+     * SuppressWarnings: UnnecessaryGetter
+     * Because otherwise the @PreFilter would not be invoked. This is only the case in tests.
+     */
+    @SuppressWarnings("UnnecessaryGetter")
     @Unroll
     void "test evaluation of hasPermission in annotation (otpAccess = #otpAccess)"() {
         given:
@@ -68,7 +73,7 @@ class OtpPermissionEvaluatorIntegrationSpec extends Specification implements Use
 
         when:
         List<Project> resultList = doWithAuth(user.username) {
-            projectService.allProjects
+            projectService.getAllProjects()
         }
 
         then:

@@ -23,10 +23,9 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
+import spock.lang.TempDir
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.TestConfigService
@@ -41,6 +40,7 @@ import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightNotificationService
 import de.dkfz.tbi.otp.utils.*
 
 import java.nio.file.FileSystems
+import java.nio.file.Path
 
 @Rollback
 @Integration
@@ -50,13 +50,11 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends Specification im
     @Autowired
     RemoteShellHelper remoteShellHelper
 
-    @Rule
-    TemporaryFolder temporaryFolder = new TemporaryFolder()
-
+    @TempDir
+    Path tempDir
     RnaRoddyBamFile roddyBamFile
     Realm realm
     TestConfigService configService
-    String fileName
 
     void setupData() {
         service = new LinkFilesToFinalDestinationService()
@@ -76,7 +74,7 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends Specification im
         roddyBamFile = createBamFile()
 
         realm = roddyBamFile.project.realm
-        configService.addOtpProperties(temporaryFolder.newFolder().toPath())
+        configService.addOtpProperties(tempDir)
     }
 
     void cleanup() {

@@ -24,10 +24,9 @@ package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 import grails.core.GrailsApplication
 import grails.gorm.transactions.Rollback
 import grails.testing.mixin.integration.Integration
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
+import spock.lang.TempDir
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.CommentService
@@ -41,6 +40,8 @@ import de.dkfz.tbi.otp.security.SecurityService
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
+import java.nio.file.Path
+
 @Rollback
 @Integration
 class ParseWgbsAlignmentQcJobIntegrationSpec extends Specification {
@@ -50,8 +51,8 @@ class ParseWgbsAlignmentQcJobIntegrationSpec extends Specification {
 
     ParseWgbsAlignmentQcJob parseWgbsAlignmentQcJob
 
-    @Rule
-    TemporaryFolder temporaryFolder = new TemporaryFolder()
+    @TempDir
+    Path tempDir
 
     QcTrafficLightService qcTrafficLightService
     TestConfigService configService
@@ -63,7 +64,7 @@ class ParseWgbsAlignmentQcJobIntegrationSpec extends Specification {
     RoddyBamFile roddyBamFile
 
     void setupData() {
-        configService.addOtpProperties(temporaryFolder.newFolder().toPath())
+        configService.addOtpProperties(tempDir)
 
         qcTrafficLightService = new QcTrafficLightService()
         qcTrafficLightService.commentService = new CommentService()

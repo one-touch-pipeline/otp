@@ -24,8 +24,8 @@ package de.dkfz.tbi.otp.job
 import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
 import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+import spock.lang.TempDir
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.TestConfigService
@@ -39,20 +39,22 @@ import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.tracking.OtrsTicketService
 import de.dkfz.tbi.otp.utils.MailHelperService
 
+import java.nio.file.Path
+
 @Rollback
 @Integration
 class JobMailServiceIntegrationSpec extends Specification implements DomainFactoryCore, DomainFactoryProcessingPriority {
 
     TestConfigService configService
 
-    @Rule
-    TemporaryFolder temporaryFolder
+    @TempDir
+    Path tempDir
 
     @Unroll
     void "sendErrorNotification, when with #completedCount completed cluster jobs and with #failedCount failed cluster job, send expected email"() {
         given:
         JobStatusLoggingService jobStatusLoggingService = new JobStatusLoggingService()
-        configService.addOtpProperties(temporaryFolder.newFolder().toPath())
+        configService.addOtpProperties(tempDir)
         jobStatusLoggingService.configService = configService
 
         OtrsTicket otrsTicket = createOtrsTicket()
@@ -107,7 +109,7 @@ class JobMailServiceIntegrationSpec extends Specification implements DomainFacto
         assert step.processParameterObject
 
         AbstractJobImpl job = Mock(AbstractJobImpl) {
-            _ * getProperty('processingStep') >> step
+            _ * processingStep >> step
             0 * _
         }
 

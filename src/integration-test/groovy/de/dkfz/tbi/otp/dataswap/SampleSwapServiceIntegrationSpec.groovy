@@ -23,9 +23,8 @@ package de.dkfz.tbi.otp.dataswap
 
 import grails.gorm.transactions.Rollback
 import grails.testing.mixin.integration.Integration
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+import spock.lang.TempDir
 
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
@@ -39,6 +38,7 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.CreateRoddyFileHelper
 
 import java.nio.file.Path
+import java.nio.file.Files
 
 @Rollback
 @Integration
@@ -48,14 +48,14 @@ class SampleSwapServiceIntegrationSpec extends Specification implements UserAndR
     LsdfFilesService lsdfFilesService
     TestConfigService configService
 
-    @Rule
-    TemporaryFolder temporaryFolder
+    @TempDir
+    Path tempDir
 
     Path outputFolder
 
     void setupData() {
         createUserAndRoles()
-        outputFolder = temporaryFolder.newFolder("outputFolder").toPath()
+        outputFolder = Files.createDirectory(tempDir.resolve("outputFolder"))
         configService.addOtpProperties(outputFolder)
     }
 
@@ -96,7 +96,7 @@ class SampleSwapServiceIntegrationSpec extends Specification implements UserAndR
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(bamFile)
         File destinationDirectory = bamFile.baseDirectory
 
-        Path scriptFolder = temporaryFolder.newFolder("files").toPath()
+        Path scriptFolder = Files.createDirectory(tempDir.resolve("files"))
 
         Individual oldIndividual = bamFile.individual
         oldIndividual.species = TaxonomyFactoryInstance.INSTANCE.createSpeciesWithStrain()

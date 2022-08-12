@@ -160,7 +160,7 @@ class QcTrafficLightServiceIntegrationSpec extends Specification implements Doma
     }
 
     @Unroll
-    void "setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling, once blocked files do not get unblocked (qcBasesMapped = #qcBasesMapped & onTargetMappedBases = #onTargetMappedBases --> #resultStatus)"() {
+    void "setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling, once blocked files do not get unblocked (qcBasesMapped = #qcBasesMapped & onTargetMappedBases = #onTargetMappedBases --> #exceedingExpected)"() {
         given:
         setupData()
 

@@ -23,9 +23,8 @@ package de.dkfz.tbi.otp.job.jobs.sophia
 
 import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+import spock.lang.TempDir
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.TestConfigService
@@ -46,8 +45,8 @@ class ExecuteRoddySophiaJobIntegrationSpec extends Specification {
 
     TestConfigService configService
 
-    @Rule
-    TemporaryFolder temporaryFolder
+    @TempDir
+    Path tempDir
 
     void "prepareAndReturnWorkflowSpecificCValues, when roddySophiaInstance is null, throw assert"() {
         when:
@@ -60,10 +59,9 @@ class ExecuteRoddySophiaJobIntegrationSpec extends Specification {
 
     void "prepareAndReturnWorkflowSpecificCValues, when all fine, return correct value list"() {
         given:
-        Path path = temporaryFolder.newFolder().toPath()
-        configService.addOtpProperties(path)
+        configService.addOtpProperties(tempDir)
         IndividualService individualService = Mock(IndividualService) {
-            getViewByPidPath(_, _) >> path
+            getViewByPidPath(_, _) >> tempDir
         }
         ExecuteRoddySophiaJob job = new ExecuteRoddySophiaJob([
                 sophiaService    : Spy(SophiaService) {
@@ -146,10 +144,9 @@ class ExecuteRoddySophiaJobIntegrationSpec extends Specification {
 
     void "validate, when all fine, set processing state to finished"() {
         given:
-        Path path = temporaryFolder.newFolder().toPath()
-        configService.addOtpProperties(path)
+        configService.addOtpProperties(tempDir)
         IndividualService individualService = Mock(IndividualService) {
-            getViewByPidPath(_, _) >> path
+            getViewByPidPath(_, _) >> tempDir
         }
         ExecuteRoddySophiaJob job = new ExecuteRoddySophiaJob([
                 configService             : configService,
@@ -187,10 +184,9 @@ class ExecuteRoddySophiaJobIntegrationSpec extends Specification {
 
     void "validate, when correctPermissionsAndGroups fail, throw assert"() {
         given:
-        Path path = temporaryFolder.newFolder().toPath()
-        configService.addOtpProperties(path)
+        configService.addOtpProperties(tempDir)
         IndividualService individualService = Mock(IndividualService) {
-            getViewByPidPath(_, _) >> path
+            getViewByPidPath(_, _) >> tempDir
         }
         String md5sum = HelperUtils.uniqueString
         ExecuteRoddySophiaJob job = new ExecuteRoddySophiaJob([
@@ -220,10 +216,9 @@ class ExecuteRoddySophiaJobIntegrationSpec extends Specification {
     @Unroll
     void "validate, when file not exist, throw assert"() {
         given:
-        Path path = temporaryFolder.newFolder().toPath()
-        configService.addOtpProperties(path)
+        configService.addOtpProperties(tempDir)
         IndividualService individualService = Mock(IndividualService) {
-            getViewByPidPath(_, _) >> path
+            getViewByPidPath(_, _) >> tempDir
         }
         ExecuteRoddySophiaJob job = new ExecuteRoddySophiaJob([
                 configService             : configService,

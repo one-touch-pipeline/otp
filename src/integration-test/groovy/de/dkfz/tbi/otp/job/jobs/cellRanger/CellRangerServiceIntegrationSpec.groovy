@@ -23,10 +23,9 @@ package de.dkfz.tbi.otp.job.jobs.cellRanger
 
 import grails.gorm.transactions.Rollback
 import grails.testing.mixin.integration.Integration
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
+import spock.lang.TempDir
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerQualityAssessment
@@ -42,13 +41,14 @@ import de.dkfz.tbi.otp.utils.HelperUtils
 
 import java.nio.file.AccessDeniedException
 import java.nio.file.NoSuchFileException
+import java.nio.file.Path
 
 @Rollback
 @Integration
 class CellRangerServiceIntegrationSpec extends Specification implements UserAndRoles, CellRangerFactory {
 
-    @Rule
-    TemporaryFolder temporaryFolder
+    @TempDir
+    Path tempDir
 
     @Autowired
     CellRangerService cellRangerService
@@ -68,9 +68,9 @@ class CellRangerServiceIntegrationSpec extends Specification implements UserAndR
 
     void setupSingleCellBamFile() {
         singleCellBamFile = createBamFile()
-        metricsSummaryFile = new File(temporaryFolder.newFolder(), "${HelperUtils.uniqueString}_metrics_summary.csv")
+        metricsSummaryFile = tempDir.resolve("${HelperUtils.uniqueString}_metrics_summary.csv").toFile()
         singleCellBamFile.metaClass.getQualityAssessmentCsvFile = { return metricsSummaryFile }
-        webSummaryFile = new File(temporaryFolder.newFolder(), "${HelperUtils.uniqueString}_web_summary.csv")
+        webSummaryFile = tempDir.resolve("${HelperUtils.uniqueString}_web_summary.csv").toFile()
         singleCellBamFile.metaClass.getWebSummaryResultFile = { return webSummaryFile }
     }
 
@@ -112,9 +112,9 @@ class CellRangerServiceIntegrationSpec extends Specification implements UserAndR
         given:
         setupData()
         metricsSummaryFile = CreateFileHelper.createFile(
-                new File(temporaryFolder.newFolder(), "${HelperUtils.uniqueString}_metrics_summary.csv"),
+                tempDir.resolve("${HelperUtils.uniqueString}_metrics_summary.csv"),
                 "column1,column2\ncontent1,content2"
-        )
+        ).toFile()
 
         when:
         cellRangerService.parseCellRangerQaStatistics(singleCellBamFile)

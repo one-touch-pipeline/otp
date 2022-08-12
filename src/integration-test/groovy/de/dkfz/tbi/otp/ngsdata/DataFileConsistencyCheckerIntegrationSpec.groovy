@@ -26,20 +26,24 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.utils.MailHelperService
 import de.dkfz.tbi.otp.utils.SessionUtils
+import de.dkfz.tbi.otp.utils.CreateFileHelper
 
 import java.nio.file.Files
+import java.nio.file.Path
 
 class DataFileConsistencyCheckerIntegrationSpec extends AbstractIntegrationSpecWithoutRollbackAnnotation {
 
-    File testFolder
+    Path rootDir
+    Path initialDir
+    Path copiedOrLinkedDir
 
     void setupData() {
         SessionUtils.withTransaction {
             DomainFactory.createAllAlignableSeqTypes()
 
-            testFolder = temporaryFolder.newFolder("root")
-            temporaryFolder.newFolder("root", "initial")
-            temporaryFolder.newFolder("root", "copiedOrLinked")
+            rootDir = Files.createDirectory(tempDir.resolve("root"))
+            initialDir = Files.createDirectory(rootDir.resolve("initial"))
+            copiedOrLinkedDir = Files.createDirectory(rootDir.resolve("copiedOrLinked"))
         }
     }
 
@@ -55,55 +59,56 @@ class DataFileConsistencyCheckerIntegrationSpec extends AbstractIntegrationSpecW
         DataFileConsistencyChecker dataFileConsistencyChecker = new DataFileConsistencyChecker()
 
         SessionUtils.withTransaction {
-            File initialFile1 = temporaryFolder.newFile("root/initial/fileName1")
-            File initialFile2 = temporaryFolder.newFile("root/initial/fileName2")
-            File initialFile3 = temporaryFolder.newFile("root/initial/fileName3")
-            File initialFile4 = temporaryFolder.newFile("root/initial/fileName4")
-            File copiedFile1 = new File("${testFolder.absolutePath}/copiedOrLinked/fileName1")
-            File copiedFile2 = new File("${testFolder.absolutePath}/copiedOrLinked/fileName2")
+            Path initialFile1 = CreateFileHelper.createFile(initialDir.resolve("fileName1"))
+            Path initialFile2 = CreateFileHelper.createFile(initialDir.resolve("fileName2"))
+            Path initialFile3 = CreateFileHelper.createFile(initialDir.resolve("fileName3"))
+            Path initialFile4 = CreateFileHelper.createFile(initialDir.resolve("fileName4"))
+            Path copiedFile1 = copiedOrLinkedDir.resolve("fileName1")
+            Path copiedFile2 = copiedOrLinkedDir.resolve("fileName2")
             Map<String, Object> commonProperties = [
                     fileType        : DomainFactory.createFileType(type: FileType.Type.SEQUENCE, subType: 'fastq'),
                     seqTrack        : DomainFactory.createSeqTrack(dataInstallationState: SeqTrack.DataProcessingState.FINISHED),
-                    initialDirectory: "${testFolder.absolutePath}/initial",
+                    initialDirectory: initialDir,
             ]
-            dataFile1 = DomainFactory.createDataFile(commonProperties + [fileName: initialFile1.name, fileLinked: false])
-            dataFile2 = DomainFactory.createDataFile(commonProperties + [fileName: initialFile2.name, fileLinked: false])
-            dataFile3 = DomainFactory.createDataFile(commonProperties + [fileName: initialFile3.name, fileLinked: true])
-            dataFile4 = DomainFactory.createDataFile(commonProperties + [fileName: initialFile4.name, fileLinked: true])
-            Files.copy(initialFile1.toPath(), copiedFile1.toPath())
-            Files.copy(initialFile2.toPath(), copiedFile2.toPath())
-            Files.createSymbolicLink(new File("${testFolder.absolutePath}/copiedOrLinked/fileName3").toPath(), initialFile3.toPath())
-            Files.createSymbolicLink(new File("${testFolder.absolutePath}/copiedOrLinked/fileName4").toPath(), initialFile4.toPath())
+            dataFile1 = DomainFactory.createDataFile(commonProperties + [fileName: initialFile1.toFile().name, fileLinked: false])
+            dataFile2 = DomainFactory.createDataFile(commonProperties + [fileName: initialFile2.toFile().name, fileLinked: false])
+            dataFile3 = DomainFactory.createDataFile(commonProperties + [fileName: initialFile3.toFile().name, fileLinked: true])
+            dataFile4 = DomainFactory.createDataFile(commonProperties + [fileName: initialFile4.toFile().name, fileLinked: true])
+            Files.copy(initialFile1, copiedFile1)
+            Files.copy(initialFile2, copiedFile2)
+            Files.createSymbolicLink(copiedOrLinkedDir.resolve("fileName3"), initialFile3)
+            Files.createSymbolicLink(copiedOrLinkedDir.resolve("fileName4"), initialFile4)
 
             dataFileConsistencyChecker.lsdfFilesService = Mock(LsdfFilesService) {
-                1 * getFileFinalPath(dataFile1) >> "${testFolder.absolutePath}/copiedOrLinked/fileName1"
-                1 * getFileFinalPath(dataFile2) >> "${testFolder.absolutePath}/copiedOrLinked/fileName2"
-                1 * getFileFinalPath(dataFile3) >> "${testFolder.absolutePath}/copiedOrLinked/fileName3"
-                1 * getFileFinalPath(dataFile4) >> "${testFolder.absolutePath}/copiedOrLinked/fileName4"
+                1 * getFileFinalPath(dataFile1) >> "${copiedOrLinkedDir}/fileName1"
+                1 * getFileFinalPath(dataFile2) >> "${copiedOrLinkedDir}/fileName2"
+                1 * getFileFinalPath(dataFile3) >> "${copiedOrLinkedDir}/fileName3"
+                1 * getFileFinalPath(dataFile4) >> "${copiedOrLinkedDir}/fileName4"
             }
             dataFileConsistencyChecker.schedulerService = Mock(SchedulerService) {
                 1 * isActive() >> true
             }
 
-            copiedFile2.delete()
-            initialFile4.delete()
+            Files.delete(copiedFile2)
+            Files.delete(initialFile4)
         }
 
         when:
         SessionUtils.withTransaction {
             dataFileConsistencyChecker.setFileExistsForAllDataFiles()
-            dataFile1.refresh()
-            dataFile2.refresh()
-            dataFile3.refresh()
-            dataFile4.refresh()
         }
 
         then:
         SessionUtils.withTransaction {
-            return dataFile1.fileExists &&
-                    !dataFile2.fileExists &&
-                    dataFile3.fileExists &&
-                    !dataFile4.fileExists
+            dataFile1.refresh()
+            dataFile2.refresh()
+            dataFile3.refresh()
+            dataFile4.refresh()
+            assert dataFile1.fileExists
+            assert !dataFile2.fileExists
+            assert dataFile3.fileExists
+            assert !dataFile4.fileExists
+            return true
         }
     }
 

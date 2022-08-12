@@ -23,9 +23,8 @@ package de.dkfz.tbi.otp.job.jobs.cellRanger
 
 import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+import spock.lang.TempDir
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.CommentService
@@ -39,20 +38,23 @@ import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.qcTrafficLight.QcThreshold
 import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightService
+import de.dkfz.tbi.otp.utils.CreateFileHelper
+
+import java.nio.file.Path
 
 @Rollback
 @Integration
 class ParseCellRangerQcJobIntegrationSpec extends Specification implements CellRangerFactory {
 
-    @Rule
-    TemporaryFolder temporaryFolder
+    @TempDir
+    Path tempDir
 
     File qaFile
     SingleCellBamFile singleCellBamFile
     ParseCellRangerQcJob job
 
     void setupData() {
-        qaFile = temporaryFolder.newFile(SingleCellBamFile.METRICS_SUMMARY_CSV_FILE_NAME)
+        qaFile = CreateFileHelper.createFile(tempDir.resolve(SingleCellBamFile.METRICS_SUMMARY_CSV_FILE_NAME)).toFile()
         createQaFileOnFileSystem(qaFile)
         singleCellBamFile = createBamFile()
         singleCellBamFile.metaClass.getQualityAssessmentCsvFile = { -> qaFile }

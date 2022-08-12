@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp
 
 import grails.util.Environment
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.ApplicationContext
 
 import de.dkfz.tbi.TestCase
@@ -30,10 +31,12 @@ import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.LocalShellHelper
 
+import java.nio.file.Files
 import java.nio.file.Path
 import java.time.*
 
 @SuppressWarnings('JavaIoPackageAccess')
+@Qualifier('TestConfigService')
 class TestConfigService extends ConfigService {
 
     Clock fixedClock
@@ -119,15 +122,11 @@ class TestConfigService extends ConfigService {
         otpProperties.put(key, value)
     }
 
-    void addOtpProperties(Map<OtpProperty, String> properties) {
-        otpProperties.putAll(properties)
-    }
-
     void addOtpProperties(Path baseFolder, Map<OtpProperty, String> properties = [:]) {
-        addOtpProperty(OtpProperty.PATH_PROJECT_ROOT, baseFolder.resolve('root').toString())
-        addOtpProperty(OtpProperty.PATH_PROCESSING_ROOT, baseFolder.resolve('processing').toString())
-        addOtpProperty(OtpProperty.PATH_CLUSTER_LOGS_OTP, baseFolder.resolve('logging').toString())
-        addOtpProperties(properties)
+        addOtpProperty(OtpProperty.PATH_PROJECT_ROOT, Files.createDirectory(baseFolder.resolve('root')).toString())
+        addOtpProperty(OtpProperty.PATH_PROCESSING_ROOT, Files.createDirectory(baseFolder.resolve('processing')).toString())
+        addOtpProperty(OtpProperty.PATH_CLUSTER_LOGS_OTP, Files.createDirectory(baseFolder.resolve('logging')).toString())
+        otpProperties.putAll(properties)
     }
 
     void clean() {

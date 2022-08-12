@@ -23,9 +23,8 @@ package de.dkfz.tbi.otp.job.jobs.rnaAlignment
 
 import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+import spock.lang.TempDir
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.TestConfigService
@@ -38,6 +37,8 @@ import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.utils.SessionUtils
 
+import java.nio.file.Path
+
 @Rollback
 @Integration
 class ExecuteRnaAlignmentJobIntegrationSpec extends Specification implements RoddyRnaFactory {
@@ -47,8 +48,8 @@ class ExecuteRnaAlignmentJobIntegrationSpec extends Specification implements Rod
 
     final static String ADAPTER_SEQUENCE1 = "ATGCCCTTGAATC"
 
-    @Rule
-    TemporaryFolder tmpDir = new TemporaryFolder()
+    @TempDir
+    Path tempDir
     TestConfigService configService
 
     void setup() {
@@ -56,7 +57,7 @@ class ExecuteRnaAlignmentJobIntegrationSpec extends Specification implements Rod
     }
 
     void setupData() {
-        configService.addOtpProperties(tmpDir.root.toPath())
+        configService.addOtpProperties(tempDir)
     }
 
     void cleanup() {
@@ -122,7 +123,7 @@ class ExecuteRnaAlignmentJobIntegrationSpec extends Specification implements Rod
         executeRnaAlignmentJob.referenceGenomeService.configService = configService
         executeRnaAlignmentJob.referenceGenomeService.processingOptionService = new ProcessingOptionService()
 
-        DomainFactory.createProcessingOptionBasePathReferenceGenome(tmpDir.root.absolutePath)
+        DomainFactory.createProcessingOptionBasePathReferenceGenome(tempDir.toString())
         RnaRoddyBamFile roddyBamFile = createBamFile()
         roddyBamFile.containedSeqTracks.each { SeqTrack s ->
             s.dataFiles.each { DataFile dataFile ->

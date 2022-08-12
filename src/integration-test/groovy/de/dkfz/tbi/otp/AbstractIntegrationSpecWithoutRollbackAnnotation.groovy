@@ -23,19 +23,21 @@ package de.dkfz.tbi.otp
 
 import grails.testing.mixin.integration.Integration
 import groovy.sql.Sql
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+import spock.lang.TempDir
+
+import de.dkfz.tbi.otp.utils.CreateFileHelper
 
 import javax.sql.DataSource
+import java.nio.file.Path
 
 @Integration
 abstract class AbstractIntegrationSpecWithoutRollbackAnnotation extends Specification {
 
     DataSource dataSource
 
-    @Rule
-    TemporaryFolder temporaryFolder
+    @TempDir
+    Path tempDir
 
     void cleanup() {
         boolean usePostgresDocker = "TRUE".equalsIgnoreCase(System.properties['usePostgresDocker'])
@@ -61,7 +63,7 @@ abstract class AbstractIntegrationSpecWithoutRollbackAnnotation extends Specific
             String truncate = "TRUNCATE TABLE ${tables.join(', ')} CASCADE;"
             sql.execute(truncate)
         } else { //h2 database
-            File schemaDump = temporaryFolder.newFile("test-database-dump.sql")
+            File schemaDump = CreateFileHelper.createFile(tempDir.resolve("test-database-dump.sql")).toFile()
             sql.execute("SCRIPT NODATA DROP TO ?", [schemaDump.absolutePath])
             sql.execute("DROP ALL OBJECTS")
             sql.execute("RUNSCRIPT FROM ?", [schemaDump.absolutePath])

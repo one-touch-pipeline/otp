@@ -23,9 +23,8 @@ package de.dkfz.tbi.otp.withdraw
 
 import grails.gorm.transactions.Rollback
 import grails.testing.mixin.integration.Integration
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+import spock.lang.TempDir
 
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
@@ -44,13 +43,13 @@ import java.nio.file.Path
 @Integration
 class UnwithdrawServiceIntegrationSpec extends Specification implements DomainFactoryCore, IsRoddy {
 
-    @Rule
-    TemporaryFolder temporaryFolder
+    @TempDir
+    Path tempDir
 
     TestConfigService configService
 
     void setup() {
-        configService.addOtpProperties(temporaryFolder.newFolder().toPath())
+        configService.addOtpProperties(tempDir)
     }
 
     void cleanup() {

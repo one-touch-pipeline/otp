@@ -25,11 +25,10 @@ import grails.gorm.transactions.Rollback
 import grails.testing.mixin.integration.Integration
 import org.grails.datastore.gorm.events.AutoTimestampEventListener
 import org.grails.spring.context.support.PluginAwareResourceBundleMessageSource
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy
 import org.springframework.security.authentication.AuthenticationTrustResolver
 import spock.lang.Specification
+import spock.lang.TempDir
 import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
@@ -45,6 +44,7 @@ import de.dkfz.tbi.otp.security.user.identityProvider.IdentityProvider
 import de.dkfz.tbi.otp.security.user.identityProvider.data.IdpUserDetails
 import de.dkfz.tbi.otp.utils.*
 
+import java.nio.file.Path
 import java.time.*
 import java.time.temporal.ChronoUnit
 
@@ -72,8 +72,8 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
     TestConfigService configService
     UserProjectRoleService userProjectRoleService
 
-    @Rule
-    TemporaryFolder temporaryFolder
+    @TempDir
+    Path tempDir
 
     void setupData() {
         createUserAndRoles()
@@ -86,7 +86,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
                 roleHierarchy: roleHierarchy,
         )
 
-        configService.addOtpProperties(temporaryFolder.newFolder().toPath())
+        configService.addOtpProperties(tempDir)
 
         userProjectRoleService = new UserProjectRoleService()
         userProjectRoleService.messageSourceService = messageSourceServiceWithMockedMessageSource
@@ -179,7 +179,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
     }
 
     @Unroll
-    void "createUserProjectRole, sets manageUsers and delegate users true for #projectRoles when manageUsers #manageUsers and delegateUser #delegateUsers"() {
+    void "createUserProjectRole, sets manageUsers and delegate users true for #projectRoleNames when manageUsers #manageUsers and delegateUser #delegateUsers"() {
         given:
         setupData()
 
@@ -1093,7 +1093,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
     }
 
     @Unroll
-    void "setAccessToFiles, when old and new File Access is the same (#fileAccess) and force is #forse, then create no AuditLog"() {
+    void "setAccessToFiles, when old and new File Access is the same (#fileAccess) and force is #force, then create no AuditLog"() {
         given:
         setupData()
         createUser([username: SYSTEM_USER])

@@ -23,11 +23,11 @@ package de.dkfz.tbi.otp.ngsdata
 
 import grails.gorm.transactions.Rollback
 import grails.testing.mixin.integration.Integration
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+import spock.lang.TempDir
 
 import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.taxonomy.TaxonomyFactory
@@ -39,19 +39,27 @@ import de.dkfz.tbi.otp.ngsdata.taxonomy.Species
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.workflowExecution.ExternalWorkflowConfigSelector
+
+import java.nio.file.Files
+import java.nio.file.Path
 
 @Rollback
 @Integration
 class ReferenceGenomeServiceIntegrationSpec extends Specification implements UserAndRoles, DomainFactoryCore, TaxonomyFactory {
 
-    @Rule
-    TemporaryFolder temporaryFolder = new TemporaryFolder()
+    @TempDir
+    Path tempDir
 
     ReferenceGenomeService referenceGenomeService
     TestConfigService configService
 
     ReferenceGenome referenceGenome
+
+    Path directory
+    Path statFile
+    Path chromosomeLengthFile
 
     void setupData() {
         referenceGenomeService = new ReferenceGenomeService(
@@ -64,9 +72,13 @@ class ReferenceGenomeServiceIntegrationSpec extends Specification implements Use
         referenceGenomeService.fileService.configService = referenceGenomeService.configService
         referenceGenome = createReferenceGenome()
 
-        File referenceGenomeDirectory = temporaryFolder.newFolder("reference_genomes", referenceGenome.path)
+        File referenceGenomeDirectory = Files.createDirectories(tempDir.resolve("reference_genomes/${referenceGenome.path}")).toFile()
         DomainFactory.createProcessingOptionBasePathReferenceGenome(referenceGenomeDirectory.parent)
         DomainFactory.createDefaultRealmWithProcessingOption()
+    }
+
+    void cleanup() {
+        configService.clean()
     }
 
     void "createReferenceGenomeMetafile, file is created with expected content"() {
@@ -114,7 +126,7 @@ class ReferenceGenomeServiceIntegrationSpec extends Specification implements Use
 
         DomainFactory.createDefaultRealmWithProcessingOption()
 
-        temporaryFolder.newFolder("reference_genomes", path).toPath()
+        Files.createDirectories(tempDir.resolve("reference_genomes").resolve(path))
 
         String fastaName = "chr21"
         String fastaAlias = "21"
@@ -155,5 +167,130 @@ class ReferenceGenomeServiceIntegrationSpec extends Specification implements Use
         ExternalWorkflowConfigSelector selector = CollectionUtils.exactlyOneElement(ExternalWorkflowConfigSelector.all)
         selector.referenceGenomes == [referenceGenome] as Set
         selector.fragments.first().configValues.contains(statSizeFileName)
+    }
+
+    void testChromosomeStatSizeFile_AllFine() {
+        given:
+        MergingWorkPackage mergingWorkPackage = createDataForChromosomeSizeInformationFiles()
+        File pathExp = statFile.toFile()
+
+        when:
+        File pathAct = referenceGenomeService.chromosomeStatSizeFile(mergingWorkPackage, false)
+
+        then:
+        pathExp == pathAct
+    }
+
+    void testChromosomeStatSizeFile_WithFileCheck_AllFine() {
+        given:
+        MergingWorkPackage mergingWorkPackage = createDataForChromosomeSizeInformationFiles()
+        File pathExp = statFile.toFile()
+        CreateFileHelper.createFile(pathExp)
+
+        when:
+        File pathAct = referenceGenomeService.chromosomeStatSizeFile(mergingWorkPackage, true)
+
+        then:
+        pathExp == pathAct
+    }
+
+    void testChromosomeStatSizeFile_MergingWorkPackageIsNull_ShouldFail() {
+        when:
+        referenceGenomeService.chromosomeStatSizeFile(null)
+
+        then:
+        AssertionError e = thrown(AssertionError)
+        e.message.contains('mergingWorkPackage')
+    }
+
+    void testChromosomeStatSizeFile_NoStatSizeFileIsDefined_ShouldFail() {
+        given:
+        MergingWorkPackage mergingWorkPackage = createDataForChromosomeSizeInformationFiles()
+        mergingWorkPackage.pipeline = DomainFactory.createDefaultOtpPipeline()
+        mergingWorkPackage.statSizeFileName = null
+        mergingWorkPackage.save(flush: true)
+
+        when:
+        referenceGenomeService.chromosomeStatSizeFile(mergingWorkPackage, false)
+
+        then:
+        AssertionError e = thrown(AssertionError)
+        e.message.contains('No stat file size name is defined')
+    }
+
+    void testChromosomeStatSizeFile_StateSizeFileDoesNotExistAndExistenceIsChecked_ShouldFail() {
+        given:
+        MergingWorkPackage mergingWorkPackage = createDataForChromosomeSizeInformationFiles()
+
+        when:
+        referenceGenomeService.chromosomeStatSizeFile(mergingWorkPackage, true)
+
+        then:
+        FileNotReadableException e = thrown(FileNotReadableException)
+        e.message.contains(DomainFactory.DEFAULT_TAB_FILE_NAME)
+    }
+
+    void testChromosomeLengthFile_AllFine() {
+        given:
+        MergingWorkPackage mergingWorkPackage = createDataForChromosomeSizeInformationFiles()
+        File pathExp = chromosomeLengthFile.toFile()
+
+        when:
+        File pathAct = referenceGenomeService.chromosomeLengthFile(mergingWorkPackage, false)
+
+        then:
+        pathExp == pathAct
+    }
+
+    void testChromosomeLengthFile_WithFileCheck_AllFine() {
+        given:
+        MergingWorkPackage mergingWorkPackage = createDataForChromosomeSizeInformationFiles()
+        File pathExp = chromosomeLengthFile.toFile()
+        CreateFileHelper.createFile(pathExp)
+
+        when:
+        File pathAct = referenceGenomeService.chromosomeLengthFile(mergingWorkPackage, true)
+
+        then:
+        pathExp == pathAct
+    }
+
+    void testChromosomeLengthFile_MergingWorkPackageIsNull_ShouldFail() {
+        when:
+        referenceGenomeService.chromosomeLengthFile(null)
+
+        then:
+        AssertionError e = thrown(AssertionError)
+        e.message.contains('mergingWorkPackage')
+    }
+
+    void testChromosomeLengthFile_ChromosomeLengthFileFileDoesNotExistAndExistenceIsChecked_ShouldFail() {
+        given:
+        MergingWorkPackage mergingWorkPackage = createDataForChromosomeSizeInformationFiles()
+
+        when:
+        referenceGenomeService.chromosomeLengthFile(mergingWorkPackage, true)
+
+        then:
+        FileNotReadableException e = thrown(FileNotReadableException)
+        e.message.contains(DomainFactory.DEFAULT_CHROMOSOME_LENGTH_FILE_NAME)
+    }
+
+    private MergingWorkPackage createDataForChromosomeSizeInformationFiles()  {
+        configService.addOtpProperties(tempDir)
+        MergingWorkPackage mergingWorkPackage = DomainFactory.createMergingWorkPackage([
+                statSizeFileName: DomainFactory.DEFAULT_TAB_FILE_NAME,
+                referenceGenome: DomainFactory.createReferenceGenome(chromosomeLengthFilePath: DomainFactory.DEFAULT_CHROMOSOME_LENGTH_FILE_NAME),
+                pipeline: DomainFactory.createPanCanPipeline(),
+        ])
+
+        Path referenceGenomeDirectory = Files.createDirectory(configService.processingRootPath.toPath().resolve('reference_genomes'))
+        DomainFactory.createProcessingOptionBasePathReferenceGenome(referenceGenomeDirectory.toFile().path)
+        Path referenceGenomePath = Files.createDirectory(referenceGenomeDirectory.resolve(mergingWorkPackage.referenceGenome.path))
+        directory = Files.createDirectory(referenceGenomePath.resolve(ReferenceGenomeService.CHROMOSOME_SIZE_FILES_PREFIX))
+        statFile = directory.resolve(DomainFactory.DEFAULT_TAB_FILE_NAME)
+        chromosomeLengthFile = directory.resolve(DomainFactory.DEFAULT_CHROMOSOME_LENGTH_FILE_NAME)
+
+        return mergingWorkPackage
     }
 }

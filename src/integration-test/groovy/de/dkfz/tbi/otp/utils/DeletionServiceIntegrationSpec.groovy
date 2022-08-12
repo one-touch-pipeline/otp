@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.utils
 import grails.gorm.transactions.Rollback
 import grails.testing.mixin.integration.Integration
 import spock.lang.Specification
+import spock.lang.TempDir
 
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.*
@@ -46,6 +47,7 @@ import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.project.dta.*
 import de.dkfz.tbi.otp.workflowExecution.*
 
+import java.nio.file.Path
 import java.nio.file.Paths
 
 @Rollback
@@ -57,6 +59,9 @@ class DeletionServiceIntegrationSpec extends Specification implements EgaSubmiss
 
     String seqDir = "/seq-dir"
     String vbpDir = "/vbp-dir"
+
+    @TempDir
+    Path tempDir
 
     void setupData() {
         IndividualService individualService = Mock(IndividualService) {
@@ -517,8 +522,7 @@ class DeletionServiceIntegrationSpec extends Specification implements EgaSubmiss
         given:
         setupData()
 
-        final File basePath = new File("/dev/null/otp-test/")
-        configService.addOtpProperties(basePath.toPath())
+        configService.addOtpProperties(tempDir)
         final String projectPath = "projectPath"
         final Individual individual = createIndividual(
                 project: createProject(

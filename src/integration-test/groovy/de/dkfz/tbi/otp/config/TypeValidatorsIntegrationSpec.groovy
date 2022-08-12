@@ -34,7 +34,7 @@ import de.dkfz.tbi.otp.job.jobs.roddyAlignment.ExecutePanCanJob
 class TypeValidatorsIntegrationSpec extends Specification {
 
     @Unroll
-    void "check JOB_NAME for value '#name' should return '#ret'"() {
+    void "check JOB_NAME for value '#name' should return '#returnValue'"() {
         expect:
         returnValue == TypeValidators.JOB_NAME_SEQ_TYPE.validate(valueClosure())
 

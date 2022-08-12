@@ -23,8 +23,6 @@ package de.dkfz.tbi.otp.project
 
 import grails.gorm.transactions.Rollback
 import grails.testing.mixin.integration.Integration
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import org.springframework.mock.web.MockMultipartFile
 import spock.lang.*
 
@@ -52,8 +50,8 @@ class ProjectInfoServiceIntegrationSpec extends Specification implements UserAnd
     TestConfigService configService
     ProjectService projectService
 
-    @Rule
-    TemporaryFolder temporaryFolder
+    @TempDir
+    Path tempDir
 
     void setupData() {
         createUserAndRoles()
@@ -72,7 +70,7 @@ class ProjectInfoServiceIntegrationSpec extends Specification implements UserAnd
                 ]),
                 projectService: projectService,
         )
-        configService.addOtpProperties(temporaryFolder.newFolder().toPath())
+        configService.addOtpProperties(tempDir)
     }
 
     void cleanup() {

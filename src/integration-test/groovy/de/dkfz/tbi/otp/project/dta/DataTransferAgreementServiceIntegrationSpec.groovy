@@ -24,10 +24,9 @@ package de.dkfz.tbi.otp.project.dta
 import grails.gorm.transactions.Rollback
 import grails.testing.mixin.integration.Integration
 import grails.validation.ValidationException
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import org.springframework.web.multipart.MultipartFile
 import spock.lang.Specification
+import spock.lang.TempDir
 
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.domainFactory.administration.DocumentFactory
@@ -48,8 +47,8 @@ class DataTransferAgreementServiceIntegrationSpec extends Specification implemen
     TestConfigService configService
     ProjectService projectService
 
-    @Rule
-    TemporaryFolder temporaryFolder
+    @TempDir
+    Path tempDir
 
     void setup() {
         dataTransferAgreementService = new DataTransferAgreementService(
@@ -67,7 +66,7 @@ class DataTransferAgreementServiceIntegrationSpec extends Specification implemen
                 ]),
                 projectService: projectService,
         )
-        configService.addOtpProperties(temporaryFolder.newFolder().toPath())
+        configService.addOtpProperties(tempDir)
     }
 
     void cleanup() {

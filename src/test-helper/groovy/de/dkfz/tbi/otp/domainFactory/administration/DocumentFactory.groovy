@@ -94,8 +94,7 @@ trait DocumentFactory implements DomainFactoryCore {
     }
 
     MockMultipartFile createMultipartFile(String name = "fileName", String originalFilename = "fileName", byte[] content = 0..3) {
-        MockMultipartFile mockMultipartFile = new MockMultipartFile(name, content)
-        mockMultipartFile.originalFilename = originalFilename
+        MockMultipartFile mockMultipartFile = new MockMultipartFile(name, originalFilename, null, content)
         return mockMultipartFile
     }
 }

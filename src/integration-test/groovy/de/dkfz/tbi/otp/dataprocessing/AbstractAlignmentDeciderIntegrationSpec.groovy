@@ -129,9 +129,9 @@ class AbstractAlignmentDeciderIntegrationSpec extends Specification {
         )
 
         expect:
-        shouldFail(AssertionError, {
+        shouldFail AssertionError, {
             decider.decideAndPrepareForAlignment(seqTrack, true)
-        })
+        }
     }
 
     void testDecideAndPrepareForAlignment_whenWrongPipeline_shouldThrowAssertionError() {
@@ -148,9 +148,9 @@ class AbstractAlignmentDeciderIntegrationSpec extends Specification {
         )
 
         expect:
-        shouldFail(AssertionError, {
+        shouldFail AssertionError, {
             decider.decideAndPrepareForAlignment(seqTrack, true)
-        })
+        }
     }
 
     void testDecideAndPrepareForAlignment_whenDifferentSeqPlatformGroup_shouldReturnEmptyListAndSendMail() {
@@ -306,9 +306,9 @@ class AbstractAlignmentDeciderIntegrationSpec extends Specification {
         exactlyOneElement(ReferenceGenomeProjectSeqType.list()).delete(flush: true)
 
         expect:
-        shouldFail(RuntimeException, {
+        shouldFail RuntimeException, {
             decider.ensureConfigurationIsComplete(seqTrack)
-        })
+        }
     }
 
     void testEnsureConfigurationIsComplete_whenLibraryPreparationKitIsMissing_shouldThrowRuntimeException() {
@@ -326,9 +326,9 @@ class AbstractAlignmentDeciderIntegrationSpec extends Specification {
         dataFile.save(flush: true)
 
         expect:
-        shouldFail(RuntimeException, {
+        shouldFail RuntimeException, {
             decider.ensureConfigurationIsComplete(seqTrack)
-        })
+        }
     }
 
     void testCanPipelineAlign_whenEverythingIsOkay_shouldReturnTrue() {

@@ -122,7 +122,7 @@ class DataFile implements CommentableWithProject, Entity {
 
         project nullable: true,  // Shall not be null, but legacy data exists
                 validator: { Project val, DataFile obj ->
-                    obj.seqTrack == null || val == obj.seqTrack.project
+                    obj.seqTrack == null || val == obj.seqTrack.sample.individual.project
                 }
         dateExecuted(nullable: true)  // Shall not be null, but legacy data exists
         dateFileSystem(nullable: true)

@@ -23,9 +23,8 @@ package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
 import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+import spock.lang.TempDir
 import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
@@ -46,8 +45,8 @@ import java.nio.file.Path
 @Integration
 class SnvCallingServiceIntegrationSpec extends Specification implements DomainFactoryCore, DomainFactoryProcessingPriority {
 
-    @Rule
-    TemporaryFolder temporaryFolder
+    @TempDir
+    Path tempDir
 
     final static String ARBITRARY_INSTANCE_NAME = '2014-08-25_15h32'
     final static double COVERAGE_TOO_LOW = 20.0
@@ -419,10 +418,9 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
         given:
         setupData()
 
-        Path path = temporaryFolder.newFolder().toPath()
-        configService.addOtpProperties(path)
+        configService.addOtpProperties(tempDir)
         IndividualService individualService = Mock(IndividualService) {
-            getViewByPidPath(_, _) >> path
+            getViewByPidPath(_, _) >> tempDir
         }
         SnvCallingService snvCallingService = new SnvCallingService(
                 fileService: new FileService(),

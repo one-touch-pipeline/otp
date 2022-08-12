@@ -23,10 +23,9 @@ package de.dkfz.tbi.otp.project.dta
 
 import grails.gorm.transactions.Rollback
 import grails.testing.mixin.integration.Integration
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import org.springframework.web.multipart.MultipartFile
 import spock.lang.Specification
+import spock.lang.TempDir
 
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.domainFactory.administration.DocumentFactory
@@ -39,6 +38,7 @@ import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.utils.ProcessOutput
 
 import java.nio.file.FileSystems
+import java.nio.file.Path
 
 @Rollback
 @Integration
@@ -48,8 +48,8 @@ class DataTransferServiceIntegrationSpec extends Specification implements Docume
     TestConfigService configService
     ProjectService projectService
 
-    @Rule
-    TemporaryFolder temporaryFolder
+    @TempDir
+    Path tempDir
 
     void setupData() {
         createUserAndRoles()
@@ -71,7 +71,7 @@ class DataTransferServiceIntegrationSpec extends Specification implements Docume
                 },
                 dataTransferAgreementService: new DataTransferAgreementService(projectService: projectService),
         )
-        configService.addOtpProperties(temporaryFolder.newFolder().toPath())
+        configService.addOtpProperties(tempDir)
     }
 
     void cleanup() {

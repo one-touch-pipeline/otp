@@ -25,10 +25,10 @@ import grails.gorm.transactions.Rollback
 import grails.testing.mixin.integration.Integration
 import grails.validation.ValidationException
 import org.grails.datastore.gorm.events.AutoTimestampEventListener
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
+import org.springframework.lang.Nullable
 import org.springframework.mock.web.MockMultipartFile
 import spock.lang.Specification
+import spock.lang.TempDir
 import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
@@ -78,12 +78,12 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
     static final String FILE_NAME = "fileName"
     static final byte[] CONTENT = 0..3
 
-    @Rule
-    TemporaryFolder temporaryFolder
+    @TempDir
+    Path tempDir
 
     void baseSetupData() {
         createUserAndRoles()
-        configService.addOtpProperties(temporaryFolder.newFolder().toPath())
+        configService.addOtpProperties(tempDir)
     }
 
     void setupData() {
@@ -111,8 +111,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         int counter = 0
         projectService.remoteShellHelper = Stub(RemoteShellHelper) {
             executeCommandReturnProcessOutput(_, _) >> { Realm realm2, String command ->
-                File script = temporaryFolder.newFile('script' + counter++ + '.sh')
-                script.text = command
+                File script = CreateFileHelper.createFile(tempDir.resolve('script' + counter++ + '.sh'), command).toFile()
                 return LocalShellHelper.executeAndWait("bash ${script.absolutePath}").assertExitCodeZero()
             }
         }
@@ -175,7 +174,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         }
 
         if (dirAnalysis) {
-            dirAnalysis = "${temporaryFolder.newFolder()}${dirAnalysis}"
+            dirAnalysis = "${tempDir}${dirAnalysis}"
             Path analysisPath = Paths.get(dirAnalysis)
             1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(analysisPath.parent, _, '', FileService.DIRECTORY_WITH_OTHER_PERMISSION_STRING)
             1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(analysisPath, _, unixGroup, FileService.OWNER_AND_GROUP_DIRECTORY_PERMISSION_STRING)
@@ -266,7 +265,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
         String dirName = 'projectDir/projectSubDir'
         Path projectPath = configService.rootPath.toPath().resolve(dirName)
-        Path analysisPath = temporaryFolder.newFolder().toPath().resolve('analysisDir/analysisSubDir')
+        Path analysisPath = tempDir.resolve('analysisDir/analysisSubDir')
         projectService.fileService = Mock(FileService)
 
         Project project
@@ -313,7 +312,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
         String dirName = 'projectDir/subDir'
         Path projectPath = configService.rootPath.toPath().resolve(dirName)
-        Path analysisPath = temporaryFolder.newFolder().toPath().resolve('analysisDir/subDir')
+        Path analysisPath = tempDir.resolve('analysisDir/subDir')
         projectService.fileService = Mock(FileService)
 
         Files.createDirectories(projectPath)
@@ -364,7 +363,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         String exceptionMessage = "message ${nextId}"
         String dirName = 'projectDir'
         Path projectPath = configService.rootPath.toPath().resolve(dirName)
-        Path analysisPath = temporaryFolder.newFolder().toPath().resolve('analysisDir')
+        Path analysisPath = tempDir.resolve('analysisDir')
         projectService.fileService = Mock(FileService)
 
         Project project
@@ -424,7 +423,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 name: name,
                 dirName: dirName,
                 individualPrefix: 'individualPrefix',
-                dirAnalysis: "${temporaryFolder.newFolder()}/dirA",
+                dirAnalysis: "${tempDir}/dirA",
                 unixGroup: group,
                 projectGroup: '',
                 nameInMetadataFiles: nameInMetadataFiles,
@@ -461,7 +460,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         String exceptionMessage = "message ${nextId}"
         String dirName = 'projectDir'
         Path projectPath = configService.rootPath.toPath().resolve(dirName)
-        Path analysisPath = temporaryFolder.newFolder().toPath().resolve('analysisDir')
+        Path analysisPath = tempDir.resolve('analysisDir')
         projectService.fileService = Mock(FileService)
 
         when:
@@ -538,14 +537,13 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
         String dirName = 'projectDir/projectSubDir'
         Path projectPath = configService.rootPath.toPath().resolve(dirName)
-        Path analysisPath = temporaryFolder.newFolder().toPath().resolve('analysisDir/analysisSubDir')
+        Path analysisPath = tempDir.resolve('analysisDir/analysisSubDir')
         projectService.fileService = Mock(FileService)
 
         projectService.projectInfoService = Mock(ProjectInfoService) {
             1 * createProjectInfoAndUploadFile(_, _)
         }
-        MockMultipartFile mockMultipartFile = new MockMultipartFile(FILE_NAME, CONTENT)
-        mockMultipartFile.originalFilename = FILE_NAME
+        MockMultipartFile mockMultipartFile = new MockMultipartFile(FILE_NAME, FILE_NAME, null,CONTENT)
 
         when:
         ProjectCreationCommand projectParams = new ProjectCreationCommand(
@@ -625,7 +623,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 name: 'project',
                 dirName: 'dir',
                 individualPrefix: 'individualPrefix',
-                dirAnalysis: "${temporaryFolder.newFolder()}/dirA",
+                dirAnalysis: "${tempDir}/dirA",
                 unixGroup: group,
                 projectGroup: '',
                 nameInMetadataFiles: 'project',
@@ -1345,7 +1343,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         String oldName = "oldNameUsedInConfig"
         String newName = "newNameUsedInConfig"
 
-        Path configFile = temporaryFolder.newFile().toPath()
+        Path configFile = CreateFileHelper.createFile(tempDir.resolve("test.txt"))
         CreateFileHelper.createRoddyWorkflowConfig(configFile.toFile(), oldName)
 
         when:
@@ -1388,7 +1386,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         String programVersion = "1.1.51"
         String configVersion = "v1_2"
 
-        File baseXmlConfigFile = temporaryFolder.newFile("PANCAN_ALIGNMENT_WES_PAIRED_${programVersion}_${configVersion}.xml")
+        File baseXmlConfigFile = CreateFileHelper.createFile(tempDir.resolve("PANCAN_ALIGNMENT_WES_PAIRED_${programVersion}_${configVersion}.xml")).toFile()
         CreateFileHelper.createRoddyWorkflowConfig(baseXmlConfigFile, "PANCAN_ALIGNMENT_WES_PAIRED_${pluginName}:${programVersion}_${configVersion}")
 
         Pipeline pipeline = CollectionUtils.atMostOneElement(Pipeline.findAllByTypeAndName(Pipeline.Type.ALIGNMENT, Pipeline.Name.PANCAN_ALIGNMENT))
@@ -1788,7 +1786,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
     void "updateAnalysisDirectory, should succeed and send no mail, when unix group has permission to create directory and force #force"() {
         given:
         setupData()
-        String analysisDirectory = "${temporaryFolder.newFolder()}/dirA"
+        String analysisDirectory = "${tempDir}/dirA"
         Project project = CollectionUtils.atMostOneElement(Project.findAllByName("testProject"))
         project.unixGroup = configService.testingGroup
         project.save(flush: true)

@@ -24,9 +24,9 @@ package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
 import org.codehaus.groovy.control.io.NullWriter
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
+import org.springframework.beans.factory.annotation.Qualifier
 import spock.lang.Specification
+import spock.lang.TempDir
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.TestConstants
@@ -40,6 +40,8 @@ import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.LocalShellHelper
 import de.dkfz.tbi.otp.utils.ProcessOutput
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
+
+import java.nio.file.Path
 
 @Rollback
 @Integration
@@ -55,19 +57,14 @@ class AbstractRoddyJobIntegrationSpec extends Specification {
     AbstractRoddyJob roddyJob
     RoddyBamFile roddyBamFile
     Realm realm
+
+    @Qualifier('TestConfigService')
     TestConfigService configService
-    int executeCommandCounter
-    int validateCounter
 
-    String stderr
-
-    @Rule
-    TemporaryFolder tmpDir = new TemporaryFolder()
+    @TempDir
+    Path tempDir
 
     void setupData() {
-        executeCommandCounter = 0
-        validateCounter = 0
-
         roddyBamFile = DomainFactory.createRoddyBamFile()
 
         realm = roddyBamFile.project.realm
@@ -80,20 +77,19 @@ class AbstractRoddyJobIntegrationSpec extends Specification {
                 exitCode: 0,
         )
 
-        roddyJob = [
-                getProcessParameterObject: { -> roddyBamFile },
-                prepareAndReturnWorkflowSpecificCommand: { Object instance, Realm realm -> return "workflowSpecificCommand" },
-                validate: { Object instance -> validateCounter ++ },
-                getProcessingStep : { -> return DomainFactory.createAndSaveProcessingStep() },
-        ] as AbstractRoddyJob
+        roddyJob = Spy(AbstractRoddyJob) {
+            _ * getProcessParameterObject() >> roddyBamFile
+            _ * prepareAndReturnWorkflowSpecificCommand(_, _) >> "workflowSpecificCommand"
+            _ * getProcessingStep() >> DomainFactory.createAndSaveProcessingStep()
+        }
 
         roddyJob.roddyExecutionService = new RoddyExecutionService()
         roddyJob.roddyExecutionService.configService = configService
         roddyJob.roddyExecutionService.clusterJobService = new ClusterJobService()
         roddyJob.roddyExecutionService.processingOptionService = new ProcessingOptionService()
-        roddyJob.clusterJobSchedulerService = [
-                retrieveAndSaveJobInformationAfterJobStarted: { ClusterJob clusterJob -> },
-        ] as ClusterJobSchedulerService
+        roddyJob.clusterJobSchedulerService = Mock(ClusterJobSchedulerService) {
+            _ * retrieveAndSaveJobInformationAfterJobStarted(_)
+        }
         roddyJob.fileSystemService = new TestFileSystemService()
     }
 
@@ -105,60 +101,24 @@ class AbstractRoddyJobIntegrationSpec extends Specification {
     }
 
     private File setRootPathAndCreateWorkExecutionStoreDirectory() {
-        configService.addOtpProperties(tmpDir.newFolder().toPath())
+        configService.addOtpProperties(tempDir)
         File workRoddyExecutionDir = new File(roddyBamFile.workExecutionStoreDirectory, RODDY_EXECUTION_STORE_DIRECTORY_NAME)
         assert workRoddyExecutionDir.mkdirs()
         return workRoddyExecutionDir
     }
 
-    private File setUpWorkDirAndMockProcessOutput() {
+    void "test maybeSubmit"() {
+        given:
+        setupData()
         File workExecutionDir = setRootPathAndCreateWorkExecutionStoreDirectory()
 
         String stdout = "Running job abc_def => 3504988"
-        stderr = """newLine
+        String stderr = """newLine
 Creating the following execution directory to store information about this process:
 ${workExecutionDir.absolutePath}
 newLine"""
 
-        mockProcessOutput(stdout, stderr)
-
-        return workExecutionDir
-    }
-
-    private File setupWorkDirAndMockProcessOutputWithError(String error) {
-        File workExecutionDir = setRootPathAndCreateWorkExecutionStoreDirectory()
-
-        stderr = """newLine
-Creating the following execution directory to ${error} store information about this process:
-${workExecutionDir.absolutePath}
-newLine"""
-        mockProcessOutput("", stderr)
-
-        return workExecutionDir
-    }
-
-    private void mockProcessOutput(String output, String error) {
-        roddyJob.roddyExecutionService.remoteShellHelper = [
-                executeCommandReturnProcessOutput: { Realm realm, String cmd ->
-                    executeCommandCounter++
-                    return new ProcessOutput(stdout: output, stderr: error, exitCode: 0)
-                }
-        ] as RemoteShellHelper
-    }
-
-    private void mockProcessOutput_noClusterJobsSubmitted() {
-        roddyJob.roddyExecutionService.remoteShellHelper = [
-                executeCommandReturnProcessOutput: { Realm realm, String cmd ->
-                    executeCommandCounter++
-                    return outputNoClusterJobsSubmitted
-                }
-        ] as RemoteShellHelper
-    }
-
-    void "test maybeSubmit"() {
-        given:
-        setupData()
-        setUpWorkDirAndMockProcessOutput()
+        roddyJob.roddyExecutionService.remoteShellHelper = Mock(RemoteShellHelper)
 
         when:
         NextAction result
@@ -168,14 +128,18 @@ newLine"""
 
         then:
         result == NextAction.WAIT_FOR_CLUSTER_JOBS
-        executeCommandCounter == 1
-        validateCounter == 0
+
+        and:
+        1 * roddyJob.roddyExecutionService.remoteShellHelper.executeCommandReturnProcessOutput(_, _) >>
+                new ProcessOutput(stdout: stdout, stderr: stderr, exitCode: 0)
+        0 * roddyJob.validate()
+        0 * roddyJob.validate(_)
     }
 
     void "test maybeSubmit, no cluster jobs submitted, validate succeeds"() {
         given:
         setupData()
-        mockProcessOutput_noClusterJobsSubmitted()
+        roddyJob.roddyExecutionService.remoteShellHelper = Mock(RemoteShellHelper)
 
         when:
         NextAction result
@@ -185,19 +149,18 @@ newLine"""
 
         then:
         result == NextAction.SUCCEED
-        executeCommandCounter == 1
-        validateCounter == 1
+
+        and:
+        1 * roddyJob.validate() >> _
+        1 * roddyJob.roddyExecutionService.remoteShellHelper.executeCommandReturnProcessOutput(_, _) >> outputNoClusterJobsSubmitted
     }
 
-    @SuppressWarnings("ThrowRuntimeException") // ignored: will be removed with the old workflow system
+    @SuppressWarnings("ThrowRuntimeException")
+    // ignored: will be removed with the old workflow system
     void "test maybeSubmit, no cluster jobs submitted, validate fails"() {
         given:
         setupData()
-        mockProcessOutput_noClusterJobsSubmitted()
-        roddyJob.metaClass.validate = { ->
-            validateCounter++
-            throw new RuntimeException(TestConstants.ARBITRARY_MESSAGE)
-        }
+        roddyJob.roddyExecutionService.remoteShellHelper = Mock(RemoteShellHelper)
 
         when:
         LogThreadLocal.withThreadLog(new NullWriter()) {
@@ -208,7 +171,10 @@ newLine"""
         RuntimeException e = thrown(RuntimeException)
         e.message == 'validate() failed after Roddy has not submitted any cluster jobs.'
         e.cause?.message == TestConstants.ARBITRARY_MESSAGE
-        executeCommandCounter == 1
+
+        and:
+        1 * roddyJob.roddyExecutionService.remoteShellHelper.executeCommandReturnProcessOutput(_, _) >> outputNoClusterJobsSubmitted
+        _ * roddyJob.validate() >> { throw new RuntimeException(TestConstants.ARBITRARY_MESSAGE) }
     }
 
     void "test validate"() {
@@ -219,20 +185,21 @@ newLine"""
         roddyJob.validate()
 
         then:
-        validateCounter == 1
+        1 * roddyJob.validate(_) >> _
     }
 
-    @SuppressWarnings("ThrowRuntimeException") // ignored: will be removed with the old workflow system
     void "test execute, finishedClusterJobs is null"() {
         given:
         setupData()
-        setUpWorkDirAndMockProcessOutput()
-        roddyJob.metaClass.maybeSubmit = {
-            return NextAction.WAIT_FOR_CLUSTER_JOBS
-        }
-        roddyJob.metaClass.validate = {
-            throw new RuntimeException("should not come here")
-        }
+        File workExecutionDir = setRootPathAndCreateWorkExecutionStoreDirectory()
+
+        String stdout = "Running job abc_def => 3504988"
+        String stderr = """newLine
+Creating the following execution directory to store information about this process:
+${workExecutionDir.absolutePath}
+newLine"""
+
+        roddyJob.roddyExecutionService.remoteShellHelper = Mock(RemoteShellHelper)
 
         when:
         NextAction result
@@ -242,12 +209,23 @@ newLine"""
 
         then:
         result == NextAction.WAIT_FOR_CLUSTER_JOBS
+
+        and:
+        0 * roddyJob.metaClass.validate()
+        0 * roddyJob.validate()
+        1 * roddyJob.roddyExecutionService.remoteShellHelper.executeCommandReturnProcessOutput(_, _) >>
+                new ProcessOutput(stdout: stdout, stderr: stderr, exitCode: 0)
     }
 
     void "test maybeSubmit, with Roddy errors"() {
         given:
         setupData()
-        setupWorkDirAndMockProcessOutputWithError(cause)
+        File workExecutionDir = setRootPathAndCreateWorkExecutionStoreDirectory()
+        String stderr = """newLine
+Creating the following execution directory to ${cause} store information about this process:
+${workExecutionDir.absolutePath}
+newLine"""
+        roddyJob.roddyExecutionService.remoteShellHelper = Mock(RemoteShellHelper)
 
         when:
         LogThreadLocal.withThreadLog(System.out) {
@@ -258,20 +236,19 @@ newLine"""
         RuntimeException e = thrown(RuntimeException)
         e.message == message
 
+        and:
+        1 * roddyJob.roddyExecutionService.remoteShellHelper.executeCommandReturnProcessOutput(_, _) >>
+                new ProcessOutput(stdout: stderr, stderr: cause, exitCode: 0)
+
         where:
         cause                                             || message
         "java.lang.OutOfMemoryError"                      || "An out of memory error occurred when executing Roddy."
         "An uncaught error occurred during a run. SEVERE" || "An unexpected error occurred when executing Roddy."
     }
 
-    @SuppressWarnings("ThrowRuntimeException") // ignored: will be removed with the old workflow system
     void "test execute"() {
         given:
         setupData()
-        roddyJob = [
-                validate                      : { -> validateCounter++ },
-                failedOrNotFinishedClusterJobs: { Collection<? extends ClusterJobIdentifier> finishedClusterJobs -> [:] },
-        ] as AbstractRoddyJob
 
         Realm realm = DomainFactory.createRealm()
         realm.save(flush: true)
@@ -284,16 +261,16 @@ newLine"""
 
         final ClusterJobIdentifier jobIdentifier = new ClusterJobIdentifier(realm, clusterJob.clusterJobId)
 
-        roddyJob.metaClass.maybeSubmit = {
-            throw new RuntimeException("should not come here")
-        }
-
         when:
         NextAction result = roddyJob.execute([jobIdentifier])
 
         then:
         result == NextAction.SUCCEED
-        executeCommandCounter == 0
-        validateCounter == 1
+
+        and:
+        0 * roddyJob.metaClass.maybeSubmit()
+        0 * roddyJob.maybeSubmit()
+        1 * roddyJob.validate() >> _
+        _ * roddyJob.failedOrNotFinishedClusterJobs(_) >> { Collection<? extends ClusterJobIdentifier> finishedClusterJobs -> [:] }
     }
 }

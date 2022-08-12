@@ -23,10 +23,9 @@ package de.dkfz.tbi.otp.utils
 
 import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
-import org.junit.*
-import org.junit.rules.TemporaryFolder
+import spock.lang.Specification
+import spock.lang.TempDir
 
-import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.utils.exceptions.FileNotFoundException
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
@@ -38,10 +37,11 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.UserAndRoles
 
 import java.nio.file.Path
+import java.nio.file.Files
 
 @Rollback
 @Integration
-class DeletionServiceIntegrationTests implements UserAndRoles {
+class DeletionServiceIntegrationTests extends Specification implements UserAndRoles {
 
     DeletionService deletionService
     LsdfFilesService lsdfFilesService
@@ -51,48 +51,49 @@ class DeletionServiceIntegrationTests implements UserAndRoles {
     SnvCallingService snvCallingService
     FileService fileService
 
-    @SuppressWarnings("PublicInstanceField") // must be public in JUnit tests
-    @Rule
-    public TemporaryFolder temporaryFolder = new TemporaryFolder()
+    @TempDir
+    Path tempDir
 
     Path outputFolder
 
     void setupData() {
         createUserAndRoles()
-        outputFolder = temporaryFolder.newFolder("outputFolder").toPath()
+        outputFolder = Files.createDirectory(tempDir.resolve("outputFolder"))
         configService.addOtpProperties(outputFolder)
         DomainFactory.createDefaultRealmWithProcessingOption()
     }
 
-    @After
-    void tearDown() {
+    void cleanup() {
         configService.clean()
     }
 
-    @Test
-    void testDeleteFastQCInformationFromDataFile() {
+    void "testDeleteFastQCInformationFromDataFile"() {
+        given:
         setupData()
         DataFile dataFile = DomainFactory.createDataFile()
         FastqcProcessedFile fastqcProcessedFile = DomainFactory.createFastqcProcessedFile(dataFile: dataFile)
 
+        when:
         deletionService.deleteFastQCInformationFromDataFile(dataFile)
 
-        assert !FastqcProcessedFile.get(fastqcProcessedFile.id)
+        then:
+        !FastqcProcessedFile.get(fastqcProcessedFile.id)
     }
 
-    @Test
-    void testDeleteMetaDataEntryForDataFile() {
-        setupData()
+    void "testDeleteMetaDataEntryForDataFile"() {
+        given:
         DataFile dataFile = DomainFactory.createDataFile()
         MetaDataEntry metaDataEntry = DomainFactory.createMetaDataEntry(dataFile: dataFile)
 
+        when:
         deletionService.deleteMetaDataEntryForDataFile(dataFile)
 
-        assert !MetaDataEntry.get(metaDataEntry.id)
+        then:
+        !MetaDataEntry.get(metaDataEntry.id)
     }
 
-    @Test
-    void testDeleteQualityAssessmentInfoForAbstractBamFile_ProcessedBamFile() {
+    void "testDeleteQualityAssessmentInfoForAbstractBamFile_ProcessedBamFile"() {
+        given:
         setupData()
         AbstractBamFile abstractBamFile = DomainFactory.createProcessedBamFile()
 
@@ -100,15 +101,17 @@ class DeletionServiceIntegrationTests implements UserAndRoles {
         ChromosomeQualityAssessment chromosomeQualityAssessment = DomainFactory.createChromosomeQualityAssessment(qualityAssessmentPass: qualityAssessmentPass, referenceLength: 0)
         OverallQualityAssessment overallQualityAssessment = DomainFactory.createOverallQualityAssessment(qualityAssessmentPass: qualityAssessmentPass, referenceLength: 0)
 
+        when:
         deletionService.deleteQualityAssessmentInfoForAbstractBamFile(abstractBamFile)
 
-        assert !QualityAssessmentPass.get(qualityAssessmentPass.id)
-        assert !ChromosomeQualityAssessment.get(chromosomeQualityAssessment.id)
-        assert !OverallQualityAssessment.get(overallQualityAssessment.id)
+        then:
+        !QualityAssessmentPass.get(qualityAssessmentPass.id)
+        !ChromosomeQualityAssessment.get(chromosomeQualityAssessment.id)
+        !OverallQualityAssessment.get(overallQualityAssessment.id)
     }
 
-    @Test
-    void testDeleteQualityAssessmentInfoForAbstractBamFile_ProcessedMergedBamFile() {
+    void "testDeleteQualityAssessmentInfoForAbstractBamFile_ProcessedMergedBamFile"() {
+        given:
         setupData()
         AbstractBamFile abstractBamFile = DomainFactory.createProcessedMergedBamFile()
 
@@ -117,16 +120,18 @@ class DeletionServiceIntegrationTests implements UserAndRoles {
         OverallQualityAssessmentMerged overallQualityAssessment = DomainFactory.createOverallQualityAssessmentMerged(qualityAssessmentMergedPass: qualityAssessmentPass, referenceLength: 0)
         PicardMarkDuplicatesMetrics picardMarkDuplicatesMetrics = DomainFactory.createPicardMarkDuplicatesMetrics(abstractBamFile: abstractBamFile)
 
+        when:
         deletionService.deleteQualityAssessmentInfoForAbstractBamFile(abstractBamFile)
 
-        assert !QualityAssessmentMergedPass.get(qualityAssessmentPass.id)
-        assert !ChromosomeQualityAssessmentMerged.get(chromosomeQualityAssessment.id)
-        assert !OverallQualityAssessmentMerged.get(overallQualityAssessment.id)
-        assert !PicardMarkDuplicatesMetrics.get(picardMarkDuplicatesMetrics.id)
+        then:
+        !QualityAssessmentMergedPass.get(qualityAssessmentPass.id)
+        !ChromosomeQualityAssessmentMerged.get(chromosomeQualityAssessment.id)
+        !OverallQualityAssessmentMerged.get(overallQualityAssessment.id)
+        !PicardMarkDuplicatesMetrics.get(picardMarkDuplicatesMetrics.id)
     }
 
-    @Test
-    void testDeleteQualityAssessmentInfoForAbstractBamFile_RoddyBamFile() {
+    void "testDeleteQualityAssessmentInfoForAbstractBamFile_RoddyBamFile"() {
+        given:
         setupData()
         AbstractBamFile abstractBamFile = DomainFactory.createRoddyBamFile()
 
@@ -138,40 +143,47 @@ class DeletionServiceIntegrationTests implements UserAndRoles {
         RoddySingleLaneQa roddySingleLaneQa = DomainFactory.createRoddySingleLaneQa(seqTrack: abstractBamFile.seqTracks.iterator().next(),
                 qualityAssessmentMergedPass: qualityAssessmentPass, genomeWithoutNCoverageQcBases: 0, referenceLength: 0)
 
+        when:
         deletionService.deleteQualityAssessmentInfoForAbstractBamFile(abstractBamFile)
 
-        assert !QualityAssessmentMergedPass.get(qualityAssessmentPass.id)
-        assert !RoddyLibraryQa.get(roddyLibraryQa.id)
-        assert !RoddyMergedBamQa.get(roddyMergedBamQa.id)
-        assert !RoddySingleLaneQa.get(roddySingleLaneQa.id)
+        then:
+        !QualityAssessmentMergedPass.get(qualityAssessmentPass.id)
+        !RoddyLibraryQa.get(roddyLibraryQa.id)
+        !RoddyMergedBamQa.get(roddyMergedBamQa.id)
+        !RoddySingleLaneQa.get(roddySingleLaneQa.id)
     }
 
-    @Test
-    void testDeleteQualityAssessmentInfoForAbstractBamFile_SingleCellBamFile() {
+    void "testDeleteQualityAssessmentInfoForAbstractBamFile_SingleCellBamFile"() {
+        given:
         setupData()
         AbstractBamFile abstractBamFile = DomainFactory.proxyCellRanger.createBamFile()
 
         QualityAssessmentMergedPass qualityAssessmentPass = DomainFactory.createQualityAssessmentMergedPass(abstractMergedBamFile: abstractBamFile)
 
+        when:
         deletionService.deleteQualityAssessmentInfoForAbstractBamFile(abstractBamFile)
 
-        assert !QualityAssessmentMergedPass.get(qualityAssessmentPass.id)
+        then:
+        !QualityAssessmentMergedPass.get(qualityAssessmentPass.id)
     }
 
-    @Test
-    void testDeleteQualityAssessmentInfoForAbstractBamFile_null() {
+    void "testDeleteQualityAssessmentInfoForAbstractBamFile_null"() {
+        given:
         setupData()
         AbstractBamFile abstractBamFile = null
 
+        when:
         final shouldFail = new GroovyTestCase().&shouldFail
         String message = shouldFail RuntimeException, {
             deletionService.deleteQualityAssessmentInfoForAbstractBamFile(abstractBamFile)
         }
-        assert message == "The input AbstractBamFile is null"
+
+        then:
+        message == "The input AbstractBamFile is null"
     }
 
-    @Test
-    void testDeleteMergingRelatedConnectionsOfBamFile() {
+    void "testDeleteMergingRelatedConnectionsOfBamFile"() {
+        given:
         setupData()
         MergingWorkPackage mergingWorkPackage = DomainFactory.createMergingWorkPackage([
                 pipeline: DomainFactory.createDefaultOtpPipeline()
@@ -182,16 +194,18 @@ class DeletionServiceIntegrationTests implements UserAndRoles {
         MergingSetAssignment mergingSetAssignment = DomainFactory.createMergingSetAssignment(bamFile: processedBamFile, mergingSet: mergingSet)
         ProcessedMergedBamFile bamFile = DomainFactory.createProcessedMergedBamFileWithoutProcessedBamFile(workPackage: mergingWorkPackage, mergingPass: mergingPass)
 
+        when:
         deletionService.deleteMergingRelatedConnectionsOfBamFile(processedBamFile)
 
-        assert !MergingPass.get(mergingPass.id)
-        assert !MergingSet.get(mergingSet.id)
-        assert !MergingSetAssignment.get(mergingSetAssignment.id)
-        assert !ProcessedMergedBamFile.get(bamFile.id)
+        then:
+        !MergingPass.get(mergingPass.id)
+        !MergingSet.get(mergingSet.id)
+        !MergingSetAssignment.get(mergingSetAssignment.id)
+        !ProcessedMergedBamFile.get(bamFile.id)
     }
 
-    @Test
-    void testDeleteDataFile() {
+    void "testDeleteDataFile"() {
+        given:
         setupData()
         DataFile dataFile = DomainFactory.createDataFile()
         FastqcProcessedFile fastqcProcessedFile = DomainFactory.createFastqcProcessedFile(dataFile: dataFile)
@@ -208,27 +222,31 @@ class DeletionServiceIntegrationTests implements UserAndRoles {
                 "${fastqFile}.md5sum",
         ].collect { new File(it) }
 
+        when:
         List<File> result = deletionService.deleteDataFile(dataFile)
 
-        assert expected == result
-        assert !FastqcProcessedFile.get(fastqcProcessedFile.id)
+        then:
+        expected == result
+        !FastqcProcessedFile.get(fastqcProcessedFile.id)
     }
 
-    @Test
-    void testDeleteConnectionFromSeqTrackRepresentingABamFile() {
+    void "testDeleteConnectionFromSeqTrackRepresentingABamFile"() {
+        given:
         setupData()
         SeqTrack seqTrack = DomainFactory.createSeqTrack()
         AlignmentLog alignmentLog = DomainFactory.createAlignmentLog(seqTrack: seqTrack)
         DataFile dataFile = DomainFactory.createDataFile(alignmentLog: alignmentLog)
 
+        when:
         deletionService.deleteConnectionFromSeqTrackRepresentingABamFile(seqTrack)
 
-        assert !AlignmentLog.get(alignmentLog.id)
-        assert !DataFile.get(dataFile.id)
+        then:
+        !AlignmentLog.get(alignmentLog.id)
+        !DataFile.get(dataFile.id)
     }
 
-    @Test
-    void testDeleteAllProcessingInformationAndResultOfOneSeqTrack_ProcessedBamFile() {
+    void "testDeleteAllProcessingInformationAndResultOfOneSeqTrack_ProcessedBamFile"() {
+        given:
         setupData()
         SeqTrack seqTrack = DomainFactory.createSeqTrack()
         DataFile dataFile = DomainFactory.createDataFile(seqTrack: seqTrack)
@@ -245,153 +263,187 @@ class DeletionServiceIntegrationTests implements UserAndRoles {
         workPackage.save(flush: true)
         alignmentPass.save(flush: true)
 
+        when:
         deletionService.deleteAllProcessingInformationAndResultOfOneSeqTrack(alignmentPass.seqTrack)
 
-        assert !ProcessedSaiFile.get(processedSaiFile.id)
-        assert !ProcessedBamFile.get(processedMergedBamFile.id)
-        assert !AlignmentPass.get(alignmentPass.id)
+        then:
+        !ProcessedSaiFile.get(processedSaiFile.id)
+        !ProcessedBamFile.get(processedMergedBamFile.id)
+        !AlignmentPass.get(alignmentPass.id)
     }
 
-    @Test
-    void testDeleteAllProcessingInformationAndResultOfOneSeqTrack_RoddyBamFile() {
+    void "testDeleteAllProcessingInformationAndResultOfOneSeqTrack_RoddyBamFile"() {
+        given:
         setupData()
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
         roddyBamFile.workPackage.bamFileInProjectFolder = roddyBamFile
         roddyBamFile.workPackage.save(flush: true)
 
+        when:
         deletionService.deleteAllProcessingInformationAndResultOfOneSeqTrack(roddyBamFile.seqTracks.iterator().next())
 
-        assert !RoddyBamFile.get(roddyBamFile.id)
-        assert !MergingWorkPackage.get(roddyBamFile.workPackage.id)
+        then:
+        !RoddyBamFile.get(roddyBamFile.id)
+        !MergingWorkPackage.get(roddyBamFile.workPackage.id)
     }
 
-    @Test
-    void testDeleteAllProcessingInformationAndResultOfOneSeqTrack_SingleCellBamFile() {
+    void "testDeleteAllProcessingInformationAndResultOfOneSeqTrack_SingleCellBamFile"() {
+        given:
         setupData()
         SingleCellBamFile singleCellBamFile = DomainFactory.proxyCellRanger.createBamFile()
         singleCellBamFile.workPackage.bamFileInProjectFolder = singleCellBamFile
         singleCellBamFile.workPackage.save(flush: true)
 
+        when:
         deletionService.deleteAllProcessingInformationAndResultOfOneSeqTrack(singleCellBamFile.seqTracks.iterator().next())
 
-        assert !RoddyBamFile.get(singleCellBamFile.id)
-        assert !MergingWorkPackage.get(singleCellBamFile.workPackage.id)
+        then:
+        !RoddyBamFile.get(singleCellBamFile.id)
+        !MergingWorkPackage.get(singleCellBamFile.workPackage.id)
     }
 
-    @Test
-    void testDeleteSeqTrack() {
+    void "testDeleteSeqTrack"() {
+        given:
         setupData()
         SeqTrack seqTrack = DomainFactory.createSeqTrack()
         DataFile dataFile = DomainFactory.createDataFile(seqTrack: seqTrack)
 
+        when:
         deletionService.deleteSeqTrack(seqTrack)
 
-        assert !SeqTrack.get(seqTrack.id)
-        assert !DataFile.get(dataFile.id)
+        then:
+        !SeqTrack.get(seqTrack.id)
+        !DataFile.get(dataFile.id)
     }
 
-    @Test
-    void testDeleteSeqTrack_seqTrackIsOnlyLinked() {
+    void "testDeleteSeqTrack_seqTrackIsOnlyLinked"() {
+        given:
         setupData()
         SeqTrack seqTrack = DomainFactory.createSeqTrack(linkedExternally: true)
         DomainFactory.createDataFile(seqTrack: seqTrack)
 
-        TestCase.shouldFailWithMessageContaining(AssertionError, "seqTracks only linked") {
-            deletionService.deleteSeqTrack(seqTrack)
-        }
+        when:
+        deletionService.deleteSeqTrack(seqTrack)
+
+        then:
+        AssertionError e = thrown(AssertionError)
+        e.message.contains("seqTracks only linked")
     }
 
-    @Test
-    void testDeleteProcessingFilesOfProject_EmptyProject() {
+    void "testDeleteProcessingFilesOfProject_EmptyProject"() {
+        given:
         setupData()
         Project project = DomainFactory.createProject()
 
-        TestCase.shouldFail(AssertionError) {
-            deletionService.deleteProcessingFilesOfProject(project.name, outputFolder)
-        }
-    }
-
-    @Test
-    void testDeleteProcessingFilesOfProject_NoProcessedData_FastqFilesMissing() {
-        setupData()
-        SeqTrack seqTrack = deleteProcessingFilesOfProject_NoProcessedData_Setup()
-        Project project = seqTrack.project
-
-        TestCase.shouldFail(FileNotFoundException) {
-            deletionService.deleteProcessingFilesOfProject(project.name, outputFolder)
-        }
-    }
-
-    @Test
-    void testDeleteProcessingFilesOfProject_NoProcessedData_FastqFilesAvailable() {
-        setupData()
-        Project project = deleteProcessingFilesOfProject_NoProcessedData_SetupWithFiles()
-
+        when:
         deletionService.deleteProcessingFilesOfProject(project.name, outputFolder)
+
+        then:
+        thrown(AssertionError)
     }
 
-    @Test
-    void testDeleteProcessingFilesOfProject_NoProcessedData_FastqFilesLinked() {
+    void "testDeleteProcessingFilesOfProject_NoProcessedData_FastqFilesMissing"() {
+        given:
+        setupData()
+        SeqTrack seqTrack = deleteProcessingFilesOfProject_NoProcessedData_Setup()
+        Project project = seqTrack.project
+
+        when:
+        deletionService.deleteProcessingFilesOfProject(project.name, outputFolder)
+
+        then:
+        thrown(FileNotFoundException)
+    }
+
+    void "testDeleteProcessingFilesOfProject_NoProcessedData_FastqFilesAvailable"() {
+        given:
+        setupData()
+        Project project = deleteProcessingFilesOfProject_NoProcessedData_SetupWithFiles()
+
+        when:
+        deletionService.deleteProcessingFilesOfProject(project.name, outputFolder)
+
+        then:
+        noExceptionThrown()
+    }
+
+    void "testDeleteProcessingFilesOfProject_NoProcessedData_FastqFilesLinked"() {
+        given:
         setupData()
         Project project = deleteProcessingFilesOfProject_NoProcessedData_SetupWithFiles()
         markFilesAsLinked(SeqTrack.list())
 
-        TestCase.shouldFail(FileNotFoundException) {
-            deletionService.deleteProcessingFilesOfProject(project.name, outputFolder)
-        }
+        when:
+        deletionService.deleteProcessingFilesOfProject(project.name, outputFolder)
+
+        then:
+        thrown(FileNotFoundException)
     }
 
-    @Test
-    void testDeleteProcessingFilesOfProject_NoProcessedData_FastqFilesLinked_Verified() {
+    void "testDeleteProcessingFilesOfProject_NoProcessedData_FastqFilesLinked_Verified"() {
+        given:
         setupData()
         Project project = deleteProcessingFilesOfProject_NoProcessedData_SetupWithFiles()
         markFilesAsLinked(SeqTrack.list())
 
+        when:
         deletionService.deleteProcessingFilesOfProject(project.name, outputFolder, true)
+
+        then:
+        noExceptionThrown()
     }
 
-    @Test
-    void testDeleteProcessingFilesOfProject_NoProcessedData_FastqFilesWithdrawn() {
+    void "testDeleteProcessingFilesOfProject_NoProcessedData_FastqFilesWithdrawn"() {
+        given:
         setupData()
         SeqTrack seqTrack = deleteProcessingFilesOfProject_NoProcessedData_Setup()
         Project project = seqTrack.project
         markFilesAsWithdrawn([seqTrack])
 
-        TestCase.shouldFail(FileNotFoundException) {
-            deletionService.deleteProcessingFilesOfProject(project.name, outputFolder, true)
-        }
+        when:
+        deletionService.deleteProcessingFilesOfProject(project.name, outputFolder, true)
+
+        then:
+        thrown(FileNotFoundException)
     }
 
-    @Test
-    void testDeleteProcessingFilesOfProject_NoProcessedData_FastqFilesWithdrawn_IgnoreWithdrawn() {
+    void "testDeleteProcessingFilesOfProject_NoProcessedData_FastqFilesWithdrawn_IgnoreWithdrawn"() {
+        given:
         setupData()
         SeqTrack seqTrack = deleteProcessingFilesOfProject_NoProcessedData_Setup()
         Project project = seqTrack.project
         markFilesAsWithdrawn([seqTrack])
 
+        when:
         deletionService.deleteProcessingFilesOfProject(project.name, outputFolder, true, true)
+
+        then:
+        noExceptionThrown()
     }
 
-    @Test
-    void testDeleteProcessingFileSOfProject_NoProcessedData_FastqFilesAvailalbe_explicitSeqTrack() {
+    void "testDeleteProcessingFileSOfProject_NoProcessedData_FastqFilesAvailalbe_explicitSeqTrack"() {
+        given:
         setupData()
         SeqTrack st = deleteProcessingFilesOfProject_NoProcessedData_Setup()
         createFastqFiles([st])
 
-        assert [st] == deletionService.deleteProcessingFilesOfProject(st.project.name, outputFolder, true, true, [st])
+        expect:
+        [st] == deletionService.deleteProcessingFilesOfProject(st.project.name, outputFolder, true, true, [st])
     }
 
-    @Test
-    void testDeleteProcessingFileSOfProject_NoProcessedData_FastqFilesAvailalbe_explicitSeqTrackDifferentProject_ShouldFail() {
+    void "testDeleteProcessingFileSOfProject_NoProcessedData_FastqFilesAvailalbe_explicitSeqTrackDifferentProject_ShouldFail"() {
+        given:
         setupData()
         SeqTrack st = deleteProcessingFilesOfProject_NoProcessedData_Setup()
         createFastqFiles([st])
 
         Project project = DomainFactory.createProject()
 
-        TestCase.shouldFail(AssertionError) {
-            assert [st] == deletionService.deleteProcessingFilesOfProject(project.name, outputFolder, true, true, [st])
-        }
+        when:
+        deletionService.deleteProcessingFilesOfProject(project.name, outputFolder, true, true, [st])
+
+        then:
+        thrown(AssertionError)
     }
 
     private SeqTrack deleteProcessingFilesOfProject_NoProcessedData_Setup() {
@@ -468,8 +520,8 @@ class DeletionServiceIntegrationTests implements UserAndRoles {
         assert MergingPass.list().empty
     }
 
-    @Test
-    void testDeleteProcessingFilesOfProject_PMBF() {
+    void "testDeleteProcessingFilesOfProject_PMBF"() {
+        given:
         setupData()
         ProcessedMergedBamFile bamFile = deleteProcessingFilesOfProject_PMBF_Setup()
 
@@ -485,8 +537,8 @@ class DeletionServiceIntegrationTests implements UserAndRoles {
         deleteProcessingFilesOfProject_PMBF_Validation()
     }
 
-    @Test
-    void testDeleteProcessingFilesOfProject_PMBF_notVerified() {
+    void "testDeleteProcessingFilesOfProject_PMBF_notVerified"() {
+        given:
         setupData()
         ProcessedMergedBamFile bamFile = deleteProcessingFilesOfProject_PMBF_Setup()
 
@@ -519,8 +571,8 @@ class DeletionServiceIntegrationTests implements UserAndRoles {
         assert MergingWorkPackage.list().empty
     }
 
-    @Test
-    void testDeleteProcessingFilesOfProject_RBF() {
+    void "testDeleteProcessingFilesOfProject_RBF"() {
+        given:
         setupData()
         RoddyBamFile bamFile = deleteProcessingFilesOfProject_RBF_Setup()
 
@@ -534,8 +586,8 @@ class DeletionServiceIntegrationTests implements UserAndRoles {
         deleteProcessingFilesOfProject_RBF_Validation()
     }
 
-    @Test
-    void testDeleteProcessingFilesOfProject_RBF_notVerified() {
+    void "testDeleteProcessingFilesOfProject_RBF_notVerified"() {
+        given:
         setupData()
         RoddyBamFile bamFile = deleteProcessingFilesOfProject_RBF_Setup()
 
@@ -566,34 +618,38 @@ class DeletionServiceIntegrationTests implements UserAndRoles {
         return snvCallingInstance
     }
 
-    private void deleteProcessingFilesOfProject_RBF_SNV_Validation(AbstractSnvCallingInstance snvCallingInstance) {
-        File snvFolder = snvCallingInstance.samplePair.snvSamplePairPath.absoluteDataManagementPath
-
-        Path outputFile = outputFolder.resolve("Delete_${snvCallingInstance.project.name}.sh")
-        assert outputFile.text.contains(snvFolder.path) && outputFile.text.contains(snvFolder.parent)
-
-        assert AbstractSnvCallingInstance.list().empty
-        assert SamplePair.list().empty
-    }
-
-    @Test
-    void testDeleteProcessingFilesOfProject_RBF_SNV() {
+    void "testDeleteProcessingFilesOfProject_RBF_SNV"() {
+        given:
         setupData()
         AbstractSnvCallingInstance snvCallingInstance = deleteProcessingFilesOfProject_RBF_SNV_Setup()
 
+        when:
         deletionService.deleteProcessingFilesOfProject(snvCallingInstance.project.name, outputFolder, true)
 
-        deleteProcessingFilesOfProject_RBF_SNV_Validation(snvCallingInstance)
+        then:
+        File snvFolder = snvCallingInstance.samplePair.snvSamplePairPath.absoluteDataManagementPath
+        Path outputFile = outputFolder.resolve("Delete_${snvCallingInstance.project.name}.sh")
+
+        outputFile.text.contains(snvFolder.path) && outputFile.text.contains(snvFolder.parent)
+        AbstractSnvCallingInstance.list().empty
+        SamplePair.list().empty
     }
 
-    @Test
-    void testDeleteProcessingFilesOfProject_RBF_SNV_notVerified() {
+    void "testDeleteProcessingFilesOfProject_RBF_SNV_notVerified"() {
+        given:
         setupData()
         AbstractSnvCallingInstance snvCallingInstance = deleteProcessingFilesOfProject_RBF_SNV_Setup()
 
+        when:
         deletionService.deleteProcessingFilesOfProject(snvCallingInstance.project.name, outputFolder)
 
-        deleteProcessingFilesOfProject_RBF_SNV_Validation(snvCallingInstance)
+        then:
+        File snvFolder = snvCallingInstance.samplePair.snvSamplePairPath.absoluteDataManagementPath
+        Path outputFile = outputFolder.resolve("Delete_${snvCallingInstance.project.name}.sh")
+
+        outputFile.text.contains(snvFolder.path) && outputFile.text.contains(snvFolder.parent)
+        AbstractSnvCallingInstance.list().empty
+        SamplePair.list().empty
     }
 
     private ExternallyProcessedMergedBamFile deleteProcessingFilesOfProject_ExternalBamFilesAttached_Setup() {
@@ -617,44 +673,49 @@ class DeletionServiceIntegrationTests implements UserAndRoles {
         return bamFile
     }
 
-    private void deleteProcessingFilesOfProject_ExternalBamFilesAttached_Verified_Validation(ExternallyProcessedMergedBamFile bamFile) {
-        File nonOtpFolder = bamFile.nonOtpFolder
-        Path outputFile = outputFolder.resolve("Delete_${bamFile.project.name}.sh")
-
-        assert !outputFile.text.contains(nonOtpFolder.path)
-        assert ExternallyProcessedMergedBamFile.list().contains(bamFile)
-    }
-
-    @Test
-    void testDeleteProcessingFilesOfProject_ExternalBamFilesAttached() {
+    void "testDeleteProcessingFilesOfProject_ExternalBamFilesAttached"() {
+        given:
         setupData()
         ExternallyProcessedMergedBamFile bamFile = deleteProcessingFilesOfProject_ExternalBamFilesAttached_Setup()
 
-        TestCase.shouldFailWithMessageContaining(AssertionError, "external merged bam files", {
-            deletionService.deleteProcessingFilesOfProject(bamFile.project.name, outputFolder)
-        })
+        when:
+        deletionService.deleteProcessingFilesOfProject(bamFile.project.name, outputFolder)
+
+        then:
+        AssertionError e = thrown(AssertionError)
+        e.message.contains("external merged bam files")
     }
 
-    @Test
-    void testDeleteProcessingFilesOfProject_ExternalBamFilesAttached_Verified() {
+    void "testDeleteProcessingFilesOfProject_ExternalBamFilesAttached_Verified"() {
+        given:
         setupData()
         ExternallyProcessedMergedBamFile bamFile = deleteProcessingFilesOfProject_ExternalBamFilesAttached_Setup()
 
+        when:
         deletionService.deleteProcessingFilesOfProject(bamFile.project.name, outputFolder, true)
 
-        deleteProcessingFilesOfProject_ExternalBamFilesAttached_Verified_Validation(bamFile)
+        then:
+        File nonOtpFolder = bamFile.nonOtpFolder
+        Path outputFile = outputFolder.resolve("Delete_${bamFile.project.name}.sh")
+        !outputFile.text.contains(nonOtpFolder.path)
+        ExternallyProcessedMergedBamFile.list().contains(bamFile)
     }
 
-    @Test
-    void testDeleteProcessingFilesOfProject_ExternalBamFilesAttached_nonMergedSeqTrackExists_Verified() {
+    void "testDeleteProcessingFilesOfProject_ExternalBamFilesAttached_nonMergedSeqTrackExists_Verified"() {
+        given:
         setupData()
         ExternallyProcessedMergedBamFile bamFile = deleteProcessingFilesOfProject_ExternalBamFilesAttached_Setup()
 
         SeqTrack seqTrack = DomainFactory.createSeqTrackWithTwoDataFiles([sample: bamFile.sample, seqType: bamFile.seqType])
         createFastqFiles([seqTrack])
 
+        when:
         deletionService.deleteProcessingFilesOfProject(bamFile.project.name, outputFolder, true)
 
-        deleteProcessingFilesOfProject_ExternalBamFilesAttached_Verified_Validation(bamFile)
+        then:
+        File nonOtpFolder = bamFile.nonOtpFolder
+        Path outputFile = outputFolder.resolve("Delete_${bamFile.project.name}.sh")
+        !outputFile.text.contains(nonOtpFolder.path)
+        ExternallyProcessedMergedBamFile.list().contains(bamFile)
     }
 }

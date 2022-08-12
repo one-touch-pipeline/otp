@@ -23,9 +23,8 @@ package de.dkfz.tbi.otp.dataswap
 
 import grails.gorm.transactions.Rollback
 import grails.testing.mixin.integration.Integration
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+import spock.lang.TempDir
 
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
@@ -40,6 +39,7 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.CreateRoddyFileHelper
 
 import java.nio.file.Path
+import java.nio.file.Files
 
 @Rollback
 @Integration
@@ -49,14 +49,12 @@ class IndividualSwapServiceIntegrationSpec extends Specification implements User
     LsdfFilesService lsdfFilesService
     TestConfigService configService
 
-    @Rule
-    TemporaryFolder temporaryFolder
-
-    Path outputFolder
+    @TempDir
+    Path tempDir
 
     void setupData() {
         createUserAndRoles()
-        outputFolder = temporaryFolder.newFolder("outputFolder").toPath()
+        Path outputFolder = Files.createDirectory(tempDir.resolve("outputFolder"))
         configService.addOtpProperties(outputFolder)
     }
 
@@ -97,7 +95,7 @@ class IndividualSwapServiceIntegrationSpec extends Specification implements User
 
         File destinationDirectory = bamFile.baseDirectory
 
-        Path scriptFolder = temporaryFolder.newFolder("files").toPath()
+        Path scriptFolder = Files.createDirectory(tempDir.resolve("files"))
 
         StringBuilder outputLog = new StringBuilder()
 

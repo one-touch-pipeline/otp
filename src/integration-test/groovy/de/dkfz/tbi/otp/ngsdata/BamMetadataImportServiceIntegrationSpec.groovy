@@ -23,10 +23,9 @@ package de.dkfz.tbi.otp.ngsdata
 
 import grails.gorm.transactions.Rollback
 import grails.testing.mixin.integration.Integration
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
+import spock.lang.TempDir
 import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
@@ -40,6 +39,7 @@ import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.utils.HelperUtils
 import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 
+import java.nio.file.Files
 import java.nio.file.Path
 import java.security.MessageDigest
 
@@ -60,7 +60,7 @@ class BamMetadataImportServiceIntegrationSpec extends Specification implements R
 
     class DataBamImportRow implements DomainFactoryCore {
 
-        TemporaryFolder temporaryFolder
+        Path tempDir
 
         Sample sample = createSample()
 
@@ -70,7 +70,7 @@ class BamMetadataImportServiceIntegrationSpec extends Specification implements R
 
         ReferenceGenome referenceGenome = createReferenceGenome()
 
-        File bamFilesDir
+        Path bamFilesDir
 
         File bamFile
 
@@ -82,18 +82,20 @@ class BamMetadataImportServiceIntegrationSpec extends Specification implements R
 
         Map<BamMetadataColumn, String> metaData
 
-        DataBamImportRow(TemporaryFolder temporaryFolder, Map<BamMetadataColumn, String> metaDataChanges = [:]) {
-            this.temporaryFolder = temporaryFolder
+        DataBamImportRow(Path tempDir, Map<BamMetadataColumn, String> metaDataChanges = [:]) {
+            this.tempDir = tempDir
             DomainFactory.createExternallyProcessedPipelineLazy()
 
-            bamFilesDir = temporaryFolder.newFolder("path-to-bam-files")
-            bamFile = CreateFileHelper.createFile(new File(bamFilesDir, "bamFile.bam"))
-            baiFile = CreateFileHelper.createFile(new File(bamFilesDir, "bamFile.bai"))
-            insertSizeFile = CreateFileHelper.createFile(new File(bamFilesDir, "insertSize.txt"))
+            bamFilesDir = Files.createDirectory(tempDir.resolve("path-to-bam-files"))
 
-            qualityControlFile = CreateFileHelper.createFile(new File(bamFilesDir, "qualityControl.json"), """\
+            bamFile = Files.createFile(bamFilesDir.resolve("bamFile.bam")).toFile()
+            baiFile = Files.createFile(bamFilesDir.resolve("bamFile.bai")).toFile()
+            insertSizeFile = Files.createFile(bamFilesDir.resolve("insertSize.txt")).toFile()
+
+            qualityControlFile = Files.createFile(bamFilesDir.resolve("qualityControl.json")).toFile()
+            qualityControlFile.text = """\
 { "all":{"insertSizeCV": 23, "insertSizeMedian": 425, "pairedInSequencing": 2134421157,  "properlyPaired": 2050531101 }}
-""")
+"""
 
             metaData = [
                     (BAM_FILE_PATH)          : bamFile.absolutePath,
@@ -104,9 +106,9 @@ class BamMetadataImportServiceIntegrationSpec extends Specification implements R
                     (SEQUENCING_READ_TYPE)   : seqType.libraryLayout.toString(),
                     (LIBRARY_PREPARATION_KIT): libraryPreparationKit?.name,
                     (REFERENCE_GENOME)       : referenceGenome.name,
-                    (MD5)                    : HelperUtils.randomMd5sum,
-                    (COVERAGE)               : nextId,
-                    (MAXIMAL_READ_LENGTH)    : nextId,
+                    (MD5)                    : HelperUtils.randomMd5sum as String,
+                    (COVERAGE)               : nextId as String,
+                    (MAXIMAL_READ_LENGTH)    : nextId as String,
                     (INSERT_SIZE_FILE)       : insertSizeFile.name,
                     (QUALITY_CONTROL_FILE)   : qualityControlFile.name,
             ] + metaDataChanges
@@ -114,13 +116,13 @@ class BamMetadataImportServiceIntegrationSpec extends Specification implements R
 
         List<File> createDirectories(String... directories) {
             return directories.collect {
-                CreateFileHelper.createFile(new File(new File(bamFilesDir, it), 'someFile'))
+                CreateFileHelper.createFile(bamFilesDir.resolve(it).resolve('someFile')).toFile()
             }
         }
 
         List<File> createFiles(String... files) {
             return files.collect {
-                CreateFileHelper.createFile(new File(bamFilesDir, it))
+                CreateFileHelper.createFile(bamFilesDir.resolve(it)).toFile()
             }
         }
 
@@ -148,7 +150,7 @@ class BamMetadataImportServiceIntegrationSpec extends Specification implements R
 
     class DataBamImportMetaData implements DomainFactoryCore {
 
-        TemporaryFolder temporaryFolder
+        Path tempDir
 
         List<DataBamImportRow> rows
 
@@ -156,9 +158,9 @@ class BamMetadataImportServiceIntegrationSpec extends Specification implements R
 
         String md5sum
 
-        DataBamImportMetaData(TemporaryFolder temporaryFolder, List<DataBamImportRow> rows) {
+        DataBamImportMetaData(Path tempDir, List<DataBamImportRow> rows) {
             createUserAndRoles()
-            this.temporaryFolder = temporaryFolder
+            this.tempDir = tempDir
             this.rows = rows
             writeMetadata()
             md5sum = byteArrayToHexString(MessageDigest.getInstance('MD5').digest(metadataFile.bytes))
@@ -174,12 +176,12 @@ class BamMetadataImportServiceIntegrationSpec extends Specification implements R
                     map[key] ?: ''
                 }.join('\t')
             }
-            metadataFile = CreateFileHelper.createFile(new File(temporaryFolder.newFolder(), 'bamImport.tsv'), content.join('\n')).toPath()
+            metadataFile = CreateFileHelper.createFile(tempDir.resolve('bamImport.tsv'), content.join('\n'))
         }
     }
 
-    @Rule
-    TemporaryFolder temporaryFolder
+    @TempDir
+    Path tempDir
 
     void assertResultNoError(Map results, DataBamImportRow dataBamImportRow, Path metadataFile) {
         assert results.context.metadataFile == metadataFile
@@ -204,8 +206,8 @@ class BamMetadataImportServiceIntegrationSpec extends Specification implements R
 
     void "validateAndImport, if all values given, then all values should be set"() {
         given:
-        DataBamImportRow dataBamImportRow = new DataBamImportRow(temporaryFolder, [:])
-        DataBamImportMetaData dataBamImportMetaData = new DataBamImportMetaData(temporaryFolder, [dataBamImportRow])
+        DataBamImportRow dataBamImportRow = new DataBamImportRow(tempDir, [:])
+        DataBamImportMetaData dataBamImportMetaData = new DataBamImportMetaData(tempDir, [dataBamImportRow])
         Map results
 
         when:
@@ -230,8 +232,8 @@ class BamMetadataImportServiceIntegrationSpec extends Specification implements R
     @Unroll
     void "validateAndImport, case #name with operation #linkOperation, then create importProcess without any errors"() {
         given:
-        DataBamImportRow dataBamImportRow = new DataBamImportRow(temporaryFolder, updateMap)
-        DataBamImportMetaData dataBamImportMetaData = new DataBamImportMetaData(temporaryFolder, [dataBamImportRow])
+        DataBamImportRow dataBamImportRow = new DataBamImportRow(tempDir, updateMap)
+        DataBamImportMetaData dataBamImportMetaData = new DataBamImportMetaData(tempDir, [dataBamImportRow])
         Map results
 
         when:
@@ -272,8 +274,8 @@ class BamMetadataImportServiceIntegrationSpec extends Specification implements R
     @Unroll
     void "validateAndImport, case #name with operation #linkOperation, then create no importProcess and return errors"() {
         given:
-        DataBamImportRow dataBamImportRow = new DataBamImportRow(temporaryFolder, updateMap)
-        DataBamImportMetaData dataBamImportMetaData = new DataBamImportMetaData(temporaryFolder, [dataBamImportRow])
+        DataBamImportRow dataBamImportRow = new DataBamImportRow(tempDir, updateMap)
+        DataBamImportMetaData dataBamImportMetaData = new DataBamImportMetaData(tempDir, [dataBamImportRow])
         Map results
 
         when:
@@ -303,8 +305,8 @@ class BamMetadataImportServiceIntegrationSpec extends Specification implements R
 
     void "validateAndImport, when further files given, then imported bam files has them if they exist on file system"() {
         given:
-        DataBamImportRow dataBamImportRow = new DataBamImportRow(temporaryFolder, [:])
-        DataBamImportMetaData dataBamImportMetaData = new DataBamImportMetaData(temporaryFolder, [dataBamImportRow])
+        DataBamImportRow dataBamImportRow = new DataBamImportRow(tempDir, [:])
+        DataBamImportMetaData dataBamImportMetaData = new DataBamImportMetaData(tempDir, [dataBamImportRow])
 
         String qualityDirExistAndCopy = "dirExistAndCopy"
         String qualityDirExistAndNotCopy = "DirExistAndNotCopy"
