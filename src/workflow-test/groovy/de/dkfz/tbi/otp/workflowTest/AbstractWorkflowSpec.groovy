@@ -339,7 +339,8 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
                     logEntries << "  - ${key}: ${value}"
                 }
                 configs.eachWithIndex { ExternalWorkflowConfigFragment externalWorkflowConfigFragment, int configIndex ->
-                    logEntries << "  - config ${runIndex}.${configIndex}: ${externalWorkflowConfigFragment.name}"
+                    int priority = externalWorkflowConfigFragment.findSelector().get().priority
+                    logEntries << "  - config ${runIndex}.${configIndex}: priority: ${priority}, name: ${externalWorkflowConfigFragment.name}"
                 }
                 workflowSteps.eachWithIndex { WorkflowStep workflowStep, int stepIndex ->
                     List<WorkflowLog> workflowLogs = workflowStep.logs
@@ -580,7 +581,7 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
                 dir.resolve("workflow.sql"),
                 dir.resolve("workflowVersions.sql"),
         ]
-        files.addAll(Files.newDirectoryStream(dir, "ewc-*.sql").toList())
+        files.addAll(Files.newDirectoryStream(dir.resolve('ewc'), "ewc-*.sql").toList().sort())
 
         files.each {
             log.debug("  - Load ${it}")

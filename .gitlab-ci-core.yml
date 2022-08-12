@@ -187,6 +187,7 @@ test migration:
     - ./gradlew dbmUpdate
     - bash ./devScripts/grails-migration-plugin/create-dbm-gorm-diff-without-false-changes.sh testing
     - bash ./devScripts/grails-migration-plugin/check-for-changelog-file.sh testing
+    - bash ./devScripts/grails-migration-plugin/check-variable-problems.sh
   artifacts:
     <<: *artifacts_template
     paths:

@@ -57,7 +57,7 @@ $(() => {
         data: {
           workflow: workflowId,
           workflowVersion: workflowVersionId,
-          project: projectId,
+          selectedProject: projectId,
           seqType: seqTypeId,
           referenceGenome: refGenId,
           libraryPreparationKit: libPrepKitId

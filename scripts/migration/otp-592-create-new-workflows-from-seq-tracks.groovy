@@ -115,7 +115,7 @@ void migrateToNewWorkflow(List<SeqTrack> seqTracks, Workflow workflow, Processin
             //create the WF artefact
             Map artefactParam = [
                     producedBy  : run,
-                    state       : WorkflowArtefact.State.LEGACY,
+                    state       : WorkflowArtefact.State.SUCCESS,
                     outputRole  : outputRole,
                     artefactType: ArtefactType.FASTQ,
                     individual  : seqTrack.individual,

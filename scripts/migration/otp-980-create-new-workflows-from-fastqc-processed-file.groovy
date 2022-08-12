@@ -67,7 +67,7 @@ String processPriority = 'NORMAL'
 assert batchSize > 1
 
 @Field final String OUTPUT_ROLE = 'FastQC'
-@Field final String WORKFLOW_NAME = 'FastQC'
+@Field final String WORKFLOW_NAME = BashFastQcWorkflow.WORKFLOW
 
 @Field final LsdfFilesService lsdfFilesService = ctx.lsdfFilesService
 
@@ -128,7 +128,7 @@ void migrateToNewWorkflow(
         DataFile.findAllBySeqTrackAndIndexFile(seqTrack, false).eachWithIndex { DataFile dataFile, int i ->
             WorkflowArtefact workflowArtefact = new WorkflowArtefact([
                     producedBy  : workflowRun,
-                    state       : WorkflowArtefact.State.LEGACY,
+                    state       : WorkflowArtefact.State.SUCCESS,
                     outputRole  : "${outputRole}_${i + 1}",
                     artefactType: ArtefactType.FASTQC,
                     individual  : seqTrack.individual,

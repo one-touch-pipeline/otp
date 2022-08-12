@@ -47,14 +47,6 @@ databaseChangeLog = {
         sqlFile(path: 'changelogs/defaultValues/roles.sql')
     }
 
-    changeSet(author: "", id: "ewc-roddy-base", runOnChange: "true") {
-        sqlFile(path: 'changelogs/defaultValues/ewc-roddy-base.sql')
-    }
-
-    changeSet(author: "", id: "ewc-roddy-pancancer", runOnChange: "true") {
-        sqlFile(path: 'changelogs/defaultValues/ewc-roddy-pancancer.sql')
-    }
-
     changeSet(author: "", id: "file-types", runOnChange: "true") {
         sqlFile(path: 'changelogs/defaultValues/file-types.sql')
     }
@@ -62,4 +54,7 @@ databaseChangeLog = {
     changeSet(author: "", id: "pipeline", runOnChange: "true") {
         sqlFile(path: 'changelogs/defaultValues/pipeline.sql')
     }
+
+    include file: 'changelogs/defaultValues/ewc/ewc-roddy-pancancer-defaults.groovy'
+
 }

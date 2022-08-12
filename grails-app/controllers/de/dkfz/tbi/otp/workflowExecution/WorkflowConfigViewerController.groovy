@@ -26,6 +26,7 @@ import com.fasterxml.jackson.core.JsonParseException
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 import grails.validation.Validateable
+import groovy.transform.ToString
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 
@@ -68,12 +69,13 @@ class WorkflowConfigViewerController implements BaseWorkflowConfigController {
         extendedCriteria = new SingleSelectSelectorExtendedCriteria(
                 cmd.workflow,
                 cmd.workflowVersion,
-                cmd.project,
+                cmd.selectedProject,
                 cmd.seqType,
                 cmd.referenceGenome,
                 cmd.libraryPreparationKit,
         )
-        List<ExternalWorkflowConfigSelector> selectors = configSelectorService.findAllSelectors(extendedCriteria)
+
+        List<ExternalWorkflowConfigSelector> selectors = configSelectorService.findAllSelectorsSortedByPriority(extendedCriteria)
         List<ExternalWorkflowConfigFragment> fragments = selectors*.externalWorkflowConfigFragment
 
         response.setContentType(MediaType.APPLICATION_JSON_VALUE)
@@ -93,11 +95,12 @@ class WorkflowConfigViewerController implements BaseWorkflowConfigController {
 
 }
 
+@ToString
 class SingleSelectorCommand implements Validateable {
 
     Workflow workflow
     WorkflowVersion workflowVersion
-    Project project
+    Project selectedProject
     SeqType seqType
     ReferenceGenome referenceGenome
     LibraryPreparationKit libraryPreparationKit
@@ -105,7 +108,7 @@ class SingleSelectorCommand implements Validateable {
     static constraints = {
         workflow(nullable: true)
         workflowVersion(nullable: true)
-        project(nullable: true)
+        selectedProject(nullable: true)
         seqType(nullable: true)
         referenceGenome(nullable: true)
         libraryPreparationKit(nullable: true)

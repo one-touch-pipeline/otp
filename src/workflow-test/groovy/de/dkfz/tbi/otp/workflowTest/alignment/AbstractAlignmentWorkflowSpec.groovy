@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory
 
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
-import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
+import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.otp.workflowExecution.decider.AbstractWorkflowDecider
 import de.dkfz.tbi.otp.workflowTest.AbstractWorkflowSpec
 
@@ -57,6 +57,13 @@ abstract class AbstractAlignmentWorkflowSpec extends AbstractWorkflowSpec {
         log.debug("Decide output artefacts ${newWorkflowArtefact.size()}:")
         newWorkflowArtefact.each {
             log.debug("- ${it.toString().replaceAll('\n', ' ')} (${it.artefactType}) for ${it.artefact}")
+        }
+        log.debug("Created runs with configs:")
+        newWorkflowArtefact*.producedBy.unique().sort { it.id }.eachWithIndex { WorkflowRun workflowRun, int i ->
+            log.debug("  - run ${i}: ${workflowRun.shortDisplayName}")
+            workflowRun.configs.eachWithIndex { ExternalWorkflowConfigFragment ewcf, int j ->
+                log.debug("    - config ${j} (priority: ${ewcf.findSelector().get().priority}): ${ewcf.name}")
+            }
         }
         assert newWorkflowArtefact.size() == expectedNewWorkflowArtefactCount
     }

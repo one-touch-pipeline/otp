@@ -687,4 +687,8 @@ databaseChangeLog = {
     include file: 'changelogs/2022/otp-1596-rename-old-fastqc.sql'
 
     include file: 'changelogs/2022/otp-1777-add-index-seqtrack-ilsesubmission.groovy'
+
+    changeSet(author: "", id: "otp-1685") {
+        sqlFile(path: 'changelogs/2022/otp-1685-delete-old-defaults.sql')
+    }
 }

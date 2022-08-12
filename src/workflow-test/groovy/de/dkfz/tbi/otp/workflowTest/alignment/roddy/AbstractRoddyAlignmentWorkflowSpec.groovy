@@ -285,26 +285,6 @@ abstract class AbstractRoddyAlignmentWorkflowSpec extends AbstractAlignmentWorkf
                 workflows       : [workflowAlignment],
                 referenceGenomes: [referenceGenome],
         ])
-
-        createFragmentAndSelector("toolVersionFragment", """
-                    {
-                        "RODDY": {
-                            "cvalues": {
-                                "markDuplicatesVariant": {
-                                    "value": "sambamba"
-                                },
-                                "BWA_VERSION": {
-                                    "value": "0.7.15"
-                                },
-                                "SAMBAMBA_MARKDUP_VERSION": {
-                                    "value": "0.6.5"
-                                }
-                            }
-                        }
-                    }
-                """, [
-                workflows: [workflowAlignment],
-        ])
     }
 
     private void createFragmentAndSelector(String name, String json, Map selectors) {
