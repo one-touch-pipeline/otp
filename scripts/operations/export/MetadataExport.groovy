@@ -182,6 +182,11 @@ boolean overwriteExisting = false
  */
 boolean exportOnlyWhiteListedColumns = false
 
+/**
+ * Flag to indicate whether withdrawn Data should be exported or not
+ */
+boolean exportWithdrawn = false
+
 //=============================================
 // check input area
 
@@ -221,7 +226,7 @@ List<SeqTrack> seqTracksSampleIdentifier = selectBySampleName.split('\n')*.trim(
 List<SeqTrack> seqTracksPerMd5sum = selectByMd5Sum.split('\n')*.trim().findAll {
     it && !it.startsWith('#')
 }.collectMany {
-    List<DataFile> dataFiles = DataFile.findAllByMd5sum(it)
+    List<DataFile> dataFiles = exportWithdrawn ? DataFile.findAllByMd5sum(it) : DataFile.findAllByMd5sumAndFileWithdrawn(it, exportWithdrawn)
 
     if (!dataFiles) {
         throw new AssertionError("Could not find any datafile with the md5sum ${it}")
@@ -305,6 +310,9 @@ if (seqTrackPerMultiImport && seqTypes && !seqTypes.containsAll(seqTrackPerMulti
 // work area
 
 Collection<DataFile> dataFiles = DataFile.createCriteria().list {
+    if (!exportWithdrawn) {
+        eq('fileWithdrawn', false)
+    }
     seqTrack {
         or {
             if (projects) {
