@@ -26,6 +26,7 @@
 <head>
     <title>${g.message(code: "mergingCriteria.title", args: [selectedProject.name])}</title>
     <asset:javascript src="common/CommentBox.js"/>
+    <asset:javascript src="pages/defaultSeqPlatformGroup/index.js"/>
 </head>
 
 <body>
