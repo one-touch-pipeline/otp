@@ -21,7 +21,7 @@
  */
 package de.dkfz.tbi.otp.analysis.pair.roddy
 
-import org.junit.Assume
+import spock.lang.IgnoreIf
 import spock.lang.Shared
 
 import de.dkfz.tbi.otp.analysis.pair.AbstractBamFilePairAnalysisWorkflowTests
@@ -51,9 +51,9 @@ abstract class AbstractRoddyBamFilePairAnalysisWorkflowTests<Instance extends Ba
         createConfig()
     }
 
+    @IgnoreIf({ instance.ignoreRoddyBamFileTest })
     void "testWholeWorkflowWithRoddyBamFile"() {
         given:
-        Assume.assumeFalse(ignoreRoddyBamFileTest)
         SessionUtils.withTransaction {
             setupRoddyBamFile()
             setupData()
@@ -66,9 +66,9 @@ abstract class AbstractRoddyBamFilePairAnalysisWorkflowTests<Instance extends Ba
         checkInstance()
     }
 
+    @IgnoreIf({ instance.ignoreExternalBamFileTest })
     void "testWholeWorkflowWithExternalBamFile"() {
         given:
-        Assume.assumeFalse(ignoreExternalBamFileTest)
         SessionUtils.withTransaction {
             setupExternalBamFile()
             setupData()

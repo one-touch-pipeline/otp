@@ -26,12 +26,10 @@ import grails.util.Holders
 import groovy.json.JsonOutput
 import groovy.sql.Sql
 import groovy.transform.TupleConstructor
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
-import org.junit.rules.TestName
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import spock.lang.Specification
+import spock.lang.TempDir
 
 import de.dkfz.roddy.BEException
 import de.dkfz.roddy.execution.jobs.*
@@ -55,7 +53,9 @@ import de.dkfz.tbi.otp.workflowExecution.log.WorkflowError
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowLog
 import de.dkfz.tbi.util.TimeFormats
 
+import javax.inject.Inject
 import javax.sql.DataSource
+import java.lang.reflect.Method
 import java.nio.file.*
 import java.nio.file.attribute.PosixFilePermission
 import java.time.Duration
@@ -108,14 +108,8 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
     /**
      * Needed to save the place of the database dump afterwards.
      */
-    @Rule
-    TemporaryFolder temporaryFolder
-
-    /**
-     * Allow the access of the current test method name
-     */
-    @Rule
-    TestName methodName
+    @TempDir
+    Path tempDir
 
     /**
      * holds the remote file system
@@ -221,10 +215,10 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
 
     @SuppressWarnings("CatchThrowable")
     void setup() {
-        log.debug("Start to setup ${getClass().simpleName}.${methodName.methodName}")
+        log.debug("Start to setup ${getClass().simpleName}.${specificationContext.currentIteration.name}")
         SessionUtils.withTransaction {
             sql = new Sql(dataSource)
-            schemaDump = new File(temporaryFolder.newFolder(), "test-database-dump.sql")
+            schemaDump = tempDir.resolve("test-database-dump.sql").toFile()
             sql.execute("SCRIPT NODATA DROP TO ?", [schemaDump.absolutePath])
             log.debug("database dump written to ${schemaDump}")
 
@@ -247,9 +241,10 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
 
     @SuppressWarnings("CatchThrowable")
     void cleanup() {
+        String methodName = specificationContext.currentIteration.name
         try {
             log.info("--------------------------------------------------")
-            log.info("Starting cleanup after test '${getClass().simpleName}.${methodName.methodName}' for base directory: ${workingDirectory}")
+            log.info("Starting cleanup after test '${getClass().simpleName}.${methodName}' for base directory: ${workingDirectory}")
 
             workflowSystemService.stopWorkflowSystem()
 
@@ -272,7 +267,7 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
             sql.execute("DROP ALL OBJECTS")
             sql.execute("RUNSCRIPT FROM ?", [schemaDump.absolutePath])
 
-            log.info "Finish test '${getClass().simpleName}.${methodName.methodName}' using base directory: ${workingDirectory}"
+            log.info "Finish test '${getClass().simpleName}.${methodName}' using base directory: ${workingDirectory}"
         } catch (Throwable t) {
             //exception in cleanup was not reported with stacktrace, therefore add own logging
             log.error("cleanup error", t)
