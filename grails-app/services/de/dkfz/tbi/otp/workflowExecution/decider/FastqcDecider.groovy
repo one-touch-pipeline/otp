@@ -89,6 +89,7 @@ class FastqcDecider implements Decider {
         }
 
         SeqTrack seqTrack = optionalArtefact.get() as SeqTrack
+        assert !seqTrack.project.archived
         String workDirectory = fastQcProcessedFileService.buildWorkingPath(workflowVersion)
         List<DataFile> dataFiles = seqTrackService.getSequenceFilesForSeqTrack(seqTrack)
         Map<DataFile, FastqcProcessedFile> fastqcProcessedFiles = dataFiles.collectEntries {

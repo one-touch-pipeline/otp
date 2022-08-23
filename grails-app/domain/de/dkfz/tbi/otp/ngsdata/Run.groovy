@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.ngsdata
 import grails.gorm.hibernate.annotation.ManagedEntity
 
 import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.Entity
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
@@ -65,6 +66,8 @@ class Run implements ProcessParameterObject, Entity {
      * because this case is unusable for creating Cluster Jobs
      */
 
+    //the method is needed for compatibility of very old data of the old workflow system and shouldn't be used in new code
+    @Deprecated
     @Override
     SeqType getSeqType() {
         List<SeqType> seqTypes = SeqTrack.findAllByRun(this)*.seqType
@@ -74,11 +77,19 @@ class Run implements ProcessParameterObject, Entity {
         return null
     }
 
+    //the method is needed for compatibility of very old data of the old workflow system and shouldn't be used in new code
+    @Deprecated
+    @Override
+    Project getProject() {
+        return individual?.project
+    }
+
     /*
      * returns the individual being sequenced in this run
      * returns null if a run has more than one individual
      */
-
+    //the method is needed for compatibility of very old data of the old workflow system  and shouldn't be used in new code
+    @Deprecated
     @Override
     Individual getIndividual() {
         List<Individual> individuals = SeqTrack.findAllByRun(this)*.individual

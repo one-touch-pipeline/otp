@@ -31,6 +31,11 @@
 </head>
 <body>
     <div class="body">
+        <g:if test="${dataFile.project.archived}">
+            <otp:annotation type="warning">
+                <g:message code="configurePipeline.info.projectArchived.noChange" args="[dataFile.project.name]"/>
+            </otp:annotation>
+        </g:if>
         <div class="two-column-grid-container">
             <div class="grid-element">
                 <h1><g:message code="datafile.showDetails.title"/></h1>

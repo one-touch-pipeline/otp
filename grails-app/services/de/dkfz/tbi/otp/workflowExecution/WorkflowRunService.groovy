@@ -52,6 +52,7 @@ class WorkflowRunService {
             WorkflowRun wr
         where
             wr.state = '${WorkflowRun.State.PENDING}'
+            and wr.project.archived = false
             and wr.priority in (
                 select
                     pp

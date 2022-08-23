@@ -28,9 +28,15 @@
 <title><g:message code="seqTrack.seqTrackSet.title" args="[individual.pid]"/></title>
 </head>
 <body>
-    <g:set var="archived" value="${individual.project.archived ? 'archived' : ''}"/>
+    <g:set var="archivedClickable" value="${individual.project.archived ? 'archivedClickable' : ''}"/>
     <div class="body">
         <h1><g:message code="seqTrack.seqTrackSet.header"/></h1>
+        <g:if test="${archivedClickable}">
+            <otp:annotation type="warning">
+                <g:message code="configurePipeline.info.projectArchived.noChange" args="[individual.project.name]"/>
+            </otp:annotation>
+        </g:if>
+
         <h2><g:message code="seqTrack.seqTrackSet.selectionCriteria.header"/></h2>
         <table class="seq-track-set-tables">
             <tbody>
@@ -143,8 +149,8 @@
                                 <g:if test="${dataFile.fileWithdrawn}">
                                     <img src="/assets/warning.png" title="${withdrawnComment}&#013;${withdrawnDate}">
                                 </g:if>
-                                <g:if test="${archived}">
-                                    <span title="${selectedProject} is archivedClickable">&#128451;</span>
+                                <g:if test="${archivedClickable}">
+                                    <span title="${selectedProject} is archived">&#128451;</span>
                                 </g:if>
                             </div>
                             <div class="grid-element dataFile bases" style="grid-row: ${row}" title="${UnitHelper.asNucleobases(nBasePairs)}">

@@ -31,6 +31,11 @@
 <body>
 <div class="body">
     <h1><g:message code="seqTrack.show.title"/></h1>
+    <g:if test="${seqTrack.project.archived}">
+        <otp:annotation type="warning">
+            <g:message code="configurePipeline.info.projectArchived.noChange" args="[seqTrack.project.name]"/>
+        </otp:annotation>
+    </g:if>
 
     <div class="tableBlock">
         <input type="hidden" name="seqTrackId" value="${seqTrack.id}"/>

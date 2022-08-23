@@ -43,6 +43,12 @@
             <g:message code="configurePipeline.info.humanOnly"/>
         </otp:annotation>
 
+        <g:if test="${archived}">
+            <otp:annotation type="warning">
+                <g:message code="configurePipeline.info.projectArchived.noChange" args="[selectedProject.name]"/>
+            </otp:annotation>
+        </g:if>
+
         <g:form action="save" params='["seqType.id": seqType.id]' method="POST">
             <table class="pipelineTable">
                 <tr>

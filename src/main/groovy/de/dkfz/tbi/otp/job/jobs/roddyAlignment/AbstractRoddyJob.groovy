@@ -31,7 +31,6 @@ import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.ProcessOutput
-import de.dkfz.tbi.otp.utils.exceptions.FileAccessForArchivedProjectNotAllowedException
 
 import java.nio.file.FileSystem
 
@@ -91,12 +90,6 @@ abstract class AbstractRoddyJob<R extends RoddyResult> extends AbstractMaybeSubm
     protected void validate() throws Throwable {
         Realm.withTransaction {
             final RoddyResult roddyResultObject = refreshedProcessParameterObject
-            assert !roddyResultObject.project.archived
-
-            if (roddyResultObject.project.archived) {
-                throw new FileAccessForArchivedProjectNotAllowedException("Validation failed: ${roddyResultObject.project} is archived.")
-            }
-
             validate(roddyResultObject)
         }
     }

@@ -84,7 +84,8 @@ abstract class AbstractAlignmentStartJob extends AbstractStartJobImpl implements
         return MergingWorkPackage.findAll(
                 'FROM MergingWorkPackage mwp ' +
                         'WHERE needsProcessing = true ' +
-                        'AND seqType IN (:seqTypes)' +
+                        'AND seqType IN (:seqTypes) ' +
+                        'AND sample.individual.project.archived = false ' +
                         'AND NOT EXISTS (' +
                         ' FROM AbstractMergedBamFile ' +
                         'WHERE workPackage = mwp ' +

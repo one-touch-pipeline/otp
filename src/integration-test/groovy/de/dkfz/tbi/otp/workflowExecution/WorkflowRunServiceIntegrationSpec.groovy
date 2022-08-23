@@ -21,8 +21,8 @@
  */
 package de.dkfz.tbi.otp.workflowExecution
 
-import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import org.grails.datastore.gorm.events.AutoTimestampEventListener
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -183,6 +183,20 @@ class WorkflowRunServiceIntegrationSpec extends Specification implements Workflo
         ret == workflowRun
     }
 
+    void "nextWaitingWorkflow, if project of workflow run is archived, then return null"() {
+        given:
+        WorkflowRun workflowRun = createWorkflowRunHelper()
+        workflowRun.project.archived = true
+        workflowRun.project.save(flush: true)
+        WorkflowRunService service = new WorkflowRunService()
+
+        when:
+        WorkflowRun ret = service.nextWaitingWorkflow(0)
+
+        then:
+        ret == null
+    }
+
     private WorkflowRun createWorkflowRunHelper(WorkflowRun.State runState = WorkflowRun.State.PENDING,
                                                 WorkflowArtefact.State artefactState = WorkflowArtefact.State.SUCCESS, Workflow workflow = createWorkflow()) {
         workflow.maxParallelWorkflows = 2
@@ -209,11 +223,11 @@ class WorkflowRunServiceIntegrationSpec extends Specification implements Workflo
 
         autoTimestampEventListener.withoutDateCreated(WorkflowRun) {
             workflowRun = createWorkflowRun([
-                    state   : WorkflowRun.State.PENDING,
-                    priority: findOrCreateProcessingPriority([
+                    state      : WorkflowRun.State.PENDING,
+                    priority   : findOrCreateProcessingPriority([
                             priority: runPriority,
                     ]),
-                    workflow: wf,
+                    workflow   : wf,
                     dateCreated: dateCreated,
             ])
         }

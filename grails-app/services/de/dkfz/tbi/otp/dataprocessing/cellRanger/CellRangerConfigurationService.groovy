@@ -226,6 +226,9 @@ class CellRangerConfigurationService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#mwpToKeep.project, 'OTP_READ_ACCESS')")
     void selectMwpAsFinal(CellRangerMergingWorkPackage mwpToKeep) {
+        if (mwpToKeep.project.archived) {
+            throw new FileAccessForArchivedProjectNotAllowedException("Cannot set Mwp of archived project ${mwpToKeep.project} to final")
+        }
         List<CellRangerMergingWorkPackage> allMwps = getAllMwps(
                 mwpToKeep.sample, mwpToKeep.seqType, mwpToKeep.config.programVersion, mwpToKeep.referenceGenomeIndex
         )
@@ -237,6 +240,9 @@ class CellRangerConfigurationService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#sample.project, 'OTP_READ_ACCESS')")
     void selectNoneAsFinal(Sample sample, SeqType seqType, String programVersion, ReferenceGenomeIndex reference) {
+        if (sample.project.archived) {
+            throw new FileAccessForArchivedProjectNotAllowedException("Cannot delete Mwp of archived project ${sample.project}")
+        }
         deleteMwps(getAllMwps(sample, seqType, programVersion, reference))
     }
 

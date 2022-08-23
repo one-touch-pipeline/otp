@@ -23,6 +23,7 @@
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.ngsdata.SeqTrackWithComment
 import de.dkfz.tbi.otp.utils.ScriptInputHelperService
+import de.dkfz.tbi.otp.utils.exceptions.FileAccessForArchivedProjectNotAllowedException
 import de.dkfz.tbi.otp.withdraw.UnwithdrawService
 import de.dkfz.tbi.otp.withdraw.UnwithdrawStateHolder
 
@@ -169,6 +170,9 @@ unwithdrawStateHolder.scriptFileName = fileName
 final String TRIM_LINE = "----------------------------------------"
 
 SeqTrack.withTransaction {
+    if (unwithdrawStateHolder.seqTracks.any { it.project.archived }) {
+        throw new FileAccessForArchivedProjectNotAllowedException("Project is archived, unwithdraw is not allowed")
+    }
 
     unwithdrawService.unwithdrawSeqTracks(unwithdrawStateHolder)
     if (unwithdrawBamFiles) {

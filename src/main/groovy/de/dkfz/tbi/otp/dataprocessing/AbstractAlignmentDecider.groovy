@@ -58,6 +58,8 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
     @Override
     @Deprecated
     Collection<MergingWorkPackage> decideAndPrepareForAlignment(SeqTrack seqTrack, boolean forceRealign) {
+        assert !seqTrack.project.archived
+
         if (!SeqTrackService.mayAlign(seqTrack)) {
             return Collections.emptyList()
         }

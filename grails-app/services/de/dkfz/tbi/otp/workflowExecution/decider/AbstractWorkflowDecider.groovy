@@ -99,6 +99,7 @@ abstract class AbstractWorkflowDecider implements Decider {
         Map<Pair<Project, SeqType>, Set<WorkflowArtefact>> groupedInputArtefacts = groupInputArtefacts(filteredInputArtefacts)
         return groupedInputArtefacts.collectMany { entry ->
             WorkflowVersionSelector matchingWorkflows = WorkflowVersionSelector.createCriteria().get {
+                assert !entry.key.aValue.archived
                 eq('project', entry.key.aValue)
                 eq('seqType', entry.key.bValue)
                 workflowVersion {

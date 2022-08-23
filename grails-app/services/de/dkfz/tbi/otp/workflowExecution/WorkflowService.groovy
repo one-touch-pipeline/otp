@@ -59,32 +59,51 @@ class WorkflowService {
         }
 
         WorkflowRun oldRun = step.workflowRun
-        OtpWorkflow otpWorkflow = otpWorkflowService.lookupOtpWorkflowBean(oldRun)
+        WorkflowRun run = createNewRunBasedOnOldRun(oldRun)
+        createInputArtefactsForNewRun(oldRun, run)
+        createAndConnectOutputArtefactsForNewRun(oldRun, run)
 
-        WorkflowRun run = new WorkflowRun([
+        oldRun.state = WorkflowRun.State.RESTARTED
+        oldRun.save(flush: true)
+
+        if (startDirectly) {
+            jobService.createNextJob(run)
+        }
+
+        return run
+    }
+
+    private WorkflowRun createNewRunBasedOnOldRun(WorkflowRun oldRun) {
+        return new WorkflowRun([
                 workflow        : oldRun.workflow,
                 workflowVersion : oldRun.workflowVersion,
                 priority        : oldRun.project.processingPriority,
                 project         : oldRun.project,
                 displayName     : oldRun.displayName,
-                shortDisplayName: step.workflowRun.shortDisplayName,
+                shortDisplayName: oldRun.shortDisplayName,
                 combinedConfig  : oldRun.combinedConfig,
                 restartedFrom   : oldRun,
                 state           : WorkflowRun.State.PENDING,
         ]).save(flush: true)
+    }
 
+    private void createInputArtefactsForNewRun(WorkflowRun oldRun, WorkflowRun newRun) {
         oldRun.inputArtefacts.each { String role, WorkflowArtefact inputArtefact ->
             new WorkflowRunInputArtefact([
                     role            : role,
                     workflowArtefact: inputArtefact,
-                    workflowRun     : run,
+                    workflowRun     : newRun,
             ]).save(flush: true)
         }
+    }
+
+    private void createAndConnectOutputArtefactsForNewRun(WorkflowRun oldRun, WorkflowRun newRun) {
+        OtpWorkflow otpWorkflow = otpWorkflowService.lookupOtpWorkflowBean(oldRun)
 
         oldRun.outputArtefacts.each { String role, WorkflowArtefact oldWorkflowArtefact ->
             WorkflowArtefact newWorkflowArtefact = new WorkflowArtefact(
                     state: WorkflowArtefact.State.PLANNED_OR_RUNNING,
-                    producedBy: run,
+                    producedBy: newRun,
                     outputRole: oldWorkflowArtefact.outputRole,
                     displayName: oldWorkflowArtefact.displayName,
                     artefactType: oldWorkflowArtefact.artefactType,
@@ -108,15 +127,6 @@ class WorkflowService {
             oldWorkflowArtefact.state = WorkflowArtefact.State.FAILED
             oldWorkflowArtefact.save(flush: true)
         }
-
-        oldRun.state = WorkflowRun.State.RESTARTED
-        oldRun.save(flush: true)
-
-        if (startDirectly) {
-            jobService.createNextJob(run)
-        }
-
-        return run
     }
 
     void enableWorkflow(Workflow workflow) {

@@ -70,6 +70,8 @@ class DeletionService {
     WorkflowDeletionService workflowDeletionService
 
     void deleteProjectContent(Project project) {
+        assert !project.archived
+
         assert !EgaSubmission.findAllByProject(project): "There are Ega Submissions connected to this Project, thus it can not be deleted"
 
         // Delete individuals for a project
@@ -91,6 +93,8 @@ class DeletionService {
     }
 
     void deleteProject(Project project) {
+        assert !project.archived
+
         deleteProjectContent(project)
         deleteProjectDependencies(project)
         project.delete(flush: true)
@@ -98,6 +102,8 @@ class DeletionService {
 
     @SuppressWarnings('JavaIoPackageAccess')
     String deleteIndividual(Individual individual, boolean check = true) {
+        assert !individual.project.archived
+
         StringBuilder deletionScript = new StringBuilder()
 
         List<Sample> samples = Sample.findAllByIndividual(individual)
@@ -163,6 +169,7 @@ class DeletionService {
                                                   boolean ignoreWithdrawn = false, List<SeqTrack> explicitSeqTracks = []) throws FileNotFoundException {
         Project project = CollectionUtils.atMostOneElement(Project.findAllByName(projectName))
         assert project: "Project does not exist"
+        assert !project.archived
 
         Set<String> dirsToDelete = [] as Set
         Set<String> externalMergedBamFolders = [] as Set
@@ -302,6 +309,7 @@ class DeletionService {
      */
     List<File> deleteAllProcessingInformationAndResultOfOneSeqTrack(SeqTrack seqTrack, boolean enableChecks = true) {
         notNull(seqTrack, "The input seqTrack of the method deleteAllProcessingInformationAndResultOfOneSeqTrack is null")
+        assert !seqTrack.project.archived
         List<File> dirsToDelete = []
 
         if (enableChecks) {
@@ -519,6 +527,7 @@ class DeletionService {
      */
     List<File> deleteSeqTrack(SeqTrack seqTrack, boolean check = true) {
         notNull(seqTrack, "The input seqTrack of the method deleteSeqTrack is null")
+        assert !seqTrack.project.archived
 
         if (check) {
             seqTrackService.throwExceptionInCaseOfExternalMergedBamFileIsAttached([seqTrack])

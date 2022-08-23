@@ -106,6 +106,7 @@ abstract class AbstractBamFileAnalysisService<T extends BamFilePairAnalysis> imp
                 //check that processing priority of the corresponding project is high enough
                 'AND sp.mergingWorkPackage1.sample.individual.project.processingPriority.priority >= :minPriority ' +
                 'AND sp.mergingWorkPackage1.seqType in (:seqTypes) ' +
+                'AND sp.mergingWorkPackage1.sample.individual.project.archived = false ' +
                 checkReferenceGenome() +
 
                 //check that the config file is available with at least one script with same version

@@ -596,12 +596,16 @@ abstract class AbstractDataSwapService<P extends DataSwapParameters, D extends D
      * @return Swap contain the entities of the old and new project.
      */
     protected Swap<Project> getProjectSwap(P parameters) {
-        return new Swap<Project>(
+        Swap<Project> swap =  new Swap<Project>(
                 CollectionUtils.exactlyOneElement(Project.findAllByName(parameters.projectNameSwap.old),
                         "old project ${parameters.projectNameSwap.old} not found"),
                 CollectionUtils.exactlyOneElement(Project.findAllByName(parameters.projectNameSwap.new),
                         "new project ${parameters.projectNameSwap.new} not found")
         )
+        assert !swap.old.archived
+        assert !swap.new.archived
+
+        return swap
     }
 
     /**

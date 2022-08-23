@@ -141,6 +141,16 @@ class AbstractAlignmentStartJobIntegrationTests implements DomainFactoryProcessi
     }
 
     @Test
+    void testFindProcessableMergingWorkPackages_WhenProjectIsArchive__ShouldReturnEmptyList() {
+        setupData()
+        MergingWorkPackage mwp = createMergingWorkPackage()
+        mwp.project.archived = true
+        mwp.project.save(flush: true)
+
+        assert [] == testAbstractAlignmentStartJob.findProcessableMergingWorkPackages(ProcessingPriority.MINIMUM)
+    }
+
+    @Test
     void testIsDataInstallationWFInProgress_WhenSeqTrackInStateFinished_ShouldReturnFalse() {
         setupData()
         MergingWorkPackage mwp = createMergingWorkPackageWithSeqTrackInState(SeqTrack.DataProcessingState.FINISHED)

@@ -114,7 +114,6 @@ class RunController {
                     seqCenters  : run.seqCenter?.toString()?.toLowerCase(),
                     dateCreated : TimeFormats.DATE.getFormattedDate(run.dateCreated),
                     dateExecuted: TimeFormats.DATE.getFormattedDate(run.dateExecuted),
-                    archived    : run.project?.archived,
             ]
         }
         render dataToRender as JSON
