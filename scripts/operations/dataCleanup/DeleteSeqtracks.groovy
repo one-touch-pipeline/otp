@@ -28,7 +28,7 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.DeletionService
 
-import java.nio.file.FileSystem
+import java.nio.file.*
 
 // input area
 //----------------------
@@ -58,6 +58,22 @@ List<Integer> ilseSubmissionNumbers = [
 ]
 
 /**
+ * List of seqTracks.
+ *
+ * The seqTracks can be seperated comma, semicolon, space, tab or newline
+ */
+String seqTracksIdList = """
+#123456, 456,789 852;987
+#987
+
+"""
+
+/**
+ * Absolute path of the file to generate.
+ */
+String pathName = ''
+
+/**
  * should be stopped, if seqTracks are only linked (property) or for the sample an external bam files exist
  */
 boolean checkForExternalBamFilesOrLinkedFastqFiles = true
@@ -78,6 +94,17 @@ SeqTypeService seqTypeService = ctx.seqTypeService
 
 Realm realm = configService.defaultRealm
 FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
+
+assert pathName: 'No file name given, but this is required'
+assert !pathName.contains(' '): 'File name contains spaces, which is not allowed'
+
+Path outputPath = fileSystem.getPath(pathName)
+
+assert outputPath.absolute: '"The file name is not absolute, but that is required'
+
+if (Files.exists(outputPath)) {
+    Files.delete(outputPath)
+}
 
 List<SeqTrack> seqTrackPerMultiImport = multiColumnInput.split('\n')*.trim().findAll { String line ->
     line && !line.startsWith('#')
@@ -121,20 +148,34 @@ if (ilseSubmissionNumbers) {
     })
 }
 
+List<SeqTrack> seqTrackPerId = seqTracksIdList.split('\n')*.trim().findAll { String line ->
+    line && !line.startsWith('#')
+}.collectMany { String line ->
+    line.split('[ ,;\t]+').toList()
+}.collect {
+    CollectionUtils.exactlyOneElement(SeqTrack.findAllById(it as long))
+}
+
 Project.withTransaction {
-    List<File> filesToDelete = (seqTrackPerMultiImport + ilseSeqTracks).collect {
+    List<File> filesToDelete = (seqTrackPerMultiImport + ilseSeqTracks + seqTrackPerId).collect {
         println "deleting ${it}"
         deletionService.deleteSeqTrack(it, checkForExternalBamFilesOrLinkedFastqFiles)
     }.flatten().unique()
-    println """"
-deleted in OTP
 
-please delete it now one the files system
-
+    String content = """"
 #!/bin/bash
 
 set -ve
 ${filesToDelete.collect { "rm -rf ${it}" }.join('\n')}
+
+"""
+    fileService.createFileWithContentOnDefaultRealm(outputPath, content)
+
+    println """
+deleted in OTP
+
+please delete it now one the files system.
+The script is writen:\n${outputPath}
 
 """
 

@@ -400,6 +400,7 @@ class SeqTrack implements ProcessParameterObject, Entity, Artefact {
         antibodyTarget index: "seq_track_antibody_target_idx"
         libraryPreparationKit index: "seq_track_library_preparation_kit_idx"
         normalizedLibraryName index: "seq_track_normalized_library_name_idx"
+        ilseSubmission index: "seq_track_ilse_submission_idx"
         run index: "seq_track_run_idx"
         sample index: "seq_track_sample_idx"
         sampleIdentifier index: "seq_track_sample_identifier_idx"
