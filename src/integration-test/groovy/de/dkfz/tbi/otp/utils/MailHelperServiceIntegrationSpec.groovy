@@ -85,7 +85,6 @@ class MailHelperServiceIntegrationSpec extends Specification implements DomainFa
         subject | body | recipient
         null    | BODY | RECIPIENT
         SUBJECT | null | RECIPIENT
-        SUBJECT | BODY | null
     }
 
     void "sendEmail with recipients list"() {
@@ -109,7 +108,6 @@ class MailHelperServiceIntegrationSpec extends Specification implements DomainFa
 
         where:
         receiverList     | testSubject
-        []               | "is empty list"
         ["a@b.c", "abc"] | "contains non-email strings"
     }
 

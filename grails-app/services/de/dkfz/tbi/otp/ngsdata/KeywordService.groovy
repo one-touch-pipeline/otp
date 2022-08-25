@@ -25,6 +25,7 @@ import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.searchability.Keyword
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.StringUtils
 
 import grails.gorm.transactions.Transactional
@@ -34,7 +35,7 @@ class KeywordService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void createOrAddKeyword(String value, Project project) {
-        Keyword keyword = Keyword.findOrSaveByName(StringUtils.trimAndShortenWhitespace(value))
+        Keyword keyword = findOrSaveByName(StringUtils.trimAndShortenWhitespace(value))
         addKeywordToProject(keyword, project)
     }
 
@@ -52,5 +53,9 @@ class KeywordService {
 
     List<Keyword> list() {
         return Keyword.list()
+    }
+
+    Keyword findOrSaveByName(String name) {
+        return CollectionUtils.atMostOneElement(Keyword.findAllByName(name)) ?: new Keyword(name: name).save(flush: true)
     }
 }

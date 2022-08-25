@@ -39,6 +39,7 @@
         </div>
         <div class="item">
             <g:form controller="projectConfig" view="index" method="GET">
+                <g:hiddenField name="project" value="${selectedProject.name}"/>
                 <g:submitButton name="back" value="Back to Overview"/>
             </g:form>
         </div>

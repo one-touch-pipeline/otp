@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.searchability
 
 import grails.gorm.hibernate.annotation.ManagedEntity
 
+import de.dkfz.tbi.otp.ngsdata.KeywordService
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.Entity
@@ -41,6 +42,10 @@ class Keyword implements Entity {
         name(blank: false, unique: true, size: 1..255)
     }
 
+    /**
+     * @deprecated Use {@link KeywordService#findOrSaveByName(String)}
+     */
+    @Deprecated
     static Keyword findOrSaveByName(String name) {
         return CollectionUtils.atMostOneElement(findAllByName(name)) ?: new Keyword(name: name).save(flush: true)
     }

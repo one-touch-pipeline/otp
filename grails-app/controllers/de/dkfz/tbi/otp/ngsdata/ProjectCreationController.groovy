@@ -25,6 +25,7 @@ import grails.databinding.BindUsing
 import grails.databinding.SimpleMapDataBindingSource
 import grails.plugin.springsecurity.annotation.Secured
 import grails.validation.Validateable
+import org.springframework.context.ApplicationContext
 import org.springframework.web.multipart.MultipartFile
 
 import de.dkfz.tbi.otp.FlashMessage
@@ -36,6 +37,7 @@ import de.dkfz.tbi.otp.project.additionalField.AbstractFieldDefinition
 import de.dkfz.tbi.otp.project.additionalField.ProjectPageType
 import de.dkfz.tbi.otp.project.projectRequest.*
 import de.dkfz.tbi.otp.searchability.Keyword
+import de.dkfz.tbi.otp.utils.StaticApplicationContextWrapper
 import de.dkfz.tbi.otp.utils.StringUtils
 import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
@@ -375,8 +377,10 @@ class ProjectCreationCommand extends ProjectCreationBasisCommand {
 
     void setKeywordNames(String keywordNames) {
         keywords = []
+        ApplicationContext context = StaticApplicationContextWrapper.context
+        KeywordService keywordService = context.keywordService
         keywordNames.split(",")*.trim().findAll().each { String name ->
-            Keyword keyword = Keyword.findOrSaveByName(name)
+            Keyword keyword = keywordService.findOrSaveByName(name)
             keywords.add(keyword)
         }
     }

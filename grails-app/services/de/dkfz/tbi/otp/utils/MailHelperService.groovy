@@ -79,7 +79,6 @@ class MailHelperService {
     void sendEmail(String emailSubject, String content, List<String> recipients, String replyToAddress, List<String> ccs = []) {
         assert emailSubject
         assert content
-        assert recipients
 
         [recipients, ccs].each {
             assert it.every { isEmailValid(it) }
