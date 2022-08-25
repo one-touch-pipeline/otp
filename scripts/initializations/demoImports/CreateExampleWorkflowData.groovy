@@ -44,8 +44,9 @@ import java.time.ZonedDateTime
  */
 int numberOfDemoSets = 6;
 
+
 WorkflowRun.withNewTransaction {
-    SeqType seqType = SeqType.findByName(SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName)
+    SeqType seqType = SeqTypeService.getWholeGenomeBisulfiteTagmentationPairedSeqType();
     SeqTrack seqTrack = SeqTrack.findBySeqType(seqType)
     Individual individual = seqTrack.individual
     Project project = individual.project
