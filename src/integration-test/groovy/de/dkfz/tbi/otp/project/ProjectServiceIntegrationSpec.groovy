@@ -21,9 +21,9 @@
  */
 package de.dkfz.tbi.otp.project
 
+import grails.gorm.transactions.Rollback
 import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.testing.mixin.integration.Integration
-import grails.gorm.transactions.Rollback
 import grails.validation.ValidationException
 import org.grails.datastore.gorm.events.AutoTimestampEventListener
 import org.junit.Rule
@@ -41,6 +41,8 @@ import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfigService
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvConfig
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryProcessingPriority
+import de.dkfz.tbi.otp.domainFactory.workflowSystem.FastqcWorkflowDomainFactory
+import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
@@ -50,19 +52,18 @@ import de.dkfz.tbi.otp.project.exception.unixGroup.*
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.utils.*
-import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
+import de.dkfz.tbi.otp.workflowExecution.*
 
 import java.nio.file.*
 import java.nio.file.attribute.PosixFileAttributes
 import java.nio.file.attribute.PosixFilePermission
-import java.time.Instant
-import java.time.LocalDate
-import java.time.ZoneOffset
+import java.time.*
 import java.time.temporal.ChronoUnit
 
 @Rollback
 @Integration
-class ProjectServiceIntegrationSpec extends Specification implements UserAndRoles, DomainFactoryCore, DomainFactoryProcessingPriority {
+class ProjectServiceIntegrationSpec extends Specification implements UserAndRoles, DomainFactoryCore, DomainFactoryProcessingPriority,
+        WorkflowSystemDomainFactory, FastqcWorkflowDomainFactory {
 
     RemoteShellHelper remoteShellHelper
     ProcessingOptionService processingOptionService
@@ -142,6 +143,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         ])
 
         DomainFactory.createProcessingOptionBasePathReferenceGenome(new File(configService.rootPath, "reference_genome").path)
+        findOrCreateProcessingOption([name: OptionName.DEFAULT_FASTQC_TYPE, value: "BASH"])
     }
 
     void cleanup() {
@@ -158,6 +160,10 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
     void "test createProject valid input"() {
         given:
         setupData()
+
+        WorkflowVersion workflowVersion = createBashFastqcWorkflowVersion()
+        Workflow workflow = workflowVersion.workflow
+        workflow.supportedSeqTypes = SeqType.findAll()
 
         String unixGroup = configService.testingGroup
         Path projectPath = configService.rootPath.toPath().resolve(dirName)
@@ -213,6 +219,9 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         project.description == description
         project.processingPriority.priority == processingPriority
 
+        WorkflowVersionSelector.findAll().first().project == project
+        WorkflowVersionSelector.findAll().first().workflowVersion == workflowVersion
+
         where:
         name      | dirName | dirAnalysis | relatedProjects | projectGroup   | nameInMetadataFiles | forceCopyFiles | description   | processingPriority            | sampleIdentifierParserBeanName           | qcThresholdHandling
         'project' | 'dir'   | ''          | ''              | ''             | null                | true           | ''            | ProcessingPriority.FAST_TRACK | SampleIdentifierParserBeanName.INFORM    | QcThresholdHandling.CHECK_AND_NOTIFY
@@ -249,6 +258,10 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         given:
         setupData()
         String unixGroup = configService.testingGroup
+
+        WorkflowVersion workflowVersion = createBashFastqcWorkflowVersion()
+        Workflow workflow = workflowVersion.workflow
+        workflow.supportedSeqTypes = SeqType.findAll()
 
         String dirName = 'projectDir/projectSubDir'
         Path projectPath = configService.rootPath.toPath().resolve(dirName)
@@ -292,6 +305,10 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         given:
         setupData()
         String unixGroup = configService.testingGroup
+
+        WorkflowVersion workflowVersion = createBashFastqcWorkflowVersion()
+        Workflow workflow = workflowVersion.workflow
+        workflow.supportedSeqTypes = SeqType.findAll()
 
         String dirName = 'projectDir/subDir'
         Path projectPath = configService.rootPath.toPath().resolve(dirName)
@@ -338,6 +355,10 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         given:
         setupData()
         String unixGroup = configService.testingGroup
+
+        WorkflowVersion workflowVersion = createBashFastqcWorkflowVersion()
+        Workflow workflow = workflowVersion.workflow
+        workflow.supportedSeqTypes = SeqType.findAll()
 
         String exceptionMessage = "message ${nextId}"
         String dirName = 'projectDir'
@@ -509,6 +530,10 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         given:
         setupData()
         String unixGroup = configService.testingGroup
+
+        WorkflowVersion workflowVersion = createBashFastqcWorkflowVersion()
+        Workflow workflow = workflowVersion.workflow
+        workflow.supportedSeqTypes = SeqType.findAll()
 
         String dirName = 'projectDir/projectSubDir'
         Path projectPath = configService.rootPath.toPath().resolve(dirName)

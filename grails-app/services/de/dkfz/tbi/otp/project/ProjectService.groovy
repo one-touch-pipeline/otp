@@ -51,6 +51,7 @@ import de.dkfz.tbi.otp.project.projectRequest.ProjectRequestStateProvider
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
+import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.util.TimeFormats
 
 import java.nio.file.*
@@ -255,7 +256,23 @@ class ProjectService {
 
         mergingCriteriaService.createDefaultMergingCriteria(project)
 
+        configureDefaultFastQc(project)
+
         return project
+    }
+
+    private void configureDefaultFastQc(Project project) {
+        if (project.projectType == Project.ProjectType.SEQUENCING) {
+            String defaultFastQcType = processingOptionService.findOptionAsString(ProcessingOption.OptionName.DEFAULT_FASTQC_TYPE)
+            if (defaultFastQcType) {
+                Workflow workflow = CollectionUtils.exactlyOneElement(Workflow.findAllByNameIlike(defaultFastQcType + " fastqc"))
+                WorkflowVersion workflowVersion = CollectionUtils.exactlyOneElement(WorkflowVersion.createCriteria().list(max: 1) {
+                    eq("workflow", workflow)
+                    order("lastUpdated", "desc")
+                } as Collection<Object>) as WorkflowVersion
+                new WorkflowVersionSelector(project: project, workflowVersion: workflowVersion).save(flush: true)
+            }
+        }
     }
 
     void updateAllRelatedProjects(Project project) {
