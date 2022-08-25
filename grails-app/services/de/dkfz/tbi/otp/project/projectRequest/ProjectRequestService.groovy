@@ -66,7 +66,7 @@ class ProjectRequestService {
                 name                    : cmd.name,
                 state                   : state,
                 description             : cmd.description,
-                keywords                : cmd.keywords*.name,
+                keywords                : cmd.keywords,
                 endDate                 : cmd.endDate,
                 storageUntil            : resolveStoragePeriodToLocalDate(cmd.storagePeriod, cmd.storageUntil),
                 relatedProjects         : cmd.relatedProjects,

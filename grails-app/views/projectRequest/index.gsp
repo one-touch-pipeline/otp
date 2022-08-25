@@ -118,7 +118,6 @@
                 <label class="col-form-label" for="keywords">${g.message(code: "project.keywords")}*</label>
                 <i class="helper-icon bi bi-question-circle-fill" title="${g.message(code: "projectRequest.keywords.detail")}"></i>
             </div>
-
             <div class="col-sm-10">
                 <select class="use-select-2 tag-select form-control"
                         name="keywords"
@@ -126,9 +125,10 @@
                         id="keywords"
                         multiple="multiple"
                         required>
-                    <g:each in="${keywords}" var="keyword">
+                    <g:set var="allKeywordNames" value="${((keywords*.name as List<String>) + (cmd?.keywords ?: [])).unique()}"/>
+                    <g:each in="${allKeywordNames}" var="keyword">
                         <g:set var="selected" value="${keyword in cmd?.keywords ? "selected" : ""}"/>
-                        <option value="${keyword.name}" ${selected}>${keyword.name}</option>
+                        <option value="${keyword}" ${selected}>${keyword}</option>
                     </g:each>
                 </select>
             </div>

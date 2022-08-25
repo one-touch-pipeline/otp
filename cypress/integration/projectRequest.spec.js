@@ -41,7 +41,7 @@ describe('Check projectRequest page', () => {
         cy.get('input#name').type(request.projectName);
         cy.get('textarea#description').type(request.description);
         cy.get('input#approxNoOfSamples').type(request.approximateNumberOfSamples);
-        cy.get('select#keywords').select(0, { force: true });
+        cy.get('select#keywords').parent().find('input').type(request.keywords, { force: true });
         cy.get('select#storagePeriod').select(request.storagePeriod, { force: true });
         cy.get('select#speciesWithStrainList').select(request.speciesWithStrainList, { force: true });
         cy.get('select#seqTypesList').select(0, { force: true });

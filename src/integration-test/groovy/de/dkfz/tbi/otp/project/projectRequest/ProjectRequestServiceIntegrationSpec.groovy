@@ -447,7 +447,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         User currentUser = createUser()
         SeqCenter seqCenter = createSeqCenter()
         SpeciesWithStrain speciesWithStrain = createSpeciesWithStrain()
-        List<Keyword> keywords = [createKeyword(), createKeyword()]
+        List<Keyword> keywords = ['keyword1', 'keyword2', 'test keyword']
         Set<ProjectRequestUser> users = [createProjectRequestUser([projectRoles: [pi]]), createProjectRequestUser()]
         ProjectRequestPersistentState projectRequestPersistentState = createProjectRequestPersistentState()
         ProjectRequest projectRequest = projectRequestExists ? createProjectRequest([state: projectRequestPersistentState]) : null
@@ -489,7 +489,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         result.project == null
         projectRequestExists ? result.state == projectRequestPersistentState : result.state.beanName == "initial"
         result.customSpeciesWithStrains == cmd.customSpeciesWithStrains as Set
-        result.keywords == cmd.keywords*.name as Set
+        result.keywords == cmd.keywords as Set
         result.sequencingCenters == cmd.sequencingCenters as Set
         result.approxNoOfSamples == cmd.approxNoOfSamples
         result.seqTypes == cmd.seqTypes as Set

@@ -344,15 +344,7 @@ class ProjectRequestCreationCommand implements Validateable {
     String name
     ProjectType projectType
     String description
-
-    @BindUsing({ ProjectRequestCreationCommand obj, SimpleMapDataBindingSource source ->
-        Object input = source['keywords']
-        List<String> keywordList = (input instanceof String ? [input] : input) as List<String>
-        return keywordList.collect { keyword ->
-            return keyword ? Keyword.findOrSaveByName(StringUtils.trimAndShortenWhitespace(keyword)) : null
-        }.findAll()
-    })
-    List<Keyword> keywords
+    List<String> keywords
     LocalDate endDate
     StoragePeriod storagePeriod
     LocalDate storageUntil
@@ -515,7 +507,7 @@ class ProjectRequestCreationCommand implements Validateable {
         LocalDate storageUntil = projectRequest.storageUntil
         StoragePeriod storagePeriod = storageUntil ? StoragePeriod.USER_DEFINED : StoragePeriod.INFINITELY
 
-        List<Keyword> keywords = projectRequest.keywords.collect { CollectionUtils.atMostOneElement(Keyword.findAllByName(it)) }
+        List<String> keywords = projectRequest.keywords as List ?: [null]
         List<String> speciesWithStrainList = projectRequest.customSpeciesWithStrains as List ?: []
         List<String> seqTypesList = projectRequest.customSeqTypes as List ?: []
         List<String> sequencingCenterList = projectRequest.customSequencingCenters as List ?: []
