@@ -91,7 +91,7 @@ class SearchSeqTrackService {
                 ilseId          : seqTrack.ilseId,
                 withdrawn       : seqTrack.withdrawn,
                 libPrepkit      : seqTrack.libraryPreparationKit ? seqTrack.libraryPreparationKit.name : '',
-                seqPlatform     : seqTrack.seqPlatform?.fullName(),
+                seqPlatform     : seqTrack.seqPlatform?.fullName,
                 seqPlatformGroup: seqTrack.seqPlatformGroup?.toString(),
         ]
     }

@@ -23,13 +23,14 @@ package de.dkfz.tbi.otp.workflowExecution.decider
 
 import grails.gorm.transactions.Transactional
 import grails.util.Holders
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.workflow.panCancer.PanCancerWorkflow
-import de.dkfz.tbi.otp.workflowExecution.Workflow
 import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
+import de.dkfz.tbi.otp.workflowExecution.WorkflowService
 
 /**
  * knows all deciders and also the order of the deciders based on the input and output  WorkflowArtefacts
@@ -39,6 +40,10 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
 @Component
 @Transactional
 class AllDecider implements Decider {
+
+    @Autowired
+    WorkflowService workflowService
+
     /** list of Deciders in the correct order */
     List<Class<Decider>> deciders = [
             FastqcDecider,
@@ -59,7 +64,7 @@ class AllDecider implements Decider {
     }
 
     Collection<SeqTrack> findAllSeqTracksInNewWorkflowSystem(Collection<SeqTrack> seqTracks) {
-        Set<SeqType> supportedSeqTypes = Workflow.getExactlyOneWorkflow(PanCancerWorkflow.WORKFLOW).supportedSeqTypes
+        Set<SeqType> supportedSeqTypes = workflowService.getExactlyOneWorkflow(PanCancerWorkflow.WORKFLOW).supportedSeqTypes
         return deciders.contains(PanCancerDeciderService) ? seqTracks.findAll {
             supportedSeqTypes.contains(it.seqType)
         } : [] as Collection<SeqTrack>
