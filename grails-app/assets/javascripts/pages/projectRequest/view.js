@@ -40,7 +40,7 @@ $(document).ready(() => {
     confirmButton.on('click', () => {
       modal.hide();
       $.ajax({
-        url: '/projectRequest/delete',
+        url: $.otp.createLink({ controller: 'projectRequest', action: 'delete' }),
         type: 'POST',
         dataType: 'json',
         data: {
@@ -48,7 +48,7 @@ $(document).ready(() => {
         },
         success() {
           $.otp.toaster.showErrorToast('deletion was successful.');
-          window.location.href = '/projectRequest/unresolved';
+          window.location.href = $.otp.createLink({ controller: 'projectRequest', action: 'unresolved' });
         },
         error(jqXHR, textStatus, errorThrown) {
           $.otp.toaster.showErrorToast(`${textStatus} occurred while processing the data.`, errorThrown);
