@@ -46,7 +46,7 @@ int numberOfDemoSets = 6;
 
 
 WorkflowRun.withNewTransaction {
-    SeqType seqType = SeqTypeService.getWholeGenomeBisulfiteTagmentationPairedSeqType();
+    SeqType seqType = SeqTypeService.getWholeGenomeBisulfiteTagmentationPairedSeqType()
     SeqTrack seqTrack = SeqTrack.findBySeqType(seqType)
     Individual individual = seqTrack.individual
     Project project = individual.project
