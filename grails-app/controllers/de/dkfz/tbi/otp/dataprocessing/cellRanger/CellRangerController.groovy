@@ -29,6 +29,7 @@ import de.dkfz.tbi.otp.FlashMessage
 import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.utils.exceptions.FileAccessForArchivedProjectNotAllowedException
 
 @Secured('isFullyAuthenticated()')
 class CellRangerController {
@@ -37,8 +38,9 @@ class CellRangerController {
     SeqTypeService seqTypeService
 
     static allowedMethods = [
-            finalRunSelection    : "GET",
-            saveFinalRunSelection: "POST",
+            finalRunSelection     : "GET",
+            saveFinalRunSelection : "POST",
+            deleteFinalSelectedRun: "POST",
     ]
 
     def finalRunSelection() {
@@ -79,7 +81,26 @@ class CellRangerController {
             flash.message = new FlashMessage(g.message(code: "cellRanger.selection.success") as String)
         } catch (ValidationException e) {
             flash.message = new FlashMessage(g.message(code: "cellRanger.selection.failure") as String, e.errors)
-        } catch (Exception e) {
+        } catch (FileAccessForArchivedProjectNotAllowedException | IOException e) {
+            flash.message = new FlashMessage(g.message(code: "cellRanger.selection.failure") as String, e.message)
+        }
+
+        redirect(action: "finalRunSelection")
+    }
+
+    def deleteFinalSelectedRun(FinalMwpDeletionCommand cmd) {
+        if (!cmd.validate()) {
+            flash.message = new FlashMessage(g.message(code: "cellRanger.selection.failure") as String, cmd.errors)
+            redirect(action: "finalRunSelection")
+            return
+        }
+
+        try {
+            cellRangerConfigurationService.deleteFinalMwp(cmd.sample, cmd.seqType, cmd.programVersion, cmd.reference)
+            flash.message = new FlashMessage(g.message(code: "cellRanger.selection.success") as String)
+        } catch (ValidationException e) {
+            flash.message = new FlashMessage(g.message(code: "cellRanger.selection.failure") as String, e.errors)
+        } catch (FileAccessForArchivedProjectNotAllowedException | IOException e) {
             flash.message = new FlashMessage(g.message(code: "cellRanger.selection.failure") as String, e.message)
         }
 
@@ -100,7 +121,11 @@ class GroupedMwp implements Comparable {
     }
 
     boolean isAnyUnsetAndNoneFinal() {
-        mwps.any { it.status == CellRangerMergingWorkPackage.Status.UNSET } && !mwps.any { it.status == CellRangerMergingWorkPackage.Status.FINAL }
+        return mwps.any { it.status == CellRangerMergingWorkPackage.Status.UNSET } && !mwps.any { it.status == CellRangerMergingWorkPackage.Status.FINAL }
+    }
+
+    boolean isAnyFinal() {
+        return mwps.any { it.status == CellRangerMergingWorkPackage.Status.FINAL }
     }
 
     @Override
@@ -110,6 +135,25 @@ class GroupedMwp implements Comparable {
                         this.seqType.nameWithLibraryLayout <=> o.seqType.nameWithLibraryLayout ?:
                                 this.programVersion <=> o.programVersion ?:
                                         this.reference.toString() <=> o.reference.toString()
+    }
+}
+
+class FinalMwpDeletionCommand {
+    Sample sample
+    SeqType seqType
+    String programVersion
+    ReferenceGenomeIndex reference
+    List<CellRangerMergingWorkPackage> mwps
+
+    @Override
+    String toString() {
+        return "finalMwpDeletionCommand{" +
+                "sample=" + sample +
+                ", seqType=" + seqType +
+                ", programVersion='" + programVersion + '\'' +
+                ", reference=" + reference +
+                ", mwps=" + mwps +
+                '}'
     }
 }
 

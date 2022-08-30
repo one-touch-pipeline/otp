@@ -50,4 +50,26 @@ $(() => {
       removeSubmitted(e.target);
     }
   });
+
+  $('#confirmDeleteModal').on('show.bs.modal', function (event) {
+    const button = $(event.relatedTarget);
+    const sample = button.data('sample');
+    const seqType = button.data('seq-type');
+    const programVersion = button.data('program-version');
+    const reference = button.data('reference');
+    const mwps = button.data('mwps');
+    const modal = $(this);
+    modal.find('input[type=hidden]').remove();
+    modal.find('#modal-form').append(`<input type="hidden" name="sample" value="${sample}"/>`);
+    modal.find('#modal-form').append(`<input type="hidden" name="seqType" value="${seqType}"/>`);
+    modal.find('#modal-form').append(`<input type="hidden" name="programVersion" value="${programVersion}"/>`);
+    modal.find('#modal-form').append(`<input type="hidden" name="reference" value="${reference}"/>`);
+    mwps.forEach((mwp, index) => {
+      modal.find('#modal-form').append(`<input type="hidden" name="mwps[${index}]" value="${mwp}"/>`);
+    });
+    modal.find('#modal-form').prop('action', $.otp.createLink({
+      controller: 'cellRanger',
+      action: 'deleteFinalSelectedRun'
+    }));
+  });
 });

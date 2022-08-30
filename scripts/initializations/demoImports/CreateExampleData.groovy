@@ -727,12 +727,21 @@ class ExampleData {
             Pipeline pipeline = Pipeline.Name.CELL_RANGER.pipeline
 
             CellRangerConfig config = findOrCreateCellRangerConfig(seqType, pipeline)
-            CellRangerMergingWorkPackage cellRangerMergingWorkPackage = createCellRangerMergingWorkPackage(seqTracks, config, pipeline)
-            println "      - crmwp: ${cellRangerMergingWorkPackage}"
-            SingleCellBamFile singleCellBamFile = createSingleCellBamFile(cellRangerMergingWorkPackage)
-            println "      - cell ranger bam file: ${singleCellBamFile}"
-            return singleCellBamFile
-        }
+
+            List<CellRangerMergingWorkPackage> mwpGroup = []
+
+            (0..3).each {
+                CellRangerMergingWorkPackage crmwp = createCellRangerMergingWorkPackage(seqTracks, config, pipeline, it)
+                println "      - crmwp: ${crmwp}"
+                mwpGroup.add(crmwp)
+            }
+
+            mwpGroup.each {
+                SingleCellBamFile singleCellBamFile = createSingleCellBamFile(it)
+                println "      - cell ranger bam file: ${singleCellBamFile}"
+            }
+            return mwpGroup
+        }.flatten()
     }
 
     Sample findOrCreateSample(Individual individual, SampleType sampleType) {
@@ -831,7 +840,7 @@ class ExampleData {
         ]).save(flush: true)
     }
 
-    CellRangerMergingWorkPackage createCellRangerMergingWorkPackage(List<SeqTrack> seqTracks, CellRangerConfig config, Pipeline pipeline) {
+    CellRangerMergingWorkPackage createCellRangerMergingWorkPackage(List<SeqTrack> seqTracks, CellRangerConfig config, Pipeline pipeline, Integer cells) {
         SeqTrack seqTrack = seqTracks.first()
 
         CellRangerMergingWorkPackage cellRangerMergingWorkPackage = new CellRangerMergingWorkPackage([
@@ -844,7 +853,8 @@ class ExampleData {
                 seqPlatformGroup     : seqPlatformGroup,
                 libraryPreparationKit: libraryPreparationKit,
                 referenceGenomeIndex : findOrCreateCellRangerReferenceGenomeIndex(),
-                requester            : User.findByUsername("otp")
+                requester            : User.findByUsername("otp"),
+                expectedCells: cells,
         ]).save(flush: true)
 
         return cellRangerMergingWorkPackage

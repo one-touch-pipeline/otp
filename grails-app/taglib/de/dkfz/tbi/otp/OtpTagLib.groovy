@@ -230,8 +230,19 @@ class OtpTagLib {
         if (attrs.type == "dialog") {
             out << "<div class='modal-footer'>"
             out << "<button type='button' class='btn btn-secondary closeModal' data-dismiss='modal' onclick='${attrs.onClose}'>${closeText}</button>"
-            out << "<button id='confirmModal' type='button' class='btn btn-primary confirm' data-dismiss='modal' onclick='${attrs.onConfirm}'>" +
-                    "${confirmText}</button>"
+            if (attrs.submit) {
+                out << "<form id='modal-form' method='${attrs.submitMethod ?: "POST"}' action='${attrs.action}'>"
+                if (attrs.hiddenInput) {
+                    (attrs.hiddenInput as Map<String, String>).each {
+                        out << "<input type='hidden' name='${it.key}' value='${it.value}' id='${it.key}'>"
+                    }
+                }
+                out << "<button type='submit' class='btn btn-primary confirm'>${confirmText}</button>"
+                out << "</form>"
+            } else {
+                out << "<button id='confirmModal' type='button' class='btn btn-primary confirm' data-dismiss='modal' onclick='${attrs.onConfirm}'>" +
+                        "${confirmText}</button>"
+            }
             out << "</div>"
         }
         out << "</div>"
@@ -341,7 +352,7 @@ class OtpTagLib {
         assert type: "attribute `type` must be given"
         String variant = attrs.remove("variant") ?: "standalone"
 
-        out << "<div ${attrs.collect { "${it.key}=\"${it.value}\"" }.join(" ") } class=\"annotation-box type-${type} variant-${variant}\">"
+        out << "<div ${attrs.collect { "${it.key}=\"${it.value}\"" }.join(" ")} class=\"annotation-box type-${type} variant-${variant}\">"
         out << body()
         out << "</div>"
     }

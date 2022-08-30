@@ -480,6 +480,34 @@ class CellRangerConfigurationServiceIntegrationSpec extends Specification implem
         mwp2.status == CellRangerMergingWorkPackage.Status.FINAL
     }
 
+    void "deleteFinalMwp, should delete final CellRangerMergingWorkPackage"() {
+        given:
+        createUserAndRoles()
+        CellRangerMergingWorkPackage mwp1 = createMergingWorkPackage(expectedCells: 1, status: CellRangerMergingWorkPackage.Status.FINAL)
+        createBamFile([workPackage: mwp1])
+        CellRangerMergingWorkPackage mwp2 = createMergingWorkPackage(expectedCells: 2, sample: mwp1.sample, seqType: mwp1.seqType,
+                config: mwp1.config, referenceGenomeIndex: mwp1.referenceGenomeIndex, status: CellRangerMergingWorkPackage.Status.DELETED)
+        createBamFile([workPackage: mwp2])
+        CellRangerMergingWorkPackage mwp3 = createMergingWorkPackage(expectedCells: 2, sample: mwp1.sample, seqType: mwp1.seqType,
+                config: mwp1.config, referenceGenomeIndex: mwp1.referenceGenomeIndex, status: CellRangerMergingWorkPackage.Status.UNSET)
+        createBamFile([workPackage: mwp3])
+
+        CellRangerConfigurationService cellRangerConfigurationService = new CellRangerConfigurationService()
+        cellRangerConfigurationService.cellRangerWorkflowService = Mock(CellRangerWorkflowService) {
+            1 * deleteOutputDirectory(mwp1.bamFileInProjectFolder)
+            0 * _
+        }
+
+        when:
+        SpringSecurityUtils.doWithAuth(ADMIN) {
+            cellRangerConfigurationService.deleteFinalMwp(mwp1.sample, mwp1.seqType, mwp1.config.programVersion, mwp1.referenceGenomeIndex)
+        }
+
+        then:
+        [mwp1, mwp2].every { it.status == CellRangerMergingWorkPackage.Status.DELETED }
+        mwp3.status == CellRangerMergingWorkPackage.Status.UNSET
+    }
+
     void "deleteMwps, sets status and calls delete"() {
         given:
         CellRangerConfigurationService cellRangerConfigurationService = new CellRangerConfigurationService(

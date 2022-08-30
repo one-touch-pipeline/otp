@@ -230,7 +230,8 @@ class CellRangerConfigurationService {
             throw new FileAccessForArchivedProjectNotAllowedException("Cannot set Mwp of archived project ${mwpToKeep.project} to final")
         }
         List<CellRangerMergingWorkPackage> allMwps = getAllMwps(
-                mwpToKeep.sample, mwpToKeep.seqType, mwpToKeep.config.programVersion, mwpToKeep.referenceGenomeIndex
+                mwpToKeep.sample, mwpToKeep.seqType, mwpToKeep.config.programVersion, mwpToKeep.referenceGenomeIndex,
+                CellRangerMergingWorkPackage.Status.UNSET
         )
         deleteMwps(allMwps - mwpToKeep)
         mwpToKeep.status = CellRangerMergingWorkPackage.Status.FINAL
@@ -243,10 +244,19 @@ class CellRangerConfigurationService {
         if (sample.project.archived) {
             throw new FileAccessForArchivedProjectNotAllowedException("Cannot delete Mwp of archived project ${sample.project}")
         }
-        deleteMwps(getAllMwps(sample, seqType, programVersion, reference))
+        deleteMwps(getAllMwps(sample, seqType, programVersion, reference, CellRangerMergingWorkPackage.Status.UNSET))
     }
 
-    private List<CellRangerMergingWorkPackage> getAllMwps(Sample sample, SeqType seqType, String programVersion, ReferenceGenomeIndex reference) {
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#sample.project, 'OTP_READ_ACCESS')")
+    void deleteFinalMwp(Sample sample, SeqType seqType, String programVersion, ReferenceGenomeIndex reference) {
+        if (sample.project.archived) {
+            throw new FileAccessForArchivedProjectNotAllowedException("Cannot delete Mwp of archived project ${sample.project}")
+        }
+        deleteMwps(getAllMwps(sample, seqType, programVersion, reference, CellRangerMergingWorkPackage.Status.FINAL), false)
+    }
+
+    private List<CellRangerMergingWorkPackage> getAllMwps(Sample sample, SeqType seqType, String programVersion, ReferenceGenomeIndex reference,
+                                                          CellRangerMergingWorkPackage.Status status) {
         return (CellRangerMergingWorkPackage.createCriteria().list {
             eq("sample", sample)
             eq("seqType", seqType)
@@ -254,13 +264,15 @@ class CellRangerConfigurationService {
                 eq("programVersion", programVersion)
             }
             eq("referenceGenomeIndex", reference)
-            eq("status", CellRangerMergingWorkPackage.Status.UNSET)
+            eq("status", status)
         } as List<CellRangerMergingWorkPackage>)
     }
 
-    void deleteMwps(List<CellRangerMergingWorkPackage> mwpToDelete) {
+    void deleteMwps(List<CellRangerMergingWorkPackage> mwpToDelete, boolean checkFinal = true) {
         mwpToDelete.each {
-            assert it.status != CellRangerMergingWorkPackage.Status.FINAL
+            if (checkFinal) {
+                assert it.status != CellRangerMergingWorkPackage.Status.FINAL
+            }
             if (it.project.archived) {
                 throw new FileAccessForArchivedProjectNotAllowedException("Cannot delete Mwp ${it} since project ${it.project} is archived.")
             }

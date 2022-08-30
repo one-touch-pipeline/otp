@@ -57,7 +57,7 @@ class CellRangerMergingWorkPackage extends MergingWorkPackage {
                         isNull('expectedCells')
                     }
                     if (obj.enforcedCells) {
-                        eq('enforcedCells', obj.expectedCells)
+                        eq('enforcedCells', obj.enforcedCells)
                     } else {
                         isNull('enforcedCells')
                     }
