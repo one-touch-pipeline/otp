@@ -66,7 +66,7 @@ class ProjectCreationController {
     }
 
     def index(ProjectCreationBasisCommand cmd) {
-        List<ProjectRequest> projectRequests = ProjectRequest.createCriteria().list {
+        List<ProjectRequest> projectRequests = ProjectRequest.createCriteria().listDistinct {
             state {
                 eq("beanName", ProjectRequestStateProvider.getStateBeanName(Approved))
             }
