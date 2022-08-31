@@ -44,8 +44,8 @@ class ExternalWorkflowConfigSelectorService {
                 ExternalWorkflowConfigSelector.findAllByExternalWorkflowConfigFragment(fragment))
     }
 
-    List<String> getAllConflictingConfigValues(String configValue1, String configValue2) {
-        if (!configValue1 || !configValue2) {
+    List<JsonConflictingParameters> getAllConflictingConfigValues(String configValue1, String configValue2) {
+        if (!configValue1 || !configValue2 || configValue1 == configValue2) {
             return []
         }
         Object json1 = new JsonSlurper().parseText(configValue1)
@@ -53,22 +53,23 @@ class ExternalWorkflowConfigSelectorService {
         return getConflictingKeysForJson(json1, json2)
     }
 
-    List<String> getConflictingKeysForJson(Object json1, Object json2, String completeKey = '') {
-        List<String> conflictingKeys = []
-
-        json1.each { key, value ->
+    /**
+     * @param json1 : The current json object that should be compared
+     * @param json2 : The json the first one should be compared to
+     * @param completeKey : When recursively searching though the json, this parameter saves the already visited nodes.
+     * @return a map with key of the json argument as first parameter and an object that contains the currentValue and the otherValue as value.
+     */
+    List<JsonConflictingParameters> getConflictingKeysForJson(Object json1, Object json2, String completeKey = '') {
+        List<JsonConflictingParameters> conflictingKeys = []
+        json1.each { String key, value ->
             String newCompleteKey = completeKey ? "${completeKey}.${key}" : key
-            if (!json2[key]) {
+            if ((!value && json2[key] && !(value instanceof Map)) || (value && !json2[key] && !(json2[key] instanceof Map))) {
                 return
             }
-            if (json1[key] instanceof String && json2[key] instanceof String) {
+            if (!(json1[key] instanceof Map && json2[key] instanceof Map)) {
                 if (json1[key] != json2[key]) {
-                    conflictingKeys.add(newCompleteKey)
+                    conflictingKeys.add(new JsonConflictingParameters(newCompleteKey, json1[key].toString(), json2[key].toString()))
                 }
-                return
-            }
-            if (json1[key] instanceof String || json2[key] instanceof String) {
-                conflictingKeys.add(newCompleteKey)
                 return
             }
             conflictingKeys.addAll(getConflictingKeysForJson(json1[key], json2[key], newCompleteKey))
@@ -188,16 +189,32 @@ class ExternalWorkflowConfigSelectorService {
 }
 
 class NameValueAndConflictingKeysExternalWorkflowConfigSelector {
+    List<JsonConflictingParameters> conflictingParameters
+    String selectorName
+    String configFragmentValue
+    List<String> projectNames
 
     NameValueAndConflictingKeysExternalWorkflowConfigSelector(String selectorName, String configFragmentValue, List<String> projectNames) {
         this.selectorName = selectorName
         this.configFragmentValue = configFragmentValue
         this.projectNames = projectNames
     }
+}
 
-    List<String> conflictingKeys
-    String selectorName
-    String configFragmentValue
-    List<String> projectNames
+class JsonConflictingParameters {
+    String conflictingKey
+    String currentValue
+    String otherValue
+
+    JsonConflictingParameters(String conflictingKey, String currentValue, String otherValue) {
+        this.conflictingKey = conflictingKey
+        this.currentValue = currentValue
+        this.otherValue = otherValue
+    }
+
+    @Override
+    String toString() {
+        return "${conflictingKey} (current: ${currentValue}, other: ${otherValue})"
+    }
 }
 

@@ -39,12 +39,12 @@ class WorkflowConfigController implements BaseWorkflowConfigController {
     static allowedMethods = [
             index    : "GET",
             create   : "POST",
+            check    : "POST",
             update   : "POST",
             deprecate: "POST",
             data     : "GET",
             selector : "GET",
             fragments: "GET",
-            check    : "GET",
     ]
 
     ConfigSelectorService configSelectorService
@@ -68,7 +68,7 @@ class WorkflowConfigController implements BaseWorkflowConfigController {
             transformToMap(selector, selectors.exactMatchSelectors)
         }
 
-        render([data: selectorData] as JSON)
+        return render([data: selectorData] as JSON)
     }
 
     JSON fragments(Long id) {
@@ -101,31 +101,25 @@ class WorkflowConfigController implements BaseWorkflowConfigController {
         }
     }
 
-    def check() {
-        List<Long> workflowIds = queryParameterToLongList("workflows", params as Map)
-        List<Long> workflowVersionIds = queryParameterToLongList("workflowVersions", params as Map)
-        List<Long> projectIds = queryParameterToLongList("projects", params as Map)
-        List<Long> seqTypeIds = queryParameterToLongList("seqTypes", params as Map)
-        List<Long> referenceGenomeIds = queryParameterToLongList("referenceGenomes", params as Map)
-        List<Long> libraryPreparationKitIds = queryParameterToLongList("libraryPreparationKits", params as Map)
-        String fragmentValue = params.fragmentValue
-
+    JSON check(CheckCommand cmd) {
         List<NameValueAndConflictingKeysExternalWorkflowConfigSelector> moreSpecificSelectors =
                 externalWorkflowConfigSelectorService.getNameAndConfigValueOfMoreSpecificSelectors(
-                        workflowIds, workflowVersionIds, projectIds, referenceGenomeIds, seqTypeIds, libraryPreparationKitIds
+                        cmd.workflows*.id, cmd.workflowVersions*.id, cmd.projects*.id,
+                        cmd.referenceGenomes*.id, cmd.seqTypes*.id, cmd.libraryPreparationKits*.id
                 )
 
         moreSpecificSelectors.each { selector ->
-            selector.conflictingKeys = externalWorkflowConfigSelectorService.getAllConflictingConfigValues(fragmentValue, selector.configFragmentValue)
+            selector.conflictingParameters = externalWorkflowConfigSelectorService
+                    .getAllConflictingConfigValues(cmd.fragmentValue, selector.configFragmentValue)
         }
 
         List<NameValueAndConflictingKeysExternalWorkflowConfigSelector> conflictingSelectors = moreSpecificSelectors.findAll { selector ->
-            return selector.conflictingKeys.size() > 0
+            return selector.conflictingParameters.size() > 0
         }
 
-        render([
+        return render([
                 conflictingSelectors: conflictingSelectors.collect { selector ->
-                    [name: selector.selectorName, projectNames: selector.projectNames, conflictingKeys: selector.conflictingKeys]
+                    [name: selector.selectorName, projectNames: selector.projectNames, conflictingParameters: selector.conflictingParameters]
                 },
         ] as JSON)
     }
@@ -152,8 +146,8 @@ class WorkflowConfigController implements BaseWorkflowConfigController {
         checkErrorAndCallMethodReturns(cmd) {
             ExternalWorkflowConfigSelector selector = configSelectorService.create(cmd)
 
-            render transformToMap(selector) as JSON
-        }
+            return render(transformToMap(selector) as JSON)
+        } as JSON
     }
 
     JSON update(UpdateCommand cmd) {
@@ -161,8 +155,8 @@ class WorkflowConfigController implements BaseWorkflowConfigController {
         checkErrorAndCallMethodReturns(cmd) {
             ExternalWorkflowConfigSelector selector = configSelectorService.update(cmd)
 
-            render transformToMap(selector) as JSON
-        }
+            return render(transformToMap(selector) as JSON)
+        } as JSON
     }
 
     JSON deprecate(ExternalWorkflowConfigFragment fragment) {
@@ -274,6 +268,10 @@ class CreateCommand extends SelectorCommand {
     String value
 
     Set<ExternalWorkflowConfigSelector> matchingSelectors
+}
+
+class CheckCommand extends SelectorCommand {
+    String fragmentValue
 }
 
 class UpdateCommand extends CreateCommand {

@@ -497,9 +497,9 @@ $(document).ready(() => {
   $('button.check').on('click', (e) => {
     e.preventDefault();
 
-    const value = $('.modal-body textarea');
+    const fragmentValueElement = $('.modal-body textarea');
     try {
-      value.val(JSON.stringify(JSON.parse(value.val()), null, 2));
+      fragmentValueElement.val(JSON.stringify(JSON.parse(fragmentValueElement.val()), null, 2));
     } catch (err) {
       $.otp.toaster.showErrorToast('Syntax Error in JSON', err);
       return;
@@ -512,32 +512,37 @@ $(document).ready(() => {
     const seqTypes = getIdsOfSelect2($('select[name="seqTypes"]'));
     const referenceGenomes = getIdsOfSelect2($('select[name="referenceGenomes"]'));
     const libraryPreparationKits = getIdsOfSelect2($('select[name="libraryPreparationKits"]'));
-    const fragmentValue = $('textarea[name="value"]').val();
+    const fragmentValue = JSON.stringify(JSON.parse(fragmentValueElement.val()));
 
     $.ajax({
       url: $.otp.createLink({
         controller: 'workflowConfig',
-        action: 'check',
-        parameters: {
-          workflows,
-          workflowVersions,
-          projects,
-          seqTypes,
-          referenceGenomes,
-          libraryPreparationKits,
-          fragmentValue
-        }
+        action: 'check'
       }),
-      type: 'GET',
+      traditional: true,
+      type: 'POST',
+      data: {
+        fragmentValue,
+        workflows,
+        workflowVersions,
+        projects,
+        seqTypes,
+        referenceGenomes,
+        libraryPreparationKits
+      },
       success(response) {
         const { conflictingSelectors } = response;
         if (conflictingSelectors.length > 0) {
-          let responseMessage = 'The following selectors overwrite Keys in the mentioned projects<br><ul>';
+          let responseMessage = 'The following selectors overwrite keys in the mentioned projects:<br><ul>';
           conflictingSelectors.forEach((selector) => {
             responseMessage += `<li>${selector.name} [${selector.projectNames.join(', ')}]</li>`;
             responseMessage += '<ul>';
-            selector.conflictingKeys.forEach((key) => {
-              responseMessage += `<li>${key}</li>`;
+            selector.conflictingParameters.forEach((parameter) => {
+              responseMessage += '<li>';
+              responseMessage += `${parameter.conflictingKey} `;
+              responseMessage += `(overwriting value: ${parameter.otherValue}, `;
+              responseMessage += `current value: ${parameter.currentValue})`;
+              responseMessage += '</li>';
             });
             responseMessage += '</ul>';
           });

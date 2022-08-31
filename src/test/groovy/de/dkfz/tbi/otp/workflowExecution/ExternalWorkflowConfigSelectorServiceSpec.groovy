@@ -30,21 +30,23 @@ class ExternalWorkflowConfigSelectorServiceSpec extends Specification implements
 
     ExternalWorkflowConfigSelectorService service = new ExternalWorkflowConfigSelectorService()
 
+    @SuppressWarnings("LineLength")
     @Unroll()
-    void "getAllConflictingConfigValues, should return conflicting values in json formatted strings"() {
+    void "getAllConflictingConfigValues, should return conflicting key with corresponding values in json formatted strings"() {
         when:
-        List<String> conflictingValues = service.getAllConflictingConfigValues(string1, string2)
+        List<JsonConflictingParameters> conflictingValues = service.getAllConflictingConfigValues(string1, string2)
 
         then:
-        conflictingValues == expectedConflictingValues
+        conflictingValues.toString() == expectedConflictingValues.toString()
 
         where:
-        string1                                             | string2                                              | expectedConflictingValues
-        '{"arg1": "test"}'                                  | '{"arg1": "test"}'                                   | []
-        '{"arg1": "test2"}'                                 | '{"arg1": "test"}'                                   | ['arg1']
-        '{"arg1": {"subarg1" : "test", "subarg2": "test2"}' | '{"arg1": {"subarg1" : "test2"}}'                    | ['arg1.subarg1']
-        '{"arg1": {"subarg1" : "test", "subarg2": "test2"}' | '{"arg1": {"subarg1" : "test2", "subarg2": "test"}}' | ['arg1.subarg1', 'arg1.subarg2']
-        null                                                | null                                                 | []
+        string1                                   | string2                                    | expectedConflictingValues
+        '{"arg1":"test","arg2":{}}'               | '{"arg1":"test","arg2":{}}'                | []
+        '{"arg1":"test2"}'                        | '{"arg1":"test","arg2":{}}'                | [new JsonConflictingParameters('arg1', "test2", "test")]
+        '{"arg1":{"subarg1":1,"subarg2":"test2"}' | '{"arg1":{"subarg1":true}}'                | [new JsonConflictingParameters('arg1.subarg1', "1", "true")]
+        '{"arg1":{"subarg1":true,"subarg2":{}}}'  | '{"arg1":{"subarg1":{},"subarg2":"test"}}' | [new JsonConflictingParameters('arg1.subarg1', "true", "{}"),
+                                                                                                  new JsonConflictingParameters('arg1.subarg2', "{}", "test")]
+        null                                      | null                                       | []
     }
 
     @Unroll()
@@ -56,9 +58,9 @@ class ExternalWorkflowConfigSelectorServiceSpec extends Specification implements
         thrown(JsonException)
 
         where:
-        string1                                             | string2
-        '{"arg1: "test"}'                                   | '{"arg1": "test"}'
-        '{"arg1": "test2"}'                                 | '{"arg1": test"}'
+        string1                                            | string2
+        '{"arg1: "test"}'                                  | '{"arg1": "test"}'
+        '{"arg1": "test2"}'                                | '{"arg1": test"}'
         '{"arg1": {"subarg1" : "test", "subarg2": "test2"' | '{"arg1": {"subarg1" : "test2"},}'
     }
 }
