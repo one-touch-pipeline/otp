@@ -85,7 +85,11 @@ class MailHelperService {
         }
 
         if (!recipients.contains(ticketSystemEmailAddress)) {
-            ccs.add(ticketSystemEmailAddress)
+            if (recipients) {
+                ccs.add(ticketSystemEmailAddress)
+            } else {
+                recipients.add(ticketSystemEmailAddress)
+            }
         }
 
         logEmail(recipients, ccs, emailSubject, content)
