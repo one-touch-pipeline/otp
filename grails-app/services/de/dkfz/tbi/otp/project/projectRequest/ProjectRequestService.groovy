@@ -28,6 +28,7 @@ import org.codehaus.groovy.runtime.InvokerHelper
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.prepost.PreAuthorize
 
+import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.ngsdata.ProjectRole
@@ -178,7 +179,7 @@ class ProjectRequestService {
         List<String> ccs = projectRequest.state.usersThatNeedToApprove*.email
         String subject = messageSourceService.createMessage("notification.projectRequest.submit.subject")
         String body = messageSourceService.createMessage("notification.projectRequest.submit.body", [
-                link         : getProjectRequestLink(projectRequest),
+                link         : getProjectRequestLinkWithoutParams(projectRequest),
                 requester    : "${requester.username} (${requester.realName})",
                 teamSignature: processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME),
         ])
@@ -211,7 +212,7 @@ class ProjectRequestService {
         String body = messageSourceService.createMessage("notification.projectRequest.operatorReject.body", [
                 requester    : "${requester.username} (${requester.realName})",
                 comment      : rejectComment,
-                link         : getProjectRequestLink(projectRequest),
+                link         : getProjectRequestLinkWithoutParams(projectRequest),
                 teamSignature: processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME),
         ])
         mailHelperService.sendEmail(subject, body, recipient, ccs)
@@ -228,7 +229,7 @@ class ProjectRequestService {
                 recipients        :  "$projectAuthoritiesUsernames, $requester.username",
                 projectAuthorities: projectAuthoritiesUsernames,
                 projectName       : projectRequest.name,
-                link              : getProjectRequestLink(projectRequest),
+                link              : getProjectRequestLinkWithoutParams(projectRequest),
                 teamSignature     : processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME),
         ])
         mailHelperService.sendEmail(subject, body, recipients, ccs)
@@ -244,7 +245,7 @@ class ProjectRequestService {
                 projectName     : projectRequest.name,
                 projectAuthority: securityService.currentUserAsUser.username,
                 comment         : rejectComment,
-                link            : getProjectRequestLink(projectRequest),
+                link            : getProjectRequestLinkWithoutParams(projectRequest),
                 teamSignature   : processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME),
         ])
         mailHelperService.sendEmail(subject, body, recipient, ccs)
@@ -299,7 +300,7 @@ class ProjectRequestService {
         String subject = messageSourceService.createMessage("notification.projectRequest.draft.subject")
         String body = messageSourceService.createMessage("notification.projectRequest.draft.body", [
                 requester    : "${requester.username} (${requester.realName})",
-                link         : getProjectRequestLink(projectRequest),
+                link         : getProjectRequestLinkWithoutParams(projectRequest),
                 teamSignature: processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME),
         ])
         mailHelperService.sendEmail(subject, body, recipient)
@@ -326,30 +327,32 @@ class ProjectRequestService {
                 projectAuthorities: allProjectAuthorities*.username.join(", "),
                 projectAuthority  : securityService.currentUserAsUser.username,
                 projectName       : projectRequest.name,
-                link              : getProjectRequestLink(projectRequest),
+                link              : getProjectRequestLinkWithoutParams(projectRequest),
                 teamSignature     : processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME),
         ])
         mailHelperService.sendEmail(subject, body, recipient, ccs)
     }
 
     void sendCreatedEmail(Project project, List<String> recipient, List<String> ccs) {
-        String projectOverviewLink = linkGenerator.link(
-                controller: "projectOverview",
+        String sampleOverviewLink = linkGenerator.link(
+                controller: "sampleOverview",
                 action: "index",
                 absolute: true,
                 id: project.id,
+                params: [(ProjectSelectionService.PROJECT_SELECTION_PARAMETER): project.name]
         )
         String userManagementLink = linkGenerator.link(
-                controller: "userAdministration",
+                controller: "projectUser",
                 action: "index",
                 absolute: true,
+                params: [(ProjectSelectionService.PROJECT_SELECTION_PARAMETER): project.name]
         )
         String subject = messageSourceService.createMessage("notification.projectRequest.created.subject", [
                 projectName: project.name,
         ])
         String body = messageSourceService.createMessage("notification.projectRequest.created.body", [
                 projectName               : project.displayName,
-                projectLink               : projectOverviewLink,
+                projectLink               : sampleOverviewLink,
                 projectDirectoryPath      : project.dirName,
                 analysisDirectoryPath     : project.dirAnalysis,
                 additionalText            : processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_PROJECT_CREATION_FREETEXT),
@@ -362,12 +365,13 @@ class ProjectRequestService {
         mailHelperService.sendEmail(subject, body, recipient, ccs)
     }
 
-    private String getProjectRequestLink(ProjectRequest projectRequest) {
+    private String getProjectRequestLinkWithoutParams(ProjectRequest projectRequest) {
         return linkGenerator.link(
                 controller: "projectRequest",
                 action: "view",
                 absolute: true,
                 id: projectRequest.id,
+                params: [:]
         )
     }
 

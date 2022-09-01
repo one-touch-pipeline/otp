@@ -37,13 +37,10 @@ class ProjectLinkGenerator extends LinkGenerator {
     @Override
     String link(Map attrs, String encoding = 'UTF-8') {
         Object paramsAttribute = attrs.get(ATTRIBUTE_PARAMS)
-        Map params = paramsAttribute instanceof Map ? paramsAttribute as Map : [:]
-        if (SecurityContextHolder.context?.authentication) {
+        if (paramsAttribute != [:] && SecurityContextHolder.context?.authentication) {
+            Map params = paramsAttribute instanceof Map ? paramsAttribute as Map : [:]
             if (!params.get(ProjectSelectionService.PROJECT_SELECTION_PARAMETER) && projectSelectionService.selectedProject) {
-                attrs.put(
-                        ATTRIBUTE_PARAMS,
-                        [(ProjectSelectionService.PROJECT_SELECTION_PARAMETER): projectSelectionService.selectedProject] << params,
-                )
+                attrs.put(ATTRIBUTE_PARAMS, [(ProjectSelectionService.PROJECT_SELECTION_PARAMETER): projectSelectionService.selectedProject] << params)
             }
         }
         return super.link(attrs, encoding)

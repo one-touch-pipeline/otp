@@ -25,7 +25,6 @@ import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
 import grails.validation.ValidationException
-import grails.web.mapping.LinkGenerator
 import org.grails.datastore.gorm.events.AutoTimestampEventListener
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
@@ -46,7 +45,6 @@ import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
-import de.dkfz.tbi.otp.notification.CreateNotificationTextService
 import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
 import de.dkfz.tbi.otp.project.exception.unixGroup.*
 import de.dkfz.tbi.otp.security.User
@@ -1758,71 +1756,6 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         "P1,P3"         | "P2"    || "P1,P2,P3"
         "P2,P1,P2"      | "P2"    || "P1,P2"
         ",P1,,P3,P2,P1" | "P4"    || "P1,P2,P3,P4"
-    }
-
-    void "sendProjectCreationNotificationEmail, test if email send to correct recipients"() {
-        given:
-        User userPi = DomainFactory.createUser()
-        User userBioinf = DomainFactory.createUser()
-        User userBioinfNoNotification = DomainFactory.createUser()
-
-        createAllBasicProjectRoles()
-        ProjectRole pi = CollectionUtils.atMostOneElement(ProjectRole.findAllByName(ProjectRole.Basic.PI.name()))
-        ProjectRole bioinf = CollectionUtils.atMostOneElement(ProjectRole.findAllByName(ProjectRole.Basic.BIOINFORMATICIAN.name()))
-
-        Project project = createProject()
-
-        DomainFactory.createUserProjectRole(
-                project: project,
-                user: userPi,
-                projectRoles: [pi] as Set<ProjectRole>,
-                receivesNotifications: true,
-        )
-
-        DomainFactory.createUserProjectRole(
-                project: project,
-                user: userBioinf,
-                projectRoles: [bioinf] as Set<ProjectRole>,
-                receivesNotifications: true,
-        )
-
-        DomainFactory.createUserProjectRole(
-                project: project,
-                user: userBioinfNoNotification,
-                projectRoles: [bioinf] as Set<ProjectRole>,
-                receivesNotifications: false,
-        )
-
-        ProjectService projectService = new ProjectService(
-                processingOptionService: processingOptionService,
-                messageSourceService: Stub(MessageSourceService) {
-                    createMessage("notification.projectCreation.subject", [projectName: project.displayName]) >> "subject"
-                    createMessage("notification.projectCreation.message", [
-                            projectName             : project.displayName,
-                            linkProjectConfig       : 'link',
-                            projectFolder           : LsdfFilesService.getPath(configService.rootPath.path, project.dirName),
-                            analysisFolder          : project.dirAnalysis,
-                            linkUserManagementConfig: 'link',
-                            teamSignature           : processingOptionService.findOptionAsString(OptionName.HELP_DESK_TEAM_NAME),
-                    ]) >> "body"
-                },
-                mailHelperService: Mock(MailHelperService),
-                createNotificationTextService: new CreateNotificationTextService(
-                        linkGenerator: Mock(LinkGenerator) {
-                            _ * link(_) >> 'link'
-                        },
-                        lsdfFilesService: new LsdfFilesService(),
-                        processingOptionService: processingOptionService,
-                ),
-                userProjectRoleService: new UserProjectRoleService(),
-                configService: configService,
-        )
-
-        when:
-        projectService.sendProjectCreationMailToUserAndTicketSystem(project)
-
-        then:
-        1 * projectService.mailHelperService.sendEmail('subject', 'body', [userPi.email, userBioinf.email].sort())
     }
 
     @Unroll

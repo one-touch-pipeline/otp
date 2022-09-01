@@ -368,42 +368,6 @@ class ProjectService {
         }
     }
 
-    /**
-     * Send project creation email to the added users and the ticket system in CC. If no user mail address for
-     * the given project exists, then the mail will be sent to the ticket system only.
-     *
-     * @param project which was just created
-     */
-    void sendProjectCreationMailToUserAndTicketSystem(Project project) {
-        List<String> userMails = userProjectRoleService.getEmailsOfToBeNotifiedProjectUsers([project]).sort().unique()
-        sendProjectCreationMail(project, userMails)
-    }
-
-    /**
-     * Generate project creation email and send it to the given receivers.
-     *
-     * @param project which was just created
-     * @param receivers mail addresses
-     */
-    void sendProjectCreationMail(Project project, List<String> receivers) {
-        String subject = messageSourceService.createMessage("notification.projectCreation.subject", [projectName: project.displayName])
-        String content = messageSourceService.createMessage('notification.projectCreation.message',
-                [
-                        projectName             : project.displayName,
-                        linkProjectConfig       : createNotificationTextService.createOtpLinks([project], 'projectConfig', 'index'),
-                        projectFolder           : LsdfFilesService.getPath(configService.rootPath.path, project.dirName),
-                        analysisFolder          : project.dirAnalysis,
-                        linkUserManagementConfig: createNotificationTextService.createOtpLinks([project], 'projectUser', 'index'),
-                        teamSignature           : processingOptionService.findOptionAsString(OptionName.HELP_DESK_TEAM_NAME),
-                ])
-
-        if (receivers) {
-            mailHelperService.sendEmail(subject, content, receivers)
-        } else {
-            mailHelperService.sendEmailToTicketSystem(subject, content)
-        }
-    }
-
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     <T> void updateProjectField(T fieldValue, String fieldName, Project project) {
         assert fieldName && [
