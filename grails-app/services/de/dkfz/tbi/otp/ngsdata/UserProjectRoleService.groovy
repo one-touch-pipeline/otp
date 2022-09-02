@@ -280,6 +280,22 @@ class UserProjectRoleService {
         }
     }
 
+    private void notifyProjectAuthoritiesAndDisabledUser(UserProjectRole userProjectRole) {
+        List<User> projectAuthoritiesAndUserManagers = getUniqueProjectAuthoritiesAndUserManagers(userProjectRole.project)
+        List<String> recipient = [userProjectRole.user]*.email
+        List<String> ccs = projectAuthoritiesAndUserManagers*.email.unique().sort()
+
+        String subject = messageSourceService.createMessage("projectUser.notification.userDeactivated.subject", [
+                project: userProjectRole.project.name,
+        ])
+        String body = messageSourceService.createMessage("projectUser.notification.userDeactivated.body", [
+                user                 : "${userProjectRole.user.realName} (${userProjectRole.user.username})",
+                project              : userProjectRole.project.name,
+                supportTeamSalutation: processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME),
+        ])
+        mailHelperService.sendEmail(subject, body, recipient, ccs)
+    }
+
     private static String getFlagChangeLogMessage(String flagName, boolean newStatus, String username, String projectName) {
         return "${flagName} ${newStatus ? "en" : "dis"}abled for ${username} in ${projectName}"
     }
@@ -443,6 +459,7 @@ class UserProjectRoleService {
         if (value) {
             notifyProjectAuthoritiesAndUser(userProjectRole)
         } else {
+            notifyProjectAuthoritiesAndDisabledUser(userProjectRole)
             if (hadFileAccess) {
                 notifyAdministration(userProjectRole, OperatorAction.REMOVE)
             }

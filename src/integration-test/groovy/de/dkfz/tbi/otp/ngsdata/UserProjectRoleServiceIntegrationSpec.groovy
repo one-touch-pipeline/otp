@@ -408,6 +408,11 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
             it.contains("newProjectMember")
         }, _ as String, [requesterUserProjectRole.user.email, userProjectRole.user.email])
 
+        and: "notification for user that he was disabled"
+        (enabledStatus ? 1 : 0) * userProjectRoleService.mailHelperService.sendEmail({
+            it.contains("deactivateUserIn")
+        }, _ as String, [userProjectRole.user.email], [requesterUserProjectRole.user.email])
+
         0 * userProjectRoleService.mailHelperService.sendEmail(*_)
 
         where:
@@ -822,6 +827,48 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         false         | ProjectRole.Basic.SUBMITTER.name()
         true          | null
         false         | null
+    }
+
+    void "notifyProjectAuthoritiesAndDisabledUser, sends mail, direct recipients: affected, CC: authorities and user managers"() {
+        given:
+        setupData()
+
+        Project project = createProject()
+
+        createUserProjectRole(
+                project: project,
+                projectRoles: [bioinformatician],
+                manageUsersAndDelegate: false,
+                manageUsers: false,
+                enabled: true,
+        )
+        UserProjectRole piUserRole = createUserProjectRole(
+                project: project,
+                projectRoles: [pi],
+                manageUsersAndDelegate: true,
+                manageUsers: true,
+                enabled: true,
+        )
+        UserProjectRole manageUserRole = createUserProjectRole(
+                project: project,
+                projectRoles: [coordinator],
+                manageUsersAndDelegate: false,
+                manageUsers: true,
+                enabled: true,
+        )
+
+        UserProjectRole userProjectRoleToDeactivate = createUserProjectRole(
+                project: project,
+                enabled: true,
+        )
+
+        when:
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
+            userProjectRoleService.notifyProjectAuthoritiesAndDisabledUser(userProjectRoleToDeactivate)
+        }
+
+        then:
+        1 * userProjectRoleService.mailHelperService.sendEmail(_, _, [userProjectRoleToDeactivate.user.email], [piUserRole, manageUserRole]*.user*.email)
     }
 
     void "notifyUsersAboutFileAccessChange, builds correct content"() {
@@ -1608,6 +1655,16 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
             _ * getMessageInternal("projectUser.notification.newProjectMember.subject", [], _) >>
                     '''newProjectMember
                     |${projectName}'''.stripMargin()
+
+            _ * getMessageInternal("projectUser.notification.userDeactivated.subject", [], _) >>
+                    '''deactivateUserIn
+                    |${project}'''.stripMargin()
+
+            _ * getMessageInternal("projectUser.notification.userDeactivated.body", [], _) >>
+                    '''BodyWith
+                    |${user}
+                    |${project}
+                    |${supportTeamSalutation}'''.stripMargin()
 
             _ * getMessageInternal("projectUser.notification.newProjectMember.body.userManagerAddedMember", [], _) >>
                     '''newProjectMember
