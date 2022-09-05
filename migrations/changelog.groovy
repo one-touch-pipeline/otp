@@ -693,4 +693,8 @@ databaseChangeLog = {
     }
 
     include file: 'changelogs/2022/otp-1791-missing-indexes.groovy'
+
+    changeSet(author: "", id: "otp-1771") {
+        sqlFile(path: 'changelogs/2022/otp-1771-delete-old-defaults.sql')
+    }
 }

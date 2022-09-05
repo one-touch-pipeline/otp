@@ -1,6 +1,6 @@
 
     INSERT INTO external_workflow_config_fragment(id, version, date_created, last_updated, object_version, name, config_values)
-        VALUES(nextval('hibernate_sequence'), 0, now(), now(), 0, 'Default cvalue values for PanCancer alignment 1.2.51-2, 1.2.73-1, 1.2.73-201, 1.2.73-202, 1.2.73-204 WHOLE_GENOME',
+        VALUES(nextval('hibernate_sequence'), 0, now(), now(), 0, 'Default cvalue values for PanCancer alignment 1.2.182',
 '{' ||
 '    "RODDY": {' ||
 '        "cvalues": {' ||
@@ -36,7 +36,7 @@
 '                "type": "string"' ||
 '            },' ||
 '            "mergedBamSuffixList": {' ||
-'                "value": "${mergedBamSuffix_markDuplicates},${mergedBamSuffix_markDuplicatesShort},${mergedBamSuffix_removeDuplicates}",' ||
+'                "value": "${mergedBamSuffix_markDuplicatesShort}",' ||
 '                "type": "string"' ||
 '            },' ||
 '            "defaultMergedBamSuffix": {' ||
@@ -319,7 +319,7 @@
 '                "value": "\"-a 1000\""' ||
 '            },' ||
 '            "SAMPESORT_MEMSIZE": {' ||
-'                "value": 500000000,' ||
+'                "value": 2000000000,' ||
 '                "type": "integer"' ||
 '            },' ||
 '            "BWA_MEM_OPTIONS": {' ||
@@ -359,20 +359,16 @@
 '                "type": "path"' ||
 '            },' ||
 '            "CLIP_INDEX": {' ||
-'                "value": "${DIR_EXECUTION}/analysisTools/qcPipelineTools/trimmomatic/adapters/TruSeq3-PE.fa",' ||
+'                "value": "$DIR_EXECUTION/analysisTools/qcPipeline/trimmomatic/adapters/TruSeq3-PE.fa",' ||
 '                "type": "path"' ||
 '            },' ||
 '            "ADAPTOR_TRIMMING_OPTIONS_0": {' ||
 '                "value": "\"PE -threads 12 -phred33\""' ||
 '            },' ||
 '            "ADAPTOR_TRIMMING_OPTIONS_1": {' ||
-'                "value": "\"ILLUMINACLIP:${CLIP_INDEX}:2:30:10:8:true SLIDINGWINDOW:4:15 MINLEN:36\""' ||
+'                "value": "\"ILLUMINACLIP:$CLIP_INDEX:2:30:10:8:true SLIDINGWINDOW:4:15 MINLEN:36\""' ||
 '            },' ||
 '            "debugOptionsUseUndefinedVariableBreak": {' ||
-'                "value": "false",' ||
-'                "type": "boolean"' ||
-'            },' ||
-'            "debugOptionsUseExitOnError": {' ||
 '                "value": "false",' ||
 '                "type": "boolean"' ||
 '            },' ||
@@ -382,6 +378,23 @@
 '            "useBioBamBamSort": {' ||
 '                "value": "false",' ||
 '                "type": "boolean"' ||
+'            },' ||
+'            "useAcceleratedHardware": {' ||
+'                "value": "false",' ||
+'                "type": "boolean"' ||
+'            },' ||
+'            "useBioBamBamMarkDuplicates": {' ||
+'                "value": "true"' ||
+'            },' ||
+'            "INSERT_SIZE_LIMIT": {' ||
+'                "value": 1000,' ||
+'                "type": "integer"' ||
+'            },' ||
+'            "SAMTOOLS_VIEW_OPTIONS": {' ||
+'                "value": "\" -bu -q 1 -F 1024\""' ||
+'            },' ||
+'            "useAdaptorTrimming": {' ||
+'                "value": "false"' ||
 '            },' ||
 '            "runFastQC": {' ||
 '                "value": "false",' ||
@@ -395,21 +408,45 @@
 '                "value": "true",' ||
 '                "type": "boolean"' ||
 '            },' ||
-'            "useAcceleratedHardware": {' ||
-'                "value": "false",' ||
-'                "type": "boolean"' ||
-'            },' ||
 '            "BWA_VERSION": {' ||
-'                "value": "0.7.15",' ||
+'                "value": "0.7.8",' ||
 '                "type": "string"' ||
 '            },' ||
-'            "markDuplicatesVariant": {' ||
-'                "value": "sambamba",' ||
+'            "PICARD_VERSION": {' ||
+'                "value": "1.125",' ||
+'                "type": "string"' ||
+'            },' ||
+'            "BEDTOOLS_VERSION": {' ||
+'                "value": "2.16.2",' ||
+'                "type": "string"' ||
+'            },' ||
+'            "FASTQC_VERSION": {' ||
+'                "value": "0.10.1",' ||
+'                "type": "string"' ||
+'            },' ||
+'            "SAMTOOLS_VERSION": {' ||
+'                "value": "0.1.19",' ||
+'                "type": "string"' ||
+'            },' ||
+'            "SAMBAMBA_VERSION": {' ||
+'                "value": "0.4.6",' ||
 '                "type": "string"' ||
 '            },' ||
 '            "SAMBAMBA_MARKDUP_VERSION": {' ||
-'                "value": "0.6.5",' ||
+'                "value": "0.4.6",' ||
 '                "type": "string"' ||
+'            },' ||
+'            "BIOBAMBAM_VERSION": {' ||
+'                "value": "0.0.148",' ||
+'                "type": "string"' ||
+'            },' ||
+'            "HTSLIB_VERSION": {' ||
+'                "value": "0.2.5",' ||
+'                "type": "string"' ||
+'            },' ||
+'            "BWA_MEM_THREADS": {' ||
+'                "value": 8,' ||
+'                "type": "integer"' ||
 '            }' ||
 '        }' ||
 '    }' ||
@@ -418,34 +455,14 @@
     ON CONFLICT DO NOTHING;
 
     INSERT INTO external_workflow_config_selector(id, version, date_created, last_updated, name, priority, selector_type, external_workflow_config_fragment_id)
-    VALUES(nextval('hibernate_sequence'), 0, now(), now(), 'Default cvalue values for PanCancer alignment 1.2.51-2, 1.2.73-1, 1.2.73-201, 1.2.73-202, 1.2.73-204 WHOLE_GENOME', 22, 'DEFAULT_VALUES', (
-       SELECT id FROM external_workflow_config_fragment WHERE name = 'Default cvalue values for PanCancer alignment 1.2.51-2, 1.2.73-1, 1.2.73-201, 1.2.73-202, 1.2.73-204 WHOLE_GENOME'))
+    VALUES(nextval('hibernate_sequence'), 0, now(), now(), 'Default cvalue values for PanCancer alignment 1.2.182', 6, 'DEFAULT_VALUES', (
+       SELECT id FROM external_workflow_config_fragment WHERE name = 'Default cvalue values for PanCancer alignment 1.2.182'))
     ON CONFLICT DO NOTHING;
 
     INSERT INTO external_workflow_config_selector_workflow (external_workflow_config_selector_workflows_id, workflow_id)
-        SELECT (SELECT id FROM external_workflow_config_selector WHERE name = 'Default cvalue values for PanCancer alignment 1.2.51-2, 1.2.73-1, 1.2.73-201, 1.2.73-202, 1.2.73-204 WHOLE_GENOME'), (SELECT id FROM workflow WHERE name = 'PanCancer alignment')
+        SELECT (SELECT id FROM external_workflow_config_selector WHERE name = 'Default cvalue values for PanCancer alignment 1.2.182'), (SELECT id FROM workflow WHERE name = 'PanCancer alignment')
     ON CONFLICT DO NOTHING;
 
     INSERT INTO external_workflow_config_selector_workflow_version (external_workflow_config_selector_workflow_versions_id, workflow_version_id)
-        SELECT (SELECT id FROM external_workflow_config_selector WHERE name = 'Default cvalue values for PanCancer alignment 1.2.51-2, 1.2.73-1, 1.2.73-201, 1.2.73-202, 1.2.73-204 WHOLE_GENOME'), (SELECT id FROM workflow_version WHERE workflow_id = (SELECT id FROM workflow WHERE name = 'PanCancer alignment') AND workflow_version.workflow_version = '1.2.51-2')
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO external_workflow_config_selector_workflow_version (external_workflow_config_selector_workflow_versions_id, workflow_version_id)
-        SELECT (SELECT id FROM external_workflow_config_selector WHERE name = 'Default cvalue values for PanCancer alignment 1.2.51-2, 1.2.73-1, 1.2.73-201, 1.2.73-202, 1.2.73-204 WHOLE_GENOME'), (SELECT id FROM workflow_version WHERE workflow_id = (SELECT id FROM workflow WHERE name = 'PanCancer alignment') AND workflow_version.workflow_version = '1.2.73-1')
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO external_workflow_config_selector_workflow_version (external_workflow_config_selector_workflow_versions_id, workflow_version_id)
-        SELECT (SELECT id FROM external_workflow_config_selector WHERE name = 'Default cvalue values for PanCancer alignment 1.2.51-2, 1.2.73-1, 1.2.73-201, 1.2.73-202, 1.2.73-204 WHOLE_GENOME'), (SELECT id FROM workflow_version WHERE workflow_id = (SELECT id FROM workflow WHERE name = 'PanCancer alignment') AND workflow_version.workflow_version = '1.2.73-201')
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO external_workflow_config_selector_workflow_version (external_workflow_config_selector_workflow_versions_id, workflow_version_id)
-        SELECT (SELECT id FROM external_workflow_config_selector WHERE name = 'Default cvalue values for PanCancer alignment 1.2.51-2, 1.2.73-1, 1.2.73-201, 1.2.73-202, 1.2.73-204 WHOLE_GENOME'), (SELECT id FROM workflow_version WHERE workflow_id = (SELECT id FROM workflow WHERE name = 'PanCancer alignment') AND workflow_version.workflow_version = '1.2.73-202')
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO external_workflow_config_selector_workflow_version (external_workflow_config_selector_workflow_versions_id, workflow_version_id)
-        SELECT (SELECT id FROM external_workflow_config_selector WHERE name = 'Default cvalue values for PanCancer alignment 1.2.51-2, 1.2.73-1, 1.2.73-201, 1.2.73-202, 1.2.73-204 WHOLE_GENOME'), (SELECT id FROM workflow_version WHERE workflow_id = (SELECT id FROM workflow WHERE name = 'PanCancer alignment') AND workflow_version.workflow_version = '1.2.73-204')
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO external_workflow_config_selector_seq_type (external_workflow_config_selector_seq_types_id, seq_type_id)
-        SELECT (SELECT id FROM external_workflow_config_selector WHERE name = 'Default cvalue values for PanCancer alignment 1.2.51-2, 1.2.73-1, 1.2.73-201, 1.2.73-202, 1.2.73-204 WHOLE_GENOME'), (SELECT id FROM seq_type WHERE name = 'WHOLE_GENOME' AND single_cell = false AND library_layout = 'PAIRED')
+        SELECT (SELECT id FROM external_workflow_config_selector WHERE name = 'Default cvalue values for PanCancer alignment 1.2.182'), (SELECT id FROM workflow_version WHERE workflow_id = (SELECT id FROM workflow WHERE name = 'PanCancer alignment') AND workflow_version.workflow_version = '1.2.182')
     ON CONFLICT DO NOTHING;

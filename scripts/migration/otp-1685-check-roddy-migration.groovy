@@ -167,6 +167,7 @@ List<RoddyWorkflowConfig> roddyWorkflowConfigs = RoddyWorkflowConfig.findAllByIn
 GParsPool.withPool(parallel) {
     String output = roddyWorkflowConfigs.collectParallel { RoddyWorkflowConfig roddyWorkflowConfig ->
         List<?> out = []
+        Path work = null
         try {
             SessionUtils.withTransaction {
                 roddyWorkflowConfig = RoddyWorkflowConfig.get(roddyWorkflowConfig.id)
@@ -181,7 +182,7 @@ GParsPool.withPool(parallel) {
                 ])
 
                 //base directory
-                Path work = base.resolve("${roddyWorkflowConfig.project.name} ${roddyWorkflowConfig.seqType.displayNameWithLibraryLayout}".replaceAll('[^a-zA-Z0-9_]', '-'))
+                work = base.resolve("${roddyWorkflowConfig.project.name} ${roddyWorkflowConfig.seqType.displayNameWithLibraryLayout}".replaceAll('[^a-zA-Z0-9_]', '-'))
                 fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(work, realm)
 
                 //-------------
@@ -296,8 +297,11 @@ ${c2Set*.toString().sort().join('\n')}
             }
         } catch (Throwable t) {
             println t
+            String stacktrace = StackTraceUtils.getStackTrace(t)
             out << "\n Exception:"
-            out << StackTraceUtils.getStackTrace(t)
+            out << stacktrace
+            Path exceptionOut = work ? work.resolve('44-exception'): base.resolve("exceptionOut-${roddyWorkflowConfig.id}")
+            fileService.createFileWithContent(exceptionOut, stacktrace, realm)
         }
         return out.join('\n')
     }.join('\n\n')
