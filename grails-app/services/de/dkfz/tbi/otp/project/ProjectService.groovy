@@ -106,7 +106,7 @@ class ProjectService {
 
     /**
      * This method doesn't use a @PostFilter security annotation for performance reasons
-     * If you change this method, also change {@link OtpPermissionEvaluator#checkProjectRolePermission}
+     * If you change this method, also change {@link ProjectPermissionEvaluator#checkProjectRolePermission}
      *
      * @return List of projects accessible by the current user
      */

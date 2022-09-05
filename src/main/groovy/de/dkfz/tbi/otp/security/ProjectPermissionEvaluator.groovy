@@ -36,7 +36,7 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 
 @Component
 @GrailsCompileStatic
-class OtpPermissionEvaluator implements PermissionEvaluator {
+class ProjectPermissionEvaluator implements PermissionEvaluator {
 
     private static final List PERMISSIONS = ["OTP_READ_ACCESS", "MANAGE_USERS", "DELEGATE_USER_MANAGEMENT", "ADD_USER", "IS_USER",
                                              "PROJECT_REQUEST_NEEDED_PIS", "PROJECT_REQUEST_CURRENT_OWNER", "PROJECT_REQUEST_PI"]

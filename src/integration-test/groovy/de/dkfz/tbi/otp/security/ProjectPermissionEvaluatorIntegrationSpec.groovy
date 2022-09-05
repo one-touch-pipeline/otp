@@ -38,9 +38,9 @@ import de.dkfz.tbi.otp.utils.Principal
 
 @Rollback
 @Integration
-class OtpPermissionEvaluatorIntegrationSpec extends Specification implements UserAndRoles, UserDomainFactory {
+class ProjectPermissionEvaluatorIntegrationSpec extends Specification implements UserAndRoles, UserDomainFactory {
 
-    OtpPermissionEvaluator permissionEvaluator
+    ProjectPermissionEvaluator permissionEvaluator
     Authentication authentication
     User user
     Project project

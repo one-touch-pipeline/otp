@@ -53,7 +53,7 @@ beans = {
         task.'annotation-driven'(executor: "taskExecutor", scheduler: "taskScheduler")
     }
 
-    permissionEvaluator(OtpPermissionEvaluator)
+    permissionEvaluator(ProjectPermissionEvaluator)
 
     // overwrite default 'authenticationEntryPoint'
     authenticationEntryPoint(TargetUrlEntryPoint, securityConfig.auth.loginFormUrl) {
