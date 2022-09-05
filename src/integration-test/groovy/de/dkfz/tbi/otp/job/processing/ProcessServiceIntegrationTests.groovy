@@ -22,7 +22,6 @@
 package de.dkfz.tbi.otp.job.processing
 
 import grails.gorm.transactions.Rollback
-import grails.plugin.springsecurity.acl.AclUtilService
 import grails.testing.mixin.integration.Integration
 import grails.web.mapping.LinkGenerator
 import org.apache.commons.io.FileUtils
@@ -43,7 +42,6 @@ import static org.junit.Assert.*
 @Integration
 class ProcessServiceIntegrationTests implements UserAndRoles {
 
-    AclUtilService aclUtilService
     ErrorLogService errorLogService
 
     @Autowired

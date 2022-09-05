@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.plugin.springsecurity.acl.AclSid
 import grails.testing.gorm.DataTest
 import grails.testing.web.controllers.ControllerUnitTest
 import spock.lang.Specification
@@ -35,7 +34,6 @@ class RunControllerSpec extends Specification implements ControllerUnitTest<RunC
     @Override
     Class[] getDomainClassesToMock() {
         return [
-                AclSid,
                 SeqPlatformGroup,
                 Role,
                 User,

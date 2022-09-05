@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.plugin.springsecurity.acl.AclSid
 import grails.testing.gorm.DataTest
 import grails.testing.web.controllers.ControllerUnitTest
 import org.grails.web.servlet.mvc.SynchronizerTokensHolder
@@ -39,7 +38,6 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
     @Override
     Class[] getDomainClassesToMock() {
         [
-                AclSid,
                 AntibodyTarget,
                 LibraryPreparationKit,
                 Project,

@@ -23,14 +23,12 @@ package de.dkfz.tbi.otp.security
 
 import grails.compiler.GrailsCompileStatic
 import groovy.transform.CompileDynamic
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.PermissionEvaluator
-import org.springframework.security.acls.AclPermissionEvaluator
 import org.springframework.security.core.Authentication
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.ngsdata.UserProjectRole
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectRequest
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.project.projectRequest.ProjectRequestPersistentStateService
@@ -39,9 +37,6 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 @Component
 @GrailsCompileStatic
 class OtpPermissionEvaluator implements PermissionEvaluator {
-
-    @Autowired
-    AclPermissionEvaluator aclPermissionEvaluator
 
     private static final List PERMISSIONS = ["OTP_READ_ACCESS", "MANAGE_USERS", "DELEGATE_USER_MANAGEMENT", "ADD_USER", "IS_USER",
                                              "PROJECT_REQUEST_NEEDED_PIS", "PROJECT_REQUEST_CURRENT_OWNER", "PROJECT_REQUEST_PI"]
@@ -65,7 +60,7 @@ class OtpPermissionEvaluator implements PermissionEvaluator {
                     return false
             }
         }
-        return aclPermissionEvaluator.hasPermission(auth, targetDomainObject, permission)
+        return false
     }
 
     @Override
@@ -83,7 +78,7 @@ class OtpPermissionEvaluator implements PermissionEvaluator {
                     return false
             }
         }
-        return aclPermissionEvaluator.hasPermission(auth, targetId, targetType, permission)
+        return false
     }
 
     @CompileDynamic

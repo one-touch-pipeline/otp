@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.plugin.springsecurity.acl.AclSid
 import grails.testing.gorm.DataTest
 import grails.testing.web.controllers.ControllerUnitTest
 import org.springframework.http.HttpStatus
@@ -50,7 +49,6 @@ class MetadataImportControllerSpec extends Specification implements ControllerUn
     @Override
     Class[] getDomainClassesToMock() {
         return [
-                AclSid,
                 Role,
                 User,
                 UserRole,

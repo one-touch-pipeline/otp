@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.administration
 
-import grails.plugin.springsecurity.acl.AclSid
 import grails.testing.gorm.DataTest
 import grails.testing.web.controllers.ControllerUnitTest
 import org.grails.web.servlet.mvc.SynchronizerTokensHolder
@@ -39,7 +38,6 @@ class DocumentControllerSpec extends Specification implements ControllerUnitTest
     @Override
     Class[] getDomainClassesToMock() {
         return [
-                AclSid,
                 Document,
                 DocumentType,
                 User,

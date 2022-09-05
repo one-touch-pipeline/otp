@@ -30,8 +30,6 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 
 /**
  * Service to retrieve information about Runs.
- * This service provides ACL protected access to Runs and the information connected with a given
- * Run. It's main usage is from a controller.
  */
 @Transactional
 class RunService {

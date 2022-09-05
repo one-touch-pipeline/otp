@@ -35,6 +35,7 @@ import org.springframework.security.web.authentication.switchuser.SwitchUserGran
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.ProjectRole
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.*
 
 import static org.junit.Assert.assertNotNull

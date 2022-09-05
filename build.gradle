@@ -270,7 +270,6 @@ dependencies {
 
     implementation 'org.grails.plugins:spring-security-core:5.1.0'
     implementation "org.grails.plugins:spring-security-ldap:4.0.0.M1"
-    implementation "org.grails.plugins:spring-security-acl:4.0.0.M2"
     implementation 'org.grails.plugins:spring-security-oauth2-provider:4.0.0-RC1'
 
     swaggerCodegen 'io.swagger:swagger-codegen-cli:2.4.27'

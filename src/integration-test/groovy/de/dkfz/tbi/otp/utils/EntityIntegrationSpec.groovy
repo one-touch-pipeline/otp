@@ -22,7 +22,6 @@
 package de.dkfz.tbi.otp.utils
 
 import grails.core.GrailsApplication
-import grails.plugin.springsecurity.acl.*
 import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
 import spock.lang.Specification
@@ -179,7 +178,7 @@ class EntityIntegrationSpec extends Specification {
     void "test that all domain classes implement Entity"() {
         setup:
         List<Class> dbViews = [AggregateSequences, Sequence]
-        List<Class> nonOtpDomains = [AclClass, AclEntry, AclObjectIdentity, AclSid]
+        List<Class> nonOtpDomains = []
 
         when:
         List<String> domainsWithoutEntity = grailsApplication.domainClasses.findAll {

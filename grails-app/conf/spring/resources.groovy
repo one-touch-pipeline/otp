@@ -19,10 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 import grails.util.Environment
-import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler
-import org.springframework.security.acls.AclPermissionEvaluator
 import org.springframework.web.servlet.i18n.FixedLocaleResolver
 
 import de.dkfz.tbi.otp.ProjectLinkGenerator
@@ -56,13 +53,7 @@ beans = {
         task.'annotation-driven'(executor: "taskExecutor", scheduler: "taskScheduler")
     }
 
-    permissionEvaluator(OtpPermissionEvaluator) {}
-    aclPermissionEvaluator(AclPermissionEvaluator, ref('aclService')) {
-        objectIdentityRetrievalStrategy = ref('objectIdentityRetrievalStrategy')
-        objectIdentityGenerator = ref('objectIdentityRetrievalStrategy')
-        sidRetrievalStrategy = ref('sidRetrievalStrategy')
-        permissionFactory = ref('aclPermissionFactory')
-    }
+    permissionEvaluator(OtpPermissionEvaluator)
 
     // overwrite default 'authenticationEntryPoint'
     authenticationEntryPoint(TargetUrlEntryPoint, securityConfig.auth.loginFormUrl) {
@@ -72,15 +63,6 @@ beans = {
         portMapper = ref('portMapper')
         portResolver = ref('portResolver')
         redirectStrategy = ref('redirectStrategy')
-    }
-
-    // workaround for @PreFilter annotation
-    // https://jira.grails.org/browse/GPSPRINGSECURITYACL-37
-    expressionHandler(DefaultMethodSecurityExpressionHandler) {
-        parameterNameDiscoverer = ref('parameterNameDiscoverer')
-        permissionEvaluator = ref('permissionEvaluator')
-        roleHierarchy = ref('roleHierarchy')
-        permissionCacheOptimizer = null
     }
 
     requestDataValueProcessor(CustomRequestDataValueProcessor)

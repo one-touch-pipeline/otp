@@ -21,8 +21,6 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.plugin.springsecurity.acl.*
-
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.Comment
 import de.dkfz.tbi.otp.InformationReliability
@@ -2428,15 +2426,6 @@ class DomainFactory {
     "germlineSmallVarsInBothRare":23,
 }
 """
-    }
-
-    static void createAclObjects(Object domainObject, Map properties = [:]) {
-        AclObjectIdentity aclObjectIdentity = createDomainObject(AclObjectIdentity, [objectId: domainObject.id, aclClass: {
-            createDomainObject(AclClass, [className: domainObject.class.name], [:])
-        }], [:])
-        createDomainObject(AclEntry, [aclObjectIdentity: aclObjectIdentity, sid: {
-            createDomainObject(AclSid, [sid: Role.ROLE_ADMIN], properties)
-        }], [:])
     }
 
     @Deprecated

@@ -53,16 +53,14 @@ class IndividualService {
     }
 
     /**
-     * Retrieves list of Individual in ACL aware manner.
-     * For an admin user all Individuals are returned, for a non-admin user the ACL on Project is
-     * used to determine the list of Individuals to return.
+     * Retrieves list of individuals in permission aware manner.
      * The result set can be sorted and filtered. The filter (search) is only applied if the filter String has a length of at least three character.
      * by default it is sorted by the pid
      * @param sortOrder true for ascending, false for descending sorting
      * @param column The column to perform the sorting on
      * @param filtering Filtering restrictions
      * @param filter Filter restrictions
-     * @return List of Individuals matching the criterias and ACL restricted
+     * @return List of Individuals matching the criteria
      * */
     List<Individual> listIndividuals(boolean sortOrder, IndividualColumn column, IndividualFiltering filtering, String filterString) {
         List projects = projectService.allProjects

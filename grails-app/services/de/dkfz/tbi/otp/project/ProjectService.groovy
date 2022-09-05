@@ -149,7 +149,7 @@ class ProjectService {
     }
 
     /**
-     * Returns the Project in an acl aware manner
+     * Returns the Project in an permission aware manner
      * @param id The Id of the Project
      * @return The Project
      */

@@ -31,7 +31,7 @@ import de.dkfz.tbi.otp.utils.StringUtils
 class MetaDataService {
 
     /**
-     * Retries a MetaDataEntry in an ACL aware manner.
+     * Retries a MetaDataEntry in permission aware manner.
      * @param id The id of the MetaDataEntry to retrieve
      * @return The MetaDataEntry if present, otherwise null
      */
@@ -41,7 +41,7 @@ class MetaDataService {
     }
 
     /**
-     * Retrieves the DataFile identified by the given ID in an ACL aware manner.
+     * Retrieves the DataFile identified by the given ID in permission aware manner.
      * @param id The Id of the DataFile.
      * @return DataFile if it exists, otherwise null
      */

@@ -22,7 +22,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.gorm.transactions.Rollback
-import grails.plugin.springsecurity.acl.AclUtilService
 import grails.testing.mixin.integration.Integration
 import org.junit.*
 import org.junit.rules.TemporaryFolder
@@ -39,7 +38,6 @@ import static org.junit.Assert.*
 @Integration
 class MetaDataServiceTests implements UserAndRoles {
     MetaDataService metaDataService
-    AclUtilService aclUtilService
 
     @SuppressWarnings("PublicInstanceField") // must be public in JUnit tests
     @Rule
@@ -58,10 +56,6 @@ class MetaDataServiceTests implements UserAndRoles {
         assertTrue(baseDir.deleteDir())
     }
 
-    /**
-     * Tests that an anonymous user does not have access to the MetaDataEntry
-     * if no project is defined which could have an ACL on it.
-     */
     @Test
     void testGetMetaDataEntryByIdNoProjectAnonymous() {
         setupData()
@@ -78,10 +72,6 @@ class MetaDataServiceTests implements UserAndRoles {
         }
     }
 
-    /**
-     * Tests that a User does not have access to the MetaDataEntry
-     * if there is no project which could have an ACL on it.
-     */
     @Test
     void testGetMetaDataEntryByIdNoProjectUser() {
         setupData()
@@ -96,10 +86,6 @@ class MetaDataServiceTests implements UserAndRoles {
         }
     }
 
-    /**
-     * Tests that an operator user does have access to the MetaDataEntry
-     * if no Project is defined for the MetaDataEntry.
-     */
     @Test
     void testGetMetaDataEntryByIdNoProjectOperator() {
         setupData()
@@ -112,10 +98,6 @@ class MetaDataServiceTests implements UserAndRoles {
         }
     }
 
-    /**
-     * Tests that an admin user does have access to the MetaDataEntry
-     * if no Project is defined for the MetaDataEntry.
-     */
     @Test
     void testGetMetaDataEntryByIdNoProjectAdmin() {
         setupData()
@@ -128,10 +110,6 @@ class MetaDataServiceTests implements UserAndRoles {
         }
     }
 
-    /**
-     * Tests that an anonymous user does not have access to a MetaDataEntry
-     * if a project is defined for it, but no ACL.
-     */
     @Test
     void testGetMetaDataEntryByIdWithProjectNoAclAsAnonymous() {
         setupData()
@@ -149,10 +127,6 @@ class MetaDataServiceTests implements UserAndRoles {
         }
     }
 
-    /**
-     * Tests that a User does not have access to the MetaDataEntry
-     * if there is a project defined for it
-     */
     @Test
     void testGetMetaDataEntryByIdWithProjectAsUser() {
         setupData()
@@ -184,10 +158,6 @@ class MetaDataServiceTests implements UserAndRoles {
         }
     }
 
-    /**
-     * Tests that an operator user does have access to the MetaDataEntry
-     * if there is a project defined for it, but no ACL
-     */
     @Test
     void testGetMetaDataEntryByIdWithProjectAsOperator() {
         setupData()
@@ -200,10 +170,6 @@ class MetaDataServiceTests implements UserAndRoles {
         }
     }
 
-    /**
-     * Tests that an admin user does have access to the MetaDataEntry
-     * if there is a project defined for it, but no ACL
-     */
     @Test
     void testGetMetaDataEntryByIdWithProjectAsAdmin() {
         setupData()

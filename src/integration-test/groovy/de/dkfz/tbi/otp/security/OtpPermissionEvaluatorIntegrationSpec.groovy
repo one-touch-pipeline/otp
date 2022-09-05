@@ -101,15 +101,15 @@ class OtpPermissionEvaluatorIntegrationSpec extends Specification implements Use
         }
     }
 
-    void "hasPermission, aclPermissionEvaluator throws exceptions on unsupported permissions"() {
+    void "hasPermission, unsupported permissions return false"() {
         given:
         setupData()
 
         when:
-        permissionEvaluator.hasPermission(authentication, project, permission)
+        boolean result = permissionEvaluator.hasPermission(authentication, project, permission)
 
         then:
-        thrown(IllegalArgumentException)
+        !result
 
         where:
         permission          | _
@@ -126,7 +126,6 @@ class OtpPermissionEvaluatorIntegrationSpec extends Specification implements Use
 
         then:
         !access
-        0 * permissionEvaluator.aclPermissionEvaluator.hasPermission(_, _, _)
     }
 
     void "hasPermission, missing user for project role permissions returns false"() {
@@ -140,7 +139,6 @@ class OtpPermissionEvaluatorIntegrationSpec extends Specification implements Use
 
         then:
         !checkResult
-        0 * permissionEvaluator.aclPermissionEvaluator.hasPermission(_, _, _)
     }
 
     void "hasPermission, missing userProjectRole for project role permissions returns false"() {

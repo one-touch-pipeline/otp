@@ -22,7 +22,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.gorm.transactions.Rollback
-import grails.plugin.springsecurity.acl.AclUtilService
 import grails.testing.mixin.integration.Integration
 import org.junit.Test
 import org.springframework.security.access.AccessDeniedException
@@ -37,8 +36,6 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 class SeqTypeServiceTest implements UserAndRoles {
 
     SeqTypeService seqTypeService
-
-    AclUtilService aclUtilService
 
     void setupData() {
         createUserAndRoles()
