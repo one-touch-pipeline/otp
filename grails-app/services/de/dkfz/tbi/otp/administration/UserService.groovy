@@ -167,10 +167,6 @@ class UserService {
         if (SpringSecurityUtils.switched) {
             return true
         }
-        // privacy policy does not need to be accepted when OTP is executed with a backdoor user
-        if (configService.useBackdoor()) {
-            return true
-        }
 
         User user = springSecurityService.currentUser as User
         return user.acceptedPrivacyPolicy

@@ -159,20 +159,6 @@ class ConfigService implements ApplicationContextAware {
         return Date.from(Instant.from(zonedDateTime))
     }
 
-    boolean useBackdoor() {
-        if (Environment.isDevelopmentMode()) {
-            return getBooleanValue(OtpProperty.DEVEL_USE_BACKDOOR, false)
-        }
-        return Environment.current == Environment.TEST
-    }
-
-    String getBackdoorUser() {
-        if (Environment.isDevelopmentMode()) {
-            return otpProperties.get(OtpProperty.DEVEL_BACKDOOR_USER)
-        }
-        return Environment.current == Environment.TEST ? 'otp' : null
-    }
-
     boolean getLdapEnabled() {
         return getBooleanValue(OtpProperty.LDAP_ENABLED)
     }

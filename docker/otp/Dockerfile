@@ -19,7 +19,6 @@
 # SOFTWARE.
 
 # This Docker image is for the default development case.
-# It provides the possibility for hot reloading and the backdoor user.
 
 FROM registry.gitlab.com/one-touch-pipeline/otp/otp-gitlab-ci:latest
 

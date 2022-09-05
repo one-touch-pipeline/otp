@@ -19,7 +19,7 @@
 # SOFTWARE.
 
 # This Docker image takes a prebuilt war file and deploys it on a production like tomcat server.
-# It is helpful to test scenarios in a prod-like way. Hot reloading and backdoor user is not available.
+# It is helpful to test scenarios in a prod-like way. Hot reloading is not available.
 
 FROM tomcat:8.5.34-jre8
 

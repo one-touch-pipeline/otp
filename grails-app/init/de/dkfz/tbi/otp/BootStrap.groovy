@@ -23,8 +23,6 @@ package de.dkfz.tbi.otp
 
 import grails.converters.JSON
 import grails.core.GrailsApplication
-import grails.plugin.springsecurity.SecurityFilterPosition
-import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.util.Environment
 import groovy.transform.CompileStatic
 
@@ -69,11 +67,6 @@ class BootStrap {
             }
         } else {
             log.info("JobSystem is disabled")
-        }
-
-        if (Environment.isDevelopmentMode()) {
-            // adds the backdoor filter allowing a developer to login without password only in development mode
-            SpringSecurityUtils.clientRegisterFilter('backdoorFilter', SecurityFilterPosition.SECURITY_CONTEXT_FILTER.order + 10)
         }
 
         JSON.registerObjectMarshaller(Enum, { Enum e -> e.name() })
