@@ -1,3 +1,5 @@
+import de.dkfz.tbi.otp.security.user.SwitchedUserDeniedException
+
 /*
  * Copyright 2011-2019 The OTP authors
  *
@@ -35,6 +37,6 @@ class UrlMappings {
         "405"(controller: "errors", action: "error405")
         "500"(controller: "errors", action: "error500")
         "500"(controller: "errors", action: "error403", exception: org.springframework.security.access.AccessDeniedException)
-        "500"(controller: "errors", action: "switchedUserDeniedException", exception: de.dkfz.tbi.otp.security.SwitchedUserDeniedException)
+        "500"(controller: "errors", action: "switchedUserDeniedException", exception: SwitchedUserDeniedException)
     }
 }

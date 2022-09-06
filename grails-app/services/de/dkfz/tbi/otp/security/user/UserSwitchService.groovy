@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2022 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,18 +19,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.security
+package de.dkfz.tbi.otp.security.user
 
 import grails.gorm.transactions.Transactional
 import grails.plugin.springsecurity.SpringSecurityUtils
 
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.config.PseudoEnvironment
-import de.dkfz.tbi.otp.security.user.UserService
+import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 @Transactional
-class SecurityService {
+class UserSwitchService {
 
     ConfigService configService
     UserService userService
@@ -39,7 +39,7 @@ class SecurityService {
      * Returns the true current user, so if the user is switched it returns not the switched user but
      * the user that switched to the current user.
      */
-    User getTrueCurrentUserAsUser() {
+    User getUserSwitchInitiator() {
         return isSwitched() ? CollectionUtils.exactlyOneElement(
                 User.findAllByUsername(SpringSecurityUtils.switchedUserOriginalUsername)
         ) : userService.currentUser

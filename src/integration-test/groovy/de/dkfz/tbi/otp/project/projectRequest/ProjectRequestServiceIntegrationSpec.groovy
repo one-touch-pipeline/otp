@@ -43,6 +43,7 @@ import de.dkfz.tbi.otp.searchability.Keyword
 import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.security.user.RolesService
 import de.dkfz.tbi.otp.security.user.UserService
+import de.dkfz.tbi.otp.security.user.UserSwitchService
 import de.dkfz.tbi.otp.utils.MailHelperService
 import de.dkfz.tbi.otp.utils.MessageSourceService
 
@@ -67,7 +68,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
                 messageSourceService                : Mock(MessageSourceService),
                 mailHelperService                   : Mock(MailHelperService),
                 linkGenerator                       : Mock(LinkGenerator),
-                securityService                     : Mock(SecurityService),
+                userSwitchService                   : Mock(UserSwitchService),
                 userService                         : Mock(UserService),
                 auditLogService                     : Mock(AuditLogService),
                 projectRequestUserService           : Mock(ProjectRequestUserService),
@@ -478,7 +479,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         ProjectRequest result = projectRequestService.saveProjectRequestFromCommand(cmd)
 
         then:
-        1 * projectRequestService.securityService.ensureNotSwitchedUser()
+        1 * projectRequestService.userSwitchService.ensureNotSwitchedUser()
         1 * projectRequestService.projectRequestUserService.saveProjectRequestUsersFromCommands(_) >> users
         (projectRequestExists ? 0 : 1) * projectRequestService.userService.currentUser >> currentUser
         1 * projectRequestService.auditLogService.logAction(_, _) >> _

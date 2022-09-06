@@ -43,7 +43,7 @@ import de.dkfz.tbi.otp.project.*
 import de.dkfz.tbi.otp.project.Project.ProjectType
 import de.dkfz.tbi.otp.project.additionalField.*
 import de.dkfz.tbi.otp.searchability.Keyword
-import de.dkfz.tbi.otp.security.SwitchedUserDeniedException
+import de.dkfz.tbi.otp.security.user.SwitchedUserDeniedException
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.security.user.UserService
 import de.dkfz.tbi.otp.utils.CollectionUtils

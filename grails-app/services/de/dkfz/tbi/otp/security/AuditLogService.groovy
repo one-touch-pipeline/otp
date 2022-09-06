@@ -26,12 +26,13 @@ import grails.gorm.transactions.Transactional
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.security.AuditLog.Action
+import de.dkfz.tbi.otp.security.user.UserSwitchService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 @Transactional
 class AuditLogService {
 
-    SecurityService securityService
+    UserSwitchService userSwitchService
 
     ProcessingOptionService processingOptionService
 
@@ -46,7 +47,7 @@ class AuditLogService {
     }
 
     AuditLog logAction(Action action, String description) {
-        return createActionLog(securityService.trueCurrentUserAsUser, action, description)
+        return createActionLog(userSwitchService.userSwitchInitiator, action, description)
     }
 
     AuditLog logActionWithSystemUser(Action action, String description) {

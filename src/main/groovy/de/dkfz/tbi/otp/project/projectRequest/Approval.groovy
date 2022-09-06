@@ -29,6 +29,7 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.project.ProjectRequest
 import de.dkfz.tbi.otp.security.*
+import de.dkfz.tbi.otp.security.user.SwitchedUserDeniedException
 
 import javax.naming.OperationNotSupportedException
 

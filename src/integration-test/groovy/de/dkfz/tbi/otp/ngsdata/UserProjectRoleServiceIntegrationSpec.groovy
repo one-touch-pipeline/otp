@@ -44,10 +44,10 @@ import de.dkfz.tbi.otp.domainFactory.UserDomainFactory
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.AuditLogService
 import de.dkfz.tbi.otp.security.AuditLog
-import de.dkfz.tbi.otp.security.SecurityService
 import de.dkfz.tbi.otp.security.InsufficientRightsException
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.security.UserAndRoles
+import de.dkfz.tbi.otp.security.user.UserSwitchService
 import de.dkfz.tbi.otp.security.user.UserService
 import de.dkfz.tbi.otp.security.user.identityProvider.LdapService
 import de.dkfz.tbi.otp.security.user.identityProvider.LdapUserDetails
@@ -108,8 +108,8 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         userProjectRoleService.messageSourceService = messageSourceServiceWithMockedMessageSource
         userProjectRoleService.springSecurityService = springSecurityService
         userProjectRoleService.auditLogService = new AuditLogService()
-        userProjectRoleService.auditLogService.securityService = new SecurityService()
-        userProjectRoleService.auditLogService.securityService.userService = userService
+        userProjectRoleService.auditLogService.userSwitchService = new UserSwitchService()
+        userProjectRoleService.auditLogService.userSwitchService.userService = userService
         userProjectRoleService.auditLogService.processingOptionService = new ProcessingOptionService()
         userProjectRoleService.processingOptionService = new ProcessingOptionService()
         userProjectRoleService.configService = configService

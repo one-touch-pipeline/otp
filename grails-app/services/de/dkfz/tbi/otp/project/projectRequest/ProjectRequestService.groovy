@@ -37,7 +37,9 @@ import de.dkfz.tbi.otp.project.*
 import de.dkfz.tbi.otp.project.additionalField.*
 import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.security.user.RolesService
+import de.dkfz.tbi.otp.security.user.SwitchedUserDeniedException
 import de.dkfz.tbi.otp.security.user.UserService
+import de.dkfz.tbi.otp.security.user.UserSwitchService
 import de.dkfz.tbi.otp.utils.*
 
 import java.time.LocalDate
@@ -49,7 +51,7 @@ class ProjectRequestService {
     LinkGenerator linkGenerator
 
     AuditLogService auditLogService
-    SecurityService securityService
+    UserSwitchService userSwitchService
     UserService userService
     MessageSourceService messageSourceService
     MailHelperService mailHelperService
@@ -61,7 +63,7 @@ class ProjectRequestService {
     UserProjectRoleService userProjectRoleService
 
     ProjectRequest saveProjectRequestFromCommand(ProjectRequestCreationCommand cmd) throws SwitchedUserDeniedException {
-        securityService.ensureNotSwitchedUser()
+        userSwitchService.ensureNotSwitchedUser()
         ProjectRequest projectRequest
         Set<ProjectRequestUser> users = projectRequestUserService.saveProjectRequestUsersFromCommands(cmd.users)
         ProjectRequestPersistentState state = projectRequestPersistentStateService
@@ -172,7 +174,7 @@ class ProjectRequestService {
     }
 
     void approveProjectRequest(ProjectRequest projectRequest, User user) throws SwitchedUserDeniedException {
-        securityService.ensureNotSwitchedUser()
+        userSwitchService.ensureNotSwitchedUser()
         projectRequestPersistentStateService.approveUser(projectRequest.state, user)
     }
 

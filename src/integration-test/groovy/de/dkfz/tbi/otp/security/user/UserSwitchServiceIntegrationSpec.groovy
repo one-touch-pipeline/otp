@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2022 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.security
+package de.dkfz.tbi.otp.security.user
 
 import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
@@ -30,16 +30,19 @@ import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.config.PseudoEnvironment
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+import de.dkfz.tbi.otp.security.UserAndRoles
+import de.dkfz.tbi.otp.security.user.SwitchedUserDeniedException
+import de.dkfz.tbi.otp.security.user.UserSwitchService
 
 @Rollback
 @Integration
-class SecurityServiceIntegrationSpec extends Specification implements UserAndRoles, DomainFactoryCore {
+class UserSwitchServiceIntegrationSpec extends Specification implements UserAndRoles, DomainFactoryCore {
 
-    SecurityService securityService
+    UserSwitchService securityService
 
     void "getWhitelistedEnvironments, returns all Environments but PRODUCTION"() {
         given:
-        securityService = new SecurityService()
+        securityService = new UserSwitchService()
 
         expect:
         TestCase.assertContainSame(securityService.whitelistedEnvironments, [
@@ -53,7 +56,7 @@ class SecurityServiceIntegrationSpec extends Specification implements UserAndRol
     @Unroll
     void "isToBeBlockedBecauseOfSwitchedUser, all test cases, #environment, #expectedNormal, #expectedSwitched"() {
         given:
-        securityService = new SecurityService(
+        securityService = new UserSwitchService(
                 configService: Mock(TestConfigService) {
                     1 * getPseudoEnvironment() >> environment
                 }
@@ -83,7 +86,7 @@ class SecurityServiceIntegrationSpec extends Specification implements UserAndRol
 
     void "assertNotSwitchedUser, throws Exception when action is blocked for switched users"() {
         given:
-        securityService = new SecurityService(
+        securityService = new UserSwitchService(
                 configService: Mock(TestConfigService) {
                     1 * getPseudoEnvironment() >> PseudoEnvironment.PRODUCTION
                 }
