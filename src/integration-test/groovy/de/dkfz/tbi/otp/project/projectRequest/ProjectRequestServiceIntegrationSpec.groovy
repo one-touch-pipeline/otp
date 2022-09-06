@@ -42,6 +42,7 @@ import de.dkfz.tbi.otp.project.additionalField.*
 import de.dkfz.tbi.otp.searchability.Keyword
 import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.security.user.RolesService
+import de.dkfz.tbi.otp.security.user.UserService
 import de.dkfz.tbi.otp.utils.MailHelperService
 import de.dkfz.tbi.otp.utils.MessageSourceService
 
@@ -67,6 +68,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
                 mailHelperService                   : Mock(MailHelperService),
                 linkGenerator                       : Mock(LinkGenerator),
                 securityService                     : Mock(SecurityService),
+                userService                         : Mock(UserService),
                 auditLogService                     : Mock(AuditLogService),
                 projectRequestUserService           : Mock(ProjectRequestUserService),
                 processingOptionService             : Mock(ProcessingOptionService),
@@ -169,7 +171,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         then:
         1 * projectRequestService.messageSourceService.createMessage(_) >> subject
         1 * projectRequestService.linkGenerator.link(_) >> link
-        1 * projectRequestService.securityService.currentUserAsUser >> pi1
+        1 * projectRequestService.userService.currentUser >> pi1
         1 * projectRequestService.messageSourceService.createMessage(_, [
                 requester       : "${requester.username} (${requester.realName})",
                 projectName     : request.name,
@@ -226,7 +228,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
 
         then:
         1 * projectRequestService.messageSourceService.createMessage(_) >> subject
-        1 * projectRequestService.securityService.currentUserAsUser >> pi1
+        1 * projectRequestService.userService.currentUser >> pi1
         1 * projectRequestService.messageSourceService.createMessage(_, [
                 requester       : "${requester.username} (${requester.realName})",
                 projectName     : request.name,
@@ -252,7 +254,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
 
         then:
         1 * projectRequestService.messageSourceService.createMessage(_) >> subject
-        1 * projectRequestService.securityService.currentUserAsUser >> pi1
+        1 * projectRequestService.userService.currentUser >> pi1
         1 * projectRequestService.messageSourceService.createMessage(_, [
                 recipients   : expectedRecipients*.username.join(", "),
                 projectName  : request.name,
@@ -330,7 +332,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
 
         then:
         1 * projectRequestService.messageSourceService.createMessage(_) >> subject
-        1 * projectRequestService.securityService.currentUserAsUser >> pi1
+        1 * projectRequestService.userService.currentUser >> pi1
         1 * projectRequestService.linkGenerator.link(_) >> link
         1 * projectRequestService.messageSourceService.createMessage(_, [
                 projectAuthorities: (usersThatNeedToApprove + usersThatAlreadyApproved)*.username.join(", "),
@@ -478,7 +480,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         then:
         1 * projectRequestService.securityService.ensureNotSwitchedUser()
         1 * projectRequestService.projectRequestUserService.saveProjectRequestUsersFromCommands(_) >> users
-        (projectRequestExists ? 0 : 1) * projectRequestService.securityService.currentUserAsUser >> currentUser
+        (projectRequestExists ? 0 : 1) * projectRequestService.userService.currentUser >> currentUser
         1 * projectRequestService.auditLogService.logAction(_, _) >> _
         0 * _
 
@@ -525,7 +527,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         }
 
         then:
-        1 * projectRequestService.securityService.currentUserAsUser >> currentUser
+        1 * projectRequestService.userService.currentUser >> currentUser
         0 * _
 
         then:
@@ -849,7 +851,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
 
         then:
         1 * projectRequestService.rolesService.isAdministrativeUser(_) >> false
-        1 * projectRequestService.securityService.currentUserAsUser >> currentUser
+        1 * projectRequestService.userService.currentUser >> currentUser
         0 * _
 
         then:
@@ -869,7 +871,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
 
         then:
         1 * projectRequestService.rolesService.isAdministrativeUser(_) >> false
-        1 * projectRequestService.securityService.currentUserAsUser >> currentUser
+        1 * projectRequestService.userService.currentUser >> currentUser
         1 * projectRequestService.processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME) >> emailSenderSalutation
         0 * _
 
@@ -890,7 +892,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
 
         then:
         1 * projectRequestService.rolesService.isAdministrativeUser(_) >> true
-        1 * projectRequestService.securityService.currentUserAsUser >> currentUser
+        1 * projectRequestService.userService.currentUser >> currentUser
         0 * _
 
         then:

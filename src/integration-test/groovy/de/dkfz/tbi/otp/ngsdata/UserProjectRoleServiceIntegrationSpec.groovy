@@ -42,7 +42,12 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.UserDomainFactory
 import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.otp.security.*
+import de.dkfz.tbi.otp.security.AuditLogService
+import de.dkfz.tbi.otp.security.AuditLog
+import de.dkfz.tbi.otp.security.SecurityService
+import de.dkfz.tbi.otp.security.InsufficientRightsException
+import de.dkfz.tbi.otp.security.User
+import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.security.user.UserService
 import de.dkfz.tbi.otp.security.user.identityProvider.LdapService
 import de.dkfz.tbi.otp.security.user.identityProvider.LdapUserDetails
@@ -93,6 +98,10 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
                 }
         )
 
+        UserService userService = new UserService(
+                springSecurityService: springSecurityService
+        )
+
         configService.addOtpProperties(temporaryFolder.newFolder().toPath())
 
         userProjectRoleService = new UserProjectRoleService()
@@ -100,11 +109,11 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         userProjectRoleService.springSecurityService = springSecurityService
         userProjectRoleService.auditLogService = new AuditLogService()
         userProjectRoleService.auditLogService.securityService = new SecurityService()
-        userProjectRoleService.auditLogService.securityService.springSecurityService = springSecurityService
+        userProjectRoleService.auditLogService.securityService.userService = userService
         userProjectRoleService.auditLogService.processingOptionService = new ProcessingOptionService()
         userProjectRoleService.processingOptionService = new ProcessingOptionService()
         userProjectRoleService.configService = configService
-        userProjectRoleService.userService = new UserService()
+        userProjectRoleService.userService = userService
         userProjectRoleService.userProjectRoleService = userProjectRoleService
 
         userProjectRoleService.mailHelperService = Mock(MailHelperService) {

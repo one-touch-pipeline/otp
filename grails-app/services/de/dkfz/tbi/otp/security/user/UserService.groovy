@@ -46,6 +46,10 @@ class UserService {
     ConfigService configService
     LdapService ldapService
 
+    User getCurrentUser() {
+        return springSecurityService.currentUser as User
+    }
+
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void editUser(User user, String email, String realName) {
         updateEmail(user, email)

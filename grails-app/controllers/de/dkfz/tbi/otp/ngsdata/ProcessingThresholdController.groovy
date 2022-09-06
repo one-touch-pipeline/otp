@@ -31,7 +31,6 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingThresholdsService
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePairDeciderService
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.user.RolesService
-import de.dkfz.tbi.otp.security.SecurityService
 
 @Secured('isFullyAuthenticated()')
 class ProcessingThresholdController {
@@ -47,13 +46,12 @@ class ProcessingThresholdController {
     SampleTypePerProjectService sampleTypePerProjectService
     SampleTypeService sampleTypeService
     UserService userService
-    SecurityService securityService
     RolesService rolesService
 
     Map index(ProcThresholdsEditCommand cmd) {
         Project project = projectSelectionService.selectedProject
 
-        boolean isAdmin = rolesService.isAdministrativeUser(securityService.currentUserAsUser)
+        boolean isAdmin = rolesService.isAdministrativeUser(userService.currentUser)
         boolean edit = isAdmin ? cmd.edit : false
 
         List<SampleTypePerProject> sampleTypePerProjects = sampleTypePerProjectService.findByProject(project)

@@ -25,7 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.project.ProjectRequest
-import de.dkfz.tbi.otp.security.SecurityService
+import de.dkfz.tbi.otp.security.user.UserService
 import de.dkfz.tbi.otp.utils.MessageSourceService
 
 trait ProjectRequestState {
@@ -37,7 +37,7 @@ trait ProjectRequestState {
     ProjectRequestStateProvider projectRequestStateProvider
 
     @Autowired
-    SecurityService securityService
+    UserService userService
 
     @Autowired
     MessageSourceService messageSourceService

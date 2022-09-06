@@ -34,6 +34,7 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.UserDomainFactory
+import de.dkfz.tbi.otp.security.user.UserService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 import java.time.*
@@ -53,9 +54,10 @@ class AuditLogServiceIntegrationSpec extends Specification implements UserAndRol
                 processingOptionService: new ProcessingOptionService()
         ])
         auditLogService.securityService = new SecurityService()
-        auditLogService.securityService.springSecurityService = new SpringSecurityService()
-        auditLogService.securityService.springSecurityService.grailsApplication = grailsApplication
-        auditLogService.securityService.springSecurityService.authenticationTrustResolver = Mock(AuthenticationTrustResolver) {
+        auditLogService.securityService.userService = new UserService()
+        auditLogService.securityService.userService.springSecurityService = new SpringSecurityService()
+        auditLogService.securityService.userService.springSecurityService.grailsApplication = grailsApplication
+        auditLogService.securityService.userService.springSecurityService.authenticationTrustResolver = Mock(AuthenticationTrustResolver) {
             isAnonymous(_) >> false
         }
     }

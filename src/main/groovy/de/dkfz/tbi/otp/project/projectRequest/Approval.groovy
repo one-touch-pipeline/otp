@@ -39,9 +39,6 @@ class Approval implements ProjectRequestState {
     ProjectRequestUserService projectRequestUserService
 
     @Autowired
-    SecurityService securityService
-
-    @Autowired
     ProjectRequestPersistentStateService projectRequestPersistentStateService
 
     String displayName = "projectRequestState.displayName.approval"
@@ -53,7 +50,7 @@ class Approval implements ProjectRequestState {
 
     @Override
     List<ProjectRequestAction> getViewActions(ProjectRequest projectRequest) {
-        User currentUser = securityService.currentUserAsUser
+        User currentUser = userService.currentUser
         boolean currentUserIsOperator = SpringSecurityUtils.ifAllGranted(Role.ROLE_OPERATOR)
         List<ProjectRequestAction> actions = []
         if (projectRequest.state.usersThatNeedToApprove.contains(currentUser)) {
@@ -81,7 +78,7 @@ class Approval implements ProjectRequestState {
     @Override
     @PreAuthorize("hasPermission(#projectRequest, 'PROJECT_REQUEST_NEEDED_PIS')")
     void reject(ProjectRequest projectRequest, String rejectComment) {
-        User currentUser = securityService.currentUserAsUser
+        User currentUser = userService.currentUser
         projectRequestStateProvider.setState(projectRequest, RequesterEdit)
         projectRequestPersistentStateService.setCurrentOwner(projectRequest.state, projectRequest.requester)
         commentService.addCommentToList(projectRequest, rejectComment, currentUser.username)
@@ -95,7 +92,7 @@ class Approval implements ProjectRequestState {
     @Override
     @PreAuthorize("hasPermission(#projectRequest, 'PROJECT_REQUEST_PI')")
     ProjectRequestCreationCommand edit(ProjectRequest projectRequest) {
-        User currentUser = securityService.currentUserAsUser
+        User currentUser = userService.currentUser
         projectRequestPersistentStateService.setCurrentOwner(projectRequest.state, currentUser)
         projectRequestStateProvider.setState(projectRequest, PiEdit)
         return ProjectRequestCreationCommand.fromProjectRequest(projectRequest)
@@ -105,7 +102,7 @@ class Approval implements ProjectRequestState {
     @PreAuthorize("hasPermission(#cmd.projectRequest, 'PROJECT_REQUEST_NEEDED_PIS')")
     void approve(ApprovalCommand cmd) throws SwitchedUserDeniedException {
         ProjectRequest projectRequest = cmd?.projectRequest
-        projectRequestService.approveProjectRequest(projectRequest, securityService.currentUserAsUser)
+        projectRequestService.approveProjectRequest(projectRequest, userService.currentUser)
         if (projectRequestPersistentStateService.allProjectRequestUsersApproved(projectRequest.state)) {
             projectRequestStateProvider.setState(projectRequest, Approved)
             projectRequestService.sendApprovedEmail(projectRequest)

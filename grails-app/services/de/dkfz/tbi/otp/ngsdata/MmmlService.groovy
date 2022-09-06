@@ -26,13 +26,13 @@ import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.user.RolesService
-import de.dkfz.tbi.otp.security.SecurityService
+import de.dkfz.tbi.otp.security.user.UserService
 
 @Transactional
 class MmmlService {
 
     RolesService rolesService
-    SecurityService securityService
+    UserService userService
 
     static final Collection PROJECT_TO_HIDE_SAMPLE_IDENTIFIER = [
             "ICGC_MMML",
@@ -49,7 +49,7 @@ class MmmlService {
     }
 
     boolean hideSampleIdentifiersForCurrentUser(Project project) {
-        if (rolesService.isAdministrativeUser(securityService.currentUserAsUser)) {
+        if (rolesService.isAdministrativeUser(userService.currentUser)) {
             return false
         }
         return hideSampleIdentifier(project)

@@ -21,11 +21,13 @@
  */
 package de.dkfz.tbi.otp.security.user
 
+import grails.plugin.springsecurity.SpringSecurityService
 import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
 import spock.lang.Specification
 
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.security.user.UserService
 import de.dkfz.tbi.otp.utils.CollectionUtils
@@ -37,6 +39,19 @@ class UserServiceIntegrationSpec extends Specification implements UserAndRoles {
 
     void setupData() {
         createUserAndRoles()
+    }
+
+    void "getCurrentUserAsUser, simply returns the current user of spring security as a User object"() {
+        given:
+        User currentUser = DomainFactory.createUser()
+        userService = new UserService(
+                springSecurityService: Mock(SpringSecurityService) {
+                    getCurrentUser() >> currentUser
+                }
+        )
+
+        expect:
+        userService.currentUser == currentUser
     }
 
     void "test updateEmail valid input"() {

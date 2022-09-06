@@ -27,8 +27,8 @@ import spock.lang.Specification
 import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.domainFactory.UserDomainFactory
 import de.dkfz.tbi.otp.project.*
-import de.dkfz.tbi.otp.security.SecurityService
 import de.dkfz.tbi.otp.security.User
+import de.dkfz.tbi.otp.security.user.UserService
 
 import javax.naming.OperationNotSupportedException
 
@@ -45,7 +45,7 @@ class ApprovalSpec extends Specification implements UserDomainFactory, DataTest 
         ]
     }
 
-    SecurityService securityService
+    UserService userService
     ProjectRequestService projectRequestService
     ProjectRequestStateProvider projectRequestStateProvider
     ProjectRequestState state
@@ -53,13 +53,13 @@ class ApprovalSpec extends Specification implements UserDomainFactory, DataTest 
     CommentService commentService
 
     void setup() {
-        securityService = Mock(SecurityService)
+        userService = Mock(UserService)
         projectRequestService = Mock(ProjectRequestService)
         projectRequestStateProvider = Mock(ProjectRequestStateProvider)
         projectRequestPersistentStateService = Mock(ProjectRequestPersistentStateService)
         commentService = Mock(CommentService)
 
-        state = new Approval(securityService: securityService, projectRequestService: projectRequestService,
+        state = new Approval(userService: userService, projectRequestService: projectRequestService,
                 projectRequestStateProvider: projectRequestStateProvider, projectRequestPersistentStateService: projectRequestPersistentStateService,
                 commentService: commentService)
     }
@@ -76,7 +76,7 @@ class ApprovalSpec extends Specification implements UserDomainFactory, DataTest 
         state.reject(projectRequest, rejectComment)
 
         then:
-        1 * securityService.currentUserAsUser >> requester
+        1 * userService.currentUser >> requester
         1 * projectRequestStateProvider.setState(projectRequest, RequesterEdit) >> _
         1 * projectRequestPersistentStateService.setCurrentOwner(projectRequest.state, requester)
         1 * projectRequestService.sendPiRejectEmail(projectRequest, rejectComment)
@@ -101,7 +101,7 @@ class ApprovalSpec extends Specification implements UserDomainFactory, DataTest 
         state.approve(cmd)
 
         then:
-        1 * securityService.currentUserAsUser >> pi
+        1 * userService.currentUser >> pi
         1 * projectRequestService.approveProjectRequest(projectRequest, pi)
         1 * projectRequestPersistentStateService.allProjectRequestUsersApproved(projectRequest.state) >> true
         1 * projectRequestStateProvider.setState(projectRequest, Approved)
@@ -126,7 +126,7 @@ class ApprovalSpec extends Specification implements UserDomainFactory, DataTest 
         state.approve(cmd)
 
         then:
-        1 * securityService.currentUserAsUser >> pi
+        1 * userService.currentUser >> pi
         1 * projectRequestService.approveProjectRequest(projectRequest, pi)
         1 * projectRequestPersistentStateService.allProjectRequestUsersApproved(projectRequest.state) >> false
         1 * projectRequestService.sendPartiallyApprovedEmail(projectRequest)
@@ -160,7 +160,7 @@ class ApprovalSpec extends Specification implements UserDomainFactory, DataTest 
         state.edit(projectRequest)
 
         then:
-        1 * securityService.currentUserAsUser >> requester
+        1 * userService.currentUser >> requester
         1 * projectRequestPersistentStateService.setCurrentOwner(projectRequest.state, requester)
         1 * projectRequestStateProvider.setState(projectRequest, PiEdit)
         0 * _

@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.security
 
-import grails.plugin.springsecurity.SpringSecurityService
 import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
 import spock.lang.Specification
@@ -31,26 +30,12 @@ import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.config.PseudoEnvironment
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
 @Rollback
 @Integration
 class SecurityServiceIntegrationSpec extends Specification implements UserAndRoles, DomainFactoryCore {
 
     SecurityService securityService
-
-    void "getCurrentUserAsUser, simply returns the current user of spring security as a User object"() {
-        given:
-        User currentUser = DomainFactory.createUser()
-        securityService = new SecurityService(
-                springSecurityService: Mock(SpringSecurityService) {
-                    getCurrentUser() >> currentUser
-                }
-        )
-
-        expect:
-        securityService.currentUserAsUser == currentUser
-    }
 
     void "getWhitelistedEnvironments, returns all Environments but PRODUCTION"() {
         given:

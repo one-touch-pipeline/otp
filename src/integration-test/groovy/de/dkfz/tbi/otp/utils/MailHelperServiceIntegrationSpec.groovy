@@ -34,7 +34,7 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.UserDomainFactory
 import de.dkfz.tbi.otp.security.user.RolesService
-import de.dkfz.tbi.otp.security.SecurityService
+import de.dkfz.tbi.otp.security.user.UserService
 import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.security.User
 
@@ -116,8 +116,8 @@ class MailHelperServiceIntegrationSpec extends Specification implements DomainFa
         setupData()
         createUserAndRoles()
 
-        mailHelperService.securityService = Mock(SecurityService) {
-            1 * getCurrentUserAsUser() >> {
+        mailHelperService.userService = Mock(UserService) {
+            1 * getCurrentUser() >> {
                 User user = getUser(user)
                 user.realName = TESTUSER
                 return user

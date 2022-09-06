@@ -27,8 +27,8 @@ import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.domainFactory.UserDomainFactory
 import de.dkfz.tbi.otp.project.*
-import de.dkfz.tbi.otp.security.SecurityService
 import de.dkfz.tbi.otp.security.User
+import de.dkfz.tbi.otp.security.user.UserService
 
 import javax.naming.OperationNotSupportedException
 
@@ -46,18 +46,18 @@ class PiEditSpec extends Specification implements UserDomainFactory, DataTest {
         ]
     }
 
-    SecurityService securityService
+    UserService userService
     ProjectRequestService projectRequestService
     ProjectRequestStateProvider projectRequestStateProvider
     ProjectRequestState state
     ProjectRequestPersistentStateService projectRequestPersistentStateService
 
     void setup() {
-        securityService = Mock(SecurityService)
+        userService = Mock(UserService)
         projectRequestService = Mock(ProjectRequestService)
         projectRequestStateProvider = Mock(ProjectRequestStateProvider)
         projectRequestPersistentStateService = Mock(ProjectRequestPersistentStateService)
-        state = new PiEdit(securityService: securityService, projectRequestService: projectRequestService,
+        state = new PiEdit(userService: userService, projectRequestService: projectRequestService,
                 projectRequestStateProvider: projectRequestStateProvider, projectRequestPersistentStateService: projectRequestPersistentStateService)
     }
 

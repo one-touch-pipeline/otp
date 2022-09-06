@@ -28,7 +28,7 @@ import spock.lang.Specification
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.user.RolesService
-import de.dkfz.tbi.otp.security.SecurityService
+import de.dkfz.tbi.otp.security.user.UserService
 
 @Rollback
 @Integration
@@ -40,8 +40,8 @@ class MmmlServiceIntegrationSpec extends Specification implements DomainFactoryC
                 rolesService   : Mock(RolesService) {
                     _ * isAdministrativeUser(_) >> isAdmin
                 },
-                securityService: Mock(SecurityService) {
-                    _ * getCurrentUserAsUser() >> { DomainFactory.createUser() }
+                userService: Mock(UserService) {
+                    _ * getCurrentUser() >> { DomainFactory.createUser() }
                 },
         )
 
