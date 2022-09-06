@@ -20,8 +20,8 @@
  * SOFTWARE.
  */
 
-import de.dkfz.tbi.otp.administration.LdapService
-import de.dkfz.tbi.otp.administration.LdapUserDetails
+import de.dkfz.tbi.otp.security.user.identityProvider.LdapService
+import de.dkfz.tbi.otp.security.user.identityProvider.LdapUserDetails
 import de.dkfz.tbi.otp.ngsdata.UserEntry
 import de.dkfz.tbi.otp.ngsdata.UserProjectRole
 import de.dkfz.tbi.otp.project.Project

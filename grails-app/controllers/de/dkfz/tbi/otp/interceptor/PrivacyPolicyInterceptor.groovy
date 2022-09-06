@@ -23,7 +23,7 @@ package de.dkfz.tbi.otp.interceptor
 
 import groovy.transform.CompileStatic
 
-import de.dkfz.tbi.otp.administration.UserService
+import de.dkfz.tbi.otp.security.user.UserService
 
 @CompileStatic
 class PrivacyPolicyInterceptor {

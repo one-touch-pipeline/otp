@@ -33,7 +33,7 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.UserDomainFactory
-import de.dkfz.tbi.otp.security.RolesService
+import de.dkfz.tbi.otp.security.user.RolesService
 import de.dkfz.tbi.otp.security.SecurityService
 import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.security.User

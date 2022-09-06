@@ -23,7 +23,7 @@
 import grails.plugin.springsecurity.annotation.Secured
 
 import de.dkfz.tbi.otp.FlashMessage
-import de.dkfz.tbi.otp.administration.UserService
+import de.dkfz.tbi.otp.security.user.UserService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 

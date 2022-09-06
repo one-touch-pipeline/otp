@@ -29,7 +29,7 @@ import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 
-import de.dkfz.tbi.otp.administration.LdapUserDetails
+import de.dkfz.tbi.otp.security.user.identityProvider.LdapUserDetails
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.utils.CollectionUtils
 

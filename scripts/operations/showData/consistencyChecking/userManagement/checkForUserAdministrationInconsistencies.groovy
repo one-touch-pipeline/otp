@@ -53,10 +53,11 @@ package operations.showData.consistencyChecking.userManagement
  *    If not, remove the file-access flag and remove the user from unixGroup.
  */
 
-import de.dkfz.tbi.otp.administration.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.*
+import de.dkfz.tbi.otp.security.user.identityProvider.LdapService
+import de.dkfz.tbi.otp.security.user.identityProvider.LdapUserDetails
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 List output = []

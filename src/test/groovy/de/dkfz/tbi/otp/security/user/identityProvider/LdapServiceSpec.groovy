@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 The OTP authors
+ * Copyright 2011-2022 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.administration
+package de.dkfz.tbi.otp.security.user.identityProvider
 
 import grails.testing.gorm.DataTest
 import org.springframework.ldap.core.LdapTemplate
@@ -27,9 +27,13 @@ import org.springframework.ldap.query.LdapQuery
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import de.dkfz.tbi.otp.administration.LdapKey
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.security.User
+import de.dkfz.tbi.otp.security.user.identityProvider.IsUserDeactivatedMapper
+import de.dkfz.tbi.otp.security.user.identityProvider.LdapService
+import de.dkfz.tbi.otp.security.user.identityProvider.UsernameAttributesMapper
 
 import java.time.LocalDateTime
 import java.time.ZoneId

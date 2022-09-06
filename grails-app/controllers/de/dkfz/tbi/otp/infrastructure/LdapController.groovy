@@ -24,7 +24,9 @@ package de.dkfz.tbi.otp.infrastructure
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 
-import de.dkfz.tbi.otp.administration.*
+import de.dkfz.tbi.otp.security.user.UserService
+import de.dkfz.tbi.otp.security.user.identityProvider.LdapService
+import de.dkfz.tbi.otp.security.user.identityProvider.LdapUserDetails
 
 @Secured('isFullyAuthenticated()')
 class LdapController {

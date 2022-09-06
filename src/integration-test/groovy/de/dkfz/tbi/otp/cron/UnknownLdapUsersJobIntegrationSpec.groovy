@@ -26,7 +26,7 @@ import grails.gorm.transactions.Rollback
 import spock.lang.Ignore
 import spock.lang.Specification
 
-import de.dkfz.tbi.otp.administration.LdapService
+import de.dkfz.tbi.otp.security.user.identityProvider.LdapService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.ngsdata.DomainFactory

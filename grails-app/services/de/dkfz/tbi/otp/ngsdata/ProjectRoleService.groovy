@@ -23,7 +23,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import grails.gorm.transactions.Transactional
 
-import de.dkfz.tbi.otp.administration.UserService
+import de.dkfz.tbi.otp.security.user.UserService
 
 @Transactional
 class ProjectRoleService {

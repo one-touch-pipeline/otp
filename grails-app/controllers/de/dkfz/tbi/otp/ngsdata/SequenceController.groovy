@@ -26,7 +26,7 @@ import grails.plugin.springsecurity.annotation.Secured
 import groovy.json.JsonSlurper
 import groovy.transform.TupleConstructor
 
-import de.dkfz.tbi.otp.administration.UserService
+import de.dkfz.tbi.otp.security.user.UserService
 import de.dkfz.tbi.otp.ngsqc.FastqcResultsService
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.utils.DataTableCommand

@@ -27,7 +27,7 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.otp.security.RolesService
+import de.dkfz.tbi.otp.security.user.RolesService
 import de.dkfz.tbi.otp.security.SecurityService
 
 @Rollback

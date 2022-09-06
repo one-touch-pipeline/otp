@@ -22,9 +22,11 @@
 
 import grails.validation.*
 
-import de.dkfz.tbi.otp.administration.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.User
+import de.dkfz.tbi.otp.security.user.UserService
+import de.dkfz.tbi.otp.security.user.identityProvider.LdapService
+import de.dkfz.tbi.otp.security.user.identityProvider.LdapUserDetails
 
 /**
  *  Looks up all users that are unknown to OTP and creates them.

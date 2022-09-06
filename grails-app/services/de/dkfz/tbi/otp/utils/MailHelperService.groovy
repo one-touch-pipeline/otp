@@ -28,6 +28,7 @@ import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.security.*
+import de.dkfz.tbi.otp.security.user.RolesService
 
 @Transactional
 class MailHelperService {

@@ -24,7 +24,7 @@ package de.dkfz.tbi.otp.project.projectRequest
 import grails.gorm.transactions.Transactional
 import org.codehaus.groovy.runtime.InvokerHelper
 
-import de.dkfz.tbi.otp.administration.UserService
+import de.dkfz.tbi.otp.security.user.UserService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.ProjectRequestUser
 import de.dkfz.tbi.otp.security.User
