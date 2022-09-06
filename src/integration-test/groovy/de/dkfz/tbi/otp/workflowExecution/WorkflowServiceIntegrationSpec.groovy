@@ -71,6 +71,7 @@ class WorkflowServiceIntegrationSpec extends Specification implements WorkflowSy
         and:
         workflowStep.workflowRun.state == WorkflowRun.State.RESTARTED
         newRun.state == WorkflowRun.State.PENDING
+        newRun.workDirectory != null
         wa.state == WorkflowArtefact.State.FAILED
         WorkflowArtefact.count == 2
         WorkflowRun.count == 3

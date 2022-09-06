@@ -60,6 +60,7 @@ class WorkflowService {
 
         WorkflowRun oldRun = step.workflowRun
         WorkflowRun run = createNewRunBasedOnOldRun(oldRun)
+        run.workDirectory = oldRun.workDirectory
         createInputArtefactsForNewRun(oldRun, run)
         createAndConnectOutputArtefactsForNewRun(oldRun, run)
 
