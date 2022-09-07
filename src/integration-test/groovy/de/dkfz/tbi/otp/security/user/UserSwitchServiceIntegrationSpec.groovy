@@ -31,8 +31,6 @@ import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.config.PseudoEnvironment
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.security.UserAndRoles
-import de.dkfz.tbi.otp.security.user.SwitchedUserDeniedException
-import de.dkfz.tbi.otp.security.user.UserSwitchService
 
 @Rollback
 @Integration

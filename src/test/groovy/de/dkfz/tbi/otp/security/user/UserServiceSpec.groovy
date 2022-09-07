@@ -27,7 +27,7 @@ import spock.lang.Specification
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.security.Role
 import de.dkfz.tbi.otp.security.User
-import de.dkfz.tbi.otp.security.user.UserService
+import de.dkfz.tbi.otp.security.UserRole
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 

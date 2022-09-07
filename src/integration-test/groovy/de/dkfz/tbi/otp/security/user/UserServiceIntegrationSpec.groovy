@@ -29,7 +29,6 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.security.*
-import de.dkfz.tbi.otp.security.user.UserService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 @Rollback

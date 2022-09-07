@@ -31,9 +31,6 @@ import de.dkfz.tbi.otp.administration.LdapKey
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.security.User
-import de.dkfz.tbi.otp.security.user.identityProvider.IsUserDeactivatedMapper
-import de.dkfz.tbi.otp.security.user.identityProvider.LdapService
-import de.dkfz.tbi.otp.security.user.identityProvider.UsernameAttributesMapper
 
 import java.time.LocalDateTime
 import java.time.ZoneId
