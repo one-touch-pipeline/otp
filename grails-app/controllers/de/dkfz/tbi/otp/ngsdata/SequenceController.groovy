@@ -156,7 +156,7 @@ class SequenceController {
                     row.fileExists,
                     row.fileArchived,
                     TimeFormats.DATE.getFormattedDate(row.dateCreated),
-                    SeqTrack.get(row.seqTrackId).isWithdrawn(),
+                    row.fileWithdrawn,
             ].collect { it ?: "" }.join(",")
         }.join("\n")
         String contentHeader = (SequenceColumn.values() - SequenceColumn.FASTQC)
