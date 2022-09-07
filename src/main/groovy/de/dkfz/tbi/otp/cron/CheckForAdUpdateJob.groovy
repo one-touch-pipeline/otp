@@ -26,7 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.security.user.identityProvider.LdapService
-import de.dkfz.tbi.otp.security.user.identityProvider.LdapUserDetails
+import de.dkfz.tbi.otp.security.user.identityProvider.data.IdpUserDetails
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.ngsdata.UserProjectRole
 import de.dkfz.tbi.otp.security.User
@@ -57,10 +57,10 @@ class CheckForAdUpdateJob extends AbstractScheduledJob {
         checkingUserProjectRoles.groupBy {
             it.user
         }.each { User user, List<UserProjectRole> userProjectRoleService ->
-            LdapUserDetails ldapUserDetails = ldapService.getLdapUserDetailsByUsername(user.username)
+            IdpUserDetails idpUserDetails = ldapService.getLdapUserDetailsByUsername(user.username)
             userProjectRoleService.each { UserProjectRole userProjectRole ->
                 if ((userProjectRole.accessToFiles && userProjectRole.user.enabled) ==
-                        (ldapUserDetails && ldapUserDetails.memberOfGroupList?.contains(userProjectRole.project.unixGroup))) {
+                        (idpUserDetails && idpUserDetails.memberOfGroupList?.contains(userProjectRole.project.unixGroup))) {
                     log.debug("File access of user ${user} in project ${userProjectRole.project.name} now matches the target")
                     UserProjectRole.withTransaction {
                         userProjectRole.fileAccessChangeRequested = false

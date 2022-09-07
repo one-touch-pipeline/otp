@@ -37,7 +37,7 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.security.user.UserService
 import de.dkfz.tbi.otp.security.user.identityProvider.LdapService
-import de.dkfz.tbi.otp.security.user.identityProvider.LdapUserDetails
+import de.dkfz.tbi.otp.security.user.identityProvider.data.IdpUserDetails
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 import static javax.servlet.http.HttpServletResponse.SC_MOVED_TEMPORARILY
@@ -88,7 +88,7 @@ class ProjectUserControllerSpec extends Specification implements ControllerUnitT
         controller.ldapService = Mock(LdapService) {
             getDistinguishedNameOfGroupByGroupName(_) >> project.unixGroup
             getGroupMembersByDistinguishedName(_) >> [enabledUser.username, disabledUser.username, unconnectedUser.username, unknownUsername, ignoredUsername]
-            getLdapUserDetailsByUsername(_) >> new LdapUserDetails()
+            getLdapUserDetailsByUsername(_) >> new IdpUserDetails()
         }
         controller.springSecurityService = Mock(SpringSecurityService) {
             getCurrentUser() >> currentUser
@@ -210,10 +210,10 @@ class ProjectUserControllerSpec extends Specification implements ControllerUnitT
                 projectRoles: ProjectRole.findAllByName(ProjectRole.Basic.SUBMITTER.name()),
         ])
 
-        LdapUserDetails ldapUserDetails = new LdapUserDetails()
+        IdpUserDetails idpUserDetails = new IdpUserDetails()
 
         when:
-        UserEntry userEntry = new UserEntry(getUser(name), project, ldapUserDetails, hasAdministrativeRole)
+        UserEntry userEntry = new UserEntry(getUser(name), project, idpUserDetails, hasAdministrativeRole)
 
         then:
         CollectionUtils.containSame(userEntry.availableRoles, result())

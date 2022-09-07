@@ -30,7 +30,7 @@ import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.ngsdata.LdapUserCreationException
 import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.security.user.identityProvider.LdapService
-import de.dkfz.tbi.otp.security.user.identityProvider.LdapUserDetails
+import de.dkfz.tbi.otp.security.user.identityProvider.data.IdpUserDetails
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 /**
@@ -244,15 +244,15 @@ No user exists yet, create user ${currentUser} with admin rights.
     }
 
     User findUserByUsername(String username) {
-        LdapUserDetails ldapUserDetails = ldapService.getLdapUserDetailsByUsername(username)
-        if (!ldapUserDetails) {
+        IdpUserDetails idpUserDetails = ldapService.getLdapUserDetailsByUsername(username)
+        if (!idpUserDetails) {
             throw new LdapUserCreationException("'${username}' can not be resolved to a user via LDAP")
         }
-        if (!ldapUserDetails.mail) {
+        if (!idpUserDetails.mail) {
             throw new LdapUserCreationException("Could not get a mail for '${username}' via LDAP")
         }
 
-        return CollectionUtils.atMostOneElement(User.findAllByUsername(ldapUserDetails.username)) ?:
-                createUser(ldapUserDetails.username, ldapUserDetails.mail, ldapUserDetails.realName)
+        return CollectionUtils.atMostOneElement(User.findAllByUsername(idpUserDetails.username)) ?:
+                createUser(idpUserDetails.username, idpUserDetails.mail, idpUserDetails.realName)
     }
 }

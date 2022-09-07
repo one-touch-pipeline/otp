@@ -37,7 +37,7 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.security.user.UserService
 import de.dkfz.tbi.otp.security.user.identityProvider.LdapService
-import de.dkfz.tbi.otp.security.user.identityProvider.LdapUserDetails
+import de.dkfz.tbi.otp.security.user.identityProvider.data.IdpUserDetails
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.StringUtils
 import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
@@ -89,22 +89,22 @@ class ProjectUserController implements CheckAndCall {
         List<UserEntry> userEntries = []
         List<String> usersWithoutUserProjectRole = []
         projectUsers.each { User user ->
-            LdapUserDetails ldapUserDetails = ldapService.getLdapUserDetailsByUsername(user.username)
+            IdpUserDetails idpUserDetails = ldapService.getLdapUserDetailsByUsername(user.username)
             UserProjectRole userProjectRole = userProjectRolesOfProject.find { it.user == user }
 
             // force IS state from ldap in case of inconsistency
-            if (!((ldapUserDetails?.username ?: false) && userProjectRole?.accessToFiles) &&
-                    (userProjectRole?.project?.unixGroup in ldapUserDetails?.memberOfGroupList) &&
+            if (!((idpUserDetails?.username ?: false) && userProjectRole?.accessToFiles) &&
+                    (userProjectRole?.project?.unixGroup in idpUserDetails?.memberOfGroupList) &&
                     !userProjectRole?.fileAccessChangeRequested) {
                 userProjectRole = userProjectRoleService.setAccessToFiles(userProjectRole, true, true)
-            } else if (((ldapUserDetails?.username ?: false) && userProjectRole?.accessToFiles) &&
-                    !(userProjectRole?.project?.unixGroup in ldapUserDetails?.memberOfGroupList) &&
+            } else if (((idpUserDetails?.username ?: false) && userProjectRole?.accessToFiles) &&
+                    !(userProjectRole?.project?.unixGroup in idpUserDetails?.memberOfGroupList) &&
                     !userProjectRole?.fileAccessChangeRequested) {
                 userProjectRole = userProjectRoleService.setAccessToFiles(userProjectRole, false, true)
             }
 
             if (userProjectRole) {
-                userEntries.add(new UserEntry(user, project, ldapUserDetails, userService.hasCurrentUserAdministrativeRoles()))
+                userEntries.add(new UserEntry(user, project, idpUserDetails, userService.hasCurrentUserAdministrativeRoles()))
             } else {
                 usersWithoutUserProjectRole.add(user.username)
             }
@@ -210,8 +210,8 @@ class ProjectUserController implements CheckAndCall {
         checkErrorAndCallMethod(cmd, {
             userProjectRoleService.setAccessToFilesWithUserNotification(cmd.userProjectRole, cmd.value)
         }) {
-            LdapUserDetails ldapUserDetails = ldapService.getLdapUserDetailsByUsername(cmd.userProjectRole.user.username)
-            UserEntry userEntry = new UserEntry(cmd.userProjectRole.user, cmd.userProjectRole.project, ldapUserDetails)
+            IdpUserDetails idpUserDetails = ldapService.getLdapUserDetailsByUsername(cmd.userProjectRole.user.username)
+            UserEntry userEntry = new UserEntry(cmd.userProjectRole.user, cmd.userProjectRole.project, idpUserDetails)
             [tooltip: g.message(code: userEntry.fileAccess.toolTipKey), permissionState: userEntry.fileAccess]
         }
     }
@@ -299,22 +299,22 @@ class UserEntry {
      * Class to describe a userEntry in the projectUser view
      * @param hasAdministrativeRole is used to describe whether the user logged in has an administrative role. (caution: not ProjectRole)!
      */
-    UserEntry(User user, Project project, LdapUserDetails ldapUserDetails, boolean hasAdministrativeRole = false) {
+    UserEntry(User user, Project project, IdpUserDetails idpUserDetails, boolean hasAdministrativeRole = false) {
         this.user = user
         this.userProjectRole = CollectionUtils.exactlyOneElement(UserProjectRole.findAllByUserAndProject(user, project))
 
-        this.inLdap = ldapUserDetails?.username ?: false
-        this.realName = inLdap ? ldapUserDetails.realName : user.realName
-        this.thumbnailPhoto = inLdap ? ldapUserDetails.thumbnailPhoto.encodeAsBase64() : ""
-        this.department = inLdap ? ldapUserDetails.department : ""
+        this.inLdap = idpUserDetails?.username ?: false
+        this.realName = inLdap ? idpUserDetails.realName : user.realName
+        this.thumbnailPhoto = inLdap ? idpUserDetails.thumbnailPhoto.encodeAsBase64() : ""
+        this.department = inLdap ? idpUserDetails.department : ""
         this.projectRoleNames = userProjectRole.projectRoles*.name.sort()
         // each UserEntry might have different Roles available dependent on the assigned Roles to the userProjectRole
         this.availableRoles = fetchAvailableRoles(userProjectRole, hasAdministrativeRole)
-        this.deactivated = inLdap ? ldapUserDetails.deactivated : false
+        this.deactivated = inLdap ? idpUserDetails.deactivated : false
 
         this.otpAccess = getPermissionStatus(inLdap && userProjectRole.accessToOtp)
         this.fileAccess = getFilePermissionStatus(inLdap && userProjectRole.accessToFiles,
-                project.unixGroup in ldapUserDetails?.memberOfGroupList, userProjectRole.fileAccessChangeRequested)
+                project.unixGroup in idpUserDetails?.memberOfGroupList, userProjectRole.fileAccessChangeRequested)
         this.manageUsers = getPermissionStatus(inLdap && userProjectRole.manageUsers)
         this.manageUsersAndDelegate = getPermissionStatus(inLdap && userProjectRole.manageUsersAndDelegate)
         this.receivesNotifications = getPermissionStatus(userProjectRole.receivesNotifications)

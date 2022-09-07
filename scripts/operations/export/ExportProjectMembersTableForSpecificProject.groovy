@@ -21,7 +21,7 @@
  */
 
 import de.dkfz.tbi.otp.security.user.identityProvider.LdapService
-import de.dkfz.tbi.otp.security.user.identityProvider.LdapUserDetails
+import de.dkfz.tbi.otp.security.user.identityProvider.data.IdpUserDetails
 import de.dkfz.tbi.otp.ngsdata.UserEntry
 import de.dkfz.tbi.otp.ngsdata.UserProjectRole
 import de.dkfz.tbi.otp.project.Project
@@ -42,8 +42,8 @@ def project = CollectionUtils.exactlyOneElement(Project.findAllByName(projectNam
 
 List<UserProjectRole> userProjectRoles = UserProjectRole.findAllByProject(project)
 String table = userProjectRoles.collect { UserProjectRole upr ->
-    LdapUserDetails ldapUserDetails = ldapService.getLdapUserDetailsByUsername(upr.user.username)
-    new UserEntry(upr.user, upr.project, ldapUserDetails)
+    IdpUserDetails idpUserDetails = ldapService.getLdapUserDetailsByUsername(upr.user.username)
+    new UserEntry(upr.user, upr.project, idpUserDetails)
 }.sort { UserEntry userEntry ->
     userEntry.user.username
 }.collect { UserEntry userEntry ->

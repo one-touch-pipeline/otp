@@ -29,7 +29,7 @@ import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 
-import de.dkfz.tbi.otp.security.user.identityProvider.LdapUserDetails
+import de.dkfz.tbi.otp.security.user.identityProvider.data.IdpUserDetails
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
@@ -43,12 +43,12 @@ class UserCreatingUserDetailsService extends GormUserDetailsService {
     UserDetails loadUserByUsername(String username, boolean loadRoles) throws UsernameNotFoundException {
         User user = CollectionUtils.atMostOneElement(User.findAllByUsername(username))
         if (!user) {
-            LdapUserDetails ldapUserDetails = grailsApplication.mainContext.ldapService.getLdapUserDetailsByUsername(username)
-            if (!ldapUserDetails || !ldapUserDetails.mail) {
+            IdpUserDetails idpUserDetails = grailsApplication.mainContext.ldapService.getLdapUserDetailsByUsername(username)
+            if (!idpUserDetails || !idpUserDetails.mail) {
                 throw new FailedToCreateUserException("There is a problem with your account. Please contact " +
                 "${grailsApplication.mainContext.processingOptionService.findOptionAsString(ProcessingOption.OptionName.GUI_CONTACT_DATA_SUPPORT_EMAIL)}.")
             }
-            user = grailsApplication.mainContext.userService.createUser(ldapUserDetails.username, ldapUserDetails.mail, ldapUserDetails.realName)
+            user = grailsApplication.mainContext.userService.createUser(idpUserDetails.username, idpUserDetails.mail, idpUserDetails.realName)
         }
         Collection<GrantedAuthority> authorities = loadAuthorities(user, username, loadRoles)
         createUserDetails user, authorities

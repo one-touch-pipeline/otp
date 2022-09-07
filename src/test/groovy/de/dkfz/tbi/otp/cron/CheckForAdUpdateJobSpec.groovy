@@ -27,7 +27,7 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.security.user.identityProvider.LdapService
-import de.dkfz.tbi.otp.security.user.identityProvider.LdapUserDetails
+import de.dkfz.tbi.otp.security.user.identityProvider.data.IdpUserDetails
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
@@ -65,7 +65,7 @@ class CheckForAdUpdateJobSpec extends Specification implements DataTest, DomainF
         CheckForAdUpdateJob job = new CheckForAdUpdateJob([
                 ldapService: Mock(LdapService) {
                     callCount * getLdapUserDetailsByUsername(_) >> {
-                        new LdapUserDetails([
+                        new IdpUserDetails([
                                 memberOfGroupList: groups
                         ])
                     }

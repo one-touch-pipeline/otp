@@ -26,7 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.security.user.identityProvider.LdapService
-import de.dkfz.tbi.otp.security.user.identityProvider.LdapUserDetails
+import de.dkfz.tbi.otp.security.user.identityProvider.data.IdpUserDetails
 import de.dkfz.tbi.otp.ngsdata.UserProjectRole
 import de.dkfz.tbi.otp.ngsdata.UserProjectRoleService
 import de.dkfz.tbi.otp.project.Project
@@ -76,7 +76,7 @@ class CheckFileAccessInconsistenciesJob extends AbstractScheduledJob {
         List<String> content = []
 
         List<User> userList = User.findAllByUsernameIsNotNull()
-        Map<String, LdapUserDetails> ldapUserDetailsByUsername = ldapService.getLdapUserDetailsByUserList(userList).collectEntries {
+        Map<String, IdpUserDetails> ldapUserDetailsByUsername = ldapService.getLdapUserDetailsByUserList(userList).collectEntries {
             [(it.username): it]
         }
 

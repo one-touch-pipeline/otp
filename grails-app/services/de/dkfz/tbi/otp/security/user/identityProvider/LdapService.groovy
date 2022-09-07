@@ -22,7 +22,6 @@
 package de.dkfz.tbi.otp.security.user.identityProvider
 
 import grails.gorm.transactions.Transactional
-import groovy.transform.Immutable
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.ldap.NameNotFoundException
 import org.springframework.ldap.core.AttributesMapper
@@ -36,6 +35,7 @@ import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.security.User
+import de.dkfz.tbi.otp.security.user.identityProvider.data.IdpUserDetails
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.StringUtils
 import de.dkfz.tbi.util.ldap.UserAccountControl
@@ -72,7 +72,7 @@ class LdapService implements InitializingBean {
         ldapTemplate.ignorePartialResultException = true
     }
 
-    LdapUserDetails getLdapUserDetailsByUsername(String username) {
+    IdpUserDetails getLdapUserDetailsByUsername(String username) {
         if (username == null) {
             return null
         }
@@ -83,12 +83,12 @@ class LdapService implements InitializingBean {
     }
 
     /**
-     * Get a list of LdapUserDetails for every otp user who is given.
+     * Get a list of IdpUserDetails for every otp user who is given.
      *
      * @param otpUsers, for those the ldap details are wanted
-     * @return List of LdapUserDetails for the given users
+     * @return List of IdpUserDetails for the given users
      */
-    List<LdapUserDetails> getLdapUserDetailsByUserList(List<User> otpUsers) {
+    List<IdpUserDetails> getLdapUserDetailsByUserList(List<User> otpUsers) {
         OrFilter innerFilter = new OrFilter()
 
         otpUsers.each { User user ->
@@ -104,7 +104,7 @@ class LdapService implements InitializingBean {
                 new LdapUserDetailsAttributesMapper(ldapService: this))
     }
 
-    List<LdapUserDetails> getListOfLdapUserDetailsByUsernameOrMailOrRealName(String searchString, int countLimit = 0) {
+    List<IdpUserDetails> getListOfLdapUserDetailsByUsernameOrMailOrRealName(String searchString, int countLimit = 0) {
         if (searchString == null) {
             return []
         }
@@ -302,9 +302,9 @@ abstract class AbstractLdapServiceAwareAttributesMapper<T> implements Attributes
     LdapService ldapService
 }
 
-class LdapUserDetailsAttributesMapper extends AbstractLdapServiceAwareAttributesMapper<LdapUserDetails> {
+class LdapUserDetailsAttributesMapper extends AbstractLdapServiceAwareAttributesMapper<IdpUserDetails> {
     @Override
-    LdapUserDetails mapFromAttributes(Attributes a) throws NamingException {
+    IdpUserDetails mapFromAttributes(Attributes a) throws NamingException {
         List<String> memberOfList = a.get(LdapKey.MEMBER_OF)?.all?.collect {
             Matcher matcher = it =~ /CN=(?<group>[^,]*),.*/
             if (matcher.matches() && matcher.group("group")) {
@@ -315,7 +315,7 @@ class LdapUserDetailsAttributesMapper extends AbstractLdapServiceAwareAttributes
         String givenName = a.get(LdapKey.GIVEN_NAME)?.get()
         String sn = a.get(LdapKey.SURNAME)?.get()
         boolean realNameCreatable = givenName && sn
-        return new LdapUserDetails([
+        return new IdpUserDetails([
                 username         : a.get(ldapService.configService.ldapSearchAttribute)?.get()?.toString(),
                 realName         : realNameCreatable ? "${givenName} ${sn}" : null,
                 mail             : a.get(LdapKey.MAIL)?.get()?.toString(),
@@ -376,15 +376,4 @@ class MemberOfAttributesMapper implements AttributesMapper<List<String>> {
             }
         }
     }
-}
-
-@Immutable
-class LdapUserDetails {
-    String username
-    String realName
-    String mail
-    String department
-    byte[] thumbnailPhoto
-    boolean deactivated
-    List<String> memberOfGroupList
 }

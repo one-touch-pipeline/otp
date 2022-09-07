@@ -57,7 +57,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.security.user.identityProvider.LdapService
-import de.dkfz.tbi.otp.security.user.identityProvider.LdapUserDetails
+import de.dkfz.tbi.otp.security.user.identityProvider.data.IdpUserDetails
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 List output = []
@@ -65,8 +65,8 @@ List output = []
 LdapService ldapService = ctx.getBean('ldapService')
 UserProjectRoleService uprs = ctx.getBean('userProjectRoleService')
 
-// this cache maps username to LdapUserDetails in an effort to reduce the number of duplicate ldap requests
-Map<String, LdapUserDetails> cache = [:]
+// this cache maps username to IdpUserDetails in an effort to reduce the number of duplicate ldap requests
+Map<String, IdpUserDetails> cache = [:]
 
 // Check 1
 Project.findAll().each { Project project ->
@@ -107,7 +107,7 @@ Project.findAll().each { Project project ->
         if (nonDatabaseUsers) {
             output << "Following Users could not be resolved to a user in the OTP database:"
             nonDatabaseUsers.each { String username ->
-                LdapUserDetails details
+                IdpUserDetails details
                 if (cache[username]) {
                     details = cache[username]
                 } else {

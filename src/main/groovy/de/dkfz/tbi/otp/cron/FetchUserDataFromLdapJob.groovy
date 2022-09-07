@@ -26,7 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.security.user.identityProvider.LdapService
-import de.dkfz.tbi.otp.security.user.identityProvider.LdapUserDetails
+import de.dkfz.tbi.otp.security.user.identityProvider.data.IdpUserDetails
 import de.dkfz.tbi.otp.security.User
 
 /**
@@ -42,15 +42,15 @@ class FetchUserDataFromLdapJob extends AbstractScheduledJob {
     @Override
     void wrappedExecute() {
         List<User> otpUsers = User.findAllByEnabled(true)
-        List<LdapUserDetails> ldapUserDetails = ldapService.getLdapUserDetailsByUserList(otpUsers)
+        List<IdpUserDetails> idpUserDetails = ldapService.getLdapUserDetailsByUserList(otpUsers)
 
         otpUsers.each { User otpUser ->
-            LdapUserDetails syncedLdapUser = ldapUserDetails.find { it.username == otpUser.username }
+            IdpUserDetails syncedUserDetails = idpUserDetails.find { it.username == otpUser.username }
 
-            if (syncedLdapUser) {
-                otpUser.realName = syncedLdapUser.realName
-                if (syncedLdapUser.mail) {
-                    otpUser.email = syncedLdapUser.mail
+            if (syncedUserDetails) {
+                otpUser.realName = syncedUserDetails.realName
+                if (syncedUserDetails.mail) {
+                    otpUser.email = syncedUserDetails.mail
                 }
                 otpUser.save(flush: true)
             }

@@ -26,7 +26,7 @@ import grails.gorm.transactions.Rollback
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.security.user.identityProvider.LdapService
-import de.dkfz.tbi.otp.security.user.identityProvider.LdapUserDetails
+import de.dkfz.tbi.otp.security.user.identityProvider.data.IdpUserDetails
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.security.User
 
@@ -45,7 +45,7 @@ class FetchUserDataFromLdapJobIntegrationSpec extends Specification {
         job.ldapService = Mock(LdapService) {
             1 * getLdapUserDetailsByUserList(_) >> { List<User> otpUsers ->
                 return [
-                        new LdapUserDetails([
+                        new IdpUserDetails([
                                 username: otpUsers.flatten().first().username,
                                 realName: newName,
                                 mail: newMail,

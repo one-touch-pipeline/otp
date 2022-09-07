@@ -50,7 +50,7 @@ import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.security.user.UserSwitchService
 import de.dkfz.tbi.otp.security.user.UserService
 import de.dkfz.tbi.otp.security.user.identityProvider.LdapService
-import de.dkfz.tbi.otp.security.user.identityProvider.LdapUserDetails
+import de.dkfz.tbi.otp.security.user.identityProvider.data.IdpUserDetails
 import de.dkfz.tbi.otp.utils.*
 
 import java.time.Instant
@@ -525,18 +525,18 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
         Project project = createProject()
         ProjectRole projectRole = createProjectRole()
-        LdapUserDetails ldapUserDetails = new LdapUserDetails(
+        IdpUserDetails idpUserDetails = new IdpUserDetails(
                 username: "unknown",
                 realName: "Unknown User",
                 mail: mailOfUser,
         )
         userProjectRoleService.userService = new UserService()
         userProjectRoleService.ldapService = Mock(LdapService) {
-            getLdapUserDetailsByUsername(_) >> ldapUserDetails
+            getLdapUserDetailsByUsername(_) >> idpUserDetails
         }
 
         expect:
-        User.findAllByUsernameAndEmail(ldapUserDetails.username, ldapUserDetails.mail).empty
+        User.findAllByUsernameAndEmail(idpUserDetails.username, idpUserDetails.mail).empty
 
         when:
         SpringSecurityUtils.doWithAuth(OPERATOR) {
@@ -544,7 +544,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         }
 
         then:
-        User.findAllByUsernameAndEmail(ldapUserDetails.username, ldapUserDetails.mail)
+        User.findAllByUsernameAndEmail(idpUserDetails.username, idpUserDetails.mail)
 
         where:
         name                       | mailOfUser
@@ -560,13 +560,13 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         User user = createUser()
         Project project = createProject()
         ProjectRole projectRole = createProjectRole()
-        LdapUserDetails ldapUserDetails = new LdapUserDetails(
+        IdpUserDetails idpUserDetails = new IdpUserDetails(
                 username: user.username,
                 realName: user.realName,
                 mail: user.email,
         )
         userProjectRoleService.ldapService = Mock(LdapService) {
-            getLdapUserDetailsByUsername(_) >> ldapUserDetails
+            getLdapUserDetailsByUsername(_) >> idpUserDetails
         }
 
         expect:
@@ -620,7 +620,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         createUser(username: SYSTEM_USER)
 
         User user = createUser()
-        LdapUserDetails ldapUserDetails = new LdapUserDetails(
+        IdpUserDetails idpUserDetails = new IdpUserDetails(
                 username: user.username,
                 realName: user.realName,
                 mail: user.email,
@@ -632,7 +632,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
                 manageUsers: true
         )
         userProjectRoleService.ldapService = Mock(LdapService) {
-            getLdapUserDetailsByUsername(_) >> ldapUserDetails
+            getLdapUserDetailsByUsername(_) >> idpUserDetails
             getGroupsOfUser(_) >> []
         }
 
@@ -672,14 +672,14 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         Project projectB = createProject(unixGroup: projectA.unixGroup)
 
         User user = createUser()
-        LdapUserDetails ldapUserDetails = new LdapUserDetails(
+        IdpUserDetails idpUserDetails = new IdpUserDetails(
                 username: user.username,
                 realName: user.realName,
                 mail: user.email,
         )
 
         userProjectRoleService.ldapService = Mock(LdapService) {
-            getLdapUserDetailsByUsername(_) >> ldapUserDetails
+            getLdapUserDetailsByUsername(_) >> idpUserDetails
         }
 
         when:

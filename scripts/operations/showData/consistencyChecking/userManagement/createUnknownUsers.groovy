@@ -26,7 +26,7 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.security.user.UserService
 import de.dkfz.tbi.otp.security.user.identityProvider.LdapService
-import de.dkfz.tbi.otp.security.user.identityProvider.LdapUserDetails
+import de.dkfz.tbi.otp.security.user.identityProvider.data.IdpUserDetails
 
 /**
  *  Looks up all users that are unknown to OTP and creates them.
@@ -76,12 +76,12 @@ List<String> fails = []
 println("Created users:")
 println(userPropertiesToPrint.join(separator))
 ldapOnlyUsers.each { String username ->
-    LdapUserDetails ldapUserDetails = ldapService.getLdapUserDetailsByUsername(username)
+    IdpUserDetails idpUserDetails = ldapService.getLdapUserDetailsByUsername(username)
     try {
-        User user = userService.createUser(ldapUserDetails.username, ldapUserDetails.mail, ldapUserDetails.realName)
+        User user = userService.createUser(idpUserDetails.username, idpUserDetails.mail, idpUserDetails.realName)
         println(userPropertiesToPrint.collect { user[it] }.join(separator))
     } catch (ValidationException e) {
-        fails << "Failed when creating user '${username}' (LDAP username: ${ldapUserDetails.username}, mail: ${ldapUserDetails.mail})\n${e}"
+        fails << "Failed when creating user '${username}' (LDAP username: ${idpUserDetails.username}, mail: ${idpUserDetails.mail})\n${e}"
     }
 }
 println("\n\nFailed to create:")

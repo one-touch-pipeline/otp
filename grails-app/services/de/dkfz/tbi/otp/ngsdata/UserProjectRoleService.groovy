@@ -40,7 +40,7 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.security.user.UserService
 import de.dkfz.tbi.otp.security.user.identityProvider.LdapService
-import de.dkfz.tbi.otp.security.user.identityProvider.LdapUserDetails
+import de.dkfz.tbi.otp.security.user.identityProvider.data.IdpUserDetails
 import de.dkfz.tbi.otp.utils.*
 
 import static de.dkfz.tbi.otp.security.DicomAuditUtils.getRealUserName
@@ -154,16 +154,16 @@ class UserProjectRoleService {
     }
 
     User createUserWithLdapData(String username) {
-        LdapUserDetails ldapUserDetails = ldapService.getLdapUserDetailsByUsername(username)
-        if (!ldapUserDetails) {
+        IdpUserDetails idpUserDetails = ldapService.getLdapUserDetailsByUsername(username)
+        if (!idpUserDetails) {
             throw new LdapUserCreationException("'${username}' can not be resolved to a user via LDAP")
         }
-        if (!ldapUserDetails.mail) {
+        if (!idpUserDetails.mail) {
             throw new LdapUserCreationException("Could not get a mail for '${username}' via LDAP")
         }
 
-        return CollectionUtils.atMostOneElement(User.findAllByUsername(ldapUserDetails.username)) ?:
-                userService.createUser(ldapUserDetails.username, ldapUserDetails.mail, ldapUserDetails.realName)
+        return CollectionUtils.atMostOneElement(User.findAllByUsername(idpUserDetails.username)) ?:
+                userService.createUser(idpUserDetails.username, idpUserDetails.mail, idpUserDetails.realName)
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'MANAGE_USERS')")

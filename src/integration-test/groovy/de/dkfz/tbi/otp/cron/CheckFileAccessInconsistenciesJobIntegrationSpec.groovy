@@ -27,7 +27,7 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.security.user.identityProvider.LdapService
-import de.dkfz.tbi.otp.security.user.identityProvider.LdapUserDetails
+import de.dkfz.tbi.otp.security.user.identityProvider.data.IdpUserDetails
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.UserDomainFactory
@@ -72,7 +72,7 @@ class CheckFileAccessInconsistenciesJobIntegrationSpec extends Specification imp
                 fileAccessChangeRequested: fileAccessChangeRequested,
         ])
 
-        LdapUserDetails ldapUserDetails = new LdapUserDetails([
+        IdpUserDetails idpUserDetails = new IdpUserDetails([
                 username         : USER_ACCOUNT,
                 realName         : USER_REAL_NAME,
                 mail             : USER_EMAIL,
@@ -82,7 +82,7 @@ class CheckFileAccessInconsistenciesJobIntegrationSpec extends Specification imp
         CheckFileAccessInconsistenciesJob job = new CheckFileAccessInconsistenciesJob([
                 processingOptionService: new ProcessingOptionService(),
                 ldapService            : Mock(LdapService) {
-                    1 * getLdapUserDetailsByUserList(_) >> [ldapUserDetails,]
+                    1 * getLdapUserDetailsByUserList(_) >> [idpUserDetails,]
                     1 * isUserDeactivated(_) >> ldapDisabled
                     0 * _
                 },

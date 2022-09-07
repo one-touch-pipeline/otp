@@ -26,7 +26,7 @@ import grails.plugin.springsecurity.annotation.Secured
 
 import de.dkfz.tbi.otp.security.user.UserService
 import de.dkfz.tbi.otp.security.user.identityProvider.LdapService
-import de.dkfz.tbi.otp.security.user.identityProvider.LdapUserDetails
+import de.dkfz.tbi.otp.security.user.identityProvider.data.IdpUserDetails
 
 @Secured('isFullyAuthenticated()')
 class LdapController {
@@ -50,18 +50,18 @@ class LdapController {
             return render([[minLength: true]] as JSON)
         }
 
-        List<LdapUserDetails> ldapUsers = ldapService.getListOfLdapUserDetailsByUsernameOrMailOrRealName(cmd.searchString)
+        List<IdpUserDetails> idpUsers = ldapService.getListOfLdapUserDetailsByUsernameOrMailOrRealName(cmd.searchString)
 
-        Set<String> otpUserNames = userService.getAllUserNamesOfOtpUsers(ldapUsers*.username)
+        Set<String> otpUserNames = userService.getAllUserNamesOfOtpUsers(idpUsers*.username)
 
-        List<LdapUserDetails> otpLdapUsers = ldapUsers.findAll { LdapUserDetails ldapUser ->
-            ldapUser.username in otpUserNames
+        List<IdpUserDetails> otpIdpUsers = idpUsers.findAll { IdpUserDetails usrDetails ->
+            usrDetails.username in otpUserNames
         }
 
-        ldapUsers.removeAll(otpLdapUsers)
-        ldapUsers.addAll(0, otpLdapUsers)
+        idpUsers.removeAll(otpIdpUsers)
+        idpUsers.addAll(0, otpIdpUsers)
 
-        render ldapUsers as JSON
+        render idpUsers as JSON
     }
 }
 
