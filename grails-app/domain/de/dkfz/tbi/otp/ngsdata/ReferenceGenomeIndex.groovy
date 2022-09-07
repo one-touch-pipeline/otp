@@ -50,6 +50,11 @@ class ReferenceGenomeIndex implements Entity {
             referenceGenome: ReferenceGenome,
     ]
 
+    static Closure mapping = {
+        toolName index: "reference_genome_index_tool_name_idx"
+        referenceGenome index: "reference_genome_index_reference_genome_idx"
+    }
+
     @Override
     String toString() {
         return "${referenceGenome.name} ${toolWithVersion}"

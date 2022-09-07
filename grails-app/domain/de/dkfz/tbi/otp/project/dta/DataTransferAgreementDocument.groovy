@@ -41,6 +41,7 @@ class DataTransferAgreementDocument implements Entity {
     }
 
     static Closure mapping = {
+        dataTransferAgreement index: "data_transfer_agreement_document_data_transfer_agreement_idx"
         fileName type: "text"
     }
 

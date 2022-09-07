@@ -28,6 +28,10 @@ import de.dkfz.tbi.otp.utils.Entity
 import java.util.regex.Pattern
 import java.util.regex.PatternSyntaxException
 
+/**
+ * @deprecated class is part of the old workflow system
+ */
+@Deprecated
 @ManagedEntity
 class JobErrorDefinition implements Entity {
     String errorExpression

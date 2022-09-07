@@ -117,7 +117,7 @@ abstract class AbstractMergingWorkPackage implements Entity {
 
     @SuppressWarnings("GrailsDuplicateMapping")
     //this is needed due to grails not supporting indices on multiple columns
-    static mapping = {
+    static Closure mapping = {
         'class' index: "abstract_merging_work_package_class_idx"
         seqType index: "abstract_merging_work_package_seq_type_idx"
         seqType index: 'abstract_merging_work_package_sample_seq_type_idx'
@@ -125,5 +125,7 @@ abstract class AbstractMergingWorkPackage implements Entity {
         bamFileInProjectFolder index: "abstract_merging_work_package_bam_file_in_project_folder_idx"
         antibodyTarget index: 'abstract_merging_work_package_antibody_target_idx'
         sample index: 'abstract_merging_work_package_sample_seq_type_idx'
+        pipeline index: 'abstract_merging_work_package_pipeline_idx'
+        libraryPreparationKit index: 'abstract_merging_work_package_library_preparation_kit_idx'
     }
 }

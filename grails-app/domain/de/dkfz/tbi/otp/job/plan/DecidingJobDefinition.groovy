@@ -27,7 +27,9 @@ import grails.gorm.hibernate.annotation.ManagedEntity
  * Subclass for a {@link JobDefinition} describing a Job which can choose between decisions.
  *
  * @see JobDecision
+ * @deprecated class is part of the old workflow system
  */
+@Deprecated
 @ManagedEntity
 class DecidingJobDefinition extends JobDefinition {
 

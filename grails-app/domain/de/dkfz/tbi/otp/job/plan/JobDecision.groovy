@@ -34,7 +34,9 @@ import de.dkfz.tbi.otp.utils.Entity
  * @see DecidingJobDefinition
  * @see DecisionJob
  * @see DecisionMapping
+ * @deprecated class is part of the old workflow system
  */
+@Deprecated
 @ManagedEntity
 class JobDecision implements Entity {
     /**

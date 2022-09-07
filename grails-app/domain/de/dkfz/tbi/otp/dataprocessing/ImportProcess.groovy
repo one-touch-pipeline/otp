@@ -80,6 +80,10 @@ class ImportProcess implements Entity, ProcessParameterObject {
         }
     }
 
+    static Closure mapping = {
+        state index: "import_process_state_idx"
+    }
+
     @SuppressWarnings("GetterMethodCouldBeProperty") //is no property
     @Override
     SeqType getSeqType() {

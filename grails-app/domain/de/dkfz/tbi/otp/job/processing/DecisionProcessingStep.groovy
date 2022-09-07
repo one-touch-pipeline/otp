@@ -51,4 +51,8 @@ class DecisionProcessingStep extends ProcessingStep {
             return (val.jobDefinition == step.jobDefinition) ?: "jobDefinition"
         })
     }
+
+    static Closure mapping = {
+        decision index: 'decision_processing_step_decision_idx'
+    }
 }

@@ -80,6 +80,10 @@ class SeqPlatformGroup implements Entity, CommentableWithHistory {
         comments nullable: true
     }
 
+    static Closure mapping = {
+        mergingCriteria index: "seq_platform_group_merging_criteria_idx"
+    }
+
     @Override
     String toString() {
         StringBuilder sb = new StringBuilder()

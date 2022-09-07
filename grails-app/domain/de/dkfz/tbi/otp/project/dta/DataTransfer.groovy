@@ -120,6 +120,7 @@ class DataTransfer implements Entity {
     }
 
     static Closure mapping = {
+        dataTransferAgreement index: "data_transfer_data_transfer_agreement_idx"
         comment type: "text"
     }
 

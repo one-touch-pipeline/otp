@@ -44,4 +44,8 @@ class MergingWorkPackageAlignmentProperty implements Entity {
         name blank: false, unique: ['mergingWorkPackage']
         value blank: false, maxSize: 500
     }
+
+    static Closure mapping = {
+        mergingWorkPackage index: "merging_work_package_alignment_property_merging_work_package_idx"
+    }
 }

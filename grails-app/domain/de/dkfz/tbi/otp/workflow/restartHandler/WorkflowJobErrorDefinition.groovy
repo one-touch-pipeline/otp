@@ -35,10 +35,10 @@ import java.util.regex.PatternSyntaxException
 @ToString(includes = ['name', 'jobBeanName', 'sourceType'])
 @ManagedEntity
 class WorkflowJobErrorDefinition implements Entity {
-    /** The type of log to use for checking the expression */
+    /** The bean name of the job the error is defined for. */
     String jobBeanName
 
-    /** The bean name of the job the error is defined for. */
+    /** The type of log to use for checking the expression */
     SourceType sourceType
 
     /** A name for the definition. It's used in the emails .*/
@@ -112,9 +112,10 @@ class WorkflowJobErrorDefinition implements Entity {
         }
     }
 
-    static mapping = {
+    static Closure mapping = {
         mailText type: "text"
         errorExpression type: "text"
+        jobBeanName index: 'workflow_job_error_definition_job_bean_name_idx'
     }
 
 }

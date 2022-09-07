@@ -42,6 +42,10 @@ class FileType implements Entity {
         subType()
     }
 
+    static Closure mapping = {
+        type index: "file_type_type_idx"
+    }
+
     @Override
     String toString() {
         "${type}-${subType}"

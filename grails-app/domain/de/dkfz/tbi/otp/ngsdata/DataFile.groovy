@@ -205,9 +205,10 @@ class DataFile implements CommentableWithProject, Entity {
         return "${indexFile ? 'I' : 'R'}${mateNumber}"
     }
 
-    static mapping = {
+    static Closure mapping = {
         withdrawnComment type: 'text'
         run index: "data_file_run_idx"
+        project index: "data_file_project_idx"
         fastqImportInstance index: "data_file_fastq_import_instance_idx"
         seqTrack index: "data_file_seq_track_idx"
         md5sum index: 'data_file_md5sum_idx'

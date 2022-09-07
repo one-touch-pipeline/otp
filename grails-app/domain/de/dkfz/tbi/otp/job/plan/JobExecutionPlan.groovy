@@ -26,6 +26,10 @@ import grails.gorm.hibernate.annotation.ManagedEntity
 import de.dkfz.tbi.otp.job.processing.ProcessParameter
 import de.dkfz.tbi.otp.utils.Entity
 
+/**
+ * @deprecated class is part of the old workflow system
+ */
+@Deprecated
 @ManagedEntity
 class JobExecutionPlan implements Serializable, Entity {
     /**
@@ -77,6 +81,13 @@ class JobExecutionPlan implements Serializable, Entity {
         // firstJob needs to be nullable as JobDefinition has a dependency on JobExecutionPlan and this circle could not be solved in the database
         startJob(nullable: true)
         processParameter(nullable: true, blank: true)
+    }
+
+    static Closure mapping = {
+        previousPlan index: 'job_execution_plan_previous_plan_idx'
+        firstJob index: 'job_execution_plan_first_job_idx'
+        startJob index: 'job_execution_start_job_idx'
+        processParameter index: 'job_execution_process_parameter_idx'
     }
 
     @Override

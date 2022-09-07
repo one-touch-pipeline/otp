@@ -97,10 +97,11 @@ class ProjectRequest implements ProjectPropertiesGivenWithRequest, Entity, Comme
             sequencingCenters : SeqCenter,
     ]
 
-    static mapping = {
+    static Closure mapping = {
         description type: "text"
         requester index: "project_request_requester_idx"
         users index: "project_request_users_idx"
         seqTypes index: "project_request_seqTypes_idx"
+        state index: "project_request_state_idx"
     }
 }

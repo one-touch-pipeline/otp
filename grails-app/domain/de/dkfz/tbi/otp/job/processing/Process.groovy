@@ -76,9 +76,10 @@ class Process implements CommentableWithProject, Serializable, Entity {
      */
     Process restarted
 
-    static mapping = {
+    static Closure mapping = {
         finished index: 'finished_idx'
         jobExecutionPlan index: 'job_execution_plan_idx'
+        started index: 'process_started_idx'
         comment cascade: "all-delete-orphan"
     }
 

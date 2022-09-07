@@ -294,7 +294,7 @@ class ClusterJob implements Entity {
         processingStep nullable: true
     }
 
-    static mapping = {
+    static Closure mapping = {
         processingStep index: "cluster_job_processing_step_idx"
         queued type: PersistentDateTimeAsMillis
         eligible type: PersistentDateTimeAsMillis
@@ -308,6 +308,10 @@ class ClusterJob implements Entity {
         clusterJobId index: "cluster_job_cluster_job_id_idx"
         clusterJobName index: "cluster_job_cluster_job_name_idx"
         workflowStep index: "cluster_job_workflow_step_idx"
+        oldSystem index: "cluster_job_old_system_check_status_idx"
+        checkStatus index: "cluster_job_old_system_check_status_idx"
+        realm index: "cluster_job_realm_idx"
+        individual index: "cluster_job_individual_idx"
     }
 
     /*
@@ -414,4 +418,3 @@ class ClusterJob implements Entity {
         return "Cluster job ${clusterJobId} on realm ${realm}"
     }
 }
-

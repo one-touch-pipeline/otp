@@ -71,4 +71,10 @@ class ParameterType implements Serializable, Entity {
         className(nullable: true)
         parameterUsage(nullable: false)
     }
+
+    static Closure mapping = {
+        className index: 'parameter_type_class_name_idx'
+        jobDefinition index: 'parameter_type_job_definition_idx'
+        parameterUsage index: 'parameter_type_parameter_usage_idx'
+    }
 }

@@ -37,7 +37,8 @@ class Parameter implements Serializable, Entity {
     @SuppressWarnings("GrailsDomainReservedSqlKeywordName")
     String value
 
-    static mapping = {
+    static Closure mapping = {
+        type index: 'parameter_type_idx'
         value type: 'text'
     }
 }

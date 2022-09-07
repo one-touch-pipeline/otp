@@ -73,9 +73,11 @@ class WorkflowArtefact implements Withdrawable, Entity {
         displayName blank: false, nullable: false
     }
 
-    static mapping = {
+    static Closure mapping = {
         withdrawnComment type: "text"
         state index: 'workflow_artefact_state_idx'
+        producedBy index: 'workflow_artefact_produced_by_idx'
+        artefactType index: 'workflow_artefact_artefact_type_idx'
     }
 
     // gorm/hibernate ignores the property workflowArtefact of trait Artefact if this method returns Artefact

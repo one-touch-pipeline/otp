@@ -39,6 +39,10 @@ class WorkflowVersion implements Entity {
         workflow unique: 'workflowVersion'
     }
 
+    static Closure mapping = {
+        workflow index: "workflow_version_workflow_idx"
+    }
+
     @Override
     String toString() {
         return displayName

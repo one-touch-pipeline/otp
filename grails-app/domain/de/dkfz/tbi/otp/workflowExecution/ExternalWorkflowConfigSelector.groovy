@@ -136,6 +136,11 @@ class ExternalWorkflowConfigSelector implements Comparable<ExternalWorkflowConfi
         }
     }
 
+    static Closure mapping = {
+        externalWorkflowConfigFragment index: "external_workflow_config_selector_external_workflow_config_fragment_idx"
+        selectorType index: "external_workflow_config_selector_selector_type_idx"
+    }
+
     @Override
     int compareTo(ExternalWorkflowConfigSelector externalWorkflowConfigSelector) {
         return externalWorkflowConfigSelector.priority <=> priority

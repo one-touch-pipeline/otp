@@ -94,12 +94,12 @@ abstract class BamFilePairAnalysis implements CommentableWithProject, ProcessPar
         comment nullable: true
     }
 
-    static mapping = {
+    static Closure mapping = {
         sampleType1BamFile index: "bam_file_pair_analysis_sample_type_1_bam_file_idx"
         sampleType2BamFile index: "bam_file_pair_analysis_sample_type_2_bam_file_idx"
         qcTrafficLightStatus index: "bam_file_pair_analysis_qc_traffic_light_status_idx"
         samplePair index: "bam_file_pair_analysis_sample_pair_idx"
-        config lazy: false
+        config lazy: false, index: "bam_file_pair_analysis_config_idx"
         comment cascade: "all-delete-orphan"
     }
 

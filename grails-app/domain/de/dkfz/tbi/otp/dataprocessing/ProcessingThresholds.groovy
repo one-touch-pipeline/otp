@@ -24,7 +24,8 @@ package de.dkfz.tbi.otp.dataprocessing
 import grails.gorm.hibernate.annotation.ManagedEntity
 import groovy.transform.ToString
 
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.SampleType
+import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.Entity
 
@@ -62,6 +63,12 @@ class ProcessingThresholds implements Entity {
         numberOfLanes nullable: true, validator: { val, obj ->
             return (val != null && val > 0) || (val == null && obj.coverage != null)
         }
+    }
+
+    static Closure mapping = {
+        project index: "processing_thresholds_project_idx"
+        seqType index: "processing_thresholds_seq_type_idx"
+        sampleType index: "processing_thresholds_sample_type_idx"
     }
 
     boolean isAboveLaneThreshold(AbstractMergedBamFile bamFile) {

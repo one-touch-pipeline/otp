@@ -100,7 +100,8 @@ class IndelQualityControl implements Entity {
         indelCallingInstance: IndelCallingInstance,
     ]
 
-    static mapping = {
+    static Closure mapping = {
         file type: "text"
+        indelCallingInstance index: "indel_quality_control_indel_calling_instance_idx"
     }
 }

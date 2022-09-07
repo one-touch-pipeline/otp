@@ -95,8 +95,13 @@ class WorkflowStep implements Commentable, Entity {
         comment nullable: true
     }
 
-    static mapping = {
+    static Closure mapping = {
         comment cascade: "all-delete-orphan"
+        workflowRun index: 'workflow_step_workflow_run_idx'
+        state index: 'workflow_step_state_idx'
+        workflowError index: 'workflow_step_workflow_error_idx'
+        previous index: 'workflow_step_previous_idx'
+        restartedFrom index: 'workflow_step_restarted_from_idx'
     }
 
     WorkflowStep getNext() {

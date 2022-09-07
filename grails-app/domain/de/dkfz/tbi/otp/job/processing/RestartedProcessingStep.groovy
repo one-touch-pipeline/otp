@@ -55,6 +55,10 @@ class RestartedProcessingStep extends ProcessingStep {
         original(nullable: false)
     }
 
+    static Closure mapping = {
+        original index: 'restarted_processing_step_original_idx'
+    }
+
     /**
      * Creates a RestartedProcessingStep from given ProcessingStep.
      * @param step The original to be restarted ProcessingStep

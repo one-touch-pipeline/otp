@@ -43,4 +43,8 @@ class SophiaQc implements Entity {
     static constraints = {
         sophiaInstance unique: true
     }
+
+    static Closure mapping = {
+        sophiaInstance index: "sophia_qc_sophia_instance_idx"
+    }
 }

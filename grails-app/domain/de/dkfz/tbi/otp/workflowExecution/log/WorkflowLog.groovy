@@ -40,12 +40,13 @@ abstract class WorkflowLog implements Entity {
 
     abstract String displayLog()
 
-    static mapping = {
+    static Closure mapping = {
         /**
          * we do not use table-per-hierarchy here as WorkflowLog serves more as an interface
          * but Grails does not seem to support relations with interfaces
          */
         tablePerHierarchy false
+        workflowStep index: 'workflow_log_workflow_step_idx'
     }
 
     static constraints = {

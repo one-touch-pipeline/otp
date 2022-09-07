@@ -92,7 +92,8 @@ class SeqPlatform implements Entity, Legacy {
         ].findAll().join(' ')
     }
 
-    static mapping = {
+    static Closure mapping = {
+        name index: "seq_platform_name_idx"
         sequencingKitLabel index: "seq_platform_sequencing_kit_label_idx"
         seqPlatformModelLabel index: "seq_platform_seq_platform_model_label_idx"
     }

@@ -51,7 +51,8 @@ class ProjectRequestUser implements Entity {
         }
     }
 
-    static mapping = {
+    static Closure mapping = {
+        user index: "project_request_user_user_idx"
         projectRoles index: "project_request_user_project_roles_idx"
     }
 

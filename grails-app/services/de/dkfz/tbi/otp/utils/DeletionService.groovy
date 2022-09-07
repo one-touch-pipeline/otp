@@ -328,7 +328,7 @@ class DeletionService {
             MergingWorkPackage mergingWorkPackage = alignmentPass.workPackage
             mergingWorkPackage.bamFileInProjectFolder = null
             mergingWorkPackage.seqTracks.remove(seqTrack)
-            mergingWorkPackage.save(flush: true)
+            mergingWorkPackage.save(flush: true, validate: false)
             ProcessedBamFile.findAllByAlignmentPass(alignmentPass).each { ProcessedBamFile processedBamFile ->
                 deleteQualityAssessmentInfoForAbstractBamFile(processedBamFile)
                 List<File> processingDirsToDelete = deleteMergingRelatedConnectionsOfBamFile(processedBamFile)
@@ -405,7 +405,7 @@ class DeletionService {
         singleCellBamFiles.each { SingleCellBamFile bamFile ->
             crmwp = bamFile.mergingWorkPackage
             crmwp.bamFileInProjectFolder = null
-            crmwp.save(flush: true)
+            crmwp.save(flush: true, validate: false)
             deleteQualityAssessmentInfoForAbstractBamFile(bamFile)
             deleteProcessParameters(ProcessParameter.findAllByValueAndClassName(bamFile.id.toString(), bamFile.class.name))
             dirsToDelete << bamFile.workDirectory
@@ -450,7 +450,7 @@ class DeletionService {
         // processes can only be safely deleted if no associations between them left
         processSet.each {
             it.restarted = null
-            it.save(flush: true)
+            it.save(flush: true, validate: false)
         }.each {
             deleteProcess(it)
         }

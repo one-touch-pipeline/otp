@@ -52,4 +52,8 @@ class AceseqQc implements Entity {
     static constraints = {
         number unique: 'aceseqInstance'
     }
+
+    static Closure mapping = {
+        aceseqInstance index: "aceseq_qc_aceseq_instance_idx"
+    }
 }

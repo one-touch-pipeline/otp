@@ -85,10 +85,11 @@ class ProcessingStep implements Serializable, Entity {
      */
     ProcessingStep next
 
-    static mapping = {
+    static Closure mapping = {
         next index: 'processing_step_next_idx'
         previous index: 'processing_step_previous_idx'
         process index: 'processing_step_process_idx'
+        jobDefinition index: 'processing_step_job_definition_idx'
     }
 
     static constraints = {

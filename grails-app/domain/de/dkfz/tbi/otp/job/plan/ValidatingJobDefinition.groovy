@@ -23,6 +23,10 @@ package de.dkfz.tbi.otp.job.plan
 
 import grails.gorm.hibernate.annotation.ManagedEntity
 
+/**
+ * @deprecated class is part of the old workflow system
+ */
+@Deprecated
 @ManagedEntity
 class ValidatingJobDefinition extends JobDefinition {
     JobDefinition validatorFor

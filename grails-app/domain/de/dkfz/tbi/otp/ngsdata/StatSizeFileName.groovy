@@ -38,4 +38,8 @@ class StatSizeFileName implements Entity {
     static belongsTo = [
             referenceGenome: ReferenceGenome,
     ]
+
+    static Closure mapping = {
+        referenceGenome index: 'stat_size_file_name_reference_genome_idx'
+    }
 }

@@ -51,6 +51,10 @@ class GeneModel implements Entity {
         gcFileName nullable: true, shared: "pathComponent"
     }
 
+    static Closure mapping = {
+        referenceGenome index: "gene_model_reference_genome_idx"
+    }
+
     @Override
     String toString() {
         fileName

@@ -40,7 +40,8 @@ class ProjectInfo implements Entity {
         comment blank: false, nullable: true
     }
 
-    static mapping = {
+    static Closure mapping = {
+        project index: "project_info_project_idx"
         fileName type: "text"
         comment type: "text"
     }

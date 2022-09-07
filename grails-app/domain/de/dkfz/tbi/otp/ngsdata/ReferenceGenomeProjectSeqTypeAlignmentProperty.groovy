@@ -44,4 +44,8 @@ class ReferenceGenomeProjectSeqTypeAlignmentProperty implements Entity {
         name blank: false, unique: ['referenceGenomeProjectSeqType']
         value blank: false, maxSize: 500
     }
+
+    static Closure mapping = {
+        referenceGenomeProjectSeqType index: "reference_genome_project_seq_type_alignment_property_reference_genome_project_seq_type_idx"
+    }
 }

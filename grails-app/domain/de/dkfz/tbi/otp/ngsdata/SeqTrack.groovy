@@ -380,7 +380,9 @@ class SeqTrack implements ProcessParameterObject, Entity, Artefact {
         return dataFiles.sum { it.fileSize } as Long ?: 0
     }
 
-    static mapping = {
+    static Closure mapping = {
+        laneId index: "seq_track_lane_id_idx"
+        pipelineVersion index: "seq_track_pipeline_version_idx"
         antibodyTarget index: "seq_track_antibody_target_idx"
         libraryPreparationKit index: "seq_track_library_preparation_kit_idx"
         normalizedLibraryName index: "seq_track_normalized_library_name_idx"

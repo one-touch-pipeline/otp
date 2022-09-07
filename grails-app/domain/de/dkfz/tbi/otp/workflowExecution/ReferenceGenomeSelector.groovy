@@ -50,6 +50,13 @@ class ReferenceGenomeSelector implements Entity {
         }
     }
 
+    static Closure mapping = {
+        project index: 'reference_genome_selector_project_idx'
+        seqType index: 'reference_genome_selector_seq_type_idx'
+        workflow index: 'reference_genome_selector_workflow_idx'
+        referenceGenome index: 'reference_genome_selector_reference_genome_idx'
+    }
+
     @Override
     String toString() {
         return "RGS: (${project} ${seqType} ${species.sort { it.displayString }.join("+")} ${workflow}) -> (${referenceGenome})"

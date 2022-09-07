@@ -106,14 +106,16 @@ class SamplePair implements Entity {
         }
     }
 
-    static mapping = {
+    static Closure mapping = {
         /**
          * sample_pair_snv_idx1 is used by SnvCallingService.samplePairForProcessing.
          * processing_status must be the first column in this index! Grails does not provide a means to specify this, so
          * this must be done via SQL.
          */
-        mergingWorkPackage1 index: 'sample_pair_snv_idx1,sample_pair_indel_idx1,sample_pair_sophia_idx1,sample_pair_aceseq_idx1,sample_pair_runyapsa_idx1'
-        mergingWorkPackage2 index: 'sample_pair_snv_idx1,sample_pair_indel_idx1,sample_pair_sophia_idx1,sample_pair_aceseq_idx1,sample_pair_runyapsa_idx1'
+        mergingWorkPackage1 index: 'sample_pair_snv_idx1,sample_pair_indel_idx1,sample_pair_sophia_idx1,sample_pair_aceseq_idx1,sample_pair_runyapsa_idx1,' +
+                'sample_pair_merging_work_package_1_idx'
+        mergingWorkPackage2 index: 'sample_pair_snv_idx1,sample_pair_indel_idx1,sample_pair_sophia_idx1,sample_pair_aceseq_idx1,sample_pair_runyapsa_idx1,' +
+                'sample_pair_merging_work_package_2_idx'
         snvProcessingStatus index: 'sample_pair_snv_idx1'
         indelProcessingStatus index: 'sample_pair_indel_idx1'
         sophiaProcessingStatus index: 'sample_pair_sophia_idx1'

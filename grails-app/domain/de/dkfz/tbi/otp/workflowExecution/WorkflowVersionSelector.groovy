@@ -46,6 +46,13 @@ class WorkflowVersionSelector implements Deprecateable<WorkflowVersionSelector>,
         seqType nullable: true
     }
 
+    static Closure mapping = {
+        project index: "workflow_version_selector_project_idx"
+        seqType index: "workflow_version_selector_seq_type_idx"
+        workflowVersion index: "workflow_version_selector_workflow_version_idx"
+        previous index: "workflow_version_selector_previous_idx"
+    }
+
     @Override
     String toString() {
         return "WVS ${deprecationDate ? "[DEPRECATED]" : ""}: (${project} ${seqType}) -> (${workflowVersion})"

@@ -27,7 +27,9 @@ import grails.gorm.hibernate.annotation.ManagedEntity
  * Special JobDefinition for the StartJob.
  *
  * @see StartJob
+ * @deprecated class is part of the old workflow system
  */
+@Deprecated
 @ManagedEntity
 class StartJobDefinition extends JobDefinition implements Serializable {
 

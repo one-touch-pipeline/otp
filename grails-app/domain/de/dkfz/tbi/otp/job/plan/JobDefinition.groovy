@@ -27,6 +27,10 @@ import de.dkfz.tbi.otp.job.processing.Parameter
 import de.dkfz.tbi.otp.job.processing.ParameterMapping
 import de.dkfz.tbi.otp.utils.Entity
 
+/**
+ * @deprecated class is part of the old workflow system
+ */
+@Deprecated
 @ManagedEntity
 class JobDefinition implements Serializable, Entity {
     /**
@@ -63,5 +67,12 @@ class JobDefinition implements Serializable, Entity {
         previous(nullable: true)
         next(nullable: true)
         plan(nullable: false)
+    }
+
+    static Closure mapping = {
+        plan index: 'job_definition_plan_idx'
+        previous index: 'job_definition_previous_idx'
+        next index: 'job_definition_next_idx'
+        bean index: 'job_definition_bean_idx'
     }
 }

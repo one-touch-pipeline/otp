@@ -202,10 +202,13 @@ class Project implements CommentableWithProject, ProjectPropertiesGivenWithReque
         return name
     }
 
-    static mapping = {
+    static Closure mapping = {
         projectGroup index: "project_project_group_idx"
         processingPriority index: "project_processing_priority_idx"
         name index: "project_name_idx"
+        nameInMetadataFiles index: "project_name_in_metadata_files_idx"
+        realm index: "project_realm_idx"
+        unixGroup index: "project_unix_group_idx"
         dirAnalysis type: "text"
         description type: "text"
         internalNotes type: "text"

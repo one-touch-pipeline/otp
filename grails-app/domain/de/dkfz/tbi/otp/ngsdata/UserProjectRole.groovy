@@ -60,6 +60,11 @@ class UserProjectRole implements Serializable, Entity {
         project(unique: 'user')
     }
 
+    static Closure mapping = {
+        project index: 'user_project_role_project_idx'
+        user index: 'user_project_role_user_idx'
+    }
+
     static List<String> getAccessRelatedProperties() {
         return [
                 "projectRoles",

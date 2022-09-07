@@ -69,4 +69,10 @@ class ParameterMapping implements Serializable, Entity {
             return value == mapping.to?.jobDefinition
         })
     }
+
+    static Closure mapping = {
+        from index: 'parameter_mapping_from_idx'
+        to index: 'parameter_mapping_to_idx'
+        job index: 'parameter_mapping_job_idx'
+    }
 }
