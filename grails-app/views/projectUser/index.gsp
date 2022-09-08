@@ -72,7 +72,7 @@
                 </label>
             </sec:access>
             <div class="ldap-user">
-                   <sec:access
+                <sec:access
                         expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'MANAGE_USERS')">
                     <g:set var="checkboxes" value="['otpAccess', 'fileAccess', 'receivesNotifications']"/>
                     <sec:access
@@ -319,17 +319,21 @@
                             <span class="icon-${userEntry.receivesNotifications}"></span>
                         </sec:noAccess>
                     </td>
-                    <sec:access
-                            expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'MANAGE_USERS')">
-                        <td>
-                            <div class="submit-container">
-                                <input type="hidden" name="changeProjectAccessButton"
-                                       value="${g.createLink(controller: "projectUser", action: "setEnabled", params: ["userProjectRole.id": userEntry.userProjectRole.id, "value": false])}"/>
-                                <button class="btn btn-primary changeProjectAccess js-add" data-confirmation="${confirmationTextHtml}"><g:message
-                                        code="projectUser.table.deactivateUser"/></button>
-                            </div>
-                        </td>
-                    </sec:access>
+                    <td>
+                        <g:set var="disabled" value="disabled"/>
+                        <sec:access
+                                expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'MANAGE_USERS') or ${userEntry.user.id == currentUser.id}">
+                            <g:set var="disabled" value=""/>
+                        </sec:access>
+                        <div class="submit-container">
+                            <input type="hidden" name="changeProjectAccessButton"
+                                   value="${g.createLink(controller: "projectUser", action: "setEnabled", params: ["userProjectRole.id": userEntry.userProjectRole.id, "value": false])}"/>
+                            <button class="btn btn-primary changeProjectAccess js-add" ${disabled}  data-confirmation="${confirmationTextHtml ?:
+                                    g.message(code: "projectUser.deactivateConfirmation", args: [userEntry.user.username, selectedProject.name])}">
+                                <g:message code="projectUser.table.deactivateUser"/>
+                            </button>
+                        </div>
+                    </td>
                 </tr>
             </g:each>
         </table>

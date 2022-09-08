@@ -424,6 +424,87 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
     }
 
     @Unroll
+    void "setEnabled, setting enabled to #enabled should be restricted, when not admins try to remove pi userProjectRoles"() {
+        given:
+        setupData()
+
+        User user = createUser()
+        UserProjectRole userProjectRolePi = createUserProjectRole(user: user, projectRoles: [pi])
+
+        User currentUser = getUser(USER)
+        createUserProjectRole(user: currentUser, projectRoles: [pi])
+
+        // mock user currently logged in
+        userProjectRoleService.userService = new UserService(
+                springSecurityService: Mock(SpringSecurityService)
+        )
+        userProjectRoleService.springSecurityService = Mock(SpringSecurityService)
+
+        when:
+        SpringSecurityUtils.doWithAuth(USER) {
+            userProjectRoleService.setEnabled(userProjectRolePi, enabled)
+        }
+
+        then:
+        1 * userProjectRoleService.userService.springSecurityService.currentUser >> currentUser
+        1 * userProjectRoleService.springSecurityService.currentUser >> currentUser
+
+        and:
+        thrown(InsufficientRightsException)
+
+        where:
+        enabled << [true, false]
+    }
+
+    void "setEnabled, setting disabled should always be possible, if userProjectRole is the current users userProjectRole"() {
+        given:
+        setupData()
+
+        User currentUser = getUser(USER)
+        UserProjectRole userProjectRole = createUserProjectRole(user: currentUser, projectRoles: [pi], enabled: true)
+
+        // mock user currently logged in
+        userProjectRoleService.springSecurityService = Mock(SpringSecurityService)
+
+        when:
+        SpringSecurityUtils.doWithAuth(USER) {
+            userProjectRoleService.setEnabled(userProjectRole, false)
+        }
+
+        then:
+        1 * userProjectRoleService.springSecurityService.currentUser >> currentUser
+
+        and:
+        !userProjectRole.enabled
+    }
+
+    void "setEnabled, setting enabled, if user is userProjectRoles user should not be possible"() {
+        given:
+        setupData()
+
+        User currentUser = getUser(USER)
+        UserProjectRole userProjectRole = createUserProjectRole(user: currentUser, projectRoles: [pi], enabled: false)
+
+        // mock user currently logged in
+        userProjectRoleService.userService = new UserService(
+                springSecurityService: Mock(SpringSecurityService)
+        )
+        userProjectRoleService.springSecurityService = Mock(SpringSecurityService)
+
+        when:
+        SpringSecurityUtils.doWithAuth(USER) {
+            userProjectRoleService.setEnabled(userProjectRole, true)
+        }
+
+        then:
+        1 * userProjectRoleService.userService.springSecurityService.currentUser >> currentUser
+        1 * userProjectRoleService.springSecurityService.currentUser >> currentUser
+
+        and:
+        thrown(InsufficientRightsException)
+    }
+
+    @Unroll
     void "addUserToProjectAndNotifyGroupManagementAuthority, create User if non is found for username for #name"() {
         given:
         setupData()

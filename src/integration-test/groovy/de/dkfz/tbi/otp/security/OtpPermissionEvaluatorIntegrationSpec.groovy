@@ -275,4 +275,24 @@ class OtpPermissionEvaluatorIntegrationSpec extends Specification implements Use
         expect:
         permissionEvaluator.hasPermission(authentication, null, "ADD_USER")
     }
+
+    void "hasPermission, IS_USER takes the according user of the UserProjectRole into account"() {
+        given:
+        setupData()
+
+        expect:
+        permissionEvaluator.hasPermission(authentication, userProjectRole, "IS_USER")
+    }
+
+    void "hasPermission, IS_USER restricts for different users then the UserProjectRoles user"() {
+        given:
+        setupData()
+        User otherUser = createUser()
+        UserProjectRole otherUserProjectRole = createUserProjectRole(
+            user: otherUser
+        )
+
+        expect:
+        !permissionEvaluator.hasPermission(authentication, otherUserProjectRole, "IS_USER")
+    }
 }

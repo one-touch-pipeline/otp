@@ -446,9 +446,13 @@ class UserProjectRoleService {
      * @param value which will be set
      * @return updated UserProjectRole
      */
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#userProjectRole.project, 'MANAGE_USERS')")
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#userProjectRole.project, 'MANAGE_USERS') or hasPermission(#userProjectRole, 'IS_USER')")
     UserProjectRole setEnabled(UserProjectRole userProjectRole, boolean value) {
-        if (!userService.hasCurrentUserAdministrativeRoles() && userProjectRole.isPi()) {
+        User currentUser = springSecurityService.currentUser as User
+        if (value && userProjectRole.user == currentUser && !userService.hasCurrentUserAdministrativeRoles()) {
+            throw new InsufficientRightsException("You are not allowed to reactivate your own user! Please ask your administrator.")
+        }
+        if (userProjectRole.user != currentUser && !userService.hasCurrentUserAdministrativeRoles() && userProjectRole.isPi()) {
             throw new InsufficientRightsException("You don't have enough rights to execute this operation! Please ask your administrator.")
         }
         boolean hadFileAccess = userProjectRole.accessToFiles

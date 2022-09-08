@@ -51,6 +51,10 @@ describe('Check projectUser page', () => {
         .find('button.changeProjectAccess').contains('Deactivate')
         .click();
 
+      cy.get('#confirmationModal').should('be.visible');
+      cy.get('button#confirmModal').click();
+      cy.get('#confirmationModal').should('not.be.visible');
+
       cy.wait('@setEnabled').then((interception) => {
         expect(interception.response.statusCode).to.eq(200);
         expect(interception.response.body.success).to.eq(true);

@@ -39,9 +39,10 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 @GrailsCompileStatic
 class OtpPermissionEvaluator implements PermissionEvaluator {
 
-    @Autowired AclPermissionEvaluator aclPermissionEvaluator
+    @Autowired
+    AclPermissionEvaluator aclPermissionEvaluator
 
-    private static final List PERMISSIONS = ["OTP_READ_ACCESS", "MANAGE_USERS", "DELEGATE_USER_MANAGEMENT", "ADD_USER",
+    private static final List PERMISSIONS = ["OTP_READ_ACCESS", "MANAGE_USERS", "DELEGATE_USER_MANAGEMENT", "ADD_USER", "IS_USER",
                                              "PROJECT_REQUEST_NEEDED_PIS", "PROJECT_REQUEST_CURRENT_OWNER", "PROJECT_REQUEST_PI"]
 
     @Override
@@ -51,6 +52,8 @@ class OtpPermissionEvaluator implements PermissionEvaluator {
         }
         if (permission instanceof String && permission in PERMISSIONS) {
             switch (targetDomainObject?.class) {
+                case UserProjectRole:
+                    return checkUserProjectRolePermission(auth, (UserProjectRole) targetDomainObject, permission)
                 case Project:
                     return checkProjectRolePermission(auth, (Project) targetDomainObject, permission)
                 case ProjectRequest:
@@ -124,6 +127,15 @@ class OtpPermissionEvaluator implements PermissionEvaluator {
             default:
                 return false
         }
+    }
+
+    @CompileDynamic
+    private boolean checkUserProjectRolePermission(Authentication auth, UserProjectRole userProjectRole, String permission) {
+        User activeUser = CollectionUtils.atMostOneElement(User.findAllByUsername(auth.principal.username))
+        if (!activeUser) {
+            return false
+        }
+        return (permission == 'IS_USER' && userProjectRole && userProjectRole.user == activeUser)
     }
 
     @CompileDynamic
