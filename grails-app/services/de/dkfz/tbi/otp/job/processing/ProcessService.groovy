@@ -360,16 +360,17 @@ class ProcessService {
     }
 
     /**
-     * Helper function to retrieve the last ProcessingSTepUpdate for given Process.
+     * Helper function to retrieve the last ProcessingStepUpdate for given Process.
      */
     private ProcessingStepUpdate lastUpdate(Process process) {
-        return ProcessingStepUpdate.withCriteria {
-            processingStep {
-                eq("process", process)
-            }
-            maxResults(1)
+        List<ProcessingStep> processingSteps = ProcessingStep.createCriteria().list {
+            eq("process", process)
+        } as List<ProcessingStep>
+        return ProcessingStepUpdate.createCriteria().get {
+            'in'('processingStep', processingSteps)
             order("id", "desc")
-        } [0]
+            maxResults(1)
+        } as ProcessingStepUpdate
     }
 
     String processUrl(Process process) {
