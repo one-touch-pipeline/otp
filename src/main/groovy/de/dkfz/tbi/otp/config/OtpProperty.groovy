@@ -34,6 +34,11 @@ enum OtpProperty {
     LDAP_SEARCH_SUBTREE('otp.security.ldap.search.subTree', TypeValidators.BOOLEAN, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT), 'true'),
     LDAP_SEARCH_ATTRIBUTE('otp.security.ldap.search.attribute', TypeValidators.SINGLE_LINE_TEXT_OPTIONAL, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT)),
 
+    KEYCLOAK_SERVER('otp.security.keycloak.server', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.DEVELOPMENT)),
+    KEYCLOAK_REALM('otp.security.keycloak.realm', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.DEVELOPMENT)),
+    KEYCLOAK_CLIENT_ID('otp.security.keycloak.clientId', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.DEVELOPMENT)),
+    KEYCLOAK_CLIENT_SECRET('otp.security.keycloak.clientSecret', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.DEVELOPMENT)),
+
     SSH_AUTH_METHOD('otp.ssh.authMethod', TypeValidators.SSH_AUTH_METHOD, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT, UsedIn.WORKFLOW_TEST),
             SshAuthMethod.SSH_AGENT.name()),
     SSH_USER('otp.ssh.user', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT)),

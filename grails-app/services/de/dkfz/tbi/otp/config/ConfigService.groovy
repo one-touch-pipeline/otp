@@ -183,6 +183,22 @@ class ConfigService implements ApplicationContextAware {
         return otpProperties.get(OtpProperty.LDAP_SEARCH_ATTRIBUTE)
     }
 
+    String getKeycloakServer() {
+        return otpProperties.get(OtpProperty.KEYCLOAK_SERVER)
+    }
+
+    String getKeycloakRealm() {
+        return otpProperties.get(OtpProperty.KEYCLOAK_REALM)
+    }
+
+    String getKeycloakClientId() {
+        return otpProperties.get(OtpProperty.KEYCLOAK_CLIENT_ID)
+    }
+
+    String getKeycloakClientSecret() {
+        return otpProperties.get(OtpProperty.KEYCLOAK_CLIENT_SECRET)
+    }
+
     String getEnvironmentName() {
         if (otpProperties.get(OtpProperty.CONFIG_ENVIRONMENT_NAME)) {
             return otpProperties.get(OtpProperty.CONFIG_ENVIRONMENT_NAME)
