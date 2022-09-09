@@ -75,7 +75,7 @@ class UnknownLdapUsersJob extends AbstractScheduledJob {
     }
 
     List<User> getUsersThatCanNotBeFoundInLdap(List<User> users) {
-        return users.findAll { User user -> !ldapService.existsInLdap(user) }
+        return users.findAll { User user -> !ldapService.exists(user) }
     }
 
     @Override

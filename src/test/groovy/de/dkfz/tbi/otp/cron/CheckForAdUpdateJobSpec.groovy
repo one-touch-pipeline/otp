@@ -64,7 +64,7 @@ class CheckForAdUpdateJobSpec extends Specification implements DataTest, DomainF
         ])
         CheckForAdUpdateJob job = new CheckForAdUpdateJob([
                 ldapService: Mock(LdapService) {
-                    callCount * getLdapUserDetailsByUsername(_) >> {
+                    callCount * getIdpUserDetailsByUsername(_) >> {
                         new IdpUserDetails([
                                 memberOfGroupList: groups
                         ])

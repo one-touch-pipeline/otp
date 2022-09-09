@@ -43,7 +43,7 @@ class FetchUserDataFromLdapJobIntegrationSpec extends Specification {
         final User otpUser = DomainFactory.createUser()
 
         job.ldapService = Mock(LdapService) {
-            1 * getLdapUserDetailsByUserList(_) >> { List<User> otpUsers ->
+            1 * getIdpUserDetailsByUserList(_) >> { List<User> otpUsers ->
                 return [
                         new IdpUserDetails([
                                 username: otpUsers.flatten().first().username,

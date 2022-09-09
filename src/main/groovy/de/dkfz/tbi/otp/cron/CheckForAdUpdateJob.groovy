@@ -57,7 +57,7 @@ class CheckForAdUpdateJob extends AbstractScheduledJob {
         checkingUserProjectRoles.groupBy {
             it.user
         }.each { User user, List<UserProjectRole> userProjectRoleService ->
-            IdpUserDetails idpUserDetails = ldapService.getLdapUserDetailsByUsername(user.username)
+            IdpUserDetails idpUserDetails = ldapService.getIdpUserDetailsByUsername(user.username)
             userProjectRoleService.each { UserProjectRole userProjectRole ->
                 if ((userProjectRole.accessToFiles && userProjectRole.user.enabled) ==
                         (idpUserDetails && idpUserDetails.memberOfGroupList?.contains(userProjectRole.project.unixGroup))) {

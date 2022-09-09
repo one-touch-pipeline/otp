@@ -76,7 +76,7 @@ class CheckFileAccessInconsistenciesJob extends AbstractScheduledJob {
         List<String> content = []
 
         List<User> userList = User.findAllByUsernameIsNotNull()
-        Map<String, IdpUserDetails> ldapUserDetailsByUsername = ldapService.getLdapUserDetailsByUserList(userList).collectEntries {
+        Map<String, IdpUserDetails> ldapUserDetailsByUsername = ldapService.getIdpUserDetailsByUserList(userList).collectEntries {
             [(it.username): it]
         }
 

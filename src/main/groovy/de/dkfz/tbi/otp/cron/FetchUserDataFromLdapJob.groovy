@@ -42,7 +42,7 @@ class FetchUserDataFromLdapJob extends AbstractScheduledJob {
     @Override
     void wrappedExecute() {
         List<User> otpUsers = User.findAllByEnabled(true)
-        List<IdpUserDetails> idpUserDetails = ldapService.getLdapUserDetailsByUserList(otpUsers)
+        List<IdpUserDetails> idpUserDetails = ldapService.getIdpUserDetailsByUserList(otpUsers)
 
         otpUsers.each { User otpUser ->
             IdpUserDetails syncedUserDetails = idpUserDetails.find { it.username == otpUser.username }

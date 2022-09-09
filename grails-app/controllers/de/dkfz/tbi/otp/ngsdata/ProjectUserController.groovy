@@ -89,7 +89,7 @@ class ProjectUserController implements CheckAndCall {
         List<UserEntry> userEntries = []
         List<String> usersWithoutUserProjectRole = []
         projectUsers.each { User user ->
-            IdpUserDetails idpUserDetails = ldapService.getLdapUserDetailsByUsername(user.username)
+            IdpUserDetails idpUserDetails = ldapService.getIdpUserDetailsByUsername(user.username)
             UserProjectRole userProjectRole = userProjectRolesOfProject.find { it.user == user }
 
             // force IS state from ldap in case of inconsistency
@@ -210,7 +210,7 @@ class ProjectUserController implements CheckAndCall {
         checkErrorAndCallMethod(cmd, {
             userProjectRoleService.setAccessToFilesWithUserNotification(cmd.userProjectRole, cmd.value)
         }) {
-            IdpUserDetails idpUserDetails = ldapService.getLdapUserDetailsByUsername(cmd.userProjectRole.user.username)
+            IdpUserDetails idpUserDetails = ldapService.getIdpUserDetailsByUsername(cmd.userProjectRole.user.username)
             UserEntry userEntry = new UserEntry(cmd.userProjectRole.user, cmd.userProjectRole.project, idpUserDetails)
             [tooltip: g.message(code: userEntry.fileAccess.toolTipKey), permissionState: userEntry.fileAccess]
         }

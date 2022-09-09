@@ -50,7 +50,7 @@ class LdapController {
             return render([[minLength: true]] as JSON)
         }
 
-        List<IdpUserDetails> idpUsers = ldapService.getListOfLdapUserDetailsByUsernameOrMailOrRealName(cmd.searchString)
+        List<IdpUserDetails> idpUsers = ldapService.getListOfIdpUserDetailsBySearchString(cmd.searchString)
 
         Set<String> otpUserNames = userService.getAllUserNamesOfOtpUsers(idpUsers*.username)
 

@@ -76,7 +76,7 @@ List<String> fails = []
 println("Created users:")
 println(userPropertiesToPrint.join(separator))
 ldapOnlyUsers.each { String username ->
-    IdpUserDetails idpUserDetails = ldapService.getLdapUserDetailsByUsername(username)
+    IdpUserDetails idpUserDetails = ldapService.getIdpUserDetailsByUsername(username)
     try {
         User user = userService.createUser(idpUserDetails.username, idpUserDetails.mail, idpUserDetails.realName)
         println(userPropertiesToPrint.collect { user[it] }.join(separator))

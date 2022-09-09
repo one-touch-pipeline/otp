@@ -92,7 +92,7 @@ UserProjectRole.withTransaction {
                         project: project,
                         projectRoles: projectRoles,
                         enabled: enabled,
-                        accessToOtp: ldapService.isUserInLdapAndActivated(user),
+                        accessToOtp: ldapService.isUserInIdpAndActivated(user),
                         accessToFiles: accessToFiles,
                         manageUsers: manageUsers,
                         manageUsersAndDelegate: manageUsersAndDelegate,

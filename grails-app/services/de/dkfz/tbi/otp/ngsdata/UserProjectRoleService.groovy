@@ -154,7 +154,7 @@ class UserProjectRoleService {
     }
 
     User createUserWithLdapData(String username) {
-        IdpUserDetails idpUserDetails = ldapService.getLdapUserDetailsByUsername(username)
+        IdpUserDetails idpUserDetails = ldapService.getIdpUserDetailsByUsername(username)
         if (!idpUserDetails) {
             throw new LdapUserCreationException("'${username}' can not be resolved to a user via LDAP")
         }

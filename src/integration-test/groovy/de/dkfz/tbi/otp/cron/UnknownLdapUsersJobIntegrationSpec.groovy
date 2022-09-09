@@ -68,7 +68,7 @@ class UnknownLdapUsersJobIntegrationSpec extends Specification implements Domain
         }
         UnknownLdapUsersJob job = new UnknownLdapUsersJob([
                 ldapService: Mock(LdapService) {
-                    5 * existsInLdap(_) >> { User user ->
+                    5 * exists(_) >> { User user ->
                         return (user in usersToBeFound)
                     }
                     0 * _
@@ -96,7 +96,7 @@ class UnknownLdapUsersJobIntegrationSpec extends Specification implements Domain
         UnknownLdapUsersJob job = new UnknownLdapUsersJob([
                 processingOptionService: new ProcessingOptionService(),
                 ldapService: Mock(LdapService) {
-                    5 * existsInLdap(_) >> { User user ->
+                    5 * exists(_) >> { User user ->
                         return !(user in usersToNotBeFound)
                     }
                     0 * _
@@ -117,7 +117,7 @@ class UnknownLdapUsersJobIntegrationSpec extends Specification implements Domain
         UnknownLdapUsersJob job = new UnknownLdapUsersJob([
                 processingOptionService: new ProcessingOptionService(),
                 ldapService: Mock(LdapService) {
-                    1 * existsInLdap(_) >> { User user ->
+                    1 * exists(_) >> { User user ->
                         return true
                     }
                     0 * _

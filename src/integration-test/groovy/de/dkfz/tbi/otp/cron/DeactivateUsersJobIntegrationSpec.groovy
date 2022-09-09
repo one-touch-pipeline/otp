@@ -151,7 +151,7 @@ class DeactivateUsersJobIntegrationSpec extends Specification implements DomainF
                 userProjectRoleService: new UserProjectRoleService(),
         ])
         job.userProjectRoleService.ldapService = Mock(LdapService) {
-            isUserInLdapAndActivated(_) >> false
+            isUserInIdpAndActivated(_) >> false
         }
 
         User user = createUser()

@@ -393,7 +393,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
         // mock user existence in ldap
         userProjectRoleService.ldapService = Mock(LdapService) {
-            isUserInLdapAndActivated(_) >> accountInLdap
+            isUserInIdpAndActivated(_) >> accountInLdap
         }
 
         when:
@@ -532,7 +532,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         )
         userProjectRoleService.userService = new UserService()
         userProjectRoleService.ldapService = Mock(LdapService) {
-            getLdapUserDetailsByUsername(_) >> idpUserDetails
+            getIdpUserDetailsByUsername(_) >> idpUserDetails
         }
 
         expect:
@@ -566,7 +566,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
                 mail: user.email,
         )
         userProjectRoleService.ldapService = Mock(LdapService) {
-            getLdapUserDetailsByUsername(_) >> idpUserDetails
+            getIdpUserDetailsByUsername(_) >> idpUserDetails
         }
 
         expect:
@@ -600,7 +600,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         Project project = createProject()
         ProjectRole projectRole = createProjectRole()
         userProjectRoleService.ldapService = Mock(LdapService) {
-            getLdapUserDetailsByUsername(_) >> null
+            getIdpUserDetailsByUsername(_) >> null
         }
 
         when:
@@ -632,7 +632,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
                 manageUsers: true
         )
         userProjectRoleService.ldapService = Mock(LdapService) {
-            getLdapUserDetailsByUsername(_) >> idpUserDetails
+            getIdpUserDetailsByUsername(_) >> idpUserDetails
             getGroupsOfUser(_) >> []
         }
 
@@ -679,7 +679,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         )
 
         userProjectRoleService.ldapService = Mock(LdapService) {
-            getLdapUserDetailsByUsername(_) >> idpUserDetails
+            getIdpUserDetailsByUsername(_) >> idpUserDetails
         }
 
         when:
@@ -1047,7 +1047,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
         // mock user existence in ldap
         userProjectRoleService.ldapService = Mock(LdapService) {
-            isUserInLdapAndActivated(_) >> true
+            isUserInIdpAndActivated(_) >> true
         }
 
         when:
@@ -1211,7 +1211,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
         // mock user existence in ldap
         userProjectRoleService.ldapService = Mock(LdapService) {
-            isUserInLdapAndActivated(_) >> true
+            isUserInIdpAndActivated(_) >> true
         }
 
         when:

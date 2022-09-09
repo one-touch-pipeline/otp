@@ -82,7 +82,7 @@ class CheckFileAccessInconsistenciesJobIntegrationSpec extends Specification imp
         CheckFileAccessInconsistenciesJob job = new CheckFileAccessInconsistenciesJob([
                 processingOptionService: new ProcessingOptionService(),
                 ldapService            : Mock(LdapService) {
-                    1 * getLdapUserDetailsByUserList(_) >> [idpUserDetails,]
+                    1 * getIdpUserDetailsByUserList(_) >> [idpUserDetails,]
                     1 * isUserDeactivated(_) >> ldapDisabled
                     0 * _
                 },

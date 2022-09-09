@@ -211,7 +211,7 @@ class ScheduleUsersForDeactivationJobIntegrationSpec extends Specification imple
                     _ * isUserDeactivated(_) >> { User user ->
                         return user in expiredUsers
                     }
-                    _ * existsInLdap(_) >> { return true }
+                    _ * exists(_) >> { return true }
                 },
         ])
 

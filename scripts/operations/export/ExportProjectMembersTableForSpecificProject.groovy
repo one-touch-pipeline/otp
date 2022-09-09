@@ -42,7 +42,7 @@ def project = CollectionUtils.exactlyOneElement(Project.findAllByName(projectNam
 
 List<UserProjectRole> userProjectRoles = UserProjectRole.findAllByProject(project)
 String table = userProjectRoles.collect { UserProjectRole upr ->
-    IdpUserDetails idpUserDetails = ldapService.getLdapUserDetailsByUsername(upr.user.username)
+    IdpUserDetails idpUserDetails = ldapService.getIdpUserDetailsByUsername(upr.user.username)
     new UserEntry(upr.user, upr.project, idpUserDetails)
 }.sort { UserEntry userEntry ->
     userEntry.user.username

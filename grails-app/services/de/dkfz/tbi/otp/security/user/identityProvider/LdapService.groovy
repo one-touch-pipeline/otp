@@ -72,7 +72,7 @@ class LdapService implements InitializingBean {
         ldapTemplate.ignorePartialResultException = true
     }
 
-    IdpUserDetails getLdapUserDetailsByUsername(String username) {
+    IdpUserDetails getIdpUserDetailsByUsername(String username) {
         if (username == null) {
             return null
         }
@@ -88,7 +88,7 @@ class LdapService implements InitializingBean {
      * @param otpUsers, for those the ldap details are wanted
      * @return List of IdpUserDetails for the given users
      */
-    List<IdpUserDetails> getLdapUserDetailsByUserList(List<User> otpUsers) {
+    List<IdpUserDetails> getIdpUserDetailsByUserList(List<User> otpUsers) {
         OrFilter innerFilter = new OrFilter()
 
         otpUsers.each { User user ->
@@ -104,7 +104,14 @@ class LdapService implements InitializingBean {
                 new LdapUserDetailsAttributesMapper(ldapService: this))
     }
 
-    List<IdpUserDetails> getListOfLdapUserDetailsByUsernameOrMailOrRealName(String searchString, int countLimit = 0) {
+    /**
+     * Find users by username or mail or real name. Only a few start letters are required.
+     *
+     * @param searchString  (contains username or mail or real name)
+     * @param countLimit max query limit
+     * @return list of matching IdpUserDetails
+     */
+    List<IdpUserDetails> getListOfIdpUserDetailsBySearchString(String searchString, int countLimit = 0) {
         if (searchString == null) {
             return []
         }
@@ -165,7 +172,7 @@ class LdapService implements InitializingBean {
         return ldapTemplate.search(query, new MemberOfAttributesMapper())[0]
     }
 
-    boolean existsInLdap(User user) {
+    boolean exists(User user) {
         if (!user.username) {
             return false
         }
@@ -176,7 +183,7 @@ class LdapService implements InitializingBean {
         return ldapTemplate.search(query, new DistinguishedNameAttributesMapper()).size() >= 1
     }
 
-    Map<String, String> getAllLdapValuesForUser(User user) {
+    Map<String, String> getAllUserAttributes(User user) {
         if (!user.username) {
             return [:]
         }
@@ -194,7 +201,7 @@ class LdapService implements InitializingBean {
      * @param user, an OTP user
      * @return if user is in the ou=DeletedUsers
      */
-    Boolean isUserInDeletedUsersOu(User user) {
+    private Boolean isUserInDeletedUsersOu(User user) {
         try {
             ContainerCriteria query = query().base("${LdapKey.ORGANIZATIONAL_UNIT}=${LdapKey.DELETED_USERS}").countLimit(1)
                     .where(LdapKey.OBJECT_CATEGORY).is(LdapKey.USER)
@@ -214,7 +221,7 @@ class LdapService implements InitializingBean {
      * @param user, an OTP user
      * @return if user's accountExpires attribute is set earlier than now
      */
-    Boolean isUserAccountExpired(User user) {
+    private Boolean isUserAccountExpired(User user) {
         long ldapTimestamp = toLdapTimestamp100Nanos(System.currentTimeMillis())
         ContainerCriteria query = query().countLimit(1)
                 .where(LdapKey.OBJECT_CATEGORY).is(LdapKey.USER)
@@ -230,7 +237,7 @@ class LdapService implements InitializingBean {
      * @param user, an OTP user
      * @return true if user's ACCOUNTDISABLE bit is set
      */
-    Boolean isUserAccountDisabled(User user) {
+    private Boolean isUserAccountDisabled(User user) {
         ContainerCriteria query = query()
                 .attributes(configService.ldapSearchAttribute, LdapKey.USER_ACCOUNT_CONTROL)
                 .where(LdapKey.OBJECT_CATEGORY).is(LdapKey.USER)
@@ -246,8 +253,8 @@ class LdapService implements InitializingBean {
         return isUserAccountDisabled(user) || isUserInDeletedUsersOu(user) || isUserAccountExpired(user)
     }
 
-    boolean isUserInLdapAndActivated(User user) {
-        return (existsInLdap(user) && !isUserDeactivated(user))
+    boolean isUserInIdpAndActivated(User user) {
+        return (exists(user) && !isUserDeactivated(user))
     }
 
     Integer getUserAccountControlOfUser(User user) {
@@ -285,15 +292,8 @@ class LdapService implements InitializingBean {
      * number of 100-nanosecond intervals since 12:00 am 1/1/1601
      * It is used e.g. in accountExpires attribute
      */
-    long toLdapTimestamp100Nanos(long unixTimestampMillis) {
+    private long toLdapTimestamp100Nanos(long unixTimestampMillis) {
         return (unixTimestampMillis + gapEpochLdapTime) * 10000
-    }
-
-    /*
-     * Convert Ldap timestamp (UTC) to Unix timestamp in milli seconds
-     */
-    long toUnixTimestampMillis(long ldapTimestamp100Nano) {
-        return ldapTimestamp100Nano * 0.0001 - gapEpochLdapTime
     }
 }
 

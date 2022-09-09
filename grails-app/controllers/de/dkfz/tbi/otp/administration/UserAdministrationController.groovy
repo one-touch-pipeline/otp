@@ -122,7 +122,7 @@ class UserAdministrationController implements CheckAndCall {
                 user                   : user,
                 ldapGroups             : ldapService.getGroupsOfUser(user) ?: [],
                 roleLists              : roleLists,
-                userExistsInLdap       : ldapService.existsInLdap(user),
+                userExistsInLdap       : ldapService.exists(user),
                 userAccountControlValue: ldapService.getUserAccountControlOfUser(user),
                 userAccountControlMap  : ldapService.getAllUserAccountControlFlagsOfUser(user),
                 cmd                    : flash.cmd as EditUserCommand,
@@ -136,8 +136,8 @@ class UserAdministrationController implements CheckAndCall {
             return [:]
         }
         User user = cmd.user
-        boolean userExists = ldapService.existsInLdap(user)
-        Map ldapProperties = userExists ? ldapService.getAllLdapValuesForUser(user) : [:]
+        boolean userExists = ldapService.exists(user)
+        Map ldapProperties = userExists ? ldapService.getAllUserAttributes(user) : [:]
 
         return [
                 user            : user,

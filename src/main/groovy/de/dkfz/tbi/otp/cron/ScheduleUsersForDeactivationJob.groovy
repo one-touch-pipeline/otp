@@ -128,7 +128,7 @@ class ScheduleUsersForDeactivationJob extends AbstractScheduledJob {
      * Non-existing users are to be handled as deactivated.
      */
     boolean userIsDeactivated(User user) {
-        return !ldapService.existsInLdap(user) || ldapService.isUserDeactivated(user)
+        return !ldapService.exists(user) || ldapService.isUserDeactivated(user)
     }
 
     String getMailBodyWithInvalidUsers(Set<UserProjectRole> invalidUsers) {
