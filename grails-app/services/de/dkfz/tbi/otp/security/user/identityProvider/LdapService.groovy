@@ -48,7 +48,7 @@ import static org.springframework.ldap.query.LdapQueryBuilder.query
 
 @SuppressWarnings(["ExplicitCallToAndMethod", "ExplicitCallToOrMethod"])
 @Transactional
-class LdapService implements InitializingBean {
+class LdapService implements InitializingBean, IdentityProvider {
 
     ConfigService configService
     ProcessingOptionService processingOptionService
@@ -72,6 +72,7 @@ class LdapService implements InitializingBean {
         ldapTemplate.ignorePartialResultException = true
     }
 
+    @Override
     IdpUserDetails getIdpUserDetailsByUsername(String username) {
         if (username == null) {
             return null
@@ -82,12 +83,7 @@ class LdapService implements InitializingBean {
                 new LdapUserDetailsAttributesMapper(ldapService: this))[0]
     }
 
-    /**
-     * Get a list of IdpUserDetails for every otp user who is given.
-     *
-     * @param otpUsers, for those the ldap details are wanted
-     * @return List of IdpUserDetails for the given users
-     */
+    @Override
     List<IdpUserDetails> getIdpUserDetailsByUserList(List<User> otpUsers) {
         OrFilter innerFilter = new OrFilter()
 
@@ -104,14 +100,10 @@ class LdapService implements InitializingBean {
                 new LdapUserDetailsAttributesMapper(ldapService: this))
     }
 
-    /**
-     * Find users by username or mail or real name. Only a few start letters are required.
-     *
-     * @param searchString  (contains username or mail or real name)
-     * @param countLimit max query limit
-     * @return list of matching IdpUserDetails
-     */
-    List<IdpUserDetails> getListOfIdpUserDetailsBySearchString(String searchString, int countLimit = 0) {
+    @Override
+    List<IdpUserDetails> getListOfIdpUserDetailsBySearchString(String searchString) {
+        int countLimit = 0
+
         if (searchString == null) {
             return []
         }
@@ -141,6 +133,7 @@ class LdapService implements InitializingBean {
                 new LdapUserDetailsAttributesMapper(ldapService: this))
     }
 
+    @Override
     String getDistinguishedNameOfGroupByGroupName(String groupName) {
         if (groupName == null) {
             return ""
@@ -151,6 +144,7 @@ class LdapService implements InitializingBean {
                 new DistinguishedNameAttributesMapper())[0]
     }
 
+    @Override
     List<String> getGroupMembersByDistinguishedName(String distinguishedName) {
         if (distinguishedName == null) {
             return []
@@ -162,6 +156,7 @@ class LdapService implements InitializingBean {
                 new UsernameAttributesMapper(ldapService: this))
     }
 
+    @Override
     List<String> getGroupsOfUser(User user) {
         if (!user.username) {
             return []
@@ -172,6 +167,7 @@ class LdapService implements InitializingBean {
         return ldapTemplate.search(query, new MemberOfAttributesMapper())[0]
     }
 
+    @Override
     boolean exists(User user) {
         if (!user.username) {
             return false
@@ -183,6 +179,7 @@ class LdapService implements InitializingBean {
         return ldapTemplate.search(query, new DistinguishedNameAttributesMapper()).size() >= 1
     }
 
+    @Override
     Map<String, String> getAllUserAttributes(User user) {
         if (!user.username) {
             return [:]
@@ -191,6 +188,51 @@ class LdapService implements InitializingBean {
                 .where(LdapKey.OBJECT_CATEGORY).is(LdapKey.USER)
                 .and(configService.ldapSearchAttribute).is(user.username)
         return CollectionUtils.exactlyOneElement(ldapTemplate.search(query, new AllAttributesMapper()))
+    }
+
+    @Override
+    boolean isUserDeactivated(User user) {
+        if (!user.username) {
+            return true
+        }
+
+        return isUserAccountDisabled(user) || isUserInDeletedUsersOu(user) || isUserAccountExpired(user)
+    }
+
+    @Override
+    boolean isUserInIdpAndActivated(User user) {
+        return (exists(user) && !isUserDeactivated(user))
+    }
+
+    @Override
+    Integer getUserAccountControlOfUser(User user) {
+        if (!user.username) {
+            return null
+        }
+        ContainerCriteria query = query()
+                .attributes(configService.ldapSearchAttribute, LdapKey.USER_ACCOUNT_CONTROL)
+                .where(LdapKey.OBJECT_CATEGORY).is(LdapKey.USER)
+                .and(configService.ldapSearchAttribute).is(user.username)
+        return ldapTemplate.search(query, new UserAccountControlMapper())[0]
+    }
+
+    @Override
+    Map<UserAccountControl, Boolean> getAllUserAccountControlFlagsOfUser(User user) {
+        Integer value = getUserAccountControlOfUser(user)
+        if (value == null) {
+            return [:]
+        }
+        return UserAccountControl.values().collectEntries { UserAccountControl field ->
+            [(field): UserAccountControl.isSet(field, value)]
+        }
+    }
+
+    boolean getIsDeactivatedFromAttributes(Attributes attributes) {
+        if (processingOptionService.findOptionAsBoolean(ProcessingOption.OptionName.LDAP_RESPECT_DEACTIVATED_USER)) {
+            int uacValue = attributes.get(LdapKey.USER_ACCOUNT_CONTROL)?.get()?.toString()?.toInteger() ?: 0
+            return UserAccountControl.isSet(UserAccountControl.ACCOUNTDISABLE, uacValue)
+        }
+        return false
     }
 
     /**
@@ -243,47 +285,6 @@ class LdapService implements InitializingBean {
                 .where(LdapKey.OBJECT_CATEGORY).is(LdapKey.USER)
                 .and(configService.ldapSearchAttribute).is(user.username)
         return ldapTemplate.search(query, new IsUserDeactivatedMapper(ldapService: this))[0]
-    }
-
-    Boolean isUserDeactivated(User user) {
-        if (!user.username) {
-            return true
-        }
-
-        return isUserAccountDisabled(user) || isUserInDeletedUsersOu(user) || isUserAccountExpired(user)
-    }
-
-    boolean isUserInIdpAndActivated(User user) {
-        return (exists(user) && !isUserDeactivated(user))
-    }
-
-    Integer getUserAccountControlOfUser(User user) {
-        if (!user.username) {
-            return null
-        }
-        ContainerCriteria query = query()
-                .attributes(configService.ldapSearchAttribute, LdapKey.USER_ACCOUNT_CONTROL)
-                .where(LdapKey.OBJECT_CATEGORY).is(LdapKey.USER)
-                .and(configService.ldapSearchAttribute).is(user.username)
-        return ldapTemplate.search(query, new UserAccountControlMapper())[0]
-    }
-
-    Map<UserAccountControl, Boolean> getAllUserAccountControlFlagsOfUser(User user) {
-        Integer value = getUserAccountControlOfUser(user)
-        if (value == null) {
-            return [:]
-        }
-        return UserAccountControl.values().collectEntries { UserAccountControl field ->
-            [(field): UserAccountControl.isSet(field, value)]
-        }
-    }
-
-    boolean getIsDeactivatedFromAttributes(Attributes a) {
-        if (processingOptionService.findOptionAsBoolean(ProcessingOption.OptionName.LDAP_RESPECT_DEACTIVATED_USER)) {
-            int uacValue = a.get(LdapKey.USER_ACCOUNT_CONTROL)?.get()?.toString()?.toInteger() ?: 0
-            return UserAccountControl.isSet(UserAccountControl.ACCOUNTDISABLE, uacValue)
-        }
-        return false
     }
 
     /*
