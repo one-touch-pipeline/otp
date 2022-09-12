@@ -48,12 +48,12 @@ describe('Check workflow run list page', () => {
     });
 
     it('should set a failed workflow to failed final', () => {
-      cy.get('td button[name="Setfailedfinal"]').first().click();
+      cy.get('td button.failed-final-btn').first().click();
       cy.get('.toast-body').should('contain.text', 'success');
     });
 
     it('should restart a failed workflow step', () => {
-      cy.get('button[name="Restart"]').first().click();
+      cy.get('td button.restart-step-btn').first().click();
       cy.get('.toast-body').should('contain.text', 'success');
     });
 
@@ -64,7 +64,7 @@ describe('Check workflow run list page', () => {
     });
 
     it('should restart a failed workflow run', () => {
-      cy.get('button[name="Restartrun"]').first().click();
+      cy.get('td button.restart-run-btn').first().click();
       cy.get('.toast-body').should('contain.text', 'success');
     });
   });

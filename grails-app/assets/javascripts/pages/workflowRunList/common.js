@@ -56,11 +56,11 @@ const statusToClassName = function (status) {
 };
 
 // eslint-disable-next-line no-unused-vars
-const button = function (action, value, title, buttonsDisabled, icon) {
+const button = function (action, value, title, className, buttonsDisabled, icon) {
   'use strict';
 
-  return `<button class="btn btn-xs btn-primary" formaction="${action}"
-                  name="${title.replaceAll(' ', '')}" value="${value}" title="${title}" ${buttonsDisabled}>
+  return `<button class="btn btn-xs btn-primary ${className}"
+                  formaction="${action}" name="step" value="${value}" title="${title}" ${buttonsDisabled}>
             <i class="bi-${icon}"></i>
           </button>`;
 };

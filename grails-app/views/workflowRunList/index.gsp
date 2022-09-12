@@ -96,7 +96,8 @@
                     <button class="btn btn-primary" formaction="${g.createLink(action: "restartStep")}"
                             title="${g.message(code: "workflowRun.list.restartSteps")}"><i class="bi-reply"></i></button>
                     <button class="btn btn-primary" formaction="${g.createLink(action: "restartPreviousStep")}"
-                            title="${g.message(code: "workflowRun.list.restartPreviousSteps")}"><i class="bi-reply"></i> ${g.message(code: "workflowRun.list.previous")}</button>
+                            title="${g.message(code: "workflowRun.list.restartPreviousSteps")}"><i
+                            class="bi-reply"></i> ${g.message(code: "workflowRun.list.previous")}</button>
                     <button class="btn btn-primary" formaction="${g.createLink(action: "restartRun")}"
                             title="${g.message(code: "workflowRun.list.restartRuns")}"><i class="bi-reply-all"></i></button>
                 </div>

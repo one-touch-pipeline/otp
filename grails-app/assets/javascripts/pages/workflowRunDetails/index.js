@@ -23,11 +23,11 @@ $(() => {
   'use strict';
 
   /**
-     * Generate the child tables which can be opened by the show/hide button inside the steps table.
-     *
-     * @param rowData
-     * @returns {string}
-     */
+   * Generate the child tables which can be opened by the show/hide button inside the steps table.
+   *
+   * @param rowData
+   * @returns {string}
+   */
   function generateChildTables(rowData) {
     return generateClusterJobChildTable(rowData) + generateWorkflowChildTable(rowData);
   }
@@ -39,17 +39,17 @@ $(() => {
 
     let childTable = '<div class="p-3"><table class="table table-sm table-borderless p-3">';
     childTable +=
-          '<thead>' +
-          '<tr class="table-info">' +
-          '<th></th>' +
-          '<th>Job Name</th>' +
-          '<th>Job Id</th>' +
-          '<th></th>' +
-          '<th>Cluster Node</th>' +
-          '<th>Wall Time</th>' +
-          '<th>Exit Code</th>' +
-          '</tr>' +
-          '</thead>';
+      '<thead>' +
+      '<tr class="table-info">' +
+      '<th></th>' +
+      '<th>Job Name</th>' +
+      '<th>Job Id</th>' +
+      '<th></th>' +
+      '<th>Cluster Node</th>' +
+      '<th>Wall Time</th>' +
+      '<th>Exit Code</th>' +
+      '</tr>' +
+      '</thead>';
 
     childTable += '<tbody>';
 
@@ -113,13 +113,13 @@ $(() => {
   function generateWorkflowChildTable(rowData) {
     let childTable = '<div class="p-3"><table class="table table-sm table-borderless">';
     childTable +=
-          '<thead>' +
-          '<tr class="table-info">' +
-          '<th class="narrow-column">Type</th>' +
-          '<th class="wide-column"></th>' +
-          '<th class="narrow-column"></th>' +
-          '</tr>' +
-          '</thead>';
+      '<thead>' +
+      '<tr class="table-info">' +
+      '<th class="narrow-column">Type</th>' +
+      '<th class="wide-column"></th>' +
+      '<th class="narrow-column"></th>' +
+      '</tr>' +
+      '</thead>';
 
     childTable += '<tbody>';
 
@@ -166,11 +166,11 @@ $(() => {
   }
 
   /**
-     * Render the color and tooltip of the status circle for a single workflow step row.
-     *
-     * @param row with workflow step data
-     * @returns {string}
-     */
+   * Render the color and tooltip of the status circle for a single workflow step row.
+   *
+   * @param row with workflow step data
+   * @returns {string}
+   */
   function renderStepStatusCircle(row) {
     let cssClass = '';
 
@@ -204,16 +204,22 @@ $(() => {
           if (!row.error && !row.clusterJobs.length && !row.wes && !row.hasLogs) {
             return '';
           }
-          return "<button class='btn btn-xs btn-info details-control'>" +
-            "<i title='Show/hide details' class='bi bi-chevron-bar-expand'></i></button>";
+          return '<button class=\'btn btn-xs btn-info details-control\'>' +
+            '<i title=\'Show/hide details\' class=\'bi bi-chevron-bar-expand\'></i></button>';
         },
         orderable: false
       },
 
-      { data: 'name', orderable: false },
+      {
+        data: 'name',
+        orderable: false
+      },
       { data: 'dateCreated' },
       { data: 'lastUpdated' },
-      { data: 'duration', orderable: false },
+      {
+        data: 'duration',
+        orderable: false
+      },
       { data: 'id' },
       {
         data(row, type) {
@@ -231,7 +237,7 @@ $(() => {
             controller: 'workflowRunDetails',
             action: 'restartStep',
             parameters: { redirect: $.otp.uriWithParams }
-          }), row.id, 'Restart step', buttonsDisabled, 'reply');
+          }), row.id, 'Restart step', 'restart-step-btn', buttonsDisabled, 'reply');
           return `<form class="restart-step-form" method="POST" class="single">
                     ${restartStepButton}
                  </form>`;
@@ -274,8 +280,8 @@ $(() => {
   }
 
   /**
-     * Render the workflow configuration as JSON string.
-     */
+   * Render the workflow configuration as JSON string.
+   */
   function renderWorkflowConfiguration() {
     const configurationHolder = $('#configurationHolder');
     const configurationValue = configurationHolder.val();

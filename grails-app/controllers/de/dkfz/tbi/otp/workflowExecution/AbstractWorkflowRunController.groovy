@@ -45,6 +45,7 @@ abstract class AbstractWorkflowRunController implements CheckAndCall {
 
     def setFailedFinal(RunUpdateCommand cmd) {
         checkErrorAndCallMethodWithFlashMessageWithoutTokenCheck(cmd, "workflowRun.list.setFailed") {
+            assert cmd.step: 'No steps defined.'
             workflowStateChangeService.changeStateToFinalFailed(cmd.step.collect { WorkflowStep.get(it) })
         }
         redirect uri: cmd.redirect
@@ -52,6 +53,7 @@ abstract class AbstractWorkflowRunController implements CheckAndCall {
 
     def restartStep(RunUpdateCommand cmd) {
         checkErrorAndCallMethodWithFlashMessageWithoutTokenCheck(cmd, "workflowRun.list.restartSteps") {
+            assert cmd.step: 'No steps defined.'
             jobService.createRestartedJobAfterJobFailures(cmd.step.collect { WorkflowStep.get(it) })
         }
         redirect uri: cmd.redirect
@@ -59,6 +61,7 @@ abstract class AbstractWorkflowRunController implements CheckAndCall {
 
     def restartPreviousStep(RunUpdateCommand cmd) {
         checkErrorAndCallMethodWithFlashMessageWithoutTokenCheck(cmd, "workflowRun.list.restartSteps") {
+            assert cmd.step: 'No steps defined.'
             jobService.createRestartedPreviousJobAfterJobFailures(cmd.step.collect { WorkflowStep.get(it) })
         }
         redirect uri: cmd.redirect
@@ -66,6 +69,7 @@ abstract class AbstractWorkflowRunController implements CheckAndCall {
 
     def restartRun(RunUpdateCommand cmd) {
         checkErrorAndCallMethodWithFlashMessageWithoutTokenCheck(cmd, "workflowRun.list.restartRuns") {
+            assert cmd.step: 'No steps defined.'
             workflowService.createRestartedWorkflows(cmd.step.collect { WorkflowStep.get(it) })
         }
         redirect uri: cmd.redirect

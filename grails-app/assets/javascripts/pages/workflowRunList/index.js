@@ -101,6 +101,7 @@ $(() => {
             }),
             row.stepId,
             'Set failed final',
+            'failed-final-btn',
             buttonsDisabled,
             'file-earmark-x'
           );
@@ -109,7 +110,8 @@ $(() => {
               controller: 'workflowRunList', action: 'restartStep'
             }),
             row.stepId,
-            `Restart "${row.step}" step`,
+            `Restart ${row.step} step`,
+            'restart-step-btn',
             buttonsDisabled,
             'reply'
           );
@@ -119,6 +121,7 @@ $(() => {
             }),
             row.stepId,
             'Restart run',
+            'restart-run-btn',
             buttonsDisabled,
             'reply-all'
           );
