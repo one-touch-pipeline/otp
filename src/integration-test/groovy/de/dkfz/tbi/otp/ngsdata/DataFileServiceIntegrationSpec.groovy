@@ -27,7 +27,6 @@ import grails.gorm.transactions.Rollback
 import spock.lang.Specification
 import spock.lang.Unroll
 
-import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.UserAndRoles
@@ -65,9 +64,25 @@ class DataFileServiceIntegrationSpec extends Specification implements UserAndRol
         when:
         List<DataFile> result = SpringSecurityUtils.doWithAuth(ADMIN) {
             dataFileService.getAllDataFilesOfProject(project)
-        }
+        } as List<DataFile>
 
         then:
-        TestCase.assertContainSame(expected, result)
+        dataFilesContentIsEqual(result[0], expected[0])
+        dataFilesContentIsEqual(result[1], expected[1])
+    }
+
+    private boolean dataFilesContentIsEqual(DataFile file1, DataFile file2) {
+        return file1.withdrawnComment == file2.withdrawnComment &&
+                file1.fileWithdrawn == file2.fileWithdrawn &&
+                file1.seqTrack.sampleIdentifier == file2.seqTrack.sampleIdentifier &&
+                file1.seqTrack.sample.individual.id == file2.seqTrack.sample.individual.id &&
+                file1.seqTrack.sample.individual.mockFullName == file2.seqTrack.sample.individual.mockFullName &&
+                file1.seqTrack.sample.sampleType.id == file2.seqTrack.sample.sampleType.id &&
+                file1.seqTrack.sample.sampleType.name == file2.seqTrack.sample.sampleType.name &&
+                file1.seqTrack.seqType.displayNameWithLibraryLayout == file2.seqTrack.seqType.displayNameWithLibraryLayout &&
+                file1.seqTrack.seqType.libraryLayout == file2.seqTrack.seqType.libraryLayout &&
+                file1.seqTrack.seqType.singleCell == file2.seqTrack.seqType.singleCell &&
+                file1.seqTrack.seqType.displayName == file2.seqTrack.seqType.displayName &&
+                file1.seqTrack.seqType.id == file2.seqTrack.seqType.id
     }
 }
