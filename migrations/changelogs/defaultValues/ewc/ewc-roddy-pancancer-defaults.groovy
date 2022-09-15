@@ -1,11 +1,6 @@
 
 databaseChangeLog = {
 
-    changeSet(author: "", id: "pancancer-defaults-0", runOnChange: "true") {
-        sqlFile(path: 'changelogs/defaultValues/ewc/ewc-roddy-pancancer-cvalue-1.2.182.sql')
-    }
-
-
     changeSet(author: "", id: "pancancer-defaults-1", runOnChange: "true") {
         sqlFile(path: 'changelogs/defaultValues/ewc/ewc-roddy-pancancer-cvalue-1.2.73-1+1.2.73-201.sql')
     }
@@ -18,11 +13,6 @@ databaseChangeLog = {
 
     changeSet(author: "", id: "pancancer-defaults-3", runOnChange: "true") {
         sqlFile(path: 'changelogs/defaultValues/ewc/ewc-roddy-pancancer-cvalue-1.2.73-204.sql')
-    }
-
-
-    changeSet(author: "", id: "pancancer-defaults-4", runOnChange: "true") {
-        sqlFile(path: 'changelogs/defaultValues/ewc/ewc-roddy-pancancer-cvalue-EXON-1.2.182.sql')
     }
 
 
@@ -46,11 +36,6 @@ databaseChangeLog = {
     }
 
 
-    changeSet(author: "", id: "pancancer-defaults-9", runOnChange: "true") {
-        sqlFile(path: 'changelogs/defaultValues/ewc/ewc-roddy-pancancer-filenames-1.2.182.sql')
-    }
-
-
     changeSet(author: "", id: "pancancer-defaults-10", runOnChange: "true") {
         sqlFile(path: 'changelogs/defaultValues/ewc/ewc-roddy-pancancer-filenames-ChIPSeq-1.2.73-1+1.2.73-201+1.2.73-204.sql')
     }
@@ -71,11 +56,6 @@ databaseChangeLog = {
     }
 
 
-    changeSet(author: "", id: "pancancer-defaults-14", runOnChange: "true") {
-        sqlFile(path: 'changelogs/defaultValues/ewc/ewc-roddy-pancancer-resources-1.2.182.sql')
-    }
-
-
     changeSet(author: "", id: "pancancer-defaults-15", runOnChange: "true") {
         sqlFile(path: 'changelogs/defaultValues/ewc/ewc-roddy-pancancer-resources-1.2.73-1+1.2.73-201+1.2.73-204.sql')
     }
@@ -91,11 +71,6 @@ databaseChangeLog = {
     }
 
 
-    changeSet(author: "", id: "pancancer-defaults-18", runOnChange: "true") {
-        sqlFile(path: 'changelogs/defaultValues/ewc/ewc-roddy-pancancer-resources-EXON-1.2.182.sql')
-    }
-
-
     changeSet(author: "", id: "pancancer-defaults-19", runOnChange: "true") {
         sqlFile(path: 'changelogs/defaultValues/ewc/ewc-roddy-pancancer-resources-EXON-1.2.73-1+1.2.73-201+1.2.73-204.sql')
     }
@@ -103,11 +78,6 @@ databaseChangeLog = {
 
     changeSet(author: "", id: "pancancer-defaults-20", runOnChange: "true") {
         sqlFile(path: 'changelogs/defaultValues/ewc/ewc-roddy-pancancer-resources-EXON-1.2.73-202.sql')
-    }
-
-
-    changeSet(author: "", id: "pancancer-defaults-21", runOnChange: "true") {
-        sqlFile(path: 'changelogs/defaultValues/ewc/ewc-roddy-pancancer-resources-WHOLE_GENOME-1.2.182.sql')
     }
 
 

@@ -20,7 +20,6 @@
  * SOFTWARE.
  */
 
-
 import groovy.json.JsonOutput
 import groovy.transform.Field
 import groovyx.gpars.GParsPool
@@ -78,10 +77,10 @@ Realm realm = configService.defaultRealm
 FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
 
 @Field
-Semaphore semaphore = new Semaphore(5)
+Semaphore semaphore = new Semaphore(10)
 
 @Field
-int parallel = 10
+int parallel = 20
 
 String loadModule = processingOptionService.findOptionAsString(ProcessingOption.OptionName.COMMAND_LOAD_MODULE_LOADER)
 String activateJava = processingOptionService.findOptionAsString(ProcessingOption.OptionName.COMMAND_ACTIVATION_JAVA)
@@ -146,6 +145,16 @@ ${output.stderr}
                 it.key,
                 it.value,
         ].join(' = ')
+    }.findAll {
+        /**
+         * remove two false positives:
+         * - remove empty lines
+         * - workflowEnvironmentScript: is set in old workflow system via resource set, not used by printidlessruntimeconfig,
+         *   therefore the value for old are always wrong. Remove it reduce wrong output
+         * - USERGROUP: is getting from system, but do it for so often cause many values. Therefore remove it to reduce output.
+         */
+        it && !it.startsWith('workflowEnvironmentScript') &&
+                !it.startsWith('USERGROUP =')
     }.sort()
 
     fileService.createFileWithContent(extractedOutput, result.join('\n') + '\n', realm)
@@ -182,7 +191,10 @@ GParsPool.withPool(parallel) {
                 ])
 
                 //base directory
-                work = base.resolve("${roddyWorkflowConfig.project.name} ${roddyWorkflowConfig.seqType.displayNameWithLibraryLayout}".replaceAll('[^a-zA-Z0-9_]', '-'))
+                String projectName = "${roddyWorkflowConfig.project.name} ${roddyWorkflowConfig.seqType.displayNameWithLibraryLayout}".replaceAll(
+                        '[^a-zA-Z0-9_]', '-')
+                String plugin = roddyWorkflowConfig.programVersion.split(':')[1]
+                work = base.resolve(plugin).resolve(projectName)
                 fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(work, realm)
 
                 //-------------
@@ -220,7 +232,7 @@ GParsPool.withPool(parallel) {
                 //parameter
                 String combinedConfig = fragmentJson
                 Map<String, String> specificConfig = [:]
-                String workflowName = "AlignmentAndQCWorkflows"
+                String workflowName = workflowVersion.workflowVersion == "1.2.182" ? "QualityControlWorkflows" : "AlignmentAndQCWorkflows"
                 String analysisConfiguration = roddyWorkflowConfig.seqType.needsBedFile ? 'exomeAnalysis' : 'qcAnalysis'
                 Path inputDir = fileSystem.getPath('$USERHOME/temp/testproject/vbp')//value taken from roddy base config to have no difference
                 Path outputDir = fileSystem.getPath('$USERHOME/temp/testproject/rpp')//value taken from roddy base config to have no difference
@@ -300,7 +312,7 @@ ${c2Set*.toString().sort().join('\n')}
             String stacktrace = StackTraceUtils.getStackTrace(t)
             out << "\n Exception:"
             out << stacktrace
-            Path exceptionOut = work ? work.resolve('44-exception'): base.resolve("exceptionOut-${roddyWorkflowConfig.id}")
+            Path exceptionOut = work ? work.resolve('44-exception') : base.resolve("exceptionOut-${roddyWorkflowConfig.id}")
             fileService.createFileWithContent(exceptionOut, stacktrace, realm)
         }
         return out.join('\n')

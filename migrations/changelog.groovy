@@ -697,4 +697,9 @@ databaseChangeLog = {
     changeSet(author: "", id: "otp-1771") {
         sqlFile(path: 'changelogs/2022/otp-1771-delete-old-defaults.sql')
     }
+
+    changeSet(author: "", id: "otp-1772") {
+        sqlFile(path: 'changelogs/2022/otp-1772-delete-defaults-for-version-1-2-182.sql')
+    }
+
 }
