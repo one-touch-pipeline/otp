@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.gorm.transactions.Transactional
+import org.hibernate.transform.ResultTransformer
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.project.Project
@@ -39,6 +40,59 @@ class DataFileService {
                     }
                 }
             }
+
+            projections {
+                property("withdrawnComment")
+                property("fileWithdrawn")
+
+                seqTrack {
+                    property("sampleIdentifier")
+                    sample {
+                        individual {
+                            property("id")
+                            property("mockFullName")
+                        }
+                        sampleType {
+                            property("id")
+                            property("name")
+                        }
+                    }
+                    seqType {
+                        property("id")
+                        property("displayName")
+                        property("singleCell")
+                        property("libraryLayout")
+                    }
+                }
+            }
+            resultTransformer(new ResultTransformer() {
+                @Override
+                DataFile transformTuple(Object[] tuple, String[] aliases) {
+                    DataFile dataFile = new DataFile()
+                    dataFile.withdrawnComment = tuple[0]
+                    dataFile.fileWithdrawn = tuple[1]
+                    dataFile.seqTrack = new SeqTrack()
+                    dataFile.seqTrack.sampleIdentifier = tuple[2]
+                    dataFile.seqTrack.sample = new Sample()
+                    dataFile.seqTrack.sample.individual = new Individual()
+                    dataFile.seqTrack.sample.individual.id = tuple[3] as Long
+                    dataFile.seqTrack.sample.individual.mockFullName = tuple[4]
+                    dataFile.seqTrack.sample.sampleType = new SampleType()
+                    dataFile.seqTrack.sample.sampleType.id = tuple[5] as Long
+                    dataFile.seqTrack.sample.sampleType.name = tuple[6]
+                    dataFile.seqTrack.seqType = new SeqType()
+                    dataFile.seqTrack.seqType.id = tuple[7] as long
+                    dataFile.seqTrack.seqType.displayName = tuple[8]
+                    dataFile.seqTrack.seqType.singleCell = tuple[9]
+                    dataFile.seqTrack.seqType.libraryLayout = tuple[10] as SequencingReadType
+                    return dataFile
+                }
+
+                @Override
+                List transformList(List collection) {
+                    return collection
+                }
+            })
         } as List<DataFile>
     }
 
