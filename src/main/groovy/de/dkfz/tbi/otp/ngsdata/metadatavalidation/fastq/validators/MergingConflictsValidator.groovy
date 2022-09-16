@@ -81,16 +81,19 @@ class MergingConflictsValidator extends ValueTuplesValidator<MetadataValidationC
     void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> valueTuples) {
         valueTuples.groupBy { values ->
             SeqType seqType = validatorHelperService.getSeqTypeFromMetadata(values)
+            if (!seqType) {
+                return null
+            }
 
             return new MwpDetermingValues(
                     validatorHelperService.getPid(values),
                     validatorHelperService.getSampleType(values),
                     seqType,
-                    seqType ? validatorHelperService.findAntibodyTarget(values, seqType) : null,
+                    validatorHelperService.findAntibodyTarget(values, seqType),
                     validatorHelperService.getMergingCriteria(values, seqType),
             )
         }.findAll { key, values ->
-            key.individual && key.sampleType && key.seqType
+            key && key.individual && key.sampleType
         }.findAll { key, values ->
             values.collect { ValueTuple valueTuple ->
                 validatorHelperService.findSeqPlatformGroup(valueTuple, key.seqType) ?: validatorHelperService.findSeqPlatform(valueTuple)

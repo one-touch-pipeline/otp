@@ -21,8 +21,8 @@
  */
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 
-import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import spock.lang.Specification
 
 import de.dkfz.tbi.TestCase
@@ -48,17 +48,17 @@ class MergingConflictsValidatorIntegrationSpec extends Specification implements 
     void setup() {
         validator = new MergingConflictsValidator([
                 validatorHelperService: new ValidatorHelperService([
-                        antibodyTargetService       : new AntibodyTargetService(),
-                        sampleIdentifierService     : Spy(SampleIdentifierService) {
+                        antibodyTargetService  : new AntibodyTargetService(),
+                        sampleIdentifierService: Spy(SampleIdentifierService) {
                             _ * getSampleIdentifierParser(_) >> { SampleIdentifierParserBeanName sampleIdentifierParserBeanName ->
                                 new TestSampleIdentifierParser()
                             }
                         },
-                        seqPlatformService          : new SeqPlatformService([
+                        seqPlatformService     : new SeqPlatformService([
                                 seqPlatformModelLabelService: new SeqPlatformModelLabelService(),
                                 sequencingKitLabelService   : new SequencingKitLabelService()
                         ]),
-                        seqTypeService              : new SeqTypeService(),
+                        seqTypeService         : new SeqTypeService(),
                 ]),
         ])
     }
@@ -215,6 +215,42 @@ class MergingConflictsValidatorIntegrationSpec extends Specification implements 
 
         then:
         Collection<Problem> expectedProblems = []
+        TestCase.assertContainSame(expectedProblems, context.problems)
+    }
+
+    void "validate success without warning when seqType is not found"() {
+        given:
+        DomainFactory.createRoddyAlignableSeqTypes()
+        DomainFactory.createCellRangerAlignableSeqTypes()
+
+        Project project = createProject(sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.DEEP)
+        Individual individual = createIndividual(project: project)
+
+        Sample sample1 = createSample(individual: individual)
+        SeqType seqType1 = DomainFactory.proxyCellRanger.createSeqType()
+        DomainFactory.createSampleIdentifier(sample: sample1, name: "sample1")
+
+        SeqPlatform seqPlatform = createSeqPlatform()
+        LibraryPreparationKit libraryPreparationKit = createLibraryPreparationKit()
+
+        String furtherValues = [
+                seqPlatform.name,
+                seqPlatform.seqPlatformModelLabel,
+                "",
+                libraryPreparationKit.name,
+        ].join('\t')
+
+        MetadataValidationContext context = MetadataValidationContextFactory.createContext(
+                "${SAMPLE_NAME}\t${SEQUENCING_TYPE}\t${SEQUENCING_READ_TYPE}\t${PROJECT}\t${BASE_MATERIAL}\t${ANTIBODY_TARGET}\t${INSTRUMENT_PLATFORM}\t${INSTRUMENT_MODEL}\t${SEQUENCING_KIT}\t${LIB_PREP_KIT}\n" +
+                        "sample1\tUnknownSeqType\t${seqType1.libraryLayout.name()}\t\t\t\t${furtherValues}\n"
+        )
+
+        when:
+        validator.validate(context)
+
+        then:
+        Collection<Problem> expectedProblems = []
+
         TestCase.assertContainSame(expectedProblems, context.problems)
     }
 }
