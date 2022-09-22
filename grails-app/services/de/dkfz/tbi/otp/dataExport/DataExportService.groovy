@@ -121,6 +121,9 @@ class DataExportService {
                 }
             }
         }
+        if (dataExportInput.unixGroup) {
+            scriptFileBuilder.append("chgrp -R ${dataExportInput.unixGroup} ${copyTargetBase}${dataExportInput.targetFolder}\n")
+        }
     }
 
     private final Closure exportBamFilesClosure = { dataExportInput, scriptFileBuilder, scriptListBuilder, consoleBuilder, copyConnection, copyTargetBase ->
@@ -182,6 +185,9 @@ class DataExportService {
                 }
             }
         }
+        if (dataExportInput.unixGroup) {
+            scriptFileBuilder.append("chgrp -R ${dataExportInput.unixGroup} ${copyTargetBase}${dataExportInput.targetFolder}}\n")
+        }
     }
 
     private final Closure exportAnalysisFilesClosure = { dataExportInput, scriptFileBuilder, scriptListBuilder,
@@ -218,6 +224,9 @@ class DataExportService {
                     }
                 }
             }
+        }
+        if (dataExportInput.unixGroup) {
+            scriptFileBuilder.append("chgrp -R ${dataExportInput.unixGroup} ${copyTargetBase}${dataExportInput.targetFolder}}\n")
         }
     }
 
