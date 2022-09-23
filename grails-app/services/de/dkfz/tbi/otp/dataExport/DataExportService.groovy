@@ -186,7 +186,7 @@ class DataExportService {
             }
         }
         if (dataExportInput.unixGroup) {
-            scriptFileBuilder.append("chgrp -R ${dataExportInput.unixGroup} ${copyTargetBase}${dataExportInput.targetFolder}}\n")
+            scriptFileBuilder.append("chgrp -R ${dataExportInput.unixGroup} ${copyTargetBase}${dataExportInput.targetFolder}\n")
         }
     }
 
@@ -226,7 +226,7 @@ class DataExportService {
             }
         }
         if (dataExportInput.unixGroup) {
-            scriptFileBuilder.append("chgrp -R ${dataExportInput.unixGroup} ${copyTargetBase}${dataExportInput.targetFolder}}\n")
+            scriptFileBuilder.append("chgrp -R ${dataExportInput.unixGroup} ${copyTargetBase}${dataExportInput.targetFolder}\n")
         }
     }
 
