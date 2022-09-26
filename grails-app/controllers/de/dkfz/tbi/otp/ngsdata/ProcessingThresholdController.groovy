@@ -97,6 +97,15 @@ class ProcessingThresholdController {
     def update(ProcThresholdsCommand cmd) {
         assert cmd.validate()
         Project project = projectSelectionService.requestedProject
+
+        // Find the modified sampleTypes
+        Map<SampleType, SampleTypePerProject.Category> categories = sampleTypePerProjectService.findByProject(project).collectEntries {
+            [it.sampleType, it.category]
+        }
+        Set<SampleType> sampleTypesChanged = cmd.sampleTypes.findAll { ProcThresholdSampleTypeCommand sampleType ->
+            return sampleType.category != categories[sampleType.sampleType]
+        }*.sampleType
+
         Project.withTransaction {
             cmd.sampleTypes.each { ProcThresholdSampleTypeCommand sampleType ->
                 sampleTypePerProjectService.createOrUpdate(project, sampleType.sampleType, sampleType.category)
@@ -107,7 +116,9 @@ class ProcessingThresholdController {
                 }
             }
         }
-        samplePairDeciderService.findOrCreateSamplePairsForProject(project)
+
+        // Sample pairs are created only if their sample types have been changed
+        samplePairDeciderService.createSamplePairs(project, sampleTypesChanged)
         flash.message = new FlashMessage("success")
         redirect(action: "index")
     }

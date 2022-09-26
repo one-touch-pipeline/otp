@@ -63,6 +63,31 @@ class SamplePairDeciderService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    List<SamplePair> createSamplePairs(Project project, Set<SampleType> sampleTypes) {
+        if (!sampleTypes) {
+            return []
+        }
+
+        final String hql = """
+            select
+                mwp
+            from
+                AbstractMergingWorkPackage mwp
+            where
+                mwp.sample.individual.project = :project
+                and mwp.seqType in :seqTypes
+                and mwp.sample.sampleType in :sampleTypes
+            """
+
+        List<AbstractMergingWorkPackage> mergingWorkPackages = AbstractMergingWorkPackage.executeQuery(hql, [
+                project    : project,
+                seqTypes   : SeqTypeService.allAnalysableSeqTypes,
+                sampleTypes: sampleTypes,
+        ])
+        return findOrCreateSamplePairs(mergingWorkPackages)
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
     List<SamplePair> findOrCreateSamplePairs(Collection<AbstractMergingWorkPackage> mergingWorkPackages) {
         assert mergingWorkPackages != null
 
