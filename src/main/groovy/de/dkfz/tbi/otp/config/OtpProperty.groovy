@@ -84,7 +84,7 @@ enum OtpProperty {
 
     CONFIG_JOB_SYSTEM_START('otp.jobsystem.start', TypeValidators.BOOLEAN, EnumSet.of(UsedIn.PRODUCTION), 'false'),
     CONFIG_SERVER_URL('otp.server.url', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.PRODUCTION)),
-    CONFIG_ENVIRONMENT_NAME('otp.environment.name', TypeValidators.SINGLE_LINE_TEXT_OPTIONAL, EnumSet.of(UsedIn.PRODUCTION), Environment.current.name),
+    CONFIG_ENVIRONMENT_NAME('otp.environment.name', TypeValidators.SINGLE_LINE_TEXT_OPTIONAL, EnumSet.of(UsedIn.PRODUCTION), null),
     CONFIG_AUTO_IMPORT_SECRET('otp.autoimport.secret', TypeValidators.SINGLE_LINE_TEXT_OPTIONAL, EnumSet.of(UsedIn.PRODUCTION), ''),
     CONFIG_SECURECHANNEL_HEADERCHECK('otp.securechannel.headercheck.enabled', TypeValidators.BOOLEAN, EnumSet.of(UsedIn.PRODUCTION), 'false'),
 

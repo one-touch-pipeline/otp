@@ -229,6 +229,11 @@ dependencies {
     // JDBC
     runtime 'org.postgresql:postgresql:42.3.3'
 
+    // Conditional processing in logback configuration files
+    implementation 'org.codehaus.janino:janino:3.0.6'
+    // required for Grails 4
+    compile 'org.codehaus.janino:janino:3.0.6'
+
     // Dicom Audit Logging
     if (Environment.isDevelopmentMode()) {
         compile "com.gitlab.one-touch-pipeline:dicom-audit-trail-impl:v1.1.0-NOP"

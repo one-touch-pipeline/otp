@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright 2011-2022 The OTP authors
+  ~
+  ~ Permission is hereby granted, free of charge, to any person obtaining a copy
+  ~ of this software and associated documentation files (the "Software"), to deal
+  ~ in the Software without restriction, including without limitation the rights
+  ~ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  ~ copies of the Software, and to permit persons to whom the Software is
+  ~ furnished to do so, subject to the following conditions:
+  ~
+  ~ The above copyright notice and this permission notice shall be included in all
+  ~ copies or substantial portions of the Software.
+  ~
+  ~ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  ~ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  ~ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  ~ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  ~ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  ~ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  ~ SOFTWARE.
+  -->
+
+<configuration>
+
+    <conversionRule conversionWord="clr" converterClass="org.springframework.boot.logging.logback.ColorConverter" />
+    <conversionRule conversionWord="wex" converterClass="org.springframework.boot.logging.logback.WhitespaceThrowableProxyConverter" />
+
+
+    <variable name="defaultPattern" value="%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(%5p) %clr(---){faint} %clr([%25.25t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n%wex" />
+
+    <define name="isDevelopmentMode" class="de.dkfz.tbi.otp.utils.logging.EnvironmentDefiner">
+        <key>isDevelopmentMode</key>
+    </define>
+    <define name="isProductionEnvironment" class="de.dkfz.tbi.otp.utils.logging.EnvironmentDefiner">
+        <key>isProductionEnvironment</key>
+    </define>
+    <define name="isWorkflowTestEnvironment" class="de.dkfz.tbi.otp.utils.logging.EnvironmentDefiner">
+        <key>isWorkflowTestEnvironment</key>
+    </define>
+
+    <define name="targetDir" class="de.dkfz.tbi.otp.utils.logging.TargetDirDefiner"/>
+    <define name="jobLogDir" class="de.dkfz.tbi.otp.utils.logging.JobLogDirDefiner"/>
+
+    <define name="targetDirExists" class="ch.qos.logback.core.property.FileExistsPropertyDefiner">
+        <path>${targetDir}</path>
+    </define>
+
+
+    <if condition='p("isProductionEnvironment").equals("false")'>
+        <then>
+            <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+                <encoder>
+                    <charset>UTF-8</charset>
+                    <pattern>${defaultPattern}</pattern>
+                </encoder>
+            </appender>
+        </then>
+        <else>
+            <appender name="STDOUT" class="ch.qos.logback.core.helpers.NOPAppender">
+            </appender>
+        </else>
+    </if>
+
+    <if condition='p("isDevelopmentMode").equals("true") &amp;&amp; p("targetDirExists").equals("true")'>
+        <then>
+            <appender name="FULL_STACKTRACE" class="ch.qos.logback.core.FileAppender">
+                <file>${targetDir}/stacktrace.log</file>
+                <append>true</append>
+                <encoder>
+                    <pattern>%d %-5level %logger{35} - %msg %n</pattern>
+                </encoder>
+            </appender>
+            <logger name="StackTrace" level="ERROR" additivity="false">
+                 <appender-ref ref="FULL_STACKTRACE"/>
+            </logger>
+        </then>
+    </if>
+
+    <appender name="OTP" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <append>true</append>
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>${defaultPattern}</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>logs/OTP-%d{yyyy-MM-dd}.log</fileNamePattern>
+        </rollingPolicy>
+    </appender>
+
+    <appender name="WAIT_TO_FILE_SYSTEM" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <append>true</append>
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>${defaultPattern}</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>logs/WAIT_TO_FILE_SYSTEM-%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>7</maxHistory>
+            <totalSizeCap>1GB</totalSizeCap>
+        </rollingPolicy>
+    </appender>
+
+    <!--
+    This configuration creates a separate log file for each job execution (= processing step).
+    It requires that the logging context is set, which is done in the SchedulerService.
+    -->
+    <appender name="JOBS" class="ch.qos.logback.classic.sift.SiftingAppender">
+        <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
+            <evaluator class="ch.qos.logback.classic.boolex.JaninoEventEvaluator">
+                <expression>
+                    return mdc.containsKey("PROCESS_AND_JOB_ID");
+                </expression>
+            </evaluator>
+            <onMismatch>DENY</onMismatch>
+            <onMatch>ACCEPT</onMatch>
+        </filter>
+        <discriminator class="ch.qos.logback.classic.sift.MDCBasedDiscriminator">
+            <key>PROCESS_AND_JOB_ID</key>
+            <defaultValue>THIS_FILE_SHOULD_NOT_EXIST</defaultValue><!--this shouldn't happen but defaultValue is required-->
+        </discriminator>
+        <sift>
+            <appender name="JOB-%X{PROCESS_AND_JOB_ID}" class="ch.qos.logback.core.FileAppender">
+                <file>${jobLogDir}/%X{PROCESS_AND_JOB_ID}.log</file>
+                <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+                    <layout class="de.dkfz.tbi.otp.utils.logging.ContentOnlyHtmlLayout">
+                        <pattern>%date%level%logger{0}%msg</pattern>
+                    </layout>
+                </encoder>
+            </appender>
+        </sift>
+    </appender>
+    <appender name="STARTJOBS" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
+            <evaluator class="ch.qos.logback.classic.boolex.JaninoEventEvaluator">
+                <expression>
+                    return mdc.containsKey("PROCESS_AND_JOB_ID");
+                </expression>
+            </evaluator>
+            <onMismatch>ACCEPT</onMismatch>
+            <onMatch>DENY</onMatch>
+        </filter>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- daily rollover, keeping seven days of logs-->
+            <fileNamePattern>${jobLogDir}/startjobs/%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>7</maxHistory>
+        </rollingPolicy>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>%date %level %-40.40logger{39} : %msg%n</pattern>
+        </encoder>
+    </appender>
+    <logger name="de.dkfz.tbi.otp.job.jobs" level="DEBUG" additivity="${isWorkflowTestEnvironment}">
+        <appender-ref ref="JOBS" />
+        <appender-ref ref="STARTJOBS" />
+    </logger>
+
+    <logger name="de.dkfz.tbi.otp.infrastructure.FileService.WAITING" level="DEBUG" additivity="false">
+        <appender-ref ref="WAIT_TO_FILE_SYSTEM" />
+    </logger>
+
+    <logger name="de.dkfz.tbi.otp" level="DEBUG" additivity="false">
+        <appender-ref ref="OTP" />
+        <appender-ref ref="STDOUT" />
+    </logger>
+    <logger name="liquibase" level="INFO" additivity="false">
+        <appender-ref ref="OTP" />
+        <appender-ref ref="STDOUT" />
+    </logger>
+    <logger name="grails.plugin.databasemigration" level="INFO" additivity="false">
+        <appender-ref ref="OTP" />
+        <appender-ref ref="STDOUT" />
+    </logger>
+    <logger name="org.hibernate.SQL" level="ERROR" additivity="false">
+        <appender-ref ref="OTP" />
+        <appender-ref ref="STDOUT" />
+    </logger>
+    <logger name="de.dkfz.roddy.execution.jobs.cluster" level="DEBUG" additivity="false">
+        <appender-ref ref="OTP" />
+        <appender-ref ref="STDOUT" />
+    </logger>
+
+    <root level="error">
+        <appender-ref ref="OTP" />
+        <appender-ref ref="STDOUT" />
+    </root>
+</configuration>
