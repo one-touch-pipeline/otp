@@ -21,8 +21,8 @@
  */
 package de.dkfz.tbi.otp.utils
 
-import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
@@ -145,6 +145,39 @@ class WorkflowDeletionServiceIntegrationSpec extends Specification implements Wo
 
         then:
         ReferenceGenomeSelector.count == 0
+    }
+
+    void "deleteWorkflowRun, should delete all WorkflowRun to corresponding project"() {
+        given:
+        Project project = createProject()
+
+        WorkflowArtefact workflowArtefact = createWorkflowArtefact([
+                producedBy: createWorkflowRun([
+                        project      : project,
+                        restartedFrom: createWorkflowRun([
+                                project: project,
+                        ]),
+                ])
+        ])
+
+        createWorkflowRunInputArtefact([
+                workflowArtefact: workflowArtefact,
+                workflowRun     : createWorkflowRun([
+                        project: project,
+                ])
+        ])
+
+        createWorkflowSteps(createWorkflowRun([
+                project: project,
+        ]))
+
+        when:
+        workflowDeletionService.deleteWorkflowRun(project)
+
+        then:
+        WorkflowRun.count == 0
+        WorkflowStep.count == 0
+        WorkflowArtefact.count == 0
     }
 
     private WorkflowRunInputArtefact createWorkflowArtefactAndRun() {

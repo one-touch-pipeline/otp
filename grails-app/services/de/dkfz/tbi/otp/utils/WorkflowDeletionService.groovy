@@ -41,6 +41,10 @@ class WorkflowDeletionService {
             deleteWorkflowArtefact(it)
         }
 
+        WorkflowRunInputArtefact.findAllByWorkflowRun(workflowRun).each {
+            it.delete(flush: true)
+        }
+
         OmittedMessage omittedMessage = workflowRun.omittedMessage
 
         workflowRun.delete(flush: true)
@@ -50,9 +54,7 @@ class WorkflowDeletionService {
 
     void deleteWorkflowArtefact(WorkflowArtefact workflowArtefact) {
         WorkflowRunInputArtefact.findAllByWorkflowArtefact(workflowArtefact).each {
-            WorkflowRun workflowRun = it.workflowRun
-            it.delete(flush: true)
-            deleteWorkflowRun(workflowRun)
+            deleteWorkflowRun(it.workflowRun)
         }
         workflowArtefact.artefact.ifPresent { it.delete(flush: true) }
         workflowArtefact.delete(flush: true)
@@ -104,5 +106,11 @@ class WorkflowDeletionService {
         ReferenceGenomeSelector.findAllByProject(project)
                 .sort { -it.id }
                 .each { it.delete(flush: true) }
+    }
+
+    void deleteWorkflowRun(Project project) {
+        WorkflowRun.findAllByProject(project)
+                .sort { -it.id }
+                .each { deleteWorkflowRun(it) }
     }
 }

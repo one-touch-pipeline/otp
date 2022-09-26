@@ -24,7 +24,6 @@ package de.dkfz.tbi.otp.utils
 import grails.gorm.transactions.Transactional
 
 import de.dkfz.tbi.otp.CommentService
-import de.dkfz.tbi.otp.utils.exceptions.FileNotFoundException
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerMergingWorkPackage
@@ -42,6 +41,7 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectInfo
 import de.dkfz.tbi.otp.project.dta.DataTransferAgreement
 import de.dkfz.tbi.otp.qcTrafficLight.QcThreshold
+import de.dkfz.tbi.otp.utils.exceptions.FileNotFoundException
 import de.dkfz.tbi.otp.workflowExecution.ExternalWorkflowConfigSelector
 
 import java.nio.file.Files
@@ -87,6 +87,8 @@ class DeletionService {
         workflowDeletionService.deleteWorkflowVersionSelector(project)
 
         workflowDeletionService.deleteReferenceGenomeSelector(project)
+
+        workflowDeletionService.deleteWorkflowRun(project)
 
         // remove project from ExternalWorkflowConfigSelector or delete selector completely
         deleteProjectsExternalWorkflowConfigSelector(project)

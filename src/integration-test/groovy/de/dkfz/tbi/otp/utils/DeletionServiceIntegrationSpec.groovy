@@ -21,8 +21,8 @@
  */
 package de.dkfz.tbi.otp.utils
 
-import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.*
@@ -59,7 +59,7 @@ class DeletionServiceIntegrationSpec extends Specification implements EgaSubmiss
     String vbpDir = "/vbp-dir"
 
     void setupData() {
-        IndividualService individualService =  Mock(IndividualService) {
+        IndividualService individualService = Mock(IndividualService) {
             getViewByPidPath(_, _) >> Paths.get(vbpDir)
         }
 
@@ -127,6 +127,9 @@ class DeletionServiceIntegrationSpec extends Specification implements EgaSubmiss
         createWorkflowVersionSelector(project: project)
         createWorkflowVersionSelector(project: project)
         createExternalWorkflowConfigSelector(projects: [project])
+        (1..5).each {
+            createWorkflowRun(project: project, restartedFrom: createWorkflowRun(project: project))
+        }
 
         when:
         deletionService.deleteProjectContent(project)
@@ -137,6 +140,7 @@ class DeletionServiceIntegrationSpec extends Specification implements EgaSubmiss
         WorkflowVersionSelector.count == 0
         ReferenceGenomeSelector.count == 0
         ExternalWorkflowConfigSelector.count == 0
+        WorkflowRun.count == 0
         Project.count() == 1
     }
 
