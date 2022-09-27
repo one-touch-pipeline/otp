@@ -26,12 +26,11 @@ import groovy.transform.Field
 import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
-import de.dkfz.tbi.otp.utils.TransactionUtils
+import de.dkfz.tbi.otp.utils.SessionUtils
 import de.dkfz.tbi.otp.workflow.fastqc.BashFastQcWorkflow
 import de.dkfz.tbi.otp.workflowExecution.*
 
 import static groovyx.gpars.GParsPool.withPool
-
 /**
  * Creates new WorkflowRuns and WorkflowArtefacts based on the current FastqcProcessedFile data
  * @param BATCH_SIZE to process of fastqcProcessedFiles in trunks
@@ -186,7 +185,7 @@ if (seqTrackIdsWithDataFileCount) {
     withPool(numCores, {
         //loop through each batch and process it
         loop.makeConcurrent().each {
-            TransactionUtils.withNewTransaction { session ->
+            SessionUtils.withNewTransaction { session ->
                 //start the migration
                 int start = batchSize * it
                 int adjustedSize = Math.min((numSeqTracks - start), batchSize) - 1
