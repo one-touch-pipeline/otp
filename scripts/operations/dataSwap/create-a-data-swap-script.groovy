@@ -56,7 +56,6 @@ def swapMap = """
 #oldPid oldSampleType newPid newSampleType
 #oldPid oldSampleType newPid newSampleType
 #oldPid sampleType newPid sampleType
-
 """.split("\n")*.trim().findAll {
     it && !it.startsWith('#')
 }.collectEntries {

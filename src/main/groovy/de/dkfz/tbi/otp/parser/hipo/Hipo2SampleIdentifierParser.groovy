@@ -21,13 +21,27 @@
  */
 package de.dkfz.tbi.otp.parser.hipo
 
+import groovy.json.JsonSlurper
 import org.springframework.stereotype.Component
+
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 
 @Component
 class Hipo2SampleIdentifierParser extends AbstractHipo2SampleIdentifierParser {
 
+    ProcessingOptionService processingOptionService
+
     @Override
     String createProjectName(String projectNumber) {
-        return "hipo_${projectNumber}"
+        String option = processingOptionService.findOptionAsString(ProcessingOption.OptionName.HIPO_PARSER_MAPPING)
+        def text = new JsonSlurper().parseText(option) as Map<String, String>
+        String projectName
+        text.each { Map.Entry<String, String> it ->
+            if (it.key == projectNumber) {
+                projectName = it.value
+            }
+        }
+        return projectName ?: ""
     }
 }
