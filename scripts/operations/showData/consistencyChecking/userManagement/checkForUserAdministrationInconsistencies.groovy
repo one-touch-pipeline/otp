@@ -111,7 +111,7 @@ Project.findAll().each { Project project ->
                 if (cache[username]) {
                     details = cache[username]
                 } else {
-                    details = ldapService.getLdapUserDetailsByUsername(username)
+                    details = ldapService.getIdpUserDetailsByUsername(username)
                     cache[username] = details
                 }
                 output << sprintf("%-15s | %-20s | %-30s ", [details.username, details.realName, details.mail])

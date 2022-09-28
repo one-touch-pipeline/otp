@@ -58,7 +58,7 @@ class UnknownLdapUsersJobIntegrationSpec extends Specification implements Domain
         expected == result
     }
 
-    void "getUsersThatCanNotBeFoundInLdap, only returns users that return false from existsInLdap"() {
+    void "getUsersThatCanNotBeFoundInLdap, only returns users that return false from exists"() {
         given:
         List<User> usersToBeFound = ["a", "b", "c"].collect { String username ->
             return DomainFactory.createUser(username: username)
