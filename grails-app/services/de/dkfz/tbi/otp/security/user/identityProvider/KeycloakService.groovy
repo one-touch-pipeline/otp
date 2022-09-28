@@ -50,7 +50,7 @@ class KeycloakService implements IdentityProvider {
 
     @Override
     List<IdpUserDetails> getIdpUserDetailsByUserList(List<User> otpUsers) {
-        String requestUrl = "$apiBaseUrl/$configService.keycloakRealm/users?max=1000000"
+        String requestUrl = "$apiBaseUrl/${configService.keycloakRealm}/users?max=1000000"
         HttpEntity<String> entity = new HttpEntity<>(null, authorizationHeader)
         ResponseEntity<List<KeycloakUser>> response = restTemplate.exchange(requestUrl, HttpMethod.GET, entity, KeycloakUser[].class)
         List<KeycloakUser> keycloakUsers = response.body
@@ -61,7 +61,7 @@ class KeycloakService implements IdentityProvider {
 
     @Override
     List<IdpUserDetails> getListOfIdpUserDetailsBySearchString(String searchString) {
-        String requestUrl = "$apiBaseUrl/$configService.keycloakRealm/users?search=$searchString"
+        String requestUrl = "$apiBaseUrl/${configService.keycloakRealm}/users?search=$searchString"
         HttpEntity<String> entity = new HttpEntity<>(null, authorizationHeader)
         ResponseEntity<List<KeycloakUser>> response = restTemplate.exchange(requestUrl, HttpMethod.GET, entity, KeycloakUser[].class)
         List<KeycloakUser> keycloakUsers = response.body
@@ -130,7 +130,7 @@ class KeycloakService implements IdentityProvider {
     }
 
     private String getApiBaseUrl() {
-        return "$configService.keycloakServer/admin/realms"
+        return "${configService.keycloakServer}/admin/realms"
     }
 
     /**
@@ -159,14 +159,14 @@ class KeycloakService implements IdentityProvider {
      */
     private ClientCredentialsResourceDetails oAuthConfigDetails() {
         ClientCredentialsResourceDetails authConfig = new ClientCredentialsResourceDetails()
-        authConfig.accessTokenUri = "$configService.keycloakServer/realms/otp-dev/protocol/openid-connect/token"
+        authConfig.accessTokenUri = "${configService.keycloakServer}/realms/otp-dev/protocol/openid-connect/token"
         authConfig.clientId = configService.keycloakClientId
         authConfig.clientSecret = configService.keycloakClientSecret
         return authConfig
     }
 
     private KeycloakUser getKeycloakUserByExactUsername(String username) {
-        String requestUrl = "$apiBaseUrl/$configService.keycloakRealm/users?username=$username&exact=true"
+        String requestUrl = "$apiBaseUrl/${configService.keycloakRealm}/users?username=$username&exact=true"
         HttpEntity<String> entity = new HttpEntity<>(null, authorizationHeader)
         ResponseEntity<List<KeycloakUser>> response = restTemplate.exchange(requestUrl, HttpMethod.GET, entity, KeycloakUser[].class)
         KeycloakUser keycloakUser = response.body.first()
