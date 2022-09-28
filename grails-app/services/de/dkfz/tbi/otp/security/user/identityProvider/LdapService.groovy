@@ -293,7 +293,7 @@ class LdapService implements InitializingBean, IdentityProvider {
      * number of 100-nanosecond intervals since 12:00 am 1/1/1601
      * It is used e.g. in accountExpires attribute
      */
-    private long toLdapTimestamp100Nanos(long unixTimestampMillis) {
+    long toLdapTimestamp100Nanos(long unixTimestampMillis) {
         return (unixTimestampMillis + gapEpochLdapTime) * 10000
     }
 }

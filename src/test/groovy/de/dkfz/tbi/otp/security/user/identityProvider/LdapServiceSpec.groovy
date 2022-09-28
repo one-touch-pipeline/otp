@@ -92,6 +92,11 @@ class LdapServiceSpec extends Specification implements DataTest {
         service.processingOptionService = Mock(ProcessingOptionService)
     }
 
+    void "test toLdapTimestamp100Nanos, when unixTimestap is given"() {
+        expect:
+        service.toLdapTimestamp100Nanos(0) == gapMilliSec * 10000
+    }
+
     @Unroll
     void "test user is disabled, when user in ldap has ACCOUNTDISABLE bit set, is in DeletedUsers list ou, or has accountExpires attribute less than now"() {
         given:
