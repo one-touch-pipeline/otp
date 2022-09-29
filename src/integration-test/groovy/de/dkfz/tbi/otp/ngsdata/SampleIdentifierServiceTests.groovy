@@ -25,8 +25,11 @@ import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
 import org.junit.Test
 
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
+import de.dkfz.tbi.otp.parser.hipo.Hipo2SampleIdentifierParser
 import de.dkfz.tbi.otp.project.Project
 
 @Rollback
@@ -34,6 +37,18 @@ import de.dkfz.tbi.otp.project.Project
 class SampleIdentifierServiceTests implements DomainFactoryCore {
 
     SampleIdentifierService sampleIdentifierService
+
+    void setup() {
+        findOrCreateProcessingOption(
+                name: ProcessingOption.OptionName.HIPO_PARSER_MAPPING,
+                value: '{\n' +
+                        '   "H021":"hipo_021",\n' +
+                        '   "H123":"hipo_123",\n' +
+                        '}',
+        )
+        Hipo2SampleIdentifierParser parser = sampleIdentifierService.getSampleIdentifierParser(SampleIdentifierParserBeanName.HIPO2) as Hipo2SampleIdentifierParser
+        parser.processingOptionService = new ProcessingOptionService()
+    }
 
     @Test
     void testParseAndFindOrSaveSampleIdentifier_WithHipoSampleNameAndDefaultParsers_ShouldReturnHipoSampleIdentifier() {
@@ -55,8 +70,10 @@ class SampleIdentifierServiceTests implements DomainFactoryCore {
 
     @Test
     void 'testParseSampleIdentifier, when HIPO2 sample name, uses HIPO2 parser'() {
+        setup()
         Project project = createProject(name: 'hipo_123', sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.HIPO2)
-        assert sampleIdentifierService.parseSampleIdentifier('K12A-ABCDEF-T1-D1', project).sampleTypeDbName == 'tumor1-01'
+        assert sampleIdentifierService.parseSampleIdentifier('H123-ABCDEF-T1-D1', project).sampleTypeDbName == 'tumor1-01'
+        assert sampleIdentifierService.parseSampleIdentifier('H123-ABCDEF-T1-D1', project).projectName == 'hipo_123'
     }
 
     @Test

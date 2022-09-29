@@ -35,13 +35,9 @@ class Hipo2SampleIdentifierParser extends AbstractHipo2SampleIdentifierParser {
     @Override
     String createProjectName(String projectNumber) {
         String option = processingOptionService.findOptionAsString(ProcessingOption.OptionName.HIPO_PARSER_MAPPING)
-        def text = new JsonSlurper().parseText(option) as Map<String, String>
+        Map<String, String> text = new JsonSlurper().parseText(option) as Map<String, String>
         String projectName
-        text.each { Map.Entry<String, String> it ->
-            if (it.key == projectNumber) {
-                projectName = it.value
-            }
-        }
+        projectName = text[projectNumber]
         return projectName ?: ""
     }
 }

@@ -73,8 +73,10 @@ class Hipo2SampleIdentifierParserSpec extends AbstractHipo2SampleIdentifierParse
 
         where:
         identifier        || sampleTypeDbName
-        'H021-12AB-N0-D1' || 'control0-01'
-        'H022-12AB-T0-D1' || 'tumor0-01'
+        'H021-123ABC-N0-D1'  || 'control0-01'
+
+        //different project prefixes
+        'H022-123ABC-T0-D1'  || 'tumor0-01'
     }
 
     @Unroll
@@ -87,11 +89,11 @@ class Hipo2SampleIdentifierParserSpec extends AbstractHipo2SampleIdentifierParse
 
         where:
         identifier << [
-                'K12-12AB-N0-D1',
-                'K12AB-12AB-N0-D1',
-                '212A-12AB-N0-D1',
-                'KABC-12AB-N0-D1',
-                'K123-12AB-N012-D1',
+                'K12-123ABC-N0-D1',
+                'K12AB-123ABC-N0-D1',
+                '212A-123ABC-N0-D1',
+                'KABC-123ABC-N0-D1',
+                'K123-123ABC-N012-D1',
         ]
     }
 }
