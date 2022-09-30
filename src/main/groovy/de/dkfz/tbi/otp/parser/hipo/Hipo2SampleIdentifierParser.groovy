@@ -21,7 +21,9 @@
  */
 package de.dkfz.tbi.otp.parser.hipo
 
+import groovy.json.JsonException
 import groovy.json.JsonSlurper
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
@@ -30,14 +32,23 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 @Component
 class Hipo2SampleIdentifierParser extends AbstractHipo2SampleIdentifierParser {
 
+    @Autowired
     ProcessingOptionService processingOptionService
 
     @Override
     String createProjectName(String projectNumber) {
         String option = processingOptionService.findOptionAsString(ProcessingOption.OptionName.HIPO_PARSER_MAPPING)
-        Map<String, String> text = new JsonSlurper().parseText(option) as Map<String, String>
         String projectName
-        projectName = text[projectNumber]
-        return projectName ?: ""
+        if (option?.trim()) {
+            try {
+                Map<String, String> text = new JsonSlurper().parseText(option) as Map<String, String>
+                projectName = text[projectNumber]
+            }
+            catch (JsonException ignored) {
+                projectName = ""
+            }
+            return projectName?.trim() ? projectName : null
+        }
+        return null
     }
 }

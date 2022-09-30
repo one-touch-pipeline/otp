@@ -54,6 +54,14 @@ class Hipo2SampleIdentifierParserSpec extends AbstractHipo2SampleIdentifierParse
         parser.processingOptionService = new ProcessingOptionService()
     }
 
+    void setup2(String value) {
+        findOrCreateProcessingOption(
+                name: ProcessingOption.OptionName.HIPO_PARSER_MAPPING,
+                value: value,
+        )
+        parser.processingOptionService = new ProcessingOptionService()
+    }
+
     @Unroll
     void 'tryParse for projectPart, when identifier is #identifier, parses correctly'() {
         given:
@@ -72,11 +80,11 @@ class Hipo2SampleIdentifierParserSpec extends AbstractHipo2SampleIdentifierParse
         parsed.useSpecificReferenceGenome == SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
 
         where:
-        identifier        || sampleTypeDbName
-        'H021-123ABC-N0-D1'  || 'control0-01'
+        identifier          || sampleTypeDbName
+        'H021-123ABC-N0-D1' || 'control0-01'
 
         //different project prefixes
-        'H022-123ABC-T0-D1'  || 'tumor0-01'
+        'H022-123ABC-T0-D1' || 'tumor0-01'
     }
 
     @Unroll
@@ -95,5 +103,21 @@ class Hipo2SampleIdentifierParserSpec extends AbstractHipo2SampleIdentifierParse
                 'KABC-123ABC-N0-D1',
                 'K123-123ABC-N012-D1',
         ]
+    }
+
+    @Unroll
+    void 'tryParse for project part, when identifier is #identifier and processingOption is invalid, returns null'() {
+        expect:
+        setup2(value)
+        parser.tryParse(identifier) == null
+
+        where:
+        identifier          || value
+        'H020-123ABC-N0-D1' || ''
+        'H020-123ABC-N0-D1' || 'invalid'
+        'H020-123ABC-N0-D1' || '{\n' +
+                '   "H021":"hipo_021",\n' +
+                '   "H022":"hipo_022",\n' +
+                '}'
     }
 }
