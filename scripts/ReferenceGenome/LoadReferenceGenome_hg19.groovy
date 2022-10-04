@@ -47,9 +47,9 @@ String cytosinePositionsIndex = null
 String chromosomePrefix = "chr"
 String chromosomeSuffix = ""
 String fingerPrintingFileName = "snp138Common.n1000.vh20140318.bed"
+String defaultStatSizeFileName = "hg19_1-22_X_Y_M.fa.chrLenOnlyACGT.tab"
 @Field
-List<String> statSizeFileNames = [
-        "hg19_1-22_X_Y_M.fa.chrLenOnlyACGT.tab",
+List<String> furtherStatSizeFileNames = [
 ]
 
 List<FastaEntry> fastaEntries = [
@@ -82,4 +82,4 @@ List<FastaEntry> fastaEntries = [
 
 ReferenceGenomeService referenceGenomeService = ctx.referenceGenomeService
 referenceGenomeService.loadReferenceGenome(name, species, path, fileNamePrefix, cytosinePositionsIndex, chromosomePrefix, chromosomeSuffix,
-        fastaEntries, fingerPrintingFileName, statSizeFileNames)
+        fastaEntries, fingerPrintingFileName, defaultStatSizeFileName, furtherStatSizeFileNames)

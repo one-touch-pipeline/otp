@@ -42,7 +42,10 @@ class RoddyConfigValueService {
     private static final ObjectMapper MAPPER = new ObjectMapper()
 
     Map<String, String> getDefaultValues() {
-        return ["sharedFilesBaseDirectory": processingOptionService.findOptionAsString(ProcessingOption.OptionName.RODDY_SHARED_FILES_BASE_DIRECTORY)]
+        return [
+                "BASE_REFERENCE_GENOME"   : processingOptionService.findOptionAsString(ProcessingOption.OptionName.BASE_PATH_REFERENCE_GENOME),
+                "sharedFilesBaseDirectory": processingOptionService.findOptionAsString(ProcessingOption.OptionName.RODDY_SHARED_FILES_BASE_DIRECTORY),
+        ]
     }
 
     /**

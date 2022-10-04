@@ -35,7 +35,9 @@ import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
-import de.dkfz.tbi.otp.workflowExecution.ExternalWorkflowConfigFragment
+import de.dkfz.tbi.otp.workflow.panCancer.PanCancerWorkflow
+import de.dkfz.tbi.otp.workflow.wgbs.WgbsWorkflow
+import de.dkfz.tbi.otp.workflowExecution.*
 
 import java.nio.file.FileSystem
 import java.nio.file.Path
@@ -175,7 +177,8 @@ class ReferenceGenomeService {
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void loadReferenceGenome(String name, Set<SpeciesWithStrain> species, String path, String fileNamePrefix, String cytosinePositionsIndex,
                              String chromosomePrefix, String chromosomeSuffix,
-                             List<FastaEntry> fastaEntries, String fingerPrintingFileName, List<String> statSizeFileNames) {
+                             List<FastaEntry> fastaEntries, String fingerPrintingFileName,
+                             String defaultStatSizeFileName, List<String> furtherStatSizeFileNames) {
         // get list of all standard chromosomes (1...22, X, Y)
         List<String> standardChromosomes = Chromosomes.allLabels()
         standardChromosomes.remove("M")
@@ -224,11 +227,45 @@ class ReferenceGenomeService {
             ).save(flush: true)
         }
 
-        statSizeFileNames.each { String fileName ->
-            new StatSizeFileName(
-                    name: fileName,
-                    referenceGenome: referenceGenome
+        if (defaultStatSizeFileName) {
+            String conf = """
+                   {
+                        "RODDY": {
+                            "cvalues": {
+                                "CHROM_SIZES_FILE": {
+                                    "value": "\${BASE_REFERENCE_GENOME}/${referenceGenome.path}/stats/${defaultStatSizeFileName}",
+                                    "type": "path"
+                                }
+                            }
+                        }
+                    }
+"""
+            String confName = "Default chromosome stat size file for ${referenceGenome}"
+
+            ExternalWorkflowConfigFragment fragment = new ExternalWorkflowConfigFragment(
+                    name: confName,
+                    configValues: conf,
             ).save(flush: true)
+
+            new ExternalWorkflowConfigSelector(
+                    name: confName,
+                    workflows: Workflow.findAllByNameInList([PanCancerWorkflow.WORKFLOW, WgbsWorkflow.WORKFLOW]) as Set,
+                    workflowVersions: [] as Set,
+                    projects: [] as Set,
+                    seqTypes: [] as Set,
+                    referenceGenomes: [referenceGenome] as Set,
+                    libraryPreparationKits: [] as Set,
+                    externalWorkflowConfigFragment: fragment,
+                    selectorType: SelectorType.GENERIC,
+                    priority: 4130,
+            ).save(flush: true)
+
+            ([defaultStatSizeFileName] + furtherStatSizeFileNames).each { String fileName ->
+                new StatSizeFileName(
+                        name: fileName,
+                        referenceGenome: referenceGenome
+                ).save(flush: true)
+            }
         }
 
         createReferenceGenomeMetafile(referenceGenome)

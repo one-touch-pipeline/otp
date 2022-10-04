@@ -21,8 +21,9 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
+import grails.plugin.springsecurity.SpringSecurityUtils
+import grails.testing.mixin.integration.Integration
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
@@ -30,14 +31,19 @@ import spock.lang.Specification
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+import de.dkfz.tbi.otp.domainFactory.taxonomy.TaxonomyFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
+import de.dkfz.tbi.otp.ngsdata.referencegenome.FastaEntry
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
+import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.security.UserAndRoles
+import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.workflowExecution.ExternalWorkflowConfigSelector
 
 @Rollback
 @Integration
-class ReferenceGenomeServiceIntegrationSpec extends Specification implements UserAndRoles, DomainFactoryCore {
+class ReferenceGenomeServiceIntegrationSpec extends Specification implements UserAndRoles, DomainFactoryCore, TaxonomyFactory {
 
     @Rule
     TemporaryFolder temporaryFolder = new TemporaryFolder()
@@ -88,5 +94,63 @@ class ReferenceGenomeServiceIntegrationSpec extends Specification implements Use
         then:
         expectedFile.exists()
         expectedFile.text == expectedContent
+    }
+
+    void "test loadReferenceGenome"() {
+        given:
+        setupData()
+        createUserAndRoles()
+
+        String name = "my_reference_gnome"
+        String path = "bwa06_my_reference_gnome"
+        String fileNamePrefix = "my_reference_gnome"
+        String cytosinePositionsIndex = null
+        String fingerPrintingFileName = "my_fingerprint.bed"
+        String statSizeFileName = "my_reference_gnome.fa.chrLenOnlyACGT.tab"
+        String chromosomePrefix = ""
+        String chromosomeSuffix = ""
+        Set<SpeciesWithStrain> species = [createSpeciesWithStrain(), createSpeciesWithStrain()] as Set
+
+        DomainFactory.createDefaultRealmWithProcessingOption()
+
+        temporaryFolder.newFolder("reference_genomes", path).toPath()
+
+        String fastaName = "chr21"
+        String fastaAlias = "21"
+        long fastaLength = 249250621
+        long fastaLengthWithoutN = 238204518
+        ReferenceGenomeEntry.Classification fastaClassification = ReferenceGenomeEntry.Classification.CHROMOSOME
+
+        List<FastaEntry> fastaEntries = [
+                new FastaEntry(fastaName, fastaAlias, fastaLength, fastaLengthWithoutN, fastaClassification),
+        ]
+
+        when:
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
+            referenceGenomeService.loadReferenceGenome(name, species, path, fileNamePrefix, cytosinePositionsIndex, chromosomePrefix, chromosomeSuffix,
+                    fastaEntries, fingerPrintingFileName, statSizeFileName, [])
+        }
+
+        then:
+        ReferenceGenome referenceGenome = CollectionUtils.exactlyOneElement(ReferenceGenome.findAllByName(name))
+        referenceGenome.path == path
+        referenceGenome.fileNamePrefix == fileNamePrefix
+        referenceGenome.cytosinePositionsIndex == cytosinePositionsIndex
+        referenceGenome.fingerPrintingFileName == fingerPrintingFileName
+        referenceGenome.species == species
+
+        ReferenceGenomeEntry entry = CollectionUtils.exactlyOneElement(ReferenceGenomeEntry.findAllByName(fastaName))
+        entry.referenceGenome == referenceGenome
+        entry.alias == fastaAlias
+        entry.length == fastaLength
+        entry.lengthWithoutN == fastaLengthWithoutN
+        entry.classification == fastaClassification
+
+        StatSizeFileName statSizeFileName1 = CollectionUtils.exactlyOneElement(StatSizeFileName.findAllByName(statSizeFileName))
+        statSizeFileName1.referenceGenome == referenceGenome
+
+        ExternalWorkflowConfigSelector selector = CollectionUtils.exactlyOneElement(ExternalWorkflowConfigSelector.all)
+        selector.referenceGenomes == [referenceGenome] as Set
+        selector.fragments.first().configValues.contains(statSizeFileName)
     }
 }

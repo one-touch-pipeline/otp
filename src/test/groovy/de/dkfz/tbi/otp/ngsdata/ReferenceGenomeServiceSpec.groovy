@@ -31,19 +31,15 @@ import spock.lang.Specification
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
-import de.dkfz.tbi.otp.domainFactory.taxonomy.TaxonomyFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
-import de.dkfz.tbi.otp.ngsdata.referencegenome.FastaEntry
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
-import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
-class ReferenceGenomeServiceSpec extends Specification implements DataTest, ServiceUnitTest<ReferenceGenomeService>, TaxonomyFactory {
+class ReferenceGenomeServiceSpec extends Specification implements DataTest, ServiceUnitTest<ReferenceGenomeService> {
 
     ReferenceGenome referenceGenome
     ReferenceGenomeEntry referenceGenomeEntry
@@ -348,55 +344,5 @@ class ReferenceGenomeServiceSpec extends Specification implements DataTest, Serv
         then:
         Exception e = thrown RuntimeException
         e.message.contains(referenceGenome.cytosinePositionsIndex)
-    }
-
-    void "test loadReferenceGenome"() {
-        given:
-        setupTest()
-        String name = "my_reference_gnome"
-        String path = "bwa06_my_reference_gnome"
-        String fileNamePrefix = "my_reference_gnome"
-        String cytosinePositionsIndex = null
-        String fingerPrintingFileName = "my_fingerprint.bed"
-        String statSizeFileName = "my_reference_gnome.fa.chrLenOnlyACGT.tab"
-        String chromosomePrefix = ""
-        String chromosomeSuffix = ""
-        Set<SpeciesWithStrain> species = [createSpeciesWithStrain(), createSpeciesWithStrain()] as Set
-
-        DomainFactory.createDefaultRealmWithProcessingOption()
-
-        temporaryFolder.newFolder("reference_genomes", path).toPath()
-
-        String fastaName = "chr21"
-        String fastaAlias = "21"
-        long fastaLength = 249250621
-        long fastaLengthWithoutN = 238204518
-        Classification fastaClassification = Classification.CHROMOSOME
-
-        List<FastaEntry> fastaEntries = [
-                new FastaEntry(fastaName, fastaAlias, fastaLength, fastaLengthWithoutN, fastaClassification),
-        ]
-
-        when:
-        referenceGenomeService.loadReferenceGenome(name, species, path, fileNamePrefix, cytosinePositionsIndex, chromosomePrefix, chromosomeSuffix,
-                fastaEntries, fingerPrintingFileName, [statSizeFileName])
-
-        then:
-        ReferenceGenome referenceGenome = CollectionUtils.exactlyOneElement(ReferenceGenome.findAllByName(name))
-        referenceGenome.path == path
-        referenceGenome.fileNamePrefix == fileNamePrefix
-        referenceGenome.cytosinePositionsIndex == cytosinePositionsIndex
-        referenceGenome.fingerPrintingFileName == fingerPrintingFileName
-        referenceGenome.species == species
-
-        ReferenceGenomeEntry entry = CollectionUtils.exactlyOneElement(ReferenceGenomeEntry.findAllByName(fastaName))
-        entry.referenceGenome == referenceGenome
-        entry.alias == fastaAlias
-        entry.length == fastaLength
-        entry.lengthWithoutN == fastaLengthWithoutN
-        entry.classification == fastaClassification
-
-        StatSizeFileName statSizeFileName1 = CollectionUtils.exactlyOneElement(StatSizeFileName.findAllByName(statSizeFileName))
-        statSizeFileName1.referenceGenome == referenceGenome
     }
 }
