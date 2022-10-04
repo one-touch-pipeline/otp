@@ -22,10 +22,9 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.core.GrailsApplication
-import grails.plugin.springsecurity.SpringSecurityService
-import grails.plugin.springsecurity.SpringSecurityUtils
-import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
+import grails.plugin.springsecurity.SpringSecurityService
+import grails.testing.mixin.integration.Integration
 import org.grails.datastore.gorm.events.AutoTimestampEventListener
 import org.grails.spring.context.support.PluginAwareResourceBundleMessageSource
 import org.junit.Rule
@@ -42,20 +41,14 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.UserDomainFactory
 import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.otp.security.AuditLogService
-import de.dkfz.tbi.otp.security.AuditLog
-import de.dkfz.tbi.otp.security.InsufficientRightsException
-import de.dkfz.tbi.otp.security.User
-import de.dkfz.tbi.otp.security.UserAndRoles
-import de.dkfz.tbi.otp.security.user.UserSwitchService
+import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.security.user.UserService
+import de.dkfz.tbi.otp.security.user.UserSwitchService
 import de.dkfz.tbi.otp.security.user.identityProvider.LdapService
 import de.dkfz.tbi.otp.security.user.identityProvider.data.IdpUserDetails
 import de.dkfz.tbi.otp.utils.*
 
-import java.time.Instant
-import java.time.LocalDate
-import java.time.ZoneOffset
+import java.time.*
 import java.time.temporal.ChronoUnit
 
 @Rollback
@@ -180,7 +173,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         )
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             userProjectRoleService.createUserProjectRole(upr.user, upr.project, upr.projectRoles)
         }
 
@@ -211,7 +204,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         Set<ProjectRole> projectRoles = projectRoleNames.collect({ roleName -> ProjectRole.findByName(roleName.name()) })
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             userProjectRoleService.createUserProjectRole(user, project, projectRoles as Set, flags)
         }
 
@@ -257,7 +250,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
             |${requesterUserProjectRole.projectRoles*.name.join(",")}""".stripMargin()
 
         when:
-        SpringSecurityUtils.doWithAuth(requesterUserProjectRole.user.username) {
+        doWithAuth(requesterUserProjectRole.user.username) {
             userProjectRoleService.notifyAdministration(userProjectRole, operatorAction)
         }
 
@@ -299,7 +292,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         String projectList = [otherProject1, otherProject2]*.name.sort().join(", ")
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             userProjectRoleService.notifyAdministration(userProjectRole, UserProjectRoleService.OperatorAction.ADD)
         }
 
@@ -333,7 +326,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
             |Non-Project-User""".stripMargin()
 
         when:
-        SpringSecurityUtils.doWithAuth(executingUser.username) {
+        doWithAuth(executingUser.username) {
             doAsSwitchedToUser(switchedUser.username) {
                 userProjectRoleService.notifyAdministration(userProjectRole, operatorAction)
             }
@@ -397,7 +390,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         }
 
         when:
-        SpringSecurityUtils.doWithAuth(requesterUserProjectRole.user.username) {
+        doWithAuth(requesterUserProjectRole.user.username) {
             userProjectRoleService.setEnabled(userProjectRole, !enabledStatus)
         }
 
@@ -452,7 +445,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         userProjectRoleService.springSecurityService = Mock(SpringSecurityService)
 
         when:
-        SpringSecurityUtils.doWithAuth(USER) {
+        doWithAuth(USER) {
             userProjectRoleService.setEnabled(userProjectRolePi, enabled)
         }
 
@@ -478,7 +471,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         userProjectRoleService.springSecurityService = Mock(SpringSecurityService)
 
         when:
-        SpringSecurityUtils.doWithAuth(USER) {
+        doWithAuth(USER) {
             userProjectRoleService.setEnabled(userProjectRole, false)
         }
 
@@ -503,7 +496,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         userProjectRoleService.springSecurityService = Mock(SpringSecurityService)
 
         when:
-        SpringSecurityUtils.doWithAuth(USER) {
+        doWithAuth(USER) {
             userProjectRoleService.setEnabled(userProjectRole, true)
         }
 
@@ -539,7 +532,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         User.findAllByUsernameAndEmail(idpUserDetails.username, idpUserDetails.mail).empty
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             userProjectRoleService.addUserToProjectAndNotifyGroupManagementAuthority(project, projectRole as Set<ProjectRole>, SEARCH, [:])
         }
 
@@ -579,7 +572,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         } == []
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             userProjectRoleService.addUserToProjectAndNotifyGroupManagementAuthority(project, projectRole as Set<ProjectRole>, SEARCH, [:])
         }
 
@@ -604,7 +597,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         }
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             userProjectRoleService.addUserToProjectAndNotifyGroupManagementAuthority(project, projectRole as Set<ProjectRole>, SEARCH, [:])
         }
 
@@ -639,7 +632,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         int expectedInvocations = accessToFiles ? 1 : 0
 
         when:
-        SpringSecurityUtils.doWithAuth(requesterUserProjectRole.user.username) {
+        doWithAuth(requesterUserProjectRole.user.username) {
             userProjectRoleService.addUserToProjectAndNotifyGroupManagementAuthority(
                     project,
                     createProjectRole() as Set<ProjectRole>,
@@ -683,7 +676,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         }
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             userProjectRoleService.addUserToProjectAndNotifyGroupManagementAuthority(projectA, createProjectRole() as Set<ProjectRole>, SEARCH)
         }
 
@@ -705,7 +698,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         User.findAllByEmail(email).empty
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             userProjectRoleService.addExternalUserToProject(project, realName, email, projectRole as Set<ProjectRole>)
         }
 
@@ -732,7 +725,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         } == []
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             userProjectRoleService.addExternalUserToProject(project, user.realName, user.email, projectRole as Set<ProjectRole>)
         }
 
@@ -761,7 +754,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         )
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             userProjectRoleService.addExternalUserToProject(project, user.realName, user.email, projectRole as Set<ProjectRole>)
         }
 
@@ -784,7 +777,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         )
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             userProjectRoleService.addExternalUserToProject(project, 'wrong name', user.email, projectRole as Set<ProjectRole>)
         }
 
@@ -802,7 +795,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         User user = createUser(username: null)
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             userProjectRoleService.addExternalUserToProject(projectA, user.realName, user.email, createProjectRole() as Set<ProjectRole>)
         }
 
@@ -841,7 +834,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         }
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             userProjectRoleService.notifyProjectAuthoritiesAndUser(newUserProjectRole)
         }
 
@@ -867,7 +860,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         UserProjectRole newUPR = createUserProjectRole(project: project)
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             userProjectRoleService.notifyProjectAuthoritiesAndUser(newUPR)
         }
 
@@ -902,7 +895,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         String expectedContent = "newProjectMember\n${EMAIL_SENDER_NAME}\n${newUPR.user.realName}\n${newUPR.projectRoles.name.join(",")}\n${newUPR.project.name}"
 
         when:
-        SpringSecurityUtils.doWithAuth(executingUPR.user.username) {
+        doWithAuth(executingUPR.user.username) {
             userProjectRoleService.notifyProjectAuthoritiesAndUser(newUPR)
         }
 
@@ -955,7 +948,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         )
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             userProjectRoleService.notifyProjectAuthoritiesAndDisabledUser(userProjectRoleToDeactivate)
         }
 
@@ -991,7 +984,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
             ${EMAIL_SENDER_SALUTATION}""".stripIndent()
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             userProjectRoleService.notifyUsersAboutFileAccessChange(userProjectRole)
         }
 
@@ -1018,7 +1011,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         )
 
         when:
-        SpringSecurityUtils.doWithAuth(executingUser.username) {
+        doWithAuth(executingUser.username) {
             userProjectRoleService.addProjectRolesToProjectUserRole(userProjectRole, projectRoleList.toList())
         }
 
@@ -1051,7 +1044,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         }
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             userProjectRoleService."set${flag.capitalize()}"(userProjectRoles[0], true)
         }
 
@@ -1060,7 +1053,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         fileAccessMail * userProjectRoleService.mailHelperService.sendEmailToTicketSystem(_ as String, { it.contains("ADD") })
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             userProjectRoleService."set${flag.capitalize()}"(userProjectRoles[0], false)
         }
 
@@ -1089,7 +1082,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         )
 
         when:
-        SpringSecurityUtils.doWithAuth(USER) {
+        doWithAuth(USER) {
             userProjectRoleService.setAccessToOtp(userProjectRole, accessToOtpCall)
         }
 
@@ -1116,7 +1109,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         )
 
         when:
-        SpringSecurityUtils.doWithAuth(USER) {
+        doWithAuth(USER) {
             userProjectRoleService.setAccessToFiles(userProjectRole, newFileAccess, force)
         }
 
@@ -1144,7 +1137,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         )
 
         when:
-        SpringSecurityUtils.doWithAuth(USER) {
+        doWithAuth(USER) {
             userProjectRoleService.setAccessToFiles(userProjectRole, fileAccess, force)
         }
 
@@ -1171,7 +1164,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         }
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             userProjectRoleService.setAccessToFilesWithUserNotification(userProjectRoles[0], true)
         }
 
@@ -1181,7 +1174,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         1 * userProjectRoleService.mailHelperService.sendEmail({ it.contains("fileAccessChange") }, _ as String, _ as String, _ as List<String>)
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             userProjectRoleService.setAccessToFilesWithUserNotification(userProjectRoles[0], false)
         }
 
@@ -1215,7 +1208,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         }
 
         when:
-        SpringSecurityUtils.doWithAuth(user.username) {
+        doWithAuth(user.username) {
             userProjectRoleService."set${flag.capitalize()}"(userProjectRole, !flagInit)
         }
 
@@ -1328,7 +1321,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         )
 
         when:
-        SpringSecurityUtils.doWithAuth(user.username) {
+        doWithAuth(user.username) {
             userProjectRoleService."set${flag.capitalize()}"(userProjectRole, !flagInit)
         }
 
@@ -1361,8 +1354,8 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         )
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            output = userProjectRoleService.getEmailsOfToBeNotifiedProjectUsers([project])
+        output = doWithAuth(OPERATOR) {
+            userProjectRoleService.getEmailsOfToBeNotifiedProjectUsers([project])
         }
 
         then:
@@ -1567,7 +1560,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         createUserProjectRole(project: projectB, user: users[1], manageUsers: true)
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             userProjectRoleService.applyUserProjectRolesOntoProject(projectA, projectB)
         }
 

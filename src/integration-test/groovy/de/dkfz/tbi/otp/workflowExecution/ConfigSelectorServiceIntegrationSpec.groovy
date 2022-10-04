@@ -21,9 +21,8 @@
  */
 package de.dkfz.tbi.otp.workflowExecution
 
-import grails.plugin.springsecurity.SpringSecurityUtils
-import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -314,7 +313,7 @@ class ConfigSelectorServiceIntegrationSpec extends Specification implements Work
         )
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             service.create(cmd)
         }
 
@@ -359,7 +358,7 @@ class ConfigSelectorServiceIntegrationSpec extends Specification implements Work
         cmd.selectorName = "new name"
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             service.update(cmd)
         }
 
@@ -381,7 +380,7 @@ class ConfigSelectorServiceIntegrationSpec extends Specification implements Work
         ExternalWorkflowConfigFragment oldFragment = cmd.selector.externalWorkflowConfigFragment
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             service.update(cmd)
         }
 
@@ -401,7 +400,7 @@ class ConfigSelectorServiceIntegrationSpec extends Specification implements Work
         UpdateCommand cmd = updateCommand
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             service.update(cmd)
         }
 
@@ -417,7 +416,7 @@ class ConfigSelectorServiceIntegrationSpec extends Specification implements Work
         createExternalWorkflowConfigSelector(externalWorkflowConfigFragment: fragment)
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             service.deprecate(fragment)
         }
 

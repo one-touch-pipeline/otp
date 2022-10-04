@@ -21,9 +21,8 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.plugin.springsecurity.SpringSecurityUtils
-import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -62,7 +61,7 @@ class DataFileServiceIntegrationSpec extends Specification implements UserAndRol
         createDataFile()
 
         when:
-        List<DataFile> result = SpringSecurityUtils.doWithAuth(ADMIN) {
+        List<DataFile> result = doWithAuth(ADMIN) {
             dataFileService.getAllDataFilesOfProject(project)
         } as List<DataFile>
 

@@ -21,9 +21,8 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.plugin.springsecurity.SpringSecurityUtils
-import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import org.springframework.security.access.AccessDeniedException
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -60,16 +59,16 @@ class IndividualServiceIntegrationSpec extends Specification implements UserAndR
         Individual returnedIndividual
 
         when: "requesting an available individual"
-        SpringSecurityUtils.doWithAuth(role) {
-            returnedIndividual = individualService.getIndividual(searchProperty[identifier] as String)
+        returnedIndividual = doWithAuth(role) {
+            individualService.getIndividual(searchProperty[identifier] as String)
         }
 
         then: "permission granted, returns individual"
         returnedIndividual == individual
 
         when: "requesting an unavailable individual"
-        SpringSecurityUtils.doWithAuth(role) {
-            returnedIndividual = individualService.getIndividual("unavail_" + searchProperty[identifier] as String)
+        returnedIndividual = doWithAuth(role) {
+            individualService.getIndividual("unavail_" + searchProperty[identifier] as String)
         }
 
         then: "permission granted, returns null"
@@ -91,7 +90,7 @@ class IndividualServiceIntegrationSpec extends Specification implements UserAndR
         Map<String, Object> searchProperty = [id: individual.id, name: individual.mockFullName]
 
         when: "an unauthorized user requests an available individual"
-        SpringSecurityUtils.doWithAuth(TESTUSER) {
+        doWithAuth(TESTUSER) {
             individualService.getIndividual(searchProperty[identifier] as String)
         }
 
@@ -99,20 +98,20 @@ class IndividualServiceIntegrationSpec extends Specification implements UserAndR
         thrown(AccessDeniedException)
 
         when: "add permission to user and request again"
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             addUserWithReadAccessToProject(CollectionUtils.atMostOneElement(User.findAllByUsername(TESTUSER)), individual.project)
         }
 
         Individual returnedIndividual
-        SpringSecurityUtils.doWithAuth(TESTUSER) {
-            returnedIndividual = individualService.getIndividual(searchProperty[identifier] as String)
+        returnedIndividual = doWithAuth(TESTUSER) {
+            individualService.getIndividual(searchProperty[identifier] as String)
         }
 
         then: "return the requested individual"
         returnedIndividual == individual
 
         when: "non-project user requests the same individual"
-        SpringSecurityUtils.doWithAuth(USER) {
+        doWithAuth(USER) {
             individualService.getIndividual(searchProperty[identifier] as String)
         }
 
@@ -197,7 +196,7 @@ a: 2
             |${oldHasComment ? oldIndividual.comment.comment : ""}""".stripMargin().trim()
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             individualService.createComment(operation, [individual: oldIndividual], [individual: newIndividual])
         }
 
@@ -232,7 +231,7 @@ a: 2
             |diff: B""".stripMargin().trim()
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             individualService.createComment(operation, [individual: individual, diff: "A"], [individual: individual, diff: "B"])
         }
 

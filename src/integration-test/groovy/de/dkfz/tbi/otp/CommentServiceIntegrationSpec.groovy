@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp
 
-import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
 import spock.lang.Specification
@@ -48,8 +47,8 @@ class CommentServiceIntegrationSpec extends Specification implements UserAndRole
         Comment comment
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
-            comment = commentService.saveComment(project, TEST_MESSAGE)
+        comment = doWithAuth(ADMIN) {
+            commentService.saveComment(project, TEST_MESSAGE)
         }
 
         then:
@@ -65,8 +64,8 @@ class CommentServiceIntegrationSpec extends Specification implements UserAndRole
         Comment comment
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
-            comment = commentService.saveComment(individual, TEST_MESSAGE)
+        comment = doWithAuth(ADMIN) {
+            commentService.saveComment(individual, TEST_MESSAGE)
         }
 
         then:
@@ -82,8 +81,8 @@ class CommentServiceIntegrationSpec extends Specification implements UserAndRole
         Comment comment
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
-            comment = commentService.saveComment(datafile, TEST_MESSAGE)
+        comment = doWithAuth(ADMIN) {
+            commentService.saveComment(datafile, TEST_MESSAGE)
         }
 
         then:
@@ -99,8 +98,8 @@ class CommentServiceIntegrationSpec extends Specification implements UserAndRole
         Comment comment
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
-            comment = commentService.saveComment(process, TEST_MESSAGE)
+        comment = doWithAuth(ADMIN) {
+            commentService.saveComment(process, TEST_MESSAGE)
         }
 
         then:

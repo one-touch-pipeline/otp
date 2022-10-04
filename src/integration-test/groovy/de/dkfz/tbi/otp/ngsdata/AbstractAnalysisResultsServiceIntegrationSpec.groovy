@@ -21,9 +21,8 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.plugin.springsecurity.SpringSecurityUtils
-import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -61,8 +60,8 @@ class AbstractAnalysisResultsServiceIntegrationSpec extends Specification implem
 
         when:
         List callingInstances
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            callingInstances = abstractAnalysisResultsService.getCallingInstancesForProject(analysisInstance.samplePair.project.name)
+        callingInstances = doWithAuth(OPERATOR) {
+            abstractAnalysisResultsService.getCallingInstancesForProject(analysisInstance.samplePair.project.name)
         }
 
         then:
@@ -84,8 +83,8 @@ class AbstractAnalysisResultsServiceIntegrationSpec extends Specification implem
         when:
         abstractAnalysisResultsService = Mock(AbstractAnalysisResultsService)
         File result
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            result = abstractAnalysisResultsService.getFiles(null, null)
+        result = doWithAuth(OPERATOR) {
+            abstractAnalysisResultsService.getFiles(null, null)
         }
 
         then:
@@ -103,8 +102,8 @@ class AbstractAnalysisResultsServiceIntegrationSpec extends Specification implem
 
         when:
         File file
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            file = abstractAnalysisResultsService.getFiles(analysisInstance, plotType) ? abstractAnalysisResultsService.getFiles(analysisInstance, plotType).first() : null
+        file = doWithAuth(OPERATOR) {
+            abstractAnalysisResultsService.getFiles(analysisInstance, plotType) ? abstractAnalysisResultsService.getFiles(analysisInstance, plotType).first() : null
         }
 
         then:

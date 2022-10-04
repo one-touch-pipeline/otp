@@ -21,9 +21,8 @@
  */
 package de.dkfz.tbi.otp.ngsdata.taxonomy
 
-import grails.plugin.springsecurity.SpringSecurityUtils
-import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.validation.Errors
 import spock.lang.Specification
@@ -53,8 +52,8 @@ class SpeciesServiceSpec extends Specification implements UserAndRoles, Taxonomy
         Errors errors
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            errors = speciesService.createSpeciesAndSpeciesCommonName(MOUSE, MUS)
+        errors = doWithAuth(OPERATOR) {
+            speciesService.createSpeciesAndSpeciesCommonName(MOUSE, MUS)
         }
 
         then:
@@ -68,8 +67,8 @@ class SpeciesServiceSpec extends Specification implements UserAndRoles, Taxonomy
         Errors errors
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            errors = speciesService.createSpeciesAndSpeciesCommonName(speciesCommonName, MUS)
+        errors = doWithAuth(OPERATOR) {
+            speciesService.createSpeciesAndSpeciesCommonName(speciesCommonName, MUS)
         }
 
         then:
@@ -90,8 +89,8 @@ class SpeciesServiceSpec extends Specification implements UserAndRoles, Taxonomy
         Errors errors
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            errors = speciesService.createSpeciesAndSpeciesCommonName(MOUSE, scientificName)
+        errors = doWithAuth(OPERATOR) {
+            speciesService.createSpeciesAndSpeciesCommonName(MOUSE, scientificName)
         }
 
         then:

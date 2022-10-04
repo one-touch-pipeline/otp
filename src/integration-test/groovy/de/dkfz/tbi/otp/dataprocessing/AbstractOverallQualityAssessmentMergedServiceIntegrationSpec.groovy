@@ -21,9 +21,8 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
-import grails.plugin.springsecurity.SpringSecurityUtils
-import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import org.springframework.security.access.AccessDeniedException
 import spock.lang.Specification
 
@@ -65,8 +64,8 @@ abstract class AbstractOverallQualityAssessmentMergedServiceIntegrationSpec exte
         List<OverallQualityAssessmentMerged> result
 
         when:
-        SpringSecurityUtils.doWithAuth(user) {
-            result = overallQualityAssessmentMergedService.findAllByProjectAndSeqType(qualityAssessment.project, qualityAssessment.seqType)
+        result = doWithAuth(user) {
+            overallQualityAssessmentMergedService.findAllByProjectAndSeqType(qualityAssessment.project, qualityAssessment.seqType)
         }
 
         then:
@@ -89,8 +88,8 @@ abstract class AbstractOverallQualityAssessmentMergedServiceIntegrationSpec exte
         addUserWithReadAccessToProject(CollectionUtils.atMostOneElement(User.findAllByUsername(TESTUSER)), qualityAssessment.project)
 
         when:
-        SpringSecurityUtils.doWithAuth(TESTUSER) {
-            result = overallQualityAssessmentMergedService.findAllByProjectAndSeqType(qualityAssessment.project, qualityAssessment.seqType)
+        result = doWithAuth(TESTUSER) {
+            overallQualityAssessmentMergedService.findAllByProjectAndSeqType(qualityAssessment.project, qualityAssessment.seqType)
         }
 
         then:
@@ -102,7 +101,7 @@ abstract class AbstractOverallQualityAssessmentMergedServiceIntegrationSpec exte
         setupData()
 
         when:
-        SpringSecurityUtils.doWithAuth(TESTUSER) {
+        doWithAuth(TESTUSER) {
             overallQualityAssessmentMergedService.findAllByProjectAndSeqType(qualityAssessment.project, qualityAssessment.seqType)
         }
 
@@ -116,8 +115,8 @@ abstract class AbstractOverallQualityAssessmentMergedServiceIntegrationSpec exte
         List<OverallQualityAssessmentMerged> result
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
-            result = overallQualityAssessmentMergedService.findAllByProjectAndSeqType(createProject(), qualityAssessment.seqType)
+        result = doWithAuth(ADMIN) {
+            overallQualityAssessmentMergedService.findAllByProjectAndSeqType(createProject(), qualityAssessment.seqType)
         }
 
         then:
@@ -130,8 +129,8 @@ abstract class AbstractOverallQualityAssessmentMergedServiceIntegrationSpec exte
         List<OverallQualityAssessmentMerged> result
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
-            result = overallQualityAssessmentMergedService.findAllByProjectAndSeqType(qualityAssessment.project, createSeqType([name: 'otherSeqType', dirName: 'otherDirName']))
+        result = doWithAuth(ADMIN) {
+            overallQualityAssessmentMergedService.findAllByProjectAndSeqType(qualityAssessment.project, createSeqType([name: 'otherSeqType', dirName: 'otherDirName']))
         }
 
         then:
@@ -148,8 +147,8 @@ abstract class AbstractOverallQualityAssessmentMergedServiceIntegrationSpec exte
         qualityAssessment.bamFile.save(flush: true)
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
-            result = overallQualityAssessmentMergedService.findAllByProjectAndSeqType(qualityAssessment.project, qualityAssessment.seqType)
+        result = doWithAuth(ADMIN) {
+            overallQualityAssessmentMergedService.findAllByProjectAndSeqType(qualityAssessment.project, qualityAssessment.seqType)
         }
 
         then:
@@ -164,8 +163,8 @@ abstract class AbstractOverallQualityAssessmentMergedServiceIntegrationSpec exte
         qualityAssessment.bamFile.save(flush: true)
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
-            result = overallQualityAssessmentMergedService.findAllByProjectAndSeqType(qualityAssessment.project, qualityAssessment.seqType)
+        result = doWithAuth(ADMIN) {
+            overallQualityAssessmentMergedService.findAllByProjectAndSeqType(qualityAssessment.project, qualityAssessment.seqType)
         }
 
         then:
@@ -180,8 +179,8 @@ abstract class AbstractOverallQualityAssessmentMergedServiceIntegrationSpec exte
         qualityAssessment.bamFile.save(flush: true)
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
-            result = overallQualityAssessmentMergedService.findAllByProjectAndSeqType(qualityAssessment.project, qualityAssessment.seqType)
+        result = doWithAuth(ADMIN) {
+            overallQualityAssessmentMergedService.findAllByProjectAndSeqType(qualityAssessment.project, qualityAssessment.seqType)
         }
 
         then:

@@ -22,7 +22,6 @@
 package de.dkfz.tbi.otp.project
 
 import grails.gorm.transactions.Rollback
-import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.testing.mixin.integration.Integration
 import grails.validation.ValidationException
 import org.grails.datastore.gorm.events.AutoTimestampEventListener
@@ -203,8 +202,8 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 storageUntil: LocalDate.now(),
                 publiclyAvailable: false,
         )
-        SpringSecurityUtils.doWithAuth(ADMIN) {
-            project = projectService.createProject(projectParams)
+        project = doWithAuth(ADMIN) {
+            projectService.createProject(projectParams)
         }
 
         then:
@@ -241,7 +240,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         Project newProject = createProject(name: "P1", relatedProjects: "P2,P3,P10")
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             projectService.updateAllRelatedProjects(newProject)
         }
 
@@ -289,8 +288,8 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 projectType: Project.ProjectType.SEQUENCING,
                 storageUntil: LocalDate.now(),
         )
-        SpringSecurityUtils.doWithAuth(ADMIN) {
-            project = projectService.createProject(projectParams)
+        project = doWithAuth(ADMIN) {
+            projectService.createProject(projectParams)
         }
 
         then:
@@ -339,8 +338,8 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 projectType: Project.ProjectType.SEQUENCING,
                 storageUntil: LocalDate.now(),
         )
-        SpringSecurityUtils.doWithAuth(ADMIN) {
-            project = projectService.createProject(projectParams)
+        project = doWithAuth(ADMIN) {
+            projectService.createProject(projectParams)
         }
 
         then:
@@ -394,8 +393,8 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
             }
         }
 
-        SpringSecurityUtils.doWithAuth(ADMIN) {
-            project = projectService.createProject(projectParams)
+        project = doWithAuth(ADMIN) {
+            projectService.createProject(projectParams)
         }
 
         then:
@@ -437,7 +436,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 projectType: Project.ProjectType.SEQUENCING,
                 storageUntil: LocalDate.now(),
         )
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             projectService.createProject(projectParams)
         }
 
@@ -482,7 +481,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 projectType: Project.ProjectType.SEQUENCING,
                 storageUntil: LocalDate.now(),
         )
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             projectService.createProject(projectParams)
         }
 
@@ -519,7 +518,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 projectType: Project.ProjectType.SEQUENCING,
                 storageUntil: LocalDate.now(),
         )
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             projectService.createProject(projectParams)
         }
 
@@ -566,7 +565,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 projectType: Project.ProjectType.SEQUENCING,
                 storageUntil: LocalDate.now(),
         )
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             projectService.createProject(projectParams)
         }
 
@@ -582,7 +581,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         when:
         setupData()
         Project project = CollectionUtils.atMostOneElement(Project.findAllByName("testProject"))
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             projectService.updateProjectField(name, "nameInMetadataFiles", project)
         }
 
@@ -601,7 +600,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         when:
         setupData()
         Project project = CollectionUtils.atMostOneElement(Project.findAllByName("testProject3"))
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             projectService.updateProjectField(name, "nameInMetadataFiles", project)
         }
 
@@ -636,7 +635,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 processingPriority: createProcessingPriority(),
                 storageUntil: LocalDate.now(),
         )
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             projectService.createProject(projectParams)
         }
 
@@ -678,7 +677,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         addUserWithReadAccessToProject(CollectionUtils.atMostOneElement(User.findAllByUsername(USER)), project)
 
         when:
-        SpringSecurityUtils.doWithAuth(username) {
+        doWithAuth(username) {
             projectService.updateProjectField(individualPrefix, 'individualPrefix', project)
         }
 
@@ -698,7 +697,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         Project project = CollectionUtils.atMostOneElement(Project.findAllByName("testProject"))
 
         when:
-        SpringSecurityUtils.doWithAuth(TESTUSER) {
+        doWithAuth(TESTUSER) {
             projectService.updateProjectField(individualPrefix, 'individualPrefix', project)
         }
 
@@ -715,7 +714,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
         when:
         assert project.processingPriority != fastTrackProcessingPriority
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             projectService.updateProjectField(fastTrackProcessingPriority, "processingPriority", project)
         }
 
@@ -730,7 +729,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         TumorEntity tumorEntity = DomainFactory.createTumorEntity()
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             projectService.updateProjectField(tumorEntity, "tumorEntity", project)
         }
 
@@ -745,7 +744,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         String relatedProjects = "testProject3"
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             projectService.updateProjectField(relatedProjects, "relatedProjects", project)
         }
 
@@ -760,7 +759,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         String internalNotes = "internalNotes"
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             projectService.updateProjectField(internalNotes, "internalNotes", project)
         }
 
@@ -774,7 +773,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         Project project = CollectionUtils.atMostOneElement(Project.findAllByName("testProjectAlignment"))
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             projectService.configureNoAlignmentDeciderProject(project)
         }
 
@@ -790,7 +789,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         ReferenceGenome referenceGenome = CollectionUtils.atMostOneElement(ReferenceGenome.findAllByName("testReferenceGenome"))
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             projectService.configureDefaultOtpAlignmentDecider(project, referenceGenome.name)
         }
 
@@ -809,7 +808,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         ReferenceGenome referenceGenome2 = CollectionUtils.atMostOneElement(ReferenceGenome.findAllByName("testReferenceGenome2"))
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             projectService.configureDefaultOtpAlignmentDecider(project, referenceGenome.name)
             projectService.configureDefaultOtpAlignmentDecider(project, referenceGenome2.name)
         }
@@ -828,7 +827,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         CollectionUtils.atMostOneElement(ReferenceGenome.findAllByName("testReferenceGenome"))
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             projectService.configureDefaultOtpAlignmentDecider(project, "error")
         }
 
@@ -843,7 +842,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         PanCanAlignmentConfiguration configuration = createPanCanAlignmentConfiguration()
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             projectService.configurePanCanAlignmentDeciderProject(configuration)
         }
 
@@ -873,7 +872,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         ])
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             projectService.configurePanCanAlignmentDeciderProject(configuration)
             projectService.configurePanCanAlignmentDeciderProject(configuration2)
         }
@@ -899,7 +898,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         int count = configurations.size()
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             configurations.each {
                 projectService.configurePanCanAlignmentDeciderProject(it)
             }
@@ -919,7 +918,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         configuration.referenceGenome = 'invalidReferenceGenome'
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             projectService.configurePanCanAlignmentDeciderProject(configuration)
         }
 
@@ -936,7 +935,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         )
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             projectService.configurePanCanAlignmentDeciderProject(configuration)
         }
 
@@ -953,7 +952,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         )
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             projectService.configurePanCanAlignmentDeciderProject(configuration)
         }
 
@@ -971,7 +970,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         )
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             projectService.configurePanCanAlignmentDeciderProject(configuration)
         }
 
@@ -992,7 +991,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         configuration.statSizeFileName = 'nonExistingFile.tab'
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             projectService.configurePanCanAlignmentDeciderProject(configuration)
         }
 
@@ -1009,7 +1008,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         )
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             projectService.configurePanCanAlignmentDeciderProject(configuration)
         }
 
@@ -1026,7 +1025,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         )
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             projectService.configurePanCanAlignmentDeciderProject(configuration)
         }
 
@@ -1044,7 +1043,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         )
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             projectService.configurePanCanAlignmentDeciderProject(configuration)
         }
 
@@ -1063,7 +1062,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         )
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             projectService.configurePanCanAlignmentDeciderProject(configuration)
         }
 
@@ -1083,7 +1082,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         )
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             projectService.configurePanCanAlignmentDeciderProject(configuration)
         }
 
@@ -1098,7 +1097,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         PanCanAlignmentConfiguration configuration = createPanCanAlignmentConfiguration()
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             projectService.configurePanCanAlignmentDeciderProject(configuration)
             projectService.configureDefaultOtpAlignmentDecider(configuration.project, configuration.referenceGenome)
         }
@@ -1118,7 +1117,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         PanCanAlignmentConfiguration configuration = createPanCanAlignmentConfiguration()
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             projectService.configurePanCanAlignmentDeciderProject(configuration)
             projectService.configureNoAlignmentDeciderProject(configuration.project)
         }
@@ -1146,7 +1145,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         assert projectDirectory.mkdirs()
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             projectService.configureRnaAlignmentConfig(configuration)
         }
 
@@ -1172,7 +1171,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         )
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             projectService.configureRnaAlignmentReferenceGenome(configuration)
         }
 
@@ -1227,7 +1226,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         )
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             projectService.configureRnaAlignmentReferenceGenome(configuration)
         }
 
@@ -1250,7 +1249,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         PanCanAlignmentConfiguration configuration = createPanCanAlignmentConfiguration()
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             projectService.configureDefaultOtpAlignmentDecider(configuration.project, configuration.referenceGenome)
             projectService.configurePanCanAlignmentDeciderProject(configuration)
         }
@@ -1278,7 +1277,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         [] == ReferenceGenomeProjectSeqType.findAllByProjectAndSeqType(targetProject, seqType)
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             projectService.copyPanCanAlignmentXml(baseProject, targetProject, seqType)
         }
 
@@ -1322,7 +1321,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         [targetRefGenProjectSeqType] == ReferenceGenomeProjectSeqType.findAllByProjectAndSeqType(targetProject, seqType)
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             projectService.copyPanCanAlignmentXml(baseProject, targetProject, seqType)
         }
 
@@ -1430,7 +1429,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         ReferenceGenome referenceGenome = CollectionUtils.atMostOneElement(ReferenceGenome.findAllByName("testReferenceGenome"))
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             projectService.configureDefaultOtpAlignmentDecider(project, referenceGenome.name)
             projectService.configureNoAlignmentDeciderProject(project)
         }
@@ -1452,7 +1451,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                     referenceGenome: DomainFactory.createAceseqReferenceGenome()
             )
             referenceGenomeService.pathToChromosomeSizeFilesPerReference(referenceGenomeProjectSeqType.referenceGenome, false).mkdirs()
-            SpringSecurityUtils.doWithAuth(ADMIN) {
+            doWithAuth(ADMIN) {
                 processingOptionService.createOrUpdate(
                         genomeOption,
                         referenceGenomeProjectSeqType.referenceGenome.name
@@ -1461,7 +1460,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         }
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             projectService."configure${analysisName}PipelineProject"(configuration)
         }
 
@@ -1501,7 +1500,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                     referenceGenome: DomainFactory.createAceseqReferenceGenome()
             )
             referenceGenomeService.pathToChromosomeSizeFilesPerReference(referenceGenomeProjectSeqType.referenceGenome, false).mkdirs()
-            SpringSecurityUtils.doWithAuth(ADMIN) {
+            doWithAuth(ADMIN) {
                 processingOptionService.createOrUpdate(
                         genomeOption,
                         referenceGenomeProjectSeqType.referenceGenome.name
@@ -1510,7 +1509,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         }
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             projectService."configure${analysisName}PipelineProject"(configuration)
             projectService."configure${analysisName}PipelineProject"(configuration2)
         }
@@ -1550,7 +1549,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         ])
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             projectService.configureSnvPipelineProject(configuration2)
         }
 
@@ -1578,7 +1577,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         }
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             configurations.each {
                 projectService."configure${analysisName}PipelineProject"(it)
             }
@@ -1605,7 +1604,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         )
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             projectService."configure${analysisName}PipelineProject"(configuration)
         }
 
@@ -1630,7 +1629,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         )
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             projectService."configure${analysisName}PipelineProject"(configuration)
         }
 
@@ -1655,7 +1654,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         )
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             projectService."configure${analysisName}PipelineProject"(configuration)
         }
 
@@ -1680,7 +1679,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         )
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             projectService."configure${analysisName}PipelineProject"(configuration)
         }
 
@@ -1768,7 +1767,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         Project newProject = createProject(name: newName)
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             projectService.addProjectToRelatedProjects(baseProject, newProject)
         }
 
@@ -1795,7 +1794,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         project.save(flush: true)
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             projectService.updateAnalysisDirectory(project, analysisDirectory, force)
         }
 
@@ -1818,7 +1817,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         projectService.mailHelperService = Mock(MailHelperService)
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             projectService.updateAnalysisDirectory(project, newDirAnalysis, false)
         }
 
@@ -1838,7 +1837,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         projectService.mailHelperService = Mock(MailHelperService)
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             projectService.updateAnalysisDirectory(project, newDirAnalysis, true)
         }
 
@@ -1854,7 +1853,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         String invalidUnixGroup = "%group"
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             projectService.updateUnixGroup(project, invalidUnixGroup)
         }
 
@@ -1869,7 +1868,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         String unixGroup = "unknownGroup"
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             projectService.updateUnixGroup(project, unixGroup)
         }
 
@@ -1884,7 +1883,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         String unixGroup = createProject().unixGroup
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             projectService.updateUnixGroup(project, unixGroup)
         }
 
@@ -1899,7 +1898,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         String unixGroup = configService.testingGroup
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             projectService.updateUnixGroup(project, unixGroup)
         }
 
@@ -1914,7 +1913,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         String unixGroup = configService.testingGroup
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             projectService.updateUnixGroup(project, unixGroup, true)
         }
 

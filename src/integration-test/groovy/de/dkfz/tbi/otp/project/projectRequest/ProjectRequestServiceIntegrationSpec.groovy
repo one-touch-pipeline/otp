@@ -22,7 +22,6 @@
 package de.dkfz.tbi.otp.project.projectRequest
 
 import grails.gorm.transactions.Rollback
-import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.testing.mixin.integration.Integration
 import grails.web.mapping.LinkGenerator
 import spock.lang.Specification
@@ -41,9 +40,7 @@ import de.dkfz.tbi.otp.project.*
 import de.dkfz.tbi.otp.project.additionalField.*
 import de.dkfz.tbi.otp.searchability.Keyword
 import de.dkfz.tbi.otp.security.*
-import de.dkfz.tbi.otp.security.user.RolesService
-import de.dkfz.tbi.otp.security.user.UserService
-import de.dkfz.tbi.otp.security.user.UserSwitchService
+import de.dkfz.tbi.otp.security.user.*
 import de.dkfz.tbi.otp.utils.MailHelperService
 import de.dkfz.tbi.otp.utils.MessageSourceService
 
@@ -523,8 +520,8 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         List<ProjectRequest> result = []
 
         when:
-        SpringSecurityUtils.doWithAuth(role) {
-            result = projectRequestService.getRequestsUserIsInvolved(resolved)
+        result = doWithAuth(role) {
+            projectRequestService.getRequestsUserIsInvolved(resolved)
         }
 
         then:
@@ -571,7 +568,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         projectRequestService.projectRequestPersistentStateService.projectRequestStateProvider = projectRequestStateProvider
 
         when:
-        List<ProjectRequest> requestsToBeHandledByUser = SpringSecurityUtils.doWithAuth(userName) {
+        List<ProjectRequest> requestsToBeHandledByUser = doWithAuth(userName) {
             projectRequestService.sortRequestToBeHandledByUser(projectRequests)
         }
 
@@ -632,7 +629,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         ])
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             projectRequestService.addProjectRequestUsersToProject(projectRequest)
         }
 
@@ -781,7 +778,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         ])
 
         when:
-        List<AbstractFieldDefinition> result = SpringSecurityUtils.doWithAuth(role) {
+        List<AbstractFieldDefinition> result = doWithAuth(role) {
             projectRequestService.listAndFetchAbstractFields(projectType, projectPageType)
         }
 

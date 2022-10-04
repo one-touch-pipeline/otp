@@ -21,17 +21,15 @@
  */
 package de.dkfz.tbi.otp.project.dta
 
-import grails.plugin.springsecurity.SpringSecurityUtils
-import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import grails.validation.ValidationException
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import org.springframework.web.multipart.MultipartFile
 import spock.lang.Specification
 
-import de.dkfz.tbi.otp.OtpException
-import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.domainFactory.administration.DocumentFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.*
@@ -39,8 +37,6 @@ import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.utils.ProcessOutput
-import de.dkfz.tbi.otp.FileIsEmptyException
-import de.dkfz.tbi.otp.FileNotFoundException
 
 import java.nio.file.*
 
@@ -87,8 +83,8 @@ class DataTransferAgreementServiceIntegrationSpec extends Specification implemen
         when:
         DataTransferAgreement dataTransferAgreement = null
 
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            dataTransferAgreement = dataTransferAgreementService.persistDtaWithDtaDocuments(dta, files)
+        dataTransferAgreement = doWithAuth(OPERATOR) {
+            dataTransferAgreementService.persistDtaWithDtaDocuments(dta, files)
         }
 
         then:
@@ -104,7 +100,7 @@ class DataTransferAgreementServiceIntegrationSpec extends Specification implemen
         List<MultipartFile> files = [createMultipartFile()]
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             dataTransferAgreementService.persistDtaWithDtaDocuments(dta, files)
         }
 
@@ -123,8 +119,8 @@ class DataTransferAgreementServiceIntegrationSpec extends Specification implemen
         MultipartFile file = createMultipartFile("demo", fileName + fileEnding)
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            dta = dataTransferAgreementService.addFileToDta(dta, file)
+        dta = doWithAuth(OPERATOR) {
+            dataTransferAgreementService.addFileToDta(dta, file)
         }
 
         then:
@@ -141,8 +137,8 @@ class DataTransferAgreementServiceIntegrationSpec extends Specification implemen
         MultipartFile file = createMultipartFile("demo", "demo", new byte[0])
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            dta = dataTransferAgreementService.addFileToDta(dta, file)
+        dta = doWithAuth(OPERATOR) {
+            dataTransferAgreementService.addFileToDta(dta, file)
         }
 
         then:
@@ -157,9 +153,9 @@ class DataTransferAgreementServiceIntegrationSpec extends Specification implemen
         Path resultFile = null
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        resultFile = doWithAuth(OPERATOR) {
             dta = dataTransferAgreementService.addFileToDta(dta, inputFile)
-            resultFile = Paths.get(dataTransferAgreementService.getPathOnRemoteFileSystem(dta.dataTransferAgreementDocuments[0]).toString())
+            Paths.get(dataTransferAgreementService.getPathOnRemoteFileSystem(dta.dataTransferAgreementDocuments[0]).toString())
         }
 
         then:
@@ -177,7 +173,7 @@ class DataTransferAgreementServiceIntegrationSpec extends Specification implemen
         DataTransferAgreement unsavedDta = createDataTransferAgreement([:], false)
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             dataTransferAgreementService.addFilesToDta(unsavedDta, inputFiles)
         }
 
@@ -191,7 +187,7 @@ class DataTransferAgreementServiceIntegrationSpec extends Specification implemen
         DataTransferAgreementDocument dtaDoc = null
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             dataTransferAgreementService.getDataTransferAgreementDocumentContent(dtaDoc)
         }
 
@@ -208,8 +204,8 @@ class DataTransferAgreementServiceIntegrationSpec extends Specification implemen
         byte[] content
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            content = dataTransferAgreementService.getDataTransferAgreementDocumentContent(dta.dataTransferAgreementDocuments[0])
+        content = doWithAuth(OPERATOR) {
+            dataTransferAgreementService.getDataTransferAgreementDocumentContent(dta.dataTransferAgreementDocuments[0])
         }
 
         then:
@@ -227,8 +223,8 @@ class DataTransferAgreementServiceIntegrationSpec extends Specification implemen
         String newComment = "new comment text"
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            dta = dataTransferAgreementService.updateDataTransferAgreementComment(dta, newComment)
+        dta = doWithAuth(OPERATOR) {
+            dataTransferAgreementService.updateDataTransferAgreementComment(dta, newComment)
         }
 
         then:
@@ -246,7 +242,7 @@ class DataTransferAgreementServiceIntegrationSpec extends Specification implemen
         String newComment = ""
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             dataTransferAgreementService.updateDataTransferAgreementComment(dta, newComment)
         }
 
@@ -268,7 +264,7 @@ class DataTransferAgreementServiceIntegrationSpec extends Specification implemen
         dta.refresh()
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             dataTransferAgreementService.deleteDataTransferAgreement(dta)
         }
 
@@ -288,8 +284,8 @@ class DataTransferAgreementServiceIntegrationSpec extends Specification implemen
         Path resultFile = Paths.get(dataTransferAgreementService.getPathOnRemoteFileSystem(dta.dataTransferAgreementDocuments[0]).toString())
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            dta = dataTransferAgreementService.deleteDataTransferAgreement(dta)
+        dta = doWithAuth(OPERATOR) {
+            dataTransferAgreementService.deleteDataTransferAgreement(dta)
         }
 
         then:

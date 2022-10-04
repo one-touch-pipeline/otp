@@ -21,10 +21,9 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.plugin.springsecurity.SpringSecurityUtils
+import grails.gorm.transactions.Rollback
 import grails.plugin.springsecurity.acl.AclUtilService
 import grails.testing.mixin.integration.Integration
-import grails.gorm.transactions.Rollback
 import org.junit.*
 import org.junit.rules.TemporaryFolder
 import org.springframework.security.access.AccessDeniedException
@@ -88,7 +87,7 @@ class MetaDataServiceTests implements UserAndRoles {
         setupData()
         MetaDataEntry entry = mockEntry()
 
-        SpringSecurityUtils.doWithAuth(TESTUSER) {
+        doWithAuth(TESTUSER) {
             TestCase.shouldFail(AccessDeniedException) {
                 metaDataService.getMetaDataEntryById(entry.id)
             }
@@ -106,7 +105,7 @@ class MetaDataServiceTests implements UserAndRoles {
         setupData()
         MetaDataEntry entry = mockEntry()
 
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             assertSame(entry, metaDataService.getMetaDataEntryById(entry.id))
             // accessing a non-existing id should still work
             assertNull(metaDataService.getMetaDataEntryById(entry.id + 1))
@@ -122,7 +121,7 @@ class MetaDataServiceTests implements UserAndRoles {
         setupData()
         MetaDataEntry entry = mockEntry()
 
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             assertSame(entry, metaDataService.getMetaDataEntryById(entry.id))
             // accessing a non-existing id should still work
             assertNull(metaDataService.getMetaDataEntryById(entry.id + 1))
@@ -159,7 +158,7 @@ class MetaDataServiceTests implements UserAndRoles {
         setupData()
         MetaDataEntry entry = mockEntry()
 
-        SpringSecurityUtils.doWithAuth(TESTUSER) {
+        doWithAuth(TESTUSER) {
             TestCase.shouldFail(AccessDeniedException) {
                 metaDataService.getMetaDataEntryById(entry.id)
             }
@@ -168,7 +167,7 @@ class MetaDataServiceTests implements UserAndRoles {
         }
 
         addUserWithReadAccessToProject(CollectionUtils.atMostOneElement(User.findAllByUsername(TESTUSER)), entry.dataFile.project)
-        SpringSecurityUtils.doWithAuth(TESTUSER) {
+        doWithAuth(TESTUSER) {
             // now our test user should have access
             assertSame(entry, metaDataService.getMetaDataEntryById(entry.id))
             // accessing a non-existing id should still work
@@ -176,7 +175,7 @@ class MetaDataServiceTests implements UserAndRoles {
         }
 
         // but another user should not have
-        SpringSecurityUtils.doWithAuth(USER) {
+        doWithAuth(USER) {
             TestCase.shouldFail(AccessDeniedException) {
                 metaDataService.getMetaDataEntryById(entry.id)
             }
@@ -194,7 +193,7 @@ class MetaDataServiceTests implements UserAndRoles {
         setupData()
         MetaDataEntry entry = mockEntry()
 
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             assertSame(entry, metaDataService.getMetaDataEntryById(entry.id))
             // accessing a non-existing id should still work
             assertNull(metaDataService.getMetaDataEntryById(entry.id + 1))
@@ -210,7 +209,7 @@ class MetaDataServiceTests implements UserAndRoles {
         setupData()
         MetaDataEntry entry = mockEntry()
 
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             assertSame(entry, metaDataService.getMetaDataEntryById(entry.id))
             // accessing a non-existing id should still work
             assertNull(metaDataService.getMetaDataEntryById(entry.id + 1))

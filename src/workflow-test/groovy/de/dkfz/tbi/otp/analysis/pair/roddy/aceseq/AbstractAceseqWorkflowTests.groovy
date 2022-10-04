@@ -21,8 +21,6 @@
  */
 package de.dkfz.tbi.otp.analysis.pair.roddy.aceseq
 
-import grails.plugin.springsecurity.SpringSecurityUtils
-
 import de.dkfz.tbi.otp.analysis.pair.roddy.AbstractRoddyBamFilePairAnalysisWorkflowTests
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
@@ -70,7 +68,7 @@ abstract class AbstractAceseqWorkflowTests extends AbstractRoddyBamFilePairAnaly
         )
         createDirectories([new File(projectService.getSequencingDirectory(project).toString())])
 
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             config = projectService.configureAceseqPipelineProject(
                     new RoddyConfiguration([
                             project          : project,
@@ -103,7 +101,7 @@ abstract class AbstractAceseqWorkflowTests extends AbstractRoddyBamFilePairAnaly
         referenceGenome.replicationTimeFile = new File(referenceGenomePath, 'ENCODE/ReplicationTime_10cellines_mean_10KB.Rda').absolutePath
         referenceGenome.save(flush: true)
 
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             processingOptionService.createOrUpdate(
                     OptionName.PIPELINE_ACESEQ_REFERENCE_GENOME,
                     referenceGenome.name

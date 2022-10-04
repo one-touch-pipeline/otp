@@ -22,10 +22,9 @@
 package de.dkfz.tbi.otp.security
 
 import grails.core.GrailsApplication
-import grails.plugin.springsecurity.SpringSecurityService
-import grails.plugin.springsecurity.SpringSecurityUtils
-import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
+import grails.plugin.springsecurity.SpringSecurityService
+import grails.testing.mixin.integration.Integration
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.authentication.AuthenticationTrustResolver
 import spock.lang.Specification
@@ -70,8 +69,8 @@ class AuditLogServiceIntegrationSpec extends Specification implements UserAndRol
         AuditLog actionLog = null
 
         when:
-        SpringSecurityUtils.doWithAuth(USER) {
-            actionLog = auditLogService.logAction(AuditLog.Action.PROJECT_USER_CHANGED_ENABLED, "Test")
+        actionLog = doWithAuth(USER) {
+            auditLogService.logAction(AuditLog.Action.PROJECT_USER_CHANGED_ENABLED, "Test")
         }
         ZonedDateTime stamp = ZonedDateTime.ofInstant(Instant.ofEpochMilli(actionLog.timestamp.time), ZoneId.systemDefault())
 
@@ -89,9 +88,9 @@ class AuditLogServiceIntegrationSpec extends Specification implements UserAndRol
         User admin = CollectionUtils.exactlyOneElement(User.findAllByUsername(ADMIN))
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        actionLog = doWithAuth(ADMIN) {
             doAsSwitchedToUser(USER) {
-                actionLog = auditLogService.logAction(AuditLog.Action.PROJECT_USER_CHANGED_ENABLED, "Test")
+                auditLogService.logAction(AuditLog.Action.PROJECT_USER_CHANGED_ENABLED, "Test")
             }
         }
 
@@ -107,8 +106,8 @@ class AuditLogServiceIntegrationSpec extends Specification implements UserAndRol
         AuditLog actionLog
 
         when:
-        SpringSecurityUtils.doWithAuth(USER) {
-            actionLog = auditLogService.logActionWithSystemUser(AuditLog.Action.PROJECT_USER_CHANGED_ENABLED, "Test")
+        actionLog = doWithAuth(USER) {
+            auditLogService.logActionWithSystemUser(AuditLog.Action.PROJECT_USER_CHANGED_ENABLED, "Test")
         }
 
         then:

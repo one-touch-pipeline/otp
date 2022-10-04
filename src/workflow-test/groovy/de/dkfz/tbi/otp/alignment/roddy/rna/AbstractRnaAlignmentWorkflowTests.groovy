@@ -22,7 +22,6 @@
 package de.dkfz.tbi.otp.alignment.roddy.rna
 
 import grails.converters.JSON
-import grails.plugin.springsecurity.SpringSecurityUtils
 
 import de.dkfz.tbi.otp.alignment.roddy.AbstractRoddyAlignmentWorkflowTests
 import de.dkfz.tbi.otp.dataprocessing.*
@@ -30,9 +29,7 @@ import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeProjectSeqTypeService
-import de.dkfz.tbi.otp.project.ProjectService
-import de.dkfz.tbi.otp.project.RnaAlignmentReferenceGenomeConfiguration
-import de.dkfz.tbi.otp.project.RoddyConfiguration
+import de.dkfz.tbi.otp.project.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.SessionUtils
 
@@ -221,7 +218,7 @@ abstract class AbstractRnaAlignmentWorkflowTests extends AbstractRoddyAlignmentW
                 path: "blacklist_hs37d5_gencode19_2017-01-09.tsv.gz",
         )
 
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             projectService.configureRnaAlignmentConfig(new RoddyConfiguration([
                     project          : workPackage.project,
                     seqType          : workPackage.seqType,

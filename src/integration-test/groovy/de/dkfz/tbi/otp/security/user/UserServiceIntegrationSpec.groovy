@@ -21,10 +21,9 @@
  */
 package de.dkfz.tbi.otp.security.user
 
-import grails.plugin.springsecurity.SpringSecurityService
-import grails.plugin.springsecurity.SpringSecurityUtils
-import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
+import grails.plugin.springsecurity.SpringSecurityService
+import grails.testing.mixin.integration.Integration
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
@@ -60,7 +59,7 @@ class UserServiceIntegrationSpec extends Specification implements UserAndRoles {
         String newMail = "dummy@dummy.de"
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             userService.updateEmail(user, newMail)
         }
 
@@ -74,7 +73,7 @@ class UserServiceIntegrationSpec extends Specification implements UserAndRoles {
         User user = CollectionUtils.exactlyOneElement(User.findAllByUsername(TESTUSER))
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             userService.updateEmail(user, "")
         }
 
@@ -88,7 +87,7 @@ class UserServiceIntegrationSpec extends Specification implements UserAndRoles {
         User user = CollectionUtils.exactlyOneElement(User.findAllByUsername(TESTUSER))
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             userService.updateRealName(user, "newName")
         }
 
@@ -103,7 +102,7 @@ class UserServiceIntegrationSpec extends Specification implements UserAndRoles {
         User user = CollectionUtils.exactlyOneElement(User.findAllByUsername(TESTUSER))
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             userService.updateRealName(user, "")
         }
 
@@ -118,8 +117,8 @@ class UserServiceIntegrationSpec extends Specification implements UserAndRoles {
         List<Role> roles
 
         when:
-        SpringSecurityUtils.doWithAuth(username) {
-            roles = userService.rolesOfCurrentUser
+        roles = doWithAuth(username) {
+            userService.rolesOfCurrentUser
         }
 
         then:
@@ -158,8 +157,8 @@ class UserServiceIntegrationSpec extends Specification implements UserAndRoles {
         boolean check
 
         when:
-        SpringSecurityUtils.doWithAuth(username) {
-            check = userService.hasCurrentUserAdministrativeRoles()
+        check = doWithAuth(username) {
+            userService.hasCurrentUserAdministrativeRoles()
         }
 
         then:

@@ -21,9 +21,8 @@
  */
 package de.dkfz.tbi.otp.dataswap
 
-import grails.plugin.springsecurity.SpringSecurityUtils
-import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
@@ -108,7 +107,7 @@ class IndividualSwapServiceIntegrationSpec extends Specification implements User
         Path cleanupPath = oldIndividual.getViewByPidPath(seqType).absoluteDataManagementPath.toPath()
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             individualSwapService.swap(
                     new IndividualSwapParameters(
                             projectNameSwap: new Swap(bamFile.project.name, newProject.name),

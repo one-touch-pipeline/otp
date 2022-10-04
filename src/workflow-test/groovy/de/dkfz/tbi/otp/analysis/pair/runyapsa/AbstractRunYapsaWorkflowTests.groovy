@@ -21,10 +21,9 @@
  */
 package de.dkfz.tbi.otp.analysis.pair.runyapsa
 
-import grails.plugin.springsecurity.SpringSecurityUtils
-
 import de.dkfz.tbi.otp.analysis.pair.roddy.AbstractRoddyBamFilePairAnalysisWorkflowTests
-import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.ConfigPerProjectAndSeqType
+import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
@@ -77,7 +76,7 @@ abstract class AbstractRunYapsaWorkflowTests extends AbstractRoddyBamFilePairAna
     ReferenceGenome createReferenceGenome() {
         ReferenceGenome referenceGenome = super.createReferenceGenome()
 
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             processingOptionService.createOrUpdate(
                     OptionName.PIPELINE_RUNYAPSA_REFERENCE_GENOME,
                     referenceGenome.name

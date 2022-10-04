@@ -21,9 +21,8 @@
  */
 package de.dkfz.tbi.otp.ngsdata.taxonomy
 
-import grails.plugin.springsecurity.SpringSecurityUtils
-import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.validation.Errors
 import spock.lang.Specification
@@ -50,8 +49,8 @@ class StrainServiceSpec extends Specification implements UserAndRoles, TaxonomyF
         Errors errors
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            errors = strainService.createStrain(NAME)
+        errors = doWithAuth(OPERATOR) {
+            strainService.createStrain(NAME)
         }
 
         then:

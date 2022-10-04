@@ -21,10 +21,9 @@
  */
 package de.dkfz.tbi.otp.analysis.pair.roddy.sophia
 
-import grails.plugin.springsecurity.SpringSecurityUtils
-
 import de.dkfz.tbi.otp.analysis.pair.roddy.AbstractRoddyBamFilePairAnalysisWorkflowTests
-import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.ConfigPerProjectAndSeqType
+import de.dkfz.tbi.otp.dataprocessing.SophiaService
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaQc
 import de.dkfz.tbi.otp.ngsdata.*
@@ -65,8 +64,8 @@ abstract class AbstractSophiaWorkflowTests extends AbstractRoddyBamFilePairAnaly
         )
         createDirectories([new File(projectService.getSequencingDirectory(project).toString())])
 
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            config = projectService.configureSophiaPipelineProject(
+        config = doWithAuth(OPERATOR) {
+            projectService.configureSophiaPipelineProject(
                     new RoddyConfiguration([
                             project          : project,
                             seqType          : seqType,
@@ -84,7 +83,7 @@ abstract class AbstractSophiaWorkflowTests extends AbstractRoddyBamFilePairAnaly
     ReferenceGenome createReferenceGenome() {
         ReferenceGenome referenceGenome = super.createReferenceGenome()
 
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             processingOptionService.createOrUpdate(
                     PIPELINE_SOPHIA_REFERENCE_GENOME,
                     referenceGenome.name

@@ -21,9 +21,8 @@
  */
 package de.dkfz.tbi.otp.job.scheduler
 
-import grails.plugin.springsecurity.SpringSecurityUtils
-import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import grails.util.Holders
 import org.junit.After
 import spock.lang.Specification
@@ -604,7 +603,7 @@ class SchedulerServiceIntegrationSpec extends Specification implements UserAndRo
         StartJob job = Holders.grailsApplication.mainContext.getBean("testStartJob") as StartJob
         job.jobExecutionPlan = jep
 
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             schedulerService.suspendScheduler()
         }
 
@@ -619,7 +618,7 @@ class SchedulerServiceIntegrationSpec extends Specification implements UserAndRo
         e.message.contains("Scheduler is disabled")
 
         cleanup:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             schedulerService.resumeScheduler()
         }
     }

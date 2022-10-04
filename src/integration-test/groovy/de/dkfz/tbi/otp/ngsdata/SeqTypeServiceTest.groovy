@@ -21,10 +21,9 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.plugin.springsecurity.SpringSecurityUtils
+import grails.gorm.transactions.Rollback
 import grails.plugin.springsecurity.acl.AclUtilService
 import grails.testing.mixin.integration.Integration
-import grails.gorm.transactions.Rollback
 import org.junit.Test
 import org.springframework.security.access.AccessDeniedException
 
@@ -51,7 +50,7 @@ class SeqTypeServiceTest implements UserAndRoles {
         DomainFactory.createAllAlignableSeqTypes()
         SeqTrack seqTrack = DomainFactory.createSeqTrack()
 
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             List<SeqType> seqtypes = seqTypeService.alignableSeqTypesByProject(seqTrack.project)
             assert 0 == seqtypes.size()
         }
@@ -63,7 +62,7 @@ class SeqTypeServiceTest implements UserAndRoles {
         DomainFactory.createAllAlignableSeqTypes()
         SeqTrack seqTrack = DomainFactory.createSeqTrack()
 
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             List<SeqType> seqtypes = seqTypeService.alignableSeqTypesByProject(seqTrack.project)
             assert 0 == seqtypes.size()
         }
@@ -75,7 +74,7 @@ class SeqTypeServiceTest implements UserAndRoles {
         DomainFactory.createAllAlignableSeqTypes()
         SeqTrack seqTrack = DomainFactory.createSeqTrack()
         addUserWithReadAccessToProject(CollectionUtils.atMostOneElement(User.findAllByUsername(USER)), seqTrack.project)
-        SpringSecurityUtils.doWithAuth(USER) {
+        doWithAuth(USER) {
             List<SeqType> seqtypes = seqTypeService.alignableSeqTypesByProject(seqTrack.project)
             assert 0 == seqtypes.size()
         }
@@ -87,7 +86,7 @@ class SeqTypeServiceTest implements UserAndRoles {
         DomainFactory.createDefaultOtpAlignableSeqTypes()
         SeqTrack seqTrack = DomainFactory.createSeqTrack()
 
-        SpringSecurityUtils.doWithAuth(USER) {
+        doWithAuth(USER) {
             TestCase.shouldFail(AccessDeniedException) {
                 seqTypeService.alignableSeqTypesByProject(seqTrack.project)
             }
@@ -103,7 +102,7 @@ class SeqTypeServiceTest implements UserAndRoles {
         DomainFactory.createSeqTrack(sample: seqTrack.sample, seqType: alignableSeqTypes[0])
         DomainFactory.createSeqTrack(sample: seqTrack.sample, seqType: alignableSeqTypes[0])
 
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             List<SeqType> seqtypes = seqTypeService.alignableSeqTypesByProject(seqTrack.project)
             assert 1 == seqtypes.size()
         }
@@ -120,7 +119,7 @@ class SeqTypeServiceTest implements UserAndRoles {
         DomainFactory.createSeqTrack(sample: seqTrack.sample, seqType: alignableSeqTypes[1])
         DomainFactory.createSeqTrack(sample: seqTrack.sample, seqType: alignableSeqTypes[1])
 
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             List<SeqType> seqtypes = seqTypeService.alignableSeqTypesByProject(seqTrack.project)
             assert 2 == seqtypes.size()
         }

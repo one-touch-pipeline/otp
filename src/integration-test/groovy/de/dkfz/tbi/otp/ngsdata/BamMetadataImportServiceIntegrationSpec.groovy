@@ -21,9 +21,8 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.plugin.springsecurity.SpringSecurityUtils
-import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import org.springframework.beans.factory.annotation.Autowired
@@ -210,8 +209,8 @@ class BamMetadataImportServiceIntegrationSpec extends Specification implements R
         Map results
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            results = bamMetadataImportService.validateAndImport(dataBamImportMetaData.metadataFile.toString(), true,
+        results = doWithAuth(OPERATOR) {
+            bamMetadataImportService.validateAndImport(dataBamImportMetaData.metadataFile.toString(), true,
                     dataBamImportMetaData.md5sum, ImportProcess.LinkOperation.COPY_AND_KEEP, false, [])
         }
 
@@ -236,8 +235,8 @@ class BamMetadataImportServiceIntegrationSpec extends Specification implements R
         Map results
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            results = bamMetadataImportService.validateAndImport(dataBamImportMetaData.metadataFile.toString(), true,
+        results = doWithAuth(OPERATOR) {
+            bamMetadataImportService.validateAndImport(dataBamImportMetaData.metadataFile.toString(), true,
                     dataBamImportMetaData.md5sum, linkOperation, false, [])
         }
 
@@ -278,8 +277,8 @@ class BamMetadataImportServiceIntegrationSpec extends Specification implements R
         Map results
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            results = bamMetadataImportService.validateAndImport(dataBamImportMetaData.metadataFile.toString(), true,
+        results = doWithAuth(OPERATOR) {
+            bamMetadataImportService.validateAndImport(dataBamImportMetaData.metadataFile.toString(), true,
                     dataBamImportMetaData.md5sum, linkOperation, false, [])
         }
         then:
@@ -335,8 +334,8 @@ class BamMetadataImportServiceIntegrationSpec extends Specification implements R
         Map results
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            results = bamMetadataImportService.validateAndImport(dataBamImportMetaData.metadataFile.toString(), true,
+        results = doWithAuth(OPERATOR) {
+            bamMetadataImportService.validateAndImport(dataBamImportMetaData.metadataFile.toString(), true,
                     dataBamImportMetaData.md5sum, ImportProcess.LinkOperation.COPY_AND_KEEP, false, furtherFiles)
         }
 

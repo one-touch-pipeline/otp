@@ -21,9 +21,8 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.plugin.springsecurity.SpringSecurityUtils
-import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import grails.validation.ValidationException
 import org.springframework.validation.Errors
 import spock.lang.Specification
@@ -93,8 +92,8 @@ class SoftwareToolServiceIntegrationSpec extends Specification implements UserAn
         Map<SoftwareTool, List<SoftwareToolIdentifier>> result
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            result = softwareToolService.identifiersPerSoftwareTool
+        result = doWithAuth(OPERATOR) {
+            softwareToolService.identifiersPerSoftwareTool
         }
 
         then:
@@ -123,8 +122,8 @@ class SoftwareToolServiceIntegrationSpec extends Specification implements UserAn
         Map<String, List<SoftwareTool>> result = [:]
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            result = softwareToolService.softwareToolsPerProgramName
+        result = doWithAuth(OPERATOR) {
+            softwareToolService.softwareToolsPerProgramName
         }
 
         then:
@@ -141,7 +140,7 @@ class SoftwareToolServiceIntegrationSpec extends Specification implements UserAn
         SoftwareTool softwareTool = createSoftwareTool()
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             softwareToolService.updateSoftwareTool(softwareTool.id, newVersion)
         }
 
@@ -156,7 +155,7 @@ class SoftwareToolServiceIntegrationSpec extends Specification implements UserAn
         SoftwareTool softwareToolB = createSoftwareTool(programName: softwareToolA.programName)
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             softwareToolService.updateSoftwareTool(softwareToolB.id, softwareToolA.programVersion)
         }
 
@@ -172,8 +171,8 @@ class SoftwareToolServiceIntegrationSpec extends Specification implements UserAn
         Errors result
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            result = softwareToolService.createSoftwareTool("Test", "1.0", SoftwareTool.Type.BASECALLING)
+        result = doWithAuth(OPERATOR) {
+            softwareToolService.createSoftwareTool("Test", "1.0", SoftwareTool.Type.BASECALLING)
         }
 
         then:
@@ -189,7 +188,7 @@ class SoftwareToolServiceIntegrationSpec extends Specification implements UserAn
         ])
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             softwareToolService.updateSoftwareToolIdentifier(softwareToolIdentifier.id, newIdentifier)
         }
 
@@ -210,8 +209,8 @@ class SoftwareToolServiceIntegrationSpec extends Specification implements UserAn
         SoftwareToolIdentifier result
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            result = softwareToolService.createSoftwareToolIdentifier(softwareTool, alias)
+        result = doWithAuth(OPERATOR) {
+            softwareToolService.createSoftwareToolIdentifier(softwareTool, alias)
         }
 
         then:
@@ -228,9 +227,9 @@ class SoftwareToolServiceIntegrationSpec extends Specification implements UserAn
         SoftwareToolIdentifier result
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        result = doWithAuth(OPERATOR) {
             softwareToolService.createSoftwareToolIdentifier(softwareTool, alias)
-            result = softwareToolService.createSoftwareToolIdentifier(softwareTool, alias2)
+            softwareToolService.createSoftwareToolIdentifier(softwareTool, alias2)
         }
 
         then:

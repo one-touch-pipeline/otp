@@ -22,7 +22,6 @@
 package de.dkfz.tbi.otp.alignment.roddy
 
 import grails.converters.JSON
-import grails.plugin.springsecurity.SpringSecurityUtils
 import org.grails.web.json.JSONObject
 
 import de.dkfz.tbi.TestCase
@@ -204,7 +203,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
 
     void createProjectConfig(MergingWorkPackage workPackage, Map options = [:]) {
         createDirectories([new File(projectService.getSequencingDirectory(workPackage.project).toString())])
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             projectService.configurePanCanAlignmentDeciderProject(new PanCanAlignmentConfiguration([
                     project          : workPackage.project,
                     seqType          : workPackage.seqType,

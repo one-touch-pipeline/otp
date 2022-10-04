@@ -21,9 +21,8 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.plugin.springsecurity.SpringSecurityUtils
-import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -45,7 +44,7 @@ class ProjectRoleServiceIntegrationSpec extends Specification implements UserAnd
         List<ProjectRole> projectRoleList = []
 
         when:
-        SpringSecurityUtils.doWithAuth(role) {
+        doWithAuth(role) {
             projectRoleList.addAll(projectRoleService.listAvailableProjectRolesAuthenticatedByCurrentUser())
         }
 

@@ -21,9 +21,8 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.plugin.springsecurity.SpringSecurityUtils
-import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import org.junit.Test
 import org.springframework.security.access.AccessDeniedException
 
@@ -47,7 +46,7 @@ class RunServiceTests implements UserAndRoles {
     @Test
     void testGetRunWithoutRun() {
         setupData()
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             assertNull(runService.getRun(null))
             assertNull(runService.getRun(""))
             assertNull(runService.getRun(0))
@@ -60,13 +59,13 @@ class RunServiceTests implements UserAndRoles {
         setupData()
         Run run = createRun("testRun")
         [OPERATOR, ADMIN].each { String username ->
-            SpringSecurityUtils.doWithAuth(username) {
+            doWithAuth(username) {
                 assertNotNull(runService.getRun(run.id))
             }
         }
         [USER, TESTUSER].each { String username ->
             TestCase.shouldFail(AccessDeniedException) {
-                SpringSecurityUtils.doWithAuth(username) {
+                doWithAuth(username) {
                     runService.getRun(run.id)
                 }
             }
@@ -77,7 +76,7 @@ class RunServiceTests implements UserAndRoles {
     void testGetRunByLongAndStringIdentifier() {
         setupData()
         Run run = createRun("test")
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             assertEquals(run, runService.getRun(run.id))
             assertEquals(run, runService.getRun("${run.id}"))
         }
@@ -87,7 +86,7 @@ class RunServiceTests implements UserAndRoles {
     void testGetRunByName() {
         setupData()
         Run run = createRun("test")
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             assertNotNull(runService.getRun(run.name))
         }
     }
@@ -96,7 +95,7 @@ class RunServiceTests implements UserAndRoles {
     void testGetRunByNameAsIdentifier() {
         setupData()
         Run run = createRun("test")
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             assertEquals(run, runService.getRun("test"))
             run.name = run.id + 1
             assertNotNull(run.save(flush: true))
@@ -112,13 +111,13 @@ class RunServiceTests implements UserAndRoles {
         setupData()
         Run run = createRun("test")
         [OPERATOR, ADMIN].each { String username ->
-            SpringSecurityUtils.doWithAuth(username) {
+            doWithAuth(username) {
                 assertNotNull(runService.retrieveProcessParameters(run))
             }
         }
         [USER, TESTUSER].each { String username ->
             TestCase.shouldFail(AccessDeniedException) {
-                SpringSecurityUtils.doWithAuth(username) {
+                doWithAuth(username) {
                     runService.retrieveProcessParameters(run)
                 }
             }
@@ -129,7 +128,7 @@ class RunServiceTests implements UserAndRoles {
     void testRetrieveProcessParameterEmpty() {
         setupData()
         Run run = createRun("test")
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             assertTrue(runService.retrieveProcessParameters(run).isEmpty())
         }
     }
@@ -149,7 +148,7 @@ class RunServiceTests implements UserAndRoles {
         ProcessParameter param = new ProcessParameter(value: run.id, className: Run.name, process: process)
         assert param.save(flush: true)
 
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             assertEquals(1, runService.retrieveProcessParameters(run).size())
             assertEquals(param, runService.retrieveProcessParameters(run).first())
         }
@@ -159,7 +158,7 @@ class RunServiceTests implements UserAndRoles {
         ProcessParameter param2 = new ProcessParameter(value: run.id, className: Run.name, process: process2)
         assert param2.save(flush: true)
 
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             assertEquals(2, runService.retrieveProcessParameters(run).size())
             assertEquals(param, runService.retrieveProcessParameters(run).first())
             assertEquals(param2, runService.retrieveProcessParameters(run).last())

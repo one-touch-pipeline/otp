@@ -21,9 +21,8 @@
  */
 package de.dkfz.tbi.otp.dataswap
 
-import grails.plugin.springsecurity.SpringSecurityUtils
-import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
@@ -107,7 +106,7 @@ class SampleSwapServiceIntegrationSpec extends Specification implements UserAndR
         SampleType sampleType = bamFile.sampleType
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             sampleSwapService.swap(
                     new SampleSwapParameters(
                             projectNameSwap: new Swap(bamFile.project.name, bamFile.project.name),

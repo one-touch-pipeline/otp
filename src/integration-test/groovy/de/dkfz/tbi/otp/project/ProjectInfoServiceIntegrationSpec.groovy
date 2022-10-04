@@ -21,9 +21,8 @@
  */
 package de.dkfz.tbi.otp.project
 
-import grails.plugin.springsecurity.SpringSecurityUtils
-import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import org.springframework.mock.web.MockMultipartFile
@@ -96,8 +95,8 @@ class ProjectInfoServiceIntegrationSpec extends Specification implements UserAnd
         List<ProjectInfo> result = []
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            result = projectInfoService.getAllProjectInfosSortedByDateDesc(project)
+        result = doWithAuth(OPERATOR) {
+            projectInfoService.getAllProjectInfosSortedByDateDesc(project)
         }
 
         then:
@@ -113,8 +112,8 @@ class ProjectInfoServiceIntegrationSpec extends Specification implements UserAnd
         ProjectInfo projectInfo
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            projectInfo = projectInfoService.createProjectInfoAndUploadFile(project, cmd)
+        projectInfo = doWithAuth(OPERATOR) {
+            projectInfoService.createProjectInfoAndUploadFile(project, cmd)
         }
 
         then:
@@ -132,9 +131,11 @@ class ProjectInfoServiceIntegrationSpec extends Specification implements UserAnd
         ProjectInfo projectInfo1, projectInfo2
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            projectInfo1 = projectInfoService.createProjectInfoAndUploadFile(createProject(), cmd1)
-            projectInfo2 = projectInfoService.createProjectInfoAndUploadFile(createProject(), cmd2)
+        projectInfo1 = doWithAuth(OPERATOR) {
+            projectInfoService.createProjectInfoAndUploadFile(createProject(), cmd1)
+        }
+        projectInfo2 = doWithAuth(OPERATOR) {
+            projectInfoService.createProjectInfoAndUploadFile(createProject(), cmd2)
         }
 
         then:
@@ -153,7 +154,7 @@ class ProjectInfoServiceIntegrationSpec extends Specification implements UserAnd
         AddProjectInfoCommand cmd2 = createAddProjectInfoCommand(projectSelectionService: projectSelectionService, projectInfoFile: file)
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             projectInfoService.createProjectInfoAndUploadFile(project, cmd1)
             projectInfoService.createProjectInfoAndUploadFile(project, cmd2)
         }
@@ -170,7 +171,7 @@ class ProjectInfoServiceIntegrationSpec extends Specification implements UserAnd
         MockMultipartFile file = createMultipartFile()
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             projectInfoService.createProjectInfoAndUploadFile(project, createAddProjectInfoCommand(projectInfoFile: file))
         }
 
@@ -189,7 +190,7 @@ class ProjectInfoServiceIntegrationSpec extends Specification implements UserAnd
         Project project = createProject()
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             projectInfoService.createProjectInfoAndUploadFile(project, cmd)
         }
 
@@ -218,7 +219,7 @@ class ProjectInfoServiceIntegrationSpec extends Specification implements UserAnd
         cmd[property] = value
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             projectInfoService.createProjectInfoAndUploadFile(createProject(), cmd)
         }
 
@@ -239,7 +240,7 @@ class ProjectInfoServiceIntegrationSpec extends Specification implements UserAnd
         cmd[property] = value
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             projectInfoService.createProjectInfoAndUploadFile(createProject(), cmd)
         }
 
@@ -258,7 +259,7 @@ class ProjectInfoServiceIntegrationSpec extends Specification implements UserAnd
         AddProjectInfoCommand cmd = createAddProjectInfoCommand()
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             projectInfoService.createProjectInfoAndUploadFile(null, cmd)
         }
 
@@ -275,9 +276,9 @@ class ProjectInfoServiceIntegrationSpec extends Specification implements UserAnd
         MockMultipartFile file = createMultipartFile()
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        projectInfoContent = doWithAuth(ADMIN) {
             projectInfoService.createProjectInfoAndUploadFile(project, createAddProjectInfoCommand(projectInfoFile: file))
-            projectInfoContent = projectInfoService.getProjectInfoContent(CollectionUtils.exactlyOneElement(project.projectInfos))
+            projectInfoService.getProjectInfoContent(CollectionUtils.exactlyOneElement(project.projectInfos))
         }
 
         then:
@@ -302,8 +303,8 @@ class ProjectInfoServiceIntegrationSpec extends Specification implements UserAnd
         byte[] content
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            content = projectInfoService.getProjectInfoContent(projectInfo)
+        content = doWithAuth(OPERATOR) {
+            projectInfoService.getProjectInfoContent(projectInfo)
         }
 
         then:
@@ -324,8 +325,8 @@ class ProjectInfoServiceIntegrationSpec extends Specification implements UserAnd
         Path file
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            file = projectInfoService.uploadProjectInfoToProjectFolder(projectInfo, content)
+        file = doWithAuth(OPERATOR) {
+            projectInfoService.uploadProjectInfoToProjectFolder(projectInfo, content)
         }
 
         then:
@@ -339,7 +340,7 @@ class ProjectInfoServiceIntegrationSpec extends Specification implements UserAnd
         ProjectInfo projectInfo = createProjectInfo(comment: "outdated")
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             projectInfoService.updateProjectInfoComment(projectInfo, "updated")
         }
 

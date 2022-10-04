@@ -21,9 +21,8 @@
  */
 package de.dkfz.tbi.otp.job.processing
 
-import grails.plugin.springsecurity.SpringSecurityUtils
-import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -70,8 +69,8 @@ class ProcessServiceIntegrationSpec extends Specification implements UserAndRole
         Long result
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            result = processService.getProcessingStepDuration(step)
+        result = doWithAuth(OPERATOR) {
+            processService.getProcessingStepDuration(step)
         }
 
         then:
@@ -93,8 +92,8 @@ class ProcessServiceIntegrationSpec extends Specification implements UserAndRole
         Long result
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            result = processService.getProcessingStepDuration(step)
+        result = doWithAuth(OPERATOR) {
+            processService.getProcessingStepDuration(step)
         }
 
         then:
@@ -118,8 +117,8 @@ class ProcessServiceIntegrationSpec extends Specification implements UserAndRole
         Long result
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            result = processService.getProcessingStepDuration(step)
+        result = doWithAuth(OPERATOR) {
+            processService.getProcessingStepDuration(step)
         }
 
         then:
@@ -142,8 +141,8 @@ class ProcessServiceIntegrationSpec extends Specification implements UserAndRole
         Long result
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            result = processService.getProcessingStepDuration(step)
+        result = doWithAuth(OPERATOR) {
+            processService.getProcessingStepDuration(step)
         }
 
         then:
@@ -163,8 +162,8 @@ class ProcessServiceIntegrationSpec extends Specification implements UserAndRole
         Long result
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            result = processService.getProcessingStepDuration(step)
+        result = doWithAuth(OPERATOR) {
+            processService.getProcessingStepDuration(step)
         }
 
         then:
@@ -187,8 +186,8 @@ class ProcessServiceIntegrationSpec extends Specification implements UserAndRole
         Long result
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            result = processService.getProcessingStepDuration(step)
+        result = doWithAuth(OPERATOR) {
+            processService.getProcessingStepDuration(step)
         }
 
         then:
@@ -209,8 +208,8 @@ class ProcessServiceIntegrationSpec extends Specification implements UserAndRole
         Long result
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            result = processService.getProcessingStepDuration(step, new Date(60))
+        result = doWithAuth(OPERATOR) {
+            processService.getProcessingStepDuration(step, new Date(60))
         }
 
         then:
@@ -224,8 +223,8 @@ class ProcessServiceIntegrationSpec extends Specification implements UserAndRole
         Long result
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            result = processService.getProcessingStepDuration(step)
+        result = doWithAuth(OPERATOR) {
+            processService.getProcessingStepDuration(step)
         }
 
         then:

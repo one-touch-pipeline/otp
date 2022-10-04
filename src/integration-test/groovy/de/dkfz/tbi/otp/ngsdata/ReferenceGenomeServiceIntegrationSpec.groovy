@@ -22,7 +22,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.gorm.transactions.Rollback
-import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.testing.mixin.integration.Integration
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
@@ -126,7 +125,7 @@ class ReferenceGenomeServiceIntegrationSpec extends Specification implements Use
         ]
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             referenceGenomeService.loadReferenceGenome(name, species, path, fileNamePrefix, cytosinePositionsIndex, chromosomePrefix, chromosomeSuffix,
                     fastaEntries, fingerPrintingFileName, statSizeFileName, [])
         }

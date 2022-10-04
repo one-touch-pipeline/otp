@@ -21,9 +21,8 @@
  */
 package de.dkfz.tbi.otp.job.jobs.cellRanger
 
-import grails.plugin.springsecurity.SpringSecurityUtils
-import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import org.springframework.beans.factory.annotation.Autowired
@@ -136,8 +135,8 @@ class CellRangerServiceIntegrationSpec extends Specification implements UserAndR
         }
 
         when:
-        SpringSecurityUtils.doWithAuth(username) {
-            content = cellRangerService.getWebSummaryResultFileContent(singleCellBamFile)
+        content = doWithAuth(username) {
+            cellRangerService.getWebSummaryResultFileContent(singleCellBamFile)
         }
 
         then:
@@ -154,7 +153,7 @@ class CellRangerServiceIntegrationSpec extends Specification implements UserAndR
         webSummaryFile.readable = false
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             cellRangerService.getWebSummaryResultFileContent(singleCellBamFile)
         }
 
@@ -167,7 +166,7 @@ class CellRangerServiceIntegrationSpec extends Specification implements UserAndR
         setupData()
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             cellRangerService.getWebSummaryResultFileContent(singleCellBamFile)
         }
 
@@ -182,7 +181,7 @@ class CellRangerServiceIntegrationSpec extends Specification implements UserAndR
         webSummaryFile = CreateFileHelper.createFile(singleCellBamFile.webSummaryResultFile, "content")
 
         when:
-        SpringSecurityUtils.doWithAuth(TESTUSER) {
+        doWithAuth(TESTUSER) {
             cellRangerService.getWebSummaryResultFileContent(singleCellBamFile)
         }
 

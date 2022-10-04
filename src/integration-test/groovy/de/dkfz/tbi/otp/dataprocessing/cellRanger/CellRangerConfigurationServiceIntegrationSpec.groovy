@@ -21,9 +21,8 @@
  */
 package de.dkfz.tbi.otp.dataprocessing.cellRanger
 
-import grails.plugin.springsecurity.SpringSecurityUtils
-import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import grails.validation.ValidationException
 import org.springframework.validation.Errors
 import spock.lang.Specification
@@ -142,7 +141,7 @@ class CellRangerConfigurationServiceIntegrationSpec extends Specification implem
         setupData()
 
         when:
-        CellRangerConfigurationService.Samples samples = SpringSecurityUtils.doWithAuth(ADMIN) {
+        CellRangerConfigurationService.Samples samples = doWithAuth(ADMIN) {
             cellRangerConfigurationService.getSamples(project, individual, sampleType)
         }
 
@@ -156,7 +155,7 @@ class CellRangerConfigurationServiceIntegrationSpec extends Specification implem
         setupData()
 
         when:
-        CellRangerConfigurationService.Samples samples = SpringSecurityUtils.doWithAuth(ADMIN) {
+        CellRangerConfigurationService.Samples samples = doWithAuth(ADMIN) {
             cellRangerConfigurationService.getSamples(project, null, null)
         }
 
@@ -195,7 +194,7 @@ class CellRangerConfigurationServiceIntegrationSpec extends Specification implem
         CellRangerMwpParameter expectedParameter = createCellRangerMwpParameter()
 
         when:
-        Errors errors = SpringSecurityUtils.doWithAuth(ADMIN) {
+        Errors errors = doWithAuth(ADMIN) {
             cellRangerConfigurationService.prepareCellRangerExecution(
                     expectedParameter.expectedCells,
                     expectedParameter.enforcedCells,
@@ -421,7 +420,7 @@ class CellRangerConfigurationServiceIntegrationSpec extends Specification implem
         }
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             cellRangerConfigurationService.selectNoneAsFinal(mwp1.sample, mwp1.seqType, mwp1.config.programVersion, mwp1.referenceGenomeIndex)
         }
 
@@ -446,7 +445,7 @@ class CellRangerConfigurationServiceIntegrationSpec extends Specification implem
         }
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             cellRangerConfigurationService.selectMwpAsFinal(mwp1)
         }
 
@@ -472,7 +471,7 @@ class CellRangerConfigurationServiceIntegrationSpec extends Specification implem
         }
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             cellRangerConfigurationService.selectMwpAsFinal(mwp2)
         }
 
@@ -499,7 +498,7 @@ class CellRangerConfigurationServiceIntegrationSpec extends Specification implem
         }
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             cellRangerConfigurationService.deleteFinalMwp(mwp1.sample, mwp1.seqType, mwp1.config.programVersion, mwp1.referenceGenomeIndex)
         }
 

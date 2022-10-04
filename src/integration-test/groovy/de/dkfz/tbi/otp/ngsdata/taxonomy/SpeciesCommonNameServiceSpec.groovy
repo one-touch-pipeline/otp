@@ -21,9 +21,8 @@
  */
 package de.dkfz.tbi.otp.ngsdata.taxonomy
 
-import grails.plugin.springsecurity.SpringSecurityUtils
-import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import grails.validation.ValidationException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.validation.Errors
@@ -53,8 +52,8 @@ class SpeciesCommonNameServiceSpec extends Specification implements UserAndRoles
         Errors errors
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            errors = speciesCommonNameService.createSpeciesCommonName(NAME)
+        errors = doWithAuth(OPERATOR) {
+            speciesCommonNameService.createSpeciesCommonName(NAME)
         }
 
         then:
@@ -67,8 +66,8 @@ class SpeciesCommonNameServiceSpec extends Specification implements UserAndRoles
         Errors errors
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            errors = speciesCommonNameService.createSpeciesCommonName("${NAME}#@!")
+        errors = doWithAuth(OPERATOR) {
+            speciesCommonNameService.createSpeciesCommonName("${NAME}#@!")
         }
 
         then:
@@ -84,8 +83,8 @@ class SpeciesCommonNameServiceSpec extends Specification implements UserAndRoles
         createSpeciesCommonName(name: NAME)
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            errors = speciesCommonNameService.createSpeciesCommonName(name)
+        errors = doWithAuth(OPERATOR) {
+            speciesCommonNameService.createSpeciesCommonName(name)
         }
 
         then:
@@ -105,8 +104,8 @@ class SpeciesCommonNameServiceSpec extends Specification implements UserAndRoles
         SpeciesCommonName foundSpeciesCommonName
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            foundSpeciesCommonName = speciesCommonNameService.findOrSaveSpeciesCommonName(name)
+        foundSpeciesCommonName = doWithAuth(OPERATOR) {
+            speciesCommonNameService.findOrSaveSpeciesCommonName(name)
         }
 
         then:
@@ -128,8 +127,8 @@ class SpeciesCommonNameServiceSpec extends Specification implements UserAndRoles
 
         SpeciesCommonName speciesCommonName
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            speciesCommonName = speciesCommonNameService.findOrSaveSpeciesCommonName(NAME)
+        speciesCommonName = doWithAuth(OPERATOR) {
+            speciesCommonNameService.findOrSaveSpeciesCommonName(NAME)
         }
 
         then:
@@ -145,8 +144,8 @@ class SpeciesCommonNameServiceSpec extends Specification implements UserAndRoles
 
         SpeciesCommonName speciesCommonName
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            speciesCommonName = speciesCommonNameService.createAndGetSpeciesCommonName(NAME)
+        speciesCommonName = doWithAuth(OPERATOR) {
+            speciesCommonNameService.createAndGetSpeciesCommonName(NAME)
         }
 
         then:
@@ -161,7 +160,7 @@ class SpeciesCommonNameServiceSpec extends Specification implements UserAndRoles
         !CollectionUtils.atMostOneElement(SpeciesCommonName.findAllByNameIlike(NAME))
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             speciesCommonNameService.createAndGetSpeciesCommonName("${NAME}#@!")
         }
 

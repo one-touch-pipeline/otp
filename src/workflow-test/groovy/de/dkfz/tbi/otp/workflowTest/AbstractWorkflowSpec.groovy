@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.workflowTest
 
-import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.testing.mixin.integration.Integration
 import grails.util.Holders
 import groovy.json.JsonOutput
@@ -36,7 +35,8 @@ import spock.lang.Specification
 
 import de.dkfz.roddy.BEException
 import de.dkfz.roddy.execution.jobs.*
-import de.dkfz.tbi.otp.*
+import de.dkfz.tbi.otp.GroovyScriptAwareTestCase
+import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
@@ -562,7 +562,7 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
             it.isFile()
         }
         log.debug("Loading ${scripts.size()} initializing scripts")
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             scripts.each { File script ->
                 log.debug("  - Load ${script}")
                 runScript(script)

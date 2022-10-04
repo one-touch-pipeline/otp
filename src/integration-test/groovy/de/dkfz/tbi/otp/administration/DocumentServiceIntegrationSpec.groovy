@@ -21,9 +21,8 @@
  */
 package de.dkfz.tbi.otp.administration
 
-import grails.plugin.springsecurity.SpringSecurityUtils
-import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.validation.Errors
@@ -54,8 +53,8 @@ class DocumentServiceIntegrationSpec extends Specification implements UserAndRol
         Errors errors
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
-            errors = service.createDocumentType(TITLE, DESCRIPTION)
+        errors = doWithAuth(ADMIN) {
+            service.createDocumentType(TITLE, DESCRIPTION)
         }
 
         then:
@@ -69,8 +68,8 @@ class DocumentServiceIntegrationSpec extends Specification implements UserAndRol
         Errors errors
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
-            errors = service.createDocumentType(title, description)
+        errors = doWithAuth(ADMIN) {
+            service.createDocumentType(title, description)
         }
 
         then:
@@ -92,7 +91,7 @@ class DocumentServiceIntegrationSpec extends Specification implements UserAndRol
         Errors errors
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             errors = service.createDocumentType(TITLE, DESCRIPTION)
             errors = service.createDocumentType(TITLE, DESCRIPTION)
         }
@@ -108,8 +107,8 @@ class DocumentServiceIntegrationSpec extends Specification implements UserAndRol
         DocumentType documentType = createDocumentType()
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
-            errors = service.deleteDocumentType(documentType)
+        errors = doWithAuth(ADMIN) {
+            service.deleteDocumentType(documentType)
         }
 
         then:
@@ -124,8 +123,8 @@ class DocumentServiceIntegrationSpec extends Specification implements UserAndRol
         Document document = createDocument()
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
-            errors = service.deleteDocumentType(document.documentType)
+        errors = doWithAuth(ADMIN) {
+            service.deleteDocumentType(document.documentType)
         }
 
         then:
@@ -139,7 +138,7 @@ class DocumentServiceIntegrationSpec extends Specification implements UserAndRol
         setupData()
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             service.deleteDocumentType(null)
         }
 
@@ -153,7 +152,7 @@ class DocumentServiceIntegrationSpec extends Specification implements UserAndRol
         DocumentType documentType = createDocumentType()
 
         when:
-        SpringSecurityUtils.doWithAuth(USER) {
+        doWithAuth(USER) {
             service.updateDocument(documentType, HelperUtils.uniqueString.bytes, null, Document.FormatType.PDF)
         }
 
@@ -169,7 +168,7 @@ class DocumentServiceIntegrationSpec extends Specification implements UserAndRol
         Document.FormatType type = Document.FormatType.PDF
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             service.updateDocument(documentType, content, null, type)
         }
 
@@ -189,7 +188,7 @@ class DocumentServiceIntegrationSpec extends Specification implements UserAndRol
         Document.FormatType type = Document.FormatType.LINK
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             service.updateDocument(documentType, null, link, type)
         }
 
@@ -212,7 +211,7 @@ class DocumentServiceIntegrationSpec extends Specification implements UserAndRol
         Document.FormatType type = Document.FormatType.CSV
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             service.updateDocument(documentType, content, null, type)
         }
 
@@ -235,7 +234,7 @@ class DocumentServiceIntegrationSpec extends Specification implements UserAndRol
         Document.FormatType type = Document.FormatType.LINK
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             service.updateDocument(documentType, null, link, type)
         }
 
@@ -250,7 +249,7 @@ class DocumentServiceIntegrationSpec extends Specification implements UserAndRol
     void "test listDocumentTypes, not authenticated"() {
         when:
         setupData()
-        SpringSecurityUtils.doWithAuth(USER) {
+        doWithAuth(USER) {
             service.listDocumentTypes()
         }
 
@@ -261,7 +260,7 @@ class DocumentServiceIntegrationSpec extends Specification implements UserAndRol
     void "test listDocumentTypes and listDocuments, none found"() {
         expect:
         setupData()
-        [] == SpringSecurityUtils.doWithAuth(ADMIN) {
+        [] == doWithAuth(ADMIN) {
             service.listDocumentTypes()
         }
         [] == service.listDocuments()
@@ -275,7 +274,7 @@ class DocumentServiceIntegrationSpec extends Specification implements UserAndRol
         expect:
         [document] == service.listDocuments()
 
-        [document.documentType] == SpringSecurityUtils.doWithAuth(ADMIN) {
+        [document.documentType] == doWithAuth(ADMIN) {
             service.listDocumentTypes()
         }
     }

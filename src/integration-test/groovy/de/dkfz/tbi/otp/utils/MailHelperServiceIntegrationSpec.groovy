@@ -21,10 +21,9 @@
  */
 package de.dkfz.tbi.otp.utils
 
-import grails.plugin.springsecurity.SpringSecurityUtils
+import grails.gorm.transactions.Rollback
 import grails.plugins.mail.MailService
 import grails.testing.mixin.integration.Integration
-import grails.gorm.transactions.Rollback
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -33,10 +32,10 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.UserDomainFactory
+import de.dkfz.tbi.otp.security.User
+import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.security.user.RolesService
 import de.dkfz.tbi.otp.security.user.UserService
-import de.dkfz.tbi.otp.security.UserAndRoles
-import de.dkfz.tbi.otp.security.User
 
 @Rollback
 @Integration
@@ -127,8 +126,8 @@ class MailHelperServiceIntegrationSpec extends Specification implements DomainFa
         when:
         String sender = ""
 
-        SpringSecurityUtils.doWithAuth(user) {
-            sender = mailHelperService.senderName
+        sender = doWithAuth(user) {
+            mailHelperService.senderName
         }
 
         then:

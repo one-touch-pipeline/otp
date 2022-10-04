@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
-import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.gorm.transactions.Rollback
 
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
@@ -41,8 +40,8 @@ class OverallQualityAssessmentMergedServiceForProcessedMergedBamFilesIntegration
         DomainFactory.createQualityAssessmentMergedPass(abstractMergedBamFile: qualityAssessment.bamFile, identifier: qualityAssessment.qualityAssessmentMergedPass.identifier + 1)
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
-            result = overallQualityAssessmentMergedService.findAllByProjectAndSeqType(qualityAssessment.project, qualityAssessment.seqType)
+        result = doWithAuth(ADMIN) {
+            overallQualityAssessmentMergedService.findAllByProjectAndSeqType(qualityAssessment.project, qualityAssessment.seqType)
         }
 
         then:

@@ -21,9 +21,8 @@
  */
 package de.dkfz.tbi.otp.job.processing
 
-import grails.plugin.springsecurity.SpringSecurityUtils
-import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import grails.util.Holders
 import org.junit.After
 import org.junit.Test
@@ -402,12 +401,12 @@ class JobExecutionPlanServiceIntegrationTests implements UserAndRoles {
         assertNotNull(plan)
         assertFalse(plan.enabled)
         // let's enable the Plan
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             jobExecutionPlanService.enablePlan(plan)
         }
         assertTrue(plan.enabled)
         // enabling the plan again should not change anything
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             jobExecutionPlanService.enablePlan(plan)
         }
         assertTrue(plan.enabled)
@@ -432,7 +431,7 @@ class JobExecutionPlanServiceIntegrationTests implements UserAndRoles {
         assertFalse(plan.enabled)
         assertFalse(job.jobExecutionPlan.enabled)
         // let's enable the Plan
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             jobExecutionPlanService.enablePlan(plan)
         }
         assertTrue(plan.enabled)
@@ -447,12 +446,12 @@ class JobExecutionPlanServiceIntegrationTests implements UserAndRoles {
         assertNotNull(plan)
         assertTrue(plan.enabled)
         // let's disable the Plan
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             jobExecutionPlanService.disablePlan(plan)
         }
         assertFalse(plan.enabled)
         // disabling the plan again should not change anything
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             jobExecutionPlanService.disablePlan(plan)
         }
         assertFalse(plan.enabled)
@@ -477,7 +476,7 @@ class JobExecutionPlanServiceIntegrationTests implements UserAndRoles {
         assertTrue(plan.enabled)
         assertTrue(job.jobExecutionPlan.enabled)
         // let's disable the Plan
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             jobExecutionPlanService.disablePlan(plan)
         }
         assertFalse(plan.enabled)
@@ -491,10 +490,10 @@ class JobExecutionPlanServiceIntegrationTests implements UserAndRoles {
         plan = plan.save(flush: true)
         assertNotNull(plan)
 
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             assertSame(plan, jobExecutionPlanService.getPlan(plan.id))
         }
-        SpringSecurityUtils.doWithAuth(TESTUSER) {
+        doWithAuth(TESTUSER) {
             TestCase.shouldFail(AccessDeniedException) {
                 jobExecutionPlanService.getPlan(plan.id)
             }
@@ -508,10 +507,10 @@ class JobExecutionPlanServiceIntegrationTests implements UserAndRoles {
         plan = plan.save(flush: true)
         assertNotNull(plan)
 
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             jobExecutionPlanService.enablePlan(plan)
         }
-        SpringSecurityUtils.doWithAuth(TESTUSER) {
+        doWithAuth(TESTUSER) {
             TestCase.shouldFail(AccessDeniedException) {
                 jobExecutionPlanService.enablePlan(plan)
             }
@@ -525,10 +524,10 @@ class JobExecutionPlanServiceIntegrationTests implements UserAndRoles {
         plan.save(flush: true)
         assertNotNull(plan)
 
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             jobExecutionPlanService.disablePlan(plan)
         }
-        SpringSecurityUtils.doWithAuth(TESTUSER) {
+        doWithAuth(TESTUSER) {
             TestCase.shouldFail(AccessDeniedException) {
                 jobExecutionPlanService.disablePlan(plan)
             }
@@ -545,10 +544,10 @@ class JobExecutionPlanServiceIntegrationTests implements UserAndRoles {
             assertNotNull(plan)
         }
 
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             assertEquals(numberOfPlans, jobExecutionPlanService.jobExecutionPlans.size())
         }
-        SpringSecurityUtils.doWithAuth(TESTUSER) {
+        doWithAuth(TESTUSER) {
             assertTrue(jobExecutionPlanService.jobExecutionPlans.empty)
         }
     }
@@ -560,10 +559,10 @@ class JobExecutionPlanServiceIntegrationTests implements UserAndRoles {
         plan.save(flush: true)
         assertNotNull(plan)
 
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             assertTrue(jobExecutionPlanService.getAllProcesses(plan).empty)
         }
-        SpringSecurityUtils.doWithAuth(USER) {
+        doWithAuth(USER) {
             TestCase.shouldFail(AccessDeniedException) {
                 jobExecutionPlanService.getAllProcesses(plan)
             }
@@ -577,10 +576,10 @@ class JobExecutionPlanServiceIntegrationTests implements UserAndRoles {
         plan = plan.save(flush: true)
         assertNotNull(plan)
 
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             assertNull(jobExecutionPlanService.getLatestUpdatesForPlan(plan).empty)
         }
-        SpringSecurityUtils.doWithAuth(TESTUSER) {
+        doWithAuth(TESTUSER) {
             TestCase.shouldFail(AccessDeniedException) {
                 jobExecutionPlanService.getLatestUpdatesForPlan(plan)
             }
@@ -594,10 +593,10 @@ class JobExecutionPlanServiceIntegrationTests implements UserAndRoles {
         plan = plan.save(flush: true)
         assertNotNull(plan)
 
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             assertFalse(jobExecutionPlanService.isProcessRunning(plan))
         }
-        SpringSecurityUtils.doWithAuth(TESTUSER) {
+        doWithAuth(TESTUSER) {
             TestCase.shouldFail(AccessDeniedException) {
                 jobExecutionPlanService.isProcessRunning(plan)
             }
@@ -611,10 +610,10 @@ class JobExecutionPlanServiceIntegrationTests implements UserAndRoles {
         plan = plan.save(flush: true)
         assertNotNull(plan)
 
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             assertEquals(0, jobExecutionPlanService.getProcessCount(plan))
         }
-        SpringSecurityUtils.doWithAuth(TESTUSER) {
+        doWithAuth(TESTUSER) {
             TestCase.shouldFail(AccessDeniedException) {
                 jobExecutionPlanService.getProcessCount(plan)
             }
@@ -628,10 +627,10 @@ class JobExecutionPlanServiceIntegrationTests implements UserAndRoles {
         plan = plan.save(flush: true)
         assertNotNull(plan)
 
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             assertNull(jobExecutionPlanService.getLastExecutedProcess(plan))
         }
-        SpringSecurityUtils.doWithAuth(TESTUSER) {
+        doWithAuth(TESTUSER) {
             TestCase.shouldFail(AccessDeniedException) {
                 jobExecutionPlanService.getLastExecutedProcess(plan)
             }
@@ -645,10 +644,10 @@ class JobExecutionPlanServiceIntegrationTests implements UserAndRoles {
         plan = plan.save(flush: true)
         assertNotNull(plan)
 
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             assertEquals(0, jobExecutionPlanService.getNumberOfProcesses(plan))
         }
-        SpringSecurityUtils.doWithAuth(TESTUSER) {
+        doWithAuth(TESTUSER) {
             TestCase.shouldFail(AccessDeniedException) {
                 jobExecutionPlanService.getNumberOfProcesses(plan)
             }
@@ -665,10 +664,10 @@ class JobExecutionPlanServiceIntegrationTests implements UserAndRoles {
         plan.firstJob = startJob
         assertNotNull(plan.save(flush: true))
 
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             jobExecutionPlanService.planInformation(plan)
         }
-        SpringSecurityUtils.doWithAuth(TESTUSER) {
+        doWithAuth(TESTUSER) {
             TestCase.shouldFail(AccessDeniedException) {
                 jobExecutionPlanService.planInformation(plan)
             }
@@ -723,9 +722,8 @@ class JobExecutionPlanServiceIntegrationTests implements UserAndRoles {
         createJepsWithProcesses()
 
         when:
-        def result
-        SpringSecurityUtils.doWithAuth(ADMIN) {
-            result = jobExecutionPlanService.processCount()
+        Map<String, Long> result = doWithAuth(ADMIN) {
+            jobExecutionPlanService.processCount()
         }
 
         then:
@@ -739,9 +737,8 @@ class JobExecutionPlanServiceIntegrationTests implements UserAndRoles {
         createJepsWithProcesses()
 
         when:
-        def result
-        SpringSecurityUtils.doWithAuth(ADMIN) {
-            result = jobExecutionPlanService.finishedProcessCount()
+        Map<String, Long> result = doWithAuth(ADMIN) {
+            jobExecutionPlanService.finishedProcessCount()
         }
 
         then:
@@ -801,9 +798,8 @@ class JobExecutionPlanServiceIntegrationTests implements UserAndRoles {
         createProcessingStepHelper(plan5, ExecutionState.SUSPENDED)
 
         when:
-        def result
-        SpringSecurityUtils.doWithAuth(ADMIN) {
-            result = jobExecutionPlanService.failedProcessCount(jobExecutionPlanService.jobExecutionPlansWithPreviousVersions)
+        Map<String, Long> result = doWithAuth(ADMIN) {
+            jobExecutionPlanService.failedProcessCount(jobExecutionPlanService.jobExecutionPlansWithPreviousVersions)
         }
 
         then:
@@ -829,9 +825,8 @@ class JobExecutionPlanServiceIntegrationTests implements UserAndRoles {
         Date date = createLastDateStructure("panCanInstallation", ExecutionState.SUCCESS)
 
         when:
-        def result
-        SpringSecurityUtils.doWithAuth(ADMIN) {
-            result = jobExecutionPlanService.lastProcessDate(jobExecutionPlanService.jobExecutionPlansWithPreviousVersions, ExecutionState.SUCCESS)
+        Map<String, Date> result = doWithAuth(ADMIN) {
+            jobExecutionPlanService.lastProcessDate(jobExecutionPlanService.jobExecutionPlansWithPreviousVersions, ExecutionState.SUCCESS)
         }
 
         then:

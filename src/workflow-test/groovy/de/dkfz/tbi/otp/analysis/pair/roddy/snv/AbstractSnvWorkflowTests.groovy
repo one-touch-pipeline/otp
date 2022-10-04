@@ -21,8 +21,6 @@
  */
 package de.dkfz.tbi.otp.analysis.pair.roddy.snv
 
-import grails.plugin.springsecurity.SpringSecurityUtils
-
 import de.dkfz.tbi.otp.analysis.pair.roddy.AbstractRoddyBamFilePairAnalysisWorkflowTests
 import de.dkfz.tbi.otp.dataprocessing.ConfigPerProjectAndSeqType
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
@@ -67,8 +65,8 @@ abstract class AbstractSnvWorkflowTests extends AbstractRoddyBamFilePairAnalysis
         )
         createDirectories([new File(projectService.getSequencingDirectory(project).toString())])
 
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            config = projectService.configureSnvPipelineProject(
+        config = doWithAuth(OPERATOR) {
+            projectService.configureSnvPipelineProject(
                     new RoddyConfiguration([
                             project          : project,
                             seqType          : seqType,

@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp
 
-import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.testing.mixin.integration.Integration
 import grails.util.Holders
 import groovy.json.JsonOutput
@@ -180,7 +179,7 @@ abstract class WorkflowTestCase extends Specification implements UserAndRoles, G
             createUserAndRoles()
             loadWorkflow()
 
-            SpringSecurityUtils.doWithAuth(ADMIN) {
+            doWithAuth(ADMIN) {
                 new File("scripts/initializations").listFiles().findAll {
                     it.isFile()
                 }.each { File script ->
@@ -509,7 +508,7 @@ echo \$TEMP_DIR
         setupForLoadingWorkflow()
 
         assert workflowScripts: 'No workflow script provided.'
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             JobExecutionPlan.withTransaction {
                 workflowScripts.each { String script ->
                     runScript(script)

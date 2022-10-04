@@ -21,9 +21,8 @@
  */
 package de.dkfz.tbi.otp.administration
 
-import grails.plugin.springsecurity.SpringSecurityUtils
-import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import org.springframework.validation.Errors
 import spock.lang.Specification
 
@@ -49,8 +48,8 @@ class ShutdownServiceIntegrationSpec extends Specification implements UserAndRol
         Errors errors
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
-            errors = shutdownService.planShutdown(REASON)
+        errors = doWithAuth(ADMIN) {
+            shutdownService.planShutdown(REASON)
         }
 
         then:
@@ -72,9 +71,9 @@ class ShutdownServiceIntegrationSpec extends Specification implements UserAndRol
         Errors errors
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        errors = doWithAuth(ADMIN) {
             shutdownService.planShutdown(REASON)
-            errors = shutdownService.cancelShutdown()
+            shutdownService.cancelShutdown()
         }
 
         then:
@@ -89,7 +88,7 @@ class ShutdownServiceIntegrationSpec extends Specification implements UserAndRol
         setupData()
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             shutdownService.cancelShutdown()
         }
 
@@ -103,7 +102,7 @@ class ShutdownServiceIntegrationSpec extends Specification implements UserAndRol
         setupData()
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             shutdownService.planShutdown(REASON)
             shutdownService.destroy()
         }
@@ -120,7 +119,7 @@ class ShutdownServiceIntegrationSpec extends Specification implements UserAndRol
         setupData()
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
+        doWithAuth(ADMIN) {
             shutdownService.destroy()
         }
 

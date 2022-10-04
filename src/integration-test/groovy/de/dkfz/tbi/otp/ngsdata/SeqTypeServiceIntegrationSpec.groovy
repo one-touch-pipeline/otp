@@ -21,9 +21,8 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.plugin.springsecurity.SpringSecurityUtils
-import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import org.springframework.security.access.AccessDeniedException
 import spock.lang.Shared
 import spock.lang.Specification
@@ -56,8 +55,8 @@ class SeqTypeServiceIntegrationSpec extends Specification implements UserAndRole
         List<SeqType> seqTypes = []
 
         when:
-        SpringSecurityUtils.doWithAuth(user) {
-            seqTypes = seqTypeService.alignableSeqTypesByProject(seqTrack.project)
+        seqTypes = doWithAuth(user) {
+            seqTypeService.alignableSeqTypesByProject(seqTrack.project)
         }
 
         then:
@@ -79,8 +78,8 @@ class SeqTypeServiceIntegrationSpec extends Specification implements UserAndRole
         DomainFactory.createSeqTrack(sample: seqTrack.sample, seqType: alignableSeqTypes[0])
 
         when:
-        SpringSecurityUtils.doWithAuth(user) {
-            seqTypes = seqTypeService.alignableSeqTypesByProject(seqTrack.project)
+        seqTypes = doWithAuth(user) {
+            seqTypeService.alignableSeqTypesByProject(seqTrack.project)
         }
 
         then:
@@ -104,8 +103,8 @@ class SeqTypeServiceIntegrationSpec extends Specification implements UserAndRole
         DomainFactory.createSeqTrack(sample: seqTrack.sample, seqType: alignableSeqTypes[1])
 
         when:
-        SpringSecurityUtils.doWithAuth(user) {
-            seqTypes = seqTypeService.alignableSeqTypesByProject(seqTrack.project)
+        seqTypes = doWithAuth(user) {
+            seqTypeService.alignableSeqTypesByProject(seqTrack.project)
         }
 
         then:
@@ -123,7 +122,7 @@ class SeqTypeServiceIntegrationSpec extends Specification implements UserAndRole
         setupData()
 
         when:
-        SpringSecurityUtils.doWithAuth(TESTUSER) {
+        doWithAuth(TESTUSER) {
             seqTypeService.alignableSeqTypesByProject(seqTrack.project)
         }
 

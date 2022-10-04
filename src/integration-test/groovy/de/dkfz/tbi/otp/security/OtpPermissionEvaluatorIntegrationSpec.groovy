@@ -21,9 +21,8 @@
  */
 package de.dkfz.tbi.otp.security
 
-import grails.plugin.springsecurity.SpringSecurityUtils
-import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
 import spock.lang.Specification
@@ -68,7 +67,7 @@ class OtpPermissionEvaluatorIntegrationSpec extends Specification implements Use
         userProjectRole.accessToOtp = otpAccess
 
         when:
-        List<Project> resultList = SpringSecurityUtils.doWithAuth(user.username) {
+        List<Project> resultList = doWithAuth(user.username) {
             projectService.allProjects
         }
 
@@ -88,7 +87,7 @@ class OtpPermissionEvaluatorIntegrationSpec extends Specification implements Use
         user = CollectionUtils.exactlyOneElement(User.findAllByUsername(OPERATOR))
 
         when:
-        List<Project> resultList = SpringSecurityUtils.doWithAuth(user.username) {
+        List<Project> resultList = doWithAuth(user.username) {
             projectService.allProjects
         }
 

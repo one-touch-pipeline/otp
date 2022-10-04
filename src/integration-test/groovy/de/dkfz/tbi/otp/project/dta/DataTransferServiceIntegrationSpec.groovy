@@ -21,16 +21,15 @@
  */
 package de.dkfz.tbi.otp.project.dta
 
-import grails.plugin.springsecurity.SpringSecurityService
-import grails.plugin.springsecurity.SpringSecurityUtils
-import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
+import grails.plugin.springsecurity.SpringSecurityService
+import grails.testing.mixin.integration.Integration
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import org.springframework.web.multipart.MultipartFile
 import spock.lang.Specification
 
-import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.domainFactory.administration.DocumentFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.*
@@ -38,8 +37,6 @@ import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.utils.ProcessOutput
-import de.dkfz.tbi.otp.FileIsEmptyException
-import de.dkfz.tbi.otp.FileNotFoundException
 
 import java.nio.file.FileSystems
 
@@ -90,8 +87,8 @@ class DataTransferServiceIntegrationSpec extends Specification implements Docume
         when:
         DataTransfer returnedTransfer = null
 
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            returnedTransfer = dataTransferService.persistDataTransferWithTransferDocuments(unsavedTransfer, files)
+        returnedTransfer = doWithAuth(OPERATOR) {
+            dataTransferService.persistDataTransferWithTransferDocuments(unsavedTransfer, files)
         }
 
         then:
@@ -109,8 +106,8 @@ class DataTransferServiceIntegrationSpec extends Specification implements Docume
         when:
         DataTransfer resultTransfer = null
 
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            resultTransfer = dataTransferService.addFileToDataTransfer(transfer, file)
+        resultTransfer = doWithAuth(OPERATOR) {
+            dataTransferService.addFileToDataTransfer(transfer, file)
         }
 
         then:
@@ -125,7 +122,7 @@ class DataTransferServiceIntegrationSpec extends Specification implements Docume
         MultipartFile file = createMultipartFile("demo", "demo", new byte[0])
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             dataTransferService.addFileToDataTransfer(transfer, file)
         }
 
@@ -140,7 +137,7 @@ class DataTransferServiceIntegrationSpec extends Specification implements Docume
         List<MultipartFile> files = [createMultipartFile(), createMultipartFile()]
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             dataTransferService.addFilesToDataTransfer(transfer, files)
         }
 
@@ -154,7 +151,7 @@ class DataTransferServiceIntegrationSpec extends Specification implements Docume
         DataTransferDocument dataTransferDocument = null
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             dataTransferService.getDataTransferDocumentContent(dataTransferDocument)
         }
 
@@ -172,8 +169,8 @@ class DataTransferServiceIntegrationSpec extends Specification implements Docume
         when:
         byte[] content
 
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            content = dataTransferService.getDataTransferDocumentContent(dataTransfer.dataTransferDocuments[0])
+        content = doWithAuth(OPERATOR) {
+            dataTransferService.getDataTransferDocumentContent(dataTransfer.dataTransferDocuments[0])
         }
 
         then:
@@ -191,7 +188,7 @@ class DataTransferServiceIntegrationSpec extends Specification implements Docume
         String newComment = "new comment text"
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
+        doWithAuth(OPERATOR) {
             dataTransferService.updateDataTransferComment(transfer, newComment)
         }
 
