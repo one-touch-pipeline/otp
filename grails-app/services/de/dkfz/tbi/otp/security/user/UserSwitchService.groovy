@@ -26,6 +26,7 @@ import grails.plugin.springsecurity.SpringSecurityUtils
 
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.config.PseudoEnvironment
+import de.dkfz.tbi.otp.security.SecurityService
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
@@ -33,7 +34,7 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 class UserSwitchService {
 
     ConfigService configService
-    UserService userService
+    SecurityService securityService
 
     /**
      * Returns the true current user, so if the user is switched it returns not the switched user but
@@ -42,7 +43,7 @@ class UserSwitchService {
     User getUserSwitchInitiator() {
         return isSwitched() ? CollectionUtils.exactlyOneElement(
                 User.findAllByUsername(SpringSecurityUtils.switchedUserOriginalUsername)
-        ) : userService.currentUser
+        ) : securityService.currentUser
     }
 
     boolean isSwitched() {

@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.egaSubmission
 
-import grails.plugin.springsecurity.SpringSecurityService
 import grails.testing.gorm.DataTest
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
@@ -39,6 +38,7 @@ import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
+import de.dkfz.tbi.otp.security.SecurityService
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.util.spreadsheet.Delimiter
@@ -366,7 +366,7 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
                 1 * getPath(*_) >> basePath
             }
         }
-        egaSubmissionFileService.springSecurityService = Mock(SpringSecurityService) {
+        egaSubmissionFileService.securityService = Mock(SecurityService) {
             1 * getCurrentUser() >> user
         }
         egaSubmissionFileService.messageSourceService = Mock(MessageSourceService) {
@@ -419,7 +419,7 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
         egaSubmissionFileService.fileService = Mock(FileService) {
             _ * createFileWithContent(_, _, _)
         }
-        egaSubmissionFileService.springSecurityService = Mock(SpringSecurityService) {
+        egaSubmissionFileService.securityService = Mock(SecurityService) {
             1 * getCurrentUser() >> user
         }
         egaSubmissionFileService.messageSourceService = Mock(MessageSourceService) {

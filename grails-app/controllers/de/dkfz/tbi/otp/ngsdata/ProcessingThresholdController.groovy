@@ -25,12 +25,11 @@ import grails.plugin.springsecurity.annotation.Secured
 
 import de.dkfz.tbi.otp.FlashMessage
 import de.dkfz.tbi.otp.ProjectSelectionService
-import de.dkfz.tbi.otp.security.user.UserService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingThresholds
 import de.dkfz.tbi.otp.dataprocessing.ProcessingThresholdsService
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePairDeciderService
 import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.otp.security.user.RolesService
+import de.dkfz.tbi.otp.security.SecurityService
 
 @Secured('isFullyAuthenticated()')
 class ProcessingThresholdController {
@@ -45,13 +44,12 @@ class ProcessingThresholdController {
     SamplePairDeciderService samplePairDeciderService
     SampleTypePerProjectService sampleTypePerProjectService
     SampleTypeService sampleTypeService
-    UserService userService
-    RolesService rolesService
+    SecurityService securityService
 
     Map index(ProcThresholdsEditCommand cmd) {
         Project project = projectSelectionService.selectedProject
 
-        boolean isAdmin = rolesService.isAdministrativeUser(userService.currentUser)
+        boolean isAdmin = securityService.hasCurrentUserAdministrativeRoles()
         boolean edit = isAdmin ? cmd.edit : false
 
         List<SampleTypePerProject> sampleTypePerProjects = sampleTypePerProjectService.findByProject(project)

@@ -22,7 +22,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.converters.JSON
-import grails.plugin.springsecurity.SpringSecurityService
 import grails.plugin.springsecurity.annotation.Secured
 import grails.validation.Validateable
 import groovy.transform.TupleConstructor
@@ -34,6 +33,7 @@ import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.security.SecurityService
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.security.user.UserService
 import de.dkfz.tbi.otp.security.user.identityProvider.LdapService
@@ -49,7 +49,7 @@ class ProjectUserController implements CheckAndCall {
     UserService userService
     UserProjectRoleService userProjectRoleService
     LdapService ldapService
-    SpringSecurityService springSecurityService
+    SecurityService securityService
     ProcessingOptionService processingOptionService
     ProjectRoleService projectRoleService
 
@@ -103,7 +103,7 @@ class ProjectUserController implements CheckAndCall {
             }
 
             if (userProjectRole) {
-                userEntries.add(new UserEntry(user, project, idpUserDetails, userService.hasCurrentUserAdministrativeRoles()))
+                userEntries.add(new UserEntry(user, project, idpUserDetails, securityService.hasCurrentUserAdministrativeRoles()))
             } else {
                 usersWithoutUserProjectRole.add(user.username)
             }
@@ -121,7 +121,7 @@ class ProjectUserController implements CheckAndCall {
                 hasErrors                  : params.hasErrors,
                 message                    : params.message,
                 emails                     : userProjectRoleService.getEmailsOfToBeNotifiedProjectUsers([project]).sort().join(','),
-                currentUser                : springSecurityService.currentUser as User,
+                currentUser                : securityService.currentUser,
         ]
     }
 

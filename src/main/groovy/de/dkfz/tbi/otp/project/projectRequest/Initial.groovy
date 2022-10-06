@@ -59,7 +59,7 @@ class Initial implements ProjectRequestState {
         ProjectRequest projectRequest = projectRequestService.saveProjectRequestFromCommand(cmd)
         projectRequestStateProvider.setState(projectRequest, Draft)
         projectRequestService.sendDraftCreateEmail(projectRequest)
-        projectRequestPersistentStateService.setCurrentOwner(projectRequest.state, userService.currentUser)
+        projectRequestPersistentStateService.setCurrentOwner(projectRequest.state, securityService.currentUser)
         return projectRequest.id
     }
 

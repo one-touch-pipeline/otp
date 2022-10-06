@@ -22,7 +22,6 @@
 package de.dkfz.tbi.otp.administration
 
 import grails.gorm.transactions.Transactional
-import grails.plugin.springsecurity.SpringSecurityService
 import grails.validation.ValidationException
 import org.springframework.beans.factory.DisposableBean
 import org.springframework.security.access.prepost.PreAuthorize
@@ -34,6 +33,7 @@ import de.dkfz.tbi.otp.OtpException
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
+import de.dkfz.tbi.otp.security.SecurityService
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.workflowExecution.*
@@ -54,7 +54,7 @@ class ShutdownService implements DisposableBean {
     static transactional = false
 
     SchedulerService schedulerService
-    SpringSecurityService springSecurityService
+    SecurityService securityService
     ProcessService processService
     ConfigService configService
     WorkflowSystemService workflowSystemService
@@ -124,7 +124,7 @@ class ShutdownService implements DisposableBean {
         lock.lock()
         try {
             ShutdownInformation.withTransaction {
-                User user = CollectionUtils.atMostOneElement(User.findAllByUsername(springSecurityService.authentication.principal.username))
+                User user = securityService.currentUser
                 ShutdownInformation info = new ShutdownInformation(initiatedBy: user, initiated: new Date(), reason: reason)
                 info.save(flush: true)
                 schedulerService.suspendScheduler()
@@ -150,7 +150,7 @@ class ShutdownService implements DisposableBean {
                 if (!info) {
                     throw new OtpException('Canceling Shutdown failed since there is no shutdown in progress')
                 }
-                info.canceledBy = CollectionUtils.atMostOneElement(User.findAllByUsername(springSecurityService.authentication.principal.username))
+                info.canceledBy = securityService.currentUser
                 info.canceled = new Date()
                 info.save(flush: true)
                 schedulerService.resumeScheduler()

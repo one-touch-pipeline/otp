@@ -40,14 +40,14 @@ class RequesterEdit implements ProjectRequestState {
 
     @Override
     List<ProjectRequestAction> getIndexActions(ProjectRequest projectRequest) {
-        if (userService.currentUser == projectRequest.requester) {
+        if (securityService.currentUser == projectRequest.requester) {
             return [ProjectRequestAction.SUBMIT_INDEX, ProjectRequestAction.SAVE_INDEX]
         }
     }
 
     @Override
     List<ProjectRequestAction> getViewActions(ProjectRequest projectRequest) {
-        User currentUser = userService.currentUser
+        User currentUser = securityService.currentUser
         return currentUser == projectRequest.requester ? [ProjectRequestAction.SUBMIT_VIEW, ProjectRequestAction.EDIT, ProjectRequestAction.DELETE] : []
     }
 
@@ -74,7 +74,7 @@ class RequesterEdit implements ProjectRequestState {
     @PreAuthorize("hasPermission(#cmd.projectRequest, 'PROJECT_REQUEST_CURRENT_OWNER')")
     Long save(ProjectRequestCreationCommand cmd) {
         ProjectRequest projectRequest = projectRequestService.saveProjectRequestFromCommand(cmd)
-        projectRequestPersistentStateService.setCurrentOwner(projectRequest.state, userService.currentUser)
+        projectRequestPersistentStateService.setCurrentOwner(projectRequest.state, securityService.currentUser)
         return projectRequest.id
     }
 

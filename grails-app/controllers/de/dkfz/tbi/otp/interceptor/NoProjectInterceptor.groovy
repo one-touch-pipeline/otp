@@ -21,15 +21,15 @@
  */
 package de.dkfz.tbi.otp.interceptor
 
-import grails.plugin.springsecurity.SpringSecurityService
 import groovy.transform.CompileStatic
 
 import de.dkfz.tbi.otp.project.ProjectService
+import de.dkfz.tbi.otp.security.SecurityService
 
 @CompileStatic
 class NoProjectInterceptor {
     ProjectService projectService
-    SpringSecurityService springSecurityService
+    SecurityService securityService
 
     int order = 1
 
@@ -60,7 +60,7 @@ class NoProjectInterceptor {
 
     @Override
     boolean before() {
-        if (springSecurityService.loggedIn) {
+        if (securityService.loggedIn) {
             if (!projectService.allProjects) {
                 forward(controller: "errors", action: "noProject")
                 return false

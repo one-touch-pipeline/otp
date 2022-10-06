@@ -22,7 +22,6 @@
 package de.dkfz.tbi.otp.dataprocessing.cellRanger
 
 import grails.gorm.transactions.Transactional
-import grails.plugin.springsecurity.SpringSecurityService
 import grails.validation.ValidationException
 import groovy.transform.*
 import org.springframework.security.access.prepost.PreAuthorize
@@ -33,6 +32,7 @@ import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.security.SecurityService
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.tracking.OtrsTicketService
@@ -43,7 +43,7 @@ import de.dkfz.tbi.otp.utils.exceptions.FileAccessForArchivedProjectNotAllowedEx
 @Transactional
 class CellRangerConfigurationService {
 
-    SpringSecurityService springSecurityService
+    SecurityService securityService
 
     @Immutable
     @ToString
@@ -169,7 +169,7 @@ class CellRangerConfigurationService {
         CellRangerMwpParameter parameter = new CellRangerMwpParameter(expectedCells, enforcedCells, referenceGenomeIndex, seqType)
 
         try {
-            User requester = springSecurityService.currentUser as User
+            User requester = securityService.currentUser
             List<CellRangerMergingWorkPackage> mwps = createMergingWorkPackagesForSamples(samples, parameter, requester)
             resetAllTicketsOfSeqTracksForCellRangerExecution(mwps.collectMany { return it.seqTracks } as Set<SeqTrack>)
         } catch (ValidationException e) {

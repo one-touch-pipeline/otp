@@ -26,9 +26,9 @@ import grails.plugin.springsecurity.annotation.Secured
 import groovy.json.JsonSlurper
 import groovy.transform.TupleConstructor
 
-import de.dkfz.tbi.otp.security.user.UserService
 import de.dkfz.tbi.otp.ngsqc.FastqcResultsService
 import de.dkfz.tbi.otp.project.ProjectService
+import de.dkfz.tbi.otp.security.SecurityService
 import de.dkfz.tbi.otp.utils.DataTableCommand
 import de.dkfz.tbi.util.TimeFormats
 
@@ -37,7 +37,7 @@ class SequenceController {
     SeqTrackService seqTrackService
     ProjectService projectService
     FastqcResultsService fastqcResultsService
-    UserService userService
+    SecurityService securityService
 
     static allowedMethods = [
             index          : "GET",
@@ -55,7 +55,7 @@ class SequenceController {
             seqCenters: SeqCenter.list(sort: "name", order: "asc"),
             libraryPreparationKits: LibraryPreparationKit.list(sort: "shortDisplayName", order: "asc").shortDisplayName,
             antibodyTargets: AntibodyTarget.list(sort: "name", order: "asc"),
-            showRunLinks: userService.hasCurrentUserAdministrativeRoles(),
+            showRunLinks: securityService.hasCurrentUserAdministrativeRoles(),
             filterTree : [
                     [name : 'projectSelection', msgcode: 'sequence.search.project',
                      type : 'LIST', from: projectService.allProjects,

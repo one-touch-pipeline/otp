@@ -22,7 +22,6 @@
 package de.dkfz.tbi.otp.egaSubmission
 
 import grails.gorm.transactions.Transactional
-import grails.plugin.springsecurity.SpringSecurityService
 import groovy.transform.CompileStatic
 
 import de.dkfz.tbi.otp.infrastructure.FileService
@@ -30,12 +29,11 @@ import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 import de.dkfz.tbi.otp.notification.CreateNotificationTextService
 import de.dkfz.tbi.otp.project.ProjectService
+import de.dkfz.tbi.otp.security.SecurityService
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.MailHelperService
 import de.dkfz.tbi.otp.utils.MessageSourceService
-import de.dkfz.tbi.util.spreadsheet.Delimiter
-import de.dkfz.tbi.util.spreadsheet.Row
-import de.dkfz.tbi.util.spreadsheet.Spreadsheet
+import de.dkfz.tbi.util.spreadsheet.*
 
 import java.nio.file.Files
 import java.nio.file.Path
@@ -56,7 +54,7 @@ class EgaSubmissionFileService {
     MailHelperService mailHelperService
     MessageSourceService messageSourceService
     ProjectService projectService
-    SpringSecurityService springSecurityService
+    SecurityService securityService
 
     enum EgaColumnName {
         INDIVIDUAL("Individual"),
@@ -282,7 +280,7 @@ class EgaSubmissionFileService {
 
     void sendEmail(EgaSubmission submission) {
         Path basePath = createPathForSubmission(submission)
-        User user = springSecurityService.currentUser as User
+        User user = securityService.currentUser
 
         String subject = "New ${submission}"
         String content = messageSourceService.createMessage('egaSubmission.template.base', [

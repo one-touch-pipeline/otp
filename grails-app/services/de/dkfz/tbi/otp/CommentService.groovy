@@ -22,21 +22,21 @@
 package de.dkfz.tbi.otp
 
 import grails.gorm.transactions.Transactional
-import grails.plugin.springsecurity.SpringSecurityService
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
+import de.dkfz.tbi.otp.security.SecurityService
 
 @Transactional
 class CommentService {
 
-    SpringSecurityService springSecurityService
+    SecurityService securityService
     ProcessingOptionService processingOptionService
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#commentable?.project, 'OTP_READ_ACCESS')")
     Comment saveComment(Commentable commentable, String message) {
-        String userName = springSecurityService.principal.username
+        String userName = securityService.currentUser.username
         return createOrUpdateComment(commentable, message, userName)
     }
 
@@ -58,7 +58,7 @@ class CommentService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void saveComment(CommentableWithHistory commentableWithHistory, String message) {
-        String author = springSecurityService.principal.username
+        String author = securityService.currentUser.username
         addCommentToList(commentableWithHistory, message, author)
     }
 

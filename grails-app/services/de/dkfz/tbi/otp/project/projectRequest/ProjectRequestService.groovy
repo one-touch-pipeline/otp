@@ -36,9 +36,7 @@ import de.dkfz.tbi.otp.ngsdata.UserProjectRoleService
 import de.dkfz.tbi.otp.project.*
 import de.dkfz.tbi.otp.project.additionalField.*
 import de.dkfz.tbi.otp.security.*
-import de.dkfz.tbi.otp.security.user.RolesService
 import de.dkfz.tbi.otp.security.user.SwitchedUserDeniedException
-import de.dkfz.tbi.otp.security.user.UserService
 import de.dkfz.tbi.otp.security.user.UserSwitchService
 import de.dkfz.tbi.otp.utils.*
 
@@ -52,14 +50,13 @@ class ProjectRequestService {
 
     AuditLogService auditLogService
     UserSwitchService userSwitchService
-    UserService userService
     MessageSourceService messageSourceService
     MailHelperService mailHelperService
     ProjectRequestUserService projectRequestUserService
     ProjectRequestPersistentStateService projectRequestPersistentStateService
     ProjectRequestStateProvider projectRequestStateProvider
     ProcessingOptionService processingOptionService
-    RolesService rolesService
+    SecurityService securityService
     UserProjectRoleService userProjectRoleService
 
     ProjectRequest saveProjectRequestFromCommand(ProjectRequestCreationCommand cmd) throws SwitchedUserDeniedException {
@@ -86,7 +83,7 @@ class ProjectRequestService {
                 customSeqTypes          : cmd.customSeqTypes as Set,
                 requesterComment        : cmd.requesterComment,
                 comments                : cmd.projectRequest?.comments ?: [],
-                requester               : cmd.projectRequest?.requester ?: userService.currentUser,
+                requester               : cmd.projectRequest?.requester ?: securityService.currentUser,
                 users                   : users,
         ]
         if (cmd.projectRequest) {
@@ -248,7 +245,7 @@ class ProjectRequestService {
         String body = messageSourceService.createMessage("notification.projectRequest.piReject.body", [
                 requester       : "${requester.username} (${requester.realName})",
                 projectName     : projectRequest.name,
-                projectAuthority: userService.currentUser.username,
+                projectAuthority: securityService.currentUser.username,
                 comment         : rejectComment,
                 link            : getProjectRequestLinkWithoutParams(projectRequest),
                 teamSignature   : processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME),
@@ -277,7 +274,7 @@ class ProjectRequestService {
         String body = messageSourceService.createMessage("notification.projectRequest.partiallyApproved.body", [
                 requester       : "${requester.username} (${requester.realName})",
                 projectName     : projectRequest.name,
-                projectAuthority: userService.currentUser.username,
+                projectAuthority: securityService.currentUser.username,
                 teamSignature   : processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME),
         ])
         mailHelperService.sendEmail(subject, body, recipient, ccs)
@@ -293,7 +290,7 @@ class ProjectRequestService {
         String body = messageSourceService.createMessage("notification.projectRequest.deleted.body", [
                 recipients   : recipients*.username.join(", "),
                 projectName  : projectRequest.name,
-                deletingUser : userService.currentUser,
+                deletingUser : securityService.currentUser,
                 teamSignature: processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME),
         ])
         mailHelperService.sendEmail(subject, body, recipients*.email)
@@ -330,7 +327,7 @@ class ProjectRequestService {
         String subject = messageSourceService.createMessage("notification.projectRequest.piEdit.subject")
         String body = messageSourceService.createMessage("notification.projectRequest.piEdit.body", [
                 projectAuthorities: allProjectAuthorities*.username.join(", "),
-                projectAuthority  : userService.currentUser.username,
+                projectAuthority  : securityService.currentUser.username,
                 projectName       : projectRequest.name,
                 link              : getProjectRequestLinkWithoutParams(projectRequest),
                 teamSignature     : processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME),
@@ -383,7 +380,7 @@ class ProjectRequestService {
     String getCurrentOwnerDisplayName(ProjectRequest projectRequest) {
         if (projectRequest?.state?.currentOwner) {
             User currentOwner = projectRequest.state.currentOwner
-            if (rolesService.isAdministrativeUser(userService.currentUser)) {
+            if (securityService.hasCurrentUserAdministrativeRoles()) {
                 return currentOwner.username
             }
             List<String> currentOwnerAuthorities = currentOwner.authorities*.authority
@@ -416,7 +413,7 @@ class ProjectRequestService {
     List<ProjectRequest> getRequestsUserIsInvolved(boolean resolved) {
         String equalOrNotEqual = resolved ? "eq" : "ne"
         boolean currentUserIsOperator = SpringSecurityUtils.ifAllGranted(Role.ROLE_OPERATOR)
-        User currentUser = userService.currentUser
+        User currentUser = securityService.currentUser
         if (currentUserIsOperator) {
             return (ProjectRequest.withCriteria {
                 state {

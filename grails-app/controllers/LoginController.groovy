@@ -29,10 +29,15 @@ import org.springframework.security.web.WebAttributes
 import org.springframework.security.web.authentication.session.SessionAuthenticationException
 
 import de.dkfz.tbi.otp.security.FailedToCreateUserException
+import de.dkfz.tbi.otp.security.SecurityService
+import de.dkfz.tbi.otp.utils.RequestUtilService
 
 @SuppressWarnings('ClassNameSameAsSuperclass') //this affects the URL of the superclass
 @Secured('permitAll')
 class LoginController extends grails.plugin.springsecurity.LoginController {
+
+    RequestUtilService requestUtilService
+    SecurityService securityService
 
     static allowedMethods = [
             auth: "GET",
@@ -43,7 +48,7 @@ class LoginController extends grails.plugin.springsecurity.LoginController {
     def auth(LoginCommand cmd) {
         assert cmd.validate()
 
-        if (springSecurityService.isLoggedIn()) {
+        if (securityService.isLoggedIn()) {
             redirect uri: cmd.target ?: conf.successHandler.defaultTargetUrl
             return [:]
         }
@@ -77,7 +82,7 @@ class LoginController extends grails.plugin.springsecurity.LoginController {
             }
         }
 
-        if (springSecurityService.isAjax(request)) {
+        if (requestUtilService.isAjax(request)) {
             render([error: msg] as JSON)
         } else {
             flash.message = msg

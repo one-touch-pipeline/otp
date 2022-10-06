@@ -40,7 +40,7 @@ import de.dkfz.tbi.otp.project.*
 import de.dkfz.tbi.otp.project.additionalField.*
 import de.dkfz.tbi.otp.searchability.Keyword
 import de.dkfz.tbi.otp.security.*
-import de.dkfz.tbi.otp.security.user.*
+import de.dkfz.tbi.otp.security.user.UserSwitchService
 import de.dkfz.tbi.otp.utils.MailHelperService
 import de.dkfz.tbi.otp.utils.MessageSourceService
 
@@ -66,11 +66,10 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
                 mailHelperService                   : Mock(MailHelperService),
                 linkGenerator                       : Mock(LinkGenerator),
                 userSwitchService                   : Mock(UserSwitchService),
-                userService                         : Mock(UserService),
+                securityService                     : Mock(SecurityService),
                 auditLogService                     : Mock(AuditLogService),
                 projectRequestUserService           : Mock(ProjectRequestUserService),
                 processingOptionService             : Mock(ProcessingOptionService),
-                rolesService                        : Mock(RolesService),
                 projectRequestStateProvider         : Mock(ProjectRequestStateProvider),
                 userProjectRoleService              : Mock(UserProjectRoleService),
                 projectRequestPersistentStateService: new ProjectRequestPersistentStateService([
@@ -169,7 +168,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         then:
         1 * projectRequestService.messageSourceService.createMessage(_) >> subject
         1 * projectRequestService.linkGenerator.link(_) >> link
-        1 * projectRequestService.userService.currentUser >> pi1
+        1 * projectRequestService.securityService.currentUser >> pi1
         1 * projectRequestService.messageSourceService.createMessage(_, [
                 requester       : "${requester.username} (${requester.realName})",
                 projectName     : request.name,
@@ -226,7 +225,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
 
         then:
         1 * projectRequestService.messageSourceService.createMessage(_) >> subject
-        1 * projectRequestService.userService.currentUser >> pi1
+        1 * projectRequestService.securityService.currentUser >> pi1
         1 * projectRequestService.messageSourceService.createMessage(_, [
                 requester       : "${requester.username} (${requester.realName})",
                 projectName     : request.name,
@@ -252,7 +251,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
 
         then:
         1 * projectRequestService.messageSourceService.createMessage(_) >> subject
-        1 * projectRequestService.userService.currentUser >> pi1
+        1 * projectRequestService.securityService.currentUser >> pi1
         1 * projectRequestService.messageSourceService.createMessage(_, [
                 recipients   : expectedRecipients*.username.join(", "),
                 projectName  : request.name,
@@ -330,7 +329,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
 
         then:
         1 * projectRequestService.messageSourceService.createMessage(_) >> subject
-        1 * projectRequestService.userService.currentUser >> pi1
+        1 * projectRequestService.securityService.currentUser >> pi1
         1 * projectRequestService.linkGenerator.link(_) >> link
         1 * projectRequestService.messageSourceService.createMessage(_, [
                 projectAuthorities: (usersThatNeedToApprove + usersThatAlreadyApproved)*.username.join(", "),
@@ -478,7 +477,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         then:
         1 * projectRequestService.userSwitchService.ensureNotSwitchedUser()
         1 * projectRequestService.projectRequestUserService.saveProjectRequestUsersFromCommands(_) >> users
-        (projectRequestExists ? 0 : 1) * projectRequestService.userService.currentUser >> currentUser
+        (projectRequestExists ? 0 : 1) * projectRequestService.securityService.currentUser >> currentUser
         1 * projectRequestService.auditLogService.logAction(_, _) >> _
         0 * _
 
@@ -525,7 +524,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         }
 
         then:
-        1 * projectRequestService.userService.currentUser >> currentUser
+        1 * projectRequestService.securityService.currentUser >> currentUser
         0 * _
 
         then:
@@ -841,15 +840,13 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
     void "getCurrentOwnerDisplayName, should return real name if user is not an admin user"() {
         given:
         User nonAdminUser = createUser()
-        User currentUser = createUser()
         ProjectRequest projectRequest = createProjectRequest([state: createProjectRequestPersistentState([currentOwner: nonAdminUser])])
 
         when:
         String currentUsername = projectRequestService.getCurrentOwnerDisplayName(projectRequest)
 
         then:
-        1 * projectRequestService.rolesService.isAdministrativeUser(_) >> false
-        1 * projectRequestService.userService.currentUser >> currentUser
+        1 * projectRequestService.securityService.hasCurrentUserAdministrativeRoles() >> false
         0 * _
 
         then:
@@ -862,14 +859,11 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         User adminUser = getUser(ADMIN)
         ProjectRequest projectRequest = createProjectRequest([state: createProjectRequestPersistentState([currentOwner: adminUser])])
 
-        User currentUser = createUser()
-
         when:
         String username = projectRequestService.getCurrentOwnerDisplayName(projectRequest)
 
         then:
-        1 * projectRequestService.rolesService.isAdministrativeUser(_) >> false
-        1 * projectRequestService.userService.currentUser >> currentUser
+        1 * projectRequestService.securityService.hasCurrentUserAdministrativeRoles() >> false
         1 * projectRequestService.processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME) >> emailSenderSalutation
         0 * _
 
@@ -882,15 +876,13 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         given:
         createUserAndRoles()
         User adminUser = getUser(ADMIN)
-        User currentUser = getUser(OPERATOR)
         ProjectRequest projectRequest = createProjectRequest([state: createProjectRequestPersistentState([currentOwner: adminUser])])
 
         when:
         String username = projectRequestService.getCurrentOwnerDisplayName(projectRequest)
 
         then:
-        1 * projectRequestService.rolesService.isAdministrativeUser(_) >> true
-        1 * projectRequestService.userService.currentUser >> currentUser
+        1 * projectRequestService.securityService.hasCurrentUserAdministrativeRoles() >> true
         0 * _
 
         then:

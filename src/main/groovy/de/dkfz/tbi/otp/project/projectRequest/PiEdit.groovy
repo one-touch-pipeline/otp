@@ -40,13 +40,13 @@ class PiEdit implements ProjectRequestState {
 
     @Override
     List<ProjectRequestAction> getIndexActions(ProjectRequest projectRequest) {
-        User currentUser = userService.currentUser
+        User currentUser = securityService.currentUser
         return currentUser == projectRequest?.state?.currentOwner ? [ProjectRequestAction.SAVE_INDEX] : []
     }
 
     @Override
     List<ProjectRequestAction> getViewActions(ProjectRequest projectRequest) {
-        User currentUser = userService.currentUser
+        User currentUser = securityService.currentUser
         return currentUser == projectRequest?.state?.currentOwner ?
                 [ProjectRequestAction.SAVE_VIEW, ProjectRequestAction.EDIT, ProjectRequestAction.DELETE] : []
     }

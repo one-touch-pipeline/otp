@@ -23,12 +23,12 @@ package de.dkfz.tbi.otp.ngsdata
 
 import grails.gorm.transactions.Transactional
 
-import de.dkfz.tbi.otp.security.user.UserService
+import de.dkfz.tbi.otp.security.SecurityService
 
 @Transactional
 class ProjectRoleService {
 
-    UserService userService
+    SecurityService securityService
 
     static boolean projectRolesContainAuthoritativeRole(Set<ProjectRole> projectRoles) {
         return (projectRoles*.name)?.intersect(ProjectRole.AUTHORITY_PROJECT_ROLES)
@@ -39,11 +39,9 @@ class ProjectRoleService {
     }
 
     List<ProjectRole> listAvailableProjectRolesAuthenticatedByCurrentUser() {
-        return ProjectRole.all.findAll {
-            if (userService.hasCurrentUserAdministrativeRoles()) {
-                return true
-            }
-            return it.name != ProjectRole.Basic.PI.name()
+        if (securityService.hasCurrentUserAdministrativeRoles()) {
+            return ProjectRole.all
         }
+        return ProjectRole.all.findAll { it.name != ProjectRole.Basic.PI.name() }
     }
 }

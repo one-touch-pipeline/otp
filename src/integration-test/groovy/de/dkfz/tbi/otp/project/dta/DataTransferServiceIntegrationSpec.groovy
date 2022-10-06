@@ -22,7 +22,6 @@
 package de.dkfz.tbi.otp.project.dta
 
 import grails.gorm.transactions.Rollback
-import grails.plugin.springsecurity.SpringSecurityService
 import grails.testing.mixin.integration.Integration
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
@@ -35,6 +34,7 @@ import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.project.ProjectService
+import de.dkfz.tbi.otp.security.SecurityService
 import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.utils.ProcessOutput
 
@@ -66,7 +66,7 @@ class DataTransferServiceIntegrationSpec extends Specification implements Docume
                             }
                         }
                 ]),
-                springSecurityService : Mock(SpringSecurityService) {
+                securityService : Mock(SecurityService) {
                     _ * getCurrentUser() >> getUser(ADMIN)
                 },
                 dataTransferAgreementService: new DataTransferAgreementService(projectService: projectService),

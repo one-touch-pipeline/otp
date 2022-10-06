@@ -22,34 +22,21 @@
 package de.dkfz.tbi.otp.security.user
 
 import grails.gorm.transactions.Rollback
-import grails.plugin.springsecurity.SpringSecurityService
 import grails.testing.mixin.integration.Integration
 import spock.lang.Specification
 
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.security.*
+import de.dkfz.tbi.otp.security.User
+import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 @Rollback
 @Integration
 class UserServiceIntegrationSpec extends Specification implements UserAndRoles {
+
     UserService userService = new UserService()
 
     void setupData() {
         createUserAndRoles()
-    }
-
-    void "getCurrentUserAsUser, simply returns the current user of spring security as a User object"() {
-        given:
-        User currentUser = DomainFactory.createUser()
-        userService = new UserService(
-                springSecurityService: Mock(SpringSecurityService) {
-                    getCurrentUser() >> currentUser
-                }
-        )
-
-        expect:
-        userService.currentUser == currentUser
     }
 
     void "test updateEmail valid input"() {
@@ -108,66 +95,5 @@ class UserServiceIntegrationSpec extends Specification implements UserAndRoles {
 
         then:
         thrown(AssertionError)
-    }
-
-    void "getRolesOfCurrentUser, return the role of the current user"() {
-        given:
-        setupData()
-        User user = CollectionUtils.exactlyOneElement(User.findAllByUsername(username))
-        List<Role> roles
-
-        when:
-        roles = doWithAuth(username) {
-            userService.rolesOfCurrentUser
-        }
-
-        then:
-        user.authorities == roles as Set
-
-        where:
-        username << [
-                OPERATOR,
-                ADMIN,
-                TESTUSER,
-        ]
-    }
-
-    void "checkRolesContainsAdministrativeRole, check if roles includes an administrative role"() {
-        given:
-        setupData()
-        List<Role> roles = authorities ? Role.findAllByAuthorityInList(authorities) : []
-
-        when:
-        boolean check = userService.checkRolesContainsAdministrativeRole(roles)
-
-        then:
-        check == expectedValue
-
-        where:
-        expectedValue | authorities
-        true          | [Role.ROLE_ADMIN, Role.ROLE_OPERATOR, Role.ROLE_SWITCH_USER, Role.ROLE_SWITCH_USER]
-        true          | [Role.ROLE_SWITCH_USER, Role.ROLE_OPERATOR, Role.ROLE_SWITCH_USER]
-        false         | [Role.ROLE_SWITCH_USER]
-        false         | []
-    }
-
-    void "hasCurrentUserAdministrativeRoles, check if current user has an administrative role"() {
-        given:
-        setupData()
-        boolean check
-
-        when:
-        check = doWithAuth(username) {
-            userService.hasCurrentUserAdministrativeRoles()
-        }
-
-        then:
-        check == expectedValue
-
-        where:
-        username | expectedValue
-        OPERATOR | true
-        ADMIN    | true
-        TESTUSER | false
     }
 }

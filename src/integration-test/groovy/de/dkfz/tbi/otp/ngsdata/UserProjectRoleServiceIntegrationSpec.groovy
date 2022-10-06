@@ -23,7 +23,6 @@ package de.dkfz.tbi.otp.ngsdata
 
 import grails.core.GrailsApplication
 import grails.gorm.transactions.Rollback
-import grails.plugin.springsecurity.SpringSecurityService
 import grails.testing.mixin.integration.Integration
 import org.grails.datastore.gorm.events.AutoTimestampEventListener
 import org.grails.spring.context.support.PluginAwareResourceBundleMessageSource
@@ -84,29 +83,23 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         createUserAndRoles()
         createAllBasicProjectRoles()
 
-        SpringSecurityService springSecurityService = new SpringSecurityService(
-                grailsApplication: grailsApplication,
+        SecurityService securityService = new SecurityService(
                 authenticationTrustResolver: Mock(AuthenticationTrustResolver) {
                     isAnonymous(_) >> false
                 }
-        )
-
-        UserService userService = new UserService(
-                springSecurityService: springSecurityService
         )
 
         configService.addOtpProperties(temporaryFolder.newFolder().toPath())
 
         userProjectRoleService = new UserProjectRoleService()
         userProjectRoleService.messageSourceService = messageSourceServiceWithMockedMessageSource
-        userProjectRoleService.springSecurityService = springSecurityService
+        userProjectRoleService.securityService = securityService
         userProjectRoleService.auditLogService = new AuditLogService()
         userProjectRoleService.auditLogService.userSwitchService = new UserSwitchService()
-        userProjectRoleService.auditLogService.userSwitchService.userService = userService
+        userProjectRoleService.auditLogService.userSwitchService.securityService = securityService
         userProjectRoleService.auditLogService.processingOptionService = new ProcessingOptionService()
         userProjectRoleService.processingOptionService = new ProcessingOptionService()
         userProjectRoleService.configService = configService
-        userProjectRoleService.userService = userService
         userProjectRoleService.userProjectRoleService = userProjectRoleService
 
         userProjectRoleService.mailHelperService = Mock(MailHelperService) {
@@ -378,11 +371,9 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         )
 
         // mock user currently logged in
-        userProjectRoleService.userService = new UserService(
-                springSecurityService: Mock(SpringSecurityService) {
-                    getCurrentUser() >> requesterUserProjectRole.user
-                }
-        )
+        userProjectRoleService.securityService = Mock(SecurityService) {
+            getCurrentUser() >> requesterUserProjectRole.user
+        }
 
         // mock user existence in ldap
         userProjectRoleService.ldapService = Mock(LdapService) {
@@ -438,22 +429,12 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         User currentUser = getUser(USER)
         createUserProjectRole(user: currentUser, projectRoles: [pi])
 
-        // mock user currently logged in
-        userProjectRoleService.userService = new UserService(
-                springSecurityService: Mock(SpringSecurityService)
-        )
-        userProjectRoleService.springSecurityService = Mock(SpringSecurityService)
-
         when:
         doWithAuth(USER) {
             userProjectRoleService.setEnabled(userProjectRolePi, enabled)
         }
 
         then:
-        1 * userProjectRoleService.userService.springSecurityService.currentUser >> currentUser
-        1 * userProjectRoleService.springSecurityService.currentUser >> currentUser
-
-        and:
         thrown(InsufficientRightsException)
 
         where:
@@ -467,18 +448,12 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         User currentUser = getUser(USER)
         UserProjectRole userProjectRole = createUserProjectRole(user: currentUser, projectRoles: [pi], enabled: true)
 
-        // mock user currently logged in
-        userProjectRoleService.springSecurityService = Mock(SpringSecurityService)
-
         when:
         doWithAuth(USER) {
             userProjectRoleService.setEnabled(userProjectRole, false)
         }
 
         then:
-        1 * userProjectRoleService.springSecurityService.currentUser >> currentUser
-
-        and:
         !userProjectRole.enabled
     }
 
@@ -490,10 +465,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         UserProjectRole userProjectRole = createUserProjectRole(user: currentUser, projectRoles: [pi], enabled: false)
 
         // mock user currently logged in
-        userProjectRoleService.userService = new UserService(
-                springSecurityService: Mock(SpringSecurityService)
-        )
-        userProjectRoleService.springSecurityService = Mock(SpringSecurityService)
+        userProjectRoleService.securityService = Mock(SecurityService)
 
         when:
         doWithAuth(USER) {
@@ -501,8 +473,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         }
 
         then:
-        1 * userProjectRoleService.userService.springSecurityService.currentUser >> currentUser
-        1 * userProjectRoleService.springSecurityService.currentUser >> currentUser
+        1 * userProjectRoleService.securityService.currentUser >> currentUser
 
         and:
         thrown(InsufficientRightsException)
@@ -1032,11 +1003,9 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         }
 
         // mock user currently logged in
-        userProjectRoleService.userService = new UserService(
-                springSecurityService: Mock(SpringSecurityService) {
-                    getCurrentUser() >> getUser(OPERATOR)
-                }
-        )
+        userProjectRoleService.securityService = Mock(SecurityService) {
+            getCurrentUser() >> getUser(OPERATOR)
+        }
 
         // mock user existence in ldap
         userProjectRoleService.ldapService = Mock(LdapService) {
@@ -1195,13 +1164,6 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
                 projectRoles: ProjectRole.findAllByName(projectRole.name())
         )
 
-        // mock user currently logged in
-        userProjectRoleService.userService = new UserService(
-                springSecurityService: Mock(SpringSecurityService) {
-                    getCurrentUser() >> user
-                }
-        )
-
         // mock user existence in ldap
         userProjectRoleService.ldapService = Mock(LdapService) {
             isUserInIdpAndActivated(_) >> true
@@ -1314,11 +1276,9 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         )
 
         // mock user currently logged in
-        userProjectRoleService.userService = new UserService(
-                springSecurityService: Mock(SpringSecurityService) {
-                    getCurrentUser() >> user
-                }
-        )
+        userProjectRoleService.securityService = Mock(SecurityService) {
+            getCurrentUser() >> user
+        }
 
         when:
         doWithAuth(user.username) {

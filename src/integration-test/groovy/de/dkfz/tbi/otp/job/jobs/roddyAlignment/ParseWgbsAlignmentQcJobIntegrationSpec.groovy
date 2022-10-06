@@ -22,9 +22,8 @@
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
 import grails.core.GrailsApplication
-import grails.plugin.springsecurity.SpringSecurityService
-import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import org.springframework.beans.factory.annotation.Autowired
@@ -38,8 +37,9 @@ import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightService
+import de.dkfz.tbi.otp.security.SecurityService
+import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.CollectionUtils
-import de.dkfz.tbi.otp.utils.Principal
 
 @Rollback
 @Integration
@@ -67,8 +67,8 @@ class ParseWgbsAlignmentQcJobIntegrationSpec extends Specification {
 
         qcTrafficLightService = new QcTrafficLightService()
         qcTrafficLightService.commentService = new CommentService()
-        qcTrafficLightService.commentService.springSecurityService = Mock(SpringSecurityService) {
-            getPrincipal() >> { new Principal(username: "dummy") }
+        qcTrafficLightService.commentService.securityService = Mock(SecurityService) {
+            getCurrentUser() >> { new User(username: "dummy") }
         }
 
         roddyBamFile = DomainFactory.createRoddyBamFile()

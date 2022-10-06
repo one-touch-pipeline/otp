@@ -43,9 +43,9 @@ import de.dkfz.tbi.otp.project.*
 import de.dkfz.tbi.otp.project.Project.ProjectType
 import de.dkfz.tbi.otp.project.additionalField.*
 import de.dkfz.tbi.otp.searchability.Keyword
-import de.dkfz.tbi.otp.security.user.SwitchedUserDeniedException
+import de.dkfz.tbi.otp.security.SecurityService
 import de.dkfz.tbi.otp.security.User
-import de.dkfz.tbi.otp.security.user.UserService
+import de.dkfz.tbi.otp.security.user.SwitchedUserDeniedException
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.StringUtils
 import de.dkfz.tbi.otp.workflow.shared.WorkflowException
@@ -58,7 +58,7 @@ class ProjectRequestController implements CheckAndCall {
 
     ProjectRequestService projectRequestService
     ProcessingOptionService processingOptionService
-    UserService userService
+    SecurityService securityService
 
     @Autowired
     ProjectRequestStateProvider projectRequestStateProvider
@@ -141,7 +141,7 @@ class ProjectRequestController implements CheckAndCall {
                 ProjectPageType.PROJECT_REQUEST)
 
         boolean isProjectAuthority = ProjectRoleService.projectRolesContainAuthoritativeRole(projectRequest.users.find {
-            it.user == userService.currentUser
+            it.user == securityService.currentUser
         }?.projectRoles)
 
         return [

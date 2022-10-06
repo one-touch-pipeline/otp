@@ -21,18 +21,21 @@
  */
 package de.dkfz.tbi.otp.errors
 
-import grails.plugin.springsecurity.SpringSecurityService
 import grails.plugin.springsecurity.annotation.Secured
 import groovy.util.logging.Slf4j
 
+import de.dkfz.tbi.otp.security.SecurityService
 import de.dkfz.tbi.otp.utils.ExceptionUtils
+import de.dkfz.tbi.otp.utils.RequestUtilService
 
 import javax.servlet.http.HttpServletResponse
 
 @Slf4j
 @Secured('isFullyAuthenticated()')
 class ErrorsController {
-    SpringSecurityService springSecurityService
+
+    RequestUtilService requestUtilService
+    SecurityService securityService
 
     static List<String> allHttpMethods = ["GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "TRACE", "PATCH"]
 
@@ -47,15 +50,15 @@ class ErrorsController {
 
     def error403 = {
         response.status = HttpServletResponse.SC_FORBIDDEN
-        if (springSecurityService.isAjax(request)) {
-            return render(springSecurityService.isLoggedIn().toString())
+        if (requestUtilService.isAjax(request)) {
+            return render(securityService.isLoggedIn().toString())
         }
-        return [authenticated: springSecurityService.isLoggedIn()]
+        return [authenticated: securityService.isLoggedIn()]
     }
 
     def error404 = {
         response.status = HttpServletResponse.SC_NOT_FOUND
-        if (springSecurityService.isAjax(request)) {
+        if (requestUtilService.isAjax(request)) {
             return render(request.forwardURI)
         }
         return [notFound: request.forwardURI]
@@ -75,7 +78,7 @@ class ErrorsController {
         String digest = stackTrace.encodeAsMD5()
         log.error("Displaying exception with digest ${digest}.")
         response.status = HttpServletResponse.SC_INTERNAL_SERVER_ERROR
-        if (springSecurityService.isAjax(request)) {
+        if (requestUtilService.isAjax(request)) {
             render digest
         } else {
             return [

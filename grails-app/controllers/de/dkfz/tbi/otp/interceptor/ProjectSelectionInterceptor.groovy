@@ -21,17 +21,17 @@
  */
 package de.dkfz.tbi.otp.interceptor
 
-import grails.plugin.springsecurity.SpringSecurityService
 import groovy.transform.CompileStatic
 
 import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.project.ProjectService
+import de.dkfz.tbi.otp.security.SecurityService
 
 @CompileStatic
 class ProjectSelectionInterceptor {
     ProjectService projectService
     ProjectSelectionService projectSelectionService
-    SpringSecurityService springSecurityService
+    SecurityService securityService
 
     int order = 2
 
@@ -41,7 +41,7 @@ class ProjectSelectionInterceptor {
 
     @Override
     boolean before() {
-        if (springSecurityService.loggedIn) {
+        if (securityService.loggedIn) {
             projectSelectionService.selectedProject = params.remove(ProjectSelectionService.PROJECT_SELECTION_PARAMETER) as String
         }
         true
@@ -49,7 +49,7 @@ class ProjectSelectionInterceptor {
 
     @Override
     boolean after() {
-        if (model != null && springSecurityService.loggedIn) {
+        if (model != null && securityService.loggedIn) {
             model.selectedProject = projectSelectionService.selectedProject
             model.availableProjects = projectService.allProjects
             model.projectParameter = ProjectSelectionService.PROJECT_SELECTION_PARAMETER

@@ -84,6 +84,9 @@ class LicenseCheck {
             "grailsw.bat",
             "grailsw",
 
+            "grails-app/services/de/dkfz/tbi/otp/security/SecurityService.groovy",
+            "grails-app/services/de/dkfz/tbi/otp/utils/RequestUtilService.groovy",
+
             "src/main/resources/wes-api/workflow_execution_service.swagger.config.json",
             "src/main/resources/wes-api/workflow_execution_service.swagger.yaml",
 

@@ -22,7 +22,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.gorm.transactions.Transactional
-import grails.plugin.springsecurity.SpringSecurityService
 import grails.plugin.springsecurity.SpringSecurityUtils
 import groovy.text.SimpleTemplateEngine
 import groovy.transform.TupleConstructor
@@ -32,7 +31,6 @@ import de.dkfz.odcf.audit.impl.DicomAuditLogger
 import de.dkfz.odcf.audit.impl.OtpDicomAuditFactory
 import de.dkfz.odcf.audit.impl.OtpDicomAuditFactory.UniqueIdentifierType
 import de.dkfz.odcf.audit.xml.layer.EventIdentification.EventOutcomeIndicator
-import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
@@ -42,29 +40,29 @@ import de.dkfz.tbi.otp.security.user.UserService
 import de.dkfz.tbi.otp.security.user.identityProvider.LdapService
 import de.dkfz.tbi.otp.security.user.identityProvider.data.IdpUserDetails
 import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 
 import static de.dkfz.tbi.otp.security.DicomAuditUtils.getRealUserName
 
 @Transactional
 class UserProjectRoleService {
 
-    SpringSecurityService springSecurityService
     AuditLogService auditLogService
+    ConfigService configService
     LdapService ldapService
     MailHelperService mailHelperService
     MessageSourceService messageSourceService
     ProcessingOptionService processingOptionService
-    UserService userService
-    ConfigService configService
+    SecurityService securityService
     UserProjectRoleService userProjectRoleService
+    UserService userService
 
     UserProjectRole createUserProjectRole(User user, Project project, Set<ProjectRole> projectRoles, Map<String, Boolean> flags = [:]) {
         assert user: "the user must not be null"
         assert project: "the project must not be null"
         assert !UserProjectRole.findAllByUserAndProject(user, project): "User '${user.username ?: user.realName}' is already part of project '${project.name}'"
 
-        String requester = springSecurityService?.principal?.hasProperty("username") ?
-                springSecurityService.principal.username : springSecurityService?.principal
+        String requester = securityService.currentUser.username
 
         UserProjectRole userProjectRole = new UserProjectRole([
                 user   : user,
@@ -214,7 +212,7 @@ class UserProjectRoleService {
     }
 
     private void notifyAdministration(UserProjectRole userProjectRole, OperatorAction action) {
-        User requester = CollectionUtils.exactlyOneElement(User.findAllByUsername(springSecurityService.authentication.principal.username as String))
+        User requester = securityService.currentUser
         UserProjectRole requesterUserProjectRole = CollectionUtils.atMostOneElement(
                 UserProjectRole.findAllByUserAndProject(requester, userProjectRole.project)
         )
@@ -450,11 +448,11 @@ class UserProjectRoleService {
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#userProjectRole.project, 'MANAGE_USERS') or hasPermission(#userProjectRole, 'IS_USER')")
     UserProjectRole setEnabled(UserProjectRole userProjectRole, boolean value) {
-        User currentUser = springSecurityService.currentUser as User
-        if (value && userProjectRole.user == currentUser && !userService.hasCurrentUserAdministrativeRoles()) {
+        User currentUser = securityService.currentUser
+        if (value && userProjectRole.user == currentUser && !securityService.hasCurrentUserAdministrativeRoles()) {
             throw new InsufficientRightsException("You are not allowed to reactivate your own user! Please ask your administrator.")
         }
-        if (userProjectRole.user != currentUser && !userService.hasCurrentUserAdministrativeRoles() && userProjectRole.isPi()) {
+        if (userProjectRole.user != currentUser && !securityService.hasCurrentUserAdministrativeRoles() && userProjectRole.isPi()) {
             throw new InsufficientRightsException("You don't have enough rights to execute this operation! Please ask your administrator.")
         }
         boolean hadFileAccess = userProjectRole.accessToFiles
@@ -505,7 +503,7 @@ class UserProjectRoleService {
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#userProjectRole.project, 'MANAGE_USERS')")
     UserProjectRole deleteProjectUserRole(UserProjectRole userProjectRole, ProjectRole currentProjectRole) {
         assert currentProjectRole in userProjectRole.projectRoles
-        if (currentProjectRole.name == ProjectRole.Basic.PI.name() && !userService.hasCurrentUserAdministrativeRoles()) {
+        if (currentProjectRole.name == ProjectRole.Basic.PI.name() && !securityService.hasCurrentUserAdministrativeRoles()) {
             throw new OtpRuntimeException("Cannot remove role ${ProjectRole.Basic.PI.name()}. Please ask an administrator!")
         }
         if (userProjectRole.projectRoles.size() <= 1) {

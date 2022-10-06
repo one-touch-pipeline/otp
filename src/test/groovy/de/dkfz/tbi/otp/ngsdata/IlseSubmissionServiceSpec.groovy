@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.plugin.springsecurity.SpringSecurityService
 import grails.testing.gorm.DataTest
 import grails.validation.ValidationException
 import spock.lang.Specification
@@ -31,6 +30,8 @@ import de.dkfz.tbi.otp.Comment
 import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.security.SecurityService
+import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.HelperUtils
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
@@ -54,8 +55,8 @@ class IlseSubmissionServiceSpec extends Specification implements DataTest, Domai
     private IlseSubmissionService createIlseSubmissionServiceHelper() {
         return new IlseSubmissionService(
                 commentService: new CommentService(
-                        springSecurityService: Mock(SpringSecurityService) {
-                            getPrincipal() >> GroovyMock(Object) {
+                        securityService: Mock(SecurityService) {
+                            getCurrentUser() >> GroovyMock(User) {
                                 getUsername() >> 'username'
                             }
                         }

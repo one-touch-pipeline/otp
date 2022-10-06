@@ -23,12 +23,16 @@ package de.dkfz.tbi.otp
 
 import asset.pipeline.grails.LinkGenerator
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.security.core.context.SecurityContextHolder
+
+import de.dkfz.tbi.otp.security.SecurityService
 
 class ProjectLinkGenerator extends LinkGenerator {
 
     @Autowired
     ProjectSelectionService projectSelectionService
+
+    @Autowired
+    SecurityService securityService
 
     ProjectLinkGenerator(final String serverUrl) {
         super(serverUrl)
@@ -37,7 +41,7 @@ class ProjectLinkGenerator extends LinkGenerator {
     @Override
     String link(Map attrs, String encoding = 'UTF-8') {
         Object paramsAttribute = attrs.get(ATTRIBUTE_PARAMS)
-        if (paramsAttribute != [:] && SecurityContextHolder.context?.authentication) {
+        if (paramsAttribute != [:] && securityService.loggedIn) {
             Map params = paramsAttribute instanceof Map ? paramsAttribute as Map : [:]
             if (!params.get(ProjectSelectionService.PROJECT_SELECTION_PARAMETER) && projectSelectionService.selectedProject) {
                 attrs.put(ATTRIBUTE_PARAMS, [(ProjectSelectionService.PROJECT_SELECTION_PARAMETER): projectSelectionService.selectedProject] << params)

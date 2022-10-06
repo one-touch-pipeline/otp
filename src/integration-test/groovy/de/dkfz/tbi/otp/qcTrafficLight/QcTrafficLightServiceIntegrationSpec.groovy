@@ -21,9 +21,8 @@
  */
 package de.dkfz.tbi.otp.qcTrafficLight
 
-import grails.plugin.springsecurity.SpringSecurityService
-import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -35,8 +34,9 @@ import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.pipelines.AlignmentPipelineFactory
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.QcThresholdHandling
+import de.dkfz.tbi.otp.security.SecurityService
+import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.CollectionUtils
-import de.dkfz.tbi.otp.utils.Principal
 
 import static de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.QcTrafficLightStatus.*
 
@@ -52,8 +52,8 @@ class QcTrafficLightServiceIntegrationSpec extends Specification implements Doma
     void setupData() {
         qcTrafficLightService = new QcTrafficLightService()
         qcTrafficLightService.commentService = new CommentService()
-        qcTrafficLightService.commentService.springSecurityService = Mock(SpringSecurityService) {
-            getPrincipal() >> { new Principal(username: "dummy") }
+        qcTrafficLightService.commentService.securityService = Mock(SecurityService) {
+            getCurrentUser() >> { new User(username: "dummy") }
         }
         qcTrafficLightService.linkFilesToFinalDestinationService = new LinkFilesToFinalDestinationService()
 

@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.plugin.springsecurity.SpringSecurityService
 import grails.plugin.springsecurity.acl.AclSid
 import grails.testing.gorm.DataTest
 import grails.testing.web.controllers.ControllerUnitTest
@@ -35,7 +34,6 @@ import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.UserDomainFactory
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.*
-import de.dkfz.tbi.otp.security.user.UserService
 import de.dkfz.tbi.otp.security.user.identityProvider.LdapService
 import de.dkfz.tbi.otp.security.user.identityProvider.data.IdpUserDetails
 import de.dkfz.tbi.otp.utils.CollectionUtils
@@ -89,14 +87,12 @@ class ProjectUserControllerSpec extends Specification implements ControllerUnitT
             getGroupMembersByGroupName(_) >> [enabledUser.username, disabledUser.username, unconnectedUser.username, unknownUsername, ignoredUsername]
             getIdpUserDetailsByUsername(_) >> new IdpUserDetails()
         }
-        controller.springSecurityService = Mock(SpringSecurityService) {
+        controller.securityService = Mock(SecurityService) {
             getCurrentUser() >> currentUser
-        }
-        controller.userService = Mock(UserService) {
             hasCurrentUserAdministrativeRoles() >> true
         }
         controller.projectRoleService = new ProjectRoleService([
-                userService: Mock(UserService) {
+                securityService: Mock(SecurityService) {
                     hasCurrentUserAdministrativeRoles() >> true
                 }
         ])

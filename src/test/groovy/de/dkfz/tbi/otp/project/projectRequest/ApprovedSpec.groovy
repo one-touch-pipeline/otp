@@ -28,8 +28,8 @@ import spock.lang.Unroll
 import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.domainFactory.UserDomainFactory
 import de.dkfz.tbi.otp.project.*
+import de.dkfz.tbi.otp.security.SecurityService
 import de.dkfz.tbi.otp.security.User
-import de.dkfz.tbi.otp.security.user.UserService
 import de.dkfz.tbi.otp.utils.MessageSourceService
 
 @SuppressWarnings('ExplicitFlushForDeleteRule')
@@ -47,7 +47,7 @@ class ApprovedSpec extends Specification implements UserDomainFactory, DataTest 
     }
 
     MessageSourceService messageSourceService
-    UserService userService
+    SecurityService securityService
     ProjectRequestService projectRequestService
     ProjectRequestStateProvider projectRequestStateProvider
     ProjectRequestState state
@@ -56,12 +56,12 @@ class ApprovedSpec extends Specification implements UserDomainFactory, DataTest 
 
     void setup() {
         messageSourceService = Mock(MessageSourceService)
-        userService = Mock(UserService)
+        securityService = Mock(SecurityService)
         projectRequestService = Mock(ProjectRequestService)
         projectRequestStateProvider = Mock(ProjectRequestStateProvider)
         projectRequestPersistentStateService = Mock(ProjectRequestPersistentStateService)
         commentService = Mock(CommentService)
-        state = new Approved(userService: userService, projectRequestService: projectRequestService,
+        state = new Approved(securityService: securityService, projectRequestService: projectRequestService,
                 projectRequestStateProvider: projectRequestStateProvider, commentService: commentService,
                 messageSourceService: messageSourceService, projectRequestPersistentStateService: projectRequestPersistentStateService)
     }
@@ -96,7 +96,7 @@ class ApprovedSpec extends Specification implements UserDomainFactory, DataTest 
 
         then:
         1 * messageSourceService.createMessage(_) >> "error"
-        1 * userService.currentUser >> requester
+        1 * securityService.currentUser >> requester
 
         and:
         thrown ProjectRequestBeingEditedException
@@ -112,7 +112,7 @@ class ApprovedSpec extends Specification implements UserDomainFactory, DataTest 
         state.edit(projectRequest)
 
         then:
-        1 * userService.currentUser >> requester
+        1 * securityService.currentUser >> requester
         1 * projectRequestPersistentStateService.setCurrentOwner(projectRequest.state, requester)
 
         where:
@@ -133,7 +133,7 @@ class ApprovedSpec extends Specification implements UserDomainFactory, DataTest 
 
         then:
         1 * messageSourceService.createMessage(_) >> "error"
-        1 * userService.currentUser >> requester
+        1 * securityService.currentUser >> requester
         0 * _
 
         and:
@@ -150,7 +150,7 @@ class ApprovedSpec extends Specification implements UserDomainFactory, DataTest 
         Long result = state.save(cmd)
 
         then:
-        1 * userService.currentUser >> requester
+        1 * securityService.currentUser >> requester
         1 * projectRequestService.saveProjectRequestFromCommand(cmd) >> projectRequest
         0 * _
 

@@ -22,13 +22,11 @@
 package de.dkfz.tbi.otp.workflowExecution
 
 import grails.gorm.transactions.Transactional
-import grails.plugin.springsecurity.SpringSecurityService
 
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
-import de.dkfz.tbi.otp.utils.ProcessOutput
-import de.dkfz.tbi.otp.utils.StackTraceUtils
-import de.dkfz.tbi.otp.utils.TransactionUtils
+import de.dkfz.tbi.otp.security.SecurityService
+import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowCommandLog
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowMessageLog
 
@@ -38,7 +36,7 @@ import de.dkfz.tbi.otp.workflowExecution.log.WorkflowMessageLog
 @Transactional
 class LogService {
 
-    SpringSecurityService springSecurityService
+    SecurityService securityService
 
     ProcessingOptionService processingOptionService
 
@@ -89,7 +87,7 @@ class LogService {
     }
 
     private String userName() {
-        return springSecurityService.currentUser?.username ?:
+        return securityService.currentUser?.username ?:
                 processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_SYSTEM_USER)
     }
 }

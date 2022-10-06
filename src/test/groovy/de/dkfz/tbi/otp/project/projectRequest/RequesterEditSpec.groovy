@@ -26,8 +26,8 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.otp.domainFactory.UserDomainFactory
 import de.dkfz.tbi.otp.project.*
+import de.dkfz.tbi.otp.security.SecurityService
 import de.dkfz.tbi.otp.security.User
-import de.dkfz.tbi.otp.security.user.UserService
 
 import javax.naming.OperationNotSupportedException
 
@@ -45,18 +45,18 @@ class RequesterEditSpec extends Specification implements UserDomainFactory, Data
         ]
     }
 
-    UserService userService
+    SecurityService securityService
     ProjectRequestService projectRequestService
     ProjectRequestStateProvider projectRequestStateProvider
     ProjectRequestPersistentStateService projectRequestPersistentStateService
     ProjectRequestState state
 
     void setup() {
-        userService = Mock(UserService)
+        securityService = Mock(SecurityService)
         projectRequestService = Mock(ProjectRequestService)
         projectRequestStateProvider = Mock(ProjectRequestStateProvider)
         projectRequestPersistentStateService = Mock(ProjectRequestPersistentStateService)
-        state = new RequesterEdit(userService: userService, projectRequestService: projectRequestService,
+        state = new RequesterEdit(securityService: securityService, projectRequestService: projectRequestService,
                 projectRequestStateProvider: projectRequestStateProvider, projectRequestPersistentStateService: projectRequestPersistentStateService)
     }
 
@@ -103,7 +103,7 @@ class RequesterEditSpec extends Specification implements UserDomainFactory, Data
         Long result = state.save(cmd)
 
         then:
-        1 * userService.currentUser >> requester
+        1 * securityService.currentUser >> requester
         1 * projectRequestService.saveProjectRequestFromCommand(cmd) >> projectRequest
         1 * projectRequestPersistentStateService.setCurrentOwner(projectRequest.state, requester)
 

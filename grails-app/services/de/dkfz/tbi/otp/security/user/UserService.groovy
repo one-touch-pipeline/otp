@@ -22,11 +22,9 @@
 package de.dkfz.tbi.otp.security.user
 
 import grails.gorm.transactions.Transactional
-import grails.plugin.springsecurity.SpringSecurityService
 import grails.plugin.springsecurity.SpringSecurityUtils
 import org.springframework.security.access.prepost.PreAuthorize
 
-import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.ngsdata.LdapUserCreationException
 import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.security.user.identityProvider.LdapService
@@ -42,13 +40,8 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 @Transactional
 class UserService {
 
-    SpringSecurityService springSecurityService
-    ConfigService configService
     LdapService ldapService
-
-    User getCurrentUser() {
-        return springSecurityService.currentUser as User
-    }
+    SecurityService securityService
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void editUser(User user, String email, String realName) {
@@ -165,7 +158,7 @@ class UserService {
     boolean isPrivacyPolicyAccepted() {
         // HACK: skip in  case we are not logged in yet, otherwise we will never get to the log-in page...
         // (this _should_ probably be solved in a different layer of OTP)
-        if (!springSecurityService.loggedIn) {
+        if (!securityService.loggedIn) {
             return true
         }
         // switched users need not be checked, because before switching, they must have been a user that must
@@ -174,13 +167,13 @@ class UserService {
             return true
         }
 
-        User user = springSecurityService.currentUser as User
+        User user = securityService.currentUser as User
         return user.acceptedPrivacyPolicy
     }
 
     void acceptPrivacyPolicy() {
-        if (springSecurityService.loggedIn) {
-            User user = springSecurityService.currentUser as User
+        if (securityService.loggedIn) {
+            User user = securityService.currentUser as User
             setAcceptPrivacyPolicy(user, true)
         }
     }
@@ -227,20 +220,6 @@ No user exists yet, create user ${currentUser} with admin rights.
                 }
             }
         }
-    }
-
-    List<Role> getRolesOfCurrentUser() {
-        return getRolesOfUser(springSecurityService.currentUser as User)
-    }
-
-    boolean checkRolesContainsAdministrativeRole(List<Role> roles) {
-        return roles.any {
-            it.authority in Role.ADMINISTRATIVE_ROLES
-        }
-    }
-
-    boolean hasCurrentUserAdministrativeRoles() {
-        return checkRolesContainsAdministrativeRole(rolesOfCurrentUser)
     }
 
     User findUserByUsername(String username) {

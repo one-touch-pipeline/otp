@@ -22,18 +22,17 @@
 package de.dkfz.tbi.otp.project.dta
 
 import grails.gorm.transactions.Transactional
-import grails.plugin.springsecurity.SpringSecurityService
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.multipart.MultipartFile
 
+import de.dkfz.tbi.otp.FileIsEmptyException
+import de.dkfz.tbi.otp.FileNotFoundException
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.ExecutionHelperService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.Realm
-import de.dkfz.tbi.otp.security.User
+import de.dkfz.tbi.otp.security.SecurityService
 import de.dkfz.tbi.otp.utils.FileNameGenerator
-import de.dkfz.tbi.otp.FileIsEmptyException
-import de.dkfz.tbi.otp.FileNotFoundException
 
 import java.nio.file.Files
 import java.nio.file.Path
@@ -48,7 +47,7 @@ class DataTransferService {
     FileService fileService
     FileSystemService fileSystemService
     ExecutionHelperService executionHelperService
-    SpringSecurityService springSecurityService
+    SecurityService securityService
 
     /**
      * Constructs a full DataTransfer object with its files as DataTransferDocuments in the database layer
@@ -61,7 +60,7 @@ class DataTransferService {
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     DataTransfer persistDataTransferWithTransferDocuments(DataTransfer dataTransfer, List<MultipartFile> files) throws FileIsEmptyException {
-        dataTransfer.performingUser = springSecurityService.currentUser as User
+        dataTransfer.performingUser = securityService.currentUser
         dataTransfer.dataTransferAgreement.addToTransfers(dataTransfer).save(flush: true)
         return addFilesToDataTransfer(dataTransfer, files)
     }

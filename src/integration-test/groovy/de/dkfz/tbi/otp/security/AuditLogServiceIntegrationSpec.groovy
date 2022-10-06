@@ -23,7 +23,6 @@ package de.dkfz.tbi.otp.security
 
 import grails.core.GrailsApplication
 import grails.gorm.transactions.Rollback
-import grails.plugin.springsecurity.SpringSecurityService
 import grails.testing.mixin.integration.Integration
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.authentication.AuthenticationTrustResolver
@@ -33,7 +32,6 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.UserDomainFactory
-import de.dkfz.tbi.otp.security.user.UserService
 import de.dkfz.tbi.otp.security.user.UserSwitchService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
@@ -54,10 +52,8 @@ class AuditLogServiceIntegrationSpec extends Specification implements UserAndRol
                 processingOptionService: new ProcessingOptionService()
         ])
         auditLogService.userSwitchService = new UserSwitchService()
-        auditLogService.userSwitchService.userService = new UserService()
-        auditLogService.userSwitchService.userService.springSecurityService = new SpringSecurityService()
-        auditLogService.userSwitchService.userService.springSecurityService.grailsApplication = grailsApplication
-        auditLogService.userSwitchService.userService.springSecurityService.authenticationTrustResolver = Mock(AuthenticationTrustResolver) {
+        auditLogService.userSwitchService.securityService = new SecurityService()
+        auditLogService.userSwitchService.securityService.authenticationTrustResolver = Mock(AuthenticationTrustResolver) {
             isAnonymous(_) >> false
         }
     }

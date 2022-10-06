@@ -21,18 +21,18 @@
  */
 package de.dkfz.tbi.otp.workflowExecution
 
-import grails.plugin.springsecurity.SpringSecurityService
 import grails.testing.gorm.DataTest
 import grails.testing.services.ServiceUnitTest
 import spock.lang.Specification
 
-import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.UserDomainFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.security.SecurityService
 import de.dkfz.tbi.otp.security.User
+import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowMessageLog
 
 class LogServiceSpec extends Specification implements ServiceUnitTest<LogService>, DataTest, WorkflowSystemDomainFactory, UserDomainFactory {
@@ -47,7 +47,7 @@ class LogServiceSpec extends Specification implements ServiceUnitTest<LogService
     }
 
     void setup() {
-        service.springSecurityService = Mock(SpringSecurityService)
+        service.securityService = Mock(SecurityService)
         service.processingOptionService = Mock(ProcessingOptionService) {
             0 * _
         }
@@ -92,7 +92,7 @@ class LogServiceSpec extends Specification implements ServiceUnitTest<LogService
         String message = "message ${nextId}"
         User testUser = createUser()
 
-        service.springSecurityService = Mock(SpringSecurityService) {
+        service.securityService = Mock(SecurityService) {
             getCurrentUser() >> testUser
         }
 
@@ -148,7 +148,7 @@ class LogServiceSpec extends Specification implements ServiceUnitTest<LogService
         OtpRuntimeException otpRuntimeException = new OtpRuntimeException(exceptionMessage)
         User testUser = DomainFactory.createUser()
 
-        service.springSecurityService = Mock(SpringSecurityService) {
+        service.securityService = Mock(SecurityService) {
             getCurrentUser() >> testUser
         }
 

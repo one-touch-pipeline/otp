@@ -41,7 +41,7 @@ class Approved implements ProjectRequestState {
 
     @Override
     List<ProjectRequestAction> getIndexActions(ProjectRequest projectRequest) {
-        User currentUser = userService.currentUser
+        User currentUser = securityService.currentUser
         return (currentUser == projectRequest?.state?.currentOwner) ? [ProjectRequestAction.SAVE_INDEX] : []
     }
 
@@ -72,7 +72,7 @@ class Approved implements ProjectRequestState {
     @Override
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     ProjectRequestCreationCommand edit(ProjectRequest projectRequest) throws ProjectRequestBeingEditedException {
-        User currentUser = userService.currentUser
+        User currentUser = securityService.currentUser
         if (projectRequest.state.currentOwner == null || projectRequest.state.currentOwner == currentUser) {
             projectRequestPersistentStateService.setCurrentOwner(projectRequest.state, currentUser)
             return ProjectRequestCreationCommand.fromProjectRequest(projectRequest)
@@ -87,7 +87,7 @@ class Approved implements ProjectRequestState {
     @Override
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     Long save(ProjectRequestCreationCommand cmd) throws ProjectRequestBeingEditedException{
-        if (cmd.projectRequest.state.currentOwner == userService.currentUser) {
+        if (cmd.projectRequest.state.currentOwner == securityService.currentUser) {
             return projectRequestService.saveProjectRequestFromCommand(cmd).id
         }
         throw new ProjectRequestBeingEditedException(messageSourceService.createMessage("projectRequest.edit.already"))
