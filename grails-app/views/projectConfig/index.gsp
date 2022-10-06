@@ -162,13 +162,18 @@
                 <td><g:message code="project.speciesWithStrain"/></td>
                 <td></td>
                 <td>
-                    <otp:editorSwitch
-                            roles="ROLE_OPERATOR"
-                            template="dropDownMulti"
-                            link="${g.createLink(controller: "projectConfig", action: 'updateSpeciesWithStrains', params: ['fieldName': 'speciesWithStrains'])}"
-                            values="${allSpeciesWithStrain}"
-                            optionKey="id"
-                            value="${selectedProject?.speciesWithStrains?:""}"/>
+                    <sec:ifAllGranted roles="ROLE_OPERATOR">
+                        <otp:editorSwitch
+                                roles="ROLE_OPERATOR"
+                                template="dropDownMulti"
+                                link="${g.createLink(controller: "projectConfig", action: 'updateSpeciesWithStrains', params: ['fieldName': 'speciesWithStrains'])}"
+                                values="${allSpeciesWithStrain}"
+                                optionKey="id"
+                                value="${selectedProject?.speciesWithStrains ?: ""}"/>
+                    </sec:ifAllGranted>
+                    <sec:ifNotGranted roles="ROLE_OPERATOR">
+                        ${selectedProject?.speciesWithStrains ?: ""}
+                    </sec:ifNotGranted>
                 </td>
             </tr>
             <tr>
