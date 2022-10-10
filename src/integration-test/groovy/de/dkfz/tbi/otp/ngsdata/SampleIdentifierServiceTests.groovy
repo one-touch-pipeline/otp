@@ -40,7 +40,7 @@ class SampleIdentifierServiceTests implements DomainFactoryCore {
 
     void setup() {
         findOrCreateProcessingOption(
-                name: ProcessingOption.OptionName.HIPO_PARSER_MAPPING,
+                name: ProcessingOption.OptionName.HIPO2_PARSER_MAPPING,
                 value: '{\n' +
                         '   "H021":"hipo_021",\n' +
                         '   "H123":"hipo_123",\n' +

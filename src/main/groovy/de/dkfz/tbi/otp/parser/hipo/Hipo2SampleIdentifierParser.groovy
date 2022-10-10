@@ -37,7 +37,7 @@ class Hipo2SampleIdentifierParser extends AbstractHipo2SampleIdentifierParser {
 
     @Override
     String createProjectName(String projectNumber) {
-        String option = processingOptionService.findOptionAsString(ProcessingOption.OptionName.HIPO_PARSER_MAPPING)
+        String option = processingOptionService.findOptionAsString(ProcessingOption.OptionName.HIPO2_PARSER_MAPPING)
         String projectName
         if (option?.trim()) {
             try {

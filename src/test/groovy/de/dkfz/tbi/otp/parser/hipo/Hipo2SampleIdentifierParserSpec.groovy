@@ -45,7 +45,7 @@ class Hipo2SampleIdentifierParserSpec extends AbstractHipo2SampleIdentifierParse
 
     void setup() {
         findOrCreateProcessingOption(
-                name: ProcessingOption.OptionName.HIPO_PARSER_MAPPING,
+                name: ProcessingOption.OptionName.HIPO2_PARSER_MAPPING,
                 value: '{\n' +
                         '   "H021":"hipo_021",\n' +
                         '   "H022":"hipo_022",\n' +
@@ -56,7 +56,7 @@ class Hipo2SampleIdentifierParserSpec extends AbstractHipo2SampleIdentifierParse
 
     void setup2(String value) {
         findOrCreateProcessingOption(
-                name: ProcessingOption.OptionName.HIPO_PARSER_MAPPING,
+                name: ProcessingOption.OptionName.HIPO2_PARSER_MAPPING,
                 value: value,
         )
         parser.processingOptionService = new ProcessingOptionService()

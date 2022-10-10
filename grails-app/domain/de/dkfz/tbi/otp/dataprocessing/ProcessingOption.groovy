@@ -606,7 +606,7 @@ class ProcessingOption implements Entity {
                 "default fastqc workflow type",
                 Necessity.OPTIONAL, FastqcType.BASH.name(), TypeValidators.DEFAULT_FASTQC_TYPE
         ),
-        HIPO_PARSER_MAPPING(
+        HIPO2_PARSER_MAPPING(
                 "Hipo Parser mapping",
                 Necessity.OPTIONAL, "", TypeValidators.MULTI_LINE_TEXT,
         ),

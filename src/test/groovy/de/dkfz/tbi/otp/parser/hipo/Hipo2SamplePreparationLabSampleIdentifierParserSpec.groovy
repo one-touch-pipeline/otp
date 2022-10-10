@@ -43,7 +43,7 @@ class Hipo2SamplePreparationLabSampleIdentifierParserSpec extends AbstractHipo2S
 
     void setup() {
         findOrCreateProcessingOption(
-                name: ProcessingOption.OptionName.HIPO_PARSER_MAPPING,
+                name: ProcessingOption.OptionName.HIPO2_PARSER_MAPPING,
                 value: '{\n' +
                         '   "H021":"hipo_021",\n' +
                         '   "H022":"hipo_022",\n' +
