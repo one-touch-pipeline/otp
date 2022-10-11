@@ -33,7 +33,6 @@ import de.dkfz.tbi.util.spreadsheet.validation.*
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 import static de.dkfz.tbi.otp.ngsdata.MultiplexingService.combineLaneNumberAndBarcode
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
-import static de.dkfz.tbi.otp.utils.StringUtils.escapeForSqlLike
 import static de.dkfz.tbi.otp.utils.StringUtils.extractDistinguishingCharacter
 
 @Component
@@ -57,7 +56,7 @@ class SeqTrackValidator extends ColumnSetValidator<MetadataValidationContext> im
 
     @Override
     Collection<String> getDescriptions() {
-        [
+        return [
                 "For the same combination of run and lane, either all or none of the rows should have a barcode.",
                 "For the same combination of run, lane and barcode, there must be the same value in each of the columns '${EQUAL_ATTRIBUTES.join("', '")}'.",
                 "For the same combination of run, lane and barcode data is already registered in OTP.",
@@ -78,19 +77,19 @@ class SeqTrackValidator extends ColumnSetValidator<MetadataValidationContext> im
     void validate(MetadataValidationContext context) {
         getRowsWithExtractedValues(context).groupBy {
             it.runName.value
-        }.values().each { List<RowWithExtractedValues> runRows ->
-            runRows.groupBy { it.laneNumber.value }.values().each { List<RowWithExtractedValues> laneRows ->
-                Map<String, List<RowWithExtractedValues>> laneRowsByBarcode =
-                        laneRows.findAll { it.barcode }.groupBy { it.barcode.value }
-                validateMultiplexing(context, laneRowsByBarcode)
+        }.each { String runName, List<RowWithExtractedValues> runRows ->
+            Set<String> laneIds = findAllLanesForRun(runName)
+            runRows.groupBy { it.laneNumber.value }.each { String laneNumber, List<RowWithExtractedValues> laneRows ->
+                Map<String, List<RowWithExtractedValues>> laneRowsByBarcode = laneRows.findAll { it.barcode }.groupBy { it.barcode.value }
+                validateMultiplexing(context, laneRowsByBarcode, laneIds)
                 laneRowsByBarcode.values().each { List<RowWithExtractedValues> seqTrackRows ->
-                    validateSeqTrack(context, seqTrackRows)
+                    validateSeqTrack(context, seqTrackRows, laneIds)
                 }
             }
         }
     }
 
-    List<RowWithExtractedValues> getRowsWithExtractedValues(MetadataValidationContext context) {
+    private List<RowWithExtractedValues> getRowsWithExtractedValues(MetadataValidationContext context) {
         Column runColumn
         Column laneNumberColumn
         try {
@@ -111,7 +110,18 @@ class SeqTrackValidator extends ColumnSetValidator<MetadataValidationContext> im
         }
     }
 
-    static void validateMultiplexing(MetadataValidationContext context, Map<String, List<RowWithExtractedValues>> laneRowsByBarcode) {
+    private Set<String> findAllLanesForRun(String runName) {
+        return SeqTrack.withCriteria {
+            projections {
+                run {
+                    eq 'name', runName
+                }
+                property('laneId')
+            }
+        } as Set
+    }
+
+    private void validateMultiplexing(MetadataValidationContext context, Map<String, List<RowWithExtractedValues>> laneRowsByBarcode, Set<String> laneIds) {
         if (laneRowsByBarcode.isEmpty()) {
             return
         }
@@ -123,60 +133,58 @@ class SeqTrackValidator extends ColumnSetValidator<MetadataValidationContext> im
             if (laneRowsByBarcode.size() > 1) {
                 hasRowsWithBarcode = true
                 context.addProblem(seqTrackCells((Collection<RowWithExtractedValues>) laneRowsByBarcode.values().sum()),
-                        LogLevel.WARNING, "For ${anyLaneRow.laneString} there are rows with and without barcode.", "There are rows with and without barcode.")
+                        LogLevel.WARNING,
+                        "For ${anyLaneRow.laneString} there are rows with and without barcode.",
+                        "There are rows with and without barcode.")
             }
-            if (SeqTrack.createCriteria().get {
-                run {
-                    eq 'name', anyLaneRow.runName.value
-                }
-                like 'laneId', "${escapeForSqlLike("${anyLaneRow.laneNumber.value}${MultiplexingService.BARCODE_DELIMITER}")}%"
-                maxResults 1
+            String search = "${anyLaneRow.laneNumber.value}${MultiplexingService.BARCODE_DELIMITER}"
+            if (laneIds.any {
+                it.startsWith(search)
             }) {
                 List<RowWithExtractedValues> laneRowsWithoutBarcode = laneRowsByBarcode.get(null)
                 context.addProblem(seqTrackCells(laneRowsWithoutBarcode),
-                        LogLevel.WARNING, "At least one row for ${anyLaneRow.laneString} has no barcode, but for that run and lane there already is data with a barcode registered in OTP.", "At least one row has no barcode, but for that run and lane there already is data with a barcode registered in OTP.")
+                        LogLevel.WARNING,
+                        "At least one row for ${anyLaneRow.laneString} has no barcode, but for that run and lane there already is data with " +
+                                "a barcode registered in OTP.",
+                        "At least one row has no barcode, but for that run and lane there already is data with a barcode registered in OTP.")
             }
         } else {
             hasRowsWithBarcode = true
         }
 
         if (hasRowsWithBarcode) {
-            if (SeqTrack.createCriteria().get {
-                run {
-                    eq 'name', anyLaneRow.runName.value
-                }
-                eq 'laneId', anyLaneRow.laneNumber.value
-                maxResults 1
-            }) {
-                List<RowWithExtractedValues> laneRowsWithBarcode =
-                        (List<RowWithExtractedValues>) laneRowsByBarcode.findAll { it.key != null }.values().sum()
+            if (laneIds.contains(anyLaneRow.laneNumber.value)) {
+                List<RowWithExtractedValues> laneRowsWithBarcode = (List<RowWithExtractedValues>) laneRowsByBarcode.findAll {
+                    it.key != null
+                }.values().sum()
                 context.addProblem(seqTrackCells(laneRowsWithBarcode),
-                        LogLevel.WARNING, "At least one row for ${anyLaneRow.laneString} has a barcode, but for that run and lane there already is data without a barcode registered in OTP.", "At least one row has a barcode, but for that run and lane there already is data without a barcode registered in OTP.")
+                        LogLevel.WARNING,
+                        "At least one row for ${anyLaneRow.laneString} has a barcode, but for that run and lane there already is data without" +
+                                " a barcode registered in OTP.",
+                        "At least one row has a barcode, but for that run and lane there already is data without a barcode registered in OTP.")
             }
         }
     }
 
-    static void validateSeqTrack(MetadataValidationContext context, List<RowWithExtractedValues> seqTrackRows) {
+    private void validateSeqTrack(MetadataValidationContext context, List<RowWithExtractedValues> seqTrackRows, Set<String> laneIds) {
         RowWithExtractedValues anySeqTrackRow = seqTrackRows.first()
 
         for (MetaDataColumn mdColumn : EQUAL_ATTRIBUTES) {
             Column column = context.spreadsheet.getColumn(mdColumn.name())
             if (column && seqTrackRows*.row*.getCell(column)*.text.unique().size() != 1) {
                 context.addProblem(seqTrackCells(seqTrackRows) + seqTrackRows*.row*.getCell(column) as Set,
-                        LogLevel.ERROR, "All rows for ${anySeqTrackRow.seqTrackString} must have the same value in column '${mdColumn}'.", "All rows of the same seqTrack must have the same value in column '${mdColumn}'.")
+                        LogLevel.ERROR,
+                        "All rows for ${anySeqTrackRow.seqTrackString} must have the same value in column '${mdColumn}'.",
+                        "All rows of the same seqTrack must have the same value in column '${mdColumn}'.")
             }
         }
 
         if (anySeqTrackRow.laneNumber.value) {
-            if (SeqTrack.createCriteria().get {
-                run {
-                    eq 'name', anySeqTrackRow.runName.value
-                }
-                eq 'laneId', combineLaneNumberAndBarcode(anySeqTrackRow.laneNumber.value, anySeqTrackRow.barcode.value)
-                maxResults 1
-            }) {
+            if (laneIds.contains(combineLaneNumberAndBarcode(anySeqTrackRow.laneNumber.value, anySeqTrackRow.barcode.value))) {
                 context.addProblem(seqTrackCells(seqTrackRows),
-                        LogLevel.WARNING, "For ${anySeqTrackRow.seqTrackString}, data is already registered in OTP.", "For at least one seqTrack, data is already registered in OTP.")
+                        LogLevel.WARNING,
+                        "For ${anySeqTrackRow.seqTrackString}, data is already registered in OTP.",
+                        "For at least one seqTrack, data is already registered in OTP.")
             }
         }
 
@@ -184,14 +192,15 @@ class SeqTrackValidator extends ColumnSetValidator<MetadataValidationContext> im
         validateMateNumbersInFilenames(context, rowsWithoutIndex(context, seqTrackRows))
     }
 
-    static void validateMates(MetadataValidationContext context, List<RowWithExtractedValues> seqTrackRows) {
+    private void validateMates(MetadataValidationContext context, List<RowWithExtractedValues> seqTrackRows) {
         Map<String, List<RowWithExtractedValues>> seqTrackRowsByMateNumber =
                 seqTrackRows.findAll { it.mateNumber }.groupBy { it.mateNumber.value }
 
         seqTrackRowsByMateNumber.values().each { List<RowWithExtractedValues> mateRows ->
             if (mateRows.size() > 1) {
                 context.addProblem(mateCells(mateRows),
-                        LogLevel.ERROR, "There must be no more than one row for ${mateRows.first().mateString}.", "There must be no more than one row for one mate."
+                        LogLevel.ERROR, "There must be no more than one row for ${mateRows.first().mateString}.",
+                        "There must be no more than one row for one mate."
                 )
             }
         }
@@ -209,26 +218,28 @@ class SeqTrackValidator extends ColumnSetValidator<MetadataValidationContext> im
             }
             if (missingMateNumbers.size() == 1) {
                 context.addProblem(mateCells(seqTrackRows) + libraryLayoutCells,
-                        LogLevel.ERROR, "Mate ${exactlyOneElement(missingMateNumbers)} is missing for ${seqTrackRows.first().seqTrackString} with sequencing read type '${libraryLayoutName}'.",
+                        LogLevel.ERROR, "Mate ${exactlyOneElement(missingMateNumbers)} is missing for ${seqTrackRows.first().seqTrackString} with " +
+                        "sequencing read type '${libraryLayoutName}'.",
                         "A mate is missing for at least one seqTrack."
                 )
             } else if (missingMateNumbers) {
                 context.addProblem(mateCells(seqTrackRows) + libraryLayoutCells,
-                        LogLevel.ERROR, "The following mates are missing for ${seqTrackRows.first().seqTrackString} with sequencing read type '${libraryLayoutName}': ${missingMateNumbers.join(', ')}",
+                        LogLevel.ERROR, "The following mates are missing for ${seqTrackRows.first().seqTrackString} with " +
+                        "sequencing read type '${libraryLayoutName}': ${missingMateNumbers.join(', ')}",
                         "Mates are missing for at least one seqTrack."
                 )
             }
         }
     }
 
-    static List<RowWithExtractedValues> rowsWithoutIndex(MetadataValidationContext context, List<RowWithExtractedValues> seqTrackRows) {
+    private List<RowWithExtractedValues> rowsWithoutIndex(MetadataValidationContext context, List<RowWithExtractedValues> seqTrackRows) {
         Column mateColumn = context.spreadsheet.getColumn(READ.name())
         return seqTrackRows.findAll {
             !it.row.getCell(mateColumn)?.text?.toUpperCase(Locale.ENGLISH)?.startsWith('I')
         }
     }
 
-    static void validateMateNumbersInFilenames(MetadataValidationContext context, List<RowWithExtractedValues> seqTrackRows) {
+    private void validateMateNumbersInFilenames(MetadataValidationContext context, List<RowWithExtractedValues> seqTrackRows) {
         Column filenameColumn = context.spreadsheet.getColumn(FASTQ_FILE.name())
         if (filenameColumn && seqTrackRows.size() > 1) {
             Collection<Cell> filenameCells = seqTrackRows*.row*.getCell(filenameColumn)
@@ -240,21 +251,30 @@ class SeqTrackValidator extends ColumnSetValidator<MetadataValidationContext> im
                     String extractedMateNumber = extractedMateNumbers.get(filename)
                     if (it.mateNumber && extractedMateNumber != it.mateNumber.value) {
                         context.addProblem(seqTrackCells(seqTrackRows) + seqTrackRows*.row*.getCell(filenameColumn).toSet() + mateCells([it]),
-                                LogLevel.ERROR, "The filenames '${filenameCells*.text.sort().join("', '")}' for ${seqTrackRows.first().seqTrackString} differ in exactly one character as expected, but the distinguishing character '${extractedMateNumber}' in filename '${filename}' is not the mate number '${it.mateNumber.value}'.", "The filenames of one seqTrack differ in exactly one character as expected, but the distinguishing character is not the mate number.")
+                                LogLevel.ERROR,
+                                "The filenames '${filenameCells*.text.sort().join("', '")}' for ${seqTrackRows.first().seqTrackString} differ in exactly " +
+                                        "one character as expected, but the distinguishing character '${extractedMateNumber}' in filename '${filename}' is " +
+                                        "not the mate number '${it.mateNumber.value}'.",
+                                "The filenames of one seqTrack differ in exactly one character as expected, but the distinguishing character is not " +
+                                        "the mate number.")
                     }
                 }
             } else {
                 context.addProblem(mateCells(seqTrackRows) + filenameCells,
-                        LogLevel.ERROR, "The filenames '${filenameCells*.text.sort().join("', '")}' for ${seqTrackRows.first().seqTrackString} do not differ in exactly one character. They must differ in exactly one character which is the mate number.", "The filenames of one seqTrack do not differ in exactly one character. They must differ in exactly one character which is the mate number.")
+                        LogLevel.ERROR,
+                        "The filenames '${filenameCells*.text.sort().join("', '")}' for ${seqTrackRows.first().seqTrackString} do not differ in " +
+                                "exactly one character. They must differ in exactly one character which is the mate number.",
+                        "The filenames of one seqTrack do not differ in exactly one character. They must differ in exactly one character which is " +
+                                "the mate number.")
             }
         }
     }
 
-    static Set<Cell> seqTrackCells(Collection<RowWithExtractedValues> rows) {
+    private Set<Cell> seqTrackCells(Collection<RowWithExtractedValues> rows) {
         return rows*.runName*.cells.flatten() + rows*.laneNumber*.cells.flatten() + rows*.barcode*.cells.flatten()
     }
 
-    static Set<Cell> mateCells(Collection<RowWithExtractedValues> rows) {
+    private Set<Cell> mateCells(Collection<RowWithExtractedValues> rows) {
         return seqTrackCells(rows) + (Set<Cell>) rows*.mateNumber.findAll()*.cells.flatten()
     }
 }

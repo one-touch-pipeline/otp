@@ -138,13 +138,15 @@ class MetadataImportService {
         if (context.spreadsheet) {
             Long hash = System.currentTimeMillis()
             Long startTimeAll = System.currentTimeMillis()
+            int dataCount = context.spreadsheet.dataRows.size()
+            log.debug("start validation of ${dataCount} lines of ${metadataFile}, validation started : ${hash}")
             metadataValidators.each {
                 Long startTime = System.currentTimeMillis()
                 it.validate(context)
-                log.debug("finished ${it.class} took ${System.currentTimeMillis() - startTime}ms validation started : ${hash}")
+                log.debug("finished ${it.class} took ${System.currentTimeMillis() - startTime}ms for ${dataCount} lines, validation started : ${hash}")
             }
-            log.debug("finished all ${metadataValidators.size()} validators for ${context.spreadsheet.dataRows.size()} lines took " +
-                    "${System.currentTimeMillis() - startTimeAll}ms validation started : ${hash}")
+            log.debug("finished all ${metadataValidators.size()} validators for ${dataCount} lines took " +
+                    "${System.currentTimeMillis() - startTimeAll}ms, validation started : ${hash}")
         }
         return context
     }

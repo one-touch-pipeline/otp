@@ -776,7 +776,7 @@ abc
         List<RowWithExtractedValues> expectedRows = rows[0, 1, 6, 7]
 
         when:
-        List<RowWithExtractedValues> filteredRows = SeqTrackValidator.rowsWithoutIndex(context, rows)
+        List<RowWithExtractedValues> filteredRows = new SeqTrackValidator().rowsWithoutIndex(context, rows)
 
         then:
         assertContainSame(
