@@ -293,12 +293,32 @@ $(() => {
 
   renderWorkflowConfiguration();
 
+  function showChildTable(tr, row) {
+    row.child(generateChildTables(row.data())).show();
+    tr.addClass('shown');
+    $('[title]').tooltip();
+  }
+
+  function hideChildTable(tr, row) {
+    row.child.hide();
+    tr.removeClass('shown');
+  }
+
   table.on('draw', () => {
     $('[title]').tooltip();
     if (lastStepFailed) {
       $('#steps tbody tr:nth-child(2) td .details-control').trigger('click');
       $('#steps tbody tr:first-child td .details-control').trigger('click');
     }
+
+    // expand to show the clusterJobs if exist
+    $('#steps tbody tr.even, tr.odd').each((idx) => {
+      const row = table.row(idx);
+      const rowData = row.data();
+      if (rowData && rowData.clusterJobs.length > 0) {
+        showChildTable($(this), row);
+      }
+    });
   });
 
   $('#steps tbody').on('click', 'td .details-control', function () {
@@ -306,12 +326,9 @@ $(() => {
     const row = table.row(tr);
 
     if (row.child.isShown()) {
-      row.child.hide();
-      tr.removeClass('shown');
+      hideChildTable(tr, row);
     } else {
-      row.child(generateChildTables(row.data())).show();
-      tr.addClass('shown');
-      $('[title]').tooltip();
+      showChildTable(tr, row);
     }
   });
 });
