@@ -21,6 +21,8 @@
  */
 package operations.dataCorrection
 
+import org.hibernate.criterion.CriteriaSpecification
+
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.DirectoryStructureBeanName
@@ -82,10 +84,10 @@ Path midTermPath = fileSystem.getPath(midTermDirectory)
 
 IlseSubmission.withTransaction { def transaction ->
 
-    List<MetaDataEntry> toDelete = []
-    List<MetaDataEntry> ignoreForDelete = []
-    Map<MetaDataEntry, String> toUpdate = [:]
-    Map<MetaDataEntry, String> ignoreForUpdate = [:]
+    List<Map<String, ?>> toDelete = []
+    List<Map<String, ?>> ignoreForDelete = []
+    Map<Map<String, ?>, String> toUpdate = [:]
+    Map<Map<String, ?>, String> ignoreForUpdate = [:]
 
     List<String> columnsUsedByOTP = [
             MetaDataColumn.FASTQ_FILE,
@@ -118,8 +120,9 @@ IlseSubmission.withTransaction { def transaction ->
         line && !line.startsWith('#')
     }.collect {
         CollectionUtils.exactlyOneElement(IlseSubmission.findAllByIlseNumber(it as Integer), "Could not find ilse $it")
-    }.each { IlseSubmission ilseSubmission ->
-        Path metadataFile = midTermPath.resolve(ilseSubmission.ilseNumber.toString().padLeft(6, '0')).resolve('data').resolve("${ilseSubmission.ilseNumber}_meta.tsv")
+    }.each { IlseSubmission ilseSubmissionParam ->
+        int ilseNumber = ilseSubmissionParam.ilseNumber
+        Path metadataFile = midTermPath.resolve(ilseNumber.toString().padLeft(6, '0')).resolve('data').resolve("${ilseNumber}_meta.tsv")
         assert Files.exists(metadataFile): "Could not find file ${metadataFile}. Does it exist?"
         assert Files.isReadable(metadataFile): "Could not read file ${metadataFile}. Is it readable for icgcdata?"
 
@@ -128,22 +131,36 @@ IlseSubmission.withTransaction { def transaction ->
                 ctx.dataFilesInGpcfSpecificStructure,
                 DirectoryStructureBeanName.GPCF_SPECIFIC.name(),
         )
-        Map<String, List<MetaDataEntry>> entriesByFastqFileName = MetaDataEntry.withCriteria {
-            dataFile {
-                seqTrack {
-                    eq('ilseSubmission', ilseSubmission)
+        Map<String, Map<String, ?>> entriesByFastqFileName = MetaDataEntry.withCriteria {
+            resultTransformer(CriteriaSpecification.ALIAS_TO_ENTITY_MAP)
+            projections {
+                dataFile {
+                    seqTrack {
+                        eq('ilseSubmission', ilseSubmissionParam)
+                        ilseSubmission {
+                            property('ilseNumber', 'ilseNumber')
+                        }
+                    }
                 }
+                property('id', 'id')
+                key {
+                    property('name', 'name')
+                }
+                dataFile {
+                    property('fileName', 'fileName')
+                }
+                property('value', 'value')
             }
-        }.groupBy { MetaDataEntry entry ->
-            entry.dataFile.fileName
+        }.groupBy { Map map ->
+            map.fileName
         }
 
         context.spreadsheet.dataRows.each { Row row ->
             String fastqName = row.getCellByColumnTitle(MetaDataColumn.FASTQ_FILE.name()).text
-            List<MetaDataEntry> entries = entriesByFastqFileName[fastqName]
+            List<Map<String, ?>> entries = entriesByFastqFileName[fastqName]
 
-            entries.each { MetaDataEntry entry ->
-                String columnName = entry.key.name
+            entries.each { Map<String, ?> entry ->
+                String columnName = entry.name
                 boolean usedByOTP = columnsUsedByOTP.contains(columnName)
                 Cell cell = row.getCellByColumnTitle(columnName)
                 if (cell) {
@@ -169,11 +186,11 @@ IlseSubmission.withTransaction { def transaction ->
 
     if (ignoreForDelete) {
         println "\n\nFollowing entries are missed in the input of columns OTP is using:"
-        println ignoreForDelete.collect { MetaDataEntry entry ->
+        println ignoreForDelete.collect { Map<String, ?> entry ->
             [
-                    entry.dataFile.seqTrack.ilseSubmission.ilseNumber,
-                    entry.dataFile.fileName,
-                    entry.key.name,
+                    entry.ilseNumber,
+                    entry.fileName,
+                    entry.name,
                     entry.value,
             ].join(' \t')
         }.join('\n')
@@ -182,11 +199,11 @@ IlseSubmission.withTransaction { def transaction ->
 
     if (toDelete) {
         println "\n\nFollowing entries are missed in the input of columns OTP is not using:"
-        println toDelete.collect { MetaDataEntry entry ->
+        println toDelete.collect { Map<String, ?> entry ->
             [
-                    entry.dataFile.seqTrack.ilseSubmission.ilseNumber,
-                    entry.dataFile.fileName,
-                    entry.key.name,
+                    entry.ilseNumber,
+                    entry.fileName,
+                    entry.name,
                     entry.value,
             ].join(' \t')
         }.join('\n')
@@ -195,13 +212,13 @@ IlseSubmission.withTransaction { def transaction ->
 
     if (ignoreForUpdate) {
         println "\n\nFollowing entries are changed of columns OTP is using:"
-        println ignoreForUpdate.collect { MetaDataEntry entry, String value ->
+        println ignoreForUpdate.collect { Map<String, ?> entry, String value ->
             [
-                    entry.dataFile.seqTrack.ilseSubmission.ilseNumber,
+                    entry.ilseNumber,
                     "\t ",
-                    entry.dataFile.fileName,
+                    entry.fileName,
                     "\t ",
-                    entry.key.name,
+                    entry.name,
                     ': "',
                     entry.value,
                     '" --> "',
@@ -214,13 +231,13 @@ IlseSubmission.withTransaction { def transaction ->
 
     if (toUpdate) {
         println "\n\nFollowing entries are changed of columns OTP is not using:"
-        println toUpdate.collect { MetaDataEntry entry, String value ->
+        println toUpdate.collect { Map<String, ?> entry, String value ->
             [
-                    entry.dataFile.seqTrack.ilseSubmission.ilseNumber,
+                    entry.ilseNumber,
                     "\t ",
-                    entry.dataFile.fileName,
+                    entry.fileName,
                     "\t ",
-                    entry.key.name,
+                    entry.name,
                     ': "',
                     entry.value,
                     '" --> "',
@@ -244,10 +261,15 @@ IlseSubmission.withTransaction { def transaction ->
     println '\n'
     assert !testRun: "only test, change testRun to false to do the changes"
 
-    toDelete*.delete(flush: false)
-    toUpdate.each { MetaDataEntry entry, String value ->
-        entry.value = value
-        entry.save(flush: false)
+    MetaDataEntry.getAll(toDelete*.id)*.delete(flush: false)
+
+    Map<Long, MetaDataEntry> entriesToUpdateList = MetaDataEntry.getAll(toUpdate*.key*.id).collectEntries {
+        [(it.id), it]
+    }
+    toUpdate.each { Map<String, ?> entry, String value ->
+        MetaDataEntry metaDataEntry = entriesToUpdateList[entry.id]
+        metaDataEntry.value = value
+        metaDataEntry.save(flush: false)
     }
     transaction.flush()
     println 'Values delete and updated as announced'
