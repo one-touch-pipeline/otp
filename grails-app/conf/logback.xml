@@ -29,25 +29,12 @@
 
     <variable name="defaultPattern" value="%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(%5p) %clr(---){faint} %clr([%25.25t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n%wex" />
 
-    <define name="isDevelopmentMode" class="de.dkfz.tbi.otp.utils.logging.EnvironmentDefiner">
-        <key>isDevelopmentMode</key>
-    </define>
-    <define name="isProductionEnvironment" class="de.dkfz.tbi.otp.utils.logging.EnvironmentDefiner">
-        <key>isProductionEnvironment</key>
-    </define>
-    <define name="isWorkflowTestEnvironment" class="de.dkfz.tbi.otp.utils.logging.EnvironmentDefiner">
-        <key>isWorkflowTestEnvironment</key>
-    </define>
+    <define name="isDevelopmentMode" class="de.dkfz.tbi.otp.utils.logging.EnvironmentDefiner"/>
 
-    <define name="targetDir" class="de.dkfz.tbi.otp.utils.logging.TargetDirDefiner"/>
     <define name="jobLogDir" class="de.dkfz.tbi.otp.utils.logging.JobLogDirDefiner"/>
 
-    <define name="targetDirExists" class="ch.qos.logback.core.property.FileExistsPropertyDefiner">
-        <path>${targetDir}</path>
-    </define>
 
-
-    <if condition='p("isProductionEnvironment").equals("false")'>
+    <if condition='p("isDevelopmentMode").equals("true")'>
         <then>
             <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
                 <encoder>
@@ -62,20 +49,20 @@
         </else>
     </if>
 
-    <if condition='p("isDevelopmentMode").equals("true") &amp;&amp; p("targetDirExists").equals("true")'>
-        <then>
-            <appender name="FULL_STACKTRACE" class="ch.qos.logback.core.FileAppender">
-                <file>${targetDir}/stacktrace.log</file>
-                <append>true</append>
-                <encoder>
-                    <pattern>%d %-5level %logger{35} - %msg %n</pattern>
-                </encoder>
-            </appender>
-            <logger name="StackTrace" level="ERROR" additivity="false">
-                 <appender-ref ref="FULL_STACKTRACE"/>
-            </logger>
-        </then>
-    </if>
+    <appender name="FULL_STACKTRACE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <append>true</append>
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>%d %-5level %logger{35} - %msg %n</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>logs/STACKTRACE-%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>7</maxHistory>
+        </rollingPolicy>
+    </appender>
+    <logger name="StackTrace" level="ERROR" additivity="false">
+         <appender-ref ref="FULL_STACKTRACE"/>
+    </logger>
 
     <appender name="OTP" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <append>true</append>
@@ -149,7 +136,7 @@
             <pattern>%date %level %-40.40logger{39} : %msg%n</pattern>
         </encoder>
     </appender>
-    <logger name="de.dkfz.tbi.otp.job.jobs" level="DEBUG" additivity="${isWorkflowTestEnvironment}">
+    <logger name="de.dkfz.tbi.otp.job.jobs" level="DEBUG" additivity="${isDevelopmentMode}">
         <appender-ref ref="JOBS" />
         <appender-ref ref="STARTJOBS" />
     </logger>
