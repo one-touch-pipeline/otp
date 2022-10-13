@@ -146,7 +146,7 @@ class MergingWorkPackage extends AbstractMergingWorkPackage {
         return null
     }
 
-    static mapping = {
+    static Closure mapping = {
         needsProcessing index: "merging_work_package_needs_processing_idx"
         // partial index: WHERE needs_processing = true
         alignmentProperties cascade: "all-delete-orphan"

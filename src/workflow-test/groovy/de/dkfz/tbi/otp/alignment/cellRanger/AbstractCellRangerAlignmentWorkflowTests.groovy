@@ -197,7 +197,7 @@ abstract class AbstractCellRangerAlignmentWorkflowTests extends AbstractAlignmen
 
     @Override
     Duration getTimeout() {
-        return Duration.ofHours(3)
+        return Duration.ofHours(5)
     }
 
     @Override

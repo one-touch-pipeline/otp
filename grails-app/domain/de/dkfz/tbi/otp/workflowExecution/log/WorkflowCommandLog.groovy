@@ -43,7 +43,7 @@ class WorkflowCommandLog extends WorkflowLog {
     String stdout
     String stderr
 
-    static mapping = {
+    static Closure mapping = {
         command type: "text"
         stdout type: "text"
         stderr type: "text"

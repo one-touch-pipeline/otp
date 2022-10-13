@@ -362,6 +362,6 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase implements
 
     @Override
     Duration getTimeout() {
-        return Duration.ofMinutes(20)
+        return Duration.ofHours(5)
     }
 }

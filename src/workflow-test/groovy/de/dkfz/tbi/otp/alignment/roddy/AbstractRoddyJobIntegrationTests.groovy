@@ -124,6 +124,6 @@ class AbstractRoddyJobIntegrationTests extends AbstractRoddyAlignmentWorkflowTes
 
     @Override
     Duration getTimeout() {
-        return Duration.ofMinutes(60)
+        return Duration.ofHours(5)
     }
 }

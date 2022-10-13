@@ -33,7 +33,7 @@ class WorkflowMessageLog extends WorkflowLog {
 
     String message
 
-    static mapping = {
+    static Closure mapping = {
         message type: "text"
     }
 

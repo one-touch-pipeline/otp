@@ -31,8 +31,6 @@ trait RoddyReferences {
             'realJobCalls.txt',
             'repeatableJobCalls.sh',
             'roddyCall.sh',
-            'runtimeConfig.sh',
-            'runtimeConfig.xml',
             'versionsInfo.txt',
     ].asImmutable()
 }

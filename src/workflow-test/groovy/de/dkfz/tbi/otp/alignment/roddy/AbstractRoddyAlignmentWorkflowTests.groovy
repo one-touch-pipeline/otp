@@ -38,6 +38,7 @@ import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.SessionUtils
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
+import de.dkfz.tbi.otp.workflowTest.roddy.RoddyReferences
 
 import java.time.Duration
 
@@ -45,7 +46,7 @@ import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 import static de.dkfz.tbi.otp.utils.LocalShellHelper.executeAndWait
 
-abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWorkflowTest {
+abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWorkflowTest implements RoddyReferences {
 
     //The number of reads of the example fastqc files
     protected static final int NUMBER_OF_READS = 1000
@@ -68,19 +69,6 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
 
     // some text to be used to fill in files created on the fly
     protected final static String TEST_CONTENT = 'dummy file, created by OTP'
-
-    // files expected to be in every roddyExecutionDir
-    final List<String> filesInRoddyExecutionDir = [
-            'applicationProperties.ini',
-            'executedJobs.txt',
-            'jobStateLogfile.txt',
-            'realJobCalls.txt',
-            'repeatableJobCalls.sh',
-            'roddyCall.sh',
-            'runtimeConfig.sh',
-            'runtimeConfig.xml',
-            'versionsInfo.txt',
-    ].asImmutable()
 
     // test fastq files grouped by lane
     Map<String, List<File>> testFastqFiles
@@ -110,7 +98,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
 
     @Override
     Duration getTimeout() {
-        return Duration.ofHours(60)
+        return Duration.ofHours(5)
     }
 
     @Override

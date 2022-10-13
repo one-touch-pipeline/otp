@@ -173,7 +173,7 @@ class FastqcWorkflowSpec extends AbstractWorkflowSpec {
 
     @Override
     Duration getRunningTimeout() {
-        return Duration.ofMinutes(20)
+        return Duration.ofHours(5)
     }
 
     @Override

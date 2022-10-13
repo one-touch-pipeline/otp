@@ -60,7 +60,7 @@ class DataInstallationWorkflowSpec extends AbstractWorkflowSpec {
 
     @Override
     Duration getRunningTimeout() {
-        return Duration.ofMinutes(60)
+        return Duration.ofHours(5)
     }
 
     @Override

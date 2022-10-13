@@ -230,11 +230,10 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
             createProcessingPriorityObject()
             initRealm()
             initFileSystem()
+            createUserAndRoles()
+            loadInitialisationScripts()
             initProcessingOption()
 
-            createUserAndRoles()
-
-            loadInitialisationScripts()
             initScheduler()
 
             log.debug("Finish setting up base test setup, workflow depending setup will follow")
