@@ -91,9 +91,10 @@ class MergingPreventionService {
         if (!seqTracks) {
             return
         }
-
-        seqTracks.each { SeqTrack seqTrack ->
-            SeqPlatformGroup seqPlatformGroup = seqTrack.seqPlatformGroup
+        seqTracks.groupBy {
+            it.seqPlatform
+        }.each { SeqPlatform seqPlatform, List<SeqTrack> seqTracksPerSeqPlatform ->
+            SeqPlatformGroup seqPlatformGroup = seqPlatform.getSeqPlatformGroupForMergingCriteria(data.sample.project, data.seqType)
 
             if (data.seqType.singleCell) {
                 context.addProblem(valueTuple.cells, LogLevel.WARNING,
@@ -101,24 +102,26 @@ class MergingPreventionService {
                         ALREADY_DATA_EXIST)
             } else {
                 boolean mergeableSeqPlatform = data.ignoreSeqPlatformGroupForMerging() || seqPlatformGroup == data.seqPlatformGroupImport
-                boolean mergeableLibPrepKit = data.checkLibPrepKit() ? seqTrack.libraryPreparationKit == data.libraryPreparationKit : true
-                if (mergeableSeqPlatform && mergeableLibPrepKit) {
-                    context.addProblem(valueTuple.cells, LogLevel.WARNING,
-                            "For ${data.createMessagePrefix(true)} already data are registered in OTP, with are compatble to merge.",
-                            ALREADY_DATA_EXIST_COMPATIBLE)
-                } else {
-                    List<String> warnings = []
-                    if (!mergeableSeqPlatform) {
-                        warnings << "the new seq platform ${data.seqPlatform} is part of another seq platform group then the existing"
+                seqTracksPerSeqPlatform*.libraryPreparationKit.unique().each { LibraryPreparationKit libraryPreparationKit ->
+                    boolean mergeableLibPrepKit = data.checkLibPrepKit() ? libraryPreparationKit == data.libraryPreparationKit : true
+                    if (mergeableSeqPlatform && mergeableLibPrepKit) {
+                        context.addProblem(valueTuple.cells, LogLevel.WARNING,
+                                "For ${data.createMessagePrefix(true)} already data are registered in OTP, with are compatble to merge.",
+                                ALREADY_DATA_EXIST_COMPATIBLE)
+                    } else {
+                        List<String> warnings = []
+                        if (!mergeableSeqPlatform) {
+                            warnings << "the new seq platform ${data.seqPlatform} is part of another seq platform group then the existing"
+                        }
+                        if (!mergeableLibPrepKit) {
+                            warnings << "the new library preparation kit ${data.libraryPreparationKit} differs from the old library preparation kit " +
+                                    "${libraryPreparationKit}"
+                        }
+                        context.addProblem(valueTuple.cells, LogLevel.WARNING,
+                                "For ${data.createMessagePrefix(true)} already data are registered in OTP, with are not compatble to merge, " +
+                                        "since ${warnings.join(' and ')}.",
+                                ALREADY_DATA_EXIST_INCOMPATIBLE)
                     }
-                    if (!mergeableLibPrepKit) {
-                        warnings << "the new library preparation kit ${data.libraryPreparationKit} differs from the old library preparation kit " +
-                                "${seqTrack.libraryPreparationKit}"
-                    }
-                    context.addProblem(valueTuple.cells, LogLevel.WARNING,
-                            "For ${data.createMessagePrefix(true)} already data are registered in OTP, with are not compatble to merge, " +
-                                    "since ${warnings.join(' and ')}.",
-                            ALREADY_DATA_EXIST_INCOMPATIBLE)
                 }
             }
         }

@@ -45,14 +45,14 @@ import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
  * - check for MergingWorkPackages:
  *   - Check in OTP, if there already exist an MergingWorkPackage
  *   - if yes,
- *     - if it is a single cell seq type: create an error
+ *     - if it is a single cell seq type: create a warning
  *     - if it is a bulk seq type: create an warning
  *       - if it is mergeable the warning should say, that it will be merged into the existing
  *       - otherwise: the warning should say, that it won't be aligned and merged because of the incompatible {@link SeqPlatformGroup} or {@link LibraryPreparationKit}
  * - check for lanes of the same sample
  *   - Check in OTP, if there already exist lanes for the sample seqType combination
  *   - if yes,
- *     - if it is a single cell seq type: create an error
+ *     - if it is a single cell seq type: create an warning
  *     - if it is a bulk seq type: create an warning
  *       - if it is mergeable the warning should say, that it will be merged into the existing
  *       - otherwise: the warning should say, that it won't be aligned and merged because of the incompatible {@link SeqPlatformGroup} or {@link LibraryPreparationKit}
@@ -62,7 +62,7 @@ import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
  *  - if {@link MergingCriteria#useSeqPlatformGroup} is:
  *    - {@link MergingCriteria.SpecificSeqPlatformGroups#IGNORE_FOR_MERGING}: all seqPlatform can be merged
  *    - {@link MergingCriteria.SpecificSeqPlatformGroups#USE_OTP_DEFAULT}: seqPlatform can be merged according the default OTP definition of compatible seqPlatforms
- *    - {@link MergingCriteria.SpecificSeqPlatformGroups#USE_PROJECT_SEQ_TYPE_SPECIFIC}: seqPlatform can be merged according the project and seqType specific defintion
+ *    - {@link MergingCriteria.SpecificSeqPlatformGroups#USE_PROJECT_SEQ_TYPE_SPECIFIC}: seqPlatform can be merged according the project and seqType specific definition
  *  - if no MergingCriteria is defined yet, then assumes the default settings for MergingCriteria:
  *    - {@link MergingCriteria#useLibPrepKit} is for wgbs seq types false, otherwise true
  *    - {@link MergingCriteria#useSeqPlatformGroup} is {@link MergingCriteria.SpecificSeqPlatformGroups#USE_OTP_DEFAULT}
