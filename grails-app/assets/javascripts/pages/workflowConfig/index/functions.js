@@ -121,6 +121,8 @@ $.otp.workflowConfig = {
           const selectedOptions = response[f].map((option) => option.id);
           $.otp.workflowConfig.findQuerySelection(f).val(selectedOptions).trigger('change');
         });
+        // trigger the search directly
+        $.otp.workflowConfig.search();
       },
       error(err) {
         const message = err && err.responseJSON ? err.responseJSON.message : `Workflow selector ${id} cannot be found.`;
@@ -245,6 +247,18 @@ $.otp.workflowConfig = {
     'use strict';
 
     return $('#workflowConfigModal');
+  },
+
+  getWorkflowSelection: () => {
+    'use strict';
+
+    return $('select[name="workflows"]');
+  },
+
+  getWorkflowVersionSelection: () => {
+    'use strict';
+
+    return $('select[name="workflowVersions"]');
   },
 
   /**
@@ -397,13 +411,22 @@ $(document).ready(() => {
   });
 
   /**
+   * Close the dialog and reset the restrictions for the workflow version selection
+   */
+  $.otp.workflowConfig.getDialog().on('hidden.bs.modal', () => {
+    $.otp.workflowConfig.getWorkflowVersionSelection().select2({
+      templateResult: (data) => data.text
+    });
+  });
+
+  /**
    * Initialize the dialog
    */
-  $.otp.workflowConfig.getDialog().on('show.bs.modal', function (event) {
+  $.otp.workflowConfig.getDialog().on('shown.bs.modal', (event) => {
     // set the correct title operation: create|update|deprecate|view
     let operation = $(event.relatedTarget).data('operation');
     if (operation) {
-      $(this).find('.modal-footer #save-button').removeClass('d-none');
+      $('div.modal-footer #save-button').removeClass('d-none');
     }
     operation = operation || $.otp.workflowConfig.OPERATION.VIEW;
 
@@ -427,6 +450,32 @@ $(document).ready(() => {
     }
 
     $.otp.workflowConfig.initDialogWithData(rowData, operation);
+
+    if (operation === $.otp.workflowConfig.OPERATION.CREATE || operation === $.otp.workflowConfig.OPERATION.UPDATE) {
+      // clear selected workflow versions
+      $.otp.workflowConfig.getWorkflowSelection().on('change', () => {
+        $.otp.workflowConfig.getWorkflowVersionSelection().val(null).trigger('change');
+      });
+
+      // hold the workflows selected
+      let selectedWorkflows = [];
+      $.otp.workflowConfig.getWorkflowVersionSelection().on('select2:opening', () => {
+        selectedWorkflows = $.otp.workflowConfig.getWorkflowSelection().select2('data');
+      });
+
+      // filter the workflow versions options shown
+      $.otp.workflowConfig.getWorkflowVersionSelection().select2({
+        templateResult: (data) => {
+          /* eslint-disable-next-line */
+          for (const workflow of selectedWorkflows) {
+            if (data.text.startsWith(workflow.text)) {
+              return data.text;
+            }
+          }
+          return null;
+        }
+      });
+    }
 
     // don't fetch the fragment by creating selector
     if (rowData.id < 0) {

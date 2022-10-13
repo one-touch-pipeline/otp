@@ -24,7 +24,14 @@
     <div class="input-group-prepend">
         <label class="input-group-text"><g:message code="workflowConfig.selector.versions"/></label>
     </div>
-    <select name="workflowVersions" class="custom-select use-select-2" multiple="multiple">
+    <g:if test="${isEdit}">
+        <select name="workflowVersions" class="custom-select use-select-2" multiple="multiple"
+                title="<g:message code="workflowConfig.selector.versions.tooltip"/>"
+                data-placeholder="<g:message code="workflowConfig.selector.versions.hint"/>">
+    </g:if>
+    <g:else>
+        <select name="workflowVersions" class="custom-select use-select-2" multiple="multiple">
+    </g:else>
         <g:each in="${workflowVersions}" var="workflowVersion">
             <option value="${workflowVersion.id}">${workflowVersion.displayName}</option>
         </g:each>

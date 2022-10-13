@@ -35,6 +35,30 @@ $(() => {
   form.on('change', 'input', build);
   form.on('keyup', 'input[type=text]', build);
 
+  // clear selected workflow versions
+  $('#workflowSelector').on('select2:select', () => {
+    $('#workflowVersionSelector').val(null).trigger('change');
+  });
+
+  // hold the workflows selected
+  let selectedWorkflows = [];
+  $('#workflowVersionSelector').on('select2:opening', () => {
+    selectedWorkflows = $('#workflowSelector').select2('data');
+  });
+
+  // filter the workflow versions options shown
+  $('#workflowVersionSelector').select2({
+    templateResult: (data) => {
+      /* eslint-disable-next-line */
+      for (const workflow of selectedWorkflows) {
+        if (data.text.startsWith(workflow.text)) {
+          return data.text;
+        }
+      }
+      return null;
+    }
+  });
+
   function build() {
     const workflowId = $('#workflowSelector').val();
     const workflowVersionId = $('#workflowVersionSelector').val();

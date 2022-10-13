@@ -28,7 +28,6 @@
     <asset:stylesheet src="pages/workflowConfig/viewer/styles.less"/>
     <asset:stylesheet src="pages/workflowConfig/selector/styles.less"/>
     <asset:javascript src="pages/workflowConfigViewer/index.js"/>
-    <asset:javascript src="pages/workflowConfigViewer/selector.js"/>
 </head>
 
 <body>

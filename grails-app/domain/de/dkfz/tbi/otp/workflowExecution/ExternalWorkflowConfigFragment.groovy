@@ -49,7 +49,13 @@ class ExternalWorkflowConfigFragment implements Commentable, Deprecateable<Exter
      * which is ignored by validation due to parsing.
      * */
     @BindUsing({ obj, source ->
-        JSON.parse(source['configValues'] as String).toString()
+        // Grails doesn't handle exception thrown here nicely
+        // Let validator do its job by passing the (invalid) value back
+        try {
+            JSON.parse(source['configValues'] as String).toString()
+        } catch (ConverterException e) {
+            source['configValues']
+        }
     })
     String configValues
 

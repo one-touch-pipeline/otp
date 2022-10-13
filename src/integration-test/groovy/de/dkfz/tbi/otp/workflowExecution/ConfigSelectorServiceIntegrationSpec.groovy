@@ -70,8 +70,8 @@ class ConfigSelectorServiceIntegrationSpec extends Specification implements Work
         Workflow workflow2 = createWorkflow(name: "w2")
         createWorkflow(name: "w3")
 
-        WorkflowVersion workflowVersion1 = createWorkflowVersion(workflowVersion: "v1")
-        WorkflowVersion workflowVersion2 = createWorkflowVersion(workflowVersion: "v2")
+        WorkflowVersion workflowVersion1 = createWorkflowVersion([workflow: workflow1, workflowVersion: "v1"])
+        WorkflowVersion workflowVersion2 = createWorkflowVersion([workflow: workflow2, workflowVersion: "v2"])
 
         SeqType seqType1 = createSeqType(name: "s1")
         SeqType seqType2 = createSeqType(name: "s2")
@@ -116,7 +116,7 @@ class ConfigSelectorServiceIntegrationSpec extends Specification implements Work
         createEWCSHelperExtendedCriteria(
                 "ewcs4",
                 [project2] as Set<Project>,
-                [workflowVersion1] as Set<WorkflowVersion>,
+                [workflowVersion2] as Set<WorkflowVersion>,
                 [workflow2] as Set<Workflow>,
                 [seqType1] as Set<SeqType>,
                 [] as Set<ReferenceGenome>,
@@ -136,7 +136,16 @@ class ConfigSelectorServiceIntegrationSpec extends Specification implements Work
 
     void "test findExactSelectors, anyValueSet"() {
         given:
-        ExternalWorkflowConfigSelector selector = createExternalWorkflowConfigSelector()
+        Workflow workflow1 = createWorkflow(name: "w1")
+        Workflow workflow2 = createWorkflow(name: "w2")
+
+        WorkflowVersion workflowVersion1 = createWorkflowVersion([workflow: workflow1, workflowVersion: "v1"])
+        WorkflowVersion workflowVersion2 = createWorkflowVersion([workflow: workflow2, workflowVersion: "v2"])
+
+        ExternalWorkflowConfigSelector selector = createExternalWorkflowConfigSelector([
+                workflows       : [workflow1, workflow2],
+                workflowVersions: [workflowVersion1, workflowVersion2],
+        ])
 
         MultiSelectSelectorExtendedCriteria multiSelectSelectorExtendedCriteria = new MultiSelectSelectorExtendedCriteria(
                 workflows: selector.workflows,
@@ -234,7 +243,7 @@ class ConfigSelectorServiceIntegrationSpec extends Specification implements Work
         1 | { Project.findAllByName("p1") }               | { WorkflowVersion.findAllByWorkflowVersion("v1") }               | { Workflow.findAllByName("w1") }               | { SeqType.findAllByName("s1") }               | { ReferenceGenome.findAllByName("r1") }               | { LibraryPreparationKit.findAllByName("l1") }               | "ewcs1"
         2 | { Project.findAllByName("p2") }               | { null }                                                         | { Workflow.findAllByName("w2") }               | { SeqType.findAllByName("s2") }               | { ReferenceGenome.findAllByName("r2") }               | { null }                                                    | "ewcs2"
         3 | { Project.findAllByNameInList(["p1", "p2"]) } | { WorkflowVersion.findAllByWorkflowVersionInList(["v1", "v2"]) } | { Workflow.findAllByNameInList(["w1", "w2"]) } | { SeqType.findAllByNameInList(["s1", "s2"]) } | { ReferenceGenome.findAllByNameInList(["r1", "r2"]) } | { LibraryPreparationKit.findAllByNameInList(["l1", "l2"]) } | "ewcs3"
-        4 | { Project.findAllByName("p2") }               | { WorkflowVersion.findAllByWorkflowVersion("v1") }               | { Workflow.findAllByName("w2") }               | { SeqType.findAllByName("s1") }               | { null }                                              | { LibraryPreparationKit.findAllByName("l1") }               | "ewcs4"
+        4 | { Project.findAllByName("p2") }               | { WorkflowVersion.findAllByWorkflowVersion("v2") }               | { Workflow.findAllByName("w2") }               | { SeqType.findAllByName("s1") }               | { null }                                              | { LibraryPreparationKit.findAllByName("l1") }               | "ewcs4"
         5 | { null }                                      | { null }                                                         | { null }                                       | { null }                                      | { null }                                              | { null }                                                    | "ewcs5"
         6 | { Project.findAllByName("p3") }               | { null }                                                         | { null }                                       | { null }                                      | { null }                                              | { null }                                                    | null
         7 | { Project.findAll() }                         | { WorkflowVersion.findAllByWorkflowVersionInList(["v1", "v2"]) } | { Workflow.findAllByNameInList(["w1", "w2"]) } | { SeqType.findAllByNameInList(["s1", "s2"]) } | { ReferenceGenome.findAllByNameInList(["r1", "r2"]) } | { LibraryPreparationKit.findAllByNameInList(["l1", "l2"]) } | null

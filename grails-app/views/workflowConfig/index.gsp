@@ -44,18 +44,10 @@
                         data-toggle="tooltip" onclick="$.otp.workflowConfig.search()">
                     <g:message code="workflowConfig.button.search"/>
                 </button>
-                <button id="create-button" type="button" class="btn btn-primary" data-toggle="modal" title="${g.message(code: "workflowConfig.button.create.title")}"
-                        data-toggle="tooltip" data-target="#workflowConfigModal" data-operation="create">
-                    <g:message code="workflowConfig.button.create"/>
-                </button>
-                <button id="clear-button" type="button" class="btn btn-primary" title="${g.message(code: "workflowConfig.button.clear.title")}"
-                        data-toggle="tooltip" onclick="$.otp.workflowConfig.clear()">
-                    <g:message code="workflowConfig.button.clear"/>
-                </button>
-                <div class="btn-group dropdown ml-auto pl-2">
+                <div class="btn-group dropdown ml-auto">
                     <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown"
-                            data-toggle="tooltip" title="Disabled tooltip" aria-expanded="false" data-reference="parent">
-                        <g:message code="workflowConfig.selector.prefill"/>
+                            data-toggle="tooltip" title="${g.message(code: "workflowConfig.button.searchBySelector.title")}" aria-expanded="false" data-reference="parent">
+                        <g:message code="workflowConfig.button.searchBySelector"/>
                     </button>
                     <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                         <g:each in="${allSelectors}" var="selector">
@@ -63,7 +55,14 @@
                         </g:each>
                     </div>
                 </div>
-
+                <button id="clear-button" type="button" class="btn btn-primary" title="${g.message(code: "workflowConfig.button.clear.title")}"
+                        data-toggle="tooltip" onclick="$.otp.workflowConfig.clear()">
+                    <g:message code="workflowConfig.button.clear"/>
+                </button>
+                <button id="create-button" type="button" class="btn btn-primary" data-toggle="modal" title="${g.message(code: "workflowConfig.button.create.title")}"
+                        data-toggle="tooltip" data-target="#workflowConfigModal" data-operation="create">
+                    <g:message code="workflowConfig.button.create"/>
+                </button>
             </div>
             <div class="col-sm">
                 <div class="input-group">

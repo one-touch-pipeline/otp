@@ -56,7 +56,7 @@
                         </div>
                     </div>
 
-                    <g:render template="search"/>
+                    <g:render template="search" model="[isEdit: true]"/>
 
                     <div class="row">
                         <div class="col">

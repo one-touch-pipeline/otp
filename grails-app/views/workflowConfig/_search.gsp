@@ -26,7 +26,7 @@
         <g:render template="workflowsSelection" model="[workflows: workflows]"/>
     </div>
     <div class="col">
-        <g:render template="workflowVersionsSelection" model="[workflowVersions: workflowVersions]"/>
+        <g:render template="workflowVersionsSelection" model="[workflowVersions: workflowVersions, isEdit: isEdit]"/>
     </div>
 </div>
 <div class="row">

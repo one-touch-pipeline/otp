@@ -33,6 +33,14 @@ import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 @Integration
 class ExternalWorkflowConfigSelectorIntegrationSpec extends Specification implements WorkflowSystemDomainFactory {
 
+    void setupData() {
+        Workflow workflow1 = createWorkflow(name: "w1")
+        Workflow workflow2 = createWorkflow(name: "w2")
+
+        createWorkflowVersion([workflow: workflow1, workflowVersion: "v1"])
+        createWorkflowVersion([workflow: workflow2, workflowVersion: "v2"])
+    }
+
     void "test validation of fragment, keys are unique"() {
         given:
         ExternalWorkflowConfigFragment fragment = createExternalWorkflowConfigFragment([
@@ -105,6 +113,19 @@ class ExternalWorkflowConfigSelectorIntegrationSpec extends Specification implem
         TestCase.assertValidateError(selector2, 'externalWorkflowConfigFragment', 'duplicate.key')
     }
 
+    void "test validation of workflowVersions, versions should match"() {
+        given:
+        setupData()
+
+        ExternalWorkflowConfigSelector selector = createExternalWorkflowConfigSelector([
+                workflows       : Workflow.findAllByName("w1"),
+                workflowVersions: WorkflowVersion.findAllByWorkflowVersion("v2"),
+        ], false)
+
+        expect:
+        TestCase.assertValidateError(selector, 'workflowVersions', 'externalWorkflowConfigSelector.workflowVersions.noWorkflowDefined')
+    }
+
     void "test the calculated priority if all fields are selected - highest priority is 4726"() {
         when:
         ExternalWorkflowConfigSelector selector  = createExternalWorkflowConfigSelector()
@@ -140,6 +161,8 @@ class ExternalWorkflowConfigSelectorIntegrationSpec extends Specification implem
     @Unroll
     void "test if priority is calculated correctly - multiple cases"() {
         given:
+        setupData()
+
         ExternalWorkflowConfigSelector selector  = createExternalWorkflowConfigSelector([
                 name                          : p_name,
                 workflows                     : c_workflows(),
@@ -155,16 +178,16 @@ class ExternalWorkflowConfigSelectorIntegrationSpec extends Specification implem
         selector.priority == p_priority
 
         where:
-        p_name              | p_selectorType                | c_workflows            | c_workflowVersions            | c_seqTypes            | c_referenceGenomes            | c_libraryPreparationKits            | c_projects             || p_priority
-        "Default values 2"  | SelectorType.DEFAULT_VALUES   | { [createWorkflow()] } | { [] }                        | { [] }                | { [] }                        | { [] }                              | { [] }                 || 0b0000000000000010
-        "Default values 6"  | SelectorType.DEFAULT_VALUES   | { [createWorkflow()] } | { [createWorkflowVersion()] } | { [] }                | { [] }                        | { [] }                              | { [] }                 || 0b0000000000000110
-        "Default values 18" | SelectorType.DEFAULT_VALUES   | { [createWorkflow()] } | { [] }                        | { [createSeqType()] } | { [] }                        | { [] }                              | { [] }                 || 0b0000000000010010
-        "Not Default 4098"  | SelectorType.ADAPTER_FILE     | { [createWorkflow()] } | { [] }                        | { [] }                | { [] }                        | { [] }                              | { [] }                 || 0b0001000000000010
-        "Not Default 4100"  | SelectorType.BED_FILE         | { [] }                 | { [createWorkflowVersion()] } | { [] }                | { [] }                        | { [] }                              | { [] }                 || 0b0001000000000100
-        "Not Default 4112"  | SelectorType.GENERIC          | { [] }                 | { [] }                        | { [createSeqType()] } | { [] }                        | { [] }                              | { [] }                 || 0b0001000000010000
-        "Not Default 4132"  | SelectorType.REVERSE_SEQUENCE | { [] }                 | { [createWorkflowVersion()] } | { [] }                | { [createReferenceGenome()] } | { [] }                              | { [] }                 || 0b0001000000100100
-        "Not Default 4192"  | SelectorType.GENERIC          | { [] }                 | { [] }                        | { [] }                | { [createReferenceGenome()] } | { [createLibraryPreparationKit()] } | { [] }                 || 0b0001000001100000
-        "Not Default 4130"  | SelectorType.ADAPTER_FILE     | { [createWorkflow()] } | { [] }                        | { [] }                | { [createReferenceGenome()] } | { [] }                              | { [] }                 || 0b0001000000100010
-        "Not Default 4726"  | SelectorType.ADAPTER_FILE     | { [createWorkflow()] } | { [createWorkflowVersion()] } | { [createSeqType()] } | { [createReferenceGenome()] } | { [createLibraryPreparationKit()] } | { [createProject() ] } || 0b0001001001110110
+        p_name              | p_selectorType                | c_workflows                      | c_workflowVersions                                 | c_seqTypes            | c_referenceGenomes            | c_libraryPreparationKits            | c_projects             || p_priority
+        "Default values 2"  | SelectorType.DEFAULT_VALUES   | { Workflow.findAllByName("w1") } | { [] }                                             | { [] }                | { [] }                        | { [] }                              | { [] }                 || 0b0000000000000010
+        "Default values 2"  | SelectorType.DEFAULT_VALUES   | { Workflow.findAll() }           | { [] }                                             | { [] }                | { [] }                        | { [] }                              | { [] }                 || 0b0000000000000010
+        "Default values 6"  | SelectorType.DEFAULT_VALUES   | { Workflow.findAllByName("w1") } | { WorkflowVersion.findAllByWorkflowVersion("v1") } | { [] }                | { [] }                        | { [] }                              | { [] }                 || 0b0000000000000110
+        "Default values 6"  | SelectorType.DEFAULT_VALUES   | { Workflow.findAll() }           | { WorkflowVersion.findAllByWorkflowVersion("v2") } | { [] }                | { [] }                        | { [] }                              | { [] }                 || 0b0000000000000110
+        "Default values 18" | SelectorType.DEFAULT_VALUES   | { Workflow.findAllByName("w1") } | { [] }                                             | { [createSeqType()] } | { [] }                        | { [] }                              | { [] }                 || 0b0000000000010010
+        "Not Default 4098"  | SelectorType.ADAPTER_FILE     | { Workflow.findAllByName("w1") } | { [] }                                             | { [] }                | { [] }                        | { [] }                              | { [] }                 || 0b0001000000000010
+        "Not Default 4112"  | SelectorType.GENERIC          | { [] }                           | { [] }                                             | { [createSeqType()] } | { [] }                        | { [] }                              | { [] }                 || 0b0001000000010000
+        "Not Default 4192"  | SelectorType.GENERIC          | { [] }                           | { [] }                                             | { [] }                | { [createReferenceGenome()] } | { [createLibraryPreparationKit()] } | { [] }                 || 0b0001000001100000
+        "Not Default 4130"  | SelectorType.ADAPTER_FILE     | { Workflow.findAllByName("w1") } | { [] }                                             | { [] }                | { [createReferenceGenome()] } | { [] }                              | { [] }                 || 0b0001000000100010
+        "Not Default 4726"  | SelectorType.ADAPTER_FILE     | { Workflow.findAllByName("w2") } | { WorkflowVersion.findAllByWorkflowVersion("v2") } | { [createSeqType()] } | { [createReferenceGenome()] } | { [createLibraryPreparationKit()] } | { [createProject() ] } || 0b0001001001110110
     }
 }

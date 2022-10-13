@@ -134,6 +134,17 @@ class ExternalWorkflowConfigSelector implements Comparable<ExternalWorkflowConfi
                 return ["duplicate.key", duplicateKeys.join(", ")]
             }
         }
+        workflowVersions validator: { val, obj ->
+            if (val && !obj.workflows) {
+                return "externalWorkflowConfigSelector.workflowVersions.workflowsEmpty"
+            }
+            WorkflowVersion currentVersion = val.find {
+                !(it.workflow in obj.workflows)
+            }
+            if (currentVersion) {
+                return ["externalWorkflowConfigSelector.workflowVersions.noWorkflowDefined", currentVersion]
+            }
+        }
     }
 
     static Closure mapping = {

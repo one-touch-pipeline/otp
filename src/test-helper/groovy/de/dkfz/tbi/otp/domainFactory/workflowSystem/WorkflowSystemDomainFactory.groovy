@@ -142,10 +142,11 @@ trait WorkflowSystemDomainFactory implements DomainFactoryCore, TaxonomyFactory 
     }
 
     ExternalWorkflowConfigSelector createExternalWorkflowConfigSelector(Map properties = [:], boolean saveAndValidate = true) {
+        Set<Workflow> workflows = properties.workflows ?: properties.workflowVersions ? properties.workflowVersions*.workflow : [createWorkflow()] as Set
         return createDomainObject(ExternalWorkflowConfigSelector, [
                 name                          : "externalWorkflowConfigSelectorName_${nextId}",
-                workflowVersions              : { [createWorkflowVersion()] },
-                workflows                     : { [createWorkflow()] },
+                workflowVersions              : { [createWorkflowVersion(workflow: workflows.first())] },
+                workflows                     : workflows,
                 referenceGenomes              : { [createReferenceGenome()] },
                 libraryPreparationKits        : { [createLibraryPreparationKit()] },
                 seqTypes                      : { [createSeqType()] },
