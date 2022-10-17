@@ -72,7 +72,7 @@ class JobService {
                             "Please restart the workflow instead, if possible.")
         }
 
-        assert stepToRestart.workflowRun.state != WorkflowRun.State.PENDING: "Can not restart job of ${stepToRestart.workflowRun.displayName}, " +
+        assert stepToRestart.workflowRun.state == WorkflowRun.State.FAILED: "Can not restart job of ${stepToRestart.workflowRun.displayName}, " +
                 "since the job has already been restarted."
 
         List<WorkflowStep> workflowSteps = stepToRestart.workflowRun.workflowSteps

@@ -312,7 +312,7 @@ $(() => {
     }
 
     // expand to show the clusterJobs if exist
-    $('#steps tbody tr.even, tr.odd').each((idx) => {
+    $('#steps tbody tr.even, #steps tbody tr.odd').each((idx) => {
       const row = table.row(idx);
       const rowData = row.data();
       if (rowData && rowData.clusterJobs.length > 0) {
