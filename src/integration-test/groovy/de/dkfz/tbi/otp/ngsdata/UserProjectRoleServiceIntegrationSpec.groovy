@@ -21,14 +21,13 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.core.GrailsApplication
 import grails.gorm.transactions.Rollback
 import grails.testing.mixin.integration.Integration
 import org.grails.datastore.gorm.events.AutoTimestampEventListener
 import org.grails.spring.context.support.PluginAwareResourceBundleMessageSource
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
-import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.security.access.hierarchicalroles.RoleHierarchy
 import org.springframework.security.authentication.AuthenticationTrustResolver
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -42,7 +41,6 @@ import de.dkfz.tbi.otp.domainFactory.UserDomainFactory
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.security.user.UserService
-import de.dkfz.tbi.otp.security.user.UserSwitchService
 import de.dkfz.tbi.otp.security.user.identityProvider.LdapService
 import de.dkfz.tbi.otp.security.user.identityProvider.data.IdpUserDetails
 import de.dkfz.tbi.otp.utils.*
@@ -69,12 +67,10 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
     private static final String EMAIL_TICKET_SYSTEM = HelperUtils.randomEmail
     private static final String EMAIL_SENDER_NAME = "Tina Test"
 
-    @Autowired
-    GrailsApplication grailsApplication
-
     AutoTimestampEventListener autoTimestampEventListener
-    UserProjectRoleService userProjectRoleService
+    RoleHierarchy roleHierarchy
     TestConfigService configService
+    UserProjectRoleService userProjectRoleService
 
     @Rule
     TemporaryFolder temporaryFolder
@@ -86,7 +82,8 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         SecurityService securityService = new SecurityService(
                 authenticationTrustResolver: Mock(AuthenticationTrustResolver) {
                     isAnonymous(_) >> false
-                }
+                },
+                roleHierarchy: roleHierarchy,
         )
 
         configService.addOtpProperties(temporaryFolder.newFolder().toPath())
@@ -95,12 +92,13 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         userProjectRoleService.messageSourceService = messageSourceServiceWithMockedMessageSource
         userProjectRoleService.securityService = securityService
         userProjectRoleService.auditLogService = new AuditLogService()
-        userProjectRoleService.auditLogService.userSwitchService = new UserSwitchService()
-        userProjectRoleService.auditLogService.userSwitchService.securityService = securityService
+        userProjectRoleService.auditLogService.securityService = securityService
         userProjectRoleService.auditLogService.processingOptionService = new ProcessingOptionService()
         userProjectRoleService.processingOptionService = new ProcessingOptionService()
         userProjectRoleService.configService = configService
         userProjectRoleService.userProjectRoleService = userProjectRoleService
+        userProjectRoleService.dicomAuditUtils = new DicomAuditUtils()
+        userProjectRoleService.dicomAuditUtils.securityService = securityService
 
         userProjectRoleService.mailHelperService = Mock(MailHelperService) {
             getTicketSystemEmailAddress() >> EMAIL_TICKET_SYSTEM

@@ -40,7 +40,6 @@ import de.dkfz.tbi.otp.project.*
 import de.dkfz.tbi.otp.project.additionalField.*
 import de.dkfz.tbi.otp.searchability.Keyword
 import de.dkfz.tbi.otp.security.*
-import de.dkfz.tbi.otp.security.user.UserSwitchService
 import de.dkfz.tbi.otp.utils.MailHelperService
 import de.dkfz.tbi.otp.utils.MessageSourceService
 
@@ -52,6 +51,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
 
     ProjectRequestService projectRequestService
     ProjectRequestStateProvider projectRequestStateProvider
+    SecurityService securityService
 
     final String subject = "subject"
     final String body = "body"
@@ -65,7 +65,6 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
                 messageSourceService                : Mock(MessageSourceService),
                 mailHelperService                   : Mock(MailHelperService),
                 linkGenerator                       : Mock(LinkGenerator),
-                userSwitchService                   : Mock(UserSwitchService),
                 securityService                     : Mock(SecurityService),
                 auditLogService                     : Mock(AuditLogService),
                 projectRequestUserService           : Mock(ProjectRequestUserService),
@@ -475,7 +474,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         ProjectRequest result = projectRequestService.saveProjectRequestFromCommand(cmd)
 
         then:
-        1 * projectRequestService.userSwitchService.ensureNotSwitchedUser()
+        1 * projectRequestService.securityService.ensureNotSwitchedUser()
         1 * projectRequestService.projectRequestUserService.saveProjectRequestUsersFromCommands(_) >> users
         (projectRequestExists ? 0 : 1) * projectRequestService.securityService.currentUser >> currentUser
         1 * projectRequestService.auditLogService.logAction(_, _) >> _
@@ -508,24 +507,20 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
     void "getRequestsUserIsInvolved, with #resolved parameter and #testDescription requests the user is involved in"() {
         given:
         createUserAndRoles()
-        User currentUser = createUser()
-        ProjectRequest prRequestedByUser = createProjectRequest([requester: currentUser])
+        ProjectRequest prRequestedByUser = createProjectRequest([requester: getUser(USER)])
         ProjectRequest prCreatedByOtherUser = createProjectRequest([:], [beanName: "created"])
-        ProjectRequest prCreatedByUser = createProjectRequest([requester: currentUser], [beanName: "created"])
+        ProjectRequest prCreatedByUser = createProjectRequest([requester: getUser(USER)], [beanName: "created"])
         ProjectRequest prDraftByOtherUser = createProjectRequest([:], [beanName: "draft"])
-        ProjectRequest prDraftByUser = createProjectRequest([requester: currentUser], [beanName: "draft"])
+        ProjectRequest prDraftByUser = createProjectRequest([requester: getUser(USER)], [beanName: "draft"])
 
         String role = isOperator ? OPERATOR : USER
-        List<ProjectRequest> result = []
+
+        projectRequestService.securityService = securityService
 
         when:
-        result = doWithAuth(role) {
+        List<ProjectRequest> result = doWithAuth(role) {
             projectRequestService.getRequestsUserIsInvolved(resolved)
         }
-
-        then:
-        1 * projectRequestService.securityService.currentUser >> currentUser
-        0 * _
 
         then:
         (isOperator && resolved) ? TestCase.assertContainSame(result, [prCreatedByOtherUser, prCreatedByUser]) : true
@@ -775,6 +770,8 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         DateFieldDefinition dateFdHideOnConfig = createDateFieldDefinition([
                 projectDisplayOnConfigPage: ProjectDisplayOnConfigPage.HIDE,
         ])
+
+        projectRequestService.securityService = securityService
 
         when:
         List<AbstractFieldDefinition> result = doWithAuth(role) {

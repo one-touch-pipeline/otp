@@ -21,14 +21,14 @@
  */
 package de.dkfz.tbi.otp.project.projectRequest
 
-import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.plugin.springsecurity.annotation.Secured
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.project.ProjectRequest
-import de.dkfz.tbi.otp.security.*
+import de.dkfz.tbi.otp.security.Role
+import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.security.user.SwitchedUserDeniedException
 
 import javax.naming.OperationNotSupportedException
@@ -52,7 +52,7 @@ class Approval implements ProjectRequestState {
     @Override
     List<ProjectRequestAction> getViewActions(ProjectRequest projectRequest) {
         User currentUser = securityService.currentUser
-        boolean currentUserIsOperator = SpringSecurityUtils.ifAllGranted(Role.ROLE_OPERATOR)
+        boolean currentUserIsOperator = securityService.ifAllGranted(Role.ROLE_OPERATOR)
         List<ProjectRequestAction> actions = []
         if (projectRequest.state.usersThatNeedToApprove.contains(currentUser)) {
             actions.addAll([ProjectRequestAction.APPROVE, ProjectRequestAction.REJECT])

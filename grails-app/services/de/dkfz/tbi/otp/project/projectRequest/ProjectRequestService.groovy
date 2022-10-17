@@ -22,7 +22,6 @@
 package de.dkfz.tbi.otp.project.projectRequest
 
 import grails.gorm.transactions.Transactional
-import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.web.mapping.LinkGenerator
 import org.codehaus.groovy.runtime.InvokerHelper
 import org.springframework.beans.factory.annotation.Autowired
@@ -37,7 +36,6 @@ import de.dkfz.tbi.otp.project.*
 import de.dkfz.tbi.otp.project.additionalField.*
 import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.security.user.SwitchedUserDeniedException
-import de.dkfz.tbi.otp.security.user.UserSwitchService
 import de.dkfz.tbi.otp.utils.*
 
 import java.time.LocalDate
@@ -49,7 +47,6 @@ class ProjectRequestService {
     LinkGenerator linkGenerator
 
     AuditLogService auditLogService
-    UserSwitchService userSwitchService
     MessageSourceService messageSourceService
     MailHelperService mailHelperService
     ProjectRequestUserService projectRequestUserService
@@ -60,7 +57,7 @@ class ProjectRequestService {
     UserProjectRoleService userProjectRoleService
 
     ProjectRequest saveProjectRequestFromCommand(ProjectRequestCreationCommand cmd) throws SwitchedUserDeniedException {
-        userSwitchService.ensureNotSwitchedUser()
+        securityService.ensureNotSwitchedUser()
         ProjectRequest projectRequest
         Set<ProjectRequestUser> users = projectRequestUserService.saveProjectRequestUsersFromCommands(cmd.users)
         ProjectRequestPersistentState state = projectRequestPersistentStateService
@@ -122,7 +119,7 @@ class ProjectRequestService {
     }
 
     List<AbstractFieldDefinition> listAndFetchAbstractFields(Project.ProjectType projectType, ProjectPageType page) {
-        boolean isOperator = SpringSecurityUtils.ifAllGranted(Role.ROLE_OPERATOR)
+        boolean isOperator = securityService.ifAllGranted(Role.ROLE_OPERATOR)
         List<AbstractFieldDefinition> fieldDefinitions = []
         AbstractFieldDefinition.list().each {
             if ((projectType == Project.ProjectType.SEQUENCING && it.fieldUseForSequencingProjects != FieldExistenceType.NOT_AVAILABLE) ||
@@ -171,7 +168,7 @@ class ProjectRequestService {
     }
 
     void approveProjectRequest(ProjectRequest projectRequest, User user) throws SwitchedUserDeniedException {
-        userSwitchService.ensureNotSwitchedUser()
+        securityService.ensureNotSwitchedUser()
         projectRequestPersistentStateService.approveUser(projectRequest.state, user)
     }
 
@@ -412,7 +409,7 @@ class ProjectRequestService {
 
     List<ProjectRequest> getRequestsUserIsInvolved(boolean resolved) {
         String equalOrNotEqual = resolved ? "eq" : "ne"
-        boolean currentUserIsOperator = SpringSecurityUtils.ifAllGranted(Role.ROLE_OPERATOR)
+        boolean currentUserIsOperator = securityService.ifAllGranted(Role.ROLE_OPERATOR)
         User currentUser = securityService.currentUser
         if (currentUserIsOperator) {
             return (ProjectRequest.withCriteria {

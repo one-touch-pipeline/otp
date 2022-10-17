@@ -22,11 +22,17 @@
 package de.dkfz.tbi.otp.security
 
 import grails.gorm.transactions.Transactional
-import grails.plugin.springsecurity.SpringSecurityUtils
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Component
 
 @Transactional
-abstract class DicomAuditUtils {
-    static String getRealUserName(String username) {
-        return SpringSecurityUtils.isSwitched() ? "${SpringSecurityUtils.switchedUserOriginalUsername} as ${username}" : username
+@Component
+class DicomAuditUtils {
+
+    @Autowired
+    SecurityService securityService
+
+    String getRealUserName(String username) {
+        return securityService.switched ? "${securityService.userSwitchInitiator.username} as ${username}" : username
     }
 }

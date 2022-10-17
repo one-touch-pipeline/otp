@@ -22,7 +22,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.gorm.transactions.Transactional
-import grails.plugin.springsecurity.SpringSecurityUtils
 import groovy.text.SimpleTemplateEngine
 import groovy.transform.TupleConstructor
 import org.springframework.security.access.prepost.PreAuthorize
@@ -42,13 +41,12 @@ import de.dkfz.tbi.otp.security.user.identityProvider.data.IdpUserDetails
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 
-import static de.dkfz.tbi.otp.security.DicomAuditUtils.getRealUserName
-
 @Transactional
 class UserProjectRoleService {
 
     AuditLogService auditLogService
     ConfigService configService
+    DicomAuditUtils dicomAuditUtils
     LdapService ldapService
     MailHelperService mailHelperService
     MessageSourceService messageSourceService
@@ -95,7 +93,7 @@ class UserProjectRoleService {
                 "Created Project User: ${userProjectRole.toStringWithAllProperties()}"
         )
         String studyUID = OtpDicomAuditFactory.generateUID(UniqueIdentifierType.STUDY, String.valueOf(project.id))
-        DicomAuditLogger.logUserActivated(EventOutcomeIndicator.SUCCESS, getRealUserName(requester), user.username, studyUID)
+        DicomAuditLogger.logUserActivated(EventOutcomeIndicator.SUCCESS, dicomAuditUtils.getRealUserName(requester), user.username, studyUID)
 
         return userProjectRole
     }
@@ -216,7 +214,7 @@ class UserProjectRoleService {
         UserProjectRole requesterUserProjectRole = CollectionUtils.atMostOneElement(
                 UserProjectRole.findAllByUserAndProject(requester, userProjectRole.project)
         )
-        String switchedUserAnnotation = SpringSecurityUtils.switched ? " (switched from ${SpringSecurityUtils.switchedUserOriginalUsername})" : ""
+        String switchedUserAnnotation = securityService.switched ? " (switched from ${securityService.userSwitchInitiator.username})" : ""
 
         String formattedAction = action.toString().toLowerCase()
         String conjunction = action == OperatorAction.ADD ? 'to' : 'from'

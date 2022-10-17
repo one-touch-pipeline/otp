@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.project.projectRequest
 
-import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.plugin.springsecurity.annotation.Secured
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.prepost.PreAuthorize
@@ -52,7 +51,7 @@ class Check implements ProjectRequestState {
 
     @Override
     List<ProjectRequestAction> getViewActions(ProjectRequest projectRequest) {
-        boolean currentUserIsOperator = SpringSecurityUtils.ifAllGranted(Role.ROLE_OPERATOR)
+        boolean currentUserIsOperator = securityService.ifAllGranted(Role.ROLE_OPERATOR)
         return currentUserIsOperator ? [ProjectRequestAction.REJECT, ProjectRequestAction.PASS_ON, ProjectRequestAction.EDIT, ProjectRequestAction.DELETE] : []
     }
 

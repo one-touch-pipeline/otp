@@ -21,7 +21,7 @@
  */
 package de.dkfz.tbi.otp
 
-import de.dkfz.tbi.otp.security.user.UserSwitchService
+import de.dkfz.tbi.otp.security.SecurityService
 
 /**
  * This tag lib contains helper tags that deal with security related issues in the GUI.
@@ -29,7 +29,7 @@ import de.dkfz.tbi.otp.security.user.UserSwitchService
 class OtpSecurityTagLib {
     static namespace = "otpsecurity"
 
-    UserSwitchService userSwitchService
+    SecurityService securityService
 
     /**
      * Disables all submit buttons wrapped inside this tag and adds a warning highlight and tooltip.
@@ -38,12 +38,12 @@ class OtpSecurityTagLib {
      * highlight but leaves the buttons enabled.
      *
      * To be used in conjunction with:
-     *   - UserSwitchService.assertNotSwitchedUser in the respective function to prevent direct submissions
+     *   - SecurityService.ensureNotSwitchedUser in the respective function to prevent direct submissions
      *   - taglib/NoSwitchedUser.js to actually disable the buttons in the GUI
      */
     def noSwitchedUser = { attrs, body ->
         out << "<div "
-        if (userSwitchService.toBeBlockedBecauseOfSwitchedUser) {
+        if (securityService.toBeBlockedBecauseOfSwitchedUser) {
             out << "class=\"no-switched-user\">"
             out << "<img src=\"${g.assetPath(src: "warning.png")}\"/> "
             out << "${g.message(code: "error.switchedUserDeniedException.description")}"

@@ -21,18 +21,18 @@
  */
 package de.dkfz.tbi.otp
 
-import grails.plugin.springsecurity.SpringSecurityUtils
-
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.qcTrafficLight.TableCellValue
+import de.dkfz.tbi.otp.security.SecurityService
 
 class OtpTagLib {
     static namespace = "otp"
 
     ConfigService configService
     ProcessingOptionService processingOptionService
+    SecurityService securityService
 
     /**
      * Renders a text field with editor functionality. The editor renders the text with a button next to it.
@@ -164,7 +164,7 @@ class OtpTagLib {
      * @return html to show
      */
     private String editorSwitchRender(String roles, String template, Map model) {
-        if (!roles || (roles && SpringSecurityUtils.ifAnyGranted(roles))) {
+        if (!roles || (roles && securityService.ifAnyGranted(roles))) {
             model.checkBoxes = model.checkBoxes ?: [:]
             model.dropDowns = model.dropDowns ?: [:]
 

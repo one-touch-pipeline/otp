@@ -23,15 +23,21 @@ package de.dkfz.tbi.otp.security
 
 import grails.gorm.transactions.Rollback
 import grails.testing.mixin.integration.Integration
+import org.springframework.security.access.hierarchicalroles.RoleHierarchy
 import spock.lang.Specification
+import spock.lang.Unroll
 
+import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.config.PseudoEnvironment
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.security.user.SwitchedUserDeniedException
 
 @Rollback
 @Integration
 class SecurityServiceIntegrationSpec extends Specification implements UserAndRoles {
 
+    RoleHierarchy roleHierarchy
     SecurityService securityService
 
     void setupData() {
@@ -48,64 +54,80 @@ class SecurityServiceIntegrationSpec extends Specification implements UserAndRol
         }
     }
 
-    void "getRolesOfCurrentUser, return the role of the current user"() {
-        given:
-        setupData()
-        User user = CollectionUtils.exactlyOneElement(User.findAllByUsername(username))
-        List<Role> roles
-
-        when:
-        roles = doWithAuth(username) {
-            securityService.rolesOfCurrentUser
-        }
-
-        then:
-        user.authorities == roles as Set
-
-        where:
-        username << [
-                OPERATOR,
-                ADMIN,
-                TESTUSER,
-        ]
-    }
-
-    void "checkRolesContainsAdministrativeRole, check if roles includes an administrative role"() {
-        given:
-        setupData()
-        List<Role> roles = authorities ? Role.findAllByAuthorityInList(authorities) : []
-
-        when:
-        boolean check = securityService.checkRolesContainsAdministrativeRole(roles)
-
-        then:
-        check == expectedValue
-
-        where:
-        expectedValue | authorities
-        true          | [Role.ROLE_ADMIN, Role.ROLE_OPERATOR, Role.ROLE_SWITCH_USER, Role.ROLE_SWITCH_USER]
-        true          | [Role.ROLE_SWITCH_USER, Role.ROLE_OPERATOR, Role.ROLE_SWITCH_USER]
-        false         | [Role.ROLE_SWITCH_USER]
-        false         | []
-    }
-
     void "hasCurrentUserAdministrativeRoles, check if current user has an administrative role"() {
         given:
         setupData()
-        boolean check
 
-        when:
-        check = doWithAuth(username) {
+        expect:
+        expectedValue == doWithAuth(username) {
             securityService.hasCurrentUserAdministrativeRoles()
         }
-
-        then:
-        check == expectedValue
 
         where:
         username | expectedValue
         OPERATOR | true
         ADMIN    | true
         TESTUSER | false
+    }
+
+    void "getWhitelistedEnvironments, returns all Environments but PRODUCTION"() {
+        given:
+        securityService = new SecurityService()
+
+        expect:
+        TestCase.assertContainSame(securityService.whitelistedEnvironments, [
+                PseudoEnvironment.PRODUCTION_TEST,
+                PseudoEnvironment.DEVELOPMENT,
+                PseudoEnvironment.TEST,
+                PseudoEnvironment.WORKFLOW_TEST,
+        ])
+    }
+
+    @Unroll
+    void "isToBeBlockedBecauseOfSwitchedUser, all test cases, #environment, #expectedNormal, #expectedSwitched"() {
+        given:
+        securityService = new SecurityService(
+                configService: Mock(TestConfigService) {
+                    1 * getPseudoEnvironment() >> environment
+                },
+                roleHierarchy: roleHierarchy,
+        )
+        createUserAndRoles()
+
+        expect:
+        expectedNormal == securityService.toBeBlockedBecauseOfSwitchedUser
+        expectedSwitched == doAsSwitchedToUser(USER) {
+            securityService.toBeBlockedBecauseOfSwitchedUser
+        }
+
+        where:
+        environment                   || expectedNormal | expectedSwitched
+        PseudoEnvironment.DEVELOPMENT || false          | false
+        PseudoEnvironment.PRODUCTION  || false          | true
+    }
+
+    void "assertNotSwitchedUser, throws Exception when action is blocked for switched users"() {
+        given:
+        securityService = new SecurityService(
+                configService: Mock(TestConfigService) {
+                    1 * getPseudoEnvironment() >> PseudoEnvironment.PRODUCTION
+                },
+                roleHierarchy: roleHierarchy,
+        )
+        createUserAndRoles()
+
+        when:
+        securityService.ensureNotSwitchedUser()
+
+        then:
+        notThrown(SwitchedUserDeniedException)
+
+        when:
+        doAsSwitchedToUser(USER) {
+            securityService.ensureNotSwitchedUser()
+        }
+
+        then:
+        thrown(SwitchedUserDeniedException)
     }
 }

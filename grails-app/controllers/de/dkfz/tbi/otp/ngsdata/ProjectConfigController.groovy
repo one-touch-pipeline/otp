@@ -22,7 +22,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.converters.JSON
-import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.plugin.springsecurity.annotation.Secured
 import grails.validation.Validateable
 import org.springframework.http.HttpStatus
@@ -39,6 +38,7 @@ import de.dkfz.tbi.otp.project.additionalField.ProjectPageType
 import de.dkfz.tbi.otp.project.exception.unixGroup.UnixGroupIsSharedException
 import de.dkfz.tbi.otp.project.projectRequest.ProjectRequestService
 import de.dkfz.tbi.otp.security.Role
+import de.dkfz.tbi.otp.security.SecurityService
 import de.dkfz.tbi.otp.utils.CommentCommand
 import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriorityService
@@ -56,6 +56,7 @@ class ProjectConfigController implements CheckAndCall {
     ProjectRequestService projectRequestService
     ProjectSelectionService projectSelectionService
     ProjectService projectService
+    SecurityService securityService
     SpeciesWithStrainService speciesWithStrainService
     TumorEntityService tumorEntityService
 
@@ -87,7 +88,7 @@ class ProjectConfigController implements CheckAndCall {
     @Secured('isFullyAuthenticated()')
     Map index() {
         Project project = projectSelectionService.selectedProject
-        String projectRequestComment = (SpringSecurityUtils.ifAllGranted(Role.ROLE_OPERATOR) ?
+        String projectRequestComment = (securityService.ifAllGranted(Role.ROLE_OPERATOR) ?
                 projectRequestService.findProjectRequestByProject(project)?.requesterComment : '')
 
         Map<String, String> abstractValues = projectRequestService.listAdditionalFieldValues(project)

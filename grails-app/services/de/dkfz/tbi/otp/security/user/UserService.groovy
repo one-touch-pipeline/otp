@@ -22,7 +22,6 @@
 package de.dkfz.tbi.otp.security.user
 
 import grails.gorm.transactions.Transactional
-import grails.plugin.springsecurity.SpringSecurityUtils
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.ngsdata.LdapUserCreationException
@@ -163,7 +162,7 @@ class UserService {
         }
         // switched users need not be checked, because before switching, they must have been a user that must
         // have already accepted the policy (or else they couldn't have reached the "switch user" page in the first place)
-        if (SpringSecurityUtils.switched) {
+        if (securityService.switched) {
             return true
         }
 

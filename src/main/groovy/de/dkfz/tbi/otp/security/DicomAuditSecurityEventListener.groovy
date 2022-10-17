@@ -39,6 +39,9 @@ import de.dkfz.tbi.otp.ProjectSelectionService
 class DicomAuditSecurityEventListener implements ApplicationListener<AbstractAuthenticationEvent> {
 
     @Autowired
+    DicomAuditUtils dicomAuditUtils
+
+    @Autowired
     ProjectSelectionService projectSelectionService
 
     @Override
@@ -65,14 +68,14 @@ class DicomAuditSecurityEventListener implements ApplicationListener<AbstractAut
                 // User switch
                 DicomAuditLogger.logUserSwitched(
                         EventIdentification.EventOutcomeIndicator.SUCCESS,
-                        DicomAuditUtils.getRealUserName(event.authentication.principal.username as String),
+                        dicomAuditUtils.getRealUserName(event.authentication.principal.username as String),
                         event.targetUser?.username
                 )
                 break
             case { it instanceof AuthorizationFailureEvent } :
                 DicomAuditLogger.logRestrictedFunctionUsed(
                         EventIdentification.EventOutcomeIndicator.MINOR_FAILURE,
-                        DicomAuditUtils.getRealUserName(event.authentication.principal.username as String),
+                        dicomAuditUtils.getRealUserName(event.authentication.principal.username as String),
                         event.source.hasProperty("request") ? event.source.request.requestURI : "null"
                 )
                 break
