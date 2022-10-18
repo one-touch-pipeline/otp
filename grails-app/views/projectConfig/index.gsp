@@ -172,7 +172,7 @@
                                 value="${selectedProject?.speciesWithStrains ?: ""}"/>
                     </sec:ifAllGranted>
                     <sec:ifNotGranted roles="ROLE_OPERATOR">
-                        ${selectedProject?.speciesWithStrains ?: ""}
+                        ${selectedProject?.speciesWithStrains?.join(", ") ?: ""}
                     </sec:ifNotGranted>
                 </td>
             </tr>
