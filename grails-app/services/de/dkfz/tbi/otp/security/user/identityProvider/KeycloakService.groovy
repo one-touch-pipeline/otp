@@ -29,6 +29,7 @@ import org.springframework.security.oauth2.client.token.grant.client.ClientCrede
 import org.springframework.security.oauth2.common.OAuth2AccessToken
 import org.springframework.web.client.RestTemplate
 
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.security.user.identityProvider.data.IdpUserDetails
@@ -68,16 +69,26 @@ class KeycloakService implements IdentityProvider {
         return castKeycloakUsersIntoIdpUserDetails(keycloakUsers)
     }
 
-    @Override
-    String getDistinguishedNameOfGroupByGroupName(String groupName) {
-        // TODO: otp-1825
-        return null
+    private String getGroupIdByGroupName(String groupName) {
+        String requestUrl = "$apiBaseUrl/${configService.keycloakRealm}/groups?search=$groupName"
+        HttpEntity<String> entity = new HttpEntity<String>(null, authorizationHeader)
+        ResponseEntity<List<KeycloakGroup>> response = restTemplate.exchange(requestUrl, HttpMethod.GET, entity, KeycloakGroup[].class)
+        List<KeycloakGroup> keycloakGroups = response.body
+        return CollectionUtils.atMostOneElement(keycloakGroups).id
+    }
+
+    private List<String> getGroupMembersByGroupId(String groupId) {
+        String requestUrl = "$apiBaseUrl/${configService.keycloakRealm}/groups/$groupId/members"
+        HttpEntity<String> entity = new HttpEntity<String>(null, authorizationHeader)
+        ResponseEntity<List<KeycloakUser>> response = restTemplate.exchange(requestUrl, HttpMethod.GET, entity, KeycloakUser[].class)
+        List<KeycloakUser> keycloakUsersInGroup = response.body
+        return keycloakUsersInGroup*.username
     }
 
     @Override
-    List<String> getGroupMembersByDistinguishedName(String distinguishedName) {
-        // TODO: otp-1825
-        return [:]
+    List<String> getGroupMembersByGroupName(String groupName) {
+        String groupId = getGroupIdByGroupName(groupName)
+        return getGroupMembersByGroupId(groupId)
     }
 
     @Override
@@ -146,7 +157,7 @@ class KeycloakService implements IdentityProvider {
 
         HttpHeaders headers = new HttpHeaders()
         headers.set("Authorization", "Bearer " + accessToken.value)
-        headers.contentType(MediaType.APPLICATION_JSON_UTF8)
+        headers.contentType = MediaType.APPLICATION_JSON_UTF8
 
         return headers
     }
@@ -206,6 +217,13 @@ class KeycloakUser {
     List requiredActions
     int notBefore
     Object access
+}
+
+class KeycloakGroup {
+    String id
+    String name
+    String path
+    List<KeycloakGroup> subGroups
 }
 
 @SuppressWarnings("PropertyName")

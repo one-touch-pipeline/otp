@@ -74,8 +74,7 @@ UserProjectRole.withTransaction {
         }*.user.username
         println(getSortedListInfo("Usernames of project:", usernamesInProject ?: []))
 
-        String groupDistinguishedName = ldapService.getDistinguishedNameOfGroupByGroupName(project.unixGroup)
-        List<String> usernamesInLdapGroup = ldapService.getGroupMembersByDistinguishedName(groupDistinguishedName)
+        List<String> usernamesInLdapGroup = ldapService.getGroupMembersByGroupName(project.unixGroup)
         println(getSortedListInfo("Username in LDAP group:", usernamesInLdapGroup ?: []))
 
         List<String> unconnectedUsernames = usernamesInLdapGroup - usernamesInProject

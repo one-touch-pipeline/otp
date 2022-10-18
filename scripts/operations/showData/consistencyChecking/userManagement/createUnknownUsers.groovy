@@ -54,8 +54,7 @@ println(getListInfo("Unique usernames of OTP users:", allUsernames))
 List<String> usernamesInUnixGroups = []
 
 Project.list().each { Project project ->
-    String groupDistinguishedName = ldapService.getDistinguishedNameOfGroupByGroupName(project.unixGroup)
-    usernamesInUnixGroups << ldapService.getGroupMembersByDistinguishedName(groupDistinguishedName)
+    usernamesInUnixGroups << ldapService.getGroupMembersByGroupName(project.unixGroup)
 }
 
 usernamesInUnixGroups = usernamesInUnixGroups.flatten().unique().sort()

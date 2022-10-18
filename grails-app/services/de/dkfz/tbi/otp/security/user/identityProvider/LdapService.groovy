@@ -133,8 +133,7 @@ class LdapService implements InitializingBean, IdentityProvider {
                 new LdapUserDetailsAttributesMapper(ldapService: this))
     }
 
-    @Override
-    String getDistinguishedNameOfGroupByGroupName(String groupName) {
+    private String getDistinguishedNameByGroupName(String groupName) {
         if (groupName == null) {
             return ""
         }
@@ -144,8 +143,7 @@ class LdapService implements InitializingBean, IdentityProvider {
                 new DistinguishedNameAttributesMapper())[0]
     }
 
-    @Override
-    List<String> getGroupMembersByDistinguishedName(String distinguishedName) {
+    private List<String> getGroupMembersByDistinguishedName(String distinguishedName) {
         if (distinguishedName == null) {
             return []
         }
@@ -154,6 +152,12 @@ class LdapService implements InitializingBean, IdentityProvider {
                 query().where(LdapKey.OBJECT_CATEGORY).is(LdapKey.USER)
                         .and(LdapKey.MEMBER_OF).is(distinguishedName),
                 new UsernameAttributesMapper(ldapService: this))
+    }
+
+    @Override
+    List<String> getGroupMembersByGroupName(String groupName) {
+        String distinguishedName = getDistinguishedNameByGroupName(groupName)
+        return getGroupMembersByDistinguishedName(distinguishedName)
     }
 
     @Override

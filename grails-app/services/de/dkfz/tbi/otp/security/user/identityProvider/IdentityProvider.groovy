@@ -45,9 +45,7 @@ interface IdentityProvider {
      */
     List<IdpUserDetails> getListOfIdpUserDetailsBySearchString(String searchString)
 
-    String getDistinguishedNameOfGroupByGroupName(String groupName)
-
-    List<String> getGroupMembersByDistinguishedName(String distinguishedName)
+    List<String> getGroupMembersByGroupName(String groupName)
 
     List<String> getGroupsOfUser(User user)
 

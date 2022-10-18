@@ -86,8 +86,7 @@ class ProjectUserControllerSpec extends Specification implements ControllerUnitT
             getSelectedProject() >> project
         }
         controller.ldapService = Mock(LdapService) {
-            getDistinguishedNameOfGroupByGroupName(_) >> project.unixGroup
-            getGroupMembersByDistinguishedName(_) >> [enabledUser.username, disabledUser.username, unconnectedUser.username, unknownUsername, ignoredUsername]
+            getGroupMembersByGroupName(_) >> [enabledUser.username, disabledUser.username, unconnectedUser.username, unknownUsername, ignoredUsername]
             getIdpUserDetailsByUsername(_) >> new IdpUserDetails()
         }
         controller.springSecurityService = Mock(SpringSecurityService) {

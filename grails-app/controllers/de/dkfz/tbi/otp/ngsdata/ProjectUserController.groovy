@@ -74,8 +74,7 @@ class ProjectUserController implements CheckAndCall {
         List<UserProjectRole> userProjectRolesOfProject = UserProjectRole.findAllByProject(project)
         List<User> projectUsers = userProjectRolesOfProject*.user
 
-        String groupDistinguishedName = ldapService.getDistinguishedNameOfGroupByGroupName(project.unixGroup)
-        List<String> ldapGroupMemberUsernames = ldapService.getGroupMembersByDistinguishedName(groupDistinguishedName)
+        List<String> ldapGroupMemberUsernames = ldapService.getGroupMembersByGroupName(project.unixGroup)
 
         List<User> ldapGroupMemberUsers = ldapGroupMemberUsernames ? User.findAllByUsernameInList(ldapGroupMemberUsernames) : []
         projectUsers.addAll(ldapGroupMemberUsers)

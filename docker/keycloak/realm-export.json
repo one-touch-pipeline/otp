@@ -1370,6 +1370,26 @@
             "read.only" : [ "true" ],
             "user.model.attribute" : [ "username" ]
           }
+        }, {
+          "id" : "df6e094e-d50f-43a7-a97d-32d03b6b5f48",
+          "name" : "group",
+          "providerId" : "group-ldap-mapper",
+          "subComponents" : { },
+          "config" : {
+            "membership.attribute.type" : [ "DN" ],
+            "group.name.ldap.attribute" : [ "cn" ],
+            "preserve.group.inheritance" : [ "true" ],
+            "membership.user.ldap.attribute" : [ "uid" ],
+            "groups.dn" : [ "ou=groups,dc=otpldap,dc=dev" ],
+            "mode" : [ "READ_ONLY" ],
+            "user.roles.retrieve.strategy" : [ "LOAD_GROUPS_BY_MEMBER_ATTRIBUTE" ],
+            "ignore.missing.groups" : [ "false" ],
+            "membership.ldap.attribute" : [ "member" ],
+            "group.object.classes" : [ "groupOfNames" ],
+            "memberof.ldap.attribute" : [ "memberOf" ],
+            "drop.non.existing.groups.during.sync" : [ "false" ],
+            "groups.path" : [ "/" ]
+          }
         } ]
       },
       "config" : {

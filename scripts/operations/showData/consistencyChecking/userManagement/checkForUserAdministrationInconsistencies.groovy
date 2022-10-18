@@ -73,8 +73,7 @@ Project.findAll().each { Project project ->
     List<User> projectUsers = UserProjectRole.findAllByProject(project)*.user
     List<String> nonDatabaseUsers = []
 
-    String groupDistinguishedName = ldapService.getDistinguishedNameOfGroupByGroupName(project.unixGroup)
-    List<String> ldapGroupMembers = ldapService.getGroupMembersByDistinguishedName(groupDistinguishedName)
+    List<String> ldapGroupMembers = ldapService.getGroupMembersByGroupName(project.unixGroup)
 
     ldapGroupMembers.each { String username ->
         User user = CollectionUtils.atMostOneElement(User.findAllByUsername(username))
