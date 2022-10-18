@@ -96,7 +96,7 @@ class DocumentController {
         redirect(action: "manage")
     }
 
-    @Secured('permitAll')
+    @Secured('isFullyAuthenticated()')
     def download(DownloadCommand cmd) {
         if (cmd.hasErrors()) {
             response.sendError(404)

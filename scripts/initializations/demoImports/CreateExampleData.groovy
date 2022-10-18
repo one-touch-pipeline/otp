@@ -20,6 +20,7 @@
  * SOFTWARE.
  */
 
+import de.dkfz.tbi.otp.administration.*
 import de.dkfz.tbi.otp.Comment
 import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.dataprocessing.*
@@ -173,6 +174,8 @@ class ExampleData {
 
     CellRangerWorkflowService cellRangerWorkflowService
 
+    DocumentService documentService
+
     static final List<String> chromosomeXY = [
             "X",
             "Y",
@@ -241,6 +244,7 @@ class ExampleData {
             findOrCreateMergingCriteria(it)
         }
         findOrCreateProcessingThresholds()
+        createDocumentTestData()
     }
 
     void createObjects() {
@@ -487,6 +491,13 @@ class ExampleData {
                 sampleType: sampleType,
                 category  : category,
         ]).save(flush: true)
+    }
+
+    void createDocumentTestData() {
+        Set<DocumentType> documentTypes = documentService.listDocumentTypes()
+        documentService.updateDocument(documentTypes[0], "PROJECT_FORM".bytes, Document.FormatType.TXT)
+        documentService.updateDocument(documentTypes[1], "METADATA_TEMPLATE".bytes, Document.FormatType.TXT)
+        documentService.updateDocument(documentTypes[2], "PROCESSING_INFORMATION".bytes, Document.FormatType.TXT)
     }
 
     void findOrCreateProcessingThresholds() {
@@ -1209,6 +1220,7 @@ Project.withTransaction {
             cellRangerConfigurationService: ctx.cellRangerConfigurationService,
             singleCellBamFileService      : ctx.singleCellBamFileService,
             cellRangerWorkflowService     : ctx.cellRangerWorkflowService,
+            documentService               : ctx.documentService,
     ])
 
     exampleData.init()
