@@ -108,7 +108,7 @@
         </discriminator>
         <sift>
             <appender name="JOB-%X{PROCESS_AND_JOB_ID}" class="ch.qos.logback.core.FileAppender">
-                <file>${jobLogDir}/%X{PROCESS_AND_JOB_ID}.log</file>
+                <file>${jobLogDir}/${PROCESS_AND_JOB_ID}.log</file>
                 <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
                     <layout class="de.dkfz.tbi.otp.utils.logging.ContentOnlyHtmlLayout">
                         <pattern>%date%level%logger{0}%msg</pattern>
