@@ -59,6 +59,9 @@ class SampleValidatorSpec extends Specification implements DataTest {
     static final Pattern PATTERN = Pattern.compile(/^P-([^ ]+)_I-([^ ]+)_S-([^ ]+)$/)
     static final String SAMPLE_Z = "P-X_I-Y_S-z"
     static final String SAMPLE_N = "P-B_I-M_S-N"
+    static final String PROJECT_Z = "Z"
+    static final String PROJECT_B = "B"
+    static final String PROJECT_X = "X"
 
     static final String PARSED_SAMPLETYPE_PID = "The following Samples will be created:\n${SampleIdentifierService.BulkSampleCreationHeader.headers}\n"
 
@@ -100,7 +103,7 @@ class SampleValidatorSpec extends Specification implements DataTest {
     void 'validate, when identifier is not in DB but parseable and project is not in DB, adds error'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${SAMPLE_NAME}\t${PROJECT}\n${SAMPLE_Z}")
+                "${SAMPLE_NAME}\t${PROJECT}\n${SAMPLE_Z}\t${PROJECT_X}")
 
         when:
         validator.validate(context)
@@ -114,13 +117,15 @@ class SampleValidatorSpec extends Specification implements DataTest {
     void 'validate, when identifier is not in DB but parseable and project is not in DB but individual is, adds errors'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${SAMPLE_NAME}\t${PROJECT}\n${SAMPLE_Z}")
+                "${SAMPLE_NAME}\t${PROJECT}\n${SAMPLE_Z}\t${PROJECT_Z}\t${PROJECT_X}")
         Individual individual = DomainFactory.createIndividual(pid: 'Y')
         Collection<Problem> expectedProblems = [
                 new Problem([context.spreadsheet.dataRows[0].cells[0], context.spreadsheet.dataRows[0].cells[1]] as Set, LogLevel.ERROR,
                         "Sample name '${SAMPLE_Z}' is not registered in OTP. It looks like it belongs to project 'X', but no project with that name is registered in OTP.", "At least one sample name is not registered in OTP. It looks like it belongs to a project not registered in OTP."),
                 new Problem([context.spreadsheet.dataRows[0].cells[0], context.spreadsheet.dataRows[0].cells[1]] as Set, LogLevel.ERROR,
                         "Sample name '${SAMPLE_Z}' is not registered in OTP. It looks like it belongs to project 'X' and individual 'Y', but individual 'Y' is already registered in OTP with project '${individual.project.name}'.", "At least one sample name is not registered in OTP. It looks like it belongs to a specific project and individual, but this individual is already registered in OTP with another project."),
+                new Problem([context.spreadsheet.dataRows[0].cells[0], context.spreadsheet.dataRows[0].cells[1]] as Set, LogLevel.ERROR,
+                        "Project '${PROJECT_Z}' does not match the Project in the Sample name: 'X'", "At least for one sample name the the parsed project does not match the project name column."),
         ]
 
         when:
@@ -133,7 +138,7 @@ class SampleValidatorSpec extends Specification implements DataTest {
     void 'validate, when identifier is not in DB but parseable and individual belongs to different project, adds error'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${SAMPLE_NAME}\t${PROJECT}\n${SAMPLE_Z}")
+                "${SAMPLE_NAME}\t${PROJECT}\n${SAMPLE_Z}\t${PROJECT_X}")
         DomainFactory.createProject(name: 'X')
         Individual individual = DomainFactory.createIndividual(pid: 'Y')
 
@@ -149,7 +154,7 @@ class SampleValidatorSpec extends Specification implements DataTest {
     void 'validate, when identifier is not in DB but parseable and project is in DB, succeeds'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${SAMPLE_NAME}\t${PROJECT}\n${SAMPLE_Z}")
+                "${SAMPLE_NAME}\t${PROJECT}\n${SAMPLE_Z}\t${PROJECT_X}")
         DomainFactory.createProject(name: 'X')
 
         when:
@@ -164,7 +169,7 @@ class SampleValidatorSpec extends Specification implements DataTest {
     void 'validate, when identifier is in DB and parseable and project is inconsistent, adds warning'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${SAMPLE_NAME}\t${PROJECT}\n${SAMPLE_Z}")
+                "${SAMPLE_NAME}\t${PROJECT}\n${SAMPLE_Z}\t${PROJECT_X}")
         createSampleIdentifier(context.spreadsheet.dataRows.get(0).cells.get(0).text, 'A', 'Y', 'z')
 
         when:
@@ -179,7 +184,7 @@ class SampleValidatorSpec extends Specification implements DataTest {
     void 'validate, when identifier is in DB and parseable and individual is inconsistent, adds warning'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${SAMPLE_NAME}\t${PROJECT}\n${SAMPLE_Z}")
+                "${SAMPLE_NAME}\t${PROJECT}\n${SAMPLE_Z}\t${PROJECT_X}")
         createSampleIdentifier(context.spreadsheet.dataRows.get(0).cells.get(0).text, 'X', 'B', 'z')
 
         when:
@@ -194,7 +199,7 @@ class SampleValidatorSpec extends Specification implements DataTest {
     void 'validate, when identifier is in DB and parseable and sample type is inconsistent, adds warning'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${SAMPLE_NAME}\t${PROJECT}\n${SAMPLE_Z}")
+                "${SAMPLE_NAME}\t${PROJECT}\n${SAMPLE_Z}\t${PROJECT_X}")
         createSampleIdentifier(context.spreadsheet.dataRows.get(0).cells.get(0).text, 'X', 'Y', 'c')
 
         when:
@@ -209,14 +214,14 @@ class SampleValidatorSpec extends Specification implements DataTest {
     void 'validate, when identifiers belong to different projects, adds warning'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${SAMPLE_NAME}\n" +
+                "${SAMPLE_NAME}\t${PROJECT}\n" +
                         "SampleA\n" +
                         "SampleB\n" +
                         "SampleC1\n" +
                         "SampleC2\n" +
                         "SampleC3\n" +
-                        "${SAMPLE_N}\n" +
-                        "P-C_I-M_S-N\n")
+                        "${SAMPLE_N}\t${PROJECT_B}\n" +
+                        "P-C_I-M_S-N\tC\n")
         createSampleIdentifier('SampleB', 'B', 'W', 'x')
         SampleIdentifier c1 = createSampleIdentifier('SampleC1', 'C', 'Y', 'z')
         DomainFactory.createSampleIdentifier(name: 'SampleC2', sample: c1.sample)
@@ -254,10 +259,10 @@ Project 'C':
     void 'validate, when all known identifiers belong to the same project, adds no warning about different projects'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${SAMPLE_NAME}\n" +
+                "${SAMPLE_NAME}\t${PROJECT}\n" +
                         "SampleA\n" +
                         "SampleB\n" +
-                        "${SAMPLE_N}\n")
+                        "${SAMPLE_N}\t${PROJECT_B}\n")
         createSampleIdentifier('SampleB', 'B', 'W', 'x')
         Collection<Problem> expectedProblems = [
                 new Problem(context.spreadsheet.dataRows[0].cells as Set, LogLevel.ERROR,
@@ -279,13 +284,11 @@ Project 'C':
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${SAMPLE_NAME}\n" +
-                        "SampleB\n" +
-                        "${SAMPLE_N}\n")
+                        "SampleB\n")
         createSampleIdentifier('SampleB', 'B', 'W', 'x')
         Collection<Problem> expectedProblems = [
-                new Problem(context.spreadsheet.dataRows[0].cells + context.spreadsheet.dataRows[1].cells as Set, LogLevel.INFO,
-                        "All sample names belong to project 'B'."),
-                new Problem(Collections.emptySet(), LogLevel.INFO, "${PARSED_SAMPLETYPE_PID}B\tM\tN\tP-B_I-M_S-N"),
+                new Problem(context.spreadsheet.dataRows[0].cells as Set, LogLevel.INFO,
+                        "All sample names belong to project 'B'.")
         ]
 
         when:
@@ -300,7 +303,7 @@ Project 'C':
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${SAMPLE_NAME}\t${PROJECT}\n" +
                         "SampleB\n" +
-                        "${SAMPLE_N}\n")
+                        "${SAMPLE_N}\t${PROJECT_B}\n")
         createSampleIdentifier('SampleB', 'B', 'W', 'x')
 
         when:
