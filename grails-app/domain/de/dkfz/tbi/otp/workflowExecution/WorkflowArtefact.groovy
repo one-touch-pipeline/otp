@@ -35,11 +35,14 @@ class WorkflowArtefact implements Withdrawable, Entity {
      * @see {@link WorkflowRun.State} for descriptions
      */
     enum State {
+        // Covers the states before workflow is finished (not started yet, or is still running)
         PLANNED_OR_RUNNING,
+        // Workflow has finished successfully
         SUCCESS,
-        OMITTED,
+        // Workflow has finished with errors
         FAILED,
-        LEGACY,
+        // Workflow cannot be started due to unfulfilled preconditions (e.g. too low coverage). No artefact will be created
+        OMITTED,
     }
 
     WorkflowRun producedBy
@@ -47,7 +50,7 @@ class WorkflowArtefact implements Withdrawable, Entity {
     // 'role' of the artefact for the workflow it was produced by, e.g. "disease" and "control"
     String outputRole
 
-    State state = State.LEGACY
+    State state = State.PLANNED_OR_RUNNING
 
     ArtefactType artefactType
 
