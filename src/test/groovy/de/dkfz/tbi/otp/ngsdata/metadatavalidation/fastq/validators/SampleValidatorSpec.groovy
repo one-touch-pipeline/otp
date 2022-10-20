@@ -117,7 +117,7 @@ class SampleValidatorSpec extends Specification implements DataTest {
     void 'validate, when identifier is not in DB but parseable and project is not in DB but individual is, adds errors'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${SAMPLE_NAME}\t${PROJECT}\n${SAMPLE_Z}\t${PROJECT_Z}\t${PROJECT_X}")
+                "${SAMPLE_NAME}\t${PROJECT}\n${SAMPLE_Z}\t${PROJECT_Z}")
         Individual individual = DomainFactory.createIndividual(pid: 'Y')
         Collection<Problem> expectedProblems = [
                 new Problem([context.spreadsheet.dataRows[0].cells[0], context.spreadsheet.dataRows[0].cells[1]] as Set, LogLevel.ERROR,
