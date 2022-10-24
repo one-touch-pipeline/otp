@@ -125,7 +125,7 @@ class SampleValidatorSpec extends Specification implements DataTest {
                 new Problem([context.spreadsheet.dataRows[0].cells[0], context.spreadsheet.dataRows[0].cells[1]] as Set, LogLevel.ERROR,
                         "Sample name '${SAMPLE_Z}' is not registered in OTP. It looks like it belongs to project 'X' and individual 'Y', but individual 'Y' is already registered in OTP with project '${individual.project.name}'.", "At least one sample name is not registered in OTP. It looks like it belongs to a specific project and individual, but this individual is already registered in OTP with another project."),
                 new Problem([context.spreadsheet.dataRows[0].cells[0], context.spreadsheet.dataRows[0].cells[1]] as Set, LogLevel.ERROR,
-                        "Project '${PROJECT_Z}' does not match the Project in the Sample name: 'X'", "At least for one sample name the the parsed project does not match the project name column."),
+                        "The parsed project '${PROJECT_Z}' of the sample name does not match the project in the metadata column 'X'", "At least for one sample name the parsed project does not match the project in the metadata column."),
         ]
 
         when:

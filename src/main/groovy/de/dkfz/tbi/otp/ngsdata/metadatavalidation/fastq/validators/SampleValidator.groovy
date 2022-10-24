@@ -96,7 +96,7 @@ class SampleValidator extends ValueTuplesValidator<MetadataValidationContext> im
                     error = true
                 }
                 if (projectName != parsedIdentifier.projectName) {
-                    context.addProblem(it.cells, LogLevel.ERROR, "Project '${projectName}' does not match the Project in the Sample name: '${parsedIdentifier.projectName}'", "At least for one sample name the the parsed project does not match the project name column.")
+                    context.addProblem(it.cells, LogLevel.ERROR, "The parsed project '${parsedIdentifier.projectName}' of the sample name does not match the project in the metadata column '${projectName}'", "At least for one sample name the parsed project does not match the project in the metadata column.")
                 }
                 if (!error) {
                     parsedSampleIdentifiers.add("${parsedIdentifier.projectName}\t${parsedIdentifier.pid}\t${parsedIdentifier.sampleTypeDbName}\t${parsedIdentifier.fullSampleName}")
