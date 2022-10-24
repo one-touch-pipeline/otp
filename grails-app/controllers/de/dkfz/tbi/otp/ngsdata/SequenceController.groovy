@@ -26,6 +26,9 @@ import grails.plugin.springsecurity.annotation.Secured
 import groovy.json.JsonSlurper
 import groovy.transform.TupleConstructor
 
+import de.dkfz.tbi.otp.ngsdata.taxonomy.Species
+import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesCommonName
+import de.dkfz.tbi.otp.ngsdata.taxonomy.Strain
 import de.dkfz.tbi.otp.ngsqc.FastqcResultsService
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.security.SecurityService
@@ -83,6 +86,15 @@ class SequenceController {
                      value: 'name', key: 'id'],
                     [name: 'runSearch', msgcode: 'sequence.search.run',
                      type: 'TEXT'],
+                    [name: 'speciesCommonNameSearch', msgcode: 'sequence.search.speciesCommonName',
+                     type : 'LIST', from: SpeciesCommonName.list().sort { it.name },
+                     value: 'name', key: 'name'],
+                    [name: 'scientificNameSearch', msgcode: 'sequence.search.scientificName',
+                     type : 'LIST', from: Species.list().sort { it.scientificName },
+                     value: 'scientificName', key: 'scientificName'],
+                    [name: 'strainSearch', msgcode: 'sequence.search.strain',
+                     type : 'LIST', from: Strain.list().sort { it.name },
+                     value: 'name', key: 'name'],
             ]
         ]
     }
@@ -157,6 +169,10 @@ class SequenceController {
                     row.fileArchived,
                     TimeFormats.DATE.getFormattedDate(row.dateCreated),
                     row.fileWithdrawn,
+                    row.speciesCommonName,
+                    row.scientificName,
+                    row.strain,
+                    row.mixedInSpecies,
             ].collect { it ?: "" }.join(",")
         }.join("\n")
         String contentHeader = (SequenceColumn.values() - SequenceColumn.FASTQC)
@@ -191,6 +207,10 @@ enum SequenceColumn {
     FILE_ARCHIVED("sequence.list.headers.fileArchived", "fileArchived"),
     DATE("sequence.list.headers.date", "dateCreated"),
     WITHDRAWN("sequence.list.headers.withdrawn", "withdrawn"),
+    SPECIES_COMMON_NAME("sequence.list.headers.speciesCommonName", "speciesCommonName"),
+    SCIENTIFIC_NAME("sequence.list.headers.scientificName", "scientificName"),
+    STRAIN("sequence.list.headers.strain", "strain"),
+    MIXED_IN_SPECIES("sequence.list.headers.mixedInSpecies", "strain"),
 
     final String message
     final String columnName
@@ -218,6 +238,9 @@ class SequenceFiltering {
     List<String> run = []
     List<String> libraryPreparationKit = []
     List<String> antibodyTarget = []
+    List<String> speciesCommonName = []
+    List<String> scientificName = []
+    List<String> strain = []
 
     boolean enabled = false
 
@@ -298,6 +321,24 @@ class SequenceFiltering {
                 case "antibodyTargetSelection":
                     if (it.value) {
                         filtering.antibodyTarget << it.value
+                        filtering.enabled = true
+                    }
+                    break
+                case "speciesCommonNameSearch":
+                    if (it.value) {
+                        filtering.speciesCommonName << it.value
+                        filtering.enabled = true
+                    }
+                    break
+                case "scientificNameSearch":
+                    if (it.value) {
+                        filtering.scientificName << it.value
+                        filtering.enabled = true
+                    }
+                    break
+                case "strainSearch":
+                    if (it.value) {
+                        filtering.strain << it.value
                         filtering.enabled = true
                     }
                     break

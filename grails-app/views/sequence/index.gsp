@@ -28,6 +28,7 @@
     <title><g:message code="sequence.title"/></title>
     <asset:javascript src="common/DataTableFilter.js"/>
     <asset:javascript src="pages/sequence/index/datatable.js"/>
+    <asset:javascript src="pages/sequence/index/index.js"/>
 </head>
 
 <body>

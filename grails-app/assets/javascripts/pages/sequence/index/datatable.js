@@ -32,13 +32,13 @@ $.otp.sequence = {
 
     $('#sequenceTable').dataTable({
       dom: '<i> B rt<"clear">S',
-      buttons: $.otp.getDownloadButtonServerSide(() => $.otp.createLink({
+      buttons: [$.otp.getDownloadButtonServerSide(() => $.otp.createLink({
         controller: 'sequence',
         action: 'exportAll',
         parameters: {
           filtering: JSON.stringify(searchCriteria())
         }
-      })),
+      })), $.otp.showOrHideColumn(() => $.otp.showOrHideColumn())],
       bFilter: false,
       bProcessing: true,
       bServerSide: true,
@@ -54,6 +54,10 @@ $.otp.sequence = {
       iDisplayLength: 100,
       bDeferRender: true,
       scroller: true,
+      columnDefs: [{
+        targets: -1,
+        visible: false
+      }],
       fnServerData(sSource, aoData, fnCallback) {
         aoData.push({
           name: 'filtering',
@@ -139,7 +143,11 @@ $.otp.sequence = {
                   `<span title="${row.problemDescription}">${row.problem}</span>` : '',
                 row.fileExists,
                 row.fileArchived,
-                row.dateCreated
+                row.dateCreated,
+                row.speciesCommonName,
+                row.scientificName,
+                row.strain,
+                row.mixedInSpecies
               ];
 
               if (row.withdrawn) {

@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import grails.gorm.hibernate.annotation.ManagedEntity
 
+import de.dkfz.tbi.otp.ngsdata.taxonomy.*
 import de.dkfz.tbi.otp.project.Project
 
 /**
@@ -42,6 +43,10 @@ import de.dkfz.tbi.otp.project.Project
  * <li>SampleType</li>
  * <li>Individual</li>
  * <li>Project</li>
+ * <li>SpeciesCommonName</li>
+ * <li>Species</li>
+ * <li>Strain</li>
+ * <li>SpeciesWithStrain</li>
  * </ul>
  */
 @ManagedEntity
@@ -108,6 +113,15 @@ class Sequence implements Serializable {
     String mockFullName
     Individual.Type type
 
+    /** fields from {@link SpeciesCommonName} */
+    String speciesCommonName
+
+    /** fields from {@link Species} */
+    String scientificName
+
+    /** fields from {@link Strain} */
+    String strain
+
     /** fields from {@link Project} */
     String projectName
     String projectDirName
@@ -132,6 +146,9 @@ class Sequence implements Serializable {
 
     // derived property for calculating the creation date without time
     Date dayCreated
+
+    /** contains accumulated and compound information of {@link Sample#mixedInSpecies} */
+    String mixedInSpecies
 
     static mapping = {
         table 'sequences'
@@ -180,6 +197,10 @@ class Sequence implements Serializable {
         nBasePairs(nullable: true)
         problem nullable: true
         libraryPreparationKit nullable: true
+        speciesCommonName nullable: true
+        scientificName nullable: true
+        strain nullable: true
+        mixedInSpecies nullable: true
     }
 
     String getLibraryLayoutDirName() {

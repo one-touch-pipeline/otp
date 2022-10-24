@@ -165,6 +165,15 @@ class SeqTrackService {
                     }
                 }
             }
+            if (filtering.speciesCommonName) {
+                'in'('speciesCommonName', filtering.speciesCommonName)
+            }
+            if (filtering.scientificName) {
+                'in'('scientificName', filtering.scientificName)
+            }
+            if (filtering.strain) {
+                'in'('strain', filtering.strain)
+            }
         }
     }
 

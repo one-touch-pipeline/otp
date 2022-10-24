@@ -56,8 +56,28 @@ p.archived as file_archived,
 sc.name AS seq_center_name,
 sc.dir_name AS seq_center_dir_name,
 COALESCE((select bool_and(file_exists) from data_file df where df.seq_track_id = st.id), false) as file_exists,
-COALESCE((select bool_and(file_withdrawn) from data_file df where df.seq_track_id = st.id), false) as file_withdrawn
-
+COALESCE((select bool_and(file_withdrawn) from data_file df where df.seq_track_id = st.id), false) as file_withdrawn,
+scn.name AS species_common_name,
+spe.scientific_name AS scientific_name,
+strn.name AS strain,
+(
+    SELECT STRING_AGG(
+                   (
+                       SELECT CONCAT(
+                                      (
+                                          SELECT name
+                                          FROM species_common_name
+                                          WHERE id = (SELECT species_common_name_id FROM species WHERE species.id = sws.species_id)
+                                      ),
+                                      ' (', (SELECT scientific_name FROM species WHERE species.id = sws.species_id), ')',
+                                      ' [', (SELECT name FROM strain WHERE strain.id = sws.strain_id), ']')
+                       FROM species_with_strain sws
+                       WHERE ssws.species_with_strain_id = sws.id
+                   ), ' | ')
+    FROM sample_species_with_strain ssws
+    WHERE ssws.sample_mixed_in_species_id = s.id
+    GROUP BY ssws.sample_mixed_in_species_id
+) AS mixed_in_species
 FROM seq_track AS st
 INNER JOIN run AS r
 ON r.id = st.run_id
@@ -87,6 +107,14 @@ LEFT OUTER JOIN library_preparation_kit lpk
 ON st.library_preparation_kit_id = lpk.id
 LEFT OUTER JOIN antibody_target at
 ON st.antibody_target_id = at.id
+LEFT OUTER JOIN species_with_strain sws
+ON i.species_id = sws.id
+LEFT OUTER JOIN species spe
+ON sws.species_id = spe.id
+LEFT OUTER JOIN species_common_name scn
+ON scn.id = spe.species_common_name_id
+LEFT OUTER JOIN strain strn
+ON strn.id = sws.strain_id
 ;
 
 COMMIT;
