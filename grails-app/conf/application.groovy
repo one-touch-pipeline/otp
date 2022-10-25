@@ -20,6 +20,12 @@
  * SOFTWARE.
  */
 
+import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.config.OtpProperty
+
+Properties otpProperties = ConfigService.parsePropertiesFile()
+Boolean consoleEnabled = Boolean.parseBoolean(otpProperties.getProperty(OtpProperty.GRAILS_CONSOLE.key))
+
 spring {
     jmx {
         uniqueNames = true
@@ -112,11 +118,9 @@ grails.plugin.springsecurity.userLookup.accountExpiredPropertyName = null
 grails.plugin.springsecurity.userLookup.accountLockedPropertyName = null
 grails.plugin.springsecurity.userLookup.passwordExpiredPropertyName = null
 
-grails.plugin.springsecurity.controllerAnnotations.staticRules = [
+ArrayList<LinkedHashMap<String, Serializable>> staticRules = [
         // restricted access to special pages
         [pattern: "/adminSeed/**"                                        , access: ["denyAll"]],
-        [pattern: "/console/**"                                          , access: ["hasRole('ROLE_ADMIN') and @dicomAuditConsoleHandler.log()"]],
-        [pattern: "/static/console*/**"                                  , access: ["hasRole('ROLE_ADMIN') and @dicomAuditConsoleHandler.log()"]],
         [pattern: "/plugins/**"                                          , access: ["denyAll"]],
         [pattern: "/login/impersonate"                                   , access: ["hasRole('ROLE_SWITCH_USER')"]],
 
@@ -129,6 +133,16 @@ grails.plugin.springsecurity.controllerAnnotations.staticRules = [
         // Hence, default behavior is to denyAll and explicitly allow access in the services
         [pattern: "/**"                                                  , access:  ["denyAll"]],
 ]
+
+// avoid black screen if console is disabled
+if(consoleEnabled) {
+    staticRules = staticRules + [
+            [pattern: "/console/**"                                          , access: ["hasRole('ROLE_ADMIN') and @dicomAuditConsoleHandler.log()"]],
+            [pattern: "/static/console*/**"                                  , access: ["hasRole('ROLE_ADMIN') and @dicomAuditConsoleHandler.log()"]],
+    ]
+}
+
+grails.plugin.springsecurity.controllerAnnotations.staticRules = staticRules
 
 // hierarchy of roles
 grails.plugin.springsecurity.roleHierarchy = '''
@@ -201,7 +215,7 @@ environments {
 grails.plugin.springsecurity.oauthProvider.active=false
 
 //configure groovy web console
-grails.plugin.console.enabled = true
+grails.plugin.console.enabled = consoleEnabled
 environments {
     production {
         grails.plugin.console.baseUrl="/otp/console"

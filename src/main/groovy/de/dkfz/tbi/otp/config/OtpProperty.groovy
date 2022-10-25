@@ -39,6 +39,8 @@ enum OtpProperty {
     KEYCLOAK_CLIENT_ID('otp.security.keycloak.clientId', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.DEVELOPMENT)),
     KEYCLOAK_CLIENT_SECRET('otp.security.keycloak.clientSecret', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.DEVELOPMENT)),
 
+    GRAILS_CONSOLE('otp.security.console.enabled', TypeValidators.BOOLEAN, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT), 'false'),
+
     SSH_AUTH_METHOD('otp.ssh.authMethod', TypeValidators.SSH_AUTH_METHOD, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT, UsedIn.WORKFLOW_TEST),
             SshAuthMethod.SSH_AGENT.name()),
     SSH_USER('otp.ssh.user', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT)),
