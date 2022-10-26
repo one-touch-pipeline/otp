@@ -25,7 +25,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.tracking.OtrsTicketService
 import de.dkfz.tbi.otp.utils.MailHelperService
 
@@ -45,6 +44,9 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
 
     @Autowired
     OtrsTicketService otrsTicketService
+
+    @Autowired
+    UnalignableSeqTrackEmailCreator unalignableSeqTrackEmailCreator
 
     @Deprecated
     Pipeline getPipeline(SeqTrack seqTrack) {
@@ -127,7 +129,7 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
             assert workPackage.pipeline.id == pipeline.id
             if (!workPackage.satisfiesCriteria(seqTrack)) {
                 logNotAligning(seqTrack, "it does not satisfy the criteria of the existing MergingWorkPackage ${workPackage}.")
-                Map<String, String> content = buildUnalignableSeqTrackMailContent(workPackage, seqTrack)
+                Map<String, String> content = unalignableSeqTrackEmailCreator.getMailContent(workPackage, seqTrack)
                 mailHelperService.sendEmailToTicketSystem(content["subject"], content["body"])
                 return Collections.emptyList()
             }
@@ -149,66 +151,6 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
         workPackage.save(flush: true)
 
         return [workPackage]
-    }
-
-    @Deprecated
-    Map<String, String> buildUnalignableSeqTrackMailContent(MergingWorkPackage workPackage, SeqTrack seqTrack) {
-        return [
-                "subject"  : buildUnalignableSeqTrackMailSubject(seqTrack),
-                "body"     : buildUnalignableSeqTrackMailBody(workPackage, seqTrack),
-        ]
-    }
-
-    @Deprecated
-    String buildUnalignableSeqTrackMailSubject(SeqTrack seqTrack) {
-        OtrsTicket ticket = atMostOneElement(otrsTicketService.findAllOtrsTickets([seqTrack]))
-        return [
-            ticket ? "[${ticket.prefixedTicketNumber}]" : null,
-            "Will not be aligned:",
-            seqTrack.ilseId ? "[ILSe ${seqTrack.ilseId}]" : null,
-            seqTrack.run.name,
-            seqTrack.project,
-            seqTrack.sample,
-        ].findAll().join(" ")
-    }
-
-    @Deprecated
-    String buildUnalignableSeqTrackMailBody(MergingWorkPackage workPackage, SeqTrack seqTrack) {
-        List<String> propertyOverview = MergingWorkPackage.getMergingProperties(seqTrack).collect { key, value ->
-            return getComparedPropertiesForMail(workPackage, key, value)
-        }
-
-        return """\
-            |Processing was stopped: samples which must be merged according to PID/Sample Type combination could not \
-be merged because of incompatible sequencing platforms or used chemistry.
-            |
-            |OTP considered the following properties when checking for merging:
-            |${propertyOverview.join("\n\n")}
-            |
-            |Please be aware that OTP can currently only handle one bam file, therefore your current samples will not be aligned.
-            |Please contact ${mailHelperService.ticketSystemEmailAddress} if you wish the samples \
-nevertheless to be merged or if you want to withdraw the old samples (would result in deletion of the old bam files), to align \
-the current ones.""".stripMargin()
-    }
-
-    @Deprecated
-    String getComparedPropertiesForMail(MergingWorkPackage workPackage, String key, Object value) {
-        List<String> props = ["- ${key}: ${transformObjectForMail(value ?: "None")}"]
-        if (value != workPackage[key]) {
-            props << "    Currently active BAM file uses: ${transformObjectForMail(workPackage[key]) ?: "None"}"
-        }
-        return props.join("\n")
-    }
-
-    @Deprecated
-    String transformObjectForMail(Object object) {
-        switch (object.class) {
-            case Sample:
-                Sample sample = (Sample) object
-                return "${sample} from project '${sample.project.name}'"
-            default:
-                return object
-        }
     }
 
     @Deprecated

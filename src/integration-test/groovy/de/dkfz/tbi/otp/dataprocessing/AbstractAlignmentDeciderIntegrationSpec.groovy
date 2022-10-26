@@ -21,8 +21,8 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
-import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 import spock.lang.Specification
@@ -32,9 +32,7 @@ import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.tracking.OtrsTicketService
-import de.dkfz.tbi.otp.utils.CollectionUtils
-import de.dkfz.tbi.otp.utils.Entity
-import de.dkfz.tbi.otp.utils.MailHelperService
+import de.dkfz.tbi.otp.utils.*
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
@@ -52,6 +50,9 @@ class AbstractAlignmentDeciderIntegrationSpec extends Specification {
     void setupData() {
         decider = newDecider()
         decider.otrsTicketService = new OtrsTicketService()
+        decider.unalignableSeqTrackEmailCreator = new UnalignableSeqTrackEmailCreator()
+        decider.unalignableSeqTrackEmailCreator.mailHelperService = Mock(MailHelperService)
+        decider.unalignableSeqTrackEmailCreator.otrsTicketService = new OtrsTicketService()
     }
 
     void testDecideAndPrepareForAlignment_whenEverythingIsOkay_shouldReturnWorkPackages() {
