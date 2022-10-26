@@ -34,6 +34,8 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowService
 
 class PanCancerDeciderServiceSpec extends Specification implements ServiceUnitTest<PanCancerDeciderService>, DataTest, WorkflowSystemDomainFactory, IsRoddy {
 
+    PanCancerDeciderService service = new PanCancerDeciderService()
+
     @Override
     Class[] getDomainClassesToMock() {
         return [

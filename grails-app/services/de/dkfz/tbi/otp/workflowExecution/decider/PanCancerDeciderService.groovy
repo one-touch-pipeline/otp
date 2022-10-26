@@ -24,14 +24,16 @@ package de.dkfz.tbi.otp.workflowExecution.decider
 import grails.gorm.transactions.Transactional
 import grails.util.Pair
 import groovy.transform.Canonical
+import org.springframework.beans.factory.annotation.Autowired
 
-import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.utils.MailHelperService
+import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 import de.dkfz.tbi.otp.workflow.panCancer.PanCancerWorkflow
 import de.dkfz.tbi.otp.workflowExecution.*
 
@@ -41,7 +43,11 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 class PanCancerDeciderService extends AbstractWorkflowDecider {
 
     ConfigFragmentService configFragmentService
+    MailHelperService mailHelperService
     RoddyBamFileService roddyBamFileService
+
+    @Autowired
+    UnalignableSeqTrackEmailCreator unalignableSeqTrackEmailCreator
     WorkflowArtefactService workflowArtefactService
     WorkflowRunService workflowRunService
     WorkflowService workflowService
@@ -287,6 +293,8 @@ class PanCancerDeciderService extends AbstractWorkflowDecider {
             }
             assert workPackage.referenceGenome == referenceGenome
             if (!workPackage.satisfiesCriteria(seqTrack)) {
+                Map<String, String> content = unalignableSeqTrackEmailCreator.getMailContent(workPackage, seqTrack)
+                mailHelperService.sendEmailToTicketSystem(content["subject"], content["body"])
                 return null
             }
         } else {
@@ -364,7 +372,7 @@ class PanCancerDeciderService extends AbstractWorkflowDecider {
         bamFile.numberOfMergedLanes = bamFile.containedSeqTracks.size()
         assert bamFile.save(flush: true)
 
-        run.workDirectory = roddyBamFileService.getWorkDirectory(bamFile).toString()
+        run.workDirectory = roddyBamFileService.getWorkDirectory(bamFile)
         run.save(flush: true)
 
         return workflowOutputArtefact

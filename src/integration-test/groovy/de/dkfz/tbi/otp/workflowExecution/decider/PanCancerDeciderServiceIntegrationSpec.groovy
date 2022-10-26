@@ -27,12 +27,16 @@ import grails.util.Pair
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
+import de.dkfz.tbi.otp.domainFactory.FastqcDomainFactory
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.tracking.OtrsTicketService
 import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.utils.MailHelperService
 import de.dkfz.tbi.otp.workflow.panCancer.PanCancerWorkflow
 import de.dkfz.tbi.otp.workflowExecution.*
 
@@ -40,7 +44,7 @@ import java.time.LocalDate
 
 @Rollback
 @Integration
-class PanCancerDeciderServiceIntegrationSpec extends Specification implements WorkflowSystemDomainFactory, IsRoddy {
+class PanCancerDeciderServiceIntegrationSpec extends Specification implements WorkflowSystemDomainFactory, FastqcDomainFactory, IsRoddy {
 
     PanCancerDeciderService panCancerDeciderService
 
@@ -56,7 +60,7 @@ class PanCancerDeciderServiceIntegrationSpec extends Specification implements Wo
     void "test getSeqType for FastQC file"() {
         given:
         WorkflowArtefact wa = createWorkflowArtefact()
-        FastqcProcessedFile fastqcProcessedFile = DomainFactory.createFastqcProcessedFile(workflowArtefact: wa)
+        FastqcProcessedFile fastqcProcessedFile = createFastqcProcessedFile(workflowArtefact: wa)
 
         expect:
         panCancerDeciderService.getSeqType(wa) == fastqcProcessedFile.dataFile.seqType
@@ -87,7 +91,7 @@ class PanCancerDeciderServiceIntegrationSpec extends Specification implements Wo
         createBamFile(workflowArtefact: additionalRequiredArtefact2, workPackage: createMergingWorkPackage(sample: sample1, seqType: seqType))
 
         WorkflowArtefact additionalRequiredArtefact3 = createWorkflowArtefact(artefactType: ArtefactType.FASTQ)
-        DomainFactory.createFastqcProcessedFile(workflowArtefact: additionalRequiredArtefact3, dataFile: createDataFile(seqTrack: createSeqTrack(
+        createFastqcProcessedFile(workflowArtefact: additionalRequiredArtefact3, dataFile: createDataFile(seqTrack: createSeqTrack(
                 sample: sample1,
                 seqType: seqType,
         )))
@@ -154,7 +158,7 @@ class PanCancerDeciderServiceIntegrationSpec extends Specification implements Wo
         )
 
         WorkflowArtefact wa3 = createWorkflowArtefact()
-        DomainFactory.createFastqcProcessedFile(workflowArtefact: wa3, dataFile: createDataFile(seqTrack: createSeqTrack(
+        createFastqcProcessedFile(workflowArtefact: wa3, dataFile: createDataFile(seqTrack: createSeqTrack(
                 sample: sample,
                 seqType: seqType,
                 run: createRun(seqPlatform: seqPlatform),
@@ -162,7 +166,7 @@ class PanCancerDeciderServiceIntegrationSpec extends Specification implements Wo
         ), project: project))
 
         WorkflowArtefact differentIndividual = createWorkflowArtefact()
-        DomainFactory.createFastqcProcessedFile(workflowArtefact: differentIndividual, dataFile: createDataFile(seqTrack: createSeqTrack(
+        createFastqcProcessedFile(workflowArtefact: differentIndividual, dataFile: createDataFile(seqTrack: createSeqTrack(
                 sample: createSample(individual: createIndividual(project: project), sampleType: sampleType),
                 seqType: seqType,
                 run: createRun(seqPlatform: seqPlatform),
@@ -170,7 +174,7 @@ class PanCancerDeciderServiceIntegrationSpec extends Specification implements Wo
         ), project: project))
 
         WorkflowArtefact differentSampleType = createWorkflowArtefact()
-        DomainFactory.createFastqcProcessedFile(workflowArtefact: differentSampleType, dataFile: createDataFile(seqTrack: createSeqTrack(
+        createFastqcProcessedFile(workflowArtefact: differentSampleType, dataFile: createDataFile(seqTrack: createSeqTrack(
                 sample: createSample(individual: individual, sampleType: createSampleType()),
                 seqType: seqType,
                 run: createRun(seqPlatform: seqPlatform),
@@ -178,7 +182,7 @@ class PanCancerDeciderServiceIntegrationSpec extends Specification implements Wo
         ), project: project))
 
         WorkflowArtefact differentSeqType = createWorkflowArtefact()
-        DomainFactory.createFastqcProcessedFile(workflowArtefact: differentSeqType, dataFile: createDataFile(seqTrack: createSeqTrack(
+        createFastqcProcessedFile(workflowArtefact: differentSeqType, dataFile: createDataFile(seqTrack: createSeqTrack(
                 sample: sample,
                 seqType: exomeSeqType,
                 run: createRun(seqPlatform: seqPlatform),
@@ -188,7 +192,7 @@ class PanCancerDeciderServiceIntegrationSpec extends Specification implements Wo
         WorkflowArtefact differentSPG = createWorkflowArtefact()
         SeqPlatform seqPlatform2 = createSeqPlatform()
         createSeqPlatformGroup(seqPlatforms: [seqPlatform2])
-        DomainFactory.createFastqcProcessedFile(workflowArtefact: differentSPG, dataFile: createDataFile(seqTrack: createSeqTrack(
+        createFastqcProcessedFile(workflowArtefact: differentSPG, dataFile: createDataFile(seqTrack: createSeqTrack(
                 sample: sample,
                 seqType: seqType,
                 run: createRun(seqPlatform: seqPlatform2),
@@ -196,7 +200,7 @@ class PanCancerDeciderServiceIntegrationSpec extends Specification implements Wo
         ), project: project))
 
         WorkflowArtefact differentLibPrepKit = createWorkflowArtefact()
-        DomainFactory.createFastqcProcessedFile(workflowArtefact: differentLibPrepKit, dataFile: createDataFile(seqTrack: createSeqTrack(
+        createFastqcProcessedFile(workflowArtefact: differentLibPrepKit, dataFile: createDataFile(seqTrack: createSeqTrack(
                 sample: sample,
                 seqType: seqType,
                 run: createRun(seqPlatform: seqPlatform),
@@ -476,7 +480,7 @@ class PanCancerDeciderServiceIntegrationSpec extends Specification implements Wo
         WorkflowArtefact artefact1 = createWorkflowArtefact(artefactType: ArtefactType.BAM)
         createBamFile(workflowArtefact: artefact1)
         WorkflowArtefact artefact2 = createWorkflowArtefact(artefactType: ArtefactType.FASTQC)
-        DomainFactory.createFastqcProcessedFile(workflowArtefact: artefact2)
+        createFastqcProcessedFile(workflowArtefact: artefact2)
 
         expect:
         panCancerDeciderService.createWorkflowRunsAndOutputArtefacts([[artefact1, artefact2]], [], createWorkflowVersion()) == []
@@ -494,7 +498,7 @@ class PanCancerDeciderServiceIntegrationSpec extends Specification implements Wo
     void "test createWorkflowRunsAndOutputArtefacts, no corresponding FASTQ for FastQC file is passed, doesn't create run"() {
         given:
         WorkflowArtefact artefact = createWorkflowArtefact(artefactType: ArtefactType.FASTQC)
-        DomainFactory.createFastqcProcessedFile(workflowArtefact: artefact)
+        createFastqcProcessedFile(workflowArtefact: artefact)
 
         expect:
         panCancerDeciderService.createWorkflowRunsAndOutputArtefacts([[artefact]], [], createWorkflowVersion()) == []
@@ -505,9 +509,9 @@ class PanCancerDeciderServiceIntegrationSpec extends Specification implements Wo
         WorkflowArtefact artefact1 = createWorkflowArtefact(artefactType: ArtefactType.FASTQ)
         SeqTrack seqTrack = createSeqTrackWithTwoDataFile(workflowArtefact: artefact1)
         WorkflowArtefact artefact2 = createWorkflowArtefact(artefactType: ArtefactType.FASTQC)
-        DomainFactory.createFastqcProcessedFile(workflowArtefact: artefact2, dataFile: seqTrack.dataFiles.first(), workDirectoryName: 'workdir')
+        createFastqcProcessedFile(workflowArtefact: artefact2, dataFile: seqTrack.dataFiles.first(), workDirectoryName: 'workdir')
         WorkflowArtefact artefact3 = createWorkflowArtefact(artefactType: ArtefactType.FASTQC)
-        DomainFactory.createFastqcProcessedFile(workflowArtefact: artefact3, dataFile: seqTrack.dataFiles.last(), workDirectoryName: 'workdir')
+        createFastqcProcessedFile(workflowArtefact: artefact3, dataFile: seqTrack.dataFiles.last(), workDirectoryName: 'workdir')
 
         WorkflowArtefact artefact4 = createWorkflowArtefact(artefactType: ArtefactType.BAM)
         RoddyBamFile bamFile = createBamFile(workflowArtefact: artefact4, baseBamFile: createBamFile(seqTracks: [seqTrack]),
@@ -540,7 +544,7 @@ class PanCancerDeciderServiceIntegrationSpec extends Specification implements Wo
                 libraryPreparationKit: libraryPreparationKit)
         List<WorkflowArtefact> fastqcInputArtefacts = seqTrack1.dataFiles.collect {
             WorkflowArtefact inputArtefact = createWorkflowArtefact(artefactType: ArtefactType.FASTQC)
-            DomainFactory.createFastqcProcessedFile(workflowArtefact: inputArtefact, dataFile: it, workDirectoryName: 'workdir')
+            createFastqcProcessedFile(workflowArtefact: inputArtefact, dataFile: it, workDirectoryName: 'workdir')
             return inputArtefact
         }
 
@@ -549,7 +553,7 @@ class PanCancerDeciderServiceIntegrationSpec extends Specification implements Wo
                 libraryPreparationKit: libraryPreparationKit)
         fastqcInputArtefacts += seqTrack2.dataFiles.collect {
             WorkflowArtefact inputArtefact = createWorkflowArtefact(artefactType: ArtefactType.FASTQC)
-            DomainFactory.createFastqcProcessedFile(workflowArtefact: inputArtefact, dataFile: it, workDirectoryName: 'workdir')
+            createFastqcProcessedFile(workflowArtefact: inputArtefact, dataFile: it, workDirectoryName: 'workdir')
             return inputArtefact
         }
 
@@ -605,7 +609,7 @@ class PanCancerDeciderServiceIntegrationSpec extends Specification implements Wo
         seqTrack.individual.save(flush: true)
 
         WorkflowArtefact artefact3 = createWorkflowArtefact()
-        FastqcProcessedFile fastqcFile = DomainFactory.createFastqcProcessedFile(workflowArtefact: artefact3)
+        FastqcProcessedFile fastqcFile = createFastqcProcessedFile(workflowArtefact: artefact3)
         fastqcFile.dataFile.project = project1
         fastqcFile.dataFile.seqTrack.individual.project = project1
         fastqcFile.dataFile.save(flush: true)
@@ -631,5 +635,55 @@ class PanCancerDeciderServiceIntegrationSpec extends Specification implements Wo
         result[new Pair(project1, seqType1)] == [artefact1, artefact2, artefact3]
         result[new Pair(project1, seqType2)] == [differentSeqType]
         result[new Pair(project2, seqType1)] == [differentProject]
+    }
+
+    void "test createWorkflowRunsAndOutputArtefacts, should send mail if seq. track is not alignable"() {
+        given:
+        PanCancerDeciderService panCancerDeciderService = new PanCancerDeciderService()
+        panCancerDeciderService.configFragmentService = new ConfigFragmentService()
+        panCancerDeciderService.configFragmentService.configSelectorService = new ConfigSelectorService()
+        panCancerDeciderService.mailHelperService = Mock(MailHelperService)
+        panCancerDeciderService.roddyBamFileService = Mock(RoddyBamFileService)
+        panCancerDeciderService.unalignableSeqTrackEmailCreator = new UnalignableSeqTrackEmailCreator()
+        panCancerDeciderService.unalignableSeqTrackEmailCreator.mailHelperService = Mock(MailHelperService)
+        panCancerDeciderService.unalignableSeqTrackEmailCreator.otrsTicketService = new OtrsTicketService()
+        panCancerDeciderService.workflowArtefactService = new WorkflowArtefactService()
+        panCancerDeciderService.workflowRunService = new WorkflowRunService()
+        panCancerDeciderService.workflowRunService.configFragmentService = new ConfigFragmentService()
+        panCancerDeciderService.workflowService = new WorkflowService()
+
+        Project project1 = createProject()
+        SeqType seqType1 = createSeqType()
+        SpeciesWithStrain species = createSpeciesWithStrain()
+        SampleType sampleType = createSampleType()
+        SeqPlatformGroup seqPlatformGroup = createSeqPlatformGroup()
+        SeqPlatform seqPlatform = createSeqPlatform(seqPlatformGroups: [seqPlatformGroup])
+        Individual individual = createIndividual(species: species, project: project1)
+
+        Sample sample = createSample(individual: individual, sampleType: sampleType)
+        WorkflowArtefact artefact1 = createWorkflowArtefact()
+        SeqTrack seqTrack = createSeqTrackWithOneDataFile(seqType: seqType1, sample: sample, run: createRun(seqPlatform: seqPlatform), workflowArtefact: artefact1)
+        WorkflowArtefact artefact2 = createWorkflowArtefact(artefactType: ArtefactType.FASTQC)
+        createFastqcProcessedFile(dataFile: seqTrack.dataFiles.first(), workflowArtefact: artefact2)
+
+        WorkflowArtefact artefact3 = createWorkflowArtefact()
+        SeqTrack seqTrack2 = createSeqTrackWithOneDataFile(seqType: seqType1, sample: sample, run: createRun(seqPlatform: seqPlatform), workflowArtefact: artefact3,
+                libraryPreparationKit: createLibraryPreparationKit())
+        WorkflowArtefact artefact4 = createWorkflowArtefact(artefactType: ArtefactType.FASTQC)
+        createFastqcProcessedFile(dataFile: seqTrack2.dataFiles.first(), workflowArtefact: artefact4)
+
+        Workflow workflow = createWorkflow(name: PanCancerWorkflow.WORKFLOW, supportedSeqTypes: [seqType1] as Set)
+        WorkflowVersion workflowVersion = createWorkflowVersion(workflow: workflow)
+        createWorkflowVersionSelector(project: project1, seqType: seqType1, workflowVersion: workflowVersion)
+        createMergingCriteria(project: project1, seqType: seqType1)
+        createReferenceGenomeSelector(project: project1, seqType: seqType1, workflow: workflow, species: [seqTrack.individual.species])
+        DomainFactory.createPanCanPipeline()
+
+        when:
+        Collection<WorkflowArtefact> result = panCancerDeciderService.createWorkflowRunsAndOutputArtefacts([[artefact1, artefact2], [artefact3, artefact4]], [], workflowVersion)
+
+        then:
+        1 * panCancerDeciderService.mailHelperService.sendEmailToTicketSystem(_, _)
+        result.size() == 1
     }
 }
