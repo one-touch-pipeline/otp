@@ -33,8 +33,8 @@ variables:
   GRADLE_OPTS: '-Xms1g -Xmx4g -Dorg.gradle.daemon=false'
   GRAILS_OPTS: '-Xmx4g'
   ARTIFACTS_BASE_DIRECTORY: 'artifacts'
-  GRADLE_CACHES: $CI_PROJECT_DIR/.gradle/caches
-  GRADLE_WRAPPER: $CI_PROJECT_DIR/.gradle/wrapper
+  GRADLE_CACHES: cache/caches/
+  GRADLE_WRAPPER: cache/wrapper/
   ARTIFACT_DOWNLOAD_ATTEMPTS: "3"
   GET_SOURCES_ATTEMPTS: "3"
   RESTORE_CACHE_ATTEMPTS: "3"
@@ -52,7 +52,9 @@ variables:
     - branches
     - tags
   cache:
-    key: "${CI_PROJECT_PATH_SLUG}-cache2"
+    key:
+      files:
+        - $CI_PROJECT_DIR/gradle/wrapper/gradle-wrapper.properties
     paths:
       - $GRADLE_CACHES
       - $GRADLE_WRAPPER
@@ -88,7 +90,7 @@ unit tests:
   stage: test
   script:
     - set -e
-    - ./gradlew test
+    - ./gradlew --build-cache --gradle-user-home cache/ test
   artifacts:
     <<: *artifacts_template
     paths:
@@ -103,7 +105,7 @@ integration tests:
   stage: test
   script:
     - set -e
-    - ./gradlew integrationTest
+    - ./gradlew --build-cache --gradle-user-home cache/ integrationTest
   artifacts:
     <<: *artifacts_template
     paths:
@@ -121,7 +123,7 @@ codenarc:
     - branches
   script:
     - set -e
-    - ./gradlew codenarcAll
+    - ./gradlew --build-cache --gradle-user-home cache/ codenarcAll
   after_script:
     - set -e
     - devScripts/gitlab-ci/codenarc-informations.sh
@@ -140,7 +142,7 @@ eslint:
     - branches
   script:
     - set -e
-    - ./gradlew esLintExportCi
+    - ./gradlew --build-cache --gradle-user-home cache/ esLintExportCi
   artifacts:
     <<: *artifacts_template
     paths:
@@ -158,7 +160,7 @@ create doc:
   stage: doc
   script:
     - set -e
-    - ./gradlew generateHtml
+    - ./gradlew --build-cache --gradle-user-home cache/ generateHtml
   artifacts:
     <<: *artifacts_template
     paths:
@@ -184,7 +186,7 @@ test migration:
     - echo 'otp.database.password=otp' >> $HOME/.otp.properties
   script:
     - set -e
-    - ./gradlew dbmUpdate
+    - ./gradlew --build-cache --gradle-user-home cache/ dbmUpdate
     - bash ./devScripts/grails-migration-plugin/create-dbm-gorm-diff-without-false-changes.sh testing
     - bash ./devScripts/grails-migration-plugin/check-for-changelog-file.sh testing
     - bash ./devScripts/grails-migration-plugin/check-variable-problems.sh
