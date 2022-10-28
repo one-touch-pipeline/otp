@@ -39,6 +39,7 @@ class Document implements Entity {
         CSV("text/csv", "csv"),
         TSV("text/tab-separated-values", "tsv"),
         TXT("text/plain", "txt"),
+        LINK("", ""),
 
         final String mimeType
         final String extension
@@ -51,12 +52,18 @@ class Document implements Entity {
     FormatType formatType
     DocumentType documentType
     byte[] content
+    String link
 
     @SuppressWarnings('DuplicateNumberLiteral')
     static constraints = {
         // limit file size to 1MB
-        content maxSize: 1024 * 1024, blank: false, validator: {
-            if (it.size() == 0) {
+        content maxSize: 1024 * 1024, nullable: true, validator: { val, obj ->
+            if (obj.formatType != FormatType.LINK && (!val || val.size() == 0)) {
+                return "empty"
+            }
+        }
+        link nullable: true, validator: { val, obj ->
+            if (obj.formatType == FormatType.LINK && !val) {
                 return "empty"
             }
         }

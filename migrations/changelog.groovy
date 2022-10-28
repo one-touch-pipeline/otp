@@ -709,4 +709,6 @@ databaseChangeLog = {
     include file: 'changelogs/2022/otp-797.groovy'
 
     include file: 'changelogs/2022/otp-1753.groovy'
+
+    include file: 'changelogs/2022/otp-1758.groovy'
 }

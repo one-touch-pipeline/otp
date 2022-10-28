@@ -24,6 +24,7 @@
 <html>
 <head>
     <title><g:message code="otp.menu.documents"/></title>
+    <asset:javascript src="pages/document/manage.js"/>
 </head>
 
 <body>
@@ -50,8 +51,13 @@
                     <g:if test="${document.value}">
                         <td>${document.value.formatType}</td>
                         <td>
-                            <g:link action="download" params="['document.id': document.value.id, to: DocumentController.Action.VIEW]">${g.message(code: "document.view")}</g:link> |
-                            <g:link action="download" params="['document.id': document.value.id, to: DocumentController.Action.DOWNLOAD]">${g.message(code: "document.download")}</g:link>
+                            <g:if test="${document.value.formatType == de.dkfz.tbi.otp.administration.Document.FormatType.LINK}">
+                                <a href="${document.value.link}">${g.message(code: "document.open")}</a>
+                            </g:if>
+                            <g:else>
+                                <g:link action="download" params="['document.id': document.value.id, to: DocumentController.Action.VIEW]">${g.message(code: "document.view")}</g:link> |
+                                <g:link action="download" params="['document.id': document.value.id, to: DocumentController.Action.DOWNLOAD]">${g.message(code: "document.download")}</g:link>
+                            </g:else>
                         </td>
                     </g:if>
                     <g:else>
@@ -61,8 +67,15 @@
                     <td>
                         <g:uploadForm action="upload" useToken="true">
                             <input type="hidden" name="documentType.id" value="${document.key.id}"/>
-                            <input type="file" name="content" />
-                            <g:select id="formatType-${document.key.title}" class="use-select-2" style="min-width: 20ch;"
+                            <g:if test="${document.value?.formatType == de.dkfz.tbi.otp.administration.Document.FormatType.LINK}">
+                                <input name="link" value="${document.value?.link}"/>
+                                <input type="file" name="content"  style="display: none"/>
+                            </g:if>
+                            <g:else>
+                                <input name="link" value="${document.value?.link}" style="display: none"/>
+                                <input type="file" name="content" />
+                            </g:else>
+                            <g:select id="formatType-${document.key.title}" class="formatType use-select-2" style="min-width: 20ch;"
                                       name="formatType" from="${Document.FormatType}" optionValue="displayName"
                                       noSelection="${[(""): "Select file format"]}" />
                             <g:submitButton class="btn btn-primary" name="${g.message(code: "document.update")}"/>

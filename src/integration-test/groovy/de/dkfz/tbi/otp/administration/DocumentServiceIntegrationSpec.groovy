@@ -154,14 +154,14 @@ class DocumentServiceIntegrationSpec extends Specification implements UserAndRol
 
         when:
         SpringSecurityUtils.doWithAuth(USER) {
-            service.updateDocument(documentType, HelperUtils.uniqueString.bytes, Document.FormatType.PDF)
+            service.updateDocument(documentType, HelperUtils.uniqueString.bytes, null, Document.FormatType.PDF)
         }
 
         then:
         thrown(AccessDeniedException)
     }
 
-    void "test updateDocument, create new document"() {
+    void "test updateDocument, create new document file"() {
         given:
         setupData()
         DocumentType documentType = createDocumentType()
@@ -170,17 +170,38 @@ class DocumentServiceIntegrationSpec extends Specification implements UserAndRol
 
         when:
         SpringSecurityUtils.doWithAuth(ADMIN) {
-            service.updateDocument(documentType, content, type)
+            service.updateDocument(documentType, content, null, type)
         }
 
         then:
         Document d = CollectionUtils.exactlyOneElement(Document.all)
         d.documentType == documentType
         d.content == content
+        d.link == null
         d.formatType == type
     }
 
-    void "test updateDocument, update existing document"() {
+    void "test updateDocument, create new document link"() {
+        given:
+        setupData()
+        DocumentType documentType = createDocumentType()
+        String link = "https://example.com"
+        Document.FormatType type = Document.FormatType.LINK
+
+        when:
+        SpringSecurityUtils.doWithAuth(ADMIN) {
+            service.updateDocument(documentType, null, link, type)
+        }
+
+        then:
+        Document d = CollectionUtils.exactlyOneElement(Document.all)
+        d.documentType == documentType
+        d.content == null
+        d.link == link
+        d.formatType == type
+    }
+
+    void "test updateDocument, update existing document file"() {
         given:
         setupData()
         DocumentType documentType = createDocumentType()
@@ -192,13 +213,37 @@ class DocumentServiceIntegrationSpec extends Specification implements UserAndRol
 
         when:
         SpringSecurityUtils.doWithAuth(ADMIN) {
-            service.updateDocument(documentType, content, type)
+            service.updateDocument(documentType, content, null, type)
         }
 
         then:
         Document d = CollectionUtils.exactlyOneElement(Document.all)
         d.documentType == documentType
         d.content == content
+        d.link == null
+        d.formatType == type
+    }
+
+    void "test updateDocument, update existing document link"() {
+        given:
+        setupData()
+        DocumentType documentType = createDocumentType()
+        createDocument([
+                documentType: documentType,
+        ])
+        String link = "https://example.com"
+        Document.FormatType type = Document.FormatType.LINK
+
+        when:
+        SpringSecurityUtils.doWithAuth(ADMIN) {
+            service.updateDocument(documentType, null, link, type)
+        }
+
+        then:
+        Document d = CollectionUtils.exactlyOneElement(Document.all)
+        d.documentType == documentType
+        d.content == null
+        d.link == link
         d.formatType == type
     }
 

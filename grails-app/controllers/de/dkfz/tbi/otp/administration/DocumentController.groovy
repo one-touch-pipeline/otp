@@ -56,7 +56,7 @@ class DocumentController {
 
     def upload(UploadCommand cmd) {
         withForm {
-            Errors errors = documentService.updateDocument(cmd.documentType, cmd.content, cmd.formatType)
+            Errors errors = documentService.updateDocument(cmd.documentType, cmd.content, cmd.link, cmd.formatType)
             if (errors) {
                 flash.message = new FlashMessage(g.message(code: "document.store.fail") as String, errors)
             } else {
@@ -155,6 +155,7 @@ class UploadCommand {
     DocumentType documentType
     Document.FormatType formatType
     byte[] content
+    String link
 }
 
 class UpdateSortOrderCommand {

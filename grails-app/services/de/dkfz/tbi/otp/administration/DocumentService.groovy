@@ -77,9 +77,15 @@ class DocumentService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    Errors updateDocument(DocumentType documentType, byte[] content, Document.FormatType formatType) {
+    Errors updateDocument(DocumentType documentType, byte[] content, String link, Document.FormatType formatType) {
         Document document = (Document)atMostOneElement(Document.findAllByDocumentType(documentType)) ?: new Document(documentType: documentType)
-        document.content = content
+        if (formatType == Document.FormatType.LINK) {
+            document.content = null
+            document.link = link
+        } else {
+            document.content = content
+            document.link = null
+        }
         document.formatType = formatType
         try {
             document.save(flush: true)

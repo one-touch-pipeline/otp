@@ -20,7 +20,6 @@
   - SOFTWARE.
   --}%
 
-<%@ page import="de.dkfz.tbi.otp.administration.DocumentController; de.dkfz.tbi.otp.administration.Document" %>
 <%@ page contentType="text/html;charset=UTF-8"%>
 <html>
 <head>

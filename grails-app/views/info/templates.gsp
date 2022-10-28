@@ -45,10 +45,15 @@
     <g:each in="${availableTemplates}" var="template">
         <li>
             ${template.document.documentType.description}<br>
-            <g:link controller="document" action="download"
-                    params="['document.id': template.document.id, to: DocumentController.Action.DOWNLOAD]">
-                <g:message code="info.template.download" args="[template.fullFileName]"/>
-            </g:link>
+            <g:if test="${template.document.formatType == de.dkfz.tbi.otp.administration.Document.FormatType.LINK}">
+                <a href="${template.document.link}"><g:message code="info.template.open" args="[template.fullFileName]"/></a>
+            </g:if>
+            <g:else>
+                <g:link controller="document" action="download"
+                        params="['document.id': template.document.id, to: DocumentController.Action.DOWNLOAD]">
+                    <g:message code="info.template.download" args="[template.fullFileName]"/>
+                </g:link>
+            </g:else>
         </li>
     </g:each>
 </ul>
