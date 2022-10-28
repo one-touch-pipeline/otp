@@ -21,17 +21,10 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
-import groovy.json.JsonSlurper
-import groovy.transform.TupleConstructor
 
 import de.dkfz.tbi.otp.ngsqc.FastqcResultsService
 import de.dkfz.tbi.otp.utils.CollectionUtils
-import de.dkfz.tbi.otp.utils.DataTableCommand
-import de.dkfz.tbi.util.TimeFormats
-
-import java.text.SimpleDateFormat
 
 @Secured("hasRole('ROLE_OPERATOR')")
 class RunController {
@@ -39,13 +32,10 @@ class RunController {
     LsdfFilesService lsdfFilesService
     RunService runService
     FastqcResultsService fastqcResultsService
-    SeqCenterService seqCenterService
 
     static allowedMethods = [
             display        : "GET",
             show           : "GET",
-            list           : "GET",
-            dataTableSource: "POST",
     ]
 
     def display() {
@@ -83,114 +73,5 @@ class RunController {
                 errorFiles         : runService.dataFilesWithError(run),
                 fastqcLinks        : fastqcResultsService.fastqcLinkMap(run),
         ]
-    }
-
-    def list() {
-        return [
-                seqCenters: seqCenterService.allSeqCenters(),
-                tableHeader: RunColumn.values()*.message,
-                filterTree : [
-                        [name: 'seqCenterSelection', msgcode: 'run.search.seqCenter', type: 'LIST',
-                         from: seqCenterService.allSeqCenters(), value: 'name', key: 'id'],
-                        [name: 'runSearch', msgcode: 'run.search.run', type: 'TEXT'],
-                        [name: 'dateCreatedSelection', msgcode: 'run.search.dateCreated', type: 'DATE'],
-                        [name: 'dateExecutedSelection', msgcode: 'run.search.dateExecuted', type: 'DATE'],
-                ],
-        ]
-    }
-
-    def dataTableSource(DataTableCommand cmd) {
-        Map dataToRender = cmd.dataToRender()
-
-        RunFiltering filtering = RunFiltering.fromJSON(params.filtering)
-
-        dataToRender.iTotalRecords = runService.countRun(filtering, cmd.sSearch)
-        dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
-
-        runService.listRuns(cmd.sortOrder, RunColumn.fromDataTable(cmd.iSortCol_0), filtering, cmd.sSearch).each { run ->
-            dataToRender.aaData << [
-                    id          : run.id,
-                    name        : run.name,
-                    seqCenters  : run.seqCenter?.toString()?.toLowerCase(),
-                    dateCreated : TimeFormats.DATE.getFormattedDate(run.dateCreated),
-                    dateExecuted: TimeFormats.DATE.getFormattedDate(run.dateExecuted),
-            ]
-        }
-        render dataToRender as JSON
-    }
-}
-
-@TupleConstructor
-enum RunColumn {
-    RUN('run.list.name', "name"),
-    SEQCENTER('run.list.seqCenter', "seqCenter"),
-    DATECREATED('run.list.dateCreated', "dateCreated"),
-    DATEEXECUTED('run.list.dateExecuted', "dateExecuted",),
-
-    final String message
-    final String columnName
-
-    static RunColumn fromDataTable(int column) {
-        if (column >= values().size() || column < 0) {
-            return RUN
-        }
-        return values()[column]
-    }
-}
-
-/**
- * Class describing the various filtering to do on WorkPackage.
- */
-class RunFiltering {
-    List<String> name = []
-    List<Long> seqCenter = []
-    List<List<Date>> dateCreated = []
-    List<List<Date>> dateExecuted = []
-
-    boolean enabled = false
-
-    static RunFiltering fromJSON(String json) {
-        RunFiltering filtering = new RunFiltering()
-        if (!json) {
-            return filtering
-        }
-        def slurper = new JsonSlurper()
-        slurper.parseText(json).each {
-            switch (it.type) {
-                case "runSearch":
-                    if (it.value && it.value.length() >= 3) {
-                        filtering.name << it.value
-                        filtering.enabled = true
-                    }
-                    break
-                case "seqCenterSelection":
-                    if (it.value.isLong()) {
-                        filtering.seqCenter << (it.value as Long)
-                        filtering.enabled = true
-                    }
-                    break
-                case "dateCreatedSelection":
-                    if (it.value) {
-                        SimpleDateFormat sdf = new SimpleDateFormat(TimeFormats.DATE.format, Locale.ENGLISH)
-                        Date dateFrom = it.value.start ? sdf.parse(it.value.start) : new Date()
-                        Date dateTo   = it.value.end   ? sdf.parse(it.value.end)   : new Date()
-
-                        filtering.dateCreated << [dateFrom, dateTo]
-                        filtering.enabled = true
-                    }
-                    break
-                case "dateExecutedSelection":
-                    if (it.value) {
-                        SimpleDateFormat sdf = new SimpleDateFormat(TimeFormats.DATE.format, Locale.ENGLISH)
-                        Date dateFrom = it.value.start ? sdf.parse(it.value.start) : new Date()
-                        Date dateTo   = it.value.end   ? sdf.parse(it.value.end)   : new Date()
-
-                        filtering.dateExecuted << [dateFrom, dateTo]
-                        filtering.enabled = true
-                    }
-                    break
-            }
-        }
-        return filtering
     }
 }

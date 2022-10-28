@@ -168,9 +168,6 @@ describe('Click all menu items in the menu bar', () => {
 
       cy.get('.navigation li').contains('Project Info Documents').click({ force: true });
       cy.checkPage('/document/manage');
-
-      cy.get('.navigation li').contains('Runs').click({ force: true });
-      cy.checkPage('/run/list');
     });
 
     it('should check the number of menu items and click all Workflow System menu items', () => {

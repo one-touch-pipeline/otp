@@ -154,16 +154,5 @@ class SeqCenterServiceSpec extends Specification implements DataTest, DomainFact
         then:
         seqCenter.importDirsAllowLinking == ["/new", "/old"] as Set
     }
-
-    void "test allSeqCenters, should return all saved seq centers"() {
-        given:
-        SeqCenter seqCenter = createSeqCenter()
-
-        when:
-        List<SeqCenter> seqCenters = seqCenterService.allSeqCenters()
-
-        then:
-        seqCenters == [seqCenter]
-    }
 }
 

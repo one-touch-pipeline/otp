@@ -67,11 +67,6 @@ class SeqCenterService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    List<SeqCenter> allSeqCenters() {
-        return SeqCenter.list(sort: "name", order: "asc")
-    }
-
-    @PreAuthorize("hasRole('ROLE_OPERATOR')")
     SeqCenter createSeqCenter(String name, String dirName) {
         assert name : "the input name '${name}' must not be null"
         assert dirName : "the input dirname '${dirName}' must not be null"
