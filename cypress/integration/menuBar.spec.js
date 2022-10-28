@@ -163,9 +163,6 @@ describe('Click all menu items in the menu bar', () => {
       cy.get('.navigation li').contains('QC Thresholds').click({ force: true });
       cy.checkPage('/qcThreshold/defaultConfiguration');
 
-      cy.get('.navigation li').contains('Progress').click({ force: true });
-      cy.checkPage('/projectProgress/progress');
-
       cy.get('.navigation li').contains('Project Info Documents').click({ force: true });
       cy.checkPage('/document/manage');
     });

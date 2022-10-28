@@ -142,7 +142,6 @@
                                             <li><g:link controller="metaDataFields" action="index"><g:message code="otp.menu.metaDataFields"/></g:link></li>
                                             <li><g:link controller="qcThreshold" action="defaultConfiguration"><g:message
                                                     code="otp.menu.qcThreshold"/></g:link></li>
-                                            <li><g:link controller="projectProgress" action="progress"><g:message code="otp.menu.progress"/></g:link></li>
                                             <li><g:link controller="document" action="manage"><g:message code="otp.menu.documents"/></g:link></li>
                                         </ul>
                                     </li>
