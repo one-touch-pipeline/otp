@@ -62,13 +62,6 @@
                             </td>
                         </tr>
                         <tr>
-                            <td><label for="internIdentifier"><g:message code="individual.insert.internIdentifier"/></label></td>
-                            <td>
-                                <input type="text" id="internIdentifier" name="internIdentifier" value="${cmd?.internIdentifier}"/>
-                                <i><g:message code="otp.optional"/></i>
-                            </td>
-                        </tr>
-                        <tr>
                             <td><label for="individualType"><g:message code="individual.insert.individualType"/></label></td>
                             <td><g:select class="use-select-2" name="type" from="${individualTypes}" id="individualType" value="${cmd?.type}"/></td>
                         </tr>

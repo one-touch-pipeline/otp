@@ -706,4 +706,5 @@ databaseChangeLog = {
         sqlFile(path: 'changelogs/2022/otp-1772-delete-defaults-for-version-1-2-182.sql')
     }
 
+    include file: 'changelogs/2022/otp-797.groovy'
 }

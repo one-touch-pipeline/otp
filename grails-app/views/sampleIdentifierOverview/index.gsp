@@ -33,15 +33,6 @@
         <g:render template="/templates/projectSelection"/>
         <h1>${g.message(code: "sampleIdentifierOverview.index.title")}</h1>
 
-        <g:if test="${hideSampleIdentifier}">
-            <otp:annotation type="warning">
-                <g:message code="sampleIdentifierOverview.index.sampleNamesHidden"/>
-                <sec:ifAllGranted roles="ROLE_OPERATOR">
-                    <g:message code="sampleIdentifierOverview.index.sampleNamesHidden.authorized"/>
-                </sec:ifAllGranted>
-            </otp:annotation>
-        </g:if>
-
         <div class="otpDataTables">
             <otp:dataTable codes="${[
                     'sampleIdentifierOverview.index.pid',

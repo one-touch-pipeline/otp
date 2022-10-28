@@ -36,27 +36,23 @@ class SampleIdentifierOverviewController {
             dataTableSourceSampleIdentifierOverview: "POST",
     ]
 
-    MmmlService mmmlService
     SampleIdentifierOverviewService sampleIdentifierOverviewService
     ProjectSelectionService projectSelectionService
 
     Map index() {
-        return [
-                hideSampleIdentifier: MmmlService.hideSampleIdentifier(projectSelectionService.selectedProject),
-        ]
+        return [:]
     }
 
     JSON dataTableSourceSampleIdentifierOverview(DataTableCommand cmd) {
         Map dataToRender = cmd.dataToRender()
         Project project = projectSelectionService.requestedProject
-        boolean hideSampleIdentifier = mmmlService.hideSampleIdentifiersForCurrentUser(projectSelectionService.selectedProject)
 
         Map<List, List<DataFile>> data = sampleIdentifierOverviewService.dataFilesOfProjectBySampleAndSeqType(project)
 
         dataToRender.iTotalRecords = data.size()
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
         dataToRender.aaData = data.collect { Map.Entry entry ->
-            sampleIdentifierOverviewService.handleSampleIdentifierEntry(entry, hideSampleIdentifier)
+            sampleIdentifierOverviewService.handleSampleIdentifierEntry(entry)
         }
 
         render dataToRender as JSON

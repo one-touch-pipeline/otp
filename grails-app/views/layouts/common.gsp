@@ -82,10 +82,6 @@
                                             <li class="allGranted"><g:link controller="projectFields" action="index"><g:message
                                                     code="otp.menu.configureProjectInformation"/></g:link></li>
                                         </sec:ifAnyGranted>
-                                        <sec:ifAllGranted roles="ROLE_MMML_MAPPING">
-                                            <li class="allGranted"><g:link controller="mmml" action="mmmlIdentifierMapping"><g:message
-                                                    code="otp.menu.mmmlIdentifierMapping"/></g:link></li>
-                                        </sec:ifAllGranted>
                                     </ul>
                                 </li>
                             </ul>

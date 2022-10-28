@@ -20,7 +20,7 @@
   - SOFTWARE.
   --}%
 
-<%@ page import="de.dkfz.tbi.otp.ngsdata.MmmlService; de.dkfz.tbi.otp.ngsdata.MetaDataColumn" contentType="text/html;charset=UTF-8" %>
+<%@ page import="de.dkfz.tbi.otp.ngsdata.MetaDataColumn" contentType="text/html;charset=UTF-8" %>
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
@@ -161,14 +161,7 @@
         <g:each var="metaDataEntry" in="${entries}">
             <tr>
                 <td class="myKey">${metaDataEntry.key.name}</td>
-                <td class="myValue">
-                    <g:if test="${metaDataEntry.key.name == MetaDataColumn.SAMPLE_NAME.name() && MmmlService.PROJECT_TO_HIDE_SAMPLE_IDENTIFIER.contains(dataFile.project.name)}">
-                        <g:message code="datafile.showDetails.hiddenSampleName"/>
-                    </g:if>
-                    <g:else>
-                        ${metaDataEntry.value}
-                    </g:else>
-                </td>
+                <td class="myValue">${metaDataEntry.value}</td>
             </tr>
         </g:each>
     </table>

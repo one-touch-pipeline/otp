@@ -79,15 +79,6 @@ class IndividualSpec extends Specification implements DataTest {
         !individual.validate()
     }
 
-    void "test validate, when internIdentifier is null"() {
-        given:
-        Individual individual = createIndividual()
-        individual.internIdentifier = null
-
-        expect:
-        individual.validate()
-    }
-
     void "test validate, when type is null"() {
         given:
         Individual individual = createIndividual()
@@ -160,7 +151,6 @@ class IndividualSpec extends Specification implements DataTest {
                 pid: "pid",
                 mockPid: "mockPid",
                 mockFullName: "mockFullName",
-                internIdentifier: "internIdentifier",
                 type: Type.REAL,
                 project: DomainFactory.createProject()
         )

@@ -80,9 +80,6 @@ describe('Click all menu items in the menu bar', () => {
 
       cy.get('.navigation li').contains('Configure Project Information').click({ force: true });
       cy.checkPage('/projectFields/index');
-
-      cy.get('.navigation li').contains('MMML Identifier Mapping').click({ force: true });
-      cy.checkPage('/mmml/mmmlIdentifierMapping');
     });
 
     it('should check the number of menu items and click all Results menu items', () => {

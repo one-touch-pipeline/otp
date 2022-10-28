@@ -77,7 +77,6 @@ class IndividualController {
                 comment            : individual.comment,
                 typeDropDown       : Individual.Type.values(),
                 sampleTypeDropDown : individualService.sampleTypeNames,
-                projectBlacklisted : MmmlService.hideSampleIdentifier(individual.project),
                 groupedSeqTrackSets: seqTrackService.getSeqTrackSetsGroupedBySeqTypeAndSampleType(individual.seqTracks),
                 samplesWrapper     : individual.samples.collect {
                     [
@@ -252,7 +251,6 @@ class IndividualCommand implements Validateable {
     Project individualProject
     String alias
     String displayedIdentifier
-    String internIdentifier
     Individual.Type type
     List<SampleCommand> samples
     boolean checkRedirect
@@ -265,7 +263,6 @@ class IndividualCommand implements Validateable {
         })
         alias(blank: false)
         displayedIdentifier(blank: false)
-        internIdentifier(nullable: true, blank: true)
     }
 }
 

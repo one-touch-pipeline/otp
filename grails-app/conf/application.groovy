@@ -147,7 +147,6 @@ grails.plugin.springsecurity.controllerAnnotations.staticRules = staticRules
 // hierarchy of roles
 grails.plugin.springsecurity.roleHierarchy = '''
     ROLE_ADMIN > ROLE_OPERATOR
-    ROLE_OPERATOR > ROLE_MMML_MAPPING
     ROLE_OPERATOR > ROLE_TEST_PI
     ROLE_OPERATOR > ROLE_TEST_BIOINFORMATICAN
     ROLE_OPERATOR > ROLE_TEST_SUBMITTER

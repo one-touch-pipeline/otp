@@ -63,7 +63,6 @@ class IndividualControllerSpec extends Specification implements ControllerUnitTe
         controller.params['individualProject.id'] = project.id
         controller.params.alias = "Alias"
         controller.params.displayedIdentifier = "Displayed Identifier"
-        controller.params.internIdentifier = "Intern Identifier"
         controller.params.type = Individual.Type.REAL.toString()
 
         controller.params["samples[0].sampleType"] = sampleType1.name
@@ -88,7 +87,6 @@ class IndividualControllerSpec extends Specification implements ControllerUnitTe
         individual.project == project
         individual.mockPid == 'Alias'
         individual.mockFullName == 'Displayed Identifier'
-        individual.internIdentifier == 'Intern Identifier'
         individual.type == Individual.Type.REAL
 
         controller.response.redirectedUrl == "/individual/insert/${individual.id}"
@@ -169,7 +167,6 @@ class IndividualControllerSpec extends Specification implements ControllerUnitTe
         controller.params['individualProject.id'] = project.id
         controller.params.alias = "Alias"
         controller.params.displayedIdentifier = "Displayed Identifier"
-        controller.params.internIdentifier = "Intern Identifier"
         controller.params.type = Individual.Type.REAL.toString()
 
         controller.params["samples[0].sampleType"] = sampleType.name

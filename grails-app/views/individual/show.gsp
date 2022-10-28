@@ -64,17 +64,6 @@
                                     value="${individual.mockFullName}"/>
                         </td>
                     </tr>
-                    <sec:ifAllGranted roles="ROLE_ADMIN">
-                        <tr>
-                            <td class="myKey"><g:message code="individual.show.details.internIdentifier"/></td>
-                            <td class="myValue">
-                                <otp:editorSwitch
-                                        roles="ROLE_OPERATOR"
-                                        link="${g.createLink(controller: 'individual', action: 'updateField', id: individual.id, params: [key: 'internIdentifier'])}"
-                                        value="${individual.internIdentifier}"/>
-                            </td>
-                        </tr>
-                    </sec:ifAllGranted>
                     <tr>
                         <td class="myKey"><g:message code="individual.show.details.type"/></td>
                         <td class="myValue typeDropDown">
@@ -113,9 +102,7 @@
                         <tr>
                             <td class="myKey">${wrappedSample.sample.sampleType.name}</td>
                             <td class="myValue">
-                                <sec:access expression="hasRole('ROLE_OPERATOR') or ${!projectBlacklisted}">
-                                    ${wrappedSample.sampleIdentifierObjects.join(", ")}
-                                </sec:access>
+                                ${wrappedSample.sampleIdentifierObjects.join(", ")}
                                 <otp:expandable value="${g.message(code: 'individual.show.updateSampleName')}" collapsed="true">
                                     <g:render template="editorSampleIdentifier"
                                               model="[sample: wrappedSample.sample, sampleIdentifierObjects: wrappedSample.sampleIdentifierObjects]"/>
@@ -176,13 +163,10 @@
                                 <td><g:link controller="seqTrack" action="seqTrackSet" params="${seqTrackSelection}">Details</g:link></td>
                                 <td><strong>${sampleType}</strong></td>
                                 <td>
-                                    <sec:access expression="hasRole('ROLE_OPERATOR') or ${!projectBlacklisted}">
-                                        <g:set var="sampleIdentifiers" value="${(seqTrackSet.seqTracks*.sampleIdentifier).unique().sort()}"/>
-                                        <otp:expandableText shortened="${"${sampleIdentifiers.take(3).join("<br>")}<br>"}"
-                                                            full="${"${sampleIdentifiers.join("<br>")}<br>"}"
-                                                            expandable="${sampleIdentifiers.size() > 3}"/>
-
-                                    </sec:access>
+                                    <g:set var="sampleIdentifiers" value="${(seqTrackSet.seqTracks*.sampleIdentifier).unique().sort()}"/>
+                                    <otp:expandableText shortened="${"${sampleIdentifiers.take(3).join("<br>")}<br>"}"
+                                                        full="${"${sampleIdentifiers.join("<br>")}<br>"}"
+                                                        expandable="${sampleIdentifiers.size() > 3}"/>
                                 </td>
 
                                 <td>${seqTrackSet.numberOfLanes}</td>

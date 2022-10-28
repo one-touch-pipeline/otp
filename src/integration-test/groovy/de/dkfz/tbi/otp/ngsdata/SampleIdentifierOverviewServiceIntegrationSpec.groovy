@@ -21,8 +21,8 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import spock.lang.Specification
 
 import de.dkfz.tbi.TestCase
@@ -99,9 +99,7 @@ class SampleIdentifierOverviewServiceIntegrationSpec extends Specification imple
 
         sampleIdentifierOverviewService = new SampleIdentifierOverviewService()
 
-        List<Map> expected = identifiersHidden ? [
-                [text: "hidden", withdrawn: false, comments: ""],
-        ] : [
+        List<Map> expected = [
                 [text: seqTracks[0].sampleIdentifier, withdrawn: false, comments: ""],
                 [text: seqTracks[1].sampleIdentifier, withdrawn: true,  comments: "comment"],
                 [text: seqTracks[2].sampleIdentifier, withdrawn: true,  comments: "commentA; commentB"],
@@ -111,13 +109,10 @@ class SampleIdentifierOverviewServiceIntegrationSpec extends Specification imple
         ]
 
         when:
-        List<Map> result = sampleIdentifierOverviewService.extractSampleIdentifiers(dataFiles, identifiersHidden)
+        List<Map> result = sampleIdentifierOverviewService.extractSampleIdentifiers(dataFiles)
 
         then:
         TestCase.assertContainSame(expected, result)
-
-        where:
-        identifiersHidden << [true, false]
     }
 
     void "handleSampleIdentifierEntry, test map building"() {
@@ -133,7 +128,7 @@ class SampleIdentifierOverviewServiceIntegrationSpec extends Specification imple
         sampleIdentifierOverviewService = new SampleIdentifierOverviewService()
 
         Map sampleIdentifier = [
-                text     : identifiersHidden ? "hidden" : dataFile.seqTrack.sampleIdentifier,
+                text     : dataFile.seqTrack.sampleIdentifier,
                 withdrawn: false,
                 comments : "",
         ]
@@ -155,12 +150,9 @@ class SampleIdentifierOverviewServiceIntegrationSpec extends Specification imple
         ]
 
         when:
-        Map result = sampleIdentifierOverviewService.handleSampleIdentifierEntry(dataFile.seqTrack.sample, dataFile.seqTrack.seqType, [dataFile], identifiersHidden)
+        Map result = sampleIdentifierOverviewService.handleSampleIdentifierEntry(dataFile.seqTrack.sample, dataFile.seqTrack.seqType, [dataFile])
 
         then:
         TestCase.assertContainSame(expected, result)
-
-        where:
-        identifiersHidden << [true, false]
     }
 }

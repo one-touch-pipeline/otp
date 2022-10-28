@@ -228,7 +228,6 @@ class IndividualService {
                 pid: cmd.identifier,
                 mockPid: cmd.alias,
                 mockFullName: cmd.displayedIdentifier,
-                internIdentifier: cmd.internIdentifier,
                 type: cmd.type,
                 project: cmd.individualProject,
         )

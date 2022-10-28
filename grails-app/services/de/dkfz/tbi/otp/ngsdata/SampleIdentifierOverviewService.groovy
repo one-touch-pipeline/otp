@@ -45,10 +45,7 @@ class SampleIdentifierOverviewService {
         return dataFileService.getAllDataFilesOfProject(project).groupBy { [it.sample, it.seqType] }
     }
 
-    List<Map> extractSampleIdentifiers(List<DataFile> dataFiles, boolean hideSampleIdentifier) {
-        if (hideSampleIdentifier) {
-            return [[text: "hidden", withdrawn: false, comments : ""]]
-        }
+    List<Map> extractSampleIdentifiers(List<DataFile> dataFiles) {
         return dataFiles.groupBy { it.seqTrack.sampleIdentifier }.sort { it.key }.collect { String sampleIdentifier, List<DataFile> dataFilesPerIdentifier ->
             return [
                 text     : sampleIdentifier,
@@ -58,11 +55,11 @@ class SampleIdentifierOverviewService {
         }
     }
 
-    Map handleSampleIdentifierEntry(Map.Entry<List, List<DataFile>> entry, boolean hideSampleIdentifier) {
-        return handleSampleIdentifierEntry(entry.key[0] as Sample, entry.key[1] as SeqType, entry.value, hideSampleIdentifier)
+    Map handleSampleIdentifierEntry(Map.Entry<List, List<DataFile>> entry) {
+        return handleSampleIdentifierEntry(entry.key[0] as Sample, entry.key[1] as SeqType, entry.value)
     }
 
-    Map handleSampleIdentifierEntry(Sample sample, SeqType seqType, List<DataFile> dataFiles, boolean hideSampleIdentifier) {
+    Map handleSampleIdentifierEntry(Sample sample, SeqType seqType, List<DataFile> dataFiles) {
         return [
                 individual      : [
                         id  : sample.individual.id,
@@ -76,7 +73,7 @@ class SampleIdentifierOverviewService {
                         id         : seqType.id,
                         displayText: seqType.displayNameWithLibraryLayout,
                 ],
-                sampleIdentifier: extractSampleIdentifiers(dataFiles, hideSampleIdentifier),
+                sampleIdentifier: extractSampleIdentifiers(dataFiles),
         ]
     }
 }

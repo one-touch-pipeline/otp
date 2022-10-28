@@ -58,12 +58,6 @@ class Individual implements CommentableWithProject, Entity {
      */
     String mockPid
 
-    /**
-     * Holds an internal identifier, which shouldn't be visible for normal users.
-     * Only admin users are allowed to see this value.
-     */
-    String internIdentifier
-
     enum Type { REAL, POOL, CELLLINE, UNDEFINED }
     Type type
 
@@ -78,7 +72,6 @@ class Individual implements CommentableWithProject, Entity {
 
     static constraints = {
         pid(unique: true, nullable: false, blank: false, shared: "pathComponent")
-        internIdentifier(nullable: true)
         species(nullable: true)
         comment(nullable: true)
     }
