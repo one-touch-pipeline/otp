@@ -108,7 +108,7 @@ sourceSets {
     }
     main {
         resources {
-            srcDirs 'migrations', "$buildDir/version"
+            srcDirs '/migrations', "$buildDir/version"
         }
     }
 

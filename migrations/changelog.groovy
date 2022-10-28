@@ -478,7 +478,9 @@ databaseChangeLog = {
         sqlFile(path: 'changelogs/2020/otp-623.sql')
     }
 
-    include file: 'changelogs/2020/otp-695.sql'
+    changeSet(author: "Julian Rausch", id: "otp-695") {
+        sqlFile(path: 'changelogs/2020/otp-695.sql')
+    }
 
     include file: 'changelogs/2020/otp-664.groovy'
 
@@ -684,7 +686,9 @@ databaseChangeLog = {
         sqlFile(path: 'changelogs/2022/otp-1751.sql')
     }
 
-    include file: 'changelogs/2022/otp-1596-rename-old-fastqc.sql'
+    changeSet(author: "Julian Rausch", id: "otp-1596") {
+        sqlFile(path: 'changelogs/2022/otp-1596-rename-old-fastqc.sql')
+    }
 
     include file: 'changelogs/2022/otp-1777-add-index-seqtrack-ilsesubmission.groovy'
 
