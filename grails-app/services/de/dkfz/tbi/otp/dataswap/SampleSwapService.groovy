@@ -170,6 +170,16 @@ class SampleSwapService extends AbstractDataSwapService<SampleSwapParameters, Sa
      * @param data DTO containing all entities necessary to perform a swap.
      */
     private void swapSample(SampleSwapData data) {
+        // copy the species if the new individual has no species defined
+        // and the sample doesn't exist
+        if (!data.individualSwap.new.species && !SeqTrack.withCriteria {
+            sample {
+                eq('individual', data.individualSwap.new)
+            }
+        }) {
+            data.individualSwap.new.species = data.individualSwap.old.species
+        }
+
         data.sample.individual = data.individualSwap.new
         data.sample.sampleType = data.sampleTypeSwap.new
         data.sample.save(flush: true)

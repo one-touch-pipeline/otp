@@ -33,8 +33,10 @@ import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.dataswap.parameters.SampleSwapParameters
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
+import de.dkfz.tbi.otp.domainFactory.taxonomy.TaxonomyFactoryInstance
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.security.UserAndRoles
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.CreateRoddyFileHelper
 
 import java.nio.file.Path
@@ -76,6 +78,11 @@ class SampleSwapServiceIntegrationSpec extends Specification implements UserAndR
         Individual individual = DomainFactory.createIndividual(project: bamFile.project)
 
         SeqTrack seqTrack = bamFile.seqTracks.iterator().next()
+        seqTrack.sample.mixedInSpecies = [
+                TaxonomyFactoryInstance.INSTANCE.createSpeciesWithStrain(),
+                TaxonomyFactoryInstance.INSTANCE.createSpeciesWithStrain(),
+        ]
+
         List<String> dataFileLinks = []
         DataFile.findAllBySeqTrack(seqTrack).each {
             new File(lsdfFilesService.getFileFinalPath(it)).parentFile.mkdirs()
@@ -93,7 +100,11 @@ class SampleSwapServiceIntegrationSpec extends Specification implements UserAndR
         Path scriptFolder = temporaryFolder.newFolder("files").toPath()
 
         Individual oldIndividual = bamFile.individual
+        oldIndividual.species = TaxonomyFactoryInstance.INSTANCE.createSpeciesWithStrain()
+
         Path cleanupPath = oldIndividual.getViewByPidPath(seqType).absoluteDataManagementPath.toPath()
+
+        SampleType sampleType = bamFile.sampleType
 
         when:
         SpringSecurityUtils.doWithAuth(ADMIN) {
@@ -101,7 +112,7 @@ class SampleSwapServiceIntegrationSpec extends Specification implements UserAndR
                     new SampleSwapParameters(
                             projectNameSwap: new Swap(bamFile.project.name, bamFile.project.name),
                             pidSwap: new Swap(oldIndividual.pid, individual.pid),
-                            sampleTypeSwap: new Swap(bamFile.sampleType.name, bamFile.sampleType.name),
+                            sampleTypeSwap: new Swap(sampleType.name, sampleType.name),
                             dataFileSwaps: [new Swap(dataFileName1, ""), new Swap(dataFileName2, "")],
                             bashScriptName: script,
                             log: new StringBuilder(),
@@ -133,5 +144,8 @@ class SampleSwapServiceIntegrationSpec extends Specification implements UserAndR
             assert it.comment.comment == "Attention: Datafile swapped!"
         }
         copyScriptContent.contains("rm -rf ${cleanupPath}")
+
+        individual.species == oldIndividual.species
+        CollectionUtils.exactlyOneElement(Sample.findAllByIndividualAndSampleType(individual, sampleType)).mixedInSpecies.size() == 2
     }
 }

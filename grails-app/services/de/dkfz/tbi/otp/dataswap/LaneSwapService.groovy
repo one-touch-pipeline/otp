@@ -27,6 +27,7 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataswap.data.LaneSwapData
 import de.dkfz.tbi.otp.dataswap.parameters.LaneSwapParameters
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
@@ -183,6 +184,23 @@ class LaneSwapService extends AbstractDataSwapService<LaneSwapParameters, LaneSw
      * @return swapped seqTrack
      */
     void swapLanes(LaneSwapData data) {
+        // copy the species if the new individual has no species defined
+        // and the sample doesn't exist
+        if (!data.individualSwap.new.species && !SeqTrack.withCriteria {
+            sample {
+                eq('individual', data.individualSwap.new)
+            }
+        }) {
+            data.individualSwap.new.species = data.individualSwap.old.species
+        }
+
+        // copy the mixedInSpecies if exist
+        if (!data.sampleSwap.new.mixedInSpecies && !SeqTrack.withCriteria {
+            eq('sample', data.sampleSwap.new)
+        }) {
+            data.sampleSwap.new.mixedInSpecies = new HashSet<SpeciesWithStrain>(data.sampleSwap.old.mixedInSpecies)
+        }
+
         data.seqTrackList = data.seqTrackList.collect {
             if (data.seqTypeSwap.old.hasAntibodyTarget != data.seqTypeSwap.new.hasAntibodyTarget) {
                 throw new UnsupportedOperationException("Old and new SeqTypes (old: ${data.seqTypeSwap.old};" +

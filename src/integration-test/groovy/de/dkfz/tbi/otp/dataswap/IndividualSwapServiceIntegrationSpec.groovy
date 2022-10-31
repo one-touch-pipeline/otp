@@ -33,9 +33,11 @@ import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.dataswap.parameters.IndividualSwapParameters
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
+import de.dkfz.tbi.otp.domainFactory.taxonomy.TaxonomyFactoryInstance
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.UserAndRoles
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.CreateRoddyFileHelper
 
 import java.nio.file.Path
@@ -101,6 +103,8 @@ class IndividualSwapServiceIntegrationSpec extends Specification implements User
         StringBuilder outputLog = new StringBuilder()
 
         Individual oldIndividual = bamFile.individual
+        oldIndividual.species = TaxonomyFactoryInstance.INSTANCE.createSpeciesWithStrain()
+
         Path cleanupPath = oldIndividual.getViewByPidPath(seqType).absoluteDataManagementPath.toPath()
 
         when:
@@ -146,5 +150,6 @@ class IndividualSwapServiceIntegrationSpec extends Specification implements User
             assert it.comment.comment == "Attention: Datafile swapped!"
         }
         copyScriptContent.contains("rm -rf ${cleanupPath}")
+        CollectionUtils.exactlyOneElement(Individual.findAllByPid(oldIndividual.pid)).species == oldIndividual.species
     }
 }

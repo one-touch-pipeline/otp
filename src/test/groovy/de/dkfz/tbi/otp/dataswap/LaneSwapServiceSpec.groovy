@@ -34,6 +34,7 @@ import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataswap.parameters.LaneSwapParameters
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+import de.dkfz.tbi.otp.domainFactory.taxonomy.TaxonomyFactoryInstance
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
@@ -126,6 +127,7 @@ class LaneSwapServiceSpec extends Specification implements DataTest, ServiceUnit
         // the same individual will have another Sample, but this is correct
         Sample falsyLabeledSample = createSample([
                 individual: oldIndividual,
+                mixedInSpecies: [TaxonomyFactoryInstance.INSTANCE.createSpeciesWithStrain(), TaxonomyFactoryInstance.INSTANCE.createSpeciesWithStrain()],
         ])
         Sample correctlyLabeledSample = createSample([
                 individual: oldIndividual,
@@ -218,5 +220,8 @@ class LaneSwapServiceSpec extends Specification implements DataTest, ServiceUnit
 
         and: "Falsy labeled sample is removed from oldIndividual but correctly is still there"
         CollectionUtils.containSame(Sample.findAllByIndividual(oldIndividual), [correctlyLabeledSample])
+
+        and: "Swapped sample should have the mixedInSpecies copied"
+        CollectionUtils.exactlyOneElement(Sample.findAllByIndividual(newIndividual)).mixedInSpecies.size() == 2
     }
 }
