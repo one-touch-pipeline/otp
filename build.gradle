@@ -255,7 +255,7 @@ dependencies {
     compile "org.grails:grails-async-gpars:3.3.2"
 
     // library for interacting with cluster job schedulers
-    compile('com.github.theroddywms:BatchEuphoria:0.1.0') {
+    compile('com.github.theroddywms:BatchEuphoria:ae89a31') {
         exclude group: 'org.apache.commons', module: 'commons-io'
     }
 
