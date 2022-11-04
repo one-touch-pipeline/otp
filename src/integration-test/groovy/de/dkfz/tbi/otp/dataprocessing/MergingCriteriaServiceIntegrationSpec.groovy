@@ -21,9 +21,9 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.gorm.transactions.Rollback
 import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.testing.mixin.integration.Integration
-import grails.gorm.transactions.Rollback
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
@@ -32,6 +32,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.workflow.wgbs.WgbsWorkflow
 
 @Rollback
 @Integration
@@ -40,6 +41,7 @@ class MergingCriteriaServiceIntegrationSpec extends Specification implements Use
 
     void setupData() {
         createUserAndRoles()
+        createWorkflow(name: WgbsWorkflow.WORKFLOW)
     }
 
     void "test findMergingCriteria, no MergingCriteria exists"() {
@@ -173,6 +175,7 @@ class MergingCriteriaServiceIntegrationSpec extends Specification implements Use
 
     void "test createDefaultMergingCriteria, creates a MergingCriteria"() {
         given:
+        setupData()
         DomainFactory.createAllAlignableSeqTypes()
         Project project = createProject()
         SeqType seqType = DomainFactory.createWholeGenomeSeqType()
@@ -215,6 +218,7 @@ class MergingCriteriaServiceIntegrationSpec extends Specification implements Use
 
     void "test createDefaultMergingCriteria for seq. type, creates a MergingCriteria"() {
         given:
+        setupData()
         createWorkflow(supportedSeqTypes: DomainFactory.createAllAlignableSeqTypes())
         Project project = createProject()
         SeqType seqType = DomainFactory.createWholeGenomeSeqType()
@@ -230,6 +234,7 @@ class MergingCriteriaServiceIntegrationSpec extends Specification implements Use
 
     void "test createDefaultMergingCriteria for seq. type, MergingCriteria already exists, is not changed"() {
         given:
+        setupData()
         createWorkflow(supportedSeqTypes: DomainFactory.createAllAlignableSeqTypes())
         Project project = createProject()
         SeqType seqType = DomainFactory.createWholeGenomeSeqType()
@@ -260,6 +265,7 @@ class MergingCriteriaServiceIntegrationSpec extends Specification implements Use
 
     void "test createDefaultMergingCriteria for project, creates a MergingCriteria"() {
         given:
+        setupData()
         DomainFactory.createAllAlignableSeqTypes()
         SeqType seqType = DomainFactory.createWholeGenomeSeqType()
         createWorkflow(supportedSeqTypes: [seqType])
@@ -276,6 +282,7 @@ class MergingCriteriaServiceIntegrationSpec extends Specification implements Use
 
     void "test createDefaultMergingCriteria for project, MergingCriteria already exists, is not changed"() {
         given:
+        setupData()
         SeqType seqType = DomainFactory.createWholeGenomeSeqType()
         createWorkflow(supportedSeqTypes: [seqType])
         Project project = createProject()

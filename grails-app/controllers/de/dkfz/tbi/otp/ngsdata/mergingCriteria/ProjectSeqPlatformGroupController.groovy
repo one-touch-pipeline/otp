@@ -28,11 +28,10 @@ import de.dkfz.tbi.otp.FlashMessage
 import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.dataprocessing.MergingCriteria
 import de.dkfz.tbi.otp.dataprocessing.MergingCriteriaService
-import de.dkfz.tbi.otp.ngsdata.SeqPlatform
-import de.dkfz.tbi.otp.ngsdata.SeqPlatformGroup
-import de.dkfz.tbi.otp.ngsdata.SeqType
-import de.dkfz.tbi.otp.ngsdata.SeqTypeService
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.workflow.wgbs.WgbsWorkflow
+import de.dkfz.tbi.otp.workflowExecution.WorkflowService
 
 @Secured("hasRole('ROLE_OPERATOR')")
 class ProjectSeqPlatformGroupController {
@@ -52,6 +51,7 @@ class ProjectSeqPlatformGroupController {
 
     MergingCriteriaService mergingCriteriaService
     ProjectSelectionService projectSelectionService
+    WorkflowService workflowService
 
     @Secured('isFullyAuthenticated()')
     def index(ConfigureMergingCriteriaBaseCommand cmd) {
@@ -70,9 +70,12 @@ class ProjectSeqPlatformGroupController {
         List<SeqPlatform> allUsedSpecificSeqPlatforms = seqPlatformGroupsPerProjectAndSeqType*.seqPlatforms?.flatten() as List<SeqPlatform>
         List<SeqPlatform> allSeqPlatformsWithoutGroup = SeqPlatform.all.sort { it.toString() } - allUsedSpecificSeqPlatforms
         List<SeqType> availableSeqTypes = SeqTypeService.allAlignableSeqTypes
-        [
+        boolean noLibPrepKit = cmd.seqType in workflowService.getSupportedSeqTypes(WgbsWorkflow.WORKFLOW)
+
+        return [
                 mergingCriteria                      : mergingCriteria,
                 seqType                              : cmd.seqType,
+                noLibPrepKit                         : noLibPrepKit,
                 seqPlatformGroups                    : seqPlatformGroups,
                 seqPlatformGroupsPerProjectAndSeqType: seqPlatformGroupsPerProjectAndSeqType,
                 allSeqPlatformsWithoutGroup          : allSeqPlatformsWithoutGroup,

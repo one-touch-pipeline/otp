@@ -46,21 +46,22 @@ class TriggerAlignmentServiceSpec extends HibernateSpec implements ServiceUnitTe
     List<Class> getDomainClasses() {
         return [
                 AbstractMergedBamFile,
-                RoddyBamFile,
+                BamFilePairAnalysis,
                 DataFile,
-                Project,
-                SampleType,
-                SeqType,
-                Sample,
-                Individual,
-                SeqTrack,
                 ExternallyProcessedMergedBamFile,
+                Individual,
                 MergingWorkPackage,
+                Project,
+                ReferenceGenomeSelector,
+                RoddyBamFile,
+                Sample,
+                SampleType,
+                SeqTrack,
+                SeqType,
+                Workflow,
                 WorkflowArtefact,
                 WorkflowRun,
                 WorkflowVersionSelector,
-                ReferenceGenomeSelector,
-                BamFilePairAnalysis,
         ]
     }
 

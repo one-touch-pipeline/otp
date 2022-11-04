@@ -33,6 +33,8 @@ import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.ngsdata.mergingCriteria.ConfigureMergingCriteriaBaseCommand
 import de.dkfz.tbi.otp.ngsdata.mergingCriteria.ProjectSeqPlatformGroupController
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.workflowExecution.Workflow
+import de.dkfz.tbi.otp.workflowExecution.WorkflowService
 
 @SuppressWarnings(['GroovyImplicitNullArgumentCall', 'GroovyAssignabilityCheck',])
 class ProjectSeqPlatformGroupControllerSpec extends Specification implements ControllerUnitTest<ProjectSeqPlatformGroupController>, DataTest,
@@ -41,11 +43,12 @@ class ProjectSeqPlatformGroupControllerSpec extends Specification implements Con
     @Override
     Class[] getDomainClassesToMock() {
         return [
-                SeqPlatformGroup,
-                SeqPlatform,
                 MergingCriteria,
                 Project,
+                SeqPlatform,
+                SeqPlatformGroup,
                 SeqType,
+                Workflow,
         ]
     }
 
@@ -58,6 +61,7 @@ class ProjectSeqPlatformGroupControllerSpec extends Specification implements Con
         }
         controller.mergingCriteriaService = Mock(MergingCriteriaService)
         controller.projectSelectionService = Mock(ProjectSelectionService)
+        controller.workflowService = new WorkflowService()
     }
 
     void "index, when MergingCriteria is project specific it should respond with status 200"() {

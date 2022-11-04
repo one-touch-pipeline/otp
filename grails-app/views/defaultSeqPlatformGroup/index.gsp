@@ -24,7 +24,7 @@
 <%@ page import="de.dkfz.tbi.otp.ngsdata.mergingCriteria.SelectorViewState;" contentType="text/html;charset=UTF-8" %>
 <html>
 <head>
-    <title>${g.message(code: "mergingCriteria.title", args: [selectedProject.name])}</title>
+    <title>${g.message(code: "mergingCriteria.seqPlatformDefinition")}</title>
     <asset:javascript src="common/CommentBox.js"/>
     <asset:javascript src="pages/defaultSeqPlatformGroup/index.js"/>
 </head>

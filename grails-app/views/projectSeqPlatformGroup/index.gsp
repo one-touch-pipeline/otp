@@ -23,7 +23,7 @@
 <%@ page import="de.dkfz.tbi.otp.ngsdata.mergingCriteria.SelectorViewState; de.dkfz.tbi.otp.dataprocessing.MergingCriteria" contentType="text/html;charset=UTF-8" %>
 <html>
 <head>
-    <title>${g.message(code: "mergingCriteria.title", args: [selectedProject.name])}</title>
+    <title>${g.message(code: "mergingCriteria.title", args: [selectedProject.name, seqType.displayName])}</title>
     <asset:stylesheet src="pages/projectSeqPlatformGroup/index.less"/>
     <asset:javascript src="common/CommentBox.js"/>
     <asset:javascript src="pages/projectSeqPlatformGroup/index.js"/>
@@ -35,11 +35,11 @@
 
     %{-- first row: table form--}%
 
-    <h1>${g.message(code: "mergingCriteria.title", args: [selectedProject.name])}</h1>
+    <h1>${g.message(code: "mergingCriteria.title", args: [selectedProject.name, seqType.displayName])}</h1>
 
     <g:form action="update" class="my-5">
         <g:hiddenField name="seqType.id" value="${seqType.id}"/>
-        <table>
+        <table class="table">
             <tr>
                 <th>${g.message(code: 'projectOverview.mergingCriteria.seqType')}</th>
                 <th>${g.message(code: 'projectOverview.mergingCriteria.libPrepKit')}</th>
@@ -54,9 +54,9 @@
                         true
                         <g:hiddenField name="useLibPrepKit" value="on"/>
                     </g:if>
-                    <g:elseif test="${seqType.isWgbs()}">
+                    <g:elseif test="${noLibPrepKit}">
                         false
-                    %{-- no hidden field needed --}%
+                        %{-- no hidden field needed --}%
                     </g:elseif>
                     <g:else>
                         <sec:ifAllGranted roles="ROLE_OPERATOR">

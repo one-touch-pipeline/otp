@@ -52,6 +52,7 @@ import de.dkfz.tbi.otp.project.exception.unixGroup.*
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.otp.workflow.wgbs.WgbsWorkflow
 import de.dkfz.tbi.otp.workflowExecution.*
 
 import java.nio.file.*
@@ -106,6 +107,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         DomainFactory.createIndelPipelineLazy()
         DomainFactory.createSophiaPipelineLazy()
         DomainFactory.createAceseqPipelineLazy()
+        createWorkflow(name: WgbsWorkflow.WORKFLOW)
 
         int counter = 0
         projectService.remoteShellHelper = Stub(RemoteShellHelper) {

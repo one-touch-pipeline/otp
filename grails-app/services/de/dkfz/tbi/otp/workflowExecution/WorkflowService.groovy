@@ -42,6 +42,10 @@ class WorkflowService {
         return CollectionUtils.exactlyOneElement(Workflow.findAllByNameAndDeprecatedDateIsNull(name))
     }
 
+    Set<SeqType> getSupportedSeqTypes(String name) {
+        return CollectionUtils.exactlyOneElement(Workflow.findAllByName(name)).supportedSeqTypes
+    }
+
     void createRestartedWorkflows(List<WorkflowStep> steps, boolean startDirectly = true) {
         steps.each {
             createRestartedWorkflow(it, startDirectly)

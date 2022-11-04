@@ -39,7 +39,7 @@ import de.dkfz.tbi.otp.qcTrafficLight.*
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.workflow.panCancer.PanCancerWorkflow
 import de.dkfz.tbi.otp.workflow.wgbs.WgbsWorkflow
-import de.dkfz.tbi.otp.workflowExecution.Workflow
+import de.dkfz.tbi.otp.workflowExecution.WorkflowService
 import de.dkfz.tbi.util.TimeFormats
 
 import java.nio.file.*
@@ -156,18 +156,19 @@ class AlignmentQualityOverviewController implements CheckAndCall {
             'alignment.quality.date',
     ].asImmutable()
 
-    OverallQualityAssessmentMergedService overallQualityAssessmentMergedService
-    ChromosomeQualityAssessmentMergedService chromosomeQualityAssessmentMergedService
-    ReferenceGenomeService referenceGenomeService
-    SeqTypeService seqTypeService
+    CellRangerConfigurationService cellRangerConfigurationService
     CellRangerService cellRangerService
+    ChromosomeQualityAssessmentMergedService chromosomeQualityAssessmentMergedService
+    DataFileService dataFileService
     FileSystemService fileSystemService
+    OverallQualityAssessmentMergedService overallQualityAssessmentMergedService
+    ProcessingOptionService processingOptionService
     ProjectSelectionService projectSelectionService
     QcThresholdService qcThresholdService
     QcTrafficLightService qcTrafficLightService
-    ProcessingOptionService processingOptionService
-    CellRangerConfigurationService cellRangerConfigurationService
-    DataFileService dataFileService
+    ReferenceGenomeService referenceGenomeService
+    SeqTypeService seqTypeService
+    WorkflowService workflowService
 
     def index(AlignmentQcCommand cmd) {
         Project project = projectSelectionService.selectedProject
@@ -189,12 +190,12 @@ class AlignmentQualityOverviewController implements CheckAndCall {
             case null:
                 header = ['alignment.quality.noSeqType']
                 break
-            case exactlyOneElement(Workflow.findAllByName(PanCancerWorkflow.WORKFLOW)).supportedSeqTypes.findAll { !it.needsBedFile }:
-            case exactlyOneElement(Workflow.findAllByName(WgbsWorkflow.WORKFLOW)).supportedSeqTypes:
+            case workflowService.getSupportedSeqTypes(PanCancerWorkflow.WORKFLOW).findAll { !it.needsBedFile }:
+            case workflowService.getSupportedSeqTypes(WgbsWorkflow.WORKFLOW):
                 header = HEADER_PANCANCER_AND_WGBS
                 columnsSelectionKey = "PANCANCER_AND_WGBS"
                 break
-            case exactlyOneElement(Workflow.findAllByName(PanCancerWorkflow.WORKFLOW)).supportedSeqTypes.findAll { it.needsBedFile }:
+            case workflowService.getSupportedSeqTypes(PanCancerWorkflow.WORKFLOW).findAll { it.needsBedFile }:
                 header = HEADER_PANCANCER_BED
                 columnsSelectionKey = "PANCANCER_BED"
                 break
@@ -385,8 +386,8 @@ class AlignmentQualityOverviewController implements CheckAndCall {
             ]
 
             switch (seqType) {
-                case exactlyOneElement(Workflow.findAllByName(PanCancerWorkflow.WORKFLOW)).supportedSeqTypes.findAll { !it.needsBedFile }:
-                case exactlyOneElement(Workflow.findAllByName(WgbsWorkflow.WORKFLOW)).supportedSeqTypes:
+                case workflowService.getSupportedSeqTypes(PanCancerWorkflow.WORKFLOW).findAll { !it.needsBedFile }:
+                case workflowService.getSupportedSeqTypes(WgbsWorkflow.WORKFLOW):
                     Double coverageX
                     Double coverageY
                     if (chromosomeLengthForChromosome[it.referenceGenome.id]) {
@@ -408,7 +409,7 @@ class AlignmentQualityOverviewController implements CheckAndCall {
                     ]
                     break
 
-                case exactlyOneElement(Workflow.findAllByName(PanCancerWorkflow.WORKFLOW)).supportedSeqTypes.findAll { it.needsBedFile }:
+                case workflowService.getSupportedSeqTypes(PanCancerWorkflow.WORKFLOW).findAll { it.needsBedFile }:
                     qcTableRow << [
                             targetCoverage: FormatHelper.formatNumber(abstractMergedBamFile.coverage),
                     ]
@@ -532,10 +533,10 @@ class AlignmentQualityOverviewController implements CheckAndCall {
     }
 
     private List<String> getSupportedSeqTypes() {
-        return Workflow.findAllByNameInList([
+        return [
                 PanCancerWorkflow.WORKFLOW,
                 WgbsWorkflow.WORKFLOW,
-        ]).collectMany { it.supportedSeqTypes*.name } + [
+        ].collectMany { workflowService.getSupportedSeqTypes(it)*.name } + [
                 SeqTypeNames.RNA.seqTypeName,
                 SeqTypeNames._10X_SCRNA.seqTypeName,
         ]

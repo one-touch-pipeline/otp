@@ -97,7 +97,7 @@ class MergingCriteriaService {
     }
 
     void createDefaultMergingCriteria(SeqType seqType) {
-        if (!(seqType in Workflow.all.collectMany { it.supportedSeqTypes })) {
+        if (!(seqType in Workflow.all.collectMany { it.supportedSeqTypes ?: [] })) {
             return
         }
         List<Project> allProjects = Project.all
@@ -108,7 +108,7 @@ class MergingCriteriaService {
     }
 
     void createDefaultMergingCriteria(Project project) {
-        List<SeqType> allSeqTypes = Workflow.all.collectMany { it.supportedSeqTypes }
+        List<SeqType> allSeqTypes = Workflow.all.collectMany { it.supportedSeqTypes ?: [] }
         if (!allSeqTypes) {
             return
         }

@@ -25,10 +25,13 @@ import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.workflow.wgbs.WgbsWorkflow
+import de.dkfz.tbi.otp.workflowExecution.Workflow
 
-class MergingCriteriaSpec extends Specification implements DataTest {
+class MergingCriteriaSpec extends Specification implements DataTest, WorkflowSystemDomainFactory {
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -37,6 +40,7 @@ class MergingCriteriaSpec extends Specification implements DataTest {
                 Project,
                 Realm,
                 SeqType,
+                Workflow,
         ]
     }
 
@@ -71,8 +75,9 @@ class MergingCriteriaSpec extends Specification implements DataTest {
 
     void "test that for WGBS data LibPrepKit must be false, should fail when it is true"() {
         given:
-        MergingCriteria mergingCriteria = DomainFactory.createMergingCriteria()
         SeqType seqType = DomainFactory.createWholeGenomeBisulfiteSeqType()
+        createWorkflow(name: WgbsWorkflow.WORKFLOW, supportedSeqTypes: [seqType] as Set)
+        MergingCriteria mergingCriteria = DomainFactory.createMergingCriteria()
 
         when:
         mergingCriteria.useLibPrepKit = true

@@ -26,7 +26,10 @@ import groovy.transform.ToString
 
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.Entity
+import de.dkfz.tbi.otp.workflow.wgbs.WgbsWorkflow
+import de.dkfz.tbi.otp.workflowExecution.Workflow
 
 @ToString(includeNames = true, includePackage = false)
 @ManagedEntity
@@ -48,7 +51,8 @@ class MergingCriteria implements Entity {
             if (obj.seqType.needsBedFile && !val) {
                 return "exome"
             }
-            if (obj.seqType.isWgbs() && val) {
+
+            if (obj.seqType in CollectionUtils.exactlyOneElement(Workflow.findAllByName(WgbsWorkflow.WORKFLOW)).supportedSeqTypes && val) {
                 return "wgbs"
             }
         }
