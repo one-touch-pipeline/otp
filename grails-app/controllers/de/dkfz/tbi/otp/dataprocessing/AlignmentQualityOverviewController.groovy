@@ -38,6 +38,7 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.qcTrafficLight.*
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.workflow.panCancer.PanCancerWorkflow
+import de.dkfz.tbi.otp.workflow.wgbs.WgbsWorkflow
 import de.dkfz.tbi.otp.workflowExecution.Workflow
 import de.dkfz.tbi.util.TimeFormats
 
@@ -189,7 +190,7 @@ class AlignmentQualityOverviewController implements CheckAndCall {
                 header = ['alignment.quality.noSeqType']
                 break
             case exactlyOneElement(Workflow.findAllByName(PanCancerWorkflow.WORKFLOW)).supportedSeqTypes.findAll { !it.needsBedFile }:
-            case { it.name in [SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName, SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName] }:
+            case exactlyOneElement(Workflow.findAllByName(WgbsWorkflow.WORKFLOW)).supportedSeqTypes:
                 header = HEADER_PANCANCER_AND_WGBS
                 columnsSelectionKey = "PANCANCER_AND_WGBS"
                 break
@@ -385,7 +386,7 @@ class AlignmentQualityOverviewController implements CheckAndCall {
 
             switch (seqType) {
                 case exactlyOneElement(Workflow.findAllByName(PanCancerWorkflow.WORKFLOW)).supportedSeqTypes.findAll { !it.needsBedFile }:
-                case { it.name in [SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName, SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName] }:
+                case exactlyOneElement(Workflow.findAllByName(WgbsWorkflow.WORKFLOW)).supportedSeqTypes:
                     Double coverageX
                     Double coverageY
                     if (chromosomeLengthForChromosome[it.referenceGenome.id]) {
@@ -531,12 +532,13 @@ class AlignmentQualityOverviewController implements CheckAndCall {
     }
 
     private List<String> getSupportedSeqTypes() {
-        return [
-                SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName,
-                SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName,
+        return Workflow.findAllByNameInList([
+                PanCancerWorkflow.WORKFLOW,
+                WgbsWorkflow.WORKFLOW,
+        ]).collectMany { it.supportedSeqTypes*.name } + [
                 SeqTypeNames.RNA.seqTypeName,
                 SeqTypeNames._10X_SCRNA.seqTypeName,
-        ] + exactlyOneElement(Workflow.findAllByName(PanCancerWorkflow.WORKFLOW)).supportedSeqTypes*.name
+        ]
     }
 }
 
