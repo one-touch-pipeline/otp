@@ -30,7 +30,7 @@
                    data-target="#collapse${selector.id}" aria-controls="collapse${selector.id}">
                     <i class="bi bi-chevron-down float-right"></i>
                     ${selector.priority}
-                    <g:link class="above-stretched-link" controller="workflowConfig" action="index"
+                    <g:link class="above-stretched-link" controller="workflowConfig" action="index" fragment="workflowConfigModal"
                             params="${['selector.id': selector.id]}">${selector.name}</g:link>
                 </a>
             </div>

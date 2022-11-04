@@ -233,6 +233,19 @@ $.otp.workflowConfig = {
     });
   },
 
+  fetchSelector: (id) => {
+    'use strict';
+
+    return new Promise((resolve, reject) => {
+      $.ajax({
+        url: $.otp.createLink({ controller: $.otp.workflowConfig.CONTROLLER, action: 'selector', id }),
+        type: 'GET',
+        success: (data) => resolve(data),
+        error: (error) => reject(error)
+      });
+    });
+  },
+
   /**
    * Helper function to get the datatable
    */
@@ -297,6 +310,23 @@ $.otp.workflowConfig = {
 
 $(document).ready(() => {
   'use strict';
+
+  let selectorData;
+  if (window.location.hash.includes('workflowConfigModal')) {
+    const selectorId = parseInt(window.location.search.split('selector.id=')[1], 10);
+    if (!Number.isNaN(selectorId)) {
+      $.otp.workflowConfig.fetchSelector(selectorId).then((data) => {
+        selectorData = data;
+        $.otp.workflowConfig.getDialog().modal('show');
+      }).catch((err) => {
+        const message = (err && err.responseJSON) ? err.responseJSON.message :
+          `Failed fetching Selector by selectorId: ${selectorId}`;
+        $.otp.toaster.showErrorToast('Failed fetching Selector', message);
+      });
+    } else {
+      $.otp.toaster.showErrorToast('Selector Id Error', 'selectorId should be an integer');
+    }
+  }
 
   /**
    * Datatables shown a list of selectors that match the search query.
@@ -419,6 +449,8 @@ $(document).ready(() => {
     $.otp.workflowConfig.getWorkflowVersionSelection().select2({
       templateResult: (data) => data.text
     });
+    // remove the search parameters if exists
+    window.history.replaceState(null, '', window.location.href.replace(/&(.*)#workflowConfigModal/, ''));
   });
 
   /**
@@ -426,14 +458,18 @@ $(document).ready(() => {
    */
   $.otp.workflowConfig.getDialog().on('shown.bs.modal', (event) => {
     // set the correct title operation: create|update|deprecate|view
-    let operation = $(event.relatedTarget).data('operation');
+    let operation = event.relatedTarget ? $(event.relatedTarget).data('operation') :
+      $.otp.workflowConfig.OPERATION.UPDATE;
+    const rowIdx = event.relatedTarget ? workflowConfigTable.row($(event.relatedTarget).parents('tr').first())
+      .index() : -1;
+    const rowData = event.relatedTarget ? workflowConfigTable.row(rowIdx).data() || {} : selectorData;
+
     if (operation) {
       $('div.modal-footer #save-button').removeClass('d-none');
+    } else {
+      operation = $.otp.workflowConfig.OPERATION.VIEW;
     }
-    operation = operation || $.otp.workflowConfig.OPERATION.VIEW;
 
-    const rowIdx = workflowConfigTable.row($(event.relatedTarget).parents('tr').first()).index();
-    const rowData = workflowConfigTable.row(rowIdx).data() || {};
     if (rowIdx === undefined) { // create a select without reference
       $.otp.workflowConfig.QUERY_FIELDS.forEach((f) => {
         rowData[f] = $.otp.workflowConfig.findQuerySelection(f).val().map((id) => ({ id }));
@@ -648,7 +684,7 @@ $(document).ready(() => {
         let op = operation.toLowerCase();
         const row = $.otp.workflowConfig.getDataTable().row(`#${response.id}`);
         response.exactMatch = false;
-        if (op === $.otp.workflowConfig.OPERATION.UPDATE) {
+        if (op === $.otp.workflowConfig.OPERATION.UPDATE && row.data()) {
           response.exactMatch = row.data().exactMatch;
           newSelector = JSON.parse(JSON.stringify(response)
             .replace(/"workflowVersion"/g, '"name"'));
