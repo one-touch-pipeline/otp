@@ -171,11 +171,13 @@ $.otp.workflowConfig = {
     thisDialog.find('.modal-content #pp-operation').attr('name', `_action_${operation}`);
 
     thisDialog.find('.modal-content #workflowConfigModalForm').removeClass('d-none');
+    thisDialog.find('.modal-footer button.check').removeClass('d-none');
     thisDialog.find('.modal-content #confirmContent').addClass('d-none');
 
     thisDialog.find('.modal-dialog').addClass('modal-xl');
     if (operation === $.otp.workflowConfig.OPERATION.DEPRECATE) {
       thisDialog.find('.modal-content #workflowConfigModalForm').addClass('d-none');
+      thisDialog.find('.modal-footer button.check').addClass('d-none');
       thisDialog.find('.modal-content #confirmContent').removeClass('d-none');
       thisDialog.find('.modal-dialog').removeClass('modal-xl');
     } else if (operation === $.otp.workflowConfig.OPERATION.VIEW) {

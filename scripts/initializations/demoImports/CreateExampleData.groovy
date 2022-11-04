@@ -495,9 +495,9 @@ class ExampleData {
 
     void createDocumentTestData() {
         Set<DocumentType> documentTypes = documentService.listDocumentTypes()
-        documentService.updateDocument(documentTypes[0], "PROJECT_FORM".bytes, Document.FormatType.TXT)
-        documentService.updateDocument(documentTypes[1], "METADATA_TEMPLATE".bytes, Document.FormatType.TXT)
-        documentService.updateDocument(documentTypes[2], "PROCESSING_INFORMATION".bytes, Document.FormatType.TXT)
+        documentService.updateDocument(documentTypes[0], "PROJECT_FORM".bytes, "some link", Document.FormatType.TXT)
+        documentService.updateDocument(documentTypes[1], "METADATA_TEMPLATE".bytes, "some link", Document.FormatType.TXT)
+        documentService.updateDocument(documentTypes[2], "PROCESSING_INFORMATION".bytes, "some link", Document.FormatType.TXT)
     }
 
     void findOrCreateProcessingThresholds() {

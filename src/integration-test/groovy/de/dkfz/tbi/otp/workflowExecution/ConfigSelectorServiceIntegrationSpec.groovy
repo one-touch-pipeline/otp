@@ -413,11 +413,11 @@ class ConfigSelectorServiceIntegrationSpec extends Specification implements Work
         given:
         createUserAndRoles()
         ExternalWorkflowConfigFragment fragment = createExternalWorkflowConfigFragment()
-        createExternalWorkflowConfigSelector(externalWorkflowConfigFragment: fragment)
+        ExternalWorkflowConfigSelector selector = createExternalWorkflowConfigSelector(externalWorkflowConfigFragment: fragment)
 
         when:
         doWithAuth(ADMIN) {
-            service.deprecate(fragment)
+            service.deprecate(selector)
         }
 
         then:

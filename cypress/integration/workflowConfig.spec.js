@@ -64,6 +64,7 @@ describe('Check workflow config page', () => {
 
     it('should filter the workflow configuration and edit it', () => {
       cy.intercept('/workflowConfig/data*').as('searchWorkflowConfig');
+      cy.intercept('/workflowConfig/fragments/*').as('getWorkflowConfigFragments');
 
       cy.fixture('workflowConfig.json').then((config) => {
         cy.get('div.search-query').find('select[name="projects"]').select(config[1].projects, { force: true });
@@ -74,18 +75,23 @@ describe('Check workflow config page', () => {
         cy.wait('@searchWorkflowConfig').then((interception) => {
           expect(interception.response.statusCode).to.eq(200);
           expect(interception.response.body.data.length).to.eq(3);
-          cy.get('div.search-query').contains(config[0].selectorName).should('exist');
         });
 
         cy.intercept('/workflowConfig/update*').as('updateWorkflowConfig');
 
-        cy.get('tr').contains(config[0].selectorName).parent().parent()
+        cy.get('table#workflowConfigResult td.dataTables_empty').should('not.exist');
+        cy.get('table#workflowConfigResult tbody tr').contains(config[0].selectorName).should('exist').parent()
+          .parent()
           .find('#edit-row')
           .click();
 
+        cy.wait('@getWorkflowConfigFragments').then((interception) => {
+          expect(interception.response.statusCode).to.eq(200);
+        });
+
         cy.get('div.modal-content').should('be.visible');
-        cy.get('div.modal-content').find('input[name="selectorName"]').click().clear()
-          .type(config[2].selectorName);
+        cy.get('div.modal-content input[name="selectorName"]').should('have.value', config[0].selectorName)
+          .clear().type(config[2].selectorName);
         cy.get('div.modal-content').find('select[name="workflows"]').select(config[2].workflows, { force: true });
         cy.get('div.modal-content').find('select[name="projects"]').select(config[2].projects, { force: true });
         cy.get('div.modal-content').find('select[name="referenceGenomes"]')
@@ -108,6 +114,7 @@ describe('Check workflow config page', () => {
     it('should search for the modified selector and create a new selector based on the modified one', () => {
       // Search for the modified selector
       cy.intercept('/workflowConfig/data*').as('searchWorkflowConfig');
+      cy.intercept('/workflowConfig/fragments/*').as('getWorkflowConfigFragments');
 
       cy.fixture('workflowConfig.json').then((config) => {
         cy.get('div.search-query').find('select[name="projects"]').select(config[2].projects, { force: true });
@@ -117,8 +124,9 @@ describe('Check workflow config page', () => {
         cy.wait('@searchWorkflowConfig').then((interception) => {
           expect(interception.response.statusCode).to.eq(200);
           expect(interception.response.body.data.length).to.eq(1);
-          cy.contains(config[2].selectorName).should('exist');
         });
+
+        cy.get('table#workflowConfigResult td.dataTables_empty').should('not.exist');
 
         // create a new selector based on the modified one
         cy.intercept('/workflowConfig/create*').as('createWorkflowConfig');
@@ -127,11 +135,14 @@ describe('Check workflow config page', () => {
           .find('#new-row')
           .click();
 
+        cy.wait('@getWorkflowConfigFragments').then((interception) => {
+          expect(interception.response.statusCode).to.eq(200);
+        });
+
         cy.get('div.modal-content').should('be.visible');
-        cy.get('div.modal-content').find('input[name="selectorName"]').click().clear()
+        cy.get('div.modal-content input[name="selectorName"]').should('have.value', config[2].selectorName).clear()
           .type(config[3].selectorName);
         cy.get('div.modal-content').find('select[name="projects"]').select(config[3].projects, { force: true });
-        cy.get('div.modal-content').find('select[name="workflowVersions"]').select(config[3].versions, { force: true });
 
         cy.get('div.modal-content').find('#save-button').click();
 
@@ -143,6 +154,7 @@ describe('Check workflow config page', () => {
 
     it('should search for the selectors and delete them', () => {
       cy.intercept('/workflowConfig/data*').as('searchWorkflowConfig');
+      cy.intercept('/workflowConfig/fragments/*').as('getWorkflowConfigFragments');
       cy.intercept('/workflowConfig/deprecate*').as('deprecateWorkflowConfig');
 
       cy.fixture('workflowConfig.json').then((config) => {
@@ -156,6 +168,7 @@ describe('Check workflow config page', () => {
           expect(outerInterception.response.body.data.length).to.eq(2);
         });
 
+        cy.get('table#workflowConfigResult td.dataTables_empty').should('not.exist');
         cy.get('table#workflowConfigResult').contains(config[2].selectorName).should('exist');
         cy.get('table#workflowConfigResult').contains(config[3].selectorName).should('exist');
 
@@ -163,21 +176,27 @@ describe('Check workflow config page', () => {
           .parent()
           .find('#deprecate-row')
           .click({ force: true });
-        cy.get('div#workflowConfigModal').should('be.visible');
-        cy.get('div#workflowConfigModal').find('#save-button').click({ force: true });
+        cy.wait('@getWorkflowConfigFragments').then((interception) => {
+          expect(interception.response.statusCode).to.eq(200);
+          cy.get('div#workflowConfigModal').should('be.visible');
+          cy.get('div.modal-dialog button#save-button').should('be.visible').click({ force: true });
+        });
 
         cy.wait('@deprecateWorkflowConfig').then((interception) => {
           expect(interception.response.statusCode).to.eq(200);
           expect(interception.response.body.name).to.eq(config[2].selectorName);
-          cy.get('div#workflowConfigModal').should('not.be.visible');
+          cy.get('div.modal-dialog').should('not.be.visible');
         });
 
         cy.get('table#workflowConfigResult tr').contains(config[3].selectorName).parent()
           .parent()
           .find('#deprecate-row')
           .click();
-        cy.get('div#workflowConfigModal').should('be.visible');
-        cy.get('div#workflowConfigModal').find('#save-button').click({ force: true });
+        cy.wait('@getWorkflowConfigFragments').then((interception) => {
+          expect(interception.response.statusCode).to.eq(200);
+          cy.get('div#workflowConfigModal').should('be.visible');
+          cy.get('div.modal-dialog button#save-button').should('be.visible').click({ force: true });
+        });
         cy.wait('@deprecateWorkflowConfig').then((interception2) => {
           expect(interception2.response.statusCode).to.eq(200);
           expect(interception2.response.body.name).to.eq(config[3].selectorName);

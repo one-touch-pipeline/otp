@@ -159,13 +159,11 @@ class WorkflowConfigController implements BaseWorkflowConfigController {
         } as JSON
     }
 
-    JSON deprecate(ExternalWorkflowConfigFragment fragment) {
-        log.debug("selector deprecating: ${fragment.name}")
+    JSON deprecate(ExternalWorkflowConfigSelector selector) {
+        log.debug("selector deprecating: ${selector.name}")
         try {
-            ExternalWorkflowConfigSelector selector = externalWorkflowConfigSelectorService.findExactlyOneByExternalWorkflowConfigFragment(fragment)
-
             Map<String, Object> deprecatedSelector = transformToMap(selector)
-            configSelectorService.deprecate(fragment)
+            configSelectorService.deprecate(selector)
 
             render deprecatedSelector as JSON
         } catch (AssertionError ex) {
