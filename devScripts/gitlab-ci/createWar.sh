@@ -22,7 +22,7 @@
 #
 
 # Run war build and save output to warLogs
-./gradlew war 2>&1 | tee warLogs
+./gradlew --build-cache war 2>&1 | tee warLogs
 
 # Grep all errors and save them to warErrors
 cat warLogs | grep -e " error(s)," -e "ERROR -" >> warErrors

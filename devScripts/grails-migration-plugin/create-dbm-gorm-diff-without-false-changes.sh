@@ -199,7 +199,7 @@ uniqueConstraints="\
 mkdir -p migrations/changelogs/${year} ${tmpDir}
 
 #create diff and cleanup false positives
-bash gradlew dbmGormDiff -q | \
+bash gradlew dbmGormDiff --build-cache -q | \
   tee ${tmpDir}/migration-step01.groovy | \
 
   # delete anything before the line with "databaseChangeLog = {"
