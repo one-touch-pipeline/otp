@@ -26,5 +26,5 @@
 <g:if test="${mwp.status == Status.DELETED}"><span class="deleted">${g.message(code: "cellRanger.selection.deletedRun")}</g:if>
 <g:if test="${mwp.expectedCells}">${g.message(code: "cellRanger.selection.expectedCells", args: [mwp.expectedCells])}</g:if>
 <g:if test="${mwp.enforcedCells}">${g.message(code: "cellRanger.selection.enforcedCells", args: [mwp.enforcedCells])}</g:if>
-<g:if test="${!(mwp.expectedCells || mwp.enforcedCells)}">${g.message(code: "cellRanger.selection.noExpectedEnforced")}</g:if>
+<g:if test="${!(mwp.expectedCells || mwp.enforcedCells)}">${g.message(code: "cellRanger.selection.default")}</g:if>
 <g:if test="${mwp.status == Status.DELETED}"></span></g:if>

@@ -160,7 +160,7 @@
                             <strong>${g.message(code: "cellRanger.create.expectedOrEnforcedCells")}:</strong><br><br>
                             <label>
                                 <g:radio name="expectedOrEnforcedCells" value="neither" checked="${cmd == null || cmd.expectedOrEnforcedCells == "neither"}"/>
-                                ${g.message(code: "cellRanger.neither")}
+                                ${g.message(code: "cellRanger.default")}
                             </label>
                             <br>
                             <label>
