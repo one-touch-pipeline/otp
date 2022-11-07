@@ -20,4 +20,4 @@
  * SOFTWARE.
  */
 
-CREATE INDEX seq_track_sample_identifier_idx ON seq_track (sample_identifier);
+CREATE INDEX IF NOT EXISTS seq_track_sample_identifier_idx ON seq_track (sample_identifier);
