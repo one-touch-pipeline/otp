@@ -22,11 +22,6 @@
 
 set -ev
 
-#create link of maven cache to place were gitlab ci allows caching
-mkdir -p $GRADLE_CACHES $GRADLE_WRAPPER $HOME/.gradle
-ln -s $GRADLE_CACHES $HOME/.gradle/caches
-ln -s $GRADLE_WRAPPER $HOME/.gradle/wrapper
-
 #needed log dir
 mkdir -p logs/jobs
 
