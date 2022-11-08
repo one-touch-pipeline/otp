@@ -33,7 +33,7 @@ variables:
   GRADLE_OPTS: '-Xms1g -Xmx4g -Dorg.gradle.daemon=false'
   GRAILS_OPTS: '-Xmx4g'
   ARTIFACTS_BASE_DIRECTORY: 'artifacts'
-  GRADLE_USER_HOME: $CI_PROJECT_DIR/cache # overrides GRADLE_USER_HOMER default for caching
+  GRADLE_USER_HOME: $CI_PROJECT_DIR/cache # overrides GRADLE_USER_HOME default for caching
   GRADLE_CACHES: cache/caches/
   GRADLE_WRAPPER: cache/wrapper/
   ARTIFACT_DOWNLOAD_ATTEMPTS: "3"
