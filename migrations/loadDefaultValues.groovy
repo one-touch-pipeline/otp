@@ -56,4 +56,6 @@ databaseChangeLog = {
     }
 
     include file: 'changelogs/defaultValues/ewc/ewc-roddy-pancancer-defaults.groovy'
+
+    include file: 'changelogs/defaultValues/ewc/ewc-roddy-wgbs-defaults.groovy'
 }

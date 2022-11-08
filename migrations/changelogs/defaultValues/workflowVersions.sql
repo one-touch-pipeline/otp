@@ -30,7 +30,7 @@ INSERT INTO workflow_version(id, version, workflow_id, workflow_version, date_cr
 VALUES (nextval('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'WES FastQC'), '0.11.5', now(), now())
 ON CONFLICT DO NOTHING;
 
---pancan versions
+--pancancer versions
 INSERT INTO workflow_version(id, version, workflow_id, workflow_version, date_created, last_updated)
 VALUES (nextval('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'PanCancer alignment'), '1.2.182', now(), now())
 ON CONFLICT DO NOTHING;
@@ -59,9 +59,30 @@ INSERT INTO workflow_version(id, version, workflow_id, workflow_version, date_cr
 VALUES (nextval('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'PanCancer alignment'), '1.2.73-204', now(), now())
 ON CONFLICT DO NOTHING;
 
---wgbs pancan versions
+--wgbs pancancer versions
+INSERT INTO workflow_version(id, version, workflow_id, workflow_version, date_created, last_updated)
+VALUES (nextval('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'WGBS alignment'), '1.2.51-1', now(), now())
+ON CONFLICT DO NOTHING;
+INSERT INTO workflow_version(id, version, workflow_id, workflow_version, date_created, last_updated)
+VALUES (nextval('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'WGBS alignment'), '1.2.51-2', now(), now())
+ON CONFLICT DO NOTHING;
+INSERT INTO workflow_version(id, version, workflow_id, workflow_version, date_created, last_updated)
+VALUES (nextval('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'WGBS alignment'), '1.2.73-1', now(), now())
+ON CONFLICT DO NOTHING;
+INSERT INTO workflow_version(id, version, workflow_id, workflow_version, date_created, last_updated)
+VALUES (nextval('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'WGBS alignment'), '1.2.73-2', now(), now())
+ON CONFLICT DO NOTHING;
+INSERT INTO workflow_version(id, version, workflow_id, workflow_version, date_created, last_updated)
+VALUES (nextval('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'WGBS alignment'), '1.2.73-3', now(), now())
+ON CONFLICT DO NOTHING;
 INSERT INTO workflow_version(id, version, workflow_id, workflow_version, date_created, last_updated)
 VALUES (nextval('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'WGBS alignment'), '1.2.73-201', now(), now())
+ON CONFLICT DO NOTHING;
+INSERT INTO workflow_version(id, version, workflow_id, workflow_version, date_created, last_updated)
+VALUES (nextval('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'WGBS alignment'), '1.2.73-202', now(), now())
+ON CONFLICT DO NOTHING;
+INSERT INTO workflow_version(id, version, workflow_id, workflow_version, date_created, last_updated)
+VALUES (nextval('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'WGBS alignment'), '1.2.73-204', now(), now())
 ON CONFLICT DO NOTHING;
 
 --rna versions
