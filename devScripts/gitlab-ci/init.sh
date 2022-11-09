@@ -34,8 +34,5 @@ mkdir -p logs/jobs
 echo 'otp.testing.group=othergroup' >> $HOME/.otp.properties
 echo 'otp.testing.project.unix.group=otp' >> $HOME/.otp.properties
 
-#set proxy if given
-`dirname $0`/use-proxy.sh
-
 #set local repository
 `dirname $0`/use-local-repository.sh
