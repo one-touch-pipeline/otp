@@ -95,9 +95,6 @@ class SampleValidator extends ValueTuplesValidator<MetadataValidationContext> im
                     context.addProblem(it.cells, LogLevel.ERROR, "Sample name '${sampleName}' is not registered in OTP. It looks like it belongs to project '${parsedIdentifier.projectName}' and individual '${parsedIdentifier.pid}', but individual '${parsedIdentifier.pid}' is already registered in OTP with project '${individual.project.name}'.", "At least one sample name is not registered in OTP. It looks like it belongs to a specific project and individual, but this individual is already registered in OTP with another project.")
                     error = true
                 }
-                if (projectName != parsedIdentifier.projectName) {
-                    context.addProblem(it.cells, LogLevel.ERROR, "The parsed project '${parsedIdentifier.projectName}' of the sample name does not match the project in the metadata column '${projectName}'", "At least for one sample name the parsed project does not match the project in the metadata column.")
-                }
                 if (!error) {
                     parsedSampleIdentifiers.add("${parsedIdentifier.projectName}\t${parsedIdentifier.pid}\t${parsedIdentifier.sampleTypeDbName}\t${parsedIdentifier.fullSampleName}")
                 }
