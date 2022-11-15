@@ -176,6 +176,18 @@ Closure<String> createScript = { String swapLabel ->
 
         List<Sample> samples = Sample.findAllByIndividual(oldIndividual, [sort: 'id'])
 
+        List<SeqType> seqTypes = SeqTrack.createCriteria().listDistinct {
+            projections {
+                property('seqType')
+                'in'("sample", samples)
+            }
+        } as List<SeqType>
+
+        println "\t- SeqTypes:"
+        seqTypes.each {
+            println "\t\t- ${it} ${seqTypeFilterList.contains(it) ? "(ignored)" : ""}"
+        }
+
         // simplest case: move entire patient
         if (newSampleType == null && seqTypeFilterList.empty && // only if we're moving entire, unfiltered patients...
                 (!newIndividual || newProject != oldIndividual.project) // .. either into a shiny new patient, or into another project entirely
@@ -300,6 +312,8 @@ private int moveOneSample(Project newProject,
                           StringBuilder script, List<String> files,
                           Set<String> createdPids, Set<String> createdSamples
 ) {
+    assert oldSampleType: "A sampletype needs to be set for \"${oldIndividual.displayName}\". " +
+            "If this functionality is required please create a new Issue."
     Sample oldSample = CollectionUtils.exactlyOneElement(Sample.findAllByIndividualAndSampleType(oldIndividual, oldSampleType),
             "couldn't find old sample for \"${oldIndividual.displayName} ${oldSampleType.displayName}\"")
 
