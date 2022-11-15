@@ -313,10 +313,14 @@ $(document).ready(() => {
 
   let selectorData;
   if (window.location.hash.includes('workflowConfigModal')) {
-    const selectorId = parseInt(window.location.search.split('selector.id=')[1], 10);
+    const urlSearchParams = new URLSearchParams(window.location.search);
+    const params = Object.fromEntries(urlSearchParams.entries());
+    const selectorId = parseInt(params['selector.id'], 10);
+
     if (!Number.isNaN(selectorId)) {
       $.otp.workflowConfig.fetchSelector(selectorId).then((data) => {
         selectorData = data;
+        $.otp.workflowConfig.prefill(selectorId);
         $.otp.workflowConfig.getDialog().modal('show');
       }).catch((err) => {
         const message = (err && err.responseJSON) ? err.responseJSON.message :

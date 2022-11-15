@@ -69,25 +69,26 @@ describe('Check workflow config viewer page', () => {
       });
     });
     it('should show workflowConfigModal on workflowConfig page', () => {
-      let selectorName;
       cy.intercept('/workflowConfigViewer/build*').as('buildConfig');
 
       cy.get('.selector').find('#workflowSelector').select('Cell Ranger', { force: true });
 
       cy.get('#relatedSelectors').find('a.above-stretched-link').first().then(($link) => {
-        selectorName = $link.text();
+        const selectorName = $link.text();
+        cy.get('#relatedSelectors').find('a.above-stretched-link').first().click()
+          .should('not.be.empty');
+        cy.url().should('include', 'selector.id')
+          .should('include', '#workflowConfigModal');
+        cy.get('div.modal-content').should('be.visible');
+        cy.get('div.modal-content').find('input[name="selectorName"]').should('have.value', selectorName);
       });
-      cy.get('#relatedSelectors').find('a.above-stretched-link').first().click()
-        .should('not.be.empty');
-      cy.get('div.modal-content').should('be.visible');
-      //cy.get('div.modal-content').find('input[name="selectorName"]').should('have.value', selectorName);
     });
     it('should show toaster if selectorId does not match', () => {
       cy.intercept('/workflowConfigViewer/build*').as('buildConfig');
 
       cy.get('#otpToastBox').should('not.exist');
       cy.get('.selector').find('#workflowSelector').select('Cell Ranger', { force: true });
-      cy.visit('http://localhost:8080/workflowConfig/index?project=ExampleProject&selector.id=100#workflowConfigModal');
+      cy.visit('http://localhost:8080/workflowConfig/index?project=ExampleProject&selector.id=-1#workflowConfigModal');
       cy.get('#otpToastBox').should('exist').then((toaster) => {
         cy.wrap(toaster).should('contain', 'Failed fetching Selector by selectorId: ');
       });
