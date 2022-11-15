@@ -68,12 +68,12 @@ WorkflowVersionSelector.withTransaction {
 List<ReferenceGenome> allUsedReferenceGenomes = []
 ReferenceGenomeSelector.withTransaction {
     ReferenceGenomeProjectSeqType.findAllBySeqTypeInListAndDeprecatedDateIsNull(seqTypes)
-            .groupBy { [it.project, it.seqType, it.referenceGenome.species] }
+            .groupBy { [it.project, it.seqType, it.referenceGenome.speciesWithStrain] }
             .each { _, List<ReferenceGenomeProjectSeqType> rgpsts ->
 
                 ReferenceGenomeProjectSeqType rgpst = rgpsts.first()
                 if (rgpsts*.referenceGenome.unique().size() > 1) {
-                    println "WARNING: multiple refernce genomes found for '${rgpst.project} ${rgpst.seqType} ${rgpst.referenceGenome.species.join("+")}', using first one:"
+                    println "WARNING: multiple reference genomes found for '${rgpst.project} ${rgpst.seqType} ${rgpst.referenceGenome.speciesWithStrain.join("+")}', using first one:"
                     rgpsts*.referenceGenome.each {
                         println "    ${it}"
                     }
@@ -82,7 +82,7 @@ ReferenceGenomeSelector.withTransaction {
                 new ReferenceGenomeSelector(
                         project: rgpst.project,
                         seqType: rgpst.seqType,
-                        species: new HashSet(rgpst.referenceGenome.species),
+                        species: new HashSet(rgpst.referenceGenome.speciesWithStrain),
                         workflow: workflow,
                         referenceGenome: rgpst.referenceGenome,
                 ).save(flush: true)

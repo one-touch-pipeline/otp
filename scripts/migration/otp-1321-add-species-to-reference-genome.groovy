@@ -71,7 +71,7 @@ ReferenceGenome.withTransaction {
         ReferenceGenome referenceGenome = CollectionUtils.atMostOneElement(ReferenceGenome.findAllByName(it[0].trim()))
         if (referenceGenome) {
             Set<SpeciesWithStrain> species = it[1].split(" \\+ ").collect { String speciesName -> speciesMap[speciesName] }
-            referenceGenome.species = species as Set
+            referenceGenome.speciesWithStrain = species as Set
             referenceGenome.save(flush: true)
         }
     }

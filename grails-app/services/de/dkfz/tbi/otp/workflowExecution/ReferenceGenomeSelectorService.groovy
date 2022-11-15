@@ -27,6 +27,7 @@ import org.springframework.validation.Errors
 
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.ngsdata.taxonomy.Species
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.project.Project
 
@@ -59,5 +60,44 @@ class ReferenceGenomeSelectorService {
             return e.errors
         }
         return null
+    }
+
+    Map<Set<SpeciesWithStrain>, List<ReferenceGenome>> getMappingOfSpeciesCombinationsToReferenceGenomes(Project project) {
+        Set<SpeciesWithStrain> projectSpecies = project.speciesWithStrains
+        List<ReferenceGenome> referenceGenomes = ReferenceGenome.all
+
+        Map<Set<SpeciesWithStrain>, List<ReferenceGenome>> result = [:]
+        referenceGenomes.each { referenceGenome ->
+            if (referenceGenome.speciesWithStrain.any { it in projectSpecies } || referenceGenome.species.any { it in projectSpecies*.species }) {
+                List<Collection<SpeciesWithStrain>> speciesReplacements = referenceGenome.species.collect {
+                    Species s -> projectSpecies.findAll { SpeciesWithStrain sws -> sws.species == s } ?: SpeciesWithStrain.findAllBySpecies(s)
+                }
+                Set<Set<SpeciesWithStrain>> speciesWithStrainSets = speciesToSpeciesWithStrain(speciesReplacements, referenceGenome.speciesWithStrain)
+                speciesWithStrainSets.each { speciesWithStrain ->
+                    if (result[speciesWithStrain]) {
+                        result[speciesWithStrain].add(referenceGenome)
+                    } else {
+                        result[speciesWithStrain] = [referenceGenome]
+                    }
+                }
+            }
+        }
+        return result
+    }
+
+    private Set<Set<SpeciesWithStrain>> speciesToSpeciesWithStrain(List<Collection<SpeciesWithStrain>> species,
+                                                                   Set<SpeciesWithStrain> speciesWithStrain = [] as Set) {
+        Set<Set<SpeciesWithStrain>> result = [] as Set
+        if (species) {
+            while (species) {
+                Collection<SpeciesWithStrain> sp = species.remove(0)
+                sp.each {
+                    result.addAll(speciesToSpeciesWithStrain(species, speciesWithStrain + [it]))
+                }
+            }
+        } else {
+            result.add(speciesWithStrain)
+        }
+        return result
     }
 }

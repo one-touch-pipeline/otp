@@ -592,7 +592,7 @@ class ExampleData {
                 lengthRefChromosomes        : 100,
                 lengthRefChromosomesWithoutN: 100,
                 length                      : 100,
-                species                     : [speciesWithStrain] as Set,
+                speciesWithStrains          : [speciesWithStrain] as Set,
         ]).save(flush: true)
 
         new StatSizeFileName([

@@ -29,6 +29,7 @@ import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.taxonomy.TaxonomyFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.taxonomy.Species
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.project.Project
 
@@ -54,7 +55,7 @@ class ReferenceGenomeSelectorServiceSpec extends Specification implements Servic
         SeqType seqType = createSeqType()
         Set<SpeciesWithStrain> species = [createSpeciesWithStrain()] as Set
         Workflow workflow = createWorkflow()
-        ReferenceGenome referenceGenome = createReferenceGenome(species: species)
+        ReferenceGenome referenceGenome = createReferenceGenome(species: [] as Set, speciesWithStrain: species)
 
         when:
         service.createOrUpdate(project, seqType, species, workflow, referenceGenome)
@@ -79,5 +80,60 @@ class ReferenceGenomeSelectorServiceSpec extends Specification implements Servic
                         .findAll { it.species == existing.species })
         selector == existing
         selector.referenceGenome == referenceGenome
+    }
+
+    void "test getMappingOfSpeciesCombinationsToReferenceGenomes"() {
+        given:
+        SpeciesWithStrain s1 = createSpeciesWithStrain()
+        SpeciesWithStrain s2 = createSpeciesWithStrain()
+        SpeciesWithStrain s3 = createSpeciesWithStrain()
+        SpeciesWithStrain s4 = createSpeciesWithStrain()
+        SpeciesWithStrain s5 = createSpeciesWithStrain()
+        SpeciesWithStrain s6 = createSpeciesWithStrain()
+        SpeciesWithStrain s7 = createSpeciesWithStrain()
+        SpeciesWithStrain s8 = createSpeciesWithStrain()
+        SpeciesWithStrain s81 = createSpeciesWithStrain()
+
+        Species sp = createSpecies()
+        SpeciesWithStrain s9 = createSpeciesWithStrain(species: sp)
+        SpeciesWithStrain s0 = createSpeciesWithStrain(species: sp)
+
+        Species sp2 = createSpecies()
+        SpeciesWithStrain s11 = createSpeciesWithStrain(species: sp2)
+        createSpeciesWithStrain(species: sp2)
+
+        Species sp3 = createSpecies()
+        SpeciesWithStrain s13 = createSpeciesWithStrain(species: sp3)
+        SpeciesWithStrain s14 = createSpeciesWithStrain(species: sp3)
+
+        Project project = createProject(speciesWithStrains: [s2, s3, s4, s5, s6, s7, s8, s9, s0, s11] as Set)
+
+        createReferenceGenome(species: [s1.species] as Set, speciesWithStrain: [] as Set)
+        ReferenceGenome r2 = createReferenceGenome(species: [s3.species] as Set, speciesWithStrain: [] as Set)
+        ReferenceGenome r3 = createReferenceGenome(species: [] as Set, speciesWithStrain: [s4] as Set)
+        ReferenceGenome r31 = createReferenceGenome(species: [] as Set, speciesWithStrain: [s4] as Set)
+        ReferenceGenome r4 = createReferenceGenome(species: [s5.species] as Set, speciesWithStrain: [s6] as Set)
+        ReferenceGenome r5 = createReferenceGenome(species: [s7.species] as Set, speciesWithStrain: [s8] as Set)
+        ReferenceGenome r6 = createReferenceGenome(species: [] as Set, speciesWithStrain: [s8, s81] as Set)
+        ReferenceGenome r7 = createReferenceGenome(species: [sp] as Set, speciesWithStrain: [s8] as Set)
+        ReferenceGenome r8 = createReferenceGenome(species: [sp2] as Set, speciesWithStrain: [] as Set)
+        ReferenceGenome r9 = createReferenceGenome(species: [sp3] as Set, speciesWithStrain: [s3] as Set)
+
+        expect:
+        service.getMappingOfSpeciesCombinationsToReferenceGenomes(project) == [
+                ([s3] as Set)     : [r2],
+                ([s4] as Set)     : [r3, r31],
+                ([s5, s6] as Set) : [r4],
+                ([s7, s8] as Set) : [r5],
+                ([s8, s81] as Set): [r6],
+
+                ([s8, s9] as Set) : [r7],
+                ([s8, s0] as Set) : [r7],
+
+                ([s11] as Set)    : [r8],
+
+                ([s13, s3] as Set): [r9],
+                ([s14, s3] as Set): [r9],
+        ]
     }
 }

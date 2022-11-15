@@ -25,6 +25,7 @@ import groovy.transform.Field
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
 import de.dkfz.tbi.otp.ngsdata.referencegenome.FastaEntry
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
+import de.dkfz.tbi.otp.ngsdata.taxonomy.Species
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
@@ -37,9 +38,11 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 */
 
 String name = "hs37d5_GRCm38mm_PhiX"
-Set<SpeciesWithStrain> species = [
+Set<Species> species = [
+        CollectionUtils.exactlyOneElement(Species.where { scientificName == "Mus musculus" }.list()),
+] as Set
+Set<SpeciesWithStrain> speciesWithStrain = [
         CollectionUtils.exactlyOneElement(SpeciesWithStrain.where { species.scientificName == "Homo sapiens" && strain.name == "No strain available" }.list()),
-        CollectionUtils.exactlyOneElement(SpeciesWithStrain.where { species.scientificName == "Mus musculus" && strain.name == "Unknown" }.list()),
 ] as Set
 @Field
 String path = "bwa06_hs37d5_GRCm38mm_PhiX"
@@ -211,5 +214,5 @@ List<FastaEntry> fastaEntries = [
 ]
 
 ReferenceGenomeService referenceGenomeService = ctx.referenceGenomeService
-referenceGenomeService.loadReferenceGenome(name, species, path, fileNamePrefix, cytosinePositionsIndex, chromosomePrefix, chromosomeSuffix,
+referenceGenomeService.loadReferenceGenome(name, species, speciesWithStrain, path, fileNamePrefix, cytosinePositionsIndex, chromosomePrefix, chromosomeSuffix,
         fastaEntries, fingerPrintingFileName, defaultStatSizeFileName, furtherStatSizeFileNames)

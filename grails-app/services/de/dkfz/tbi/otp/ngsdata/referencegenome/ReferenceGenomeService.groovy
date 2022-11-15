@@ -32,6 +32,7 @@ import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
+import de.dkfz.tbi.otp.ngsdata.taxonomy.Species
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
@@ -175,7 +176,8 @@ class ReferenceGenomeService {
      * @param cytosinePositionsIndex only for methylCtools processed reference genomes
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    void loadReferenceGenome(String name, Set<SpeciesWithStrain> species, String path, String fileNamePrefix, String cytosinePositionsIndex,
+    void loadReferenceGenome(String name, Set<Species> species, Set<SpeciesWithStrain> speciesWithStrain,
+                             String path, String fileNamePrefix, String cytosinePositionsIndex,
                              String chromosomePrefix, String chromosomeSuffix,
                              List<FastaEntry> fastaEntries, String fingerPrintingFileName,
                              String defaultStatSizeFileName, List<String> furtherStatSizeFileNames) {
@@ -202,6 +204,7 @@ class ReferenceGenomeService {
 
         ReferenceGenome referenceGenome = new ReferenceGenome(
                 name: name,
+                speciesWithStrain: speciesWithStrain,
                 species: species,
                 path: path,
                 fileNamePrefix: fileNamePrefix,

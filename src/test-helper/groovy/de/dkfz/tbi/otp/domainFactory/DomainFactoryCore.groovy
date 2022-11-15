@@ -289,7 +289,8 @@ trait DomainFactoryCore implements DomainFactoryHelper {
     ReferenceGenome createReferenceGenome(Map properties = [:], boolean saveAndValidate = true) {
         return createDomainObject(ReferenceGenome, [
                 name                        : "referencegenome_name${nextId}",
-                species                     : { [TaxonomyFactoryInstance.INSTANCE.createSpeciesWithStrain()] as Set },
+                species                     : { [TaxonomyFactoryInstance.INSTANCE.createSpecies()] as Set },
+                speciesWithStrain           : { [TaxonomyFactoryInstance.INSTANCE.createSpeciesWithStrain()] as Set },
                 path                        : HelperUtils.uniqueString,
                 fileNamePrefix              : "referencegenome-prefix_${nextId}",
                 length                      : 1,

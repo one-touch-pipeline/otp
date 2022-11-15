@@ -35,6 +35,7 @@ import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.referencegenome.FastaEntry
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
+import de.dkfz.tbi.otp.ngsdata.taxonomy.Species
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.utils.CollectionUtils
@@ -108,7 +109,8 @@ class ReferenceGenomeServiceIntegrationSpec extends Specification implements Use
         String statSizeFileName = "my_reference_gnome.fa.chrLenOnlyACGT.tab"
         String chromosomePrefix = ""
         String chromosomeSuffix = ""
-        Set<SpeciesWithStrain> species = [createSpeciesWithStrain(), createSpeciesWithStrain()] as Set
+        Set<Species> species = [createSpecies(), createSpecies()] as Set
+        Set<SpeciesWithStrain> speciesWithStrain = [createSpeciesWithStrain(), createSpeciesWithStrain()] as Set
 
         DomainFactory.createDefaultRealmWithProcessingOption()
 
@@ -126,7 +128,8 @@ class ReferenceGenomeServiceIntegrationSpec extends Specification implements Use
 
         when:
         doWithAuth(OPERATOR) {
-            referenceGenomeService.loadReferenceGenome(name, species, path, fileNamePrefix, cytosinePositionsIndex, chromosomePrefix, chromosomeSuffix,
+            referenceGenomeService.loadReferenceGenome(name, species, speciesWithStrain, path, fileNamePrefix,
+                    cytosinePositionsIndex, chromosomePrefix, chromosomeSuffix,
                     fastaEntries, fingerPrintingFileName, statSizeFileName, [])
         }
 
@@ -137,6 +140,7 @@ class ReferenceGenomeServiceIntegrationSpec extends Specification implements Use
         referenceGenome.cytosinePositionsIndex == cytosinePositionsIndex
         referenceGenome.fingerPrintingFileName == fingerPrintingFileName
         referenceGenome.species == species
+        referenceGenome.speciesWithStrain == speciesWithStrain
 
         ReferenceGenomeEntry entry = CollectionUtils.exactlyOneElement(ReferenceGenomeEntry.findAllByName(fastaName))
         entry.referenceGenome == referenceGenome

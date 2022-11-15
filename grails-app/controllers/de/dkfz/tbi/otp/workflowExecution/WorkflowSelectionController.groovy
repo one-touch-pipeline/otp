@@ -64,15 +64,9 @@ class WorkflowSelectionController implements CheckAndCall {
                 Workflow.findAllByBeanNameInListAndDeprecatedDateIsNull(analysisWorkflowNames).sort { it.name } : []
 
         Project project = projectSelectionService.selectedProject
-        Set<SpeciesWithStrain> projectSpecies = project.speciesWithStrains
 
-        List<ReferenceGenome> referenceGenomes = ReferenceGenome.all
-
-        List<Set<SpeciesWithStrain>> species = referenceGenomes*.species.unique().findAll { it.any { species -> species in projectSpecies } }
-
-        Map<Set<SpeciesWithStrain>, Set<ReferenceGenome>> spr = species.collectEntries {
-            [(it): referenceGenomes.findAll { r -> r.species == it }]
-        }
+        Map<Set<SpeciesWithStrain>, Set<ReferenceGenome>> speciesReferenceGenomeMapping =
+                referenceGenomeSelectorService.getMappingOfSpeciesCombinationsToReferenceGenomes(project)
 
         List<ConfValue> alignmentConf = []
         List<ConfValue> analysisConf = []
@@ -85,12 +79,12 @@ class WorkflowSelectionController implements CheckAndCall {
                         })?.workflowVersion
                 List<WorkflowVersion> versions = WorkflowVersion.findAllByWorkflow(workflow).sort { it.workflowVersion }
 
-                List<RefGenConfValue> refGens = species.collect { sp ->
+                List<RefGenConfValue> refGens = speciesReferenceGenomeMapping.collect { sp, rs ->
                     ReferenceGenome r = atMostOneElement(
                             ReferenceGenomeSelector.findAllByProjectAndSeqTypeAndWorkflow(project, seqType, workflow)
                                     .findAll { it.species == sp }
                     )?.referenceGenome
-                    return new RefGenConfValue(sp.sort { it.displayString }, spr[sp].intersect(workflow.allowedReferenceGenomes).sort { it.name }, r)
+                    return new RefGenConfValue(sp.sort { it.displayString }, rs.intersect(workflow.allowedReferenceGenomes).sort { it.name }, r)
                 }
                 alignmentConf.add(new ConfValue(workflow, seqType, versions, version, refGens))
             }

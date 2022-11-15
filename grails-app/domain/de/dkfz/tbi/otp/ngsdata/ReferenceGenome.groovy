@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import grails.gorm.hibernate.annotation.ManagedEntity
 
+import de.dkfz.tbi.otp.ngsdata.taxonomy.Species
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.utils.Entity
 import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
@@ -40,7 +41,8 @@ class ReferenceGenome implements Entity {
      */
     String name
 
-    Set<SpeciesWithStrain> species
+    Set<Species> species
+    Set<SpeciesWithStrain> speciesWithStrain
 
     /**
      * Reference genome specific directory
@@ -135,7 +137,7 @@ class ReferenceGenome implements Entity {
     static constraints = {
         name(unique: true, blank: false)
         species validator:  { val, obj ->
-            if (!val) {
+            if (!(val || obj.speciesWithStrain)) {
                 return "empty"
             }
         }
