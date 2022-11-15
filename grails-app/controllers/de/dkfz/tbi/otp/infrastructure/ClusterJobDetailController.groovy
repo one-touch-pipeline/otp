@@ -22,7 +22,7 @@
 package de.dkfz.tbi.otp.infrastructure
 
 import grails.converters.JSON
-import grails.plugin.springsecurity.annotation.Secured
+import org.springframework.security.access.annotation.Secured
 
 import de.dkfz.tbi.otp.ngsdata.Individual
 import de.dkfz.tbi.otp.project.Project

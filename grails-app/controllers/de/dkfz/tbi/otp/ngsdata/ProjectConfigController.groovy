@@ -22,7 +22,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.converters.JSON
-import grails.plugin.springsecurity.annotation.Secured
+import org.springframework.security.access.annotation.Secured
 import grails.validation.Validateable
 import org.springframework.http.HttpStatus
 

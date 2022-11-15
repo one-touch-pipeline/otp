@@ -21,7 +21,7 @@
  */
 package de.dkfz.tbi.otp.administration
 
-import grails.plugin.springsecurity.annotation.Secured
+import org.springframework.security.access.annotation.Secured
 import org.springframework.validation.Errors
 
 import de.dkfz.tbi.otp.FlashMessage

@@ -21,7 +21,7 @@
  */
 package de.dkfz.tbi.otp.security
 
-import grails.plugin.springsecurity.annotation.Secured
+import org.springframework.security.access.annotation.Secured
 
 import de.dkfz.tbi.otp.security.user.RolesService
 import de.dkfz.tbi.otp.security.user.RolesWithUsers

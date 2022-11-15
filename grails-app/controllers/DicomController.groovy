@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-import grails.plugin.springsecurity.annotation.Secured
+import org.springframework.security.access.annotation.Secured
 
 @Secured("hasRole('ROLE_ADMIN')")
 class DicomController {

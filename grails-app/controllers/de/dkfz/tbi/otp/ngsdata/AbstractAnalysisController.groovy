@@ -21,7 +21,7 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.plugin.springsecurity.annotation.Secured
+import org.springframework.security.access.annotation.Secured
 import groovy.transform.ToString
 
 import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis

@@ -21,7 +21,7 @@
  */
 
 import grails.compiler.GrailsCompileStatic
-import grails.plugin.springsecurity.annotation.Secured
+import org.springframework.security.access.annotation.Secured
 
 import de.dkfz.tbi.otp.administration.DocumentService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption

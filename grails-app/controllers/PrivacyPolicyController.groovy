@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-import grails.plugin.springsecurity.annotation.Secured
+import org.springframework.security.access.annotation.Secured
 
 import de.dkfz.tbi.otp.FlashMessage
 import de.dkfz.tbi.otp.security.user.UserService

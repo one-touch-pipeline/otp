@@ -21,7 +21,7 @@
  */
 package de.dkfz.tbi.otp.workflowExecution
 
-import grails.plugin.springsecurity.annotation.Secured
+import org.springframework.security.access.annotation.Secured
 import grails.util.Pair
 
 import de.dkfz.tbi.util.TimeFormats

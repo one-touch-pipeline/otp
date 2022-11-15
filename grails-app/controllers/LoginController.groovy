@@ -22,7 +22,7 @@
 
 import grails.converters.JSON
 import grails.plugin.springsecurity.SpringSecurityUtils
-import grails.plugin.springsecurity.annotation.Secured
+import org.springframework.security.access.annotation.Secured
 import org.springframework.security.authentication.*
 import org.springframework.security.core.AuthenticationException
 import org.springframework.security.web.WebAttributes

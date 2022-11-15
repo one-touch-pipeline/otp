@@ -22,7 +22,7 @@
 package de.dkfz.tbi.otp.workflow.restartHandler
 
 import grails.converters.JSON
-import grails.plugin.springsecurity.annotation.Secured
+import org.springframework.security.access.annotation.Secured
 import grails.util.Holders
 import grails.validation.Validateable
 import groovy.transform.ToString

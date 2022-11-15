@@ -21,7 +21,7 @@
  */
 package de.dkfz.tbi.otp.ngsdata.mergingCriteria
 
-import grails.plugin.springsecurity.annotation.Secured
+import org.springframework.security.access.annotation.Secured
 
 import de.dkfz.tbi.otp.dataprocessing.MergingCriteriaService
 import de.dkfz.tbi.otp.ngsdata.SeqPlatform

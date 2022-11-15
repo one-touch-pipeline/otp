@@ -21,7 +21,7 @@
  */
 package de.dkfz.tbi.otp.errors
 
-import grails.plugin.springsecurity.annotation.Secured
+import org.springframework.security.access.annotation.Secured
 import groovy.util.logging.Slf4j
 
 import de.dkfz.tbi.otp.security.SecurityService

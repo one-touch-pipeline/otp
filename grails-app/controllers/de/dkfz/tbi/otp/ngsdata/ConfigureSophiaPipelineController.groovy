@@ -21,7 +21,7 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.plugin.springsecurity.annotation.Secured
+import org.springframework.security.access.annotation.Secured
 
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption

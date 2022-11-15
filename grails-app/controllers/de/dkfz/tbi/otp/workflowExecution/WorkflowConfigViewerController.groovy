@@ -24,7 +24,7 @@ package de.dkfz.tbi.otp.workflowExecution
 
 import com.fasterxml.jackson.core.JsonParseException
 import grails.converters.JSON
-import grails.plugin.springsecurity.annotation.Secured
+import org.springframework.security.access.annotation.Secured
 import grails.validation.Validateable
 import groovy.transform.ToString
 import org.springframework.http.HttpStatus

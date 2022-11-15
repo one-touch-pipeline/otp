@@ -22,7 +22,7 @@
 package de.dkfz.tbi.otp.component
 
 import grails.converters.JSON
-import grails.plugin.springsecurity.annotation.Secured
+import org.springframework.security.access.annotation.Secured
 import org.springframework.http.HttpStatus
 
 import de.dkfz.tbi.otp.ProjectSelectionService

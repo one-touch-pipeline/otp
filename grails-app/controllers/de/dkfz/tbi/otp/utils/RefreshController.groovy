@@ -22,7 +22,7 @@
 package de.dkfz.tbi.otp.utils
 
 import grails.converters.JSON
-import grails.plugin.springsecurity.annotation.Secured
+import org.springframework.security.access.annotation.Secured
 
 /**
  * Controller for enabling/disabling the auto-refresh functionality

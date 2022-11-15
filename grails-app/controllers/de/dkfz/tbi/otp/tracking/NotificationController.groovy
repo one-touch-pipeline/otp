@@ -21,7 +21,7 @@
  */
 package de.dkfz.tbi.otp.tracking
 
-import grails.plugin.springsecurity.annotation.Secured
+import org.springframework.security.access.annotation.Secured
 import grails.validation.Validateable
 import groovy.transform.ToString
 

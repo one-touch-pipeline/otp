@@ -29,7 +29,7 @@ class SecureAllControllersRule extends AbstractAstVisitorRule {
     String name = 'SecureAllControllers'
     int priority = 1
     String applyToFileNames = "*/*grails-app/controllers*/*Controller.groovy"
-    String description = "All controllers should be secured with the \"@Secured\" annotation!"
+    String description = "All controllers should be secured with the spring \"@Secured\" annotation!"
     Class astVisitorClass = SecureAllControllerRuleVisitor
 }
 

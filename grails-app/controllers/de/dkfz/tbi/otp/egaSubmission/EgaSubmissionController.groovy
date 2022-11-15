@@ -22,7 +22,7 @@
 package de.dkfz.tbi.otp.egaSubmission
 
 import grails.converters.JSON
-import grails.plugin.springsecurity.annotation.Secured
+import org.springframework.security.access.annotation.Secured
 import org.springframework.http.HttpStatus
 import org.springframework.validation.Errors
 

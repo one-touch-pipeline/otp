@@ -21,7 +21,7 @@
  */
 package de.dkfz.tbi.otp.ngsqc
 
-import grails.plugin.springsecurity.annotation.Secured
+import org.springframework.security.access.annotation.Secured
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
 import org.jsoup.select.Elements
