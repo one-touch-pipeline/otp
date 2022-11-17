@@ -72,14 +72,22 @@ class KeycloakService implements IdentityProvider {
     }
 
     private String getGroupIdByGroupName(String groupName) {
+        if (groupName == null) {
+            return ""
+        }
+
         String requestUrl = "$apiBaseUrl/${configService.keycloakRealm}/groups?search=$groupName"
         HttpEntity<String> entity = new HttpEntity<String>(null, authorizationHeader)
         ResponseEntity<List<KeycloakGroup>> response = restTemplate.exchange(requestUrl, HttpMethod.GET, entity, KeycloakGroup[].class)
         List<KeycloakGroup> keycloakGroups = response.body
-        return CollectionUtils.atMostOneElement(keycloakGroups).id
+        return keycloakGroups ? CollectionUtils.atMostOneElement(keycloakGroups).id : ""
     }
 
     private List<String> getGroupMembersByGroupId(String groupId) {
+        if (!groupId) {
+            return []
+        }
+
         String requestUrl = "$apiBaseUrl/${configService.keycloakRealm}/groups/$groupId/members"
         HttpEntity<String> entity = new HttpEntity<String>(null, authorizationHeader)
         ResponseEntity<List<KeycloakUser>> response = restTemplate.exchange(requestUrl, HttpMethod.GET, entity, KeycloakUser[].class)
