@@ -43,7 +43,7 @@ class UserCreatingUserDetailsService extends GormUserDetailsService {
     UserDetails loadUserByUsername(String username, boolean loadRoles) throws UsernameNotFoundException {
         User user = CollectionUtils.atMostOneElement(User.findAllByUsername(username))
         if (!user) {
-            IdpUserDetails idpUserDetails = grailsApplication.mainContext.ldapService.getIdpUserDetailsByUsername(username)
+            IdpUserDetails idpUserDetails = grailsApplication.mainContext.identityProvider.getIdpUserDetailsByUsername(username)
             if (!idpUserDetails || !idpUserDetails.mail) {
                 throw new FailedToCreateUserException("There is a problem with your account. Please contact " +
                 "${grailsApplication.mainContext.processingOptionService.findOptionAsString(ProcessingOption.OptionName.GUI_CONTACT_DATA_SUPPORT_EMAIL)}.")

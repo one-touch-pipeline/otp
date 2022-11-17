@@ -20,10 +20,10 @@
  * SOFTWARE.
  */
 
-import de.dkfz.tbi.otp.security.user.identityProvider.LdapService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.User
+import de.dkfz.tbi.otp.security.user.identityProvider.IdentityProvider
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 /**
@@ -56,7 +56,7 @@ String getSortedListInfo(String text, List list) {
     return "${text}\n${list.sort()}\n${list.size()} entries\n"
 }
 
-LdapService ldapService = ctx.ldapService
+IdentityProvider identityProvider = ctx.getBean('identityProvider')
 
 List<String> allUsernames = User.list()*.username
 
@@ -74,7 +74,7 @@ UserProjectRole.withTransaction {
         }*.user.username
         println(getSortedListInfo("Usernames of project:", usernamesInProject ?: []))
 
-        List<String> usernamesInLdapGroup = ldapService.getGroupMembersByGroupName(project.unixGroup)
+        List<String> usernamesInLdapGroup = identityProvider.getGroupMembersByGroupName(project.unixGroup)
         println(getSortedListInfo("Username in LDAP group:", usernamesInLdapGroup ?: []))
 
         List<String> unconnectedUsernames = usernamesInLdapGroup - usernamesInProject
@@ -91,7 +91,7 @@ UserProjectRole.withTransaction {
                         project: project,
                         projectRoles: projectRoles,
                         enabled: enabled,
-                        accessToOtp: ldapService.isUserInIdpAndActivated(user),
+                        accessToOtp: identityProvider.isUserInIdpAndActivated(user),
                         accessToFiles: accessToFiles,
                         manageUsers: manageUsers,
                         manageUsersAndDelegate: manageUsersAndDelegate,

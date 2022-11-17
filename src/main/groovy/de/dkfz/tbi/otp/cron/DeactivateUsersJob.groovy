@@ -25,7 +25,6 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.security.user.identityProvider.LdapService
 import de.dkfz.tbi.otp.security.user.UserService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.ngsdata.UserProjectRole
@@ -33,6 +32,7 @@ import de.dkfz.tbi.otp.ngsdata.UserProjectRoleService
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.security.User
+import de.dkfz.tbi.otp.security.user.identityProvider.IdentityProvider
 import de.dkfz.tbi.otp.utils.MessageSourceService
 
 /**
@@ -51,7 +51,7 @@ class DeactivateUsersJob extends AbstractScheduledJob {
     UserProjectRoleService userProjectRoleService
 
     @Autowired
-    LdapService ldapService
+    IdentityProvider identityProvider
 
     @Autowired
     UserService userService
@@ -116,7 +116,7 @@ class DeactivateUsersJob extends AbstractScheduledJob {
     }
 
     boolean isInGroup(User user, String unixGroup) {
-        return unixGroup in ldapService.getGroupsOfUser(user)
+        return unixGroup in identityProvider.getGroupsOfUser(user)
     }
 
     void disableUserAndNotify(User user) {

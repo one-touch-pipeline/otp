@@ -25,7 +25,7 @@ import grails.validation.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.security.user.UserService
-import de.dkfz.tbi.otp.security.user.identityProvider.LdapService
+import de.dkfz.tbi.otp.security.user.identityProvider.IdentityProvider
 import de.dkfz.tbi.otp.security.user.identityProvider.data.IdpUserDetails
 
 /**
@@ -44,7 +44,7 @@ String getListInfo(String text, List list) {
     return "${text}\n${list}\n${list.size()} entries\n"
 }
 
-LdapService ldapService = ctx.ldapService
+IdentityProvider identityProvider = ctx.getBean('identityProvider')
 UserService userService = ctx.userService
 
 List<String> allUsernames = User.list()*.username.sort()
@@ -54,7 +54,7 @@ println(getListInfo("Unique usernames of OTP users:", allUsernames))
 List<String> usernamesInUnixGroups = []
 
 Project.list().each { Project project ->
-    usernamesInUnixGroups << ldapService.getGroupMembersByGroupName(project.unixGroup)
+    usernamesInUnixGroups << identityProvider.getGroupMembersByGroupName(project.unixGroup)
 }
 
 usernamesInUnixGroups = usernamesInUnixGroups.flatten().unique().sort()
@@ -75,7 +75,7 @@ List<String> fails = []
 println("Created users:")
 println(userPropertiesToPrint.join(separator))
 ldapOnlyUsers.each { String username ->
-    IdpUserDetails idpUserDetails = ldapService.getIdpUserDetailsByUsername(username)
+    IdpUserDetails idpUserDetails = identityProvider.getIdpUserDetailsByUsername(username)
     try {
         User user = userService.createUser(idpUserDetails.username, idpUserDetails.mail, idpUserDetails.realName)
         println(userPropertiesToPrint.collect { user[it] }.join(separator))

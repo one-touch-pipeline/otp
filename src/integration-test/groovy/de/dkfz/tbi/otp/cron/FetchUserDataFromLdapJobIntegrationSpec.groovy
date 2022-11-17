@@ -25,7 +25,7 @@ import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
 import spock.lang.Specification
 
-import de.dkfz.tbi.otp.security.user.identityProvider.LdapService
+import de.dkfz.tbi.otp.security.user.identityProvider.IdentityProvider
 import de.dkfz.tbi.otp.security.user.identityProvider.data.IdpUserDetails
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.security.User
@@ -36,13 +36,13 @@ class FetchUserDataFromLdapJobIntegrationSpec extends Specification {
 
     FetchUserDataFromLdapJob job = new FetchUserDataFromLdapJob()
 
-    void "wrappedExecute, should update the realName and email when it was changed on ldap"() {
+    void "wrappedExecute, should update the realName and email when it was changed on identity provider"() {
         given:
         final String newName = "new name"
         final String newMail = "new@mail.de"
         final User otpUser = DomainFactory.createUser()
 
-        job.ldapService = Mock(LdapService) {
+        job.identityProvider = Mock(IdentityProvider) {
             1 * getIdpUserDetailsByUserList(_) >> { List<User> otpUsers ->
                 return [
                         new IdpUserDetails([

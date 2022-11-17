@@ -25,7 +25,7 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.security.user.identityProvider.LdapService
+import de.dkfz.tbi.otp.security.user.identityProvider.IdentityProvider
 import de.dkfz.tbi.otp.security.user.identityProvider.data.IdpUserDetails
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.ngsdata.UserProjectRole
@@ -39,7 +39,7 @@ import de.dkfz.tbi.otp.security.User
 class CheckForAdUpdateJob extends AbstractScheduledJob {
 
     @Autowired
-    LdapService ldapService
+    IdentityProvider identityProvider
 
     @Autowired
     ConfigService configService
@@ -57,7 +57,7 @@ class CheckForAdUpdateJob extends AbstractScheduledJob {
         checkingUserProjectRoles.groupBy {
             it.user
         }.each { User user, List<UserProjectRole> userProjectRoleService ->
-            IdpUserDetails idpUserDetails = ldapService.getIdpUserDetailsByUsername(user.username)
+            IdpUserDetails idpUserDetails = identityProvider.getIdpUserDetailsByUsername(user.username)
             userProjectRoleService.each { UserProjectRole userProjectRole ->
                 if ((userProjectRole.accessToFiles && userProjectRole.user.enabled) ==
                         (idpUserDetails && idpUserDetails.memberOfGroupList?.contains(userProjectRole.project.unixGroup))) {

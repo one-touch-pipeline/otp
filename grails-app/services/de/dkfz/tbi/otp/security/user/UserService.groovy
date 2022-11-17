@@ -26,8 +26,8 @@ import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.ngsdata.LdapUserCreationException
 import de.dkfz.tbi.otp.security.*
-import de.dkfz.tbi.otp.security.user.identityProvider.LdapService
 import de.dkfz.tbi.otp.security.user.identityProvider.data.IdpUserDetails
+import de.dkfz.tbi.otp.security.user.identityProvider.IdentityProvider
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 /**
@@ -39,7 +39,7 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 @Transactional
 class UserService {
 
-    LdapService ldapService
+    IdentityProvider identityProvider
     SecurityService securityService
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
@@ -222,7 +222,7 @@ No user exists yet, create user ${currentUser} with admin rights.
     }
 
     User findUserByUsername(String username) {
-        IdpUserDetails idpUserDetails = ldapService.getIdpUserDetailsByUsername(username)
+        IdpUserDetails idpUserDetails = identityProvider.getIdpUserDetailsByUsername(username)
         if (!idpUserDetails) {
             throw new LdapUserCreationException("'${username}' can not be resolved to a user via LDAP")
         }

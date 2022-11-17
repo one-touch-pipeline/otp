@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.administration
 import grails.converters.JSON
 import org.springframework.security.access.annotation.Secured
 import grails.validation.Validateable
+import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.CheckAndCall
 import de.dkfz.tbi.otp.FlashMessage
@@ -31,7 +32,7 @@ import de.dkfz.tbi.otp.ngsdata.UserProjectRoleService
 import de.dkfz.tbi.otp.security.Role
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.security.user.UserService
-import de.dkfz.tbi.otp.security.user.identityProvider.LdapService
+import de.dkfz.tbi.otp.security.user.identityProvider.IdentityProvider
 import de.dkfz.tbi.otp.utils.DataTableCommand
 import de.dkfz.tbi.util.TimeFormats
 
@@ -61,7 +62,8 @@ class UserAdministrationController implements CheckAndCall {
      */
     UserService userService
     UserProjectRoleService userProjectRoleService
-    LdapService ldapService
+
+    IdentityProvider identityProvider
 
     /**
      * Default action showing the DataTable markup
@@ -120,11 +122,11 @@ class UserAdministrationController implements CheckAndCall {
         return [
                 userProjectRoles       : userProjectRoleService.findAllByUser(user).sort { it.project.name },
                 user                   : user,
-                ldapGroups             : ldapService.getGroupsOfUser(user) ?: [],
+                userGroups             : identityProvider.getGroupsOfUser(user) ?: [],
                 roleLists              : roleLists,
-                userExistsInLdap       : ldapService.exists(user),
-                userAccountControlValue: ldapService.getUserAccountControlOfUser(user),
-                userAccountControlMap  : ldapService.getAllUserAccountControlFlagsOfUser(user),
+                userExistsInLdap       : identityProvider.exists(user),
+                userAccountControlValue: identityProvider.getUserAccountControlOfUser(user),
+                userAccountControlMap  : identityProvider.getAllUserAccountControlFlagsOfUser(user),
                 cmd                    : flash.cmd as EditUserCommand,
         ]
     }
@@ -136,8 +138,8 @@ class UserAdministrationController implements CheckAndCall {
             return [:]
         }
         User user = cmd.user
-        boolean userExists = ldapService.exists(user)
-        Map ldapProperties = userExists ? ldapService.getAllUserAttributes(user) : [:]
+        boolean userExists = identityProvider.exists(user)
+        Map ldapProperties = userExists ? identityProvider.getAllUserAttributes(user) : [:]
 
         return [
                 user            : user,

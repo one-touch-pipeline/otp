@@ -106,7 +106,7 @@
             </table>
             <br>
             <h2><g:message code="user.administration.groups.heading" args="[user.username]"/></h2>
-            ${ldapGroups.sort().join(", ")}
+            ${userGroups?.sort().join(", ")}
             <br>
             <h2><g:message code="user.administration.groups.userAccountControl" args="[userAccountControlValue]"/></h2>
             <table class="key-value-table key-input user-account-control-table">

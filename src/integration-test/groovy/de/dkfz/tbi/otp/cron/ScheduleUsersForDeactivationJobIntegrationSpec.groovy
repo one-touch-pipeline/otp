@@ -28,7 +28,6 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.TestConfigService
-import de.dkfz.tbi.otp.security.user.identityProvider.LdapService
 import de.dkfz.tbi.otp.security.user.UserService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
@@ -38,6 +37,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.security.UserAndRoles
+import de.dkfz.tbi.otp.security.user.identityProvider.IdentityProvider
 import de.dkfz.tbi.otp.utils.MailHelperService
 import de.dkfz.tbi.otp.utils.MessageSourceService
 
@@ -207,7 +207,7 @@ class ScheduleUsersForDeactivationJobIntegrationSpec extends Specification imple
         List<User> expiredUsers = []
         ScheduleUsersForDeactivationJob job = new ScheduleUsersForDeactivationJob([
                 processingOptionService: new ProcessingOptionService(),
-                ldapService            : Mock(LdapService) {
+                identityProvider: Mock(IdentityProvider) {
                     _ * isUserDeactivated(_) >> { User user ->
                         return user in expiredUsers
                     }

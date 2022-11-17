@@ -34,7 +34,7 @@ import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.UserDomainFactory
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.*
-import de.dkfz.tbi.otp.security.user.identityProvider.LdapService
+import de.dkfz.tbi.otp.security.user.identityProvider.IdentityProvider
 import de.dkfz.tbi.otp.security.user.identityProvider.data.IdpUserDetails
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
@@ -83,7 +83,7 @@ class ProjectUserControllerSpec extends Specification implements ControllerUnitT
         controller.projectSelectionService = Mock(ProjectSelectionService) {
             getSelectedProject() >> project
         }
-        controller.ldapService = Mock(LdapService) {
+        controller.identityProvider = Mock(IdentityProvider) {
             getGroupMembersByGroupName(_) >> [enabledUser.username, disabledUser.username, unconnectedUser.username, unknownUsername, ignoredUsername]
             getIdpUserDetailsByUsername(_) >> new IdpUserDetails()
         }

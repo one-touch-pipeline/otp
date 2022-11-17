@@ -30,13 +30,13 @@ import de.dkfz.odcf.audit.impl.DicomAuditLogger
 import de.dkfz.odcf.audit.impl.OtpDicomAuditFactory
 import de.dkfz.odcf.audit.impl.OtpDicomAuditFactory.UniqueIdentifierType
 import de.dkfz.odcf.audit.xml.layer.EventIdentification.EventOutcomeIndicator
+import de.dkfz.tbi.otp.security.user.identityProvider.IdentityProvider
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.security.user.UserService
-import de.dkfz.tbi.otp.security.user.identityProvider.LdapService
 import de.dkfz.tbi.otp.security.user.identityProvider.data.IdpUserDetails
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
@@ -45,9 +45,9 @@ import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 class UserProjectRoleService {
 
     AuditLogService auditLogService
+    IdentityProvider identityProvider
     ConfigService configService
     DicomAuditUtils dicomAuditUtils
-    LdapService ldapService
     MailHelperService mailHelperService
     MessageSourceService messageSourceService
     ProcessingOptionService processingOptionService
@@ -150,7 +150,7 @@ class UserProjectRoleService {
     }
 
     User createUserWithLdapData(String username) {
-        IdpUserDetails idpUserDetails = ldapService.getIdpUserDetailsByUsername(username)
+        IdpUserDetails idpUserDetails = identityProvider.getIdpUserDetailsByUsername(username)
         if (!idpUserDetails) {
             throw new LdapUserCreationException("'${username}' can not be resolved to a user via LDAP")
         }

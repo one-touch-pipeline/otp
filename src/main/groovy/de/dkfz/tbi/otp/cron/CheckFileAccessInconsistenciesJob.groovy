@@ -25,7 +25,7 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.security.user.identityProvider.LdapService
+import de.dkfz.tbi.otp.security.user.identityProvider.IdentityProvider
 import de.dkfz.tbi.otp.security.user.identityProvider.data.IdpUserDetails
 import de.dkfz.tbi.otp.ngsdata.UserProjectRole
 import de.dkfz.tbi.otp.ngsdata.UserProjectRoleService
@@ -54,7 +54,7 @@ class CheckFileAccessInconsistenciesJob extends AbstractScheduledJob {
     ].join('\t')
 
     @Autowired
-    LdapService ldapService
+    IdentityProvider identityProvider
 
     @Autowired
     UserProjectRoleService userProjectRoleService
@@ -76,7 +76,7 @@ class CheckFileAccessInconsistenciesJob extends AbstractScheduledJob {
         List<String> content = []
 
         List<User> userList = User.findAllByUsernameIsNotNull()
-        Map<String, IdpUserDetails> ldapUserDetailsByUsername = ldapService.getIdpUserDetailsByUserList(userList).collectEntries {
+        Map<String, IdpUserDetails> ldapUserDetailsByUsername = identityProvider.getIdpUserDetailsByUserList(userList).collectEntries {
             [(it.username): it]
         }
 
@@ -87,7 +87,7 @@ class CheckFileAccessInconsistenciesJob extends AbstractScheduledJob {
             boolean fileAccessInOtp = userProjectRole.accessToFiles
             List<String> groupsOfUser = ldapUserDetailsByUsername[user.username]?.memberOfGroupList ?: []
             boolean fileAccessInLdap = project.unixGroup in groupsOfUser
-            boolean ldapDeactivated = ldapService.isUserDeactivated(user)
+            boolean ldapDeactivated = identityProvider.isUserDeactivated(user)
 
             if (fileAccessInOtp && !fileAccessInLdap && !userProjectRole.fileAccessChangeRequested) {
                 SystemUserUtils.useSystemUser {

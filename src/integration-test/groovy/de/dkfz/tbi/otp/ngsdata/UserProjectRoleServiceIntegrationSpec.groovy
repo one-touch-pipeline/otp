@@ -41,7 +41,7 @@ import de.dkfz.tbi.otp.domainFactory.UserDomainFactory
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.security.user.UserService
-import de.dkfz.tbi.otp.security.user.identityProvider.LdapService
+import de.dkfz.tbi.otp.security.user.identityProvider.IdentityProvider
 import de.dkfz.tbi.otp.security.user.identityProvider.data.IdpUserDetails
 import de.dkfz.tbi.otp.utils.*
 
@@ -374,7 +374,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         }
 
         // mock user existence in ldap
-        userProjectRoleService.ldapService = Mock(LdapService) {
+        userProjectRoleService.identityProvider = Mock(IdentityProvider) {
             isUserInIdpAndActivated(_) >> accountInLdap
         }
 
@@ -493,7 +493,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
                 mail: mailOfUser,
         )
         userProjectRoleService.userService = new UserService()
-        userProjectRoleService.ldapService = Mock(LdapService) {
+        userProjectRoleService.identityProvider = Mock(IdentityProvider) {
             getIdpUserDetailsByUsername(_) >> idpUserDetails
         }
 
@@ -527,7 +527,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
                 realName: user.realName,
                 mail: user.email,
         )
-        userProjectRoleService.ldapService = Mock(LdapService) {
+        userProjectRoleService.identityProvider = Mock(IdentityProvider) {
             getIdpUserDetailsByUsername(_) >> idpUserDetails
         }
 
@@ -561,7 +561,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
         Project project = createProject()
         ProjectRole projectRole = createProjectRole()
-        userProjectRoleService.ldapService = Mock(LdapService) {
+        userProjectRoleService.identityProvider = Mock(IdentityProvider) {
             getIdpUserDetailsByUsername(_) >> null
         }
 
@@ -593,7 +593,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
                 projectRoles: [pi],
                 manageUsers: true
         )
-        userProjectRoleService.ldapService = Mock(LdapService) {
+        userProjectRoleService.identityProvider = Mock(IdentityProvider) {
             getIdpUserDetailsByUsername(_) >> idpUserDetails
             getGroupsOfUser(_) >> []
         }
@@ -640,7 +640,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
                 mail: user.email,
         )
 
-        userProjectRoleService.ldapService = Mock(LdapService) {
+        userProjectRoleService.identityProvider = Mock(IdentityProvider) {
             getIdpUserDetailsByUsername(_) >> idpUserDetails
         }
 
@@ -1006,7 +1006,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         }
 
         // mock user existence in ldap
-        userProjectRoleService.ldapService = Mock(LdapService) {
+        userProjectRoleService.identityProvider = Mock(IdentityProvider) {
             isUserInIdpAndActivated(_) >> true
         }
 
@@ -1163,7 +1163,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         )
 
         // mock user existence in ldap
-        userProjectRoleService.ldapService = Mock(LdapService) {
+        userProjectRoleService.identityProvider = Mock(IdentityProvider) {
             isUserInIdpAndActivated(_) >> true
         }
 

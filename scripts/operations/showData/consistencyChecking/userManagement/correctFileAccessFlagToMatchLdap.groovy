@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-import de.dkfz.tbi.otp.security.user.identityProvider.LdapService
+import de.dkfz.tbi.otp.security.user.identityProvider.IdentityProvider
 import de.dkfz.tbi.otp.ngsdata.UserProjectRole
 import de.dkfz.tbi.otp.security.User
 
@@ -28,7 +28,7 @@ import de.dkfz.tbi.otp.security.User
  *  Correct the fileAccess flag of all UserProjectRoles to match the status in the LDAP.
  */
 
-LdapService ldapService = ctx.ldapService
+IdentityProvider identityProvider = ctx.getBean('identityProvider')
 
 Map<String, List<String>> cache = [:]
 
@@ -40,7 +40,7 @@ UserProjectRole.withTransaction {
         }
         User user = userProjectRole.user
         if (!cache[user.username]) {
-            cache[user.username] = ldapService.getGroupsOfUser(user)
+            cache[user.username] = identityProvider.getGroupsOfUser(user)
         }
         boolean fileAccessInOtp = userProjectRole.accessToFiles
         boolean fileAccessInLdap = userProjectRole.project.unixGroup in cache[user.username]

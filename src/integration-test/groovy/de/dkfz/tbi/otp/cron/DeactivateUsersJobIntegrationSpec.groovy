@@ -27,7 +27,6 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.security.user.identityProvider.LdapService
 import de.dkfz.tbi.otp.security.user.UserService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
@@ -36,6 +35,7 @@ import de.dkfz.tbi.otp.domainFactory.UserDomainFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.User
+import de.dkfz.tbi.otp.security.user.identityProvider.IdentityProvider
 import de.dkfz.tbi.otp.utils.MailHelperService
 import de.dkfz.tbi.otp.utils.MessageSourceService
 
@@ -59,10 +59,10 @@ class DeactivateUsersJobIntegrationSpec extends Specification implements DomainF
         +1         | null       || false
     }
 
-    void "isInGroup, checks list returned from ldapService"() {
+    void "isInGroup, checks list returned from identityProvider"() {
         given:
         DeactivateUsersJob job = new DeactivateUsersJob([
-                ldapService: Mock(LdapService) {
+                identityProvider: Mock(IdentityProvider) {
                     _ * getGroupsOfUser(_) >> {
                         return ["GroupA", "GroupB"]
                     }
@@ -141,7 +141,7 @@ class DeactivateUsersJobIntegrationSpec extends Specification implements DomainF
                     _ * findOptionAsString(_) { return "option" }
                     _ * findOptionAsLong(_) { return 0L }
                 },
-                ldapService            : Mock(LdapService) {
+                identityProvider: Mock(IdentityProvider) {
                     _ * getGroupsOfUser(_) >> { return ["group"] }
                 },
                 userService: new UserService(),
@@ -150,7 +150,7 @@ class DeactivateUsersJobIntegrationSpec extends Specification implements DomainF
                 },
                 userProjectRoleService: new UserProjectRoleService(),
         ])
-        job.userProjectRoleService.ldapService = Mock(LdapService) {
+        job.userProjectRoleService.identityProvider = Mock(IdentityProvider) {
             isUserInIdpAndActivated(_) >> false
         }
 
@@ -182,7 +182,7 @@ class DeactivateUsersJobIntegrationSpec extends Specification implements DomainF
                     _ * findOptionAsString(_) { return "option" }
                     _ * findOptionAsLong(_) { return 0L }
                 },
-                ldapService: Mock(LdapService) {
+                identityProvider: Mock(IdentityProvider) {
                     1 * getGroupsOfUser(_) >> { return ["group"] }
                 },
                 userService: new UserService(),
@@ -191,7 +191,7 @@ class DeactivateUsersJobIntegrationSpec extends Specification implements DomainF
                 },
                 userProjectRoleService: new UserProjectRoleService(),
         ])
-        job.userProjectRoleService.ldapService = Mock(LdapService)
+        job.userProjectRoleService.identityProvider = Mock(IdentityProvider)
 
         Closure<User> createUserWithProjectsHelper = { String username, int offset ->
             Date date = new Date(System.currentTimeMillis() + offset * 24 * 60 * 60 * 1000)

@@ -26,7 +26,6 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.security.user.identityProvider.LdapService
 import de.dkfz.tbi.otp.security.user.UserService
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
@@ -34,6 +33,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.security.User
+import de.dkfz.tbi.otp.security.user.identityProvider.IdentityProvider
 import de.dkfz.tbi.otp.utils.MessageSourceService
 
 import java.time.LocalDateTime
@@ -64,7 +64,7 @@ class ScheduleUsersForDeactivationJob extends AbstractScheduledJob {
     ProjectService projectService
 
     @Autowired
-    LdapService ldapService
+    IdentityProvider identityProvider
 
     @Autowired
     UserService userService
@@ -128,7 +128,7 @@ class ScheduleUsersForDeactivationJob extends AbstractScheduledJob {
      * Non-existing users are to be handled as deactivated.
      */
     boolean userIsDeactivated(User user) {
-        return !ldapService.exists(user) || ldapService.isUserDeactivated(user)
+        return !identityProvider.exists(user) || identityProvider.isUserDeactivated(user)
     }
 
     String getMailBodyWithInvalidUsers(Set<UserProjectRole> invalidUsers) {

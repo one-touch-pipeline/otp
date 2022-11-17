@@ -25,7 +25,7 @@ import grails.converters.JSON
 import org.springframework.security.access.annotation.Secured
 
 import de.dkfz.tbi.otp.security.user.UserService
-import de.dkfz.tbi.otp.security.user.identityProvider.LdapService
+import de.dkfz.tbi.otp.security.user.identityProvider.IdentityProvider
 import de.dkfz.tbi.otp.security.user.identityProvider.data.IdpUserDetails
 
 @Secured('isFullyAuthenticated()')
@@ -36,7 +36,7 @@ class LdapController {
     ]
 
     UserService userService
-    LdapService ldapService
+    IdentityProvider identityProvider
 
     /**
      * Return a json list of all users from the ldap system which fit the search criteria.
@@ -50,7 +50,7 @@ class LdapController {
             return render([[minLength: true]] as JSON)
         }
 
-        List<IdpUserDetails> idpUsers = ldapService.getListOfIdpUserDetailsBySearchString(cmd.searchString)
+        List<IdpUserDetails> idpUsers = identityProvider.getListOfIdpUserDetailsBySearchString(cmd.searchString)
 
         Set<String> otpUserNames = userService.getAllUserNamesOfOtpUsers(idpUsers*.username)
 

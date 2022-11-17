@@ -56,13 +56,13 @@ package operations.showData.consistencyChecking.userManagement
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.*
-import de.dkfz.tbi.otp.security.user.identityProvider.LdapService
+import de.dkfz.tbi.otp.security.user.identityProvider.IdentityProvider
 import de.dkfz.tbi.otp.security.user.identityProvider.data.IdpUserDetails
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 List output = []
 
-LdapService ldapService = ctx.getBean('ldapService')
+IdentityProvider identityProvider = ctx.getBean('identityProvider')
 UserProjectRoleService uprs = ctx.getBean('userProjectRoleService')
 
 // this cache maps username to IdpUserDetails in an effort to reduce the number of duplicate ldap requests
@@ -73,7 +73,7 @@ Project.findAll().each { Project project ->
     List<User> projectUsers = UserProjectRole.findAllByProject(project)*.user
     List<String> nonDatabaseUsers = []
 
-    List<String> ldapGroupMembers = ldapService.getGroupMembersByGroupName(project.unixGroup)
+    List<String> ldapGroupMembers = identityProvider.getGroupMembersByGroupName(project.unixGroup)
 
     ldapGroupMembers.each { String username ->
         User user = CollectionUtils.atMostOneElement(User.findAllByUsername(username))
@@ -110,7 +110,7 @@ Project.findAll().each { Project project ->
                 if (cache[username]) {
                     details = cache[username]
                 } else {
-                    details = ldapService.getIdpUserDetailsByUsername(username)
+                    details = identityProvider.getIdpUserDetailsByUsername(username)
                     cache[username] = details
                 }
                 output << sprintf("%-15s | %-20s | %-30s ", [details.username, details.realName, details.mail])
@@ -144,8 +144,8 @@ UserProjectRole.findAll().sort {
         return
     }
     boolean fileAccessInOtp = userProjectRole.accessToFiles
-    boolean fileAccessInLdap = userProjectRole.project.unixGroup in ldapService.getGroupsOfUser(userProjectRole.user)
-    boolean ldapDeactivated = ldapService.isUserDeactivated(userProjectRole.user)
+    boolean fileAccessInLdap = userProjectRole.project.unixGroup in identityProvider.getGroupsOfUser(userProjectRole.user)
+    boolean ldapDeactivated = identityProvider.isUserDeactivated(userProjectRole.user)
     if (fileAccessInOtp && !fileAccessInLdap && !userProjectRole.fileAccessChangeRequested) {
         uprs.setAccessToFiles(userProjectRole, false, true)
         fileAccessInOtp = false

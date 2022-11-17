@@ -25,7 +25,7 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.security.user.identityProvider.LdapService
+import de.dkfz.tbi.otp.security.user.identityProvider.IdentityProvider
 import de.dkfz.tbi.otp.security.user.identityProvider.data.IdpUserDetails
 import de.dkfz.tbi.otp.security.User
 
@@ -37,12 +37,12 @@ import de.dkfz.tbi.otp.security.User
 class FetchUserDataFromLdapJob extends AbstractScheduledJob {
 
     @Autowired
-    LdapService ldapService
+    IdentityProvider identityProvider
 
     @Override
     void wrappedExecute() {
         List<User> otpUsers = User.findAllByEnabled(true)
-        List<IdpUserDetails> idpUserDetails = ldapService.getIdpUserDetailsByUserList(otpUsers)
+        List<IdpUserDetails> idpUserDetails = identityProvider.getIdpUserDetailsByUserList(otpUsers)
 
         otpUsers.each { User otpUser ->
             IdpUserDetails syncedUserDetails = idpUserDetails.find { it.username == otpUser.username }

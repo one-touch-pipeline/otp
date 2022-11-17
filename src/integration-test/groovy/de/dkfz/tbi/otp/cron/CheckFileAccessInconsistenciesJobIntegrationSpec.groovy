@@ -26,7 +26,7 @@ import grails.gorm.transactions.Rollback
 import spock.lang.Specification
 import spock.lang.Unroll
 
-import de.dkfz.tbi.otp.security.user.identityProvider.LdapService
+import de.dkfz.tbi.otp.security.user.identityProvider.IdentityProvider
 import de.dkfz.tbi.otp.security.user.identityProvider.data.IdpUserDetails
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
@@ -81,7 +81,7 @@ class CheckFileAccessInconsistenciesJobIntegrationSpec extends Specification imp
 
         CheckFileAccessInconsistenciesJob job = new CheckFileAccessInconsistenciesJob([
                 processingOptionService: new ProcessingOptionService(),
-                ldapService            : Mock(LdapService) {
+                identityProvider: Mock(IdentityProvider) {
                     1 * getIdpUserDetailsByUserList(_) >> [idpUserDetails,]
                     1 * isUserDeactivated(_) >> ldapDisabled
                     0 * _

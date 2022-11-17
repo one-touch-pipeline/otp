@@ -26,11 +26,11 @@ import grails.gorm.transactions.Rollback
 import spock.lang.Ignore
 import spock.lang.Specification
 
-import de.dkfz.tbi.otp.security.user.identityProvider.LdapService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.security.User
+import de.dkfz.tbi.otp.security.user.identityProvider.IdentityProvider
 import de.dkfz.tbi.otp.utils.MailHelperService
 
 @Rollback
@@ -67,7 +67,7 @@ class UnknownLdapUsersJobIntegrationSpec extends Specification implements Domain
             return DomainFactory.createUser(username: username)
         }
         UnknownLdapUsersJob job = new UnknownLdapUsersJob([
-                ldapService: Mock(LdapService) {
+                identityProvider: Mock(IdentityProvider) {
                     5 * exists(_) >> { User user ->
                         return (user in usersToBeFound)
                     }
@@ -95,7 +95,7 @@ class UnknownLdapUsersJobIntegrationSpec extends Specification implements Domain
         }
         UnknownLdapUsersJob job = new UnknownLdapUsersJob([
                 processingOptionService: new ProcessingOptionService(),
-                ldapService: Mock(LdapService) {
+                identityProvider: Mock(IdentityProvider) {
                     5 * exists(_) >> { User user ->
                         return !(user in usersToNotBeFound)
                     }
@@ -116,7 +116,7 @@ class UnknownLdapUsersJobIntegrationSpec extends Specification implements Domain
         DomainFactory.createUser(username: "username", enabled: true)
         UnknownLdapUsersJob job = new UnknownLdapUsersJob([
                 processingOptionService: new ProcessingOptionService(),
-                ldapService: Mock(LdapService) {
+                identityProvider: Mock(IdentityProvider) {
                     1 * exists(_) >> { User user ->
                         return true
                     }

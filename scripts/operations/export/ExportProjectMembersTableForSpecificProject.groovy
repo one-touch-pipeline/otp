@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-import de.dkfz.tbi.otp.security.user.identityProvider.LdapService
+import de.dkfz.tbi.otp.security.user.identityProvider.IdentityProvider
 import de.dkfz.tbi.otp.security.user.identityProvider.data.IdpUserDetails
 import de.dkfz.tbi.otp.ngsdata.UserEntry
 import de.dkfz.tbi.otp.ngsdata.UserProjectRole
@@ -36,13 +36,13 @@ The column "Project Access" is not exported since there is no information provid
 String projectName = '???'
 
 //work
-LdapService ldapService = ctx.ldapService
+IdentityProvider identityProvider = ctx.getBean('identityProvider')
 
 def project = CollectionUtils.exactlyOneElement(Project.findAllByName(projectName))
 
 List<UserProjectRole> userProjectRoles = UserProjectRole.findAllByProject(project)
 String table = userProjectRoles.collect { UserProjectRole upr ->
-    IdpUserDetails idpUserDetails = ldapService.getIdpUserDetailsByUsername(upr.user.username)
+    IdpUserDetails idpUserDetails = identityProvider.getIdpUserDetailsByUsername(upr.user.username)
     new UserEntry(upr.user, upr.project, idpUserDetails)
 }.sort { UserEntry userEntry ->
     userEntry.user.username

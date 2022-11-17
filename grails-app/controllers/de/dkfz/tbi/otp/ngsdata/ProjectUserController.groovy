@@ -36,7 +36,7 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.SecurityService
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.security.user.UserService
-import de.dkfz.tbi.otp.security.user.identityProvider.LdapService
+import de.dkfz.tbi.otp.security.user.identityProvider.IdentityProvider
 import de.dkfz.tbi.otp.security.user.identityProvider.data.IdpUserDetails
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.StringUtils
@@ -48,7 +48,7 @@ class ProjectUserController implements CheckAndCall {
     ProjectSelectionService projectSelectionService
     UserService userService
     UserProjectRoleService userProjectRoleService
-    LdapService ldapService
+    IdentityProvider identityProvider
     SecurityService securityService
     ProcessingOptionService processingOptionService
     ProjectRoleService projectRoleService
@@ -74,7 +74,7 @@ class ProjectUserController implements CheckAndCall {
         List<UserProjectRole> userProjectRolesOfProject = UserProjectRole.findAllByProject(project)
         List<User> projectUsers = userProjectRolesOfProject*.user
 
-        List<String> ldapGroupMemberUsernames = ldapService.getGroupMembersByGroupName(project.unixGroup)
+        List<String> ldapGroupMemberUsernames = identityProvider.getGroupMembersByGroupName(project.unixGroup)
 
         List<User> ldapGroupMemberUsers = ldapGroupMemberUsernames ? User.findAllByUsernameInList(ldapGroupMemberUsernames) : []
         projectUsers.addAll(ldapGroupMemberUsers)
@@ -88,7 +88,7 @@ class ProjectUserController implements CheckAndCall {
         List<UserEntry> userEntries = []
         List<String> usersWithoutUserProjectRole = []
         projectUsers.each { User user ->
-            IdpUserDetails idpUserDetails = ldapService.getIdpUserDetailsByUsername(user.username)
+            IdpUserDetails idpUserDetails = identityProvider.getIdpUserDetailsByUsername(user.username)
             UserProjectRole userProjectRole = userProjectRolesOfProject.find { it.user == user }
 
             // force IS state from ldap in case of inconsistency
@@ -209,7 +209,7 @@ class ProjectUserController implements CheckAndCall {
         checkErrorAndCallMethod(cmd, {
             userProjectRoleService.setAccessToFilesWithUserNotification(cmd.userProjectRole, cmd.value)
         }) {
-            IdpUserDetails idpUserDetails = ldapService.getIdpUserDetailsByUsername(cmd.userProjectRole.user.username)
+            IdpUserDetails idpUserDetails = identityProvider.getIdpUserDetailsByUsername(cmd.userProjectRole.user.username)
             UserEntry userEntry = new UserEntry(cmd.userProjectRole.user, cmd.userProjectRole.project, idpUserDetails)
             [tooltip: g.message(code: userEntry.fileAccess.toolTipKey), permissionState: userEntry.fileAccess]
         }

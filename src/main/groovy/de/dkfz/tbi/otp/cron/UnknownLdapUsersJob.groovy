@@ -25,8 +25,8 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.security.user.identityProvider.LdapService
 import de.dkfz.tbi.otp.security.User
+import de.dkfz.tbi.otp.security.user.identityProvider.IdentityProvider
 import de.dkfz.tbi.otp.utils.MailHelperService
 
 /**
@@ -42,7 +42,7 @@ class UnknownLdapUsersJob extends AbstractScheduledJob {
     MailHelperService mailHelperService
 
     @Autowired
-    LdapService ldapService
+    IdentityProvider identityProvider
 
     static final String MAIL_SUBJECT = "Found unknown LDAP users in the OTP user management"
 
@@ -75,7 +75,7 @@ class UnknownLdapUsersJob extends AbstractScheduledJob {
     }
 
     List<User> getUsersThatCanNotBeFoundInLdap(List<User> users) {
-        return users.findAll { User user -> !ldapService.exists(user) }
+        return users.findAll { User user -> !identityProvider.exists(user) }
     }
 
     @Override

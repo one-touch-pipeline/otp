@@ -26,7 +26,7 @@ import spock.lang.Ignore
 import spock.lang.Specification
 import spock.lang.Unroll
 
-import de.dkfz.tbi.otp.security.user.identityProvider.LdapService
+import de.dkfz.tbi.otp.security.user.identityProvider.IdentityProvider
 import de.dkfz.tbi.otp.security.user.identityProvider.data.IdpUserDetails
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
@@ -63,7 +63,7 @@ class CheckForAdUpdateJobSpec extends Specification implements DataTest, DomainF
                 fileAccessChangeRequested: fileAccessChangeRequested,
         ])
         CheckForAdUpdateJob job = new CheckForAdUpdateJob([
-                ldapService: Mock(LdapService) {
+                identityProvider: Mock(IdentityProvider) {
                     callCount * getIdpUserDetailsByUsername(_) >> {
                         new IdpUserDetails([
                                 memberOfGroupList: groups
