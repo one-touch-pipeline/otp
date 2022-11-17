@@ -203,32 +203,35 @@ describe('Check workflow config page', () => {
         });
       });
     });
+
     it('should show workflowConfigModal on workflowConfig page', () => {
+      cy.visit('/workflowConfigViewer/index');
       cy.intercept('/workflowConfigViewer/build*').as('buildConfig');
+      cy.get('.selector').find('#workflowSelector').select('Cell Ranger', { force: true });
       cy.wait('@buildConfig').then((interception) => {
         expect(interception.response.statusCode).to.eq(200);
       });
-      cy.get('.selector').find('#workflowSelector').select('Cell Ranger', { force: true });
 
       cy.get('#relatedSelectors').find('a.above-stretched-link').first().then(($link) => {
         const selectorName = $link.text();
         cy.get('#relatedSelectors').find('a.above-stretched-link').first().should('not.be.empty')
           .click();
+
         cy.url().should('include', 'selector.id')
-          .should('include', '#workflowConfigModal');
-        cy.get('div.modal-content').should('be.visible');
-        cy.get('div.modal-content').find('input[name="selectorName"]').should('have.value', selectorName);
+          .and('include', '#workflowConfigModal');
+        cy.get('div.modal-content').should('be.visible')
+          .find('input[name="selectorName"]').should('have.value', selectorName);
       });
     });
+
     it('should show error toaster if selectorId is wrong', () => {
+      cy.visit('/workflowConfigViewer/index');
       cy.intercept('/workflowConfigViewer/build*').as('buildConfig');
 
       cy.get('#otpToastBox').should('not.exist');
       cy.get('.selector').find('#workflowSelector').select('Cell Ranger', { force: true });
       cy.visit('/workflowConfig/index?project=ExampleProject&selector.id=-1#workflowConfigModal');
-      cy.get('#otpToastBox').should('exist').then((toaster) => {
-        cy.wrap(toaster).should('contain', 'Failed fetching Selector by selectorId: ');
-      });
+      cy.get('#otpToastBox').should('exist').and('contain', 'Failed fetching Selector by selectorId: ');
     });
   });
 });
