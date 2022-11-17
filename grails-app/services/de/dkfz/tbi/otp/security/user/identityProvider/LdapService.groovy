@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.security.user.identityProvider
 
 import grails.gorm.transactions.Transactional
 import org.springframework.beans.factory.InitializingBean
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.ldap.NameNotFoundException
 import org.springframework.ldap.core.AttributesMapper
 import org.springframework.ldap.core.LdapTemplate
@@ -50,7 +51,9 @@ import static org.springframework.ldap.query.LdapQueryBuilder.query
 @Transactional
 class LdapService implements InitializingBean, IdentityProvider {
 
+    @Autowired
     ConfigService configService
+
     ProcessingOptionService processingOptionService
 
     private LdapTemplate ldapTemplate

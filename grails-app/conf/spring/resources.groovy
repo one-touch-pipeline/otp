@@ -26,12 +26,16 @@ import org.springframework.security.acls.AclPermissionEvaluator
 import org.springframework.web.servlet.i18n.FixedLocaleResolver
 
 import de.dkfz.tbi.otp.ProjectLinkGenerator
+import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.utils.NumberConverter
 
 import static grails.plugin.springsecurity.SpringSecurityUtils.getSecurityConfig
 
 beans = {
+    Properties otpProperties = ConfigService.parsePropertiesFile()
+
     // include Spring Beans with @Component annotation
     xmlns context: "http://www.springframework.org/schema/context"
     context.'component-scan'('base-package': "de.dkfz.tbi.otp")
@@ -104,4 +108,10 @@ beans = {
 
     // only use English (prevents translations included in plugins being used)
     localeResolver(FixedLocaleResolver, Locale.ENGLISH)
+
+    if (Boolean.parseBoolean(otpProperties.getProperty(OtpProperty.OIDC_ENABLED.key))) {
+        identityProvider(Class.forName("de.dkfz.tbi.otp.security.user.identityProvider.KeycloakService"))
+    } else {
+        identityProvider(Class.forName("de.dkfz.tbi.otp.security.user.identityProvider.LdapService"))
+    }
 }

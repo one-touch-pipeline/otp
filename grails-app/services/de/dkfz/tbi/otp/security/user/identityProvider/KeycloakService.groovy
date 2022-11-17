@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.security.user.identityProvider
 
 import grails.gorm.transactions.Transactional
 import org.apache.commons.lang.StringUtils
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.*
 import org.springframework.security.oauth2.client.OAuth2RestTemplate
 import org.springframework.security.oauth2.client.token.grant.client.ClientCredentialsResourceDetails
@@ -38,9 +39,10 @@ import de.dkfz.tbi.util.ldap.UserAccountControl
 @Transactional
 class KeycloakService implements IdentityProvider {
 
-    private final RestTemplate restTemplate = new RestTemplate()
-
+    @Autowired
     ConfigService configService
+
+    private final RestTemplate restTemplate = new RestTemplate()
 
     private OAuth2AccessToken accessToken
 
@@ -88,12 +90,12 @@ class KeycloakService implements IdentityProvider {
     @Override
     List<String> getGroupMembersByGroupName(String groupName) {
         String groupId = getGroupIdByGroupName(groupName)
-        return getGroupMembersByGroupId(groupId)
+        return new ArrayList<String>(getGroupMembersByGroupId(groupId))
     }
 
     @Override
     List<String> getGroupsOfUser(User user) {
-        return getIdpUserDetailsByUsername(user.username).memberOfGroupList
+        return new ArrayList<String>(getIdpUserDetailsByUsername(user.username).memberOfGroupList)
     }
 
     @Override
