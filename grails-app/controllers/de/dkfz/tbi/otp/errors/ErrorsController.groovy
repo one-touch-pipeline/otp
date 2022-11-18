@@ -24,7 +24,6 @@ package de.dkfz.tbi.otp.errors
 import org.springframework.security.access.annotation.Secured
 import groovy.util.logging.Slf4j
 
-import de.dkfz.tbi.otp.security.SecurityService
 import de.dkfz.tbi.otp.utils.ExceptionUtils
 import de.dkfz.tbi.otp.utils.RequestUtilService
 
@@ -35,7 +34,6 @@ import javax.servlet.http.HttpServletResponse
 class ErrorsController {
 
     RequestUtilService requestUtilService
-    SecurityService securityService
 
     static List<String> allHttpMethods = ["GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "TRACE", "PATCH"]
 
@@ -51,9 +49,9 @@ class ErrorsController {
     def error403 = {
         response.status = HttpServletResponse.SC_FORBIDDEN
         if (requestUtilService.isAjax(request)) {
-            return render(securityService.isLoggedIn().toString())
+            return render([:])
         }
-        return [authenticated: securityService.isLoggedIn()]
+        return [:]
     }
 
     def error404 = {

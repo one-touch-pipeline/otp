@@ -36,7 +36,7 @@ class SecurityTagLib {
 
     static namespace = "sec"
 
-    SecurityExpressionHandler webExpressionHandler
+    SecurityExpressionHandler webSecurityExpressionHandler
     SecurityService securityService
 
     /**
@@ -156,9 +156,9 @@ class SecurityTagLib {
             return false
         }
 
-        Expression expression = webExpressionHandler.expressionParser.parseExpression(expressionText)
+        Expression expression = webSecurityExpressionHandler.expressionParser.parseExpression(expressionText)
         Authentication auth = SecurityContextHolder.context.authentication
         FilterInvocation fi = new FilterInvocation(request, response, DUMMY_CHAIN)
-        return ExpressionUtils.evaluateAsBoolean(expression, webExpressionHandler.createEvaluationContext(auth, fi))
+        return ExpressionUtils.evaluateAsBoolean(expression, webSecurityExpressionHandler.createEvaluationContext(auth, fi))
     }
 }

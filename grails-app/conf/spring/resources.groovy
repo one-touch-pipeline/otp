@@ -25,17 +25,10 @@ import org.springframework.web.servlet.i18n.FixedLocaleResolver
 import de.dkfz.tbi.otp.ProjectLinkGenerator
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.config.OtpProperty
-import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.utils.NumberConverter
-
-import static grails.plugin.springsecurity.SpringSecurityUtils.getSecurityConfig
 
 beans = {
     Properties otpProperties = ConfigService.parsePropertiesFile()
-
-    // include Spring Beans with @Component annotation
-    xmlns context: "http://www.springframework.org/schema/context"
-    context.'component-scan'('base-package': "de.dkfz.tbi.otp")
 
     if (Environment.current == Environment.TEST) {
         // use Class.forName because classes in test-helper are not found in production env
@@ -52,20 +45,6 @@ beans = {
         task.scheduler(id: "taskScheduler", "pool-size": 10)
         task.'annotation-driven'(executor: "taskExecutor", scheduler: "taskScheduler")
     }
-
-    permissionEvaluator(ProjectPermissionEvaluator)
-
-    // overwrite default 'authenticationEntryPoint'
-    authenticationEntryPoint(TargetUrlEntryPoint, securityConfig.auth.loginFormUrl) {
-        ajaxLoginFormUrl = securityConfig.auth.ajaxLoginFormUrl
-        forceHttps = securityConfig.auth.forceHttps
-        useForward = securityConfig.auth.useForward
-        portMapper = ref('portMapper')
-        portResolver = ref('portResolver')
-        redirectStrategy = ref('redirectStrategy')
-    }
-
-    requestDataValueProcessor(CustomRequestDataValueProcessor)
 
     // don't use the default locale specific value converter
     [

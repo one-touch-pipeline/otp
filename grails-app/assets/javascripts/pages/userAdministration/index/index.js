@@ -99,7 +99,7 @@ $.otp.userAdministration.loadUserList = function () {
         mData(source) {
           let result = '';
           if (source.username) {
-            result = `<form action="${$.otp.createLink({ controller: 'login', action: 'impersonate' })}" 
+            result = `<form action="${$.otp.createLink({ controller: 'impersonate' })}" 
                             method="POST">
                         <input type="hidden" name="username" value="${source.username}"/>
                           <button>Switch to ${source.username}</button>

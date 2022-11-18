@@ -20,13 +20,25 @@
   - SOFTWARE.
   --}%
 
+<html>
 <head>
-    <meta name='layout' content='main' />
-    <title><g:message code="springSecurity.denied.title" /></title>
+    <meta name='layout' content='main'/>
+    <title><g:message code="security.login.title"/></title>
+    <asset:stylesheet src="modules/info.css"/>
+    <asset:javascript src="common/FocusLogin.js"/>
 </head>
 
 <body>
-<div class='body'>
-    <div class='errors'><g:message code="springSecurity.denied.message" /></div>
+<div class="body">
+    <div id='login'>
+        <h2><g:message code="security.login.header"/></h2>
+
+        <g:if test='${flash.message}'>
+            <div class='login_message'>${flash.message}</div>
+        </g:if>
+
+        <g:render template="login"/>
+    </div>
 </div>
 </body>
+</html>

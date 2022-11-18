@@ -79,6 +79,12 @@ class DicomAuditSecurityEventListener implements ApplicationListener<AbstractAut
                         event.source.hasProperty("request") ? event.source.request.requestURI : "null"
                 )
                 break
+            case { it instanceof LogoutSuccessEvent } :
+                DicomAuditLogger.logUserLogout(
+                        EventIdentification.EventOutcomeIndicator.SUCCESS,
+                        dicomAuditUtils.getRealUserName(event.authentication.principal.username as String)
+                )
+                break
         }
     }
 }

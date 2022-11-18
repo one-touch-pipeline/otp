@@ -21,21 +21,19 @@
  */
 package de.dkfz.tbi.otp.security
 
-import grails.util.Holders
 import org.springframework.security.authentication.AnonymousAuthenticationToken
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.context.SecurityContextHolder
-import org.springframework.security.core.userdetails.*
+import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.web.authentication.switchuser.SwitchUserFilter
 import org.springframework.security.web.authentication.switchuser.SwitchUserGrantedAuthority
 
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.ProjectRole
 import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.*
 
 import static org.junit.Assert.assertNotNull
@@ -85,9 +83,9 @@ trait UserAndRoles {
     static <T> T doWithAuth(String username, final Closure<T> closure) {
         Authentication previousAuth = SecurityContextHolder.context.authentication
 
-        UserDetails userDetails = Holders.applicationContext.getBean('userDetailsService', UserDetailsService).loadUserByUsername(username)
+        UserDetails userDetails = new org.springframework.security.core.userdetails.User(username, "",
+                UserRole.findAllByUser(User.findByUsername(username))*.role.collect { new SimpleGrantedAuthority(it.authority) })
         SecurityContextHolder.context.authentication = new UsernamePasswordAuthenticationToken(userDetails, userDetails.password, userDetails.authorities)
-        Holders.applicationContext.getBean('userCache', UserCache).removeUserFromCache(username)
 
         try {
             return closure.call()

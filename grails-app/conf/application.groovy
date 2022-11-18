@@ -104,8 +104,6 @@ grails.scaffolding.templates.domainSuffix = 'Instance'
 grails.json.legacy.builder = false
 // enabled native2ascii conversion of i18n properties files
 grails.enable.native2ascii = true
-// packages to include in Spring bean scanning
-grails.spring.bean.packages = []
 // whether to disable processing of multi part requests
 grails.web.disable.multipart=false
 
@@ -115,72 +113,6 @@ grails.controllers.upload.maxRequestSize = 10*1024*1024
 
 // request parameters to mask when logging exceptions
 grails.exceptionresolver.params.exclude = ['password']
-
-// Added by the Spring Security Core plugin:
-grails.plugin.springsecurity.authority.className = 'de.dkfz.tbi.otp.security.Role'
-grails.plugin.springsecurity.userLookup.authorityJoinClassName = 'de.dkfz.tbi.otp.security.UserRole'
-grails.plugin.springsecurity.userLookup.userDomainClassName = 'de.dkfz.tbi.otp.security.User'
-grails.plugin.springsecurity.userLookup.usernameIgnoreCase = true
-grails.plugin.springsecurity.userLookup.accountExpiredPropertyName = null
-grails.plugin.springsecurity.userLookup.accountLockedPropertyName = null
-grails.plugin.springsecurity.userLookup.passwordExpiredPropertyName = null
-
-ArrayList<LinkedHashMap<String, Serializable>> staticRules = [
-        // restricted access to special pages
-        [pattern: "/adminSeed/**"                                        , access: ["denyAll"]],
-        [pattern: "/plugins/**"                                          , access: ["denyAll"]],
-        [pattern: "/login/impersonate"                                   , access: ["hasRole('ROLE_SWITCH_USER')"]],
-
-        // publicly available pages
-        [pattern: "/assets/**"                                           , access: ["permitAll"]],
-        [pattern: "/grails-errorhandler/**"                              , access: ["permitAll"]],
-        [pattern: "/"                                                    , access: ["permitAll"]],
-
-        // regular pages with access for logged-in users, protected by annotations in services
-        // Hence, default behavior is to denyAll and explicitly allow access in the services
-        [pattern: "/**"                                                  , access:  ["denyAll"]],
-]
-
-// avoid black screen if console is disabled
-if(consoleEnabled) {
-    staticRules = staticRules + [
-            [pattern: "/console/**"                                          , access: ["hasRole('ROLE_ADMIN') and @dicomAuditConsoleHandler.log()"]],
-            [pattern: "/static/console*/**"                                  , access: ["hasRole('ROLE_ADMIN') and @dicomAuditConsoleHandler.log()"]],
-    ]
-}
-
-grails.plugin.springsecurity.controllerAnnotations.staticRules = staticRules
-
-// hierarchy of roles
-grails.plugin.springsecurity.roleHierarchy = '''
-    ROLE_ADMIN > ROLE_OPERATOR
-    ROLE_OPERATOR > ROLE_TEST_PI
-    ROLE_OPERATOR > ROLE_TEST_BIOINFORMATICAN
-    ROLE_OPERATOR > ROLE_TEST_SUBMITTER
-    ROLE_ADMIN > ROLE_SWITCH_USER
-'''
-
-grails.plugin.springsecurity.adh.errorPage = "/errors/error403"
-grails.plugin.springsecurity.useSwitchUserFilter = true
-
-grails.plugin.springsecurity.successHandler.targetUrlParameter = "target"
-grails.plugin.springsecurity.successHandler.defaultTargetUrl = '/home/index'
-grails.plugin.springsecurity.apf.storeLastUsername = true
-grails.plugin.springsecurity.logout.postOnly = false
-grails.plugin.springsecurity.printStatusMessages = false
-
-// enable event listeners for logging login processes to the Dicom audit log
-grails.plugin.springsecurity.useSecurityEventListener = true
-// Injection of the Dicom logout handler
-// The way used above (Adding listeners to Spring Security) would be preferred,
-// but Spring doesn't offer an interface for logout, so we had to use a bean.
-grails.plugin.springsecurity.logout.additionalHandlerNames = [
-        'dicomAuditLogoutHandler',
-]
-
-// Use a ThreadLocal as security context holder strategy
-// By default, Grails uses an InheritableThreadLocal, but this does not work with thread pools (used by Grails promises)
-grails.plugin.springsecurity.sch.strategyName = org.springframework.security.core.context.SecurityContextHolder.MODE_THREADLOCAL
 
 //databasemigration configuration
 grails.plugin.databasemigration.changelogLocation = 'migrations'
@@ -216,9 +148,6 @@ environments {
         grails.mail.disabled=true
     }
 }
-
-// disable auto config of the grails oauth2 plugin. the plugin is configured manually and used to handle the wes server to server communication.
-grails.plugin.springsecurity.oauthProvider.active=false
 
 //configure groovy web console
 grails.plugin.console.enabled = consoleEnabled

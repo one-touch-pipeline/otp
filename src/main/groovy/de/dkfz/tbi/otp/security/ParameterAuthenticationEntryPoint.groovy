@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,27 +21,27 @@
  */
 package de.dkfz.tbi.otp.security
 
-import grails.plugin.springsecurity.SpringSecurityUtils
-import grails.plugin.springsecurity.web.authentication.AjaxAwareAuthenticationEntryPoint
 import org.springframework.security.core.AuthenticationException
+import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint
 import org.springframework.security.web.util.UrlUtils
 import org.springframework.web.util.UriComponentsBuilder
 
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
-class TargetUrlEntryPoint extends AjaxAwareAuthenticationEntryPoint {
+class ParameterAuthenticationEntryPoint extends LoginUrlAuthenticationEntryPoint {
 
-    TargetUrlEntryPoint(String loginFormUrl) {
+    static final String TARGET_PARAM_NAME = "target"
+
+    ParameterAuthenticationEntryPoint(String loginFormUrl) {
         super(loginFormUrl)
     }
 
     @Override
     protected String determineUrlToUseForThisRequest(HttpServletRequest request, HttpServletResponse response,
                                                      AuthenticationException exception) {
-        String targetParamName = SpringSecurityUtils.securityConfig.successHandler.targetUrlParameter
         String targetParamValue = UrlUtils.buildRequestUrl(request)
         String redirect = super.determineUrlToUseForThisRequest(request, response, exception)
-        return UriComponentsBuilder.fromPath(redirect).queryParam(targetParamName, targetParamValue).toUriString()
+        return UriComponentsBuilder.fromPath(redirect).queryParam(TARGET_PARAM_NAME, targetParamValue).toUriString()
     }
 }

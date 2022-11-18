@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,76 +19,68 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+package de.dkfz.tbi.otp
 
 import grails.converters.JSON
-import grails.plugin.springsecurity.SpringSecurityUtils
-import org.springframework.security.access.annotation.Secured
-import org.springframework.security.authentication.*
 import org.springframework.security.core.AuthenticationException
-import org.springframework.security.web.WebAttributes
-import org.springframework.security.web.authentication.session.SessionAuthenticationException
 
-import de.dkfz.tbi.otp.security.FailedToCreateUserException
 import de.dkfz.tbi.otp.security.SecurityService
 import de.dkfz.tbi.otp.utils.RequestUtilService
 
-@SuppressWarnings('ClassNameSameAsSuperclass') //this affects the URL of the superclass
-@Secured('permitAll')
-class LoginController extends grails.plugin.springsecurity.LoginController {
+class LoginController {
 
     RequestUtilService requestUtilService
     SecurityService securityService
 
+    final static String LAST_USERNAME_KEY = "LAST_USERNAME_KEY"
+    final static String LAST_TARGET_KEY = "LAST_TARGET_KEY"
+
     static allowedMethods = [
-            auth: "GET",
+            index   : "GET",
             authfail: "GET",
     ]
 
-    /** Show the login page. */
-    def auth(LoginCommand cmd) {
+    def index(LoginCommand cmd) {
         assert cmd.validate()
 
         if (securityService.isLoggedIn()) {
-            redirect uri: cmd.target ?: conf.successHandler.defaultTargetUrl
+            redirect uri: cmd.target ?: "/"
             return [:]
         }
 
-        String postUrl = "${request.contextPath}${conf.apf.filterProcessesUrl}"
+        String postUrl = "${request.contextPath}/authenticate"
         return [
                 target             : cmd.target,
                 username           : flash.username,
                 postUrl            : postUrl,
-                rememberMeParameter: conf.rememberMe.parameter,
-                usernameParameter  : conf.apf.usernameParameter,
-                passwordParameter  : conf.apf.passwordParameter,
-                gspLayout          : conf.gsp.layoutAuth,
         ]
     }
 
     /** Callback after a failed login. Redirects to the auth page with a warning message. */
-    @Override
     def authfail() {
         String msg = ''
         AuthenticationException exception = session[WebAttributes.AUTHENTICATION_EXCEPTION] as AuthenticationException
         if (exception) {
             switch (exception.class) {
-                case AccountExpiredException: msg = g.message(code: "springSecurity.errors.login.expired"); break
-                case CredentialsExpiredException: msg = g.message(code: "springSecurity.errors.login.passwordExpired"); break
-                case DisabledException: msg = g.message(code: "springSecurity.errors.login.disabled"); break
-                case LockedException: msg = g.message(code: "springSecurity.errors.login.locked"); break
-                case SessionAuthenticationException: msg = g.message(code: "springSecurity.errors.login.max.sessions.exceeded"); break
+                case AccountExpiredException: msg = g.message(code: "security.errors.login.expired"); break
+                case CredentialsExpiredException: msg = g.message(code: "security.errors.login.passwordExpired"); break
+                case DisabledException: msg = g.message(code: "security.errors.login.disabled"); break
+                case LockedException: msg = g.message(code: "security.errors.login.locked"); break
+                case SessionAuthenticationException: msg = g.message(code: "security.errors.login.max.sessions.exceeded"); break
                 case FailedToCreateUserException: msg = exception.message; break
-                default: msg = g.message(code: "springSecurity.errors.login.fail"); break
+                default: msg = g.message(code: "security.errors.login.fail"); break
             }
         }
 
         if (requestUtilService.isAjax(request)) {
             render([error: msg] as JSON)
-        } else {
-            flash.message = msg
-            flash.username = session.getAttribute(SpringSecurityUtils.SPRING_SECURITY_LAST_USERNAME_KEY)
-            redirect action: 'auth', params: params
+            return
         }
+
+        flash.message = msg
+        flash.username = session[LAST_USERNAME_KEY]
+        String target = session[LAST_TARGET_KEY]
+        redirect action: 'index', params: [target: target ?: ""]
     }
 }
 

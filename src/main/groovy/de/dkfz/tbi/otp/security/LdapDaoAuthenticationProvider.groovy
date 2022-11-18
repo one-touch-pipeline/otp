@@ -23,28 +23,49 @@ package de.dkfz.tbi.otp.security
 
 import groovy.transform.CompileStatic
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.ldap.core.LdapTemplate
+import org.springframework.ldap.core.support.LdapContextSource
+import org.springframework.ldap.filter.EqualsFilter
+import org.springframework.ldap.filter.Filter
+import org.springframework.ldap.support.LdapUtils
 import org.springframework.security.authentication.*
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.AuthenticationException
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UsernameNotFoundException
-import org.springframework.security.ldap.authentication.LdapAuthenticationProvider
 import org.springframework.stereotype.Component
+
+import de.dkfz.tbi.otp.config.ConfigService
 
 /**
  * This provider checks whether the user exists in the database and can be authenticated by LDAP.
  * It also does the default pre-authentication checks, but does not validate the password from the database.
  * If successful, the LDAP authentication object is returned
  */
-@Component("ldapDaoAuthenticationProvider")
+@Component
 @CompileStatic
 class LdapDaoAuthenticationProvider implements AuthenticationProvider {
 
     @Autowired
-    LdapAuthenticationProvider ldapAuthProvider
+    UserCreatingUserDetailsService userDetailsService
 
     @Autowired
-    UserCreatingUserDetailsService userDetailsService
+    ConfigService configService
+
+    private LdapContextSource contextSource
+    private LdapTemplate ldapTemplate
+
+    private void initContext() {
+        contextSource = new LdapContextSource()
+        contextSource.url = configService.ldapServer
+        contextSource.base = configService.ldapSearchBase
+        contextSource.userDn = configService.ldapManagerDistinguishedName
+        contextSource.password = configService.ldapManagerPassword
+        contextSource.afterPropertiesSet()
+
+        ldapTemplate = new LdapTemplate(contextSource)
+        ldapTemplate.ignorePartialResultException = true
+    }
 
     @Override
     Authentication authenticate(Authentication authentication) throws AuthenticationException {
@@ -63,11 +84,20 @@ class LdapDaoAuthenticationProvider implements AuthenticationProvider {
             throw new DisabledException("User is disabled")
         }
 
-        return ldapAuthProvider.authenticate(authentication)
+        initContext()
+        Filter filter = new EqualsFilter(configService.ldapSearchAttribute, authentication.name)
+        Boolean authenticate = ldapTemplate.authenticate(LdapUtils.emptyLdapName(), filter.encode(), authentication.credentials.toString())
+        if (authenticate) {
+            UserDetails userDetails = new org.springframework.security.core.userdetails.User(authentication.name,
+                    authentication.credentials.toString(), user.authorities)
+            return new UsernamePasswordAuthenticationToken(userDetails, authentication.credentials.toString(), user.authorities)
+        }
+
+        return null
     }
 
     @Override
-    boolean supports(Class<? extends Object> aClass) {
-        ldapAuthProvider.supports(aClass)
+    boolean supports(Class<?> authentication) {
+        return authentication == UsernamePasswordAuthenticationToken
     }
 }

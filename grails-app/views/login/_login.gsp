@@ -22,13 +22,13 @@
 
 <div id="loginBox" style="position: absolute;">
     <div id="loginFormBox" style="position: absolute;">
-        <form id="loginForm" method="POST" action="${createLink(controller: 'login', action: 'authenticate')}">
+        <form id="loginForm" method="POST" action="${createLink(controller: 'authenticate')}">
 
             <input name="username" id="account" oninput="this.value = this.value.toLowerCase()"
-                   placeholder="${g.message(code: "login.account")}" value="${username}" required>
-            <input type="password" name="password" id="password" placeholder="${g.message(code: "login.password")}" required><br/>
+                   placeholder="${g.message(code: "security.login.username.label")}" value="${username}" required>
+            <input type="password" name="password" id="password" placeholder="${g.message(code: "security.login.password.label")}" required><br/>
             <input type="hidden" name="target" value="${target}"/>
-            <input id="loginButton" type="submit" value="Login"/>
+            <input id="loginButton" type="submit" value="${g.message(code: "security.login.button")}"/>
         </form>
     </div>
 </div>

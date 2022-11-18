@@ -39,7 +39,6 @@ environments {
     production {
         grails.logging.jul.usebridge = false
         grails.serverURL = otpProperties.getProperty(OtpProperty.CONFIG_SERVER_URL.key)
-        grails.plugin.springsecurity.secureChannel.useHeaderCheckChannelSecurity = Boolean.parseBoolean(otpProperties.getProperty(OtpProperty.CONFIG_SECURECHANNEL_HEADERCHECK.key))
     }
     WORKFLOW_TEST {
         grails.serverURL = "http://localhost"
@@ -47,38 +46,6 @@ environments {
     test {
         grails.serverURL = "http://example.com"
     }
-}
-
-// ldap
-if (!Boolean.parseBoolean(otpProperties.getProperty(OtpProperty.LDAP_ENABLED.key))) {
-    grails.plugin.springsecurity.providerNames = [
-            'daoAuthenticationProvider',
-            'anonymousAuthenticationProvider',
-    ]
-} else {
-    grails.plugin.springsecurity.providerNames = [
-            'ldapDaoAuthenticationProvider',
-            'anonymousAuthenticationProvider',
-    ]
-    if (otpProperties.getProperty(OtpProperty.LDAP_MANAGER_DN.key)) {
-        grails.plugin.springsecurity.ldap.context.managerDn     = otpProperties.getProperty(OtpProperty.LDAP_MANAGER_DN.key)
-    }
-    grails.plugin.springsecurity.ldap.context.managerPassword = otpProperties.getProperty(OtpProperty.LDAP_MANAGER_PASSWORD.key)
-    if (otpProperties.getProperty(OtpProperty.LDAP_MANAGER_PASSWORD.key)) {
-        grails.plugin.springsecurity.ldap.auth.useAuthPassword = true
-    } else {
-        grails.plugin.springsecurity.ldap.auth.useAuthPassword = false
-    }
-    grails.plugin.springsecurity.ldap.context.server            = otpProperties.getProperty(OtpProperty.LDAP_SERVER.key)
-    grails.plugin.springsecurity.ldap.search.base               = otpProperties.getProperty(OtpProperty.LDAP_SEARCH_BASE.key)
-    grails.plugin.springsecurity.ldap.authorities.searchSubtree = otpProperties.getProperty(OtpProperty.LDAP_SEARCH_SUBTREE.key)
-    grails.plugin.springsecurity.ldap.search.filter             = "(${otpProperties.getProperty(OtpProperty.LDAP_SEARCH_ATTRIBUTE.key)}={0})"
-
-    // static options
-    grails.plugin.springsecurity.ldap.authorities.ignorePartialResultException = true
-    grails.plugin.springsecurity.ldap.authorities.retrieveGroupRoles = false
-    grails.plugin.springsecurity.ldap.authorities.retrieveDatabaseRoles = true
-    grails.plugin.springsecurity.ldap.mapper.userDetailsClass = 'inetOrgPerson'
 }
 
 String server = otpProperties.getProperty(OtpProperty.DATABASE_SERVER.key)
