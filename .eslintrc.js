@@ -34,7 +34,8 @@ const lintRules = {
   'no-undef': 'off',
   'func-names': 'off',
   'no-use-before-define': 'off',
-  strict: ['error', 'function']
+  strict: ['error', 'function'],
+  'no-console': 'error'
 };
 
 if (process.env.CI) {
