@@ -36,7 +36,7 @@
   margin-top: 36px;
 }
 
-.navigation ul li a {
+.navigation ul li a, button.menuLink {
   display: block;
   position: relative;
   float: left;
@@ -97,7 +97,7 @@
   position: relative;
 }
 
-.menuContainer a {
+.menuContainer a, button.menuLink {
   float: left;
   padding: 1em 0.9em;
   color: #999;
@@ -105,13 +105,15 @@
   font: bold 12px Arial, Helvetica;
   text-decoration: none;
   text-shadow: 0 1px 0 #000;
+  border: 0;
+  border-radius: 0;
 }
 
 .menuLinkContainer {
   text-align: center;
 }
 
-.menuContainer li:hover > a {
+.menuContainer li:hover > a, .menuContainer li:hover button.menuLink {
   color: #fafafa;
 }
 

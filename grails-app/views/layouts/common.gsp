@@ -187,7 +187,11 @@
                             </li>
                         </sec:ifAnyGranted>
                         <sec:ifSwitched>
-                            <li><a href='${request.contextPath}/logout/impersonate'>Resume as <sec:switchedUserOriginalUsername/></a></li>
+                            <li class="navigation menuContainerItem">
+                                <g:form controller="logout" action="impersonate" method="POST">
+                                    <button class="menuLink">${g.message(code: "header.switchBack", args: [sec.switchedUserOriginalUsername()])}</button>
+                                </g:form>
+                            </li>
                         </sec:ifSwitched>
                     </sec:ifLoggedIn>
                 </ul>
