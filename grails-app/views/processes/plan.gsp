@@ -41,18 +41,10 @@
             <g:else>
                 <g:message code="processes.plan.workflowIsDisabled"/>
             </g:else>
-            <% boolean buttonRendered = false; %>
-            <sec:permitted className="de.dkfz.tbi.otp.job.plan.JobExecutionPlan" id="${id}" permission="write">
-                <% buttonRendered = true; %>
+            <sec:ifAllGranted roles="ROLE_ADMIN">
                 <button id="enable-workflow-button" style="${enabled ? 'display: none;' : ''}"><g:message code="processes.plan.enableWorkflow"/></button>
                 <button id="disable-workflow-button" style="${enabled ? '' : 'display: none;'}"><g:message code="processes.plan.disableWorkflow"/></button>
-            </sec:permitted>
-            <g:if test="${!buttonRendered}">
-                <sec:ifAllGranted roles="ROLE_ADMIN">
-                    <button id="enable-workflow-button" style="${enabled ? 'display: none;' : ''}"><g:message code="processes.plan.enableWorkflow"/></button>
-                    <button id="disable-workflow-button" style="${enabled ? '' : 'display: none;'}"><g:message code="processes.plan.disableWorkflow"/></button>
-                </sec:ifAllGranted>
-            </g:if>
+            </sec:ifAllGranted>
         </div>
         <div id="workflowOverview">
             <div class="otpDataTables">
