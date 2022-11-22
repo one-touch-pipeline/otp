@@ -221,13 +221,13 @@ class ProjectRequestService {
 
     void sendPassOnEmail(ProjectRequest projectRequest) {
         User requester = projectRequest.requester
-        List<User> projectAuthorities = projectRequest.state.usersThatNeedToApprove as List
+        List<User> projectAuthorities = ((projectRequest.state.usersThatNeedToApprove as List) + [requester]).unique()
         List<String> recipients = projectAuthorities*.email
         List<String> ccs = [requester.email]
         String projectAuthoritiesUsernames = projectAuthorities*.username.join(', ')
         String subject = messageSourceService.createMessage("notification.projectRequest.passOn.subject")
         String body = messageSourceService.createMessage("notification.projectRequest.passOn.body", [
-                recipients        :  "$projectAuthoritiesUsernames, $requester.username",
+                recipients        : projectAuthoritiesUsernames,
                 projectAuthorities: projectAuthoritiesUsernames,
                 projectName       : projectRequest.name,
                 link              : getProjectRequestLinkWithoutParams(projectRequest),
@@ -254,7 +254,8 @@ class ProjectRequestService {
 
     void sendApprovedEmail(ProjectRequest projectRequest) {
         User requester = projectRequest.requester
-        List<String> recipient = (ProjectRequestPersistentStateService.getAllProjectRequestAuthorities(projectRequest.state)*.email) + [requester.email]
+        List<String> recipient = ((ProjectRequestPersistentStateService.getAllProjectRequestAuthorities(projectRequest.state)*.email) + [requester.email])
+                .unique()
         String subject = messageSourceService.createMessage("notification.projectRequest.approved.subject")
         String body = messageSourceService.createMessage("notification.projectRequest.approved.body", [
                 requester    : "${requester.username} (${requester.realName})",

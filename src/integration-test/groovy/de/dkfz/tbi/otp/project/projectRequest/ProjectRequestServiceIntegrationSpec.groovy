@@ -134,7 +134,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         final User requester = createUser()
         final User pi1 = createUser()
         final User pi2 = createUser()
-        final List<User> users = [pi1, pi2]
+        final List<User> users = [pi1, pi2, requester]
         final ProjectRequest request = createProjectRequest([requester: requester], [usersThatNeedToApprove: users])
         final String expectedAuthorityUsernames = users*.username.join(", ")
 
@@ -146,7 +146,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         1 * projectRequestService.linkGenerator.link(_) >> link
         1 * projectRequestService.messageSourceService.createMessage(_, [
                 projectAuthorities: expectedAuthorityUsernames,
-                recipients        : "$expectedAuthorityUsernames, $requester.username",
+                recipients        : expectedAuthorityUsernames,
                 projectName       : request.name,
                 link              : link,
                 teamSignature     : emailSenderSalutation,
@@ -205,6 +205,41 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         1 * projectRequestService.mailHelperService.sendEmail(subject, body, (users*.email + [requester.email]))
         1 * projectRequestService.processingOptionService.findOptionAsString(_) >> emailSenderSalutation
         0 * _
+    }
+
+    void "recipientShouldBeUnique"() {
+        given:
+        final User currentUser = createUser()
+        final User requester = createUser()
+        final List<User> users = [createUser(), createUser(), requester]
+        final ProjectRequest request = createProjectRequest([requester: requester], [
+                usersThatNeedToApprove  : users[0..0],
+                usersThatAlreadyApproved: users[1..2],
+        ])
+
+        when:
+        projectRequestService.sendSubmitEmail(request)
+        projectRequestService.sendPassOnEmail(request)
+        projectRequestService.sendPiRejectEmail(request, comment)
+        projectRequestService.sendOperatorRejectEmail(request, comment)
+        projectRequestService.sendPartiallyApprovedEmail(request)
+        projectRequestService.sendPiEditedEmail(request)
+        projectRequestService.sendApprovedEmail(request)
+        projectRequestService.sendDeleteEmail(request)
+        projectRequestService.sendDraftCreateEmail(request)
+        projectRequestService.sendDraftDeleteEmail(request)
+
+        then:
+        4 * projectRequestService.securityService.currentUser >> currentUser
+        6 * projectRequestService.linkGenerator.link(_) >> link
+        6 * projectRequestService.mailHelperService.sendEmail(_, _, _, _) >> { arguments ->
+            final List<User> recipients = arguments.get(2)
+            assert recipients.unique(false).size() == recipients.size()
+        }
+        4 * projectRequestService.mailHelperService.sendEmail(_, _, _) >> { arguments ->
+            final List<User> recipients = arguments.get(2)
+            assert recipients.unique(false).size() == recipients.size()
+        }
     }
 
     void "sendPartiallyApprovedEmail"() {
