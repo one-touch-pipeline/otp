@@ -26,6 +26,7 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
+import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.security.user.UserService
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
@@ -198,8 +199,17 @@ class ScheduleUsersForDeactivationJob extends AbstractScheduledJob {
         String body = messageSourceService.createMessage("scheduledUsersForDeactivationJob.notification.userReactivated.body", [
                 addressedUser        : "${projectAuthority.realName}",
                 reactivatedUser      : "${reactivatedUser.realName} (${reactivatedUser.username})",
+                userAuthority        : processingOptionService.findOptionAsString(ProcessingOption.OptionName.USER_AUTHORITY_TEAM_NAME),
                 supportTeamSalutation: processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME),
                 projects             : projects*.name.sort().join('\n\t- '),
+                projectUserLinks     : projects.collect {
+                    linkGenerator.link(
+                            controller: 'projectUser',
+                            action: 'index',
+                            absolute: true,
+                            params: [(ProjectSelectionService.PROJECT_SELECTION_PARAMETER): it],
+                    )
+                }.sort().join('\n\t- '),
         ])
         mailHelperService.sendEmail(subject, body, recipient, ccs)
     }

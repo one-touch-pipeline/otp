@@ -434,6 +434,10 @@ class ProcessingOption implements Entity {
                 "The name and optionally email of the helpdesk team, to be used in the middle of sentences",
                 Necessity.OPTIONAL, "OTP team", TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
         ),
+        USER_AUTHORITY_TEAM_NAME(
+                "The name and optionally email of the user authority team, to be used in the middle of sentences",
+                Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT
+        ),
         BLACKLIST_IMPORT_SOURCE_NOTIFICATION(
                 "Comma separated list of path prefixes which are ignored in the import source notification",
                 Necessity.OPTIONAL, "", TypeValidators.SINGLE_LINE_TEXT_OPTIONAL

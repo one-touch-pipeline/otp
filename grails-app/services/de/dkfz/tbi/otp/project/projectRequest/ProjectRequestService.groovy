@@ -28,6 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.ProjectSelectionService
+import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.ngsdata.ProjectRole
@@ -55,6 +56,7 @@ class ProjectRequestService {
     ProcessingOptionService processingOptionService
     SecurityService securityService
     UserProjectRoleService userProjectRoleService
+    ConfigService configService
 
     ProjectRequest saveProjectRequestFromCommand(ProjectRequestCreationCommand cmd) throws SwitchedUserDeniedException {
         securityService.ensureNotSwitchedUser()
@@ -346,13 +348,20 @@ class ProjectRequestService {
                 absolute: true,
                 params: [(ProjectSelectionService.PROJECT_SELECTION_PARAMETER): project.name]
         )
+        String projectConfigLink = linkGenerator.link(
+                controller: "projectConfig",
+                action: "index",
+                absolute: true,
+                params: [(ProjectSelectionService.PROJECT_SELECTION_PARAMETER): project.name]
+        )
         String subject = messageSourceService.createMessage("notification.projectRequest.created.subject", [
                 projectName: project.name,
         ])
         String body = messageSourceService.createMessage("notification.projectRequest.created.body", [
                 projectName               : project.displayName,
                 projectLink               : sampleOverviewLink,
-                projectDirectoryPath      : project.dirName,
+                projectConfigLink         : projectConfigLink,
+                projectDirectoryPath      : configService.rootPath.toPath().resolve(project.dirName),
                 analysisDirectoryPath     : project.dirAnalysis,
                 additionalText            : processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_PROJECT_CREATION_FREETEXT),
                 userManagementLink        : userManagementLink,

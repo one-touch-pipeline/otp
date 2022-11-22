@@ -28,6 +28,7 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.ProjectFieldsDomainFactory
@@ -52,6 +53,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
     ProjectRequestService projectRequestService
     ProjectRequestStateProvider projectRequestStateProvider
     SecurityService securityService
+    TestConfigService configService
 
     final String subject = "subject"
     final String body = "body"
@@ -74,6 +76,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
                 projectRequestPersistentStateService: new ProjectRequestPersistentStateService([
                         projectRequestStateProvider: Mock(ProjectRequestStateProvider)
                 ]),
+                configService: configService,
         ])
     }
 
@@ -369,12 +372,13 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         1 * projectRequestService.processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_PROJECT_CREATION_FREETEXT) >> additionalText
         1 * projectRequestService.processingOptionService.findOptionAsString(ProcessingOption.OptionName.CLUSTER_NAME) >> clusterName
         1 * projectRequestService.processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME) >> emailSenderSalutation
-        2 * projectRequestService.linkGenerator.link(_) >> link
+        3 * projectRequestService.linkGenerator.link(_) >> link
         1 * projectRequestService.messageSourceService.createMessage(_, [projectName: project.name]) >> subject
         1 * projectRequestService.messageSourceService.createMessage(_, [
                 projectName               : project.name,
                 projectLink               : link,
-                projectDirectoryPath      : dirName,
+                projectConfigLink         : link,
+                projectDirectoryPath      : configService.rootPath.toPath().resolve(dirName),
                 analysisDirectoryPath     : dirAnalysis,
                 additionalText            : additionalText,
                 userManagementLink        : link,
@@ -410,12 +414,13 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         1 * projectRequestService.processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_PROJECT_CREATION_FREETEXT) >> additionalText
         1 * projectRequestService.processingOptionService.findOptionAsString(ProcessingOption.OptionName.CLUSTER_NAME) >> clusterName
         1 * projectRequestService.processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME) >> emailSenderSalutation
-        2 * projectRequestService.linkGenerator.link(_) >> link
+        3 * projectRequestService.linkGenerator.link(_) >> link
         1 * projectRequestService.messageSourceService.createMessage(_, [projectName: project.name]) >> subject
         1 * projectRequestService.messageSourceService.createMessage(_, [
                 projectName               : project.name,
                 projectLink               : link,
-                projectDirectoryPath      : dirName,
+                projectConfigLink         : link,
+                projectDirectoryPath      : configService.rootPath.toPath().resolve(dirName),
                 analysisDirectoryPath     : dirAnalysis,
                 additionalText            : additionalText,
                 userManagementLink        : link,

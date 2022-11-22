@@ -183,6 +183,7 @@ class ScheduleUsersForDeactivationJobIntegrationSpec extends Specification imple
                 messageSourceService   : Mock(MessageSourceService) {
                     _ * createMessage(_) { return "message" }
                 },
+                linkGenerator: Mock(LinkGenerator),
         ])
         List<Project> projects = [createProject(), createProject(), createProject()]
         User user = createUser()
@@ -193,6 +194,7 @@ class ScheduleUsersForDeactivationJobIntegrationSpec extends Specification imple
         job.sendReactivationMails(user)
 
         then:
+        _ * job.linkGenerator.link(_) >> 'some link'
         1 * job.userProjectRoleService.projectsAssociatedToProjectAuthority(user) >> [
                 (projectAuthorityA): [projects[0], projects[1], projects[2]],
                 (projectAuthorityB): [projects[1]],
