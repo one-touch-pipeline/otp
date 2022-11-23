@@ -309,7 +309,7 @@ abstract class AbstractDataSwapService<P extends DataSwapParameters, D extends D
                |## recreate link
                |rm -f '${oldValues[WELL_FILE_NAME]}'
                |mkdir -p -m 2750 '${wellFile.parent}'
-               |ln -s '${newDirectFileName}' \\\n      '${wellFile}'
+               |ln -sr '${newDirectFileName}' \\\n      '${wellFile}'
                |
                |## remove entry from old mapping file
                |sed -i '\\#${oldValues[WELL_MAPPING_FILE_ENTRY_NAME]}#d' ${oldMappingFile}
@@ -548,7 +548,7 @@ abstract class AbstractDataSwapService<P extends DataSwapParameters, D extends D
         }
         bashMoveVbpFile += """\
                                |mkdir -p -m 2750 '${newVbpPath.parent}';
-                               |ln -s '${newDirectPath}' \\
+                               |ln -sr '${newDirectPath}' \\
                                |      '${newVbpPath}'""".stripMargin()
 
         outPutBashCommands += "${bashMoveDirectFile}\n${bashMoveVbpFile}\n"

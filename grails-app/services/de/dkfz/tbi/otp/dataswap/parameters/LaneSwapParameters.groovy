@@ -49,6 +49,16 @@ class LaneSwapParameters extends DataSwapParameters {
                 return "neither the old nor the new sequencingReadType name may be null or blank"
             }
         }
+        wellLabelSwap nullable: true, validator: { val, obj ->
+            if (val) {
+                if (!val.old && val.new || val.old && !val.new) {
+                    return "both old and new well labels should have values or both not"
+                }
+                if (obj.lanes.size() != 1) {
+                    return "exactly one single lane must be specified if its well label should be swapped, but ${obj.lanes.size()} lanes are given"
+                }
+            }
+        }
         runName nullable: false, blank: false
         lanes nullable: false, minSize: 1
     }
@@ -57,6 +67,7 @@ class LaneSwapParameters extends DataSwapParameters {
     Swap<String> seqTypeSwap
     Swap<Boolean> singleCellSwap
     Swap<String> sequencingReadTypeSwap
+    Swap<String> wellLabelSwap
     String runName
     List<String> lanes
     boolean sampleNeedsToBeCreated = false

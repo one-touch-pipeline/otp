@@ -31,9 +31,11 @@ import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerMergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerWorkflowService
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
+import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellMappingFileService
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaQc
+import de.dkfz.tbi.otp.infrastructure.CreateLinkOption
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
@@ -149,6 +151,14 @@ class ExampleData {
             "control01",
     ]
 
+    /**
+     * The SampleType names (lanes are marked with well label) for which data is to be created.
+     *
+     * If analysis are created, each singleCellWellLabelSampleTypeNames is combined with each controlSampleTypeNames.
+     */
+    List<String> singleCellWellLabelSampleTypeNames = [
+            "tumor03",
+    ]
 //------------------------------
 //work
 
@@ -174,6 +184,8 @@ class ExampleData {
 
     CellRangerWorkflowService cellRangerWorkflowService
 
+    SingleCellMappingFileService singleCellMappingFileService
+
     DocumentService documentService
 
     static final List<String> chromosomeXY = [
@@ -196,6 +208,7 @@ class ExampleData {
     SoftwareTool softwareTool
 
     List<SampleType> diseaseSampleTypes = []
+    List<SampleType> singleCellWellLabelSampleTypes = []
     List<SampleType> controlSampleTypes = []
     List<RoddyBamFile> roddyBamFiles = []
     List<SingleCellBamFile> singleCellBamFiles = []
@@ -210,6 +223,9 @@ class ExampleData {
 
     void init() {
         diseaseSampleTypes = diseaseSampleTypeNames.collect {
+            findOrCreateSampleType(it)
+        }
+        singleCellWellLabelSampleTypes = singleCellWellLabelSampleTypeNames.collect {
             findOrCreateSampleType(it)
         }
         controlSampleTypes = controlSampleTypeNames.collect {
@@ -235,6 +251,9 @@ class ExampleData {
         createMetaDataFile()
         project = findOrCreateProject(projectName)
         diseaseSampleTypes.each { SampleType sampleType ->
+            findOrCreateSampleTypePerProject(sampleType, SampleTypePerProject.Category.DISEASE)
+        }
+        singleCellWellLabelSampleTypes.each { SampleType sampleType ->
             findOrCreateSampleTypePerProject(sampleType, SampleTypePerProject.Category.DISEASE)
         }
         controlSampleTypes.each { SampleType sampleType ->
@@ -264,10 +283,13 @@ class ExampleData {
                 it.seqType
             }
             diseaseSampleTypes.collectMany { SampleType sampleType ->
-                createSingleCellSampleWithSeqTracksAndBamFile(individual, sampleType)
+                createSingleCellSampleWithSeqTracksAndBamFile(individual, sampleType, singleCellSeqTypes)
             }
             controlSampleTypes.collectMany { SampleType sampleType ->
-                createSingleCellSampleWithSeqTracksAndBamFile(individual, sampleType)
+                createSingleCellSampleWithSeqTracksAndBamFile(individual, sampleType, singleCellSeqTypes)
+            }
+            singleCellWellLabelSampleTypes.collectMany { SampleType sampleType ->
+                createSingleCellSampleWithSeqTracksAndBamFile(individual, sampleType, singleCellSeqTypes, true)
             }
             analyseAbleSeqType.each { SeqType seqType ->
                 diseaseBamFiles[seqType].each { AbstractMergedBamFile diseaseBamFile ->
@@ -293,6 +315,7 @@ class ExampleData {
             createSophiaFilesOnFilesystem()
             createAceseqFilesOnFilesystem()
             createCellRangerFilesOnFilesystem()
+            createSingleCellWellLabelOnFilesystem()
         } else {
             println "Skip creating dummy files/directories on file system"
         }
@@ -324,6 +347,20 @@ class ExampleData {
                     fastqcMd5Path,
             ].each {
                 fileService.createFileWithContent(it, it.toString(), realm)
+            }
+        }
+    }
+
+    void createSingleCellWellLabelOnFilesystem() {
+        println "creating additional files or links for well labeled lanes on file system"
+        dataFiles.each { DataFile dataFile ->
+            if (dataFile.seqTrack.singleCellWellLabel) {
+                Path target = lsdfFilesService.getFileFinalPathAsPath(dataFile)
+                Path link = lsdfFilesService.getFileViewByPidPathAsPath(dataFile, WellDirectory.ALL_WELL)
+
+                fileService.createLink(link, target, realm, CreateLinkOption.DELETE_EXISTING_FILE)
+
+                singleCellMappingFileService.addMappingFileEntryIfMissing(dataFile)
             }
         }
     }
@@ -724,13 +761,14 @@ class ExampleData {
         }
     }
 
-    List<AbstractMergedBamFile> createSingleCellSampleWithSeqTracksAndBamFile(Individual individual, SampleType sampleType) {
+    List<AbstractMergedBamFile> createSingleCellSampleWithSeqTracksAndBamFile(Individual individual, SampleType sampleType, List<SeqType> seqTypes,
+                                                                              boolean createWellLabel = false) {
         Sample sample = findOrCreateSample(individual, sampleType)
         println "  - sample: ${sample}"
-        return singleCellSeqTypes.collect { SeqType seqType ->
+        return seqTypes.collect { SeqType seqType ->
             println "    - for: ${seqType}"
             List<SeqTrack> seqTracks = (1..lanesPerSampleAndSeqType).collect {
-                SeqTrack seqTrack = createSeqTrack(sample, seqType)
+                SeqTrack seqTrack = createSeqTrack(sample, seqType, createWellLabel)
                 println "      - seqtrack: ${seqTrack}"
                 return seqTrack
             }
@@ -766,12 +804,13 @@ class ExampleData {
         ]).save(flush: true)
     }
 
-    SeqTrack createSeqTrack(Sample sample, SeqType seqType) {
+    SeqTrack createSeqTrack(Sample sample, SeqType seqType, createWellLabel = false) {
         SeqTrack seqTrack = new SeqTrack([
                 sample               : sample,
                 seqType              : seqType,
                 run                  : createRun(),
                 laneId               : (SeqTrack.count() % 8) + 1,
+                singleCellWellLabel  : createWellLabel ? "well_${SeqTrack.count() + 1}" : "",
                 sampleIdentifier     : "sample_${SeqTrack.count() + 1}",
                 pipelineVersion      : softwareTool,
                 dataInstallationState: SeqTrack.DataProcessingState.FINISHED,
@@ -1220,6 +1259,7 @@ Project.withTransaction {
             cellRangerConfigurationService: ctx.cellRangerConfigurationService,
             singleCellBamFileService      : ctx.singleCellBamFileService,
             cellRangerWorkflowService     : ctx.cellRangerWorkflowService,
+            singleCellMappingFileService  : ctx.singleCellMappingFileService,
             documentService               : ctx.documentService,
     ])
 

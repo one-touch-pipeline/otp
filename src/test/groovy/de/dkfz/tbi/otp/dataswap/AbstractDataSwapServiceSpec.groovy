@@ -331,7 +331,7 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
                                 |## recreate link
                                 |rm -f '${OLD_WELL_PATH}'
                                 |mkdir -p -m 2750 '${NEW_ALL_PATH}'
-                                |ln -s '${NEW_FINAL_PATH}' \\\n      '${NEW_WELL_PATH}'
+                                |ln -sr '${NEW_FINAL_PATH}' \\\n      '${NEW_WELL_PATH}'
                                 |
                                 |## remove entry from old mapping file
                                 |sed -i '\\#${OLD_ENTRY}#d' ${OLD_MAPPING_PATH}
@@ -823,7 +823,7 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
             final String bashMoveVbpFile = """\
                                  |rm -f '${dataFilePaths[it].oldVbpPath}';
                                  |mkdir -p -m 2750 '${dataFilePaths[it].newVbpPath.parent}';
-                                 |ln -s '${dataFilePaths[it].newPath}' \\
+                                 |ln -sr '${dataFilePaths[it].newPath}' \\
                                  |      '${dataFilePaths[it].newVbpPath}'""".stripMargin()
 
             bashScriptToMoveFiles += "${bashMoveDirectFile}\n${bashMoveVbpFile}\n"
@@ -947,7 +947,7 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
             final String bashMoveVbpFile = """\
                                  |rm -f '${dataFilePaths[it].oldVbpPath}';
                                  |mkdir -p -m 2750 '${dataFilePaths[it].newVbpPath.parent}';
-                                 |ln -s '${dataFilePaths[it].newPath}' \\
+                                 |ln -sr '${dataFilePaths[it].newPath}' \\
                                  |      '${dataFilePaths[it].newVbpPath}'""".stripMargin()
 
             bashScriptToMoveFiles += "${bashMoveDirectFile}\n${bashMoveVbpFile}\n"
@@ -1045,7 +1045,7 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
             final String bashMoveVbpFile = """\
                                  |rm -f '${dataFilePaths[it].oldVbpPath}';
                                  |mkdir -p -m 2750 '${dataFilePaths[it].newVbpPath.parent}';
-                                 |ln -s '${dataFilePaths[it].newPath}' \\
+                                 |ln -sr '${dataFilePaths[it].newPath}' \\
                                  |      '${dataFilePaths[it].newVbpPath}'""".stripMargin()
 
             bashScriptToMoveFiles += "${bashMoveDirectFile}\n${bashMoveVbpFile}\n"
@@ -1054,7 +1054,7 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
                                  |## recreate link
                                  |rm -f '${dataFilePaths[it].oldWellFile}'
                                  |mkdir -p -m 2750 '${dataFilePaths[it].newVbpPath.parent}'
-                                 |ln -s '${dataFilePaths[it].newPath}' \\\n      '${dataFilePaths[it].newVbpPath}'
+                                 |ln -sr '${dataFilePaths[it].newPath}' \\\n      '${dataFilePaths[it].newVbpPath}'
                                  |\n## remove entry from old mapping file
                                  |sed -i '\\#${dataFilePaths[it].oldWellMappingFileEntryName}#d' ${dataFilePaths[it].oldWellMappingFile}
                                  |\n## add entry to new mapping file

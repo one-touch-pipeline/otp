@@ -52,6 +52,14 @@ class LaneSwapData extends DataSwapData<LaneSwapParameters> {
                 return "Given lane(s) ${obj.lanes} and found SeqTracks differ!"
             }
         }
+
+        wellLabelSwap nullable: true, validator: { val, obj ->
+            if (val && !obj.seqTrackList*.singleCellWellLabel.any {
+                it == val.old
+            }) {
+                return "No seqTrack found to match the given wellLabel: ${val.old}"
+            }
+        }
     }
 
     Run run
@@ -60,6 +68,7 @@ class LaneSwapData extends DataSwapData<LaneSwapParameters> {
     Swap<SeqType> seqTypeSwap
     Swap<SequencingReadType> sequencingReadTypeSwap
     Swap<Sample> sampleSwap
+    Swap<String> wellLabelSwap
 
     List<String> getLanes() {
         return parameters.lanes

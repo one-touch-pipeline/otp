@@ -83,6 +83,7 @@ class LaneSwapService extends AbstractDataSwapService<LaneSwapParameters, LaneSw
                 oldFastQcFileNames: getFastQcOutputFileNamesByDataFilesInList(dataFiles),
                 cleanupIndividualPaths: [individualPath],
                 cleanupSampleTypePaths: sampleDirs,
+                wellLabelSwap: parameters.wellLabelSwap,
         )
     }
 
@@ -209,6 +210,12 @@ class LaneSwapService extends AbstractDataSwapService<LaneSwapParameters, LaneSw
             }
             it.seqType = data.seqTypeSwap.new
             it.sample = data.sampleSwap.new
+            // swapping the well label if required
+            if (data.wellLabelSwap) {
+                it.singleCellWellLabel = data.wellLabelSwap.new
+                data.log << "\n  swapping well label for ST: ${it.id} lane: ${it.laneId} run: ${it.run.name}:"
+                data.log << "\n    - \"${data.wellLabelSwap.old}\" --> \"${data.wellLabelSwap.new}\""
+            }
             assert it.save(flush: true)
             return it
         }

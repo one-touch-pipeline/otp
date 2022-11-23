@@ -87,6 +87,7 @@ try {
                                 seqTypeSwap           : new Swap('oldSeqTypeName', 'newSeqTypeName'),
                                 singleCellSwap        : new Swap('oldSingleCell', 'newSingleCell'),
                                 sequencingReadTypeSwap: new Swap('sequencingReadType', 'sequencingReadType'),
+                                wellLabelSwap         : new Swap('oldWellLabel', 'newWellLabel'),
                                 runName               : 'runName',
                                 lanes                 : [
                                         'lane1',
