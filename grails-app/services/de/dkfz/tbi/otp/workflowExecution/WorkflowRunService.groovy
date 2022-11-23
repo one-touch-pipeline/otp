@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.workflowExecution
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.TupleConstructor
 import org.hibernate.NullPrecedence
 import org.hibernate.criterion.Order
 import org.hibernate.sql.JoinType
@@ -36,8 +37,6 @@ import de.dkfz.tbi.util.TimeFormats
 import de.dkfz.tbi.util.TimeUtils
 
 import java.time.LocalDateTime
-
-import static de.dkfz.tbi.otp.infrastructure.ClusterJob.CheckStatus.FINISHED
 
 @Transactional
 class WorkflowRunService {
@@ -263,27 +262,48 @@ class WorkflowRunService {
         return data
     }
 
+    String getCumulatedClusterJobsStatus(List<ClusterJobStateDto> clusterJobStates) {
+        if (!clusterJobStates || clusterJobStates.size() == 0) {
+            return ''
+        }
+
+        Map<ClusterJob.CheckStatus, Integer> mappingOfCheckStates = [
+                (ClusterJob.CheckStatus.CHECKING): 5,
+                (ClusterJob.CheckStatus.CREATED) : 3,
+                (ClusterJob.CheckStatus.FINISHED): 1,
+        ]
+
+        Map<ClusterJob.Status, Integer> mappingOfExitStates = [
+                (null)                       : 0,
+                (ClusterJob.Status.COMPLETED): 0,
+                (ClusterJob.Status.FAILED)   : 1,
+        ]
+
+        ClusterJobStateDto highestPriorityClusterJobState = clusterJobStates.max { clusterJobState ->
+            mappingOfCheckStates[clusterJobState.checkStatus] + mappingOfExitStates[clusterJobState.exitStatus]
+        }
+
+        return mapCheckStatusAndExitStatusToState(highestPriorityClusterJobState.checkStatus, highestPriorityClusterJobState.exitStatus)
+    }
+
     List<Map<String, Object>> workflowRunDetails(WorkflowRun workflowRun) {
         List<WorkflowStep> workflowSteps = workflowRun.workflowSteps.reverse()
 
         return workflowSteps.collect { step ->
-            boolean isPreviousOfFailedStep = !workflowSteps.findAll {
-                workflowStepService.getPreviousRunningWorkflowStep(it)?.id == step.id && it.state == WorkflowStep.State.FAILED
-            }.empty
+            List<ClusterJob> clusterJobs = (step.clusterJobs as List<ClusterJob>).sort { it.dateCreated }
 
             return [
-                    state                 : step.state,
-                    id                    : step.id,
-                    name                  : step.beanName,
-                    dateCreated           : TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(step.dateCreated),
-                    lastUpdated           : TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(step.lastUpdated),
-                    duration              : TimeUtils.getFormattedDuration(convertDateToLocalDateTime(step.dateCreated),
+                    state                     : step.state,
+                    id                        : step.id,
+                    name                      : step.beanName,
+                    dateCreated               : TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(step.dateCreated),
+                    lastUpdated               : TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(step.lastUpdated),
+                    duration                  : TimeUtils.getFormattedDuration(convertDateToLocalDateTime(step.dateCreated),
                             convertDateToLocalDateTime(step.lastUpdated)),
-
-                    error                 : step.workflowError,
-                    clusterJobs           : (step.clusterJobs as List<ClusterJob>).sort { it.dateCreated }.collect { ClusterJob clusterJob ->
+                    error                     : step.workflowError,
+                    clusterJobs               : clusterJobs.collect { ClusterJob clusterJob ->
                         [
-                                state   : "${clusterJob.checkStatus}${clusterJob.checkStatus == FINISHED ? "/${clusterJob.exitStatus}" : ""}",
+                                state   : mapCheckStatusAndExitStatusToState(clusterJob.checkStatus, clusterJob.exitStatus),
                                 id      : clusterJob.id,
                                 name    : clusterJob.clusterJobName,
                                 jobId   : clusterJob.clusterJobId,
@@ -293,12 +313,22 @@ class WorkflowRunService {
                                 exitCode: clusterJob.exitCode ?: "-",
                         ]
                     },
-                    wes                   : step.wesIdentifier,
-                    hasLogs               : !step.logs.empty,
-                    obsolete              : step.obsolete,
-                    previousStepId        : workflowStepService.getPreviousRunningWorkflowStep(step)?.id,
-                    isPreviousOfFailedStep: isPreviousOfFailedStep,
+                    cummulatedClusterJobsState: getCumulatedClusterJobsStatus(clusterJobs.collect { new ClusterJobStateDto(it.checkStatus, it.exitStatus) }),
+                    wes                       : step.wesIdentifier,
+                    hasLogs                   : !step.logs.empty,
+                    obsolete                  : step.obsolete,
+                    previousStepId            : workflowStepService.getPreviousRunningWorkflowStep(step)?.id,
             ]
         }
     }
+
+    private static String mapCheckStatusAndExitStatusToState(ClusterJob.CheckStatus checkStatus, ClusterJob.Status exitStatus) {
+        return "${checkStatus}${checkStatus == ClusterJob.CheckStatus.FINISHED ? "/${exitStatus}" : ""}"
+    }
+}
+
+@TupleConstructor
+class ClusterJobStateDto {
+    ClusterJob.CheckStatus checkStatus
+    ClusterJob.Status exitStatus
 }

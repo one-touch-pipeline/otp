@@ -172,15 +172,18 @@ $(() => {
    * @returns {string}
    */
   function renderStepStatusCircle(row) {
-    let cssClass = '';
+    const cssClass = statusToClassName(row.state);
+    return `<div title="${row.state}" class="${cssClass} small"></div> ${renderStepClusterJobsStatusCircle(row)}`;
+  }
 
-    if (row.isPreviousOfFailedStep) {
-      cssClass += 'dot darkorange';
-    } else {
-      cssClass += statusToClassName(row.state);
+  function renderStepClusterJobsStatusCircle(row) {
+    if (row.clusterJobs.length > 0) {
+      const state = row.cummulatedClusterJobsState;
+      const cssClass = statusToClassName(state);
+      return `<div title="${state} is the congregated state of the cluster/wes jobs" 
+                   class="ml-1 ${cssClass} small"></div>`;
     }
-
-    return `<div title="${row.state}" class="${cssClass} small"></div>`;
+    return '';
   }
 
   let lastStepFailed = false;

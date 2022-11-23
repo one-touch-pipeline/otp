@@ -24,8 +24,10 @@ package de.dkfz.tbi.otp.workflowExecution
 import grails.testing.gorm.DataTest
 import grails.testing.services.ServiceUnitTest
 import spock.lang.Specification
+import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.project.Project
 
@@ -92,5 +94,34 @@ class WorkflowRunServiceSpec extends Specification implements ServiceUnitTest<Wo
 
         then:
         !workflowRun.jobCanBeRestarted
+    }
+
+    @Unroll
+    void 'getCumulatedClusterJobsStatus, should return state of a cluster job list with highest priority'() {
+        when:
+        List<ClusterJobStateDto> clusterJobStatusList = statusList.collect {
+            it as ClusterJobStateDto
+        }
+
+        then:
+        service.getCumulatedClusterJobsStatus(clusterJobStatusList) == resultStatus
+
+        where:
+        statusList                                                                                | resultStatus
+        [[checkStatus: ClusterJob.CheckStatus.CHECKING, exitStatus: null],
+         [checkStatus: ClusterJob.CheckStatus.CREATED, exitStatus: null],
+         [checkStatus: ClusterJob.CheckStatus.FINISHED, exitStatus: ClusterJob.Status.COMPLETED]] | 'CHECKING'
+        [[checkStatus: ClusterJob.CheckStatus.CREATED, exitStatus: null],
+         [checkStatus: ClusterJob.CheckStatus.FINISHED, exitStatus: ClusterJob.Status.FAILED]]    | 'CREATED'
+        [[checkStatus: ClusterJob.CheckStatus.FINISHED, exitStatus: ClusterJob.Status.COMPLETED],
+         [checkStatus: ClusterJob.CheckStatus.FINISHED, exitStatus: ClusterJob.Status.FAILED]]    | 'FINISHED/FAILED'
+        [[checkStatus: ClusterJob.CheckStatus.FINISHED, exitStatus: ClusterJob.Status.COMPLETED],
+         [checkStatus: ClusterJob.CheckStatus.FINISHED, exitStatus: ClusterJob.Status.COMPLETED]] | 'FINISHED/COMPLETED'
+    }
+
+    void 'getCumulatedClusterJobsStatus, should return empty string for null object or empty list'() {
+        expect:
+        service.getCumulatedClusterJobsStatus([]) == ''
+        service.getCumulatedClusterJobsStatus(null) == ''
     }
 }
