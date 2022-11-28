@@ -54,6 +54,7 @@
         <div>
             <sec:ifAllGranted roles="ROLE_OPERATOR">
                 <h2><g:message code="projectOverview.alignmentInformation.configureRoddy"/></h2>
+                <otp:annotation type="info">The configuration for the new system moved to the <g:link controller="workflowSelection">workflow selection page</g:link>.</otp:annotation>
 
                 <div class="show_button">
                     <ul>
@@ -78,7 +79,7 @@
             </sec:ifAllGranted>
 
             <g:if test="${alignmentInfo}">
-                <h3>${g.message(code: 'projectOverview.alignmentInformation.tool.configuration')}</h3>
+                <h2>${g.message(code: 'projectOverview.alignmentInformation.tool.configuration')}</h2>
                 <div class="fixed-table-header">
                     <table>
                         <tr>
@@ -97,7 +98,7 @@
                 </div>
             </g:if>
 
-            <h3>${g.message(code: 'projectOverview.alignmentInformation.tool.configuration.old')}</h3>
+            <h2>${g.message(code: 'projectOverview.alignmentInformation.tool.configuration.old')}</h2>
             <div id="alignment_info" class="fixed-table-header">
                 <table style="visibility: hidden" id="alignment_info_table">
                     <tr>
@@ -112,11 +113,12 @@
 
         <div class="fixed-table-header">
             <h2>${g.message(code: 'projectOverview.mergingCriteria')}</h2>
+            <otp:annotation type="info">The configuration for the new system moved to the <g:link controller="workflowSelection">workflow selection page</g:link>.</otp:annotation>
             <table class="merging-criteria-table">
                 <tr>
-                    <th>${g.message(code: 'projectOverview.mergingCriteria.seqType')}</th>
-                    <th>${g.message(code: 'projectOverview.mergingCriteria.libPrepKit')}</th>
-                    <th>${g.message(code: 'projectOverview.mergingCriteria.seqPlatformGroup')}</th>
+                    <th>${g.message(code: 'mergingCriteria.seqType')}</th>
+                    <th>${g.message(code: 'mergingCriteria.libPrepKit')}</th>
+                    <th>${g.message(code: 'mergingCriteria.seqPlatformGroup')}</th>
                 </tr>
                 <g:each in="${seqTypeMergingCriteria}" var="m">
                     <tr>
@@ -139,6 +141,7 @@
 
         <div class="otpDataTables fixed-table-header">
             <h2>${g.message(code: 'projectOverview.listReferenceGenome.title')}</h2>
+            <otp:annotation type="info">The configuration for the new system moved to the <g:link controller="workflowSelection">workflow selection page</g:link>.</otp:annotation>
             <otp:dataTable
                     codes="${[
                             'projectOverview.index.referenceGenome.sequenceTypeName',

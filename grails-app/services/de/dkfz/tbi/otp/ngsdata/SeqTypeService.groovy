@@ -411,14 +411,16 @@ class SeqTypeService extends MetadataFieldsService<SeqType> {
         ].flatten().unique()
     }
 
-    static List<SeqType> getSeqTypesIgnoringLibraryPreparationKitForMerging() {
+    @Deprecated
+    List<SeqType> getSeqTypesNewWorkflowSystem() {
         return [
-                wholeGenomeBisulfitePairedSeqType,
-                wholeGenomeBisulfiteTagmentationPairedSeqType,
-        ].flatten().unique()
+                exomePairedSeqType,
+                wholeGenomePairedSeqType,
+                chipSeqPairedSeqType,
+        ]
     }
 
-    static List<SeqType> getSeqTypesWithAntibodyTarget() {
+    List<SeqType> getSeqTypesWithAntibodyTarget() {
         return SeqType.findAllByHasAntibodyTarget(true)
     }
 }

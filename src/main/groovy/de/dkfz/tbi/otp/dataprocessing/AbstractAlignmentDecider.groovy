@@ -46,6 +46,9 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
     OtrsTicketService otrsTicketService
 
     @Autowired
+    SeqTypeService seqTypeService
+
+    @Autowired
     UnalignableSeqTrackEmailCreator unalignableSeqTrackEmailCreator
 
     @Deprecated
@@ -56,11 +59,15 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
         ).save(flush: true)
     }
 
-    /** This method is used externally. Please discuss a change in the team */
     @Override
     @Deprecated
     Collection<MergingWorkPackage> decideAndPrepareForAlignment(SeqTrack seqTrack, boolean forceRealign) {
         assert !seqTrack.project.archived
+
+        if (seqTrack.seqType in seqTypeService.seqTypesNewWorkflowSystem) {
+            // alignment is done by the new workflow system
+            return Collections.emptyList()
+        }
 
         if (!SeqTrackService.mayAlign(seqTrack)) {
             return Collections.emptyList()

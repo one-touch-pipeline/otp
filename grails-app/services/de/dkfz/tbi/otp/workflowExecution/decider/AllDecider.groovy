@@ -47,6 +47,7 @@ class AllDecider implements Decider {
     /** list of Deciders in the correct order */
     List<Class<Decider>> deciders = [
             FastqcDecider,
+            PanCancerDeciderService,
     ]
 
     @Override

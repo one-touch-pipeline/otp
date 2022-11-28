@@ -41,9 +41,9 @@
         <g:hiddenField name="seqType.id" value="${seqType.id}"/>
         <table class="table">
             <tr>
-                <th>${g.message(code: 'projectOverview.mergingCriteria.seqType')}</th>
-                <th>${g.message(code: 'projectOverview.mergingCriteria.libPrepKit')}</th>
-                <th>${g.message(code: 'projectOverview.mergingCriteria.seqPlatformGroup')}</th>
+                <th>${g.message(code: 'mergingCriteria.seqType')}</th>
+                <th>${g.message(code: 'mergingCriteria.libPrepKit')}</th>
+                <th>${g.message(code: 'mergingCriteria.seqPlatformGroup')}</th>
             </tr>
             <tr>
                 <td>

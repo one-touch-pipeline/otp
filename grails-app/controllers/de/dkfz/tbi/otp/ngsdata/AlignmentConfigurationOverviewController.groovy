@@ -43,24 +43,39 @@ class AlignmentConfigurationOverviewController {
     MergingCriteriaService mergingCriteriaService
     PipelineService pipelineService
     ProjectSelectionService projectSelectionService
+    SeqTypeService seqTypeService
 
     Map index() {
         Project project = projectSelectionService.selectedProject
 
-        List<MergingCriteria> mergingCriteria = mergingCriteriaService.findAllByProject(project)
-        Map<SeqType, MergingCriteria> seqTypeMergingCriteria = SeqTypeService.allAlignableSeqTypes.collectEntries { SeqType seqType ->
-            [(seqType): mergingCriteria.find { it.seqType == seqType }]
-        }.sort { Map.Entry<SeqType, MergingCriteria> it -> it.key.displayNameWithLibraryLayout }
-
         Map<SeqType, AlignmentInfo> alignmentInfo = alignmentInfoService.getAlignmentInformationForProject(project)
 
         return [
-                seqTypeMergingCriteria         : seqTypeMergingCriteria,
-                roddySeqTypes                  : SeqTypeService.roddyAlignableSeqTypes.sort {
-                    it.displayNameWithLibraryLayout
-                },
-                alignmentInfo                  : alignmentInfo,
+                seqTypeMergingCriteria: getSeqTypeMergingCriteria(project),
+                roddySeqTypes         : roddySeqTypes,
+                alignmentInfo         : alignmentInfo,
         ]
+    }
+
+    /**
+     * @deprecated method is part of the old workflow system
+     */
+    @Deprecated
+    private Map<SeqType, MergingCriteria> getSeqTypeMergingCriteria(Project project) {
+        List<MergingCriteria> mergingCriteria = mergingCriteriaService.findAllByProject(project)
+        return SeqTypeService.allAlignableSeqTypes.findAll { !(it in seqTypeService.seqTypesNewWorkflowSystem) }.collectEntries { SeqType seqType ->
+            [(seqType): mergingCriteria.find { it.seqType == seqType }]
+        }.sort { Map.Entry<SeqType, MergingCriteria> it -> it.key.displayNameWithLibraryLayout }
+    }
+
+    /**
+     * @deprecated method is part of the old workflow system
+     */
+    @Deprecated
+    private List<SeqType> getRoddySeqTypes() {
+        return SeqTypeService.roddyAlignableSeqTypes.findAll { !(it in seqTypeService.seqTypesNewWorkflowSystem) }.sort {
+            it.displayNameWithLibraryLayout
+        }
     }
 
     /**
@@ -83,27 +98,34 @@ class AlignmentConfigurationOverviewController {
         render map as JSON
     }
 
+    /**
+     * @deprecated method is part of the old workflow system
+     */
+    @SuppressWarnings('Indentation')
+    @Deprecated
     JSON dataTableSourceReferenceGenome(DataTableCommand cmd) {
         Project project = projectSelectionService.requestedProject
         Map dataToRender = cmd.dataToRender()
-        List data = alignmentInfoService.listReferenceGenome(project).collect { ReferenceGenomeProjectSeqType it ->
-            String adapterTrimming = ""
-            if (!it.sampleType) {
-                adapterTrimming = it.seqType.wgbs ?:
-                        RoddyWorkflowConfig.getLatestForProject(
-                                project,
-                                it.seqType,
-                                pipelineService.findByPipelineName(Pipeline.Name.PANCAN_ALIGNMENT)
-                        )?.adapterTrimmingNeeded
-            }
-            return [
-                    it.seqType.displayNameWithLibraryLayout,
-                    it.sampleType?.name,
-                    it.referenceGenome.name,
-                    it.statSizeFileName ?: "",
-                    adapterTrimming,
-            ]
-        }
+        List data = alignmentInfoService.listReferenceGenome(project)
+                .findAll { !(it.seqType in seqTypeService.seqTypesNewWorkflowSystem) }
+                .collect { ReferenceGenomeProjectSeqType it ->
+                    String adapterTrimming = ""
+                    if (!it.sampleType) {
+                        adapterTrimming = it.seqType.wgbs ?:
+                                RoddyWorkflowConfig.getLatestForProject(
+                                        project,
+                                        it.seqType,
+                                        pipelineService.findByPipelineName(Pipeline.Name.PANCAN_ALIGNMENT)
+                                )?.adapterTrimmingNeeded
+                    }
+                    return [
+                            it.seqType.displayNameWithLibraryLayout,
+                            it.sampleType?.name,
+                            it.referenceGenome.name,
+                            it.statSizeFileName ?: "",
+                            adapterTrimming,
+                    ]
+                }
         dataToRender.iTotalRecords = data.size()
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
         dataToRender.aaData = data
