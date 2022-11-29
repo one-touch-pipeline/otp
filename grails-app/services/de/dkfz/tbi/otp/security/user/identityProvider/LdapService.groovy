@@ -54,6 +54,7 @@ class LdapService implements InitializingBean, IdentityProvider {
     @Autowired
     ConfigService configService
 
+    @Autowired
     ProcessingOptionService processingOptionService
 
     private LdapTemplate ldapTemplate
