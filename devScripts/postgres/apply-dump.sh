@@ -78,4 +78,9 @@ ${PSQL} --command "UPDATE public.process SET finished='true' WHERE finished='fal
 echo "Marking all cluster jobs as finished"
 ${PSQL} --command "UPDATE public.cluster_job SET check_status = 'FINISHED' WHERE check_status != 'FINISHED';"
 
+echo "Disabling workflow runs"
+${PSQL} --command "UPDATE public.workflow_run SET state = 'FAILED' WHERE state = 'PENDING';"
+echo "Disabling workflow steps"
+${PSQL} --command "UPDATE public.workflow_step SET state = 'FAILED' WHERE state = 'CREATED';"
+
 echo ""

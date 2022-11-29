@@ -28,6 +28,7 @@ import groovy.transform.CompileStatic
 
 import de.dkfz.odcf.audit.impl.DicomAuditLogger
 import de.dkfz.odcf.audit.xml.layer.EventIdentification.EventOutcomeIndicator
+import de.dkfz.tbi.otp.ngsdata.FastqImportInstanceService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.security.user.UserService
@@ -44,6 +45,7 @@ class BootStrap {
     PropertiesValidationService propertiesValidationService
     SchedulerService schedulerService
     WorkflowSystemService workflowSystemService
+    FastqImportInstanceService fastqImportInstanceService
     FileSystemService fileSystemService
     RemoteShellHelper remoteShellHelper
 
@@ -56,6 +58,8 @@ class BootStrap {
         if ([Environment.PRODUCTION, Environment.DEVELOPMENT].contains(Environment.current)) {
             UserService.createFirstAdminUserIfNoUserExists()
         }
+
+        fastqImportInstanceService.changeProcessToWait()
 
         if (configService.isJobSystemEnabled()) {
             log.info("JobSystem is enabled")

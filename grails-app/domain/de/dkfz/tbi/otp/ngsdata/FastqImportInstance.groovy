@@ -45,6 +45,16 @@ class FastqImportInstance implements Entity {
     }
     ImportMode importMode
 
+    enum WorkFlowTriggerState {
+        WAITING,
+        PROCESSING,
+        SUCCESS,
+        FAILED,
+    }
+
+    WorkFlowTriggerState state = WorkFlowTriggerState.WAITING
+
+
     static constraints = {
         //the field can be null, since for the old data the information is not needed; only for new incoming fastqImportInstances
         otrsTicket(nullable: true)
@@ -52,5 +62,6 @@ class FastqImportInstance implements Entity {
 
     static mapping = {
         otrsTicket index: "fastq_import_instance_otrs_ticket_idx"
+        state index: "fastq_import_instance_state_idx"
     }
 }

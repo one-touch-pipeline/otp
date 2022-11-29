@@ -20,12 +20,16 @@
  * SOFTWARE.
  */
 
-databaseChangeLog = {
-    include file: 'changelogs/2022/initialDatabaseSchema.groovy'
+package de.dkfz.tbi.otp.ngsdata
 
-    include file: 'changelogs/2022/otp-1860-adapt-databasechangelog.groovy'
+import grails.gorm.transactions.Transactional
 
-    include file: 'changelogs/2022/otp-1611-wes-domains.groovy'
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
-    include file: 'changelogs/2022/otp-1612-state-for-workflow-creation.groovy'
+@Transactional(readOnly = true)
+class MetaDataFileService {
+
+    MetaDataFile getByFastqImportInstance(FastqImportInstance fastqImportInstance) {
+        return CollectionUtils.exactlyOneElement(MetaDataFile.findAllByFastqImportInstance(fastqImportInstance))
+    }
 }

@@ -240,17 +240,17 @@ class NotificationCreator {
         StringBuilder content = new StringBuilder()
 
         final String metadataImportController = "metadataImport"
-        final String metadataImportAction     = "details"
+        final String metadataImportAction = "details"
 
         GrailsArtefactCheckHelper.check(grailsApplication, metadataImportController, metadataImportAction)
 
         ticket.fastqImportInstances.each {
             content.append('\n')
             content.append(createNotificationTextService.linkGenerator.link([
-                    (LinkGenerator.ATTRIBUTE_CONTROLLER) : metadataImportController,
-                    (LinkGenerator.ATTRIBUTE_ACTION)     : metadataImportAction,
-                    (LinkGenerator.ATTRIBUTE_ID)         : it.id,
-                    (LinkGenerator.ATTRIBUTE_ABSOLUTE)   : true,
+                    (LinkGenerator.ATTRIBUTE_CONTROLLER): metadataImportController,
+                    (LinkGenerator.ATTRIBUTE_ACTION)    : metadataImportAction,
+                    (LinkGenerator.ATTRIBUTE_ID)        : it.id,
+                    (LinkGenerator.ATTRIBUTE_ABSOLUTE)  : true,
             ]))
         }
 
@@ -468,5 +468,52 @@ class NotificationCreator {
             return NOTHING_DONE_WONT_DO
         }
         return WorkflowProcessingStatus.values().find { it.done == done && it.mightDoMore == mightDoMore }
+    }
+
+    void sendWorkflowCreateSuccessMail(MetaDataFile metaDataFile) {
+        metaDataFile.refresh()
+        long id = metaDataFile.fastqImportInstance.id
+
+        String subject = [
+                "[${metaDataFile.fastqImportInstance.otrsTicket.prefixedTicketNumber}] ",
+                "Workflow created successfully for ${metaDataFile.fileName}"
+        ].join('')
+
+        String body = [
+                "The workflow creation succeeded:",
+                "Import id: ${id}",
+                "File: ${metaDataFile.fileName}",
+        ].join('\n')
+
+        mailHelperService.sendEmailToTicketSystem(subject, body)
+    }
+
+    void sendWorkflowCreateErrorMail(MetaDataFile metaDataFile, Throwable throwable) {
+        metaDataFile.refresh()
+        long id = metaDataFile.fastqImportInstance.id
+        List<Long> seqTrackIds = metaDataFile.fastqImportInstance.dataFiles*.seqTrack*.id.unique().sort()
+
+        String subject = [
+                "[${metaDataFile.fastqImportInstance.otrsTicket.prefixedTicketNumber}] ",
+                "Failed to create workflows for ${metaDataFile.fileName}"
+        ].join('')
+
+        String body = [
+                "The workflow creation failed:",
+                "Import id: ${id}",
+                "File: ${metaDataFile.fileName}",
+                "Exception:",
+                StackTraceUtils.getStackTrace(throwable),
+                "",
+                "To retry the workflow creation, please use the following command in the groovy web console:",
+                "ctx.fastqImportInstanceService.updateState(FastqImportInstance.get(${id}), FastqImportInstance.WorkFlowTriggerState.WAITING)",
+                "The console do not wait therefore, you will get another email.",
+                "",
+                "To delete the import, please use the script 'DeleteSeqtracks':",
+                "https://gitlab.com/one-touch-pipeline/otp/-/blob/master/scripts/operations/dataCleanup/DeleteSeqtracks.groovy",
+                "The seqTrack ids of the import are: ",
+                seqTrackIds.join(', '),
+        ].join('\n')
+        mailHelperService.sendEmailToTicketSystem(subject, body)
     }
 }
