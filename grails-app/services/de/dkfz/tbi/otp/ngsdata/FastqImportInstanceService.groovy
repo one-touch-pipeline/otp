@@ -19,7 +19,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.gorm.transactions.Transactional
@@ -33,6 +32,10 @@ class FastqImportInstanceService {
         return CollectionUtils.atMostOneElement(
                 FastqImportInstance.findAllByState(FastqImportInstance.WorkFlowTriggerState.WAITING, [max: 1, sort: 'id', order: 'asc'])
         )
+    }
+
+    int findCountWithWaitingState() {
+        return FastqImportInstance.countByState(FastqImportInstance.WorkFlowTriggerState.WAITING)
     }
 
     @Transactional(readOnly = false)

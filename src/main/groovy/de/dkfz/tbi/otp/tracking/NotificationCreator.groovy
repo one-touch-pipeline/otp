@@ -476,7 +476,7 @@ class NotificationCreator {
 
         String subject = [
                 "[${metaDataFile.fastqImportInstance.otrsTicket.prefixedTicketNumber}] ",
-                "Workflow created successfully for ${metaDataFile.fileName}"
+                "Workflow created successfully for ${metaDataFile.fileName}",
         ].join('')
 
         String body = [
@@ -495,7 +495,7 @@ class NotificationCreator {
 
         String subject = [
                 "[${metaDataFile.fastqImportInstance.otrsTicket.prefixedTicketNumber}] ",
-                "Failed to create workflows for ${metaDataFile.fileName}"
+                "Failed to create workflows for ${metaDataFile.fileName}",
         ].join('')
 
         String body = [

@@ -80,11 +80,11 @@ class WorkflowCreaterScheduler {
 
     @Transactional
     private void createWorkflows(MetaDataFile metaDataFile) {
-        metaDataFile = MetaDataFile.get(metaDataFile.id)
+        MetaDataFile metaDataFileFromDb = MetaDataFile.get(metaDataFile.id)
         Long timeCreateWorkflowRuns = System.currentTimeMillis()
-        FastqImportInstance fastqImportInstance = metaDataFile.fastqImportInstance
+        FastqImportInstance fastqImportInstance = metaDataFileFromDb.fastqImportInstance
 
-        log.debug("workflows for ${metaDataFile.fileName} (${FastqImportInstance.countByState(FastqImportInstance.WorkFlowTriggerState.WAITING)} in queue)")
+        log.debug("workflows for ${metaDataFileFromDb.fileName} (${fastqImportInstanceService.findCountWithWaitingState()} in queue)")
         log.debug("  create workflow runs started")
         List<WorkflowRun> runs = dataInstallationInitializationService.createWorkflowRuns(fastqImportInstance)
         log.debug("  create workflow runs stopped took: ${System.currentTimeMillis() - timeCreateWorkflowRuns}")

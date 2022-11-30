@@ -54,7 +54,6 @@ class FastqImportInstance implements Entity {
 
     WorkFlowTriggerState state = WorkFlowTriggerState.WAITING
 
-
     static constraints = {
         //the field can be null, since for the old data the information is not needed; only for new incoming fastqImportInstances
         otrsTicket(nullable: true)
