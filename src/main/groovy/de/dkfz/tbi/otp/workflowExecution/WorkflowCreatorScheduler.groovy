@@ -34,7 +34,7 @@ import de.dkfz.tbi.otp.workflowExecution.decider.AllDecider
 
 @Component
 @Slf4j
-class WorkflowCreaterScheduler {
+class WorkflowCreatorScheduler {
 
     @Autowired
     AllDecider allDecider

@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.tracking
 
 import grails.testing.gorm.DataTest
 import grails.web.mapping.LinkGenerator
+import org.hibernate.HibernateException
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -277,6 +278,52 @@ ILSe 5678, runA, lane 1, ${sampleText}
             fastqImportInstances.each {
                 assert content.contains(pathMetadataImportDetail + "/${it.id}")
             }
+        }
+    }
+
+    void 'sendWorkflowCreateSuccessMail, when finalNotification is true, sending message contains a link to the import detail page'() {
+        given:
+        MetaDataFile metaDataFile = DomainFactory.createMetaDataFile([
+                fastqImportInstance: createFastqImportInstance([
+                        otrsTicket: createOtrsTicket()
+                ])
+        ])
+        notificationCreator.mailHelperService = Mock(MailHelperService)
+
+        when:
+        notificationCreator.sendWorkflowCreateSuccessMail(metaDataFile)
+
+        then:
+        1 * notificationCreator.mailHelperService.sendEmailToTicketSystem(_, _) >> { arguments ->
+            assert arguments[0].contains("Workflow created successfully for ${metaDataFile.fileName}")
+            assert arguments[1].contains("The workflow creation succeeded:")
+            assert arguments[1].contains("Import id: ${metaDataFile.fastqImportInstance.id}")
+        }
+    }
+
+    void 'sendWorkflowCreateErrorMail, when finalNotification is true, sending message contains a link to the import detail page'() {
+        given:
+        MetaDataFile metaDataFile = DomainFactory.createMetaDataFile([
+                fastqImportInstance: createFastqImportInstance([
+                        otrsTicket: createOtrsTicket(),
+                        dataFiles: [
+                                createDataFile(),
+                                createDataFile()
+                        ],
+                ])
+        ])
+        notificationCreator.mailHelperService = Mock(MailHelperService)
+
+        when:
+        notificationCreator.sendWorkflowCreateErrorMail(metaDataFile, new HibernateException("Something happened"))
+
+        then:
+        1 * notificationCreator.mailHelperService.sendEmailToTicketSystem(_, _) >> { arguments ->
+            assert arguments[0].contains("Failed to create workflows for ${metaDataFile.fileName}")
+            assert arguments[1].contains("The workflow creation failed:")
+            assert arguments[1].contains("Import id: ${metaDataFile.fastqImportInstance.id}")
+            assert arguments[1].contains("ctx.fastqImportInstanceService.updateState(FastqImportInstance.get(${metaDataFile.fastqImportInstance.id}), \
+FastqImportInstance.WorkFlowTriggerState.WAITING)")
         }
     }
 
