@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2022 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -36,18 +36,19 @@ class MetaDataFileServiceSpec extends Specification implements ServiceUnitTest<M
                 FastqImportInstance,
         ]
     }
+
     void "getByFastqImportInstance, should return the metaDataFile"() {
         given:
         FastqImportInstance fastqImportInstance = createFastqImportInstance()
 
-        DomainFactory.createMetaDataFile(fastqImportInstance: fastqImportInstance)
+        MetaDataFile metaDataFile1 = DomainFactory.createMetaDataFile(fastqImportInstance: fastqImportInstance)
         DomainFactory.createMetaDataFile()
 
         when:
         MetaDataFile metaDataFile = service.getByFastqImportInstance(fastqImportInstance)
 
         then:
-        metaDataFile
+        metaDataFile == metaDataFile1
     }
 
     void "getByFastqImportInstance, should throw exception if more than one MetaDataFiles are found"() {

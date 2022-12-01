@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2022 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -64,7 +64,7 @@ class NotificationCreatorSpec extends Specification implements DataTest, DomainF
         DomainFactory.createProcessingOptionForOtrsTicketPrefix("TICKET_PREFIX")
         DomainFactory.createProcessingOptionForTicketSystemEmail()
 
-        GroovyMock([global : true], GrailsArtefactCheckHelper)
+        GroovyMock([global: true], GrailsArtefactCheckHelper)
     }
 
     @Unroll
@@ -235,34 +235,34 @@ ILSe 5678, runA, lane 1, ${sampleText}
         //one ticket with three imports
         OtrsTicket ticket = createOtrsTicket()
         List<FastqImportInstance> fastqImportInstances = [
-            createFastqImportInstance([otrsTicket : ticket]),
-            createFastqImportInstance([otrsTicket : ticket]),
-            createFastqImportInstance([otrsTicket : ticket]),
+                createFastqImportInstance([otrsTicket: ticket]),
+                createFastqImportInstance([otrsTicket: ticket]),
+                createFastqImportInstance([otrsTicket: ticket]),
         ]
 
         final Map linkProperties = [
-            (LinkGenerator.ATTRIBUTE_CONTROLLER) : "metadataImport",
-            (LinkGenerator.ATTRIBUTE_ACTION)     : "details",
+                (LinkGenerator.ATTRIBUTE_CONTROLLER): "metadataImport",
+                (LinkGenerator.ATTRIBUTE_ACTION)    : "details",
         ]
 
         //url path to the details page of metadata import
         final String pathMetadataImportDetail = linkProperties.values().join('/')
 
         notificationCreator.createNotificationTextService = new CreateNotificationTextService(
-            messageSourceService : Mock(MessageSourceService),
-            linkGenerator: Mock(LinkGenerator) {
-                3 * link(_) >> { Map params ->
-                    assert params.size() == 4
-                    assert params.get(LinkGenerator.ATTRIBUTE_CONTROLLER) == linkProperties.get(LinkGenerator.ATTRIBUTE_CONTROLLER)
-                    assert params.get(LinkGenerator.ATTRIBUTE_ACTION)     == linkProperties.get(LinkGenerator.ATTRIBUTE_ACTION)
-                    assert params.get(LinkGenerator.ATTRIBUTE_ABSOLUTE)
-                    return "http://dummy.com/${pathMetadataImportDetail}/${params.get(LinkGenerator.ATTRIBUTE_ID)}"
-                }
-            },
+                messageSourceService: Mock(MessageSourceService),
+                linkGenerator: Mock(LinkGenerator) {
+                    3 * link(_) >> { Map params ->
+                        assert params.size() == 4
+                        assert params.get(LinkGenerator.ATTRIBUTE_CONTROLLER) == linkProperties.get(LinkGenerator.ATTRIBUTE_CONTROLLER)
+                        assert params.get(LinkGenerator.ATTRIBUTE_ACTION) == linkProperties.get(LinkGenerator.ATTRIBUTE_ACTION)
+                        assert params.get(LinkGenerator.ATTRIBUTE_ABSOLUTE)
+                        return "http://dummy.com/${pathMetadataImportDetail}/${params.get(LinkGenerator.ATTRIBUTE_ID)}"
+                    }
+                },
         )
 
         notificationCreator.mailHelperService = Mock(MailHelperService)
-        GroovyMock([global : true], GrailsArtefactCheckHelper)
+        GroovyMock([global: true], GrailsArtefactCheckHelper)
 
         when:
         notificationCreator.sendProcessingStatusOperatorNotification(ticket, [createSeqTrack()] as Set, new ProcessingStatus(), true)
@@ -281,12 +281,13 @@ ILSe 5678, runA, lane 1, ${sampleText}
         }
     }
 
-    void 'sendWorkflowCreateSuccessMail, when finalNotification is true, sending message contains a link to the import detail page'() {
+    void 'sendWorkflowCreateSuccessMail, when called, the send success mail'() {
         given:
+        OtrsTicket ticket = createOtrsTicket()
         MetaDataFile metaDataFile = DomainFactory.createMetaDataFile([
                 fastqImportInstance: createFastqImportInstance([
-                        otrsTicket: createOtrsTicket()
-                ])
+                        otrsTicket: ticket,
+                ]),
         ])
         notificationCreator.mailHelperService = Mock(MailHelperService)
 
@@ -294,23 +295,26 @@ ILSe 5678, runA, lane 1, ${sampleText}
         notificationCreator.sendWorkflowCreateSuccessMail(metaDataFile)
 
         then:
-        1 * notificationCreator.mailHelperService.sendEmailToTicketSystem(_, _) >> { arguments ->
-            assert arguments[0].contains("Workflow created successfully for ${metaDataFile.fileName}")
-            assert arguments[1].contains("The workflow creation succeeded:")
-            assert arguments[1].contains("Import id: ${metaDataFile.fastqImportInstance.id}")
+        1 * notificationCreator.mailHelperService.sendEmailToTicketSystem(_, _) >> { String emailSubject, String content ->
+            assert emailSubject.startsWith("[${ticket.prefixedTicketNumber}]")
+            assert emailSubject.contains("Workflow created successfully for ${metaDataFile.fileName}")
+            assert content.contains("The workflow creation succeeded:")
+            assert content.contains("Import id: ${metaDataFile.fastqImportInstance.id}")
         }
     }
 
-    void 'sendWorkflowCreateErrorMail, when finalNotification is true, sending message contains a link to the import detail page'() {
+    void 'sendWorkflowCreateErrorMail, when called, then send error mail'() {
         given:
+        OtrsTicket ticket = createOtrsTicket()
+        List<DataFile> dataFiles = [
+                createDataFile(),
+                createDataFile(),
+        ]
         MetaDataFile metaDataFile = DomainFactory.createMetaDataFile([
                 fastqImportInstance: createFastqImportInstance([
-                        otrsTicket: createOtrsTicket(),
-                        dataFiles: [
-                                createDataFile(),
-                                createDataFile()
-                        ],
-                ])
+                        otrsTicket: ticket,
+                        dataFiles : dataFiles,
+                ]),
         ])
         notificationCreator.mailHelperService = Mock(MailHelperService)
 
@@ -318,12 +322,17 @@ ILSe 5678, runA, lane 1, ${sampleText}
         notificationCreator.sendWorkflowCreateErrorMail(metaDataFile, new HibernateException("Something happened"))
 
         then:
-        1 * notificationCreator.mailHelperService.sendEmailToTicketSystem(_, _) >> { arguments ->
-            assert arguments[0].contains("Failed to create workflows for ${metaDataFile.fileName}")
-            assert arguments[1].contains("The workflow creation failed:")
-            assert arguments[1].contains("Import id: ${metaDataFile.fastqImportInstance.id}")
-            assert arguments[1].contains("ctx.fastqImportInstanceService.updateState(FastqImportInstance.get(${metaDataFile.fastqImportInstance.id}), \
-FastqImportInstance.WorkFlowTriggerState.WAITING)")
+        1 * notificationCreator.mailHelperService.sendEmailToTicketSystem(_, _) >> { String emailSubject, String content ->
+            assert emailSubject.startsWith("[${ticket.prefixedTicketNumber}]")
+            assert emailSubject.contains("Failed to create workflows for ${metaDataFile.fileName}")
+            assert content.contains("The workflow creation failed:")
+            assert content.contains("Import id: ${metaDataFile.fastqImportInstance.id}")
+            assert content.contains("ctx.fastqImportInstanceService.updateState(FastqImportInstance.get(${metaDataFile.fastqImportInstance.id}), " +
+                    "FastqImportInstance.WorkFlowTriggerState.WAITING)")
+            assert content.contains("https://gitlab.com/one-touch-pipeline/otp/-/blob/master/scripts/operations/dataCleanup/DeleteSeqtracks.groovy")
+            dataFiles*.seqTrack.unique().each {
+                assert content.contains(it.id.toString())
+            }
         }
     }
 

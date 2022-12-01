@@ -45,14 +45,14 @@ class FastqImportInstance implements Entity {
     }
     ImportMode importMode
 
-    enum WorkFlowTriggerState {
+    enum WorkflowCreateState {
         WAITING,
         PROCESSING,
         SUCCESS,
         FAILED,
     }
 
-    WorkFlowTriggerState state = WorkFlowTriggerState.WAITING
+    WorkflowCreateState state = WorkflowCreateState.WAITING
 
     static constraints = {
         //the field can be null, since for the old data the information is not needed; only for new incoming fastqImportInstances

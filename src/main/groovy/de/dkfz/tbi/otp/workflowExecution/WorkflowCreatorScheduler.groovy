@@ -55,7 +55,7 @@ class WorkflowCreatorScheduler {
     WorkflowSystemService workflowSystemService
 
     @Scheduled(fixedDelay = 5000L)
-    void scheduleCreateWorkFlow() {
+    void scheduleCreateWorkflow() {
         if (!workflowSystemService.enabled) {
             return
         }
@@ -68,12 +68,12 @@ class WorkflowCreatorScheduler {
         MetaDataFile metaDataFile = metaDataFileService.getByFastqImportInstance(fastqImportInstance)
 
         try {
-            fastqImportInstanceService.updateState(fastqImportInstance, FastqImportInstance.WorkFlowTriggerState.PROCESSING)
+            fastqImportInstanceService.updateState(fastqImportInstance, FastqImportInstance.WorkflowCreateState.PROCESSING)
             createWorkflows(metaDataFile)
 
             notificationCreator.sendWorkflowCreateSuccessMail(metaDataFile)
         } catch (Throwable throwable) {
-            fastqImportInstanceService.updateState(fastqImportInstance, FastqImportInstance.WorkFlowTriggerState.FAILED)
+            fastqImportInstanceService.updateState(fastqImportInstance, FastqImportInstance.WorkflowCreateState.FAILED)
             notificationCreator.sendWorkflowCreateErrorMail(metaDataFile, throwable)
         }
     }
@@ -93,6 +93,6 @@ class WorkflowCreatorScheduler {
         allDecider.decide(runs.collectMany { it.outputArtefacts*.value }, false)
         log.debug("  decider stopped took: ${System.currentTimeMillis() - timeDecider}")
 
-        fastqImportInstanceService.updateState(fastqImportInstance, FastqImportInstance.WorkFlowTriggerState.SUCCESS)
+        fastqImportInstanceService.updateState(fastqImportInstance, FastqImportInstance.WorkflowCreateState.SUCCESS)
     }
 }

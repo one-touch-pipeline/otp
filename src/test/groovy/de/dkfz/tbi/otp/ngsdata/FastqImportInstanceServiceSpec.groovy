@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2022 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -32,7 +32,7 @@ class FastqImportInstanceServiceSpec extends Specification implements ServiceUni
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 FastqImportInstance,
         ]
     }
@@ -40,14 +40,14 @@ class FastqImportInstanceServiceSpec extends Specification implements ServiceUni
     void "findCountWithWaitingState, should return the correct count of FastqImportInstance in WAITING state"() {
         given:
         [
-            FastqImportInstance.WorkFlowTriggerState.PROCESSING,
-            FastqImportInstance.WorkFlowTriggerState.SUCCESS,
-            FastqImportInstance.WorkFlowTriggerState.FAILED,
-            FastqImportInstance.WorkFlowTriggerState.WAITING,
-            FastqImportInstance.WorkFlowTriggerState.WAITING,
+                FastqImportInstance.WorkflowCreateState.PROCESSING,
+                FastqImportInstance.WorkflowCreateState.SUCCESS,
+                FastqImportInstance.WorkflowCreateState.FAILED,
+                FastqImportInstance.WorkflowCreateState.WAITING,
+                FastqImportInstance.WorkflowCreateState.WAITING,
         ].each {
             createFastqImportInstance([
-                    state : it
+                    state: it
             ])
         }
 
@@ -61,7 +61,7 @@ class FastqImportInstanceServiceSpec extends Specification implements ServiceUni
     void "changeProcessToWait, should change the state from PROCESSING to WAITING"() {
         given:
         FastqImportInstance fastqImportInstance = createFastqImportInstance([
-                state : FastqImportInstance.WorkFlowTriggerState.PROCESSING,
+                state     : FastqImportInstance.WorkflowCreateState.PROCESSING,
                 otrsTicket: createOtrsTicket(),
         ])
 
@@ -69,15 +69,37 @@ class FastqImportInstanceServiceSpec extends Specification implements ServiceUni
         service.changeProcessToWait()
 
         then:
-        fastqImportInstance.state == FastqImportInstance.WorkFlowTriggerState.WAITING
+        fastqImportInstance.state == FastqImportInstance.WorkflowCreateState.WAITING
     }
 
     @Unroll
-    void "waiting, should return a valid FastqImportInstance or null object depending on the available FastqImportInstancea"() {
+    void "changeProcessToWait, should not change state #state"() {
+        given:
+        FastqImportInstance fastqImportInstance = createFastqImportInstance([
+                state     : state,
+                otrsTicket: createOtrsTicket(),
+        ])
+
+        when:
+        service.changeProcessToWait()
+
+        then:
+        fastqImportInstance.state == state
+
+        where:
+        state << [
+                FastqImportInstance.WorkflowCreateState.FAILED,
+                FastqImportInstance.WorkflowCreateState.SUCCESS,
+                FastqImportInstance.WorkflowCreateState.WAITING
+        ]
+    }
+
+    @Unroll
+    void "waiting, should return a valid FastqImportInstance or null object depending on the available FastqImportInstances"() {
         given:
         states.each {
             createFastqImportInstance([
-                    state : it,
+                    state: it,
             ])
         }
 
@@ -88,10 +110,25 @@ class FastqImportInstanceServiceSpec extends Specification implements ServiceUni
         (fastqImportInstance == null) == checkCondition
 
         where:
-        states                                                                                                    || checkCondition
-        [ FastqImportInstance.WorkFlowTriggerState.WAITING,    FastqImportInstance.WorkFlowTriggerState.WAITING ] || false
-        [ FastqImportInstance.WorkFlowTriggerState.PROCESSING, FastqImportInstance.WorkFlowTriggerState.SUCCESS ] || true
-        [ FastqImportInstance.WorkFlowTriggerState.WAITING,    FastqImportInstance.WorkFlowTriggerState.FAILED  ] || false
-        [ FastqImportInstance.WorkFlowTriggerState.PROCESSING, FastqImportInstance.WorkFlowTriggerState.SUCCESS ] || true
+        states                                                                                                || checkCondition
+        [FastqImportInstance.WorkflowCreateState.WAITING, FastqImportInstance.WorkflowCreateState.WAITING]    || false
+        [FastqImportInstance.WorkflowCreateState.PROCESSING, FastqImportInstance.WorkflowCreateState.SUCCESS] || true
+        [FastqImportInstance.WorkflowCreateState.WAITING, FastqImportInstance.WorkflowCreateState.FAILED]     || false
+        [FastqImportInstance.WorkflowCreateState.PROCESSING, FastqImportInstance.WorkflowCreateState.SUCCESS] || true
+    }
+
+    void "waiting, when multiple waiting, then return the oldest"() {
+        given:
+        FastqImportInstance fastqImportInstanceExpected = (1..3).collect {
+            createFastqImportInstance([
+                    state: FastqImportInstance.WorkflowCreateState.WAITING,
+            ])
+        }.first()
+
+        when:
+        FastqImportInstance fastqImportInstance = service.waiting()
+
+        then:
+        fastqImportInstance == fastqImportInstanceExpected
     }
 }

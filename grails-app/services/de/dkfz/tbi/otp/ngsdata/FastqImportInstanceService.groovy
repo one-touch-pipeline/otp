@@ -30,16 +30,16 @@ class FastqImportInstanceService {
 
     FastqImportInstance waiting() {
         return CollectionUtils.atMostOneElement(
-                FastqImportInstance.findAllByState(FastqImportInstance.WorkFlowTriggerState.WAITING, [max: 1, sort: 'id', order: 'asc'])
+                FastqImportInstance.findAllByState(FastqImportInstance.WorkflowCreateState.WAITING, [max: 1, sort: 'id', order: 'asc'])
         )
     }
 
     int findCountWithWaitingState() {
-        return FastqImportInstance.countByState(FastqImportInstance.WorkFlowTriggerState.WAITING)
+        return FastqImportInstance.countByState(FastqImportInstance.WorkflowCreateState.WAITING)
     }
 
     @Transactional(readOnly = false)
-    void updateState(FastqImportInstance fastqImportInstance, FastqImportInstance.WorkFlowTriggerState state) {
+    void updateState(FastqImportInstance fastqImportInstance, FastqImportInstance.WorkflowCreateState state) {
         fastqImportInstance.state = state
         fastqImportInstance.save(flush: true)
     }
@@ -50,10 +50,10 @@ class FastqImportInstanceService {
      */
     @Transactional(readOnly = false)
     void changeProcessToWait() {
-        FastqImportInstance.findAllByState(FastqImportInstance.WorkFlowTriggerState.PROCESSING).each { FastqImportInstance fastqImportInstance ->
-            log.info("Change import ${fastqImportInstance.otrsTicket.ticketNumber} from ${FastqImportInstance.WorkFlowTriggerState.PROCESSING} back " +
-                    "to ${FastqImportInstance.WorkFlowTriggerState.WAITING}")
-            updateState(fastqImportInstance, FastqImportInstance.WorkFlowTriggerState.WAITING)
+        FastqImportInstance.findAllByState(FastqImportInstance.WorkflowCreateState.PROCESSING).each { FastqImportInstance fastqImportInstance ->
+            log.info("Change import ${fastqImportInstance.otrsTicket.ticketNumber} from ${FastqImportInstance.WorkflowCreateState.PROCESSING} back " +
+                    "to ${FastqImportInstance.WorkflowCreateState.WAITING}")
+            updateState(fastqImportInstance, FastqImportInstance.WorkflowCreateState.WAITING)
         }
     }
 }

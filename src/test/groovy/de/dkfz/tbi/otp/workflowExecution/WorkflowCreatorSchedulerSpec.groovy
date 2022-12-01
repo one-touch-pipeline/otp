@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2022 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -42,22 +42,63 @@ class WorkflowCreatorSchedulerSpec extends Specification implements ServiceUnitT
         ]
     }
 
-    void "createWorkflows, if system runs and nextWaitingWorkflow return null, then do not call createJob "() {
+    void "scheduleCreateWorkflow, if system do not run, then do not call createWorkflowRuns"() {
+        given:
+        WorkflowCreatorScheduler scheduler = createWorkflowCreatorScheduler()
+
+        when:
+        scheduler.scheduleCreateWorkflow()
+
+        then:
+        1 * scheduler.workflowSystemService.isEnabled() >> false
+
+        0 * scheduler.fastqImportInstanceService.waiting()
+        0 * scheduler.metaDataFileService.getByFastqImportInstance(_)
+        0 * scheduler.fastqImportInstanceService.updateState(_, _)
+
+        0 * scheduler.fastqImportInstanceService.findCountWithWaitingState()
+        0 * scheduler.dataInstallationInitializationService.createWorkflowRuns(_)
+        0 * scheduler.allDecider.decide(_, _)
+        0 * scheduler.notificationCreator.sendWorkflowCreateSuccessMail(_)
+    }
+
+    void "scheduleCreateWorkflow, if system runs and waiting return null, then do not call createWorkflowRuns"() {
+        given:
+        WorkflowCreatorScheduler scheduler = createWorkflowCreatorScheduler()
+
+        when:
+        scheduler.scheduleCreateWorkflow()
+
+        then:
+        1 * scheduler.workflowSystemService.isEnabled() >> true
+
+        1 * scheduler.fastqImportInstanceService.waiting() >> null
+        0 * scheduler.metaDataFileService.getByFastqImportInstance(_)
+        0 * scheduler.fastqImportInstanceService.updateState(_, _)
+
+        0 * scheduler.fastqImportInstanceService.findCountWithWaitingState()
+        0 * scheduler.dataInstallationInitializationService.createWorkflowRuns(_)
+        0 * scheduler.allDecider.decide(_, _)
+        0 * scheduler.notificationCreator.sendWorkflowCreateSuccessMail(_)
+    }
+
+    void "createWorkflows, if system runs and waiting return instance and all fine, call all methods for success called"() {
         given:
         WorkflowCreatorScheduler scheduler = createWorkflowCreatorScheduler()
         MetaDataFile metaDataFile = DomainFactory.createMetaDataFile()
         FastqImportInstance fastqImportInstance = DomainFactory.createFastqImportInstance()
-        List<WorkflowRun> runs = [ createWorkflowRun() ]
+        List<WorkflowRun> runs = [createWorkflowRun()]
 
         when:
-        scheduler.scheduleCreateWorkFlow()
+        scheduler.scheduleCreateWorkflow()
 
         then:
         1 * scheduler.workflowSystemService.isEnabled() >> true
 
         1 * scheduler.fastqImportInstanceService.waiting() >> fastqImportInstance
         1 * scheduler.metaDataFileService.getByFastqImportInstance(_) >> metaDataFile
-        2 * scheduler.fastqImportInstanceService.updateState(_, _)
+        1 * scheduler.fastqImportInstanceService.updateState(_, FastqImportInstance.WorkflowCreateState.PROCESSING)
+        1 * scheduler.fastqImportInstanceService.updateState(_, FastqImportInstance.WorkflowCreateState.SUCCESS)
 
         1 * scheduler.fastqImportInstanceService.findCountWithWaitingState() >> 1
         1 * scheduler.dataInstallationInitializationService.createWorkflowRuns(_) >> runs
@@ -65,24 +106,25 @@ class WorkflowCreatorSchedulerSpec extends Specification implements ServiceUnitT
         1 * scheduler.notificationCreator.sendWorkflowCreateSuccessMail(_)
     }
 
-    void "Run createWorkflows and it throws an exception, it should catches the exception, set the correct state, and send E-Mail to ticketing system"() {
+    void "createWorkflows, if system runs and waiting return instance and decider throw exception, then send error E-Mail to ticketing system"() {
         given:
         WorkflowCreatorScheduler scheduler = createWorkflowCreatorScheduler()
         MetaDataFile metaDataFile = DomainFactory.createMetaDataFile()
         FastqImportInstance fastqImportInstance = DomainFactory.createFastqImportInstance()
-        List<WorkflowRun> runs = [ createWorkflowRun() ]
+        List<WorkflowRun> runs = [createWorkflowRun()]
 
         OtpRuntimeException otpRuntimeException = new OtpRuntimeException("Decider throws exceptions")
 
         when:
-        scheduler.scheduleCreateWorkFlow()
+        scheduler.scheduleCreateWorkflow()
 
         then:
         1 * scheduler.workflowSystemService.isEnabled() >> true
 
         1 * scheduler.fastqImportInstanceService.waiting() >> fastqImportInstance
         1 * scheduler.metaDataFileService.getByFastqImportInstance(_) >> metaDataFile
-        2 * scheduler.fastqImportInstanceService.updateState(_, _)
+        1 * scheduler.fastqImportInstanceService.updateState(_, FastqImportInstance.WorkflowCreateState.PROCESSING)
+        1 * scheduler.fastqImportInstanceService.updateState(_, FastqImportInstance.WorkflowCreateState.FAILED)
 
         1 * scheduler.fastqImportInstanceService.findCountWithWaitingState() >> 1
         1 * scheduler.dataInstallationInitializationService.createWorkflowRuns(_) >> runs

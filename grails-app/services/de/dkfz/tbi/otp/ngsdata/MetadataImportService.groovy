@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2022 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -340,7 +340,7 @@ class MetadataImportService {
         FastqImportInstance fastqImportInstance = new FastqImportInstance(
                 otrsTicket: ticketNumber ? otrsTicketService.createOrResetOtrsTicket(ticketNumber, seqCenterComment, automaticNotification) : null,
                 importMode: importMode,
-                state: FastqImportInstance.WorkFlowTriggerState.WAITING,
+                state: FastqImportInstance.WorkflowCreateState.WAITING,
         ).save(flush: true)
 
         Long timeStarted = System.currentTimeMillis()
