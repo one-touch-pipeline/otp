@@ -90,7 +90,7 @@ class FastqImportInstanceServiceSpec extends Specification implements ServiceUni
         state << [
                 FastqImportInstance.WorkflowCreateState.FAILED,
                 FastqImportInstance.WorkflowCreateState.SUCCESS,
-                FastqImportInstance.WorkflowCreateState.WAITING
+                FastqImportInstance.WorkflowCreateState.WAITING,
         ]
     }
 
