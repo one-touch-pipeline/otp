@@ -24,6 +24,8 @@ package de.dkfz.tbi.otp.workflowExecution.decider
 import grails.gorm.transactions.Transactional
 import grails.util.Pair
 import groovy.transform.Canonical
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
@@ -36,13 +38,23 @@ import de.dkfz.tbi.otp.workflowExecution.*
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
+@Component
 @Transactional
-class WgbsDeciderService extends AbstractWorkflowDecider {
+class WgbsDecider extends AbstractWorkflowDecider {
 
+    @Autowired
     ConfigFragmentService configFragmentService
+
+    @Autowired
     RoddyBamFileService roddyBamFileService
+
+    @Autowired
     WorkflowArtefactService workflowArtefactService
+
+    @Autowired
     WorkflowRunService workflowRunService
+
+    @Autowired
     WorkflowService workflowService
 
     @Override
