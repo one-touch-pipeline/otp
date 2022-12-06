@@ -32,7 +32,7 @@
             <span class="navbar-brand mb-0 h1"><g:message code="triggerAlignment.title"/></span>
         </nav>
 
-        <div
+        <div class="mt-3">
             <g:render template="/triggerAlignment/components/inputArea" model="[tabs: ['project', 'pid', 'lane', 'ilse'], seqTypes: seqTypes]"/>
         </div>
 
