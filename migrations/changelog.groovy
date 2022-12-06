@@ -717,4 +717,6 @@ databaseChangeLog = {
     }
 
     include file: 'changelogs/2022/otp-1559.groovy'
+
+    include file: 'changelogs/2022/otp-1611-wes-domains.groovy'
 }
