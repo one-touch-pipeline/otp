@@ -118,17 +118,6 @@ class SeqCenterServiceSpec extends Specification implements DataTest, DomainFact
         seqCenter.autoImportable
     }
 
-    void "test updateCopyMetadateFile, when value is set then the object should have that value"() {
-        given:
-        SeqCenter seqCenter = createSeqCenter()
-
-        when:
-        seqCenterService.updateCopyMetadateFile(seqCenter, true)
-
-        then:
-        seqCenter.copyMetadataFile
-    }
-
     void "test updateImportDirsAllowLinking, when old value is set, old value will be deleted and new value will be set"() {
         given:
         SeqCenter seqCenter = createSeqCenter([

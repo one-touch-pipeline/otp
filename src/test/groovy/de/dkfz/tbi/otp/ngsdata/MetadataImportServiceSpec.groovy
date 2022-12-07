@@ -31,7 +31,6 @@ import spock.lang.Unroll
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.TestConfigService
-import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
@@ -39,6 +38,7 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePairDeciderService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.taxonomy.TaxonomyFactory
+import de.dkfz.tbi.otp.infrastructure.CreateFileException
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
@@ -54,6 +54,7 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.tracking.OtrsTicketService
 import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.otp.utils.exceptions.CopyingOfFileFailedException
 import de.dkfz.tbi.otp.workflow.datainstallation.DataInstallationInitializationService
 import de.dkfz.tbi.otp.workflowExecution.decider.AllDecider
 import de.dkfz.tbi.util.TimeFormats
@@ -189,8 +190,9 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
         MetaDataFile metadataFileObject = new MetaDataFile()
         MetadataImportService service = Spy(MetadataImportService) {
             1 * importMetadataFile(_, align, FastqImportInstance.ImportMode.MANUAL, TICKET_NUMBER, null, automaticNotification) >> metadataFileObject
-            1 * copyMetadataFileIfRequested(_)
+            1 * copyMetadataFile(_, TICKET_NUMBER) >> null
         }
+        service.fileSystemService = new TestFileSystemService()
         service.configService = new TestConfigService()
         service.configService.processingOptionService = new ProcessingOptionService()
         service.applicationContext = Mock(ApplicationContext) {
@@ -224,6 +226,7 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
         service.applicationContext = Mock(ApplicationContext) {
             getBean(directoryStructureName.beanName, DirectoryStructure) >> directoryStructure
         }
+        service.fileSystemService = new TestFileSystemService()
 
         when:
         List<ValidateAndImportResult> results = service.validateAndImportWithAuth(
@@ -254,6 +257,7 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
         int imported = 0
 
         MetadataImportService service = Spy(MetadataImportService) {
+            2 * copyMetadataFile(_, TICKET_NUMBER) >> null
             1 * validate(context1.metadataFile, directoryStructureName, false) >> { assert imported == 0; context1 }
             1 * validate(context2.metadataFile, directoryStructureName, false) >> { assert imported == 0; context2 }
             1 * importMetadataFile(context1, true, FastqImportInstance.ImportMode.MANUAL, TICKET_NUMBER, null, true) >> {
@@ -296,6 +300,7 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
         DomainFactory.createDefaultRealmWithProcessingOption()
 
         MetadataImportService service = Spy(MetadataImportService) {
+            2 * copyMetadataFile(_, TICKET_NUMBER) >> null
             1 * validate(context1.metadataFile, DirectoryStructureBeanName.GPCF_SPECIFIC, _) >> context1
             1 * validate(context2.metadataFile, DirectoryStructureBeanName.GPCF_SPECIFIC, _) >> context2
             1 * importMetadataFile(context1, true, FastqImportInstance.ImportMode.AUTOMATIC, TICKET_NUMBER, null, true) >> metadataFile1
@@ -406,6 +411,7 @@ ${SPECIES}                      ${speciesImportAlias}                       ${sp
             }
         }
         MetadataImportService service = Spy(MetadataImportService) {
+            2 * copyMetadataFile(_, TICKET_NUMBER) >> null
             2 * getMetadataFilePathForIlseNumber(_, _) >> file1 >> file2
             _ * notifyAboutUnsetConfig(_, _, _) >> null
             _ * getDirectoryStructure(_) >> directoryStructure
@@ -496,6 +502,7 @@ ${SPECIES}                      ${speciesImportAlias}                       ${sp
                 [metadataFile: Paths.get("${seqCenter.autoImportDir}/003333/data/3333_meta.tsv"), problems: problems])
 
         MetadataImportService service = Spy(MetadataImportService) {
+            1 * copyMetadataFile(_, TICKET_NUMBER) >> null
             1 * validate(context1.metadataFile, DirectoryStructureBeanName.GPCF_SPECIFIC, _) >> context1
             1 * validate(context2.metadataFile, DirectoryStructureBeanName.GPCF_SPECIFIC, _) >> context2
             1 * validate(context3.metadataFile, DirectoryStructureBeanName.GPCF_SPECIFIC, _) >> context3
@@ -1656,40 +1663,20 @@ ${SPECIES}                      ${human}+${mouse}+${chicken}                ${hu
         ]
     }
 
-    void "copyMetaDataFileIfRequested, if data not on midterm, do nothing"() {
-        given:
-        DomainFactory.createDefaultRealmWithProcessingOption()
-
-        MetadataImportService service = new MetadataImportService(
-                lsdfFilesService: Mock(LsdfFilesService) {
-                    0 * _
-                }
-        )
-        service.configService = new TestConfigService()
-        service.configService.processingOptionService = new ProcessingOptionService()
-        MetadataValidationContext context = MetadataValidationContextFactory.createContext()
-
-        expect:
-        service.copyMetadataFileIfRequested(context)
-    }
-
-    private Map setupForCopyMetaDataFileIfRequested(String contextContent, boolean returnValidPath = true) {
-        String ilseId = '1234'
+    private Map setupForCopyMetaDataFile(String contextContent) {
         String fileName = 'metadataFile.tsv'
-        SeqCenter seqCenter = createSeqCenter(copyMetadataFile: true)
         String content = """\
                 ${ILSE_NO.name()}\t${CENTER_NAME.name()}
-                ${ilseId}\t${seqCenter.name}
                 """.stripIndent()
         Path file = Files.createFile(tempDir.resolve(fileName))
         file.text = content
         Path targetDirectory = Files.createDirectory(tempDir.resolve('target'))
         ProcessingOptionService processingOptionService = new ProcessingOptionService()
         DomainFactory.createDefaultRealmWithProcessingOption()
-        MetadataImportService service = Spy(MetadataImportService) {
-            1 * getIlseFolder(_, _) >> (returnValidPath ? targetDirectory : null)
-        }
-        service.configService = new ConfigService()
+        MetadataImportService service = new MetadataImportService()
+        service.configService = new TestConfigService([
+                (OtpProperty.PATH_SEQ_CENTER_INBOX): targetDirectory.toString(),
+        ])
         service.fileService = new FileService()
         service.fileSystemService = new TestFileSystemService()
         service.configService.processingOptionService = processingOptionService
@@ -1711,64 +1698,55 @@ ${SPECIES}                      ${human}+${mouse}+${chicken}                ${hu
         ]
     }
 
-    void "copyMetaDataFileIfRequested, if metadata does not exist and copying failed, should fail"() {
+    void "copyMetaDataFile, if metadata exists and copying failed, should fail"() {
         given:
-        Map data = setupForCopyMetaDataFileIfRequested('something')
+        Map data = setupForCopyMetaDataFile('something')
 
         data.service.mailHelperService = Mock(MailHelperService) {
             1 * sendEmailToTicketSystem(_, _)
         }
         data.service.fileService = Mock(FileService) {
-            1 * createFileWithContentOnDefaultRealm(_, _)
+            1 * createFileWithContentOnDefaultRealm(_, _) >> {
+                throw new CreateFileException("Creating of file failed")
+            }
         }
 
         when:
-        data.service.copyMetadataFileIfRequested(data.context)
+        data.service.copyMetadataFile(data.context, TICKET_NUMBER)
 
         then:
-        RuntimeException e = thrown()
-        e.message.contains('Copying of metadata file')
-        e.cause.message.contains('target/metadataFile')
+        CopyingOfFileFailedException e = thrown(CopyingOfFileFailedException)
+        e.message.contains("Copying of metadata file")
+        e.cause.message.contains("Creating of file failed")
     }
 
-    void "copyMetaDataFileIfRequested, if metadata does not exist and copying fine, all fine"() {
+    void "copyMetaDataFile, if metadata exists and copying fine, all fine"() {
         given:
-        Map data = setupForCopyMetaDataFileIfRequested(null)
+        Map data = setupForCopyMetaDataFile(null)
+        data.service.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
+            3 * executeCommandReturnProcessOutput(_, _) >> { return new ProcessOutput([stderr: "", exitCode: 0]) }
+        }
 
         when:
-        data.service.copyMetadataFileIfRequested(data.context)
+        String copiedFile = data.service.copyMetadataFile(data.context, TICKET_NUMBER)
 
         then:
+        copiedFile ==~ /${data.targetDirectory}\/\d{4}\/\d{2}\/${TICKET_NUMBER}\/[^\/]*metadataFile-.*\.tsv/
         Files.exists(data.targetDirectory)
-        List<Path> paths = Files.list(data.targetDirectory).collect(Collectors.toList())
-        paths.size() == 1
-        Files.size(paths[0])
-        paths[0][-1].toString() ==~ /metadataFile-.*\.tsv/
+        Path yearDir = exactlyOneElement(Files.list(data.targetDirectory).collect(Collectors.toList()))
+        Path monthDir = exactlyOneElement(Files.list(yearDir).collect(Collectors.toList()))
+        Path ticketNumberDir = exactlyOneElement(Files.list(monthDir).collect(Collectors.toList()))
+        Path files = exactlyOneElement(Files.list(ticketNumberDir).collect(Collectors.toList()))
+        Files.size(files)
+        files[-1].toString() ==~ /metadataFile-.*\.tsv/
     }
 
-    void "copyMetaDataFileIfRequested, if metadata does not exist and IlseNumber is wrong, should fail"() {
+    void "copyMetaDataFile, if metadata is copied, check the permission string must be 2770"() {
         given:
-        Map data = setupForCopyMetaDataFileIfRequested(null, false)
-
-        data.service.mailHelperService = Mock(MailHelperService) {
-            1 * sendEmailToTicketSystem(_, _)
-        }
-
-        when:
-        data.service.copyMetadataFileIfRequested(data.context)
-
-        then:
-        RuntimeException e = thrown()
-        e.message.contains('Copying of metadata file')
-        e.cause.message.contains('Cannot invoke method resolve() on null object')
-    }
-
-    void "copyMetaDataFileIfRequested, if metadata is copied, check the permission string must be 2770"() {
-        given:
-        Map data = setupForCopyMetaDataFileIfRequested(null)
+        Map data = setupForCopyMetaDataFile(null)
 
         data.service.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
-            1 * executeCommandReturnProcessOutput(_, _) >> { Realm realm, String command ->
+            4 * executeCommandReturnProcessOutput(_, _) >> { Realm realm, String command ->
                 assert command.contains("chmod 2770")
                 return new ProcessOutput(command, '', 0)
             }
@@ -1782,45 +1760,11 @@ ${SPECIES}                      ${human}+${mouse}+${chicken}                ${hu
         }
 
         when:
-        data.service.copyMetadataFileIfRequested(data.context)
+        String copiedFile = data.service.copyMetadataFile(data.context, TICKET_NUMBER)
 
         then:
+        copiedFile ==~ /${data.targetDirectory}\/\d{4}\/\d{2}\/${TICKET_NUMBER}\/[^\/]*metadataFile-.*\.tsv/
         Files.exists(targetDirectory)
-    }
-
-    void "test getIlseFolder, invalid input, should return null"() {
-        given:
-        SeqCenter seqCenter = createSeqCenter()
-        Path output
-
-        when:
-        output = new MetadataImportService().getIlseFolder(input, seqCenter)
-
-        then:
-        output == null
-
-        where:
-        input << [null, '', '1234567', '12a3']
-    }
-
-    void "test getIlseFolder, valid input"() {
-        given:
-        SeqCenter seqCenter = createSeqCenter(dirName: "SEQ_FACILITY")
-        MetadataImportService service = new MetadataImportService()
-        service.configService = new TestConfigService((OtpProperty.PATH_SEQ_CENTER_INBOX): "/test")
-        service.configService.metaClass.getDefaultRealm = {
-            return null
-        }
-        service.fileSystemService = new TestFileSystemService()
-
-        expect:
-        output == service.getIlseFolder(input, seqCenter)
-
-        where:
-        input    || output
-        '123'    || FileSystems.default.getPath("/test/SEQ_FACILITY/000/000123")
-        '1234'   || FileSystems.default.getPath("/test/SEQ_FACILITY/001/001234")
-        '123456' || FileSystems.default.getPath("/test/SEQ_FACILITY/123/123456")
     }
 
     void "test getConfiguredSeqTracks"() {

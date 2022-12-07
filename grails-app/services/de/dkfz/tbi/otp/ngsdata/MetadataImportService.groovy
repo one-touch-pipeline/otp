@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-import com.jcraft.jsch.JSchException
 import grails.gorm.transactions.Transactional
 import groovy.transform.ToString
 import groovy.transform.TupleConstructor
@@ -177,11 +176,12 @@ class MetadataImportService {
                                                        boolean ignoreWarnings, String previousValidationMd5sum, String ticketNumber, String seqCenterComment,
                                                        boolean automaticNotification) {
         MetaDataFile metadataFileObject = null
+        String copiedFile = null
         if (mayImport(context, ignoreWarnings, previousValidationMd5sum)) {
             metadataFileObject = importMetadataFile(context, align, importMode, ticketNumber, seqCenterComment, automaticNotification)
-            copyMetadataFileIfRequested(context)
+            copiedFile = copyMetadataFile(context, ticketNumber)
         }
-        return new ValidateAndImportResult(context, metadataFileObject)
+        return new ValidateAndImportResult(context, metadataFileObject, copiedFile)
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
@@ -196,39 +196,39 @@ class MetadataImportService {
         assert otrsTicket.save(flush: true)
     }
 
-    protected void copyMetadataFileIfRequested(MetadataValidationContext context) {
-        List<SeqCenter> seqCenters = getSeqCenters(context)
-        seqCenters.findAll { it?.copyMetadataFile }.unique().each { SeqCenter seqCenter ->
-            Path source = context.metadataFile
-            try {
-                String ilse = context.spreadsheet.dataRows[0].getCellByColumnTitle(ILSE_NO.name()).text
-                Path targetDirectory = getIlseFolder(ilse, seqCenter)
-                String oldName = source.fileName
+    protected String copyMetadataFile(MetadataValidationContext context, String ticketNumber) {
+        Path source = context.metadataFile
 
-                int position = oldName.lastIndexOf('.')
-                String time = TimeFormats.DATE_TIME_SECONDS_DASHES.getFormattedDate(new Date())
-                String newName = "${oldName.substring(0, position)}-${time}${oldName.substring(position)}"
+        try {
+            FileSystem fileSystem = fileSystemService.getRemoteFileSystem(configService.defaultRealm)
+            String oldName = source.fileName
 
-                Path targetFile = targetDirectory.resolve(newName)
-                if (!Files.exists(targetFile)) {
-                    //create the directory and set the permission with owner and group access (setgid bit) explicitly
-                    fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(targetDirectory, configService.defaultRealm,
-                            "", FileService.OWNER_AND_GROUP_DIRECTORY_PERMISSION_STRING)
-                    fileService.createFileWithContentOnDefaultRealm(targetFile, context.content)
-                }
+            Date date = new Date()
+            String yearMonth = TimeFormats.YEAR_MONTH_SLASH.getFormattedDate(date)
+            String timeStamp = TimeFormats.DATE_TIME_SECONDS_DASHES.getFormattedDate(date)
 
-                assert Files.readAllBytes(targetFile) == context.content
-            } catch (Throwable t) {
-                mailHelperService.sendEmailToTicketSystem("Error: Copying of metadatafile ${source} failed",
-                        "${t.localizedMessage}\n${t.cause}")
-                throw new CopyingOfFileFailedException("Copying of metadata file ${source} failed", t)
+            Path seqCenterInboxDir = fileSystem.getPath("${configService.seqCenterInboxPath}")
+            Path targetDir = seqCenterInboxDir.resolve(yearMonth).resolve(ticketNumber)
+
+            int position = oldName.lastIndexOf('.')
+            String newName = "${oldName.substring(0, position)}-${timeStamp}${oldName.substring(position)}"
+
+            Path targetFile = targetDir.resolve(newName)
+
+            if (!Files.exists(targetFile)) {
+                //create the directory and set the permission with owner and group access (setgid bit) explicitly
+                fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(targetDir, configService.defaultRealm,
+                        "", FileService.OWNER_AND_GROUP_DIRECTORY_PERMISSION_STRING)
+                fileService.createFileWithContentOnDefaultRealm(targetFile, context.content)
             }
-        }
-    }
+            assert Files.readAllBytes(targetFile) == context.content
 
-    static List<SeqCenter> getSeqCenters(MetadataValidationContext context) {
-        List<String> centerNames = context.spreadsheet.dataRows*.getCellByColumnTitle(CENTER_NAME.name())?.text
-        return centerNames ? SeqCenter.findAllByNameInList(centerNames) : []
+            return targetFile.toString()
+        } catch (Throwable t) {
+            mailHelperService.sendEmailToTicketSystem("Error: Copying of metadatafile ${source} failed",
+                    "${t.localizedMessage}\n${t.cause}")
+            throw new CopyingOfFileFailedException("Copying of metadata file ${source} failed", t)
+        }
     }
 
     List<ValidateAndImportResult> validateAndImportMultiple(String otrsTicketNumber, String ilseNumbers, boolean ignoreAlreadyKnownMd5sum) {
@@ -255,20 +255,6 @@ class MetadataImportService {
         }
 
         throw new MultiImportFailedException(failedValidations, metadataFiles)
-    }
-
-    /**
-     * Returns the absolute path to an ILSe Folder inside the sequencing center inbox
-     */
-    Path getIlseFolder(String ilseId, SeqCenter seqCenter) throws JSchException {
-        assert seqCenter
-        if (!(ilseId =~ /^\d{1,6}$/)) {
-            return null
-        }
-        String ilse = ilseId.padLeft(6, '0')
-        FileSystem fileSystem = fileSystemService.getRemoteFileSystem(configService.defaultRealm)
-
-        return fileSystem.getPath("${configService.seqCenterInboxPath}/${seqCenter.dirName}/${ilse[0..2]}/${ilse}")
     }
 
     protected Path getMetadataFilePathForIlseNumber(int ilseNumber, FileSystem fileSystem) {
@@ -721,6 +707,7 @@ class ValidateAndImportResult {
      * {@code null} if the import has been rejected
      */
     final MetaDataFile metadataFile
+    final String copiedFile
 }
 
 @TupleConstructor

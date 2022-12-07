@@ -278,7 +278,7 @@ class MetadataImportController implements CheckAndCall, PlainResponseExceptionHa
                     ignoreAlreadyKnownMd5sum)
             text.append('Automatic import succeeded :-)')
             results.each {
-                text.append("\n\n${it.context.metadataFile}:\n")
+                text.append("\n\n${it.context.metadataFile} --> ${it.copiedFile}\n")
                 text.append(g.createLink(action: 'details', id: it.metadataFile.fastqImportInstance.id, absolute: 'true'))
             }
         } catch (MultiImportFailedException e) {

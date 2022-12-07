@@ -32,6 +32,7 @@ enum TimeFormats {
     DATE_TIME('yyyy-MM-dd HH:mm:ss'),
     DATE_TIME_WITHOUT_SECONDS('yyyy-MM-dd HH:mm'),
     MONTH_YEAR('MMM yyyy'),
+    YEAR_MONTH_SLASH('yyyy/MM'),
     DATE_TIME_WITH_ZONE('yyyy-MM-dd-HH-mm-ss-SSSZ'),
     WEEKDAY_DATE_TIME('EEE, d MMM yyyy HH:mm'),
     DATE_2('dd.MM.yyyy'),

@@ -114,6 +114,7 @@ class MetadataImportControllerSpec extends Specification implements ControllerUn
     }
 
     void "autoImport, should succeeded with 200 and text of each MetadataFile and created link"() {
+        given:
         setupData()
         final String ticketNumber = "426964"
         final String ilseNumbers = "1111+2222+3333"
@@ -123,20 +124,21 @@ class MetadataImportControllerSpec extends Specification implements ControllerUn
             MetaDataFile metadataFile = DomainFactory.createMetaDataFile()
             resultList.add(new ValidateAndImportResult(
                     MetadataValidationContextFactory.createContext([metadataFile: Paths.get("${metadataFile.filePath}/${metadataFile.fileName}")]),
-                    metadataFile
+                    metadataFile,
+                    "new_path_${i}",
             ))
         }
 
         String expected = """\
                           Automatic import succeeded :-)
 
-                          ${resultList[0].context.metadataFile}:
+                          ${resultList[0].context.metadataFile} --> ${resultList[0].copiedFile}
                           http://example.com/metadataImport/details/${resultList[0].metadataFile.fastqImportInstance.id}
 
-                          ${resultList[1].context.metadataFile}:
+                          ${resultList[1].context.metadataFile} --> ${resultList[1].copiedFile}
                           http://example.com/metadataImport/details/${resultList[1].metadataFile.fastqImportInstance.id}
 
-                          ${resultList[2].context.metadataFile}:
+                          ${resultList[2].context.metadataFile} --> ${resultList[2].copiedFile}
                           http://example.com/metadataImport/details/${resultList[2].metadataFile.fastqImportInstance.id}
                           """.stripIndent().trim()
 
@@ -162,6 +164,7 @@ class MetadataImportControllerSpec extends Specification implements ControllerUn
     }
 
     void "autoImport, should succeeded with 200 and text of each MetadataFile, a Link for manual creation and problems"() {
+        given:
         setupData()
         final String ticketNumber = "426964"
         final String ilseNumbers = "1111+2222+3333"
@@ -227,6 +230,7 @@ class MetadataImportControllerSpec extends Specification implements ControllerUn
     }
 
     void "autoImport, if first import contains only some lines and second all, then both should succeeded with 200 and text of each MetadataFile, a Link for manual creation and problems"() {
+        given:
         setupData()
         final String ticketNumber = "426964"
         final String ilseNumbers = "1111+2222+3333"
@@ -236,20 +240,21 @@ class MetadataImportControllerSpec extends Specification implements ControllerUn
             MetaDataFile metadataFile = DomainFactory.createMetaDataFile()
             resultList.add(new ValidateAndImportResult(
                     MetadataValidationContextFactory.createContext([metadataFile: Paths.get("${metadataFile.filePath}/${metadataFile.fileName}")]),
-                    metadataFile
+                    metadataFile,
+                    "new_path_${i}",
             ))
         }
 
         String expected = """\
                           Automatic import succeeded :-)
 
-                          ${resultList[0].context.metadataFile}:
+                          ${resultList[0].context.metadataFile} --> ${resultList[0].copiedFile}
                           http://example.com/metadataImport/details/${resultList[0].metadataFile.fastqImportInstance.id}
 
-                          ${resultList[1].context.metadataFile}:
+                          ${resultList[1].context.metadataFile} --> ${resultList[1].copiedFile}
                           http://example.com/metadataImport/details/${resultList[1].metadataFile.fastqImportInstance.id}
 
-                          ${resultList[2].context.metadataFile}:
+                          ${resultList[2].context.metadataFile} --> ${resultList[2].copiedFile}
                           http://example.com/metadataImport/details/${resultList[2].metadataFile.fastqImportInstance.id}
                           """.stripIndent().trim()
 

@@ -46,9 +46,6 @@ class SeqCenter implements Entity, ProjectFieldReferenceAble {
             importDirsAllowLinking: String,
     ]
 
-    /** should meta data files be copied to the seq center inbox */
-    boolean copyMetadataFile = false
-
     static constraints = {
         name(blank: false, unique: true)
         dirName(blank: false, unique: true, shared: "pathComponent")

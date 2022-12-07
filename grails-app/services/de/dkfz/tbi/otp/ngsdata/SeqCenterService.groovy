@@ -46,12 +46,6 @@ class SeqCenterService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    void updateCopyMetadateFile(SeqCenter seqCenter, boolean copyMetadataFile) {
-        seqCenter.copyMetadataFile = copyMetadataFile
-        seqCenter.save(flush: true)
-    }
-
-    @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void updateImportDirsAllowLinking(SeqCenter seqCenter, String importDirOld, String importDirNew) {
         seqCenter.removeFromImportDirsAllowLinking(importDirOld)
         if (importDirNew) {

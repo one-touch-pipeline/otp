@@ -48,7 +48,6 @@
             <th class="export_column" title="${g.message(code: "dataFields.seqCenter.autoImportable.tooltip")}"><g:message code="dataFields.seqCenter.autoImportable"/></th>
             <th title="${g.message(code: "dataFields.seqCenter.importDirsAllowLinking.tooltip")}"><g:message code="dataFields.seqCenter.importDirsAllowLinking"/></th>
             <th class="export_column" hidden><g:message code="dataFields.seqCenter.importDirsAllowLinking"/></th>
-            <th class="export_column" title="${g.message(code: "dataFields.seqCenter.copyMetadataFile.tooltip")}"><g:message code="dataFields.seqCenter.copyMetadataFile"/></th>
         </tr>
         </thead>
         <tbody>
@@ -84,14 +83,6 @@
                             link="${g.createLink(controller: 'metaDataFields', action: 'createImportDirsAllowLinking', params: ['seqCenter.id': seqCenter.id])}"/>
                 </td>
                 <td hidden><span class="keep-whitespace">${seqCenter.importDirsAllowLinking.join(";\n")}</span></td>
-                <td>
-                    <otp:editorSwitch
-                        roles="DISABLED"
-                        template="dropDown"
-                        link="${g.createLink(controller: 'metaDataFields', action: 'updateCopyMetadataFile', params: ['seqCenter.id': seqCenter.id])}"
-                        values="${["true", "false"]}"
-                        value="${seqCenter.copyMetadataFile}"/>
-                </td>
             </tr>
         </g:each>
         </tbody>

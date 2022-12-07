@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,15 +21,8 @@
  */
 
 databaseChangeLog = {
-    include file: 'changelogs/2022/initialDatabaseSchema.groovy'
 
-    include file: 'changelogs/2022/otp-1860-adapt-databasechangelog.groovy'
-
-    include file: 'changelogs/2022/otp-1611-wes-domains.groovy'
-
-    include file: 'changelogs/2022/otp-1612-state-for-workflow-creation.groovy'
-
-    include file: 'changelogs/2022/otp-1135.groovy'
-
-    include file: 'changelogs/2023/otp-1732.groovy'
+    changeSet(author: "Julian Rausch", id: "1672751403196-201") {
+        dropColumn(columnName: "copy_metadata_file", tableName: "seq_center")
+    }
 }
