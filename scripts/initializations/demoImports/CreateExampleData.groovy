@@ -630,6 +630,7 @@ class ExampleData {
                 lengthRefChromosomesWithoutN: 100,
                 length                      : 100,
                 speciesWithStrains          : [speciesWithStrain] as Set,
+                species                     : [speciesWithStrain.species] as Set,
         ]).save(flush: true)
 
         new StatSizeFileName([
@@ -1237,7 +1238,6 @@ class ExampleData {
                                         pipeline             : pipeline,
                                         programVersion       : "programVersion:1.1.1",
                                         configVersion        : "v1_0",
-                                        nameUsedInConfig     : "",
                                         adapterTrimmingNeeded: false,
                                         nameUsedInConfig     : nameUsedInConfig,
                                         md5sum               : HelperUtils.getRandomMd5sum(),
