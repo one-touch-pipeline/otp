@@ -85,6 +85,7 @@ class SampleValidator extends ValueTuplesValidator<MetadataValidationContext> im
                 missingIdentifiersWithProject.add("${projectName}\t${pid}\t${sampleType}\t${sampleName}\t\t${antibodyTarget}")
             }
             if (parsedIdentifier && !sampleIdentifier) {
+                String nameInMetadata = atMostOneElement(Project.findAllByName(parsedIdentifier.projectName))?.nameInMetadataFiles
                 boolean error = false
                 if (!atMostOneElement(Project.findAllByName(parsedIdentifier.projectName))) {
                     context.addProblem(it.cells, LogLevel.ERROR, "Sample name '${sampleName}' is not registered in OTP. It looks like it belongs to project '${parsedIdentifier.projectName}', but no project with that name is registered in OTP.", "At least one sample name is not registered in OTP. It looks like it belongs to a project not registered in OTP.")
@@ -94,6 +95,9 @@ class SampleValidator extends ValueTuplesValidator<MetadataValidationContext> im
                 if (individual && individual.project.name != parsedIdentifier.projectName) {
                     context.addProblem(it.cells, LogLevel.ERROR, "Sample name '${sampleName}' is not registered in OTP. It looks like it belongs to project '${parsedIdentifier.projectName}' and individual '${parsedIdentifier.pid}', but individual '${parsedIdentifier.pid}' is already registered in OTP with project '${individual.project.name}'.", "At least one sample name is not registered in OTP. It looks like it belongs to a specific project and individual, but this individual is already registered in OTP with another project.")
                     error = true
+                }
+                if ((projectName != parsedIdentifier.projectName) || (nameInMetadata ? (projectName != nameInMetadata) : false)) {
+                    context.addProblem(it.cells, LogLevel.ERROR, "The parsed project '${parsedIdentifier.projectName}' of the sample name does not match the project in the metadata column '${projectName}'.", "At least for one sample name the parsed project does not match the project in the metadata column.")
                 }
                 if (!error) {
                     parsedSampleIdentifiers.add("${parsedIdentifier.projectName}\t${parsedIdentifier.pid}\t${parsedIdentifier.sampleTypeDbName}\t${parsedIdentifier.fullSampleName}")
