@@ -49,7 +49,6 @@ class LicenseCheck {
     ]
 
     static List<Path> ignoredDirs = [
-            "migrations/changelogs",
             "src/docs",
 
             "grails-app/assets/images",

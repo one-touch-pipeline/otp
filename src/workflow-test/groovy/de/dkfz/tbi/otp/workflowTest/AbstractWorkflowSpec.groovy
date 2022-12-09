@@ -577,9 +577,9 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
         log.debug("Loading default values:")
         Path dir = new File(".").toPath().resolve("migrations/changelogs/defaultValues")
         List<Path> files = [
-                dir.resolve("seqTypes.sql"),
-                dir.resolve("workflow.sql"),
-                dir.resolve("workflowVersions.sql"),
+                dir.resolve("seq-types.sql"),
+                dir.resolve("workflows.sql"),
+                dir.resolve("workflow-versions.sql"),
         ]
         files.addAll(Files.newDirectoryStream(dir.resolve('ewc'), "ewc-*.sql").toList().sort())
 

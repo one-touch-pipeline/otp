@@ -21,9 +21,9 @@
  */
 
 INSERT INTO file_type(id, version, type, sub_type, vbp_path, signature, date_created, last_updated)
-VALUES(nextval('hibernate_sequence'), 0, 'SEQUENCE', 'fastq', '/sequence/', '.fastq', now(), now())
+VALUES (NEXTVAL('hibernate_sequence'), 0, 'SEQUENCE', 'fastq', '/sequence/', '.fastq', NOW(), NOW())
 ON CONFLICT DO NOTHING;
 
 INSERT INTO file_type(id, version, type, sub_type, vbp_path, signature, date_created, last_updated)
-VALUES(nextval('hibernate_sequence'), 0, 'SEQUENCE', 'fastq', '/sequence/', '_fastq', now(), now())
+VALUES (NEXTVAL('hibernate_sequence'), 0, 'SEQUENCE', 'fastq', '/sequence/', '_fastq', NOW(), NOW())
 ON CONFLICT DO NOTHING;

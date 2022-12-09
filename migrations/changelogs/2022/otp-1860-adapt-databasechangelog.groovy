@@ -20,27 +20,10 @@
  * SOFTWARE.
  */
 
--- The entries should be kept in sync with the values of ProjectRole.Basic
-INSERT INTO project_role(id, version, name, date_created, last_updated)
-VALUES (NEXTVAL('hibernate_sequence'), 0, 'PI', NOW(), NOW())
-ON CONFLICT DO NOTHING;
+databaseChangeLog = {
 
-INSERT INTO project_role(id, version, name, date_created, last_updated)
-VALUES (NEXTVAL('hibernate_sequence'), 0, 'LEAD_BIOINFORMATICIAN', NOW(), NOW())
-ON CONFLICT DO NOTHING;
+    changeSet(author: "Julian Rausch", id: "adapt-databasechangelog-id-length") {
+        modifyDataType(columnName: "id", newDataType: "varchar(255)", tableName: "databasechangelog")
+    }
 
-INSERT INTO project_role(id, version, name, date_created, last_updated)
-VALUES (NEXTVAL('hibernate_sequence'), 0, 'BIOINFORMATICIAN', NOW(), NOW())
-ON CONFLICT DO NOTHING;
-
-INSERT INTO project_role(id, version, name, date_created, last_updated)
-VALUES (NEXTVAL('hibernate_sequence'), 0, 'SUBMITTER', NOW(), NOW())
-ON CONFLICT DO NOTHING;
-
-INSERT INTO project_role(id, version, name, date_created, last_updated)
-VALUES (NEXTVAL('hibernate_sequence'), 0, 'COORDINATOR', NOW(), NOW())
-ON CONFLICT DO NOTHING;
-
-INSERT INTO project_role(id, version, name, date_created, last_updated)
-VALUES (NEXTVAL('hibernate_sequence'), 0, 'OTHER', NOW(), NOW())
-ON CONFLICT DO NOTHING;
+}

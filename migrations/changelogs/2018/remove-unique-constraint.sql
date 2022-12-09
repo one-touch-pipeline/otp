@@ -1,1 +1,0 @@
-DROP INDEX abstract_bam_file_work_directory_name_work_package_idx;

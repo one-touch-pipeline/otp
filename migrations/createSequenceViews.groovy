@@ -19,11 +19,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+import java.nio.file.Path
+import java.nio.file.Paths
 
 databaseChangeLog = {
 
-    changeSet(author: "kaercher", id: "sequence view", runOnChange: "true") {
-        sqlFile(path: 'changelogs/dbview/aggregate_sequences.sql')
-        sqlFile(path: 'changelogs/dbview/sequences.sql')
+    Path dir = Paths.get("migrations/changelogs/dbview")
+
+    // Views
+    List<Path> files = [
+            dir.resolve("aggregate-sequences.sql"),
+            dir.resolve("sequences.sql"),
+    ]
+
+    files.each { file ->
+        changeSet(author: "otp", id: file.getFileName().toString(), runOnChange: "true") {
+            sql(file.text)
+        }
     }
 }

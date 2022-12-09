@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2022 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,26 +22,26 @@
 
 -- basic roles
 INSERT INTO role (id, version, authority, date_created, last_updated)
-VALUES (nextval('hibernate_sequence'), 0, 'ROLE_ADMIN', now(), now())
+VALUES (NEXTVAL('hibernate_sequence'), 0, 'ROLE_ADMIN', NOW(), NOW())
 ON CONFLICT DO NOTHING;
 
 INSERT INTO role (id, version, authority, date_created, last_updated)
-VALUES (nextval('hibernate_sequence'), 0, 'ROLE_OPERATOR', now(), now())
+VALUES (NEXTVAL('hibernate_sequence'), 0, 'ROLE_OPERATOR', NOW(), NOW())
 ON CONFLICT DO NOTHING;
 
 INSERT INTO role (id, version, authority, date_created, last_updated)
-VALUES (nextval('hibernate_sequence'), 0, 'ROLE_SWITCH_USER', now(), now())
+VALUES (NEXTVAL('hibernate_sequence'), 0, 'ROLE_SWITCH_USER', NOW(), NOW())
 ON CONFLICT DO NOTHING;
 
 -- additional roles
 INSERT INTO role (id, version, authority, date_created, last_updated)
-VALUES (nextval('hibernate_sequence'), 0, 'ROLE_TEST_PI', now(), now())
+VALUES (NEXTVAL('hibernate_sequence'), 0, 'ROLE_TEST_PI', NOW(), NOW())
 ON CONFLICT DO NOTHING;
 
 INSERT INTO role (id, version, authority, date_created, last_updated)
-VALUES (nextval('hibernate_sequence'), 0, 'ROLE_TEST_BIOINFORMATICAN', now(), now())
+VALUES (NEXTVAL('hibernate_sequence'), 0, 'ROLE_TEST_BIOINFORMATICAN', NOW(), NOW())
 ON CONFLICT DO NOTHING;
 
 INSERT INTO role (id, version, authority, date_created, last_updated)
-VALUES (nextval('hibernate_sequence'), 0, 'ROLE_TEST_SUBMITTER', now(), now())
+VALUES (NEXTVAL('hibernate_sequence'), 0, 'ROLE_TEST_SUBMITTER', NOW(), NOW())
 ON CONFLICT DO NOTHING;
