@@ -27,6 +27,7 @@ import com.jcraft.jsch.IdentityRepository
 import com.jcraft.jsch.agentproxy.*
 import grails.core.GrailsApplication
 import grails.gorm.transactions.Transactional
+import grails.util.Environment
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.scheduling.annotation.Scheduled
@@ -175,18 +176,22 @@ class FileSystemService {
      * Close the used remote file systems.
      *
      * <b>Attention:</b>
-     * This method is only for running workflow tests and should never be used in production.
+     * This method is only for running workflow tests and for development and should never be used in production.
      *
      * Since each workflow tests starts with an empty database, each test have other realms and therefore can not reuse the cached file system.
      * To avoid collecting more and more not needed cached file system and references to not valid realm, the cache are closed after each test.
      *
      * Since in production always the same realm is used, the cache shouldn't cleared and therefore this method also not used.
+     *
+     * A similar problem occurred during development with the otp restart triggered by spring-devtools.
      */
     void closeFileSystem() {
+        assert Environment.current != Environment.PRODUCTION
+        log.debug("start closing sftp filesystems")
         Map<Realm, FileSystem> fileSystems = createdFileSystems
         createdFileSystems = [:]
         fileSystems.each { Realm realm, FileSystem fileSystem ->
-            log.debug("closing filesystems for realm ${realm}")
+            log.debug("closing sftp filesystems for realm ${realm}")
             fileSystem.close()
         }
     }

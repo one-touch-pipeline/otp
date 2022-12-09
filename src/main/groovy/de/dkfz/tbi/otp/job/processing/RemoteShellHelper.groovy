@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.job.processing
 
 import com.jcraft.jsch.*
 import com.jcraft.jsch.agentproxy.*
+import grails.util.Environment
 import groovy.transform.Synchronized
 import groovy.util.logging.Slf4j
 import org.slf4j.Logger
@@ -257,11 +258,11 @@ class RemoteShellHelper {
     @SuppressWarnings('CatchThrowable')
     void keepAlive() {
         sessionPerRealm.each { Realm realm, Session session ->
-            log.debug("Send keep alive for ${realm}")
+            log.debug("Send SSH session keep alive for ${realm}")
             try {
                 session.sendKeepAliveMsg()
             } catch (Throwable e) {
-                log.error("Send keep alive failed for ${realm} ${session}", e)
+                log.error("Send SSH session keep alive failed for ${realm} ${session}", e)
                 synchronized (synchronizeVariable) {
                     sessionPerRealm.remove(realm)
                 }
@@ -280,18 +281,22 @@ class RemoteShellHelper {
      * Close the used remote file systems.
      *
      * <b>Attention:</b>
-     * This method is only for running workflow tests and should never be used in production.
+     * This method is only for running workflow tests and for development and should never be used in production.
      *
      * Since each workflow tests starts with an empty database, each test have other realms and therefore can not reuse the cached file system.
      * To avoid collecting more and more not needed cached file system and references to not valid realm, the cache are closed after each test.
      *
      * Since in production always the same realm is used, the cache shouldn't cleared and therefore this method also not used.
+     *
+     * A similar problem occurred during development with the otp restart triggered by spring-devtools.
      */
     void closeFileSystem() {
+        assert Environment.current != Environment.PRODUCTION
+        log.debug("start closing SSH session")
         Map<Realm, Session> sessionPerRealmCopy = sessionPerRealm
         sessionPerRealm = [:]
         sessionPerRealmCopy.each { Realm realm, Session session ->
-            log.debug("closing filesystems for realm ${realm}")
+            log.debug("closing SSH session for realm ${realm}")
             session.disconnect()
         }
     }

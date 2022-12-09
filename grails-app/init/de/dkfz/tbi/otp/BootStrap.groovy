@@ -28,6 +28,8 @@ import groovy.transform.CompileStatic
 
 import de.dkfz.odcf.audit.impl.DicomAuditLogger
 import de.dkfz.odcf.audit.xml.layer.EventIdentification.EventOutcomeIndicator
+import de.dkfz.tbi.otp.job.processing.FileSystemService
+import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.security.user.UserService
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.config.PropertiesValidationService
@@ -42,6 +44,8 @@ class BootStrap {
     PropertiesValidationService propertiesValidationService
     SchedulerService schedulerService
     WorkflowSystemService workflowSystemService
+    FileSystemService fileSystemService
+    RemoteShellHelper remoteShellHelper
 
     def init = { servletContext ->
         // load the shutdown service
@@ -74,5 +78,10 @@ class BootStrap {
     }
 
     def destroy = {
+        if (Environment.current == Environment.DEVELOPMENT) {
+            //destroy file system to avoid problems on spring dev-tools restart
+            fileSystemService.closeFileSystem()
+            remoteShellHelper.closeFileSystem()
+        }
     }
 }

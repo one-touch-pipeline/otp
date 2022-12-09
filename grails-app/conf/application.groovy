@@ -32,7 +32,30 @@ spring {
     }
     devtools {
         restart {
-            exclude = ['grails-app/views/**', 'grails-app/i18n/**', 'grails-app/conf/**']
+            exclude = [
+                    'cypress/**',
+                    'devScripts/**',
+                    'docker/**',
+                    'docs/**',
+                    'grails-app/assets/**',
+                    'grails-app/codenarcRules/**',
+                    'grails-app/conf/**',
+                    'grails-app/i18n/**',
+                    'grails-app/taglib/**',
+                    'grails-app/views/**',
+                    'migration/**',
+                    'misc/**',
+                    'node_modules/**',
+                    'review/**',
+                    'scripts/**',
+                    'src/docs/**',
+                    'src/integration-test/**',
+                    'src/test/**',
+                    'src/test-helper/**',
+                    'src/workflow-test/**',
+                    'tmp/**',
+                    'tools/**',
+            ]
         }
     }
 }
