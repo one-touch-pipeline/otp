@@ -34,6 +34,7 @@ describe('Check sampleOverview page', () => {
       const sampleTypeName = 'tumor01';
       cy.get('span#select2--container').contains('Sample Type').click();
       cy.get('li').contains(sampleTypeName).click();
+      cy.get('table#laneOverviewId td.dataTables_empty').should('not.exist');
 
       cy.get('table#laneOverviewId tbody').find('tr').each((tableRow) => {
         cy.wrap(tableRow).find('td').eq(1).should('contain', 'tumor01');

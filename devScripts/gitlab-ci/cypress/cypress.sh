@@ -1,4 +1,6 @@
-# Copyright 2011-2020 The OTP authors
+#!/bin/sh
+#
+# Copyright 2011-2022 The OTP authors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -17,17 +19,21 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+#
 
-FROM ghcr.io/linuxserver/openssh-server
+set -ev -o pipefail
 
-ADD *.sh /custom-cont-init.d/
-RUN mkdir -p /home/otp
+cp $DOCKER_ENV ./.env
+cp $CYPRESS_ENV ./cypress.env.json
+cp $OTP_PROPERTIES_CYPRESS ~/.otp.properties
 
-#cache file system for the dump
-ADD https://gitlab.com/one-touch-pipeline/otp/-/wikis/uploads/ci/filesystem.tar.gz /home/otp
+echo "===================================="
+docker compose -f docker-compose.yml up --build postgres > logs/postgres.log &
+docker compose -f docker-compose.yml up --build open-ldap > logs/open-ldap.log &
+docker compose -f docker-compose.yml up --build openssh-server > logs/openssh-server.log &
 
-# example data for fastq meta data import
-ADD https://gitlab.com/one-touch-pipeline/otp/-/wikis/uploads/ci/otp_example_data.tar.gz /home/otp
+echo "===================================="
+./gradlew --build-cache classes npm_install_cypress
 
-# example data for bam meta data import
-ADD https://gitlab.com/one-touch-pipeline/otp/-/wikis/uploads/ci/bam-import.tar.gz /home/otp
+echo "===================================="
+./gradlew --build-cache npm_run_cy-wait | tee cypressReport.txt

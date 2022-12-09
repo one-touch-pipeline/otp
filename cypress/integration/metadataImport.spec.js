@@ -33,7 +33,7 @@ describe('Check metadata import page', () => {
       cy.intercept('/metadataImport/validateOrImport*').as('validateOrImport');
 
       cy.get('#ticketNumber').clear().type('123');
-      cy.get('#paths').clear().type('/home/otp/otp_example_data/example_import_project01_1.csv');
+      cy.get('#paths').clear().type('/home/otp/filesystem/otp_example_data/example_import_project01_1.csv');
       cy.get('input[type=radio][name=directoryStructure]').check('ABSOLUTE_PATH');
       cy.get('input#validate').click();
 

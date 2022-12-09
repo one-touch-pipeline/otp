@@ -89,3 +89,4 @@ node_modules/
 /cypress/videos/*
 /cypress/downloads/*
 cypress.env.json
+cypressReport.txt

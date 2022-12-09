@@ -511,7 +511,7 @@ task runCypressTests(type: NpmTask) {
     }
     dependsOn npmInstall
     environment = ['CI':'true']
-    args = ['run', 'cy:run']
+    args = ['run', 'cy-run']
 }
 
 task runCypressTestsInWindow(type: NpmTask) {
@@ -519,5 +519,5 @@ task runCypressTestsInWindow(type: NpmTask) {
         println "Make sure that OTP is running, the connection is configured via environment variable CYPRESS_BASE_URL and credentials are set in cypress.env.json"
     }
     dependsOn npmInstall
-    args = ['run', 'cy:open']
+    args = ['run', 'cy-open']
 }

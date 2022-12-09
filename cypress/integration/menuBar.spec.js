@@ -33,7 +33,7 @@ describe('Click all menu items in the menu bar', () => {
       const menuBar = 'div.menuContainer';
       const menuBarItem = 'li:not(.nav_container)';
       cy.get(menuBar).find(menuBarItem)
-        .should('have.length', 71).and('contain', 'a');
+        .should('have.length', 68).and('contain', 'a');
     });
 
     it('should click the Overview menu item', () => {
@@ -53,7 +53,7 @@ describe('Click all menu items in the menu bar', () => {
 
     it('should check the number of menu items and click all Project menu items', () => {
       cy.get('li.navigation').contains('Project').parent().find('li')
-        .should('have.length', 10);
+        .should('have.length', 9);
       cy.get('.navigation li').contains('Project Specific Statistics').click({ force: true });
       cy.checkPage('/projectOverview/index');
 
@@ -130,7 +130,7 @@ describe('Click all menu items in the menu bar', () => {
 
     it('should check the number of menu items and click all Operator menu items', () => {
       cy.get('li.navigation').contains('Operator').parent().find('li')
-        .should('have.length', 13);
+        .should('have.length', 11);
       cy.get('.navigation li').contains('FASTQ Import').click({ force: true });
       cy.checkPage('/metadataImport/index');
       cy.go('back');

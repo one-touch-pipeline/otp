@@ -47,15 +47,15 @@ describe('Check statistics page', () => {
 
       cy.get('div#centerNameRunId_wrapper button')
         .contains('Download').click();
-      cy.checkDownloadByMd5Sum('sequencing_center-ExampleProject', '.csv', 'efb04158aea103e9d3a8e79a65c86249');
+      cy.checkDownloadByMd5Sum('sequencing_center-ExampleProject', '.csv', 'eb2d0de62d478b80deb15da2c2d87857');
 
       cy.get('div#projectOverviewTable_wrapper button')
         .contains('Download').click();
-      cy.checkDownloadByMd5Sum('sequences_of_samples-ExampleProject', '.csv', '0d1344046a40d48f3a6a069b44bf88a9');
+      cy.checkDownloadByMd5Sum('sequences_of_samples-ExampleProject', '.csv', '5de0472d9144405fcea6e9c8aadc3ef6');
 
       cy.get('div#patientsAndSamplesGBCountPerProject_wrapper button')
         .contains('Download').click();
-      cy.checkDownloadByMd5Sum('sequencing_technologies-ExampleProject', '.csv', 'fd17dfcf2f221eedd2b4d064f808ff81');
+      cy.checkDownloadByMd5Sum('sequencing_technologies-ExampleProject', '.csv', '4b2a37ef52e61b2e6459ef5ec23e3d52');
     });
 
     it('should check the length of the tables', () => {
@@ -63,8 +63,8 @@ describe('Check statistics page', () => {
 
       cy.get('table#sampleTypeNameCountBySample tbody').find('tr').should('have.length', 3);
       cy.get('table#centerNameRunId tbody').find('tr').should('have.length', 1);
-      cy.get('table#projectOverviewTable tbody').find('tr').should('have.length', 24);
-      cy.get('table#patientsAndSamplesGBCountPerProject tbody').find('tr').should('have.length', 4);
+      cy.get('table#projectOverviewTable tbody').find('tr').should('have.length', 30);
+      cy.get('table#patientsAndSamplesGBCountPerProject tbody').find('tr').should('have.length', 5);
     });
   });
 });

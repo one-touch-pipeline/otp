@@ -41,7 +41,7 @@ describe('Check statistics page', () => {
 
       cy.get('div').contains('Processing...').should('not.be.visible');
       cy.get('div#sequenceTable_wrapper button').contains('Download').click();
-      cy.checkDownloadByMd5Sum('Sequence_Export', '.csv', 'a688467ab6a5806074b21f95eaf5c2d3');
+      cy.checkDownloadByMd5Sum('Sequence_Export', '.csv', '958bffcac84bbf89f8d0494a9b10a631');
     });
 
     it('should filter the table by sample type', () => {

@@ -32,7 +32,7 @@ describe('Check bam metadata import page', () => {
     it('should visit the index page', () => {
       cy.intercept('/bamMetadataImport/validateOrImport*').as('validateOrImport');
 
-      cy.get('#path').clear().type('/home/otp/bam-import/import.tsv');
+      cy.get('#path').clear().type('/home/otp/filesystem/bam-import/import.tsv');
       cy.get('input#validate').click();
 
       cy.wait('@validateOrImport').then((interception) => {

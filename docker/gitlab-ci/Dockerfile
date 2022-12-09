@@ -22,15 +22,31 @@ FROM azul/zulu-openjdk-centos:8
 MAINTAINER OTP Developers <otp-devel@dkfz-heidelberg.de>
 
 RUN rpm -ivh http://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+
 # Install dependencies
 RUN yum -y update && \
     yum -y install \
+        alsa-lib \
+        GConf2 \
         git \
+        gtk2-devel  \
+        gtk3-devel  \
         jq \
+        libnotify-devel \
+        libXScrnSaver  \
+        nss  \
         postgresql.x86_64 \
         python-mako.noarch \
-        unzip && \
+        unzip \
+        which \
+        xorg-x11-server-Xvfb  \
+        yum-utils && \
+    yum-config-manager \
+        --add-repo \
+        https://download.docker.com/linux/centos/docker-ce.repo && \
+    yum -y install docker-ce docker-ce-cli containerd.io docker-compose-plugin && \
     yum clean all
+
 
 # Configure system via environment variables
 ENV JAVA_HOME /usr/lib/jvm/zulu8

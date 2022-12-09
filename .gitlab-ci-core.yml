@@ -33,12 +33,13 @@ variables:
   GRADLE_OPTS: '-Xms1g -Xmx4g -Dorg.gradle.daemon=false'
   GRAILS_OPTS: '-Xmx4g'
   ARTIFACTS_BASE_DIRECTORY: 'artifacts'
-  GRADLE_USER_HOME: $CI_PROJECT_DIR/cache # overrides GRADLE_USER_HOME default for caching
-  GRADLE_CACHES: cache/caches/
-  GRADLE_WRAPPER: cache/wrapper/
+  CACHE: $CI_PROJECT_DIR/cache
+  GRADLE_USER_HOME: $CI_PROJECT_DIR/cache/gradle # overrides GRADLE_USER_HOME default for caching
+  NPM_CACHE: $CI_PROJECT_DIR/cache/npm
   ARTIFACT_DOWNLOAD_ATTEMPTS: "3"
   GET_SOURCES_ATTEMPTS: "3"
   RESTORE_CACHE_ATTEMPTS: "3"
+  ENABLE_CYPRESS: "true"  #indicate, if cypress should run or not
 
 #----------------------------
 # templates
@@ -56,9 +57,10 @@ variables:
     key:
       files:
         - $CI_PROJECT_DIR/gradle/wrapper/gradle-wrapper.properties
+      prefix: $CI_JOB_NAME
     paths:
-      - $GRADLE_CACHES
-      - $GRADLE_WRAPPER
+      - $CACHE
+      - node_modules/
   artifacts: &artifacts_template
     expire_in: 4 week
   before_script:
@@ -79,7 +81,6 @@ otp license:
     - tags
   script:
     - groovy devScripts/gitlab-ci/license-checker/licensecheck.groovy
-
 
 # ------------------------------------------------------
 # jobs stage tests
@@ -115,6 +116,63 @@ integration tests:
       junit: build/test-results/integrationTest/*.xml
     when: always
 
+test migration:
+  extends: .abstract_base_template
+  stage: test
+  services:
+    - postgres:9.5.9
+  variables:
+    POSTGRES_DB: otp
+    POSTGRES_USER: otp
+    POSTGRES_PASSWORD: otp
+  before_script:
+    - set -e
+    - devScripts/gitlab-ci/init.sh
+    - cp $OTP_PROPERTIES_POSTGRES ~/.otp.properties
+  script:
+    - set -e
+    - ./gradlew --build-cache dbmUpdate
+    - bash ./devScripts/grails-migration-plugin/create-dbm-gorm-diff-without-false-changes.sh testing
+    - bash ./devScripts/grails-migration-plugin/check-for-changelog-file.sh testing
+    - bash ./devScripts/grails-migration-plugin/check-variable-problems.sh
+  artifacts:
+    <<: *artifacts_template
+    paths:
+      - migrations/changelogs/*/testing.groovy
+    when: on_failure
+
+cypress tests:
+  extends: .abstract_base_template
+  only:
+    refs:
+      - branches
+      - tags
+    variables:
+      - $ENABLE_CYPRESS == 'true'
+  stage: test
+  allow_failure: true
+  cache:
+    when: 'always'
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
+  services:
+    - name: docker:dind
+      alias: openssh-server
+  script:
+    - set -e
+    - devScripts/gitlab-ci/cypress/cypress.sh
+  artifacts:
+    expire_in: 4 week
+    paths:
+      - cypress/screenshots
+      - cypressReport.txt
+      - logs/
+    when: always
+
+# ------------------------------------------------------
+# jobs stage codestyle
+# ------------------------------------------------------
 
 codenarc:
   extends: .abstract_base_template
@@ -149,11 +207,19 @@ eslint:
       - build/reports/eslint
     when: always
 
+# ------------------------------------------------------
+# jobs stage war
+# ------------------------------------------------------
+
 create war:
   extends: .abstract_base_template
   stage: war
   script:
     - devScripts/gitlab-ci/createWar.sh
+
+# ------------------------------------------------------
+# jobs stage doc
+# ------------------------------------------------------
 
 create doc:
   extends: .abstract_base_template
@@ -165,37 +231,6 @@ create doc:
     <<: *artifacts_template
     paths:
       - build/docs
-
-
-test migration:
-  extends: .abstract_base_template
-  stage: test
-  services:
-    - postgres:9.5.9
-  variables:
-    POSTGRES_DB: otp
-    POSTGRES_USER: otp
-    POSTGRES_PASSWORD: otp
-  before_script:
-    - set -e
-    - devScripts/gitlab-ci/init.sh
-    - echo 'otp.database.server=postgres' >> $HOME/.otp.properties
-    - echo 'otp.database.port=5432' >> $HOME/.otp.properties
-    - echo 'otp.database.database=otp' >> $HOME/.otp.properties
-    - echo 'otp.database.username=otp' >> $HOME/.otp.properties
-    - echo 'otp.database.password=otp' >> $HOME/.otp.properties
-  script:
-    - set -e
-    - ./gradlew --build-cache dbmUpdate
-    - bash ./devScripts/grails-migration-plugin/create-dbm-gorm-diff-without-false-changes.sh testing
-    - bash ./devScripts/grails-migration-plugin/check-for-changelog-file.sh testing
-    - bash ./devScripts/grails-migration-plugin/check-variable-problems.sh
-  artifacts:
-    <<: *artifacts_template
-    paths:
-      - migrations/changelogs/*/testing.groovy
-    when: on_failure
-
 
 generate_changelog:
   extends: .abstract_base_template

@@ -31,14 +31,6 @@ ARG GRADLE_PROXY_PORT
 ENV GRADLE_COMMAND=bootRun
 ENV OTP_PROPERTIES=$APP_HOME/.otp.properties
 
-# example data for fastq meta data import
-ADD --chown=otp https://gitlab.com/one-touch-pipeline/otp/-/wikis/uploads/c6ced70036c6f2e46b54c1ea589a7763/otp_example_data.zip /home/otp
-RUN unzip -q /home/otp/otp_example_data.zip && rm /home/otp/otp_example_data.zip
-
-# example data for bam meta data import
-ADD --chown=otp https://gitlab.com/one-touch-pipeline/otp/-/wikis/uploads/123986679f487ef21c98e24701d162fa/bam-import.zip /home/otp
-RUN unzip -q /home/otp/bam-import.zip && rm /home/otp/bam-import.zip
-
 WORKDIR $APP_HOME
 
 COPY --chown=otp:otp . .

@@ -32,7 +32,7 @@ describe('Check workflow artefact page', () => {
       cy.visit('/workflowRunList');
 
       cy.get('table#runs tbody').find('tr')
-        .should('have.length', 63).eq(2)
+        .eq(2)
         .find('a')
         .click();
 
