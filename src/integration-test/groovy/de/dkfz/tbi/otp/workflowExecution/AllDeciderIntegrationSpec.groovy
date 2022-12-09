@@ -21,13 +21,12 @@
  */
 package de.dkfz.tbi.otp.workflowExecution
 
-import grails.gorm.transactions.Rollback
 import grails.testing.mixin.integration.Integration
 import grails.testing.services.ServiceUnitTest
+import grails.gorm.transactions.Rollback
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.FastqcWorkflowDomainFactory
-import de.dkfz.tbi.otp.workflow.panCancer.PanCancerWorkflow
 import de.dkfz.tbi.otp.workflowExecution.decider.AllDecider
 
 @Rollback
@@ -38,12 +37,9 @@ class AllDeciderIntegrationSpec extends Specification implements ServiceUnitTest
         given:
         AllDecider allDecider = new AllDecider()
         createBashFastqcWorkflowVersion()
-        createWorkflow(name: PanCancerWorkflow.WORKFLOW)
         WorkflowStep workflowStep = createWorkflowStep()
-        WorkflowArtefact wa1 = createWorkflowArtefact(state: WorkflowArtefact.State.SUCCESS, producedBy: workflowStep.workflowRun,
-                artefactType: ArtefactType.RUN_YAPSA)
-        WorkflowArtefact wa2 = createWorkflowArtefact(state: WorkflowArtefact.State.SUCCESS, producedBy: workflowStep.workflowRun,
-                artefactType: ArtefactType.RUN_YAPSA)
+        WorkflowArtefact wa1 = createWorkflowArtefact(state: WorkflowArtefact.State.SUCCESS, producedBy: workflowStep.workflowRun)
+        WorkflowArtefact wa2 = createWorkflowArtefact(state: WorkflowArtefact.State.SUCCESS, producedBy: workflowStep.workflowRun)
         Collection<WorkflowArtefact> allWorkflowArtefacts = [wa1, wa2]
 
         when:

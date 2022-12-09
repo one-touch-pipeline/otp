@@ -40,7 +40,7 @@ class MergedAlignmentDataFileServiceTests {
         SeqType seqType = testData.seqType
         Sample sample = testData.sample
 
-        String expectedPath = "${testData.project.dirName}/sequencing/rna_sequencing/view-by-pid/654321/tumor/paired/merged-alignment/"
+        String expectedPath = "${testData.project.dirName}/sequencing/whole_genome_sequencing/view-by-pid/654321/tumor/paired/merged-alignment/"
         String actualPath = mergedAlignmentDataFileService.buildRelativePath(seqType, sample)
 
         assertEquals(expectedPath, actualPath)

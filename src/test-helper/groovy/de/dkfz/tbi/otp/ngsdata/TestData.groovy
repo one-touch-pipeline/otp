@@ -135,7 +135,7 @@ class TestData {
         sample = createSample()
         assertNotNull(sample.save(flush: true))
 
-        seqType = DomainFactory.createRnaPairedSeqType()
+        seqType = DomainFactory.createWholeGenomeSeqType()
         exomeSeqType = DomainFactory.createExomeSeqType()
 
         seqCenter = DomainFactory.createSeqCenter()
@@ -264,6 +264,7 @@ class TestData {
             project: project,
             seqType: seqType,
             referenceGenome: referenceGenome,
+            statSizeFileName: DomainFactory.DEFAULT_TAB_FILE_NAME,
         ] + properties)
     }
 

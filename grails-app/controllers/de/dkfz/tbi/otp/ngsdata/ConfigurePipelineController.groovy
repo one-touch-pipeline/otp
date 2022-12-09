@@ -58,10 +58,6 @@ class ConfigurePipelineController implements ConfigurePipelineHelper {
     ]
 
     def alignment(BaseConfigurePipelineSubmitCommand cmd) {
-        if (cmd.seqType in seqTypeService.seqTypesNewWorkflowSystem) {
-            return response.sendError(404)
-        }
-
         Pipeline pipeline = Pipeline.Name.PANCAN_ALIGNMENT.pipeline
 
         Project project = projectSelectionService.selectedProject
@@ -128,10 +124,6 @@ class ConfigurePipelineController implements ConfigurePipelineHelper {
     }
 
     def saveAlignment(ConfigureAlignmentPipelineSubmitCommand cmd) {
-        if (cmd.seqType in seqTypeService.seqTypesNewWorkflowSystem) {
-            return response.sendError(404)
-        }
-
         Project project = projectSelectionService.requestedProject
         if (!cmd.validate()) {
             flash.message = new FlashMessage(g.message(code: "configurePipeline.store.failure") as String, cmd.errors)
@@ -169,10 +161,6 @@ class ConfigurePipelineController implements ConfigurePipelineHelper {
     }
 
     def copyAlignment(CopyAlignmentPipelineSubmitCommand cmd) {
-        if (cmd.seqType in seqTypeService.seqTypesNewWorkflowSystem) {
-            return response.sendError(404)
-        }
-
         Project project = projectSelectionService.requestedProject
         if (!cmd.validate()) {
             flash.message = new FlashMessage(g.message(code: "configurePipeline.store.failure") as String, cmd.errors)
@@ -359,10 +347,6 @@ class ConfigurePipelineController implements ConfigurePipelineHelper {
     }
 
     def invalidateConfig(InvalidateConfigurationCommand cmd) {
-        if (cmd.seqType in seqTypeService.seqTypesNewWorkflowSystem) {
-            return response.sendError(404)
-        }
-
         boolean hasErrors = cmd.hasErrors()
 
         if (hasErrors) {
