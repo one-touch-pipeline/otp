@@ -22,16 +22,15 @@
 package de.dkfz.tbi.otp.workflowExecution.decider
 
 import grails.testing.gorm.DataTest
+import grails.testing.services.ServiceUnitTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
-import de.dkfz.tbi.otp.workflow.panCancer.PanCancerWorkflow
+import de.dkfz.tbi.otp.workflow.wgbs.WgbsWorkflow
 import de.dkfz.tbi.otp.workflowExecution.*
 
-class PanCancerDeciderSpec extends Specification implements DataTest, WorkflowSystemDomainFactory, IsRoddy {
-
-    PanCancerDecider decider = new PanCancerDecider()
+class WgbsDeciderServiceSpec extends Specification implements ServiceUnitTest<WgbsDeciderService>, DataTest, WorkflowSystemDomainFactory, IsRoddy {
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -42,19 +41,17 @@ class PanCancerDeciderSpec extends Specification implements DataTest, WorkflowSy
 
     void "test getWorkflow"() {
         given:
-        decider.workflowService = new WorkflowService()
-        createWorkflow(name: PanCancerWorkflow.WORKFLOW)
+        service.workflowService = new WorkflowService()
+        createWorkflow(name: WgbsWorkflow.WORKFLOW)
 
         expect:
-        decider.workflow.name == PanCancerWorkflow.WORKFLOW
+        service.workflow.name == WgbsWorkflow.WORKFLOW
     }
 
     void "test getSupportedInputArtefactTypes"() {
         expect:
-        decider.supportedInputArtefactTypes == [
+        service.supportedInputArtefactTypes == [
                 ArtefactType.FASTQ,
-                ArtefactType.FASTQC,
-                ArtefactType.BAM,
         ] as Set
     }
 }

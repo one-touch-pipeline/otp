@@ -22,13 +22,12 @@
 package de.dkfz.tbi.otp.workflowTest.alignment.roddy.pancancer
 
 import grails.converters.JSON
-import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.utils.SessionUtils
 import de.dkfz.tbi.otp.workflow.panCancer.PanCancerWorkflow
 import de.dkfz.tbi.otp.workflowExecution.decider.AbstractWorkflowDecider
-import de.dkfz.tbi.otp.workflowExecution.decider.PanCancerDecider
+import de.dkfz.tbi.otp.workflowExecution.decider.PanCancerDeciderService
 import de.dkfz.tbi.otp.workflowTest.FileAssertHelper
 import de.dkfz.tbi.otp.workflowTest.alignment.roddy.AbstractRoddyAlignmentWorkflowSpec
 
@@ -43,12 +42,11 @@ abstract class AbstractPanCancerWorkflowSpec extends AbstractRoddyAlignmentWorkf
 
     final Class<PanCancerWorkflow> workflowComponentClass = PanCancerWorkflow
 
-    @Autowired
-    PanCancerDecider panCancerDecider
+    PanCancerDeciderService panCancerDeciderService
 
     @Override
     protected AbstractWorkflowDecider getDecider() {
-        return panCancerDecider
+        return panCancerDeciderService
     }
 
     @Override
