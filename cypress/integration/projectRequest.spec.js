@@ -171,7 +171,7 @@ describe('Check projectRequest page', () => {
 
       cy.location('pathname').should('match', /^\/projectRequest\/view\//);
       cy.get('#delete-request-btn').click();
-      cy.get('#confirmModal').click();
+      cy.get('#confirmModal').should('be.visible').click();
 
       cy.wait('@deleteProjectRequest').then((interception) => {
         expect(interception.response.statusCode).to.eq(200);

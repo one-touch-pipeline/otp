@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.project.projectRequest
 
-import org.springframework.security.access.annotation.Secured
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Component
@@ -102,7 +101,7 @@ class Check implements ProjectRequestState {
     }
 
     @Override
-    @Secured("hasRole('ROLE_OPERATOR')")
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void delete(ProjectRequest projectRequest) {
         projectRequestService.deleteProjectRequest(projectRequest)
         projectRequestService.sendDeleteEmail(projectRequest)

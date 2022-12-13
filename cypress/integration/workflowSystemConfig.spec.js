@@ -40,7 +40,9 @@ describe('Check workflow system configuration page', () => {
         .find('button i.bi-pencil')
         .click();
 
+      cy.get('#editWorkflowModal').should('be.visible');
       cy.get('#editWorkflowModal').find('.modal-title').should('contain.text', 'Cell Ranger');
+
       cy.get('#editWorkflowModal #modal-priority').clear().type(priority);
       cy.get('#editWorkflowModal #modal-max-runs').clear().type(maxRuns);
       cy.get('#editWorkflowModal #modal-seqTypes').select(supportedSeqType, { force: true });
