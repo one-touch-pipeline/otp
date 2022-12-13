@@ -39,11 +39,6 @@ class ExternalWorkflowConfigSelectorService {
         return ExternalWorkflowConfigSelector.get(id)
     }
 
-    ExternalWorkflowConfigSelector findExactlyOneByExternalWorkflowConfigFragment(ExternalWorkflowConfigFragment fragment) {
-        return CollectionUtils.exactlyOneElement(
-                ExternalWorkflowConfigSelector.findAllByExternalWorkflowConfigFragment(fragment))
-    }
-
     List<JsonConflictingParameters> getAllConflictingConfigValues(String configValue1, String configValue2) {
         if (!configValue1 || !configValue2 || configValue1 == configValue2) {
             return []

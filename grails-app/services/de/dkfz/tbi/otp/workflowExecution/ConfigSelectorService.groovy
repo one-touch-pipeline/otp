@@ -58,7 +58,7 @@ class ConfigSelectorService {
             return []
         }
         return ExternalWorkflowConfigSelector.createCriteria().listDistinct {
-            or {
+            and {
                 if (relatedSelectorExtendedCriteria.workflows) {
                     workflows {
                         'in'('id', relatedSelectorExtendedCriteria.workflows*.id)
@@ -155,87 +155,58 @@ class ConfigSelectorService {
     }
 
     /**
-     * Used to find all ExternalWorkflowConfigSelectors exactly matching the attributes of an MultiSelectSelectorExtendedCriteria object.
-     * Multi select option. There can only be a single match.
-     */
-    ExternalWorkflowConfigSelector findExactSelector(MultiSelectSelectorExtendedCriteria multiSelectSelectorExtendedCriteria) {
-        String hql = """
-            select
-                ewcs
-            from
-                ExternalWorkflowConfigSelector as ewcs
-            where
-            """
-
-        Map parameters = [:]
-
-        hql += findExactSelectorQueryHelper(multiSelectSelectorExtendedCriteria, "workflows", parameters, true)
-        hql += findExactSelectorQueryHelper(multiSelectSelectorExtendedCriteria, "workflowVersions", parameters, true)
-        hql += findExactSelectorQueryHelper(multiSelectSelectorExtendedCriteria, "projects", parameters, true)
-        hql += findExactSelectorQueryHelper(multiSelectSelectorExtendedCriteria, "seqTypes", parameters, true)
-        hql += findExactSelectorQueryHelper(multiSelectSelectorExtendedCriteria, "referenceGenomes", parameters, true)
-        hql += findExactSelectorQueryHelper(multiSelectSelectorExtendedCriteria, "libraryPreparationKits", parameters, false)
-
-        List<ExternalWorkflowConfigSelector> result = ExternalWorkflowConfigSelector.executeQuery(hql, parameters)
-        if (result == [] || result.size() >= 2) {
-            return null
-        }
-        return result.first() as ExternalWorkflowConfigSelector
-    }
-
-    /**
      * Used to find a ExternalWorkflowConfigSelector exactly matching the attributes of an SingleSelectSelectorExtendedCriteria object.
      * Single select option.
      */
-    List<ExternalWorkflowConfigSelector> findAllSelectors(SingleSelectSelectorExtendedCriteria singleSelectSelectorExtendedCriteria) {
+    protected List<ExternalWorkflowConfigSelector> findAllSelectors(SingleSelectSelectorExtendedCriteria singleSelectSelectorExtendedCriteria) {
         if (!singleSelectSelectorExtendedCriteria.anyValueSet()) {
             return []
         }
         BuildableCriteria criteria = ExternalWorkflowConfigSelector.createCriteria()
         return criteria.listDistinct {
-            if (singleSelectSelectorExtendedCriteria.workflow) {
-                criteria | {
-                    criteria.isEmpty('workflows')
+            criteria | {
+                criteria.isEmpty('workflows')
+                if (singleSelectSelectorExtendedCriteria.workflow) {
                     criteria.workflows(JoinType.LEFT_OUTER_JOIN.joinTypeValue) {
                         criteria.'in'('id', singleSelectSelectorExtendedCriteria.workflow.id)
                     }
                 }
             }
-            if (singleSelectSelectorExtendedCriteria.workflowVersion) {
-                criteria | {
-                    criteria.isEmpty('workflowVersions')
+            criteria | {
+                criteria.isEmpty('workflowVersions')
+                if (singleSelectSelectorExtendedCriteria.workflowVersion) {
                     criteria.workflowVersions(JoinType.LEFT_OUTER_JOIN.joinTypeValue) {
                         criteria.'in'('id', singleSelectSelectorExtendedCriteria.workflowVersion.id)
                     }
                 }
             }
-            if (singleSelectSelectorExtendedCriteria.project) {
-                criteria | {
-                    criteria.isEmpty('projects')
+            criteria | {
+                criteria.isEmpty('projects')
+                if (singleSelectSelectorExtendedCriteria.project) {
                     criteria.projects(JoinType.LEFT_OUTER_JOIN.joinTypeValue) {
                         criteria.'in'('id', singleSelectSelectorExtendedCriteria.project.id)
                     }
                 }
             }
-            if (singleSelectSelectorExtendedCriteria.seqType) {
-                criteria | {
-                    criteria.isEmpty('seqTypes')
+            criteria | {
+                criteria.isEmpty('seqTypes')
+                if (singleSelectSelectorExtendedCriteria.seqType) {
                     criteria.seqTypes(JoinType.LEFT_OUTER_JOIN.joinTypeValue) {
                         criteria.'in'('id', singleSelectSelectorExtendedCriteria.seqType.id)
                     }
                 }
             }
-            if (singleSelectSelectorExtendedCriteria.referenceGenome) {
-                criteria | {
-                    criteria.isEmpty('referenceGenomes')
+            criteria | {
+                criteria.isEmpty('referenceGenomes')
+                if (singleSelectSelectorExtendedCriteria.referenceGenome) {
                     criteria.referenceGenomes(JoinType.LEFT_OUTER_JOIN.joinTypeValue) {
                         criteria.'in'('id', singleSelectSelectorExtendedCriteria.referenceGenome.id)
                     }
                 }
             }
-            if (singleSelectSelectorExtendedCriteria.libraryPreparationKit) {
-                criteria | {
-                    criteria.isEmpty('libraryPreparationKits')
+            criteria | {
+                criteria.isEmpty('libraryPreparationKits')
+                if (singleSelectSelectorExtendedCriteria.libraryPreparationKit) {
                     criteria.libraryPreparationKits(JoinType.LEFT_OUTER_JOIN.joinTypeValue) {
                         criteria.'in'('id', singleSelectSelectorExtendedCriteria.libraryPreparationKit.id)
                     }

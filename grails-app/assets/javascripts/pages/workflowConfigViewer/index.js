@@ -31,14 +31,16 @@ $(() => {
   });
 
   const form = $('form.selector');
-  form.on('change', 'select', build);
+  form.on('change', 'select', (e) => {
+    if (e.target.id === 'workflowSelector') {
+      // clear selected workflow versions
+      $('#workflowVersionSelector').val(null).trigger('change');
+    } else {
+      build();
+    }
+  });
   form.on('change', 'input', build);
   form.on('keyup', 'input[type=text]', build);
-
-  // clear selected workflow versions
-  $('#workflowSelector').on('select2:select', () => {
-    $('#workflowVersionSelector').val(null).trigger('change');
-  });
 
   // hold the workflows selected
   let selectedWorkflows = [];

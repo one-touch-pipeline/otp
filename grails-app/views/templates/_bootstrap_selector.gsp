@@ -89,5 +89,5 @@
     </div>
 </g:each>
 <g:if test="${!relatedSelectors}">
-    ${g.message(code: "workflowConfig.config.related.none")}
+    ${g.message(code: "workflowConfig.config.used.none")}
 </g:if>

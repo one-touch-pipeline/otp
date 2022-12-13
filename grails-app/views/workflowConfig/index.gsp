@@ -44,17 +44,6 @@
                         data-toggle="tooltip" onclick="$.otp.workflowConfig.search()">
                     <g:message code="workflowConfig.button.search"/>
                 </button>
-                <div class="btn-group dropdown ml-auto">
-                    <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown"
-                            data-toggle="tooltip" title="${g.message(code: "workflowConfig.button.searchBySelector.title")}" aria-expanded="false" data-reference="parent">
-                        <g:message code="workflowConfig.button.searchBySelector"/>
-                    </button>
-                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                        <g:each in="${allSelectors}" var="selector">
-                            <a class="dropdown-item" onclick="$.otp.workflowConfig.prefill(${selector.id})">${selector.name}</a>
-                        </g:each>
-                    </div>
-                </div>
                 <button id="clear-button" type="button" class="btn btn-primary" title="${g.message(code: "workflowConfig.button.clear.title")}"
                         data-toggle="tooltip" onclick="$.otp.workflowConfig.clear()">
                     <g:message code="workflowConfig.button.clear"/>
@@ -64,7 +53,7 @@
                     <g:message code="workflowConfig.button.create"/>
                 </button>
             </div>
-            <div class="col-sm">
+            <div class="col-sm mb-3">
                 <div class="input-group">
                     <div class="input-group-prepend">
                         <label class="input-group-text"><g:message code="workflowConfig.selector.type"/></label>
@@ -75,6 +64,19 @@
                         </g:each>
                     </select>
                 </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <g:select id="workflowSelector"
+                          name="workflowSelector"
+                          from="${allSelectors}"
+                          class="use-select-2 btn-primary"
+                          noSelection="${['': '']}"
+                          optionKey="id"
+                          optionValue="name"
+                          data-placeholder="${g.message(code: "workflowConfig.button.searchBySelector")}"
+                          title="${g.message(code: "workflowConfig.button.searchBySelector.title")}"/>
             </div>
         </div>
     </div>

@@ -167,20 +167,6 @@ class ExternalWorkflowConfigSelector implements Comparable<ExternalWorkflowConfi
         return result
     }
 
-    static boolean validateIsUnique(ExternalWorkflowConfigSelector externalWorkflowConfigSelector) {
-        ExternalWorkflowConfigSelector other = Holders.applicationContext.getBean(ConfigSelectorService).findExactSelector(
-                new MultiSelectSelectorExtendedCriteria(
-                        externalWorkflowConfigSelector.workflows,
-                        externalWorkflowConfigSelector.workflowVersions,
-                        externalWorkflowConfigSelector.projects,
-                        externalWorkflowConfigSelector.seqTypes,
-                        externalWorkflowConfigSelector.referenceGenomes,
-                        externalWorkflowConfigSelector.libraryPreparationKits,
-                )
-        )
-        return !(other && other.id != externalWorkflowConfigSelector.id)
-    }
-
     static List<String> validateUniqueKeys(ExternalWorkflowConfigFragment fragment, ExternalWorkflowConfigSelector selector) {
         ConfigSelectorService configSelectorService = Holders.applicationContext.getBean(ConfigSelectorService)
 

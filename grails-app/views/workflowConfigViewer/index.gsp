@@ -130,7 +130,7 @@
         </div>
 
         <div class="col-4" id="right-side">
-            <h6><strong>${g.message(code: "workflowConfig.config.related")}</strong></h6>
+            <h6><strong>${g.message(code: "workflowConfig.config.used")}</strong></h6>
 
             ${g.message(code: "workflowConfig.selector.type")}
             <g:select id="relatedSelectorType"

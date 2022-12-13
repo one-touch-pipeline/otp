@@ -311,6 +311,10 @@ $.otp.workflowConfig = {
 $(document).ready(() => {
   'use strict';
 
+  $('#workflowSelector').on('change', (e) => {
+    $.otp.workflowConfig.prefill($(e.target).val());
+  });
+
   let selectorData;
   if (window.location.hash.includes('workflowConfigModal')) {
     const urlSearchParams = new URLSearchParams(window.location.search);
@@ -451,7 +455,8 @@ $(document).ready(() => {
    */
   $.otp.workflowConfig.getDialog().on('hidden.bs.modal', () => {
     $.otp.workflowConfig.getWorkflowVersionSelection().select2({
-      templateResult: (data) => data.text
+      templateResult: (data) => data.text,
+      theme: 'bootstrap4'
     });
     // remove the search parameters if exists
     window.history.replaceState(null, '', window.location.href.replace(/&(.*)#workflowConfigModal/, ''));
@@ -460,7 +465,7 @@ $(document).ready(() => {
   /**
    * Initialize the dialog
    */
-  $.otp.workflowConfig.getDialog().on('shown.bs.modal', (event) => {
+  $.otp.workflowConfig.getDialog().on('show.bs.modal', (event) => {
     // set the correct title operation: create|update|deprecate|view
     let operation = event.relatedTarget ? $(event.relatedTarget).data('operation') :
       $.otp.workflowConfig.OPERATION.UPDATE;
@@ -515,7 +520,8 @@ $(document).ready(() => {
             }
           }
           return null;
-        }
+        },
+        theme: 'bootstrap4'
       });
     }
 
