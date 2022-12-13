@@ -186,6 +186,8 @@ describe('Check workflow config page', () => {
         cy.wait('@getWorkflowConfigFragments').then((interception) => {
           expect(interception.response.statusCode).to.eq(200);
           cy.get('div#workflowConfigModal').should('be.visible');
+          // Cypress has to wait, until eventListener for closing modal when clicking ok is appended
+          cy.wait(20);
           cy.get('div.modal-dialog button#save-button').should('be.visible').click();
         });
 
@@ -202,6 +204,8 @@ describe('Check workflow config page', () => {
         cy.wait('@getWorkflowConfigFragments').then((interception) => {
           expect(interception.response.statusCode).to.eq(200);
           cy.get('div#workflowConfigModal').should('be.visible');
+          // Cypress has to wait, until eventListener for closing modal when clicking ok is appended
+          cy.wait(20);
           cy.get('div.modal-dialog button#save-button').should('be.visible').click();
         });
         cy.wait('@deprecateWorkflowConfig').then((interception2) => {

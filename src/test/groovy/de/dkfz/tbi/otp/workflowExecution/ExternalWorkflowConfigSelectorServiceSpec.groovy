@@ -26,6 +26,11 @@ import groovy.json.JsonException
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import de.dkfz.tbi.otp.ngsdata.LibraryPreparationKit
+import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
+import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.project.Project
+
 class ExternalWorkflowConfigSelectorServiceSpec extends Specification implements DataTest {
 
     ExternalWorkflowConfigSelectorService service = new ExternalWorkflowConfigSelectorService()
@@ -62,5 +67,28 @@ class ExternalWorkflowConfigSelectorServiceSpec extends Specification implements
         '{"arg1: "test"}'                                  | '{"arg1": "test"}'
         '{"arg1": "test2"}'                                | '{"arg1": test"}'
         '{"arg1": {"subarg1" : "test", "subarg2": "test2"' | '{"arg1": {"subarg1" : "test2"},}'
+    }
+
+    @Unroll()
+    void "calculatePriority, should calculate #priority as priorities when #description"() {
+        expect:
+        service.calculatePriority(selector as CalculatePriorityDTO) == priority
+
+        where:
+        description              | selector                                                         | priority
+        "no arguments are set"   | [selectorType          : [],
+                                    projects              : [],
+                                    libraryPreparationKits: [],
+                                    referenceGenomes      : [],
+                                    seqTypes              : [],
+                                    workflowVersions      : [],
+                                    workflows             : [],]                                    | 4096
+        "all arguments are set " | [selectorType          : SelectorType.GENERIC,
+                                    projects              : [Mock(Project)],
+                                    libraryPreparationKits: [Mock(LibraryPreparationKit)],
+                                    referenceGenomes      : [Mock(ReferenceGenome)],
+                                    seqTypes              : [Mock(SeqType)],
+                                    workflowVersions      : [Mock(WorkflowVersion)],
+                                    workflows             : [Mock(Workflow)],]                      | 4726
     }
 }

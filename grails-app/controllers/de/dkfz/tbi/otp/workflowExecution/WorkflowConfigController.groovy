@@ -102,25 +102,49 @@ class WorkflowConfigController implements BaseWorkflowConfigController {
     }
 
     JSON check(CheckCommand cmd) {
-        List<NameValueAndConflictingKeysExternalWorkflowConfigSelector> moreSpecificSelectors =
-                externalWorkflowConfigSelectorService.getNameAndConfigValueOfMoreSpecificSelectors(
-                        cmd.workflows*.id, cmd.workflowVersions*.id, cmd.projects*.id,
-                        cmd.referenceGenomes*.id, cmd.seqTypes*.id, cmd.libraryPreparationKits*.id
+        int calculatedPriority = ExternalWorkflowConfigSelectorService.calculatePriority([
+                selectorType          : cmd.type,
+                projects              : cmd.projects,
+                libraryPreparationKits: cmd.libraryPreparationKits,
+                referenceGenomes      : cmd.referenceGenomes,
+                seqTypes              : cmd.seqTypes,
+                workflowVersions      : cmd.workflowVersions,
+                workflows             : cmd.workflows,
+        ] as CalculatePriorityDTO)
+
+        OverwritingSubstitutedAndConflictingSelectors groupedSelectors =
+                externalWorkflowConfigSelectorService.getOverwritingSubstitutedAndConflictingSelectors(
+                        cmd.workflows*.id, cmd.workflowVersions*.id, cmd.projects*.id, cmd.referenceGenomes*.id,
+                        cmd.seqTypes*.id, cmd.libraryPreparationKits*.id, calculatedPriority
                 )
 
-        moreSpecificSelectors.each { selector ->
+        groupedSelectors.allSelectors.each { selector ->
             selector.conflictingParameters = externalWorkflowConfigSelectorService
                     .getAllConflictingConfigValues(cmd.fragmentValue, selector.configFragmentValue)
         }
 
-        List<NameValueAndConflictingKeysExternalWorkflowConfigSelector> conflictingSelectors = moreSpecificSelectors.findAll { selector ->
+        def overwritingSelectors = groupedSelectors.overwritingSelectors.findAll { selector ->
             return selector.conflictingParameters.size() > 0
+        }.collect { selector ->
+            [name: selector.selectorName, projectNames: selector.projectNames, conflictingParameters: selector.conflictingParameters]
+        }
+
+        def substitutedSelectors = groupedSelectors.substitutedSelectors.findAll { selector ->
+            return selector.conflictingParameters.size() > 0
+        }.collect { selector ->
+            [name: selector.selectorName, projectNames: selector.projectNames, conflictingParameters: selector.conflictingParameters]
+        }
+
+        def conflictingSelectors = groupedSelectors.conflictingSelectors.findAll { selector ->
+            return selector.conflictingParameters.size() > 0
+        }.collect { selector ->
+            [name: selector.selectorName, projectNames: selector.projectNames, conflictingParameters: selector.conflictingParameters]
         }
 
         return render([
-                conflictingSelectors: conflictingSelectors.collect { selector ->
-                    [name: selector.selectorName, projectNames: selector.projectNames, conflictingParameters: selector.conflictingParameters]
-                },
+                overwritingSelectors : overwritingSelectors,
+                substitutedSelectors : substitutedSelectors,
+                conflictingSelectors : conflictingSelectors,
         ] as JSON)
     }
 
@@ -270,6 +294,7 @@ class CreateCommand extends SelectorCommand {
 
 class CheckCommand extends SelectorCommand {
     String fragmentValue
+    SelectorType type
 }
 
 class UpdateCommand extends CreateCommand {

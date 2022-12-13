@@ -611,6 +611,28 @@ $(document).ready(() => {
     const libraryPreparationKits = getIdsOfSelect2($('select[name="libraryPreparationKits"]'));
     const fragmentValue = JSON.stringify(JSON.parse(fragmentValueElement.val()));
 
+    function getHtmlForPotentiallyProblematicSelectors(potentiallyProblematicSelectors, otherValueDescription) {
+      let text = '<ul>';
+      potentiallyProblematicSelectors.forEach((selector) => {
+        text += `<li>${selector.name}`;
+        if (selector.projectNames.length > 0) {
+          text += `[${selector.projectNames.join(', ')}]`;
+        }
+        text += '</li>';
+        text += '<ul>';
+        selector.conflictingParameters.forEach((parameter) => {
+          text += '<li>';
+          text += `${parameter.conflictingKey} `;
+          text += `(${otherValueDescription} value: ${parameter.otherValue}, `;
+          text += `current value: ${parameter.currentValue})`;
+          text += '</li>';
+        });
+        text += '</ul>';
+      });
+      text += '</ul>';
+      return text;
+    }
+
     $.ajax({
       url: $.otp.createLink({
         controller: 'workflowConfig',
@@ -628,33 +650,38 @@ $(document).ready(() => {
         libraryPreparationKits
       },
       success(response) {
-        const { conflictingSelectors } = response;
-        if (conflictingSelectors.length > 0) {
-          let responseMessage = 'The following selectors overwrite keys in the mentioned projects:<br><ul>';
-          conflictingSelectors.forEach((selector) => {
-            responseMessage += `<li>${selector.name} [${selector.projectNames.join(', ')}]</li>`;
-            responseMessage += '<ul>';
-            selector.conflictingParameters.forEach((parameter) => {
-              responseMessage += '<li>';
-              responseMessage += `${parameter.conflictingKey} `;
-              responseMessage += `(overwriting value: ${parameter.otherValue}, `;
-              responseMessage += `current value: ${parameter.currentValue})`;
-              responseMessage += '</li>';
-            });
-            responseMessage += '</ul>';
-          });
-          responseMessage += '</ul>';
+        const {
+          overwritingSelectors,
+          substitutedSelectors,
+          conflictingSelectors
+        } = response;
+
+        if (overwritingSelectors.length > 0 || substitutedSelectors.length > 0 || conflictingSelectors.length > 0) {
+          let responseMessage = 'The following selectors overwrite keys in the mentioned projects:<br>';
+          if (overwritingSelectors.length > 0) {
+            responseMessage += '<b>Overwriting Selectors:</b>';
+            responseMessage += getHtmlForPotentiallyProblematicSelectors(overwritingSelectors, 'overwriting');
+          }
+          if (substitutedSelectors.length > 0) {
+            responseMessage += '<b>Substituted Selectors:</b>';
+            responseMessage += getHtmlForPotentiallyProblematicSelectors(substitutedSelectors, 'substituted');
+          }
+          if (conflictingSelectors.length > 0) {
+            responseMessage += '<b>Conflicting Selectors:</b>';
+            responseMessage += getHtmlForPotentiallyProblematicSelectors(conflictingSelectors, 'conflicting');
+          }
           $.otp.toaster.showWarningToast(
-            'Found conflicting selectors',
+            'Found potentially problematic selectors',
             responseMessage
           );
         } else {
-          const message = 'There are no other selectors overwriting these values.';
-          $.otp.toaster.showSuccessToast('No conflicting selectors found.', message);
+          const message = 'There are no other selectors overwriting ' +
+            'these values or getting overwritten by these values.';
+          $.otp.toaster.showSuccessToast('No potentially problematic selectors found.', message);
         }
       },
       error(err) {
-        const defaultErrorMessage = 'Failed checking for conflicting selectors.';
+        const defaultErrorMessage = 'Failed checking for potentially problematic selectors.';
         const message = (err && err.responseJSON) ? err.responseJSON.message : defaultErrorMessage;
         $.otp.toaster.showErrorToast(message);
       }
