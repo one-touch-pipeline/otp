@@ -92,7 +92,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         projectRequestService.sendSubmitEmail(request)
 
         then:
-        1 * projectRequestService.messageSourceService.createMessage(_) >> subject
+        1 * projectRequestService.messageSourceService.createMessage(_, _) >> subject
         1 * projectRequestService.linkGenerator.link(_) >> link
         1 * projectRequestService.messageSourceService.createMessage(_, [
                 link         : link,
@@ -116,7 +116,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         projectRequestService.sendOperatorRejectEmail(request, comment)
 
         then:
-        1 * projectRequestService.messageSourceService.createMessage(_) >> subject
+        1 * projectRequestService.messageSourceService.createMessage(_, _) >> subject
         1 * projectRequestService.linkGenerator.link(_) >> link
         1 * projectRequestService.messageSourceService.createMessage(_, [
                 requester    : "${requester.username} (${requester.realName})",
@@ -142,7 +142,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         projectRequestService.sendPassOnEmail(request)
 
         then:
-        1 * projectRequestService.messageSourceService.createMessage(_) >> subject
+        1 * projectRequestService.messageSourceService.createMessage(_, _) >> subject
         1 * projectRequestService.linkGenerator.link(_) >> link
         1 * projectRequestService.messageSourceService.createMessage(_, [
                 projectAuthorities: expectedAuthorityUsernames,
@@ -168,7 +168,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         projectRequestService.sendPiRejectEmail(request, comment)
 
         then:
-        1 * projectRequestService.messageSourceService.createMessage(_) >> subject
+        1 * projectRequestService.messageSourceService.createMessage(_, _) >> subject
         1 * projectRequestService.linkGenerator.link(_) >> link
         1 * projectRequestService.securityService.currentUser >> pi1
         1 * projectRequestService.messageSourceService.createMessage(_, [
@@ -196,7 +196,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         projectRequestService.sendApprovedEmail(request)
 
         then:
-        1 * projectRequestService.messageSourceService.createMessage(_) >> subject
+        1 * projectRequestService.messageSourceService.createMessage(_, _) >> subject
         1 * projectRequestService.messageSourceService.createMessage(_, [
                 requester    : "${requester.username} (${requester.realName})",
                 projectName  : request.name,
@@ -261,7 +261,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         projectRequestService.sendPartiallyApprovedEmail(request)
 
         then:
-        1 * projectRequestService.messageSourceService.createMessage(_) >> subject
+        1 * projectRequestService.messageSourceService.createMessage(_, _) >> subject
         1 * projectRequestService.securityService.currentUser >> pi1
         1 * projectRequestService.messageSourceService.createMessage(_, [
                 requester       : "${requester.username} (${requester.realName})",
@@ -287,7 +287,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         projectRequestService.sendDeleteEmail(request)
 
         then:
-        1 * projectRequestService.messageSourceService.createMessage(_) >> subject
+        1 * projectRequestService.messageSourceService.createMessage(_, _) >> subject
         1 * projectRequestService.securityService.currentUser >> pi1
         1 * projectRequestService.messageSourceService.createMessage(_, [
                 recipients   : expectedRecipients*.username.join(", "),
@@ -312,7 +312,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         projectRequestService.sendDraftCreateEmail(request)
 
         then:
-        1 * projectRequestService.messageSourceService.createMessage(_) >> subject
+        1 * projectRequestService.messageSourceService.createMessage(_, _) >> subject
         1 * projectRequestService.linkGenerator.link(_) >> link
         1 * projectRequestService.messageSourceService.createMessage(_, [
                 requester    : "${requester.username} (${requester.realName})",
@@ -335,7 +335,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         projectRequestService.sendDraftDeleteEmail(request)
 
         then:
-        1 * projectRequestService.messageSourceService.createMessage(_) >> subject
+        1 * projectRequestService.messageSourceService.createMessage(_, _) >> subject
         1 * projectRequestService.messageSourceService.createMessage(_, [
                 requester    : "${requester.username} (${requester.realName})",
                 projectName  : request.name,
@@ -365,7 +365,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         projectRequestService.sendPiEditedEmail(request)
 
         then:
-        1 * projectRequestService.messageSourceService.createMessage(_) >> subject
+        1 * projectRequestService.messageSourceService.createMessage(_, _) >> subject
         1 * projectRequestService.securityService.currentUser >> pi1
         1 * projectRequestService.linkGenerator.link(_) >> link
         1 * projectRequestService.messageSourceService.createMessage(_, [
@@ -408,7 +408,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         1 * projectRequestService.processingOptionService.findOptionAsString(ProcessingOption.OptionName.CLUSTER_NAME) >> clusterName
         1 * projectRequestService.processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME) >> emailSenderSalutation
         3 * projectRequestService.linkGenerator.link(_) >> link
-        1 * projectRequestService.messageSourceService.createMessage(_, [projectName: project.name]) >> subject
+        1 * projectRequestService.messageSourceService.createMessage(_, [projectName: project.name, projectId: project.id]) >> subject
         1 * projectRequestService.messageSourceService.createMessage(_, [
                 projectName               : project.name,
                 projectLink               : link,
@@ -450,7 +450,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         1 * projectRequestService.processingOptionService.findOptionAsString(ProcessingOption.OptionName.CLUSTER_NAME) >> clusterName
         1 * projectRequestService.processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME) >> emailSenderSalutation
         3 * projectRequestService.linkGenerator.link(_) >> link
-        1 * projectRequestService.messageSourceService.createMessage(_, [projectName: project.name]) >> subject
+        1 * projectRequestService.messageSourceService.createMessage(_, [projectName: project.name, projectId: project.id]) >> subject
         1 * projectRequestService.messageSourceService.createMessage(_, [
                 projectName               : project.name,
                 projectLink               : link,

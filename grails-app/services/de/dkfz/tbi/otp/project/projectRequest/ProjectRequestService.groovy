@@ -178,7 +178,10 @@ class ProjectRequestService {
         User requester = projectRequest.requester
         List<String> recipient = [requester.email]
         List<String> ccs = projectRequest.state.usersThatNeedToApprove*.email
-        String subject = messageSourceService.createMessage("notification.projectRequest.submit.subject")
+        String subject = messageSourceService.createMessage("notification.projectRequest.submit.subject", [
+                projectName: projectRequest.name,
+                projectId: projectRequest.id,
+        ])
         String body = messageSourceService.createMessage("notification.projectRequest.submit.body", [
                 link         : getProjectRequestLinkWithoutParams(projectRequest),
                 requester    : "${requester.username} (${requester.realName})",
@@ -209,7 +212,10 @@ class ProjectRequestService {
         User requester = projectRequest.requester
         List<String> recipient = [requester.email]
         List<String> ccs = projectRequest.state.usersThatNeedToApprove*.email
-        String subject = messageSourceService.createMessage("notification.projectRequest.operatorReject.subject")
+        String subject = messageSourceService.createMessage("notification.projectRequest.operatorReject.subject", [
+                projectName: projectRequest.name,
+                projectId: projectRequest.id,
+        ])
         String body = messageSourceService.createMessage("notification.projectRequest.operatorReject.body", [
                 requester    : "${requester.username} (${requester.realName})",
                 comment      : rejectComment,
@@ -225,7 +231,10 @@ class ProjectRequestService {
         List<String> recipients = projectAuthorities*.email
         List<String> ccs = [requester.email]
         String projectAuthoritiesUsernames = projectAuthorities*.username.join(', ')
-        String subject = messageSourceService.createMessage("notification.projectRequest.passOn.subject")
+        String subject = messageSourceService.createMessage("notification.projectRequest.passOn.subject", [
+                projectName: projectRequest.name,
+                projectId: projectRequest.id,
+        ])
         String body = messageSourceService.createMessage("notification.projectRequest.passOn.body", [
                 recipients        : projectAuthoritiesUsernames,
                 projectAuthorities: projectAuthoritiesUsernames,
@@ -240,7 +249,10 @@ class ProjectRequestService {
         User requester = projectRequest.requester
         List<String> recipient = [requester.email]
         List<String> ccs = projectRequest.state.usersThatNeedToApprove*.email
-        String subject = messageSourceService.createMessage("notification.projectRequest.piReject.subject")
+        String subject = messageSourceService.createMessage("notification.projectRequest.piReject.subject", [
+                projectName: projectRequest.name,
+                projectId: projectRequest.id,
+        ])
         String body = messageSourceService.createMessage("notification.projectRequest.piReject.body", [
                 requester       : "${requester.username} (${requester.realName})",
                 projectName     : projectRequest.name,
@@ -256,7 +268,10 @@ class ProjectRequestService {
         User requester = projectRequest.requester
         List<String> recipient = ((ProjectRequestPersistentStateService.getAllProjectRequestAuthorities(projectRequest.state)*.email) + [requester.email])
                 .unique()
-        String subject = messageSourceService.createMessage("notification.projectRequest.approved.subject")
+        String subject = messageSourceService.createMessage("notification.projectRequest.approved.subject", [
+                projectName: projectRequest.name,
+                projectId: projectRequest.id,
+        ])
         String body = messageSourceService.createMessage("notification.projectRequest.approved.body", [
                 requester    : "${requester.username} (${requester.realName})",
                 projectName  : projectRequest.name,
@@ -270,7 +285,10 @@ class ProjectRequestService {
         User requester = projectRequest.requester
         List<String> recipient = [requester.email]
         List<String> ccs = allProjectAuthorities*.email
-        String subject = messageSourceService.createMessage("notification.projectRequest.partiallyApproved.subject")
+        String subject = messageSourceService.createMessage("notification.projectRequest.partiallyApproved.subject", [
+                projectName: projectRequest.name,
+                projectId: projectRequest.id,
+        ])
         String body = messageSourceService.createMessage("notification.projectRequest.partiallyApproved.body", [
                 requester       : "${requester.username} (${requester.realName})",
                 projectName     : projectRequest.name,
@@ -286,7 +304,10 @@ class ProjectRequestService {
         List<User> recipients = allProjectAuthorities
         recipients?.add(requester)
         recipients.unique()
-        String subject = messageSourceService.createMessage("notification.projectRequest.deleted.subject")
+        String subject = messageSourceService.createMessage("notification.projectRequest.deleted.subject", [
+                projectName: projectRequest.name,
+                projectId: projectRequest.id,
+        ])
         String body = messageSourceService.createMessage("notification.projectRequest.deleted.body", [
                 recipients   : recipients*.username.join(", "),
                 projectName  : projectRequest.name,
@@ -299,7 +320,10 @@ class ProjectRequestService {
     void sendDraftCreateEmail(ProjectRequest projectRequest) {
         User requester = projectRequest.requester
         List<String> recipient = [requester.email]
-        String subject = messageSourceService.createMessage("notification.projectRequest.draft.subject")
+        String subject = messageSourceService.createMessage("notification.projectRequest.draft.subject", [
+                projectName: projectRequest.name,
+                projectId: projectRequest.id,
+        ])
         String body = messageSourceService.createMessage("notification.projectRequest.draft.body", [
                 requester    : "${requester.username} (${requester.realName})",
                 link         : getProjectRequestLinkWithoutParams(projectRequest),
@@ -311,7 +335,10 @@ class ProjectRequestService {
     void sendDraftDeleteEmail(ProjectRequest projectRequest) {
         User requester = projectRequest.requester
         List<String> recipient = [requester.email]
-        String subject = messageSourceService.createMessage("notification.projectRequest.draftDelete.subject")
+        String subject = messageSourceService.createMessage("notification.projectRequest.draftDelete.subject", [
+                projectName: projectRequest.name,
+                projectId: projectRequest.id,
+        ])
         String body = messageSourceService.createMessage("notification.projectRequest.draftDelete.body", [
                 requester    : "${requester.username} (${requester.realName})",
                 projectName  : projectRequest.name,
@@ -324,7 +351,10 @@ class ProjectRequestService {
         List<User> allProjectAuthorities = ProjectRequestPersistentStateService.getAllProjectRequestAuthorities(projectRequest.state) as List
         List<String> recipient = allProjectAuthorities*.email
         List<String> ccs = [projectRequest.requester.email]
-        String subject = messageSourceService.createMessage("notification.projectRequest.piEdit.subject")
+        String subject = messageSourceService.createMessage("notification.projectRequest.piEdit.subject", [
+                projectName: projectRequest.name,
+                projectId: projectRequest.id,
+        ])
         String body = messageSourceService.createMessage("notification.projectRequest.piEdit.body", [
                 projectAuthorities: allProjectAuthorities*.username.join(", "),
                 projectAuthority  : securityService.currentUser.username,
@@ -357,6 +387,7 @@ class ProjectRequestService {
         )
         String subject = messageSourceService.createMessage("notification.projectRequest.created.subject", [
                 projectName: project.name,
+                projectId: project.id,
         ])
         String body = messageSourceService.createMessage("notification.projectRequest.created.body", [
                 projectName               : project.displayName,
