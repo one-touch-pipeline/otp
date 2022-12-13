@@ -198,7 +198,8 @@ abstract class AbstractRoddyAlignmentWorkflowSpec extends AbstractAlignmentWorkf
                 chromosomeLengthFilePath: chromosomeLengthFilePath,
                 chromosomeSuffix        : '',
                 chromosomePrefix        : '',
-                species                 : [human] as Set,
+                species                 : [] as Set,
+                speciesWithStrain       : [human] as Set,
         ])
         log.info("Create referenceGenome ${referenceGenome}")
 
