@@ -50,6 +50,10 @@ enum SeqTypeNames {
         return SeqType.WGBS_SEQ_TYPE_NAMES.contains(this)
     }
 
+    boolean isWgs() {
+        return SeqType.WGS_SEQ_TYPE_NAMES.contains(this)
+    }
+
     static SeqTypeNames fromSeqTypeName(String seqTypeName) {
         return values().find { it.seqTypeName == seqTypeName }
     }

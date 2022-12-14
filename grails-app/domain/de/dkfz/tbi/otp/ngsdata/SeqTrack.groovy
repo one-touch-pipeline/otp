@@ -72,6 +72,7 @@ class SeqTrack implements ProcessParameterObject, Entity, Artefact {
     String laneId
     IlseSubmission ilseSubmission
     boolean hasOriginalBam = false
+    boolean lowCov = false
     /**
      * {@code true} if the data files belonging to this {@link SeqTrack} are symlinked to the project folder.
      * {@code false} if they are copied.

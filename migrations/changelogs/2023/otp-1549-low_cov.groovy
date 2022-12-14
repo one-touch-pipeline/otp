@@ -19,29 +19,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 databaseChangeLog = {
-    include file: 'changelogs/2022/initialDatabaseSchema.groovy'
 
-    include file: 'changelogs/2022/otp-1860-adapt-databasechangelog.groovy'
+    changeSet(author: "", id: "1673520690898-76") {
+        addColumn(tableName: "seq_track") {
+            column(name: "low_cov", type: "boolean") {
+                constraints(nullable: "true")
+            }
+        }
+    }
 
-    include file: 'changelogs/2022/otp-1611-wes-domains.groovy'
+    changeSet(author: "", id: "1673520690898-76b") {
+        sql("update seq_track set low_cov = false;")
+    }
 
-    include file: 'changelogs/2022/otp-1612-state-for-workflow-creation.groovy'
-
-    include file: 'changelogs/2022/otp-1135.groovy'
-
-    include file: 'changelogs/2023/otp-1732.groovy'
-
-    include file: 'changelogs/2023/otp-1926-bugfix-wgbs-defaults.groovy'
-
-    include file: 'changelogs/2023/otp-1909.groovy'
-
-    include file: 'changelogs/2023/otp-1919-fix-pancan-defaults.groovy'
-
-    include file: 'changelogs/2023/otp-1871.groovy'
-
-    include file: 'changelogs/2023/otp-1911-remove-fastq-linking.groovy'
-
-    include file: 'changelogs/2023/otp-1549-low_cov.groovy'
+    changeSet(author: "", id: "1673520690898-76c") {
+        addNotNullConstraint(columnDataType: "boolean", columnName: "low_cov", tableName: "seq_track")
+    }
 }

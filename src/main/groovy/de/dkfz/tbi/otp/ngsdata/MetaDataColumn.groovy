@@ -63,6 +63,7 @@ enum MetaDataColumn {
     WITHDRAWN,
     WITHDRAWN_DATE,
     WITHDRAWN_COMMENT,
+    LOW_COVERAGE_REQUESTED,
 
     final List<String> importAliases = []
 

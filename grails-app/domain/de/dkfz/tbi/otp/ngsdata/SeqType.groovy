@@ -155,6 +155,10 @@ class SeqType implements Entity, MetadataField, ProjectFieldReferenceAble {
         return WGBS_SEQ_TYPE_NAMES.contains(seqTypeName)
     }
 
+    boolean isWgs() {
+        return name == SeqTypeNames.WHOLE_GENOME.seqTypeName
+    }
+
     boolean isRna() {
         return name == SeqTypeNames.RNA.seqTypeName
     }
