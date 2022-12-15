@@ -34,7 +34,7 @@ class FastqImportInstanceService {
         )
     }
 
-    int findCountWithWaitingState() {
+    int countInstancesInWaitingState() {
         return FastqImportInstance.countByState(FastqImportInstance.WorkflowCreateState.WAITING)
     }
 
@@ -45,7 +45,7 @@ class FastqImportInstanceService {
     }
 
     /**
-     * Change in progress instance back to wait. It is for the case, OTP is shutdown during an object is processed.
+     * Change all FastqImportInstances with state processing to state wait. This is meant for the case, OTP is shutdown during an object is processed.
      * Should only be called during startup
      */
     @Transactional(readOnly = false)

@@ -328,7 +328,7 @@ ILSe 5678, runA, lane 1, ${sampleText}
             assert content.contains("The workflow creation failed:")
             assert content.contains("Import id: ${metaDataFile.fastqImportInstance.id}")
             assert content.contains("ctx.fastqImportInstanceService.updateState(FastqImportInstance.get(${metaDataFile.fastqImportInstance.id}), " +
-                    "FastqImportInstance.WorkFlowTriggerState.WAITING)")
+                    "FastqImportInstance.WorkflowCreateState.WAITING)")
             assert content.contains("https://gitlab.com/one-touch-pipeline/otp/-/blob/master/scripts/operations/dataCleanup/DeleteSeqtracks.groovy")
             dataFiles*.seqTrack.unique().each {
                 assert content.contains(it.id.toString())

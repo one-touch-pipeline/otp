@@ -42,7 +42,7 @@ class WorkflowCreatorSchedulerSpec extends Specification implements ServiceUnitT
         ]
     }
 
-    void "scheduleCreateWorkflow, if system do not run, then do not call createWorkflowRuns"() {
+    void "scheduleCreateWorkflow, if system does't run, don't call createWorkflowRuns"() {
         given:
         WorkflowCreatorScheduler scheduler = createWorkflowCreatorScheduler()
 
@@ -53,10 +53,10 @@ class WorkflowCreatorSchedulerSpec extends Specification implements ServiceUnitT
         1 * scheduler.workflowSystemService.isEnabled() >> false
 
         0 * scheduler.fastqImportInstanceService.waiting()
-        0 * scheduler.metaDataFileService.getByFastqImportInstance(_)
+        0 * scheduler.metaDataFileService.findByFastqImportInstance(_)
         0 * scheduler.fastqImportInstanceService.updateState(_, _)
 
-        0 * scheduler.fastqImportInstanceService.findCountWithWaitingState()
+        0 * scheduler.fastqImportInstanceService.countInstancesInWaitingState()
         0 * scheduler.dataInstallationInitializationService.createWorkflowRuns(_)
         0 * scheduler.allDecider.decide(_, _)
         0 * scheduler.notificationCreator.sendWorkflowCreateSuccessMail(_)
@@ -73,16 +73,16 @@ class WorkflowCreatorSchedulerSpec extends Specification implements ServiceUnitT
         1 * scheduler.workflowSystemService.isEnabled() >> true
 
         1 * scheduler.fastqImportInstanceService.waiting() >> null
-        0 * scheduler.metaDataFileService.getByFastqImportInstance(_)
+        0 * scheduler.metaDataFileService.findByFastqImportInstance(_)
         0 * scheduler.fastqImportInstanceService.updateState(_, _)
 
-        0 * scheduler.fastqImportInstanceService.findCountWithWaitingState()
+        0 * scheduler.fastqImportInstanceService.countInstancesInWaitingState()
         0 * scheduler.dataInstallationInitializationService.createWorkflowRuns(_)
         0 * scheduler.allDecider.decide(_, _)
         0 * scheduler.notificationCreator.sendWorkflowCreateSuccessMail(_)
     }
 
-    void "createWorkflows, if system runs and waiting return instance and all fine, call all methods for success called"() {
+    void "createWorkflows, if system runs and waiting returns instance and all fine, call all methods for success called"() {
         given:
         WorkflowCreatorScheduler scheduler = createWorkflowCreatorScheduler()
         MetaDataFile metaDataFile = DomainFactory.createMetaDataFile()
@@ -96,17 +96,17 @@ class WorkflowCreatorSchedulerSpec extends Specification implements ServiceUnitT
         1 * scheduler.workflowSystemService.isEnabled() >> true
 
         1 * scheduler.fastqImportInstanceService.waiting() >> fastqImportInstance
-        1 * scheduler.metaDataFileService.getByFastqImportInstance(_) >> metaDataFile
+        1 * scheduler.metaDataFileService.findByFastqImportInstance(_) >> metaDataFile
         1 * scheduler.fastqImportInstanceService.updateState(_, FastqImportInstance.WorkflowCreateState.PROCESSING)
         1 * scheduler.fastqImportInstanceService.updateState(_, FastqImportInstance.WorkflowCreateState.SUCCESS)
 
-        1 * scheduler.fastqImportInstanceService.findCountWithWaitingState() >> 1
+        1 * scheduler.fastqImportInstanceService.countInstancesInWaitingState() >> 1
         1 * scheduler.dataInstallationInitializationService.createWorkflowRuns(_) >> runs
         1 * scheduler.allDecider.decide(_, _)
         1 * scheduler.notificationCreator.sendWorkflowCreateSuccessMail(_)
     }
 
-    void "createWorkflows, if system runs and waiting return instance and decider throw exception, then send error E-Mail to ticketing system"() {
+    void "createWorkflows, if system runs and waiting returns instance and decider throws exception, then send error E-Mail to ticketing system"() {
         given:
         WorkflowCreatorScheduler scheduler = createWorkflowCreatorScheduler()
         MetaDataFile metaDataFile = DomainFactory.createMetaDataFile()
@@ -122,11 +122,11 @@ class WorkflowCreatorSchedulerSpec extends Specification implements ServiceUnitT
         1 * scheduler.workflowSystemService.isEnabled() >> true
 
         1 * scheduler.fastqImportInstanceService.waiting() >> fastqImportInstance
-        1 * scheduler.metaDataFileService.getByFastqImportInstance(_) >> metaDataFile
+        1 * scheduler.metaDataFileService.findByFastqImportInstance(_) >> metaDataFile
         1 * scheduler.fastqImportInstanceService.updateState(_, FastqImportInstance.WorkflowCreateState.PROCESSING)
         1 * scheduler.fastqImportInstanceService.updateState(_, FastqImportInstance.WorkflowCreateState.FAILED)
 
-        1 * scheduler.fastqImportInstanceService.findCountWithWaitingState() >> 1
+        1 * scheduler.fastqImportInstanceService.countInstancesInWaitingState() >> 1
         1 * scheduler.dataInstallationInitializationService.createWorkflowRuns(_) >> runs
         1 * scheduler.allDecider.decide(_, _) >> { throw otpRuntimeException }
         1 * scheduler.notificationCreator.sendWorkflowCreateErrorMail(metaDataFile, otpRuntimeException)

@@ -52,7 +52,7 @@ class FastqImportInstanceServiceSpec extends Specification implements ServiceUni
         }
 
         when:
-        int count = service.findCountWithWaitingState()
+        int count = service.countInstancesInWaitingState()
 
         then:
         count == 2

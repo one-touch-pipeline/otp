@@ -28,7 +28,7 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 @Transactional(readOnly = true)
 class MetaDataFileService {
 
-    MetaDataFile getByFastqImportInstance(FastqImportInstance fastqImportInstance) {
+    MetaDataFile findByFastqImportInstance(FastqImportInstance fastqImportInstance) {
         return CollectionUtils.exactlyOneElement(MetaDataFile.findAllByFastqImportInstance(fastqImportInstance))
     }
 }

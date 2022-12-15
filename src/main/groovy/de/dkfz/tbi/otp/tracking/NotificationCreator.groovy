@@ -474,10 +474,8 @@ class NotificationCreator {
         metaDataFile.refresh()
         long id = metaDataFile.fastqImportInstance.id
 
-        String subject = [
-                "[${metaDataFile.fastqImportInstance.otrsTicket.prefixedTicketNumber}] ",
-                "Workflow created successfully for ${metaDataFile.fileName}",
-        ].join('')
+        String subject = "[${metaDataFile.fastqImportInstance.otrsTicket.prefixedTicketNumber}] " +
+                "Workflow created successfully for ${metaDataFile.fileName}"
 
         String body = [
                 "The workflow creation succeeded:",
@@ -493,10 +491,12 @@ class NotificationCreator {
         long id = metaDataFile.fastqImportInstance.id
         List<Long> seqTrackIds = metaDataFile.fastqImportInstance.dataFiles*.seqTrack*.id.unique().sort()
 
-        String subject = [
-                "[${metaDataFile.fastqImportInstance.otrsTicket.prefixedTicketNumber}] ",
-                "Failed to create workflows for ${metaDataFile.fileName}",
-        ].join('')
+        String subject = "[${metaDataFile.fastqImportInstance.otrsTicket.prefixedTicketNumber}] " +
+                "Failed to create workflows for ${metaDataFile.fileName}"
+
+        // Retrieve the names for the code generated in the body
+        String className = metaDataFile.fastqImportInstance.class.simpleName
+        String propertyName = metaDataFile.fastqImportInstance.state.metaClass.theClass.simpleName
 
         String body = [
                 "The workflow creation failed:",
@@ -506,12 +506,12 @@ class NotificationCreator {
                 StackTraceUtils.getStackTrace(throwable),
                 "",
                 "To retry the workflow creation, please use the following command in the groovy web console:",
-                "ctx.fastqImportInstanceService.updateState(FastqImportInstance.get(${id}), FastqImportInstance.WorkFlowTriggerState.WAITING)",
-                "The console do not wait therefore, you will get another email.",
+                "ctx.fastqImportInstanceService.updateState(${className}.get(${id}), ${className}.${propertyName}.WAITING)",
+                "The console won't wait but another email will be sent.",
                 "",
-                "To delete the import, please use the script 'DeleteSeqtracks':",
+                "To delete the import, please run the script 'DeleteSeqtracks':",
                 "https://gitlab.com/one-touch-pipeline/otp/-/blob/master/scripts/operations/dataCleanup/DeleteSeqtracks.groovy",
-                "The seqTrack ids of the import are: ",
+                "with the following seqTrack ids as input for the variable seqTracksIdList in the script: ",
                 seqTrackIds.join(', '),
         ].join('\n')
         mailHelperService.sendEmailToTicketSystem(subject, body)

@@ -65,7 +65,7 @@ class WorkflowCreatorScheduler {
             return
         }
 
-        MetaDataFile metaDataFile = metaDataFileService.getByFastqImportInstance(fastqImportInstance)
+        MetaDataFile metaDataFile = metaDataFileService.findByFastqImportInstance(fastqImportInstance)
 
         try {
             fastqImportInstanceService.updateState(fastqImportInstance, FastqImportInstance.WorkflowCreateState.PROCESSING)
@@ -84,14 +84,14 @@ class WorkflowCreatorScheduler {
         Long timeCreateWorkflowRuns = System.currentTimeMillis()
         FastqImportInstance fastqImportInstance = metaDataFileFromDb.fastqImportInstance
 
-        log.debug("workflows for ${metaDataFileFromDb.fileName} (${fastqImportInstanceService.findCountWithWaitingState()} in queue)")
+        log.debug("workflows for ${metaDataFileFromDb.fileName} (${fastqImportInstanceService.countInstancesInWaitingState()} in queue)")
         log.debug("  create workflow runs started")
         List<WorkflowRun> runs = dataInstallationInitializationService.createWorkflowRuns(fastqImportInstance)
-        log.debug("  create workflow runs stopped took: ${System.currentTimeMillis() - timeCreateWorkflowRuns}")
+        log.debug("  create workflow runs finished after: ${System.currentTimeMillis() - timeCreateWorkflowRuns}ms")
         Long timeDecider = System.currentTimeMillis()
         log.debug("  decider started")
         allDecider.decide(runs.collectMany { it.outputArtefacts*.value }, false)
-        log.debug("  decider stopped took: ${System.currentTimeMillis() - timeDecider}")
+        log.debug("  decider finished after: ${System.currentTimeMillis() - timeDecider}ms")
 
         fastqImportInstanceService.updateState(fastqImportInstance, FastqImportInstance.WorkflowCreateState.SUCCESS)
     }

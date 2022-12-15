@@ -45,7 +45,7 @@ class MetaDataFileServiceSpec extends Specification implements ServiceUnitTest<M
         DomainFactory.createMetaDataFile()
 
         when:
-        MetaDataFile metaDataFile = service.getByFastqImportInstance(fastqImportInstance)
+        MetaDataFile metaDataFile = service.findByFastqImportInstance(fastqImportInstance)
 
         then:
         metaDataFile == metaDataFile1
@@ -59,7 +59,7 @@ class MetaDataFileServiceSpec extends Specification implements ServiceUnitTest<M
         DomainFactory.createMetaDataFile(fastqImportInstance: fastqImportInstance)
 
         when:
-        service.getByFastqImportInstance(fastqImportInstance)
+        service.findByFastqImportInstance(fastqImportInstance)
 
         then:
         thrown AssertionError
