@@ -20,10 +20,10 @@
  * SOFTWARE.
  */
 
-describe('Check workflow config viewer page', () => {
+describe.skip('Check workflow config viewer page', () => {
   'use strict';
 
-  context('when user is an operator', () => {
+  context.skip('when user is an operator', () => {
     beforeEach(() => {
       cy.loginAsOperator();
       cy.visit('/workflowConfigViewer/index');

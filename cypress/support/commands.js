@@ -21,7 +21,6 @@
  */
 
 const path = require('path');
-const md5 = require('md5');
 
 const login = (username, password) => {
   'use strict';
@@ -112,17 +111,17 @@ Cypress.Commands.add('checkPage', (url) => {
 
   if (url) {
     cy.url().should('contain', url).then((currentUrl) => {
-      cy.request(currentUrl);
+      cy.request(currentUrl).its('status').should('equal', 200);
     });
   } else {
     cy.url().then((currentUrl) => {
-      cy.request(currentUrl);
+      cy.request(currentUrl).its('status').should('equal', 200);
     });
   }
 });
 
 // eslint-disable-next-line strict
-Cypress.Commands.add('checkDownloadByMd5Sum', (filename, fileEnding, md5Sum) => {
+Cypress.Commands.add('checkDownloadByContent', (filename, fileEnding, contentList) => {
   const downloadsFolder = Cypress.config('downloadsFolder');
   const today = new Date();
   const year = today.getFullYear();
@@ -132,8 +131,11 @@ Cypress.Commands.add('checkDownloadByMd5Sum', (filename, fileEnding, md5Sum) => 
 
   const filepath = path.join(downloadsFolder, `${filename}_${date}${fileEnding}`);
 
-  cy.readFile(filepath, 'binary', { timeout: 15000 })
-    .should((buffer) => expect(md5(buffer)).to.be.equal(md5Sum));
+  cy.readFile(filepath, 'binary', { timeout: 5000 }).then((content) => {
+    contentList.forEach((expectedContent) => {
+      cy.wrap(content).should('contain', expectedContent);
+    });
+  });
 });
 
 Cypress.Commands.add('clearDownloadsFolder', () => {

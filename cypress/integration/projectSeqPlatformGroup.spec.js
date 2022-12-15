@@ -39,7 +39,7 @@ describe('Check projectSeqPlatformGroup page', () => {
         cy.get('input#libPrepKit').check();
 
         cy.visit('/alignmentConfigurationOverview/index');
-        cy.get('.merging-criteria-table').contains('td', 'ChIP PAIRED bulk').find('a').click();
+        cy.get('table.merging-criteria-table tbody tr').last().find('a').click();
 
         cy.wait('@projectSeqPlatformGroupIndex').then(() => {
           cy.get('.seqPlatformGroupSelector button[type=submit].btn-danger').click();
@@ -92,7 +92,7 @@ describe('Check projectSeqPlatformGroup page', () => {
       cy.intercept('/projectSeqPlatformGroup/searchForSeqPlatformGroups*').as('searchForSeqPlatformGroups');
       cy.intercept('/projectSeqPlatformGroup/copySeqPlatformGroup*').as('copySeqPlatformGroup');
       cy.visit('/alignmentConfigurationOverview/index');
-      cy.get('.merging-criteria-table').contains('td', 'ChIP PAIRED bulk').find('a').click();
+      cy.get('table.merging-criteria-table tbody tr').last().find('a').click();
 
       cy.wait('@projectSeqPlatformGroupIndex').then(() => {
         cy.get('select#useSeqPlatformGroup').select('USE_PROJECT_SEQ_TYPE_SPECIFIC', { force: true });

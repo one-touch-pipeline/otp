@@ -20,4 +20,4 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-psql otp --username "$POSTGRES_USER" -f /docker-entrypoint-initdb.d/dev_base.dump
+psql otp --username "$POSTGRES_USER" -f /docker-entrypoint-initdb.d/dev_base_2.dump

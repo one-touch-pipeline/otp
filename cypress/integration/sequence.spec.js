@@ -41,7 +41,11 @@ describe('Check statistics page', () => {
 
       cy.get('div').contains('Processing...').should('not.be.visible');
       cy.get('div#sequenceTable_wrapper button').contains('Download').click();
-      cy.checkDownloadByMd5Sum('Sequence_Export', '.csv', '958bffcac84bbf89f8d0494a9b10a631');
+      cy.checkDownloadByContent('Sequence_Export', '.csv', [
+        'Project', 'Patient ID', 'Sample Type', 'Seq. Type', 'Sequencing Read Type', 'Single Cell',
+        'Seq. Center', 'Library Prep. Kit', 'Antibody Target,', 'Run,', 'Lane,', 'Library,',
+        'Single Cell Well Label', 'ILSe,', 'Known Issues', 'File Exists', 'File Archived', 'Date,',
+        'Withdrawn,', 'Species Common Name', 'Scientific Name', 'Strain,', 'Mixed In Species']);
     });
 
     it('should filter the table by sample type', () => {

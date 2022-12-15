@@ -43,19 +43,25 @@ describe('Check statistics page', () => {
       cy.get('div#sampleTypeNameCountBySample_wrapper button')
         .contains('Download').click();
       // eslint-disable-next-line max-len
-      cy.checkDownloadByMd5Sum('number_of_samples_by_sample_type-ExampleProject', '.csv', '86c24f467eb02942db7a168c8dfbabed');
+      cy.checkDownloadByContent('number_of_samples_by_sample_type-ExampleProject', '.csv', ['Sample Type', 'Number of Samples']);
 
       cy.get('div#centerNameRunId_wrapper button')
         .contains('Download').click();
-      cy.checkDownloadByMd5Sum('sequencing_center-ExampleProject', '.csv', 'eb2d0de62d478b80deb15da2c2d87857');
+      cy.checkDownloadByContent('sequencing_center-ExampleProject', '.csv', [
+        'Center', 'Total Registered Runs', 'Recent (6 months) Registered Runs'
+      ]);
 
       cy.get('div#projectOverviewTable_wrapper button')
         .contains('Download').click();
-      cy.checkDownloadByMd5Sum('sequences_of_samples-ExampleProject', '.csv', '5de0472d9144405fcea6e9c8aadc3ef6');
+      cy.checkDownloadByContent('sequences_of_samples-ExampleProject', '.csv', [
+        'Patient ID', 'Sample Type', 'Seq. Type', 'Sequencing Read Type', 'Single Cell', 'Center', 'Platform', 'Lanes'
+      ]);
 
       cy.get('div#patientsAndSamplesGBCountPerProject_wrapper button')
         .contains('Download').click();
-      cy.checkDownloadByMd5Sum('sequencing_technologies-ExampleProject', '.csv', '4b2a37ef52e61b2e6459ef5ec23e3d52');
+      cy.checkDownloadByContent('sequencing_technologies-ExampleProject', '.csv', [
+        'Seq. Type', 'Library Layout', 'Single Cell', '#Sequenced Patients', '#Sequenced Samples', 'Giga Bases (total)'
+      ]);
     });
 
     it('should check the length of the tables', () => {

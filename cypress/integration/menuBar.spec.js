@@ -54,6 +54,7 @@ describe('Click all menu items in the menu bar', () => {
     it('should check the number of menu items and click all Project menu items', () => {
       cy.get('li.navigation').contains('Project').parent().find('li')
         .should('have.length', 9);
+
       cy.get('.navigation li').contains('Project Specific Statistics').click({ force: true });
       cy.checkPage('/projectOverview/index');
 
@@ -61,7 +62,7 @@ describe('Click all menu items in the menu bar', () => {
       cy.checkPage('/projectConfig/index');
 
       cy.get('.navigation li').contains('Workflow Config').click({ force: true });
-      cy.checkPage('/alignmentConfigurationOverview/index');
+      cy.checkPage('/workflowSelection/index');
 
       cy.get('.navigation li').contains('User Management').click({ force: true });
       cy.checkPage('/projectUser/index');
@@ -227,14 +228,14 @@ describe('Click all menu items in the menu bar', () => {
       // Some problem with the session doesn't display Home Button
       cy.get('li.menuContainerItem').contains('Overview').click();
       cy.get('li.menuContainerItem').contains('Home').click();
-      cy.checkPage();
+      cy.checkPage('/home/index');
     });
 
     it('should check the number of menu items and click all Info menu items', () => {
       cy.get('li.navigation').contains('Info ▽').parent().find('li')
         .should('have.length', 6);
       cy.get('.navigation li').contains('About').click({ force: true });
-      cy.checkPage();
+      cy.checkPage('/');
 
       cy.get('.navigation li').contains('In numbers').click({ force: true });
       cy.checkPage('/info/numbers');
@@ -256,7 +257,7 @@ describe('Click all menu items in the menu bar', () => {
       // Some problem with the session doesn't display Logout Button
       cy.get('li.menuContainerItem').contains('Overview').click();
       cy.get('li.menuContainerItem').contains('Logout').click();
-      cy.checkPage();
+      cy.checkPage('');
     });
   });
 });
