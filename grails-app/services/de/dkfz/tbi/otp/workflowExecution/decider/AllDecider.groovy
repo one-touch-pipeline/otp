@@ -47,7 +47,7 @@ class AllDecider implements Decider {
     /** list of Deciders in the correct order */
     List<Class<Decider>> deciders = [
             FastqcDecider,
-            PanCancerDeciderService,
+            PanCancerDecider,
     ]
 
     @Override
@@ -66,7 +66,7 @@ class AllDecider implements Decider {
 
     Collection<SeqTrack> findAllSeqTracksInNewWorkflowSystem(Collection<SeqTrack> seqTracks) {
         Set<SeqType> supportedSeqTypes = workflowService.getExactlyOneWorkflow(PanCancerWorkflow.WORKFLOW).supportedSeqTypes
-        return deciders.contains(PanCancerDeciderService) ? seqTracks.findAll {
+        return deciders.contains(PanCancerDecider) ? seqTracks.findAll {
             supportedSeqTypes.contains(it.seqType)
         } : [] as Collection<SeqTrack>
     }
