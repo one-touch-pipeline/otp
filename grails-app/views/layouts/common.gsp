@@ -65,7 +65,7 @@
                                         <li><g:link controller="projectOverview" action="index"><g:message
                                                 code="otp.menu.projectSpecificStatistics"/></g:link></li>
                                         <li><g:link controller="projectConfig" action="index"><g:message code="otp.menu.projectConfig"/></g:link></li>
-                                        <li><g:link controller="alignmentConfigurationOverview" action="index"><g:message
+                                        <li><g:link controller="workflowSelection" action="index"><g:message
                                                 code="otp.menu.alignmenAndAnalysis"/></g:link></li>
                                         <li><g:link controller="projectUser" action="index"><g:message code="otp.menu.userManagement"/></g:link></li>
                                         <li><g:link controller="projectRequest" action="index"><g:message

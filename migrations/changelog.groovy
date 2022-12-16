@@ -28,4 +28,6 @@ databaseChangeLog = {
     include file: 'changelogs/2022/otp-1611-wes-domains.groovy'
 
     include file: 'changelogs/2022/otp-1612-state-for-workflow-creation.groovy'
+
+    include file: 'changelogs/2022/otp-1135.groovy'
 }

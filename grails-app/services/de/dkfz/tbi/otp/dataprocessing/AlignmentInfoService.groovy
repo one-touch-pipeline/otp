@@ -45,6 +45,7 @@ class AlignmentInfoService {
     ConfigFragmentService configFragmentService
     ExecuteRoddyCommandService executeRoddyCommandService
     RemoteShellHelper remoteShellHelper
+    SeqTypeService seqTypeService
 
     private static final ObjectMapper MAPPER = new ObjectMapper()
 
@@ -281,6 +282,9 @@ class AlignmentInfoService {
                     List<ReferenceGenomeProjectSeqType> rgpst = ReferenceGenomeProjectSeqType.findAllByProjectAndDeprecatedDateIsNull(project)
                     Map<String, AlignmentInfo> result = [:]
                     rgpst*.seqType.unique().sort { it.displayNameWithLibraryLayout }.each { SeqType seqType ->
+                        if (seqType in seqTypeService.seqTypesNewWorkflowSystem) {
+                            return
+                        }
                         RoddyWorkflowConfig workflowConfig = RoddyWorkflowConfig.getLatestForProject(project, seqType,
                                 CollectionUtils.atMostOneElement(Pipeline.findAllByNameAndType(Pipeline.Name.forSeqType(seqType), Pipeline.Type.ALIGNMENT)))
                         if (!workflowConfig) {

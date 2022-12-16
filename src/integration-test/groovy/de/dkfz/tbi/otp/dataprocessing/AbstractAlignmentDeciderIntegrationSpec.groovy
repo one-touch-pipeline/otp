@@ -53,6 +53,7 @@ class AbstractAlignmentDeciderIntegrationSpec extends Specification {
         decider.unalignableSeqTrackEmailCreator = new UnalignableSeqTrackEmailCreator()
         decider.unalignableSeqTrackEmailCreator.mailHelperService = Mock(MailHelperService)
         decider.unalignableSeqTrackEmailCreator.otrsTicketService = new OtrsTicketService()
+        DomainFactory.createRoddyAlignableSeqTypes()
     }
 
     void testDecideAndPrepareForAlignment_whenEverythingIsOkay_shouldReturnWorkPackages() {
@@ -76,7 +77,7 @@ class AbstractAlignmentDeciderIntegrationSpec extends Specification {
         SeqTrack seqTrack2 = DomainFactory.createSeqTrack(sample: seqTrack.sample, seqType: seqTrack.seqType, run: DomainFactory.createRun(seqPlatform: seqTrack.seqPlatform))
         DomainFactory.createMergingCriteriaLazy(project: seqTrack2.project, seqType: seqTrack2.seqType)
         ReferenceGenome referenceGenome = DomainFactory.createReferenceGenome()
-        DomainFactory.createReferenceGenomeProjectSeqType(project: seqTrack.project, referenceGenome: referenceGenome, seqType: seqTrack.seqType, statSizeFileName: DomainFactory.DEFAULT_TAB_FILE_NAME)
+        DomainFactory.createReferenceGenomeProjectSeqType(project: seqTrack.project, referenceGenome: referenceGenome, seqType: seqTrack.seqType)
 
         when:
         Collection<MergingWorkPackage> workPackages = decider.findOrSaveWorkPackages(seqTrack, seqTrack.configuredReferenceGenomeProjectSeqType, decider.getPipeline(seqTrack))
@@ -125,7 +126,6 @@ class AbstractAlignmentDeciderIntegrationSpec extends Specification {
                 sample: seqTrack.sample,
                 seqType: seqTrack.seqType,
                 seqPlatformGroup: seqTrack.seqPlatformGroup,
-                statSizeFileName: seqTrack.configuredReferenceGenomeProjectSeqType.statSizeFileName,
         )
 
         expect:
@@ -144,7 +144,7 @@ class AbstractAlignmentDeciderIntegrationSpec extends Specification {
                 seqType: seqTrack.seqType,
                 seqPlatformGroup: seqTrack.seqPlatformGroup,
                 referenceGenome: exactlyOneElement(ReferenceGenome.list()),
-                pipeline: findOrSaveByNameAndType(Pipeline.Name.RODDY_RNA_ALIGNMENT, Pipeline.Type.ALIGNMENT),
+                pipeline: findOrSaveByNameAndType(Pipeline.Name.PANCAN_ALIGNMENT, Pipeline.Type.ALIGNMENT),
         )
 
         expect:
@@ -169,7 +169,7 @@ class AbstractAlignmentDeciderIntegrationSpec extends Specification {
                 sample: seqTrack.sample,
                 seqType: seqTrack.seqType,
                 referenceGenome: exactlyOneElement(ReferenceGenome.list()),
-                statSizeFileName: seqTrack.configuredReferenceGenomeProjectSeqType.statSizeFileName,
+                pipeline: findOrSaveByNameAndType(Pipeline.Name.RODDY_RNA_ALIGNMENT, Pipeline.Type.ALIGNMENT),
         )
 
         decider.mailHelperService = Mock(MailHelperService) {
@@ -248,8 +248,7 @@ class AbstractAlignmentDeciderIntegrationSpec extends Specification {
                 seqType: seqTrack.seqType,
                 seqPlatformGroup: seqTrack.seqPlatformGroup,
                 referenceGenome: exactlyOneElement(ReferenceGenome.list()),
-                pipeline: findOrSaveByNameAndType(Pipeline.Name.PANCAN_ALIGNMENT, Pipeline.Type.ALIGNMENT),
-                statSizeFileName: seqTrack.configuredReferenceGenomeProjectSeqType.statSizeFileName,
+                pipeline: findOrSaveByNameAndType(Pipeline.Name.RODDY_RNA_ALIGNMENT, Pipeline.Type.ALIGNMENT),
         )
         workPackage.save(flush: true)
 
@@ -340,6 +339,8 @@ class AbstractAlignmentDeciderIntegrationSpec extends Specification {
 
         SeqTrack seqTrack = testData.createSeqTrack()
         seqTrack.save(flush: true)
+        DomainFactory.createRoddyWorkflowConfig(project: seqTrack.project, seqType: seqTrack.seqType,
+                pipeline: findOrSaveByNameAndType(Pipeline.Name.RODDY_RNA_ALIGNMENT, Pipeline.Type.ALIGNMENT))
 
         expect:
         decider.canPipelineAlign(seqTrack)
@@ -409,11 +410,12 @@ class AbstractAlignmentDeciderIntegrationSpec extends Specification {
         AbstractAlignmentDecider decider = ([
                 prepareForAlignment: { MergingWorkPackage workPackage, SeqTrack seqTrack, boolean forceRealign -> },
                 getPipeline        : {
-                    return findOrSaveByNameAndType(Pipeline.Name.PANCAN_ALIGNMENT, Pipeline.Type.ALIGNMENT)
+                    return findOrSaveByNameAndType(Pipeline.Name.RODDY_RNA_ALIGNMENT, Pipeline.Type.ALIGNMENT)
                 },
-        ] + methods) as AbstractAlignmentDecider
+        ] + methods) as PanCanAlignmentDecider
         decider.applicationContext = applicationContext
         decider.mailHelperService = applicationContext.mailHelperService
+        decider.seqTypeService = new SeqTypeService()
         return decider
     }
 
@@ -428,7 +430,7 @@ class AbstractAlignmentDeciderIntegrationSpec extends Specification {
                 seqType: seqTrack.seqType,
                 seqPlatformGroup: seqTrack.seqPlatformGroup,
                 referenceGenome: exactlyOneElement(ReferenceGenome.list()),
-                statSizeFileName: seqTrack.configuredReferenceGenomeProjectSeqType.statSizeFileName,
+                pipeline: findOrSaveByNameAndType(Pipeline.Name.RODDY_RNA_ALIGNMENT, Pipeline.Type.ALIGNMENT),
         )
         workPackage.save(flush: true)
 
@@ -445,6 +447,8 @@ class AbstractAlignmentDeciderIntegrationSpec extends Specification {
         DataFile dataFile = testData.createDataFile(seqTrack: seqTrack)
         dataFile.save(flush: true)
 
+        DomainFactory.createRoddyWorkflowConfig(project: seqTrack.project, seqType: seqTrack.seqType,
+                pipeline: findOrSaveByNameAndType(Pipeline.Name.RODDY_RNA_ALIGNMENT, Pipeline.Type.ALIGNMENT))
         return seqTrack
     }
 
