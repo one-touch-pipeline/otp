@@ -19,12 +19,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+import grails.util.Environment
+import grails.util.Holders
+
 import java.nio.file.Path
 import java.nio.file.Paths
 
 databaseChangeLog = {
 
-    Path dir = Paths.get("migrations/changelogs/defaultValues")
+    Path base = Environment.isWarDeployed() ?
+            Paths.get(Holders.applicationContext.grailsResourceLocator.findResourceForURI('WEB-INF/classes').file.path) :
+            Paths.get('migrations')
+    Path dir = base.resolve("changelogs/defaultValues")
 
     // Default values
     List<Path> files = [
@@ -83,4 +89,3 @@ databaseChangeLog = {
         }
     }
 }
-
