@@ -58,14 +58,15 @@ class DeletionServiceIntegrationSpec extends Specification implements EgaSubmiss
     TestConfigService configService
 
     String seqDir = "/seq-dir"
-    String vbpDir = "/vbp-dir"
 
     @TempDir
     Path tempDir
 
     void setupData() {
         IndividualService individualService = Mock(IndividualService) {
-            getViewByPidPath(_, _) >> Paths.get(vbpDir)
+            getViewByPidPath(_, _) >> { Individual individual, SeqType seqType ->
+                Paths.get(seqDir).resolve(seqType.dirName).resolve(individual.pid)
+            }
         }
 
         deletionService = new DeletionService()
@@ -255,6 +256,107 @@ class DeletionServiceIntegrationSpec extends Specification implements EgaSubmiss
 
         then:
         IlseSubmission.count() == 1
+    }
+
+    void "deleteSeqTrack, should delete subdirectories correctly"() {
+        given:
+        setupData()
+        Run run = createRun(name: "0", seqCenter: createSeqCenter(dirName: "sc0"))
+
+        Individual individual = createIndividual(pid: "pid0")
+        Sample sample1 = createSample(individual: individual, sampleType: createSampleType(name: "sampletype1"))
+        Sample sample2 = createSample(individual: individual, sampleType: createSampleType(name: "sampletype2"))
+        SeqType seqType1 = createSeqType(dirName: "seqType1")
+        SeqType seqType2 = createSeqType(dirName: "seqType2")
+        SeqType seqType3 = createSeqType(dirName: "seqType3", hasAntibodyTarget: true)
+        AntibodyTarget antibodyTarget1 = createAntibodyTarget(name: "abt1")
+        AntibodyTarget antibodyTarget2 = createAntibodyTarget(name: "abt2")
+
+        SeqTrack seqTrack1 = createSeqTrackWithOneDataFile([laneId: "lane1", sample: sample1, seqType: seqType1, run: run], [fileName: "df1.gz", vbpFileName: "df1.gz"])
+        SeqTrack seqTrack2 = createSeqTrackWithOneDataFile([laneId: "lane2", sample: sample1, seqType: seqType1, run: run], [fileName: "df2.gz", vbpFileName: "df2.gz"])
+        SeqTrack seqTrack3 = createSeqTrackWithOneDataFile([laneId: "lane3", sample: sample2, seqType: seqType1, run: run], [fileName: "df3.gz", vbpFileName: "df3.gz"])
+        SeqTrack seqTrack4 = createSeqTrackWithOneDataFile([laneId: "lane4", sample: sample2, seqType: seqType1, run: run], [fileName: "df4.gz", vbpFileName: "df4.gz"])
+
+        SeqTrack seqTrack1a = createSeqTrackWithOneDataFile([laneId: "lane1a", sample: sample1, seqType: seqType3, run: run, antibodyTarget: antibodyTarget1], [fileName: "df1.gz", vbpFileName: "df1.gz"])
+        SeqTrack seqTrack2a = createSeqTrackWithOneDataFile([laneId: "lane2a", sample: sample1, seqType: seqType3, run: run, antibodyTarget: antibodyTarget1], [fileName: "df2.gz", vbpFileName: "df2.gz"])
+        SeqTrack seqTrack3a = createSeqTrackWithOneDataFile([laneId: "lane3a", sample: sample1, seqType: seqType3, run: run, antibodyTarget: antibodyTarget2], [fileName: "df3.gz", vbpFileName: "df3.gz"])
+        SeqTrack seqTrack4a = createSeqTrackWithOneDataFile([laneId: "lane4a", sample: sample1, seqType: seqType3, run: run, antibodyTarget: antibodyTarget2], [fileName: "df4.gz", vbpFileName: "df4.gz"])
+
+        SeqTrack seqTrack5 = createSeqTrackWithOneDataFile([laneId: "lane5", sample: sample1, seqType: seqType2, run: run], [fileName: "df5.gz", vbpFileName: "df5.gz"])
+        SeqTrack seqTrack6 = createSeqTrackWithOneDataFile([laneId: "lane6", sample: sample1, seqType: seqType2, run: run], [fileName: "df6.gz", vbpFileName: "df6.gz"])
+        SeqTrack seqTrack7 = createSeqTrackWithOneDataFile([laneId: "lane7", sample: sample2, seqType: seqType2, run: run], [fileName: "df7.gz", vbpFileName: "df7.gz"])
+        SeqTrack seqTrack8 = createSeqTrackWithOneDataFile([laneId: "lane8", sample: sample2, seqType: seqType2, run: run], [fileName: "df8.gz", vbpFileName: "df8.gz"])
+
+        expect:
+        deletionService.deleteSeqTrack(seqTrack1) == [
+                new File("/seq-dir/seqType1/sc0/run0/df1.gz"),
+                new File("/seq-dir/seqType1/sc0/run0/df1.gz.md5sum"),
+                new File("/seq-dir/seqType1/pid0/sampletype1/single/run0/sequence/df1.gz"),
+        ]
+        deletionService.deleteSeqTrack(seqTrack2) == [
+                new File("/seq-dir/seqType1/sc0/run0/df2.gz"),
+                new File("/seq-dir/seqType1/sc0/run0/df2.gz.md5sum"),
+                new File("/seq-dir/seqType1/pid0/sampletype1/single/run0/sequence/df2.gz"),
+                new File("/seq-dir/seqType1/pid0/sampletype1"),
+        ]
+        deletionService.deleteSeqTrack(seqTrack3) == [
+                new File("/seq-dir/seqType1/sc0/run0/df3.gz"),
+                new File("/seq-dir/seqType1/sc0/run0/df3.gz.md5sum"),
+                new File("/seq-dir/seqType1/pid0/sampletype2/single/run0/sequence/df3.gz"),
+        ]
+        deletionService.deleteSeqTrack(seqTrack4) == [
+                new File("/seq-dir/seqType1/sc0/run0/df4.gz"),
+                new File("/seq-dir/seqType1/sc0/run0/df4.gz.md5sum"),
+                new File("/seq-dir/seqType1/pid0/sampletype2/single/run0/sequence/df4.gz"),
+                new File("/seq-dir/seqType1/pid0/sampletype2"),
+                new File("/seq-dir/seqType1/pid0"),
+        ]
+        deletionService.deleteSeqTrack(seqTrack1a) == [
+                new File("/seq-dir/seqType3/sc0/run0/df1.gz"),
+                new File("/seq-dir/seqType3/sc0/run0/df1.gz.md5sum"),
+                new File("/seq-dir/seqType3/pid0/sampletype1-abt1/single/run0/sequence/df1.gz"),
+        ]
+        deletionService.deleteSeqTrack(seqTrack2a) == [
+                new File("/seq-dir/seqType3/sc0/run0/df2.gz"),
+                new File("/seq-dir/seqType3/sc0/run0/df2.gz.md5sum"),
+                new File("/seq-dir/seqType3/pid0/sampletype1-abt1/single/run0/sequence/df2.gz"),
+                new File("/seq-dir/seqType3/pid0/sampletype1-abt1"),
+        ]
+        deletionService.deleteSeqTrack(seqTrack3a) == [
+                new File("/seq-dir/seqType3/sc0/run0/df3.gz"),
+                new File("/seq-dir/seqType3/sc0/run0/df3.gz.md5sum"),
+                new File("/seq-dir/seqType3/pid0/sampletype1-abt2/single/run0/sequence/df3.gz"),
+        ]
+        deletionService.deleteSeqTrack(seqTrack4a) == [
+                new File("/seq-dir/seqType3/sc0/run0/df4.gz"),
+                new File("/seq-dir/seqType3/sc0/run0/df4.gz.md5sum"),
+                new File("/seq-dir/seqType3/pid0/sampletype1-abt2/single/run0/sequence/df4.gz"),
+                new File("/seq-dir/seqType3/pid0/sampletype1-abt2"),
+                new File("/seq-dir/seqType3/pid0"),
+        ]
+        deletionService.deleteSeqTrack(seqTrack5) == [
+                new File("/seq-dir/seqType2/sc0/run0/df5.gz"),
+                new File("/seq-dir/seqType2/sc0/run0/df5.gz.md5sum"),
+                new File("/seq-dir/seqType2/pid0/sampletype1/single/run0/sequence/df5.gz"),
+        ]
+        deletionService.deleteSeqTrack(seqTrack6) == [
+                new File("/seq-dir/seqType2/sc0/run0/df6.gz"),
+                new File("/seq-dir/seqType2/sc0/run0/df6.gz.md5sum"),
+                new File("/seq-dir/seqType2/pid0/sampletype1/single/run0/sequence/df6.gz"),
+                new File("/seq-dir/seqType2/pid0/sampletype1"),
+        ]
+        deletionService.deleteSeqTrack(seqTrack7) == [
+                new File("/seq-dir/seqType2/sc0/run0/df7.gz"),
+                new File("/seq-dir/seqType2/sc0/run0/df7.gz.md5sum"),
+                new File("/seq-dir/seqType2/pid0/sampletype2/single/run0/sequence/df7.gz"),
+        ]
+        deletionService.deleteSeqTrack(seqTrack8) == [
+                new File("/seq-dir/seqType2/sc0/run0/df8.gz"),
+                new File("/seq-dir/seqType2/sc0/run0/df8.gz.md5sum"),
+                new File("/seq-dir/seqType2/pid0/sampletype2/single/run0/sequence/df8.gz"),
+                new File("/seq-dir/seqType2/pid0/sampletype2"),
+                new File("/seq-dir/seqType2/pid0"),
+        ]
     }
 
     void "deleteProjectContent without any content"() {
@@ -549,8 +651,10 @@ class DeletionServiceIntegrationSpec extends Specification implements EgaSubmiss
 rm -rf $seqDir/$seqTypeDirName/$seqCenterName/$runDirName/${dataFile.pathName}${dataFile?.fileName}
 rm -rf $seqDir/$seqTypeDirName/$seqCenterName/$runDirName/${dataFile.pathName}${dataFile?.fileName}
 rm -rf $seqDir/$seqTypeDirName/$seqCenterName/$runDirName/${dataFile.pathName}${dataFile?.fileName}.md5sum
-rm -rf $vbpDir/$sampleTypeDirName/single/$runDirName/$vbpPath/$vbpFileName
-rm -rf $vbpDir
+rm -rf $seqDir/$seqTypeDirName/${individual.pid}/$sampleTypeDirName/single/$runDirName/$vbpPath/$vbpFileName
+rm -rf $seqDir/$seqTypeDirName/${individual.pid}/$sampleTypeDirName
+rm -rf $seqDir/$seqTypeDirName/${individual.pid}
+rm -rf $seqDir/$seqTypeDirName/${individual.pid}
 """
         when:
         String deletionScript = deletionService.deleteIndividual(seqTrack.individual)

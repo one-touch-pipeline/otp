@@ -565,11 +565,61 @@ class DeletionService {
         List<File> seqTrackDelete = deleteAllProcessingInformationAndResultOfOneSeqTrack(seqTrack, check)
         dirsToDelete.addAll(seqTrackDelete)
         deleteConnectionFromSeqTrackRepresentingABamFile(seqTrack)
+
+        List<DataFile> dataFiles = seqTrack.dataFiles
+
         DataFile.findAllBySeqTrack(seqTrack).each { DataFile df ->
             dirsToDelete.addAll(deleteDataFile(df))
         }
 
+        Sample sample1 = seqTrack.sample
+        SeqType seqType = seqTrack.seqType
+        Individual individual = seqTrack.individual
+        AntibodyTarget antibodyTarget = seqTrack.antibodyTarget
+
         seqTrack.delete(flush: true)
+
+        List<SeqTrack> leftOverSeqTracks
+        if (seqType.hasAntibodyTarget) {
+            leftOverSeqTracks = SeqTrack.findAllBySampleAndAntibodyTarget(sample1, antibodyTarget)
+        } else {
+            leftOverSeqTracks = SeqTrack.findAllBySample(sample1)
+        }
+        List<ExternallyProcessedMergedBamFile> leftOverBamFiles = ExternallyProcessedMergedBamFile.withCriteria {
+            'workPackage' {
+                eq('sample', sample1)
+                eq('seqType', seqType)
+            }
+        } as List<ExternallyProcessedMergedBamFile>
+
+        if (!leftOverSeqTracks && !leftOverBamFiles) {
+            dataFiles.collect {
+                dirsToDelete.add(fileService.toFile(lsdfFilesService.getSampleTypeDirectory(it)))
+            }
+        } else {
+            List<SeqTrack> seqTrackSampleList = SeqTrack.createCriteria().list {
+                eq('sample', sample1)
+                eq('seqType', seqType)
+                if (seqType.hasAntibodyTarget) {
+                    eq('antibodyTarget', antibodyTarget)
+                }
+            } as List<SeqTrack>
+            if (seqTrackSampleList.empty) {
+                dataFiles.collect {
+                    dirsToDelete.add(fileService.toFile(lsdfFilesService.getSampleTypeDirectory(it)))
+                }
+            }
+        }
+
+        List<SeqTrack> seqTrackIndividualList = SeqTrack.createCriteria().list {
+            sample {
+                eq('individual', individual)
+            }
+            eq('seqType', seqType)
+        } as List<SeqTrack>
+        if (seqTrackIndividualList.empty) {
+            dirsToDelete.add(fileService.toFile(individualService.getViewByPidPath(individual, seqType)))
+        }
 
         //delete ilseSubmission if it is not used by other seqTracks and is not blacklisted
         if (ilseSubmission && !ilseSubmission.warning && SeqTrack.countByIlseSubmission(ilseSubmission) == 0) {
