@@ -27,8 +27,12 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 
+import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
+import de.dkfz.tbi.otp.dataprocessing.AbstractMergingWorkPackage
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePairDeciderService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.NotificationCreator
+import de.dkfz.tbi.otp.utils.SystemUserUtils
 import de.dkfz.tbi.otp.workflow.datainstallation.DataInstallationInitializationService
 import de.dkfz.tbi.otp.workflowExecution.decider.AllDecider
 
@@ -50,6 +54,9 @@ class WorkflowCreatorScheduler {
 
     @Autowired
     NotificationCreator notificationCreator
+
+    @Autowired
+    SamplePairDeciderService samplePairDeciderService
 
     @Autowired
     WorkflowSystemService workflowSystemService
@@ -90,9 +97,36 @@ class WorkflowCreatorScheduler {
         log.debug("  create workflow runs finished after: ${System.currentTimeMillis() - timeCreateWorkflowRuns}ms")
         Long timeDecider = System.currentTimeMillis()
         log.debug("  decider started")
-        allDecider.decide(runs.collectMany { it.outputArtefacts*.value }, false)
+        Collection<WorkflowArtefact> workflowArtefacts = allDecider.decide(runs.collectMany { it.outputArtefacts*.value }, false)
         log.debug("  decider finished after: ${System.currentTimeMillis() - timeDecider}ms")
 
+        createSamplePairs(workflowArtefacts)
+
         fastqImportInstanceService.updateState(fastqImportInstance, FastqImportInstance.WorkflowCreateState.SUCCESS)
+    }
+
+    /**
+     * creates the sample pairs for the alignments.
+     *
+     * Needed, as long not all analysis workflows are migrated.
+     *
+     * @deprecated old workflow system
+     */
+    @Deprecated
+    private void createSamplePairs(Collection<WorkflowArtefact> workflowArtefacts) {
+        Long timeSamplePairs = System.currentTimeMillis()
+        log.debug("  sample pair creation started")
+        List<SeqType> seqTypes = SeqTypeService.allAnalysableSeqTypes
+        Collection<AbstractMergingWorkPackage> mergingWorkPackages = workflowArtefacts.findAll {
+            it.artefactType == ArtefactType.BAM
+        }.collect {
+            return (it.artefact.get() as AbstractMergedBamFile).workPackage
+        }.findAll {
+            it.seqType in seqTypes
+        }
+        SystemUserUtils.useSystemUser {
+            samplePairDeciderService.findOrCreateSamplePairs(mergingWorkPackages)
+        }
+        log.debug("  sample pair creation finished after: ${System.currentTimeMillis() - timeSamplePairs}ms")
     }
 }

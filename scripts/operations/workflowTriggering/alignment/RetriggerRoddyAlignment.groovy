@@ -25,6 +25,10 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
+/**
+ * The script only works for the old workflow system. For the new workflow system please use the GUI: https://otp.dkfz.de/otp/triggerAlignment/index
+ */
+
 LogThreadLocal.withThreadLog(System.out, { SeqTrack.withTransaction {
     Collection<RoddyBamFile> roddyBamFiles = RoddyBamFile.withCriteria {
         'in'('id', [
@@ -33,6 +37,16 @@ LogThreadLocal.withThreadLog(System.out, { SeqTrack.withTransaction {
 
         ] as long[])
     }
+
+
+    List<SeqType> unsupportedSeqTypes = [
+            SeqTypeService.wholeGenomePairedSeqType,
+            SeqTypeService.exomePairedSeqType,
+            SeqTypeService.chipSeqPairedSeqType,
+    ]
+
+    roddyBamFiles.each {
+        assert !unsupportedSeqTypes.contains(it.seqType) : "${it.seqType} is not supported by this script, since it is part of the new workflow system. Please use gui: https://otp.dkfz.de/otp/triggerAlignment/index"    }
 
     roddyBamFiles.each {
         println "${it}"

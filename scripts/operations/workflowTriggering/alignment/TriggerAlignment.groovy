@@ -23,6 +23,8 @@
 /**
  * script to trigger alignments for a patient or a project or a ilse.
  * It is Possible to restrict the selection to specific SeqTypes
+ *
+ * The script only works for the old workflow system. For the new workflow system please use the GUI: https://otp.dkfz.de/otp/triggerAlignment/index
  */
 
 import org.hibernate.sql.JoinType
@@ -66,15 +68,21 @@ LogThreadLocal.withThreadLog(System.out, {
                 }
             }
             'in'('seqType', [
-                    //SeqTypeService.wholeGenomePairedSeqType,
-                    //SeqTypeService.exomePairedSeqType,
                     //SeqTypeService.wholeGenomeBisulfitePairedSeqType,
                     //SeqTypeService.wholeGenomeBisulfiteTagmentationPairedSeqType,
                     //SeqTypeService.rnaPairedSeqType,
                     //SeqTypeService.rnaSingleSeqType,
-                    //SeqTypeService.chipSeqPairedSeqType,
             ])
         }
+
+        List<SeqType> unsupportedSeqTypes = [
+            SeqTypeService.wholeGenomePairedSeqType,
+            SeqTypeService.exomePairedSeqType,
+            SeqTypeService.chipSeqPairedSeqType,
+        ]
+
+        seqTracks.each {
+            assert !unsupportedSeqTypes.contains(it.seqType) : "${it.seqType} is not supported by this script, since it is part of the new workflow system. Please use gui: https://otp.dkfz.de/otp/triggerAlignment/index"        }
 
         //show seqtracks
         // Header

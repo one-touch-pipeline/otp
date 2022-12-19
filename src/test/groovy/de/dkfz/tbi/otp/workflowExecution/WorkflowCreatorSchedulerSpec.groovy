@@ -21,11 +21,14 @@
  */
 package de.dkfz.tbi.otp.workflowExecution
 
-import grails.testing.gorm.DataTest
+import grails.test.hibernate.HibernateSpec
 import grails.testing.services.ServiceUnitTest
-import spock.lang.Specification
+import spock.lang.Unroll
 
-import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePairDeciderService
+import de.dkfz.tbi.otp.domainFactory.UserDomainFactory
+import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPancanFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.NotificationCreator
@@ -33,13 +36,24 @@ import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 import de.dkfz.tbi.otp.workflow.datainstallation.DataInstallationInitializationService
 import de.dkfz.tbi.otp.workflowExecution.decider.AllDecider
 
-class WorkflowCreatorSchedulerSpec extends Specification implements ServiceUnitTest<WorkflowCreatorScheduler>, DataTest, DomainFactoryCore, WorkflowSystemDomainFactory {
+class WorkflowCreatorSchedulerSpec extends HibernateSpec implements ServiceUnitTest<WorkflowCreatorScheduler>, RoddyPancanFactory, UserDomainFactory,
+        WorkflowSystemDomainFactory {
 
     @Override
-    Class[] getDomainClassesToMock() {
+    List<Class> getDomainClasses() {
         return [
+                MergingWorkPackage,
                 MetaDataFile,
+                ProcessingOption,
+                RoddyBamFile,
         ]
+    }
+
+    @Override
+    Closure doWithSpring() {
+        { ->
+            processingOptionService(ProcessingOptionService)
+        }
     }
 
     void "scheduleCreateWorkflow, if system does't run, don't call createWorkflowRuns"() {
@@ -59,6 +73,7 @@ class WorkflowCreatorSchedulerSpec extends Specification implements ServiceUnitT
         0 * scheduler.fastqImportInstanceService.countInstancesInWaitingState()
         0 * scheduler.dataInstallationInitializationService.createWorkflowRuns(_)
         0 * scheduler.allDecider.decide(_, _)
+        0 * scheduler.samplePairDeciderService.findOrCreateSamplePairs(_)
         0 * scheduler.notificationCreator.sendWorkflowCreateSuccessMail(_)
     }
 
@@ -79,15 +94,44 @@ class WorkflowCreatorSchedulerSpec extends Specification implements ServiceUnitT
         0 * scheduler.fastqImportInstanceService.countInstancesInWaitingState()
         0 * scheduler.dataInstallationInitializationService.createWorkflowRuns(_)
         0 * scheduler.allDecider.decide(_, _)
+        0 * scheduler.samplePairDeciderService.findOrCreateSamplePairs(_)
         0 * scheduler.notificationCreator.sendWorkflowCreateSuccessMail(_)
     }
 
-    void "createWorkflows, if system runs and waiting returns instance and all fine, call all methods for success called"() {
+    @Unroll
+    void "createWorkflows, if system runs and waiting returns instance and all fine and #name, call all methods for success called"() {
         given:
         WorkflowCreatorScheduler scheduler = createWorkflowCreatorScheduler()
+
+        findOrCreateProcessingOption(ProcessingOption.OptionName.OTP_SYSTEM_USER, createUser().username)
+        List<SeqType> seqTypes = DomainFactory.createAllAnalysableSeqTypes()
+
         MetaDataFile metaDataFile = DomainFactory.createMetaDataFile()
         FastqImportInstance fastqImportInstance = DomainFactory.createFastqImportInstance()
         List<WorkflowRun> runs = [createWorkflowRun()]
+        List<WorkflowArtefact> workflowArtefacts = runs.collect {
+            createWorkflowArtefact([
+                    producedBy  : it,
+                    artefactType: artefactType,
+            ])
+        }
+
+        List<AbstractMergedBamFile> expectedListForSnv = []
+        if (artefactType == ArtefactType.BAM) {
+            RoddyBamFile roddyBamFile = createBamFile([
+                    workflowArtefact: workflowArtefacts.first(),
+                    workPackage     : createMergingWorkPackage([
+                            seqType: analysableSeqType ? seqTypes.first() : createSeqType([
+                                    name: "OtherName",
+                            ])
+                    ]),
+            ])
+            if (analysableSeqType) {
+                expectedListForSnv << roddyBamFile.workPackage
+            }
+        }
+
+        applicationContext //initialize the applicationContext
 
         when:
         scheduler.scheduleCreateWorkflow()
@@ -102,8 +146,17 @@ class WorkflowCreatorSchedulerSpec extends Specification implements ServiceUnitT
 
         1 * scheduler.fastqImportInstanceService.countInstancesInWaitingState() >> 1
         1 * scheduler.dataInstallationInitializationService.createWorkflowRuns(_) >> runs
-        1 * scheduler.allDecider.decide(_, _)
+        1 * scheduler.allDecider.decide(_, _) >> workflowArtefacts
+        1 * scheduler.samplePairDeciderService.findOrCreateSamplePairs(expectedListForSnv)
+        0 * scheduler.samplePairDeciderService._
         1 * scheduler.notificationCreator.sendWorkflowCreateSuccessMail(_)
+
+        where:
+        name                                | artefactType       | analysableSeqType
+        "no bam and not analysable seqType" | ArtefactType.FASTQ | false
+        "no bam and analysable seqType"     | ArtefactType.FASTQ | true
+        "bam and not analysable seqType"    | ArtefactType.BAM   | false
+        "bam and analysable seqType"        | ArtefactType.BAM   | true
     }
 
     void "createWorkflows, if system runs and waiting returns instance and decider throws exception, then send error E-Mail to ticketing system"() {
@@ -112,7 +165,6 @@ class WorkflowCreatorSchedulerSpec extends Specification implements ServiceUnitT
         MetaDataFile metaDataFile = DomainFactory.createMetaDataFile()
         FastqImportInstance fastqImportInstance = DomainFactory.createFastqImportInstance()
         List<WorkflowRun> runs = [createWorkflowRun()]
-
         OtpRuntimeException otpRuntimeException = new OtpRuntimeException("Decider throws exceptions")
 
         when:
@@ -129,6 +181,7 @@ class WorkflowCreatorSchedulerSpec extends Specification implements ServiceUnitT
         1 * scheduler.fastqImportInstanceService.countInstancesInWaitingState() >> 1
         1 * scheduler.dataInstallationInitializationService.createWorkflowRuns(_) >> runs
         1 * scheduler.allDecider.decide(_, _) >> { throw otpRuntimeException }
+        0 * scheduler.samplePairDeciderService.findOrCreateSamplePairs(_)
         1 * scheduler.notificationCreator.sendWorkflowCreateErrorMail(metaDataFile, otpRuntimeException)
     }
 
@@ -140,6 +193,7 @@ class WorkflowCreatorSchedulerSpec extends Specification implements ServiceUnitT
                 metaDataFileService                  : Mock(MetaDataFileService),
                 notificationCreator                  : Mock(NotificationCreator),
                 workflowSystemService                : Mock(WorkflowSystemService),
+                samplePairDeciderService             : Mock(SamplePairDeciderService),
         ])
     }
 }

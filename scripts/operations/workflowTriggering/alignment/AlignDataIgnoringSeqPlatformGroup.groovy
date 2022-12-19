@@ -30,6 +30,8 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 /**
  * Add all lanes given by Pid, SampleType, SeqType and optional SampleName to MWP ignoring the seqPlatformGroup
  *
+ * The script only works for the old workflow system. For the new workflow system please use the GUI: https://otp.dkfz.de/otp/triggerAlignment/index
+ *
  * In case some lanes was not aligned because the SeqPlatformGroup are not compatible, this script
  * will add this lanes to the other and trigger the alignment.
  */
@@ -98,6 +100,16 @@ IlseSubmission.withTransaction {
         }
         assert seqTracks: "Could not find any seqtracks for ${values.join(' ')}"
         return seqTracks
+    }
+
+    List<SeqType> unsupportedSeqTypes = [
+            SeqTypeService.wholeGenomePairedSeqType,
+            SeqTypeService.exomePairedSeqType,
+            SeqTypeService.chipSeqPairedSeqType,
+    ]
+
+    seqTracks.each {
+        assert !unsupportedSeqTypes.contains(it.seqType) : "${it.seqType} is not supported by this script, since it is part of the new workflow system. Please use gui: https://otp.dkfz.de/otp/triggerAlignment/index"
     }
 
     List<SeqTrack> retriggeredSeqTracks = []

@@ -24,6 +24,8 @@ import de.dkfz.tbi.otp.dataprocessing.MergingCriteriaService
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.taxonomy.Species
+import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.workflowExecution.*
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
@@ -43,6 +45,8 @@ MergingCriteriaService mergingCriteriaService = ctx.mergingCriteriaService
 Pipeline pipeline = exactlyOneElement(Pipeline.findAllByName(oldPipelineName))
 Workflow workflow = exactlyOneElement(Workflow.findAllByName(newWorkflowName))
 List<WorkflowVersion> workflowVersions = WorkflowVersion.findAllByWorkflow(workflow)
+List<ReferenceGenome> allUsedReferenceGenomes = []
+
 WorkflowVersionSelector.withTransaction {
     RoddyWorkflowConfig.findAllWhere(
             pipeline: pipeline,
@@ -63,22 +67,28 @@ WorkflowVersionSelector.withTransaction {
                 workflowVersion: workflowVersion,
         ).save(flush: true)
     }
-}
 
-List<ReferenceGenome> allUsedReferenceGenomes = []
-ReferenceGenomeSelector.withTransaction {
     ReferenceGenomeProjectSeqType.findAllBySeqTypeInListAndDeprecatedDateIsNull(seqTypes)
-            .groupBy { [it.project, it.seqType, it.referenceGenome.speciesWithStrain] }
-            .each { _, List<ReferenceGenomeProjectSeqType> rgpsts ->
+            .groupBy {
+                [
+                        it.project,
+                        it.seqType,
+                        it.referenceGenome.species,
+                        it.referenceGenome.speciesWithStrain,
+                ]
+            }.each { _, List<ReferenceGenomeProjectSeqType> rgpsts ->
 
-                ReferenceGenomeProjectSeqType rgpst = rgpsts.first()
-                if (rgpsts*.referenceGenome.unique().size() > 1) {
-                    println "WARNING: multiple reference genomes found for '${rgpst.project} ${rgpst.seqType} ${rgpst.referenceGenome.speciesWithStrain.join("+")}', using first one:"
-                    rgpsts*.referenceGenome.each {
-                        println "    ${it}"
-                    }
-                }
+        ReferenceGenomeProjectSeqType rgpst = rgpsts.first()
+        if (rgpsts*.referenceGenome.unique().size() > 1) {
+            println "WARNING: multiple reference genomes found for '${rgpst.project} ${rgpst.seqType} ${rgpst.referenceGenome.speciesWithStrain.join("+")}', using first one:"
+            rgpsts*.referenceGenome.each {
+                println "    ${it}"
+            }
+        }
 
+        Set<Species> species = rgpst.referenceGenome.species
+        switch (species.size()) {
+            case 0:
                 new ReferenceGenomeSelector(
                         project: rgpst.project,
                         seqType: rgpst.seqType,
@@ -86,14 +96,28 @@ ReferenceGenomeSelector.withTransaction {
                         workflow: workflow,
                         referenceGenome: rgpst.referenceGenome,
                 ).save(flush: true)
+                break
+            case 1:
+                SpeciesWithStrain.findAllBySpecies(species.first()).each {
+                    new ReferenceGenomeSelector(
+                            project: rgpst.project,
+                            seqType: rgpst.seqType,
+                            species: new HashSet([it] + rgpst.referenceGenome.speciesWithStrain),
+                            workflow: workflow,
+                            referenceGenome: rgpst.referenceGenome,
+                    ).save(flush: true)
+                }
+            default:
+                assert "Unsupported count: ${rgpst.referenceGenome.species.size()}"
+        }
+        allUsedReferenceGenomes.add(rgpst.referenceGenome)
+    }
 
-                allUsedReferenceGenomes.add(rgpst.referenceGenome)
-            }
-}
-Workflow.withTransaction {
     workflow.supportedSeqTypes = seqTypes
     workflow.allowedReferenceGenomes = allUsedReferenceGenomes as Set
     workflow.save(flush: true)
+
+    assert false
 }
 seqTypes.each {
     mergingCriteriaService.createDefaultMergingCriteria(it)

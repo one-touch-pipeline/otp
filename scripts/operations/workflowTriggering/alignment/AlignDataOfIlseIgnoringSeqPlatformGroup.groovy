@@ -23,11 +23,15 @@ import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.PanCanAlignmentDecider
 import de.dkfz.tbi.otp.ngsdata.IlseSubmission
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.ngsdata.SeqTypeService
 import de.dkfz.tbi.otp.tracking.OtrsTicketService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 /**
  * Add all lanes of an ilse to MWP ignoring the seqplatform group
+ *
+ * The script only works for the old workflow system. For the new workflow system please use the GUI: https://otp.dkfz.de/otp/triggerAlignment/index
  *
  * In case some lanes of an ilse was not aligned because the SeqPlatformGroup are not compatible, this script
  * will add this lanes to the other and trigger the alignment.
@@ -53,6 +57,16 @@ IlseSubmission.withTransaction {
     List<SeqTrack> seqTracks = SeqTrack.findAllByIlseSubmission(ilseSubmission)
     List<SeqTrack> retriggeredSeqTracks = []
     Set<SeqTrack> retriggeredMergingWorkPackages = [] as Set
+
+    List<SeqType> unsupportedSeqTypes = [
+            SeqTypeService.wholeGenomePairedSeqType,
+            SeqTypeService.exomePairedSeqType,
+            SeqTypeService.chipSeqPairedSeqType,
+    ]
+
+    seqTracks.each {
+        assert !unsupportedSeqTypes.contains(it.seqType) : "${it.seqType} is not supported by this script, since it is part of the new workflow system. Please use gui: https://otp.dkfz.de/otp/triggerAlignment/index"
+    }
 
     seqTracks.groupBy {
         [
