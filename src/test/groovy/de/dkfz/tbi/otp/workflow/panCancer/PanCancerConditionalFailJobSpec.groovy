@@ -25,6 +25,7 @@ import grails.testing.gorm.DataTest
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
@@ -50,11 +51,12 @@ class PanCancerConditionalFailJobSpec extends Specification implements DataTest,
         ]
     }
 
-    void "test check, succeeds"() {
+    @Unroll
+    void "test check #name, succeeds"() {
         given:
         WorkflowStep workflowStep = createWorkflowStep()
         List<SeqTrack> seqTracks = [
-                createSeqTrackWithTwoDataFile([:], [fileName: "DataFileFileName_123_R1.gz"], [fileName: "DataFileFileName_123_R2.gz"]),
+                createSeqTrackWithTwoDataFile([:], [mateNumber: mateFile1, fileName: file1], [mateNumber: mateFile2, fileName: file2]),
                 createSeqTrackWithTwoDataFile([:], [fileName: "SecondSeqTrack_123_R1.gz"], [fileName: "SecondSeqTrack_123_R2.gz"]),
         ]
 
@@ -84,6 +86,11 @@ class PanCancerConditionalFailJobSpec extends Specification implements DataTest,
 
         then:
         notThrown(WorkflowException)
+
+        where:
+        name              | mateFile1 | file1                        | mateFile2 | file2
+        "given as R1, R2" | 1         | "DataFileFileName_123_R1.gz" | 2         | "DataFileFileName_123_R2.gz"
+        "given as R2, R1" | 2         | "DataFileFileName_123_R2.gz" | 1         | "DataFileFileName_123_R1.gz"
     }
 
     void "test check, fails because seqTrack has no dataFiles"() {

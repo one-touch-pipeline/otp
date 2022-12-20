@@ -58,20 +58,20 @@ class PanCancerConditionalFailJob extends AbstractConditionalFailJob implements 
         List<Path> allDataFiles = []
 
         seqTracks.each { SeqTrack seqTrack ->
-            List<DataFile> dataFiles = seqTrack.dataFiles
-
-            if (!dataFiles) {
-                return errorMessages.push("SeqTrack '${seqTrack}' has no dataFiles." as String)
+            List<DataFile> nonIndexDataFiles = seqTrack.dataFilesWhereIndexFileIsFalse.sort {
+                it.mateNumber
             }
 
-            List<DataFile> nonIndexDataFiles = seqTrack.dataFilesWhereIndexFileIsFalse
+            if (!nonIndexDataFiles) {
+                return errorMessages.push("SeqTrack '${seqTrack}' has no dataFiles." as String)
+            }
 
             if (nonIndexDataFiles.size() != 2) {
                 return errorMessages.push("SeqTrack '${seqTrack}' has not exactly two dataFiles. " +
                         "It has ${nonIndexDataFiles} (index files are ignored)." as String)
             }
 
-            final Collection<Path> paths = dataFiles.collect { DataFile dataFile ->
+            final Collection<Path> paths = nonIndexDataFiles.collect { DataFile dataFile ->
                 lsdfFilesService.getFileViewByPidPathAsPath(dataFile)
             }
 

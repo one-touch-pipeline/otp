@@ -67,9 +67,9 @@ class TriggerAlignmentServiceSpec extends HibernateSpec implements ServiceUnitTe
 
     void "run triggerAlignment, which should trigger 1 new workflow and 1 old workflow"() {
         given:
-        final SeqType st1 = createSeqType()
-        final SeqType st2 = createSeqType()
-        final SeqType st3 = createSeqType()
+        final SeqType st1 = createSeqTypePaired()
+        final SeqType st2 = createSeqTypePaired()
+        final SeqType st3 = createSeqTypePaired()
 
         Project project = createProject()
         Individual individual = createIndividual(project: project)

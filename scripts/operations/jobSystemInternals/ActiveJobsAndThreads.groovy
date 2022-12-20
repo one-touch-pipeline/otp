@@ -19,22 +19,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
-import de.dkfz.tbi.otp.job.processing.*
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
-println "SCHEDULER ACTIVE"
-println ctx.schedulerService.active
-println ""
-println "SCHEDULER QUEUE"
-ctx.schedulerService.queue.each {
-    println it
-}
-println ""
-println "RUNNING JOBS"
-ctx.schedulerService.running.each {
-    println "${it}\t(ProcessingStep ID ${it.processingStep.id}, ${it.processingStep.process.jobExecutionPlan.name} on ${atMostOneElement(ProcessParameter.findAllByProcess(it.processingStep.process))?.toObject()}"
-}
-println ""
 println "THREADS"
 Thread.allStackTraces.each {
     println "${it.key} (ID ${it.key.id})"

@@ -124,6 +124,9 @@ trait DomainFactoryCore implements DomainFactoryHelper {
         return createDomainObject(SeqType, getCustomSeqTypeProperties(properties), properties, saveAndValidate)
     }
 
+    SeqType createSeqTypePaired(Map properties = [:], boolean saveAndValidate = true) {
+        return createDomainObject(SeqType, getCustomSeqTypeProperties(properties) + [libraryLayout: SequencingReadType.PAIRED], properties, saveAndValidate)
+    }
     private Map getCustomSeqTypeProperties(Map properties = [:]) {
         String defaultName = "seqTypeName_${nextId}"
         return [
@@ -268,9 +271,10 @@ trait DomainFactoryCore implements DomainFactoryHelper {
     }
 
     SeqTrack createSeqTrackWithTwoDataFile(Map seqTrackProperties = [:], Map dataFile1Properties = [:], Map dataFile2Properties = [:]) {
-        SeqTrack seqTrack = createSeqTrack(seqTrackProperties)
-        createSequenceDataFile(dataFile1Properties + [seqTrack: seqTrack])
-        createSequenceDataFile(dataFile2Properties + [seqTrack: seqTrack])
+        SeqType seqType = seqTrackProperties.containsKey('seqType') ? seqTrackProperties.seqType : createSeqTypePaired()
+        SeqTrack seqTrack = createSeqTrack([seqType: seqType] + seqTrackProperties)
+        createSequenceDataFile([mateNumber: 1,] + dataFile1Properties + [seqTrack: seqTrack])
+        createSequenceDataFile([mateNumber: 2,] + dataFile2Properties + [seqTrack: seqTrack])
         return seqTrack
     }
 

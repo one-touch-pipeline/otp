@@ -51,9 +51,9 @@ class SearchSeqTrackServiceSpec extends HibernateSpec implements ServiceUnitTest
 
     void "run getAllSeqTracksByProjectAndSeqTypes, should return the expected seqTracks"() {
         given:
-        final SeqType st1 = createSeqType()
-        final SeqType st2 = createSeqType()
-        final SeqType st3 = createSeqType()
+        final SeqType st1 = createSeqTypePaired()
+        final SeqType st2 = createSeqTypePaired()
+        final SeqType st3 = createSeqTypePaired()
 
         final Project project = createProject()
         final Individual individual = createIndividual(project: project)
@@ -90,8 +90,8 @@ class SearchSeqTrackServiceSpec extends HibernateSpec implements ServiceUnitTest
 
     void "run getAllSeqTracksByIndividualsAndSeqTypes, should return the expected seqTracks"() {
         given:
-        final SeqType st1 = createSeqType()
-        final SeqType st2 = createSeqType()
+        final SeqType st1 = createSeqTypePaired()
+        final SeqType st2 = createSeqTypePaired()
 
         Project project = createProject()
         Individual individual1 = createIndividual([
@@ -134,8 +134,8 @@ class SearchSeqTrackServiceSpec extends HibernateSpec implements ServiceUnitTest
 
     void "run getAllSeqTracksByLaneIds, should return the expected seqTracks"() {
         given:
-        final SeqType st1 = createSeqType(name: SeqTypeNames.EXOME.seqTypeName)
-        final SeqType st2 = createSeqType(name: SeqTypeNames.WHOLE_GENOME.seqTypeName)
+        final SeqType st1 = createSeqTypePaired(name: SeqTypeNames.EXOME.seqTypeName)
+        final SeqType st2 = createSeqTypePaired(name: SeqTypeNames.WHOLE_GENOME.seqTypeName)
 
         Project project = createProject()
         Individual individual = createIndividual([
@@ -166,8 +166,8 @@ class SearchSeqTrackServiceSpec extends HibernateSpec implements ServiceUnitTest
 
     void "run getAllSeqTracksByIlseSubmissions, should return the expected seqTracks"() {
         given:
-        final SeqType st1 = createSeqType(name: SeqTypeNames.EXOME.seqTypeName)
-        final SeqType st2 = createSeqType(name: SeqTypeNames.WHOLE_GENOME.seqTypeName)
+        final SeqType st1 = createSeqTypePaired(name: SeqTypeNames.EXOME.seqTypeName)
+        final SeqType st2 = createSeqTypePaired(name: SeqTypeNames.WHOLE_GENOME.seqTypeName)
 
         final IlseSubmission ilseSubmission1 = createIlseSubmission(ilseNumber: 1234)
         final IlseSubmission ilseSubmission2 = createIlseSubmission(ilseNumber: 2345)

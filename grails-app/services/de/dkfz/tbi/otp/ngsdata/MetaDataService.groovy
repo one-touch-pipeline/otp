@@ -74,7 +74,8 @@ class MetaDataService {
 
         final int mateCount = 2
         if (!CollectionUtils.containSame(vbpDataFiles.collate(mateCount), sortedFiles.collate(mateCount))) {
-            throw new IllegalFileNameException("The file names would cause Roddy to reorder the files in the wrong way.")
+            throw new IllegalFileNameException("The file names would cause Roddy to reorder the files in the wrong way:\n" +
+                    "${vbpDataFiles.join('\n')}\n----------\n${sortedFiles.join('\\n')}")
         }
     }
 }

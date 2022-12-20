@@ -42,6 +42,7 @@ class ConfigurePipelineController implements ConfigurePipelineHelper {
     ReferenceGenomeIndexService referenceGenomeIndexService
     GeneModelService geneModelService
     SampleTypeService sampleTypeService
+    SeqTypeService seqTypeService
     ToolNameService toolNameService
 
     static allowedMethods = [
