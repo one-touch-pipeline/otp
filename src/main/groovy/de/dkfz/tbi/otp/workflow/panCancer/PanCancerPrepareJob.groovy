@@ -26,11 +26,11 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
+import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.utils.LinkEntry
 import de.dkfz.tbi.otp.workflow.jobs.AbstractPrepareJob
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
-import java.nio.file.FileSystem
 import java.nio.file.Path
 
 @Component
@@ -41,10 +41,12 @@ class PanCancerPrepareJob extends AbstractPrepareJob implements PanCancerShared 
     @Autowired
     PanCancerPreparationService panCancerPreparationService
 
+    @Autowired
+    RoddyBamFileService roddyBamFileService
+
     @Override
     protected Path buildWorkDirectoryPath(WorkflowStep workflowStep) {
-        FileSystem fileSystem = getFileSystem(workflowStep)
-        return fileSystem.getPath(workflowStep.workflowRun.workDirectory)
+        return roddyBamFileService.getWorkDirectory(getRoddyBamFile(workflowStep))
     }
 
     @Override

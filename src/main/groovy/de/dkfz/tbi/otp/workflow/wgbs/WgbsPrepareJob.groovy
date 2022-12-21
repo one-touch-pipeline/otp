@@ -55,7 +55,7 @@ class WgbsPrepareJob extends AbstractPrepareJob implements PanCancerShared {
 
     @Override
     protected Path buildWorkDirectoryPath(WorkflowStep workflowStep) {
-        return getFileSystem(workflowStep).getPath(workflowStep.workflowRun.workDirectory)
+        return roddyBamFileService.getWorkDirectory(getRoddyBamFile(workflowStep))
     }
 
     @Override

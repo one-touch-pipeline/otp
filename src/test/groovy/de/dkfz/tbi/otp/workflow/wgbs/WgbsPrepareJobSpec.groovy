@@ -31,20 +31,21 @@ import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
-import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.domainFactory.workflowSystem.WgbsAlignmentWorkflowDomainFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
-import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.job.processing.RoddyConfigValueService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.NotificationCreator
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.utils.LinkEntry
+import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflow.panCancer.PanCancerPreparationService
-import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
+import de.dkfz.tbi.otp.workflow.panCancer.PanCancerWorkflow
+import de.dkfz.tbi.otp.workflowExecution.*
 
 import java.nio.file.*
 
-class WgbsPrepareJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory, IsRoddy {
+class WgbsPrepareJobSpec extends Specification implements DataTest, WgbsAlignmentWorkflowDomainFactory, IsRoddy {
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -59,25 +60,35 @@ class WgbsPrepareJobSpec extends Specification implements DataTest, WorkflowSyst
         ]
     }
 
+    static private final String DIRECTORY = "/tmp"
+
     @Rule
     TemporaryFolder temporaryFolder
 
+    private WorkflowStep workflowStep
+    private WorkflowRun workflowRun
+    private WorkflowArtefact workflowArtefact
+    private RoddyBamFile roddyBamFile
+
     void "test buildWorkDirectoryPath should return workflowRun workDirectory"() {
         given:
-        WorkflowStep workflowStep = createWorkflowStep()
-        WgbsPrepareJob job = new WgbsPrepareJob()
-
-        job.fileSystemService = Mock(FileSystemService) {
-            1 * getRemoteFileSystem(_) >> FileSystems.default
-        }
+        setupData()
+        WgbsPrepareJob job = new WgbsPrepareJob([
+                concreteArtefactService: Mock(ConcreteArtefactService) {
+                    1 * getOutputArtefact(workflowStep, WgbsWorkflow.OUTPUT_BAM) >> roddyBamFile
+                },
+                roddyBamFileService    : Mock(RoddyBamFileService) {
+                    1 * getWorkDirectory(roddyBamFile) >> Paths.get(DIRECTORY)
+                },
+        ])
 
         expect:
-        job.buildWorkDirectoryPath(workflowStep).toString() == workflowStep.workflowRun.workDirectory
+        job.buildWorkDirectoryPath(workflowStep).toString() == DIRECTORY
     }
 
     void "test generateMapForLinking should return empty list"() {
         given:
-        WorkflowStep workflowStep = createWorkflowStep()
+        setupData()
         WgbsPrepareJob job = new WgbsPrepareJob()
 
         when:
@@ -89,14 +100,15 @@ class WgbsPrepareJobSpec extends Specification implements DataTest, WorkflowSyst
 
     void "test doFurtherPreparation should create a notification"() {
         given:
-        WorkflowStep workflowStep = createWorkflowStep()
+        setupData()
         List<SeqTrack> seqTracks = [createSeqTrack(), createSeqTrack()]
-        RoddyBamFile roddyBamFile = createBamFile()
 
-        WgbsPrepareJob job = Spy(WgbsPrepareJob) {
-            1 * getSeqTracks(workflowStep) >> seqTracks
-            1 * getRoddyBamFile(workflowStep) >> roddyBamFile
-        }
+        WgbsPrepareJob job = new WgbsPrepareJob([
+                concreteArtefactService: Mock(ConcreteArtefactService) {
+                    1 * getInputArtefacts(workflowStep, WgbsWorkflow.INPUT_FASTQ) >> seqTracks
+                    1 * getOutputArtefact(workflowStep, WgbsWorkflow.OUTPUT_BAM) >> roddyBamFile
+                },
+        ])
 
         job.panCancerPreparationService = new PanCancerPreparationService()
         job.panCancerPreparationService.notificationCreator = Mock(NotificationCreator)
@@ -115,15 +127,15 @@ class WgbsPrepareJobSpec extends Specification implements DataTest, WorkflowSyst
 
     void "test doFurtherPreparation should mark start of workflow in MergingWorkPackage"() {
         given:
-        WorkflowStep workflowStep = createWorkflowStep()
+        setupData()
         List<SeqTrack> seqTracks = [createSeqTrack(), createSeqTrack()]
-        MergingWorkPackage mergingWorkPackage = createMergingWorkPackage([seqTracks: seqTracks, needsProcessing: true])
-        RoddyBamFile roddyBamFile = createBamFile(workPackage: mergingWorkPackage)
 
-        WgbsPrepareJob job = Spy(WgbsPrepareJob) {
-            1 * getSeqTracks(workflowStep) >> seqTracks
-            1 * getRoddyBamFile(workflowStep) >> roddyBamFile
-        }
+        WgbsPrepareJob job = new WgbsPrepareJob([
+                concreteArtefactService: Mock(ConcreteArtefactService) {
+                    1 * getInputArtefacts(workflowStep, WgbsWorkflow.INPUT_FASTQ) >> seqTracks
+                    1 * getOutputArtefact(workflowStep, WgbsWorkflow.OUTPUT_BAM) >> roddyBamFile
+                },
+        ])
 
         job.panCancerPreparationService = new PanCancerPreparationService()
         job.panCancerPreparationService.notificationCreator = Mock(NotificationCreator)
@@ -144,15 +156,15 @@ class WgbsPrepareJobSpec extends Specification implements DataTest, WorkflowSyst
         given:
         Path metadataFile = temporaryFolder.newFolder().toPath().resolve("file.tsv")
 
-        WorkflowStep workflowStep = createWorkflowStep()
+        setupData()
         List<SeqTrack> seqTracks = [createSeqTrackWithTwoDataFile(), createSeqTrackWithTwoDataFile()]
-        MergingWorkPackage mergingWorkPackage = createMergingWorkPackage([seqTracks: seqTracks, needsProcessing: true])
-        RoddyBamFile roddyBamFile = createBamFile(workPackage: mergingWorkPackage)
 
-        WgbsPrepareJob job = Spy(WgbsPrepareJob) {
-            1 * getSeqTracks(workflowStep) >> seqTracks
-            1 * getRoddyBamFile(workflowStep) >> roddyBamFile
-        }
+        WgbsPrepareJob job = new WgbsPrepareJob([
+                concreteArtefactService: Mock(ConcreteArtefactService) {
+                    1 * getInputArtefacts(workflowStep, WgbsWorkflow.INPUT_FASTQ) >> seqTracks
+                    1 * getOutputArtefact(workflowStep, WgbsWorkflow.OUTPUT_BAM) >> roddyBamFile
+                },
+        ])
 
         job.panCancerPreparationService = Mock(PanCancerPreparationService)
         job.roddyConfigValueService = new RoddyConfigValueService()
@@ -168,5 +180,27 @@ class WgbsPrepareJobSpec extends Specification implements DataTest, WorkflowSyst
         then:
         Files.exists(metadataFile)
         metadataFile.readLines().size() == 5
+    }
+
+    void setupData() {
+        workflowRun = createWorkflowRun([
+                workflowVersion: createWgbsAlignmenWorkflowVersion(),
+                workDirectory  : DIRECTORY,
+        ])
+        workflowStep = createWorkflowStep([
+                workflowRun: workflowRun,
+        ])
+        workflowArtefact = createWorkflowArtefact([
+                producedBy  : workflowRun,
+                artefactType: ArtefactType.BAM,
+                outputRole  : PanCancerWorkflow.OUTPUT_BAM,
+        ])
+        MergingWorkPackage mergingWorkPackage = createMergingWorkPackage([
+                needsProcessing: true,
+        ])
+        roddyBamFile = createBamFile([
+                workflowArtefact: workflowArtefact,
+                workPackage     : mergingWorkPackage,
+        ])
     }
 }

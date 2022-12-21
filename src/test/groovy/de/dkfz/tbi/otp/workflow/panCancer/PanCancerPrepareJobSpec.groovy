@@ -26,22 +26,20 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
+import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
-import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
-import de.dkfz.tbi.otp.job.processing.FileSystemService
-import de.dkfz.tbi.otp.ngsdata.FastqImportInstance
-import de.dkfz.tbi.otp.ngsdata.FileType
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeProjectSeqType
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.domainFactory.workflowSystem.PanCancerWorkflowDomainFactory
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.NotificationCreator
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.utils.LinkEntry
-import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
+import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
+import de.dkfz.tbi.otp.workflowExecution.*
 
-import java.nio.file.FileSystems
+import java.nio.file.Paths
 
-class PanCancerPrepareJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory, IsRoddy {
+class PanCancerPrepareJobSpec extends Specification implements DataTest, PanCancerWorkflowDomainFactory, IsRoddy {
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -56,22 +54,32 @@ class PanCancerPrepareJobSpec extends Specification implements DataTest, Workflo
         ]
     }
 
+    static private final String DIRECTORY = "/tmp"
+
+    private WorkflowStep workflowStep
+    private WorkflowRun workflowRun
+    private WorkflowArtefact workflowArtefact
+    private RoddyBamFile roddyBamFile
+
     void "test buildWorkDirectoryPath should return workflowRun workDirectory"() {
         given:
-        WorkflowStep workflowStep = createWorkflowStep()
-        PanCancerPrepareJob job = new PanCancerPrepareJob()
-
-        job.fileSystemService = Mock(FileSystemService) {
-            1 * getRemoteFileSystem(_) >> FileSystems.default
-        }
+        setupData()
+        PanCancerPrepareJob job = new PanCancerPrepareJob([
+                concreteArtefactService: Mock(ConcreteArtefactService) {
+                    1 * getOutputArtefact(workflowStep, PanCancerWorkflow.OUTPUT_BAM) >> roddyBamFile
+                },
+                roddyBamFileService    : Mock(RoddyBamFileService) {
+                    1 * getWorkDirectory(roddyBamFile) >> Paths.get(DIRECTORY)
+                },
+        ])
 
         expect:
-        job.buildWorkDirectoryPath(workflowStep).toString() == workflowStep.workflowRun.workDirectory
+        job.buildWorkDirectoryPath(workflowStep).toString() == DIRECTORY
     }
 
     void "test generateMapForLinking should return empty list"() {
         given:
-        WorkflowStep workflowStep = createWorkflowStep()
+        setupData()
         PanCancerPrepareJob job = new PanCancerPrepareJob()
 
         when:
@@ -83,14 +91,15 @@ class PanCancerPrepareJobSpec extends Specification implements DataTest, Workflo
 
     void "test doFurtherPreparation should create a notification"() {
         given:
-        WorkflowStep workflowStep = createWorkflowStep()
+        setupData()
         List<SeqTrack> seqTracks = [createSeqTrack(), createSeqTrack()]
-        RoddyBamFile roddyBamFile = createBamFile()
 
-        PanCancerPrepareJob job = Spy(PanCancerPrepareJob) {
-            1 * getSeqTracks(workflowStep) >> seqTracks
-            1 * getRoddyBamFile(workflowStep) >> roddyBamFile
-        }
+        PanCancerPrepareJob job = new PanCancerPrepareJob([
+                concreteArtefactService: Mock(ConcreteArtefactService) {
+                    1 * getInputArtefacts(workflowStep, PanCancerWorkflow.INPUT_FASTQ) >> seqTracks
+                    1 * getOutputArtefact(workflowStep, PanCancerWorkflow.OUTPUT_BAM) >> roddyBamFile
+                },
+        ])
 
         job.panCancerPreparationService = new PanCancerPreparationService()
         job.panCancerPreparationService.notificationCreator = Mock(NotificationCreator)
@@ -104,15 +113,15 @@ class PanCancerPrepareJobSpec extends Specification implements DataTest, Workflo
 
     void "test doFurtherPreparation should mark start of workflow in MergingWorkPackage"() {
         given:
-        WorkflowStep workflowStep = createWorkflowStep()
+        setupData()
         List<SeqTrack> seqTracks = [createSeqTrack(), createSeqTrack()]
-        MergingWorkPackage mergingWorkPackage = createMergingWorkPackage([seqTracks: seqTracks, needsProcessing: true])
-        RoddyBamFile roddyBamFile = createBamFile(workPackage: mergingWorkPackage)
 
-        PanCancerPrepareJob job = Spy(PanCancerPrepareJob) {
-            1 * getSeqTracks(workflowStep) >> seqTracks
-            1 * getRoddyBamFile(workflowStep) >> roddyBamFile
-        }
+        PanCancerPrepareJob job = new PanCancerPrepareJob([
+                concreteArtefactService: Mock(ConcreteArtefactService) {
+                    1 * getInputArtefacts(workflowStep, PanCancerWorkflow.INPUT_FASTQ) >> seqTracks
+                    1 * getOutputArtefact(workflowStep, PanCancerWorkflow.OUTPUT_BAM) >> roddyBamFile
+                }
+        ])
 
         job.panCancerPreparationService = new PanCancerPreparationService()
         job.panCancerPreparationService.notificationCreator = Mock(NotificationCreator)
@@ -122,5 +131,27 @@ class PanCancerPrepareJobSpec extends Specification implements DataTest, Workflo
 
         then:
         !MergingWorkPackage.findAll(seqTracks: seqTracks).first().needsProcessing
+    }
+
+    void setupData() {
+        workflowRun = createWorkflowRun([
+                workflowVersion: createPanCancerWorkflowVersion(),
+                workDirectory  : DIRECTORY,
+        ])
+        workflowStep = createWorkflowStep([
+                workflowRun: workflowRun,
+        ])
+        workflowArtefact = createWorkflowArtefact([
+                producedBy  : workflowRun,
+                artefactType: ArtefactType.BAM,
+                outputRole  : PanCancerWorkflow.OUTPUT_BAM,
+        ])
+        MergingWorkPackage mergingWorkPackage = createMergingWorkPackage([
+                needsProcessing: true,
+        ])
+        roddyBamFile = createBamFile([
+                workflowArtefact: workflowArtefact,
+                workPackage     : mergingWorkPackage,
+        ])
     }
 }
