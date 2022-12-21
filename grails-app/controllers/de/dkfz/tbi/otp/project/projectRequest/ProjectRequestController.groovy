@@ -202,7 +202,7 @@ class ProjectRequestController implements CheckAndCall {
             flash.cmd = projectRequestStateProvider.getCurrentState(projectRequest).edit(projectRequest)
             redirect(action: ACTION_INDEX)
         } catch (ProjectRequestBeingEditedException e) {
-            flash.message =  new FlashMessage(g.message(code: "projectRequest.edit.failure") as String, e.message)
+            flash.message = new FlashMessage(g.message(code: "projectRequest.edit.failure") as String, e.message)
             redirect(action: ACTION_VIEW, id: projectRequest.id)
         }
     }
@@ -359,10 +359,20 @@ class ProjectRequestCreationCommand implements Validateable {
     List<String> speciesWithStrainList
     List<SpeciesWithStrain> speciesWithStrains = []
     List<String> customSpeciesWithStrains = []
+
+    @BindUsing({ ProjectRequestCreationCommand obj, SimpleMapDataBindingSource source ->
+        Object input = source['sequencingCenterList']
+        return (input instanceof String ? [input] : input) as List<String>
+    })
     List<String> sequencingCenterList
     List<SeqCenter> sequencingCenters = []
     List<String> customSequencingCenters = []
     Integer approxNoOfSamples
+
+    @BindUsing({ ProjectRequestCreationCommand obj, SimpleMapDataBindingSource source ->
+        Object input = source['seqTypesList']
+        return (input instanceof String ? [input] : input) as List<String>
+    })
     List<String> seqTypesList
     List<SeqType> seqTypes = []
     List<String> customSeqTypes = []
