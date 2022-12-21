@@ -350,11 +350,12 @@ abstract class AbstractRoddyAlignmentWorkflowSpec extends AbstractAlignmentWorkf
         List<DataFile> dataFiles = (1..seqType.libraryLayout.mateCount).collect { int index ->
             String fileName = "fastq_${seqTrack.individual.pid}_${seqTrack.sampleType.name}_${seqTrack.laneId}_${index}.fastq.gz"
             DataFile dataFile = createDataFile([
-                    seqTrack   : seqTrack,
-                    mateNumber : index,
-                    vbpFileName: fileName,
-                    fileName   : fileName,
-                    nReads     : NUMBER_OF_READS,
+                    seqTrack           : seqTrack,
+                    mateNumber         : index,
+                    vbpFileName        : fileName,
+                    fileName           : fileName,
+                    nReads             : NUMBER_OF_READS,
+                    fastqImportInstance: fastqImportInstance,
             ])
             log.info("Create dataFile ${dataFile}")
             return dataFile

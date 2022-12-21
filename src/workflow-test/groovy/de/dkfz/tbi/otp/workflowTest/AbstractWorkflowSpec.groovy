@@ -45,8 +45,7 @@ import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
-import de.dkfz.tbi.otp.ngsdata.Realm
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.utils.*
@@ -154,6 +153,11 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
     protected ProcessingPriority processingPriority
 
     /**
+     * An instance for fastq import
+     */
+    protected FastqImportInstance fastqImportInstance
+
+    /**
      * The file holding the dump for restore the database afterwards
      */
     protected File schemaDump
@@ -228,6 +232,7 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
 
             loadDefaultValuesScripts()
             createProcessingPriorityObject()
+            initFastqImportInstance()
             initRealm()
             initFileSystem()
             createUserAndRoles()
@@ -435,6 +440,16 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
                 allowedParallelWorkflowRuns: 1000,
         ])
         findOrCreateProcessingOption(name: OptionName.PROCESSING_PRIORITY_DEFAULT_NAME, value: processingPriority.name)
+    }
+
+    /**
+     * create fastqImportInstance & otrsTicket
+     */
+    private void initFastqImportInstance() {
+        log.debug("creating fastqImportInstance & otrsTicket")
+        fastqImportInstance = createFastqImportInstance([
+                otrsTicket: createOtrsTicket()
+        ])
     }
 
     /**
@@ -651,17 +666,25 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
      *   - processingPriority
      * - WorkflowRun:
      *   - priority
+     * - connect dataFiles to fastqImportInstance with otrsTicket
      */
     private void updateDomainValuesForTesting() {
         String unixGroup = configService.workflowProjectUnixGroup
+        log.debug("update projects")
         Project.list().each {
             it.unixGroup = unixGroup
             it.processingPriority = processingPriority
             it.save(flush: true)
         }
+        log.debug("update workflow runs")
         WorkflowRun.list().each {
             it.priority = processingPriority
             it.save(flush: true)
+        }
+
+        log.debug("check correct connection of datafiles to fastqImportInstance")
+        DataFile.list().each {
+            assert it.fastqImportInstance == fastqImportInstance
         }
     }
 

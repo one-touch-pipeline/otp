@@ -96,18 +96,19 @@ class DataInstallationWorkflowSpec extends AbstractWorkflowSpec {
 
     private DataFile createDataFile(SeqTrack seqTrack, Integer mateNumber, String fastqFilename, Path fastqFilePath, Map map = [:]) {
         return createDataFile([
-                mateNumber      : mateNumber,
-                seqTrack        : seqTrack,
-                project         : seqTrack.project,
-                fileName        : fastqFilename,
-                vbpFileName     : fastqFilename,
-                md5sum          : md5sum(fastqFilePath),
-                fileExists      : false,
-                fileLinked      : false,
-                fileSize        : 0,
-                initialDirectory: additionalDataDirectory.toString(),
-                run             : seqTrack.run,
-                fileType        : fileType,
+                mateNumber         : mateNumber,
+                seqTrack           : seqTrack,
+                project            : seqTrack.project,
+                fileName           : fastqFilename,
+                vbpFileName        : fastqFilename,
+                md5sum             : md5sum(fastqFilePath),
+                fileExists         : false,
+                fileLinked         : false,
+                fileSize           : 0,
+                initialDirectory   : additionalDataDirectory.toString(),
+                run                : seqTrack.run,
+                fastqImportInstance: fastqImportInstance,
+                fileType           : fileType,
         ] + map)
     }
 
@@ -125,9 +126,8 @@ class DataInstallationWorkflowSpec extends AbstractWorkflowSpec {
 
     protected void prepareAndExecute(int expectedWorkflows = 1) {
         SessionUtils.withTransaction {
-            FastqImportInstance fastqImportInstance = createFastqImportInstance([
-                    dataFiles: DataFile.list(),
-            ])
+            fastqImportInstance.refresh()
+            assert fastqImportInstance.dataFiles
             List<WorkflowRun> workflowRuns = dataInstallationInitializationService.createWorkflowRuns(fastqImportInstance)
             assert workflowRuns.size() == expectedWorkflows
         }

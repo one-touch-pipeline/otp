@@ -349,6 +349,7 @@ class CreateNotificationTextService {
                 bamFilePerConfig.each { AlignmentInfo alignmentInfo, List<AbstractMergedBamFile> configBamFiles ->
                     builder << messageSourceService.createMessage("notification.template.alignment.processing", [
                             seqType           : seqType.displayNameWithLibraryLayout,
+                            individuals       : "",
                             referenceGenome   : configBamFiles*.referenceGenome.unique().join(', '),
                             alignmentProgram  : alignmentInfo.alignmentProgram,
                             alignmentParameter: alignmentInfo.alignmentParameter,

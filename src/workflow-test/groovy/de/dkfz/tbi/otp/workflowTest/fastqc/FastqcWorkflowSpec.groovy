@@ -83,6 +83,7 @@ class FastqcWorkflowSpec extends AbstractWorkflowSpec {
                 seqTrack: seqTrack,
                 run: run,
                 initialDirectory: workingDirectory.resolve("ftp").resolve(run.name),
+                fastqImportInstance: fastqImportInstance,
         )
 
         fileService.createLink(lsdfFilesService.getFileViewByPidPathAsPath(dataFile), sourceFastq, realm)
