@@ -26,28 +26,20 @@
     <conversionRule conversionWord="clr" converterClass="org.springframework.boot.logging.logback.ColorConverter" />
     <conversionRule conversionWord="wex" converterClass="org.springframework.boot.logging.logback.WhitespaceThrowableProxyConverter" />
 
-
     <variable name="defaultPattern" value="%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(%5p) %clr(---){faint} %clr([%25.25t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n%wex" />
-
-    <define name="isDevelopmentMode" class="de.dkfz.tbi.otp.utils.logging.EnvironmentDefiner"/>
 
     <define name="jobLogDir" class="de.dkfz.tbi.otp.utils.logging.JobLogDirDefiner"/>
 
-
-    <if condition='p("isDevelopmentMode").equals("true")'>
-        <then>
-            <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-                <encoder>
-                    <charset>UTF-8</charset>
-                    <pattern>${defaultPattern}</pattern>
-                </encoder>
-            </appender>
-        </then>
-        <else>
-            <appender name="STDOUT" class="ch.qos.logback.core.helpers.NOPAppender">
-            </appender>
-        </else>
-    </if>
+    <!--
+    This appender for stdout relies on the filter class ConsoleFilter, which is switches it on only when system is in the development mode
+    -->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <filter class="de.dkfz.tbi.otp.utils.logging.ConsoleFilter"/>
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>${defaultPattern}</pattern>
+        </encoder>
+    </appender>
 
     <appender name="FULL_STACKTRACE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <append>true</append>
@@ -93,15 +85,7 @@
     It requires that the logging context is set, which is done in the SchedulerService.
     -->
     <appender name="JOBS" class="ch.qos.logback.classic.sift.SiftingAppender">
-        <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
-            <evaluator class="ch.qos.logback.classic.boolex.JaninoEventEvaluator">
-                <expression>
-                    return mdc.containsKey("PROCESS_AND_JOB_ID");
-                </expression>
-            </evaluator>
-            <onMismatch>DENY</onMismatch>
-            <onMatch>ACCEPT</onMatch>
-        </filter>
+        <filter class="de.dkfz.tbi.otp.utils.logging.JobsFilter"/>
         <discriminator class="ch.qos.logback.classic.sift.MDCBasedDiscriminator">
             <key>PROCESS_AND_JOB_ID</key>
             <defaultValue>THIS_FILE_SHOULD_NOT_EXIST</defaultValue><!--this shouldn't happen but defaultValue is required-->
@@ -117,16 +101,9 @@
             </appender>
         </sift>
     </appender>
+
     <appender name="STARTJOBS" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
-            <evaluator class="ch.qos.logback.classic.boolex.JaninoEventEvaluator">
-                <expression>
-                    return mdc.containsKey("PROCESS_AND_JOB_ID");
-                </expression>
-            </evaluator>
-            <onMismatch>ACCEPT</onMismatch>
-            <onMatch>DENY</onMatch>
-        </filter>
+        <filter class="de.dkfz.tbi.otp.utils.logging.StartJobsFilter"/>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!-- daily rollover, keeping seven days of logs-->
             <fileNamePattern>${jobLogDir}/startjobs/%d{yyyy-MM-dd}.log</fileNamePattern>

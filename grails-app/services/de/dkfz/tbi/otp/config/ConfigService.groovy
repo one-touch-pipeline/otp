@@ -235,7 +235,7 @@ class ConfigService implements ApplicationContextAware {
     }
 
     private File getAndCheckPathFromProperty(OtpProperty property) {
-        return new File(otpProperties.get(property).toString() ?: property.defaultValue.toString())
+        return new File(otpProperties.get(property) ?: property.defaultValue)
     }
 
     private boolean getBooleanValue(OtpProperty otpPropertiesValue) {

@@ -83,6 +83,7 @@ class TestConfigService extends ConfigService {
                 it.key in [
                         OtpProperty.TEST_TESTING_GROUP,
                         OtpProperty.TEST_TESTING_PROJECT_UNIX_GROUP,
+                        OtpProperty.PATH_JOB_LOGS,
                 ]
             }
         }
