@@ -20,36 +20,48 @@
  * SOFTWARE.
  */
 
-describe.skip('Check workflow config viewer page', () => {
+describe('Check workflow config viewer page', () => {
   'use strict';
 
-  context.skip('when user is an operator', () => {
+  context('when user is an operator', () => {
     beforeEach(() => {
       cy.loginAsOperator();
       cy.visit('/workflowConfigViewer/index');
     });
 
-    it('should load config and related selectors when config exists', () => {
+    it('should load the right configs for selected properties and filter with selected types', () => {
       cy.intercept('/workflowConfigViewer/build*').as('buildConfig');
 
-      cy.get('.selector').find('#workflowSelector').select('Cell Ranger', { force: true });
+      const workflow = 'PanCancer alignment';
+
+      cy.get('.selector').find('#workflowSelector').select(workflow, { force: true });
 
       cy.wait('@buildConfig').then((interception) => {
         expect(interception.response.statusCode).to.eq(200);
         cy.get('#configValue').invoke('val').should('not.be.empty');
-        cy.get('#relatedSelectors').find('div .card').should('have.length', 9).then(
-          (relatedSelectors) => {
-            cy.wrap(relatedSelectors['0']).find('pre').should('not.be.visible');
-            cy.wrap(relatedSelectors['0']).find('.code > a').click({ force: true });
-            cy.wrap(relatedSelectors['0']).find('pre').should('be.visible');
-            cy.wrap(relatedSelectors['0']).find('pre').should('not.be.empty');
-          }
-        );
-        cy.get('#relatedSelectorType').select('BED_FILE', { force: true });
-        cy.get('#relatedSelectors').find('div .card').filter(':visible').should('have.length', 3);
-        cy.get('#relatedSelectorType').invoke('val', ''); // to override selected elements
-        cy.get('#relatedSelectorType').select(['BED_FILE', 'REVERSE_SEQUENCE'], { force: true });
-        cy.get('#relatedSelectors').find('div .card').filter(':visible').should('have.length', 6);
+        cy.get('div#right-side #relatedSelectors').children().should('have.length', 2);
+      });
+
+      cy.get('#libPrepKitSelector').select('Agilent SureSelect V5', { force: true });
+      cy.wait('@buildConfig').then((interception) => {
+        expect(interception.response.statusCode).to.eq(200);
+        cy.get('#configValue').invoke('val').should('not.be.empty');
+        cy.get('div#right-side #relatedSelectors').children().should('have.length', 3);
+      });
+
+      cy.get('#relatedSelectorType').select('REVERSE_SEQUENCE', { force: true });
+      cy.get('#configValue').invoke('val').should('not.be.empty');
+      cy.get('[data-type]:not([data-type="REVERSE_SEQUENCE"])').should('not.be.visible');
+
+      cy.get('#relatedSelectorType + .select2').contains('.select2-selection__choice', 'REVERSE_SEQUENCE')
+        .find('.select2-selection__choice__remove').click();
+      cy.get('[data-type]:not([data-type="REVERSE_SEQUENCE"])').should('be.visible');
+
+      cy.get('#refGenSelector').select('GRCm38mm10_PhiX', { force: true });
+      cy.wait('@buildConfig').then((interception) => {
+        expect(interception.response.statusCode).to.eq(200);
+        cy.get('#configValue').invoke('val').should('not.be.empty');
+        cy.get('div#right-side #relatedSelectors').children().should('have.length', 4);
       });
     });
 

@@ -20,14 +20,29 @@
  * SOFTWARE.
  */
 
-//= require ../shared/workflowConfigBase
-
 $(() => {
   'use strict';
 
   $('select').select2({
     allowClear: true,
     theme: 'bootstrap4'
+  });
+
+  const selectorTypeSelector = $('#relatedSelectorType');
+
+  const filterBySelectorType = () => {
+    const types = selectorTypeSelector.val();
+    $('#relatedSelectors').children('div').each(function () {
+      if (types !== null && types.length > 0 && types.indexOf($(this).data('type')) === -1) {
+        $(this).hide();
+      } else {
+        $(this).show();
+      }
+    });
+  };
+
+  selectorTypeSelector.on('change', () => {
+    filterBySelectorType();
   });
 
   const form = $('form.selector');
@@ -103,6 +118,7 @@ $(() => {
             configValue.val('');
             $.otp.toaster.showInfoToast('No selectors found', 'There are no related selectors to this selection');
           }
+          filterBySelectorType();
         },
         error(error) {
           if (error && error.responseJSON && error.responseJSON.message) {
