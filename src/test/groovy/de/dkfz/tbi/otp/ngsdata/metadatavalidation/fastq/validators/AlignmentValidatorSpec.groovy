@@ -25,33 +25,77 @@ import grails.testing.gorm.DataTest
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerConfig
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
+import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.workflowExecution.WorkflowVersionSelector
+import de.dkfz.tbi.otp.workflowExecution.WorkflowVersionSelectorService
 import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
 
-class AlignmentValidatorSpec extends Specification implements DataTest, DomainFactoryCore {
+class AlignmentValidatorSpec extends Specification implements DataTest, DomainFactoryCore, WorkflowSystemDomainFactory {
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
-                RoddyWorkflowConfig,
+        return [
                 CellRangerConfig,
+                Pipeline,
                 Project,
+                RoddyWorkflowConfig,
                 SeqType,
                 SampleIdentifier,
-                Pipeline,
+                WorkflowVersionSelector,
         ]
+    }
+
+    private SeqType seqTypeNotAlignable
+    private SeqType seqTypeOldSystem
+    private SeqType seqTypeNewSystem
+    private SeqType seqTypeCellRanger
+
+    private SeqTypeService mockSeqTypeService
+    private AlignmentValidator validator
+
+    private void setupData(int count = 1) {
+        seqTypeNotAlignable = createSeqTypePaired()
+        seqTypeOldSystem = DomainFactory.createRnaPairedSeqType()
+        seqTypeNewSystem = createSeqTypePaired()
+        seqTypeCellRanger = DomainFactory.createCellRangerAlignableSeqTypes().first()
+
+        mockSeqTypeService = Mock(SeqTypeService) {
+            count * findAlignAbleSeqTypes() >> [
+                    seqTypeOldSystem,
+                    seqTypeNewSystem,
+            ]
+            count * seqTypesNewWorkflowSystem >> [
+                    seqTypeNewSystem,
+            ]
+            _ * findByNameOrImportAlias(_, _) >> { String nameOrImportAlias, Map properties ->
+                return CollectionUtils.exactlyOneElement(SeqType.findAllByName(nameOrImportAlias), "Not found: ${nameOrImportAlias}")
+            }
+            0 * _
+        }
+
+        validator = new AlignmentValidator([
+                validatorHelperService        : new ValidatorHelperService([seqTypeService: mockSeqTypeService]),
+                seqTypeService                : mockSeqTypeService,
+                projectService                : new ProjectService(),
+                workflowVersionSelectorService: Mock(WorkflowVersionSelectorService) {
+                    0 * _
+                },
+        ])
     }
 
     @Unroll
@@ -71,100 +115,90 @@ class AlignmentValidatorSpec extends Specification implements DataTest, DomainFa
         containSame(context.problems, expectedProblems)
     }
 
-    @Unroll
     void 'validate, does not check for missing optional columns'() {
         given:
-        DomainFactory.createAllAlignableSeqTypes()
-        SeqType seqType = DomainFactory.createWholeGenomeSeqType()
+        setupData()
 
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
 ${SEQUENCING_TYPE},${SEQUENCING_READ_TYPE}
-${seqType.seqTypeName},${seqType.libraryLayout}
+${seqTypeNotAlignable.name},${seqTypeNotAlignable.libraryLayout}
 """.replaceAll(',', '\t'))
 
         when:
-        new AlignmentValidator([validatorHelperService: new ValidatorHelperService([seqTypeService: new SeqTypeService()])]).validate(context)
+        validator.validate(context)
 
         then:
-        containSame(context.problems, [])
+        TestCase.assertContainSame(context.problems, [])
     }
 
-    @Unroll
     void 'validate, when seqType is not supported for alignment, returns info'() {
         given:
-        DomainFactory.createAllAlignableSeqTypes()
-        SeqType seqType = createSeqType()
+        setupData()
 
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
 ${SEQUENCING_TYPE},${PROJECT},${SAMPLE_NAME},${BASE_MATERIAL},${SEQUENCING_READ_TYPE}
-${seqType.name},${createProject().name},,DNA,${SequencingReadType.SINGLE}
+${seqTypeNotAlignable.name},${createProject().name},,DNA,${seqTypeNotAlignable.libraryLayout}
 """.replaceAll(',', '\t'))
 
         Collection<Problem> expectedProblems = [
-                new Problem(Collections.emptySet(), LogLevel.INFO, "Alignment for SeqType ${seqType} is not supported"),
+                new Problem(Collections.emptySet(), LogLevel.INFO, "Alignment for SeqType ${seqTypeNotAlignable} is not supported"),
         ]
 
         when:
-        new AlignmentValidator([validatorHelperService: new ValidatorHelperService([seqTypeService: new SeqTypeService()])]).validate(context)
+        validator.validate(context)
 
         then:
-        containSame(context.problems, expectedProblems)
+        TestCase.assertContainSame(context.problems, expectedProblems)
     }
 
-    @Unroll
     void 'validate, when alignment is not configured, return warning'() {
         given:
-        DomainFactory.createAllAlignableSeqTypes()
-        Pipeline pipeline = DomainFactory.createPanCanPipeline()
-        SeqType seqType1 = DomainFactory.createWholeGenomeBisulfiteTagmentationSeqType()
-        SeqType seqType2 = DomainFactory.createCellRangerAlignableSeqTypes().first()
+        setupData()
+        DomainFactory.createPanCanPipeline()
+        Pipeline pipeline = DomainFactory.createRnaPipeline()
         Project project = createProject()
 
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
 ${SEQUENCING_TYPE},${PROJECT},${SAMPLE_NAME},${BASE_MATERIAL},${SEQUENCING_READ_TYPE}
-${seqType1.name},${project.name},,DNA,${SequencingReadType.PAIRED}
-${seqType2.name},${project.name},,${SeqType.SINGLE_CELL_DNA},${SequencingReadType.PAIRED}
+${seqTypeOldSystem.name},${project.name},,DNA,${seqTypeOldSystem.libraryLayout}
+${seqTypeCellRanger.name},${project.name},,${SeqType.SINGLE_CELL_DNA},${seqTypeCellRanger.libraryLayout}
+${seqTypeNewSystem.name},${project.name},,DNA,${seqTypeNewSystem.libraryLayout}
 """.replaceAll(',', '\t'))
 
         Collection<Problem> expectedProblems = [
-                new Problem(Collections.emptySet(), LogLevel.WARNING, "${pipeline.name} is not configured for Project '${project}' and SeqType '${seqType1}'", "At least one Alignment is not configured."),
-                new Problem(Collections.emptySet(), LogLevel.WARNING, "CellRanger is not configured for Project '${project}' and SeqType '${seqType2}'", "At least one Alignment is not configured."),
+                new Problem(Collections.emptySet(), LogLevel.WARNING, "${pipeline.name} is not configured for Project '${project}' and SeqType '${seqTypeOldSystem}'", "At least one Alignment is not configured."),
+                new Problem(Collections.emptySet(), LogLevel.WARNING, "CellRanger is not configured for Project '${project}' and SeqType '${seqTypeCellRanger}'", "At least one Alignment is not configured."),
+                new Problem(Collections.emptySet(), LogLevel.WARNING, "Alignment is not configured for Project '${project}' and SeqType '${seqTypeNewSystem}'", "At least one Alignment is not configured."),
         ]
 
         when:
-        new AlignmentValidator([
-                validatorHelperService: new ValidatorHelperService([seqTypeService: new SeqTypeService()]),
-                projectService: new ProjectService(),
-        ]).validate(context)
+        validator.validate(context)
 
         then:
-        containSame(context.problems, expectedProblems)
+        validator.workflowVersionSelectorService.hasAlignmentConfigForProjectAndSeqType(project, seqTypeNewSystem) >> false
+        TestCase.assertContainSame(context.problems, expectedProblems)
     }
 
-    @Unroll
     void 'validate, when alignment is configured, no warnings or errors'() {
         given:
-        DomainFactory.createAllAlignableSeqTypes()
-        Pipeline pipeline = DomainFactory.createPanCanPipeline()
-        SeqType seqType1 = DomainFactory.createWholeGenomeBisulfiteTagmentationSeqType()
-        SeqType seqType2 = DomainFactory.createCellRangerAlignableSeqTypes().first()
+        setupData()
+        Pipeline pipeline = DomainFactory.createRnaPipeline()
         Project project = createProject()
-        DomainFactory.createRoddyWorkflowConfig(project: project, pipeline: pipeline, seqType: seqType1)
-        DomainFactory.proxyCellRanger.createConfig(project: project)
+        DomainFactory.createRoddyWorkflowConfig(project: project, pipeline: pipeline, seqType: seqTypeOldSystem)
+        DomainFactory.proxyCellRanger.createConfig(project: project, seqType: seqTypeCellRanger)
 
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
 ${SEQUENCING_TYPE},${PROJECT},${SAMPLE_NAME},${BASE_MATERIAL},${SEQUENCING_READ_TYPE}
-${seqType1.name},${project.name},,DNA,${SequencingReadType.PAIRED}
-${seqType2.name},${project.name},,${SeqType.SINGLE_CELL_DNA},${SequencingReadType.PAIRED}
+${seqTypeOldSystem.name},${project.name},,DNA,${seqTypeOldSystem.libraryLayout}
+${seqTypeCellRanger.name},${project.name},,${SeqType.SINGLE_CELL_DNA},${seqTypeCellRanger.libraryLayout}
+${seqTypeNewSystem.name},${project.name},,DNA,${seqTypeNewSystem.libraryLayout}
 """.replaceAll(',', '\t'))
 
         when:
-        new AlignmentValidator([
-                validatorHelperService: new ValidatorHelperService([seqTypeService: new SeqTypeService()]),
-                projectService: new ProjectService(),
-        ]).validate(context)
+        validator.validate(context)
 
         then:
+        validator.workflowVersionSelectorService.hasAlignmentConfigForProjectAndSeqType(project, seqTypeNewSystem) >> true
         context.problems.empty
     }
 }

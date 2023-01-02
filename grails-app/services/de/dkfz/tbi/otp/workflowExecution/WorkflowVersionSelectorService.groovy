@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -35,6 +35,8 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 @Transactional
 class WorkflowVersionSelectorService {
 
+    OtpWorkflowService otpWorkflowService
+
     Errors createOrUpdate(Project project, SeqType seqType, WorkflowVersion version) {
         WorkflowVersionSelector previous = atMostOneElement(WorkflowVersionSelector.findAllByProjectAndSeqTypeAndDeprecationDateIsNull(project, seqType))
         try {
@@ -54,5 +56,12 @@ class WorkflowVersionSelectorService {
             return e.errors
         }
         return null
+    }
+
+    boolean hasAlignmentConfigForProjectAndSeqType(Project project, SeqType seqType) {
+        Set<String> otpWorkflows = otpWorkflowService.lookupAlignableOtpWorkflowBeans().keySet()
+        return WorkflowVersionSelector.findAllByProjectAndSeqTypeAndDeprecationDateIsNull(project, seqType).find {
+            otpWorkflows.contains(it.workflowVersion.workflow.beanName)
+        }
     }
 }

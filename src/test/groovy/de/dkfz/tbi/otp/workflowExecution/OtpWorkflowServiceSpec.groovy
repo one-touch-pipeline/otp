@@ -21,35 +21,39 @@
  */
 package de.dkfz.tbi.otp.workflowExecution
 
-import org.springframework.beans.factory.annotation.Autowired
+import grails.testing.services.ServiceUnitTest
 import org.springframework.context.ApplicationContext
+import spock.lang.Specification
 
-class OtpWorkflowService {
+import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 
-    @Autowired
-    ApplicationContext applicationContext
+class OtpWorkflowServiceSpec extends Specification implements ServiceUnitTest<OtpWorkflowService>, DomainFactoryCore {
 
-    /**
-     * return the bean of the workflow for the workflowRun
-     */
-    OtpWorkflow lookupOtpWorkflowBean(WorkflowRun workflowRun) {
-        return lookupOtpWorkflowBean(workflowRun.workflow)
-    }
-
-    /**
-     * return the bean of the workflow of the given workflow
-     */
-    OtpWorkflow lookupOtpWorkflowBean(Workflow workflow) {
-        String bean = workflow.beanName
-        return applicationContext.getBean(bean, OtpWorkflow)
-    }
-
-    /**
-     * returns the map of bean names and spring beans for alignable workflows
-     */
-    Map<String, OtpWorkflow> lookupAlignableOtpWorkflowBeans() {
-        return applicationContext.getBeansOfType(OtpWorkflow).findAll { String key, OtpWorkflow value ->
-            value.isAlignment()
+    void "lookupAlignableOtpWorkflowBeans, when called, should return all alignable OtpWorkflows"() {
+        given:
+        Map<String, OtpWorkflow> otpWorkflowAlignable = (1..3).collectEntries {
+            [("align_${it}" as String): Mock(OtpWorkflow) {
+                1 * isAlignment() >> true
+            }]
         }
+        Map<String, OtpWorkflow> otpWorkflowNotAlignable = (1..3).collectEntries {
+            [("notAlign_${it}" as String): Mock(OtpWorkflow) {
+                1 * isAlignment() >> false
+            }]
+        }
+
+        and:
+        Map<String, OtpWorkflow> otpWorkflowMap = otpWorkflowAlignable + otpWorkflowNotAlignable
+
+        service.applicationContext = Mock(ApplicationContext) {
+            1 * getBeansOfType(OtpWorkflow) >> otpWorkflowMap
+            0 * _
+        }
+
+        when:
+        Map<String, OtpWorkflow> foundOtpWorkflows = service.lookupAlignableOtpWorkflowBeans()
+
+        then:
+        foundOtpWorkflows == otpWorkflowAlignable
     }
 }
