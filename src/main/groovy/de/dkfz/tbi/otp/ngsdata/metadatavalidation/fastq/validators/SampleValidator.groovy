@@ -28,6 +28,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.otp.parser.ParsedSampleIdentifier
+import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.util.spreadsheet.validation.*
 
@@ -38,13 +39,24 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 @Component
 class SampleValidator extends ValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
 
+    static final String ERROR_NEITHER_REGISTERED_NOR_PARSEABLE = "At least one sample name is neither registered in OTP nor can be parsed."
+    static final String ERROR_PARSED_PROJECT_UNKNOWN = "At least for one sample name the parsed project is not registered in OTP"
+    static final String ERROR_PARSED_PROJECT_DIFFERS = "At least for one sample name the parsed project does not match the project in the metadata column."
+    static final String ERROR_PARSED_INDIVIDUAL_KNOWN_IN_OTHER_PROJECT = "At least one sample name refers to an existing pid connected not to the parsed project."
+    static final String ERROR_PARSED_AND_FOUND_PROJECT_DIFFER = "At least one sample name looks like it belongs to a specific project, but it is already " +
+            "registered in OTP with another project."
+    static final String ERROR_PARSED_AND_FOUND_INDIVIDUAL_DIFFER = "At least one sample name looks like it belongs to a specific individual, but it is " +
+            "already registered in OTP with another individual."
+    static final String ERROR_PARSED_AND_FOUND_SAMPLE_TYPE_DIFFER = "At least one sample name looks like it belongs to a specific sample type, but it is " +
+            "already registered in OTP with another sample type."
+
     @Autowired
     SampleIdentifierService sampleIdentifierService
 
     @Override
     Collection<String> getDescriptions() {
         return [
-                'The sample name must be registered in OTP or parsable using a pattern known to OTP.',
+                'The sample name must be registered in OTP or parsable by the parser defined by the project.',
                 'If the sample name can be parsed and is already registered in the OTP database,' +
                         ' the current parsed values should match those already registered in the database.',
                 'All sample names in the metadata file should belong to the same project.',
@@ -62,7 +74,8 @@ class SampleValidator extends ValueTuplesValidator<MetadataValidationContext> im
     }
 
     @Override
-    void checkMissingOptionalColumn(MetadataValidationContext context, String columnTitle) { }
+    void checkMissingOptionalColumn(MetadataValidationContext context, String columnTitle) {
+    }
 
     @Override
     @SuppressWarnings("Indentation")
@@ -71,50 +84,7 @@ class SampleValidator extends ValueTuplesValidator<MetadataValidationContext> im
         Collection<String> parsedSampleIdentifiers = []
 
         Map<String, Collection<ValueTuple>> byProjectName = valueTuples.groupBy {
-            String sampleName = it.getValue(SAMPLE_NAME.name())
-            String projectName = it.getValue(PROJECT.name()) ?: ''
-            String pid = it.getValue(PATIENT_ID.name()) ?: ''
-            String sampleType = it.getValue(SAMPLE_TYPE.name()) ?: ''
-            String antibodyTarget = it.getValue(ANTIBODY_TARGET.name()) ?: ''
-
-            Project project = Project.getByNameOrNameInMetadataFiles(projectName)
-            ParsedSampleIdentifier parsedIdentifier = sampleIdentifierService.parseSampleIdentifier(sampleName, project)
-            SampleIdentifier sampleIdentifier = atMostOneElement(SampleIdentifier.findAllByName(sampleName))
-            if (!parsedIdentifier && !sampleIdentifier) {
-                context.addProblem(it.cells, LogLevel.ERROR, "Sample name '${sampleName}' is neither registered in OTP nor matches a pattern known to OTP.", "At least one sample name is neither registered in OTP nor matches a pattern known to OTP.")
-                missingIdentifiersWithProject.add("${projectName}\t${pid}\t${sampleType}\t${sampleName}\t\t${antibodyTarget}")
-            }
-            if (parsedIdentifier && !sampleIdentifier) {
-                String nameInMetadata = atMostOneElement(Project.findAllByName(parsedIdentifier.projectName))?.nameInMetadataFiles
-                boolean error = false
-                if (!atMostOneElement(Project.findAllByName(parsedIdentifier.projectName))) {
-                    context.addProblem(it.cells, LogLevel.ERROR, "Sample name '${sampleName}' is not registered in OTP. It looks like it belongs to project '${parsedIdentifier.projectName}', but no project with that name is registered in OTP.", "At least one sample name is not registered in OTP. It looks like it belongs to a project not registered in OTP.")
-                    error = true
-                }
-                Individual individual = atMostOneElement(Individual.findAllByPid(parsedIdentifier.pid))
-                if (individual && individual.project.name != parsedIdentifier.projectName) {
-                    context.addProblem(it.cells, LogLevel.ERROR, "Sample name '${sampleName}' is not registered in OTP. It looks like it belongs to project '${parsedIdentifier.projectName}' and individual '${parsedIdentifier.pid}', but individual '${parsedIdentifier.pid}' is already registered in OTP with project '${individual.project.name}'.", "At least one sample name is not registered in OTP. It looks like it belongs to a specific project and individual, but this individual is already registered in OTP with another project.")
-                    error = true
-                }
-                if ((projectName != parsedIdentifier.projectName) || (nameInMetadata && projectName != nameInMetadata)) {
-                    context.addProblem(it.cells, LogLevel.ERROR, "The parsed project '${parsedIdentifier.projectName}' of the sample name does not match the project in the metadata column '${projectName}'.", "At least for one sample name the parsed project does not match the project in the metadata column.")
-                }
-                if (!error) {
-                    parsedSampleIdentifiers.add("${parsedIdentifier.projectName}\t${parsedIdentifier.pid}\t${parsedIdentifier.sampleTypeDbName}\t${parsedIdentifier.fullSampleName}")
-                }
-            }
-            if (parsedIdentifier && sampleIdentifier) {
-                if (sampleIdentifier.project.name != parsedIdentifier.projectName) {
-                    context.addProblem(it.cells, LogLevel.WARNING, "Sample name '${sampleName}' looks like it belongs to project '${parsedIdentifier.projectName}', but it is already registered in OTP with project '${sampleIdentifier.project.name}'. If you ignore this warning, OTP will keep the assignment of the sample name to project '${sampleIdentifier.project.name}'.", "At least one sample name looks like it belongs to a specific project, but it is already registered in OTP with another project.")
-                }
-                if (sampleIdentifier.individual.pid != parsedIdentifier.pid) {
-                    context.addProblem(it.cells, LogLevel.WARNING, "Sample name '${sampleName}' looks like it belongs to individual '${parsedIdentifier.pid}', but it is already registered in OTP with individual '${sampleIdentifier.individual.pid}'. If you ignore this warning, OTP will keep the assignment of the sample name to individual '${sampleIdentifier.individual.pid}'.", "At least one sample name looks like it belongs to a specific individual, but it is already registered in OTP with another individual.")
-                }
-                if (sampleIdentifier.sampleType.name != parsedIdentifier.sampleTypeDbName) {
-                    context.addProblem(it.cells, LogLevel.WARNING, "Sample name '${sampleName}' looks like it belongs to sample type '${parsedIdentifier.sampleTypeDbName}', but it is already registered in OTP with sample type '${sampleIdentifier.sampleType.name}' If you ignore this warning, OTP will keep the assignment of the sample name to sample type '${sampleIdentifier.sampleType.name}'.", "At least one sample name looks like it belongs to a specific sample type, but it is already registered in OTP with another sample type.")
-                }
-            }
-            return sampleIdentifier?.project?.name ?: parsedIdentifier?.projectName
+            return checkValueTupleAndReportProjectAndFillLists(it, context, missingIdentifiersWithProject, parsedSampleIdentifiers)
         }
 
         if (parsedSampleIdentifiers) {
@@ -127,7 +97,9 @@ class SampleValidator extends ValueTuplesValidator<MetadataValidationContext> im
             context.addProblem(Collections.emptySet(), LogLevel.INFO,
                     "All sample names which are neither registered in OTP nor match a pattern known to OTP:\n" +
                             "${SampleIdentifierService.BulkSampleCreationHeader.headers}\n" +
-                            "${missingIdentifiersWithProject.collect { it.substring(0, it.length() - it.reverse().indexOf("\t\t") - 2) }.sort().join('\n')}",
+                            missingIdentifiersWithProject.collect {
+                                it.substring(0, it.length() - it.reverse().indexOf("\t\t") - 2)
+                            }.sort().join('\n'),
                     "All sample names which are neither registered in OTP nor match a pattern known to OTP:\n" +
                             "${SampleIdentifierService.BulkSampleCreationHeader.summaryHeaders}\n" +
                             "${missingIdentifiersWithProject.sort().join('\n')}")
@@ -144,8 +116,106 @@ class SampleValidator extends ValueTuplesValidator<MetadataValidationContext> im
             context.addProblem((Set) byProjectName.values().sum()*.cells.sum(), LogLevel.WARNING,
                     'The sample names belong to different projects:\n' +
                             byProjectName.collect { projectName, valueTuplesOfProject ->
-                                return "Project '${projectName}':\n        ${valueTuplesOfProject.collect { "'${it.getValue(SAMPLE_NAME.name())}'" }.sort().join('\n        ')}"
+                                String sampleNames = valueTuplesOfProject.collect {
+                                    "\n        '${it.getValue(SAMPLE_NAME.name())}'"
+                                }.sort().join('')
+                                return "Project '${projectName}':${sampleNames}"
                             }.join('\n'))
+        }
+    }
+
+    private String checkValueTupleAndReportProjectAndFillLists(ValueTuple valueTuple, MetadataValidationContext context,
+                                                               List<String> missingIdentifiersWithProject, List<String> parsedSampleIdentifiers) {
+        String sampleName = valueTuple.getValue(SAMPLE_NAME.name())
+        String projectName = valueTuple.getValue(PROJECT.name()) ?: ''
+        String pid = valueTuple.getValue(PATIENT_ID.name()) ?: ''
+        String sampleType = valueTuple.getValue(SAMPLE_TYPE.name()) ?: ''
+        String antibodyTarget = valueTuple.getValue(ANTIBODY_TARGET.name()) ?: ''
+
+        Project project = Project.getByNameOrNameInMetadataFiles(projectName)
+        ParsedSampleIdentifier parsedIdentifier = sampleIdentifierService.parseSampleIdentifier(sampleName, project)
+        SampleIdentifier sampleIdentifier = atMostOneElement(SampleIdentifier.findAllByName(sampleName))
+        if (!parsedIdentifier && !sampleIdentifier) {
+            checkNeitherKnownSampleIdentifierNorParsable(project, context, valueTuple, sampleName, projectName)
+            missingIdentifiersWithProject.add("${projectName}\t${pid}\t${sampleType}\t${sampleName}\t\t${antibodyTarget}")
+        }
+        if (parsedIdentifier && !sampleIdentifier) {
+            if (!checkParsableButUnknownSampleIdentfier(parsedIdentifier, context, valueTuple, sampleName, project)) {
+                parsedSampleIdentifiers <<
+                        "${parsedIdentifier.projectName}\t${parsedIdentifier.pid}\t${parsedIdentifier.sampleTypeDbName}\t${parsedIdentifier.fullSampleName}"
+            }
+        }
+        if (parsedIdentifier && sampleIdentifier) {
+            checkKnownSampleIdentifierAndParsable(parsedIdentifier, sampleIdentifier, context, valueTuple, sampleName)
+        }
+        return sampleIdentifier?.project?.name ?: parsedIdentifier?.projectName
+    }
+
+    private void checkNeitherKnownSampleIdentifierNorParsable(Project project, MetadataValidationContext context, ValueTuple valueTuple, String sampleName,
+                                                              String projectName) {
+        if (project && project.sampleIdentifierParserBeanName != SampleIdentifierParserBeanName.NO_PARSER) {
+            context.addProblem(valueTuple.cells, LogLevel.ERROR,
+                    "Sample name '${sampleName}' is neither registered in OTP nor can be parsed by the parser " +
+                            "'${project.sampleIdentifierParserBeanName}' (specified by project '${projectName}')",
+                    ERROR_NEITHER_REGISTERED_NOR_PARSEABLE)
+        } else {
+            context.addProblem(valueTuple.cells, LogLevel.ERROR,
+                    "Sample name '${sampleName}' is not registered in OTP and for the project no parser is defined.",
+                    ERROR_NEITHER_REGISTERED_NOR_PARSEABLE)
+        }
+    }
+
+    private boolean checkParsableButUnknownSampleIdentfier(ParsedSampleIdentifier parsedIdentifier, MetadataValidationContext context,
+                                                           ValueTuple valueTuple, String sampleName, Project project) {
+        boolean error = false
+        Project parsedProject = Project.getByNameOrNameInMetadataFiles(parsedIdentifier.projectName)
+        if (!parsedProject) {
+            context.addProblem(valueTuple.cells, LogLevel.ERROR,
+                    "The parsed project '${parsedIdentifier.projectName}' of the sample name '${sampleName}' could not be found in the database.",
+                    ERROR_PARSED_PROJECT_UNKNOWN)
+            error = true
+        } else if (project != parsedProject) {
+            context.addProblem(valueTuple.cells, LogLevel.ERROR,
+                    "The parsed project '${parsedIdentifier.projectName}' of the sample name '${sampleName}' does not match the project in " +
+                            "the metadata column '${project.name}'.",
+                    ERROR_PARSED_PROJECT_DIFFERS)
+            error = true
+        }
+        Individual individual = atMostOneElement(Individual.findAllByPid(parsedIdentifier.pid))
+        if (individual && individual.project != parsedProject) {
+            context.addProblem(valueTuple.cells, LogLevel.ERROR,
+                    "The parsed pid '${parsedIdentifier.pid}' of the sample name '${sampleName}' already exist, but belongs to the project " +
+                            "'${individual.project.name}' and not the parsed project '${parsedIdentifier.projectName}'.",
+                    ERROR_PARSED_INDIVIDUAL_KNOWN_IN_OTHER_PROJECT)
+            error = true
+        }
+
+        return error
+    }
+
+    private void checkKnownSampleIdentifierAndParsable(ParsedSampleIdentifier parsedIdentifier, SampleIdentifier sampleIdentifier,
+                                                       MetadataValidationContext context, ValueTuple valueTuple, String sampleName) {
+        Project parsedProject = Project.getByNameOrNameInMetadataFiles(parsedIdentifier.projectName)
+        if (sampleIdentifier.project != parsedProject) {
+            context.addProblem(valueTuple.cells, LogLevel.WARNING,
+                    "Sample name '${sampleName}' looks like it belongs to project '${parsedIdentifier.projectName}', but it is already " +
+                            "registered in OTP with project '${sampleIdentifier.project.name}'. If you ignore this warning, " +
+                            "OTP will keep the assignment of the sample name to project '${sampleIdentifier.project.name}'.",
+                    ERROR_PARSED_AND_FOUND_PROJECT_DIFFER)
+        }
+        if (sampleIdentifier.individual.pid != parsedIdentifier.pid) {
+            context.addProblem(valueTuple.cells, LogLevel.WARNING,
+                    "Sample name '${sampleName}' looks like it belongs to individual '${parsedIdentifier.pid}', but it is already " +
+                            "registered in OTP with individual '${sampleIdentifier.individual.pid}'. If you ignore this warning, " +
+                            "OTP will keep the assignment of the sample name to individual '${sampleIdentifier.individual.pid}'.",
+                    ERROR_PARSED_AND_FOUND_INDIVIDUAL_DIFFER)
+        }
+        if (sampleIdentifier.sampleType.name != parsedIdentifier.sampleTypeDbName) {
+            context.addProblem(valueTuple.cells, LogLevel.WARNING,
+                    "Sample name '${sampleName}' looks like it belongs to sample type '${parsedIdentifier.sampleTypeDbName}', but it is already " +
+                            "registered in OTP with sample type '${sampleIdentifier.sampleType.name}'. If you ignore this warning, " +
+                            "OTP will keep the assignment of the sample name to sample type '${sampleIdentifier.sampleType.name}'.",
+                    ERROR_PARSED_AND_FOUND_SAMPLE_TYPE_DIFFER)
         }
     }
 }

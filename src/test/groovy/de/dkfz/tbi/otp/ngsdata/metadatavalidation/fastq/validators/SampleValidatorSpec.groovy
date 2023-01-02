@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
+import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
@@ -47,7 +48,7 @@ class SampleValidatorSpec extends Specification implements DataTest, DomainFacto
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 Individual,
                 ProcessingOption,
                 Project,
@@ -61,7 +62,6 @@ class SampleValidatorSpec extends Specification implements DataTest, DomainFacto
     static final Pattern PATTERN = Pattern.compile(/^P-([^ ]+)_I-([^ ]+)_S-([^ ]+)$/)
     static final String SAMPLE_Z = "P-X_I-Y_S-z"
     static final String SAMPLE_N = "P-B_I-M_S-N"
-    static final String SAMPLE_D = "P-D_I-M_S-N"
     static final String PROJECT_C = "C"
     static final String PROJECT_B = "B"
     static final String PROJECT_X = "X"
@@ -89,9 +89,11 @@ class SampleValidatorSpec extends Specification implements DataTest, DomainFacto
                 "${SAMPLE_NAME}\nABC\nAAA")
         Collection<Problem> expectedProblems = [
                 new Problem(context.spreadsheet.dataRows[0].cells as Set, LogLevel.ERROR,
-                        "Sample name 'ABC' is neither registered in OTP nor matches a pattern known to OTP.", "At least one sample name is neither registered in OTP nor matches a pattern known to OTP."),
+                        "Sample name 'ABC' is not registered in OTP and for the project no parser is defined.",
+                        SampleValidator.ERROR_NEITHER_REGISTERED_NOR_PARSEABLE),
                 new Problem(context.spreadsheet.dataRows[1].cells as Set, LogLevel.ERROR,
-                        "Sample name 'AAA' is neither registered in OTP nor matches a pattern known to OTP.", "At least one sample name is neither registered in OTP nor matches a pattern known to OTP."),
+                        "Sample name 'AAA' is not registered in OTP and for the project no parser is defined.",
+                        SampleValidator.ERROR_NEITHER_REGISTERED_NOR_PARSEABLE),
                 new Problem(Collections.emptySet(), LogLevel.INFO,
                         "All sample names which are neither registered in OTP nor match a pattern known to OTP:\n${SampleIdentifierService.BulkSampleCreationHeader.headers}\n\t\t\tAAA\n\t\t\tABC",
                         "All sample names which are neither registered in OTP nor match a pattern known to OTP:\n${SampleIdentifierService.BulkSampleCreationHeader.summaryHeaders}\n\t\t\tAAA\t\t\n\t\t\tABC\t\t"),
@@ -108,13 +110,17 @@ class SampleValidatorSpec extends Specification implements DataTest, DomainFacto
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${SAMPLE_NAME}\t${PROJECT}\n${SAMPLE_Z}\t${PROJECT_X}")
 
+        Collection<Problem> expectedProblems = [
+                new Problem([context.spreadsheet.dataRows[0].cells[0], context.spreadsheet.dataRows[0].cells[1]] as Set, LogLevel.ERROR,
+                        "The parsed project '${PROJECT_X}' of the sample name '${SAMPLE_Z}' could not be found in the database.",
+                        SampleValidator.ERROR_PARSED_PROJECT_UNKNOWN),
+        ]
+
         when:
         validator.validate(context)
 
         then:
-        Problem problem = exactlyOneElement(context.problems)
-        problem.level == LogLevel.ERROR
-        problem.message == "Sample name '${SAMPLE_Z}' is not registered in OTP. It looks like it belongs to project 'X', but no project with that name is registered in OTP."
+        assertContainSame(context.problems, expectedProblems)
     }
 
     void 'validate, when identifier is not in DB but parseable and project is not in DB but individual is, adds errors'() {
@@ -124,10 +130,12 @@ class SampleValidatorSpec extends Specification implements DataTest, DomainFacto
         Individual individual = DomainFactory.createIndividual(pid: 'Y')
         Collection<Problem> expectedProblems = [
                 new Problem([context.spreadsheet.dataRows[0].cells[0], context.spreadsheet.dataRows[0].cells[1]] as Set, LogLevel.ERROR,
-                        "Sample name '${SAMPLE_Z}' is not registered in OTP. It looks like it belongs to project 'X', but no project with that name is registered in OTP.", "At least one sample name is not registered in OTP. It looks like it belongs to a project not registered in OTP."),
+                        "The parsed pid 'Y' of the sample name '${SAMPLE_Z}' already exist, but belongs to the project '${individual.project.name}' and not the parsed project 'X'.",
+                        SampleValidator.ERROR_PARSED_INDIVIDUAL_KNOWN_IN_OTHER_PROJECT),
                 new Problem([context.spreadsheet.dataRows[0].cells[0], context.spreadsheet.dataRows[0].cells[1]] as Set, LogLevel.ERROR,
-                        "Sample name '${SAMPLE_Z}' is not registered in OTP. It looks like it belongs to project 'X' and individual 'Y', but individual 'Y' is already registered in OTP with project '${individual.project.name}'.", "At least one sample name is not registered in OTP. It looks like it belongs to a specific project and individual, but this individual is already registered in OTP with another project."),
-                ]
+                        "The parsed project '${PROJECT_X}' of the sample name '${SAMPLE_Z}' could not be found in the database.",
+                        SampleValidator.ERROR_PARSED_PROJECT_UNKNOWN),
+        ]
 
         when:
         validator.validate(context)
@@ -136,27 +144,36 @@ class SampleValidatorSpec extends Specification implements DataTest, DomainFacto
         assertContainSame(context.problems, expectedProblems)
     }
 
-    void 'validate, when identifier is not in DB but parseable and individual belongs to different project, adds error'() {
+    @Unroll
+    void 'validate, when identifier is not in DB but parseable and individual belongs to different project, adds error (case: #name)'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${SAMPLE_NAME}\t${PROJECT}\n${SAMPLE_Z}\t${PROJECT_X}")
-        createProject([name: 'X'])
+        createProject([name: projectName, nameInMetadataFiles: projectAlias])
         Individual individual = DomainFactory.createIndividual(pid: 'Y')
-
+        Collection<Problem> expectedProblems = [
+                new Problem([context.spreadsheet.dataRows[0].cells[0], context.spreadsheet.dataRows[0].cells[1]] as Set, LogLevel.ERROR,
+                        "The parsed pid 'Y' of the sample name '${SAMPLE_Z}' already exist, but belongs to the project '${individual.project.name}' and not the parsed project 'X'.",
+                        SampleValidator.ERROR_PARSED_INDIVIDUAL_KNOWN_IN_OTHER_PROJECT),
+        ]
         when:
         validator.validate(context)
 
         then:
-        Problem problem = exactlyOneElement(context.problems)
-        problem.level == LogLevel.ERROR
-        problem.message == "Sample name '${SAMPLE_Z}' is not registered in OTP. It looks like it belongs to project 'X' and individual 'Y', but individual 'Y' is already registered in OTP with project '${individual.project.name}'.".toString()
+        assertContainSame(context.problems, expectedProblems)
+
+        where:
+        name              | projectName | projectAlias
+        'matchAboutName'  | 'X'         | null
+        'matchAboutAlias' | 'SOME'      | 'X'
     }
 
-    void 'validate, when identifier is not in DB but parseable and project is in DB, succeeds'() {
+    @Unroll
+    void 'validate, when identifier is not in DB but parseable and project is in DB, succeeds (case: #name)'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${SAMPLE_NAME}\t${PROJECT}\n${SAMPLE_Z}\t${PROJECT_X}")
-        createProject([name: 'X'])
+        createProject([name: projectName, nameInMetadataFiles: projectAlias])
 
         when:
         validator.validate(context)
@@ -164,14 +181,20 @@ class SampleValidatorSpec extends Specification implements DataTest, DomainFacto
         then:
         Problem problem = exactlyOneElement(context.problems)
         problem.level == LogLevel.INFO
-        problem.message == "${PARSED_SAMPLETYPE_PID}X\tY\tz\tP-X_I-Y_S-z"
+        problem.message == "${PARSED_SAMPLETYPE_PID}X\tY\tz\t${SAMPLE_Z}"
+
+        where:
+        name              | projectName | projectAlias
+        'matchAboutName'  | 'X'         | null
+        'matchAboutAlias' | 'SOME'      | 'X'
     }
 
-    void 'validate, when identifier is in DB and parseable and project is inconsistent, adds warning'() {
+    @Unroll
+    void 'validate, when identifier is in DB and parseable and project is inconsistent, adds warning (case: #name)'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${SAMPLE_NAME}\t${PROJECT}\n${SAMPLE_Z}")
-        createSampleIdentifier2(context.spreadsheet.dataRows.get(0).cells.get(0).text, 'A', 'Y', 'z')
+        createSampleIdentifier2(context.spreadsheet.dataRows.get(0).cells.get(0).text, projectName, 'Y', 'z', projectAlias)
 
         when:
         validator.validate(context)
@@ -179,14 +202,21 @@ class SampleValidatorSpec extends Specification implements DataTest, DomainFacto
         then:
         Problem problem = exactlyOneElement(context.problems)
         problem.level == LogLevel.WARNING
-        problem.message == "Sample name '${SAMPLE_Z}' looks like it belongs to project 'X', but it is already registered in OTP with project 'A'. If you ignore this warning, OTP will keep the assignment of the sample name to project 'A'."
+        problem.message == "Sample name '${SAMPLE_Z}' looks like it belongs to project 'X', but it is already registered in OTP with project '${projectName}'. If you ignore this warning, OTP will keep the assignment of the sample name to project '${projectName}'."
+        problem.type == SampleValidator.ERROR_PARSED_AND_FOUND_PROJECT_DIFFER
+
+        where:
+        name              | projectName | projectAlias
+        'matchAboutName'  | 'A'         | null
+        'matchAboutAlias' | 'SOME'      | 'A'
     }
 
-    void 'validate, when identifier is in DB and parseable and individual is inconsistent, adds warning'() {
+    @Unroll
+    void 'validate, when identifier is in DB and parseable and individual is inconsistent, adds warning (case: #name)'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${SAMPLE_NAME}\t${PROJECT}\n${SAMPLE_Z}\t${PROJECT_X}")
-        createSampleIdentifier2(context.spreadsheet.dataRows.get(0).cells.get(0).text, 'X', 'B', 'z')
+        createSampleIdentifier2(context.spreadsheet.dataRows.get(0).cells.get(0).text, projectName, 'B', 'z', projectAlias)
 
         when:
         validator.validate(context)
@@ -195,13 +225,20 @@ class SampleValidatorSpec extends Specification implements DataTest, DomainFacto
         Problem problem = exactlyOneElement(context.problems)
         problem.level == LogLevel.WARNING
         problem.message == "Sample name '${SAMPLE_Z}' looks like it belongs to individual 'Y', but it is already registered in OTP with individual 'B'. If you ignore this warning, OTP will keep the assignment of the sample name to individual 'B'."
+        problem.type == SampleValidator.ERROR_PARSED_AND_FOUND_INDIVIDUAL_DIFFER
+
+        where:
+        name              | projectName | projectAlias
+        'matchAboutName'  | 'X'         | null
+        'matchAboutAlias' | 'SOME'      | 'X'
     }
 
-    void 'validate, when identifier is in DB and parseable and sample type is inconsistent, adds warning'() {
+    @Unroll
+    void 'validate, when identifier is in DB and parseable and sample type is inconsistent, adds warning (case: #name)'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${SAMPLE_NAME}\t${PROJECT}\n${SAMPLE_Z}")
-        createSampleIdentifier2(context.spreadsheet.dataRows.get(0).cells.get(0).text, 'X', 'Y', 'c')
+        createSampleIdentifier2(context.spreadsheet.dataRows.get(0).cells.get(0).text, projectName, 'Y', 'c', projectAlias)
 
         when:
         validator.validate(context)
@@ -209,7 +246,13 @@ class SampleValidatorSpec extends Specification implements DataTest, DomainFacto
         then:
         Problem problem = exactlyOneElement(context.problems)
         problem.level == LogLevel.WARNING
-        problem.message == "Sample name '${SAMPLE_Z}' looks like it belongs to sample type 'z', but it is already registered in OTP with sample type 'c' If you ignore this warning, OTP will keep the assignment of the sample name to sample type 'c'."
+        problem.message == "Sample name '${SAMPLE_Z}' looks like it belongs to sample type 'z', but it is already registered in OTP with sample type 'c'. If you ignore this warning, OTP will keep the assignment of the sample name to sample type 'c'."
+        problem.type == SampleValidator.ERROR_PARSED_AND_FOUND_SAMPLE_TYPE_DIFFER
+
+        where:
+        name              | projectName | projectAlias
+        'matchAboutName'  | 'X'         | null
+        'matchAboutAlias' | 'SOME'      | 'X'
     }
 
     void 'validate, when identifiers belong to different projects, adds warning'() {
@@ -240,8 +283,8 @@ Project 'C':
         'SampleC3'\
 """),
                 new Problem(context.spreadsheet.dataRows[0].cells as Set, LogLevel.ERROR,
-                        "Sample name 'SampleA' is neither registered in OTP nor matches a pattern known to OTP.",
-                        "At least one sample name is neither registered in OTP nor matches a pattern known to OTP."),
+                        "Sample name 'SampleA' is not registered in OTP and for the project no parser is defined.",
+                        SampleValidator.ERROR_NEITHER_REGISTERED_NOR_PARSEABLE),
                 new Problem(Collections.emptySet(), LogLevel.INFO,
                         "All sample names which are neither registered in OTP nor match a pattern known to OTP:\n" +
                                 "${SampleIdentifierService.BulkSampleCreationHeader.headers}\n\t\t\tSampleA",
@@ -267,7 +310,8 @@ Project 'C':
         createSampleIdentifier2('SampleB', 'B', 'W', 'x')
         Collection<Problem> expectedProblems = [
                 new Problem(context.spreadsheet.dataRows[0].cells as Set, LogLevel.ERROR,
-                        "Sample name 'SampleA' is neither registered in OTP nor matches a pattern known to OTP.", "At least one sample name is neither registered in OTP nor matches a pattern known to OTP."),
+                        "Sample name 'SampleA' is not registered in OTP and for the project no parser is defined.",
+                        SampleValidator.ERROR_NEITHER_REGISTERED_NOR_PARSEABLE),
                 new Problem(Collections.emptySet(), LogLevel.INFO,
                         "All sample names which are neither registered in OTP nor match a pattern known to OTP:\n${SampleIdentifierService.BulkSampleCreationHeader.headers}\n\t\t\tSampleA",
                         "All sample names which are neither registered in OTP nor match a pattern known to OTP:\n${SampleIdentifierService.BulkSampleCreationHeader.summaryHeaders}\n\t\t\tSampleA\t\t"),
@@ -317,31 +361,14 @@ Project 'C':
         problem.message == "${PARSED_SAMPLETYPE_PID}B\tM\tN\tP-B_I-M_S-N"
     }
 
-    void 'validate, checks for project name alias also, adds error about project name mismatch in metadata column'() {
-        given:
-        MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${SAMPLE_NAME}\t${PROJECT}\n" +
-                        "${SAMPLE_D}\tD\n")
-        createProject([name: 'D']).nameInMetadataFiles = 'd'
-        Collection<Problem> expectedProblems = [
-                new Problem(context.spreadsheet.dataRows[0].cells as Set, LogLevel.ERROR,
-                        "The parsed project 'D' of the sample name does not match the project in the metadata column 'D'.", "At least for one sample name the parsed project does not match the project in the metadata column."),
-                new Problem(Collections.emptySet(), LogLevel.INFO, "${PARSED_SAMPLETYPE_PID}D\tM\tN\tP-D_I-M_S-N"),
-        ]
-
-        when:
-        validator.validate(context)
-
-        then:
-        assertContainSame(context.problems, expectedProblems)
-    }
-
-    private static SampleIdentifier createSampleIdentifier2(String sampleIdentifierName, String projectName, String pid, String sampleTypeName) {
+    private static SampleIdentifier createSampleIdentifier2(String sampleIdentifierName, String projectName, String pid, String sampleTypeName,
+                                                            String projectAlias = null) {
         return DomainFactory.createSampleIdentifier(
                 sample: DomainFactory.createSample(
                         individual: DomainFactory.createIndividual(
                                 project: DomainFactory.createProject(
                                         name: projectName,
+                                        nameInMetadataFiles: projectAlias,
                                 ),
                                 pid: pid,
                         ),

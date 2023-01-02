@@ -27,7 +27,7 @@ import groovy.transform.ToString
 import de.dkfz.tbi.util.spreadsheet.Cell
 
 @EqualsAndHashCode
-@ToString
+@ToString(allProperties=false)
 class Problem {
 
     final Set<Cell> affectedCells
