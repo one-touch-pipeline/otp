@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -30,27 +30,35 @@ describe('Check projectRequest page', () => {
 
     beforeEach(() => {
       cy.loginAsUser();
-      cy.visit('/projectRequest/index');
     });
 
     it('should add project request as draft', () => {
       cy.intercept('/projectRequest/index*').as('saveProjectRequest');
+      cy.visit('/projectRequest/index');
 
       cy.fixture('projectRequest.json').then((request) => {
-        cy.get('select#projectType').select(request.projectType, { force: true });
-        cy.get('input#name').type(request.projectName);
-        cy.get('textarea#description').type(request.description);
-        cy.get('input#approxNoOfSamples').type(request.approximateNumberOfSamples);
-        cy.get('select#keywords').parent().find('input').type(request.keywords, { force: true });
-        cy.get('select#storagePeriod').select(request.storagePeriod, { force: true });
-        cy.get('select#speciesWithStrainList').select(request.speciesWithStrainList, { force: true });
+        cy.get('select#projectType').select(request[0].projectType, { force: true });
+        cy.get('input#name').type(request[0].projectName);
+        cy.get('textarea#description').type(request[0].description);
+        cy.get('input#approxNoOfSamples').type(request[0].approximateNumberOfSamples);
+        cy.get('select#keywords').parent().find('input').type(request[0].keywords, { force: true });
+        cy.get('select#storagePeriod').select(request[0].storagePeriod, { force: true });
+        cy.get('select#speciesWithStrainList').select(request[0].speciesWithStrainList, { force: true });
         cy.get('select#seqTypesList').select(0, { force: true });
-        cy.get('input.username-input').first().type('otp');
-        cy.get('select.project-role-select').first().select('PI', { force: true });
+
+        const operatorUsername = Cypress.env('operator_username');
+        cy.get('input.username-input').first().type(operatorUsername);
+        cy.get('select.project-role-select').first().select('BIOINFORMATICIAN', { force: true });
+
+        const username = Cypress.env('user_username');
+        cy.get('button#clone-add').click();
+        cy.get('input.username-input').eq(1).type(username);
+        cy.get('select.project-role-select').eq(1).select('PI', { force: true });
+
         cy.get('input[name=_action_saveIndex]').click();
 
         cy.wait('@saveProjectRequest').then((interception) => {
-          expect(interception.response.statusCode).to.eq(302);
+          expect(interception.response.statusCode).to.eq(200);
           cy.location('pathname').should('match', /^\/projectRequest\/view\//);
         });
       });
@@ -59,6 +67,7 @@ describe('Check projectRequest page', () => {
     it('should find, edit and save unresolved project request', () => {
       cy.intercept('/projectRequest/unresolved*').as('routeToUnresolved');
       cy.intercept('/projectRequest/index*').as('projectRequestIndex');
+      cy.visit('/projectRequest/index');
 
       // navigate to the unresolved tab
       cy.get('.nav-link').contains('Unresolved').click();
@@ -73,10 +82,10 @@ describe('Check projectRequest page', () => {
         // edit a field of the project request
         cy.get('input[value=Edit]').click();
         cy.wait('@projectRequestIndex').then((intcpt) => {
-          expect(intcpt.response.statusCode).to.eq(302);
+          expect(intcpt.response.statusCode).to.eq(200);
           cy.location('pathname').should('eq', '/projectRequest/index');
           cy.get('textarea#requesterComment').type('hello world');
-          cy.get('input[name=_action_saveIndex]').click();
+          cy.get('input#saveIndex-request-btn').click();
           cy.location('pathname').should('match', /^\/projectRequest\/view\//);
         });
       });
@@ -92,7 +101,7 @@ describe('Check projectRequest page', () => {
         .click();
 
       // edit a field of the project request
-      cy.get('input[value=Submit]').click();
+      cy.get('input#submitView-request-btn').click();
       cy.wait('@projectRequestIndex').then((interception) => {
         expect(interception.response.statusCode).to.eq(302);
         cy.location('pathname').should('eq', '/projectRequest/unresolved');
@@ -101,26 +110,37 @@ describe('Check projectRequest page', () => {
     });
   });
 
-  context('when user is a PI', () => {
-    before(() => {
-      cy.logout();
-    });
-
+  context('when user is an operator', () => {
     beforeEach(() => {
       cy.loginAsOperator();
     });
 
-    it('should find the project request', () => {
+    it('should pass on the project request', () => {
+      cy.intercept('/projectRequest/index*').as('projectRequestIndex');
       cy.visit('/projectRequest/unresolved');
 
       // select the project request in the table
       cy.fixture('projectRequest.json').then((request) => {
         cy.get('table tbody tr').first().find('td').first()
-          .should('contain', request.projectName);
+          .should('contain', request[0].projectName).click();
+      });
+
+      cy.location('pathname').should('match', /^\/projectRequest\/view\//);
+      cy.get('input#passOn-request-btn').click();
+
+      cy.wait('@projectRequestIndex').then((interception) => {
+        expect(interception.response.statusCode).to.eq(302);
+        cy.location('pathname').should('match', /^\/projectRequest\/view\//);
       });
     });
+  });
 
-    it('should pass on the project request', () => {
+  context('when user is a PI', () => {
+    beforeEach(() => {
+      cy.loginAsUser();
+    });
+
+    it('should edit and save the project request', () => {
       cy.intercept('/projectRequest/index*').as('projectRequestIndex');
       cy.visit('/projectRequest/unresolved');
 
@@ -129,14 +149,114 @@ describe('Check projectRequest page', () => {
         .find('a')
         .click();
 
+      cy.get('input#edit-request-btn').click();
+      cy.location('pathname').should('match', /^\/projectRequest\/index/);
+
+      cy.fixture('projectRequest.json').then((request) => {
+        cy.get('select#speciesWithStrainList').parent().find('input')
+          .type(request[1].speciesWithStrainList, { force: true });
+      });
+
+      cy.get('input#saveIndex-request-btn').click();
+    });
+
+    it('should delete a project request being edited', () => {
+      cy.intercept('/projectRequest/delete*').as('deleteProjectRequest');
+      cy.visit('/projectRequest/unresolved');
+      // select the project request in the table
+      cy.get('table tbody tr').first().find('td').first()
+        .find('a')
+        .click();
+
+      cy.get('input#edit-request-btn').click();
+
+      cy.visit('/projectRequest/unresolved');
+      // select the project request in the table
+      cy.get('table tbody tr').first().find('td').first()
+        .find('a')
+        .click();
+
+      cy.get('#delete-request-btn').click();
+      cy.get('#confirmModal').should('be.visible').click();
+
+      cy.wait('@deleteProjectRequest').then((interception) => {
+        expect(interception.response.statusCode).to.eq(200);
+        cy.location('pathname').should('eq', '/projectRequest/unresolved');
+        cy.fixture('projectRequest.json').then((request) => {
+          cy.get('body').should('not.contain', request[0].projectName);
+        });
+      });
+    });
+  });
+
+  context('when user is a default user', () => {
+    before(() => {
+      cy.logout();
+    });
+
+    beforeEach(() => {
+      cy.loginAsUser();
+    });
+
+    it('should submit a project request', () => {
+      cy.intercept('/projectRequest/index*').as('saveProjectRequest');
+      cy.visit('/projectRequest/index');
+
+      cy.fixture('projectRequest.json').then((requests) => {
+        const request = requests[2];
+        cy.get('select#projectType').select(request.projectType, { force: true });
+        cy.get('input#name').type(request.projectName);
+        cy.get('textarea#description').type(request.description);
+        cy.get('input#approxNoOfSamples').type(request.approximateNumberOfSamples);
+        cy.get('select#keywords').parent().find('input').type(request.keywords, { force: true });
+        cy.get('select#storagePeriod').select(request.storagePeriod, { force: true });
+        cy.get('select#speciesWithStrainList').select(request.speciesWithStrainList, { force: true });
+        cy.get('select#seqTypesList').select(0, { force: true });
+
+        const username = Cypress.env('user_username');
+        cy.get('button#clone-add').click();
+        cy.get('input.username-input').eq(1).type(username);
+        cy.get('select.project-role-select').eq(1).select('PI', { force: true });
+
+        cy.get('input#submitIndex-request-btn').click();
+
+        cy.wait('@saveProjectRequest').then((interception) => {
+          expect(interception.response.statusCode).to.eq(200);
+          cy.location('pathname').should('match', /^\/projectRequest\/unresolved/);
+        });
+      });
+    });
+  });
+
+  context('when user is an operator', () => {
+    beforeEach(() => {
+      cy.loginAsOperator();
+    });
+
+    it('should pass on the project request', () => {
+      cy.intercept('/projectRequest/index*').as('projectRequestIndex');
+      cy.visit('/projectRequest/unresolved');
+
+      // select the project request in the table
+      cy.fixture('projectRequest.json').then((request) => {
+        cy.get('table tbody tr').first().find('td').first()
+          .should('contain', request[0].projectName)
+          .click();
+      });
+
       cy.location('pathname').should('match', /^\/projectRequest\/view\//);
-      cy.get('input[name=_action_passOn]').click();
+      cy.get('input#passOn-request-btn').click();
 
       cy.wait('@projectRequestIndex').then((interception) => {
         expect(interception.response.statusCode).to.eq(302);
         cy.location('pathname').should('match', /^\/projectRequest\/view\//);
-        cy.get('input[name=_action_approve]').should('exist');
       });
+    });
+  });
+
+  context('when user is a PI', () => {
+    beforeEach(() => {
+      cy.loginAsUser();
     });
 
     it('should approve the project request', () => {
@@ -159,6 +279,12 @@ describe('Check projectRequest page', () => {
         cy.get('h3').contains('Approved').should('exist');
       });
     });
+  });
+
+  context('when user is an operator', () => {
+    beforeEach(() => {
+      cy.loginAsOperator();
+    });
 
     it('should delete the project request', () => {
       cy.intercept('/projectRequest/delete*').as('deleteProjectRequest');
@@ -177,7 +303,7 @@ describe('Check projectRequest page', () => {
         expect(interception.response.statusCode).to.eq(200);
         cy.location('pathname').should('eq', '/projectRequest/unresolved');
         cy.fixture('projectRequest.json').then((request) => {
-          cy.get('body').should('not.contain', request.projectName);
+          cy.get('body').should('not.contain', request[0].projectName);
         });
       });
     });

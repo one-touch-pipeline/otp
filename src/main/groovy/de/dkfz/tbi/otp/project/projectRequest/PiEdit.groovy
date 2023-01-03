@@ -84,7 +84,7 @@ class PiEdit implements ProjectRequestState {
     }
 
     @Override
-    @PreAuthorize("hasPermission(#cmd.projectRequest, 'PROJECT_REQUEST_CURRENT_OWNER')")
+    @PreAuthorize("hasPermission(#projectRequest, 'PROJECT_REQUEST_CURRENT_OWNER')")
     void delete(ProjectRequest projectRequest) {
         projectRequestService.deleteProjectRequest(projectRequest)
         projectRequestService.sendDeleteEmail(projectRequest)

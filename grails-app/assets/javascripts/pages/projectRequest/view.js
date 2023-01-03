@@ -47,7 +47,7 @@ $(document).ready(() => {
           id: deleteButton.data('req-id')
         },
         success() {
-          $.otp.toaster.showErrorToast('deletion was successful.');
+          $.otp.toaster.showSuccessToast('Deletion was successful.');
           window.location.href = $.otp.createLink({ controller: 'projectRequest', action: 'unresolved' });
         },
         error(jqXHR, textStatus, errorThrown) {

@@ -32,7 +32,7 @@
                 <a id="delete-request-btn" data-project-request-id="projectRequestId" class="btn btn-${buttonAction.styling}" data-req-id="${projectRequestId}">Delete</a>
             </g:if>
             <g:else>
-                <g:actionSubmit action="${buttonAction.action}" name="${buttonAction.action}" class="btn btn-${buttonAction.styling}" value="${buttonAction.text}"/>
+                <g:actionSubmit id="${buttonAction.action}-request-btn" action="${buttonAction.action}" name="${buttonAction.action}" class="btn btn-${buttonAction.styling}" value="${buttonAction.text}"/>
             </g:else>
         </g:each>
     </div>

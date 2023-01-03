@@ -1,9 +1,23 @@
-{
-  "projectName": "my-demo-project",
-  "keywords": "new-keyword{enter} keyword1{enter}",
-  "description": "my-description: hello world, this ist description is longer than 50 chars.",
-  "approximateNumberOfSamples": "100",
-  "projectType": "SEQUENCING",
-  "storagePeriod": "Store data for ten years",
-  "speciesWithStrainList": "Mouse (Mus caroli) [Unknown]"
-}
+[
+  {
+    "projectName": "my-demo-project",
+    "keywords": "new-keyword{enter} keyword1{enter}",
+    "description": "my-description: hello world, this ist description is longer than 50 chars.",
+    "approximateNumberOfSamples": "100",
+    "projectType": "SEQUENCING",
+    "storagePeriod": "Store data for ten years",
+    "speciesWithStrainList": "Mouse (Mus caroli) [Unknown]"
+  },
+  {
+    "speciesWithStrainList": "Mouse (Mus caroli) [Unknown]{enter} Test species with Strain{enter}"
+  },
+  {
+    "projectName": "my-demo-project-2",
+    "keywords": "keyword1{enter}",
+    "description": "my-description: hello world, this ist description is longer than 50 chars.",
+    "approximateNumberOfSamples": "100",
+    "projectType": "SEQUENCING",
+    "storagePeriod": "Store data for ten years",
+    "speciesWithStrainList": "Mouse (Mus caroli) [Unknown]"
+  }
+]
