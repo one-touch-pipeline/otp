@@ -228,7 +228,7 @@
     <div id="infoBox" class="info-box"></div>
     <g:layoutBody/>
     <div class="footer" role="contentinfo">
-        &copy;2011-2022
+        &copy;2011-2023
         <a href="https://www.dkfz.de" target="_blank">DKFZ</a>,
         <a href="https://www.uni-heidelberg.de/" target="_blank">Heidelberg University</a>,
         <a href="https://www.charite.de/" target="_blank">Charité</a>,
