@@ -349,8 +349,7 @@ class MetadataImportController implements CheckAndCall, PlainResponseExceptionHa
     }
 
     JSON updateSeqCenterComment(OtrsTicket otrsTicket, String value) {
-        otrsTicket.seqCenterComment = value
-        assert otrsTicket.save(flush: true)
+        otrsTicketService.saveSeqCenterComment(otrsTicket, value)
         Map map = [success: true]
         render(map as JSON)
     }

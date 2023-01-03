@@ -73,7 +73,7 @@
                     </tr>
                     <tr>
                         <td><g:message code="metadataImport.details.otrsTicket.seqCenter.comment"/></td>
-                        <td>
+                        <td class="comment-td">
                             <otp:editorSwitch
                                     roles="ROLE_OPERATOR"
                                     template="textArea"

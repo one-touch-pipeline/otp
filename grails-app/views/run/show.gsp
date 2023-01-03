@@ -86,7 +86,7 @@
             <g:each var="file" in="${metaDataFileWrapper}">
                 <tbody>
                 <tr>
-                    <td>
+                    <td class="metaDataDetails-link">
                         <g:link controller="metadataImport" action="details" id="${file.metaDataFile.fastqImportInstanceId}">
                             ${file.fullPath}
                         </g:link>

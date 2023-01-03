@@ -206,6 +206,11 @@ class OtrsTicketService {
         return FastqImportInstance.findAllByOtrsTicket(otrsTicket)
     }
 
+    void saveSeqCenterComment(OtrsTicket otrsTicket, String value) {
+        otrsTicket.seqCenterComment = value
+        otrsTicket.save(flush: true)
+    }
+
     static String buildTicketDirectLink(OtrsTicket otrsTicket) {
         return buildTicketDirectLink(otrsTicket.ticketNumber)
     }
