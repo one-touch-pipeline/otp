@@ -36,6 +36,6 @@ class ExternalWorkflowConfigSelectorSearchParameter {
     List<String> type = []
 
     boolean hasIds() {
-        return workflowIds || workflowVersionIds || projectIds || seqTypeIds || referenceGenomeIds || libraryPreparationKitIds
+        return workflowIds || workflowVersionIds || projectIds || seqTypeIds || referenceGenomeIds || libraryPreparationKitIds || type
     }
 }
