@@ -92,8 +92,6 @@ class LicenseCheck {
             "package-lock.json",
             "package.json",
 
-            "cypress.json",
-
             "docker/keycloak/realm-export.json",
     ].collect { Paths.get(it) }
 

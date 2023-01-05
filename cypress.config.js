@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,7 +19,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+const { defineConfig } = require('cypress');
 
-module.exports = () => {
-  'use strict';
-};
+module.exports = defineConfig({
+  e2e: {
+    baseUrl: 'http://localhost:8080/',
+    specPattern: 'cypress/e2e/**/*.spec.js',
+    supportFile: 'cypress/support/index.js'
+  },
+  screenshotsFolder: 'cypress/screenshots',
+  fixturesFolder: 'cypress/fixtures',
+  downloadsFolder: 'cypress/downloads',
+  pageLoadTimeout: 60000,
+  defaultCommandTimeout: 60000,
+  viewportHeight: 900,
+  viewportWidth: 1440,
+  video: false,
+  videoUploadOnPasses: false,
+  chromeWebSecurity: false,
+  videosFolder: 'cypress/videos'
+});

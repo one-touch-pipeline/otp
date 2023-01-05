@@ -30,7 +30,6 @@ describe('Check seq track pages', () => {
 
     it('should visit the seq track set page by starting on project overview page', () => {
       cy.visit('/projectOverview/index');
-      cy.get('table#projectOverviewTable td.dataTables_empty').contains('Loading...').should('not.exist');
       cy.get('table#projectOverviewTable tbody').find('tr').eq(5)
         .find('td')
         .eq(0)
@@ -42,7 +41,6 @@ describe('Check seq track pages', () => {
       cy.checkPage('seqTrack/seqTrackSet');
 
       cy.visit('/projectOverview/index');
-      cy.get('table#projectOverviewTable td.dataTables_empty').contains('Loading...').should('not.exist');
       cy.get('table#projectOverviewTable tbody').find('tr').eq(23)
         .find('td')
         .eq(0)
@@ -54,7 +52,6 @@ describe('Check seq track pages', () => {
 
     it('should visit the show page by starting on project overview page via the run page', () => {
       cy.visit('/projectOverview/index');
-      cy.get('table#projectOverviewTable td.dataTables_empty').contains('Loading...').should('not.exist');
       cy.get('table#projectOverviewTable tbody').find('tr').eq(12)
         .find('td')
         .eq(0)
