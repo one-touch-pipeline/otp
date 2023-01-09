@@ -26,19 +26,13 @@ describe('Check metadata import details page', () => {
   context('when user is an operator', () => {
     beforeEach(() => {
       cy.intercept('/sequence/dataTableSource*').as('dataSource');
-      cy.intercept('/run/show/*').as('runDetails');
-      cy.intercept('/metadataImport/details/*').as('metadataImportDetails');
 
       cy.loginAsOperator();
       cy.visit('/sequence/index');
 
       cy.wait('@dataSource').then(() => {
         cy.get('a[title=run_0]').click();
-        cy.wait('@runDetails').then(() => {
-          cy.get('.metaDataDetails-link').first().find('a').click();
-
-          cy.wait('@metadataImportDetails');
-        });
+        cy.get('.metaDataDetails-link').first().find('a').click();
       });
     });
 
