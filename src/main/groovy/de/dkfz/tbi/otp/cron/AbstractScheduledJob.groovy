@@ -49,6 +49,7 @@ abstract class AbstractScheduledJob {
             GenerateAndSendKPIsForNBI,
             FetchUserDataFromLdapJob,
             CheckFileAccessInconsistenciesJob,
+            CheckExpiredProjects,
     ]
 
     @Autowired

@@ -39,6 +39,7 @@ import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfigService
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvConfig
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryProcessingPriority
+import de.dkfz.tbi.otp.domainFactory.UserDomainFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.FastqcWorkflowDomainFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.infrastructure.*
@@ -62,7 +63,7 @@ import java.time.temporal.ChronoUnit
 @Rollback
 @Integration
 class ProjectServiceIntegrationSpec extends Specification implements UserAndRoles, DomainFactoryCore, DomainFactoryProcessingPriority,
-        WorkflowSystemDomainFactory, FastqcWorkflowDomainFactory {
+        WorkflowSystemDomainFactory, FastqcWorkflowDomainFactory, UserDomainFactory {
 
     RemoteShellHelper remoteShellHelper
     ProcessingOptionService processingOptionService
@@ -1916,6 +1917,65 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
         then:
         noExceptionThrown()
+    }
+
+    void "getExpiredProjectsWithPIs, when an expired project with PI user exists, it should be found"() {
+        given:
+        setupData()
+        createProject([storageUntil: LocalDate.of(3000, 1, 1)])
+        Project expiredProject = createProject([storageUntil: LocalDate.of(1970, 1, 1)])
+        ProjectRole projectRolePI = CollectionUtils.atMostOneElement(ProjectRole.findAllByName(ProjectRole.Basic.PI.name()))
+        User user = createUser()
+        createUserProjectRole([
+                project     : expiredProject,
+                user        : user,
+                projectRoles: [projectRolePI],
+        ])
+
+        when:
+        Map<Project, List<User>> projectUsers = projectService.expiredProjectsWithPIs
+
+        then:
+        projectUsers.each { Project resultProject, List<User> users ->
+            resultProject == expiredProject
+            users.length == 1
+            users[0] = user
+        }
+    }
+
+    void "getExpiredProjectsWithPIs, when all projects are not expired, it should return an empty map"() {
+        given:
+        setupData()
+        createProject([storageUntil: LocalDate.of(3000, 1, 1)])
+        createProject([storageUntil: LocalDate.of(3010, 2, 2)])
+        createProject([storageUntil: LocalDate.of(3020, 3, 3)])
+
+        when:
+        Map<Project, List<User>> projectUsers = projectService.expiredProjectsWithPIs
+
+        then:
+        projectUsers == [:]
+    }
+
+    void "getExpiredProjectsWithPIs, when an expired project without PI users exists, it should return the project with empty user list"() {
+        given:
+        setupData()
+        createProject([storageUntil: LocalDate.of(3000, 1, 1)])
+        Project expiredProject = createProject([storageUntil: LocalDate.of(1970, 1, 1)])
+        User user = createUser()
+        createUserProjectRole([
+                project     : expiredProject,
+                user        : user,
+        ])
+
+        when:
+        Map<Project, List<User>> projectUsers = projectService.expiredProjectsWithPIs
+
+        then:
+        projectUsers.each { Project resultProject, List<User> users ->
+            resultProject == expiredProject
+            users == []
+        }
     }
 
     private File makeStatFile(ReferenceGenome referenceGenome, String statFileName) {

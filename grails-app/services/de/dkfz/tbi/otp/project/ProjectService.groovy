@@ -48,6 +48,7 @@ import de.dkfz.tbi.otp.project.additionalField.*
 import de.dkfz.tbi.otp.project.exception.unixGroup.*
 import de.dkfz.tbi.otp.project.projectRequest.ProjectRequestService
 import de.dkfz.tbi.otp.project.projectRequest.ProjectRequestStateProvider
+import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
@@ -1144,6 +1145,29 @@ echo 'OK'
 
     Project findByProjectWithFetchedKeywords(Project project) {
         return atMostOneElement(Project.findAllByName(project?.name, [ fetch: [ keywords: 'join']]))
+    }
+
+    Map<Project, List<User>> getExpiredProjectsWithPIs() {
+        List<Project> projects = Project.findAllByStorageUntilLessThan(LocalDate.now())
+
+        if (projects.empty) {
+            return [:]
+        }
+
+        List<UserProjectRole> userProjectRoles = UserProjectRole.withCriteria {
+            'in'('project', projects)
+            projectRoles {
+                eq('name', ProjectRole.Basic.PI.toString())
+            }
+            user {
+                eq('enabled', true)
+            }
+        }
+
+        return projects.collectEntries { Project project ->
+            List<User> users = userProjectRoles.findAll { it.project == project }*.user
+            return [(project): users]
+        }
     }
 }
 
