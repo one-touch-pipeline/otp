@@ -320,7 +320,9 @@ dependencies {
     implementation "org.grails.plugins:grails-console:2.1.1"
     implementation "org.grails.plugins:mail:2.0.0"
 
-    implementation "org.grails.plugins:database-migration:4.1.0"
+    implementation ("org.grails.plugins:database-migration:4.1.0") {
+        exclude group: "org.grails", module: "grails-shell"
+    }
     implementation 'org.liquibase:liquibase-core:4.8.0'
 
     // support for java8 time classes
