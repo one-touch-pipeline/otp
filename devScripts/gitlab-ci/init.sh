@@ -28,6 +28,11 @@ mkdir -p logs/jobs
 #add required otp properties
 cp $OTP_PROPERTIES_BASE ~/.otp.properties
 
-#cache redirect
+#npm cache redirect
 mkdir -p $NPM_CACHE
 ln -s $NPM_CACHE $HOME/.npm
+
+#cypress cache redirect
+mkdir -p $CYPRESS_CACHE
+mkdir -p $HOME/.cache/Cypress
+ln -s $CYPRESS_CACHE $HOME/.cache/Cypress

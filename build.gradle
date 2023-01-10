@@ -44,7 +44,7 @@ buildscript {
 plugins {
     id "com.github.monosoul.markdown.page.generator" version "2.1.0.1"
     id 'org.hidetake.swagger.generator' version '2.19.2'
-    id "com.github.node-gradle.node" version "2.2.4"
+    id "com.github.node-gradle.node" version "3.5.1"
 }
 
 buildScan {
@@ -490,7 +490,7 @@ generateHtml {
 }
 
 node {
-    version = '14.17.6'
+    version = '16.19.0'
     download = true
 }
 

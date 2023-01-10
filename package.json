@@ -7,14 +7,11 @@
     "cy-open": "npx cypress open",
     "cy-wait": "start-server-and-test './gradlew --build-cache bootRun' 'http-get://localhost:8080' cy-run"
   },
-  "dependencies": {
-    "md5": "~2.3.0"
-  },
   "devDependencies": {
     "cypress": "~12.3.0",
-    "eslint": "~8.8.0",
+    "eslint": "~8.31.0",
     "eslint-config-airbnb-base": "~15.0.0",
-    "eslint-plugin-import": "~2.25.4",
-    "start-server-and-test": "~1.14.0"
+    "eslint-plugin-import": "~2.26.0",
+    "start-server-and-test": "~1.15.2"
   }
 }
