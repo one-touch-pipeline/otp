@@ -28,7 +28,7 @@ cd /home/otp
 #base file system according the dump
 tar -xf filesystem.tar.gz && rm filesystem.tar.gz
 
-#ecample data
+#example data
 mv *.tar.gz filesystem
 cd filesystem
 tar -xf otp_example_data.tar.gz && rm otp_example_data.tar.gz

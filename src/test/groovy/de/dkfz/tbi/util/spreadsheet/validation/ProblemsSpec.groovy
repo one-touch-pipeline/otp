@@ -22,6 +22,7 @@
 package de.dkfz.tbi.util.spreadsheet.validation
 
 import spock.lang.Specification
+import spock.lang.Unroll
 
 import de.dkfz.tbi.util.spreadsheet.Cell
 import de.dkfz.tbi.util.spreadsheet.Spreadsheet
@@ -79,4 +80,46 @@ class ProblemsSpec extends Specification {
         containSame(problems.getProblems(a1), [problemA1, problemA1B1])
         containSame(problems.getProblems(b1), [problemA1B1, problemB1])
     }
+
+    void "addProblems, should add all listed problems to the problems list"() {
+        given:
+        Problems problems = new Problems()
+        Problems problemsToAdd = new Problems()
+        Spreadsheet spreadsheet = new Spreadsheet('A1\tB1')
+        def (Cell a1, Cell b1) = spreadsheet.header.cells
+        String msg1 = 'msg1'
+        String msg2 = 'msg2'
+        problems.addProblem([a1] as Set, LogLevel.WARNING, msg1)
+        problems.addProblem([a1] as Set, LogLevel.WARNING, msg2)
+        problemsToAdd.addProblem([b1] as Set, LogLevel.WARNING, msg1)
+        problemsToAdd.addProblem([b1] as Set, LogLevel.WARNING, msg2)
+
+        when:
+        problems.addProblems(problemsToAdd)
+
+        then:
+        problems.problems.size() == 4
+    }
+
+    @Unroll
+    void "addProblems, should add no problems when called with null"() {
+        given:
+        Problems problems = new Problems()
+        Spreadsheet spreadsheet = new Spreadsheet('A1\tB1')
+        def (Cell a1, Cell b1) = spreadsheet.header.cells
+        String msg1 = 'msg1'
+        String msg2 = 'msg2'
+        problems.addProblem([a1] as Set, LogLevel.WARNING, msg1)
+        problems.addProblem([b1] as Set, LogLevel.WARNING, msg2)
+
+        when:
+        problems.addProblems(null)
+
+        then:
+        problems.problems.size() == 2
+
+        where:
+        problemsToAdd << [null, new Problems()]
+    }
+
 }

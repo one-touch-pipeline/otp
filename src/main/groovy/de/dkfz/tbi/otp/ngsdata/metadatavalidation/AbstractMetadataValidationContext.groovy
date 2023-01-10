@@ -52,13 +52,9 @@ abstract class AbstractMetadataValidationContext extends ValidationContext {
         this.metadataFileMd5sum = metadataFileMd5sum
     }
 
-    static Map readAndCheckFile(Path metadataFile,
-                                @ClosureParams(value = SimpleType, options = ['java.lang.String']) Closure<String> renameHeader = Closure.IDENTITY,
-                                @ClosureParams(value = SimpleType, options = ['de.dkfz.tbi.util.spreadsheet.Row']) Closure<Boolean> dataRowFilter = { true }) {
+    static ContentWithPathAndProblems readPath(Path metadataFile) {
         Problems problems = new Problems()
-        String metadataFileMd5sum = null
-        Spreadsheet spreadsheet = null
-        byte[] bytes = null
+        byte[] content = null
         List<String> acceptedExtensions = ['.tsv', '.csv', '.txt']
 
         if (!OtpPathValidator.isValidAbsolutePath(metadataFile.toString())) {
@@ -82,27 +78,60 @@ abstract class AbstractMetadataValidationContext extends ValidationContext {
                     "${MAX_METADATA_FILE_SIZE_IN_MIB} MiB.")
         } else {
             try {
-                bytes = Files.readAllBytes(metadataFile)
-                metadataFileMd5sum = byteArrayToHexString(MessageDigest.getInstance('MD5').digest(bytes))
-                String document = new String(bytes, CHARSET)
-                if (document.getBytes(CHARSET) != bytes) {
-                    problems.addProblem(Collections.emptySet(), LogLevel.WARNING, "The content of ${pathForMessage(metadataFile)} is not properly " +
-                            "encoded with ${CHARSET.name()}. Characters might be corrupted.")
-                }
-                spreadsheet = new FilteredSpreadsheet(document.replaceFirst(/[\t\r\n]+$/, ''), Delimiter.AUTO_DETECT,
-                        renameHeader, dataRowFilter)
-                if (spreadsheet.dataRows.size() < 1) {
-                    spreadsheet = null
-                    problems.addProblem(Collections.emptySet(), LogLevel.ERROR, "${pathForMessage(metadataFile)} contains less than two lines.")
-                }
+                content = Files.readAllBytes(metadataFile)
             } catch (Exception e) {
                 problems.addProblem(Collections.emptySet(), LogLevel.ERROR, e.message)
             }
         }
+        return new ContentWithPathAndProblems(content, metadataFile, problems)
+    }
+
+    static Map checkContent(byte[] content, @ClosureParams(value = SimpleType, options = ['java.lang.String']) Closure<String> renameHeader = Closure.IDENTITY,
+                            @ClosureParams(value = SimpleType, options = ['de.dkfz.tbi.util.spreadsheet.Row']) Closure<Boolean> dataRowFilter = { true }) {
+        Problems problems = new Problems()
+        String metadataFileMd5sum = null
+        Spreadsheet spreadsheet = null
+        try {
+            metadataFileMd5sum = byteArrayToHexString(MessageDigest.getInstance('MD5').digest(content))
+            String document = new String(content, CHARSET)
+            if (document.getBytes(CHARSET) != content) {
+                problems.addProblem(Collections.emptySet(), LogLevel.WARNING, "The content of the file is not properly " +
+                        "encoded with ${CHARSET.name()}. Characters might be corrupted.")
+            }
+            spreadsheet = new FilteredSpreadsheet(document.replaceFirst(/[\t\r\n]+$/, ''), Delimiter.AUTO_DETECT,
+                    renameHeader, dataRowFilter)
+            if (spreadsheet.dataRows.size() < 1) {
+                spreadsheet = null
+                problems.addProblem(Collections.emptySet(), LogLevel.ERROR, "The file contains less than two lines.")
+            }
+        } catch (Exception e) {
+            problems.addProblem(Collections.emptySet(), LogLevel.ERROR, e.message)
+        }
+
         return [
                 metadataFileMd5sum: metadataFileMd5sum,
                 spreadsheet       : spreadsheet,
-                bytes             : bytes,
+                problems          : problems,
+        ]
+    }
+
+    static Map readAndCheckFile(Path metadataFile,
+                                @ClosureParams(value = SimpleType, options = ['java.lang.String']) Closure<String> renameHeader = Closure.IDENTITY,
+                                @ClosureParams(value = SimpleType, options = ['de.dkfz.tbi.util.spreadsheet.Row']) Closure<Boolean> dataRowFilter = { true }) {
+        Problems problems = new Problems()
+
+        ContentWithPathAndProblems readPathMap = readPath(metadataFile)
+        problems.addProblems(readPathMap.problems)
+
+        byte[] content = readPathMap.content
+
+        Map checkContentMap = checkContent(content, renameHeader, dataRowFilter)
+        problems.addProblems(checkContentMap.problems)
+
+        return [
+                metadataFileMd5sum: checkContentMap.metadataFileMd5sum,
+                spreadsheet       : checkContentMap.spreadsheet,
+                bytes             : content,
                 problems          : problems,
         ]
     }
@@ -117,5 +146,23 @@ abstract class AbstractMetadataValidationContext extends ValidationContext {
      */
     static Path canonicalPath(Path path) {
         return Files.isSymbolicLink(path) ? canonicalPath(Files.readSymbolicLink(path)) : path
+    }
+}
+
+class ContentWithPathAndProblems {
+    byte[] content
+    Path path
+    Problems problems
+
+    ContentWithPathAndProblems(byte[] content, Path path) {
+        this.content = content
+        this.path = path
+        this.problems = new Problems()
+    }
+
+    ContentWithPathAndProblems(byte[] content, Path path, Problems problems) {
+        this.problems = problems
+        this.path = path
+        this.content = content
     }
 }

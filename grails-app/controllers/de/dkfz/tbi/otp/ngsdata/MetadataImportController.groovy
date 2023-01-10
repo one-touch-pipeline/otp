@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.converters.JSON
+import org.springframework.http.HttpStatus
 import org.springframework.security.access.annotation.Secured
 import grails.validation.Validateable
 import groovy.transform.Immutable
@@ -33,14 +34,17 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.core.userdetails.User
 import org.springframework.security.core.userdetails.UserDetails
+import org.springframework.web.multipart.MultipartFile
 
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.ContentWithPathAndProblems
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.DirectoryStructureBeanName
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.metadatasource.MetaDataFileSourceEnum
 import de.dkfz.tbi.otp.security.Role
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.tracking.OtrsTicketService
@@ -50,10 +54,16 @@ import de.dkfz.tbi.otp.utils.StringUtils
 import de.dkfz.tbi.otp.utils.error.ForbiddenErrorPlainResponseException
 import de.dkfz.tbi.otp.utils.error.InternalServerErrorPlainResponseException
 import de.dkfz.tbi.otp.utils.error.PlainResponseExceptionHandler
+import de.dkfz.tbi.otp.utils.exceptions.MetadataFileImportException
 import de.dkfz.tbi.util.TimeFormats
 import de.dkfz.tbi.util.TimeUtils
+import de.dkfz.tbi.util.spreadsheet.Cell
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
+import de.dkfz.tbi.util.spreadsheet.validation.Problem
+import de.dkfz.tbi.util.spreadsheet.validation.Problems
 
 import java.nio.file.FileSystem
+import java.nio.file.Paths
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
@@ -62,7 +72,7 @@ class MetadataImportController implements CheckAndCall, PlainResponseExceptionHa
 
     static allowedMethods = [
             index                                : "GET",
-            validateOrImport                     : "POST",
+            importByPathOrContent                : "POST",
             details                              : "GET",
             multiDetails                         : "GET",
             autoImport                           : "GET",
@@ -74,6 +84,7 @@ class MetadataImportController implements CheckAndCall, PlainResponseExceptionHa
             updateSeqCenterComment               : "POST",
             updateAutomaticNotificationFlag      : "POST",
             updateFinalNotificationFlag          : "POST",
+            validatePathsOrFiles                 : "POST",
     ]
 
     CommentService commentService
@@ -86,84 +97,94 @@ class MetadataImportController implements CheckAndCall, PlainResponseExceptionHa
     ProcessingOptionService processingOptionService
     RunService runService
 
-    @SuppressWarnings("UnnecessaryGetter")
-    def index(MetadataImportControllerSubmitCommand cmd) {
-        boolean isValidated = false
-        int problems = 0
-        List<MetadataValidationContext> metadataValidationContexts = []
-
-        if (flash.mvc) {
-            metadataValidationContexts = flash.mvc
-        } else if (cmd.paths) {
-            cmd.paths.each { path ->
-                MetadataValidationContext mvc = metadataImportService.validateWithAuth(new File(path), cmd.directoryStructure, cmd.ignoreMd5sumError)
-                metadataValidationContexts.add(mvc)
-                if (mvc.maximumProblemLevel.intValue() > problems) {
-                    problems = mvc.maximumProblemLevel.intValue()
-                }
-            }
-            isValidated = true
-        }
-
+    def index() {
         return [
-                directoryStructures    : DirectoryStructureBeanName.values(),
-                cmd                    : cmd,
-                paths                  : cmd.paths ?: [""],
-                contexts               : metadataValidationContexts,
-                implementedValidations : metadataImportService.getImplementedValidations(),
-                isValidated            : isValidated,
-                problems               : problems,
-                ignoreMd5sumError      : cmd.ignoreMd5sumError,
+                cmd                   : flash?.cmd as MetadataImportControllerSubmitCommand,
+                metadataFileSources   : MetaDataFileSourceEnum.values(),
+                directoryStructures   : DirectoryStructureBeanName.values(),
+                implementedValidations: metadataImportService.implementedValidations,
         ]
     }
 
-    def validateOrImport(MetadataImportControllerSubmitCommand cmd) {
-        List<MetadataValidationContext> metadataValidationContexts = []
-        boolean hasRedirected = false
-        withForm {
-            if (cmd.hasErrors()) {
-                flash.message = new FlashMessage("Error", cmd.errors)
-            } else if (cmd.submit == "Import") {
+    def validatePathsOrFiles(MetadataImportControllerSubmitCommand cmd) {
+        checkDefaultErrorsAndCallMethod(cmd) {
+            List<ContentWithPathAndProblems> contentsWithPathAndProblems = null
+            if (cmd.metadataFileSource == MetaDataFileSourceEnum.PATH && cmd.paths) {
                 FileSystem fs = fileSystemService.filesystemForFastqImport
+                contentsWithPathAndProblems = cmd.paths.collect { metadataFilePath ->
+                    return MetadataValidationContext.readPath(fs.getPath(metadataFilePath))
+                }
+            } else if (cmd.metadataFileSource == MetaDataFileSourceEnum.FILE && cmd.contentList) {
+                contentsWithPathAndProblems = cmd.contentList.collect { content ->
+                    return new ContentWithPathAndProblems(content.bytes, Paths.get(content.originalFilename))
+                }
+            }
 
-                List<MetadataImportService.PathWithMd5sum> pathWithMd5sums = cmd.paths.withIndex().collect {
-                    return new MetadataImportService.PathWithMd5sum(fs.getPath(it.first), cmd.md5.get(it.second))
-                }
-                List<ValidateAndImportResult> validateAndImportResults = metadataImportService.validateAndImportWithAuth(
-                        pathWithMd5sums, cmd.directoryStructure, cmd.align, cmd.ignoreWarnings, cmd.ticketNumber,
-                        cmd.seqCenterComment, cmd.automaticNotification, cmd.ignoreMd5sumError
-                )
-                metadataValidationContexts = validateAndImportResults*.context
-                boolean allValid = validateAndImportResults.every {
-                    it.metadataFile
-                }
-                if (allValid) {
+            List<MetadataValidationContext> metadataValidationContexts = contentsWithPathAndProblems.collect { contentWithPathAndProblems ->
+                metadataImportService.validateWithAuth(contentWithPathAndProblems, cmd.directoryStructure, cmd.ignoreMd5sumError)
+            }
+
+            render([
+                    contexts           : metadataValidationContexts.collect { context ->
+                        [spreadsheet        : new SpreadsheetDTO(context),
+                         problems           : context.problems?.collect { problem -> new ProblemDTO(problem, context) },
+                         summary            : context.summary,
+                         maximumProblemLevel: LogLevel.normalize(context.maximumProblemLevel).name,]
+                    },
+                    problemLevel       : metadataValidationContexts*.maximumProblemLevel*.intValue().max(),
+                    warningLevel       : LogLevel.WARNING.intValue(),
+                    metadataFileMd5sums: metadataValidationContexts*.metadataFileMd5sum,
+            ] as JSON)
+        }
+    }
+
+    def importByPathOrContent(MetadataImportControllerSubmitCommand cmd) {
+        checkDefaultErrorsAndCallMethod(cmd) {
+            try {
+                withForm {
+                    FileSystem fs = fileSystemService.filesystemForFastqImport
+                    List<ContentWithProblemsAndPreviousMd5sum> contentsWithProblemsAndPreviousMd5sum = []
+                    if (cmd.metadataFileSource == MetaDataFileSourceEnum.PATH && cmd.paths) {
+                        contentsWithProblemsAndPreviousMd5sum = cmd.paths.withIndex().collect { String path, Integer index ->
+                            [
+                                    contentWithPathAndProblems: MetadataValidationContext.readPath(fs.getPath(path)),
+                                    previousMd5sum            : cmd.md5.get(index),
+                            ] as ContentWithProblemsAndPreviousMd5sum
+                        }
+                    } else if (cmd.metadataFileSource == MetaDataFileSourceEnum.FILE && cmd.contentList) {
+                        contentsWithProblemsAndPreviousMd5sum = cmd.contentList.withIndex().collect { MultipartFile content, Integer index ->
+                            [
+                                    contentWithPathAndProblems: new ContentWithPathAndProblems(content.bytes, Paths.get(content.originalFilename)),
+                                    previousMd5sum            : cmd.md5.get(index),
+                            ] as ContentWithProblemsAndPreviousMd5sum
+                        }
+                    }
+                    List<ValidateAndImportResult> validateAndImportResults = metadataImportService.validateAndImport(
+                            contentsWithProblemsAndPreviousMd5sum, cmd.directoryStructure, cmd.align, cmd.ignoreWarnings,
+                            cmd.ticketNumber, cmd.seqCenterComment, cmd.automaticNotification, cmd.ignoreMd5sumError
+                    )
                     log.debug("No problem")
                     if (validateAndImportResults.size() == 1) {
                         log.debug("This should be the id to the details page: ${validateAndImportResults.first().metadataFile.fastqImportInstance.id}")
-                        redirect(action: "details", id: validateAndImportResults.first().metadataFile.fastqImportInstance.id)
-                    } else {
-                        redirect(action: "multiDetails", params: [metaDataFiles: validateAndImportResults*.metadataFile*.id])
+                        render([redirect: grailsLinkGenerator.link([
+                                action  : 'details',
+                                absolute: 'true',
+                                id      : validateAndImportResults.first().metadataFile.fastqImportInstance.id,
+                        ])] as JSON)
                     }
-                    hasRedirected = true
-                } else {
-                    log.debug("There was a problem")
+                    render([redirect: grailsLinkGenerator.link([
+                            action  : 'multiDetails',
+                            absolute: 'true',
+                            params  : [metaDataFiles: validateAndImportResults*.metadataFile*.id],
+                    ])] as JSON)
+                }.invalidToken {
+                    return response.sendError(HttpStatus.BAD_REQUEST.value(), g.message(code: "default.invalid.session") as String)
                 }
+            } catch (MetadataFileImportException e) {
+                log.debug("There was a problem: ${e.message}")
+                return response.sendError(HttpStatus.BAD_REQUEST.value(),
+                        e.message.replace('\n', '<br/>'))
             }
-        }.invalidToken {
-            flash.message = new FlashMessage(g.message(code: "default.message.error") as String, g.message(code: "default.invalid.session") as String)
-        }
-        if (!hasRedirected) {
-            flash.mvc = metadataValidationContexts
-            redirect(action: "index", params: [
-                    paths                : cmd.paths,
-                    directoryStructure   : cmd.directoryStructure,
-                    ticketNumber         : cmd.ticketNumber,
-                    seqCenterComment     : cmd.seqCenterComment,
-                    align                : cmd.align,
-                    automaticNotification: cmd.automaticNotification,
-                    ignoreMd5sumError    : cmd.ignoreMd5sumError
-            ])
         }
     }
 
@@ -178,10 +199,10 @@ class MetadataImportController implements CheckAndCall, PlainResponseExceptionHa
         List<MetaDataFileWrapper> metaDataFiles = params.metaDataFiles.collect {
             MetaDataFile file = metadataImportService.findById(it as long)
 
-            new MetaDataFileWrapper(
+            new MetaDataFileWrapper([
                     metaDataFile: file,
                     fullPath    : metadataImportService.getMetaDataFileFullPath(file),
-            )
+            ])
         }
 
         return [
@@ -193,11 +214,11 @@ class MetadataImportController implements CheckAndCall, PlainResponseExceptionHa
         List<DataFile> dataFilesNotAssignedToSeqTrack = []
 
         List<MetaDataFileWrapper> metaDataFiles = metadataImportService.findAllByFastqImportInstance(importInstance).collect {
-            new MetaDataFileWrapper(
+            new MetaDataFileWrapper([
                     metaDataFile: it,
                     fullPath    : metadataImportService.getMetaDataFileFullPath(it),
                     dateCreated : TimeFormats.DATE_TIME.getFormattedZonedDateTime(TimeUtils.toZonedDateTime(it.dateCreated)),
-            )
+            ])
         }
 
         List<DataFile> dataFiles = dataFileService.findAllByFastqImportInstance(importInstance)
@@ -222,11 +243,11 @@ class MetadataImportController implements CheckAndCall, PlainResponseExceptionHa
             }
         }
 
-        return new MetadataDetails(
-                metaDataFileWrapper: metaDataFiles,
+        return new MetadataDetails([
+                metaDataFileWrapper           : metaDataFiles,
                 dataFilesNotAssignedToSeqTrack: dataFilesNotAssignedToSeqTrack,
-                runs: runs,
-        )
+                runs                          : runs,
+        ])
     }
 
     def assignOtrsTicketToFastqImportInstance() {
@@ -294,15 +315,15 @@ class MetadataImportController implements CheckAndCall, PlainResponseExceptionHa
                 problems.append("${context.problemsObject.sortedProblemListString}\n\n")
             }
             text.append("\n\nClick here for manual import:")
-            text.append("\n" + g.createLink(
-                    action: 'index',
+            text.append("\n" + g.createLink([
+                    action  : 'index',
                     absolute: 'true',
-                    params: [
+                    params  : [
                             'ticketNumber'      : otrsTicketNumber,
                             'paths'             : e.allPaths,
                             'directoryStructure': DirectoryStructureBeanName.GPCF_SPECIFIC,
-                    ])
-            )
+                    ],
+            ]))
             text.append("\n\n")
             text.append(problems)
         }
@@ -364,6 +385,66 @@ class MetadataImportController implements CheckAndCall, PlainResponseExceptionHa
         metadataImportService.updateFinalNotificationFlag(otrsTicket, value.toBoolean())
         Map map = [success: true]
         render(map as JSON)
+    }
+
+    class SpreadsheetDTO {
+        HeaderDTO header
+        DataRowDTO[] dataRows
+
+        SpreadsheetDTO(MetadataValidationContext context) {
+            this.header = new HeaderDTO(context.spreadsheet?.header?.cells, context)
+            this.dataRows = context.spreadsheet?.dataRows?.collect { dataRow ->
+                new DataRowDTO(dataRow.cells, context)
+            }
+        }
+    }
+
+    class DataRowDTO {
+        CellDTO[] cells
+        String rowAddress
+
+        DataRowDTO(List<Cell> cells, MetadataValidationContext context) {
+            this.cells = cells.collect { cell -> new CellDTO(cell, context) }
+            this.rowAddress = cells?.first()?.rowAddress
+        }
+    }
+
+    class HeaderDTO {
+        CellDTO[] cells
+        String rowAddress
+
+        HeaderDTO(List<Cell> cells, MetadataValidationContext context) {
+            this.cells = cells.collect { cell -> new CellDTO(cell, context) }
+            this.rowAddress = cells?.first()?.rowAddress
+        }
+    }
+
+    class CellDTO {
+        String columnAddress
+        String text
+        String cellAddress
+        String cellProblemsLevelAndMessage
+        String cellProblemsName
+
+        CellDTO(Cell cell, MetadataValidationContext context) {
+            this.columnAddress = cell.columnAddress
+            this.text = cell.text
+            this.cellAddress = cell.cellAddress
+            this.cellProblemsLevelAndMessage = context.getProblems(cell)*.levelAndMessage.join('\n\n')
+            this.cellProblemsName = LogLevel.normalize(Problems.getMaximumProblemLevel(context.getProblems(cell))).name
+        }
+    }
+
+    class ProblemDTO {
+        String levelAndMessage
+        List<CellDTO> affectedCells
+        String level
+
+        ProblemDTO(Problem problem, MetadataValidationContext context) {
+            this.levelAndMessage = problem.levelAndMessage
+            this.affectedCells = problem.affectedCells.collect { cell -> new CellDTO(cell, context) }
+            this.level = LogLevel.normalize(problem.level).name
+        }
     }
 }
 
@@ -443,26 +524,26 @@ class SeqTrackWithDataFiles {
     List<DataFile> dataFiles
 }
 
-class MetadataImportControllerSubmitCommand implements Serializable {
+class MetadataImportControllerSubmitCommand implements Serializable, Validateable {
     ProcessingOptionService processingOptionService
-
     List<String> paths
+    List<MultipartFile> contentList
     DirectoryStructureBeanName directoryStructure
+    MetaDataFileSourceEnum metadataFileSource
     List<String> md5
-    String submit
     String ticketNumber
     String seqCenterComment
     boolean align = true
     boolean automaticNotification = true
-    boolean ignoreWarnings
+    boolean ignoreWarnings = false
 
     boolean ignoreMd5sumError = false
 
     static constraints = {
+        contentList(nullable: true)
         paths(nullable: true)
         directoryStructure(nullable: true)
         md5(nullable: true)
-        submit(nullable: true)
         seqCenterComment(nullable: true, validator: { val, obj ->
             return !val || obj.ticketNumber
         })

@@ -42,6 +42,7 @@ import de.dkfz.tbi.otp.infrastructure.CreateFileException
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.ContentWithPathAndProblems
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.DirectoryStructure
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.DirectoryStructureBeanName
@@ -55,6 +56,7 @@ import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.tracking.OtrsTicketService
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.exceptions.CopyingOfFileFailedException
+import de.dkfz.tbi.otp.utils.exceptions.MetadataFileImportException
 import de.dkfz.tbi.otp.workflow.datainstallation.DataInstallationInitializationService
 import de.dkfz.tbi.otp.workflowExecution.decider.AllDecider
 import de.dkfz.tbi.util.TimeFormats
@@ -135,7 +137,7 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
         containSame(service.implementedValidations, ['description1', 'description2', 'description3'])
     }
 
-    void "validate creates context and calls validators"() {
+    void "validatePath creates context and calls validators"() {
         given:
         DirectoryStructure directoryStructure = [:] as DirectoryStructure
         DirectoryStructureBeanName directoryStructureName = DirectoryStructureBeanName.SAME_DIRECTORY
@@ -163,7 +165,7 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
         }
 
         when:
-        MetadataValidationContext context = service.validate(metadataFile, directoryStructureName)
+        MetadataValidationContext context = service.validatePath(metadataFile, directoryStructureName)
 
         then:
         containSame(context.problems*.message, ['message1', 'message2', 'message3'])
@@ -174,7 +176,7 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
     }
 
     @Unroll
-    void "validateAndImportWithAuth, when there are no problems, calls importMetadataFile and returns created MetaDataFile"() {
+    void "validateAndImport, when there are no problems, calls importMetadataFile and returns created MetaDataFile"() {
         given:
         SeqCenter seqCenter = createSeqCenter(autoImportable: true, autoImportDir: "/auto-import-dir")
         DirectoryStructure directoryStructure = [:] as DirectoryStructure
@@ -199,14 +201,17 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
             getBeansOfType(MetadataValidator) >> [:]
             getBean(directoryStructureName.beanName, DirectoryStructure) >> directoryStructure
         }
-        MetadataImportService.PathWithMd5sum pathWithMd5sum = new MetadataImportService.PathWithMd5sum(metadataFile, null)
+        ContentWithProblemsAndPreviousMd5sum pathWithMd5sum = [
+                contentWithPathAndProblems: new ContentWithPathAndProblems(metadataFile.bytes, metadataFile.fileName),
+                previousMd5sum            : null,
+        ] as ContentWithProblemsAndPreviousMd5sum
 
         when:
-        List<ValidateAndImportResult> results = service.validateAndImportWithAuth(
+        List<ValidateAndImportResult> results = service.validateAndImport(
                 [pathWithMd5sum], directoryStructureName, align, false, TICKET_NUMBER, null, automaticNotification)
 
         then:
-        results[0].context.metadataFile == metadataFile
+        results[0].context.metadataFile == metadataFile.fileName
         results[0].metadataFile == metadataFileObject
 
         where:
@@ -214,13 +219,17 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
         automaticNotification << [true, false]
     }
 
-    void "validateAndImportWithAuth, when there are errors, returns null as metadataFile"() {
+    void "validateAndImportWithAuth, when there are errors, throws an exception"() {
         given:
         DirectoryStructure directoryStructure = [:] as DirectoryStructure
         DirectoryStructureBeanName directoryStructureName = DirectoryStructureBeanName.SAME_DIRECTORY
 
-        Path metadataFile = Paths.get('relative_path')
-        MetadataImportService.PathWithMd5sum pathWithMd5sum = new MetadataImportService.PathWithMd5sum(metadataFile, null)
+        Path metadataFile = Paths.get("relative_path")
+        byte[] content = "test".bytes
+        ContentWithProblemsAndPreviousMd5sum pathWithMd5sum = [
+                contentWithPathAndProblems: new ContentWithPathAndProblems(content, metadataFile),
+                previousMd5sum            : null,
+        ] as ContentWithProblemsAndPreviousMd5sum
 
         MetadataImportService service = new MetadataImportService()
         service.applicationContext = Mock(ApplicationContext) {
@@ -229,12 +238,11 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
         service.fileSystemService = new TestFileSystemService()
 
         when:
-        List<ValidateAndImportResult> results = service.validateAndImportWithAuth(
-                [pathWithMd5sum], directoryStructureName, false, false, TICKET_NUMBER, null, true)
+        service.validateAndImport([pathWithMd5sum], directoryStructureName, false,
+                false, TICKET_NUMBER, null, true)
 
         then:
-        results[0].context.metadataFile == metadataFile
-        results[0].metadataFile == null
+        thrown(MetadataFileImportException)
     }
 
     void "validateAndImportWithAuth, validate all before import the first"() {
@@ -242,24 +250,33 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
         DirectoryStructure directoryStructure = [:] as DirectoryStructure
         DirectoryStructureBeanName directoryStructureName = DirectoryStructureBeanName.SAME_DIRECTORY
         createSeqCenter(autoImportable: false)
-        MetadataValidationContext context1 = MetadataValidationContextFactory.createContext([metadataFile: Paths.get("import1_meta.tsv")])
+        byte[] content1 = 'a\tb\ta'.bytes
+        Path path1 = Paths.get("import1_meta.tsv")
+        MetadataValidationContext context1 = MetadataValidationContextFactory.createContext([metadataFile: Paths.get("import1_meta.tsv"), content: content1])
         MetaDataFile metadataFile1 = DomainFactory.createMetaDataFile()
-        MetadataValidationContext context2 = MetadataValidationContextFactory.createContext([metadataFile: Paths.get("import2_meta.tsv")])
+        byte[] content2 = 'c\td\te'.bytes
+        Path path2 = Paths.get("import2_meta.tsv")
+        MetadataValidationContext context2 = MetadataValidationContextFactory.createContext([metadataFile: path2, content: 'c\td\te'.bytes])
         MetaDataFile metadataFile2 = DomainFactory.createMetaDataFile()
 
         DomainFactory.createDefaultRealmWithProcessingOption()
 
-        List<MetadataImportService.PathWithMd5sum> pathWithMd5sums = [
-                new MetadataImportService.PathWithMd5sum(context1.metadataFile, HelperUtils.randomMd5sum),
-                new MetadataImportService.PathWithMd5sum(context2.metadataFile, HelperUtils.randomMd5sum),
+        List<ContentWithPathAndProblems> contentWithProblems = [
+                new ContentWithPathAndProblems(content1, path1),
+                new ContentWithPathAndProblems(content2, path2),
+        ]
+
+        List<ContentWithProblemsAndPreviousMd5sum> contentWithProblemsAndPreviousMd5sums = [
+                new ContentWithProblemsAndPreviousMd5sum(contentWithProblems[0], HelperUtils.randomMd5sum),
+                new ContentWithProblemsAndPreviousMd5sum(contentWithProblems[1], HelperUtils.randomMd5sum),
         ]
 
         int imported = 0
 
         MetadataImportService service = Spy(MetadataImportService) {
             2 * copyMetadataFile(_, TICKET_NUMBER) >> null
-            1 * validate(context1.metadataFile, directoryStructureName, false) >> { assert imported == 0; context1 }
-            1 * validate(context2.metadataFile, directoryStructureName, false) >> { assert imported == 0; context2 }
+            1 * validateWithAuth(contentWithProblems[0], directoryStructureName, false) >> { assert imported == 0; context1 }
+            1 * validateWithAuth(contentWithProblems[1], directoryStructureName, false) >> { assert imported == 0; context2 }
             1 * importMetadataFile(context1, true, FastqImportInstance.ImportMode.MANUAL, TICKET_NUMBER, null, true) >> {
                 imported++
                 metadataFile1
@@ -278,8 +295,8 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
         service.configService.processingOptionService = new ProcessingOptionService()
 
         when:
-        List<ValidateAndImportResult> validateAndImportResults = service.validateAndImportWithAuth(
-                pathWithMd5sums, directoryStructureName, true, false, TICKET_NUMBER, null, true)
+        List<ValidateAndImportResult> validateAndImportResults = service.validateAndImport(
+                contentWithProblemsAndPreviousMd5sums, directoryStructureName, true, false, TICKET_NUMBER, null, true)
 
         then:
         validateAndImportResults*.context == [context1, context2]
@@ -301,8 +318,8 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
 
         MetadataImportService service = Spy(MetadataImportService) {
             2 * copyMetadataFile(_, TICKET_NUMBER) >> null
-            1 * validate(context1.metadataFile, DirectoryStructureBeanName.GPCF_SPECIFIC, _) >> context1
-            1 * validate(context2.metadataFile, DirectoryStructureBeanName.GPCF_SPECIFIC, _) >> context2
+            1 * validatePath(context1.metadataFile, DirectoryStructureBeanName.GPCF_SPECIFIC, _) >> context1
+            1 * validatePath(context2.metadataFile, DirectoryStructureBeanName.GPCF_SPECIFIC, _) >> context2
             1 * importMetadataFile(context1, true, FastqImportInstance.ImportMode.AUTOMATIC, TICKET_NUMBER, null, true) >> metadataFile1
             1 * importMetadataFile(context2, true, FastqImportInstance.ImportMode.AUTOMATIC, TICKET_NUMBER, null, true) >> metadataFile2
         }
@@ -503,9 +520,9 @@ ${SPECIES}                      ${speciesImportAlias}                       ${sp
 
         MetadataImportService service = Spy(MetadataImportService) {
             1 * copyMetadataFile(_, TICKET_NUMBER) >> null
-            1 * validate(context1.metadataFile, DirectoryStructureBeanName.GPCF_SPECIFIC, _) >> context1
-            1 * validate(context2.metadataFile, DirectoryStructureBeanName.GPCF_SPECIFIC, _) >> context2
-            1 * validate(context3.metadataFile, DirectoryStructureBeanName.GPCF_SPECIFIC, _) >> context3
+            1 * validatePath(context1.metadataFile, DirectoryStructureBeanName.GPCF_SPECIFIC, _) >> context1
+            1 * validatePath(context2.metadataFile, DirectoryStructureBeanName.GPCF_SPECIFIC, _) >> context2
+            1 * validatePath(context3.metadataFile, DirectoryStructureBeanName.GPCF_SPECIFIC, _) >> context3
             1 * importMetadataFile(context2, true, FastqImportInstance.ImportMode.AUTOMATIC, TICKET_NUMBER, null, true) >> DomainFactory.createMetaDataFile()
         }
 
@@ -518,8 +535,8 @@ ${SPECIES}                      ${speciesImportAlias}                       ${sp
 
         then:
         MultiImportFailedException e = thrown()
-        e.failedValidations == [context1, context3]
-        e.allPaths == [context1, context2, context3]*.metadataFile
+        containSame(e.failedValidations, [context1, context3])
+        containSame(e.allPaths, [context1, context2, context3]*.metadataFile)
     }
 
     @Unroll
@@ -557,48 +574,78 @@ ${SPECIES}                      ${speciesImportAlias}                       ${sp
         '1111-2222' || "Range of ILSe numbers is too large: '1111-2222'"
     }
 
-    void "mayImport, when maximumProblemLevel is less than WARNING, returns true"() {
+    void "mayImport, when maximumProblemLevel is less than WARNING, no exception is thrown"() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext()
         assert context.maximumProblemLevel.intValue() < LogLevel.WARNING.intValue()
 
-        expect:
+        when:
         MetadataImportService.mayImport(context, false, HelperUtils.randomMd5sum)
+
+        then:
+        noExceptionThrown()
     }
 
-    void "mayImport, when maximumProblemLevel is greater than WARNING, returns false"() {
+    void "mayImport, when maximumProblemLevel is greater than WARNING, exception is thrown"() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext()
         context.addProblem(Collections.emptySet(), LogLevel.ERROR, 'my message')
         assert context.maximumProblemLevel.intValue() > LogLevel.WARNING.intValue()
 
-        expect:
-        !MetadataImportService.mayImport(context, true, context.metadataFileMd5sum)
+        when:
+        MetadataImportService.mayImport(context, true, context.metadataFileMd5sum)
+
+        then:
+        MetadataFileImportException e = thrown(MetadataFileImportException)
+        e.message.contains("problems exceeding the warning level")
+        e.message.contains(context.metadataFile.toString())
     }
 
-    @Unroll
-    void "mayImport, when maximumProblemLevel is WARNING and MD5 sum matches, returns ignoreWarnings"() {
+    void "mayImport, when maximumProblemLevel is WARNING, MD5 sum matches and ignore warnings is false, an exception is thrown"() {
+        given:
+        MetadataValidationContext context = MetadataValidationContextFactory.createContext()
+        boolean ignoreWarnings = false
+        context.addProblem(Collections.emptySet(), LogLevel.WARNING, 'my message')
+        assert context.maximumProblemLevel == LogLevel.WARNING
+
+        when:
+        MetadataImportService.mayImport(context, ignoreWarnings, context.metadataFileMd5sum)
+
+        then:
+        MetadataFileImportException e = thrown(MetadataFileImportException)
+        e.message.contains("problems with warning level")
+        e.message.contains("ignore these warnings")
+        e.message.contains(context.metadataFile.toString())
+    }
+
+    void "mayImport, when maximumProblemLevel is WARNING, MD5 sum matches and ignore warnings is true, no exception is thrown"() {
+        given:
+        MetadataValidationContext context = MetadataValidationContextFactory.createContext()
+        boolean ignoreWarnings = true
+        context.addProblem(Collections.emptySet(), LogLevel.WARNING, 'my message')
+        assert context.maximumProblemLevel == LogLevel.WARNING
+
+        when:
+        MetadataImportService.mayImport(context, ignoreWarnings, context.metadataFileMd5sum)
+
+        then:
+        noExceptionThrown()
+    }
+
+    void "mayImport, when maximumProblemLevel is WARNING and ignoreWarnings is false and MD5 sum does not match, throws exception"() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext()
         context.addProblem(Collections.emptySet(), LogLevel.WARNING, 'my message')
         assert context.maximumProblemLevel == LogLevel.WARNING
 
-        expect:
-        MetadataImportService.mayImport(context, ignoreWarnings, context.metadataFileMd5sum) == ignoreWarnings
+        when:
+        MetadataImportService.mayImport(context, false, HelperUtils.randomMd5sum)
 
-        where:
-        ignoreWarnings << [true, false]
-    }
-
-    void "mayImport, when maximumProblemLevel is WARNING and ignoreWarnings is false and MD5 sum does not match, returns false"() {
-        given:
-        MetadataValidationContext context = MetadataValidationContextFactory.createContext()
-        context.addProblem(Collections.emptySet(), LogLevel.WARNING, 'my message')
-        assert context.maximumProblemLevel == LogLevel.WARNING
-
-        expect:
-        !MetadataImportService.mayImport(context, false, HelperUtils.randomMd5sum)
-        exactlyOneElement(context.problems).message == 'my message'
+        then:
+        MetadataFileImportException e = thrown(MetadataFileImportException)
+        e.message.contains("problems with warning level")
+        e.message.contains("ignore these warnings")
+        e.message.contains(context.metadataFile.toString())
     }
 
     void "mayImport, when maximumProblemLevel is WARNING and ignoreWarnings is true and MD5 sum does not match, adds problem and returns false"() {
@@ -607,11 +654,14 @@ ${SPECIES}                      ${speciesImportAlias}                       ${sp
         context.addProblem(Collections.emptySet(), LogLevel.WARNING, HelperUtils.uniqueString)
         assert context.maximumProblemLevel == LogLevel.WARNING
 
-        expect:
-        !MetadataImportService.mayImport(context, true, HelperUtils.randomMd5sum)
-        context.problems.find {
-            it.level == LogLevel.INFO && it.message == 'Not ignoring warnings, because the metadata file has changed since the previous validation.'
-        }
+        when:
+        MetadataImportService.mayImport(context, true, HelperUtils.randomMd5sum)
+
+        then:
+        MetadataFileImportException e = thrown(MetadataFileImportException)
+        e.message.contains("changed its md5 sum")
+        e.message.contains("revalidate your metadata")
+        e.message.contains(context.metadataFile.toString())
     }
 
     @Unroll
@@ -1363,7 +1413,7 @@ ${SPECIES}                      ${human}+${mouse}+${chicken}                ${hu
                 (READ)      : 'i2',
         ] + baseData
 
-        List<String> keys = fastqData1.keySet().toList()
+        List<String> keys = fastqData1.keySet().toList() as List<String>
         StringBuilder builder = new StringBuilder()
         builder << keys.join('\t') << '\n'
         [

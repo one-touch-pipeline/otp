@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq
 
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.AbstractMetadataValidationContext
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.ContentWithPathAndProblems
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.DirectoryStructure
 import de.dkfz.tbi.util.spreadsheet.Row
 import de.dkfz.tbi.util.spreadsheet.Spreadsheet
@@ -57,7 +58,7 @@ class MetadataValidationContext extends AbstractMetadataValidationContext {
     }
 
     static MetadataValidationContext createFromFile(Path metadataFile, DirectoryStructure directoryStructure, String directoryStructureDescription,
-        boolean ignoreAlreadyKnownMd5sum = false) {
+                                                    boolean ignoreAlreadyKnownMd5sum = false) {
         Map parametersForFile = readAndCheckFile(metadataFile, { String s ->
             MetaDataColumn.getColumnForName(s)?.name() ?: s
         }, { Row row ->
@@ -67,7 +68,25 @@ class MetadataValidationContext extends AbstractMetadataValidationContext {
         })
 
         return new MetadataValidationContext(metadataFile, parametersForFile.metadataFileMd5sum,
-                parametersForFile.spreadsheet, parametersForFile.problems, directoryStructure, directoryStructureDescription, parametersForFile.bytes)
+                parametersForFile.spreadsheet, parametersForFile.problems, directoryStructure,
+                directoryStructureDescription, parametersForFile.bytes)
+    }
+
+    static MetadataValidationContext createFromContent(ContentWithPathAndProblems contentWithPathAndProblems,
+                                                       DirectoryStructure directoryStructure,
+                                                       String directoryStructureDescription,
+                                                       boolean ignoreAlreadyKnownMd5sum = false) {
+        Map parametersForFile = checkContent(contentWithPathAndProblems.content, { String s ->
+            MetaDataColumn.getColumnForName(s)?.name() ?: s
+        }, { Row row ->
+            !row.getCellByColumnTitle(FASTQ_FILE.name())?.text?.startsWith('Undetermined') &&
+                    // Add additional filter to skip rows containing known md5sum in database
+                    (!ignoreAlreadyKnownMd5sum || DataFile.findAllByMd5sum(row.getCellByColumnTitle(MD5.name())?.text).empty)
+        })
+
+        return new MetadataValidationContext(contentWithPathAndProblems.path, parametersForFile.metadataFileMd5sum,
+                parametersForFile.spreadsheet, parametersForFile.problems.addProblems(contentWithPathAndProblems.problems),
+                directoryStructure, directoryStructureDescription, contentWithPathAndProblems.content)
     }
 
     List<String> getSummary() {

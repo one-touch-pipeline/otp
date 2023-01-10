@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,40 +19,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.util.spreadsheet.validation
+package de.dkfz.tbi.otp.utils.exceptions
 
-import groovy.transform.EqualsAndHashCode
-import groovy.transform.ToString
+import groovy.transform.InheritConstructors
 
-import de.dkfz.tbi.util.spreadsheet.Cell
-
-import java.util.logging.Level
-
-@EqualsAndHashCode
-@ToString(allProperties=false)
-class Problem {
-
-    final Set<Cell> affectedCells
-    final Level level
-    final String message
-    final String type
-
-    Problem(Set<Cell> affectedCells, Level level, String message, String type = message) {
-        this.affectedCells = new LinkedHashSet<Cell>(affectedCells).asImmutable()
-        this.level = level
-        this.message = message
-        this.type = type
-    }
-
-    String getLevelAndMessage() {
-        return level.name + ": " + message
-    }
-
-    String getLogLikeString() {
-        return "[${level.name}]: ${messageWithIndentedMultiline}"
-    }
-
-    String getMessageWithIndentedMultiline(String indent = "    ") {
-        return message?.split("\\n")?.join("\n${indent}")
-    }
+@InheritConstructors
+class MetadataFileImportException extends OtpRuntimeException {
 }

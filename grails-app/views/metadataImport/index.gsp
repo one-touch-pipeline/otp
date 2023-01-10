@@ -21,8 +21,9 @@
   --}%
 
 <%@ page contentType="text/html;charset=UTF-8" %>
-<%@ page import="de.dkfz.tbi.util.spreadsheet.validation.LogLevel; de.dkfz.tbi.util.spreadsheet.validation.Problems" %>
+<%@ page import="de.dkfz.tbi.otp.ngsdata.metadatavalidation.metadatasource.MetaDataFileSourceEnum; de.dkfz.tbi.util.spreadsheet.validation.LogLevel; de.dkfz.tbi.util.spreadsheet.validation.Problems" %>
 <%@ page import="de.dkfz.tbi.util.spreadsheet.validation.LogLevel" %>
+<%@ page import="de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.DirectoryStructureBeanName" %>
 <html>
 <head>
     <meta name="layout" content="metadataLayout"/>
@@ -35,160 +36,188 @@
     </title>
     <asset:javascript src="modules/defaultPageDependencies.js"/>
     <asset:javascript src="pages/metadataImport/index/metadataImportDataTable.js"/>
+    <asset:javascript src="pages/metadataImport/index/metadataImportUpload.js"/>
     <asset:javascript src="common/MultiInputField.js"/>
-    <asset:javascript src="common/DisableOnSubmit.js"/>
+    <asset:javascript src="common/toaster.js"/>
+    <asset:javascript src="modules/application.js"/>
+    <asset:stylesheet src="modules/application.css"/>
 </head>
 
 <body>
-<g:if test="${contexts}">
-    <g:each var="context" in="${contexts}">
-        <div id="border" class="borderMetadataImport${de.dkfz.tbi.util.spreadsheet.validation.LogLevel.normalize(context.maximumProblemLevel).name}">
-            <g:if test="${context.problems.isEmpty()}">
-                No problems found :)
-            </g:if>
-            <g:else>
-                <ul>
-                    <g:each var="problem" in="${context.problems}">
-                        <li class="${LogLevel.normalize(problem.level).name}"><span style="white-space: pre-wrap">${problem.levelAndMessage}</span>
-                            <g:each var="cell" in="${problem.affectedCells}">
-                                <a href="#${cell.cellAddress}">${cell.cellAddress}</a>
-                            </g:each>
-                        </li>
-                    </g:each>
-                </ul>
-                <h4><g:message code="metadataImport.summary"/></h4>
-                <ul>
-                    <g:each var="problemType" in="${context.summary}">
-                        <li><span style="white-space: pre">${problemType}</span></li>
-                    </g:each>
-                </ul>
-            </g:else>
-            <div class="fixed-scrollbar-container">
-                <g:if test="${context.spreadsheet}">
-                    <table>
-                        <thead>
-                        <tr>
-                            <th></th>
-                            <g:each var="cell" in="${context.spreadsheet.header.cells}">
-                                <th>
-                                    ${cell.columnAddress}
-                                </th>
-                            </g:each>
-                        </tr>
-                        <tr>
-                            <th>
-                                ${context.spreadsheet.header.cells.first().rowAddress}
-                            </th>
-                            <g:each var="cell" in="${context.spreadsheet.header.cells}">
-                                <g:set var="cellProblems" value="${context.getProblems(cell)}"/>
-                                <th class="${LogLevel.normalize(Problems.getMaximumProblemLevel(cellProblems)).name}"
-                                    title="${cellProblems*.levelAndMessage.join('\n\n')}">
-                                    <span class="anchor" id="${cell.cellAddress}"></span>
-                                    ${cell.text}
-                                </th>
-                            </g:each>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <g:each var="row" in="${context.spreadsheet.dataRows}">
-                            <tr>
-                                <th>
-                                    ${row.cells.first().rowAddress}
-                                </th>
-                                <g:each var="cell" in="${row.cells}">
-                                    <g:set var="cellProblems" value="${context.getProblems(cell)}"/>
-                                    <td class="${LogLevel.normalize(Problems.getMaximumProblemLevel(cellProblems)).name}"
-                                        title="${cellProblems*.levelAndMessage.join('\n\n')}">
-                                        <span class="anchor" id="${cell.cellAddress}"></span>
-                                        ${cell.text}
-                                    </td>
-                                </g:each>
-                            </tr>
-                        </g:each>
-                        </tbody>
-                    </table>
-                </g:if>
-            </div>
-        </div>
-    </g:each>
-</g:if>
+<div id="context-content" class="m-2">
+    <!-- this is rendered by the javascript in metadataImportUpload.js -->
+</div>
+
 <g:render template="/templates/messages"/>
-<div>
-    <g:form useToken="true" controller="metadataImport" action="validateOrImport">
-        <table class="options">
-            <sec:ifAllGranted roles="ROLE_OPERATOR">
-                <tr>
-                    <td><g:message code="metadataImport.otrs"/></td>
-                    <td>
-                        <g:textField name="ticketNumber" size="30" required="true" value="${cmd.ticketNumber}"/>&nbsp;&nbsp;&nbsp;
-                        <g:checkBox name="automaticNotification" checked="${cmd.automaticNotification}" value="true"/>
-                        <g:message code="metadataImport.otrs.automaticNotificationFlag"/></td>
-                </tr>
-                <tr>
-                    <td><g:message code="metadataImport.otrs.seqCenter.comment"/></td>
-                    <td>
-                        <g:textArea name="seqCenterComment" rows="5" style="width: 1000px" value="${cmd.seqCenterComment}"/>
-                    </td>
-                </tr>
-            </sec:ifAllGranted>
-            <tr>
-                <td><g:message code="metadataImport.path"/></td>
-                <td class="multi-input-field">
-                    <g:each in="${paths}" var="path" status="i">
-                        <div class="field">
-                            <g:textField name="paths" style="width: 1000px" value="${path}"/>
-                            <g:if test="${i == 0}">
-                                <button class="add-field">+</button>
-                            </g:if>
-                            <g:else>
-                                <button class="remove-field">-</button>
-                            </g:else>
+<div class="m-2 overflow-hidden">
+
+    <g:form name="metadata-import-form" useToken="true" controller="metadataImport" action="importByPathOrContent" enctype="multipart/form-data">
+        <sec:ifAllGranted roles="ROLE_OPERATOR">
+            <div class="form-group row">
+                <label for="ticketNumber" class="col-sm-2 col-form-label">
+                    <g:message code="metadataImport.otrs"/>
+                </label>
+
+                <div class="col-sm-6">
+                    <input type="text" name="ticketNumber" id="ticketNumber" size="30" required class="form-control" value="${cmd?.ticketNumber ?: ''}">
+                </div>
+
+                <div class="col-sm-3 d-flex align-items-center">
+                    <input class="form-check-input" name="automaticNotification" type="checkbox" ${cmd?.automaticNotification == false ? '' : 'checked'}
+                           id="automaticNotification">
+                    <label class="form-check-label" for="automaticNotification">
+                        <g:message code="metadataImport.otrs.automaticNotificationFlag"/>
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label for="seqCenterComment" class="col-sm-2 col-form-label">
+                    <g:message code="metadataImport.otrs.seqCenter.comment"/>
+                </label>
+
+                <div class="col-sm-10">
+                    <textarea rows="5" name="seqCenterComment" class="form-control" id="seqCenterComment">${cmd?.seqCenterComment ?: ''}</textarea>
+                </div>
+            </div>
+        </sec:ifAllGranted>
+
+        <div class="form-group row" id="path-container">
+            <label for="paths" class="col-sm-2 col-form-label">
+                <g:message code="metadataImport.path"/>
+            </label>
+
+            <div class="col-sm-10 multi-input-field">
+                <div class="input-group field">
+                    <input type="text" class="form-control" name="paths" id="paths" value="${cmd?.paths?.first() ?: ''}">
+
+                    <div class="input-group-append path-spinner" style="display: none;">
+                        <button class="btn btn-outline-secondary" type="button" disabled>
+                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                            <span class="sr-only">Loading...</span>
+                        </button>
+                    </div>
+                    <button class="add-field" type="button">+</button>
+                </div>
+                <g:if test="${cmd?.paths?.size() > 1}">
+                    <g:each var="path" in="${cmd.paths.tail()}">
+                        <div class="input-group field">
+                            <input type="text" class="form-control" name="paths" value="${path}">
+
+                            <div class="input-group-append path-spinner" style="display: none;">
+                                <button class="btn btn-outline-secondary" type="button" disabled>
+                                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                    <span class="sr-only">Loading...</span>
+                                </button>
+                            </div>
+                            <button class="remove-field" type="button">-</button>
                         </div>
                     </g:each>
-                </td>
-            </tr>
-            <tr>
-                <td><g:message code="metadataImport.directoryStructure"/></td>
-                <td>
-                    <g:set var="active" value="${cmd.directoryStructure ?: directoryStructures.first().name()}"/>
-                    <g:radioGroup name="directoryStructure" labels="${directoryStructures*.displayName}" values="${directoryStructures*.name()}"
-                                  value="${active}">
-                        <label>
-                            ${it.radio}
-                            <g:message code="${it.label}"/>
+                </g:if>
+            </div>
+
+        </div>
+
+        <div class="form-group row" id="file-container">
+            <label for="contentList" class="col-sm-2 col-form-label">
+                <g:message code="metadataImport.contentList"/>
+            </label>
+
+            <div class="col-sm-10 multi-input-field">
+                <div class="input-group field">
+                    <input class="form-control" type="file" multiple name="contentList" id="contentList">
+
+                    <div class="input-group-append content-spinner" style="display: none;">
+                        <button class="btn btn-outline-secondary" type="button" disabled>
+                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                            <span class="sr-only">Loading...</span>
+                        </button>
+                    </div>
+                    <button class="add-field" type="button">+</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label class="col-sm-2 col-form-label ">
+                <g:message code="metadataImport.metadataFileSource"/>
+            </label>
+
+            <div class="col-sm-10">
+                <g:set var="initialMetadataFileSource" value="${cmd?.metadataFileSource ?: MetaDataFileSourceEnum.PATH}"/>
+                <g:each status="i" var="metadataFileSource" in="${metadataFileSources}">
+                    <g:set var="checked" value="${(metadataFileSource == initialMetadataFileSource) ? "checked" : ""}"/>
+                    <div class="form-check form-check-inline py-2">
+                        <input class="form-check-input" type="radio" ${checked} name="metadataFileSource" id="metadataFileSource_${i}"
+                               value="${metadataFileSource.name()}">
+                        <label class="form-check-label" for="metadataFileSource_${i}">${metadataFileSource.displayName}</label>
+                    </div>
+                </g:each>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label class="col-sm-2 col-form-label">
+                <g:message code="metadataImport.directoryStructure"/>
+            </label>
+
+            <div class="col-sm-10">
+                <g:set var="initialDirectoryStructure" value="${cmd?.directoryStructure ?: DirectoryStructureBeanName.ABSOLUTE_PATH}"/>
+                <g:each status="i" var="directoryStructure" in="${directoryStructures}">
+                    <g:set var="checked"
+                           value="${(directoryStructure == initialDirectoryStructure) ? "checked" : ""}"/>
+                    <div class="form-check form-check-inline py-2">
+                        <input class="form-check-input" type="radio" name="directoryStructure" ${checked} id="directoryStructure_${i}"
+                               value="${directoryStructure.name()}">
+                        <label class="form-check-label" for="directoryStructure_${i}">
+                            ${directoryStructure.displayName}
                         </label>
-                    </g:radioGroup>
-                </td>
-            </tr>
-            <tr>
-                <td><label><g:message code="runSubmit.align"/></label></td>
-                <td><g:checkBox name="align" checked="${cmd.align}" value="true"/></td>
-            </tr>
-            <g:if test="${cmd.paths}">
-                <tr>
-                    <td><label><g:message code="metadataImport.ignoreMd5sumError.label"/></label></td>
-                    <td>
-                        <g:checkBox name="ignoreMd5sumError" checked="${cmd.ignoreMd5sumError}" value="true"/>
-                    </td>
-                </tr>
-            </g:if>
-        </table>
-        <g:submitButton id="validate" name="submit" value="Validate"/>
-        <g:each var="context" in="${contexts}">
-            <g:hiddenField name="md5" value="${context?.metadataFileMd5sum}"/>
-        </g:each>
+                    </div>
+                </g:each>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <div class="col-sm-2"></div>
+
+            <div class="col-sm-10">
+                <div class="form-check">
+                    <g:set var="intialAlignValue" value="${cmd?.align == false ? '' : 'checked'}"/>
+                    <input class="form-check-input" ${intialAlignValue} name="align" type="checkbox" id="align">
+                    <label for="align" class="form-check-label">
+                        <g:message code="runSubmit.align"/>
+                    </label>
+                </div>
+
+                <div class="form-check" id="ignore-md5-sum-row">
+                    <input class="form-check-input" name="ignoreMd5sumError" type="checkbox" id="ignore-md5-sum-input">
+                    <label for="ignore-md5-sum-input" class="form-check-label">
+                        <g:message code="metadataImport.ignoreMd5sumError.label"/>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <button class="btn btn-primary" id="validate-btn" type="submit" value="Validate">
+            <span id="validate-spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            Validate
+        </button>
         <sec:ifAllGranted roles="ROLE_OPERATOR">
-            <g:if test="${isValidated && !(problems > LogLevel.WARNING.intValue())}">
-                <g:submitButton id="import" name="submit" value="Import"/>
-            </g:if>
-            <g:if test="${problems == LogLevel.WARNING.intValue()}">
-                <label>
-                    <g:checkBox name="ignoreWarnings" checked="false" value="true"/>
-                    <g:message code="metadataImport.ignore"/>
-                </label>
-            </g:if>
+            <button class="btn btn-primary" id="import-btn" type="submit" value="Import" disabled>
+                <span id="import-spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                Import
+            </button>
+            <label id="ignore-warnings-label">
+                <g:checkBox id="ignore-warnings-input" name="ignoreWarnings"/>
+                <g:message code="metadataImport.ignore"/>
+            </label>
         </sec:ifAllGranted>
+
+        <div id="md5-hidden-container" aria-hidden="true" hidden>
+            <!-- The md5 sums get rendered in java script -->
+        </div>
     </g:form>
+
     <h3><g:message code="metadataImport.implementedValidations"/></h3>
     <ul>
         <g:each var="implementedValidation" in="${implementedValidations}">

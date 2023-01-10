@@ -35,6 +35,7 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationConte
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidator
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.utils.exceptions.MetadataFileImportException
 import de.dkfz.tbi.util.spreadsheet.Row
 import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 
@@ -94,7 +95,8 @@ class BamMetadataImportService {
         Project outputProject
         ImportProcess importProcess
         BamMetadataValidationContext context = validate(metadataFile, furtherFiles, linkOperation.linkSource)
-        if (MetadataImportService.mayImport(context, ignoreWarnings, previousValidationMd5sum)) {
+        try {
+            MetadataImportService.mayImport(context, ignoreWarnings, previousValidationMd5sum)
             importProcess = new ImportProcess([
                     externallyProcessedMergedBamFiles: [],
                     state                            : ImportProcess.State.NOT_STARTED,
@@ -133,7 +135,7 @@ class BamMetadataImportService {
                 assert sample: "No sample found for ${_individual} and ${_sampleType} in ${_project}"
 
                 SeqType seqType = seqTypeService.findByNameOrImportAlias(_seqType, [libraryLayout: SequencingReadType.getByName(libraryLayout),
-                                                                                    singleCell: false,])
+                                                                                    singleCell   : false,])
                 assert seqType: "No seqtype found for ${_seqType}, ${libraryLayout} and bulk"
 
                 ReferenceGenome referenceGenome = CollectionUtils.atMostOneElement(ReferenceGenome.findAllByName(_referenceGenome))
@@ -212,6 +214,8 @@ class BamMetadataImportService {
             }
 
             outputProject = importProcess.externallyProcessedMergedBamFiles.first().project
+        } catch (MetadataFileImportException e) {
+            context.addProblem(Collections.emptySet(), LogLevel.INFO, e.message)
         }
 
         return [

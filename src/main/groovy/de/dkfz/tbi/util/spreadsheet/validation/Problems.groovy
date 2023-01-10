@@ -24,12 +24,14 @@ package de.dkfz.tbi.util.spreadsheet.validation
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.util.spreadsheet.Cell
 
+import java.util.logging.Level
+
 class Problems {
 
     private final Set<Problem> allProblems = new LinkedHashSet<Problem>()
     private final Map<Cell, Set<Problem>> problemsByCell = [:]
 
-    Problem addProblem(Set<Cell> affectedCells, java.util.logging.Level level, String message, String type = message) {
+    Problem addProblem(Set<Cell> affectedCells, Level level, String message, String type = message) {
         assert !affectedCells.contains(null)
         Problem problem = new Problem(affectedCells, level, message, type)
         allProblems.add(problem)
@@ -39,11 +41,22 @@ class Problems {
         return problem
     }
 
-    java.util.logging.Level getMaximumProblemLevel() {
+    Problems addProblems(Problems problems) {
+        if (problems) {
+            problems.problems.collect { problem ->
+                if (problem) {
+                    addProblem(problem.affectedCells, problem.level, problem.message, problem.type)
+                }
+            }
+        }
+        return this
+    }
+
+    Level getMaximumProblemLevel() {
         return getMaximumProblemLevel(allProblems)
     }
 
-    static java.util.logging.Level getMaximumProblemLevel(Collection<Problem> problems) {
+    static Level getMaximumProblemLevel(Collection<Problem> problems) {
         return problems*.level.max { it.intValue() } ?: LogLevel.ALL
     }
 

@@ -44,20 +44,18 @@ class AbstractMetadataValidationContextSpec extends Specification {
     Path tempDir
 
     @Unroll
-    void 'readAndCheckFile, when file cannot be opened, adds an error'() {
+    void 'readPath, when file cannot be opened, adds an error'() {
         when:
-        Map infoMetadata = AbstractMetadataValidationContext.readAndCheckFile(file, null)
+        ContentWithPathAndProblems contentWithProblems = AbstractMetadataValidationContext.readPath(path)
 
         then:
-        Problem problem = exactlyOneElement(infoMetadata.problems.problems)
+        Problem problem = exactlyOneElement(contentWithProblems.problems.problems)
         problem.affectedCells.isEmpty()
         problem.level == LogLevel.ERROR
         problem.message.contains(problemMessage)
-        infoMetadata.metadataFileMd5sum == null
-        infoMetadata.spreadsheet == null
 
         where:
-        file                                                                                  || problemMessage
+        path                                                                                  || problemMessage
         Paths.get('metadata.tsv')                                                             || 'not a valid absolute path'
         Paths.get(TestCase.uniqueNonExistentPath.path, 'metadata.tsv')                        || 'does not exist'
         Files.createDirectory(tempDir.resolve('folder.tsv'))                                  || 'is not a file'
@@ -68,13 +66,9 @@ class AbstractMetadataValidationContextSpec extends Specification {
     }
 
     @SuppressWarnings('Indentation')
-    void 'readAndCheckFile, when there is a parsing problem, adds a warning'() {
-        given:
-        Path file = tempDir.resolve("${HelperUtils.uniqueString}.tsv")
-        file.bytes = bytes
-
+    void 'checkContent, when there is a parsing problem, adds a warning'() {
         when:
-        Map infoMetadata = AbstractMetadataValidationContext.readAndCheckFile(file)
+        Map infoMetadata = AbstractMetadataValidationContext.checkContent(bytes)
 
         then:
         Problem problem = exactlyOneElement(infoMetadata.problems.problems)
@@ -90,13 +84,9 @@ class AbstractMetadataValidationContextSpec extends Specification {
     }
 
     @Unroll
-    void 'readAndCheckFile, when there is a parsing problem, adds an error'() {
-        given:
-        Path file = tempDir.resolve("${HelperUtils.uniqueString}.tsv")
-        file.bytes = bytes
-
+    void 'checkContent, when there is a parsing problem, adds an error'() {
         when:
-        Map infoMetadata = AbstractMetadataValidationContext.readAndCheckFile(file)
+        Map infoMetadata = AbstractMetadataValidationContext.checkContent(bytes)
 
         then:
         Problem problem = exactlyOneElement(infoMetadata.problems.problems)
@@ -112,13 +102,12 @@ class AbstractMetadataValidationContextSpec extends Specification {
         'x\na"b'.getBytes(MetadataValidationContext.CHARSET)  || '01a73fb20c4582eb9668dc39431c4748' | "Unterminated quoted field at end of CSV line"
     }
 
-    void 'readAndCheckFile, when file can be parsed successfully, does not add problems'() {
+    void 'checkContent, when file can be parsed successfully, does not add problems'() {
         given:
-        Path file = tempDir.resolve("${HelperUtils.uniqueString}.tsv")
-        file.bytes = 'x\nM\u00e4use'.getBytes(MetadataValidationContext.CHARSET)
+        byte[] bytes = 'x\nM\u00e4use'.getBytes(MetadataValidationContext.CHARSET)
 
         when:
-        Map infoMetadata = AbstractMetadataValidationContext.readAndCheckFile(file)
+        Map infoMetadata = AbstractMetadataValidationContext.checkContent(bytes)
 
         then:
         infoMetadata.problems.problems.isEmpty()
@@ -126,26 +115,40 @@ class AbstractMetadataValidationContextSpec extends Specification {
         infoMetadata.spreadsheet.dataRows[0].cells[0].text == 'M\u00e4use'
     }
 
-    void 'readAndCheckFile, removes tabs and newlines at end of file'() {
+    void 'checkContent, removes tabs and newlines at end of file'() {
         given:
-        Path file = tempDir.resolve("${HelperUtils.uniqueString}.tsv")
-        file.bytes = 'a\nb\t\r\n\t\t\r\n'.getBytes(MetadataValidationContext.CHARSET)
+        byte[] bytes = 'a\nb\t\r\n\t\t\r\n'.getBytes(MetadataValidationContext.CHARSET)
 
         when:
-        Map infoMetadata = AbstractMetadataValidationContext.readAndCheckFile(file)
+        Map infoMetadata = AbstractMetadataValidationContext.checkContent(bytes)
 
         then:
         infoMetadata.spreadsheet.dataRows.size() == 1
         infoMetadata.spreadsheet.dataRows[0].cells.size() == 1
     }
 
-    void 'readAndCheckFile, when file contains only one line, adds error'() {
+    void 'checkContent, when file contains only one line, adds error'() {
+        given:
+        byte[] bytes = 'a\n\n'.getBytes(MetadataValidationContext.CHARSET)
+
+        when:
+        Map infoMetadata = AbstractMetadataValidationContext.checkContent(bytes)
+
+        then:
+        Problem problem = exactlyOneElement(infoMetadata.problems.problems)
+        problem.affectedCells.isEmpty()
+        problem.level == LogLevel.ERROR
+        problem.message.contains('contains less than two lines')
+        infoMetadata.spreadsheet == null
+    }
+
+    void 'readAndCheckFile, should concat problems and spreadsheet from readPath and checkContent'() {
         given:
         Path file = tempDir.resolve("${HelperUtils.uniqueString}.tsv")
         file.bytes = 'a\n\n'.getBytes(MetadataValidationContext.CHARSET)
 
         when:
-        Map infoMetadata = AbstractMetadataValidationContext.readAndCheckFile(file)
+        Map infoMetadata = MetadataValidationContext.readAndCheckFile(file)
 
         then:
         Problem problem = exactlyOneElement(infoMetadata.problems.problems)

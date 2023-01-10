@@ -36,6 +36,7 @@ import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.AbstractMetadataValidationContext
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.ContentWithPathAndProblems
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.DirectoryStructure
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.DirectoryStructureBeanName
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
@@ -47,7 +48,7 @@ import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.tracking.OtrsTicketService
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.exceptions.CopyingOfFileFailedException
-import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
+import de.dkfz.tbi.otp.utils.exceptions.MetadataFileImportException
 import de.dkfz.tbi.otp.workflow.datainstallation.DataInstallationInitializationService
 import de.dkfz.tbi.otp.workflowExecution.decider.AllDecider
 import de.dkfz.tbi.util.TimeFormats
@@ -55,6 +56,7 @@ import de.dkfz.tbi.util.spreadsheet.*
 import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 
 import java.nio.file.*
+import java.util.logging.Level
 import java.util.regex.Matcher
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
@@ -66,13 +68,6 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
  */
 @Transactional
 class MetadataImportService {
-
-    @TupleConstructor
-    @ToString
-    static class PathWithMd5sum {
-        final Path path
-        final String md5sum
-    }
 
     @Autowired
     ApplicationContext applicationContext
@@ -113,23 +108,33 @@ class MetadataImportService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    MetadataValidationContext validateWithAuth(File metadataFile, DirectoryStructureBeanName directoryStructure, boolean ignoreAlreadyKnownMd5sum = false) {
-        FileSystem fs = fileSystemService.filesystemForFastqImport
-        return validate(fs.getPath(metadataFile.path), directoryStructure, ignoreAlreadyKnownMd5sum)
-    }
-
-    MetadataValidationContext validate(Path metadataFile, DirectoryStructureBeanName directoryStructure, boolean ignoreAlreadyKnownMd5sum = false) {
-        MetadataValidationContext context = MetadataValidationContext.createFromFile(
-                metadataFile,
+    MetadataValidationContext validateWithAuth(ContentWithPathAndProblems contentWithPathAndProblems,
+                                               DirectoryStructureBeanName directoryStructure, boolean ignoreAlreadyKnownMd5sum = false) {
+        MetadataValidationContext context = MetadataValidationContext.createFromContent(
+                contentWithPathAndProblems,
                 getDirectoryStructure(directoryStructure),
                 directoryStructure.displayName,
                 ignoreAlreadyKnownMd5sum
         )
+        return validate(context)
+    }
+
+    MetadataValidationContext validatePath(Path metadataPath, DirectoryStructureBeanName directoryStructure, boolean ignoreAlreadyKnownMd5sum = false) {
+        MetadataValidationContext context = MetadataValidationContext.createFromFile(
+                metadataPath,
+                getDirectoryStructure(directoryStructure),
+                directoryStructure.displayName,
+                ignoreAlreadyKnownMd5sum
+        )
+        return validate(context)
+    }
+
+    private MetadataValidationContext validate(MetadataValidationContext context) {
         if (context.spreadsheet) {
             Long hash = System.currentTimeMillis()
             Long startTimeAll = System.currentTimeMillis()
             int dataCount = context.spreadsheet.dataRows.size()
-            log.debug("start validation of ${dataCount} lines of ${metadataFile}, validation started : ${hash}")
+            log.debug("start validation of ${dataCount} lines of ${context.metadataFile}, validation started : ${hash}")
             metadataValidators.each {
                 Long startTime = System.currentTimeMillis()
                 it.validate(context)
@@ -141,46 +146,39 @@ class MetadataImportService {
         return context
     }
 
-    /**
-     * @param previousValidationMd5sum May be {@code null}
-     */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    List<ValidateAndImportResult> validateAndImportWithAuth(List<PathWithMd5sum> metadataPaths, DirectoryStructureBeanName directoryStructure, boolean align,
-                                                            boolean ignoreWarnings, String ticketNumber, String seqCenterComment,
-                                                            boolean automaticNotification,
-                                                            boolean ignoreAlreadyKnownMd5sum = false) {
+    List<ValidateAndImportResult> validateAndImport(List<ContentWithProblemsAndPreviousMd5sum> metadataPaths,
+                                                    DirectoryStructureBeanName directoryStructure, boolean align,
+                                                    boolean ignoreWarnings, String ticketNumber, String seqCenterComment,
+                                                    boolean automaticNotification,
+                                                    boolean ignoreAlreadyKnownMd5sum = false) {
         try {
             Long startTime = System.currentTimeMillis()
-            Map<MetadataValidationContext, String> contexts = metadataPaths.collectEntries { PathWithMd5sum pathWithMd5sum ->
-                return [(validate(pathWithMd5sum.path, directoryStructure, ignoreAlreadyKnownMd5sum)): pathWithMd5sum.md5sum]
+            Map<MetadataValidationContext, String> contexts = metadataPaths.collectEntries { ContentWithProblemsAndPreviousMd5sum pathWithMd5sum ->
+                MetadataValidationContext context = validateWithAuth(pathWithMd5sum.contentWithPathAndProblems, directoryStructure, ignoreAlreadyKnownMd5sum)
+                return [(context): pathWithMd5sum.previousMd5sum]
             }
+            contexts.collect { context, previousMd5Sum ->
+                mayImport(context, ignoreWarnings, previousMd5Sum)
+            }
+
             List<ValidateAndImportResult> results = contexts.collect { context, md5sum ->
-                return importHelperMethod(context, align, FastqImportInstance.ImportMode.MANUAL, ignoreWarnings, md5sum, ticketNumber, seqCenterComment,
-                        automaticNotification)
+                return importHelperMethod(context, align, FastqImportInstance.ImportMode.MANUAL,
+                        ticketNumber, seqCenterComment, automaticNotification)
             }
-            int lines = results*.context*.spreadsheet*.dataRows*.size().sum() ?: 0
+            int lines = (results*.context*.spreadsheet*.dataRows*.size().sum() ?: 0) as int
             log.debug("finished validate and import took ${System.currentTimeMillis() - startTime}ms for ${lines}")
             return results
         } catch (Exception e) {
-            if (e.message && !e.message.startsWith('Copying of metadata file')) {
-                TransactionUtils.withNewTransaction {
-                    mailHelperService.sendEmailToTicketSystem("Error: while importing metadata file", "Metadata paths: ${metadataPaths*.path.join('\n')}\n" +
-                            "${e.localizedMessage}\n${e.cause}")
-                }
-            }
-            throw new OtpRuntimeException("Error while importing metadata file with paths: ${metadataPaths*.path.join('\n')}", e)
+            throw new MetadataFileImportException("Error while importing metadata file with paths: " +
+                    "${metadataPaths*.path.join('\n')}\n${e.localizedMessage}\n${e.cause}", e)
         }
     }
 
     private ValidateAndImportResult importHelperMethod(MetadataValidationContext context, boolean align, FastqImportInstance.ImportMode importMode,
-                                                       boolean ignoreWarnings, String previousValidationMd5sum, String ticketNumber, String seqCenterComment,
-                                                       boolean automaticNotification) {
-        MetaDataFile metadataFileObject = null
-        String copiedFile = null
-        if (mayImport(context, ignoreWarnings, previousValidationMd5sum)) {
-            metadataFileObject = importMetadataFile(context, align, importMode, ticketNumber, seqCenterComment, automaticNotification)
-            copiedFile = copyMetadataFile(context, ticketNumber)
-        }
+                                                       String ticketNumber, String seqCenterComment, boolean automaticNotification) {
+        MetaDataFile metadataFileObject = importMetadataFile(context, align, importMode, ticketNumber, seqCenterComment, automaticNotification)
+        String copiedFile = copyMetadataFile(context, ticketNumber)
         return new ValidateAndImportResult(context, metadataFileObject, copiedFile)
     }
 
@@ -243,13 +241,19 @@ class MetadataImportService {
 
     List<ValidateAndImportResult> validateAndImportMultiple(String otrsTicketNumber, List<Path> metadataFiles, DirectoryStructureBeanName directoryStructure,
                                                             boolean ignoreAlreadyKnownMd5sum) {
+        List<MetadataValidationContext> failedValidations = []
         List<MetadataValidationContext> contexts = metadataFiles.collect {
-            return validate(it, directoryStructure, ignoreAlreadyKnownMd5sum)
+            return validatePath(it, directoryStructure, ignoreAlreadyKnownMd5sum)
         }
-        List<ValidateAndImportResult> results = contexts.collect {
-            return importHelperMethod(it, true, FastqImportInstance.ImportMode.AUTOMATIC, false, null, otrsTicketNumber, null, true)
+        List<ValidateAndImportResult> results = contexts.collect { context ->
+            try {
+                mayImport(context, false, null)
+                return importHelperMethod(context, true, FastqImportInstance.ImportMode.AUTOMATIC, otrsTicketNumber, null, true)
+            } catch (MetadataFileImportException e) {
+                failedValidations.push(context)
+                return new ValidateAndImportResult()
+            }
         }
-        List<MetadataValidationContext> failedValidations = results.findAll { it.metadataFile == null }*.context
         if (failedValidations.isEmpty()) {
             return results
         }
@@ -305,18 +309,18 @@ class MetadataImportService {
         return directoryStructure
     }
 
-    static boolean mayImport(AbstractMetadataValidationContext context, boolean ignoreWarnings, String previousValidationMd5sum) {
-        java.util.logging.Level maxLevel = context.maximumProblemLevel
-        if (maxLevel.intValue() < LogLevel.WARNING.intValue()) {
-            return true
-        } else if (maxLevel == LogLevel.WARNING && ignoreWarnings) {
-            if (context.metadataFileMd5sum.equalsIgnoreCase(previousValidationMd5sum)) {
-                return true
-            }
-            context.addProblem(Collections.emptySet(), LogLevel.INFO,
-                    'Not ignoring warnings, because the metadata file has changed since the previous validation.')
+    static void mayImport(AbstractMetadataValidationContext context, boolean ignoreWarnings, String previousValidationMd5sum)
+            throws MetadataFileImportException {
+        Level maxLevel = context.maximumProblemLevel
+        if (maxLevel.intValue() > LogLevel.WARNING.intValue()) {
+            throw new MetadataFileImportException("The file with path ${context.metadataFile} problems exceeding the warning level.")
+        } else if (maxLevel == LogLevel.WARNING && !ignoreWarnings) {
+            throw new MetadataFileImportException("The file with path ${context.metadataFile} has problems with warning level. " +
+                    "To import anyway ignore these warnings.")
+        } else if (maxLevel == LogLevel.WARNING && ignoreWarnings && !context.metadataFileMd5sum.equalsIgnoreCase(previousValidationMd5sum)) {
+            throw new MetadataFileImportException("The file with path ${context.metadataFile} has changed" +
+                    " its md5 sum between validation and import. Please revalidate your metadata file(s) and import again.")
         }
-        return false
     }
 
     protected MetaDataFile importMetadataFile(MetadataValidationContext context, boolean align, FastqImportInstance.ImportMode importMode, String ticketNumber,
@@ -336,7 +340,8 @@ class MetadataImportService {
 
         MetaDataFile metaDataFile = new MetaDataFile(
                 fileName: context.metadataFile.fileName.toString(),
-                filePath: context.metadataFile.parent.toString(),
+                // If the file is passed via drag and drop there is no parent directory so we pass just a point
+                filePath: context.metadataFile?.parent?.toString() ?: '',
                 md5sum: context.metadataFileMd5sum,
                 fastqImportInstance: fastqImportInstance,
         ).save(flush: true)
@@ -714,6 +719,19 @@ class ValidateAndImportResult {
 class MultiImportFailedException extends RuntimeException {
 
     final List<MetadataValidationContext> failedValidations
-
     final List<Path> allPaths
+}
+
+@TupleConstructor
+class ContentWithProblemsAndPreviousMd5sum {
+    ContentWithPathAndProblems contentWithPathAndProblems
+    String previousMd5sum
+
+    Path getPath() {
+        return this.contentWithPathAndProblems.path
+    }
+
+    byte[] getContent() {
+        return this.contentWithPathAndProblems.content
+    }
 }
