@@ -2419,6 +2419,15 @@ input[type=submit].submitting {
     vertical-align: middle;
 }
 
+select:invalid + .select2 .selection .select2-selection {
+    background: #fff3f3;
+    border-color: #ffaaaa;
+    color: #cc0000;
+    -moz-box-shadow: 0 0 0.5em #ffaaaa;
+    -webkit-box-shadow: 0 0 0.5em #ffaaaa;
+    box-shadow: 0 0 0.5em #ffaaaa;
+}
+
 /**
     Bootstrapped: Override template styles which
     appear on a bootstrap and also on a non-bootstrap page.
