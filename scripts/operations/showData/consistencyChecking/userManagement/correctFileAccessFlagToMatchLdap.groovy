@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,15 +20,28 @@
  * SOFTWARE.
  */
 
-import de.dkfz.tbi.otp.security.user.identityProvider.IdentityProvider
 import de.dkfz.tbi.otp.ngsdata.UserProjectRole
+import de.dkfz.tbi.otp.ngsdata.UserProjectRoleService
 import de.dkfz.tbi.otp.security.User
+import de.dkfz.tbi.otp.security.user.identityProvider.IdentityProvider
 
 /**
  *  Correct the fileAccess flag of all UserProjectRoles to match the status in the LDAP.
  */
 
+// input area
+//----------------------
+
+/**
+ * flag to allow a try and rollback the changes at the end (true) or do the changes(false)
+ */
+boolean tryRun = true
+
+//------------------------------------
+//work
+
 IdentityProvider identityProvider = ctx.getBean('identityProvider')
+UserProjectRoleService uprs = ctx.getBean('userProjectRoleService')
 
 Map<String, List<String>> cache = [:]
 
@@ -46,11 +59,9 @@ UserProjectRole.withTransaction {
         boolean fileAccessInLdap = userProjectRole.project.unixGroup in cache[user.username]
         if (fileAccessInOtp != fileAccessInLdap) {
             println "${userProjectRole.user.username} ${userProjectRole.project.name} ${userProjectRole.projectRoles.name.join(", ")}: ${fileAccessInOtp} -> ${fileAccessInLdap}"
-            userProjectRole.accessToFiles = fileAccessInLdap
-            userProjectRole.save(flush: false)
+            uprs.setAccessToFiles(userProjectRole, fileAccessInLdap, true)
         }
     }
-    allUPRs.last().save(flush: true)
-    assert false: "Assert for debug, remove to continue"
+    assert !tryRun: "Rollback, since only tryRun."
 }
 ''
