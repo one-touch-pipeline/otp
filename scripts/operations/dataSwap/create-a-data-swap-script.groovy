@@ -214,10 +214,6 @@ Closure<String> createScript = { String swapLabel ->
                         counter, script,
                         createdSamples
                 )
-                if (seqTypeFilterList.empty) {
-                    // if we moved _everything_ out of a patient, delete the leftover empty patient
-                    script << "\n\tCollectionUtils.atMostOneElement(Individual.findAllByPid('${oldIndividual.pid}')).delete(flush: true)\n"
-                }
             }
         }
     }
