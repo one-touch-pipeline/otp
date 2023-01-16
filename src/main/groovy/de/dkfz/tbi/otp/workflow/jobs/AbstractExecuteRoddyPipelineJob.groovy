@@ -87,6 +87,8 @@ abstract class AbstractExecuteRoddyPipelineJob extends AbstractExecutePipelineJo
         Path xmlPath = confDir.resolve("${RoddyConfigService.CONFIGURATION_NAME}.xml")
         fileService.createFileWithContent(xmlPath, xmlConfig, realm, FileService.DEFAULT_FILE_PERMISSION, true)
 
+        createAdditionalConfigFiles(workflowStep, confDir, realm)
+
         String command = roddyCommandService.createRoddyCommand(
                 roddyResult.individual,
                 confDir,
@@ -126,4 +128,6 @@ abstract class AbstractExecuteRoddyPipelineJob extends AbstractExecutePipelineJo
     protected abstract Map<String, String> getConfigurationValues(WorkflowStep workflowStep, String combinedConfig)
 
     protected abstract List<String> getAdditionalParameters(WorkflowStep workflowStep)
+
+    protected abstract void createAdditionalConfigFiles(WorkflowStep workflowStep, Path configPath, Realm realm)
 }

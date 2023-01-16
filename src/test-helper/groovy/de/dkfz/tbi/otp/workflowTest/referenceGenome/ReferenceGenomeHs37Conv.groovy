@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,15 +19,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflowTest.alignment.roddy.pancancer
+package de.dkfz.tbi.otp.workflowTest.referenceGenome
 
-import de.dkfz.tbi.otp.ngsdata.SeqType
-import de.dkfz.tbi.otp.ngsdata.SeqTypeService
+import de.dkfz.tbi.otp.dataprocessing.NotSupportedException
 
-class PanCancerExomeAlignmentWorkflowSpec extends AbstractPanCancerWorkflowWithoutAntibodySpec {
+trait ReferenceGenomeHs37Conv extends UsingReferenceGenome {
+
+    final String referenceGenomeFileNamePrefix = 'hs37d5_PhiX_Lambda.conv'
+
+    final String referenceGenomeSpecificPath = 'bwa06_methylCtools_hs37d5_PhiX_Lambda'
+
+    final String chromosomeLengthFilePath = null
+
+    final String chromosomeStatFileName = 'hs37d5_PhiX_Lambda.fa.chrLenOnlyACGT.tab'
+
+    final String referenceGenomeCytosinePositionsIndex = 'hs37d5_PhiX_Lambda.pos.gz'
 
     @Override
-    protected SeqType findSeqType() {
-        return SeqTypeService.exomePairedSeqType
+    String getFingerPrintingFileName() {
+        throw new NotSupportedException("No fingerprinting file name exists")
     }
 }

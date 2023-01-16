@@ -36,7 +36,7 @@ class PanCancerChipSeqAlignmentWorkflowSpec extends AbstractPanCancerWorkflowSpe
     final static Logger log = LoggerFactory.getLogger(PanCancerChipSeqAlignmentWorkflowSpec)
 
     @Override
-    SeqType findSeqType() {
+    protected SeqType findSeqType() {
         return SeqTypeService.chipSeqPairedSeqType
     }
 

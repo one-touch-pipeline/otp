@@ -95,4 +95,13 @@ abstract class AbstractAlignmentWorkflowSpec extends AbstractWorkflowSpec {
         Path link = remoteFileSystem.getPath(referenceGenomeService.referenceGenomeDirectory(referenceGenome, false).absolutePath)
         fileService.createLink(link, target, realm)
     }
+
+    /**
+     * link the adapter directory into the test structure
+     */
+    void linkAdapterDirectoryToReference(LibraryPreparationKit libraryPreparationKit) {
+        Path target = referenceDataDirectory.resolve("adapters")
+        Path link = remoteFileSystem.getPath(libraryPreparationKit.adapterFile).parent
+        fileService.createLink(link, target, realm)
+    }
 }

@@ -33,6 +33,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.workflow.panCancer.PanCancerWorkflow
+import de.dkfz.tbi.otp.workflow.wgbs.WgbsWorkflow
 import de.dkfz.tbi.otp.workflowExecution.*
 
 class AlignmentInfoServiceSpec extends Specification implements DataTest, WorkflowSystemDomainFactory, IsRoddy {
@@ -245,6 +246,9 @@ class AlignmentInfoServiceSpec extends Specification implements DataTest, Workfl
         "SAMTOOLS_VERSION": {"value": "6.0", "type": "string"}
         }}}"""
         AlignmentInfoService service = new AlignmentInfoService()
+        service.otpWorkflowService = Mock(OtpWorkflowService) {
+            1 * lookupOtpWorkflowBean(_) >> new WgbsWorkflow()
+        }
         service.configFragmentService = Mock(ConfigFragmentService) {
             getSortedFragments(_) >> { }
             mergeSortedFragments(_) >> { config }
@@ -291,6 +295,9 @@ class AlignmentInfoServiceSpec extends Specification implements DataTest, Workfl
         }}}"""
 
         AlignmentInfoService service = new AlignmentInfoService()
+        service.otpWorkflowService = Mock(OtpWorkflowService) {
+            1 * lookupOtpWorkflowBean(_) >> new WgbsWorkflow()
+        }
         service.configFragmentService = Mock(ConfigFragmentService) {
             getSortedFragments(_) >> { }
             mergeSortedFragments(_) >> { config }
@@ -318,6 +325,9 @@ class AlignmentInfoServiceSpec extends Specification implements DataTest, Workfl
     void "test getAlignmentInformationForProject, when #name, throw exception"() {
         given:
         AlignmentInfoService service = new AlignmentInfoService()
+        service.otpWorkflowService = Mock(OtpWorkflowService) {
+            1 * lookupOtpWorkflowBean(_) >> new WgbsWorkflow()
+        }
         service.configFragmentService = Mock(ConfigFragmentService) {
             getSortedFragments(_) >> { }
             mergeSortedFragments(_) >> { """{"RODDY": {"cvalues": { ${config}}}}""" }

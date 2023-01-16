@@ -126,11 +126,12 @@ abstract class AbstractRoddyAlignmentWorkflowSpec extends AbstractAlignmentWorkf
             setUpDomainVariables()
 
             linkReferenceGenomeDirectoryToReference(referenceGenome)
+            linkAdapterDirectoryToReference(libraryPreparationKit)
         }
         log.debug("Finish setup ${this.class.simpleName}")
     }
 
-    private void setUpFilesVariables() {
+    protected void setUpFilesVariables() {
         testFastqFiles = [
                 readGroup1: [
                         referenceDataDirectory.resolve('fastqFiles/wgs/normal/paired/run1/sequence/gerald_D1VCPACXX_6_R1.fastq.bz2'),
@@ -198,7 +199,11 @@ abstract class AbstractRoddyAlignmentWorkflowSpec extends AbstractAlignmentWorkf
                 species                 : [] as Set,
                 speciesWithStrain       : [human] as Set,
         ])
-        log.info("Create referenceGenome ${referenceGenome}")
+        log.info("Create ReferenceGenome ${referenceGenome}")
+
+        List<String> chromosomeNames =  ["21", "22"]
+        DomainFactory.createReferenceGenomeEntries(referenceGenome, chromosomeNames)
+        log.info("Create ReferenceGenomeEntry for ${chromosomeNames}")
 
         sample = createSample([
                 individual: createIndividual([
@@ -253,21 +258,6 @@ abstract class AbstractRoddyAlignmentWorkflowSpec extends AbstractAlignmentWorkf
     }
 
     private void createFragments() {
-        createFragmentAndSelector("baseReferenceGenomeDirectoryFragment", """
-                    {
-                        "RODDY": {
-                            "cvalues": {
-                                "BASE_REFERENCE_GENOME": {
-                                    "value": "${referenceGenomeDirectory}",
-                                    "type": "path"
-                                }
-                            }
-                        }
-                    }
-                """, [
-                workflows: [workflowAlignment],
-        ])
-
         createFragmentAndSelector("statSizeFileFragment", """
                     {
                         "RODDY": {
@@ -357,16 +347,19 @@ abstract class AbstractRoddyAlignmentWorkflowSpec extends AbstractAlignmentWorkf
             log.info("Create dataFile ${dataFile}")
             return dataFile
         }
-
-        List<FastqcProcessedFile> fastqcProcessedFiles = dataFiles.collect { DataFile dataFile ->
-            createFastqcProcessedFile([
-                    dataFile         : dataFile,
-                    workDirectoryName: "workDirectoryName",
-            ])
-        }
-
         createWorkflowArtefacts(workflowDataInstallation, seqTrack, ArtefactType.FASTQ)
-        createWorkflowArtefacts(workflowFastqc, fastqcProcessedFiles, ArtefactType.FASTQC)
+        log.info("Create workflow artefact for seqTrack")
+
+        if (isFastQcRequired()) {
+            List<FastqcProcessedFile> fastqcProcessedFiles = dataFiles.collect { DataFile dataFile ->
+                createFastqcProcessedFile([
+                        dataFile         : dataFile,
+                        workDirectoryName: "workDirectoryName",
+                ])
+            }
+            createWorkflowArtefacts(workflowFastqc, fastqcProcessedFiles, ArtefactType.FASTQC)
+            log.info("Create fastQc files with workflow artefact")
+        }
 
         linkFastqFiles(seqTrack, testFastqFiles.get(readGroupNum))
         return seqTrack
@@ -613,6 +606,8 @@ abstract class AbstractRoddyAlignmentWorkflowSpec extends AbstractAlignmentWorkf
             checkQC(bamFile)
         }
     }
+
+    abstract protected boolean isFastQcRequired()
 
     abstract protected SeqType findSeqType()
 

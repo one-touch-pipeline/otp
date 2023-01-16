@@ -31,6 +31,8 @@ import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.workflow.panCancer.PanCancerWorkflow
+import de.dkfz.tbi.otp.workflow.wgbs.WgbsWorkflow
+import de.dkfz.tbi.otp.workflowExecution.OtpWorkflowService
 import de.dkfz.tbi.otp.workflowExecution.Workflow
 import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 
@@ -75,6 +77,9 @@ class AlignmentInfoServiceIntegrationSpec extends Specification implements Workf
                 )
         )
         bam.workPackage.seqType = seqType
+        alignmentInfoService.otpWorkflowService = Mock(OtpWorkflowService) {
+            1 * lookupOtpWorkflowBean(_) >> new WgbsWorkflow()
+        }
 
         when:
         RoddyAlignmentInfo alignmentInfo = alignmentInfoService.getAlignmentInformationForRun(workflowRun)
@@ -116,6 +121,9 @@ class AlignmentInfoServiceIntegrationSpec extends Specification implements Workf
                 combinedConfig: config, workflowVersion: createWorkflowVersion(workflow: workflow))
         RoddyBamFile bam = createBamFile(workflowArtefact: createWorkflowArtefact(producedBy: workflowRun, outputRole: PanCancerWorkflow.OUTPUT_BAM))
         bam.workPackage.seqType = seqType
+        alignmentInfoService.otpWorkflowService = Mock(OtpWorkflowService) {
+            1 * lookupOtpWorkflowBean(_) >> new WgbsWorkflow()
+        }
 
         when:
         RoddyAlignmentInfo alignmentInfo = alignmentInfoService.getAlignmentInformationForRun(workflowRun)
@@ -137,6 +145,9 @@ class AlignmentInfoServiceIntegrationSpec extends Specification implements Workf
                 combinedConfig: """{"RODDY": {"cvalues": { ${config}}}}""", workflowVersion: createWorkflowVersion(workflow: workflow))
         RoddyBamFile bam = createBamFile(workflowArtefact: createWorkflowArtefact(producedBy: workflowRun, outputRole: PanCancerWorkflow.OUTPUT_BAM))
         bam.workPackage.seqType = seqType
+        alignmentInfoService.otpWorkflowService = Mock(OtpWorkflowService) {
+            1 * lookupOtpWorkflowBean(_) >> new WgbsWorkflow()
+        }
 
         when:
         alignmentInfoService.getAlignmentInformationForRun(workflowRun)

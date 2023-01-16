@@ -32,6 +32,8 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.workflow.jobs.AbstractExecuteRoddyPipelineJob
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
+import java.nio.file.Path
+
 @Component
 @Slf4j
 @CompileStatic
@@ -87,5 +89,9 @@ class PanCancerExecuteJob extends AbstractExecuteRoddyPipelineJob implements Pan
     @Override
     protected final List<String> getAdditionalParameters(WorkflowStep workflowStep) {
         return []
+    }
+
+    @Override
+    protected final void createAdditionalConfigFiles(WorkflowStep workflowStep, Path configPath, Realm realm) {
     }
 }

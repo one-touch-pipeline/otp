@@ -30,12 +30,16 @@ import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
 import de.dkfz.tbi.otp.ngsdata.BedFileService
+import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 import de.dkfz.tbi.otp.workflow.jobs.AbstractExecuteRoddyPipelineJob
 import de.dkfz.tbi.otp.workflow.panCancer.PanCancerShared
 import de.dkfz.tbi.otp.workflow.shared.JobFailedException
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
+
+import java.nio.file.Files
+import java.nio.file.Path
 
 @Component
 @Slf4j
@@ -93,5 +97,20 @@ class WgbsExecuteJob extends AbstractExecuteRoddyPipelineJob implements PanCance
     protected final List<String> getAdditionalParameters(WorkflowStep workflowStep) {
         RoddyBamFile roddyBamFile = getRoddyBamFile(workflowStep)
         return ["--usemetadatatable=${roddyBamFileService.getWorkMetadataTableFile(roddyBamFile)}" as String]
+    }
+
+    @Override
+    protected final void createAdditionalConfigFiles(WorkflowStep workflowStep, Path configPath, Realm realm) {
+        Path file = configPath.resolve("coAppAndRef.xml")
+        if (Files.exists(file)) {
+            return
+        }
+        // workaround since Roddy plugin imports this config
+        String coAppAndRef = """
+            |<configuration name='coAppAndRef'
+            |               description='This file is a workaround since Roddy plugin imports this config.'>
+            |</configuration>
+            |""".stripMargin()
+        fileService.createFileWithContent(configPath.resolve("coAppAndRef.xml"), coAppAndRef, realm)
     }
 }

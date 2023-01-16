@@ -89,6 +89,7 @@ class AbstractExecuteRoddyPipelineJobSpec extends Specification implements DataT
             1 * getFilenameSectionKillSwitch() >> { true }
             1 * getConfigurationValues(_, _) >> { [a: "b"] }
             1 * getAdditionalParameters(_) >> { ["c", "d"] }
+            1 * createAdditionalConfigFiles(_, _, _) >> { return }
         }
         job.clusterJobHandlingService = Mock(ClusterJobHandlingService)
         job.fileService = Mock(FileService)
@@ -141,6 +142,7 @@ class AbstractExecuteRoddyPipelineJobSpec extends Specification implements DataT
             1 * getFilenameSectionKillSwitch() >> { true }
             1 * getConfigurationValues(_, _) >> { [a: "b"] }
             1 * getAdditionalParameters(_) >> { ["c", "d"] }
+            1 * createAdditionalConfigFiles(_, _, _) >> { return }
         }
         job.clusterJobHandlingService = Mock(ClusterJobHandlingService)
         job.fileService = Mock(FileService)
@@ -194,6 +196,7 @@ class AbstractExecuteRoddyPipelineJobSpec extends Specification implements DataT
             1 * getFilenameSectionKillSwitch() >> { true }
             1 * getConfigurationValues(_, _) >> { [a: "b"] }
             1 * getAdditionalParameters(_) >> { ["c", "d"] }
+            1 * createAdditionalConfigFiles(_, _, _) >> { return }
         }
         job.clusterJobHandlingService = Mock(ClusterJobHandlingService)
         job.fileService = Mock(FileService)

@@ -28,7 +28,7 @@ import de.dkfz.tbi.otp.utils.SessionUtils
 class PanCancerWholeGenomeAlignmentWorkflowSpec extends AbstractPanCancerWorkflowWithoutAntibodySpec {
 
     @Override
-    SeqType findSeqType() {
+    protected SeqType findSeqType() {
         return SeqTypeService.wholeGenomePairedSeqType
     }
 

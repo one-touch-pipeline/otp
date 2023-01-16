@@ -44,13 +44,14 @@ class AlignmentInfoService {
     ExecuteRoddyCommandService executeRoddyCommandService
     RemoteShellHelper remoteShellHelper
     SeqTypeService seqTypeService
+    OtpWorkflowService otpWorkflowService
 
     private static final ObjectMapper MAPPER = new ObjectMapper()
 
     AlignmentInfo getAlignmentInformationForRun(WorkflowRun run) {
         assert run: "No run provided"
 
-        if (run.workflow.name == PanCancerWorkflow.WORKFLOW) {
+        if (otpWorkflowService.lookupOtpWorkflowBean(run.workflow).isAlignment()) {
             Map<String, String> config = extractCValuesMapFromJsonConfigString(run.combinedConfig)
             AbstractBamFile bamFile = run.outputArtefacts[PanCancerWorkflow.OUTPUT_BAM].artefact.get() as AbstractBamFile
             return generateRoddyAlignmentInfo(config, bamFile.project, bamFile.seqType,
@@ -65,7 +66,7 @@ class AlignmentInfoService {
 
         return WorkflowVersionSelector.findAllByProjectAndDeprecationDateIsNull(project)
                 .collectEntries { WorkflowVersionSelector projectWorkflow ->
-                    if (projectWorkflow.workflowVersion.workflow.name == PanCancerWorkflow.WORKFLOW) {
+                    if (otpWorkflowService.lookupOtpWorkflowBean(projectWorkflow.workflowVersion.workflow).isAlignment()) {
                         Map<String, String> config = extractCValuesMapFromJsonConfigString(
                                 configFragmentService.mergeSortedFragments(configFragmentService.getSortedFragments(
                                         new SingleSelectSelectorExtendedCriteria(
