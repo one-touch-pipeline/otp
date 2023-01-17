@@ -27,7 +27,6 @@ import org.springframework.security.authentication.*
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.AuthenticationException
 import org.springframework.security.core.userdetails.UserDetails
-import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.ldap.authentication.LdapAuthenticationProvider
 import org.springframework.stereotype.Component
@@ -45,7 +44,7 @@ class LdapDaoAuthenticationProvider implements AuthenticationProvider {
     LdapAuthenticationProvider ldapAuthProvider
 
     @Autowired
-    UserDetailsService userDetailsService
+    UserCreatingUserDetailsService userDetailsService
 
     @Override
     Authentication authenticate(Authentication authentication) throws AuthenticationException {
@@ -55,24 +54,16 @@ class LdapDaoAuthenticationProvider implements AuthenticationProvider {
             throw new UsernameNotFoundException("Username must be lower case")
         }
 
-        // authenticate with LDAP first, so that it can't be found out whether an account
-        // is locked/disabled/expired by somebody else than the account owner
-        Authentication ldapAuth = ldapAuthProvider.authenticate(authentication)
-
         UserDetails user = userDetailsService.loadUserByUsername(authentication.name)
         if (user == null) {
             throw new InternalAuthenticationServiceException("UserDetailsService returned null, which is an interface contract violation")
         }
 
-        if (!user.isAccountNonLocked()) {
-            throw new LockedException("User account is locked")
-        } else if (!user.isEnabled()) {
+        if (!user.isEnabled()) {
             throw new DisabledException("User is disabled")
-        } else if (!user.isAccountNonExpired()) {
-            throw new AccountExpiredException("User account has expired")
         }
 
-        return ldapAuth
+        return ldapAuthProvider.authenticate(authentication)
     }
 
     @Override

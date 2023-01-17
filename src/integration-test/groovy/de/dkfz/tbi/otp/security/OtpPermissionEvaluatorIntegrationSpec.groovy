@@ -56,7 +56,7 @@ class OtpPermissionEvaluatorIntegrationSpec extends Specification implements Use
                 project: project,
                 manageUsers: true,
         )
-        authentication = new UsernamePasswordAuthenticationToken(new Principal(username: user.username), null, [])
+        authentication = new UsernamePasswordAuthenticationToken(new Principal(user.username, [], user.enabled), null, [])
     }
 
     /**
@@ -132,7 +132,7 @@ class OtpPermissionEvaluatorIntegrationSpec extends Specification implements Use
         given:
         setupData()
 
-        authentication = new UsernamePasswordAuthenticationToken(new Principal(username: "unknownUsername"), null, [])
+        authentication = new UsernamePasswordAuthenticationToken(new Principal("unknownUsername", [], true), null, [])
 
         when:
         boolean checkResult = permissionEvaluator.hasPermission(authentication, createProject(), "OTP_READ_ACCESS")

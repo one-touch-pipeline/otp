@@ -21,16 +21,20 @@
  */
 package de.dkfz.tbi.otp.utils
 
-import groovy.transform.Immutable
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails
 
-@Immutable
 class Principal implements UserDetails {
 
     String username
-    String displayName = "OTP Developer"
     Collection<? extends GrantedAuthority> authorities
+    boolean enabled
+
+    Principal(String username, Collection<? extends GrantedAuthority> authorities, boolean enabled) {
+        this.username = username
+        this.authorities = authorities
+        this.enabled = enabled
+    }
 
     @Override
     String toString() {
@@ -60,6 +64,6 @@ class Principal implements UserDetails {
 
     @Override
     boolean isEnabled() {
-        return true
+        return enabled
     }
 }

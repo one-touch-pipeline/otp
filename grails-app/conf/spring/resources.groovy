@@ -56,8 +56,6 @@ beans = {
         task.'annotation-driven'(executor: "taskExecutor", scheduler: "taskScheduler")
     }
 
-    userDetailsService(UserCreatingUserDetailsService)
-
     permissionEvaluator(OtpPermissionEvaluator) {}
     aclPermissionEvaluator(AclPermissionEvaluator, ref('aclService')) {
         objectIdentityRetrievalStrategy = ref('objectIdentityRetrievalStrategy')

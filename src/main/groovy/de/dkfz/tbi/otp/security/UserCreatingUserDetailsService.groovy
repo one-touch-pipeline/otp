@@ -21,36 +21,46 @@
  */
 package de.dkfz.tbi.otp.security
 
-import grails.core.GrailsApplication
-import grails.plugin.springsecurity.userdetails.GormUserDetailsService
 import grails.gorm.transactions.Transactional
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.security.core.GrantedAuthority
+import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails
+import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.core.userdetails.UsernameNotFoundException
+import org.springframework.stereotype.Service
 
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
+import de.dkfz.tbi.otp.security.user.UserService
+import de.dkfz.tbi.otp.security.user.identityProvider.IdentityProvider
 import de.dkfz.tbi.otp.security.user.identityProvider.data.IdpUserDetails
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.utils.Principal
 
-class UserCreatingUserDetailsService extends GormUserDetailsService {
+@Service
+class UserCreatingUserDetailsService implements UserDetailsService {
 
     @Autowired
-    GrailsApplication grailsApplication
+    ProcessingOptionService processingOptionService
+
+    @Autowired
+    UserService userService
+
+    @Autowired
+    IdentityProvider identityProvider
 
     @Override
     @Transactional(readOnly = false, noRollbackFor = [IllegalArgumentException, UsernameNotFoundException])
-    UserDetails loadUserByUsername(String username, boolean loadRoles) throws UsernameNotFoundException {
+    UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = CollectionUtils.atMostOneElement(User.findAllByUsername(username))
         if (!user) {
-            IdpUserDetails idpUserDetails = grailsApplication.mainContext.identityProvider.getIdpUserDetailsByUsername(username)
+            IdpUserDetails idpUserDetails = identityProvider.getIdpUserDetailsByUsername(username)
             if (!idpUserDetails || !idpUserDetails.mail) {
                 throw new FailedToCreateUserException("There is a problem with your account. Please contact " +
-                "${grailsApplication.mainContext.processingOptionService.findOptionAsString(ProcessingOption.OptionName.GUI_CONTACT_DATA_SUPPORT_EMAIL)}.")
+                        "${processingOptionService.findOptionAsString(ProcessingOption.OptionName.GUI_CONTACT_DATA_SUPPORT_EMAIL)}.")
             }
-            user = grailsApplication.mainContext.userService.createUser(idpUserDetails.username, idpUserDetails.mail, idpUserDetails.realName)
+            user = userService.createUser(idpUserDetails.username, idpUserDetails.mail, idpUserDetails.realName)
         }
-        Collection<GrantedAuthority> authorities = loadAuthorities(user, username, loadRoles)
-        createUserDetails user, authorities
+        return new Principal(user.username, user.authorities as Collection<SimpleGrantedAuthority>, user.enabled)
     }
 }

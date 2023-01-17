@@ -105,7 +105,7 @@ trait UserAndRoles {
 
     static <T> T doWithAnonymousAuth(final Closure<T> closure) {
         Authentication previousAuth = SecurityContextHolder.context.authentication
-        AnonymousAuthenticationToken auth = new AnonymousAuthenticationToken("test", new Principal(username: "Anonymous"), [new SimpleGrantedAuthority("ROLE_ANONYMOUS")])
+        AnonymousAuthenticationToken auth = new AnonymousAuthenticationToken("test", new Principal("Anonymous", [], true), [new SimpleGrantedAuthority("ROLE_ANONYMOUS")])
         SecurityContextHolder.context.authentication = auth
 
         try {
@@ -123,12 +123,12 @@ trait UserAndRoles {
         Authentication previousAuth = SecurityContextHolder.context.authentication
         Authentication primaryAuth = previousAuth
         if (primaryAuth == null) {
-            primaryAuth = new UsernamePasswordAuthenticationToken(new Principal(username: DomainFactory.createUser().username), null, [])
+            primaryAuth = new UsernamePasswordAuthenticationToken(new Principal(DomainFactory.createUser().username, [], true), null, [])
             SecurityContextHolder.context.authentication = primaryAuth
         }
 
         List<GrantedAuthority> authorities = [new SwitchUserGrantedAuthority(SwitchUserFilter.ROLE_PREVIOUS_ADMINISTRATOR, primaryAuth)]
-        Authentication switchedAuth = new UsernamePasswordAuthenticationToken(new Principal(username: username), null, authorities)
+        Authentication switchedAuth = new UsernamePasswordAuthenticationToken(new Principal(username, [], true), null, authorities)
         SecurityContextHolder.context.authentication = switchedAuth
 
         try {
