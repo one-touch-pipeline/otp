@@ -850,7 +850,7 @@ class ProjectService {
 
         String xmlConfig
         if (pipeline.name == Pipeline.Name.RODDY_ACESEQ) {
-            checkReferenceGenomeForAceseq(configuration.project, configuration.seqType).onSuccess { ReferenceGenome referenceGenome ->
+            checkReferenceGenomeForAceseq(configuration.project, configuration.seqType).onSuccess {
                 xmlConfig = roddyConfigTemplate.createConfig(
                         configuration,
                         pipeline.name,
@@ -889,38 +889,43 @@ class ProjectService {
         )
     }
 
-    @SuppressWarnings('Indentation')
-//auto format and codenarc does not match
-    Result<ReferenceGenome, String> checkReferenceGenomeForAceseq(Project project, SeqType seqType) {
+    Result<List<ReferenceGenome>, String> checkReferenceGenomeForAceseq(Project project, SeqType seqType) {
         return Result.ofNullable(project, "project must not be null")
                 .map { Project p ->
-                    ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndSampleTypeIsNullAndDeprecatedDateIsNull(
-                            project, seqType)
+                    ReferenceGenomeSelector.findAllByProjectAndSeqType(project, seqType)*.referenceGenome
                 }
-                .ensure({ List<ReferenceGenomeProjectSeqType> rgpsts -> rgpsts.size() == 1 }, "No reference genome set.")
-                .map { List<ReferenceGenomeProjectSeqType> rgpsts -> rgpsts.first().referenceGenome }
-                .ensure({ ReferenceGenome referenceGenome -> referenceGenome in aceseqService.checkReferenceGenomeMap()['referenceGenomes'] },
-                        "Reference genome is not compatible with ACESeq.")
-                .ensure({ ReferenceGenome referenceGenome ->
-                    referenceGenome.knownHaplotypesLegendFileX &&
-                            referenceGenome.knownHaplotypesLegendFile &&
-                            referenceGenome.knownHaplotypesFileX &&
-                            referenceGenome.knownHaplotypesFile &&
-                            referenceGenome.geneticMapFileX &&
-                            referenceGenome.geneticMapFile &&
-                            referenceGenome.gcContentFile &&
-                            referenceGenome.mappabilityFile &&
-                            referenceGenome.replicationTimeFile
-                }, "The selected reference genome is not configured for CNV (from ACEseq) (files are missing).")
+                .ensure({ List<ReferenceGenome> referenceGenomes ->
+                    referenceGenomes.size() >= 1
+                }, "No reference genome is configured.")
+                .ensure({ List<ReferenceGenome> referenceGenomes ->
+                    List<ReferenceGenome> allowedReferenceGenomes = aceseqService.checkReferenceGenomeMap()['referenceGenomes']
+                    List<ReferenceGenome> filteredReferenceGenomes = allowedReferenceGenomes.findAll { ReferenceGenome referenceGenome ->
+                        referenceGenome.knownHaplotypesLegendFileX &&
+                                referenceGenome.knownHaplotypesLegendFile &&
+                                referenceGenome.knownHaplotypesFileX &&
+                                referenceGenome.knownHaplotypesFile &&
+                                referenceGenome.geneticMapFileX &&
+                                referenceGenome.geneticMapFile &&
+                                referenceGenome.gcContentFile &&
+                                referenceGenome.mappabilityFile &&
+                                referenceGenome.replicationTimeFile
+                    }
+                    referenceGenomes.intersect(filteredReferenceGenomes)
+                }, "No reference genome is compatible with ACESeq.")
     }
 
-    Result<ReferenceGenome, String> checkReferenceGenomeForSophia(Project project, SeqType seqType) {
-        return Result.ofNullable(project, "project must not be null").map { Project p ->
-            ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndSampleTypeIsNullAndDeprecatedDateIsNull(project, seqType)
-        }.ensure({ List<ReferenceGenomeProjectSeqType> rgpsts -> rgpsts.size() == 1 }, "No reference genome set.")
-                .map { List<ReferenceGenomeProjectSeqType> rgpsts -> rgpsts.first().referenceGenome }
-                .ensure({ ReferenceGenome referenceGenome -> referenceGenome in sophiaService.checkReferenceGenomeMap()['referenceGenomes'] },
-                        "Reference genome is not compatible with SOPHIA.")
+    Result<List<ReferenceGenome>, String> checkReferenceGenomeForSophia(Project project, SeqType seqType) {
+        return Result.ofNullable(project, "project must not be null")
+                .map { Project p ->
+                    ReferenceGenomeSelector.findAllByProjectAndSeqType(project, seqType)*.referenceGenome
+                }
+                .ensure({ List<ReferenceGenome> referenceGenomes ->
+                    referenceGenomes.size() >= 1
+                }, "No reference genome is configured.")
+                .ensure({ List<ReferenceGenome> referenceGenomes ->
+                    List<ReferenceGenome> allowedReferenceGenomes = sophiaService.checkReferenceGenomeMap()['referenceGenomes']
+                    referenceGenomes.intersect(allowedReferenceGenomes)
+                }, "No reference genome is compatible with SOPHIA.")
     }
 
     private String getScriptBash(File configDirectory, String xmlConfig, File configFilePath) {
@@ -1144,7 +1149,7 @@ echo 'OK'
     }
 
     Project findByProjectWithFetchedKeywords(Project project) {
-        return atMostOneElement(Project.findAllByName(project?.name, [ fetch: [ keywords: 'join']]))
+        return atMostOneElement(Project.findAllByName(project?.name, [fetch: [keywords: 'join']]))
     }
 
     Map<Project, List<User>> getExpiredProjectsWithPIs() {

@@ -40,6 +40,7 @@ import de.dkfz.tbi.otp.domainFactory.*
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.CellRangerFactory
 import de.dkfz.tbi.otp.domainFactory.pipelines.externalBam.ExternalBamFactoryInstance
+import de.dkfz.tbi.otp.domainFactory.taxonomy.TaxonomyFactoryInstance
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactoryInstance
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
@@ -1521,6 +1522,8 @@ class DomainFactory {
 
     static ReferenceGenome createAceseqReferenceGenome() {
         return createReferenceGenome(
+                speciesWithStrain: [TaxonomyFactoryInstance.INSTANCE.findOrCreateHumanSpecies()] as Set,
+                species: [] as Set,
                 gcContentFile: "gcContentFile.file",
                 geneticMapFile: "/geneticMapFile.file",
                 geneticMapFileX: "/geneticMapFileX.file",

@@ -1443,16 +1443,17 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         setupData()
         RoddyConfiguration configuration = "createRoddy${analysisName}Configuration"()
         if (analysisName in ["Sophia", "Aceseq"]) {
-            ReferenceGenomeProjectSeqType referenceGenomeProjectSeqType = DomainFactory.createReferenceGenomeProjectSeqType(
+            ReferenceGenomeSelector referenceGenomeSelector = createReferenceGenomeSelector([
                     project: configuration.project,
                     seqType: configuration.seqType,
-                    referenceGenome: DomainFactory.createAceseqReferenceGenome()
-            )
-            referenceGenomeService.pathToChromosomeSizeFilesPerReference(referenceGenomeProjectSeqType.referenceGenome, false).mkdirs()
+                    species: [findOrCreateHumanSpecies()] as Set,
+                    referenceGenome: DomainFactory.createAceseqReferenceGenome(),
+            ])
+            referenceGenomeService.pathToChromosomeSizeFilesPerReference(referenceGenomeSelector.referenceGenome, false).mkdirs()
             doWithAuth(ADMIN) {
                 processingOptionService.createOrUpdate(
                         genomeOption,
-                        referenceGenomeProjectSeqType.referenceGenome.name
+                        referenceGenomeSelector.referenceGenome.name
                 )
             }
         }
@@ -1492,16 +1493,17 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 configVersion: 'v1_1',
         ])
         if (analysisName in ["Sophia", "Aceseq"]) {
-            ReferenceGenomeProjectSeqType referenceGenomeProjectSeqType = DomainFactory.createReferenceGenomeProjectSeqType(
+            ReferenceGenomeSelector referenceGenomeSelector = createReferenceGenomeSelector([
                     project: configuration.project,
                     seqType: configuration.seqType,
-                    referenceGenome: DomainFactory.createAceseqReferenceGenome()
-            )
-            referenceGenomeService.pathToChromosomeSizeFilesPerReference(referenceGenomeProjectSeqType.referenceGenome, false).mkdirs()
+                    species: [findOrCreateHumanSpecies()] as Set,
+                    referenceGenome: DomainFactory.createAceseqReferenceGenome(),
+            ])
+            referenceGenomeService.pathToChromosomeSizeFilesPerReference(referenceGenomeSelector.referenceGenome, false).mkdirs()
             doWithAuth(ADMIN) {
                 processingOptionService.createOrUpdate(
                         genomeOption,
-                        referenceGenomeProjectSeqType.referenceGenome.name
+                        referenceGenomeSelector.referenceGenome.name
                 )
             }
         }
