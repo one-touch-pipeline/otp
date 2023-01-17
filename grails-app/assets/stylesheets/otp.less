@@ -354,7 +354,7 @@ td, th {
 
 // style for TableCellValue.WarnColor, TableCellValue.Icon
 td span {
-    &.text-OKAY {
+    &.text-OKAY, &.text-NA {
         //use default color
     }
     &.text-WARNING {
@@ -377,6 +377,10 @@ td span {
     &.icon-ERROR {
         .background-usage-hint;
         background: url(error.png) left center no-repeat;
+    }
+    &.icon-NA {
+        .background-usage-hint;
+        background: url(na.png) left center no-repeat;
     }
 }
 

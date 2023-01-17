@@ -49,6 +49,7 @@ class QcTrafficLightService {
     OtrsTicketService otrsTicketService
 
     SeqTypeService seqTypeService
+    QcThresholdService qcThresholdService
 
     @Lazy
     Map<SeqType, Closure<Void>> qcHandlerMap = initQcHandlerMap()
@@ -110,7 +111,7 @@ class QcTrafficLightService {
 
         Project project = bamFile.project
 
-        if (!project.qcThresholdHandling.checksThreshold) {
+        if (!project.qcThresholdHandling.checksThreshold || qcThresholdService.getThresholds(bamFile.project, bamFile.seqType, qc.class).empty) {
             setQcTrafficLightStatus(bamFile, AbstractMergedBamFile.QcTrafficLightStatus.UNCHECKED)
             return
         }

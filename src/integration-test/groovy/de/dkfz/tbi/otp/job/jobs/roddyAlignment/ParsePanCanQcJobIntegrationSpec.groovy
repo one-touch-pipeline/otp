@@ -30,6 +30,8 @@ import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.qcTrafficLight.QcThreshold
+import de.dkfz.tbi.otp.qcTrafficLight.QcThresholdService
 import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
@@ -61,6 +63,9 @@ class ParsePanCanQcJobIntegrationSpec extends Specification {
         ParsePanCanQcJob job = Spy(ParsePanCanQcJob)
         job.abstractQualityAssessmentService = abstractQualityAssessmentService
         job.qcTrafficLightService = new QcTrafficLightService()
+        job.qcTrafficLightService.qcThresholdService = Mock(QcThresholdService) {
+            getThresholds(_, _, _) >> [new QcThreshold()]
+        }
 
         when:
         job.execute()

@@ -139,6 +139,7 @@ class QcThreshold implements Entity {
         OKAY,
         WARNING,
         ERROR,
+        NA,
     }
 
     static void validateProperty(String val, String cls, Errors errors, String propertyName) {

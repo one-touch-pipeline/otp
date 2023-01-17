@@ -56,6 +56,7 @@ class QcTrafficLightServiceIntegrationSpec extends Specification implements Doma
             getCurrentUser() >> { new User(username: "dummy") }
         }
         qcTrafficLightService.linkFilesToFinalDestinationService = new LinkFilesToFinalDestinationService()
+        qcTrafficLightService.qcThresholdService = new QcThresholdService()
 
         bamFile = AlignmentPipelineFactory.CellRangerFactoryInstance.INSTANCE.createBamFile()
         ["totalReadCounter", "qcBasesMapped", "allBasesMapped", "onTargetMappedBases"].each { String property ->

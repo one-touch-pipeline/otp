@@ -27,43 +27,48 @@ import groovy.transform.Canonical
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.Errors
 
-import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.FormatHelper
 
 @Transactional
 class QcThresholdService {
 
-    def <T extends QcTrafficLightValue> ThresholdColorizer<T> createThresholdColorizer(Project project, SeqType seqType, Class<T> qcClass) {
-        new ThresholdColorizer(project, seqType, qcClass)
+    List<QcThreshold> getThresholds(Project project, SeqType seqType, Class<? extends QcTrafficLightValue> qcClass) {
+        return QcThreshold.createCriteria().list {
+            eq("qcClass", qcClass.name)
+            eq("seqType", seqType)
+            or {
+                eq("project", project)
+                isNull("project")
+            }
+        } as List<QcThreshold>
+    }
+
+    <T extends QcTrafficLightValue> ThresholdColorizer<T> createThresholdColorizer(Project project, SeqType seqType, Class<T> qcClass) {
+        new ThresholdColorizer(project, seqType, getThresholds(project, seqType, qcClass))
     }
 
     static class ThresholdColorizer<T extends QcTrafficLightValue> {
-        private final Map<String, QcThreshold> thresholdList
-        private final Class<QcTrafficLightValue> qcClass
+        private final Map<String, QcThreshold> thresholds
+        private final boolean qcAvailable
 
-        ThresholdColorizer(Project project, SeqType seqType, Class<T> qcClass) {
-            this.thresholdList = QcThreshold.createCriteria().list {
-                eq("qcClass", qcClass.name)
-                eq("seqType", seqType)
-                or {
-                    eq("project", project)
-                    isNull("project")
-                }
-            }.groupBy { it.qcProperty1 }.collect {
+        ThresholdColorizer(Project project, SeqType seqType, List<QcThreshold> thresholdList) {
+            thresholds = thresholdList.groupBy { it.qcProperty1 }.collect {
                 it.value.find { it.project == project && it.seqType == seqType } ?:
                         it.value.find { it.project == null && it.seqType == seqType }
             }.collectEntries { QcThreshold threshold ->
                 [(threshold.qcProperty1): threshold]
             }
-            this.qcClass = qcClass
+            qcAvailable = !thresholdList.isEmpty()
         }
 
         Map<String, TableCellValue> colorize(List<String> properties, T qcObject) {
             properties.collectEntries { String property ->
                 String value = FormatHelper.formatNumber(qcObject."${property}")
-                TableCellValue.WarnColor warn = convert(thresholdList[property]?.qcPassed(qcObject) ?:
-                        QcThreshold.ThresholdLevel.OKAY)
+                TableCellValue.WarnColor warn = convert(qcAvailable ?
+                        (thresholds[property]?.qcPassed(qcObject) ?: QcThreshold.ThresholdLevel.OKAY) :
+                        QcThreshold.ThresholdLevel.NA)
                 [(property), new TableCellValue(value, warn)]
             }
         }
@@ -72,8 +77,9 @@ class QcThresholdService {
         Map<String, TableCellValue> colorize(Map<String, Double> properties, T qcObject) {
             properties.collectEntries { String property, Double externalValue ->
                 String value = FormatHelper.formatNumber(qcObject."${property}")
-                TableCellValue.WarnColor warn = convert(thresholdList[property]?.qcPassed(qcObject, externalValue) ?:
-                        QcThreshold.ThresholdLevel.OKAY)
+                TableCellValue.WarnColor warn = convert(qcAvailable ?
+                        (thresholds[property]?.qcPassed(qcObject, externalValue) ?: QcThreshold.ThresholdLevel.OKAY) :
+                        QcThreshold.ThresholdLevel.NA)
                 [(property), new TableCellValue(value, warn)]
             } as Map<String, TableCellValue>
         }
@@ -83,6 +89,7 @@ class QcThresholdService {
                     (QcThreshold.ThresholdLevel.OKAY)   : TableCellValue.WarnColor.OKAY,
                     (QcThreshold.ThresholdLevel.WARNING): TableCellValue.WarnColor.WARNING,
                     (QcThreshold.ThresholdLevel.ERROR)  : TableCellValue.WarnColor.ERROR,
+                    (QcThreshold.ThresholdLevel.NA)     : TableCellValue.WarnColor.NA,
             ].get(t)
         }
     }
@@ -219,12 +226,14 @@ class TableCellValue implements Serializable {
         OKAY,
         WARNING,
         ERROR,
+        NA,
     }
 
     enum Icon {
         OKAY,
         WARNING,
         ERROR,
+        NA,
     }
 }
 

@@ -22,9 +22,9 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import grails.converters.JSON
-import org.springframework.security.access.annotation.Secured
 import grails.validation.Validateable
 import org.springframework.http.HttpStatus
+import org.springframework.security.access.annotation.Secured
 
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerConfigurationService
@@ -508,19 +508,27 @@ class AlignmentQualityOverviewController implements CheckAndCall {
      * @param abstractMergedBamFile containing the infos to display
      * @return TableCellValue for the DataTable
      */
-    private static TableCellValue generateQcStatusCell(AbstractMergedBamFile abstractMergedBamFile) {
+    private TableCellValue generateQcStatusCell(AbstractMergedBamFile abstractMergedBamFile) {
         TableCellValue.Icon icon = [
-                (AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED) : TableCellValue.Icon.WARNING,
-                (AbstractMergedBamFile.QcTrafficLightStatus.WARNING) : TableCellValue.Icon.WARNING,
-                (AbstractMergedBamFile.QcTrafficLightStatus.REJECTED): TableCellValue.Icon.ERROR,
+                (AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED)  : TableCellValue.Icon.WARNING,
+                (AbstractMergedBamFile.QcTrafficLightStatus.WARNING)  : TableCellValue.Icon.WARNING,
+                (AbstractMergedBamFile.QcTrafficLightStatus.REJECTED) : TableCellValue.Icon.ERROR,
+                (AbstractMergedBamFile.QcTrafficLightStatus.UNCHECKED): TableCellValue.Icon.NA,
         ].getOrDefault(abstractMergedBamFile.qcTrafficLightStatus, TableCellValue.Icon.OKAY)
-        String comment = abstractMergedBamFile.comment ? "\n${abstractMergedBamFile.comment?.comment}\n${abstractMergedBamFile.comment?.author}" : ""
+
+        String tooltip
+        if (abstractMergedBamFile.qcTrafficLightStatus == AbstractMergedBamFile.QcTrafficLightStatus.UNCHECKED) {
+            tooltip = g.message(code: "alignment.quality.not.available")
+        } else {
+            String comment = abstractMergedBamFile.comment ? "\n${abstractMergedBamFile.comment?.comment}\n${abstractMergedBamFile.comment?.author}" : ""
+            tooltip = "Status: ${(abstractMergedBamFile.qcTrafficLightStatus)} ${comment}"
+        }
 
         return new TableCellValue(
                 value: abstractMergedBamFile.comment ? "${abstractMergedBamFile.comment?.comment}" : "",
                 warnColor: null,
                 link: null,
-                tooltip: "Status: ${(abstractMergedBamFile.qcTrafficLightStatus)} ${comment}",
+                tooltip: tooltip,
                 icon: icon,
                 status: (abstractMergedBamFile.qcTrafficLightStatus).toString(),
                 id: abstractMergedBamFile.id

@@ -37,6 +37,7 @@ import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.CellRangerFactory
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.qcTrafficLight.QcThreshold
+import de.dkfz.tbi.otp.qcTrafficLight.QcThresholdService
 import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightService
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 
@@ -65,6 +66,7 @@ class ParseCellRangerQcJobIntegrationSpec extends Specification implements CellR
         job.cellRangerService.fileSystemService = new TestFileSystemService()
         job.qcTrafficLightService = new QcTrafficLightService()
         job.qcTrafficLightService.commentService = new CommentService()
+        job.qcTrafficLightService.qcThresholdService = new QcThresholdService()
     }
 
     @Unroll

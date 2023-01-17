@@ -21,13 +21,10 @@
  */
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
-import grails.core.GrailsApplication
 import grails.gorm.transactions.Rollback
 import grails.testing.mixin.integration.Integration
 import org.springframework.beans.factory.annotation.Autowired
-import spock.lang.Specification
-import spock.lang.TempDir
-import spock.lang.Unroll
+import spock.lang.*
 
 import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.TestConfigService
@@ -35,7 +32,7 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
-import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightService
+import de.dkfz.tbi.otp.qcTrafficLight.*
 import de.dkfz.tbi.otp.security.SecurityService
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.CollectionUtils
@@ -46,15 +43,14 @@ import java.nio.file.Path
 @Integration
 class ParseWgbsAlignmentQcJobIntegrationSpec extends Specification {
 
-    @Autowired
-    GrailsApplication grailsApplication
-
     ParseWgbsAlignmentQcJob parseWgbsAlignmentQcJob
+
+    @Autowired
+    AbstractQualityAssessmentService abstractQualityAssessmentService
 
     @TempDir
     Path tempDir
 
-    QcTrafficLightService qcTrafficLightService
     TestConfigService configService
 
     final static String LIBRARY_NAME = "library12"
@@ -66,12 +62,6 @@ class ParseWgbsAlignmentQcJobIntegrationSpec extends Specification {
     void setupData() {
         configService.addOtpProperties(tempDir)
 
-        qcTrafficLightService = new QcTrafficLightService()
-        qcTrafficLightService.commentService = new CommentService()
-        qcTrafficLightService.commentService.securityService = Mock(SecurityService) {
-            getCurrentUser() >> { new User(username: "dummy") }
-        }
-
         roddyBamFile = DomainFactory.createRoddyBamFile()
 
         SeqTrack seqTrack = CollectionUtils.exactlyOneElement(roddyBamFile.seqTracks)
@@ -80,8 +70,18 @@ class ParseWgbsAlignmentQcJobIntegrationSpec extends Specification {
         assert seqTrack.save(flush: true)
 
         ProcessingStep step = DomainFactory.createAndSaveProcessingStep(ParseWgbsAlignmentQcJob.toString(), roddyBamFile)
-        parseWgbsAlignmentQcJob = grailsApplication.mainContext.getBean('parseWgbsAlignmentQcJob')
+
+        parseWgbsAlignmentQcJob = new ParseWgbsAlignmentQcJob()
+        parseWgbsAlignmentQcJob.abstractQualityAssessmentService = abstractQualityAssessmentService
         parseWgbsAlignmentQcJob.processingStep = step
+        parseWgbsAlignmentQcJob.qcTrafficLightService = new QcTrafficLightService()
+        parseWgbsAlignmentQcJob.qcTrafficLightService.commentService = new CommentService()
+        parseWgbsAlignmentQcJob.qcTrafficLightService.commentService.securityService = Mock(SecurityService) {
+            getCurrentUser() >> { new User(username: "dummy") }
+        }
+        parseWgbsAlignmentQcJob.qcTrafficLightService.qcThresholdService = Mock(QcThresholdService) {
+            getThresholds(_, _, _) >> [new QcThreshold()]
+        }
     }
 
     void cleanup() {

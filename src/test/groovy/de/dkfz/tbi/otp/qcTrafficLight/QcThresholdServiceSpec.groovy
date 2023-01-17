@@ -122,7 +122,7 @@ class QcThresholdServiceSpec extends Specification implements DataTest {
         Map<String, TableCellValue> result = thresholdColorizer.colorize([testedProperty], cellRangerQualityAssessment)
 
         then:
-        result.get(testedProperty) == new TableCellValue(testedPropertyValue.toString(), OKAY, null, null)
+        result.get(testedProperty) == new TableCellValue(testedPropertyValue.toString(), NA, null, null)
     }
 
     @Unroll
