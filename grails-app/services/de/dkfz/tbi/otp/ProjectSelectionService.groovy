@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileStatic
 import org.grails.web.util.WebUtils
 import org.springframework.security.access.AccessDeniedException
 
@@ -30,6 +31,7 @@ import de.dkfz.tbi.otp.project.ProjectService
 
 import javax.servlet.http.HttpServletRequest
 
+@CompileStatic
 @Transactional
 class ProjectSelectionService {
     ProjectService projectService
@@ -43,9 +45,10 @@ class ProjectSelectionService {
      * It must only be used in ProjectSelectionInterceptor.
      */
     void setSelectedProject(String projectName) {
-        Project project = projectService.getProjectByNameAsList(projectName).find()
-        currentRequest.setAttribute(PROJECT_REQUEST_KEY, project)
-        currentRequest.setAttribute(PROJECT_SELECTION_KEY, project ?: projectService.allProjects.find())
+        Project projectRequested = projectService.getProjectByNameAsList(projectName).find()
+        currentRequest.setAttribute(PROJECT_REQUEST_KEY, projectRequested)
+        Project projectSelected = projectRequested ?: projectService.allProjects.find()
+        currentRequest.setAttribute(PROJECT_SELECTION_KEY, projectSelected)
     }
 
     /**
