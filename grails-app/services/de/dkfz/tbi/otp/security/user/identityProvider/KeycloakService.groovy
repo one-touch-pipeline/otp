@@ -146,8 +146,13 @@ class KeycloakService implements IdentityProvider {
 
     @Override
     Map<UserAccountControl, Boolean> getAllUserAccountControlFlagsOfUser(User user) {
-        // TODO: otp-1826
-        return [:]
+        Integer value = getUserAccountControlOfUser(user)
+        if (value == null) {
+            return [:]
+        }
+        return UserAccountControl.values().collectEntries { UserAccountControl field ->
+            [(field): UserAccountControl.isSet(field, value)]
+        }
     }
 
     private String getApiBaseUrl() {
