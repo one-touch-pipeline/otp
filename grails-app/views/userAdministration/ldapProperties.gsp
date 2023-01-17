@@ -23,7 +23,7 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <html>
 <head>
-    <title><g:message code="user.administration.ldapProperties.title"/></title>
+    <title><g:message code="user.administration.userProperties.title"/></title>
     <meta name="layout" content="main"/>
 </head>
 
@@ -35,8 +35,8 @@
     <table class="key-value-table key-input">
         <thead>
         <tr>
-            <th><g:message code="user.administration.ldapProperties.field"/></th>
-            <th><g:message code="user.administration.ldapProperties.value"/></th>
+            <th><g:message code="user.administration.userProperties.field"/></th>
+            <th><g:message code="user.administration.userProperties.value"/></th>
         </tr>
         </thead>
         <tbody>

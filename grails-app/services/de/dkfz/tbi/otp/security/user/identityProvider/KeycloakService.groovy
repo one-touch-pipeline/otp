@@ -121,8 +121,8 @@ class KeycloakService implements IdentityProvider {
 
     @Override
     Map<String, String> getAllUserAttributes(User user) {
-        // TODO: otp-1826
-        return [:]
+        KeycloakUser keycloakUser = getKeycloakUserByExactUsername(user.username)
+        return keycloakUser.attributes.properties + keycloakUser.properties.findAll { it.key != "attributes" }
     }
 
     @Override

@@ -22,5 +22,5 @@
 
 <div class="tab-menu">
     <g:link action="show" class="${actionName=="show" ? "active" : ""}" params="['user.id': user.id]"><g:message code="user.administration.tab.overview"/></g:link>
-    <g:link action="ldapProperties" class="${actionName=="ldapProperties" ? "active" : ""}" params="['user.id': user.id]"><g:message code="user.administration.tab.ldapProperties"/></g:link>
+    <g:link action="ldapProperties" class="${actionName=="ldapProperties" ? "active" : ""}" params="['user.id': user.id]"><g:message code="user.administration.tab.userProperties"/></g:link>
 </div>
