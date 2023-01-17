@@ -18,7 +18,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-FROM quay.io/keycloak/keycloak:19.0.1
+FROM quay.io/keycloak/keycloak:20.0.3
 
 ADD ./realm-export.json /opt/keycloak_import/realm.json
 
