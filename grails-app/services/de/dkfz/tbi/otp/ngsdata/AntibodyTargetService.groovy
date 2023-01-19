@@ -30,7 +30,7 @@ import de.dkfz.tbi.otp.utils.StringUtils
 class AntibodyTargetService extends MetadataFieldsService<AntibodyTarget> {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    List<Map> getDisplayableMetadata() {
+    List<Map> displayableMetadata() {
         return AntibodyTarget.list(sort: "name", order: "asc").collect {
             [
                     id           : it.id,

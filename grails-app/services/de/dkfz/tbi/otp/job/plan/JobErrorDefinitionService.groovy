@@ -43,7 +43,7 @@ class JobErrorDefinitionService {
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    Map<Object, Object> getAllJobErrorDefinition() {
+    Map<Object, Object> allJobErrorDefinition() {
         List<JobErrorDefinition> jobErrorDefinitionList = JobErrorDefinition.list()
 
         Map jobErrorDefinition = [:]

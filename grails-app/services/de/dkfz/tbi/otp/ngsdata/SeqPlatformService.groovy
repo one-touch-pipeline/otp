@@ -58,7 +58,7 @@ class SeqPlatformService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    List<Map> getDisplayableMetadata() {
+    List<Map> displayableMetadata() {
         return SeqPlatform.list().collect {
             [
                     id                 : it.id,

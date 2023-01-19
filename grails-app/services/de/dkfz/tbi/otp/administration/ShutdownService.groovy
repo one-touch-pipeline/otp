@@ -67,7 +67,7 @@ class ShutdownService implements DisposableBean {
 
     @Override
     void destroy() {
-        ShutdownInformation info = currentPlannedShutdown
+        ShutdownInformation info = currentPlannedShutdown()
         if (info) {
             ShutdownInformation.withTransaction {
                 info.succeeded = new Date()
@@ -146,7 +146,7 @@ class ShutdownService implements DisposableBean {
         lock.lock()
         try {
             ShutdownInformation.withTransaction {
-                ShutdownInformation info = currentPlannedShutdown
+                ShutdownInformation info = currentPlannedShutdown()
                 if (!info) {
                     throw new OtpException('Canceling Shutdown failed since there is no shutdown in progress')
                 }
@@ -168,7 +168,7 @@ class ShutdownService implements DisposableBean {
      * @return Currently planned shutdown information or null if there is no planned shutdown.
      */
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    ShutdownInformation getCurrentPlannedShutdown() {
+    ShutdownInformation currentPlannedShutdown() {
         return CollectionUtils.atMostOneElement(ShutdownInformation.findAllBySucceededIsNullAndCanceledIsNull())
     }
 
@@ -178,7 +178,7 @@ class ShutdownService implements DisposableBean {
      */
     @Deprecated
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    List<ProcessingStep> getRunningJobs() {
+    List<ProcessingStep> runningJobs() {
         return schedulerService.retrieveRunningProcessingSteps()
     }
 
@@ -187,7 +187,7 @@ class ShutdownService implements DisposableBean {
      * @return list of running and restartable workflowSteps
      */
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    List<WorkflowStep> getRestartableRunningWorkflowSteps() {
+    List<WorkflowStep> restartableRunningWorkflowSteps() {
         return workflowStepService.runningWorkflowSteps().findAll({
             it.workflowRun.jobCanBeRestarted
         })
@@ -198,7 +198,7 @@ class ShutdownService implements DisposableBean {
      * @return list of running and not restartable workflowSteps
      */
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    List<WorkflowStep> getNonRestartableRunningWorkflowSteps() {
+    List<WorkflowStep> nonRestartableRunningWorkflowSteps() {
         return workflowStepService.runningWorkflowSteps().findAll({
             !it.workflowRun.jobCanBeRestarted
         })

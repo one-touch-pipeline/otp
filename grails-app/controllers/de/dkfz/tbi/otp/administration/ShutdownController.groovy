@@ -42,13 +42,13 @@ class ShutdownController {
     ]
 
     def index() {
-        ShutdownInformation shutdownInformation = shutdownService.currentPlannedShutdown
+        ShutdownInformation shutdownInformation = shutdownService.currentPlannedShutdown()
         if (shutdownInformation == null) {
             return [
                     shutdownSucceeded: shutdownService.shutdownSuccessful
             ]
         }
-        List<ProcessingStep> runningJobs = shutdownService.runningJobs
+        List<ProcessingStep> runningJobs = shutdownService.runningJobs()
         List<ProcessingStep> resumableJobs = []
         List<ProcessingStep> notResumableJobs = []
         runningJobs.each {
@@ -59,8 +59,8 @@ class ShutdownController {
             }
         }
 
-        List<WorkflowStep> restartableRunningWorkflowSteps = shutdownService.restartableRunningWorkflowSteps
-        List<WorkflowStep> notRestartableRunningWorkflowSteps = shutdownService.nonRestartableRunningWorkflowSteps
+        List<WorkflowStep> restartableRunningWorkflowSteps = shutdownService.restartableRunningWorkflowSteps()
+        List<WorkflowStep> notRestartableRunningWorkflowSteps = shutdownService.nonRestartableRunningWorkflowSteps()
 
         render(view: "status", model: [
                 shutdown                          : shutdownInformation,

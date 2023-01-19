@@ -108,7 +108,7 @@ class ProjectService {
      * @return List of all available Projects
      */
     @PostFilter("hasRole('ROLE_OPERATOR') or hasPermission(filterObject, 'OTP_READ_ACCESS')")
-    List<Project> getAllProjects() {
+    List<Project> allProjects() {
         return Project.withCriteria {
             createAlias 'projectGroup', 'projectGroup', JoinType.LEFT_OUTER_JOIN
             order('name', 'asc')

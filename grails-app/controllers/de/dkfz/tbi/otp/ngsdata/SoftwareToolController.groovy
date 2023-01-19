@@ -43,8 +43,8 @@ class SoftwareToolController {
 
     def list() {
         return [
-                identifierPerSoftwareTool : softwareToolService.identifiersPerSoftwareTool,
-                softwareToolPerProgramName: softwareToolService.softwareToolsPerProgramName,
+                identifierPerSoftwareTool : softwareToolService.identifiersPerSoftwareTool(),
+                softwareToolPerProgramName: softwareToolService.softwareToolsPerProgramName(),
                 cmd                       : flash.cmd as CreateSoftwareToolCommand,
         ]
     }

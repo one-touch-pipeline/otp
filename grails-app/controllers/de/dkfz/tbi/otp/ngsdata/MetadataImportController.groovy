@@ -310,7 +310,7 @@ class MetadataImportController implements CheckAndCall, PlainResponseExceptionHa
     }
 
     def blacklistedIlseNumbers() {
-        List<IlseSubmission> ilseSubmissions = ilseSubmissionService.sortedBlacklistedIlseSubmissions
+        List<IlseSubmission> ilseSubmissions = ilseSubmissionService.sortedBlacklistedIlseSubmissions()
         return [
                 ilseSubmissions: ilseSubmissions,
                 command        : flash.cmd as BlackListedIlseCommand,

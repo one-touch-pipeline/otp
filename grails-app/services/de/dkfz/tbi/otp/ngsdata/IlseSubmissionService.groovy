@@ -37,7 +37,7 @@ class IlseSubmissionService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    List<IlseSubmission> getSortedBlacklistedIlseSubmissions() {
+    List<IlseSubmission> sortedBlacklistedIlseSubmissions() {
         return IlseSubmission.findAllByWarning(true, [sort: 'ilseNumber', order: 'desc'])
     }
 

@@ -51,7 +51,7 @@ class ProjectSelectionInterceptor {
     boolean after() {
         if (model != null && securityService.loggedIn) {
             model.selectedProject = projectSelectionService.selectedProject
-            model.availableProjects = projectService.allProjects
+            model.availableProjects = projectService.allProjects()
             model.projectParameter = ProjectSelectionService.PROJECT_SELECTION_PARAMETER
         }
         true

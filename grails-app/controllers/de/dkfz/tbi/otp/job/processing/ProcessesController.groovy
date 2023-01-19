@@ -113,8 +113,8 @@ class ProcessesController {
     def listData(DataTableCommand cmd) {
         Map dataToRender = cmd.dataToRender()
 
-        List<JobExecutionPlan> plans = jobExecutionPlanService.jobExecutionPlans
-        List<JobExecutionPlan> plansWithPrevious = jobExecutionPlanService.jobExecutionPlansWithPreviousVersions
+        List<JobExecutionPlan> plans = jobExecutionPlanService.jobExecutionPlans()
+        List<JobExecutionPlan> plansWithPrevious = jobExecutionPlanService.jobExecutionPlansWithPreviousVersions()
         dataToRender.iTotalRecords = plans.size()
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
 

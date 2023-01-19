@@ -93,7 +93,7 @@ class SoftwareToolServiceIntegrationSpec extends Specification implements UserAn
 
         when:
         result = doWithAuth(OPERATOR) {
-            softwareToolService.identifiersPerSoftwareTool
+            softwareToolService.identifiersPerSoftwareTool()
         }
 
         then:
@@ -123,7 +123,7 @@ class SoftwareToolServiceIntegrationSpec extends Specification implements UserAn
 
         when:
         result = doWithAuth(OPERATOR) {
-            softwareToolService.softwareToolsPerProgramName
+            softwareToolService.softwareToolsPerProgramName()
         }
 
         then:

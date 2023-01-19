@@ -45,7 +45,7 @@ class QcThresholdController {
     def defaultConfiguration() {
         List<SeqType> seqTypes = SeqTypeService.allProcessableSeqTypes
 
-        List<ClassWithThreshold> classesWithProperties = qcThresholdService.classesWithProperties
+        List<ClassWithThreshold> classesWithProperties = qcThresholdService.classesWithProperties()
 
         return [
                 classesWithProperties: classesWithProperties,

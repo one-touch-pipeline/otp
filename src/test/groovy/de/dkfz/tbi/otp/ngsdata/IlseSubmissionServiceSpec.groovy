@@ -74,7 +74,7 @@ class IlseSubmissionServiceSpec extends Specification implements DataTest, Domai
         IlseSubmissionService service = new IlseSubmissionService(commentService: new CommentService())
 
         when:
-        List<IlseSubmission> ilseSubmissions = service.sortedBlacklistedIlseSubmissions
+        List<IlseSubmission> ilseSubmissions = service.sortedBlacklistedIlseSubmissions()
 
         then:
         expectedResultSize == ilseSubmissions.size()
@@ -101,7 +101,7 @@ class IlseSubmissionServiceSpec extends Specification implements DataTest, Domai
         IlseSubmissionService service = new IlseSubmissionService()
 
         when:
-        List<IlseSubmission> ilseSubmissions = service.sortedBlacklistedIlseSubmissions
+        List<IlseSubmission> ilseSubmissions = service.sortedBlacklistedIlseSubmissions()
 
         then:
         expectedIlse == ilseSubmissions*.ilseNumber

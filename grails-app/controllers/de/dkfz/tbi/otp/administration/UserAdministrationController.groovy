@@ -24,7 +24,6 @@ package de.dkfz.tbi.otp.administration
 import grails.converters.JSON
 import org.springframework.security.access.annotation.Secured
 import grails.validation.Validateable
-import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.CheckAndCall
 import de.dkfz.tbi.otp.FlashMessage
@@ -77,10 +76,10 @@ class UserAdministrationController implements CheckAndCall {
     def dataTableSource(DataTableCommand cmd) {
         Map dataToRender = cmd.dataToRender()
 
-        dataToRender.iTotalRecords = userService.userCount
+        dataToRender.iTotalRecords = userService.userCount()
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
 
-        List users = userService.allUsers
+        List users = userService.allUsers()
 
         users.each { User user ->
             String dateString
@@ -115,9 +114,9 @@ class UserAdministrationController implements CheckAndCall {
         User user = cmd.user
         Map<String, List<Role>> roleLists = [:]
         roleLists['userRole'] = userService.getRolesOfUser(user)
-        roleLists['availableRole'] = userService.allRoles - roleLists['userRole']
+        roleLists['availableRole'] = userService.allRoles() - roleLists['userRole']
         roleLists['userGroup'] = userService.getGroupsOfUser(user)
-        roleLists['availableGroup'] = userService.allGroups - roleLists['userGroup']
+        roleLists['availableGroup'] = userService.allGroups() - roleLists['userGroup']
 
         return [
                 userProjectRoles       : userProjectRoleService.findAllByUser(user).sort { it.project.name },

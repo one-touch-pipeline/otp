@@ -126,7 +126,7 @@ class ProjectCreationController {
                 projectCreationCmd             : projectCreationCmd,
                 projectRequests                : projectRequests,
                 projectRequest                 : cmd.projectRequest,
-                projects                       : projectService.allProjects,
+                projects                       : projectService.allProjects(),
                 baseProject                    : cmd.baseProject,
                 baseProjectUsers               : usersToCopyFromBaseProject,
                 baseProjectInfos               : baseProjectInfos,

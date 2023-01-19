@@ -36,7 +36,7 @@ class SpeciesWithStrainService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    List<Species> getAllSpecies() {
+    List<Species> allSpecies() {
         return Species.list()
     }
 

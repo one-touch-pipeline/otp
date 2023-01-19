@@ -41,7 +41,7 @@ class JobErrorDefinitionController implements CheckAndCall {
     ]
 
     def index() {
-        Map jobErrorDefinitions = jobErrorDefinitionService.allJobErrorDefinition
+        Map jobErrorDefinitions = jobErrorDefinitionService.allJobErrorDefinition()
         List<JobDefinition> jobDefinitions = jobErrorDefinitionService.getJobDefinition(jobErrorDefinitions)
         JobDefinition jobDefinition = jobErrorDefinitionService.findByName(params.job)
         [

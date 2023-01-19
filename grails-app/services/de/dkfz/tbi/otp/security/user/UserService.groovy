@@ -49,7 +49,7 @@ class UserService {
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    List<User> getAllUsers() {
+    List<User> allUsers() {
         return User.list()
     }
 
@@ -62,7 +62,7 @@ class UserService {
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    int getUserCount() {
+    int userCount() {
         return User.count()
     }
 
@@ -114,24 +114,24 @@ class UserService {
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    List<Role> getAllRoles() {
+    List<Role> allRoles() {
         return Role.findAllByAuthorityLike("ROLE_%")
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    List<Role> getAllGroups() {
+    List<Role> allGroups() {
         return Role.findAllByAuthorityLike("GROUP_%")
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     List<Role> getRolesOfUser(User user) {
-        List<Role> roles = allRoles
+        List<Role> roles = allRoles()
         return roles ? UserRole.findAllByUserAndRoleInList(user, roles)*.role : []
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     List<Role> getGroupsOfUser(User user) {
-        List<Role> groups = allGroups
+        List<Role> groups = allGroups()
         return groups ? UserRole.findAllByUserAndRoleInList(user, groups)*.role : []
     }
 

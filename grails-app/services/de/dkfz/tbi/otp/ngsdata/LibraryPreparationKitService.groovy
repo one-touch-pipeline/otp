@@ -38,7 +38,7 @@ class LibraryPreparationKitService extends MetadataFieldsService<LibraryPreparat
     FileService fileService
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    List<Map> getDisplayableMetadata() {
+    List<Map> displayableMetadata() {
         return LibraryPreparationKit.list(sort: "name", order: "asc").collect { LibraryPreparationKit it ->
             [
                     id                              : it.id,

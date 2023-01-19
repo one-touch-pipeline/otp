@@ -97,7 +97,7 @@ class IndividualService {
      * @return List of Individuals matching the criterias and ACL restricted
      * */
     List<Individual> listIndividuals(boolean sortOrder, IndividualColumn column, IndividualFiltering filtering, String filterString) {
-        List projects = projectService.allProjects
+        List projects = projectService.allProjects()
         if (!projects) {
             return []
         }
@@ -164,7 +164,7 @@ class IndividualService {
         if (filtering.enabled || filterString.length() >= 3) {
             def c = Individual.createCriteria()
             return c.get {
-                'in'('project', projectService.allProjects)
+                'in'('project', projectService.allProjects())
                 if (filterString.length() >= 3) {
                     String filter = "%${filterString}%"
                     or {
@@ -211,7 +211,7 @@ class IndividualService {
             }
         }
         // shortcut for unfiltered results
-        List<Project> projects = projectService.allProjects
+        List<Project> projects = projectService.allProjects()
         return projects ? Individual.countByProjectInList(projects) : 0
     }
 

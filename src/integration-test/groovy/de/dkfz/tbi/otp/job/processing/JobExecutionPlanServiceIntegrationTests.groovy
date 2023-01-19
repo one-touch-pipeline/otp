@@ -144,14 +144,14 @@ class JobExecutionPlanServiceIntegrationTests implements UserAndRoles {
     void testGetAllJobExecutionPlans() {
         setupData()
         JobExecutionPlanService service = new JobExecutionPlanService()
-        assertTrue(service.getJobExecutionPlans().isEmpty())
+        assertTrue(service.jobExecutionPlans().isEmpty())
 
         JobExecutionPlan plan = new JobExecutionPlan(name: "test", obsoleted: true)
         assertNotNull(plan.save(flush: true))
-        assertTrue(service.getJobExecutionPlans().isEmpty())
+        assertTrue(service.jobExecutionPlans().isEmpty())
         JobExecutionPlan plan2 = new JobExecutionPlan(name: "test", previousPlan: plan, obsoleted: false, planVersion: 1)
         assertNotNull(plan2.save(flush: true))
-        List<JobExecutionPlan> plans = service.getJobExecutionPlans()
+        List<JobExecutionPlan> plans = service.jobExecutionPlans()
         assertEquals(1, plans.size())
         assertSame(plan2, plans[0])
 
@@ -163,7 +163,7 @@ class JobExecutionPlanServiceIntegrationTests implements UserAndRoles {
         JobExecutionPlan plan5 = new JobExecutionPlan(name: "test5", obsoleted: false)
         assertNotNull(plan5.save(flush: true))
         // service should return four objects
-        plans = service.jobExecutionPlans
+        plans = service.jobExecutionPlans()
         assertEquals(4, plans.size())
         assertTrue(plans.contains(plan2))
         assertTrue(plans.contains(plan3))
@@ -182,7 +182,7 @@ class JobExecutionPlanServiceIntegrationTests implements UserAndRoles {
         plan5.planVersion = 2
         assertNotNull(plan4.save(flush: true))
         // service should return two objects
-        plans = service.jobExecutionPlans
+        plans = service.jobExecutionPlans()
         assertEquals(2, plans.size())
         assertTrue(plans.contains(plan2))
         assertTrue(plans.contains(plan5))
@@ -555,10 +555,10 @@ class JobExecutionPlanServiceIntegrationTests implements UserAndRoles {
         }
 
         doWithAuth(OPERATOR) {
-            assertEquals(numberOfPlans, jobExecutionPlanService.getJobExecutionPlans().size())
+            assertEquals(numberOfPlans, jobExecutionPlanService.jobExecutionPlans().size())
         }
         doWithAuth(TESTUSER) {
-            assertTrue(jobExecutionPlanService.getJobExecutionPlans().empty)
+            assertTrue(jobExecutionPlanService.jobExecutionPlans().empty)
         }
     }
 
@@ -809,7 +809,7 @@ class JobExecutionPlanServiceIntegrationTests implements UserAndRoles {
 
         when:
         Map<String, Long> result = doWithAuth(ADMIN) {
-            jobExecutionPlanService.failedProcessCount(jobExecutionPlanService.jobExecutionPlansWithPreviousVersions)
+            jobExecutionPlanService.failedProcessCount(jobExecutionPlanService.jobExecutionPlansWithPreviousVersions())
         }
 
         then:
@@ -836,7 +836,7 @@ class JobExecutionPlanServiceIntegrationTests implements UserAndRoles {
 
         when:
         Map<String, Date> result = doWithAuth(ADMIN) {
-            jobExecutionPlanService.lastProcessDate(jobExecutionPlanService.jobExecutionPlansWithPreviousVersions, ExecutionState.SUCCESS)
+            jobExecutionPlanService.lastProcessDate(jobExecutionPlanService.jobExecutionPlansWithPreviousVersions(), ExecutionState.SUCCESS)
         }
 
         then:

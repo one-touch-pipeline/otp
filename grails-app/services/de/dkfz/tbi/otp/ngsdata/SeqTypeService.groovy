@@ -42,7 +42,7 @@ class SeqTypeService extends MetadataFieldsService<SeqType> {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    List<Map> getDisplayableMetadata() {
+    List<Map> displayableMetadata() {
         return SeqType.list(sort: "name", order: "asc").collect {
             [
                     id               : SeqType.findAllByNameAndSingleCell(it.name, it.singleCell)*.id?.sort()?.first(),

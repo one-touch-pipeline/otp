@@ -97,13 +97,13 @@ class JobExecutionPlanService {
      * @return List of all not obsoleted JobExecutionPlans
      */
     @PostFilter("hasRole('ROLE_OPERATOR')")
-    List<JobExecutionPlan> getJobExecutionPlans() {
+    List<JobExecutionPlan> jobExecutionPlans() {
         return JobExecutionPlan.findAllByObsoleted(false, [sort: "name", order: "asc"])
     }
 
     @PostFilter("hasRole('ROLE_OPERATOR')")
-    List<JobExecutionPlan> getJobExecutionPlansWithPreviousVersions() {
-        return JobExecutionPlan.findAllByNameInList(jobExecutionPlans*.name)
+    List<JobExecutionPlan> jobExecutionPlansWithPreviousVersions() {
+        return JobExecutionPlan.findAllByNameInList(jobExecutionPlans()*.name)
     }
 
     /**

@@ -41,12 +41,12 @@ class SoftwareToolService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    Map<SoftwareTool, List<SoftwareToolIdentifier>> getIdentifiersPerSoftwareTool() {
+    Map<SoftwareTool, List<SoftwareToolIdentifier>> identifiersPerSoftwareTool() {
         return SoftwareToolIdentifier.list(sort: "name", order: "asc").groupBy { it.softwareTool }
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    Map<String, List<SoftwareTool>> getSoftwareToolsPerProgramName() {
+    Map<String, List<SoftwareTool>> softwareToolsPerProgramName() {
         return SoftwareTool.findAllByType(SoftwareTool.Type.BASECALLING, [sort: "programVersion", order: "asc"]).groupBy { it.programName }
     }
 

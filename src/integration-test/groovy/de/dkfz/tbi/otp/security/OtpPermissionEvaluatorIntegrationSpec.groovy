@@ -73,7 +73,7 @@ class OtpPermissionEvaluatorIntegrationSpec extends Specification implements Use
 
         when:
         List<Project> resultList = doWithAuth(user.username) {
-            projectService.getAllProjects()
+            projectService.allProjects()
         }
 
         then:
@@ -93,7 +93,7 @@ class OtpPermissionEvaluatorIntegrationSpec extends Specification implements Use
 
         when:
         List<Project> resultList = doWithAuth(user.username) {
-            projectService.allProjects
+            projectService.allProjects()
         }
 
         then:

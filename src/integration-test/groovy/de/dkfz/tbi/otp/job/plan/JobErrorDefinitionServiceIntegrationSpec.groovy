@@ -40,7 +40,7 @@ class JobErrorDefinitionServiceIntegrationSpec extends Specification {
         JobErrorDefinitionService service = new JobErrorDefinitionService()
 
         when:
-        Map jobErrorDefinitions = service.allJobErrorDefinition
+        Map jobErrorDefinitions = service.allJobErrorDefinition()
 
         then:
         jobErrorDefinitions.size() == 1
@@ -63,7 +63,7 @@ class JobErrorDefinitionServiceIntegrationSpec extends Specification {
         JobErrorDefinitionService service = new JobErrorDefinitionService()
 
         when:
-        Map jobErrorDefinitions = service.allJobErrorDefinition
+        Map jobErrorDefinitions = service.allJobErrorDefinition()
 
         then:
         jobErrorDefinitions.size() == 3
@@ -78,7 +78,7 @@ class JobErrorDefinitionServiceIntegrationSpec extends Specification {
         JobErrorDefinitionService service = new JobErrorDefinitionService()
 
         when:
-        List<JobDefinition> jobDefinitions = service.getJobDefinition(service.allJobErrorDefinition)
+        List<JobDefinition> jobDefinitions = service.getJobDefinition(service.allJobErrorDefinition())
 
         then:
         jobDefinitions.size() == 1
@@ -91,7 +91,7 @@ class JobErrorDefinitionServiceIntegrationSpec extends Specification {
         JobErrorDefinitionService service = new JobErrorDefinitionService()
 
         when:
-        List<JobDefinition> jobDefinitions = service.getJobDefinition(service.allJobErrorDefinition)
+        List<JobDefinition> jobDefinitions = service.getJobDefinition(service.allJobErrorDefinition())
 
         then:
         jobDefinitions.size() == 3
@@ -106,7 +106,7 @@ class JobErrorDefinitionServiceIntegrationSpec extends Specification {
         service.addErrorExpressionFirstLevel(type, action, errorExpression)
 
         then:
-        service.allJobErrorDefinition.get(CollectionUtils.atMostOneElement(JobErrorDefinition.findAllByErrorExpression(errorExpression))) == errorExpression
+        service.allJobErrorDefinition().get(CollectionUtils.atMostOneElement(JobErrorDefinition.findAllByErrorExpression(errorExpression))) == errorExpression
 
         where:
         type                            | action        | errorExpression
@@ -128,7 +128,7 @@ class JobErrorDefinitionServiceIntegrationSpec extends Specification {
         service.addErrorExpression(type, action, errorExpression, jobErrorDefinition)
 
         then:
-        service.allJobErrorDefinition.get(jobErrorDefinition).
+        service.allJobErrorDefinition().get(jobErrorDefinition).
                 get(CollectionUtils.atMostOneElement(JobErrorDefinition.findAllByErrorExpression(errorExpression))) == errorExpression
 
         where:

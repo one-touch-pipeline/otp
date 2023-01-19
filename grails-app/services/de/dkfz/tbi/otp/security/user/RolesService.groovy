@@ -32,7 +32,7 @@ import de.dkfz.tbi.otp.security.UserRole
 class RolesService {
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    List<RolesWithUsers> getRolesAndUsers() {
+    List<RolesWithUsers> rolesAndUsers() {
         List<RolesWithUsers> roles = Role.list().collect { Role role ->
             new RolesWithUsers(role: role)
         }

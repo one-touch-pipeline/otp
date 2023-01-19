@@ -88,7 +88,7 @@ class QcThresholdService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    List<ClassWithThreshold> getClassesWithProperties() {
+    List<ClassWithThreshold> classesWithProperties() {
         List<QcThreshold> thr = QcThreshold.createCriteria().list {
             isNull("project")
         }

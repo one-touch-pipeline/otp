@@ -78,11 +78,11 @@ class MetaDataFieldsController implements CheckAndCall {
     }
 
     def libraryPreparationKits() {
-        return [libraryPreparationKits: libraryPreparationKitService.displayableMetadata]
+        return [libraryPreparationKits: libraryPreparationKitService.displayableMetadata()]
     }
 
     def antibodyTargets() {
-        return [antibodyTargets: antibodyTargetService.displayableMetadata]
+        return [antibodyTargets: antibodyTargetService.displayableMetadata()]
     }
 
     def seqCenters() {
@@ -90,12 +90,12 @@ class MetaDataFieldsController implements CheckAndCall {
     }
 
     def seqPlatforms() {
-        return [seqPlatforms: seqPlatformService.displayableMetadata]
+        return [seqPlatforms: seqPlatformService.displayableMetadata()]
     }
 
     def seqTypes() {
         return [
-                seqTypes: seqTypeService.displayableMetadata,
+                seqTypes: seqTypeService.displayableMetadata(),
                 cmd     : flash.cmd as CreateSeqTypeCommand,
         ]
     }
