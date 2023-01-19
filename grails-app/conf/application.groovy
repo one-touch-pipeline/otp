@@ -247,3 +247,8 @@ environments {
     }
 }
 grails.plugin.console.fileStore.remote.defaultPath=System.getenv("CONSOLE_REMOTE_DEFAULTPATH")
+
+
+System.setProperty("javax.net.ssl.trustStore", otpProperties.getProperty(OtpProperty.TRUSTSTORE_PATH.key) ?: OtpProperty.TRUSTSTORE_PATH.defaultValue)
+System.setProperty("javax.net.ssl.trustStorePassword", otpProperties.getProperty(OtpProperty.TRUSTSTORE_PASSWORD.key) ?: OtpProperty.TRUSTSTORE_PASSWORD.defaultValue)
+System.setProperty("javax.net.ssl.trustStoreType", otpProperties.getProperty(OtpProperty.TRUSTSTORE_TYPE.key) ?: OtpProperty.TRUSTSTORE_TYPE.defaultValue)
