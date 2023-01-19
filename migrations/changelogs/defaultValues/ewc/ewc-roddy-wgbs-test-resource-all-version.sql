@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -141,8 +141,8 @@ VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 0, 'Default test-resourc
 ON CONFLICT DO NOTHING;
 
 INSERT INTO external_workflow_config_selector(id, version, date_created, last_updated, name, priority, selector_type, external_workflow_config_fragment_id)
-VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 'Default test-resource values for WGBS alignment test', 100, 'DEFAULT_VALUES',
-        (SELECT id FROM external_workflow_config_fragment WHERE name = 'Default test-resource values for WGBS alignment test'))
+VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 'Default test-resource values for WGBS alignment test', 100, 'DEFAULT_VALUES', (
+    SELECT id FROM external_workflow_config_fragment WHERE name = 'Default test-resource values for WGBS alignment test'))
 ON CONFLICT DO NOTHING;
 
 INSERT INTO external_workflow_config_selector_workflow (external_workflow_config_selector_workflows_id, workflow_id)

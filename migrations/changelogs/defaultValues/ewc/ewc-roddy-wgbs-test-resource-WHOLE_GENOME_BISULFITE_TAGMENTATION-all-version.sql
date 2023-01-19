@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -39,9 +39,10 @@ ON CONFLICT DO NOTHING;
 
 INSERT INTO external_workflow_config_selector(id, version, date_created, last_updated, name, priority, selector_type, external_workflow_config_fragment_id)
 VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 'Default test-resource values for WGBS alignment WHOLE_GENOME_BISULFITE_TAGMENTATION test', 100,
-        'DEFAULT_VALUES', (SELECT id
-                           FROM external_workflow_config_fragment
-                           WHERE name = 'Default test-resource values for WGBS alignment WHOLE_GENOME_BISULFITE_TAGMENTATION test'))
+        'DEFAULT_VALUES', (
+            SELECT id
+            FROM external_workflow_config_fragment
+            WHERE name = 'Default test-resource values for WGBS alignment WHOLE_GENOME_BISULFITE_TAGMENTATION test'))
 ON CONFLICT DO NOTHING;
 
 INSERT INTO external_workflow_config_selector_workflow (external_workflow_config_selector_workflows_id, workflow_id)
@@ -55,9 +56,5 @@ INSERT INTO external_workflow_config_selector_seq_type (external_workflow_config
 SELECT (SELECT id
         FROM external_workflow_config_selector
         WHERE name = 'Default test-resource values for WGBS alignment WHOLE_GENOME_BISULFITE_TAGMENTATION test'),
-       (SELECT id
-        FROM seq_type
-        WHERE name = 'WHOLE_GENOME_BISULFITE_TAGMENTATION'
-          AND single_cell = FALSE
-          AND library_layout = 'PAIRED')
+       (SELECT id FROM seq_type WHERE name = 'WHOLE_GENOME_BISULFITE_TAGMENTATION' AND single_cell = FALSE AND library_layout = 'PAIRED')
 ON CONFLICT DO NOTHING;

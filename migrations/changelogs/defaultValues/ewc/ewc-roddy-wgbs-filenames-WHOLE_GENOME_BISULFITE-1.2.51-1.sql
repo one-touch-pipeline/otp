@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,7 +21,7 @@
  */
 
 INSERT INTO external_workflow_config_fragment(id, version, date_created, last_updated, object_version, name, config_values)
-VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 0, 'Default filenames values for WGBS alignment 1.2.51-1, 1.2.51-2 WHOLE_GENOME_BISULFITE',
+VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 0, 'Default filenames values for WGBS alignment 1.2.51-1 WHOLE_GENOME_BISULFITE',
         '{' ||
         '    "RODDY_FILENAMES": {' ||
         '        "filenames": [' ||
@@ -370,34 +370,24 @@ VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 0, 'Default filenames va
 ON CONFLICT DO NOTHING;
 
 INSERT INTO external_workflow_config_selector(id, version, date_created, last_updated, name, priority, selector_type, external_workflow_config_fragment_id)
-VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 'Default filenames values for WGBS alignment 1.2.51-1, 1.2.51-2 WHOLE_GENOME_BISULFITE', 22,
-        'DEFAULT_VALUES', (SELECT id
-                           FROM external_workflow_config_fragment
-                           WHERE name = 'Default filenames values for WGBS alignment 1.2.51-1, 1.2.51-2 WHOLE_GENOME_BISULFITE'))
+VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 'Default filenames values for WGBS alignment 1.2.51-1 WHOLE_GENOME_BISULFITE', 22, 'DEFAULT_VALUES', (
+    SELECT id FROM external_workflow_config_fragment WHERE name = 'Default filenames values for WGBS alignment 1.2.51-1 WHOLE_GENOME_BISULFITE'))
 ON CONFLICT DO NOTHING;
 
 INSERT INTO external_workflow_config_selector_workflow (external_workflow_config_selector_workflows_id, workflow_id)
-SELECT (SELECT id FROM external_workflow_config_selector WHERE name = 'Default filenames values for WGBS alignment 1.2.51-1, 1.2.51-2 WHOLE_GENOME_BISULFITE'),
+SELECT (SELECT id FROM external_workflow_config_selector WHERE name = 'Default filenames values for WGBS alignment 1.2.51-1 WHOLE_GENOME_BISULFITE'),
        (SELECT id FROM workflow WHERE name = 'WGBS alignment')
 ON CONFLICT DO NOTHING;
 
 INSERT INTO external_workflow_config_selector_workflow_version (external_workflow_config_selector_workflow_versions_id, workflow_version_id)
-SELECT (SELECT id FROM external_workflow_config_selector WHERE name = 'Default filenames values for WGBS alignment 1.2.51-1, 1.2.51-2 WHOLE_GENOME_BISULFITE'),
+SELECT (SELECT id FROM external_workflow_config_selector WHERE name = 'Default filenames values for WGBS alignment 1.2.51-1 WHOLE_GENOME_BISULFITE'),
        (SELECT id
         FROM workflow_version
         WHERE workflow_id = (SELECT id FROM workflow WHERE name = 'WGBS alignment')
           AND workflow_version.workflow_version = '1.2.51-1')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO external_workflow_config_selector_workflow_version (external_workflow_config_selector_workflow_versions_id, workflow_version_id)
-SELECT (SELECT id FROM external_workflow_config_selector WHERE name = 'Default filenames values for WGBS alignment 1.2.51-1, 1.2.51-2 WHOLE_GENOME_BISULFITE'),
-       (SELECT id
-        FROM workflow_version
-        WHERE workflow_id = (SELECT id FROM workflow WHERE name = 'WGBS alignment')
-          AND workflow_version.workflow_version = '1.2.51-2')
-ON CONFLICT DO NOTHING;
-
 INSERT INTO external_workflow_config_selector_seq_type (external_workflow_config_selector_seq_types_id, seq_type_id)
-SELECT (SELECT id FROM external_workflow_config_selector WHERE name = 'Default filenames values for WGBS alignment 1.2.51-1, 1.2.51-2 WHOLE_GENOME_BISULFITE'),
+SELECT (SELECT id FROM external_workflow_config_selector WHERE name = 'Default filenames values for WGBS alignment 1.2.51-1 WHOLE_GENOME_BISULFITE'),
        (SELECT id FROM seq_type WHERE name = 'WHOLE_GENOME_BISULFITE' AND single_cell = FALSE AND library_layout = 'PAIRED')
 ON CONFLICT DO NOTHING;

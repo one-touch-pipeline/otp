@@ -72,15 +72,15 @@ databaseChangeLog = {
 
     // Roddy WGBS defaults values
     files += [
-            ewcDir.resolve("ewc-roddy-wgbs-cvalue-1.2.73-1+1.2.73-2+1.2.73-201+1.2.73-202+1.2.73-3.sql"),
+            ewcDir.resolve("ewc-roddy-wgbs-cvalue-1.2.73-1+1.2.73-2+1.2.73-201+1.2.73-202.sql"),
             ewcDir.resolve("ewc-roddy-wgbs-cvalue-1.2.73-204.sql"),
-            ewcDir.resolve("ewc-roddy-wgbs-cvalue-WHOLE_GENOME_BISULFITE-1.2.51-1+1.2.51-2.sql"),
-            ewcDir.resolve("ewc-roddy-wgbs-filenames-1.2.73-1+1.2.73-2+1.2.73-201+1.2.73-202+1.2.73-204+1.2.73-3.sql"),
-            ewcDir.resolve("ewc-roddy-wgbs-filenames-WHOLE_GENOME_BISULFITE-1.2.51-1+1.2.51-2.sql"),
-            ewcDir.resolve("ewc-roddy-wgbs-resources-1.2.73-1+1.2.73-2+1.2.73-201+1.2.73-202+1.2.73-204+1.2.73-3.sql"),
-            ewcDir.resolve("ewc-roddy-wgbs-resources-WHOLE_GENOME_BISULFITE-1.2.51-1+1.2.51-2.sql"),
-            ewcDir.resolve("ewc-roddy-wgbs-resources-WHOLE_GENOME_BISULFITE-1.2.73-1+1.2.73-2+1.2.73-201+1.2.73-202+1.2.73-204+1.2.73-3.sql"),
-            ewcDir.resolve("ewc-roddy-wgbs-resources-WHOLE_GENOME_BISULFITE_TAGMENTATION-1.2.73-1+1.2.73-2+1.2.73-201+1.2.73-202+1.2.73-204+1.2.73-3.sql"),
+            ewcDir.resolve("ewc-roddy-wgbs-cvalue-WHOLE_GENOME_BISULFITE-1.2.51-1.sql"),
+            ewcDir.resolve("ewc-roddy-wgbs-filenames-1.2.73-1+1.2.73-2+1.2.73-201+1.2.73-202+1.2.73-204.sql"),
+            ewcDir.resolve("ewc-roddy-wgbs-filenames-WHOLE_GENOME_BISULFITE-1.2.51-1.sql"),
+            ewcDir.resolve("ewc-roddy-wgbs-resources-1.2.73-1+1.2.73-2+1.2.73-201+1.2.73-202+1.2.73-204.sql"),
+            ewcDir.resolve("ewc-roddy-wgbs-resources-WHOLE_GENOME_BISULFITE-1.2.51-1.sql"),
+            ewcDir.resolve("ewc-roddy-wgbs-resources-WHOLE_GENOME_BISULFITE-1.2.73-1+1.2.73-2+1.2.73-201+1.2.73-202+1.2.73-204.sql"),
+            ewcDir.resolve("ewc-roddy-wgbs-resources-WHOLE_GENOME_BISULFITE_TAGMENTATION-1.2.73-1+1.2.73-2+1.2.73-201+1.2.73-202+1.2.73-204.sql"),
     ]
 
     files.each { file ->
