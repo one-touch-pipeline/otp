@@ -32,6 +32,7 @@ import org.springframework.stereotype.Component
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.ngsdata.UserProjectRole
 import de.dkfz.tbi.otp.project.ProjectRequest
+import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.project.projectRequest.ProjectRequestPersistentStateService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
@@ -138,6 +139,9 @@ class OtpPermissionEvaluator implements PermissionEvaluator {
         return (permission == 'IS_USER' && userProjectRole && userProjectRole.user == activeUser)
     }
 
+    /**
+     * If you change this method, also change {@link ProjectService#getAllProjects}
+     */
     @CompileDynamic
     private boolean checkProjectRolePermission(Authentication auth, Project project, String permission) {
         User activeUser = CollectionUtils.atMostOneElement(User.findAllByUsername(auth.principal.username))

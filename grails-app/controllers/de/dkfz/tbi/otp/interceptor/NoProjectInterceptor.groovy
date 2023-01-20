@@ -61,7 +61,7 @@ class NoProjectInterceptor {
     @Override
     boolean before() {
         if (securityService.loggedIn) {
-            if (!projectService.allProjects()) {
+            if (!projectService.allProjects) {
                 forward(controller: "errors", action: "noProject")
                 return false
             }

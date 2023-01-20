@@ -60,7 +60,7 @@ trait BaseWorkflowConfigController extends CheckAndCall {
     }
 
     List<Project> getProjects() {
-        return projectService.allProjects().sort { a, b ->
+        return projectService.allProjects.sort { a, b ->
             String.CASE_INSENSITIVE_ORDER.compare(a.name, b.name)
         }
     }

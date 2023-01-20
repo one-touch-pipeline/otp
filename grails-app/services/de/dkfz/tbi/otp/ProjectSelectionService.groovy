@@ -47,7 +47,7 @@ class ProjectSelectionService {
     void setSelectedProject(String projectName) {
         Project projectRequested = projectService.getProjectByNameAsList(projectName).find()
         currentRequest.setAttribute(PROJECT_REQUEST_KEY, projectRequested)
-        Project projectSelected = projectRequested ?: projectService.allProjects().find()
+        Project projectSelected = projectRequested ?: projectService.allProjects.find()
         currentRequest.setAttribute(PROJECT_SELECTION_KEY, projectSelected)
     }
 

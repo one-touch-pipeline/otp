@@ -61,7 +61,7 @@ class SequenceController {
             showRunLinks: securityService.hasCurrentUserAdministrativeRoles(),
             filterTree : [
                     [name : 'projectSelection', msgcode: 'sequence.search.project',
-                     type : 'LIST', from: projectService.allProjects(),
+                     type : 'LIST', from: projectService.allProjects,
                      value: 'displayName', key: 'id'],
                     [name: 'individualSearch', msgcode: 'sequence.search.individual',
                      type: 'TEXT'],

@@ -23,7 +23,6 @@ package de.dkfz.tbi.otp.project
 
 import grails.gorm.transactions.Transactional
 import grails.validation.ValidationException
-import org.hibernate.sql.JoinType
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.prepost.*
 import org.springframework.validation.Errors
@@ -48,7 +47,7 @@ import de.dkfz.tbi.otp.project.additionalField.*
 import de.dkfz.tbi.otp.project.exception.unixGroup.*
 import de.dkfz.tbi.otp.project.projectRequest.ProjectRequestService
 import de.dkfz.tbi.otp.project.projectRequest.ProjectRequestStateProvider
-import de.dkfz.tbi.otp.security.User
+import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
@@ -103,24 +102,38 @@ class ProjectService {
     MessageSourceService messageSourceService
     CreateNotificationTextService createNotificationTextService
     MergingCriteriaService mergingCriteriaService
+    SecurityService securityService
 
     /**
-     * @return List of all available Projects
+     * This method doesn't use a @PostFilter security annotation for performance reasons
+     * If you change this method, also change {@link OtpPermissionEvaluator#checkProjectRolePermission}
+     *
+     * @return List of projects accessible by the current user
      */
-    @PostFilter("hasRole('ROLE_OPERATOR') or hasPermission(filterObject, 'OTP_READ_ACCESS')")
-    List<Project> allProjects() {
-        return Project.withCriteria {
-            createAlias 'projectGroup', 'projectGroup', JoinType.LEFT_OUTER_JOIN
-            order('name', 'asc')
+    List<Project> getAllProjects() {
+        if (securityService.ifAllGranted(Role.ROLE_OPERATOR)) {
+            return Project.withCriteria {
+                order('name', 'asc')
+            } as List<Project>
         }
+        return UserProjectRole.withCriteria {
+            user {
+                eq("id", securityService.currentUser.id)
+                eq("enabled", true)
+            }
+            eq("enabled", true)
+            eq("accessToOtp", true)
+            projections {
+                property("project")
+                project {
+                    order('name', 'asc')
+                }
+            }
+        } as List<Project>
     }
 
     List<Project> getAllPublicProjects() {
         return Project.findAllByPubliclyAvailable(true, [sort: "name", order: "asc"])
-    }
-
-    int getProjectCount() {
-        return Project.count()
     }
 
     /**

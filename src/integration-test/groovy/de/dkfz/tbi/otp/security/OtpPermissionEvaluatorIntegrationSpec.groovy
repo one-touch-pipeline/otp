@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.security
 
 import grails.gorm.transactions.Rollback
 import grails.testing.mixin.integration.Integration
+import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
 import spock.lang.Specification
@@ -59,45 +60,45 @@ class OtpPermissionEvaluatorIntegrationSpec extends Specification implements Use
         authentication = new UsernamePasswordAuthenticationToken(new Principal(user.username, [], user.enabled), null, [])
     }
 
-    /**
-     * SuppressWarnings: UnnecessaryGetter
-     * Because otherwise the @PreFilter would not be invoked. This is only the case in tests.
-     */
-    @SuppressWarnings("UnnecessaryGetter")
-    @Unroll
-    void "test evaluation of hasPermission in annotation (otpAccess = #otpAccess)"() {
+    void "test evaluation of hasPermission in annotation (otpAccess = true)"() {
         given:
         setupData()
 
-        userProjectRole.accessToOtp = otpAccess
+        userProjectRole.accessToOtp = true
+        userProjectRole.save(flush: true)
+
+        expect:
+        project == doWithAuth(user.username) {
+            projectService.getProject(project.id)
+        }
+    }
+
+    void "test evaluation of hasPermission in annotation (otpAccess = false)"() {
+        given:
+        setupData()
+
+        userProjectRole.accessToOtp = false
+        userProjectRole.save(flush: true)
 
         when:
-        List<Project> resultList = doWithAuth(user.username) {
-            projectService.allProjects()
+        doWithAuth(user.username) {
+            projectService.getProject(project.id)
         }
 
         then:
-        resultList.size() == expectedSize
-
-        where:
-        otpAccess || expectedSize
-        false     || 0
-        true      || 1
+        thrown(AccessDeniedException)
     }
 
-    void "pass annotation via userrole"() {
+    void "test evaluation of hasRole in annotation"() {
         given:
         setupData()
 
         user = CollectionUtils.exactlyOneElement(User.findAllByUsername(OPERATOR))
 
-        when:
-        List<Project> resultList = doWithAuth(user.username) {
-            projectService.allProjects()
+        expect:
+        project == doWithAuth(user.username) {
+            projectService.getProject(project.id)
         }
-
-        then:
-        resultList == [project]
     }
 
     void "hasPermission, aclPermissionEvaluator throws exceptions on unsupported permissions"() {

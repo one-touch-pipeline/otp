@@ -92,7 +92,7 @@ class SeqTrackService {
                 order(column.columnName, sortOrder ? "asc" : "desc")
             }
         }
-        List<Project> projects = projectService.allProjects()
+        List<Project> projects = projectService.allProjects
         return projects ? Sequence.findAllByProjectIdInList(projects*.id, [
                 offset: offset,
                 max   : max,
@@ -117,13 +117,13 @@ class SeqTrackService {
             }
         }
         // shortcut for unfiltered results
-        List<Project> projects = projectService.allProjects()
+        List<Project> projects = projectService.allProjects
         return projects ? Sequence.countByProjectIdInList(projects*.id) : 0
     }
 
     Closure createSequenceFilteringClosure() {
         return { SequenceFiltering filtering ->
-            'in'('projectId', projectService.allProjects()*.id)
+            'in'('projectId', projectService.allProjects*.id)
             if (filtering.project) {
                 'in'('projectId', filtering.project)
             }

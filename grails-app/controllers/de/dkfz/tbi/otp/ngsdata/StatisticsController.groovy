@@ -48,7 +48,7 @@ class StatisticsController {
     def downloadDirectoriesCSV() {
         StringBuilder output = new StringBuilder()
 
-        projectService.allProjects().each { Project project ->
+        projectService.allProjects.each { Project project ->
             output << projectService.getProjectDirectory(project) << ","
             output << project.dirAnalysis ?: ''
             output << "\n"
@@ -60,9 +60,9 @@ class StatisticsController {
     def kpi() {
         List<Project> projects
         if (params.projectGroup) {
-            projects = projectService.allProjects().intersect(Project.findAllByProjectGroup(projectGroupService.projectGroupByName(params.projectGroup)))
+            projects = projectService.allProjects.intersect(Project.findAllByProjectGroup(projectGroupService.projectGroupByName(params.projectGroup)))
         } else {
-            projects = projectService.allProjects()
+            projects = projectService.allProjects
         }
         Project project = projectSelectionService.selectedProject
 

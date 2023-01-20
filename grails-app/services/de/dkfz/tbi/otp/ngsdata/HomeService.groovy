@@ -32,7 +32,7 @@ class HomeService {
     ProjectService projectService
 
     List<ProjectData> getAllProjects() {
-        getProjectData(projectService.allProjects())
+        getProjectData(projectService.allProjects)
     }
 
     List<ProjectData> getAllPublicProjects() {

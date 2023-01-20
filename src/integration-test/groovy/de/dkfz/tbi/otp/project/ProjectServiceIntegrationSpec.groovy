@@ -26,9 +26,7 @@ import grails.testing.mixin.integration.Integration
 import grails.validation.ValidationException
 import org.grails.datastore.gorm.events.AutoTimestampEventListener
 import org.springframework.mock.web.MockMultipartFile
-import spock.lang.Specification
-import spock.lang.TempDir
-import spock.lang.Unroll
+import spock.lang.*
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.TestConfigService
@@ -37,9 +35,7 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfigService
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvConfig
-import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
-import de.dkfz.tbi.otp.domainFactory.DomainFactoryProcessingPriority
-import de.dkfz.tbi.otp.domainFactory.UserDomainFactory
+import de.dkfz.tbi.otp.domainFactory.*
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.FastqcWorkflowDomainFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.infrastructure.*
@@ -153,6 +149,76 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         projectService.fileSystemService = fileSystemService
         fileService.remoteShellHelper = remoteShellHelper
         configService.clean()
+    }
+
+    @Unroll
+    void "test getAllProjects, user #user can access all projects"() {
+        given:
+        createUserAndRoles()
+        List<Project> projects = [createProject(), createProject()]
+        projects.each {
+            addUserWithReadAccessToProject(getUser(TESTUSER), it)
+        }
+
+        expect:
+        TestCase.assertContainSame(projects, doWithAuth(user) {
+            projectService.allProjects
+        })
+
+        where:
+        user << [OPERATOR, ADMIN, TESTUSER]
+    }
+
+    void "test getAllProjects, user can only access projects to which they have access"() {
+        given:
+        createUserAndRoles()
+        List<Project> projects = [createProject(), createProject()]
+        projects.each {
+            addUserWithReadAccessToProject(getUser(TESTUSER), it)
+        }
+        createProject()
+        createProject()
+
+        expect:
+        TestCase.assertContainSame(projects, doWithAuth(TESTUSER) {
+            projectService.allProjects
+        })
+    }
+
+    void "test getAllProjects, user doesn't have access"() {
+        given:
+        createUserAndRoles()
+        Project projectWithRoleNotEnabled = createProject()
+        Project projectWithNoAccessToOtp = createProject()
+        createProject() // project with no UserProjectRole
+        addUserWithReadAccessToProject(getUser(TESTUSER), projectWithRoleNotEnabled, false)
+        createUserProjectRole(
+                user: getUser(TESTUSER),
+                project: projectWithNoAccessToOtp,
+                enabled: true,
+                accessToOtp: false,
+        )
+
+        expect:
+        TestCase.assertContainSame([], doWithAuth(TESTUSER) {
+            projectService.allProjects
+        })
+    }
+
+    void "test getAllProjects, user is disabled"() {
+        given:
+        createUserAndRoles()
+        List<Project> projects = [createProject(), createProject()]
+        projects.each {
+            addUserWithReadAccessToProject(getUser(TESTUSER), it)
+        }
+        getUser(TESTUSER).enabled = false
+        getUser(TESTUSER).save(flush: true)
+
+        expect:
+        TestCase.assertContainSame([], doWithAuth(TESTUSER) {
+            projectService.allProjects
+        })
     }
 
     @SuppressWarnings("UnnecessaryObjectReferences")

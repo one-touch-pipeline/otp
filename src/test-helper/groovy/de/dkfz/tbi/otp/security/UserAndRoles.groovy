@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.security
 
-import grails.plugin.springsecurity.acl.AclSid
 import grails.util.Holders
 import org.springframework.security.authentication.AnonymousAuthenticationToken
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
@@ -29,9 +28,7 @@ import org.springframework.security.core.Authentication
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.context.SecurityContextHolder
-import org.springframework.security.core.userdetails.UserCache
-import org.springframework.security.core.userdetails.UserDetails
-import org.springframework.security.core.userdetails.UserDetailsService
+import org.springframework.security.core.userdetails.*
 import org.springframework.security.web.authentication.switchuser.SwitchUserFilter
 import org.springframework.security.web.authentication.switchuser.SwitchUserGrantedAuthority
 
@@ -69,7 +66,6 @@ trait UserAndRoles {
         [ADMIN, OPERATOR, TESTUSER, USER].each {
             User user = DomainFactory.createUser([username: it])
             assertNotNull(user.save(flush: true))
-            assertNotNull(new AclSid(sid: user.username, principal: true).save(flush: true))
             it == ADMIN ? UserRole.create(user, adminRole) : ""
             it == OPERATOR ? UserRole.create(user, operatorRole) : ""
         }
