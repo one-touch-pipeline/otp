@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.job.jobs.rnaAlignment
 
+import groovy.transform.CompileDynamic
 import groovy.util.logging.Slf4j
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
@@ -30,6 +31,7 @@ import de.dkfz.tbi.otp.job.jobs.roddyAlignment.ExecutePanCanJob
 import de.dkfz.tbi.otp.ngsdata.SequencingReadType
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
+@CompileDynamic
 @Component
 @Scope("prototype")
 @Slf4j

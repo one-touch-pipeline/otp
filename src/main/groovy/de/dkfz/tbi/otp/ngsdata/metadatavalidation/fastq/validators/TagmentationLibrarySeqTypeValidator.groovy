@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 
+import groovy.transform.CompileDynamic
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
@@ -40,6 +41,7 @@ class TagmentationLibrarySeqTypeValidator extends ValueTuplesValidator<MetadataV
     static final String TAGMENTATION_WITHOUT_LIBRARY = "For tagmentation sequencing types there should be a value in the ${TAGMENTATION_LIBRARY} column."
     static final String LIBRARY_WITHOUT_TAGMENTATION = "At least one tagmentation library is given in ${TAGMENTATION_LIBRARY} for a non tagmentation sequencing type"
 
+    @CompileDynamic
     @Override
     Collection<String> getDescriptions() {
         return ["If the sequencing type is '${SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName}', " +
@@ -62,6 +64,7 @@ class TagmentationLibrarySeqTypeValidator extends ValueTuplesValidator<MetadataV
     @Override
     void checkMissingOptionalColumn(MetadataValidationContext context, String columnTitle) { }
 
+    @CompileDynamic
     @Override
     void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> valueTuples) {
         valueTuples.each { ValueTuple valueTuple ->

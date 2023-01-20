@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.job.jobs.importExternallyMergedBam
 
+import groovy.transform.CompileDynamic
 import groovy.util.logging.Slf4j
 import org.springframework.context.annotation.Scope
 import org.springframework.scheduling.annotation.Scheduled
@@ -32,6 +33,7 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.SessionUtils
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
+@CompileDynamic
 @Component("importExternallyMergedBamStartJob")
 @Scope("singleton")
 @Slf4j

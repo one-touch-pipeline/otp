@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.extractData
 
+import groovy.transform.CompileDynamic
 import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.ngsdata.*
@@ -49,6 +50,7 @@ trait ExtractProjectSampleType {
      * - project
      * - sampleType
      */
+    @CompileDynamic
     ProjectSampleType getProjectAndSampleTypeFromMetadata(ValueTuple tuple) {
         String sampleName = tuple.getValue(SAMPLE_NAME.name())
         String projectName = tuple.getValue(PROJECT.name()) ?: ''

@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation
 
+import groovy.transform.CompileDynamic
 import groovy.transform.stc.ClosureParams
 import groovy.transform.stc.SimpleType
 
@@ -115,6 +116,7 @@ abstract class AbstractMetadataValidationContext extends ValidationContext {
         ]
     }
 
+    @CompileDynamic
     static Map readAndCheckFile(Path metadataFile,
                                 @ClosureParams(value = SimpleType, options = ['java.lang.String']) Closure<String> renameHeader = Closure.IDENTITY,
                                 @ClosureParams(value = SimpleType, options = ['de.dkfz.tbi.util.spreadsheet.Row']) Closure<Boolean> dataRowFilter = { true }) {

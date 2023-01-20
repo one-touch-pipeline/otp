@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.validation.ValidationException
+import groovy.transform.CompileDynamic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.scheduling.annotation.Scheduled
@@ -93,6 +94,7 @@ class DataFileConsistencyChecker {
         }
     }
 
+    @CompileDynamic
     List<DataFile> getFastqDataFiles() {
         return DataFile.createCriteria().list {
             eq('fileWithdrawn', false)
@@ -112,6 +114,7 @@ class DataFileConsistencyChecker {
         }
     }
 
+    @CompileDynamic
     int countDataFiles() {
         return DataFile.createCriteria().count {
             eq('fileWithdrawn', false)

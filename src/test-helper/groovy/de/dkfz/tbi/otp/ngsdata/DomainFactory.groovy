@@ -1734,13 +1734,13 @@ class DomainFactory {
         [
                 createPanCanAlignableSeqTypes(),
                 createRnaAlignableSeqTypes(),
-        ].flatten()
+        ].flatten() as List<SeqType>
     }
 
     static List<SeqType> createCellRangerAlignableSeqTypes() {
         [
                 proxyCellRanger.createSeqType(),
-        ].flatten()
+        ].flatten() as List<SeqType>
     }
 
     static List<SeqType> createAllAlignableSeqTypes() {
@@ -1748,7 +1748,7 @@ class DomainFactory {
                 createDefaultOtpAlignableSeqTypes(),
                 createRoddyAlignableSeqTypes(),
                 createCellRangerAlignableSeqTypes(),
-        ].flatten().unique()
+        ].flatten().unique() as List<SeqType>
     }
 
     static List<SeqType> createSnvSeqTypes() {

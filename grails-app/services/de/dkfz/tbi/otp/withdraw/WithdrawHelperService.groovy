@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.withdraw
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.prepost.PreAuthorize
 
@@ -41,6 +42,7 @@ import java.nio.file.*
  *
  * The service should used outside.
  */
+@CompileDynamic
 @PreAuthorize("hasRole('ROLE_OPERATOR')")
 @Transactional
 class WithdrawHelperService {

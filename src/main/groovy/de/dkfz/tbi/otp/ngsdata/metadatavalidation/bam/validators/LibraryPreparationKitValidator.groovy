@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.validators
 
+import groovy.transform.CompileDynamic
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
@@ -58,6 +59,7 @@ class LibraryPreparationKitValidator extends ValueTuplesValidator<BamMetadataVal
     @Override
     void checkMissingOptionalColumn(BamMetadataValidationContext context, String columnTitle) { }
 
+    @CompileDynamic
     @Override
     void validateValueTuples(BamMetadataValidationContext context, Collection<ValueTuple> valueTuples) {
         valueTuples.each {

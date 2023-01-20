@@ -20,13 +20,11 @@
  * SOFTWARE.
  */
 
-import groovy.transform.CompileStatic
 import org.codehaus.groovy.ast.AnnotationNode
 import org.codehaus.groovy.ast.ClassNode
 import org.codenarc.rule.AbstractAstVisitor
 import org.codenarc.rule.AbstractAstVisitorRule
 
-@CompileStatic
 class AnnotationsForJobsRule extends AbstractAstVisitorRule {
     String doNotApplyToFileNames = "*/*test*/*,*/*StartJob.groovy,*/*domain*/*"
     String applyToFileNames = "*/*Job.groovy"
@@ -36,7 +34,6 @@ class AnnotationsForJobsRule extends AbstractAstVisitorRule {
     Class astVisitorClass = AnnotationsForJobsVisitor
 }
 
-@CompileStatic
 class AnnotationsForJobsVisitor extends AbstractAstVisitor implements IsAnnotationVisitor {
 
     @Override
@@ -50,7 +47,6 @@ class AnnotationsForJobsVisitor extends AbstractAstVisitor implements IsAnnotati
         boolean hasComponent = false
         boolean hasScope = false
         boolean hasLog = false
-        boolean hasCompileStatic = false
 
         node.annotations.each { AnnotationNode annotationNode ->
             switch (annotationNode.classNode.text) {
@@ -70,9 +66,6 @@ class AnnotationsForJobsVisitor extends AbstractAstVisitor implements IsAnnotati
                 case 'Slf4j':
                     hasLog = true
                     break
-                case 'CompileStatic':
-                    hasCompileStatic = true
-                    break
                 default:
                     return
             }
@@ -86,9 +79,6 @@ class AnnotationsForJobsVisitor extends AbstractAstVisitor implements IsAnnotati
         }
         if (!hasLog) {
             addViolation(node, buildErrorString("@Slf4j"))
-        }
-        if (!hasCompileStatic && isNewWorkflowSystem) {
-            addViolation(node, buildErrorString("@CompileStatic"))
         }
     }
 }

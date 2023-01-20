@@ -27,10 +27,8 @@ import groovy.transform.Canonical
 
 import de.dkfz.tbi.otp.OtpException
 import de.dkfz.tbi.otp.dataprocessing.*
-import groovy.transform.CompileStatic
 
 @Transactional
-@CompileStatic
 class PropertiesValidationService {
     ConfigService configService
     ProcessingOptionService processingOptionService

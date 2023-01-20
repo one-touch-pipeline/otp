@@ -22,7 +22,6 @@
 package de.dkfz.tbi.otp.dataprocessing.qaalignmentoverview
 
 import grails.gorm.transactions.Transactional
-import groovy.transform.CompileStatic
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractQualityAssessment
 import de.dkfz.tbi.otp.dataprocessing.RnaQualityAssessment
@@ -31,7 +30,6 @@ import de.dkfz.tbi.otp.ngsdata.SeqTypeService
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.qcTrafficLight.TableCellValue
 
-@CompileStatic
 @Transactional(readOnly = true)
 class RnaQaOverviewService extends AbstractRoddyQaOverviewService {
 

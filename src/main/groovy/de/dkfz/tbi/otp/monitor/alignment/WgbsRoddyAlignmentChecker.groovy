@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.otp.monitor.alignment
 
+import groovy.transform.CompileDynamic
+
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.workflow.wgbs.WgbsWorkflow
@@ -35,6 +37,7 @@ class WgbsRoddyAlignmentChecker extends AbstractRoddyAlignmentChecker {
         return Pipeline.Name.PANCAN_ALIGNMENT
     }
 
+    @CompileDynamic
     @Override
     Workflow getWorkflow() {
         return CollectionUtils.exactlyOneElement(Workflow.findAllByName(WgbsWorkflow.WORKFLOW))

@@ -21,12 +21,15 @@
  */
 package de.dkfz.tbi.otp
 
+import groovy.transform.CompileDynamic
+
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.qcTrafficLight.TableCellValue
 import de.dkfz.tbi.otp.security.SecurityService
 
+@CompileDynamic
 class OtpTagLib {
     static namespace = "otp"
 

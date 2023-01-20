@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 
+import groovy.transform.CompileDynamic
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.MultiplexingService
@@ -34,6 +35,7 @@ import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.INDEX
 @Component
 class BarcodeFilenameValidator extends ValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
 
+    @CompileDynamic
     @Override
     Collection<String> getDescriptions() {
         return ["If a barcode can be parsed from the fastq filename, it is consistent with the entry in the '${INDEX}' column."]

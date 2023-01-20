@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.utils
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.project.Project
@@ -29,6 +30,7 @@ import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowError
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowLog
 
+@CompileDynamic
 @Transactional
 class WorkflowDeletionService {
 

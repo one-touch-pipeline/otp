@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 
+import groovy.transform.CompileDynamic
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
@@ -36,6 +37,7 @@ class WithdrawnValidator extends SingleValueValidator<MetadataValidationContext>
 
     static final String NONE = 'NONE'
 
+    @CompileDynamic
     @Override
     Collection<String> getDescriptions() {
         return ["If a '${WITHDRAWN}' column exists, it must only contain cells which are empty or contain '0' or contain 'None'."]

@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.cron
 
+import groovy.transform.CompileDynamic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.scheduling.annotation.Scheduled
@@ -38,6 +39,7 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 /**
  * Scheduled job to find and report inconsistencies in the user management.
  */
+@CompileDynamic
 @Component
 @Slf4j
 class UserManagementInconsistenciesJob {

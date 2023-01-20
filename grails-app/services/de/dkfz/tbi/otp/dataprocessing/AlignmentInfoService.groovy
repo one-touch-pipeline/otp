@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.dataprocessing
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 import org.springframework.beans.factory.NoSuchBeanDefinitionException
 
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
@@ -37,6 +38,7 @@ import de.dkfz.tbi.otp.workflowExecution.*
 
 import java.util.regex.Matcher
 
+@CompileDynamic
 @Transactional
 class AlignmentInfoService {
 

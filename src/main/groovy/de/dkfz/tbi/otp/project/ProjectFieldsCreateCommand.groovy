@@ -22,10 +22,12 @@
 package de.dkfz.tbi.otp.project
 
 import grails.validation.Validateable
+import groovy.transform.CompileDynamic
 import groovy.transform.ToString
 
 import de.dkfz.tbi.otp.project.additionalField.*
 
+@CompileDynamic
 @ToString(includeNames = true)
 abstract class ProjectFieldsCreateCommand implements Validateable {
 

@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.security.user.identityProvider
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.ldap.NameNotFoundException
@@ -48,6 +49,7 @@ import java.util.regex.Matcher
 
 import static org.springframework.ldap.query.LdapQueryBuilder.query
 
+@CompileDynamic
 @SuppressWarnings(["ExplicitCallToAndMethod", "ExplicitCallToOrMethod"])
 @Transactional
 class LdapService implements InitializingBean, IdentityProvider {
@@ -348,6 +350,7 @@ class IsUserDeactivatedMapper extends AbstractLdapServiceAwareAttributesMapper<B
     }
 }
 
+@CompileDynamic
 class AllAttributesMapper implements AttributesMapper<Map<String, String>> {
     @Override
     Map<String, String> mapFromAttributes(Attributes a) throws NamingException {

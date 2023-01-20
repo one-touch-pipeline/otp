@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.workflowExecution.decider
 
 import grails.gorm.transactions.Transactional
 import grails.util.Pair
+import groovy.transform.CompileDynamic
 import groovy.util.logging.Slf4j
 
 import de.dkfz.tbi.otp.ngsdata.SeqType
@@ -36,6 +37,7 @@ import de.dkfz.tbi.otp.workflowExecution.*
  * knows all requirements
  * is called with a list of new/changed workflow artefacts
  */
+@CompileDynamic
 @Transactional
 @Slf4j
 abstract class AbstractWorkflowDecider implements Decider {

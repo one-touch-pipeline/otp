@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 
+import groovy.transform.CompileDynamic
 import groovy.transform.TupleConstructor
 import org.springframework.stereotype.Component
 
@@ -54,6 +55,7 @@ class SeqTrackValidator extends ColumnSetValidator<MetadataValidationContext> im
             TAGMENTATION_LIBRARY,
     ].asImmutable()
 
+    @CompileDynamic
     @Override
     Collection<String> getDescriptions() {
         return [
@@ -89,6 +91,7 @@ class SeqTrackValidator extends ColumnSetValidator<MetadataValidationContext> im
         }
     }
 
+    @CompileDynamic
     private List<RowWithExtractedValues> getRowsWithExtractedValues(MetadataValidationContext context) {
         Column runColumn
         Column laneNumberColumn
@@ -110,6 +113,7 @@ class SeqTrackValidator extends ColumnSetValidator<MetadataValidationContext> im
         }
     }
 
+    @CompileDynamic
     private Set<String> findAllLanesForRun(String runName) {
         return SeqTrack.withCriteria {
             projections {
@@ -270,6 +274,7 @@ class SeqTrackValidator extends ColumnSetValidator<MetadataValidationContext> im
         }
     }
 
+    @CompileDynamic
     private Set<Cell> seqTrackCells(Collection<RowWithExtractedValues> rows) {
         return rows*.runName*.cells.flatten() + rows*.laneNumber*.cells.flatten() + rows*.barcode*.cells.flatten()
     }

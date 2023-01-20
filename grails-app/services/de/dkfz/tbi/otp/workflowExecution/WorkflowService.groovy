@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.workflowExecution
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.dataprocessing.MergingCriteriaService
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
@@ -29,6 +30,7 @@ import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.exceptions.FileAccessForArchivedProjectNotAllowedException
 
+@CompileDynamic
 @Transactional
 class WorkflowService {
 

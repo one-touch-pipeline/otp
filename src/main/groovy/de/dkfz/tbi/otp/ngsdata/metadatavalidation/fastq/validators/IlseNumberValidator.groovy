@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 
+import groovy.transform.CompileDynamic
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.IlseSubmission
@@ -36,6 +37,7 @@ class IlseNumberValidator extends ValueTuplesValidator<MetadataValidationContext
 
     final static String ILSE_RANGE = "[${IlseSubmission.MIN_ILSE_VALUE}..${IlseSubmission.MAX_ILSE_NUMBER}]"
 
+    @CompileDynamic
     @Override
     Collection<String> getDescriptions() {
         return ["The ILSe number is valid.",
@@ -53,6 +55,7 @@ class IlseNumberValidator extends ValueTuplesValidator<MetadataValidationContext
     @Override
     void checkMissingRequiredColumn(MetadataValidationContext context, String columnTitle) { }
 
+    @CompileDynamic
     @Override
     void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> allValueTuples) {
         if (allValueTuples) {

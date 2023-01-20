@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 
+import groovy.transform.CompileDynamic
 import groovyx.gpars.GParsPool
 import org.springframework.stereotype.Component
 
@@ -50,6 +51,7 @@ class DataFileExistenceValidator extends ValueTuplesValidator<MetadataValidation
         return context.directoryStructure.requiredColumnTitles
     }
 
+    @CompileDynamic
     @Override
     void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> allValueTuples) {
         boolean directoryStructureInfoAdded = false

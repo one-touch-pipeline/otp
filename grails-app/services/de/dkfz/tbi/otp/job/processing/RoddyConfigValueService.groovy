@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.job.processing
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
@@ -31,6 +32,7 @@ import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
+@CompileDynamic
 @Transactional
 class RoddyConfigValueService {
 

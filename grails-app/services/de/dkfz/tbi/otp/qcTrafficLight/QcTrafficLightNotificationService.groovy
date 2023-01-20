@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.qcTrafficLight
 
 import grails.gorm.transactions.Transactional
 import grails.web.mapping.LinkGenerator
+import groovy.transform.CompileDynamic
 import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.ProjectSelectionService
@@ -34,6 +35,7 @@ import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.tracking.OtrsTicketService
 import de.dkfz.tbi.otp.utils.*
 
+@CompileDynamic
 @Transactional
 class QcTrafficLightNotificationService {
 

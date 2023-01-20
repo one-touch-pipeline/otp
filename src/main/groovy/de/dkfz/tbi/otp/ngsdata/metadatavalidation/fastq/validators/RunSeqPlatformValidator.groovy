@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 
+import groovy.transform.CompileDynamic
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
@@ -38,6 +39,7 @@ class RunSeqPlatformValidator extends ValueTuplesValidator<MetadataValidationCon
     @Autowired
     SeqPlatformService seqPlatformService
 
+    @CompileDynamic
     @Override
     Collection<String> getDescriptions() {
         return [
@@ -56,6 +58,7 @@ class RunSeqPlatformValidator extends ValueTuplesValidator<MetadataValidationCon
         return [SEQUENCING_KIT]*.name()
     }
 
+    @CompileDynamic
     @Override
     void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> allValueTuples) {
         allValueTuples.groupBy { it.getValue(RUN_ID.name()) }.each { String runName, List<ValueTuple> valueTuplesOfRun ->

@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 import org.springframework.security.access.prepost.PostAuthorize
@@ -39,6 +40,7 @@ import java.text.MessageFormat
 
 import static org.springframework.util.Assert.notNull
 
+@CompileDynamic
 @Transactional
 class SeqTrackService {
 

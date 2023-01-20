@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
 import grails.gorm.transactions.NotTransactional
+import groovy.transform.CompileDynamic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Scope
@@ -40,6 +41,7 @@ import de.dkfz.tbi.otp.utils.SessionUtils
  * are linked from the working processing folder in the project folder.
  * After linking, tmp roddy files and not used files in older work directories are deleted.
  */
+@CompileDynamic
 @Component
 @Scope("prototype")
 @Slf4j

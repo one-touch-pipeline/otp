@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.administration
 
 import grails.gorm.transactions.Transactional
 import grails.validation.ValidationException
+import groovy.transform.CompileDynamic
 import org.springframework.beans.factory.DisposableBean
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.Errors
@@ -48,6 +49,7 @@ import java.util.concurrent.locks.ReentrantLock
  * running but resumable jobs. In case of non-resumable Jobs the service will log a warning
  * message.
  */
+@CompileDynamic
 @Transactional
 class ShutdownService implements DisposableBean {
     // service is not transactional as the database access has to be locked

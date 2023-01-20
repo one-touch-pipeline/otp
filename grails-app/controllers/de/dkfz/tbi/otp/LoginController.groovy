@@ -23,18 +23,13 @@ package de.dkfz.tbi.otp
 
 import grails.converters.JSON
 import org.springframework.security.access.prepost.PreAuthorize
-import org.springframework.security.authentication.AccountExpiredException
-import org.springframework.security.authentication.CredentialsExpiredException
-import org.springframework.security.authentication.DisabledException
-import org.springframework.security.authentication.LockedException
+import org.springframework.security.authentication.*
 import org.springframework.security.core.AuthenticationException
 import org.springframework.security.web.authentication.session.SessionAuthenticationException
 
 import de.dkfz.tbi.otp.security.FailedToCreateUserException
 import de.dkfz.tbi.otp.security.SecurityService
 import de.dkfz.tbi.otp.utils.RequestUtilService
-
-import static org.springframework.security.web.WebAttributes.*
 
 @PreAuthorize("permitAll()")
 class LoginController {

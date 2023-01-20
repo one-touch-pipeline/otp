@@ -22,10 +22,12 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.ngsdata.*
 
+@CompileDynamic
 @Transactional
 class SamplePairService {
 

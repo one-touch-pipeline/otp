@@ -23,11 +23,14 @@ package de.dkfz.tbi.otp.egaSubmission
 
 import grails.databinding.BindUsing
 import grails.validation.Validateable
+import groovy.transform.CompileDynamic
 import org.springframework.web.multipart.MultipartFile
 
+@CompileDynamic
 trait SubmitCommands {
 }
 
+@CompileDynamic
 class NewSubmissionControllerSubmitCommand implements Validateable {
     String egaBox
     String submissionName
@@ -45,6 +48,7 @@ class NewSubmissionControllerSubmitCommand implements Validateable {
     }
 }
 
+@CompileDynamic
 class UpdateSubmissionStateSubmitCommand implements Validateable {
     EgaSubmission submission
     EgaSubmission.State state
@@ -67,6 +71,7 @@ class UpdateSubmissionStateSubmitCommand implements Validateable {
     }
 }
 
+@CompileDynamic
 class UpdatePubMedIdSubmitCommand implements Validateable {
     EgaSubmission submission
     String pubMedId
@@ -76,6 +81,7 @@ class UpdatePubMedIdSubmitCommand implements Validateable {
     }
 }
 
+@CompileDynamic
 class SelectSamplesControllerSubmitCommand implements Validateable {
     EgaSubmission submission
     String csv
@@ -104,6 +110,7 @@ class SelectSamplesControllerSubmitCommand implements Validateable {
     }
 }
 
+@CompileDynamic
 class UploadFormSubmitCommand extends MultiPartFileCommand implements Validateable {
     EgaSubmission submission
     String upload
@@ -113,6 +120,7 @@ class UploadFormSubmitCommand extends MultiPartFileCommand implements Validateab
     }
 }
 
+@CompileDynamic
 class SampleInformationFormsSubmitCommand implements Validateable {
     EgaSubmission submission
     String csv
@@ -129,6 +137,7 @@ class SampleInformationFormsSubmitCommand implements Validateable {
     }
 }
 
+@CompileDynamic
 class SelectFilesDataFilesFormSubmitCommand implements Validateable {
     EgaSubmission submission
     String saveSelection
@@ -146,6 +155,7 @@ class SelectFilesDataFilesFormSubmitCommand implements Validateable {
     }
 }
 
+@CompileDynamic
 class SelectFilesBamFilesFormSubmitCommand implements Validateable {
     EgaSubmission submission
     String saveSelection
@@ -163,16 +173,19 @@ class SelectFilesBamFilesFormSubmitCommand implements Validateable {
     }
 }
 
+@CompileDynamic
 class GenerateFilesToUploadFileSubmitCommand implements Validateable {
     EgaSubmission submission
     String save
 }
 
+@CompileDynamic
 class SampleMetadataFormSubmitCommand implements Validateable {
     EgaSubmission submission
     String download
 }
 
+@CompileDynamic
 class SelectSampleDownloadCommand implements Validateable {
     @BindUsing({ obj, source ->
         source['selectedSamples'].collect {
@@ -186,10 +199,12 @@ class SelectSampleDownloadCommand implements Validateable {
     List<EgaMapKey> selectedSamples
 }
 
+@CompileDynamic
 class MultiPartFileCommand {
     MultipartFile file
 }
 
+@CompileDynamic
 class UploadCsvFileCommand extends MultiPartFileCommand implements Validateable {
 
     static constraints = {

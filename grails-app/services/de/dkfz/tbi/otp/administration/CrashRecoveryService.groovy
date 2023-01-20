@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.administration
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.job.processing.*
@@ -30,6 +31,7 @@ import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 /**
  * @deprecated Not needed for the new workflow system. It will be removed within the old workflow system.
  */
+@CompileDynamic
 @Deprecated
 @SuppressWarnings('ThrowRuntimeException')
 @Transactional

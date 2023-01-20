@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.otp.dataswap.data
 
+import groovy.transform.CompileDynamic
+
 import de.dkfz.tbi.otp.dataswap.Swap
 import de.dkfz.tbi.otp.dataswap.parameters.LaneSwapParameters
 import de.dkfz.tbi.otp.ngsdata.Run
@@ -29,6 +31,7 @@ import de.dkfz.tbi.otp.ngsdata.SampleType
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.ngsdata.SequencingReadType
 
+@CompileDynamic
 class LaneSwapData extends DataSwapData<LaneSwapParameters> {
 
     static Closure constraints = {

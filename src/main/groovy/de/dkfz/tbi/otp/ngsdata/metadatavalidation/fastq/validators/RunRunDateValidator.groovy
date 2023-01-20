@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 
+import groovy.transform.CompileDynamic
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
@@ -41,6 +42,7 @@ class RunRunDateValidator extends ValueTuplesValidator<MetadataValidationContext
     @Autowired
     RunDateParserService runDateParserService
 
+    @CompileDynamic
     @Override
     Collection<String> getDescriptions() {
         return [
@@ -54,6 +56,7 @@ class RunRunDateValidator extends ValueTuplesValidator<MetadataValidationContext
         return [RUN_ID, RUN_DATE]*.name()
     }
 
+    @CompileDynamic
     @Override
     void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> allValueTuples) {
         allValueTuples.groupBy { it.getValue(RUN_ID.name()) }.each { String runName, Collection<ValueTuple> valueTuplesOfRun ->

@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam
 
+import groovy.transform.CompileDynamic
 import de.dkfz.tbi.otp.ngsdata.BamMetadataColumn
 import de.dkfz.tbi.otp.ngsdata.BamMetadataImportService
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.AbstractMetadataValidationContext
@@ -29,10 +30,10 @@ import de.dkfz.tbi.util.spreadsheet.Row
 import de.dkfz.tbi.util.spreadsheet.Spreadsheet
 import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.Problems
-
 import java.nio.file.*
 import java.util.stream.Stream
 
+@CompileDynamic
 class BamMetadataValidationContext extends AbstractMetadataValidationContext {
 
     static final long FACTOR_1024 = 1024L
@@ -51,6 +52,7 @@ class BamMetadataValidationContext extends AbstractMetadataValidationContext {
         this.linkSourceFiles = linkSourceFiles
     }
 
+    @CompileDynamic
     static BamMetadataValidationContext createFromFile(Path metadataFile, List<String> furtherFiles, FileSystem fileSystem, boolean linkSourceFiles) {
         Map parametersForFile = readAndCheckFile(metadataFile) { String s ->
             BamMetadataColumn.getColumnForName(s)?.name() ?: s

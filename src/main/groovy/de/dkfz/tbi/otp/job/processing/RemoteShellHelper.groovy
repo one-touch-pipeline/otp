@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.job.processing
 import com.jcraft.jsch.*
 import com.jcraft.jsch.agentproxy.*
 import grails.util.Environment
+import groovy.transform.CompileDynamic
 import groovy.transform.Synchronized
 import groovy.util.logging.Slf4j
 import org.slf4j.Logger
@@ -48,6 +49,7 @@ import java.util.concurrent.Semaphore
  *
  * @see LocalShellHelper
  */
+@CompileDynamic
 @Component
 @Slf4j
 class RemoteShellHelper {

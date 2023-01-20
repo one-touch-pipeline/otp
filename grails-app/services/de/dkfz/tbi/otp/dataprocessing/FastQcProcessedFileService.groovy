@@ -23,7 +23,6 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import grails.gorm.transactions.Transactional
 import groovy.transform.CompileDynamic
-import groovy.transform.CompileStatic
 
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.ngsdata.DataFile
@@ -34,7 +33,6 @@ import de.dkfz.tbi.util.TimeFormats
 
 import java.time.ZonedDateTime
 
-@CompileStatic
 @Transactional(readOnly = true)
 class FastQcProcessedFileService {
 

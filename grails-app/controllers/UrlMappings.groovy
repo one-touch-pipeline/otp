@@ -1,5 +1,3 @@
-import de.dkfz.tbi.otp.security.user.SwitchedUserDeniedException
-
 /*
  * Copyright 2011-2019 The OTP authors
  *
@@ -21,6 +19,8 @@ import de.dkfz.tbi.otp.security.user.SwitchedUserDeniedException
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
+import de.dkfz.tbi.otp.security.user.SwitchedUserDeniedException
 
 class UrlMappings {
 

@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.util
 
+import groovy.transform.CompileDynamic
+
 import java.time.LocalDate
 
 /**
@@ -44,6 +46,7 @@ class MultiObjectValueSource {
         this.objects = objects.findAll()
     }
 
+    @CompileDynamic
     private static Object getPropertyByNameHelper(Object object, String fieldName) {
         if (object instanceof Map) {
             return object.getOrDefault(fieldName, null)

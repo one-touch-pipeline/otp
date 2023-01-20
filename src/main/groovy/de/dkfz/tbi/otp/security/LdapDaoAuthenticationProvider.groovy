@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.security
 
-import groovy.transform.CompileStatic
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.authentication.*
 import org.springframework.security.core.Authentication
@@ -39,7 +38,6 @@ import de.dkfz.tbi.otp.security.user.identityProvider.LdapService
  * If successful, the LDAP authentication object is returned
  */
 @Component
-@CompileStatic
 class LdapDaoAuthenticationProvider implements AuthenticationProvider {
 
     @Autowired

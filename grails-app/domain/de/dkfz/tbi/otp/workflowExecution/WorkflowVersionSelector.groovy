@@ -22,7 +22,6 @@
 package de.dkfz.tbi.otp.workflowExecution
 
 import grails.gorm.hibernate.annotation.ManagedEntity
-
 import groovy.transform.ToString
 
 import de.dkfz.tbi.otp.ngsdata.SeqType

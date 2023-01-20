@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
+import groovy.transform.CompileDynamic
+
 import de.dkfz.tbi.otp.SqlUtil
 import de.dkfz.tbi.otp.dataprocessing.MergingCriteria
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
@@ -34,6 +36,7 @@ import de.dkfz.tbi.util.spreadsheet.validation.ValueTuple
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
+@CompileDynamic
 class ValidatorHelperService {
 
     AntibodyTargetService antibodyTargetService

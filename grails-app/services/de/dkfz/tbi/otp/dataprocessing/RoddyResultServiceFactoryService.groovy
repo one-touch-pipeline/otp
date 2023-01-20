@@ -22,12 +22,14 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.dataprocessing.bamfiles.RnaRoddyBamFileService
 import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
 
+@CompileDynamic
 @Transactional
 class RoddyResultServiceFactoryService {
 

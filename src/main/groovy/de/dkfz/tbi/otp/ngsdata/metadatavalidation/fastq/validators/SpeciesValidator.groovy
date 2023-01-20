@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 
 import groovy.transform.Canonical
+import groovy.transform.CompileDynamic
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
@@ -50,6 +51,7 @@ class SpeciesValidator extends ValueTuplesValidator<MetadataValidationContext> i
     @Autowired
     SampleIdentifierService sampleIdentifierService
 
+    @CompileDynamic
     @Override
     Collection<String> getDescriptions() {
         return [
@@ -78,6 +80,7 @@ class SpeciesValidator extends ValueTuplesValidator<MetadataValidationContext> i
     void checkMissingOptionalColumn(MetadataValidationContext context, String columnTitle) {
     }
 
+    @CompileDynamic
     @Override
     void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> valueTuples) {
         Set<Cell> emptyCells = [] as Set

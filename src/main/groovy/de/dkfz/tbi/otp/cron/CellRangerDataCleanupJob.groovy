@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.cron
 
+import groovy.transform.CompileDynamic
 import groovy.transform.TupleConstructor
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
@@ -41,6 +42,7 @@ import de.dkfz.tbi.util.TimeFormats
 import java.sql.Timestamp
 import java.time.LocalDate
 
+@CompileDynamic
 @Component
 @Slf4j
 class CellRangerDataCleanupJob extends AbstractScheduledJob {

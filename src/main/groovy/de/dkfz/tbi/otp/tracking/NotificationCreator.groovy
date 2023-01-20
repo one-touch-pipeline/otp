@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.tracking
 import grails.core.GrailsApplication
 import grails.gorm.transactions.Transactional
 import grails.web.mapping.LinkGenerator
+import groovy.transform.CompileDynamic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
@@ -46,6 +47,7 @@ import static de.dkfz.tbi.otp.tracking.ProcessingStatus.Done.NOTHING
 import static de.dkfz.tbi.otp.tracking.ProcessingStatus.Done.PARTLY
 import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus.*
 
+@CompileDynamic
 @Slf4j
 @Component
 @Transactional

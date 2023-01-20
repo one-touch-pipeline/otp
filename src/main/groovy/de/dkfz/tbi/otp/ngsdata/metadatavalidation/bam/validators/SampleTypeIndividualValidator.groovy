@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.validators
 
+import groovy.transform.CompileDynamic
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.*
@@ -32,6 +33,7 @@ import de.dkfz.tbi.util.spreadsheet.validation.*
 import static de.dkfz.tbi.otp.ngsdata.BamMetadataColumn.INDIVIDUAL
 import static de.dkfz.tbi.otp.ngsdata.BamMetadataColumn.SAMPLE_TYPE
 
+@CompileDynamic
 @Component
 class SampleTypeIndividualValidator extends ValueTuplesValidator<BamMetadataValidationContext> implements BamMetadataValidator {
 

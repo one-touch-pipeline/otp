@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.project.Project
 
@@ -29,6 +30,7 @@ import de.dkfz.tbi.otp.project.Project
  * @Deprecated Old workflow system
  */
 @Deprecated
+@CompileDynamic
 @Transactional
 class WorkflowConfigService {
 

@@ -22,7 +22,6 @@
 package de.dkfz.tbi.otp.job.processing
 
 import grails.gorm.transactions.Transactional
-import groovy.transform.CompileStatic
 
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
@@ -36,7 +35,6 @@ import static org.springframework.util.Assert.notNull
 /**
  * A service to construct paths and messages for logging the status of cluster jobs.
  */
-@CompileStatic
 @Transactional
 class JobStatusLoggingService {
 

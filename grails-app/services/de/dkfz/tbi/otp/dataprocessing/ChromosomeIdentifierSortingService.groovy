@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 
 import static org.springframework.util.Assert.notNull
 
@@ -29,6 +30,7 @@ import static org.springframework.util.Assert.notNull
  * sort the chromosome identifier
  * the sorting is like this: 1..22 X Y M * 23...1000 A..V
  */
+@CompileDynamic
 @Transactional
 class ChromosomeIdentifierSortingService {
 

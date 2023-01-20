@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.workflow.jobs
 
+import groovy.transform.CompileDynamic
 import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.workflow.RoddyService
@@ -56,6 +57,7 @@ abstract class AbstractRoddyClusterValidationJob extends AbstractValidationJob {
      * @param workflowStep to be validated
      * @throws ValidationJobFailedException if Roddy job validation fails
      */
+    @CompileDynamic
     @Override
     protected void ensureExternalJobsRunThrough(WorkflowStep workflowStep) {
         //cluster jobs are connected to the job sending them, not to this validation job

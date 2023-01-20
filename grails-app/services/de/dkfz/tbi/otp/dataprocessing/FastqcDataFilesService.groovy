@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 import groovy.transform.TupleConstructor
 
 import de.dkfz.tbi.otp.infrastructure.FileService
@@ -39,6 +40,7 @@ import java.util.zip.ZipFile
  * Creates and updates "FastqcDataFile" object.
  * Serves content of fastqc zipped output file.
  */
+@CompileDynamic
 @Transactional
 class FastqcDataFilesService {
 

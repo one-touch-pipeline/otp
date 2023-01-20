@@ -21,9 +21,12 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
+import groovy.transform.CompileDynamic
+
 /**
  * Holds possible seqType names for using in the code
  */
+@CompileDynamic
 @SuppressWarnings("FieldName")
 enum SeqTypeNames {
     _10X_SCRNA("10x_scRNA"),

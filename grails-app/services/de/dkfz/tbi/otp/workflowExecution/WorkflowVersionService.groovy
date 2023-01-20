@@ -22,11 +22,11 @@
 package de.dkfz.tbi.otp.workflowExecution
 
 import grails.gorm.transactions.Transactional
-
+import groovy.transform.CompileDynamic
 import de.dkfz.tbi.otp.CommentService
-
 import java.time.LocalDate
 
+@CompileDynamic
 @Transactional
 class WorkflowVersionService {
 

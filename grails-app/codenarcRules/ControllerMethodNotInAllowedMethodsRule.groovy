@@ -19,13 +19,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-import groovy.transform.CompileStatic
+
 import org.codehaus.groovy.ast.*
 import org.codehaus.groovy.ast.expr.*
 import org.codenarc.rule.AbstractAstVisitor
 import org.codenarc.rule.AbstractAstVisitorRule
 
-@CompileStatic
 class ControllerMethodNotInAllowedMethodsRule extends AbstractAstVisitorRule {
     String applyToFileNames = "*/*grails-app/controllers*/*"
     int priority = 1
@@ -34,7 +33,6 @@ class ControllerMethodNotInAllowedMethodsRule extends AbstractAstVisitorRule {
     Class astVisitorClass = ControllerMethodNotInAllowedMethodsVisitor
 }
 
-@CompileStatic
 class ControllerMethodNotInAllowedMethodsVisitor extends AbstractAstVisitor {
 
     private static final String CONTROLLER = 'Controller'

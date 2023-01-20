@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.ngsdata.referencegenome
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 import groovy.transform.TupleConstructor
 import org.springframework.security.access.prepost.PreAuthorize
 
@@ -45,6 +46,7 @@ import java.nio.file.Path
 
 import static org.springframework.util.Assert.notNull
 
+@CompileDynamic
 @Transactional
 class ReferenceGenomeService {
 

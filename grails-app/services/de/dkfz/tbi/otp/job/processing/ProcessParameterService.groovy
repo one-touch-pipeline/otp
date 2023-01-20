@@ -22,9 +22,11 @@
 package de.dkfz.tbi.otp.job.processing
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 
+@CompileDynamic
 @Transactional
 class ProcessParameterService {
 

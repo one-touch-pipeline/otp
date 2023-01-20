@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 
+import groovy.transform.CompileDynamic
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.DataFile
@@ -62,6 +63,7 @@ class MultiImportValidator extends ValueTuplesValidator<AbstractMetadataValidati
         }
     }
 
+    @CompileDynamic
     void validateValueTuple(AbstractMetadataValidationContext context, ValueTuple valueTuple) {
         String md5sum = valueTuple.getValue(MD5.name())
 

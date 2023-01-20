@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
+import groovy.transform.CompileDynamic
 import htsjdk.samtools.SamReaderFactory
 
 import de.dkfz.tbi.otp.dataprocessing.*
@@ -30,6 +31,7 @@ import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 import static de.dkfz.tbi.otp.ngsdata.LsdfFilesService.ensureFileIsReadableAndNotEmpty
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
+@CompileDynamic
 abstract class AbstractRoddyAlignmentJob extends AbstractExecutePanCanJob<RoddyBamFile> {
 
     /**

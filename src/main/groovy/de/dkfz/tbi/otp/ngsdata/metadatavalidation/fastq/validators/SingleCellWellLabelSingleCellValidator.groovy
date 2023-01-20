@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 
+import groovy.transform.CompileDynamic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
@@ -43,6 +44,7 @@ class SingleCellWellLabelSingleCellValidator extends ValueTuplesValidator<Abstra
     @Autowired
     SampleIdentifierService sampleIdentifierService
 
+    @CompileDynamic
     @Override
     Collection<String> getDescriptions() {
         return [

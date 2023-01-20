@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.security
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
@@ -38,6 +39,7 @@ class DicomAuditConsoleHandler {
     // Hack: The dicomAuditConsolseHandler#log method is a pseudo condition
     // that always returns true and logs the access to the console as side effect.
     // There is sadly no other way to intercept the access to these URLs.
+    @CompileDynamic
     boolean log() {
         DicomAuditLogger.logEmergencyOverrideStart(EventOutcomeIndicator.SUCCESS, dicomAuditUtils.realUserName)
         return true

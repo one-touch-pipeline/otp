@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.job.processing
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.config.ConfigService
@@ -39,6 +40,7 @@ import java.util.concurrent.Semaphore
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
+@CompileDynamic
 @Transactional
 class RoddyExecutionService {
 

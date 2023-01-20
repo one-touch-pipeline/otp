@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 
+import groovy.transform.CompileDynamic
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
@@ -35,6 +36,7 @@ import de.dkfz.tbi.util.spreadsheet.validation.*
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.TAGMENTATION_LIBRARY
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.PROJECT
 
+@CompileDynamic
 @Component
 class TagmentationLibraryProjectValidator extends ValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
 
@@ -97,7 +99,7 @@ class TagmentationLibraryProjectValidator extends ValueTuplesValidator<MetadataV
                     projections {
                         distinct('libraryName')
                     }
-                }
+                } as List<String>
                 if (result) {
                     //This is done, to remove correct rows from cells. Correct rows are rows where result.size is 1 and equal to the library name.
                     if (result.size() == 1) {

@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.workflow.jobs
 
+import groovy.transform.CompileDynamic
 import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
@@ -31,6 +32,7 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 /**
  * Check qc thresholds given for the workflow.
  */
+@CompileDynamic
 abstract class AbstractCheckQcJob extends AbstractJob {
 
     @Autowired

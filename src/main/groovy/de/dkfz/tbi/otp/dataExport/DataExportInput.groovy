@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.dataExport
 
 import grails.validation.Validateable
+import groovy.transform.CompileDynamic
 import groovy.transform.TupleConstructor
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
@@ -30,6 +31,7 @@ import de.dkfz.tbi.otp.ngsdata.SeqTrack
 
 import java.nio.file.Path
 
+@CompileDynamic
 @TupleConstructor
 class DataExportInput implements Validateable {
 

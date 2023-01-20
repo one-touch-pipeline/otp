@@ -22,13 +22,11 @@
 package de.dkfz.tbi.otp.egaSubmission
 
 import grails.gorm.transactions.Transactional
-import groovy.transform.CompileStatic
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
-@CompileStatic
 @Transactional
 class EgaFileContentService {
 

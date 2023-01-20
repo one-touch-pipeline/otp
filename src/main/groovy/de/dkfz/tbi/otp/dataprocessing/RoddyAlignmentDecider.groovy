@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
+import groovy.transform.CompileDynamic
+
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.ngsdata.SeqTrackService
@@ -29,6 +31,7 @@ import de.dkfz.tbi.otp.ngsdata.SeqTypeService
 /**
  * @deprecated class is part of the old workflow system, use {@link de.dkfz.tbi.otp.workflowExecution.decider.Decider} instead
  */
+@CompileDynamic
 @Deprecated
 @SuppressWarnings('AbstractClassName')
 abstract class RoddyAlignmentDecider extends AbstractAlignmentDecider {

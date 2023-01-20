@@ -21,20 +21,14 @@
  */
 package de.dkfz.tbi.otp.workflow.wgbs
 
-import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.workflow.jobs.SetCorrectPermissionJob
-import de.dkfz.tbi.otp.workflow.panCancer.PanCancerCheckQcJob
-import de.dkfz.tbi.otp.workflow.panCancer.PanCancerCleanUpJob
-import de.dkfz.tbi.otp.workflow.panCancer.PanCancerConditionalFailJob
-import de.dkfz.tbi.otp.workflow.panCancer.PanCancerFinishJob
-import de.dkfz.tbi.otp.workflow.panCancer.PanCancerWorkflow
+import de.dkfz.tbi.otp.workflow.panCancer.*
 
 @Component
 @Slf4j
-@CompileStatic
 class WgbsWorkflow extends PanCancerWorkflow {
     static final String WORKFLOW = "WGBS alignment"
     static final String OUTPUT_BAM = "BAM"

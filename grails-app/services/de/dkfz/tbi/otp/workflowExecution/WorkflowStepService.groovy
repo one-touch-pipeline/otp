@@ -21,6 +21,9 @@
  */
 package de.dkfz.tbi.otp.workflowExecution
 
+import groovy.transform.CompileDynamic
+
+@CompileDynamic
 class WorkflowStepService {
 
     /**

@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 import org.springframework.security.access.prepost.PostAuthorize
 import org.springframework.security.access.prepost.PreAuthorize
 
@@ -34,6 +35,7 @@ import de.dkfz.tbi.util.TimeFormats
 
 import java.nio.file.Path
 
+@CompileDynamic
 @Transactional
 class IndividualService {
 

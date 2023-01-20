@@ -40,6 +40,7 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.Entity
 import de.dkfz.tbi.otp.utils.exceptions.FileAccessForArchivedProjectNotAllowedException
 
+@CompileDynamic
 @Transactional
 class CellRangerConfigurationService {
 

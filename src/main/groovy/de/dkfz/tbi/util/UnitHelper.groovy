@@ -21,11 +21,14 @@
  */
 package de.dkfz.tbi.util
 
+import groovy.transform.CompileDynamic
+
 import java.text.NumberFormat
 
 /**
  * This class is the central class to use when printing out numbers with their unit.
  */
+@CompileDynamic
 class UnitHelper {
 
     private static final Locale LOCALE = Locale.US

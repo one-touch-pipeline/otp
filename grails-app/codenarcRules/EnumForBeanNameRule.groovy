@@ -20,7 +20,6 @@
  * SOFTWARE.
  */
 
-import groovy.transform.CompileStatic
 import org.codehaus.groovy.ast.AnnotationNode
 import org.codehaus.groovy.ast.ClassNode
 import org.codehaus.groovy.transform.trait.Traits
@@ -33,7 +32,6 @@ import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
 
 import java.lang.reflect.Modifier
 
-@CompileStatic
 class EnumForBeanNameRule extends AbstractAstVisitorRule {
     String doNotApplyToFileNames = "*/*test*/*"
     int priority = 1
@@ -43,7 +41,6 @@ class EnumForBeanNameRule extends AbstractAstVisitorRule {
     Class astVisitorClass = EnumForBeanNameVisitor
 }
 
-@CompileStatic
 class EnumForBeanNameVisitor extends AbstractAstVisitor {
 
     // [InterfaceName: AllAvailableBeanNames]

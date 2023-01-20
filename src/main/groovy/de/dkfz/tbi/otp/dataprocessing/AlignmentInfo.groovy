@@ -22,7 +22,9 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import groovy.transform.Canonical
+import groovy.transform.CompileDynamic
 
+@CompileDynamic
 trait AlignmentInfo {
     String alignmentProgram
     String alignmentParameter
@@ -31,6 +33,7 @@ trait AlignmentInfo {
     abstract Map<String, Object> getAlignmentSpecificMessageAttributes()
 }
 
+@CompileDynamic
 @Canonical
 class RoddyAlignmentInfo implements AlignmentInfo {
     String samToolsCommand
@@ -51,6 +54,7 @@ class RoddyAlignmentInfo implements AlignmentInfo {
     }
 }
 
+@CompileDynamic
 @Canonical
 class SingleCellAlignmentInfo implements AlignmentInfo {
 

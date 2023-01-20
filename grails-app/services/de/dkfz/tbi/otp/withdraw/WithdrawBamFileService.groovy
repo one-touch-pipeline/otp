@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.withdraw
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFileService
@@ -34,6 +35,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.util.stream.Stream
 
+@CompileDynamic
 @Transactional
 abstract class WithdrawBamFileService<E extends AbstractMergedBamFile> implements ProcessingWithdrawService<E, SeqTrack> {
 

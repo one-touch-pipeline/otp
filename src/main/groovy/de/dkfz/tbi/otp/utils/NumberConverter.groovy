@@ -22,9 +22,7 @@
 package de.dkfz.tbi.otp.utils
 
 import grails.databinding.converters.ValueConverter
-import groovy.transform.CompileStatic
 
-@CompileStatic
 class NumberConverter implements ValueConverter {
 
     Class<?> targetType

@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.project
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.infrastructure.FileService
@@ -31,6 +32,7 @@ import de.dkfz.tbi.otp.job.processing.FileSystemService
 import java.nio.file.*
 import java.nio.file.attribute.PosixFilePermission
 
+@CompileDynamic
 @Transactional
 class ProjectInfoService {
 

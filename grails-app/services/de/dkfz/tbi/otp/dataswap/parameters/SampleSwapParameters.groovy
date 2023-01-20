@@ -21,10 +21,12 @@
  */
 package de.dkfz.tbi.otp.dataswap.parameters
 
+import groovy.transform.CompileDynamic
 import groovy.transform.TupleConstructor
 
 import de.dkfz.tbi.otp.dataswap.Swap
 
+@CompileDynamic
 @TupleConstructor
 class SampleSwapParameters extends DataSwapParameters {
 

@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.security
 
+import groovy.transform.CompileDynamic
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationListener
 import org.springframework.security.access.event.AuthorizationFailureEvent
@@ -35,6 +36,7 @@ import de.dkfz.tbi.otp.ProjectSelectionService
 /**
  * Spring Security Authentication event listeners for logging login processes to the Dicom audit log
  */
+@CompileDynamic
 @Component
 class DicomAuditSecurityEventListener implements ApplicationListener<AbstractAuthenticationEvent> {
 

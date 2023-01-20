@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.project.additionalField
 
+import groovy.transform.CompileDynamic
 import groovy.transform.TupleConstructor
 
 import de.dkfz.tbi.otp.project.*
@@ -30,6 +31,7 @@ import de.dkfz.tbi.otp.project.*
  *
  * For each type a definition class {@link AbstractFieldDefinition} and a value class {@link AbstractFieldValue} is required.
  */
+@CompileDynamic
 @TupleConstructor
 enum ProjectFieldType {
 
@@ -100,6 +102,7 @@ enum ProjectFieldType {
      * and all others are ignored (until they are implemented)
      * This method replaces the build-in values() for GSP page
      */
+    @CompileDynamic
     static ProjectFieldType[] getSupportedValues() {
         return [ProjectFieldType.TEXT, ProjectFieldType.INTEGER]
     }

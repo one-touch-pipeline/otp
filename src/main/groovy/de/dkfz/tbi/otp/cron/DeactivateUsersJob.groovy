@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.cron
 
+import groovy.transform.CompileDynamic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
@@ -40,6 +41,7 @@ import de.dkfz.tbi.otp.utils.MessageSourceService
  * If so, it subsequently deactivates them in all projects and notifies the group administration to
  * remove them from all groups.
  */
+@CompileDynamic
 @Component
 @Slf4j
 class DeactivateUsersJob extends AbstractScheduledJob {

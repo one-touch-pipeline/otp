@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.utils
 
 import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
+import groovy.transform.CompileDynamic
 import org.junit.*
 import org.junit.rules.TemporaryFolder
 
@@ -36,6 +37,7 @@ import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
 import java.nio.file.Paths
 
+@CompileDynamic
 @Rollback
 @Integration
 class ExecuteRoddyCommandServiceIntegrationTests {
@@ -158,7 +160,7 @@ class ExecuteRoddyCommandServiceIntegrationTests {
     @Test
     void testGetAnalysisIDinConfigFile_ObjectDoesNotHaveGetSeqTypeMethod_ShouldFail() {
         setupData()
-        roddyBamFile.metaClass.getSeqType = { -> null }
+        roddyBamFile.workPackage.seqType = null
         assert TestCase.shouldFail(AssertionError) {
             executeRoddyCommandService.getAnalysisIDinConfigFile(roddyBamFile)
         }.contains("There is not seqType available")

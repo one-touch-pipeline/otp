@@ -22,7 +22,6 @@
 package de.dkfz.tbi.otp.egaSubmission
 
 import grails.gorm.transactions.Transactional
-import groovy.transform.CompileStatic
 
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
@@ -41,7 +40,6 @@ import java.nio.file.attribute.PosixFilePermission
 
 import static de.dkfz.tbi.otp.egaSubmission.EgaSubmissionFileService.EgaColumnName.*
 
-@CompileStatic
 @Transactional
 class EgaSubmissionFileService {
 

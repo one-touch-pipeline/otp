@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.workflow.datainstallation
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.workflowExecution.*
@@ -31,6 +32,7 @@ import java.nio.file.Paths
 /**
  * A service providing functionality needed by the different jobs for the data installation workflow.
  */
+@CompileDynamic
 @Transactional
 class DataInstallationInitializationService {
 

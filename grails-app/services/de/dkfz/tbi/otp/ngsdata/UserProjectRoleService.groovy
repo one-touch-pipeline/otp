@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import grails.gorm.transactions.Transactional
 import groovy.text.SimpleTemplateEngine
+import groovy.transform.CompileDynamic
 import groovy.transform.TupleConstructor
 import org.springframework.security.access.prepost.PreAuthorize
 
@@ -42,6 +43,7 @@ import de.dkfz.tbi.otp.security.user.identityProvider.data.IdpUserDetails
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 
+@CompileDynamic
 @Transactional
 class UserProjectRoleService {
 

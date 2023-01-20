@@ -22,7 +22,6 @@
 package de.dkfz.tbi.otp.dataprocessing.qaalignmentoverview
 
 import grails.gorm.transactions.Transactional
-import groovy.transform.CompileStatic
 
 import de.dkfz.tbi.otp.project.Project
 
@@ -37,7 +36,6 @@ import de.dkfz.tbi.otp.project.Project
  *
  * Each type use single query.
  */
-@CompileStatic
 @Transactional(readOnly = true)
 class QaOverviewFetchDataService {
 

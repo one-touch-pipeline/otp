@@ -571,22 +571,26 @@ ${expectedAlign}"""
         }
 
         String expectedLinks = seqTracks*.project.unique().collect { 'link' }.join('\n')
-        List<String> alignments = []
+        List<String> alignments1 = []
+        List<String> alignments2 = []
         if (projectCount == 2) {
-            alignments << "***********************"
-            alignments << seqTrack1.project.name
+            alignments1 << "***********************"
+            alignments1 << seqTrack1.project.name
         }
-        alignments << createAlignmentInfoString(data1) + "\n" + createRoddyAlignmentInfoString(data1)
+        alignments1 << createAlignmentInfoString(data1) + "\n" + createRoddyAlignmentInfoString(data1)
         if (alignmentCount == 2) {
-            alignments << ''
             if (projectCount == 2) {
-                alignments << "***********************"
-                alignments << seqTrack2.project.name
+                alignments2 << "***********************"
+                alignments2 << seqTrack2.project.name
             }
-            alignments << createAlignmentInfoString(data2) + "\n" + createRoddyAlignmentInfoString(data2)
+            alignments2 << createAlignmentInfoString(data2) + "\n" + createRoddyAlignmentInfoString(data2)
         }
+        List<String> alignmentsAll = [
+                alignments1,
+                alignments2,
+        ]*.join('\n').sort()
         String expectedPaths = createNotificationTextService.getMergingDirectories(seqTracks)
-        String expectedAlignment = alignments.join('\n').trim()
+        String expectedAlignment = alignmentsAll.join('\n\n').trim()
         String expectedVariantCallingRunning = samplePairWithVariantCalling ? """\n
             |run variant calling
             |variantCallingPipelines: ${variantCallingPipelines.join(', ')}

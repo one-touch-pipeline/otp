@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
+import groovy.transform.CompileDynamic
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
@@ -32,6 +33,7 @@ import de.dkfz.tbi.otp.utils.MailHelperService
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
+@CompileDynamic
 @Component
 class UnalignableSeqTrackEmailCreator {
 

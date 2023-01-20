@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,22 +19,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.ngsdata
+import groovy.transform.CompileStatic
 
-import grails.gorm.transactions.Transactional
-import groovy.transform.CompileDynamic
-
-import de.dkfz.tbi.otp.utils.CollectionUtils
-
-@CompileDynamic
-@Transactional
-class TumorEntityService {
-
-    List<TumorEntity> list() {
-        return TumorEntity.list()
-    }
-
-    TumorEntity findByName(String name) {
-        return CollectionUtils.atMostOneElement(TumorEntity.findAllByName(name))
+withConfig(configuration) {
+    source(unitValidator: { unit ->
+        String fileName = unit.source.file.toString()
+        [
+                '/services/',
+                '/src/main/',
+                '/src/init/',
+                '/codenarcRules/',
+        ].any {
+            fileName.contains(it)
+        }
+    }) {
+        ast(CompileStatic)
     }
 }

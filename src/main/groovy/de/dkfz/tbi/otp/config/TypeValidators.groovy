@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.config
 
+import groovy.transform.CompileDynamic
 import org.apache.commons.validator.routines.EmailValidator
 import org.springframework.context.ApplicationContext
 
@@ -38,6 +39,7 @@ import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 import java.time.DateTimeException
 import java.time.ZoneId
 
+@CompileDynamic
 enum TypeValidators {
 
     BOOLEAN({ it ==~ /true|false/ }, { ["true", "false"] }),

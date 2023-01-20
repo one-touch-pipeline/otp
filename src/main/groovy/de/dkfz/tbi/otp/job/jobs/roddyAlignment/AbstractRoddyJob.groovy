@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
+import groovy.transform.CompileDynamic
 import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.config.ConfigService
@@ -40,6 +41,7 @@ import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.threadLog
  * class for roddy jobs that handle failed or not finished cluster jobs, analyse them and provide
  * information about their failure for {@link AbstractMaybeSubmitWaitValidateJob}
  */
+@CompileDynamic
 abstract class AbstractRoddyJob<R extends RoddyResult> extends AbstractMaybeSubmitWaitValidateJob {
 
     @Autowired

@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.monitor
 
+import groovy.transform.CompileDynamic
 import groovy.transform.TupleConstructor
 
 import de.dkfz.tbi.otp.dataprocessing.*
@@ -29,6 +30,7 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
+@CompileDynamic
 class SamplePairChecker extends PipelinesChecker<AbstractMergedBamFile> {
 
     static final String HEADER_UNKNOWN_DISEASE_STATUS =
@@ -326,6 +328,7 @@ class SamplePairChecker extends PipelinesChecker<AbstractMergedBamFile> {
         ])
     }
 
+    @CompileDynamic
     @TupleConstructor
     static class BlockedSamplePair {
         SamplePair samplePair

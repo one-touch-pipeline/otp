@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.job.scheduler
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.scheduling.annotation.Scheduled
@@ -43,6 +44,7 @@ import de.dkfz.tbi.otp.ngsdata.Realm
  *
  * @Deprecated Old job system
  */
+@CompileDynamic
 @Deprecated
 @Component
 @Slf4j

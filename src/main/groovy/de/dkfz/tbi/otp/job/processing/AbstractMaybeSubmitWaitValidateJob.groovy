@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.job.processing
 
 import grails.gorm.transactions.NotTransactional
+import groovy.transform.CompileDynamic
 import groovy.util.logging.Slf4j
 
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
@@ -30,6 +31,7 @@ import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
 /**
  * Base class for jobs which maybe submit cluster jobs, wait for them to finish, and then validate their results.
  */
+@CompileDynamic
 @Slf4j
 abstract class AbstractMaybeSubmitWaitValidateJob extends AbstractMultiJob {
 

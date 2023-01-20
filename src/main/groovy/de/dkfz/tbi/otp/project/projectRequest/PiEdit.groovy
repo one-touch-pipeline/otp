@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.project.projectRequest
 
+import groovy.transform.CompileDynamic
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Component
@@ -66,6 +67,7 @@ class PiEdit implements ProjectRequestState {
     void approve(ApprovalCommand cmd) {
     }
 
+    @CompileDynamic
     @Override
     @PreAuthorize("hasPermission(#cmd.projectRequest, 'PROJECT_REQUEST_CURRENT_OWNER')")
     Long save(ProjectRequestCreationCommand cmd) {

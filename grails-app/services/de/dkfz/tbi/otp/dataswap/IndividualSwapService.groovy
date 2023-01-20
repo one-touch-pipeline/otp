@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.dataswap
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
 import de.dkfz.tbi.otp.dataswap.data.IndividualSwapData
@@ -34,6 +35,7 @@ import java.nio.file.FileSystem
 import java.nio.file.Path
 
 @SuppressWarnings("JavaIoPackageAccess")
+@CompileDynamic
 @Transactional
 class IndividualSwapService extends AbstractDataSwapService<IndividualSwapParameters, IndividualSwapData> {
 

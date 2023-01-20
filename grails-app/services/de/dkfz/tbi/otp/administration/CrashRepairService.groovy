@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.administration
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 import org.hibernate.criterion.CriteriaSpecification
 import org.hibernate.sql.JoinType
 
@@ -29,6 +30,7 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStateChangeService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
+@CompileDynamic
 @Transactional
 class CrashRepairService {
 

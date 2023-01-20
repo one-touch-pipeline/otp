@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.utils
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.config.ConfigService
@@ -52,6 +53,7 @@ import static org.springframework.util.Assert.notNull
 /**
  * This class is written for scripts, so it needs the output in stdout.
  */
+@CompileDynamic
 @SuppressWarnings('Println')
 @Transactional
 class DeletionService {

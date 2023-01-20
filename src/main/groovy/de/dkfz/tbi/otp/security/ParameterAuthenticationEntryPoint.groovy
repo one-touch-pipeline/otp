@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.security
 
+import groovy.transform.CompileDynamic
 import org.springframework.security.core.AuthenticationException
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint
 import org.springframework.security.web.util.UrlUtils
@@ -37,6 +38,7 @@ class ParameterAuthenticationEntryPoint extends LoginUrlAuthenticationEntryPoint
         super(loginFormUrl)
     }
 
+    @CompileDynamic
     @Override
     protected String determineUrlToUseForThisRequest(HttpServletRequest request, HttpServletResponse response,
                                                      AuthenticationException exception) {

@@ -22,11 +22,13 @@
 package de.dkfz.tbi.otp.job.processing
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 import org.springframework.security.access.prepost.*
 
 import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
+@CompileDynamic
 @Transactional
 class JobExecutionPlanService {
 

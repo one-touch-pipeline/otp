@@ -22,12 +22,14 @@
 package de.dkfz.tbi.otp.withdraw
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.BamFileAnalysisServiceFactoryService
 import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.AnalysisDeletionService
 
+@CompileDynamic
 @Transactional
 class WithdrawAnalysisService implements ProcessingWithdrawService<BamFilePairAnalysis, AbstractMergedBamFile> {
     AnalysisDeletionService analysisDeletionService

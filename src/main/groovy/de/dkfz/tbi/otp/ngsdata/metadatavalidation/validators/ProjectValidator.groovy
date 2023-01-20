@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 
+import groovy.transform.CompileDynamic
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.BamMetadataColumn
@@ -37,6 +38,7 @@ import de.dkfz.tbi.util.spreadsheet.validation.SingleValueValidator
 @Component
 class ProjectValidator extends SingleValueValidator<AbstractMetadataValidationContext> implements MetadataValidator, BamMetadataValidator {
 
+    @CompileDynamic
     @Override
     Collection<String> getDescriptions() {
         return ["The project is registered in OTP or the column ${MetaDataColumn.PROJECT} does not exist.",]

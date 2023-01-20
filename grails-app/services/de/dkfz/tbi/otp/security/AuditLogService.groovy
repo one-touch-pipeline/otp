@@ -22,12 +22,14 @@
 package de.dkfz.tbi.otp.security
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.security.AuditLog.Action
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
+@CompileDynamic
 @Transactional
 class AuditLogService {
 

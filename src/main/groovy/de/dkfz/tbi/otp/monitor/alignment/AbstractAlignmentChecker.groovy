@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.otp.monitor.alignment
 
+import groovy.transform.CompileDynamic
+
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.monitor.MonitorOutputCollector
@@ -29,6 +31,7 @@ import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.workflowExecution.Workflow
 
+@CompileDynamic
 abstract class AbstractAlignmentChecker extends PipelinesChecker<SeqTrack> {
 
     static final String HEADER_NO_CONFIG =

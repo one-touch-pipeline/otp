@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.otp.monitor.alignment
 
+import groovy.transform.CompileDynamic
+
 import de.dkfz.tbi.otp.monitor.MonitorOutputCollector
 import de.dkfz.tbi.otp.monitor.PipelinesChecker
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
@@ -31,6 +33,7 @@ class AllAlignmentsChecker extends PipelinesChecker<SeqTrack> {
     static final String HEADER_NOT_SUPPORTED_SEQTYPES =
             'The following SeqTypes are unsupported by any alignment workflow supported by OTP'
 
+    @CompileDynamic
     @Override
     List handle(List<SeqTrack> seqTracks, MonitorOutputCollector output) {
         if (!seqTracks) {

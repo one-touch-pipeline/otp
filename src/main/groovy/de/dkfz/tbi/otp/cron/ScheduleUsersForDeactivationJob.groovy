@@ -22,18 +22,19 @@
 package de.dkfz.tbi.otp.cron
 
 import grails.web.mapping.LinkGenerator
+import groovy.transform.CompileDynamic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ProjectSelectionService
-import de.dkfz.tbi.otp.security.user.UserService
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.security.User
+import de.dkfz.tbi.otp.security.user.UserService
 import de.dkfz.tbi.otp.security.user.identityProvider.IdentityProvider
 import de.dkfz.tbi.otp.utils.MessageSourceService
 
@@ -51,6 +52,7 @@ import java.time.LocalDateTime
  * This job works in conjunction with {@link DeactivateUsersJob}, which is responsible
  * for actually disabling the users.
  */
+@CompileDynamic
 @Component
 @Slf4j
 class ScheduleUsersForDeactivationJob extends AbstractScheduledJob {
@@ -248,6 +250,7 @@ class ScheduleUsersForDeactivationJob extends AbstractScheduledJob {
     }
 }
 
+@CompileDynamic
 @SuppressWarnings("AnnotationsForJobs")
 class ActionPlan {
 

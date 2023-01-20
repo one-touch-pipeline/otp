@@ -63,7 +63,7 @@ class InformSampleIdentifierParser implements SampleIdentifierParser {
 
     private String buildSampleTypeDbName(Matcher matcher) {
         List<String> tissueType = []
-        tissueType << InformTissueType.fromKey(matcher.group('tissueTypeKey'))
+        tissueType << (InformTissueType.fromKey(matcher.group('tissueTypeKey')) as String)
 
         if (matcher.group('sampleTypeNumber').toLowerCase() == 'x') {
             tissueType << "0X"

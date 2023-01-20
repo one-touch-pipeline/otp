@@ -22,10 +22,12 @@
 package de.dkfz.tbi.otp.workflowExecution
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.utils.StackTraceUtils
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowError
 
+@CompileDynamic
 @Transactional
 class WorkflowStateChangeService {
 

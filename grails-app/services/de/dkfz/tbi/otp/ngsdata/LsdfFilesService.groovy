@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.infrastructure.FileService
@@ -36,6 +37,7 @@ import java.util.regex.Pattern
 
 import static de.dkfz.tbi.otp.utils.WaitingFileUtils.waitUntilDoesNotExist
 
+@CompileDynamic
 @Transactional
 class LsdfFilesService {
 

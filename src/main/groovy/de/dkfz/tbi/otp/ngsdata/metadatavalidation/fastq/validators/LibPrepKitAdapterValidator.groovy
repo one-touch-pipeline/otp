@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 
+import groovy.transform.CompileDynamic
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
@@ -52,6 +53,7 @@ class LibPrepKitAdapterValidator extends ValueTuplesValidator<MetadataValidation
     @Autowired
     ValidatorHelperService validatorHelperService
 
+    @CompileDynamic
     @Override
     Collection<String> getDescriptions() {
         return ["If the sample is configured for adapter trimming the library preparation kit must contain adapter information."]
@@ -70,6 +72,7 @@ class LibPrepKitAdapterValidator extends ValueTuplesValidator<MetadataValidation
     @Override
     void checkMissingOptionalColumn(MetadataValidationContext context, String columnTitle) { }
 
+    @CompileDynamic
     @Override
     void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> valueTuples) {
         valueTuples.each { ValueTuple valueTuple ->

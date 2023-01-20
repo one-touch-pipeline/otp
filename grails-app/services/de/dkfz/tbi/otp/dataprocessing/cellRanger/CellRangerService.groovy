@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.dataprocessing.cellRanger
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 import groovy.transform.TupleConstructor
 import org.springframework.security.access.prepost.PreAuthorize
 
@@ -37,6 +38,7 @@ import de.dkfz.tbi.util.spreadsheet.*
 
 import java.nio.file.*
 
+@CompileDynamic
 @Transactional
 class CellRangerService {
 

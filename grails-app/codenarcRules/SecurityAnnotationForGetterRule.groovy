@@ -20,14 +20,12 @@
  * SOFTWARE.
  */
 
-import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.codehaus.groovy.ast.ClassNode
 import org.codehaus.groovy.ast.MethodNode
 import org.codenarc.rule.AbstractAstVisitor
 import org.codenarc.rule.AbstractAstVisitorRule
 
-@CompileStatic
 class SecurityAnnotationForGetterRule extends AbstractAstVisitorRule {
     int priority = 1
     String name = 'SecurityAnnotationForGetter'
@@ -36,7 +34,6 @@ class SecurityAnnotationForGetterRule extends AbstractAstVisitorRule {
     Class astVisitorClass = SecurityAnnotationForGetterVisitor
 }
 
-@CompileStatic
 @Slf4j
 class SecurityAnnotationForGetterVisitor extends AbstractAstVisitor {
 

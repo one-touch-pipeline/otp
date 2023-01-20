@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 
+import groovy.transform.CompileDynamic
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.*
@@ -45,6 +46,7 @@ class FilenameValidator extends SingleValueValidator<MetadataValidationContext> 
       */
     static final List<String> REQUIRED_CHARACTERS = ['_']
 
+    @CompileDynamic
     @Override
     Collection<String> getDescriptions() {
         return [

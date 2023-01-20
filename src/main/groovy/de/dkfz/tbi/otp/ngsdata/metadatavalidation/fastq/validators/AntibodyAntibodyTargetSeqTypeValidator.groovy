@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 
+import groovy.transform.CompileDynamic
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
@@ -40,6 +41,7 @@ class AntibodyAntibodyTargetSeqTypeValidator extends ValueTuplesValidator<Metada
     @Autowired
     ValidatorHelperService validatorHelperService
 
+    @CompileDynamic
     @Override
     Collection<String> getDescriptions() {
         String seqTypeString = seqTypesStringWithAntibody()

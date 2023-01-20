@@ -22,12 +22,14 @@
 package de.dkfz.tbi.otp.workflow.restartHandler
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.workflow.restartHandler.WorkflowJobErrorDefinition.Action
 import de.dkfz.tbi.otp.workflowExecution.LogService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
+@CompileDynamic
 @Transactional
 class WorkflowJobErrorDefinitionService {
 

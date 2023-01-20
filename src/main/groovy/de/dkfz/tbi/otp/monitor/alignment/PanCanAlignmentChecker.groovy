@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.otp.monitor.alignment
 
+import groovy.transform.CompileDynamic
+
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.monitor.MonitorOutputCollector
 import de.dkfz.tbi.otp.ngsdata.*
@@ -43,11 +45,13 @@ class PanCanAlignmentChecker extends AbstractRoddyAlignmentChecker {
         return Pipeline.Name.PANCAN_ALIGNMENT
     }
 
+    @CompileDynamic
     @Override
     Workflow getWorkflow() {
         return CollectionUtils.exactlyOneElement(Workflow.findAllByName(PanCancerWorkflow.WORKFLOW))
     }
 
+    @CompileDynamic
     @Override
     List<SeqTrack> filter(List<SeqTrack> seqTracks, MonitorOutputCollector output) {
         String libraryPreparationKitMissing = 'libraryPreparationKitMissing'

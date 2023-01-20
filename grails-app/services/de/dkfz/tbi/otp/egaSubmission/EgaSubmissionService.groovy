@@ -31,7 +31,6 @@ import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedMergedBamFile
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 
-@CompileStatic
 @Transactional
 class EgaSubmissionService {
 
@@ -536,7 +535,6 @@ class EgaSubmissionService {
     }
 }
 
-@CompileStatic
 @Canonical
 class DataFileAndSampleAlias implements Comparable<DataFileAndSampleAlias> {
 
@@ -554,7 +552,6 @@ class DataFileAndSampleAlias implements Comparable<DataFileAndSampleAlias> {
     }
 }
 
-@CompileStatic
 class BamFileAndSampleAlias implements Comparable<BamFileAndSampleAlias> {
     final AbstractMergedBamFile bamFile
     final SampleSubmissionObject sampleSubmissionObject
@@ -584,7 +581,6 @@ class BamFileAndSampleAlias implements Comparable<BamFileAndSampleAlias> {
     }
 }
 
-@CompileStatic
 @Canonical
 class SampleAndSeqTypeAndDataFileProjection implements Comparable<SampleAndSeqTypeAndDataFileProjection> {
     long sampleId

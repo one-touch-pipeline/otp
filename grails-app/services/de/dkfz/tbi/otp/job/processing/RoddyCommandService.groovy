@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.job.processing
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
@@ -29,6 +30,7 @@ import de.dkfz.tbi.otp.ngsdata.Individual
 
 import java.nio.file.Path
 
+@CompileDynamic
 @Transactional
 class RoddyCommandService {
 

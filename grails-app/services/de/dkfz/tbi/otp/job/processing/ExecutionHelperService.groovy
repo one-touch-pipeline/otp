@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.job.processing
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
@@ -35,6 +36,7 @@ import java.nio.file.Path
 /**
  * This service provides file operations
  */
+@CompileDynamic
 @Transactional
 @Deprecated
 class ExecutionHelperService {

@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.tracking
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 import groovy.transform.ToString
 
 import de.dkfz.tbi.otp.dataprocessing.*
@@ -35,6 +36,7 @@ import de.dkfz.tbi.otp.ngsdata.UserProjectRole
 /**
  * Service to provide different Key Performance Indicators (KPIs) for de.NBI
  */
+@CompileDynamic
 @Transactional
 class DeNbiKpiService {
 

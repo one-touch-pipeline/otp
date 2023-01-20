@@ -22,7 +22,6 @@
 package de.dkfz.tbi.otp.workflowExecution.wes
 
 import grails.converters.JSON
-import groovy.transform.CompileStatic
 import org.grails.web.json.JSONElement
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
@@ -37,7 +36,6 @@ import de.dkfz.tbi.otp.config.ConfigService
 /**
  * Helper service for {@link WeskitAccessService} and {@link WeskitApiService} to get the access token from keycloak.
  */
-@CompileStatic
 class WeskitAuthService {
 
     static final String CLIENT_REGISTRATION_ID = "wes"

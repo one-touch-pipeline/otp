@@ -22,7 +22,6 @@
 package de.dkfz.tbi.otp.workflowExecution.cluster.logs
 
 import grails.gorm.transactions.Transactional
-import groovy.transform.CompileStatic
 
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
@@ -35,7 +34,6 @@ import java.nio.file.Path
  *
  * The directory of the file is created, if it doesn't exist yet.
  */
-@CompileStatic
 @Transactional
 class ClusterLogDirectoryService extends AbstractLogDirectoryService {
 

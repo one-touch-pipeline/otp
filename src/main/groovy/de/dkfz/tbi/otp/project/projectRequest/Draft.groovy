@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.project.projectRequest
 
+import groovy.transform.CompileDynamic
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Component
@@ -50,6 +51,7 @@ class Draft implements ProjectRequestState {
         return currentUser == projectRequest.requester ? [ProjectRequestAction.SUBMIT_VIEW, ProjectRequestAction.EDIT, ProjectRequestAction.DELETE] : []
     }
 
+    @CompileDynamic
     @Override
     @PreAuthorize("hasPermission(#cmd?.projectRequest, 'PROJECT_REQUEST_CURRENT_OWNER')")
     Long submit(ProjectRequestCreationCommand cmd) {

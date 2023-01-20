@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.job.plan
 
 import grails.util.Holders
+import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
@@ -30,6 +31,7 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
  * Class representing a serialized form of a JobDefinition and a
  * ProcessingStep for the JobDefinition.
  */
+@CompileDynamic
 class JobInformation implements Serializable {
     Long id
     String name

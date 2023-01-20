@@ -22,7 +22,9 @@
 package de.dkfz.tbi.otp.workflowExecution
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 
+@CompileDynamic
 @Transactional
 class WorkflowRunInputArtefactService {
 

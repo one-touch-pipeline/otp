@@ -23,12 +23,14 @@ package de.dkfz.tbi.otp.project
 
 import grails.core.GrailsApplication
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 import de.dkfz.tbi.otp.project.additionalField.*
 
+@CompileDynamic
 @Transactional
 class ProjectFieldsService {
 

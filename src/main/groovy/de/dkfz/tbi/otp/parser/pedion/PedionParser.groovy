@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.parser.pedion
 
+import groovy.transform.CompileDynamic
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.SampleType
@@ -32,6 +33,7 @@ import java.util.regex.Matcher
 /**
  * Checker for Project PeDiOn (Berlin).
  */
+@CompileDynamic
 @Component
 class PedionParser implements SampleIdentifierParser {
 

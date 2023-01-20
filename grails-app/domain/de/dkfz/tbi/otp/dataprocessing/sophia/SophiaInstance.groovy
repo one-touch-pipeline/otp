@@ -24,9 +24,7 @@ package de.dkfz.tbi.otp.dataprocessing.sophia
 import grails.gorm.hibernate.annotation.ManagedEntity
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyAnalysisResult
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 import de.dkfz.tbi.otp.utils.CollectionUtils

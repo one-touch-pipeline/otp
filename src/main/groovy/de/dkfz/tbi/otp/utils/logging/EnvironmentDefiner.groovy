@@ -23,8 +23,11 @@ package de.dkfz.tbi.otp.utils.logging
 
 import ch.qos.logback.core.PropertyDefinerBase
 import grails.util.Environment
+import groovy.transform.CompileDynamic
 
 class EnvironmentDefiner extends PropertyDefinerBase {
+
+    @CompileDynamic
     @Override
     String getPropertyValue() {
         return Environment.isDevelopmentEnvironmentAvailable()

@@ -22,9 +22,11 @@
 package de.dkfz.tbi.otp.workflowExecution
 
 import grails.util.Pair
+import groovy.transform.CompileDynamic
 
 import java.sql.Timestamp
 
+@CompileDynamic
 class WorkflowRunOverviewService {
     Map<Pair<WorkflowRun.State, Workflow>, Long> getNumberOfRunsPerWorkflowAndState() {
         return WorkflowRun.createCriteria().list {

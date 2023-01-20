@@ -22,11 +22,13 @@
 package de.dkfz.tbi.otp.job.restarting
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.job.plan.JobErrorDefinition
 import de.dkfz.tbi.otp.job.processing.Job
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
 
+@CompileDynamic
 @Transactional
 class RestartHandlerService {
 

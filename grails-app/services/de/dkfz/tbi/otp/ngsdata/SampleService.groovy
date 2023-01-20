@@ -22,9 +22,11 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.project.Project
 
+@CompileDynamic
 @Transactional
 class SampleService {
 

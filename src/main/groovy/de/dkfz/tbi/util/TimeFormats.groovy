@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.util
 
+import groovy.transform.CompileDynamic
+
 import java.time.*
 import java.time.format.DateTimeFormatter
 
@@ -90,6 +92,7 @@ enum TimeFormats {
      * @param value Date in JSON representation
      * @returns Formatted dates and value to sort by
      */
+    @CompileDynamic
     static Map<String, Object> asTimestamp(Date date) {
         return date ? [
                 shortest: getInShortestTimeFormat(date),

@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.job.jobs.cellRanger
 
+import groovy.transform.CompileDynamic
 import groovy.util.logging.Slf4j
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
@@ -34,6 +35,7 @@ import de.dkfz.tbi.otp.job.jobs.alignment.AbstractAlignmentStartJob
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
+@CompileDynamic
 @Component('cellRangerAlignmentStartJob')
 @Scope('singleton')
 @Slf4j

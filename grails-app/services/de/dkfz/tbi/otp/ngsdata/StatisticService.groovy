@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
@@ -29,6 +30,7 @@ import de.dkfz.tbi.util.TimeFormats
 
 import java.time.*
 
+@CompileDynamic
 @Transactional
 class StatisticService {
 

@@ -21,10 +21,12 @@
  */
 package de.dkfz.tbi.otp.infrastructure
 
+import groovy.transform.CompileDynamic
 import groovy.transform.EqualsAndHashCode
 
 import de.dkfz.tbi.otp.ngsdata.Realm
 
+@CompileDynamic
 @EqualsAndHashCode(includes = ["clusterJobId", "realm"])
 class ClusterJobIdentifier {
 

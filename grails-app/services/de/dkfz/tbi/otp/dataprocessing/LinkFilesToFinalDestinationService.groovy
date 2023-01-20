@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
@@ -38,6 +39,7 @@ import java.nio.file.Path
 
 import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.threadLog
 
+@CompileDynamic
 @Transactional
 class LinkFilesToFinalDestinationService {
 

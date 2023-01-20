@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
+import groovy.transform.CompileDynamic
+
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 
@@ -34,6 +36,7 @@ trait HasIdentifier {
         return (maxIdentifier == null) ? 0 : (maxIdentifier + 1)
     }
 
+    @CompileDynamic
     static Integer maxIdentifier(MergingWorkPackage workPackage) {
         assert workPackage
         return AbstractMergedBamFile.createCriteria().get {
@@ -41,6 +44,6 @@ trait HasIdentifier {
             projections {
                 max("identifier")
             }
-        }
+        } as Integer
     }
 }

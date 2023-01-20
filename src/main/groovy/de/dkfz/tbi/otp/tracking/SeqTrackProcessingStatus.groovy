@@ -21,12 +21,14 @@
  */
 package de.dkfz.tbi.otp.tracking
 
+import groovy.transform.CompileDynamic
 import groovy.transform.TupleConstructor
 
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 
 import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus
 
+@CompileDynamic
 @TupleConstructor
 class SeqTrackProcessingStatus {
 

@@ -41,7 +41,7 @@ class SeqTrackSet {
     SeqTrackSet(List<SeqTrack> seqTracks) {
         this.seqTracks = seqTracks as Set<SeqTrack>
 
-        this.dataFiles = seqTracks.collectMany { it.dataFiles }
+        this.dataFiles = seqTracks.collectMany { it.dataFiles } as Set<DataFile>
         this.totalFileSize = this.dataFiles.sum { it.fileSize } as Long
         this.containsWithdrawnData = this.dataFiles.any { it.fileWithdrawn }
         this.containsSwappedLane = this.seqTracks.any { it.swapped }

@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.workflowExecution.decider
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
@@ -33,6 +34,7 @@ import de.dkfz.tbi.otp.utils.LogUsedTimeUtils
 import de.dkfz.tbi.otp.workflow.fastqc.BashFastQcWorkflow
 import de.dkfz.tbi.otp.workflowExecution.*
 
+@CompileDynamic
 @Component
 @Transactional
 @Slf4j

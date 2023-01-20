@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.workflow.fastqc
 
-import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.stereotype.Component
 
@@ -32,7 +31,6 @@ import de.dkfz.tbi.otp.workflowExecution.*
  */
 @Component
 @Slf4j
-@CompileStatic
 class BashFastQcWorkflow implements OtpWorkflow {
 
     static final String WORKFLOW = "Bash Fastqc"

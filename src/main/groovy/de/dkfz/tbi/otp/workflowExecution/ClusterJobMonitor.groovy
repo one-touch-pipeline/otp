@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.workflowExecution
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.scheduling.annotation.Scheduled
@@ -63,6 +64,7 @@ class ClusterJobMonitor extends AbstractClusterJobMonitor {
         doCheck()
     }
 
+    @CompileDynamic
     @Override
     protected List<ClusterJob> findAllClusterJobsToCheck() {
         return ClusterJob.findAllByCheckStatusAndOldSystem(ClusterJob.CheckStatus.CHECKING, false)

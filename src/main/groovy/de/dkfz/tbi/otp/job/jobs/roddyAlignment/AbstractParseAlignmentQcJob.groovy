@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
+import groovy.transform.CompileDynamic
 import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.dataprocessing.*
@@ -29,6 +30,7 @@ import de.dkfz.tbi.otp.job.processing.AbstractEndStateAwareJobImpl
 import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightService
 import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightValue
 
+@CompileDynamic
 abstract class AbstractParseAlignmentQcJob extends AbstractEndStateAwareJobImpl implements AutoRestartableJob {
 
     @Autowired

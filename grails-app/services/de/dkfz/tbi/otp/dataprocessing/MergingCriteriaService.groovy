@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import grails.gorm.transactions.Transactional
 import grails.validation.ValidationException
+import groovy.transform.CompileDynamic
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.Errors
 
@@ -32,6 +33,7 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.workflowExecution.Workflow
 
+@CompileDynamic
 @Transactional
 class MergingCriteriaService {
 

@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.job.jobs.cellRanger
 
+import groovy.transform.CompileDynamic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Scope
@@ -31,6 +32,7 @@ import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.job.jobs.AutoRestartableJob
 import de.dkfz.tbi.otp.job.processing.AbstractEndStateAwareJobImpl
 
+@CompileDynamic
 @Component
 @Scope("prototype")
 @Slf4j

@@ -21,10 +21,12 @@
  */
 package de.dkfz.tbi.otp.tracking
 
+import groovy.transform.CompileDynamic
 import groovy.transform.TupleConstructor
 
 import static de.dkfz.tbi.otp.tracking.ProcessingStatus.Done.*
 
+@CompileDynamic
 @TupleConstructor
 class ProcessingStatus {
 
@@ -53,8 +55,8 @@ class ProcessingStatus {
     }
 
     Collection<SamplePairProcessingStatus> getSamplePairProcessingStatuses() {
-        return ((Collection<SamplePairProcessingStatus>)
-                seqTrackProcessingStatuses*.mergingWorkPackageProcessingStatuses*.samplePairProcessingStatuses.flatten()).unique()
+        return ((Collection<SamplePairProcessingStatus>) seqTrackProcessingStatuses*.mergingWorkPackageProcessingStatuses*.samplePairProcessingStatuses.
+                flatten()).unique()
     }
 
     WorkflowProcessingStatus getInstallationProcessingStatus() {

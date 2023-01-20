@@ -25,9 +25,7 @@ import grails.gorm.hibernate.annotation.ManagedEntity
 import org.hibernate.Hibernate
 
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyAnalysisResult
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 
 @ManagedEntity

@@ -20,12 +20,10 @@
  * SOFTWARE.
  */
 
-import groovy.transform.CompileStatic
 import org.codehaus.groovy.ast.expr.MethodCallExpression
 import org.codenarc.rule.AbstractAstVisitor
 import org.codenarc.rule.AbstractAstVisitorRule
 
-@CompileStatic
 class ExplicitFlushForDeleteRule extends AbstractAstVisitorRule {
     int priority = 1
     String name = 'ExplicitFlushForDeleteRule'
@@ -33,7 +31,6 @@ class ExplicitFlushForDeleteRule extends AbstractAstVisitorRule {
     Class astVisitorClass = ExplicitFlushForDeleteVisitor
 }
 
-@CompileStatic
 class ExplicitFlushForDeleteVisitor extends AbstractAstVisitor {
 
     @Override

@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.dataprocessing.bamfiles
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerMergingWorkPackage
@@ -29,6 +30,7 @@ import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 
 import java.nio.file.Path
 
+@CompileDynamic
 @Transactional
 class SingleCellBamFileService<T extends AbstractMergedBamFile> extends AbstractAbstractMergedBamFileService<SingleCellBamFile> {
 

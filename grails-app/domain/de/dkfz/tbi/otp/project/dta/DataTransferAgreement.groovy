@@ -23,10 +23,9 @@ package de.dkfz.tbi.otp.project.dta
 
 import grails.gorm.hibernate.annotation.ManagedEntity
 
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectInfoService
 import de.dkfz.tbi.otp.utils.Entity
-
-import de.dkfz.tbi.otp.project.Project
 
 @ManagedEntity
 class DataTransferAgreement implements Entity {

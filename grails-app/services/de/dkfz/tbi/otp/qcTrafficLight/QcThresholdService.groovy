@@ -24,7 +24,6 @@ package de.dkfz.tbi.otp.qcTrafficLight
 import grails.gorm.transactions.Transactional
 import grails.validation.ValidationException
 import groovy.transform.Canonical
-import groovy.transform.CompileStatic
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.Errors
 
@@ -32,7 +31,6 @@ import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.FormatHelper
 
-@CompileStatic
 @Transactional
 class QcThresholdService {
 

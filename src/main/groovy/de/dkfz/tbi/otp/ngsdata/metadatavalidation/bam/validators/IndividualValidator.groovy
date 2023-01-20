@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.validators
 
+import groovy.transform.CompileDynamic
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.BamMetadataColumn
@@ -44,6 +45,7 @@ class IndividualValidator extends SingleValueValidator<BamMetadataValidationCont
         return BamMetadataColumn.INDIVIDUAL.name()
     }
 
+    @CompileDynamic
     @Override
     void validateValue(BamMetadataValidationContext context, String individual, Set<Cell> cells) {
         if (!Individual.findAllByPid(individual)) {

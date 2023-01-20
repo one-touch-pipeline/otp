@@ -23,7 +23,6 @@ package de.dkfz.tbi.otp.security.user.identityProvider
 
 import grails.gorm.transactions.Transactional
 import groovy.transform.CompileDynamic
-import groovy.transform.CompileStatic
 import groovy.transform.ToString
 import org.apache.commons.lang.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
@@ -37,7 +36,6 @@ import de.dkfz.tbi.otp.security.user.identityProvider.data.IdpUserDetails
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.util.ldap.UserAccountControl
 
-@CompileStatic
 @Transactional
 class KeycloakService implements IdentityProvider {
 

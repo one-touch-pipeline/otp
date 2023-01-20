@@ -21,12 +21,14 @@
  */
 package de.dkfz.tbi.otp.dataswap.data
 
+import groovy.transform.CompileDynamic
 import groovy.transform.TupleConstructor
 
 import de.dkfz.tbi.otp.dataswap.Swap
 import de.dkfz.tbi.otp.dataswap.parameters.IndividualSwapParameters
 import de.dkfz.tbi.otp.ngsdata.Sample
 
+@CompileDynamic
 @TupleConstructor
 class IndividualSwapData extends DataSwapData<IndividualSwapParameters> {
     static Closure constraints = {

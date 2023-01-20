@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import grails.gorm.transactions.Transactional
 import grails.validation.ValidationException
+import groovy.transform.CompileDynamic
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 import org.springframework.security.access.prepost.PreAuthorize
@@ -40,6 +41,7 @@ import de.dkfz.tbi.util.spreadsheet.validation.ValidationContext
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
+@CompileDynamic
 @Transactional
 class SampleIdentifierService {
     MessageSourceService messageSourceService

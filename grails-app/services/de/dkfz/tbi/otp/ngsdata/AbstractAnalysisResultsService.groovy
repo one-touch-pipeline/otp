@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 import org.hibernate.criterion.CriteriaSpecification
 import org.hibernate.sql.JoinType
 import org.springframework.security.access.prepost.PreAuthorize
@@ -38,6 +39,7 @@ import de.dkfz.tbi.util.TimeFormats
 import java.nio.file.Files
 import java.nio.file.Path
 
+@CompileDynamic
 @Transactional
 abstract class AbstractAnalysisResultsService<T extends BamFilePairAnalysis> {
 

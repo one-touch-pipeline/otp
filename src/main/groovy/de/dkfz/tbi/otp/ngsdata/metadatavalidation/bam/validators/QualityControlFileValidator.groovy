@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.validators
 
 import groovy.json.JsonSlurper
+import groovy.transform.CompileDynamic
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
@@ -62,6 +63,7 @@ class QualityControlFileValidator extends ValueTuplesValidator<BamMetadataValida
     @Override
     void checkMissingOptionalColumn(BamMetadataValidationContext context, String columnTitle) { }
 
+    @CompileDynamic
     @Override
     void validateValueTuples(BamMetadataValidationContext context, Collection<ValueTuple> valueTuples) {
         valueTuples.each {

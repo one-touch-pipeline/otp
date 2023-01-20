@@ -20,13 +20,11 @@
  * SOFTWARE.
  */
 
-import groovy.transform.CompileStatic
 import org.codehaus.groovy.ast.AnnotationNode
 import org.codehaus.groovy.ast.ClassNode
 import org.codenarc.rule.AbstractAstVisitor
 import org.codenarc.rule.AbstractAstVisitorRule
 
-@CompileStatic
 class ManagedEntityAnnotationForEntityRule extends AbstractAstVisitorRule {
     String applyToFileNames = "*/*grails-app/domain*/*.groovy"
     int priority = 1

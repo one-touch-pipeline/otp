@@ -24,12 +24,14 @@ package de.dkfz.tbi.otp
 import grails.converters.JSON
 import grails.validation.Validateable
 import grails.validation.ValidationException
+import groovy.transform.CompileDynamic
 import groovy.util.logging.Slf4j
 import org.springframework.http.HttpStatus
 import org.springframework.validation.Errors
 
 import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 
+@CompileDynamic
 @Slf4j
 trait CheckAndCall {
 

@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 
+import groovy.transform.CompileDynamic
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
@@ -35,6 +36,7 @@ class SampleLibraryValidator extends ValueTuplesValidator<MetadataValidationCont
 
     static final String LIB = "lib"
 
+    @CompileDynamic
     @Override
     Collection<String> getDescriptions() {
         return ["If '${LIB}' is contained in the '${SAMPLE_NAME}' then the tagementation library number (CUSTOMER LIBRARY) should be given."]

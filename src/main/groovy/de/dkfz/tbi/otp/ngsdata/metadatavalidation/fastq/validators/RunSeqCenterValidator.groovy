@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 
+import groovy.transform.CompileDynamic
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.Run
@@ -35,6 +36,7 @@ import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.RUN_ID
 @Component
 class RunSeqCenterValidator extends ValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
 
+    @CompileDynamic
     @Override
     Collection<String> getDescriptions() {
         return [
@@ -48,6 +50,7 @@ class RunSeqCenterValidator extends ValueTuplesValidator<MetadataValidationConte
         return [RUN_ID, CENTER_NAME]*.name()
     }
 
+    @CompileDynamic
     @Override
     void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> allValueTuples) {
         allValueTuples.groupBy { it.getValue(RUN_ID.name()) }.each { String runName, Collection<ValueTuple> valueTuplesOfRun ->

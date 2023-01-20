@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.workflowExecution
 
 import grails.gorm.transactions.Transactional
 import grails.validation.ValidationException
+import groovy.transform.CompileDynamic
 import org.springframework.validation.Errors
 
 import de.dkfz.tbi.otp.ngsdata.SeqType
@@ -32,6 +33,7 @@ import java.time.LocalDate
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
+@CompileDynamic
 @Transactional
 class WorkflowVersionSelectorService {
 

@@ -21,12 +21,15 @@
  */
 package de.dkfz.tbi.otp.utils
 
+import groovy.transform.CompileDynamic
+
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 
 /**
  * A service for parsing inputs and returning values.
  */
+@CompileDynamic
 class ScriptInputHelperService {
 
     private static final int INPUT_INDEX_SAMPLE_DEFINITION_PID = 0

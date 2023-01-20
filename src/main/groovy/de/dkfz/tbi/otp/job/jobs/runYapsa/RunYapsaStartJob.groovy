@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.job.jobs.runYapsa
 
+import groovy.transform.CompileDynamic
 import groovy.util.logging.Slf4j
 import org.hibernate.Hibernate
 import org.springframework.beans.factory.annotation.Autowired
@@ -36,6 +37,7 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
+@CompileDynamic
 @Component("runYapsaStartJob")
 @Scope("singleton")
 @Slf4j

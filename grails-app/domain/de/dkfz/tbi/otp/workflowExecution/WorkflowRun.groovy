@@ -28,10 +28,10 @@ import org.grails.web.converters.exceptions.ConverterException
 import org.grails.web.json.JSONObject
 
 import de.dkfz.tbi.otp.Commentable
+import de.dkfz.tbi.otp.filestore.WorkFolder
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.Entity
-import de.dkfz.tbi.otp.filestore.WorkFolder
 
 @ManagedEntity
 class WorkflowRun implements Commentable, Entity {

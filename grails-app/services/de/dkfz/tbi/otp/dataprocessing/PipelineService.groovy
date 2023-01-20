@@ -22,9 +22,11 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
+@CompileDynamic
 @Transactional
 class PipelineService {
 

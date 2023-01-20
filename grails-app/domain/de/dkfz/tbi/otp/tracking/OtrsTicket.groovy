@@ -27,7 +27,7 @@ import groovy.transform.TupleConstructor
 import de.dkfz.tbi.otp.Commentable
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.utils.Entity
 
 @ManagedEntity
@@ -65,7 +65,9 @@ class OtrsTicket implements Commentable, Entity {
          */
         @Override
         String toString() {
-            return name().toLowerCase(Locale.ENGLISH).replaceAll("(_)([a-z0-9])", { it -> it[2].toUpperCase() })
+            return name().toLowerCase(Locale.ENGLISH).replaceAll("(_)([a-z0-9])") { List<String> it ->
+                it[2].toString().toUpperCase()
+            }
         }
     }
 

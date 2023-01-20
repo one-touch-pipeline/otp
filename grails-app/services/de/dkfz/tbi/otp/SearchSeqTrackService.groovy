@@ -22,11 +22,13 @@
 package de.dkfz.tbi.otp
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 
+@CompileDynamic
 @Transactional
 @PreAuthorize("hasRole('ROLE_OPERATOR')")
 class SearchSeqTrackService {

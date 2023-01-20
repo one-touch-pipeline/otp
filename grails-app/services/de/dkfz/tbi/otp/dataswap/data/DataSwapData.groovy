@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.dataswap.data
 
 import grails.validation.Validateable
+import groovy.transform.CompileDynamic
 import groovy.transform.TupleConstructor
 
 import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
@@ -33,6 +34,7 @@ import de.dkfz.tbi.otp.project.Project
 
 import java.nio.file.Path
 
+@CompileDynamic
 @TupleConstructor
 class DataSwapData<P extends DataSwapParameters> implements Validateable {
 

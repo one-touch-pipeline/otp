@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.job.scheduler
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 import groovy.xml.MarkupBuilder
 import org.apache.commons.io.FileUtils
 
@@ -40,6 +41,7 @@ import static org.springframework.util.Assert.notNull
  * with the point in time when the exception occurred is appended as exception itself
  * is by definition of the file name completely equivalent to the already stored.
  */
+@CompileDynamic
 @Transactional
 class ErrorLogService {
 

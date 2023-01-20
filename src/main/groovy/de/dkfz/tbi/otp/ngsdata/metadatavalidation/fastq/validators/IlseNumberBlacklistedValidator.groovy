@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 
+import groovy.transform.CompileDynamic
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.IlseSubmission
@@ -49,6 +50,7 @@ class IlseNumberBlacklistedValidator extends SingleValueValidator<MetadataValida
     @Override
     void checkColumn(MetadataValidationContext context) { }
 
+    @CompileDynamic
     @Override
     void validateValue(MetadataValidationContext context, String value, Set<Cell> cells) {
         if (value && value.isInteger()) {

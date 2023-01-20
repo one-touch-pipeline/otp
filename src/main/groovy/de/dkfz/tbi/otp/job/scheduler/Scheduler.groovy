@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.job.scheduler
 
 import grails.core.GrailsApplication
+import groovy.transform.CompileDynamic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
@@ -53,6 +54,7 @@ import static org.springframework.util.Assert.notNull
  * @see ProcessingStep
  * @see ProcessingStepUpdate
  */
+@CompileDynamic
 @Deprecated
 @Component("scheduler")
 @Slf4j

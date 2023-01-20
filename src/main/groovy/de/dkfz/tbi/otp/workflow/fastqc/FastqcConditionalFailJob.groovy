@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.workflow.fastqc
 
-import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.stereotype.Component
 
@@ -36,7 +35,6 @@ import java.nio.file.Path
 
 @Component
 @Slf4j
-@CompileStatic
 class FastqcConditionalFailJob extends AbstractConditionalFailJob implements FastqcShared {
 
     @Override

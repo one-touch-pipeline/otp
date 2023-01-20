@@ -21,9 +21,12 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
+import groovy.transform.CompileDynamic
+
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
+@CompileDynamic
 trait WithReferenceGenomeRestriction implements BamFileAnalysisServiceTrait {
 
     @Override

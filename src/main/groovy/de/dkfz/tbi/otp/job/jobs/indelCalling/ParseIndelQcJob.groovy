@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.job.jobs.indelCalling
 
 import grails.converters.JSON
+import groovy.transform.CompileDynamic
 import groovy.util.logging.Slf4j
 import org.grails.web.json.JSONObject
 import org.springframework.beans.factory.annotation.Autowired
@@ -36,6 +37,7 @@ import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightService
 
 import java.nio.file.Path
 
+@CompileDynamic
 @Component
 @Scope("prototype")
 @Slf4j

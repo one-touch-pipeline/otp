@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.workflow.restartHandler
 
 import grails.gorm.transactions.Transactional
 import grails.web.mapping.LinkGenerator
+import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
@@ -37,6 +38,7 @@ import de.dkfz.tbi.util.TimeFormats
 import java.time.LocalDateTime
 import java.time.ZonedDateTime
 
+@CompileDynamic
 @Transactional
 class ErrorNotificationService {
 

@@ -109,8 +109,8 @@ abstract class AbstractExecuteRoddyPipelineJob extends AbstractExecutePipelineJo
         Collection<ClusterJob> clusterJobs = roddyExecutionService.createClusterJobObjects(roddyResult, output, workflowStep)
         if (clusterJobs) {
             roddyExecutionService.saveRoddyExecutionStoreDirectory(roddyResult, output.stderr, fs)
-            clusterJobHandlingService.collectJobStatistics(workflowStep, clusterJobs)
-            clusterJobHandlingService.startMonitorClusterJob(workflowStep, clusterJobs)
+            clusterJobHandlingService.collectJobStatistics(workflowStep, clusterJobs as List<ClusterJob>)
+            clusterJobHandlingService.startMonitorClusterJob(workflowStep, clusterJobs as List<ClusterJob>)
             workflowStateChangeService.changeStateToWaitingOnSystem(workflowStep)
         } else {
             workflowStateChangeService.changeStateToSuccess(workflowStep)

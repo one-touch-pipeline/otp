@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import grails.converters.JSON
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 import org.grails.web.json.JSONObject
 
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
@@ -32,6 +33,7 @@ import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 import static de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification.CONTIG
 import static de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification.UNDEFINED
 
+@CompileDynamic
 @Transactional
 class AbstractQualityAssessmentService {
 

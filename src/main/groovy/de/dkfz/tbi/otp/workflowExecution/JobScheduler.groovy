@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.workflowExecution
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 import groovy.transform.InheritConstructors
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
@@ -38,6 +39,7 @@ import de.dkfz.tbi.otp.workflow.shared.WorkflowException
 
 import static grails.async.Promises.task
 
+@CompileDynamic
 @Slf4j
 @Component
 class JobScheduler {

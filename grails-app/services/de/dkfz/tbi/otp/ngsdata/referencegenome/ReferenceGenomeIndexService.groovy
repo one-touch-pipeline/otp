@@ -22,9 +22,11 @@
 package de.dkfz.tbi.otp.ngsdata.referencegenome
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.ngsdata.*
 
+@CompileDynamic
 @Transactional
 class ReferenceGenomeIndexService {
     ReferenceGenomeService referenceGenomeService

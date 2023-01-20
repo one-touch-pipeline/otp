@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 
+import groovy.transform.CompileDynamic
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.SeqCenter
@@ -36,6 +37,7 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 @Component
 class SeqCenterValidator extends SingleValueValidator<MetadataValidationContext> implements MetadataValidator {
 
+    @CompileDynamic
     @Override
     Collection<String> getDescriptions() {
         return ['The sequencing center is registered in the OTP database.']
@@ -46,6 +48,7 @@ class SeqCenterValidator extends SingleValueValidator<MetadataValidationContext>
         return CENTER_NAME.name()
     }
 
+    @CompileDynamic
     @Override
     void validateValue(MetadataValidationContext context, String centerName, Set<Cell> cells) {
         if (!atMostOneElement(SeqCenter.findAllByName(centerName))) {

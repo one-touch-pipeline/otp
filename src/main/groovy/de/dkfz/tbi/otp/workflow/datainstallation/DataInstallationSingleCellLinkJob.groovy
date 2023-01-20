@@ -21,15 +21,12 @@
  */
 package de.dkfz.tbi.otp.workflow.datainstallation
 
-import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellMappingFileService
-import de.dkfz.tbi.otp.ngsdata.DataFile
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
-import de.dkfz.tbi.otp.ngsdata.WellDirectory
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.LinkEntry
 import de.dkfz.tbi.otp.workflow.jobs.AbstractLinkJob
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
@@ -38,7 +35,6 @@ import java.nio.file.Path
 
 @Component
 @Slf4j
-@CompileStatic
 class DataInstallationSingleCellLinkJob extends AbstractLinkJob implements DataInstallationShared {
 
     @Autowired

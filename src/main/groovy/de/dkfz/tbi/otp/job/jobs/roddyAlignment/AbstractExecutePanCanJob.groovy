@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
+import groovy.transform.CompileDynamic
 import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.dataprocessing.*
@@ -37,6 +38,7 @@ import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 import java.nio.file.FileSystem
 import java.nio.file.Path
 
+@CompileDynamic
 abstract class AbstractExecutePanCanJob<R extends RoddyResult> extends AbstractRoddyJob<R> {
 
     @Autowired

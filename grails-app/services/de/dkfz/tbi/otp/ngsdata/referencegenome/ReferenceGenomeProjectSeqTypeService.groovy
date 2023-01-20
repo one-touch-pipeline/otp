@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.otp.ngsdata.referencegenome
 
+import groovy.transform.CompileDynamic
+
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeProjectSeqType
 import de.dkfz.tbi.otp.ngsdata.SampleType
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
@@ -28,6 +30,7 @@ import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
+@CompileDynamic
 class ReferenceGenomeProjectSeqTypeService {
 
     ReferenceGenomeProjectSeqType findReferenceGenomeProjectSeqTypeNoSampleType(Project project, SeqType seqType) {

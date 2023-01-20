@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.job.jobs.bamFilePairAnalysis
 
+import groovy.transform.CompileDynamic
 import org.hibernate.Hibernate
 
 import de.dkfz.tbi.otp.dataprocessing.ConfigPerProjectAndSeqType
@@ -30,6 +31,7 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 
+@CompileDynamic
 trait RoddyBamFilePairAnalysisStartJob implements BamFilePairAnalysisStartJobTrait {
 
     @Override

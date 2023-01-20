@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.validators
 
+import groovy.transform.CompileDynamic
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.BamMetadataColumn
@@ -44,6 +45,7 @@ class ReferenceGenomeValidator extends SingleValueValidator<BamMetadataValidatio
         return BamMetadataColumn.REFERENCE_GENOME.name()
     }
 
+    @CompileDynamic
     @Override
     void validateValue(BamMetadataValidationContext context, String refGen, Set<Cell> cells) {
         if (!ReferenceGenome.findAllByName(refGen)) {

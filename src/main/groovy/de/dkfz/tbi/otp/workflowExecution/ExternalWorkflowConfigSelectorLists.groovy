@@ -21,10 +21,10 @@
  */
 package de.dkfz.tbi.otp.workflowExecution
 
-import groovy.transform.*
+import groovy.transform.ToString
+import groovy.transform.TupleConstructor
 
 @ToString(includeNames = true, includePackage = false)
-@CompileStatic
 @TupleConstructor
 class ExternalWorkflowConfigSelectorLists {
     List<ExternalWorkflowConfigSelector> relatedSelectors

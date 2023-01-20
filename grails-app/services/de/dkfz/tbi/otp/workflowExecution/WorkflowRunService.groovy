@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.workflowExecution
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 import groovy.transform.TupleConstructor
 import org.hibernate.LockMode
 import org.hibernate.LockOptions
@@ -42,6 +43,7 @@ import de.dkfz.tbi.util.TimeUtils
 
 import java.time.LocalDateTime
 
+@CompileDynamic
 @Transactional
 class WorkflowRunService {
 

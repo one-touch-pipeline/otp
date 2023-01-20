@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.utils
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 import groovy.transform.TupleConstructor
 import org.springframework.beans.factory.annotation.Autowired
 
@@ -36,6 +37,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 /**
  * @deprecated use {@link RoddyCommandService} for the new WF system
  */
+@CompileDynamic
 @Transactional
 @Deprecated
 class ExecuteRoddyCommandService {
@@ -74,6 +76,7 @@ class ExecuteRoddyCommandService {
      * @param realm , This is the realm to work on.
      * @deprecated use {@link RoddyCommandService} for the new WF system
      */
+    @CompileDynamic
     @Deprecated
     String defaultRoddyExecutionCommand(RoddyResult roddyResult, String nameInConfigFile, String analysisIDinConfigFile, Realm realm) {
         assert roddyResult: "The input roddyResult is not allowed to be null"

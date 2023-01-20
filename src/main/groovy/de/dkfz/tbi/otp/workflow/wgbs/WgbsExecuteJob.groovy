@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.workflow.wgbs
 
-import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
@@ -29,9 +28,7 @@ import org.springframework.stereotype.Component
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
-import de.dkfz.tbi.otp.ngsdata.BedFileService
-import de.dkfz.tbi.otp.ngsdata.Realm
-import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 import de.dkfz.tbi.otp.workflow.jobs.AbstractExecuteRoddyPipelineJob
 import de.dkfz.tbi.otp.workflow.panCancer.PanCancerShared
@@ -43,7 +40,6 @@ import java.nio.file.Path
 
 @Component
 @Slf4j
-@CompileStatic
 class WgbsExecuteJob extends AbstractExecuteRoddyPipelineJob implements PanCancerShared {
 
     @Autowired

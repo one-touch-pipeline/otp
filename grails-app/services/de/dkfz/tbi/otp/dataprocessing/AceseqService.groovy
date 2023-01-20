@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.ngsdata.PlotType
 import de.dkfz.tbi.otp.utils.CollectionUtils
@@ -32,6 +33,7 @@ import java.text.DecimalFormat
 import java.text.NumberFormat
 import java.util.stream.Collectors
 
+@CompileDynamic
 @Transactional
 class AceseqService extends AbstractBamFileAnalysisService<AceseqInstance> implements RoddyBamFileAnalysis, WithReferenceGenomeRestriction {
 
@@ -141,4 +143,3 @@ class AceseqService extends AbstractBamFileAnalysisService<AceseqInstance> imple
         ].flatten()
     }
 }
-

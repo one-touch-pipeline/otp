@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.ngsqc
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.dataprocessing.*
 
@@ -30,6 +31,7 @@ import java.util.regex.Matcher
 /**
  * Service providing methods to parse FastQC files and saving the parsed data to the database
  */
+@CompileDynamic
 @Transactional
 class FastqcUploadService {
 

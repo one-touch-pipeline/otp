@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 
+import groovy.transform.CompileDynamic
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
@@ -36,6 +37,7 @@ class BarcodeValidator extends SingleValueValidator<MetadataValidationContext> i
 
     final static String MUST_REGEX = /^[ACGTN\-,]*$/
 
+    @CompileDynamic
     @Override
     Collection<String> getDescriptions() {
         return ["Barcodes must match the regular expression '${MUST_REGEX}'."]

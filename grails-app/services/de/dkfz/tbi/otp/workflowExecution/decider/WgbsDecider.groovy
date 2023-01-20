@@ -22,12 +22,14 @@
 package de.dkfz.tbi.otp.workflowExecution.decider
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 import groovy.util.logging.Slf4j
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.workflow.wgbs.WgbsWorkflow
 import de.dkfz.tbi.otp.workflowExecution.Workflow
 
+@CompileDynamic
 @Component
 @Transactional
 @Slf4j

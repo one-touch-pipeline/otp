@@ -21,9 +21,9 @@
  */
 package de.dkfz.tbi.otp.workflow.panCancer
 
-import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.stereotype.Component
+
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.workflow.jobs.SetCorrectPermissionJob
@@ -34,7 +34,6 @@ import de.dkfz.tbi.otp.workflowExecution.*
  */
 @Component
 @Slf4j
-@CompileStatic
 class PanCancerWorkflow implements OtpWorkflow {
 
     static final String WORKFLOW = "PanCancer alignment"

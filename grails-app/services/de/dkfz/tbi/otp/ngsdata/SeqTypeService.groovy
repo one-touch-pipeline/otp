@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 import org.springframework.security.access.prepost.PreAuthorize
@@ -31,6 +32,7 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.workflowExecution.OtpWorkflow
 import de.dkfz.tbi.otp.workflowExecution.Workflow
 
+@CompileDynamic
 @Transactional
 class SeqTypeService extends MetadataFieldsService<SeqType> {
 

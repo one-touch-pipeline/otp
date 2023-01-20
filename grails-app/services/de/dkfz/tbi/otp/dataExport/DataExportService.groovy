@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.dataExport
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.dataprocessing.*
@@ -33,6 +34,7 @@ import java.nio.file.*
 
 @SuppressWarnings("GStringExpressionWithinString")
 @PreAuthorize("hasRole('ROLE_OPERATOR')")
+@CompileDynamic
 @Transactional
 class DataExportService {
 

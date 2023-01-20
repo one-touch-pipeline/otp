@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.config
 
 import grails.gorm.transactions.Transactional
 import grails.util.Environment
+import groovy.transform.CompileDynamic
 import org.springframework.beans.BeansException
 import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationContextAware
@@ -35,6 +36,7 @@ import java.time.*
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
+@CompileDynamic
 @Transactional
 class ConfigService implements ApplicationContextAware {
 

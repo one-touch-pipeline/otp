@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 
+import groovy.transform.CompileDynamic
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
@@ -40,6 +41,7 @@ class LibPrepKitValidator extends SingleValueValidator<MetadataValidationContext
     @Autowired
     LibraryPreparationKitService libraryPreparationKitService
 
+    @CompileDynamic
     @Override
     Collection<String> getDescriptions() {
         return ["The library preparation kit is registered in the OTP database or '${InformationReliability.UNKNOWN_VERIFIED.rawValue}' or empty."]

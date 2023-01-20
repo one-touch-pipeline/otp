@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
+import groovy.transform.CompileDynamic
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 
@@ -33,6 +34,7 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 /**
  * @deprecated class is part of the old workflow system, use {@link de.dkfz.tbi.otp.workflowExecution.decider.Decider} instead
 */
+@CompileDynamic
 @Deprecated
 abstract class AbstractAlignmentDecider implements AlignmentDecider {
 

@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.otp.monitor
 
+import groovy.transform.CompileDynamic
+
 import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaInstance
@@ -32,6 +34,7 @@ class RunYapsaPipelineChecker extends AbstractVariantCallingPipelineChecker {
 
     final String processingStateMember = 'runYapsaProcessingStatus'
 
+    @CompileDynamic
     @Override
     Pipeline getPipeline() {
         return CollectionUtils.atMostOneElement(Pipeline.findAllByName(Pipeline.Name.RUN_YAPSA))

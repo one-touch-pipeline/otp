@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.otp.job.processing
 
+import groovy.transform.CompileDynamic
+
 import de.dkfz.tbi.otp.job.plan.JobDecision
 
 /**
@@ -28,6 +30,7 @@ import de.dkfz.tbi.otp.job.plan.JobDecision
  *
  * @see DecisionJob
  */
+@CompileDynamic
 @Deprecated
 abstract class AbstractDecisionJobImpl extends AbstractEndStateAwareJobImpl implements DecisionJob {
     private JobDecision decision

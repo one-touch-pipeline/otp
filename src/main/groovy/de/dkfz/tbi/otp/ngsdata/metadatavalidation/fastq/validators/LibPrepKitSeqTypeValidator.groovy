@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 
+import groovy.transform.CompileDynamic
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
@@ -40,6 +41,7 @@ class LibPrepKitSeqTypeValidator extends ValueTuplesValidator<MetadataValidation
     @Autowired
     ValidatorHelperService validatorHelperService
 
+    @CompileDynamic
     @Override
     Collection<String> getDescriptions() {
         return ["If the sequencing type is ${SeqTypeService.seqTypesRequiredLibPrepKit*.nameWithLibraryLayout.join(' or ')}, " +

@@ -21,12 +21,11 @@
  */
 package de.dkfz.tbi.otp.project
 
+import grails.gorm.hibernate.annotation.ManagedEntity
+
 import de.dkfz.tbi.otp.Comment
 import de.dkfz.tbi.otp.CommentableWithHistory
-import grails.gorm.hibernate.annotation.ManagedEntity
-import de.dkfz.tbi.otp.ngsdata.ProjectRoleService
-import de.dkfz.tbi.otp.ngsdata.SeqCenter
-import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.project.additionalField.AbstractFieldValue
 import de.dkfz.tbi.otp.security.User

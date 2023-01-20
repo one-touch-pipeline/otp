@@ -22,11 +22,9 @@
 package de.dkfz.tbi.otp.dataprocessing.qaalignmentoverview
 
 import grails.gorm.transactions.Transactional
-import groovy.transform.CompileStatic
 
 import de.dkfz.tbi.otp.dataprocessing.RoddyQualityAssessment
 
-@CompileStatic
 @Transactional(readOnly = true)
 abstract class AbstractRoddyQaOverviewService extends AbstractQaOverviewService {
 

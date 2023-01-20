@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.job.scheduler
 
 import grails.core.GrailsApplication
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 import groovy.util.logging.Slf4j
 import org.slf4j.Logger
 import org.slf4j.MDC
@@ -48,6 +49,7 @@ import static ch.qos.logback.classic.ClassicConstants.FINALIZE_SESSION_MARKER
 import static grails.async.Promises.task
 import static org.springframework.util.Assert.notNull
 
+@CompileDynamic
 @Deprecated
 @Scope("singleton")
 @Component

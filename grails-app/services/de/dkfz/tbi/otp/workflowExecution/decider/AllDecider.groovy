@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.workflowExecution.decider
 
 import grails.gorm.transactions.Transactional
 import grails.util.Holders
+import groovy.transform.CompileDynamic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
@@ -40,6 +41,7 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowService
  * can be called during Fastq or BAM import, realignment, …
  * is called with a list of new/changed workflowArtefacts (see method decide in Decider)
  */
+@CompileDynamic
 @Component
 @Transactional
 @Slf4j

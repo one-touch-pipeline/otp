@@ -22,12 +22,15 @@
 package de.dkfz.tbi.otp.workflowExecution
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
+
 import de.dkfz.tbi.otp.project.Project
 
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
+@CompileDynamic
 @Transactional
 class ProcessingPriorityService {
 

@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 
+import groovy.transform.CompileDynamic
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
@@ -39,6 +40,7 @@ class ProjectRunNameFileNameValidator extends ValueTuplesValidator<MetadataValid
     @Autowired
     SampleIdentifierService sampleIdentifierService
 
+    @CompileDynamic
     @Override
     Collection<String> getDescriptions() {
         return ["The combination of project, run and filename must be unique."]
@@ -67,6 +69,7 @@ class ProjectRunNameFileNameValidator extends ValueTuplesValidator<MetadataValid
         }
     }
 
+    @CompileDynamic
     void validateValueTuple(MetadataValidationContext context, ValueTuple valueTuple) {
         String runId = valueTuple.getValue(RUN_ID.name())
         String fileName = new File(valueTuple.getValue(FASTQ_FILE.name())).name

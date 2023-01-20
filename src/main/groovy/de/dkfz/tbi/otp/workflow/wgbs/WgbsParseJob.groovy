@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.workflow.wgbs
 
-import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.stereotype.Component
 
@@ -31,7 +30,6 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 @Component
 @Slf4j
-@CompileStatic
 class WgbsParseJob extends PanCancerParseJob {
 
     @Override

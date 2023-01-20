@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackageService
@@ -33,6 +34,7 @@ import de.dkfz.tbi.util.spreadsheet.validation.ValueTuple
 /**
  * A helper service for {@link MergingPreventionValidator}. It should not be used elsewhere.
  */
+@CompileDynamic
 @Transactional(readOnly = true)
 class MergingPreventionService {
 

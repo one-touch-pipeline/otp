@@ -71,6 +71,8 @@ apply plugin: "com.bertramlabs.asset-pipeline"
 apply plugin: "org.grails.grails-gsp"
 apply plugin: "codenarc"
 
+compileGroovy.groovyOptions.configurationScript = file('gradle/config/groovyc.groovy')
+
 repositories {
     mavenLocal()
     mavenCentral()
@@ -254,6 +256,7 @@ dependencies {
     implementation "org.grails.plugins:hibernate5:7.3.0"
     implementation "org.hibernate:hibernate-core:5.4.33.Final"
     implementation "org.grails.plugins:gsp"
+    implementation "javax.mail:javax.mail-api:1.6.2"
     profile "org.grails.profiles:web"
     runtimeOnly "org.glassfish.web:el-impl:2.2.1-b05"
     runtimeOnly "com.h2database:h2"

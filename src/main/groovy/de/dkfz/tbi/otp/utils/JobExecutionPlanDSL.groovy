@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.utils
 
+import groovy.transform.CompileDynamic
 import groovy.util.logging.Slf4j
 
 import de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys
@@ -33,6 +34,7 @@ class Helper {
     JobDefinition watchdogJobDefinition = null
 }
 
+@CompileDynamic
 @SuppressWarnings("UnusedPrivateField")
 @Slf4j
 class JobExecutionPlanDSL {

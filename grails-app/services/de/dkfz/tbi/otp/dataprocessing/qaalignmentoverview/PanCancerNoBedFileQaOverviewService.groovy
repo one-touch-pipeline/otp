@@ -22,7 +22,6 @@
 package de.dkfz.tbi.otp.dataprocessing.qaalignmentoverview
 
 import grails.gorm.transactions.Transactional
-import groovy.transform.CompileStatic
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.SeqType
@@ -32,7 +31,6 @@ import de.dkfz.tbi.otp.workflow.panCancer.PanCancerWorkflow
 import de.dkfz.tbi.otp.workflow.wgbs.WgbsWorkflow
 import de.dkfz.tbi.otp.workflowExecution.WorkflowService
 
-@CompileStatic
 @Transactional(readOnly = true)
 class PanCancerNoBedFileQaOverviewService extends AbstractRoddyQaOverviewService {
 

@@ -21,11 +21,9 @@
  */
 package de.dkfz.tbi.otp.workflowExecution
 
-import groovy.transform.CompileStatic
 import groovy.transform.ToString
 
 @ToString(includeNames = true, includePackage = false)
-@CompileStatic
 class ExternalWorkflowConfigSelectorSearchParameter {
     List<Long> workflowIds = []
     List<Long> workflowVersionIds = []

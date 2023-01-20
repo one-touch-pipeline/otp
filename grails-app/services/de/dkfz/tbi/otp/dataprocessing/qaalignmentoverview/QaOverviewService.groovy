@@ -22,7 +22,6 @@
 package de.dkfz.tbi.otp.dataprocessing.qaalignmentoverview
 
 import grails.gorm.transactions.Transactional
-import groovy.transform.CompileStatic
 import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractQualityAssessment
@@ -31,7 +30,6 @@ import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
-@CompileStatic
 @Transactional(readOnly = true)
 class QaOverviewService {
 

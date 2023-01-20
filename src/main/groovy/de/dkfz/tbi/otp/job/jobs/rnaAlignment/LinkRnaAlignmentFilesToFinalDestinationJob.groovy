@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.job.jobs.rnaAlignment
 
 import grails.gorm.transactions.NotTransactional
+import groovy.transform.CompileDynamic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Scope
@@ -36,6 +37,7 @@ import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.ExecuteRoddyCommandService
 import de.dkfz.tbi.otp.utils.SessionUtils
 
+@CompileDynamic
 @Component
 @Scope("prototype")
 @Slf4j

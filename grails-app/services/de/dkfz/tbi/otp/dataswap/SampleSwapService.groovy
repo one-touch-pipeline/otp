@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.dataswap
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataswap.data.SampleSwapData
@@ -32,6 +33,7 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 import java.nio.file.Path
 
 @SuppressWarnings("JavaIoPackageAccess")
+@CompileDynamic
 @Transactional
 class SampleSwapService extends AbstractDataSwapService<SampleSwapParameters, SampleSwapData> {
 

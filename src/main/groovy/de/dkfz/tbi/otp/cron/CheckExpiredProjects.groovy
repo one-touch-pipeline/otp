@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.cron
 
+import groovy.transform.CompileDynamic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
@@ -32,6 +33,7 @@ import de.dkfz.tbi.otp.utils.MessageSourceService
 
 import java.time.LocalDate
 
+@CompileDynamic
 @Component
 @Slf4j
 class CheckExpiredProjects extends AbstractScheduledJob {

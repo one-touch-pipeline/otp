@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.otp.job.jobs.rnaAlignment
 
+import groovy.transform.CompileDynamic
+
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.*
 import de.dkfz.tbi.otp.job.jobs.*
@@ -31,6 +33,7 @@ import org.springframework.beans.factory.annotation.*
 import org.springframework.context.annotation.*
 import org.springframework.stereotype.*
 
+@CompileDynamic
 @Component
 @Scope("prototype")
 @Slf4j

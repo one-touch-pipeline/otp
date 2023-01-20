@@ -22,12 +22,14 @@
 package de.dkfz.tbi.otp.security.user
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.security.Role
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.security.UserRole
 
+@CompileDynamic
 @Transactional
 class RolesService {
 

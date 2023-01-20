@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.job.jobs.aceseq
 
+import groovy.transform.CompileDynamic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Scope
@@ -37,6 +38,7 @@ import de.dkfz.tbi.otp.utils.LinkFileUtils
 
 import java.nio.file.Path
 
+@CompileDynamic
 @Component
 @Scope("prototype")
 @Slf4j

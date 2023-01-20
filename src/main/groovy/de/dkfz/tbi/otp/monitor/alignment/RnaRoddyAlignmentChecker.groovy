@@ -70,7 +70,7 @@ class RnaRoddyAlignmentChecker extends AbstractRoddyAlignmentChecker {
                     mergingWorkPackages               : [],
             ]
         }
-        List list = MergingWorkPackage.executeQuery("""
+        List<List<?>> list = (MergingWorkPackage.executeQuery("""
                     select
                         mergingWorkPackage,
                         seqTrack
@@ -84,14 +84,14 @@ class RnaRoddyAlignmentChecker extends AbstractRoddyAlignmentChecker {
                 """.toString(), [
                 seqTracks                                    : seqTracks,
                 pipeLineName                                 : pipeLineName,
-        ])
+        ]) as List<List<?>>)
 
-        List seqTracksWithoutMergingWorkpackage = seqTracks - list.collect {
-            it[1]
+        List<SeqTrack> seqTracksWithoutMergingWorkpackage = seqTracks - list.collect {
+            it[1] as SeqTrack
         }
 
         List<MergingWorkPackage> mergingWorkPackages = list.collect {
-            it[0]
+            it[0] as MergingWorkPackage
         }.unique()
 
         return [

@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.job.processing
 
 import grails.gorm.transactions.Transactional
 import grails.web.mapping.LinkGenerator
+import groovy.transform.CompileDynamic
 import org.springframework.security.access.prepost.PostAuthorize
 import org.springframework.security.access.prepost.PreAuthorize
 
@@ -36,6 +37,7 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 /**
  * Service providing methods to access information about Processes.
  */
+@CompileDynamic
 @Transactional
 class ProcessService {
 

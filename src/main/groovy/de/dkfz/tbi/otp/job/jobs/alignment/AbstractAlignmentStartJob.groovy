@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.job.jobs.alignment
 
+import groovy.transform.CompileDynamic
 import groovy.util.logging.Slf4j
 import org.springframework.scheduling.annotation.Scheduled
 
@@ -34,6 +35,7 @@ import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.utils.SessionUtils
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
+@CompileDynamic
 @Slf4j
 abstract class AbstractAlignmentStartJob extends AbstractStartJobImpl implements RestartableStartJob {
 

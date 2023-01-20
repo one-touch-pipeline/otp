@@ -22,11 +22,13 @@
 package de.dkfz.tbi.otp.ngsdata.referencegenome
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.ngsdata.ToolName
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
+@CompileDynamic
 @Transactional
 class ToolNameService {
 

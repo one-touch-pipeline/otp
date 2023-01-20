@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.project.projectRequest
 
+import groovy.transform.CompileDynamic
 import org.springframework.aop.framework.AopProxyUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
@@ -30,6 +31,7 @@ import de.dkfz.tbi.otp.project.ProjectRequest
 
 import javax.annotation.PostConstruct
 
+@CompileDynamic
 @Component
 class ProjectRequestStateProvider {
 

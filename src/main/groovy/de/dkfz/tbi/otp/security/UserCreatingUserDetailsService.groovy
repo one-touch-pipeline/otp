@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.security
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails
@@ -49,6 +50,7 @@ class UserCreatingUserDetailsService implements UserDetailsService {
     @Autowired
     IdentityProvider identityProvider
 
+    @CompileDynamic
     @Override
     @Transactional(readOnly = false, noRollbackFor = [IllegalArgumentException, UsernameNotFoundException])
     UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {

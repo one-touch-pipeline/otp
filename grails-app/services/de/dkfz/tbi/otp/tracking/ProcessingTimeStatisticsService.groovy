@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.tracking
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.dataprocessing.NotSupportedException
@@ -35,6 +36,7 @@ import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 
+@CompileDynamic
 @Transactional
 class ProcessingTimeStatisticsService {
 

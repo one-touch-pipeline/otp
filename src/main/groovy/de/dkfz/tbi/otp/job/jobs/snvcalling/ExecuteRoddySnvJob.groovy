@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
+import groovy.transform.CompileDynamic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Scope
@@ -34,13 +35,12 @@ import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.jobs.AutoRestartableJob
 import de.dkfz.tbi.otp.job.jobs.roddyAlignment.AbstractExecutePanCanJob
 import de.dkfz.tbi.otp.job.processing.FileSystemService
-import de.dkfz.tbi.otp.ngsdata.IndividualService
-import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 
 import java.nio.file.Path
 
+@CompileDynamic
 @Component
 @Scope("prototype")
 @Slf4j
@@ -99,7 +99,7 @@ class ExecuteRoddySnvJob extends AbstractExecutePanCanJob<RoddySnvCallingInstanc
 
     @Override
     protected void validate(RoddySnvCallingInstance roddySnvCallingInstance) throws Throwable {
-        assert roddySnvCallingInstance : "The input roddyResult must not be null"
+        assert roddySnvCallingInstance: "The input roddyResult must not be null"
 
         executeRoddyCommandService.correctPermissionsAndGroups(roddySnvCallingInstance, roddySnvCallingInstance.project.realm)
 

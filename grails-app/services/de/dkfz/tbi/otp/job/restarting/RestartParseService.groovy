@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.job.restarting
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.job.plan.JobErrorDefinition
 import de.dkfz.tbi.otp.job.processing.Job
@@ -30,6 +31,7 @@ import de.dkfz.tbi.otp.job.scheduler.ErrorLogService
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
+@CompileDynamic
 @Transactional
 class RestartParseService {
 

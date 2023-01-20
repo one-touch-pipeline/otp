@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.notification
 
 import grails.gorm.transactions.Transactional
 import grails.web.mapping.LinkGenerator
+import groovy.transform.CompileDynamic
 import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.ProjectSelectionService
@@ -45,6 +46,7 @@ import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus
 import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus.ALL_DONE
 import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO
 
+@CompileDynamic
 @Transactional
 class CreateNotificationTextService {
 

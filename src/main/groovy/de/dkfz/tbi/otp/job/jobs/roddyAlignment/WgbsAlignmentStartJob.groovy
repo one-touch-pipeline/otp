@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
+import groovy.transform.CompileDynamic
 import groovy.util.logging.Slf4j
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
@@ -30,6 +31,7 @@ import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.ngsdata.SequencingReadType
 
+@CompileDynamic
 @Component('WgbsAlignmentStartJob')
 @Scope('singleton')
 @Slf4j

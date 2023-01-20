@@ -15,6 +15,7 @@
 package de.dkfz.tbi.otp.security
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy
 import org.springframework.security.authentication.AuthenticationTrustResolver
 import org.springframework.security.core.Authentication
@@ -37,6 +38,7 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
  * This code was copied from the Grails Spring Security Core plugin
  * (grails.plugin.springsecurity.SpringSecurityService and grails.plugin.springsecurity.SpringSecurityUtils)
  */
+@CompileDynamic
 @Transactional
 class SecurityService {
 

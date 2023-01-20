@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp
 
+import groovy.transform.CompileDynamic
 import org.springframework.expression.Expression
 import org.springframework.security.access.expression.ExpressionUtils
 import org.springframework.security.access.expression.SecurityExpressionHandler
@@ -32,6 +33,7 @@ import de.dkfz.tbi.otp.security.SecurityService
 
 import javax.servlet.FilterChain
 
+@CompileDynamic
 class SecurityTagLib {
 
     static namespace = "sec"

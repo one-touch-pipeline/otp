@@ -150,6 +150,7 @@ class ScriptBuilderSpec extends Specification implements DataTest, RoddyPancanFa
         builder.configService = configService
         builder.fileService = fileService
         builder.fileSystemService = fileSystemService
+        builder.relativeOutputDir = Paths.get("subDir")
 
         when:
         metaInformations.forEach {

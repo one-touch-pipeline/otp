@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.workflowExecution
 
 import grails.gorm.transactions.Transactional
 import groovy.json.JsonSlurper
+import groovy.transform.CompileDynamic
 import groovy.util.logging.Slf4j
 import org.hibernate.sql.JoinType
 
@@ -30,6 +31,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
+@CompileDynamic
 @Slf4j
 @Transactional(readOnly = true)
 class ExternalWorkflowConfigSelectorService {
@@ -249,6 +251,7 @@ class ExternalWorkflowConfigSelectorService {
  * - substitutedSelectors, which get overwritten by the according selector
  * - conflictingSelectors, which have same priority and will be potentially cause a problem *
  */
+@CompileDynamic
 class OverwritingSubstitutedAndConflictingSelectors {
     List<NameValueAndConflictingKeysExternalWorkflowConfigSelector> overwritingSelectors
     List<NameValueAndConflictingKeysExternalWorkflowConfigSelector> substitutedSelectors
@@ -269,6 +272,7 @@ class OverwritingSubstitutedAndConflictingSelectors {
     }
 }
 
+@CompileDynamic
 class NameValueAndConflictingKeysExternalWorkflowConfigSelector {
     List<JsonConflictingParameters> conflictingParameters
     String selectorName
@@ -286,6 +290,7 @@ class NameValueAndConflictingKeysExternalWorkflowConfigSelector {
     }
 }
 
+@CompileDynamic
 class JsonConflictingParameters {
     String conflictingKey
     String currentValue
@@ -303,6 +308,7 @@ class JsonConflictingParameters {
     }
 }
 
+@CompileDynamic
 class CalculatePriorityDTO {
     /**
      * Global bit/flag definition for the priority calculation.
@@ -337,4 +343,3 @@ class CalculatePriorityDTO {
     Set<WorkflowVersion> workflowVersions
     Set<Workflow> workflows
 }
-

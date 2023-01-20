@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
+import groovy.transform.CompileDynamic
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 
 /**
@@ -29,6 +30,7 @@ import de.dkfz.tbi.otp.ngsdata.SeqTrack
  *
  * @deprecated class is part of the old workflow system, use {@link de.dkfz.tbi.otp.workflowExecution.decider.Decider} instead
  */
+@CompileDynamic
 @Deprecated
 interface AlignmentDecider {
 

@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.util.spreadsheet.validation
 
+import groovy.transform.CompileDynamic
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 
@@ -28,6 +29,7 @@ import de.dkfz.tbi.util.spreadsheet.Cell
 
 import java.util.logging.Level
 
+@CompileDynamic
 @EqualsAndHashCode
 @ToString(allProperties=false)
 class Problem {
@@ -49,10 +51,10 @@ class Problem {
     }
 
     String getLogLikeString() {
-        return "[${level.name}]: ${messageWithIndentedMultiline}"
+        return "[${level.name}]: ${fetchMessageWithIndentedMultiline()}"
     }
 
-    String getMessageWithIndentedMultiline(String indent = "    ") {
+    String fetchMessageWithIndentedMultiline(String indent = "    ") {
         return message?.split("\\n")?.join("\n${indent}")
     }
 }

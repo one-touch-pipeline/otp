@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.project.projectRequest
 
+import groovy.transform.CompileDynamic
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
@@ -46,6 +47,7 @@ class Initial implements ProjectRequestState {
         return []
     }
 
+    @CompileDynamic
     @Override
     Long submit(ProjectRequestCreationCommand cmd) {
         ProjectRequest createdProjectRequest = projectRequestService.saveProjectRequestFromCommand(cmd)
@@ -54,6 +56,7 @@ class Initial implements ProjectRequestState {
         return createdProjectRequest.id
     }
 
+    @CompileDynamic
     @Override
     Long save(ProjectRequestCreationCommand cmd) {
         ProjectRequest projectRequest = projectRequestService.saveProjectRequestFromCommand(cmd)

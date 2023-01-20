@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 
+import groovy.transform.CompileDynamic
 import groovy.transform.TupleConstructor
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
@@ -101,6 +102,7 @@ class AlignmentValidator extends ValueTuplesValidator<MetadataValidationContext>
         }
     }
 
+    @CompileDynamic
     private void checkSingleTuple(ProjectSeqTypeSpecies projectSeqTypeSpecies, List<SeqType> seqTypesOldSystem, MetadataValidationContext context, List<SeqType> seqTypesNewSystem) {
         Project project = projectSeqTypeSpecies.project
         SeqType seqType = projectSeqTypeSpecies.seqType

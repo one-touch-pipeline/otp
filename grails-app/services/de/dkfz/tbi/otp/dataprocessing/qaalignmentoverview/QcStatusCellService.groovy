@@ -22,7 +22,6 @@
 package de.dkfz.tbi.otp.dataprocessing.qaalignmentoverview
 
 import grails.gorm.transactions.Transactional
-import groovy.transform.CompileStatic
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
 import de.dkfz.tbi.otp.qcTrafficLight.TableCellValue
@@ -31,7 +30,6 @@ import de.dkfz.tbi.otp.utils.MessageSourceService
 /**
  * service to create the cell for the {@link AbstractMergedBamFile.QcTrafficLightStatus}
  */
-@CompileStatic
 @Transactional(readOnly = true)
 class QcStatusCellService {
 

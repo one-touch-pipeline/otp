@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.job.jobs.runYapsa
 
+import groovy.transform.CompileDynamic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Scope
@@ -42,6 +43,7 @@ import java.nio.file.Path
 
 import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
 
+@CompileDynamic
 @Component
 @Scope("prototype")
 @Slf4j

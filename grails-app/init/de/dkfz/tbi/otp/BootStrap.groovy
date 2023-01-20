@@ -24,21 +24,19 @@ package de.dkfz.tbi.otp
 import grails.converters.JSON
 import grails.core.GrailsApplication
 import grails.util.Environment
-import groovy.transform.CompileStatic
 
 import de.dkfz.odcf.audit.impl.DicomAuditLogger
 import de.dkfz.odcf.audit.xml.layer.EventIdentification.EventOutcomeIndicator
-import de.dkfz.tbi.otp.ngsdata.FastqImportInstanceService
-import de.dkfz.tbi.otp.job.processing.FileSystemService
-import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
-import de.dkfz.tbi.otp.security.user.UserService
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.config.PropertiesValidationService
+import de.dkfz.tbi.otp.job.processing.FileSystemService
+import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
+import de.dkfz.tbi.otp.ngsdata.FastqImportInstanceService
+import de.dkfz.tbi.otp.security.user.UserService
 import de.dkfz.tbi.otp.workflow.shared.WorkflowException
 import de.dkfz.tbi.otp.workflowExecution.WorkflowSystemService
 
-@CompileStatic
 class BootStrap {
     ConfigService configService
     GrailsApplication grailsApplication

@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 
+import groovy.transform.CompileDynamic
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedMergedBamFile
@@ -51,6 +52,7 @@ class Md5sumUniqueValidator extends ValueTuplesValidator<AbstractMetadataValidat
     void checkMissingRequiredColumn(AbstractMetadataValidationContext context, String columnTitle) {
     }
 
+    @CompileDynamic
     @Override
     void validateValueTuples(AbstractMetadataValidationContext context, Collection<ValueTuple> valueTuples) {
         valueTuples.groupBy {

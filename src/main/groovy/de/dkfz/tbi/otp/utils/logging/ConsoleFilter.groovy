@@ -25,9 +25,11 @@ import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.filter.Filter
 import ch.qos.logback.core.spi.FilterReply
 import grails.util.Environment
+import groovy.transform.CompileDynamic
 
 class ConsoleFilter extends Filter<ILoggingEvent> {
 
+    @CompileDynamic
     @Override
     FilterReply decide(ILoggingEvent event) {
         if (Environment.isDevelopmentEnvironmentAvailable() || Environment.current.name == "WORKFLOW_TEST") {

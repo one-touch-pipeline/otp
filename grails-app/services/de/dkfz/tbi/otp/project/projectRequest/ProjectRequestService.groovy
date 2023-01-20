@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.project.projectRequest
 
 import grails.gorm.transactions.Transactional
 import grails.web.mapping.LinkGenerator
+import groovy.transform.CompileDynamic
 import org.codehaus.groovy.runtime.InvokerHelper
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.prepost.PreAuthorize
@@ -41,6 +42,7 @@ import de.dkfz.tbi.otp.utils.*
 
 import java.time.LocalDate
 
+@CompileDynamic
 @Transactional
 class ProjectRequestService {
 

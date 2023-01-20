@@ -21,9 +21,6 @@
  */
 package de.dkfz.tbi.otp.egaSubmission
 
-import groovy.transform.CompileStatic
-
-@CompileStatic
 class SampleIdSeqTypeId {
 
     final Long sampleId

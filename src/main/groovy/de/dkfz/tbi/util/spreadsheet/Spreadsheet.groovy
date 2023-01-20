@@ -22,6 +22,7 @@
 package de.dkfz.tbi.util.spreadsheet
 
 import com.opencsv.*
+import groovy.transform.CompileDynamic
 import groovy.transform.stc.ClosureParams
 import groovy.transform.stc.SimpleType
 
@@ -169,6 +170,7 @@ class Column {
     }
 }
 
+@CompileDynamic
 class Cell {
 
     private static final char[] LETTERS = 'A'..'Z'

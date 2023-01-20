@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
+import groovy.transform.CompileDynamic
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.project.Project
@@ -30,6 +31,7 @@ import de.dkfz.tbi.otp.utils.StringUtils
 
 import grails.gorm.transactions.Transactional
 
+@CompileDynamic
 @Transactional
 class KeywordService {
 

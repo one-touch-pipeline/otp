@@ -22,11 +22,13 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.MetadataField
 
+@CompileDynamic
 @Transactional
 abstract class MetadataFieldsService<T extends MetadataField> {
 

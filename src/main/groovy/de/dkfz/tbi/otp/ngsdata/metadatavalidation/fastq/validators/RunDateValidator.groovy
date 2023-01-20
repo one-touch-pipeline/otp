@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 
+import groovy.transform.CompileDynamic
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
@@ -48,6 +49,7 @@ class RunDateValidator extends SingleValueValidator<MetadataValidationContext> i
 
     static final DateTimeFormatter RUN_DATE_FORMATTER = DateTimeFormatter.ofPattern(RUN_DATE_FORMAT)
 
+    @CompileDynamic
     @Override
     Collection<String> getDescriptions() {
         return [

@@ -24,12 +24,14 @@ package de.dkfz.tbi.otp.job.processing
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.networknt.schema.*
+import groovy.transform.CompileDynamic
 import groovy.xml.MarkupBuilder
 
 import de.dkfz.tbi.otp.workflowExecution.WorkflowVersion
 
 import java.nio.file.Path
 
+@CompileDynamic
 class RoddyConfigService {
 
     final static String ANALYSIS_ID = "analysis"

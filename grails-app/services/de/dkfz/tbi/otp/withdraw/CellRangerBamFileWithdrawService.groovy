@@ -22,10 +22,12 @@
 package de.dkfz.tbi.otp.withdraw
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 
+@CompileDynamic
 @Transactional
 class CellRangerBamFileWithdrawService extends WithdrawBamFileService<SingleCellBamFile> {
 

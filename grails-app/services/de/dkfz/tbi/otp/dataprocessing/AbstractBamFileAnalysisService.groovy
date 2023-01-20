@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.utils.exceptions.FileInconsistencyException
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
@@ -32,6 +33,7 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 
 import java.nio.file.Path
 
+@CompileDynamic
 @Transactional
 abstract class AbstractBamFileAnalysisService<T extends BamFilePairAnalysis> implements BamFileAnalysisServiceTrait {
 

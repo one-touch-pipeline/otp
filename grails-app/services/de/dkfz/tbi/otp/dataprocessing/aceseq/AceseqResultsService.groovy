@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.dataprocessing.aceseq
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.dataprocessing.AceseqInstance
 import de.dkfz.tbi.otp.dataprocessing.AceseqQc
@@ -29,6 +30,7 @@ import de.dkfz.tbi.otp.ngsdata.AbstractAnalysisResultsService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.FormatHelper
 
+@CompileDynamic
 @Transactional
 class AceseqResultsService extends AbstractAnalysisResultsService<AceseqInstance> {
 

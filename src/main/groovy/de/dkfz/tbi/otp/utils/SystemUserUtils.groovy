@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.utils
 
 import grails.util.Holders
+import groovy.transform.CompileDynamic
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.GrantedAuthority
@@ -44,6 +45,7 @@ class SystemUserUtils {
      *
      * In case a security context is already set, it will fail.
      */
+    @CompileDynamic
     static <T> T useSystemUser(Closure<T> closure) {
         String userName = Holders.applicationContext.processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_SYSTEM_USER)
         assert userName: "no system user is defined"
@@ -56,6 +58,7 @@ class SystemUserUtils {
      *
      * In case a security context is already set, it will fail.
      */
+    @CompileDynamic
     static <T> T useUser(String userName, Closure<T> closure) {
         Authentication authentication = SecurityContextHolder.context.authentication
         if (authentication) {

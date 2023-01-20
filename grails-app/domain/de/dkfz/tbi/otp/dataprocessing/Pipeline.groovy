@@ -99,11 +99,11 @@ class Pipeline implements Entity {
 
         @Deprecated
         static List<Name> getAlignmentPipelineNames() {
-            return values().findAll {
+            return values().findAll { Name it ->
                 it.type == Type.ALIGNMENT
-            }.findAll {
+            }.findAll { Name it ->
                 !it.class.getField(it.name()).isAnnotationPresent(Deprecated)
-            }.findAll {
+            }.findAll { Name it ->
                 it != EXTERNALLY_PROCESSED
             }
         }

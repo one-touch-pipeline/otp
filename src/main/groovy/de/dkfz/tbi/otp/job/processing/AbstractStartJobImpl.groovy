@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.job.processing
 
 import grails.gorm.transactions.Transactional
 import grails.util.Environment
+import groovy.transform.CompileDynamic
 import org.hibernate.Hibernate
 import org.springframework.beans.factory.BeanNameAware
 import org.springframework.beans.factory.annotation.Autowired
@@ -44,6 +45,7 @@ import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
  *
  * @see StartJob
  */
+@CompileDynamic
 abstract class AbstractStartJobImpl implements StartJob, ApplicationListener<JobExecutionPlanChangedEvent>, BeanNameAware {
 
     @Autowired

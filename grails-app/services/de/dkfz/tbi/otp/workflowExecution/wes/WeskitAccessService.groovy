@@ -22,7 +22,6 @@
 package de.dkfz.tbi.otp.workflowExecution.wes
 
 import grails.converters.JSON
-import groovy.transform.CompileStatic
 import io.swagger.client.wes.api.WorkflowExecutionServiceApi
 import io.swagger.client.wes.model.*
 import org.springframework.web.reactive.function.client.WebClientResponseException
@@ -36,7 +35,6 @@ import java.time.Duration
  *
  * This service provides simplified access to the Weskit method used in OTP.
  */
-@CompileStatic
 class WeskitAccessService {
 
     /**

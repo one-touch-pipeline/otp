@@ -20,13 +20,11 @@
  * SOFTWARE.
  */
 
-import groovy.transform.CompileStatic
 import org.codehaus.groovy.ast.AnnotationNode
 import org.codehaus.groovy.ast.ClassNode
 import org.codenarc.rule.AbstractAstVisitor
 import org.codenarc.rule.AbstractAstVisitorRule
 
-@CompileStatic
 class AnnotationsForStartJobsRule extends AbstractAstVisitorRule {
     String doNotApplyToFileNames = "*/*test*/*"
     String applyToFileNames = "*/*StartJob.groovy"
@@ -36,7 +34,6 @@ class AnnotationsForStartJobsRule extends AbstractAstVisitorRule {
     Class astVisitorClass = AnnotationsForStartJobsVisitor
 }
 
-@CompileStatic
 class AnnotationsForStartJobsVisitor extends AbstractAstVisitor implements IsAnnotationVisitor {
 
     @Override

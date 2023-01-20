@@ -23,7 +23,6 @@ package de.dkfz.tbi.otp.utils
 
 import grails.gorm.transactions.Transactional
 import groovy.transform.CompileDynamic
-import groovy.transform.CompileStatic
 import org.codehaus.groovy.runtime.StringGroovyMethods
 import org.grails.datastore.gorm.GormEntityApi
 import org.springframework.security.access.prepost.PreAuthorize
@@ -51,7 +50,6 @@ import java.time.format.DateTimeFormatter
  * It can also handle sets or list, were each string value is converted to the requested generic type of the collection, which itself are converted to the
  * type of the property. Empty values are removed from the list.
  */
-@CompileStatic
 @Transactional
 class UpdateDomainPropertyService {
 

@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaInstance
@@ -31,6 +32,7 @@ import de.dkfz.tbi.otp.infrastructure.FileService
 
 import java.nio.file.Path
 
+@CompileDynamic
 @Transactional
 class AnalysisDeletionService {
     AceseqService aceseqService

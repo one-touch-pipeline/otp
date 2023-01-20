@@ -21,12 +21,14 @@
  */
 package de.dkfz.tbi.otp.cron
 
+import groovy.transform.CompileDynamic
 import groovy.util.logging.Slf4j
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
 import de.dkfz.tbi.otp.workflowExecution.WorkflowRunInputArtefact
 
+@CompileDynamic
 @Component
 @Slf4j
 class DeleteConcreteArtefactsOfOmittedWorkflowArtefactsJob extends AbstractScheduledJob {

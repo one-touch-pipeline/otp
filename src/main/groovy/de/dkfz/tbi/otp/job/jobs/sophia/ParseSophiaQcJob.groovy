@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.job.jobs.sophia
 
 import grails.converters.JSON
+import groovy.transform.CompileDynamic
 import groovy.util.logging.Slf4j
 import org.grails.web.json.JSONObject
 import org.springframework.beans.factory.annotation.Autowired
@@ -49,6 +50,7 @@ class ParseSophiaQcJob extends AbstractEndStateAwareJobImpl implements AutoResta
     @Autowired
     SophiaService sophiaService
 
+    @CompileDynamic
     @Override
     void execute() throws Exception {
         final SophiaInstance sophiaInstance = processParameterObject

@@ -22,7 +22,6 @@
 package de.dkfz.tbi.otp.workflowExecution.cluster.logs
 
 import grails.gorm.transactions.Transactional
-import groovy.transform.CompileStatic
 
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.infrastructure.FileService
@@ -31,7 +30,6 @@ import de.dkfz.tbi.util.TimeFormats
 
 import java.nio.file.*
 
-@CompileStatic
 @Transactional
 abstract class AbstractLogDirectoryService {
 

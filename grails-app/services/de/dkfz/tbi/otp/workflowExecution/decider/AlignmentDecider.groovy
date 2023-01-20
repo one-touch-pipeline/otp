@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.workflowExecution.decider
 import grails.gorm.transactions.Transactional
 import grails.util.Pair
 import groovy.transform.Canonical
+import groovy.transform.CompileDynamic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 
@@ -38,6 +39,7 @@ import de.dkfz.tbi.otp.workflowExecution.*
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
+@CompileDynamic
 @Transactional
 @Slf4j
 abstract class AlignmentDecider extends AbstractWorkflowDecider {

@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.workflow.alignment
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.dataprocessing.*
@@ -34,6 +35,7 @@ import de.dkfz.tbi.otp.withdraw.RoddyBamFileWithdrawService
 import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.otp.workflowExecution.decider.AllDecider
 
+@CompileDynamic
 @Transactional(readOnly = true)
 class TriggerAlignmentService {
 

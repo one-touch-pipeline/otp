@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.project.projectRequest
 
+import groovy.transform.CompileDynamic
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Component
@@ -75,6 +76,7 @@ class Approval implements ProjectRequestState {
         return null
     }
 
+    @CompileDynamic
     @Override
     @PreAuthorize("hasPermission(#projectRequest, 'PROJECT_REQUEST_NEEDED_PIS')")
     void reject(ProjectRequest projectRequest, String rejectComment) {
@@ -89,6 +91,7 @@ class Approval implements ProjectRequestState {
     void passOn(ProjectRequest projectRequest) {
     }
 
+    @CompileDynamic
     @Override
     @PreAuthorize("hasPermission(#projectRequest, 'PROJECT_REQUEST_PI')")
     ProjectRequestCreationCommand edit(ProjectRequest projectRequest) {
@@ -98,6 +101,7 @@ class Approval implements ProjectRequestState {
         return ProjectRequestCreationCommand.fromProjectRequest(projectRequest)
     }
 
+    @CompileDynamic
     @Override
     @PreAuthorize("hasPermission(#cmd.projectRequest, 'PROJECT_REQUEST_NEEDED_PIS')")
     void approve(ApprovalCommand cmd) throws SwitchedUserDeniedException {

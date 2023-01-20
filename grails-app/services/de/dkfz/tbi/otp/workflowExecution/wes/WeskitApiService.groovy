@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.workflowExecution.wes
 
-import groovy.transform.CompileStatic
 import io.swagger.client.wes.api.WorkflowExecutionServiceApi
 
 import de.dkfz.tbi.otp.config.ConfigService
@@ -36,7 +35,6 @@ import de.dkfz.tbi.otp.config.ConfigService
  *
  * The returned instance is ready to use.
  */
-@CompileStatic
 class WeskitApiService {
 
     ConfigService configService

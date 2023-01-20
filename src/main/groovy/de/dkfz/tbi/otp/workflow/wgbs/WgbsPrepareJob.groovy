@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.workflow.wgbs
 
-import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
@@ -41,7 +40,6 @@ import java.nio.file.Path
 
 @Component
 @Slf4j
-@CompileStatic
 class WgbsPrepareJob extends AbstractPrepareJob implements PanCancerShared {
 
     @Autowired

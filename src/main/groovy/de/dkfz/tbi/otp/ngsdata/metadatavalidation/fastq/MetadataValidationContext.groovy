@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq
 
+import groovy.transform.CompileDynamic
+
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.AbstractMetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.ContentWithPathAndProblems
@@ -57,6 +59,7 @@ class MetadataValidationContext extends AbstractMetadataValidationContext {
         this.usedSampleIdentifiers = [] as Set
     }
 
+    @CompileDynamic
     static MetadataValidationContext createFromFile(Path metadataFile, DirectoryStructure directoryStructure, String directoryStructureDescription,
                                                     boolean ignoreAlreadyKnownMd5sum = false) {
         Map parametersForFile = readAndCheckFile(metadataFile, { String s ->
@@ -72,6 +75,7 @@ class MetadataValidationContext extends AbstractMetadataValidationContext {
                 directoryStructureDescription, parametersForFile.bytes)
     }
 
+    @CompileDynamic
     static MetadataValidationContext createFromContent(ContentWithPathAndProblems contentWithPathAndProblems,
                                                        DirectoryStructure directoryStructure,
                                                        String directoryStructureDescription,
@@ -90,6 +94,6 @@ class MetadataValidationContext extends AbstractMetadataValidationContext {
     }
 
     List<String> getSummary() {
-        return problems*.type.flatten().unique()
+        return problems*.type.flatten().unique() as List<String>
     }
 }

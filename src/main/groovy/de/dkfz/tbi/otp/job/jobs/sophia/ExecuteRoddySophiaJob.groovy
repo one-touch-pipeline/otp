@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.job.jobs.sophia
 
+import groovy.transform.CompileDynamic
 import groovy.util.logging.Slf4j
 import org.hibernate.Hibernate
 import org.springframework.beans.factory.annotation.Autowired
@@ -36,6 +37,7 @@ import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 
 import java.nio.file.Path
 
+@CompileDynamic
 @Component
 @Scope("prototype")
 @Slf4j

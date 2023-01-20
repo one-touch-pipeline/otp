@@ -21,8 +21,10 @@
  */
 package de.dkfz.tbi.otp.utils
 
+import groovy.transform.CompileDynamic
 import static org.hibernate.proxy.HibernateProxyHelper.getClassWithoutInitializingProxy
 
+@CompileDynamic
 trait Entity {
 
     @Override

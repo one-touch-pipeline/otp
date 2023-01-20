@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 
+import groovy.transform.CompileDynamic
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
@@ -62,6 +63,7 @@ class SeqTypeLibraryLayoutValidator extends ValueTuplesValidator<AbstractMetadat
     void checkMissingOptionalColumn(AbstractMetadataValidationContext context, String columnTitle) {
     }
 
+    @CompileDynamic
     @Override
     void validateValueTuples(AbstractMetadataValidationContext context, Collection<ValueTuple> valueTuples) {
         List<SeqType> seqTypes = []

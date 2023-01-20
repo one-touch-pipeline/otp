@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.workflow.fastqc
 
-import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
@@ -36,7 +35,6 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 @Component
 @Slf4j
-@CompileStatic
 class FastqcParseJob extends AbstractJob implements FastqcShared {
 
     @Autowired

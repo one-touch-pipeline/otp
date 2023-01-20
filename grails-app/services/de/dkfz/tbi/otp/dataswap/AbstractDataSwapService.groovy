@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.dataswap
 
 import grails.gorm.transactions.Transactional
 import grails.validation.Validateable
+import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.utils.exceptions.FileNotFoundException
@@ -50,6 +51,7 @@ import java.nio.file.*
  *        necessary to perform swap.
  */
 @SuppressWarnings("JavaIoPackageAccess")
+@CompileDynamic
 @Transactional
 abstract class AbstractDataSwapService<P extends DataSwapParameters, D extends DataSwapData<P>> {
 

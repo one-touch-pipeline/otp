@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.dataswap.data
 
+import groovy.transform.CompileDynamic
 import groovy.transform.TupleConstructor
 
 import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedMergedBamFile
@@ -28,6 +29,7 @@ import de.dkfz.tbi.otp.dataswap.Swap
 import de.dkfz.tbi.otp.dataswap.parameters.SampleSwapParameters
 import de.dkfz.tbi.otp.ngsdata.*
 
+@CompileDynamic
 @TupleConstructor
 class SampleSwapData extends DataSwapData<SampleSwapParameters> {
 

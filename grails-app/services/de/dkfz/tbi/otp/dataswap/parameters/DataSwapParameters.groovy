@@ -22,12 +22,14 @@
 package de.dkfz.tbi.otp.dataswap.parameters
 
 import grails.validation.Validateable
+import groovy.transform.CompileDynamic
 import groovy.transform.TupleConstructor
 
 import de.dkfz.tbi.otp.dataswap.Swap
 
 import java.nio.file.Path
 
+@CompileDynamic
 @TupleConstructor
 class DataSwapParameters implements Validateable {
 

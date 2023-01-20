@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.cron
 
+import groovy.transform.CompileDynamic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
@@ -34,6 +35,7 @@ import de.dkfz.tbi.otp.security.User
 /**
  * Scheduled job that checks if requested role changes are done.
  */
+@CompileDynamic
 @Component
 @Slf4j
 class CheckForAdUpdateJob extends AbstractScheduledJob {

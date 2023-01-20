@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.infrastructure
 import com.github.robtimus.filesystems.sftp.SFTPFileSystemProvider
 import grails.gorm.transactions.Transactional
 import grails.util.Environment
+import groovy.transform.CompileDynamic
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -45,6 +46,7 @@ import java.util.stream.Stream
 /**
  * Helper methods to work with file paths
  */
+@CompileDynamic
 @Transactional
 class FileService {
 

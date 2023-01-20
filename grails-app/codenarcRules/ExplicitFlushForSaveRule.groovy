@@ -20,12 +20,10 @@
  * SOFTWARE.
  */
 
-import groovy.transform.CompileStatic
 import org.codehaus.groovy.ast.expr.MethodCallExpression
 import org.codenarc.rule.AbstractAstVisitor
 import org.codenarc.rule.AbstractAstVisitorRule
 
-@CompileStatic
 class ExplicitFlushForSaveRule extends AbstractAstVisitorRule {
     int priority = 1
     String name = 'ExplicitFlushForSaveRule'
@@ -33,7 +31,6 @@ class ExplicitFlushForSaveRule extends AbstractAstVisitorRule {
     Class astVisitorClass = ExplicitFlushForSaveVisitor
 }
 
-@CompileStatic
 class ExplicitFlushForSaveVisitor extends AbstractAstVisitor {
 
     @Override

@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.infrastructure.FileService
@@ -31,6 +32,7 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 import java.nio.charset.StandardCharsets
 import java.nio.file.*
 
+@CompileDynamic
 @Transactional
 class LibraryPreparationKitService extends MetadataFieldsService<LibraryPreparationKit> {
 

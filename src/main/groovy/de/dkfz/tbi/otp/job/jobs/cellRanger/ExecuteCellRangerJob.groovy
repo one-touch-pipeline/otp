@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.job.jobs.cellRanger
 
+import groovy.transform.CompileDynamic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Scope
@@ -39,6 +40,7 @@ import java.nio.file.FileSystem
 import java.nio.file.Path
 import java.nio.file.Paths
 
+@CompileDynamic
 @Component
 @Scope("prototype")
 @Slf4j

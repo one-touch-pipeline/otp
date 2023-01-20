@@ -33,6 +33,7 @@ import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.ngsdata.mergingCriteria.ConfigureMergingCriteriaBaseCommand
 import de.dkfz.tbi.otp.ngsdata.mergingCriteria.ProjectSeqPlatformGroupController
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.workflowExecution.Workflow
 import de.dkfz.tbi.otp.workflowExecution.WorkflowService
 
@@ -121,7 +122,7 @@ class ProjectSeqPlatformGroupControllerSpec extends Specification implements Con
         model.allSeqPlatformsWithoutGroup == expectedSeqPlatformsWithoutGroup.sort { it.toString() }
         model.allUsedSpecificSeqPlatforms == expectedUsedSpecificSeqPlatforms
         model.dontAllowCopyingAll == expectedCopyingAllAllowed
-        model.availableSeqTypes == availableSeqTypes
+        CollectionUtils.containSame(model.availableSeqTypes, availableSeqTypes)
         model.selectedProjectToCopyForm == null
         model.selectedSeqTypeToCopyFrom == null
     }
@@ -196,7 +197,7 @@ class ProjectSeqPlatformGroupControllerSpec extends Specification implements Con
         model.allSeqPlatformsWithoutGroup == expectedSeqPlatformsWithoutGroup.sort { it.toString() }
         model.allUsedSpecificSeqPlatforms == expectedUsedSpecificSeqPlatforms
         model.dontAllowCopyingAll == expectedCopyingAllAllowed
-        model.availableSeqTypes == availableSeqTypes
+        CollectionUtils.containSame(model.availableSeqTypes, availableSeqTypes)
         model.selectedProjectToCopyForm == expectedProjectToCopyForm
         model.selectedSeqTypeToCopyFrom == expectedSeqTypeToCopyFrom
     }

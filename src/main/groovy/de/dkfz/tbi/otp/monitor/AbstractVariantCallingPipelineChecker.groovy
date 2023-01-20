@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.monitor
 
+import groovy.transform.CompileDynamic
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.TupleConstructor
 
@@ -30,6 +31,7 @@ import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
+@CompileDynamic
 abstract class AbstractVariantCallingPipelineChecker extends PipelinesChecker<SamplePair> {
 
     static final String HEADER_NO_CONFIG = 'For the following project seqtype combination no config is defined'
@@ -321,6 +323,7 @@ abstract class AbstractVariantCallingPipelineChecker extends PipelinesChecker<Sa
         return "${samplePair} ${ret ? " (${ret.join(', ')})" : ''}"
     }
 
+    @CompileDynamic
     @TupleConstructor
     @EqualsAndHashCode
     static class ToLittleCoverageSamplePair {

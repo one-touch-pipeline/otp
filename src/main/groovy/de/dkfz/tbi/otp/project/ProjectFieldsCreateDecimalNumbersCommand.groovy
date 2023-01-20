@@ -21,10 +21,12 @@
  */
 package de.dkfz.tbi.otp.project
 
+import groovy.transform.CompileDynamic
 import groovy.transform.ToString
 
 import de.dkfz.tbi.otp.project.additionalField.ProjectFieldType
 
+@CompileDynamic
 @ToString(includeNames = true, includeSuperProperties = true)
 class ProjectFieldsCreateDecimalNumbersCommand extends ProjectFieldsCreateCommand {
 

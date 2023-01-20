@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.workflowExecution
 
 import grails.gorm.transactions.Transactional
 import groovy.json.JsonSlurper
+import groovy.transform.CompileDynamic
 import groovy.transform.ToString
 import groovy.transform.TupleConstructor
 import org.grails.datastore.mapping.query.api.BuildableCriteria
@@ -34,6 +35,7 @@ import de.dkfz.tbi.otp.project.Project
 
 import java.time.LocalDate
 
+@CompileDynamic
 @Transactional
 class ConfigSelectorService {
 
@@ -294,6 +296,7 @@ class ConfigSelectorService {
     }
 }
 
+@CompileDynamic
 @TupleConstructor
 class MultiSelectSelectorExtendedCriteria {
     Set<Workflow> workflows
@@ -310,6 +313,7 @@ class MultiSelectSelectorExtendedCriteria {
     }
 }
 
+@CompileDynamic
 @ToString
 @TupleConstructor
 class SingleSelectSelectorExtendedCriteria {

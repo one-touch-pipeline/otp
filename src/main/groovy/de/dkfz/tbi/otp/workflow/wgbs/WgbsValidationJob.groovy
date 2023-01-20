@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.workflow.wgbs
 
-import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.stereotype.Component
 
@@ -33,7 +32,6 @@ import java.nio.file.Path
 
 @Component
 @Slf4j
-@CompileStatic
 class WgbsValidationJob extends PanCancerValidationJob {
 
     @Override

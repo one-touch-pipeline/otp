@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.otp.monitor
 
+import groovy.transform.CompileDynamic
+
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
@@ -30,6 +32,7 @@ class IndelCallingPipelineChecker extends AbstractVariantCallingPipelineChecker 
 
     final String processingStateMember = 'indelProcessingStatus'
 
+    @CompileDynamic
     @Override
     Pipeline getPipeline() {
         return CollectionUtils.atMostOneElement(Pipeline.findAllByName(Pipeline.Name.RODDY_INDEL))

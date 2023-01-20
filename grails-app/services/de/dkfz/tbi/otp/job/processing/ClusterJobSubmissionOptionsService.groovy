@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.job.processing
 
 import grails.converters.JSON
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 import org.grails.web.converters.exceptions.ConverterException
 import org.grails.web.json.JSONElement
 import org.grails.web.json.JSONObject
@@ -32,6 +33,7 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.SeqType
 
+@CompileDynamic
 @Transactional
 class ClusterJobSubmissionOptionsService {
 

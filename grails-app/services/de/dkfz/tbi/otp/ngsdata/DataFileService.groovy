@@ -22,11 +22,13 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 import org.hibernate.transform.ResultTransformer
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.project.Project
 
+@CompileDynamic
 @Transactional
 class DataFileService {
 

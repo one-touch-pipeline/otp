@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.dataprocessing.roddyExecution
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 import groovy.transform.TupleConstructor
 
 import de.dkfz.tbi.otp.dataprocessing.*
@@ -37,6 +38,7 @@ import java.nio.file.Path
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
+@CompileDynamic
 @Transactional
 class RoddyWorkflowConfigService {
 

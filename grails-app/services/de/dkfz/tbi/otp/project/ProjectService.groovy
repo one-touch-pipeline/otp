@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.project
 
 import grails.gorm.transactions.Transactional
 import grails.validation.ValidationException
+import groovy.transform.CompileDynamic
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.prepost.*
 import org.springframework.validation.Errors
@@ -62,6 +63,7 @@ import java.time.format.DateTimeFormatter
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
+@CompileDynamic
 @Transactional
 class ProjectService {
 

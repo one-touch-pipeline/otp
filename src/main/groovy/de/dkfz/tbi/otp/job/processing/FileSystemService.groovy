@@ -28,6 +28,7 @@ import com.jcraft.jsch.agentproxy.*
 import grails.core.GrailsApplication
 import grails.gorm.transactions.Transactional
 import grails.util.Environment
+import groovy.transform.CompileDynamic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.scheduling.annotation.Scheduled
@@ -46,6 +47,7 @@ import java.nio.file.*
 import static com.github.robtimus.filesystems.sftp.Identity.fromFiles
 import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
 
+@CompileDynamic
 @Slf4j
 @Component
 @Transactional

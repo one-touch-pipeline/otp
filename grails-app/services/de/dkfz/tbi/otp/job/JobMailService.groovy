@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.job
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
@@ -35,6 +36,7 @@ import de.dkfz.tbi.util.TimeFormats
 
 import java.time.ZonedDateTime
 
+@CompileDynamic
 @Transactional
 class JobMailService {
 

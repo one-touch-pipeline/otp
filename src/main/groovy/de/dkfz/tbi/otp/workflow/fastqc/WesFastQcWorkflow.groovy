@@ -21,21 +21,17 @@
  */
 package de.dkfz.tbi.otp.workflow.fastqc
 
-import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.workflow.jobs.SetCorrectPermissionJob
-import de.dkfz.tbi.otp.workflowExecution.Artefact
-import de.dkfz.tbi.otp.workflowExecution.OtpWorkflow
-import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
+import de.dkfz.tbi.otp.workflowExecution.*
 
 /**
  * Represents the fastqc workflow for WES, which calculates or copies the fastqc reports.
  */
 @Component
 @Slf4j
-@CompileStatic
 class WesFastQcWorkflow implements OtpWorkflow {
 
     static final String WORKFLOW = "WES FastQC"

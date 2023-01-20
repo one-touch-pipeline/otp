@@ -22,10 +22,12 @@
 package de.dkfz.tbi.otp.administration
 
 import grails.validation.Validateable
+import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.StringUtils
 
+@CompileDynamic
 class EditUserCommand implements Validateable {
     private static final long serialVersionUID = 1L
 

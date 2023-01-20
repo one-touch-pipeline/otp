@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.job.processing
 
+import groovy.transform.CompileDynamic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 
@@ -33,6 +34,7 @@ import de.dkfz.tbi.otp.job.scheduler.*
  * Base class for jobs which submit cluster jobs and wait for them to finish and optionally do other
  * things (for example validation).
  */
+@CompileDynamic
 @Slf4j
 abstract class AbstractMultiJob extends AbstractEndStateAwareJobImpl implements SometimesResumableJob, MonitoringJob {
 

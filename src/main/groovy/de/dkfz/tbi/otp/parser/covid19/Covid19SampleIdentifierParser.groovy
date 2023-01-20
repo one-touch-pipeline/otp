@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.parser.covid19
 
+import groovy.transform.CompileDynamic
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.SampleType
@@ -29,6 +30,7 @@ import de.dkfz.tbi.otp.parser.SampleIdentifierParser
 
 import java.util.regex.Matcher
 
+@CompileDynamic
 @Component
 class Covid19SampleIdentifierParser implements SampleIdentifierParser {
 

@@ -71,7 +71,7 @@ class CellRangerAlignmentChecker extends AbstractAlignmentChecker {
                     mergingWorkPackages               : [],
             ]
         }
-        List list = MergingWorkPackage.executeQuery("""
+        List<List<?>> list = (MergingWorkPackage.executeQuery("""
                     select
                         mergingWorkPackage,
                         seqTrack
@@ -85,15 +85,15 @@ class CellRangerAlignmentChecker extends AbstractAlignmentChecker {
                 """.toString(), [
                 seqTracks                                    : seqTracks,
                 pipeLineName                                 : pipeLineName,
-        ])
+        ]) as List<List<?>>)
 
-        List seqTracksWithoutMergingWorkpackage = seqTracks - list.collect {
+        List<SeqTrack> seqTracksWithoutMergingWorkpackage = seqTracks - list.collect {
             it[1]
-        }
+        } as List<SeqTrack>
 
         List<MergingWorkPackage> mergingWorkPackages = list.collect {
             it[0]
-        }.unique()
+        }.unique() as List<MergingWorkPackage>
 
         return [
                 seqTracksWithoutMergingWorkpackage: seqTracksWithoutMergingWorkpackage,

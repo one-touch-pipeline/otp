@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.project.projectRequest
 
+import groovy.transform.CompileDynamic
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Component
@@ -59,6 +60,7 @@ class Check implements ProjectRequestState {
         return null
     }
 
+    @CompileDynamic
     @Override
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void reject(ProjectRequest projectRequest, String rejectComment) {
@@ -92,6 +94,7 @@ class Check implements ProjectRequestState {
         throw new ProjectRequestBeingEditedException(messageSourceService.createMessage("projectRequest.edit.already"))
     }
 
+    @CompileDynamic
     @Override
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void passOn(ProjectRequest projectRequest) {

@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.workflow.jobs
 
+import groovy.transform.CompileDynamic
 import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
@@ -55,6 +56,7 @@ abstract class AbstractValidationJob extends AbstractJob {
     @Autowired
     JobStatusLoggingFileService jobStatusLoggingFileService
 
+    @CompileDynamic
     @Override
     final void execute(WorkflowStep workflowStep) {
         ensureExternalJobsRunThrough(workflowStep)

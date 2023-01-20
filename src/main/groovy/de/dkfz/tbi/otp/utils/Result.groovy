@@ -86,7 +86,7 @@ class Result<T, U> {
         return this
     }
 
-    Result<T, U> ensure(Closure<Boolean> function, U error) {
+    Result<T, U> ensure(Closure function, U error) {
         if (result != null) {
             if (!function.call(result)) {
                 this.error = error

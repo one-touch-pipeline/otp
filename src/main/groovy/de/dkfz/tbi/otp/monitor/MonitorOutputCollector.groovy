@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.monitor
 
 import grails.util.Holders
 import grails.web.mapping.LinkGenerator
+import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.Comment
 import de.dkfz.tbi.otp.config.ConfigService
@@ -34,6 +35,7 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.util.TimeFormats
 
+@CompileDynamic
 class MonitorOutputCollector {
 
     final static String INDENT = "    "

@@ -21,12 +21,14 @@
  */
 package de.dkfz.tbi.otp.project
 
+import groovy.transform.CompileDynamic
 import groovy.transform.ToString
 
 import de.dkfz.tbi.otp.project.additionalField.ProjectFieldType
 
 import java.time.LocalDate
 
+@CompileDynamic
 @ToString(includeNames = true, includeSuperProperties = true)
 class ProjectFieldsCreateDateCommand extends ProjectFieldsCreateCommand {
 

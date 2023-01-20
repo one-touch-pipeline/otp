@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.security.user
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.ngsdata.LdapUserCreationException
@@ -36,6 +37,7 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
  * This service is meant for any kind of user management, such as changing password
  * and administrative tasks like enabling/disabling users, etc.
  */
+@CompileDynamic
 @Transactional
 class UserService {
 

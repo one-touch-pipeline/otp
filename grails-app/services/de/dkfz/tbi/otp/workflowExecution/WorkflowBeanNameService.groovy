@@ -22,9 +22,11 @@
 package de.dkfz.tbi.otp.workflowExecution
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 
+@CompileDynamic
 class WorkflowBeanNameService {
     @Autowired
     ApplicationContext applicationContext
