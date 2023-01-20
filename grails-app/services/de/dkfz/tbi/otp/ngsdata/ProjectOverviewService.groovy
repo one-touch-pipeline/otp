@@ -34,7 +34,7 @@ class ProjectOverviewService {
         List seq = AggregateSequences.withCriteria {
             eq("projectId", project?.id)
             property("individualId")
-            property("mockPid")
+            property("pid")
             property("sampleTypeName")
             property("seqTypeDisplayName")
             property("libraryLayout")
@@ -44,7 +44,7 @@ class ProjectOverviewService {
             property("laneCount")
             property("sum_N_BasePairsGb")
             property("projectName")
-            order("mockPid")
+            order("pid")
             order("sampleTypeName")
             order("seqTypeDisplayName")
             order("libraryLayout")
@@ -55,7 +55,7 @@ class ProjectOverviewService {
         List queryList = []
         for (def track in seq) {
             def queryListSingleRow = [
-                    track.mockPid,
+                    track.pid,
                     track.sampleTypeName,
                     track.seqTypeDisplayName,
                     track.libraryLayout,
@@ -77,7 +77,7 @@ class ProjectOverviewService {
                 groupProperty("seqTypeDisplayName")
                 groupProperty("libraryLayout")
                 groupProperty("singleCell")
-                countDistinct("mockPid")
+                countDistinct("pid")
                 count("sampleId")
                 sum("sum_N_BasePairsGb")
             }
@@ -89,7 +89,7 @@ class ProjectOverviewService {
     Long individualCountByProject(Project project) {
         List seq = AggregateSequences.withCriteria {
             eq("projectId", project?.id)
-            projections { countDistinct("mockPid") }
+            projections { countDistinct("pid") }
         }
         return seq[0]
     }

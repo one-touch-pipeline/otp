@@ -25,7 +25,7 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="layout" content="main"/>
-    <title>${individual.mockFullName}</title>
+    <title>${individual.pid}</title>
     <asset:javascript src="common/CommentBox.js"/>
     <asset:javascript src="taglib/EditorSwitch.js"/>
     <asset:javascript src="pages/individual/show/functions.js"/>
@@ -45,24 +45,6 @@
                     <tr>
                         <td class="myKey"><g:message code="individual.show.details.pid"/></td>
                         <td class="myValue">${individual.pid}</td>
-                    </tr>
-                    <tr>
-                        <td class="myKey"><g:message code="individual.show.details.mockPid"/></td>
-                        <td class="myValue">
-                            <otp:editorSwitch
-                                roles="ROLE_OPERATOR"
-                                link="${g.createLink(controller: 'individual', action: 'updateField', id: individual.id, params: [key: 'mockPid'])}"
-                                value="${individual.mockPid}"/>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="myKey"><g:message code="individual.show.details.mockFullName"/></td>
-                        <td class="myValue">
-                            <otp:editorSwitch
-                                    roles="ROLE_OPERATOR"
-                                    link="${g.createLink(controller: 'individual', action: 'updateField', id: individual.id, params: [key: 'mockFullName'])}"
-                                    value="${individual.mockFullName}"/>
-                        </td>
                     </tr>
                     <tr>
                         <td class="myKey"><g:message code="individual.show.details.type"/></td>

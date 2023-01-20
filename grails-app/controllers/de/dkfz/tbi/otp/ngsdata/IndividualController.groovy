@@ -62,8 +62,8 @@ class IndividualController {
         Individual individual
         if (params.id) {
             individual = individualService.getIndividual(params.id as Long)
-        } else if (params.mockPid) {
-            individual = individualService.getIndividualByMockPid(params.mockPid)
+        } else if (params.pid) {
+            individual = individualService.getIndividualByPid(params.pid as String)
         } else {
             return response.sendError(404)
         }
@@ -96,8 +96,6 @@ class IndividualController {
                          type : 'LIST', from: projectService.allProjects(),
                          value: 'displayName', key: 'id'],
                         [name: 'pidSearch', msgcode: 'individual.search.pid', type: 'TEXT'],
-                        [name: 'mockFullNameSearch', msgcode: 'individual.search.mockFullName', type: 'TEXT'],
-                        [name: 'mockPidSearch', msgcode: 'individual.search.mockPid', type: 'TEXT'],
                         [name: 'typeSelection', msgcode: 'individual.search.type',
                          type: 'LIST', from: Individual.Type.values()],
                 ],
@@ -117,8 +115,6 @@ class IndividualController {
             dataToRender.aaData << [
                     id          : individual.id,
                     pid         : individual.pid,
-                    mockFullName: individual.mockFullName,
-                    mockPid     : individual.mockPid,
                     project     : individual.project.toString(),
                     type        : individual.type.toString(),
             ]
@@ -228,8 +224,6 @@ class IndividualController {
 @TupleConstructor
 enum IndividualColumn {
     PID('individual.list.pid', "pid"),
-    MOCKFULLNAME('individual.list.mockName', "mockFullName"),
-    MOCKPID('individual.list.mockPid', "mockPid"),
     PROJECT('individual.list.project', "project"),
     TYPE('individual.list.type', "type"),
 
@@ -249,8 +243,6 @@ class IndividualCommand implements Validateable {
 
     String identifier
     Project individualProject
-    String alias
-    String displayedIdentifier
     Individual.Type type
     List<SampleCommand> samples
     boolean checkRedirect
@@ -261,8 +253,6 @@ class IndividualCommand implements Validateable {
                 return 'alreadyExists'
             }
         })
-        alias(blank: false)
-        displayedIdentifier(blank: false)
     }
 }
 
@@ -293,8 +283,6 @@ class UpdateFieldCommand {
 class IndividualFiltering {
     List<Long> project = []
     List<String> pid = []
-    List<String> mockPid = []
-    List<String> mockFullName = []
     List<Individual.Type> type = []
 
     boolean enabled = false
@@ -316,18 +304,6 @@ class IndividualFiltering {
                 case "pidSearch":
                     if (it.value && it.value.length() >= 3) {
                         filtering.pid << it.value
-                        filtering.enabled = true
-                    }
-                    break
-                case "mockFullNameSearch":
-                    if (it.value && it.value.length() >= 3) {
-                        filtering.mockFullName << it.value
-                        filtering.enabled = true
-                    }
-                    break
-                case "mockPidSearch":
-                    if (it.value && it.value.length() >= 3) {
-                        filtering.mockPid << it.value
                         filtering.enabled = true
                     }
                     break

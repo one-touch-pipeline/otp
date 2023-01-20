@@ -107,7 +107,6 @@ class DataExportServiceSpec extends Specification implements DataTest, DomainFac
             createSeqTrackWithOneDataFile(sample: createSample(
                     individual: createIndividual(
                             pid: it,
-                            mockPid: "mock_${it}",
                     )
             )
             )
@@ -425,7 +424,7 @@ class DataExportServiceSpec extends Specification implements DataTest, DomainFac
 
         Pattern bashScriptPattern = ~/\[\[ -n "(.{2}ECHO_LOG.)" \]\] && echo ${instancePath}\nmkdir -p (.{2}COPY_TARGET_BASE.)?[a-zA-Z0-9-_\/]*\nrsync (.{2}RSYNC_LOG.) -urpL --exclude=\*roddyExec\* --exclude=\*bam\*/
         Pattern listScriptPattern = ~/ls -l --ignore=\"\*roddyExec\*\" ${instancePath}\n/
-        Pattern consoleLogPattern = ~/Found following [a-zA-Z]* analyses:\n(\s*mockPid_\d\s*[a-zA-Z0-9-\s]*:\s*instance-\d*\n){2}/
+        Pattern consoleLogPattern = ~/Found following [a-zA-Z]* analyses:\n(\s*pid_\d\s*[a-zA-Z0-9-\s]*:\s*instance-\d*\n){2}/
 
         when:
         DataExportOutput output = service.exportAnalysisFiles(dataExportInput)

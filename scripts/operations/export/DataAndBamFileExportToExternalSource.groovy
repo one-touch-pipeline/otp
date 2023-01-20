@@ -184,7 +184,7 @@ scriptInputHelperService.parseAndSplitHelper([selectByIndividual, multiColumnInp
     assert paramsCount in [1, 2, 5, 6, 7]: "Missing input data for seqType determination"
 
     //required column
-    Individual individual = CollectionUtils.exactlyOneElement(Individual.findAllByPidOrMockPidOrMockFullName(params[0], params[0], params[0]),
+    Individual individual = CollectionUtils.exactlyOneElement(Individual.findAllByPid(params[0]),
             "Could not find one individual with name ${params[0]}")
 
     //optional columns
@@ -382,7 +382,7 @@ dataExportOverview.findAll { DataExportOverviewItem dataExportOverviewItem ->
     ))
 }
 dataExportOverview.each {
-    summaryString.append("${it.individual.mockPid}")
+    summaryString.append("${it.individual.pid}")
 
     summaryString.append("\t" + (it.sampleType ? "${it.sampleType.name}" : "-"))
     summaryString.append("\t" + (it.sampleType2 ? "${it.sampleType2.name}" : "-"))

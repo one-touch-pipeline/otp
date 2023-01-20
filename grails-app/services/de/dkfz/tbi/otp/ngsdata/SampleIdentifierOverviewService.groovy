@@ -63,7 +63,7 @@ class SampleIdentifierOverviewService {
         return [
                 individual      : [
                         id  : sample.individual.id,
-                        name: sample.individual.mockFullName,
+                        name: sample.individual.pid,
                 ],
                 sampleType      : [
                         id  : sample.sampleType.id,

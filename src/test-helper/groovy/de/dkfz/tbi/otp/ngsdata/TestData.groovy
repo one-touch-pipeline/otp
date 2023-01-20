@@ -186,8 +186,6 @@ class TestData {
     private Individual createIndividual(Map properties = [:]) {
         return DomainFactory.createIndividual([
             pid: "654321",
-            mockPid: "PID",
-            mockFullName: "PID",
             type: Individual.Type.REAL,
             project: project,
         ] + properties)

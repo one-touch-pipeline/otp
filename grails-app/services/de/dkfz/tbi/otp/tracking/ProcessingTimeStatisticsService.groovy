@@ -87,7 +87,7 @@ ${search ? """
         List<SeqTrack> seqTracks = ticket.findAllSeqTracks() as List
         List<String> ilseIds = seqTracks.collect { it.ilseSubmission?.ilseNumber as String }.unique().sort()
         List<String> projectNames = seqTracks.collect { it.sample.individual.project.name }.unique().sort()
-        List<String> sampleNames = seqTracks.collect { "${it.sample.individual.mockFullName} ${it.sample.sampleType.name}" }.unique().sort()
+        List<String> sampleNames = seqTracks.collect { "${it.sample.individual.pid} ${it.sample.sampleType.name}" }.unique().sort()
         List<String> runs = seqTracks.collect { it.run.name }.unique().sort()
 
         List data = [

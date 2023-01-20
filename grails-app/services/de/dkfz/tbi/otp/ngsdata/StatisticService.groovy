@@ -78,7 +78,7 @@ class StatisticService {
                     'in'("projectId", projects*.id)
                 }
                 groupProperty("seqTypeDisplayName")
-                countDistinct("mockPid")
+                countDistinct("pid")
             }
             order("seqTypeDisplayName")
         }

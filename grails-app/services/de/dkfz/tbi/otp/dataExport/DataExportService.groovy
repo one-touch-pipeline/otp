@@ -73,9 +73,9 @@ class DataExportService {
         }
 
         dataExportInput.seqTrackList*.individual.unique().each { Individual individual ->
-            Path targetFolderWithPid = dataExportInput.targetFolder.resolve(individual.mockPid)
+            Path targetFolderWithPid = dataExportInput.targetFolder.resolve(individual.pid)
             if (dataExportInput.checkFileStatus) {
-                consoleBuilder.append("${individual.mockPid}\n")
+                consoleBuilder.append("${individual.pid}\n")
             } else {
                 scriptFileBuilder.append("mkdir -p ${copyTargetBase}${targetFolderWithPid}\n")
             }
@@ -101,7 +101,7 @@ class DataExportService {
                 Path currentFile = fileSystem.getPath(lsdfFilesService.getFileFinalPath(dataFile))
                 if (Files.exists(currentFile)) {
                     if (!dataExportInput.checkFileStatus) {
-                        Path targetFolderWithPid = dataExportInput.targetFolder.resolve(dataFile.individual.mockPid)
+                        Path targetFolderWithPid = dataExportInput.targetFolder.resolve(dataFile.individual.pid)
                         Path targetFastqFolder = targetFolderWithPid.resolve(seqTrack.seqType.dirName).
                                 resolve(individualService.getViewByPidPath(dataFile.individual, dataFile.seqType)
                                         .relativize(lsdfFilesService.getFileViewByPidPathAsPath(dataFile)).parent)
@@ -142,7 +142,7 @@ class DataExportService {
             Path qcFolder = fileSystem.getPath(basePath.toString(), "qualitycontrol")
 
             Path targetBamFolder = dataExportInput.targetFolder.
-                    resolve(bamFile.individual.mockPid).
+                    resolve(bamFile.individual.pid).
                     resolve(bamFile.seqType.dirName).
                     resolve(bamFile.sampleType.dirName + (bamFile.workPackage.seqType.hasAntibodyTarget ?
                             "-${bamFile.workPackage.antibodyTarget.name}" : ""))
@@ -202,13 +202,13 @@ class DataExportService {
                 if (dataExportInput.checkFileStatus) {
                     consoleBuilder.append("\nFound following ${instanceName} analyses:\n")
                     analyses.each {
-                        consoleBuilder.append("\t${it.individual.mockPid}\t${it.seqType.displayName}")
+                        consoleBuilder.append("\t${it.individual.pid}\t${it.seqType.displayName}")
                         consoleBuilder.append("\t${it.sampleType1BamFile.sampleType.name}-${it.sampleType2BamFile.sampleType.name}:  " +
                                 "${it.instanceName}\n")
                     }
                 } else {
                     analyses.each {
-                        Path targetFolderWithPid = dataExportInput.targetFolder.resolve(it.individual.mockPid)
+                        Path targetFolderWithPid = dataExportInput.targetFolder.resolve(it.individual.pid)
                         Path resultFolder = targetFolderWithPid.resolve(it.seqType.dirName).
                                 resolve("${instanceName.toLowerCase()}_results").
                                 resolve("${it.samplePair.sampleType1.dirName}_${it.samplePair.sampleType2.dirName}")

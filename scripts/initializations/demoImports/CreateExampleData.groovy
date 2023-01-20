@@ -737,8 +737,6 @@ class ExampleData {
         return new Individual([
                 project     : project,
                 pid         : pid,
-                mockPid     : pid,
-                mockFullName: pid,
                 type        : Individual.Type.REAL,
                 species     : speciesWithStrain,
         ]).save(flush: true)

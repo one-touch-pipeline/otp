@@ -51,7 +51,7 @@ class SampleTypeIndividualValidator extends ValueTuplesValidator<BamMetadataVali
             String individual = it.getValue(INDIVIDUAL.name())
             String sampleType = it.getValue(SAMPLE_TYPE.name())
             if (!Sample.findAllByIndividualAndSampleType(
-                    CollectionUtils.atMostOneElement(Individual.findAllByPidOrMockPidOrMockFullName(individual, individual, individual)), SampleTypeService.findSampleTypeByName(sampleType))) {
+                    CollectionUtils.atMostOneElement(Individual.findAllByPid(individual)), SampleTypeService.findSampleTypeByName(sampleType))) {
                 context.addProblem(it.cells, LogLevel.ERROR,
                         "The sample as combination of the individual '${individual}' and the sample type '${sampleType}' is not registered in OTP.", "At least one sample as combination of the individual and the sample type is not registered in OTP.")
             }

@@ -52,7 +52,7 @@ List<DataFile> fastq_to_export = DataFile.createCriteria().listDistinct {
             sample {
                 individual {
                     or {
-                        'in'('mockPid', [
+                        'in'('pid', [
                                 '',
                         ])
                         project {

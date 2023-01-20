@@ -193,7 +193,7 @@ class SamplePair implements Entity {
     }
 
     String toStringWithoutId() {
-        return "${individual.mockPid} ${sampleType1.name} ${sampleType2.name} ${seqType.displayName} ${seqType.libraryLayout}"
+        return "${individual.pid} ${sampleType1.name} ${sampleType2.name} ${seqType.displayName} ${seqType.libraryLayout}"
     }
 
     @Override

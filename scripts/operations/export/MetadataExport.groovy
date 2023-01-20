@@ -205,7 +205,7 @@ List<Project> projects = parseHelper(selectByProject, 'project') {
 }
 
 List<Individual> individuals = parseHelper(selectByIndividual, 'Individual') {
-    Individual.findAllByPidOrMockPidOrMockFullName(it, it, it)
+    Individual.findAllByPid(it)
 }
 
 List<IlseSubmission> ilseSubmissions = parseHelper(selectByIlse, 'IlseNumber') {
@@ -262,7 +262,7 @@ List<SeqTrack> seqTrackPerMultiImport = multiColumnInput.split('\n')*.trim().fin
     List<String> values = line.split('[ ,;\t]+')*.trim()
     int valueSize = values.size()
     assert valueSize in [5, 6]: "A multi input is defined by 5 or 6 columns"
-    Individual individual = CollectionUtils.exactlyOneElement(Individual.findAllByPidOrMockPidOrMockFullName(values[0], values[0], values[0]),
+    Individual individual = CollectionUtils.exactlyOneElement(Individual.findAllByPid(values[0]),
             "Could not find one individual with name ${values[0]}")
     SampleType sampleType = CollectionUtils.exactlyOneElement(SampleType.findAllByNameIlike(values[1]),
             "Could not find one sampleType with name ${values[1]}")
@@ -452,8 +452,6 @@ class MetaDataExport {
         put(SEQUENCING_TYPE, seqType)
         put(SEQUENCING_READ_TYPE, seqTrack.seqType.libraryLayout.toString())
         properties.put('OTP_PID', seqTrack.individual.pid)
-        properties.put('OTP_PID_ALIAS', seqTrack.individual.mockPid)
-        properties.put('OTP_PID_DISPLAYED_IDENTIFIER', seqTrack.individual.mockFullName)
         properties.put('OTP_SAMPLE_TYPE', seqTrack.sampleType.name)
         put(SAMPLE_NAME, seqTrack.sampleIdentifier)
         put(FASTQ_GENERATOR, preferredOrLongest(

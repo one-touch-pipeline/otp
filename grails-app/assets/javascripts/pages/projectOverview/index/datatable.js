@@ -129,7 +129,7 @@ $.otp.projectOverviewTable = {
             action: 'show',
             text: row[0],
             parameters: {
-              mockPid: row[0]
+              pid: row[0]
             }
           });
         }

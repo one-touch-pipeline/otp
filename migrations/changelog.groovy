@@ -34,4 +34,6 @@ databaseChangeLog = {
     include file: 'changelogs/2023/otp-1732.groovy'
 
     include file: 'changelogs/2023/otp-1926-bugfix-wgbs-defaults.groovy'
+
+    include file: 'changelogs/2023/otp-1909.groovy'
 }

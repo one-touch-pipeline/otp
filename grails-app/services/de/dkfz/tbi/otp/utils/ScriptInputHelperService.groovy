@@ -140,10 +140,7 @@ class ScriptInputHelperService {
     List<SeqTrackWithComment> seqTracksBySampleDefinition(String input) {
         return parseAndSplitHelper(input).collectMany { List<String> values ->
             assert values.size() == INPUT_INDEX_SAMPLE_DEFINITION_COLUMN_COUNT: "A multi input for sample seqType is defined by 7 columns"
-            Individual individual = CollectionUtils.exactlyOneElement(Individual.findAllByPidOrMockPidOrMockFullName(
-                    values[INPUT_INDEX_SAMPLE_DEFINITION_PID],
-                    values[INPUT_INDEX_SAMPLE_DEFINITION_PID],
-                    values[INPUT_INDEX_SAMPLE_DEFINITION_PID]),
+            Individual individual = CollectionUtils.exactlyOneElement(Individual.findAllByPid(values[INPUT_INDEX_SAMPLE_DEFINITION_PID]),
                     "Could not find any individual with name ${values[INPUT_INDEX_SAMPLE_DEFINITION_PID]}")
             SampleType sampleType = CollectionUtils.exactlyOneElement(SampleType
                     .findAllByNameIlike(values[INPUT_INDEX_SAMPLE_DEFINITION_SAMPLE_TYPE]),

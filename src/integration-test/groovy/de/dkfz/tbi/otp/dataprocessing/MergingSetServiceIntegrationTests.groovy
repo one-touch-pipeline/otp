@@ -52,8 +52,6 @@ class MergingSetServiceIntegrationTests {
 
         Individual individual = new Individual(
                         pid: "pid_1",
-                        mockPid: "mockPid_1",
-                        mockFullName: "mockFullName_1",
                         type: Individual.Type.UNDEFINED,
                         project: project
                         )

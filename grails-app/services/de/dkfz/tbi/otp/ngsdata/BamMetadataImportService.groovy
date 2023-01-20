@@ -120,11 +120,7 @@ class BamMetadataImportService {
                 Sample sample = Sample.createCriteria().get {
                     individual {
                         and {
-                            or {
-                                eq('pid', _individual)
-                                eq('mockPid', _individual)
-                                eq('mockFullName', _individual)
-                            }
+                            eq('pid', _individual)
                             project {
                                 eq('name', _project)
                             }

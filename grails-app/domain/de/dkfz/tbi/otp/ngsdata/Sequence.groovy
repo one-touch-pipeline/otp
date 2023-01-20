@@ -109,8 +109,6 @@ class Sequence implements Serializable {
 
     /** fields from {@link Individual} */
     String pid
-    String mockPid
-    String mockFullName
     Individual.Type type
 
     /** fields from {@link SpeciesCommonName} */

@@ -59,7 +59,7 @@
             </tr>
             <tr>
                 <td><g:message code="seqTrack.show.sampleType"/></td>
-                <td>${seqTrack.sample.individual.mockPid} ${seqTrack.sample.sampleType.name}</td>
+                <td>${seqTrack.sample.individual.pid} ${seqTrack.sample.sampleType.name}</td>
             </tr>
             <tr>
                 <td><g:message code="seqTrack.show.seqType"/></td>

@@ -92,8 +92,6 @@ trait DomainFactoryCore implements DomainFactoryHelper {
     Individual createIndividual(Map properties = [:]) {
         return createDomainObject(Individual, [
                 pid         : "pid_${nextId}",
-                mockPid     : "mockPid_${nextId}",
-                mockFullName: "mockFullName_${nextId}",
                 type        : Individual.Type.REAL,
                 project     : { createProject() },
         ], properties)

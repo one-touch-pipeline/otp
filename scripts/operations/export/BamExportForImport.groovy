@@ -141,7 +141,7 @@ class BamExportImport {
         InputData data = new InputData([
                 newProject   : values[0],
                 newPid       : values[1],
-                oldIndividual: CollectionUtils.exactlyOneElement(Individual.findAllByPidOrMockPidOrMockFullName(values[2], values[2], values[2])),
+                oldIndividual: CollectionUtils.exactlyOneElement(Individual.findAllByPid(values[2])),
                 sampleType   : SampleTypeService.findSampleTypeByName(values[3]),
                 seqType      : getSeqTypeForIdentifier(values[4])
         ])
@@ -284,7 +284,7 @@ class DisplaySamples {
         InputData data = new InputData([
                 newProject   : values[0],
                 newPid       : values[1],
-                oldIndividual: CollectionUtils.exactlyOneElement(Individual.findAllByPidOrMockPidOrMockFullName(values[2], values[2], values[2])),
+                oldIndividual: CollectionUtils.exactlyOneElement(Individual.findAllByPid(values[2])),
         ])
         if (values[1] == values[2]) {
             println "\n${values[1]} is used as oldPid and as newPid\n"

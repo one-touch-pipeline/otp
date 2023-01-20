@@ -112,8 +112,6 @@ class AbstractBamFileServiceIntegrationTests {
 
         Individual individual = new Individual(
                 pid: "patient",
-                mockPid: "mockPid",
-                mockFullName: "mockFullName",
                 type: Individual.Type.UNDEFINED,
                 project: project
                 )

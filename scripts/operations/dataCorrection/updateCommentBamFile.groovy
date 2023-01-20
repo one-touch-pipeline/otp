@@ -73,7 +73,7 @@ AbstractMergedBamFile.withTransaction {
         List<String> split = line.split(' *[ ,;\t] *')*.trim()
         println split as List
 
-        Individual individual = CollectionUtils.exactlyOneElement(Individual.findAllByPidOrMockPidOrMockFullName(split[0], split[0], split[0]),
+        Individual individual = CollectionUtils.exactlyOneElement(Individual.findAllByPid(split[0]),
                 "Could not find individual for '${split[0]}'")
         SampleType sampleType = CollectionUtils.exactlyOneElement(SampleType.findAllByName(split[1]), "Could not find sampleType for '${split[1]}'")
         SeqType seqType = seqTypeService.findByNameOrImportAlias(split[2], [

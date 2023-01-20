@@ -151,7 +151,7 @@ class SequenceController {
         String contentBody = sequences.collect { Sequence row ->
             [
                     row.projectName,
-                    row.mockPid,
+                    row.pid,
                     row.sampleTypeName,
                     row.seqTypeDisplayName,
                     row.libraryLayout,
@@ -188,7 +188,7 @@ class SequenceController {
 @TupleConstructor
 enum SequenceColumn {
     PROJECT("sequence.list.headers.project", "projectName"),
-    INDIVIDUAL("sequence.list.headers.individual", "mockPid"),
+    INDIVIDUAL("sequence.list.headers.individual", "pid"),
     SAMPLE_TYPE("sequence.list.headers.sampleType", "sampleTypeName"),
     SEQ_TYPE("sequence.list.headers.seqType", "seqTypeName"),
     LIBRARY_LAYOUT("sequence.list.headers.sequencingReadType", "libraryLayout"),

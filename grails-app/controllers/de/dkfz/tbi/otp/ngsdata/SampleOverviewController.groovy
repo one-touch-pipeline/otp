@@ -65,9 +65,9 @@ class SampleOverviewController {
      * Retrieves the data shown in the table of projectOverview/laneOverview.
      * The data structure is:
      * <pre>
-     * [[mockPid1, sampleTypeName1, one sample name for mockPid1.sampleType1, lane count for seqType1, lane count for seqType2, ...],
-     * [mockPid1, sampleTypeName2, one sample name for mockPid1.sampleType2, lane count for seqType1, lane count for seqType2, ...],
-     * [mockPid2, sampleTypeName2, one sample name for mockPid1.sampleType2, lane count for seqType1, lane count for seqType2, ...],
+     * [[pid1, sampleTypeName1, one sample name for pid1.sampleType1, lane count for seqType1, lane count for seqType2, ...],
+     * [pid1, sampleTypeName2, one sample name for pid1.sampleType2, lane count for seqType1, lane count for seqType2, ...],
+     * [pid2, sampleTypeName2, one sample name for pid2.sampleType2, lane count for seqType1, lane count for seqType2, ...],
      * ...]
      * </pre>
      * The available seqTypes are depend on the selected Project.
@@ -76,29 +76,29 @@ class SampleOverviewController {
         Project project = projectSelectionService.requestedProject
 
         List<SeqType> seqTypes = sampleOverviewService.seqTypeByProject(project)
-        /*Map<mockPid, Map<sampleTypeName, InformationOfSample>>*/
+        /*Map<pid, Map<sampleTypeName, InformationOfSample>>*/
         Map<String, Map<String, InfoAboutOneSample>> dataLastMap = [:].withDefault { [:].withDefault { new InfoAboutOneSample() } }
 
         //Only counts lanes, which are not withdrawn
         sampleOverviewService.laneCountForSeqtypesPerPatientAndSampleType(project).each {
-            dataLastMap[it.mockPid as String][it.sampleTypeName as String].laneCountRegistered[it.seqType.id as Long] = it.laneCount as String
+            dataLastMap[it.pid as String][it.sampleTypeName as String].laneCountRegistered[it.seqType.id as Long] = it.laneCount as String
         }
 
         //adds all withdrawn lanes to the total amount of registered Lanes and shows the number of withdrawn lanes in brackets
         sampleOverviewService.withdrawnLaneCountForSeqTypesPerPatientAndSampleType(project).each {
-            Integer notWithdrawnLanesCount = (dataLastMap[it.mockPid as String][it.sampleTypeName as String]
+            Integer notWithdrawnLanesCount = (dataLastMap[it.pid as String][it.sampleTypeName as String]
                     .laneCountRegistered[it.seqType.id as Long] ?: 0) as Integer
             String registeredLanesCount = (notWithdrawnLanesCount + (it.withdrawnCount as Integer)) as String
-            dataLastMap[it.mockPid as String][it.sampleTypeName as String].laneCountRegistered[it.seqType.id as Long] =
+            dataLastMap[it.pid as String][it.sampleTypeName as String].laneCountRegistered[it.seqType.id as Long] =
                     registeredLanesCount + " (${it.withdrawnCount})"
         }
 
         sampleOverviewService.abstractMergedBamFilesInProjectFolder(project).each {
-            dataLastMap[it.individual.mockPid][it.sampleType.name].bamFilesInProjectFolder[it.seqType.id][it.pipeline.id].add(it)
+            dataLastMap[it.individual.pid][it.sampleType.name].bamFilesInProjectFolder[it.seqType.id][it.pipeline.id].add(it)
         }
 
         sampleService.getSamplesOfProject(project).each { Sample sample ->
-            dataLastMap[sample.individual.mockPid][sample.sampleType.name]
+            dataLastMap[sample.individual.pid][sample.sampleType.name]
         }
 
         List<Pipeline> pipelines = findPipelines()

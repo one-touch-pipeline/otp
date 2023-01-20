@@ -50,7 +50,7 @@ LogThreadLocal.withThreadLog(System.out, {
                 sample {
                     individual {
                         or {
-                            'in'('mockPid', [
+                            'in'('pid', [
                                     '',
                             ])
                             project {
@@ -89,7 +89,7 @@ LogThreadLocal.withThreadLog(System.out, {
         println([
                 "seqtrack_id",
                 "project",
-                "mockPid",
+                "pid",
                 "sampleType",
                 "seqType",
                 "laneId",
@@ -104,7 +104,7 @@ LogThreadLocal.withThreadLog(System.out, {
             println([
                     it.id,
                     it.project.name,
-                    it.individual.mockPid,
+                    it.individual.pid,
                     it.sampleType.name,
                     it.seqType,
                     it.laneId,

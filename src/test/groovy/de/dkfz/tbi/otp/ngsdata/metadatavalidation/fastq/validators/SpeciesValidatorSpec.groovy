@@ -71,14 +71,14 @@ class SpeciesValidatorSpec extends Specification implements DataTest, DomainFact
         createSampleIdentifier(name: "existingSampleWithoutData2", sample: createSample(individual: createIndividual(species: null), mixedInSpecies: []))
 
         // incorrect metadata
-        createSampleIdentifier(name: "distinctSpecies", sample: createSample(individual: createIndividual(pid: "1", mockPid: "1", species: mouse)))
-        createSampleIdentifier(name: "existingDifferentSpecies1", sample: createSample(individual: createIndividual(pid: "2", mockPid: "2", species: dolphin)))
-        createSampleIdentifier(name: "existingDifferentSpecies2", sample: createSample(individual: createIndividual(pid: "3", mockPid: "3", species: null), seqTracks: [createSeqTrack()]))
+        createSampleIdentifier(name: "distinctSpecies", sample: createSample(individual: createIndividual(pid: "1", species: mouse)))
+        createSampleIdentifier(name: "existingDifferentSpecies1", sample: createSample(individual: createIndividual(pid: "2", species: dolphin)))
+        createSampleIdentifier(name: "existingDifferentSpecies2", sample: createSample(individual: createIndividual(pid: "3", species: null), seqTracks: [createSeqTrack()]))
 
-        createSampleIdentifier(name: "distinctMixin", sample: createSample(individual: createIndividual(pid: "4", mockPid: "4", species: human), sampleType: createSampleType(name: "a")))
-        createSampleIdentifier(name: "existingDifferentMixin1", sample: createSample(individual: createIndividual(pid: "5", mockPid: "5", species: human), sampleType: createSampleType(name: "b"), mixedInSpecies: [mouse]))
-        createSampleIdentifier(name: "existingDifferentMixin2", sample: createSample(individual: createIndividual(pid: "6", mockPid: "6", species: human), sampleType: createSampleType(name: "c"), mixedInSpecies: [], seqTracks: [createSeqTrack()]))
-        createSampleIdentifier(name: "existingDifferentMixin3", sample: createSample(individual: createIndividual(pid: "7", mockPid: "7", species: human), sampleType: createSampleType(name: "d"), mixedInSpecies: [human, mouse]))
+        createSampleIdentifier(name: "distinctMixin", sample: createSample(individual: createIndividual(pid: "4", species: human), sampleType: createSampleType(name: "a")))
+        createSampleIdentifier(name: "existingDifferentMixin1", sample: createSample(individual: createIndividual(pid: "5", species: human), sampleType: createSampleType(name: "b"), mixedInSpecies: [mouse]))
+        createSampleIdentifier(name: "existingDifferentMixin2", sample: createSample(individual: createIndividual(pid: "6", species: human), sampleType: createSampleType(name: "c"), mixedInSpecies: [], seqTracks: [createSeqTrack()]))
+        createSampleIdentifier(name: "existingDifferentMixin3", sample: createSample(individual: createIndividual(pid: "7", species: human), sampleType: createSampleType(name: "d"), mixedInSpecies: [human, mouse]))
 
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
 ${SAMPLE_NAME}\t${SPECIES}\t${PROJECT}

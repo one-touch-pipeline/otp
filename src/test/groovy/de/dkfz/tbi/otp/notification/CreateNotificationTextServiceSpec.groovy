@@ -1148,7 +1148,6 @@ samplePairsNotProcessed: ${expectedSamplePairsNotProcessed}
                         individual: DomainFactory.createIndividual([
                                 project     : project,
                                 pid         : pid,
-                                mockFullName: pid,
                         ])
                 ]),
                 run    : run,

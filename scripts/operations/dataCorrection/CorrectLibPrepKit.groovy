@@ -50,7 +50,7 @@ Collection<SeqTrack> seqTrackList = SeqTrack.withCriteria {
         sample {
             individual {
                 or {
-                    'in'('mockPid', [
+                    'in'('pid', [
                             '',
                     ])
                     project {

@@ -120,8 +120,8 @@ $.otp.sequence = {
                   controller: 'individual',
                   action: 'show',
                   id: row.individualId,
-                  title: row.mockPid,
-                  text: row.mockPid
+                  title: row.pid,
+                  text: row.pid
                 })}</bdi>
                  </div>`,
                 row.sampleTypeName,

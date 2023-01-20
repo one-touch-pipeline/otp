@@ -76,18 +76,6 @@ $.otp.individual = {
                   text: row.pid
                 }),
                 $.otp.createLinkMarkup({
-                  controller: 'individual',
-                  action: 'show',
-                  id: row.id,
-                  text: row.mockFullName
-                }),
-                $.otp.createLinkMarkup({
-                  controller: 'individual',
-                  action: 'show',
-                  id: row.id,
-                  text: row.mockPid
-                }),
-                $.otp.createLinkMarkup({
                   controller: 'projectOverview',
                   action: 'index',
                   parameters: {

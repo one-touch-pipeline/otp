@@ -58,8 +58,6 @@ class ExternallyProcessedMergedBamFileIntegrationTests {
 
         individual = DomainFactory.createIndividual(
                         pid: "patient",
-                        mockPid: "mockPid",
-                        mockFullName: "mockFullName",
                         type: Individual.Type.UNDEFINED,
                         project: project
                         )

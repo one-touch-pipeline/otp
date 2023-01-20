@@ -85,7 +85,7 @@ on the general cluster job page
                         <td class="pl-4"><g:message code="jobstats.jobSpecific.detail.table.attribute.individual"/></td>
                         <td>
                             <g:if test="${individual != null}">
-                                <g:link controller="individual" action="show" id="${individual.id}">${individual.mockPid}</g:link>
+                                <g:link controller="individual" action="show" id="${individual.id}">${individual.pid}</g:link>
                             </g:if>
                             <g:else>
                                 ${NA}

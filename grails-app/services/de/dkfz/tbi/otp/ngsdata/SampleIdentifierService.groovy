@@ -214,8 +214,6 @@ class SampleIdentifierService {
         } else {
             individual = new Individual(
                     pid: identifier.pid,
-                    mockPid: identifier.pid,
-                    mockFullName: identifier.pid,
                     project: findProject(identifier),
                     type: Individual.Type.REAL
             )

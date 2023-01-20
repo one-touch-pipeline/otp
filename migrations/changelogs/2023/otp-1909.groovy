@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,20 +20,19 @@
  * SOFTWARE.
  */
 
-$(() => {
-  'use strict';
+databaseChangeLog = {
+    changeSet(author: "", id: "1674217918877-113") {
+        sql("""
+            DROP VIEW IF EXISTS aggregate_sequences;
+            DROP VIEW IF EXISTS sequences;
+        """)
+    }
 
-  $('.add-button').on('click', (event) => {
-    event.preventDefault();
-    // Subtract the hidden element
-    const existingSamples = $('tr.sample').not('.hidden');
+    changeSet(author: "", id: "1674217918877-114") {
+        dropColumn(columnName: "mock_full_name", tableName: "individual")
+    }
 
-    // also copy event handlers on clone
-    const sampleBoxes = $('tr.hidden.template').clone(true, true).removeClass('hidden');
-    sampleBoxes.insertAfter($('.sampleIdentifier:last'));
-    sampleBoxes.find('select').attr('name', `samples[${existingSamples.length}].sampleType`);
-    sampleBoxes.find('input').attr('name', `samples[${existingSamples.length}].sampleIdentifiers`);
-    // The templates contain a select-tag that needs to become a select2 searchable dropdown.
-    $.otp.applySelect2($('select.use-select-2-after-clone', sampleBoxes));
-  });
-});
+    changeSet(author: "", id: "1674217918877-115") {
+        dropColumn(columnName: "mock_pid", tableName: "individual")
+    }
+}

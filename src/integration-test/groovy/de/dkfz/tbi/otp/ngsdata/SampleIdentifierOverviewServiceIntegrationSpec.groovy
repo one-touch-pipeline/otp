@@ -136,7 +136,7 @@ class SampleIdentifierOverviewServiceIntegrationSpec extends Specification imple
         Map expected = [
                 individual      : [
                         id  : sample.individual.id,
-                        name: sample.individual.mockFullName,
+                        name: sample.individual.pid,
                 ],
                 sampleType      : [
                         id  : sample.sampleType.id,

@@ -63,22 +63,22 @@ class SampleOverviewService {
     }
 
     /**
-     * fetch and return all combination of {@link Individual} (as mockpid) and of Sample type name with the number of lanes depend of {@link SeqType}
+     * fetch and return all combination of {@link Individual} (as pid) and of Sample type name with the number of lanes depend of {@link SeqType}
      * as list.
      * <br> Example:[
-     * [mockPid: patient1, sampleTypeName: sampleTypeName1, seqType: sampleType1, laneCount: laneCount1],
-     * [mockPid: patient1, sampleTypeName: sampleTypeName1, seqType: sampleType2, laneCount: laneCount2],
-     * [mockPid: patient1, sampleTypeName: sampleTypeName2, seqType: sampleType1, laneCount: laneCount3],
-     * [mockPid: patient2, sampleTypeName: sampleTypeName1, seqType: sampleType1, laneCount: laneCount4],
+     * [pid: patient1, sampleTypeName: sampleTypeName1, seqType: sampleType1, laneCount: laneCount1],
+     * [pid: patient1, sampleTypeName: sampleTypeName1, seqType: sampleType2, laneCount: laneCount2],
+     * [pid: patient1, sampleTypeName: sampleTypeName2, seqType: sampleType1, laneCount: laneCount3],
+     * [pid: patient2, sampleTypeName: sampleTypeName1, seqType: sampleType1, laneCount: laneCount4],
      * ...]
      * @param project the project for filtering the result
-     * @return all combination of  name of {@link Individual}(mockPid) and sampleTypeName with with the number of lanes depend of {@link SeqType}  as list
+     * @return all combination of  name of {@link Individual}(pid) and sampleTypeName with with the number of lanes depend of {@link SeqType}  as list
      */
     List<Map> laneCountForSeqtypesPerPatientAndSampleType(Project project) {
         List lanes = AggregateSequences.withCriteria {
             eq("projectId", project?.id)
             projections {
-                groupProperty("mockPid")
+                groupProperty("pid")
                 groupProperty("sampleTypeName")
                 groupProperty("seqTypeId")
                 sum("laneCount")
@@ -94,7 +94,7 @@ class SampleOverviewService {
                 seqTypes.put(it[2], seqType)
             }
             [
-                    mockPid       : it[0],
+                    pid           : it[0],
                     sampleTypeName: it[1],
                     seqType       : seqType,
                     laneCount     : it[3],
@@ -107,7 +107,7 @@ class SampleOverviewService {
             eq("projectId", project?.id)
             eq("fileWithdrawn", true)
             projections {
-                groupProperty("mockPid")
+                groupProperty("pid")
                 groupProperty("sampleTypeName")
                 groupProperty("seqTypeId")
                 count()
@@ -123,7 +123,7 @@ class SampleOverviewService {
                 seqTypes.put(it[2], seqType)
             }
             [
-                    mockPid       : it[0],
+                    pid           : it[0],
                     sampleTypeName: it[1],
                     seqType       : seqType,
                     withdrawnCount: it[3],

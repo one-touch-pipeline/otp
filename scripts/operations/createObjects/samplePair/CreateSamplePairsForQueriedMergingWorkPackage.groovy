@@ -38,7 +38,7 @@ Collection<AbstractMergingWorkPackage> mergingWorkPackages = AbstractMergingWork
     sample {
         individual {
             or {
-                'in'('mockPid', [
+                'in'('pid', [
                         '',
                 ])
                 project {

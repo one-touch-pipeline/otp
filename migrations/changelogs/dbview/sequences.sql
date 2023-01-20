@@ -65,8 +65,6 @@ SELECT st.id                                                                    
        sampleType.name                                                                                    AS sample_type_name,
        i.type,
        i.pid,
-       i.mock_pid,
-       i.mock_full_name,
        re.name                                                                                            AS realm_name,
        p.name                                                                                             AS project_name,
        p.dir_name                                                                                         AS project_dir_name,

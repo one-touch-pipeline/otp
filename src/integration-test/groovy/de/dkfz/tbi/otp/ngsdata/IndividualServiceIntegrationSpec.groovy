@@ -51,47 +51,31 @@ class IndividualServiceIntegrationSpec extends Specification implements UserAndR
     }
 
     @Unroll
-    void "getIndividual by #identifier as #role"() {
+    void "getIndividual"() {
         given:
         setupData()
         Individual individual = createIndividual()
-        Map<String, Object> searchProperty = [id: individual.id, name: individual.mockFullName]
         Individual returnedIndividual
 
-        when: "requesting an available individual"
-        returnedIndividual = doWithAuth(role) {
-            individualService.getIndividual(searchProperty[identifier] as String)
+        when: "requesting an available individual as operator"
+        returnedIndividual = doWithAuth(OPERATOR) {
+            individualService.getIndividual(individual.id)
         }
 
         then: "permission granted, returns individual"
         returnedIndividual == individual
 
-        when: "requesting an unavailable individual"
-        returnedIndividual = doWithAuth(role) {
-            individualService.getIndividual("unavail_" + searchProperty[identifier] as String)
+        when: "requesting an unavailable individual as operator"
+        returnedIndividual = doWithAuth(OPERATOR) {
+            individualService.getIndividual(individual.id + 1)
         }
 
         then: "permission granted, returns null"
         returnedIndividual == null
 
-        where:
-        role     | identifier
-        OPERATOR | "name"
-        OPERATOR | "id"
-        ADMIN    | "name"
-        ADMIN    | "id"
-    }
-
-    @Unroll
-    void "getIndividual by #identifier with permission granted via project membership"() {
-        given:
-        setupData()
-        Individual individual = createIndividual()
-        Map<String, Object> searchProperty = [id: individual.id, name: individual.mockFullName]
-
         when: "an unauthorized user requests an available individual"
         doWithAuth(TESTUSER) {
-            individualService.getIndividual(searchProperty[identifier] as String)
+            individualService.getIndividual(individual.id)
         }
 
         then: "throw an AccessDeniedException"
@@ -102,9 +86,8 @@ class IndividualServiceIntegrationSpec extends Specification implements UserAndR
             addUserWithReadAccessToProject(CollectionUtils.atMostOneElement(User.findAllByUsername(TESTUSER)), individual.project)
         }
 
-        Individual returnedIndividual
         returnedIndividual = doWithAuth(TESTUSER) {
-            individualService.getIndividual(searchProperty[identifier] as String)
+            individualService.getIndividual(individual.id)
         }
 
         then: "return the requested individual"
@@ -112,16 +95,63 @@ class IndividualServiceIntegrationSpec extends Specification implements UserAndR
 
         when: "non-project user requests the same individual"
         doWithAuth(USER) {
-            individualService.getIndividual(searchProperty[identifier] as String)
+            individualService.getIndividual(individual.id)
         }
 
         then: "still throws an AccessDeniedException"
         thrown(AccessDeniedException)
+    }
 
-        where:
-        identifier | _
-        "name"     | _
-        "id"       | _
+    @Unroll
+    void "getIndividualByPid"() {
+        given:
+        setupData()
+        Individual individual = createIndividual()
+        Individual returnedIndividual
+
+        when: "requesting an available individual as operator"
+        returnedIndividual = doWithAuth(OPERATOR) {
+            individualService.getIndividualByPid(individual.pid)
+        }
+
+        then: "permission granted, returns individual"
+        returnedIndividual == individual
+
+        when: "requesting an unavailable individual as operator"
+        returnedIndividual = doWithAuth(OPERATOR) {
+            individualService.getIndividualByPid("unavail_" + individual.pid)
+        }
+
+        then: "permission granted, returns null"
+        returnedIndividual == null
+
+        when: "an unauthorized user requests an available individual"
+        doWithAuth(TESTUSER) {
+            individualService.getIndividualByPid(individual.pid)
+        }
+
+        then: "throw an AccessDeniedException"
+        thrown(AccessDeniedException)
+
+        when: "add permission to user and request again"
+        doWithAuth(ADMIN) {
+            addUserWithReadAccessToProject(CollectionUtils.atMostOneElement(User.findAllByUsername(TESTUSER)), individual.project)
+        }
+
+        returnedIndividual = doWithAuth(TESTUSER) {
+            individualService.getIndividualByPid(individual.pid)
+        }
+
+        then: "return the requested individual"
+        returnedIndividual == individual
+
+        when: "non-project user requests the same individual"
+        doWithAuth(USER) {
+            individualService.getIndividualByPid(individual.pid)
+        }
+
+        then: "still throws an AccessDeniedException"
+        thrown(AccessDeniedException)
     }
 
     void "createCommentString, when several properties equal, should just add different ones"() {

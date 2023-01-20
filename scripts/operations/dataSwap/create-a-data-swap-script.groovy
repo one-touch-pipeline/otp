@@ -453,8 +453,6 @@ class Snippets {
         return """
                assert new Individual(
                \tpid: '${newIndividualName}',
-               \tmockPid: '${newIndividualName}',
-               \tmockFullName: '${newIndividualName}',
                \ttype: Individual.Type.REAL,
                \tproject: CollectionUtils.atMostOneElement(Project.findAllByName('${newProjectName}')),
                ).save(flush: true, failOnError: true) : "Error creating new Individual '${newIndividualName}'"

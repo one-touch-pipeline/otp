@@ -154,8 +154,6 @@ class IndividualSwapService extends AbstractDataSwapService<IndividualSwapParame
         Individual individual = data.individualSwap.new ? data.individualSwap.new : data.individualSwap.old
         individual.project = data.projectSwap.new
         individual.pid = data.pidSwap.new
-        individual.mockPid = data.pidSwap.new
-        individual.mockFullName = data.pidSwap.new
         individual.save(flush: true)
         data.individualSwap = new Swap<>(data.individualSwap.old, individual)
     }

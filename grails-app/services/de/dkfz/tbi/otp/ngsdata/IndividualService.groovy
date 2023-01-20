@@ -42,46 +42,14 @@ class IndividualService {
     ProjectService projectService
     CommentService commentService
 
-    /**
-     * Retrieves the given Individual.
-     * If the parameter can be converted to a Long it is assumed to be the database ID.
-     * Otherwise it is tried to find the Individual by its mock name - as well if the Individual could not
-     * be found by the database id.
-     *
-     * If no Individual is found null is returned.
-     * @param identifier Name or database Id
-     * @return Individual
-     * */
     @PostAuthorize("hasRole('ROLE_OPERATOR') or (returnObject == null) or hasPermission(returnObject.project, 'OTP_READ_ACCESS')")
-    Individual getIndividual(String identifier) {
-        if (!identifier) {
-            return null
-        }
-        Individual individual = null
-        if (identifier?.isLong()) {
-            individual = Individual.get(identifier as Long)
-        }
-        return individual ?: CollectionUtils.atMostOneElement(Individual.findAllByMockFullName(identifier))
+    Individual getIndividual(long id) {
+        return Individual.get(id)
     }
 
     @PostAuthorize("hasRole('ROLE_OPERATOR') or (returnObject == null) or hasPermission(returnObject.project, 'OTP_READ_ACCESS')")
-    Individual getIndividualByMockPid(String mockPid) {
-        if (!mockPid) {
-            return null
-        }
-        Individual individual = CollectionUtils.atMostOneElement(Individual.findAllByMockPid(mockPid))
-        return individual
-    }
-
-    /**
-     * Retrieves the given Individual.
-     * Overloaded method for convenience.
-     * @param identifier Name or database Id
-     * @return Individual
-     * */
-    @PostAuthorize("hasRole('ROLE_OPERATOR') or (returnObject == null) or hasPermission(returnObject.project, 'OTP_READ_ACCESS')")
-    Individual getIndividual(long identifier) {
-        return getIndividual("${identifier}")
+    Individual getIndividualByPid(String pid) {
+        return CollectionUtils.atMostOneElement(Individual.findAllByPid(pid))
     }
 
     /**
@@ -108,8 +76,6 @@ class IndividualService {
                 String filter = "%${filterString}%"
                 or {
                     ilike("pid", filter)
-                    ilike("mockFullName", filter)
-                    ilike("mockPid", filter)
                     project {
                         ilike("name", filter)
                     }
@@ -124,20 +90,6 @@ class IndividualService {
                 or {
                     filtering.pid.each {
                         ilike('pid', "%${it}%")
-                    }
-                }
-            }
-            if (filtering.mockFullName) {
-                or {
-                    filtering.mockFullName.each {
-                        ilike('mockFullName', "%${it}%")
-                    }
-                }
-            }
-            if (filtering.mockPid) {
-                or {
-                    filtering.mockPid.each {
-                        ilike('mockPid', "%${it}%")
                     }
                 }
             }
@@ -169,8 +121,6 @@ class IndividualService {
                     String filter = "%${filterString}%"
                     or {
                         ilike("pid", filter)
-                        ilike("mockFullName", filter)
-                        ilike("mockPid", filter)
                         project {
                             ilike("name", filter)
                         }
@@ -188,25 +138,11 @@ class IndividualService {
                         }
                     }
                 }
-                if (filtering.mockFullName) {
-                    or {
-                        filtering.mockFullName.each {
-                            ilike('mockFullName', "%${it}%")
-                        }
-                    }
-                }
-                if (filtering.mockPid) {
-                    or {
-                        filtering.mockPid.each {
-                            ilike('mockPid', "%${it}%")
-                        }
-                    }
-                }
                 if (filtering.type) {
                     'in'('type', filtering.type)
                 }
                 projections {
-                    count('mockPid')
+                    count('pid')
                 }
             }
         }
@@ -226,8 +162,6 @@ class IndividualService {
     Individual createIndividual(IndividualCommand cmd) throws IndividualCreationException {
         Individual individual = new Individual(
                 pid: cmd.identifier,
-                mockPid: cmd.alias,
-                mockFullName: cmd.displayedIdentifier,
                 type: cmd.type,
                 project: cmd.individualProject,
         )

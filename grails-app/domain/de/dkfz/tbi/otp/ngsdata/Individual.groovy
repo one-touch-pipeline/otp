@@ -29,7 +29,7 @@ import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.Entity
 
-/*
+/**
  * In the GUI and e-mails sent by OTP this shall be called "Patient ID".
  * Decided by the OTP Product Owner on 2020-08-20.
  */
@@ -38,25 +38,13 @@ import de.dkfz.tbi.otp.utils.Entity
 class Individual implements CommentableWithProject, Entity {
 
     /**
-     * Identifier used in the file system. It should never change.
-     * Usually its the same as {@link #mockPid}
+     * Patient ID
+     *
+     * Used in the file system, so it should never change without DataSwap
      *
      * This attribute is used externally. Please discuss a change in the team
      */
     String pid
-
-    /**
-     * Identifier used in the user interface.
-     *
-     * Access this via {@link #getDisplayName()}
-     */
-    String mockFullName
-
-    /**
-     * Alternative Identifier. If an individual is renamed, this column can contain the old identifier.
-     * Also it can be used for visible mapping of identifier.
-     */
-    String mockPid
 
     enum Type { REAL, POOL, CELLLINE, UNDEFINED }
     Type type
@@ -78,11 +66,11 @@ class Individual implements CommentableWithProject, Entity {
 
     @Override
     String toString() {
-        "${mockPid}"
+        return pid
     }
 
     String getDisplayName() {
-        return mockFullName
+        return pid
     }
 
     /**
@@ -126,8 +114,6 @@ class Individual implements CommentableWithProject, Entity {
     static mapping = {
         project index: "individual_project_idx"
         pid index: "individual_pid_idx"
-        mockPid index: "individual_mock_pid_idx"
-        mockFullName index: "individual_mock_full_name_idx"
         comment cascade: "all-delete-orphan"
         species index: "individual_species_idx"
     }

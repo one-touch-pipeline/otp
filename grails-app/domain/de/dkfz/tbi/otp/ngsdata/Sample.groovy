@@ -53,8 +53,7 @@ class Sample implements Entity {
 
     @Override
     String toString() {
-        // useful for scaffolding
-        "${individual?.mockPid} ${sampleType?.name}"
+        return "${individual?.pid} ${sampleType?.name}"
     }
 
     String getDisplayName() {

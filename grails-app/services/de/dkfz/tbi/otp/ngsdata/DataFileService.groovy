@@ -50,7 +50,7 @@ class DataFileService {
                     sample {
                         individual {
                             property("id")
-                            property("mockFullName")
+                            property("pid")
                         }
                         sampleType {
                             property("id")
@@ -76,7 +76,7 @@ class DataFileService {
                     dataFile.seqTrack.sample = new Sample()
                     dataFile.seqTrack.sample.individual = new Individual()
                     dataFile.seqTrack.sample.individual.id = tuple[3] as Long
-                    dataFile.seqTrack.sample.individual.mockFullName = tuple[4]
+                    dataFile.seqTrack.sample.individual.pid = tuple[4]
                     dataFile.seqTrack.sample.sampleType = new SampleType()
                     dataFile.seqTrack.sample.sampleType.id = tuple[5] as Long
                     dataFile.seqTrack.sample.sampleType.name = tuple[6]

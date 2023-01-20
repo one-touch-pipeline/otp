@@ -85,8 +85,6 @@ class IndividualControllerSpec extends Specification implements ControllerUnitTe
         Individual individual = CollectionUtils.exactlyOneElement(Individual.list())
         individual.pid == 'Identifier'
         individual.project == project
-        individual.mockPid == 'Alias'
-        individual.mockFullName == 'Displayed Identifier'
         individual.type == Individual.Type.REAL
 
         controller.response.redirectedUrl == "/individual/insert/${individual.id}"

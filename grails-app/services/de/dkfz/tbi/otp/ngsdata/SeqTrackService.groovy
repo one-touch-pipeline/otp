@@ -113,7 +113,7 @@ class SeqTrackService {
                 filteringClosure.delegate = delegate
                 filteringClosure.resolveStrategy = Closure.DELEGATE_FIRST
                 filteringClosure(filtering)
-                projections { count('mockPid') }
+                projections { count('pid') }
             }
         }
         // shortcut for unfiltered results
@@ -130,7 +130,7 @@ class SeqTrackService {
             if (filtering.individual) {
                 or {
                     filtering.individual.each {
-                        ilike('mockPid', "%${it}%")
+                        ilike('pid', "%${it}%")
                     }
                 }
             }

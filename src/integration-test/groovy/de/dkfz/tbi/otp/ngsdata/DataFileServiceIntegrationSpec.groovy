@@ -75,7 +75,7 @@ class DataFileServiceIntegrationSpec extends Specification implements UserAndRol
                 file1.fileWithdrawn == file2.fileWithdrawn &&
                 file1.seqTrack.sampleIdentifier == file2.seqTrack.sampleIdentifier &&
                 file1.seqTrack.sample.individual.id == file2.seqTrack.sample.individual.id &&
-                file1.seqTrack.sample.individual.mockFullName == file2.seqTrack.sample.individual.mockFullName &&
+                file1.seqTrack.sample.individual.pid == file2.seqTrack.sample.individual.pid &&
                 file1.seqTrack.sample.sampleType.id == file2.seqTrack.sample.sampleType.id &&
                 file1.seqTrack.sample.sampleType.name == file2.seqTrack.sample.sampleType.name &&
                 file1.seqTrack.seqType.displayNameWithLibraryLayout == file2.seqTrack.seqType.displayNameWithLibraryLayout &&

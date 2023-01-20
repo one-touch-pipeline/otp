@@ -110,13 +110,13 @@ $(() => {
           }
           for (let i = 0; i < json.aaData.length; i += 1) {
             const row = json.aaData[i];
-            const mockPid = row[0];
+            const pid = row[0];
             row[0] = $.otp.createLinkMarkup({
               controller: 'individual',
               action: 'show',
-              text: row[0],
+              text: pid,
               parameters: {
-                mockPid
+                pid
               }
             });
           }

@@ -73,7 +73,7 @@ IlseSubmission.withTransaction {
         List<String> values = line.split('[ ,;\t]+')*.trim()
         int valueSize = values.size()
         assert valueSize in [5, 6]: "A multi input is defined by 5 or 6 columns"
-        Individual individual = CollectionUtils.exactlyOneElement(Individual.findAllByPidOrMockPidOrMockFullName(values[0], values[0], values[0]),
+        Individual individual = CollectionUtils.exactlyOneElement(Individual.findAllByPid(values[0]),
                 "Could not find one individual with name ${values[0]}")
         SampleType sampleType = CollectionUtils.exactlyOneElement(SampleType.findAllByNameIlike(values[1]),
                 "Could not find one sampleType with name ${values[1]}")

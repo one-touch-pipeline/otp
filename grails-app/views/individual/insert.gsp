@@ -52,16 +52,6 @@
                             </td>
                         </tr>
                         <tr>
-                            <td><label for="alias"><g:message code="individual.insert.alias"/></label></td>
-                            <td><input type="text" id="alias" name="alias" value="${cmd?.alias}"/></td>
-                        </tr>
-                        <tr>
-                            <td valign="top"><label for="displayedIdentifier"><g:message code="individual.insert.displayedIdentifier"/></label></td>
-                            <td>
-                                <input type="text" id="displayedIdentifier" name="displayedIdentifier" value="${cmd?.displayedIdentifier}"/>
-                            </td>
-                        </tr>
-                        <tr>
                             <td><label for="individualType"><g:message code="individual.insert.individualType"/></label></td>
                             <td><g:select class="use-select-2" name="type" from="${individualTypes}" id="individualType" value="${cmd?.type}"/></td>
                         </tr>
