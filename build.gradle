@@ -211,6 +211,10 @@ task workflowTest(type: Test) {
     systemProperty "grails.env", "WORKFLOW_TEST" // change to TEST??
 }
 
+tasks.withType(GroovyCompile).configureEach {
+    options.incremental = true
+}
+
 configurations {
     developmentOnly
     runtimeClasspath {
