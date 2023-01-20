@@ -43,6 +43,9 @@ All the Rules that will be used for OTP
 '''
 
     // OTP Rules
+    rule("file:grails-app/codenarcRules/SecurityAnnotationForGetterRule.groovy") {
+        doNotApplyToFileNames = TEST
+    }
     rule("file:grails-app/codenarcRules/ScheduledServiceBugRule.groovy")
     rule("file:grails-app/codenarcRules/DoNotCreateServicesWithNewRule.groovy")
     rule("file:grails-app/codenarcRules/EnumForBeanNameRule.groovy")
