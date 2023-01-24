@@ -71,11 +71,11 @@ def swapMap = """
 String newProjectName = ''
 
 /**
- * Allow to filter for specific seqTypes. If given, only SeqTracks of the given SeqTypes will be swapped.
+ * Allow to define a whitelist for specific seqTypes. If given, only SeqTracks of the given SeqTypes will be swapped.
  *
  * For example: SeqTypeService.wholeGenomePairedSeqType
  */
-List<SeqType> seqTypeFilterList = [
+List<SeqType> seqTypeWhiteList = [
 ]
 
 /**
@@ -185,21 +185,21 @@ Closure<String> createScript = { String swapLabel ->
 
         println "\t- SeqTypes:"
         seqTypes.each {
-            println "\t\t- ${it} ${seqTypeFilterList.contains(it) ? "(ignored)" : ""}"
+            println "\t\t- ${it} ${seqTypeWhiteList.contains(it) ? "" : "(ignored)"}"
         }
 
         // simplest case: move entire patient
-        if (newSampleType == null && seqTypeFilterList.empty && // only if we're moving entire, unfiltered patients...
+        if (newSampleType == null && seqTypeWhiteList.empty && // only if we're moving entire, unfiltered patients...
                 (!newIndividual || newProject != oldIndividual.project) // .. either into a shiny new patient, or into another project entirely
         ) {
             counter = renamePatient(newIndividualName, oldIndividual, newProject, samples, counter, script, newSampleTypeClosure, newDataFileNameClosure, files)
         } else { // more complex case: moving partial source, or into non-empty destination
             // moving one single sample in its entirety
-            if (oldSampleType || seqTypeFilterList) {
+            if (oldSampleType || seqTypeWhiteList) {
                 counter = moveOneSample(newProject,
                         oldIndividual, newIndividual, newIndividualName,
                         oldSampleType, newSampleType,
-                        seqTypeFilterList,
+                        seqTypeWhiteList,
                         newDataFileNameClosure,
                         newSampleSwapScript,
                         counter, script, files,
@@ -301,7 +301,7 @@ private int moveAllSamples(List<Sample> samples,
 private int moveOneSample(Project newProject,
                           Individual oldIndividual, Individual newIndividual, String newIndividualName,
                           SampleType oldSampleType, SampleType newSampleType,
-                          List<SeqType> seqTypeFilterList,
+                          List<SeqType> seqTypeWhiteList,
                           Closure<String> newDataFileNameClosure,
                           Closure newSampleSwapScript,
                           int counter,
@@ -324,16 +324,16 @@ private int moveOneSample(Project newProject,
             "couldn't find new sample \"${newIndividualName} ${newSampleType.displayName}\"")
     // create recipient Sample if needed
     boolean sampleExists = newSample || createdSamples.contains("${newIndividualName} ${newSampleType.displayName}".toString())
-    if (!sampleExists && seqTypeFilterList) {
+    if (!sampleExists && seqTypeWhiteList) {
         script << Snippets.createSample(newIndividualName, newSampleType.displayName)
         createdSamples << "${newIndividualName} ${newSampleType.displayName}".toString()
         sampleExists = true
     }
     if (sampleExists) {
         List<SeqTrack> oldSeqTracks = SeqTrack.findAllBySample(oldSample, [sort: 'id'])
-        if (seqTypeFilterList) {
+        if (seqTypeWhiteList) {
             oldSeqTracks = oldSeqTracks.findAll {
-                seqTypeFilterList.contains(it.seqType)
+                seqTypeWhiteList.contains(it.seqType)
             }
         }
         oldSeqTracks.each { SeqTrack seqTrack ->
