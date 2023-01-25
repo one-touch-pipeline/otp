@@ -34,5 +34,5 @@ ln -s $NPM_CACHE $HOME/.npm
 
 #cypress cache redirect
 mkdir -p $CYPRESS_CACHE
-mkdir -p $HOME/.cache/Cypress
+mkdir -p $HOME/.cache
 ln -s $CYPRESS_CACHE $HOME/.cache/Cypress

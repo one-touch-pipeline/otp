@@ -76,7 +76,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
                 projectRequestPersistentStateService: new ProjectRequestPersistentStateService([
                         projectRequestStateProvider: Mock(ProjectRequestStateProvider)
                 ]),
-                configService: configService,
+                configService                       : configService,
         ])
     }
 
@@ -96,7 +96,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         1 * projectRequestService.linkGenerator.link(_) >> link
         1 * projectRequestService.messageSourceService.createMessage(_, [
                 link         : link,
-                requester    : "${requester.username} (${requester.realName})",
+                requester    : "${requester.realName} (${requester.username})",
                 teamSignature: emailSenderSalutation,
         ]) >> body
         1 * projectRequestService.mailHelperService.sendEmail(subject, body, [requester.email], users*.email)
@@ -119,7 +119,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         1 * projectRequestService.messageSourceService.createMessage(_, _) >> subject
         1 * projectRequestService.linkGenerator.link(_) >> link
         1 * projectRequestService.messageSourceService.createMessage(_, [
-                requester    : "${requester.username} (${requester.realName})",
+                requester    : "${requester.realName} (${requester.username})",
                 comment      : comment,
                 link         : link,
                 teamSignature: emailSenderSalutation,
@@ -136,7 +136,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         final User pi2 = createUser()
         final List<User> users = [pi1, pi2, requester]
         final ProjectRequest request = createProjectRequest([requester: requester], [usersThatNeedToApprove: users])
-        final String expectedAuthorityUsernames = users*.username.join(", ")
+        final String expectedAuthorityUsernames = users.collect { "${it.realName} (${it.username})" }.join(", ")
 
         when:
         projectRequestService.sendPassOnEmail(request)
@@ -145,8 +145,8 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         1 * projectRequestService.messageSourceService.createMessage(_, _) >> subject
         1 * projectRequestService.linkGenerator.link(_) >> link
         1 * projectRequestService.messageSourceService.createMessage(_, [
+                recipients        : "$expectedAuthorityUsernames, ${requester.realName} (${requester.username})",
                 projectAuthorities: expectedAuthorityUsernames,
-                recipients        : expectedAuthorityUsernames,
                 projectName       : request.name,
                 link              : link,
                 teamSignature     : emailSenderSalutation,
@@ -172,7 +172,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         1 * projectRequestService.linkGenerator.link(_) >> link
         1 * projectRequestService.securityService.currentUser >> pi1
         1 * projectRequestService.messageSourceService.createMessage(_, [
-                requester       : "${requester.username} (${requester.realName})",
+                requester       : "${requester.realName} (${requester.username})",
                 projectName     : request.name,
                 projectAuthority: pi1.username,
                 comment         : comment,
@@ -198,7 +198,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         then:
         1 * projectRequestService.messageSourceService.createMessage(_, _) >> subject
         1 * projectRequestService.messageSourceService.createMessage(_, [
-                requester    : "${requester.username} (${requester.realName})",
+                requester    : "${requester.realName} (${requester.username})",
                 projectName  : request.name,
                 teamSignature: emailSenderSalutation,
         ]) >> body
@@ -264,7 +264,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         1 * projectRequestService.messageSourceService.createMessage(_, _) >> subject
         1 * projectRequestService.securityService.currentUser >> pi1
         1 * projectRequestService.messageSourceService.createMessage(_, [
-                requester       : "${requester.username} (${requester.realName})",
+                requester       : "${requester.realName} (${requester.username})",
                 projectName     : request.name,
                 projectAuthority: pi1.username,
                 teamSignature   : emailSenderSalutation,
@@ -279,9 +279,10 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         final User requester = createUser()
         final User pi1 = createUser()
         final User pi2 = createUser()
-        final List<User> users = [pi1, pi2]
+        final List<User> users = [pi1, pi2, requester]
         final ProjectRequest request = createProjectRequest([requester: requester], [usersThatNeedToApprove: users])
-        final List<User> expectedRecipients = users + [requester]
+        final List<User> expectedRecipients = users
+        final String expectedAuthorityUsernames = users.collect { "${it.realName} (${it.username})" }.join(", ")
 
         when:
         projectRequestService.sendDeleteEmail(request)
@@ -290,7 +291,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         1 * projectRequestService.messageSourceService.createMessage(_, _) >> subject
         1 * projectRequestService.securityService.currentUser >> pi1
         1 * projectRequestService.messageSourceService.createMessage(_, [
-                recipients   : expectedRecipients*.username.join(", "),
+                recipients   : "$expectedAuthorityUsernames, ${requester.realName} (${requester.username})",
                 projectName  : request.name,
                 deletingUser : pi1,
                 teamSignature: emailSenderSalutation,
@@ -315,7 +316,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         1 * projectRequestService.messageSourceService.createMessage(_, _) >> subject
         1 * projectRequestService.linkGenerator.link(_) >> link
         1 * projectRequestService.messageSourceService.createMessage(_, [
-                requester    : "${requester.username} (${requester.realName})",
+                requester    : "${requester.realName} (${requester.username})",
                 link         : link,
                 teamSignature: emailSenderSalutation,
         ]) >> body
@@ -337,7 +338,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         then:
         1 * projectRequestService.messageSourceService.createMessage(_, _) >> subject
         1 * projectRequestService.messageSourceService.createMessage(_, [
-                requester    : "${requester.username} (${requester.realName})",
+                requester    : "${requester.realName} (${requester.username})",
                 projectName  : request.name,
                 teamSignature: emailSenderSalutation,
         ]) >> body
