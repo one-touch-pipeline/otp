@@ -21,10 +21,13 @@
  */
 package de.dkfz.tbi.otp.workflowExecution.decider
 
+import grails.gorm.transactions.Transactional
 import grails.util.Pair
+import groovy.util.logging.Slf4j
 
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.utils.LogUsedTimeUtils
 import de.dkfz.tbi.otp.workflowExecution.*
 
 /**
@@ -33,6 +36,8 @@ import de.dkfz.tbi.otp.workflowExecution.*
  * knows all requirements
  * is called with a list of new/changed workflow artefacts
  */
+@Transactional
+@Slf4j
 abstract class AbstractWorkflowDecider implements Decider {
 
     abstract protected Workflow getWorkflow()
@@ -93,26 +98,43 @@ abstract class AbstractWorkflowDecider implements Decider {
     final Collection<WorkflowArtefact> decide(Collection<WorkflowArtefact> inputArtefacts, boolean forceRun = false, Map<String, String> userParams = [:]) {
         Set<ArtefactType> supportedTypes = supportedInputArtefactTypes
         Set<SeqType> supportedSeqTypes = workflow.supportedSeqTypes
-        Collection<WorkflowArtefact> filteredInputArtefacts = inputArtefacts
-                .findAll { it.artefactType in supportedTypes }
-                .findAll { getSeqType(it) in supportedSeqTypes }
-        Map<Pair<Project, SeqType>, Set<WorkflowArtefact>> groupedInputArtefacts = groupInputArtefacts(filteredInputArtefacts)
-        return groupedInputArtefacts.collectMany { entry ->
-            WorkflowVersionSelector matchingWorkflows = WorkflowVersionSelector.createCriteria().get {
-                assert !entry.key.aValue.archived
-                eq('project', entry.key.aValue)
-                eq('seqType', entry.key.bValue)
-                workflowVersion {
-                    eq('workflow', workflow)
+        Collection<WorkflowArtefact> filteredInputArtefacts = LogUsedTimeUtils.logUsedTime(log, "        filter artefacts") {
+            inputArtefacts
+                    .findAll { it.artefactType in supportedTypes }
+                    .findAll { getSeqType(it) in supportedSeqTypes }
+        }
+        Map<Pair<Project, SeqType>, Set<WorkflowArtefact>> groupedInputArtefacts =
+                LogUsedTimeUtils.logUsedTime(log, "        group artefacts by project and seqType") {
+                    groupInputArtefacts(filteredInputArtefacts)
                 }
-                isNull('deprecationDate')
+        return LogUsedTimeUtils.logUsedTimeStartEnd(log, "        handle artefact groups") {
+            groupedInputArtefacts.collectMany { entry ->
+                LogUsedTimeUtils.logUsedTimeStartEnd(log, "          handle artefact group: ${entry.key.aValue} ${entry.key.bValue}") {
+                    WorkflowVersionSelector matchingWorkflows = WorkflowVersionSelector.createCriteria().get {
+                        assert !entry.key.aValue.archived
+                        eq('project', entry.key.aValue)
+                        eq('seqType', entry.key.bValue)
+                        workflowVersion {
+                            eq('workflow', workflow)
+                        }
+                        isNull('deprecationDate')
+                    }
+                    if (!matchingWorkflows) {
+                        return []
+                    }
+                    Collection<WorkflowArtefact> combinedWorkflowArtefacts =
+                            LogUsedTimeUtils.logUsedTime(log, "          fetch additional artefacts for group") {
+                                (entry.value + findAdditionalRequiredInputArtefacts(entry.value)).unique()
+                            }
+                    Collection<Collection<WorkflowArtefact>> artefactsPerWorkflowRun =
+                            LogUsedTimeUtils.logUsedTime(log, "          group artefact for workflow run") {
+                                groupArtefactsForWorkflowExecution(combinedWorkflowArtefacts, userParams)
+                            }
+                    return LogUsedTimeUtils.logUsedTimeStartEnd(log, "          create ${artefactsPerWorkflowRun.size()} new artefacts and workflow runs") {
+                        createWorkflowRunsAndOutputArtefacts(artefactsPerWorkflowRun, filteredInputArtefacts, matchingWorkflows.workflowVersion)
+                    }
+                }
             }
-            if (!matchingWorkflows) {
-                return []
-            }
-            Collection<WorkflowArtefact> combinedWorkflowArtefacts = (entry.value + findAdditionalRequiredInputArtefacts(entry.value)).unique()
-            Collection<Collection<WorkflowArtefact>> artefactsPerWorkflowRun = groupArtefactsForWorkflowExecution(combinedWorkflowArtefacts, userParams)
-            return createWorkflowRunsAndOutputArtefacts(artefactsPerWorkflowRun, filteredInputArtefacts, matchingWorkflows.workflowVersion)
         }
     }
 }

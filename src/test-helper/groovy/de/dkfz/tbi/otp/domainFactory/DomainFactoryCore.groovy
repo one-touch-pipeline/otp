@@ -187,6 +187,7 @@ trait DomainFactoryCore implements DomainFactoryHelper {
     FastqImportInstance createFastqImportInstance(Map properties = [:]) {
         FastqImportInstance fastqImportInstance = createDomainObject(FastqImportInstance, [
                 importMode: FastqImportInstance.ImportMode.AUTOMATIC,
+                dataFiles: [] as Set,
         ], properties)
         properties.dataFiles.each { DataFile dataFile ->
             fastqImportInstance.addToDataFiles(dataFile)

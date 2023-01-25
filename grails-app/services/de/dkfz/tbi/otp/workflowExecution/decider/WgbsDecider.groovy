@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.workflowExecution.decider
 import grails.gorm.transactions.Transactional
 import grails.util.Pair
 import groovy.transform.Canonical
+import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
@@ -33,6 +34,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.utils.LogUsedTimeUtils
 import de.dkfz.tbi.otp.workflow.wgbs.WgbsWorkflow
 import de.dkfz.tbi.otp.workflowExecution.*
 
@@ -40,6 +42,7 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
 @Component
 @Transactional
+@Slf4j
 class WgbsDecider extends AbstractWorkflowDecider {
 
     @Autowired
@@ -141,8 +144,10 @@ class WgbsDecider extends AbstractWorkflowDecider {
     @Override
     final protected Collection<WorkflowArtefact> createWorkflowRunsAndOutputArtefacts(Collection<Collection<WorkflowArtefact>> inputArtefacts,
                                                                                       Collection<WorkflowArtefact> initialArtefacts, WorkflowVersion version) {
-        return inputArtefacts.collect {
-            createWorkflowRunIfPossible(it, version)
+        return inputArtefacts.withIndex().collect { Collection<WorkflowArtefact> artefacts, Integer index ->
+            LogUsedTimeUtils.logUsedTime(log, "            create workflow run: ${index + 1}") {
+                createWorkflowRunIfPossible(artefacts, version)
+            }
         }.findAll()
     }
 

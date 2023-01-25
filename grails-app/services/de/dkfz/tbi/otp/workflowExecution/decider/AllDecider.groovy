@@ -23,11 +23,13 @@ package de.dkfz.tbi.otp.workflowExecution.decider
 
 import grails.gorm.transactions.Transactional
 import grails.util.Holders
+import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.utils.LogUsedTimeUtils
 import de.dkfz.tbi.otp.workflow.panCancer.PanCancerWorkflow
 import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
 import de.dkfz.tbi.otp.workflowExecution.WorkflowService
@@ -39,6 +41,7 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowService
  */
 @Component
 @Transactional
+@Slf4j
 class AllDecider implements Decider {
 
     @Autowired
@@ -53,13 +56,17 @@ class AllDecider implements Decider {
     @Override
     Collection<WorkflowArtefact> decide(Collection<WorkflowArtefact> allWorkflowArtefacts, boolean forceRun = false, Map<String,
             String> userParams = [:]) {
-        Collection<WorkflowArtefact> newWorkflowArtefacts = []
 
-        deciders.each { it ->
-            Decider decider = Holders.grailsApplication.mainContext.getBean(it)
-            Collection<WorkflowArtefact> workflowArtefacts = decider.decide(allWorkflowArtefacts, forceRun, userParams)
-            allWorkflowArtefacts += workflowArtefacts
-            newWorkflowArtefacts += workflowArtefacts
+        Collection<WorkflowArtefact> newWorkflowArtefacts = []
+        LogUsedTimeUtils.logUsedTimeStartEnd(log, "    AllDecider for ${allWorkflowArtefacts.size()} workflow artefacts") {
+            deciders.each { deciderClass ->
+                Decider decider = Holders.grailsApplication.mainContext.getBean(deciderClass)
+                Collection<WorkflowArtefact> workflowArtefacts = LogUsedTimeUtils.logUsedTimeStartEnd(log, "      Decider ${deciderClass.simpleName}") {
+                    decider.decide(allWorkflowArtefacts, forceRun, userParams)
+                }
+                allWorkflowArtefacts += workflowArtefacts
+                newWorkflowArtefacts += workflowArtefacts
+            }
         }
         return newWorkflowArtefacts
     }

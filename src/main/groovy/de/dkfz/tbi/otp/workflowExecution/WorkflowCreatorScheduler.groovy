@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.workflowExecution
 
+import grails.async.Promise
 import grails.gorm.transactions.Transactional
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
@@ -35,6 +36,8 @@ import de.dkfz.tbi.otp.tracking.NotificationCreator
 import de.dkfz.tbi.otp.utils.SystemUserUtils
 import de.dkfz.tbi.otp.workflow.datainstallation.DataInstallationInitializationService
 import de.dkfz.tbi.otp.workflowExecution.decider.AllDecider
+
+import static grails.async.Promises.task
 
 @Component
 @Slf4j
@@ -74,35 +77,58 @@ class WorkflowCreatorScheduler {
 
         MetaDataFile metaDataFile = metaDataFileService.findByFastqImportInstance(fastqImportInstance)
 
+        fastqImportInstanceService.updateState(fastqImportInstance, FastqImportInstance.WorkflowCreateState.PROCESSING)
+
+        createWorkflowsAsync(metaDataFile)
+    }
+
+    /**
+     * only protected for testing, should not used outside this class
+     */
+    protected Promise<Void> createWorkflowsAsync(MetaDataFile metaDataFile) {
+        return task {
+            createWorkflowsTask(metaDataFile)
+        }
+    }
+
+    /**
+     * only protected for testing, should not used outside this class
+     */
+    @SuppressWarnings("CatchThrowable")
+    protected void createWorkflowsTask(MetaDataFile metaDataFile) {
         try {
-            fastqImportInstanceService.updateState(fastqImportInstance, FastqImportInstance.WorkflowCreateState.PROCESSING)
-            createWorkflows(metaDataFile)
+            createWorkflowsTransactional(metaDataFile)
 
             notificationCreator.sendWorkflowCreateSuccessMail(metaDataFile)
         } catch (Throwable throwable) {
-            fastqImportInstanceService.updateState(fastqImportInstance, FastqImportInstance.WorkflowCreateState.FAILED)
+            fastqImportInstanceService.updateState(metaDataFile.fastqImportInstance, FastqImportInstance.WorkflowCreateState.FAILED)
             notificationCreator.sendWorkflowCreateErrorMail(metaDataFile, throwable)
+            log.debug("  workflow creation for ${metaDataFile.fileName} failed")
         }
     }
 
     @Transactional
-    private void createWorkflows(MetaDataFile metaDataFile) {
+    private void createWorkflowsTransactional(MetaDataFile metaDataFile) {
         MetaDataFile metaDataFileFromDb = MetaDataFile.get(metaDataFile.id)
         Long timeCreateWorkflowRuns = System.currentTimeMillis()
         FastqImportInstance fastqImportInstance = metaDataFileFromDb.fastqImportInstance
+        int count = fastqImportInstance.dataFiles.size()
 
-        log.debug("workflows for ${metaDataFileFromDb.fileName} (${fastqImportInstanceService.countInstancesInWaitingState()} in queue)")
+        log.debug("create workflows starts for ${metaDataFileFromDb.fileName} " +
+                "(dataFiles: ${count}, ${fastqImportInstanceService.countInstancesInWaitingState()} in queue)")
         log.debug("  create workflow runs started")
         List<WorkflowRun> runs = dataInstallationInitializationService.createWorkflowRuns(fastqImportInstance)
-        log.debug("  create workflow runs finished after: ${System.currentTimeMillis() - timeCreateWorkflowRuns}ms")
+        log.debug("  create workflow runs finished for ${count} datafiles after: ${System.currentTimeMillis() - timeCreateWorkflowRuns}ms")
         Long timeDecider = System.currentTimeMillis()
         log.debug("  decider started")
         Collection<WorkflowArtefact> workflowArtefacts = allDecider.decide(runs.collectMany { it.outputArtefacts*.value }, false)
-        log.debug("  decider finished after: ${System.currentTimeMillis() - timeDecider}ms")
+        log.debug("  decider finished for ${count} datafiles after: ${System.currentTimeMillis() - timeDecider}ms")
 
-        createSamplePairs(workflowArtefacts)
+        createSamplePairs(workflowArtefacts, count)
 
         fastqImportInstanceService.updateState(fastqImportInstance, FastqImportInstance.WorkflowCreateState.SUCCESS)
+        log.debug("create workflows finishs for ${metaDataFileFromDb.fileName} " +
+                "(dataFiles: ${count}, ${fastqImportInstanceService.countInstancesInWaitingState()} in queue)")
     }
 
     /**
@@ -113,7 +139,7 @@ class WorkflowCreatorScheduler {
      * @deprecated old workflow system
      */
     @Deprecated
-    private void createSamplePairs(Collection<WorkflowArtefact> workflowArtefacts) {
+    private void createSamplePairs(Collection<WorkflowArtefact> workflowArtefacts, int count) {
         Long timeSamplePairs = System.currentTimeMillis()
         log.debug("  sample pair creation started")
         List<SeqType> seqTypes = SeqTypeService.allAnalysableSeqTypes
@@ -127,6 +153,6 @@ class WorkflowCreatorScheduler {
         SystemUserUtils.useSystemUser {
             samplePairDeciderService.findOrCreateSamplePairs(mergingWorkPackages)
         }
-        log.debug("  sample pair creation finished after: ${System.currentTimeMillis() - timeSamplePairs}ms")
+        log.debug("  sample pair creation finished for ${count} datafiles after: ${System.currentTimeMillis() - timeSamplePairs}ms")
     }
 }

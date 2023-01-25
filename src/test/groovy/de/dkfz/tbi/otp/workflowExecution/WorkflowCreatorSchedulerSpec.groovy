@@ -51,14 +51,14 @@ class WorkflowCreatorSchedulerSpec extends HibernateSpec implements ServiceUnitT
 
     @Override
     Closure doWithSpring() {
-        { ->
+        return { ->
             processingOptionService(ProcessingOptionService)
         }
     }
 
-    void "scheduleCreateWorkflow, if system does't run, don't call createWorkflowRuns"() {
+    void "scheduleCreateWorkflow, if system doesn't run, don't call createWorkflowRuns"() {
         given:
-        WorkflowCreatorScheduler scheduler = createWorkflowCreatorScheduler()
+        WorkflowCreatorScheduler scheduler = createWorkflowCreatorSchedulerSpy()
 
         when:
         scheduler.scheduleCreateWorkflow()
@@ -70,16 +70,12 @@ class WorkflowCreatorSchedulerSpec extends HibernateSpec implements ServiceUnitT
         0 * scheduler.metaDataFileService.findByFastqImportInstance(_)
         0 * scheduler.fastqImportInstanceService.updateState(_, _)
 
-        0 * scheduler.fastqImportInstanceService.countInstancesInWaitingState()
-        0 * scheduler.dataInstallationInitializationService.createWorkflowRuns(_)
-        0 * scheduler.allDecider.decide(_, _)
-        0 * scheduler.samplePairDeciderService.findOrCreateSamplePairs(_)
-        0 * scheduler.notificationCreator.sendWorkflowCreateSuccessMail(_)
+        0 * scheduler.createWorkflowsAsync(_)
     }
 
     void "scheduleCreateWorkflow, if system runs and waiting return null, then do not call createWorkflowRuns"() {
         given:
-        WorkflowCreatorScheduler scheduler = createWorkflowCreatorScheduler()
+        WorkflowCreatorScheduler scheduler = createWorkflowCreatorSchedulerSpy()
 
         when:
         scheduler.scheduleCreateWorkflow()
@@ -91,15 +87,23 @@ class WorkflowCreatorSchedulerSpec extends HibernateSpec implements ServiceUnitT
         0 * scheduler.metaDataFileService.findByFastqImportInstance(_)
         0 * scheduler.fastqImportInstanceService.updateState(_, _)
 
-        0 * scheduler.fastqImportInstanceService.countInstancesInWaitingState()
-        0 * scheduler.dataInstallationInitializationService.createWorkflowRuns(_)
-        0 * scheduler.allDecider.decide(_, _)
-        0 * scheduler.samplePairDeciderService.findOrCreateSamplePairs(_)
-        0 * scheduler.notificationCreator.sendWorkflowCreateSuccessMail(_)
+        0 * scheduler.createWorkflowsAsync(_)
+    }
+
+    void "createWorkflowsAsync, if call then call createWorkflowsTask in new thread"() {
+        given:
+        WorkflowCreatorScheduler scheduler = createWorkflowCreatorSchedulerSpy()
+        MetaDataFile metaDataFile = DomainFactory.createMetaDataFile()
+
+        when:
+        scheduler.createWorkflowsAsync(metaDataFile)?.get()
+
+        then:
+        1 * scheduler.createWorkflowsTask(metaDataFile) >> { return Void }
     }
 
     @Unroll
-    void "createWorkflows, if system runs and waiting returns instance and all fine and #name, call all methods for success called"() {
+    void "createWorkflowsTask, if all fine and #name, call all methods for success called"() {
         given:
         WorkflowCreatorScheduler scheduler = createWorkflowCreatorScheduler()
 
@@ -107,7 +111,7 @@ class WorkflowCreatorSchedulerSpec extends HibernateSpec implements ServiceUnitT
         List<SeqType> seqTypes = DomainFactory.createAllAnalysableSeqTypes()
 
         MetaDataFile metaDataFile = DomainFactory.createMetaDataFile()
-        FastqImportInstance fastqImportInstance = DomainFactory.createFastqImportInstance()
+        FastqImportInstance fastqImportInstance = metaDataFile.fastqImportInstance
         List<WorkflowRun> runs = [createWorkflowRun()]
         List<WorkflowArtefact> workflowArtefacts = runs.collect {
             createWorkflowArtefact([
@@ -134,18 +138,15 @@ class WorkflowCreatorSchedulerSpec extends HibernateSpec implements ServiceUnitT
         applicationContext //initialize the applicationContext
 
         when:
-        scheduler.scheduleCreateWorkflow()
+        scheduler.createWorkflowsTask(metaDataFile)
 
         then:
-        1 * scheduler.workflowSystemService.isEnabled() >> true
+        1 * scheduler.fastqImportInstanceService.updateState(fastqImportInstance, FastqImportInstance.WorkflowCreateState.SUCCESS)
+        0 * scheduler.fastqImportInstanceService._
 
-        1 * scheduler.fastqImportInstanceService.waiting() >> fastqImportInstance
-        1 * scheduler.metaDataFileService.findByFastqImportInstance(_) >> metaDataFile
-        1 * scheduler.fastqImportInstanceService.updateState(_, FastqImportInstance.WorkflowCreateState.PROCESSING)
-        1 * scheduler.fastqImportInstanceService.updateState(_, FastqImportInstance.WorkflowCreateState.SUCCESS)
-
-        1 * scheduler.fastqImportInstanceService.countInstancesInWaitingState() >> 1
-        1 * scheduler.dataInstallationInitializationService.createWorkflowRuns(_) >> runs
+        2 * scheduler.fastqImportInstanceService.countInstancesInWaitingState() >> 1
+        1 * scheduler.dataInstallationInitializationService.createWorkflowRuns(fastqImportInstance) >> runs
+        0 * scheduler.dataInstallationInitializationService._
         1 * scheduler.allDecider.decide(_, _) >> workflowArtefacts
         1 * scheduler.samplePairDeciderService.findOrCreateSamplePairs(expectedListForSnv)
         0 * scheduler.samplePairDeciderService._
@@ -159,30 +160,34 @@ class WorkflowCreatorSchedulerSpec extends HibernateSpec implements ServiceUnitT
         "bam and analysable seqType"        | ArtefactType.BAM   | true
     }
 
-    void "createWorkflows, if system runs and waiting returns instance and decider throws exception, then send error E-Mail to ticketing system"() {
+    void "createWorkflowsTask, if decider throws exception, then send error E-Mail to ticketing system"() {
         given:
         WorkflowCreatorScheduler scheduler = createWorkflowCreatorScheduler()
         MetaDataFile metaDataFile = DomainFactory.createMetaDataFile()
-        FastqImportInstance fastqImportInstance = DomainFactory.createFastqImportInstance()
+        FastqImportInstance fastqImportInstance = metaDataFile.fastqImportInstance
         List<WorkflowRun> runs = [createWorkflowRun()]
         OtpRuntimeException otpRuntimeException = new OtpRuntimeException("Decider throws exceptions")
 
         when:
-        scheduler.scheduleCreateWorkflow()
+        scheduler.createWorkflowsTask(metaDataFile)
 
         then:
-        1 * scheduler.workflowSystemService.isEnabled() >> true
-
-        1 * scheduler.fastqImportInstanceService.waiting() >> fastqImportInstance
-        1 * scheduler.metaDataFileService.findByFastqImportInstance(_) >> metaDataFile
-        1 * scheduler.fastqImportInstanceService.updateState(_, FastqImportInstance.WorkflowCreateState.PROCESSING)
-        1 * scheduler.fastqImportInstanceService.updateState(_, FastqImportInstance.WorkflowCreateState.FAILED)
+        1 * scheduler.fastqImportInstanceService.updateState(fastqImportInstance, FastqImportInstance.WorkflowCreateState.FAILED)
+        0 * scheduler.fastqImportInstanceService._
 
         1 * scheduler.fastqImportInstanceService.countInstancesInWaitingState() >> 1
-        1 * scheduler.dataInstallationInitializationService.createWorkflowRuns(_) >> runs
+        1 * scheduler.dataInstallationInitializationService.createWorkflowRuns(fastqImportInstance) >> runs
+        0 * scheduler.dataInstallationInitializationService._
         1 * scheduler.allDecider.decide(_, _) >> { throw otpRuntimeException }
         0 * scheduler.samplePairDeciderService.findOrCreateSamplePairs(_)
         1 * scheduler.notificationCreator.sendWorkflowCreateErrorMail(metaDataFile, otpRuntimeException)
+    }
+
+    private WorkflowCreatorScheduler createWorkflowCreatorSchedulerSpy() {
+        WorkflowCreatorScheduler workflowCreatorScheduler = Spy(WorkflowCreatorScheduler)
+        workflowCreatorScheduler.workflowSystemService = Mock(WorkflowSystemService)
+        workflowCreatorScheduler.fastqImportInstanceService = Mock(FastqImportInstanceService)
+        return workflowCreatorScheduler
     }
 
     private WorkflowCreatorScheduler createWorkflowCreatorScheduler() {
@@ -192,7 +197,6 @@ class WorkflowCreatorSchedulerSpec extends HibernateSpec implements ServiceUnitT
                 fastqImportInstanceService           : Mock(FastqImportInstanceService),
                 metaDataFileService                  : Mock(MetaDataFileService),
                 notificationCreator                  : Mock(NotificationCreator),
-                workflowSystemService                : Mock(WorkflowSystemService),
                 samplePairDeciderService             : Mock(SamplePairDeciderService),
         ])
     }

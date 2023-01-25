@@ -28,9 +28,37 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 @Transactional(readOnly = true)
 class FastqImportInstanceService {
 
+    final static String QUERY_WAITING_AND_ALLOWED_FASTQ_IMPORT_INSTANCE = """
+        select
+            fii
+        from
+            FastqImportInstance fii
+        where
+            fii.state = 'WAITING'
+            and not exists (
+                select
+                    fii2.id
+                from
+                    FastqImportInstance fii2
+                    join fii2.dataFiles df2
+                where
+                    fii2.state = 'PROCESSING'
+                    and df2.seqTrack.sample.individual.project in (
+                        select
+                            df3.seqTrack.sample.individual.project
+                        from
+                            FastqImportInstance fii3
+                            join fii3.dataFiles df3
+                        where
+                            fii3 = fii
+                    )
+            )
+        order by fii.id asc
+        """
+
     FastqImportInstance waiting() {
         return CollectionUtils.atMostOneElement(
-                FastqImportInstance.findAllByState(FastqImportInstance.WorkflowCreateState.WAITING, [max: 1, sort: 'id', order: 'asc'])
+                FastqImportInstance.executeQuery(QUERY_WAITING_AND_ALLOWED_FASTQ_IMPORT_INSTANCE, [:], [max: 1])
         )
     }
 

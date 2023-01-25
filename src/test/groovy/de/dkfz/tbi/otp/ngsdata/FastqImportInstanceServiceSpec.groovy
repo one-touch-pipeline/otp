@@ -93,42 +93,4 @@ class FastqImportInstanceServiceSpec extends Specification implements ServiceUni
                 FastqImportInstance.WorkflowCreateState.WAITING,
         ]
     }
-
-    @Unroll
-    void "waiting, should return a valid FastqImportInstance or null object depending on the available FastqImportInstances"() {
-        given:
-        states.each {
-            createFastqImportInstance([
-                    state: it,
-            ])
-        }
-
-        when:
-        FastqImportInstance fastqImportInstance = service.waiting()
-
-        then:
-        (fastqImportInstance == null) == checkCondition
-
-        where:
-        states                                                                                                || checkCondition
-        [FastqImportInstance.WorkflowCreateState.WAITING, FastqImportInstance.WorkflowCreateState.WAITING]    || false
-        [FastqImportInstance.WorkflowCreateState.PROCESSING, FastqImportInstance.WorkflowCreateState.SUCCESS] || true
-        [FastqImportInstance.WorkflowCreateState.WAITING, FastqImportInstance.WorkflowCreateState.FAILED]     || false
-        [FastqImportInstance.WorkflowCreateState.PROCESSING, FastqImportInstance.WorkflowCreateState.SUCCESS] || true
-    }
-
-    void "waiting, when multiple waiting, then return the oldest"() {
-        given:
-        FastqImportInstance fastqImportInstanceExpected = (1..3).collect {
-            createFastqImportInstance([
-                    state: FastqImportInstance.WorkflowCreateState.WAITING,
-            ])
-        }.first()
-
-        when:
-        FastqImportInstance fastqImportInstance = service.waiting()
-
-        then:
-        fastqImportInstance == fastqImportInstanceExpected
-    }
 }

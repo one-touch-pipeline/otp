@@ -22,17 +22,20 @@
 package de.dkfz.tbi.otp.workflowExecution.decider
 
 import grails.gorm.transactions.Transactional
+import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.utils.LogUsedTimeUtils
 import de.dkfz.tbi.otp.workflow.fastqc.BashFastQcWorkflow
 import de.dkfz.tbi.otp.workflowExecution.*
 
 @Component
 @Transactional
+@Slf4j
 class FastqcDecider implements Decider {
 
     @Autowired
@@ -66,8 +69,10 @@ class FastqcDecider implements Decider {
         //currently fixed to one supported version, will be changed later
         final WorkflowVersion workflowVersion = CollectionUtils.exactlyOneElement(WorkflowVersion.findAllByWorkflow(workflow))
 
-        return inputArtefacts.collectMany {
-            decideEach(it, workflowVersion)
+        return inputArtefacts.collectMany { WorkflowArtefact workflowArtefact ->
+            LogUsedTimeUtils.logUsedTime(log, "        decide for: ${workflowArtefact.toString().replaceAll('\n', ', ')}") {
+                decideEach(workflowArtefact, workflowVersion)
+            }
         }.findAll()
     }
 

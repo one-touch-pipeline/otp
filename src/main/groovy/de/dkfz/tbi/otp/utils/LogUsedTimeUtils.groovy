@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.utils
 
 import groovy.util.logging.Slf4j
+import org.slf4j.Logger
 
 /**
  * Utility to calculate the time needed for execute a given closure
@@ -41,6 +42,39 @@ class LogUsedTimeUtils {
         T t = closure()
         long end = System.currentTimeMillis()
         log.debug("${logText}: ${end - start}ms")
+        return t
+    }
+
+    /**
+     * utility to log the time used for execute the closure using the provided logger
+     *
+     * @param logger the logger to use
+     * @param logText a text used for logging the time
+     * @param closure the closure for which the duration should be taken
+     * @return the value of the closure
+     */
+    static <T> T logUsedTime(Logger logger, String logText, Closure closure) {
+        long start = System.currentTimeMillis()
+        T t = closure()
+        long end = System.currentTimeMillis()
+        logger.debug("${logText}: took ${end - start}ms")
+        return t
+    }
+
+    /**
+     * Utility to log the start and the time used for execute the closure using the provided logger
+     *
+     * @param logger the logger to use
+     * @param logText a text used for logging the time
+     * @param closure the closure for which the duration should be taken
+     * @return the value of the closure
+     */
+    static <T> T logUsedTimeStartEnd(Logger logger, String logText, Closure closure) {
+        logger.debug("${logText}: starts")
+        long start = System.currentTimeMillis()
+        T t = closure()
+        long end = System.currentTimeMillis()
+        logger.debug("${logText}: ends, took ${end - start}ms")
         return t
     }
 }
