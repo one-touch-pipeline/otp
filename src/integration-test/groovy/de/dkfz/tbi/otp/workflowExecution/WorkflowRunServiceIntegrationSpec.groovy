@@ -52,6 +52,18 @@ class WorkflowRunServiceIntegrationSpec extends Specification implements Workflo
         ret == workflowRun
     }
 
+    void "nextWaitingWorkflow, when workflow is disabled, then return null"() {
+        given:
+        createWorkflowRunHelper(WorkflowRun.State.RUNNING_OTP, WorkflowArtefact.State.SUCCESS, createWorkflow(enabled: false))
+        WorkflowRunService service = new WorkflowRunService()
+
+        when:
+        WorkflowRun ret = service.nextWaitingWorkflow(0)
+
+        then:
+        ret == null
+    }
+
     void "nextWaitingWorkflow, if overall workflow count is ok, but the workflow specific count is too high then return null"() {
         given:
         WorkflowRun workflowRun = createWorkflowRunHelper()
