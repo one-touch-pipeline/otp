@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,23 +19,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 databaseChangeLog = {
-    include file: 'changelogs/2022/initialDatabaseSchema.groovy'
 
-    include file: 'changelogs/2022/otp-1860-adapt-databasechangelog.groovy'
+    changeSet(author: "", id: "") {
+        sql("""
+DELETE
+FROM workflow_version_selector
+where workflow_version_id IN (SELECT id
+                              FROM workflow_version
+                              WHERE workflow_id IN (SELECT id
+                                                    FROM workflow
+                                                    WHERE name = 'PanCancer alignment')
+                                AND workflow_version.workflow_version IN ('1.2.73-2', '1.2.73-3'));
 
-    include file: 'changelogs/2022/otp-1611-wes-domains.groovy'
-
-    include file: 'changelogs/2022/otp-1612-state-for-workflow-creation.groovy'
-
-    include file: 'changelogs/2022/otp-1135.groovy'
-
-    include file: 'changelogs/2023/otp-1732.groovy'
-
-    include file: 'changelogs/2023/otp-1926-bugfix-wgbs-defaults.groovy'
-
-    include file: 'changelogs/2023/otp-1909.groovy'
-
-    include file: 'changelogs/2023/otp-1919-fix-pancan-defaults.groovy'
+DELETE
+FROM workflow_version
+WHERE workflow_id IN (SELECT id
+                      FROM workflow
+                      WHERE name = 'PanCancer alignment')
+  AND workflow_version.workflow_version IN ('1.2.73-2', '1.2.73-3');
+ 
+DELETE
+FROM workflow_version
+WHERE workflow_id IN (SELECT id
+                      FROM workflow
+                      WHERE name = 'WGBS alignment')
+  AND workflow_version.workflow_version IN ('1.2.51-2', '1.2.73-3');
+""")
+    }
 }
