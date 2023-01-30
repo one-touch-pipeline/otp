@@ -380,6 +380,7 @@ grails {
 
 tasks.withType(Test) {
     maxParallelForks = System.getenv('MAX_PARALLEL_FORKS')?.isInteger() ? System.getenv('MAX_PARALLEL_FORKS') as int : 1
+    jvmArgs('-Xms1g', '-Xmx4g')
     testLogging {
         exceptionFormat = TestExceptionFormat.FULL
         afterSuite { desc, result ->
