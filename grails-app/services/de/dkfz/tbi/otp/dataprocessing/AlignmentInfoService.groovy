@@ -26,14 +26,12 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import grails.gorm.transactions.Transactional
 import org.springframework.beans.factory.NoSuchBeanDefinitionException
 
-import de.dkfz.tbi.otp.utils.exceptions.FileNotFoundException
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.otp.utils.CollectionUtils
-import de.dkfz.tbi.otp.utils.ExecuteRoddyCommandService
-import de.dkfz.tbi.otp.utils.ProcessOutput
+import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.otp.utils.exceptions.FileNotFoundException
 import de.dkfz.tbi.otp.workflow.panCancer.PanCancerWorkflow
 import de.dkfz.tbi.otp.workflowExecution.*
 
@@ -54,7 +52,8 @@ class AlignmentInfoService {
 
         if (run.workflow.name == PanCancerWorkflow.WORKFLOW) {
             Map<String, String> config = extractCValuesMapFromJsonConfigString(run.combinedConfig)
-            return generateRoddyAlignmentInfo(config, (run.outputArtefacts[PanCancerWorkflow.OUTPUT_BAM].artefact.get() as AbstractBamFile).seqType,
+            AbstractBamFile bamFile = run.outputArtefacts[PanCancerWorkflow.OUTPUT_BAM].artefact.get() as AbstractBamFile
+            return generateRoddyAlignmentInfo(config, bamFile.project, bamFile.seqType,
                     run.workflowVersion.workflowVersion)
         }
         return null
@@ -77,7 +76,8 @@ class AlignmentInfoService {
                                         )
                                 ))
                         )
-                        RoddyAlignmentInfo info = generateRoddyAlignmentInfo(config, projectWorkflow.seqType, projectWorkflow.workflowVersion.workflowVersion)
+                        RoddyAlignmentInfo info = generateRoddyAlignmentInfo(config, projectWorkflow.project, projectWorkflow.seqType,
+                                projectWorkflow.workflowVersion.workflowVersion)
                         return [(projectWorkflow.seqType): info]
                     }
                     return [:]
@@ -99,7 +99,7 @@ class AlignmentInfoService {
         assert workflowConfig
         ProcessOutput output = getRoddyProcessOutput(workflowConfig)
         Map<String, String> config = extractConfigRoddyOutput(output)
-        return generateRoddyAlignmentInfo(config, workflowConfig.seqType, workflowConfig.programVersion)
+        return generateRoddyAlignmentInfo(config, workflowConfig.project, workflowConfig.seqType, workflowConfig.programVersion)
     }
 
     /**
@@ -136,17 +136,17 @@ class AlignmentInfoService {
      * @param programVersion Version of the Roddy workflow plugin
      * @return new Alignment info
      */
-    private RoddyAlignmentInfo generateRoddyAlignmentInfo(Map<String, String> config, SeqType seqType, String programVersion) {
-        Map bwa = createAlignmentCommandOptionsMap(config, seqType)
-        Map merge = createMergeCommandOptionsMap(config, seqType)
+    private RoddyAlignmentInfo generateRoddyAlignmentInfo(Map<String, String> config, Project project, SeqType seqType, String programVersion) {
+        Map bwa = createAlignmentCommandOptionsMap(config, project, seqType)
+        Map merge = createMergeCommandOptionsMap(config, project, seqType)
 
         return new RoddyAlignmentInfo(
-                alignmentProgram  : bwa.command,
+                alignmentProgram: bwa.command,
                 alignmentParameter: bwa.options,
-                samToolsCommand   : config.get("SAMTOOLS_VERSION") ? "Version ${config.get("SAMTOOLS_VERSION")}" : "",
-                mergeCommand      : merge.command,
-                mergeOptions      : merge.options,
-                programVersion    : programVersion,
+                samToolsCommand: config.get("SAMTOOLS_VERSION") ? "Version ${config.get("SAMTOOLS_VERSION")}" : "",
+                mergeCommand: merge.command,
+                mergeOptions: merge.options,
+                programVersion: programVersion,
         )
     }
 
@@ -157,7 +157,7 @@ class AlignmentInfoService {
      * @param seqType Sequencing type for which the merging information should be returned
      * @return Map that holds command and options for the Merging
      */
-    private Map createMergeCommandOptionsMap(Map<String, String> config, SeqType seqType) {
+    private Map createMergeCommandOptionsMap(Map<String, String> config, Project project, SeqType seqType) {
         Map merge = [:]
 
         // Default empty
@@ -184,8 +184,8 @@ class AlignmentInfoService {
         }
 
         if (!merge.command) {
-            log?.debug("Could not extract merging configuration from config:\n${config}")
-            throw new ParsingException("Could not extract merging configuration value from Roddy config")
+            log?.debug("Could not extract merging configuration for ${project} ${seqType} from config:\n${config}")
+            throw new ParsingException("Could not extract merging configuration value from Roddy config for ${project} ${seqType}")
         }
 
         return merge
@@ -208,7 +208,7 @@ class AlignmentInfoService {
      * Creates a Map bwa with command and options for the alignment
      * @return Map that holds command and options for the alignment
      */
-    private Map createAlignmentCommandOptionsMap(Map<String, String> config, SeqType seqType) {
+    private Map createAlignmentCommandOptionsMap(Map<String, String> config, Project project, SeqType seqType) {
         Map bwa = [:]
 
         if (seqType.isRna()) {
@@ -225,8 +225,8 @@ class AlignmentInfoService {
         }
 
         if (!bwa.command) {
-            log?.debug("Could not extract alignment configuration from config:\n${config}")
-            throw new ParsingException("Could not extract alignment configuration value from Roddy config")
+            log?.debug("Could not extract alignment configuration for ${project} ${seqType} from config:\n${config}")
+            throw new ParsingException("Could not extract alignment configuration value from Roddy config for ${project} ${seqType}")
         }
 
         return bwa
