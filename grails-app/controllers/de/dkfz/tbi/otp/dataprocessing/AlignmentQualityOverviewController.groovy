@@ -29,22 +29,21 @@ import org.springframework.security.access.annotation.Secured
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerConfigurationService
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerService
+import de.dkfz.tbi.otp.dataprocessing.qaalignmentoverview.QaOverviewService
+import de.dkfz.tbi.otp.dataprocessing.qaalignmentoverview.QcStatusCellService
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.otp.qcTrafficLight.*
+import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightService
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.workflow.panCancer.PanCancerWorkflow
 import de.dkfz.tbi.otp.workflow.wgbs.WgbsWorkflow
 import de.dkfz.tbi.otp.workflowExecution.WorkflowService
-import de.dkfz.tbi.util.TimeFormats
 
 import java.nio.file.*
-
-import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 @Secured('isFullyAuthenticated()')
 class AlignmentQualityOverviewController implements CheckAndCall {
@@ -56,11 +55,6 @@ class AlignmentQualityOverviewController implements CheckAndCall {
             viewCellRangerSummary: "GET",
             renderPDF            : "GET",
     ]
-
-    static final String CHR_X_HG19 = 'chrX'
-    static final String CHR_Y_HG19 = 'chrY'
-
-    private static final List<String> CHROMOSOMES = [Chromosomes.CHR_X.alias, Chromosomes.CHR_Y.alias, CHR_X_HG19, CHR_Y_HG19].asImmutable()
 
     private static final List<String> HEADER_COMMON = [
             'alignment.quality.rowId',
@@ -158,13 +152,12 @@ class AlignmentQualityOverviewController implements CheckAndCall {
 
     CellRangerConfigurationService cellRangerConfigurationService
     CellRangerService cellRangerService
-    ChromosomeQualityAssessmentMergedService chromosomeQualityAssessmentMergedService
-    DataFileService dataFileService
     FileSystemService fileSystemService
     OverallQualityAssessmentMergedService overallQualityAssessmentMergedService
     ProcessingOptionService processingOptionService
     ProjectSelectionService projectSelectionService
-    QcThresholdService qcThresholdService
+    QaOverviewService qaOverviewService
+    QcStatusCellService qcStatusCellService
     QcTrafficLightService qcTrafficLightService
     ReferenceGenomeService referenceGenomeService
     SeqTypeService seqTypeService
@@ -177,9 +170,9 @@ class AlignmentQualityOverviewController implements CheckAndCall {
             return response.sendError(HttpStatus.NOT_FOUND.value())
         }
 
-        List<String> suppSeqTypes = supportedSeqTypes
+        List<String> suppSeqTypes = qaOverviewService.allSupportedSeqTypes()
         List<SeqType> seqTypes = seqTypeService.alignableSeqTypesByProject(project).findAll {
-            it.name in suppSeqTypes
+            it in suppSeqTypes
         }
 
         SeqType seqType = (cmd.seqType && seqTypes.contains(cmd.seqType)) ? cmd.seqType : seqTypes[0]
@@ -242,28 +235,37 @@ class AlignmentQualityOverviewController implements CheckAndCall {
                     cmd.comment
             )
 
-            render(generateQcStatusCell(cmd.abstractBamFile as AbstractMergedBamFile) as JSON)
+            Map<String, ?> qcStatusMap = [
+                    qcStatus : cmd.abstractBamFile.qualityAssessmentStatus,
+                    qcComment: cmd.abstractBamFile.comment?.comment,
+                    qcAuthor : cmd.abstractBamFile.comment?.author,
+                    bamId    : cmd.abstractBamFile.id,
+            ]
+
+            render(qcStatusCellService.generateQcStatusCell(qcStatusMap) as JSON)
         }
     }
 
     def dataTableSource(AlignmentQcDataTableCommand cmd) {
-        Map dataToRender = cmd.dataToRender()
-        Project project = projectSelectionService.requestedProject
+        LogUsedTimeUtils.logUsedTimeStartEnd(log, "dataTableSource") {
+            Map dataToRender = cmd.dataToRender()
+            Project project = projectSelectionService.requestedProject
 
-        if (!cmd.seqType) {
-            dataToRender.iTotalRecords = 0
-            dataToRender.iTotalDisplayRecords = 0
-            dataToRender.aaData = []
+            if (!cmd.seqType) {
+                dataToRender.iTotalRecords = 0
+                dataToRender.iTotalDisplayRecords = 0
+                dataToRender.aaData = []
+                render(dataToRender as JSON)
+                return
+            }
+
+            List<Map<String, ?>> dataOverall = qaOverviewService.overviewData(project, cmd.seqType, cmd.sample)
+
+            dataToRender.iTotalRecords = dataOverall.size()
+            dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
+            dataToRender.aaData = dataOverall
             render(dataToRender as JSON)
-            return
         }
-
-        List<AbstractQualityAssessment> dataOverall = overallQualityAssessmentMergedService.findAllByProjectAndSeqType(project, cmd.seqType, cmd.sample)
-
-        dataToRender.iTotalRecords = dataOverall.size()
-        dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
-        dataToRender.aaData = generateAlignmentQcTableRows(dataOverall, project, cmd.seqType)
-        render(dataToRender as JSON)
     }
 
     def viewCellRangerSummary(ViewCellRangerSummaryCommand cmd) {
@@ -304,250 +306,6 @@ class AlignmentQualityOverviewController implements CheckAndCall {
         } else {
             render(text: "no plot available", contentType: "text/plain")
         }
-    }
-
-    @SuppressWarnings(['AbcMetric', 'CyclomaticComplexity', 'MethodSize'])
-    private List<Map<String, TableCellValue>> generateAlignmentQcTableRows(List<AbstractQualityAssessment> dataOverall, Project project, SeqType seqType) {
-        List<AbstractQualityAssessment> dataChromosomeXY = chromosomeQualityAssessmentMergedService.qualityAssessmentMergedForSpecificChromosomes(CHROMOSOMES,
-                dataOverall*.qualityAssessmentMergedPass)
-        Map<Long, Map<String, List<AbstractQualityAssessment>>> chromosomeMapXY = dataChromosomeXY.groupBy([
-                { it.qualityAssessmentMergedPass.id },
-                { it.chromosomeName },
-        ])
-
-        QcThresholdService.ThresholdColorizer thresholdColorizer
-        if (dataOverall) {
-            thresholdColorizer = qcThresholdService.createThresholdColorizer(project, seqType, dataOverall.first().class as Class<QcTrafficLightValue>)
-        }
-
-        Map<Long, Map<String, List<ReferenceGenomeEntry>>> chromosomeLengthForChromosome =
-                overallQualityAssessmentMergedService.findChromosomeLengthForQualityAssessmentMerged(CHROMOSOMES, dataOverall)
-                        .groupBy([{ it.referenceGenome.id }, { it.alias }])
-
-        return dataOverall.collect { AbstractQualityAssessment it ->
-            QualityAssessmentMergedPass qualityAssessmentMergedPass = it.qualityAssessmentMergedPass
-            AbstractMergedBamFile abstractMergedBamFile = qualityAssessmentMergedPass.abstractMergedBamFile
-            Set<SeqTrack> seqTracks = abstractMergedBamFile.mergingWorkPackage.seqTracks
-            /*
-                This method assumes, that it does not matter which seqTrack is used to get the sequencedLength.
-                Within one merged bam file all are the same. This is incorrect, see OTP-1670.
-            */
-            Double readLength = null
-            if (seqTracks) {
-                DataFile dataFile = dataFileService.findAllBySeqTrack(seqTracks.first()).first()
-                String readLengthString = dataFile.sequenceLength
-                if (readLengthString) {
-                    readLength = readLengthString.contains('-') ? (readLengthString.split('-').sum {
-                        it as double
-                    } / 2) : readLengthString as double
-                }
-            }
-
-            Set<LibraryPreparationKit> kit = qualityAssessmentMergedPass.containedSeqTracks*.libraryPreparationKit.findAll().unique()
-
-            Map<String, TableCellValue> qcTableRow = [
-                    rowId             : abstractMergedBamFile.id,
-                    pid               : new TableCellValue(
-                            value: abstractMergedBamFile.individual.displayName,
-                            link: g.createLink(
-                                    controller: 'individual',
-                                    action: 'show',
-                                    id: abstractMergedBamFile.individual.id,
-                            ).toString()
-                    ),
-                    sampleType        : abstractMergedBamFile.sampleType.name,
-                    dateFromFileSystem: TimeFormats.DATE.getFormattedDate(abstractMergedBamFile.dateFromFileSystem),
-                    withdrawn         : abstractMergedBamFile.withdrawn,
-                    pipeline          : abstractMergedBamFile.workPackage.pipeline.displayName,
-                    qcStatus          : generateQcStatusCell(abstractMergedBamFile),
-                    qcStatusOnly      : abstractMergedBamFile.qcTrafficLightStatus,
-                    qcComment         : abstractMergedBamFile.comment?.comment,
-                    qcAuthor          : abstractMergedBamFile.comment?.author,
-                    kit               : new TableCellValue(
-                            value: kit*.shortDisplayName.join(", ") ?: "-",
-                            warnColor: null,
-                            link: null,
-                            tooltip: kit*.name.join(", ") ?: ""
-                    ),
-                    dbVersion         : new TableCellValue(
-                            value: abstractMergedBamFile.version
-                    ),
-            ]
-
-            Map<String, Double> qcKeysMap = [
-                    insertSizeMedian: readLength,
-            ]
-            List<String> qcKeys = [
-                    "percentMappedReads",
-                    "percentDuplicates",
-                    "percentDiffChr",
-                    "percentProperlyPaired",
-                    "percentSingletons",
-            ]
-
-            switch (seqType) {
-                case workflowService.getSupportedSeqTypes(PanCancerWorkflow.WORKFLOW).findAll { !it.needsBedFile }:
-                case workflowService.getSupportedSeqTypes(WgbsWorkflow.WORKFLOW):
-                    Double coverageX
-                    Double coverageY
-                    if (chromosomeLengthForChromosome[it.referenceGenome.id]) {
-                        Map<String, List<AbstractQualityAssessment>> chromosomeMap = chromosomeMapXY[qualityAssessmentMergedPass.id]
-                        AbstractQualityAssessment x = getQualityAssessmentForFirstMatchingChromosomeName(chromosomeMap, [Chromosomes.CHR_X.alias, CHR_X_HG19])
-                        AbstractQualityAssessment y = getQualityAssessmentForFirstMatchingChromosomeName(chromosomeMap, [Chromosomes.CHR_Y.alias, CHR_Y_HG19])
-                        long qcBasesMappedXChromosome = x.qcBasesMapped
-                        long qcBasesMappedYChromosome = y.qcBasesMapped
-                        long chromosomeLengthX = chromosomeLengthForChromosome[it.referenceGenome.id][Chromosomes.CHR_X.alias][0].lengthWithoutN
-                        long chromosomeLengthY = chromosomeLengthForChromosome[it.referenceGenome.id][Chromosomes.CHR_Y.alias][0].lengthWithoutN
-                        coverageX = qcBasesMappedXChromosome / chromosomeLengthX
-                        coverageY = qcBasesMappedYChromosome / chromosomeLengthY
-                    }
-
-                    qcTableRow << [
-                            coverageWithoutN: FormatHelper.formatNumber(abstractMergedBamFile.coverage), //Coverage w/o N
-                            coverageX       : FormatHelper.formatNumber(coverageX), //ChrX Coverage w/o N
-                            coverageY       : FormatHelper.formatNumber(coverageY), //ChrY Coverage w/o N
-                    ]
-                    break
-
-                case workflowService.getSupportedSeqTypes(PanCancerWorkflow.WORKFLOW).findAll { it.needsBedFile }:
-                    qcTableRow << [
-                            targetCoverage: FormatHelper.formatNumber(abstractMergedBamFile.coverage),
-                    ]
-                    qcKeys += [
-                            "onTargetRatio",
-                    ]
-                    break
-
-                case { it.name == SeqTypeNames.RNA.seqTypeName }:
-                    qcTableRow << [
-                            arribaPlots: new TableCellValue(
-                                    archived: project.archived,
-                                    value: "PDF",
-                                    linkTarget: "_blank",
-                                    link: g.createLink(
-                                            action: "renderPDF",
-                                            params: ["abstractMergedBamFile.id": abstractMergedBamFile.id])
-                            ),
-                    ]
-                    qcKeys += [
-                            "totalReadCounter",
-                            "threePNorm",
-                            "fivePNorm",
-                            "chimericPairs",
-                            "duplicatesRate",
-                            "end1Sense",
-                            "end2Sense",
-                            "estimatedLibrarySize",
-                            "exonicRate",
-                            "expressionProfilingEfficiency",
-                            "genesDetected",
-                            "intergenicRate",
-                            "intragenicRate",
-                            "intronicRate",
-                            "mapped",
-                            "mappedUnique",
-                            "mappedUniqueRateOfTotal",
-                            "mappingRate",
-                            "meanCV",
-                            "uniqueRateofMapped",
-                            "rRNARate",
-                    ]
-                    break
-
-                case { it.name == SeqTypeNames._10X_SCRNA.seqTypeName }:
-                    qcTableRow << [
-                            summary          : new TableCellValue(
-                                    archived: project.archived,
-                                    value: "Summary",
-                                    linkTarget: "_blank",
-                                    link: g.createLink(
-                                            action: "viewCellRangerSummary",
-                                            params: [
-                                                    "singleCellBamFile.id": ((SingleCellBamFile) abstractMergedBamFile).id,
-                                            ],
-                                    ).toString()
-                            ),
-                            referenceGenome  : abstractMergedBamFile.workPackage.referenceGenomeIndex.toString(),
-                            cellRangerVersion: ((SingleCellBamFile)abstractMergedBamFile).mergingWorkPackage.config.programVersion,
-                    ]
-                    qcKeys += [
-                            'expectedCells',
-                            'enforcedCells',
-                            'estimatedNumberOfCells',
-                            'meanReadsPerCell',
-                            'medianGenesPerCell',
-                            'numberOfReads',
-                            'validBarcodes',
-                            'sequencingSaturation',
-                            'q30BasesInBarcode',
-                            'q30BasesInRnaRead',
-                            'q30BasesInUmi',
-                            'readsMappedConfidentlyToIntergenicRegions',
-                            'readsMappedConfidentlyToIntronicRegions',
-                            'readsMappedConfidentlyToExonicRegions',
-                            'readsMappedConfidentlyToTranscriptome',
-                            'fractionReadsInCells',
-                            'totalGenesDetected',
-                            'medianUmiCountsPerCell',
-                    ]
-                    break
-
-                default:
-                    throw new NotSupportedException("${seqType.name} cannot be handled")
-            }
-
-            qcTableRow += thresholdColorizer.colorize(qcKeysMap, it)
-            qcTableRow += thresholdColorizer.colorize(qcKeys, it)
-            return qcTableRow
-        }
-    }
-
-    /**
-     * Generate the QC Status info in a DataTable cell format.
-     *
-     * @param abstractMergedBamFile containing the infos to display
-     * @return TableCellValue for the DataTable
-     */
-    private TableCellValue generateQcStatusCell(AbstractMergedBamFile abstractMergedBamFile) {
-        TableCellValue.Icon icon = [
-                (AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED)  : TableCellValue.Icon.WARNING,
-                (AbstractMergedBamFile.QcTrafficLightStatus.WARNING)  : TableCellValue.Icon.WARNING,
-                (AbstractMergedBamFile.QcTrafficLightStatus.REJECTED) : TableCellValue.Icon.ERROR,
-                (AbstractMergedBamFile.QcTrafficLightStatus.UNCHECKED): TableCellValue.Icon.NA,
-        ].getOrDefault(abstractMergedBamFile.qcTrafficLightStatus, TableCellValue.Icon.OKAY)
-
-        String tooltip
-        if (abstractMergedBamFile.qcTrafficLightStatus == AbstractMergedBamFile.QcTrafficLightStatus.UNCHECKED) {
-            tooltip = g.message(code: "alignment.quality.not.available")
-        } else {
-            String comment = abstractMergedBamFile.comment ? "\n${abstractMergedBamFile.comment?.comment}\n${abstractMergedBamFile.comment?.author}" : ""
-            tooltip = "Status: ${(abstractMergedBamFile.qcTrafficLightStatus)} ${comment}"
-        }
-
-        return new TableCellValue(
-                value: abstractMergedBamFile.comment ? "${abstractMergedBamFile.comment?.comment}" : "",
-                warnColor: null,
-                link: null,
-                tooltip: tooltip,
-                icon: icon,
-                status: (abstractMergedBamFile.qcTrafficLightStatus).toString(),
-                id: abstractMergedBamFile.id
-        )
-    }
-
-    private static AbstractQualityAssessment getQualityAssessmentForFirstMatchingChromosomeName(Map<String,
-            List<AbstractQualityAssessment>> qualityAssessmentMergedPassGroupedByChromosome, List<String> chromosomeNames) {
-        return exactlyOneElement(chromosomeNames.findResult { qualityAssessmentMergedPassGroupedByChromosome.get(it) })
-    }
-
-    private List<String> getSupportedSeqTypes() {
-        return [
-                PanCancerWorkflow.WORKFLOW,
-                WgbsWorkflow.WORKFLOW,
-        ].collectMany { workflowService.getSupportedSeqTypes(it)*.name } + [
-                SeqTypeNames.RNA.seqTypeName,
-                SeqTypeNames._10X_SCRNA.seqTypeName,
-        ]
     }
 }
 

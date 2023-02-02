@@ -118,11 +118,11 @@ $(() => {
     const workflow = $('#seqType').data('columns');
 
     let columnNames = [
-      { data: 'rowId', visible: false, className: 'no_csv_export' },
+      { data: 'bamId', visible: false, className: 'no_csv_export' },
       { data: 'pid' },
       { data: 'sampleType' },
-      { data: 'qcStatus', className: 'no_csv_export maxWidth230', render: renderQcStatusColumn },
-      { data: 'qcStatusOnly', visible: false },
+      { data: 'qcStatusGui', className: 'no_csv_export maxWidth230', render: renderQcStatusColumn },
+      { data: 'qcStatus', visible: false },
       { data: 'qcComment', visible: false },
       { data: 'qcAuthor', visible: false },
       { data: 'dbVersion', visible: false, className: 'no_csv_export' }
@@ -209,7 +209,7 @@ $(() => {
         { data: 'percentSingletons' },
         { data: 'insertSizeMedian' },
         { data: 'percentDiffChr' },
-        { data: 'pipeline' },
+        { data: 'pipelineName' },
         { data: 'dateFromFileSystem' }
       ]);
     }

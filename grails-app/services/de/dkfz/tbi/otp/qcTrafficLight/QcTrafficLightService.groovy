@@ -129,12 +129,16 @@ class QcTrafficLightService {
     }
 
     private boolean qcValuesExceedErrorThreshold(AbstractMergedBamFile bamFile, QcTrafficLightValue qc) {
-        return QcThreshold.getValidQcPropertyForQcClass(qc.class.name).any { String property ->
+        List<String> properties = QcThreshold.getValidQcPropertyForQcClass(qc.class.name)
+        Map<String, ?> qcMap = properties.collectEntries {
+            [(it): qc[it]]
+        }
+        return properties.any { String property ->
             QcThreshold qcThreshold = CollectionUtils.atMostOneElement(
                     QcThreshold.findAllByQcClassAndSeqTypeAndQcProperty1AndProject(qc.class.name, bamFile.seqType, property, bamFile.project)) ?:
                             CollectionUtils.atMostOneElement(
                                     QcThreshold.findAllByQcClassAndSeqTypeAndQcProperty1AndProjectIsNull(qc.class.name, bamFile.seqType, property))
-            return qcThreshold?.qcPassed(qc) == ERROR
+            return qcThreshold?.qcPassed(qcMap) == ERROR
         }
     }
 }

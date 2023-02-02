@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.qcTrafficLight
 import grails.gorm.transactions.Transactional
 import grails.validation.ValidationException
 import groovy.transform.Canonical
+import groovy.transform.CompileStatic
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.Errors
 
@@ -31,6 +32,7 @@ import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.FormatHelper
 
+@CompileStatic
 @Transactional
 class QcThresholdService {
 
@@ -45,16 +47,18 @@ class QcThresholdService {
         } as List<QcThreshold>
     }
 
-    <T extends QcTrafficLightValue> ThresholdColorizer<T> createThresholdColorizer(Project project, SeqType seqType, Class<T> qcClass) {
-        new ThresholdColorizer(project, seqType, getThresholds(project, seqType, qcClass))
+    ThresholdColorizer createThresholdColorizer(Project project, SeqType seqType, Class<? extends QcTrafficLightValue> qcClass) {
+        return new ThresholdColorizer(project, seqType, getThresholds(project, seqType, qcClass))
     }
 
-    static class ThresholdColorizer<T extends QcTrafficLightValue> {
-        private final Map<String, QcThreshold> thresholds
+    static class ThresholdColorizer {
+        private final Map<String, QcThreshold> thresholdList
         private final boolean qcAvailable
 
         ThresholdColorizer(Project project, SeqType seqType, List<QcThreshold> thresholdList) {
-            thresholds = thresholdList.groupBy { it.qcProperty1 }.collect {
+            this.thresholdList = thresholdList.groupBy {
+                it.qcProperty1
+            }.collect {
                 it.value.find { it.project == project && it.seqType == seqType } ?:
                         it.value.find { it.project == null && it.seqType == seqType }
             }.collectEntries { QcThreshold threshold ->
@@ -63,22 +67,22 @@ class QcThresholdService {
             qcAvailable = !thresholdList.isEmpty()
         }
 
-        Map<String, TableCellValue> colorize(List<String> properties, T qcObject) {
-            properties.collectEntries { String property ->
-                String value = FormatHelper.formatNumber(qcObject."${property}")
+        Map<String, TableCellValue> colorize(List<String> properties, Map<String, ?> qcMap) {
+            return properties.collectEntries { String property ->
+                String value = FormatHelper.formatNumber((Number) qcMap[property])
                 TableCellValue.WarnColor warn = convert(qcAvailable ?
-                        (thresholds[property]?.qcPassed(qcObject) ?: QcThreshold.ThresholdLevel.OKAY) :
+                        thresholdList[property]?.qcPassed(qcMap) ?: QcThreshold.ThresholdLevel.OKAY :
                         QcThreshold.ThresholdLevel.NA)
                 [(property), new TableCellValue(value, warn)]
             }
         }
 
         /** for properties where a comparison with an external value is needed */
-        Map<String, TableCellValue> colorize(Map<String, Double> properties, T qcObject) {
-            properties.collectEntries { String property, Double externalValue ->
-                String value = FormatHelper.formatNumber(qcObject."${property}")
+        Map<String, TableCellValue> colorize(Map<String, Double> properties, Map<String, ?> qcMap) {
+            return properties.collectEntries { String property, Double externalValue ->
+                String value = FormatHelper.formatNumber((Double) qcMap[property])
                 TableCellValue.WarnColor warn = convert(qcAvailable ?
-                        (thresholds[property]?.qcPassed(qcObject, externalValue) ?: QcThreshold.ThresholdLevel.OKAY) :
+                        thresholdList[property]?.qcPassed(qcMap, externalValue) ?: QcThreshold.ThresholdLevel.OKAY :
                         QcThreshold.ThresholdLevel.NA)
                 [(property), new TableCellValue(value, warn)]
             } as Map<String, TableCellValue>
@@ -96,9 +100,9 @@ class QcThresholdService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     List<ClassWithThreshold> classesWithProperties() {
-        List<QcThreshold> thr = QcThreshold.createCriteria().list {
+        List<QcThreshold> qcThresholds = QcThreshold.createCriteria().list {
             isNull("project")
-        }
+        } as List<QcThreshold>
 
         List<Class> qcTrafficLightClasses = QcThreshold.validQcClass
         List<ClassWithThreshold> classesWithProperties = qcTrafficLightClasses.collect { Class clasz ->
@@ -106,7 +110,7 @@ class QcThresholdService {
         }.sort { it.clasz.simpleName }
 
         classesWithProperties.each { ClassWithThreshold cl ->
-            cl.existingThresholds = thr.findAll { it.qcClass == cl.clasz.name }.sort { it.qcProperty1 }
+            cl.existingThresholds = qcThresholds.findAll { it.qcClass == cl.clasz.name }.sort { it.qcProperty1 }
         }
         return classesWithProperties
     }
@@ -120,7 +124,7 @@ class QcThresholdService {
                 eq("project", project)
                 isNull("project")
             }
-        }
+        } as List<QcThreshold>
         List<Class> qcTrafficLightClasses = QcThreshold.validQcClass
         List<ClassWithThresholds> classesWithProperties = qcTrafficLightClasses.collect { Class clasz ->
             new ClassWithThresholds(

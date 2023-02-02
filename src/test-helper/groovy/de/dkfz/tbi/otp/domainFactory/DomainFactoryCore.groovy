@@ -91,9 +91,9 @@ trait DomainFactoryCore implements DomainFactoryHelper {
 
     Individual createIndividual(Map properties = [:]) {
         return createDomainObject(Individual, [
-                pid         : "pid_${nextId}",
-                type        : Individual.Type.REAL,
-                project     : { createProject() },
+                pid    : "pid_${nextId}",
+                type   : Individual.Type.REAL,
+                project: { createProject() },
         ], properties)
     }
 
@@ -125,6 +125,11 @@ trait DomainFactoryCore implements DomainFactoryHelper {
     SeqType createSeqTypePaired(Map properties = [:], boolean saveAndValidate = true) {
         return createDomainObject(SeqType, getCustomSeqTypeProperties(properties) + [libraryLayout: SequencingReadType.PAIRED], properties, saveAndValidate)
     }
+
+    SeqType createSeqTypeSingle(Map properties = [:], boolean saveAndValidate = true) {
+        return createDomainObject(SeqType, getCustomSeqTypeProperties(properties) + [libraryLayout: SequencingReadType.SINGLE], properties, saveAndValidate)
+    }
+
     private Map getCustomSeqTypeProperties(Map properties = [:]) {
         String defaultName = "seqTypeName_${nextId}"
         return [
@@ -136,6 +141,14 @@ trait DomainFactoryCore implements DomainFactoryHelper {
                 singleCell   : false,
                 importAlias  : [],
         ]
+    }
+
+    LibraryPreparationKit findOrCreateLibraryPreparationKit(Map<String, ?> requiredSearchProperties, Map<String, ?> additionalCreationProperties=[:]) {
+        return findOrCreateDomainObject(LibraryPreparationKit, requiredSearchProperties, [
+                name            : "library-preperation-kit-name_${nextId}",
+                shortDisplayName: "library-preperation-kit-short-name_${nextId}",
+                importAlias     : [],
+        ], additionalCreationProperties)
     }
 
     LibraryPreparationKit createLibraryPreparationKit(Map properties = [:]) {
@@ -187,7 +200,7 @@ trait DomainFactoryCore implements DomainFactoryHelper {
     FastqImportInstance createFastqImportInstance(Map properties = [:]) {
         FastqImportInstance fastqImportInstance = createDomainObject(FastqImportInstance, [
                 importMode: FastqImportInstance.ImportMode.AUTOMATIC,
-                dataFiles: [] as Set,
+                dataFiles : [] as Set,
         ], properties)
         properties.dataFiles.each { DataFile dataFile ->
             fastqImportInstance.addToDataFiles(dataFile)

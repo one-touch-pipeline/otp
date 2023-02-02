@@ -179,48 +179,46 @@ class QcThreshold implements Entity {
     }
 
     static String convertShortToLongName(String s) {
-        validQcClass.find { it.simpleName == s }.name
+        return validQcClass.find { it.simpleName == s }.name
     }
 
     static List<Class> getValidQcClass() {
         GrailsClass[] classes = Holders.grailsApplication.getArtefacts('Domain')
-        classes*.clazz.findAll { QcTrafficLightValue.isAssignableFrom(it) }
+        return classes*.clazz.findAll { QcTrafficLightValue.isAssignableFrom(it) }
     }
 
-    ThresholdLevel qcPassed(QcTrafficLightValue qc, Double externalValue = 0) {
+    ThresholdLevel qcPassed(Map<String, ?> qcMap, Double externalValue = 0) {
         switch (this.compare) {
             case ThresholdStrategy.ABSOLUTE_LIMITS:
-                compareToThreshold(qc)
-                break
+                return compareToThreshold(qcMap)
             case ThresholdStrategy.DIFFERENCE_WITH_OTHER_PROPERTY:
-                compareThresholdToDifferenceWithQcProperty2(qc)
-                break
+                return compareThresholdToDifferenceWithQcProperty2(qcMap)
             case ThresholdStrategy.RATIO_TO_EXTERNAL_VALUE:
-                compareThresholdToRatioWithExternalValue(qc, externalValue)
-                break
-            default: throw new NotSupportedException("No other comparison is defined yet")
+                return compareThresholdToRatioWithExternalValue(qcMap, externalValue)
+            default:
+                throw new NotSupportedException("No other comparison is defined yet")
         }
     }
 
-    private ThresholdLevel compareToThreshold(QcTrafficLightValue qc) {
-        if (qc."${qcProperty1}" == null) {
+    private ThresholdLevel compareToThreshold(Map<String, ?> qcMap) {
+        if (qcMap[qcProperty1] == null) {
             return ThresholdLevel.OKAY
         }
-        return getWarningLevel(qc."${qcProperty1}")
+        return getWarningLevel((double) qcMap[qcProperty1])
     }
 
-    private ThresholdLevel compareThresholdToDifferenceWithQcProperty2(QcTrafficLightValue qc) {
-        if (qc."${qcProperty1}" == null || qc."${qcProperty2}" == null) {
+    private ThresholdLevel compareThresholdToDifferenceWithQcProperty2(Map<String, ?> qcMap) {
+        if (qcMap."${qcProperty1}" == null || qcMap."${qcProperty2}" == null) {
             return ThresholdLevel.OKAY
         }
-        return getWarningLevel(qc."${qcProperty1}" - qc."${qcProperty2}")
+        return getWarningLevel((double) qcMap[qcProperty1] - (double) qcMap[qcProperty2])
     }
 
-    private ThresholdLevel compareThresholdToRatioWithExternalValue(QcTrafficLightValue qc, Double externalValue) {
-        if (qc."${qcProperty1}" == null || externalValue == null || externalValue == 0) {
+    private ThresholdLevel compareThresholdToRatioWithExternalValue(Map<String, ?> qcMap, Double externalValue) {
+        if (qcMap[qcProperty1] == null || externalValue == null || externalValue == 0) {
             return ThresholdLevel.OKAY
         }
-        return getWarningLevel(qc."${qcProperty1}" / externalValue)
+        return getWarningLevel((double) qcMap[qcProperty1] / externalValue)
     }
 
     private ThresholdLevel getWarningLevel(double value) {

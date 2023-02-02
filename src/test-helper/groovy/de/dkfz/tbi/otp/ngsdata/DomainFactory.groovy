@@ -2473,7 +2473,7 @@ class DomainFactory {
                 errorThresholdUpper  : counter++,
                 compare              : QcThreshold.ThresholdStrategy.ABSOLUTE_LIMITS,
                 qcClass              : CellRangerQualityAssessment.name,
-                seqType              : createSeqType(),
+                seqType              : { createSeqType() },
         ], properties, saveAndValidate)
     }
 

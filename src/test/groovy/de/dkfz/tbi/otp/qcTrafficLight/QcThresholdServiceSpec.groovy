@@ -28,8 +28,8 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerQualityAssessment
-import de.dkfz.tbi.otp.domainFactory.pipelines.AlignmentPipelineFactory
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.project.Project
 
 import static de.dkfz.tbi.otp.qcTrafficLight.TableCellValue.WarnColor.*
@@ -40,10 +40,7 @@ class QcThresholdServiceSpec extends Specification implements DataTest {
     Class[] getDomainClassesToMock() {
         return [
                 CellRangerQualityAssessment,
-                Project,
                 QcThreshold,
-                Realm,
-                SeqType,
         ]
     }
 
@@ -54,8 +51,8 @@ class QcThresholdServiceSpec extends Specification implements DataTest {
 
     Project project
     SeqType seqType
-    CellRangerQualityAssessment cellRangerQualityAssessment
     QcThreshold qcThreshold
+    Map<String, ?> qaMap
 
     List<String> availableThresholdProperties = [
             "allBasesMapped",
@@ -103,7 +100,7 @@ class QcThresholdServiceSpec extends Specification implements DataTest {
             "withMateMappedToDifferentChrMaq",
     ]
 
-    def setup() {
+    void setup() {
         qcThresholdService = new QcThresholdService()
 
         testedProperty = "referenceLength"
@@ -111,15 +108,16 @@ class QcThresholdServiceSpec extends Specification implements DataTest {
 
         project = DomainFactory.createProject()
         seqType = DomainFactory.createWholeGenomeSeqType()
-        cellRangerQualityAssessment = AlignmentPipelineFactory.CellRangerFactoryInstance.INSTANCE.createQa(null, [
-                ("${testedProperty}".toString()): testedPropertyValue,
-        ], false)
+
+        qaMap = [
+                (testedProperty): testedPropertyValue,
+        ]
     }
 
     void "test createThresholdColorizer with no QcThreshold"() {
         when:
-        QcThresholdService.ThresholdColorizer thresholdColorizer = qcThresholdService.createThresholdColorizer(project, seqType, cellRangerQualityAssessment.class)
-        Map<String, TableCellValue> result = thresholdColorizer.colorize([testedProperty], cellRangerQualityAssessment)
+        QcThresholdService.ThresholdColorizer thresholdColorizer = qcThresholdService.createThresholdColorizer(project, seqType, CellRangerQualityAssessment)
+        Map<String, TableCellValue> result = thresholdColorizer.colorize([testedProperty], qaMap)
 
         then:
         result.get(testedProperty) == new TableCellValue(testedPropertyValue.toString(), NA, null, null)
@@ -135,12 +133,12 @@ class QcThresholdServiceSpec extends Specification implements DataTest {
                 warningThresholdUpper: 10,
                 errorThresholdUpper: 20,
                 compare: QcThreshold.ThresholdStrategy.ABSOLUTE_LIMITS,
-                qcClass: cellRangerQualityAssessment.class.name,
+                qcClass: CellRangerQualityAssessment.name,
         )
 
         when:
-        QcThresholdService.ThresholdColorizer thresholdColorizer = qcThresholdService.createThresholdColorizer(project, seqType, cellRangerQualityAssessment.class)
-        Map<String, TableCellValue> result = thresholdColorizer.colorize([testedProperty], cellRangerQualityAssessment)
+        QcThresholdService.ThresholdColorizer thresholdColorizer = qcThresholdService.createThresholdColorizer(project, seqType, CellRangerQualityAssessment)
+        Map<String, TableCellValue> result = thresholdColorizer.colorize([testedProperty], qaMap)
 
         then:
         result.get(testedProperty) == new TableCellValue(testedPropertyValue.toString(), WARNING, null, null)
@@ -164,13 +162,13 @@ class QcThresholdServiceSpec extends Specification implements DataTest {
                     warningThresholdUpper: l - 1 == i ? 10 : 99,
                     errorThresholdUpper: l - 1 == i ? 20 : 100,
                     compare: QcThreshold.ThresholdStrategy.ABSOLUTE_LIMITS,
-                    qcClass: cellRangerQualityAssessment.class.name,
+                    qcClass: CellRangerQualityAssessment.name,
             )
         }
 
         when:
-        QcThresholdService.ThresholdColorizer thresholdColorizer = qcThresholdService.createThresholdColorizer(project, seqType, cellRangerQualityAssessment.class)
-        Map<String, TableCellValue> result = thresholdColorizer.colorize([testedProperty], cellRangerQualityAssessment)
+        QcThresholdService.ThresholdColorizer thresholdColorizer = qcThresholdService.createThresholdColorizer(project, seqType, CellRangerQualityAssessment)
+        Map<String, TableCellValue> result = thresholdColorizer.colorize([testedProperty], qaMap)
 
         then:
         result.get(testedProperty) == new TableCellValue(testedPropertyValue.toString(), thresholdLevel, null, null)
@@ -184,20 +182,20 @@ class QcThresholdServiceSpec extends Specification implements DataTest {
     @Unroll
     void "test createThresholdColorizer with different warning and error levels"() {
         given:
-        qcThreshold = DomainFactory.createQcThreshold(
-                qcProperty1: testedProperty,
+        qcThreshold = DomainFactory.createQcThreshold([
+                qcProperty1          : testedProperty,
                 warningThresholdLower: wtl,
                 warningThresholdUpper: wtu,
-                errorThresholdLower: etl,
-                errorThresholdUpper: etu,
-                compare: QcThreshold.ThresholdStrategy.ABSOLUTE_LIMITS,
-                qcClass: cellRangerQualityAssessment.class.name,
-                seqType: seqType,
-        )
+                errorThresholdLower  : etl,
+                errorThresholdUpper  : etu,
+                compare              : QcThreshold.ThresholdStrategy.ABSOLUTE_LIMITS,
+                qcClass              : CellRangerQualityAssessment.name,
+                seqType              : seqType,
+        ])
 
         when:
-        QcThresholdService.ThresholdColorizer thresholdColorizer = qcThresholdService.createThresholdColorizer(project, seqType, cellRangerQualityAssessment.class)
-        Map<String, TableCellValue> result = thresholdColorizer.colorize([testedProperty], cellRangerQualityAssessment)
+        QcThresholdService.ThresholdColorizer thresholdColorizer = qcThresholdService.createThresholdColorizer(project, seqType, CellRangerQualityAssessment)
+        Map<String, TableCellValue> result = thresholdColorizer.colorize([testedProperty], qaMap)
 
         then:
         result.get(testedProperty) == new TableCellValue(testedPropertyValue.toString(), thresholdLevel, null, null)
@@ -226,7 +224,7 @@ class QcThresholdServiceSpec extends Specification implements DataTest {
                 warningThresholdUpper: 3,
                 errorThresholdUpper: 4,
                 compare: QcThreshold.ThresholdStrategy.ABSOLUTE_LIMITS,
-                qcClass: cellRangerQualityAssessment.class.name,
+                qcClass: CellRangerQualityAssessment.name,
         )
 
         expect:
@@ -250,7 +248,7 @@ class QcThresholdServiceSpec extends Specification implements DataTest {
                 warningThresholdUpper: 3,
                 errorThresholdUpper: 4,
                 compare: QcThreshold.ThresholdStrategy.ABSOLUTE_LIMITS,
-                qcClass: cellRangerQualityAssessment.class.name,
+                qcClass: CellRangerQualityAssessment.name,
                 seqType: seqType,
         )
 
@@ -261,7 +259,7 @@ class QcThresholdServiceSpec extends Specification implements DataTest {
                 warningThresholdUpper: 3,
                 errorThresholdUpper: 4,
                 compare: QcThreshold.ThresholdStrategy.ABSOLUTE_LIMITS,
-                qcClass: cellRangerQualityAssessment.class.name,
+                qcClass: CellRangerQualityAssessment.name,
                 project: project,
                 seqType: seqType,
         )
@@ -289,7 +287,7 @@ class QcThresholdServiceSpec extends Specification implements DataTest {
                 warningThresholdUpper: 3,
                 errorThresholdUpper: 4,
                 compare: QcThreshold.ThresholdStrategy.ABSOLUTE_LIMITS,
-                qcClass: cellRangerQualityAssessment.class.name,
+                qcClass: CellRangerQualityAssessment.name,
                 seqType: seqType,
         )
 
@@ -300,7 +298,7 @@ class QcThresholdServiceSpec extends Specification implements DataTest {
                 warningThresholdUpper: 3,
                 errorThresholdUpper: 4,
                 compare: QcThreshold.ThresholdStrategy.ABSOLUTE_LIMITS,
-                qcClass: cellRangerQualityAssessment.class.name,
+                qcClass: CellRangerQualityAssessment.name,
                 seqType: seqType,
         )
 
@@ -358,7 +356,7 @@ class QcThresholdServiceSpec extends Specification implements DataTest {
                 warningThresholdUpper: 3,
                 errorThresholdUpper: 4,
                 compare: QcThreshold.ThresholdStrategy.ABSOLUTE_LIMITS,
-                qcClass: cellRangerQualityAssessment.class.name,
+                qcClass: CellRangerQualityAssessment.name,
         )
 
         when:
@@ -381,7 +379,7 @@ class QcThresholdServiceSpec extends Specification implements DataTest {
         qcThreshold.warningThresholdUpper == 8
         qcThreshold.errorThresholdUpper == 9
         qcThreshold.compare == QcThreshold.ThresholdStrategy.DIFFERENCE_WITH_OTHER_PROPERTY
-        qcThreshold.qcClass == cellRangerQualityAssessment.class.name
+        qcThreshold.qcClass == CellRangerQualityAssessment.name
         qcThreshold.qcProperty2 == "estimatedNumberOfCells"
     }
 
@@ -394,7 +392,7 @@ class QcThresholdServiceSpec extends Specification implements DataTest {
                 warningThresholdUpper: 3,
                 errorThresholdUpper: 4,
                 compare: QcThreshold.ThresholdStrategy.ABSOLUTE_LIMITS,
-                qcClass: cellRangerQualityAssessment.class.name,
+                qcClass: CellRangerQualityAssessment.name,
         )
 
         expect:

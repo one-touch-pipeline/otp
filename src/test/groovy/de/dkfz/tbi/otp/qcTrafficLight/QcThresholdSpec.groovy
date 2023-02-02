@@ -26,13 +26,9 @@ import grails.validation.ValidationException
 import spock.lang.Specification
 import spock.lang.Unroll
 
-import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerQualityAssessment
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
-import de.dkfz.tbi.otp.domainFactory.pipelines.AlignmentPipelineFactory
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.ngsdata.SeqType
 
 import static de.dkfz.tbi.otp.qcTrafficLight.QcThreshold.ThresholdStrategy.*
 
@@ -41,35 +37,8 @@ class QcThresholdSpec extends Specification implements DataTest {
     @Override
     Class[] getDomainClassesToMock() {
         return [
-                AbstractMergedBamFile,
                 CellRangerQualityAssessment,
-                DataFile,
-                FileType,
-                Individual,
-                LibraryPreparationKit,
-                MergingCriteria,
-                MergingWorkPackage,
-                Pipeline,
-                Project,
-                ReferenceGenome,
-                RoddyBamFile,
-                RoddyWorkflowConfig,
-                Run,
-                FastqImportInstance,
-                Sample,
-                SamplePair,
-                SampleType,
-                SampleTypePerProject,
-                SeqCenter,
-                SeqPlatform,
-                SeqPlatformModelLabel,
-                SeqPlatformGroup,
-                SeqPlatformModelLabel,
-                SeqTrack,
-                SoftwareTool,
                 QcThreshold,
-                SeqType,
-                Realm,
         ]
     }
 
@@ -171,9 +140,9 @@ class QcThresholdSpec extends Specification implements DataTest {
     @Unroll
     void "test qcPassed method with compare mode toThreshold"() {
         given:
-        CellRangerQualityAssessment qc = AlignmentPipelineFactory.CellRangerFactoryInstance.INSTANCE.createQa(null, [
+        Map<String, ?> qcMap = [
                 estimatedNumberOfCells: 25,
-        ], false)
+        ]
 
         QcThreshold threshold = DomainFactory.createQcThreshold(
                 qcProperty1: "estimatedNumberOfCells",
@@ -186,7 +155,7 @@ class QcThresholdSpec extends Specification implements DataTest {
         )
 
         expect:
-        threshold.qcPassed(qc) == warning
+        threshold.qcPassed(qcMap) == warning
 
         where:
         wtl  | wtu  | etl  | etu  || warning
@@ -206,10 +175,10 @@ class QcThresholdSpec extends Specification implements DataTest {
     @Unroll
     void "test qcPassed method with compare mode toQcProperty2"() {
         given:
-        CellRangerQualityAssessment qc = AlignmentPipelineFactory.CellRangerFactoryInstance.INSTANCE.createQa(null, [
+        Map<String, ?> qcMap = [
                 estimatedNumberOfCells: control,
-                meanReadsPerCell: tumor,
-        ], false)
+                meanReadsPerCell      : tumor,
+        ]
 
         QcThreshold threshold = DomainFactory.createQcThreshold(
                 qcProperty1: "estimatedNumberOfCells",
@@ -223,7 +192,7 @@ class QcThresholdSpec extends Specification implements DataTest {
         )
 
         expect:
-        threshold.qcPassed(qc) == warning
+        threshold.qcPassed(qcMap) == warning
 
         where:
         control | tumor || warning
@@ -237,9 +206,9 @@ class QcThresholdSpec extends Specification implements DataTest {
     @Unroll
     void "test qcPassed method with compare mode toThresholdFactorExternalValue"() {
         given:
-        CellRangerQualityAssessment qc = AlignmentPipelineFactory.CellRangerFactoryInstance.INSTANCE.createQa(null, [
+        Map<String, ?> qcMap = [
                 estimatedNumberOfCells: 50,
-        ], false)
+        ]
 
         QcThreshold threshold = DomainFactory.createQcThreshold(
                 qcProperty1: "estimatedNumberOfCells",
@@ -253,7 +222,7 @@ class QcThresholdSpec extends Specification implements DataTest {
         double externalValue = 2
 
         expect:
-        threshold.qcPassed(qc, externalValue) == warning
+        threshold.qcPassed(qcMap, externalValue) == warning
 
         where:
         wtl | wtu | etl | etu || warning
@@ -267,9 +236,9 @@ class QcThresholdSpec extends Specification implements DataTest {
     @Unroll
     void "test qcPassed method with compare mode toThresholdFactorExternalValue if factor is #extValue"() {
         given:
-        CellRangerQualityAssessment qc = AlignmentPipelineFactory.CellRangerFactoryInstance.INSTANCE.createQa(null, [
+        Map<String, ?> qcMap = [
                 estimatedNumberOfCells: 50,
-        ], false)
+        ]
 
         QcThreshold threshold = DomainFactory.createQcThreshold(
                 qcProperty1: "estimatedNumberOfCells",
@@ -282,7 +251,7 @@ class QcThresholdSpec extends Specification implements DataTest {
         )
 
         expect:
-        threshold.qcPassed(qc, extValue) == QcThreshold.ThresholdLevel.OKAY
+        threshold.qcPassed(qcMap, extValue) == QcThreshold.ThresholdLevel.OKAY
 
         where:
         extValue << [

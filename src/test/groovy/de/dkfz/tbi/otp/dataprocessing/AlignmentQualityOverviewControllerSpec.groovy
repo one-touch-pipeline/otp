@@ -21,15 +21,17 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.testing.gorm.DataTest
 import grails.testing.web.controllers.ControllerUnitTest
 import org.springframework.http.HttpStatus
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.CommentService
+import de.dkfz.tbi.otp.dataprocessing.qaalignmentoverview.QcStatusCellService
 import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightService
 import de.dkfz.tbi.otp.tracking.OtrsTicketService
 
-class AlignmentQualityOverviewControllerSpec extends Specification implements ControllerUnitTest<AlignmentQualityOverviewController> {
+class AlignmentQualityOverviewControllerSpec extends Specification implements ControllerUnitTest<AlignmentQualityOverviewController>, DataTest {
 
     AbstractFileSystemBamFile bamFile = new RoddyBamFile()
 
@@ -55,6 +57,7 @@ class AlignmentQualityOverviewControllerSpec extends Specification implements Co
                 assert comment == commentUsed
             }
         }
+        controller.qcStatusCellService = new QcStatusCellService()
 
         when:
         controller.request.method = 'POST'
@@ -85,6 +88,8 @@ class AlignmentQualityOverviewControllerSpec extends Specification implements Co
         controller.qcTrafficLightService.otrsTicketService = Mock(OtrsTicketService) {
             0 * findAllOtrsTickets(_)
         }
+
+        controller.qcStatusCellService = new QcStatusCellService()
 
         when:
         controller.request.method = 'POST'
