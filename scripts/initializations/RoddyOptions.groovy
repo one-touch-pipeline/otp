@@ -32,7 +32,7 @@ String roddy_base_path = configService.roddyPath.toString()
 
 processingOptionService.createOrUpdate(
         RODDY_PATH,
-        "${roddy_base_path}/roddy/3.7.1"
+        "${roddy_base_path}/roddy/3.7.2"
 )
 
 processingOptionService.createOrUpdate(
