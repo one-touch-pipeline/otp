@@ -47,7 +47,7 @@ class QcTrafficLightNotificationService {
     MailHelperService mailHelperService
     MessageSourceService messageSourceService
 
-    String createResultsAreWarnedSubject(AbstractMergedBamFile bamFile, boolean toBeSent) {
+    private String createResultsAreWarnedSubject(AbstractMergedBamFile bamFile, boolean toBeSent) {
         StringBuilder subject = new StringBuilder()
         if (toBeSent) {
             subject << 'TO BE SENT: '
@@ -68,7 +68,7 @@ class QcTrafficLightNotificationService {
         return subject.toString()
     }
 
-    String createResultsAreWarnedMessage(AbstractMergedBamFile bamFile) {
+    private String createResultsAreWarnedMessage(AbstractMergedBamFile bamFile) {
         return messageSourceService.createMessage("notification.template.alignment.qcTrafficWarningMessage", [
                 bamFile              : bamFile,
                 link                 : getAlignmentQualityOverviewLink(bamFile.project, bamFile.seqType),
@@ -92,7 +92,7 @@ class QcTrafficLightNotificationService {
         ])
     }
 
-    String buildSeqTypeBlockForNotification(SeqType seqType, List<AbstractMergedBamFile> bamFiles) {
+    private String buildSeqTypeBlockForNotification(SeqType seqType, List<AbstractMergedBamFile> bamFiles) {
         Project project = CollectionUtils.exactlyOneElement(bamFiles*.project.unique())
         return """\
             |${seqType}
@@ -101,7 +101,7 @@ class QcTrafficLightNotificationService {
             |${bamFiles.collect { AbstractMergedBamFile bam -> buildBamFileForNotification(bam) }.join("\n\n")}""".stripMargin()
     }
 
-    String buildBamFileForNotification(AbstractMergedBamFile bamFile, int indent = 4) {
+    private String buildBamFileForNotification(AbstractMergedBamFile bamFile, int indent = 4) {
         String i = " " * indent
         return """\
             |${i}${bamFile.sample}
@@ -126,7 +126,7 @@ class QcTrafficLightNotificationService {
         }
     }
 
-    String getThresholdPageLink(Project project) {
+    private String getThresholdPageLink(Project project) {
         return linkGenerator.link(
                 controller: 'qcThreshold',
                 action    : 'projectConfiguration',
@@ -135,7 +135,7 @@ class QcTrafficLightNotificationService {
         )
     }
 
-    String getAlignmentQualityOverviewLink(Project project, SeqType seqType, Sample sample = null) {
+    private String getAlignmentQualityOverviewLink(Project project, SeqType seqType, Sample sample = null) {
         Map conditionalParams = [:]
         if (sample) {
             conditionalParams["sample"] = sample.id

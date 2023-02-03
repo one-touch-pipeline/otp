@@ -83,7 +83,7 @@ class PanCancerCheckQcJobSpec extends Specification implements WorkflowSystemDom
             }
         }
         successCalls * job.workflowStateChangeService.changeStateToSuccess(workflowStep)
-        sendwarningMail * job.qcTrafficLightNotificationService.createResultsAreWarnedMessage(bamFile)
+        sendwarningMail * job.qcTrafficLightNotificationService.informResultsAreWarned(bamFile)
         0 * _
 
         where:
