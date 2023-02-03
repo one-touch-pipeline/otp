@@ -29,4 +29,8 @@ class WorkflowVersionService {
     List<WorkflowVersion> list() {
         return WorkflowVersion.list()
     }
+
+    List<WorkflowVersion> findAllByWorkflow(Workflow workflow) {
+        return WorkflowVersion.findAllByWorkflow(workflow)
+    }
 }

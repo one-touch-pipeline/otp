@@ -22,8 +22,8 @@
 package de.dkfz.tbi.otp.workflowExecution
 
 import grails.converters.JSON
-import org.springframework.security.access.annotation.Secured
 import grails.validation.Validateable
+import org.springframework.security.access.annotation.Secured
 
 import de.dkfz.tbi.otp.CheckAndCall
 import de.dkfz.tbi.otp.dataprocessing.MergingCriteriaService
@@ -47,6 +47,8 @@ class WorkflowSystemConfigController implements CheckAndCall {
     SeqTypeService seqTypeService
 
     WorkflowService workflowService
+
+    WorkflowVersionService workflowVersionService
 
     def index() {
         return [
@@ -75,6 +77,7 @@ class WorkflowSystemConfigController implements CheckAndCall {
                     cmd.priority,
                     cmd.maxParallelWorkflows,
                     cmd.enabled,
+                    cmd.defaultVersion,
                     cmd.allowedRefGenomes,
                     cmd.supportedSeqTypes,
             )
@@ -90,7 +93,10 @@ class WorkflowSystemConfigController implements CheckAndCall {
      *
      * @return map of workflow data
      */
-    private static Map buildWorkflowOutputObject(Workflow wf) {
+    private Map buildWorkflowOutputObject(Workflow wf) {
+        List<WorkflowVersion> versions = workflowVersionService.findAllByWorkflow(wf)
+                .sort { a, b -> VersionComparator.COMPARATOR.compare(a.workflowVersion, b.workflowVersion) }
+
         List<Map> supportedSeqTypes = wf.supportedSeqTypes.collect { SeqType st ->
             [
                     id           : st.id,
@@ -113,12 +119,46 @@ class WorkflowSystemConfigController implements CheckAndCall {
                 priority            : wf.priority,
                 enabled             : wf.enabled,
                 maxParallelWorkflows: wf.maxParallelWorkflows,
-                deprecationDate     : TimeFormats.DATE.getFormattedLocalDate(wf.deprecatedDate),
+                defaultVersion      : wf.defaultVersion,
+                versions            : versions,
                 supportedSeqTypes   : supportedSeqTypes,
                 allowedRefGenomes   : allowedRefGenomes,
+                deprecationDate     : TimeFormats.DATE.getFormattedLocalDate(wf.deprecatedDate),
         ]
     }
 }
 
 class WorkflowUpdateCommand extends UpdateWorkflowDto implements Validateable {
+    static constraints = {
+        defaultVersion nullable: true
+    }
+}
+
+class VersionComparator implements Comparator<String> {
+    public static final Comparator<String> COMPARATOR = new VersionComparator()
+
+    @Override
+    int compare(String o1, String o2) {
+        String[] s1 = split(o1)
+        String[] s2 = split(o2)
+
+        for (int i = 0; i < Math.min(s1.length, s2.length); i++) {
+            int result = compareToken(s1[i], s2[i])
+            if (result != 0) {
+                return -result
+            }
+        }
+        return 0
+    }
+
+    private split(String s) {
+        return s.split(/[-\/.]/)
+    }
+
+    private int compareToken(String s1, String s2) {
+        if (s1.isInteger() && s2.isInteger()) {
+            return s1 as Integer <=> s2 as Integer
+        }
+        return String.CASE_INSENSITIVE_ORDER.compare(s1, s2)
+    }
 }

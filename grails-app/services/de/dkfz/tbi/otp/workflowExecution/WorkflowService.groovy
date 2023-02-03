@@ -159,6 +159,7 @@ class WorkflowService {
         workflow.priority = updateWorkflowDto.priority
         workflow.enabled = updateWorkflowDto.enabled
         workflow.maxParallelWorkflows = updateWorkflowDto.maxParallelWorkflows
+        workflow.defaultVersion = updateWorkflowDto.defaultVersion
 
         if (updateWorkflowDto.supportedSeqTypes) {
             workflow.supportedSeqTypes = SeqType.getAll(updateWorkflowDto.supportedSeqTypes)

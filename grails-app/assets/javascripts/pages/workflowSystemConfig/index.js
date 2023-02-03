@@ -61,6 +61,15 @@ const renderWorkflowOverviewTable = (workflowData) => {
       },
       { data: 'maxParallelWorkflows' },
       {
+        data: 'defaultVersion',
+        render: (defaultVersion) => {
+          if (defaultVersion) {
+            return defaultVersion.workflowVersion;
+          }
+          return '';
+        }
+      },
+      {
         data: 'supportedSeqTypes',
         render: (seqTypes) => {
           if (seqTypes) {
@@ -152,6 +161,16 @@ const updateModalWithCurrentWorkflow = (workflow, modal) => {
     $('#modal-refGenomes', modal).val();
   }
   $('#modal-refGenomes', modal).trigger('change');
+
+  const defaultVersion = $('#modal-defaultVersion', modal);
+  defaultVersion.empty();
+  defaultVersion.append('<option value=" ">No default version</option>');
+  workflow.versions.forEach((version) => {
+    defaultVersion.append(`<option value="${version.id}">${version.workflowVersion}</option>`);
+  });
+  if (workflow.defaultVersion) {
+    defaultVersion.val(workflow.defaultVersion.id);
+  }
 };
 
 /**
@@ -168,6 +187,7 @@ const updateWorkflow = (workflow, modal) => {
     priority: $('#modal-priority', modal).val(),
     enabled: $('#modal-enabled', modal).prop('checked'),
     maxParallelWorkflows: $('#modal-max-runs', modal).val(),
+    defaultVersion: $('#modal-defaultVersion', modal).val(),
     supportedSeqTypes: $('#modal-seqTypes', modal).select2('data').map((s) => s.id),
     allowedRefGenomes: $('#modal-refGenomes', modal).select2('data').map((rg) => rg.id)
   };

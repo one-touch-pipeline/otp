@@ -65,7 +65,7 @@
                         roles="ROLE_OPERATOR"
                         template="dropDown"
                         optionKey="id"
-                        optionValue="workflowVersion"
+                        optionValue="nameWithDefault"
                         link="${g.createLink(controller: 'workflowSelection', action: 'updateVersion', params: ['seqType.id' : workflow.seqType.id,
                                                                                                                 'workflow.id': workflow.workflow.id])}"
                         values="${workflow.versions}"

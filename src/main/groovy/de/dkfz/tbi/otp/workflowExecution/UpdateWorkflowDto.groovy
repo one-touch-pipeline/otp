@@ -29,6 +29,7 @@ class UpdateWorkflowDto {
     short priority
     short maxParallelWorkflows
     boolean enabled
+    WorkflowVersion defaultVersion
     List<Long> allowedRefGenomes
     List<Long> supportedSeqTypes
 }

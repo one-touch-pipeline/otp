@@ -57,11 +57,18 @@ class Workflow implements Commentable, Entity {
 
     Set<SeqType> supportedSeqTypes
 
+    WorkflowVersion defaultVersion
+
     static constraints = {
         name unique: true
         beanName nullable: true
         deprecatedDate nullable: true
         comment nullable: true
+        defaultVersion nullable: true, validator: { val, obj ->
+            if (val) {
+                return val.workflow == obj
+            }
+        }
     }
 
     static mapping = {

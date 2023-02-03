@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,23 +21,18 @@
  */
 
 databaseChangeLog = {
-    include file: 'changelogs/2022/initialDatabaseSchema.groovy'
 
-    include file: 'changelogs/2022/otp-1860-adapt-databasechangelog.groovy'
+    changeSet(author: "", id: "1675346213964-77") {
+        addColumn(tableName: "workflow") {
+            column(name: "default_version_id", type: "int8")
+        }
+    }
 
-    include file: 'changelogs/2022/otp-1611-wes-domains.groovy'
+    changeSet(author: "", id: "1675346213964-80") {
+        addForeignKeyConstraint(baseColumnNames: "default_version_id", baseTableName: "workflow", constraintName: "FKpf4oiirm8a9w7i5wjiw8dotuq", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "id", referencedTableName: "workflow_version", validate: "true")
+    }
 
-    include file: 'changelogs/2022/otp-1612-state-for-workflow-creation.groovy'
-
-    include file: 'changelogs/2022/otp-1135.groovy'
-
-    include file: 'changelogs/2023/otp-1732.groovy'
-
-    include file: 'changelogs/2023/otp-1926-bugfix-wgbs-defaults.groovy'
-
-    include file: 'changelogs/2023/otp-1909.groovy'
-
-    include file: 'changelogs/2023/otp-1919-fix-pancan-defaults.groovy'
-
-    include file: 'changelogs/2023/otp-1871.groovy'
+    changeSet(author: "", id: "1675346213964-44") {
+        dropNotNullConstraint(columnDataType: "bigint", columnName: "workflow_id", tableName: "workflow_version")
+    }
 }

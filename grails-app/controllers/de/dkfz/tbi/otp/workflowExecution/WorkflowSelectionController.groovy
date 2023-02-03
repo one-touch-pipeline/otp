@@ -22,9 +22,10 @@
 package de.dkfz.tbi.otp.workflowExecution
 
 import grails.converters.JSON
-import org.springframework.security.access.annotation.Secured
 import grails.validation.Validateable
 import groovy.transform.Canonical
+import groovy.transform.Immutable
+import org.springframework.security.access.annotation.Secured
 
 import de.dkfz.tbi.otp.CheckAndCall
 import de.dkfz.tbi.otp.ProjectSelectionService
@@ -77,7 +78,16 @@ class WorkflowSelectionController implements CheckAndCall {
                         WorkflowVersionSelector.findAllByProjectAndSeqTypeAndDeprecationDateIsNull(project, seqType).findAll {
                             it.workflowVersion.workflow == workflow
                         })?.workflowVersion
-                List<WorkflowVersion> versions = WorkflowVersion.findAllByWorkflow(workflow).sort { it.workflowVersion }
+                List<Version> versions = WorkflowVersion.findAllByWorkflow(workflow).sort { a, b ->
+                    if (a == workflow.defaultVersion) {
+                        return -1
+                    } else if (b == workflow.defaultVersion) {
+                        return 1
+                    }
+                    VersionComparator.COMPARATOR.compare(a.workflowVersion, b.workflowVersion)
+                }.collect {
+                    new Version(it.id, it.workflowVersion, it == workflow.defaultVersion)
+                }
 
                 List<RefGenConfValue> refGens = speciesReferenceGenomeMapping.collect { sp, rs ->
                     ReferenceGenome r = atMostOneElement(
@@ -96,7 +106,16 @@ class WorkflowSelectionController implements CheckAndCall {
                         WorkflowVersionSelector.findAllByProjectAndSeqTypeAndDeprecationDateIsNull(project, seqType).findAll {
                             it.workflowVersion.workflow == workflow
                         })?.workflowVersion
-                List<WorkflowVersion> versions = WorkflowVersion.findAllByWorkflow(workflow).sort { it.workflowVersion }
+                List<Version> versions = WorkflowVersion.findAllByWorkflow(workflow).sort { a, b ->
+                    if (a == workflow.defaultVersion) {
+                        return -1
+                    } else if (b == workflow.defaultVersion) {
+                        return 1
+                    }
+                    VersionComparator.COMPARATOR.compare(a.workflowVersion, b.workflowVersion)
+                }.collect {
+                    new Version(it.id, it.workflowVersion, it == workflow.defaultVersion)
+                }
                 analysisConf.add(new ConfValue(workflow, seqType, versions, version, null))
             }
         }
@@ -145,11 +164,22 @@ class WorkflowSelectionController implements CheckAndCall {
     }
 }
 
+@Immutable
+class Version {
+    long id
+    String name
+    boolean isDefault
+
+    String getNameWithDefault() {
+        return "${name}${isDefault ? " (default)" : ""}"
+    }
+}
+
 @Canonical
 class ConfValue {
     Workflow workflow
     SeqType seqType
-    List<WorkflowVersion> versions
+    List<Version> versions
     WorkflowVersion version
     List<RefGenConfValue> refGens
 }

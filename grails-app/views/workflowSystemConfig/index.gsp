@@ -37,6 +37,7 @@
                 <th title="${g.message(code: 'workflowSystemConfig.th.priority.title')}"><g:message code="workflowSystemConfig.th.priority"/></th>
                 <th title="${g.message(code: 'workflowSystemConfig.th.enabled.title')}"><g:message code="workflowSystemConfig.th.enabled"/></th>
                 <th title="${g.message(code: 'workflowSystemConfig.th.maxParallel.title')}"><g:message code="workflowSystemConfig.th.maxParallel"/></th>
+                <th title="${g.message(code: 'workflowSystemConfig.th.default.version.title')}"><g:message code="workflowSystemConfig.th.default.version"/></th>
                 <th title="${g.message(code: 'workflowSystemConfig.th.supportedSeqTypes.title')}"><g:message code="workflowSystemConfig.th.supportedSeqTypes"/></th>
                 <th title="${g.message(code: 'workflowSystemConfig.th.allowedRefGen.title')}"><g:message code="workflowSystemConfig.th.allowedRefGen"/></th>
                 <th title="${g.message(code: 'workflowSystemConfig.th.deprecated.title')}"><g:message code="workflowSystemConfig.th.deprecated"/></th>
@@ -61,6 +62,14 @@
                 <label for="modal-max-runs"><g:message code="workflowSystemConfig.modal.maxParallel"/></label>
                 <input type="number" class="form-control" id="modal-max-runs" aria-describedby="priority">
                 <small id="max-runs" class="form-text text-muted"><g:message code="workflowSystemConfig.modal.maxParallel.description"/></small>
+            </div>
+            <div class="form-group">
+                <label for="modal-defaultVersion"><g:message code="workflowSystemConfig.modal.default.version"/></label>
+                <select id="modal-defaultVersion"
+                        name="modal-defaultVersion"
+                        class="form-control use-select-2"
+                        data-placeholder="${g.message(code: 'workflowSystemConfig.modal.default.version.placeholder')}">
+                </select>
             </div>
             <div class="form-group">
                 <label for="modal-seqTypes"><g:message code="workflowSystemConfig.modal.supportedSeqTypes"/></label>
