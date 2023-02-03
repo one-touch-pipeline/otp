@@ -179,8 +179,8 @@ class ProjectRequestService {
         List<String> recipient = [requester.email]
         List<String> ccs = projectRequest.state.usersThatNeedToApprove*.email
         String subject = messageSourceService.createMessage("notification.projectRequest.submit.subject", [
-                projectName: projectRequest.name,
-                projectId  : projectRequest.id,
+                projectRequestName: projectRequest.name,
+                projectRequestId  : projectRequest.id,
         ])
         String body = messageSourceService.createMessage("notification.projectRequest.submit.body", [
                 link         : getProjectRequestLinkWithoutParams(projectRequest),
@@ -213,8 +213,8 @@ class ProjectRequestService {
         List<String> recipient = [requester.email]
         List<String> ccs = projectRequest.state.usersThatNeedToApprove*.email
         String subject = messageSourceService.createMessage("notification.projectRequest.operatorReject.subject", [
-                projectName: projectRequest.name,
-                projectId  : projectRequest.id,
+                projectRequestName: projectRequest.name,
+                projectRequestId  : projectRequest.id,
         ])
         String body = messageSourceService.createMessage("notification.projectRequest.operatorReject.body", [
                 requester    : "${requester.realName} (${requester.username})",
@@ -232,13 +232,13 @@ class ProjectRequestService {
         List<String> ccs = [requester.email]
         String projectAuthoritiesUsernames = projectAuthorities.collect { "${it.realName} (${it.username})" }.join(", ")
         String subject = messageSourceService.createMessage("notification.projectRequest.passOn.subject", [
-                projectName: projectRequest.name,
-                projectId  : projectRequest.id,
+                projectRequestName: projectRequest.name,
+                projectRequestId  : projectRequest.id,
         ])
         String body = messageSourceService.createMessage("notification.projectRequest.passOn.body", [
                 recipients        : "$projectAuthoritiesUsernames, ${requester.realName} (${requester.username})",
                 projectAuthorities: projectAuthoritiesUsernames,
-                projectName       : projectRequest.name,
+                projectRequestName: projectRequest.name,
                 link              : getProjectRequestLinkWithoutParams(projectRequest),
                 teamSignature     : processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME),
         ])
@@ -250,16 +250,16 @@ class ProjectRequestService {
         List<String> recipient = [requester.email]
         List<String> ccs = projectRequest.state.usersThatNeedToApprove*.email
         String subject = messageSourceService.createMessage("notification.projectRequest.piReject.subject", [
-                projectName: projectRequest.name,
-                projectId  : projectRequest.id,
+                projectRequestName: projectRequest.name,
+                projectRequestId  : projectRequest.id,
         ])
         String body = messageSourceService.createMessage("notification.projectRequest.piReject.body", [
-                requester       : "${requester.realName} (${requester.username})",
-                projectName     : projectRequest.name,
-                projectAuthority: securityService.currentUser.username,
-                comment         : rejectComment,
-                link            : getProjectRequestLinkWithoutParams(projectRequest),
-                teamSignature   : processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME),
+                requester         : "${requester.username} (${requester.realName})",
+                projectRequestName: projectRequest.name,
+                projectAuthority  : securityService.currentUser.username,
+                comment           : rejectComment,
+                link              : getProjectRequestLinkWithoutParams(projectRequest),
+                teamSignature     : processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME),
         ])
         mailHelperService.sendEmail(subject, body, recipient, ccs)
     }
@@ -269,13 +269,13 @@ class ProjectRequestService {
         List<String> recipient = ((ProjectRequestPersistentStateService.getAllProjectRequestAuthorities(projectRequest.state)*.email) + [requester.email])
                 .unique()
         String subject = messageSourceService.createMessage("notification.projectRequest.approved.subject", [
-                projectName: projectRequest.name,
-                projectId  : projectRequest.id,
+                projectRequestName: projectRequest.name,
+                projectRequestId  : projectRequest.id,
         ])
         String body = messageSourceService.createMessage("notification.projectRequest.approved.body", [
-                requester    : "${requester.realName} (${requester.username})",
-                projectName  : projectRequest.name,
-                teamSignature: processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME),
+                requester         : "${requester.username} (${requester.realName})",
+                projectRequestName: projectRequest.name,
+                teamSignature     : processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME),
         ])
         mailHelperService.sendEmail(subject, body, recipient)
     }
@@ -286,14 +286,14 @@ class ProjectRequestService {
         List<String> recipient = [requester.email]
         List<String> ccs = allProjectAuthorities*.email
         String subject = messageSourceService.createMessage("notification.projectRequest.partiallyApproved.subject", [
-                projectName: projectRequest.name,
-                projectId  : projectRequest.id,
+                projectRequestName: projectRequest.name,
+                projectRequestId  : projectRequest.id,
         ])
         String body = messageSourceService.createMessage("notification.projectRequest.partiallyApproved.body", [
-                requester       : "${requester.realName} (${requester.username})",
-                projectName     : projectRequest.name,
-                projectAuthority: securityService.currentUser.username,
-                teamSignature   : processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME),
+                requester         : "${requester.username} (${requester.realName})",
+                projectRequestName: projectRequest.name,
+                projectAuthority  : securityService.currentUser.username,
+                teamSignature     : processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME),
         ])
         mailHelperService.sendEmail(subject, body, recipient, ccs)
     }
@@ -306,14 +306,14 @@ class ProjectRequestService {
         recipients.unique()
         String projectAuthoritiesUsernames = allProjectAuthorities.collect { "${it.realName} (${it.username})" }.join(", ")
         String subject = messageSourceService.createMessage("notification.projectRequest.deleted.subject", [
-                projectName: projectRequest.name,
-                projectId  : projectRequest.id,
+                projectRequestName: projectRequest.name,
+                projectRequestId  : projectRequest.id,
         ])
         String body = messageSourceService.createMessage("notification.projectRequest.deleted.body", [
-                recipients   : "$projectAuthoritiesUsernames, ${requester.realName} (${requester.username})",
-                projectName  : projectRequest.name,
-                deletingUser : securityService.currentUser,
-                teamSignature: processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME),
+                recipients        : "$projectAuthoritiesUsernames, ${requester.realName} (${requester.username})",
+                projectRequestName: projectRequest.name,
+                deletingUser      : securityService.currentUser,
+                teamSignature     : processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME),
         ])
         mailHelperService.sendEmail(subject, body, recipients)
     }
@@ -322,8 +322,8 @@ class ProjectRequestService {
         User requester = projectRequest.requester
         List<String> recipient = [requester.email]
         String subject = messageSourceService.createMessage("notification.projectRequest.draft.subject", [
-                projectName: projectRequest.name,
-                projectId  : projectRequest.id,
+                projectRequestName: projectRequest.name,
+                projectRequestId  : projectRequest.id,
         ])
         String body = messageSourceService.createMessage("notification.projectRequest.draft.body", [
                 requester    : "${requester.realName} (${requester.username})",
@@ -337,13 +337,13 @@ class ProjectRequestService {
         User requester = projectRequest.requester
         List<String> recipient = [requester.email]
         String subject = messageSourceService.createMessage("notification.projectRequest.draftDelete.subject", [
-                projectName: projectRequest.name,
-                projectId  : projectRequest.id,
+                projectRequestName: projectRequest.name,
+                projectRequestId  : projectRequest.id,
         ])
         String body = messageSourceService.createMessage("notification.projectRequest.draftDelete.body", [
-                requester    : "${requester.realName} (${requester.username})",
-                projectName  : projectRequest.name,
-                teamSignature: processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME),
+                requester         : "${requester.username} (${requester.realName})",
+                projectRequestName: projectRequest.name,
+                teamSignature     : processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME),
         ])
         mailHelperService.sendEmail(subject, body, recipient)
     }
@@ -353,20 +353,20 @@ class ProjectRequestService {
         List<String> recipient = allProjectAuthorities*.email
         List<String> ccs = [projectRequest.requester.email]
         String subject = messageSourceService.createMessage("notification.projectRequest.piEdit.subject", [
-                projectName: projectRequest.name,
-                projectId  : projectRequest.id,
+                projectRequestName: projectRequest.name,
+                projectRequestId  : projectRequest.id,
         ])
         String body = messageSourceService.createMessage("notification.projectRequest.piEdit.body", [
                 projectAuthorities: allProjectAuthorities*.username.join(", "),
                 projectAuthority  : securityService.currentUser.username,
-                projectName       : projectRequest.name,
+                projectRequestName: projectRequest.name,
                 link              : getProjectRequestLinkWithoutParams(projectRequest),
                 teamSignature     : processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME),
         ])
         mailHelperService.sendEmail(subject, body, recipient, ccs)
     }
 
-    void sendCreatedEmail(Project project, List<String> recipient, List<String> ccs) {
+    void sendCreatedEmail(ProjectRequest projectRequest, Project project, List<String> recipient, List<String> ccs) {
         String sampleOverviewLink = linkGenerator.link(
                 controller: "sampleOverview",
                 action: "index",
@@ -387,8 +387,9 @@ class ProjectRequestService {
                 params: [(ProjectSelectionService.PROJECT_SELECTION_PARAMETER): project.name]
         )
         String subject = messageSourceService.createMessage("notification.projectRequest.created.subject", [
-                projectName: project.name,
-                projectId  : project.id,
+                projectName       : project.name,
+                projectRequestId  : projectRequest?.id ?: '-',
+                projectRequestName: projectRequest?.name ?: '-',
         ])
         String body = messageSourceService.createMessage("notification.projectRequest.created.body", [
                 projectName               : project.displayName,

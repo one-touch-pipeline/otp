@@ -147,7 +147,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         1 * projectRequestService.messageSourceService.createMessage(_, [
                 recipients        : "$expectedAuthorityUsernames, ${requester.realName} (${requester.username})",
                 projectAuthorities: expectedAuthorityUsernames,
-                projectName       : request.name,
+                projectRequestName: request.name,
                 link              : link,
                 teamSignature     : emailSenderSalutation,
         ]) >> body
@@ -172,12 +172,12 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         1 * projectRequestService.linkGenerator.link(_) >> link
         1 * projectRequestService.securityService.currentUser >> pi1
         1 * projectRequestService.messageSourceService.createMessage(_, [
-                requester       : "${requester.realName} (${requester.username})",
-                projectName     : request.name,
-                projectAuthority: pi1.username,
-                comment         : comment,
-                link            : link,
-                teamSignature   : emailSenderSalutation,
+                requester         : "${requester.username} (${requester.realName})",
+                projectRequestName: request.name,
+                projectAuthority  : pi1.username,
+                comment           : comment,
+                link              : link,
+                teamSignature     : emailSenderSalutation,
         ]) >> body
         1 * projectRequestService.mailHelperService.sendEmail(subject, body, [requester.email], users*.email)
         1 * projectRequestService.processingOptionService.findOptionAsString(_) >> emailSenderSalutation
@@ -198,9 +198,9 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         then:
         1 * projectRequestService.messageSourceService.createMessage(_, _) >> subject
         1 * projectRequestService.messageSourceService.createMessage(_, [
-                requester    : "${requester.realName} (${requester.username})",
-                projectName  : request.name,
-                teamSignature: emailSenderSalutation,
+                requester         : "${requester.username} (${requester.realName})",
+                projectRequestName: request.name,
+                teamSignature     : emailSenderSalutation,
         ]) >> body
         1 * projectRequestService.mailHelperService.sendEmail(subject, body, (users*.email + [requester.email]))
         1 * projectRequestService.processingOptionService.findOptionAsString(_) >> emailSenderSalutation
@@ -264,10 +264,10 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         1 * projectRequestService.messageSourceService.createMessage(_, _) >> subject
         1 * projectRequestService.securityService.currentUser >> pi1
         1 * projectRequestService.messageSourceService.createMessage(_, [
-                requester       : "${requester.realName} (${requester.username})",
-                projectName     : request.name,
-                projectAuthority: pi1.username,
-                teamSignature   : emailSenderSalutation,
+                requester         : "${requester.username} (${requester.realName})",
+                projectRequestName: request.name,
+                projectAuthority  : pi1.username,
+                teamSignature     : emailSenderSalutation,
         ]) >> body
         1 * projectRequestService.processingOptionService.findOptionAsString(_) >> emailSenderSalutation
         1 * projectRequestService.mailHelperService.sendEmail(subject, body, [requester.email], (usersThatNeedToApprove + usersThatAlreadyApproved)*.email)
@@ -291,10 +291,10 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         1 * projectRequestService.messageSourceService.createMessage(_, _) >> subject
         1 * projectRequestService.securityService.currentUser >> pi1
         1 * projectRequestService.messageSourceService.createMessage(_, [
-                recipients   : "$expectedAuthorityUsernames, ${requester.realName} (${requester.username})",
-                projectName  : request.name,
-                deletingUser : pi1,
-                teamSignature: emailSenderSalutation,
+                recipients        : "$expectedAuthorityUsernames, ${requester.realName} (${requester.username})",
+                projectRequestName: request.name,
+                deletingUser      : pi1,
+                teamSignature     : emailSenderSalutation,
         ]) >> body
         1 * projectRequestService.processingOptionService.findOptionAsString(_) >> emailSenderSalutation
         1 * projectRequestService.mailHelperService.sendEmail(subject, body, expectedRecipients*.email)
@@ -338,9 +338,9 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         then:
         1 * projectRequestService.messageSourceService.createMessage(_, _) >> subject
         1 * projectRequestService.messageSourceService.createMessage(_, [
-                requester    : "${requester.realName} (${requester.username})",
-                projectName  : request.name,
-                teamSignature: emailSenderSalutation,
+                requester         : "${requester.username} (${requester.realName})",
+                projectRequestName: request.name,
+                teamSignature     : emailSenderSalutation,
         ]) >> body
         1 * projectRequestService.mailHelperService.sendEmail(subject, body, [requester.email])
         1 * projectRequestService.processingOptionService.findOptionAsString(_) >> emailSenderSalutation
@@ -372,7 +372,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         1 * projectRequestService.messageSourceService.createMessage(_, [
                 projectAuthorities: (usersThatNeedToApprove + usersThatAlreadyApproved)*.username.join(", "),
                 projectAuthority  : pi1.username,
-                projectName       : request.name,
+                projectRequestName: request.name,
                 link              : link,
                 teamSignature     : emailSenderSalutation,
         ]) >> body
@@ -385,6 +385,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         given:
         final String dirAnalysis = "/dirAnalysis"
         final String dirName = "dirName"
+        final ProjectRequest projectRequest = ProjectRequest.create()
         final Project project = createProject([
                 dirAnalysis: dirAnalysis,
                 dirName    : dirName,
@@ -400,7 +401,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         projectRequestService.linkGenerator = Mock(LinkGenerator)
 
         when:
-        projectRequestService.sendCreatedEmail(project, [], [])
+        projectRequestService.sendCreatedEmail(projectRequest, project, [], [])
 
         then:
         1 * projectRequestService.processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_TICKET_SYSTEM) >> ticketingSystemMail
@@ -409,7 +410,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         1 * projectRequestService.processingOptionService.findOptionAsString(ProcessingOption.OptionName.CLUSTER_NAME) >> clusterName
         1 * projectRequestService.processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME) >> emailSenderSalutation
         3 * projectRequestService.linkGenerator.link(_) >> link
-        1 * projectRequestService.messageSourceService.createMessage(_, [projectName: project.name, projectId: project.id]) >> subject
+        1 * projectRequestService.messageSourceService.createMessage(_, [projectName: project.name, projectRequestId: projectRequest?.id ?: '-', projectRequestName: projectRequest?.name ?: '-']) >> subject
         1 * projectRequestService.messageSourceService.createMessage(_, [
                 projectName               : project.name,
                 projectLink               : link,
@@ -432,6 +433,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         final List<String> ccs = ['ccUser1', 'ccUser2']
         final String dirAnalysis = "/dirAnalysis"
         final String dirName = "dirName"
+        final ProjectRequest projectRequest = ProjectRequest.create()
         final Project project = createProject([
                 dirAnalysis: dirAnalysis,
                 dirName    : dirName,
@@ -442,7 +444,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         final String clusterName = "clusterName"
 
         when:
-        projectRequestService.sendCreatedEmail(project, recipients, ccs)
+        projectRequestService.sendCreatedEmail(projectRequest, project, recipients, ccs)
 
         then:
         1 * projectRequestService.processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_TICKET_SYSTEM) >> ticketingSystemMail
@@ -451,7 +453,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         1 * projectRequestService.processingOptionService.findOptionAsString(ProcessingOption.OptionName.CLUSTER_NAME) >> clusterName
         1 * projectRequestService.processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME) >> emailSenderSalutation
         3 * projectRequestService.linkGenerator.link(_) >> link
-        1 * projectRequestService.messageSourceService.createMessage(_, [projectName: project.name, projectId: project.id]) >> subject
+        1 * projectRequestService.messageSourceService.createMessage(_, [projectName: project.name, projectRequestId: projectRequest?.id ?: '-', projectRequestName: projectRequest?.name ?: '-']) >> subject
         1 * projectRequestService.messageSourceService.createMessage(_, [
                 projectName               : project.name,
                 projectLink               : link,

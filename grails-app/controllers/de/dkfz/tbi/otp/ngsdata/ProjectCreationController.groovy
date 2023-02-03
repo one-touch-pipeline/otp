@@ -179,9 +179,9 @@ class ProjectCreationController {
                     if (cmd.sendProjectCreationNotification) {
                         List<String> copiedUsers = cmd.projectRequest ? [cmd.projectRequest.requester.email] : []
                         List<String> notifiedUsers = userProjectRoleService.getEmailsOfToBeNotifiedProjectUsers([project]).sort().unique()
-                        projectRequestService.sendCreatedEmail(project, notifiedUsers, copiedUsers)
+                        projectRequestService.sendCreatedEmail(cmd.projectRequest, project, notifiedUsers, copiedUsers)
                     } else {
-                        projectRequestService.sendCreatedEmail(project, [], [])
+                        projectRequestService.sendCreatedEmail(cmd.projectRequest, project, [], [])
                     }
                     redirect(controller: "projectConfig", params: [(ProjectSelectionService.PROJECT_SELECTION_PARAMETER): project.name])
                     return
