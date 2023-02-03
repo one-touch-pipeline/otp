@@ -503,8 +503,11 @@ class FileService {
      * The path have to be absolute and may not exist yet. Missing parent directories are created automatically with the
      * {@link #DEFAULT_DIRECTORY_PERMISSION_STRING}.
      */
-    void createFileWithContentOnDefaultRealm(Path path, String content, Set<PosixFilePermission> filePermission = DEFAULT_FILE_PERMISSION) {
-        createFileWithContent(path, content, configService.defaultRealm, filePermission)
+    void createFileWithContentOnDefaultRealm(Path path,
+                                             String content,
+                                             Set<PosixFilePermission> filePermission = DEFAULT_FILE_PERMISSION,
+                                             boolean overwrite = false) {
+        createFileWithContent(path, content, configService.defaultRealm, filePermission, overwrite)
     }
 
     /**
@@ -513,8 +516,12 @@ class FileService {
      * The path have to be absolute and may not exist yet. Missing parent directories are created automatically with the
      * {@link #DEFAULT_DIRECTORY_PERMISSION_STRING}.
      */
-    void createFileWithContent(Path path, String content, Realm realm, Set<PosixFilePermission> filePermission = DEFAULT_FILE_PERMISSION) {
-        createFileWithContentCommonPartHelper(path, realm, filePermission) {
+    void createFileWithContent(Path path,
+                               String content,
+                               Realm realm,
+                               Set<PosixFilePermission> filePermission = DEFAULT_FILE_PERMISSION,
+                               boolean overwrite = false) {
+        createFileWithContentCommonPartHelper(path, realm, filePermission, overwrite) {
             path.text = content
         }
     }
@@ -525,8 +532,11 @@ class FileService {
      * The path have to be absolute and may not exist yet. Missing parent directories are created automatically with the
      * {@link #DEFAULT_DIRECTORY_PERMISSION_STRING}.
      */
-    void createFileWithContentOnDefaultRealm(Path path, byte[] content, Set<PosixFilePermission> filePermission = DEFAULT_FILE_PERMISSION) {
-        createFileWithContent(path, content, configService.defaultRealm, filePermission)
+    void createFileWithContentOnDefaultRealm(Path path,
+                                             byte[] content,
+                                             Set<PosixFilePermission> filePermission = DEFAULT_FILE_PERMISSION,
+                                             boolean overwrite = false) {
+        createFileWithContent(path, content, configService.defaultRealm, filePermission, overwrite)
     }
 
     /**
@@ -535,16 +545,24 @@ class FileService {
      * The path have to be absolute and may not exist yet. Missing parent directories are created automatically with the
      * {@link #DEFAULT_DIRECTORY_PERMISSION_STRING}.
      */
-    void createFileWithContent(Path path, byte[] content, Realm realm, Set<PosixFilePermission> filePermission = DEFAULT_FILE_PERMISSION) {
-        createFileWithContentCommonPartHelper(path, realm, filePermission) {
+    void createFileWithContent(Path path,
+                               byte[] content,
+                               Realm realm,
+                               Set<PosixFilePermission> filePermission = DEFAULT_FILE_PERMISSION,
+                               boolean overwrite = false) {
+        createFileWithContentCommonPartHelper(path, realm, filePermission, overwrite) {
             path.bytes = content
         }
     }
 
-    private void createFileWithContentCommonPartHelper(Path path, Realm realm, Set<PosixFilePermission> filePermission, Closure closure) {
+    private void createFileWithContentCommonPartHelper(Path path,
+                                                       Realm realm,
+                                                       Set<PosixFilePermission> filePermission,
+                                                       boolean overwrite,
+                                                       Closure closure) {
         assert path
         assert path.absolute
-        assert !Files.exists(path)
+        assert !Files.exists(path) || overwrite
 
         createDirectoryRecursivelyAndSetPermissionsViaBash(path.parent, realm)
 

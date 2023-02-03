@@ -111,7 +111,7 @@ class AbstractExecuteRoddyPipelineJobSpec extends Specification implements DataT
         1 * job.roddyConfigService.createRoddyXmlConfig(_, [e: "f", a: "b"], "workflow-name", workflowStep.workflowRun.workflowVersion, "analysis-id", _, _, _,
                 true) >> { configText }
         1 * job.fileService.createFileWithContent(Paths.get(bamFile.workDirectory.absolutePath).resolve(RoddyConfigService.CONFIGURATION_DIRECTORY).
-                resolve("config.xml"), configText, _)
+                resolve("config.xml"), configText, _, _, true)
         1 * job.roddyCommandService.createRoddyCommand(_, _, ["c", "d"]) >> { cmd }
         1 * job.roddyExecutionService.clearRoddyExecutionStoreDirectory(bamFile)
         1 * job.workflowRunService.markJobAsNotRestartableInSeparateTransaction(workflowStep.workflowRun)
@@ -163,7 +163,7 @@ class AbstractExecuteRoddyPipelineJobSpec extends Specification implements DataT
         1 * job.roddyConfigService.createRoddyXmlConfig(_, [e: "f", a: "b"], "workflow-name", workflowStep.workflowRun.workflowVersion, "analysis-id", _, _, _,
                 true) >> { configText }
         1 * job.fileService.createFileWithContent(Paths.get(bamFile.workDirectory.absolutePath).resolve(RoddyConfigService.CONFIGURATION_DIRECTORY).
-                resolve("config.xml"), configText, _)
+                resolve("config.xml"), configText, _, _, true)
         1 * job.roddyCommandService.createRoddyCommand(_, _, ["c", "d"]) >> { cmd }
         1 * job.roddyExecutionService.clearRoddyExecutionStoreDirectory(bamFile)
         1 * job.workflowRunService.markJobAsNotRestartableInSeparateTransaction(workflowStep.workflowRun)
@@ -216,7 +216,7 @@ class AbstractExecuteRoddyPipelineJobSpec extends Specification implements DataT
         1 * job.roddyConfigService.createRoddyXmlConfig(_, [e: "f", a: "b"], "workflow-name", workflowStep.workflowRun.workflowVersion, "analysis-id", _, _, _,
                 true) >> { configText }
         1 * job.fileService.createFileWithContent(Paths.get(bamFile.workDirectory.absolutePath).resolve(RoddyConfigService.CONFIGURATION_DIRECTORY).
-                resolve("config.xml"), configText, _)
+                resolve("config.xml"), configText, _, _, true)
         1 * job.roddyCommandService.createRoddyCommand(_, _, ["c", "d"]) >> { cmd }
         1 * job.roddyExecutionService.clearRoddyExecutionStoreDirectory(bamFile)
         1 * job.workflowRunService.markJobAsNotRestartableInSeparateTransaction(workflowStep.workflowRun)

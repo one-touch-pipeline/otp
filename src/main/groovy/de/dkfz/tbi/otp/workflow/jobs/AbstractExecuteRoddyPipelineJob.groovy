@@ -26,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
+import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.ProcessOutput
@@ -82,7 +83,9 @@ abstract class AbstractExecuteRoddyPipelineJob extends AbstractExecutePipelineJo
                 filenameSectionKillSwitch,
         )
         logService.addSimpleLogEntry(workflowStep, "The final xml:\n${xmlConfig}")
-        fileService.createFileWithContent(confDir.resolve("${RoddyConfigService.CONFIGURATION_NAME}.xml"), xmlConfig, realm)
+
+        Path xmlPath = confDir.resolve("${RoddyConfigService.CONFIGURATION_NAME}.xml")
+        fileService.createFileWithContent(xmlPath, xmlConfig, realm, FileService.DEFAULT_FILE_PERMISSION, true)
 
         String command = roddyCommandService.createRoddyCommand(
                 roddyResult.individual,

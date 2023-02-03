@@ -417,7 +417,7 @@ class FileServiceSpec extends Specification implements DataTest {
         'relative path'      | new File('relative/path').toPath()
     }
 
-    void "createFileWithContent, if file already exists, then throw assertion"() {
+    void "createFileWithContent, if file already exists and overwrite is false, then throw assertion"() {
         given:
         mockRemoteShellHelper()
         Path path = CreateFileHelper.createFile(tempDir.resolve("test.txt"))
@@ -429,6 +429,22 @@ class FileServiceSpec extends Specification implements DataTest {
 
         then:
         thrown(AssertionError)
+    }
+
+    void "createFileWithContent, if file already exists and overwrite is true, then overwrite file content"() {
+        given:
+        String oldContent = "OLD CONTENT"
+        mockRemoteShellHelper()
+        Path path = CreateFileHelper.createFile(tempDir.resolve("test.txt"), oldContent)
+        assert Files.exists(path)
+        assert Files.isRegularFile(path)
+        assert path.text == oldContent
+
+        when:
+        fileService.createFileWithContent(path, SOME_CONTENT, new Realm(), FileService.DEFAULT_FILE_PERMISSION, true)
+
+        then:
+        path.text == SOME_CONTENT
     }
 
     void "createFileWithContent, if a parent of path is a file, then throw CreateDirectoryException"() {
@@ -523,6 +539,21 @@ class FileServiceSpec extends Specification implements DataTest {
 
         then:
         thrown(AssertionError)
+    }
+
+    void "createFileWithContent (byte), if file already exists and overwrite is true, then overwrite file content"() {
+        given:
+        mockRemoteShellHelper()
+        Path path = CreateFileHelper.createFile(tempDir.resolve("test.txt"))
+        assert Files.exists(path)
+        assert Files.isRegularFile(path)
+        assert path.bytes != SOME_BYTE_CONTENT
+
+        when:
+        fileService.createFileWithContent(path, SOME_BYTE_CONTENT, new Realm(), FileService.DEFAULT_FILE_PERMISSION, true)
+
+        then:
+        path.bytes == SOME_BYTE_CONTENT
     }
 
     void "createFileWithContent (byte), if a parent of path is a file, then throw CreateDirectoryException"() {
