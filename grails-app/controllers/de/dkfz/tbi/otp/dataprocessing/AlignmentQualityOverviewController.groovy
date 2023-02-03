@@ -289,7 +289,7 @@ class AlignmentQualityOverviewController implements CheckAndCall {
             return response.sendError(HttpStatus.NOT_FOUND.value())
         }
 
-        if (cmd.singleCellBamFile.project.archived) {
+        if (cmd.abstractMergedBamFile.project.archived) {
             return render(g.message(code: "alignment.quality.projectArchived.warning"))
         }
 
