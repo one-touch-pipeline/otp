@@ -24,6 +24,8 @@ package de.dkfz.tbi.otp.workflow.jobs
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.infrastructure.CreateLinkOption
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.utils.LinkEntry
@@ -44,6 +46,9 @@ abstract class AbstractPrepareJob extends AbstractJob {
     @Autowired
     FileService fileService
 
+    @Autowired
+    ProcessingOptionService processingOptionService
+
     @Override
     final void execute(WorkflowStep workflowStep) {
         Path workDirectory = buildWorkDirectoryPath(workflowStep)
@@ -56,6 +61,15 @@ abstract class AbstractPrepareJob extends AbstractJob {
             )
             workflowStep.workflowRun.workDirectory = workDirectory
             workflowStep.workflowRun.save(flush: true)
+
+            boolean protectWorkDirectory = shouldWorkDirectoryBeProtected()
+            if (protectWorkDirectory) {
+                fileService.setGroupViaBash(
+                        workDirectory,
+                        workflowStep.workflowRun.project.realm,
+                        processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP)
+                )
+            }
         }
         generateMapForLinking(workflowStep).each { LinkEntry entry ->
             logService.addSimpleLogEntry(workflowStep, "Creating link ${entry.link} to ${entry.target}")
@@ -73,6 +87,16 @@ abstract class AbstractPrepareJob extends AbstractJob {
     @Override
     final JobStage getJobStage() {
         return JobStage.PREPARE
+    }
+
+    /**
+     * Indicate, if the work directory should be created a way that it is not accessible for project members.
+     *
+     * Most of our workflows do protect it, but there are two old workflows not using it.
+     * Since all new one should protect it, the default value 'true' is here directly returned.
+     */
+    protected boolean shouldWorkDirectoryBeProtected() {
+        return true
     }
 
     abstract protected Path buildWorkDirectoryPath(WorkflowStep workflowStep)

@@ -24,6 +24,8 @@ package de.dkfz.tbi.otp.workflow.jobs
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.infrastructure.CreateLinkOption
 import de.dkfz.tbi.otp.infrastructure.FileService
@@ -48,7 +50,7 @@ class AbstractPrepareJobSpec extends Specification implements DataTest, Workflow
         ]
     }
 
-    void "test execute"() {
+    void "test execute, no protection of work directory"() {
         given:
         Path workDirectory = Paths.get("/test")
         Path link, target
@@ -56,6 +58,7 @@ class AbstractPrepareJobSpec extends Specification implements DataTest, Workflow
         job.fileService = Mock(FileService)
         job.workflowStateChangeService = Mock(WorkflowStateChangeService)
         job.logService = Mock(LogService)
+        job.processingOptionService = Mock(ProcessingOptionService)
         WorkflowStep workflowStep = createWorkflowStep()
 
         when:
@@ -63,6 +66,7 @@ class AbstractPrepareJobSpec extends Specification implements DataTest, Workflow
 
         then:
         1 * job.buildWorkDirectoryPath(workflowStep) >> workDirectory
+        1 * job.shouldWorkDirectoryBeProtected() >> false
         1 * job.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(workDirectory, _, workflowStep.workflowRun.project.unixGroup) >> null
         workflowStep.workflowRun.workDirectory == workDirectory.toString()
 
@@ -72,5 +76,43 @@ class AbstractPrepareJobSpec extends Specification implements DataTest, Workflow
         1 * job.doFurtherPreparation(workflowStep) >> null
 
         1 * job.workflowStateChangeService.changeStateToSuccess(workflowStep)
+
+        0 * job.processingOptionService._
+        0 * job.fileService._
+    }
+
+    void "test execute, protection of work directory"() {
+        given:
+        String testGroup = "TestGroup"
+        Path workDirectory = Paths.get("/test")
+        Path link, target
+        AbstractPrepareJob job = Spy(AbstractPrepareJob)
+        job.fileService = Mock(FileService)
+        job.workflowStateChangeService = Mock(WorkflowStateChangeService)
+        job.logService = Mock(LogService)
+        job.processingOptionService = Mock(ProcessingOptionService)
+        WorkflowStep workflowStep = createWorkflowStep()
+
+        when:
+        job.execute(workflowStep)
+
+        then:
+        1 * job.buildWorkDirectoryPath(workflowStep) >> workDirectory
+        1 * job.shouldWorkDirectoryBeProtected() >> true
+        1 * job.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(workDirectory, _, workflowStep.workflowRun.project.unixGroup) >> null
+        workflowStep.workflowRun.workDirectory == workDirectory.toString()
+
+        1 * job.processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP) >> testGroup
+        1 * job.fileService.setGroupViaBash(workDirectory, _, testGroup)
+
+        1 * job.generateMapForLinking(workflowStep) >> [new LinkEntry(link, target)]
+        1 * job.fileService.createLink(target, link, _, CreateLinkOption.DELETE_EXISTING_FILE) >> null
+
+        1 * job.doFurtherPreparation(workflowStep) >> null
+
+        1 * job.workflowStateChangeService.changeStateToSuccess(workflowStep)
+
+        0 * job.processingOptionService._
+        0 * job.fileService._
     }
 }

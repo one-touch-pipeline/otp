@@ -48,6 +48,11 @@ class FastqcPrepareJob extends AbstractPrepareJob implements FastqcShared {
     FastqcDataFilesService fastqcDataFilesService
 
     @Override
+    protected boolean shouldWorkDirectoryBeProtected() {
+        return false
+    }
+
+    @Override
     protected void doFurtherPreparation(WorkflowStep workflowStep) {
         SeqTrack seqTrack = getSeqTrack(workflowStep)
         notificationCreator.setStartedForSeqTracks([seqTrack], OtrsTicket.ProcessingStep.FASTQC)

@@ -44,6 +44,11 @@ class DataInstallationPrepareJob extends AbstractPrepareJob implements DataInsta
     NotificationCreator notificationCreator
 
     @Override
+    protected boolean shouldWorkDirectoryBeProtected() {
+        return false
+    }
+
+    @Override
     protected void doFurtherPreparation(WorkflowStep workflowStep) {
         SeqTrack seqTrack = getSeqTrack(workflowStep)
         notificationCreator.setStartedForSeqTracks([seqTrack], OtrsTicket.ProcessingStep.INSTALLATION)
