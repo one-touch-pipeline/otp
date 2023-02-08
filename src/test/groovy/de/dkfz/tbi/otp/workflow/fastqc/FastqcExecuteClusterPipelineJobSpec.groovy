@@ -56,6 +56,8 @@ class FastqcExecuteClusterPipelineJobSpec extends Specification implements DataT
     private DataFile dataFile2
     private FastqcProcessedFile fastqcProcessedFile1
     private FastqcProcessedFile fastqcProcessedFile2
+    private Workflow workflow
+    private WorkflowVersion version
 
     private Path sourceDir
     private Path targetDir
@@ -70,8 +72,10 @@ class FastqcExecuteClusterPipelineJobSpec extends Specification implements DataT
 
     @TempDir
     Path tempDir
+    @TempDir
+    Path tempOutDir
 
-    private void createData(boolean targetAlreadyExist) {
+    private void createData(boolean outputDirAlreadyExists) {
         fileSystem = FileSystems.default
         sourceDir = tempDir.resolve("src")
         targetDir = tempDir.resolve("tgt")
@@ -83,18 +87,22 @@ class FastqcExecuteClusterPipelineJobSpec extends Specification implements DataT
         targetFastqc2 = targetDir.resolve('fastq2')
         targetFastqcHtml1 = targetDir.resolve('html1')
         targetFastqcHtml2 = targetDir.resolve('html2')
+        CreateFileHelper.createFile(targetFastqc1)
+        CreateFileHelper.createFile(targetFastqc2)
 
-        if (targetAlreadyExist) {
-            CreateFileHelper.createFile(targetFastqc1)
-            CreateFileHelper.createFile(targetFastqc2)
-        }
-        int callOfDelete = targetAlreadyExist ? 1 : 0
-        int logEntryCount = targetAlreadyExist ? 3 : 1
+        int callOfDelete = outputDirAlreadyExists ? 1 : 0
+        int logEntryCount = outputDirAlreadyExists ? 2 : 1
 
+        workflow = createWorkflow([
+                name: WORKFLOW
+        ])
+        version = createWorkflowVersion([
+                workflow       : workflow,
+                workflowVersion: '0.1.1',
+        ])
         run = createWorkflowRun([
-                workflow: createWorkflow([
-                        name: WORKFLOW
-                ]),
+                workflow       : workflow,
+                workflowVersion: version,
         ])
         step = createWorkflowStep([
                 workflowRun: run,
@@ -121,23 +129,36 @@ class FastqcExecuteClusterPipelineJobSpec extends Specification implements DataT
                 workDirectoryName: fastqcProcessedFile1.workDirectoryName,
         ])
 
+        if (outputDirAlreadyExists) {
+            tempOutDir = Files.createDirectory(fileSystem.getPath(step.workflowRun.workDirectory))
+        }
+
         job = new FastqcExecuteClusterPipelineJob()
         job.concreteArtefactService = Mock(ConcreteArtefactService) {
             _ * getInputArtefact(step, INPUT_ROLE) >> seqTrack
             _ * getOutputArtefacts(step, OUTPUT_ROLE) >> [fastqcProcessedFile1, fastqcProcessedFile2]
             0 * _
         }
+
         job.fileSystemService = new TestFileSystemService()
         job.fileService = Mock(FileService) {
-            callOfDelete * deleteDirectoryRecursively(targetFastqc1)
-            callOfDelete * deleteDirectoryRecursively(targetFastqc2)
             _ * ensureFileIsReadableAndNotEmpty(_)
             _ * convertPermissionsToOctalString(_)
+            callOfDelete * deleteDirectoryRecursively(_)
+            callOfDelete * createDirectoryRecursivelyAndSetPermissionsViaBash(_, _, _)
             0 * _
         }
         job.logService = Mock(LogService) {
             logEntryCount * addSimpleLogEntry(_, _)
         }
+        findOrCreateProcessingOption(
+                name: ProcessingOption.OptionName.COMMAND_ENABLE_MODULE,
+                value: 'module load',
+        )
+        findOrCreateProcessingOption(
+                name: ProcessingOption.OptionName.COMMAND_FASTQC,
+                value: 'fastqc',
+        )
     }
 
     @Override
@@ -146,13 +167,15 @@ class FastqcExecuteClusterPipelineJobSpec extends Specification implements DataT
                 FastqcProcessedFile,
                 WorkflowArtefact,
                 WorkflowStep,
+                Realm,
+                ProcessingOption,
         ]
     }
 
     @Unroll
     void "test, when fastqc reports can be copied #m1, then #m2 copy fastqc"() {
         given:
-        createData(targetAlreadyExist)
+        createData(outputDirAlreadyExists)
 
         CreateFileHelper.createFile(sourceFastqc1)
         CreateFileHelper.createFile(sourceFastqc2)
@@ -164,8 +187,8 @@ class FastqcExecuteClusterPipelineJobSpec extends Specification implements DataT
             2 * pathToFastQcResultFromSeqCenter(fastqcProcessedFile2) >> sourceFastqc2
             1 * pathToFastQcResultMd5SumFromSeqCenter(fastqcProcessedFile1) >> sourceFastqcMd5sum1
             1 * pathToFastQcResultMd5SumFromSeqCenter(fastqcProcessedFile2) >> sourceFastqcMd5sum2
-            2 * fastqcOutputPath(fastqcProcessedFile1) >> targetFastqc1
-            2 * fastqcOutputPath(fastqcProcessedFile2) >> targetFastqc2
+            1 * fastqcOutputPath(fastqcProcessedFile1) >> targetFastqc1
+            1 * fastqcOutputPath(fastqcProcessedFile2) >> targetFastqc2
             0 * _
         }
         job.remoteShellHelper = Mock(RemoteShellHelper) {
@@ -184,7 +207,7 @@ class FastqcExecuteClusterPipelineJobSpec extends Specification implements DataT
         scripts.size() == 0
 
         where:
-        m1                          | m2                     | targetAlreadyExist
+        m1                          | m2                     | outputDirAlreadyExists
         ""                          | ""                     | false
         " and target exist already" | "delete existing and " | true
     }
@@ -192,17 +215,16 @@ class FastqcExecuteClusterPipelineJobSpec extends Specification implements DataT
     @Unroll
     void "test, if fastqc reports can not be copied #m1, then #m2 create copy fastqc scripts"() {
         given:
-        createData(targetAlreadyExist)
+        createData(outputDirAlreadyExists)
 
-        final String cmd_module_loader = "cmd load module loader"
-        final String cmd_activation_fastqc = "cmd activate fastqc"
+        final String cmd_activation_fastqc = "cmd module load fastqc"
         final String cmd_fastqc = "cmd fastqc"
 
         job.fastqcDataFilesService = Mock(FastqcDataFilesService) {
             1 * pathToFastQcResultFromSeqCenter(fastqcProcessedFile1) >> sourceFastqc1
             0 * pathToFastQcResultFromSeqCenter(fastqcProcessedFile2) >> sourceFastqc2
-            2 * fastqcOutputPath(fastqcProcessedFile1) >> targetFastqc1
-            2 * fastqcOutputPath(fastqcProcessedFile2) >> targetFastqc2
+            1 * fastqcOutputPath(fastqcProcessedFile1) >> targetFastqc1
+            1 * fastqcOutputPath(fastqcProcessedFile2) >> targetFastqc2
             1 * fastqcHtmlPath(fastqcProcessedFile1) >> targetFastqcHtml1
             1 * fastqcHtmlPath(fastqcProcessedFile2) >> targetFastqcHtml2
             0 * _
@@ -214,8 +236,7 @@ class FastqcExecuteClusterPipelineJobSpec extends Specification implements DataT
         }
 
         job.processingOptionService = Mock(ProcessingOptionService) {
-            _ * findOptionAsString(ProcessingOption.OptionName.COMMAND_LOAD_MODULE_LOADER) >> cmd_module_loader
-            _ * findOptionAsString(ProcessingOption.OptionName.COMMAND_ACTIVATION_FASTQC) >> cmd_activation_fastqc
+            _ * findOptionAsString(ProcessingOption.OptionName.COMMAND_ENABLE_MODULE) >> cmd_activation_fastqc
             _ * findOptionAsString(ProcessingOption.OptionName.COMMAND_FASTQC) >> cmd_fastqc
         }
 
@@ -225,13 +246,12 @@ class FastqcExecuteClusterPipelineJobSpec extends Specification implements DataT
         then:
         scripts.size() == 2
         scripts.each { String it ->
-            assert it.contains(cmd_module_loader)
-            assert it.contains(cmd_activation_fastqc)
+            assert it.contains(cmd_activation_fastqc + 'fastqc/' + version.workflowVersion)
             assert it.contains(cmd_fastqc)
         }
 
         where:
-        m1                          | m2                     | targetAlreadyExist
+        m1                          | m2                     | outputDirAlreadyExists
         ""                          | ""                     | false
         " and target exist already" | "delete existing and " | true
     }

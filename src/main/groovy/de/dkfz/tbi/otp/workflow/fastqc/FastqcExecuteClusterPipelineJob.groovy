@@ -59,16 +59,15 @@ class FastqcExecuteClusterPipelineJob extends AbstractExecuteClusterPipelineJob 
         Realm realm = workflowStep.realm
         Path outputDir = getFileSystem(workflowStep).getPath(workflowStep.workflowRun.workDirectory)
 
-        List<FastqcProcessedFile> fastqcProcessedFiles = getFastqcProcessedFiles(workflowStep)
-
-        //delete existing file in case of restart
-        fastqcProcessedFiles.each { FastqcProcessedFile fastqcProcessedFile ->
-            Path resultFilePath = fastqcDataFilesService.fastqcOutputPath(fastqcProcessedFile)
-            if (Files.exists(resultFilePath)) {
-                logService.addSimpleLogEntry(workflowStep, "Delete result file ${resultFilePath}")
-                fileService.deleteDirectoryRecursively(resultFilePath)
-            }
+        //delete existing output directory in case of restart
+        if (Files.exists(outputDir)) {
+            logService.addSimpleLogEntry(workflowStep, "Deleting output directory ${outputDir}")
+            fileService.deleteDirectoryRecursively(outputDir)
+            fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(outputDir, workflowStep.workflowRun.project.realm,
+                    workflowStep.workflowRun.project.unixGroup,)
         }
+
+        List<FastqcProcessedFile> fastqcProcessedFiles = getFastqcProcessedFiles(workflowStep)
 
         //check if fastqc reports are provided and can be copied
         if (canFastQcReportsBeCopied(fastqcProcessedFiles)) {
@@ -79,7 +78,7 @@ class FastqcExecuteClusterPipelineJob extends AbstractExecuteClusterPipelineJob 
         }
         //create and return the shell script only (w/o running it)
         logService.addSimpleLogEntry(workflowStep, "Creating cluster scripts")
-        return createFastQcClusterScript(fastqcProcessedFiles, outputDir)
+        return createFastQcClusterScript(fastqcProcessedFiles, outputDir, workflowStep)
     }
 
     private boolean canFastQcReportsBeCopied(List<FastqcProcessedFile> fastqcProcessedFiles) {
@@ -116,7 +115,7 @@ class FastqcExecuteClusterPipelineJob extends AbstractExecuteClusterPipelineJob 
         }
     }
 
-    private List<String> createFastQcClusterScript(List<FastqcProcessedFile> fastqcProcessedFiles, Path outDir) {
+    private List<String> createFastQcClusterScript(List<FastqcProcessedFile> fastqcProcessedFiles, Path outDir, WorkflowStep workflowStep) {
         String permission = fileService.convertPermissionsToOctalString(FileService.DEFAULT_FILE_PERMISSION)
 
         return fastqcProcessedFiles.collect { FastqcProcessedFile fastqcProcessedFile ->
@@ -133,13 +132,12 @@ class FastqcExecuteClusterPipelineJob extends AbstractExecuteClusterPipelineJob 
                 deleteDecompressedFileCommand = "rm -f ${inputFileName}"
             }
 
-            String moduleLoader = processingOptionService.findOptionAsString(ProcessingOption.OptionName.COMMAND_LOAD_MODULE_LOADER)
-            String fastqcActivation = processingOptionService.findOptionAsString(ProcessingOption.OptionName.COMMAND_ACTIVATION_FASTQC)
+            String workflowVersion = workflowStep.workflowRun.workflowVersion.workflowVersion
+            String fastqcActivation = processingOptionService.findOptionAsString(ProcessingOption.OptionName.COMMAND_ENABLE_MODULE) + 'fastqc/' + workflowVersion
             String fastqcCommand = processingOptionService.findOptionAsString(ProcessingOption.OptionName.COMMAND_FASTQC)
 
             return """|
-                |${moduleLoader}
-                |${fastqcActivation}
+                |${fastqcActivation }
                 |${decompressFileCommand}
                 |${fastqcCommand} ${inputFileName} --noextract --nogroup -o ${outDir}
                 |chmod ${permission} ${fastqcDataFilesService.fastqcOutputPath(fastqcProcessedFile)}
