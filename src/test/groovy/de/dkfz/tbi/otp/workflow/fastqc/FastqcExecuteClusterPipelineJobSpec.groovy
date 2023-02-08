@@ -132,7 +132,6 @@ class FastqcExecuteClusterPipelineJobSpec extends Specification implements DataT
             CreateFileHelper.createFile(tempOutDir.resolve(targetFastqc2))
         }
 
-
         job = new FastqcExecuteClusterPipelineJob()
         job.concreteArtefactService = Mock(ConcreteArtefactService) {
             _ * getInputArtefact(step, INPUT_ROLE) >> seqTrack
