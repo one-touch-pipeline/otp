@@ -72,7 +72,6 @@ class FastqcExecuteClusterPipelineJobSpec extends Specification implements DataT
 
     @TempDir
     Path tempDir
-    @TempDir
     Path tempOutDir
 
     private void createData(boolean outputDirAlreadyExists) {
@@ -87,8 +86,6 @@ class FastqcExecuteClusterPipelineJobSpec extends Specification implements DataT
         targetFastqc2 = targetDir.resolve('fastq2')
         targetFastqcHtml1 = targetDir.resolve('html1')
         targetFastqcHtml2 = targetDir.resolve('html2')
-        CreateFileHelper.createFile(targetFastqc1)
-        CreateFileHelper.createFile(targetFastqc2)
 
         int callOfDelete = outputDirAlreadyExists ? 1 : 0
         int logEntryCount = outputDirAlreadyExists ? 2 : 1
@@ -131,7 +128,10 @@ class FastqcExecuteClusterPipelineJobSpec extends Specification implements DataT
 
         if (outputDirAlreadyExists) {
             tempOutDir = Files.createDirectory(fileSystem.getPath(step.workflowRun.workDirectory))
+            CreateFileHelper.createFile(tempOutDir.resolve(targetFastqc1))
+            CreateFileHelper.createFile(tempOutDir.resolve(targetFastqc2))
         }
+
 
         job = new FastqcExecuteClusterPipelineJob()
         job.concreteArtefactService = Mock(ConcreteArtefactService) {
@@ -246,7 +246,7 @@ class FastqcExecuteClusterPipelineJobSpec extends Specification implements DataT
         then:
         scripts.size() == 2
         scripts.each { String it ->
-            assert it.contains(cmd_activation_fastqc + 'fastqc/' + version.workflowVersion)
+            assert it.contains(cmd_activation_fastqc + ' fastqc/' + version.workflowVersion)
             assert it.contains(cmd_fastqc)
         }
 

@@ -132,11 +132,14 @@ class FastqcExecuteClusterPipelineJob extends AbstractExecuteClusterPipelineJob 
                 deleteDecompressedFileCommand = "rm -f ${inputFileName}"
             }
 
-            String workflowVersion = workflowStep.workflowRun.workflowVersion.workflowVersion
-            String fastqcActivation = processingOptionService.findOptionAsString(ProcessingOption.OptionName.COMMAND_ENABLE_MODULE) + 'fastqc/' + workflowVersion
+            String workflowVersion = workflowStep?.workflowRun?.workflowVersion?.workflowVersion ?: ""
+            String moduleLoader = processingOptionService.findOptionAsString(ProcessingOption.OptionName.COMMAND_LOAD_MODULE_LOADER)
+            String fastqcActivation = processingOptionService.findOptionAsString(ProcessingOption.OptionName.COMMAND_ENABLE_MODULE) + ' fastqc/' +
+                    workflowVersion
             String fastqcCommand = processingOptionService.findOptionAsString(ProcessingOption.OptionName.COMMAND_FASTQC)
 
             return """|
+                |${moduleLoader }
                 |${fastqcActivation }
                 |${decompressFileCommand}
                 |${fastqcCommand} ${inputFileName} --noextract --nogroup -o ${outDir}
