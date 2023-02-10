@@ -191,7 +191,7 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
 
         MetaDataFile metadataFileObject = new MetaDataFile()
         MetadataImportService service = Spy(MetadataImportService) {
-            1 * importMetadataFile(_, align, FastqImportInstance.ImportMode.MANUAL, TICKET_NUMBER, null, automaticNotification) >> metadataFileObject
+            1 * importMetadataFile(_, FastqImportInstance.ImportMode.MANUAL, TICKET_NUMBER, null, automaticNotification) >> metadataFileObject
             1 * copyMetadataFile(_, TICKET_NUMBER) >> null
         }
         service.fileSystemService = new TestFileSystemService()
@@ -208,14 +208,13 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
 
         when:
         List<ValidateAndImportResult> results = service.validateAndImport(
-                [pathWithMd5sum], directoryStructureName, align, false, TICKET_NUMBER, null, automaticNotification)
+                [pathWithMd5sum], directoryStructureName, false, TICKET_NUMBER, null, automaticNotification)
 
         then:
         results[0].context.metadataFile == metadataFile.fileName
         results[0].metadataFile == metadataFileObject
 
         where:
-        align << [true, false]
         automaticNotification << [true, false]
     }
 
@@ -238,7 +237,7 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
         service.fileSystemService = new TestFileSystemService()
 
         when:
-        service.validateAndImport([pathWithMd5sum], directoryStructureName, false,
+        service.validateAndImport([pathWithMd5sum], directoryStructureName,
                 false, TICKET_NUMBER, null, true)
 
         then:
@@ -277,11 +276,11 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
             2 * copyMetadataFile(_, TICKET_NUMBER) >> null
             1 * validateWithAuth(contentWithProblems[0], directoryStructureName, false) >> { assert imported == 0; context1 }
             1 * validateWithAuth(contentWithProblems[1], directoryStructureName, false) >> { assert imported == 0; context2 }
-            1 * importMetadataFile(context1, true, FastqImportInstance.ImportMode.MANUAL, TICKET_NUMBER, null, true) >> {
+            1 * importMetadataFile(context1, FastqImportInstance.ImportMode.MANUAL, TICKET_NUMBER, null, true) >> {
                 imported++
                 metadataFile1
             }
-            1 * importMetadataFile(context2, true, FastqImportInstance.ImportMode.MANUAL, TICKET_NUMBER, null, true) >> {
+            1 * importMetadataFile(context2, FastqImportInstance.ImportMode.MANUAL, TICKET_NUMBER, null, true) >> {
                 imported++
                 metadataFile2
             }
@@ -296,7 +295,7 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
 
         when:
         List<ValidateAndImportResult> validateAndImportResults = service.validateAndImport(
-                contentWithProblemsAndPreviousMd5sums, directoryStructureName, true, false, TICKET_NUMBER, null, true)
+                contentWithProblemsAndPreviousMd5sums, directoryStructureName, false, TICKET_NUMBER, null, true)
 
         then:
         validateAndImportResults*.context == [context1, context2]
@@ -320,8 +319,8 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
             2 * copyMetadataFile(_, TICKET_NUMBER) >> null
             1 * validatePath(context1.metadataFile, DirectoryStructureBeanName.GPCF_SPECIFIC, _) >> context1
             1 * validatePath(context2.metadataFile, DirectoryStructureBeanName.GPCF_SPECIFIC, _) >> context2
-            1 * importMetadataFile(context1, true, FastqImportInstance.ImportMode.AUTOMATIC, TICKET_NUMBER, null, true) >> metadataFile1
-            1 * importMetadataFile(context2, true, FastqImportInstance.ImportMode.AUTOMATIC, TICKET_NUMBER, null, true) >> metadataFile2
+            1 * importMetadataFile(context1, FastqImportInstance.ImportMode.AUTOMATIC, TICKET_NUMBER, null, true) >> metadataFile1
+            1 * importMetadataFile(context2, FastqImportInstance.ImportMode.AUTOMATIC, TICKET_NUMBER, null, true) >> metadataFile2
         }
         service.fileSystemService = new TestFileSystemService()
         service.configService = new TestConfigService()
@@ -523,7 +522,7 @@ ${SPECIES}                      ${speciesImportAlias}                       ${sp
             1 * validatePath(context1.metadataFile, DirectoryStructureBeanName.GPCF_SPECIFIC, _) >> context1
             1 * validatePath(context2.metadataFile, DirectoryStructureBeanName.GPCF_SPECIFIC, _) >> context2
             1 * validatePath(context3.metadataFile, DirectoryStructureBeanName.GPCF_SPECIFIC, _) >> context3
-            1 * importMetadataFile(context2, true, FastqImportInstance.ImportMode.AUTOMATIC, TICKET_NUMBER, null, true) >> DomainFactory.createMetaDataFile()
+            1 * importMetadataFile(context2, FastqImportInstance.ImportMode.AUTOMATIC, TICKET_NUMBER, null, true) >> DomainFactory.createMetaDataFile()
         }
 
         service.fileSystemService = new TestFileSystemService()
@@ -665,7 +664,7 @@ ${SPECIES}                      ${speciesImportAlias}                       ${sp
     }
 
     @Unroll
-    void "importMetadataFile imports correctly"(boolean runExists, boolean includeOptional, boolean align, FastqImportInstance.ImportMode importMode) {
+    void "importMetadataFile imports correctly"(boolean runExists, boolean includeOptional, FastqImportInstance.ImportMode importMode) {
         given:
         DomainFactory.createAllAnalysableSeqTypes()
 
@@ -832,7 +831,7 @@ ${ILSE_NO}                      -                           1234          1234  
         )
 
         when:
-        MetaDataFile result = service.importMetadataFile(context, align, importMode, otrsTicket.ticketNumber, null, otrsTicket.automaticNotification)
+        MetaDataFile result = service.importMetadataFile(context, importMode, otrsTicket.ticketNumber, null, otrsTicket.automaticNotification)
 
         then:
 
@@ -1096,16 +1095,16 @@ ${ILSE_NO}                      -                           1234          1234  
             ]))
         }
 
-        (align ? 1 : 0 * seqTrackCount) * service.seqTrackService.decideAndPrepareForAlignment(!null) >> []
+        seqTrackCount * service.seqTrackService.decideAndPrepareForAlignment(!null) >> []
         seqTrackCount * service.seqTrackService.determineAndStoreIfFastqFilesHaveToBeLinked(!null, false)
 
         cleanup:
         GroovySystem.metaClassRegistry.removeMetaClass(SamplePair)
 
         where:
-        runExists | includeOptional | align | importMode
-        false     | true            | false | FastqImportInstance.ImportMode.AUTOMATIC
-        true      | false           | true  | FastqImportInstance.ImportMode.MANUAL
+        runExists | includeOptional | importMode
+        false     | true            | FastqImportInstance.ImportMode.AUTOMATIC
+        true      | false           | FastqImportInstance.ImportMode.MANUAL
     }
 
     @TupleConstructor
@@ -1165,7 +1164,7 @@ ${ILSE_NO}                      -                           1234          1234  
             0 * _
         }
         service.seqTrackService = Mock(SeqTrackService) {
-            0 * decideAndPrepareForAlignment(!null) >> []
+            1 * decideAndPrepareForAlignment(!null) >> []
             1 * determineAndStoreIfFastqFilesHaveToBeLinked(!null, false)
         }
         service.seqPlatformService = Mock(SeqPlatformService) {
@@ -1226,7 +1225,7 @@ ${SPECIES}                      ${human}+${mouse}+${chicken}                ${hu
         )
 
         when:
-        MetaDataFile result = service.importMetadataFile(context, false, FastqImportInstance.ImportMode.MANUAL, null, null, false)
+        MetaDataFile result = service.importMetadataFile(context, FastqImportInstance.ImportMode.MANUAL, null, null, false)
 
         then:
         // runs
@@ -1347,7 +1346,7 @@ ${SPECIES}                      ${human}+${mouse}+${chicken}                ${hu
             0 * _
         }
         service.seqTrackService = Mock(SeqTrackService) {
-            0 * decideAndPrepareForAlignment(!null) >> []
+            1 * decideAndPrepareForAlignment(!null) >> []
             1 * determineAndStoreIfFastqFilesHaveToBeLinked(!null, false)
         }
         service.seqPlatformService = Mock(SeqPlatformService) {
@@ -1436,7 +1435,7 @@ ${SPECIES}                      ${human}+${mouse}+${chicken}                ${hu
         )
 
         when:
-        MetaDataFile result = service.importMetadataFile(context, false, FastqImportInstance.ImportMode.MANUAL, null, null, false)
+        MetaDataFile result = service.importMetadataFile(context, FastqImportInstance.ImportMode.MANUAL, null, null, false)
 
         then:
         // runs

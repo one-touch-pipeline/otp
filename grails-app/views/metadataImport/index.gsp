@@ -181,14 +181,6 @@
             <div class="col-sm-2"></div>
 
             <div class="col-sm-10">
-                <div class="form-check">
-                    <g:set var="intialAlignValue" value="${cmd?.align == false ? '' : 'checked'}"/>
-                    <input class="form-check-input" ${intialAlignValue} name="align" type="checkbox" id="align">
-                    <label for="align" class="form-check-label">
-                        <g:message code="runSubmit.align"/>
-                    </label>
-                </div>
-
                 <div class="form-check" id="ignore-md5-sum-row">
                     <input class="form-check-input" name="ignoreMd5sumError" type="checkbox" id="ignore-md5-sum-input">
                     <label for="ignore-md5-sum-input" class="form-check-label">

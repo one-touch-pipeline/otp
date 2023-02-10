@@ -148,7 +148,7 @@ class MetadataImportService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     List<ValidateAndImportResult> validateAndImport(List<ContentWithProblemsAndPreviousMd5sum> metadataPaths,
-                                                    DirectoryStructureBeanName directoryStructure, boolean align,
+                                                    DirectoryStructureBeanName directoryStructure,
                                                     boolean ignoreWarnings, String ticketNumber, String seqCenterComment,
                                                     boolean automaticNotification,
                                                     boolean ignoreAlreadyKnownMd5sum = false) {
@@ -163,7 +163,7 @@ class MetadataImportService {
             }
 
             List<ValidateAndImportResult> results = contexts.collect { context, md5sum ->
-                return importHelperMethod(context, align, FastqImportInstance.ImportMode.MANUAL,
+                return importHelperMethod(context, FastqImportInstance.ImportMode.MANUAL,
                         ticketNumber, seqCenterComment, automaticNotification)
             }
             int lines = (results*.context*.spreadsheet*.dataRows*.size().sum() ?: 0) as int
@@ -175,9 +175,9 @@ class MetadataImportService {
         }
     }
 
-    private ValidateAndImportResult importHelperMethod(MetadataValidationContext context, boolean align, FastqImportInstance.ImportMode importMode,
+    private ValidateAndImportResult importHelperMethod(MetadataValidationContext context, FastqImportInstance.ImportMode importMode,
                                                        String ticketNumber, String seqCenterComment, boolean automaticNotification) {
-        MetaDataFile metadataFileObject = importMetadataFile(context, align, importMode, ticketNumber, seqCenterComment, automaticNotification)
+        MetaDataFile metadataFileObject = importMetadataFile(context, importMode, ticketNumber, seqCenterComment, automaticNotification)
         String copiedFile = copyMetadataFile(context, ticketNumber)
         return new ValidateAndImportResult(context, metadataFileObject, copiedFile)
     }
@@ -248,7 +248,7 @@ class MetadataImportService {
         List<ValidateAndImportResult> results = contexts.collect { context ->
             try {
                 mayImport(context, false, null)
-                return importHelperMethod(context, true, FastqImportInstance.ImportMode.AUTOMATIC, otrsTicketNumber, null, true)
+                return importHelperMethod(context, FastqImportInstance.ImportMode.AUTOMATIC, otrsTicketNumber, null, true)
             } catch (MetadataFileImportException e) {
                 failedValidations.push(context)
                 return new ValidateAndImportResult()
@@ -323,7 +323,7 @@ class MetadataImportService {
         }
     }
 
-    protected MetaDataFile importMetadataFile(MetadataValidationContext context, boolean align, FastqImportInstance.ImportMode importMode, String ticketNumber,
+    protected MetaDataFile importMetadataFile(MetadataValidationContext context, FastqImportInstance.ImportMode importMode, String ticketNumber,
                                               String seqCenterComment, boolean automaticNotification) {
         Long timeImportStarted = System.currentTimeMillis()
         log.debug("import started ${context.metadataFile.fileName} ${timeImportStarted}")
@@ -335,7 +335,7 @@ class MetadataImportService {
 
         Long timeStarted = System.currentTimeMillis()
         log.debug("  import runs of file  ${context.metadataFile.fileName} started")
-        importRuns(context, fastqImportInstance, context.spreadsheet.dataRows, align)
+        importRuns(context, fastqImportInstance, context.spreadsheet.dataRows)
         log.debug("  import runs of file  ${context.metadataFile.fileName} stopped took: ${System.currentTimeMillis() - timeStarted}")
 
         MetaDataFile metaDataFile = new MetaDataFile(
@@ -404,7 +404,7 @@ class MetadataImportService {
         }
     }
 
-    private void importRuns(MetadataValidationContext context, FastqImportInstance fastqImportInstance, Collection<Row> metadataFileRows, boolean align) {
+    private void importRuns(MetadataValidationContext context, FastqImportInstance fastqImportInstance, Collection<Row> metadataFileRows) {
         Map<String, List<Row>> seqTrackPerRun = metadataFileRows.groupBy {
             it.getCellByColumnTitle(RUN_ID.name()).text
         }
@@ -414,7 +414,7 @@ class MetadataImportService {
 
             Long timeStarted = System.currentTimeMillis()
             log.debug("    seqTracks of run ${run.name} started ${index}/${amountOfRows}")
-            importSeqTracks(context, fastqImportInstance, run, rows, align)
+            importSeqTracks(context, fastqImportInstance, run, rows)
             log.debug("    seqTracks of run ${run.name} stopped took: ${System.currentTimeMillis() - timeStarted}")
         }
 
@@ -450,7 +450,7 @@ class MetadataImportService {
         return newRun
     }
 
-    private void importSeqTracks(MetadataValidationContext context, FastqImportInstance fastqImportInstance, Run run, Collection<Row> runRows, boolean align) {
+    private void importSeqTracks(MetadataValidationContext context, FastqImportInstance fastqImportInstance, Run run, Collection<Row> runRows) {
         Map<String, List<Row>> runsGroupedByLane = runRows.groupBy {
             MultiplexingService.combineLaneNumberAndBarcode(it.getCellByColumnTitle(LANE_NO.name()).text, extractBarcode(it).value)
         }
@@ -562,10 +562,7 @@ class MetadataImportService {
             seqTrack.save(flush: true) //needs to flush the session, so seqTrackService.decideAndPrepareForAlignment can work
 
             mergingCriteriaService.createDefaultMergingCriteria(sampleIdentifier.project, seqType)
-            Collection<MergingWorkPackage> mergingWorkPackages = []
-            if (align) {
-                mergingWorkPackages = seqTrackService.decideAndPrepareForAlignment(seqTrack)
-            }
+            Collection<MergingWorkPackage> mergingWorkPackages = seqTrackService.decideAndPrepareForAlignment(seqTrack)
             seqTrackService.determineAndStoreIfFastqFilesHaveToBeLinked(seqTrack, !mergingWorkPackages.empty)
             samplePairDeciderService.findOrCreateSamplePairs(mergingWorkPackages)
         }

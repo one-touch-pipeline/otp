@@ -160,7 +160,7 @@ class MetadataImportController implements CheckAndCall, PlainResponseExceptionHa
                         }
                     }
                     List<ValidateAndImportResult> validateAndImportResults = metadataImportService.validateAndImport(
-                            contentsWithProblemsAndPreviousMd5sum, cmd.directoryStructure, cmd.align, cmd.ignoreWarnings,
+                            contentsWithProblemsAndPreviousMd5sum, cmd.directoryStructure, cmd.ignoreWarnings,
                             cmd.ticketNumber, cmd.seqCenterComment, cmd.automaticNotification, cmd.ignoreMd5sumError
                     )
                     log.debug("No problem")
@@ -533,7 +533,6 @@ class MetadataImportControllerSubmitCommand implements Serializable, Validateabl
     List<String> md5
     String ticketNumber
     String seqCenterComment
-    boolean align = true
     boolean automaticNotification = true
     boolean ignoreWarnings = false
 
