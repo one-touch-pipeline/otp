@@ -321,7 +321,7 @@ class PanCancerDecider extends AbstractWorkflowDecider {
                     ])
         }
         workPackage.seqTracks = seqTracks
-        workPackage.save(flush: true)
+        workPackage.save(flush: false)
 
         List<String> runDisplayName = [
                 "project: ${project.name}",
@@ -354,7 +354,7 @@ class PanCancerDecider extends AbstractWorkflowDecider {
                             workflowRun: run,
                             role: PanCancerWorkflow.INPUT_BASE_BAM_FILE,
                             workflowArtefact: it,
-                    ).save(flush: true)
+                    ).save(flush: false)
                 }
             } else {
                 String role = (type == ArtefactType.FASTQ) ? PanCancerWorkflow.INPUT_FASTQ : PanCancerWorkflow.INPUT_FASTQC
@@ -363,7 +363,7 @@ class PanCancerDecider extends AbstractWorkflowDecider {
                             workflowRun: run,
                             role: "${role}_${it.artefact.get().id}",
                             workflowArtefact: it,
-                    ).save(flush: true)
+                    ).save(flush: false)
                 }
             }
         }
@@ -373,7 +373,7 @@ class PanCancerDecider extends AbstractWorkflowDecider {
                 PanCancerWorkflow.OUTPUT_BAM,
                 ArtefactType.BAM,
                 artefactDisplayName,
-        )).save(flush: true)
+        )).save(flush: false)
 
         int identifier = RoddyBamFile.nextIdentifier(workPackage)
         RoddyBamFile bamFile = new RoddyBamFile(
@@ -386,12 +386,12 @@ class PanCancerDecider extends AbstractWorkflowDecider {
         )
 
         bamFile.numberOfMergedLanes = bamFile.containedSeqTracks.size()
-        assert bamFile.save(flush: true)
+        assert bamFile.save(flush: false)
 
         run.workDirectory = roddyBamFileService.getWorkDirectory(bamFile)
-        run.save(flush: true)
+        run.save(flush: false)
 
-        return workflowOutputArtefact
+        return workflowOutputArtefact.save(flush: true)
     }
 
     @Override

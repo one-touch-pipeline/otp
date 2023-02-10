@@ -192,7 +192,7 @@ class WgbsDecider extends AbstractWorkflowDecider {
                     ])
         }
         workPackage.seqTracks = seqTracks
-        workPackage.save(flush: true)
+        workPackage.save(flush: false)
 
         List<String> runDisplayName = [
                 "project: ${project.name}",
@@ -223,7 +223,7 @@ class WgbsDecider extends AbstractWorkflowDecider {
                     workflowRun: run,
                     role: "${WgbsWorkflow.INPUT_FASTQ}_${it.artefact.get().id}",
                     workflowArtefact: it,
-            ).save(flush: true)
+            ).save(flush: false)
         }
 
         WorkflowArtefact workflowOutputArtefact = workflowArtefactService.buildWorkflowArtefact(new WorkflowArtefactValues(
@@ -231,7 +231,7 @@ class WgbsDecider extends AbstractWorkflowDecider {
                 WgbsWorkflow.OUTPUT_BAM,
                 ArtefactType.BAM,
                 artefactDisplayName,
-        )).save(flush: true)
+        )).save(flush: false)
 
         int identifier = RoddyBamFile.nextIdentifier(workPackage)
         RoddyBamFile bamFile = new RoddyBamFile(
@@ -243,12 +243,12 @@ class WgbsDecider extends AbstractWorkflowDecider {
         )
 
         bamFile.numberOfMergedLanes = bamFile.containedSeqTracks.size()
-        assert bamFile.save(flush: true)
+        assert bamFile.save(flush: false)
 
         run.workDirectory = roddyBamFileService.getWorkDirectory(bamFile).toString()
-        run.save(flush: true)
+        run.save(flush: false)
 
-        return workflowOutputArtefact
+        return workflowOutputArtefact.save(flush: true)
     }
 
     @Override

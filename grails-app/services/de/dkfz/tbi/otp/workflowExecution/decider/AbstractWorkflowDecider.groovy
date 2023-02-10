@@ -110,8 +110,8 @@ abstract class AbstractWorkflowDecider implements Decider {
         return LogUsedTimeUtils.logUsedTimeStartEnd(log, "        handle artefact groups") {
             groupedInputArtefacts.collectMany { entry ->
                 LogUsedTimeUtils.logUsedTimeStartEnd(log, "          handle artefact group: ${entry.key.aValue} ${entry.key.bValue}") {
+                    assert !entry.key.aValue.archived
                     WorkflowVersionSelector matchingWorkflows = WorkflowVersionSelector.createCriteria().get {
-                        assert !entry.key.aValue.archived
                         eq('project', entry.key.aValue)
                         eq('seqType', entry.key.bValue)
                         workflowVersion {

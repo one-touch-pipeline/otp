@@ -37,7 +37,7 @@ class LogUsedTimeUtils {
      * @param closure the closure for which the duration should be taken
      * @return the value of the closure
      */
-    static <T> T logUsedTime(String logText, Closure closure) {
+    static <T> T logUsedTime(String logText, Closure<T> closure) {
         long start = System.currentTimeMillis()
         T t = closure()
         long end = System.currentTimeMillis()
@@ -53,7 +53,7 @@ class LogUsedTimeUtils {
      * @param closure the closure for which the duration should be taken
      * @return the value of the closure
      */
-    static <T> T logUsedTime(Logger logger, String logText, Closure closure) {
+    static <T> T logUsedTime(Logger logger, String logText, Closure<T> closure) {
         long start = System.currentTimeMillis()
         T t = closure()
         long end = System.currentTimeMillis()
@@ -69,7 +69,7 @@ class LogUsedTimeUtils {
      * @param closure the closure for which the duration should be taken
      * @return the value of the closure
      */
-    static <T> T logUsedTimeStartEnd(Logger logger, String logText, Closure closure) {
+    static <T> T logUsedTimeStartEnd(Logger logger, String logText, Closure<T> closure) {
         logger.debug("${logText}: starts")
         long start = System.currentTimeMillis()
         T t = closure()
