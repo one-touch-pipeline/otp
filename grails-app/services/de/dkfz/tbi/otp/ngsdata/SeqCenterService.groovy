@@ -46,21 +46,6 @@ class SeqCenterService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    void updateImportDirsAllowLinking(SeqCenter seqCenter, String importDirOld, String importDirNew) {
-        seqCenter.removeFromImportDirsAllowLinking(importDirOld)
-        if (importDirNew) {
-            seqCenter.addToImportDirsAllowLinking(importDirNew)
-        }
-        seqCenter.save(flush: true)
-    }
-
-    @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    void createImportDirsAllowLinking(SeqCenter seqCenter, String importDir) {
-        seqCenter.addToImportDirsAllowLinking(importDir)
-        seqCenter.save(flush: true)
-    }
-
-    @PreAuthorize("hasRole('ROLE_OPERATOR')")
     SeqCenter createSeqCenter(String name, String dirName) {
         assert name : "the input name '${name}' must not be null"
         assert dirName : "the input dirname '${dirName}' must not be null"

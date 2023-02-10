@@ -51,8 +51,6 @@ class MetaDataFieldsController implements CheckAndCall {
             updateAutoImportDirectory                : "POST",
             updateAutoImportable                     : "POST",
             updateCopyMetadataFile                   : "POST",
-            updateImportDirsAllowLinking             : "POST",
-            createImportDirsAllowLinking             : "POST",
             createLibraryPreparationKit              : "POST",
             addAdapterFileToLibraryPreparationKit    : "POST",
             addAdapterSequenceToLibraryPreparationKit: "POST",
@@ -135,18 +133,6 @@ class MetaDataFieldsController implements CheckAndCall {
     JSON updateCopyMetadataFile(UpdateSeqCenterFlagCommand cmd) {
         checkErrorAndCallMethod(cmd) {
             seqCenterService.updateCopyMetadateFile(cmd.seqCenter, cmd.flag)
-        }
-    }
-
-    JSON updateImportDirsAllowLinking(ReplaceSeqCenterAbsolutePathCommand cmd) {
-        checkErrorAndCallMethod(cmd) {
-            seqCenterService.updateImportDirsAllowLinking(cmd.seqCenter, cmd.oldAbsolutePath, cmd.absolutePath)
-        }
-    }
-
-    JSON createImportDirsAllowLinking(UpdateSeqCenterAbsolutePathCommand cmd) {
-        checkErrorAndCallMethod(cmd) {
-            seqCenterService.createImportDirsAllowLinking(cmd.seqCenter, cmd.absolutePath)
         }
     }
 

@@ -30,14 +30,12 @@ import org.springframework.security.access.prepost.PreAuthorize
 import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.LogMessage
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
 import javax.sql.DataSource
-import java.nio.file.Paths
 import java.text.MessageFormat
 
 import static org.springframework.util.Assert.notNull
@@ -266,51 +264,6 @@ class SeqTrackService {
                 eq("sampleType", sampleType)
             }
             eq("seqType", seqType)
-        }
-    }
-
-    /**
-     * This method determines if a fastq file has to be linked or copied to the project folder and stores the information in the seqTrack.
-     * If a fastq file fulfills the following constraints it has to be linked:
-     * - provided via storage that allows linking
-     * - will be aligned
-     * - the project allows linking
-     * - the sequencing type allows linking (depends on whether the corresponding alignment workflow allows incremental merging)
-     * - doesn't need adapter trimming
-     */
-    void determineAndStoreIfFastqFilesHaveToBeLinked(SeqTrack seqTrack, boolean willBeAligned) {
-        assert seqTrack: "The input seqTrack for determineAndStoreIfFastqFilesHaveToBeLinked must not be null"
-        boolean importDirAllowsLinking = doesImportDirAllowLinking(seqTrack)
-        boolean projectAllowsLinking = !seqTrack.project.forceCopyFiles
-        boolean seqTypeAllowsLinking = seqTrack.seqType.seqTypeAllowsLinking()
-        boolean hasIndexFiles = hasIndexFiles(seqTrack)
-        boolean adapterTrimming = RoddyWorkflowConfig.getLatestForIndividual(seqTrack.individual, seqTrack.seqType,
-                CollectionUtils.atMostOneElement(Pipeline.findAllByName(seqTrack.seqType.isRna() ?
-                        Pipeline.Name.RODDY_RNA_ALIGNMENT : Pipeline.Name.PANCAN_ALIGNMENT)))?.adapterTrimmingNeeded ?: false
-        boolean link = willBeAligned && importDirAllowsLinking && projectAllowsLinking && seqTypeAllowsLinking && !hasIndexFiles && !adapterTrimming
-        seqTrack.log("Fastq files{0} will be ${link ? "linked" : "copied"}, because " +
-                "willBeAligned=${willBeAligned}, importDirAllowsLinking=${importDirAllowsLinking}, projectAllowsLinking=${projectAllowsLinking}, " +
-                "seqTypeAllowsLinking=${seqTypeAllowsLinking}, needs adapter trimming=${adapterTrimming}, hasIndexFiles=${hasIndexFiles}")
-        if (link) {
-            seqTrack.linkedExternally = true
-            assert seqTrack.save(flush: true)
-        }
-    }
-
-    private boolean hasIndexFiles(SeqTrack seqTrack) {
-        assert seqTrack: "The input seqTrack for doesImportDirAllowLinking must not be null"
-        return seqTrack.dataFiles.find {
-            it.indexFile
-        }
-    }
-
-    private boolean doesImportDirAllowLinking(SeqTrack seqTrack) {
-        assert seqTrack: "The input seqTrack for doesImportDirAllowLinking must not be null"
-        List<DataFile> files = DataFile.findAllBySeqTrack(seqTrack)
-        return files.every { DataFile dataFile ->
-            seqTrack.seqCenter.importDirsAllowLinking.any {
-                Paths.get(dataFile.initialDirectory).startsWith(it)
-            }
         }
     }
 

@@ -173,24 +173,6 @@ describe('Check projectConfig page', () => {
       cy.wait('@updateSpeciesWithStrains').its('response.statusCode').should('eq', 200);
     });
 
-    it('should update the permanent storage of FASTQ files flag', () => {
-      const cellKey = 'Permanent Storage of FASTQ Files';
-
-      cy.intercept('/projectConfig/updateCopyFiles*').as('updateCopyFiles');
-
-      cy.get('td').contains(cellKey).siblings().last()
-        .find('button.edit')
-        .click();
-      cy.get('td').contains(cellKey).siblings().last()
-        .find('select')
-        .select(0, { force: true });
-      cy.get('td').contains(cellKey).siblings().last()
-        .find('button.save')
-        .click();
-
-      cy.wait('@updateCopyFiles').its('response.statusCode').should('eq', 200);
-    });
-
     it('should update the storage until date', () => {
       const cellKey = 'Storage Until';
 

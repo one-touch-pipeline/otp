@@ -75,6 +75,8 @@ class SeqTrack implements ProcessParameterObject, Entity, Artefact {
     /**
      * {@code true} if the data files belonging to this {@link SeqTrack} are symlinked to the project folder.
      * {@code false} if they are copied.
+     *
+     * This is legacy, new data will always be copied. It is only kept for old, existing data.
      */
     boolean linkedExternally = false
     /**

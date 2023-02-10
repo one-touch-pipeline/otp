@@ -23,9 +23,9 @@ package de.dkfz.tbi.otp.ngsdata
 
 import grails.databinding.BindUsing
 import grails.databinding.SimpleMapDataBindingSource
-import org.springframework.security.access.annotation.Secured
 import grails.validation.Validateable
 import org.springframework.context.ApplicationContext
+import org.springframework.security.access.annotation.Secured
 import org.springframework.web.multipart.MultipartFile
 
 import de.dkfz.tbi.otp.FlashMessage
@@ -101,7 +101,6 @@ class ProjectCreationController {
                 processingPriority             : processingPriorityService.defaultPriority(),
                 storageUntil                   : "3000-01-01",
                 projectType                    : Project.ProjectType.SEQUENCING,
-                forceCopyFiles                 : true,
                 fingerPrinting                 : true,
                 sendProjectCreationNotification: true,
                 projectRequestAvailable        : true,
@@ -213,10 +212,20 @@ class ProjectCreationBasisCommand implements Validateable {
     @SuppressWarnings("ReturnNullFromCatchBlock")
     Object getPropertyOrNull(Object baseObject, String propertyName) {
         try {
-            return baseObject ? baseObject."${propertyName}" : null
+            getPropertyOrNullRecursive(baseObject, propertyName.split('\\.').iterator())
         } catch (MissingPropertyException e) {
             return null
         }
+    }
+
+    private Object getPropertyOrNullRecursive(Object baseObject, Iterator<String> propertyNameIterator) {
+        if (propertyNameIterator.hasNext()) {
+            if (baseObject != null) {
+                return getPropertyOrNullRecursive(baseObject[propertyNameIterator.next()], propertyNameIterator)
+            }
+            return null
+        }
+        return baseObject
     }
 
     @SuppressWarnings("ReturnNullFromCatchBlock")
@@ -273,7 +282,6 @@ class ProjectCreationCommand extends ProjectCreationBasisCommand {
     ProjectInfo projectInfoToCopy
     String description
     ProcessingPriority processingPriority
-    boolean forceCopyFiles
     boolean fingerPrinting = true
     Set<Keyword> keywords
     LocalDate endDate

@@ -437,7 +437,6 @@ ${SPECIES}                      ${speciesImportAlias}                       ${sp
         }
         service.seqTrackService = Mock(SeqTrackService) {
             2 * decideAndPrepareForAlignment(_) >> []
-            2 * determineAndStoreIfFastqFilesHaveToBeLinked(!null, false)
         }
         service.seqPlatformService = Mock(SeqPlatformService) {
             2 * findSeqPlatform(seqPlatform.name, seqPlatform.seqPlatformModelLabel.name, null) >> seqPlatform
@@ -1096,7 +1095,6 @@ ${ILSE_NO}                      -                           1234          1234  
         }
 
         seqTrackCount * service.seqTrackService.decideAndPrepareForAlignment(!null) >> []
-        seqTrackCount * service.seqTrackService.determineAndStoreIfFastqFilesHaveToBeLinked(!null, false)
 
         cleanup:
         GroovySystem.metaClassRegistry.removeMetaClass(SamplePair)
@@ -1165,7 +1163,6 @@ ${ILSE_NO}                      -                           1234          1234  
         }
         service.seqTrackService = Mock(SeqTrackService) {
             1 * decideAndPrepareForAlignment(!null) >> []
-            1 * determineAndStoreIfFastqFilesHaveToBeLinked(!null, false)
         }
         service.seqPlatformService = Mock(SeqPlatformService) {
             1 * findSeqPlatform(seqPlatform.name, seqPlatform.seqPlatformModelLabel.name, null) >> seqPlatform
@@ -1347,7 +1344,6 @@ ${SPECIES}                      ${human}+${mouse}+${chicken}                ${hu
         }
         service.seqTrackService = Mock(SeqTrackService) {
             1 * decideAndPrepareForAlignment(!null) >> []
-            1 * determineAndStoreIfFastqFilesHaveToBeLinked(!null, false)
         }
         service.seqPlatformService = Mock(SeqPlatformService) {
             1 * findSeqPlatform(seqPlatform.name, seqPlatform.seqPlatformModelLabel.name, null) >> seqPlatform

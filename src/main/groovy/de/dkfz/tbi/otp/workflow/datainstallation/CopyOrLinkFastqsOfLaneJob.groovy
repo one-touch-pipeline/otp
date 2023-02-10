@@ -26,7 +26,6 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.infrastructure.CreateLinkOption
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.workflow.jobs.AbstractExecuteClusterPipelineJob
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
@@ -44,23 +43,7 @@ class CopyOrLinkFastqsOfLaneJob extends AbstractExecuteClusterPipelineJob implem
     @Override
     protected List<String> createScripts(WorkflowStep workflowStep) {
         SeqTrack seqTrack = getSeqTrack(workflowStep)
-
-        if (seqTrack.linkedExternally) {
-            logService.addSimpleLogEntry(workflowStep, "Files will only be linked, no cluster jobs are created")
-            createLinks(workflowStep, seqTrack)
-            return []
-        }
         return createCopyJob(seqTrack)
-    }
-
-    private void createLinks(WorkflowStep workflowStep, SeqTrack seqTrack) {
-        Realm realm = seqTrack.project.realm
-        seqTrack.dataFiles.each { DataFile dataFile ->
-            Path target = lsdfFilesService.getFileInitialPathAsPath(dataFile)
-            Path link = lsdfFilesService.getFileFinalPathAsPath(dataFile)
-            logService.addSimpleLogEntry(workflowStep, "Creating link ${link} to ${target}")
-            fileService.createLink(link, target, realm, CreateLinkOption.DELETE_EXISTING_FILE)
-        }
     }
 
     private List<String> createCopyJob(SeqTrack seqTrack) {

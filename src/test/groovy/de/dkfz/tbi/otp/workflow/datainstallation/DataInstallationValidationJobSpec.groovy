@@ -77,11 +77,9 @@ class DataInstallationValidationJobSpec extends Specification implements DataTes
     }
 
     @Unroll
-    void "test doFurtherValidation, md5Sum is correct and file link is #isLinked"() {
+    void "test doFurtherValidation, when md5Sum is correct, then return empty list"() {
         given:
         SeqTrack seqTrack = createSeqTrackWithTwoDataFile()
-        seqTrack.linkedExternally = isLinked
-        seqTrack.save(flush: true)
         WorkflowStep workflowStep = createWorkflowStep()
         DataInstallationValidationJob job = Spy(DataInstallationValidationJob) {
             _ * getSeqTrack(workflowStep) >> seqTrack
@@ -92,20 +90,15 @@ class DataInstallationValidationJobSpec extends Specification implements DataTes
         List<String> result = job.doFurtherValidationAndReturnProblems(workflowStep)
 
         then:
-        (isLinked ? 0 : 1) * job.checksumFileService.compareMd5(seqTrack.dataFiles.first()) >> true
-        (isLinked ? 0 : 1) * job.checksumFileService.compareMd5(seqTrack.dataFiles.last()) >> true
+        1 * job.checksumFileService.compareMd5(seqTrack.dataFiles.first()) >> true
+        1 * job.checksumFileService.compareMd5(seqTrack.dataFiles.last()) >> true
 
         result == []
-
-        where:
-        isLinked << [true, false]
     }
 
-    void "test doFurtherValidation, md5Sum is not equals"() {
+    void "test doFurtherValidation, when md5Sum is incorrect, then return list with problems"() {
         given:
         SeqTrack seqTrack = createSeqTrackWithTwoDataFile()
-        seqTrack.linkedExternally = false
-        seqTrack.save(flush: true)
         WorkflowStep workflowStep = createWorkflowStep()
         DataInstallationValidationJob job = Spy(DataInstallationValidationJob) {
             _ * getSeqTrack(workflowStep) >> seqTrack

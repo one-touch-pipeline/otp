@@ -46,8 +46,6 @@
             <th class="export_column" title="${g.message(code: "dataFields.seqCenter.listSeqCenterDirName.tooltip")}"><g:message code="dataFields.seqCenter.listSeqCenterDirName"/></th>
             <th class="export_column" title="${g.message(code: "dataFields.seqCenter.autoImportDir.tooltip")}"><g:message code="dataFields.seqCenter.autoImportDir"/></th>
             <th class="export_column" title="${g.message(code: "dataFields.seqCenter.autoImportable.tooltip")}"><g:message code="dataFields.seqCenter.autoImportable"/></th>
-            <th title="${g.message(code: "dataFields.seqCenter.importDirsAllowLinking.tooltip")}"><g:message code="dataFields.seqCenter.importDirsAllowLinking"/></th>
-            <th class="export_column" hidden><g:message code="dataFields.seqCenter.importDirsAllowLinking"/></th>
         </tr>
         </thead>
         <tbody>
@@ -69,20 +67,6 @@
                         values="${["true", "false"]}"
                         value="${seqCenter.autoImportable}"/>
                 </td>
-                <td>
-                    <g:each var="importDirs" in="${seqCenter.importDirsAllowLinking}">
-                        <otp:editorSwitch
-                            roles="ROLE_OPERATOR"
-                            link="${g.createLink(controller: 'metaDataFields', action: 'updateImportDirsAllowLinking', params: ['seqCenter.id': seqCenter.id, 'oldAbsolutePath': importDirs])}"
-                            value="${importDirs}"/>
-                    </g:each>
-                    <otp:editorSwitchNewValues
-                            roles="ROLE_OPERATOR"
-                            labels="${["Path"]}"
-                            textFields="${["absolutePath"]}"
-                            link="${g.createLink(controller: 'metaDataFields', action: 'createImportDirsAllowLinking', params: ['seqCenter.id': seqCenter.id])}"/>
-                </td>
-                <td hidden><span class="keep-whitespace">${seqCenter.importDirsAllowLinking.join(";\n")}</span></td>
             </tr>
         </g:each>
         </tbody>

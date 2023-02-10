@@ -260,7 +260,6 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 unixGroup: unixGroup,
                 projectGroup: projectGroup,
                 nameInMetadataFiles: nameInMetadataFiles,
-                forceCopyFiles: forceCopyFiles,
                 description: description,
                 processingPriority: createProcessingPriority(priority: processingPriority),
                 projectType: Project.ProjectType.SEQUENCING,
@@ -281,7 +280,6 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         project.unixGroup == unixGroup
         project.projectGroup == CollectionUtils.atMostOneElement(ProjectGroup.findAllByName(projectGroup))
         project.nameInMetadataFiles == nameInMetadataFiles
-        project.forceCopyFiles == forceCopyFiles
         project.description == description
         project.processingPriority.priority == processingPriority
 
@@ -289,11 +287,11 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         WorkflowVersionSelector.findAll().first().workflowVersion == workflowVersion
 
         where:
-        name      | dirName | dirAnalysis | relatedProjects | projectGroup   | nameInMetadataFiles | forceCopyFiles | description   | processingPriority            | sampleIdentifierParserBeanName           | qcThresholdHandling
-        'project' | 'dir'   | ''          | ''              | ''             | null                | true           | ''            | ProcessingPriority.FAST_TRACK | SampleIdentifierParserBeanName.INFORM    | QcThresholdHandling.CHECK_AND_NOTIFY
-        'project' | 'dir'   | ''          | ''              | 'projectGroup' | 'project'           | true           | 'description' | ProcessingPriority.NORMAL     | SampleIdentifierParserBeanName.HIPO      | QcThresholdHandling.NO_CHECK
-        'project' | 'dir'   | ''          | ''              | ''             | 'project'           | true           | 'description' | ProcessingPriority.NORMAL     | SampleIdentifierParserBeanName.DEEP      | QcThresholdHandling.CHECK_AND_NOTIFY
-        'project' | 'dir'   | '/dirA'     | ''              | ''             | 'project'           | true           | 'description' | ProcessingPriority.FAST_TRACK | SampleIdentifierParserBeanName.NO_PARSER | QcThresholdHandling.NO_CHECK
+        name      | dirName | dirAnalysis | relatedProjects | projectGroup   | nameInMetadataFiles | description   | processingPriority            | sampleIdentifierParserBeanName           | qcThresholdHandling
+        'project' | 'dir'   | ''          | ''              | ''             | null                | ''            | ProcessingPriority.FAST_TRACK | SampleIdentifierParserBeanName.INFORM    | QcThresholdHandling.CHECK_AND_NOTIFY
+        'project' | 'dir'   | ''          | ''              | 'projectGroup' | 'project'           | 'description' | ProcessingPriority.NORMAL     | SampleIdentifierParserBeanName.HIPO      | QcThresholdHandling.NO_CHECK
+        'project' | 'dir'   | ''          | ''              | ''             | 'project'           | 'description' | ProcessingPriority.NORMAL     | SampleIdentifierParserBeanName.DEEP      | QcThresholdHandling.CHECK_AND_NOTIFY
+        'project' | 'dir'   | '/dirA'     | ''              | ''             | 'project'           | 'description' | ProcessingPriority.FAST_TRACK | SampleIdentifierParserBeanName.NO_PARSER | QcThresholdHandling.NO_CHECK
     }
 
     @Unroll
@@ -345,7 +343,6 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 unixGroup: unixGroup,
                 projectGroup: '',
                 nameInMetadataFiles: null,
-                forceCopyFiles: false,
                 description: '',
                 processingPriority: createProcessingPriority(),
                 sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.NO_PARSER,
@@ -395,7 +392,6 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 unixGroup: unixGroup,
                 projectGroup: '',
                 nameInMetadataFiles: null,
-                forceCopyFiles: false,
                 description: '',
                 processingPriority: createProcessingPriority(),
                 sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.NO_PARSER,
@@ -443,7 +439,6 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 unixGroup: unixGroup,
                 projectGroup: '',
                 nameInMetadataFiles: null,
-                forceCopyFiles: false,
                 description: '',
                 processingPriority: createProcessingPriority(),
                 sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.NO_PARSER,
@@ -493,7 +488,6 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 unixGroup: group,
                 projectGroup: '',
                 nameInMetadataFiles: nameInMetadataFiles,
-                forceCopyFiles: true,
                 description: '',
                 processingPriority: createProcessingPriority(),
                 sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.NO_PARSER,
@@ -538,7 +532,6 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 unixGroup: unixGroup,
                 projectGroup: '',
                 nameInMetadataFiles: null,
-                forceCopyFiles: false,
                 description: '',
                 processingPriority: createProcessingPriority(),
                 sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.NO_PARSER,
@@ -576,7 +569,6 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 unixGroup: group,
                 projectGroup: '',
                 nameInMetadataFiles: null,
-                forceCopyFiles: false,
                 description: '',
                 processingPriority: createProcessingPriority(),
                 qcThresholdHandling: QcThresholdHandling.NO_CHECK,
@@ -620,7 +612,6 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 unixGroup: unixGroup,
                 projectGroup: '',
                 nameInMetadataFiles: null,
-                forceCopyFiles: false,
                 description: '',
                 processingPriority: createProcessingPriority(),
                 projectInfoFile: mockMultipartFile,
@@ -693,7 +684,6 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 unixGroup: group,
                 projectGroup: '',
                 nameInMetadataFiles: 'project',
-                forceCopyFiles: true,
                 description: '',
                 qcThresholdHandling: QcThresholdHandling.NO_CHECK,
                 processingPriority: createProcessingPriority(),

@@ -26,7 +26,6 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
-import de.dkfz.tbi.otp.infrastructure.CreateLinkOption
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
@@ -61,7 +60,7 @@ class CopyOrLinkFastqsOfLaneJobSpec extends Specification implements DataTest, W
         ]
     }
 
-    private void createData(boolean linkedExternally) {
+    private void createData() {
         fileSystem = FileSystems.default
         run = createWorkflowRun([
                 workflow: createWorkflow([
@@ -78,7 +77,7 @@ class CopyOrLinkFastqsOfLaneJobSpec extends Specification implements DataTest, W
         ])
         seqTrack = createSeqTrack([
                 workflowArtefact: artefact,
-                linkedExternally: linkedExternally,
+                linkedExternally: false,
         ])
         dataFile1 = createDataFile([
                 seqTrack: seqTrack,
@@ -106,27 +105,9 @@ class CopyOrLinkFastqsOfLaneJobSpec extends Specification implements DataTest, W
         }
     }
 
-    void "createScripts, when SeqTrack should be linked, then create links and return empty list"() {
+    void "createScripts, when called, then return scripts"() {
         given:
-        createData(true)
-
-        job.fileService = Mock(FileService) {
-            1 * createLink(target1, source1, _, CreateLinkOption.DELETE_EXISTING_FILE)
-            1 * createLink(target2, source2, _, CreateLinkOption.DELETE_EXISTING_FILE)
-            0 * _
-        }
-        job.logService = Mock(LogService)
-
-        when:
-        List<String> scripts = job.createScripts(step)
-
-        then:
-        scripts == []
-    }
-
-    void "createScripts, when SeqTrack should be copied, then do not create links and return scripts"() {
-        given:
-        createData(false)
+        createData()
 
         job.fileService = Mock(FileService) {
             0 * _

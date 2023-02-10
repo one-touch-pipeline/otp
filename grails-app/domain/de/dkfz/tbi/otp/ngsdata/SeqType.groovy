@@ -52,12 +52,6 @@ class SeqType implements Entity, MetadataField, ProjectFieldReferenceAble {
             SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION,
     ].asImmutable()
 
-    // files with these seqTypes must be copied because the corresponding workflows don't support incremental merging
-    static final Collection<SeqTypeNames> SEQTYPES_MUST_BE_COPIED = WGBS_SEQ_TYPE_NAMES + [
-            SeqTypeNames.RNA,
-            SeqTypeNames.CHIP_SEQ,
-    ].asImmutable()
-
     /** This attribute is used externally. Please discuss a change in the team */
     SequencingReadType libraryLayout
     String dirName
@@ -167,10 +161,6 @@ class SeqType implements Entity, MetadataField, ProjectFieldReferenceAble {
 
     boolean isChipSeq() {
         return name == SeqTypeNames.CHIP_SEQ.seqTypeName
-    }
-
-    boolean seqTypeAllowsLinking() {
-        return !SEQTYPES_MUST_BE_COPIED.contains(seqTypeName)
     }
 
     @Override

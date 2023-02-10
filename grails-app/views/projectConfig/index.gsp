@@ -177,18 +177,6 @@
                 </td>
             </tr>
             <tr>
-                <td><g:message code="project.forceCopyFiles"/></td>
-                <td></td>
-                <td>
-                    <otp:editorSwitch
-                            roles="ROLE_OPERATOR"
-                            template="dropDown"
-                            link="${g.createLink(controller: 'projectConfig', action: 'updateCopyFiles', params: ['fieldName': 'forceCopyFiles'])}"
-                            values="${["true", "false"]}"
-                            value="${selectedProject.forceCopyFiles}"/>
-                </td>
-            </tr>
-            <tr>
                 <td><g:message code="project.creationDate"/></td>
                 <td></td>
                 <td>${creationDate}</td>

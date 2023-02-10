@@ -41,11 +41,6 @@ class SeqCenter implements Entity, ProjectFieldReferenceAble {
     String autoImportDir
     boolean autoImportable = false
 
-    /** files in this directories may be linked */
-    static hasMany = [
-            importDirsAllowLinking: String,
-    ]
-
     static constraints = {
         name(blank: false, unique: true)
         dirName(blank: false, unique: true, shared: "pathComponent")
@@ -55,16 +50,6 @@ class SeqCenter implements Entity, ProjectFieldReferenceAble {
             }
             if (val != null && !OtpPathValidator.isValidAbsolutePath(val)) {
                 return "validator.absolute.path"
-            }
-        }
-        importDirsAllowLinking nullable: true, validator: { val ->
-            if (val != null) {
-                Set<String> invalidPaths = val.findAll {
-                    !OtpPathValidator.isValidAbsolutePath(it)
-                }
-                if (invalidPaths) {
-                    return ["absolute.path", invalidPaths.join(", ")]
-                }
             }
         }
     }

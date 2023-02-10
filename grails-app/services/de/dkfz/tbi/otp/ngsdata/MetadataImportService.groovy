@@ -563,7 +563,6 @@ class MetadataImportService {
 
             mergingCriteriaService.createDefaultMergingCriteria(sampleIdentifier.project, seqType)
             Collection<MergingWorkPackage> mergingWorkPackages = seqTrackService.decideAndPrepareForAlignment(seqTrack)
-            seqTrackService.determineAndStoreIfFastqFilesHaveToBeLinked(seqTrack, !mergingWorkPackages.empty)
             samplePairDeciderService.findOrCreateSamplePairs(mergingWorkPackages)
         }
     }

@@ -21,8 +21,6 @@
  */
 package de.dkfz.tbi.otp.workflowTest.dataInstallation
 
-import spock.lang.Unroll
-
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
@@ -118,9 +116,9 @@ class DataInstallationWorkflowSpec extends AbstractWorkflowSpec {
         createDataFile(seqTrack, 2, FASTQ_R2_FILENAME, fastqR2Filepath, map)
     }
 
-    private SeqTrack createWholeGenomeSetup(boolean linkedExternally = false) {
+    private SeqTrack createWholeGenomeSetup() {
         SeqType seqType = DomainFactory.createWholeGenomeSeqType()
-        SeqTrack seqTrack = createSeqTrack([seqType: seqType, linkedExternally: linkedExternally])
+        SeqTrack seqTrack = createSeqTrack([seqType: seqType])
         createDataFiles(seqTrack)
         return seqTrack
     }
@@ -135,11 +133,10 @@ class DataInstallationWorkflowSpec extends AbstractWorkflowSpec {
         execute(expectedWorkflows)
     }
 
-    @Unroll
-    void "test DataInstallation, files have to be linkedExternally #linkedExternally"() {
+    void "test WholeGenome DataInstallation"() {
         given:
         SessionUtils.withTransaction {
-            createWholeGenomeSetup(linkedExternally)
+            createWholeGenomeSetup()
         }
 
         when:
@@ -147,11 +144,6 @@ class DataInstallationWorkflowSpec extends AbstractWorkflowSpec {
 
         then:
         checkThatWorkflowWasSuccessful()
-
-        where:
-        linkedExternally | _
-        true             | _
-        false            | _
     }
 
     void "test ChipSeq DataInstallation"() {

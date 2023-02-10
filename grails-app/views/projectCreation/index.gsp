@@ -270,11 +270,6 @@
                 <g:render template="baseValueColumns" model="[fieldName: 'speciesWithStrains', cmd: cmd]"/>
             </tr>
             <tr>
-                <td><g:message code="project.forceCopyFiles"/></td>
-                <td><g:checkBox name="forceCopyFiles" checked="${source.getByFieldName("forceCopyFiles")}" value="true"/></td>
-                <g:render template="baseValueColumns" model="[fieldName: 'forceCopyFiles', cmd: cmd, type: 'boolean']"/>
-            </tr>
-            <tr>
                 <td><g:message code="project.storageUntil"/></td>
                 <td><input type="date" name="storageUntilInput" value="${source.getFieldAsLocalDate("storageUntil")?.format(DateTimeFormatter.ISO_LOCAL_DATE)}"
                            required/></td>
@@ -290,7 +285,7 @@
                 <td><g:select id="priority" name="processingPriority" class="use-select-2"
                               from="${processingPriorities}" optionKey="id" optionValue="name" required="true"
                               value="${source.getByFieldName("processingPriority")?.id}"/></td>
-                <g:render template="baseValueColumns" model="[fieldName: 'processingPriority', cmd: cmd]"/>
+                <g:render template="baseValueColumns" model="[fieldName: 'processingPriority.name', cmd: cmd]"/>
             </tr>
             <tr>
                 <td><g:message code="project.group"/></td>
