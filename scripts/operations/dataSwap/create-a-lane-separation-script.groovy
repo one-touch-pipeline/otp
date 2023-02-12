@@ -21,9 +21,16 @@
  */
 package operations.dataSwap
 
-import de.dkfz.tbi.otp.dataswap.AbstractDataSwapService
+import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.dataswap.ScriptBuilder
+import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
+
+ConfigService configService = ctx.configService
+FileService fileService = ctx.fileService
+FileSystemService fileSystemService = ctx.fileSystemService
 
 /**
  * Generation Script which allows to separate lanes of a Sample into different SampleTypes.
@@ -54,17 +61,16 @@ Map<String, String> swapMap = [
 
 List<String> files = []
 
-Closure<ScriptOutput> createSamplesAndSampleTypesCreationScript = { List<String> sampleNames ->
-    ScriptOutput scriptOutput = new ScriptOutput()
+Closure<ScriptBuilder> createSamplesAndSampleTypesCreationScript = { List<String> sampleNames ->
+    ScriptBuilder builder = new ScriptBuilder(configService, fileService, fileSystemService)
 
-    scriptOutput.meta << "Objects to be created:"
+    builder.addMetaInfo("Objects to be created:")
 
     List<SampleComponents> uniqueParsedSamples = sampleNames.unique().collect { String sampleName -> parseSampleAndGetComponents(sampleName) }
 
-    scriptOutput.script << Snippets.databaseFixingBanner()
-    scriptOutput.script << "import de.dkfz.tbi.otp.utils.CollectionUtils\n"
+    builder.addGroovyCommand("import de.dkfz.tbi.otp.utils.CollectionUtils\n")
 
-    scriptOutput.script << "Sample.withTransaction {"
+    builder.addGroovyCommand("Sample.withTransaction {")
 
     List<SampleType> existingSampleTypes = SampleType.createCriteria().list {
         or {
@@ -77,14 +83,13 @@ Closure<ScriptOutput> createSamplesAndSampleTypesCreationScript = { List<String>
     List<String> expectedSampleTypes = uniqueParsedSamples*.sampleTypeName.unique()
     List<String> sampleTypesToBeCreated = expectedSampleTypes - existingSampleTypes*.name
 
-    scriptOutput.meta << "  * new SampleTypes:"
+    builder.addMetaInfo("  * new SampleTypes:")
     sampleTypesToBeCreated.each { String name ->
-        scriptOutput.meta << "    - ${name}"
-        scriptOutput.script << Snippets.indent(Snippets.createSampleType(name), 1)
-        scriptOutput.containsChanges = true
+        builder.addMetaInfo("    - ${name}")
+        builder.addGroovyCommandWithChanges(Snippets.indent(Snippets.createSampleType(name), 1))
     }
 
-    scriptOutput.meta << "  * new Samples:"
+    builder.addMetaInfo("  * new Samples:")
     uniqueParsedSamples.each { SampleComponents components ->
         Individual individual = CollectionUtils.exactlyOneElement(Individual.findAllByPid(components.pid), "Could not find new individual '${components.pid}")
 
@@ -92,69 +97,54 @@ Closure<ScriptOutput> createSamplesAndSampleTypesCreationScript = { List<String>
         Sample sample = CollectionUtils.atMostOneElement(Sample.findAllByIndividualAndSampleType(individual, sampleType))
 
         if (!sample) {
-            scriptOutput.meta << "    - ${components.pid} ${components.sampleTypeName}"
-            scriptOutput.script << Snippets.indent(Snippets.createSample(components.pid, components.sampleTypeName), 1)
-            scriptOutput.containsChanges = true
+            builder.addMetaInfo("    - ${components.pid} ${components.sampleTypeName}")
+            builder.addGroovyCommandWithChanges(Snippets.indent(Snippets.createSample(components.pid, components.sampleTypeName), 1))
         }
     }
 
-    scriptOutput.script << "}"
-
-    return scriptOutput
+    builder.addGroovyCommandWithChanges("}")
+    return builder
 }
 
 int counter = 1
-Closure<ScriptOutput> createSwapScript = { String swapLabel ->
-    ScriptOutput scriptOutput = new ScriptOutput()
+Closure<ScriptBuilder> createSwapScript = { String swapLabel ->
+    ScriptBuilder builder = new ScriptBuilder(configService, fileService, fileSystemService)
 
-    scriptOutput.script << Snippets.databaseFixingHeader(swapLabel)
+    builder.addGroovyCommand(Snippets.databaseFixingHeader(swapLabel))
 
     swapMap.each { String from, String to ->
         ParsedSwapMapEntry parsedEntry = ParsedSwapMapEntry.parse(from, to)
 
-        scriptOutput.meta << "${parsedEntry.oldSample} [${parsedEntry.identifier}] --> ${parsedEntry.newSample}"
+        builder.addMetaInfo("${parsedEntry.oldSample} [${parsedEntry.identifier}] --> ${parsedEntry.newSample}")
 
         Map<SeqTrack, List<DataFile>> dataFilesPerSeqTrack = getDataFilesBySampleIdentifierString(parsedEntry).groupBy { it.seqTrack }
         dataFilesPerSeqTrack.eachWithIndex { SeqTrack seqTrack, List<DataFile> dataFiles, int index ->
             String fileName = "mv_${counter++}_${parsedEntry.oldSampleString}_ST_${index}_${seqTrack.laneId}__to__${parsedEntry.newSampleString}"
 
-            scriptOutput.meta << "  * ${seqTrack.laneId}  ${seqTrack.seqType}"
+            builder.addMetaInfo("  * ${seqTrack.laneId}  ${seqTrack.seqType}")
 
             dataFiles.each { DataFile dataFile ->
-                scriptOutput.meta << "    - ${dataFile}"
+                builder.addMetaInfo("    - ${dataFile}")
             }
 
-            scriptOutput.script << Snippets.indent(Snippets.swapLane(seqTrack, fileName, parsedEntry.newSample), 2)
+            builder.addGroovyCommand(Snippets.indent(Snippets.swapLane(seqTrack, fileName, parsedEntry.newSample), 2))
 
             files << fileName
         }
     }
 
-    scriptOutput.script << """
+    builder.addGroovyCommand("""
                            |        assert false : "DEBUG: transaction intentionally failed to rollback changes"
                            |    }
                            |} finally {
                            |    println log
                            |}
                            |
-                           |""".stripMargin()
+                           |""".stripMargin())
 
-    scriptOutput.script << """|
-                           |/****************************************************************
-                           | * FILESYSTEM FIXING
-                           | *
-                           | * meta-Bash script; calls all generated bash-scripts to fix
-                           | * the filesystem-side of things.
-                           | *
-                           | * execute this after the database-side of things has been updated
-                           | ****************************************************************/
-                           |
-                           |/*
-                           |${AbstractDataSwapService.BASH_HEADER + files.collect { "bash ${it}.sh" }.join('\n')}
-                           |*/
-                           |""".stripMargin()
+    builder.addBashCommand(AbstractDataSwapService.BASH_HEADER + files.collect { "bash ${it}.sh" }.join('\n'))
 
-    return scriptOutput
+    return builder
 }
 
 /*********************************************************************************
@@ -162,12 +152,12 @@ Closure<ScriptOutput> createSwapScript = { String swapLabel ->
  * This is the actual part of the script which is executed when calling it.
  ********************************************************************************/
 
-ScriptOutput samplesAndTypesScriptOutput = createSamplesAndSampleTypesCreationScript(swapMap.values() as List<String>)
-if (samplesAndTypesScriptOutput.containsChanges) {
-    samplesAndTypesScriptOutput.printToStdout()
+ScriptBuilder samplesAndTypesScriptBuilder = createSamplesAndSampleTypesCreationScript(swapMap.values() as List<String>)
+if (samplesAndTypesScriptBuilder.containsChanges) {
+    println samplesAndTypesScriptBuilder.build("lane-swap-${swapLabel}.sh")
     return
 }
-createSwapScript(swapLabel).printToStdout()
+println createSwapScript(swapLabel).build("lane-swap-${swapLabel}.sh")
 
 /*********************************************************************************
  * Utility Functions and Classes
@@ -186,20 +176,6 @@ private SampleComponents parseSampleAndGetComponents(String sampleName) {
     return new SampleComponents(sampleName.split(" "))
 }
 
-class ScriptOutput {
-    List<String> meta = []
-    List<String> script = []
-    boolean containsChanges = false
-
-    String getStdoutReady() {
-        return Snippets.encloseInMetaDescription(meta.join("\n")) + "\n" + (script.join("\n"))
-    }
-
-    void printToStdout() {
-        println getStdoutReady()
-    }
-}
-
 class SampleComponents {
     String pid
     String sampleTypeName
@@ -207,10 +183,6 @@ class SampleComponents {
     SampleComponents(String[] componentList) {
         this.pid = componentList[0]
         this.sampleTypeName = componentList[1]
-    }
-
-    boolean equals(SampleComponents other) {
-        return pid == other.pid && sampleTypeName == other.sampleTypeName
     }
 
     @Override
@@ -270,19 +242,8 @@ class Snippets {
         return target.replaceAll(/(?m)^/, indentationChar * indentationLevel)
     }
 
-    static String databaseFixingBanner() {
-        return """\n
-               /****************************************************************
-                * DATABASE FIXING
-                *
-                * OTP console script to move the database-side of things
-                ****************************************************************/
-               """.stripIndent()
-    }
-
     static String databaseFixingHeader(String swapLabel) {
         return """|
-               |${databaseFixingBanner()}
                |import de.dkfz.tbi.otp.dataswap.LaneSwapService
                |import de.dkfz.tbi.otp.dataswap.Swap
                |import de.dkfz.tbi.otp.dataswap.parameters.LaneSwapParameters
@@ -367,18 +328,5 @@ class Snippets {
                 "\t))\n"
 
         return snippet.toString()
-    }
-
-    static String encloseInMetaDescription(String enclosedContent) {
-        return """|
-               |/****************************************************************
-               | * META DESCRIPTION
-               | *
-               | * What will change?
-               | ****************************************************************/
-               |/*
-               |${enclosedContent}
-               |*/
-               |""".stripMargin()
     }
 }

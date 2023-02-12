@@ -20,8 +20,17 @@
  * SOFTWARE.
  */
 
+import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataswap.AbstractDataSwapService
+import de.dkfz.tbi.otp.dataswap.ScriptBuilder
+import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
+
+ConfigService configService = ctx.configService
+FileService fileService = ctx.fileService
+FileSystemService fileSystemService = ctx.fileSystemService
+
 
 /**
  * Generation script for LaneSwaps
@@ -84,10 +93,10 @@ def adaptValues = { SeqTrack oldSeqTrack ->
 //------------------------------
 
 int counter = 1
-StringBuilder script = new StringBuilder()
+ScriptBuilder builder = new ScriptBuilder(configService, fileService, fileSystemService)
 List<String> all_swaps = []
 
-script << """
+builder.addGroovyCommand("""
           import de.dkfz.tbi.otp.dataswap.LaneSwapService
           import de.dkfz.tbi.otp.dataswap.Swap
           import de.dkfz.tbi.otp.dataswap.parameters.LaneSwapParameters
@@ -130,7 +139,7 @@ script << """
           
           try {
               Individual.withTransaction {[
-          """.stripIndent()
+          """.stripIndent())
 
 seqTracks.each { seqTrack ->
     Map newValues = adaptValues(seqTrack)
@@ -139,8 +148,7 @@ seqTracks.each { seqTrack ->
     String swapOrderedName = "swap_${String.valueOf(counter++).padLeft(4, '0')}_${swapName}"
     all_swaps << swapOrderedName
 
-    script <<
-            "\n{\n" +
+    builder.addGroovyCommand("\n{\n" +
             "\n\tlaneSwapService.swap( \n" +
             "\t\tnew LaneSwapParameters(\n" +
             "\t\tprojectNameSwap: new Swap('${seqTrack.project.name}', '${newValues.newProjectName}'),\n" +
@@ -152,22 +160,22 @@ seqTracks.each { seqTrack ->
             "\t\trunName: '${seqTrack.run.name}',\n" +
             "\t\tlanes: ['${seqTrack.laneId}',],\n" +
             "\t\tsampleNeedsToBeCreated: false,\n" +
-            "\t\tdataFileSwaps        : [\n"
+            "\t\tdataFileSwaps        : [\n")
 
     seqTrack.dataFiles.each { dataFile ->
-        script << "\t\t\tnew Swap('${dataFile.fileName}', ''),\n"
+        builder.addGroovyCommand( "\t\t\tnew Swap('${dataFile.fileName}', ''),\n")
     }
 
-    script << "\t\t],\n" +
+    builder.addGroovyCommand("\t\t],\n" +
             "\t\t'bashScriptName': '${swapOrderedName}',\n" +
             "\t\t'log': log,\n" +
             "\t\t'failOnMissingFiles': failOnMissingFiles,\n" +
             "\t\t'scriptOutputDirectory': SCRIPT_OUTPUT_DIRECTORY,\n" +
             "\t\t'linkedFilesVerified': linkedFilesVerified,\n" +
-            "\t))\n},\n"
+            "\t))\n},\n")
 }
 
-script << """|
+builder.addGroovyCommand("""|
           |].each { it() }
           |    assert false : "transaction intentionally failed to rollback transaction"
           |    }
@@ -175,15 +183,8 @@ script << """|
           |    println log
           |}
           |
-          |""".stripMargin()
+          |""".stripMargin())
 
-script << """
-          |//scripts to execute
-          |/*
-          |${AbstractDataSwapService.BASH_HEADER + all_swaps.collect { "bash ${it}.sh" }.join('\n')}
-          |*/
-          |
-          |""".stripMargin()
+builder.addBashCommand(AbstractDataSwapService.BASH_HEADER + all_swaps.collect { "bash ${it}.sh" }.join('\n'))
 
-println script
-
+println builder.build("seqtype-swap-${swapLabel}.sh")

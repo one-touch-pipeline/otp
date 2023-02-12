@@ -20,10 +20,18 @@
  * SOFTWARE.
  */
 
+import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataswap.AbstractDataSwapService
+import de.dkfz.tbi.otp.dataswap.ScriptBuilder
+import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.*
+
+ConfigService configService = ctx.configService
+FileService fileService = ctx.fileService
+FileSystemService fileSystemService = ctx.fileSystemService
 
 /**
  * Generation Script which allow:
@@ -117,57 +125,51 @@ Closure<String> newDataFileNameClosure = { DataFile dataFile, String oldPatientN
 int counter = 1
 List<String> files = []
 
-Closure<Integer> newSampleSwapScript = { StringBuilder script, Project newProject,
+Closure<Integer> newSampleSwapScript = { ScriptBuilder builder, Project newProject,
                                          Individual oldIndividual, String newIndividualName,
                                          Sample oldSample, SampleType newSampleType ->
     String fileName = "mv_${counter++}_${oldSample.individual.pid}_${oldSample.sampleType.name}__to__${newIndividualName}_${newSampleType.displayName}"
 
-    script << "\n\tsampleSwapService.swap( \n" +
+    builder.addGroovyCommand("\n\tsampleSwapService.swap( \n" +
             "\t\tnew SampleSwapParameters(\n" +
             "\t\tprojectNameSwap: new Swap('${oldIndividual.project.name}', '${newProject.name}'),\n" +
             "\t\tpidSwap: new Swap('${oldIndividual.pid}', '${newIndividualName}'),\n" +
             "\t\tsampleTypeSwap: new Swap('${oldSample.sampleType.name}', '${newSampleType.name}'),\n" +
-            "\t\tdataFileSwaps        : [\n"
+            "\t\tdataFileSwaps        : [\n")
 
     SeqTrack.findAllBySample(oldSample, [sort: 'id']).each { SeqTrack seqTrack ->
         DataFile.findAllBySeqTrack(seqTrack, [sort: 'id']).each { datafile ->
-            script << "\t\tnew Swap('${datafile.fileName}', '${newDataFileNameClosure(datafile, oldIndividual.pid, newIndividualName)}'), \n"
+            builder.addGroovyCommand("\t\tnew Swap('${datafile.fileName}', '${newDataFileNameClosure(datafile, oldIndividual.pid, newIndividualName)}'), \n")
         }
     }
 
-    script << "\t\t],\n" +
+    builder.addGroovyCommand("\t\t],\n" +
             "\t\tbashScriptName: '${fileName}',\n" +
             "\t\tlog: log,\n" +
             "\t\tfailOnMissingFiles: failOnMissingFiles,\n" +
             "\t\tscriptOutputDirectory: SCRIPT_OUTPUT_DIRECTORY,\n" +
             "\t\tlinkedFilesVerified: verifiedLinkedFiles,\n" +
-            "\t)\n)\n"
+            "\t)\n)\n")
 
     files << fileName
 
     return counter
 }
 
-Closure<String> createScript = { String swapLabel ->
+Closure<ScriptBuilder> createScripts = { String swapLabel ->
     // buffers for all the changes we are preparing
-    StringBuilder script = new StringBuilder()
+    ScriptBuilder builder = new ScriptBuilder(configService, fileService, fileSystemService)
+
     Set<String> createdPids = [] as Set
     Set<String> createdSamples = [] as Set
 
-    // prepare the console script that fixes the DB-side of things
-    println """|
-            |/****************************************************************
-            | * META DESCRIPTION
-            | *
-            | * What will change?
-            | ****************************************************************/""".stripMargin()
-    println "/*"
-
-    script << Snippets.databaseFixingHeader(swapLabel)
+    builder.addGroovyCommand(Snippets.databaseFixingHeader(swapLabel))
 
     swapMap.each { String key, String value ->
-        println "swap of '${key}' to '${value}'"
-        script << "\n\t//swap '${key}' to '${value}'"
+        builder.addMetaInfo("swap of '${key}' to '${value}'")
+
+        builder.addGroovyCommand("\n\t//swap '${key}' to '${value}'")
+
         def (Individual oldIndividual, String newIndividualName, SampleType oldSampleType, SampleType newSampleType) = parseSwapMapEntry(key, value)
 
         Individual newIndividual = CollectionUtils.atMostOneElement(Individual.findAllByPid(newIndividualName))
@@ -183,16 +185,16 @@ Closure<String> createScript = { String swapLabel ->
             }
         } as List<SeqType>
 
-        println "\t- SeqTypes:"
+        builder.addMetaInfo("\t- SeqTypes:")
         seqTypes.each {
-            println "\t\t- ${it} ${seqTypeWhiteList.contains(it) ? "" : "(ignored)"}"
+            builder.addMetaInfo("\t\t- ${it} ${seqTypeWhiteList.contains(it) ? "" : "(ignored)"}")
         }
 
         // simplest case: move entire patient
         if (newSampleType == null && seqTypeWhiteList.empty && // only if we're moving entire, unfiltered patients...
                 (!newIndividual || newProject != oldIndividual.project) // .. either into a shiny new patient, or into another project entirely
         ) {
-            counter = renamePatient(newIndividualName, oldIndividual, newProject, samples, counter, script, newSampleTypeClosure, newDataFileNameClosure, files)
+            counter = renamePatient(newIndividualName, oldIndividual, newProject, samples, counter, builder, newSampleTypeClosure, newDataFileNameClosure, files)
         } else { // more complex case: moving partial source, or into non-empty destination
             // moving one single sample in its entirety
             if (oldSampleType || seqTypeWhiteList) {
@@ -202,7 +204,7 @@ Closure<String> createScript = { String swapLabel ->
                         seqTypeWhiteList,
                         newDataFileNameClosure,
                         newSampleSwapScript,
-                        counter, script, files,
+                        counter, builder, files,
                         createdPids, createdSamples
                 )
             } else { // moving ALL the samples for a patient (e.g. into another existing patient)
@@ -211,41 +213,29 @@ Closure<String> createScript = { String swapLabel ->
                         oldIndividual, newIndividualName,
                         newSampleTypeClosure,
                         newSampleSwapScript,
-                        counter, script,
+                        counter, builder,
                         createdSamples
                 )
             }
         }
     }
-    println "*/\n"
-    script << """|
+    builder.addMetaInfo("*/\n")
+    builder.addGroovyCommand("""|
               |        assert false : "DEBUG: transaction intentionally failed to rollback changes"
               |    }
               |} finally {
               |    println log
               |}
               |
-              |""".stripMargin()
+              |""".stripMargin())
 
-    script << """
-              |/****************************************************************
-              | * FILESYSTEM FIXING
-              | *
-              | * meta-Bash script; calls all generated bash-scripts to fix
-              | * the filesystem-side of things.
-              | *
-              | * execute this after the database-side of things has been updated
-              | ****************************************************************/
-              |
-              |/*
-              |${AbstractDataSwapService.BASH_HEADER + files.collect { "bash ${it}.sh" }.join('\n')}
-              |*/
-              |""".stripMargin()
-    println "\n"
-    return script as String
+    builder.addBashCommand(AbstractDataSwapService.BASH_HEADER + files.collect { "bash ${it}.sh" }.join('\n'))
+
+    builder.addMetaInfo("\n")
+    return builder
 }
 
-println createScript(swapLabel)
+println createScripts(swapLabel).build("data-swap-${swapLabel}.sh")
 
 /****************************************************************
  * refactoring milestone:
@@ -288,10 +278,10 @@ private int moveAllSamples(List<Sample> samples,
                            Closure<SampleType> newSampleTypeClosure,
                            Closure newSampleSwapScript,
                            int counter,
-                           StringBuilder script,
+                           ScriptBuilder builder,
                            Set<String> createdSamples) {
     samples.each { Sample sample ->
-        counter = newSampleSwapScript(script, newProject, oldIndividual, newIndividualName, sample, newSampleTypeClosure(sample.sampleType))
+        counter = newSampleSwapScript(builder, newProject, oldIndividual, newIndividualName, sample, newSampleTypeClosure(sample.sampleType))
         createdSamples << "${newIndividualName} ${newSampleTypeClosure(sample.sampleType)}".toString()
     }
 
@@ -305,7 +295,7 @@ private int moveOneSample(Project newProject,
                           Closure<String> newDataFileNameClosure,
                           Closure newSampleSwapScript,
                           int counter,
-                          StringBuilder script, List<String> files,
+                          ScriptBuilder builder, List<String> files,
                           Set<String> createdPids, Set<String> createdSamples
 ) {
     assert oldSampleType: "A sampletype needs to be set for \"${oldIndividual.displayName}\". " +
@@ -316,7 +306,7 @@ private int moveOneSample(Project newProject,
     // create our recipient patient, if needed
     boolean individualExists = newIndividual || createdPids.contains(newIndividualName)
     if (!individualExists) {
-        script << Snippets.createIndividual(newIndividualName, newProject.name)
+        builder.addGroovyCommand(Snippets.createIndividual(newIndividualName, newProject.name))
         createdPids << newIndividualName
     }
 
@@ -325,7 +315,7 @@ private int moveOneSample(Project newProject,
     // create recipient Sample if needed
     boolean sampleExists = newSample || createdSamples.contains("${newIndividualName} ${newSampleType.displayName}".toString())
     if (!sampleExists && seqTypeWhiteList) {
-        script << Snippets.createSample(newIndividualName, newSampleType.displayName)
+        builder.addGroovyCommand(Snippets.createSample(newIndividualName, newSampleType.displayName))
         createdSamples << "${newIndividualName} ${newSampleType.displayName}".toString()
         sampleExists = true
     }
@@ -338,14 +328,14 @@ private int moveOneSample(Project newProject,
         }
         oldSeqTracks.each { SeqTrack seqTrack ->
             String fileName = "mv_${counter++}_${oldIndividual.pid}_${oldSampleType.name}_${seqTrack.run.name}_${seqTrack.laneId}__to__${newIndividualName}_${newSampleType.displayName}"
-            script << Snippets.swapLane(seqTrack, fileName, newDataFileNameClosure,
+            builder.addGroovyCommand(Snippets.swapLane(seqTrack, fileName, newDataFileNameClosure,
                     newProject,
                     oldIndividual, newIndividualName,
-                    oldSampleType, newSampleType)
+                    oldSampleType, newSampleType))
             files << fileName
         }
     } else {
-        counter = newSampleSwapScript(script, newProject, oldIndividual, newIndividualName, oldSample, newSampleType)
+        counter = newSampleSwapScript(builder, newProject, oldIndividual, newIndividualName, oldSample, newSampleType)
         createdSamples << "${newIndividualName} ${newSampleType.displayName}".toString()
     }
 
@@ -354,37 +344,37 @@ private int moveOneSample(Project newProject,
 
 private int renamePatient(String newIndividualName, Individual oldIndividual,
                           Project newProject,
-                          List<Sample> samples, int counter, StringBuilder script,
+                          List<Sample> samples, int counter, ScriptBuilder builder,
                           Closure<SampleType> newSampleTypeClosure, Closure<String> newDataFileNameClosure,
                           List<String> files
 ) {
     String fileName = "mv_${counter++}_${oldIndividual.pid}__to__${newIndividualName}"
 
-    script << "\n\t individualSwapService.swap(\n" +
+    builder.addGroovyCommand("\n\t individualSwapService.swap(\n" +
             "\t\tnew IndividualSwapParameters(\n" +
             "\t\tprojectNameSwap : new Swap('${oldIndividual.project.name}', '${newProject.name}'),\n" +
             "\t\tpidSwap: new Swap('${oldIndividual.pid}', '${newIndividualName}'),\n" +
-            "\t\tsampleTypeSwaps : [\n"
+            "\t\tsampleTypeSwaps : [\n")
 
     samples.each { sample ->
-        script << "\t\tnew Swap('${sample.sampleType.name}', '${newSampleTypeClosure(sample.sampleType).name}'), \n"
+        builder.addGroovyCommand("\t\tnew Swap('${sample.sampleType.name}', '${newSampleTypeClosure(sample.sampleType).name}'), \n")
     }
-    script << "\t\t],\n" +
-            "\t\tdataFileSwaps : [\n"
+    builder.addGroovyCommand("\t\t],\n" +
+            "\t\tdataFileSwaps : [\n")
     samples.each { sample ->
         SeqTrack.findAllBySample(sample, [sort: 'id']).each { SeqTrack seqTrack ->
             DataFile.findAllBySeqTrack(seqTrack, [sort: 'id']).each { datafile ->
-                script << "\t\tnew Swap('${datafile.fileName}', '${newDataFileNameClosure(datafile, oldIndividual.pid, newIndividualName)}'),\n"
+                builder.addGroovyCommand("\t\tnew Swap('${datafile.fileName}', '${newDataFileNameClosure(datafile, oldIndividual.pid, newIndividualName)}'),\n")
             }
         }
     }
-    script << "\t\t],\n" +
+    builder.addGroovyCommand("\t\t],\n" +
             "\t\tbashScriptName: '${fileName}',\n" +
             "\t\tlog: log,\n" +
             "\t\tfailOnMissingFiles: failOnMissingFiles,\n" +
             "\t\tscriptOutputDirectory: SCRIPT_OUTPUT_DIRECTORY,\n" +
             "\t\tlinkedFilesVerified: verifiedLinkedFiles,\n" +
-            "\t)\n)\n"
+            "\t)\n)\n")
     files << fileName
 
     return counter
@@ -393,12 +383,6 @@ private int renamePatient(String newIndividualName, Individual oldIndividual,
 class Snippets {
     static String databaseFixingHeader(String swapLabel) {
         return """
-               |/****************************************************************
-               | * DATABASE FIXING
-               | *
-               | * OTP console script to move the database-side of things
-               | ****************************************************************/
-               |
                |import de.dkfz.tbi.otp.ngsdata.*
                |import de.dkfz.tbi.otp.dataprocessing.*
                |import de.dkfz.tbi.otp.utils.*
