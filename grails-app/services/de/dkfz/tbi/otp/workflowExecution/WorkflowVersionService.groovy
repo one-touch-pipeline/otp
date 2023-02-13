@@ -23,8 +23,14 @@ package de.dkfz.tbi.otp.workflowExecution
 
 import grails.gorm.transactions.Transactional
 
+import de.dkfz.tbi.otp.CommentService
+
+import java.time.LocalDate
+
 @Transactional
 class WorkflowVersionService {
+
+    CommentService commentService
 
     List<WorkflowVersion> list() {
         return WorkflowVersion.list()
@@ -32,5 +38,20 @@ class WorkflowVersionService {
 
     List<WorkflowVersion> findAllByWorkflow(Workflow workflow) {
         return WorkflowVersion.findAllByWorkflow(workflow)
+    }
+
+    List<WorkflowVersion> findAllByWorkflowId(Long workflowId) {
+        return WorkflowVersion.createCriteria().list {
+            workflow {
+                eq("id", workflowId)
+            }
+        } as List<WorkflowVersion>
+    }
+
+    WorkflowVersion updateWorkflowVersion(Long workflowVersionId, String comment, boolean deprecate) {
+        WorkflowVersion workflowVersion = WorkflowVersion.get(workflowVersionId)
+        commentService.saveComment(workflowVersion, comment)
+        workflowVersion.deprecatedDate = deprecate ? LocalDate.now() : null
+        return workflowVersion.save(flush: true)
     }
 }

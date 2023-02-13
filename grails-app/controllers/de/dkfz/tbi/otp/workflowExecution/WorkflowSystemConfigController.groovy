@@ -35,9 +35,11 @@ import de.dkfz.tbi.util.TimeFormats
 class WorkflowSystemConfigController implements CheckAndCall {
 
     static allowedMethods = [
-            index         : "GET",
-            getWorkflows  : "GET",
-            updateWorkflow: "POST",
+            index                : "GET",
+            getWorkflows         : "GET",
+            getWorkflowVersions  : "GET",
+            updateWorkflow       : "POST",
+            updateWorkflowVersion: "PATCH",
     ]
 
     MergingCriteriaService mergingCriteriaService
@@ -70,6 +72,20 @@ class WorkflowSystemConfigController implements CheckAndCall {
         render(workflows as JSON)
     }
 
+    def getWorkflowVersions(Long workflowId) {
+        List<Map> workflowVersions = workflowVersionService.findAllByWorkflowId(workflowId)
+                .sort()
+                .collect { it -> buildWorkflowVersionOutputObject(it) }
+        render(workflowVersions as JSON)
+    }
+
+    def updateWorkflowVersion(WorkflowVersionUpdateCommand cmd) {
+        checkDefaultErrorsAndCallMethod(cmd) {
+            WorkflowVersion workflowVersion = workflowVersionService.updateWorkflowVersion(cmd.workflowVersionId, cmd.comment, cmd.deprecate)
+            render(buildWorkflowVersionOutputObject(workflowVersion) as JSON)
+        }
+    }
+
     def updateWorkflow(WorkflowUpdateCommand cmd) {
         checkDefaultErrorsAndCallMethod(cmd) {
             UpdateWorkflowDto updateWorkflowDto = new UpdateWorkflowDto(
@@ -88,6 +104,20 @@ class WorkflowSystemConfigController implements CheckAndCall {
         }
     }
 
+    private Map buildWorkflowVersionOutputObject(WorkflowVersion wv) {
+        return [
+                workflowId   : wv.workflow.id,
+                id           : wv.id,
+                name         : wv.workflowVersion,
+                comment      : wv.comment?.comment ?: '',
+                commentData  : [
+                        author: wv.comment?.author ?: '',
+                        date  : TimeFormats.DATE.getFormattedDate(wv.comment?.modificationDate),
+                ],
+                deprecateDate: TimeFormats.DATE.getFormattedLocalDate(wv.deprecatedDate),
+        ]
+    }
+
     /**
      * Converter especially to get the correct time format in output data sets.
      *
@@ -95,7 +125,7 @@ class WorkflowSystemConfigController implements CheckAndCall {
      */
     private Map buildWorkflowOutputObject(Workflow wf) {
         List<WorkflowVersion> versions = workflowVersionService.findAllByWorkflow(wf)
-                .sort { a, b -> VersionComparator.COMPARATOR.compare(a.workflowVersion, b.workflowVersion) }
+                .sort()
 
         List<Map> supportedSeqTypes = wf.supportedSeqTypes.collect { SeqType st ->
             [
@@ -134,31 +164,8 @@ class WorkflowUpdateCommand extends UpdateWorkflowDto implements Validateable {
     }
 }
 
-class VersionComparator implements Comparator<String> {
-    public static final Comparator<String> COMPARATOR = new VersionComparator()
-
-    @Override
-    int compare(String o1, String o2) {
-        String[] s1 = split(o1)
-        String[] s2 = split(o2)
-
-        for (int i = 0; i < Math.min(s1.length, s2.length); i++) {
-            int result = compareToken(s1[i], s2[i])
-            if (result != 0) {
-                return -result
-            }
-        }
-        return 0
-    }
-
-    private split(String s) {
-        return s.split(/[-\/.]/)
-    }
-
-    private int compareToken(String s1, String s2) {
-        if (s1.isInteger() && s2.isInteger()) {
-            return s1 as Integer <=> s2 as Integer
-        }
-        return String.CASE_INSENSITIVE_ORDER.compare(s1, s2)
-    }
+class WorkflowVersionUpdateCommand implements Validateable {
+    Long workflowVersionId
+    String comment
+    boolean deprecate
 }

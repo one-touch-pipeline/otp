@@ -26,7 +26,10 @@
 const loadWorkflowOverviewData = () => {
   'use strict';
 
-  fetch($.otp.createLink({ controller: 'workflowSystemConfig', action: 'getWorkflows' }))
+  fetch($.otp.createLink({
+    controller: 'workflowSystemConfig',
+    action: 'getWorkflows'
+  }))
     .then((response) => response.json())
     .then((data) => renderWorkflowOverviewTable(data))
     .catch(() => {
@@ -45,9 +48,20 @@ const renderWorkflowOverviewTable = (workflowData) => {
   $('#workflowOverview').DataTable({
     data: workflowData,
     pageLength: 100,
-    order: [1, 'asc'],
+    order: [2, 'asc'],
     columns: [
-      { data: 'id', visible: false },
+      {
+        data: 'id',
+        visible: false
+      },
+      {
+        className: 'details-control',
+        ordering: false,
+        render: () => `<button class="btn btn-xs btn-info spinner-button">
+          <i class="bi bi-chevron-bar-expand" id="versions-icon" data-original-title="Show/hide workflow versions"></i>
+          <span id="versions-spinner" class="spinner-border spinner-border-sm" role="status" 
+          style="display: none" aria-hidden="true"></span></button>`
+      },
       { data: 'name' },
       { data: 'priority' },
       {
@@ -93,13 +107,16 @@ const renderWorkflowOverviewTable = (workflowData) => {
       },
       {
         data: '',
-        render: (column, type, row) => `<button class="btn btn-sm btn-primary"
+        render: (column, type, row) => `<button class="btn btn-sm btn-primary float-right"
           onclick="openAndRenderEditModal(
             JSON.parse('${JSON.stringify(row).replace(/'/g, '&apos;').replace(/"/g, '&quot;')}'))">
             <i class="bi bi-pencil"></i>
           </button>`
       }
     ]
+  });
+  $('[data-original-title], [title]').tooltip({
+    placement: 'bottom'
   });
 };
 
@@ -166,7 +183,8 @@ const updateModalWithCurrentWorkflow = (workflow, modal) => {
   defaultVersion.empty();
   defaultVersion.append('<option value=" ">No default version</option>');
   workflow.versions.forEach((version) => {
-    defaultVersion.append(`<option value="${version.id}">${version.workflowVersion}</option>`);
+    const deprecated = version.deprecatedDate ? ' (deprecated)' : '';
+    defaultVersion.append(`<option value="${version.id}">${version.workflowVersion}${deprecated}</option>`);
   });
   if (workflow.defaultVersion) {
     defaultVersion.val(workflow.defaultVersion.id);
@@ -192,43 +210,40 @@ const updateWorkflow = (workflow, modal) => {
     allowedRefGenomes: $('#modal-refGenomes', modal).select2('data').map((rg) => rg.id)
   };
 
-  fetch($.otp.createLink({ controller: 'workflowSystemConfig', action: 'updateWorkflow' }), {
+  fetch($.otp.createLink({
+    controller: 'workflowSystemConfig',
+    action: 'updateWorkflow'
+  }), {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
     },
     body: JSON.stringify(workflowToUpdate)
-  })
-    .then((response) => {
-      if (!response.ok) {
-        return response.json().then((res) => {
-          throw Error(res.message);
-        });
-      }
+  }).then((response) => {
+    if (!response.ok) {
+      return response.json().then((res) => {
+        throw Error(res.message);
+      });
+    }
 
-      return response.json();
-    })
-    .then((response) => {
-      const wfTable = $('#workflowOverview');
-      const rowToUpdate = wfTable.dataTable().api().cells(`:contains(${response.name})`).nodes()[0];
+    return response.json();
+  }).then((response) => {
+    const wfTable = $('#workflowOverview');
+    const rowToUpdate = wfTable.dataTable().api().cells(`:contains(${response.name})`).nodes()[0];
 
-      wfTable.dataTable().fnUpdate(response, rowToUpdate, undefined, false);
+    wfTable.dataTable().fnUpdate(response, rowToUpdate, undefined, false);
 
-      $.otp.toaster.showSuccessToast(
-        'Update successful',
-        `<b>${workflow.name}</b> configuration has been updated.`
-      );
-    })
-    .catch((error) => {
-      $.otp.toaster.showErrorToast('Error', `Failed to load workflows. ${error}`);
-    });
+    $.otp.toaster.showSuccessToast(
+      'Update successful',
+      `<b>${workflow.name}</b> configuration has been updated.`
+    );
+  }).catch((error) => {
+    $.otp.toaster.showErrorToast('Error', `Failed to load workflows. ${error}`);
+  });
 };
 
 $(document).ready(() => {
   'use strict';
 
   loadWorkflowOverviewData();
-  $('[title]').tooltip({
-    placement: 'bottom'
-  });
 });

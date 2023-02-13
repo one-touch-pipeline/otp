@@ -257,7 +257,6 @@ class MetadataImportService {
         if (failedValidations.isEmpty()) {
             return results
         }
-
         throw new MultiImportFailedException(failedValidations, metadataFiles)
     }
 

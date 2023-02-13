@@ -79,14 +79,9 @@ class WorkflowSelectionController implements CheckAndCall {
                             it.workflowVersion.workflow == workflow
                         })?.workflowVersion
                 List<Version> versions = WorkflowVersion.findAllByWorkflow(workflow).sort { a, b ->
-                    if (a == workflow.defaultVersion) {
-                        return -1
-                    } else if (b == workflow.defaultVersion) {
-                        return 1
-                    }
-                    VersionComparator.COMPARATOR.compare(a.workflowVersion, b.workflowVersion)
+                    new WorkflowVersionComparatorConsideringDefaultAndDeprecated(workflow.defaultVersion).compare(a, b)
                 }.collect {
-                    new Version(it.id, it.workflowVersion, it == workflow.defaultVersion)
+                    new Version(it.id, it.workflowVersion, it == workflow.defaultVersion, it.deprecatedDate as boolean)
                 }
 
                 List<RefGenConfValue> refGens = speciesReferenceGenomeMapping.collect { sp, rs ->
@@ -107,14 +102,9 @@ class WorkflowSelectionController implements CheckAndCall {
                             it.workflowVersion.workflow == workflow
                         })?.workflowVersion
                 List<Version> versions = WorkflowVersion.findAllByWorkflow(workflow).sort { a, b ->
-                    if (a == workflow.defaultVersion) {
-                        return -1
-                    } else if (b == workflow.defaultVersion) {
-                        return 1
-                    }
-                    VersionComparator.COMPARATOR.compare(a.workflowVersion, b.workflowVersion)
+                    new WorkflowVersionComparatorConsideringDefaultAndDeprecated(workflow.defaultVersion).compare(a, b)
                 }.collect {
-                    new Version(it.id, it.workflowVersion, it == workflow.defaultVersion)
+                    new Version(it.id, it.workflowVersion, it == workflow.defaultVersion, it.deprecatedDate as boolean)
                 }
                 analysisConf.add(new ConfValue(workflow, seqType, versions, version, null))
             }
@@ -169,9 +159,10 @@ class Version {
     long id
     String name
     boolean isDefault
+    boolean isDeprecated
 
     String getNameWithDefault() {
-        return "${name}${isDefault ? " (default)" : ""}"
+        return "${name}${isDefault ? " (default)" : ""}${isDeprecated ? " (deprecated)" : ""}"
     }
 }
 
@@ -232,4 +223,26 @@ class UpdateMergingCriteriaCommandLPK implements Validateable {
 class UpdateMergingCriteriaCommandSPG implements Validateable {
     MergingCriteria mergingCriteria
     MergingCriteria.SpecificSeqPlatformGroups value
+}
+
+class WorkflowVersionComparatorConsideringDefaultAndDeprecated implements Comparator<WorkflowVersion> {
+    WorkflowVersion defaultVersion
+
+    WorkflowVersionComparatorConsideringDefaultAndDeprecated(WorkflowVersion defaultVersion) {
+        this.defaultVersion = defaultVersion
+    }
+
+    @Override
+    int compare(WorkflowVersion a, WorkflowVersion b) {
+        if (a == defaultVersion) {
+            return -1
+        } else if (b == defaultVersion) {
+            return 1
+        } else if (a.deprecatedDate && !b.deprecatedDate) {
+            return 1
+        } else if (b.deprecatedDate && !a.deprecatedDate) {
+            return -1
+        }
+        return a <=> b
+    }
 }

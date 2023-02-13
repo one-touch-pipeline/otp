@@ -23,19 +23,25 @@ package de.dkfz.tbi.otp.workflowExecution
 
 import grails.gorm.hibernate.annotation.ManagedEntity
 
+import de.dkfz.tbi.otp.Commentable
 import de.dkfz.tbi.otp.utils.Entity
 
+import java.time.LocalDate
+
 @ManagedEntity
-class WorkflowVersion implements Entity {
+class WorkflowVersion implements Entity, Commentable, Comparable<WorkflowVersion> {
 
     Workflow workflow
     String workflowVersion
+    LocalDate deprecatedDate
 
     String getDisplayName() {
         return "${workflow.name} ${workflowVersion}"
     }
 
     static Closure constraints = {
+        deprecatedDate nullable: true
+        comment nullable: true
         workflow unique: 'workflowVersion'
     }
 
@@ -46,5 +52,30 @@ class WorkflowVersion implements Entity {
     @Override
     String toString() {
         return displayName
+    }
+
+    @Override
+    int compareTo(WorkflowVersion wv) {
+        String[] s1 = splitByDot(this.workflowVersion)
+        String[] s2 = splitByDot(wv.workflowVersion)
+
+        for (int i = 0; i < Math.min(s1.length, s2.length); i++) {
+            int result = compareToken(s1[i], s2[i])
+            if (result != 0) {
+                return -result
+            }
+        }
+        return 0
+    }
+
+    private splitByDot(String s) {
+        return s.split(/[-\/.]/)
+    }
+
+    private int compareToken(String s1, String s2) {
+        if (s1.isInteger() && s2.isInteger()) {
+            return s1 as Integer <=> s2 as Integer
+        }
+        return String.CASE_INSENSITIVE_ORDER.compare(s1, s2)
     }
 }

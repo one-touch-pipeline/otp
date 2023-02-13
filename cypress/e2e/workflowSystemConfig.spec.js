@@ -43,6 +43,7 @@ describe('Check workflow system configuration page', () => {
       cy.get('#editWorkflowModal').should('be.visible');
       cy.get('#editWorkflowModal').find('.modal-title').should('contain.text', 'Cell Ranger');
 
+      cy.get('#editWorkflowModal #modal-priority').type('x');
       cy.get('#editWorkflowModal #modal-priority').clear().type(priority);
       cy.get('#editWorkflowModal #modal-max-runs').clear().type(maxRuns);
       cy.get('#editWorkflowModal #modal-seqTypes').select(supportedSeqType, { force: true });
@@ -54,6 +55,56 @@ describe('Check workflow system configuration page', () => {
         cy.get('td').contains('Cell Ranger').siblings().contains(priority);
         cy.get('td').contains('Cell Ranger').siblings().contains(maxRuns);
         cy.get('td').contains('Cell Ranger').siblings().contains(supportedSeqType);
+      });
+    });
+
+    it('should deprecate a workflow version with comment and undeprecate it again', () => {
+      const comment = 'This is a test comment. With some numbers 124 and signs %&!.';
+
+      cy.intercept('/workflowSystemConfig/getWorkflowVersions*').as('getWorkflowVersions');
+      cy.intercept('/workflowSystemConfig/updateWorkflowVersion*').as('updateWorkflowVersion');
+
+      cy.get('td').contains('PanCancer alignment').siblings().first()
+        .find('button i#versions-icon')
+        .click();
+
+      cy.wait('@getWorkflowVersions').then((interception) => {
+        expect(interception.response.statusCode).to.eq(200);
+        const workflowVersionId = interception.response.body[0].id;
+        cy.get(`#modify-btn-${workflowVersionId}`).should('be.visible').as('deprecateBtn');
+
+        // deprecate workflow version
+        cy.get('@deprecateBtn').click();
+        cy.get('#updateWorkflowVersionModal').as('modal').should('be.visible');
+
+        cy.get('@modal').find('textarea#comment').type('x');
+        cy.get('@modal').find('textarea#comment').clear().type(comment);
+        cy.get('@modal').find('input#deprecate-state').check({ force: true });
+
+        cy.get('@modal').find('button#confirmModal').click();
+
+        cy.wait('@updateWorkflowVersion').then((interception2) => {
+          expect(interception2.response.statusCode).to.eq(200);
+          cy.get(`#modify-btn-${workflowVersionId}`).parent().parent().as('wvRow');
+          cy.get('@wvRow').contains(interception2.response.body.comment);
+          cy.get('@wvRow').contains(interception2.response.body.commentData.date);
+          cy.get('@wvRow').contains(interception2.response.body.commentData.author);
+          cy.get('@wvRow').contains(interception2.response.body.deprecateDate);
+        });
+
+        // undeprecate workflow version
+        cy.get(`#modify-btn-${workflowVersionId}`).click();
+        cy.get('@modal').should('be.visible');
+
+        cy.get('@modal').find('input#deprecate-state').uncheck({ force: true });
+        cy.get('@modal').find('button#confirmModal').click();
+
+        cy.wait('@updateWorkflowVersion').then((interception2) => {
+          expect(interception2.response.statusCode).to.eq(200);
+          cy.get(`#modify-btn-${workflowVersionId}`).parent().parent().as('wvRow');
+          cy.get('@wvRow').contains(interception2.response.body.name);
+          cy.get('@wvRow').find('td').eq(3).should('have.text', '');
+        });
       });
     });
   });
