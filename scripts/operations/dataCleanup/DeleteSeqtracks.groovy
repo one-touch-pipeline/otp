@@ -162,7 +162,7 @@ Project.withTransaction {
         deletionService.deleteSeqTrack(it, checkForExternalBamFilesOrLinkedFastqFiles)
     }.flatten().unique()
 
-    String content = """"
+    String content = """
 #!/bin/bash
 
 set -ve
