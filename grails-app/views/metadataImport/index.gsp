@@ -144,9 +144,9 @@
             </label>
 
             <div class="col-sm-10">
-                <g:set var="initialMetadataFileSource" value="${cmd?.metadataFileSource ?: MetaDataFileSourceEnum.PATH}"/>
+                <g:set var="initialMetadataFileSource" value="${cmd?.metadataFileSource ?: MetaDataFileSourceEnum.PATH.name()}"/>
                 <g:each status="i" var="metadataFileSource" in="${metadataFileSources}">
-                    <g:set var="checked" value="${(metadataFileSource == initialMetadataFileSource) ? "checked" : ""}"/>
+                    <g:set var="checked" value="${(metadataFileSource.name() == initialMetadataFileSource) ? "checked" : ""}"/>
                     <div class="form-check form-check-inline py-2">
                         <input class="form-check-input" type="radio" ${checked} name="metadataFileSource" id="metadataFileSource_${i}"
                                value="${metadataFileSource.name()}">
@@ -162,10 +162,10 @@
             </label>
 
             <div class="col-sm-10">
-                <g:set var="initialDirectoryStructure" value="${cmd?.directoryStructure ?: DirectoryStructureBeanName.ABSOLUTE_PATH}"/>
+                <g:set var="initialDirectoryStructure" value="${cmd?.directoryStructure ?: DirectoryStructureBeanName.ABSOLUTE_PATH.name()}"/>
                 <g:each status="i" var="directoryStructure" in="${directoryStructures}">
                     <g:set var="checked"
-                           value="${(directoryStructure == initialDirectoryStructure) ? "checked" : ""}"/>
+                           value="${(directoryStructure.name() == initialDirectoryStructure) ? "checked" : ""}"/>
                     <div class="form-check form-check-inline py-2">
                         <input class="form-check-input" type="radio" name="directoryStructure" ${checked} id="directoryStructure_${i}"
                                value="${directoryStructure.name()}">

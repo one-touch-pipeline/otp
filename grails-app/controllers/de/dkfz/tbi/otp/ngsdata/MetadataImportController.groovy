@@ -98,8 +98,9 @@ class MetadataImportController implements CheckAndCall, PlainResponseExceptionHa
     RunService runService
 
     def index() {
+        params.paths = params.paths instanceof String ? [params.paths] : params.paths
         return [
-                cmd                   : flash?.cmd as MetadataImportControllerSubmitCommand,
+                cmd                   : params,
                 metadataFileSources   : MetaDataFileSourceEnum.values(),
                 directoryStructures   : DirectoryStructureBeanName.values(),
                 implementedValidations: metadataImportService.implementedValidations,

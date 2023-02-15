@@ -351,6 +351,15 @@ $(() => {
     sendAjaxImportCall(formData);
   });
 
+  const initialValidationCall = () => {
+    const formData = new FormData(form);
+    if (formData.get('ticketNumber') && formData.get('paths')) {
+      validateButton.trigger('click');
+    }
+  };
+
+  initialValidationCall();
+
   // Helper handler to remove clicked argument from other buttons after click,
   // to identify clicked button upon submitting of form
   $('form input[type=submit]').on('click', function () {
@@ -452,7 +461,7 @@ $(() => {
       renderedProblems += `<li class="${problem.level}">`;
       renderedProblems += `<span style="white-space: pre-wrap">${problem.levelAndMessage} </span>`;
       problem.affectedCells.forEach((cell) => {
-        renderedProblems += `<a href="#${cell.cellAddress}_${index}">${cell.cellAddress}</a>`;
+        renderedProblems += `<a href="#${cell.cellAddress}_${index}">${cell.cellAddress}</a> `;
       });
       renderedProblems += '</li>';
     });
