@@ -36,6 +36,8 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 @Transactional
 class ReferenceGenomeSelectorService {
 
+    OtpWorkflowService otpWorkflowService
+
     Errors createOrUpdate(Project project, SeqType seqType, Set<SpeciesWithStrain> species, Workflow workflow, ReferenceGenome referenceGenome) {
         ReferenceGenomeSelector existing = atMostOneElement(ReferenceGenomeSelector.findAllByProjectAndSeqTypeAndWorkflow(project, seqType, workflow)
                 .findAll { it.species == species })
@@ -99,5 +101,18 @@ class ReferenceGenomeSelectorService {
             result.add(speciesWithStrain)
         }
         return result
+    }
+
+    boolean hasReferenceGenomeConfigForProjectAndSeqTypeAndSpecies(Project project, SeqType seqType, List<SpeciesWithStrain> speciesWithStrains) {
+        if (speciesWithStrains.empty) {
+            return false
+        }
+        Set<String> otpWorkflows = otpWorkflowService.lookupAlignableOtpWorkflowBeans().keySet()
+        Set<SpeciesWithStrain> speciesWithStrainSet = speciesWithStrains as Set
+        List<Workflow> workflows = Workflow.findAllByBeanNameInList(otpWorkflows as List)
+        ReferenceGenomeSelector.findAllByProjectAndSeqTypeAndWorkflowInList(project, seqType, workflows).
+                findAll { ReferenceGenomeSelector rgs ->
+                    rgs.species == speciesWithStrainSet
+                }
     }
 }

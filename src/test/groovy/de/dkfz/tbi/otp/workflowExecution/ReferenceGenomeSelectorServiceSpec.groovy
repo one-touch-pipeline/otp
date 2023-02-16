@@ -29,8 +29,7 @@ import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.taxonomy.TaxonomyFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.ngsdata.taxonomy.Species
-import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
+import de.dkfz.tbi.otp.ngsdata.taxonomy.*
 import de.dkfz.tbi.otp.project.Project
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
@@ -46,6 +45,9 @@ class ReferenceGenomeSelectorServiceSpec extends Specification implements Servic
                 ReferenceGenomeSelector,
                 SeqType,
                 Workflow,
+                ReferenceGenome,
+                Species,
+                SpeciesCommonName,
         ]
     }
 
@@ -135,5 +137,48 @@ class ReferenceGenomeSelectorServiceSpec extends Specification implements Servic
                 ([s13, s3] as Set): [r9],
                 ([s14, s3] as Set): [r9],
         ]
+    }
+
+    void "test hasReferenceGenomeConfigForProjectAndSeqTypeAndSpecies, when species is known to OTP, then returns true"() {
+        given:
+        List<String> speciesStringList = ['human', 'mouse']
+        List<SpeciesWithStrain> speciesWithStrainList = []
+        speciesStringList.unique().each { String str ->
+            SpeciesCommonName speciesCommonName = createSpeciesCommonName(name: str)
+            SpeciesWithStrain speciesWithStrain = createSpeciesWithStrain([species: createSpecies([speciesCommonName: speciesCommonName])])
+            speciesWithStrainList.add(speciesWithStrain)
+        }
+        Project project1 = createProject()
+        SeqType seqType1 = createSeqTypePaired()
+        ReferenceGenome referenceGenome1 = createReferenceGenome(species: [] as Set, speciesWithStrain: speciesWithStrainList as Set)
+        Workflow workflow = createWorkflow()
+
+        and:
+        ReferenceGenomeSelector referenceGenomeSelector = createReferenceGenomeSelector([
+                project        : project1,
+                seqType        : seqType1,
+                referenceGenome: referenceGenome1,
+                workflow       : workflow,
+        ])
+
+        and:
+        Map<String, OtpWorkflow> alignmentWorkflows = [(referenceGenomeSelector.workflow.beanName): Mock(OtpWorkflow)]
+        service.otpWorkflowService = Mock(OtpWorkflowService) {
+            1 * lookupAlignableOtpWorkflowBeans() >> alignmentWorkflows
+        }
+
+        expect:
+        service.hasReferenceGenomeConfigForProjectAndSeqTypeAndSpecies(project1, seqType1, speciesWithStrainList)
+    }
+
+    void "test hasReferenceGenomeConfigForProjectAndSeqTypeAndSpecies, when species is not known to OTP, then returns false"() {
+        given:
+        List<SpeciesWithStrain> speciesWithStrainList = []
+        Project project1 = createProject()
+        SeqType seqType1 = createSeqTypePaired()
+        createWorkflow()
+
+        expect:
+        !service.hasReferenceGenomeConfigForProjectAndSeqTypeAndSpecies(project1, seqType1, speciesWithStrainList)
     }
 }

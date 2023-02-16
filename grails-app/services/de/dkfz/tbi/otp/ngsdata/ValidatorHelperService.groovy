@@ -23,6 +23,8 @@ package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.SqlUtil
 import de.dkfz.tbi.otp.dataprocessing.MergingCriteria
+import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
+import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrainService
 import de.dkfz.tbi.otp.parser.ParsedSampleIdentifier
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
@@ -38,11 +40,25 @@ class ValidatorHelperService {
     SampleIdentifierService sampleIdentifierService
     SeqTypeService seqTypeService
     SeqPlatformService seqPlatformService
+    SpeciesWithStrainService speciesWithStrainService
 
     String getSeqTypeNameFromMetadata(ValueTuple tuple) {
         assert tuple
 
         return tuple.getValue(SEQUENCING_TYPE.name()) ?: ''
+    }
+
+    List<SpeciesWithStrain> getSpeciesFromMetadata(ValueTuple tuple) {
+        assert tuple
+        List<String> speciesList = tuple.getValue(MetaDataColumn.SPECIES.name())?.split('[+]')*.trim() ?: '' as List<String>
+        List<SpeciesWithStrain> speciesWithStrainsList = []
+        speciesList.each { String speciesCommonName ->
+            SpeciesWithStrain sws = speciesWithStrainService.getByAlias(speciesCommonName)
+            if (sws) {
+                speciesWithStrainsList.add(sws)
+            }
+        }
+        return speciesList.size() > speciesWithStrainsList.size() ? [] : speciesWithStrainsList.unique()
     }
 
     Project getProjectFromMetadata(ValueTuple tuple) {

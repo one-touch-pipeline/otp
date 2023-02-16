@@ -30,9 +30,11 @@ import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
+import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.workflowExecution.ReferenceGenomeSelectorService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowVersionSelectorService
 import de.dkfz.tbi.util.spreadsheet.validation.*
 
@@ -56,6 +58,9 @@ class AlignmentValidator extends ValueTuplesValidator<MetadataValidationContext>
     @Autowired
     WorkflowVersionSelectorService workflowVersionSelectorService
 
+    @Autowired
+    ReferenceGenomeSelectorService referenceGenomeSelectorService
+
     @Override
     Collection<String> getDescriptions() {
         return [
@@ -70,7 +75,7 @@ class AlignmentValidator extends ValueTuplesValidator<MetadataValidationContext>
 
     @Override
     List<String> getOptionalColumnTitles(MetadataValidationContext context) {
-        return [BASE_MATERIAL, PROJECT, SAMPLE_NAME]*.name()
+        return [BASE_MATERIAL, PROJECT, SAMPLE_NAME, SPECIES]*.name()
     }
 
     @Override
@@ -84,20 +89,22 @@ class AlignmentValidator extends ValueTuplesValidator<MetadataValidationContext>
         List<SeqType> seqTypesOldSystem = alignAbleSeqTypes - seqTypesNewSystem
 
         allValueTuples.groupBy {
-            new ProjectSeqType(
+            new ProjectSeqTypeSpecies(
                     validatorHelperService.getProjectFromMetadata(it),
                     validatorHelperService.getSeqTypeFromMetadata(it),
+                    validatorHelperService.getSpeciesFromMetadata(it) ?: [],
             )
         }.findAll {
             it.key.valuesGiven()
-        }.each { ProjectSeqType projectSeqType, List<ValueTuple> valueTuplesSameSeqType ->
-            checkSingleTuple(projectSeqType, seqTypesOldSystem, context, seqTypesNewSystem)
+        }.each { ProjectSeqTypeSpecies projectSeqTypeSpecies, List<ValueTuple> valueTuplesSameSeqType ->
+            checkSingleTuple(projectSeqTypeSpecies, seqTypesOldSystem, context, seqTypesNewSystem)
         }
     }
 
-    private void checkSingleTuple(ProjectSeqType projectSeqType, List<SeqType> seqTypesOldSystem, MetadataValidationContext context, List<SeqType> seqTypesNewSystem) {
-        Project project = projectSeqType.project
-        SeqType seqType = projectSeqType.seqType
+    private void checkSingleTuple(ProjectSeqTypeSpecies projectSeqTypeSpecies, List<SeqType> seqTypesOldSystem, MetadataValidationContext context, List<SeqType> seqTypesNewSystem) {
+        Project project = projectSeqTypeSpecies.project
+        SeqType seqType = projectSeqTypeSpecies.seqType
+        List<SpeciesWithStrain> species = projectSeqTypeSpecies.speciesWithStrains
         if (seqType in seqTypesOldSystem) {
             Pipeline pipeline = CollectionUtils.atMostOneElement(Pipeline.findAllByNameAndType(Pipeline.Name.forSeqType(seqType), Pipeline.Type.ALIGNMENT))
             if (!RoddyWorkflowConfig.getLatestForProject(project, seqType, pipeline)) {
@@ -106,6 +113,9 @@ class AlignmentValidator extends ValueTuplesValidator<MetadataValidationContext>
         } else if (seqType in seqTypesNewSystem) {
             if (!workflowVersionSelectorService.hasAlignmentConfigForProjectAndSeqType(project, seqType)) {
                 createWarningMessage(context, "Alignment is not configured for Project '${project}' and SeqType '${seqType}'")
+            }
+            else if (!referenceGenomeSelectorService.hasReferenceGenomeConfigForProjectAndSeqTypeAndSpecies(project, seqType, species)) {
+                createWarningMessage(context, "Reference Genome is not configured for Project '${project}', SeqType '${seqType}' and Species '${species.join(' + ')}'")
             }
         } else if (seqType in SeqTypeService.cellRangerAlignableSeqTypes) {
             if (!projectService.getLatestCellRangerConfig(project, seqType)) {
@@ -116,17 +126,18 @@ class AlignmentValidator extends ValueTuplesValidator<MetadataValidationContext>
         }
     }
 
-    private void createWarningMessage(MetadataValidationContext context, String message) {
-        context.addProblem(Collections.emptySet(), LogLevel.WARNING, message, "At least one Alignment is not configured.")
+    private static void createWarningMessage(MetadataValidationContext context, String message) {
+        context.addProblem(Collections.emptySet(), LogLevel.WARNING, message, "At least one Alignment or Reference Genome is not configured.")
     }
 
     @TupleConstructor
-    static private class ProjectSeqType {
+    static private class ProjectSeqTypeSpecies {
         final Project project
         final SeqType seqType
+        final List<SpeciesWithStrain> speciesWithStrains
 
         boolean valuesGiven() {
-            return project && seqType
+            return project && seqType && speciesWithStrains
         }
     }
 }
