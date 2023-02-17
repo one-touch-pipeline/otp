@@ -27,6 +27,7 @@ import grails.util.Pair
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
 
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.domainFactory.FastqcDomainFactory
@@ -86,39 +87,45 @@ class PanCancerDeciderIntegrationSpec extends Specification implements WorkflowS
         Sample sample1 = createSample(individual: individual, sampleType: sampleType)
         createSeqTrack(workflowArtefact: inputArtefact, seqType: seqType, sample: sample1)
 
-        WorkflowArtefact additionalRequiredArtefact1 = createWorkflowArtefact(artefactType: ArtefactType.FASTQ)
+        WorkflowArtefact additionalRequiredArtefact1 = createWorkflowArtefact(artefactType: ArtefactType.FASTQ, displayName: 'additionalRequiredArtefact1')
         createSeqTrack(workflowArtefact: additionalRequiredArtefact1, seqType: seqType, sample: sample1)
 
-        WorkflowArtefact additionalRequiredArtefact2 = createWorkflowArtefact(artefactType: ArtefactType.FASTQ)
-        createBamFile(workflowArtefact: additionalRequiredArtefact2, workPackage: createMergingWorkPackage(sample: sample1, seqType: seqType))
+        WorkflowArtefact withdrawnArtefactBam = createWorkflowArtefact(artefactType: ArtefactType.BAM, withdrawnDate: LocalDate.now(), withdrawnComment: "bam withdrawn", displayName: 'withdrawnArtefactBam')
+        RoddyBamFile bamFile = createBamFile(workflowArtefact: withdrawnArtefactBam, workPackage: createMergingWorkPackage(sample: sample1, seqType: seqType), withdrawn: true)
 
-        WorkflowArtefact additionalRequiredArtefact3 = createWorkflowArtefact(artefactType: ArtefactType.FASTQ)
+        WorkflowArtefact baseBamFileArtefact = createWorkflowArtefact(artefactType: ArtefactType.BAM, displayName: 'baseBamFileArtefact')
+        RoddyBamFile baseBamFile = createBamFile(workflowArtefact: baseBamFileArtefact, workPackage: bamFile.workPackage)
+
+        WorkflowArtefact additionalRequiredArtefact2 = createWorkflowArtefact(artefactType: ArtefactType.BAM, displayName: 'additionalRequiredArtefact2')
+        createBamFile(workflowArtefact: additionalRequiredArtefact2, workPackage: bamFile.workPackage, baseBamFile: baseBamFile)
+
+        WorkflowArtefact additionalRequiredArtefact3 = createWorkflowArtefact(artefactType: ArtefactType.FASTQC, displayName: 'additionalRequiredArtefact3')
         createFastqcProcessedFile(workflowArtefact: additionalRequiredArtefact3, dataFile: createDataFile(seqTrack: createSeqTrack(
                 sample: sample1,
                 seqType: seqType,
         )))
 
-        WorkflowArtefact failedArtefact = createWorkflowArtefact(artefactType: ArtefactType.FASTQ, state: WorkflowArtefact.State.FAILED)
+        WorkflowArtefact failedArtefact = createWorkflowArtefact(artefactType: ArtefactType.FASTQ, state: WorkflowArtefact.State.FAILED, displayName: 'failedArtefact')
         createSeqTrack(workflowArtefact: failedArtefact, seqType: seqType, sample: sample1)
 
-        WorkflowArtefact withdrawnArtefact = createWorkflowArtefact(artefactType: ArtefactType.FASTQ, withdrawnDate: LocalDate.now(), withdrawnComment: "x")
-        createSeqTrack(workflowArtefact: withdrawnArtefact, seqType: seqType, sample: sample1)
+        WorkflowArtefact withdrawnArtefactFastq = createWorkflowArtefact(artefactType: ArtefactType.FASTQ, withdrawnDate: LocalDate.now(), withdrawnComment: "fastq withdrawn", displayName: 'withdrawnArtefactFastq')
+        createSeqTrack(workflowArtefact: withdrawnArtefactFastq, seqType: seqType, sample: sample1)
 
-        WorkflowArtefact differentSeqType = createWorkflowArtefact(artefactType: ArtefactType.FASTQ)
+        WorkflowArtefact differentSeqType = createWorkflowArtefact(artefactType: ArtefactType.FASTQ, displayName: 'differentSeqType')
         createSeqTrack(workflowArtefact: differentSeqType, seqType: DomainFactory.createExomeSeqType(), sample: sample1)
 
-        WorkflowArtefact differentIndividual = createWorkflowArtefact(artefactType: ArtefactType.FASTQ)
+        WorkflowArtefact differentIndividual = createWorkflowArtefact(artefactType: ArtefactType.FASTQ, displayName: 'differentIndividual')
         Individual individual2 = createIndividual()
         Sample sample2 = createSample(individual: individual2, sampleType: sampleType)
         createSeqTrack(workflowArtefact: differentIndividual, seqType: seqType, sample: sample2)
 
-        WorkflowArtefact differentSampleType = createWorkflowArtefact(artefactType: ArtefactType.FASTQ)
+        WorkflowArtefact differentSampleType = createWorkflowArtefact(artefactType: ArtefactType.FASTQ, displayName: 'differentSampleType')
         SampleType sampleType2 = createSampleType()
         Sample sample3 = createSample(individual: individual, sampleType: sampleType2)
         createSeqTrack(workflowArtefact: differentSampleType, seqType: seqType, sample: sample3)
 
         expect:
-        CollectionUtils.containSame(
+        TestCase.assertContainSame(
                 panCancerDecider.findAdditionalRequiredInputArtefacts([inputArtefact]),
                 [
                         inputArtefact,

@@ -94,80 +94,84 @@ class PanCancerDecider extends AbstractWorkflowDecider {
     final protected Collection<WorkflowArtefact> findAdditionalRequiredInputArtefacts(Collection<WorkflowArtefact> inputArtefacts) {
         Set<WorkflowArtefact> result = [] as Set
         inputArtefacts.each { WorkflowArtefact inputArtefact ->
-            Individual individual
-            SampleType sampleType
-            SeqType seqType
-            Object artefact = inputArtefact.artefact.get()
-            switch (artefact) {
-                case SeqTrack:
-                    SeqTrack seqTrack = artefact as SeqTrack
-                    individual = seqTrack.individual
-                    sampleType = seqTrack.sampleType
-                    seqType = seqTrack.seqType
-                    break
-                case FastqcProcessedFile:
-                    FastqcProcessedFile fastqcProcessedFile = artefact as FastqcProcessedFile
-                    individual = (fastqcProcessedFile.dataFile.individual)
-                    sampleType = (fastqcProcessedFile.dataFile.sampleType)
-                    seqType = (fastqcProcessedFile.dataFile.seqType)
-                    break
-                case RoddyBamFile:
-                    RoddyBamFile rbf = artefact as RoddyBamFile
-                    individual = (rbf.individual)
-                    sampleType = (rbf.sampleType)
-                    seqType = (rbf.seqType)
-                    break
-            }
+            String artefactString = "${inputArtefact.artefactType} ${inputArtefact.toString().replaceAll('\n', ' ')}"
+            LogUsedTimeUtils.logUsedTime(log, "            fetch for ${artefactString}") {
+                Individual individual
+                SampleType sampleType
+                SeqType seqType
+                Object artefact = inputArtefact.artefact.get()
+                switch (artefact) {
+                    case SeqTrack:
+                        SeqTrack seqTrack = artefact as SeqTrack
+                        individual = seqTrack.individual
+                        sampleType = seqTrack.sampleType
+                        seqType = seqTrack.seqType
+                        break
+                    case FastqcProcessedFile:
+                        FastqcProcessedFile fastqcProcessedFile = artefact as FastqcProcessedFile
+                        individual = (fastqcProcessedFile.dataFile.individual)
+                        sampleType = (fastqcProcessedFile.dataFile.sampleType)
+                        seqType = (fastqcProcessedFile.dataFile.seqType)
+                        break
+                    case RoddyBamFile:
+                        RoddyBamFile rbf = artefact as RoddyBamFile
+                        individual = (rbf.individual)
+                        sampleType = (rbf.sampleType)
+                        seqType = (rbf.seqType)
+                        break
+                }
 
-            result.addAll(SeqTrack.createCriteria().list {
-                sample {
-                    eq("individual", individual)
-                    eq("sampleType", sampleType)
-                }
-                eq("seqType", seqType)
-                workflowArtefact {
-                    not {
-                        'in'("state", [WorkflowArtefact.State.FAILED, WorkflowArtefact.State.OMITTED])
+                result.addAll(SeqTrack.createCriteria().list {
+                    sample {
+                        eq("individual", individual)
+                        eq("sampleType", sampleType)
                     }
-                    isNull("withdrawnDate")
-                }
-            }.findAll { !it.isWithdrawn() }*.workflowArtefact)
-            result.addAll(FastqcProcessedFile.createCriteria().list {
-                dataFile {
-                    seqTrack {
+                    eq("seqType", seqType)
+                    workflowArtefact {
+                        not {
+                            'in'("state", [WorkflowArtefact.State.FAILED, WorkflowArtefact.State.OMITTED])
+                        }
+                        isNull("withdrawnDate")
+                    }
+                }.findAll { !it.isWithdrawn() }*.workflowArtefact)
+                result.addAll(FastqcProcessedFile.createCriteria().list {
+                    dataFile {
+                        seqTrack {
+                            sample {
+                                eq("individual", individual)
+                                eq("sampleType", sampleType)
+                            }
+                            eq("seqType", seqType)
+                        }
+                        eq("fileWithdrawn", false)
+                    }
+                    workflowArtefact {
+                        not {
+                            'in'("state", [WorkflowArtefact.State.FAILED, WorkflowArtefact.State.OMITTED])
+                        }
+                        isNull("withdrawnDate")
+                    }
+                }*.workflowArtefact)
+                result.addAll(RoddyBamFile.createCriteria().list {
+                    workPackage {
                         sample {
                             eq("individual", individual)
                             eq("sampleType", sampleType)
                         }
                         eq("seqType", seqType)
                     }
-                    eq("fileWithdrawn", false)
-                }
-                workflowArtefact {
-                    not {
-                        'in'("state", [WorkflowArtefact.State.FAILED, WorkflowArtefact.State.OMITTED])
+                    eq("withdrawn", false)
+                    workflowArtefact {
+                        not {
+                            'in'("state", [WorkflowArtefact.State.FAILED, WorkflowArtefact.State.OMITTED])
+                        }
+                        isNull("withdrawnDate")
                     }
-                    isNull("withdrawnDate")
-                }
-            }*.workflowArtefact)
-            result.addAll(RoddyBamFile.createCriteria().list {
-                workPackage {
-                    sample {
-                        eq("individual", individual)
-                        eq("sampleType", sampleType)
-                    }
-                    eq("seqType", seqType)
-                }
-                eq("withdrawn", false)
-                workflowArtefact {
-                    not {
-                        'in'("state", [WorkflowArtefact.State.FAILED, WorkflowArtefact.State.OMITTED])
-                    }
-                    isNull("withdrawnDate")
-                }
-            }*.workflowArtefact)
+                }.findAll { RoddyBamFile roddyBamFile ->
+                    roddyBamFile.isMostRecentBamFile()
+                }*.workflowArtefact)
+            }
         }
-
         return result
     }
 
@@ -247,7 +251,10 @@ class PanCancerDecider extends AbstractWorkflowDecider {
     final protected Collection<WorkflowArtefact> createWorkflowRunsAndOutputArtefacts(Collection<Collection<WorkflowArtefact>> inputArtefacts,
                                                                                       Collection<WorkflowArtefact> initialArtefacts, WorkflowVersion version) {
         return inputArtefacts.withIndex().collect { Collection<WorkflowArtefact> artefacts, Integer index ->
-            LogUsedTimeUtils.logUsedTime(log, "            create workflow run: ${index + 1}") {
+            String artefactString = artefacts.collect {
+                "${it.artefactType} ${it.toString().replaceAll('\n', ' ')}"
+            }.join('; ')
+            LogUsedTimeUtils.logUsedTimeStartEnd(log, "            create workflow run: ${index + 1}: ${artefactString}") {
                 createWorkflowRunIfPossible(artefacts, version)
             }
         }.findAll()

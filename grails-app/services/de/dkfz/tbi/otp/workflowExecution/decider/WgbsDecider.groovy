@@ -81,26 +81,28 @@ class WgbsDecider extends AbstractWorkflowDecider {
     final protected Collection<WorkflowArtefact> findAdditionalRequiredInputArtefacts(Collection<WorkflowArtefact> inputArtefacts) {
         Set<WorkflowArtefact> result = [] as Set
         inputArtefacts.each { WorkflowArtefact inputArtefact ->
-            SeqTrack seqTrack = inputArtefact.artefact.get() as SeqTrack
-            Individual individual = seqTrack.individual
-            SampleType sampleType = seqTrack.sampleType
-            SeqType seqType = seqTrack.seqType
+            String artefactString = "${inputArtefact.artefactType} ${inputArtefact.toString().replaceAll('\n', ' ')}"
+            LogUsedTimeUtils.logUsedTime(log, "            fetch for ${artefactString}") {
+                SeqTrack seqTrack = inputArtefact.artefact.get() as SeqTrack
+                Individual individual = seqTrack.individual
+                SampleType sampleType = seqTrack.sampleType
+                SeqType seqType = seqTrack.seqType
 
-            result.addAll(SeqTrack.createCriteria().list {
-                sample {
-                    eq("individual", individual)
-                    eq("sampleType", sampleType)
-                }
-                eq("seqType", seqType)
-                workflowArtefact {
-                    not {
-                        'in'("state", [WorkflowArtefact.State.FAILED, WorkflowArtefact.State.OMITTED])
+                result.addAll(SeqTrack.createCriteria().list {
+                    sample {
+                        eq("individual", individual)
+                        eq("sampleType", sampleType)
                     }
-                    isNull("withdrawnDate")
-                }
-            }.findAll { !it.isWithdrawn() }*.workflowArtefact)
+                    eq("seqType", seqType)
+                    workflowArtefact {
+                        not {
+                            'in'("state", [WorkflowArtefact.State.FAILED, WorkflowArtefact.State.OMITTED])
+                        }
+                        isNull("withdrawnDate")
+                    }
+                }.findAll { !it.isWithdrawn() }*.workflowArtefact)
+            }
         }
-
         return result
     }
 
@@ -145,7 +147,10 @@ class WgbsDecider extends AbstractWorkflowDecider {
     final protected Collection<WorkflowArtefact> createWorkflowRunsAndOutputArtefacts(Collection<Collection<WorkflowArtefact>> inputArtefacts,
                                                                                       Collection<WorkflowArtefact> initialArtefacts, WorkflowVersion version) {
         return inputArtefacts.withIndex().collect { Collection<WorkflowArtefact> artefacts, Integer index ->
-            LogUsedTimeUtils.logUsedTime(log, "            create workflow run: ${index + 1}") {
+            String artefactString = artefacts.collect {
+                "${it.artefactType} ${it.toString().replaceAll('\n', ' ')}"
+            }.join('; ')
+            LogUsedTimeUtils.logUsedTimeStartEnd(log, "            create workflow run: ${index + 1}: ${artefactString}") {
                 createWorkflowRunIfPossible(artefacts, version)
             }
         }.findAll()
