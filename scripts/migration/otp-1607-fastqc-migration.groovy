@@ -24,9 +24,7 @@ package migration
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
-import de.dkfz.tbi.otp.workflowExecution.Workflow
-import de.dkfz.tbi.otp.workflowExecution.WorkflowVersion
-import de.dkfz.tbi.otp.workflowExecution.WorkflowVersionSelector
+import de.dkfz.tbi.otp.workflowExecution.*
 
 List<Project> projectList = Project.findAllByProjectType(Project.ProjectType.SEQUENCING)
 
@@ -48,8 +46,12 @@ Project.withTransaction {
     if (workflowVersion) {
         println "The following projects would be updated with workflowVersion: ${workflowVersion}"
         projectList.each { Project project ->
-            println project
-            new WorkflowVersionSelector(project: project, workflowVersion: workflowVersion).save(flush: true)
+            if (WorkflowVersionSelector.findByProjectAndWorkflowVersion(project, workflowVersion)) {
+                println "skip: ${project}"
+            } else {
+                println "configure: ${project}"
+                new WorkflowVersionSelector(project: project, workflowVersion: workflowVersion).save(flush: true)
+            }
         }
     }
     assert false: "DEBUG: transaction intentionally failed to rollback changes"
