@@ -136,8 +136,8 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
             assert workPackage.pipeline.id == pipeline.id
             if (!workPackage.satisfiesCriteria(seqTrack)) {
                 logNotAligning(seqTrack, "it does not satisfy the criteria of the existing MergingWorkPackage ${workPackage}.")
-                Map<String, String> content = unalignableSeqTrackEmailCreator.getMailContent(workPackage, seqTrack)
-                mailHelperService.sendEmailToTicketSystem(content["subject"], content["body"])
+                UnalignableSeqTrackEmailCreator.MailContent content = unalignableSeqTrackEmailCreator.getMailContent(workPackage, seqTrack)
+                mailHelperService.sendEmailToTicketSystem(content.subject, content.body)
                 return Collections.emptyList()
             }
         } else {

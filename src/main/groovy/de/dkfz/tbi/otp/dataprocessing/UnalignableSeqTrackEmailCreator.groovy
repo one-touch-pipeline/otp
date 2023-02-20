@@ -41,11 +41,11 @@ class UnalignableSeqTrackEmailCreator {
     @Autowired
     OtrsTicketService otrsTicketService
 
-    Map<String, String> getMailContent(MergingWorkPackage workPackage, SeqTrack seqTrack) {
-        return [
-                "subject"  : getSubject(seqTrack),
-                "body"     : getBody(workPackage, seqTrack),
-        ]
+    MailContent getMailContent(MergingWorkPackage workPackage, SeqTrack seqTrack) {
+        return new MailContent(
+                subject: getSubject(seqTrack),
+                body: getBody(workPackage, seqTrack),
+        )
     }
 
     private String getSubject(SeqTrack seqTrack) {
@@ -94,5 +94,10 @@ the current ones.""".stripMargin()
             default:
                 return object
         }
+    }
+
+    static class MailContent {
+        String subject
+        String body
     }
 }

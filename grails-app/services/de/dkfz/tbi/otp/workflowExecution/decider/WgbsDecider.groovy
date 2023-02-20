@@ -22,43 +22,16 @@
 package de.dkfz.tbi.otp.workflowExecution.decider
 
 import grails.gorm.transactions.Transactional
-import grails.util.Pair
-import groovy.transform.Canonical
 import groovy.util.logging.Slf4j
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
-import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.otp.utils.CollectionUtils
-import de.dkfz.tbi.otp.utils.LogUsedTimeUtils
 import de.dkfz.tbi.otp.workflow.wgbs.WgbsWorkflow
-import de.dkfz.tbi.otp.workflowExecution.*
-
-import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
+import de.dkfz.tbi.otp.workflowExecution.Workflow
 
 @Component
 @Transactional
 @Slf4j
-class WgbsDecider extends AbstractWorkflowDecider {
-
-    @Autowired
-    ConfigFragmentService configFragmentService
-
-    @Autowired
-    RoddyBamFileService roddyBamFileService
-
-    @Autowired
-    WorkflowArtefactService workflowArtefactService
-
-    @Autowired
-    WorkflowRunService workflowRunService
-
-    @Autowired
-    WorkflowService workflowService
+class WgbsDecider extends AlignmentDecider {
 
     @Override
     final protected Workflow getWorkflow() {
@@ -66,211 +39,31 @@ class WgbsDecider extends AbstractWorkflowDecider {
     }
 
     @Override
-    final protected Set<ArtefactType> getSupportedInputArtefactTypes() {
-        return [
-                ArtefactType.FASTQ,
-        ] as Set
+    final boolean supportsIncrementalMerging() {
+        return false
     }
 
     @Override
-    final protected SeqType getSeqType(WorkflowArtefact inputArtefact) {
-        return (inputArtefact.artefact.get() as SeqTrack).seqType
+    final boolean requiresFastqcResults() {
+        return false
     }
 
     @Override
-    final protected Collection<WorkflowArtefact> findAdditionalRequiredInputArtefacts(Collection<WorkflowArtefact> inputArtefacts) {
-        Set<WorkflowArtefact> result = [] as Set
-        inputArtefacts.each { WorkflowArtefact inputArtefact ->
-            String artefactString = "${inputArtefact.artefactType} ${inputArtefact.toString().replaceAll('\n', ' ')}"
-            LogUsedTimeUtils.logUsedTime(log, "            fetch for ${artefactString}") {
-                SeqTrack seqTrack = inputArtefact.artefact.get() as SeqTrack
-                Individual individual = seqTrack.individual
-                SampleType sampleType = seqTrack.sampleType
-                SeqType seqType = seqTrack.seqType
-
-                result.addAll(SeqTrack.createCriteria().list {
-                    sample {
-                        eq("individual", individual)
-                        eq("sampleType", sampleType)
-                    }
-                    eq("seqType", seqType)
-                    workflowArtefact {
-                        not {
-                            'in'("state", [WorkflowArtefact.State.FAILED, WorkflowArtefact.State.OMITTED])
-                        }
-                        isNull("withdrawnDate")
-                    }
-                }.findAll { !it.isWithdrawn() }*.workflowArtefact)
-            }
-        }
-        return result
+    final String getWorkflowName() {
+        return WgbsWorkflow.WORKFLOW
     }
 
     @Override
-    final protected Collection<Collection<WorkflowArtefact>> groupArtefactsForWorkflowExecution(Collection<WorkflowArtefact> inputArtefacts,
-                                                                                                Map<String, String> userParams = [:]) {
-        boolean ignoreSeqPlatformGroup = "TRUE".equalsIgnoreCase(userParams['ignoreSeqPlatformGroup'].toString())
-        return inputArtefacts.groupBy { WorkflowArtefact inputArtefact ->
-            SeqTrack seqTrack = inputArtefact.artefact.get() as SeqTrack
-            Individual individual = seqTrack.individual
-            SampleType sampleType = seqTrack.sampleType
-            Project project = seqTrack.project
-            SeqType seqType = seqTrack.seqType
-            AntibodyTarget antibodyTarget = seqTrack.antibodyTarget
-            SeqPlatformGroup seqPlatformGroup = seqTrack.seqPlatformGroup
-            LibraryPreparationKit libraryPreparationKit = seqTrack.libraryPreparationKit
-
-            MergingCriteria mergingCriteria = CollectionUtils.atMostOneElement(MergingCriteria.findAllByProjectAndSeqType(project, seqType))
-            if (seqPlatformGroup == null) {
-                assert mergingCriteria?.useSeqPlatformGroup == MergingCriteria.SpecificSeqPlatformGroups.IGNORE_FOR_MERGING
-            }
-
-            if (mergingCriteria?.useSeqPlatformGroup == MergingCriteria.SpecificSeqPlatformGroups.IGNORE_FOR_MERGING || ignoreSeqPlatformGroup) {
-                seqPlatformGroup = null
-            }
-            if (!mergingCriteria.useLibPrepKit) {
-                libraryPreparationKit = null
-            }
-
-            new GroupBy(
-                    individual,
-                    sampleType,
-                    seqType,
-                    antibodyTarget,
-                    seqPlatformGroup,
-                    libraryPreparationKit,
-            )
-        }.values()
+    final String getInputFastqRole() {
+        return WgbsWorkflow.INPUT_FASTQ
     }
+
+    final String inputFastqcRole = null
+
+    final String inputBaseBamRole = null
 
     @Override
-    final protected Collection<WorkflowArtefact> createWorkflowRunsAndOutputArtefacts(Collection<Collection<WorkflowArtefact>> inputArtefacts,
-                                                                                      Collection<WorkflowArtefact> initialArtefacts, WorkflowVersion version) {
-        return inputArtefacts.withIndex().collect { Collection<WorkflowArtefact> artefacts, Integer index ->
-            String artefactString = artefacts.collect {
-                "${it.artefactType} ${it.toString().replaceAll('\n', ' ')}"
-            }.join('; ')
-            LogUsedTimeUtils.logUsedTimeStartEnd(log, "            create workflow run: ${index + 1}: ${artefactString}") {
-                createWorkflowRunIfPossible(artefacts, version)
-            }
-        }.findAll()
-    }
-
-    private WorkflowArtefact createWorkflowRunIfPossible(Collection<WorkflowArtefact> artefacts, WorkflowVersion version) {
-        List<SeqTrack> seqTracks = artefacts.findAll { it.artefactType == ArtefactType.FASTQ }*.artefact*.get() as List<SeqTrack>
-
-        if (seqTracks.empty) {
-            return null
-        }
-
-        SeqTrack seqTrack = seqTracks.first()
-        Project project = seqTrack.project
-        SeqType seqType = seqTrack.seqType
-        AntibodyTarget antibodyTarget = seqTrack.antibodyTarget
-        Set<SpeciesWithStrain> allSpecies = ([seqTrack.individual.species] + (seqTrack.sample.mixedInSpecies ?: [])) as Set
-        Individual individual = seqTrack.individual
-        SampleType sampleType = seqTrack.sampleType
-        ProcessingPriority priority = project.processingPriority
-
-        ReferenceGenome referenceGenome = CollectionUtils.exactlyOneElement(
-                ReferenceGenomeSelector.findAllByProjectAndSeqTypeAndWorkflow(project, seqType, workflow)
-                        .findAll { it.species == allSpecies }
-        ).referenceGenome
-
-        MergingWorkPackage workPackage = atMostOneElement(
-                MergingWorkPackage.findAllWhere(
-                        sample: seqTrack.sample,
-                        seqType: seqType,
-                        antibodyTarget: seqType.hasAntibodyTarget ? antibodyTarget : null,
-                )
-        )
-        if (workPackage) {
-            assert workPackage.referenceGenome == referenceGenome
-            if (!workPackage.satisfiesCriteria(seqTrack)) {
-                return null
-            }
-        } else {
-            workPackage = new MergingWorkPackage(
-                    MergingWorkPackage.getMergingProperties(seqTrack) + [
-                            referenceGenome: referenceGenome,
-                            pipeline       : CollectionUtils.exactlyOneElement(Pipeline.findAllByName(Pipeline.Name.PANCAN_ALIGNMENT)),
-                    ])
-        }
-        workPackage.seqTracks = seqTracks
-        workPackage.save(flush: false)
-
-        List<String> runDisplayName = [
-                "project: ${project.name}",
-                "individual: ${individual.displayName}",
-                "sampleType: ${sampleType.displayName}",
-                "seqType: ${seqType.displayNameWithLibraryLayout}",
-        ]
-        List<String> artefactDisplayName = runDisplayName
-        artefactDisplayName.remove(0)
-        String shortName = "${WgbsWorkflow.WORKFLOW}: ${individual.pid} ${sampleType.displayName} ${seqType.displayNameWithLibraryLayout}"
-
-        List<ExternalWorkflowConfigFragment> configFragments = configFragmentService.getSortedFragments(new SingleSelectSelectorExtendedCriteria(
-                workflow, version, project, seqType, referenceGenome, workPackage.libraryPreparationKit))
-
-        WorkflowRun run = workflowRunService.buildWorkflowRun(
-                workflow,
-                priority,
-                "", // set later
-                project,
-                runDisplayName,
-                shortName,
-                configFragments,
-                version,
-        )
-
-        artefacts.each {
-            new WorkflowRunInputArtefact(
-                    workflowRun: run,
-                    role: "${WgbsWorkflow.INPUT_FASTQ}_${it.artefact.get().id}",
-                    workflowArtefact: it,
-            ).save(flush: false)
-        }
-
-        WorkflowArtefact workflowOutputArtefact = workflowArtefactService.buildWorkflowArtefact(new WorkflowArtefactValues(
-                run,
-                WgbsWorkflow.OUTPUT_BAM,
-                ArtefactType.BAM,
-                artefactDisplayName,
-        )).save(flush: false)
-
-        int identifier = RoddyBamFile.nextIdentifier(workPackage)
-        RoddyBamFile bamFile = new RoddyBamFile(
-                workflowArtefact: workflowOutputArtefact,
-                workPackage: workPackage,
-                identifier: identifier,
-                workDirectoryName: "${roddyBamFileService.WORK_DIR_PREFIX}_${identifier}",
-                seqTracks: seqTracks,
-        )
-
-        bamFile.numberOfMergedLanes = bamFile.containedSeqTracks.size()
-        assert bamFile.save(flush: false)
-
-        run.workDirectory = roddyBamFileService.getWorkDirectory(bamFile).toString()
-        run.save(flush: false)
-
-        return workflowOutputArtefact.save(flush: true)
-    }
-
-    @Override
-    final protected Map<Pair<Project, SeqType>, List<WorkflowArtefact>> groupInputArtefacts(Collection<WorkflowArtefact> inputArtefacts) {
-        return inputArtefacts.groupBy { WorkflowArtefact inputArtefact ->
-            SeqTrack seqTrack = inputArtefact.artefact.get() as SeqTrack
-            return new Pair<Project, SeqType>(seqTrack.project, seqTrack.seqType)
-        }
-    }
-
-    @Canonical
-    class GroupBy {
-        Individual individual
-        SampleType sampleType
-        SeqType seqType
-        AntibodyTarget antibodyTarget
-        SeqPlatformGroup seqPlatformGroup
-        LibraryPreparationKit libraryPreparationKit
+    final String getOutputBamRole() {
+        return WgbsWorkflow.OUTPUT_BAM
     }
 }
