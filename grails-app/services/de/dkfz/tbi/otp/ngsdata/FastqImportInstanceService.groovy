@@ -68,8 +68,9 @@ class FastqImportInstanceService {
 
     @Transactional(readOnly = false)
     void updateState(FastqImportInstance fastqImportInstance, FastqImportInstance.WorkflowCreateState state) {
-        fastqImportInstance.state = state
-        fastqImportInstance.save(flush: true)
+        FastqImportInstance fastqImportInstanceReFetch = FastqImportInstance.get(fastqImportInstance.id)
+        fastqImportInstanceReFetch.state = state
+        fastqImportInstanceReFetch.save(flush: true)
     }
 
     /**

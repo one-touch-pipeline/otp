@@ -100,6 +100,7 @@ class FastqcExecuteClusterPipelineJobSpec extends Specification implements DataT
         run = createWorkflowRun([
                 workflow       : workflow,
                 workflowVersion: version,
+                workDirectory  : tempDir.resolve("workflowrun_${nextId}"),
         ])
         step = createWorkflowStep([
                 workflowRun: run,

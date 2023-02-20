@@ -101,9 +101,19 @@ class WorkflowCreatorScheduler {
 
             notificationCreator.sendWorkflowCreateSuccessMail(metaDataFile)
         } catch (Throwable throwable) {
-            fastqImportInstanceService.updateState(metaDataFile.fastqImportInstance, FastqImportInstance.WorkflowCreateState.FAILED)
-            notificationCreator.sendWorkflowCreateErrorMail(metaDataFile, throwable)
-            log.debug("  workflow creation for ${metaDataFile.fileName} failed")
+            log.debug("  failed workflow creation for ${metaDataFile.fileName}", throwable)
+            try {
+                notificationCreator.sendWorkflowCreateErrorMail(metaDataFile, throwable)
+            } catch (Throwable throwable2) {
+                log.debug("  failed error notification for workflow creation of ${metaDataFile.fileName}", throwable2)
+                throw throwable2
+            }
+            try {
+                fastqImportInstanceService.updateState(metaDataFile.fastqImportInstance, FastqImportInstance.WorkflowCreateState.FAILED)
+            } catch (Throwable throwable2) {
+                log.debug("  failed update status for failed workflow creation of ${metaDataFile.fileName}", throwable2)
+                throw throwable2
+            }
         }
     }
 
