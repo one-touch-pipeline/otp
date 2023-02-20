@@ -32,7 +32,9 @@ import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.SeqTrackService
 import de.dkfz.tbi.otp.workflow.jobs.AbstractExecuteClusterPipelineJob
+import de.dkfz.tbi.otp.workflow.shared.NoWorkflowVersionSpecifiedException
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
+import de.dkfz.tbi.otp.workflowExecution.WorkflowVersion
 
 import java.nio.file.Files
 import java.nio.file.Path
@@ -132,10 +134,13 @@ class FastqcExecuteClusterPipelineJob extends AbstractExecuteClusterPipelineJob 
                 deleteDecompressedFileCommand = "rm -f ${inputFileName}"
             }
 
-            String workflowVersion = workflowStep?.workflowRun?.workflowVersion?.workflowVersion ?: ""
+            WorkflowVersion workflowVersion = workflowStep.workflowRun.workflowVersion
+            if (!workflowVersion) {
+                throw new NoWorkflowVersionSpecifiedException("For project '${workflowStep.workflowRun.project}' no fastqc workflow version is specified")
+            }
             String moduleLoader = processingOptionService.findOptionAsString(ProcessingOption.OptionName.COMMAND_LOAD_MODULE_LOADER)
             String fastqcActivation = processingOptionService.findOptionAsString(ProcessingOption.OptionName.COMMAND_ENABLE_MODULE) + ' fastqc/' +
-                    workflowVersion
+                    workflowVersion.workflowVersion
             String fastqcCommand = processingOptionService.findOptionAsString(ProcessingOption.OptionName.COMMAND_FASTQC)
 
             return """|

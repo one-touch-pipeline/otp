@@ -120,6 +120,7 @@ class FastqcDecider implements Decider {
                 runDisplayName,
                 shortName,
                 getConfigFragments(seqTrack, workflowVersion),
+                workflowVersion,
         )
 
         new WorkflowRunInputArtefact(
