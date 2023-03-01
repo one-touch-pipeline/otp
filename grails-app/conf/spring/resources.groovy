@@ -23,13 +23,9 @@ import grails.util.Environment
 import org.springframework.web.servlet.i18n.FixedLocaleResolver
 
 import de.dkfz.tbi.otp.ProjectLinkGenerator
-import de.dkfz.tbi.otp.config.ConfigService
-import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.utils.NumberConverter
 
 beans = {
-    Properties otpProperties = ConfigService.parsePropertiesFile()
-
     if (Environment.current == Environment.TEST) {
         // use Class.forName because classes in test-helper are not found in production env
         fileSystemService(Class.forName("de.dkfz.tbi.otp.job.processing.TestFileSystemService"))
@@ -67,10 +63,4 @@ beans = {
 
     // only use English (prevents translations included in plugins being used)
     localeResolver(FixedLocaleResolver, Locale.ENGLISH)
-
-    if (Boolean.parseBoolean(otpProperties.getProperty(OtpProperty.OIDC_ENABLED.key))) {
-        identityProvider(Class.forName("de.dkfz.tbi.otp.security.user.identityProvider.KeycloakService"))
-    } else {
-        identityProvider(Class.forName("de.dkfz.tbi.otp.security.user.identityProvider.LdapService"))
-    }
 }

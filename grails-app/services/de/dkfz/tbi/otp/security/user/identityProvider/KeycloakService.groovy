@@ -24,27 +24,25 @@ package de.dkfz.tbi.otp.security.user.identityProvider
 import grails.gorm.transactions.Transactional
 import org.apache.commons.lang.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.http.*
-import org.springframework.security.oauth2.client.OAuth2RestTemplate
-import org.springframework.security.oauth2.client.token.grant.client.ClientCredentialsResourceDetails
-import org.springframework.security.oauth2.common.OAuth2AccessToken
-import org.springframework.web.client.RestTemplate
+import org.springframework.security.oauth2.client.web.reactive.function.client.ServerOAuth2AuthorizedClientExchangeFilterFunction
+import org.springframework.web.reactive.function.client.WebClient
 
-import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.security.user.identityProvider.data.IdpUserDetails
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.util.ldap.UserAccountControl
 
 @Transactional
 class KeycloakService implements IdentityProvider {
 
+    static final String CLIENT_REGISTRATION_ID = "keycloak"
+
     @Autowired
     ConfigService configService
 
-    private final RestTemplate restTemplate = new RestTemplate()
-
-    private OAuth2AccessToken accessToken
+    @Autowired
+    WebClient webClient
 
     @Override
     IdpUserDetails getIdpUserDetailsByUsername(String username) {
@@ -54,9 +52,13 @@ class KeycloakService implements IdentityProvider {
     @Override
     List<IdpUserDetails> getIdpUserDetailsByUserList(List<User> otpUsers) {
         String requestUrl = "$apiBaseUrl/${configService.keycloakRealm}/users?max=1000000"
-        HttpEntity<String> entity = new HttpEntity<>(null, authorizationHeader)
-        ResponseEntity<List<KeycloakUser>> response = restTemplate.exchange(requestUrl, HttpMethod.GET, entity, KeycloakUser[].class)
-        List<KeycloakUser> keycloakUsers = response.body
+        List<KeycloakUser> keycloakUsers = webClient
+                .get()
+                .uri(requestUrl)
+                .attributes(ServerOAuth2AuthorizedClientExchangeFilterFunction.clientRegistrationId(CLIENT_REGISTRATION_ID))
+                .retrieve()
+                .bodyToMono(KeycloakUser[].class)
+                .block()
         List<String> otpUsernames = otpUsers*.username
         keycloakUsers.removeAll { !otpUsernames.contains(it.username) }
         return castKeycloakUsersIntoIdpUserDetails(keycloakUsers)
@@ -65,9 +67,13 @@ class KeycloakService implements IdentityProvider {
     @Override
     List<IdpUserDetails> getListOfIdpUserDetailsBySearchString(String searchString) {
         String requestUrl = "$apiBaseUrl/${configService.keycloakRealm}/users?search=$searchString"
-        HttpEntity<String> entity = new HttpEntity<>(null, authorizationHeader)
-        ResponseEntity<List<KeycloakUser>> response = restTemplate.exchange(requestUrl, HttpMethod.GET, entity, KeycloakUser[].class)
-        List<KeycloakUser> keycloakUsers = response.body
+        List<KeycloakUser> keycloakUsers = webClient
+                .get()
+                .uri(requestUrl)
+                .attributes(ServerOAuth2AuthorizedClientExchangeFilterFunction.clientRegistrationId(CLIENT_REGISTRATION_ID))
+                .retrieve()
+                .bodyToMono(KeycloakUser[].class)
+                .block()
         return castKeycloakUsersIntoIdpUserDetails(keycloakUsers)
     }
 
@@ -77,9 +83,13 @@ class KeycloakService implements IdentityProvider {
         }
 
         String requestUrl = "$apiBaseUrl/${configService.keycloakRealm}/groups?search=$groupName"
-        HttpEntity<String> entity = new HttpEntity<String>(null, authorizationHeader)
-        ResponseEntity<List<KeycloakGroup>> response = restTemplate.exchange(requestUrl, HttpMethod.GET, entity, KeycloakGroup[].class)
-        List<KeycloakGroup> keycloakGroups = response.body
+        List<KeycloakGroup> keycloakGroups = webClient
+                .get()
+                .uri(requestUrl)
+                .attributes(ServerOAuth2AuthorizedClientExchangeFilterFunction.clientRegistrationId(CLIENT_REGISTRATION_ID))
+                .retrieve()
+                .bodyToMono(KeycloakGroup[].class)
+                .block()
         return keycloakGroups ? CollectionUtils.atMostOneElement(keycloakGroups).id : ""
     }
 
@@ -89,9 +99,13 @@ class KeycloakService implements IdentityProvider {
         }
 
         String requestUrl = "$apiBaseUrl/${configService.keycloakRealm}/groups/$groupId/members"
-        HttpEntity<String> entity = new HttpEntity<String>(null, authorizationHeader)
-        ResponseEntity<List<KeycloakUser>> response = restTemplate.exchange(requestUrl, HttpMethod.GET, entity, KeycloakUser[].class)
-        List<KeycloakUser> keycloakUsersInGroup = response.body
+        List<KeycloakUser> keycloakUsersInGroup = webClient
+                .get()
+                .uri(requestUrl)
+                .attributes(ServerOAuth2AuthorizedClientExchangeFilterFunction.clientRegistrationId(CLIENT_REGISTRATION_ID))
+                .retrieve()
+                .bodyToMono(KeycloakUser[].class)
+                .block()
         return keycloakUsersInGroup*.username
     }
 
@@ -159,43 +173,16 @@ class KeycloakService implements IdentityProvider {
         return "${configService.keycloakServer}/admin/realms"
     }
 
-    /**
-     * Get a HTTP header containing a valid Bearer access token. It uses the cached token, if it is still valid. Otherwise
-     * the method will request a new access token.
-     *
-     * @return HttpHeaders with Bearer token
-     */
-    private HttpHeaders getAuthorizationHeader() {
-        if (!accessToken || accessToken.expired) {
-            this.accessToken = new OAuth2RestTemplate(oAuthConfigDetails()).accessToken
-        }
-
-        HttpHeaders headers = new HttpHeaders()
-        headers.set("Authorization", "Bearer " + accessToken.value)
-        headers.contentType = MediaType.APPLICATION_JSON_UTF8
-
-        return headers
-    }
-
-    /**
-     * Generate an oAuth2 configuration which contains all required request parameters to fetch a
-     * Bearer token from the otp authorization server.
-     *
-     * @return ClientCredentialsResourceDetails, which contains the oAuth2 configuration
-     */
-    private ClientCredentialsResourceDetails oAuthConfigDetails() {
-        ClientCredentialsResourceDetails authConfig = new ClientCredentialsResourceDetails()
-        authConfig.accessTokenUri = "${configService.keycloakServer}/realms/otp-dev/protocol/openid-connect/token"
-        authConfig.clientId = configService.keycloakClientId
-        authConfig.clientSecret = configService.keycloakClientSecret
-        return authConfig
-    }
-
     private KeycloakUser getKeycloakUserByExactUsername(String username) {
         String requestUrl = "$apiBaseUrl/${configService.keycloakRealm}/users?username=$username&exact=true"
-        HttpEntity<String> entity = new HttpEntity<>(null, authorizationHeader)
-        ResponseEntity<List<KeycloakUser>> response = restTemplate.exchange(requestUrl, HttpMethod.GET, entity, KeycloakUser[].class)
-        KeycloakUser keycloakUser = response.body.first()
+        KeycloakUser keycloakUser = webClient
+                .get()
+                .uri(requestUrl)
+                .attributes(ServerOAuth2AuthorizedClientExchangeFilterFunction.clientRegistrationId(CLIENT_REGISTRATION_ID))
+                .retrieve()
+                .bodyToMono(KeycloakUser[].class)
+                .block()
+                .first()
         return keycloakUser
     }
 
@@ -205,12 +192,12 @@ class KeycloakService implements IdentityProvider {
 
     private IdpUserDetails castKeycloakUserIntoIdpUserDetails(KeycloakUser keycloakUser) {
         return new IdpUserDetails([
-                username: keycloakUser.username,
-                realName: "$keycloakUser.firstName $keycloakUser.lastName",
-                mail: keycloakUser.email,
-                department: keycloakUser.attributes.department.first(),
-                thumbnailPhoto: keycloakUser.attributes.thumbnailPhoto.first().bytes,
-                deactivated: !keycloakUser.enabled,
+                username         : keycloakUser.username,
+                realName         : "$keycloakUser.firstName $keycloakUser.lastName",
+                mail             : keycloakUser.email,
+                department       : keycloakUser.attributes.department.first(),
+                thumbnailPhoto   : keycloakUser.attributes.thumbnailPhoto.first().bytes,
+                deactivated      : !keycloakUser.enabled,
                 memberOfGroupList: keycloakUser.attributes.memberOf,
         ])
     }

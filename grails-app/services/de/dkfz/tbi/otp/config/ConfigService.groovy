@@ -183,6 +183,10 @@ class ConfigService implements ApplicationContextAware {
         return otpProperties.get(OtpProperty.LDAP_SEARCH_ATTRIBUTE)
     }
 
+    boolean getOidcEnabled() {
+        return getBooleanValue(OtpProperty.OIDC_ENABLED)
+    }
+
     String getKeycloakServer() {
         return otpProperties.get(OtpProperty.KEYCLOAK_SERVER)
     }
@@ -232,6 +236,10 @@ class ConfigService implements ApplicationContextAware {
 
     String getConfigServerUrl() {
         return otpProperties.get(OtpProperty.CONFIG_SERVER_URL)
+    }
+
+    boolean getConsoleEnabled() {
+        return getBooleanValue(OtpProperty.GRAILS_CONSOLE)
     }
 
     private File getAndCheckPathFromProperty(OtpProperty property) {

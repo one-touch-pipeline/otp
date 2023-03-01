@@ -38,12 +38,19 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.core.AuthenticationException
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.ldap.DefaultSpringSecurityContextSource
+import org.springframework.security.oauth2.client.AuthorizedClientServiceReactiveOAuth2AuthorizedClientManager
+import org.springframework.security.oauth2.client.InMemoryReactiveOAuth2AuthorizedClientService
+import org.springframework.security.oauth2.client.registration.*
+import org.springframework.security.oauth2.client.web.reactive.function.client.ServerOAuth2AuthorizedClientExchangeFilterFunction
+import org.springframework.security.oauth2.core.AuthorizationGrantType
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.*
 import org.springframework.security.web.authentication.switchuser.SwitchUserFilter
+import org.springframework.web.reactive.function.client.WebClient
 
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.security.*
+import de.dkfz.tbi.otp.security.user.identityProvider.*
 
 import javax.servlet.ServletException
 import javax.servlet.http.HttpServletRequest
@@ -126,8 +133,22 @@ class SecurityConfiguration {
         return new DefaultAuthenticationEventPublisher(applicationEventPublisher)
     }
 
-    @SuppressWarnings('Indentation')
+    @Autowired
+    KeycloakService keycloakService
+
+    @Autowired
+    LdapService ldapService
+
     @Bean
+    IdentityProvider identityProvider() {
+        if (configService.oidcEnabled) {
+            return keycloakService
+        }
+        return ldapService
+    }
+
+    @Bean
+    @SuppressWarnings('Indentation')
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         AuthenticationSuccessHandler successHandler = new SavedRequestAwareAuthenticationSuccessHandler()
         successHandler.defaultTargetUrl = "/home/index"
@@ -211,6 +232,39 @@ class SecurityConfiguration {
                             .invalidateHttpSession(true)
                             .clearAuthentication(true)
                 }
+                .oauth2Client(withDefaults())
         return http.build()
+    }
+
+    @Bean
+    ReactiveClientRegistrationRepository clientRegistrations() {
+        ClientRegistration keycloakRegistration = ClientRegistration
+                .withRegistrationId(KeycloakService.CLIENT_REGISTRATION_ID)
+                .tokenUri("${configService.keycloakServer}/realms/otp-dev/protocol/openid-connect/token")
+                .clientId(configService.keycloakClientId)
+                .clientSecret(configService.keycloakClientSecret)
+                .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
+                .build()
+        ClientRegistration wesRegistration = ClientRegistration
+                .withRegistrationId("wes")
+                .tokenUri(configService.wesAuthBaseUrl)
+                .clientId(configService.wesAuthClientId)
+                .clientSecret(configService.wesAuthClientSecret)
+                .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
+                .build()
+        return new InMemoryReactiveClientRegistrationRepository(keycloakRegistration, wesRegistration)
+    }
+
+    @Bean
+    @SuppressWarnings("DoNotCreateServicesWithNew")
+    WebClient webClient(ReactiveClientRegistrationRepository clientRegistrations) {
+        InMemoryReactiveOAuth2AuthorizedClientService clientService = new InMemoryReactiveOAuth2AuthorizedClientService(clientRegistrations)
+        AuthorizedClientServiceReactiveOAuth2AuthorizedClientManager authorizedClientManager =
+                new AuthorizedClientServiceReactiveOAuth2AuthorizedClientManager(clientRegistrations, clientService)
+        ServerOAuth2AuthorizedClientExchangeFilterFunction oauth = new ServerOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager)
+
+        return WebClient.builder()
+                .filter(oauth)
+                .build()
     }
 }
