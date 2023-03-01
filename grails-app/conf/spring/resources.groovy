@@ -20,7 +20,6 @@
  * SOFTWARE.
  */
 import grails.util.Environment
-import org.springframework.web.servlet.i18n.FixedLocaleResolver
 
 import de.dkfz.tbi.otp.ProjectLinkGenerator
 import de.dkfz.tbi.otp.handler.CustomExceptionResolver
@@ -67,7 +66,4 @@ beans = {
     grailsLinkGenerator(ProjectLinkGenerator, grailsApplication.config.getProperty("grails.serverURL", String.class)) { bean ->
         bean.autowire = true
     }
-
-    // only use English (prevents translations included in plugins being used)
-    localeResolver(FixedLocaleResolver, Locale.ENGLISH)
 }
