@@ -36,7 +36,7 @@ class ProjectSelectionInterceptor {
     int order = 2
 
     ProjectSelectionInterceptor() {
-        matchAll().except(controller: 'errors')
+        matchAll().except(controller: 'error')
     }
 
     @Override

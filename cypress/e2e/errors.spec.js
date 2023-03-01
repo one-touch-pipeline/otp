@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-describe('Check errors pages', () => {
+describe('Check error pages', () => {
   'use strict';
 
   context('when user is an operator', () => {
@@ -29,7 +29,7 @@ describe('Check errors pages', () => {
     });
 
     it('should visit the error403 page and expect a 403 HTTP Error', () => {
-      const url = '/errors/error403';
+      const url = '/error/error403';
       cy.request({
         url,
         failOnStatusCode: false
@@ -41,7 +41,7 @@ describe('Check errors pages', () => {
     });
 
     it('should visit the error404 page and expect a 404 HTTP Error', () => {
-      const url = '/errors/error404';
+      const url = '/error/error404';
       cy.request({
         url,
         failOnStatusCode: false
@@ -53,7 +53,7 @@ describe('Check errors pages', () => {
     });
 
     it('should visit the error405 page and expect a 405 HTTP Error', () => {
-      const url = '/errors/error405';
+      const url = '/error/error405';
       cy.request({
         url,
         failOnStatusCode: false
@@ -65,7 +65,7 @@ describe('Check errors pages', () => {
     });
 
     it('should visit the error500 page and expect a 500 HTTP Error', () => {
-      const url = '/errors/error500';
+      const url = '/error/error500';
       cy.request({
         url,
         failOnStatusCode: false
@@ -77,7 +77,7 @@ describe('Check errors pages', () => {
     });
 
     it('should visit the noProject page and expect a 404 HTTP Error', () => {
-      const url = '/errors/noProject';
+      const url = '/error/noProject';
       cy.request({
         url,
         failOnStatusCode: false
@@ -89,7 +89,7 @@ describe('Check errors pages', () => {
     });
 
     it('should visit the switchedUserDeniedException page and expect a 401 HTTP Error', () => {
-      const url = '/errors/switchedUserDeniedException';
+      const url = '/error/switchedUserDeniedException';
       cy.request({
         url,
         failOnStatusCode: false

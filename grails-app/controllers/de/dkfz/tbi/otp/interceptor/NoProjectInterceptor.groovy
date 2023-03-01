@@ -35,7 +35,7 @@ class NoProjectInterceptor {
 
     NoProjectInterceptor() {
         matchAll()
-                .except(controller: 'errors')
+                .except(controller: 'error')
                 .except(controller: 'projectRequest')
                 .except(controller: 'ldap')
                 .except(controller: 'projectCreation')
@@ -62,7 +62,7 @@ class NoProjectInterceptor {
     boolean before() {
         if (securityService.loggedIn) {
             if (!projectService.allProjects) {
-                forward(controller: "errors", action: "noProject")
+                forward(controller: "error", action: "noProject")
                 return false
             }
         }

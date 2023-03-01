@@ -31,13 +31,14 @@ import javax.servlet.http.HttpServletResponse
 
 @Slf4j
 @Secured('isFullyAuthenticated()')
-class ErrorsController {
+class ErrorController {
 
     RequestUtilService requestUtilService
 
     static List<String> allHttpMethods = ["GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "TRACE", "PATCH"]
 
     static allowedMethods = [
+            index                      : allHttpMethods,
             error403                   : "GET",
             error404                   : "GET",
             error405                   : allHttpMethods,
@@ -45,6 +46,10 @@ class ErrorsController {
             noProject                  : "GET",
             switchedUserDeniedException: "GET",
     ]
+
+    def index = {
+        forward action: "error500"
+    }
 
     def error403 = {
         response.status = HttpServletResponse.SC_FORBIDDEN

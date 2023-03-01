@@ -32,11 +32,11 @@ class UrlMappings {
         }
 
         "/"(controller: "info", action: "about")
-        "403"(controller: "errors", action: "error403")
-        "404"(controller: "errors", action: "error404")
-        "405"(controller: "errors", action: "error405")
-        "500"(controller: "errors", action: "error500")
-        "500"(controller: "errors", action: "error403", exception: org.springframework.security.access.AccessDeniedException)
-        "500"(controller: "errors", action: "switchedUserDeniedException", exception: SwitchedUserDeniedException)
+        "403"(controller: "error", action: "error403")
+        "404"(controller: "error", action: "error404")
+        "405"(controller: "error", action: "error405")
+        "500"(controller: "error", action: "error500")
+        "500"(controller: "error", action: "error403", exception: org.springframework.security.access.AccessDeniedException)
+        "500"(controller: "error", action: "switchedUserDeniedException", exception: SwitchedUserDeniedException)
     }
 }
