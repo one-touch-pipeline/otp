@@ -22,7 +22,7 @@
 package de.dkfz.tbi.otp.infrastructure
 
 import grails.converters.JSON
-import org.springframework.security.access.annotation.Secured
+import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.ngsdata.SeqTypeService
@@ -32,7 +32,7 @@ import de.dkfz.tbi.util.TimeUtils
 import java.time.Duration
 import java.time.LocalDate
 
-@Secured("hasRole('ROLE_OPERATOR')")
+@PreAuthorize("hasRole('ROLE_OPERATOR')")
 class ClusterJobJobTypeSpecificController {
 
     static final int GIGABASES_TO_BASES = 1000000000

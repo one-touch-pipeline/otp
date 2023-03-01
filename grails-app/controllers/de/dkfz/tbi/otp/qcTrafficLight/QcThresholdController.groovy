@@ -21,15 +21,16 @@
  */
 package de.dkfz.tbi.otp.qcTrafficLight
 
-import org.springframework.security.access.annotation.Secured
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.Errors
 
 import de.dkfz.tbi.otp.FlashMessage
 import de.dkfz.tbi.otp.ProjectSelectionService
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.ngsdata.SeqTypeService
 import de.dkfz.tbi.otp.project.Project
 
-@Secured("hasRole('ROLE_OPERATOR')")
+@PreAuthorize("hasRole('ROLE_OPERATOR')")
 class QcThresholdController {
     QcThresholdService qcThresholdService
     ProjectSelectionService projectSelectionService
@@ -54,7 +55,7 @@ class QcThresholdController {
         ]
     }
 
-    @Secured('isFullyAuthenticated()')
+    @PreAuthorize("isFullyAuthenticated()")
     def projectConfiguration() {
         Project project = projectSelectionService.selectedProject
 
@@ -69,7 +70,7 @@ class QcThresholdController {
         ]
     }
 
-    @Secured('isFullyAuthenticated()')
+    @PreAuthorize("isFullyAuthenticated()")
     def create(CreateCommand cmd) {
         checkErrorAndCallMethod(cmd, {
             qcThresholdService.createThreshold(
@@ -82,7 +83,7 @@ class QcThresholdController {
         })
     }
 
-    @Secured('isFullyAuthenticated()')
+    @PreAuthorize("isFullyAuthenticated()")
     def update(UpdateCommand cmd) {
         checkErrorAndCallMethod(cmd, {
             qcThresholdService.updateThreshold(cmd.qcThreshold, cmd.condition,
@@ -93,7 +94,7 @@ class QcThresholdController {
         })
     }
 
-    @Secured('isFullyAuthenticated()')
+    @PreAuthorize("isFullyAuthenticated()")
     def delete(DeleteCommand cmd) {
         checkErrorAndCallMethod(cmd, { qcThresholdService.deleteThreshold(cmd.qcThreshold) })
     }

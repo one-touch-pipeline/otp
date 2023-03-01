@@ -22,9 +22,9 @@
 package de.dkfz.tbi.otp.utils
 
 import grails.converters.JSON
-import org.springframework.security.access.annotation.Secured
 import grails.validation.Validateable
 import groovy.transform.ToString
+import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.CheckAndCall
 
@@ -54,7 +54,7 @@ abstract class AbstractGeneralDomainPropertyUpdateController<T extends Entity> i
      * @param cmd command object for the GUI parameters, see  {@link UpdateDomainPropertyCommand}
      * @return a JSON providing information about success or failure.
      */
-    @Secured("hasRole('ROLE_OPERATOR')")
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
     JSON updateField(UpdateDomainPropertyCommand cmd) {
         return checkErrorAndCallMethodWithExtendedMessagesAndJsonRendering(cmd) {
             updateDomainPropertyService.updateProperty(entityClass, cmd.entityId, cmd.property, cmd.value)
@@ -70,7 +70,7 @@ abstract class AbstractGeneralDomainPropertyUpdateController<T extends Entity> i
      * @param cmd command object for the GUI parameters, see  {@link UpdateDomainPropertiesCommand}
      * @return a JSON providing information about success or failure.
      */
-    @Secured("hasRole('ROLE_OPERATOR')")
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
     JSON updateMultiField(UpdateDomainPropertiesCommand cmd) {
         return checkErrorAndCallMethodWithExtendedMessagesAndJsonRendering(cmd) {
             updateDomainPropertyService.updateProperties(entityClass, cmd.entityId, cmd.property, cmd.value)

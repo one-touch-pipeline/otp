@@ -21,13 +21,13 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-import org.springframework.security.access.annotation.Secured
+import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.project.RoddyConfiguration
 
-@Secured("hasRole('ROLE_OPERATOR')")
+@PreAuthorize("hasRole('ROLE_OPERATOR')")
 class ConfigureIndelPipelineController extends AbstractConfigureRoddyPipelineController {
 
     @Override

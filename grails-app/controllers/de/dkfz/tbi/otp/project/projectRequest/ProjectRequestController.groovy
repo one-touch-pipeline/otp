@@ -24,7 +24,6 @@ package de.dkfz.tbi.otp.project.projectRequest
 import grails.converters.JSON
 import grails.databinding.BindUsing
 import grails.databinding.SimpleMapDataBindingSource
-import org.springframework.security.access.annotation.Secured
 import grails.validation.Validateable
 import grails.validation.ValidationException
 import groovy.transform.TupleConstructor
@@ -53,7 +52,7 @@ import de.dkfz.tbi.util.TimeFormats
 
 import java.time.LocalDate
 
-@Secured('isFullyAuthenticated()')
+@PreAuthorize('isFullyAuthenticated()')
 class ProjectRequestController implements CheckAndCall {
 
     ProjectRequestService projectRequestService

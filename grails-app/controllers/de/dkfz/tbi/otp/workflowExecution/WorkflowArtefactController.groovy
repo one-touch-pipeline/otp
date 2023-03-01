@@ -21,9 +21,9 @@
  */
 package de.dkfz.tbi.otp.workflowExecution
 
-import org.springframework.security.access.annotation.Secured
+import org.springframework.security.access.prepost.PreAuthorize
 
-@Secured("hasRole('ROLE_OPERATOR')")
+@PreAuthorize("hasRole('ROLE_OPERATOR')")
 class WorkflowArtefactController {
 
     static allowedMethods = [

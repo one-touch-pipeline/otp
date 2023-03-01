@@ -21,11 +21,11 @@
  */
 package de.dkfz.tbi.otp
 
-import org.springframework.security.access.annotation.Secured
+import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.workflowExecution.*
 
-@Secured("hasRole('ROLE_ADMIN')")
+@PreAuthorize("hasRole('ROLE_ADMIN')")
 class SystemStatusController implements CheckAndCall {
 
     WorkflowSystemService workflowSystemService

@@ -22,8 +22,8 @@
 package de.dkfz.tbi.otp.component
 
 import grails.converters.JSON
-import org.springframework.security.access.annotation.Secured
 import org.springframework.http.HttpStatus
+import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.SearchSeqTrackService
@@ -44,7 +44,7 @@ import de.dkfz.tbi.otp.project.Project
  *
  * @return a list of seqTracks in JSON format
  */
-@Secured("hasRole('ROLE_OPERATOR')")
+@PreAuthorize("hasRole('ROLE_OPERATOR')")
 class SearchSeqTrackController {
 
     ProjectSelectionService projectSelectionService

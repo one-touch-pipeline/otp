@@ -22,8 +22,8 @@
 package de.dkfz.tbi.otp.infrastructure
 
 import grails.converters.JSON
-import org.springframework.security.access.annotation.Secured
 import groovy.transform.TupleConstructor
+import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.utils.DataTableCommand
 import de.dkfz.tbi.util.TimeFormats
@@ -31,7 +31,7 @@ import de.dkfz.tbi.util.TimeFormats
 import java.time.LocalDate
 import java.time.ZonedDateTime
 
-@Secured("hasRole('ROLE_OPERATOR')")
+@PreAuthorize("hasRole('ROLE_OPERATOR')")
 class ClusterJobGeneralController {
 
     @TupleConstructor

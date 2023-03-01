@@ -21,7 +21,7 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-import org.springframework.security.access.annotation.Secured
+import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.FlashMessage
 import de.dkfz.tbi.otp.ProjectSelectionService
@@ -31,7 +31,7 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePairDeciderService
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.SecurityService
 
-@Secured('isFullyAuthenticated()')
+@PreAuthorize('isFullyAuthenticated()')
 class ProcessingThresholdController {
 
     static allowedMethods = [
@@ -89,7 +89,7 @@ class ProcessingThresholdController {
         ]
     }
 
-    @Secured("hasRole('ROLE_OPERATOR')")
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
     def update(ProcThresholdsCommand cmd) {
         assert cmd.validate()
         Project project = projectSelectionService.requestedProject

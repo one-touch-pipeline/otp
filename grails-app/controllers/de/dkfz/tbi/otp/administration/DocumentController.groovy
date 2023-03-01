@@ -21,12 +21,12 @@
  */
 package de.dkfz.tbi.otp.administration
 
-import org.springframework.security.access.annotation.Secured
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.Errors
 
 import de.dkfz.tbi.otp.FlashMessage
 
-@Secured("hasRole('ROLE_OPERATOR')")
+@PreAuthorize("hasRole('ROLE_OPERATOR')")
 class DocumentController {
 
     static allowedMethods = [
@@ -96,7 +96,7 @@ class DocumentController {
         redirect(action: "manage")
     }
 
-    @Secured('isFullyAuthenticated()')
+    @PreAuthorize("isFullyAuthenticated()")
     def download(DownloadCommand cmd) {
         if (cmd.hasErrors()) {
             response.sendError(404)

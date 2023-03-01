@@ -21,9 +21,9 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-import org.springframework.security.access.annotation.Secured
+import org.springframework.security.access.prepost.PreAuthorize
 
-@Secured('isFullyAuthenticated()')
+@PreAuthorize('isFullyAuthenticated()')
 class HomeController {
 
     HomeService homeService

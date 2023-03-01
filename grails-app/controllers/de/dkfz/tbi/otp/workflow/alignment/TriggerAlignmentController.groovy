@@ -22,14 +22,14 @@
 package de.dkfz.tbi.otp.workflow.alignment
 
 import grails.converters.JSON
-import org.springframework.security.access.annotation.Secured
+import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.SearchSeqTrackService
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.ngsdata.SeqTypeService
 
-@Secured("hasRole('ROLE_OPERATOR')")
+@PreAuthorize("hasRole('ROLE_OPERATOR')")
 class TriggerAlignmentController {
 
     static final String PARAM_KEY_SEQ_TRACKS = 'seqTracks[]'

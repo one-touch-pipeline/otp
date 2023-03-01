@@ -24,7 +24,7 @@ package de.dkfz.tbi.otp.dataprocessing
 import grails.converters.JSON
 import grails.validation.Validateable
 import org.springframework.http.HttpStatus
-import org.springframework.security.access.annotation.Secured
+import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerConfigurationService
@@ -45,7 +45,7 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowService
 
 import java.nio.file.*
 
-@Secured('isFullyAuthenticated()')
+@PreAuthorize('isFullyAuthenticated()')
 class AlignmentQualityOverviewController implements CheckAndCall {
 
     static allowedMethods = [

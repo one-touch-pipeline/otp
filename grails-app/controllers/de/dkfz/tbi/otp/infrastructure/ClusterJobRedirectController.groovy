@@ -21,11 +21,11 @@
  */
 package de.dkfz.tbi.otp.infrastructure
 
-import org.springframework.security.access.annotation.Secured
 import grails.validation.Validateable
 import org.springframework.http.HttpStatus
+import org.springframework.security.access.prepost.PreAuthorize
 
-@Secured("hasRole('ROLE_OPERATOR')")
+@PreAuthorize("hasRole('ROLE_OPERATOR')")
 class ClusterJobRedirectController {
 
     static allowedMethods = [

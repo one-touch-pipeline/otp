@@ -20,9 +20,9 @@
  * SOFTWARE.
  */
 
-import org.springframework.security.access.annotation.Secured
+import org.springframework.security.access.prepost.PreAuthorize
 
-@Secured("hasRole('ROLE_ADMIN')")
+@PreAuthorize("hasRole('ROLE_ADMIN')")
 class DicomController {
 
     static allowedMethods = [

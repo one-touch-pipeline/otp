@@ -22,7 +22,7 @@
 package de.dkfz.tbi.otp.tracking
 
 import grails.converters.JSON
-import org.springframework.security.access.annotation.Secured
+import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.utils.DataTableCommand
@@ -32,7 +32,7 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
-@Secured("hasRole('ROLE_OPERATOR')")
+@PreAuthorize("hasRole('ROLE_OPERATOR')")
 class ProcessingTimeStatisticsController {
 
     ProcessingTimeStatisticsService processingTimeStatisticsService

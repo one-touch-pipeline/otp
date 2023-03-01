@@ -25,7 +25,7 @@ import grails.converters.JSON
 import grails.validation.Validateable
 import groovy.transform.Canonical
 import groovy.transform.Immutable
-import org.springframework.security.access.annotation.Secured
+import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.CheckAndCall
 import de.dkfz.tbi.otp.ProjectSelectionService
@@ -38,7 +38,7 @@ import de.dkfz.tbi.otp.project.Project
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
-@Secured("hasRole('ROLE_OPERATOR')")
+@PreAuthorize("hasRole('ROLE_OPERATOR')")
 class WorkflowSelectionController implements CheckAndCall {
 
     static allowedMethods = [
@@ -54,7 +54,7 @@ class WorkflowSelectionController implements CheckAndCall {
     ReferenceGenomeSelectorService referenceGenomeSelectorService
     WorkflowVersionSelectorService workflowVersionSelectorService
 
-    @Secured('isFullyAuthenticated()')
+    @PreAuthorize('isFullyAuthenticated()')
     def index() {
         Map<String, OtpWorkflow> workflowBeans = applicationContext.getBeansOfType(OtpWorkflow)
         List<String> alignmentWorkflowNames = workflowBeans.findAll { it.value.isAlignment() }*.key

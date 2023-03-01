@@ -21,9 +21,9 @@
  */
 package de.dkfz.tbi.otp.tracking
 
-import org.springframework.security.access.annotation.Secured
 import grails.validation.Validateable
 import groovy.transform.ToString
+import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.CheckAndCall
 import de.dkfz.tbi.otp.FlashMessage
@@ -32,7 +32,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.notification.NotificationDigestService
 import de.dkfz.tbi.otp.project.Project
 
-@Secured("hasRole('ROLE_OPERATOR')")
+@PreAuthorize("hasRole('ROLE_OPERATOR')")
 class NotificationController implements CheckAndCall {
 
     OtrsTicketService otrsTicketService

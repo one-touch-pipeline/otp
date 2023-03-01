@@ -21,13 +21,13 @@
  */
 package de.dkfz.tbi.otp.ngsdata.mergingCriteria
 
-import org.springframework.security.access.annotation.Secured
+import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.dataprocessing.MergingCriteriaService
 import de.dkfz.tbi.otp.ngsdata.SeqPlatform
 import de.dkfz.tbi.otp.ngsdata.SeqPlatformGroup
 
-@Secured("hasRole('ROLE_OPERATOR')")
+@PreAuthorize("hasRole('ROLE_OPERATOR')")
 class DefaultSeqPlatformGroupController {
 
     MergingCriteriaService mergingCriteriaService

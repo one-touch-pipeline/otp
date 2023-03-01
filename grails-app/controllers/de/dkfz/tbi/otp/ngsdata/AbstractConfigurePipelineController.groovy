@@ -21,13 +21,13 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-import org.springframework.security.access.annotation.Secured
+import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.project.ProjectService
 
-@Secured('isFullyAuthenticated()')
+@PreAuthorize('isFullyAuthenticated()')
 abstract class AbstractConfigurePipelineController {
 
     ProjectService projectService

@@ -21,25 +21,15 @@
  */
 package de.dkfz.tbi.otp.ngsqc
 
-import org.springframework.security.access.annotation.Secured
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
 import org.jsoup.select.Elements
+import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
 
-class RenderFileCommand {
-    DataFile dataFile
-    String path
-
-    static constraints = {
-        dataFile nullable: false
-        path nullable: false, blank: false
-    }
-}
-
-@Secured('isFullyAuthenticated()')
+@PreAuthorize('isFullyAuthenticated()')
 class FastqcResultsController {
 
     FastqcDataFilesService fastqcDataFilesService
@@ -111,5 +101,15 @@ class FastqcResultsController {
             return void
         }
         render(file: stream, contentType: "image/png")
+    }
+}
+
+class RenderFileCommand {
+    DataFile dataFile
+    String path
+
+    static constraints = {
+        dataFile nullable: false
+        path nullable: false, blank: false
     }
 }

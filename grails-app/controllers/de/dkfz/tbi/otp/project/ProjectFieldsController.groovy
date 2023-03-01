@@ -21,17 +21,17 @@
  */
 package de.dkfz.tbi.otp.project
 
-import org.springframework.security.access.annotation.Secured
 import grails.validation.Validateable
 import grails.validation.ValidationException
 import groovy.transform.ToString
+import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.FlashMessage
 import de.dkfz.tbi.otp.config.TypeValidators
 import de.dkfz.tbi.otp.project.additionalField.AbstractFieldDefinition
 import de.dkfz.tbi.otp.utils.AbstractGeneralDomainPropertyUpdateController
 
-@Secured("hasRole('ROLE_OPERATOR')")
+@PreAuthorize("hasRole('ROLE_OPERATOR')")
 class ProjectFieldsController extends AbstractGeneralDomainPropertyUpdateController<AbstractFieldDefinition> {
 
     static allowedMethods = [

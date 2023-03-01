@@ -22,7 +22,7 @@
 package de.dkfz.tbi.otp.administration
 
 import grails.converters.JSON
-import org.springframework.security.access.annotation.Secured
+import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.config.PropertiesValidationService
 import de.dkfz.tbi.otp.job.processing.*
@@ -34,7 +34,7 @@ import de.dkfz.tbi.otp.utils.DataTableCommand
  * @see de.dkfz.tbi.otp.administration.CrashRepairController
  */
 @Deprecated
-@Secured("hasRole('ROLE_ADMIN')")
+@PreAuthorize("hasRole('ROLE_ADMIN')")
 class CrashRecoveryController {
 
     CrashRecoveryService crashRecoveryService

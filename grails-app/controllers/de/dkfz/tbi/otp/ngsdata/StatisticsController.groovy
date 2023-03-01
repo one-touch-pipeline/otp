@@ -21,7 +21,7 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-import org.springframework.security.access.annotation.Secured
+import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.infrastructure.ClusterJobService
@@ -31,7 +31,7 @@ import de.dkfz.tbi.util.TimeFormats
 
 import java.text.SimpleDateFormat
 
-@Secured("hasRole('ROLE_OPERATOR')")
+@PreAuthorize("hasRole('ROLE_OPERATOR')")
 class StatisticsController {
     ProjectService projectService
     UserProjectRoleService userProjectRoleService

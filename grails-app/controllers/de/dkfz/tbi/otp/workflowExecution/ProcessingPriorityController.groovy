@@ -22,11 +22,11 @@
 package de.dkfz.tbi.otp.workflowExecution
 
 import grails.converters.JSON
-import org.springframework.security.access.annotation.Secured
 import grails.validation.ValidationException
 import org.springframework.http.HttpStatus
+import org.springframework.security.access.prepost.PreAuthorize
 
-@Secured("hasRole('ROLE_OPERATOR')")
+@PreAuthorize("hasRole('ROLE_OPERATOR')")
 class ProcessingPriorityController {
 
     ProcessingPriorityService processingPriorityService

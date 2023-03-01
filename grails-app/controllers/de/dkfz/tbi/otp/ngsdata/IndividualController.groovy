@@ -22,11 +22,11 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.converters.JSON
-import org.springframework.security.access.annotation.Secured
 import grails.validation.Validateable
 import grails.validation.ValidationException
 import groovy.json.JsonSlurper
 import groovy.transform.TupleConstructor
+import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.FlashMessage
@@ -36,7 +36,7 @@ import de.dkfz.tbi.otp.utils.CommentCommand
 import de.dkfz.tbi.otp.utils.DataTableCommand
 import de.dkfz.tbi.util.TimeFormats
 
-@Secured("hasRole('ROLE_OPERATOR')")
+@PreAuthorize("hasRole('ROLE_OPERATOR')")
 class IndividualController {
 
     IndividualService individualService
@@ -57,7 +57,7 @@ class IndividualController {
             editNewSampleIdentifier: "POST",
     ]
 
-    @Secured('isFullyAuthenticated()')
+    @PreAuthorize("isFullyAuthenticated()")
     def show() {
         Individual individual
         if (params.id) {
@@ -87,7 +87,7 @@ class IndividualController {
         ]
     }
 
-    @Secured('isFullyAuthenticated()')
+    @PreAuthorize("isFullyAuthenticated()")
     def list() {
         return [
                 tableHeader    : IndividualColumn.values()*.message,
@@ -102,7 +102,7 @@ class IndividualController {
         ]
     }
 
-    @Secured('isFullyAuthenticated()')
+    @PreAuthorize("isFullyAuthenticated()")
     def dataTableSource(DataTableCommand cmd) {
         Map dataToRender = cmd.dataToRender()
 
@@ -122,7 +122,7 @@ class IndividualController {
         render(dataToRender as JSON)
     }
 
-    @Secured("hasRole('ROLE_OPERATOR')")
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
     def insert() {
         List<Individual.Type> individualTypes = Individual.Type.values()
         List<String> sampleTypes = individualService.sampleTypeNames

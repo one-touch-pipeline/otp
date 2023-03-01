@@ -21,12 +21,12 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-import org.springframework.security.access.annotation.Secured
 import groovy.transform.ToString
+import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
 
-@Secured('isFullyAuthenticated()')
+@PreAuthorize('isFullyAuthenticated()')
 abstract class AbstractAnalysisController {
 
     static allowedMethods = [

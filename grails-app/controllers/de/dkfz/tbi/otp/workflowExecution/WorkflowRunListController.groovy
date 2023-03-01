@@ -22,11 +22,11 @@
 package de.dkfz.tbi.otp.workflowExecution
 
 import grails.converters.JSON
-import org.springframework.security.access.annotation.Secured
+import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.utils.DataTablesCommand
 
-@Secured("hasRole('ROLE_OPERATOR')")
+@PreAuthorize("hasRole('ROLE_OPERATOR')")
 class WorkflowRunListController extends AbstractWorkflowRunController {
 
     WorkflowService workflowService

@@ -21,12 +21,12 @@
  */
 package de.dkfz.tbi.otp.security
 
-import org.springframework.security.access.annotation.Secured
+import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.security.user.RolesService
 import de.dkfz.tbi.otp.security.user.RolesWithUsers
 
-@Secured("hasRole('ROLE_ADMIN')")
+@PreAuthorize("hasRole('ROLE_ADMIN')")
 class RolesController {
 
     RolesService rolesService

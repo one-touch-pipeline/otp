@@ -21,8 +21,8 @@
  */
 package de.dkfz.tbi.otp.errors
 
-import org.springframework.security.access.annotation.Secured
 import groovy.util.logging.Slf4j
+import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.utils.ExceptionUtils
 import de.dkfz.tbi.otp.utils.RequestUtilService
@@ -30,7 +30,7 @@ import de.dkfz.tbi.otp.utils.RequestUtilService
 import javax.servlet.http.HttpServletResponse
 
 @Slf4j
-@Secured('isFullyAuthenticated()')
+@PreAuthorize('isFullyAuthenticated()')
 class ErrorController {
 
     RequestUtilService requestUtilService

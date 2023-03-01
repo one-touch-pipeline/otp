@@ -22,8 +22,8 @@
 package de.dkfz.tbi.otp.administration
 
 import grails.converters.JSON
-import org.springframework.security.access.annotation.Secured
 import grails.validation.Validateable
+import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.CheckAndCall
 import de.dkfz.tbi.otp.FlashMessage
@@ -42,7 +42,7 @@ import de.dkfz.tbi.util.TimeFormats
  * There is a list of users which is rendered in a dataTable and allows to modify
  * the users' properties.
  */
-@Secured("hasRole('ROLE_ADMIN')")
+@PreAuthorize("hasRole('ROLE_ADMIN')")
 class UserAdministrationController implements CheckAndCall {
 
     static allowedMethods = [

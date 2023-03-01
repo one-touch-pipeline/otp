@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp
 
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -41,6 +42,7 @@ import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.*
 import org.springframework.security.web.authentication.switchuser.SwitchUserFilter
 
+import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.security.*
 
 import javax.servlet.ServletException
@@ -53,6 +55,9 @@ import static org.springframework.security.config.Customizer.withDefaults
 @EnableWebSecurity
 @EnableMethodSecurity()
 class SecurityConfiguration {
+
+    @Autowired
+    ConfigService configService
 
     @Bean
     static MethodSecurityExpressionHandler securityExpressionHandler(ProjectPermissionEvaluator projectPermissionEvaluator) {
@@ -121,6 +126,7 @@ class SecurityConfiguration {
         return new DefaultAuthenticationEventPublisher(applicationEventPublisher)
     }
 
+    @SuppressWarnings('Indentation')
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         AuthenticationSuccessHandler successHandler = new SavedRequestAwareAuthenticationSuccessHandler()
@@ -159,6 +165,45 @@ class SecurityConfiguration {
                             .loginProcessingUrl("/authenticate").permitAll()
                             .successHandler(successHandler)
                             .failureHandler(failureHandler)
+                }
+                .authorizeRequests { authorize ->
+                    if (configService.consoleEnabled) {
+                        authorize.mvcMatchers(
+                                "/console/**",
+                                "/static/console*/**",
+                        ).access("hasRole('ROLE_ADMIN') and @dicomAuditConsoleHandler.log()")
+                    } else {
+                        authorize.mvcMatchers(
+                                "/console/**",
+                                "/static/console*/**",
+                        ).denyAll()
+                    }
+                    authorize
+                            .mvcMatchers(
+                                    "/adminSeed/**",
+                                    "/plugins/**",
+                            ).denyAll()
+                            .mvcMatchers(
+                                    "/impersonate",
+                            ).hasRole("SWITCH_USER")
+                            .mvcMatchers(
+                                    "/",
+                                    "/login/**",
+                                    "/info/about",
+                                    "/info/numbers",
+                                    "/info/contact",
+                                    "/info/imprint",
+                                    "/info/partners",
+                                    "/info/faq",
+                                    "/info/newsBanner",
+                                    "/statistic/projectCountPerDate",
+                                    "/statistic/laneCountPerDate",
+                                    "/privacyPolicy/**",
+                                    "/metadataImport/autoImport",
+                                    "/error",
+                                    "/error/**",
+                            ).permitAll()
+                            .anyRequest().fullyAuthenticated()
                 }
                 .logout { logout ->
                     logout

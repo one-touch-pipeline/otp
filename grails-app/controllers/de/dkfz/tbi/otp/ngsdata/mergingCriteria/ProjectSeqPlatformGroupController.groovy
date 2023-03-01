@@ -21,7 +21,7 @@
  */
 package de.dkfz.tbi.otp.ngsdata.mergingCriteria
 
-import org.springframework.security.access.annotation.Secured
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.Errors
 
 import de.dkfz.tbi.otp.FlashMessage
@@ -33,7 +33,7 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.workflow.wgbs.WgbsWorkflow
 import de.dkfz.tbi.otp.workflowExecution.WorkflowService
 
-@Secured("hasRole('ROLE_OPERATOR')")
+@PreAuthorize("hasRole('ROLE_OPERATOR')")
 class ProjectSeqPlatformGroupController {
 
     static allowedMethods = [
@@ -53,7 +53,7 @@ class ProjectSeqPlatformGroupController {
     ProjectSelectionService projectSelectionService
     WorkflowService workflowService
 
-    @Secured('isFullyAuthenticated()')
+    @PreAuthorize("isFullyAuthenticated()")
     def index(ConfigureMergingCriteriaBaseCommand cmd) {
         Project project = projectSelectionService.selectedProject
         MergingCriteria mergingCriteria = mergingCriteriaService.findMergingCriteria(project, cmd.seqType)

@@ -25,7 +25,7 @@ import grails.databinding.BindUsing
 import grails.databinding.SimpleMapDataBindingSource
 import grails.validation.Validateable
 import org.springframework.context.ApplicationContext
-import org.springframework.security.access.annotation.Secured
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.multipart.MultipartFile
 
 import de.dkfz.tbi.otp.FlashMessage
@@ -47,7 +47,7 @@ import de.dkfz.tbi.util.MultiObjectValueSource
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-@Secured("hasRole('ROLE_OPERATOR')")
+@PreAuthorize("hasRole('ROLE_OPERATOR')")
 class ProjectCreationController {
     static allowedMethods = [
             index: "GET",

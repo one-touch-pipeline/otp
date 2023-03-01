@@ -29,7 +29,7 @@ class SecureAllControllersRule extends AbstractAstVisitorRule {
     String name = 'SecureAllControllers'
     int priority = 1
     String applyToFileNames = "*/*grails-app/controllers*/*Controller.groovy"
-    String description = "All controllers should be secured with the spring \"@Secured\" annotation!"
+    String description = 'All controllers should be secured with the "@PreAuthorize" annotation.'
     Class astVisitorClass = SecureAllControllerRuleVisitor
 }
 
@@ -49,9 +49,9 @@ class SecureAllControllerRuleVisitor extends AbstractAstVisitor implements IsAnn
         List<AnnotationNode> annotationNodeList = node.annotations
 
         if (!annotationNodeList.any {
-            it.classNode.name == "Secured"
+            it.classNode.name == "PreAuthorize"
         }) {
-            addViolation(node, buildErrorString("@Secured"))
+            addViolation(node, buildErrorString("@PreAuthorize"))
         }
     }
 }

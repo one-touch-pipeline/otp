@@ -21,14 +21,14 @@
  */
 package de.dkfz.tbi.otp.workflowExecution
 
-import org.springframework.security.access.annotation.Secured
 import grails.util.Pair
+import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.util.TimeFormats
 
 import java.sql.Timestamp
 
-@Secured("hasRole('ROLE_ADMIN')")
+@PreAuthorize("hasRole('ROLE_ADMIN')")
 class WorkflowRunOverviewController {
 
     static allowedMethods = [

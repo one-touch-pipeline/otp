@@ -21,9 +21,9 @@
  */
 package de.dkfz.tbi.otp.dataprocessing.cellRanger
 
-import org.springframework.security.access.annotation.Secured
 import grails.validation.ValidationException
 import groovy.transform.Canonical
+import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.FlashMessage
 import de.dkfz.tbi.otp.ProjectSelectionService
@@ -31,7 +31,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.exceptions.FileAccessForArchivedProjectNotAllowedException
 
-@Secured('isFullyAuthenticated()')
+@PreAuthorize('isFullyAuthenticated()')
 class CellRangerController {
     CellRangerConfigurationService cellRangerConfigurationService
     ProjectSelectionService projectSelectionService

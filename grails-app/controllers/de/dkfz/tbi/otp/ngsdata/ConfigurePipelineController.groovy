@@ -22,8 +22,8 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.converters.JSON
-import org.springframework.security.access.annotation.Secured
 import groovy.transform.ToString
+import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.FlashMessage
 import de.dkfz.tbi.otp.dataprocessing.*
@@ -32,7 +32,7 @@ import de.dkfz.tbi.otp.ngsdata.referencegenome.*
 import de.dkfz.tbi.otp.project.*
 import de.dkfz.tbi.otp.utils.StringUtils
 
-@Secured("hasRole('ROLE_OPERATOR')")
+@PreAuthorize("hasRole('ROLE_OPERATOR')")
 class ConfigurePipelineController implements ConfigurePipelineHelper {
 
     ProcessingOptionService processingOptionService

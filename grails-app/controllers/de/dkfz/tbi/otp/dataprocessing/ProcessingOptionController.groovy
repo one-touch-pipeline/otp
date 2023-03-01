@@ -22,10 +22,10 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import grails.converters.JSON
-import org.springframework.security.access.annotation.Secured
 import grails.validation.ValidationException
 import groovy.transform.Canonical
 import org.springframework.http.HttpStatus
+import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
@@ -34,7 +34,7 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.qcTrafficLight.TableCellValue
 import de.dkfz.tbi.util.TimeFormats
 
-@Secured("hasRole('ROLE_ADMIN')")
+@PreAuthorize("hasRole('ROLE_ADMIN')")
 class ProcessingOptionController {
 
     static allowedMethods = [

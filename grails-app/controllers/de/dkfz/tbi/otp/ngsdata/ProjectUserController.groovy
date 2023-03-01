@@ -22,12 +22,12 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.converters.JSON
-import org.springframework.security.access.annotation.Secured
 import grails.validation.Validateable
 import groovy.transform.TupleConstructor
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang.WordUtils
 import org.springframework.security.access.AccessDeniedException
+import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
@@ -42,7 +42,7 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.StringUtils
 import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 
-@Secured('isFullyAuthenticated()')
+@PreAuthorize('isFullyAuthenticated()')
 class ProjectUserController implements CheckAndCall {
 
     ProjectSelectionService projectSelectionService

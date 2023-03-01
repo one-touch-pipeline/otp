@@ -22,11 +22,13 @@
 package de.dkfz.tbi.otp
 
 import grails.converters.JSON
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.AuthenticationException
 
 import de.dkfz.tbi.otp.security.SecurityService
 import de.dkfz.tbi.otp.utils.RequestUtilService
 
+@PreAuthorize("permitAll()")
 class LoginController {
 
     RequestUtilService requestUtilService

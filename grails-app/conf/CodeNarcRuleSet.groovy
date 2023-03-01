@@ -61,7 +61,6 @@ All the Rules that will be used for OTP
     rule("file:grails-app/codenarcRules/ControllerMethodNotInAllowedMethodsRule.groovy")
     rule("file:grails-app/codenarcRules/SecureAllControllerRule.groovy")
     rule("file:grails-app/codenarcRules/ManagedEntityAnnotationForEntityRule.groovy")
-    rule("file:grails-app/codenarcRules/SecuredFromSpringAnnotationRule.groovy")
 
     // rulesets/basic.xml
     AssertWithinFinallyBlock {

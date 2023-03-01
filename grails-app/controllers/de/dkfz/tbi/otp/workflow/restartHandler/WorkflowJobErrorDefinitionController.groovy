@@ -22,10 +22,10 @@
 package de.dkfz.tbi.otp.workflow.restartHandler
 
 import grails.converters.JSON
-import org.springframework.security.access.annotation.Secured
 import grails.util.Holders
 import grails.validation.Validateable
 import groovy.transform.ToString
+import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.workflow.jobs.Job
@@ -33,7 +33,7 @@ import de.dkfz.tbi.otp.workflow.jobs.Job
 import java.util.regex.Pattern
 import java.util.regex.PatternSyntaxException
 
-@Secured("hasRole('ROLE_OPERATOR')")
+@PreAuthorize("hasRole('ROLE_OPERATOR')")
 class WorkflowJobErrorDefinitionController extends AbstractGeneralDomainPropertyUpdateController {
 
     WorkflowJobErrorDefinitionService workflowJobErrorDefinitionService

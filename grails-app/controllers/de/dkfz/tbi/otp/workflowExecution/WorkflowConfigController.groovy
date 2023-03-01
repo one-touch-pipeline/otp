@@ -22,18 +22,18 @@
 package de.dkfz.tbi.otp.workflowExecution
 
 import grails.converters.JSON
-import org.springframework.security.access.annotation.Secured
 import grails.validation.Validateable
 import groovy.transform.TupleConstructor
 import groovy.util.logging.Slf4j
 import org.hibernate.ObjectNotFoundException
 import org.springframework.http.HttpStatus
+import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 
 @Slf4j
-@Secured("hasRole('ROLE_ADMIN')")
+@PreAuthorize("hasRole('ROLE_ADMIN')")
 class WorkflowConfigController implements BaseWorkflowConfigController {
 
     static allowedMethods = [

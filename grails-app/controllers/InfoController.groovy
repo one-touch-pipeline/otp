@@ -21,7 +21,7 @@
  */
 
 import grails.compiler.GrailsCompileStatic
-import org.springframework.security.access.annotation.Secured
+import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.administration.DocumentService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
@@ -31,16 +31,16 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 /*
  * show information about OTP
  */
-@Secured('permitAll')
+@PreAuthorize('permitAll')
 class InfoController {
     static allowedMethods = [
             about               : "GET",
-            imprint             : "GET",
             numbers             : "GET",
-            faq                 : "GET",
             contact             : "GET",
+            imprint             : "GET",
             partners            : "GET",
             templates           : "GET",
+            faq                 : "GET",
             newsBanner          : "GET",
     ]
 
@@ -56,6 +56,12 @@ class InfoController {
     }
 
     @GrailsCompileStatic
+    def numbers() { }
+
+    @GrailsCompileStatic
+    def contact() { }
+
+    @GrailsCompileStatic
     def imprint() {
         String imprint = processingOptionService.findOptionAsString(OptionName.GUI_IMPRINT)
         return [
@@ -64,18 +70,9 @@ class InfoController {
     }
 
     @GrailsCompileStatic
-    def numbers() { }
-
-    @GrailsCompileStatic
-    def faq() { }
-
-    @GrailsCompileStatic
-    def contact() { }
-
-    @GrailsCompileStatic
     def partners() { }
 
-    @Secured('isFullyAuthenticated()')
+    @PreAuthorize('isFullyAuthenticated()')
     def templates() {
         return [
                 availableTemplates: documentService.listDocuments().collect {
@@ -86,6 +83,9 @@ class InfoController {
                 },
         ]
     }
+
+    @GrailsCompileStatic
+    def faq() { }
 
     String newsBanner() {
         render(processingOptionService.findOptionAsString(ProcessingOption.OptionName.NEWS_BANNER))

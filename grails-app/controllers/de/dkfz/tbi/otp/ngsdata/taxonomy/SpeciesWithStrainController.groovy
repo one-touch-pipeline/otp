@@ -22,14 +22,14 @@
 package de.dkfz.tbi.otp.ngsdata.taxonomy
 
 import grails.converters.JSON
-import org.springframework.security.access.annotation.Secured
 import grails.validation.Validateable
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.Errors
 
 import de.dkfz.tbi.otp.CheckAndCall
 import de.dkfz.tbi.otp.FlashMessage
 
-@Secured("hasRole('ROLE_OPERATOR')")
+@PreAuthorize("hasRole('ROLE_OPERATOR')")
 class SpeciesWithStrainController implements CheckAndCall {
 
     SpeciesWithStrainService speciesWithStrainService

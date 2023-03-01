@@ -23,7 +23,7 @@ package de.dkfz.tbi.otp.workflowExecution
 
 import grails.converters.JSON
 import grails.validation.Validateable
-import org.springframework.security.access.annotation.Secured
+import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.CheckAndCall
 import de.dkfz.tbi.otp.dataprocessing.MergingCriteriaService
@@ -31,7 +31,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 import de.dkfz.tbi.util.TimeFormats
 
-@Secured("hasRole('ROLE_ADMIN')")
+@PreAuthorize("hasRole('ROLE_ADMIN')")
 class WorkflowSystemConfigController implements CheckAndCall {
 
     static allowedMethods = [

@@ -22,15 +22,15 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.converters.JSON
-import org.springframework.security.access.annotation.Secured
 import grails.validation.Validateable
 import org.springframework.http.HttpStatus
+import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
 
-@Secured('isFullyAuthenticated()')
+@PreAuthorize('isFullyAuthenticated()')
 class StatisticController {
 
     static final String ALL_PROJECTS = "All projects"
@@ -55,6 +55,7 @@ class StatisticController {
         return Math.round(numerator * 100 / denominator)
     }
 
+    @PreAuthorize('permitAll()')
     JSON projectCountPerDate(ProjectGroupCommand command) {
         ProjectGroup projectGroup = null
         if (command.projectGroupName) {
@@ -65,6 +66,7 @@ class StatisticController {
         render(statisticService.projectCountPerDate(data) as JSON)
     }
 
+    @PreAuthorize('permitAll()')
     JSON laneCountPerDate(ProjectGroupCommand command) {
         List<Project> projects = null
         if (command.projectGroupName && command.projectGroupName != ALL_PROJECTS) {

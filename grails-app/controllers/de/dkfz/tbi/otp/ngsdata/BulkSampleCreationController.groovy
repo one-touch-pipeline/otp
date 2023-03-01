@@ -21,12 +21,12 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-import org.springframework.security.access.annotation.Secured
+import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.util.spreadsheet.Delimiter
 
-@Secured("hasRole('ROLE_OPERATOR')")
+@PreAuthorize("hasRole('ROLE_OPERATOR')")
 class BulkSampleCreationController {
 
     static allowedMethods = [

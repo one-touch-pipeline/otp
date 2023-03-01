@@ -21,7 +21,7 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-import org.springframework.security.access.annotation.Secured
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.Errors
 
 import de.dkfz.tbi.otp.FlashMessage
@@ -32,7 +32,7 @@ import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeIndexService
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ToolNameService
 import de.dkfz.tbi.otp.project.Project
 
-@Secured('isFullyAuthenticated()')
+@PreAuthorize('isFullyAuthenticated()')
 class CellRangerConfigurationController extends AbstractConfigureNonRoddyPipelineController {
 
     CellRangerConfigurationService cellRangerConfigurationService

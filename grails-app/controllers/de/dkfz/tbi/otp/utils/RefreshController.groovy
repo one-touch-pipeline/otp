@@ -22,13 +22,13 @@
 package de.dkfz.tbi.otp.utils
 
 import grails.converters.JSON
-import org.springframework.security.access.annotation.Secured
+import org.springframework.security.access.prepost.PreAuthorize
 
 /**
  * Controller for enabling/disabling the auto-refresh functionality
  * of List Views.
  */
-@Secured('isFullyAuthenticated()')
+@PreAuthorize('isFullyAuthenticated()')
 class RefreshController {
 
     static allowedMethods = [

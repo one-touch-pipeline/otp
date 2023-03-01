@@ -22,12 +22,12 @@
 package de.dkfz.tbi.otp.job.plan
 
 import grails.converters.JSON
-import org.springframework.security.access.annotation.Secured
 import grails.validation.Validateable
+import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.CheckAndCall
 
-@Secured("hasRole('ROLE_ADMIN')")
+@PreAuthorize("hasRole('ROLE_ADMIN')")
 class JobErrorDefinitionController implements CheckAndCall {
 
     JobErrorDefinitionService jobErrorDefinitionService

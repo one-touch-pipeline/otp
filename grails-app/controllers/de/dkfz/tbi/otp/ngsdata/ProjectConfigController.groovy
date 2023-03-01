@@ -22,9 +22,9 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.converters.JSON
-import org.springframework.security.access.annotation.Secured
 import grails.validation.Validateable
 import org.springframework.http.HttpStatus
+import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.config.ConfigService
@@ -46,7 +46,7 @@ import de.dkfz.tbi.util.TimeFormats
 
 import java.nio.file.FileSystemException
 
-@Secured("hasRole('ROLE_OPERATOR')")
+@PreAuthorize("hasRole('ROLE_OPERATOR')")
 class ProjectConfigController implements CheckAndCall {
 
     CommentService commentService
@@ -85,7 +85,7 @@ class ProjectConfigController implements CheckAndCall {
             updateCustomFinalNotification       : "POST",
     ]
 
-    @Secured('isFullyAuthenticated()')
+    @PreAuthorize("isFullyAuthenticated()")
     Map index() {
         Project project = projectSelectionService.selectedProject
         String projectRequestComment = (securityService.ifAllGranted(Role.ROLE_OPERATOR) ?
@@ -209,7 +209,7 @@ class ProjectConfigController implements CheckAndCall {
         }
     }
 
-    @Secured('isFullyAuthenticated()')
+    @PreAuthorize("isFullyAuthenticated()")
     def saveProjectComment(CommentCommand cmd) {
         Project project = projectService.getProject(cmd.id)
         commentService.saveComment(project, cmd.comment)

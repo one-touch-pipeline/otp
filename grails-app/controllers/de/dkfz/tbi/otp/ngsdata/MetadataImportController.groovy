@@ -22,11 +22,11 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.converters.JSON
-import org.springframework.http.HttpStatus
-import org.springframework.security.access.annotation.Secured
 import grails.validation.Validateable
 import groovy.transform.Immutable
 import groovy.transform.TupleConstructor
+import org.springframework.http.HttpStatus
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.GrantedAuthority
@@ -36,7 +36,8 @@ import org.springframework.security.core.userdetails.User
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.web.multipart.MultipartFile
 
-import de.dkfz.tbi.otp.*
+import de.dkfz.tbi.otp.CheckAndCall
+import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
@@ -51,23 +52,19 @@ import de.dkfz.tbi.otp.tracking.OtrsTicketService
 import de.dkfz.tbi.otp.user.UserException
 import de.dkfz.tbi.otp.utils.CommentCommand
 import de.dkfz.tbi.otp.utils.StringUtils
-import de.dkfz.tbi.otp.utils.error.ForbiddenErrorPlainResponseException
-import de.dkfz.tbi.otp.utils.error.InternalServerErrorPlainResponseException
-import de.dkfz.tbi.otp.utils.error.PlainResponseExceptionHandler
+import de.dkfz.tbi.otp.utils.error.*
 import de.dkfz.tbi.otp.utils.exceptions.MetadataFileImportException
 import de.dkfz.tbi.util.TimeFormats
 import de.dkfz.tbi.util.TimeUtils
 import de.dkfz.tbi.util.spreadsheet.Cell
-import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
-import de.dkfz.tbi.util.spreadsheet.validation.Problem
-import de.dkfz.tbi.util.spreadsheet.validation.Problems
+import de.dkfz.tbi.util.spreadsheet.validation.*
 
 import java.nio.file.FileSystem
 import java.nio.file.Paths
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
-@Secured("hasRole('ROLE_OPERATOR')")
+@PreAuthorize("hasRole('ROLE_OPERATOR')")
 class MetadataImportController implements CheckAndCall, PlainResponseExceptionHandler {
 
     static allowedMethods = [
@@ -264,7 +261,7 @@ class MetadataImportController implements CheckAndCall, PlainResponseExceptionHa
         render(dataToRender as JSON)
     }
 
-    @Secured('permitAll')
+    @PreAuthorize("permitAll()")
     def autoImport(String secret) {
         String expectedSecret = configService.autoImportSecret
         if (!secret || !expectedSecret || secret != expectedSecret) {

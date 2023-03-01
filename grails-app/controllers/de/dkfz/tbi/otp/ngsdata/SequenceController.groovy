@@ -22,20 +22,18 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.converters.JSON
-import org.springframework.security.access.annotation.Secured
 import groovy.json.JsonSlurper
 import groovy.transform.TupleConstructor
+import org.springframework.security.access.prepost.PreAuthorize
 
-import de.dkfz.tbi.otp.ngsdata.taxonomy.Species
-import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesCommonName
-import de.dkfz.tbi.otp.ngsdata.taxonomy.Strain
+import de.dkfz.tbi.otp.ngsdata.taxonomy.*
 import de.dkfz.tbi.otp.ngsqc.FastqcResultsService
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.security.SecurityService
 import de.dkfz.tbi.otp.utils.DataTableCommand
 import de.dkfz.tbi.util.TimeFormats
 
-@Secured('isFullyAuthenticated()')
+@PreAuthorize('isFullyAuthenticated()')
 class SequenceController {
     SeqTrackService seqTrackService
     ProjectService projectService

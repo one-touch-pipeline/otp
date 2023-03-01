@@ -1,5 +1,3 @@
-package de.dkfz.tbi.otp.workflowExecution
-
 /*
  * Copyright 2011-2020 The OTP authors
  *
@@ -21,22 +19,21 @@ package de.dkfz.tbi.otp.workflowExecution
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+package de.dkfz.tbi.otp.workflowExecution
 
 import com.fasterxml.jackson.core.JsonParseException
 import grails.converters.JSON
-import org.springframework.security.access.annotation.Secured
 import grails.validation.Validateable
 import groovy.transform.ToString
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
-import de.dkfz.tbi.otp.ngsdata.LibraryPreparationKit
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
-import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 
-@Secured("hasRole('ROLE_ADMIN')")
+@PreAuthorize("hasRole('ROLE_ADMIN')")
 class WorkflowConfigViewerController implements BaseWorkflowConfigController {
 
     ConfigSelectorService configSelectorService

@@ -20,14 +20,14 @@
  * SOFTWARE.
  */
 
-import org.springframework.security.access.annotation.Secured
+import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.FlashMessage
-import de.dkfz.tbi.otp.security.user.UserService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
+import de.dkfz.tbi.otp.security.user.UserService
 
-@Secured('permitAll')
+@PreAuthorize('permitAll')
 class PrivacyPolicyController {
     static allowedMethods = [
             index : "GET",

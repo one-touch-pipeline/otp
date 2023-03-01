@@ -22,7 +22,7 @@
 package de.dkfz.tbi.otp.workflowExecution
 
 import grails.converters.JSON
-import org.springframework.security.access.annotation.Secured
+import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.infrastructure.ClusterJobService
@@ -32,7 +32,7 @@ import de.dkfz.tbi.util.TimeFormats
 
 import javax.servlet.http.HttpServletResponse
 
-@Secured("hasRole('ROLE_OPERATOR')")
+@PreAuthorize("hasRole('ROLE_OPERATOR')")
 class WorkflowRunDetailsController extends AbstractWorkflowRunController {
 
     ClusterJobService clusterJobService

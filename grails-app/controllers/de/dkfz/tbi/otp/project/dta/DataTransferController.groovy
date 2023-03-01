@@ -22,11 +22,11 @@
 package de.dkfz.tbi.otp.project.dta
 
 import grails.converters.JSON
-import org.springframework.security.access.annotation.Secured
 import grails.validation.Validateable
 import grails.validation.ValidationException
 import org.apache.http.entity.ContentType
 import org.springframework.http.HttpStatus
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.multipart.MultipartFile
 
 import de.dkfz.tbi.otp.*
@@ -39,7 +39,7 @@ import de.dkfz.tbi.util.TimeFormats
 
 import java.text.SimpleDateFormat
 
-@Secured("hasRole('ROLE_OPERATOR')")
+@PreAuthorize("hasRole('ROLE_OPERATOR')")
 class DataTransferController implements CheckAndCall {
 
     static allowedMethods = [
