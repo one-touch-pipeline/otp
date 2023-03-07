@@ -26,11 +26,7 @@ import groovy.transform.TupleConstructor
 import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedMergedBamFile
 import de.dkfz.tbi.otp.dataswap.Swap
 import de.dkfz.tbi.otp.dataswap.parameters.SampleSwapParameters
-import de.dkfz.tbi.otp.ngsdata.DataFile
-import de.dkfz.tbi.otp.ngsdata.Sample
-import de.dkfz.tbi.otp.ngsdata.SampleType
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
-import de.dkfz.tbi.otp.ngsdata.SeqTrackService
+import de.dkfz.tbi.otp.ngsdata.*
 
 @TupleConstructor
 class SampleSwapData extends DataSwapData<SampleSwapParameters> {
@@ -52,8 +48,6 @@ class SampleSwapData extends DataSwapData<SampleSwapParameters> {
     Swap<SampleType> sampleTypeSwap
 
     Sample sample
-
-    List<DataFile> fastqDataFiles
 
     SeqTrackService seqTrackService
 }

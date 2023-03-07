@@ -230,48 +230,6 @@ class DeletionServiceIntegrationTests extends Specification implements UserAndRo
         !FastqcProcessedFile.get(fastqcProcessedFile.id)
     }
 
-    void "testDeleteConnectionFromSeqTrackRepresentingABamFile"() {
-        given:
-        setupData()
-        SeqTrack seqTrack = DomainFactory.createSeqTrack()
-        AlignmentLog alignmentLog = DomainFactory.createAlignmentLog(seqTrack: seqTrack)
-        DataFile dataFile = DomainFactory.createDataFile(alignmentLog: alignmentLog)
-
-        when:
-        deletionService.deleteConnectionFromSeqTrackRepresentingABamFile(seqTrack)
-
-        then:
-        !AlignmentLog.get(alignmentLog.id)
-        !DataFile.get(dataFile.id)
-    }
-
-    void "testDeleteAllProcessingInformationAndResultOfOneSeqTrack_ProcessedBamFile"() {
-        given:
-        setupData()
-        SeqTrack seqTrack = DomainFactory.createSeqTrack()
-        DataFile dataFile = DomainFactory.createDataFile(seqTrack: seqTrack)
-        ProcessedSaiFile processedSaiFile = DomainFactory.createProcessedSaiFile(dataFile: dataFile)
-
-        new TestData()
-        AlignmentPass alignmentPass = DomainFactory.createAlignmentPass(seqTrack: seqTrack)
-        MergingWorkPackage workPackage = alignmentPass.workPackage
-        MergingSet mergingSet = DomainFactory.createMergingSet(mergingWorkPackage: workPackage)
-        MergingPass mergingPass = DomainFactory.createMergingPass(mergingSet: mergingSet)
-
-        AbstractMergedBamFile processedMergedBamFile = DomainFactory.createProcessedMergedBamFile(mergingPass: mergingPass, fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.INPROGRESS, workPackage: workPackage)
-        workPackage.bamFileInProjectFolder = processedMergedBamFile
-        workPackage.save(flush: true)
-        alignmentPass.save(flush: true)
-
-        when:
-        deletionService.deleteAllProcessingInformationAndResultOfOneSeqTrack(alignmentPass.seqTrack)
-
-        then:
-        !ProcessedSaiFile.get(processedSaiFile.id)
-        !ProcessedBamFile.get(processedMergedBamFile.id)
-        !AlignmentPass.get(alignmentPass.id)
-    }
-
     void "testDeleteAllProcessingInformationAndResultOfOneSeqTrack_RoddyBamFile"() {
         given:
         setupData()

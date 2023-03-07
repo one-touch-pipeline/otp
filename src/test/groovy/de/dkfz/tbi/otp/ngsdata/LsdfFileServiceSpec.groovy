@@ -310,10 +310,7 @@ class LsdfFileServiceSpec extends Specification implements DataTest, DomainFacto
         SeqTrack seqTrack = createSeqTrack()
 
         DataFile dataFile = createDataFile([
-                seqTrack    : null,
-                alignmentLog: DomainFactory.createAlignmentLog([
-                        seqTrack: seqTrack,
-                ]),
+                seqTrack    : seqTrack,
         ])
 
         String expected = [

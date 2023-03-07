@@ -101,14 +101,12 @@ class DataFile implements CommentableWithProject, Entity {
      * SeqTrack, so actually this field should be defined in the SeqTrack class. */
     FastqImportInstance fastqImportInstance
     SeqTrack seqTrack
-    AlignmentLog alignmentLog
     FileType fileType
 
     static belongsTo = [
             run                : Run,
             fastqImportInstance: FastqImportInstance,
             seqTrack           : SeqTrack,
-            alignmentLog       : AlignmentLog,
             fileType           : FileType,
     ]
 
@@ -129,7 +127,6 @@ class DataFile implements CommentableWithProject, Entity {
 
         run(validator: { Run val, DataFile obj -> obj.seqTrack == null || val == obj.seqTrack.run })
         seqTrack(nullable: true)  // Shall not be null, but legacy data exists
-        alignmentLog(nullable: true)
 
         nReads(nullable: true)
         sequenceLength nullable: true, validator: { val, obj ->
@@ -186,19 +183,19 @@ class DataFile implements CommentableWithProject, Entity {
     }
 
     Individual getIndividual() {
-        return seqTrack ? seqTrack.individual : alignmentLog.seqTrack.individual
+        return seqTrack.individual
     }
 
     Sample getSample() {
-        return seqTrack ? seqTrack.sample : alignmentLog.seqTrack.sample
+        return seqTrack.sample
     }
 
     SampleType getSampleType() {
-        return seqTrack ? seqTrack.sampleType : alignmentLog.seqTrack.sampleType
+        return seqTrack.sampleType
     }
 
     SeqType getSeqType() {
-        return seqTrack ? seqTrack.seqType : alignmentLog.seqTrack.seqType
+        return seqTrack.seqType
     }
 
     String getReadName() {
@@ -212,7 +209,6 @@ class DataFile implements CommentableWithProject, Entity {
         fastqImportInstance index: "data_file_fastq_import_instance_idx"
         seqTrack index: "data_file_seq_track_idx"
         md5sum index: 'data_file_md5sum_idx'
-        alignmentLog index: "data_file_alignment_log_idx"
         fileType index: "data_file_file_type_idx"
         initialDirectory type: 'text'
         dateLastChecked index: 'data_file_date_last_checked_idx'

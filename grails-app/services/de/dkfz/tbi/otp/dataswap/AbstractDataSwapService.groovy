@@ -637,20 +637,6 @@ abstract class AbstractDataSwapService<P extends DataSwapParameters, D extends D
     }
 
     /**
-     * Gathers all bam data files by given given list of seq tracks.
-     *
-     * @param seqTrackList as parameters for searching for corresponding data files.
-     * @param parameters containing the StringBuilder for logging
-     * @return found list of bam data files
-     */
-    protected List<DataFile> getBAMDataFilesBySeqTrackInList(List<SeqTrack> seqTrackList, P parameters) {
-        List<AlignmentLog> alignmentsLog = seqTrackList ? AlignmentLog.findAllBySeqTrackInList(seqTrackList) : []
-        List<DataFile> bamDataFiles = alignmentsLog ? DataFile.findAllByAlignmentLogInList(alignmentsLog) : []
-        logListEntries(bamDataFiles, "alignment dataFiles", parameters.log)
-        return bamDataFiles
-    }
-
-    /**
      * Gathers all fastq data filenames by given given list of fastq data files.
      *
      * @param seqTrackList as parameters for searching for corresponding data filenames.

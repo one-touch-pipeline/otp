@@ -518,23 +518,6 @@ class DomainFactory {
         return alignmentPass
     }
 
-    static AlignmentLog createAlignmentLog(Map properties = [:]) {
-        return createDomainObject(AlignmentLog, [
-                qcState        : AlignmentLog.QCState.NON,
-                executedBy     : AlignmentLog.Execution.UNKNOWN,
-                alignmentParams: { createAlignmentParams() },
-                seqTrack       : { createSeqTrack() },
-        ], properties)
-    }
-
-    static AlignmentParams createAlignmentParams(Map properties = [:]) {
-        return createDomainObject(AlignmentParams, [
-                pipeline: createSoftwareTool(),
-                genome  : "genome_${counter++}",
-                params  : "params_${counter++}",
-        ], properties)
-    }
-
     static QualityAssessmentPass createQualityAssessmentPass(Map properties = [:]) {
         return createDomainObject(QualityAssessmentPass, [
                 identifier      : counter++,

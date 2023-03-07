@@ -306,7 +306,7 @@ class DeletionService {
      *
      * The function should be called inside a transaction (DOMAIN.withTransaction{}) to roll back changes if an exception occurs or a check fails.
      *
-     * !! Be aware that the run information, alignmentLog information and the seqTrack are not deleted.
+     * !! Be aware that the run information and the seqTrack are not deleted.
      * !! If it is not needed to delete this information, this method can be used without pre-work.
      */
     List<File> deleteAllProcessingInformationAndResultOfOneSeqTrack(SeqTrack seqTrack, boolean enableChecks = true) {
@@ -564,7 +564,6 @@ class DeletionService {
         List<File> dirsToDelete = []
         List<File> seqTrackDelete = deleteAllProcessingInformationAndResultOfOneSeqTrack(seqTrack, check)
         dirsToDelete.addAll(seqTrackDelete)
-        deleteConnectionFromSeqTrackRepresentingABamFile(seqTrack)
 
         List<DataFile> dataFiles = seqTrack.dataFiles
 
@@ -773,21 +772,6 @@ class DeletionService {
         deleteMetaDataEntryForDataFile(dataFile)
         dataFile.delete(flush: true)
         return dirs
-    }
-
-    /**
-     * Deletes the datafiles, which represent external bam files, and the connection to the seqTrack (alignmentLog).
-     *
-     * There are not only fastq files, which are represented by a dataFile, but also bam files.
-     * They are not directly connected to a seqTrack, but via an alignmentLog.
-     */
-    private void deleteConnectionFromSeqTrackRepresentingABamFile(SeqTrack seqTrack) {
-        notNull(seqTrack, "The input seqTrack of the method deleteConnectionFromSeqTrackRepresentingABamFile is null")
-
-        AlignmentLog.findAllBySeqTrack(seqTrack).each { AlignmentLog alignmentLog ->
-            DataFile.findAllByAlignmentLog(alignmentLog).each { deleteDataFile(it) }
-            alignmentLog.delete(flush: true)
-        }
     }
 
     /**

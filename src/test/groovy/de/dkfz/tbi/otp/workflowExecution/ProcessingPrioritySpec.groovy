@@ -87,7 +87,6 @@ class ProcessingPrioritySpec extends Specification implements DataTest, DomainFa
         clazz                       | createClousure
         SeqTrack                    | { createSeqTrack() }
         // old OTP alignment
-        AlignmentPass               | { DomainFactory.createAlignmentPass() }
         MergingPass                 | { DomainFactory.createMergingPass() }
         QualityAssessmentPass       | { DomainFactory.createQualityAssessmentMergedPass() }
         QualityAssessmentMergedPass | { DomainFactory.createQualityAssessmentMergedPass() }

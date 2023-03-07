@@ -56,10 +56,7 @@ class SampleSwapService extends AbstractDataSwapService<SampleSwapParameters, Sa
 
         Sample sample = getSampleByIndividualAndSampleType(individualSwap.old, sampleTypeSwap.old, parameters)
         List<SeqTrack> seqTrackList = getSeqTracksBySample(sample, parameters)
-
-        List<DataFile> fastqDataFiles = getFastQDataFilesBySeqTrackInList(seqTrackList, parameters)
-        List<DataFile> bamDataFiles = getBAMDataFilesBySeqTrackInList(seqTrackList, parameters)
-        List<DataFile> dataFiles = [fastqDataFiles, bamDataFiles].flatten() as List<DataFile>
+        List<DataFile> dataFiles = getFastQDataFilesBySeqTrackInList(seqTrackList, parameters)
 
         List<Path> individualPaths = seqTrackList*.seqType.unique().collect {
             individualService.getViewByPidPath(individualSwap.old, it)
@@ -75,7 +72,6 @@ class SampleSwapService extends AbstractDataSwapService<SampleSwapParameters, Sa
                 sampleTypeSwap: sampleTypeSwap,
                 sample: sample,
                 seqTrackList: seqTrackList,
-                fastqDataFiles: fastqDataFiles,
                 dataFiles: dataFiles,
                 oldDataFileNameMap: collectFileNamesOfDataFiles(dataFiles),
                 oldFastQcFileNames: getFastQcOutputFileNamesByDataFilesInList(dataFiles),
@@ -133,7 +129,7 @@ class SampleSwapService extends AbstractDataSwapService<SampleSwapParameters, Sa
 
         SampleIdentifier.findAllBySample(data.sample)*.delete(flush: true)
 
-        Map<FastqcProcessedFile, String> newFastQcFileNames = getFastQcOutputFileNamesByDataFilesInList(data.fastqDataFiles)
+        Map<FastqcProcessedFile, String> newFastQcFileNames = getFastQcOutputFileNamesByDataFilesInList(data.dataFiles)
         data.moveFilesCommands << "\n\n\n################ move fastqc files ################\n"
         data.oldFastQcFileNames.each { fastqcProcessedFile, oldFastQcFileName ->
             data.moveFilesCommands << copyAndRemoveFastQcFile(oldFastQcFileName, newFastQcFileNames[fastqcProcessedFile], data)

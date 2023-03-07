@@ -134,22 +134,6 @@
                         </td>
                     </tr>
                 </g:each>
-                <g:each var="alignment" in="${track.value.alignments}">
-                    <g:each var="file" in="${alignment.value}">
-                        <tr>
-                            <td>-</td>
-                            <td>a</td>
-                            <td><g:link controller="dataFile" action="showDetails" id="${file.id}">${file.fileName}</g:link></td>
-                            <td>${alignment.key.alignmentParams.pipeline}</td>
-                            <td>${alignment.key.executedBy}</td>
-                            <td class="${file.fileExists}">lsdf</td>
-                            <td class="${file.fileLinked}">view-by-pid</td>
-                            <td>${String.format("%.1f GB", file.fileSize / 1e9)}</td>
-                            <td>${TimeFormats.DATE.getFormattedDate(file?.dateFileSystem)}</td>
-                            <td>&nbsp;</td>
-                        </tr>
-                    </g:each>
-                </g:each>
                 </tbody>
             </table>
         </g:each>

@@ -46,4 +46,6 @@ databaseChangeLog = {
     include file: 'changelogs/2023/otp-1549-low_cov.groovy'
 
     include file: 'changelogs/2023/otp-1940.groovy'
+
+    include file: 'changelogs/2023/otp-1986.groovy'
 }

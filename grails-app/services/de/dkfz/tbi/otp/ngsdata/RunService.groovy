@@ -93,10 +93,6 @@ class RunService {
      * <ul>
      * <li>SeqTrack:<ul>
      *   <li>files: [DataFile, DataFile]</li>
-     *   <li>alignments: <ul>
-     *     <li>Alignment: [DataFile, DataFile]</li>
-     *     <li>Alignment: [DataFile, DataFile]</li>
-     *   </ul></li>
      * </ul></li>
      * <ul>
      * @param run The Run for which the Sequence Track information should be retrieved
@@ -109,11 +105,7 @@ class RunService {
             return returnData
         }
         SeqTrack.findAllByRun(run, [sort: 'laneId']).each { track ->
-            Map<AlignmentLog, List<DataFile>> alignments = [:]
-            AlignmentLog.findAllBySeqTrack(track).each { alignment ->
-                alignments.put(alignment, DataFile.findAllByAlignmentLog(alignment))
-            }
-            Map dataElement = [files: DataFile.findAllBySeqTrack(track), alignments: alignments]
+            Map dataElement = [files: DataFile.findAllBySeqTrack(track)]
             returnData.put(track, dataElement)
         }
         returnData

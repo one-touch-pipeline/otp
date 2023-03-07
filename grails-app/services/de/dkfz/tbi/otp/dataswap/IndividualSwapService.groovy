@@ -62,10 +62,7 @@ class IndividualSwapService extends AbstractDataSwapService<IndividualSwapParame
 
         List<SeqTrack> seqTrackList = getSeqTracksBySampleInList(samples, parameters)
 
-        // gather dataFiles
-        List<DataFile> fastqDataFiles = getFastQDataFilesBySeqTrackInList(seqTrackList, parameters)
-        List<DataFile> bamDataFiles = getBAMDataFilesBySeqTrackInList(seqTrackList, parameters)
-        List<DataFile> dataFiles = [fastqDataFiles, bamDataFiles].flatten() as List<DataFile>
+        List<DataFile> dataFiles = getFastQDataFilesBySeqTrackInList(seqTrackList, parameters)
 
         FileSystem fileSystem = fileSystemService.remoteFileSystemOnDefaultRealm
         List<Path> individualPaths = seqTrackList*.seqType.unique().collect {

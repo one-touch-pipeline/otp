@@ -61,13 +61,7 @@ class LsdfFilesService {
 
     Path getSeqTypeDirectory(DataFile dataFile) {
         Path basePath = projectService.getSequencingDirectory(dataFile.project)
-        String seqTypeDirName
-        if (dataFile.seqTrack) {
-            seqTypeDirName = dataFile.seqTrack.seqType?.dirName
-        }
-        if (dataFile.alignmentLog) {
-            seqTypeDirName = dataFile.alignmentLog.seqTrack.seqType?.dirName
-        }
+        String seqTypeDirName = dataFile.seqTrack?.seqType?.dirName
         if (!seqTypeDirName) {
             return null
         }
@@ -109,14 +103,14 @@ class LsdfFilesService {
      */
     Path getSampleTypeDirectory(DataFile dataFile) {
         Path basePath = individualService.getViewByPidPath(dataFile.individual, dataFile.seqType)
-        SeqTrack seqTrack = dataFile.seqTrack ?: dataFile.alignmentLog.seqTrack
+        SeqTrack seqTrack = dataFile.seqTrack
         String antiBodyTarget = seqTrack.seqType.hasAntibodyTarget ? "-${seqTrack.antibodyTarget.name}" : ""
         return basePath.resolve("${seqTrack.sample.sampleType.dirName}${antiBodyTarget}")
     }
 
     Path getSingleCellWellDirectory(DataFile dataFile, WellDirectory wellDirectory = null) {
         Path basePath = getSampleTypeDirectory(dataFile)
-        SeqTrack seqTrack = dataFile.seqTrack ?: dataFile.alignmentLog.seqTrack
+        SeqTrack seqTrack = dataFile.seqTrack
         if (seqTrack.singleCellWellLabel && seqTrack.seqType.singleCell) {
             return basePath.resolve(wellDirectory == WellDirectory.ALL_WELL ? SINGLE_CELL_ALL_WELL : seqTrack.singleCellWellLabel)
         }
@@ -125,7 +119,7 @@ class LsdfFilesService {
 
     Path getFileViewByPidDirectory(DataFile dataFile, WellDirectory wellDirectory = null) {
         Path basePath = getSingleCellWellDirectory(dataFile, wellDirectory)
-        SeqTrack seqTrack = dataFile.seqTrack ?: dataFile.alignmentLog.seqTrack
+        SeqTrack seqTrack = dataFile.seqTrack
         return basePath.resolve(seqTrack.seqType.libraryLayoutDirName).resolve(seqTrack.run.dirName)
     }
 
