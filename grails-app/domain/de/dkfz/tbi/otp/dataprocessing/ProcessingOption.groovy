@@ -443,6 +443,11 @@ class ProcessingOption implements Entity {
                 Necessity.OPTIONAL, "", TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
         ),
 
+        AD_GROUP_USER_SNIPPET_EXECUTE(
+                "Should OTP execute the shell program for group changes (true) or send an email (false)",
+                Necessity.OPTIONAL, "false", TypeValidators.BOOLEAN
+        ),
+
         @SuppressWarnings('GStringExpressionWithinString')
         AD_GROUP_ADD_USER_SNIPPET(
                 "Shell program to do AD group changes with, outside of OTP, e.g. adtool." +

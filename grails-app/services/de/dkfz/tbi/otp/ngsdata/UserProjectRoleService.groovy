@@ -30,13 +30,14 @@ import de.dkfz.odcf.audit.impl.DicomAuditLogger
 import de.dkfz.odcf.audit.impl.OtpDicomAuditFactory
 import de.dkfz.odcf.audit.impl.OtpDicomAuditFactory.UniqueIdentifierType
 import de.dkfz.odcf.audit.xml.layer.EventIdentification.EventOutcomeIndicator
-import de.dkfz.tbi.otp.security.user.identityProvider.IdentityProvider
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
+import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.security.user.UserService
+import de.dkfz.tbi.otp.security.user.identityProvider.IdentityProvider
 import de.dkfz.tbi.otp.security.user.identityProvider.data.IdpUserDetails
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
@@ -51,6 +52,7 @@ class UserProjectRoleService {
     MailHelperService mailHelperService
     MessageSourceService messageSourceService
     ProcessingOptionService processingOptionService
+    RemoteShellHelper remoteShellHelper
     SecurityService securityService
     UserProjectRoleService userProjectRoleService
     UserService userService
@@ -218,7 +220,25 @@ class UserProjectRoleService {
 
         String formattedAction = action.toString().toLowerCase()
         String conjunction = action == OperatorAction.ADD ? 'to' : 'from'
-        String scriptCommand = commandTemplate(userProjectRole, action)
+
+        CommandAndResult command = executeOrNotify(userProjectRole, action)
+        String scriptCommand
+        String subjectPrefix = ""
+        if (command.output) {
+            String success
+            if (command.output.exitCode == 0) {
+                success = "successfully"
+                subjectPrefix = 'DONE: '
+            } else {
+                success = "unsuccessfully"
+                subjectPrefix = 'ERROR: '
+            }
+            scriptCommand = "Command '${command.command}' was executed ${success}.\n" +
+                    "Output:\n${command.output.stdout ?: '-'}\nError:\n${command.output.stderr ?: '-'}"
+        } else {
+            scriptCommand = "Command to execute:\n${command.command}"
+        }
+
         String subject = messageSourceService.createMessage("projectUser.notification.addToUnixGroup.subject", [
                 requester  : requester.username,
                 action     : formattedAction,
@@ -250,7 +270,7 @@ class UserProjectRoleService {
                 scriptCommand         : scriptCommand,
         ])
 
-        mailHelperService.sendEmailToTicketSystem(subject, body)
+        mailHelperService.sendEmailToTicketSystem("${subjectPrefix}${subject}", body)
         auditLogService.logAction(AuditLog.Action.PROJECT_USER_SENT_MAIL,
                 "Sent mail to ${mailHelperService.ticketSystemEmailAddress} to ${formattedAction} ${userProjectRole.user.username} ${conjunction} " +
                         "${userProjectRole.project.name} at the request of ${requester.username + switchedUserAnnotation}")
@@ -353,17 +373,16 @@ class UserProjectRoleService {
      * if force is set neither fileAccessChangeRequested is set nor the administration gets notified.
      *
      * @param userProjectRole UserProjectRole to change
-     * @param value The new value for
      * @param force The flag to determined whether the change should requested or set immediately
      * @return The changed UserProjectRole
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#userProjectRole.project, 'MANAGE_USERS')")
-    UserProjectRole setAccessToFiles(UserProjectRole userProjectRole, boolean value, boolean force = false) {
-        if (checkRelatedUserProjectRolesFor(userProjectRole) { UserProjectRole upr -> upr.accessToFiles == value }) {
+    UserProjectRole setAccessToFiles(UserProjectRole userProjectRole, boolean accessToFiles, boolean force = false) {
+        if (checkRelatedUserProjectRolesFor(userProjectRole) { UserProjectRole upr -> upr.accessToFiles == accessToFiles }) {
             return userProjectRole
         }
         applyToRelatedUserProjectRoles(userProjectRole) { UserProjectRole upr ->
-            upr.accessToFiles = value
+            upr.accessToFiles = accessToFiles
             upr.fileAccessChangeRequested = !force
             assert upr.save(flush: true)
             if (force) {
@@ -386,8 +405,8 @@ class UserProjectRoleService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#userProjectRole.project, 'MANAGE_USERS')")
-    UserProjectRole setAccessToFilesWithUserNotification(UserProjectRole userProjectRole, boolean value) {
-        setAccessToFiles(userProjectRole, value)
+    UserProjectRole setAccessToFilesWithUserNotification(UserProjectRole userProjectRole, boolean accessToFiles) {
+        setAccessToFiles(userProjectRole, accessToFiles)
         if (userProjectRole.accessToFiles) {
             notifyUsersAboutFileAccessChange(userProjectRole)
         }
@@ -631,11 +650,20 @@ class UserProjectRoleService {
         }*.user
     }
 
-    String commandTemplate(UserProjectRole userProjectRole, OperatorAction action) {
+    CommandAndResult executeOrNotify(UserProjectRole userProjectRole, OperatorAction action) {
+        String command = userProjectRoleService.commandTemplate(userProjectRole, action)
+        if (processingOptionService.findOptionAsBoolean(ProcessingOption.OptionName.AD_GROUP_USER_SNIPPET_EXECUTE)) {
+            ProcessOutput processOutput = remoteShellHelper.executeCommandReturnProcessOutput(userProjectRole.project.realm, command)
+            return new CommandAndResult(command, processOutput)
+        }
+        return new CommandAndResult(command, null)
+    }
+
+    protected String commandTemplate(UserProjectRole userProjectRole, OperatorAction action) {
         return commandTemplate(userProjectRole.project.unixGroup, userProjectRole.user.username, action)
     }
 
-    String commandTemplate(String unixGroup, String username, OperatorAction action) {
+    protected String commandTemplate(String unixGroup, String username, OperatorAction action) {
         return new SimpleTemplateEngine()
                 .createTemplate(processingOptionService.findOptionAsString(action.commandTemplateOptionName))
                 .make([unixGroup: unixGroup, username: username])
@@ -648,6 +676,12 @@ class UserProjectRoleService {
         REMOVE(ProcessingOption.OptionName.AD_GROUP_REMOVE_USER_SNIPPET),
 
         final ProcessingOption.OptionName commandTemplateOptionName
+    }
+
+    @TupleConstructor
+    static class CommandAndResult {
+        String command
+        ProcessOutput output
     }
 }
 

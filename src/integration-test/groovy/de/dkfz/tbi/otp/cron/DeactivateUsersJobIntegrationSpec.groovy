@@ -21,13 +21,12 @@
  */
 package de.dkfz.tbi.otp.cron
 
-import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.security.user.UserService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
@@ -35,9 +34,9 @@ import de.dkfz.tbi.otp.domainFactory.UserDomainFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.User
+import de.dkfz.tbi.otp.security.user.UserService
 import de.dkfz.tbi.otp.security.user.identityProvider.IdentityProvider
-import de.dkfz.tbi.otp.utils.MailHelperService
-import de.dkfz.tbi.otp.utils.MessageSourceService
+import de.dkfz.tbi.otp.utils.*
 
 @Rollback
 @Integration
@@ -80,6 +79,7 @@ class DeactivateUsersJobIntegrationSpec extends Specification implements DomainF
 
     void "notifyAdministration, uses different prefix depending on groups"() {
         given:
+        ProcessOutput p = executed ? new ProcessOutput("", "", success ? 0 : 1) : null
         DeactivateUsersJob job = new DeactivateUsersJob([
                 processingOptionService: Mock(ProcessingOptionService) {
                     _ * findOptionAsString(_) { return "option" }
@@ -89,17 +89,23 @@ class DeactivateUsersJobIntegrationSpec extends Specification implements DomainF
                     1 * sendEmailToTicketSystem({ it.contains(expectedContent) }, _) >> { }
                 },
                 userProjectRoleService: Mock(UserProjectRoleService) {
-                    _ * commandTemplate(_, _) >> "removal command"
+                    _ * executeOrNotify(_, _) >> { return new UserProjectRoleService.CommandAndResult("removal command", p) }
                 },
         ])
 
+        List<UserProjectRole> g = groups.collect { createUserProjectRole(project: createProject(name: it)) }
+
         expect:
-        job.notifyAdministration(createUser(), groups as Set<String>)
+        job.notifyAdministration(createUser(), g as Set)
 
         where:
-        groups     | expectedContent
-        ["A", "B"] | "TODO"
-        []         | "DONE"
+        groups     | executed | success || expectedContent
+        ["A", "B"] | true     | true    || "DONE"
+        []         | true     | true    || "DONE"
+        ["A", "B"] | true     | false   || "ERROR"
+        []         | true     | false   || "DONE"
+        ["A", "B"] | false    | true    || "TODO"
+        []         | false    | true    || "DONE"
     }
 
     void "notifyProjectAuthoritiesOfUsersProjects, send notification mail to all project authorities of a users projects"() {

@@ -27,9 +27,7 @@ import org.grails.datastore.gorm.events.AutoTimestampEventListener
 import org.grails.spring.context.support.PluginAwareResourceBundleMessageSource
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy
 import org.springframework.security.authentication.AuthenticationTrustResolver
-import spock.lang.Specification
-import spock.lang.TempDir
-import spock.lang.Unroll
+import spock.lang.*
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.TestConfigService
@@ -37,6 +35,7 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.UserDomainFactory
+import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.security.user.UserService
@@ -217,7 +216,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
     }
 
     @Unroll
-    void "notifyAdministration sends email with correct content (action=#operatorAction)"() {
+    void "notifyAdministration sends email with correct content (manual execution) (action=#operatorAction)"() {
         given:
         setupData()
         setupAdGroupToolSnippetProcessingOptions()
@@ -257,6 +256,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
                 |${userProjectRole.project.unixGroup}
                 |${userProjectRole.project.name}
                 |${operatorAction}
+                |Command to execute:
                 |${scriptCommand}
                 |${affectedUserUserDetail}
                 |${requesterUserDetail}""".stripMargin()
@@ -266,6 +266,72 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         conjunction | operatorAction
         "to"        | UserProjectRoleService.OperatorAction.ADD
         "from"      | UserProjectRoleService.OperatorAction.REMOVE
+    }
+
+    @Unroll
+    void "notifyAdministration sends email with correct content (automatic execution)"() {
+        given:
+        setupData()
+        setupAdGroupToolSnippetProcessingOptions()
+        findOrCreateProcessingOption(
+                name: ProcessingOption.OptionName.AD_GROUP_USER_SNIPPET_EXECUTE,
+                value: "true",
+        )
+
+        userProjectRoleService.remoteShellHelper = Mock(RemoteShellHelper)
+
+        Project project = createProject()
+        UserProjectRole userProjectRole = createUserProjectRole(project: project)
+        UserProjectRole requesterUserProjectRole = createUserProjectRole(project: project)
+        String formattedAction = operatorAction.toString().toLowerCase()
+
+        String scriptCommand = "${AD_GROUP_TOOL_PATH} ${operatorAction.name()} ${userProjectRole.project.unixGroup} ${userProjectRole.user.username}"
+
+        String affectedUserUserDetail = """\
+            |${userProjectRole.user.realName}
+            |${userProjectRole.user.username}
+            |${userProjectRole.user.email}
+            |${userProjectRole.projectRoles*.name.join(",")}""".stripMargin()
+        String requesterUserDetail = """\
+            |${requesterUserProjectRole.user.realName}
+            |${requesterUserProjectRole.user.username}
+            |${requesterUserProjectRole.user.email}
+            |${requesterUserProjectRole.projectRoles*.name.join(",")}""".stripMargin()
+
+        when:
+        doWithAuth(requesterUserProjectRole.user.username) {
+            userProjectRoleService.notifyAdministration(userProjectRole, operatorAction)
+        }
+
+        then:
+        1 * userProjectRoleService.mailHelperService.sendEmailToTicketSystem(
+                """${subject}addToUnixGroup
+                |${requesterUserProjectRole.user.username}
+                |${formattedAction}
+                |${userProjectRole.user.username}
+                |${conjunction}
+                |${userProjectRole.project.unixGroup}""".stripMargin(),
+                """addToUnixGroup
+                |${userProjectRole.project.unixGroup}
+                |${userProjectRole.project.name}
+                |${operatorAction}
+                |Command '${scriptCommand}' was executed ${result}.
+                |Output:
+                |test-output
+                |Error:
+                |test-error
+                |${affectedUserUserDetail}
+                |${requesterUserDetail}""".stripMargin()
+        )
+        1 * userProjectRoleService.remoteShellHelper.executeCommandReturnProcessOutput(
+                _, scriptCommand
+        ) >> new ProcessOutput("test-output", "test-error", exitCode)
+
+        where:
+        exitCode | operatorAction                               || result           | conjunction | subject
+        0        | UserProjectRoleService.OperatorAction.ADD    || "successfully"   | "to"        | "DONE: "
+        1        | UserProjectRoleService.OperatorAction.REMOVE || "unsuccessfully" | "from"      | "ERROR: "
+        1        | UserProjectRoleService.OperatorAction.ADD    || "unsuccessfully" | "to"        | "ERROR: "
     }
 
     void "notifyAdministration lists other projects with same unix group as requested project"() {
@@ -335,6 +401,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
                 |${userProjectRole.project.unixGroup}
                 |${userProjectRole.project.name}
                 |${operatorAction}
+                |Command to execute:
                 |${scriptCommand}
                 |${affectedUserUserDetail}
                 |${requesterUserDetail}""".stripMargin()

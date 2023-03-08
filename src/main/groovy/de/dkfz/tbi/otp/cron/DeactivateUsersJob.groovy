@@ -25,13 +25,13 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.security.user.UserService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.ngsdata.UserProjectRole
 import de.dkfz.tbi.otp.ngsdata.UserProjectRoleService
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.security.User
+import de.dkfz.tbi.otp.security.user.UserService
 import de.dkfz.tbi.otp.security.user.identityProvider.IdentityProvider
 import de.dkfz.tbi.otp.utils.MessageSourceService
 
@@ -67,27 +67,46 @@ class DeactivateUsersJob extends AbstractScheduledJob {
         } as List<User>
     }
 
-    String getUserRemovalCommandHelper(String unixGroup, User user) {
-        return userProjectRoleService.commandTemplate(unixGroup, user.username, UserProjectRoleService.OperatorAction.REMOVE)
-    }
+    void notifyAdministration(User user, Collection<UserProjectRole> allGroups) {
+        allGroups.unique { it.project.unixGroup }
 
-    void notifyAdministration(User user, Set<String> allGroups) {
+        List<UserProjectRoleService.CommandAndResult> commands = allGroups.collect {
+            unixGroup -> userProjectRoleService.executeOrNotify(unixGroup, UserProjectRoleService.OperatorAction.REMOVE)
+        }
+
         String prefix = allGroups ? "TODO" : "DONE"
-        String subject = "[${prefix}] Clean up LDAP groups of expired user ${user}"
         String body = "OTP has disabled ${user} because the LDAP account is expired.\n"
 
         if (allGroups) {
-            body += """\
+            if (commands.any { it.output }) {
+                body += "Automatic removal of users form groups:"
+                List<UserProjectRoleService.CommandAndResult> failed = commands.findAll { it.output.exitCode != 0 }
+                if (failed) {
+                    prefix = "ERROR"
+                    body += "Commands were executed unsuccessfully:\n"
+                    body += failed.collect { "${it.command}\nOutput:\n${it.output.stdout ?: '-'}\nError:\n${it.output.stderr ?: '-'}\n" }
+                } else {
+                    prefix = "DONE"
+                }
+                List<UserProjectRoleService.CommandAndResult> successful = commands - failed
+                if (successful) {
+                    body += "Commands were executed successfully:\n"
+                    body += successful.collect { "${it.command}\nOutput:\n${it.output.stdout ?: '-'}\nError:\n${it.output.stderr ?: '-'}\n" }
+                }
+            } else {
+                body += """\
                 |The user is still a member of some unix groups. Please remove this users access from the following groups:
                 |
-                |${allGroups.join(", ")}
+                |${allGroups.join(",")}
                 |
-                |Removal helper command:
-                |${allGroups.collect { String unixGroup -> getUserRemovalCommandHelper(unixGroup, user) }.join("\n")}
+                |Command to execute:
+                |${commands.collect { it.command.join("\n") }}
                 |""".stripMargin()
+            }
         } else {
             body += "The user has no groups left to remove."
         }
+        String subject = "[${prefix}] Clean up LDAP groups of expired user ${user}"
 
         mailHelperService.sendEmailToTicketSystem(subject, body)
     }
@@ -121,16 +140,16 @@ class DeactivateUsersJob extends AbstractScheduledJob {
 
     void disableUserAndNotify(User user) {
         log.info("Disable user ${user} with deactivation date ${user.plannedDeactivationDate}")
-        Set<String> affectedUnixGroups = [] as Set<String>
+        Set<UserProjectRole> affectedGroups = [] as Set<UserProjectRole>
         UserProjectRole.findAllByUserAndEnabled(user, true).each { UserProjectRole userProjectRole ->
             userProjectRoleService.doSetEnabled(userProjectRole, false)
             if (isInGroup(user, userProjectRole.project.unixGroup)) {
-                affectedUnixGroups.add(userProjectRole.project.unixGroup)
+                affectedGroups.add(userProjectRole)
             }
         }
         userService.setPlannedDeactivationDateOfUser(user, null)
         notifyProjectAuthoritiesOfUsersProjects(user)
-        notifyAdministration(user, affectedUnixGroups)
+        notifyAdministration(user, affectedGroups)
     }
 
     @Override
