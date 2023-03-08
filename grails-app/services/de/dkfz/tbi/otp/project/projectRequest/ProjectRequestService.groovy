@@ -227,7 +227,7 @@ class ProjectRequestService {
 
     void sendPassOnEmail(ProjectRequest projectRequest) {
         User requester = projectRequest.requester
-        List<User> projectAuthorities = ((projectRequest.state.usersThatNeedToApprove as List) + [requester]).unique()
+        List<User> projectAuthorities = (projectRequest.state.usersThatNeedToApprove as List).unique()
         List<String> recipients = projectAuthorities*.email
         List<String> ccs = [requester.email]
         String projectAuthoritiesUsernames = projectAuthorities.collect { "${it.realName} (${it.username})" }.join(", ")
@@ -236,7 +236,7 @@ class ProjectRequestService {
                 projectRequestId  : projectRequest.id,
         ])
         String body = messageSourceService.createMessage("notification.projectRequest.passOn.body", [
-                recipients        : "$projectAuthoritiesUsernames, ${requester.realName} (${requester.username})",
+                recipients        : projectAuthoritiesUsernames,
                 projectAuthorities: projectAuthoritiesUsernames,
                 projectRequestName: projectRequest.name,
                 link              : getProjectRequestLinkWithoutParams(projectRequest),
@@ -248,7 +248,7 @@ class ProjectRequestService {
     void sendPiRejectEmail(ProjectRequest projectRequest, String rejectComment) {
         User requester = projectRequest.requester
         List<String> recipient = [requester.email]
-        List<String> ccs = projectRequest.state.usersThatNeedToApprove*.email
+        List<String> ccs = (ProjectRequestPersistentStateService.getAllProjectRequestAuthorities(projectRequest.state)*.email as List).unique()
         String subject = messageSourceService.createMessage("notification.projectRequest.piReject.subject", [
                 projectRequestName: projectRequest.name,
                 projectRequestId  : projectRequest.id,
@@ -266,8 +266,8 @@ class ProjectRequestService {
 
     void sendApprovedEmail(ProjectRequest projectRequest) {
         User requester = projectRequest.requester
-        List<String> recipient = ((ProjectRequestPersistentStateService.getAllProjectRequestAuthorities(projectRequest.state)*.email) + [requester.email])
-                .unique()
+        List<String> recipient = [requester.email]
+        List<String> ccs = (ProjectRequestPersistentStateService.getAllProjectRequestAuthorities(projectRequest.state)*.email as List).unique()
         String subject = messageSourceService.createMessage("notification.projectRequest.approved.subject", [
                 projectRequestName: projectRequest.name,
                 projectRequestId  : projectRequest.id,
@@ -277,7 +277,7 @@ class ProjectRequestService {
                 projectRequestName: projectRequest.name,
                 teamSignature     : processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME),
         ])
-        mailHelperService.sendEmail(subject, body, recipient)
+        mailHelperService.sendEmail(subject, body, recipient, ccs)
     }
 
     void sendPartiallyApprovedEmail(ProjectRequest projectRequest) {

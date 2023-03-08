@@ -134,9 +134,9 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         final User requester = createUser()
         final User pi1 = createUser()
         final User pi2 = createUser()
-        final List<User> users = [pi1, pi2, requester]
-        final ProjectRequest request = createProjectRequest([requester: requester], [usersThatNeedToApprove: users])
-        final String expectedAuthorityUsernames = users.collect { "${it.realName} (${it.username})" }.join(", ")
+        final List<User> authorities = [pi1, pi2]
+        final ProjectRequest request = createProjectRequest([requester: requester], [usersThatNeedToApprove: authorities])
+        final String expectedAuthorityUsernames = authorities.collect { "${it.realName} (${it.username})" }.join(", ")
 
         when:
         projectRequestService.sendPassOnEmail(request)
@@ -145,13 +145,13 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         1 * projectRequestService.messageSourceService.createMessage(_, _) >> subject
         1 * projectRequestService.linkGenerator.link(_) >> link
         1 * projectRequestService.messageSourceService.createMessage(_, [
-                recipients        : "$expectedAuthorityUsernames, ${requester.realName} (${requester.username})",
+                recipients        : expectedAuthorityUsernames,
                 projectAuthorities: expectedAuthorityUsernames,
                 projectRequestName: request.name,
                 link              : link,
                 teamSignature     : emailSenderSalutation,
         ]) >> body
-        1 * projectRequestService.mailHelperService.sendEmail(subject, body, users*.email, [requester.email])
+        1 * projectRequestService.mailHelperService.sendEmail(subject, body, authorities*.email, [requester.email])
         1 * projectRequestService.processingOptionService.findOptionAsString(_) >> emailSenderSalutation
         0 * _
     }
@@ -202,7 +202,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
                 projectRequestName: request.name,
                 teamSignature     : emailSenderSalutation,
         ]) >> body
-        1 * projectRequestService.mailHelperService.sendEmail(subject, body, (users*.email + [requester.email]))
+        1 * projectRequestService.mailHelperService.sendEmail(subject, body, [requester.email], users*.email)
         1 * projectRequestService.processingOptionService.findOptionAsString(_) >> emailSenderSalutation
         0 * _
     }
@@ -232,11 +232,11 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         then:
         4 * projectRequestService.securityService.currentUser >> currentUser
         6 * projectRequestService.linkGenerator.link(_) >> link
-        6 * projectRequestService.mailHelperService.sendEmail(_, _, _, _) >> { arguments ->
+        7 * projectRequestService.mailHelperService.sendEmail(_, _, _, _) >> { arguments ->
             final List<User> recipients = arguments.get(2)
             assert recipients.unique(false).size() == recipients.size()
         }
-        4 * projectRequestService.mailHelperService.sendEmail(_, _, _) >> { arguments ->
+        3 * projectRequestService.mailHelperService.sendEmail(_, _, _) >> { arguments ->
             final List<User> recipients = arguments.get(2)
             assert recipients.unique(false).size() == recipients.size()
         }
