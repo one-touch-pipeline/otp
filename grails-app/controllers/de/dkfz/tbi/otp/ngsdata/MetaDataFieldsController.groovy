@@ -45,6 +45,7 @@ class MetaDataFieldsController implements CheckAndCall {
             changeLibPrepKitLegacyState              : "POST",
             changeSeqTypeLegacyState                 : "POST",
             changeAntibodyTargetLegacyState          : "POST",
+            changeSeqCenterLegacyState               : "POST",
             changeSeqPlatformLegacyState             : "POST",
             toggleNeedsBedFile                       : "POST",
             showAdapterFile                          : "GET",
@@ -206,6 +207,13 @@ class MetaDataFieldsController implements CheckAndCall {
             seqTypeService.changeLegacyState(cmd.seqType, cmd.legacy)
         }
         redirect action: 'seqTypes'
+    }
+
+    def changeSeqCenterLegacyState(SeqCenterLegacyCommand cmd) {
+        checkErrorAndCallMethodWithFlashMessage(cmd, "dataFields.legacy") {
+            seqCenterService.changeLegacyState(cmd.seqCenter, cmd.legacy)
+        }
+        redirect action: 'seqCenters'
     }
 
     def changeAntibodyTargetLegacyState(AntibodyTargetLegacyCommand cmd) {
@@ -630,6 +638,10 @@ class LibPrepKitLegacyCommand extends LegacyCommand {
 
 class SeqTypeLegacyCommand extends LegacyCommand {
     SeqType seqType
+}
+
+class SeqCenterLegacyCommand extends LegacyCommand {
+    SeqCenter seqCenter
 }
 
 class AntibodyTargetLegacyCommand extends LegacyCommand {

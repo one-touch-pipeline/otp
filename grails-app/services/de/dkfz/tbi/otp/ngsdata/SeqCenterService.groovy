@@ -46,14 +46,21 @@ class SeqCenterService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void changeLegacyState(SeqCenter seqCenter, boolean legacy = false) {
+        SeqCenter seqCenterUpdate = SeqCenter.get(seqCenter.id)
+        seqCenterUpdate.legacy = legacy
+        assert seqCenterUpdate.save(flush: true)
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
     SeqCenter createSeqCenter(String name, String dirName) {
-        assert name : "the input name '${name}' must not be null"
-        assert dirName : "the input dirname '${dirName}' must not be null"
-        assert !CollectionUtils.atMostOneElement(SeqCenter.findAllByName(name)) : "The SeqCenter '${name}' exists already"
-        assert !CollectionUtils.atMostOneElement(SeqCenter.findAllByDirName(dirName)) : "The SeqCenter dirname '${dirName}' exists already"
+        assert name: "the input name '${name}' must not be null"
+        assert dirName: "the input dirname '${dirName}' must not be null"
+        assert !CollectionUtils.atMostOneElement(SeqCenter.findAllByName(name)): "The SeqCenter '${name}' exists already"
+        assert !CollectionUtils.atMostOneElement(SeqCenter.findAllByDirName(dirName)): "The SeqCenter dirname '${dirName}' exists already"
         SeqCenter seqCenter = new SeqCenter(
-            name: name,
-            dirName: dirName
+                name: name,
+                dirName: dirName
         )
         assert seqCenter.save(flush: true)
         return seqCenter

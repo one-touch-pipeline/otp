@@ -24,9 +24,10 @@ package de.dkfz.tbi.otp.ngsdata
 import grails.gorm.hibernate.annotation.ManagedEntity
 
 import de.dkfz.tbi.otp.utils.Entity
+import de.dkfz.tbi.otp.utils.Legacy
 
 @ManagedEntity
-class SoftwareTool implements Entity {
+class SoftwareTool implements Entity, Legacy {
 
     enum Type {
         BASECALLING,

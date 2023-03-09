@@ -56,9 +56,10 @@ class SoftwareToolService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    SoftwareTool updateSoftwareTool(Long id, String version) {
+    SoftwareTool updateSoftwareTool(Long id, String version, boolean legacy = false) {
         SoftwareTool softwareTool = getSoftwareTool(id)
         softwareTool.programVersion = version
+        softwareTool.legacy = legacy
         return softwareTool.save(flush: true)
     }
 
@@ -71,6 +72,13 @@ class SoftwareToolService {
             return e.errors
         }
         return null
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void changeLegacyState(SoftwareTool softwareTool, boolean legacy = false) {
+        SoftwareTool softwareToolUpdate = SoftwareTool.get(softwareTool.id)
+        softwareToolUpdate.legacy = legacy
+        assert softwareToolUpdate.save(flush: true)
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")

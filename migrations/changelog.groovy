@@ -52,4 +52,6 @@ databaseChangeLog = {
     include file: 'changelogs/2023/otp-1651.groovy'
 
     include file: 'changelogs/2023/otp-1651-bugfix-wgbs-defaults.groovy'
+
+    include file: 'changelogs/2023/otp-474-legacy.groovy'
 }

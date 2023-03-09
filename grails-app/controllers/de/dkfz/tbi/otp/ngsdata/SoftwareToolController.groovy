@@ -26,17 +26,19 @@ import org.springframework.security.access.annotation.Secured
 import grails.validation.Validateable
 import org.springframework.validation.Errors
 
+import de.dkfz.tbi.otp.CheckAndCall
 import de.dkfz.tbi.otp.FlashMessage
 
 @Secured("hasRole('ROLE_OPERATOR')")
-class SoftwareToolController {
+class SoftwareToolController implements CheckAndCall {
 
     static allowedMethods = [
-            list                        : "GET",
-            createSoftwareTool          : "POST",
-            updateSoftwareTool          : "POST",
-            updateSoftwareToolIdentifier: "POST",
-            createSoftwareToolIdentifier: "POST",
+            list                         : "GET",
+            createSoftwareTool           : "POST",
+            updateSoftwareTool           : "POST",
+            updateSoftwareToolIdentifier : "POST",
+            createSoftwareToolIdentifier : "POST",
+            changeSoftwareToolLegacyState: "POST",
     ]
 
     SoftwareToolService softwareToolService
@@ -49,13 +51,20 @@ class SoftwareToolController {
         ]
     }
 
+    def changeSoftwareToolLegacyState(SoftwareToolLegacyCommand cmd) {
+        checkErrorAndCallMethodWithFlashMessage(cmd, "dataFields.legacy") {
+            softwareToolService.changeLegacyState(cmd.softwareTool, cmd.legacy)
+        }
+        redirect action: 'list'
+    }
+
     def createSoftwareTool(CreateSoftwareToolCommand cmd) {
         Errors errors = softwareToolService.createSoftwareTool(cmd.programName.trim(), cmd.programVersion.trim(), SoftwareTool.Type.BASECALLING)
         if (errors) {
-            flash.message = new FlashMessage(g.message(code:  "softwareTool.list.error") as String, errors)
+            flash.message = new FlashMessage(g.message(code: "softwareTool.list.error") as String, errors)
             flash.cmd = cmd
         } else {
-            flash.message = new FlashMessage(g.message(code:  "softwareTool.list.success") as String)
+            flash.message = new FlashMessage(g.message(code: "softwareTool.list.success") as String)
         }
         redirect(action: 'list')
     }
@@ -70,7 +79,7 @@ class SoftwareToolController {
             render(data as JSON)
             return
         }
-        Map data = [success: true, softwareTool: softwareToolService.updateSoftwareTool(cmd.id, cmd.value.trim())]
+        Map data = [success: true, softwareTool: softwareToolService.updateSoftwareTool(cmd.id, cmd.value.trim(), cmd.legacy)]
         render(data as JSON)
     }
 
@@ -107,6 +116,7 @@ class SoftwareToolController {
 class UpdateCommand implements Validateable {
     Long id
     String value
+    boolean legacy
 
     static constraints = {
         id(min: 0L)
@@ -117,4 +127,8 @@ class UpdateCommand implements Validateable {
 class CreateSoftwareToolCommand implements Validateable {
     String programName
     String programVersion
+}
+
+class SoftwareToolLegacyCommand extends LegacyCommand {
+    SoftwareTool softwareTool
 }

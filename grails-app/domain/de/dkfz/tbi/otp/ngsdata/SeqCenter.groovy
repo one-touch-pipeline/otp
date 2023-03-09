@@ -25,11 +25,12 @@ import grails.gorm.hibernate.annotation.ManagedEntity
 
 import de.dkfz.tbi.otp.project.ProjectFieldReferenceAble
 import de.dkfz.tbi.otp.utils.Entity
+import de.dkfz.tbi.otp.utils.Legacy
 import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
 
 /** This table is used externally. Please discuss a change in the team */
 @ManagedEntity
-class SeqCenter implements Entity, ProjectFieldReferenceAble {
+class SeqCenter implements Entity, ProjectFieldReferenceAble, Legacy {
 
     /** This attribute is used externally. Please discuss a change in the team */
     String name

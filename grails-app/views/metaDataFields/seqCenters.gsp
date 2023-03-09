@@ -46,10 +46,12 @@
             <th class="export_column" title="${g.message(code: "dataFields.seqCenter.listSeqCenterDirName.tooltip")}"><g:message code="dataFields.seqCenter.listSeqCenterDirName"/></th>
             <th class="export_column" title="${g.message(code: "dataFields.seqCenter.autoImportDir.tooltip")}"><g:message code="dataFields.seqCenter.autoImportDir"/></th>
             <th class="export_column" title="${g.message(code: "dataFields.seqCenter.autoImportable.tooltip")}"><g:message code="dataFields.seqCenter.autoImportable"/></th>
+            <th class="export_column" title="${g.message(code: "dataFields.seqCenter.legacy")}"><g:message code="dataFields.seqCenter.legacy"/></th>
         </tr>
         </thead>
         <tbody>
-        <g:each var="seqCenter" in="${seqCenters}">
+        <g:each status="i" var="seqCenter" in="${seqCenters}">
+            <tr class="${seqCenter.legacy ? 'text-muted' : ''}">
             <tr>
                 <td>${seqCenter.name}</td>
                 <td>${seqCenter.dirName}</td>
@@ -66,6 +68,15 @@
                         link="${g.createLink(controller: 'metaDataFields', action: 'updateAutoImportable', params: ['seqCenter.id': seqCenter.id])}"
                         values="${["true", "false"]}"
                         value="${seqCenter.autoImportable}"/>
+                </td>
+                <td>
+                    <g:render template="/templates/slider" model="[
+                            targetAction: 'changeSeqCenterLegacyState',
+                            objectName  : 'seqCenter',
+                            object      : seqCenter,
+                            i           : i,
+                    ]"/>
+                    <span hidden>${seqCenter.legacy}</span>
                 </td>
             </tr>
         </g:each>

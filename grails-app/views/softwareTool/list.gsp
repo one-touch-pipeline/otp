@@ -41,18 +41,21 @@
         <table id="metadatafields-datatable" class="software-table fixed-table-header">
             <thead>
                 <tr>
-                    <th><g:message code="softwareTool.list.version"/></th>
-                    <th><g:message code="softwareTool.list.aliases"/></th>
+                    <th class="export_column"><g:message code="softwareTool.list.version"/></th>
+                    <th class="export_column"><g:message code="softwareTool.list.aliases"/></th>
                     <th></th>
+                    <th class="export_column"><g:message code="softwareTool.list.legacy"/></th>
                     <th class="export_column" hidden><g:message code="softwareTool.list.tool"/></th>
                     <th class="export_column" hidden><g:message code="softwareTool.list.version"/></th>
                     <th class="export_column" hidden><g:message code="softwareTool.list.aliases"/></th>
+                    <th class="export_column" hidden><g:message code="softwareTool.list.legacy"/></th>
                 </tr>
             </thead>
             <tbody>
-            <g:each var="programName" in="${(softwareToolPerProgramName.keySet() as List<String>).sort { it.toLowerCase() }}">
+            <g:each status="i" var="programName" in="${(softwareToolPerProgramName.keySet() as List<String>).sort { it.toLowerCase() }}">
                 <tr class="tool-header-row">
                     <td>${programName}</td>
+                    <td></td>
                     <td></td>
                     <td></td>
                     <td hidden></td>
@@ -60,6 +63,7 @@
                     <td hidden></td>
                 </tr>
                 <g:each var="softwareTool" in="${softwareToolPerProgramName[programName]}">
+                    <tr class="${softwareTool.legacy ? 'text-muted' : ''}">
                      <tr>
                          <td>
                              <otp:editorSwitch
@@ -81,6 +85,15 @@
                                      template="newFreeTextValue"
                                      link="${g.createLink(controller: 'softwareTool', action: 'createSoftwareToolIdentifier', id: softwareTool.id)}"
                                      value=""/>
+                         </td>
+                         <td>
+                             <g:render template="/templates/slider" model="[
+                                     targetAction: 'changeSoftwareToolLegacyState',
+                                     objectName  : 'softwareTool',
+                                     object      : softwareTool,
+                                     i           : i++,
+                             ]"/>
+                             <span hidden>${softwareTool.legacy}</span>
                          </td>
                          <g:render template="exportableListEntry" model="[softwareTool: softwareTool, identifier: identifierPerSoftwareTool[softwareTool]]"/>
                      </tr>
