@@ -34,7 +34,8 @@ beans = {
         configService(Class.forName("de.dkfz.tbi.otp.TestConfigService")) {
             processingOptionService = ref('processingOptionService')
         }
-    } else {
+    }
+    if (Environment.current in [Environment.PRODUCTION, Environment.DEVELOPMENT]) {
         // proper thread pool
         xmlns task: "http://www.springframework.org/schema/task"
         task.executor(id: "taskExecutor", "pool-size": 10)

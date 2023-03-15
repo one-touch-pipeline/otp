@@ -104,7 +104,7 @@ dropUniqueConstraints="\
 mkdir -p migrations/changelogs/${year} ${tmpDir}
 
 #create diff and cleanup false positives
-bash gradlew --build-cache dbmGormDiff -q | \
+bash gradlew -Dgrails.env='SCRIPT' --build-cache dbmGormDiff -q | \
   tee ${tmpDir}/migration-step01.groovy | \
 
   # delete anything before the line with "databaseChangeLog = {"
