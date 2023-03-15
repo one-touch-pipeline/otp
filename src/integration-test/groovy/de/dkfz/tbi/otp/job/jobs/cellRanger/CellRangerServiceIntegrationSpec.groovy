@@ -187,6 +187,6 @@ class CellRangerServiceIntegrationSpec extends Specification implements UserAndR
 
         then:
         org.springframework.security.access.AccessDeniedException e = thrown()
-        e.message.contains("Access is denied")
+        e.message.contains("Access Denied")
     }
 }

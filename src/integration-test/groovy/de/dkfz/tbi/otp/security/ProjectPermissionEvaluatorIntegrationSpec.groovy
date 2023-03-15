@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.security
 
 import grails.gorm.transactions.Rollback
 import grails.testing.mixin.integration.Integration
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
@@ -40,7 +41,9 @@ import de.dkfz.tbi.otp.utils.Principal
 @Integration
 class ProjectPermissionEvaluatorIntegrationSpec extends Specification implements UserAndRoles, UserDomainFactory {
 
+    @Autowired
     ProjectPermissionEvaluator permissionEvaluator
+
     Authentication authentication
     User user
     Project project
