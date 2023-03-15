@@ -30,7 +30,7 @@ import de.dkfz.tbi.otp.utils.RequestUtilService
 import javax.servlet.http.HttpServletResponse
 
 @Slf4j
-@PreAuthorize('isFullyAuthenticated()')
+@PreAuthorize('permitAll')
 class ErrorController {
 
     RequestUtilService requestUtilService

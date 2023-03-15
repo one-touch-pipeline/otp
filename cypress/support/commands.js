@@ -26,7 +26,7 @@ const login = (username, password) => {
   'use strict';
 
   cy.session(username, () => {
-    cy.visit('/login/auth');
+    cy.visit('/login');
     cy.get('body')
       .then(($body) => {
         const loginButtonId = '#loginButton';
