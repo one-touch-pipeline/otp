@@ -26,13 +26,13 @@ import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
 
-@PreAuthorize('isFullyAuthenticated()')
 abstract class AbstractAnalysisController {
 
     static allowedMethods = [
             results: "GET",
     ]
 
+    @PreAuthorize('isFullyAuthenticated()')
     Map results() {
         return [:]
     }

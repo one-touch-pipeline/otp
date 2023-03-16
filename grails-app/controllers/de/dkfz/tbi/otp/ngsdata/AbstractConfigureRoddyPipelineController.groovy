@@ -27,7 +27,6 @@ import de.dkfz.tbi.otp.FlashMessage
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.RoddyConfiguration
 
-@PreAuthorize("hasRole('ROLE_OPERATOR')")
 abstract class AbstractConfigureRoddyPipelineController extends AbstractConfigurePipelineController implements ConfigurePipelineHelper {
 
     static allowedMethods = [
@@ -35,6 +34,7 @@ abstract class AbstractConfigureRoddyPipelineController extends AbstractConfigur
             save: "POST",
     ]
 
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
     Map index(BaseConfigurePipelineSubmitCommand cmd) {
         Project project = projectSelectionService.selectedProject
         Map result = [:]
@@ -56,6 +56,7 @@ abstract class AbstractConfigureRoddyPipelineController extends AbstractConfigur
         return result
     }
 
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
     def save(ConfigurePipelineSubmitCommand cmd) {
         Project project = projectSelectionService.requestedProject
         if (!cmd.validate()) {

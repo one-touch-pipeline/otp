@@ -88,11 +88,16 @@ class TestConfigService extends ConfigService {
             }
         }
         otpProperties += [
-                (OtpProperty.SSH_USER)             : "user",
-                (OtpProperty.PATH_PROJECT_ROOT)    : TestCase.uniqueNonExistentPath.path + '/root_path',
-                (OtpProperty.PATH_PROCESSING_ROOT) : TestCase.uniqueNonExistentPath.path + '/processing_root_path',
-                (OtpProperty.PATH_CLUSTER_LOGS_OTP): TestCase.uniqueNonExistentPath.path + '/logging_root_path',
-
+                (OtpProperty.SSH_USER)              : "user",
+                (OtpProperty.PATH_PROJECT_ROOT)     : TestCase.uniqueNonExistentPath.path + '/root_path',
+                (OtpProperty.PATH_PROCESSING_ROOT)  : TestCase.uniqueNonExistentPath.path + '/processing_root_path',
+                (OtpProperty.PATH_CLUSTER_LOGS_OTP) : TestCase.uniqueNonExistentPath.path + '/logging_root_path',
+                (OtpProperty.KEYCLOAK_SERVER)       : '-',
+                (OtpProperty.KEYCLOAK_CLIENT_ID)    : '-',
+                (OtpProperty.KEYCLOAK_CLIENT_SECRET): '-',
+                (OtpProperty.WES_AUTH_BASE_URL)     : '-',
+                (OtpProperty.WES_AUTH_CLIENT_ID)    : '-',
+                (OtpProperty.WES_AUTH_CLIENT_SECRET): '-',
         ]
         cleanProperties = new HashMap<>(otpProperties)
 
