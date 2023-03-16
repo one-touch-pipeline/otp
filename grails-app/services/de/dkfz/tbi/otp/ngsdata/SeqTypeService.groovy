@@ -417,6 +417,8 @@ class SeqTypeService extends MetadataFieldsService<SeqType> {
                 exomePairedSeqType,
                 wholeGenomePairedSeqType,
                 chipSeqPairedSeqType,
+                wholeGenomeBisulfitePairedSeqType,
+                wholeGenomeBisulfiteTagmentationPairedSeqType,
         ]
     }
 

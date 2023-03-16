@@ -51,6 +51,7 @@ class AllDecider implements Decider {
     List<Class<Decider>> deciders = [
             FastqcDecider,
             PanCancerDecider,
+            WgbsDecider,
     ]
 
     @Override

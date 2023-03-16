@@ -22,12 +22,10 @@
 package de.dkfz.tbi.otp.workflowExecution
 
 import grails.gorm.hibernate.annotation.ManagedEntity
-
 import groovy.transform.ToString
 
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 import de.dkfz.tbi.otp.ngsdata.SeqType
-import de.dkfz.tbi.otp.ngsdata.taxonomy.Species
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.Entity
@@ -47,7 +45,7 @@ class ReferenceGenomeSelector implements Entity {
         referenceGenome validator: { val, obj ->
             if (!(val.species.every { s -> s in obj.species*.species } &&
                     val.speciesWithStrain.every { sws -> sws in obj.species } &&
-                    obj.species.every { sws -> sws in val.speciesWithStrain || sws in SpeciesWithStrain.findAllBySpecies(val.species as Species) })) {
+                    obj.species.every { sws -> sws in val.speciesWithStrain || sws.species in val.species })) {
                 return "species"
             }
         }

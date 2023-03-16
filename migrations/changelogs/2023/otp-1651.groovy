@@ -21,33 +21,11 @@
  */
 
 databaseChangeLog = {
-    include file: 'changelogs/2022/initialDatabaseSchema.groovy'
-
-    include file: 'changelogs/2022/otp-1860-adapt-databasechangelog.groovy'
-
-    include file: 'changelogs/2022/otp-1611-wes-domains.groovy'
-
-    include file: 'changelogs/2022/otp-1612-state-for-workflow-creation.groovy'
-
-    include file: 'changelogs/2022/otp-1135.groovy'
-
-    include file: 'changelogs/2023/otp-1732.groovy'
-
-    include file: 'changelogs/2023/otp-1926-bugfix-wgbs-defaults.groovy'
-
-    include file: 'changelogs/2023/otp-1909.groovy'
-
-    include file: 'changelogs/2023/otp-1919-fix-pancan-defaults.groovy'
-
-    include file: 'changelogs/2023/otp-1871.groovy'
-
-    include file: 'changelogs/2023/otp-1911-remove-fastq-linking.groovy'
-
-    include file: 'changelogs/2023/otp-1549-low_cov.groovy'
-
-    include file: 'changelogs/2023/otp-1940.groovy'
-
-    include file: 'changelogs/2023/otp-1986.groovy'
-
-    include file: 'changelogs/2023/otp-1651.groovy'
+    changeSet(author: "", id: "otp-1651") {
+        sql("""
+            UPDATE job_execution_plan
+            SET enabled = false
+            WHERE name = 'WgbsAlignmentWorkflow';
+        """)
+    }
 }

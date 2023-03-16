@@ -28,6 +28,7 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.FastqcWorkflowDomainFactory
 import de.dkfz.tbi.otp.workflow.panCancer.PanCancerWorkflow
+import de.dkfz.tbi.otp.workflow.wgbs.WgbsWorkflow
 import de.dkfz.tbi.otp.workflowExecution.decider.AllDecider
 
 @Rollback
@@ -39,6 +40,7 @@ class AllDeciderIntegrationSpec extends Specification implements ServiceUnitTest
         AllDecider allDecider = new AllDecider()
         createBashFastqcWorkflowVersion()
         createWorkflow(name: PanCancerWorkflow.WORKFLOW)
+        createWorkflow(name: WgbsWorkflow.WORKFLOW)
         WorkflowStep workflowStep = createWorkflowStep()
         WorkflowArtefact wa1 = createWorkflowArtefact(state: WorkflowArtefact.State.SUCCESS, producedBy: workflowStep.workflowRun,
                 artefactType: ArtefactType.RUN_YAPSA)
