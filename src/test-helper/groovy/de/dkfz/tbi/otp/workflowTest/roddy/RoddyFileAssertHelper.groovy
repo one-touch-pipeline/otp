@@ -25,6 +25,7 @@ import grails.converters.JSON
 
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
+import de.dkfz.tbi.otp.job.processing.RoddyConfigService
 import de.dkfz.tbi.otp.workflowTest.FileAssertHelper
 
 import java.nio.file.Files
@@ -90,11 +91,13 @@ class RoddyFileAssertHelper {
         }
     }
 
-    static protected void assertWorkDirectoryFileSystemState(RoddyBamFile bamFile, boolean isBaseBamFile, RoddyBamFileService roddyBamFileService) {
+    static protected void assertWorkDirectoryFileSystemState(RoddyBamFile bamFile, boolean isBaseBamFile, RoddyBamFileService roddyBamFileService,
+                                                             RoddyConfigService roddyConfigService) {
         List<Path> rootDirs = [
                 roddyBamFileService.getWorkQADirectory(bamFile),
                 roddyBamFileService.getWorkExecutionStoreDirectory(bamFile),
                 roddyBamFileService.getWorkMergedQADirectory(bamFile),
+                roddyConfigService.getConfigDirectory(roddyBamFileService.getWorkDirectory(bamFile)),
         ]
         List<Path> rootFiles = []
         if (isBaseBamFile) {

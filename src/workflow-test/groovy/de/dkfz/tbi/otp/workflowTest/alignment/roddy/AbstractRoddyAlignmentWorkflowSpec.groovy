@@ -31,6 +31,7 @@ import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.domainFactory.FastqcDomainFactory
 import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPancanFactory
+import de.dkfz.tbi.otp.job.processing.RoddyConfigService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.utils.*
@@ -77,6 +78,8 @@ abstract class AbstractRoddyAlignmentWorkflowSpec extends AbstractAlignmentWorkf
     protected static final String SAMPLE_TYPE = "control"
 
     AbstractBamFileService abstractBamFileService
+
+    RoddyConfigService roddyConfigService
 
     RoddyBamFileService roddyBamFileService
 

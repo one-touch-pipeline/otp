@@ -66,7 +66,8 @@ abstract class AbstractExecuteRoddyPipelineJob extends AbstractExecutePipelineJo
         Realm realm = workflowStep.workflowRun.realm
         FileSystem fs = fileSystemService.getRemoteFileSystem(realm)
         Path outputDir = fs.getPath(roddyResult.workDirectory.absolutePath)
-        Path confDir = outputDir.resolve(RoddyConfigService.CONFIGURATION_DIRECTORY)
+        Path confDir = roddyConfigService.getConfigDirectory(outputDir)
+        Path confFile = roddyConfigService.getConfigFile(outputDir)
 
         logService.addSimpleLogEntry(workflowStep,
                 "The json config (without run specific values):\n${JsonOutput.prettyPrint(workflowStep.workflowRun.combinedConfig)}")
@@ -84,8 +85,7 @@ abstract class AbstractExecuteRoddyPipelineJob extends AbstractExecutePipelineJo
         )
         logService.addSimpleLogEntry(workflowStep, "The final xml:\n${xmlConfig}")
 
-        Path xmlPath = confDir.resolve("${RoddyConfigService.CONFIGURATION_NAME}.xml")
-        fileService.createFileWithContent(xmlPath, xmlConfig, realm, FileService.DEFAULT_FILE_PERMISSION, true)
+        fileService.createFileWithContent(confFile, xmlConfig, realm, FileService.DEFAULT_FILE_PERMISSION, true)
 
         createAdditionalConfigFiles(workflowStep, confDir, realm)
 

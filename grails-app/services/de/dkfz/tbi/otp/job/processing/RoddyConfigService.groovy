@@ -35,6 +35,7 @@ class RoddyConfigService {
     final static String ANALYSIS_ID = "analysis"
     final static String CONFIGURATION_DIRECTORY = "config"
     final static String CONFIGURATION_NAME = "config"
+    final static String CONFIGURATION_FILE = "config.xml"
 
     private static final String SCHEMA = '''
         {
@@ -329,5 +330,13 @@ class RoddyConfigService {
             }
         }
         return writer.toString()
+    }
+
+    Path getConfigDirectory(Path basPath) {
+        return basPath.resolve(CONFIGURATION_DIRECTORY)
+    }
+
+    Path getConfigFile(Path basPath) {
+        return getConfigDirectory(basPath).resolve(CONFIGURATION_FILE)
     }
 }

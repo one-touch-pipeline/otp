@@ -30,6 +30,7 @@ import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.job.processing.RoddyConfigService
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
@@ -89,6 +90,7 @@ class LinkFilesToFinalDestinationServiceSpec extends Specification implements Is
                 fileSize           : -1,
         ])
         Realm realm = roddyBamFile.realm
+        Path workDirectory = roddyBamFile.workDirectory.toPath()
 
         DomainFactory.createRoddyProcessingOptions(tempDir.toFile())
 
@@ -115,6 +117,10 @@ class LinkFilesToFinalDestinationServiceSpec extends Specification implements Is
                 },
                 abstractMergedBamFileService: Mock(AbstractMergedBamFileService) {
                     1 * updateSamplePairStatusToNeedProcessing(roddyBamFile)
+                },
+                roddyConfigService          : Mock(RoddyConfigService) {
+                    1 * getConfigDirectory(workDirectory) >> workDirectory.resolve(RoddyConfigService.CONFIGURATION_DIRECTORY)
+                    0 * _
                 },
         ])
         linkFilesToFinalDestinationService.fileSystemService = new TestFileSystemService()

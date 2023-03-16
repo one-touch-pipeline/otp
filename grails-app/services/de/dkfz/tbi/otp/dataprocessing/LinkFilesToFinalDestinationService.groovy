@@ -28,6 +28,7 @@ import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
+import de.dkfz.tbi.otp.job.processing.RoddyConfigService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightCheckService
 import de.dkfz.tbi.otp.utils.*
@@ -49,6 +50,7 @@ class LinkFilesToFinalDestinationService {
     Md5SumService md5SumService
     QcTrafficLightCheckService qcTrafficLightCheckService
     RemoteShellHelper remoteShellHelper
+    RoddyConfigService roddyConfigService
 
     void prepareRoddyBamFile(RoddyBamFile roddyBamFile) {
         assert roddyBamFile: "roddyBamFile must not be null"
@@ -204,6 +206,7 @@ class LinkFilesToFinalDestinationService {
                 roddyBamFile.workMd5sumFile,
                 roddyBamFile.workQADirectory,
                 roddyBamFile.workExecutionStoreDirectory,
+                roddyConfigService.getConfigDirectory(roddyBamFile.workDirectory.toPath()).toFile(),
         ]
         if (roddyBamFile.seqType.isWgbs()) {
             expectedFiles.add(roddyBamFile.workMethylationDirectory)
