@@ -22,15 +22,14 @@
 package de.dkfz.tbi.otp.errors
 
 import groovy.util.logging.Slf4j
-import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.utils.ExceptionUtils
 import de.dkfz.tbi.otp.utils.RequestUtilService
 
 import javax.servlet.http.HttpServletResponse
 
+@SuppressWarnings("SecureAllControllers")
 @Slf4j
-@PreAuthorize('permitAll')
 class ErrorController {
 
     RequestUtilService requestUtilService
