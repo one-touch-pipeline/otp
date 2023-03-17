@@ -68,8 +68,6 @@ LogThreadLocal.withThreadLog(System.out, {
                 }
             }
             'in'('seqType', [
-                    //SeqTypeService.wholeGenomeBisulfitePairedSeqType,
-                    //SeqTypeService.wholeGenomeBisulfiteTagmentationPairedSeqType,
                     //SeqTypeService.rnaPairedSeqType,
                     //SeqTypeService.rnaSingleSeqType,
             ])
@@ -79,6 +77,8 @@ LogThreadLocal.withThreadLog(System.out, {
             SeqTypeService.wholeGenomePairedSeqType,
             SeqTypeService.exomePairedSeqType,
             SeqTypeService.chipSeqPairedSeqType,
+            SeqTypeService.wholeGenomeBisulfitePairedSeqType,
+            SeqTypeService.wholeGenomeBisulfiteTagmentationPairedSeqType,
         ]
 
         seqTracks.each {

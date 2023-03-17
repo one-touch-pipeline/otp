@@ -43,6 +43,8 @@ LogThreadLocal.withThreadLog(System.out, { SeqTrack.withTransaction {
             SeqTypeService.wholeGenomePairedSeqType,
             SeqTypeService.exomePairedSeqType,
             SeqTypeService.chipSeqPairedSeqType,
+            SeqTypeService.wholeGenomeBisulfitePairedSeqType,
+            SeqTypeService.wholeGenomeBisulfiteTagmentationPairedSeqType,
     ]
 
     roddyBamFiles.each {

@@ -51,8 +51,8 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
  * The columns can be separated by space, comma, semicolon or tab. Multiple separators are merged together.
  */
 String multiColumnInput = """
-#pid1,tumor,WGS,PAIRED,false,sampleName1
-#pid3,control,WES,PAIRED,false,
+#pid1,tumor,RNA,PAIRED,false,sampleName1
+#pid3,control,RNA,PAIRED,false,
 #pid5,control,RNA,SINGLE,true,sampleName2
 
 """
@@ -106,6 +106,8 @@ IlseSubmission.withTransaction {
             SeqTypeService.wholeGenomePairedSeqType,
             SeqTypeService.exomePairedSeqType,
             SeqTypeService.chipSeqPairedSeqType,
+            SeqTypeService.wholeGenomeBisulfitePairedSeqType,
+            SeqTypeService.wholeGenomeBisulfiteTagmentationPairedSeqType,
     ]
 
     seqTracks.each {

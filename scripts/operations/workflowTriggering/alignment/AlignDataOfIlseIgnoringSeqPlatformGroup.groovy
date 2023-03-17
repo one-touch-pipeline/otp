@@ -62,6 +62,8 @@ IlseSubmission.withTransaction {
             SeqTypeService.wholeGenomePairedSeqType,
             SeqTypeService.exomePairedSeqType,
             SeqTypeService.chipSeqPairedSeqType,
+            SeqTypeService.wholeGenomeBisulfitePairedSeqType,
+            SeqTypeService.wholeGenomeBisulfiteTagmentationPairedSeqType,
     ]
 
     seqTracks.each {
