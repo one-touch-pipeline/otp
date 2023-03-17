@@ -31,6 +31,7 @@ import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.utils.LogUsedTimeUtils
 import de.dkfz.tbi.otp.workflow.panCancer.PanCancerWorkflow
+import de.dkfz.tbi.otp.workflow.wgbs.WgbsWorkflow
 import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
 import de.dkfz.tbi.otp.workflowExecution.WorkflowService
 
@@ -73,9 +74,14 @@ class AllDecider implements Decider {
     }
 
     Collection<SeqTrack> findAllSeqTracksInNewWorkflowSystem(Collection<SeqTrack> seqTracks) {
-        Set<SeqType> supportedSeqTypes = workflowService.getExactlyOneWorkflow(PanCancerWorkflow.WORKFLOW).supportedSeqTypes
-        return deciders.contains(PanCancerDecider) ? seqTracks.findAll {
+        Set<SeqType> supportedSeqTypes = [
+                workflowService.getExactlyOneWorkflow(PanCancerWorkflow.WORKFLOW),
+                workflowService.getExactlyOneWorkflow(WgbsWorkflow.WORKFLOW),
+        ].collectMany {
+            it.supportedSeqTypes
+        } as Set<SeqType>
+        return seqTracks.findAll {
             supportedSeqTypes.contains(it.seqType)
-        } : [] as Collection<SeqTrack>
+        }
     }
 }
