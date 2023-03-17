@@ -20,6 +20,7 @@
  * SOFTWARE.
  */
 
+
 INSERT INTO external_workflow_config_fragment(id, version, date_created, last_updated, object_version, name, config_values)
 VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 0, 'Default resources values for WGBS alignment 1.2.73-1, 1.2.73-2, 1.2.73-201, 1.2.73-202, 1.2.73-204',
         '{' ||
@@ -205,8 +206,7 @@ SELECT (SELECT id
         WHERE name = 'Default resources values for WGBS alignment 1.2.73-1, 1.2.73-2, 1.2.73-201, 1.2.73-202, 1.2.73-204'),
        (SELECT id
         FROM workflow_version
-        WHERE workflow_id = (SELECT id FROM workflow WHERE name = 'WGBS alignment')
-          AND workflow_version.workflow_version = '1.2.73-1')
+        WHERE workflow_id = (SELECT id FROM workflow WHERE name = 'WGBS alignment') AND workflow_version.workflow_version = '1.2.73-1')
 ON CONFLICT DO NOTHING;
 
 INSERT INTO external_workflow_config_selector_workflow_version (external_workflow_config_selector_workflow_versions_id, workflow_version_id)
@@ -215,8 +215,7 @@ SELECT (SELECT id
         WHERE name = 'Default resources values for WGBS alignment 1.2.73-1, 1.2.73-2, 1.2.73-201, 1.2.73-202, 1.2.73-204'),
        (SELECT id
         FROM workflow_version
-        WHERE workflow_id = (SELECT id FROM workflow WHERE name = 'WGBS alignment')
-          AND workflow_version.workflow_version = '1.2.73-2')
+        WHERE workflow_id = (SELECT id FROM workflow WHERE name = 'WGBS alignment') AND workflow_version.workflow_version = '1.2.73-2')
 ON CONFLICT DO NOTHING;
 
 INSERT INTO external_workflow_config_selector_workflow_version (external_workflow_config_selector_workflow_versions_id, workflow_version_id)
@@ -225,8 +224,7 @@ SELECT (SELECT id
         WHERE name = 'Default resources values for WGBS alignment 1.2.73-1, 1.2.73-2, 1.2.73-201, 1.2.73-202, 1.2.73-204'),
        (SELECT id
         FROM workflow_version
-        WHERE workflow_id = (SELECT id FROM workflow WHERE name = 'WGBS alignment')
-          AND workflow_version.workflow_version = '1.2.73-201')
+        WHERE workflow_id = (SELECT id FROM workflow WHERE name = 'WGBS alignment') AND workflow_version.workflow_version = '1.2.73-201')
 ON CONFLICT DO NOTHING;
 
 INSERT INTO external_workflow_config_selector_workflow_version (external_workflow_config_selector_workflow_versions_id, workflow_version_id)
@@ -235,8 +233,7 @@ SELECT (SELECT id
         WHERE name = 'Default resources values for WGBS alignment 1.2.73-1, 1.2.73-2, 1.2.73-201, 1.2.73-202, 1.2.73-204'),
        (SELECT id
         FROM workflow_version
-        WHERE workflow_id = (SELECT id FROM workflow WHERE name = 'WGBS alignment')
-          AND workflow_version.workflow_version = '1.2.73-202')
+        WHERE workflow_id = (SELECT id FROM workflow WHERE name = 'WGBS alignment') AND workflow_version.workflow_version = '1.2.73-202')
 ON CONFLICT DO NOTHING;
 
 INSERT INTO external_workflow_config_selector_workflow_version (external_workflow_config_selector_workflow_versions_id, workflow_version_id)
@@ -245,6 +242,5 @@ SELECT (SELECT id
         WHERE name = 'Default resources values for WGBS alignment 1.2.73-1, 1.2.73-2, 1.2.73-201, 1.2.73-202, 1.2.73-204'),
        (SELECT id
         FROM workflow_version
-        WHERE workflow_id = (SELECT id FROM workflow WHERE name = 'WGBS alignment')
-          AND workflow_version.workflow_version = '1.2.73-204')
+        WHERE workflow_id = (SELECT id FROM workflow WHERE name = 'WGBS alignment') AND workflow_version.workflow_version = '1.2.73-204')
 ON CONFLICT DO NOTHING;

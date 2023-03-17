@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,37 +19,44 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 databaseChangeLog = {
-    include file: 'changelogs/2022/initialDatabaseSchema.groovy'
 
-    include file: 'changelogs/2022/otp-1860-adapt-databasechangelog.groovy'
+    String searchString = 'Default%WGBS alignment%'
 
-    include file: 'changelogs/2022/otp-1611-wes-domains.groovy'
+    changeSet(author: "", id: "otp-1651-fix-wgbs-defaults") {
+        sql("""
+DELETE
+FROM external_workflow_config_selector_workflow
+WHERE external_workflow_config_selector_workflows_id IN (
+    SELECT id
+    FROM external_workflow_config_selector
+    WHERE name LIKE '${searchString}'
+);
 
-    include file: 'changelogs/2022/otp-1612-state-for-workflow-creation.groovy'
+DELETE
+FROM external_workflow_config_selector_workflow_version
+WHERE external_workflow_config_selector_workflow_versions_id IN (
+    SELECT id
+    FROM external_workflow_config_selector
+    WHERE name LIKE '${searchString}'
+);
 
-    include file: 'changelogs/2022/otp-1135.groovy'
+DELETE
+FROM external_workflow_config_selector_seq_type
+WHERE external_workflow_config_selector_seq_types_id IN (
+    SELECT id
+    FROM external_workflow_config_selector
+    WHERE name LIKE '${searchString}'
+);
 
-    include file: 'changelogs/2023/otp-1732.groovy'
+DELETE
+FROM external_workflow_config_selector
+WHERE name LIKE '${searchString}';
 
-    include file: 'changelogs/2023/otp-1926-bugfix-wgbs-defaults.groovy'
+DELETE
+FROM external_workflow_config_fragment
+WHERE name LIKE '${searchString}';
 
-    include file: 'changelogs/2023/otp-1909.groovy'
-
-    include file: 'changelogs/2023/otp-1919-fix-pancan-defaults.groovy'
-
-    include file: 'changelogs/2023/otp-1871.groovy'
-
-    include file: 'changelogs/2023/otp-1911-remove-fastq-linking.groovy'
-
-    include file: 'changelogs/2023/otp-1549-low_cov.groovy'
-
-    include file: 'changelogs/2023/otp-1940.groovy'
-
-    include file: 'changelogs/2023/otp-1986.groovy'
-
-    include file: 'changelogs/2023/otp-1651.groovy'
-
-    include file: 'changelogs/2023/otp-1651-bugfix-wgbs-defaults.groovy'
+""")
+    }
 }

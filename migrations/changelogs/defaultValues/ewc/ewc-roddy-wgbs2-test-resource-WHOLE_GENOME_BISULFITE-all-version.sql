@@ -20,6 +20,7 @@
  * SOFTWARE.
  */
 
+
 INSERT INTO external_workflow_config_fragment(id, version, date_created, last_updated, object_version, name, config_values)
 VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 0, 'Default test-resource values for WGBS alignment WHOLE_GENOME_BISULFITE test',
         '{' ||

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -32,7 +32,7 @@ import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
-import de.dkfz.tbi.otp.workflow.panCancer.PanCancerWorkflow
+import de.dkfz.tbi.otp.workflow.wgbs.WgbsWorkflow
 import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.util.TimeFormats
 
@@ -40,6 +40,51 @@ import java.nio.file.FileSystem
 import java.nio.file.Path
 import java.util.concurrent.Semaphore
 import java.util.regex.Matcher
+
+/**
+ * script to check migration.
+ *
+ * Currently configured for wgbs alignment. For other please adapt the input.
+ *
+ * In case more config files are needed, add content of file to new variable and adapt creation at place of creation of config files.
+ */
+
+//----------------------------------
+//input
+
+//the seqtypes to check for workflow
+@Field
+List<SeqType> seqTypes = [
+        SeqTypeService.wholeGenomeBisulfitePairedSeqType,
+        SeqTypeService.wholeGenomeBisulfiteTagmentationPairedSeqType,
+]
+
+//the pipeline to check
+@Field
+Pipeline pipeline = Pipeline.findByName(Pipeline.Name.PANCAN_ALIGNMENT)
+
+//the name of the new workflow in the new system
+@Field
+String nameNewWorkflow = WgbsWorkflow.WORKFLOW
+
+//name of the roddy plugin
+@Field
+String roddyWorkflowPlugin = "AlignmentAndQCWorkflows"
+
+//name of the roddy analysis
+@Field
+String roddyAnalysisConfiguration = 'bisulfiteCoreAnalysis'
+
+//additinal config file need for wgbs alignment, if not needed, remove it again
+@Field
+String coAppAndRef = """
+            |<configuration name='coAppAndRef'
+            |               description='This file is a workaround since Roddy plugin imports this config.'>
+            |</configuration>
+            |""".stripMargin()
+
+//----------------------------------
+//script
 
 @Field
 ConfigService configService = ctx.configService
@@ -61,16 +106,6 @@ RemoteShellHelper remoteShellHelper = ctx.remoteShellHelper
 ProcessingOptionService processingOptionService = ctx.processingOptionService
 
 @Field
-List<SeqType> seqTypes = [
-        SeqTypeService.exomePairedSeqType,
-        SeqTypeService.wholeGenomePairedSeqType,
-        SeqTypeService.chipSeqPairedSeqType,
-]
-
-@Field
-Pipeline pipeline = Pipeline.findByName(Pipeline.Name.PANCAN_ALIGNMENT)
-
-@Field
 Realm realm = configService.defaultRealm
 
 @Field
@@ -90,7 +125,8 @@ String applicationIniPath = processingOptionService.findOptionAsString(Processin
 String featureTogglesConfigPath = processingOptionService.findOptionAsString(ProcessingOption.OptionName.RODDY_FEATURE_TOGGLES_CONFIG_PATH)
 
 @Field
-Path base = fileSystem.getPath(configService.scriptOutputPath.toString()).resolve('checkXmlMigration').resolve('pancancer').resolve(TimeFormats.DATE_TIME_SECONDS_DASHES.getFormattedDate(new Date()))
+Path base = fileSystem.getPath(configService.scriptOutputPath.toString()).resolve('checkXmlMigration').
+        resolve(TimeFormats.DATE_TIME_SECONDS_DASHES.getFormattedDate(new Date()))
 
 fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(base, realm)
 println "Base Directory:\n${base}"
@@ -210,7 +246,7 @@ GParsPool.withPool(parallel) {
                 //new system
                 WorkflowVersion workflowVersion = CollectionUtils.exactlyOneElement(
                         WorkflowVersionSelector.findAllByProjectAndSeqTypeAndDeprecationDateIsNull(roddyWorkflowConfig.project, roddyWorkflowConfig.seqType).findAll {
-                            it.workflowVersion.workflow.name == PanCancerWorkflow.WORKFLOW
+                            it.workflowVersion.workflow.name == nameNewWorkflow
                         }).workflowVersion
 
                 SingleSelectSelectorExtendedCriteria extendedCriteria = new SingleSelectSelectorExtendedCriteria(
@@ -232,8 +268,6 @@ GParsPool.withPool(parallel) {
                 //parameter
                 String combinedConfig = fragmentJson
                 Map<String, String> specificConfig = [:]
-                String workflowName = workflowVersion.workflowVersion == "1.2.182" ? "QualityControlWorkflows" : "AlignmentAndQCWorkflows"
-                String analysisConfiguration = roddyWorkflowConfig.seqType.needsBedFile ? 'exomeAnalysis' : 'qcAnalysis'
                 Path inputDir = fileSystem.getPath('$USERHOME/temp/testproject/vbp')//value taken from roddy base config to have no difference
                 Path outputDir = fileSystem.getPath('$USERHOME/temp/testproject/rpp')//value taken from roddy base config to have no difference
                 String queue = 'devel'
@@ -242,9 +276,9 @@ GParsPool.withPool(parallel) {
                 String newXml = roddyConfigService.createRoddyXmlConfig(
                         combinedConfig,
                         specificConfig,
-                        workflowName,
+                        roddyWorkflowPlugin,
                         workflowVersion,
-                        analysisConfiguration,
+                        roddyAnalysisConfiguration,
                         inputDir,
                         outputDir,
                         queue,
@@ -254,6 +288,7 @@ GParsPool.withPool(parallel) {
 
                 Path configDir = work.resolve('config')
                 fileService.createFileWithContent(configDir.resolve('config.xml'), newXml, realm)
+                fileService.createFileWithContent(configDir.resolve('coAppAndRef.xml'), coAppAndRef, realm)
 
                 String cmdNew = [
                         loadModule,
