@@ -25,7 +25,9 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.monitor.MonitorOutputCollector
 import de.dkfz.tbi.otp.monitor.PipelinesChecker
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.workflowExecution.Workflow
 
 abstract class AbstractAlignmentChecker extends PipelinesChecker<SeqTrack> {
 
@@ -62,7 +64,7 @@ abstract class AbstractAlignmentChecker extends PipelinesChecker<SeqTrack> {
 
         output.showWorkflowOldSystem(workflowName)
 
-        List<SeqType> supportedSeqTypes = seqTypes
+        Set<SeqType> supportedSeqTypes = seqTypes
 
         Map seqTrackMap = seqTracks.groupBy {
             supportedSeqTypes.contains(it.seqType)
@@ -144,7 +146,7 @@ abstract class AbstractAlignmentChecker extends PipelinesChecker<SeqTrack> {
         if (!seqTracks) {
             return []
         }
-        return SamplePair.executeQuery("""
+        return SamplePair.executeQuery('''
                     select
                         seqTrack
                     from
@@ -155,17 +157,16 @@ abstract class AbstractAlignmentChecker extends PipelinesChecker<SeqTrack> {
                             select
                                 config
                             from
-                                ConfigPerProjectAndSeqType config
+                                WorkflowVersionSelector config
                             where
                                 config.project = seqTrack.sample.individual.project
                                 and config.seqType = seqTrack.seqType
-                                and config.pipeline.type = '${Pipeline.Type.ALIGNMENT}'
-                                and config.pipeline.name = :pipeLineName
-                                and config.obsoleteDate is null
+                                and config.workflowVersion.workflow = :workflow
+                                and config.deprecationDate is null
                         )
-                """.toString(), [
-                seqTracks   : seqTracks,
-                pipeLineName: pipeLineName,
+                ''', [
+                seqTracks: seqTracks,
+                workflow : workflow,
         ])
     }
 
@@ -176,7 +177,7 @@ abstract class AbstractAlignmentChecker extends PipelinesChecker<SeqTrack> {
                     mergingWorkPackages               : [],
             ]
         }
-        List list = MergingWorkPackage.executeQuery("""
+        List list = MergingWorkPackage.executeQuery('''
                     select
                         mergingWorkPackage,
                         seqTrack
@@ -185,11 +186,10 @@ abstract class AbstractAlignmentChecker extends PipelinesChecker<SeqTrack> {
                         join mergingWorkPackage.seqTracks seqTrack
                     where
                         seqTrack in (:seqTracks)
-                        and mergingWorkPackage.pipeline.type = '${Pipeline.Type.ALIGNMENT}'
-                        and mergingWorkPackage.pipeline.name = :pipeLineName
-                """.toString(), [
-                seqTracks                                    : seqTracks,
-                pipeLineName                                 : pipeLineName,
+                        and mergingWorkPackage.seqType in (:seqTypes)
+                ''', [
+                seqTracks: seqTracks,
+                seqTypes : seqTypes,
         ])
 
         List seqTracksWithoutMergingWorkpackage = seqTracks - list.collect {
@@ -241,11 +241,17 @@ abstract class AbstractAlignmentChecker extends PipelinesChecker<SeqTrack> {
         ])
     }
 
+    @Deprecated
     abstract String getWorkflowName()
 
+    @Deprecated
     abstract Pipeline.Name getPipeLineName()
 
-    abstract List<SeqType> getSeqTypes()
+    abstract Workflow getWorkflow()
+
+    Set<SeqType> getSeqTypes() {
+        return workflow.supportedSeqTypes
+    }
 
     /**
      * Subclass can override this method to do additional filtering

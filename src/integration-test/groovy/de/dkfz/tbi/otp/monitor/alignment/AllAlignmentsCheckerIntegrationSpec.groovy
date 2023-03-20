@@ -21,8 +21,8 @@
  */
 package de.dkfz.tbi.otp.monitor.alignment
 
-import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
@@ -30,13 +30,16 @@ import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.domainFactory.pipelines.AlignmentPipelineFactory
 import de.dkfz.tbi.otp.domainFactory.pipelines.roddyRna.RoddyRnaFactory
+import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.monitor.MonitorOutputCollector
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.workflow.panCancer.PanCancerWorkflow
+import de.dkfz.tbi.otp.workflow.wgbs.WgbsWorkflow
 
 @Rollback
 @Integration
-class AllAlignmentsCheckerIntegrationSpec extends Specification implements RoddyRnaFactory {
+class AllAlignmentsCheckerIntegrationSpec extends Specification implements WorkflowSystemDomainFactory, RoddyRnaFactory {
 
     void "handle, if SeqTracks given, then return finished RoddyBamFile, call Roddy alignments workflows with correct seqTracks and output SeqTypes not supported by any workflow"() {
         given:
@@ -61,6 +64,11 @@ class AllAlignmentsCheckerIntegrationSpec extends Specification implements Roddy
                     )
             )
         }
+
+        createWorkflow(name: PanCancerWorkflow.WORKFLOW, supportedSeqTypes: [DomainFactory.createWholeGenomeSeqType(), DomainFactory.createExomeSeqType(),
+                                                                             DomainFactory.createChipSeqType(),] as Set)
+        createWorkflow(name: WgbsWorkflow.WORKFLOW, supportedSeqTypes: [DomainFactory.createWholeGenomeBisulfiteSeqType(),
+                                                                        DomainFactory.createWholeGenomeBisulfiteTagmentationSeqType(),] as Set)
 
         RnaRoddyBamFile rnaRoddyBamFile = createBamFile([
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,

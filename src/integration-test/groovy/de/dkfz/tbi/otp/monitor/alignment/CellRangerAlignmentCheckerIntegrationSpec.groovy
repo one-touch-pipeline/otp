@@ -23,7 +23,6 @@ package de.dkfz.tbi.otp.monitor.alignment
 
 import grails.gorm.transactions.Rollback
 
-import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.CellRangerFactory
 import de.dkfz.tbi.otp.ngsdata.*
@@ -37,6 +36,17 @@ class CellRangerAlignmentCheckerIntegrationSpec extends AbstractAlignmentChecker
     }
 
     @Override
+    @SuppressWarnings("GetterMethodCouldBeProperty")
+    String getWorkflowName() {
+        return null
+    }
+
+    @Override
+    Set<SeqType> getSupportedSeqTypes() {
+        return DomainFactory.createCellRangerAlignableSeqTypes() as Set
+    }
+
+    @Override
     Pipeline createPipeLine() {
         return CellRangerFactory.super.findOrCreatePipeline()
     }
@@ -44,6 +54,12 @@ class CellRangerAlignmentCheckerIntegrationSpec extends AbstractAlignmentChecker
     @Override
     Pipeline createPipeLineForCrosschecking() {
         return DomainFactory.createRoddyRnaPipeline()
+    }
+
+    @Override
+    @SuppressWarnings("GetterMethodCouldBeProperty")
+    String getWorkflowNameForCrosschecking() {
+        return null
     }
 
     @Override
@@ -80,13 +96,5 @@ class CellRangerAlignmentCheckerIntegrationSpec extends AbstractAlignmentChecker
     void "pipeLineName, should return CELL_RANGER"() {
         expect:
         Pipeline.Name.CELL_RANGER == createAlignmentChecker().pipeLineName
-    }
-
-    void "seqTypes, should return single cell"() {
-        given:
-        List<SeqType> seqTypes = DomainFactory.createCellRangerAlignableSeqTypes()
-
-        expect:
-        TestCase.assertContainSame(seqTypes, createAlignmentChecker().seqTypes)
     }
 }

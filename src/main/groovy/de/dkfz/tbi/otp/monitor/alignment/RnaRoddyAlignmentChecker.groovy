@@ -21,21 +21,131 @@
  */
 package de.dkfz.tbi.otp.monitor.alignment
 
-import de.dkfz.tbi.otp.dataprocessing.Pipeline
-import de.dkfz.tbi.otp.ngsdata.SeqType
-import de.dkfz.tbi.otp.ngsdata.SeqTypeService
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.workflowExecution.Workflow
 
 class RnaRoddyAlignmentChecker extends AbstractRoddyAlignmentChecker {
 
     final String workflowName = 'RnaAlignmentWorkflow'
+
+    // delete this method when the RNA workflow is migrated to the new system
+    @Override
+    List<SeqTrack> getSeqTracksWithoutCorrespondingAlignmentConfig(List<SeqTrack> seqTracks) {
+        if (!seqTracks) {
+            return []
+        }
+        return SamplePair.executeQuery("""
+                    select
+                        seqTrack
+                    from
+                        SeqTrack seqTrack
+                    where
+                        seqTrack in (:seqTracks)
+                        and not exists (
+                            select
+                                config
+                            from
+                                ConfigPerProjectAndSeqType config
+                            where
+                                config.project = seqTrack.sample.individual.project
+                                and config.seqType = seqTrack.seqType
+                                and config.pipeline.type = '${Pipeline.Type.ALIGNMENT}'
+                                and config.pipeline.name = :pipeLineName
+                                and config.obsoleteDate is null
+                        )
+                """.toString(), [
+                seqTracks   : seqTracks,
+                pipeLineName: pipeLineName,
+        ])
+    }
+
+    // delete this method when the RNA workflow is migrated to the new system
+    @Override
+    Map mergingWorkPackageForSeqTracks(List<SeqTrack> seqTracks) {
+        if (!seqTracks) {
+            return [
+                    seqTracksWithoutMergingWorkpackage: [],
+                    mergingWorkPackages               : [],
+            ]
+        }
+        List list = MergingWorkPackage.executeQuery("""
+                    select
+                        mergingWorkPackage,
+                        seqTrack
+                    from
+                        MergingWorkPackage mergingWorkPackage
+                        join mergingWorkPackage.seqTracks seqTrack
+                    where
+                        seqTrack in (:seqTracks)
+                        and mergingWorkPackage.pipeline.type = '${Pipeline.Type.ALIGNMENT}'
+                        and mergingWorkPackage.pipeline.name = :pipeLineName
+                """.toString(), [
+                seqTracks                                    : seqTracks,
+                pipeLineName                                 : pipeLineName,
+        ])
+
+        List seqTracksWithoutMergingWorkpackage = seqTracks - list.collect {
+            it[1]
+        }
+
+        List<MergingWorkPackage> mergingWorkPackages = list.collect {
+            it[0]
+        }.unique()
+
+        return [
+                seqTracksWithoutMergingWorkpackage: seqTracksWithoutMergingWorkpackage,
+                mergingWorkPackages               : mergingWorkPackages,
+        ]
+    }
+
+    // delete this method when the RNA workflow is migrated to the new system
+    @Override
+    List<AbstractMergedBamFile> getBamFileForMergingWorkPackage(List<MergingWorkPackage> mergingWorkPackages, boolean showFinished, boolean showWithdrawn) {
+        if (!mergingWorkPackages) {
+            return []
+        }
+
+        String filterFinished = showFinished ? '' :
+                "and bamFile.fileOperationStatus != '${AbstractMergedBamFile.FileOperationStatus.PROCESSED}'"
+        String filterWithdrawnFinished = showWithdrawn ? '' :
+                "and bamFile.withdrawn = false"
+
+        return AbstractMergedBamFile.executeQuery("""
+                    select
+                        bamFile
+                    from
+                        AbstractMergedBamFile bamFile
+                    where
+                        bamFile.workPackage in (:mergingWorkPackage)
+                        ${filterFinished}
+                        ${filterWithdrawnFinished}
+                        and bamFile.config.pipeline.type = '${Pipeline.Type.ALIGNMENT}'
+                        and bamFile.config.pipeline.name = :pipeLineName
+                        and bamFile.id = (
+                            select
+                                max(bamFile1.id)
+                            from
+                                AbstractMergedBamFile bamFile1
+                            where
+                                bamFile1.workPackage = bamFile.workPackage
+                        )
+                """.toString(), [
+                mergingWorkPackage: mergingWorkPackages,
+                pipeLineName      : pipeLineName,
+        ])
+    }
 
     @Override
     Pipeline.Name getPipeLineName() {
         return Pipeline.Name.RODDY_RNA_ALIGNMENT
     }
 
+    final Workflow workflow = null
+
     @Override
-    List<SeqType> getSeqTypes() {
-        return SeqTypeService.rnaAlignableSeqTypes
+    Set<SeqType> getSeqTypes() {
+        return SeqTypeService.rnaAlignableSeqTypes as Set
     }
 }

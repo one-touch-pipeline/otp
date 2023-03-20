@@ -25,11 +25,13 @@ import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.monitor.MonitorOutputCollector
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.workflow.panCancer.PanCancerWorkflow
+import de.dkfz.tbi.otp.workflowExecution.Workflow
 
 class PanCanAlignmentChecker extends AbstractRoddyAlignmentChecker {
 
-    static final String HEADER_EXOME_WITHOUT_LIBRARY_PREPERATION_KIT =
-            'The following SeqTracks have no library preperation kit'
+    static final String HEADER_EXOME_WITHOUT_LIBRARY_PREPARATION_KIT =
+            'The following SeqTracks have no library preparation kit'
 
     static final String HEADER_EXOME_NO_BEDFILE =
             'The following SeqTracks have no bedfile kit'
@@ -42,20 +44,20 @@ class PanCanAlignmentChecker extends AbstractRoddyAlignmentChecker {
     }
 
     @Override
-    List<SeqType> getSeqTypes() {
-        return [SeqTypeService.wholeGenomePairedSeqType, SeqTypeService.exomePairedSeqType, SeqTypeService.chipSeqPairedSeqType]
+    Workflow getWorkflow() {
+        return CollectionUtils.exactlyOneElement(Workflow.findAllByName(PanCancerWorkflow.WORKFLOW))
     }
 
     @Override
     List<SeqTrack> filter(List<SeqTrack> seqTracks, MonitorOutputCollector output) {
-        String libraryPreperationKitMissing = 'libraryPreperationKitMissing'
+        String libraryPreparationKitMissing = 'libraryPreparationKitMissing'
         String bedFileMissing = 'bedFileMissing'
         String ok = 'ok'
 
         Map groupedSeqTracks = seqTracks.groupBy { SeqTrack seqTrack ->
             if (seqTrack.seqType.needsBedFile) {
                 if (!seqTrack.libraryPreparationKit) {
-                    return libraryPreperationKitMissing
+                    return libraryPreparationKitMissing
                 }
                 ReferenceGenome referenceGenome = seqTrack.configuredReferenceGenome
                 BedFile bedFile = CollectionUtils.atMostOneElement(
@@ -66,7 +68,7 @@ class PanCanAlignmentChecker extends AbstractRoddyAlignmentChecker {
             }
             return ok
         }
-        output.showList(HEADER_EXOME_WITHOUT_LIBRARY_PREPERATION_KIT, groupedSeqTracks[libraryPreperationKitMissing])
+        output.showList(HEADER_EXOME_WITHOUT_LIBRARY_PREPARATION_KIT, groupedSeqTracks[libraryPreparationKitMissing])
         output.showList(HEADER_EXOME_NO_BEDFILE, groupedSeqTracks[bedFileMissing])
 
         return groupedSeqTracks[ok]

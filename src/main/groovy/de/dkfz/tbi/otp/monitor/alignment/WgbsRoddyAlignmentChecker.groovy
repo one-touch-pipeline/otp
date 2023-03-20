@@ -22,8 +22,9 @@
 package de.dkfz.tbi.otp.monitor.alignment
 
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
-import de.dkfz.tbi.otp.ngsdata.SeqType
-import de.dkfz.tbi.otp.ngsdata.SeqTypeService
+import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.workflow.wgbs.WgbsWorkflow
+import de.dkfz.tbi.otp.workflowExecution.Workflow
 
 class WgbsRoddyAlignmentChecker extends AbstractRoddyAlignmentChecker {
 
@@ -35,7 +36,7 @@ class WgbsRoddyAlignmentChecker extends AbstractRoddyAlignmentChecker {
     }
 
     @Override
-    List<SeqType> getSeqTypes() {
-        return [SeqTypeService.wholeGenomeBisulfitePairedSeqType, SeqTypeService.wholeGenomeBisulfiteTagmentationPairedSeqType]
+    Workflow getWorkflow() {
+        return CollectionUtils.exactlyOneElement(Workflow.findAllByName(WgbsWorkflow.WORKFLOW))
     }
 }

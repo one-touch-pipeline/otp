@@ -21,37 +21,56 @@
  */
 package de.dkfz.tbi.otp.monitor.alignment
 
-import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.monitor.MonitorOutputCollector
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.workflowExecution.*
+
+import java.time.LocalDate
 
 @Rollback
 @Integration
-abstract class AbstractAlignmentCheckerIntegrationSpec extends Specification {
+abstract class AbstractAlignmentCheckerIntegrationSpec extends Specification implements WorkflowSystemDomainFactory {
 
     AbstractAlignmentChecker checker
-
-    List<SeqType> seqTypes
+    Set<SeqType> seqTypes
+    Workflow workflow
+    Workflow workflowForCrosschecking
 
     void setupData() {
         DomainFactory.createRoddyAlignableSeqTypes()
         DomainFactory.createCellRangerAlignableSeqTypes()
+        if (workflowName) {
+            workflow = createWorkflow(name: workflowName, supportedSeqTypes: supportedSeqTypes as Set)
+        }
+        if (workflowNameForCrosschecking) {
+            workflowForCrosschecking = createWorkflow(name: workflowNameForCrosschecking)
+        }
         checker = createAlignmentChecker()
         seqTypes = checker.seqTypes
     }
 
     abstract AbstractAlignmentChecker createAlignmentChecker()
 
+    abstract String getWorkflowName()
+
+    abstract Set<SeqType> getSupportedSeqTypes()
+
     abstract Pipeline createPipeLine()
 
     //for checking with data of other PipeLine
     abstract Pipeline createPipeLineForCrosschecking()
+
+    //for checking with data of other workflow
+    abstract String getWorkflowNameForCrosschecking()
 
     List<SeqTrack> createSeqTracks(Map properties = [:]) {
         seqTypes.collect {
@@ -66,13 +85,32 @@ abstract class AbstractAlignmentCheckerIntegrationSpec extends Specification {
         }
     }
 
+    WorkflowVersionSelector createWorkflowVersionSelector(Project project, SeqType seqType, Workflow workflow) {
+        if (workflow) {
+            return createWorkflowVersionSelector(
+                    project: project,
+                    seqType: seqType,
+                    workflowVersion: WorkflowVersion.findByWorkflow(workflow) ?: createWorkflowVersion(workflow: workflow, workflowVersion: "-"),
+            )
+        }
+    }
+
     List<SeqTrack> createSeqTracksWithConfig(Map configProperties = [:], Map seqTrackProperties = [:]) {
+        Workflow w = configProperties.remove("workflow")
         createSeqTracks(seqTrackProperties).each {
-            DomainFactory.createRoddyWorkflowConfig([
-                    seqType : it.seqType,
-                    project : it.project,
-                    pipeline: createPipeLine(),
-            ] + configProperties)
+            if (workflow) {
+                createWorkflowVersionSelector([
+                        project        : it.project,
+                        seqType        : it.seqType,
+                        workflowVersion: WorkflowVersion.findByWorkflow(w ?: workflow) ?: createWorkflowVersion(workflow: w ?: workflow, workflowVersion: "-"),
+                ] + configProperties)
+            } else {
+                DomainFactory.createRoddyWorkflowConfig([
+                        seqType : it.seqType,
+                        project : it.project,
+                        pipeline: createPipeLine(),
+                ] + configProperties)
+            }
         }
     }
 
@@ -137,13 +175,23 @@ abstract class AbstractAlignmentCheckerIntegrationSpec extends Specification {
 
         List<SeqTrack> seqTracksCorrectConfig2 = createSeqTracksWithConfig()
 
-        List<SeqTrack> seqTracksAreObsolete = createSeqTracksWithConfig([
-                obsoleteDate: new Date(),
-        ])
-
-        List<SeqTrack> seqTracksWrongPipeline = createSeqTracksWithConfig([
-                pipeline: createPipeLineForCrosschecking(),
-        ])
+        List<SeqTrack> seqTracksAreObsolete
+        List<SeqTrack> seqTracksWrongPipeline
+        if (workflow) {
+            seqTracksAreObsolete = createSeqTracksWithConfig([
+                    deprecationDate: LocalDate.now(),
+            ])
+            seqTracksWrongPipeline = createSeqTracksWithConfig([
+                    workflow: workflowForCrosschecking,
+            ])
+        } else {
+            seqTracksAreObsolete = createSeqTracksWithConfig([
+                    obsoleteDate: new Date(),
+            ])
+            seqTracksWrongPipeline = createSeqTracksWithConfig([
+                    pipeline: createPipeLineForCrosschecking(),
+            ])
+        }
 
         List<SeqTrack> seqTracks = [
                 seqTracksWithoutConfig,
@@ -181,9 +229,12 @@ abstract class AbstractAlignmentCheckerIntegrationSpec extends Specification {
             expectedMergingWorkPackage << createMWP(it)
         }
 
-        List<SeqTrack> seqTracksWrongPipeline = createSeqTracksWithMergingWorkPackages([
-                pipeline: createPipeLineForCrosschecking(),
-        ])
+        List<SeqTrack> seqTracksWrongPipeline
+        if (!workflow) {
+            seqTracksWrongPipeline = createSeqTracksWithMergingWorkPackages([
+                    pipeline: createPipeLineForCrosschecking(),
+            ])
+        }
 
         List<SeqTrack> seqTracksNoMergingWorkPackage = createSeqTracks()
 
@@ -261,6 +312,7 @@ abstract class AbstractAlignmentCheckerIntegrationSpec extends Specification {
         ], [
                 needsProcessing: true,
         ])
+        oldInstanceRunning.each { createWorkflowVersionSelector(it.project, it.seqType, workflow) }
 
         List<MergingWorkPackage> waiting = []
         List<SeqTrack> mergingWorkPackageWaiting = createSeqTracksWithConfig().each {
@@ -273,6 +325,7 @@ abstract class AbstractAlignmentCheckerIntegrationSpec extends Specification {
         ], [
                 needsProcessing: true,
         ])
+        finishedBamFilesWithNeedsProcessing.each { createWorkflowVersionSelector(it.project, it.seqType, workflow) }
         waiting.addAll(finishedBamFilesWithNeedsProcessing*.mergingWorkPackage)
         mergingWorkPackageWaiting.addAll(finishedBamFilesWithNeedsProcessing*.containedSeqTracks.flatten())
 
@@ -288,24 +341,28 @@ abstract class AbstractAlignmentCheckerIntegrationSpec extends Specification {
         ], [
                 needsProcessing: false,
         ])
+        bamFilesDeclared.each { createWorkflowVersionSelector(it.project, it.seqType, workflow) }
 
         List<AbstractMergedBamFile> bamFilesNeedsProcessing = createBamFiles([
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.NEEDS_PROCESSING,
         ], [
                 needsProcessing: false,
         ])
+        bamFilesNeedsProcessing.each { createWorkflowVersionSelector(it.project, it.seqType, workflow) }
 
         List<AbstractMergedBamFile> bamFilesInProgress = createBamFiles([
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.INPROGRESS,
         ], [
                 needsProcessing: false,
         ])
+        bamFilesInProgress.each { createWorkflowVersionSelector(it.project, it.seqType, workflow) }
 
         List<AbstractMergedBamFile> bamFilesProcessed = createBamFiles([
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
         ], [
                 needsProcessing: false,
         ])
+        bamFilesProcessed.each { createWorkflowVersionSelector(it.project, it.seqType, workflow) }
 
         List<AbstractMergedBamFile> bamFilesWithdrawn = createBamFiles([
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.DECLARED,
@@ -313,6 +370,7 @@ abstract class AbstractAlignmentCheckerIntegrationSpec extends Specification {
         ], [
                 needsProcessing: false,
         ])
+        bamFilesWithdrawn.each { createWorkflowVersionSelector(it.project, it.seqType, workflow) }
 
         List<SeqTrack> seqTracks = [
                 wrongSeqType,
@@ -419,5 +477,13 @@ abstract class AbstractAlignmentCheckerIntegrationSpec extends Specification {
 
         then:
         [] == result
+    }
+
+    void "seqTypes, should return supported seq. types"() {
+        given:
+        setupData()
+
+        expect:
+        TestCase.assertContainSame(supportedSeqTypes, checker.seqTypes)
     }
 }

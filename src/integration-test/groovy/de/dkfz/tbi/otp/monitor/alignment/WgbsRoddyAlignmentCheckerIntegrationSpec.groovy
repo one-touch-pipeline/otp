@@ -23,10 +23,11 @@ package de.dkfz.tbi.otp.monitor.alignment
 
 import grails.gorm.transactions.Rollback
 
-import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.workflow.panCancer.PanCancerWorkflow
+import de.dkfz.tbi.otp.workflow.wgbs.WgbsWorkflow
 
 @Rollback
 class WgbsRoddyAlignmentCheckerIntegrationSpec extends AbstractAlignmentCheckerIntegrationSpec {
@@ -34,6 +35,19 @@ class WgbsRoddyAlignmentCheckerIntegrationSpec extends AbstractAlignmentCheckerI
     @Override
     AbstractAlignmentChecker createAlignmentChecker() {
         return new WgbsRoddyAlignmentChecker()
+    }
+
+    @Override
+    String getWorkflowName() {
+        return WgbsWorkflow.WORKFLOW
+    }
+
+    @Override
+    Set<SeqType> getSupportedSeqTypes() {
+        return [
+                DomainFactory.createWholeGenomeBisulfiteSeqType(),
+                DomainFactory.createWholeGenomeBisulfiteTagmentationSeqType(),
+        ] as Set
     }
 
     @Override
@@ -46,6 +60,11 @@ class WgbsRoddyAlignmentCheckerIntegrationSpec extends AbstractAlignmentCheckerI
         return DomainFactory.createRoddyRnaPipeline()
     }
 
+    @Override
+    String getWorkflowNameForCrosschecking() {
+        return PanCancerWorkflow.WORKFLOW
+    }
+
     void "workflowName, should return WgbsAlignmentWorkflow"() {
         expect:
         'WgbsAlignmentWorkflow' == createAlignmentChecker().workflowName
@@ -54,16 +73,5 @@ class WgbsRoddyAlignmentCheckerIntegrationSpec extends AbstractAlignmentCheckerI
     void "pipeLineName, should return PANCAN_ALIGNMENT"() {
         expect:
         Pipeline.Name.PANCAN_ALIGNMENT == createAlignmentChecker().pipeLineName
-    }
-
-    void "seqTypes, should return WGBS and WGBS_TAG"() {
-        given:
-        List<SeqType> seqTypes = [
-                DomainFactory.createWholeGenomeBisulfiteSeqType(),
-                DomainFactory.createWholeGenomeBisulfiteTagmentationSeqType(),
-        ]
-
-        expect:
-        TestCase.assertContainSame(seqTypes, createAlignmentChecker().seqTypes)
     }
 }

@@ -48,8 +48,7 @@ abstract class AbstractRoddyAlignmentChecker extends AbstractAlignmentChecker {
                         bamFile.workPackage in (:mergingWorkPackage)
                         ${filterFinished}
                         ${filterWithdrawnFinished}
-                        and bamFile.config.pipeline.type = '${Pipeline.Type.ALIGNMENT}'
-                        and bamFile.config.pipeline.name = :pipeLineName
+                        and bamFile.workPackage.seqType in (:seqTypes)
                         and bamFile.id = (
                             select
                                 max(bamFile1.id)
@@ -60,7 +59,7 @@ abstract class AbstractRoddyAlignmentChecker extends AbstractAlignmentChecker {
                         )
                 """.toString(), [
                 mergingWorkPackage: mergingWorkPackages,
-                pipeLineName      : pipeLineName,
+                seqTypes          : seqTypes,
         ])
     }
 

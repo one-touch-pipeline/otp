@@ -23,12 +23,13 @@ package de.dkfz.tbi.otp.monitor.alignment
 
 import grails.gorm.transactions.Rollback
 
-import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.monitor.MonitorOutputCollector
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.workflow.panCancer.PanCancerWorkflow
+import de.dkfz.tbi.otp.workflow.wgbs.WgbsWorkflow
 
 @Rollback
 class PanCanAlignmentCheckerIntegrationSpec extends AbstractAlignmentCheckerIntegrationSpec {
@@ -36,6 +37,20 @@ class PanCanAlignmentCheckerIntegrationSpec extends AbstractAlignmentCheckerInte
     @Override
     AbstractAlignmentChecker createAlignmentChecker() {
         return new PanCanAlignmentChecker()
+    }
+
+    @Override
+    String getWorkflowName() {
+        return PanCancerWorkflow.WORKFLOW
+    }
+
+    @Override
+    Set<SeqType> getSupportedSeqTypes() {
+        return [
+                DomainFactory.createWholeGenomeSeqType(),
+                DomainFactory.createExomeSeqType(),
+                DomainFactory.createChipSeqType(),
+        ] as Set
     }
 
     @Override
@@ -48,6 +63,11 @@ class PanCanAlignmentCheckerIntegrationSpec extends AbstractAlignmentCheckerInte
         return DomainFactory.createRoddyRnaPipeline()
     }
 
+    @Override
+    String getWorkflowNameForCrosschecking() {
+        return WgbsWorkflow.WORKFLOW
+    }
+
     void "workflowName, should return PanCanWorkflow"() {
         expect:
         'PanCanWorkflow' == createAlignmentChecker().workflowName
@@ -56,18 +76,6 @@ class PanCanAlignmentCheckerIntegrationSpec extends AbstractAlignmentCheckerInte
     void "pipeLineName, should return PANCAN_ALIGNMENT"() {
         expect:
         Pipeline.Name.PANCAN_ALIGNMENT == createAlignmentChecker().pipeLineName
-    }
-
-    void "seqTypes, should return WGS and WES"() {
-        given:
-        List<SeqType> seqTypes = [
-                DomainFactory.createWholeGenomeSeqType(),
-                DomainFactory.createExomeSeqType(),
-                DomainFactory.createChipSeqType(),
-        ]
-
-        expect:
-        TestCase.assertContainSame(seqTypes, createAlignmentChecker().seqTypes)
     }
 
     void "filter, when seqTracks given, then create output for filtered seqTracks and return the others"() {
@@ -99,7 +107,7 @@ class PanCanAlignmentCheckerIntegrationSpec extends AbstractAlignmentCheckerInte
         List<RoddyBamFile> result = checker.filter(seqTracks, output)
 
         then:
-        1 * output.showList(PanCanAlignmentChecker.HEADER_EXOME_WITHOUT_LIBRARY_PREPERATION_KIT, [wesNoLibraryPreparationKit])
+        1 * output.showList(PanCanAlignmentChecker.HEADER_EXOME_WITHOUT_LIBRARY_PREPARATION_KIT, [wesNoLibraryPreparationKit])
 
         then:
         1 * output.showList(PanCanAlignmentChecker.HEADER_EXOME_NO_BEDFILE, [wesNoBedFile])

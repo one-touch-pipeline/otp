@@ -23,7 +23,6 @@ package de.dkfz.tbi.otp.monitor.alignment
 
 import grails.gorm.transactions.Rollback
 
-import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.domainFactory.pipelines.roddyRna.RoddyRnaFactory
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
@@ -38,6 +37,17 @@ class RnaRoddyAlignmentCheckerIntegrationSpec extends AbstractAlignmentCheckerIn
     }
 
     @Override
+    @SuppressWarnings("GetterMethodCouldBeProperty")
+    String getWorkflowName() {
+        return null
+    }
+
+    @Override
+    Set<SeqType> getSupportedSeqTypes() {
+        return DomainFactory.createRnaAlignableSeqTypes() as Set
+    }
+
+    @Override
     Pipeline createPipeLine() {
         return RoddyRnaFactory.super.findOrCreatePipeline()
     }
@@ -45,6 +55,12 @@ class RnaRoddyAlignmentCheckerIntegrationSpec extends AbstractAlignmentCheckerIn
     @Override
     Pipeline createPipeLineForCrosschecking() {
         return DomainFactory.createPanCanPipeline()
+    }
+
+    @Override
+    @SuppressWarnings("GetterMethodCouldBeProperty")
+    String getWorkflowNameForCrosschecking() {
+        return null
     }
 
     @Override
@@ -62,13 +78,5 @@ class RnaRoddyAlignmentCheckerIntegrationSpec extends AbstractAlignmentCheckerIn
     void "pipeLineName, should return RODDY_RNA_ALIGNMENT"() {
         expect:
         Pipeline.Name.RODDY_RNA_ALIGNMENT == createAlignmentChecker().pipeLineName
-    }
-
-    void "seqTypes, should return RNA"() {
-        given:
-        List<SeqType> seqTypes = DomainFactory.createRnaAlignableSeqTypes()
-
-        expect:
-        TestCase.assertContainSame(seqTypes, createAlignmentChecker().seqTypes)
     }
 }
