@@ -862,10 +862,7 @@ class ProjectService {
         String xmlConfig
         if (pipeline.name == Pipeline.Name.RODDY_ACESEQ) {
             checkReferenceGenomeForAceseq(configuration.project, configuration.seqType).onSuccess {
-                xmlConfig = roddyConfigTemplate.createConfig(
-                        configuration,
-                        pipeline.name,
-                )
+                xmlConfig = roddyConfigTemplate.createConfig(configuration, pipeline.name)
             }
         } else if (pipeline.name == Pipeline.Name.RODDY_SOPHIA) {
             checkReferenceGenomeForSophia(configuration.project, configuration.seqType).onSuccess {
@@ -874,7 +871,6 @@ class ProjectService {
         } else {
             xmlConfig = roddyConfigTemplate.createConfig(configuration, pipeline.name)
         }
-
         Path projectDirectory = getProjectDirectory(configuration.project)
         assert Files.exists(projectDirectory)
 

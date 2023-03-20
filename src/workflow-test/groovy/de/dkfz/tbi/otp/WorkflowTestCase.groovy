@@ -35,6 +35,7 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.UserDomainFactory
+import de.dkfz.tbi.otp.domainFactory.taxonomy.TaxonomyFactory
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
@@ -42,6 +43,7 @@ import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.job.scheduler.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
+import de.dkfz.tbi.otp.ngsdata.taxonomy.Species
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.security.UserAndRoles
@@ -73,7 +75,7 @@ import static de.dkfz.tbi.otp.utils.LocalShellHelper.executeAndAssertExitCodeAnd
 @Slf4j
 @Integration
 @SuppressWarnings('AbstractClassName')
-abstract class WorkflowTestCase extends Specification implements UserAndRoles, GroovyScriptAwareTestCase, DomainFactoryCore, UserDomainFactory {
+abstract class WorkflowTestCase extends Specification implements UserAndRoles, GroovyScriptAwareTestCase, DomainFactoryCore, UserDomainFactory, TaxonomyFactory {
 
     ErrorLogService errorLogService
     CreateClusterScriptService createClusterScriptService
@@ -448,6 +450,8 @@ echo \$TEMP_DIR
         File source = new File(sourceDir, CHROMOSOME_NAMES_FILE)
 
         ReferenceGenome referenceGenome = DomainFactory.createReferenceGenome(
+                speciesWithStrain: [findOrCreateHumanSpecies()] as Set,
+                species: [findOrCreateMouseSpecies().species] as Set<Species>,
                 path: referenceGenomeSpecificPath,
                 fileNamePrefix: fileNamePrefix,
                 cytosinePositionsIndex: cytosinePositionsIndex,
@@ -470,7 +474,6 @@ echo \$TEMP_DIR
                 [(sourceDir): referenceGenomeService.referenceGenomeDirectory(referenceGenome, false)],
                 realm
         )
-
         return referenceGenome
     }
 

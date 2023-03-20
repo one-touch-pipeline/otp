@@ -201,8 +201,9 @@ trait WorkflowSystemDomainFactory implements DomainFactoryCore, TaxonomyFactory 
     ReferenceGenomeSelector createReferenceGenomeSelector(Map properties = [:], boolean saveAndValidate = true) {
         ReferenceGenome referenceGenome = properties.referenceGenome ?: createReferenceGenome(properties.species ? [
                 speciesWithStrain: new HashSet<SpeciesWithStrain>(properties.species),
-                species: null,
+                species          : null,
         ] : [species: null])
+
         List<SpeciesWithStrain> speciesWithStrain = referenceGenome.species ? SpeciesWithStrain.findAllBySpeciesInList(referenceGenome.species as List) : []
         return createDomainObject(ReferenceGenomeSelector, [
                 project        : { createProject() },

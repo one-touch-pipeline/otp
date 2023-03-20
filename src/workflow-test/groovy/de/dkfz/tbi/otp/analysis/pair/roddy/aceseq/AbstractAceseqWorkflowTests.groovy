@@ -26,6 +26,7 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
+import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.project.RoddyConfiguration
@@ -36,7 +37,7 @@ import java.time.Duration
 
 import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
 
-abstract class AbstractAceseqWorkflowTests extends AbstractRoddyBamFilePairAnalysisWorkflowTests<AceseqInstance> {
+abstract class AbstractAceseqWorkflowTests extends AbstractRoddyBamFilePairAnalysisWorkflowTests<AceseqInstance> implements WorkflowSystemDomainFactory {
 
     AceseqService aceseqService
     LsdfFilesService lsdfFilesService
@@ -66,6 +67,11 @@ abstract class AbstractAceseqWorkflowTests extends AbstractRoddyBamFilePairAnaly
                 project: project,
                 seqType: seqType,
         )
+        createReferenceGenomeSelector([
+                project        : project,
+                seqType        : seqType,
+                referenceGenome: referenceGenome,
+        ])
         createDirectories([new File(projectService.getSequencingDirectory(project).toString())])
 
         doWithAuth(OPERATOR) {
