@@ -50,7 +50,11 @@
         </div>
 
         <h1>${g.message(code: 'projectOverview.alignmentInformation.title', args: [selectedProject?.name])}</h1>
-
+        <g:if test="${errorMessage}">
+            <otp:annotation type="danger">
+                ${g.message(code: 'projectOverview.alignmentInformation.error', args: [errorMessage])}
+            </otp:annotation>
+        </g:if>
         <div>
             <sec:ifAllGranted roles="ROLE_OPERATOR">
                 <h2><g:message code="projectOverview.alignmentInformation.configureRoddy"/></h2>

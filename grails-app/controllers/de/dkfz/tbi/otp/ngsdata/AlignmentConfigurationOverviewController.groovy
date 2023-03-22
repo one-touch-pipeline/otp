@@ -48,13 +48,20 @@ class AlignmentConfigurationOverviewController {
     Map index() {
         Project project = projectSelectionService.selectedProject
 
-        Map<SeqType, AlignmentInfo> alignmentInfo = alignmentInfoService.getAlignmentInformationForProject(project)
-
-        return [
-                seqTypeMergingCriteria: getSeqTypeMergingCriteria(project),
-                roddySeqTypes         : roddySeqTypes,
-                alignmentInfo         : alignmentInfo,
-        ]
+        try {
+            Map<SeqType, AlignmentInfo> alignmentInfo = alignmentInfoService.getAlignmentInformationForProject(project)
+            return [
+                    seqTypeMergingCriteria: getSeqTypeMergingCriteria(project),
+                    roddySeqTypes         : roddySeqTypes,
+                    alignmentInfo         : alignmentInfo,
+            ]
+        } catch (ParsingException exp) {
+            return [
+                    seqTypeMergingCriteria: getSeqTypeMergingCriteria(project),
+                    roddySeqTypes         : roddySeqTypes,
+                    errorMessage          : exp.message,
+            ]
+        }
     }
 
     /**
