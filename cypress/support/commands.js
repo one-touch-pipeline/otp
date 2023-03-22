@@ -50,7 +50,7 @@ const login = (username, password) => {
             .click();
         }
       });
-  });
+  }, validate);
 };
 
 Cypress.Commands.add('loginAsUser', () => {
@@ -148,3 +148,10 @@ Cypress.Commands.add('clearDownloadsFolder', () => {
     failOnNonZeroExit: false
   });
 });
+
+// Make an API request that returns a 200 only when logged in
+const validate = () => {
+  'use strict';
+
+  cy.request('/info/templates').its('status').should('eq', 200);
+};
