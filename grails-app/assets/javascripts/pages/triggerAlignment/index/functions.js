@@ -56,11 +56,11 @@ $.otp.triggerAlignment = {
    */
   trigger: () => {
     const inputdata = {
-      withdraw: false,
+      withdrawBamFiles: false,
       seqTracks: []
     };
     inputdata.ignoreSeqPlatformGroup = $('#ignoreSeqPlatformGroup').prop('checked');
-    inputdata.withdraw = $('#withdrawBamFiles').prop('checked');
+    inputdata.withdrawBamFiles = $('input[name="withdrawBamFiles"]:checked').val();
     inputdata.seqTracks = $.otp.triggerAlignment.getSeqTrackTable().column(0).data().toArray();
 
     if (inputdata.seqTracks.length) {
@@ -275,11 +275,13 @@ $(document).ready(() => {
         $.otp.triggerAlignment.fetchData(inputdata).then((outputdata) => {
           callback(outputdata.data);
 
+          const { warnings } = outputdata.data;
+
           // withdrawnData
-          if (outputdata.data.warnings.withdrawnSeqTracks.length) {
+          if (warnings.withdrawnSeqTracks && warnings.withdrawnSeqTracks.length) {
             $('#withdrawnSeqTracksWarningsCard').removeClass('d-none');
             $.otp.triggerAlignment.getWithdrawnWarningsTable().clear().rows.add(
-              outputdata.data.warnings.withdrawnSeqTracks.map((o) => [
+              warnings.withdrawnSeqTracks.map((o) => [
                 o.project,
                 o.individual,
                 o.seqType,
@@ -293,10 +295,10 @@ $(document).ready(() => {
           }
 
           // alignment config missing
-          if (outputdata.data.warnings.missingAlignmentConfigs.length) {
+          if (warnings.missingAlignmentConfigs && warnings.missingAlignmentConfigs.length) {
             $('#missingAlignmentConfigWarningsCard').removeClass('d-none');
             $.otp.triggerAlignment.getMissingAlignmentConfigsWarningsTable().clear().rows.add(
-              outputdata.data.warnings.missingAlignmentConfigs.map((o) => [o.project, o.seqType, o.count])
+              warnings.missingAlignmentConfigs.map((o) => [o.project, o.seqType, o.count])
             ).draw();
           } else {
             $('#missingAlignmentConfigWarningsCard').addClass('d-none');
@@ -304,10 +306,10 @@ $(document).ready(() => {
           }
 
           // reference genome config missing
-          if (outputdata.data.warnings.missingReferenceGenomes.length) {
+          if (warnings.missingReferenceGenomes && warnings.missingReferenceGenomes.length) {
             $('#missingReferenceGenomeWarningsCard').removeClass('d-none');
             $.otp.triggerAlignment.getReferenceGenomeWarningsTable().clear().rows.add(
-              outputdata.data.warnings.missingReferenceGenomes.map((o) => [
+              warnings.missingReferenceGenomes.map((o) => [
                 o.project,
                 o.seqType,
                 o.species,
@@ -320,10 +322,10 @@ $(document).ready(() => {
           }
 
           // seqPlatformGroup missmatch
-          if (outputdata.data.warnings.seqPlatformGroups.length) {
+          if (warnings.seqPlatformGroups && warnings.seqPlatformGroups.length) {
             $('#seqPlatformWarningsCard').removeClass('d-none');
             $.otp.triggerAlignment.getSeqPlatformWarningsTable().clear().rows.add(
-              outputdata.data.warnings.seqPlatformGroups.map((o) => [
+              warnings.seqPlatformGroups.map((o) => [
                 o.project,
                 o.individual,
                 o.seqType,
@@ -362,10 +364,10 @@ $(document).ready(() => {
           }
 
           // library preparation kit missmatch
-          if (outputdata.data.warnings.libraryPreparationKits.length) {
+          if (warnings.libraryPreparationKits && warnings.libraryPreparationKits.length) {
             $('#libraryPrepKitWarningsCard').removeClass('d-none');
             $.otp.triggerAlignment.getLibPrepKitWarningsTable().clear().rows.add(
-              outputdata.data.warnings.libraryPreparationKits.map((o) => [
+              warnings.libraryPreparationKits.map((o) => [
                 o.project,
                 o.individual,
                 o.seqType,
@@ -397,14 +399,14 @@ $(document).ready(() => {
 
           // message
           // eslint-disable-next-line no-extra-boolean-cast
-          if (!!outputdata.data.warnings.message) {
+          if (!!warnings.message) {
             $.otp.toaster.showErrorToast(
               $.otp.triggerAlignment.TOAST_TITLE.SEARCH_INFO,
-              outputdata.data.warnings.message
+              warnings.message
             );
           }
 
-          if (!outputdata.data.data.length) {
+          if (!outputdata.data.data || !outputdata.data.data.length) {
             $.otp.toaster.showErrorToast(
               $.otp.triggerAlignment.TOAST_TITLE.SEARCH_WARNING,
               'No SeqTracks can be found. Make sure the search inputs are correct'

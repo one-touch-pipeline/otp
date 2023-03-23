@@ -108,8 +108,8 @@ class TriggerAlignmentController {
         }
 
         boolean ignoreSeqPlatformGroup = "TRUE".equalsIgnoreCase(params['ignoreSeqPlatformGroup'])
+        boolean withdrawBamFiles = "TRUE".equalsIgnoreCase(params['withdrawBamFiles'])
 
-        boolean withdrawBamFiles = "TRUE".equalsIgnoreCase(params['withdraw'])
         Collection<MergingWorkPackage> workPackages = triggerAlignmentService.triggerAlignment(seqTracks, withdrawBamFiles, ignoreSeqPlatformGroup)
 
         return render(workPackages*.toString() as JSON)

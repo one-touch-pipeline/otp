@@ -27,43 +27,58 @@
 </head>
 
 <body>
-    <div class="container-fluid otp-main-container">
-        <nav class="navbar navbar-light bg-light">
-            <span class="navbar-brand mb-0 h1"><g:message code="triggerAlignment.title"/></span>
-        </nav>
+<div class="container-fluid otp-main-container">
+    <nav class="navbar navbar-light bg-light">
+        <span class="navbar-brand mb-0 h1"><g:message code="triggerAlignment.title"/></span>
+    </nav>
 
-        <div class="mt-3">
-            <g:render template="/triggerAlignment/components/inputArea" model="[tabs: ['project', 'pid', 'lane', 'ilse'], seqTypes: seqTypes]"/>
-        </div>
+    <div class="mt-3">
+        <g:render template="/triggerAlignment/components/inputArea" model="[tabs: ['project', 'pid', 'lane', 'ilse'], seqTypes: seqTypes]"/>
+    </div>
 
-        <div class="mt-3">
-            <g:render template="/triggerAlignment/components/warnArea" model="[warnings: warnings]"/>
-        </div>
+    <div class="mt-3">
+        <g:render template="/triggerAlignment/components/warnArea" model="[warnings: warnings]"/>
+    </div>
 
-        <div class="mt-3">
-            <g:render template="/triggerAlignment/components/checkArea" model="[seqTracks: seqTracks]"/>
-        </div>
+    <div class="mt-3">
+        <g:render template="/triggerAlignment/components/checkArea" model="[seqTracks: seqTracks]"/>
+    </div>
 
-        <nav class="navbar navbar-light bg-light mt-3">
-            <div>
+    <nav class="navbar navbar-light bg-light mt-3">
+        <div>
+            <div class="form-check">
                 <input type="checkbox" id="ignoreSeqPlatformGroup">
                 <label for="ignoreSeqPlatformGroup"><g:message code="triggerAlignment.input.checkbox.ignoreSeqPlatformGroup"/></label>
-                <br>
-                <input type="checkbox" id="withdrawBamFiles">
-                <label for="withdrawBamFiles"><g:message code="triggerAlignment.input.checkbox.withdrawn"/></label>
             </div>
-        </nav>
-        <nav class="navbar navbar-light bg-light mt-3">
-            <div class="nav-item">
-                <button id="triggerAlignmentButton" class="btn btn-primary nav-item mr-2" onclick="$.otp.triggerAlignment.trigger(this)">
-                    <g:message code="triggerAlignment.triggerButton"/>
-                </button>
-            </div>
-        </nav>
 
-        <div class="mt-3">
-            <g:render template="/triggerAlignment/components/resultArea"/>
+            <div class="form-check">
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="withdrawBamFiles" checked id="withdrawBamFiles2" value="false">
+                    <label class="form-check-label" for="withdrawBamFiles2">
+                        <g:message code="triggerAlignment.input.radio.missingAlignments"/>
+                    </label>
+                </div>
+
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="withdrawBamFiles" id="withdrawBamFiles1" value="true">
+                    <label class="form-check-label" for="withdrawBamFiles1">
+                        <g:message code="triggerAlignment.input.radio.allAlignments"/>
+                    </label>
+                </div>
+            </div>
         </div>
+    </nav>
+    <nav class="navbar navbar-light bg-light mt-3">
+        <div class="nav-item">
+            <button id="triggerAlignmentButton" class="btn btn-primary nav-item mr-2" onclick="$.otp.triggerAlignment.trigger(this)">
+                <g:message code="triggerAlignment.triggerButton"/>
+            </button>
+        </div>
+    </nav>
+
+    <div class="mt-3">
+        <g:render template="/triggerAlignment/components/resultArea"/>
     </div>
+</div>
 </body>
 </html>

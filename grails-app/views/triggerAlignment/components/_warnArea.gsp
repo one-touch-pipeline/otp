@@ -20,8 +20,7 @@
   - SOFTWARE.
   --}%
 
-<div class="accordion" id="warnAreaAccordeon">
-
+<div class="accordion" id="warnAreaAccordion">
     <div class="card d-none" id="withdrawnSeqTracksWarningsCard">
         <div class="card-header">
             <button class="btn btn-link w-100 text-left collapsed p-0" type="button" data-toggle="collapse" data-target="#collapseFive" aria-expanded="true"
@@ -30,7 +29,7 @@
             </button>
         </div>
 
-        <div id="collapseFive" class="collapse" data-parent="#warnAreaAccordeon">
+        <div id="collapseFive" class="collapse" data-parent="#warnAreaAccordion">
             <div class="card-body">
                 <div class="alert alert-warning" role="alert">
                     <p class="card-text"><g:message code="triggerAlignment.warn.withdrawnWarnings"/></p>
@@ -62,7 +61,7 @@
             </button>
         </div>
 
-        <div id="collapseOne" class="collapse" data-parent="#warnAreaAccordeon">
+        <div id="collapseOne" class="collapse" data-parent="#warnAreaAccordion">
             <div class="card-body">
                 <div class="alert alert-warning" role="alert">
                     <p class="card-text"><g:message code="triggerAlignment.warn.missingAlignmentConfig"/></p>
@@ -100,7 +99,7 @@
             </button>
         </div>
 
-        <div id="collapseFour" class="collapse" data-parent="#warnAreaAccordeon">
+        <div id="collapseFour" class="collapse" data-parent="#warnAreaAccordion">
             <div class="card-body">
                 <div class="alert alert-warning" role="alert">
                     <p class="card-text"><g:message code="triggerAlignment.warn.missingReferenceGenomeConfig"/></p>
@@ -139,7 +138,7 @@
             </button>
         </div>
 
-        <div id="collapseTwo" class="collapse" data-parent="#warnAreaAccordeon">
+        <div id="collapseTwo" class="collapse" data-parent="#warnAreaAccordion">
             <div class="card-body">
                 <div class="alert alert-warning" role="alert">
                     <p class="card-text"><g:message code="triggerAlignment.warn.mismatchedSeqPlatform"/></p>
@@ -171,7 +170,7 @@
             </button>
         </div>
 
-        <div id="collapseThree" class="collapse" data-parent="#warnAreaAccordeon">
+        <div id="collapseThree" class="collapse" data-parent="#warnAreaAccordion">
             <div class="card-body">
                 <div class="alert alert-warning" role="alert">
                     <p class="card-text"><g:message code="triggerAlignment.warn.mismatchedPreparationKit"/></p>
