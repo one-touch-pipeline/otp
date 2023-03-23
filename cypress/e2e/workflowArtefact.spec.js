@@ -28,8 +28,10 @@ describe('Check workflow artefact page', () => {
       cy.loginAsOperator();
     });
 
-    it('should visit different workflow artefacts index pages for the second workflow', () => {
+    it('should visit different workflow artefacts index pages for a succeeded workflow', () => {
       cy.visit('/workflowRunList');
+
+      cy.get('select#state').select('SUCCESS', { force: true });
 
       cy.get('table#runs tbody').find('tr')
         .eq(2)

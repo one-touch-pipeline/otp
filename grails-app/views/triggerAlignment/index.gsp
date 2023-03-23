@@ -33,7 +33,7 @@
     </nav>
 
     <div class="mt-3">
-        <g:render template="/triggerAlignment/components/inputArea" model="[tabs: ['project', 'pid', 'lane', 'ilse'], seqTypes: seqTypes]"/>
+        <g:render template="/triggerAlignment/components/inputArea" model="[tabs: ['project', 'pid', 'lane', 'ilse', 'multiInput'], seqTypes: seqTypes]"/>
     </div>
 
     <div class="mt-3">
@@ -48,13 +48,13 @@
         <div>
             <div class="form-check">
                 <input type="checkbox" id="ignoreSeqPlatformGroup">
-                <label for="ignoreSeqPlatformGroup"><g:message code="triggerAlignment.input.checkbox.ignoreSeqPlatformGroup"/></label>
+            <label for="ignoreSeqPlatformGroup"><g:message code="triggerAlignment.input.checkbox.ignoreSeqPlatformGroup"/></label>
             </div>
 
             <div class="form-check">
                 <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="radio" name="withdrawBamFiles" checked id="withdrawBamFiles2" value="false">
-                    <label class="form-check-label" for="withdrawBamFiles2">
+            <input class="form-check-input" type="radio" name="withdrawBamFiles" checked id="withdrawBamFiles2" value="false">
+            <label class="form-check-label" for="withdrawBamFiles2">
                         <g:message code="triggerAlignment.input.radio.missingAlignments"/>
                     </label>
                 </div>

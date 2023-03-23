@@ -33,6 +33,8 @@ import de.dkfz.tbi.otp.ngsdata.SeqTypeService
 class TriggerAlignmentController {
 
     static final String PARAM_KEY_SEQ_TRACKS = 'seqTracks[]'
+    static final String PARAM_KEY_IGNORE_SEQ_GROUP = 'ignoreSeqPlatformGroup'
+    static final String PARAM_KEY_WITHDRAW_BAMFILES = 'withdrawBamFiles'
 
     TriggerAlignmentService triggerAlignmentService
     SearchSeqTrackService searchSeqTrackService
@@ -63,12 +65,13 @@ class TriggerAlignmentController {
      */
     JSON generateWarnings() {
         List<SeqTrack> seqTracks = SeqTrack.getAll(flash.seqTrackIds)
-        String message = flash.message
+        Set<String> message = flash.message as Set<String>
 
         if (!seqTracks || !seqTracks.size()) {
             return render([
                     data    : [],
                     warnings: EMPTY_WARNINGS,
+                    message : message,
             ] as JSON)
         }
 
@@ -91,8 +94,8 @@ class TriggerAlignmentController {
                         missingReferenceGenomes: warningsForMissingReferenceGenomeConfiguration,
                         seqPlatformGroups      : warningsForSamplesHavingMultipleSeqPlatformGroups,
                         libraryPreparationKits : warningsForSamplesHavingMultipleLibPrepKits,
-                        message                : message
                 ],
+                message : message,
         ] as JSON)
     }
 
@@ -107,8 +110,8 @@ class TriggerAlignmentController {
             id in seqTracksIds
         }
 
-        boolean ignoreSeqPlatformGroup = "TRUE".equalsIgnoreCase(params['ignoreSeqPlatformGroup'])
-        boolean withdrawBamFiles = "TRUE".equalsIgnoreCase(params['withdrawBamFiles'])
+        boolean ignoreSeqPlatformGroup = Boolean.parseBoolean(params[PARAM_KEY_IGNORE_SEQ_GROUP])
+        boolean withdrawBamFiles = Boolean.parseBoolean(params[PARAM_KEY_WITHDRAW_BAMFILES])
 
         Collection<MergingWorkPackage> workPackages = triggerAlignmentService.triggerAlignment(seqTracks, withdrawBamFiles, ignoreSeqPlatformGroup)
 

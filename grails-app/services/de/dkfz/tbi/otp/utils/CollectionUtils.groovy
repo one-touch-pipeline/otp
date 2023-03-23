@@ -60,7 +60,7 @@ class CollectionUtils {
             return null
         }
         String defaultMessage = "Collection contains ${size} elements. Expected 1"
-        String message = (customErrorMessage ? "${customErrorMessage}\n${defaultMessage}" : defaultMessage)
+        String message = (customErrorMessage ? "${customErrorMessage}" : defaultMessage)
         throw new AssertionError(message)
     }
 

@@ -59,6 +59,8 @@ class SeqTrackService {
 
     AlignmentDeciderService alignmentDeciderService
 
+    SeqTypeService seqTypeService
+
     @Autowired
     ApplicationContext applicationContext
 
@@ -261,6 +263,36 @@ class SeqTrackService {
             }
             eq("seqType", seqType)
         }
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    List<SeqTrack> getSeqTracksByMultiInput(String pid, String sampleTypeName, String seqTypeName,
+                                            String readTypeName, Boolean singleCell) throws AssertionError {
+        SequencingReadType libraryLayout = SequencingReadType.getByName(readTypeName)
+        assert libraryLayout: "${readTypeName} is not a valid sequencingReadType"
+        SeqType seqTypeByImportAlias = seqTypeService.findByImportAlias(seqTypeName, [libraryLayout: libraryLayout, singleCell: singleCell])
+
+        return SeqTrack.createCriteria().list {
+            sample {
+                individual {
+                    eq("pid", pid)
+                }
+                sampleType {
+                    eq("name", sampleTypeName)
+                }
+            }
+            seqType {
+                or {
+                    eq("name", seqTypeName)
+                    eq("displayName", seqTypeName)
+                    if (seqTypeByImportAlias) {
+                        idEq(seqTypeByImportAlias.id)
+                    }
+                }
+                eq("libraryLayout", libraryLayout)
+                eq("singleCell", singleCell)
+            }
+        } as List<SeqTrack>
     }
 
     List<ExternallyProcessedMergedBamFile> returnExternallyProcessedMergedBamFiles(List<SeqTrack> seqTracks) {

@@ -259,7 +259,7 @@ $(() => {
         parameters: { 'workflowRun.id': $('#steps').data('id') }
       }),
       dataSrc(json) {
-        if (json.data[0].state === 'FAILED') {
+        if (json.data && json.data[0] && json.data[0].state === 'FAILED') {
           lastStepFailed = true;
         }
         return json.data;

@@ -49,24 +49,28 @@ class SearchSeqTrackController {
 
     ProjectSelectionService projectSelectionService
     SearchSeqTrackService searchSeqTrackService
+    SeqTrackService seqTrackService
 
     static final String PARAM_KEY_PIDS = 'pids[]'
     static final String PARAM_KEY_SEQTYPES = 'seqTypes[]'
     static final String PARAM_KEY_ILSE_NUMBERS = 'ilseNumbers[]'
     static final String PARAM_KEY_LANES = 'lanes[]'
+    static final String PARAM_KEY_SAMPLE_TYPES = 'sampleTypes[]'
+    static final String PARAM_KEY_READ_TYPES = 'readTypes[]'
+    static final String PARAM_KEY_SINGLE_CELLS = 'singleCells[]'
 
     static allowedMethods = [
             searchSeqTrackByProjectSeqType: "GET",
             searchSeqTrackByPidSeqType    : "GET",
             searchSeqTrackByLaneId        : "GET",
             searchSeqTrackByIlseNumber    : "GET",
+            searchSeqTrackByMultiInput    : "GET",
     ]
 
     JSON searchSeqTrackByProjectSeqType() {
         Project project = projectSelectionService.selectedProject
 
-        Set<Long> seqTypeIds = (params[PARAM_KEY_SEQTYPES].getClass().isArray() ? params[PARAM_KEY_SEQTYPES] :
-                [params[PARAM_KEY_SEQTYPES]]).collect { it as long }
+        Set<Long> seqTypeIds = getListParam(PARAM_KEY_SEQTYPES).collect { it as long }
 
         Set<SeqType> seqTypes = SeqType.getAll(seqTypeIds)
 
@@ -76,7 +80,7 @@ class SearchSeqTrackController {
     }
 
     JSON searchSeqTrackByPidSeqType() {
-        Set<String> pids = params[PARAM_KEY_PIDS].getClass().isArray() ? params[PARAM_KEY_PIDS] : [params[PARAM_KEY_PIDS]]
+        Set<String> pids = getListParam(PARAM_KEY_PIDS) as Set<String>
 
         Set<Individual> individuals = Individual.findAll {
             pid in pids
@@ -87,22 +91,20 @@ class SearchSeqTrackController {
             return render([error: HttpStatus.NOT_FOUND.reasonPhrase, message: g.message(code: "triggerAlignment.error.noIndividuals") as String] as JSON)
         }
 
-        Set<Long> seqTypeIds = (params[PARAM_KEY_SEQTYPES].getClass().isArray() ? params[PARAM_KEY_SEQTYPES] :
-                [params[PARAM_KEY_SEQTYPES]]).collect { it as long }
+        Set<Long> seqTypeIds = getListParam(PARAM_KEY_SEQTYPES).collect { it as long }
 
         Set<SeqType> seqTypes = SeqType.getAll(seqTypeIds)
 
         Set<SeqTrack> seqTracks = searchSeqTrackService.getAllSeqTracksByIndividualsAndSeqTypes(individuals, seqTypes)
 
         Set<String> missingItems = (pids as Set) - individuals*.pid
-        return redirectHelper(params, seqTracks, missingItems ? "Could not found: ${missingItems.join(' ,')}" : null)
+        return redirectHelper(params, seqTracks, missingItems ?: null)
     }
 
     JSON searchSeqTrackByLaneId() {
         Set<Long> laneIds
         try {
-            laneIds = (params[PARAM_KEY_LANES].getClass().isArray() ? params[PARAM_KEY_LANES] :
-                    [params[PARAM_KEY_LANES]]).collect { it as long }
+            laneIds = getListParam(PARAM_KEY_LANES).collect { it as long }
         } catch (NumberFormatException ex) {
             response.status = HttpStatus.BAD_REQUEST.value()
             return render([error: HttpStatus.BAD_REQUEST.reasonPhrase, message: ex.message] as JSON)
@@ -115,15 +117,14 @@ class SearchSeqTrackController {
 
         Set<SeqTrack> seqTracks = SeqTrack.getAll(laneIds)
 
-        Set<String> missingItems = laneIds - seqTracks*.id
-        return redirectHelper(params, seqTracks, missingItems ? "Could not found Lane: ${missingItems.join(' ,')}" : null)
+        Set<String> missingItems = (laneIds - seqTracks*.id)*.toString()
+        return redirectHelper(params, seqTracks, missingItems ?: null)
     }
 
     JSON searchSeqTrackByIlseNumber() {
         Set<Long> ilseNumbers
         try {
-            ilseNumbers = (params[PARAM_KEY_ILSE_NUMBERS].getClass().isArray() ? params[PARAM_KEY_ILSE_NUMBERS] :
-                    [params[PARAM_KEY_ILSE_NUMBERS]]).collect { it as int }
+            ilseNumbers = getListParam(PARAM_KEY_ILSE_NUMBERS).collect { it as int }
         } catch (NumberFormatException ex) {
             response.status = HttpStatus.BAD_REQUEST.value()
             return render([error: HttpStatus.BAD_REQUEST.reasonPhrase, message: ex.message] as JSON)
@@ -140,11 +141,46 @@ class SearchSeqTrackController {
 
         Set<SeqTrack> seqTracks = searchSeqTrackService.getAllSeqTracksByIlseSubmissions(ilseSubmissions)
 
-        Set<Long> missingItems = ilseNumbers - ilseSubmissions*.ilseNumber
-        return redirectHelper(params, seqTracks, missingItems ? "Could not found: ${missingItems.join(' ,')}" : null)
+        Set<String> missingItems = (ilseNumbers - ilseSubmissions*.ilseNumber)*.toString()
+        return redirectHelper(params, seqTracks, missingItems ?: null)
     }
 
-    private def redirectHelper(Map params, Collection<SeqTrack> seqTracks, String message) {
+    JSON searchSeqTrackByMultiInput() {
+        List<String> pids = getListParam(PARAM_KEY_PIDS) as List<String>
+        List<String> sampleTypes = getListParam(PARAM_KEY_SAMPLE_TYPES) as List<String>
+        List<String> seqTypes = getListParam(PARAM_KEY_SEQTYPES) as List<String>
+        List<String> readTypes = getListParam(PARAM_KEY_READ_TYPES) as List<String>
+        List<Boolean> singleCells = getListParam(PARAM_KEY_SINGLE_CELLS).collect { it -> Boolean.parseBoolean(it as String) }
+
+        Set<String> errorMessages = []
+        Set<String> missingItems = []
+
+        Set<SeqTrack> seqTracks = [pids, sampleTypes, seqTypes, readTypes, singleCells].transpose().collectMany { multiInput ->
+            try {
+                def (String pid, String sampleTypeName, String seqTypeName, String readTypeName, Boolean singleCell) = multiInput
+
+                List<SeqTrack> foundSeqTracks = seqTrackService.getSeqTracksByMultiInput(pid, sampleTypeName, seqTypeName, readTypeName, singleCell)
+
+                if (!foundSeqTracks) {
+                    missingItems.add((multiInput as List<String>).join(' '))
+                }
+
+                return foundSeqTracks
+            } catch (AssertionError e) {
+                errorMessages.add(e.message)
+                return []
+            }
+        }.toSet()
+
+        if (errorMessages) {
+            response.status = HttpStatus.BAD_REQUEST.value()
+            return render([error: HttpStatus.BAD_REQUEST.reasonPhrase, message: errorMessages] as JSON)
+        }
+
+        return redirectHelper(params, seqTracks, missingItems.size() > 0 ? missingItems : null)
+    }
+
+    private def redirectHelper(Map params, Collection<SeqTrack> seqTracks, Set<String> message) {
         flash.seqTrackIds = seqTracks*.id
         flash.message = message
 
@@ -152,5 +188,9 @@ class SearchSeqTrackController {
                 controller: params['redirect[controller]'],
                 action: params['redirect[action]'],
         )
+    }
+
+    private List<Object> getListParam(String param) {
+        return (params[param].getClass().isArray() ? params[param] : [params[param]]) as List<Object>
     }
 }

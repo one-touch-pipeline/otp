@@ -29,8 +29,9 @@
   - pid
   - lane
   - ilse
+  - multiInput
   -
-  - Usage example: <g:render template="/templates/bootstrap/seqTrackSelectionTabBar" model="[tabs: ['project', 'pid', 'lane', 'ilse']]"/>
+  - Usage example: <g:render template="/templates/bootstrap/seqTrackSelectionTabBar" model="[tabs: ['project', 'pid', 'lane', 'ilse', 'multiInput']]"/>
   --}%
 <ul class="nav nav-tabs" id="myTab" role="tablist">
     <g:if test="${tabs.contains('project')}">
@@ -61,6 +62,13 @@
             </a>
         </li>
     </g:if>
+    <g:if test="${tabs.contains('multiInput')}">
+        <li class="nav-item" role="presentation">
+            <a class="nav-link" id="multi-input-tab" data-toggle="tab" href="#multi-input" role="tab" aria-controls="multi-input" aria-selected="false">
+                <g:message code="triggerAlignment.input.tab.multiInput"/>
+            </a>
+        </li>
+    </g:if>
 </ul>
 
 <div class="tab-content" id="inputTabsContent">
@@ -82,6 +90,11 @@
     <g:if test="${tabs.contains('ilse')}">
         <div class="tab-pane fade mt-2" id="ilse" role="tabpanel" aria-labelledby="ilse-tab">
             <g:render template="/templates/bootstrap/seqTrackSelectionTabBar/tabs/ilseIdTab"/>
+        </div>
+    </g:if>
+    <g:if test="${tabs.contains('multiInput')}">
+        <div class="tab-pane fade mt-2" id="multi-input" role="tabpanel" aria-labelledby="multi-input-tab">
+            <g:render template="/templates/bootstrap/seqTrackSelectionTabBar/tabs/multiInputTab"/>
         </div>
     </g:if>
 </div>

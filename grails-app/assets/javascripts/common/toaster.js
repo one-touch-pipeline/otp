@@ -26,56 +26,71 @@
  */
 $.otp.toaster = {
   /**
-     * Fires an info toast message.
-     *
-     * @param title: title of the toast
-     * @param message: the toasts message
-     */
+   * Converts message arrays to a list of items and doesn't touch normal strings.
+   * @param message: Message as string or array string to convert
+   * @returns {*|string}: converted message
+   */
+  convertMessageArray(message) {
+    if (Array.isArray(message)) {
+      return `<ul>${message.map((msgElement) => `<li>${msgElement}</li>`).join('')}</ul>`;
+    }
+    return message;
+  },
+  /**
+   * Fires an info toast message.
+   *
+   * @param title: title of the toast
+   * @param message: the toasts message
+   */
   // eslint-disable-next-line strict
   showInfoToast(title = 'Info', message = '') {
-    this.showToast(title, message, 'info');
+    this.showToast(title, $.otp.toaster.convertMessageArray(message), 'info');
   },
   /**
-     * Fires a success toast message.
-     *
-     * @param title: title of the toast
-     * @param message: the toasts message
-     */
+   * Fires a success toast message.
+   *
+   * @param title: title of the toast
+   * @param message: the toasts message
+   */
   // eslint-disable-next-line strict
   showSuccessToast(title = 'Success', message = 'Operation has been successful.') {
-    this.showToast(title, message, 'success');
+    this.showToast(title, $.otp.toaster.convertMessageArray(message), 'success');
   },
   /**
-     * Fires a warning toast message.
-     *
-     * @param title: title of the toast
-     * @param message: the toasts message
-     */
+   * Fires a warning toast message.
+   *
+   * @param title: title of the toast
+   * @param message: the toasts message
+   */
   // eslint-disable-next-line strict
   showWarningToast(title = 'Warning', message = 'A warning occurred during the operation.') {
-    this.showToast(title, message, 'warning');
+    this.showToast(title, $.otp.toaster.convertMessageArray(message), 'warning');
   },
   /**
-     * Fires an error toast message.
-     *
-     * @param title: title of the toast
-     * @param message: the toasts message
-     */
+   * Fires an error toast message.
+   *
+   * @param title: title of the toast
+   * @param message: the toasts message
+   */
   // eslint-disable-next-line strict
-  showErrorToast(title = 'Error', message = 'Unknown error. Please try again.') {
-    this.showToast(title, message, 'danger');
+  showErrorToast(title = 'Error', error = 'Unknown error. Please try again.') {
+    this.showToast(title, $.otp.toaster.convertMessageArray(error), 'danger');
   },
   /**
-     * Fires a toast message.
-     *
-     * @param title: title of the toast
-     * @param message: the toasts message
-     * @param state: allowed states: info, success, warning, danger. default is info
-     */
+   * Fires a toast message.
+   *
+   * @param title: title of the toast
+   * @param message: the toasts message
+   * @param state: allowed states: info, success, warning, danger. default is info
+   */
   // eslint-disable-next-line strict
   showToast(title, message, state = 'info') {
     const stateProps = this.getStateProps(state);
-    const date = new Date().toLocaleTimeString('en-US', { hour12: false, hour: 'numeric', minute: 'numeric' });
+    const date = new Date().toLocaleTimeString('en-US', {
+      hour12: false,
+      hour: 'numeric',
+      minute: 'numeric'
+    });
 
     const otpToast = `<div class="toast ${stateProps.toastClass}"\
                            role="alert" aria-live="assertive" aria-atomic="true" data-autohide="false">
@@ -102,11 +117,11 @@ $.otp.toaster = {
     toast.toast('show');
   },
   /**
-     * This method returns the wrapper for the toaster.
-     * If it not exists in the DOM, it will be created then.
-     *
-     * @returns {*|Window.jQuery|HTMLElement}
-     */
+   * This method returns the wrapper for the toaster.
+   * If it not exists in the DOM, it will be created then.
+   *
+   * @returns {*|Window.jQuery|HTMLElement}
+   */
   getToastBox() {
     'use strict';
 
@@ -122,35 +137,40 @@ $.otp.toaster = {
     return getToastBoxFromDOM();
   },
   /**
-     * Convert the state into a css class name.
-     *
-     * @param state: info, success, warning, danger
-     * @returns {string}: css class
-     */
+   * Convert the state into a css class name.
+   *
+   * @param state: info, success, warning, danger
+   * @returns {string}: css class
+   */
   getStateProps(state) {
     'use strict';
 
     switch (state) {
-      case 'info': return {
-        toastClass: 'otpInfoToast',
-        icon: '<i class="bi bi-info-circle"></i>'
-      };
-      case 'success': return {
-        toastClass: 'otpSuccessToast',
-        icon: '<i class="bi bi-check-circle"></i>'
-      };
-      case 'warning': return {
-        toastClass: 'otpWarningToast',
-        icon: '<i class="bi bi-exclamation-circle"></i>'
-      };
-      case 'danger': return {
-        toastClass: 'otpErrorToast',
-        icon: '<i class="bi bi-bug"></i>'
-      };
-      default: return {
-        toastClass: 'otpInfoToast',
-        icon: '<i class="bi bi-info-circle"></i>'
-      };
+      case 'info':
+        return {
+          toastClass: 'otpInfoToast',
+          icon: '<i class="bi bi-info-circle"></i>'
+        };
+      case 'success':
+        return {
+          toastClass: 'otpSuccessToast',
+          icon: '<i class="bi bi-check-circle"></i>'
+        };
+      case 'warning':
+        return {
+          toastClass: 'otpWarningToast',
+          icon: '<i class="bi bi-exclamation-circle"></i>'
+        };
+      case 'danger':
+        return {
+          toastClass: 'otpErrorToast',
+          icon: '<i class="bi bi-bug"></i>'
+        };
+      default:
+        return {
+          toastClass: 'otpInfoToast',
+          icon: '<i class="bi bi-info-circle"></i>'
+        };
     }
   }
 };

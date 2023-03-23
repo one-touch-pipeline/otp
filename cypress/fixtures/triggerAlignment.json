@@ -1,0 +1,52 @@
+[
+  {
+    "project": "ExampleProject",
+    "seqType": "WGS PAIRED bulk"
+  },
+  {
+    "pid": [
+      "example_2",
+      "example_3"
+    ],
+    "seqType": "WGBS PAIRED bulk"
+  },
+  {
+    "laneIds": [
+      "1044",
+      "1367"
+    ]
+  },
+  {
+    "ilseNumbers": [
+      "52418",
+      "172564"
+    ]
+  },
+  {
+    "pids": [
+      "example_2",
+      "example_2",
+      "example_2"
+    ],
+    "sampleTypes": [
+      "tumor02",
+      "tumor02",
+      "tumor01"
+    ],
+    "seqTypes": [
+      "WGBS_TAG",
+      "10x_scRNA",
+      "10x_scRNA"
+    ],
+    "seqReadTypes": [
+      "PAIRED",
+      "PAIRED",
+      "PAIRED"
+    ],
+    "singleCells": [
+      "false",
+      "true",
+      "true"
+    ]
+  }
+]

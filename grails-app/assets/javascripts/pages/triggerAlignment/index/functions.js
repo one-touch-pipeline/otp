@@ -34,7 +34,8 @@ $.otp.triggerAlignment = {
     'project-tab': 'searchSeqTrackByProjectSeqType',
     'pid-tab': 'searchSeqTrackByPidSeqType',
     'lane-tab': 'searchSeqTrackByLaneId',
-    'ilse-tab': 'searchSeqTrackByIlseNumber'
+    'ilse-tab': 'searchSeqTrackByIlseNumber',
+    'multi-input-tab': 'searchSeqTrackByMultiInput'
   },
 
   TOAST_TITLE: {
@@ -43,7 +44,7 @@ $.otp.triggerAlignment = {
     TRIGGER_FAILED: 'Failed triggering alignment workflows',
     TRIGGER_CANNOT: 'Cannot trigger alignment workflow',
 
-    SEARCH_INFO: 'Some inputs seem to be wrong',
+    SEARCH_INFO: 'Could not find any SeqTracks for the following input',
     SEARCH_WARNING: 'No SeqTracks found',
     SEARCH_ERROR: 'Failed to search for SeqTrack'
   },
@@ -179,8 +180,31 @@ $.otp.triggerAlignment = {
           return;
         }
         break;
+      case 'multi-input-tab': {
+        const multiInputList = $.otp.parseDelimitedMultiLineStringToArrays($('#multi-input-selection').val());
+        if (!multiInputList.length) {
+          $.otp.toaster.showErrorToast(
+            $.otp.triggerAlignment.TOAST_TITLE.SEARCH_ERROR,
+            'At least one multi input must be supplied'
+          );
+          return;
+        }
+        $.otp.triggerAlignment.searchQuery.pids = multiInputList.map((multiInput) => multiInput[0] || null);
+        $.otp.triggerAlignment.searchQuery.sampleTypes = multiInputList.map((multiInput) => multiInput[1] || null);
+        $.otp.triggerAlignment.searchQuery.seqTypes = multiInputList.map((multiInput) => multiInput[2] || null);
+        $.otp.triggerAlignment.searchQuery.readTypes = multiInputList.map((multiInput) => multiInput[3] || null);
+        $.otp.triggerAlignment.searchQuery.singleCells = multiInputList.map((multiInput) => multiInput[4] || null);
+        if (!($.otp.triggerAlignment.searchQuery.singleCells
+          .every((singleCell) => ['true', 'false'].includes(singleCell)))) {
+          $.otp.toaster.showErrorToast(
+            $.otp.triggerAlignment.TOAST_TITLE.SEARCH_ERROR,
+            'The single cell argument must be a boolean'
+          );
+          return;
+        }
+        break;
+      }
     }
-
     // reload the datatable by fetching data from backend
     $.otp.triggerAlignment.getSeqTrackTable().ajax.reload();
   },
@@ -194,6 +218,7 @@ $.otp.triggerAlignment = {
         controller: $.otp.triggerAlignment.SEARCH_CONTROLLER,
         action: $.otp.triggerAlignment.SEARCH_ACTION[inputdata.type]
       }),
+      method: 'GET',
       data: inputdata,
       success: (response) => (resolve({
         data: response
@@ -400,15 +425,15 @@ $(document).ready(() => {
 
           // message
           // eslint-disable-next-line no-extra-boolean-cast
-          if (!!warnings.message) {
+          if (!!outputdata.data.message) {
             $.otp.toaster.showErrorToast(
               $.otp.triggerAlignment.TOAST_TITLE.SEARCH_INFO,
-              warnings.message
+              outputdata.data.message
             );
           }
 
           if (!outputdata.data.data || !outputdata.data.data.length) {
-            $.otp.toaster.showErrorToast(
+            $.otp.toaster.showWarningToast(
               $.otp.triggerAlignment.TOAST_TITLE.SEARCH_WARNING,
               'No SeqTracks can be found. Make sure the search inputs are correct'
             );

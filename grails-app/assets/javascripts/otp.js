@@ -27,13 +27,13 @@ $.otp = {
   projectParameter: $('head meta[name=projectParameter]').attr('content'),
 
   /**
-     * Helper method to extend the given link by a further component.
-     * Ensures that there is exactly one slash between the link and the further
-     * component.
-     * @param link The original link
-     * @param component The new component to add
-     * @returns link + '/' + component
-     */
+   * Helper method to extend the given link by a further component.
+   * Ensures that there is exactly one slash between the link and the further
+   * component.
+   * @param link The original link
+   * @param component The new component to add
+   * @returns link + '/' + component
+   */
   addLinkComponent(link, component) {
     'use strict';
 
@@ -59,23 +59,23 @@ $.otp = {
     return newLink;
   },
   /**
-     * Creates an URL from the passed in options in the same way as the Grails
-     * createLink tag. The options is an object with the following attributes:
-     * <ul>
-     * <li>controller</li>
-     * <li>action</li>
-     * <li>id</li>
-     * <li>parameters</li>
-     * </ul>
-     *
-     * All elements are optional. Parameters is an object which gets serialized
-     * into key/value pairs for the query part of the URL.
-     *
-     * If all elements are provided the following link structure is generated:
-     * <strong>/applicationContextPath/controller/action/id?key1=value1&key2=value2</strong>
-     * @param options The URL parts to construct the link from
-     * @returns an URL to be used in e.g. href element of an a-attribute
-     */
+   * Creates an URL from the passed in options in the same way as the Grails
+   * createLink tag. The options is an object with the following attributes:
+   * <ul>
+   * <li>controller</li>
+   * <li>action</li>
+   * <li>id</li>
+   * <li>parameters</li>
+   * </ul>
+   *
+   * All elements are optional. Parameters is an object which gets serialized
+   * into key/value pairs for the query part of the URL.
+   *
+   * If all elements are provided the following link structure is generated:
+   * <strong>/applicationContextPath/controller/action/id?key1=value1&key2=value2</strong>
+   * @param options The URL parts to construct the link from
+   * @returns an URL to be used in e.g. href element of an a-attribute
+   */
   createLink(options) {
     'use strict';
 
@@ -115,26 +115,28 @@ $.otp = {
     return link;
   },
   /**
-     * Creates the HTML markup for an a element from the passed in options.
-     * For the actual link (href) the same attributes in options are supported
-     * as in {@link $.otp.createLink}. In addition the following attributes in
-     * options are supported:
-     * <ul>
-     * <li>title</li>
-     * <li>text</li>
-     * <li>target</li>
-     * </ul>
-     *
-     * Title is used for the title attribute of the a-attribute and text is used
-     * for the innerHTML element of the a-attribute
-     * @param options The options defining the hyperlink
-     * @returns {String} Markup for HTML element a
-     */
+   * Creates the HTML markup for an a element from the passed in options.
+   * For the actual link (href) the same attributes in options are supported
+   * as in {@link $.otp.createLink}. In addition the following attributes in
+   * options are supported:
+   * <ul>
+   * <li>title</li>
+   * <li>text</li>
+   * <li>target</li>
+   * </ul>
+   *
+   * Title is used for the title attribute of the a-attribute and text is used
+   * for the innerHTML element of the a-attribute
+   * @param options The options defining the hyperlink
+   * @returns {String} Markup for HTML element a
+   */
   createLinkMarkup(options) {
     'use strict';
 
-    let link; let text; let title; let
-      target;
+    let link;
+    let text;
+    let title;
+    let target;
     link = `<a href="${$.otp.createLink(options)}"`;
     text = '';
     if (options !== undefined && options) {
@@ -160,7 +162,10 @@ $.otp = {
   createAssetLink(path) {
     'use strict';
 
-    return $.otp.createLink({ controller: 'assets', action: path });
+    return $.otp.createLink({
+      controller: 'assets',
+      action: path
+    });
   }
 };
 
@@ -318,10 +323,10 @@ $.otp.createInfinityScrollListView = (selector, sourcePath, sortOrder, jsonCallb
  */
 $.otp.refreshTable = {
   /**
-     * Setup the autorefresh of tables.
-     * @param selector A jquery selector for a datatable to be refreshed
-     * @param time the time interval for refresh
-     */
+   * Setup the autorefresh of tables.
+   * @param selector A jquery selector for a datatable to be refreshed
+   * @param time the time interval for refresh
+   */
   setup(selector, time) {
     'use strict';
 
@@ -338,12 +343,12 @@ $.otp.refreshTable = {
  */
 $.otp.autorefresh = {
   /**
-     * Whether auto-refresh is currently enabled.
-     */
+   * Whether auto-refresh is currently enabled.
+   */
   enabled: false,
   /**
-     * Registers the click handler on the links
-     */
+   * Registers the click handler on the links
+   */
   setup(enabled) {
     'use strict';
 
@@ -351,9 +356,9 @@ $.otp.autorefresh = {
     $.otp.autorefresh.enabled = enabled;
   },
   /**
-     * The click handler for the links. Performs an AJAX request to enable/disable auto-refresh.
-     * @param event
-     */
+   * The click handler for the links. Performs an AJAX request to enable/disable auto-refresh.
+   * @param event
+   */
   handleClick(event) {
     'use strict';
 
@@ -366,9 +371,9 @@ $.otp.autorefresh = {
     });
   },
   /**
-     * Callback for AJAX request to enable/diasble auto-refresh
-     * @param data
-     */
+   * Callback for AJAX request to enable/diasble auto-refresh
+   * @param data
+   */
   ajaxHandler(data) {
     'use strict';
 
@@ -424,7 +429,9 @@ $.otp.resizeBodyInit = function (table, margin) {
  * action: action, text: string, title: string}]}
  */
 // eslint-disable-next-line strict
-$.otp.getDownloadButton = (columnSelector, fileName, beforeDownload = (callback) => { callback(); }) => {
+$.otp.getDownloadButton = (columnSelector, fileName, beforeDownload = (callback) => {
+  callback();
+}) => {
   const defaultFileName = document.title.replaceAll(' ', '_');
   const date = new Date();
   const formattedDate = `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1)
@@ -541,9 +548,26 @@ $.otp.applySelect2 = function (jqSelection) {
 
 /**
  * Parse the input string delimited with whitespace ([ \t\r\n\f]), comma or semicolon to an array
- *
+ * @param input is a delimited string
+ * @returns an array of the split input
  */
-$.otp.parseDelimitedStringToArray = (input) => input.trim().split(/[\s,;]+/).filter((o) => o);
+$.otp.parseDelimitedStringToArray = (input) => input.trim().split(/[\s,;]+/).filter((o) => o.trim());
+
+/**
+ * Parse the input string array delimited with whitespace ([ \t\r\n\f]), comma or semicolon to an array or arrays
+ * @param input is a string array
+ * @returns an array of arrays containing the split input
+ */
+$.otp.parseDelimitedStringArrayToArrays = (input) => input.map((string) => $.otp.parseDelimitedStringToArray(string));
+
+/**
+ * Parse the input multi line string delimited by new lines and
+ * with whitespace ([ \t\r\n\f]), comma or semicolon to an array or arrays
+ * @param input is a multiline (/n) string split by delimiters
+ * @returns an array of arrays containing the split input
+ */
+$.otp.parseDelimitedMultiLineStringToArrays =
+  (input) => $.otp.parseDelimitedStringArrayToArrays(input.split('\n').filter(String));
 
 $(document).ready(() => {
   'use strict';
