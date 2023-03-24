@@ -25,3 +25,4 @@ plugins {
 }
 
 rootProject.name = 'otp'
+enableFeaturePreview('GROOVY_COMPILATION_AVOIDANCE')
