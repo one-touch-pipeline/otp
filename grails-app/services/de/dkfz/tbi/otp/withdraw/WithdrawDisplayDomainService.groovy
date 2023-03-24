@@ -40,6 +40,8 @@ class WithdrawDisplayDomainService {
 
     String analysisInfo(BamFilePairAnalysis analysis) {
         return [
+                analysis.id,
+                analysis.instanceName,
                 analysis.project,
                 analysis.individual.pid,
                 analysis.sampleType1BamFile.sampleType.name,
@@ -51,6 +53,7 @@ class WithdrawDisplayDomainService {
 
     String bamFileInfo(AbstractMergedBamFile bamFile) {
         return [
+                bamFile.id,
                 bamFile.project,
                 bamFile.individual.pid,
                 bamFile.sampleType.name,

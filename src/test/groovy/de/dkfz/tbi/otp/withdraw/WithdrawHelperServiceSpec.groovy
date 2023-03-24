@@ -113,7 +113,7 @@ class WithdrawHelperServiceSpec extends HibernateSpec implements FastqcDomainFac
                 "- seqTrack1\twith comment: \'withdrawnComment1\nover multiple Lines\'",
                 "- seqTrack2\twith comment: \'withdrawnComment2\'",
                 WithdrawHelperService.TRIM_LINE,
-                "${deleteBamFileText} 4 bam files",
+                "${deleteBamFileText} 4 bam file(s)",
                 "- roddyBamFile1",
                 "- roddyBamFile2",
                 "- singleCellBamFile1",

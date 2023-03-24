@@ -74,15 +74,15 @@ class WithdrawHelperService {
         summary << "\n"
         summary << TRIM_LINE
         String deleteOrWithdrawBamFile = withdrawStateHolder.deleteBamFile ? 'Deleting' : 'Withdrawing'
-        summary << "${deleteOrWithdrawBamFile} ${withdrawStateHolder.mergedBamFiles.size()} bam files"
-        withdrawStateHolder.mergedBamFiles.each {
+        summary << "${deleteOrWithdrawBamFile} ${withdrawStateHolder.mergedBamFiles.unique().size()} bam file(s)"
+        withdrawStateHolder.mergedBamFiles.unique().each {
             summary << "  - ${withdrawDisplayDomainService.bamFileInfo(it)}"
         }
         summary << "\n"
         summary << TRIM_LINE
         String deleteOrWithdrawAnalysis = withdrawStateHolder.deleteBamFile || withdrawStateHolder.deleteAnalysis ? 'Deleting' : 'Withdrawing'
-        summary << "${deleteOrWithdrawAnalysis} ${withdrawStateHolder.analysis.size()} analysis"
-        withdrawStateHolder.analysis.each {
+        summary << "${deleteOrWithdrawAnalysis} ${withdrawStateHolder.analysis.unique().size()} analysis"
+        withdrawStateHolder.analysis.unique().each {
             summary << "  - ${withdrawDisplayDomainService.analysisInfo(it)}"
         }
         summary << "\n"

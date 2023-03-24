@@ -99,7 +99,6 @@ with multiple lines'
 dfgdg
 dfghsdf
 '
-
 """
 
 /**

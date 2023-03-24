@@ -91,11 +91,14 @@ class UnwithdrawService {
                         Files.exists(abstractMergedBamFileService.getBaseDirectory(bamFile).resolve(bamFile.bamFileName))
             },]
         }
-        withdrawStateHolder.mergedBamFiles = bamFileMap.values().flatten()
+        withdrawStateHolder.mergedBamFiles = bamFileMap.values().flatten().unique()
+        if (withdrawStateHolder.mergedBamFiles.size() > 0) {
+            withdrawStateHolder.mergedBamFiles.each {
+                withdrawStateHolder.summary << "Unwithdrawing BAM file: ${it}"
+            }
+        }
 
         bamFileMap.each {
-            withdrawStateHolder.summary << "Unwithdrawing BAM file: ${it.value}"
-
             withdrawStateHolder.pathsToChangeGroup.putAll(it.value.collectEntries { bamFile ->
                 it.key.collectPaths([bamFile]).collectEntries { String path ->
                     [(path): bamFile.project.unixGroup]
@@ -117,8 +120,12 @@ class UnwithdrawService {
         withdrawStateHolder.pathsToChangeGroup.putAll(analysis.collectEntries {
             [withdrawAnalysisService.collectPaths([it]).first(), it.project.unixGroup]
         })
-        withdrawStateHolder.summary << "Unwithdrawing analysis result: ${analysis}"
-        withdrawAnalysisService.unwithdrawObjects(analysis)
+        if (analysis.size() > 0) {
+            withdrawStateHolder.summary << "Unwithdrawing analysis result: ${analysis}"
+            withdrawAnalysisService.unwithdrawObjects(analysis)
+        } else {
+            withdrawStateHolder.summary << "Unwithdrawing analysis result: Nothing to do"
+        }
     }
 
     void writeBashScript(UnwithdrawStateHolder withdrawStateHolder) {
