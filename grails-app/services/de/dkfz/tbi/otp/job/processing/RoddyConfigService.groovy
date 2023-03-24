@@ -292,7 +292,7 @@ class RoddyConfigService {
             processingTools {
                 combinedConfigJson.get("RODDY")?.get("resources")?.fields()?.sort { a, b ->
                     String.CASE_INSENSITIVE_ORDER.compare(a.key, b.key)
-                }.each { resource ->
+                }?.each { resource ->
                     tool(
                             name: resource.key,
                             value: resource.value.get("value").textValue(),

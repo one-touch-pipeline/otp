@@ -131,12 +131,12 @@ class SequenceController {
 
             data.fastQCFiles = seqTrackIdDataFileMap[seq.seqTrackId]?.sort {
                 [!it.indexFile, it.mateNumber]
-            }.collect {
+            }?.collect {
                 [
                         readName: it.readName,
                         fastqId : it.id,
                 ]
-            }
+            } ?: []
             dataToRender.aaData << data
         }
         render(dataToRender as JSON)

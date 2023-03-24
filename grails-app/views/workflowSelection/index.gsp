@@ -184,5 +184,6 @@
             </tr>
         </g:each>
     </table>
+</div>
 </body>
 </html>

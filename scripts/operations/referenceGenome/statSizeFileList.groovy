@@ -37,7 +37,7 @@ ReferenceGenome.list().sort {
     File statDir = referenceGenomeService.pathToChromosomeSizeFilesPerReference(referenceGenome, false)
     statDir.list()?.findAll {
         it ==~ ReferenceGenomeProjectSeqType.TAB_FILE_PATTERN
-    }?.sort().each {
+    }?.sort()?.each {
         println " *   - ${it}"
     }
 }

@@ -96,7 +96,6 @@ class ProcessingStepSpec extends Specification implements DataTest {
     @Unroll
     void "test previous expects same Process but different JobDefinition but has problem with #errorField"() {
         given:
-        given:
         Process process = DomainFactory.createProcess()
         JobDefinition jobDefinition = DomainFactory.createJobDefinition(plan: process.jobExecutionPlan)
         Process process2 = DomainFactory.createProcess()

@@ -170,7 +170,7 @@ class AlignmentQualityOverviewController implements CheckAndCall {
             return response.sendError(HttpStatus.NOT_FOUND.value())
         }
 
-        List<String> suppSeqTypes = qaOverviewService.allSupportedSeqTypes()
+        List<SeqType> suppSeqTypes = qaOverviewService.allSupportedSeqTypes()
         List<SeqType> seqTypes = seqTypeService.alignableSeqTypesByProject(project).findAll {
             it in suppSeqTypes
         }

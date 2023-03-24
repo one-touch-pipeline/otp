@@ -126,7 +126,7 @@ class SampleOverviewController {
                     pipelines.each { Pipeline pipeline ->
                         columnNumber++
                         String cell = ""
-                        bamFilesPerWorkflow?.get(pipeline.id).each {
+                        bamFilesPerWorkflow?.get(pipeline.id)?.each {
                             String subCell
                             if (pipeline.name == Pipeline.Name.RODDY_RNA_ALIGNMENT) {
                                 subCell = "${it.numberOfMergedLanes} | ${informationOfSample.laneCountRegistered[seqType.id]}"
