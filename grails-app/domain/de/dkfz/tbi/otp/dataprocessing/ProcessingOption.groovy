@@ -188,38 +188,39 @@ class ProcessingOption implements Entity {
                 Necessity.OPTIONAL, "0.5.9, 0.6.5", TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
         ),
 
-        @Deprecated
+        /** @deprecated */
         PIPELINE_RODDY_ALIGNMENT_BWA_PATHS(
                 "Path to bwa_mem",
-                Necessity.OPTIONAL, "", TypeValidators.ABSOLUTE_PATH
+                Necessity.OPTIONAL, "", TypeValidators.ABSOLUTE_PATH, null, true
         ),
 
-        @Deprecated
+        /** @deprecated */
         PIPELINE_RODDY_ALIGNMENT_SAMBAMBA_PATHS(
                 "Path to sambamba",
-                Necessity.OPTIONAL, "", TypeValidators.ABSOLUTE_PATH
+                Necessity.OPTIONAL, "", TypeValidators.ABSOLUTE_PATH, null, true
         ),
+
         PIPELINE_RODDY_ALIGNMENT_RNA_DEFAULT_GENOME_STAR_INDEX(
                 "Default genome star index, used when configuring the pipeline",
                 Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT_OPTIONAL,
         ),
 
-        @Deprecated
+        /** @deprecated */
         PIPELINE_OTP_ALIGNMENT_QUALITY_MERGED_ASSESSMENT(
                 "Quality assessment Command and parameters template",
-                Necessity.OPTIONAL, "", TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
+                Necessity.OPTIONAL, "", TypeValidators.SINGLE_LINE_TEXT_OPTIONAL, null, true
         ),
 
-        @Deprecated
+        /** @deprecated */
         COMMAND_BWA(
                 "BWA command for pairing and sorting",
-                Necessity.OPTIONAL, "", TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
+                Necessity.OPTIONAL, "", TypeValidators.SINGLE_LINE_TEXT_OPTIONAL, null, true
         ),
 
-        @Deprecated
+        /** @deprecated */
         COMMAND_CONVEY_BWA(
                 "BWA convey command for alignment",
-                Necessity.OPTIONAL, "", TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
+                Necessity.OPTIONAL, "", TypeValidators.SINGLE_LINE_TEXT_OPTIONAL, null, true
         ),
 
         // modules and commands for OTP workflows
@@ -265,16 +266,16 @@ class ProcessingOption implements Entity {
                 Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
         ),
 
-        @Deprecated
+        /** @deprecated */
         COMMAND_R(
                 "command for R",
-                Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
+                Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT_OPTIONAL, null, true
         ),
 
-        @Deprecated
+        /** @deprecated */
         COMMAND_RUN_YAPSA(
                 "command for runYAPSA",
-                Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
+                Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT_OPTIONAL, null, true
         ),
 
         //basePath
@@ -289,16 +290,16 @@ class ProcessingOption implements Entity {
                 Necessity.REQUIRED, null, TypeValidators.ABSOLUTE_PATH
         ),
 
-        @Deprecated
+        /** @deprecated */
         RODDY_VERSION(
                 "Roddy version which is used currently to process Roddy-Pipelines",
-                Necessity.OPTIONAL, "", TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
+                Necessity.OPTIONAL, "", TypeValidators.SINGLE_LINE_TEXT_OPTIONAL, null, true
         ),
 
-        @Deprecated // base configs are not used anymore by the new WF system
+        /** @deprecated base configs are not used anymore by the new WF system  */
         RODDY_BASE_CONFIGS_PATH(
                 "Path to the baseConfig-files which are needed to execute Roddy",
-                Necessity.REQUIRED, null, TypeValidators.ABSOLUTE_PATH
+                Necessity.REQUIRED, null, TypeValidators.ABSOLUTE_PATH, null, true
         ),
         RODDY_APPLICATION_INI(
                 "Path to the application.ini which is needed to execute Roddy",
@@ -448,17 +449,15 @@ class ProcessingOption implements Entity {
                 Necessity.OPTIONAL, "false", TypeValidators.BOOLEAN
         ),
 
-        @SuppressWarnings('GStringExpressionWithinString')
         AD_GROUP_ADD_USER_SNIPPET(
-                "Shell program to do AD group changes with, outside of OTP, e.g. adtool." +
-                        " OTP will interpret the placeholders \${unixGroup} and \${userName} when using this template.",
+                'Shell program to do AD group changes with, outside of OTP, e.g. adtool.' +
+                        ' OTP will interpret the placeholders ${unixGroup} and ${userName} when using this template.',
                 Necessity.OPTIONAL, "", TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
         ),
 
-        @SuppressWarnings('GStringExpressionWithinString')
         AD_GROUP_REMOVE_USER_SNIPPET(
-                "Shell program to do AD group changes with, outside of OTP, e.g. adtool." +
-                        " OTP will interpret the placeholders \${unixGroup} and \${userName} when using this template",
+                'Shell program to do AD group changes with, outside of OTP, e.g. adtool.' +
+                        ' OTP will interpret the placeholders ${unixGroup} and ${userName} when using this template',
                 Necessity.OPTIONAL, "", TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
         ),
 
@@ -469,10 +468,10 @@ class ProcessingOption implements Entity {
                 TypeValidators.JOB_NAME_SEQ_TYPE,
         ),
 
-        @Deprecated
+        /** @deprecated */
         CLUSTER_SUBMISSIONS_FAST_TRACK_QUEUE(
                 "name of the queue used by fast track projects",
-                Necessity.REQUIRED, null, TypeValidators.SINGLE_WORD_TEXT
+                Necessity.REQUIRED, null, TypeValidators.SINGLE_WORD_TEXT, null, true
         ),
 
         //validator
@@ -509,7 +508,6 @@ class ProcessingOption implements Entity {
                 Necessity.OPTIONAL, "true", TypeValidators.BOOLEAN
         ),
 
-        //gui
         GUI_TRACKING_PIWIK_URL(
                 "URL for Piwik Tracking",
                 Necessity.OPTIONAL, "", TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
@@ -625,15 +623,16 @@ class ProcessingOption implements Entity {
         private final String defaultValue
         private final TypeValidators validatorForValue
         private final TypeValidators validatorForType
+        public final Boolean deprecated // We cant use the deprecated annotation, since this causes problems when not using atlrs4 parser for groovy 3
 
-        OptionName(String description, Necessity necessity, String defaultValue, TypeValidators validatorForValue, TypeValidators validatorForType = null) {
+        OptionName(String description, Necessity necessity, String defaultValue, TypeValidators validatorForValue, TypeValidators validatorForType = null, deprecated = false) {
             assert description
             assert necessity
             assert validatorForValue
             if (necessity == Necessity.REQUIRED) {
-                assert defaultValue == null : "default value must be null for required values: ${name()}"
+                assert defaultValue == null: "default value must be null for required values: ${name()}"
             } else {
-                assert defaultValue != null : "default value must not be null for optional values: ${name()}"
+                assert defaultValue != null: "default value must not be null for optional values: ${name()}"
             }
 
             this.description = description
@@ -641,6 +640,7 @@ class ProcessingOption implements Entity {
             this.defaultValue = defaultValue
             this.validatorForValue = validatorForValue
             this.validatorForType = validatorForType
+            this.deprecated = deprecated
         }
 
         @Override
@@ -667,10 +667,6 @@ class ProcessingOption implements Entity {
         TypeValidators getValidatorForType() {
             validatorForType
         }
-
-        boolean isDeprecated() {
-            return this.class.getField(name()).isAnnotationPresent(Deprecated)
-        }
     }
 
     OptionName name
@@ -682,7 +678,7 @@ class ProcessingOption implements Entity {
     Date dateObsoleted
 
     static belongsTo = [
-        project: Project,
+            project: Project,
     ]
 
     static mapping = {

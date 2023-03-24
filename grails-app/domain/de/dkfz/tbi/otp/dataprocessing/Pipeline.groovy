@@ -45,7 +45,8 @@ class Pipeline implements Entity {
         EXTERNALLY_PROCESSED   (Type.ALIGNMENT, false, 'external', { [] }),
         RODDY_RNA_ALIGNMENT    (Type.ALIGNMENT, true,  'STAR', { SeqTypeService.rnaAlignableSeqTypes }),
         CELL_RANGER            (Type.ALIGNMENT, false, 'cell ranger', { SeqTypeService.cellRangerAlignableSeqTypes }),
-        @Deprecated OTP_SNV    (Type.SNV,       false, null, { SeqTypeService.snvPipelineSeqTypes }),
+        /** @deprecated */
+        OTP_SNV    (Type.SNV,       false, null, { SeqTypeService.snvPipelineSeqTypes }),
         RODDY_SNV              (Type.SNV,       true,  null, { SeqTypeService.snvPipelineSeqTypes }),
         RODDY_INDEL            (Type.INDEL,     true,  null, { SeqTypeService.indelPipelineSeqTypes }),
         RODDY_SOPHIA           (Type.SOPHIA, true, null, { SeqTypeService.sophiaPipelineSeqTypes }),
@@ -116,22 +117,22 @@ class Pipeline implements Entity {
         @Deprecated
         ACESEQ,
 
-        @Deprecated
+        /** @deprecated */
         ALIGNMENT,
 
-        @Deprecated
+        /** @deprecated */
         INDEL,
 
-        @Deprecated
+        /** @deprecated */
         MUTATIONAL_SIGNATURE,
 
-        @Deprecated
+        /** @deprecated */
         SNV,
 
-        @Deprecated
+        /** @deprecated */
         SOPHIA,
 
-        @Deprecated
+        /** @deprecated */
         static Pipeline.Type getByName(String name) {
             return values().find {
                 it.name() == name

@@ -32,19 +32,19 @@ enum AlignmentDeciderBeanName {
     @Deprecated
     NO_ALIGNMENT('noAlignmentDecider', 'No Alignment'),
 
-    @Deprecated
+    /** @deprecated */
     OTP_ALIGNMENT('defaultOtpAlignmentDecider', 'OTP Alignment'),
 
-    @Deprecated
+    /** @deprecated */
     PAN_CAN_ALIGNMENT('panCanAlignmentDecider', 'PanCan Alignment'),
 
-    @Deprecated
+    /** @deprecated */
     final String beanName
 
-    @Deprecated
+    /** @deprecated */
     final String displayName
 
-    @Deprecated
+    /** @deprecated */
     static String findByBeanName(String bean) {
         values().find { it.beanName == bean }
     }

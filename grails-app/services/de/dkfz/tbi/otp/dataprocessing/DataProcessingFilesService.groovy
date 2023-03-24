@@ -43,28 +43,28 @@ class DataProcessingFilesService {
         @Deprecated // legacy data
         BASE,
 
-        @Deprecated // legacy data
+        /** @deprecated legacy data */
         ALIGNMENT,
 
-        @Deprecated // legacy data
+        /** @deprecated legacy data */
         MERGING,
 
-        @Deprecated // legacy data
+        /** @deprecated legacy data */
         COVERAGE,
 
-        @Deprecated // legacy data
+        /** @deprecated legacy data */
         FASTX_QC,
 
-        @Deprecated // legacy data
+        /** @deprecated legacy data */
         FLAGSTATS,
 
-        @Deprecated // legacy data
+        /** @deprecated legacy data */
         INSERTSIZE_DISTRIBUTION,
 
-        @Deprecated // legacy data
+        /** @deprecated legacy data */
         SNPCOMP,
 
-        @Deprecated // legacy data
+        /** @deprecated legacy data */
         STRUCTURAL_VARIATION
     }
 

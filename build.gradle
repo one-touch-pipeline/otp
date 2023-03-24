@@ -434,7 +434,7 @@ task codenarcAll(type: CodeNarc) {
 
 tasks.withType(GroovyCompile) {
     configure(groovyOptions) {
-        forkOptions.jvmArgs = ['-Xmx4096m']
+        forkOptions.jvmArgs += ['-Xmx4096m', '-Dgroovy.antlr4=false']
     }
 }
 

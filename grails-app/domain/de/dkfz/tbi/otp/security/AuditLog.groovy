@@ -43,11 +43,10 @@ class AuditLog implements Entity {
         PROJECT_REQUEST,
         LDAP_BASED_CHANGED_ACCESS_TO_FILES,
         /**
-         * In the beginning permissions were granted via roles. Therefore it was logged. Now the permissions are no longer
+         * @deprecated In the beginning permissions were granted via roles. Therefore it was logged. Now the permissions are no longer
          * connected to a role but defined per user. The value is still needed for the data logged before this time. But
          * no new entries with this Action should be created.
          */
-        @Deprecated
         PROJECT_USER_CHANGED_PROJECT_ROLE,
     }
 

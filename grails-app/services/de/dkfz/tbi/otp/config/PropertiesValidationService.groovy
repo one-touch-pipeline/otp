@@ -68,7 +68,7 @@ class PropertiesValidationService {
     OptionProblem validateProcessingOptionName(ProcessingOption.OptionName name, String type) {
         String existingOption = processingOptionService.findOptionAsString(name, type)
 
-        if (name.isDeprecated()) {
+        if (name.deprecated) {
             return null
         }
 
