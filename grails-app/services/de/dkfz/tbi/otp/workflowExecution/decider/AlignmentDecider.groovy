@@ -173,26 +173,27 @@ abstract class AlignmentDecider extends AbstractWorkflowDecider {
                         }
                     }*.workflowArtefact)
                 }
-                if (supportsIncrementalMerging()) {
-                    result.addAll(RoddyBamFile.createCriteria().list {
-                        workPackage {
-                            sample {
-                                eq("individual", individual)
-                                eq("sampleType", sampleType)
-                            }
-                            eq("seqType", seqType)
+                //bam file is needed to check, for:
+                // - incremental merging
+                // - to check, if alignment is needed
+                result.addAll(RoddyBamFile.createCriteria().list {
+                    workPackage {
+                        sample {
+                            eq("individual", individual)
+                            eq("sampleType", sampleType)
                         }
-                        eq("withdrawn", false)
-                        workflowArtefact {
-                            not {
-                                'in'("state", [WorkflowArtefact.State.FAILED, WorkflowArtefact.State.OMITTED])
-                            }
-                            isNull("withdrawnDate")
+                        eq("seqType", seqType)
+                    }
+                    eq("withdrawn", false)
+                    workflowArtefact {
+                        not {
+                            'in'("state", [WorkflowArtefact.State.FAILED, WorkflowArtefact.State.OMITTED])
                         }
-                    }.findAll { RoddyBamFile roddyBamFile ->
-                        roddyBamFile.isMostRecentBamFile()
-                    }*.workflowArtefact)
-                }
+                        isNull("withdrawnDate")
+                    }
+                }.findAll { RoddyBamFile roddyBamFile ->
+                    roddyBamFile.isMostRecentBamFile()
+                }*.workflowArtefact)
             }
         }
         return result
@@ -237,9 +238,6 @@ abstract class AlignmentDecider extends AbstractWorkflowDecider {
                     libraryPreparationKit = fastqcProcessedFile.dataFile.seqTrack.libraryPreparationKit
                     break
                 case RoddyBamFile:
-                    if (!supportsIncrementalMerging()) {
-                        throw new ArtefactNotSupportedException("Unsupported class: ${artefact.class}")
-                    }
                     RoddyBamFile bamFile = artefact as RoddyBamFile
                     individual = bamFile.individual
                     sampleType = bamFile.sampleType
@@ -289,11 +287,7 @@ abstract class AlignmentDecider extends AbstractWorkflowDecider {
     }
 
     private WorkflowArtefact createWorkflowRunIfPossible(Collection<WorkflowArtefact> artefacts, WorkflowVersion version) {
-        RoddyBamFile baseBamFile = (artefacts.findAll { it.artefactType == ArtefactType.BAM }*.artefact*.get() as List<RoddyBamFile>)
-                .find { bamFile ->
-                    bamFile.fileOperationStatus == AbstractMergedBamFile.FileOperationStatus.PROCESSED && !bamFile.withdrawn &&
-                            bamFile.mergingWorkPackage.bamFileInProjectFolder == bamFile
-                }
+        RoddyBamFile baseBamFile = (artefacts.findAll { it.artefactType == ArtefactType.BAM }*.artefact*.get() as List<RoddyBamFile>).find()
         List<SeqTrack> seqTracks = artefacts.findAll { it.artefactType == ArtefactType.FASTQ }*.artefact*.get() as List<SeqTrack>
 
         if (seqTracks.empty) {
@@ -303,6 +297,7 @@ abstract class AlignmentDecider extends AbstractWorkflowDecider {
         if (!newSeqTracks) {
             return null
         }
+        List<SeqTrack> useSeqTracks = supportsIncrementalMerging() ? newSeqTracks : seqTracks
 
         if (requiresFastqcResults()) {
             List<FastqcProcessedFile> fastqcProcessedFiles = artefacts.findAll {
@@ -385,12 +380,14 @@ abstract class AlignmentDecider extends AbstractWorkflowDecider {
 
         artefacts.groupBy { it.artefactType }.each { type, groupedArtefacts ->
             if (type == ArtefactType.BAM) {
-                groupedArtefacts.each {
-                    new WorkflowRunInputArtefact(
-                            workflowRun: run,
-                            role: inputBaseBamRole,
-                            workflowArtefact: it,
-                    ).save(flush: false)
+                if (supportsIncrementalMerging()) {
+                    groupedArtefacts.each {
+                        new WorkflowRunInputArtefact(
+                                workflowRun: run,
+                                role: inputBaseBamRole,
+                                workflowArtefact: it,
+                        ).save(flush: false)
+                    }
                 }
             } else {
                 String role = (type == ArtefactType.FASTQ) ? inputFastqRole : inputFastqcRole
@@ -417,8 +414,8 @@ abstract class AlignmentDecider extends AbstractWorkflowDecider {
                 workPackage: workPackage,
                 identifier: identifier,
                 workDirectoryName: "${roddyBamFileService.WORK_DIR_PREFIX}_${identifier}",
-                baseBamFile: baseBamFile,
-                seqTracks: newSeqTracks,
+                baseBamFile: supportsIncrementalMerging() ? baseBamFile : null,
+                seqTracks: useSeqTracks,
         )
 
         bamFile.numberOfMergedLanes = bamFile.containedSeqTracks.size()

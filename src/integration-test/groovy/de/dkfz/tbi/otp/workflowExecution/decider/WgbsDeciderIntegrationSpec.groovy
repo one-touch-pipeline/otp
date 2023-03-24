@@ -26,7 +26,9 @@ import grails.testing.mixin.integration.Integration
 import grails.util.Pair
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
+import spock.lang.Unroll
 
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.MergingCriteria
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
@@ -56,7 +58,8 @@ class WgbsDeciderIntegrationSpec extends Specification implements WorkflowSystem
         wgbsDecider.getSeqType(wa) == seqTrack.seqType
     }
 
-    void "test findAdditionalRequiredInputArtefacts"() {
+    @Unroll
+    void "test findAdditionalRequiredInputArtefacts, #name"() {
         given:
         WorkflowArtefact inputArtefact = createWorkflowArtefact(artefactType: ArtefactType.FASTQ)
         SeqType seqType = createSeqType()
@@ -69,7 +72,7 @@ class WgbsDeciderIntegrationSpec extends Specification implements WorkflowSystem
         createSeqTrack(workflowArtefact: additionalRequiredArtefact1, seqType: seqType, sample: sample1)
 
         WorkflowArtefact bamArtefact = createWorkflowArtefact(artefactType: ArtefactType.BAM)
-        createBamFile(workflowArtefact: bamArtefact, workPackage: createMergingWorkPackage(sample: sample1, seqType: seqType))
+        createBamFile(workflowArtefact: bamArtefact, withdrawn: withdrawn, workPackage: createMergingWorkPackage(sample: sample1, seqType: seqType))
 
         WorkflowArtefact fastqcArtefact = createWorkflowArtefact(artefactType: ArtefactType.FASTQC)
         DomainFactory.createFastqcProcessedFile(workflowArtefact: fastqcArtefact, dataFile: createDataFile(seqTrack: createSeqTrack(
@@ -96,14 +99,24 @@ class WgbsDeciderIntegrationSpec extends Specification implements WorkflowSystem
         Sample sample3 = createSample(individual: individual, sampleType: sampleType2)
         createSeqTrack(workflowArtefact: differentSampleType, seqType: seqType, sample: sample3)
 
+        List<Artefact> result = [
+                inputArtefact,
+                additionalRequiredArtefact1,
+        ]
+        if (includeInResult) {
+            result << bamArtefact
+        }
+
         expect:
         CollectionUtils.containSame(
                 wgbsDecider.findAdditionalRequiredInputArtefacts([inputArtefact]),
-                [
-                        inputArtefact,
-                        additionalRequiredArtefact1,
-                ]
+                result
         )
+
+        where:
+        name                                            | withdrawn || includeInResult
+        'bam file is withdrawn, then do not include it' | true      || false
+        'bam file is not withdrawn, then include it'    | false     || true
     }
 
     void "test groupArtefactsForWorkflowExecution"() {
@@ -470,9 +483,11 @@ class WgbsDeciderIntegrationSpec extends Specification implements WorkflowSystem
         wgbsDecider.createWorkflowRunsAndOutputArtefacts([[artefact1, artefact2]], [], createWorkflowVersion()) == []
     }
 
-    void "test createWorkflowRunsAndOutputArtefacts"() {
+    @Unroll
+    void "test createWorkflowRunsAndOutputArtefacts, #name"() {
         given:
         findOrCreatePipeline()
+        DomainFactory.createProcessingOptionForTicketSystemEmail()
 
         SeqPlatformGroup seqPlatformGroup = createSeqPlatformGroup()
         SeqPlatform seqPlatform = createSeqPlatform(seqPlatformGroups: [seqPlatformGroup])
@@ -487,12 +502,41 @@ class WgbsDeciderIntegrationSpec extends Specification implements WorkflowSystem
 
         WorkflowArtefact inputArtefact1 = createWorkflowArtefact(artefactType: ArtefactType.FASTQ, producedBy: createWorkflowRun())
         Sample sample = createSample(individual: individual)
-        SeqTrack seqTrack1 = createSeqTrackWithTwoDataFile(workflowArtefact: inputArtefact1, seqType: seqType, sample: sample, run: createRun(seqPlatform: seqPlatform),
-                libraryPreparationKit: libraryPreparationKit)
+        SeqTrack seqTrack1 = createSeqTrackWithTwoDataFile(workflowArtefact: inputArtefact1, seqType: seqType, sample: sample,
+                run: createRun(seqPlatform: seqPlatform), libraryPreparationKit: libraryPreparationKit)
 
         WorkflowArtefact inputArtefact2 = createWorkflowArtefact(artefactType: ArtefactType.FASTQ)
-        SeqTrack seqTrack2 = createSeqTrackWithTwoDataFile(workflowArtefact: inputArtefact2, run: createRun(seqPlatform: seqPlatform),
-                libraryPreparationKit: libraryPreparationKit)
+        SeqTrack seqTrack2 = createSeqTrackWithTwoDataFile(workflowArtefact: inputArtefact2, seqType: seqType, sample: sample,
+                run: createRun(seqPlatform: seqPlatform), libraryPreparationKit: libraryPreparationKit)
+
+        List<Artefact> inputArtefacts = [
+                inputArtefact1,
+                inputArtefact2,
+        ]
+
+        if (bamFileExist) {
+            Set<SeqTrack> seqTrackSet = ((bamFileSameSeqTracks ? [seqTrack1, seqTrack2] : [seqTrack1])) as Set
+            WorkflowArtefact bamArtefact = createWorkflowArtefact([
+                    artefactType    : ArtefactType.BAM,
+                    withdrawnDate   : null,
+                    withdrawnComment: null,
+                    state           : WorkflowArtefact.State.PLANNED_OR_RUNNING,
+            ])
+            createBamFile([
+                    workflowArtefact: bamArtefact,
+                    withdrawn       : false,
+                    workPackage     : createMergingWorkPackage([
+                            sample               : sample,
+                            seqType              : seqType,
+                            referenceGenome      : referenceGenome,
+                            seqPlatformGroup     : seqPlatformGroup,
+                            libraryPreparationKit: libraryPreparationKit,
+                            seqTracks            : seqTrackSet,
+                    ]),
+                    seqTracks       : seqTrackSet,
+            ])
+            inputArtefacts << bamArtefact
+        }
 
         createReferenceGenomeSelector(
                 project: project,
@@ -503,18 +547,29 @@ class WgbsDeciderIntegrationSpec extends Specification implements WorkflowSystem
 
         when:
         Collection<WorkflowArtefact> result = wgbsDecider.createWorkflowRunsAndOutputArtefacts(
-                [[inputArtefact1, inputArtefact2]], [], version)
+                [inputArtefacts], [inputArtefacts], version)
 
         then:
-        result.size() == 1
-        WorkflowArtefact outputArtefact = result.first()
-        outputArtefact.artefactType == ArtefactType.BAM
-        RoddyBamFile bamFile = outputArtefact.artefact.get()
-        CollectionUtils.containSame(bamFile.seqTracks, [seqTrack1, seqTrack2])
-        CollectionUtils.containSame(bamFile.containedSeqTracks, [seqTrack1, seqTrack2])
-        WorkflowRun run = outputArtefact.producedBy
-        run.workflow == workflow
-        CollectionUtils.containSame(run.inputArtefacts.values(), [inputArtefact1, inputArtefact2])
+        if (emptyResult) {
+            assert result.empty
+        } else {
+            assert result.size() == 1
+            WorkflowArtefact outputArtefact = result.first()
+            assert outputArtefact.artefactType == ArtefactType.BAM
+            RoddyBamFile bamFile = outputArtefact.artefact.get()
+            assert bamFile.baseBamFile == null
+            TestCase.assertContainSame(bamFile.seqTracks, [seqTrack1, seqTrack2])
+            TestCase.assertContainSame(bamFile.containedSeqTracks, [seqTrack1, seqTrack2])
+            WorkflowRun run = outputArtefact.producedBy
+            assert run.workflow == workflow
+            TestCase.assertContainSame(run.inputArtefacts.values(), [inputArtefact1, inputArtefact2])
+        }
+
+        where:
+        name                        | bamFileExist | bamFileSameSeqTracks | emptyResult
+        'no bam file'               | false        | null                 | false
+        'bam file same seq Tracks'  | true         | true                 | true
+        'bam file other seq Tracks' | true         | false                | false
     }
 
     void "test groupInputArtefacts"() {
