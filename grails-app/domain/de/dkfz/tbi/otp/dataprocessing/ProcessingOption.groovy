@@ -31,6 +31,12 @@ import de.dkfz.tbi.otp.utils.Entity
 @ManagedEntity
 class ProcessingOption implements Entity {
 
+    @SuppressWarnings("GStringExpressionWithinString")
+    static private final String UNIX_GROUP = '${unixGroup}'
+
+    @SuppressWarnings("GStringExpressionWithinString")
+    static private final String USER_NAME = '${userName}'
+
     enum OptionName {
         WHOLE_GENOME_LOW_COVERAGE_THRESHOLD(
                 "Threshold for lcWGS",
@@ -296,7 +302,7 @@ class ProcessingOption implements Entity {
                 Necessity.OPTIONAL, "", TypeValidators.SINGLE_LINE_TEXT_OPTIONAL, null, true
         ),
 
-        /** @deprecated base configs are not used anymore by the new WF system  */
+        /** @deprecated base configs are not used anymore by the new WF system      */
         RODDY_BASE_CONFIGS_PATH(
                 "Path to the baseConfig-files which are needed to execute Roddy",
                 Necessity.REQUIRED, null, TypeValidators.ABSOLUTE_PATH, null, true
@@ -450,14 +456,14 @@ class ProcessingOption implements Entity {
         ),
 
         AD_GROUP_ADD_USER_SNIPPET(
-                'Shell program to do AD group changes with, outside of OTP, e.g. adtool.' +
-                        ' OTP will interpret the placeholders ${unixGroup} and ${userName} when using this template.',
+                "Shell program to do AD group changes with, outside of OTP, e.g. adtool." +
+                        " OTP will interpret the placeholders ${UNIX_GROUP} and ${USER_NAME} when using this template.",
                 Necessity.OPTIONAL, "", TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
         ),
 
         AD_GROUP_REMOVE_USER_SNIPPET(
-                'Shell program to do AD group changes with, outside of OTP, e.g. adtool.' +
-                        ' OTP will interpret the placeholders ${unixGroup} and ${userName} when using this template',
+                "Shell program to do AD group changes with, outside of OTP, e.g. adtool." +
+                        " OTP will interpret the placeholders ${UNIX_GROUP} and ${USER_NAME} when using this template",
                 Necessity.OPTIONAL, "", TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
         ),
 
@@ -623,9 +629,10 @@ class ProcessingOption implements Entity {
         private final String defaultValue
         private final TypeValidators validatorForValue
         private final TypeValidators validatorForType
-        public final Boolean deprecated // We cant use the deprecated annotation, since this causes problems when not using atlrs4 parser for groovy 3
+        private final Boolean deprecated // We cant use the deprecated annotation, since this causes problems when not using atlr4 parser for groovy 3
 
-        OptionName(String description, Necessity necessity, String defaultValue, TypeValidators validatorForValue, TypeValidators validatorForType = null, deprecated = false) {
+        OptionName(String description, Necessity necessity, String defaultValue, TypeValidators validatorForValue,
+                   TypeValidators validatorForType = null, Boolean deprecated = false) {
             assert description
             assert necessity
             assert validatorForValue
@@ -646,6 +653,10 @@ class ProcessingOption implements Entity {
         @Override
         String toString() {
             name()
+        }
+
+        Boolean getDeprecated() {
+            deprecated
         }
 
         String getDescription() {
