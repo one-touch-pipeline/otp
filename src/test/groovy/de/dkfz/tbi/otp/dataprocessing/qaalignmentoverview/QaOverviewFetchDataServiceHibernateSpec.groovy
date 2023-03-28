@@ -48,7 +48,7 @@ class QaOverviewFetchDataServiceHibernateSpec extends HibernateSpec implements R
     }
 
     @Unroll
-    void "addLibraryPreparationKitAndSequencingLengthInformation, when LibraryPreparationKit is #kitNames, then name is '#libraryPreparationKitName' and shortname' is '#libraryPreparationKitShortName'"() {
+    void "addLibraryPreparationKitAndSequencingLengthInformation, when LibraryPreparationKit is #kitNames, then name is '#libraryPreparationKitName'"() {
         given:
         setupData()
 
@@ -58,7 +58,6 @@ class QaOverviewFetchDataServiceHibernateSpec extends HibernateSpec implements R
             }
             findOrCreateLibraryPreparationKit([
                     name            : "kit_${it}".toString(),
-                    shortDisplayName: "short_${it}".toString(),
             ])
         }
 
@@ -73,7 +72,6 @@ class QaOverviewFetchDataServiceHibernateSpec extends HibernateSpec implements R
 
         Map<String, ?> expectedMap = map + [
                 libraryPreparationKitName     : libraryPreparationKitName,
-                libraryPreparationKitShortName: libraryPreparationKitShortName,
                 readLength                    : 100.0,
         ]
 
@@ -84,15 +82,15 @@ class QaOverviewFetchDataServiceHibernateSpec extends HibernateSpec implements R
         TestCase.assertContainSame(map, expectedMap)
 
         where:
-        kitNames  || libraryPreparationKitName | libraryPreparationKitShortName
-        [1]       || 'kit_1'                   | 'short_1'
-        [1, 1]    || 'kit_1'                   | 'short_1'
-        [1, 2]    || 'kit_1, kit_2'            | 'short_1, short_2'
-        [1, 2, 3] || 'kit_1, kit_2, kit_3'     | 'short_1, short_2, short_3'
-        [3, 2, 1] || 'kit_1, kit_2, kit_3'     | 'short_1, short_2, short_3'
-        [1, 2, 1] || 'kit_1, kit_2'            | 'short_1, short_2'
-        [null]    || '-'                       | '-'
-        [1, null] || 'kit_1, -'                | 'short_1, -'
+        kitNames  || libraryPreparationKitName
+        [1]       || 'kit_1'
+        [1, 1]    || 'kit_1'
+        [1, 2]    || 'kit_1, kit_2'
+        [1, 2, 3] || 'kit_1, kit_2, kit_3'
+        [3, 2, 1] || 'kit_1, kit_2, kit_3'
+        [1, 2, 1] || 'kit_1, kit_2'
+        [null]    || '-'
+        [1, null] || '-, kit_1'
     }
 
     @Unroll
@@ -109,7 +107,6 @@ class QaOverviewFetchDataServiceHibernateSpec extends HibernateSpec implements R
 
         Map<String, ?> expectedMap = map + [
                 libraryPreparationKitName     : '-',
-                libraryPreparationKitShortName: '-',
                 readLength                    : readLength,
         ]
 

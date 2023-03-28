@@ -41,14 +41,13 @@ import de.dkfz.tbi.otp.project.Project
 @Transactional(readOnly = true)
 class QaOverviewFetchDataService {
 
-    private static final List<List<String>> NO_LIBRARY_PREPARATION_KIT = [["", ""].asImmutable()].asImmutable()
+    private static final List<String> NO_LIBRARY_PREPARATION_KIT = [""].asImmutable()
 
     final static String FETCH_LIBRARY_PREPARATION_KIT = """
             |select
             |    new map (
             |        mergingWorkPackage.id as mergingWorkPackageId,
-            |        kit.name as libraryPreparationKitName,
-            |        kit.shortDisplayName as libraryPreparationKitShortName
+            |        kit.name as libraryPreparationKitName
             |    )
             |from
             |    MergingWorkPackage mergingWorkPackage
@@ -113,15 +112,11 @@ class QaOverviewFetchDataService {
     }
 
     private void addLibraryPreparationKitInformation(Map qaMap, List<Map<String, ?>> valueMapList) {
-        List<List<String>> libPrepKits = valueMapList ? valueMapList.collect {
-            [
-                    it.libraryPreparationKitShortName ?: "-",
-                    it.libraryPreparationKitName ?: "-",
-            ]
-        }.unique().sort() as List<List<String>> : NO_LIBRARY_PREPARATION_KIT
+        List<String> libPrepKits = valueMapList ? valueMapList.collect {
+                    it.libraryPreparationKitName ?: "-"
+        }.unique().sort() as List<String> : NO_LIBRARY_PREPARATION_KIT
 
-        qaMap['libraryPreparationKitShortName'] = libPrepKits*.getAt(0).join(', ')
-        qaMap['libraryPreparationKitName'] = libPrepKits*.getAt(1).join(', ')
+        qaMap['libraryPreparationKitName'] = libPrepKits.join(', ')
     }
 
     private void addReadLengthInformation(Map qaMap, List<Map<String, ?>> valueMapList) {

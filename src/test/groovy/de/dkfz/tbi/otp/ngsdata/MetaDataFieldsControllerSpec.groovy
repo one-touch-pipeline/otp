@@ -75,7 +75,6 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         when:
         request.method = 'POST'
         controller.params.name = 'LibraryPreparationKit'
-        controller.params.shortDisplayName = 'LPK'
         controller.params.adapterFile = '/asdf'
         controller.params.reverseComplementAdapterSequence = 'GATC'
         controller.params.libraryPreparationKitService = controller.libraryPreparationKitService
@@ -92,12 +91,11 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         given:
         setupData()
 
-        DomainFactory.createLibraryPreparationKit(name: 'LibraryPreparationKit', shortDisplayName: 'LPK', importAlias: ['LibraryPreparationKitImportAlias'])
+        DomainFactory.createLibraryPreparationKit(name: 'LibraryPreparationKit', importAlias: ['LibraryPreparationKitImportAlias'])
 
         when:
         request.method = 'POST'
         controller.params.name = name
-        controller.params.shortDisplayName = shortDisplayName
         controller.params.libraryPreparationKitService = controller.libraryPreparationKitService
         controller.createLibraryPreparationKit()
 
@@ -106,19 +104,18 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         !controller.response.json.success
 
         where:
-        name                               | shortDisplayName
-        ''                                 | 'LPK2'
-        'LibraryPreparationKit'            | 'LPK2'
-        'LibraryPreparationKitImportAlias' | 'LPK2'
-        'LibraryPreparationKit2'           | ''
-        'LibraryPreparationKit2'           | 'LPK'
+        name << [
+                '',
+                'LibraryPreparationKit',
+                'LibraryPreparationKitImportAlias',
+        ]
     }
 
     void "test JSON createLibraryPreparationKitImportAlias valid input"() {
         given:
         setupData()
 
-        LibraryPreparationKit libraryPreparationKit = DomainFactory.createLibraryPreparationKit(name: 'LibraryPreparationKit', shortDisplayName: 'LPK')
+        LibraryPreparationKit libraryPreparationKit = DomainFactory.createLibraryPreparationKit(name: 'LibraryPreparationKit')
 
         when:
         request.method = 'POST'
@@ -139,7 +136,7 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         setupData()
 
         LibraryPreparationKit libraryPreparationKit = DomainFactory.createLibraryPreparationKit(
-                name: 'LibraryPreparationKit', shortDisplayName: 'LPK', importAlias: ['LibraryPreparationKitImportAlias'])
+                name: 'LibraryPreparationKit', importAlias: ['LibraryPreparationKitImportAlias'])
 
         when:
         request.method = 'POST'
@@ -480,10 +477,10 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         setupData()
 
         DomainFactory.createSeqType(
-                name         : 'SEQTYPE',
-                dirName      : 'seqtype',
-                displayName  : 'SEQ TYPE',
-                importAlias  : ['importAlias'],
+                name: 'SEQTYPE',
+                dirName: 'seqtype',
+                displayName: 'SEQ TYPE',
+                importAlias: ['importAlias'],
                 libraryLayout: SequencingReadType.SINGLE
         )
 

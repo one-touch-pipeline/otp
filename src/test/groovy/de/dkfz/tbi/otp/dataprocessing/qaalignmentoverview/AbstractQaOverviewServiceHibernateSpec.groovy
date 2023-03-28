@@ -378,7 +378,6 @@ class AbstractQaOverviewServiceHibernateSpec extends HibernateSpec implements Ro
                 //general
                 pid                           : 'pid',
                 individualId                  : individualId,
-                libraryPreparationKitShortName: 'libraryPreparationKitShortName',
                 libraryPreparationKitName     : 'libraryPreparationKitName',
                 dateFromFileSystem            : Date.from(zonedDateTime.toInstant()),
                 pipelineName                  : Pipeline.Name.PANCAN_ALIGNMENT,
@@ -464,7 +463,7 @@ class AbstractQaOverviewServiceHibernateSpec extends HibernateSpec implements Ro
         pidCell.link == pidLink
 
         TableCellValue kitCell = (TableCellValue) resultEntry.kit
-        kitCell.value == 'libraryPreparationKitShortName'
+        kitCell.value == 'libraryPreparationKitName'
         kitCell.tooltip == 'libraryPreparationKitName'
         kitCell.warnColor == null
         kitCell.link == null
@@ -496,7 +495,6 @@ class AbstractQaOverviewServiceHibernateSpec extends HibernateSpec implements Ro
                 //general
                 pid                           : 'pid',
                 individualId                  : individualId,
-                libraryPreparationKitShortName: 'libraryPreparationKitShortName',
                 libraryPreparationKitName     : 'libraryPreparationKitName',
                 dateFromFileSystem            : Date.from(zonedDateTime.toInstant()),
                 pipelineName                  : Pipeline.Name.PANCAN_ALIGNMENT,
@@ -602,7 +600,7 @@ class AbstractQaOverviewServiceHibernateSpec extends HibernateSpec implements Ro
         pidCell.link == pidLink
 
         TableCellValue kitCell = (TableCellValue) resultEntry.kit
-        kitCell.value == 'libraryPreparationKitShortName'
+        kitCell.value == 'libraryPreparationKitName'
         kitCell.tooltip == 'libraryPreparationKitName'
         kitCell.warnColor == null
         kitCell.link == null

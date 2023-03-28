@@ -47,19 +47,15 @@ class LibraryPreparationKitServiceSpec extends MetadataFieldsServiceSpec<Library
 
     LibraryPreparationKitService libraryPreparationKitService = new LibraryPreparationKitService()
 
-    final static String SHORT_DISPLAY_NAME = "LPK"
-    final static String OTHER_SHORT_DISPLAY_NAME = "DLPK"
     final static String ADAPTER_FILE = "/file.fa"
     final static String ADAPTER_SEQUENCE = "ATGC"
 
     def setup() {
         properties = [
-                shortDisplayName                : SHORT_DISPLAY_NAME,
                 adapterFile                     : ADAPTER_FILE,
                 reverseComplementAdapterSequence: ADAPTER_SEQUENCE,
         ]
         otherProperties = [
-                shortDisplayName                : OTHER_SHORT_DISPLAY_NAME,
                 adapterFile                     : ADAPTER_FILE,
                 reverseComplementAdapterSequence: ADAPTER_SEQUENCE,
         ]
@@ -69,7 +65,6 @@ class LibraryPreparationKitServiceSpec extends MetadataFieldsServiceSpec<Library
         given:
         service.create(OTHER_NAME,
                 [
-                        shortDisplayName                : OTHER_SHORT_DISPLAY_NAME,
                         adapterFile                     : ADAPTER_FILE,
                         reverseComplementAdapterSequence: ADAPTER_SEQUENCE,
                 ]
@@ -78,75 +73,74 @@ class LibraryPreparationKitServiceSpec extends MetadataFieldsServiceSpec<Library
         when:
         service.create(name,
                 [
-                        shortDisplayName                : shortDisplayName,
                         adapterFile                     : adapterFile,
                         reverseComplementAdapterSequence: adapterSequence,
                 ]
         )
 
         then:
-        exactlyOneElement(LibraryPreparationKit.findAllByNameAndShortDisplayNameAndAdapterFileAndReverseComplementAdapterSequence(
-                OTHER_NAME, OTHER_SHORT_DISPLAY_NAME, ADAPTER_FILE, ADAPTER_SEQUENCE))
+        exactlyOneElement(LibraryPreparationKit.findAllByNameAndAdapterFileAndReverseComplementAdapterSequence(
+                OTHER_NAME, ADAPTER_FILE, ADAPTER_SEQUENCE))
 
         where:
-        name | shortDisplayName   | adapterFile  | adapterSequence
-        NAME | SHORT_DISPLAY_NAME | ADAPTER_FILE | ADAPTER_SEQUENCE
-        NAME | SHORT_DISPLAY_NAME | null         | ADAPTER_SEQUENCE
-        NAME | SHORT_DISPLAY_NAME | ADAPTER_FILE | null
+        name  | adapterFile  | adapterSequence
+        NAME  | ADAPTER_FILE | ADAPTER_SEQUENCE
+        NAME  | null         | ADAPTER_SEQUENCE
+        NAME  | ADAPTER_FILE | null
     }
 
     void "test createLibraryPreparationKit fails with null as argument"() {
         when:
-        service.create(name,
+        service.create(null,
                 [
-                        shortDisplayName                : shortDisplayName,
-                        adapterFile                     : adapterFile,
-                        reverseComplementAdapterSequence: adapterSequence,
+                        adapterFile                     : ADAPTER_FILE,
+                        reverseComplementAdapterSequence: ADAPTER_SEQUENCE,
                 ]
         )
 
         then:
         thrown(AssertionError)
-
-        where:
-        name | shortDisplayName   | adapterFile  | adapterSequence
-        null | SHORT_DISPLAY_NAME | ADAPTER_FILE | ADAPTER_SEQUENCE
-        NAME | null               | ADAPTER_FILE | ADAPTER_SEQUENCE
     }
 
     void "test createLibraryPreparationKit fails with existing names"() {
         given:
         service.create(NAME,
                 [
-                        shortDisplayName                : SHORT_DISPLAY_NAME,
                         adapterFile                     : ADAPTER_FILE,
                         reverseComplementAdapterSequence: ADAPTER_SEQUENCE,
                 ]
         )
 
         when:
-        service.create(name,
+        service.create(NAME,
                 [
-                        shortDisplayName                : shortDisplayName,
-                        adapterFile                     : adapterFile,
-                        reverseComplementAdapterSequence: adapterSequence,
+                        adapterFile                     : ADAPTER_FILE,
+                        reverseComplementAdapterSequence: ADAPTER_SEQUENCE,
                 ]
         )
 
         then:
         thrown(AssertionError)
+    }
 
-        where:
-        name       | shortDisplayName         | adapterFile  | adapterSequence
-        NAME       | OTHER_SHORT_DISPLAY_NAME | ADAPTER_FILE | ADAPTER_SEQUENCE
-        OTHER_NAME | SHORT_DISPLAY_NAME       | ADAPTER_FILE | ADAPTER_SEQUENCE
+    void "test createLibraryPreparationKit fails with invalid property"() {
+        when:
+        service.create(NAME,
+                [
+                        adapterFile                     : ADAPTER_FILE,
+                        reverseComplementAdapterSequence: ADAPTER_SEQUENCE,
+                        invalidProperty                 : "invalid",
+                ]
+        )
+
+        then:
+        thrown(AssertionError)
     }
 
     void "test addAdapterFileToLibraryPreparationKit succeeds"() {
         given:
         LibraryPreparationKit kit = service.create(NAME,
                 [
-                        shortDisplayName                : SHORT_DISPLAY_NAME,
                         adapterFile                     : null,
                         reverseComplementAdapterSequence: null,
                 ]
@@ -163,7 +157,6 @@ class LibraryPreparationKitServiceSpec extends MetadataFieldsServiceSpec<Library
         given:
         LibraryPreparationKit kit = service.create(NAME,
                 [
-                        shortDisplayName                : SHORT_DISPLAY_NAME,
                         adapterFile                     : null,
                         reverseComplementAdapterSequence: null,
                 ]
@@ -183,7 +176,6 @@ class LibraryPreparationKitServiceSpec extends MetadataFieldsServiceSpec<Library
         given:
         LibraryPreparationKit kit = service.create(NAME,
                 [
-                        shortDisplayName                : SHORT_DISPLAY_NAME,
                         adapterFile                     : null,
                         reverseComplementAdapterSequence: null,
                 ]
@@ -200,7 +192,6 @@ class LibraryPreparationKitServiceSpec extends MetadataFieldsServiceSpec<Library
         given:
         LibraryPreparationKit kit = service.create(NAME,
                 [
-                        shortDisplayName                : SHORT_DISPLAY_NAME,
                         adapterFile                     : null,
                         reverseComplementAdapterSequence: null,
                 ]

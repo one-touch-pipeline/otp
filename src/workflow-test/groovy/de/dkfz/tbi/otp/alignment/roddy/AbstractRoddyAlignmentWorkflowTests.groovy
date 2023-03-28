@@ -167,7 +167,6 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
 
         LibraryPreparationKit kit = new LibraryPreparationKit(
                 name: "~* xX liBrArYprEPaRaTioNkiT Xx *~",
-                shortDisplayName: "~* xX lPk Xx *~",
                 adapterFile: new File(inputRootDirectory, 'adapters/TruSeq3-PE.fa').absolutePath,
                 reverseComplementAdapterSequence: "AATGATACGGCGACCACCGAGATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT",
         ).save(flush: true)

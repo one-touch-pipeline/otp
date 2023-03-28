@@ -207,7 +207,7 @@ abstract class AbstractQaOverviewService {
                             ).toString()
                     ),
                     kit               : new TableCellValue(
-                            value: qaMap.libraryPreparationKitShortName ?: "-",
+                            value: qaMap.libraryPreparationKitName ?: "-",
                             warnColor: null,
                             link: null,
                             tooltip: qaMap.libraryPreparationKitName ?: ""

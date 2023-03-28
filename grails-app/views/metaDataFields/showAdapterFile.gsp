@@ -40,10 +40,6 @@
             <td>${libraryPreparationKit?.name}</td>
         </tr>
         <tr>
-            <td><g:message code="dataFields.libPrepKit.shortDisplayName"/></td>
-            <td>${libraryPreparationKit?.shortDisplayName}</td>
-        </tr>
-        <tr>
             <td><g:message code="dataFields.libPrepKit.reverseComplementAdapterSequenceShort"/></td>
             <td>${libraryPreparationKit?.reverseComplementAdapterSequence}</td>
         </tr>

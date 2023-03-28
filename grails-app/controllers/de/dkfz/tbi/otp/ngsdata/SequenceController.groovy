@@ -56,7 +56,7 @@ class SequenceController {
             seqTypes: seqTypes*.displayName.unique(),
             libraryLayouts: seqTypes*.libraryLayout.unique(),
             seqCenters: SeqCenter.list(sort: "name", order: "asc"),
-            libraryPreparationKits: LibraryPreparationKit.list(sort: "shortDisplayName", order: "asc").shortDisplayName,
+            libraryPreparationKits: LibraryPreparationKit.list(sort: "name", order: "asc").name,
             antibodyTargets: AntibodyTarget.list(sort: "name", order: "asc"),
             showRunLinks: securityService.hasCurrentUserAdministrativeRoles(),
             filterTree : [
@@ -77,7 +77,7 @@ class SequenceController {
                     [name: 'singleCell', msgcode: 'sequence.search.singleCell',
                      type: 'LIST', from: [true, false]],
                     [name: 'libraryPreparationKitSelection', msgcode: 'sequence.search.libPrepKit',
-                     type: 'LIST', from: LibraryPreparationKit.list(sort: "shortDisplayName", order: "asc")*.shortDisplayName],
+                     type: 'LIST', from: LibraryPreparationKit.list(sort: "name", order: "asc")],
                     [name : 'antibodyTargetSelection', msgcode: 'sequence.search.antibodyTarget',
                      type : 'LIST', from: AntibodyTarget.list(sort: "name", order: "asc"),
                      value: 'name', key: 'name'],

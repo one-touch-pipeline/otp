@@ -44,7 +44,6 @@ class LibraryPreparationKitService extends MetadataFieldsService<LibraryPreparat
                     id                              : it.id,
                     name                            : it.name,
                     legacy                          : it.legacy,
-                    shortDisplayName                : it.shortDisplayName,
                     adapterFile                     : it.adapterFile,
                     reverseComplementAdapterSequence: it.reverseComplementAdapterSequence,
                     importAliases                   : it.importAlias?.sort()?.join(MULTILINE_JOIN_STRING),
@@ -92,9 +91,9 @@ class LibraryPreparationKitService extends MetadataFieldsService<LibraryPreparat
 
     @Override
     protected void checkProperties(Map properties) {
-        assert properties.shortDisplayName: "the input shortDisplayName '${properties.shortDisplayName}' must not be null"
-        assert !CollectionUtils.atMostOneElement(LibraryPreparationKit.findAllByShortDisplayName(properties.shortDisplayName)):
-                "The shortdisplayname '${properties.shortDisplayName}' exists already"
+        properties.keySet().each { String key ->
+            assert key in ["adapterFile", "reverseComplementAdapterSequence"]: "Invalid key ${key}"
+        }
     }
 
     @Override

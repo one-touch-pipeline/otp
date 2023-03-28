@@ -159,7 +159,6 @@ class AbstractBamFileServiceIntegrationTests {
 
         LibraryPreparationKit libraryPreparationKit = new LibraryPreparationKit(
                 name: "libraryPreparationKit",
-                shortDisplayName: "libraryPreparationKit",
                 )
         assertNotNull(libraryPreparationKit.save([flush: true]))
 

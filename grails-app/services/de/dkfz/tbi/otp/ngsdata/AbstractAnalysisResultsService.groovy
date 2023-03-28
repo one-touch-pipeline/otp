@@ -84,7 +84,7 @@ abstract class AbstractAnalysisResultsService<T extends BamFilePairAnalysis> {
                             property('name', 'seqTypeName')
                         }
                         libraryPreparationKit(JoinType.LEFT_OUTER_JOIN.joinTypeValue) {
-                            property('shortDisplayName', 'libPrepKit1')
+                            property('name', 'libPrepKit1')
                         }
                     }
                     mergingWorkPackage2 {
@@ -94,7 +94,7 @@ abstract class AbstractAnalysisResultsService<T extends BamFilePairAnalysis> {
                             }
                         }
                         libraryPreparationKit(JoinType.LEFT_OUTER_JOIN.joinTypeValue) {
-                            property('shortDisplayName', 'libPrepKit2')
+                            property('name', 'libPrepKit2')
                         }
                     }
                 }
@@ -111,15 +111,14 @@ abstract class AbstractAnalysisResultsService<T extends BamFilePairAnalysis> {
             T instance = instanceClass.get(properties.instanceId)
             properties.putAll(getQcData(instance))
 
-            Collection<String> libPrepKitShortNames
+            Collection<String> libPrepKitNames
             if (SeqTypeNames.fromSeqTypeName(properties.seqTypeName)?.isWgbs()) {
                 assert properties.libPrepKit1 == null && properties.libPrepKit2 == null
-                libPrepKitShortNames = instance.containedSeqTracks*.
-                        libraryPreparationKit*.shortDisplayName
+                libPrepKitNames = instance.containedSeqTracks*.libraryPreparationKit*.name
             } else {
-                libPrepKitShortNames = [(String) properties.libPrepKit1, (String) properties.libPrepKit2]
+                libPrepKitNames = [(String) properties.libPrepKit1, (String) properties.libPrepKit2]
             }
-            properties.libPrepKits = libPrepKitShortNames.unique().collect { it ?: 'unknown' }.join(", <br>")
+            properties.libPrepKits = libPrepKitNames.unique().collect { it ?: 'unknown' }.join(", <br>")
             properties.remove('libPrepKit1')
             properties.remove('libPrepKit2')
             properties.sampleTypes = "${properties.sampleType1} \u2013 ${properties.sampleType2}"

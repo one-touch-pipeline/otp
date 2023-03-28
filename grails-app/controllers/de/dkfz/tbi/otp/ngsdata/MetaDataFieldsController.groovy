@@ -140,7 +140,6 @@ class MetaDataFieldsController implements CheckAndCall {
     JSON createLibraryPreparationKit(CreateLibraryPreparationKitCommand cmd) {
         checkErrorAndCallMethod(cmd) {
             libraryPreparationKitService.create(cmd.name, [
-                    shortDisplayName                : cmd.shortDisplayName,
                     adapterFile                     : cmd.adapterFile,
                     reverseComplementAdapterSequence: cmd.reverseComplementAdapterSequence,
             ])
@@ -290,7 +289,6 @@ class SelectLibraryPreparationKitCommand {
 
 class CreateLibraryPreparationKitCommand implements Validateable {
     String name
-    String shortDisplayName
     String adapterFile
     String reverseComplementAdapterSequence
     LibraryPreparationKitService libraryPreparationKitService
@@ -300,21 +298,12 @@ class CreateLibraryPreparationKitCommand implements Validateable {
                 return 'default.not.unique.message'
             }
         })
-        shortDisplayName(blank: false, validator: { val, obj ->
-            if (LibraryPreparationKit.findAllByShortDisplayName(val)) {
-                return 'default.not.unique.message'
-            }
-        })
         adapterFile(nullable: true, blank: false, shared: "absolutePath")
         reverseComplementAdapterSequence(nullable: true, blank: false)
     }
 
     void setName(String name) {
         this.name = StringUtils.trimAndShortenWhitespace(name)
-    }
-
-    void setShortDisplayName(String shortDisplayName) {
-        this.shortDisplayName = StringUtils.trimAndShortenWhitespace(shortDisplayName)
     }
 
     void setAdapterFile(String adapterFile) {

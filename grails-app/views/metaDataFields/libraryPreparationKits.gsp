@@ -43,7 +43,6 @@
         <thead>
         <tr>
             <th class="export_column"><g:message code="dataFields.libPrepKit.name"/></th>
-            <th class="export_column"><g:message code="dataFields.libPrepKit.shortDisplayName"/></th>
             <th class="export_column"><g:message code="dataFields.libPrepKit.importAlias"/></th>
             <th></th>
             <th class="export_column"><g:message code="dataFields.libPrepKit.adapterFile"/></th>
@@ -63,7 +62,6 @@
                 <tr>
             </g:else>
                 <td>${libraryPreparationKit.name}</td>
-                <td>${libraryPreparationKit.shortDisplayName}</td>
                 <td><span class="keep-whitespace">${libraryPreparationKit.importAliases}</span></td>
                 <td>
                     <otp:editorSwitchNewValues
@@ -127,11 +125,10 @@
             roles="ROLE_OPERATOR"
             labels="${[
                     g.message(code: "dataFields.libPrepKit.name"),
-                    g.message(code: "dataFields.libPrepKit.shortDisplayName"),
                     g.message(code: "dataFields.libPrepKit.adapterFile"),
                     g.message(code: "dataFields.libPrepKit.reverseComplementAdapterSequenceShort"),
             ]}"
-            textFields="${["name", "shortDisplayName", "adapterFile", "reverseComplementAdapterSequence"]}"
+            textFields="${["name", "adapterFile", "reverseComplementAdapterSequence"]}"
             link="${g.createLink(controller: 'metaDataFields', action: 'createLibraryPreparationKit')}"/>
     <br><br>
 </div>

@@ -146,7 +146,6 @@ trait DomainFactoryCore implements DomainFactoryHelper {
     LibraryPreparationKit findOrCreateLibraryPreparationKit(Map<String, ?> requiredSearchProperties, Map<String, ?> additionalCreationProperties=[:]) {
         return findOrCreateDomainObject(LibraryPreparationKit, requiredSearchProperties, [
                 name            : "library-preperation-kit-name_${nextId}",
-                shortDisplayName: "library-preperation-kit-short-name_${nextId}",
                 importAlias     : [],
         ], additionalCreationProperties)
     }
@@ -154,7 +153,6 @@ trait DomainFactoryCore implements DomainFactoryHelper {
     LibraryPreparationKit createLibraryPreparationKit(Map properties = [:]) {
         return createDomainObject(LibraryPreparationKit, [
                 name            : "library-preperation-kit-name_${nextId}",
-                shortDisplayName: "library-preperation-kit-short-name_${nextId}",
                 importAlias     : [],
         ], properties)
     }

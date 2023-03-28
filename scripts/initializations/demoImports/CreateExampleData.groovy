@@ -579,7 +579,6 @@ class ExampleData {
     LibraryPreparationKit findOrCreateLibraryPreparationKit() {
         return LibraryPreparationKit.last() ?: new LibraryPreparationKit([
                 name            : "ExampleLibPrep",
-                shortDisplayName: "ExampleLibPrep",
         ]).save(flush: true)
     }
 

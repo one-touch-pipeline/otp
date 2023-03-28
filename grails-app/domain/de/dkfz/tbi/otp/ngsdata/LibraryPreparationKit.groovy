@@ -35,8 +35,6 @@ import de.dkfz.tbi.otp.utils.MetadataField
 @ManagedEntity
 class LibraryPreparationKit implements Entity, MetadataField {
 
-    String shortDisplayName
-
     String adapterFile
 
     // used for RNA workflow
@@ -52,7 +50,6 @@ class LibraryPreparationKit implements Entity, MetadataField {
          * example: 'Agilent SureSelect V4+UTRs'
          */
         name(unique: true, blank: false)
-        shortDisplayName(unique: true, blank: false)
         adapterFile nullable: true, blank: false, shared: "absolutePath"
         reverseComplementAdapterSequence nullable: true, blank: false
     }
