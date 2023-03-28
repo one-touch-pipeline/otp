@@ -43,7 +43,7 @@ class ScriptBuilderSpec extends Specification implements DataTest, RoddyPancanFa
     @TempDir
     Path tempDir
 
-    ScriptBuilder builder = new ScriptBuilder(null, null, null)
+    ScriptBuilder builder = new ScriptBuilder(null, null, null, null)
 
     void "addMetaInfo, should add new list entry in metaInformation"() {
         when:

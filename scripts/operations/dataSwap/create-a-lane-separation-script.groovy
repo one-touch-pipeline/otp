@@ -28,6 +28,8 @@ import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
 
+import java.nio.file.Paths
+
 ConfigService configService = ctx.configService
 FileService fileService = ctx.fileService
 FileSystemService fileSystemService = ctx.fileSystemService
@@ -62,7 +64,7 @@ Map<String, String> swapMap = [
 List<String> files = []
 
 Closure<ScriptBuilder> createSamplesAndSampleTypesCreationScript = { List<String> sampleNames ->
-    ScriptBuilder builder = new ScriptBuilder(configService, fileService, fileSystemService)
+    ScriptBuilder builder = new ScriptBuilder(configService, fileService, fileSystemService, Paths.get('sample_swap', swapLabel))
 
     builder.addMetaInfo("Objects to be created:")
 
@@ -108,7 +110,7 @@ Closure<ScriptBuilder> createSamplesAndSampleTypesCreationScript = { List<String
 
 int counter = 1
 Closure<ScriptBuilder> createSwapScript = { String swapLabel ->
-    ScriptBuilder builder = new ScriptBuilder(configService, fileService, fileSystemService)
+    ScriptBuilder builder = new ScriptBuilder(configService, fileService, fileSystemService, Paths.get('sample_swap', swapLabel))
 
     builder.addGroovyCommand(Snippets.databaseFixingHeader(swapLabel))
 

@@ -27,7 +27,9 @@ import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.otp.utils.CollectionUtils
+
+import java.nio.file.Paths
 
 ConfigService configService = ctx.configService
 FileService fileService = ctx.fileService
@@ -158,7 +160,7 @@ Closure<Integer> newSampleSwapScript = { ScriptBuilder builder, Project newProje
 
 Closure<ScriptBuilder> createScripts = { String swapLabel ->
     // buffers for all the changes we are preparing
-    ScriptBuilder builder = new ScriptBuilder(configService, fileService, fileSystemService)
+    ScriptBuilder builder = new ScriptBuilder(configService, fileService, fileSystemService, Paths.get('sample_swap', swapLabel))
 
     Set<String> createdPids = [] as Set
     Set<String> createdSamples = [] as Set

@@ -38,11 +38,13 @@ class ScriptBuilder {
     List<String> groovyCommands = []
     List<String> bashCommands = []
     boolean containsChanges = false
+    Path relativeOutputDir = null
 
-    ScriptBuilder(ConfigService configService, FileService fileService, FileSystemService fileSystemService) {
+    ScriptBuilder(ConfigService configService, FileService fileService, FileSystemService fileSystemService, Path relativeOutputDir) {
         this.configService = configService
         this.fileService = fileService
         this.fileSystemService = fileSystemService
+        this.relativeOutputDir = relativeOutputDir
     }
 
     ScriptBuilder addMetaInfo(String info) {
@@ -134,7 +136,7 @@ class ScriptBuilder {
     private void writeBashScriptToFileSystem(String filename, String content) {
         Realm realm = configService.getDefaultRealm() // codenarc-disable-line
         FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
-        Path outDir = fileService.toPath(configService.scriptOutputPath, fileSystem).resolve('meta-swap')
+        Path outDir = fileService.toPath(configService.scriptOutputPath, fileSystem).resolve(this.relativeOutputDir.toString())
 
         try {
             Path bashScriptPath = fileService.createOrOverwriteScriptOutputFile(outDir, filename, realm)

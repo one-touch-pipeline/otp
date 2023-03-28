@@ -27,6 +27,8 @@ import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 
+import java.nio.file.Paths
+
 ConfigService configService = ctx.configService
 FileService fileService = ctx.fileService
 FileSystemService fileSystemService = ctx.fileSystemService
@@ -93,7 +95,7 @@ def adaptValues = { SeqTrack oldSeqTrack ->
 //------------------------------
 
 int counter = 1
-ScriptBuilder builder = new ScriptBuilder(configService, fileService, fileSystemService)
+ScriptBuilder builder = new ScriptBuilder(configService, fileService, fileSystemService, Paths.get('sample_swap', swapLabel))
 List<String> all_swaps = []
 
 builder.addGroovyCommand("""
