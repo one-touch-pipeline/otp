@@ -25,7 +25,6 @@ import grails.gorm.hibernate.annotation.ManagedEntity
 import io.swagger.client.wes.model.State
 
 import de.dkfz.tbi.otp.utils.Entity
-import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 @ManagedEntity
 class WesRunLog implements Entity {
@@ -34,7 +33,6 @@ class WesRunLog implements Entity {
     WesLog runLog
     List<WesLog> taskLogs
     String runRequest
-    WorkflowStep workflowStep
 
     static constraints = {
         runRequest nullable: true

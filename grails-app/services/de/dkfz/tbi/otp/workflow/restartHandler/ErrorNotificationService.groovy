@@ -31,6 +31,7 @@ import de.dkfz.tbi.otp.tracking.OtrsTicketService
 import de.dkfz.tbi.otp.utils.MailHelperService
 import de.dkfz.tbi.otp.utils.StackTraceUtils
 import de.dkfz.tbi.otp.workflowExecution.*
+import de.dkfz.tbi.otp.workflowExecution.wes.WesRun
 import de.dkfz.tbi.util.TimeFormats
 
 import java.time.LocalDateTime
@@ -240,9 +241,19 @@ class ErrorNotificationService {
             message << "None"
         }
 
-        message << header("WES job")
-        if (workflowStep.wesIdentifier) {
-            message << "ID: ${workflowStep.wesIdentifier}"
+        message << header("WES jobs")
+        if (prevRunningWorkflowStep?.wesRuns) {
+            prevRunningWorkflowStep.wesRuns.sort { it.id }.each { WesRun wesRun ->
+                message << "ID: ${wesRun.wesIdentifier}"
+                message << "State: ${wesRun.state}"
+                message << "SubPath: ${wesRun.subPath}"
+                message << "Start time: ${TimeFormats.DATE_TIME.getFormattedZonedDateTime((ZonedDateTime) wesRun.wesRunLog?.runLog?.startTime)}"
+                message << "End time: ${TimeFormats.DATE_TIME.getFormattedZonedDateTime((ZonedDateTime) wesRun.wesRunLog?.runLog?.endTime)}"
+                message << "Log file command: ${wesRun.wesRunLog.runLog.cmd}"
+                message << "Stdout: ${wesRun.wesRunLog.runLog.stdout}"
+                message << "Stderr: ${wesRun.wesRunLog.runLog.stderr}"
+                message << ""
+            }
         } else {
             message << "None"
         }

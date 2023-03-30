@@ -56,4 +56,6 @@ databaseChangeLog = {
     include file: 'changelogs/2023/otp-474-legacy.groovy'
 
     include file: 'changelogs/2023/otp-1997.groovy'
+
+    include file: 'changelogs/2023/otp-2013-wes-run.groovy'
 }

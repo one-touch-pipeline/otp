@@ -30,6 +30,7 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.Entity
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowError
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowLog
+import de.dkfz.tbi.otp.workflowExecution.wes.WesRun
 
 @ManagedEntity
 class WorkflowStep implements Commentable, Entity {
@@ -49,8 +50,6 @@ class WorkflowStep implements Commentable, Entity {
 
     String beanName
 
-    String wesIdentifier
-
     State state
 
     WorkflowError workflowError
@@ -63,16 +62,18 @@ class WorkflowStep implements Commentable, Entity {
 
     Set<ClusterJob> clusterJobs = [] as Set
 
+    Set<WesRun> wesRuns = [] as Set
+
     static belongsTo = [
             workflowRun: WorkflowRun
     ]
 
     static hasMany = [
             clusterJobs: ClusterJob,
+            wesRuns: WesRun,
     ]
 
     static constraints = {
-        wesIdentifier nullable: true
         workflowError nullable: true, validator: { val, obj ->
             if ((obj.state == State.FAILED) ^ (val != null)) {
                 return false

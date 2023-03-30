@@ -33,6 +33,7 @@ import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.ClusterJobService
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.otp.workflowExecution.wes.WesRun
 import de.dkfz.tbi.util.TimeFormats
 import de.dkfz.tbi.util.TimeUtils
 
@@ -290,8 +291,9 @@ class WorkflowRunService {
     List<Map<String, Object>> workflowRunDetails(WorkflowRun workflowRun) {
         List<WorkflowStep> workflowSteps = workflowRun.workflowSteps.reverse()
 
-        return workflowSteps.collect { step ->
+        return workflowSteps.collect { WorkflowStep step ->
             List<ClusterJob> clusterJobs = (step.clusterJobs as List<ClusterJob>).sort { it.dateCreated }
+            List<WesRun> wesRuns = (step.wesRuns as List<WesRun>).sort { it.dateCreated }
 
             return [
                     state                     : step.state,
@@ -302,23 +304,40 @@ class WorkflowRunService {
                     duration                  : TimeUtils.getFormattedDuration(convertDateToLocalDateTime(step.dateCreated),
                             convertDateToLocalDateTime(step.lastUpdated)),
                     error                     : step.workflowError,
-                    clusterJobs               : clusterJobs.collect { ClusterJob clusterJob ->
-                        [
-                                state   : mapCheckStatusAndExitStatusToState(clusterJob.checkStatus, clusterJob.exitStatus),
-                                id      : clusterJob.id,
-                                name    : clusterJob.clusterJobName,
-                                jobId   : clusterJob.clusterJobId,
-                                hasLog  : clusterJobService.doesClusterJobLogExist(clusterJob),
-                                node    : clusterJob.node ?: "-",
-                                wallTime: clusterJob.elapsedWalltimeAsHhMmSs,
-                                exitCode: clusterJob.exitCode ?: "-",
-                        ]
-                    },
+                    clusterJobs               : collectClusterJobDetails(clusterJobs),
                     cummulatedClusterJobsState: getCumulatedClusterJobsStatus(clusterJobs.collect { new ClusterJobStateDto(it.checkStatus, it.exitStatus) }),
-                    wes                       : step.wesIdentifier,
+                    wesRuns                   : collectWesRunDetails(wesRuns),
                     hasLogs                   : !step.logs.empty,
                     obsolete                  : step.obsolete,
                     previousStepId            : workflowStepService.getPreviousRunningWorkflowStep(step)?.id,
+            ]
+        }
+    }
+
+    private List<Map<String, Object>> collectClusterJobDetails(List<ClusterJob> clusterJobs) {
+        return clusterJobs.collect { ClusterJob clusterJob ->
+            [
+                    state   : mapCheckStatusAndExitStatusToState(clusterJob.checkStatus, clusterJob.exitStatus),
+                    id      : clusterJob.id,
+                    name    : clusterJob.clusterJobName,
+                    jobId   : clusterJob.clusterJobId,
+                    hasLog  : clusterJobService.doesClusterJobLogExist(clusterJob),
+                    node    : clusterJob.node ?: "-",
+                    wallTime: clusterJob.elapsedWalltimeAsHhMmSs,
+                    exitCode: clusterJob.exitCode ?: "-",
+            ]
+        }
+    }
+
+    private List<Map<String, Object>> collectWesRunDetails(List<WesRun> wesRuns) {
+        return wesRuns.collect { WesRun wesRun ->
+            [
+                    id           : wesRun.id,
+                    wesIdentifier: wesRun.wesIdentifier,
+                    state        : wesRun.state,
+                    subPath      : wesRun.subPath,
+                    logName      : wesRun.wesRunLog?.runLog?.name,
+                    exitCode     : wesRun.wesRunLog?.runLog?.exitCode ?: "-",
             ]
         }
     }
