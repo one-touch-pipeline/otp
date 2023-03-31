@@ -22,8 +22,12 @@
 package de.dkfz.tbi.otp.security.user.identityProvider
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
+import groovy.transform.CompileStatic
+import groovy.transform.ToString
 import org.apache.commons.lang.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.core.ParameterizedTypeReference
 import org.springframework.security.oauth2.client.web.reactive.function.client.ServerOAuth2AuthorizedClientExchangeFilterFunction
 import org.springframework.web.reactive.function.client.WebClient
 
@@ -33,6 +37,7 @@ import de.dkfz.tbi.otp.security.user.identityProvider.data.IdpUserDetails
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.util.ldap.UserAccountControl
 
+@CompileStatic
 @Transactional
 class KeycloakService implements IdentityProvider {
 
@@ -46,35 +51,23 @@ class KeycloakService implements IdentityProvider {
 
     @Override
     IdpUserDetails getIdpUserDetailsByUsername(String username) {
-        return castKeycloakUserIntoIdpUserDetails(getKeycloakUserByExactUsername(username))
+        return castKeycloakUserIntoIdpUserDetails(fetchKeycloakUserByExactUsername(username))
     }
 
     @Override
     List<IdpUserDetails> getIdpUserDetailsByUserList(List<User> otpUsers) {
         String requestUrl = "$apiBaseUrl/${configService.keycloakRealm}/users?max=1000000"
-        List<KeycloakUser> keycloakUsers = webClient
-                .get()
-                .uri(requestUrl)
-                .attributes(ServerOAuth2AuthorizedClientExchangeFilterFunction.clientRegistrationId(CLIENT_REGISTRATION_ID))
-                .retrieve()
-                .bodyToMono(KeycloakUser[].class)
-                .block()
+        List<KeycloakUser> keycloakUsers = this.<KeycloakUser>getFromKeycloakApi(requestUrl, keycloakUserTypeReference)
         List<String> otpUsernames = otpUsers*.username
         keycloakUsers.removeAll { !otpUsernames.contains(it.username) }
-        return castKeycloakUsersIntoIdpUserDetails(keycloakUsers)
+        return this.castKeycloakUsersIntoIdpUserDetails(keycloakUsers)
     }
 
     @Override
     List<IdpUserDetails> getListOfIdpUserDetailsBySearchString(String searchString) {
         String requestUrl = "$apiBaseUrl/${configService.keycloakRealm}/users?search=$searchString"
-        List<KeycloakUser> keycloakUsers = webClient
-                .get()
-                .uri(requestUrl)
-                .attributes(ServerOAuth2AuthorizedClientExchangeFilterFunction.clientRegistrationId(CLIENT_REGISTRATION_ID))
-                .retrieve()
-                .bodyToMono(KeycloakUser[].class)
-                .block()
-        return castKeycloakUsersIntoIdpUserDetails(keycloakUsers)
+        List<KeycloakUser> keycloakUsers = this.<KeycloakUser>getFromKeycloakApi(requestUrl, keycloakUserTypeReference)
+        return this.castKeycloakUsersIntoIdpUserDetails(keycloakUsers)
     }
 
     private String getGroupIdByGroupName(String groupName) {
@@ -83,13 +76,7 @@ class KeycloakService implements IdentityProvider {
         }
 
         String requestUrl = "$apiBaseUrl/${configService.keycloakRealm}/groups?search=$groupName"
-        List<KeycloakGroup> keycloakGroups = webClient
-                .get()
-                .uri(requestUrl)
-                .attributes(ServerOAuth2AuthorizedClientExchangeFilterFunction.clientRegistrationId(CLIENT_REGISTRATION_ID))
-                .retrieve()
-                .bodyToMono(KeycloakGroup[].class)
-                .block()
+        List<KeycloakGroup> keycloakGroups = this.<KeycloakGroup>getFromKeycloakApi(requestUrl, keycloakGroupTypeReference)
         return keycloakGroups ? CollectionUtils.atMostOneElement(keycloakGroups).id : ""
     }
 
@@ -99,13 +86,7 @@ class KeycloakService implements IdentityProvider {
         }
 
         String requestUrl = "$apiBaseUrl/${configService.keycloakRealm}/groups/$groupId/members"
-        List<KeycloakUser> keycloakUsersInGroup = webClient
-                .get()
-                .uri(requestUrl)
-                .attributes(ServerOAuth2AuthorizedClientExchangeFilterFunction.clientRegistrationId(CLIENT_REGISTRATION_ID))
-                .retrieve()
-                .bodyToMono(KeycloakUser[].class)
-                .block()
+        List<KeycloakUser> keycloakUsersInGroup = this.<KeycloakUser>getFromKeycloakApi(requestUrl, keycloakUserTypeReference)
         return keycloakUsersInGroup*.username
     }
 
@@ -126,7 +107,7 @@ class KeycloakService implements IdentityProvider {
             return false
         }
         try {
-            getKeycloakUserByExactUsername(user.username)
+            fetchKeycloakUserByExactUsername(user.username)
             return true
         } catch (NoSuchElementException e) {
             return false
@@ -135,8 +116,8 @@ class KeycloakService implements IdentityProvider {
 
     @Override
     Map<String, String> getAllUserAttributes(User user) {
-        KeycloakUser keycloakUser = getKeycloakUserByExactUsername(user.username)
-        return keycloakUser.attributes.properties + keycloakUser.properties.findAll { it.key != "attributes" }
+        KeycloakUser keycloakUser = fetchKeycloakUserByExactUsername(user.username)
+        return keycloakUser.attributes.properties + keycloakUser.properties.findAll { it.key != "attributes" } as Map<String, String>
     }
 
     @Override
@@ -155,7 +136,7 @@ class KeycloakService implements IdentityProvider {
 
     @Override
     Integer getUserAccountControlOfUser(User user) {
-        return getKeycloakUserByExactUsername(user.username).attributes.userAccountControl.first()
+        return fetchKeycloakUserByExactUsername(user.username).attributes.userAccountControl.first()
     }
 
     @Override
@@ -173,17 +154,28 @@ class KeycloakService implements IdentityProvider {
         return "${configService.keycloakServer}/admin/realms"
     }
 
-    private KeycloakUser getKeycloakUserByExactUsername(String username) {
+    private KeycloakUser fetchKeycloakUserByExactUsername(String username) {
         String requestUrl = "$apiBaseUrl/${configService.keycloakRealm}/users?username=$username&exact=true"
-        KeycloakUser keycloakUser = webClient
-                .get()
+        List<KeycloakUser> users = this.<KeycloakUser>getFromKeycloakApi(requestUrl, keycloakUserTypeReference)
+        return users.size() > 0 ? users.first() : null
+    }
+
+    @CompileDynamic
+    private <T> List<T> getFromKeycloakApi(String requestUrl, ParameterizedTypeReference typeRef) {
+        return webClient.get()
                 .uri(requestUrl)
                 .attributes(ServerOAuth2AuthorizedClientExchangeFilterFunction.clientRegistrationId(CLIENT_REGISTRATION_ID))
                 .retrieve()
-                .bodyToMono(KeycloakUser[].class)
-                .block()
-                .first()
-        return keycloakUser
+                .bodyToMono(typeRef)
+                .block() as List<T>
+    }
+
+    private ParameterizedTypeReference getKeycloakUserTypeReference() {
+        new ParameterizedTypeReference<List<KeycloakUser>>() { }
+    }
+
+    private ParameterizedTypeReference getKeycloakGroupTypeReference() {
+        new ParameterizedTypeReference<List<KeycloakGroup>>() { }
     }
 
     private List<IdpUserDetails> castKeycloakUsersIntoIdpUserDetails(List<KeycloakUser> keycloakUsers) {
@@ -193,7 +185,7 @@ class KeycloakService implements IdentityProvider {
     private IdpUserDetails castKeycloakUserIntoIdpUserDetails(KeycloakUser keycloakUser) {
         return new IdpUserDetails([
                 username         : keycloakUser.username,
-                realName         : "$keycloakUser.firstName $keycloakUser.lastName",
+                realName         : "${keycloakUser.firstName} ${keycloakUser.lastName}",
                 mail             : keycloakUser.email,
                 department       : keycloakUser.attributes.department.first(),
                 thumbnailPhoto   : keycloakUser.attributes.thumbnailPhoto.first().bytes,
@@ -203,6 +195,7 @@ class KeycloakService implements IdentityProvider {
     }
 }
 
+@ToString
 class KeycloakUser {
     String id
     String username
@@ -221,6 +214,7 @@ class KeycloakUser {
     Object access
 }
 
+@ToString
 class KeycloakGroup {
     String id
     String name
@@ -228,6 +222,7 @@ class KeycloakGroup {
     List<KeycloakGroup> subGroups
 }
 
+@ToString
 @SuppressWarnings("PropertyName")
 class KeycloakUserAttributes {
     List<String> LDAP_ENTRY_DN
