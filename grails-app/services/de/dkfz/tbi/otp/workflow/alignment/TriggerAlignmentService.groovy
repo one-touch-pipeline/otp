@@ -31,7 +31,6 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.tracking.OtrsTicketService
 import de.dkfz.tbi.otp.withdraw.RoddyBamFileWithdrawService
-import de.dkfz.tbi.otp.workflow.panCancer.PanCancerWorkflow
 import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.otp.workflowExecution.decider.AllDecider
 
@@ -44,6 +43,7 @@ class TriggerAlignmentService {
     AllDecider allDecider
     RoddyBamFileWithdrawService roddyBamFileWithdrawService
     MergingCriteriaService mergingCriteriaService
+    WorkflowService workflowService
 
     @Transactional(readOnly = false)
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
@@ -93,7 +93,7 @@ class TriggerAlignmentService {
             ]
         }.findAll {
             !WorkflowVersionSelector.findAllByProjectAndSeqTypeAndDeprecationDateIsNull(it.key[0], it.key[1]).findAll {
-                isAlignmentWorkflow(it.workflowVersion.workflow)
+                workflowService.isAlignment(it.workflowVersion.workflow)
             }
         }.collect {
             [
@@ -301,9 +301,5 @@ class TriggerAlignmentService {
                     it.sampleType,
             ]
         }
-    }
-
-    private boolean isAlignmentWorkflow(Workflow workflow) {
-        return workflow.name == PanCancerWorkflow.WORKFLOW
     }
 }

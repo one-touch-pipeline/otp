@@ -181,4 +181,11 @@ class WorkflowService {
 
         return workflow
     }
+
+    /**
+     * returns if a given workflow is an alignment workflow
+     */
+    boolean isAlignment(Workflow workflow) {
+        return otpWorkflowService.lookupOtpWorkflowBean(workflow).isAlignment()
+    }
 }

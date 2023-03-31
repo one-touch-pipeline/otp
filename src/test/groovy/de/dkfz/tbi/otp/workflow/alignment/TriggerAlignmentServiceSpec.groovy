@@ -257,6 +257,9 @@ class TriggerAlignmentServiceSpec extends HibernateSpec implements ServiceUnitTe
             ]
             0 * _
         }
+        service.workflowService = Mock(WorkflowService) {
+            2 * isAlignment(_) >> true
+        }
 
         List<Map<String, String>> expected = [
                 [
