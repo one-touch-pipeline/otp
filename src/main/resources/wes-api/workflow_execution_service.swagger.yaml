@@ -1,15 +1,28 @@
-basePath: '/ga4gh/wes/v1'
+#https://swagger.io/docs/specification/2-0/authentication/
+#https://github.com/OAI/OpenAPI-Specification/blob/main/versions/2.0.md
+
 swagger: '2.0'
-host: localhost
 info:
   title: Workflow Execution Service
   version: 1.0.0
+
 schemes:
   - https
+host: localhost
+basePath: '/ga4gh/wes/v1'
+
 consumes:
   - application/json
 produces:
   - application/json
+
+securityDefinitions:
+  OAuth2:
+    type: oauth2
+    flow: accessCode
+security:
+  - OAuth2: [read, write]
+
 paths:
   /service-info:
     get:
