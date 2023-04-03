@@ -50,7 +50,7 @@ const login = (username, password) => {
             .click();
         }
       });
-  }, validate);
+  }, { cacheAcrossSpecs: true, validate });
 };
 
 Cypress.Commands.add('loginAsUser', () => {
