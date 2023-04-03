@@ -222,8 +222,20 @@ class ConfigService implements ApplicationContextAware {
         return otpProperties.get(OtpProperty.CONFIG_DICOM_INSTANCE_NAME)
     }
 
+    String getWesUrl() {
+        return otpProperties.get(OtpProperty.WES_URL)
+    }
+
     String getWesAuthBaseUrl() {
         return otpProperties.get(OtpProperty.WES_AUTH_BASE_URL)
+    }
+
+    String getWesAuthClientUser() {
+        return otpProperties.get(OtpProperty.WES_AUTH_CLIENT_USER)
+    }
+
+    String getWesAuthClientPassword() {
+        return otpProperties.get(OtpProperty.WES_AUTH_CLIENT_PASSWORD)
     }
 
     String getWesAuthClientId() {

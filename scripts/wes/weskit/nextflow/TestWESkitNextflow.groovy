@@ -20,36 +20,24 @@
  * SOFTWARE.
  */
 
-
-/**
- * script to check connection to weskit
- *
- * for setup weskit: see https://gitlab.com/one-touch-pipeline/otp-wes-config
- */
-
 import io.swagger.client.wes.api.WorkflowExecutionServiceApi
 import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.web.client.HttpStatusCodeException
 import reactor.core.publisher.Mono
 
-/**
- * access token from keycloak to access weskit
- */
-String token = ""
+import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.workflowExecution.wes.WeskitAuthService
 
 /**
- * weskit host
+ * script to check connection to weskit directly.
+ *
+ * The access token is fetched via {@link WeskitAuthService}
+ *
+ * for setup weskit: see https://gitlab.com/one-touch-pipeline/otp-wes-config
  */
-String host = ""
 
-/**
- * protocol to use, either https or http
- */
-String protocol = ""
-/**
- * port to use, usually 443
- */
-String port = ""
+//-------------------
+//input
 
 /**
  * path where the test data are located
@@ -63,16 +51,17 @@ String TEST_OUTPUT_EXTERN = ""
 //-------------------
 //work
 
-assert token
-assert host
-assert protocol
-assert port
 assert TEST_INPUT_EXTERN
 assert TEST_OUTPUT_EXTERN
 
+String uuid = "24d5d211-234b-4b24-8d8b-70ae7b1b19b0"
+
+ConfigService configService = ctx.configService
+WeskitAuthService weskitAuthService = ctx.weskitAuthService
+
 WorkflowExecutionServiceApi apiInstance = new WorkflowExecutionServiceApi();
-apiInstance.apiClient.basePath = "${protocol}://${host}:${port}/ga4gh/wes/v1"
-apiInstance.apiClient.accessToken = token
+apiInstance.apiClient.basePath = configService.wesUrl
+apiInstance.apiClient.accessToken = weskitAuthService.requestWeskitAccessToken()
 
 def work = { String message, Closure cl ->
     try {
@@ -99,14 +88,15 @@ body: ${e.responseBodyAsString}
 
 work('serviceinfo') { apiInstance.serviceInfo }
 work('list') { apiInstance.listRuns(10, null) }
-work('run state') { apiInstance.getRunStatus('24d5d211-234b-4b24-8d8b-70ae7b1b19b0') }
-work('run log') { apiInstance.getRunLog('24d5d211-234b-4b24-8d8b-70ae7b1b19b0') }
+work('run state') { apiInstance.getRunStatus(uuid) }
+work('run log') { apiInstance.getRunLog(uuid) }
 
-work('post') {
+work('runWorkflow') {
     String workflowParams = """
 {
-    "input" : "'$TEST_INPUT_EXTERN'/run1_gerald_D1VCPACXX_1_R1.sorted.fastq.tar.bz2,'$TEST_INPUT_EXTERN'/run1_gerald_D1VCPACXX_1_R1.sorted.fastq.gz", 
-    "outputDir" : "'$TEST_OUTPUT_EXTERN'" }
+    "input" : "$TEST_INPUT_EXTERN/run1_gerald_D1VCPACXX_1_R1.sorted.fastq.tar.bz2,$TEST_INPUT_EXTERN/run1_gerald_D1VCPACXX_1_R1.sorted.fastq.gz", 
+    "outputDir" : "$TEST_OUTPUT_EXTERN" 
+}
 """
     String workflowType = "NFL"
     String workflowTypeVersion = "22.10.0"

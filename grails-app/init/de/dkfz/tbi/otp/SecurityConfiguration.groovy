@@ -51,6 +51,7 @@ import org.springframework.web.reactive.function.client.WebClient
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.security.user.identityProvider.*
+import de.dkfz.tbi.otp.workflowExecution.wes.WeskitAuthService
 
 import javax.servlet.ServletException
 import javax.servlet.http.HttpServletRequest
@@ -248,7 +249,7 @@ class SecurityConfiguration {
                 .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
                 .build()
         ClientRegistration wesRegistration = ClientRegistration
-                .withRegistrationId("wes")
+                .withRegistrationId(WeskitAuthService.CLIENT_REGISTRATION_ID)
                 .tokenUri(configService.wesAuthBaseUrl)
                 .clientId(configService.wesAuthClientId)
                 .clientSecret(configService.wesAuthClientSecret)

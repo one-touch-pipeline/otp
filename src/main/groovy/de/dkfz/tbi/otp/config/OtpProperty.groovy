@@ -80,10 +80,33 @@ enum OtpProperty {
     CONFIG_EMAIL_USERNAME('otp.mail.username', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.PRODUCTION), ''),
     CONFIG_EMAIL_PASSWORD('otp.mail.password', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.PRODUCTION), ''),
 
-    WES_AUTH_BASE_URL('otp.wes.auth.baseUrl', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.PRODUCTION, UsedIn.WORKFLOW_TEST, UsedIn.DEVELOPMENT)),
-    WES_AUTH_CLIENT_ID('otp.wes.auth.clientId', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.PRODUCTION, UsedIn.WORKFLOW_TEST, UsedIn.DEVELOPMENT)),
+    /**
+     * The url of the wes server, for example: https://localhost:443/ga4gh/wes/v1
+     */
+    WES_URL('otp.wes.url', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT, UsedIn.WORKFLOW_TEST)),
+    /**
+     * Base URL of the authentication Endpoint (Example: http://keycloak-server:8080/auth/realms/WESkit/protocol/openid-connect/token)
+     */
+    WES_AUTH_BASE_URL('otp.wes.auth.baseUrl', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT, UsedIn.WORKFLOW_TEST)),
+    /**
+     * oAuth2 client_id of the otp user on the oAuth2 server used for the wes authentication
+     */
+    WES_AUTH_CLIENT_ID('otp.wes.auth.clientId', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT, UsedIn.WORKFLOW_TEST)),
+    /**
+     * oAuth2 client_secret of the otp user on the oAuth2 server used for the wes authentication
+     */
     WES_AUTH_CLIENT_SECRET('otp.wes.auth.clientSecret', TypeValidators.SINGLE_WORD_TEXT,
-            EnumSet.of(UsedIn.PRODUCTION, UsedIn.WORKFLOW_TEST, UsedIn.DEVELOPMENT)),
+            EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT, UsedIn.WORKFLOW_TEST)),
+    /**
+     * oAuth2 user name of the otp user on the oAuth2 server used for the wes authentication
+     */
+    WES_AUTH_CLIENT_USER('otp.wes.auth.clientUser', TypeValidators.SINGLE_WORD_TEXT,
+            EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT, UsedIn.WORKFLOW_TEST)),
+    /**
+     * oAuth2 password of the otp user on the oAuth2 server used for the wes authentication
+     */
+    WES_AUTH_CLIENT_PASSWORD('otp.wes.auth.clientPassword', TypeValidators.SINGLE_WORD_TEXT,
+            EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT, UsedIn.WORKFLOW_TEST)),
 
     CONFIG_JOB_SYSTEM_START('otp.jobsystem.start', TypeValidators.BOOLEAN, EnumSet.of(UsedIn.PRODUCTION), 'false'),
     CONFIG_SERVER_URL('otp.server.url', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.PRODUCTION)),

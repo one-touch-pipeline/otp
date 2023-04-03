@@ -61,7 +61,7 @@ class PropertiesValidationService {
         }
 
         if (!errorList.isEmpty()) {
-            throw new OtpException("Configuration is invalid: ${errorList*.toString().join("\n")}")
+            throw new OtpException("Configuration is invalid:\n${errorList*.toString().join("\n")}")
         }
     }
 

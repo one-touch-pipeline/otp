@@ -26,8 +26,7 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.ApplicationContext
 
 import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.config.ConfigService
-import de.dkfz.tbi.otp.config.OtpProperty
+import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.LocalShellHelper
 
@@ -56,27 +55,7 @@ class TestConfigService extends ConfigService {
          */
         if (Environment.current.name == "WORKFLOW_TEST") {
             otpProperties = otpProperties.findAll {
-                it.key in [
-                        OtpProperty.SSH_AUTH_METHOD,
-                        OtpProperty.SSH_KEY_FILE,
-                        OtpProperty.SSH_PASSWORD,
-
-                        OtpProperty.PATH_TOOLS,
-                        OtpProperty.PATH_RODDY,
-
-                        OtpProperty.TEST_WORKFLOW_ACCOUNT,
-                        OtpProperty.TEST_WORKFLOW_HOST,
-                        OtpProperty.TEST_WORKFLOW_SCHEDULER,
-                        OtpProperty.TEST_WORKFLOW_INPUT_DIR,
-                        OtpProperty.TEST_WORKFLOW_RESULT_DIR,
-                        OtpProperty.TEST_TESTING_GROUP,
-                        OtpProperty.TEST_TESTING_PROJECT_UNIX_GROUP,
-                        OtpProperty.TEST_WORKFLOW_RODDY_SHARED_FILES_BASE_DIRECTORY,
-                        OtpProperty.TEST_WORKFLOW_QUEUE,
-                        OtpProperty.TEST_WORKFLOW_CONFIG_SUFFIX,
-                        OtpProperty.TEST_WORKFLOW_FASTTRACK_QUEUE,
-                        OtpProperty.TEST_WORKFLOW_FASTTRACK_CONFIG_SUFFIX,
-                ]
+                it.key.usedIn.contains(UsedIn.WORKFLOW_TEST)
             }
         } else {
             otpProperties = otpProperties.findAll {
@@ -86,6 +65,14 @@ class TestConfigService extends ConfigService {
                         OtpProperty.PATH_JOB_LOGS,
                 ]
             }
+            otpProperties += [
+                    (OtpProperty.WES_URL)                 : '-',
+                    (OtpProperty.WES_AUTH_BASE_URL)       : '-',
+                    (OtpProperty.WES_AUTH_CLIENT_ID)      : '-',
+                    (OtpProperty.WES_AUTH_CLIENT_SECRET)  : '-',
+                    (OtpProperty.WES_AUTH_CLIENT_USER)    : '-',
+                    (OtpProperty.WES_AUTH_CLIENT_PASSWORD): '-',
+            ]
         }
         otpProperties += [
                 (OtpProperty.SSH_USER)              : "user",
@@ -95,9 +82,6 @@ class TestConfigService extends ConfigService {
                 (OtpProperty.KEYCLOAK_SERVER)       : '-',
                 (OtpProperty.KEYCLOAK_CLIENT_ID)    : '-',
                 (OtpProperty.KEYCLOAK_CLIENT_SECRET): '-',
-                (OtpProperty.WES_AUTH_BASE_URL)     : '-',
-                (OtpProperty.WES_AUTH_CLIENT_ID)    : '-',
-                (OtpProperty.WES_AUTH_CLIENT_SECRET): '-',
                 (OtpProperty.LDAP_SERVER)           : 'ldap://test-ldap:123',
                 (OtpProperty.LDAP_SEARCH_BASE)      : 'cn=test',
         ]
@@ -176,7 +160,7 @@ class TestConfigService extends ConfigService {
      * and then changed by the software-under-test to the testing-group. This behaviour cannot be verified if the testing-group is the same as default.
      */
     private void assertTestingGroupIsNotPrimary(String testingGroup) {
-        assert testingGroup != primaryGroup : "Standard testing group shouldn't be the user's primary group, please update your .otp.properties!"
+        assert testingGroup != primaryGroup: "Standard testing group shouldn't be the user's primary group, please update your .otp.properties!"
     }
 
     /**
@@ -188,7 +172,7 @@ class TestConfigService extends ConfigService {
         String projectGroup = getAndAssertValue(OtpProperty.TEST_TESTING_PROJECT_UNIX_GROUP)
 
         assert testingGroup != projectGroup:
-                "'${OtpProperty.TEST_TESTING_GROUP.key             }' with value '${testingGroup}' does not differ from " +
+                "'${OtpProperty.TEST_TESTING_GROUP.key}' with value '${testingGroup}' does not differ from " +
                         "'${OtpProperty.TEST_TESTING_PROJECT_UNIX_GROUP.key}' with value '${projectGroup}.'" +
                         "OTP needs the primary/'default' group and the 'project' group to differ, in order to test if data re-owning works."
     }
@@ -220,12 +204,15 @@ class TestConfigService extends ConfigService {
     String getWorkflowTestQueue() {
         return new File(getAndAssertValue(OtpProperty.TEST_WORKFLOW_QUEUE))
     }
+
     String getWorkflowTestConfigSuffix() {
         return new File(getAndAssertValue(OtpProperty.TEST_WORKFLOW_CONFIG_SUFFIX))
     }
+
     String getWorkflowTestFasttrackQueue() {
         return new File(getAndAssertValue(OtpProperty.TEST_WORKFLOW_FASTTRACK_QUEUE))
     }
+
     String getWorkflowTestFasttrackConfigSuffix() {
         return new File(getAndAssertValue(OtpProperty.TEST_WORKFLOW_FASTTRACK_CONFIG_SUFFIX))
     }
