@@ -31,7 +31,6 @@ enum OtpProperty {
     LDAP_MANAGER_DN('otp.security.ldap.managerDn', TypeValidators.SINGLE_LINE_TEXT_OPTIONAL, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT)),
     LDAP_MANAGER_PASSWORD('otp.security.ldap.managerPw', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT)),
     LDAP_SEARCH_BASE('otp.security.ldap.search.base', TypeValidators.SINGLE_LINE_TEXT_OPTIONAL, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT)),
-    LDAP_SEARCH_SUBTREE('otp.security.ldap.search.subTree', TypeValidators.BOOLEAN, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT), 'true'),
     LDAP_SEARCH_ATTRIBUTE('otp.security.ldap.search.attribute', TypeValidators.SINGLE_LINE_TEXT_OPTIONAL, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT)),
     TRUSTSTORE_PATH("otp.trustStore.path", TypeValidators.ABSOLUTE_PATH, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT), '/'),
     TRUSTSTORE_PASSWORD("otp.trustStore.password", TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT), 'invalid'),
@@ -91,7 +90,6 @@ enum OtpProperty {
     CONFIG_SERVER_URL('otp.server.url', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.PRODUCTION)),
     CONFIG_ENVIRONMENT_NAME('otp.environment.name', TypeValidators.SINGLE_LINE_TEXT_OPTIONAL, EnumSet.of(UsedIn.PRODUCTION), null),
     CONFIG_AUTO_IMPORT_SECRET('otp.autoimport.secret', TypeValidators.SINGLE_LINE_TEXT_OPTIONAL, EnumSet.of(UsedIn.PRODUCTION), ''),
-    CONFIG_SECURECHANNEL_HEADERCHECK('otp.securechannel.headercheck.enabled', TypeValidators.BOOLEAN, EnumSet.of(UsedIn.PRODUCTION), 'false'),
 
     CONFIG_DICOM_INSTANCE_NAME('dicom.instance.name', TypeValidators.SINGLE_LINE_TEXT_OPTIONAL, EnumSet.of(UsedIn.PRODUCTION)),
     CONFIG_DICOM_INSTANCE_ID('dicom.instance.id', TypeValidators.POSITIVE_NUMBER, EnumSet.of(UsedIn.PRODUCTION), "1"),
