@@ -28,12 +28,13 @@ import org.springframework.security.authentication.CredentialsExpiredException
 import org.springframework.security.authentication.DisabledException
 import org.springframework.security.authentication.LockedException
 import org.springframework.security.core.AuthenticationException
-import org.springframework.security.web.WebAttributes
 import org.springframework.security.web.authentication.session.SessionAuthenticationException
 
 import de.dkfz.tbi.otp.security.FailedToCreateUserException
 import de.dkfz.tbi.otp.security.SecurityService
 import de.dkfz.tbi.otp.utils.RequestUtilService
+
+import static org.springframework.security.web.WebAttributes.*
 
 @PreAuthorize("permitAll()")
 class LoginController {
@@ -68,7 +69,7 @@ class LoginController {
     /** Callback after a failed login. Redirects to the auth page with a warning message. */
     def authfail() {
         String msg = ''
-        AuthenticationException exception = session[WebAttributes.AUTHENTICATION_EXCEPTION] as AuthenticationException
+        AuthenticationException exception = session[AUTHENTICATION_EXCEPTION] as AuthenticationException
         if (exception) {
             switch (exception.class) {
                 case AccountExpiredException: msg = g.message(code: "security.errors.login.expired"); break

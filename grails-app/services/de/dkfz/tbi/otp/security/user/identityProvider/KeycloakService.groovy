@@ -51,7 +51,8 @@ class KeycloakService implements IdentityProvider {
 
     @Override
     IdpUserDetails getIdpUserDetailsByUsername(String username) {
-        return castKeycloakUserIntoIdpUserDetails(fetchKeycloakUserByExactUsername(username))
+        KeycloakUser user = fetchKeycloakUserByExactUsername(username)
+        return user ? castKeycloakUserIntoIdpUserDetails(user) : null
     }
 
     @Override
@@ -136,7 +137,7 @@ class KeycloakService implements IdentityProvider {
 
     @Override
     Integer getUserAccountControlOfUser(User user) {
-        return fetchKeycloakUserByExactUsername(user.username).attributes.userAccountControl.first()
+        return user ? fetchKeycloakUserByExactUsername(user.username).attributes.userAccountControl.first() : null
     }
 
     @Override
