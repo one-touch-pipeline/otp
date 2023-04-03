@@ -180,7 +180,7 @@ class SecurityConfiguration {
                 .anonymous { withDefaults() }
                 .formLogin { formLogin ->
                     formLogin
-                            .loginPage("/login").permitAll()
+                            .loginPage("/").permitAll()
                             .loginProcessingUrl("/authenticate").permitAll()
                             .successHandler(successHandler)
                             .failureHandler(failureHandler)
@@ -219,7 +219,7 @@ class SecurityConfiguration {
                                     "/statistic/laneCountPerDate",
                                     "/privacyPolicy/**",
                                     "/metadataImport/autoImport",
-                                    "/error",
+                                    "/grails-errorhandler/**",
                                     "/error/**",
                             ).permitAll()
                             .anyRequest().fullyAuthenticated()

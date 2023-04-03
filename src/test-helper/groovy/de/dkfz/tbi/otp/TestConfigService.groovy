@@ -98,6 +98,8 @@ class TestConfigService extends ConfigService {
                 (OtpProperty.WES_AUTH_BASE_URL)     : '-',
                 (OtpProperty.WES_AUTH_CLIENT_ID)    : '-',
                 (OtpProperty.WES_AUTH_CLIENT_SECRET): '-',
+                (OtpProperty.LDAP_SERVER)           : 'ldap://test-ldap:123',
+                (OtpProperty.LDAP_SEARCH_BASE)      : 'cn=test',
         ]
         cleanProperties = new HashMap<>(otpProperties)
 
