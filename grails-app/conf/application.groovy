@@ -170,9 +170,4 @@ System.setProperty("javax.net.ssl.trustStoreType", otpProperties.getProperty(Otp
 spring.security.oauth2.client.registration.keycloak.authorizationGrantType="client_credentials"
 spring.security.oauth2.client.registration.keycloak.clientId=otpProperties.getProperty(OtpProperty.KEYCLOAK_CLIENT_ID.key)
 spring.security.oauth2.client.registration.keycloak.clientSecret=otpProperties.getProperty(OtpProperty.KEYCLOAK_CLIENT_SECRET.key)
-spring.security.oauth2.client.provider.keycloak.tokenUri="${otpProperties.getProperty(OtpProperty.KEYCLOAK_SERVER.key)}/realms/otp-dev/protocol/openid-connect/token"
-
-spring.security.oauth2.client.registration.wes.authorizationGrantType="client_credentials"
-spring.security.oauth2.client.registration.wes.clientId=otpProperties.getProperty(OtpProperty.WES_AUTH_CLIENT_ID.key)
-spring.security.oauth2.client.registration.wes.clientSecret=otpProperties.getProperty(OtpProperty.WES_AUTH_CLIENT_SECRET.key)
-spring.security.oauth2.client.provider.wes.tokenUri="${otpProperties.getProperty(OtpProperty.WES_AUTH_BASE_URL.key)}"
+spring.security.oauth2.client.provider.keycloak.tokenUri="${otpProperties.getProperty(OtpProperty.KEYCLOAK_SERVER.key)}/realms/${otpProperties.getProperty(OtpProperty.KEYCLOAK_REALM.key)}/protocol/openid-connect/token"

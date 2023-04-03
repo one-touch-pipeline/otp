@@ -66,6 +66,12 @@ class SecurityConfiguration {
     @Autowired
     ConfigService configService
 
+    @Autowired
+    KeycloakService keycloakService
+
+    @Autowired
+    LdapService ldapService
+
     @Bean
     static MethodSecurityExpressionHandler securityExpressionHandler(ProjectPermissionEvaluator projectPermissionEvaluator) {
         DefaultMethodSecurityExpressionHandler expressionHandler = new DefaultMethodSecurityExpressionHandler()
@@ -86,7 +92,7 @@ class SecurityConfiguration {
 
     @Bean
     DefaultSpringSecurityContextSource contextSource() {
-        return new DefaultSpringSecurityContextSource("ldap://localhost:389/dc=otpldap,dc=dev")
+        return new DefaultSpringSecurityContextSource("${configService.ldapServer}/${configService.ldapSearchBase}")
     }
 
     @Bean
@@ -112,9 +118,7 @@ class SecurityConfiguration {
     @Bean
     WebSecurityCustomizer webSecurityCustomizer() {
         // ignoring doesn't set a security context, use permitAll instead for regular pages
-        return (web) -> web.ignoring().antMatchers(
-                "/assets/**",
-        )
+        return { web -> web.ignoring().antMatchers("/assets/**") }
     }
 
     @Bean
@@ -132,12 +136,6 @@ class SecurityConfiguration {
     AuthenticationEventPublisher authenticationEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
         return new DefaultAuthenticationEventPublisher(applicationEventPublisher)
     }
-
-    @Autowired
-    KeycloakService keycloakService
-
-    @Autowired
-    LdapService ldapService
 
     @Bean
     IdentityProvider identityProvider() {
@@ -232,7 +230,11 @@ class SecurityConfiguration {
                             .invalidateHttpSession(true)
                             .clearAuthentication(true)
                 }
-                .oauth2Client(withDefaults())
+
+        if (configService.oidcEnabled) {
+            http.oauth2Client(withDefaults())
+        }
+
         return http.build()
     }
 
@@ -240,7 +242,7 @@ class SecurityConfiguration {
     ReactiveClientRegistrationRepository clientRegistrations() {
         ClientRegistration keycloakRegistration = ClientRegistration
                 .withRegistrationId(KeycloakService.CLIENT_REGISTRATION_ID)
-                .tokenUri("${configService.keycloakServer}/realms/otp-dev/protocol/openid-connect/token")
+                .tokenUri("${configService.keycloakServer}/realms/${configService.keycloakRealm}/protocol/openid-connect/token")
                 .clientId(configService.keycloakClientId)
                 .clientSecret(configService.keycloakClientSecret)
                 .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
