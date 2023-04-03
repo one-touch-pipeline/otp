@@ -30,6 +30,7 @@ import org.springframework.ldap.core.LdapTemplate
 import org.springframework.ldap.core.support.LdapContextSource
 import org.springframework.ldap.filter.*
 import org.springframework.ldap.query.ContainerCriteria
+import org.springframework.ldap.support.LdapUtils
 
 import de.dkfz.tbi.otp.administration.LdapKey
 import de.dkfz.tbi.otp.config.ConfigService
@@ -65,14 +66,13 @@ class LdapService implements InitializingBean, IdentityProvider {
     @Override
     void afterPropertiesSet() {
         LdapContextSource ldapContextSource = new LdapContextSource()
-        ldapTemplate = new LdapTemplate(ldapContextSource)
-
         ldapContextSource.url = configService.ldapServer
         ldapContextSource.base = configService.ldapSearchBase
         ldapContextSource.userDn = configService.ldapManagerDistinguishedName
         ldapContextSource.password = configService.ldapManagerPassword
         ldapContextSource.afterPropertiesSet()
 
+        ldapTemplate = new LdapTemplate(ldapContextSource)
         ldapTemplate.ignorePartialResultException = true
     }
 
@@ -241,6 +241,11 @@ class LdapService implements InitializingBean, IdentityProvider {
             return UserAccountControl.isSet(UserAccountControl.ACCOUNTDISABLE, uacValue)
         }
         return false
+    }
+
+    boolean authenticateUser(String name, String credentials) {
+        Filter filter = new EqualsFilter(configService.ldapSearchAttribute, name)
+        return ldapTemplate.authenticate(LdapUtils.emptyLdapName(), filter.encode(), credentials)
     }
 
     /**
