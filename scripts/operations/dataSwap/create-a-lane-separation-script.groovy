@@ -22,11 +22,12 @@
 package operations.dataSwap
 
 import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.dataswap.AbstractDataSwapService
 import de.dkfz.tbi.otp.dataswap.ScriptBuilder
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 import java.nio.file.Paths
 
@@ -80,31 +81,38 @@ Closure<ScriptBuilder> createSamplesAndSampleTypesCreationScript = { List<String
                 ilike("name", it)
             }
         }
-    }
+    } as List<SampleType>
 
     List<String> expectedSampleTypes = uniqueParsedSamples*.sampleTypeName.unique()
     List<String> sampleTypesToBeCreated = expectedSampleTypes - existingSampleTypes*.name
 
     builder.addMetaInfo("  * new SampleTypes:")
-    sampleTypesToBeCreated.each { String name ->
-        builder.addMetaInfo("    - ${name}")
-        builder.addGroovyCommandWithChanges(Snippets.indent(Snippets.createSampleType(name), 1))
-    }
-
-    builder.addMetaInfo("  * new Samples:")
-    uniqueParsedSamples.each { SampleComponents components ->
-        Individual individual = CollectionUtils.exactlyOneElement(Individual.findAllByPid(components.pid), "Could not find new individual '${components.pid}")
-
-        SampleType sampleType = SampleTypeService.findSampleTypeByName(components.sampleTypeName)
-        Sample sample = CollectionUtils.atMostOneElement(Sample.findAllByIndividualAndSampleType(individual, sampleType))
-
-        if (!sample) {
-            builder.addMetaInfo("    - ${components.pid} ${components.sampleTypeName}")
-            builder.addGroovyCommandWithChanges(Snippets.indent(Snippets.createSample(components.pid, components.sampleTypeName), 1))
+    if (sampleTypesToBeCreated) {
+        sampleTypesToBeCreated.each { String name ->
+            builder.addMetaInfo("    - ${name}")
+            builder.addGroovyCommandWithChanges(Snippets.indent(Snippets.createSampleType(name), 1))
         }
+    } else {
+        builder.addMetaInfo("    - nothing to do")
     }
 
-    builder.addGroovyCommandWithChanges("}")
+    if (uniqueParsedSamples) {
+        builder.addMetaInfo("  * new Samples:")
+        uniqueParsedSamples.each { SampleComponents components ->
+            Individual individual = CollectionUtils.exactlyOneElement(Individual.findAllByPid(components.pid), "Could not find new individual '${components.pid}")
+
+            SampleType sampleType = SampleTypeService.findSampleTypeByName(components.sampleTypeName)
+            Sample sample = CollectionUtils.atMostOneElement(Sample.findAllByIndividualAndSampleType(individual, sampleType))
+
+            if (!sample) {
+                builder.addMetaInfo("    - ${components.pid} ${components.sampleTypeName}")
+                builder.addGroovyCommandWithChanges(Snippets.indent(Snippets.createSample(components.pid, components.sampleTypeName), 1))
+            } else {
+                builder.addMetaInfo("    - nothing to do")
+            }
+        }
+        builder.addGroovyCommand("}")
+    }
     return builder
 }
 
