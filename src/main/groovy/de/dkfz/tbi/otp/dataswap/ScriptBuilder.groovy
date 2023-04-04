@@ -119,17 +119,7 @@ class ScriptBuilder {
 
     private String encloseInBashScriptDescription(String enclosedContent) {
         return """|
-                  |/****************************************************************
-                  | * FILESYSTEM FIXING
-                  | *
-                  | * meta-Bash script; calls all generated bash-scripts to fix
-                  | * the filesystem-side of things.
-                  | *
-                  | * execute this after the database-side of things has been updated
-                  | ****************************************************************/
-                  |/*
                   |$enclosedContent
-                  |*/
                   |""".stripMargin()
     }
 

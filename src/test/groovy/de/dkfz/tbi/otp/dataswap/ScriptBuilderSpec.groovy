@@ -102,17 +102,7 @@ class ScriptBuilderSpec extends Specification implements DataTest, RoddyPancanFa
     void "buildBashScript, should concat bash commands and header text to bash script"() {
         given:
         final String expectedBashScript = """|
-                  |/****************************************************************
-                  | * FILESYSTEM FIXING
-                  | *
-                  | * meta-Bash script; calls all generated bash-scripts to fix
-                  | * the filesystem-side of things.
-                  | *
-                  | * execute this after the database-side of things has been updated
-                  | ****************************************************************/
-                  |/*
                   |${bashCommands.join("\n")}
-                  |*/
                   |""".stripMargin()
 
         when:
