@@ -25,7 +25,8 @@ module.exports = defineConfig({
   e2e: {
     baseUrl: 'http://localhost:8080/',
     specPattern: 'cypress/e2e/**/*.spec.js',
-    supportFile: 'cypress/support/index.js'
+    supportFile: 'cypress/support/index.js',
+    experimentalRunAllSpecs: true
   },
   screenshotsFolder: 'cypress/screenshots',
   fixturesFolder: 'cypress/fixtures',

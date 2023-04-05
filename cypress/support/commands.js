@@ -27,18 +27,13 @@ const login = (username, password) => {
 
   cy.session(username, () => {
     cy.visit('/login');
-    cy.get('body')
-      .then(($body) => {
-        const loginButtonId = '#loginButton';
-        if ($body.find(loginButtonId).length > 0) {
-          cy.get('input[name=username]')
-            .type(username);
-          cy.get('input[name=password]')
-            .type(password, { log: false });
-          cy.get(loginButtonId)
-            .click();
-        }
-      });
+    const loginButtonId = '#loginButton';
+    cy.get('input[name=username]')
+      .type(username);
+    cy.get('input[name=password]')
+      .type(password, { log: false });
+    cy.get(loginButtonId)
+      .click();
     cy.get('body')
       .then(($body) => {
         const acceptPrivacyPolicy = 'input#accept';
@@ -50,7 +45,7 @@ const login = (username, password) => {
             .click();
         }
       });
-  }, { cacheAcrossSpecs: true, validate });
+  }, { validate, cacheAcrossSpecs: true });
 };
 
 Cypress.Commands.add('loginAsUser', () => {
@@ -153,5 +148,5 @@ Cypress.Commands.add('clearDownloadsFolder', () => {
 const validate = () => {
   'use strict';
 
-  cy.request('/info/templates').its('status').should('eq', 200);
+  cy.request({ url: '/info/templates', followRedirect: false }).its('status').should('eq', 200);
 };
