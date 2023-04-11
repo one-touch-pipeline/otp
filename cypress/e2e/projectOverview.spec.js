@@ -69,8 +69,8 @@ describe('Check statistics page', () => {
 
       cy.get('table#sampleTypeNameCountBySample tbody').find('tr').should('have.length', 3);
       cy.get('table#centerNameRunId tbody').find('tr').should('have.length', 1);
-      cy.get('table#projectOverviewTable tbody').find('tr').should('have.length', 30);
-      cy.get('table#patientsAndSamplesGBCountPerProject tbody').find('tr').should('have.length', 5);
+      cy.get('table#projectOverviewTable tbody').find('tr').should('have.length', 31);
+      cy.get('table#patientsAndSamplesGBCountPerProject tbody').find('tr').should('have.length', 6);
     });
   });
 });

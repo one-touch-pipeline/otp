@@ -320,6 +320,7 @@ class ExampleData {
     }
 
     void createObjects() {
+        createExampleSeqType()
         (1..individualCount).each {
             Individual individual = createIndividual(project)
             println "- individual: ${individual}"
@@ -368,6 +369,13 @@ class ExampleData {
         SessionUtils.withTransaction {
             it.flush()
         }
+    }
+
+    void createExampleSeqType() {
+        Individual individual = createIndividual(project)
+        Sample sample = findOrCreateSample(individual, diseaseSampleTypes.find().key, diseaseSampleTypes.find().value)
+        SeqType seqType = findOrCreateSeqType("EXAMPLE")
+        createSeqTrack(sample, seqType, false)
     }
 
     void createFiles() {

@@ -42,11 +42,11 @@ import java.time.ZonedDateTime
 /**
  * Change it to generate more or less data sets of workflow runs.
  */
-int numberOfDemoSets = 6;
+int numberOfDemoSets = 6
 
 
 WorkflowRun.withNewTransaction {
-    SeqType seqType = SeqTypeService.getWholeGenomeBisulfiteTagmentationPairedSeqType()
+    SeqType seqType = SeqType.findByName('EXAMPLE')
     SeqTrack seqTrack = SeqTrack.findBySeqType(seqType)
     Individual individual = seqTrack.individual
     Project project = individual.project
@@ -81,8 +81,6 @@ WorkflowRun.withNewTransaction {
                 state       : WorkflowArtefact.State.SUCCESS,
                 producedBy  : producedBy,
                 outputRole  : outputRole,
-                individual  : individual,
-                seqType     : seqType,
                 artefactType: ArtefactType.FASTQ,
                 displayName : "artefact ${WorkflowArtefact.count() + 1}\n${displayText}",
         ]).save(flush: true)
