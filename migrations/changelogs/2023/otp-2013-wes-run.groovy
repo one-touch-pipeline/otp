@@ -22,7 +22,7 @@
 
 databaseChangeLog = {
 
-    changeSet(author: "", id: "1680162652373-75") {
+    changeSet(author: "-", id: "1680162652373-75") {
         createTable(tableName: "wes_run") {
             column(name: "id", type: "BIGINT") {
                 constraints(nullable: "false", primaryKey: "true", primaryKeyName: "wes_runPK")
@@ -60,35 +60,35 @@ databaseChangeLog = {
         }
     }
 
-    changeSet(author: "", id: "1680162652373-78") {
+    changeSet(author: "-", id: "1680162652373-78") {
         createIndex(indexName: "wes_run_wes_run_log_idx", tableName: "wes_run") {
             column(name: "wes_run_log_id")
         }
     }
 
-    changeSet(author: "", id: "1680162652373-79") {
+    changeSet(author: "-", id: "1680162652373-79") {
         createIndex(indexName: "wes_run_workflow_step_idx", tableName: "wes_run") {
             column(name: "workflow_step_id")
         }
     }
 
-    changeSet(author: "", id: "1680162652373-80") {
+    changeSet(author: "-", id: "1680162652373-80") {
         addForeignKeyConstraint(baseColumnNames: "workflow_step_id", baseTableName: "wes_run", constraintName: "FKfht8np7t6730tru4oi1ewtbcp", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "id", referencedTableName: "workflow_step", validate: "true")
     }
 
-    changeSet(author: "", id: "1680162652373-81") {
+    changeSet(author: "-", id: "1680162652373-81") {
         addForeignKeyConstraint(baseColumnNames: "wes_run_log_id", baseTableName: "wes_run", constraintName: "FKqt8kluo2951qfjvlw65g09at8", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "id", referencedTableName: "wes_run_log", validate: "true")
     }
 
-    changeSet(author: "", id: "1680162652373-82") {
+    changeSet(author: "-", id: "1680162652373-82") {
         dropForeignKeyConstraint(baseTableName: "wes_run_log", constraintName: "FK3geplj7dns1dc5e8wifj9p59f")
     }
 
-    changeSet(author: "", id: "1680162652373-118") {
+    changeSet(author: "-", id: "1680162652373-118") {
         dropColumn(columnName: "wes_identifier", tableName: "workflow_step")
     }
 
-    changeSet(author: "", id: "1680162652373-119") {
+    changeSet(author: "-", id: "1680162652373-119") {
         dropColumn(columnName: "workflow_step_id", tableName: "wes_run_log")
     }
 }

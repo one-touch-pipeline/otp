@@ -22,11 +22,11 @@
 
 databaseChangeLog = {
 
-    changeSet(author: "", id: "1676032816720-97") {
+    changeSet(author: "-", id: "1676032816720-97") {
         dropTable(tableName: "seq_center_import_dirs_allow_linking")
     }
 
-    changeSet(author: "", id: "1676032816720-114") {
+    changeSet(author: "-", id: "1676032816720-114") {
         dropColumn(columnName: "force_copy_files", tableName: "project")
     }
 }

@@ -21,7 +21,7 @@
  */
 databaseChangeLog = {
 
-    changeSet(author: "", id: "1679407263063-75") {
+    changeSet(author: "-", id: "1679407263063-75") {
         addColumn(tableName: "seq_center") {
             column(name: "legacy", type: "boolean") {
                 constraints(nullable: "true")
@@ -29,21 +29,21 @@ databaseChangeLog = {
         }
     }
 
-    changeSet(author: "", id: "1679407263063-75b") {
+    changeSet(author: "-", id: "1679407263063-75b") {
         sql("update seq_center set legacy = false")
     }
 
-    changeSet(author: "", id: "1679407263063-75c") {
+    changeSet(author: "-", id: "1679407263063-75c") {
         addNotNullConstraint(columnDataType: "boolean", columnName: "legacy", tableName: "seq_center")
     }
 
-    changeSet(author: "", id: "1679407263063-172") {
+    changeSet(author: "-", id: "1679407263063-172") {
         createIndex(indexName: "seq_center_legacy_idx", tableName: "seq_center") {
             column(name: "legacy")
         }
     }
 
-    changeSet(author: "", id: "1679407263063-76") {
+    changeSet(author: "-", id: "1679407263063-76") {
         addColumn(tableName: "software_tool") {
             column(name: "legacy", type: "boolean") {
                 constraints(nullable: "true")
@@ -51,15 +51,15 @@ databaseChangeLog = {
         }
     }
 
-    changeSet(author: "", id: "1679407263063-76b") {
+    changeSet(author: "-", id: "1679407263063-76b") {
         sql("update software_tool set legacy = false")
     }
 
-    changeSet(author: "", id: "1679407263063-76c") {
+    changeSet(author: "-", id: "1679407263063-76c") {
         addNotNullConstraint(columnDataType: "boolean", columnName: "legacy", tableName: "software_tool")
     }
 
-    changeSet(author: "", id: "1679407263063-173") {
+    changeSet(author: "-", id: "1679407263063-173") {
         createIndex(indexName: "software_tool_legacy_idx", tableName: "software_tool") {
             column(name: "legacy")
         }

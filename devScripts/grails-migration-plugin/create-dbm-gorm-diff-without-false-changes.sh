@@ -137,7 +137,7 @@ bash gradlew --build-cache dbmGormDiff -q | \
   tee ${tmpDir}/migration-step08.groovy | \
 
   #delete local usernames
-  perl -0p -e "s/author: \".*?\"/author: \"\"/g"  | \
+  perl -0p -e "s/author: \".*?\"/author: \"-\"/g"  | \
   tee ${tmpDir}/migration-step09.groovy | \
 
   #delete empty changelog

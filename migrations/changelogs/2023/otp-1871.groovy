@@ -22,17 +22,17 @@
 
 databaseChangeLog = {
 
-    changeSet(author: "", id: "1675346213964-77") {
+    changeSet(author: "-", id: "1675346213964-77") {
         addColumn(tableName: "workflow") {
             column(name: "default_version_id", type: "int8")
         }
     }
 
-    changeSet(author: "", id: "1675346213964-80") {
+    changeSet(author: "-", id: "1675346213964-80") {
         addForeignKeyConstraint(baseColumnNames: "default_version_id", baseTableName: "workflow", constraintName: "FKpf4oiirm8a9w7i5wjiw8dotuq", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "id", referencedTableName: "workflow_version", validate: "true")
     }
 
-    changeSet(author: "", id: "1675346213964-44") {
+    changeSet(author: "-", id: "1675346213964-44") {
         dropNotNullConstraint(columnDataType: "bigint", columnName: "workflow_id", tableName: "workflow_version")
     }
 }

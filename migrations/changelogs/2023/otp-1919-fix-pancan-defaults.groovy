@@ -21,7 +21,7 @@
  */
 databaseChangeLog = {
 
-    changeSet(author: "", id: "") {
+    changeSet(author: "-", id: "otp-1919") {
         sql("""
 DELETE
 FROM workflow_version_selector

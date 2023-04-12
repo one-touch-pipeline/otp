@@ -19,44 +19,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-databaseChangeLog = {
 
-    String searchString = 'Default%WGBS alignment%'
-
-    changeSet(author: "-", id: "1669813380810-76b") {
-        sql("""
-DELETE
-FROM external_workflow_config_selector_workflow
-WHERE external_workflow_config_selector_workflows_id IN (
-    SELECT id
-    FROM external_workflow_config_selector
-    WHERE name LIKE '${searchString}'
-);
-
-DELETE
-FROM external_workflow_config_selector_workflow_version
-WHERE external_workflow_config_selector_workflow_versions_id IN (
-    SELECT id
-    FROM external_workflow_config_selector
-    WHERE name LIKE '${searchString}'
-);
-
-DELETE
-FROM external_workflow_config_selector_seq_type
-WHERE external_workflow_config_selector_seq_types_id IN (
-    SELECT id
-    FROM external_workflow_config_selector
-    WHERE name LIKE '${searchString}'
-);
-
-DELETE
-FROM external_workflow_config_selector
-WHERE name LIKE '${searchString}';
-
-DELETE
-FROM external_workflow_config_fragment
-WHERE name LIKE '${searchString}';
-
-""")
-    }
-}
+UPDATE databasechangelog SET author = '-' WHERE author = '';
+UPDATE databasechangelog SET id = 'otp-1919' WHERE id = '';

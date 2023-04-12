@@ -21,18 +21,18 @@
  */
 
 databaseChangeLog = {
-    changeSet(author: "", id: "1674217918877-113") {
+    changeSet(author: "-", id: "1674217918877-113") {
         sql("""
             DROP VIEW IF EXISTS aggregate_sequences;
             DROP VIEW IF EXISTS sequences;
         """)
     }
 
-    changeSet(author: "", id: "1674217918877-114") {
+    changeSet(author: "-", id: "1674217918877-114") {
         dropColumn(columnName: "mock_full_name", tableName: "individual")
     }
 
-    changeSet(author: "", id: "1674217918877-115") {
+    changeSet(author: "-", id: "1674217918877-115") {
         dropColumn(columnName: "mock_pid", tableName: "individual")
     }
 }

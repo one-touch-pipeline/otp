@@ -21,7 +21,7 @@
  */
 databaseChangeLog = {
 
-    changeSet(author: "", id: "1673520690898-76") {
+    changeSet(author: "-", id: "1673520690898-76") {
         addColumn(tableName: "seq_track") {
             column(name: "low_cov", type: "boolean") {
                 constraints(nullable: "true")
@@ -29,11 +29,11 @@ databaseChangeLog = {
         }
     }
 
-    changeSet(author: "", id: "1673520690898-76b") {
+    changeSet(author: "-", id: "1673520690898-76b") {
         sql("update seq_track set low_cov = false;")
     }
 
-    changeSet(author: "", id: "1673520690898-76c") {
+    changeSet(author: "-", id: "1673520690898-76c") {
         addNotNullConstraint(columnDataType: "boolean", columnName: "low_cov", tableName: "seq_track")
     }
 }

@@ -22,7 +22,7 @@
 
 databaseChangeLog = {
 
-    changeSet(author: "", id: "1670489633776-76") {
+    changeSet(author: "-", id: "1670489633776-76") {
         createTable(tableName: "wes_log") {
             column(name: "id", type: "BIGINT") {
                 constraints(nullable: "false", primaryKey: "true", primaryKeyName: "wes_logPK")
@@ -58,7 +58,7 @@ databaseChangeLog = {
         }
     }
 
-    changeSet(author: "", id: "1670489633776-77") {
+    changeSet(author: "-", id: "1670489633776-77") {
         createTable(tableName: "wes_run_log") {
             column(name: "id", type: "BIGINT") {
                 constraints(nullable: "false", primaryKey: "true", primaryKeyName: "wes_run_logPK")
@@ -92,7 +92,7 @@ databaseChangeLog = {
         }
     }
 
-    changeSet(author: "", id: "1670489633776-78") {
+    changeSet(author: "-", id: "1670489633776-78") {
         createTable(tableName: "wes_run_log_wes_log") {
             column(name: "wes_run_log_task_logs_id", type: "BIGINT") {
                 constraints(nullable: "false")
@@ -104,15 +104,15 @@ databaseChangeLog = {
         }
     }
 
-    changeSet(author: "", id: "1670489633776-174") {
+    changeSet(author: "-", id: "1670489633776-174") {
         addForeignKeyConstraint(baseColumnNames: "workflow_step_id", baseTableName: "wes_run_log", constraintName: "FK3geplj7dns1dc5e8wifj9p59f", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "id", referencedTableName: "workflow_step", validate: "true")
     }
 
-    changeSet(author: "", id: "1670489633776-175") {
+    changeSet(author: "-", id: "1670489633776-175") {
         addForeignKeyConstraint(baseColumnNames: "run_log_id", baseTableName: "wes_run_log", constraintName: "FKmt47xgvoyfiduakxh4pl2u5y5", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "id", referencedTableName: "wes_log", validate: "true")
     }
 
-    changeSet(author: "", id: "1670489633776-176") {
+    changeSet(author: "-", id: "1670489633776-176") {
         addForeignKeyConstraint(baseColumnNames: "wes_log_id", baseTableName: "wes_run_log_wes_log", constraintName: "FKogq6dnt82emgwdsdt4srcbjkn", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "id", referencedTableName: "wes_log", validate: "true")
     }
 }

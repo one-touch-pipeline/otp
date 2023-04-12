@@ -23,7 +23,7 @@ databaseChangeLog = {
 
     String searchString = 'Default%WGBS alignment%'
 
-    changeSet(author: "", id: "otp-1651-fix-wgbs-defaults") {
+    changeSet(author: "-", id: "otp-1651-fix-wgbs-defaults") {
         sql("""
 DELETE
 FROM external_workflow_config_selector_workflow

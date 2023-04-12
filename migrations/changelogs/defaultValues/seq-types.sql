@@ -70,6 +70,6 @@ ON CONFLICT DO NOTHING;
 -- cell ranger
 INSERT INTO seq_type(id, version, name, library_layout, dir_name, display_name, roddy_name, single_cell, has_antibody_target, legacy, needs_bed_file,
                      date_created, last_updated)
-VALUES (NEXTVAL('hibernate_sequence'), 0, '10x_scRNA', 'PAIRED', '10x_scRNA_sequencing', '10x_scRNA', '', TRUE, FALSE, FALSE, FALSE, NOW(),
+VALUES (NEXTVAL('hibernate_sequence'), 0, '10x_scRNA', 'PAIRED', '10x_scRNA_sequencing', '10x_scRNA', NULL, TRUE, FALSE, FALSE, FALSE, NOW(),
         NOW())
 ON CONFLICT DO NOTHING;

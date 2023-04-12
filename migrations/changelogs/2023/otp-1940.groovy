@@ -21,19 +21,19 @@
  */
 databaseChangeLog = {
 
-    changeSet(author: "", id: "1676275370111-76") {
+    changeSet(author: "-", id: "1676275370111-76") {
         addColumn(tableName: "workflow_version") {
             column(name: "comment_id", type: "int8")
         }
     }
 
-    changeSet(author: "", id: "1676275370111-77") {
+    changeSet(author: "-", id: "1676275370111-77") {
         addColumn(tableName: "workflow_version") {
             column(name: "deprecated_date", type: "date")
         }
     }
 
-    changeSet(author: "", id: "1676275370111-80") {
+    changeSet(author: "-", id: "1676275370111-80") {
         addForeignKeyConstraint(baseColumnNames: "comment_id", baseTableName: "workflow_version", constraintName: "FKbvmhschbsysp907kg7khcmk5", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "id", referencedTableName: "comment", validate: "true")
     }
 }

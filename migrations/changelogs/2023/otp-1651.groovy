@@ -21,7 +21,7 @@
  */
 
 databaseChangeLog = {
-    changeSet(author: "", id: "otp-1651") {
+    changeSet(author: "-", id: "otp-1651") {
         sql("""
             UPDATE job_execution_plan
             SET enabled = false
