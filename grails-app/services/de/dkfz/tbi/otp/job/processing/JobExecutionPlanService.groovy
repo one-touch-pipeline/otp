@@ -369,6 +369,10 @@ class JobExecutionPlanService {
     @Transactional(readOnly = true)
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     Map<String, Long> failedProcessCount(List<JobExecutionPlan> plans) {
+        if (!plans) {
+            return [:]
+        }
+
         String query = """
         SELECT
             plan.name,
