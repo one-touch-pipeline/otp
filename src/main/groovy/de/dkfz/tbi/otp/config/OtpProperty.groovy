@@ -82,7 +82,8 @@ enum OtpProperty {
 
     WES_AUTH_BASE_URL('otp.wes.auth.baseUrl', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.PRODUCTION, UsedIn.WORKFLOW_TEST, UsedIn.DEVELOPMENT)),
     WES_AUTH_CLIENT_ID('otp.wes.auth.clientId', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.PRODUCTION, UsedIn.WORKFLOW_TEST, UsedIn.DEVELOPMENT)),
-    WES_AUTH_CLIENT_SECRET('otp.wes.auth.clientSecret', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.PRODUCTION, UsedIn.WORKFLOW_TEST, UsedIn.DEVELOPMENT)),
+    WES_AUTH_CLIENT_SECRET('otp.wes.auth.clientSecret', TypeValidators.SINGLE_WORD_TEXT,
+            EnumSet.of(UsedIn.PRODUCTION, UsedIn.WORKFLOW_TEST, UsedIn.DEVELOPMENT)),
 
     CONFIG_JOB_SYSTEM_START('otp.jobsystem.start', TypeValidators.BOOLEAN, EnumSet.of(UsedIn.PRODUCTION), 'false'),
     CONFIG_SERVER_URL('otp.server.url', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.PRODUCTION)),
