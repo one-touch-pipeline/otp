@@ -26,26 +26,39 @@ const login = (username, password) => {
   'use strict';
 
   cy.session(username, () => {
-    cy.visit('/login');
-    const loginButtonId = '#loginButton';
-    cy.get('input[name=username]')
-      .type(username);
-    cy.get('input[name=password]')
-      .type(password, { log: false });
-    cy.get(loginButtonId)
-      .click();
-    cy.get('body')
-      .then(($body) => {
-        const acceptPrivacyPolicy = 'input#accept';
-        if ($body.find(acceptPrivacyPolicy).length > 0) {
-          cy.get(acceptPrivacyPolicy)
-            .click();
-          cy.get('button')
-            .contains('Continue')
-            .click();
-        }
-      });
-  }, { validate, cacheAcrossSpecs: true });
+    cy.clearCookies();
+    cy.setCookie('CY_LOGIN_TIME', new Date().toString());
+
+    // Login via endpoint
+    cy.request({
+      method: 'POST',
+      url: '/authenticate',
+      form: true,
+      body: {
+        username,
+        password
+      },
+      followRedirect: false
+    }).then((response) => {
+      expect(response.status).to.eq(302);
+      cy.getCookie('JSESSIONID').should('exist');
+    });
+
+    // Accept the privacy policy
+    cy.request({
+      method: 'POST',
+      url: '/privacyPolicy/accept',
+      form: true,
+      body: {
+        redirect: '',
+        accept: 'on'
+      },
+      followRedirect: false
+    }).its('status').should('eq', 302);
+  }, {
+    validate: validateSession,
+    cacheAcrossSpecs: false
+  });
 };
 
 Cypress.Commands.add('loginAsUser', () => {
@@ -144,9 +157,16 @@ Cypress.Commands.add('clearDownloadsFolder', () => {
   });
 });
 
-// Make an API request that returns a 200 only when logged in
-const validate = () => {
+const validateSession = () => {
   'use strict';
 
-  cy.request({ url: '/info/templates', followRedirect: false }).its('status').should('eq', 200);
+  return new Promise((resolve, reject) => {
+    cy.getCookie('CY_LOGIN_TIME').then((cookie) => {
+      const loginTimeDiff = new Date() - new Date(cookie.value);
+      if (loginTimeDiff > 900000) {
+        reject();
+      }
+      resolve();
+    });
+  });
 };
