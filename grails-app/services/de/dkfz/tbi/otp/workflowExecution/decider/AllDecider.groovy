@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -58,21 +58,20 @@ class AllDecider implements Decider {
     ]
 
     @Override
-    Collection<WorkflowArtefact> decide(Collection<WorkflowArtefact> allWorkflowArtefacts, boolean forceRun = false, Map<String,
-            String> userParams = [:]) {
-
-        Collection<WorkflowArtefact> newWorkflowArtefacts = []
+    DeciderResult decide(Collection<WorkflowArtefact> allWorkflowArtefacts, Map<String, String> userParams = [:]) {
+        DeciderResult deciderResultAll = new DeciderResult()
         LogUsedTimeUtils.logUsedTimeStartEnd(log, "    AllDecider for ${allWorkflowArtefacts.size()} workflow artefacts") {
             deciders.each { deciderClass ->
                 Decider decider = Holders.grailsApplication.mainContext.getBean(deciderClass)
-                Collection<WorkflowArtefact> workflowArtefacts = LogUsedTimeUtils.logUsedTimeStartEnd(log, "      Decider ${deciderClass.simpleName}") {
-                    decider.decide(allWorkflowArtefacts, forceRun, userParams)
+                DeciderResult deciderResult = LogUsedTimeUtils.logUsedTimeStartEnd(log,
+                        "      Decider ${deciderClass.simpleName} with ${allWorkflowArtefacts.size()} artefacts") {
+                    decider.decide(allWorkflowArtefacts, userParams)
                 }
-                allWorkflowArtefacts += workflowArtefacts
-                newWorkflowArtefacts += workflowArtefacts
+                deciderResultAll.add(deciderResult)
+                allWorkflowArtefacts += deciderResult.newArtefacts
             }
         }
-        return newWorkflowArtefacts
+        return deciderResultAll
     }
 
     Collection<SeqTrack> findAllSeqTracksInNewWorkflowSystem(Collection<SeqTrack> seqTracks) {

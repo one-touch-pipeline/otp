@@ -112,7 +112,7 @@ class MergingWorkPackage extends AbstractMergingWorkPackage {
         })
     }
 
-    static Map getMergingProperties(SeqTrack seqTrack) {
+    static Map<String, Entity> getMergingProperties(SeqTrack seqTrack) {
         Map<String, Entity> properties = [
                 sample          : seqTrack.sample,
                 seqType         : seqTrack.seqType,

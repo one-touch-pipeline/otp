@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -48,11 +48,11 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.tracking.OtrsTicketService
-import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.utils.MailHelperService
 import de.dkfz.tbi.otp.utils.exceptions.CopyingOfFileFailedException
 import de.dkfz.tbi.otp.utils.exceptions.MetadataFileImportException
 import de.dkfz.tbi.otp.workflow.datainstallation.DataInstallationInitializationService
-import de.dkfz.tbi.otp.workflowExecution.decider.AllDecider
 import de.dkfz.tbi.util.TimeFormats
 import de.dkfz.tbi.util.spreadsheet.*
 import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
@@ -80,8 +80,6 @@ class MetadataImportService {
     AntibodyTargetService antibodyTargetService
     DataInstallationInitializationService dataInstallationInitializationService
 
-    @Autowired
-    AllDecider allDecider
     ConfigService configService
     FileService fileService
     FileSystemService fileSystemService

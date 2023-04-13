@@ -21,43 +21,26 @@
  */
 package de.dkfz.tbi.otp.workflowExecution.decider
 
-import grails.gorm.transactions.Transactional
-import groovy.util.logging.Slf4j
-import org.springframework.stereotype.Component
+import groovy.transform.EqualsAndHashCode
+import groovy.transform.ToString
 
-import de.dkfz.tbi.otp.workflow.wgbs.WgbsWorkflow
+import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.workflowExecution.Artefact
+import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
 
-@Component
-@Transactional
-@Slf4j
-class WgbsDecider extends AbstractAlignmentDecider {
+@ToString(includePackage = false, includeNames = true)
+@EqualsAndHashCode
+class ArtefactData<A extends Artefact> {
+    final WorkflowArtefact workflowArtefact
+    final A artefact
+    final Project project
+    final SeqType seqType
 
-    @Override
-    final boolean supportsIncrementalMerging() {
-        return false
-    }
-
-    @Override
-    final boolean requiresFastqcResults() {
-        return false
-    }
-
-    @Override
-    final String getWorkflowName() {
-        return WgbsWorkflow.WORKFLOW
-    }
-
-    @Override
-    final String getInputFastqRole() {
-        return WgbsWorkflow.INPUT_FASTQ
-    }
-
-    final String inputFastqcRole = null
-
-    final String inputBaseBamRole = null
-
-    @Override
-    final String getOutputBamRole() {
-        return WgbsWorkflow.OUTPUT_BAM
+    ArtefactData(WorkflowArtefact workflowArtefact, A artefact, Project project, SeqType seqType) {
+        this.workflowArtefact = workflowArtefact
+        this.artefact = artefact
+        this.project = project
+        this.seqType = seqType
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -37,6 +37,7 @@ import de.dkfz.tbi.otp.withdraw.RoddyBamFileWithdrawService
 import de.dkfz.tbi.otp.workflow.panCancer.PanCancerWorkflow
 import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.otp.workflowExecution.decider.AllDecider
+import de.dkfz.tbi.otp.workflowExecution.decider.DeciderResult
 
 import java.time.LocalDate
 
@@ -109,6 +110,8 @@ class TriggerAlignmentServiceSpec extends HibernateSpec implements ServiceUnitTe
                 outputRole  : PanCancerWorkflow.OUTPUT_BAM,
                 producedBy  : run,
         ])
+        DeciderResult deciderResultToReturn = new DeciderResult()
+        deciderResultToReturn.newArtefacts << outputArtefact
 
         MergingWorkPackage mergingWorkPackage1 = createMergingWorkPackage()
         MergingWorkPackage mergingWorkPackage2 = createMergingWorkPackage()
@@ -125,7 +128,7 @@ class TriggerAlignmentServiceSpec extends HibernateSpec implements ServiceUnitTe
 
         // Mock service for new workflow system
         service.allDecider = Mock(AllDecider) {
-            1 * decide(_, _, _) >> [outputArtefact]
+            1 * decide(_, _) >> deciderResultToReturn
             1 * findAllSeqTracksInNewWorkflowSystem(_) >> [seqTrack1, seqTrack2]
             0 * _
         }
@@ -154,11 +157,14 @@ class TriggerAlignmentServiceSpec extends HibernateSpec implements ServiceUnitTe
         }
 
         when:
-        Collection<MergingWorkPackage> mergingWorkPackages = service.triggerAlignment([seqTrack1, seqTrack2, seqTrack3] as Set, true, true)
+        TriggerAlignmentResult triggerAlignmentResult = service.triggerAlignment([seqTrack1, seqTrack2, seqTrack3] as Set, true, true)
 
         then:
-        mergingWorkPackages.size() == 2
-        TestCase.assertContainSame(mergingWorkPackages, [mergingWorkPackage1, mergingWorkPackage2])
+        triggerAlignmentResult.newArtefacts.size() == 1
+        TestCase.assertContainSame(triggerAlignmentResult.mergingWorkPackages, [mergingWorkPackage1, mergingWorkPackage2])
+
+        triggerAlignmentResult.infos.contains("Create 1 alignments with old system")
+        triggerAlignmentResult.infos.contains(mergingWorkPackage2.toString())
 
         bamFile1.withdrawn
         bamFile2.withdrawn

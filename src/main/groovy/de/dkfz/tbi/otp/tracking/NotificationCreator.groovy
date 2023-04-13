@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -472,7 +472,7 @@ class NotificationCreator {
         return WorkflowProcessingStatus.values().find { it.done == done && it.mightDoMore == mightDoMore }
     }
 
-    void sendWorkflowCreateSuccessMail(MetaDataFile metaDataFile) {
+    void sendWorkflowCreateSuccessMail(MetaDataFile metaDataFile, String message) {
         metaDataFile.refresh()
         long id = metaDataFile.fastqImportInstance.id
 
@@ -483,6 +483,8 @@ class NotificationCreator {
                 "The workflow creation succeeded:",
                 "Import id: ${id}",
                 "File: ${metaDataFile.fileName}",
+                "",
+                message,
         ].join('\n')
 
         mailHelperService.sendEmailToTicketSystem(subject, body)

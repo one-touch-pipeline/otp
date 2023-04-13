@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -76,21 +76,42 @@ $.otp.triggerAlignment = {
         success: (response) => {
           $('#triggerAlignmentButton').prop('disabled', false);
           // clear content
-          const workPackageList = $('#workPackageList');
-          workPackageList.empty();
-          if (response && Array.isArray(response) && response.length) {
-            response.forEach((workPackage) => {
-              workPackageList.append(`<li>${workPackage}</li>`);
+          const resultInfo = $('#resultInfo');
+          const resultWarning = $('#resultWarning');
+          const resultWorkPackageList = $('#resultWorkPackageList');
+          resultInfo.empty();
+          resultWarning.empty();
+          resultWorkPackageList.empty();
+          if (response) {
+            response.infos.forEach((info) => {
+              resultInfo.append(`<li>${info}</li>`);
             });
-            $.otp.toaster.showSuccessToast(
-              $.otp.triggerAlignment.TOAST_TITLE.TRIGGER_SUCCESS,
-              `${response.length} Alignment workflows have been started successfully. ` +
-              'Refer to result section for details.'
-            );
+            response.warnings.forEach((warning) => {
+              resultWarning.append(`<li>${warning}</li>`);
+            });
+            if (response.warnings.length === 0) {
+              resultWarning.append('<li>none</li>');
+            }
+            response.newWorkPackages.forEach((newWorkPackage) => {
+              resultWorkPackageList.append(`<li>${newWorkPackage}</li>`);
+            });
+            if (response.newWorkPackages.length) {
+              $.otp.toaster.showSuccessToast(
+                $.otp.triggerAlignment.TOAST_TITLE.TRIGGER_SUCCESS,
+                `${response.newWorkPackages.length} Alignment workflows have been started successfully. ` +
+                'Refer to result section for details.'
+              );
+            } else {
+              resultWorkPackageList.append('<li>none</li>');
+              $.otp.toaster.showWarningToast(
+                $.otp.triggerAlignment.TOAST_TITLE.TRIGGER_WARNING,
+                'No alignment workflow has been started. Refer to result section for details.'
+              );
+            }
           } else {
             $.otp.toaster.showWarningToast(
               $.otp.triggerAlignment.TOAST_TITLE.TRIGGER_WARNING,
-              'No alignment workflow has been started. Make sure the workflows are configured correctly.'
+              'Something went wrong during triggering.'
             );
           }
         },

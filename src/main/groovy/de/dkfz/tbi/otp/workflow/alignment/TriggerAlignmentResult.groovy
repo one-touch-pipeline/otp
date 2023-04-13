@@ -19,45 +19,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflowExecution.decider
+package de.dkfz.tbi.otp.workflow.alignment
 
-import grails.gorm.transactions.Transactional
-import groovy.util.logging.Slf4j
-import org.springframework.stereotype.Component
+import groovy.transform.ToString
+import groovy.transform.TupleConstructor
 
-import de.dkfz.tbi.otp.workflow.wgbs.WgbsWorkflow
+import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
+import de.dkfz.tbi.otp.workflowExecution.decider.DeciderResult
 
-@Component
-@Transactional
-@Slf4j
-class WgbsDecider extends AbstractAlignmentDecider {
+@ToString
+@TupleConstructor
+class TriggerAlignmentResult {
 
-    @Override
-    final boolean supportsIncrementalMerging() {
-        return false
-    }
+    @Delegate
+    final DeciderResult deciderResult
 
-    @Override
-    final boolean requiresFastqcResults() {
-        return false
-    }
-
-    @Override
-    final String getWorkflowName() {
-        return WgbsWorkflow.WORKFLOW
-    }
-
-    @Override
-    final String getInputFastqRole() {
-        return WgbsWorkflow.INPUT_FASTQ
-    }
-
-    final String inputFastqcRole = null
-
-    final String inputBaseBamRole = null
-
-    @Override
-    final String getOutputBamRole() {
-        return WgbsWorkflow.OUTPUT_BAM
-    }
+    final Collection<MergingWorkPackage> mergingWorkPackages
 }

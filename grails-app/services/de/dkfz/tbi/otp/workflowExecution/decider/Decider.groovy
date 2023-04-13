@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,7 +24,5 @@ package de.dkfz.tbi.otp.workflowExecution.decider
 import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
 
 interface Decider {
-    abstract Collection<WorkflowArtefact> decide(Collection<WorkflowArtefact> inputArtefacts, boolean forceRun, Map<String, String> userParams)
-
-    abstract Collection<WorkflowArtefact> decide(Collection<WorkflowArtefact> inputArtefacts)
+    abstract DeciderResult decide(Collection<WorkflowArtefact> inputArtefacts, Map<String, String> userParams)
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,10 +24,7 @@ package de.dkfz.tbi.otp.workflowExecution
 import grails.gorm.transactions.Transactional
 import groovy.transform.CompileDynamic
 import groovy.transform.TupleConstructor
-import org.hibernate.LockMode
-import org.hibernate.LockOptions
-import org.hibernate.NullPrecedence
-import org.hibernate.Session
+import org.hibernate.*
 import org.hibernate.criterion.Order
 import org.hibernate.sql.JoinType
 
@@ -145,7 +142,7 @@ class WorkflowRunService {
                 workflowVersion : workflowVersion,
                 displayName     : displayName,
                 shortDisplayName: shortName,
-        ]).save(flush: false)
+        ]).save(flush: false, deepValidate: false)
     }
 
     /**

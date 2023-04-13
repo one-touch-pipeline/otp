@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -65,28 +65,29 @@ class FastqcDecider implements Decider {
     SeqTrackService seqTrackService
 
     @Override
-    Collection<WorkflowArtefact> decide(Collection<WorkflowArtefact> inputArtefacts, boolean forceRun = false, Map<String, String> userParams = [:]) {
+    DeciderResult decide(Collection<WorkflowArtefact> inputArtefacts, Map<String, String> userParams = [:]) {
         final Workflow workflow = workflowService.getExactlyOneWorkflow(BashFastQcWorkflow.WORKFLOW)
 
         //currently fixed to one supported version, will be changed later
         final WorkflowVersion workflowVersion = CollectionUtils.exactlyOneElement(WorkflowVersion.findAllByWorkflow(workflow))
 
-        return inputArtefacts.collectMany { WorkflowArtefact workflowArtefact ->
-            LogUsedTimeUtils.logUsedTime(log, "        decide for: ${workflowArtefact.toString().replaceAll('\n', ', ')}") {
-                decideEach(workflowArtefact, workflowVersion)
-            }
-        }.findAll()
+        return new DeciderResult(
+                newArtefacts: inputArtefacts.collectMany { WorkflowArtefact workflowArtefact ->
+                    LogUsedTimeUtils.logUsedTime(log, "        decide for: ${workflowArtefact.toString().replaceAll('\n', ', ')}") {
+                        decideEach(workflowArtefact, workflowVersion)
+                    }
+                }.findAll()
+        )
     }
 
-    private List<WorkflowArtefact> decideEach(WorkflowArtefact inputArtefact, WorkflowVersion workflowVersion, boolean forceRun = false) {
+    private List<WorkflowArtefact> decideEach(WorkflowArtefact inputArtefact, WorkflowVersion workflowVersion) {
         if (inputArtefact.artefactType != ArtefactType.FASTQ) {
             return []
         }
 
-        if (!forceRun &&
-                WorkflowRunInputArtefact.findAllByWorkflowArtefact(inputArtefact).any {
-                    it.workflowRun.workflow == workflowVersion.workflow
-                }) {
+        if (WorkflowRunInputArtefact.findAllByWorkflowArtefact(inputArtefact).any {
+            it.workflowRun.workflow == workflowVersion.workflow
+        }) {
             return []
         }
 

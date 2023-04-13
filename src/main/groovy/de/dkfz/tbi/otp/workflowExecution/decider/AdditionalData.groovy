@@ -21,43 +21,5 @@
  */
 package de.dkfz.tbi.otp.workflowExecution.decider
 
-import grails.gorm.transactions.Transactional
-import groovy.util.logging.Slf4j
-import org.springframework.stereotype.Component
-
-import de.dkfz.tbi.otp.workflow.wgbs.WgbsWorkflow
-
-@Component
-@Transactional
-@Slf4j
-class WgbsDecider extends AbstractAlignmentDecider {
-
-    @Override
-    final boolean supportsIncrementalMerging() {
-        return false
-    }
-
-    @Override
-    final boolean requiresFastqcResults() {
-        return false
-    }
-
-    @Override
-    final String getWorkflowName() {
-        return WgbsWorkflow.WORKFLOW
-    }
-
-    @Override
-    final String getInputFastqRole() {
-        return WgbsWorkflow.INPUT_FASTQ
-    }
-
-    final String inputFastqcRole = null
-
-    final String inputBaseBamRole = null
-
-    @Override
-    final String getOutputBamRole() {
-        return WgbsWorkflow.OUTPUT_BAM
-    }
+interface AdditionalData {
 }

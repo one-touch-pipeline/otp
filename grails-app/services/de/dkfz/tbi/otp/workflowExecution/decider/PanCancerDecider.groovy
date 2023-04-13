@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,23 +22,15 @@
 package de.dkfz.tbi.otp.workflowExecution.decider
 
 import grails.gorm.transactions.Transactional
-import groovy.transform.CompileDynamic
 import groovy.util.logging.Slf4j
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.workflow.panCancer.PanCancerWorkflow
-import de.dkfz.tbi.otp.workflowExecution.Workflow
 
-@CompileDynamic
 @Component
 @Transactional
 @Slf4j
-class PanCancerDecider extends AlignmentDecider {
-
-    @Override
-    final protected Workflow getWorkflow() {
-        return workflowService.getExactlyOneWorkflow(PanCancerWorkflow.WORKFLOW)
-    }
+class PanCancerDecider extends AbstractAlignmentDecider {
 
     @Override
     final boolean supportsIncrementalMerging() {

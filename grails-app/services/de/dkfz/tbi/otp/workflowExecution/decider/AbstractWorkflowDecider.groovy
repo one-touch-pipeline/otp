@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,12 +22,9 @@
 package de.dkfz.tbi.otp.workflowExecution.decider
 
 import grails.gorm.transactions.Transactional
-import grails.util.Pair
-import groovy.transform.CompileDynamic
 import groovy.util.logging.Slf4j
 
 import de.dkfz.tbi.otp.ngsdata.SeqType
-import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.LogUsedTimeUtils
 import de.dkfz.tbi.otp.workflowExecution.*
 
@@ -37,11 +34,13 @@ import de.dkfz.tbi.otp.workflowExecution.*
  * knows all requirements
  * is called with a list of new/changed workflow artefacts
  */
-@CompileDynamic
 @Transactional
 @Slf4j
-abstract class AbstractWorkflowDecider implements Decider {
+abstract class AbstractWorkflowDecider<ADL extends ArtefactDataList, G extends BaseDeciderGroup, AD extends AdditionalData> implements Decider {
 
+    /**
+     * returns the workflow the decider created workflow runs for.
+     */
     abstract protected Workflow getWorkflow()
 
     /**
@@ -49,26 +48,15 @@ abstract class AbstractWorkflowDecider implements Decider {
      */
     abstract protected Set<ArtefactType> getSupportedInputArtefactTypes()
 
-    /**
-     * Returns the sequencing type of an artefact.
-     */
-    abstract protected SeqType getSeqType(WorkflowArtefact inputArtefact)
+    abstract protected ADL fetchInputArtefacts(Collection<WorkflowArtefact> inputArtefacts, Set<SeqType> seqTypes)
 
-    /**
-     * Search in database for additional required WorkflowArtefacts.
-     * That are workflowArtefacts created by an earlier import and therefore not in the input list.
-     * Will be implemented in concrete Deciders, since the decider per workflows knows what is needed
-     * Make sure that in the search for the other required workflow artefacts no artefacts in state FAILED or OMITTED_MISSING_PRECONDITION or
-     * withdrawn artefacts are considered)
-     */
-    abstract protected Collection<WorkflowArtefact> findAdditionalRequiredInputArtefacts(Collection<WorkflowArtefact> inputArtefacts)
+    abstract protected ADL fetchAdditionalArtefacts(ADL inputArtefactDataList)
 
-    /**
-     * Group all workflow artefacts based on the fact if they can be processed together within WorkflowRun (e.g. individual, sample type).
-     * The inner collection are inputs for one workflow run..
-     */
-    abstract protected Collection<Collection<WorkflowArtefact>> groupArtefactsForWorkflowExecution(Collection<WorkflowArtefact> inputArtefacts,
-                                                                                                   Map<String, String> userParams)
+    abstract protected AD fetchAdditionalData(ADL inputArtefactDataList, Workflow workflow)
+
+    abstract protected List<WorkflowVersionSelector> fetchWorkflowVersionSelector(ADL inputArtefactDataList, Workflow workflow)
+
+    abstract protected Map<G, ADL> groupData(ADL inputArtefactDataList, AD additionalData, Map<String, String> userParams)
 
     /**
      * Iterate over the different collections
@@ -88,55 +76,85 @@ abstract class AbstractWorkflowDecider implements Decider {
      *     Create all corresponding output WorkflowArtefacts
      * Returns all output WorkflowArtefacts or an empty list
      */
-    abstract protected Collection<WorkflowArtefact> createWorkflowRunsAndOutputArtefacts(Collection<Collection<WorkflowArtefact>> groupedArtefacts,
-                                                                                         Collection<WorkflowArtefact> initialArtefacts, WorkflowVersion version)
-
-    /**
-     * Group the artefacts by project and seqtype.
-     */
-    abstract protected Map<Pair<Project, SeqType>, List<WorkflowArtefact>> groupInputArtefacts(Collection<WorkflowArtefact> inputArtefacts)
+    @SuppressWarnings("ParameterCount")
+    abstract protected DeciderResult createWorkflowRunsAndOutputArtefacts(
+            ProjectSeqTypeGroup projectSeqTypeGroup, G group,
+            ADL givenArtefacts, ADL additionalArtefacts,
+            AD additionalData, WorkflowVersion version)
 
     @Override
-    final Collection<WorkflowArtefact> decide(Collection<WorkflowArtefact> inputArtefacts, boolean forceRun = false, Map<String, String> userParams = [:]) {
-        Set<ArtefactType> supportedTypes = supportedInputArtefactTypes
-        Set<SeqType> supportedSeqTypes = workflow.supportedSeqTypes
-        Collection<WorkflowArtefact> filteredInputArtefacts = LogUsedTimeUtils.logUsedTime(log, "        filter artefacts") {
-            inputArtefacts
-                    .findAll { it.artefactType in supportedTypes }
-                    .findAll { getSeqType(it) in supportedSeqTypes }
+    final DeciderResult decide(Collection<WorkflowArtefact> inputWorkflowArtefacts, Map<String, String> userParams = [:]) {
+        DeciderResult deciderResult = new DeciderResult()
+        Workflow w = workflow
+        deciderResult.infos << "start decider for ${w}".toString()
+        Set<SeqType> supportedSeqTypes = w.supportedSeqTypes ?: SeqType.list() as Set
+
+        ADL inputArtefactDataList = LogUsedTimeUtils.logUsedTime(log, "        fetch concrete Artefacts") {
+            fetchInputArtefacts(inputWorkflowArtefacts, supportedSeqTypes)
         }
-        Map<Pair<Project, SeqType>, Set<WorkflowArtefact>> groupedInputArtefacts =
-                LogUsedTimeUtils.logUsedTime(log, "        group artefacts by project and seqType") {
-                    groupInputArtefacts(filteredInputArtefacts)
+
+        if (inputArtefactDataList.empty) {
+            String msg = "no data found for ${workflow}, skipp"
+            log.debug("        ${msg}")
+            deciderResult.infos << msg.toString()
+            return deciderResult
+        }
+
+        ADL additionalArtefactDataList = LogUsedTimeUtils.logUsedTime(log, "        fetch additional Artefacts") {
+            fetchAdditionalArtefacts(inputArtefactDataList)
+        }
+
+        AD additionalData = LogUsedTimeUtils.logUsedTime(log, "        fetch additional Data") {
+            fetchAdditionalData(inputArtefactDataList, w)
+        }
+
+        Map<ProjectSeqTypeGroup, WorkflowVersionSelector> workflowVersionSelectorMap =
+                LogUsedTimeUtils.logUsedTime(log, "        fetch workflow selectors") {
+                    fetchWorkflowVersionSelector(inputArtefactDataList, w).collectEntries {
+                        assert !it.project.archived
+                        [(new ProjectSeqTypeGroup(it.project, it.seqType)): it]
+                    }
                 }
-        return LogUsedTimeUtils.logUsedTimeStartEnd(log, "        handle artefact groups") {
-            groupedInputArtefacts.collectMany { entry ->
-                LogUsedTimeUtils.logUsedTimeStartEnd(log, "          handle artefact group: ${entry.key.aValue} ${entry.key.bValue}") {
-                    assert !entry.key.aValue.archived
-                    WorkflowVersionSelector matchingWorkflows = WorkflowVersionSelector.createCriteria().get {
-                        eq('project', entry.key.aValue)
-                        eq('seqType', entry.key.bValue)
-                        workflowVersion {
-                            eq('workflow', workflow)
-                        }
-                        isNull('deprecationDate')
+
+        Map<G, ADL> groupedInputData = LogUsedTimeUtils.logUsedTime(log, "        group given Artefacts") {
+            groupData(inputArtefactDataList, additionalData, userParams)
+        }
+
+        Map<G, ADL> groupedAdditionalData = LogUsedTimeUtils.logUsedTime(log, "        group additional Artefacts") {
+            groupData(additionalArtefactDataList, additionalData, userParams)
+        }
+
+        Map<ProjectSeqTypeGroup, Map<G, ADL>> groupedPerProjectSeqType =
+                LogUsedTimeUtils.logUsedTime(log, "        grouped per project / seqType") {
+                    groupedInputData.groupBy {
+                        new ProjectSeqTypeGroup(it.key.individual.project, it.key.seqType)
                     }
+                }
+
+        LogUsedTimeUtils.logUsedTimeStartEnd(log, "        handle ${groupedPerProjectSeqType.size()} base groups") {
+            groupedPerProjectSeqType.each { ProjectSeqTypeGroup baseGroup, Map<G, ADL> groups ->
+                LogUsedTimeUtils.logUsedTimeStartEnd(log, "          handle base group ${baseGroup} with ${groups.size()} groups") {
+                    WorkflowVersionSelector matchingWorkflows = workflowVersionSelectorMap[baseGroup]
                     if (!matchingWorkflows) {
-                        return []
+                        log.debug("            skip, since no workflow version is configured")
+                        deciderResult.infos << "${w}: Ignore ${baseGroup}, since no workflow version available".toString()
+                        return
                     }
-                    Collection<WorkflowArtefact> combinedWorkflowArtefacts =
-                            LogUsedTimeUtils.logUsedTime(log, "          fetch additional artefacts for group") {
-                                (entry.value + findAdditionalRequiredInputArtefacts(entry.value)).unique()
-                            }
-                    Collection<Collection<WorkflowArtefact>> artefactsPerWorkflowRun =
-                            LogUsedTimeUtils.logUsedTime(log, "          group artefact for workflow run") {
-                                groupArtefactsForWorkflowExecution(combinedWorkflowArtefacts, userParams)
-                            }
-                    return LogUsedTimeUtils.logUsedTimeStartEnd(log, "          create ${artefactsPerWorkflowRun.size()} new artefacts and workflow runs") {
-                        createWorkflowRunsAndOutputArtefacts(artefactsPerWorkflowRun, filteredInputArtefacts, matchingWorkflows.workflowVersion)
+
+                    groups.each { G group, ADL givenArtefacts ->
+                        LogUsedTimeUtils.logUsedTimeStartEnd(log, "            handle group ${group}") {
+                            ADL additionalArtefacts = groupedAdditionalData[group]
+                            deciderResult.add(createWorkflowRunsAndOutputArtefacts(
+                                    baseGroup, group,
+                                    givenArtefacts, additionalArtefacts,
+                                    additionalData,
+                                    matchingWorkflows.workflowVersion))
+                        }
                     }
                 }
             }
         }
+        deciderResult.infos << "end decider for ${w}".toString()
+        return deciderResult
     }
 }

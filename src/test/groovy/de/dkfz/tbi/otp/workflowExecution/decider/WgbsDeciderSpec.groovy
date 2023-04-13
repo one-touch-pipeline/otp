@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,26 +21,54 @@
  */
 package de.dkfz.tbi.otp.workflowExecution.decider
 
-import grails.testing.gorm.DataTest
-import spock.lang.Specification
-
-import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
-import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.workflow.wgbs.WgbsWorkflow
-import de.dkfz.tbi.otp.workflowExecution.*
+import de.dkfz.tbi.otp.workflowExecution.ArtefactType
+import de.dkfz.tbi.otp.workflowExecution.WorkflowService
 
-class WgbsDeciderSpec extends Specification implements DataTest, WorkflowSystemDomainFactory, IsRoddy {
+class WgbsDeciderSpec extends AbstractAlignmentDeciderSpec {
 
-    WgbsDecider decider = new WgbsDecider()
-
-    @Override
-    Class[] getDomainClassesToMock() {
-        return [
-                Workflow,
-        ]
+    void setup() {
+        decider = new WgbsDecider()
+        useFastqcCount = 0
     }
 
-    void "test getWorkflow"() {
+    void "supportsIncrementalMerging"() {
+        expect:
+        decider.supportsIncrementalMerging() == false
+    }
+
+    void "requiresFastqcResults"() {
+        expect:
+        decider.requiresFastqcResults() == false
+    }
+
+    void "getWorkflowName"() {
+        expect:
+        decider.workflowName == WgbsWorkflow.WORKFLOW
+    }
+
+    void "getInputFastqRole"() {
+        expect:
+        decider.inputFastqRole == WgbsWorkflow.INPUT_FASTQ
+    }
+
+    void "getInputFastqcRole"() {
+        expect:
+        decider.inputFastqcRole == null
+    }
+
+    void "getInputBaseBamRole"() {
+        expect:
+        decider.inputBaseBamRole == null
+    }
+
+    void "getOutputBamRole"() {
+        expect:
+        decider.outputBamRole == WgbsWorkflow.OUTPUT_BAM
+    }
+
+    void "getWorkflow"() {
         given:
         decider.workflowService = new WorkflowService()
         createWorkflow(name: WgbsWorkflow.WORKFLOW)
@@ -49,10 +77,10 @@ class WgbsDeciderSpec extends Specification implements DataTest, WorkflowSystemD
         decider.workflow.name == WgbsWorkflow.WORKFLOW
     }
 
-    void "test getSupportedInputArtefactTypes"() {
+    void "getSupportedInputArtefactTypes"() {
         expect:
-        decider.supportedInputArtefactTypes == [
+        TestCase.assertContainSame(decider.supportedInputArtefactTypes, [
                 ArtefactType.FASTQ,
-        ] as Set
+        ])
     }
 }

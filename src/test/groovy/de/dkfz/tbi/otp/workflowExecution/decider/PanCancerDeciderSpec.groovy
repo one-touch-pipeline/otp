@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,26 +21,56 @@
  */
 package de.dkfz.tbi.otp.workflowExecution.decider
 
-import grails.testing.gorm.DataTest
-import spock.lang.Specification
+import spock.lang.Unroll
 
-import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
-import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.workflow.panCancer.PanCancerWorkflow
-import de.dkfz.tbi.otp.workflowExecution.*
+import de.dkfz.tbi.otp.workflowExecution.ArtefactType
+import de.dkfz.tbi.otp.workflowExecution.WorkflowService
 
-class PanCancerDeciderSpec extends Specification implements DataTest, WorkflowSystemDomainFactory, IsRoddy {
+class PanCancerDeciderSpec extends AbstractAlignmentDeciderSpec {
 
-    PanCancerDecider decider = new PanCancerDecider()
-
-    @Override
-    Class[] getDomainClassesToMock() {
-        return [
-                Workflow,
-        ]
+    void setup() {
+        decider = new PanCancerDecider()
+        useFastqcCount = 1
     }
 
-    void "test getWorkflow"() {
+    void "supportsIncrementalMerging"() {
+        expect:
+        decider.supportsIncrementalMerging() == true
+    }
+
+    void "requiresFastqcResults"() {
+        expect:
+        decider.requiresFastqcResults() == true
+    }
+
+    void "getWorkflowName"() {
+        expect:
+        decider.workflowName == PanCancerWorkflow.WORKFLOW
+    }
+
+    void "getInputFastqRole"() {
+        expect:
+        decider.inputFastqRole == PanCancerWorkflow.INPUT_FASTQ
+    }
+
+    void "getInputFastqcRole"() {
+        expect:
+        decider.inputFastqcRole == PanCancerWorkflow.INPUT_FASTQC
+    }
+
+    void "getInputBaseBamRole"() {
+        expect:
+        decider.inputBaseBamRole == PanCancerWorkflow.INPUT_BASE_BAM_FILE
+    }
+
+    void "getOutputBamRole"() {
+        expect:
+        decider.outputBamRole == PanCancerWorkflow.OUTPUT_BAM
+    }
+
+    void "getWorkflow"() {
         given:
         decider.workflowService = new WorkflowService()
         createWorkflow(name: PanCancerWorkflow.WORKFLOW)
@@ -49,12 +79,35 @@ class PanCancerDeciderSpec extends Specification implements DataTest, WorkflowSy
         decider.workflow.name == PanCancerWorkflow.WORKFLOW
     }
 
-    void "test getSupportedInputArtefactTypes"() {
+    void "getSupportedInputArtefactTypes"() {
         expect:
-        decider.supportedInputArtefactTypes == [
+        TestCase.assertContainSame(decider.supportedInputArtefactTypes, [
                 ArtefactType.FASTQ,
                 ArtefactType.FASTQC,
                 ArtefactType.BAM,
-        ] as Set
+        ])
+    }
+
+    @Unroll
+    void "createWorkflowRunsAndOutputArtefacts, PanCancer cases, when #name, then do not create a new bam file and create a warning"() {
+        given:
+        createDataForCreateWorkflowRunsAndOutputArtefacts(createMwp, [(key): value])
+
+        and: 'services'
+        createEmptyServicesForCreateWorkflowRunsAndOutputArtefacts(mailCount)
+
+        when:
+        DeciderResult deciderResult = decider.createWorkflowRunsAndOutputArtefacts(projectSeqTypeGroup, alignmentDeciderGroup,
+                dataList, additionalDataList, additionalData, workflowVersion)
+
+        then:
+        deciderResult.newArtefacts.empty
+        deciderResult.warnings.size() == 1
+        deciderResult.warnings.first().contains(warningMessagePart)
+
+        where:
+        name                     | createMwp | key             | value | mailCount || warningMessagePart
+        'missing fastqc'         | false     | 'missingFastqc' | true  | 0         || "since input contains the following fastq without all corresponding fastqc"
+        'fastqc without seqrack' | false     | 'toManyFastqc'  | true  | 0         || "since input contains the following fastqc without corresponding fastq"
     }
 }

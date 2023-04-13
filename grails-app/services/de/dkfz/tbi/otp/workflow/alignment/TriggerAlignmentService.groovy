@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -31,9 +31,11 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePairDeciderService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.tracking.OtrsTicketService
+import de.dkfz.tbi.otp.utils.LogUsedTimeUtils
 import de.dkfz.tbi.otp.withdraw.RoddyBamFileWithdrawService
 import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.otp.workflowExecution.decider.AllDecider
+import de.dkfz.tbi.otp.workflowExecution.decider.DeciderResult
 
 @CompileDynamic
 @Transactional(readOnly = true)
@@ -49,12 +51,14 @@ class TriggerAlignmentService {
 
     @Transactional(readOnly = false)
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    Collection<MergingWorkPackage> triggerAlignment(Collection<SeqTrack> seqTracks, boolean withdrawBamFiles = false, boolean ignoreSeqPlatformGroup = false) {
+    TriggerAlignmentResult triggerAlignment(Collection<SeqTrack> seqTracks, boolean withdrawBamFiles = false, boolean ignoreSeqPlatformGroup = false) {
         // Mark the bam files as withdrawn
         if (withdrawBamFiles) {
-            roddyBamFileWithdrawService.collectObjects(seqTracks as List<SeqTrack>).each { RoddyBamFile bamFile ->
-                bamFile.withdraw()
-                bamFile.save(flush: true)
+            LogUsedTimeUtils.logUsedTimeStartEnd(log, "withdrawn existing bamFiles") {
+                roddyBamFileWithdrawService.collectObjects(seqTracks as List<SeqTrack>).each { RoddyBamFile bamFile ->
+                    bamFile.withdraw()
+                    bamFile.save(flush: true)
+                }
             }
         }
 
@@ -64,20 +68,43 @@ class TriggerAlignmentService {
         }
 
         // Start alignment workflows
-        Collection<SeqTrack> seqTracksInNewWorkflowSystem = allDecider.findAllSeqTracksInNewWorkflowSystem(seqTracks)
-        Collection<MergingWorkPackage> mergingWorkPackages = allDecider.decide(seqTracksInNewWorkflowSystem*.workflowArtefact, false, [
+        Collection<SeqTrack> seqTracksInNewWorkflowSystem = LogUsedTimeUtils.logUsedTime(log, "search seqTracks new system") {
+            allDecider.findAllSeqTracksInNewWorkflowSystem(seqTracks)
+        }
+        Collection<SeqTrack> seqTracksInOldWorkflowSystem = LogUsedTimeUtils.logUsedTime(log, "search seqTracks old system") {
+            seqTracks - seqTracksInNewWorkflowSystem
+        }
+        DeciderResult deciderResult = allDecider.decide(seqTracksInNewWorkflowSystem*.workflowArtefact, [
                 ignoreSeqPlatformGroup: ignoreSeqPlatformGroup.toString()
-        ]).findAll {
+        ])
+        Collection<MergingWorkPackage> mergingWorkPackagesNew = deciderResult.newArtefacts.findAll {
             it.artefactType == ArtefactType.BAM
-        }*.artefact*.get()*.workPackage + (seqTracks - seqTracksInNewWorkflowSystem).collectMany {
-            seqTrackService.decideAndPrepareForAlignment(it)
-        }.unique()
+        }*.artefact*.get()*.workPackage
 
-        if (mergingWorkPackages) {
-            samplePairDeciderService.findOrCreateSamplePairs(mergingWorkPackages)
+        Collection<MergingWorkPackage> mergingWorkPackagesOld = LogUsedTimeUtils.logUsedTime(log, "trigger alignment old system") {
+            seqTracksInOldWorkflowSystem.collectMany {
+                seqTrackService.decideAndPrepareForAlignment(it)
+            }.unique()
         }
 
-        return mergingWorkPackages
+        if (mergingWorkPackagesOld) {
+            deciderResult.infos << "Create ${mergingWorkPackagesOld.size()} alignments with old system".toString()
+            mergingWorkPackagesOld.each {
+                deciderResult.infos << it.toString()
+            }
+        }
+
+        Collection<MergingWorkPackage> mergingWorkPackages = mergingWorkPackagesNew + mergingWorkPackagesOld
+
+        if (mergingWorkPackages) {
+            LogUsedTimeUtils.logUsedTime(log, "create analyses") {
+                samplePairDeciderService.findOrCreateSamplePairs(mergingWorkPackages)
+            }
+        }
+
+        log.debug(deciderResult.toString())
+
+        return new TriggerAlignmentResult(deciderResult, mergingWorkPackages)
     }
 
     /**

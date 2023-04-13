@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -284,6 +284,7 @@ ILSe 5678, runA, lane 1, ${sampleText}
     void 'sendWorkflowCreateSuccessMail, when called, the send success mail'() {
         given:
         OtrsTicket ticket = createOtrsTicket()
+        String message = "Some text ${nextId}"
         MetaDataFile metaDataFile = DomainFactory.createMetaDataFile([
                 fastqImportInstance: createFastqImportInstance([
                         otrsTicket: ticket,
@@ -292,7 +293,7 @@ ILSe 5678, runA, lane 1, ${sampleText}
         notificationCreator.mailHelperService = Mock(MailHelperService)
 
         when:
-        notificationCreator.sendWorkflowCreateSuccessMail(metaDataFile)
+        notificationCreator.sendWorkflowCreateSuccessMail(metaDataFile, message)
 
         then:
         1 * notificationCreator.mailHelperService.sendEmailToTicketSystem(_, _) >> { String emailSubject, String content ->
@@ -300,6 +301,7 @@ ILSe 5678, runA, lane 1, ${sampleText}
             assert emailSubject.contains("Workflow created successfully for ${metaDataFile.fileName}")
             assert content.contains("The workflow creation succeeded:")
             assert content.contains("Import id: ${metaDataFile.fastqImportInstance.id}")
+            assert content.contains(message)
         }
     }
 

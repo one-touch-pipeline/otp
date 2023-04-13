@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -35,6 +35,7 @@ import de.dkfz.tbi.otp.tracking.NotificationCreator
 import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 import de.dkfz.tbi.otp.workflow.datainstallation.DataInstallationInitializationService
 import de.dkfz.tbi.otp.workflowExecution.decider.AllDecider
+import de.dkfz.tbi.otp.workflowExecution.decider.DeciderResult
 
 class WorkflowCreatorSchedulerSpec extends HibernateSpec implements ServiceUnitTest<WorkflowCreatorScheduler>, RoddyPancanFactory, UserDomainFactory,
         WorkflowSystemDomainFactory {
@@ -119,6 +120,8 @@ class WorkflowCreatorSchedulerSpec extends HibernateSpec implements ServiceUnitT
                     artefactType: artefactType,
             ])
         }
+        DeciderResult deciderResult = new DeciderResult()
+        deciderResult.newArtefacts.addAll(workflowArtefacts)
 
         List<AbstractMergedBamFile> expectedListForSnv = []
         if (artefactType == ArtefactType.BAM) {
@@ -147,10 +150,10 @@ class WorkflowCreatorSchedulerSpec extends HibernateSpec implements ServiceUnitT
         2 * scheduler.fastqImportInstanceService.countInstancesInWaitingState() >> 1
         1 * scheduler.dataInstallationInitializationService.createWorkflowRuns(fastqImportInstance) >> runs
         0 * scheduler.dataInstallationInitializationService._
-        1 * scheduler.allDecider.decide(_, _) >> workflowArtefacts
+        1 * scheduler.allDecider.decide(_) >> deciderResult
         1 * scheduler.samplePairDeciderService.findOrCreateSamplePairs(expectedListForSnv)
         0 * scheduler.samplePairDeciderService._
-        1 * scheduler.notificationCreator.sendWorkflowCreateSuccessMail(_)
+        1 * scheduler.notificationCreator.sendWorkflowCreateSuccessMail(_, _)
 
         where:
         name                                | artefactType       | analysableSeqType
@@ -178,7 +181,7 @@ class WorkflowCreatorSchedulerSpec extends HibernateSpec implements ServiceUnitT
         1 * scheduler.fastqImportInstanceService.countInstancesInWaitingState() >> 1
         1 * scheduler.dataInstallationInitializationService.createWorkflowRuns(fastqImportInstance) >> runs
         0 * scheduler.dataInstallationInitializationService._
-        1 * scheduler.allDecider.decide(_, _) >> { throw otpRuntimeException }
+        1 * scheduler.allDecider.decide(_) >> { throw otpRuntimeException }
         0 * scheduler.samplePairDeciderService.findOrCreateSamplePairs(_)
         1 * scheduler.notificationCreator.sendWorkflowCreateErrorMail(metaDataFile, otpRuntimeException)
     }

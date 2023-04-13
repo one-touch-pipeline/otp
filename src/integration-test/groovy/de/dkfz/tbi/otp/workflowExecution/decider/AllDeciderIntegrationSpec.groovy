@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflowExecution
+package de.dkfz.tbi.otp.workflowExecution.decider
 
 import grails.gorm.transactions.Rollback
 import grails.testing.mixin.integration.Integration
@@ -29,7 +29,7 @@ import spock.lang.Specification
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.FastqcWorkflowDomainFactory
 import de.dkfz.tbi.otp.workflow.panCancer.PanCancerWorkflow
 import de.dkfz.tbi.otp.workflow.wgbs.WgbsWorkflow
-import de.dkfz.tbi.otp.workflowExecution.decider.AllDecider
+import de.dkfz.tbi.otp.workflowExecution.*
 
 @Rollback
 @Integration
@@ -49,9 +49,10 @@ class AllDeciderIntegrationSpec extends Specification implements ServiceUnitTest
         Collection<WorkflowArtefact> allWorkflowArtefacts = [wa1, wa2]
 
         when:
-        Collection<WorkflowArtefact> newWorkflowArtefacts = allDecider.decide(allWorkflowArtefacts, false, [:])
+        DeciderResult deciderResult = allDecider.decide(allWorkflowArtefacts, [:])
 
         then:
-        newWorkflowArtefacts == []
+        deciderResult.newArtefacts.empty
+        deciderResult.warnings.empty
     }
 }

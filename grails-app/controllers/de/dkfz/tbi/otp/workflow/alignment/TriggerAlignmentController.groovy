@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,7 +25,6 @@ import grails.converters.JSON
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.SearchSeqTrackService
-import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.ngsdata.SeqTypeService
 
@@ -113,8 +112,13 @@ class TriggerAlignmentController {
         boolean ignoreSeqPlatformGroup = Boolean.parseBoolean(params[PARAM_KEY_IGNORE_SEQ_GROUP])
         boolean withdrawBamFiles = Boolean.parseBoolean(params[PARAM_KEY_WITHDRAW_BAMFILES])
 
-        Collection<MergingWorkPackage> workPackages = triggerAlignmentService.triggerAlignment(seqTracks, withdrawBamFiles, ignoreSeqPlatformGroup)
+        TriggerAlignmentResult triggerAlignmentResult = triggerAlignmentService.triggerAlignment(seqTracks, withdrawBamFiles, ignoreSeqPlatformGroup)
 
-        return render(workPackages*.toString() as JSON)
+        return render([
+                success        : !triggerAlignmentResult.mergingWorkPackages.empty,
+                infos          : triggerAlignmentResult.infos,
+                warnings       : triggerAlignmentResult.warnings,
+                newWorkPackages: triggerAlignmentResult.mergingWorkPackages*.toString(),
+        ] as JSON)
     }
 }

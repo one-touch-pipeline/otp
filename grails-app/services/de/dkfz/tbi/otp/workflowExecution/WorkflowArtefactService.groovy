@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -49,7 +49,7 @@ class WorkflowArtefactService {
                 state           : WorkflowArtefact.State.PLANNED_OR_RUNNING,
                 artefactType    : values.artefactType,
                 displayName     : displayName,
-        ]).save(flush: false)
+        ]).save(flush: false, deepValidate: false)
     }
 }
 

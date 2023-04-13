@@ -1,5 +1,5 @@
 %{--
-  - Copyright 2011-2021 The OTP authors
+  - Copyright 2011-2023 The OTP authors
   -
   - Permission is hereby granted, free of charge, to any person obtaining a copy
   - of this software and associated documentation files (the "Software"), to deal
@@ -20,12 +20,37 @@
   - SOFTWARE.
   --}%
 
-<div class="card">
-    <div class="card-header">
-        <i class="bi bi-list"></i> <g:message code="triggerAlignment.result.title"/>
+<div class="accordion" id="result">
+    <div class="card">
+        <div class="card-header">
+            <i class="bi bi-list"></i> <g:message code="triggerAlignment.result.warning.title"/>
+        </div>
+
+        <div class="card-body">
+            <ul id="resultWarning" class="list-group" style="white-space: pre-line;">
+            </ul>
+        </div>
     </div>
-    <div class="card-body">
-        <ul id="workPackageList" class="list-group">
-        </ul>
+
+    <div class="card">
+        <div class="card-header">
+            <i class="bi bi-list"></i> <g:message code="triggerAlignment.result.bamFile.title"/>
+        </div>
+
+        <div class="card-body">
+            <ul id="resultWorkPackageList" class="list-group" style="white-space: pre-line;">
+            </ul>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <i class="bi bi-list"></i> <g:message code="triggerAlignment.result.info.title"/>
+        </div>
+
+        <div class="card-body">
+            <ul id="resultInfo" class="list-group" style="white-space: pre-line;">
+            </ul>
+        </div>
     </div>
 </div>

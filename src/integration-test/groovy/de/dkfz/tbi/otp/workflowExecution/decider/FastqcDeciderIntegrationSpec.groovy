@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,8 +21,8 @@
  */
 package de.dkfz.tbi.otp.workflowExecution.decider
 
-import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import spock.lang.Specification
 
 import de.dkfz.tbi.TestCase
@@ -78,11 +78,12 @@ class FastqcDeciderIntegrationSpec extends Specification implements FastqcWorkfl
         decider.workflowArtefactService = new WorkflowArtefactService()
 
         when:
-        Collection<WorkflowArtefact> result = decider.decide([wa1, wa2, wa3])
+        DeciderResult result = decider.decide([wa1, wa2, wa3])
 
         then:
-        result.size() == 2
-        result.every {
+        result.warnings.empty
+        result.newArtefacts.size() == 2
+        result.newArtefacts.every {
             assert it.artefactType == ArtefactType.FASTQC
             true
         }
@@ -91,6 +92,6 @@ class FastqcDeciderIntegrationSpec extends Specification implements FastqcWorkfl
         inputArtefact.workflowRun.workflow == workflow
         inputArtefact.workflowRun.combinedConfig == '{"WORKFLOWS":{"resource":"1"}}'
         inputArtefact.workflowRun.workDirectory == "/output-dir-fastqc"
-        TestCase.assertContainSame(result*.artefact*.get()*.dataFile, dataFiles)
+        TestCase.assertContainSame(result.newArtefacts*.artefact*.get()*.dataFile, dataFiles)
     }
 }

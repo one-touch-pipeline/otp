@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -36,6 +36,7 @@ import de.dkfz.tbi.otp.tracking.NotificationCreator
 import de.dkfz.tbi.otp.utils.SystemUserUtils
 import de.dkfz.tbi.otp.workflow.datainstallation.DataInstallationInitializationService
 import de.dkfz.tbi.otp.workflowExecution.decider.AllDecider
+import de.dkfz.tbi.otp.workflowExecution.decider.DeciderResult
 
 import static grails.async.Promises.task
 
@@ -97,9 +98,10 @@ class WorkflowCreatorScheduler {
     @SuppressWarnings("CatchThrowable")
     protected void createWorkflowsTask(MetaDataFile metaDataFile) {
         try {
-            createWorkflowsTransactional(metaDataFile)
+            DeciderResult deciderResult = createWorkflowsTransactional(metaDataFile)
+            String message = messageFromDeciderResult(deciderResult)
 
-            notificationCreator.sendWorkflowCreateSuccessMail(metaDataFile)
+            notificationCreator.sendWorkflowCreateSuccessMail(metaDataFile, message)
         } catch (Throwable throwable) {
             log.debug("  failed workflow creation for ${metaDataFile.fileName}", throwable)
             try {
@@ -118,7 +120,7 @@ class WorkflowCreatorScheduler {
     }
 
     @Transactional
-    private void createWorkflowsTransactional(MetaDataFile metaDataFile) {
+    private DeciderResult createWorkflowsTransactional(MetaDataFile metaDataFile) {
         MetaDataFile metaDataFileFromDb = MetaDataFile.get(metaDataFile.id)
         Long timeCreateWorkflowRuns = System.currentTimeMillis()
         FastqImportInstance fastqImportInstance = metaDataFileFromDb.fastqImportInstance
@@ -131,14 +133,15 @@ class WorkflowCreatorScheduler {
         log.debug("  create workflow runs finished for ${count} datafiles after: ${System.currentTimeMillis() - timeCreateWorkflowRuns}ms")
         Long timeDecider = System.currentTimeMillis()
         log.debug("  decider started")
-        Collection<WorkflowArtefact> workflowArtefacts = allDecider.decide(runs.collectMany { it.outputArtefacts*.value }, false)
+        DeciderResult deciderResult = allDecider.decide(runs.collectMany { it.outputArtefacts*.value })
         log.debug("  decider finished for ${count} datafiles after: ${System.currentTimeMillis() - timeDecider}ms")
 
-        createSamplePairs(workflowArtefacts, count)
+        createSamplePairs(deciderResult.newArtefacts, count)
 
         fastqImportInstanceService.updateState(fastqImportInstance, FastqImportInstance.WorkflowCreateState.SUCCESS)
         log.debug("create workflows finishs for ${metaDataFileFromDb.fileName} " +
                 "(dataFiles: ${count}, ${fastqImportInstanceService.countInstancesInWaitingState()} in queue)")
+        return deciderResult
     }
 
     /**
@@ -164,5 +167,34 @@ class WorkflowCreatorScheduler {
             samplePairDeciderService.findOrCreateSamplePairs(mergingWorkPackages)
         }
         log.debug("  sample pair creation finished for ${count} datafiles after: ${System.currentTimeMillis() - timeSamplePairs}ms")
+    }
+
+    @Transactional
+    private String messageFromDeciderResult(DeciderResult deciderResult) {
+        List<String> message = []
+        message << "Decider Results"
+        if (deciderResult.warnings) {
+            message << "Decider created ${deciderResult.warnings.size()} warnings:".toString()
+            deciderResult.warnings.each {
+                message << "- ${it}".toString()
+            }
+            message << ""
+        }
+        if (deciderResult.newArtefacts) {
+            message << "Decider created ${deciderResult.newArtefacts.size()} workflow runs / artefact:".toString()
+            deciderResult.newArtefacts.each {
+                Optional<Artefact> optionalArtefact = it.artefact
+                String artefactText = optionalArtefact.present ? optionalArtefact.get().toString() : '-'
+                message << "- ${it.producedBy}: ${artefactText}".toString()
+            }
+        } else {
+            message << "No artefacts created"
+        }
+        message << ""
+        message << "Decider log: "
+        deciderResult.infos.each {
+            message << "- ${it}".toString()
+        }
+        return message.join('\n')
     }
 }

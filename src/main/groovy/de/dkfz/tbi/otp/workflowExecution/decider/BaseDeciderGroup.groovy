@@ -21,43 +21,20 @@
  */
 package de.dkfz.tbi.otp.workflowExecution.decider
 
-import grails.gorm.transactions.Transactional
-import groovy.util.logging.Slf4j
-import org.springframework.stereotype.Component
+import groovy.transform.EqualsAndHashCode
+import groovy.transform.ToString
 
-import de.dkfz.tbi.otp.workflow.wgbs.WgbsWorkflow
+import de.dkfz.tbi.otp.ngsdata.Individual
+import de.dkfz.tbi.otp.ngsdata.SeqType
 
-@Component
-@Transactional
-@Slf4j
-class WgbsDecider extends AbstractAlignmentDecider {
+@ToString(includePackage = false, includeNames = true)
+@EqualsAndHashCode
+class BaseDeciderGroup implements DeciderGroup {
+    final Individual individual
+    final SeqType seqType
 
-    @Override
-    final boolean supportsIncrementalMerging() {
-        return false
-    }
-
-    @Override
-    final boolean requiresFastqcResults() {
-        return false
-    }
-
-    @Override
-    final String getWorkflowName() {
-        return WgbsWorkflow.WORKFLOW
-    }
-
-    @Override
-    final String getInputFastqRole() {
-        return WgbsWorkflow.INPUT_FASTQ
-    }
-
-    final String inputFastqcRole = null
-
-    final String inputBaseBamRole = null
-
-    @Override
-    final String getOutputBamRole() {
-        return WgbsWorkflow.OUTPUT_BAM
+    BaseDeciderGroup(Individual individual, SeqType seqType) {
+        this.individual = individual
+        this.seqType = seqType
     }
 }

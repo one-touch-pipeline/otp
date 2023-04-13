@@ -21,43 +21,41 @@
  */
 package de.dkfz.tbi.otp.workflowExecution.decider
 
-import grails.gorm.transactions.Transactional
-import groovy.util.logging.Slf4j
-import org.springframework.stereotype.Component
+import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
 
-import de.dkfz.tbi.otp.workflow.wgbs.WgbsWorkflow
+class DeciderResult {
 
-@Component
-@Transactional
-@Slf4j
-class WgbsDecider extends AbstractAlignmentDecider {
+    /**
+     * Holds new creates workflow artefacts
+     */
+    Collection<WorkflowArtefact> newArtefacts = []
 
-    @Override
-    final boolean supportsIncrementalMerging() {
-        return false
+    /**
+     * Holds information about the decider process
+     */
+    List<String> infos = []
+
+    /**
+     * Holds warnings about the decider process
+     */
+    List<String> warnings = []
+
+    void add(DeciderResult result) {
+        newArtefacts.addAll(result.newArtefacts)
+        infos.addAll(result.infos)
+        warnings.addAll(result.warnings)
     }
 
     @Override
-    final boolean requiresFastqcResults() {
-        return false
-    }
-
-    @Override
-    final String getWorkflowName() {
-        return WgbsWorkflow.WORKFLOW
-    }
-
-    @Override
-    final String getInputFastqRole() {
-        return WgbsWorkflow.INPUT_FASTQ
-    }
-
-    final String inputFastqcRole = null
-
-    final String inputBaseBamRole = null
-
-    @Override
-    final String getOutputBamRole() {
-        return WgbsWorkflow.OUTPUT_BAM
+    String toString() {
+        return [
+                "DeciderResult:",
+                "  infos (${infos.size()}):",
+                infos.collect { "  - ${it}" }.join('\n'),
+                "  warnings (${warnings.size()}):",
+                warnings.collect { "  - ${it}" }.join('\n'),
+                "  newArtefacts (${newArtefacts.size()}):",
+                newArtefacts.collect { "  - ${it.toString().replaceAll('\n', ' ')}" }.join('\n'),
+        ].join('\n')
     }
 }

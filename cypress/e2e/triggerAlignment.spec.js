@@ -66,7 +66,10 @@ describe('Check trigger alignment page', () => {
           expect(interception.response.statusCode).to.eq(200);
         });
 
-        cy.get('#workPackageList li').should('have.length', 6);
+        cy.get('#infos li').should('not.be.empty');
+        cy.get('#resultWarning li').should('have.length', 1).should('have.text', 'none');
+        cy.get('#resultWorkPackageList li').should('have.length', 6);
+
       });
     });
 
@@ -111,7 +114,9 @@ describe('Check trigger alignment page', () => {
           expect(interception.response.statusCode).to.eq(200);
         });
 
-        cy.get('#workPackageList li').should('have.length', 6);
+        cy.get('#infos li').should('not.be.empty');
+        cy.get('#resultWarning li').should('have.length', 1).should('have.text', 'none');
+        cy.get('#resultWorkPackageList li').should('have.length', 6);
       });
     });
 
@@ -153,7 +158,9 @@ describe('Check trigger alignment page', () => {
       });
 
       cy.get('#warnAreaAccordion').should('not.be.visible');
-      cy.get('#workPackageList li').should('have.length', 2);
+      cy.get('#infos li').should('not.be.empty');
+      cy.get('#resultWarning li').should('have.length', 1).should('have.text', 'none');
+      cy.get('#resultWorkPackageList li').should('have.length', 2);
     });
 
     it('should search seq tracks by ilse number and trigger alignment', () => {
@@ -194,6 +201,9 @@ describe('Check trigger alignment page', () => {
 
         cy.get('#warnAreaAccordion').should('be.visible');
         cy.get('div.otpWarningToast').should('be.visible').contains('No alignment workflow has been started');
+        cy.get('#infos li').should('not.be.empty');
+        cy.get('#resultWarning li').should('have.length', 1).should('have.text', 'none');
+        cy.get('#resultWorkPackageList li').should('have.length', 1).should('have.text', 'none');
       });
     });
 
@@ -245,7 +255,9 @@ describe('Check trigger alignment page', () => {
           expect(interception.response.statusCode).to.eq(200);
         });
 
-        cy.get('#workPackageList li').should('have.length', 1);
+        cy.get('#infos li').should('not.be.empty');
+        cy.get('#resultWarning li').should('have.length', 1).should('have.text', 'none');
+        cy.get('#resultWorkPackageList li').should('have.length', 1);
       });
     });
   });

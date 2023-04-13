@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,6 +28,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.otp.workflowExecution.decider.AbstractWorkflowDecider
+import de.dkfz.tbi.otp.workflowExecution.decider.DeciderResult
 import de.dkfz.tbi.otp.workflowTest.AbstractWorkflowSpec
 
 import java.nio.file.Files
@@ -53,7 +54,8 @@ abstract class AbstractAlignmentWorkflowSpec extends AbstractWorkflowSpec {
         workflowArtefacts.each {
             log.debug("- ${it} (${it.artefactType}) for ${it.artefact}")
         }
-        List<WorkflowArtefact> newWorkflowArtefact = decider.decide(WorkflowArtefact.list())
+        DeciderResult deciderResult = decider.decide(WorkflowArtefact.list())
+        List<WorkflowArtefact> newWorkflowArtefact = deciderResult.newArtefacts
         log.debug("Decide output artefacts ${newWorkflowArtefact.size()}:")
         newWorkflowArtefact.each {
             log.debug("- ${it.toString().replaceAll('\n', ' ')} (${it.artefactType}) for ${it.artefact}")

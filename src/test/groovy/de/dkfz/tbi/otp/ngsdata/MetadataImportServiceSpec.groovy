@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -58,7 +58,6 @@ import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.exceptions.CopyingOfFileFailedException
 import de.dkfz.tbi.otp.utils.exceptions.MetadataFileImportException
 import de.dkfz.tbi.otp.workflow.datainstallation.DataInstallationInitializationService
-import de.dkfz.tbi.otp.workflowExecution.decider.AllDecider
 import de.dkfz.tbi.util.TimeFormats
 import de.dkfz.tbi.util.TimeUtils
 import de.dkfz.tbi.util.spreadsheet.Row
@@ -470,9 +469,6 @@ ${SPECIES}                      ${speciesImportAlias}                       ${sp
         }
         service.dataInstallationInitializationService = Mock(DataInstallationInitializationService) {
             _ * createWorkflowRuns(_) >> []
-        }
-        service.allDecider = Mock(AllDecider) {
-            _ * decide(_, _) >> []
         }
         service.processingThresholdsService = Mock(ProcessingThresholdsService)
         service.fileSystemService = new TestFileSystemService()
@@ -1984,9 +1980,6 @@ ${SPECIES}                      ${human}+${mouse}+${chicken}                ${hu
         }
         service.dataInstallationInitializationService = Mock(DataInstallationInitializationService) {
             _ * createWorkflowRuns(_) >> []
-        }
-        service.allDecider = Mock(AllDecider) {
-            _ * decide(_, _) >> []
         }
         service.processingThresholdsService = Mock(ProcessingThresholdsService)
     }
