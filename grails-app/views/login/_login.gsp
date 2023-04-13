@@ -22,7 +22,7 @@
 
 <div id="loginBox" style="position: absolute;">
     <div id="loginFormBox" style="position: absolute;">
-        <form id="loginForm" method="POST" action="${createLink(controller: 'authenticate')}">
+        <form id="loginForm" method="POST" action="${createLink(uri: 'authenticate')}">
 
             <input name="username" id="account" oninput="this.value = this.value.toLowerCase()"
                    placeholder="${g.message(code: "security.login.username.label")}" value="${username}" required>
