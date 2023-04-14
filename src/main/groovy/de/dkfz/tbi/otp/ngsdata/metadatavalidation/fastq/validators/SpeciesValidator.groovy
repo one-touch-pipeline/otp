@@ -31,6 +31,7 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrainService
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.util.spreadsheet.Cell
 import de.dkfz.tbi.util.spreadsheet.validation.*
@@ -121,7 +122,7 @@ class SpeciesValidator extends ValueTuplesValidator<MetadataValidationContext> i
             Sample sample = validatorHelperService.findExistingSampleForValueTuple(it)
             Individual individual = CollectionUtils.atMostOneElement(Individual.findAllByPid(pid))
 
-            Project project = Project.getByNameOrNameInMetadataFiles(it.getValue(PROJECT.name()))
+            Project project = ProjectService.findByNameOrNameInMetadataFiles(it.getValue(PROJECT.name()))
 
             new Value(
                     sampleType,

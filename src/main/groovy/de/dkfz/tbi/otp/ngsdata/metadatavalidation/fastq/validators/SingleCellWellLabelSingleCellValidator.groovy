@@ -28,7 +28,7 @@ import org.springframework.stereotype.Component
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.AbstractMetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
-import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.util.spreadsheet.validation.*
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
@@ -83,6 +83,6 @@ class SingleCellWellLabelSingleCellValidator extends ValueTuplesValidator<Abstra
         String sampleName = valueTuple.getValue(SAMPLE_NAME.name())
         String projectName = valueTuple.getValue(PROJECT.name())
 
-        return sampleName && projectName && sampleIdentifierService.parseSingleCellWellLabel(sampleName, Project.getByNameOrNameInMetadataFiles(projectName))
+        return sampleName && projectName && sampleIdentifierService.parseSingleCellWellLabel(sampleName, ProjectService.findByNameOrNameInMetadataFiles(projectName))
     }
 }

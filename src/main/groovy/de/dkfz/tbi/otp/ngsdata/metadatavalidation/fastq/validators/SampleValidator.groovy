@@ -30,6 +30,7 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.otp.parser.ParsedSampleIdentifier
 import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.util.spreadsheet.validation.*
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
@@ -132,7 +133,7 @@ class SampleValidator extends ValueTuplesValidator<MetadataValidationContext> im
         String sampleType = valueTuple.getValue(SAMPLE_TYPE.name()) ?: ''
         String antibodyTarget = valueTuple.getValue(ANTIBODY_TARGET.name()) ?: ''
 
-        Project project = Project.getByNameOrNameInMetadataFiles(projectName)
+        Project project = ProjectService.findByNameOrNameInMetadataFiles(projectName)
         ParsedSampleIdentifier parsedIdentifier = sampleIdentifierService.parseSampleIdentifier(sampleName, project)
         SampleIdentifier sampleIdentifier = atMostOneElement(SampleIdentifier.findAllByName(sampleName))
         if (!parsedIdentifier && !sampleIdentifier) {
@@ -168,7 +169,7 @@ class SampleValidator extends ValueTuplesValidator<MetadataValidationContext> im
     private boolean checkParsableButUnknownSampleIdentfier(ParsedSampleIdentifier parsedIdentifier, MetadataValidationContext context,
                                                            ValueTuple valueTuple, String sampleName, Project project) {
         boolean error = false
-        Project parsedProject = Project.getByNameOrNameInMetadataFiles(parsedIdentifier.projectName)
+        Project parsedProject = ProjectService.findByNameOrNameInMetadataFiles(parsedIdentifier.projectName)
         if (!parsedProject) {
             context.addProblem(valueTuple.cells, LogLevel.ERROR,
                     "The parsed project '${parsedIdentifier.projectName}' of the sample name '${sampleName}' could not be found in the database.",
@@ -195,7 +196,7 @@ class SampleValidator extends ValueTuplesValidator<MetadataValidationContext> im
 
     private void checkKnownSampleIdentifierAndParsable(ParsedSampleIdentifier parsedIdentifier, SampleIdentifier sampleIdentifier,
                                                        MetadataValidationContext context, ValueTuple valueTuple, String sampleName) {
-        Project parsedProject = Project.getByNameOrNameInMetadataFiles(parsedIdentifier.projectName)
+        Project parsedProject = ProjectService.findByNameOrNameInMetadataFiles(parsedIdentifier.projectName)
         if (sampleIdentifier.project != parsedProject) {
             context.addProblem(valueTuple.cells, LogLevel.WARNING,
                     "Sample name '${sampleName}' looks like it belongs to project '${parsedIdentifier.projectName}', but it is already " +

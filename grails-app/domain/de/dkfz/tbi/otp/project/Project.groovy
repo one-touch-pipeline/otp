@@ -227,13 +227,6 @@ class Project implements CommentableWithProject, ProjectPropertiesGivenWithReque
         return this
     }
 
-    static Project getByNameOrNameInMetadataFiles(String name) {
-        if (name) {
-            return atMostOneElement(findAllByNameOrNameInMetadataFiles(name, name))
-        }
-        return null
-    }
-
     String listAllKeywords() {
         return keywords*.name.sort().join(",")
     }

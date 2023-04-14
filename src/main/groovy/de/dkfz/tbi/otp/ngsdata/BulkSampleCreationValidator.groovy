@@ -23,7 +23,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.util.spreadsheet.validation.*
 
 import static de.dkfz.tbi.otp.ngsdata.SampleIdentifierService.BulkSampleCreationHeader.*
@@ -48,7 +48,7 @@ class BulkSampleCreationValidator extends ValueTuplesValidator<ValidationContext
     void validateValueTuples(ValidationContext context, Collection<ValueTuple> valueTuples) {
         valueTuples.each {
             String projectName = it.getValue(PROJECT.name())?.trim()
-            if (projectName && !Project.getByNameOrNameInMetadataFiles(projectName)) {
+            if (projectName && !ProjectService.findByNameOrNameInMetadataFiles(projectName)) {
                 context.addProblem(it.cells, LogLevel.ERROR, "Could not find Project '${projectName}'")
             }
         }

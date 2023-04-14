@@ -29,7 +29,7 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.AbstractMetadataValidationCont
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidator
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
-import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.util.spreadsheet.Cell
 import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.SingleValueValidator
@@ -56,7 +56,7 @@ class ProjectValidator extends SingleValueValidator<AbstractMetadataValidationCo
 
     @Override
     void validateValue(AbstractMetadataValidationContext context, String projectName, Set<Cell> cells) {
-        if (!Project.getByNameOrNameInMetadataFiles(projectName)) {
+        if (!ProjectService.findByNameOrNameInMetadataFiles(projectName)) {
             def level
             if (context instanceof BamMetadataValidationContext) {
                 level = LogLevel.ERROR

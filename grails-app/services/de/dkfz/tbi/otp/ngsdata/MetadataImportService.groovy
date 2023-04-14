@@ -44,6 +44,7 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrainService
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.tracking.OtrsTicketService
 import de.dkfz.tbi.otp.utils.*
@@ -456,7 +457,7 @@ class MetadataImportService {
         int amountOfRows = runsGroupedByLane.size()
         runsGroupedByLane.eachWithIndex { String laneId, List<Row> rows, int index ->
             String projectName = uniqueColumnValue(rows, PROJECT)
-            Project project = Project.getByNameOrNameInMetadataFiles(projectName)
+            Project project = ProjectService.findByNameOrNameInMetadataFiles(projectName)
             String ilseNumber = uniqueColumnValue(rows, ILSE_NO)
             String seqTypeRaw = uniqueColumnValue(rows, SEQUENCING_TYPE)
             String baseMaterial = uniqueColumnValue(rows, BASE_MATERIAL)

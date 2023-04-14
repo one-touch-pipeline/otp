@@ -27,6 +27,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.parser.ParsedSampleIdentifier
 import de.dkfz.tbi.otp.parser.SampleIdentifierParser
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.util.spreadsheet.validation.ValueTuple
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.PROJECT
@@ -56,7 +57,7 @@ trait ExtractProjectSampleType {
         if (sampleIdentifier) {
             return new ProjectSampleType(sampleIdentifier.project, sampleIdentifier.sampleType)
         }
-        Project projectFromProjectColumn = Project.getByNameOrNameInMetadataFiles(projectName)
+        Project projectFromProjectColumn = ProjectService.findByNameOrNameInMetadataFiles(projectName)
         if (!projectFromProjectColumn) {
             return null
         }

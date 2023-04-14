@@ -30,6 +30,7 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContex
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.otp.parser.ParsedSampleIdentifier
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.util.spreadsheet.validation.*
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.PROJECT
@@ -63,7 +64,7 @@ class SampleProjectValidator extends ValueTuplesValidator<MetadataValidationCont
         valueTuples.each {
             String sampleName = it.getValue(SAMPLE_NAME.name())
             String projectName = it.getValue(PROJECT.name())
-            Project project = Project.getByNameOrNameInMetadataFiles(projectName)
+            Project project = ProjectService.findByNameOrNameInMetadataFiles(projectName)
 
             SampleIdentifier sampleIdentifier = atMostOneElement(SampleIdentifier.findAllByName(sampleName))
             if (sampleIdentifier) {

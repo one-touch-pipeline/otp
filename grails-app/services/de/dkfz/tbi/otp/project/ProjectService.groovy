@@ -1181,6 +1181,10 @@ echo 'OK'
             return [(project): users]
         }
     }
+
+    static Project findByNameOrNameInMetadataFiles(String name) {
+        return name ? atMostOneElement(Project.findAllByNameOrNameInMetadataFiles(name, name)) : null
+    }
 }
 
 trait ProjectSeqTypeConfiguration {

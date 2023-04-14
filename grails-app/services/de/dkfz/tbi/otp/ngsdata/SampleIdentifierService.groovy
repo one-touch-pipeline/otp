@@ -30,6 +30,7 @@ import org.springframework.validation.ObjectError
 
 import de.dkfz.tbi.otp.parser.*
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.MessageSourceService
 import de.dkfz.tbi.otp.utils.exceptions.*
@@ -110,7 +111,7 @@ class SampleIdentifierService {
             }
             try {
                 DefaultParsedSampleIdentifier identifier = new DefaultParsedSampleIdentifier(
-                        projectName: Project.getByNameOrNameInMetadataFiles(getCell(BulkSampleCreationHeader.PROJECT))?.name ?: project.name,
+                        projectName: ProjectService.findByNameOrNameInMetadataFiles(getCell(BulkSampleCreationHeader.PROJECT))?.name ?: project.name,
                         pid: getCell(BulkSampleCreationHeader.PID),
                         sampleTypeDbName: getCell(BulkSampleCreationHeader.SAMPLE_TYPE),
                         fullSampleName: getCell(BulkSampleCreationHeader.SAMPLE_IDENTIFIER),
@@ -223,7 +224,7 @@ class SampleIdentifierService {
     }
 
     Project findProject(ParsedSampleIdentifier identifier) {
-        Project result = Project.getByNameOrNameInMetadataFiles(identifier.projectName)
+        Project result = ProjectService.findByNameOrNameInMetadataFiles(identifier.projectName)
         if (result) {
             return result
         }

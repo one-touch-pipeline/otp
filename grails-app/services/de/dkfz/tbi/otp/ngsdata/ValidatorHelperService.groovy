@@ -27,6 +27,7 @@ import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrainService
 import de.dkfz.tbi.otp.parser.ParsedSampleIdentifier
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.util.spreadsheet.validation.ValueTuple
 
@@ -70,7 +71,7 @@ class ValidatorHelperService {
         if (sampleIdentifier) {
             return sampleIdentifier.project
         }
-        Project projectFromProjectColumn = Project.getByNameOrNameInMetadataFiles(projectName)
+        Project projectFromProjectColumn = ProjectService.findByNameOrNameInMetadataFiles(projectName)
         if (projectFromProjectColumn) {
             return projectFromProjectColumn
         }

@@ -28,6 +28,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.util.spreadsheet.Cell
 import de.dkfz.tbi.util.spreadsheet.validation.*
 
@@ -67,7 +68,7 @@ class TagmentationLibraryProjectValidator extends ValueTuplesValidator<MetadataV
         List<ExtractedValues> extractedValuesList = []
         valueTuples.each { ValueTuple valueTuple ->
             String projectName = valueTuple.getValue(PROJECT.name())
-            Project project = Project.getByNameOrNameInMetadataFiles(projectName)
+            Project project = ProjectService.findByNameOrNameInMetadataFiles(projectName)
             if (!project) {
                 return
             }
