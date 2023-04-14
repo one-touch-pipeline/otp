@@ -20,16 +20,17 @@
  * SOFTWARE.
  */
 
-import de.dkfz.tbi.otp.administration.*
 import de.dkfz.tbi.otp.Comment
 import de.dkfz.tbi.otp.InformationReliability
+import de.dkfz.tbi.otp.administration.*
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.dataprocessing.bamfiles.SingleCellBamFileService
-import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerConfig
-import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerConfigurationService
-import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerMergingWorkPackage
-import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerWorkflowService
+import de.dkfz.tbi.otp.dataprocessing.cellRanger.*
+import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
+import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaConfig
+import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaInstance
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellMappingFileService
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
@@ -43,8 +44,7 @@ import de.dkfz.tbi.otp.ngsdata.taxonomy.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.tracking.OtrsTicket
-import de.dkfz.tbi.otp.utils.CollectionUtils
-import de.dkfz.tbi.otp.utils.HelperUtils
+import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 import de.dkfz.tbi.util.TimeFormats
 
@@ -62,11 +62,14 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
  * - fastq
  * - fastqc
  * - bam files
- *   - only PanCan supported yet: WGS, WES, WGBS, and WGBS_TAG
- *   - would create the same also for other seqtypes
+ *   - PanCancer / Wgbs alignment: WGS PAIRED, WES PAIRED, WGBS PAIRED, and WGBS_TAG PAIRED
+ *   - rna alignment: RNA PAIRED, RNA SINGLE
+ *   - cell ranger: 10xSingleCellRnaSeqType PAIRED
  * - snv
  * - indel
  * - sophia
+ * - aceseq
+ * - runyapsa
  *
  * It doesn't expect any existing data except the default SeqType's.
  *
@@ -74,6 +77,12 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
  * The real pipelines generates much more files.
  *
  * For file generation (on per default), the selected {@link ExampleData#realmName} needs to be valid for remote access.
+ *
+ * The script do not create the workflow artefacts of the new system, therefore the following script in the given order needs to be executed:
+ * - otp-592-create-new-workflows-from-seq-tracks.groovy
+ * - otp-980-create-new-workflows-from-fastqc-processed-file.groovy
+ * - otp-1137-create-new-workflows-from-roddy-alignments.groovy
+ * - otp-1650-create-new-workflows-from-wgbs-alignments.groovy
  */
 class ExampleData {
 //------------------------------
@@ -115,13 +124,21 @@ class ExampleData {
     boolean markDataFilesAsExisting = true
 
     /**
-     * The SeqTypes for which data is to be created.
+     * The SeqTypes using panCancer / wgbs alignment
      */
-    List<SeqType> seqTypes = [
+    List<SeqType> panCanSeqTypes = [
             SeqTypeService.exomePairedSeqType,
             SeqTypeService.wholeGenomePairedSeqType,
             SeqTypeService.wholeGenomeBisulfitePairedSeqType,
             SeqTypeService.wholeGenomeBisulfiteTagmentationPairedSeqType,
+    ]
+
+    /**
+     * The SeqTypes using rna alignment
+     */
+    List<SeqType> rnaSeqTypes = [
+            SeqTypeService.rnaPairedSeqType,
+            SeqTypeService.rnaSingleSeqType,
 
     ]
 
@@ -133,13 +150,24 @@ class ExampleData {
     ]
 
     /**
-     * The disease SampleType names for which data is to be created.
+     * no aligned seq types
+     */
+    List<SeqType> otherSeqTypes = [
+            "AMPLICON",
+            "ATAC",
+    ].collect {
+        findOrCreateSeqType(it)
+    }
+
+    /**
+     * The disease SampleType names with info about xenograft for which data is to be created.
      *
      * If analysis are created, each diseaseSampleTypeNames is combined with each controlSampleTypeNames.
      */
-    List<String> diseaseSampleTypeNames = [
-            "tumor01",
-            "tumor02",
+    Map<String, MixedInSpecies> diseaseSampleTypeNames = [
+            tumor01    : MixedInSpecies.NONE,
+            tumor02    : MixedInSpecies.NONE,
+            xenograft01: MixedInSpecies.MOUSE,
     ]
 
     /**
@@ -162,6 +190,10 @@ class ExampleData {
 //------------------------------
 //work
 
+    AbstractMergedBamFileService abstractMergedBamFileService
+
+    RoddyBamFileService roddyBamFileService
+
     FastqcDataFilesService fastqcDataFilesService
 
     FileService fileService
@@ -177,6 +209,8 @@ class ExampleData {
     SophiaService sophiaService
 
     AceseqService aceseqService
+
+    RunYapsaService runYapsaService
 
     CellRangerConfigurationService cellRangerConfigurationService
 
@@ -199,31 +233,42 @@ class ExampleData {
     LibraryPreparationKit libraryPreparationKit
     ProcessingPriority processingPriority
     Realm realm
-    SpeciesWithStrain speciesWithStrain
-    ReferenceGenome referenceGenome
-    ReferenceGenome singleCellReferenceGenome
+    SpeciesWithStrain speciesWithStrainHuman
+    SpeciesWithStrain speciesWithStrainMouse
+    ReferenceGenome referenceGenomeHuman
+    ReferenceGenome referenceGenomeMouse
+    ReferenceGenome referenceGenomeHumanMouse
+    ReferenceGenome singleCellReferenceGenomeHuman
     SeqCenter seqCenter
     SeqPlatform seqPlatform
     SeqPlatformGroup seqPlatformGroup
     SoftwareTool softwareTool
 
-    List<SampleType> diseaseSampleTypes = []
+    int individualCounter = Individual.count()
+    int runCounter = Run.count()
+    int seqTrackCounter = SeqTrack.count()
+    int dataFileCounter = DataFile.count()
+    int commentCounter = Comment.count()
+
+    Map<SampleType, MixedInSpecies> diseaseSampleTypes = [:]
     List<SampleType> singleCellWellLabelSampleTypes = []
     List<SampleType> controlSampleTypes = []
     List<RoddyBamFile> roddyBamFiles = []
+    List<RoddyBamFile> rnaRoddyBamFiles = []
     List<SingleCellBamFile> singleCellBamFiles = []
     List<RoddySnvCallingInstance> roddySnvCallingInstances = []
     List<IndelCallingInstance> indelCallingInstances = []
     List<SophiaInstance> sophiaInstances = []
     List<AceseqInstance> aceseqInstances = []
+    List<RunYapsaInstance> runYapsaInstances = []
     List<DataFile> dataFiles = []
     List<FastqcProcessedFile> fastqcProcessedFiles = []
 
     List<SeqType> analyseAbleSeqType = []
 
     void init() {
-        diseaseSampleTypes = diseaseSampleTypeNames.collect {
-            findOrCreateSampleType(it)
+        diseaseSampleTypes = diseaseSampleTypeNames.collectEntries {
+            [(findOrCreateSampleType(it.key)): it.value]
         }
         singleCellWellLabelSampleTypes = singleCellWellLabelSampleTypeNames.collect {
             findOrCreateSampleType(it)
@@ -231,17 +276,21 @@ class ExampleData {
         controlSampleTypes = controlSampleTypeNames.collect {
             findOrCreateSampleType(it)
         }
+
         analyseAbleSeqType = SeqTypeService.allAnalysableSeqTypes.findAll {
-            seqTypes.contains(it)
+            panCanSeqTypes.contains(it)
         }
 
         processingPriority = findOrCreateProcessingPriority()
         fileType = findOrCreateFileType()
         libraryPreparationKit = findOrCreateLibraryPreparationKit()
         realm = findOrCreateRealm()
-        speciesWithStrain = findOrCreateSpeciesWithStrain()
-        referenceGenome = findOrCreateReferenceGenome("1KGRef_PhiX")
-        singleCellReferenceGenome = findOrCreateReferenceGenome("hg_GRCh38")
+        speciesWithStrainHuman = findOrCreateSpeciesWithStrainHuman()
+        speciesWithStrainMouse = findOrCreateSpeciesWithStrainMouse()
+        referenceGenomeHuman = findOrCreateReferenceGenome("1KGRef_PhiX")
+        referenceGenomeMouse = findOrCreateReferenceGenome("GRCm38mm_PhiX", [], [speciesWithStrainMouse.species])
+        referenceGenomeHumanMouse = findOrCreateReferenceGenome("hs37d5_GRCm38mm_PhiX", [speciesWithStrainHuman], [speciesWithStrainMouse.species])
+        singleCellReferenceGenomeHuman = findOrCreateReferenceGenome("hg_GRCh38")
         seqCenter = findOrCreateSeqCenter()
         seqPlatform = findOrCreateSeqPlatform()
         seqPlatformGroup = findOrCreateSeqPlatformGroup()
@@ -250,7 +299,7 @@ class ExampleData {
         fastqImportInstance = createFastqImportInstance()
         createMetaDataFile()
         project = findOrCreateProject(projectName)
-        diseaseSampleTypes.each { SampleType sampleType ->
+        diseaseSampleTypes.each { SampleType sampleType, MixedInSpecies mixedInSpecies ->
             findOrCreateSampleTypePerProject(sampleType, SampleTypePerProject.Category.DISEASE)
         }
         singleCellWellLabelSampleTypes.each { SampleType sampleType ->
@@ -259,7 +308,11 @@ class ExampleData {
         controlSampleTypes.each { SampleType sampleType ->
             findOrCreateSampleTypePerProject(sampleType, SampleTypePerProject.Category.CONTROL)
         }
-        seqTypes.each {
+        [
+                panCanSeqTypes,
+                rnaSeqTypes,
+                singleCellSeqTypes,
+        ].flatten().each {
             findOrCreateMergingCriteria(it)
         }
         findOrCreateProcessingThresholds()
@@ -268,28 +321,36 @@ class ExampleData {
 
     void createObjects() {
         (1..individualCount).each {
-            String pid = "example_${Individual.count() + 1}"
-            println "- pid: ${pid}"
-            Individual individual = createIndividual(project, pid)
+            Individual individual = createIndividual(project)
             println "- individual: ${individual}"
-            Map<SeqType, List<AbstractMergedBamFile>> diseaseBamFiles = diseaseSampleTypes.collectMany { SampleType sampleType ->
-                createSampleWithSeqTracksAndBamFile(individual, sampleType)
+            Map<SeqType, List<AbstractMergedBamFile>> diseaseBamFiles = diseaseSampleTypes.collectMany { SampleType sampleType, MixedInSpecies mixedInSpecies ->
+                Sample sample = findOrCreateSample(individual, sampleType, mixedInSpecies)
+                println "  - sample: ${sample}"
+                createSampleWithSeqTracks(sample)
+                [
+                        createSampleWithSeqTracksAndPanCancerBamFile(sample),
+                        createSampleWithSeqTracksAndRnaBamFile(sample),
+                        mixedInSpecies == MixedInSpecies.NONE ? createSingleCellSampleWithSeqTracksAndBamFile(sample, singleCellSeqTypes) : [],
+                ].flatten()
             }.groupBy {
                 it.seqType
             }
             Map<SeqType, List<AbstractMergedBamFile>> controlBamFiles = controlSampleTypes.collectMany { SampleType sampleType ->
-                createSampleWithSeqTracksAndBamFile(individual, sampleType)
+                Sample sample = findOrCreateSample(individual, sampleType)
+                println "  - sample: ${sample}"
+                createSampleWithSeqTracks(sample)
+                [
+                        createSampleWithSeqTracksAndPanCancerBamFile(sample),
+                        createSampleWithSeqTracksAndRnaBamFile(sample),
+                        createSingleCellSampleWithSeqTracksAndBamFile(sample, singleCellSeqTypes),
+                ].flatten()
             }.groupBy {
                 it.seqType
             }
-            diseaseSampleTypes.collectMany { SampleType sampleType ->
-                createSingleCellSampleWithSeqTracksAndBamFile(individual, sampleType, singleCellSeqTypes)
-            }
-            controlSampleTypes.collectMany { SampleType sampleType ->
-                createSingleCellSampleWithSeqTracksAndBamFile(individual, sampleType, singleCellSeqTypes)
-            }
             singleCellWellLabelSampleTypes.collectMany { SampleType sampleType ->
-                createSingleCellSampleWithSeqTracksAndBamFile(individual, sampleType, singleCellSeqTypes, true)
+                Sample sample = findOrCreateSample(individual, sampleType)
+                println "  - sample: ${sample}"
+                createSingleCellSampleWithSeqTracksAndBamFile(sample, singleCellSeqTypes, true)
             }
             analyseAbleSeqType.each { SeqType seqType ->
                 diseaseBamFiles[seqType].each { AbstractMergedBamFile diseaseBamFile ->
@@ -299,9 +360,13 @@ class ExampleData {
                         createIndelCallingInstance(samplePair)
                         createSophiaInstance(samplePair)
                         createAceseqInstance(samplePair)
+                        createRunYapsaInstance(samplePair)
                     }
                 }
             }
+        }
+        SessionUtils.withTransaction {
+            it.flush()
         }
     }
 
@@ -309,11 +374,13 @@ class ExampleData {
         if (createFilesOnFilesystem) {
             createDataFilesFilesOnFilesystem()
             createFastqcFilesOnFilesystem()
-            createBamFilesOnFilesystem()
+            createPanCancerBamFilesOnFilesystem()
+            createRnaBamFilesOnFilesystem()
             createSnvFilesOnFilesystem()
             createIndelFilesOnFilesystem()
             createSophiaFilesOnFilesystem()
             createAceseqFilesOnFilesystem()
+            createRunYapsaFilesOnFilesystem()
             createCellRangerFilesOnFilesystem()
             createSingleCellWellLabelOnFilesystem()
         } else {
@@ -331,9 +398,9 @@ class ExampleData {
                     directPath,
                     directPathMd5sum,
             ].each {
-                fileService.createFileWithContent(it, it.toString(), realm)
+                fileService.createFileWithContent(it, it.toString(), realm, FileService.DEFAULT_FILE_PERMISSION, true)
             }
-            fileService.createLink(vbpPath, directPath, realm)
+            fileService.createLink(vbpPath, directPath, realm, CreateLinkOption.DELETE_EXISTING_FILE)
         }
     }
 
@@ -346,7 +413,7 @@ class ExampleData {
                     fastqcPath,
                     fastqcMd5Path,
             ].each {
-                fileService.createFileWithContent(it, it.toString(), realm)
+                fileService.createFileWithContent(it, it.toString(), realm, FileService.DEFAULT_FILE_PERMISSION, true)
             }
         }
     }
@@ -365,8 +432,8 @@ class ExampleData {
         }
     }
 
-    void createBamFilesOnFilesystem() {
-        println "creating dummy bam files on file system"
+    void createPanCancerBamFilesOnFilesystem() {
+        println "creating dummy pancaner bam files on file system"
         FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
 
         roddyBamFiles.each { RoddyBamFile bam ->
@@ -400,14 +467,73 @@ class ExampleData {
                 Path pathFinal = fileSystem.getPath(it.key.toString())
                 Path pathWork = fileSystem.getPath(it.value.toString())
                 fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(pathWork, realm)
-                fileService.createLink(pathFinal, pathWork, realm)
+                fileService.createLink(pathFinal, pathWork, realm, CreateLinkOption.DELETE_EXISTING_FILE)
             }
 
             filesMap.each {
                 Path pathFinal = fileSystem.getPath(it.key.toString())
                 Path pathWork = fileSystem.getPath(it.value.toString())
-                fileService.createFileWithContent(pathWork, pathWork.toString(), realm)
-                fileService.createLink(pathFinal, pathWork, realm)
+                fileService.createFileWithContent(pathWork, pathWork.toString(), realm, FileService.DEFAULT_FILE_PERMISSION, true)
+                fileService.createLink(pathFinal, pathWork, realm, CreateLinkOption.DELETE_EXISTING_FILE)
+            }
+        }
+    }
+
+    void createRnaBamFilesOnFilesystem() {
+        println "creating dummy rna bam files on file system"
+        FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
+
+        rnaRoddyBamFiles.each { RoddyBamFile bam ->
+            Path baseDir = abstractMergedBamFileService.getBaseDirectory(bam)
+            Path workDir = roddyBamFileService.getWorkDirectory(bam)
+
+            Map<Path, Path> filesMap = [
+                    (roddyBamFileService.getFinalBamFile(bam))   : roddyBamFileService.getWorkBamFile(bam),
+                    (roddyBamFileService.getFinalBaiFile(bam))   : roddyBamFileService.getWorkBaiFile(bam),
+                    (roddyBamFileService.getFinalMd5sumFile(bam)): roddyBamFileService.getWorkMd5sumFile(bam),
+            ]
+
+            [
+                    "${bam.sampleType.name}_${bam.individual.pid}_chimeric_merged.junction",
+                    "${bam.sampleType.name}_${bam.individual.pid}_chimeric_merged.mdup.bam",
+                    "${bam.sampleType.name}_${bam.individual.pid}_chimeric_merged.mdup.bam.bai",
+                    "${bam.sampleType.name}_${bam.individual.pid}_chimeric_merged.mdup.bam.md5",
+                    "${bam.sampleType.name}_${bam.individual.pid}_merged.mdup.bam",
+                    "${bam.sampleType.name}_${bam.individual.pid}_merged.mdup.bam.bai",
+                    "${bam.sampleType.name}_${bam.individual.pid}_merged.mdup.bam.flagstat",
+                    "${bam.sampleType.name}_${bam.individual.pid}_merged.mdup.bam.fp",
+                    "${bam.sampleType.name}_${bam.individual.pid}_merged.mdup.bam.md5",
+            ].each {
+                filesMap[baseDir.resolve(it)] = workDir.resolve(it)
+            }
+
+            Map<File, File> dirsMap = [
+                    (roddyBamFileService.getFinalExecutionStoreDirectory(bam)): roddyBamFileService.getWorkExecutionStoreDirectory(bam),
+                    (roddyBamFileService.getFinalQADirectory(bam))            : roddyBamFileService.getWorkQADirectory(bam),
+            ]
+            [
+                    "featureCounts",
+                    "featureCounts_dexseq",
+                    "fusions_arriba",
+                    "${bam.sampleType.name}_${bam.individual.pid}_star_logs_and_files",
+            ].each {
+                dirsMap[baseDir.resolve(it)] = workDir.resolve(it)
+            }
+
+            fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(workDir, realm)
+
+            dirsMap.each {
+                Path pathFinal = fileSystem.getPath(it.key.toString())
+                Path pathWork = fileSystem.getPath(it.value.toString())
+                fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(pathWork, realm)
+                fileService.createLink(pathFinal, pathWork, realm, CreateLinkOption.DELETE_EXISTING_FILE)
+            }
+
+            filesMap.each {
+                Path pathFinal = fileSystem.getPath(it.key.toString())
+                Path pathWork = fileSystem.getPath(it.value.toString())
+                fileService.createFileWithContent(pathWork, pathWork.toString(), realm, FileService.DEFAULT_FILE_PERMISSION, true)
+                fileService.createLink(pathFinal, pathWork, realm, CreateLinkOption.DELETE_EXISTING_FILE)
             }
         }
     }
@@ -421,7 +547,7 @@ class ExampleData {
                     snvCallingService.getSnvDeepAnnotationResult(snvCallingInstance),
                     snvCallingService.getCombinedPlotPath(snvCallingInstance),
             ].each {
-                fileService.createFileWithContent(it, it.toString(), realm)
+                fileService.createFileWithContent(it, it.toString(), realm, FileService.DEFAULT_FILE_PERMISSION, true)
             }
         }
     }
@@ -436,7 +562,7 @@ class ExampleData {
                     indelCallingService.getIndelQcJsonFile(indelCallingInstance),
                     indelCallingService.getSampleSwapJsonFile(indelCallingInstance),
             ].each {
-                fileService.createFileWithContent(it, it.toString(), realm)
+                fileService.createFileWithContent(it, it.toString(), realm, FileService.DEFAULT_FILE_PERMISSION, true)
             }
         }
     }
@@ -450,7 +576,7 @@ class ExampleData {
                     sophiaService.getFinalAceseqInputFile(sophiaInstance),
                     sophiaService.getQcJsonFile(sophiaInstance),
             ].each {
-                fileService.createFileWithContent(it, it.toString(), realm)
+                fileService.createFileWithContent(it, it.toString(), realm, FileService.DEFAULT_FILE_PERMISSION, true)
             }
         }
     }
@@ -481,7 +607,26 @@ class ExampleData {
                     base.resolve("${plotPrefixAceseqExtra}_3.png"),
                     base.resolve("${plotPrefixAceseqExtra}_5.png"),
             ].each {
-                fileService.createFileWithContent(it, it.toString(), realm)
+                fileService.createFileWithContent(it, it.toString(), realm, FileService.DEFAULT_FILE_PERMISSION, true)
+            }
+        }
+    }
+
+    void createRunYapsaFilesOnFilesystem() {
+        println "creating dummy runYapsaInstances files on file system"
+
+        runYapsaInstances.each { RunYapsaInstance runYapsaInstance ->
+            Path base = runYapsaService.getWorkDirectory(runYapsaInstance)
+            [
+                    "snvs_${runYapsaInstance.individual.pid}_somatic_snvs_conf_8_to_10.vcf.combinedSignatureExposuresConfidence.pdf",
+                    "snvs_${runYapsaInstance.individual.pid}_somatic_snvs_conf_8_to_10.vcf.combinedSignatureExposures.pdf",
+                    "snvs_${runYapsaInstance.individual.pid}_somatic_snvs_conf_8_to_10.vcf.combinedSignatureExposures.tsv",
+                    "snvs_${runYapsaInstance.individual.pid}_somatic_snvs_conf_8_to_10.vcf.combinedSignatureNormExposures.tsv",
+                    "snvs_${runYapsaInstance.individual.pid}_somatic_snvs_conf_8_to_10.vcf.confIntSignatureExposures.tsv",
+                    "snvs_${runYapsaInstance.individual.pid}_somatic_snvs_conf_8_to_10.vcfreportText.txt",
+            ].each {
+                Path file = base.resolve(it)
+                fileService.createFileWithContent(file, file.toString(), realm, FileService.DEFAULT_FILE_PERMISSION, true)
             }
         }
     }
@@ -495,9 +640,11 @@ class ExampleData {
 
             Path resultsPath = singleCellBamFileService.getResultDirectory(bam)
 
-            [singleCellBamFileService.getSampleDirectory(bam),
-             singleCellBamFileService.getOutputDirectory(bam),
-             resultsPath,].each {
+            [
+                    singleCellBamFileService.getSampleDirectory(bam),
+                    singleCellBamFileService.getOutputDirectory(bam),
+                    resultsPath,
+            ].each {
                 fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(it, realm)
             }
 
@@ -508,18 +655,32 @@ class ExampleData {
 
             SingleCellBamFileService.CREATED_RESULT_FILES.each {
                 Path path = resultsPath.resolve(it)
-                fileService.createFileWithContent(path, path.toString(), realm)
+                fileService.createFileWithContent(path, path.toString(), realm, FileService.DEFAULT_FILE_PERMISSION, true)
             }
 
             cellRangerWorkflowService.linkResultFiles(bam)
         }
     }
 
+    SeqType findOrCreateSeqType(String name) {
+        return SeqType.findByNameAndLibraryLayoutAndSingleCell(name, SequencingReadType.PAIRED, false) ?:
+                new SeqType([
+                        name             : name,
+                        libraryLayout    : SequencingReadType.PAIRED,
+                        singleCell       : false,
+                        displayName      : name,
+                        dirName          : name.toLowerCase(),
+                        roddyName        : null,
+                        hasAntibodyTarget: false,
+                        needsBedFile     : false,
+                ]).save(flush: false)
+    }
+
     SampleType findOrCreateSampleType(String name) {
         return CollectionUtils.atMostOneElement(SampleType.findAllByName(name)) ?: new SampleType([
                 name                   : name,
                 specificReferenceGenome: SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT,
-        ]).save(flush: true)
+        ]).save(flush: false)
     }
 
     SampleTypePerProject findOrCreateSampleTypePerProject(SampleType sampleType, SampleTypePerProject.Category category) {
@@ -527,7 +688,7 @@ class ExampleData {
                 project   : project,
                 sampleType: sampleType,
                 category  : category,
-        ]).save(flush: true)
+        ]).save(flush: false)
     }
 
     void createDocumentTestData() {
@@ -539,7 +700,7 @@ class ExampleData {
 
     void findOrCreateProcessingThresholds() {
         [
-                diseaseSampleTypes,
+                diseaseSampleTypes.keySet(),
                 controlSampleTypes,
         ].flatten().each { SampleType sampleType ->
             analyseAbleSeqType.each { SeqType seqType ->
@@ -550,7 +711,7 @@ class ExampleData {
                                 sampleType   : sampleType,
                                 coverage     : 20,
                                 numberOfLanes: 1,
-                        ]).save(flush: true)
+                        ]).save(flush: false)
             }
         }
     }
@@ -564,7 +725,7 @@ class ExampleData {
                 errorMailPrefix            : "error",
                 roddyConfigSuffix          : "error",
                 allowedParallelWorkflowRuns: 10,
-        ]).save(flush: true)
+        ]).save(flush: false)
     }
 
     FileType findOrCreateFileType() {
@@ -578,28 +739,36 @@ class ExampleData {
 
     LibraryPreparationKit findOrCreateLibraryPreparationKit() {
         return LibraryPreparationKit.last() ?: new LibraryPreparationKit([
-                name            : "ExampleLibPrep",
-        ]).save(flush: true)
+                name: "ExampleLibPrep",
+        ]).save(flush: false)
     }
 
-    SpeciesWithStrain findOrCreateSpeciesWithStrain() {
-        SpeciesCommonName speciesCommonName = SpeciesCommonName.findByName('Human') ?: new SpeciesCommonName([
-                name: 'Human',
-        ]).save(flush: true)
+    SpeciesWithStrain findOrCreateSpeciesWithStrainHuman() {
+        return findOrCreateSpeciesWithStrain('Human', 'Homo sapiens', 'No strain available')
+    }
 
-        Species species = Species.findBySpeciesCommonNameAndScientificName(speciesCommonName, 'Homo sapiens') ?: new Species([
+    SpeciesWithStrain findOrCreateSpeciesWithStrainMouse() {
+        return findOrCreateSpeciesWithStrain('Mouse', 'Mus musculus', 'No strain available')
+    }
+
+    SpeciesWithStrain findOrCreateSpeciesWithStrain(String name, String scientificName, String strainName) {
+        SpeciesCommonName speciesCommonName = SpeciesCommonName.findByName(name) ?: new SpeciesCommonName([
+                name: name,
+        ]).save(flush: false)
+
+        Species species = Species.findBySpeciesCommonNameAndScientificName(speciesCommonName, scientificName) ?: new Species([
                 speciesCommonName: speciesCommonName,
-                scientificName   : 'Homo sapiens',
-        ]).save(flush: true)
+                scientificName   : scientificName,
+        ]).save(flush: false)
 
-        Strain strain = Strain.findByName('No strain available') ?: new SpeciesCommonName([
-                name: 'No strain available',
-        ]).save(flush: true)
+        Strain strain = Strain.findByName(strainName) ?: new SpeciesCommonName([
+                name: strainName,
+        ]).save(flush: false)
 
         return SpeciesWithStrain.findBySpeciesAndStrain(species, strain) ?: new SpeciesWithStrain([
                 species: species,
                 strain : strain,
-        ]).save(flush: true)
+        ]).save(flush: false)
     }
 
     Realm findOrCreateRealm() {
@@ -610,15 +779,17 @@ class ExampleData {
                 port                       : 22,
                 timeout                    : 0,
                 defaultJobSubmissionOptions: "",
-        ]).save(flush: true)
+        ]).save(flush: false)
     }
 
-    ReferenceGenome findOrCreateReferenceGenome(String name) {
+    ReferenceGenome findOrCreateReferenceGenome(String name,
+                                                Collection<SpeciesWithStrain> speciesWithStrains = [speciesWithStrainHuman],
+                                                Collection<Species> speciesCollection = []) {
         ReferenceGenome referenceGenome = CollectionUtils.atMostOneElement(ReferenceGenome.findAllByName(name))
         if (referenceGenome) {
             return referenceGenome
         }
-        referenceGenome = new ReferenceGenome([
+        return new ReferenceGenome([
                 name                        : name,
                 path                        : name,
                 fileNamePrefix              : name,
@@ -628,15 +799,9 @@ class ExampleData {
                 lengthRefChromosomes        : 100,
                 lengthRefChromosomesWithoutN: 100,
                 length                      : 100,
-                speciesWithStrains          : [speciesWithStrain] as Set,
-                species                     : [speciesWithStrain.species] as Set,
-        ]).save(flush: true)
-
-        new StatSizeFileName([
-                name           : "ExampleReferenceGenome_realChromosomes.tab",
-                referenceGenome: referenceGenome,
-        ]).save(flush: true)
-        return referenceGenome
+                speciesWithStrains          : speciesWithStrains as Set,
+                species                     : speciesCollection as Set,
+        ]).save(flush: false)
     }
 
     SeqCenter findOrCreateSeqCenter() {
@@ -644,7 +809,7 @@ class ExampleData {
         return CollectionUtils.atMostOneElement(SeqCenter.findAllByName(name)) ?: new SeqCenter([
                 name   : name,
                 dirName: "center",
-        ]).save(flush: true)
+        ]).save(flush: false)
     }
 
     SeqPlatform findOrCreateSeqPlatform() {
@@ -653,11 +818,11 @@ class ExampleData {
                 name                 : name,
                 seqPlatformModelLabel: new SeqPlatformModelLabel([
                         name: "ExampleModel",
-                ]).save(flush: true),
+                ]).save(flush: false),
                 sequencingKitLabel   : new SequencingKitLabel([
                         name: "ExampleKit",
-                ]).save(flush: true),
-        ]).save(flush: true)
+                ]).save(flush: false),
+        ]).save(flush: false)
     }
 
     MergingCriteria findOrCreateMergingCriteria(SeqType seqType) {
@@ -728,23 +893,30 @@ class ExampleData {
                 projectType        : Project.ProjectType.SEQUENCING,
                 qcThresholdHandling: QcThresholdHandling.CHECK_AND_NOTIFY,
                 unixGroup          : "developer",
-                speciesWithStrains : [speciesWithStrain] as Set,
+                speciesWithStrains : [speciesWithStrainHuman] as Set,
         ]).save(flush: true)
     }
 
-    Individual createIndividual(Project project, String pid) {
+    Individual createIndividual(Project project) {
         return new Individual([
-                project     : project,
-                pid         : pid,
-                type        : Individual.Type.REAL,
-                species     : speciesWithStrain,
-        ]).save(flush: true)
+                project: project,
+                pid    : "pid_${individualCounter++}",
+                type   : Individual.Type.REAL,
+                species: speciesWithStrainHuman,
+        ]).save(flush: false)
     }
 
-    List<AbstractMergedBamFile> createSampleWithSeqTracksAndBamFile(Individual individual, SampleType sampleType) {
-        Sample sample = findOrCreateSample(individual, sampleType)
-        println "  - sample: ${sample}"
-        return seqTypes.collect { SeqType seqType ->
+    void createSampleWithSeqTracks(Sample sample) {
+        otherSeqTypes.collect { SeqType seqType ->
+            println "    - for: ${seqType}"
+            (1..lanesPerSampleAndSeqType).each {
+                createSeqTrack(sample, seqType)
+            }
+        }
+    }
+
+    List<AbstractMergedBamFile> createSampleWithSeqTracksAndPanCancerBamFile(Sample sample) {
+        return panCanSeqTypes.collect { SeqType seqType ->
             println "    - for: ${seqType}"
             List<SeqTrack> seqTracks = (1..lanesPerSampleAndSeqType).collect {
                 SeqTrack seqTrack = createSeqTrack(sample, seqType)
@@ -759,10 +931,24 @@ class ExampleData {
         }
     }
 
-    List<AbstractMergedBamFile> createSingleCellSampleWithSeqTracksAndBamFile(Individual individual, SampleType sampleType, List<SeqType> seqTypes,
+    List<AbstractMergedBamFile> createSampleWithSeqTracksAndRnaBamFile(Sample sample) {
+        return rnaSeqTypes.collect { SeqType seqType ->
+            println "    - for: ${seqType}"
+            List<SeqTrack> seqTracks = (1..lanesPerSampleAndSeqType).collect {
+                SeqTrack seqTrack = createSeqTrack(sample, seqType)
+                println "      - seqtrack: ${seqTrack}"
+                return seqTrack
+            }
+            MergingWorkPackage mergingWorkPackage = createMergingWorkPackage(seqTracks)
+            println "      - mwp: ${mergingWorkPackage}"
+            RnaRoddyBamFile roddyBamFile = createRnaRoddyBamFile(mergingWorkPackage)
+            println "      - roddy: ${roddyBamFile}"
+            return roddyBamFile
+        }
+    }
+
+    List<AbstractMergedBamFile> createSingleCellSampleWithSeqTracksAndBamFile(Sample sample, List<SeqType> seqTypes,
                                                                               boolean createWellLabel = false) {
-        Sample sample = findOrCreateSample(individual, sampleType)
-        println "  - sample: ${sample}"
         return seqTypes.collect { SeqType seqType ->
             println "    - for: ${seqType}"
             List<SeqTrack> seqTracks = (1..lanesPerSampleAndSeqType).collect {
@@ -791,33 +977,35 @@ class ExampleData {
         }.flatten()
     }
 
-    Sample findOrCreateSample(Individual individual, SampleType sampleType) {
+    Sample findOrCreateSample(Individual individual, SampleType sampleType, MixedInSpecies mixedInSpecies = MixedInSpecies.NONE) {
         Sample foundSample = atMostOneElement(Sample.findAllByIndividualAndSampleType(individual, sampleType))
         if (foundSample) {
             return foundSample
         }
         return new Sample([
-                sampleType: sampleType,
-                individual: individual,
-        ]).save(flush: true)
+                sampleType    : sampleType,
+                individual    : individual,
+                mixedInSpecies: (mixedInSpecies == MixedInSpecies.MOUSE ? [speciesWithStrainMouse] : []) as Set
+        ]).save(flush: false)
     }
 
     SeqTrack createSeqTrack(Sample sample, SeqType seqType, createWellLabel = false) {
+        int count = seqTrackCounter++
         SeqTrack seqTrack = new SeqTrack([
                 sample               : sample,
                 seqType              : seqType,
                 run                  : createRun(),
-                laneId               : (SeqTrack.count() % 8) + 1,
-                singleCellWellLabel  : createWellLabel ? "well_${SeqTrack.count() + 1}" : "",
-                sampleIdentifier     : "sample_${SeqTrack.count() + 1}",
+                laneId               : (count % 8) + 1,
+                singleCellWellLabel  : createWellLabel ? "well_${count}" : "",
+                sampleIdentifier     : "sample_${count}",
                 pipelineVersion      : softwareTool,
                 dataInstallationState: SeqTrack.DataProcessingState.FINISHED,
                 fastqcState          : SeqTrack.DataProcessingState.FINISHED,
                 libraryPreparationKit: libraryPreparationKit,
                 kitInfoReliability   : InformationReliability.KNOWN,
-        ]).save(flush: true)
+        ]).save(flush: false)
 
-        (1..2).each {
+        (1..seqType.libraryLayout.mateCount).each {
             createDataFile(seqTrack, it)
         }
 
@@ -826,16 +1014,16 @@ class ExampleData {
 
     Run createRun() {
         return new Run([
-                name        : "run_${Run.count()}",
+                name        : "run_${runCounter++}",
                 dateExecuted: new Date(),
                 blacklisted : false,
                 seqCenter   : seqCenter,
                 seqPlatform : seqPlatform,
-        ]).save(flush: true)
+        ]).save(flush: false)
     }
 
     DataFile createDataFile(SeqTrack seqTrack, int mateNumber) {
-        String fileName = "file_${DataFile.count()}_L${seqTrack.laneId}_R${mateNumber}.fastq.gz"
+        String fileName = "file_${dataFileCounter++}_L${seqTrack.laneId}_R${mateNumber}.fastq.gz"
         DataFile dataFile = new DataFile([
                 seqTrack           : seqTrack,
                 mateNumber         : mateNumber,
@@ -854,7 +1042,7 @@ class ExampleData {
                 fileSize           : 1000000000,
                 nReads             : 185000000,
                 dateLastChecked    : new Date()
-        ]).save(flush: true)
+        ]).save(flush: false)
 
         dataFiles << dataFile
         createFastqcProcessedFiles(dataFile)
@@ -866,7 +1054,7 @@ class ExampleData {
         FastqcProcessedFile fastqcProcessedFile = new FastqcProcessedFile([
                 dataFile         : dataFile,
                 workDirectoryName: "bash-unknown-version-2000-01-01-00-00-00"
-        ]).save(flush: true)
+        ]).save(flush: false)
 
         fastqcProcessedFiles << fastqcProcessedFile
         return fastqcProcessedFile
@@ -879,10 +1067,9 @@ class ExampleData {
                 sample               : seqTrack.sample,
                 seqType              : seqTrack.seqType,
                 seqTracks            : seqTracks as Set,
-                referenceGenome      : referenceGenome,
+                referenceGenome      : (seqTracks.first().sample.mixedInSpecies ? referenceGenomeHumanMouse : referenceGenomeHuman),
                 pipeline             : pipeline,
-                statSizeFileName     : pipeline.name == Pipeline.Name.PANCAN_ALIGNMENT ?
-                        CollectionUtils.exactlyOneElement(StatSizeFileName.findAllByReferenceGenome(referenceGenome, [max: 1, order: 'id'])).name : null,
+                statSizeFileName     : null,
                 seqPlatformGroup     : seqPlatformGroup,
                 libraryPreparationKit: seqTrack.seqType.isWgbs() ? null : libraryPreparationKit,
         ]).save(flush: true)
@@ -896,14 +1083,14 @@ class ExampleData {
                 sample               : seqTrack.sample,
                 seqType              : seqTrack.seqType,
                 seqTracks            : seqTracks as Set,
-                referenceGenome      : singleCellReferenceGenome,
+                referenceGenome      : singleCellReferenceGenomeHuman,
                 pipeline             : pipeline,
                 seqPlatformGroup     : seqPlatformGroup,
                 libraryPreparationKit: libraryPreparationKit,
                 referenceGenomeIndex : findOrCreateCellRangerReferenceGenomeIndex(),
                 requester            : User.findByUsername("otp"),
-                expectedCells: cells,
-        ]).save(flush: true)
+                expectedCells        : cells,
+        ]).save(flush: false)
 
         return cellRangerMergingWorkPackage
     }
@@ -924,10 +1111,10 @@ class ExampleData {
                 qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
                 qcTrafficLightStatus   : AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED,
                 comment                : createComment(),
-        ]).save(flush: true)
+        ]).save(flush: false)
 
         cellRangerMergingWorkPackage.bamFileInProjectFolder = singleCellBamFile
-        cellRangerMergingWorkPackage.save(flush: true)
+        cellRangerMergingWorkPackage.save(flush: false)
 
         singleCellBamFiles << singleCellBamFile
         return singleCellBamFile
@@ -951,15 +1138,15 @@ class ExampleData {
                 qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
                 qcTrafficLightStatus   : AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED,
                 comment                : createComment(),
-        ]).save(flush: true)
+        ]).save(flush: false)
 
         mergingWorkPackage.bamFileInProjectFolder = roddyBamFile
-        mergingWorkPackage.save(flush: true)
+        mergingWorkPackage.save(flush: false)
 
         QualityAssessmentMergedPass qualityAssessmentMergedPass = new QualityAssessmentMergedPass([
                 abstractMergedBamFile: roddyBamFile,
                 identifier           : 0,
-        ]).save(flush: true)
+        ]).save(flush: false)
 
         createRoddyMergedBamQaAll(qualityAssessmentMergedPass)
         chromosomeXY.each {
@@ -969,18 +1156,51 @@ class ExampleData {
         return roddyBamFile
     }
 
+    RnaRoddyBamFile createRnaRoddyBamFile(MergingWorkPackage mergingWorkPackage) {
+        RoddyWorkflowConfig config = findOrCreateRoddyWorkflowConfig(mergingWorkPackage)
+        RoddyBamFile roddyBamFile = new RnaRoddyBamFile([
+                workPackage            : mergingWorkPackage,
+                seqTracks              : mergingWorkPackage.seqTracks.collect() as Set,
+                numberOfMergedLanes    : mergingWorkPackage.seqTracks.size(),
+                coverage               : 35,
+                coverageWithN          : 35,
+                config                 : config,
+                dateFromFileSystem     : new Date(),
+                workDirectoryName      : ".merging_0",
+                md5sum                 : "0" * 32,
+                fileExists             : true,
+                fileSize               : 100,
+                fileOperationStatus    : AbstractMergedBamFile.FileOperationStatus.PROCESSED,
+                qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
+                qcTrafficLightStatus   : AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED,
+                comment                : createComment(),
+        ]).save(flush: false)
+
+        mergingWorkPackage.bamFileInProjectFolder = roddyBamFile
+        mergingWorkPackage.save(flush: false)
+
+        QualityAssessmentMergedPass qualityAssessmentMergedPass = new QualityAssessmentMergedPass([
+                abstractMergedBamFile: roddyBamFile,
+                identifier           : 0,
+        ]).save(flush: false)
+
+        createRnaRoddyMergedBamQaAll(qualityAssessmentMergedPass)
+        rnaRoddyBamFiles << roddyBamFile
+        return roddyBamFile
+    }
+
     ReferenceGenomeIndex findOrCreateCellRangerReferenceGenomeIndex() {
-        ReferenceGenomeIndex foundIndex = atMostOneElement(ReferenceGenomeIndex.findAllByReferenceGenome(singleCellReferenceGenome))
+        ReferenceGenomeIndex foundIndex = atMostOneElement(ReferenceGenomeIndex.findAllByReferenceGenome(singleCellReferenceGenomeHuman))
         if (foundIndex) {
             return foundIndex
         }
         ToolName tool = atMostOneElement(ToolName.findAllByName("CELL_RANGER"))
         return new ReferenceGenomeIndex(
                 toolName: tool,
-                referenceGenome: singleCellReferenceGenome,
+                referenceGenome: singleCellReferenceGenomeHuman,
                 path: '1.2.0',
                 indexToolVersion: '1.2.0',
-        ).save(flush: true)
+        ).save(flush: false)
     }
 
     CellRangerConfig findOrCreateCellRangerConfig(SeqType seqType, Pipeline pipeline) {
@@ -996,7 +1216,7 @@ class ExampleData {
                 seqType       : seqType,
                 pipeline      : pipeline,
                 programVersion: "1.2.3-4",
-        ]).save(flush: true)
+        ]).save(flush: false)
     }
 
     RoddyWorkflowConfig findOrCreateRoddyWorkflowConfig(MergingWorkPackage mergingWorkPackage) {
@@ -1019,16 +1239,16 @@ class ExampleData {
                 configVersion        : "v1_0",
                 nameUsedInConfig     : "name",
                 md5sum               : "0" * 32,
-                adapterTrimmingNeeded: mergingWorkPackage.seqType.isWgbs(),
+                adapterTrimmingNeeded: mergingWorkPackage.seqType.isWgbs() || mergingWorkPackage.seqType.isRna(),
         ]).save(flush: true)
     }
 
     Comment createComment() {
         return new Comment([
-                comment         : "comment_${Comment.count()}",
+                comment         : "comment_${commentCounter++}",
                 author          : "author",
                 modificationDate: new Date(),
-        ]).save(flush: true)
+        ]).save(flush: false)
     }
 
     RoddyMergedBamQa createRoddyMergedBamQaAll(QualityAssessmentMergedPass qualityAssessmentMergedPass) {
@@ -1052,6 +1272,86 @@ class ExampleData {
         ])
     }
 
+    RnaQualityAssessment createRnaRoddyMergedBamQaAll(QualityAssessmentMergedPass qualityAssessmentMergedPass) {
+        boolean isPaired = qualityAssessmentMergedPass.mergingWorkPackage.seqType.libraryLayout.mateCount == 2
+        return new RnaQualityAssessment([
+                qualityAssessmentMergedPass      : qualityAssessmentMergedPass,
+                chromosome                       : RoddyQualityAssessment.ALL,
+                qcBasesMapped                    : 0,
+                totalReadCounter                 : 0,
+                qcFailedReads                    : 0,
+                duplicates                       : 0,
+                totalMappedReadCounter           : 0,
+                pairedInSequencing               : 0,
+                pairedRead1                      : 0,
+                pairedRead2                      : 0,
+                properlyPaired                   : isPaired ? 0 : null,
+                withItselfAndMateMapped          : 0,
+                withMateMappedToDifferentChr     : 0,
+                withMateMappedToDifferentChrMaq  : 0,
+                singletons                       : isPaired ? 0 : null,
+                insertSizeMedian                 : 0,
+                insertSizeSD                     : 0,
+                referenceLength                  : 1,
+                genomeWithoutNCoverageQcBases    : null,
+                insertSizeCV                     : null,
+                insertSizeMedian                 : null,
+                pairedRead1                      : null,
+                pairedRead2                      : null,
+                percentageMatesOnDifferentChr    : null,
+                referenceLength                  : null,
+                properlyPairedPercentage         : isPaired ? 0 : null,
+                singletonsPercentage             : isPaired ? 0 : null,
+                alternativeAlignments            : 0,
+                baseMismatchRate                 : 0.0123456789,
+                chimericPairs                    : 0,
+                cumulGapLength                   : 123456,
+                end1Antisense                    : 12345678,
+                end1MappingRate                  : 0.1234567,
+                end1MismatchRate                 : isPaired ? 0.0123456789 : null,
+                end1PercentageSense              : isPaired ? 0.12345678 : null,
+                end1Sense                        : 123456,
+                end2Antisense                    : 123456,
+                end2MappingRate                  : 0.1234567,
+                end2MismatchRate                 : isPaired ? 0.123456789 : null,
+                end2PercentageSense              : isPaired ? 12.34567 : null,
+                end2Sense                        : 12345678,
+                estimatedLibrarySize             : 12345678,
+                exonicRate                       : 0.12345678,
+                expressionProfilingEfficiency    : 0.1234567,
+                failedVendorQCCheck              : 0,
+                fivePNorm                        : 0.12345678,
+                gapPercentage                    : 0.123456789,
+                genesDetected                    : 12345,
+                insertSizeMean                   : 123,
+                intergenicRate                   : 0.123456789,
+                intragenicRate                   : 0.1234567,
+                intronicRate                     : 0.12345678,
+                mapped                           : 12345678,
+                mappedPairs                      : 12345678,
+                mappedRead1                      : 12345678,
+                mappedRead2                      : 12345678,
+                mappedUnique                     : 12345678,
+                mappedUniqueRateOfTotal          : 0.12345678,
+                mappingRate                      : 0.1234567,
+                meanCV                           : 0.12345678,
+                meanPerBaseCov                   : 12.34567,
+                noCovered5P                      : 123,
+                numGaps                          : 123,
+                rRNARate                         : 1.234567E-8,
+                rRNAReads                        : 123456,
+                readLength                       : 123,
+                secondaryAlignments              : 0,
+                splitReads                       : 12345678,
+                supplementaryAlignments          : 0,
+                threePNorm                       : 0.12345678,
+                totalPurityFilteredReadsSequenced: 123456789,
+                transcriptsDetected              : 123456,
+                uniqueRateofMapped               : 0.1234567,
+                unpairedReads                    : 0,
+        ]).save(flush: false)
+    }
+
     RoddyMergedBamQa createRoddyMergedBamQaChromosome(QualityAssessmentMergedPass qualityAssessmentMergedPass, String chromosome) {
         return createRoddyMergedBamQa(qualityAssessmentMergedPass, [
                 chromosome: chromosome,
@@ -1063,7 +1363,7 @@ class ExampleData {
                 qualityAssessmentMergedPass  : qualityAssessmentMergedPass,
                 referenceLength              : 100,
                 genomeWithoutNCoverageQcBases: 100,
-        ] + map).save(flush: true)
+        ] + map).save(flush: false)
     }
 
     SamplePair createSamplePair(MergingWorkPackage disease, MergingWorkPackage control) {
@@ -1075,7 +1375,7 @@ class ExampleData {
                 sophiaProcessingStatus  : SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED,
                 aceseqProcessingStatus  : SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED,
                 runYapsaProcessingStatus: SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED,
-        ]).save(flush: true)
+        ]).save(flush: false)
         println "  - samplePair: ${samplePair}"
         return samplePair
     }
@@ -1090,7 +1390,7 @@ class ExampleData {
                 sampleType1BamFile: samplePair.mergingWorkPackage1.bamFileInProjectFolder,
                 sampleType2BamFile: samplePair.mergingWorkPackage2.bamFileInProjectFolder,
                 processingState   : AnalysisProcessingStates.FINISHED,
-        ]).save(flush: true)
+        ]).save(flush: false)
         println "    - snv: ${analysis}"
         roddySnvCallingInstances << analysis
         return analysis
@@ -1106,7 +1406,7 @@ class ExampleData {
                 sampleType1BamFile: samplePair.mergingWorkPackage1.bamFileInProjectFolder,
                 sampleType2BamFile: samplePair.mergingWorkPackage2.bamFileInProjectFolder,
                 processingState   : AnalysisProcessingStates.FINISHED,
-        ]).save(flush: true)
+        ]).save(flush: false)
         println "    - indel: ${analysis}"
         indelCallingInstances << analysis
 
@@ -1136,7 +1436,7 @@ class ExampleData {
                 percentDelsSize1_3   : 210.123,
                 percentDelsSize4_10  : 220.123,
                 percentDelsSize11plus: 230.123,
-        ]).save(flush: true)
+        ]).save(flush: false)
 
         new IndelSampleSwapDetection([
                 indelCallingInstance                            : analysis,
@@ -1163,7 +1463,7 @@ class ExampleData {
                 germlineSNVsHeterozygousInBoth                  : 680,
                 somaticSmallVarsInTumorPassPer                  : 690.123,
                 somaticSmallVarsInTumorCommonInGnomadPer        : 700,
-        ]).save(flush: true)
+        ]).save(flush: false)
 
         return analysis
     }
@@ -1178,7 +1478,7 @@ class ExampleData {
                 sampleType1BamFile: samplePair.mergingWorkPackage1.bamFileInProjectFolder,
                 sampleType2BamFile: samplePair.mergingWorkPackage2.bamFileInProjectFolder,
                 processingState   : AnalysisProcessingStates.FINISHED,
-        ]).save(flush: true)
+        ]).save(flush: false)
         println "    - sophia: ${analysis}"
         sophiaInstances << analysis
 
@@ -1189,7 +1489,7 @@ class ExampleData {
                 rnaContaminatedGenesMoreThanTwoIntron: "arbitraryGeneName1,arbitraryGeneName2",
                 rnaContaminatedGenesCount            : 30,
                 rnaDecontaminationApplied            : true,
-        ]).save(flush: true)
+        ]).save(flush: false)
 
         return analysis
     }
@@ -1204,7 +1504,7 @@ class ExampleData {
                 sampleType1BamFile: samplePair.mergingWorkPackage1.bamFileInProjectFolder,
                 sampleType2BamFile: samplePair.mergingWorkPackage2.bamFileInProjectFolder,
                 processingState   : AnalysisProcessingStates.FINISHED,
-        ]).save(flush: true)
+        ]).save(flush: false)
         println "    - aceseq: ${analysis}"
         aceseqInstances << analysis
 
@@ -1217,7 +1517,25 @@ class ExampleData {
                 goodnessOfFit   : 40,
                 gender          : 'M',
                 solutionPossible: 50,
-        ]).save(flush: true)
+        ]).save(flush: false)
+
+        return analysis
+    }
+
+    RunYapsaInstance createRunYapsaInstance(SamplePair samplePair) {
+        RunYapsaConfig config = getOrCreateRunYapsaConfig(samplePair, Pipeline.Name.RUN_YAPSA)
+
+        String instanceName = "runYapsa_${config.programVersion.replaceAll("/", "-")}_${TimeFormats.DATE_TIME_SECONDS_DASHES.getFormattedDate(new Date())}"
+        BamFilePairAnalysis analysis = new RunYapsaInstance([
+                samplePair        : samplePair,
+                instanceName      : instanceName,
+                config            : config,
+                sampleType1BamFile: samplePair.mergingWorkPackage1.bamFileInProjectFolder,
+                sampleType2BamFile: samplePair.mergingWorkPackage2.bamFileInProjectFolder,
+                processingState   : AnalysisProcessingStates.FINISHED,
+        ]).save(flush: false)
+        println "    - runyapsa: ${analysis}"
+        runYapsaInstances << analysis
 
         return analysis
     }
@@ -1239,12 +1557,34 @@ class ExampleData {
                                         nameUsedInConfig     : nameUsedInConfig,
                                         md5sum               : HelperUtils.getRandomMd5sum(),
                                         configFilePath       : "/dev/null/${nameUsedInConfig}_${samplePair.id}"
+        ]).save(flush: false)
+    }
+
+    RunYapsaConfig getOrCreateRunYapsaConfig(SamplePair samplePair, Pipeline.Name pipelineName) {
+        Pipeline pipeline = pipelineName.pipeline
+        RunYapsaConfig config = atMostOneElement(RunYapsaConfig.findAllByProjectAndSeqTypeAndPipelineAndObsoleteDate(
+                samplePair.project, samplePair.seqType, pipeline, null))
+        if (config) {
+            return config
+        }
+        return new RunYapsaConfig([
+                project       : samplePair.project,
+                seqType       : samplePair.seqType,
+                pipeline      : pipeline,
+                programVersion: 'yapsa-devel/b765fa8',
+                previousConfig: null,
         ]).save(flush: true)
     }
 }
 
+enum MixedInSpecies {
+    NONE,
+    MOUSE,
+}
+
 Project.withTransaction {
     ExampleData exampleData = new ExampleData([
+            abstractMergedBamFileService  : ctx.abstractMergedBamFileService,
             fastqcDataFilesService        : ctx.fastqcDataFilesService,
             fileService                   : ctx.fileService,
             fileSystemService             : ctx.fileSystemService,
@@ -1258,10 +1598,13 @@ Project.withTransaction {
             cellRangerWorkflowService     : ctx.cellRangerWorkflowService,
             singleCellMappingFileService  : ctx.singleCellMappingFileService,
             documentService               : ctx.documentService,
+            roddyBamFileService           : ctx.roddyBamFileService,
+            runYapsaService               : ctx.runYapsaService,
     ])
 
     exampleData.init()
     exampleData.createObjects()
     exampleData.createFiles()
+    println "script finished"
 }
 ''

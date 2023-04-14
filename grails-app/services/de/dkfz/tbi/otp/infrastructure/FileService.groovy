@@ -37,7 +37,8 @@ import de.dkfz.tbi.otp.utils.ThreadUtils
 
 import java.nio.charset.Charset
 import java.nio.file.*
-import java.nio.file.attribute.*
+import java.nio.file.attribute.BasicFileAttributes
+import java.nio.file.attribute.PosixFilePermission
 import java.time.Duration
 import java.util.stream.Stream
 
@@ -555,6 +556,8 @@ class FileService {
         }
     }
 
+    //delete is for file system, not on domain class
+    @SuppressWarnings('ExplicitFlushForDeleteRule')
     private void createFileWithContentCommonPartHelper(Path path,
                                                        Realm realm,
                                                        Set<PosixFilePermission> filePermission,
@@ -562,7 +565,13 @@ class FileService {
                                                        Closure closure) {
         assert path
         assert path.absolute
-        assert !Files.exists(path) || overwrite
+        if (overwrite) {
+            if (Files.exists(path)) {
+                Files.delete(path)
+            }
+        } else {
+            assert !Files.exists(path)
+        }
 
         createDirectoryRecursivelyAndSetPermissionsViaBash(path.parent, realm)
 
