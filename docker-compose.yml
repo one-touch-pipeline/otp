@@ -32,7 +32,7 @@ services:
       context: ./docker/database/
       dockerfile: Dockerfile.dev
     ports:
-      - 5432:5432
+      - ${POSTGRES_PORT:-5432}:5432
     volumes:
       - db_data:/var/lib/postgresql/data
     networks:
@@ -44,7 +44,7 @@ services:
     env_file:
       - .env
     ports:
-      - 8100:8080
+      - ${KEYCLOAK_PORT:-8100}:8080
     networks:
       otp:
 
@@ -52,7 +52,7 @@ services:
     container_name: otp-dev-ldap
     build: docker/ldap
     ports:
-      - 389:389
+      - ${OPEN_LDAP_PORT:-1389}:389
     volumes:
       - ldap_data:/var/lib/ldap
       - ldap_config:/etc/ldap/slapd.d
@@ -64,7 +64,7 @@ services:
     image: osixia/phpldapadmin:latest
     container_name: otp-dev-ldap-admin
     ports:
-      - 8090:80
+      - ${PHP_LDAP_ADMIN_PORT:-8090}:80
     environment:
       PHPLDAPADMIN_LDAP_HOSTS: open-ldap
       PHPLDAPADMIN_HTTPS: "false"
@@ -87,8 +87,8 @@ services:
     image: mailhog/mailhog:latest
     container_name: otp-dev-mailhog
     ports:
-      - 8025:8025
-      - 1025:1025
+      - ${MAILHOG_PORT_GUI:-8025}:8025
+      - ${MAILHOG_PORT_MAIL:-1025}:1025
     networks:
       otp:
 
