@@ -226,8 +226,4 @@ class Project implements CommentableWithProject, ProjectPropertiesGivenWithReque
     Project getProject() {
         return this
     }
-
-    String listAllKeywords() {
-        return keywords*.name.sort().join(",")
-    }
 }
