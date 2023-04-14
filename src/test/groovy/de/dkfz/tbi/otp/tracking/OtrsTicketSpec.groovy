@@ -26,7 +26,6 @@ import grails.validation.ValidationException
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.ThreadUtils
 
 class OtrsTicketSpec extends Specification implements DataTest {
 
@@ -71,29 +70,5 @@ class OtrsTicketSpec extends Specification implements DataTest {
         then:
         ValidationException ex = thrown()
         ex.message.contains("OtrsTicket.ticketNumber.unique.error")
-    }
-
-    def 'getFirstImportTimestamp and getLastImportTimestamp return expected result'() {
-        given:
-        OtrsTicket otrsTicketA = DomainFactory.createOtrsTicket()
-        OtrsTicket otrsTicketB = DomainFactory.createOtrsTicket()
-
-        FastqImportInstance fastqImportInstanceA = DomainFactory.createFastqImportInstance(otrsTicket: otrsTicketA)
-        FastqImportInstance fastqImportInstanceB = DomainFactory.createFastqImportInstance(otrsTicket: otrsTicketB)
-
-        MetaDataFile metadataFileB1 = DomainFactory.createMetaDataFile([fastqImportInstance: fastqImportInstanceB])
-        assert ThreadUtils.waitFor({ System.currentTimeMillis() > metadataFileB1.dateCreated.time }, 1, 1)
-        MetaDataFile metadataFileA1 = DomainFactory.createMetaDataFile([fastqImportInstance: fastqImportInstanceA])
-        assert ThreadUtils.waitFor({ System.currentTimeMillis() > metadataFileA1.dateCreated.time }, 1, 1)
-        MetaDataFile metadataFileA2 = DomainFactory.createMetaDataFile([fastqImportInstance: fastqImportInstanceA])
-
-        assert metadataFileA1.dateCreated > metadataFileB1.dateCreated
-        assert metadataFileA2.dateCreated > metadataFileA1.dateCreated
-
-        expect:
-        otrsTicketA.firstImportTimestamp == metadataFileA1.dateCreated
-        otrsTicketA.lastImportTimestamp == metadataFileA2.dateCreated
-        otrsTicketB.firstImportTimestamp == metadataFileB1.dateCreated
-        otrsTicketB.lastImportTimestamp == metadataFileB1.dateCreated
     }
 }

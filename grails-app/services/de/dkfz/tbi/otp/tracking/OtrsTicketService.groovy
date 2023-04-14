@@ -164,7 +164,7 @@ class OtrsTicketService {
 
         // assigning a fastqImportInstance that belongs to an otrsTicket which consists of several other fastqImportInstances is not allowed,
         // because it is not possible to calculate the right "Started"/"Finished" dates
-        if (oldOtrsTicket && oldOtrsTicket.fastqImportInstances.size() != 1) {
+        if (oldOtrsTicket && getFastqImportInstances(oldOtrsTicket).size() != 1) {
             throw new UserException(
                     "Assigning a fastqImportInstance that belongs to an OTRS-Ticket which consists of several other fastqImportInstances is not allowed."
             )
@@ -209,6 +209,13 @@ class OtrsTicketService {
     void saveSeqCenterComment(OtrsTicket otrsTicket, String value) {
         otrsTicket.seqCenterComment = value
         otrsTicket.save(flush: true)
+    }
+
+    List<FastqImportInstance> getFastqImportInstances(OtrsTicket otrsTicket) {
+        //Doesn't work as a single Query, probably a Unit test problem
+        return FastqImportInstance.withCriteria {
+            eq('otrsTicket', otrsTicket)
+        } as List<FastqImportInstance>
     }
 
     static String buildTicketDirectLink(OtrsTicket otrsTicket) {

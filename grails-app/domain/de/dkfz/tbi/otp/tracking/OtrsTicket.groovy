@@ -150,31 +150,6 @@ class OtrsTicket implements Commentable, Entity {
         comment cascade: "all-delete-orphan"
     }
 
-    Date getFirstImportTimestamp() {
-        return (Date) MetaDataFile.createCriteria().get {
-            'in'('fastqImportInstance', fastqImportInstances)
-            projections {
-                min("dateCreated")
-            }
-        }
-    }
-
-    Date getLastImportTimestamp() {
-        return (Date) MetaDataFile.createCriteria().get {
-            'in'('fastqImportInstance', fastqImportInstances)
-            projections {
-                max("dateCreated")
-            }
-        }
-    }
-
-    List<FastqImportInstance> getFastqImportInstances() {
-        //Doesn't work as a single Query, probably a Unit test problem
-        return FastqImportInstance.withCriteria {
-            eq('otrsTicket', this)
-        }
-    }
-
     Set<SeqTrack> findAllSeqTracks() {
         return new LinkedHashSet<SeqTrack>(SeqTrack.findAll(
                 'FROM SeqTrack st WHERE EXISTS (FROM DataFile df WHERE df.seqTrack = st AND df.fastqImportInstance.otrsTicket = :otrsTicket)',

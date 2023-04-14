@@ -244,7 +244,7 @@ class NotificationCreator {
 
         GrailsArtefactCheckHelper.check(grailsApplication, metadataImportController, metadataImportAction)
 
-        ticket.fastqImportInstances.each {
+        otrsTicketService.getAllFastqImportInstances(ticket).each {
             content.append('\n')
             content.append(createNotificationTextService.linkGenerator.link([
                     (LinkGenerator.ATTRIBUTE_CONTROLLER): metadataImportController,
