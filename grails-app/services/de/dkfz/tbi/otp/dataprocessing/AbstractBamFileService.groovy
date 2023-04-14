@@ -32,50 +32,19 @@ class AbstractBamFileService {
         assert bamFile : 'Parameter bamFile must not be null'
 
         if (!bamFile.seqType.needsBedFile) {
-            calculateCoverage(bamFile, 'length')
-        } else if (bamFile.seqType.needsBedFile) {
-            //In case of Exome sequencing this value stays 'null' since there is no differentiation between 'with N' and 'without N'
-            return null
-        } else {
-            throw new NotSupportedException("The 'with N' coverage calculation for seq Type ${bamFile.seqType.name} is not possible yet.")
-        }
-    }
+            Long length
+            Long basesMapped
 
-    private Double calculateCoverage(AbstractBamFile bamFile, String property) {
-        assert bamFile : 'Parameter bamFile must not be null'
-
-        Long length
-        Long basesMapped
-
-        if (!bamFile.seqType.needsBedFile) {
             ReferenceGenome referenceGenome = bamFile.referenceGenome
             assert referenceGenome : "Unable to find a reference genome for the BAM file ${bamFile}"
 
-            length = referenceGenome."${property}"
-            assert length > 0 : "The property '${property}' of the reference genome '${referenceGenome}' is 0 or negative."
-
+            length = referenceGenome.length
             basesMapped = bamFile.overallQualityAssessment.qcBasesMapped
-        } else if (bamFile.seqType.needsBedFile) {
-            BedFile bedFile = bamFile.bedFile
-            assert bedFile : "Unable to find a bed file for the BAM file ${bamFile}"
 
-            length = bedFile.mergedTargetSize
-            assert length > 0 : "The length of the targets in the bed file ${bedFile} is 0 or negative."
-
-            /*
-             * In the beginning of the exome alignments we calculated the QA the same way as for whole genome.
-             * Therefore for old data we do not have the field onTargetMappedBases filled in.
-             * To prevent displaying wrong values nothing is shown in the GUI (null is returned).
-             */
-            if (bamFile.overallQualityAssessment.onTargetMappedBases) {
-                basesMapped = bamFile.overallQualityAssessment.onTargetMappedBases
-            } else {
-                return null
-            }
-        } else {
-            throw new NotSupportedException("The coverage calculation for seq Type ${bamFile.seqType.name} is not possible yet.")
+            return basesMapped / length
         }
-        return basesMapped / length
+        //In case of sequencing types that need a BED file this value stays 'null' since there is no differentiation between 'with N' and 'without N'
+        return null
     }
 
     /**

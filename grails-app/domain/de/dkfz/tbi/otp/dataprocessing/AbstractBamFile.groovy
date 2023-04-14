@@ -84,7 +84,7 @@ abstract class AbstractBamFile implements CommentableWithProject, Entity {
 
     /**
      * Coverage with N of the BAM file.
-     * In case of Exome sequencing this value stays 'null' since there is no differentiation between 'with N' and 'without N'.
+     * In case of sequencing types that need a BED file this value stays 'null' since there is no differentiation between 'with N' and 'without N'.
      */
     Double coverageWithN
 

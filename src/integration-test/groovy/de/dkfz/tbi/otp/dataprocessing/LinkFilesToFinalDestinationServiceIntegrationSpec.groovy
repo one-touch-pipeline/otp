@@ -179,4 +179,77 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends Specification im
         then:
         assertBamFileIsFine()
     }
+
+    void testValidateAndSetBamFileInProjectFolder_WhenBamFileFileOperationStatusNotInProgress_ShouldFail() {
+        given:
+        AbstractMergedBamFile bamFile = createBamFile([
+                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.DECLARED,
+        ])
+
+        when:
+        new LinkFilesToFinalDestinationService().validateAndSetBamFileInProjectFolder(bamFile)
+
+        then:
+        thrown(AssertionError)
+    }
+
+    void testValidateAndSetBamFileInProjectFolder_WhenBamFileWithdrawn_ShouldFail() {
+        given:
+        AbstractMergedBamFile bamFile = createBamFile([
+                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.INPROGRESS,
+                withdrawn: true,
+        ])
+
+        when:
+        new LinkFilesToFinalDestinationService().validateAndSetBamFileInProjectFolder(bamFile)
+
+        then:
+        thrown(AssertionError)
+    }
+
+    void testValidateAndSetBamFileInProjectFolder_WhenOtherNonWithdrawnBamFilesWithFileOperationStatusInProgressOfSameMergingWorkPackageExist_ShouldFail() {
+        given:
+        MergingWorkPackage mergingWorkPackage = DomainFactory.createMergingWorkPackage(pipeline: DomainFactory.createPanCanPipeline())
+
+        AbstractMergedBamFile bamFile = createRoddyBamFile([
+                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.INPROGRESS,
+        ], mergingWorkPackage, RoddyBamFile)
+
+        createRoddyBamFile([
+                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.INPROGRESS,
+        ], mergingWorkPackage, RoddyBamFile)
+
+        when:
+        new LinkFilesToFinalDestinationService().validateAndSetBamFileInProjectFolder(bamFile)
+
+        then:
+        thrown(AssertionError)
+    }
+
+    void testValidateAndSetBamFileInProjectFolder_WhenAllFine_ShouldSetBamFileInProjectFolder() {
+        given:
+        MergingWorkPackage mergingWorkPackage = DomainFactory.createMergingWorkPackage(pipeline: DomainFactory.createPanCanPipeline())
+
+        createRoddyBamFile([
+                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.DECLARED,
+        ], mergingWorkPackage, RoddyBamFile)
+
+        createRoddyBamFile([
+                withdrawn         : true,
+        ], mergingWorkPackage, RoddyBamFile)
+
+        createBamFile([
+                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.INPROGRESS,
+        ])
+
+        AbstractMergedBamFile bamFile = createRoddyBamFile([
+                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.INPROGRESS,
+        ], mergingWorkPackage, RoddyBamFile)
+
+        when:
+        new LinkFilesToFinalDestinationService().validateAndSetBamFileInProjectFolder(bamFile)
+
+        then:
+        bamFile.mergingWorkPackage.bamFileInProjectFolder == bamFile
+    }
 }
