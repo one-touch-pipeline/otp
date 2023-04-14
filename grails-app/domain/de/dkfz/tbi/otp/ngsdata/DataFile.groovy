@@ -166,17 +166,6 @@ class DataFile implements CommentableWithProject, Entity {
         withdrawnComment nullable: true
     }
 
-    String fileSizeString() {
-        if (fileSize > 1e9) {
-            return String.format("%.2f GB", fileSize / 1e9)
-        } else if (fileSize > 1e6) {
-            return String.format("%.2f MB", fileSize / 1e6)
-        } else if (fileSize > 1e3) {
-            return String.format("%.2f kB", fileSize / 1e3)
-        }
-        return fileSize
-    }
-
     @Override
     String toString() {
         fileName

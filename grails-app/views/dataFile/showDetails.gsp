@@ -108,7 +108,7 @@
             </tr>
             <tr>
                 <td class="myKey"><g:message code="datafile.showDetails.fileSize"/></td>
-                <td class="myValue">${dataFile.fileSizeString()}</td>
+                <td class="myValue">${dataFileSize}</td>
             </tr>
             <sec:ifAllGranted roles="ROLE_OPERATOR">
                 <tr>

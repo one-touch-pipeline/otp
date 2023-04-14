@@ -54,6 +54,7 @@ class DataFileController {
 
         return [
                 dataFile       : dataFile,
+                dataFileSize   : formatDataFileSize(dataFile.fileSize),
                 dateExecuted   : TimeFormats.DATE.getFormattedDate(dataFile.dateExecuted),
                 dateFileSystem : TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(dataFile.dateFileSystem),
                 dateCreated    : TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(dataFile.dateCreated),
@@ -70,6 +71,17 @@ class DataFileController {
         commentService.saveComment(dataFile, cmd.comment)
         Map dataToRender = [date: TimeFormats.WEEKDAY_DATE_TIME.getFormattedDate(dataFile.comment.modificationDate), author: dataFile.comment.author]
         render(dataToRender as JSON)
+    }
+
+    private String formatDataFileSize(long fileSize) {
+        if (fileSize > 1e9) {
+            return String.format("%.2f GB", fileSize / 1e9)
+        } else if (fileSize > 1e6) {
+            return String.format("%.2f MB", fileSize / 1e6)
+        } else if (fileSize > 1e3) {
+            return String.format("%.2f kB", fileSize / 1e3)
+        }
+        return fileSize
     }
 }
 
