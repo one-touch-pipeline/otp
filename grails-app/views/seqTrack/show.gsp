@@ -90,10 +90,6 @@
                 <td>${seqTrack.qualityEncoding}</td>
             </tr>
             <tr>
-                <td><g:message code="seqTrack.show.details.alignmentState"/></td>
-                <td>${seqTrack.alignmentState}</td>
-            </tr>
-            <tr>
                 <td><g:message code="seqTrack.show.details.fastqcState"/></td>
                 <td>${seqTrack.fastqcState}</td>
             </tr>

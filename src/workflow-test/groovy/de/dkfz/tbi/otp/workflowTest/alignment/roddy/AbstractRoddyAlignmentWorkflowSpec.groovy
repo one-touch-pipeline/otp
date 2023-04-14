@@ -406,7 +406,6 @@ abstract class AbstractRoddyAlignmentWorkflowSpec extends AbstractAlignmentWorkf
     protected void checkQC(RoddyBamFile bamFile) {
         QualityAssessmentMergedPass qaPass = CollectionUtils.exactlyOneElement(QualityAssessmentMergedPass.findAllWhere(
                 abstractMergedBamFile: bamFile,
-                identifier: 0,
         ))
 
         bamFile.seqTracks.each {

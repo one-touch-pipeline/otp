@@ -50,8 +50,7 @@ abstract class AbstractMergedBamFile extends AbstractFileSystemBamFile {
 
     /**
      * This property contains the transfer state of an AbstractMergedBamFile to the project folder.
-     * Be aware that in case of the ProcessedMergedBamFile the property is used to trigger the transfer workflow,
-     * whereas in the RoddyBamFile it is only used for documentation of the state.
+     * Be aware that for RoddyBamFile it is only used for documentation of the state.
      */
     FileOperationStatus fileOperationStatus = FileOperationStatus.DECLARED
 

@@ -24,7 +24,6 @@ package de.dkfz.tbi.otp.domainFactory.pipelines
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.CellRangerFactory
 import de.dkfz.tbi.otp.domainFactory.pipelines.roddyRna.RoddyRnaFactory
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
 trait AlignmentPipelineFactory {
 
@@ -44,12 +43,6 @@ trait AlignmentPipelineFactory {
     }
 
     private static final Map<Pipeline.Name, Map<String, Closure<?>>> ALIGNMENT_CREATION = [
-            (Pipeline.Name.DEFAULT_OTP)        : [
-                    (AbstractMergedBamFile)     : { DomainFactory.createProcessedMergedBamFile() },
-                    (AbstractMergingWorkPackage): {
-                        DomainFactory.createMergingWorkPackage([pipeline: DomainFactory.createDefaultOtpPipeline(), seqType: DomainFactory.createSeqType()])
-                    },
-            ],
             (Pipeline.Name.PANCAN_ALIGNMENT)   : [
                     (AbstractMergedBamFile)     : { RoddyPancanFactoryInstance.INSTANCE.createBamFile() },
                     (AbstractMergingWorkPackage): { RoddyPancanFactoryInstance.INSTANCE.createMergingWorkPackage() },

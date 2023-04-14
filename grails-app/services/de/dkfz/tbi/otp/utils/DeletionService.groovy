@@ -319,35 +319,6 @@ class DeletionService {
             seqTrackService.throwExceptionInCaseOfExternalMergedBamFileIsAttached([seqTrack])
         }
 
-        List<DataFile> dataFiles = DataFile.findAllBySeqTrack(seqTrack)
-
-        if (dataFiles) {
-            ProcessedSaiFile.findAllByDataFileInList(dataFiles)*.delete(flush: true)
-        }
-
-        // for ProcessedMergedBamFiles
-        AlignmentPass.findAllBySeqTrack(seqTrack).each { AlignmentPass alignmentPass ->
-            MergingWorkPackage mergingWorkPackage = alignmentPass.workPackage
-            mergingWorkPackage.bamFileInProjectFolder = null
-            mergingWorkPackage.seqTracks.remove(seqTrack)
-            mergingWorkPackage.save(flush: true, validate: false)
-            ProcessedBamFile.findAllByAlignmentPass(alignmentPass).each { ProcessedBamFile processedBamFile ->
-                deleteQualityAssessmentInfoForAbstractBamFile(processedBamFile)
-                List<File> processingDirsToDelete = deleteMergingRelatedConnectionsOfBamFile(processedBamFile)
-                dirsToDelete.addAll(processingDirsToDelete)
-                deleteProcessParameters(ProcessParameter.findAllByValueAndClassName(processedBamFile.id.toString(), processedBamFile.class.name))
-                processedBamFile.delete(flush: true)
-            }
-            alignmentPass.delete(flush: true)
-            // The MergingWorkPackage can only be deleted if all corresponding MergingSets and AlignmentPasses are already removed
-            if (!MergingSet.findAllByMergingWorkPackage(mergingWorkPackage) &&
-                    !AlignmentPass.findAllByWorkPackage(mergingWorkPackage)) {
-                dirsToDelete << analysisDeletionService.deleteSamplePairsWithoutAnalysisInstances(
-                        SamplePair.findAllByMergingWorkPackage1OrMergingWorkPackage2(mergingWorkPackage, mergingWorkPackage))
-                mergingWorkPackage.delete(flush: true)
-            }
-        }
-
         // for RoddyBamFiles
         MergingWorkPackage mergingWorkPackage = null
         List<RoddyBamFile> bamFilesFetch = RoddyBamFile.createCriteria().listDistinct {
@@ -650,30 +621,7 @@ class DeletionService {
      */
     private void deleteQualityAssessmentInfoForAbstractBamFile(AbstractBamFile abstractBamFile) {
         notNull(abstractBamFile, "The input AbstractBamFile is null")
-        if (abstractBamFile instanceof ProcessedBamFile) {
-            List<QualityAssessmentPass> qualityAssessmentPasses = QualityAssessmentPass.findAllByProcessedBamFile(abstractBamFile)
-
-            if (qualityAssessmentPasses) {
-                ChromosomeQualityAssessment.findAllByQualityAssessmentPassInList(qualityAssessmentPasses)*.delete(flush: true)
-                OverallQualityAssessment.findAllByQualityAssessmentPassInList(qualityAssessmentPasses)*.delete(flush: true)
-            }
-
-            qualityAssessmentPasses.each {
-                deleteProcessParameters(ProcessParameter.findAllByValueAndClassName(it.id.toString(), it.class.name))
-                it.delete(flush: true)
-            }
-        } else if (abstractBamFile instanceof ProcessedMergedBamFile) {
-            List<QualityAssessmentMergedPass> qualityAssessmentMergedPasses = QualityAssessmentMergedPass.findAllByAbstractMergedBamFile(abstractBamFile)
-
-            if (qualityAssessmentMergedPasses) {
-                ChromosomeQualityAssessmentMerged.findAllByQualityAssessmentMergedPassInList(qualityAssessmentMergedPasses)*.delete(flush: true)
-                OverallQualityAssessmentMerged.findAllByQualityAssessmentMergedPassInList(qualityAssessmentMergedPasses)*.delete(flush: true)
-            }
-            qualityAssessmentMergedPasses.each {
-                deleteProcessParameters(ProcessParameter.findAllByValueAndClassName(it.id.toString(), it.class.name))
-                it.delete(flush: true)
-            }
-        } else if (abstractBamFile instanceof RoddyBamFile) {
+        if (abstractBamFile instanceof RoddyBamFile) {
             List<QualityAssessmentMergedPass> qualityAssessmentMergedPasses = QualityAssessmentMergedPass.findAllByAbstractMergedBamFile(abstractBamFile)
             if (qualityAssessmentMergedPasses) {
                 RoddyQualityAssessment.findAllByQualityAssessmentMergedPassInList(qualityAssessmentMergedPasses)*.delete(flush: true)
@@ -688,70 +636,6 @@ class DeletionService {
         } else {
             throw new NotSupportedException("This BamFile type " + abstractBamFile + " is not supported")
         }
-
-        PicardMarkDuplicatesMetrics.findAllByAbstractBamFile(abstractBamFile)*.delete(flush: true)
-    }
-
-    /**
-     * Delete merging related database entries, based on the mergingSetAssignments
-     *
-     * The function should be called inside a transaction (DOMAIN.withTransaction{}) to roll back changes if an exception occurs or a check fails.
-     */
-    private List<File> deleteMergingRelatedConnectionsOfBamFile(ProcessedBamFile processedBamFile) {
-        notNull(processedBamFile, "The input processedBamFile is null in method deleteMergingRelatedConnectionsOfBamFile")
-        List<File> dirsToDelete = []
-
-        List<MergingSetAssignment> mergingSetAssignments = MergingSetAssignment.findAllByBamFile(processedBamFile)
-        List<MergingSet> mergingSets = mergingSetAssignments*.mergingSet
-        List<MergingWorkPackage> mergingWorkPackages = mergingSets*.mergingWorkPackage
-
-        if (mergingWorkPackages.empty) {
-            println "there is no merging for processedBamFile " + processedBamFile
-        } else if (mergingWorkPackages.unique().size() > 1) {
-            throw new NotSupportedException("There is not one unique mergingWorkPackage for ProcessedBamFile " + processedBamFile)
-        } else {
-            MergingWorkPackage mergingWorkPackage = mergingWorkPackages.first()
-            List<MergingPass> mergingPasses = mergingSets ? MergingPass.findAllByMergingSetInList(mergingSets).unique() : []
-            List<ProcessedMergedBamFile> processedMergedBamFiles = mergingPasses ? ProcessedMergedBamFile.findAllByMergingPassInList(mergingPasses) : []
-
-            mergingSetAssignments*.delete(flush: true)
-
-            if (processedMergedBamFiles) {
-                List<BamFilePairAnalysis> analyses = BamFilePairAnalysis.findAllBySampleType1BamFileInListOrSampleType2BamFileInList(
-                        processedMergedBamFiles, processedMergedBamFiles)
-                List<SamplePair> samplePairs = analyses*.samplePair.unique()
-                analyses.each {
-                    dirsToDelete << analysisDeletionService.deleteInstance(it)
-                }
-                dirsToDelete.addAll(analysisDeletionService.deleteSamplePairsWithoutAnalysisInstances(samplePairs))
-            }
-
-            processedMergedBamFiles.each { ProcessedMergedBamFile processedMergedBamFile ->
-                deleteQualityAssessmentInfoForAbstractBamFile(processedMergedBamFile)
-                MergingSetAssignment.findAllByBamFile(processedMergedBamFile)*.delete(flush: true)
-
-                deleteProcessParameters(ProcessParameter.findAllByValueAndClassName(processedMergedBamFile.id.toString(), processedMergedBamFile.class.name))
-                processedMergedBamFile.delete(flush: true)
-            }
-
-            mergingPasses.each {
-                deleteProcessParameters(ProcessParameter.findAllByValueAndClassName(it.id.toString(), it.class.name))
-                it.delete(flush: true)
-            }
-
-            mergingSets.each { MergingSet mergingSet ->
-                // The MergingSet can only be deleted if all corresponding AbstractBamFiles are removed already
-                if (!MergingSetAssignment.findAllByMergingSet(mergingSet)) {
-                    mergingSet.delete(flush: true)
-                }
-            }
-            // The MerginWorkPackage can only be deleted if all corresponding MergingSets and AlignmentPasses are removed already
-            if (!MergingSet.findAllByMergingWorkPackage(mergingWorkPackage) &&
-                    !AlignmentPass.findAllByWorkPackage(mergingWorkPackage)) {
-                mergingWorkPackage.delete(flush: true)
-            }
-        }
-        return dirsToDelete
     }
 
     /**

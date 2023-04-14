@@ -23,15 +23,15 @@ package de.dkfz.tbi.otp.withdraw
 
 import grails.gorm.transactions.Transactional
 
-import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
-import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.utils.DeletionService
+import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 
-import java.nio.file.*
+import java.nio.file.Files
+import java.nio.file.Path
 import java.util.stream.Stream
 
 @Transactional
@@ -69,10 +69,6 @@ abstract class WithdrawBamFileService<E extends AbstractMergedBamFile> implement
     void withdrawObjects(List<E> entities) {
         entities.each {
             it.withdrawn = true
-            if (it.status == AbstractBamFile.State.NEEDS_PROCESSING) {
-                //if withdraw, the status may not be NEEDS_PROCESSING (constrain)
-                it.status = AbstractBamFile.State.DECLARED
-            }
             it.save(flush: true)
         }
     }

@@ -21,17 +21,18 @@
  */
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
-import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
+import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
 @Rollback
 @Integration
-class AnalysisDeletionServiceIntegrationSpec extends Specification {
+class AnalysisDeletionServiceIntegrationSpec extends Specification implements IsRoddy {
 
     AnalysisDeletionService analysisDeletionService
 
@@ -40,7 +41,7 @@ class AnalysisDeletionServiceIntegrationSpec extends Specification {
     IndelCallingInstance indelCallingInstance
     SophiaInstance sophiaInstance
     AceseqInstance aceseqInstance
-    ProcessedMergedBamFile bamFileTumor2
+    AbstractMergedBamFile bamFileTumor2
     SamplePair samplePair2
     List<File> analysisInstancesDirectories
     List<File> analysisSamplePairsDirectories
@@ -49,9 +50,10 @@ class AnalysisDeletionServiceIntegrationSpec extends Specification {
     void setupData() {
         samplePair = DomainFactory.createSamplePairWithProcessedMergedBamFiles()
         snvCallingInstance = DomainFactory.createRoddySnvCallingInstance(
-                sampleType1BamFile  : samplePair.mergingWorkPackage1.bamFileInProjectFolder,
+                sampleType1BamFile: samplePair.mergingWorkPackage1.bamFileInProjectFolder,
                 sampleType2BamFile: samplePair.mergingWorkPackage2.bamFileInProjectFolder,
-                samplePair    : samplePair,
+                samplePair: samplePair,
+                config: DomainFactory.createRoddyWorkflowConfig(pipeline: DomainFactory.createRoddySnvPipelineLazy())
         )
         indelCallingInstance = DomainFactory.createIndelCallingInstanceWithSameSamplePair(snvCallingInstance)
         sophiaInstance = DomainFactory.createSophiaInstanceWithSameSamplePair(snvCallingInstance)
@@ -59,9 +61,10 @@ class AnalysisDeletionServiceIntegrationSpec extends Specification {
         DomainFactory.createRealm()
 
         samplePair2 = DomainFactory.createDisease(samplePair.mergingWorkPackage2)
-        bamFileTumor2 = DomainFactory.createProcessedMergedBamFile(
+        bamFileTumor2 = createRoddyBamFile(
+                DomainFactory.randomProcessedBamFileProperties,
                 samplePair2.mergingWorkPackage1,
-                DomainFactory.randomProcessedBamFileProperties
+                RoddyBamFile,
         )
 
         analysisInstancesDirectories = [

@@ -85,11 +85,6 @@ class IndividualSwapService extends AbstractDataSwapService<IndividualSwapParame
     }
 
     @Override
-    protected void logSwapData(IndividualSwapData data) {
-        logAlignments(data)
-    }
-
-    @Override
     protected void performDataSwap(IndividualSwapData data) {
         swapIndividual(data)
 

@@ -569,7 +569,7 @@ class LinkFilesToFinalDestinationServiceIntegrationTests implements DomainFactor
         roddyBamFile.config.adapterTrimmingNeeded = true
         assert roddyBamFile.config.save(flush: true)
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
-        RoddyQualityAssessment qa = roddyBamFile.overallQualityAssessment
+        RoddyQualityAssessment qa = roddyBamFile.qualityAssessment
         qa.pairedRead1--
         assert qa.save(flush: true)
         assert roddyBamFile.numberOfReadsFromQa < roddyBamFile.numberOfReadsFromFastQc
@@ -581,7 +581,7 @@ class LinkFilesToFinalDestinationServiceIntegrationTests implements DomainFactor
     void testExecute_roddyBamFileHasLessNumberOfReadsThenAllSeqTracksTogether_ShouldFail() {
         setupData()
         setUp_allFine()
-        RoddyQualityAssessment qa = roddyBamFile.overallQualityAssessment
+        RoddyQualityAssessment qa = roddyBamFile.qualityAssessment
         qa.pairedRead1--
         assert qa.save(flush: true)
         assert roddyBamFile.numberOfReadsFromQa < roddyBamFile.numberOfReadsFromFastQc

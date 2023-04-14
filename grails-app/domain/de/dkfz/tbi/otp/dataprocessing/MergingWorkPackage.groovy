@@ -56,8 +56,6 @@ class MergingWorkPackage extends AbstractMergingWorkPackage {
     ]
 
     static constraints = {
-        // As soon as you loosen this constraint, un-ignore:
-        // - AlignmentPassUnitTests.testIsLatestPass_2PassesDifferentWorkPackages
         sample(validator: { val, obj ->
             MergingWorkPackage mergingWorkPackage = CollectionUtils.atMostOneElement(
                     MergingWorkPackage.findAllBySampleAndSeqTypeAndAntibodyTarget(val, obj.seqType, obj.antibodyTarget),

@@ -27,12 +27,13 @@ import de.dkfz.tbi.otp.analysis.pair.bamfiles.SeqTypeAndInputBamFiles
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
+import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 
 import java.time.Duration
 
-abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase implements SeqTypeAndInputBamFiles {
+abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase implements SeqTypeAndInputBamFiles, IsRoddy {
 
     static final Double COVERAGE = 30.0
 
@@ -49,6 +50,7 @@ abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase
     SampleType sampleTypeTumor
     SeqType seqType
 
+    @Override
     abstract ConfigPerProjectAndSeqType createConfig()
 
     @Override
@@ -100,14 +102,15 @@ abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase
     void setupProcessedMergedBamFile() {
         MergingWorkPackage tumorMwp = DomainFactory.createMergingWorkPackage(
                 seqType: seqTypeToUse(),
-                pipeline: DomainFactory.createDefaultOtpPipeline(),
+                pipeline: DomainFactory.createPanCanPipeline(),
                 referenceGenome: createReferenceGenome()
         )
-        bamFileTumor = DomainFactory.createProcessedMergedBamFile(tumorMwp, createProcessMergedBamFileProperties())
+        bamFileTumor = createRoddyBamFile(createProcessMergedBamFileProperties(), tumorMwp, RoddyBamFile)
 
-        bamFileControl = DomainFactory.createProcessedMergedBamFile(
+        bamFileControl = createRoddyBamFile(
+                createProcessMergedBamFileProperties(),
                 DomainFactory.createMergingWorkPackage(bamFileTumor.mergingWorkPackage),
-                createProcessMergedBamFileProperties())
+                RoddyBamFile)
 
         commonBamFileSetup()
         createBedFileAndLibPrepKit()

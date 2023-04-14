@@ -62,15 +62,6 @@ abstract class AbstractQaOverviewService {
             "bamFile.withdrawn = false",
             "mergingWorkPackage.seqType = :seqType",
             "mergingWorkPackage.bamFileInProjectFolder = bamFile",
-            """\
-                |qaPass.identifier = (
-                |        select
-                |            max(qaPass2.identifier)
-                |        from
-                |            QualityAssessmentMergedPass qaPass2
-                |        where
-                |            qaPass2.abstractMergedBamFile = bamFile
-                |    )""".stripMargin(),
     ].asImmutable()
 
     final static List<? extends ColumnDefinition> BASE_COLUMN_DEFINITIONS = [

@@ -32,6 +32,7 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.notification.CreateNotificationTextService
 import de.dkfz.tbi.otp.project.Project
@@ -41,7 +42,7 @@ import de.dkfz.tbi.otp.utils.*
 import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus.*
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
-class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutRollbackAnnotation implements DomainFactoryCore {
+class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutRollbackAnnotation implements DomainFactoryCore, IsRoddy {
 
     @Autowired
     GrailsApplication grailsApplication
@@ -860,11 +861,11 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
 
     void "fillInMergingWorkPackageProcessingStatuses, 1 MWP in progress, returns NOTHING_DONE_MIGHT_DO"() {
         given:
-        ProcessedMergedBamFile bamFile
+        AbstractMergedBamFile bamFile
         SeqTrackProcessingStatus seqTrackStatus
         setupData()
         SessionUtils.withTransaction {
-            bamFile = DomainFactory.createProcessedMergedBamFile()
+            bamFile = createBamFile()
             seqTrackStatus = createSeqTrackProcessingStatus(bamFile.containedSeqTracks.first())
         }
 
@@ -922,7 +923,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         SeqTrackProcessingStatus seqTrack1Status, seqTrack2Status
         setupData()
         SessionUtils.withTransaction {
-            bamFile = DomainFactory.createProcessedMergedBamFile()
+            bamFile = createBamFile()
             seqTrack1Status = createSeqTrackProcessingStatus(bamFile.containedSeqTracks.first())
             seqTrack2Status = createSeqTrackProcessingStatus(createSeqTrackWithOneDataFile())
         }
@@ -1470,8 +1471,8 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         pairAnalysis << listPairAnalysis
     }
 
-    private static AbstractMergedBamFile createBamFileInProjectFolder(Map bamFileProperties = [:]) {
-        AbstractMergedBamFile bamFile = DomainFactory.createProcessedMergedBamFile(bamFileProperties)
+    private AbstractMergedBamFile createBamFileInProjectFolder(Map bamFileProperties = [:]) {
+        AbstractMergedBamFile bamFile = createBamFile(bamFileProperties)
 
         return saveBamFileInProjectFolder(bamFile)
     }

@@ -50,7 +50,7 @@ def alignmentQualityOverview(Project p, Path file, SeqType seqType) {
     header << "PROJECT\tOTP_PID\tOTP_SAMPLE_TYPE\tSEQUENCING_TYPE\tBAM_FILE\tCOVERAGE"
     boolean first = true
 
-    List<AbstractQualityAssessment> dataOverall = ctx.overallQualityAssessmentMergedService.findAllByProjectAndSeqType(p, seqType)
+    List<AbstractQualityAssessment> dataOverall = ctx.qualityAssessmentMergedService.findAllByProjectAndSeqType(p, seqType)
     dataOverall.each { AbstractQualityAssessment aqa ->
         if (first) {
             header << aqa.properties.sort()*.key*.toString()*.toUpperCase().join("\t")

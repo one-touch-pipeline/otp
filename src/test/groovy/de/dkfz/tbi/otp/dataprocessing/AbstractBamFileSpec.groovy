@@ -30,7 +30,6 @@ import org.grails.datastore.gorm.GormEntity
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
 class AbstractBamFileSpec extends Specification implements DataTest {
 
@@ -40,7 +39,6 @@ class AbstractBamFileSpec extends Specification implements DataTest {
                 FileType,
                 DataFile,
                 MockAbstractBamFile,
-                ProcessedBamFile,
         ]
     }
 
@@ -62,31 +60,13 @@ class AbstractBamFileSpec extends Specification implements DataTest {
         bamFile.validate()
         bamFile.save(flush: true)
     }
-
-    void testWithdraw_ChangeStatusFromNeedsProcessingToDeclared() {
-        given:
-        AbstractBamFile bamFile = new MockAbstractBamFile([
-                status: AbstractBamFile.State.NEEDS_PROCESSING,
-        ])
-        expect:
-        bamFile.status == AbstractBamFile.State.NEEDS_PROCESSING
-
-        when:
-        LogThreadLocal.withThreadLog(System.out) {
-            bamFile.withdraw()
-        }
-
-        then:
-        bamFile.withdrawn
-        bamFile.status == AbstractBamFile.State.DECLARED
-    }
 }
 
 @Artefact(DomainClassArtefactHandler.TYPE)
 class MockAbstractBamFile extends AbstractBamFile implements DomainClass, GormEntity<MockAbstractBamFile>, Validateable {
 
     final MergingWorkPackage mergingWorkPackage = null
-    final AbstractQualityAssessment overallQualityAssessment = null
+    final AbstractQualityAssessment qualityAssessment = null
 
     @Override
     Set<SeqTrack> getContainedSeqTracks() {

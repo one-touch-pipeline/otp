@@ -42,7 +42,7 @@ abstract class AbstractCheckQcJob extends AbstractJob {
     @Override
     void execute(WorkflowStep workflowStep) throws Throwable {
         AbstractMergedBamFile bamFile = getAbstractMergedBamFile(workflowStep)
-        qcTrafficLightService.setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling(bamFile, bamFile.overallQualityAssessment)
+        qcTrafficLightService.setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling(bamFile, bamFile.qualityAssessment)
         if (bamFile.qcTrafficLightStatus == AbstractMergedBamFile.QcTrafficLightStatus.WARNING) {
             qcTrafficLightNotificationService.informResultsAreWarned(bamFile)
         }

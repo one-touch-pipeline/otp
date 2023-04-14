@@ -107,7 +107,7 @@ class ExternallyProcessedMergedBamFile extends AbstractMergedBamFile {
     }
 
     @Override
-    AbstractQualityAssessment getOverallQualityAssessment() {
+    AbstractQualityAssessment getQualityAssessment() {
         return CollectionUtils.exactlyOneElement(ExternalProcessedMergedBamFileQualityAssessment.createCriteria().list {
             qualityAssessmentMergedPass {
                 abstractMergedBamFile {

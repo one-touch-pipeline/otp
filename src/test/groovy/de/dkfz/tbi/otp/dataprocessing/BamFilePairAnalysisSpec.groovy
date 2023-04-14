@@ -44,7 +44,6 @@ class BamFilePairAnalysisSpec extends Specification implements DataTest {
         return [
                 AbstractMergedBamFile,
                 AceseqInstance,
-                AlignmentPass,
                 BamFilePairAnalysis,
                 DataFile,
                 ExternallyProcessedMergedBamFile,
@@ -54,14 +53,9 @@ class BamFilePairAnalysisSpec extends Specification implements DataTest {
                 Individual,
                 LibraryPreparationKit,
                 MergingCriteria,
-                MergingPass,
-                MergingSet,
-                MergingSetAssignment,
                 MergingWorkPackage,
                 MockBamFilePairAnalysis,
                 Pipeline,
-                ProcessedBamFile,
-                ProcessedMergedBamFile,
                 Project,
                 Realm,
                 ReferenceGenome,
@@ -159,14 +153,9 @@ class BamFilePairAnalysisSpec extends Specification implements DataTest {
         where:
         classBamFile1                    | classBamFile2
         RoddyBamFile                     | RoddyBamFile
-        ProcessedMergedBamFile           | ProcessedMergedBamFile
         ExternallyProcessedMergedBamFile | ExternallyProcessedMergedBamFile
         RoddyBamFile                     | ExternallyProcessedMergedBamFile
         ExternallyProcessedMergedBamFile | RoddyBamFile
-        ProcessedMergedBamFile           | ExternallyProcessedMergedBamFile
-        ExternallyProcessedMergedBamFile | ProcessedMergedBamFile
-        RoddyBamFile                     | ProcessedMergedBamFile
-        ProcessedMergedBamFile           | RoddyBamFile
     }
 
     private <E> AbstractMergedBamFile createBamFile(Class<E> clazz, Map propertiesForMergingWorkPackage = [:]) {
@@ -180,13 +169,6 @@ class BamFilePairAnalysisSpec extends Specification implements DataTest {
                 return DomainFactory.createRoddyBamFile([
                         workPackage: DomainFactory.createMergingWorkPackage([
                                 pipeline: DomainFactory.createPanCanPipeline(),
-                                seqType : DomainFactory.createWholeGenomeSeqType(),
-                        ] + propertiesForMergingWorkPackage)
-                ] + properties)
-            case ProcessedMergedBamFile:
-                return DomainFactory.createProcessedMergedBamFile([
-                        workPackage: DomainFactory.createMergingWorkPackage([
-                                pipeline: DomainFactory.createDefaultOtpPipeline(),
                                 seqType : DomainFactory.createWholeGenomeSeqType(),
                         ] + propertiesForMergingWorkPackage)
                 ] + properties)

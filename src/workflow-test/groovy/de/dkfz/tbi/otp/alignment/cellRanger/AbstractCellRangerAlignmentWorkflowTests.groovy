@@ -131,7 +131,7 @@ abstract class AbstractCellRangerAlignmentWorkflowTests extends AbstractAlignmen
             assert singleCellBamFile.fileOperationStatus == AbstractMergedBamFile.FileOperationStatus.PROCESSED
             assert singleCellBamFile.fileSize
             assert singleCellBamFile.qualityAssessmentStatus == AbstractBamFile.QaProcessingStatus.FINISHED
-            assert singleCellBamFile.overallQualityAssessment
+            assert singleCellBamFile.qualityAssessment
             assert singleCellBamFile.qcTrafficLightStatus == AbstractMergedBamFile.QcTrafficLightStatus.UNCHECKED
         }
     }

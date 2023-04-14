@@ -46,7 +46,6 @@ class SophiaInstanceSpec extends Specification implements DataTest {
                 Individual,
                 LibraryPreparationKit,
                 MergingCriteria,
-                MergingSet,
                 MergingWorkPackage,
                 Pipeline,
                 Project,

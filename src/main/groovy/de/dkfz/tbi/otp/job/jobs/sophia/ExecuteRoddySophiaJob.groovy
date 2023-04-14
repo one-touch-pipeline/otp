@@ -77,8 +77,8 @@ class ExecuteRoddySophiaJob extends AbstractExecutePanCanJob<SophiaInstance> imp
             throw new RuntimeException("Unsupported BAM-File type for '${bamFileDisease.class}' or '${bamFileControl.class}' ")
         }
 
-        SophiaWorkflowQualityAssessment bamFileDiseaseQualityAssessment = bamFileDisease.overallQualityAssessment as SophiaWorkflowQualityAssessment
-        SophiaWorkflowQualityAssessment bamFileControlQualityAssessment = bamFileControl.overallQualityAssessment as SophiaWorkflowQualityAssessment
+        SophiaWorkflowQualityAssessment bamFileDiseaseQualityAssessment = bamFileDisease.qualityAssessment as SophiaWorkflowQualityAssessment
+        SophiaWorkflowQualityAssessment bamFileControlQualityAssessment = bamFileControl.qualityAssessment as SophiaWorkflowQualityAssessment
 
         cValues.add("controlMedianIsize:${bamFileControlQualityAssessment.insertSizeMedian}")
         cValues.add("tumorMedianIsize:${bamFileDiseaseQualityAssessment.insertSizeMedian}")

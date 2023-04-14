@@ -108,13 +108,6 @@ abstract class AbstractDataSwapService<P extends DataSwapParameters, D extends D
     protected abstract D buildDataDTO(P parameters)
 
     /**
-     * Logs various arguments of DataSwapData in DataSwapData.dataSwapParameters.log that can be examined later in the script output.
-     *
-     * @param data build by buildDataDTO(P parameters) containing all entities necessary to perform a swap.
-     */
-    protected abstract void logSwapData(D data)
-
-    /**
      * Performs the actual data swap, changing database entries and creates scripts to move the datafiles.
      *
      * @param data build by buildDataDTO(P parameters) containing all entities necessary to perform a swap.
@@ -177,7 +170,6 @@ abstract class AbstractDataSwapService<P extends DataSwapParameters, D extends D
      */
     protected void swap(D data) throws IOException, AssertionError {
         validateDTO(data)
-        logSwapData(data)
         checkThatNoAnalysisIsRunning(data)
         createGroovyConsoleScriptToRestartAlignments(data)
         markSeqTracksAsSwappedAndDeleteDependingObjects(data)
@@ -557,20 +549,6 @@ abstract class AbstractDataSwapService<P extends DataSwapParameters, D extends D
         }
         outPutBashCommands += '\n\n'
         return outPutBashCommands
-    }
-
-    /**
-     * Get all AlignmentPasses for found SeqTracks from data DTO and logs them.
-     * @deprecated this function uses deprecated entities from the old workflow system.
-     *
-     * @param data DTO containing all entities necessary to perform a swap.
-     */
-    @Deprecated
-    protected void logAlignments(D data) {
-        List<AlignmentPass> alignmentPassList = AlignmentPass.findAllBySeqTrackInList(data.seqTrackList)
-        if (data.seqTrackList && alignmentPassList) {
-            data.log << "\n -->     found alignments for seqtracks (${alignmentPassList*.seqTrack.unique()}): "
-        }
     }
 
     /**

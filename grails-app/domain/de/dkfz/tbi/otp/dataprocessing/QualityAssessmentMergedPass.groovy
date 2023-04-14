@@ -22,22 +22,16 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import grails.gorm.hibernate.annotation.ManagedEntity
-import org.hibernate.Hibernate
 
 import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.Entity
 
-/**
- * Each execution of the Quality Assessment Merged Workflow on the particular data file (merged bam file) is represented as QualityAssessmentMergedPass.
- */
 @ManagedEntity
 class QualityAssessmentMergedPass implements ProcessParameterObject, Entity {
 
     AbstractMergedBamFile abstractMergedBamFile
-
-    int identifier
 
     String description
 
@@ -46,41 +40,13 @@ class QualityAssessmentMergedPass implements ProcessParameterObject, Entity {
     ]
 
     static constraints = {
-        identifier(unique: 'abstractMergedBamFile', validator: { int val, QualityAssessmentMergedPass obj ->
-            return val == 0 || (ProcessedMergedBamFile.isAssignableFrom(Hibernate.getClass(obj.abstractMergedBamFile)))
-        })
+        abstractMergedBamFile(unique: true)
         description(nullable: true)
     }
 
     @Override
     String toString() {
-        return "QAMP ${id}: pass ${identifier} " + (latestPass ? "(latest) " : "") + "on ${abstractMergedBamFile}"
-    }
-
-    /**
-     * @return Whether this is the most recent QA pass on the referenced {@link AbstractMergedBamFile}.
-     */
-    boolean isLatestPass() {
-        return identifier == maxIdentifier(abstractMergedBamFile)
-    }
-
-    static Integer maxIdentifier(final AbstractMergedBamFile abstractMergedBamFile) {
-        assert abstractMergedBamFile
-        return QualityAssessmentMergedPass.createCriteria().get {
-            eq("abstractMergedBamFile", abstractMergedBamFile)
-            projections {
-                max("identifier")
-            }
-        }
-    }
-
-    static int nextIdentifier(final AbstractMergedBamFile abstractMergedBamFile) {
-        assert abstractMergedBamFile
-        final Integer maxIdentifier = maxIdentifier(abstractMergedBamFile)
-        if (maxIdentifier == null) {
-            return 0
-        }
-        return maxIdentifier + 1
+        return "QAMP ${id}: on ${abstractMergedBamFile}"
     }
 
     static mapping = {
@@ -105,22 +71,8 @@ class QualityAssessmentMergedPass implements ProcessParameterObject, Entity {
         return abstractMergedBamFile.sampleType
     }
 
-    MergingSet getMergingSet() {
-        if (ProcessedMergedBamFile.isAssignableFrom(Hibernate.getClass(abstractMergedBamFile))) {
-            return abstractMergedBamFile.mergingSet
-        }
-        throw new NotSupportedException("MergingSet exists only for ProcessedMergedBamFiles")
-    }
-
     MergingWorkPackage getMergingWorkPackage() {
         return abstractMergedBamFile.mergingWorkPackage
-    }
-
-    MergingPass getMergingPass() {
-        if (ProcessedMergedBamFile.isAssignableFrom(Hibernate.getClass(abstractMergedBamFile))) {
-            return abstractMergedBamFile.mergingPass
-        }
-        throw new NotSupportedException("MergingPass exists only for ProcessedMergedBamFiles")
     }
 
     @Override

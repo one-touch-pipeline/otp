@@ -25,7 +25,8 @@ import grails.testing.gorm.DataTest
 import grails.validation.Validateable
 import spock.lang.*
 
-import de.dkfz.tbi.otp.*
+import de.dkfz.tbi.otp.Comment
+import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellService
@@ -38,8 +39,8 @@ import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
-import de.dkfz.tbi.otp.utils.exceptions.FileNotFoundException
 import de.dkfz.tbi.otp.utils.CreateFileHelper
+import de.dkfz.tbi.otp.utils.exceptions.FileNotFoundException
 
 import java.nio.file.*
 
@@ -57,13 +58,13 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
                 SeqTrack,
                 ExternallyProcessedMergedBamFile,
                 RoddyBamFile,
-                AlignmentPass,
                 Comment,
                 BamFilePairAnalysis,
                 ReferenceGenomeProjectSeqType,
                 SampleTypePerProject,
                 AceseqInstance,
                 AceseqQc,
+                MergingWorkPackage,
         ]
     }
 
@@ -93,11 +94,6 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
             protected DataSwapData<DataSwapParameters> buildDataDTO(DataSwapParameters params) {
                 // Is not functionally tested here
                 return null
-            }
-
-            @Override
-            protected void logSwapData(DataSwapData<DataSwapParameters> data) {
-                // Is not functionally tested here
             }
 
             @Override
@@ -155,9 +151,6 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
 
         then:
         1 * service.validateDTO(_ as Validateable) >> null
-
-        then:
-        1 * service.logSwapData(_ as DataSwapData<DataSwapParameters>) >> _
 
         then:
         1 * service.checkThatNoAnalysisIsRunning(_ as DataSwapData<DataSwapParameters>) >> null

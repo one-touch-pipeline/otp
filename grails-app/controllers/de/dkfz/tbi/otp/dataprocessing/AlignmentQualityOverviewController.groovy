@@ -156,7 +156,6 @@ class AlignmentQualityOverviewController implements CheckAndCall {
     CellRangerConfigurationService cellRangerConfigurationService
     CellRangerService cellRangerService
     FileSystemService fileSystemService
-    OverallQualityAssessmentMergedService overallQualityAssessmentMergedService
     ProcessingOptionService processingOptionService
     ProjectSelectionService projectSelectionService
     QaOverviewService qaOverviewService

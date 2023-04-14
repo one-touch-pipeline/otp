@@ -223,7 +223,7 @@ class ClusterJobService {
     }
 
     /**
-     * returns the specific workflow object to a cluster job, e.g. Run, AlignmentPass
+     * returns the specific workflow object to a cluster job, e.g. Run
      * @return Object or null
      */
     static ProcessParameterObject findProcessParameterObjectByClusterJob(ClusterJob job) {

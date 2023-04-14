@@ -147,7 +147,6 @@ class Globals {
                     "1.0.166",
             ],
             (VersionState.UNIMPORTANT): [
-                    "Unversioned ProcessedMergedBamFile",
                     "Unversioned ExternallyProcessedMergedBamFile",
             ],
             (VersionState.UNKNOWN): [

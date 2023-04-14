@@ -362,7 +362,6 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
     void checkQC(RoddyBamFile bamFile) {
         QualityAssessmentMergedPass qaPass = CollectionUtils.atMostOneElement(QualityAssessmentMergedPass.findAllWhere(
                 abstractMergedBamFile: bamFile,
-                identifier: 0,
         ))
         assert qaPass
 

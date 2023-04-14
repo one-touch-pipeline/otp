@@ -90,16 +90,11 @@ abstract class RoddyQualityAssessment extends AbstractQualityAssessment implemen
     }
 
     static mapping = {
-        // An index on qualityAssessmentMergedPass is defined in OverallQualityAssessmentMerged
+        qualityAssessmentMergedPass index: "abstract_quality_assessment_quality_assessment_merged_pass_idx"
     }
 
     RoddyBamFile getRoddyBamFile() {
         return (RoddyBamFile)qualityAssessmentMergedPass.abstractMergedBamFile
-    }
-
-    // Created to have an identical way to receive the chromosome identifier as in ChromosomeQualityAssessmentMerged
-    String getChromosomeName() {
-        return chromosome
     }
 
     RoddyBamFile getBamFile() {

@@ -151,7 +151,7 @@ class AbstractQualityAssessmentService {
     }
 
     void saveCoverageToRoddyBamFile(RoddyBamFile roddyBamFile) {
-        RoddyMergedBamQa mergedQa = roddyBamFile.overallQualityAssessment
+        RoddyMergedBamQa mergedQa = roddyBamFile.qualityAssessment
         roddyBamFile.coverage = mergedQa.genomeWithoutNCoverageQcBases
         roddyBamFile.coverageWithN = abstractBamFileService.calculateCoverageWithN(roddyBamFile)
         assert roddyBamFile.save(flush: true)

@@ -21,8 +21,8 @@
  */
 package de.dkfz.tbi.otp.monitor
 
-import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -30,41 +30,42 @@ import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.QcTrafficLightStatus
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
+import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.HelperUtils
 
 @Rollback
 @Integration
-class SamplePairCheckerIntegrationSpec extends Specification {
+class SamplePairCheckerIntegrationSpec extends Specification implements IsRoddy {
 
     SamplePair createSamplePair(Map properties = [:]) {
         return DomainFactory.createSamplePairPanCan([
                 mergingWorkPackage1: DomainFactory.createMergingWorkPackage([
                         seqType : SeqTypeService.wholeGenomePairedSeqType,
-                        pipeline: DomainFactory.createDefaultOtpPipeline(),
+                        pipeline: DomainFactory.createPanCanPipeline(),
                 ])
         ] + properties)
     }
 
-    ProcessedMergedBamFile createProcessedMergedBamFile(Map properties = [:]) {
-        return DomainFactory.createProcessedMergedBamFile([
-                workPackage: DomainFactory.createMergingWorkPackage([
+    AbstractMergedBamFile createMergedBamFile(Map properties = [:]) {
+        return createRoddyBamFile(
+                properties, DomainFactory.createMergingWorkPackage([
                         seqType : DomainFactory.createWholeGenomeSeqType(),
-                        pipeline: DomainFactory.createDefaultOtpPipeline(),
-                ])
-        ] + properties)
+                        pipeline: DomainFactory.createPanCanPipeline(),
+                ]), RoddyBamFile
+        )
     }
 
     void "bamFilesWithoutCategory, when some bam files has a category and some not, return only bam files without category"() {
         given:
         SamplePairChecker samplePairChecker = new SamplePairChecker()
 
-        ProcessedMergedBamFile bamFile1 = DomainFactory.createProcessedMergedBamFile()
-        ProcessedMergedBamFile bamFile2 = DomainFactory.createProcessedMergedBamFile()
-        ProcessedMergedBamFile bamFile3 = DomainFactory.createProcessedMergedBamFile()
-        ProcessedMergedBamFile bamFile4 = DomainFactory.createProcessedMergedBamFile()
-        ProcessedMergedBamFile bamFile5 = DomainFactory.createProcessedMergedBamFile()
-        List<ProcessedMergedBamFile> bamFiles = [bamFile1, bamFile2, bamFile3, bamFile4, bamFile5]
+        AbstractMergedBamFile bamFile1 = createBamFile()
+        AbstractMergedBamFile bamFile2 = createBamFile()
+        AbstractMergedBamFile bamFile3 = createBamFile()
+        AbstractMergedBamFile bamFile4 = createBamFile()
+        AbstractMergedBamFile bamFile5 = createBamFile()
+        List<AbstractMergedBamFile> bamFiles = [bamFile1, bamFile2, bamFile3, bamFile4, bamFile5]
 
         DomainFactory.createSampleTypePerProjectForBamFile(bamFile1)
         DomainFactory.createSampleTypePerProjectForBamFile(bamFile2)
@@ -83,12 +84,12 @@ class SamplePairCheckerIntegrationSpec extends Specification {
         given:
         SamplePairChecker samplePairChecker = new SamplePairChecker()
 
-        ProcessedMergedBamFile bamFile1 = DomainFactory.createProcessedMergedBamFile()
-        ProcessedMergedBamFile bamFile2 = DomainFactory.createProcessedMergedBamFile()
-        ProcessedMergedBamFile bamFile3 = DomainFactory.createProcessedMergedBamFile()
-        ProcessedMergedBamFile bamFile4 = DomainFactory.createProcessedMergedBamFile()
-        ProcessedMergedBamFile bamFile5 = DomainFactory.createProcessedMergedBamFile()
-        List<ProcessedMergedBamFile> bamFiles = [bamFile1, bamFile2, bamFile3, bamFile4, bamFile5]
+        AbstractMergedBamFile bamFile1 = createBamFile()
+        AbstractMergedBamFile bamFile2 = createBamFile()
+        AbstractMergedBamFile bamFile3 = createBamFile()
+        AbstractMergedBamFile bamFile4 = createBamFile()
+        AbstractMergedBamFile bamFile5 = createBamFile()
+        List<AbstractMergedBamFile> bamFiles = [bamFile1, bamFile2, bamFile3, bamFile4, bamFile5]
 
         DomainFactory.createSampleTypePerProjectForBamFile(bamFile1)
         DomainFactory.createSampleTypePerProjectForBamFile(bamFile2)
@@ -115,12 +116,12 @@ class SamplePairCheckerIntegrationSpec extends Specification {
         given:
         SamplePairChecker samplePairChecker = new SamplePairChecker()
 
-        ProcessedMergedBamFile bamFile1 = DomainFactory.createProcessedMergedBamFile()
-        ProcessedMergedBamFile bamFile2 = DomainFactory.createProcessedMergedBamFile()
-        ProcessedMergedBamFile bamFile3 = DomainFactory.createProcessedMergedBamFile()
-        ProcessedMergedBamFile bamFile4 = DomainFactory.createProcessedMergedBamFile()
-        ProcessedMergedBamFile bamFile5 = DomainFactory.createProcessedMergedBamFile()
-        List<ProcessedMergedBamFile> bamFiles = [bamFile1, bamFile2, bamFile3, bamFile4, bamFile5]
+        AbstractMergedBamFile bamFile1 = createBamFile()
+        AbstractMergedBamFile bamFile2 = createBamFile()
+        AbstractMergedBamFile bamFile3 = createBamFile()
+        AbstractMergedBamFile bamFile4 = createBamFile()
+        AbstractMergedBamFile bamFile5 = createBamFile()
+        List<AbstractMergedBamFile> bamFiles = [bamFile1, bamFile2, bamFile3, bamFile4, bamFile5]
 
         DomainFactory.createProcessingThresholdsForBamFile(bamFile1)
         DomainFactory.createProcessingThresholdsForBamFile(bamFile2)
@@ -138,12 +139,12 @@ class SamplePairCheckerIntegrationSpec extends Specification {
         given:
         SamplePairChecker samplePairChecker = new SamplePairChecker()
 
-        ProcessedMergedBamFile bamFile1 = DomainFactory.createProcessedMergedBamFile()
-        ProcessedMergedBamFile bamFile2 = DomainFactory.createProcessedMergedBamFile()
-        ProcessedMergedBamFile bamFile3 = DomainFactory.createProcessedMergedBamFile()
-        ProcessedMergedBamFile bamFile4 = DomainFactory.createProcessedMergedBamFile()
-        ProcessedMergedBamFile bamFile5 = DomainFactory.createProcessedMergedBamFile()
-        List<ProcessedMergedBamFile> bamFiles = [bamFile1, bamFile2, bamFile3, bamFile4, bamFile5]
+        AbstractMergedBamFile bamFile1 = createBamFile()
+        AbstractMergedBamFile bamFile2 = createBamFile()
+        AbstractMergedBamFile bamFile3 = createBamFile()
+        AbstractMergedBamFile bamFile4 = createBamFile()
+        AbstractMergedBamFile bamFile5 = createBamFile()
+        List<AbstractMergedBamFile> bamFiles = [bamFile1, bamFile2, bamFile3, bamFile4, bamFile5]
 
         DomainFactory.createSamplePair(mergingWorkPackage1: bamFile1.mergingWorkPackage)
         DomainFactory.createSamplePair(mergingWorkPackage2: bamFile2.mergingWorkPackage)
@@ -161,12 +162,12 @@ class SamplePairCheckerIntegrationSpec extends Specification {
         given:
         SamplePairChecker samplePairChecker = new SamplePairChecker()
 
-        ProcessedMergedBamFile bamFile1 = DomainFactory.createProcessedMergedBamFile()
-        ProcessedMergedBamFile bamFile2 = DomainFactory.createProcessedMergedBamFile()
-        ProcessedMergedBamFile bamFile3 = DomainFactory.createProcessedMergedBamFile()
-        ProcessedMergedBamFile bamFile4 = DomainFactory.createProcessedMergedBamFile()
-        ProcessedMergedBamFile bamFile5 = DomainFactory.createProcessedMergedBamFile()
-        List<ProcessedMergedBamFile> bamFiles = [bamFile1, bamFile2, bamFile3, bamFile4, bamFile5]
+        AbstractMergedBamFile bamFile1 = createBamFile()
+        AbstractMergedBamFile bamFile2 = createBamFile()
+        AbstractMergedBamFile bamFile3 = createBamFile()
+        AbstractMergedBamFile bamFile4 = createBamFile()
+        AbstractMergedBamFile bamFile5 = createBamFile()
+        List<AbstractMergedBamFile> bamFiles = [bamFile1, bamFile2, bamFile3, bamFile4, bamFile5]
 
         SamplePair samplePair1 = DomainFactory.createSamplePair(mergingWorkPackage1: bamFile1.mergingWorkPackage)
         SamplePair samplePair2 = DomainFactory.createSamplePair(mergingWorkPackage2: bamFile2.mergingWorkPackage)
@@ -184,16 +185,16 @@ class SamplePairCheckerIntegrationSpec extends Specification {
         given:
         SamplePairChecker samplePairChecker = new SamplePairChecker()
 
-        SamplePair samplePair1 = DomainFactory.createSamplePair(mergingWorkPackage1: DomainFactory.createMergingWorkPackage(pipeline: DomainFactory.createDefaultOtpPipeline()))
-        SamplePair samplePair2 = DomainFactory.createSamplePair(mergingWorkPackage1: DomainFactory.createMergingWorkPackage(pipeline: DomainFactory.createDefaultOtpPipeline()))
-        SamplePair samplePair3 = DomainFactory.createSamplePair(mergingWorkPackage1: DomainFactory.createMergingWorkPackage(pipeline: DomainFactory.createDefaultOtpPipeline()))
-        SamplePair samplePair4 = DomainFactory.createSamplePair(mergingWorkPackage1: DomainFactory.createMergingWorkPackage(pipeline: DomainFactory.createDefaultOtpPipeline()))
+        SamplePair samplePair1 = DomainFactory.createSamplePair(mergingWorkPackage1: DomainFactory.createMergingWorkPackage(pipeline: DomainFactory.createPanCanPipeline()))
+        SamplePair samplePair2 = DomainFactory.createSamplePair(mergingWorkPackage1: DomainFactory.createMergingWorkPackage(pipeline: DomainFactory.createPanCanPipeline()))
+        SamplePair samplePair3 = DomainFactory.createSamplePair(mergingWorkPackage1: DomainFactory.createMergingWorkPackage(pipeline: DomainFactory.createPanCanPipeline()))
+        SamplePair samplePair4 = DomainFactory.createSamplePair(mergingWorkPackage1: DomainFactory.createMergingWorkPackage(pipeline: DomainFactory.createPanCanPipeline()))
         List<SamplePair> samplePairs = [samplePair1, samplePair2, samplePair3, samplePair4]
 
-        DomainFactory.createProcessedMergedBamFile([workPackage: samplePair1.mergingWorkPackage1])
-        DomainFactory.createProcessedMergedBamFile([workPackage: samplePair1.mergingWorkPackage2])
-        DomainFactory.createProcessedMergedBamFile([workPackage: samplePair2.mergingWorkPackage1])
-        DomainFactory.createProcessedMergedBamFile([workPackage: samplePair3.mergingWorkPackage2])
+        createBamFile([workPackage: samplePair1.mergingWorkPackage1])
+        createBamFile([workPackage: samplePair1.mergingWorkPackage2])
+        createBamFile([workPackage: samplePair2.mergingWorkPackage1])
+        createBamFile([workPackage: samplePair3.mergingWorkPackage2])
 
         List<SamplePair> expected = [samplePair2, samplePair3, samplePair4]
 
@@ -209,10 +210,19 @@ class SamplePairCheckerIntegrationSpec extends Specification {
         given:
         SamplePairChecker samplePairChecker = new SamplePairChecker()
 
-        SamplePair samplePair = DomainFactory.createSamplePair(mergingWorkPackage1: DomainFactory.createMergingWorkPackage(pipeline: DomainFactory.createDefaultOtpPipeline()))
-        DomainFactory.createProcessedMergedBamFile([
+        SamplePair samplePair = DomainFactory.createSamplePair(mergingWorkPackage1: DomainFactory.createMergingWorkPackage(pipeline: DomainFactory.createPanCanPipeline()))
+        List<SeqTrack> seqTracks1 = []
+        numberOfMergedLanes1.times {
+            seqTracks1.add(createSeqTrack())
+        }
+        List<SeqTrack> seqTracks2 = []
+        numberOfMergedLanes2.times {
+            seqTracks2.add(createSeqTrack())
+        }
+        createBamFile([
                 workPackage         : samplePair.mergingWorkPackage1,
                 numberOfMergedLanes : numberOfMergedLanes1,
+                seqTracks           : seqTracks1,
                 coverage            : coverage1,
                 withdrawn           : withdrawn1,
                 fileOperationStatus : inProcessing1 ? AbstractMergedBamFile.FileOperationStatus.INPROGRESS : AbstractMergedBamFile.FileOperationStatus.PROCESSED,
@@ -221,9 +231,10 @@ class SamplePairCheckerIntegrationSpec extends Specification {
                 qcTrafficLightStatus: qcTrafficLightStatus1,
                 comment             : DomainFactory.createComment(),
         ])
-        DomainFactory.createProcessedMergedBamFile([
+        createBamFile([
                 workPackage         : samplePair.mergingWorkPackage2,
                 numberOfMergedLanes : numberOfMergedLanes2,
+                seqTracks           : seqTracks2,
                 coverage            : coverage2,
                 withdrawn           : withdrawn2,
                 fileOperationStatus : inProcessing2 ? AbstractMergedBamFile.FileOperationStatus.INPROGRESS : AbstractMergedBamFile.FileOperationStatus.PROCESSED,
@@ -284,65 +295,69 @@ class SamplePairCheckerIntegrationSpec extends Specification {
         SamplePairChecker samplePairChecker = Spy(SamplePairChecker)
 
         and: 'bam has not supported seq type'
-        AbstractBamFile unsupportedSeqType = DomainFactory.createProcessedMergedBamFile()
+        AbstractBamFile unsupportedSeqType = createBamFile(
+                seqTracks: [createSeqTrack(seqType: createSeqType(name: "unsupported seq type", dirName: "unsupported_seq_type"))])
 
         and: 'sample type has no disease state'
-        AbstractBamFile unknownDiseaseStatus = createProcessedMergedBamFile()
+        AbstractBamFile unknownDiseaseStatus = createMergedBamFile()
         DomainFactory.createProcessingThresholdsForBamFile(unknownDiseaseStatus)
 
         and: 'sample type has disease state undefined'
-        AbstractBamFile undefinedDiseaseStatus = createProcessedMergedBamFile()
+        AbstractBamFile undefinedDiseaseStatus = createMergedBamFile()
         DomainFactory.createSampleTypePerProjectForBamFile(undefinedDiseaseStatus, SampleTypePerProject.Category.UNDEFINED)
         DomainFactory.createProcessingThresholdsForBamFile(undefinedDiseaseStatus)
 
         and: 'sample type has disease state ignored'
-        AbstractBamFile ignoredDiseaseStatus = createProcessedMergedBamFile()
+        AbstractBamFile ignoredDiseaseStatus = createMergedBamFile()
         DomainFactory.createSampleTypePerProjectForBamFile(ignoredDiseaseStatus, SampleTypePerProject.Category.IGNORED)
         DomainFactory.createProcessingThresholdsForBamFile(ignoredDiseaseStatus)
 
         and: 'sample type has no threshold'
-        AbstractBamFile unknownThreshold = createProcessedMergedBamFile()
+        AbstractBamFile unknownThreshold = createMergedBamFile()
         DomainFactory.createSampleTypePerProjectForBamFile(unknownThreshold, SampleTypePerProject.Category.DISEASE)
 
         and: 'na sample pair exist for bam file'
-        AbstractBamFile noSamplePairFound = createProcessedMergedBamFile()
+        AbstractBamFile noSamplePairFound = createMergedBamFile()
         DomainFactory.createSampleTypePerProjectForBamFile(noSamplePairFound, SampleTypePerProject.Category.DISEASE)
         DomainFactory.createProcessingThresholdsForBamFile(noSamplePairFound)
 
         and: 'sample pair without disease bam file'
-        AbstractBamFile missingDiseaseBamFile = createProcessedMergedBamFile()
+        AbstractBamFile missingDiseaseBamFile = createMergedBamFile()
         DomainFactory.createSampleTypePerProjectForBamFile(missingDiseaseBamFile, SampleTypePerProject.Category.CONTROL)
         DomainFactory.createProcessingThresholdsForBamFile(missingDiseaseBamFile)
         SamplePair missingDiseaseSamplePair = DomainFactory.createSamplePair([mergingWorkPackage2: missingDiseaseBamFile.mergingWorkPackage])
 
         and: 'sample pair without control bam file'
-        AbstractBamFile missingControlBamFile = createProcessedMergedBamFile()
+        AbstractBamFile missingControlBamFile = createMergedBamFile()
         DomainFactory.createSampleTypePerProjectForBamFile(missingControlBamFile, SampleTypePerProject.Category.DISEASE)
         DomainFactory.createProcessingThresholdsForBamFile(missingControlBamFile)
         SamplePair missingControlSamplePair = DomainFactory.createSamplePair([mergingWorkPackage1: missingControlBamFile.mergingWorkPackage])
 
         and: 'bam files of sample pair does not reached threshold'
         SamplePair thresholdSamplePair = createSamplePair()
-        AbstractBamFile thresholdDiseaseBamFile = createProcessedMergedBamFile([workPackage: thresholdSamplePair.mergingWorkPackage1, coverage: 10])
+        AbstractBamFile thresholdDiseaseBamFile = createMergedBamFile([workPackage: thresholdSamplePair.mergingWorkPackage1, coverage: 10])
         DomainFactory.createProcessingThresholdsForBamFile(thresholdDiseaseBamFile, [coverage: 50])
-        AbstractBamFile thresholdControlFile = createProcessedMergedBamFile([workPackage: thresholdSamplePair.mergingWorkPackage2, coverage: 10])
+        AbstractBamFile thresholdControlFile = createMergedBamFile([workPackage: thresholdSamplePair.mergingWorkPackage2, coverage: 10])
         DomainFactory.createProcessingThresholdsForBamFile(thresholdControlFile, [coverage: 50])
         DomainFactory.createSampleTypePerProjectForBamFile(thresholdControlFile)
 
         and: 'fine sample pair'
         SamplePair fineSamplePair = createSamplePair()
-        AbstractBamFile diseaseBamFile = createProcessedMergedBamFile([
+        List<SeqTrack> seqTracks = [createSeqTrack(), createSeqTrack()]
+        AbstractBamFile diseaseBamFile = createMergedBamFile([
                 workPackage        : fineSamplePair.mergingWorkPackage1,
                 coverage           : 30,
                 numberOfMergedLanes: 2,
+                seqTracks          : seqTracks,
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
                 md5sum             : HelperUtils.randomMd5sum,
                 fileSize           : DomainFactory.counter++,
         ])
-        AbstractBamFile controlBamFile = createProcessedMergedBamFile([
+        AbstractBamFile controlBamFile = createMergedBamFile([
                 workPackage        : fineSamplePair.mergingWorkPackage2,
                 coverage           : 30,
                 numberOfMergedLanes: 2,
+                seqTracks          : seqTracks,
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
                 md5sum             : HelperUtils.randomMd5sum,
                 fileSize           : DomainFactory.counter++,

@@ -200,12 +200,10 @@ class RoddyBamFile extends AbstractMergedBamFile implements Artefact, HasIdentif
     QualityAssessmentMergedPass findOrSaveQaPass() {
         QualityAssessmentMergedPass assessmentMergedPass = CollectionUtils.atMostOneElement(QualityAssessmentMergedPass.findAllWhere(
                 abstractMergedBamFile: this,
-                identifier: 0,
         ))
         if (!assessmentMergedPass) {
             assessmentMergedPass = new QualityAssessmentMergedPass(
                     abstractMergedBamFile: this,
-                    identifier: 0,
             )
             assessmentMergedPass.save(flush: true)
         }
@@ -217,7 +215,7 @@ class RoddyBamFile extends AbstractMergedBamFile implements Artefact, HasIdentif
     }
 
     @Override
-    AbstractQualityAssessment getOverallQualityAssessment() {
+    AbstractQualityAssessment getQualityAssessment() {
         return CollectionUtils.exactlyOneElement(RoddyMergedBamQa.createCriteria().list {
             eq 'chromosome', RoddyQualityAssessment.ALL
             qualityAssessmentMergedPass {
@@ -621,7 +619,7 @@ class RoddyBamFile extends AbstractMergedBamFile implements Artefact, HasIdentif
     }
 
     Long getNumberOfReadsFromQa() {
-        AbstractQualityAssessment qa = overallQualityAssessment
+        AbstractQualityAssessment qa = qualityAssessment
         return qa.pairedRead1 + qa.pairedRead2
     }
 

@@ -32,7 +32,6 @@ import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 class AbstractMergedBamFileServiceFactoryServiceSpec extends Specification implements ServiceUnitTest<AbstractMergedBamFileServiceFactoryService>, DataTest {
 
     static ExternallyProcessedMergedBamFileService externallyProcessedMergedBamFileService = new ExternallyProcessedMergedBamFileService()
-    static ProcessedMergedBamFileService processedMergedBamFileService = new ProcessedMergedBamFileService()
     static RnaRoddyBamFileService rnaRoddyBamFileService = new RnaRoddyBamFileService()
     static RoddyBamFileService roddyBamFileService = new RoddyBamFileService()
     static SingleCellBamFileService singleCellBamFileService = new SingleCellBamFileService()
@@ -40,7 +39,6 @@ class AbstractMergedBamFileServiceFactoryServiceSpec extends Specification imple
     void "test getService"() {
         given:
         service.externallyProcessedMergedBamFileService = externallyProcessedMergedBamFileService
-        service.processedMergedBamFileService = processedMergedBamFileService
         service.rnaRoddyBamFileService = rnaRoddyBamFileService
         service.roddyBamFileService = roddyBamFileService
         service.singleCellBamFileService = singleCellBamFileService
@@ -51,7 +49,6 @@ class AbstractMergedBamFileServiceFactoryServiceSpec extends Specification imple
         where:
         bamFile                                || result
         new ExternallyProcessedMergedBamFile() || externallyProcessedMergedBamFileService
-        new ProcessedMergedBamFile()           || processedMergedBamFileService
         new RnaRoddyBamFile()                  || rnaRoddyBamFileService
         new RoddyBamFile()                     || roddyBamFileService
         new SingleCellBamFile()                || singleCellBamFileService

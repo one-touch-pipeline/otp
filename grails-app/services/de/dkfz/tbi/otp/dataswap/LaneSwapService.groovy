@@ -88,14 +88,6 @@ class LaneSwapService extends AbstractDataSwapService<LaneSwapParameters, LaneSw
     }
 
     @Override
-    protected void logSwapData(LaneSwapData data) {
-        List<AlignmentPass> alignmentsPasses = AlignmentPass.findAllBySeqTrackInList(data.seqTrackList)
-        if (alignmentsPasses) {
-            data.log << "Alignments found for SeqTracks ${data.seqTrackList}\n\n"
-        }
-    }
-
-    @Override
     protected void performDataSwap(LaneSwapData data) {
         createRemoveAnalysisAndAlignmentsCommands(data)
         swapLanes(data)

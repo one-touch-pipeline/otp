@@ -225,7 +225,7 @@ class BamMetadataImportServiceIntegrationSpec extends Specification implements R
         bamFile.coverage
         bamFile.maximumReadLength
         bamFile.insertSizeFile
-        bamFile.overallQualityAssessment
+        bamFile.qualityAssessment
         bamFile.mergingWorkPackage.libraryPreparationKit
     }
 

@@ -54,12 +54,6 @@ class DataExportServiceSpec extends Specification implements DataTest, DomainFac
                 SeqTrack,
                 Pipeline,
                 MergingWorkPackage,
-                ProcessedBamFile,
-                ProcessedMergedBamFile,
-                AlignmentPass,
-                MergingSet,
-                MergingPass,
-                MergingSetAssignment,
                 SampleTypePerProject,
                 SamplePair,
                 RoddyWorkflowConfig,
@@ -200,13 +194,6 @@ class DataExportServiceSpec extends Specification implements DataTest, DomainFac
                 DomainFactory.createRoddyBamFile([
                         workPackage: DomainFactory.createMergingWorkPackage([
                                 pipeline: DomainFactory.createPanCanPipeline(),
-                                seqType : DomainFactory.createWholeGenomeSeqType(),
-                        ])
-                ]),
-                //ProcessedMergedBamFile:
-                DomainFactory.createProcessedMergedBamFile([
-                        workPackage: DomainFactory.createMergingWorkPackage([
-                                pipeline: DomainFactory.createDefaultOtpPipeline(),
                                 seqType : DomainFactory.createWholeGenomeSeqType(),
                         ])
                 ]),

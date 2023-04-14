@@ -42,7 +42,7 @@ class ProcessingThresholdsSpec extends Specification implements DataTest, Domain
     void "test isAboveLaneThreshold with #laneCount lanes and #threshold threshold should return #result"() {
         setup:
         ProcessingThresholds processingThresholds = new ProcessingThresholds(numberOfLanes: threshold)
-        ProcessedMergedBamFile bamFile = new ProcessedMergedBamFile(numberOfMergedLanes: laneCount)
+        RoddyBamFile bamFile = new RoddyBamFile(numberOfMergedLanes: laneCount)
 
         expect:
         result == processingThresholds.isAboveLaneThreshold(bamFile)
@@ -70,7 +70,7 @@ class ProcessingThresholdsSpec extends Specification implements DataTest, Domain
     void "test isAboveLaneThreshold with bam file with no lane count set should throw exception"() {
         setup:
         ProcessingThresholds processingThresholds = new ProcessingThresholds(numberOfLanes: 2)
-        ProcessedMergedBamFile bamFile = new ProcessedMergedBamFile(numberOfMergedLanes: null)
+        RoddyBamFile bamFile = new RoddyBamFile(numberOfMergedLanes: null)
 
         when:
         processingThresholds.isAboveLaneThreshold(bamFile)
@@ -84,7 +84,7 @@ class ProcessingThresholdsSpec extends Specification implements DataTest, Domain
     void "test isAboveCoverageThreshold with #coverage coverage and #threshold threshold should return #result"() {
         setup:
         ProcessingThresholds processingThresholds = new ProcessingThresholds(coverage: threshold)
-        ProcessedMergedBamFile bamFile = new ProcessedMergedBamFile(coverage: coverage)
+        RoddyBamFile bamFile = new RoddyBamFile(coverage: coverage)
 
         expect:
         result == processingThresholds.isAboveCoverageThreshold(bamFile)
@@ -112,7 +112,7 @@ class ProcessingThresholdsSpec extends Specification implements DataTest, Domain
     void "test isAboveCoverageThreshold with bam file with no lane count set should throw exception"() {
         setup:
         ProcessingThresholds processingThresholds = new ProcessingThresholds(coverage: 2)
-        ProcessedMergedBamFile bamFile = new ProcessedMergedBamFile(coverage: null)
+        RoddyBamFile bamFile = new RoddyBamFile(coverage: null)
 
         when:
         processingThresholds.isAboveCoverageThreshold(bamFile)

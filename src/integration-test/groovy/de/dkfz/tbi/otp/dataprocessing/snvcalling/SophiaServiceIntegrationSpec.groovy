@@ -21,12 +21,13 @@
  */
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
-import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import spock.lang.Specification
 import spock.lang.Unroll
 
-import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
+import de.dkfz.tbi.otp.dataprocessing.SophiaService
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
@@ -38,20 +39,6 @@ class SophiaServiceIntegrationSpec extends Specification {
 
     void setupData() {
         DomainFactory.createAllAnalysableSeqTypes()
-    }
-
-    void "samplePairForProcessing, for Sophia pipeline, only PMBF available, should not return any bam file"() {
-        given:
-        setupData()
-
-        RoddyBamFile.list().each {
-            it.withdrawn = true
-            assert it.save(flush: true)
-        }
-        DomainFactory.createSamplePairWithProcessedMergedBamFiles()
-
-        expect:
-        !sophiaService.samplePairForProcessing(ProcessingPriority.NORMAL)
     }
 
     @Unroll

@@ -88,7 +88,7 @@ class RoddyBamFileIntegrationSpec extends Specification {
         numberOfReads == roddyBamFile.numberOfReadsFromQa
     }
 
-    void "test getOverallQualityAssessment"() {
+    void "test getQualityAssessment"() {
         given:
         RoddyBamFile bamFile = DomainFactory.createRoddyBamFile()
         QualityAssessmentMergedPass qaPass = DomainFactory.createQualityAssessmentMergedPass(
@@ -114,6 +114,6 @@ class RoddyBamFileIntegrationSpec extends Specification {
         )
 
         expect:
-        mergedQa == bamFile.overallQualityAssessment
+        mergedQa == bamFile.qualityAssessment
     }
 }

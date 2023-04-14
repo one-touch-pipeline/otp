@@ -33,8 +33,6 @@ class MergedAlignmentDataFileService {
     @Deprecated
     static String buildRelativePath(SeqType type, Sample sample) {
         assert !type.hasAntibodyTarget
-        // this method is also used in the ProcessedMergedBamFileService,
-        // if this method is changed make sure that the path in the ProcessedMergedBamFileService is still correct
         String sampleType = sample.sampleType.dirName
         String layout = type.libraryLayoutDirName
         return "${sample.individual.getViewByPidPath(type).relativePath}/${sampleType}/${layout}/merged-alignment/"

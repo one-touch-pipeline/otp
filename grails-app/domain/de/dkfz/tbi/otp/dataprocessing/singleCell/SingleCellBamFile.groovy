@@ -329,12 +329,10 @@ class SingleCellBamFile extends AbstractMergedBamFile implements HasIdentifier, 
     QualityAssessmentMergedPass findOrSaveQaPass() {
         QualityAssessmentMergedPass assessmentMergedPass = CollectionUtils.atMostOneElement(QualityAssessmentMergedPass.findAllWhere(
                 abstractMergedBamFile: this,
-                identifier: 0,
         ))
         if (!assessmentMergedPass) {
             assessmentMergedPass = new QualityAssessmentMergedPass(
                     abstractMergedBamFile: this,
-                    identifier: 0,
             )
             assessmentMergedPass.save(flush: true)
         }
@@ -342,11 +340,10 @@ class SingleCellBamFile extends AbstractMergedBamFile implements HasIdentifier, 
     }
 
     @Override
-    CellRangerQualityAssessment getOverallQualityAssessment() {
+    CellRangerQualityAssessment getQualityAssessment() {
         CellRangerQualityAssessment.createCriteria().get {
             qualityAssessmentMergedPass {
                 eq 'abstractMergedBamFile', this
-                eq 'identifier', 0
             }
         } as CellRangerQualityAssessment
     }

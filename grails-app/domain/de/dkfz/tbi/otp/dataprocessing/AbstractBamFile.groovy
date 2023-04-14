@@ -33,29 +33,6 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 @ManagedEntity
 abstract class AbstractBamFile implements CommentableWithProject, Entity {
 
-    /**
-     * This ENUM declares the different states a {@link AbstractBamFile} can have while it is assigned to a {@link MergingSet}
-     */
-    enum State {
-        /**
-         * default value -> state of the {@link AbstractBamFile} when it is created (declared)
-         * no processing has been started on the bam file
-         */
-        DECLARED,
-        /**
-         * {@link AbstractBamFile} should be assigned to a {@link MergingSet}
-         */
-        NEEDS_PROCESSING,
-        /**
-         * {@link AbstractBamFile} is currently in progress to be assigned to a {@link MergingSet}
-         */
-        INPROGRESS,
-        /**
-         * {@link AbstractBamFile} was assigned to a {@link MergingSet}
-         */
-        PROCESSED
-    }
-
     enum BamType {
         SORTED,
         MDUP,
@@ -90,14 +67,9 @@ abstract class AbstractBamFile implements CommentableWithProject, Entity {
 
     QaProcessingStatus qualityAssessmentStatus = QaProcessingStatus.UNKNOWN
 
-    /**
-     * Whether this has been assigned to a merging set.
-     */
-    State status = State.DECLARED
-
     abstract AbstractMergingWorkPackage getMergingWorkPackage()
     abstract Set<SeqTrack> getContainedSeqTracks()
-    abstract AbstractQualityAssessment getOverallQualityAssessment()
+    abstract AbstractQualityAssessment getQualityAssessment()
 
     static constraints = {
         // Type is not nullable for BamFiles except RoddyBamFile,
@@ -110,14 +82,6 @@ abstract class AbstractBamFile implements CommentableWithProject, Entity {
         hasMetricsFile validator: { val, obj ->
             if (obj.type == BamType.SORTED) {
                 return !val
-            }
-            return true
-        }
-        status validator: { val, obj ->
-            if (val == State.NEEDS_PROCESSING) {
-                if (obj.withdrawn || obj.type == BamType.RMDUP) {
-                    return false
-                }
             }
             return true
         }
@@ -186,28 +150,7 @@ abstract class AbstractBamFile implements CommentableWithProject, Entity {
     void withdraw() {
         withTransaction {
             withdrawn = true
-            if (status == AbstractBamFile.State.NEEDS_PROCESSING) {
-                //if withdraw, the status may not be NEEDS_PROCESSING
-                status = AbstractBamFile.State.DECLARED
-            }
             assert AbstractBamFileService.saveBamFile(this)
-        }
-    }
-
-    //shared between ProcessedMergedBamFile and ProcessedBamFile
-    protected void withdrawDownstreamBamFiles() {
-        List<Long> assignments = MergingSetAssignment.findAllByBamFile(this)*.mergingSet*.id
-
-        if (assignments) {
-            ProcessedMergedBamFile.createCriteria().list {
-                mergingPass {
-                    mergingSet {
-                        'in'('id', assignments)
-                    }
-                }
-            }.each {
-                it.withdraw()
-            }
         }
     }
 }

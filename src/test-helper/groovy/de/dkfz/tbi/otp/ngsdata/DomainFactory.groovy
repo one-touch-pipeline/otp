@@ -35,6 +35,7 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaQc
 import de.dkfz.tbi.otp.domainFactory.*
+import de.dkfz.tbi.otp.domainFactory.pipelines.AlignmentPipelineFactory
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.CellRangerFactory
 import de.dkfz.tbi.otp.domainFactory.pipelines.externalBam.ExternalBamFactoryInstance
@@ -258,50 +259,15 @@ class DomainFactory {
         return (atMostOneElement(Pipeline.list(max: 1)) ?: createPanCanPipeline())
     }
 
-    static MergingSet createMergingSet(Map properties = [:]) {
-        MergingWorkPackage mergingWorkPackage = properties.mergingWorkPackage ?: createMergingWorkPackage([pipeline: createDefaultOtpPipeline(), seqType: createSeqType()])
-        return createDomainObject(MergingSet, [
-                mergingWorkPackage: mergingWorkPackage,
-                identifier        : MergingSet.nextIdentifier(mergingWorkPackage),
-        ], properties)
-    }
-
-    static MergingSet createMergingSet(final MergingWorkPackage mergingWorkPackage, Map properties = [:]) {
-        return createDomainObject(MergingSet, [
-                mergingWorkPackage: mergingWorkPackage,
-                identifier        : MergingSet.nextIdentifier(mergingWorkPackage),
-        ], properties)
-    }
-
-    static MergingSetAssignment createMergingSetAssignment(Map properties = [:]) {
-        return createDomainObject(MergingSetAssignment, [
-                mergingSet: { createMergingSet() },
-                bamFile   : { createProcessedBamFile() },
-        ], properties)
-    }
-
     static QualityAssessmentMergedPass createQualityAssessmentMergedPass(Map properties = [:]) {
         return createDomainObject(QualityAssessmentMergedPass, [
-                abstractMergedBamFile: { createProcessedMergedBamFile() }
+                abstractMergedBamFile: { createRoddyBamFile() }
         ], properties)
     }
 
     @Deprecated
     static Map<String, ?> getDefaultValuesForAbstractQualityAssessment() {
         return proxyCellRanger.defaultValuesForAbstractQualityAssessment
-    }
-
-    static OverallQualityAssessmentMerged createOverallQualityAssessmentMerged(Map properties = [:]) {
-        return createDomainObject(OverallQualityAssessmentMerged, defaultValuesForAbstractQualityAssessment + [
-                qualityAssessmentMergedPass: { createQualityAssessmentMergedPass() },
-        ], properties)
-    }
-
-    static ChromosomeQualityAssessmentMerged createChromosomeQualityAssessmentMerged(Map properties = [:]) {
-        return createDomainObject(ChromosomeQualityAssessmentMerged, defaultValuesForAbstractQualityAssessment + [
-                chromosomeName             : "chromosomeName_${counter++}",
-                qualityAssessmentMergedPass: { createQualityAssessmentMergedPass() },
-        ], properties)
     }
 
     static JobExecutionPlan createJobExecutionPlan(Map properties = [:]) {
@@ -456,21 +422,6 @@ class DomainFactory {
         createProcessingOptionLazy(ProcessingOption.OptionName.COMMAND_ACTIVATION_GROOVY, '')
     }
 
-    static MergingPass createMergingPass(Map properties = [:]) {
-        MergingSet mergingSet = properties.mergingSet ?: createMergingSet()
-        return createDomainObject(MergingPass, [
-                mergingSet: mergingSet,
-                identifier: MergingPass.nextIdentifier(mergingSet),
-        ], properties)
-    }
-
-    static MergingPass createMergingPass(final MergingSet mergingSet) {
-        return createDomainObject(MergingPass, [
-                mergingSet: mergingSet,
-                identifier: MergingPass.nextIdentifier(mergingSet),
-        ], [:])
-    }
-
     static Map getRandomProcessedBamFileProperties() {
         return [
                 fileSize           : ++counter,
@@ -490,86 +441,6 @@ class DomainFactory {
     @Deprecated
     static createIlseSubmission(Map properties = [:], boolean saveAndValidate = true) {
         return proxyCore.createIlseSubmission(properties, saveAndValidate)
-    }
-
-    static AlignmentPass createAlignmentPass(Map properties = [:]) {
-        final SeqTrack seqTrack = properties.get('seqTrack') ?: createSeqTrack([:])
-
-        if (!seqTrack.seqPlatform.seqPlatformGroups) {
-            seqTrack.seqPlatform.addToSeqPlatformGroups(createSeqPlatformGroup())
-            seqTrack.seqPlatform.save(flush: true)
-        }
-
-        final MergingWorkPackage workPackage = findOrSaveMergingWorkPackage(
-                seqTrack,
-                properties.get('referenceGenome'),
-                properties.get('pipeline')
-        )
-        properties.remove("referenceGenome")
-        properties.remove("description")
-        final AlignmentPass alignmentPass = createDomainObject(AlignmentPass, [
-                identifier    : AlignmentPass.nextIdentifier(seqTrack),
-                seqTrack      : seqTrack,
-                workPackage   : workPackage,
-                alignmentState: AlignmentPass.AlignmentState.FINISHED,
-        ], properties)
-        return alignmentPass
-    }
-
-    static QualityAssessmentPass createQualityAssessmentPass(Map properties = [:]) {
-        return createDomainObject(QualityAssessmentPass, [
-                identifier      : counter++,
-                processedBamFile: { createProcessedBamFile() },
-        ], properties)
-    }
-
-    static Map qaJarQualityAssessmentProperties = [
-            duplicateR1                     : 0L,
-            duplicateR2                     : 0L,
-            properPairStrandConflict        : 0L,
-            referenceAgreement              : 0L,
-            referenceAgreementStrandConflict: 0L,
-            mappedQualityLongR1             : 0L,
-            mappedQualityLongR2             : 0L,
-            mappedLowQualityR1              : 0L,
-            mappedLowQualityR2              : 0L,
-            mappedShortR1                   : 0L,
-            mappedShortR2                   : 0L,
-            notMappedR1                     : 0L,
-            notMappedR2                     : 0L,
-            endReadAberration               : 0L,
-            insertSizeMean                  : 0.0,
-            insertSizeRMS                   : 0.0,
-            percentIncorrectPEorientation   : 0.0,
-            percentReadPairsMapToDiffChrom  : 0.0,
-    ]
-
-    static ChromosomeQualityAssessment createChromosomeQualityAssessment(Map properties = [:]) {
-        return createDomainObject(ChromosomeQualityAssessment, defaultValuesForAbstractQualityAssessment + qaJarQualityAssessmentProperties + [
-                chromosomeName       : "chromosomeName_${counter++}",
-                qualityAssessmentPass: { createQualityAssessmentPass() },
-        ], properties)
-    }
-
-    static OverallQualityAssessment createOverallQualityAssessment(Map properties = [:]) {
-        return createDomainObject(OverallQualityAssessment, defaultValuesForAbstractQualityAssessment + qaJarQualityAssessmentProperties + [
-                qualityAssessmentPass: { createQualityAssessmentPass() },
-        ], properties)
-    }
-
-    static PicardMarkDuplicatesMetrics createPicardMarkDuplicatesMetrics(Map properties = [:]) {
-        return createDomainObject(PicardMarkDuplicatesMetrics, [
-                metricsClass                : "metricsClass_${counter++}",
-                library                     : "library_${counter++}",
-                unpaired_reads_examined     : 0,
-                read_pairs_examined         : 0,
-                unmapped_reads              : 0,
-                unpaired_read_duplicates    : 0,
-                read_pair_duplicates        : 0,
-                read_pair_optical_duplicates: 0,
-                percent_duplication         : 0.0,
-                estimated_library_size      : 0,
-        ], properties)
     }
 
     static MergingWorkPackage findOrSaveMergingWorkPackage(SeqTrack seqTrack, ReferenceGenome referenceGenome = null, Pipeline pipeline = null) {
@@ -605,138 +476,6 @@ class DomainFactory {
 
     static ReferenceGenome createReferenceGenomeLazy() {
         return ReferenceGenome.find { true } ?: createReferenceGenome()
-    }
-
-    static ProcessedMergedBamFile createProcessedMergedBamFileWithoutProcessedBamFile(MergingWorkPackage mergingWorkPackage, Map properties = [:], boolean saveAndValidate = true) {
-        MergingSet mergingSet = createMergingSet(mergingWorkPackage)
-        return createProcessedMergedBamFileWithoutProcessedBamFile(mergingSet, properties, saveAndValidate)
-    }
-
-    static ProcessedMergedBamFile createProcessedMergedBamFile(MergingWorkPackage mergingWorkPackage, Map properties = [:], boolean saveAndValidate = true) {
-        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFileWithoutProcessedBamFile(mergingWorkPackage, properties, saveAndValidate)
-        assignNewProcessedBamFile(processedMergedBamFile)
-        return processedMergedBamFile
-    }
-
-    static ProcessedMergedBamFile createProcessedMergedBamFileWithoutProcessedBamFile(Map properties = [:], boolean saveAndValidate = true) {
-        MergingPass mergingPass = properties.mergingPass ?: properties.workPackage ?
-                createMergingPass(createMergingSet([mergingWorkPackage: properties.workPackage])) :
-                createMergingPass()
-        ProcessedMergedBamFile processedMergedBamFile = createDomainObject(ProcessedMergedBamFile, [
-                mergingPass        : mergingPass,
-                workPackage        : mergingPass.mergingWorkPackage,
-                type               : AbstractBamFile.BamType.MDUP,
-                numberOfMergedLanes: 1,
-        ], properties, saveAndValidate)
-        return processedMergedBamFile
-    }
-
-    static ProcessedMergedBamFile createProcessedMergedBamFile(Map properties = [:], boolean saveAndValidate = true) {
-        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFileWithoutProcessedBamFile(properties, saveAndValidate)
-        assignNewProcessedBamFile(processedMergedBamFile)
-        return processedMergedBamFile
-    }
-
-    static ProcessedMergedBamFile createProcessedMergedBamFileWithoutProcessedBamFile(MergingSet mergingSet, Map properties = [:], boolean saveAndValidate = true) {
-        return createProcessedMergedBamFileWithoutProcessedBamFile(properties + [
-                mergingPass: createMergingPass([
-                        mergingSet: mergingSet,
-                        identifier: MergingPass.nextIdentifier(mergingSet),
-                ]),
-        ], saveAndValidate)
-    }
-
-    static ProcessedMergedBamFile createProcessedMergedBamFile(MergingSet mergingSet, Map properties = [:], boolean saveAndValidate = true) {
-        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFileWithoutProcessedBamFile(mergingSet, properties, saveAndValidate)
-        assignNewProcessedBamFile(processedMergedBamFile)
-        return processedMergedBamFile
-    }
-
-    static ProcessedMergedBamFile createProcessedMergedBamFileWithoutProcessedBamFile(MergingPass mergingPass, Map properties = [:], boolean saveAndValidate = true) {
-        return createProcessedMergedBamFileWithoutProcessedBamFile([
-                mergingPass: mergingPass,
-        ] + properties, saveAndValidate)
-    }
-
-    static ProcessedMergedBamFile createProcessedMergedBamFile(MergingPass mergingPass, Map properties = [:], boolean saveAndValidate = true) {
-        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFileWithoutProcessedBamFile(mergingPass, properties, saveAndValidate)
-        assignNewProcessedBamFile(processedMergedBamFile)
-        return processedMergedBamFile
-    }
-
-    static ProcessedMergedBamFile createFinishedProcessedMergedBamFile(Map properties = [:]) {
-        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFileWithoutProcessedBamFile([
-                fileOperationStatus: FileOperationStatus.PROCESSED,
-                md5sum             : HelperUtils.randomMd5sum,
-                fileSize           : counter++,
-        ] + properties)
-        MergingWorkPackage mergingWorkPackage = processedMergedBamFile.mergingWorkPackage
-        mergingWorkPackage.bamFileInProjectFolder = processedMergedBamFile
-        assert mergingWorkPackage.save(flush: true)
-        return processedMergedBamFile
-    }
-
-    static ProcessedBamFile assignNewProcessedBamFile(final ProcessedMergedBamFile processedMergedBamFile) {
-        final ProcessedBamFile bamFile = assignNewProcessedBamFile(processedMergedBamFile.mergingSet)
-        processedMergedBamFile.numberOfMergedLanes++
-        return bamFile
-    }
-
-    static ProcessedBamFile assignNewProcessedBamFile(final MergingSet mergingSet) {
-        final ProcessedBamFile bamFile = createProcessedBamFile(mergingSet.mergingWorkPackage)
-        createMergingSetAssignment([
-                mergingSet: mergingSet,
-                bamFile   : bamFile,
-        ])
-        return bamFile
-    }
-
-    static ProcessedSaiFile createProcessedSaiFile(Map properties = [:], boolean saveAndValidate = true) {
-        return createDomainObject(ProcessedSaiFile, [
-                fileExists        : true,
-                dateCreated       : { new Date() },
-                dateFromFileSystem: { new Date() },
-                fileSize          : { counter++ },
-                alignmentPass     : { createAlignmentPass() },
-                dataFile          : { createDataFile() },
-        ], properties, saveAndValidate)
-    }
-
-    static ProcessedBamFile createProcessedBamFile(Map properties = [:], boolean saveAndValidate = true) {
-        return createDomainObject(ProcessedBamFile, [
-                alignmentPass     : { createAlignmentPass() },
-                md5sum            : { HelperUtils.randomMd5sum },
-                fileExists        : true,
-                dateFromFileSystem: { new Date() },
-                fileSize          : { counter++ },
-                type              : AbstractBamFile.BamType.SORTED,
-                hasIndexFile      : true,
-                hasCoveragePlot   : true,
-                hasInsertSizePlot : true,
-                withdrawn         : false,
-                coverage          : { counter++ },
-                coverageWithN     : { counter++ },
-                status            : AbstractBamFile.State.DECLARED,
-        ], properties, saveAndValidate)
-    }
-
-    static ProcessedBamFile createProcessedBamFile(
-            final MergingWorkPackage mergingWorkPackage, Map properties = [:]) {
-        SeqTrack seqTrack = createSeqTrackWithDataFiles(mergingWorkPackage)
-        mergingWorkPackage.seqTracks.add(seqTrack)
-        mergingWorkPackage.save(flush: true)
-
-        final ProcessedBamFile bamFile = createProcessedBamFile([
-                alignmentPass          : createAlignmentPass([
-                        seqTrack       : seqTrack,
-                        workPackage    : mergingWorkPackage,
-                        referenceGenome: mergingWorkPackage.referenceGenome,
-                ]),
-                qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
-                status                 : AbstractBamFile.State.PROCESSED,
-        ] + properties)
-
-        return bamFile
     }
 
     /**
@@ -958,14 +697,14 @@ class DomainFactory {
     static SamplePair createSamplePairWithProcessedMergedBamFiles() {
         MergingWorkPackage tumorMwp = createMergingWorkPackage(
                 seqType: createWholeGenomeSeqType(),
-                pipeline: createDefaultOtpPipeline(),
+                pipeline: createPanCanPipeline(),
                 referenceGenome: createReferenceGenome(name: 'hs37d5')
         )
-        ProcessedMergedBamFile bamFileTumor = createProcessedMergedBamFile(tumorMwp, randomProcessedBamFileProperties + [coverage: 30.0])
+        AbstractMergedBamFile bamFileTumor = AlignmentPipelineFactory.RoddyPancanFactoryInstance.INSTANCE.createRoddyBamFile(
+                randomProcessedBamFileProperties + [coverage: 30.0], tumorMwp, RoddyBamFile)
 
-        ProcessedMergedBamFile bamFileControl = createProcessedMergedBamFile(
-                createMergingWorkPackage(bamFileTumor.mergingWorkPackage),
-                randomProcessedBamFileProperties + [coverage: 30.0])
+        AbstractMergedBamFile bamFileControl = AlignmentPipelineFactory.RoddyPancanFactoryInstance.INSTANCE.createRoddyBamFile(
+                randomProcessedBamFileProperties + [coverage: 30.0], createMergingWorkPackage(bamFileTumor.mergingWorkPackage), RoddyBamFile)
 
         bamFileTumor.mergingWorkPackage.bamFileInProjectFolder = bamFileTumor
         assert bamFileTumor.mergingWorkPackage.save(flush: true)
@@ -2194,25 +1933,6 @@ class DomainFactory {
                 somaticSmallVarsInTumorPassPer                  : counter++ as double,
                 somaticSmallVarsInTumorCommonInGnomadPer        : counter++,
         ], properties)
-    }
-
-    static ProcessedMergedBamFile createIncrementalMergedBamFile(ProcessedMergedBamFile processedMergedBamFile) {
-        MergingSet mergingSet = createMergingSet(processedMergedBamFile.workPackage)
-        MergingPass mergingPass = createMergingPass(mergingSet)
-
-        ProcessedMergedBamFile secondBamFile = createProcessedMergedBamFile(mergingPass, [
-                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
-                md5sum             : HelperUtils.randomMd5sum,
-                fileSize           : 1000,
-        ])
-        assert secondBamFile.save(flush: true)
-
-        MergingSetAssignment mergingSetAssignment = new MergingSetAssignment(
-                mergingSet: mergingSet,
-                bamFile: processedMergedBamFile
-        )
-        assert mergingSetAssignment.save(flush: true)
-        return secondBamFile
     }
 
     @Deprecated

@@ -42,7 +42,7 @@ class AbstractMergingWorkPackageSpec extends Specification implements DataTest {
                 AbstractMergingWorkPackage,
                 AntibodyTarget,
                 Individual,
-                LibraryPreparationKit, MergingSet,
+                LibraryPreparationKit,
                 MergingWorkPackage,
                 Pipeline,
                 Project,
@@ -77,7 +77,7 @@ class AbstractMergingWorkPackageSpec extends Specification implements DataTest {
 
         final Set<SeqTrack> containedSeqTracks = []
 
-        final AbstractQualityAssessment overallQualityAssessment = null
+        final AbstractQualityAssessment qualityAssessment = null
 
         final File finalInsertSizeFile = null
 

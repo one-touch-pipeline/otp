@@ -82,47 +82,7 @@ class SampleSwapService extends AbstractDataSwapService<SampleSwapParameters, Sa
     }
 
     @Override
-    protected void logSwapData(SampleSwapData data) {
-        logAlignments(data)
-    }
-
-    @Override
     protected void performDataSwap(SampleSwapData data) {
-        List<AlignmentPass> alignmentPasses = AlignmentPass.findAllBySeqTrackInList(data.seqTrackList)
-
-        if (data.seqTrackList && alignmentPasses) {
-            data.moveFilesCommands << "\n\n\n ################ delete old aligned & merged files ################ \n"
-            alignmentPasses.each { AlignmentPass alignmentPass ->
-                String baseDirAlignment = dataProcessingFilesService.getOutputDirectory(data.individualSwap.old,
-                        DataProcessingFilesService.OutputDirectories.ALIGNMENT)
-                String middleDirAlignment = processedAlignmentFileService.getRunLaneDirectory(alignmentPass.seqTrack)
-                String oldPathToAlignedFiles = "${baseDirAlignment}/${middleDirAlignment}"
-                data.moveFilesCommands << "rm -rf ${oldPathToAlignedFiles}\n"
-            }
-
-            String baseDirMerging = dataProcessingFilesService.getOutputDirectory(data.individualSwap.old,
-                    DataProcessingFilesService.OutputDirectories.MERGING)
-            String oldProcessingPathToMergedFiles = "${baseDirMerging}/${data.sampleTypeSwap.old.name}"
-            data.moveFilesCommands << "rm -rf ${oldProcessingPathToMergedFiles}\n"
-
-            List<ProcessedMergedBamFile> processedMergedBamFiles = ProcessedMergedBamFile.createCriteria().list {
-                mergingPass {
-                    mergingSet {
-                        mergingWorkPackage {
-                            eq("sample", data.sample)
-                        }
-                    }
-                }
-            }
-            List<ProcessedMergedBamFile> latestProcessedMergedBamFiles = processedMergedBamFiles.findAll {
-                it.mergingPass.isLatestPass() && it.mergingSet.isLatestSet()
-            }
-            latestProcessedMergedBamFiles.each { ProcessedMergedBamFile latestProcessedMergedBamFile ->
-                String oldProjectPathToMergedFiles = abstractMergedBamFileService.getBaseDirectory(latestProcessedMergedBamFile)
-                data.moveFilesCommands << "rm -rf ${oldProjectPathToMergedFiles}\n"
-            }
-        }
-
         swapSample(data)
 
         createMoveDataFilesCommands(data)

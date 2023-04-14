@@ -39,7 +39,7 @@ class AbstractBamFileService {
             assert referenceGenome : "Unable to find a reference genome for the BAM file ${bamFile}"
 
             length = referenceGenome.length
-            basesMapped = bamFile.overallQualityAssessment.qcBasesMapped
+            basesMapped = bamFile.qualityAssessment.qcBasesMapped
 
             return basesMapped / length
         }

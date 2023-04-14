@@ -21,8 +21,8 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
-import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import org.junit.*
 import org.junit.rules.TemporaryFolder
 
@@ -78,14 +78,29 @@ class AbstractQualityAssessmentServiceIntegrationTests {
         final EXPECTED_COVERAGE_WITH_N = 8
 
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
-        RoddyMergedBamQa mergedQa = new RoddyMergedBamQa(
-                AbstractBamFileServiceIntegrationTests.ARBITRARY_QA_VALUES + [
+        final Long ARBITRARY_UNUSED_VALUE = 1
+        RoddyMergedBamQa mergedQa = new RoddyMergedBamQa([
                 qualityAssessmentMergedPass : DomainFactory.createQualityAssessmentMergedPass(abstractMergedBamFile: roddyBamFile),
                 qcBasesMapped : QC_BASES_MAPPED,
                 genomeWithoutNCoverageQcBases: EXPECTED_COVERAGE,
                 chromosome: RoddyQualityAssessment.ALL,
                 insertSizeCV: 123,
                 percentageMatesOnDifferentChr: 0.123,
+                totalReadCounter: ARBITRARY_UNUSED_VALUE,
+                qcFailedReads: ARBITRARY_UNUSED_VALUE,
+                duplicates: ARBITRARY_UNUSED_VALUE,
+                totalMappedReadCounter: ARBITRARY_UNUSED_VALUE,
+                pairedInSequencing: ARBITRARY_UNUSED_VALUE,
+                pairedRead2: ARBITRARY_UNUSED_VALUE,
+                pairedRead1: ARBITRARY_UNUSED_VALUE,
+                properlyPaired: ARBITRARY_UNUSED_VALUE,
+                withItselfAndMateMapped: ARBITRARY_UNUSED_VALUE,
+                withMateMappedToDifferentChr: ARBITRARY_UNUSED_VALUE,
+                withMateMappedToDifferentChrMaq: ARBITRARY_UNUSED_VALUE,
+                singletons: ARBITRARY_UNUSED_VALUE,
+                insertSizeMedian: ARBITRARY_UNUSED_VALUE,
+                insertSizeSD: ARBITRARY_UNUSED_VALUE,
+                referenceLength: ARBITRARY_UNUSED_VALUE,
         ])
         assert mergedQa.save(flush: true)
 

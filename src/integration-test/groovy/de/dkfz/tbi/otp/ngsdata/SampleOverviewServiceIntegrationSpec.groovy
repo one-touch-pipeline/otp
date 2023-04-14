@@ -21,20 +21,21 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergingWorkPackage
+import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 @Rollback
 @Integration
-class SampleOverviewServiceIntegrationSpec extends Specification implements UserAndRoles {
+class SampleOverviewServiceIntegrationSpec extends Specification implements UserAndRoles, IsRoddy {
 
     @Autowired
     SampleOverviewService sampleLaneService
@@ -51,6 +52,8 @@ class SampleOverviewServiceIntegrationSpec extends Specification implements User
     void "test abstractMergedBamFilesInProjectFolder with abstractMergedBamFile in Project"() {
         given:
         AbstractMergedBamFile mergedBamFile = abstractMergedBamFile()
+        mergedBamFile.workPackage.bamFileInProjectFolder = mergedBamFile
+        mergedBamFile.workPackage.save(flush: true)
 
         when:
         List result = sampleLaneService.abstractMergedBamFilesInProjectFolder(mergedBamFile.project)
@@ -60,7 +63,7 @@ class SampleOverviewServiceIntegrationSpec extends Specification implements User
 
         where:
         abstractMergedBamFile                                                | _
-        ({ DomainFactory.createFinishedProcessedMergedBamFile() })           | _
+        ({ createBamFile() })                                                | _
         ({ DomainFactory.createFinishedExternallyProcessedMergedBamFile() }) | _
     }
 
@@ -78,7 +81,7 @@ class SampleOverviewServiceIntegrationSpec extends Specification implements User
 
         where:
         abstractMergedBamFile                                                | _
-        ({ DomainFactory.createFinishedProcessedMergedBamFile() })           | _
+        ({ createBamFile() })                                                | _
         ({ DomainFactory.createFinishedExternallyProcessedMergedBamFile() }) | _
     }
 
@@ -98,7 +101,7 @@ class SampleOverviewServiceIntegrationSpec extends Specification implements User
 
         where:
         abstractMergedBamFile                                                | _
-        ({ DomainFactory.createFinishedProcessedMergedBamFile() })           | _
+        ({ createBamFile() })                                                | _
         ({ DomainFactory.createFinishedExternallyProcessedMergedBamFile() }) | _
     }
 
@@ -106,7 +109,9 @@ class SampleOverviewServiceIntegrationSpec extends Specification implements User
     void "test abstractMergedBamFilesInProjectFolder with two MergedBamFiles in Project but one not Finished yet"() {
         given:
         AbstractMergedBamFile mergedBamFile1 = finishedAbstractMergedBamFile()
-        unfisihedAbstractMergedBamFile(mergedBamFile1.mergingWorkPackage)
+        unfinishedAbstractMergedBamFile(mergedBamFile1.mergingWorkPackage)
+        mergedBamFile1.workPackage.bamFileInProjectFolder = mergedBamFile1
+        mergedBamFile1.workPackage.save(flush: true)
 
         when:
         List result = sampleLaneService.abstractMergedBamFilesInProjectFolder(mergedBamFile1.project)
@@ -115,8 +120,8 @@ class SampleOverviewServiceIntegrationSpec extends Specification implements User
         mergedBamFile1 == CollectionUtils.exactlyOneElement(result)
 
         where:
-        finishedAbstractMergedBamFile                                        | unfisihedAbstractMergedBamFile
-        ({ DomainFactory.createFinishedProcessedMergedBamFile() })           | ({ DomainFactory.createProcessedMergedBamFile(workPackage: it) })
+        finishedAbstractMergedBamFile                                        | unfinishedAbstractMergedBamFile
+        ({ createBamFile() })                                                | ({ createBamFile(workPackage: it) })
         ({ DomainFactory.createFinishedExternallyProcessedMergedBamFile() }) | ({ DomainFactory.createExternallyProcessedMergedBamFile(workPackage: it) })
     }
 

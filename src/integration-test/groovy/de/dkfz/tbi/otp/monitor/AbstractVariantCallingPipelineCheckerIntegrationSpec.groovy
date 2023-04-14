@@ -21,19 +21,20 @@
  */
 package de.dkfz.tbi.otp.monitor
 
-import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import spock.lang.Specification
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
+import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.SeqTypeService
 
 @Rollback
 @Integration
-abstract class AbstractVariantCallingPipelineCheckerIntegrationSpec extends Specification {
+abstract class AbstractVariantCallingPipelineCheckerIntegrationSpec extends Specification implements IsRoddy {
 
     void "samplePairWithoutCorrespondingConfigForPipelineAndSeqTypeAndProject, when some sample pairs have a config and some not some not, return project and seqtype of sample pairs without config"() {
         given:
@@ -160,12 +161,12 @@ abstract class AbstractVariantCallingPipelineCheckerIntegrationSpec extends Spec
                         coverage2: 10.0,
                 ],
         ].collect {
-            SamplePair samplePair = DomainFactory.createSamplePair(mergingWorkPackage1: DomainFactory.createMergingWorkPackage(pipeline: DomainFactory.createDefaultOtpPipeline()))
-            DomainFactory.createProcessedMergedBamFile([
+            SamplePair samplePair = DomainFactory.createSamplePair(mergingWorkPackage1: DomainFactory.createMergingWorkPackage(pipeline: DomainFactory.createPanCanPipeline()))
+            createBamFile([
                     workPackage: samplePair.mergingWorkPackage1,
                     coverage   : it.coverage1,
             ])
-            DomainFactory.createProcessedMergedBamFile([
+            createBamFile([
                     workPackage: samplePair.mergingWorkPackage2,
                     coverage   : it.coverage2,
             ])

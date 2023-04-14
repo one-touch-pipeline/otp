@@ -92,44 +92,6 @@ class DeletionServiceIntegrationTests extends Specification implements UserAndRo
         !MetaDataEntry.get(metaDataEntry.id)
     }
 
-    void "testDeleteQualityAssessmentInfoForAbstractBamFile_ProcessedBamFile"() {
-        given:
-        setupData()
-        AbstractBamFile abstractBamFile = DomainFactory.createProcessedBamFile()
-
-        QualityAssessmentPass qualityAssessmentPass = DomainFactory.createQualityAssessmentPass(processedBamFile: abstractBamFile)
-        ChromosomeQualityAssessment chromosomeQualityAssessment = DomainFactory.createChromosomeQualityAssessment(qualityAssessmentPass: qualityAssessmentPass, referenceLength: 0)
-        OverallQualityAssessment overallQualityAssessment = DomainFactory.createOverallQualityAssessment(qualityAssessmentPass: qualityAssessmentPass, referenceLength: 0)
-
-        when:
-        deletionService.deleteQualityAssessmentInfoForAbstractBamFile(abstractBamFile)
-
-        then:
-        !QualityAssessmentPass.get(qualityAssessmentPass.id)
-        !ChromosomeQualityAssessment.get(chromosomeQualityAssessment.id)
-        !OverallQualityAssessment.get(overallQualityAssessment.id)
-    }
-
-    void "testDeleteQualityAssessmentInfoForAbstractBamFile_ProcessedMergedBamFile"() {
-        given:
-        setupData()
-        AbstractBamFile abstractBamFile = DomainFactory.createProcessedMergedBamFile()
-
-        QualityAssessmentMergedPass qualityAssessmentPass = DomainFactory.createQualityAssessmentMergedPass(abstractMergedBamFile: abstractBamFile)
-        ChromosomeQualityAssessmentMerged chromosomeQualityAssessment = DomainFactory.createChromosomeQualityAssessmentMerged(qualityAssessmentMergedPass: qualityAssessmentPass, referenceLength: 0)
-        OverallQualityAssessmentMerged overallQualityAssessment = DomainFactory.createOverallQualityAssessmentMerged(qualityAssessmentMergedPass: qualityAssessmentPass, referenceLength: 0)
-        PicardMarkDuplicatesMetrics picardMarkDuplicatesMetrics = DomainFactory.createPicardMarkDuplicatesMetrics(abstractBamFile: abstractBamFile)
-
-        when:
-        deletionService.deleteQualityAssessmentInfoForAbstractBamFile(abstractBamFile)
-
-        then:
-        !QualityAssessmentMergedPass.get(qualityAssessmentPass.id)
-        !ChromosomeQualityAssessmentMerged.get(chromosomeQualityAssessment.id)
-        !OverallQualityAssessmentMerged.get(overallQualityAssessment.id)
-        !PicardMarkDuplicatesMetrics.get(picardMarkDuplicatesMetrics.id)
-    }
-
     void "testDeleteQualityAssessmentInfoForAbstractBamFile_RoddyBamFile"() {
         given:
         setupData()
@@ -180,28 +142,6 @@ class DeletionServiceIntegrationTests extends Specification implements UserAndRo
 
         then:
         message == "The input AbstractBamFile is null"
-    }
-
-    void "testDeleteMergingRelatedConnectionsOfBamFile"() {
-        given:
-        setupData()
-        MergingWorkPackage mergingWorkPackage = DomainFactory.createMergingWorkPackage([
-                pipeline: DomainFactory.createDefaultOtpPipeline()
-        ])
-        MergingSet mergingSet = DomainFactory.createMergingSet(mergingWorkPackage: mergingWorkPackage)
-        ProcessedBamFile processedBamFile = DomainFactory.createProcessedBamFile(mergingWorkPackage).save(flush: true)
-        MergingPass mergingPass = DomainFactory.createMergingPass(mergingSet: mergingSet)
-        MergingSetAssignment mergingSetAssignment = DomainFactory.createMergingSetAssignment(bamFile: processedBamFile, mergingSet: mergingSet)
-        ProcessedMergedBamFile bamFile = DomainFactory.createProcessedMergedBamFileWithoutProcessedBamFile(workPackage: mergingWorkPackage, mergingPass: mergingPass)
-
-        when:
-        deletionService.deleteMergingRelatedConnectionsOfBamFile(processedBamFile)
-
-        then:
-        !MergingPass.get(mergingPass.id)
-        !MergingSet.get(mergingSet.id)
-        !MergingSetAssignment.get(mergingSetAssignment.id)
-        !ProcessedMergedBamFile.get(bamFile.id)
     }
 
     void "testDeleteDataFile"() {
@@ -451,65 +391,6 @@ class DeletionServiceIntegrationTests extends Specification implements UserAndRo
         if (addRealm) {
             project.realm = DomainFactory.createRealm()
         }
-    }
-
-    private ProcessedMergedBamFile deleteProcessingFilesOfProject_PMBF_Setup() {
-        ProcessedMergedBamFile bamFile = DomainFactory.createProcessedMergedBamFile([
-                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
-                md5sum             : HelperUtils.randomMd5sum,
-                fileSize           : 1000,
-        ])
-        dataBaseSetupForMergedBamFiles(bamFile)
-        createFastqFiles(bamFile)
-
-        File processingBamFile = new File(dataProcessingFilesService.getOutputDirectory(
-                bamFile.individual, DataProcessingFilesService.OutputDirectories.MERGING).toString())
-        File finalBamFile = bamFile.baseDirectory
-        CreateFileHelper.createFile(new File(processingBamFile, "test.bam"))
-        CreateFileHelper.createFile(new File(finalBamFile, "test.bam"))
-
-        return bamFile
-    }
-
-    private void deleteProcessingFilesOfProject_PMBF_Validation() {
-        assert AbstractBamFile.list().empty
-        assert MergingWorkPackage.list().empty
-        assert AlignmentPass.list().empty
-        assert MergingPass.list().empty
-    }
-
-    void "testDeleteProcessingFilesOfProject_PMBF"() {
-        given:
-        setupData()
-        ProcessedMergedBamFile bamFile = deleteProcessingFilesOfProject_PMBF_Setup()
-
-        File processingBamFile = new File(dataProcessingFilesService.getOutputDirectory(
-                bamFile.individual, DataProcessingFilesService.OutputDirectories.MERGING).toString())
-        File finalBamFile = bamFile.baseDirectory
-        Path outputFile = outputFolder.resolve("Delete_${bamFile.project.name}.sh")
-
-        deletionService.deleteProcessingFilesOfProject(bamFile.project.name, outputFolder, true)
-
-        assert outputFile.text.contains(processingBamFile.path) && outputFile.text.contains(finalBamFile.path)
-
-        deleteProcessingFilesOfProject_PMBF_Validation()
-    }
-
-    void "testDeleteProcessingFilesOfProject_PMBF_notVerified"() {
-        given:
-        setupData()
-        ProcessedMergedBamFile bamFile = deleteProcessingFilesOfProject_PMBF_Setup()
-
-        File processingBamFile = new File(dataProcessingFilesService.getOutputDirectory(
-                bamFile.individual, DataProcessingFilesService.OutputDirectories.MERGING).toString())
-        File finalBamFile = bamFile.baseDirectory
-        Path outputFile = outputFolder.resolve("Delete_${bamFile.project.name}.sh")
-
-        deletionService.deleteProcessingFilesOfProject(bamFile.project.name, outputFolder)
-
-        assert outputFile.text.contains(processingBamFile.path) && outputFile.text.contains(finalBamFile.path)
-
-        deleteProcessingFilesOfProject_PMBF_Validation()
     }
 
     private RoddyBamFile deleteProcessingFilesOfProject_RBF_Setup() {

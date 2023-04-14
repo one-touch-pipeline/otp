@@ -31,7 +31,6 @@ import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 class AbstractMergedBamFileServiceFactoryService {
 
     ExternallyProcessedMergedBamFileService externallyProcessedMergedBamFileService
-    ProcessedMergedBamFileService processedMergedBamFileService
     RnaRoddyBamFileService rnaRoddyBamFileService
     RoddyBamFileService roddyBamFileService
     SingleCellBamFileService singleCellBamFileService
@@ -39,7 +38,6 @@ class AbstractMergedBamFileServiceFactoryService {
     AbstractAbstractMergedBamFileService<? extends AbstractMergedBamFile> getService(AbstractMergedBamFile bamFile) {
         Map<Class<? extends AbstractMergedBamFile>, AbstractAbstractMergedBamFileService<? extends AbstractMergedBamFile>> map = [
                 (ExternallyProcessedMergedBamFile): externallyProcessedMergedBamFileService,
-                (ProcessedMergedBamFile)          : processedMergedBamFileService,
                 (RnaRoddyBamFile)                 : rnaRoddyBamFileService,
                 (RoddyBamFile)                    : roddyBamFileService,
                 (SingleCellBamFile)               : singleCellBamFileService,

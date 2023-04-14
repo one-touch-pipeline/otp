@@ -84,9 +84,7 @@ abstract class WithdrawBamFileServiceSpec<T extends WithdrawBamFileService> exte
         List<AbstractMergedBamFile> bamFiles = (1..3).collect {
             createBamFile()
         }
-        bamFiles << createBamFile([
-                status: AbstractBamFile.State.NEEDS_PROCESSING
-        ])
+        bamFiles << createBamFile()
 
         when:
         service.withdrawObjects(bamFiles)
@@ -94,7 +92,6 @@ abstract class WithdrawBamFileServiceSpec<T extends WithdrawBamFileService> exte
         then:
         bamFiles.each {
             assert it.withdrawn
-            assert it.status != AbstractBamFile.State.NEEDS_PROCESSING
         }
     }
 

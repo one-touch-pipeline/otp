@@ -61,7 +61,6 @@ class LaneSwapServiceSpec extends Specification implements DataTest, ServiceUnit
                 SeqTrack,
                 ExternallyProcessedMergedBamFile,
                 RoddyBamFile,
-                AlignmentPass,
         ]
     }
 

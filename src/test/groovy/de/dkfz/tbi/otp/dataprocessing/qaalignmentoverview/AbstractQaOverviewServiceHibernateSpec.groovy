@@ -102,14 +102,6 @@ class AbstractQaOverviewServiceHibernateSpec extends HibernateSpec implements Ro
             |    and bamFile.withdrawn = false
             |    and mergingWorkPackage.seqType = :seqType
             |    and mergingWorkPackage.bamFileInProjectFolder = bamFile
-            |    and qaPass.identifier = (
-            |        select
-            |            max(qaPass2.identifier)
-            |        from
-            |            QualityAssessmentMergedPass qaPass2
-            |        where
-            |            qaPass2.abstractMergedBamFile = bamFile
-            |    )
         """.stripMargin().replaceAll(' *\n *', ' | ')
 
         when:
@@ -180,14 +172,6 @@ class AbstractQaOverviewServiceHibernateSpec extends HibernateSpec implements Ro
             |    and bamFile.withdrawn = false
             |    and mergingWorkPackage.seqType = :seqType
             |    and mergingWorkPackage.bamFileInProjectFolder = bamFile
-            |    and qaPass.identifier = (
-            |        select
-            |            max(qaPass2.identifier)
-            |        from
-            |            QualityAssessmentMergedPass qaPass2
-            |        where
-            |            qaPass2.abstractMergedBamFile = bamFile
-            |    )
             |    and restriction1
             |    and restriction2
         """.stripMargin().replaceAll(' *\n *', ' | ')
@@ -260,14 +244,6 @@ class AbstractQaOverviewServiceHibernateSpec extends HibernateSpec implements Ro
             |    and bamFile.withdrawn = false
             |    and mergingWorkPackage.seqType = :seqType
             |    and mergingWorkPackage.bamFileInProjectFolder = bamFile
-            |    and qaPass.identifier = (
-            |        select
-            |            max(qaPass2.identifier)
-            |        from
-            |            QualityAssessmentMergedPass qaPass2
-            |        where
-            |            qaPass2.abstractMergedBamFile = bamFile
-            |    )
             |    and restriction1
             |    and restriction2
             |    and sample = :sample

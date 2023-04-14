@@ -29,19 +29,10 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 
 @Transactional
-class OverallQualityAssessmentMergedService {
+class QualityAssessmentMergedService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'OTP_READ_ACCESS')")
     List<AbstractQualityAssessment> findAllByProjectAndSeqType(Project project, SeqType seqType, Sample sample = null) {
-        String maxQualityAssessmentMergedPassIdentifier = """
-select
-    max(identifier)
-from
-    QualityAssessmentMergedPass qualityAssessmentMergedPass
-where
-    qualityAssessmentMergedPass.abstractMergedBamFile = abstractMergedBamFile
-"""
-
         String selectSample = sample ? "and mergingWorkPackage.sample = :sample" : ""
 
         final String hql = """
@@ -56,14 +47,12 @@ where
                 mergingWorkPackage.sample.individual.project = :project
                 and mergingWorkPackage.seqType = :seqType
                 ${selectSample}
-                and qualityAssessmentMergedPass.identifier = ( ${maxQualityAssessmentMergedPassIdentifier})
                 and mergingWorkPackage.bamFileInProjectFolder = abstractMergedBamFile
                 and abstractMergedBamFile.fileOperationStatus = :fileOperationStatus
                 and abstractMergedBamFile.qualityAssessmentStatus = :qualityAssessmentStatus
                 and abstractMergedBamFile.withdrawn = false
                 and (
                     abstractQualityAssessment.class in (
-                        :overallQualityAssessmentMergedClass,
                         :cellRangerQualityAssessmentClass
                     ) or (
                         abstractQualityAssessment.class in (:roddyMergedBamQaClass)
@@ -76,7 +65,6 @@ where
             seqType: seqType,
             fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
             qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
-            overallQualityAssessmentMergedClass: OverallQualityAssessmentMerged.name,
             cellRangerQualityAssessmentClass: CellRangerQualityAssessment.name,
             roddyMergedBamQaClass: [RoddyMergedBamQa.name, RnaQualityAssessment.name],
             allChromosomes: RoddyQualityAssessment.ALL,
@@ -87,30 +75,5 @@ where
 
         List<AbstractQualityAssessment> qas = AbstractQualityAssessment.executeQuery(hql.toString(), parameters, [readOnly: true])
         return qas
-    }
-
-    List<ReferenceGenomeEntry> findChromosomeLengthForQualityAssessmentMerged(
-            List<String> chromosomeAliases, List<AbstractQualityAssessment> abstractQualityAssessments) {
-        if (!abstractQualityAssessments) {
-            return []
-        }
-        final String hql = """
-            select distinct
-                referenceGenomeEntry
-            from
-                AbstractQualityAssessment abstractQualityAssessment,
-                ReferenceGenomeEntry referenceGenomeEntry
-            where
-                abstractQualityAssessment.qualityAssessmentMergedPass.abstractMergedBamFile.workPackage.referenceGenome = referenceGenomeEntry.referenceGenome
-                and abstractQualityAssessment.id in :abstractQualityAssessmentIds
-                and referenceGenomeEntry.alias in :chromosomeAliases
-        """
-        Map parameters = [
-                abstractQualityAssessmentIds: abstractQualityAssessments*.id,
-                chromosomeAliases: chromosomeAliases,
-        ]
-
-        List<ReferenceGenomeEntry> result = ReferenceGenomeEntry.executeQuery(hql.toString(), parameters, [readOnly: true])
-        return result
     }
 }

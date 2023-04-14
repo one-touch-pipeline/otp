@@ -26,7 +26,6 @@ import groovy.transform.TupleConstructor
 
 import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.LogMessage
-import de.dkfz.tbi.otp.dataprocessing.AlignmentPass
 import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeProjectSeqTypeService
 import de.dkfz.tbi.otp.project.Project
@@ -241,18 +240,6 @@ class SeqTrack implements ProcessParameterObject, Entity, Artefact {
     // To be consistent on the filesystem the library value to use is created like this and not directly derived from libraryName
     String getLibraryDirectoryName() {
         return (libraryName ? "lib${normalizedLibraryName}" : "libNA")
-    }
-
-    DataProcessingState getAlignmentState() {
-        Collection<AlignmentPass> allPasses = AlignmentPass.findAllBySeqTrack(this)
-        Collection<AlignmentPass> latestPasses = allPasses.findAll { it.latestPass }
-        assert allPasses.empty == latestPasses.empty
-        switch (latestPasses.size()) {
-            case 1:
-                return DataProcessingState.valueOf(exactlyOneElement(latestPasses).alignmentState.name())
-            default:
-                return DataProcessingState.UNKNOWN
-        }
     }
 
     String nBaseString() {

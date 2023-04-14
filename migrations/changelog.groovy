@@ -66,4 +66,6 @@ databaseChangeLog = {
     include file: 'changelogs/2023/otp-2064.groovy'
 
     include file: 'changelogs/2023/otp-2067-fix-defaults-adapter-trimming.groovy'
+
+    include file: 'changelogs/2023/otp-1882.groovy'
 }

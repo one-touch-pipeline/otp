@@ -72,7 +72,7 @@ class AbstractFileSystemBamFileSpec extends Specification implements DataTest {
 class MockAbstractFileSystemBamFile extends AbstractFileSystemBamFile implements DomainClass, GormEntity<MockAbstractFileSystemBamFile>, Validateable {
 
     final MergingWorkPackage mergingWorkPackage = null
-    final AbstractQualityAssessment overallQualityAssessment = null
+    final AbstractQualityAssessment qualityAssessment = null
 
     @Override
     Set<SeqTrack> getContainedSeqTracks() {

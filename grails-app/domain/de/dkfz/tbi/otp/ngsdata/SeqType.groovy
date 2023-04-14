@@ -84,7 +84,7 @@ class SeqType implements Entity, MetadataField, ProjectFieldReferenceAble {
         List<String> tables = ['libraryLayout', 'singleCell']
         /**
          * One of {@link SeqTypeNames#seqTypeName}.
-         * Used in file system paths, for example by ProcessedMergedBamFileService.fileNameNoSuffix(ProcessedMergedBamFile).
+         * Used in file system paths
          */
         name(blank: false, unique: tables)
         dirName(blank: false, unique: 'libraryLayout', validator: { String val, SeqType obj ->

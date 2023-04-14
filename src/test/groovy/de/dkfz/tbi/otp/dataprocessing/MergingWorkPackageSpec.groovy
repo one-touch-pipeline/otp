@@ -26,25 +26,30 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.ngsdata.*
 
-class MergingWorkPackageSpec extends Specification implements DataTest, DomainFactoryCore {
+class MergingWorkPackageSpec extends Specification implements DataTest, DomainFactoryCore, IsRoddy {
 
     @Override
     Class[] getDomainClassesToMock() {
         return [
                 ExternalMergingWorkPackage,
-                ReferenceGenome,
-                Sample,
-                SeqPlatformGroup,
-                SeqType,
-                SeqPlatform,
-                SeqTrack,
+                FastqImportInstance,
+                FileType,
                 MergingCriteria,
                 MergingWorkPackage,
-                ProcessedBamFile,
-                AlignmentPass,
+                ReferenceGenome,
+                ReferenceGenomeProjectSeqType,
+                RoddyBamFile,
+                RoddyWorkflowConfig,
+                Sample,
+                SeqPlatform,
+                SeqPlatformGroup,
+                SeqTrack,
+                SeqType,
         ]
     }
 
@@ -189,26 +194,22 @@ class MergingWorkPackageSpec extends Specification implements DataTest, DomainFa
                 seqType              : seqTrack.seqType,
                 seqPlatformGroup     : seqPlatformGroup,
                 libraryPreparationKit: seqTrack.libraryPreparationKit,
-                pipeline             : DomainFactory.createDefaultOtpPipeline(),
+                pipeline             : DomainFactory.createPanCanPipeline(),
         ])
-        AlignmentPass alignmentPass = DomainFactory.createAlignmentPass([
-                seqTrack   : seqTrack,
-                workPackage: workPackage,
-        ])
-        ProcessedBamFile processedBamFile = DomainFactory.createProcessedBamFile(alignmentPass: alignmentPass)
+        AbstractBamFile bamFile = createBamFile(workPackage: workPackage)
 
         expect:
-        workPackage.satisfiesCriteria(processedBamFile)
+        workPackage.satisfiesCriteria(bamFile)
     }
 
     void "satisfiesCriteria with BamFile, when invalid, then return false"() {
         given:
         MergingWorkPackage workPackage = DomainFactory.createMergingWorkPackage(statSizeFileName: DomainFactory.DEFAULT_TAB_FILE_NAME)
 
-        ProcessedBamFile processedBamFile = DomainFactory.createProcessedBamFile()
+        AbstractBamFile bamFile = createBamFile()
 
         expect:
-        !workPackage.satisfiesCriteria(processedBamFile)
+        !workPackage.satisfiesCriteria(bamFile)
     }
 
     void "valid for on statSizeFileName and OTP pipeline, when name is null for, should be valid"() {

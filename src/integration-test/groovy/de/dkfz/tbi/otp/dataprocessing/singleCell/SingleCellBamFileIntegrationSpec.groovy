@@ -33,7 +33,7 @@ import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.CellRangerFactory
 @Integration
 class SingleCellBamFileIntegrationSpec extends Specification implements CellRangerFactory {
 
-    void "test getOverallQualityAssessment"() {
+    void "test getQualityAssessment"() {
         given:
         SingleCellBamFile singleCellBamFile = createBamFile()
 
@@ -41,7 +41,7 @@ class SingleCellBamFileIntegrationSpec extends Specification implements CellRang
         CellRangerQualityAssessment expected = createQa(singleCellBamFile)
 
         then:
-        expected == singleCellBamFile.overallQualityAssessment
+        expected == singleCellBamFile.qualityAssessment
     }
 
     void "test buildWorkDirectoryName"() {
