@@ -74,32 +74,3 @@ ON CONFLICT DO NOTHING;
 INSERT INTO workflow(id, version, name, bean_name, enabled, priority, date_created, last_updated, max_parallel_workflows)
 VALUES (NEXTVAL('hibernate_sequence'), 0, 'WES FastQC', 'wesFastQcWorkflow', FALSE, 0, NOW(), NOW(), 10)
 ON CONFLICT DO NOTHING;
-
--- deprecated workflows
-INSERT INTO workflow(id, version, name, enabled, priority, date_created, last_updated, deprecated_date, max_parallel_workflows)
-VALUES (NEXTVAL('hibernate_sequence'), 0, 'Convey BWA alignment', FALSE, 0, NOW(), NOW(), TIMESTAMP WITH TIME ZONE '2019-01-01 00:00:00Z',
-        10)
-ON CONFLICT DO NOTHING;
-INSERT INTO workflow(id, version, name, enabled, priority, date_created, last_updated, deprecated_date, max_parallel_workflows)
-VALUES (NEXTVAL('hibernate_sequence'), 0, 'Merging set creation', FALSE, 0, NOW(), NOW(), TIMESTAMP WITH TIME ZONE '2019-01-01 00:00:00Z',
-        10)
-ON CONFLICT DO NOTHING;
-INSERT INTO workflow(id, version, name, enabled, priority, date_created, last_updated, deprecated_date, max_parallel_workflows)
-VALUES (NEXTVAL('hibernate_sequence'), 0, 'Merging', FALSE, 0, NOW(), NOW(), TIMESTAMP WITH TIME ZONE '2019-01-01 00:00:00Z', 10)
-ON CONFLICT DO NOTHING;
-INSERT INTO workflow(id, version, name, enabled, priority, date_created, last_updated, deprecated_date, max_parallel_workflows)
-VALUES (NEXTVAL('hibernate_sequence'), 0, 'Merged BAM file transfer', FALSE, 0, NOW(), NOW(), TIMESTAMP WITH TIME ZONE '2019-01-01 00:00:00Z',
-        10)
-ON CONFLICT DO NOTHING;
-INSERT INTO workflow(id, version, name, enabled, priority, date_created, last_updated, deprecated_date, max_parallel_workflows)
-VALUES (NEXTVAL('hibernate_sequence'), 0, 'Quality assessment merged', FALSE, 0, NOW(), NOW(), TIMESTAMP WITH TIME ZONE '2019-01-01 00:00:00Z',
-        10)
-ON CONFLICT DO NOTHING;
-INSERT INTO workflow(id, version, name, enabled, priority, date_created, last_updated, deprecated_date, max_parallel_workflows)
-VALUES (NEXTVAL('hibernate_sequence'), 0, 'Quality assessment', FALSE, 0, NOW(), NOW(), TIMESTAMP WITH TIME ZONE '2019-01-01 00:00:00Z',
-        10)
-ON CONFLICT DO NOTHING;
-
-INSERT INTO workflow(id, version, name, enabled, priority, date_created, last_updated, deprecated_date, max_parallel_workflows)
-VALUES (NEXTVAL('hibernate_sequence'), 0, 'SNV calling', FALSE, 0, NOW(), NOW(), TIMESTAMP WITH TIME ZONE '2019-01-01 00:00:00Z', 10)
-ON CONFLICT DO NOTHING;
