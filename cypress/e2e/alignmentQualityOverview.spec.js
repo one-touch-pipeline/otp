@@ -31,5 +31,32 @@ describe('Check alignment quality overview page', () => {
     it('should visit the index page', () => {
       cy.visit('/alignmentQualityOverview/index');
     });
+
+    it('should change warning status to accepted', () => {
+      cy.visit('/alignmentQualityOverview/index');
+
+      cy.get('#seqType')
+        .select('EXOME PAIRED bulk', { force: true });
+
+      cy.get('table#overviewTableProcessedMergedBMF tbody')
+        .find('tr')
+        .eq(0)
+        .find('select.qcDropdown')
+        .select('ACCEPTED');
+
+      cy.get('input#modalInput')
+        .type('test-comment');
+
+      cy.get('button#confirmModal')
+        .click();
+
+      cy.get('.toast-body').should('contain.text', 'success');
+
+      cy.get('table#overviewTableProcessedMergedBMF tbody')
+        .find('tr')
+        .eq(0)
+        .should('contain.text', 'test-comment')
+        .should('not.contain.html', 'select');
+    });
   });
 });

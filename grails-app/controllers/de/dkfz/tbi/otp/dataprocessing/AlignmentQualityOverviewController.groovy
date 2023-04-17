@@ -355,7 +355,7 @@ class QcStatusCommand implements Validateable {
                 return ["status", AbstractMergedBamFile.QcTrafficLightStatus.values().join(", ")]
             }
         })
-        dbVersion(blank: false, nullable: true)
+        dbVersion(blank: false)
     }
 
     void setComment(String comment) {

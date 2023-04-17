@@ -53,7 +53,7 @@ $(() => {
      * @returns {string|*|Window.jQuery}
      */
   const tableCellFormatter = function (tableCellData) {
-    if (!tableCellData) {
+    if (tableCellData === null || tableCellData === undefined) {
       return '';
     }
     if ((tableCellData.value === undefined) && (tableCellData.icon === undefined)) {
@@ -217,8 +217,8 @@ $(() => {
   };
 
   /**
-     * Initialize the DataTable with it's default settings.
-     */
+   * Initialize the DataTable with its default settings.
+   */
   const initDataTable = function () {
     const table = $('#overviewTableProcessedMergedBMF');
     const fileName = `Alignment_Quality_Control-${$('.selected-project-value strong').text()}`;
@@ -460,7 +460,7 @@ $(() => {
   const getTableDataRowById = function (id) {
     const dataTable = $('#overviewTableProcessedMergedBMF').DataTable();
 
-    return dataTable.rows((idx, data) => data.rowId === id.toString()).data()[0];
+    return dataTable.row((idx, data) => data.bamId === id.toString()).data();
   };
 
   /**
