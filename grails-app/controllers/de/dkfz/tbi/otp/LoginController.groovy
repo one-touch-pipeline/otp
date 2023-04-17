@@ -90,7 +90,7 @@ class LoginController {
         flash.message = msg
         flash.username = session[LAST_USERNAME_KEY]
         String target = session[LAST_TARGET_KEY]
-        redirect action: 'index', params: [target: target ?: ""]
+        redirect uri: "${request.contextPath}/login", params: [target: target ?: ""]
     }
 }
 
