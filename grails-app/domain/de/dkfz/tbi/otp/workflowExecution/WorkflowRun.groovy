@@ -31,6 +31,7 @@ import de.dkfz.tbi.otp.Commentable
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.Entity
+import de.dkfz.tbi.otp.filestore.WorkFolder
 
 @ManagedEntity
 class WorkflowRun implements Commentable, Entity {
@@ -100,6 +101,11 @@ class WorkflowRun implements Commentable, Entity {
      */
     boolean jobCanBeRestarted = true
 
+    /**
+     * Reference to the work folder, in which all data produced by the run can be stored on the file system
+     */
+    WorkFolder workFolder
+
     static hasMany = [
             configs      : ExternalWorkflowConfigFragment,
             workflowSteps: WorkflowStep,
@@ -124,6 +130,8 @@ class WorkflowRun implements Commentable, Entity {
         }
         displayName blank: false, nullable: false
         shortDisplayName blank: false, nullable: false
+
+        workFolder nullable: true
     }
 
     static Closure mapping = {
