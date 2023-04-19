@@ -23,14 +23,14 @@ package de.dkfz.tbi.otp.domainFactory.administration
 
 import org.springframework.mock.web.MockMultipartFile
 
-import de.dkfz.tbi.otp.administration.*
+import de.dkfz.tbi.otp.administration.Document
+import de.dkfz.tbi.otp.administration.DocumentType
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+import de.dkfz.tbi.otp.filestore.BaseFolder
+import de.dkfz.tbi.otp.filestore.WorkFolder
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.project.ProjectInfo
-import de.dkfz.tbi.otp.project.dta.DataTransfer
-import de.dkfz.tbi.otp.project.dta.DataTransferAgreement
-import de.dkfz.tbi.otp.project.dta.DataTransferAgreementDocument
-import de.dkfz.tbi.otp.project.dta.DataTransferDocument
+import de.dkfz.tbi.otp.project.dta.*
 import de.dkfz.tbi.otp.utils.HelperUtils
 
 trait DocumentFactory implements DomainFactoryCore {
@@ -96,5 +96,20 @@ trait DocumentFactory implements DomainFactoryCore {
     MockMultipartFile createMultipartFile(String name = "fileName", String originalFilename = "fileName", byte[] content = 0..3) {
         MockMultipartFile mockMultipartFile = new MockMultipartFile(name, originalFilename, null, content)
         return mockMultipartFile
+    }
+
+    BaseFolder createBaseFolder(Map properties = [:], boolean saveAndValidate = true) {
+        return createDomainObject(BaseFolder, [
+                path: "/${nextId}",
+                writable: true,
+        ], properties, saveAndValidate)
+    }
+
+    WorkFolder createWorkFolder(Map properties = [:], boolean saveAndValidate = true) {
+        return createDomainObject(WorkFolder, [
+                baseFolder: createBaseFolder(),
+                uuid: UUID.randomUUID(),
+                size: 0,
+        ], properties, saveAndValidate)
     }
 }
