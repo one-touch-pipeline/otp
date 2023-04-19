@@ -22,39 +22,39 @@
 
 databaseChangeLog = {
 
-    changeSet(author: "", id: "1662388090999-172") {
+    changeSet(author: "-", id: "1662388090999-172") {
         dropForeignKeyConstraint(baseTableName: "acl_object_identity", constraintName: "fk2a2bb00970422cc5")
     }
 
-    changeSet(author: "", id: "1662388090999-173") {
+    changeSet(author: "-", id: "1662388090999-173") {
         dropForeignKeyConstraint(baseTableName: "acl_object_identity", constraintName: "fk2a2bb00990ec1949")
     }
 
-    changeSet(author: "", id: "1662388090999-174") {
+    changeSet(author: "-", id: "1662388090999-174") {
         dropForeignKeyConstraint(baseTableName: "acl_object_identity", constraintName: "fk2a2bb009a50290b8")
     }
 
-    changeSet(author: "", id: "1662388090999-175") {
+    changeSet(author: "-", id: "1662388090999-175") {
         dropForeignKeyConstraint(baseTableName: "acl_entry", constraintName: "fk5302d47d8fdb88d5")
     }
 
-    changeSet(author: "", id: "1662388090999-176") {
+    changeSet(author: "-", id: "1662388090999-176") {
         dropForeignKeyConstraint(baseTableName: "acl_entry", constraintName: "fk5302d47db0d9dc4d")
     }
 
-    changeSet(author: "", id: "1662388090999-185") {
+    changeSet(author: "-", id: "1662388090999-185") {
         dropTable(tableName: "acl_class")
     }
 
-    changeSet(author: "", id: "1662388090999-186") {
+    changeSet(author: "-", id: "1662388090999-186") {
         dropTable(tableName: "acl_entry")
     }
 
-    changeSet(author: "", id: "1662388090999-187") {
+    changeSet(author: "-", id: "1662388090999-187") {
         dropTable(tableName: "acl_object_identity")
     }
 
-    changeSet(author: "", id: "1662388090999-188") {
+    changeSet(author: "-", id: "1662388090999-188") {
         dropTable(tableName: "acl_sid")
     }
 }
