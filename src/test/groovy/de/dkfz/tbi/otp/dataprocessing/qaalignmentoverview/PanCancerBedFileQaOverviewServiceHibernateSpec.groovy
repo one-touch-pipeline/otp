@@ -171,7 +171,8 @@ class PanCancerBedFileQaOverviewServiceHibernateSpec extends HibernateSpec imple
                 targetCoverage: input,
         ]
         Map<String, String> expected = [
-                targetCoverage: output,
+                createdWithVersion: 'NA',
+                targetCoverage    : output,
         ]
 
         expect:

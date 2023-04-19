@@ -84,7 +84,9 @@ class RnaQaOverviewServiceHibernateSpec extends HibernateSpec implements RoddyPa
         setupData()
 
         expect:
-        service.additionalJoinDomains() == []
+        service.additionalJoinDomains() == [
+                "left outer join bamFile.config config",
+        ]
     }
 
     void "additionalDomainHierarchies, when called, should return empty list"() {
@@ -165,7 +167,7 @@ class RnaQaOverviewServiceHibernateSpec extends HibernateSpec implements RoddyPa
         then:
         service.linkGenerator.link(linkMap) >> link
 
-        ret.size() == 1
+        ret.size() == 2
         ret.containsKey('arribaPlots')
         TableCellValue arribaPlots = ret.arribaPlots
         arribaPlots.archived == archived

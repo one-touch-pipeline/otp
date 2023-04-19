@@ -74,7 +74,9 @@ class AbstractQaOverviewServiceHibernateSpec extends HibernateSpec implements Ro
             |        qa.singletons as singletons,
             |        qa.totalReadCounter as totalReadCounter,
             |        qa.pairedInSequencing as pairedInSequencing,
-            |        qa.insertSizeMedian as insertSizeMedian
+            |        qa.insertSizeMedian as insertSizeMedian,
+            |        config.programVersion as programVersion,
+            |        version.workflowVersion as workflowVersion
             |    )
             |from
             |    ${AbstractQualityAssessment.name} qa
@@ -87,6 +89,10 @@ class AbstractQaOverviewServiceHibernateSpec extends HibernateSpec implements Ro
             |    join sample.individual individual
             |    join individual.project project
             |    left outer join bamFile.comment comment
+            |    left outer join mergingWorkPackage.config config
+            |    left outer join bamFile.workflowArtefact artefact
+            |    left outer join artefact.producedBy run
+            |    left outer join run.workflowVersion version
             |where
             |    project = :project
             |    and bamFile.fileOperationStatus = 'PROCESSED'
@@ -138,6 +144,8 @@ class AbstractQaOverviewServiceHibernateSpec extends HibernateSpec implements Ro
             |        qa.totalReadCounter as totalReadCounter,
             |        qa.pairedInSequencing as pairedInSequencing,
             |        qa.insertSizeMedian as insertSizeMedian,
+            |        config.programVersion as programVersion,
+            |        version.workflowVersion as workflowVersion,
             |        domain1.property1 as alias1,
             |        domain2.property2 as alias2
             |    )
@@ -152,6 +160,10 @@ class AbstractQaOverviewServiceHibernateSpec extends HibernateSpec implements Ro
             |    join sample.individual individual
             |    join individual.project project
             |    left outer join bamFile.comment comment
+            |    left outer join mergingWorkPackage.config config
+            |    left outer join bamFile.workflowArtefact artefact
+            |    left outer join artefact.producedBy run
+            |    left outer join run.workflowVersion version
             |    join qa.property1 property1
             |    left outer join qa.property2 property2
             |    join property1.property3 property3,
@@ -210,6 +222,8 @@ class AbstractQaOverviewServiceHibernateSpec extends HibernateSpec implements Ro
             |        qa.totalReadCounter as totalReadCounter,
             |        qa.pairedInSequencing as pairedInSequencing,
             |        qa.insertSizeMedian as insertSizeMedian,
+            |        config.programVersion as programVersion,
+            |        version.workflowVersion as workflowVersion,
             |        domain1.property1 as alias1,
             |        domain2.property2 as alias2
             |    )
@@ -224,6 +238,10 @@ class AbstractQaOverviewServiceHibernateSpec extends HibernateSpec implements Ro
             |    join sample.individual individual
             |    join individual.project project
             |    left outer join bamFile.comment comment
+            |    left outer join mergingWorkPackage.config config
+            |    left outer join bamFile.workflowArtefact artefact
+            |    left outer join artefact.producedBy run
+            |    left outer join run.workflowVersion version
             |    join qa.property1 property1
             |    left outer join qa.property2 property2
             |    join property1.property3 property3,

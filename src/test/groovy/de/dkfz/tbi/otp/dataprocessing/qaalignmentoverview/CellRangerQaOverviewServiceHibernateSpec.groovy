@@ -87,7 +87,6 @@ class CellRangerQaOverviewServiceHibernateSpec extends HibernateSpec implements 
                 "join mergingWorkPackage.referenceGenomeIndex referenceGenomeIndex",
                 "join referenceGenomeIndex.referenceGenome referenceGenome",
                 "join referenceGenomeIndex.toolName toolName",
-                "join mergingWorkPackage.config config",
         ]
     }
 
@@ -155,7 +154,7 @@ class CellRangerQaOverviewServiceHibernateSpec extends HibernateSpec implements 
                 referenceGenomeName: 'referenceGenomeName',
                 toolNameName       : 'toolNameName',
                 indexToolVersion   : 'indexToolVersion',
-                programVersion     : 'programVersion',
+                createdWithVersion : 'NA',
         ]
 
         Map linkMap = [
@@ -170,7 +169,7 @@ class CellRangerQaOverviewServiceHibernateSpec extends HibernateSpec implements 
         service.linkGenerator.link(linkMap) >> link
 
         ret.size() == 3
-        ret.cellRangerVersion == 'programVersion'
+        ret.createdWithVersion == 'NA'
         ret.referenceGenome == 'referenceGenomeName toolNameName indexToolVersion'
         ret.containsKey('summary')
         TableCellValue summary = ret.summary

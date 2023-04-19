@@ -48,6 +48,10 @@ abstract class AbstractQaOverviewService {
             "join sample.individual individual",
             "join individual.project project",
             "left outer join bamFile.comment comment",
+            "left outer join mergingWorkPackage.config config",
+            "left outer join bamFile.workflowArtefact artefact",
+            "left outer join artefact.producedBy run",
+            "left outer join run.workflowVersion version",
     ].asImmutable()
 
     final static List<String> BASE_RESTRICTION = [
@@ -89,6 +93,8 @@ abstract class AbstractQaOverviewService {
             new PropertyColumnDefinition('qa', 'totalReadCounter', 'totalReadCounter'),
             new PropertyColumnDefinition('qa', 'pairedInSequencing', 'pairedInSequencing'),
             new PropertyColumnDefinition('qa', 'insertSizeMedian', 'insertSizeMedian'),
+            new PropertyColumnDefinition('config', 'programVersion', 'programVersion'),
+            new PropertyColumnDefinition('version', 'workflowVersion', 'workflowVersion'),
     ].asImmutable()
 
     final static List<String> KEY_BASE = [
@@ -157,7 +163,6 @@ abstract class AbstractQaOverviewService {
             |where
             |    ${restrictions}${selectSample}
         """.stripMargin()
-
         return hql
     }
 

@@ -172,12 +172,12 @@ $(() => {
     if (workflow === 'RNA') {
       columnNames = columnNames.concat([
         { data: 'kit' },
+        { data: 'createdWithVersion' },
         { data: 'dateFromFileSystem' }
       ]);
     } else if (workflow === 'CELL_RANGER') {
       columnNames = columnNames.concat([
         { data: 'summary' },
-        { data: 'cellRangerVersion' },
         { data: 'referenceGenome' },
         { data: 'expectedCells' },
         { data: 'enforcedCells' },
@@ -198,6 +198,7 @@ $(() => {
         { data: 'totalGenesDetected' },
         { data: 'medianUmiCountsPerCell' },
         { data: 'kit' },
+        { data: 'createdWithVersion' },
         { data: 'dateFromFileSystem' }
       ]);
     } else {
@@ -210,6 +211,7 @@ $(() => {
         { data: 'insertSizeMedian' },
         { data: 'percentDiffChr' },
         { data: 'pipelineName' },
+        { data: 'createdWithVersion' },
         { data: 'dateFromFileSystem' }
       ]);
     }

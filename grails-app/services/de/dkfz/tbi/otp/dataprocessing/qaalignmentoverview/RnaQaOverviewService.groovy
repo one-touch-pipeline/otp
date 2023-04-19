@@ -95,7 +95,9 @@ class RnaQaOverviewService extends AbstractRoddyQaOverviewService {
 
     @Override
     protected List<String> additionalJoinDomains() {
-        return []
+        return [
+                "left outer join bamFile.config config",
+        ]
     }
 
     @Override
@@ -121,7 +123,8 @@ class RnaQaOverviewService extends AbstractRoddyQaOverviewService {
     @Override
     protected Map<String, ?> extractSpecificValues(Project project, Map<String, ?> qaMap) {
         return [
-                arribaPlots: new TableCellValue(
+                createdWithVersion: "${(qaMap.programVersion ?: qaMap.workflowVersion) ?: 'NA'}",
+                arribaPlots       : new TableCellValue(
                         archived: project.archived,
                         value: "PDF",
                         linkTarget: "_blank",

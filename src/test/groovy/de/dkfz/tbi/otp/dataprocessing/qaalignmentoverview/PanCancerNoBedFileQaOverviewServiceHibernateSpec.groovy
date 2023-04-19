@@ -114,7 +114,7 @@ class PanCancerNoBedFileQaOverviewServiceHibernateSpec extends HibernateSpec imp
 
         expect:
         service.additionalJoinDomains() == [
-                "join mergingWorkPackage.referenceGenome referenceGenome"
+                "join mergingWorkPackage.referenceGenome referenceGenome",
         ]
     }
 
@@ -194,9 +194,10 @@ class PanCancerNoBedFileQaOverviewServiceHibernateSpec extends HibernateSpec imp
                 coverageY       : inputCoverageY,
         ]
         Map<String, String> expected = [
-                coverageWithoutN: outputCoverage,
-                coverageX       : outputCoverageX,
-                coverageY       : outputCoverageY,
+                createdWithVersion: "NA",
+                coverageWithoutN  : outputCoverage,
+                coverageX         : outputCoverageX,
+                coverageY         : outputCoverageY,
         ]
 
         expect:

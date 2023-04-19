@@ -66,7 +66,7 @@ class PanCancerNoBedFileQaOverviewService extends AbstractRoddyQaOverviewService
     @Override
     protected List<String> additionalJoinDomains() {
         return [
-                "join mergingWorkPackage.referenceGenome referenceGenome"
+                "join mergingWorkPackage.referenceGenome referenceGenome",
         ]
     }
 
@@ -108,11 +108,12 @@ class PanCancerNoBedFileQaOverviewService extends AbstractRoddyQaOverviewService
     }
 
     @Override
-    protected Map<String, String> extractSpecificValues(Project project, Map<String, ?> qaMap) {
+    protected Map<String, ?> extractSpecificValues(Project project, Map<String, ?> qaMap) {
         return [
-                coverageWithoutN: FormatHelper.formatNumber((Number) qaMap.coverageWithoutN), //Coverage w/o N
-                coverageX       : FormatHelper.formatNumber((Number) qaMap.coverageX), //ChrX Coverage w/o N
-                coverageY       : FormatHelper.formatNumber((Number) qaMap.coverageY), //ChrY Coverage w/o N
+                createdWithVersion: "${(qaMap.programVersion ?: qaMap.workflowVersion) ?: 'NA'}",
+                coverageWithoutN  : FormatHelper.formatNumber((Number) qaMap.coverageWithoutN), //Coverage w/o N
+                coverageX         : FormatHelper.formatNumber((Number) qaMap.coverageX), //ChrX Coverage w/o N
+                coverageY         : FormatHelper.formatNumber((Number) qaMap.coverageY), //ChrY Coverage w/o N
         ]
     }
 }
