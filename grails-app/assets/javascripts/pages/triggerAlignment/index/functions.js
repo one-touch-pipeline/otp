@@ -240,10 +240,11 @@ $(document).ready(() => {
   $('#seqTrackTable').DataTable({
     deferRender: true,
     processing: true,
-    dom: '<"toolbar">frtip',
+    dom: 'B<"toolbar">frtip',
     scrollY: '500px',
     scrollCollapse: true,
     paging: false,
+    buttons: ['csv'],
     columns: [
       {
         data: 'id',
@@ -424,32 +425,40 @@ $(document).ready(() => {
     $('#searchSeqTrackButton').prop('disabled', true);
   });
 
+  /** Move description text to toolbar */
+  $('div.toolbar').html($('#seqTrackTableText'));
+
   $('#withdrawnWarnings').DataTable({
-    dom: '<"toolbar">frtip',
+    dom: 'B<"toolbar">frtip',
+    buttons: ['csv'],
     scrollCollapse: true,
     paging: false
   });
 
   $('#missingAlignmentConfigsWarnings').DataTable({
-    dom: '<"toolbar">frtip',
+    dom: 'B<"toolbar">frtip',
+    buttons: ['csv'],
     scrollCollapse: true,
     paging: false
   });
 
   $('#missingReferenceGenomeWarnings').DataTable({
-    dom: '<"toolbar">frtip',
+    dom: 'B<"toolbar">frtip',
+    buttons: ['csv'],
     scrollCollapse: true,
     paging: false
   });
 
   $('#seqPlatformWarnings').DataTable({
-    dom: '<"toolbar">frtip',
+    dom: 'B<"toolbar">frtip',
+    buttons: ['csv'],
     scrollCollapse: true,
     paging: false
   });
 
   $('#libraryPrepKitWarnings').DataTable({
-    dom: '<"toolbar">frtip',
+    dom: 'B<"toolbar">frtip',
+    buttons: ['csv'],
     scrollCollapse: true,
     paging: false
   });

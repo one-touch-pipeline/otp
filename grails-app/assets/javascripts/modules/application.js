@@ -27,6 +27,7 @@
 //= require /webjars/datatables-fixedcolumns/3.0.2/js/dataTables.fixedColumns.js
 //= require /webjars/datatables-fixedheader/2.1.2/js/dataTables.fixedHeader.js
 //= require /webjars/datatables-buttons/1.7.0/js/dataTables.buttons.js
+//= require /webjars/datatables-buttons/1.7.0/js/buttons.bootstrap4.js
 //= require /webjars/datatables-buttons/1.7.0/js/buttons.html5.js
 //= require /webjars/datatables-plugins/1.10.24/pagination/select.js
 //= require /webjars/datatables.net-scroller/js/dataTables.scroller.js
@@ -37,6 +38,7 @@
 //= require /webjars/chartjs-plugin-datalabels/2.1.0/dist/chartjs-plugin-datalabels.js
 
 //= require otp.js
+//= require dataTable.js
 //= require banner.js
 //= require common/toaster.js
 //= require common/globalInitializer.js

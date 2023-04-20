@@ -19,14 +19,13 @@
   - OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
   - SOFTWARE.
   --}%
-
 <div class="card">
     <div class="card-header">
         <i class="bi bi-list-check"></i> <g:message code="triggerAlignment.check.header"/>
     </div>
     <div class="card-body">
-        <p class="card-text"><g:message code="triggerAlignment.check.body"/></p>
-        <table id="seqTrackTable" class="table table-sm table-striped table-hover table-bordered w-100">
+        <p id="seqTrackTableText" class="card-text"><g:message code="triggerAlignment.check.body"/></p>
+        <table id="seqTrackTable" class="table table-sm table-striped display table-hover table-bordered w-100">
             <thead>
             <tr>
                 <th><g:message code="triggerAlignment.check.header.seqTrack"/></th>
