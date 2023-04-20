@@ -22,12 +22,10 @@
 package de.dkfz.tbi.otp.withdraw
 
 import grails.gorm.transactions.Transactional
-import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 
-@PreAuthorize("hasRole('ROLE_OPERATOR')")
 @Transactional
 class ProcessedMergedBamFileWithdrawService extends WithdrawBamFileService<ProcessedMergedBamFile> {
 

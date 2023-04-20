@@ -22,7 +22,6 @@
 package de.dkfz.tbi.otp.withdraw
 
 import grails.gorm.transactions.Transactional
-import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
@@ -35,7 +34,6 @@ import de.dkfz.tbi.otp.utils.DeletionService
 import java.nio.file.*
 import java.util.stream.Stream
 
-@PreAuthorize("hasRole('ROLE_OPERATOR')")
 @Transactional
 abstract class WithdrawBamFileService<E extends AbstractMergedBamFile> implements ProcessingWithdrawService<E, SeqTrack> {
 
