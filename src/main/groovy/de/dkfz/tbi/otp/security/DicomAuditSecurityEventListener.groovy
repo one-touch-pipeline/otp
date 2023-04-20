@@ -33,7 +33,7 @@ import de.dkfz.odcf.audit.xml.layer.EventIdentification
 import de.dkfz.tbi.otp.ProjectSelectionService
 
 /**
- * Spring Security Authentification event listeners for logging login processes to the Dicom audit log
+ * Spring Security Authentication event listeners for logging login processes to the Dicom audit log
  */
 @Component
 class DicomAuditSecurityEventListener implements ApplicationListener<AbstractAuthenticationEvent> {
@@ -53,36 +53,35 @@ class DicomAuditSecurityEventListener implements ApplicationListener<AbstractAut
                 // Login failure
                 DicomAuditLogger.logUserLogin(
                         EventIdentification.EventOutcomeIndicator.MINOR_FAILURE,
-                        (event.authentication.principal.hasProperty("username") ?
-                                event.authentication.principal.username : event.authentication.principal) as String
+                        dicomAuditUtils.username
                 )
                 break
             case { it instanceof InteractiveAuthenticationSuccessEvent } :
                 // Login success, this event fires only on interactive (Non-automated) login
                 DicomAuditLogger.logUserLogin(
                         EventIdentification.EventOutcomeIndicator.SUCCESS,
-                        event.authentication.principal.username as String
+                        dicomAuditUtils.username
                 )
                 break
             case { it instanceof AuthenticationSwitchUserEvent } :
                 // User switch
                 DicomAuditLogger.logUserSwitched(
                         EventIdentification.EventOutcomeIndicator.SUCCESS,
-                        dicomAuditUtils.getRealUserName(event.authentication.principal.username as String),
+                        dicomAuditUtils.realUserName,
                         event.targetUser?.username
                 )
                 break
             case { it instanceof AuthorizationFailureEvent } :
                 DicomAuditLogger.logRestrictedFunctionUsed(
                         EventIdentification.EventOutcomeIndicator.MINOR_FAILURE,
-                        dicomAuditUtils.getRealUserName(event.authentication.principal.username as String),
+                        dicomAuditUtils.realUserName,
                         event.source.hasProperty("request") ? event.source.request.requestURI : "null"
                 )
                 break
             case { it instanceof LogoutSuccessEvent } :
                 DicomAuditLogger.logUserLogout(
                         EventIdentification.EventOutcomeIndicator.SUCCESS,
-                        dicomAuditUtils.getRealUserName(event.authentication.principal.username as String)
+                        dicomAuditUtils.realUserName
                 )
                 break
         }

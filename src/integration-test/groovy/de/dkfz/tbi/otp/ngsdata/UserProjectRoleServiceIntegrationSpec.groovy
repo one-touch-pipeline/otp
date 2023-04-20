@@ -83,6 +83,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
                     isAnonymous(_) >> false
                 },
                 roleHierarchy: roleHierarchy,
+                configService: configService,
         )
 
         configService.addOtpProperties(tempDir)

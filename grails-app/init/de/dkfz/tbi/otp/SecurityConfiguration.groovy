@@ -36,20 +36,28 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer
 import org.springframework.security.core.AuthenticationException
+import org.springframework.security.core.GrantedAuthority
+import org.springframework.security.core.authority.SimpleGrantedAuthority
+import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.ldap.DefaultSpringSecurityContextSource
 import org.springframework.security.oauth2.client.AuthorizedClientServiceReactiveOAuth2AuthorizedClientManager
 import org.springframework.security.oauth2.client.InMemoryReactiveOAuth2AuthorizedClientService
+import org.springframework.security.oauth2.client.oidc.web.logout.OidcClientInitiatedLogoutSuccessHandler
 import org.springframework.security.oauth2.client.registration.*
 import org.springframework.security.oauth2.client.web.reactive.function.client.ServerOAuth2AuthorizedClientExchangeFilterFunction
 import org.springframework.security.oauth2.core.AuthorizationGrantType
+import org.springframework.security.oauth2.core.oidc.*
+import org.springframework.security.oauth2.core.oidc.user.OidcUserAuthority
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.*
+import org.springframework.security.web.authentication.logout.LogoutSuccessHandler
 import org.springframework.security.web.authentication.switchuser.SwitchUserFilter
 import org.springframework.web.reactive.function.client.WebClient
 
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.security.*
+import de.dkfz.tbi.otp.security.user.UserService
 import de.dkfz.tbi.otp.security.user.identityProvider.*
 import de.dkfz.tbi.otp.workflowExecution.wes.WeskitAuthService
 
@@ -149,43 +157,11 @@ class SecurityConfiguration {
     @Bean
     @SuppressWarnings('Indentation')
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        AuthenticationSuccessHandler successHandler = new SavedRequestAwareAuthenticationSuccessHandler()
-        successHandler.defaultTargetUrl = "/home/index"
-        successHandler.targetUrlParameter = ParameterAuthenticationEntryPoint.TARGET_PARAM_NAME
-        AuthenticationFailureHandler failureHandler = new SimpleUrlAuthenticationFailureHandler() {
-            @Override
-            void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
-                                         AuthenticationException exception) throws IOException, ServletException {
-                String[] username = request.parameterMap.get("username")
-                if (username) {
-                    request.session.setAttribute(LoginController.LAST_USERNAME_KEY, username.first())
-                }
-                String[] target = request.parameterMap.get("target")
-                if (target) {
-                    request.session.setAttribute(LoginController.LAST_TARGET_KEY, target.first())
-                }
-                super.onAuthenticationFailure(request, response, exception)
-            }
-        }
-        failureHandler.defaultFailureUrl = "/login/authfail"
-
         http
                 .csrf { csrf ->
                     csrf.disable()
                 }
-                .exceptionHandling { exceptionHandling ->
-                    exceptionHandling
-                            .accessDeniedPage("/error/error403")
-                            .authenticationEntryPoint(new ParameterAuthenticationEntryPoint("/login"))
-                }
-                .anonymous { withDefaults() }
-                .formLogin { formLogin ->
-                    formLogin
-                            .loginPage("/").permitAll()
-                            .loginProcessingUrl("/authenticate").permitAll()
-                            .successHandler(successHandler)
-                            .failureHandler(failureHandler)
-                }
+                .oauth2Client(withDefaults())
                 .authorizeRequests { authorize ->
                     if (configService.consoleEnabled) {
                         authorize.mvcMatchers(
@@ -225,37 +201,75 @@ class SecurityConfiguration {
                             ).permitAll()
                             .anyRequest().fullyAuthenticated()
                 }
-                .logout { logout ->
-                    logout
-                            .logoutSuccessUrl("/")
-                            .invalidateHttpSession(true)
-                            .clearAuthentication(true)
-                }
 
         if (configService.oidcEnabled) {
-            http.oauth2Client(withDefaults())
+            http
+                    .oauth2Login(withDefaults())
+                    .logout { logout ->
+                        logout.logoutSuccessHandler(oidcLogoutSuccessHandler())
+                    }
+        } else {
+            http
+                    .formLogin { formLogin ->
+                        formLogin
+                                .loginPage("/").permitAll()
+                                .loginProcessingUrl("/authenticate").permitAll()
+                                .successHandler(ldapLoginSuccessHandler)
+                                .failureHandler(ldapLoginFailureHandler)
+                    }
+                    .exceptionHandling { exceptionHandling ->
+                        exceptionHandling
+                                .accessDeniedPage("/error/error403")
+                                .authenticationEntryPoint(new ParameterAuthenticationEntryPoint("/login"))
+                    }
+                    .anonymous { withDefaults() }
+                    .logout { logout ->
+                        logout
+                                .logoutSuccessUrl("/")
+                                .invalidateHttpSession(true)
+                                .clearAuthentication(true)
+                    }
         }
 
         return http.build()
     }
 
     @Bean
+    GrantedAuthoritiesMapper userAuthoritiesMapper(UserService userService) {
+        return { authorities ->
+            Set<GrantedAuthority> mappedAuthorities = [] as HashSet
+
+            authorities.forEach { authority ->
+                if (OidcUserAuthority.isInstance(authority)) {
+                    OidcUserAuthority oidcUserAuthority = (OidcUserAuthority)authority
+
+                    OidcIdToken idToken = oidcUserAuthority.idToken
+
+                    SessionUtils.withNewSession {
+                        userService.findUserByUsername(idToken.preferredUsername).authorities.each { Role role ->
+                            mappedAuthorities.add(new SimpleGrantedAuthority(role.authority))
+                        }
+                    }
+                }
+            }
+
+            return mappedAuthorities
+        }
+    }
+
+    @Bean
     ReactiveClientRegistrationRepository clientRegistrations() {
-        ClientRegistration keycloakRegistration = ClientRegistration
-                .withRegistrationId(KeycloakService.CLIENT_REGISTRATION_ID)
-                .tokenUri("${configService.keycloakServer}/realms/${configService.keycloakRealm}/protocol/openid-connect/token")
-                .clientId(configService.keycloakClientId)
-                .clientSecret(configService.keycloakClientSecret)
-                .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
-                .build()
-        ClientRegistration wesRegistration = ClientRegistration
-                .withRegistrationId(WeskitAuthService.CLIENT_REGISTRATION_ID)
-                .tokenUri(configService.wesAuthBaseUrl)
-                .clientId(configService.wesAuthClientId)
-                .clientSecret(configService.wesAuthClientSecret)
-                .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
-                .build()
-        return new InMemoryReactiveClientRegistrationRepository(keycloakRegistration, wesRegistration)
+        List<ClientRegistration> clientRegistrations = [
+                keycloakApiClientRegistration(),
+                wesClientRegistration(),
+        ]
+
+        return new InMemoryReactiveClientRegistrationRepository(clientRegistrations)
+    }
+
+    @Bean
+    ClientRegistrationRepository loginClientRegistrationRepository() {
+        return new InMemoryClientRegistrationRepository(keycloakLoginClientRegistration())
     }
 
     @Bean
@@ -269,5 +283,75 @@ class SecurityConfiguration {
         return WebClient.builder()
                 .filter(oauth)
                 .build()
+    }
+
+    private ClientRegistration keycloakLoginClientRegistration() {
+        return ClientRegistration
+                .withRegistrationId("keycloakLogin")
+                .clientId(configService.oidcClientId)
+                .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+                .redirectUri(configService.oidcRedirectUri)
+                .scope("openid", "profile", "email")
+                .authorizationUri("${configService.keycloakServer}/realms/${configService.keycloakRealm}/protocol/openid-connect/auth")
+                .tokenUri("${configService.keycloakServer}/realms/${configService.keycloakRealm}/protocol/openid-connect/token")
+                .userInfoUri("${configService.keycloakServer}/realms/${configService.keycloakRealm}/protocol/openid-connect/userinfo")
+                .jwkSetUri("${configService.keycloakServer}/realms/${configService.keycloakRealm}/protocol/openid-connect/certs")
+                .issuerUri("${configService.keycloakServer}/realms/${configService.keycloakRealm}")
+                .userNameAttributeName(IdTokenClaimNames.SUB)
+                .build()
+    }
+
+    private ClientRegistration keycloakApiClientRegistration() {
+        return ClientRegistration
+                .withRegistrationId(KeycloakService.CLIENT_REGISTRATION_ID)
+                .tokenUri("${configService.keycloakServer}/realms/${configService.keycloakRealm}/protocol/openid-connect/token")
+                .clientId(configService.keycloakClientId)
+                .clientSecret(configService.keycloakClientSecret)
+                .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
+                .build()
+    }
+
+    private ClientRegistration wesClientRegistration() {
+        return ClientRegistration
+                .withRegistrationId(WeskitAuthService.CLIENT_REGISTRATION_ID)
+                .tokenUri(configService.wesAuthBaseUrl)
+                .clientId(configService.wesAuthClientId)
+                .clientSecret(configService.wesAuthClientSecret)
+                .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
+                .build()
+    }
+
+    AuthenticationSuccessHandler getLdapLoginSuccessHandler() {
+        AuthenticationSuccessHandler successHandler = new SavedRequestAwareAuthenticationSuccessHandler()
+        successHandler.defaultTargetUrl = "/home/index"
+        successHandler.targetUrlParameter = ParameterAuthenticationEntryPoint.TARGET_PARAM_NAME
+        return successHandler
+    }
+
+    AuthenticationFailureHandler getLdapLoginFailureHandler() {
+        AuthenticationFailureHandler failureHandler = new SimpleUrlAuthenticationFailureHandler() {
+            @Override
+            void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
+                                         AuthenticationException exception) throws IOException, ServletException {
+                String[] username = request.parameterMap.get("username")
+                if (username) {
+                    request.session.setAttribute(LoginController.LAST_USERNAME_KEY, username.first())
+                }
+                String[] target = request.parameterMap.get("target")
+                if (target) {
+                    request.session.setAttribute(LoginController.LAST_TARGET_KEY, target.first())
+                }
+                super.onAuthenticationFailure(request, response, exception)
+            }
+        }
+        failureHandler.defaultFailureUrl = "/login/authfail"
+        return failureHandler
+    }
+
+    private LogoutSuccessHandler oidcLogoutSuccessHandler() {
+        OidcClientInitiatedLogoutSuccessHandler oidcLogoutSuccessHandler =
+                new OidcClientInitiatedLogoutSuccessHandler(loginClientRegistrationRepository())
+        oidcLogoutSuccessHandler.postLogoutRedirectUri = "{baseUrl}"
+        return oidcLogoutSuccessHandler
     }
 }

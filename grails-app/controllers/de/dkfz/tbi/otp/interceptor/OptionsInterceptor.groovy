@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.interceptor
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 
+import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.config.InstanceLogo
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
@@ -32,6 +33,7 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 @CompileStatic
 class OptionsInterceptor {
     ProcessingOptionService processingOptionService
+    ConfigService configService
 
     OptionsInterceptor() {
         matchAll()
@@ -51,6 +53,7 @@ class OptionsInterceptor {
             model.piwikSiteId = processingOptionService.findOptionAsInteger(ProcessingOption.OptionName.GUI_TRACKING_SITE_ID)
             model.piwikEnabled = processingOptionService.findOptionAsBoolean(ProcessingOption.OptionName.GUI_TRACKING_ENABLED)
             model.showPartners = processingOptionService.findOptionAsBoolean(ProcessingOption.OptionName.GUI_SHOW_PARTNERS)
+            model.oidcEnabled = configService.oidcEnabled
 
             InstanceLogo logo
             try {

@@ -21,6 +21,7 @@ import org.springframework.security.core.Authentication
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser
 import org.springframework.security.web.authentication.switchuser.SwitchUserFilter
 import org.springframework.security.web.authentication.switchuser.SwitchUserGrantedAuthority
 import org.springframework.util.StringUtils
@@ -53,7 +54,7 @@ class SecurityService {
         }
 
         return User.createCriteria().get {
-            eq("username", principal["username"] as String, [ignoreCase: true])
+            eq("username", username, [ignoreCase: true])
             cache(true)
         }
     }
@@ -64,6 +65,15 @@ class SecurityService {
 
     private getPrincipal() {
         return authentication?.principal
+    }
+
+    String getUsername() {
+        if (configService.oidcEnabled) {
+            DefaultOidcUser oidcUser = (DefaultOidcUser) principal
+            return oidcUser ? oidcUser.userInfo["preferredUsername"] : ""
+        }
+
+        return principal ? principal["username"] : ""
     }
 
     boolean hasCurrentUserAdministrativeRoles() {

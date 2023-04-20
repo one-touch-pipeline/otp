@@ -22,13 +22,20 @@
 
 <div id="loginBox" style="position: absolute;">
     <div id="loginFormBox" style="position: absolute;">
-        <form id="loginForm" method="POST" action="${createLink(controller: 'authenticate', action: '')}">
+        <g:if test="${!oidcEnabled}">
+            <form id="loginForm" method="POST" action="${createLink(controller: 'authenticate', action: '')}">
 
-            <input name="username" id="account" oninput="this.value = this.value.toLowerCase()"
-                   placeholder="${g.message(code: "security.login.username.label")}" value="${username}" required>
-            <input type="password" name="password" id="password" placeholder="${g.message(code: "security.login.password.label")}" required><br/>
-            <input type="hidden" name="target" value="${target}"/>
-            <input id="loginButton" type="submit" value="${g.message(code: "security.login.button")}"/>
-        </form>
+                <input name="username" id="account" oninput="this.value = this.value.toLowerCase()"
+                       placeholder="${g.message(code: "security.login.username.label")}" value="${username}" required>
+                <input type="password" name="password" id="password" placeholder="${g.message(code: "security.login.password.label")}" required><br/>
+                <input type="hidden" name="target" value="${target}"/>
+                <input id="loginButton" type="submit" value="${g.message(code: "security.login.button")}"/>
+            </form>
+        </g:if>
+        <g:else>
+            <a href="${createLink(uri: "${request.contextPath}/oauth2/authorization/keycloakLogin")}">
+                <input id="oidcLoginButton" type="submit" value="${g.message(code: "security.login.button")}"/>
+            </a>
+        </g:else>
     </div>
 </div>

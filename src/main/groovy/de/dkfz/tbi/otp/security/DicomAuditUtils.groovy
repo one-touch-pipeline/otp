@@ -32,7 +32,11 @@ class DicomAuditUtils {
     @Autowired
     SecurityService securityService
 
-    String getRealUserName(String username) {
+    String getRealUserName() {
         return securityService.switched ? "${securityService.userSwitchInitiator.username} as ${username}" : username
+    }
+
+    String getUsername() {
+        return securityService.username
     }
 }

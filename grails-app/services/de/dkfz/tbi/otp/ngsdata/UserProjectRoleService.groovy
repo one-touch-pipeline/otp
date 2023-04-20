@@ -62,8 +62,6 @@ class UserProjectRoleService {
         assert project: "the project must not be null"
         assert !UserProjectRole.findAllByUserAndProject(user, project): "User '${user.username ?: user.realName}' is already part of project '${project.name}'"
 
-        String requester = securityService.currentUser.username
-
         UserProjectRole userProjectRole = new UserProjectRole([
                 user   : user,
                 project: project,
@@ -95,7 +93,7 @@ class UserProjectRoleService {
                 "Created Project User: ${userProjectRole.toStringWithAllProperties()}"
         )
         String studyUID = OtpDicomAuditFactory.generateUID(UniqueIdentifierType.STUDY, String.valueOf(project.id))
-        DicomAuditLogger.logUserActivated(EventOutcomeIndicator.SUCCESS, dicomAuditUtils.getRealUserName(requester), user.username, studyUID)
+        DicomAuditLogger.logUserActivated(EventOutcomeIndicator.SUCCESS, dicomAuditUtils.realUserName, user.username, studyUID)
 
         return userProjectRole
     }

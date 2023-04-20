@@ -186,6 +186,14 @@ class ConfigService implements ApplicationContextAware {
         return getBooleanValue(OtpProperty.OIDC_ENABLED)
     }
 
+    String getOidcClientId() {
+        return otpProperties.get(OtpProperty.OIDC_CLIENT)
+    }
+
+    String getOidcRedirectUri() {
+        return otpProperties.get(OtpProperty.OIDC_REDIRECT_URI)
+    }
+
     String getKeycloakServer() {
         return otpProperties.get(OtpProperty.KEYCLOAK_SERVER)
     }
