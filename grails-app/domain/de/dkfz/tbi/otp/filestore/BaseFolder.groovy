@@ -21,8 +21,11 @@
  */
 package de.dkfz.tbi.otp.filestore
 
-import de.dkfz.tbi.otp.utils.Entity
 import grails.gorm.hibernate.annotation.ManagedEntity
+
+import de.dkfz.tbi.otp.utils.Entity
+
+import java.nio.file.Paths
 
 /**
  * BaseFolder is part of the UUID based file system
@@ -32,7 +35,7 @@ import grails.gorm.hibernate.annotation.ManagedEntity
 class BaseFolder implements Entity {
 
     /**
-     * Path of the base folder, which must be unique
+     * Path of the base folder, which must be unique and in absolute form
      */
     @SuppressWarnings("GrailsDomainReservedSqlKeywordName")
     String path
@@ -43,6 +46,10 @@ class BaseFolder implements Entity {
     boolean writable
 
     static constraints = {
-        path unique: true
+        path(unique: true, validator: {
+            if (!Paths.get(it).isAbsolute()) {
+                return "not.absolute"
+            }
+        })
     }
 }
