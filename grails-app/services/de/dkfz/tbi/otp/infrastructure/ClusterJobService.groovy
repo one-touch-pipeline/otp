@@ -149,6 +149,7 @@ class ClusterJobService {
             requestedMemory = jobInfo.askedResources?.mem?.toLong(BufferUnit.k)
 
             jobLog = jobInfo.logFile
+            node = jobInfo.executionHosts?.unique()?.sort()?.join(",")
             accountName = jobInfo.account
             dependencies = jobInfo.parentJobIDs ? jobInfo.parentJobIDs.collect {
                 CollectionUtils.exactlyOneElement(
@@ -172,8 +173,6 @@ class ClusterJobService {
             eligible = jobInfo.eligibleTime
             started = jobInfo.startTime
             ended = jobInfo.endTime
-            systemSuspendStateDuration = jobInfo.timeSystemSuspState
-            userSuspendStateDuration = jobInfo.timeUserSuspState
 
             cpuTime = jobInfo.cpuTime
             usedCores = jobInfo.usedResources?.cores
@@ -181,7 +180,6 @@ class ClusterJobService {
             usedSwap = jobInfo.usedResources?.swap?.toLong(BufferUnit.k) as Integer
 
             node = jobInfo.executionHosts?.unique()?.sort()?.join(",")
-            startCount = jobInfo.startCount
 
             xten = isXten(job)
             nBases = getBasesSum(job)

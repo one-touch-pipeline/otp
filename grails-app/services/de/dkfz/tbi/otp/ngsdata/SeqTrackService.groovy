@@ -35,7 +35,6 @@ import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
-import javax.sql.DataSource
 import java.text.MessageFormat
 
 import static org.springframework.util.Assert.notNull
@@ -59,9 +58,6 @@ class SeqTrackService {
     LsdfFilesService lsdfFilesService
 
     AlignmentDeciderService alignmentDeciderService
-
-    @Autowired
-    DataSource dataSource
 
     @Autowired
     ApplicationContext applicationContext

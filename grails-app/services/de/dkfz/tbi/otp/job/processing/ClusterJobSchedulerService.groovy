@@ -247,13 +247,13 @@ class ClusterJobSchedulerService {
             if (jobInfo?.jobState == JobState.UNKNOWN) {
                 throw new OtpException("Jobstate is ${JobState.UNKNOWN}")
             }
-        } catch (Throwable e) {
-            LogThreadLocal.threadLog?.warn("Failed to fill in runtime statistics after start for ${clusterJob.clusterJobId}, try again", e)
+        } catch (Throwable ignored) {
+            LogThreadLocal.threadLog?.warn("Failed to fill in runtime statistics after start for ${clusterJob.clusterJobId}, try again")
             Thread.sleep(WAITING_TIME_FOR_SECOND_TRY_IN_MILLISECONDS)
             try {
                 jobInfo = jobManager.queryExtendedJobStateById([beJobID]).get(beJobID)
-            } catch (Throwable e2) {
-                LogThreadLocal.threadLog?.warn("Failed to fill in runtime statistics after start for ${clusterJob.clusterJobId} the second time", e2)
+            } catch (Throwable e) {
+                LogThreadLocal.threadLog?.warn("Failed to fill in runtime statistics after start for ${clusterJob.clusterJobId} the second time", e)
             }
         }
         if (jobInfo) {

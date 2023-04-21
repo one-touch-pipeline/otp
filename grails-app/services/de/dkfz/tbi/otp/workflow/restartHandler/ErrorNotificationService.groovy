@@ -232,7 +232,6 @@ class ErrorNotificationService {
                 message << "Exit status: ${clusterJob.exitStatus}"
                 message << "Exit code: ${clusterJob.exitCode}"
                 message << "Node: ${clusterJob.node}"
-                message << "Start count: ${clusterJob.startCount}"
                 message << "Used memory: ${clusterJob.usedMemory}"
                 message << "Requested memory: ${clusterJob.requestedMemory}"
                 message << ""

@@ -306,7 +306,7 @@ dependencies {
     implementation "com.github.samtools:htsjdk:2.24.1"
 
     // library for interacting with cluster job schedulers
-    implementation('com.github.theroddywms:BatchEuphoria:0.1.1') {
+    implementation('com.github.theroddywms:BatchEuphoria:0.1.2') {
         exclude group: 'org.apache.commons', module: 'commons-io'
     }
 

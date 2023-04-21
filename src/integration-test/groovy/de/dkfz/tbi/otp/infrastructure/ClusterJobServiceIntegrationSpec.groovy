@@ -165,16 +165,12 @@ class ClusterJobServiceIntegrationSpec extends Specification implements DomainFa
         clusterJob.started == LocalDateTime.of(2017, 8, 10, 3, 0, 0, 0).atZone(ZoneId.systemDefault())
         clusterJob.ended == LocalDateTime.of(2017, 8, 11, 4, 0, 0, 0).atZone(ZoneId.systemDefault())
 
-        clusterJob.systemSuspendStateDuration == Duration.ofSeconds(123)
-        clusterJob.userSuspendStateDuration == Duration.ofSeconds(456)
-
         clusterJob.cpuTime == Duration.ofSeconds(789)
         clusterJob.usedCores == 3
         clusterJob.usedMemory == 2 * 1024 * 1024
         clusterJob.usedSwap == 12 * 1024 * 1024
 
         clusterJob.node == "host"
-        clusterJob.startCount == 361
     }
 
     void "test completeClusterJob empty"() {
@@ -199,8 +195,6 @@ class ClusterJobServiceIntegrationSpec extends Specification implements DomainFa
         clusterJob.eligible == null
         clusterJob.started == null
         clusterJob.ended == null
-        clusterJob.systemSuspendStateDuration == null
-        clusterJob.userSuspendStateDuration == null
 
         clusterJob.cpuTime == null
         clusterJob.usedCores == null
@@ -212,7 +206,6 @@ class ClusterJobServiceIntegrationSpec extends Specification implements DomainFa
 
         clusterJob.node == null
         clusterJob.accountName == null
-        clusterJob.startCount == null
         clusterJob.dependencies == [] as Set<ClusterJob>
     }
 

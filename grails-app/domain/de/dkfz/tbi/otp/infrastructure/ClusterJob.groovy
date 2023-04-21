@@ -218,18 +218,6 @@ class ClusterJob implements Entity {
      * the account that was requested when submitting the job (not the user account of the user submitting the job)
      */
     String accountName
-    /**
-     * duration the job was in suspended state, caused by the system
-     */
-    Duration systemSuspendStateDuration
-    /**
-     * duration the job was in suspended state, caused by the user
-     */
-    Duration userSuspendStateDuration
-    /**
-     * how often the job was started
-     */
-    Integer startCount
 
     Set<ClusterJob> dependencies = [] as Set<ClusterJob>
 
@@ -277,9 +265,6 @@ class ClusterJob implements Entity {
         node nullable: true, blank: false
         usedSwap nullable: true
         accountName nullable: true, blank: false
-        systemSuspendStateDuration nullable: true
-        userSuspendStateDuration nullable: true
-        startCount nullable: true, min: 1
         individual(nullable: true)
 
         oldSystem validator: { val, obj ->
@@ -302,8 +287,6 @@ class ClusterJob implements Entity {
         ended type: PersistentDateTimeAsMillis
         requestedWalltime type: PersistentDurationAsMillis
         cpuTime type: PersistentDurationAsMillis
-        systemSuspendStateDuration type: PersistentDurationAsMillis
-        userSuspendStateDuration type: PersistentDurationAsMillis
         jobLog type: 'text'
         clusterJobId index: "cluster_job_cluster_job_id_idx"
         clusterJobName index: "cluster_job_cluster_job_name_idx"

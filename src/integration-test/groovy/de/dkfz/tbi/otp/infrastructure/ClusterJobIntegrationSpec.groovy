@@ -111,9 +111,6 @@ class ClusterJobIntegrationSpec extends Specification implements WorkflowSystemD
                 node                      : null,
                 usedSwap                  : null,
                 accountName               : null,
-                systemSuspendStateDuration: null,
-                userSuspendStateDuration  : null,
-                startCount                : null,
                 individual                : null,
         ])
 

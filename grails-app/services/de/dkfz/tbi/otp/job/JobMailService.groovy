@@ -115,7 +115,6 @@ class JobMailService {
                     exitStatus         : clusterJob.exitStatus,
                     exitCode           : clusterJob.exitCode,
                     node               : clusterJob.node,
-                    clusterStartCount  : clusterJob.startCount,
             ]
 
             message << mapToString('Cluster Job', clusterProperties)
