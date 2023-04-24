@@ -89,6 +89,10 @@ databaseChangeLog = {
         }
     }
 
+    changeSet(author: "-", id: "1682336117671-83") {
+        addUniqueConstraint(columnNames: "work_folder_id", constraintName: "UC_WORKFLOW_RUNWORK_FOLDER_ID_COL", tableName: "workflow_run")
+    }
+
     changeSet(author: "-", id: "1681921528273-85") {
         addUniqueConstraint(columnNames: "path", constraintName: "UC_BASE_FOLDERPATH_COL", tableName: "base_folder")
     }

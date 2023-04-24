@@ -131,7 +131,7 @@ class WorkflowRun implements Commentable, Entity {
         displayName blank: false, nullable: false
         shortDisplayName blank: false, nullable: false
 
-        workFolder nullable: true
+        workFolder nullable: true, unique: true
     }
 
     static Closure mapping = {

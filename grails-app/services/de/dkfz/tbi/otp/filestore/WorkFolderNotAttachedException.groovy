@@ -26,5 +26,4 @@ import groovy.transform.InheritConstructors
 import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 
 @InheritConstructors
-class WorkFolderAttachedException extends OtpRuntimeException {
-}
+class WorkFolderNotAttachedException extends OtpRuntimeException { }

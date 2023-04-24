@@ -59,7 +59,7 @@ class FilestoreServiceSpec extends Specification implements ServiceUnitTest<File
         ])
     }
 
-    void "createUuid, should create a valid UUID"() {
+    void "test createUuid: should create a valid UUID"() {
         given:
         UUID uuid = service.createUuid(run)
 
@@ -68,17 +68,37 @@ class FilestoreServiceSpec extends Specification implements ServiceUnitTest<File
         run.workFolder.baseFolder.writable
     }
 
-    void "getWorkFolderPath, should return the correct path"() {
+    void "test createWorkFolder: should create a valid uuid"() {
         given:
-        WorkFolder anotherWorkFolder = service.createWorkFolder(baseFolder)
-        service.attachWorkFolder(run, anotherWorkFolder)
+        WorkFolder workFolder = service.createWorkFolder(baseFolder)
 
         expect:
-        Path path = service.getWorkFolderPath(run)
-        path == Paths.get(anotherWorkFolder.baseFolder.path, run.workFolder.uuid.toString().split(WorkFolder.UUID_SEPARATOR))
+        baseFolder == workFolder.baseFolder
+        UUID.fromString(workFolder.uuid.toString())
     }
 
-    void "attachWorkFolder to a WorkflowRun, workFolder has been attached to another run, which should throw an exception"() {
+    void "test getWorkFolderPath: should return the correct path"() {
+        given:
+        final String uuidString = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"
+        run.workFolder.uuid = UUID.fromString(uuidString)
+
+        expect:
+        service.getWorkFolderPath(run) == Paths.get(workFolder.baseFolder.path, "a0", "ee", "bc99-9c0b-4ef8-bb6d-6bb9bd380a11")
+    }
+
+    void "test getWorkFolderPath: if workFolder not attached yet, an exception should be thrown"() {
+        given:
+        final WorkflowRun anotherRun = createWorkflowRun()
+
+        when:
+        Path path = service.getWorkFolderPath(anotherRun)
+
+        then:
+        thrown(WorkFolderNotAttachedException)
+        path == null
+    }
+
+    void "test attachWorkFolder to a WorkflowRun: workFolder has been attached to another run, an exception should be thrown"() {
         given:
         WorkflowRun anotherWorkflowRun = createWorkflowRun()
 
@@ -86,7 +106,20 @@ class FilestoreServiceSpec extends Specification implements ServiceUnitTest<File
         service.attachWorkFolder(anotherWorkflowRun, workFolder)
 
         then:
-        WorkFolderAttachedException ex = thrown()
-        ex.message == "WorkFolder ${workFolder} has been attached to WorkflowRun ${run}"
+        thrown(grails.validation.ValidationException)
+    }
+
+    void "test attachWorkFolder to a WorkflowRun that already attached to a folder: just overwrite it and no exception should be thrown"() {
+        given:
+        WorkFolder anotherWorkFolder = createWorkFolder(
+                baseFolder: baseFolder
+        )
+
+        when:
+        service.attachWorkFolder(run, anotherWorkFolder)
+
+        then:
+        noExceptionThrown()
+        service.getWorkFolderPath(run)
     }
 }

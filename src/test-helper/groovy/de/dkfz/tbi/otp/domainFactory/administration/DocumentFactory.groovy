@@ -99,17 +99,22 @@ trait DocumentFactory implements DomainFactoryCore {
     }
 
     BaseFolder createBaseFolder(Map properties = [:], boolean saveAndValidate = true) {
+        String path = properties.path ?: "/${nextId}"
+        boolean writable = properties.writable ?: true
         return createDomainObject(BaseFolder, [
-                path: "/${nextId}",
-                writable: true,
+                path: path,
+                writable: writable,
         ], properties, saveAndValidate)
     }
 
     WorkFolder createWorkFolder(Map properties = [:], boolean saveAndValidate = true) {
+        BaseFolder baseFolder = properties.baseFolder ?: createBaseFolder()
+        UUID uuid = properties.uuid ?: UUID.randomUUID()
+        long size = properties.size ?: 0
         return createDomainObject(WorkFolder, [
-                baseFolder: createBaseFolder(),
-                uuid: UUID.randomUUID(),
-                size: 0,
+                baseFolder: baseFolder,
+                uuid: uuid,
+                size: size,
         ], properties, saveAndValidate)
     }
 }
