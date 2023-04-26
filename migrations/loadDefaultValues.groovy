@@ -22,6 +22,7 @@
 import grails.util.Environment
 import grails.util.Holders
 
+import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 
@@ -49,37 +50,9 @@ databaseChangeLog = {
     Path ewcDir = dir.resolve("ewc")
 
     // Roddy Pancancer default values
-    files += [
-            ewcDir.resolve("ewc-roddy-pancancer-cvalue-1.2.73-1+1.2.73-201.sql"),
-            ewcDir.resolve("ewc-roddy-pancancer-cvalue-1.2.73-202.sql"),
-            ewcDir.resolve("ewc-roddy-pancancer-cvalue-1.2.73-204.sql"),
-            ewcDir.resolve("ewc-roddy-pancancer-cvalue-EXON-1.2.73-1+1.2.73-201+1.2.73-204.sql"),
-            ewcDir.resolve("ewc-roddy-pancancer-cvalue-WHOLE_GENOME-1.2.51-1.sql"),
-            ewcDir.resolve("ewc-roddy-pancancer-cvalue-WHOLE_GENOME-1.2.51-2.sql"),
-            ewcDir.resolve("ewc-roddy-pancancer-cvalue-WHOLE_GENOME-1.2.73-1+1.2.73-201+1.2.73-204.sql"),
-            ewcDir.resolve("ewc-roddy-pancancer-filenames-ChIPSeq-1.2.73-1+1.2.73-201+1.2.73-204.sql"),
-            ewcDir.resolve("ewc-roddy-pancancer-filenames-EXON-1.2.73-1+1.2.73-201+1.2.73-202+1.2.73-204.sql"),
-            ewcDir.resolve("ewc-roddy-pancancer-filenames-WHOLE_GENOME-1.2.51-1.sql"),
-            ewcDir.resolve("ewc-roddy-pancancer-filenames-WHOLE_GENOME-1.2.51-2+1.2.73-1+1.2.73-201+1.2.73-202+1.2.73-204.sql"),
-            ewcDir.resolve("ewc-roddy-pancancer-resources-1.2.73-1+1.2.73-201+1.2.73-204.sql"),
-            ewcDir.resolve("ewc-roddy-pancancer-resources-1.2.73-202.sql"),
-            ewcDir.resolve("ewc-roddy-pancancer-resources-ChIPSeq-1.2.73-1+1.2.73-201+1.2.73-204.sql"),
-            ewcDir.resolve("ewc-roddy-pancancer-resources-EXON-1.2.73-1+1.2.73-201+1.2.73-204.sql"),
-            ewcDir.resolve("ewc-roddy-pancancer-resources-EXON-1.2.73-202.sql"),
-            ewcDir.resolve("ewc-roddy-pancancer-resources-WHOLE_GENOME-1.2.51-1+1.2.51-2.sql"),
-            ewcDir.resolve("ewc-roddy-pancancer-resources-WHOLE_GENOME-1.2.73-1+1.2.73-201+1.2.73-204.sql"),
-    ]
-
-    // Roddy WGBS defaults values
-    files += [
-            ewcDir.resolve("ewc-roddy-wgbs2-cvalue-1.2.73-1+1.2.73-2+1.2.73-201+1.2.73-202+1.2.73-204.sql"),
-            ewcDir.resolve("ewc-roddy-wgbs2-cvalue-WHOLE_GENOME_BISULFITE-1.2.73-1+1.2.73-2+1.2.73-201+1.2.73-202+1.2.73-204.sql"),
-            ewcDir.resolve("ewc-roddy-wgbs2-cvalue-WHOLE_GENOME_BISULFITE_TAGMENTATION-1.2.73-1+1.2.73-2+1.2.73-201+1.2.73-202+1.2.73-204.sql"),
-            ewcDir.resolve("ewc-roddy-wgbs2-resources-1.2.73-1+1.2.73-2+1.2.73-201+1.2.73-202+1.2.73-204.sql"),
-            ewcDir.resolve("ewc-roddy-wgbs2-resources-WHOLE_GENOME_BISULFITE-1.2.73-1+1.2.73-2+1.2.73-201+1.2.73-202+1.2.73-204.sql"),
-            ewcDir.resolve("ewc-roddy-wgbs2-resources-WHOLE_GENOME_BISULFITE_TAGMENTATION-1.2.73-1+1.2.73-2+1.2.73-201+1.2.73-202+1.2.73-204.sql"),
-            ewcDir.resolve("ewc-roddy-wgbs2-filenames-1.2.73-1+1.2.73-2+1.2.73-201+1.2.73-202+1.2.73-204.sql"),
-    ]
+    files += Files.list(ewcDir).findAll {
+        !it.fileName.toString().contains('test-resource')
+    }.sort()
 
     files.each { file ->
         changeSet(author: "otp", id: file.getFileName().toString(), runOnChange: "true") {

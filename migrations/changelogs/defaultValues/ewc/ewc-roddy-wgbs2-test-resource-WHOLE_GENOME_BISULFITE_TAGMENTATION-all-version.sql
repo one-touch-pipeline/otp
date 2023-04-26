@@ -43,7 +43,8 @@ VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 'Default test-resource v
         'DEFAULT_VALUES', (
             SELECT id
             FROM external_workflow_config_fragment
-            WHERE name = 'Default test-resource values for WGBS alignment WHOLE_GENOME_BISULFITE_TAGMENTATION test'))
+            WHERE name = 'Default test-resource values for WGBS alignment WHOLE_GENOME_BISULFITE_TAGMENTATION test'
+              AND deprecation_date IS NULL))
 ON CONFLICT DO NOTHING;
 
 INSERT INTO external_workflow_config_selector_workflow (external_workflow_config_selector_workflows_id, workflow_id)

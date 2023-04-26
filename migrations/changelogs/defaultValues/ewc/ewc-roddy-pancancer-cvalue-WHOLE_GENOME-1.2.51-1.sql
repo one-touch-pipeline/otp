@@ -379,9 +379,8 @@ VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 0, 'Default cvalue value
         '                "value": "${chromosomeSizesFile_hg19}",' ||
         '                "type": "path"' ||
         '            },' ||
-        '            "CLIP_INDEX": {' ||
-        '                "value": "${DIR_EXECUTION}/analysisTools/qcPipelineTools/trimmomatic/adapters/TruSeq3-PE.fa",' ||
-        '                "type": "path"' ||
+        '            "useAdaptorTrimming": {' ||
+        '                "value": "false"' ||
         '            },' ||
         '            "ADAPTOR_TRIMMING_OPTIONS_0": {' ||
         '                "value": "\"PE -threads 12 -phred33\""' ||
@@ -428,7 +427,8 @@ ON CONFLICT DO NOTHING;
 INSERT INTO external_workflow_config_selector(id, version, date_created, last_updated, name, priority, selector_type, external_workflow_config_fragment_id)
 VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 'Default cvalue values for PanCancer alignment 1.2.51-1 WHOLE_GENOME', 22, 'DEFAULT_VALUES', (SELECT id
                                                                                                                                                       FROM external_workflow_config_fragment
-                                                                                                                                                      WHERE name = 'Default cvalue values for PanCancer alignment 1.2.51-1 WHOLE_GENOME'))
+                                                                                                                                                      WHERE name = 'Default cvalue values for PanCancer alignment 1.2.51-1 WHOLE_GENOME'
+                                                                                                                                                        AND deprecation_date IS NULL))
 ON CONFLICT DO NOTHING;
 
 INSERT INTO external_workflow_config_selector_workflow (external_workflow_config_selector_workflows_id, workflow_id)

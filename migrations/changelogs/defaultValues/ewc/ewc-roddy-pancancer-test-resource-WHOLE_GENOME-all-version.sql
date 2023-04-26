@@ -51,7 +51,8 @@ INSERT INTO external_workflow_config_selector(id, version, date_created, last_up
 VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 'Default test-resource values for PanCancer alignment WHOLE_GENOME test', 100, 'DEFAULT_VALUES',
         (SELECT id
          FROM external_workflow_config_fragment
-         WHERE name = 'Default test-resource values for PanCancer alignment WHOLE_GENOME test'))
+         WHERE name = 'Default test-resource values for PanCancer alignment WHOLE_GENOME test'
+           AND deprecation_date IS NULL))
 ON CONFLICT DO NOTHING;
 
 INSERT INTO external_workflow_config_selector_workflow (external_workflow_config_selector_workflows_id, workflow_id)

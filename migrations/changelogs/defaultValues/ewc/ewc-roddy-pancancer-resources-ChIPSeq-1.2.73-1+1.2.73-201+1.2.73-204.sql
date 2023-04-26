@@ -66,7 +66,8 @@ INSERT INTO external_workflow_config_selector(id, version, date_created, last_up
 VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 'Default resources values for PanCancer alignment 1.2.73-1, 1.2.73-201, 1.2.73-204 ChIP Seq', 22,
         'DEFAULT_VALUES', (SELECT id
                            FROM external_workflow_config_fragment
-                           WHERE name = 'Default resources values for PanCancer alignment 1.2.73-1, 1.2.73-201, 1.2.73-204 ChIP Seq'))
+                           WHERE name = 'Default resources values for PanCancer alignment 1.2.73-1, 1.2.73-201, 1.2.73-204 ChIP Seq'
+                             AND deprecation_date IS NULL))
 ON CONFLICT DO NOTHING;
 
 INSERT INTO external_workflow_config_selector_workflow (external_workflow_config_selector_workflows_id, workflow_id)
