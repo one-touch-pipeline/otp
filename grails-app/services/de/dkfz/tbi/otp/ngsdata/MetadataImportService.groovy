@@ -206,8 +206,8 @@ class MetadataImportService {
             String yearMonth = TimeFormats.YEAR_MONTH_SLASH.getFormattedDate(date)
             String timeStamp = TimeFormats.DATE_TIME_SECONDS_DASHES.getFormattedDate(date)
 
-            Path seqCenterInboxDir = fileSystem.getPath("${configService.seqCenterInboxPath}")
-            Path targetDir = seqCenterInboxDir.resolve(yearMonth).resolve(ticketNumber)
+            Path metadataStorage = fileSystem.getPath("${configService.metadataStoragePath}")
+            Path targetDir = metadataStorage.resolve(yearMonth).resolve(ticketNumber)
 
             int position = oldName.lastIndexOf('.')
             String newName = "${oldName.substring(0, position)}-${timeStamp}${oldName.substring(position)}"
@@ -674,8 +674,8 @@ class MetadataImportService {
         return null
     }
 
-    static Path getMetaDataFileFullPath(MetaDataFile metaDataFile) {
-        return Paths.get("${metaDataFile.filePath}/${metaDataFile.fileName}")
+    Path getMetaDataFileFullPath(MetaDataFile metaDataFile) {
+        return Paths.get("${metaDataFile.filePath ?: configService.metadataStoragePath}/${metaDataFile.fileName}")
     }
 
     MetaDataFile findById(long id) {

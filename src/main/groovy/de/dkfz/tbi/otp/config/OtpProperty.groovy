@@ -65,7 +65,7 @@ enum OtpProperty {
     PATH_CLUSTER_LOGS_OTP('otp.logging.root.path', TypeValidators.ABSOLUTE_PATH, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT)),
     PATH_TOOLS('otp.path.tools', TypeValidators.ABSOLUTE_PATH, EnumSet.of(UsedIn.PRODUCTION, UsedIn.WORKFLOW_TEST)),
     PATH_RODDY('otp.path.tools.roddy', TypeValidators.ABSOLUTE_PATH, EnumSet.of(UsedIn.PRODUCTION, UsedIn.WORKFLOW_TEST)),
-    PATH_SEQ_CENTER_INBOX('otp.path.seqCenterInbox', TypeValidators.ABSOLUTE_PATH, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT)),
+    PATH_METADATA_STORAGE('otp.path.metadata.storage', TypeValidators.ABSOLUTE_PATH, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT)),
     PATH_SCRIPTS_OUTPUT('otp.path.script.root', TypeValidators.ABSOLUTE_PATH, EnumSet.of(UsedIn.PRODUCTION)),
 
     DATABASE_SERVER('otp.database.server', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT)),

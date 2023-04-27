@@ -109,9 +109,8 @@ class ConfigService implements ApplicationContextAware {
         return new File(otpProperties.get(OtpProperty.PATH_RODDY).toString() ?: "")
     }
 
-    // this path is where the metadata file is copied
-    File getSeqCenterInboxPath() {
-        return new File(otpProperties.get(OtpProperty.PATH_SEQ_CENTER_INBOX).toString() ?: "")
+    File getMetadataStoragePath() {
+        return new File(otpProperties.get(OtpProperty.PATH_METADATA_STORAGE).toString() ?: "")
     }
 
     String getSshUser() {

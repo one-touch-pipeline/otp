@@ -1720,7 +1720,7 @@ ${SPECIES}                      ${human}+${mouse}+${chicken}                ${hu
         DomainFactory.createDefaultRealmWithProcessingOption()
         MetadataImportService service = new MetadataImportService()
         service.configService = new TestConfigService([
-                (OtpProperty.PATH_SEQ_CENTER_INBOX): targetDirectory.toString(),
+                (OtpProperty.PATH_METADATA_STORAGE): targetDirectory.toString(),
         ])
         service.fileService = new FileService()
         service.fileSystemService = new TestFileSystemService()

@@ -32,6 +32,7 @@ class RunController {
     LsdfFilesService lsdfFilesService
     RunService runService
     FastqcResultsService fastqcResultsService
+    MetadataImportService metadataImportService
 
     static allowedMethods = [
             display        : "GET",
@@ -56,7 +57,7 @@ class RunController {
         List<Map<String, Object>> wrappedMetaDataFiles = runService.retrieveMetaDataFiles(run).collect {
             [
                     metaDataFile: it,
-                    fullPath    : MetadataImportService.getMetaDataFileFullPath(it),
+                    fullPath    : metadataImportService.getMetaDataFileFullPath(it),
             ]
         }
 
