@@ -23,7 +23,10 @@ package de.dkfz.tbi.otp.workflowExecution
 
 import grails.gorm.transactions.Transactional
 import groovy.transform.TupleConstructor
+import org.hibernate.LockMode
+import org.hibernate.LockOptions
 import org.hibernate.NullPrecedence
+import org.hibernate.Session
 import org.hibernate.criterion.Order
 import org.hibernate.sql.JoinType
 
@@ -141,6 +144,15 @@ class WorkflowRunService {
                 displayName     : displayName,
                 shortDisplayName: shortName,
         ]).save(flush: false)
+    }
+
+    /**
+     * helper do get pessimistic lock for workflowRun and wait for 1 second
+     */
+    void lockWorkflowRun(WorkflowRun run) {
+        WorkflowRun.withSession { Session s ->
+            s.refresh(run, new LockOptions(LockMode.PESSIMISTIC_WRITE).setTimeOut(1000))
+        }
     }
 
     /**

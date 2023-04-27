@@ -120,6 +120,9 @@ class JobServiceSpec extends Specification implements ServiceUnitTest<JobService
                 state      : WorkflowStep.State.FAILED,
         ])
         workflowRun.save(flush: true)
+        service.workflowRunService = Mock(WorkflowRunService) {
+            1 * it.lockWorkflowRun(_)
+        }
 
         when:
         service.createRestartedJobAfterJobFailure(stepToRestart)
@@ -146,6 +149,9 @@ class JobServiceSpec extends Specification implements ServiceUnitTest<JobService
                 state      : WorkflowStep.State.FAILED,
         ])
         workflowRun.save(flush: true)
+        service.workflowRunService = Mock(WorkflowRunService) {
+            1 * it.lockWorkflowRun(_)
+        }
 
         when:
         service.createRestartedJobAfterJobFailure(stepToRestart)
@@ -209,6 +215,9 @@ class JobServiceSpec extends Specification implements ServiceUnitTest<JobService
                 state      : WorkflowStep.State.RUNNING,
         ])
         service.workflowStateChangeService = new WorkflowStateChangeService()
+        service.workflowRunService = Mock(WorkflowRunService) {
+            1 * it.lockWorkflowRun(_)
+        }
 
         when:
         service.createRestartedJobAfterSystemRestart(workflowStep)
@@ -294,7 +303,7 @@ class JobServiceSpec extends Specification implements ServiceUnitTest<JobService
     }
 
     @Unroll
-    void "searchForJobToRestart, when bean is #beanToRestart, then ignore obolate and return step on index #index"() {
+    void "searchForJobToRestart, when bean is #beanToRestart, then ignore obsolete and return step on index #index"() {
         given:
         List<WorkflowStep> workflowSteps = createPartlyObsoleteSteps()
 

@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.workflowExecution
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.Synchronized
 
 import de.dkfz.tbi.otp.utils.exceptions.FileAccessForArchivedProjectNotAllowedException
 import de.dkfz.tbi.otp.workflow.restartHandler.BeanToRestartNotFoundInWorkflowRunException
@@ -33,6 +34,8 @@ class JobService {
     LogService logService
 
     OtpWorkflowService otpWorkflowService
+
+    WorkflowRunService workflowRunService
 
     WorkflowStateChangeService workflowStateChangeService
 
@@ -58,37 +61,45 @@ class JobService {
 
     private void createRestartedJob(WorkflowStep stepToRestart) {
         assert stepToRestart
+        WorkflowRun run = stepToRestart.workflowRun
+        println run
 
-        if (stepToRestart.workflowRun.project.archived) {
+        if (run.project.archived) {
             throw new FileAccessForArchivedProjectNotAllowedException(
-                    "${stepToRestart.workflowRun.project} is archived and ${stepToRestart.workflowRun} cannot be restarted"
+                    "${run.project} is archived and ${run} cannot be restarted"
             )
         }
 
-        if (!stepToRestart.workflowRun.jobCanBeRestarted) {
+        if (!run.jobCanBeRestarted) {
             throw new WorkflowJobIsNotRestartableException(
-                    "Can not restart job of ${stepToRestart.workflowRun.displayName}, since the job has failed at a timepoint it was working on an not save " +
+                    "Can not restart job of ${run.displayName}, since the job has failed at a timepoint it was working on an not save " +
                             "repeatable action. To avoid the risk data inconsistency the job shouldn't be restarted. " +
                             "Please restart the workflow instead, if possible.")
         }
 
-        assert stepToRestart.workflowRun.state == WorkflowRun.State.FAILED: "Can not restart job of ${stepToRestart.workflowRun.displayName}, " +
+        assert run.state == WorkflowRun.State.FAILED: "Can not restart job of ${run.displayName}, " +
                 "since the job has already been restarted."
 
-        List<WorkflowStep> workflowSteps = stepToRestart.workflowRun.workflowSteps
+        if (run.state != WorkflowRun.State.PENDING) {
+            workflowRunService.lockWorkflowRun(run)
+            if (run.state != WorkflowRun.State.PENDING) {
+                run.state = WorkflowRun.State.PENDING
+                run.save(flush: true)
+            }
+        }
+
+        List<WorkflowStep> workflowSteps = run.workflowSteps
         workflowSteps[workflowSteps.indexOf(stepToRestart)..(workflowSteps.size() - 1)].each { WorkflowStep step ->
             step.obsolete = true
             step.save(flush: true)
         }
-        stepToRestart.workflowRun.state = WorkflowRun.State.PENDING
-        stepToRestart.workflowRun.save(flush: true)
 
         new WorkflowStep(
                 beanName: stepToRestart.beanName,
                 state: WorkflowStep.State.CREATED,
-                previous: stepToRestart.workflowRun.workflowSteps.last(),
+                previous: run.workflowSteps.last(),
                 restartedFrom: stepToRestart,
-                workflowRun: stepToRestart.workflowRun,
+                workflowRun: run,
         ).save(flush: true)
     }
 
@@ -104,6 +115,7 @@ class JobService {
         }
     }
 
+    @Synchronized
     void createRestartedJobAfterJobFailure(WorkflowStep stepToRestart) {
         assert stepToRestart
 
@@ -130,6 +142,7 @@ class JobService {
                 "Could not find bean ${beanToRestart} in non obsolete running jobs, available are: ${nonObsoleteReverseSteps*.beanName.join(', ')}")
     }
 
+    @Synchronized
     void createRestartedJobAfterSystemRestart(WorkflowStep workflowStep) {
         if (!workflowStep) {
             throw new WorkflowJobIsNotRestartableException("Cannot restart unknown workflow step.")
