@@ -85,7 +85,6 @@ class RnaQaOverviewServiceHibernateSpec extends HibernateSpec implements RoddyPa
 
         expect:
         service.additionalJoinDomains() == [
-                "left outer join bamFile.config config",
         ]
     }
 

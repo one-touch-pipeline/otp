@@ -132,7 +132,7 @@ class CellRangerQaOverviewService extends AbstractQaOverviewService {
     @Override
     protected Map<String, ?> extractSpecificValues(Project project, Map<String, ?> qaMap) {
         return [
-                createdWithVersion: "${(qaMap.programVersion ?: qaMap.workflowVersion) ?: 'NA'}",
+                createdWithVersion: "${(qaMap.programVersion1 ?: qaMap.workflowVersion) ?: 'NA'}",
                 referenceGenome   : "${qaMap.referenceGenomeName} ${qaMap.toolNameName} ${qaMap.indexToolVersion}",
                 summary           : new TableCellValue(
                         archived: project.archived,

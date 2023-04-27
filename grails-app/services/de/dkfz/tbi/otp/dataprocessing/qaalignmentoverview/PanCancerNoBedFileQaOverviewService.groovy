@@ -110,7 +110,7 @@ class PanCancerNoBedFileQaOverviewService extends AbstractRoddyQaOverviewService
     @Override
     protected Map<String, ?> extractSpecificValues(Project project, Map<String, ?> qaMap) {
         return [
-                createdWithVersion: "${(qaMap.programVersion ?: qaMap.workflowVersion) ?: 'NA'}",
+                createdWithVersion: "${(qaMap.programVersion2 ?: qaMap.workflowVersion) ?: 'NA'}",
                 coverageWithoutN  : FormatHelper.formatNumber((Number) qaMap.coverageWithoutN), //Coverage w/o N
                 coverageX         : FormatHelper.formatNumber((Number) qaMap.coverageX), //ChrX Coverage w/o N
                 coverageY         : FormatHelper.formatNumber((Number) qaMap.coverageY), //ChrY Coverage w/o N

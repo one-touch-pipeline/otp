@@ -49,6 +49,7 @@ abstract class AbstractQaOverviewService {
             "join individual.project project",
             "left outer join bamFile.comment comment",
             "left outer join mergingWorkPackage.config config",
+            "left outer join bamFile.config config2",
             "left outer join bamFile.workflowArtefact artefact",
             "left outer join artefact.producedBy run",
             "left outer join run.workflowVersion version",
@@ -93,7 +94,8 @@ abstract class AbstractQaOverviewService {
             new PropertyColumnDefinition('qa', 'totalReadCounter', 'totalReadCounter'),
             new PropertyColumnDefinition('qa', 'pairedInSequencing', 'pairedInSequencing'),
             new PropertyColumnDefinition('qa', 'insertSizeMedian', 'insertSizeMedian'),
-            new PropertyColumnDefinition('config', 'programVersion', 'programVersion'),
+            new PropertyColumnDefinition('config', 'programVersion', 'programVersion1'),
+            new PropertyColumnDefinition('config2', 'programVersion', 'programVersion2'),
             new PropertyColumnDefinition('version', 'workflowVersion', 'workflowVersion'),
     ].asImmutable()
 
