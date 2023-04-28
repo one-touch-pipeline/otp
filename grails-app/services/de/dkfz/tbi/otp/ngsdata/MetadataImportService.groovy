@@ -675,7 +675,7 @@ class MetadataImportService {
     }
 
     Path getMetaDataFileFullPath(MetaDataFile metaDataFile) {
-        return Paths.get("${metaDataFile.filePath ?: configService.metadataStoragePath}/${metaDataFile.fileName}")
+        return Paths.get([metaDataFile.filePath, metaDataFile.fileName].findAll().join(FileSystems.default.separator))
     }
 
     MetaDataFile findById(long id) {
