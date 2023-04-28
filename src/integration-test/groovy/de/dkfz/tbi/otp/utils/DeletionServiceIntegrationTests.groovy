@@ -153,13 +153,10 @@ class DeletionServiceIntegrationTests extends Specification implements UserAndRo
         DomainFactory.createMetaDataEntry(dataFile: dataFile)
 
         String fileFinalPath = lsdfFilesService.getFileFinalPath(dataFile)
-        String fastqFile = fastqcDataFilesService.fastqcOutputPath(fastqcProcessedFile)
         List<File> expected = [
                 fileFinalPath,
                 "${fileFinalPath}.md5sum",
                 lsdfFilesService.getFileViewByPidPath(dataFile),
-                fastqFile,
-                "${fastqFile}.md5sum",
         ].collect { new File(it) }
 
         when:

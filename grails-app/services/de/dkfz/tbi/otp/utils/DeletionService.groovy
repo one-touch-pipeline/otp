@@ -667,18 +667,18 @@ class DeletionService {
     private List<File> deleteFastQCInformationFromDataFile(DataFile dataFile) {
         notNull(dataFile, "The input dataFile is null")
         List<FastqcProcessedFile> fastqcProcessedFiles = FastqcProcessedFile.findAllByDataFile(dataFile)
+        List<File> filesToDelete = []
+
         if (fastqcProcessedFiles) {
             String fastqFile = fastqcDataFilesService.fastqcOutputPath(fastqcProcessedFiles.first())
-            List<File> files = [
-                    fastqFile,
-                    "${fastqFile}.md5sum",
-            ].collect {
-                new File(it)
+            File folder = new File(fastqFile).parentFile
+
+            if (folder.exists()) {
+                filesToDelete.add(folder)
             }
             fastqcProcessedFiles*.delete(flush: true)
-            return files
         }
-        return []
+        return filesToDelete
     }
 
     /**
