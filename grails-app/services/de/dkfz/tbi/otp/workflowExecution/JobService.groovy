@@ -62,7 +62,6 @@ class JobService {
     private void createRestartedJob(WorkflowStep stepToRestart) {
         assert stepToRestart
         WorkflowRun run = stepToRestart.workflowRun
-        println run
 
         if (run.project.archived) {
             throw new FileAccessForArchivedProjectNotAllowedException(
