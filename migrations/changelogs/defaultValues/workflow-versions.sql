@@ -93,6 +93,14 @@ INSERT INTO workflow_version(id, version, workflow_id, workflow_version, date_cr
 VALUES (NEXTVAL('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'Roddy Indel calling'), '2.4.1', NOW(), NOW())
 ON CONFLICT DO NOTHING;
 
+INSERT INTO workflow_version(id, version, workflow_id, workflow_version, date_created, last_updated)
+VALUES (NEXTVAL('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'Roddy Indel calling'), '2.4.1-1', NOW(), NOW())
+    ON CONFLICT DO NOTHING;
+
+INSERT INTO workflow_version(id, version, workflow_id, workflow_version, date_created, last_updated)
+VALUES (NEXTVAL('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'Roddy Indel calling'), '2.4.1-2', NOW(), NOW())
+    ON CONFLICT DO NOTHING;
+
 --sophia versions
 INSERT INTO workflow_version(id, version, workflow_id, workflow_version, date_created, last_updated)
 VALUES (NEXTVAL('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'Roddy Sophia (structural variation calling)'), '2.2.3', NOW(),
