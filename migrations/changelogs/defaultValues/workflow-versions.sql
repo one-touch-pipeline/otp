@@ -88,6 +88,10 @@ INSERT INTO workflow_version(id, version, workflow_id, workflow_version, date_cr
 VALUES (NEXTVAL('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'Roddy SNV calling'), '1.2.166-3', NOW(), NOW())
 ON CONFLICT DO NOTHING;
 
+INSERT INTO workflow_version(id, version, workflow_id, workflow_version, date_created, last_updated)
+VALUES (NEXTVAL('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'Roddy SNV calling'), '1.2.166-5', NOW(), NOW())
+    ON CONFLICT DO NOTHING;
+
 --Indel versions
 INSERT INTO workflow_version(id, version, workflow_id, workflow_version, date_created, last_updated)
 VALUES (NEXTVAL('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'Roddy Indel calling'), '2.4.1', NOW(), NOW())
