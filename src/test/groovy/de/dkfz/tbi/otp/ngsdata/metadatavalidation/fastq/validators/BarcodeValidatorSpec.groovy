@@ -38,10 +38,16 @@ class BarcodeValidatorSpec extends Specification {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${MetaDataColumn.INDEX}\n" +
-                "\n" +
-                 "AGGCAGAA\n" +
-                 "AGGCAGAA-AGGCAGAA\n" +
-                 "AGGCAGAA,AGGCAGAA,AGGCAGAA,AGGCAGAA\n"
+                        "\n" +
+                        "ACAGTG\n" +
+                        "CAGATC\n" +
+                        "CAGATCGATC-ACAGTGGATC\n" +
+                        "CAGATCGATC-ACAGTGGATC\n" +
+                        "CAGATCNNNNN-ACAGTGNNNN\n" +
+                        "CAGATCGATC-ACAGTGGATC-CAGATCGATC-ACAGTGGATC\n" +
+                        "CAGATCGATC-ACAGTGGATC-CAGATCGATC-ACAGTGGATC\n" +
+                        "CAGATCGATC,ACAGTGGATC,CAGATCGATC,ACAGTGGATC\n" +
+                        "CAGATCGATC,ACAGTGGATC,CAGATCGATC,ACAGTGGATC\n"
         )
 
         when:
@@ -51,28 +57,11 @@ class BarcodeValidatorSpec extends Specification {
         context.problems.empty
     }
 
-    void 'validate, when barcode use valid chars but does not pass the regular expression, adds warnings'() {
+    void 'validate, when barcode use valid chars, if not, add error'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${MetaDataColumn.INDEX}\n" +
-                "invalidBarcode\n"
-        )
-
-        when:
-        new BarcodeValidator().validate(context)
-
-        then:
-        Problem problem = exactlyOneElement(context.problems)
-        problem.level == LogLevel.WARNING
-        containSame(problem.affectedCells*.cellAddress, ['A2'])
-        problem.message.contains("The barcode 'invalidBarcode' has an unusual format. It should match the regular expression '${BarcodeValidator.SHOULD_REGEX}'.")
-    }
-
-    void 'validate, when barcode contains invalid chars, adds error'() {
-        given:
-        MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${MetaDataColumn.INDEX}\n" +
-                "${barcode}\n"
+                        "invalidBarcode\n"
         )
 
         when:
@@ -82,7 +71,24 @@ class BarcodeValidatorSpec extends Specification {
         Problem problem = exactlyOneElement(context.problems)
         problem.level == LogLevel.ERROR
         containSame(problem.affectedCells*.cellAddress, ['A2'])
-        problem.message.contains("'${barcode}' is not a well-formed barcode. It must match the regular expression '${BarcodeValidator.MUST_REGEX}'. It should match the regular expression '${BarcodeValidator.SHOULD_REGEX}'.")
+        problem.message.contains("'invalidBarcode' is not a well-formed barcode. It must match the regular expression '${BarcodeValidator.MUST_REGEX}'.")
+    }
+
+    void 'validate, when barcode contains invalid chars, adds error'() {
+        given:
+        MetadataValidationContext context = MetadataValidationContextFactory.createContext(
+                "${MetaDataColumn.INDEX}\n" +
+                        "${barcode}\n"
+        )
+
+        when:
+        new BarcodeValidator().validate(context)
+
+        then:
+        Problem problem = exactlyOneElement(context.problems)
+        problem.level == LogLevel.ERROR
+        containSame(problem.affectedCells*.cellAddress, ['A2'])
+        problem.message.contains("'${barcode}' is not a well-formed barcode. It must match the regular expression '${BarcodeValidator.MUST_REGEX}'.")
 
         where:
         barcode << ['%', '$', '^', '_']
@@ -98,7 +104,7 @@ class BarcodeValidatorSpec extends Specification {
         then:
         Collection<Problem> expectedProblems = [
                 new Problem([] as Set, LogLevel.WARNING, "Optional column 'INDEX' is missing. OTP will try to parse the barcodes from the filenames.")
-                ]
+        ]
         containSame(context.problems, expectedProblems)
     }
 }
