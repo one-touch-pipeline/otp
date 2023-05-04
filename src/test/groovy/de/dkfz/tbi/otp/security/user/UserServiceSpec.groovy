@@ -25,13 +25,14 @@ import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.security.Role
-import de.dkfz.tbi.otp.security.User
-import de.dkfz.tbi.otp.security.UserRole
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+import de.dkfz.tbi.otp.domainFactory.UserDomainFactory
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.ngsdata.UserProjectRole
+import de.dkfz.tbi.otp.security.*
+import de.dkfz.tbi.otp.utils.exceptions.RightsNotGrantedException
 
-class UserServiceSpec extends Specification implements DataTest, DomainFactoryCore {
+class UserServiceSpec extends Specification implements DataTest, DomainFactoryCore, UserDomainFactory {
 
     @Override
     Class<?>[] getDomainClassesToMock() {
@@ -39,6 +40,9 @@ class UserServiceSpec extends Specification implements DataTest, DomainFactoryCo
                 Role,
                 User,
                 UserRole,
+                UserProjectRole,
+                PIUser,
+                Department,
         ]
     }
 
@@ -88,5 +92,99 @@ class UserServiceSpec extends Specification implements DataTest, DomainFactoryCo
 
         then:
         TestCase.assertContainSame([user1, user2]*.username, users)
+    }
+
+    void "grantDeputyPIRights, when PI is in the list of allowed users"() {
+        given:
+        User departmentHead = DomainFactory.createUser()
+        createDepartment([departmentHead: departmentHead])
+        User deputyPI = DomainFactory.createUser()
+
+        when:
+        new UserService().grantDeputyPIRights(departmentHead, deputyPI)
+
+        then:
+        PIUser.findAllByDeputyPI(deputyPI).size() == 1
+    }
+
+    void "grantDeputyPIRights, when PI is NOT in the list of allowed users"() {
+        given:
+        User user = DomainFactory.createUser()
+        User anotherHead = DomainFactory.createUser()
+        createDepartment([departmentHead: anotherHead])
+        User deputyPI = DomainFactory.createUser()
+
+        when:
+        new UserService().grantDeputyPIRights(user, deputyPI)
+
+        then:
+        thrown(RightsNotGrantedException)
+    }
+
+    void "revokeDeputyPIRights, when called with departmentHead and deputyPI"() {
+        given:
+        User departmentHead = DomainFactory.createUser()
+        createDepartment([departmentHead: departmentHead])
+        User deputyPI = DomainFactory.createUser()
+        createPIUser([pi: departmentHead, deputyPI: deputyPI, dateRightsGranted: new Date()])
+
+        when:
+        new UserService().revokeDeputyPIRights(departmentHead, deputyPI)
+
+        then:
+        PIUser.findAllByPiAndDeputyPI(departmentHead, deputyPI).size() == 0
+    }
+
+    void "revokeDeputyPIRights, when called with deputyPI"() {
+        given:
+        User departmentHead = DomainFactory.createUser()
+        User deputyPI = DomainFactory.createUser()
+        createPIUser([pi: departmentHead, deputyPI: deputyPI, dateRightsGranted: new Date()])
+
+        when:
+        new UserService().revokeDeputyPIRights(deputyPI)
+
+        then:
+        PIUser.findAllByDeputyPI(deputyPI).size() == 0
+    }
+
+    void "revokeDeputyPIRightsForHead, when called with departmentHead"() {
+        given:
+        User departmentHead = DomainFactory.createUser()
+        User deputyPI = DomainFactory.createUser()
+        createPIUser([pi: departmentHead, deputyPI: deputyPI, dateRightsGranted: new Date()])
+
+        when:
+        new UserService().revokeDeputyPIRightsForHead(departmentHead)
+
+        then:
+        PIUser.findAllByPi(departmentHead).size() == 0
+    }
+
+    void "isPI, returns true when user is the head of department"() {
+        given:
+        User departmentHead = DomainFactory.createUser()
+        createDepartment([departmentHead: departmentHead])
+
+        expect:
+        new UserService().isPI(departmentHead)
+    }
+
+    void "isPI, returns true when user is the deputy PI"() {
+        given:
+        User departmentHead = DomainFactory.createUser()
+        User deputyPI = DomainFactory.createUser()
+        createPIUser([pi: departmentHead, deputyPI: deputyPI, dateRightsGranted: new Date()])
+
+        expect:
+        new UserService().isPI(deputyPI)
+    }
+
+    void "isPI, returns false when user is neither department head nor deputy PI"() {
+        given:
+        User user = DomainFactory.createUser()
+
+        expect:
+        !new UserService().isPI(user)
     }
 }

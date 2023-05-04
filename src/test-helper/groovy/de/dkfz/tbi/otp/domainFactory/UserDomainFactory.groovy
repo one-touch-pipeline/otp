@@ -107,6 +107,21 @@ trait UserDomainFactory implements DomainFactoryCore {
                 name: projectRoleName,
         ], properties)
     }
+
+    Department createDepartment(Map properties = [:]) {
+        return createDomainObject(Department, [
+                ouNumber: "OU${nextId}",
+                costCenter: "${nextId}",
+        ], properties)
+    }
+
+    PIUser createPIUser(Map properties = [:]) {
+        return createDomainObject(PIUser, [
+                pi: { createUser() },
+                deputyPI: { createUser() },
+                dateRightsGranted: new Date(),
+        ], properties)
+    }
 }
 
 class UserDomainFactoryInstance implements UserDomainFactory {

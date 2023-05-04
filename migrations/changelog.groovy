@@ -73,6 +73,8 @@ databaseChangeLog = {
 
     include file: 'changelogs/2023/otp-2044.groovy'
 
+    include file: 'changelogs/2023/otp-2047-piUser-department.groovy'
+
     include file: 'changelogs/2023/otp-1883.groovy'
 
     include file: 'changelogs/2023/otp-233-fix-wes-tables.groovy'

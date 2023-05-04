@@ -39,7 +39,7 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 class ProjectPermissionEvaluator implements PermissionEvaluator {
 
     private static final List PERMISSIONS = ["OTP_READ_ACCESS", "MANAGE_USERS", "DELEGATE_USER_MANAGEMENT", "ADD_USER", "IS_USER",
-                                             "PROJECT_REQUEST_NEEDED_PIS", "PROJECT_REQUEST_CURRENT_OWNER", "PROJECT_REQUEST_PI"]
+                                             "PROJECT_REQUEST_NEEDED_PIS", "PROJECT_REQUEST_CURRENT_OWNER", "PROJECT_REQUEST_PI", "IS_DEPARTMENT_HEAD"]
 
     @Override
     boolean hasPermission(Authentication auth, Object targetDomainObject, Object permission) throws IllegalArgumentException {
@@ -54,6 +54,8 @@ class ProjectPermissionEvaluator implements PermissionEvaluator {
                     return checkProjectRolePermission(auth, (Project) targetDomainObject, permission)
                 case ProjectRequest:
                     return checkProjectRequestRolePermission(auth, (ProjectRequest) targetDomainObject, permission)
+                case User:
+                    return checkUserPermission(auth, (User) targetDomainObject, permission)
                 case null:
                     return checkObjectIndependentPermission(auth, permission)
                 default:
@@ -162,5 +164,14 @@ class ProjectPermissionEvaluator implements PermissionEvaluator {
             default:
                 return false
         }
+    }
+
+    @CompileDynamic
+    private boolean checkUserPermission(Authentication auth, User user, String permission) {
+        User activeUser = CollectionUtils.atMostOneElement(User.findAllByUsername(auth.principal.username))
+        if (!activeUser) {
+            return false
+        }
+        return (permission == 'IS_DEPARTMENT_HEAD' && user == activeUser && Department.findAllByDepartmentHead(user))
     }
 }
