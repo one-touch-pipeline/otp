@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,30 +19,42 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflowExecution.wes
+package de.dkfz.tbi.otp.infrastructure
 
-import grails.gorm.hibernate.annotation.ManagedEntity
-import io.swagger.client.wes.model.State
+import org.springframework.security.access.prepost.PreAuthorize
 
-import de.dkfz.tbi.otp.utils.Entity
+import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.workflowExecution.wes.*
 
-@ManagedEntity
-class WesRunLog implements Entity {
+@PreAuthorize("hasRole('ROLE_OPERATOR')")
+class WesRunController {
 
-    State state
-    WesLog runLog
-    List<WesLog> taskLogs
-    String runRequest
+    static final String NOT_AVAILABLE = "N/A"
 
-    static hasMany = [
-            taskLogs: WesLog
+    static allowedMethods = [
+            show    : "GET",
+            showTask: "GET",
     ]
 
-    static mappedBy = [
-            taskLogs: "wesRunLog",
-    ]
+    def show(NavigationCommand navigationCommand) {
+        WesRun wesRun = WesRun.get(params.id as long)
 
-    static constraints = {
-        runRequest nullable: true
+        return [
+                'wesRun': wesRun,
+                'nav'   : navigationCommand,
+                'NA'    : NOT_AVAILABLE,
+        ]
+    }
+
+    def showTask(NavigationCommand navigationCommand) {
+        WesLog wesLog = WesLog.get(params.id as long)
+        WesRun wesRun = CollectionUtils.exactlyOneElement(WesRun.findAllByWesRunLog(wesLog.wesRunLog))
+
+        return [
+                wesLog: wesLog,
+                wesRun: wesRun,
+                nav   : navigationCommand,
+                NA    : NOT_AVAILABLE,
+        ]
     }
 }

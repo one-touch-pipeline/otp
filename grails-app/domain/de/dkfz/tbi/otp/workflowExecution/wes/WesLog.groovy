@@ -36,6 +36,7 @@ class WesLog implements Entity {
     String stdout
     String stderr
     Integer exitCode
+    WesRunLog wesRunLog
 
     static constraints = {
         cmd nullable: true
@@ -44,6 +45,7 @@ class WesLog implements Entity {
         endTime nullable: true
         startTime nullable: true
         exitCode nullable: true
+        wesRunLog nullable: true
     }
     static mapping = {
         stdout type: "text"

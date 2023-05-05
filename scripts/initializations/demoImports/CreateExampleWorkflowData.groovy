@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,8 +20,9 @@
  * SOFTWARE.
  */
 
+import io.swagger.client.wes.model.State
+
 import de.dkfz.tbi.otp.InformationReliability
-import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
@@ -29,15 +30,16 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.StackTraceUtils
+import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 import de.dkfz.tbi.otp.workflow.datainstallation.DataInstallationConditionalFailJob
 import de.dkfz.tbi.otp.workflow.datainstallation.DataInstallationWorkflow
 import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowError
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowMessageLog
+import de.dkfz.tbi.otp.workflowExecution.wes.*
 
 import java.nio.file.*
-import java.time.Duration
-import java.time.ZonedDateTime
+import java.time.*
 
 /**
  * Change it to generate more or less data sets of workflow runs.
@@ -187,6 +189,50 @@ WorkflowRun.withNewTransaction {
         ])
     }
 
+    Closure createWesLog = { String finished ->
+        return new WesLog(
+                name: "wes log name",
+                cmd: "COMMAND CMD",
+                startTime: LocalDateTime.now().minusHours(6),
+                endTime: finished ? LocalDateTime.now() : null,
+                stdout: (("OUTOUT " * 20) + "\n") * 30,
+                stderr: finished == "failed" ? (("ERROR " * 20) + "\n") * 30 : "",
+                exitCode: finished == "" ? null : (finished == "success" ? 0 : 100),
+        ).save(flush: true)
+    }
+
+    Closure createWesRunLog = { String finished ->
+        return new WesRunLog(
+                state: finished == "" ? State.RUNNING : (finished == "success" ? State.COMPLETE : State.RUNNING),
+                runLog: createWesLog(finished),
+                taskLogs: [createWesLog(finished), createWesLog(finished), createWesLog(finished)],
+                runRequest: "REQUEST 12345 asdgf",
+        ).save(flush: true)
+    }
+
+    Closure createWesRun = { WorkflowStep workflowStep, int i, Map map = [:], String finished = "" ->
+        WesRun wesRun = new WesRun(
+                workflowStep: workflowStep,
+                wesIdentifier: "wesRunName_${i}_JobClass",
+                subPath: "sub/path",
+                state: WesRun.MonitorState.CHECKING,
+                wesRunLog: createWesRunLog(finished),
+        ).save(flush: true)
+        workflowStep.wesRuns.add(wesRun)
+        return wesRun
+    }
+
+    Closure createSuccessWesRun = { WorkflowStep workflowStep, int i ->
+        return createWesRun(workflowStep, i, [
+                state: WesRun.MonitorState.FINISHED,
+        ], "success")
+    }
+    Closure createFailedWesRun = { WorkflowStep workflowStep, int i ->
+        return createWesRun(workflowStep, i, [
+                state: WesRun.MonitorState.FINISHED,
+        ], "failed")
+    }
+
     Closure createWorkflowError = {
         return new WorkflowError([
                 message   : "some error message",
@@ -218,6 +264,9 @@ WorkflowRun.withNewTransaction {
                     (1..10).each {
                         lastStep = createWorkflowStep(workflowRun, WorkflowStep.State.SUCCESS, [previous: lastStep])
                     }
+                    (0..3).each {
+                        createSuccessWesRun(lastStep, it)
+                    }
                     break
                 case WorkflowRun.State.FAILED:
                     WorkflowStep step1 = createWorkflowStep(workflowRun, WorkflowStep.State.SUCCESS, [beanName: "conditionalFailJob"])
@@ -226,7 +275,10 @@ WorkflowRun.withNewTransaction {
                     WorkflowStep step4 = createWorkflowStep(workflowRun, WorkflowStep.State.SUCCESS, [restartedFrom: step2, beanName: step2.beanName, previous: step3])
                     createSuccessClusterJob(step4, 1)
                     createFailedClusterJob(step4, 2)
-                    createWorkflowStep(workflowRun, WorkflowStep.State.FAILED, [beanName: "linkJob", workflowError: createWorkflowError(), previous: step4])
+                    WorkflowStep step5 = createWorkflowStep(workflowRun, WorkflowStep.State.FAILED, [beanName: "linkJob", workflowError: createWorkflowError(), previous: step4])
+                    (0..3).each {
+                        createFailedWesRun(step5, it)
+                    }
                     break
                 case WorkflowRun.State.FAILED_FINAL:
                 case WorkflowRun.State.RESTARTED:
@@ -239,6 +291,7 @@ WorkflowRun.withNewTransaction {
                         createClusterJob(workflowStep, it * 3 + 1)
                         createSuccessClusterJob(workflowStep, it * 3 + 2)
                         createFailedClusterJob(workflowStep, it * 3 + 3)
+                        createWesRun(workflowStep, it)
                     }
                     break
                 case WorkflowRun.State.WAITING_FOR_USER:
@@ -249,7 +302,7 @@ WorkflowRun.withNewTransaction {
         }
     }
 
-    println "create worklow with restart"
+    println "create workflow with restart"
     WorkflowRun workflowRun1 = createWorkflowRun(WorkflowRun.State.RESTARTED, [
             displayName     : "Workflow with restarts: First run\n${displayText}",
             shortDisplayName: 'Workflow with restarts: First run',
@@ -304,6 +357,7 @@ WorkflowRun.withNewTransaction {
     ].each { WorkflowStep step ->
         (1..2).each {
             createSuccessClusterJob(step, it)
+            createSuccessWesRun(step, it)
         }
     }
     [
@@ -313,6 +367,7 @@ WorkflowRun.withNewTransaction {
     ].each { WorkflowStep step ->
         (3..4).each {
             createFailedClusterJob(step, it)
+            createFailedWesRun(step, it)
         }
     }
 }

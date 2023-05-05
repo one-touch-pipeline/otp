@@ -29,7 +29,8 @@ $(() => {
    * @returns {string}
    */
   function generateChildTables(rowData) {
-    return generateClusterJobChildTable(rowData) + generateWorkflowChildTable(rowData);
+    return generateWesRunChildTable(rowData) + generateClusterJobChildTable(rowData) +
+      generateWorkflowChildTable(rowData);
   }
 
   function generateClusterJobChildTable(rowData) {
@@ -37,21 +38,19 @@ $(() => {
       return '';
     }
 
-    let childTable = '<div class="p-3"><table class="table table-sm table-borderless p-3">';
-    childTable +=
-      '<thead>' +
-      '<tr class="table-info">' +
-      '<th></th>' +
-      '<th>Job Name</th>' +
-      '<th>Job Id</th>' +
-      '<th></th>' +
-      '<th>Cluster Node</th>' +
-      '<th>Wall Time</th>' +
-      '<th>Exit Code</th>' +
-      '</tr>' +
-      '</thead>';
-
-    childTable += '<tbody>';
+    let childTable = `<div class="p-3"><table class="table table-sm table-borderless p-3">
+    <thead>
+      <tr class="table-info">
+        <th></th>
+        <th>Job Name</th>
+        <th>Job Id</th>
+        <th></th>
+        <th>Cluster Node</th>
+        <th>Wall Time</th>
+        <th>Exit Code</th>
+      </tr>
+    </thead>
+    <tbody>`;
 
     rowData.clusterJobs.forEach((clusterJob) => {
       childTable += `<tr>
@@ -110,26 +109,59 @@ $(() => {
     return childTable;
   }
 
-  function generateWorkflowChildTable(rowData) {
-    let childTable = '<div class="p-3"><table class="table table-sm table-borderless">';
-    childTable +=
-      '<thead>' +
-      '<tr class="table-info">' +
-      '<th class="narrow-column">Type</th>' +
-      '<th class="wide-column"></th>' +
-      '<th class="narrow-column"></th>' +
-      '</tr>' +
-      '</thead>';
-
-    childTable += '<tbody>';
-
-    if (rowData.wes) {
-      childTable += `<tr>
-                       <td>WES job</td>
-                       <td>${rowData.wes}</td>
-                       <td></td>
-                     </tr>`;
+  function generateWesRunChildTable(rowData) {
+    if (!rowData.wesRuns || rowData.wesRuns.length === 0) {
+      return '';
     }
+
+    let childTable = `<div class="p-3"><table class="table table-sm table-borderless p-3">
+    <thead>
+      <tr class="table-info">
+        <th></th>
+        <th>WES identifier</th>
+        <th>State</th>
+        <th>Subpath</th>
+        <th>Log name</th>
+        <th>Exit code</th>
+      </tr>
+    </thead>
+    <tbody>`;
+
+    rowData.wesRuns.forEach((wesRun) => {
+      childTable += `<tr>
+                       <td>
+                         <div title="${wesRun.state}" class="small ${statusToClassName(wesRun.state)}"></div>
+                       </td>
+                       <td>
+                         ${$.otp.createLinkMarkup({
+    text: `WES run: ${wesRun.wesIdentifier}`,
+    controller: 'wesRun',
+    action: 'show',
+    id: wesRun.id,
+    parameters: createLinkParametersForNavigation()
+  })}
+                       </td>
+                       <td>${wesRun.state}</td>
+                       <td>${wesRun.subPath}</td>
+                       <td>${wesRun.logName}</td>
+                       <td>${wesRun.exitCode}</td>
+                     </tr>`;
+    });
+
+    childTable += '</tbody></table></div>';
+    return childTable;
+  }
+
+  function generateWorkflowChildTable(rowData) {
+    let childTable = `<div class="p-3"><table class="table table-sm table-borderless">
+    <thead>
+      <tr class="table-info">
+        <th class="narrow-column">Type</th>
+        <th class="wide-column"></th>
+        <th class="narrow-column"></th>
+      </tr>
+    </thead>
+    <tbody>`;
 
     if (rowData.hasLogs) {
       const logLink = $.otp.createLinkMarkup({

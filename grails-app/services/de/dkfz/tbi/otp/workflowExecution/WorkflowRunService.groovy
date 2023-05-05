@@ -348,7 +348,7 @@ class WorkflowRunService {
             [
                     id           : wesRun.id,
                     wesIdentifier: wesRun.wesIdentifier,
-                    state        : wesRun.state,
+                    state        : wesRun.wesRunLog?.state ?: wesRun.state,
                     subPath      : wesRun.subPath,
                     logName      : wesRun.wesRunLog?.runLog?.name,
                     exitCode     : wesRun.wesRunLog?.runLog?.exitCode ?: "-",

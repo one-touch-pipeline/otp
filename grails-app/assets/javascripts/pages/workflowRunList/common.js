@@ -27,9 +27,13 @@ const statusToClassName = function (status) {
       return 'dot blue';
     case 'FAILED':
     case 'FINISHED/FAILED':
+    case 'EXECUTOR_ERROR':
+    case 'SYSTEM_ERROR':
       return 'dot red';
     case 'PENDING':
     case 'CREATED':
+    case 'QUEUED':
+    case 'INITIALIZING':
       return 'dot grey';
     case 'RUNNING_WES':
       return 'sm-loader darkgreen';
@@ -37,9 +41,11 @@ const statusToClassName = function (status) {
     case 'RUNNING':
     case 'RUNNING_OTP':
     case 'CHECKING':
+    case 'PAUSED':
       return 'sm-loader green';
     case 'SUCCESS':
     case 'FINISHED/COMPLETED':
+    case 'COMPLETE':
       return 'dot green';
     case 'OMITTED':
     case 'OMITTED_MISSING_PRECONDITION':
@@ -49,6 +55,8 @@ const statusToClassName = function (status) {
     case 'RESTARTED':
       return 'dot orange';
     case 'KILLED':
+    case 'CANCELED':
+    case 'CANCELING':
       return 'dot black';
     default:
       return '';

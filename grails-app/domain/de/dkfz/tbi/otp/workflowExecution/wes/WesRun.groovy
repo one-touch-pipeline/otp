@@ -42,7 +42,7 @@ class WesRun implements Entity {
         /**
          * Indicate, that the monitoring has finished
          */
-        CHECKED
+        FINISHED
     }
 
     /**
