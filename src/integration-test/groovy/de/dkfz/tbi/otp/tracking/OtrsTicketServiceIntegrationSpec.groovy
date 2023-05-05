@@ -36,6 +36,7 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
+import static de.dkfz.tbi.TestCase.assertContainSame
 import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus.*
 
 @Rollback
@@ -46,6 +47,7 @@ class OtrsTicketServiceIntegrationSpec extends Specification implements DomainFa
 
     void setup() {
         otrsTicketService = new OtrsTicketService()
+        otrsTicketService.processingOptionService = new ProcessingOptionService()
         otrsTicketService.notificationCreator = new NotificationCreator()
         otrsTicketService.notificationCreator.processingOptionService = new ProcessingOptionService()
         otrsTicketService.notificationCreator.userProjectRoleService = new UserProjectRoleService()
@@ -117,6 +119,27 @@ class OtrsTicketServiceIntegrationSpec extends Specification implements DomainFa
 
         where:
         step << OtrsTicket.ProcessingStep.values()
+    }
+
+    void 'findAllSeqTracks finds expected SeqTracks'() {
+        given:
+        OtrsTicket ticketA = createOtrsTicket()
+        FastqImportInstance fastqImportInstanceA1 = createFastqImportInstance(otrsTicket: ticketA)
+        FastqImportInstance fastqImportInstanceA2 = createFastqImportInstance(otrsTicket: ticketA)
+        SeqTrack seqTrackA1 = createSeqTrackWithOneDataFile([:], [fastqImportInstance: fastqImportInstanceA1])
+        SeqTrack seqTrackA2 = createSeqTrackWithOneDataFile([:], [fastqImportInstance: fastqImportInstanceA2])
+        SeqTrack seqTrackA3 = createSeqTrackWithOneDataFile([:], [fastqImportInstance: fastqImportInstanceA2])
+
+        OtrsTicket ticketB = createOtrsTicket()
+        FastqImportInstance fastqImportInstanceB1 = createFastqImportInstance(otrsTicket: ticketB)
+        SeqTrack seqTrackB1 = DomainFactory.createSeqTrackWithTwoDataFiles([:], [fastqImportInstance: fastqImportInstanceB1], [:])
+
+        OtrsTicket ticketC = createOtrsTicket()
+
+        expect:
+        assertContainSame(otrsTicketService.findAllSeqTracks(ticketA), [seqTrackA1, seqTrackA2, seqTrackA3])
+        assertContainSame(otrsTicketService.findAllSeqTracks(ticketB), [seqTrackB1])
+        otrsTicketService.findAllSeqTracks(ticketC).isEmpty()
     }
 
     void 'markFinalNotificationSent, when call, then the flag finalNotificationSent should be true'() {
@@ -360,5 +383,16 @@ class OtrsTicketServiceIntegrationSpec extends Specification implements DomainFa
 
         where:
         instancesToCreate << [0, 1, 2]
+    }
+
+    void "getPrefixedTicketNumber, should give prefixed ticket number"() {
+        given:
+        final String TICKET_PREFIX = "prefix"
+        OtrsTicket otrsTicket = createOtrsTicket()
+
+        DomainFactory.createProcessingOptionForOtrsTicketPrefix(TICKET_PREFIX)
+
+        expect:
+        otrsTicketService.getPrefixedTicketNumber(otrsTicket) == "${TICKET_PREFIX}#${otrsTicket.ticketNumber}"
     }
 }

@@ -43,17 +43,17 @@ import java.text.SimpleDateFormat
 class DataTransferController implements CheckAndCall {
 
     static allowedMethods = [
-            index                                   : 'GET',
-            addDataTransferAgreement                : 'POST',
-            addFilesToTransferAgreement             : 'POST',
-            addFilesToTransfer                      : 'POST',
-            addTransfer                             : 'POST',
-            markTransferAsCompleted                 : 'POST',
-            downloadDataTransferAgreementDocument   : 'GET',
-            downloadDataTransferDocument            : 'GET',
-            updateDataTransferAgreementComment      : 'POST',
-            updateDataTransferComment               : 'POST',
-            deleteDataTransferAgreement             : 'POST',
+            index                                : 'GET',
+            addDataTransferAgreement             : 'POST',
+            addFilesToTransferAgreement          : 'POST',
+            addFilesToTransfer                   : 'POST',
+            addTransfer                          : 'POST',
+            markTransferAsCompleted              : 'POST',
+            downloadDataTransferAgreementDocument: 'GET',
+            downloadDataTransferDocument         : 'GET',
+            updateDataTransferAgreementComment   : 'POST',
+            updateDataTransferComment            : 'POST',
+            deleteDataTransferAgreement          : 'POST',
     ]
 
     DataTransferAgreementService dataTransferAgreementService
@@ -62,7 +62,11 @@ class DataTransferController implements CheckAndCall {
 
     def index() {
         Project project = projectSelectionService.selectedProject
-        List<DataTransferAgreement> dataTransferAgreements = DataTransferAgreement.findAllByProject(project, [sort: "dateCreated", order: "desc"])
+        List<DataTransferAgreement> dataTransferAgreements = dataTransferAgreementService.getSortedDataTransferAgreementsByProject(project)
+                .collect { it ->
+                    it.transfers = it.transfers.sort { a, b -> b.dateCreated <=> a.dateCreated }
+                    return it
+                }
 
         return [
                 dataTransferAgreements: dataTransferAgreements,
@@ -84,12 +88,12 @@ class DataTransferController implements CheckAndCall {
             } else {
                 try {
                     DataTransferAgreement dta = new DataTransferAgreement([
-                            project:         cmd.projectSelectionService.requestedProject,
-                            comment:         cmd.comment,
-                            dtaId:           cmd.dtaId,
-                            legalBasis:      cmd.legalBasis,
+                            project        : cmd.projectSelectionService.requestedProject,
+                            comment        : cmd.comment,
+                            dtaId          : cmd.dtaId,
+                            legalBasis     : cmd.legalBasis,
                             peerInstitution: cmd.peerInstitution,
-                            validityDate:    cmd.validityDate,
+                            validityDate   : cmd.validityDate,
                     ])
 
                     dataTransferAgreementService.persistDtaWithDtaDocuments(dta, cmd.files)
@@ -137,15 +141,15 @@ class DataTransferController implements CheckAndCall {
                     flash.message = new FlashMessage(g.message(code: "dataTransfer.message.success.storage") as String)
                     DataTransfer dataTransfer = new DataTransfer([
                             dataTransferAgreement: cmd.dataTransferAgreement,
-                            requester: cmd.requester,
-                            ticketID: cmd.ticketID,
-                            direction: cmd.direction,
-                            transferMode: cmd.transferMode,
-                            peerPerson: cmd.peerPerson,
-                            peerAccount: cmd.peerAccount,
-                            transferDate: cmd.transferDate,
-                            completionDate: cmd.completionDate,
-                            comment: cmd.comment,
+                            requester            : cmd.requester,
+                            ticketID             : cmd.ticketID,
+                            direction            : cmd.direction,
+                            transferMode         : cmd.transferMode,
+                            peerPerson           : cmd.peerPerson,
+                            peerAccount          : cmd.peerAccount,
+                            transferDate         : cmd.transferDate,
+                            completionDate       : cmd.completionDate,
+                            comment              : cmd.comment,
                     ])
                     dataTransferService.persistDataTransferWithTransferDocuments(dataTransfer, cmd.files)
                     redirectParams["fragment"] = "doc${cmd.dataTransferAgreement.id}"

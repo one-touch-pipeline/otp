@@ -54,14 +54,18 @@ class NotificationCreatorSpec extends Specification implements DataTest, DomainF
 
     private NotificationCreator notificationCreator = new NotificationCreator()
 
+    final String ticketPrefix = "prefix"
+
     void setup() {
         notificationCreator.processingOptionService = new ProcessingOptionService()
         notificationCreator.userProjectRoleService = new UserProjectRoleService()
-        notificationCreator.otrsTicketService = new OtrsTicketService()
+        notificationCreator.otrsTicketService = new OtrsTicketService(
+                processingOptionService: new ProcessingOptionService(),
+        )
         notificationCreator.createNotificationTextService = Stub(CreateNotificationTextService) {
             getMessageSourceService() >> Mock(MessageSourceService)
         }
-        DomainFactory.createProcessingOptionForOtrsTicketPrefix("TICKET_PREFIX")
+        DomainFactory.createProcessingOptionForOtrsTicketPrefix(ticketPrefix)
         DomainFactory.createProcessingOptionForTicketSystemEmail()
 
         GroovyMock([global: true], GrailsArtefactCheckHelper)
@@ -170,7 +174,7 @@ ILSe 5678, runA, lane 1, ${sampleText}
 
         notificationCreator.mailHelperService = Mock(MailHelperService) {
             1 * sendEmailToTicketSystem(_, _) >> { String emailSubject, String content ->
-                assert "${ticket.prefixedTicketNumber} Processing Status Update".toString() == emailSubject
+                assert "${ticketPrefix}#${ticket.ticketNumber} Processing Status Update".toString() == emailSubject
                 assert content.startsWith(expectedContent)
             }
         }
@@ -186,7 +190,7 @@ ILSe 5678, runA, lane 1, ${sampleText}
         given:
         OtrsTicket ticket = createOtrsTicket()
         notificationCreator.mailHelperService = Mock(MailHelperService) {
-            1 * sendEmailToTicketSystem("${ticket.prefixedTicketNumber} Final Processing Status Update", _)
+            1 * sendEmailToTicketSystem("${ticketPrefix}#${ticket.ticketNumber} Final Processing Status Update", _)
         }
 
         expect:
@@ -197,7 +201,7 @@ ILSe 5678, runA, lane 1, ${sampleText}
         given:
         OtrsTicket ticket = createOtrsTicket()
         SeqTrack seqTrack = createSeqTrackforCustomFinalNotification(createProject(), createIlseSubmission(), ticket)
-        String expectedHeader = "${ticket.prefixedTicketNumber} Final Processing Status Update [S#${seqTrack.ilseId}] ${seqTrack.individual.pid} " +
+        String expectedHeader = "${ticketPrefix}#${ticket.ticketNumber} Final Processing Status Update [S#${seqTrack.ilseId}] ${seqTrack.individual.pid} " +
                 "(${seqTrack.seqType.displayName})"
         notificationCreator.mailHelperService = Mock(MailHelperService) {
             1 * sendEmailToTicketSystem(expectedHeader, _)
@@ -220,7 +224,7 @@ ILSe 5678, runA, lane 1, ${sampleText}
         String ilseString = seqTracks*.ilseId.sort().join(',')
         String pidString = seqTracks*.individual*.pid.sort().join(', ')
         String seqTypeStringString = seqTracks*.seqType*.displayName.sort().join(', ')
-        String expectedHeader = "${ticket.prefixedTicketNumber} Final Processing Status Update [S#${ilseString}] ${pidString} (${seqTypeStringString})"
+        String expectedHeader = "${ticketPrefix}#${ticket.ticketNumber} Final Processing Status Update [S#${ilseString}] ${pidString} (${seqTypeStringString})"
 
         notificationCreator.mailHelperService = Mock(MailHelperService) {
             1 * sendEmailToTicketSystem(expectedHeader, _)
@@ -297,7 +301,7 @@ ILSe 5678, runA, lane 1, ${sampleText}
 
         then:
         1 * notificationCreator.mailHelperService.sendEmailToTicketSystem(_, _) >> { String emailSubject, String content ->
-            assert emailSubject.startsWith("[${ticket.prefixedTicketNumber}]")
+            assert emailSubject.startsWith("[${ticketPrefix}#${ticket.ticketNumber}]")
             assert emailSubject.contains("Workflow created successfully for ${metaDataFile.fileName}")
             assert content.contains("The workflow creation succeeded:")
             assert content.contains("Import id: ${metaDataFile.fastqImportInstance.id}")
@@ -325,7 +329,7 @@ ILSe 5678, runA, lane 1, ${sampleText}
 
         then:
         1 * notificationCreator.mailHelperService.sendEmailToTicketSystem(_, _) >> { String emailSubject, String content ->
-            assert emailSubject.startsWith("[${ticket.prefixedTicketNumber}]")
+            assert emailSubject.startsWith("[${ticketPrefix}#${ticket.ticketNumber}]")
             assert emailSubject.contains("Failed to create workflows for ${metaDataFile.fileName}")
             assert content.contains("The workflow creation failed:")
             assert content.contains("Import id: ${metaDataFile.fastqImportInstance.id}")

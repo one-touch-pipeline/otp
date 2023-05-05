@@ -37,6 +37,8 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 @Transactional
 class OtrsTicketService {
 
+    ProcessingOptionService processingOptionService
+
     @Autowired
     NotificationCreator notificationCreator
 
@@ -148,6 +150,13 @@ class OtrsTicketService {
         return (otrsTickets ?: []) as Set
     }
 
+    Set<SeqTrack> findAllSeqTracks(OtrsTicket otrsTicket) {
+        return new LinkedHashSet<SeqTrack>(SeqTrack.findAll(
+                'FROM SeqTrack st WHERE EXISTS (FROM DataFile df WHERE df.seqTrack = st AND df.fastqImportInstance.otrsTicket = :otrsTicket)',
+                [otrsTicket: otrsTicket]
+        ))
+    }
+
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void assignOtrsTicketToFastqImportInstance(String ticketNumber, Long fastqImportInstanceId) {
         FastqImportInstance fastqImportInstance = FastqImportInstance.get(fastqImportInstanceId)
@@ -182,7 +191,7 @@ class OtrsTicketService {
         fastqImportInstance.otrsTicket = newOtrsTicket
         assert fastqImportInstance.save(flush: true)
 
-        ProcessingStatus status = notificationCreator.getProcessingStatus(newOtrsTicket.findAllSeqTracks())
+        ProcessingStatus status = notificationCreator.getProcessingStatus(findAllSeqTracks(newOtrsTicket))
         for (OtrsTicket.ProcessingStep step : OtrsTicket.ProcessingStep.values()) {
             ProcessingStatus.WorkflowProcessingStatus stepStatus = status."${step}ProcessingStatus"
             if (stepStatus.mightDoMore) {
@@ -220,11 +229,15 @@ class OtrsTicketService {
         } as List<FastqImportInstance>
     }
 
-    static String buildTicketDirectLink(OtrsTicket otrsTicket) {
+    String getPrefixedTicketNumber(OtrsTicket otrsTicket) {
+        return "${processingOptionService.findOptionAsString(ProcessingOption.OptionName.TICKET_SYSTEM_NUMBER_PREFIX)}#${otrsTicket.ticketNumber}"
+    }
+
+    String buildTicketDirectLink(OtrsTicket otrsTicket) {
         return buildTicketDirectLink(otrsTicket.ticketNumber)
     }
 
-    static String buildTicketDirectLinkNullPointerSave(OtrsTicket otrsTicket) {
+    String buildTicketDirectLinkNullPointerSave(OtrsTicket otrsTicket) {
         return otrsTicket ? buildTicketDirectLink(otrsTicket.ticketNumber) : ""
     }
 

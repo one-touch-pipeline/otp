@@ -188,8 +188,10 @@ class MetadataImportController implements CheckAndCall, PlainResponseExceptionHa
 
     def details(FastqImportInstance fastqImportInstance) {
         return [
-                metaDataDetails    : getMetadataDetails(fastqImportInstance),
-                fastqImportInstance: fastqImportInstance,
+                metaDataDetails      : getMetadataDetails(fastqImportInstance),
+                fastqImportInstanceId: fastqImportInstance.id,
+                otrsTicket           : fastqImportInstance.otrsTicket,
+                otrsTicketUrl        : otrsTicketService.buildTicketDirectLinkNullPointerSave(fastqImportInstance.otrsTicket),
         ]
     }
 

@@ -58,6 +58,7 @@ class CreateNotificationTextService {
     MessageSourceService messageSourceService
     ProcessingOptionService processingOptionService
     ProjectService projectService
+    OtrsTicketService otrsTicketService
 
     /**
      * Helper function to create the notification for exactly one ProcessingStep.
@@ -124,7 +125,7 @@ class CreateNotificationTextService {
     String buildSeqCenterComment(OtrsTicket otrsTicket) {
         String ticketComment = otrsTicket.seqCenterComment ?: ""
 
-        List<SeqCenter> seqCenters = otrsTicket.findAllSeqTracks()*.seqCenter.unique()
+        List<SeqCenter> seqCenters = otrsTicketService.findAllSeqTracks(otrsTicket)*.seqCenter.unique()
         String generalComment = seqCenters.size() == 1 ? processingOptionService.findOptionAsString(
                 OptionName.NOTIFICATION_TEMPLATE_SEQ_CENTER_NOTE,
                 seqCenters.first().name

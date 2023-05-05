@@ -31,7 +31,6 @@ import de.dkfz.tbi.otp.utils.StringUtils
 import de.dkfz.tbi.util.TimeFormats
 import de.dkfz.tbi.util.TimeUtils
 
-import javax.sql.DataSource
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.time.LocalDate
@@ -40,7 +39,7 @@ import java.time.LocalDate
 @Transactional
 class ProcessingTimeStatisticsService {
 
-    DataSource dataSource
+    OtrsTicketService otrsTicketService
 
     List<OtrsTicket> findAllOtrsTicketsByDateBetweenAndSearch(LocalDate dateFrom, LocalDate dateTo, String search) {
         assert dateFrom: "No date 'from' is defined."
@@ -86,14 +85,14 @@ ${search ? """
     List formatData(OtrsTicket ticket) {
         assert ticket: "No OTRS ticket defined."
 
-        List<SeqTrack> seqTracks = ticket.findAllSeqTracks() as List
+        List<SeqTrack> seqTracks = otrsTicketService.findAllSeqTracks(ticket) as List
         List<String> ilseIds = seqTracks.collect { it.ilseSubmission?.ilseNumber as String }.unique().sort()
         List<String> projectNames = seqTracks.collect { it.sample.individual.project.name }.unique().sort()
         List<String> sampleNames = seqTracks.collect { "${it.sample.individual.pid} ${it.sample.sampleType.name}" }.unique().sort()
         List<String> runs = seqTracks.collect { it.run.name }.unique().sort()
 
         List data = [
-                ticket.url,
+                otrsTicketService.buildTicketDirectLink(ticket),
                 ilseIds ?: ['none'],
                 projectNames,
                 runs,

@@ -33,7 +33,7 @@
 <div class="body">
     <g:render template="/templates/messages"/>
 
-    <h1><g:message code="notification.notificationPreview.header"/>: <a href="${otrsTicketLink}">${cmd.fastqImportInstance.otrsTicket.prefixedTicketNumber}</a></h1>
+    <h1><g:message code="notification.notificationPreview.header"/>: <a href="${otrsTicketLink}">${prefixedTicketNumber}</a></h1>
 
     <g:form class="basic-flex-box">
         <div class="item basic-right-padding">

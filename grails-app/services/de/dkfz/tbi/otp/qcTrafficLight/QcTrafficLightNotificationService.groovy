@@ -56,7 +56,7 @@ class QcTrafficLightNotificationService {
         }
 
         Set<OtrsTicket> tickets = otrsTicketService.findAllOtrsTickets(bamFile.containedSeqTracks)
-        String ticketNumber = tickets ? "${tickets.last().prefixedTicketNumber} " : ""
+        String ticketNumber = tickets ? "${otrsTicketService.getPrefixedTicketNumber(tickets.last())} " : ""
 
         List<IlseSubmission> ilseSubmissions = bamFile.containedSeqTracks*.ilseSubmission.findAll().unique()
         String ilse = ilseSubmissions ? "[S#${ilseSubmissions*.ilseNumber.sort().join(',')}] " : ""

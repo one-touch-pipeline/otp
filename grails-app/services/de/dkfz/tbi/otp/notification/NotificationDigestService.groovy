@@ -44,9 +44,10 @@ class NotificationDigestService {
     MailHelperService mailHelperService
     IlseSubmissionService ilseSubmissionService
     AbstractMergedBamFileService abstractMergedBamFileService
+    OtrsTicketService otrsTicketService
 
     List<PreparedNotification> prepareNotifications(NotificationCommand cmd) {
-        return cmd.otrsTicket.findAllSeqTracks().groupBy { it.project }.collect { Project project, List<SeqTrack> seqTracksOfProject ->
+        return otrsTicketService.findAllSeqTracks(cmd.otrsTicket).groupBy { it.project }.collect { Project project, List<SeqTrack> seqTracksOfProject ->
             ProcessingStatus status = notificationCreator.getProcessingStatus(seqTracksOfProject)
             List<AbstractMergedBamFile> blockedBams = abstractMergedBamFileService.getActiveBlockedBamsContainingSeqTracks(seqTracksOfProject)
             return new PreparedNotification(
@@ -63,7 +64,7 @@ class NotificationDigestService {
 
     String buildNotificationSubject(OtrsTicket otrsTicket, List<SeqTrack> seqTracks, Project project) {
         String ilseIdentifier = ilseSubmissionService.buildIlseIdentifierFromSeqTracks(seqTracks)
-        return "[${otrsTicket.prefixedTicketNumber}]${ilseIdentifier} - ${project.name} - OTP processing completed"
+        return "[${otrsTicketService.getPrefixedTicketNumber(otrsTicket)}]${ilseIdentifier} - ${project.name} - OTP processing completed"
     }
 
     String buildNotificationDigest(NotificationCommand cmd, ProcessingStatus status, List<AbstractMergedBamFile> bams) {

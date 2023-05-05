@@ -61,9 +61,12 @@ class JobMailService {
         String subjectPrefix = object.processingPriority?.errorMailPrefix ?: "ERROR"
         Collection<SeqTrack> seqTracks = object.containedSeqTracks
         String ilseNumbers = seqTracks*.ilseSubmission*.ilseNumber.unique().sort().join(', ')
-        Collection<String> openTickets = seqTracks ? otrsTicketService.findAllOtrsTickets(seqTracks).findAll { OtrsTicket otrsTicket ->
+        Set<OtrsTicket> openTickets = seqTracks ? otrsTicketService.findAllOtrsTickets(seqTracks).findAll { OtrsTicket otrsTicket ->
             !otrsTicket.finalNotificationSent
-        }*.url : []
+        } : []
+        Set<String> openTicketsUrl = openTickets.collect {
+            otrsTicketService.buildTicketDirectLink(it)
+        }
 
         List<ClusterJob> clusterJobs = ClusterJob.findAllByProcessingStep(step)
         List<ClusterJobIdentifier> clusterJobIdentifiers = ClusterJobIdentifier.asClusterJobIdentifierList(clusterJobs)
@@ -87,7 +90,7 @@ class JobMailService {
                 originWorkflowStart   : dateString(firstWorkflow.started),
                 objectInformation     : object.toString().replaceAll(/ ?<br> ?/, ' ').replaceAll(/\n/, ' '),
                 ilseNumbers           : ilseNumbers,
-                openTickets           : openTickets.join(', '),
+                openTickets           : openTicketsUrl.join(', '),
         ]
         message << mapToString('Workflow', otpWorkflow)
 

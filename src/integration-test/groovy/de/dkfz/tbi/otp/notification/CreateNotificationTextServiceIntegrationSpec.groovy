@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.notification
 
-import grails.core.GrailsApplication
 import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
 import grails.web.mapping.LinkGenerator
@@ -37,6 +36,7 @@ import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.tracking.OtrsTicket
+import de.dkfz.tbi.otp.tracking.OtrsTicketService
 import de.dkfz.tbi.otp.tracking.ProcessingStatus
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.MessageSourceService
@@ -60,9 +60,7 @@ faq:${faq}
 '''
 
     CreateNotificationTextService createNotificationTextService
-
-    @Autowired
-    GrailsApplication grailsApplication
+    OtrsTicketService otrsTicketService
 
     @Autowired
     LinkGenerator linkGenerator
@@ -114,12 +112,13 @@ faq:${faq}
             1 * alignmentNotification(_) >> "something"
         }
         createNotificationTextService.processingOptionService = new ProcessingOptionService()
+        createNotificationTextService.otrsTicketService = new OtrsTicketService()
 
         createNotificationTextService.messageSourceService = new MessageSourceService(
                 messageSource: Mock(PluginAwareResourceBundleMessageSource) {
                     1 * getMessageInternal("notification.template.base.faq", [], _) >> "FAQs"
                     _ * getMessageInternal("notification.template.base", [], _) >> NOTIFICATION_MESSAGE
-            }
+                }
         )
 
         when:
@@ -140,12 +139,13 @@ faq:${faq}
             1 * alignmentNotification(processingStatus) >> "something"
         }
         createNotificationTextService.processingOptionService = new ProcessingOptionService()
+        createNotificationTextService.otrsTicketService = new OtrsTicketService()
 
         createNotificationTextService.messageSourceService = new MessageSourceService(
                 messageSource: Mock(PluginAwareResourceBundleMessageSource) {
                     0 * getMessageInternal("notification.template.base.faq", [], _) >> "FAQs"
                     _ * getMessageInternal("notification.template.base", [], _) >> NOTIFICATION_MESSAGE
-            }
+                }
         )
 
         when:
@@ -170,7 +170,7 @@ faq:${faq}
         )
         DomainFactory.createProcessingOptionLazy(
                 name: ProcessingOption.OptionName.NOTIFICATION_TEMPLATE_SEQ_CENTER_NOTE,
-                type: CollectionUtils.exactlyOneElement(ticket.findAllSeqTracks()*.seqCenter.unique()).name,
+                type: CollectionUtils.exactlyOneElement(otrsTicketService.findAllSeqTracks(ticket)*.seqCenter.unique()).name,
                 value: generalSeqCenterComment
         )
 
@@ -194,11 +194,12 @@ faq:${faq}
         }
         createNotificationTextService.messageSourceService = new MessageSourceService(
                 messageSource: Mock(PluginAwareResourceBundleMessageSource) {
-                    _ * getMessageInternal("notification.template.seqCenterNote.${CollectionUtils.exactlyOneElement(ticket.findAllSeqTracks()*.seqCenter.unique()).name.toLowerCase()}", [], _) >> generalSeqCenterComment
+                    _ * getMessageInternal("notification.template.seqCenterNote.${CollectionUtils.exactlyOneElement(otrsTicketService.findAllSeqTracks(ticket)*.seqCenter.unique()).name.toLowerCase()}", [], _) >> generalSeqCenterComment
                     _ * getMessageInternal("notification.template.base", [], _) >> NOTIFICATION_MESSAGE
                 }
         )
         createNotificationTextService.processingOptionService = new ProcessingOptionService()
+        createNotificationTextService.otrsTicketService = new OtrsTicketService()
 
         String expectedSeqCenterComment = ""
 
@@ -295,6 +296,7 @@ faq:
                 }
         )
         createNotificationTextService.processingOptionService = new ProcessingOptionService()
+        createNotificationTextService.otrsTicketService = new OtrsTicketService()
 
         String expectedSeqCenterComment
 
@@ -330,9 +332,9 @@ faq:
     void "test LinkGenerator.link() method, when input valid, return well formed otp URL"() {
         given:
         Map linkProperties = [
-                (LinkGenerator.ATTRIBUTE_CONTROLLER) : "metadataImport",
-                (LinkGenerator.ATTRIBUTE_ACTION)     : "details",
-                (LinkGenerator.ATTRIBUTE_ID)         : 12345,
+                (LinkGenerator.ATTRIBUTE_CONTROLLER): "metadataImport",
+                (LinkGenerator.ATTRIBUTE_ACTION)    : "details",
+                (LinkGenerator.ATTRIBUTE_ID)        : 12345,
         ]
 
         String baseUrl = createNotificationTextService.linkGenerator.serverBaseURL

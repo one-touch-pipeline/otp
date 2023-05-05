@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.project.dta
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.multipart.MultipartFile
 
@@ -29,6 +30,7 @@ import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.ExecutionHelperService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.Realm
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.utils.FileNameGenerator
 import de.dkfz.tbi.otp.FileIsEmptyException
@@ -121,6 +123,11 @@ class DataTransferAgreementService {
         }
 
         return resultDta
+    }
+
+    @CompileDynamic
+    List<DataTransferAgreement> getSortedDataTransferAgreementsByProject(Project project) {
+        DataTransferAgreement.findAllByProject(project, [sort: "dateCreated", order: "desc"])
     }
 
     /**

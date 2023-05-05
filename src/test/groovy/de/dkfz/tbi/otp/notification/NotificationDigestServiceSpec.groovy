@@ -32,6 +32,7 @@ import de.dkfz.tbi.otp.domainFactory.pipelines.AlignmentPipelineFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.tracking.OtrsTicket
+import de.dkfz.tbi.otp.tracking.OtrsTicketService
 import de.dkfz.tbi.otp.tracking.PreparedNotification
 import de.dkfz.tbi.otp.utils.MailHelperService
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
@@ -56,8 +57,10 @@ class NotificationDigestServiceSpec extends Specification implements DomainFacto
         ]
     }
 
+    String ticketPrefix = "prefix"
+
     void setupData() {
-        DomainFactory.createProcessingOptionLazy(name: ProcessingOption.OptionName.TICKET_SYSTEM_NUMBER_PREFIX, value: "prefix")
+        DomainFactory.createProcessingOptionLazy(name: ProcessingOption.OptionName.TICKET_SYSTEM_NUMBER_PREFIX, value: ticketPrefix)
         DomainFactory.createProcessingOptionLazy(name: ProcessingOption.OptionName.HELP_DESK_TEAM_NAME, value: "salutation")
     }
 
@@ -66,6 +69,9 @@ class NotificationDigestServiceSpec extends Specification implements DomainFacto
         setupData()
         NotificationDigestService service = new NotificationDigestService(
                 ilseSubmissionService: new IlseSubmissionService(),
+                otrsTicketService: new OtrsTicketService(
+                        processingOptionService: new ProcessingOptionService(),
+                ),
         )
 
         OtrsTicket ticket = createOtrsTicket()
@@ -75,7 +81,7 @@ class NotificationDigestServiceSpec extends Specification implements DomainFacto
             createSeqTrack(ilseSubmission: createIlseSubmission(ilseNumber: 2)),
         ]
 
-        String expected = "[${ticket.prefixedTicketNumber}][S#1,2] - ${project} - OTP processing completed"
+        String expected = "[${ticketPrefix}#${ticket.ticketNumber}][S#1,2] - ${project} - OTP processing completed"
 
         when:
         String result = service.buildNotificationSubject(ticket, seqTracks, project)

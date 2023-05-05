@@ -56,6 +56,7 @@ class NotificationController implements CheckAndCall {
                     cmd                  : cmd,
                     importInstances      : otrsTicketService.getAllFastqImportInstances(cmd.otrsTicket).sort { it.dateCreated },
                     otrsTicketLink       : otrsTicketService.buildTicketDirectLinkNullPointerSave(cmd.otrsTicket),
+                    prefixedTicketNumber : otrsTicketService.getPrefixedTicketNumber(cmd.fastqImportInstance.otrsTicket),
                     steps                : cmd.steps,
                     notifyQcThresholds   : cmd.notifyQcThresholds,
                     preparedNotifications: notificationDigestService.prepareNotifications(cmd),

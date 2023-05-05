@@ -30,12 +30,15 @@ import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.OtrsTicket
+import de.dkfz.tbi.otp.tracking.OtrsTicketService
 
 @Rollback
 @Integration
 class QcTrafficLightNotificationServiceIntegrationSpec extends Specification implements IsRoddy {
 
     QcTrafficLightNotificationService qcTrafficLightNotificationService
+
+    OtrsTicketService otrsTicketService
 
     @Unroll
     void "createResultsAreWarnedSubject, properly builds subject"() {
@@ -60,7 +63,7 @@ class QcTrafficLightNotificationServiceIntegrationSpec extends Specification imp
         }
         RoddyBamFile bamFile = createBamFile(seqTracks: seqTracks)
 
-        String otrsPrefix = useOtrsTickets ? "${otrsTickets.last().prefixedTicketNumber} " : ""
+        String otrsPrefix = useOtrsTickets ? "${otrsTicketService.getPrefixedTicketNumber(otrsTickets.last())} " : ""
         String base = "[S#${seqTracks*.ilseSubmission.ilseNumber.sort().join(',')}] QC issues for bam file of ${bamFile.sample} ${bamFile.seqType}"
 
         when:

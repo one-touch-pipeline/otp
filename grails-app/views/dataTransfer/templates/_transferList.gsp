@@ -23,7 +23,7 @@
 <%@ page import="de.dkfz.tbi.util.TimeFormats" %>
 <ul class="transfer-listing">
     <hr>
-    <g:each var="transfer" in="${dta.transfersSortedByDateCreatedDesc}">
+    <g:each var="transfer" in="${dta.transfers}">
         <li class="${transfer.completionDate ? "completed" : "ongoing"}">
             <g:message code="dataTransfer.dta.transfer.transfer"/>
             ${transfer.id}, ${transfer.direction.adjective} <strong>${transfer.peerPerson} (${transfer.peerAccount ?: "N/A"})</strong> via ${transfer.transferMode}

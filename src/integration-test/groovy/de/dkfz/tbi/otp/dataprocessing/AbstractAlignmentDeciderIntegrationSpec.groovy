@@ -48,11 +48,17 @@ class AbstractAlignmentDeciderIntegrationSpec extends Specification {
     final shouldFail = new GroovyTestCase().&shouldFail
 
     void setupData() {
+        OtrsTicketService otrsTicketService = new OtrsTicketService(
+                processingOptionService: new ProcessingOptionService(),
+        )
+
         decider = newDecider()
-        decider.otrsTicketService = new OtrsTicketService()
-        decider.unalignableSeqTrackEmailCreator = new UnalignableSeqTrackEmailCreator()
+        decider.otrsTicketService = otrsTicketService
+        decider.unalignableSeqTrackEmailCreator = new UnalignableSeqTrackEmailCreator(
+                otrsTicketService: otrsTicketService
+        )
         decider.unalignableSeqTrackEmailCreator.mailHelperService = Mock(MailHelperService)
-        decider.unalignableSeqTrackEmailCreator.otrsTicketService = new OtrsTicketService()
+        decider.unalignableSeqTrackEmailCreator.otrsTicketService = otrsTicketService
         DomainFactory.createRoddyAlignableSeqTypes()
     }
 

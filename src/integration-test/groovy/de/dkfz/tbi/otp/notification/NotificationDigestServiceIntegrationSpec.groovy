@@ -123,6 +123,9 @@ class NotificationDigestServiceIntegrationSpec extends Specification implements 
                     sendCalls * sendEmail(_, _, _)
                 },
                 qcTrafficLightNotificationService: Mock(QcTrafficLightNotificationService),
+                otrsTicketService: new OtrsTicketService(
+                        processingOptionService: new ProcessingOptionService(),
+                ),
         )
     }
 

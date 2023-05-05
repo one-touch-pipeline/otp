@@ -24,7 +24,6 @@ package de.dkfz.tbi.otp.project.dta
 import grails.gorm.hibernate.annotation.ManagedEntity
 
 import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.otp.project.ProjectInfoService
 import de.dkfz.tbi.otp.utils.Entity
 
 @ManagedEntity
@@ -70,7 +69,7 @@ class DataTransferAgreement implements Entity {
 
     static hasMany = [
             dataTransferAgreementDocuments: DataTransferAgreementDocument,
-            transfers: DataTransfer,
+            transfers                     : DataTransfer,
     ]
 
     static belongsTo = [
@@ -86,7 +85,7 @@ class DataTransferAgreement implements Entity {
 
     static mappedBy = [
             dataTransferAgreementDocuments: "dataTransferAgreement",
-            transfers: "dataTransferAgreement",
+            transfers                     : "dataTransferAgreement",
     ]
 
     static Closure constraints = {
@@ -94,10 +93,6 @@ class DataTransferAgreement implements Entity {
         dtaId blank: false, nullable: true
         peerInstitution blank: false
         validityDate nullable: true
-    }
-
-    List<DataTransfer> getTransfersSortedByDateCreatedDesc() {
-        return transfers.sort(ProjectInfoService.SORT_DATE_CREATED_DESC)
     }
 
     @Override

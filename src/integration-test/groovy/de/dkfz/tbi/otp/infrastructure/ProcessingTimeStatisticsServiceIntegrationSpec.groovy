@@ -32,6 +32,7 @@ import de.dkfz.tbi.otp.Comment
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.tracking.OtrsTicket
+import de.dkfz.tbi.otp.tracking.OtrsTicketService
 import de.dkfz.tbi.otp.tracking.ProcessingTimeStatisticsService
 import de.dkfz.tbi.util.TimeFormats
 import de.dkfz.tbi.util.TimeUtils
@@ -136,8 +137,8 @@ class ProcessingTimeStatisticsServiceIntegrationSpec extends Specification {
         )
 
         String url = "url.url"
-        ticket.metaClass.getUrl = { ->
-            return url
+        processingTimeStatisticsService.otrsTicketService = Spy(OtrsTicketService) {
+            1 * buildTicketDirectLink(_) >> url
         }
 
         FastqImportInstance fastqImportInstance = DomainFactory.createFastqImportInstance(otrsTicket: ticket)

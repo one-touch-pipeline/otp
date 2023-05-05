@@ -65,7 +65,7 @@ class ProcessingOptionService {
         }
     }
 
-    private static ProcessingOption findOption(OptionName name, String type = null, Project project = null) {
+    static ProcessingOption findOption(OptionName name, String type = null, Project project = null) {
         return singleElement(ProcessingOption.findAllWhere(
                 name: name,
                 type: type,
@@ -83,18 +83,23 @@ class ProcessingOptionService {
         ProcessingOption option = findOption(name, type)
         return option?.value != null ? option?.value : name.defaultValue
     }
+
     int findOptionAsInteger(OptionName name, String type = null) {
         Integer.parseInt(findOptionAsString(name, type))
     }
+
     long findOptionAsLong(OptionName name, String type = null) {
         Long.parseLong(findOptionAsString(name, type))
     }
+
     double findOptionAsDouble(OptionName name, String type = null) {
         Double.parseDouble(findOptionAsString(name, type))
     }
+
     boolean findOptionAsBoolean(OptionName name, String type = null) {
         findOptionAsString(name, type) == "true"
     }
+
     List<String> findOptionAsList(OptionName name, String type = null) {
         findOptionAsString(name, type)?.split(',')*.trim()
     }

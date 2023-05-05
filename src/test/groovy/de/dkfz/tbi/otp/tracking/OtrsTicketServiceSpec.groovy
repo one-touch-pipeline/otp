@@ -26,6 +26,7 @@ import grails.validation.ValidationException
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 
 class OtrsTicketServiceSpec extends Specification implements DataTest, DomainFactoryCore {
@@ -34,6 +35,7 @@ class OtrsTicketServiceSpec extends Specification implements DataTest, DomainFac
     Class[] getDomainClassesToMock() {
         return [
                 OtrsTicket,
+                ProcessingOption,
         ]
     }
 

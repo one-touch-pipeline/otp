@@ -68,7 +68,7 @@ println ""
 try {
     if (all) {
 
-        ProcessingStatus status = ctx.notificationCreator.getProcessingStatus(otrsTicket.findAllSeqTracks())
+        ProcessingStatus status = ctx.notificationCreator.getProcessingStatus(ctx.otrsTicketService.findAllSeqTracks(otrsTicket))
         println ctx.createNotificationTextService.installationNotification(status).trim()
         println "\n-----------------------\n"
         println ctx.createNotificationTextService.alignmentNotification(status).trim()
@@ -83,7 +83,7 @@ try {
 
     } else {
         println notificationTextService.notification(otrsTicket,
-                notificationCreator.getProcessingStatus(otrsTicket.findAllSeqTracks()), processingStep, project)
+                notificationCreator.getProcessingStatus(ctx.otrsTicketService.findAllSeqTracks(otrsTicket)), processingStep, project)
     }
 }catch (Exception e) {
     println "Please provide the processingStep you want to notify or set all = true in case you want to notify about all steps"

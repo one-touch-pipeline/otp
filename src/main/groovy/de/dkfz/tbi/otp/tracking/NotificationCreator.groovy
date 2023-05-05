@@ -111,7 +111,7 @@ class NotificationCreator {
         if (ticket.finalNotificationSent) {
             return
         }
-        Set<SeqTrack> seqTracks = ticket.findAllSeqTracks()
+        Set<SeqTrack> seqTracks = otrsTicketService.findAllSeqTracks(ticket)
         ProcessingStatus status = getProcessingStatus(seqTracks)
         List<OtrsTicket.ProcessingStep> justCompletedProcessingSteps = []
         boolean mightDoMore = false
@@ -164,7 +164,7 @@ class NotificationCreator {
             if (ticket.automaticNotification && project.processingNotification) {
                 recipients = userProjectRoleService.getEmailsOfToBeNotifiedProjectUsers([project])
             }
-            StringBuilder subject = new StringBuilder("[${ticket.prefixedTicketNumber}] ")
+            StringBuilder subject = new StringBuilder("[${otrsTicketService.getPrefixedTicketNumber(ticket)}] ")
             if (!recipients) {
                 subject.append('TO BE SENT: ')
             }
@@ -191,7 +191,7 @@ class NotificationCreator {
     void sendProcessingStatusOperatorNotification(OtrsTicket ticket, Set<SeqTrack> seqTracks, ProcessingStatus status, boolean finalNotification) {
         StringBuilder subject = new StringBuilder()
 
-        subject.append(ticket.prefixedTicketNumber)
+        subject.append(otrsTicketService.getPrefixedTicketNumber(ticket))
         if (finalNotification) {
             subject.append(' Final')
         }
@@ -260,12 +260,13 @@ class NotificationCreator {
     }
 
     void sendImportSourceOperatorNotification(OtrsTicket ticket) {
-        String prefixedTicketNumber = ticket.prefixedTicketNumber
+        String prefixedTicketNumber = otrsTicketService.getPrefixedTicketNumber(ticket)
         String subject = "Import source ready for deletion [${prefixedTicketNumber}]"
+        String otrsTicketUrl = otrsTicketService.buildTicketDirectLink(ticket)
 
         String content = """\
                 |Related Ticket: ${prefixedTicketNumber}
-                |${ticket.url}
+                |${otrsTicketUrl}
                 |
                 |Deletion Script:
                 |
@@ -476,7 +477,7 @@ class NotificationCreator {
         metaDataFile.refresh()
         long id = metaDataFile.fastqImportInstance.id
 
-        String subject = "[${metaDataFile.fastqImportInstance.otrsTicket.prefixedTicketNumber}] " +
+        String subject = "[${otrsTicketService.getPrefixedTicketNumber(metaDataFile.fastqImportInstance.otrsTicket)}] " +
                 "Workflow created successfully for ${metaDataFile.fileName}"
 
         String body = [
@@ -495,7 +496,7 @@ class NotificationCreator {
         long id = metaDataFile.fastqImportInstance.id
         List<Long> seqTrackIds = metaDataFile.fastqImportInstance.dataFiles*.seqTrack*.id.unique().sort()
 
-        String subject = "[${metaDataFile.fastqImportInstance.otrsTicket.prefixedTicketNumber}] " +
+        String subject = "[${otrsTicketService.getPrefixedTicketNumber(metaDataFile.fastqImportInstance.otrsTicket)}] " +
                 "Failed to create workflows for ${metaDataFile.fileName}"
 
         // Retrieve the names for the code generated in the body

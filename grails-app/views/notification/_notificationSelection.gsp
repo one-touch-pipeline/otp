@@ -22,7 +22,7 @@
 <%@ page import="de.dkfz.tbi.otp.tracking.OtrsTicket" %>
 
 <g:hiddenField name="otrsTicket.id" value="${otrsTicket.id}"/>
-<g:hiddenField name="fastqImportInstance.id" value="${fastqImportInstance.id}"/>
+<g:hiddenField name="fastqImportInstance.id" value="${fastqImportInstanceId}"/>
 
 <div id="notification-selection-container">
     <h3><g:message code="notification.notificationSelection.notification.processing"/></h3>

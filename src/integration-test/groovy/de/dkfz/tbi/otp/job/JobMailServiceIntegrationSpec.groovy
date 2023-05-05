@@ -46,6 +46,8 @@ class JobMailServiceIntegrationSpec extends Specification implements DomainFacto
 
     TestConfigService configService
 
+    OtrsTicketService otrsTicketService
+
     @TempDir
     Path tempDir
 
@@ -78,7 +80,7 @@ class JobMailServiceIntegrationSpec extends Specification implements DomainFacto
                 type: null,
                 value: "http:/localhost:8080",
         ])
-        String url = otrsTicket.url
+        String url = otrsTicketService.buildTicketDirectLink(otrsTicket)
 
         ProcessingStep step = DomainFactory.createProcessingStepUpdate().processingStep
 

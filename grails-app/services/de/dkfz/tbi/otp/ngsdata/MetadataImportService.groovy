@@ -372,7 +372,7 @@ class MetadataImportService {
         if (withoutCategory || defaultThresholds) {
             StringBuilder subject = new StringBuilder()
             if (ticket) {
-                subject.append("[${ticket.prefixedTicketNumber}] ")
+                subject.append("[${otrsTicketService.getPrefixedTicketNumber(ticket)}] ")
             }
             subject.append("Configuration missing for ")
             subject.append([withoutCategory ? "category" : "", defaultThresholds ? "threshold" : ""].findAll().join(" and "))

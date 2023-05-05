@@ -83,13 +83,14 @@ class QcTrafficLightNotificationServiceSpec extends Specification implements Dat
         final String BODY = 'BODY'
         final String LINK = 'LINK'
         final String FAQ = 'FAQ'
+        final String TICKET_PREFIX = "prefix"
 
         AbstractMergedBamFile bamFile = createBamFile()
         bamFile.project.qcTrafficLightNotification = qcTrafficLightNotification
         bamFile.project.save(flush: true)
 
         String emailSenderSalutation = DomainFactory.createProcessingOptionForEmailSenderSalutation().value
-        DomainFactory.createProcessingOptionForOtrsTicketPrefix()
+        DomainFactory.createProcessingOptionForOtrsTicketPrefix(TICKET_PREFIX)
         Set<OtrsTicket> otrsTickets = [
                 createOtrsTicket([
                         finalNotificationSent: finalNotificationSent,
@@ -105,10 +106,12 @@ class QcTrafficLightNotificationServiceSpec extends Specification implements Dat
             ilseNumbers = "[S#${ilseSubmission.ilseNumber}] "
         }
 
+        String prefixedTicketNumber = "prefixedTicketNumber"
         QcTrafficLightNotificationService service = new QcTrafficLightNotificationService([
                 processingOptionService: new ProcessingOptionService(),
                 otrsTicketService      : Mock(OtrsTicketService) {
                     2 * findAllOtrsTickets(_) >> otrsTickets
+                    1 * getPrefixedTicketNumber(_) >> prefixedTicketNumber
                 },
         ])
 
@@ -116,7 +119,7 @@ class QcTrafficLightNotificationServiceSpec extends Specification implements Dat
             1 * createMessage('notification.template.alignment.qcTrafficWarningSubject', _) >> { String templateName, Map properties ->
                 assert properties.size() == 3
                 assert properties['bamFile'] == bamFile
-                assert properties['ticketNumber'] == "${otrsTickets.last().prefixedTicketNumber} "
+                assert properties['ticketNumber'] == "${prefixedTicketNumber} "
                 assert properties['ilse'] == ilseNumbers
                 return HEADER
             }

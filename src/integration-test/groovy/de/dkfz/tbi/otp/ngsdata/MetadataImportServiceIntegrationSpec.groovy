@@ -32,6 +32,7 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.DirectoryS
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.directorystructures.DataFilesInSameDirectory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators.Md5sumFormatValidator
 import de.dkfz.tbi.otp.tracking.OtrsTicket
+import de.dkfz.tbi.otp.tracking.OtrsTicketService
 import de.dkfz.tbi.otp.utils.MailHelperService
 
 @Rollback
@@ -53,13 +54,12 @@ class MetadataImportServiceIntegrationSpec extends Specification implements Doma
 
     void "test notifyAboutUnsetConfig"() {
         given:
-        DomainFactory.createProcessingOptionForOtrsTicketPrefix("TICKET_PREFIX")
         MetadataImportService service = Spy(MetadataImportService) {
             getSeqTracksWithConfiguredAlignment(_) >> null
         }
-        OtrsTicket ticket = DomainFactory.createOtrsTicket()
-        SeqTrack st1 = DomainFactory.createSeqTrack()
-        SeqTrack st2 = DomainFactory.createSeqTrack()
+        OtrsTicket ticket = createOtrsTicket()
+        SeqTrack st1 = createSeqTrack()
+        SeqTrack st2 = createSeqTrack()
         ProcessingThresholds p1 = DomainFactory.createProcessingThresholds()
         ProcessingThresholds p2 = DomainFactory.createProcessingThresholds()
 
@@ -82,11 +82,11 @@ class MetadataImportServiceIntegrationSpec extends Specification implements Doma
                 assert body.contains(p2.seqType.displayName)
             }
         }
+        service.otrsTicketService = Mock(OtrsTicketService) {
+            1 * getPrefixedTicketNumber(_) >> "TICKET_PREFIX"
+        }
 
-        when:
+        expect:
         service.notifyAboutUnsetConfig([st1, st2], [p1, p2], ticket)
-
-        then:
-        true
     }
 }

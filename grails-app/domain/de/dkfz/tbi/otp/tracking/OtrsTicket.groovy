@@ -25,9 +25,6 @@ import grails.gorm.hibernate.annotation.ManagedEntity
 import groovy.transform.TupleConstructor
 
 import de.dkfz.tbi.otp.Commentable
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.utils.Entity
 
 @ManagedEntity
@@ -152,23 +149,8 @@ class OtrsTicket implements Commentable, Entity {
         comment cascade: "all-delete-orphan"
     }
 
-    Set<SeqTrack> findAllSeqTracks() {
-        return new LinkedHashSet<SeqTrack>(SeqTrack.findAll(
-                'FROM SeqTrack st WHERE EXISTS (FROM DataFile df WHERE df.seqTrack = st AND df.fastqImportInstance.otrsTicket = :otrsTicket)',
-                [otrsTicket: this]
-        ))
-    }
-
     static String ticketNumberConstraint(String val) {
         return val =~ /^[0-9]+$/ ? null : "does not match the required pattern"
-    }
-
-    String getPrefixedTicketNumber() {
-        return "${ProcessingOptionService.findOption(ProcessingOption.OptionName.TICKET_SYSTEM_NUMBER_PREFIX).value}#${ticketNumber}"
-    }
-
-    String getUrl() {
-        return OtrsTicketService.buildTicketDirectLink(this)
     }
 
     @Override

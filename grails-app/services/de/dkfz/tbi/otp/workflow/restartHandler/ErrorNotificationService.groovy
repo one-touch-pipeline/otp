@@ -275,9 +275,12 @@ class ErrorNotificationService {
     }
 
     String getTicketUrls(Set<SeqTrack> seqTracks) {
-        return (seqTracks ? otrsTicketService.findAllOtrsTickets(seqTracks).findAll { OtrsTicket otrsTicket ->
+        Set<OtrsTicket> otrsTickets = seqTracks ? otrsTicketService.findAllOtrsTickets(seqTracks).findAll { OtrsTicket otrsTicket ->
             !otrsTicket.finalNotificationSent
-        }*.url : []).join(",")
+        } : []
+        return otrsTickets.collect {
+            otrsTicketService.buildTicketDirectLink(it)
+        }.join(',')
     }
 
     Set<SeqTrack> getSeqTracks(WorkflowStep workflowStep) {

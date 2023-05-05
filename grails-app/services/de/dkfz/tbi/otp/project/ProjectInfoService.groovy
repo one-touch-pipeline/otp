@@ -41,24 +41,21 @@ class ProjectInfoService {
     FileService fileService
     ProjectService projectService
 
-    @SuppressWarnings('PropertyName') // static helper closure, not a normal property, more like a constant.
-    static Closure SORT_DATE_CREATED_DESC = { a, b ->
-        b.dateCreated <=> a.dateCreated
-    }
-
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     List<ProjectInfo> getAllProjectInfosSortedByDateDesc(Project project) {
-        return project.projectInfos.sort(SORT_DATE_CREATED_DESC)
+        return project.projectInfos.sort({ a, b ->
+            b.dateCreated <=> a.dateCreated
+        })
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     ProjectInfo createProjectInfoAndUploadFile(Project project, AddProjectInfoCommand cmd) {
         cmd.validate()
         assert !cmd.errors.hasErrors()
-        assert project : "project must not be null"
+        assert project: "project must not be null"
         ProjectInfo projectInfo = new ProjectInfo(
                 fileName: cmd.projectInfoFile.originalFilename,
-                comment : cmd.comment,
+                comment: cmd.comment,
         )
 
         project.addToProjectInfos(projectInfo)
@@ -74,7 +71,7 @@ class ProjectInfoService {
     ProjectInfo createProjectInfoByPath(Project project, Path path) {
         ProjectInfo projectInfo = new ProjectInfo(
                 fileName: path.fileName.toString(),
-                comment : "File copied from ${path.toAbsolutePath()}" ,
+                comment: "File copied from ${path.toAbsolutePath()}",
         )
 
         project.addToProjectInfos(projectInfo)

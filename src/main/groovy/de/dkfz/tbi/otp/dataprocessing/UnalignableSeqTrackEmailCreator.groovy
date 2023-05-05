@@ -53,7 +53,7 @@ class UnalignableSeqTrackEmailCreator {
     private String getSubject(SeqTrack seqTrack) {
         OtrsTicket ticket = atMostOneElement(otrsTicketService.findAllOtrsTickets([seqTrack]))
         return [
-                ticket ? "[${ticket.prefixedTicketNumber}]" : null,
+                ticket ? "[${otrsTicketService.getPrefixedTicketNumber(ticket)}]" : null,
                 "Will not be aligned:",
                 seqTrack.ilseId ? "[ILSe ${seqTrack.ilseId}]" : null,
                 seqTrack.run.name,

@@ -1629,7 +1629,8 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
                     ],
                     [fastqImportInstance: createFastqImportInstance(otrsTicket: ticket), fileLinked: true])
             DomainFactory.createProcessingOptionForOtrsTicketPrefix(PREFIX)
-            String expectedHeader = "${ticket.prefixedTicketNumber} Final Processing Status Update ${seqTrack.individual.pid} (${seqTrack.seqType.displayName})"
+            String prefix = otrsTicketService.getPrefixedTicketNumber(ticket)
+            String expectedHeader = "${prefix} Final Processing Status Update ${seqTrack.individual.pid} (${seqTrack.seqType.displayName})"
             notificationCreator.mailHelperService = Mock(MailHelperService) {
                 1 * sendEmail(expectedHeader, _, [userProjectRole.user.email])
             }
@@ -1668,7 +1669,8 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
 
             DomainFactory.createMetaDataFile(fastqImportInstance: fastqImportInstance)
 
-            String expectedHeader = "Import source ready for deletion [${otrsTicket.prefixedTicketNumber}]"
+            String prefix = otrsTicketService.getPrefixedTicketNumber(otrsTicket)
+            String expectedHeader = "Import source ready for deletion [${prefix}]"
 
             String expectedEnd = [
                     dataFile.fullInitialPath,
