@@ -71,13 +71,13 @@ class ProcessingThresholds implements Entity {
         sampleType index: "processing_thresholds_sample_type_idx"
     }
 
-    boolean isAboveLaneThreshold(AbstractMergedBamFile bamFile) {
+    boolean isAboveLaneThreshold(AbstractBamFile bamFile) {
         assert bamFile : 'bam file may not be null'
         assert bamFile.numberOfMergedLanes : 'property numberOfMergedLanes of the bam has to be set'
         return numberOfLanes == null || numberOfLanes <= bamFile.numberOfMergedLanes
     }
 
-    boolean isAboveCoverageThreshold(AbstractMergedBamFile bamFile) {
+    boolean isAboveCoverageThreshold(AbstractBamFile bamFile) {
         assert bamFile : 'bam file may not be null'
         assert bamFile.coverage : 'property coverage of the bam has to be set'
         return coverage == null || coverage <= bamFile.coverage

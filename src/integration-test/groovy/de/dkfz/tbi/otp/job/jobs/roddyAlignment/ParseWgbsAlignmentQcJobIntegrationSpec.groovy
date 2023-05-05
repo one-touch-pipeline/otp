@@ -190,7 +190,7 @@ class ParseWgbsAlignmentQcJobIntegrationSpec extends Specification {
         assert roddyBamFile.coverage != null
         assert roddyBamFile.coverageWithN != null
         assert roddyBamFile.qualityAssessmentStatus == AbstractBamFile.QaProcessingStatus.FINISHED
-        assert roddyBamFile.qcTrafficLightStatus == AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED
+        assert roddyBamFile.qcTrafficLightStatus == AbstractBamFile.QcTrafficLightStatus.QC_PASSED
     }
 
     private void createAllQaFilesOnFileSystem(RoddyBamFile roddyBamFile) {

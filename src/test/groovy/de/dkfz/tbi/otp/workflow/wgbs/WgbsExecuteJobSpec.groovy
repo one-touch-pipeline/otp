@@ -80,7 +80,7 @@ class WgbsExecuteJobSpec extends Specification implements DataTest, WorkflowSyst
     void setupDataForGetConfigurationValues() {
         roddyBamFile = createBamFile([
                 md5sum                      : null,
-                fileOperationStatus         : AbstractMergedBamFile.FileOperationStatus.DECLARED,
+                fileOperationStatus         : AbstractBamFile.FileOperationStatus.DECLARED,
                 roddyExecutionDirectoryNames: [DomainFactory.DEFAULT_RODDY_EXECUTION_STORE_DIRECTORY],
         ])
         workflowStep = createWorkflowStep()

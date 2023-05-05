@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -48,7 +48,7 @@ class ReplaceSourceWithLinkJobSpec extends Specification implements DataTest {
     Class[] getDomainClassesToMock() {
         [
                 ExternalMergingWorkPackage,
-                ExternallyProcessedMergedBamFile,
+                ExternallyProcessedBamFile,
                 ImportProcess,
                 Individual,
                 JobDefinition,
@@ -87,7 +87,7 @@ class ReplaceSourceWithLinkJobSpec extends Specification implements DataTest {
 
         mainDirectory = importedFile.parentFile
 
-        ExternallyProcessedMergedBamFile epmbf = DomainFactory.createExternallyProcessedMergedBamFile(
+        ExternallyProcessedBamFile epmbf = DomainFactory.createExternallyProcessedBamFile(
                 fileName: bamFileName,
                 importedFrom: importedFile,
                 md5sum: DomainFactory.DEFAULT_MD5_SUM,
@@ -95,7 +95,7 @@ class ReplaceSourceWithLinkJobSpec extends Specification implements DataTest {
         )
 
         importProcess = new ImportProcess(
-                externallyProcessedMergedBamFiles: [epmbf],
+                externallyProcessedBamFiles: [epmbf],
                 linkOperation: ImportProcess.LinkOperation.COPY_AND_LINK,
                 triggerAnalysis: true,
         ).save(flush: true)
@@ -108,7 +108,7 @@ class ReplaceSourceWithLinkJobSpec extends Specification implements DataTest {
     void "test execute when everything is fine"() {
         given:
         createHelperObjects()
-        ExternallyProcessedMergedBamFile bamFile = importProcess.externallyProcessedMergedBamFiles[0]
+        ExternallyProcessedBamFile bamFile = importProcess.externallyProcessedBamFiles[0]
         File sourceBam = new File(bamFile.importedFrom)
         File sourceBai = new File(sourceBam.parentFile, bamFile.baiFileName)
         File sourceFurtherFile = new File(new File(new File(bamFile.importedFrom).parentFile, bamFile.furtherFiles.first()), 'file.txt')
@@ -144,7 +144,7 @@ class ReplaceSourceWithLinkJobSpec extends Specification implements DataTest {
         linkingJob.execute()
 
         then:
-        importProcess.externallyProcessedMergedBamFiles.each {
+        importProcess.externallyProcessedBamFiles.each {
             assert !Files.isSymbolicLink(new File(it.importedFrom).toPath())
         }
         importProcess.state == ImportProcess.State.FINISHED
@@ -156,7 +156,7 @@ class ReplaceSourceWithLinkJobSpec extends Specification implements DataTest {
                 getProcessingStep        : { -> step },
         ] as ReplaceSourceWithLinkJob
 
-        CreateFileHelper.createFile(new File("${importProcess.externallyProcessedMergedBamFiles[0].importedFrom}"))
+        CreateFileHelper.createFile(new File("${importProcess.externallyProcessedBamFiles[0].importedFrom}"))
 
         configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): tempDir.resolve("root")])
 
@@ -181,7 +181,7 @@ class ReplaceSourceWithLinkJobSpec extends Specification implements DataTest {
     void "check that linking works correctly for pattern '#furtherFilePattern' with link on '#linkFileName1' and second link on '#linkFileName2' and final file '#realFurtherFileName'"() {
         given:
         createHelperObjects()
-        ExternallyProcessedMergedBamFile bamFile = importProcess.externallyProcessedMergedBamFiles[0]
+        ExternallyProcessedBamFile bamFile = importProcess.externallyProcessedBamFiles[0]
         bamFile.furtherFiles = [
                 furtherFilePattern,
         ]
@@ -241,7 +241,7 @@ class ReplaceSourceWithLinkJobSpec extends Specification implements DataTest {
             0 * _
         }
 
-        ExternallyProcessedMergedBamFile bamFile = importProcess.externallyProcessedMergedBamFiles[0]
+        ExternallyProcessedBamFile bamFile = importProcess.externallyProcessedBamFiles[0]
         [
                 bamFile.bamFileName,
                 bamFile.baiFileName,

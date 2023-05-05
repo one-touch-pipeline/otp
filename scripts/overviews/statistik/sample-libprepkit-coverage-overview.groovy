@@ -28,7 +28,7 @@ def d = RoddyBamFile.createCriteria().list {
         eq('seqType', SeqTypeService.exomePairedSeqType)
     }
 }.findAll {
-    it.fileOperationStatus == AbstractMergedBamFile.FileOperationStatus.PROCESSED && it.isMostRecentBamFile()
+    it.fileOperationStatus == AbstractBamFile.FileOperationStatus.PROCESSED && it.isMostRecentBamFile()
 }.collect {
     [it.project, it.individual, it.sampleType.name, it.seqType.displayName, it.seqType.libraryLayout, it.mergingWorkPackage.libraryPreparationKit.name, it.coverage].join(',')
 }.sort()

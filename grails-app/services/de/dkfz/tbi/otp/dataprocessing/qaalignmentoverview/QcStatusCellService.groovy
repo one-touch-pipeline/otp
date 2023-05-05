@@ -23,12 +23,12 @@ package de.dkfz.tbi.otp.dataprocessing.qaalignmentoverview
 
 import grails.gorm.transactions.Transactional
 
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.qcTrafficLight.TableCellValue
 import de.dkfz.tbi.otp.utils.MessageSourceService
 
 /**
- * service to create the cell for the {@link AbstractMergedBamFile.QcTrafficLightStatus}
+ * service to create the cell for the {@link AbstractBamFile.QcTrafficLightStatus}
  */
 @Transactional(readOnly = true)
 class QcStatusCellService {
@@ -43,14 +43,14 @@ class QcStatusCellService {
      */
     TableCellValue generateQcStatusCell(Map<String, ?> qcStatusMap) {
         TableCellValue.Icon icon = [
-                (AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED)  : TableCellValue.Icon.WARNING,
-                (AbstractMergedBamFile.QcTrafficLightStatus.WARNING)  : TableCellValue.Icon.WARNING,
-                (AbstractMergedBamFile.QcTrafficLightStatus.REJECTED) : TableCellValue.Icon.ERROR,
-                (AbstractMergedBamFile.QcTrafficLightStatus.UNCHECKED): TableCellValue.Icon.NA,
+                (AbstractBamFile.QcTrafficLightStatus.BLOCKED)  : TableCellValue.Icon.WARNING,
+                (AbstractBamFile.QcTrafficLightStatus.WARNING)  : TableCellValue.Icon.WARNING,
+                (AbstractBamFile.QcTrafficLightStatus.REJECTED) : TableCellValue.Icon.ERROR,
+                (AbstractBamFile.QcTrafficLightStatus.UNCHECKED): TableCellValue.Icon.NA,
         ].getOrDefault(qcStatusMap.qcStatus, TableCellValue.Icon.OKAY)
 
         String tooltip
-        if (qcStatusMap.qcStatus == AbstractMergedBamFile.QcTrafficLightStatus.UNCHECKED) {
+        if (qcStatusMap.qcStatus == AbstractBamFile.QcTrafficLightStatus.UNCHECKED) {
             tooltip = messageSourceService.createMessage("alignment.quality.not.available")
         } else {
             String comment = qcStatusMap.qcComment ? "\n${qcStatusMap.qcComment}\n${qcStatusMap.qcAuthor}" : ""

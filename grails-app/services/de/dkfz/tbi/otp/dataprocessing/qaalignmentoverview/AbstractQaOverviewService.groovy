@@ -38,7 +38,7 @@ abstract class AbstractQaOverviewService {
 
     final static List<String> BASE_JOIN_DOMAINS = [
             "join qa.qualityAssessmentMergedPass qaPass",
-            "join qaPass.abstractMergedBamFile bamFile",
+            "join qaPass.abstractBamFile bamFile",
             "join bamFile.workPackage mergingWorkPackage",
             "join mergingWorkPackage.sample sample",
             "join mergingWorkPackage.pipeline pipeline",

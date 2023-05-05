@@ -25,7 +25,7 @@ import grails.gorm.transactions.Rollback
 import grails.testing.mixin.integration.Integration
 import spock.lang.Specification
 
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.domainFactory.pipelines.AlignmentPipelineFactory
@@ -71,7 +71,7 @@ class AllAlignmentsCheckerIntegrationSpec extends Specification implements Workf
                                                                         DomainFactory.createWholeGenomeBisulfiteTagmentationSeqType(),] as Set)
 
         RnaRoddyBamFile rnaRoddyBamFile = createBamFile([
-                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
+                fileOperationStatus: AbstractBamFile.FileOperationStatus.PROCESSED,
         ])
 
         List<SeqTrack> seqTracks = [

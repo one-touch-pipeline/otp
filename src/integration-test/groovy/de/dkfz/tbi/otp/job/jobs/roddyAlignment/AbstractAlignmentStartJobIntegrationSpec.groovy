@@ -25,7 +25,7 @@ import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
 import spock.lang.Specification
 
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.job.jobs.alignment.AbstractAlignmentStartJob
 import de.dkfz.tbi.otp.job.processing.*
@@ -40,7 +40,7 @@ class AbstractAlignmentStartJobIntegrationSpec extends Specification {
     void "restart creates new Process on new RoddyBamFile"() {
         given:
         RoddyBamFile failedInstance = DomainFactory.createRoddyBamFile(
-                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.INPROGRESS,
+                fileOperationStatus: AbstractBamFile.FileOperationStatus.INPROGRESS,
                 md5sum: null,
         )
         Process failedProcess = DomainFactory.createProcess()

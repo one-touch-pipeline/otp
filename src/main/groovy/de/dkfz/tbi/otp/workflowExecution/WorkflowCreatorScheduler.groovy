@@ -28,7 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePairDeciderService
 import de.dkfz.tbi.otp.ngsdata.*
@@ -159,7 +159,7 @@ class WorkflowCreatorScheduler {
         Collection<AbstractMergingWorkPackage> mergingWorkPackages = workflowArtefacts.findAll {
             it.artefactType == ArtefactType.BAM
         }.collect {
-            return (it.artefact.get() as AbstractMergedBamFile).workPackage
+            return (it.artefact.get() as AbstractBamFile).workPackage
         }.findAll {
             it.seqType in seqTypes
         }

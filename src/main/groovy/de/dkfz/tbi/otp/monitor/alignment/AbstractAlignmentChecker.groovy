@@ -103,7 +103,7 @@ abstract class AbstractAlignmentChecker extends PipelinesChecker<SeqTrack> {
 
             List mergingWorkPackageNeedsProcessing = mergingWorkPackagesByNeedsProcessing[true] ?: []
 
-            List<AbstractMergedBamFile> alreadyRunningBamFiles = getBamFileForMergingWorkPackage(
+            List<AbstractBamFile> alreadyRunningBamFiles = getBamFileForMergingWorkPackage(
                     mergingWorkPackageNeedsProcessing, false, false
             )
             output.showList(HEADER_OLD_INSTANCE_RUNNING, alreadyRunningBamFiles)
@@ -113,34 +113,34 @@ abstract class AbstractAlignmentChecker extends PipelinesChecker<SeqTrack> {
 
             List mergingWorkPackageNotNeedProcessing = mergingWorkPackagesByNeedsProcessing[false] ?: []
 
-            List<AbstractMergedBamFile> bamFiles = getBamFileForMergingWorkPackage(mergingWorkPackageNotNeedProcessing, true, true)
+            List<AbstractBamFile> bamFiles = getBamFileForMergingWorkPackage(mergingWorkPackageNotNeedProcessing, true, true)
 
             List<MergingWorkPackage> mergingWorkPackagesWithoutBamFile = mergingWorkPackageNotNeedProcessing - bamFiles*.mergingWorkPackage
             output.showList(HEADER_MWP_WITHOUT_BAM, mergingWorkPackagesWithoutBamFile)
 
-            Map<Boolean, List<AbstractMergedBamFile>> bamFilesByWithdrawn = bamFiles.groupBy {
+            Map<Boolean, List<AbstractBamFile>> bamFilesByWithdrawn = bamFiles.groupBy {
                 it.withdrawn
             }
             output.showList(HEADER_MWP_WITH_WITHDRAWN_BAM, bamFilesByWithdrawn[true]*.mergingWorkPackage)
 
-            List<AbstractMergedBamFile> notWithdrawnBamFiles = (bamFilesByWithdrawn[false] ?: []) + alreadyRunningBamFiles
+            List<AbstractBamFile> notWithdrawnBamFiles = (bamFilesByWithdrawn[false] ?: []) + alreadyRunningBamFiles
 
-            Map<AbstractMergedBamFile.FileOperationStatus, Collection<AbstractMergedBamFile>> bamFileByFileOperationStatus =
+            Map<AbstractBamFile.FileOperationStatus, Collection<AbstractBamFile>> bamFileByFileOperationStatus =
                     notWithdrawnBamFiles.groupBy { it.fileOperationStatus }
 
             output.showRunningWithHeader(
-                    HEADER_RUNNING_DECLARED, workflowName, bamFileByFileOperationStatus[AbstractMergedBamFile.FileOperationStatus.DECLARED]
+                    HEADER_RUNNING_DECLARED, workflowName, bamFileByFileOperationStatus[AbstractBamFile.FileOperationStatus.DECLARED]
             )
             output.showRunningWithHeader(
-                    HEADER_RUNNING_NEEDS_PROCESSING, workflowName, bamFileByFileOperationStatus[AbstractMergedBamFile.FileOperationStatus.NEEDS_PROCESSING]
+                    HEADER_RUNNING_NEEDS_PROCESSING, workflowName, bamFileByFileOperationStatus[AbstractBamFile.FileOperationStatus.NEEDS_PROCESSING]
             )
             output.showRunningWithHeader(
-                    HEADER_RUNNING_IN_PROGRESS, workflowName, bamFileByFileOperationStatus[AbstractMergedBamFile.FileOperationStatus.INPROGRESS]
+                    HEADER_RUNNING_IN_PROGRESS, workflowName, bamFileByFileOperationStatus[AbstractBamFile.FileOperationStatus.INPROGRESS]
             )
 
-            output.showFinished(bamFileByFileOperationStatus[AbstractMergedBamFile.FileOperationStatus.PROCESSED])
+            output.showFinished(bamFileByFileOperationStatus[AbstractBamFile.FileOperationStatus.PROCESSED])
 
-            return bamFileByFileOperationStatus[AbstractMergedBamFile.FileOperationStatus.PROCESSED]
+            return bamFileByFileOperationStatus[AbstractBamFile.FileOperationStatus.PROCESSED]
         }
         return []
     }
@@ -209,21 +209,21 @@ abstract class AbstractAlignmentChecker extends PipelinesChecker<SeqTrack> {
         ]
     }
 
-    List<AbstractMergedBamFile> getBamFileForMergingWorkPackage(List<MergingWorkPackage> mergingWorkPackages, boolean showFinished, boolean showWithdrawn) {
+    List<AbstractBamFile> getBamFileForMergingWorkPackage(List<MergingWorkPackage> mergingWorkPackages, boolean showFinished, boolean showWithdrawn) {
         if (!mergingWorkPackages) {
             return []
         }
 
         String filterFinished = showFinished ? '' :
-                "and bamFile.fileOperationStatus != '${AbstractMergedBamFile.FileOperationStatus.PROCESSED}'"
+                "and bamFile.fileOperationStatus != '${AbstractBamFile.FileOperationStatus.PROCESSED}'"
         String filterWithdrawnFinished = showWithdrawn ? '' :
                 "and bamFile.withdrawn = false"
 
-        return AbstractMergedBamFile.executeQuery("""
+        return AbstractBamFile.executeQuery("""
                     select
                         bamFile
                     from
-                        AbstractMergedBamFile bamFile
+                        AbstractBamFile bamFile
                     where
                         bamFile.workPackage in (:mergingWorkPackage)
                         ${filterFinished}
@@ -234,7 +234,7 @@ abstract class AbstractAlignmentChecker extends PipelinesChecker<SeqTrack> {
                             select
                                 max(bamFile1.id)
                             from
-                                AbstractMergedBamFile bamFile1
+                                AbstractBamFile bamFile1
                             where
                                 bamFile1.workPackage = bamFile.workPackage
                         )

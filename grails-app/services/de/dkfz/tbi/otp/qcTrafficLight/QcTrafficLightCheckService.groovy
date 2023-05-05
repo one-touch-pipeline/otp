@@ -24,7 +24,7 @@ package de.dkfz.tbi.otp.qcTrafficLight
 import grails.gorm.transactions.Transactional
 
 import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 
 @Transactional
 @Deprecated
@@ -36,16 +36,16 @@ class QcTrafficLightCheckService {
 
     QcTrafficLightNotificationService qcTrafficLightNotificationService
 
-    void handleQcCheck(AbstractMergedBamFile bamFile, Closure callbackIfAllFine) {
+    void handleQcCheck(AbstractBamFile bamFile, Closure callbackIfAllFine) {
         switch (bamFile.qcTrafficLightStatus.jobLinkCase) {
             case null:
-            case AbstractMergedBamFile.QcTrafficLightStatus.JobLinkCase.CREATE_LINKS:
+            case AbstractBamFile.QcTrafficLightStatus.JobLinkCase.CREATE_LINKS:
                 callbackIfAllFine()
                 break
-            case AbstractMergedBamFile.QcTrafficLightStatus.JobLinkCase.CREATE_NO_LINK:
+            case AbstractBamFile.QcTrafficLightStatus.JobLinkCase.CREATE_NO_LINK:
                 //no links creating, so nothing to do
                 break
-            case AbstractMergedBamFile.QcTrafficLightStatus.JobLinkCase.SHOULD_NOT_OCCUR:
+            case AbstractBamFile.QcTrafficLightStatus.JobLinkCase.SHOULD_NOT_OCCUR:
                 throw new OtpRuntimeException("${bamFile.qcTrafficLightStatus} is not a valid qcTrafficLightStatus " +
                         "during workflow processing, it should only occur after the workflow has finished")
             default:
@@ -54,13 +54,13 @@ class QcTrafficLightCheckService {
 
         switch (bamFile.qcTrafficLightStatus.jobNotifyCase) {
             case null:
-            case AbstractMergedBamFile.QcTrafficLightStatus.JobNotifyCase.NO_NOTIFY:
+            case AbstractBamFile.QcTrafficLightStatus.JobNotifyCase.NO_NOTIFY:
                 //no email sending, so nothing to do
                 break
-            case AbstractMergedBamFile.QcTrafficLightStatus.JobNotifyCase.NOTIFY:
+            case AbstractBamFile.QcTrafficLightStatus.JobNotifyCase.NOTIFY:
                 qcTrafficLightNotificationService.informResultsAreWarned(bamFile)
                 break
-            case AbstractMergedBamFile.QcTrafficLightStatus.JobLinkCase.SHOULD_NOT_OCCUR:
+            case AbstractBamFile.QcTrafficLightStatus.JobLinkCase.SHOULD_NOT_OCCUR:
                 throw new OtpRuntimeException("${bamFile.qcTrafficLightStatus} is not a valid qcTrafficLightStatus " +
                         "during workflow processing, it should only occur after the workflow has finished")
             default:

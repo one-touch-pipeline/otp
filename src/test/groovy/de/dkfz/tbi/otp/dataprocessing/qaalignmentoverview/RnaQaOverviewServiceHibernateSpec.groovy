@@ -157,7 +157,7 @@ class RnaQaOverviewServiceHibernateSpec extends HibernateSpec implements RoddyPa
 
         Map linkMap = [
                 action: "renderPDF",
-                params: ["abstractMergedBamFile.id": bamId],
+                params: ["abstractBamFile.id": bamId],
         ]
 
         when:

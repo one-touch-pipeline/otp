@@ -24,7 +24,7 @@ package de.dkfz.tbi.otp.ngsdata
 import grails.gorm.transactions.Transactional
 import groovy.transform.CompileDynamic
 
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.project.Project
 
 @CompileDynamic
@@ -133,17 +133,17 @@ class SampleOverviewService {
         }
     }
 
-    Collection<AbstractMergedBamFile> abstractMergedBamFilesInProjectFolder(Project project) {
+    Collection<AbstractBamFile> abstractBamFilesInProjectFolder(Project project) {
         if (!project) {
             return []
         }
-        return AbstractMergedBamFile.executeQuery("""
+        return AbstractBamFile.executeQuery("""
 from
-        AbstractMergedBamFile abstractMergedBamFile
+        AbstractBamFile abstractBamFile
 where
         workPackage.sample.individual.project = :project
-        and workPackage.bamFileInProjectFolder = abstractMergedBamFile
+        and workPackage.bamFileInProjectFolder = abstractBamFile
         and fileOperationStatus = :fileOperationStatus
-""", [project: project, fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED])
+""", [project: project, fileOperationStatus: AbstractBamFile.FileOperationStatus.PROCESSED])
     }
 }

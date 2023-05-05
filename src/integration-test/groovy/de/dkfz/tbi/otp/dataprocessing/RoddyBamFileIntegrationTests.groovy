@@ -128,7 +128,7 @@ class RoddyBamFileIntegrationTests {
         RoddyBamFile bamFile = createRoddyBamFileWithBaseBamFile()
         bamFile.baseBamFile.md5sum = null
         bamFile.baseBamFile.fileSize = -1
-        bamFile.baseBamFile.fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.DECLARED
+        bamFile.baseBamFile.fileOperationStatus = AbstractBamFile.FileOperationStatus.DECLARED
         assert ["the base bam file is not finished"] == bamFile.isConsistentAndContainsNoWithdrawnData()
     }
 
@@ -221,7 +221,7 @@ class RoddyBamFileIntegrationTests {
     private RoddyBamFile createRoddyBamFileWithBaseBamFile() {
         return DomainFactory.createRoddyBamFile(DomainFactory.createRoddyBamFile(), [
                 md5sum: null,
-                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.DECLARED,
+                fileOperationStatus: AbstractBamFile.FileOperationStatus.DECLARED,
                 fileSize: -1,
             ]
         )

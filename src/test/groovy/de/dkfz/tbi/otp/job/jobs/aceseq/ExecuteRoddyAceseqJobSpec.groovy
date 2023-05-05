@@ -46,7 +46,7 @@ class ExecuteRoddyAceseqJobSpec extends Specification implements DataTest {
     @Override
     Class[] getDomainClassesToMock() {
         [
-                AbstractMergedBamFile,
+                AbstractBamFile,
                 AceseqInstance,
                 AceseqQc,
                 DataFile,

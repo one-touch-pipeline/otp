@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -38,7 +38,7 @@ import java.nio.file.*
 @Transactional
 class UnwithdrawService {
 
-    AbstractMergedBamFileService abstractMergedBamFileService
+    AbstractBamFileService abstractBamFileService
     ConfigService configService
     FastqcDataFilesService fastqcDataFilesService
     FileService fileService
@@ -86,16 +86,16 @@ class UnwithdrawService {
     }
 
     void unwithdrawBamFiles(UnwithdrawStateHolder withdrawStateHolder) {
-        Map<WithdrawBamFileService, List<AbstractMergedBamFile>> bamFileMap = withdrawBamFileServices.collectEntries {
+        Map<WithdrawBamFileService, List<AbstractBamFile>> bamFileMap = withdrawBamFileServices.collectEntries {
             [(it), it.collectObjects(withdrawStateHolder.seqTracks).unique().findAll { bamFile ->
-                bamFile.fileOperationStatus == AbstractMergedBamFile.FileOperationStatus.PROCESSED &&
+                bamFile.fileOperationStatus == AbstractBamFile.FileOperationStatus.PROCESSED &&
                         !bamFile.containedSeqTracks.any { it.withdrawn } &&
-                        Files.exists(abstractMergedBamFileService.getBaseDirectory(bamFile).resolve(bamFile.bamFileName))
+                        Files.exists(abstractBamFileService.getBaseDirectory(bamFile).resolve(bamFile.bamFileName))
             },]
         }
-        withdrawStateHolder.mergedBamFiles = bamFileMap.values().flatten().unique()
-        if (withdrawStateHolder.mergedBamFiles.size() > 0) {
-            withdrawStateHolder.mergedBamFiles.each {
+        withdrawStateHolder.bamFiles = bamFileMap.values().flatten().unique()
+        if (withdrawStateHolder.bamFiles.size() > 0) {
+            withdrawStateHolder.bamFiles.each {
                 withdrawStateHolder.summary << "Unwithdrawing BAM file: ${it}"
             }
         }
@@ -112,7 +112,7 @@ class UnwithdrawService {
 
     void unwithdrawAnalysis(UnwithdrawStateHolder withdrawStateHolder) {
         FileSystem fileSystem = fileSystemService.remoteFileSystemOnDefaultRealm
-        List<BamFilePairAnalysis> analysis = withdrawAnalysisService.collectObjects(withdrawStateHolder.mergedBamFiles).unique()
+        List<BamFilePairAnalysis> analysis = withdrawAnalysisService.collectObjects(withdrawStateHolder.bamFiles).unique()
         analysis = analysis.findAll {
             it.processingState == AnalysisProcessingStates.FINISHED &&
                     !it.sampleType1BamFile.withdrawn && !it.sampleType2BamFile.withdrawn &&
@@ -164,7 +164,7 @@ class UnwithdrawStateHolder {
     Map<Path, Path> linksToCreate = [:]
     Map<String, String> pathsToChangeGroup = [:]
 
-    List<AbstractMergedBamFile> mergedBamFiles = []
+    List<AbstractBamFile> bamFiles = []
 
     List<String> script = []
     String scriptFileName

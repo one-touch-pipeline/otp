@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,7 +26,7 @@ import groovy.transform.CompileDynamic
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.prepost.PreAuthorize
 
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 
 @CompileDynamic
@@ -46,12 +46,12 @@ class WithdrawService {
                 withdrawParameters: withdrawParameters,
                 remoteFileSystem  : fileSystemService.remoteFileSystemOnDefaultRealm,
         ])
-        Map<WithdrawBamFileService, List<AbstractMergedBamFile>> bamFileMap = withdrawBamFileServices.collectEntries {
+        Map<WithdrawBamFileService, List<AbstractBamFile>> bamFileMap = withdrawBamFileServices.collectEntries {
             [(it), it.collectObjects(withdrawStateHolder.seqTracks)]
         }
-        withdrawStateHolder.mergedBamFiles = bamFileMap.values().flatten()
+        withdrawStateHolder.bamFiles = bamFileMap.values().flatten()
 
-        withdrawStateHolder.analysis = withdrawAnalysisService.collectObjects(withdrawStateHolder.mergedBamFiles)
+        withdrawStateHolder.analysis = withdrawAnalysisService.collectObjects(withdrawStateHolder.bamFiles)
 
         withdrawHelperService.with {
             checkArchivedProject(withdrawStateHolder)

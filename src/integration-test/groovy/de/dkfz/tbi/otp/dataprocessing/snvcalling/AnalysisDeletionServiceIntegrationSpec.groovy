@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -41,14 +41,14 @@ class AnalysisDeletionServiceIntegrationSpec extends Specification implements Is
     IndelCallingInstance indelCallingInstance
     SophiaInstance sophiaInstance
     AceseqInstance aceseqInstance
-    AbstractMergedBamFile bamFileTumor2
+    AbstractBamFile bamFileTumor2
     SamplePair samplePair2
     List<File> analysisInstancesDirectories
     List<File> analysisSamplePairsDirectories
     List<SamplePair> samplePairs
 
     void setupData() {
-        samplePair = DomainFactory.createSamplePairWithProcessedMergedBamFiles()
+        samplePair = DomainFactory.createSamplePairWithBamFiles()
         snvCallingInstance = DomainFactory.createRoddySnvCallingInstance(
                 sampleType1BamFile: samplePair.mergingWorkPackage1.bamFileInProjectFolder,
                 sampleType2BamFile: samplePair.mergingWorkPackage2.bamFileInProjectFolder,
@@ -62,7 +62,7 @@ class AnalysisDeletionServiceIntegrationSpec extends Specification implements Is
 
         samplePair2 = DomainFactory.createDisease(samplePair.mergingWorkPackage2)
         bamFileTumor2 = createRoddyBamFile(
-                DomainFactory.randomProcessedBamFileProperties,
+                DomainFactory.randomBamFileProperties,
                 samplePair2.mergingWorkPackage1,
                 RoddyBamFile,
         )

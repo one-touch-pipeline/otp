@@ -24,7 +24,7 @@ package de.dkfz.tbi.otp.tracking
 import groovy.transform.CompileDynamic
 import groovy.transform.TupleConstructor
 
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 
 import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus
@@ -37,7 +37,7 @@ class MergingWorkPackageProcessingStatus {
 
     final WorkflowProcessingStatus alignmentProcessingStatus
 
-    final AbstractMergedBamFile completeProcessableBamFileInProjectFolder
+    final AbstractBamFile completeProcessableBamFileInProjectFolder
 
     final Collection<SamplePairProcessingStatus> samplePairProcessingStatuses
 

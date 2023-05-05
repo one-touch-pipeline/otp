@@ -49,16 +49,16 @@ abstract class WithdrawBamFileServiceSpec<T extends WithdrawBamFileService> exte
 
     void "collectPaths, when called for bamFiles, then return paths in workDir, except nonOTP paths"() {
         given:
-        service.abstractMergedBamFileService = new AbstractMergedBamFileService()
-        service.abstractMergedBamFileService.individualService = Mock(IndividualService) {
+        service.abstractBamFileService = new AbstractBamFileService()
+        service.abstractBamFileService.individualService = Mock(IndividualService) {
             getViewByPidPath(_, _) >> tempDir
         }
 
-        List<AbstractMergedBamFile> bamFiles = (1..3).collect {
+        List<AbstractBamFile> bamFiles = (1..3).collect {
             createBamFile()
         }
         List<Path> files = bamFiles.collectMany {
-            Path baseDirectory = service.abstractMergedBamFileService.getBaseDirectory(it)
+            Path baseDirectory = service.abstractBamFileService.getBaseDirectory(it)
             CreateFileHelper.createFile(baseDirectory.resolve("nonOTP").resolve("file"))
 
             return [
@@ -81,7 +81,7 @@ abstract class WithdrawBamFileServiceSpec<T extends WithdrawBamFileService> exte
 
     void "withdrawObjects, when called for bamFiles, then mark each as withdrawn "() {
         given:
-        List<AbstractMergedBamFile> bamFiles = (1..3).collect {
+        List<AbstractBamFile> bamFiles = (1..3).collect {
             createBamFile()
         }
         bamFiles << createBamFile()
@@ -101,7 +101,7 @@ abstract class WithdrawBamFileServiceSpec<T extends WithdrawBamFileService> exte
             3 * deleteAllProcessingInformationAndResultOfOneSeqTrack(_)
         }
 
-        List<AbstractMergedBamFile> bamFiles = (1..3).collect {
+        List<AbstractBamFile> bamFiles = (1..3).collect {
             createBamFile()
         }
 

@@ -55,7 +55,7 @@ class CreateNotificationTextServiceSpec extends Specification implements Alignme
     @Override
     Class[] getDomainClassesToMock() {
         return [
-                AbstractMergedBamFile,
+                AbstractBamFile,
                 AntibodyTarget,
                 CellRangerConfig,
                 CellRangerMergingWorkPackage,
@@ -338,7 +338,7 @@ class CreateNotificationTextServiceSpec extends Specification implements Alignme
         SamplePair samplePair3 = DomainFactory.createSamplePair()
         samplePair3.mergingWorkPackage1.bamFileInProjectFolder = RoddyPancanFactoryInstance.INSTANCE.createBamFile(
                 withdrawn: false,
-                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
+                fileOperationStatus: AbstractBamFile.FileOperationStatus.PROCESSED,
                 coverage : 19.0,
                 workPackage: samplePair3.mergingWorkPackage1,
         )
@@ -867,17 +867,17 @@ ${expectedAlign}"""
         DomainFactory.createAllAlignableSeqTypes()
         DomainFactory.createProcessingOptionForEmailSenderSalutation()
 
-        AbstractMergedBamFile abstractMergedBamFile = createBamFileForPipelineName(pipeline)
+        AbstractBamFile abstractBamFile = createBamFileForPipelineName(pipeline)
 
         ProcessingStatus processingStatus = new ProcessingStatus([
                 new SeqTrackProcessingStatus(
-                        abstractMergedBamFile.containedSeqTracks.first(),
+                        abstractBamFile.containedSeqTracks.first(),
                         ProcessingStatus.WorkflowProcessingStatus.ALL_DONE,
                         ProcessingStatus.WorkflowProcessingStatus.ALL_DONE, [
                         new MergingWorkPackageProcessingStatus(
-                                abstractMergedBamFile.mergingWorkPackage,
+                                abstractBamFile.mergingWorkPackage,
                                 ProcessingStatus.WorkflowProcessingStatus.ALL_DONE,
-                                abstractMergedBamFile,
+                                abstractBamFile,
                                 []
                         ),
                 ]
@@ -935,11 +935,11 @@ ${expectedAlign}"""
         DomainFactory.createAllAlignableSeqTypes()
         DomainFactory.createProcessingOptionForEmailSenderSalutation()
 
-        List<AbstractMergedBamFile> abstractMergedBamFiles = Pipeline.Name.alignmentPipelineNames.collect {
+        List<AbstractBamFile> abstractBamFiles = Pipeline.Name.alignmentPipelineNames.collect {
             createBamFileForPipelineName(it)
         }
 
-        ProcessingStatus processingStatus = new ProcessingStatus(abstractMergedBamFiles.collect {
+        ProcessingStatus processingStatus = new ProcessingStatus(abstractBamFiles.collect {
             new SeqTrackProcessingStatus(
                     it.containedSeqTracks.first(),
                     ProcessingStatus.WorkflowProcessingStatus.ALL_DONE,
@@ -1176,24 +1176,24 @@ samplePairsNotProcessed: ${expectedSamplePairsNotProcessed}
 
         AlignmentInfo alignmentInfo
         MergingWorkPackage mergingWorkPackage
-        AbstractMergedBamFile abstractMergedBamFile
+        AbstractBamFile abstractBamFile
         if (properties.singleCell == true) {
             alignmentInfo = createSingleCellAlignmentInfo(seqTrack)
             mergingWorkPackage = AlignmentPipelineFactory.CellRangerFactoryInstance.INSTANCE.createMergingWorkPackage(mergingWorkPackageProperties)
-            abstractMergedBamFile = AlignmentPipelineFactory.CellRangerFactoryInstance.INSTANCE.createBamFile([workPackage: mergingWorkPackage])
+            abstractBamFile = AlignmentPipelineFactory.CellRangerFactoryInstance.INSTANCE.createBamFile([workPackage: mergingWorkPackage])
         } else {
             alignmentInfo = createRoddyAlignmentInfo(seqTrack)
             mergingWorkPackage = DomainFactory.createMergingWorkPackage(mergingWorkPackageProperties + [
                     statSizeFileName: "statSizeFileName_${DomainFactory.counter++}.tab",
                     pipeline        : DomainFactory.createPanCanPipeline(),
             ])
-            abstractMergedBamFile = DomainFactory.createRoddyBamFile([workPackage: mergingWorkPackage])
+            abstractBamFile = DomainFactory.createRoddyBamFile([workPackage: mergingWorkPackage])
         }
         Workflow workflow
         if (newWorkflowSystem) {
             workflow = properties.workflow ?: createWorkflow()
             WorkflowRun workflowRun = createWorkflowRun(workflow: workflow, state: WorkflowRun.State.SUCCESS)
-            abstractMergedBamFile.workflowArtefact = createWorkflowArtefact(producedBy: workflowRun)
+            abstractBamFile.workflowArtefact = createWorkflowArtefact(producedBy: workflowRun)
         }
 
         SamplePair samplePair = DomainFactory.createDisease(mergingWorkPackage)
@@ -1206,7 +1206,7 @@ samplePairsNotProcessed: ${expectedSamplePairsNotProcessed}
                         new MergingWorkPackageProcessingStatus(
                                 mergingWorkPackage,
                                 alignmentProcessingStatus,
-                                abstractMergedBamFile,
+                                abstractBamFile,
                                 [
                                         new SamplePairProcessingStatus(
                                                 samplePair,

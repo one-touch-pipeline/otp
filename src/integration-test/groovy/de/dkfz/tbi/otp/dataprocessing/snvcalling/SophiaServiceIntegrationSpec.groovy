@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -50,7 +50,7 @@ class SophiaServiceIntegrationSpec extends Specification {
             it.withdrawn = true
             assert it.save(flush: true)
         }
-        DomainFactory.createSamplePairWithExternalProcessedMergedBamFiles(true, [(property): value])
+        DomainFactory.createSamplePairWithExternallyProcessedBamFiles(true, [(property): value])
 
         expect:
         !sophiaService.samplePairForProcessing(ProcessingPriority.NORMAL)
@@ -71,10 +71,10 @@ class SophiaServiceIntegrationSpec extends Specification {
             it.withdrawn = true
             assert it.save(flush: true)
         }
-        SamplePair samplePair = DomainFactory.createSamplePairWithExternalProcessedMergedBamFiles(true, [(property): value])
+        SamplePair samplePair = DomainFactory.createSamplePairWithExternallyProcessedBamFiles(true, [(property): value])
 
-        DomainFactory.createExternalProcessedMergedBamFileQualityAssessment(samplePair.mergingWorkPackage1.processableBamFileInProjectFolder)
-        DomainFactory.createExternalProcessedMergedBamFileQualityAssessment(samplePair.mergingWorkPackage2.processableBamFileInProjectFolder)
+        DomainFactory.createExternallyProcessedBamFileQualityAssessment(samplePair.mergingWorkPackage1.processableBamFileInProjectFolder)
+        DomainFactory.createExternallyProcessedBamFileQualityAssessment(samplePair.mergingWorkPackage2.processableBamFileInProjectFolder)
 
         expect:
         samplePair == sophiaService.samplePairForProcessing(ProcessingPriority.NORMAL)

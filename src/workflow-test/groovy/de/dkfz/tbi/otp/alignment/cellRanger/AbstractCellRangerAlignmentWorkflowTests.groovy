@@ -128,11 +128,11 @@ abstract class AbstractCellRangerAlignmentWorkflowTests extends AbstractAlignmen
         SessionUtils.withTransaction {
             SingleCellBamFile singleCellBamFile = CollectionUtils.exactlyOneElement(SingleCellBamFile.all)
 
-            assert singleCellBamFile.fileOperationStatus == AbstractMergedBamFile.FileOperationStatus.PROCESSED
+            assert singleCellBamFile.fileOperationStatus == AbstractBamFile.FileOperationStatus.PROCESSED
             assert singleCellBamFile.fileSize
             assert singleCellBamFile.qualityAssessmentStatus == AbstractBamFile.QaProcessingStatus.FINISHED
             assert singleCellBamFile.qualityAssessment
-            assert singleCellBamFile.qcTrafficLightStatus == AbstractMergedBamFile.QcTrafficLightStatus.UNCHECKED
+            assert singleCellBamFile.qcTrafficLightStatus == AbstractBamFile.QcTrafficLightStatus.UNCHECKED
         }
     }
 

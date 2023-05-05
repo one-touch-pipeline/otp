@@ -55,8 +55,8 @@ class ExecuteRoddySophiaJob extends AbstractExecutePanCanJob<SophiaInstance> imp
         sophiaService.validateInputBamFiles(sophiaInstance)
         Path workDirectory = sophiaService.getWorkDirectory(sophiaInstance)
 
-        AbstractMergedBamFile bamFileDisease = sophiaInstance.sampleType1BamFile
-        AbstractMergedBamFile bamFileControl = sophiaInstance.sampleType2BamFile
+        AbstractBamFile bamFileDisease = sophiaInstance.sampleType1BamFile
+        AbstractBamFile bamFileControl = sophiaInstance.sampleType2BamFile
 
         Path bamFileDiseasePath = linkBamFileInWorkDirectory(bamFileDisease, workDirectory)
         Path bamFileControlPath = linkBamFileInWorkDirectory(bamFileControl, workDirectory)
@@ -74,7 +74,7 @@ class ExecuteRoddySophiaJob extends AbstractExecutePanCanJob<SophiaInstance> imp
         List<String> cValues = []
 
         if (!([bamFileDisease, bamFileControl].every {
-            RoddyBamFile.isAssignableFrom(Hibernate.getClass(it)) || ExternallyProcessedMergedBamFile.isAssignableFrom(Hibernate.getClass(it))
+            RoddyBamFile.isAssignableFrom(Hibernate.getClass(it)) || ExternallyProcessedBamFile.isAssignableFrom(Hibernate.getClass(it))
         })) {
             throw new RuntimeException("Unsupported BAM-File type for '${bamFileDisease.class}' or '${bamFileControl.class}' ")
         }

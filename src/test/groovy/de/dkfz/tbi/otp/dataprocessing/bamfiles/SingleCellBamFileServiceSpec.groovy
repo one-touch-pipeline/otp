@@ -25,8 +25,8 @@ import grails.testing.gorm.DataTest
 import grails.testing.services.ServiceUnitTest
 import spock.lang.Specification
 
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFileService
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFileService
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerConfig
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerMergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
@@ -58,7 +58,7 @@ class SingleCellBamFileServiceSpec extends Specification implements ServiceUnitT
     void setup() {
         bamFile = createBamFile()
         testDir = "/base-dir"
-        service.abstractMergedBamFileService = Mock(AbstractMergedBamFileService) {
+        service.abstractBamFileService = Mock(AbstractBamFileService) {
             getBaseDirectory(_) >> Paths.get("/base-dir")
         }
     }
@@ -152,7 +152,7 @@ class SingleCellBamFileServiceSpec extends Specification implements ServiceUnitT
         !service.getPathForFurtherProcessing(bamFile)
 
         where:
-        status << [AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED, AbstractMergedBamFile.QcTrafficLightStatus.REJECTED]
+        status << [AbstractBamFile.QcTrafficLightStatus.BLOCKED, AbstractBamFile.QcTrafficLightStatus.REJECTED]
     }
 
     void "test getPathForFurtherProcessing, should return final directory"() {
@@ -162,7 +162,7 @@ class SingleCellBamFileServiceSpec extends Specification implements ServiceUnitT
 
     void "test getPathForFurtherProcessing, when not set in mergingWorkPackage, should throw exception"() {
         given:
-        bamFile.fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.DECLARED
+        bamFile.fileOperationStatus = AbstractBamFile.FileOperationStatus.DECLARED
         bamFile.md5sum = null
         bamFile.save(flush: true)
         bamFile.mergingWorkPackage.bamFileInProjectFolder = null

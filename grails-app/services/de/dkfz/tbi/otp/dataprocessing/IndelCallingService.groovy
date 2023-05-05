@@ -50,7 +50,7 @@ class IndelCallingService extends AbstractBamFileAnalysisService<IndelCallingIns
 
     @Override
     protected String pipelineSpecificBamFileChecks(String number) {
-        return "AND ambf${number}.class in (de.dkfz.tbi.otp.dataprocessing.RoddyBamFile, de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedMergedBamFile)"
+        return "AND ambf${number}.class in (de.dkfz.tbi.otp.dataprocessing.RoddyBamFile, de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedBamFile)"
     }
 
     @Override

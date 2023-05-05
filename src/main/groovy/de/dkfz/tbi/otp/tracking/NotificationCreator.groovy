@@ -358,7 +358,7 @@ class NotificationCreator {
     }
 
     private MergingWorkPackageProcessingStatus createMergingWorkPackageProcessingStatus(MergingWorkPackage mergingWorkPackage) {
-        AbstractMergedBamFile bamFile = mergingWorkPackage.bamFileThatIsReadyForFurtherAnalysis
+        AbstractBamFile bamFile = mergingWorkPackage.bamFileThatIsReadyForFurtherAnalysis
         MergingWorkPackageProcessingStatus mwpStatus = new MergingWorkPackageProcessingStatus(
                 mergingWorkPackage,
                 bamFile ? ALL_DONE : NOTHING_DONE_MIGHT_DO,
@@ -405,7 +405,7 @@ class NotificationCreator {
     private static WorkflowProcessingStatus getAnalysisProcessingStatus(BamFilePairAnalysis analysis, SamplePair sp, AbstractBamFileAnalysisService service) {
         WorkflowProcessingStatus status
         if (analysis && !analysis.withdrawn && analysis.processingState == AnalysisProcessingStates.FINISHED && MERGING_WORK_PACKAGE_NUMBERS.every {
-            AbstractMergedBamFile bamFile = analysis."sampleType${it}BamFile"
+            AbstractBamFile bamFile = analysis."sampleType${it}BamFile"
             return bamFile == bamFile.mergingWorkPackage.bamFileThatIsReadyForFurtherAnalysis
         }) {
             status = ALL_DONE

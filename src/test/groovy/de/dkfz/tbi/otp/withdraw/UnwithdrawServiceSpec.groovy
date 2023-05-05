@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -148,7 +148,7 @@ class UnwithdrawServiceSpec extends Specification implements DomainFactoryCore, 
                 (lsdfFilesService.getFileFinalPathAsPath(seqTrack.dataFiles.last())) : lsdfFilesService.getFileViewByPidPathAsPath(seqTrack.dataFiles.last()),
         ]
         state.pathsToChangeGroup.size() == pathsToChangeGroup
-        state.mergedBamFiles == []
+        state.bamFiles == []
         seqTrack.dataFiles.every { !it.isFileWithdrawn() }
 
         where:
@@ -163,14 +163,14 @@ class UnwithdrawServiceSpec extends Specification implements DomainFactoryCore, 
 
         FileSystemService fileSystemService = new TestFileSystemService()
         ProjectService projectService = new ProjectService(configService: configService, fileSystemService: fileSystemService)
-        AbstractMergedBamFileService abstractMergedBamFileService = new AbstractMergedBamFileService(
+        AbstractBamFileService abstractBamFileService = new AbstractBamFileService(
                 individualService: new IndividualService(projectService: projectService))
         RoddyBamFileWithdrawService roddyBamFileWithdrawService = new RoddyBamFileWithdrawService(
-                fileSystemService: fileSystemService, abstractMergedBamFileService: abstractMergedBamFileService)
+                fileSystemService: fileSystemService, abstractBamFileService: abstractBamFileService)
         CellRangerBamFileWithdrawService cellRangerBamFileWithdrawService = new CellRangerBamFileWithdrawService(
-                fileSystemService: fileSystemService, abstractMergedBamFileService: abstractMergedBamFileService)
+                fileSystemService: fileSystemService, abstractBamFileService: abstractBamFileService)
         UnwithdrawService service = new UnwithdrawService([
-                abstractMergedBamFileService: abstractMergedBamFileService,
+                abstractBamFileService: abstractBamFileService,
                 fileSystemService           : fileSystemService,
                 withdrawBamFileServices     : [
                         roddyBamFileWithdrawService,
@@ -179,12 +179,12 @@ class UnwithdrawServiceSpec extends Specification implements DomainFactoryCore, 
         ])
 
         RoddyBamFile roddyBamFile = createBamFile(withdrawn: true)
-        Path roddyPath = abstractMergedBamFileService.getBaseDirectory(roddyBamFile).resolve(roddyBamFile.bamFileName)
+        Path roddyPath = abstractBamFileService.getBaseDirectory(roddyBamFile).resolve(roddyBamFile.bamFileName)
         CreateFileHelper.createFile(roddyPath)
         state.seqTracksWithComment.addAll(roddyBamFile.containedSeqTracks.collect { new SeqTrackWithComment(it, "roddy") })
 
         SingleCellBamFile scBamFile = AlignmentPipelineFactory.CellRangerFactoryInstance.INSTANCE.createBamFile(withdrawn: true)
-        Path scPath = abstractMergedBamFileService.getBaseDirectory(scBamFile).resolve(scBamFile.bamFileName)
+        Path scPath = abstractBamFileService.getBaseDirectory(scBamFile).resolve(scBamFile.bamFileName)
         CreateFileHelper.createFile(scPath)
         state.seqTracksWithComment.addAll(scBamFile.containedSeqTracks.collect { new SeqTrackWithComment(it, "sc") })
 
@@ -194,7 +194,7 @@ class UnwithdrawServiceSpec extends Specification implements DomainFactoryCore, 
         then:
         state.linksToCreate == [:]
         state.pathsToChangeGroup == [(scPath.toString()): scBamFile.project.unixGroup, (roddyPath.toString()): roddyBamFile.project.unixGroup]
-        state.mergedBamFiles == [roddyBamFile, scBamFile]
+        state.bamFiles == [roddyBamFile, scBamFile]
         [roddyBamFile, scBamFile].every { !it.withdrawn }
     }
 
@@ -204,14 +204,14 @@ class UnwithdrawServiceSpec extends Specification implements DomainFactoryCore, 
 
         FileSystemService fileSystemService = new TestFileSystemService()
         ProjectService projectService = new ProjectService(configService: configService, fileSystemService: fileSystemService)
-        AbstractMergedBamFileService abstractMergedBamFileService = new AbstractMergedBamFileService(
+        AbstractBamFileService abstractBamFileService = new AbstractBamFileService(
                 individualService: new IndividualService(projectService: projectService))
         RoddyBamFileWithdrawService roddyBamFileWithdrawService = new RoddyBamFileWithdrawService(
-                fileSystemService: fileSystemService, abstractMergedBamFileService: abstractMergedBamFileService)
+                fileSystemService: fileSystemService, abstractBamFileService: abstractBamFileService)
         CellRangerBamFileWithdrawService cellRangerBamFileWithdrawService = new CellRangerBamFileWithdrawService(
-                fileSystemService: fileSystemService, abstractMergedBamFileService: abstractMergedBamFileService)
+                fileSystemService: fileSystemService, abstractBamFileService: abstractBamFileService)
         UnwithdrawService service = new UnwithdrawService([
-                abstractMergedBamFileService: abstractMergedBamFileService,
+                abstractBamFileService: abstractBamFileService,
                 fileSystemService           : fileSystemService,
                 withdrawBamFileServices     : [
                         roddyBamFileWithdrawService,
@@ -223,7 +223,7 @@ class UnwithdrawServiceSpec extends Specification implements DomainFactoryCore, 
         state.seqTracksWithComment.addAll(bamFileFileDeleted.containedSeqTracks.collect { new SeqTrackWithComment(it, "") })
 
         SingleCellBamFile bamFileDataFileWithdrawn = AlignmentPipelineFactory.CellRangerFactoryInstance.INSTANCE.createBamFile(withdrawn: true)
-        CreateFileHelper.createFile(abstractMergedBamFileService.getBaseDirectory(bamFileDataFileWithdrawn).resolve(bamFileDataFileWithdrawn.bamFileName))
+        CreateFileHelper.createFile(abstractBamFileService.getBaseDirectory(bamFileDataFileWithdrawn).resolve(bamFileDataFileWithdrawn.bamFileName))
         bamFileDataFileWithdrawn.containedSeqTracks.each {
             it.dataFiles*.fileWithdrawn = true
             it.dataFiles*.save()
@@ -231,8 +231,8 @@ class UnwithdrawServiceSpec extends Specification implements DomainFactoryCore, 
         state.seqTracksWithComment.addAll(bamFileDataFileWithdrawn.containedSeqTracks.collect { new SeqTrackWithComment(it, "") })
 
         SingleCellBamFile bamFileDataFileUnfinished = AlignmentPipelineFactory.CellRangerFactoryInstance.INSTANCE.createBamFile(
-                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.DECLARED, withdrawn: true)
-        CreateFileHelper.createFile(abstractMergedBamFileService.getBaseDirectory(bamFileDataFileUnfinished).resolve(bamFileDataFileUnfinished.bamFileName))
+                fileOperationStatus: AbstractBamFile.FileOperationStatus.DECLARED, withdrawn: true)
+        CreateFileHelper.createFile(abstractBamFileService.getBaseDirectory(bamFileDataFileUnfinished).resolve(bamFileDataFileUnfinished.bamFileName))
         state.seqTracksWithComment.addAll(bamFileDataFileUnfinished.containedSeqTracks.collect { new SeqTrackWithComment(it, "") })
 
         when:
@@ -241,7 +241,7 @@ class UnwithdrawServiceSpec extends Specification implements DomainFactoryCore, 
         then:
         state.linksToCreate == [:]
         state.pathsToChangeGroup == [:]
-        state.mergedBamFiles == []
+        state.bamFiles == []
         [bamFileFileDeleted, bamFileDataFileWithdrawn, bamFileDataFileUnfinished].every { it.withdrawn }
     }
 
@@ -279,10 +279,10 @@ class UnwithdrawServiceSpec extends Specification implements DomainFactoryCore, 
                 processingState: AnalysisProcessingStates.IN_PROGRESS, withdrawn: true)
         CreateFileHelper.createFile(indelService.getWorkDirectory(indelCallingInstanceUnfinished))
 
-        List<AbstractMergedBamFile> bamFiles = [indelCallingInstanceBamFileWithdrawn.sampleType1BamFile, indelCallingInstanceBamFileWithdrawn.sampleType2BamFile,
-                                                indelCallingInstanceFileDeleted.sampleType1BamFile, indelCallingInstanceFileDeleted.sampleType2BamFile,
-                                                indelCallingInstanceUnfinished.sampleType1BamFile, indelCallingInstanceUnfinished.sampleType2BamFile]
-        state.mergedBamFiles = bamFiles
+        List<AbstractBamFile> bamFiles = [indelCallingInstanceBamFileWithdrawn.sampleType1BamFile, indelCallingInstanceBamFileWithdrawn.sampleType2BamFile,
+                                          indelCallingInstanceFileDeleted.sampleType1BamFile, indelCallingInstanceFileDeleted.sampleType2BamFile,
+                                          indelCallingInstanceUnfinished.sampleType1BamFile, indelCallingInstanceUnfinished.sampleType2BamFile]
+        state.bamFiles = bamFiles
 
         when:
         service.unwithdrawAnalysis(state)
@@ -290,7 +290,7 @@ class UnwithdrawServiceSpec extends Specification implements DomainFactoryCore, 
         then:
         state.linksToCreate == [:]
         state.pathsToChangeGroup == [:]
-        state.mergedBamFiles == bamFiles
+        state.bamFiles == bamFiles
         [indelCallingInstanceBamFileWithdrawn, indelCallingInstanceFileDeleted].every { it.withdrawn }
     }
 }

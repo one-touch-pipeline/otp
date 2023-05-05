@@ -75,7 +75,7 @@ class DeNbiKpiServiceIntegrationSpec extends Specification implements RoddyRnaFa
 
         autoTimestampEventListener.withoutDateCreated(RnaRoddyBamFile) {
             roddyBamFile = createBamFile([
-                    fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
+                    fileOperationStatus: AbstractBamFile.FileOperationStatus.PROCESSED,
                     workPackage: workPackage,
                     dateCreated: Date.from(startDate.toInstant().plus(1, ChronoUnit.DAYS)),
             ])
@@ -107,7 +107,7 @@ class DeNbiKpiServiceIntegrationSpec extends Specification implements RoddyRnaFa
 
         autoTimestampEventListener.withoutDateCreated(RnaRoddyBamFile) {
             rnaRoddyBamFile = createBamFile([
-                    fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
+                    fileOperationStatus: AbstractBamFile.FileOperationStatus.PROCESSED,
                     workPackage: workPackage,
                     dateCreated: Date.from(startDate.toInstant().plus(1, ChronoUnit.DAYS)),
             ])
@@ -134,11 +134,11 @@ class DeNbiKpiServiceIntegrationSpec extends Specification implements RoddyRnaFa
                 pipeline: DomainFactory.createRoddyRnaPipeline(),
         ])
 
-        AbstractMergedBamFile singleCellBamFile
+        AbstractBamFile singleCellBamFile
 
         autoTimestampEventListener.withoutDateCreated(RnaRoddyBamFile) {
             singleCellBamFile = createBamFile([
-                    fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
+                    fileOperationStatus: AbstractBamFile.FileOperationStatus.PROCESSED,
                     workPackage: workPackage,
                     dateCreated: Date.from(startDate.toInstant().plus(1, ChronoUnit.DAYS)),
             ])

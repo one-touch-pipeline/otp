@@ -36,7 +36,7 @@ import de.dkfz.tbi.otp.workflowExecution.ExternalWorkflowConfigFragment
 
 @SuppressWarnings('JavaIoPackageAccess')
 @ManagedEntity
-class SingleCellBamFile extends AbstractMergedBamFile implements HasIdentifier, ProcessParameterObject {
+class SingleCellBamFile extends AbstractBamFile implements HasIdentifier, ProcessParameterObject {
 
     /**
      * @deprecated use {@link SingleCellBamFileService#INPUT_DIRECTORY_NAME} instead
@@ -328,11 +328,11 @@ class SingleCellBamFile extends AbstractMergedBamFile implements HasIdentifier, 
 
     QualityAssessmentMergedPass findOrSaveQaPass() {
         QualityAssessmentMergedPass assessmentMergedPass = CollectionUtils.atMostOneElement(QualityAssessmentMergedPass.findAllWhere(
-                abstractMergedBamFile: this,
+                abstractBamFile: this,
         ))
         if (!assessmentMergedPass) {
             assessmentMergedPass = new QualityAssessmentMergedPass(
-                    abstractMergedBamFile: this,
+                    abstractBamFile: this,
             )
             assessmentMergedPass.save(flush: true)
         }
@@ -343,7 +343,7 @@ class SingleCellBamFile extends AbstractMergedBamFile implements HasIdentifier, 
     CellRangerQualityAssessment getQualityAssessment() {
         CellRangerQualityAssessment.createCriteria().get {
             qualityAssessmentMergedPass {
-                eq 'abstractMergedBamFile', this
+                eq 'abstractBamFile', this
             }
         } as CellRangerQualityAssessment
     }

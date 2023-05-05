@@ -27,7 +27,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.domainFactory.FastqcDomainFactory
 import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPancanFactory
@@ -405,7 +405,7 @@ abstract class AbstractRoddyAlignmentWorkflowSpec extends AbstractAlignmentWorkf
 
     protected void checkQC(RoddyBamFile bamFile) {
         QualityAssessmentMergedPass qaPass = CollectionUtils.exactlyOneElement(QualityAssessmentMergedPass.findAllWhere(
-                abstractMergedBamFile: bamFile,
+                abstractBamFile: bamFile,
         ))
 
         bamFile.seqTracks.each {
@@ -433,7 +433,7 @@ abstract class AbstractRoddyAlignmentWorkflowSpec extends AbstractAlignmentWorkf
         assert bamFile.coverageWithN == abstractBamFileService.calculateCoverageWithN(bamFile)
 
         assert bamFile.qualityAssessmentStatus == AbstractBamFile.QaProcessingStatus.FINISHED
-        assert bamFile.qcTrafficLightStatus == AbstractMergedBamFile.QcTrafficLightStatus.UNCHECKED
+        assert bamFile.qcTrafficLightStatus == AbstractBamFile.QcTrafficLightStatus.UNCHECKED
 
         if (bamFile.seqType.wgbs && bamFile.hasMultipleLibraries()) {
             List<RoddyLibraryQa> libraryQas = RoddyLibraryQa.findAllByQualityAssessmentMergedPass(qaPass)
@@ -490,7 +490,6 @@ abstract class AbstractRoddyAlignmentWorkflowSpec extends AbstractAlignmentWorkf
 
     protected void assertBamFileFileSystemPropertiesSet(RoddyBamFile bamFile) {
         assert bamFile.md5sum =~ /^[a-f0-9]{32}$/
-        assert bamFile.fileExists
         assert null != bamFile.dateFromFileSystem
         assert bamFile.fileSize > 0
     }

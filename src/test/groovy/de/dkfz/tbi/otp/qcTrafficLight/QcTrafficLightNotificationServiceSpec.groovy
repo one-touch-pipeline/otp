@@ -44,7 +44,7 @@ class QcTrafficLightNotificationServiceSpec extends Specification implements Dat
     @Override
     Class[] getDomainClassesToMock() {
         return [
-                AbstractMergedBamFile,
+                AbstractBamFile,
                 Comment,
                 DataFile,
                 FastqImportInstance,
@@ -85,7 +85,7 @@ class QcTrafficLightNotificationServiceSpec extends Specification implements Dat
         final String FAQ = 'FAQ'
         final String TICKET_PREFIX = "prefix"
 
-        AbstractMergedBamFile bamFile = createBamFile()
+        AbstractBamFile bamFile = createBamFile()
         bamFile.project.qcTrafficLightNotification = qcTrafficLightNotification
         bamFile.project.save(flush: true)
 

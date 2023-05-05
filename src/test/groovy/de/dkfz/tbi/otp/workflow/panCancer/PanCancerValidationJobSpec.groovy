@@ -119,7 +119,7 @@ class PanCancerValidationJobSpec extends Specification implements WorkflowSystem
         final PanCancerValidationJob job = new PanCancerValidationJob()
         final RoddyBamFile bamFile = createRoddyBamFile(RoddyBamFile)
         RoddyBamFileService roddyBamFileService = new RoddyBamFileService()
-        roddyBamFileService.abstractMergedBamFileService = Mock(AbstractMergedBamFileService) {
+        roddyBamFileService.abstractBamFileService = Mock(AbstractBamFileService) {
             getBaseDirectory(_) >> Paths.get("/")
         }
 

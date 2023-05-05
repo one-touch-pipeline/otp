@@ -127,7 +127,7 @@ class RnaQaOverviewService extends AbstractRoddyQaOverviewService {
                         linkTarget: "_blank",
                         link: linkGenerator.link([
                                 action: "renderPDF",
-                                params: ["abstractMergedBamFile.id": qaMap.bamId],
+                                params: ["abstractBamFile.id": qaMap.bamId],
                         ])),
         ]
     }

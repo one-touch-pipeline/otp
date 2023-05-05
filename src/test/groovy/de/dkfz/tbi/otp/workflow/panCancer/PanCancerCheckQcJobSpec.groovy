@@ -77,9 +77,9 @@ class PanCancerCheckQcJobSpec extends Specification implements WorkflowSystemDom
         1 * job.qcTrafficLightService.setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling(bamFile, qa) >> {
             // only warning or not blocked are relevant for setting the workflow status
             if (checkSuccessful) {
-                bamFile.qcTrafficLightStatus = AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED
+                bamFile.qcTrafficLightStatus = AbstractBamFile.QcTrafficLightStatus.QC_PASSED
             } else {
-                bamFile.qcTrafficLightStatus = AbstractMergedBamFile.QcTrafficLightStatus.WARNING
+                bamFile.qcTrafficLightStatus = AbstractBamFile.QcTrafficLightStatus.WARNING
             }
         }
         successCalls * job.workflowStateChangeService.changeStateToSuccess(workflowStep)

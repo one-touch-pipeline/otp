@@ -62,8 +62,8 @@ class ExecuteRoddyAceseqJob extends AbstractExecutePanCanJob<AceseqInstance> imp
 
         aceseqService.validateInputBamFiles(aceseqInstance)
 
-        AbstractMergedBamFile bamFileDisease = aceseqInstance.sampleType1BamFile
-        AbstractMergedBamFile bamFileControl = aceseqInstance.sampleType2BamFile
+        AbstractBamFile bamFileDisease = aceseqInstance.sampleType1BamFile
+        AbstractBamFile bamFileControl = aceseqInstance.sampleType2BamFile
         File bamFileDiseasePath = bamFileDisease.pathForFurtherProcessing
         File bamFileControlPath = bamFileControl.pathForFurtherProcessing
 

@@ -40,7 +40,7 @@ class SophiaInstanceSpec extends Specification implements DataTest {
     @Override
     Class[] getDomainClassesToMock() {
         return [
-                AbstractMergedBamFile,
+                AbstractBamFile,
                 DataFile,
                 FileType,
                 Individual,

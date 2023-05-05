@@ -114,7 +114,7 @@ class DeNbiKpiService {
      * @return DeNbiKpi
      */
     DeNbiKpi getCellRangerKpi(Date from, Date to) {
-        List<String> cellRangerProjects = AbstractMergedBamFile.createCriteria().list {
+        List<String> cellRangerProjects = AbstractBamFile.createCriteria().list {
             lt("dateCreated", to)
             gt("dateCreated", from)
             workPackage {

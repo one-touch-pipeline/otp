@@ -67,8 +67,8 @@ abstract class AbstractBamFilePairAnalysisStartJob extends AbstractStartJobImpl 
 
                 ConfigPerProjectAndSeqType config = getConfig(samplePair)
 
-                AbstractMergedBamFile sampleType1BamFile = samplePair.mergingWorkPackage1.processableBamFileInProjectFolder
-                AbstractMergedBamFile sampleType2BamFile = samplePair.mergingWorkPackage2.processableBamFileInProjectFolder
+                AbstractBamFile sampleType1BamFile = samplePair.mergingWorkPackage1.processableBamFileInProjectFolder
+                AbstractBamFile sampleType2BamFile = samplePair.mergingWorkPackage2.processableBamFileInProjectFolder
 
                 BamFilePairAnalysis analysis = bamFileAnalysisService.analysisClass.newInstance(
                         samplePair: samplePair,

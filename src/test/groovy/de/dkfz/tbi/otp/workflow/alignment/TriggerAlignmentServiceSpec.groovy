@@ -46,10 +46,10 @@ class TriggerAlignmentServiceSpec extends HibernateSpec implements ServiceUnitTe
     @Override
     List<Class> getDomainClasses() {
         return [
-                AbstractMergedBamFile,
+                AbstractBamFile,
                 BamFilePairAnalysis,
                 DataFile,
-                ExternallyProcessedMergedBamFile,
+                ExternallyProcessedBamFile,
                 Individual,
                 MergingWorkPackage,
                 Project,

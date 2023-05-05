@@ -32,7 +32,7 @@ import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
 @Rollback
 @Integration
-class AbstractMergedBamFileIntegrationSpec extends Specification {
+class AbstractBamFileIntegrationSpec extends Specification {
 
     void "withdraw, check that analysis also marked as withdrawn"() {
         given:

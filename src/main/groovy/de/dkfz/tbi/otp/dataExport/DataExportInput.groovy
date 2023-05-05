@@ -25,7 +25,7 @@ import grails.validation.Validateable
 import groovy.transform.CompileDynamic
 import groovy.transform.TupleConstructor
 
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 
@@ -70,6 +70,6 @@ class DataExportInput implements Validateable {
 
     //************ Data to be exported ************//
     List<SeqTrack> seqTrackList
-    List<AbstractMergedBamFile> bamFileList
+    List<AbstractBamFile> bamFileList
     Map<PipelineType, List<BamFilePairAnalysis>> analysisListMap = [:]
 }

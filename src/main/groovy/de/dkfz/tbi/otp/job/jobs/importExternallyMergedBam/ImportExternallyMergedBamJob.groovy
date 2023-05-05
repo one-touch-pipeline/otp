@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -77,7 +77,7 @@ class ImportExternallyMergedBamJob extends AbstractOtpJob {
 
     private NextAction linkSource(ImportProcess importProcess) throws Throwable {
         FileSystem fileSystem = fileSystemService.filesystemForBamImport
-        importProcess.externallyProcessedMergedBamFiles.each { ExternallyProcessedMergedBamFile epmbf ->
+        importProcess.externallyProcessedBamFiles.each { ExternallyProcessedBamFile epmbf ->
             Realm realm = epmbf.realm
             Path targetBaseDir = fileSystem.getPath(epmbf.importedFrom).parent
             Path linkBaseDir = fileSystem.getPath(epmbf.importFolder.absolutePath)
@@ -113,7 +113,7 @@ class ImportExternallyMergedBamJob extends AbstractOtpJob {
         String groovyCommand = processingOptionService.findOptionAsString(ProcessingOption.OptionName.COMMAND_GROOVY)
         File otpScriptDir = configService.toolsPath
 
-        importProcess.externallyProcessedMergedBamFiles.each { ExternallyProcessedMergedBamFile epmbf ->
+        importProcess.externallyProcessedBamFiles.each { ExternallyProcessedBamFile epmbf ->
             Realm realm = epmbf.project.realm
             File sourceBam = new File(epmbf.importedFrom)
             File sourceBaseDir = sourceBam.parentFile
@@ -211,7 +211,7 @@ touch ${checkpoint}
 
     private void validateLink(ImportProcess importProcess) throws Throwable {
         FileSystem fileSystem = fileSystemService.filesystemForBamImport
-        importProcess.externallyProcessedMergedBamFiles.each { ExternallyProcessedMergedBamFile bamFile ->
+        importProcess.externallyProcessedBamFiles.each { ExternallyProcessedBamFile bamFile ->
             Path sourceBaseDir = fileSystem.getPath(bamFile.importedFrom).parent
             Path targetBaseDir = fileSystem.getPath(bamFile.importFolder.absolutePath)
 
@@ -237,7 +237,7 @@ touch ${checkpoint}
     private void validateCopy(ImportProcess importProcess) throws Throwable {
         FileSystem fs = fileSystemService.filesystemForBamImport
 
-        final Collection<String> problems = importProcess.externallyProcessedMergedBamFiles.collect {
+        final Collection<String> problems = importProcess.externallyProcessedBamFiles.collect {
             String path = it.bamFile.path
             Path target = fs.getPath(path)
             Path targetBai = fs.getPath(it.baiFile.path)
@@ -271,10 +271,9 @@ touch ${checkpoint}
         }
 }
 
-    private void fillBamFile(ExternallyProcessedMergedBamFile bamFile, Path bamFilePath) {
-        bamFile.fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.PROCESSED
+    private void fillBamFile(ExternallyProcessedBamFile bamFile, Path bamFilePath) {
+        bamFile.fileOperationStatus = AbstractBamFile.FileOperationStatus.PROCESSED
         bamFile.fileSize = Files.size(bamFilePath)
-        bamFile.fileExists = true
         assert bamFile.save(flush: true)
 
         bamFile.workPackage.bamFileInProjectFolder = bamFile

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,7 +28,6 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.project.RoddyConfiguration
-import de.dkfz.tbi.otp.utils.SessionUtils
 
 import java.nio.file.Path
 
@@ -39,20 +38,6 @@ abstract class AbstractSnvWorkflowTests extends AbstractRoddyBamFilePairAnalysis
     LsdfFilesService lsdfFilesService
     ProjectService projectService
     SnvCallingService snvCallingService
-
-    void "testWholeWorkflowWithProcessedMergedBamFile"() {
-        given:
-        SessionUtils.withTransaction {
-            setupProcessedMergedBamFile()
-            setupData()
-        }
-
-        when:
-        execute()
-
-        then:
-        checkInstance()
-    }
 
     @Override
     ConfigPerProjectAndSeqType createConfig() {

@@ -36,7 +36,7 @@ String libraryLayout = SequencingReadType.PAIRED
 
 //-----------------
 
-def bamFile = CollectionUtils.exactlyOneElement(AbstractMergedBamFile.createCriteria().list {
+def bamFile = CollectionUtils.exactlyOneElement(AbstractBamFile.createCriteria().list {
     workPackage {
         sample {
             individual {
@@ -58,7 +58,7 @@ println bamFile
 
 def qa = CollectionUtils.exactlyOneElement(RoddyQualityAssessment.createCriteria().list {
     qualityAssessmentMergedPass {
-        eq('abstractMergedBamFile', bamFile)
+        eq('abstractBamFile', bamFile)
     }
     eq('chromosome', 'all')
 }.findAll {

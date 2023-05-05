@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -76,8 +76,8 @@ class WithdrawHelperService {
         summary << "\n"
         summary << TRIM_LINE
         String deleteOrWithdrawBamFile = withdrawStateHolder.deleteBamFile ? 'Deleting' : 'Withdrawing'
-        summary << "${deleteOrWithdrawBamFile} ${withdrawStateHolder.mergedBamFiles.unique().size()} bam file(s)"
-        withdrawStateHolder.mergedBamFiles.unique().each {
+        summary << "${deleteOrWithdrawBamFile} ${withdrawStateHolder.bamFiles.unique().size()} bam file(s)"
+        withdrawStateHolder.bamFiles.unique().each {
             summary << "  - ${withdrawDisplayDomainService.bamFileInfo(it)}"
         }
         summary << "\n"
@@ -143,7 +143,7 @@ class WithdrawHelperService {
         }
     }
 
-    void handleBamFiles(WithdrawStateHolder withdrawStateHolder, Map<WithdrawBamFileService, List<AbstractMergedBamFile>> bamFileMap) {
+    void handleBamFiles(WithdrawStateHolder withdrawStateHolder, Map<WithdrawBamFileService, List<AbstractBamFile>> bamFileMap) {
         if (withdrawStateHolder.deleteBamFile) {
             bamFileMap.each {
                 withdrawStateHolder.pathsToDelete.addAll(it.key.collectPaths(it.value))

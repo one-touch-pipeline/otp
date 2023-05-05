@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,7 +21,7 @@
  */
 package de.dkfz.tbi.otp.withdraw
 
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
 
 import java.nio.file.FileSystem
@@ -39,7 +39,7 @@ class WithdrawStateHolder {
 
     List<String> pathsToChangeGroup = []
 
-    List<AbstractMergedBamFile> mergedBamFiles = []
+    List<AbstractBamFile> bamFiles = []
 
     List<BamFilePairAnalysis> analysis = []
 }

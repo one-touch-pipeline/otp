@@ -37,7 +37,7 @@ import java.nio.file.Path
 @Transactional
 abstract class AbstractBamFileAnalysisService<T extends BamFilePairAnalysis> implements BamFileAnalysisServiceTrait {
 
-    AbstractMergedBamFileService abstractMergedBamFileService
+    AbstractBamFileService abstractBamFileService
     IndividualService individualService
     ProcessingOptionService processingOptionService
 
@@ -70,7 +70,7 @@ abstract class AbstractBamFileAnalysisService<T extends BamFilePairAnalysis> imp
         double threshold = processingOptionService.findOptionAsDouble(ProcessingOption.OptionName.PIPELINE_MIN_COVERAGE, analysisType.toString())
 
         def testIfBamFileFulfillCriteria = { String number ->
-            return "AND EXISTS (FROM AbstractMergedBamFile ambf${number} " +
+            return "AND EXISTS (FROM AbstractBamFile ambf${number} " +
             // check that the file is not withdrawn
             "       WHERE ambf${number}.withdrawn = false " +
             //check that the bam file belongs to the SamplePair
@@ -93,9 +93,9 @@ abstract class AbstractBamFileAnalysisService<T extends BamFilePairAnalysis> imp
             //check that the file is in the workpackage
             "       AND ambf${number}.${workPackage}.bamFileInProjectFolder = ambf${number} " +
             //check that the file file operation status ist processed
-            "       AND ambf${number}.fileOperationStatus = '${AbstractMergedBamFile.FileOperationStatus.PROCESSED}' " +
+            "       AND ambf${number}.fileOperationStatus = '${AbstractBamFile.FileOperationStatus.PROCESSED}' " +
             //check that the id is the last for that MergingWorkPackage
-            "       AND ambf${number} = (select max(bamFile.id) from AbstractMergedBamFile bamFile where bamFile.workPackage = ambf${number}.workPackage)" +
+            "       AND ambf${number} = (select max(bamFile.id) from AbstractBamFile bamFile where bamFile.workPackage = ambf${number}.workPackage)" +
             "       ) "
         }
 
@@ -136,7 +136,7 @@ abstract class AbstractBamFileAnalysisService<T extends BamFilePairAnalysis> imp
                 analysis: analysisType,
                 seqTypes: seqTypes,
                 threshold: threshold,
-                rejecetedQcTrafficLightStatus: [AbstractMergedBamFile.QcTrafficLightStatus.REJECTED, AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED],
+                rejecetedQcTrafficLightStatus: [AbstractBamFile.QcTrafficLightStatus.REJECTED, AbstractBamFile.QcTrafficLightStatus.BLOCKED],
         ]
         if (sp) {
             parameters.sp = sp
@@ -148,8 +148,8 @@ abstract class AbstractBamFileAnalysisService<T extends BamFilePairAnalysis> imp
 
     void validateInputBamFiles(final BamFilePairAnalysis analysis) throws Throwable {
         try {
-            abstractMergedBamFileService.getExistingBamFilePath(analysis.sampleType1BamFile)
-            abstractMergedBamFileService.getExistingBamFilePath(analysis.sampleType2BamFile)
+            abstractBamFileService.getExistingBamFilePath(analysis.sampleType1BamFile)
+            abstractBamFileService.getExistingBamFilePath(analysis.sampleType2BamFile)
         } catch (final AssertionError e) {
             throw new FileInconsistencyException('The input BAM files have changed on the file system while this job processed them.', e)
         }

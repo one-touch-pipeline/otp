@@ -107,7 +107,7 @@ class AbstractAlignmentStartJobIntegrationTests implements DomainFactoryProcessi
         setupData()
         DomainFactory.createRoddyBamFile([
                 workPackage        : createMergingWorkPackage(),
-                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.DECLARED,
+                fileOperationStatus: AbstractBamFile.FileOperationStatus.DECLARED,
                 md5sum             : null,
                 withdrawn          : false,
         ])
@@ -120,7 +120,7 @@ class AbstractAlignmentStartJobIntegrationTests implements DomainFactoryProcessi
         setupData()
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile([
                 workPackage        : createMergingWorkPackage(),
-                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.NEEDS_PROCESSING,
+                fileOperationStatus: AbstractBamFile.FileOperationStatus.NEEDS_PROCESSING,
                 md5sum             : null,
                 withdrawn          : true,
         ])
@@ -133,7 +133,7 @@ class AbstractAlignmentStartJobIntegrationTests implements DomainFactoryProcessi
         setupData()
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile([
                 workPackage        : createMergingWorkPackage(),
-                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
+                fileOperationStatus: AbstractBamFile.FileOperationStatus.PROCESSED,
                 withdrawn          : false,
         ])
 
@@ -188,13 +188,13 @@ class AbstractAlignmentStartJobIntegrationTests implements DomainFactoryProcessi
         MergingWorkPackage mwp = createMergingWorkPackage()
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile([
                 workPackage        : mwp,
-                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.DECLARED,
+                fileOperationStatus: AbstractBamFile.FileOperationStatus.DECLARED,
                 md5sum             : null,
                 withdrawn          : true,
         ])
         DomainFactory.createRoddyBamFile([
                 workPackage        : mwp,
-                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.NEEDS_PROCESSING,
+                fileOperationStatus: AbstractBamFile.FileOperationStatus.NEEDS_PROCESSING,
                 md5sum             : null,
                 withdrawn          : true,
                 config             : roddyBamFile.config,
@@ -209,11 +209,11 @@ class AbstractAlignmentStartJobIntegrationTests implements DomainFactoryProcessi
         MergingWorkPackage mwp = createMergingWorkPackage()
         RoddyBamFile rbf = DomainFactory.createRoddyBamFile([
                 workPackage        : mwp,
-                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
+                fileOperationStatus: AbstractBamFile.FileOperationStatus.PROCESSED,
         ])
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile([
                 workPackage        : mwp,
-                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.INPROGRESS,
+                fileOperationStatus: AbstractBamFile.FileOperationStatus.INPROGRESS,
                 md5sum             : null,
                 withdrawn          : true,
                 config             : rbf.config,
@@ -230,11 +230,11 @@ class AbstractAlignmentStartJobIntegrationTests implements DomainFactoryProcessi
         MergingWorkPackage mwp = createMergingWorkPackage()
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile([
                 workPackage        : mwp,
-                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
+                fileOperationStatus: AbstractBamFile.FileOperationStatus.PROCESSED,
         ])
         DomainFactory.createRoddyBamFile([
                 workPackage        : mwp,
-                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.DECLARED,
+                fileOperationStatus: AbstractBamFile.FileOperationStatus.DECLARED,
                 md5sum             : null,
                 withdrawn          : true,
                 config             : roddyBamFile.config,

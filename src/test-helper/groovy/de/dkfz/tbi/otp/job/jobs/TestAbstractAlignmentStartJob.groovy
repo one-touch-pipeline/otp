@@ -49,7 +49,7 @@ class TestAbstractAlignmentStartJob extends AbstractAlignmentStartJob {
     }
 
     @Override
-    AbstractMergedBamFile reallyCreateBamFile(MergingWorkPackage mergingWorkPackage, int identifier, Set<SeqTrack> seqTracks, ConfigPerProjectAndSeqType config, AbstractMergedBamFile baseBamFile) {
+    AbstractBamFile reallyCreateBamFile(MergingWorkPackage mergingWorkPackage, int identifier, Set<SeqTrack> seqTracks, ConfigPerProjectAndSeqType config, AbstractBamFile baseBamFile) {
         new RoddyBamFile(
                 workPackage: mergingWorkPackage,
                 identifier: identifier,

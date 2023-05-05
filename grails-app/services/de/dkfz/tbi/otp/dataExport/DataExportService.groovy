@@ -136,9 +136,9 @@ class DataExportService {
 
         FileSystem fileSystem = fileSystemService.remoteFileSystemOnDefaultRealm
 
-        dataExportInput.bamFileList.each { AbstractMergedBamFile bamFile ->
+        dataExportInput.bamFileList.each { AbstractBamFile bamFile ->
             Path basePath = Paths.get(bamFile.baseDirectory.absolutePath)
-            Path sourceBam = bamFile instanceof ExternallyProcessedMergedBamFile ?
+            Path sourceBam = bamFile instanceof ExternallyProcessedBamFile ?
                     fileSystem.getPath(bamFile.bamFile.toString()) :
                     fileSystem.getPath(basePath.toString(), bamFile.bamFileName)
             Path qcFolder = fileSystem.getPath(basePath.toString(), "qualitycontrol")

@@ -48,12 +48,12 @@ class RnaAlignmentStartJob extends AbstractRoddyAlignmentStartJob {
     }
 
     @Override
-    AbstractMergedBamFile reallyCreateBamFile(
+    AbstractBamFile reallyCreateBamFile(
             MergingWorkPackage mergingWorkPackage,
             int identifier,
             Set<SeqTrack> seqTracks,
             ConfigPerProjectAndSeqType config,
-            AbstractMergedBamFile baseBamFile = null
+            AbstractBamFile baseBamFile = null
     ) {
         new RnaRoddyBamFile(
                 workPackage: mergingWorkPackage,

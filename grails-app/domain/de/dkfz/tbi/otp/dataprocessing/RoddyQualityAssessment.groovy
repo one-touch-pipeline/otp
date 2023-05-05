@@ -63,7 +63,7 @@ abstract class RoddyQualityAssessment extends AbstractQualityAssessment implemen
 
     static constraints = {
         qualityAssessmentMergedPass(validator: {
-            RoddyBamFile.isAssignableFrom(Hibernate.getClass(it.abstractMergedBamFile))
+            RoddyBamFile.isAssignableFrom(Hibernate.getClass(it.abstractBamFile))
         })
 
         chromosome blank: false
@@ -94,7 +94,7 @@ abstract class RoddyQualityAssessment extends AbstractQualityAssessment implemen
     }
 
     RoddyBamFile getRoddyBamFile() {
-        return (RoddyBamFile)qualityAssessmentMergedPass.abstractMergedBamFile
+        return (RoddyBamFile)qualityAssessmentMergedPass.abstractBamFile
     }
 
     RoddyBamFile getBamFile() {

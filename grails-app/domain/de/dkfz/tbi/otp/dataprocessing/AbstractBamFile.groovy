@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,22 +22,24 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import grails.gorm.hibernate.annotation.ManagedEntity
+import groovy.transform.TupleConstructor
+import org.hibernate.Hibernate
 
 import de.dkfz.tbi.otp.CommentableWithProject
+import de.dkfz.tbi.otp.dataprocessing.bamfiles.AbstractBamFileServiceFactoryService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.Entity
+import de.dkfz.tbi.otp.workflowExecution.ExternalWorkflowConfigFragment
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
+/**
+ * Represents a single generation of one merged BAM file (whereas a {@link AbstractMergingWorkPackage} represents all
+ * generations).
+ */
 @ManagedEntity
 abstract class AbstractBamFile implements CommentableWithProject, Entity {
-
-    enum BamType {
-        SORTED,
-        MDUP,
-        RMDUP
-    }
 
     enum QaProcessingStatus {
         UNKNOWN,
@@ -46,11 +48,93 @@ abstract class AbstractBamFile implements CommentableWithProject, Entity {
         FINISHED
     }
 
-    BamType type = null
-    boolean hasIndexFile = false
-    boolean hasCoveragePlot = false
-    boolean hasInsertSizePlot = false
-    boolean hasMetricsFile = false
+    @TupleConstructor
+    static enum QcTrafficLightStatus {
+        // status is set by OTP when the file is still in processing
+        NOT_RUN_YET(JobLinkCase.SHOULD_NOT_OCCUR, JobNotifyCase.SHOULD_NOT_OCCUR),
+        // status is set by OTP when QC thresholds were met
+        QC_PASSED(JobLinkCase.CREATE_LINKS, JobNotifyCase.NO_NOTIFY),
+        // status is set by bioinformaticians when they decide to keep the file although QC thresholds were not met
+        ACCEPTED(JobLinkCase.SHOULD_NOT_OCCUR, JobNotifyCase.SHOULD_NOT_OCCUR),
+        // status is set by OTP when QC error thresholds were not met
+        BLOCKED(JobLinkCase.CREATE_NO_LINK, JobNotifyCase.NOTIFY),
+        // status is set by bioinformaticians when they decide not to use a file for further analyses
+        REJECTED(JobLinkCase.SHOULD_NOT_OCCUR, JobNotifyCase.SHOULD_NOT_OCCUR),
+        // status is set by OTP when QC thresholds were not met but the project is configured to allow failed files
+        AUTO_ACCEPTED(JobLinkCase.CREATE_LINKS, JobNotifyCase.NOTIFY),
+        // status is set by OTP when project is configured to not check QC thresholds
+        UNCHECKED(JobLinkCase.CREATE_LINKS, JobNotifyCase.NO_NOTIFY),
+        // status is set by OTP when QC error thresholds were not met, replacing BLOCKED
+        WARNING(JobLinkCase.CREATE_LINKS, JobNotifyCase.NOTIFY),
+
+        final JobLinkCase jobLinkCase
+
+        final JobNotifyCase jobNotifyCase
+
+        /**
+         * Link category of {@link QcTrafficLightStatus}. It defines, if links should be created or should not be create or the status
+         * should not occur automatically in job system, but only set manually in the gui.
+         */
+        @TupleConstructor
+        static enum JobLinkCase {
+            /**
+             * For that cases, links should be created
+             */
+            CREATE_LINKS,
+            /**
+             * For that cases, no links should be created
+             */
+            CREATE_NO_LINK,
+            /**
+             * Cases set manually and should therefor not occur during workflow
+             */
+            SHOULD_NOT_OCCUR,
+        }
+
+        /**
+         * Notify category of {@link QcTrafficLightStatus}. It defines, if notify emails should be send or should not be sent or that the status
+         * should not occur automatically in job system, but only set manually in the gui.
+         */
+        @TupleConstructor
+        static enum JobNotifyCase {
+            /**
+             * For that cases, emails should be send
+             */
+            NOTIFY,
+            /**
+             * For that cases, no emails should be send
+             */
+            NO_NOTIFY,
+            /**
+             * Cases set manually and should therefore not occur during workflow
+             */
+            SHOULD_NOT_OCCUR,
+        }
+    }
+
+    /**
+     * This enum is used to specify the different transfer states of the {@link AbstractBamFile} until it is copied to the project folder
+     */
+    enum FileOperationStatus {
+        /**
+         * default value -> state of the {@link AbstractBamFile} when it is created (declared)
+         * no processing has been started on the bam file and it is also not ready to be transferred yet
+         */
+        DECLARED,
+        /**
+         * An {@link AbstractBamFile} with this status needs to be transferred.
+         */
+        NEEDS_PROCESSING,
+        /**
+         * An {@link AbstractBamFile} is in process of being transferred.
+         */
+        INPROGRESS,
+        /**
+         * The transfer of the {@link AbstractBamFile} is finished.
+         */
+        PROCESSED
+    }
+
     boolean withdrawn = false
 
     /**
@@ -67,31 +151,67 @@ abstract class AbstractBamFile implements CommentableWithProject, Entity {
 
     QaProcessingStatus qualityAssessmentStatus = QaProcessingStatus.UNKNOWN
 
+    /**
+     * Checksum to verify success of copying.
+     * When the file - and all other files handled by the transfer workflow - are copied, its checksum is stored in this property.
+     * Otherwise it is null.
+     */
+    String md5sum
+
+    /** Additional digest, may be used in the future (to verify xz compression) */
+    String sha256sum
+
+    /**
+     * date of last modification of the file on the file system
+     */
+    Date dateFromFileSystem
+
+    /**
+     * file size
+     */
+    long fileSize = -1
+
+    /**
+     * Holds the number of lanes which were merged in this bam file
+     */
+    Integer numberOfMergedLanes
+
+    /**
+     * bam file satisfies criteria from this {@link AbstractMergingWorkPackage}
+     */
+    AbstractMergingWorkPackage workPackage
+
+    /**
+     * This property contains the transfer state of an AbstractBamFile to the project folder.
+     * Be aware that for RoddyBamFile it is only used for documentation of the state.
+     */
+    FileOperationStatus fileOperationStatus = FileOperationStatus.DECLARED
+
+    QcTrafficLightStatus qcTrafficLightStatus = QcTrafficLightStatus.NOT_RUN_YET
+
     abstract AbstractMergingWorkPackage getMergingWorkPackage()
     abstract Set<SeqTrack> getContainedSeqTracks()
     abstract AbstractQualityAssessment getQualityAssessment()
 
     static constraints = {
-        // Type is not nullable for BamFiles except RoddyBamFile,
-        // Grails does not create the SQL schema correctly when using simple nullable constraints,
-        // therefore this workaround with validator constraints is used
-        type nullable: true, validator: { val, obj ->
-            // validator doesn't work correctly with subclasses
-            return val in obj.allowedTypes
-        }
-        hasMetricsFile validator: { val, obj ->
-            if (obj.type == BamType.SORTED) {
-                return !val
-            }
-            return true
-        }
         coverage(nullable: true)
         coverageWithN(nullable: true)
         comment nullable: true
-    }
-
-    List<BamType> getAllowedTypes() {
-        return [null]
+        dateFromFileSystem(nullable: true)
+        md5sum nullable: true, matches: /^[0-9a-f]{32}$/
+        sha256sum nullable: true
+        numberOfMergedLanes nullable: true, validator: { val, obj ->
+            if (Hibernate.getClass(obj) == ExternallyProcessedBamFile) {
+                val == null
+            } else {
+                val >= 1
+            }
+        }
+        qcTrafficLightStatus validator: { status, obj ->
+            if (status in [QcTrafficLightStatus.ACCEPTED, QcTrafficLightStatus.REJECTED, QcTrafficLightStatus.BLOCKED] && !obj.comment) {
+                return "comment.missing"
+            }
+        }
     }
 
     static mapping = {
@@ -99,10 +219,9 @@ abstract class AbstractBamFile implements CommentableWithProject, Entity {
         withdrawn index: "abstract_bam_file_withdrawn_idx"
         qualityAssessmentStatus index: "abstract_bam_file_quality_assessment_status_idx"
         comment cascade: "all-delete-orphan"
-    }
-
-    boolean isQualityAssessed() {
-        qualityAssessmentStatus == QaProcessingStatus.FINISHED
+        numberOfMergedLanes index: "abstract_merged_bam_file_number_of_merged_lanes_idx"
+        qcTrafficLightStatus index: "abstract_bam_file_qc_traffic_light_status"
+        workPackage lazy: false, index: "abstract_merged_bam_file_work_package_idx"
     }
 
     BedFile getBedFile() {
@@ -140,17 +259,86 @@ abstract class AbstractBamFile implements CommentableWithProject, Entity {
         return mergingWorkPackage?.pipeline
     }
 
+    abstract boolean isMostRecentBamFile()
+
+    abstract String getBamFileName()
+
+    abstract String getBaiFileName()
+
+    /**
+     * @deprecated method is part of the old workflow system, use {@link ExternalWorkflowConfigFragment} instead
+     */
+    @Deprecated
+    abstract AlignmentConfig getAlignmentConfig()
+
+    /**
+     * @deprecated use {@link AbstractAbstractBamFileService#getFinalInsertSizeFile()} and {@link AbstractBamFileServiceFactoryService#getService()}
+     */
+    @Deprecated
+    abstract File getFinalInsertSizeFile()
+
+    abstract Integer getMaximalReadLength()
+
     /**
      * @return The reference genome which was used to produce this BAM file.
      */
     ReferenceGenome getReferenceGenome() {
-        return mergingWorkPackage?.referenceGenome
+        return workPackage.referenceGenome
     }
 
     void withdraw() {
         withTransaction {
+            BamFilePairAnalysis.findAllBySampleType1BamFileOrSampleType2BamFile(this, this).each {
+                AbstractBamFileAnalysisService.withdraw(it)
+            }
+
             withdrawn = true
             assert AbstractBamFileService.saveBamFile(this)
         }
     }
+
+    /**
+     * @deprecated use {@link AbstractBamFileService#getBaseDirectory()}
+     */
+    @Deprecated
+    File getBaseDirectory() {
+        String antiBodyTarget = seqType.hasAntibodyTarget ? "-${((MergingWorkPackage) mergingWorkPackage).antibodyTarget.name}" : ''
+        OtpPath viewByPid = individual.getViewByPidPath(seqType)
+        OtpPath path = new OtpPath(
+                viewByPid,
+                "${sample.sampleType.dirName}${antiBodyTarget}".toString(),
+                seqType.libraryLayoutDirName,
+                'merged-alignment'
+        )
+        return path.absoluteDataManagementPath
+    }
+
+    /**
+     * @deprecated use {@link AbstractAbstractBamFileService#getPathForFurtherProcessing} and
+     * {@link AbstractBamFileServiceFactoryService#getService()}
+     */
+    @Deprecated
+    File getPathForFurtherProcessing() {
+        if (this.qcTrafficLightStatus in [QcTrafficLightStatus.REJECTED, QcTrafficLightStatus.BLOCKED]) {
+            return null
+        }
+        mergingWorkPackage.refresh() //Sometimes the mergingWorkPackage.processableBamFileInProjectFolder is empty but should have a value
+        AbstractBamFile processableBamFileInProjectFolder = mergingWorkPackage.processableBamFileInProjectFolder
+        if (this.id == processableBamFileInProjectFolder?.id) {
+            return pathForFurtherProcessingNoCheck
+        }
+        throw new IllegalStateException("This BAM file is not in the project folder or not processable.\n" +
+                "this: ${this}\nprocessableBamFileInProjectFolder: ${processableBamFileInProjectFolder}")
+    }
+
+    Realm getRealm() {
+        return project?.realm
+    }
+
+    /**
+     * @deprecated use {@link AbstractAbstractBamFileService#getPathForFurtherProcessingNoCheck} and
+     * {@link AbstractBamFileServiceFactoryService#getService()}
+     */
+    @Deprecated
+    protected abstract File getPathForFurtherProcessingNoCheck()
 }

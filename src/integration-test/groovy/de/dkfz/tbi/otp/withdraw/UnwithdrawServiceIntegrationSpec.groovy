@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -84,8 +84,8 @@ class UnwithdrawServiceIntegrationSpec extends Specification implements DomainFa
         Path workDir = indelService.getWorkDirectory(indelCallingInstance)
         CreateFileHelper.createFile(workDir)
 
-        List<AbstractMergedBamFile> bamFiles = [indelCallingInstance.sampleType1BamFile, indelCallingInstance.sampleType2BamFile]
-        state.mergedBamFiles = bamFiles
+        List<AbstractBamFile> bamFiles = [indelCallingInstance.sampleType1BamFile, indelCallingInstance.sampleType2BamFile]
+        state.bamFiles = bamFiles
 
         when:
         service.unwithdrawAnalysis(state)
@@ -93,7 +93,7 @@ class UnwithdrawServiceIntegrationSpec extends Specification implements DomainFa
         then:
         state.linksToCreate == [:]
         state.pathsToChangeGroup == [(workDir.toString()): indelCallingInstance.project.unixGroup]
-        state.mergedBamFiles == bamFiles
+        state.bamFiles == bamFiles
         [indelCallingInstance].every { !it.withdrawn }
     }
 }

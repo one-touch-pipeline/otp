@@ -26,8 +26,8 @@ import groovy.transform.*
 import org.springframework.security.access.prepost.PostAuthorize
 import org.springframework.security.access.prepost.PreAuthorize
 
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
-import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedMergedBamFile
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
+import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedBamFile
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 
@@ -187,20 +187,20 @@ class EgaSubmissionService {
             from
                 EgaSubmission egaSubmission
                     join egaSubmission.samplesToSubmit samplesToSubmit,
-                AbstractMergedBamFile bamFile
+                AbstractBamFile bamFile
                     join fetch bamFile.workPackage workPackage
             where
                 egaSubmission = :egaSubmission
                 and workPackage.bamFileInProjectFolder = bamFile
                 and samplesToSubmit.sample = workPackage.sample
                 and samplesToSubmit.seqType = workPackage.seqType
-                and bamFile.fileOperationStatus = '${AbstractMergedBamFile.FileOperationStatus.PROCESSED}'
+                and bamFile.fileOperationStatus = '${AbstractBamFile.FileOperationStatus.PROCESSED}'
         """
 
         Set<Long> submissionSampleIdsWithBamFiles = SampleSubmissionObject.executeQuery(checkBamFileExistQuery, [
                 egaSubmission: egaSubmission,
         ]).findAll {
-            ((it as List)[1] as AbstractMergedBamFile).mostRecentBamFile
+            ((it as List)[1] as AbstractBamFile).mostRecentBamFile
         }.collect {
             (it as List)[0] as Long
         }.toSet()
@@ -319,7 +319,7 @@ class EgaSubmissionService {
             from
                 EgaSubmission egaSubmission
                     join egaSubmission.samplesToSubmit samplesToSubmit,
-                AbstractMergedBamFile bamFile
+                AbstractBamFile bamFile
                     join fetch bamFile.workPackage workPackage
             where
                 egaSubmission = :egaSubmission
@@ -327,15 +327,15 @@ class EgaSubmissionService {
                 and samplesToSubmit.sample = workPackage.sample
                 and samplesToSubmit.seqType = workPackage.seqType
                 and samplesToSubmit.useBamFile = true
-                and bamFile.fileOperationStatus = '${AbstractMergedBamFile.FileOperationStatus.PROCESSED}'
+                and bamFile.fileOperationStatus = '${AbstractBamFile.FileOperationStatus.PROCESSED}'
             """
         return SampleSubmissionObject.executeQuery(queryBamFile, [
                 egaSubmission: egaSubmission,
         ]).findAll {
-            ((it as List)[0] as AbstractMergedBamFile).mostRecentBamFile
+            ((it as List)[0] as AbstractBamFile).mostRecentBamFile
         }.collect {
             List list = (it as List)
-            new BamFileAndSampleAlias(list[0] as AbstractMergedBamFile, list[1] as SampleSubmissionObject)
+            new BamFileAndSampleAlias(list[0] as AbstractBamFile, list[1] as SampleSubmissionObject)
         }.sort()
     }
 
@@ -553,7 +553,7 @@ class DataFileAndSampleAlias implements Comparable<DataFileAndSampleAlias> {
 }
 
 class BamFileAndSampleAlias implements Comparable<BamFileAndSampleAlias> {
-    final AbstractMergedBamFile bamFile
+    final AbstractBamFile bamFile
     final SampleSubmissionObject sampleSubmissionObject
 
     final boolean selectionEditable
@@ -561,14 +561,14 @@ class BamFileAndSampleAlias implements Comparable<BamFileAndSampleAlias> {
     final boolean producedByOtp
 
     @SuppressWarnings('Instanceof')
-    BamFileAndSampleAlias(AbstractMergedBamFile bamFile, SampleSubmissionObject sampleSubmissionObject) {
+    BamFileAndSampleAlias(AbstractBamFile bamFile, SampleSubmissionObject sampleSubmissionObject) {
         this.bamFile = bamFile
         this.sampleSubmissionObject = sampleSubmissionObject
 
         // For normal BAMs created by OTP, there is only one file and the decision was made on the previous page (disabled and checked)
         // Withdrawn BAMs can not be submitted (disabled and unchecked)
         // Imported BAMs are not supported (disabled and unchecked), regardless of withdrawn state.
-        producedByOtp = !(bamFile instanceof ExternallyProcessedMergedBamFile)
+        producedByOtp = !(bamFile instanceof ExternallyProcessedBamFile)
         selectionEditable = false //Currently editable checkboxes are not supported
         defaultSelectionState = producedByOtp && !bamFile.withdrawn
     }

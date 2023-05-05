@@ -35,8 +35,8 @@ class AceSeqServiceIntegrationSpec extends Specification {
 
     SamplePair samplePair1
     ConfigPerProjectAndSeqType roddyConfig1
-    AbstractMergedBamFile bamFile1
-    AbstractMergedBamFile bamFile2
+    AbstractBamFile bamFile1
+    AbstractBamFile bamFile2
 
     AceseqService aceseqService
 

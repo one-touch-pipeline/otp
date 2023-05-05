@@ -21,7 +21,7 @@
  */
 package de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger
 
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.*
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
@@ -85,10 +85,10 @@ trait CellRangerFactory implements IsAlignment {
                 [
                         workDirectoryName  : SingleCellBamFile.buildWorkDirectoryName(workPackage, identifier),
                         identifier         : identifier,
-                        fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
+                        fileOperationStatus: AbstractBamFile.FileOperationStatus.PROCESSED,
                         fileSize           : 10000,
                 ], properties)
-        if (bamFile.fileOperationStatus == AbstractMergedBamFile.FileOperationStatus.PROCESSED) {
+        if (bamFile.fileOperationStatus == AbstractBamFile.FileOperationStatus.PROCESSED) {
             bamFile.workPackage.bamFileInProjectFolder = bamFile
             bamFile.workPackage.save(flush: true)
         }

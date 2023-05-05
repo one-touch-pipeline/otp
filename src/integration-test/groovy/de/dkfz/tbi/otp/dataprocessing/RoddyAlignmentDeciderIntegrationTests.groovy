@@ -27,7 +27,7 @@ import org.junit.Test
 import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.HelperUtils

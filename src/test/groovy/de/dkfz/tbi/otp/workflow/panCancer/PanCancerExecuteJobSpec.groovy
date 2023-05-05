@@ -81,7 +81,7 @@ class PanCancerExecuteJobSpec extends Specification implements DataTest, Workflo
     void setupDataForGetConfigurationValues() {
         roddyBamFile = createBamFile([
                 md5sum                      : null,
-                fileOperationStatus         : AbstractMergedBamFile.FileOperationStatus.DECLARED,
+                fileOperationStatus         : AbstractBamFile.FileOperationStatus.DECLARED,
                 roddyExecutionDirectoryNames: [DomainFactory.DEFAULT_RODDY_EXECUTION_STORE_DIRECTORY],
         ])
         workflowStep = createWorkflowStep()
@@ -233,7 +233,7 @@ class PanCancerExecuteJobSpec extends Specification implements DataTest, Workflo
         setupDataForGetConfigurationValues()
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
 
-        roddyBamFile.fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.PROCESSED
+        roddyBamFile.fileOperationStatus = AbstractBamFile.FileOperationStatus.PROCESSED
         roddyBamFile.md5sum = HelperUtils.randomMd5sum
         roddyBamFile.fileSize = roddyBamFile.workBaiFile.size()
         roddyBamFile.save(flush: true)

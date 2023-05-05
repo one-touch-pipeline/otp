@@ -41,16 +41,16 @@ class QualityAssessmentMergedService {
             from
                 AbstractQualityAssessment abstractQualityAssessment
                 join abstractQualityAssessment.qualityAssessmentMergedPass qualityAssessmentMergedPass
-                join qualityAssessmentMergedPass.abstractMergedBamFile abstractMergedBamFile
-                join abstractMergedBamFile.workPackage mergingWorkPackage
+                join qualityAssessmentMergedPass.abstractBamFile abstractBamFile
+                join abstractBamFile.workPackage mergingWorkPackage
             where
                 mergingWorkPackage.sample.individual.project = :project
                 and mergingWorkPackage.seqType = :seqType
                 ${selectSample}
-                and mergingWorkPackage.bamFileInProjectFolder = abstractMergedBamFile
-                and abstractMergedBamFile.fileOperationStatus = :fileOperationStatus
-                and abstractMergedBamFile.qualityAssessmentStatus = :qualityAssessmentStatus
-                and abstractMergedBamFile.withdrawn = false
+                and mergingWorkPackage.bamFileInProjectFolder = abstractBamFile
+                and abstractBamFile.fileOperationStatus = :fileOperationStatus
+                and abstractBamFile.qualityAssessmentStatus = :qualityAssessmentStatus
+                and abstractBamFile.withdrawn = false
                 and (
                     abstractQualityAssessment.class in (
                         :cellRangerQualityAssessmentClass
@@ -63,7 +63,7 @@ class QualityAssessmentMergedService {
         Map parameters = [
             project: project,
             seqType: seqType,
-            fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
+            fileOperationStatus: AbstractBamFile.FileOperationStatus.PROCESSED,
             qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
             cellRangerQualityAssessmentClass: CellRangerQualityAssessment.name,
             roddyMergedBamQaClass: [RoddyMergedBamQa.name, RnaQualityAssessment.name],

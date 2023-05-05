@@ -38,7 +38,7 @@ class RoddyBamFileSpec extends Specification implements IsRoddy, DataTest {
     @Override
     Class[] getDomainClassesToMock() {
         [
-                AbstractMergedBamFile,
+                AbstractBamFile,
                 Comment,
                 DataFile,
                 FileType,
@@ -248,7 +248,7 @@ class RoddyBamFileSpec extends Specification implements IsRoddy, DataTest {
 
     void "test qcTrafficLightStatus constraint, should fail since bam file is blocked but no comment is provided"() {
         given:
-        roddyBamFile.qcTrafficLightStatus = AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED
+        roddyBamFile.qcTrafficLightStatus = AbstractBamFile.QcTrafficLightStatus.BLOCKED
 
         when:
         roddyBamFile.save(flush: true)
@@ -260,7 +260,7 @@ class RoddyBamFileSpec extends Specification implements IsRoddy, DataTest {
 
     void "test qcTrafficLightStatus constraint, is valid since bam file is blocked and comment is provided"() {
         given:
-        roddyBamFile.qcTrafficLightStatus = AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED
+        roddyBamFile.qcTrafficLightStatus = AbstractBamFile.QcTrafficLightStatus.BLOCKED
         roddyBamFile.comment = DomainFactory.createComment()
 
         expect:
@@ -276,6 +276,6 @@ class RoddyBamFileSpec extends Specification implements IsRoddy, DataTest {
         !roddyBamFile.pathForFurtherProcessing
 
         where:
-        status << [AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED, AbstractMergedBamFile.QcTrafficLightStatus.REJECTED]
+        status << [AbstractBamFile.QcTrafficLightStatus.BLOCKED, AbstractBamFile.QcTrafficLightStatus.REJECTED]
     }
 }

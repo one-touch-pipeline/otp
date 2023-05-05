@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -30,7 +30,7 @@ import de.dkfz.tbi.otp.utils.Entity
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
 /**
- * Represents the state of the import process of the externally processed merged BAM files
+ * Represents the state of the import process of the externally processed BAM files
  */
 @ManagedEntity
 class ImportProcess implements Entity, ProcessParameterObject {
@@ -58,16 +58,16 @@ class ImportProcess implements Entity, ProcessParameterObject {
 
     boolean triggerAnalysis
 
-    Set<ExternallyProcessedMergedBamFile> externallyProcessedMergedBamFiles
+    Set<ExternallyProcessedBamFile> externallyProcessedBamFiles
 
     static hasMany = [
-            externallyProcessedMergedBamFiles: ExternallyProcessedMergedBamFile,
+            externallyProcessedBamFiles: ExternallyProcessedBamFile,
     ]
 
     static constraints = {
-        externallyProcessedMergedBamFiles validator: { val, obj ->
+        externallyProcessedBamFiles validator: { val, obj ->
             List<ImportProcess> importProcesses = ImportProcess.createCriteria().listDistinct {
-                externallyProcessedMergedBamFiles {
+                externallyProcessedBamFiles {
                     'in'('id', val*.id)
                 }
             }
@@ -103,7 +103,7 @@ class ImportProcess implements Entity, ProcessParameterObject {
 
     @Override
     ProcessingPriority getProcessingPriority() {
-        return externallyProcessedMergedBamFiles ? externallyProcessedMergedBamFiles*.project*.processingPriority.max {
+        return externallyProcessedBamFiles ? externallyProcessedBamFiles*.project*.processingPriority.max {
             it.priority
         } : null
     }

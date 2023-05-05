@@ -35,7 +35,7 @@ class SearchSeqTrackServiceSpec extends HibernateSpec implements ServiceUnitTest
     @Override
     List<Class> getDomainClasses() {
         return [
-                AbstractMergedBamFile,
+                AbstractBamFile,
                 RoddyBamFile,
                 DataFile,
                 Project,
@@ -44,7 +44,7 @@ class SearchSeqTrackServiceSpec extends HibernateSpec implements ServiceUnitTest
                 Sample,
                 Individual,
                 SeqTrack,
-                ExternallyProcessedMergedBamFile,
+                ExternallyProcessedBamFile,
                 ExternalMergingWorkPackage,
         ]
     }

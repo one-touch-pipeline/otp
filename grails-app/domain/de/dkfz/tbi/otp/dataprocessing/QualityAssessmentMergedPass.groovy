@@ -31,61 +31,61 @@ import de.dkfz.tbi.otp.utils.Entity
 @ManagedEntity
 class QualityAssessmentMergedPass implements ProcessParameterObject, Entity {
 
-    AbstractMergedBamFile abstractMergedBamFile
+    AbstractBamFile abstractBamFile
 
     String description
 
     static belongsTo = [
-            abstractMergedBamFile: AbstractMergedBamFile,
+            abstractBamFile: AbstractBamFile,
     ]
 
     static constraints = {
-        abstractMergedBamFile(unique: true)
+        abstractBamFile(unique: true)
         description(nullable: true)
     }
 
     @Override
     String toString() {
-        return "QAMP ${id}: on ${abstractMergedBamFile}"
+        return "QAMP ${id}: on ${abstractBamFile}"
     }
 
     static mapping = {
-        abstractMergedBamFile index: "quality_assessment_merged_pass_abstract_merged_bam_file_idx"
+        abstractBamFile index: "quality_assessment_merged_pass_abstract_merged_bam_file_idx"
     }
 
     @Override
     Project getProject() {
-        return abstractMergedBamFile.project
+        return abstractBamFile.project
     }
 
     @Override
     Individual getIndividual() {
-        return abstractMergedBamFile.individual
+        return abstractBamFile.individual
     }
 
     Sample getSample() {
-        return abstractMergedBamFile.sample
+        return abstractBamFile.sample
     }
 
     SampleType getSampleType() {
-        return abstractMergedBamFile.sampleType
+        return abstractBamFile.sampleType
     }
 
     MergingWorkPackage getMergingWorkPackage() {
-        return abstractMergedBamFile.mergingWorkPackage
+        return abstractBamFile.mergingWorkPackage
     }
 
     @Override
     SeqType getSeqType() {
-        return abstractMergedBamFile.seqType
+        return abstractBamFile.seqType
     }
 
     @Override
     Set<SeqTrack> getContainedSeqTracks() {
-        return abstractMergedBamFile.containedSeqTracks
+        return abstractBamFile.containedSeqTracks
     }
 
     ReferenceGenome getReferenceGenome() {
-        return abstractMergedBamFile.referenceGenome
+        return abstractBamFile.referenceGenome
     }
 }

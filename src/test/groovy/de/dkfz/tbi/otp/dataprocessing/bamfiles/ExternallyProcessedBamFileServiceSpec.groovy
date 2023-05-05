@@ -32,23 +32,23 @@ import de.dkfz.tbi.otp.utils.HelperUtils
 
 import java.nio.file.Paths
 
-class ExternallyProcessedMergedBamFileServiceSpec extends Specification implements ServiceUnitTest<ExternallyProcessedMergedBamFileService>, DataTest, ExternalBamFactory {
+class ExternallyProcessedBamFileServiceSpec extends Specification implements ServiceUnitTest<ExternallyProcessedBamFileService>, DataTest, ExternalBamFactory {
 
     @Override
     Class[] getDomainClassesToMock() {
         return [
                 ExternalMergingWorkPackage,
-                ExternallyProcessedMergedBamFile,
+                ExternallyProcessedBamFile,
         ]
     }
 
-    ExternallyProcessedMergedBamFile bamFile
+    ExternallyProcessedBamFile bamFile
     String testDir
 
     void setup() {
         bamFile = createBamFile()
         testDir = "/base-dir"
-        service.abstractMergedBamFileService = Mock(AbstractMergedBamFileService) {
+        service.abstractBamFileService = Mock(AbstractBamFileService) {
             getBaseDirectory(_) >> Paths.get("/base-dir")
         }
     }
@@ -96,12 +96,12 @@ class ExternallyProcessedMergedBamFileServiceSpec extends Specification implemen
         !service.getPathForFurtherProcessing(bamFile)
 
         where:
-        status << [AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED, AbstractMergedBamFile.QcTrafficLightStatus.REJECTED]
+        status << [AbstractBamFile.QcTrafficLightStatus.BLOCKED, AbstractBamFile.QcTrafficLightStatus.REJECTED]
     }
 
     void "test getPathForFurtherProcessing, should return final directory"() {
         given:
-        bamFile.fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.PROCESSED
+        bamFile.fileOperationStatus = AbstractBamFile.FileOperationStatus.PROCESSED
         bamFile.md5sum = HelperUtils.randomMd5sum
         bamFile.fileSize = 1
         bamFile.save(flush: true)

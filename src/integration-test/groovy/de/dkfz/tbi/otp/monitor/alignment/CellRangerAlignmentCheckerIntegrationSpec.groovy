@@ -63,7 +63,7 @@ class CellRangerAlignmentCheckerIntegrationSpec extends AbstractAlignmentChecker
     }
 
     @Override
-    AbstractMergedBamFile createBamFile(MergingWorkPackage mergingWorkPackage, Map properties = [:]) {
+    AbstractBamFile createBamFile(MergingWorkPackage mergingWorkPackage, Map properties = [:]) {
         createBamFile([
                 workPackage: mergingWorkPackage,
         ] + properties)

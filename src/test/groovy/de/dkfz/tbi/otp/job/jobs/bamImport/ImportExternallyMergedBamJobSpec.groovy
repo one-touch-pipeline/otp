@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -54,7 +54,7 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
     Class[] getDomainClassesToMock() {
         return [
                 ExternalMergingWorkPackage,
-                ExternallyProcessedMergedBamFile,
+                ExternallyProcessedBamFile,
                 ImportProcess,
                 Individual,
                 JobDefinition,
@@ -78,8 +78,8 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
     private ProcessingStep step
     private ImportExternallyMergedBamJob importExternallyMergedBamJob
 
-    private ExternallyProcessedMergedBamFile epmbfWithMd5sum
-    private ExternallyProcessedMergedBamFile epmbfWithoutMd5sum
+    private ExternallyProcessedBamFile epmbfWithMd5sum
+    private ExternallyProcessedBamFile epmbfWithoutMd5sum
 
     private File mainDirectory
     private File subDirectory
@@ -153,7 +153,7 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
     void "test maybe submit, when files have to be link and not yet linked, then create links"() {
         given:
         ImportProcess importProcess = createImportProcess(
-                externallyProcessedMergedBamFiles: [epmbfWithMd5sum],
+                externallyProcessedBamFiles: [epmbfWithMd5sum],
                 linkOperation: ImportProcess.LinkOperation.LINK_SOURCE,
         )
         createHelperObjects(importProcess)
@@ -187,7 +187,7 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
     void "test maybe submit, when files have to be link and already linked, then do not create links again"() {
         given:
         ImportProcess importProcess = createImportProcess(
-                externallyProcessedMergedBamFiles: [epmbfWithMd5sum],
+                externallyProcessedBamFiles: [epmbfWithMd5sum],
                 linkOperation: ImportProcess.LinkOperation.LINK_SOURCE,
         )
         createHelperObjects(importProcess)
@@ -209,7 +209,7 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
     void "test maybe submit, when files have to be copied, have a md5Sum and not exist already, then create copy job using given md5sum and wait for job"() {
         given:
         ImportProcess importProcess = new ImportProcess(
-                externallyProcessedMergedBamFiles: [epmbfWithMd5sum]
+                externallyProcessedBamFiles: [epmbfWithMd5sum]
         ).save(flush: true)
 
         createHelperObjects(importProcess)
@@ -227,7 +227,7 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
     void "test maybe submit, when files have to be copied, not have a md5Sum and not exist already, then create copy job using calculate md5sum and wait for job"() {
         given:
         ImportProcess importProcess = new ImportProcess(
-                externallyProcessedMergedBamFiles: [epmbfWithoutMd5sum]
+                externallyProcessedBamFiles: [epmbfWithoutMd5sum]
         ).save(flush: true)
         createHelperObjects(importProcess)
         CreateFileHelper.createFile(epmbfWithoutMd5sum.bamFile)
@@ -244,7 +244,7 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
     void "test maybe submit, when files have to be copied and exist already but no checkpoint file exist, then create normal copy job and wait for job"() {
         given:
         ImportProcess importProcess = new ImportProcess(
-                externallyProcessedMergedBamFiles: [epmbfWithoutMd5sum]
+                externallyProcessedBamFiles: [epmbfWithoutMd5sum]
         ).save(flush: true)
 
         createHelperObjects(importProcess)
@@ -263,7 +263,7 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
     void "test maybe submit, when files already copied and a checkpoint file exists already, then create no copy job and return success"() {
         given:
         ImportProcess importProcess = new ImportProcess(
-                externallyProcessedMergedBamFiles: [epmbfWithMd5sum]
+                externallyProcessedBamFiles: [epmbfWithMd5sum]
         ).save(flush: true)
 
         createHelperObjects(importProcess)
@@ -284,7 +284,7 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
     void "test maybe submit, when files have to be copied and a checkpoint file exists already but not the files, then fail"() {
         given:
         ImportProcess importProcess = new ImportProcess(
-                externallyProcessedMergedBamFiles: [epmbfWithoutMd5sum]
+                externallyProcessedBamFiles: [epmbfWithoutMd5sum]
         ).save(flush: true)
 
         createHelperObjects(importProcess)
@@ -303,7 +303,7 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
     void "test maybe submit, check that pattern '#furtherFilePattern' with link on '#linkFileName' and final file '#realFurtherFileName' works correctly"() {
         given:
         ImportProcess importProcess = new ImportProcess(
-                externallyProcessedMergedBamFiles: [epmbfWithoutMd5sum]
+                externallyProcessedBamFiles: [epmbfWithoutMd5sum]
         ).save(flush: true)
 
         epmbfWithoutMd5sum.furtherFiles = [
@@ -357,7 +357,7 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
     void "test maybe submit, check that pattern '#furtherFilePattern' with link on '#linkFileName1' and second link on '#linkFileName2' and final file '#realFurtherFileName' works correctly"() {
         given:
         ImportProcess importProcess = new ImportProcess(
-                externallyProcessedMergedBamFiles: [epmbfWithoutMd5sum]
+                externallyProcessedBamFiles: [epmbfWithoutMd5sum]
         ).save(flush: true)
 
         epmbfWithoutMd5sum.furtherFiles = [
@@ -412,7 +412,7 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
     void "test validate when everything is valid and bam file already has a md5sum"() {
         given:
         ImportProcess importProcess = createImportProcess([
-                externallyProcessedMergedBamFiles: [epmbfWithMd5sum],
+                externallyProcessedBamFiles: [epmbfWithMd5sum],
                 linkOperation                    : ImportProcess.LinkOperation.COPY_AND_KEEP,
         ])
 
@@ -429,14 +429,14 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
         epmbfWithMd5sum.maximalReadLength == 123
         epmbfWithMd5sum.md5sum
         epmbfWithMd5sum.fileSize > 0
-        epmbfWithMd5sum.fileOperationStatus == AbstractMergedBamFile.FileOperationStatus.PROCESSED
+        epmbfWithMd5sum.fileOperationStatus == AbstractBamFile.FileOperationStatus.PROCESSED
         epmbfWithMd5sum.workPackage.bamFileInProjectFolder == epmbfWithMd5sum
     }
 
     void "test validate when everything is valid and bam file has no md5sum yet"() {
         given:
         ImportProcess importProcess = createImportProcess([
-                externallyProcessedMergedBamFiles: [epmbfWithoutMd5sum],
+                externallyProcessedBamFiles: [epmbfWithoutMd5sum],
                 linkOperation                    : ImportProcess.LinkOperation.COPY_AND_KEEP,
         ])
 
@@ -456,14 +456,14 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
         epmbfWithoutMd5sum.maximalReadLength == 123
         epmbfWithoutMd5sum.md5sum
         epmbfWithoutMd5sum.fileSize > 0
-        epmbfWithoutMd5sum.fileOperationStatus == AbstractMergedBamFile.FileOperationStatus.PROCESSED
+        epmbfWithoutMd5sum.fileOperationStatus == AbstractBamFile.FileOperationStatus.PROCESSED
         epmbfWithoutMd5sum.workPackage.bamFileInProjectFolder == epmbfWithoutMd5sum
     }
 
     void "test validate when everything is valid and bam file was only linked"() {
         given:
         ImportProcess importProcess = createImportProcess(
-                externallyProcessedMergedBamFiles: [epmbfWithMd5sum],
+                externallyProcessedBamFiles: [epmbfWithMd5sum],
                 linkOperation: ImportProcess.LinkOperation.LINK_SOURCE,
         )
 
@@ -480,14 +480,14 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
         epmbfWithMd5sum.maximalReadLength == null
         epmbfWithMd5sum.md5sum
         epmbfWithMd5sum.fileSize > 0
-        epmbfWithMd5sum.fileOperationStatus == AbstractMergedBamFile.FileOperationStatus.PROCESSED
+        epmbfWithMd5sum.fileOperationStatus == AbstractBamFile.FileOperationStatus.PROCESSED
         epmbfWithMd5sum.workPackage.bamFileInProjectFolder == epmbfWithMd5sum
     }
 
     void "test validate when maxReadLength file doesn't exist and read length is already set"() {
         given:
         ImportProcess importProcess = new ImportProcess(
-                externallyProcessedMergedBamFiles: [epmbfWithMd5sum]
+                externallyProcessedBamFiles: [epmbfWithMd5sum]
         ).save(flush: true)
 
         createHelperObjects(importProcess)
@@ -507,7 +507,7 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
     void "test validate when maxReadLength file doesn't exist and read length is not set"() {
         given:
         ImportProcess importProcess = new ImportProcess(
-                externallyProcessedMergedBamFiles: [epmbfWithMd5sum]
+                externallyProcessedBamFiles: [epmbfWithMd5sum]
         ).save(flush: true)
 
         createHelperObjects(importProcess)
@@ -526,7 +526,7 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
         given:
         String importedMd5sum = DomainFactory.DEFAULT_MD5_SUM
         ImportProcess importProcess = new ImportProcess(
-                externallyProcessedMergedBamFiles: [epmbfWithoutMd5sum]
+                externallyProcessedBamFiles: [epmbfWithoutMd5sum]
         ).save(flush: true)
 
         createHelperObjects(importProcess)
@@ -547,7 +547,7 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
     void "test validate when copying did not work"() {
         given:
         ImportProcess importProcess = new ImportProcess(
-                externallyProcessedMergedBamFiles: [epmbfWithMd5sum]
+                externallyProcessedBamFiles: [epmbfWithMd5sum]
         ).save(flush: true)
 
         createHelperObjects(importProcess)
@@ -587,9 +587,9 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
         importExternallyMergedBamJob.projectService.configService = configService
         importExternallyMergedBamJob.projectService.fileSystemService = new TestFileSystemService()
 
-        ExternallyProcessedMergedBamFile externallyProcessedMergedBamFile = importProcess.externallyProcessedMergedBamFiles[0]
-        File bamFile = new File(mainDirectory, externallyProcessedMergedBamFile.bamFileName)
-        File baiFile = new File(mainDirectory, externallyProcessedMergedBamFile.baiFileName)
+        ExternallyProcessedBamFile externallyProcessedBamFile = importProcess.externallyProcessedBamFiles[0]
+        File bamFile = new File(mainDirectory, externallyProcessedBamFile.bamFileName)
+        File baiFile = new File(mainDirectory, externallyProcessedBamFile.baiFileName)
 
         CreateFileHelper.createFile(bamFile)
         CreateFileHelper.createFile(baiFile)

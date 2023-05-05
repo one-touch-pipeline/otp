@@ -232,8 +232,8 @@ class AlignmentQualityOverviewController implements CheckAndCall {
             }
 
             qcTrafficLightService.setQcTrafficLightStatusWithComment(
-                    cmd.abstractBamFile as AbstractMergedBamFile,
-                    cmd.newValue as AbstractMergedBamFile.QcTrafficLightStatus,
+                    cmd.abstractBamFile as AbstractBamFile,
+                    cmd.newValue as AbstractBamFile.QcTrafficLightStatus,
                     cmd.comment
             )
 
@@ -284,23 +284,23 @@ class AlignmentQualityOverviewController implements CheckAndCall {
         }
     }
 
-    def renderPDF(AbstractMergedBamFileCommand cmd) {
+    def renderPDF(AbstractBamFileCommand cmd) {
         if (cmd.hasErrors()) {
             return response.sendError(HttpStatus.NOT_FOUND.value())
         }
 
-        if (!(cmd.abstractMergedBamFile instanceof RnaRoddyBamFile)) {
+        if (!(cmd.abstractBamFile instanceof RnaRoddyBamFile)) {
             return response.sendError(HttpStatus.NOT_FOUND.value())
         }
 
-        if (cmd.abstractMergedBamFile.project.archived) {
+        if (cmd.abstractBamFile.project.archived) {
             return render(g.message(code: "alignment.quality.projectArchived.warning"))
         }
 
-        // This page is semi-generic over AbstractMergedBamFile, with lots of SeqType-specific handling sprinkled all over.
+        // This page is semi-generic over AbstractBamFile, with lots of SeqType-specific handling sprinkled all over.
         // This link is only generated for seqType RNA, so this cast is probably safe.
-        RnaRoddyBamFile rrbf = cmd.abstractMergedBamFile as RnaRoddyBamFile
-        FileSystem fileSystem = fileSystemService.getRemoteFileSystem(cmd.abstractMergedBamFile.realm)
+        RnaRoddyBamFile rrbf = cmd.abstractBamFile as RnaRoddyBamFile
+        FileSystem fileSystem = fileSystemService.getRemoteFileSystem(cmd.abstractBamFile.realm)
         Path file = fileSystem.getPath(rrbf.workArribaFusionPlotPdf)
 
         if (Files.isReadable(file)) {
@@ -353,8 +353,8 @@ class QcStatusCommand implements Validateable {
             }
         })
         newValue(blank: false, nullable: false, validator: { val, obj, errors ->
-            if (!(val in AbstractMergedBamFile.QcTrafficLightStatus.values()*.toString())) {
-                return ["status", AbstractMergedBamFile.QcTrafficLightStatus.values().join(", ")]
+            if (!(val in AbstractBamFile.QcTrafficLightStatus.values()*.toString())) {
+                return ["status", AbstractBamFile.QcTrafficLightStatus.values().join(", ")]
             }
         })
         dbVersion(blank: false)
@@ -365,6 +365,6 @@ class QcStatusCommand implements Validateable {
     }
 }
 
-class AbstractMergedBamFileCommand {
-    AbstractMergedBamFile abstractMergedBamFile
+class AbstractBamFileCommand {
+    AbstractBamFile abstractBamFile
 }

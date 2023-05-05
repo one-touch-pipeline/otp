@@ -42,11 +42,11 @@ class BamFilePairAnalysisSpec extends Specification implements DataTest {
     @Override
     Class[] getDomainClassesToMock() {
         return [
-                AbstractMergedBamFile,
+                AbstractBamFile,
                 AceseqInstance,
                 BamFilePairAnalysis,
                 DataFile,
-                ExternallyProcessedMergedBamFile,
+                ExternallyProcessedBamFile,
                 ExternalMergingWorkPackage,
                 FileType,
                 IndelCallingInstance,
@@ -136,8 +136,8 @@ class BamFilePairAnalysisSpec extends Specification implements DataTest {
     @Unroll
     void "check different bamFiles classes: #classBamFile1, #classBamFile2"() {
         given:
-        AbstractMergedBamFile bamFile1 = createBamFile(classBamFile1)
-        AbstractMergedBamFile bamFile2 = createBamFile(classBamFile2, [
+        AbstractBamFile bamFile1 = createBamFile(classBamFile1)
+        AbstractBamFile bamFile2 = createBamFile(classBamFile2, [
                 seqType: bamFile1.seqType,
                 sample : DomainFactory.createSample([individual: bamFile1.individual]),
         ])
@@ -153,14 +153,14 @@ class BamFilePairAnalysisSpec extends Specification implements DataTest {
         where:
         classBamFile1                    | classBamFile2
         RoddyBamFile                     | RoddyBamFile
-        ExternallyProcessedMergedBamFile | ExternallyProcessedMergedBamFile
-        RoddyBamFile                     | ExternallyProcessedMergedBamFile
-        ExternallyProcessedMergedBamFile | RoddyBamFile
+        ExternallyProcessedBamFile | ExternallyProcessedBamFile
+        RoddyBamFile                     | ExternallyProcessedBamFile
+        ExternallyProcessedBamFile | RoddyBamFile
     }
 
-    private <E> AbstractMergedBamFile createBamFile(Class<E> clazz, Map propertiesForMergingWorkPackage = [:]) {
+    private <E> AbstractBamFile createBamFile(Class<E> clazz, Map propertiesForMergingWorkPackage = [:]) {
         Map properties = [
-                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
+                fileOperationStatus: AbstractBamFile.FileOperationStatus.PROCESSED,
                 md5sum             : DomainFactory.DEFAULT_MD5_SUM,
                 fileSize           : ++DomainFactory.counter,
         ]
@@ -172,8 +172,8 @@ class BamFilePairAnalysisSpec extends Specification implements DataTest {
                                 seqType : DomainFactory.createWholeGenomeSeqType(),
                         ] + propertiesForMergingWorkPackage)
                 ] + properties)
-            case ExternallyProcessedMergedBamFile:
-                return DomainFactory.createExternallyProcessedMergedBamFile([
+            case ExternallyProcessedBamFile:
+                return DomainFactory.createExternallyProcessedBamFile([
                         workPackage: DomainFactory.createExternalMergingWorkPackage([
                                 pipeline: DomainFactory.createExternallyProcessedPipelineLazy(),
                                 seqType : DomainFactory.createWholeGenomeSeqType(),

@@ -38,7 +38,7 @@ import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 import java.nio.file.Path
 import java.nio.file.Paths
 
-class AbstractMergedBamFileServiceSpec extends Specification implements DataTest, IsRoddy {
+class AbstractBamFileServiceSpec extends Specification implements DataTest, IsRoddy {
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -67,7 +67,7 @@ class AbstractMergedBamFileServiceSpec extends Specification implements DataTest
         given:
         RoddyBamFile bamFile = createBamFile()
 
-        AbstractMergedBamFileService service = new AbstractMergedBamFileService()
+        AbstractBamFileService service = new AbstractBamFileService()
         service.individualService = Mock(IndividualService) {
             getViewByPidPath(_, _) >> Paths.get("/vbp-path")
         }
@@ -83,7 +83,7 @@ class AbstractMergedBamFileServiceSpec extends Specification implements DataTest
         bamFile.seqType.hasAntibodyTarget = true
         bamFile.mergingWorkPackage.antibodyTarget = createAntibodyTarget(name: "antibody-target-name")
 
-        AbstractMergedBamFileService service = new AbstractMergedBamFileService()
+        AbstractBamFileService service = new AbstractBamFileService()
         service.individualService = Mock(IndividualService) {
             getViewByPidPath(_, _) >> Paths.get("/vbp-path")
         }
@@ -96,8 +96,8 @@ class AbstractMergedBamFileServiceSpec extends Specification implements DataTest
     void "getExistingBamFilePath, when all fine, return the file"() {
         given:
         File file = CreateFileHelper.createFile(tempDir.resolve("test.txt")).toFile()
-        AbstractMergedBamFileService service = new AbstractMergedBamFileService()
-        AbstractMergedBamFile bamFile = Mock(AbstractMergedBamFile) {
+        AbstractBamFileService service = new AbstractBamFileService()
+        AbstractBamFile bamFile = Mock(AbstractBamFile) {
             1 * pathForFurtherProcessing >> file
             1 * md5sum >> HelperUtils.randomMd5sum
             2 * fileSize >> file.size()
@@ -115,8 +115,8 @@ class AbstractMergedBamFileServiceSpec extends Specification implements DataTest
     void "getExistingBamFilePath, when fail for #failCase, throw an exception"() {
         given:
         File file = CreateFileHelper.createFile(tempDir.resolve("test.txt")).toFile()
-        AbstractMergedBamFileService service = new AbstractMergedBamFileService()
-        AbstractMergedBamFile bamFile = Mock(AbstractMergedBamFile) {
+        AbstractBamFileService service = new AbstractBamFileService()
+        AbstractBamFile bamFile = Mock(AbstractBamFile) {
             _ * pathForFurtherProcessing >> {
                 if (failCase == 'exceptionInFurtherProcessingPath') {
                     throw new AssertionError('pathForFurtherProcessing fail')

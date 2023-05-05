@@ -31,12 +31,12 @@ import de.dkfz.tbi.otp.ngsdata.SeqTrack
 @Slf4j
 abstract class AbstractRoddyAlignmentStartJob extends AbstractAlignmentStartJob {
     @Override
-    AbstractMergedBamFile reallyCreateBamFile(
+    AbstractBamFile reallyCreateBamFile(
             MergingWorkPackage mergingWorkPackage,
             int identifier,
             Set<SeqTrack> seqTracks,
             ConfigPerProjectAndSeqType config,
-            AbstractMergedBamFile baseBamFile
+            AbstractBamFile baseBamFile
     ) {
         new RoddyBamFile(
                 workPackage: mergingWorkPackage,

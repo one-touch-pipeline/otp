@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,7 +21,7 @@
  */
 
 import de.dkfz.tbi.otp.dataprocessing.ExternalMergingWorkPackage
-import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedMergedBamFile
+import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedBamFile
 import de.dkfz.tbi.otp.dataprocessing.ImportProcess
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
@@ -30,8 +30,8 @@ int importId = 0// set it to delete the import process and related wrong metadat
 ImportProcess importProcess = ImportProcess.get(importId)
 
 if (importProcess) {
-    ExternallyProcessedMergedBamFile.withTransaction {
-        Set<ExternallyProcessedMergedBamFile> bamFiles = importProcess.externallyProcessedMergedBamFiles
+    ExternallyProcessedBamFile.withTransaction {
+        Set<ExternallyProcessedBamFile> bamFiles = importProcess.externallyProcessedBamFiles
         println "ImportProcess ${importProcess.id} deleted"
         importProcess.delete(flush: true)
         bamFiles.each {

@@ -59,7 +59,7 @@ def alignmentQualityOverview(Project p, Path file, SeqType seqType) {
         }
         def outString = [p.name]
         QualityAssessmentMergedPass qualityAssessmentMergedPass = aqa.qualityAssessmentMergedPass
-        AbstractMergedBamFile bam = qualityAssessmentMergedPass.abstractMergedBamFile
+        AbstractBamFile bam = qualityAssessmentMergedPass.abstractBamFile
         outString << bam.individual.pid
         outString << bam.sampleType.name
         outString << bam.seqType.nameWithLibraryLayout

@@ -190,7 +190,7 @@ class ExampleData {
 //------------------------------
 //work
 
-    AbstractMergedBamFileService abstractMergedBamFileService
+    AbstractBamFileService abstractBamFileService
 
     RoddyBamFileService roddyBamFileService
 
@@ -324,7 +324,7 @@ class ExampleData {
         (1..individualCount).each {
             Individual individual = createIndividual(project)
             println "- individual: ${individual}"
-            Map<SeqType, List<AbstractMergedBamFile>> diseaseBamFiles = diseaseSampleTypes.collectMany { SampleType sampleType, MixedInSpecies mixedInSpecies ->
+            Map<SeqType, List<AbstractBamFile>> diseaseBamFiles = diseaseSampleTypes.collectMany { SampleType sampleType, MixedInSpecies mixedInSpecies ->
                 Sample sample = findOrCreateSample(individual, sampleType, mixedInSpecies)
                 println "  - sample: ${sample}"
                 createSampleWithSeqTracks(sample)
@@ -336,7 +336,7 @@ class ExampleData {
             }.groupBy {
                 it.seqType
             }
-            Map<SeqType, List<AbstractMergedBamFile>> controlBamFiles = controlSampleTypes.collectMany { SampleType sampleType ->
+            Map<SeqType, List<AbstractBamFile>> controlBamFiles = controlSampleTypes.collectMany { SampleType sampleType ->
                 Sample sample = findOrCreateSample(individual, sampleType)
                 println "  - sample: ${sample}"
                 createSampleWithSeqTracks(sample)
@@ -354,8 +354,8 @@ class ExampleData {
                 createSingleCellSampleWithSeqTracksAndBamFile(sample, singleCellSeqTypes, true)
             }
             analyseAbleSeqType.each { SeqType seqType ->
-                diseaseBamFiles[seqType].each { AbstractMergedBamFile diseaseBamFile ->
-                    controlBamFiles[seqType].each { AbstractMergedBamFile controlBamFile ->
+                diseaseBamFiles[seqType].each { AbstractBamFile diseaseBamFile ->
+                    controlBamFiles[seqType].each { AbstractBamFile controlBamFile ->
                         SamplePair samplePair = createSamplePair(diseaseBamFile.mergingWorkPackage, controlBamFile.mergingWorkPackage)
                         createRoddySnvCallingInstance(samplePair)
                         createIndelCallingInstance(samplePair)
@@ -492,7 +492,7 @@ class ExampleData {
         FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
 
         rnaRoddyBamFiles.each { RoddyBamFile bam ->
-            Path baseDir = abstractMergedBamFileService.getBaseDirectory(bam)
+            Path baseDir = abstractBamFileService.getBaseDirectory(bam)
             Path workDir = roddyBamFileService.getWorkDirectory(bam)
 
             Map<Path, Path> filesMap = [
@@ -923,7 +923,7 @@ class ExampleData {
         }
     }
 
-    List<AbstractMergedBamFile> createSampleWithSeqTracksAndPanCancerBamFile(Sample sample) {
+    List<AbstractBamFile> createSampleWithSeqTracksAndPanCancerBamFile(Sample sample) {
         return panCanSeqTypes.collect { SeqType seqType ->
             println "    - for: ${seqType}"
             List<SeqTrack> seqTracks = (1..lanesPerSampleAndSeqType).collect {
@@ -939,7 +939,7 @@ class ExampleData {
         }
     }
 
-    List<AbstractMergedBamFile> createSampleWithSeqTracksAndRnaBamFile(Sample sample) {
+    List<AbstractBamFile> createSampleWithSeqTracksAndRnaBamFile(Sample sample) {
         return rnaSeqTypes.collect { SeqType seqType ->
             println "    - for: ${seqType}"
             List<SeqTrack> seqTracks = (1..lanesPerSampleAndSeqType).collect {
@@ -955,8 +955,8 @@ class ExampleData {
         }
     }
 
-    List<AbstractMergedBamFile> createSingleCellSampleWithSeqTracksAndBamFile(Sample sample, List<SeqType> seqTypes,
-                                                                              boolean createWellLabel = false) {
+    List<AbstractBamFile> createSingleCellSampleWithSeqTracksAndBamFile(Sample sample, List<SeqType> seqTypes,
+                                                                        boolean createWellLabel = false) {
         return seqTypes.collect { SeqType seqType ->
             println "    - for: ${seqType}"
             List<SeqTrack> seqTracks = (1..lanesPerSampleAndSeqType).collect {
@@ -1115,9 +1115,9 @@ class ExampleData {
                 md5sum                 : "0" * 32,
                 fileExists             : true,
                 fileSize               : 100,
-                fileOperationStatus    : AbstractMergedBamFile.FileOperationStatus.PROCESSED,
+                fileOperationStatus    : AbstractBamFile.FileOperationStatus.PROCESSED,
                 qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
-                qcTrafficLightStatus   : AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED,
+                qcTrafficLightStatus   : AbstractBamFile.QcTrafficLightStatus.QC_PASSED,
                 comment                : createComment(),
         ]).save(flush: false)
 
@@ -1142,9 +1142,9 @@ class ExampleData {
                 md5sum                 : "0" * 32,
                 fileExists             : true,
                 fileSize               : 100,
-                fileOperationStatus    : AbstractMergedBamFile.FileOperationStatus.PROCESSED,
+                fileOperationStatus    : AbstractBamFile.FileOperationStatus.PROCESSED,
                 qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
-                qcTrafficLightStatus   : AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED,
+                qcTrafficLightStatus   : AbstractBamFile.QcTrafficLightStatus.QC_PASSED,
                 comment                : createComment(),
         ]).save(flush: false)
 
@@ -1152,7 +1152,7 @@ class ExampleData {
         mergingWorkPackage.save(flush: false)
 
         QualityAssessmentMergedPass qualityAssessmentMergedPass = new QualityAssessmentMergedPass([
-                abstractMergedBamFile: roddyBamFile,
+                abstractBamFile: roddyBamFile,
                 identifier           : 0,
         ]).save(flush: false)
 
@@ -1178,9 +1178,9 @@ class ExampleData {
                 md5sum                 : "0" * 32,
                 fileExists             : true,
                 fileSize               : 100,
-                fileOperationStatus    : AbstractMergedBamFile.FileOperationStatus.PROCESSED,
+                fileOperationStatus    : AbstractBamFile.FileOperationStatus.PROCESSED,
                 qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
-                qcTrafficLightStatus   : AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED,
+                qcTrafficLightStatus   : AbstractBamFile.QcTrafficLightStatus.QC_PASSED,
                 comment                : createComment(),
         ]).save(flush: false)
 
@@ -1188,7 +1188,7 @@ class ExampleData {
         mergingWorkPackage.save(flush: false)
 
         QualityAssessmentMergedPass qualityAssessmentMergedPass = new QualityAssessmentMergedPass([
-                abstractMergedBamFile: roddyBamFile,
+                abstractBamFile: roddyBamFile,
                 identifier           : 0,
         ]).save(flush: false)
 
@@ -1592,7 +1592,7 @@ enum MixedInSpecies {
 
 Project.withTransaction {
     ExampleData exampleData = new ExampleData([
-            abstractMergedBamFileService  : ctx.abstractMergedBamFileService,
+            abstractBamFileService  : ctx.abstractBamFileService,
             fastqcDataFilesService        : ctx.fastqcDataFilesService,
             fileService                   : ctx.fileService,
             fileSystemService             : ctx.fileSystemService,

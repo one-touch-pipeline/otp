@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,7 +27,7 @@ import de.dkfz.tbi.util.spreadsheet.validation.Validator
 
 /**
  * Validators implementing this interfaces and annotated with {@link Component} will automatically be used for
- * validating externally processed merged bam meta data files.
+ * validating externally processed bam meta data files.
  */
 interface BamMetadataValidator extends Validator<BamMetadataValidationContext> {
 

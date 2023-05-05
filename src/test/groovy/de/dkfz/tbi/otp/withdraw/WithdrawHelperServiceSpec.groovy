@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -94,7 +94,7 @@ class WithdrawHelperServiceSpec extends HibernateSpec implements FastqcDomainFac
                         deleteBamFile        : deleteBamFile,
                         deleteAnalysis       : deleteAnalysis,
                 ]),
-                mergedBamFiles    : [
+                bamFiles: [
                         roddyBamFile1,
                         roddyBamFile2,
                         singleCellBamFile1,
@@ -363,7 +363,7 @@ class WithdrawHelperServiceSpec extends HibernateSpec implements FastqcDomainFac
             1 * collectPaths([singleCellBamFile]) >> PATH_LIST2
         }
 
-        Map<WithdrawBamFileService, List<AbstractMergedBamFile>> bamFileMap = [
+        Map<WithdrawBamFileService, List<AbstractBamFile>> bamFileMap = [
                 (roddyBamFileWithdrawService)     : [roddyBamFile],
                 (cellRangerBamFileWithdrawService): [singleCellBamFile],
         ]

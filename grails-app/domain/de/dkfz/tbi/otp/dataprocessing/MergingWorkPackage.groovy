@@ -31,7 +31,7 @@ import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
 /**
- * Represents all generations of one merged BAM file (whereas an {@link AbstractMergedBamFile} represents a single
+ * Represents all generations of one merged BAM file (whereas an {@link AbstractBamFile} represents a single
  * generation). It specifies the concrete criteria for the {@link SeqTrack}s that are merged into the BAM file, and
  * processing parameters used for alignment and merging.
  */
@@ -136,8 +136,8 @@ class MergingWorkPackage extends AbstractMergingWorkPackage {
     }
 
     @Override
-    AbstractMergedBamFile getBamFileThatIsReadyForFurtherAnalysis() {
-        AbstractMergedBamFile bamFile = processableBamFileInProjectFolder
+    AbstractBamFile getBamFileThatIsReadyForFurtherAnalysis() {
+        AbstractBamFile bamFile = processableBamFileInProjectFolder
         if (bamFile && bamFile.containedSeqTracks == seqTracks) {
             return bamFile
         }

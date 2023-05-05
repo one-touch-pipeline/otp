@@ -46,7 +46,7 @@ class PanCancerFinishJob extends AbstractFinishJob implements PanCancerShared {
     Md5SumService md5SumService
 
     @Autowired
-    AbstractMergedBamFileService abstractMergedBamFileService
+    AbstractBamFileService abstractBamFileService
 
     @Autowired
     RoddyBamFileService roddyBamFileService
@@ -61,10 +61,9 @@ class PanCancerFinishJob extends AbstractFinishJob implements PanCancerShared {
         String md5sumValue = md5SumService.extractMd5Sum(md5sumPath)
 
         roddyBamFile.with {
-            fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.PROCESSED
+            fileOperationStatus = AbstractBamFile.FileOperationStatus.PROCESSED
             md5sum = md5sumValue
             fileSize = Files.size(bamFilePath)
-            fileExists = true
             dateFromFileSystem = new Date(Files.getLastModifiedTime(bamFilePath).toMillis())
             save(flush: true)
         }
@@ -72,6 +71,6 @@ class PanCancerFinishJob extends AbstractFinishJob implements PanCancerShared {
         roddyBamFile.workPackage.bamFileInProjectFolder = roddyBamFile
         roddyBamFile.workPackage.save(flush: true)
 
-        abstractMergedBamFileService.updateSamplePairStatusToNeedProcessing(roddyBamFile)
+        abstractBamFileService.updateSamplePairStatusToNeedProcessing(roddyBamFile)
     }
 }

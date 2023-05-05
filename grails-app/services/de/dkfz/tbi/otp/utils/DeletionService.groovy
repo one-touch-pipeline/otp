@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -58,7 +58,7 @@ import static org.springframework.util.Assert.notNull
 @Transactional
 class DeletionService {
 
-    AbstractMergedBamFileService abstractMergedBamFileService
+    AbstractBamFileService abstractBamFileService
     AnalysisDeletionService analysisDeletionService
     CommentService commentService
     ConfigService configService
@@ -159,7 +159,7 @@ class DeletionService {
      *
      * For the cases where the fastq files are not available in the project folder it has to be checked if the fastq files are still available on midterm.
      * If this is the case the GPCF has to be informed that the must not delete these fastq files during the sample swap.
-     * If ExternallyProcessedMergedBamFiles were imported for this project, an exception is thrown to give the opportunity for clarification.
+     * If ExternallyProcessedBamFiles were imported for this project, an exception is thrown to give the opportunity for clarification.
      * If everything was clarified the method can be called with true for "everythingVerified" so that the mentioned checks won't be executed anymore.
      * If the fastq files are not available an error is thrown.
      * If withdrawn data should be ignored, set ignoreWithdrawn "true"
@@ -246,9 +246,9 @@ class DeletionService {
 
         // in case there are no dataFiles/seqTracks left this can be ignored.
         if (seqTracks) {
-            List<ExternallyProcessedMergedBamFile> externallyProcessedMergedBamFiles = seqTrackService.returnExternallyProcessedMergedBamFiles(seqTracks)
-            assert (!externallyProcessedMergedBamFiles || everythingVerified):
-                    "There are ${externallyProcessedMergedBamFiles.size()} external merged bam files attached to this project. " +
+            List<ExternallyProcessedBamFile> externallyProcessedBamFiles = seqTrackService.returnExternallyProcessedBamFiles(seqTracks)
+            assert (!externallyProcessedBamFiles || everythingVerified):
+                    "There are ${externallyProcessedBamFiles.size()} external merged bam files attached to this project. " +
                             "Clarify if the realignment shall be done anyway."
         }
 
@@ -269,9 +269,9 @@ class DeletionService {
             Set<AbstractBamFile> bamFiles = MergingWorkPackage.findAllBySampleAndSeqType(seqTrack.sample, seqTrack.seqType)*.bamFileInProjectFolder
             bamFiles.each { AbstractBamFile bamfile ->
                 if (bamfile) {
-                    Path mergingDir = abstractMergedBamFileService.getBaseDirectory(bamfile)
+                    Path mergingDir = abstractBamFileService.getBaseDirectory(bamfile)
                     if (Files.exists(mergingDir)) {
-                        List<ExternallyProcessedMergedBamFile> files = seqTrackService.returnExternallyProcessedMergedBamFiles([seqTrack])
+                        List<ExternallyProcessedBamFile> files = seqTrackService.returnExternallyProcessedBamFiles([seqTrack])
                         files.each {
                             externalMergedBamFolders.add(it.nonOtpFolder.absoluteDataManagementPath.path)
                         }
@@ -318,7 +318,7 @@ class DeletionService {
 
         if (enableChecks) {
             seqTrackService.throwExceptionInCaseOfSeqTracksAreOnlyLinked([seqTrack])
-            seqTrackService.throwExceptionInCaseOfExternalMergedBamFileIsAttached([seqTrack])
+            seqTrackService.throwExceptionInCaseOfExternallyProcessedBamFileIsAttached([seqTrack])
         }
 
         // for RoddyBamFiles
@@ -360,7 +360,7 @@ class DeletionService {
             mergingWorkPackage.save(flush: true, validate: false) //since object is deleted later, no validation is necessary
             deleteQualityAssessmentInfoForAbstractBamFile(bamFile)
             deleteProcessParameters(ProcessParameter.findAllByValueAndClassName(bamFile.id.toString(), bamFile.class.name))
-            dirsToDelete << new File(abstractMergedBamFileService.getBaseDirectory(bamFile).toString())
+            dirsToDelete << new File(abstractBamFileService.getBaseDirectory(bamFile).toString())
             bamFile.delete(flush: true)
             // The MerginWorkPackage can only be deleted if all corresponding RoddyBamFiles are removed already
             if (!RoddyBamFile.findAllByWorkPackage(mergingWorkPackage)) {
@@ -396,7 +396,7 @@ class DeletionService {
             }
         }
         mergingWorkPackages.each {
-            if (AbstractMergedBamFile.countByWorkPackage(it)) {
+            if (AbstractBamFile.countByWorkPackage(it)) {
                 it.seqTracks.remove(seqTrack)
                 it.save(flush: true, validate: false)
             } else {
@@ -527,7 +527,7 @@ class DeletionService {
         assert !seqTrack.project.archived
 
         if (check) {
-            seqTrackService.throwExceptionInCaseOfExternalMergedBamFileIsAttached([seqTrack])
+            seqTrackService.throwExceptionInCaseOfExternallyProcessedBamFileIsAttached([seqTrack])
             seqTrackService.throwExceptionInCaseOfSeqTracksAreOnlyLinked([seqTrack])
         }
 
@@ -557,12 +557,12 @@ class DeletionService {
         } else {
             leftOverSeqTracks = SeqTrack.findAllBySample(sample1)
         }
-        List<ExternallyProcessedMergedBamFile> leftOverBamFiles = ExternallyProcessedMergedBamFile.withCriteria {
+        List<ExternallyProcessedBamFile> leftOverBamFiles = ExternallyProcessedBamFile.withCriteria {
             'workPackage' {
                 eq('sample', sample1)
                 eq('seqType', seqType)
             }
-        } as List<ExternallyProcessedMergedBamFile>
+        } as List<ExternallyProcessedBamFile>
 
         if (!leftOverSeqTracks && !leftOverBamFiles) {
             dataFiles.collect {
@@ -617,20 +617,19 @@ class DeletionService {
 
     /**
      * Removes all QA-Information & the MarkDuplicate-metrics for an AbstractBamFile.
-     * As input the AbstractBamFile is chosen, so that the method can be used for ProcessedBamFiles and ProcessedMergedBamFiles.
      *
      * The function should be called inside a transaction (DOMAIN.withTransaction{}) to roll back changes if an exception occurs or a check fails.
      */
     private void deleteQualityAssessmentInfoForAbstractBamFile(AbstractBamFile abstractBamFile) {
         notNull(abstractBamFile, "The input AbstractBamFile is null")
         if (abstractBamFile instanceof RoddyBamFile) {
-            List<QualityAssessmentMergedPass> qualityAssessmentMergedPasses = QualityAssessmentMergedPass.findAllByAbstractMergedBamFile(abstractBamFile)
+            List<QualityAssessmentMergedPass> qualityAssessmentMergedPasses = QualityAssessmentMergedPass.findAllByAbstractBamFile(abstractBamFile)
             if (qualityAssessmentMergedPasses) {
                 RoddyQualityAssessment.findAllByQualityAssessmentMergedPassInList(qualityAssessmentMergedPasses)*.delete(flush: true)
             }
             qualityAssessmentMergedPasses*.delete(flush: true)
         } else if (abstractBamFile instanceof SingleCellBamFile) {
-            List<QualityAssessmentMergedPass> qualityAssessmentMergedPasses = QualityAssessmentMergedPass.findAllByAbstractMergedBamFile(abstractBamFile)
+            List<QualityAssessmentMergedPass> qualityAssessmentMergedPasses = QualityAssessmentMergedPass.findAllByAbstractBamFile(abstractBamFile)
             if (qualityAssessmentMergedPasses) {
                 CellRangerQualityAssessment.findAllByQualityAssessmentMergedPassInList(qualityAssessmentMergedPasses)*.delete(flush: true)
             }

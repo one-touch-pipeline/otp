@@ -24,7 +24,7 @@
 // Expect inconsistencies to be reported if you run this script while the transfer workflow is running.
 
 import de.dkfz.tbi.otp.config.ConfigService
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 
 ConfigService configService = ctx.configService
@@ -40,7 +40,7 @@ try {
     out.println("MWP ID\tConsistent\tBAM file ID\tFileOpStat\tWithdrawn\tDB size\tExists on FS\tFile system size\tPath")
     mergingWorkPackages.each { MergingWorkPackage mergingWorkPackage ->
         out.print("${mergingWorkPackage.id}\t")
-        AbstractMergedBamFile bamFile = mergingWorkPackage.bamFileInProjectFolder
+        AbstractBamFile bamFile = mergingWorkPackage.bamFileInProjectFolder
         if (bamFile) {
             final File file = new File(bamFile.baseDirectory, bamFile.bamFileName)
 

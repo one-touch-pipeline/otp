@@ -42,7 +42,7 @@ class Md5sumUniqueValidatorSpec extends Specification implements DataTest {
     Class[] getDomainClassesToMock() {
         [
                 DataFile,
-                ExternallyProcessedMergedBamFile,
+                ExternallyProcessedBamFile,
                 ExternalMergingWorkPackage,
                 FileType,
                 Individual,
@@ -127,14 +127,14 @@ ${md5sum2}
 ${md5sum3}
 ${md5sum2}
 """)
-        DomainFactory.createExternallyProcessedMergedBamFile(
+        DomainFactory.createExternallyProcessedBamFile(
                 md5sum: md5sum3,
-                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
+                fileOperationStatus: AbstractBamFile.FileOperationStatus.PROCESSED,
                 fileSize: 1
         )
-        DomainFactory.createExternallyProcessedMergedBamFile(
+        DomainFactory.createExternallyProcessedBamFile(
                 md5sum: md5sum4,
-                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
+                fileOperationStatus: AbstractBamFile.FileOperationStatus.PROCESSED,
                 fileSize: 1
         )
         Collection<Problem> expectedProblems = [

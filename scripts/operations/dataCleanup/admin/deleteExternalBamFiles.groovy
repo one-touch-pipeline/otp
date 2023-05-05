@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,7 +25,7 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.AnalysisDeletionService
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 
 /**
- * Script to delete ExternallyProcessedMergedBamFile inclusive dependencies for given pids.
+ * Script to delete ExternallyProcessedBamFile inclusive dependencies for given pids.
  *
  * The script change only the database. For the filesystem a bash script is displayed.
  *
@@ -60,7 +60,7 @@ boolean tryRun = true
 //--------------------------------
 //work
 
-def bamFiles = ExternallyProcessedMergedBamFile.createCriteria().listDistinct {
+def bamFiles = ExternallyProcessedBamFile.createCriteria().listDistinct {
     workPackage {
         sample {
             individual {
@@ -74,8 +74,8 @@ List<String> dirsToDelete = []
 
 AnalysisDeletionService analysisDeletionService = ctx.analysisDeletionService
 
-ExternallyProcessedMergedBamFile.withTransaction {
-    bamFiles.each { ExternallyProcessedMergedBamFile epmbf ->
+ExternallyProcessedBamFile.withTransaction {
+    bamFiles.each { ExternallyProcessedBamFile epmbf ->
         println "to delete: ${epmbf}"
 
         ExternalMergingWorkPackage workPackage = epmbf.workPackage
@@ -107,11 +107,11 @@ ExternallyProcessedMergedBamFile.withTransaction {
             }
         }
 
-        ExternalProcessedMergedBamFileQualityAssessment.createCriteria().list {
+        ExternallyProcessedBamFileQualityAssessment.createCriteria().list {
             qualityAssessmentMergedPass {
-                eq('abstractMergedBamFile', epmbf)
+                eq('abstractBamFile', epmbf)
             }
-        }.each { ExternalProcessedMergedBamFileQualityAssessment qualityAssessment ->
+        }.each { ExternallyProcessedBamFileQualityAssessment qualityAssessment ->
             println "  --> delete qa: ${qualityAssessment}"
             QualityAssessmentMergedPass qualityAssessmentMergedPass = qualityAssessment.qualityAssessmentMergedPass
             qualityAssessment.delete(flush: true)
@@ -120,14 +120,14 @@ ExternallyProcessedMergedBamFile.withTransaction {
         }
 
         ImportProcess.withCriteria {
-            externallyProcessedMergedBamFiles {
+            externallyProcessedBamFiles {
                 eq('id', epmbf.id)
             }
         }.each { ImportProcess importProcess->
             println "  --> remove from: ${importProcess}"
-            importProcess.externallyProcessedMergedBamFiles.remove(epmbf)
+            importProcess.externallyProcessedBamFiles.remove(epmbf)
             importProcess.save(flush: true)
-            if (importProcess.externallyProcessedMergedBamFiles.empty) {
+            if (importProcess.externallyProcessedBamFiles.empty) {
                 println "    --> is now empty --> delete it"
                 importProcess.delete(flush: true)
             }

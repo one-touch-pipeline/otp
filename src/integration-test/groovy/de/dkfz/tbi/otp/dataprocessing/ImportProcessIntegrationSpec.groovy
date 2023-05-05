@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -35,33 +35,33 @@ class ImportProcessIntegrationSpec extends Specification {
     ImportProcess importProcess01
     ImportProcess importProcess02
     ImportProcess importProcess03
-    ExternallyProcessedMergedBamFile epmbf01
-    ExternallyProcessedMergedBamFile epmbf02
-    ExternallyProcessedMergedBamFile epmbf03
-    ExternallyProcessedMergedBamFile epmbf04
-    ExternallyProcessedMergedBamFile epmbf05
+    ExternallyProcessedBamFile epmbf01
+    ExternallyProcessedBamFile epmbf02
+    ExternallyProcessedBamFile epmbf03
+    ExternallyProcessedBamFile epmbf04
+    ExternallyProcessedBamFile epmbf05
 
     void setupData() {
         importProcess01 = new ImportProcess()
         importProcess02 = new ImportProcess()
         importProcess03 = new ImportProcess()
-        epmbf01 = DomainFactory.createExternallyProcessedMergedBamFile(fileName: 'epmbf01')
-        epmbf02 = DomainFactory.createExternallyProcessedMergedBamFile(fileName: 'epmbf02')
-        epmbf03 = DomainFactory.createExternallyProcessedMergedBamFile(fileName: 'epmbf03')
-        epmbf04 = DomainFactory.createExternallyProcessedMergedBamFile(fileName: 'epmbf04')
-        epmbf05 = DomainFactory.createExternallyProcessedMergedBamFile(fileName: 'epmbf05')
+        epmbf01 = DomainFactory.createExternallyProcessedBamFile(fileName: 'epmbf01')
+        epmbf02 = DomainFactory.createExternallyProcessedBamFile(fileName: 'epmbf02')
+        epmbf03 = DomainFactory.createExternallyProcessedBamFile(fileName: 'epmbf03')
+        epmbf04 = DomainFactory.createExternallyProcessedBamFile(fileName: 'epmbf04')
+        epmbf05 = DomainFactory.createExternallyProcessedBamFile(fileName: 'epmbf05')
     }
 
-    void "test validate duplicated set of externally processed merged bam files throws an exception"() {
+    void "test validate duplicated set of externally processed bam files throws an exception"() {
         given:
         setupData()
 
-        Set<ExternallyProcessedMergedBamFile> externallyProcessedMergedBamFiles = [epmbf01, epmbf02, epmbf03]
-        importProcess01.externallyProcessedMergedBamFiles = externallyProcessedMergedBamFiles
+        Set<ExternallyProcessedBamFile> externallyProcessedBamFiles = [epmbf01, epmbf02, epmbf03]
+        importProcess01.externallyProcessedBamFiles = externallyProcessedBamFiles
         assert importProcess01.save(flush: true)
 
         when:
-        importProcess02.externallyProcessedMergedBamFiles = externallyProcessedMergedBamFiles
+        importProcess02.externallyProcessedBamFiles = externallyProcessedBamFiles
         importProcess02.save(flush: true)
 
         then:
@@ -69,17 +69,17 @@ class ImportProcessIntegrationSpec extends Specification {
         e.message.contains('already.imported')
     }
 
-    void "test validate set of externally processed merged bam files partially overlapped by another one throwns an expection"() {
+    void "test validate set of externally processed bam files partially overlapped by another one throwns an expection"() {
         given:
         setupData()
 
-        Set<ExternallyProcessedMergedBamFile> externallyProcessedMergedBamFiles01 = [epmbf01, epmbf02]
-        Set<ExternallyProcessedMergedBamFile> externallyProcessedMergedBamFiles02 = [epmbf01, epmbf03]
-        importProcess01.externallyProcessedMergedBamFiles = externallyProcessedMergedBamFiles01
+        Set<ExternallyProcessedBamFile> externallyProcessedBamFiles01 = [epmbf01, epmbf02]
+        Set<ExternallyProcessedBamFile> externallyProcessedBamFiles02 = [epmbf01, epmbf03]
+        importProcess01.externallyProcessedBamFiles = externallyProcessedBamFiles01
         assert importProcess01.save(flush: true)
 
         when:
-        importProcess02.externallyProcessedMergedBamFiles = externallyProcessedMergedBamFiles02
+        importProcess02.externallyProcessedBamFiles = externallyProcessedBamFiles02
         importProcess02.save(flush: true)
 
         then:
@@ -87,20 +87,20 @@ class ImportProcessIntegrationSpec extends Specification {
         e.message.contains('already.imported')
     }
 
-    void "test validate two sets of externally processed merged bam files partially overlapped by another one throwns an expection"() {
+    void "test validate two sets of externally processed bam files partially overlapped by another one throwns an expection"() {
         given:
         setupData()
 
-        Set<ExternallyProcessedMergedBamFile> externallyProcessedMergedBamFiles01 = [epmbf01, epmbf02]
-        Set<ExternallyProcessedMergedBamFile> externallyProcessedMergedBamFiles02 = [epmbf03, epmbf04]
-        Set<ExternallyProcessedMergedBamFile> externallyProcessedMergedBamFiles03 = [epmbf02, epmbf04, epmbf05]
-        importProcess01.externallyProcessedMergedBamFiles = externallyProcessedMergedBamFiles01
+        Set<ExternallyProcessedBamFile> externallyProcessedBamFiles01 = [epmbf01, epmbf02]
+        Set<ExternallyProcessedBamFile> externallyProcessedBamFiles02 = [epmbf03, epmbf04]
+        Set<ExternallyProcessedBamFile> externallyProcessedBamFiles03 = [epmbf02, epmbf04, epmbf05]
+        importProcess01.externallyProcessedBamFiles = externallyProcessedBamFiles01
         assert importProcess01.save(flush: true)
-        importProcess02.externallyProcessedMergedBamFiles = externallyProcessedMergedBamFiles02
+        importProcess02.externallyProcessedBamFiles = externallyProcessedBamFiles02
         importProcess02.save(flush: true)
 
         when:
-        importProcess03.externallyProcessedMergedBamFiles = externallyProcessedMergedBamFiles03
+        importProcess03.externallyProcessedBamFiles = externallyProcessedBamFiles03
         importProcess03.save(flush: true)
 
         then:

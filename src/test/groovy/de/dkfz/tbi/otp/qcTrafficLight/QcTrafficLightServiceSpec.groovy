@@ -40,7 +40,7 @@ class QcTrafficLightServiceSpec extends Specification implements RoddyRnaFactory
     @Override
     Class[] getDomainClassesToMock() {
         [
-                AbstractMergedBamFile,
+                AbstractBamFile,
                 DataFile,
                 Comment,
                 FileType,
@@ -106,16 +106,16 @@ class QcTrafficLightServiceSpec extends Specification implements RoddyRnaFactory
 
         where:
         rna   | prevQcStatus                                           | qcStatus                                            | linkCount | linkRnaCount | otrsCount
-        false | AbstractMergedBamFile.QcTrafficLightStatus.NOT_RUN_YET | AbstractMergedBamFile.QcTrafficLightStatus.ACCEPTED | 1         | 0            | 1
-        false | AbstractMergedBamFile.QcTrafficLightStatus.NOT_RUN_YET | AbstractMergedBamFile.QcTrafficLightStatus.WARNING  | 1         | 0            | 1
-        false | AbstractMergedBamFile.QcTrafficLightStatus.WARNING     | AbstractMergedBamFile.QcTrafficLightStatus.ACCEPTED | 0         | 0            | 0
-        false | AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED     | AbstractMergedBamFile.QcTrafficLightStatus.WARNING  | 1         | 0            | 1
-        false | AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED     | AbstractMergedBamFile.QcTrafficLightStatus.ACCEPTED | 1         | 0            | 1
-        true  | AbstractMergedBamFile.QcTrafficLightStatus.NOT_RUN_YET | AbstractMergedBamFile.QcTrafficLightStatus.ACCEPTED | 0         | 1            | 1
-        true  | AbstractMergedBamFile.QcTrafficLightStatus.NOT_RUN_YET | AbstractMergedBamFile.QcTrafficLightStatus.WARNING  | 0         | 1            | 1
-        true  | AbstractMergedBamFile.QcTrafficLightStatus.WARNING     | AbstractMergedBamFile.QcTrafficLightStatus.ACCEPTED | 0         | 0            | 0
-        true  | AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED     | AbstractMergedBamFile.QcTrafficLightStatus.WARNING  | 0         | 1            | 1
-        true  | AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED     | AbstractMergedBamFile.QcTrafficLightStatus.ACCEPTED | 0         | 1            | 1
+        false | AbstractBamFile.QcTrafficLightStatus.NOT_RUN_YET | AbstractBamFile.QcTrafficLightStatus.ACCEPTED | 1 | 0 | 1
+        false | AbstractBamFile.QcTrafficLightStatus.NOT_RUN_YET | AbstractBamFile.QcTrafficLightStatus.WARNING  | 1 | 0 | 1
+        false | AbstractBamFile.QcTrafficLightStatus.WARNING     | AbstractBamFile.QcTrafficLightStatus.ACCEPTED | 0 | 0 | 0
+        false | AbstractBamFile.QcTrafficLightStatus.BLOCKED     | AbstractBamFile.QcTrafficLightStatus.WARNING  | 1 | 0 | 1
+        false | AbstractBamFile.QcTrafficLightStatus.BLOCKED     | AbstractBamFile.QcTrafficLightStatus.ACCEPTED | 1 | 0 | 1
+        true  | AbstractBamFile.QcTrafficLightStatus.NOT_RUN_YET | AbstractBamFile.QcTrafficLightStatus.ACCEPTED | 0 | 1 | 1
+        true  | AbstractBamFile.QcTrafficLightStatus.NOT_RUN_YET | AbstractBamFile.QcTrafficLightStatus.WARNING  | 0 | 1 | 1
+        true  | AbstractBamFile.QcTrafficLightStatus.WARNING     | AbstractBamFile.QcTrafficLightStatus.ACCEPTED | 0 | 0 | 0
+        true  | AbstractBamFile.QcTrafficLightStatus.BLOCKED     | AbstractBamFile.QcTrafficLightStatus.WARNING  | 0 | 1 | 1
+        true  | AbstractBamFile.QcTrafficLightStatus.BLOCKED     | AbstractBamFile.QcTrafficLightStatus.ACCEPTED | 0 | 1 | 1
     }
 
     void "test setQcTrafficLightStatusWithComment invalid input, fails"() {
@@ -131,17 +131,17 @@ class QcTrafficLightServiceSpec extends Specification implements RoddyRnaFactory
 
         where:
         useBamFile | qcStatus                                            | comment
-        true       | AbstractMergedBamFile.QcTrafficLightStatus.REJECTED | null
-        true       | AbstractMergedBamFile.QcTrafficLightStatus.REJECTED | ""
+        true       | AbstractBamFile.QcTrafficLightStatus.REJECTED | null
+        true       | AbstractBamFile.QcTrafficLightStatus.REJECTED | ""
         true       | null                                                | "comment"
-        false      | AbstractMergedBamFile.QcTrafficLightStatus.REJECTED | "comment"
+        false      | AbstractBamFile.QcTrafficLightStatus.REJECTED | "comment"
     }
 
     void "test setQcTrafficLightStatusWithComment set analysis of otrs to not sent"() {
         given:
         DomainFactory.createAllAlignableSeqTypes()
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile([
-                qcTrafficLightStatus: AbstractMergedBamFile.QcTrafficLightStatus.REJECTED,
+                qcTrafficLightStatus: AbstractBamFile.QcTrafficLightStatus.REJECTED,
         ])
         OtrsTicket otrsTicket1 = DomainFactory.createOtrsTicketWithEndDatesAndNotificationSent()
         OtrsTicket otrsTicket2 = DomainFactory.createOtrsTicketWithEndDatesAndNotificationSent()
@@ -164,7 +164,7 @@ class QcTrafficLightServiceSpec extends Specification implements RoddyRnaFactory
         when:
         qcTrafficLightService.setQcTrafficLightStatusWithComment(
                 roddyBamFile,
-                AbstractMergedBamFile.QcTrafficLightStatus.ACCEPTED,
+                AbstractBamFile.QcTrafficLightStatus.ACCEPTED,
                 "comment")
 
         then:

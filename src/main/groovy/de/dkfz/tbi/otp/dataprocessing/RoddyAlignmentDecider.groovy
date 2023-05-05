@@ -71,8 +71,8 @@ abstract class RoddyAlignmentDecider extends AbstractAlignmentDecider {
 
         RoddyBamFile latestValidBamFile = bamFiles.find {
                     !it.withdrawn ||
-                    it.fileOperationStatus == AbstractMergedBamFile.FileOperationStatus.INPROGRESS ||
-                    it.fileOperationStatus == AbstractMergedBamFile.FileOperationStatus.PROCESSED
+                    it.fileOperationStatus == AbstractBamFile.FileOperationStatus.INPROGRESS ||
+                    it.fileOperationStatus == AbstractBamFile.FileOperationStatus.PROCESSED
         }
         return latestValidBamFile
     }

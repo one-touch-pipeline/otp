@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,7 +23,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import groovy.transform.CompileDynamic
 
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 
 trait HasIdentifier {
@@ -39,7 +39,7 @@ trait HasIdentifier {
     @CompileDynamic
     static Integer maxIdentifier(MergingWorkPackage workPackage) {
         assert workPackage
-        return AbstractMergedBamFile.createCriteria().get {
+        return AbstractBamFile.createCriteria().get {
             eq("workPackage", workPackage)
             projections {
                 max("identifier")

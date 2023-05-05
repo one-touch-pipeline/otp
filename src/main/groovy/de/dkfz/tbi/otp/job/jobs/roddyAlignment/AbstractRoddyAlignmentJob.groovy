@@ -116,9 +116,9 @@ abstract class AbstractRoddyAlignmentJob extends AbstractExecutePanCanJob<RoddyB
             }
         }
 
-        assert [AbstractMergedBamFile.FileOperationStatus.DECLARED,
-                AbstractMergedBamFile.FileOperationStatus.NEEDS_PROCESSING].contains(roddyBamFile.fileOperationStatus)
-        roddyBamFile.fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.NEEDS_PROCESSING
+        assert [AbstractBamFile.FileOperationStatus.DECLARED,
+                AbstractBamFile.FileOperationStatus.NEEDS_PROCESSING].contains(roddyBamFile.fileOperationStatus)
+        roddyBamFile.fileOperationStatus = AbstractBamFile.FileOperationStatus.NEEDS_PROCESSING
         assert roddyBamFile.save(flush: true)
     }
 

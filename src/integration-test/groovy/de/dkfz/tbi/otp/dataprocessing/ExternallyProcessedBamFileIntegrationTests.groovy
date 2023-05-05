@@ -33,9 +33,9 @@ import static org.junit.Assert.assertNotNull
 
 @Rollback
 @Integration
-class ExternallyProcessedMergedBamFileIntegrationTests {
+class ExternallyProcessedBamFileIntegrationTests {
 
-    ExternallyProcessedMergedBamFile bamFile
+    ExternallyProcessedBamFile bamFile
     Project project
     Individual individual
     SampleType sampleType
@@ -93,8 +93,7 @@ class ExternallyProcessedMergedBamFileIntegrationTests {
                 referenceGenome: referenceGenome
         )
 
-        bamFile = DomainFactory.createExternallyProcessedMergedBamFile(
-                type: AbstractBamFile.BamType.SORTED,
+        bamFile = DomainFactory.createExternallyProcessedBamFile(
                 fileName: "FILE_NAME",
                 workPackage: externalMergingWorkPackage
         )

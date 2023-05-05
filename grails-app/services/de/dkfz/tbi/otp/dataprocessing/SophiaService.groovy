@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -58,13 +58,13 @@ class SophiaService extends AbstractBamFileAnalysisService<SophiaInstance> imple
         AND (
             ambf${number}.class = de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
             OR (
-                ambf${number}.class = de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedMergedBamFile
+                ambf${number}.class = de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedBamFile
                 AND ambf${number}.insertSizeFile IS NOT NULL
                 AND ambf${number}.maximumReadLength IS NOT NULL
                 AND EXISTS (
-                    FROM ExternalProcessedMergedBamFileQualityAssessment epmbfqa
+                    FROM ExternallyProcessedBamFileQualityAssessment epmbfqa
                     JOIN epmbfqa.qualityAssessmentMergedPass pass
-                    WHERE pass.abstractMergedBamFile = ambf${number}
+                    WHERE pass.abstractBamFile = ambf${number}
                 )
             )
         )

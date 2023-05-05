@@ -43,7 +43,7 @@ class ExecuteCellRangerJobSpec extends Specification implements CellRangerFactor
     @Override
     Class[] getDomainClassesToMock() {
         return [
-                AbstractMergedBamFile,
+                AbstractBamFile,
                 CellRangerMergingWorkPackage,
                 CellRangerConfig,
                 DataFile,

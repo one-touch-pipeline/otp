@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,8 +20,9 @@
  * SOFTWARE.
  */
 
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
+import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.ngsdata.SeqTypeService
 
 /**
  * Script to show all blocked bam files for the given seq types.
@@ -36,8 +37,8 @@ seqTypes << SeqTypeService.rnaPairedSeqType
 seqTypes << SeqTypeService.rnaSingleSeqType
 seqTypes << SeqTypeService.'10xSingleCellRnaSeqType'
 
-List<AbstractMergedBamFile> mergedBamFiles = AbstractMergedBamFile.createCriteria().list {
-    eq('qcTrafficLightStatus', AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED)
+List<AbstractBamFile> bamFiles = AbstractBamFile.createCriteria().list {
+    eq('qcTrafficLightStatus', AbstractBamFile.QcTrafficLightStatus.BLOCKED)
     workPackage {
         'in'('seqType', seqTypes)
     }
@@ -45,8 +46,8 @@ List<AbstractMergedBamFile> mergedBamFiles = AbstractMergedBamFile.createCriteri
     it.isMostRecentBamFile()
 }
 
-println mergedBamFiles.size()
-println mergedBamFiles.sort {
+println bamFiles.size()
+println bamFiles.sort {
     it.id
 }.join('\n')
 

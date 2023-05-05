@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,21 +28,21 @@ import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 
 @Transactional
-class AbstractMergedBamFileServiceFactoryService {
+class AbstractBamFileServiceFactoryService {
 
-    ExternallyProcessedMergedBamFileService externallyProcessedMergedBamFileService
+    ExternallyProcessedBamFileService externallyProcessedBamFileService
     RnaRoddyBamFileService rnaRoddyBamFileService
     RoddyBamFileService roddyBamFileService
     SingleCellBamFileService singleCellBamFileService
 
-    AbstractAbstractMergedBamFileService<? extends AbstractMergedBamFile> getService(AbstractMergedBamFile bamFile) {
-        Map<Class<? extends AbstractMergedBamFile>, AbstractAbstractMergedBamFileService<? extends AbstractMergedBamFile>> map = [
-                (ExternallyProcessedMergedBamFile): externallyProcessedMergedBamFileService,
+    AbstractAbstractBamFileService<? extends AbstractBamFile> getService(AbstractBamFile bamFile) {
+        Map<Class<? extends AbstractBamFile>, AbstractAbstractBamFileService<? extends AbstractBamFile>> map = [
+                (ExternallyProcessedBamFile): externallyProcessedBamFileService,
                 (RnaRoddyBamFile)                 : rnaRoddyBamFileService,
                 (RoddyBamFile)                    : roddyBamFileService,
                 (SingleCellBamFile)               : singleCellBamFileService,
         ]
-        AbstractAbstractMergedBamFileService<? extends AbstractMergedBamFile> result = map[bamFile.class]
+        AbstractAbstractBamFileService<? extends AbstractBamFile> result = map[bamFile.class]
         if (!result) {
             throw new IllegalArgumentException("No service exists for ${bamFile.class.simpleName}")
         }

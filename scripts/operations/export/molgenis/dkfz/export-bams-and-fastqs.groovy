@@ -192,43 +192,43 @@ enum DataFileColumns {
 
 @TupleConstructor
 enum BamColumns {
-    BAM_ID("Bam ID", { AbstractMergedBamFile bamFile, Map properties = [:] ->
+    BAM_ID("Bam ID", { AbstractBamFile bamFile, Map properties = [:] ->
         return bamFile.id
     }),
-    ALIGNMENT_DIR("Bam Path", { AbstractMergedBamFile bamFile, Map properties = [:] ->
-        return (properties["abstractMergedBamFileService"] as AbstractMergedBamFileService).getBaseDirectory(bamFile).resolve(bamFile.bamFileName)
+    ALIGNMENT_DIR("Bam Path", { AbstractBamFile bamFile, Map properties = [:] ->
+        return (properties["abstractBamFileService"] as AbstractBamFileService).getBaseDirectory(bamFile).resolve(bamFile.bamFileName)
     }),
-    DATE_CREATED("dateCreated", { AbstractMergedBamFile bamFile, Map properties = [:] ->
+    DATE_CREATED("dateCreated", { AbstractBamFile bamFile, Map properties = [:] ->
         return bamFile.dateCreated
     }),
-    QC_STATUS("QC Status", { AbstractMergedBamFile bamFile, Map properties = [:] ->
+    QC_STATUS("QC Status", { AbstractBamFile bamFile, Map properties = [:] ->
         return bamFile.qcTrafficLightStatus.name()
     }),
-    WITHDRAWN("withdrawn", { AbstractMergedBamFile bamFile, Map properties = [:] ->
+    WITHDRAWN("withdrawn", { AbstractBamFile bamFile, Map properties = [:] ->
         return bamFile.withdrawn
     }),
-    COVERAGE("coverage", { AbstractMergedBamFile bamFile, Map properties = [:] ->
+    COVERAGE("coverage", { AbstractBamFile bamFile, Map properties = [:] ->
         return bamFile.coverage
     }),
-    PERCENT_MAPPED_READS("% mapped reads", { AbstractMergedBamFile bamFile, Map properties = [:] ->
+    PERCENT_MAPPED_READS("% mapped reads", { AbstractBamFile bamFile, Map properties = [:] ->
         return MolgenisExporter.getRoddyMergedBamQaAll(bamFile)?.percentMappedReads
     }),
-    PERCENT_DUPLICATES("% duplicates", { AbstractMergedBamFile bamFile, Map properties = [:] ->
+    PERCENT_DUPLICATES("% duplicates", { AbstractBamFile bamFile, Map properties = [:] ->
         return MolgenisExporter.getRoddyMergedBamQaAll(bamFile)?.percentDuplicates
     }),
-    PERCENT_PAIRED("% properly paired", { AbstractMergedBamFile bamFile, Map properties = [:] ->
+    PERCENT_PAIRED("% properly paired", { AbstractBamFile bamFile, Map properties = [:] ->
         return MolgenisExporter.getRoddyMergedBamQaAll(bamFile)?.percentProperlyPaired
     }),
-    INSERT_SIZE_MEDIAN("insert size median", { AbstractMergedBamFile bamFile, Map properties = [:] ->
+    INSERT_SIZE_MEDIAN("insert size median", { AbstractBamFile bamFile, Map properties = [:] ->
         return MolgenisExporter.getRoddyMergedBamQaAll(bamFile)?.insertSizeMedian
     }),
-    REF_GEN_ID("Reference Genome ID", { AbstractMergedBamFile bamFile, Map properties = [:] ->
+    REF_GEN_ID("Reference Genome ID", { AbstractBamFile bamFile, Map properties = [:] ->
         return bamFile.referenceGenome?.id
     }),
-    REF_GEN("Reference Genome", { AbstractMergedBamFile bamFile, Map properties = [:] ->
+    REF_GEN("Reference Genome", { AbstractBamFile bamFile, Map properties = [:] ->
         return bamFile.referenceGenome?.name
     }),
-    CONTAINED_LANES("Contained Lanes (as SeqTrack IDs)", { AbstractMergedBamFile bamFile, Map properties = [:] ->
+    CONTAINED_LANES("Contained Lanes (as SeqTrack IDs)", { AbstractBamFile bamFile, Map properties = [:] ->
         return "${bamFile.containedSeqTracks*.id.join(";")}"
     })
 
@@ -290,7 +290,7 @@ class MolgenisBam extends MolgenisEntity {
         super(map)
     }
 
-    static MolgenisBam export(AbstractMergedBamFile bamFile) {
+    static MolgenisBam export(AbstractBamFile bamFile) {
         return new MolgenisBam(BamColumns.values().collectEntries {
             [(it.columnName): it.value(bamFile, properties)]
         })
@@ -307,15 +307,15 @@ class MolgenisExporter {
         return ([new MolgenisDataFile().headerAsCsv] + dataFiles.collect { DataFile df -> MolgenisDataFile.export(df).toCsvLine() }).join("\n")
     }
 
-    String exportBams(List<AbstractMergedBamFile> bams) {
-        MolgenisBam.properties["abstractMergedBamFileService"] = ctx.abstractMergedBamFileService
-        return ([new MolgenisBam().headerAsCsv] + bams.collect { AbstractMergedBamFile bam -> MolgenisBam.export(bam).toCsvLine() }).join("\n")
+    String exportBams(List<AbstractBamFile> bams) {
+        MolgenisBam.properties["abstractBamFileService"] = ctx.abstractBamFileService
+        return ([new MolgenisBam().headerAsCsv] + bams.collect { AbstractBamFile bam -> MolgenisBam.export(bam).toCsvLine() }).join("\n")
     }
 
-    static RoddyMergedBamQa getRoddyMergedBamQaAll(AbstractMergedBamFile bamFile) {
+    static RoddyMergedBamQa getRoddyMergedBamQaAll(AbstractBamFile bamFile) {
         List<RoddyMergedBamQa> qas = RoddyMergedBamQa.withCriteria {
             qualityAssessmentMergedPass {
-                eq("abstractMergedBamFile", bamFile)
+                eq("abstractBamFile", bamFile)
             }
             eq("chromosome", RoddyQualityAssessment.ALL)
         }
@@ -340,7 +340,7 @@ projects.each { Project project ->
         }
     } as List<DataFile>
 
-    List<AbstractMergedBamFile> bams = AbstractMergedBamFile.withCriteria {
+    List<AbstractBamFile> bams = AbstractBamFile.withCriteria {
         workPackage {
             sample {
                 individual {
@@ -348,7 +348,7 @@ projects.each { Project project ->
                 }
             }
         }
-    } as List<AbstractMergedBamFile>
+    } as List<AbstractBamFile>
 
     final Path outputDirectory = outputExportDirectory.resolve(project.name)
     ctx.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(outputDirectory, realm)

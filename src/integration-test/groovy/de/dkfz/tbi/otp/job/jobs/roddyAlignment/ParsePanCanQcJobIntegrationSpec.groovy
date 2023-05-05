@@ -76,8 +76,8 @@ class ParsePanCanQcJobIntegrationSpec extends Specification {
         roddyBamFile.coverage != null
         roddyBamFile.coverageWithN != null
         roddyBamFile.qualityAssessmentStatus == AbstractBamFile.QaProcessingStatus.FINISHED
-        roddyBamFile.qcTrafficLightStatus == AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED
-        roddyBamFile.qcTrafficLightStatus == AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED
+        roddyBamFile.qcTrafficLightStatus == AbstractBamFile.QcTrafficLightStatus.QC_PASSED
+        roddyBamFile.qcTrafficLightStatus == AbstractBamFile.QcTrafficLightStatus.QC_PASSED
 
         and:
         1 * job.processParameterObject >> roddyBamFile

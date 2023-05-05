@@ -67,7 +67,7 @@ class WithdrawAnalysisServiceSpec extends Specification implements ServiceUnitTe
     void "collectObjects, when called for #name bamFiles, then return analysis run on the bamFiles"() {
         given:
         List<BamFilePairAnalysis> analyses = createAnalysisList()
-        List<AbstractMergedBamFile> bamFiles = firstBamFile ? analyses*.sampleType1BamFile : analyses*.sampleType2BamFile
+        List<AbstractBamFile> bamFiles = firstBamFile ? analyses*.sampleType1BamFile : analyses*.sampleType2BamFile
 
         when:
         List<BamFilePairAnalysis> result = service.collectObjects(bamFiles)

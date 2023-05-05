@@ -49,7 +49,7 @@ class QcTrafficLightNotificationService {
     MailHelperService mailHelperService
     MessageSourceService messageSourceService
 
-    private String createResultsAreWarnedSubject(AbstractMergedBamFile bamFile, boolean toBeSent) {
+    private String createResultsAreWarnedSubject(AbstractBamFile bamFile, boolean toBeSent) {
         StringBuilder subject = new StringBuilder()
         if (toBeSent) {
             subject << 'TO BE SENT: '
@@ -70,7 +70,7 @@ class QcTrafficLightNotificationService {
         return subject.toString()
     }
 
-    private String createResultsAreWarnedMessage(AbstractMergedBamFile bamFile) {
+    private String createResultsAreWarnedMessage(AbstractBamFile bamFile) {
         return messageSourceService.createMessage("notification.template.alignment.qcTrafficWarningMessage", [
                 bamFile              : bamFile,
                 link                 : getAlignmentQualityOverviewLink(bamFile.project, bamFile.seqType),
@@ -80,10 +80,10 @@ class QcTrafficLightNotificationService {
         ])
     }
 
-    String buildContentForMultipleBamsWarningMessage(List<AbstractMergedBamFile> bamFiles) {
+    String buildContentForMultipleBamsWarningMessage(List<AbstractBamFile> bamFiles) {
         Project project = CollectionUtils.exactlyOneElement(bamFiles*.project.unique())
 
-        String bamListing = bamFiles.groupBy { it.seqType }.collect { SeqType seqType, List<AbstractMergedBamFile> bams ->
+        String bamListing = bamFiles.groupBy { it.seqType }.collect { SeqType seqType, List<AbstractBamFile> bams ->
             return buildSeqTypeBlockForNotification(seqType, bams)
         }.join("\n")
 
@@ -94,16 +94,16 @@ class QcTrafficLightNotificationService {
         ])
     }
 
-    private String buildSeqTypeBlockForNotification(SeqType seqType, List<AbstractMergedBamFile> bamFiles) {
+    private String buildSeqTypeBlockForNotification(SeqType seqType, List<AbstractBamFile> bamFiles) {
         Project project = CollectionUtils.exactlyOneElement(bamFiles*.project.unique())
         return """\
             |${seqType}
             |Quality overview: ${getAlignmentQualityOverviewLink(project, seqType)}
             |
-            |${bamFiles.collect { AbstractMergedBamFile bam -> buildBamFileForNotification(bam) }.join("\n\n")}""".stripMargin()
+            |${bamFiles.collect { AbstractBamFile bam -> buildBamFileForNotification(bam) }.join("\n\n")}""".stripMargin()
     }
 
-    private String buildBamFileForNotification(AbstractMergedBamFile bamFile, int indent = 4) {
+    private String buildBamFileForNotification(AbstractBamFile bamFile, int indent = 4) {
         String i = " " * indent
         return """\
             |${i}${bamFile.sample}
@@ -111,7 +111,7 @@ class QcTrafficLightNotificationService {
             |${i}Filesystem: ${bamFile.workDirectory}""".stripMargin()
     }
 
-    void informResultsAreWarned(AbstractMergedBamFile bamFile) {
+    void informResultsAreWarned(AbstractBamFile bamFile) {
         boolean projectNotification = bamFile.project.qcTrafficLightNotification
         boolean ticketNotification = otrsTicketService.findAllOtrsTickets(bamFile.containedSeqTracks).find {
             !it.finalNotificationSent && it.automaticNotification

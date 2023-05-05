@@ -54,8 +54,8 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
     SamplePair samplePair1
 
     ConfigPerProjectAndSeqType roddyConfig1
-    AbstractMergedBamFile bamFile1
-    AbstractMergedBamFile bamFile2
+    AbstractBamFile bamFile1
+    AbstractBamFile bamFile2
 
     SnvCallingService snvCallingService
     TestConfigService configService
@@ -207,10 +207,10 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
         given:
         setupData()
 
-        AbstractMergedBamFile bamFileInProgress = (number == 1) ? bamFile1 : bamFile2
+        AbstractBamFile bamFileInProgress = (number == 1) ? bamFile1 : bamFile2
 
         bamFileInProgress.md5sum = null
-        bamFileInProgress.fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.INPROGRESS
+        bamFileInProgress.fileOperationStatus = AbstractBamFile.FileOperationStatus.INPROGRESS
         assert bamFileInProgress.save(flush: true)
 
         expect:
@@ -225,7 +225,7 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
         given:
         setupData()
 
-        AbstractMergedBamFile problematicBamFile = (number == 1) ? bamFile1 : bamFile2
+        AbstractBamFile problematicBamFile = (number == 1) ? bamFile1 : bamFile2
         problematicBamFile.coverage = COVERAGE_TOO_LOW
         assert problematicBamFile.save(flush: true)
 
@@ -241,7 +241,7 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
         given:
         setupData()
 
-        AbstractMergedBamFile problematicBamFile = (number == 1) ? bamFile1 : bamFile2
+        AbstractBamFile problematicBamFile = (number == 1) ? bamFile1 : bamFile2
         ProcessingThresholds thresholds = CollectionUtils.atMostOneElement(ProcessingThresholds.findAllBySampleType(problematicBamFile.sampleType))
         thresholds.numberOfLanes = 5
         assert thresholds.save(flush: true)
@@ -285,7 +285,7 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
         setupData()
 
         Project otherProject = DomainFactory.createProject()
-        AbstractMergedBamFile problematicBamFile = (number == 1) ? bamFile1 : bamFile2
+        AbstractBamFile problematicBamFile = (number == 1) ? bamFile1 : bamFile2
         ProcessingThresholds thresholds = CollectionUtils.atMostOneElement(ProcessingThresholds.findAllBySampleType(problematicBamFile.sampleType))
         thresholds.project = otherProject
         assert thresholds.save(flush: true)
@@ -302,7 +302,7 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
         given:
         setupData()
 
-        AbstractMergedBamFile bamFile = (number == 1) ? bamFile1 : bamFile2
+        AbstractBamFile bamFile = (number == 1) ? bamFile1 : bamFile2
         ProcessingThresholds thresholds = CollectionUtils.atMostOneElement(ProcessingThresholds.findAllBySampleType(bamFile.sampleType))
         thresholds[property] = null
         if (property == "coverage") {
@@ -326,7 +326,7 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
         given:
         setupData()
 
-        AbstractMergedBamFile problematicBamFile = (number == 1) ? bamFile1 : bamFile2
+        AbstractBamFile problematicBamFile = (number == 1) ? bamFile1 : bamFile2
         problematicBamFile.withdrawn = true
         assert problematicBamFile.save(flush: true)
 
@@ -383,7 +383,7 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
         )
         snvCallingInstance.save(flush: true)
 
-        snvCallingService.abstractMergedBamFileService = Mock(AbstractMergedBamFileService) {
+        snvCallingService.abstractBamFileService = Mock(AbstractBamFileService) {
             2 * getExistingBamFilePath(_) >> TestCase.uniqueNonExistentPath
         }
 
@@ -402,7 +402,7 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
                 sampleType1BamFile: new RoddyBamFile(),
                 sampleType2BamFile: new RoddyBamFile(),
         ])
-        snvCallingService.abstractMergedBamFileService = Mock(AbstractMergedBamFileService) {
+        snvCallingService.abstractBamFileService = Mock(AbstractBamFileService) {
             2 * getExistingBamFilePath(_) >> TestCase.uniqueNonExistentPath >> { assert false }
         }
 

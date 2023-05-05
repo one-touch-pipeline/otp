@@ -29,38 +29,38 @@ import de.dkfz.tbi.otp.project.ProjectService
 import java.nio.file.Path
 
 @Transactional
-class ExternallyProcessedMergedBamFileService<T extends AbstractMergedBamFile> extends AbstractAbstractMergedBamFileService<ExternallyProcessedMergedBamFile> {
+class ExternallyProcessedBamFileService<T extends AbstractBamFile> extends AbstractAbstractBamFileService<ExternallyProcessedBamFile> {
 
-    AbstractMergedBamFileService abstractMergedBamFileService
+    AbstractBamFileService abstractBamFileService
     ProjectService projectService
 
-    Path getBamFile(ExternallyProcessedMergedBamFile bamFile) {
+    Path getBamFile(ExternallyProcessedBamFile bamFile) {
         return getImportFolder(bamFile).resolve(bamFile.bamFileName)
     }
 
-    Path getBaiFile(ExternallyProcessedMergedBamFile bamFile) {
+    Path getBaiFile(ExternallyProcessedBamFile bamFile) {
         return getImportFolder(bamFile).resolve(bamFile.baiFileName)
     }
 
-    Path getBamMaxReadLengthFile(ExternallyProcessedMergedBamFile bamFile) {
+    Path getBamMaxReadLengthFile(ExternallyProcessedBamFile bamFile) {
         return getImportFolder(bamFile).resolve("${bamFile.bamFileName}.maxReadLength")
     }
 
-    Path getNonOtpFolder(ExternallyProcessedMergedBamFile bamFile) {
-        return  abstractMergedBamFileService.getBaseDirectory(bamFile).resolve("nonOTP")
+    Path getNonOtpFolder(ExternallyProcessedBamFile bamFile) {
+        return  abstractBamFileService.getBaseDirectory(bamFile).resolve("nonOTP")
     }
 
-    Path getImportFolder(ExternallyProcessedMergedBamFile bamFile) {
+    Path getImportFolder(ExternallyProcessedBamFile bamFile) {
         return getNonOtpFolder(bamFile).resolve("analysisImport_${bamFile.referenceGenome}")
     }
 
     @Override
-    Path getFinalInsertSizeFile(ExternallyProcessedMergedBamFile bamFile) {
+    Path getFinalInsertSizeFile(ExternallyProcessedBamFile bamFile) {
         return getImportFolder(bamFile).resolve(bamFile.insertSizeFile)
     }
 
     @Override
-    protected Path getPathForFurtherProcessingNoCheck(ExternallyProcessedMergedBamFile bamFile) {
+    protected Path getPathForFurtherProcessingNoCheck(ExternallyProcessedBamFile bamFile) {
         return getBamFile(bamFile)
     }
 }

@@ -46,7 +46,7 @@ class ExecuteRoddyIndelJobSpec extends Specification implements DataTest {
     @Override
     Class[] getDomainClassesToMock() {
         return [
-                AbstractMergedBamFile,
+                AbstractBamFile,
                 BedFile,
                 DataFile,
                 FileType,
@@ -127,8 +127,8 @@ class ExecuteRoddyIndelJobSpec extends Specification implements DataTest {
 
         IndelCallingInstance indelCallingInstance = DomainFactory.createIndelCallingInstanceWithRoddyBamFiles()
 
-        AbstractMergedBamFile bamFileDisease = indelCallingInstance.sampleType1BamFile
-        AbstractMergedBamFile bamFileControl = indelCallingInstance.sampleType2BamFile
+        AbstractBamFile bamFileDisease = indelCallingInstance.sampleType1BamFile
+        AbstractBamFile bamFileControl = indelCallingInstance.sampleType2BamFile
 
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(bamFileDisease)
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(bamFileControl)
@@ -232,8 +232,8 @@ class ExecuteRoddyIndelJobSpec extends Specification implements DataTest {
         indelCallingInstance.containedSeqTracks*.seqType = seqType
         assert indelCallingInstance.containedSeqTracks*.save(flush: true)
 
-        AbstractMergedBamFile bamFileDisease = indelCallingInstance.sampleType1BamFile
-        AbstractMergedBamFile bamFileControl = indelCallingInstance.sampleType2BamFile
+        AbstractBamFile bamFileDisease = indelCallingInstance.sampleType1BamFile
+        AbstractBamFile bamFileControl = indelCallingInstance.sampleType2BamFile
 
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(bamFileDisease)
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(bamFileControl)

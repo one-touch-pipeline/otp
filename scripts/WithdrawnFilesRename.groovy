@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -33,11 +33,10 @@ import java.nio.file.Path
  * rename existing withdrawn result files in the project folder 
  *
  *
- * Withdrawn result files (ProcessedMergedBamFiles, RoddyBamFiles)
- * in the project folder are renamed by appending "-withdrawn",
+ * Withdrawn result files (BAM files) in the project folder are renamed by appending "-withdrawn",
  * for analysis instances complete directories are renamed.
  */
-AbstractMergedBamFileService abstractMergedBamFileService = ctx.abstractMergedBamFileService
+AbstractBamFileService abstractBamFileService = ctx.abstractBamFileService
 BamFileAnalysisServiceFactoryService bamFileAnalysisServiceFactoryService = ctx.bamFileAnalysisServiceFactoryService
 ConfigService configService = ctx.configService
 FileSystemService fileSystemService = ctx.fileSystemService
@@ -51,9 +50,9 @@ fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(generated_script_
 List<Path> renameFiles = []
 
 MergingWorkPackage.list().each { MergingWorkPackage mergingWorkPackage ->
-    AbstractMergedBamFile bamFile = mergingWorkPackage.bamFileInProjectFolder
+    AbstractBamFile bamFile = mergingWorkPackage.bamFileInProjectFolder
     if (bamFile && bamFile.withdrawn) {
-        final Path file = abstractMergedBamFileService.getBaseDirectory(bamFile).resolve(bamFile.bamFileName)
+        final Path file = abstractBamFileService.getBaseDirectory(bamFile).resolve(bamFile.bamFileName)
         renameFiles.add(file)
 
         List<BamFilePairAnalysis> analysisInstances = findAnalysisInstanceForBamFile(bamFile)
@@ -73,7 +72,7 @@ generated_script_to_run_manually.withPrintWriter { writer ->
     }
 }
 
-List<BamFilePairAnalysis> findAnalysisInstanceForBamFile(AbstractMergedBamFile bamFile) {
+List<BamFilePairAnalysis> findAnalysisInstanceForBamFile(AbstractBamFile bamFile) {
     return BamFilePairAnalysis.createCriteria().list {
         or {
             eq('sampleType1BamFile', bamFile)

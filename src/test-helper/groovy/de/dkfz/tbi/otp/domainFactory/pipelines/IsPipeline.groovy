@@ -77,15 +77,15 @@ trait IsPipeline implements DomainFactoryCore {
                 workPackage        : workPackage,
                 md5sum             : {
                     (!properties.containsKey('fileOperationStatus') ||
-                            properties.fileOperationStatus == AbstractMergedBamFile.FileOperationStatus.PROCESSED) ? HelperUtils.randomMd5sum : null
+                            properties.fileOperationStatus == AbstractBamFile.FileOperationStatus.PROCESSED) ? HelperUtils.randomMd5sum : null
                 },
-                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
+                fileOperationStatus: AbstractBamFile.FileOperationStatus.PROCESSED,
                 fileSize           : 10000,
                 comment            : {
                     [
-                            AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED,
-                            AbstractMergedBamFile.QcTrafficLightStatus.ACCEPTED,
-                            AbstractMergedBamFile.QcTrafficLightStatus.REJECTED,
+                            AbstractBamFile.QcTrafficLightStatus.BLOCKED,
+                            AbstractBamFile.QcTrafficLightStatus.ACCEPTED,
+                            AbstractBamFile.QcTrafficLightStatus.REJECTED,
                     ].contains(properties.qcTrafficLightStatus) ? DomainFactory.createComment() : null
                 },
         ]

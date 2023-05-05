@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -36,29 +36,43 @@ class AbstractBamFileSpec extends Specification implements DataTest {
     @Override
     Class[] getDomainClassesToMock() {
         [
-                FileType,
                 DataFile,
+                FileType,
+                MergingWorkPackage,
                 MockAbstractBamFile,
         ]
     }
 
-    void testSave() {
+    void "test save"() {
         given:
-        AbstractBamFile bamFile = new MockAbstractBamFile()
+        AbstractBamFile bamFile = new MockAbstractBamFile(numberOfMergedLanes: 1, workPackage: new MergingWorkPackage())
 
         expect:
         bamFile.validate()
         bamFile.save(flush: true)
     }
 
-    void testSaveCoverageNotNull() {
+    void "test save, when coverage is not null"() {
         given:
-        AbstractBamFile bamFile = new MockAbstractBamFile()
+        AbstractBamFile bamFile = new MockAbstractBamFile(numberOfMergedLanes: 1, workPackage: new MergingWorkPackage())
         bamFile.coverage = 30.0
 
         expect:
         bamFile.validate()
         bamFile.save(flush: true)
+    }
+
+    void "validate, if dateFromFileSystem is null, then validation should pass"() {
+        given:
+        AbstractBamFile bamFile = new MockAbstractBamFile(numberOfMergedLanes: 1, workPackage: new MergingWorkPackage())
+
+        when:
+        // dateFromFileSystem is nullable
+        bamFile.dateFromFileSystem = null
+        bamFile.validate()
+
+        then:
+        !bamFile.errors.hasErrors()
     }
 }
 
@@ -67,9 +81,24 @@ class MockAbstractBamFile extends AbstractBamFile implements DomainClass, GormEn
 
     final MergingWorkPackage mergingWorkPackage = null
     final AbstractQualityAssessment qualityAssessment = null
+    final String bamFileName = null
+    final String baiFileName = null
+    final AlignmentConfig alignmentConfig = null
+    final File finalInsertSizeFile = null
+    final Integer maximalReadLength = null
 
     @Override
     Set<SeqTrack> getContainedSeqTracks() {
         return [] as Set
+    }
+
+    @Override
+    boolean isMostRecentBamFile() {
+        return false
+    }
+
+    @Override
+    protected File getPathForFurtherProcessingNoCheck() {
+        return null
     }
 }

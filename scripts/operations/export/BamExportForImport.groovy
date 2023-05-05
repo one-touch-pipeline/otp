@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFileService
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFileService
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.infrastructure.FileService
@@ -116,7 +116,7 @@ class BamExportImport {
         Map<String, String> metadata
     }
 
-    AbstractMergedBamFileService abstractMergedBamFileService
+    AbstractBamFileService abstractBamFileService
     FileService fileService
     FileSystemService fileSystemService
     RoddyBamFileService roddyBamFileService
@@ -179,7 +179,7 @@ class BamExportImport {
 
     private String finalInsertSizeFile(RoddyBamFile bamFile) {
         Path absoluteInsertSizePath = roddyBamFileService.getFinalInsertSizeFile(bamFile)
-        Path bamFileDirectory = abstractMergedBamFileService.getBaseDirectory(bamFile)
+        Path bamFileDirectory = abstractBamFileService.getBaseDirectory(bamFile)
         Path relativeInsertSizePath = bamFileDirectory.relativize(absoluteInsertSizePath)
         return relativeInsertSizePath.toString()
     }
@@ -360,7 +360,7 @@ class DisplaySamples {
 
 class HandleInputTypes {
 
-    AbstractMergedBamFileService abstractMergedBamFileService
+    AbstractBamFileService abstractBamFileService
     FileService fileService
     FileSystemService fileSystemService
     RoddyBamFileService roddyBamFileService
@@ -391,7 +391,7 @@ class HandleInputTypes {
 
     private void handleExport(List<String> input, String fileName, boolean overwriteExisting) {
         BamExportImport export = new BamExportImport([
-                abstractMergedBamFileService: abstractMergedBamFileService,
+                abstractBamFileService: abstractBamFileService,
                 fileService                 : fileService,
                 fileSystemService           : fileSystemService,
                 roddyBamFileService         : roddyBamFileService,
@@ -424,7 +424,7 @@ class HandleInputTypes {
 }
 
 HandleInputTypes export = new HandleInputTypes([
-        abstractMergedBamFileService: ctx.abstractMergedBamFileService,
+        abstractBamFileService: ctx.abstractBamFileService,
         fileService                 : ctx.fileService,
         fileSystemService           : ctx.fileSystemService,
         roddyBamFileService         : ctx.roddyBamFileService,

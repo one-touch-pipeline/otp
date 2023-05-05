@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,16 +29,16 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 
-class AbstractMergedBamFileServiceFactoryServiceSpec extends Specification implements ServiceUnitTest<AbstractMergedBamFileServiceFactoryService>, DataTest {
+class AbstractBamFileServiceFactoryServiceSpec extends Specification implements ServiceUnitTest<AbstractBamFileServiceFactoryService>, DataTest {
 
-    static ExternallyProcessedMergedBamFileService externallyProcessedMergedBamFileService = new ExternallyProcessedMergedBamFileService()
+    static ExternallyProcessedBamFileService externallyProcessedBamFileService = new ExternallyProcessedBamFileService()
     static RnaRoddyBamFileService rnaRoddyBamFileService = new RnaRoddyBamFileService()
     static RoddyBamFileService roddyBamFileService = new RoddyBamFileService()
     static SingleCellBamFileService singleCellBamFileService = new SingleCellBamFileService()
 
     void "test getService"() {
         given:
-        service.externallyProcessedMergedBamFileService = externallyProcessedMergedBamFileService
+        service.externallyProcessedBamFileService = externallyProcessedBamFileService
         service.rnaRoddyBamFileService = rnaRoddyBamFileService
         service.roddyBamFileService = roddyBamFileService
         service.singleCellBamFileService = singleCellBamFileService
@@ -48,7 +48,7 @@ class AbstractMergedBamFileServiceFactoryServiceSpec extends Specification imple
 
         where:
         bamFile                                || result
-        new ExternallyProcessedMergedBamFile() || externallyProcessedMergedBamFileService
+        new ExternallyProcessedBamFile() || externallyProcessedBamFileService
         new RnaRoddyBamFile()                  || rnaRoddyBamFileService
         new RoddyBamFile()                     || roddyBamFileService
         new SingleCellBamFile()                || singleCellBamFileService

@@ -22,7 +22,7 @@
 
 package operations.showData
 
-import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedMergedBamFile
+import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedBamFile
 
 /**
  *  This script provides details of all the External BAM Files related to a Project
@@ -45,7 +45,7 @@ assert projectName: 'Please input project name'
 
 List<String> table = []
 
-List<ExternallyProcessedMergedBamFile> bams = ExternallyProcessedMergedBamFile.createCriteria().listDistinct {
+List<ExternallyProcessedBamFile> bams = ExternallyProcessedBamFile.createCriteria().listDistinct {
     workPackage {
         sample {
             individual {
@@ -71,7 +71,7 @@ if (bams.size()) {
             "SourcePath",
     ].join('\t')
 
-    bams.each { ExternallyProcessedMergedBamFile b ->
+    bams.each { ExternallyProcessedBamFile b ->
         table << [
                 b.fileName,
                 b.workPackage.individual.toString(),

@@ -119,7 +119,7 @@ class WgbsValidationJobSpec extends Specification implements WorkflowSystemDomai
         final WgbsValidationJob job = new WgbsValidationJob()
         final RoddyBamFile bamFile = createRoddyBamFile(RoddyBamFile)
         RoddyBamFileService roddyBamFileService = new RoddyBamFileService()
-        roddyBamFileService.abstractMergedBamFileService = Mock(AbstractMergedBamFileService) {
+        roddyBamFileService.abstractBamFileService = Mock(AbstractBamFileService) {
             getBaseDirectory(_) >> Paths.get("/")
         }
 

@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.Realm
@@ -173,7 +173,7 @@ boolean projectHasDataDependencies(Project project) {
         }
     }
 
-    boolean bamsFound = AbstractMergedBamFile.withCriteria {
+    boolean bamsFound = AbstractBamFile.withCriteria {
         workPackage {
             sample {
                 individual {

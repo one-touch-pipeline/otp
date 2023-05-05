@@ -56,7 +56,7 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
                 Sample,
                 Individual,
                 SeqTrack,
-                ExternallyProcessedMergedBamFile,
+                ExternallyProcessedBamFile,
                 RoddyBamFile,
                 Comment,
                 BamFilePairAnalysis,

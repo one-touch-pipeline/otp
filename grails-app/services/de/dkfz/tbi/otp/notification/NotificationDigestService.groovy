@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -43,13 +43,13 @@ class NotificationDigestService {
     MessageSourceService messageSourceService
     MailHelperService mailHelperService
     IlseSubmissionService ilseSubmissionService
-    AbstractMergedBamFileService abstractMergedBamFileService
+    AbstractBamFileService abstractBamFileService
     OtrsTicketService otrsTicketService
 
     List<PreparedNotification> prepareNotifications(NotificationCommand cmd) {
         return otrsTicketService.findAllSeqTracks(cmd.otrsTicket).groupBy { it.project }.collect { Project project, List<SeqTrack> seqTracksOfProject ->
             ProcessingStatus status = notificationCreator.getProcessingStatus(seqTracksOfProject)
-            List<AbstractMergedBamFile> blockedBams = abstractMergedBamFileService.getActiveBlockedBamsContainingSeqTracks(seqTracksOfProject)
+            List<AbstractBamFile> blockedBams = abstractBamFileService.getActiveBlockedBamsContainingSeqTracks(seqTracksOfProject)
             return new PreparedNotification(
                     project                 : project,
                     seqTracks               : seqTracksOfProject,
@@ -67,7 +67,7 @@ class NotificationDigestService {
         return "[${otrsTicketService.getPrefixedTicketNumber(otrsTicket)}]${ilseIdentifier} - ${project.name} - OTP processing completed"
     }
 
-    String buildNotificationDigest(NotificationCommand cmd, ProcessingStatus status, List<AbstractMergedBamFile> bams) {
+    String buildNotificationDigest(NotificationCommand cmd, ProcessingStatus status, List<AbstractBamFile> bams) {
         List<String> content = []
         List<ProcessingStep> processingSteps = cmd.steps.findAll()
         if (processingSteps) {

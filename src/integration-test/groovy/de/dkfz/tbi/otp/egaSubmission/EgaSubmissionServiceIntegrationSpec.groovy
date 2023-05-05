@@ -115,11 +115,11 @@ class EgaSubmissionServiceIntegrationSpec extends Specification implements EgaSu
 
         where:
         withBamFile | withdrawn | bamFileInProjectFolderSet | status                                               || result
-        true        | false     | true                      | AbstractMergedBamFile.FileOperationStatus.PROCESSED  || true
-        false       | false     | true                      | AbstractMergedBamFile.FileOperationStatus.PROCESSED  || false
-        true        | true      | true                      | AbstractMergedBamFile.FileOperationStatus.PROCESSED  || true
-        true        | false     | true                      | AbstractMergedBamFile.FileOperationStatus.INPROGRESS || false
-        true        | false     | false                     | AbstractMergedBamFile.FileOperationStatus.PROCESSED  || false
+        true        | false     | true                      | AbstractBamFile.FileOperationStatus.PROCESSED  || true
+        false       | false     | true                      | AbstractBamFile.FileOperationStatus.PROCESSED  || false
+        true        | true      | true                      | AbstractBamFile.FileOperationStatus.PROCESSED  || true
+        true        | false     | true                      | AbstractBamFile.FileOperationStatus.INPROGRESS || false
+        true        | false     | false                     | AbstractBamFile.FileOperationStatus.PROCESSED  || false
     }
 
     void "getDataFilesAndAlias, when already DataFiles are connected with the submission, then return these"() {
@@ -296,12 +296,12 @@ class EgaSubmissionServiceIntegrationSpec extends Specification implements EgaSu
 
         where:
         name                                   | bamFileExist | useBamFile | withdrawn | bamFileInProjectFolderSet | fileOperationStatus                                  || returnedValue
-        'all fine'                             | true         | true       | false     | true                      | AbstractMergedBamFile.FileOperationStatus.PROCESSED  || true
-        'no bam file'                          | false        | true       | false     | true                      | AbstractMergedBamFile.FileOperationStatus.PROCESSED  || false
-        'useBamFile is false'                  | true         | false      | false     | true                      | AbstractMergedBamFile.FileOperationStatus.PROCESSED  || false
-        'bam file is withdrawn'                | true         | true       | true      | true                      | AbstractMergedBamFile.FileOperationStatus.PROCESSED  || true
-        'bamFileInProjectFolder is not set'    | true         | true       | false     | false                     | AbstractMergedBamFile.FileOperationStatus.PROCESSED  || false
-        'fileOperationStatus is not PROCESSED' | true         | true       | false     | true                      | AbstractMergedBamFile.FileOperationStatus.INPROGRESS || false
+        'all fine'                             | true         | true       | false     | true                      | AbstractBamFile.FileOperationStatus.PROCESSED  || true
+        'no bam file'                          | false        | true       | false     | true                      | AbstractBamFile.FileOperationStatus.PROCESSED  || false
+        'useBamFile is false'                  | true         | false      | false     | true                      | AbstractBamFile.FileOperationStatus.PROCESSED  || false
+        'bam file is withdrawn'                | true         | true       | true      | true                      | AbstractBamFile.FileOperationStatus.PROCESSED  || true
+        'bamFileInProjectFolder is not set'    | true         | true       | false     | false                     | AbstractBamFile.FileOperationStatus.PROCESSED  || false
+        'fileOperationStatus is not PROCESSED' | true         | true       | false     | true                      | AbstractBamFile.FileOperationStatus.INPROGRESS || false
     }
 
     void "test create bam file submission objects"() {

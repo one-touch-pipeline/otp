@@ -102,21 +102,21 @@ class RnaRoddyAlignmentChecker extends AbstractRoddyAlignmentChecker {
 
     // delete this method when the RNA workflow is migrated to the new system
     @Override
-    List<AbstractMergedBamFile> getBamFileForMergingWorkPackage(List<MergingWorkPackage> mergingWorkPackages, boolean showFinished, boolean showWithdrawn) {
+    List<AbstractBamFile> getBamFileForMergingWorkPackage(List<MergingWorkPackage> mergingWorkPackages, boolean showFinished, boolean showWithdrawn) {
         if (!mergingWorkPackages) {
             return []
         }
 
         String filterFinished = showFinished ? '' :
-                "and bamFile.fileOperationStatus != '${AbstractMergedBamFile.FileOperationStatus.PROCESSED}'"
+                "and bamFile.fileOperationStatus != '${AbstractBamFile.FileOperationStatus.PROCESSED}'"
         String filterWithdrawnFinished = showWithdrawn ? '' :
                 "and bamFile.withdrawn = false"
 
-        return AbstractMergedBamFile.executeQuery("""
+        return AbstractBamFile.executeQuery("""
                     select
                         bamFile
                     from
-                        AbstractMergedBamFile bamFile
+                        AbstractBamFile bamFile
                     where
                         bamFile.workPackage in (:mergingWorkPackage)
                         ${filterFinished}
@@ -127,7 +127,7 @@ class RnaRoddyAlignmentChecker extends AbstractRoddyAlignmentChecker {
                             select
                                 max(bamFile1.id)
                             from
-                                AbstractMergedBamFile bamFile1
+                                AbstractBamFile bamFile1
                             where
                                 bamFile1.workPackage = bamFile.workPackage
                         )

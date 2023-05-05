@@ -27,7 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.dataprocessing.AnalysisProcessingStates
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingService
@@ -64,8 +64,8 @@ class ExecuteRoddySnvJob extends AbstractExecutePanCanJob<RoddySnvCallingInstanc
 
         snvCallingService.validateInputBamFiles(roddySnvCallingInstance)
 
-        AbstractMergedBamFile bamFileDisease = roddySnvCallingInstance.sampleType1BamFile
-        AbstractMergedBamFile bamFileControl = roddySnvCallingInstance.sampleType2BamFile
+        AbstractBamFile bamFileDisease = roddySnvCallingInstance.sampleType1BamFile
+        AbstractBamFile bamFileControl = roddySnvCallingInstance.sampleType2BamFile
         File bamFileDiseasePath = bamFileDisease.pathForFurtherProcessing
         File bamFileControlPath = bamFileControl.pathForFurtherProcessing
 

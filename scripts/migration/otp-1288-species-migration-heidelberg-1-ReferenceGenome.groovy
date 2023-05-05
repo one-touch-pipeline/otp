@@ -21,7 +21,7 @@
  */
 package migration
 
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.utils.CollectionUtils
@@ -88,7 +88,7 @@ boolean dryRun = true
 // script area
 assert batchSize > 1
 
-Set<Long> individualIds = AbstractMergedBamFile.createCriteria().listDistinct {
+Set<Long> individualIds = AbstractBamFile.createCriteria().listDistinct {
     projections {
         workPackage {
             sample {
@@ -174,7 +174,7 @@ Map<String, Map<String, SpeciesWithStrain>> createMetadataSpeciesMap(String mapp
     }
 }
 
-String createString(Object entity, boolean isSample, List<SpeciesWithStrain> speciesWithStrains, List<String> referenceGenomes, List<AbstractMergedBamFile> bamFiles) {
+String createString(Object entity, boolean isSample, List<SpeciesWithStrain> speciesWithStrains, List<String> referenceGenomes, List<AbstractBamFile> bamFiles) {
     List<String> value = [
             "Could not set ${isSample ? 'mixedin' : 'main'} species for ${isSample ? 'sample' : 'individual'} ${entity}, as the data has a different species"
     ]
@@ -213,36 +213,36 @@ String createString(Object entity, boolean isSample, List<SpeciesWithStrain> spe
     return value.join('\n')
 }
 
-void updateSpecies(List<AbstractMergedBamFile> abstractMergedBamFiles, Map<String, Map<String, SpeciesWithStrain>> metadataSpeciesMap,
+void updateSpecies(List<AbstractBamFile> abstractBamFiles, Map<String, Map<String, SpeciesWithStrain>> metadataSpeciesMap,
                    List<String> individualMismatch, List<String> sampleMismatch, List<String> individualsWithProblems = []) {
-    abstractMergedBamFiles.groupBy {
+    abstractBamFiles.groupBy {
         it.individual
-    }.each { Individual individual, List<AbstractMergedBamFile> abstractMergedBamFilesPerIndividual ->
-        List<String> referenceGenomeNamesForIndividual = abstractMergedBamFilesPerIndividual*.referenceGenome*.name.unique()
+    }.each { Individual individual, List<AbstractBamFile> abstractBamFilesPerIndividual ->
+        List<String> referenceGenomeNamesForIndividual = abstractBamFilesPerIndividual*.referenceGenome*.name.unique()
         List<SpeciesWithStrain> speciesForIndividual = referenceGenomeNamesForIndividual.collect {
             Map<String, SpeciesWithStrain> speciesEntry = metadataSpeciesMap[it]
             assert speciesEntry: "Could not found species entry for ${it}"
             speciesEntry.main
         }.unique()
         if (speciesForIndividual.size() > 1) {
-            individualMismatch << createString(individual, false, speciesForIndividual, referenceGenomeNamesForIndividual, abstractMergedBamFilesPerIndividual)
+            individualMismatch << createString(individual, false, speciesForIndividual, referenceGenomeNamesForIndividual, abstractBamFilesPerIndividual)
             individualsWithProblems << individual.pid
             return
         }
         individual.species = speciesForIndividual[0]
         individual.save(flush: false)
 
-        abstractMergedBamFilesPerIndividual.groupBy {
+        abstractBamFilesPerIndividual.groupBy {
             it.sample
-        }.each { Sample sample, List<AbstractMergedBamFile> abstractMergedBamFilesPerSample ->
-            List<String> referenceGenomeNamesForSample = abstractMergedBamFilesPerSample*.referenceGenome*.name.unique()
+        }.each { Sample sample, List<AbstractBamFile> abstractBamFilesPerSample ->
+            List<String> referenceGenomeNamesForSample = abstractBamFilesPerSample*.referenceGenome*.name.unique()
             List<SpeciesWithStrain> speciesForSample = referenceGenomeNamesForSample.collect {
                 Map<String, SpeciesWithStrain> speciesEntry = metadataSpeciesMap[it]
                 assert speciesEntry: "Could not found species entry for ${it}"
                 speciesEntry.mixedin
             }.unique()
             if (speciesForSample.size() > 1) {
-                sampleMismatch << createString(sample, true, speciesForSample, referenceGenomeNamesForSample, abstractMergedBamFilesPerSample)
+                sampleMismatch << createString(sample, true, speciesForSample, referenceGenomeNamesForSample, abstractBamFilesPerSample)
                 individualsWithProblems << individual.pid
                 return
             }
@@ -261,7 +261,7 @@ withPool(numCores, {
     //loop through each batch and process it
     listOfIndividualIdLists.makeConcurrent().each { List<Long> individualIdsBatch ->
         TransactionUtils.withNewTransaction { session ->
-            List<AbstractMergedBamFile> abstractMergedBamFiles = AbstractMergedBamFile.withCriteria {
+            List<AbstractBamFile> abstractBamFiles = AbstractBamFile.withCriteria {
                 workPackage {
                     sample {
                         individual {
@@ -270,11 +270,11 @@ withPool(numCores, {
                     }
                 }
                 eq('withdrawn', false)
-            }.findAll { AbstractMergedBamFile abstractMergedBamFile ->
-                abstractMergedBamFile.isMostRecentBamFile()
+            }.findAll { AbstractBamFile abstractBamFile ->
+                abstractBamFile.isMostRecentBamFile()
             }
             Map<String, Map<String, SpeciesWithStrain>> metadataSpeciesMap = createMetadataSpeciesMap(mappingReferenceGenomeSpecies)
-            updateSpecies(abstractMergedBamFiles, metadataSpeciesMap, individualMismatch, sampleMismatch, individualsWithProblems)
+            updateSpecies(abstractBamFiles, metadataSpeciesMap, individualMismatch, sampleMismatch, individualsWithProblems)
             //flush changes to the database
             if (!dryRun) {
                 session.flush()

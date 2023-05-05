@@ -25,7 +25,7 @@ import grails.gorm.transactions.Transactional
 import groovy.transform.CompileDynamic
 import org.springframework.security.access.prepost.PreAuthorize
 
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
 import de.dkfz.tbi.otp.ngsdata.DataFile
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
@@ -53,7 +53,7 @@ class WithdrawDisplayDomainService {
         ].join('\t')
     }
 
-    String bamFileInfo(AbstractMergedBamFile bamFile) {
+    String bamFileInfo(AbstractBamFile bamFile) {
         return [
                 bamFile.id,
                 bamFile.project,

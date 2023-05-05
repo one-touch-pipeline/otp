@@ -64,7 +64,7 @@ class PanCancerFinishJobSpec extends Specification implements DataTest, Workflow
         WorkflowStep workflowStep = createWorkflowStep()
         MergingWorkPackage workPackage = createMergingWorkPackage(bamFileInProjectFolder: null)
         RoddyBamFile roddyBamFile = createBamFile([
-                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.INPROGRESS,
+                fileOperationStatus: AbstractBamFile.FileOperationStatus.INPROGRESS,
                 workPackage        : workPackage,
         ])
 
@@ -79,12 +79,12 @@ class PanCancerFinishJobSpec extends Specification implements DataTest, Workflow
             1 * extractMd5Sum(_) >> md5Sum
         }
 
-        job.abstractMergedBamFileService = Mock(AbstractMergedBamFileService) {
+        job.abstractBamFileService = Mock(AbstractBamFileService) {
             1 * updateSamplePairStatusToNeedProcessing(roddyBamFile)
         }
 
         job.roddyBamFileService = new RoddyBamFileService([
-                abstractMergedBamFileService: new AbstractMergedBamFileService([
+                abstractBamFileService: new AbstractBamFileService([
                         individualService: new IndividualService([
                                 projectService: new ProjectService([
                                         fileSystemService: new TestFileSystemService(),
@@ -102,7 +102,7 @@ class PanCancerFinishJobSpec extends Specification implements DataTest, Workflow
 
         then:
         RoddyBamFile bamFileAfterUpdate = RoddyBamFile.findAll().first()
-        bamFileAfterUpdate.fileOperationStatus == AbstractMergedBamFile.FileOperationStatus.PROCESSED
+        bamFileAfterUpdate.fileOperationStatus == AbstractBamFile.FileOperationStatus.PROCESSED
         bamFileAfterUpdate.workPackage.bamFileInProjectFolder == bamFileAfterUpdate
         bamFileAfterUpdate.md5sum == md5Sum
         bamFileAfterUpdate.fileSize == Files.size(testWorkBamFile)

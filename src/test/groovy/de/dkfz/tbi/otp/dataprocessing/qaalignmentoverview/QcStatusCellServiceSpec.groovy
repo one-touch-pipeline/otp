@@ -26,7 +26,7 @@ import grails.testing.services.ServiceUnitTest
 import spock.lang.Specification
 import spock.lang.Unroll
 
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.qcTrafficLight.TableCellValue
 import de.dkfz.tbi.otp.utils.MessageSourceService
 
@@ -56,13 +56,13 @@ class QcStatusCellServiceSpec extends Specification implements ServiceUnitTest<Q
 
         where:
         status                                                   | icon                        || naCount
-        AbstractMergedBamFile.QcTrafficLightStatus.NOT_RUN_YET   | TableCellValue.Icon.OKAY    || 0
-        AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED     | TableCellValue.Icon.OKAY    || 0
-        AbstractMergedBamFile.QcTrafficLightStatus.ACCEPTED      | TableCellValue.Icon.OKAY    || 0
-        AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED       | TableCellValue.Icon.WARNING || 0
-        AbstractMergedBamFile.QcTrafficLightStatus.REJECTED      | TableCellValue.Icon.ERROR   || 0
-        AbstractMergedBamFile.QcTrafficLightStatus.AUTO_ACCEPTED | TableCellValue.Icon.OKAY    || 0
-        AbstractMergedBamFile.QcTrafficLightStatus.WARNING       | TableCellValue.Icon.WARNING || 0
+        AbstractBamFile.QcTrafficLightStatus.NOT_RUN_YET   | TableCellValue.Icon.OKAY    || 0
+        AbstractBamFile.QcTrafficLightStatus.QC_PASSED     | TableCellValue.Icon.OKAY    || 0
+        AbstractBamFile.QcTrafficLightStatus.ACCEPTED      | TableCellValue.Icon.OKAY    || 0
+        AbstractBamFile.QcTrafficLightStatus.BLOCKED       | TableCellValue.Icon.WARNING || 0
+        AbstractBamFile.QcTrafficLightStatus.REJECTED      | TableCellValue.Icon.ERROR   || 0
+        AbstractBamFile.QcTrafficLightStatus.AUTO_ACCEPTED | TableCellValue.Icon.OKAY    || 0
+        AbstractBamFile.QcTrafficLightStatus.WARNING       | TableCellValue.Icon.WARNING || 0
     }
 
     void "generateQcStatusCell, when execute for status UNCHECKED, then generate cell with icon NA"() {
@@ -70,7 +70,7 @@ class QcStatusCellServiceSpec extends Specification implements ServiceUnitTest<Q
             1 * createMessage("alignment.quality.not.available") >> 'NA'
             0 * _
         }
-        AbstractMergedBamFile.QcTrafficLightStatus status = AbstractMergedBamFile.QcTrafficLightStatus.UNCHECKED
+        AbstractBamFile.QcTrafficLightStatus status = AbstractBamFile.QcTrafficLightStatus.UNCHECKED
 
         Map<String, ?> qcStatusMap = [
                 qcStatus : status,

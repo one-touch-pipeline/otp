@@ -29,7 +29,6 @@ import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerQualityAssessment
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerService
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
@@ -95,8 +94,8 @@ class ParseCellRangerQcJobIntegrationSpec extends Specification implements CellR
 
         where:
         estimatedNumberOfCells || resultStatus
-        5.0                    || AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED
-        25.0                   || AbstractMergedBamFile.QcTrafficLightStatus.WARNING
+        5.0                    || AbstractBamFile.QcTrafficLightStatus.QC_PASSED
+        25.0                   || AbstractBamFile.QcTrafficLightStatus.WARNING
     }
 
     void "ParseCellRangerQcJob sets qualityAssessmentStatus of BamFile to FINISHED"() {

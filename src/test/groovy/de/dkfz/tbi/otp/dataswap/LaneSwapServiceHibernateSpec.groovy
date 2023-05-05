@@ -26,7 +26,7 @@ import grails.testing.services.ServiceUnitTest
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.dataprocessing.ExternalMergingWorkPackage
-import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedMergedBamFile
+import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedBamFile
 import de.dkfz.tbi.otp.dataswap.data.LaneSwapData
 import de.dkfz.tbi.otp.domainFactory.pipelines.externalBam.ExternalBamFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
@@ -48,7 +48,7 @@ class LaneSwapServiceHibernateSpec extends HibernateSpec implements ServiceUnitT
                 Sample,
                 Individual,
                 SeqTrack,
-                ExternallyProcessedMergedBamFile,
+                ExternallyProcessedBamFile,
                 ExternalMergingWorkPackage,
         ]
     }
@@ -85,16 +85,16 @@ class LaneSwapServiceHibernateSpec extends HibernateSpec implements ServiceUnitT
         Sample.count
         Individual.count
         seqTrackRemain && SeqTrack.count || !SeqTrack.count
-        bamRemain && ExternallyProcessedMergedBamFile.count || !ExternallyProcessedMergedBamFile.count
+        bamRemain && ExternallyProcessedBamFile.count || !ExternallyProcessedBamFile.count
 
         where:
         bamRemain | seqTrackRemain | title
-        true      | false          | "ExternallyProcessedMergedBamFiles"
+        true      | false          | "ExternallyProcessedBamFiles"
         false     | true           | "SeqTracks"
-        true      | true           | "SeqTracks or ExternallyProcessedMergedBamFiles"
+        true      | true           | "SeqTracks or ExternallyProcessedBamFiles"
     }
 
-    void "cleanupLeftOvers, when Sample has no connected SeqTracks or ExternallyProcessedMergedBamFiles it should delete sample"() {
+    void "cleanupLeftOvers, when Sample has no connected SeqTracks or ExternallyProcessedBamFiles it should delete sample"() {
         given:
         service.fileService = Mock(FileService)
 
@@ -124,7 +124,7 @@ class LaneSwapServiceHibernateSpec extends HibernateSpec implements ServiceUnitT
         !bashScriptSnippet.contains("rm -rf ${vbpPath}\n")
     }
 
-    void "cleanupLeftOvers, when Sample has no connected SeqTracks or ExternallyProcessedMergedBamFiles and Individual has no more samples it should delete sample and individual"() {
+    void "cleanupLeftOvers, when Sample has no connected SeqTracks or ExternallyProcessedBamFiles and Individual has no more samples it should delete sample and individual"() {
         given:
         service.fileService = Mock(FileService)
 

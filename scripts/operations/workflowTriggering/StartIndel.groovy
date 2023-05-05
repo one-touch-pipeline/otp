@@ -56,8 +56,8 @@ SamplePair.withTransaction {
 
         ConfigPerProjectAndSeqType config = roddyIndelCallingStartJob.getConfig(samplePair)
 
-        AbstractMergedBamFile sampleType1BamFile = samplePair.mergingWorkPackage1.processableBamFileInProjectFolder
-        AbstractMergedBamFile sampleType2BamFile = samplePair.mergingWorkPackage2.processableBamFileInProjectFolder
+        AbstractBamFile sampleType1BamFile = samplePair.mergingWorkPackage1.processableBamFileInProjectFolder
+        AbstractBamFile sampleType2BamFile = samplePair.mergingWorkPackage2.processableBamFileInProjectFolder
 
         BamFilePairAnalysis analysis = new IndelCallingInstance(
                 samplePair: samplePair,

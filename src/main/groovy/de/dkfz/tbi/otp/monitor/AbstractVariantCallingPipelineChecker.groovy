@@ -189,7 +189,7 @@ abstract class AbstractVariantCallingPipelineChecker extends PipelinesChecker<Sa
                             select
                                 max(bamFile.id)
                             from
-                                AbstractMergedBamFile bamFile
+                                AbstractBamFile bamFile
                             where
                                 bamFile.workPackage = bamFile${number}.workPackage
                         )
@@ -206,8 +206,8 @@ abstract class AbstractVariantCallingPipelineChecker extends PipelinesChecker<Sa
                     )
                 from
                     SamplePair samplePair,
-                    AbstractMergedBamFile bamFile1,
-                    AbstractMergedBamFile bamFile2
+                    AbstractBamFile bamFile1,
+                    AbstractBamFile bamFile2
                 where
                     samplePair in (:samplePair)
                     and ${connectBamFile('1')}
@@ -297,11 +297,11 @@ abstract class AbstractVariantCallingPipelineChecker extends PipelinesChecker<Sa
                 disease: samplePair.mergingWorkPackage1,
                 control: samplePair.mergingWorkPackage2,
         ].each { String key, AbstractMergingWorkPackage mergingWorkPackage ->
-            AbstractMergedBamFile bamFile = CollectionUtils.atMostOneElement(AbstractMergedBamFile.findAllByWorkPackage(mergingWorkPackage,
+            AbstractBamFile bamFile = CollectionUtils.atMostOneElement(AbstractBamFile.findAllByWorkPackage(mergingWorkPackage,
                     [sort: 'id', order: 'desc', max: 1]))
             if (bamFile == null) {
                 ret << "${key} ${PROBLEMS_NO_BAM_FILE}"
-            } else if (!(bamFile instanceof ExternallyProcessedMergedBamFile)) {
+            } else if (!(bamFile instanceof ExternallyProcessedBamFile)) {
                 Set<SeqTrack> containedSeqTracks = bamFile.containedSeqTracks
                 Set<SeqTrack> availableSeqTracks = bamFile.workPackage.seqTracks
                 if (!CollectionUtils.containSame(containedSeqTracks*.id, availableSeqTracks*.id)) {

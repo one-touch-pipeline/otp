@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -138,7 +138,7 @@ class BamMetadataImportServiceIntegrationSpec extends Specification implements R
             individual.project
         }
 
-        void assertBamFile(ExternallyProcessedMergedBamFile epmbf) {
+        void assertBamFile(ExternallyProcessedBamFile epmbf) {
             assert epmbf.individual == individual
             assert epmbf.referenceGenome == referenceGenome
             assert epmbf.project == project
@@ -187,8 +187,8 @@ class BamMetadataImportServiceIntegrationSpec extends Specification implements R
         assert results.context.metadataFile == metadataFile
         assert results.context.problemsObject.maximumProblemLevel.intValue() < LogLevel.ERROR.intValue()
         assert results.importProcess
-        assert results.importProcess.externallyProcessedMergedBamFiles.size() == 1
-        dataBamImportRow.assertBamFile(results.importProcess.externallyProcessedMergedBamFiles[0])
+        assert results.importProcess.externallyProcessedBamFiles.size() == 1
+        dataBamImportRow.assertBamFile(results.importProcess.externallyProcessedBamFiles[0])
         assert results.project?.name == dataBamImportRow.project.name
     }
 
@@ -220,7 +220,7 @@ class BamMetadataImportServiceIntegrationSpec extends Specification implements R
         assertResultNoError(results, dataBamImportRow, dataBamImportMetaData.metadataFile)
 
         and:
-        ExternallyProcessedMergedBamFile bamFile = results.importProcess.externallyProcessedMergedBamFiles[0]
+        ExternallyProcessedBamFile bamFile = results.importProcess.externallyProcessedBamFiles[0]
         bamFile.md5sum
         bamFile.coverage
         bamFile.maximumReadLength
@@ -343,8 +343,8 @@ class BamMetadataImportServiceIntegrationSpec extends Specification implements R
 
         then:
         assertResultNoError(results, dataBamImportRow, dataBamImportMetaData.metadataFile)
-        TestCase.assertContainSame(results.importProcess.externallyProcessedMergedBamFiles[0].furtherFiles, expected)
-        ExternalProcessedMergedBamFileQualityAssessment.findAll().size() == 1
-        ExternalProcessedMergedBamFileQualityAssessment.findAll().get(0).insertSizeCV == 23
+        TestCase.assertContainSame(results.importProcess.externallyProcessedBamFiles[0].furtherFiles, expected)
+        ExternallyProcessedBamFileQualityAssessment.findAll().size() == 1
+        ExternallyProcessedBamFileQualityAssessment.findAll().get(0).insertSizeCV == 23
     }
 }

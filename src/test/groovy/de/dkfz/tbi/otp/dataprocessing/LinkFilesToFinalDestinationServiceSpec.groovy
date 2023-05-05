@@ -44,7 +44,7 @@ class LinkFilesToFinalDestinationServiceSpec extends Specification implements Is
     @Override
     Class[] getDomainClassesToMock() {
         return [
-                AbstractMergedBamFile,
+                AbstractBamFile,
                 Comment,
                 DataFile,
                 FileType,
@@ -85,7 +85,7 @@ class LinkFilesToFinalDestinationServiceSpec extends Specification implements Is
         final String md5sum = HelperUtils.randomMd5sum
 
         RoddyBamFile roddyBamFile = createBamFile([
-                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.NEEDS_PROCESSING,
+                fileOperationStatus: AbstractBamFile.FileOperationStatus.NEEDS_PROCESSING,
                 md5sum             : null,
                 fileSize           : -1,
         ])
@@ -107,7 +107,7 @@ class LinkFilesToFinalDestinationServiceSpec extends Specification implements Is
                     1 * correctPermissionsAndGroups(roddyBamFile, realm)
                 },
                 qcTrafficLightCheckService  : Mock(QcTrafficLightCheckService) {
-                    1 * handleQcCheck(roddyBamFile, _) >> { AbstractMergedBamFile bamFile, Closure callbackIfAllFine ->
+                    1 * handleQcCheck(roddyBamFile, _) >> { AbstractBamFile bamFile, Closure callbackIfAllFine ->
                         bamFile.workDirectory.mkdirs()
                         bamFile.workBamFile.text = "something"
                     }
@@ -115,7 +115,7 @@ class LinkFilesToFinalDestinationServiceSpec extends Specification implements Is
                 md5SumService               : Mock(Md5SumService) {
                     1 * extractMd5Sum(_ as Path) >> md5sum
                 },
-                abstractMergedBamFileService: Mock(AbstractMergedBamFileService) {
+                abstractBamFileService: Mock(AbstractBamFileService) {
                     1 * updateSamplePairStatusToNeedProcessing(roddyBamFile)
                 },
                 roddyConfigService          : Mock(RoddyConfigService) {
@@ -130,10 +130,9 @@ class LinkFilesToFinalDestinationServiceSpec extends Specification implements Is
         linkFilesToFinalDestinationService.linkToFinalDestinationAndCleanup(roddyBamFile, realm)
 
         then:
-        roddyBamFile.fileOperationStatus == AbstractMergedBamFile.FileOperationStatus.PROCESSED
+        roddyBamFile.fileOperationStatus == AbstractBamFile.FileOperationStatus.PROCESSED
         roddyBamFile.md5sum == md5sum
         roddyBamFile.fileSize > 0
-        roddyBamFile.fileExists
         roddyBamFile.dateFromFileSystem != null
         roddyBamFile.dateFromFileSystem instanceof Date
     }

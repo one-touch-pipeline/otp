@@ -37,7 +37,7 @@ class EgaSubmissionSpec extends Specification implements EgaSubmissionFactory, I
     @Override
     Class[] getDomainClassesToMock() {
         return [
-                AbstractMergedBamFile,
+                AbstractBamFile,
                 BamFileSubmissionObject,
                 DataFile,
                 DataFileSubmissionObject,

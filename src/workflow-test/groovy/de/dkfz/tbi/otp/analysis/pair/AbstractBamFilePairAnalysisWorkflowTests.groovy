@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -39,8 +39,8 @@ abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase
 
     static final String PID = 'stds' //name have to be the same as in the reference data for OTP snv
 
-    AbstractMergedBamFile bamFileControl
-    AbstractMergedBamFile bamFileTumor
+    AbstractBamFile bamFileControl
+    AbstractBamFile bamFileTumor
     ConfigPerProjectAndSeqType config
     Individual individual
     Project project
@@ -64,10 +64,10 @@ abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase
             pairedInSequencing: 2120,
     ]
 
-    final Map createProcessMergedBamFileProperties() {
-        DomainFactory.randomProcessedBamFileProperties + [
+    final Map createBamFileProperties() {
+        DomainFactory.randomBamFileProperties + [
                 coverage            : COVERAGE,
-                qcTrafficLightStatus: AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED,
+                qcTrafficLightStatus: AbstractBamFile.QcTrafficLightStatus.QC_PASSED,
         ]
     }
 
@@ -86,31 +86,14 @@ abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase
                 ]),
         )
 
-        bamFileTumor = DomainFactory.createRoddyBamFile([workPackage: tumorMwp] + createProcessMergedBamFileProperties())
-        bamFileControl = DomainFactory.createRoddyBamFile(createProcessMergedBamFileProperties() + [
+        bamFileTumor = DomainFactory.createRoddyBamFile([workPackage: tumorMwp] + createBamFileProperties())
+        bamFileControl = DomainFactory.createRoddyBamFile(createBamFileProperties() + [
                 workPackage: DomainFactory.createMergingWorkPackage(controlMwp),
                 config     : bamFileTumor.config,
         ])
 
         DomainFactory.createRoddyMergedBamQa(bamFileTumor, QC_VALUES)
         DomainFactory.createRoddyMergedBamQa(bamFileControl, QC_VALUES)
-
-        commonBamFileSetup()
-        createBedFileAndLibPrepKit()
-    }
-
-    void setupProcessedMergedBamFile() {
-        MergingWorkPackage tumorMwp = DomainFactory.createMergingWorkPackage(
-                seqType: seqTypeToUse(),
-                pipeline: DomainFactory.createPanCanPipeline(),
-                referenceGenome: createReferenceGenome()
-        )
-        bamFileTumor = createRoddyBamFile(createProcessMergedBamFileProperties(), tumorMwp, RoddyBamFile)
-
-        bamFileControl = createRoddyBamFile(
-                createProcessMergedBamFileProperties(),
-                DomainFactory.createMergingWorkPackage(bamFileTumor.mergingWorkPackage),
-                RoddyBamFile)
 
         commonBamFileSetup()
         createBedFileAndLibPrepKit()
@@ -140,13 +123,13 @@ abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase
         controlMwp.sampleType.name = 'control_test'
         controlMwp.sampleType.save(flush: true)
 
-        bamFileTumor = DomainFactory.createExternallyProcessedMergedBamFile([
+        bamFileTumor = DomainFactory.createExternallyProcessedBamFile([
                 workPackage      : tumorMwp,
                 insertSizeFile   : 'tumor_insertsize_plot.png_qcValues.txt',
                 maximumReadLength: 101,
-        ] + createProcessMergedBamFileProperties())
+        ] + createBamFileProperties())
 
-        bamFileControl = DomainFactory.createExternallyProcessedMergedBamFile(createProcessMergedBamFileProperties() + [
+        bamFileControl = DomainFactory.createExternallyProcessedBamFile(createBamFileProperties() + [
                 workPackage      : controlMwp,
                 insertSizeFile   : 'control_insertsize_plot.png_qcValues.txt',
                 maximumReadLength: 101,

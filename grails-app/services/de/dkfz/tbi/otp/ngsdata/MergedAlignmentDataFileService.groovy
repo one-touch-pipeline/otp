@@ -23,12 +23,12 @@ package de.dkfz.tbi.otp.ngsdata
 
 import grails.gorm.transactions.Transactional
 
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFileService
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFileService
 
 @Transactional
 class MergedAlignmentDataFileService {
     /**
-     * @deprecated can not handle {@link SeqType} with {@link AntibodyTarget} correctly, use {@link AbstractMergedBamFileService#getBaseDirectory()} instead
+     * @deprecated can not handle {@link SeqType} with {@link AntibodyTarget} correctly, use {@link AbstractBamFileService#getBaseDirectory()} instead
      */
     @Deprecated
     static String buildRelativePath(SeqType type, Sample sample) {

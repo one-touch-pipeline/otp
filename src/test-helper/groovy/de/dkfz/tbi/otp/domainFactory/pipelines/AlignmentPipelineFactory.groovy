@@ -44,15 +44,15 @@ trait AlignmentPipelineFactory {
 
     private static final Map<Pipeline.Name, Map<String, Closure<?>>> ALIGNMENT_CREATION = [
             (Pipeline.Name.PANCAN_ALIGNMENT)   : [
-                    (AbstractMergedBamFile)     : { RoddyPancanFactoryInstance.INSTANCE.createBamFile() },
+                    (AbstractBamFile)           : { RoddyPancanFactoryInstance.INSTANCE.createBamFile() },
                     (AbstractMergingWorkPackage): { RoddyPancanFactoryInstance.INSTANCE.createMergingWorkPackage() },
             ],
             (Pipeline.Name.RODDY_RNA_ALIGNMENT): [
-                    (AbstractMergedBamFile)     : { RoddyRnaFactoryInstance.INSTANCE.createBamFile() },
+                    (AbstractBamFile)           : { RoddyRnaFactoryInstance.INSTANCE.createBamFile() },
                     (AbstractMergingWorkPackage): { RoddyRnaFactoryInstance.INSTANCE.createMergingWorkPackage() },
             ],
             (Pipeline.Name.CELL_RANGER)        : [
-                    (AbstractMergedBamFile)     : { CellRangerFactoryInstance.INSTANCE.createBamFile() },
+                    (AbstractBamFile)           : { CellRangerFactoryInstance.INSTANCE.createBamFile() },
                     (AbstractMergingWorkPackage): { CellRangerFactoryInstance.INSTANCE.createMergingWorkPackage() },
             ],
     ].asImmutable()
@@ -66,7 +66,7 @@ trait AlignmentPipelineFactory {
     }
 
     AbstractBamFile createBamFileForPipelineName(Pipeline.Name pipeline) {
-        return createObject(pipeline, AbstractMergedBamFile)
+        return createObject(pipeline, AbstractBamFile)
     }
 
     MergingWorkPackage createMergingWorkPackageForPipelineName(Pipeline.Name pipeline) {

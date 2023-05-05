@@ -61,7 +61,7 @@ class DataExportServiceSpec extends Specification implements DataTest, DomainFac
                 ProcessingOption,
                 RoddyBamFile,
                 ExternalMergingWorkPackage,
-                ExternallyProcessedMergedBamFile,
+                ExternallyProcessedBamFile,
                 IndelCallingInstance,
                 SnvCallingInstance,
                 SnvConfig,
@@ -189,7 +189,7 @@ class DataExportServiceSpec extends Specification implements DataTest, DomainFac
     }
 
     private DataExportInput createBamFileInput(boolean checkFileStatus, boolean getFileList, boolean external = false, boolean copyExternal = false) {
-        List<AbstractMergedBamFile> bamFileList = [
+        List<AbstractBamFile> bamFileList = [
                 //RoddyBamFile:
                 DomainFactory.createRoddyBamFile([
                         workPackage: DomainFactory.createMergingWorkPackage([
@@ -197,8 +197,8 @@ class DataExportServiceSpec extends Specification implements DataTest, DomainFac
                                 seqType : DomainFactory.createWholeGenomeSeqType(),
                         ])
                 ]),
-                //ExternallyProcessedMergedBamFile:
-                DomainFactory.createExternallyProcessedMergedBamFile([
+                //ExternallyProcessedBamFile:
+                DomainFactory.createExternallyProcessedBamFile([
                         workPackage: DomainFactory.createExternalMergingWorkPackage([
                                 pipeline: DomainFactory.createExternallyProcessedPipelineLazy(),
                                 seqType : DomainFactory.createRnaSingleSeqType(),

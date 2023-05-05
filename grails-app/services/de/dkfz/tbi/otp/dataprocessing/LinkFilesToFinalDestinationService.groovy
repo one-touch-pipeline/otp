@@ -24,7 +24,7 @@ package de.dkfz.tbi.otp.dataprocessing
 import grails.gorm.transactions.Transactional
 import groovy.transform.CompileDynamic
 
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
@@ -43,7 +43,7 @@ import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.threadLog
 @Transactional
 class LinkFilesToFinalDestinationService {
 
-    AbstractMergedBamFileService abstractMergedBamFileService
+    AbstractBamFileService abstractBamFileService
     ExecuteRoddyCommandService executeRoddyCommandService
     FileService fileService
     FileSystemService fileSystemService
@@ -72,11 +72,11 @@ class LinkFilesToFinalDestinationService {
         }
     }
 
-    void validateAndSetBamFileInProjectFolder(AbstractMergedBamFile bamFile) {
+    void validateAndSetBamFileInProjectFolder(AbstractBamFile bamFile) {
         RoddyBamFile.withTransaction {
             assert bamFile.fileOperationStatus == FileOperationStatus.INPROGRESS
             assert !bamFile.withdrawn
-            assert CollectionUtils.exactlyOneElement(AbstractMergedBamFile.findAllWhere(
+            assert CollectionUtils.exactlyOneElement(AbstractBamFile.findAllWhere(
                     workPackage        : bamFile.workPackage,
                     withdrawn          : false,
                     fileOperationStatus: FileOperationStatus.INPROGRESS
@@ -122,11 +122,10 @@ class LinkFilesToFinalDestinationService {
             roddyBamFile.fileOperationStatus = FileOperationStatus.PROCESSED
             roddyBamFile.fileSize = roddyBamFile.workBamFile.size()
             roddyBamFile.md5sum = md5sum
-            roddyBamFile.fileExists = true
             roddyBamFile.dateFromFileSystem = new Date(roddyBamFile.workBamFile.lastModified())
 
             assert roddyBamFile.save(flush: true)
-            abstractMergedBamFileService.updateSamplePairStatusToNeedProcessing(roddyBamFile)
+            abstractBamFileService.updateSamplePairStatusToNeedProcessing(roddyBamFile)
         }
     }
 

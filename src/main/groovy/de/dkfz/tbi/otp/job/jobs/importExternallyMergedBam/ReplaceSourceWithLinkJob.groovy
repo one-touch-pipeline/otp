@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,7 +29,7 @@ import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.config.ConfigService
-import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedMergedBamFile
+import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedBamFile
 import de.dkfz.tbi.otp.dataprocessing.ImportProcess
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.*
@@ -66,7 +66,7 @@ class ReplaceSourceWithLinkJob extends AbstractEndStateAwareJobImpl {
         SessionUtils.withNewSession {
             final ImportProcess importProcess = processParameterObject
             if (importProcess.linkOperation.replaceSourceWithLink) {
-                importProcess.externallyProcessedMergedBamFiles.each { ExternallyProcessedMergedBamFile epmbf ->
+                importProcess.externallyProcessedBamFiles.each { ExternallyProcessedBamFile epmbf ->
                     Realm realm = epmbf.project.realm
 
                     File sourceBam = new File(epmbf.importedFrom)

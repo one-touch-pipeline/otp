@@ -28,7 +28,7 @@ import org.junit.rules.TemporaryFolder
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.TestConfigService
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.domainFactory.pipelines.roddyRna.RoddyRnaFactory
 import de.dkfz.tbi.otp.job.processing.FileSystemService
@@ -68,7 +68,7 @@ class ExecutePanCanJobIntegrationTests implements RoddyRnaFactory {
 
         roddyBamFile = DomainFactory.createRoddyBamFile([
                 md5sum                      : null,
-                fileOperationStatus         : AbstractMergedBamFile.FileOperationStatus.DECLARED,
+                fileOperationStatus         : AbstractBamFile.FileOperationStatus.DECLARED,
                 roddyExecutionDirectoryNames: [DomainFactory.DEFAULT_RODDY_EXECUTION_STORE_DIRECTORY],
         ])
         SessionUtils.metaClass.static.withNewSession = { Closure c -> c() }
@@ -102,7 +102,7 @@ class ExecutePanCanJobIntegrationTests implements RoddyRnaFactory {
         setupData()
         CreateRoddyFileHelper.createRoddyAlignmentFinalResultFiles(roddyBamFile)
 
-        roddyBamFile.fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.PROCESSED
+        roddyBamFile.fileOperationStatus = AbstractBamFile.FileOperationStatus.PROCESSED
         roddyBamFile.md5sum = "abcdefabcdefabcdefabcdefabcdefab"
         roddyBamFile.fileSize = roddyBamFile.finalBamFile.size()
         assert roddyBamFile.save(flush: true)
@@ -196,7 +196,7 @@ class ExecutePanCanJobIntegrationTests implements RoddyRnaFactory {
         setupData()
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
 
-        roddyBamFile.fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.PROCESSED
+        roddyBamFile.fileOperationStatus = AbstractBamFile.FileOperationStatus.PROCESSED
         roddyBamFile.md5sum = HelperUtils.randomMd5sum
         roddyBamFile.fileSize = roddyBamFile.workBaiFile.size()
         assert roddyBamFile.save(flush: true)

@@ -123,7 +123,7 @@ class WorkflowCreatorSchedulerSpec extends HibernateSpec implements ServiceUnitT
         DeciderResult deciderResult = new DeciderResult()
         deciderResult.newArtefacts.addAll(workflowArtefacts)
 
-        List<AbstractMergedBamFile> expectedListForSnv = []
+        List<AbstractBamFile> expectedListForSnv = []
         if (artefactType == ArtefactType.BAM) {
             RoddyBamFile roddyBamFile = createBamFile([
                     workflowArtefact: workflowArtefacts.first(),

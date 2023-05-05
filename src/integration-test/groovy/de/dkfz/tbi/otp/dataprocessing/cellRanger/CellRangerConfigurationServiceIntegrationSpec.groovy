@@ -29,7 +29,7 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerConfigurationService.CellRangerMwpParameter
 import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.CellRangerFactory
@@ -515,7 +515,7 @@ class CellRangerConfigurationServiceIntegrationSpec extends Specification implem
         List<CellRangerMergingWorkPackage> mwps = (1..3).collect {
             createBamFile().workPackage
         }
-        mwps << createBamFile([fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.INPROGRESS]).workPackage
+        mwps << createBamFile([fileOperationStatus: AbstractBamFile.FileOperationStatus.INPROGRESS]).workPackage
 
         when:
         cellRangerConfigurationService.deleteMwps(mwps)

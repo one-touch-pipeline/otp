@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -117,8 +117,8 @@ abstract class AbstractSophiaWorkflowTests extends AbstractRoddyBamFilePairAnaly
     @Override
     void setupExternalBamFile() {
         super.setupExternalBamFile()
-        DomainFactory.createExternalProcessedMergedBamFileQualityAssessment(QC_VALUES, bamFileControl)
-        DomainFactory.createExternalProcessedMergedBamFileQualityAssessment(QC_VALUES, bamFileTumor)
+        DomainFactory.createExternallyProcessedBamFileQualityAssessment(QC_VALUES, bamFileControl)
+        DomainFactory.createExternallyProcessedBamFileQualityAssessment(QC_VALUES, bamFileTumor)
     }
 
     @Override

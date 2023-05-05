@@ -25,8 +25,8 @@ import grails.gorm.hibernate.annotation.ManagedEntity
 import org.hibernate.Hibernate
 
 import de.dkfz.tbi.otp.CommentableWithProject
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.QcTrafficLightStatus
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.FileOperationStatus
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.QcTrafficLightStatus
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaConfig
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
@@ -43,9 +43,9 @@ abstract class BamFilePairAnalysis implements CommentableWithProject, ProcessPar
      */
     ConfigPerProjectAndSeqType config
 
-    AbstractMergedBamFile sampleType1BamFile
+    AbstractBamFile sampleType1BamFile
 
-    AbstractMergedBamFile sampleType2BamFile
+    AbstractBamFile sampleType2BamFile
 
     /**
      * Used to construct paths in {@link AbstractBamFileAnalysisService#getWorkDirectory()}.
@@ -71,12 +71,12 @@ abstract class BamFilePairAnalysis implements CommentableWithProject, ProcessPar
     QcTrafficLightStatus qcTrafficLightStatus
 
     static constraints = {
-        sampleType1BamFile validator: { AbstractMergedBamFile val, BamFilePairAnalysis obj ->
+        sampleType1BamFile validator: { AbstractBamFile val, BamFilePairAnalysis obj ->
             obj.samplePair &&
                     val.fileOperationStatus == FileOperationStatus.PROCESSED &&
                     val.mergingWorkPackage.id == obj.samplePair.mergingWorkPackage1.id
         }
-        sampleType2BamFile validator: { AbstractMergedBamFile val, BamFilePairAnalysis obj ->
+        sampleType2BamFile validator: { AbstractBamFile val, BamFilePairAnalysis obj ->
             obj.samplePair &&
                     val.fileOperationStatus == FileOperationStatus.PROCESSED &&
                     val.mergingWorkPackage.id == obj.samplePair.mergingWorkPackage2.id

@@ -57,7 +57,7 @@ abstract class AbstractAlignmentStartJob extends AbstractStartJobImpl implements
         if (mergingWorkPackage) {
             mergingWorkPackage.needsProcessing = false
             assert mergingWorkPackage.save(flush: true)
-            AbstractMergedBamFile bamFile = createBamFile(mergingWorkPackage, findUsableBaseBamFile(mergingWorkPackage))
+            AbstractBamFile bamFile = createBamFile(mergingWorkPackage, findUsableBaseBamFile(mergingWorkPackage))
             notificationCreator.setStartedForSeqTracks(bamFile.containedSeqTracks, OtrsTicket.ProcessingStep.ALIGNMENT)
             createProcess(bamFile)
         }
@@ -67,13 +67,13 @@ abstract class AbstractAlignmentStartJob extends AbstractStartJobImpl implements
     Process restart(Process process) {
         assert process
 
-        AbstractMergedBamFile failedInstance = (AbstractMergedBamFile) process.processParameterObject
+        AbstractBamFile failedInstance = (AbstractBamFile) process.processParameterObject
 
-        AbstractMergedBamFile.withTransaction {
+        AbstractBamFile.withTransaction {
             failedInstance.withdraw()
             MergingWorkPackage mergingWorkPackage = failedInstance.workPackage
             mergingWorkPackage.needsProcessing = false
-            AbstractMergedBamFile bamFile = createBamFile(mergingWorkPackage, findUsableBaseBamFile(mergingWorkPackage))
+            AbstractBamFile bamFile = createBamFile(mergingWorkPackage, findUsableBaseBamFile(mergingWorkPackage))
 
             assert bamFile.save(flush: true)
             return createProcess(bamFile)
@@ -89,7 +89,7 @@ abstract class AbstractAlignmentStartJob extends AbstractStartJobImpl implements
                         'AND seqType IN (:seqTypes) ' +
                         'AND sample.individual.project.archived = false ' +
                         'AND NOT EXISTS (' +
-                        ' FROM AbstractMergedBamFile ' +
+                        ' FROM AbstractBamFile ' +
                         'WHERE workPackage = mwp ' +
                         'AND fileOperationStatus <> :processed ' +
                         'AND withdrawn = false ' +
@@ -98,7 +98,7 @@ abstract class AbstractAlignmentStartJob extends AbstractStartJobImpl implements
                         'AND sample.individual.project.processingPriority.priority >= :minPriority ' +
                         'ORDER BY sample.individual.project.processingPriority.priority DESC, mwp.id ASC',
                 [
-                        processed  : AbstractMergedBamFile.FileOperationStatus.PROCESSED,
+                        processed  : AbstractBamFile.FileOperationStatus.PROCESSED,
                         minPriority: minPriority,
                         seqTypes   : seqTypes,
                 ]
@@ -112,23 +112,23 @@ abstract class AbstractAlignmentStartJob extends AbstractStartJobImpl implements
         }
     }
 
-    private static AbstractMergedBamFile findBamFileInProjectFolder(MergingWorkPackage mergingWorkPackage) {
+    private static AbstractBamFile findBamFileInProjectFolder(MergingWorkPackage mergingWorkPackage) {
         assert mergingWorkPackage
         // Find the latest BAM file which moving to the final destination has been initiated for, regardless of whether
         // the moving was successful or not.
-        AbstractMergedBamFile bamFile = AbstractMergedBamFile.find(
-                'FROM AbstractMergedBamFile ' +
+        AbstractBamFile bamFile = AbstractBamFile.find(
+                'FROM AbstractBamFile ' +
                         'WHERE fileOperationStatus IN (:inprogress, :processed) ' +
                         'AND workPackage = :mergingWorkPackage ' +
                         'ORDER BY identifier DESC',
                 [
                         mergingWorkPackage: mergingWorkPackage,
-                        inprogress        : AbstractMergedBamFile.FileOperationStatus.INPROGRESS,
-                        processed         : AbstractMergedBamFile.FileOperationStatus.PROCESSED,
+                        inprogress        : AbstractBamFile.FileOperationStatus.INPROGRESS,
+                        processed         : AbstractBamFile.FileOperationStatus.PROCESSED,
                 ],
         )
         assert bamFile?.id == mergingWorkPackage.bamFileInProjectFolder?.id
-        if (bamFile && bamFile.fileOperationStatus != AbstractMergedBamFile.FileOperationStatus.PROCESSED) {
+        if (bamFile && bamFile.fileOperationStatus != AbstractBamFile.FileOperationStatus.PROCESSED) {
             // If we get here, moving of bamFile to the final destination has been initiated, but has not been reported
             // to have finished successfully. So we do not know what currently is on the file system.
             return null
@@ -137,25 +137,25 @@ abstract class AbstractAlignmentStartJob extends AbstractStartJobImpl implements
     }
 
     /**
-     * Returns the {@link AbstractMergedBamFile} which
+     * Returns the {@link AbstractBamFile} which
      * <ul>
-     *     <li>is {@link AbstractMergedBamFile.FileOperationStatus#PROCESSED}</li>
-     *     <li>has not been overwritten by a later {@link AbstractMergedBamFile}</li>
+     *     <li>is {@link AbstractBamFile.FileOperationStatus#PROCESSED}</li>
+     *     <li>has not been overwritten by a later {@link AbstractBamFile}</li>
      *     <li>is not withdrawn</li>
      * </ul>
      */
-    protected AbstractMergedBamFile findUsableBaseBamFile(MergingWorkPackage mergingWorkPackage) {
+    protected AbstractBamFile findUsableBaseBamFile(MergingWorkPackage mergingWorkPackage) {
         assert mergingWorkPackage
-        AbstractMergedBamFile bamFile = findBamFileInProjectFolder(mergingWorkPackage)
+        AbstractBamFile bamFile = findBamFileInProjectFolder(mergingWorkPackage)
         if (!bamFile || bamFile.withdrawn) {
             return null
         }
         return bamFile
     }
 
-    AbstractMergedBamFile createBamFile(MergingWorkPackage mergingWorkPackage, AbstractMergedBamFile baseBamFile) {
+    AbstractBamFile createBamFile(MergingWorkPackage mergingWorkPackage, AbstractBamFile baseBamFile) {
         assert mergingWorkPackage
-        AbstractMergedBamFile previousBamFile = mergingWorkPackage.bamFileInProjectFolder
+        AbstractBamFile previousBamFile = mergingWorkPackage.bamFileInProjectFolder
         List<Long> mergableSeqTracks = mergingWorkPackage.seqTracks*.id
         List<Long> containedSeqTracks = baseBamFile?.containedSeqTracks*.id
         Set<SeqTrack> seqTracks = SeqTrack.getAll(mergableSeqTracks - containedSeqTracks) as Set
@@ -164,7 +164,7 @@ abstract class AbstractAlignmentStartJob extends AbstractStartJobImpl implements
 
         int identifier = RoddyBamFile.nextIdentifier(mergingWorkPackage)
 
-        AbstractMergedBamFile bamFile = reallyCreateBamFile(mergingWorkPackage, identifier, seqTracks, config, baseBamFile)
+        AbstractBamFile bamFile = reallyCreateBamFile(mergingWorkPackage, identifier, seqTracks, config, baseBamFile)
         // has to be set explicitly to old value due strange behavior of GORM (?)
         mergingWorkPackage.bamFileInProjectFolder = previousBamFile
         bamFile.numberOfMergedLanes = bamFile.containedSeqTracks.size()
@@ -172,8 +172,8 @@ abstract class AbstractAlignmentStartJob extends AbstractStartJobImpl implements
         return bamFile
     }
 
-    abstract AbstractMergedBamFile reallyCreateBamFile(MergingWorkPackage mergingWorkPackage, int identifier, Set<SeqTrack> seqTracks,
-                                                       ConfigPerProjectAndSeqType config, AbstractMergedBamFile baseBamFile = null)
+    abstract AbstractBamFile reallyCreateBamFile(MergingWorkPackage mergingWorkPackage, int identifier, Set<SeqTrack> seqTracks,
+                                                 ConfigPerProjectAndSeqType config, AbstractBamFile baseBamFile = null)
 
     abstract ConfigPerProjectAndSeqType getConfig(MergingWorkPackage mergingWorkPackage)
 }

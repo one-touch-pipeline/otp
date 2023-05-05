@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -117,7 +117,7 @@ class MergingWorkPackageIntegrationSpec extends Specification {
 
     void 'getCompleteProcessableBamFileInProjectFolder, when bamFileInProjectFolder set, not withdrawn, FileOperationStatus PROCESSED, seqTracks match, returns bamFile'() {
         given:
-        RoddyBamFile bamFile = DomainFactory.createRoddyBamFile(DomainFactory.randomProcessedBamFileProperties)
+        RoddyBamFile bamFile = DomainFactory.createRoddyBamFile(DomainFactory.randomBamFileProperties)
 
         bamFile.workPackage.bamFileInProjectFolder = bamFile
         bamFile.workPackage.save(flush: true)
@@ -128,7 +128,7 @@ class MergingWorkPackageIntegrationSpec extends Specification {
 
     void 'getCompleteProcessableBamFileInProjectFolder, when bamFileInProjectFolder not set, not withdrawn, FileOperationStatus PROCESSED, seqTracks match, returns null'() {
         given:
-        RoddyBamFile bamFile = DomainFactory.createRoddyBamFile(DomainFactory.randomProcessedBamFileProperties)
+        RoddyBamFile bamFile = DomainFactory.createRoddyBamFile(DomainFactory.randomBamFileProperties)
 
         expect:
         null == ((MergingWorkPackage)(bamFile.workPackage)).bamFileThatIsReadyForFurtherAnalysis
@@ -136,7 +136,7 @@ class MergingWorkPackageIntegrationSpec extends Specification {
 
     void 'getCompleteProcessableBamFileInProjectFolder, when bamFileInProjectFolder set, withdrawn, FileOperationStatus PROCESSED, seqTracks match, returns null'() {
         given:
-        RoddyBamFile bamFile = DomainFactory.createRoddyBamFile(DomainFactory.randomProcessedBamFileProperties)
+        RoddyBamFile bamFile = DomainFactory.createRoddyBamFile(DomainFactory.randomBamFileProperties)
         bamFile.withdrawn = true
         bamFile.save(flush: true)
 
@@ -149,7 +149,7 @@ class MergingWorkPackageIntegrationSpec extends Specification {
 
     void 'getCompleteProcessableBamFileInProjectFolder, when bamFileInProjectFolder set, not withdrawn, FileOperationStatus INPROGRESS, seqTracks match, returns null'() {
         given:
-        RoddyBamFile bamFile = DomainFactory.createRoddyBamFile([fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.INPROGRESS, md5sum: null])
+        RoddyBamFile bamFile = DomainFactory.createRoddyBamFile([fileOperationStatus: AbstractBamFile.FileOperationStatus.INPROGRESS, md5sum: null])
 
         bamFile.workPackage.bamFileInProjectFolder = bamFile
         bamFile.workPackage.save(flush: true)
@@ -160,7 +160,7 @@ class MergingWorkPackageIntegrationSpec extends Specification {
 
     void 'getCompleteProcessableBamFileInProjectFolder, when bamFileInProjectFolder set, not withdrawn, FileOperationStatus PROCESSED, seqTracks do not match, returns null'() {
         given:
-        RoddyBamFile bamFile = DomainFactory.createRoddyBamFile(DomainFactory.randomProcessedBamFileProperties)
+        RoddyBamFile bamFile = DomainFactory.createRoddyBamFile(DomainFactory.randomBamFileProperties)
         DomainFactory.createSeqTrackWithDataFiles(bamFile.workPackage)
 
         bamFile.workPackage.bamFileInProjectFolder = bamFile

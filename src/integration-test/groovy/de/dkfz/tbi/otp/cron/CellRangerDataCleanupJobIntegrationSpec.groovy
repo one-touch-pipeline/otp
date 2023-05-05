@@ -81,7 +81,7 @@ class CellRangerDataCleanupJobIntegrationSpec extends Specification implements C
 
         SingleCellBamFile bamFile = createBamFile([
                 workPackage        : mwp,
-                fileOperationStatus: withFinishedBamFile ? AbstractMergedBamFile.FileOperationStatus.PROCESSED : AbstractMergedBamFile.FileOperationStatus.NEEDS_PROCESSING,
+                fileOperationStatus: withFinishedBamFile ? AbstractBamFile.FileOperationStatus.PROCESSED : AbstractBamFile.FileOperationStatus.NEEDS_PROCESSING,
         ])
         mwp.save(flush: true)
 

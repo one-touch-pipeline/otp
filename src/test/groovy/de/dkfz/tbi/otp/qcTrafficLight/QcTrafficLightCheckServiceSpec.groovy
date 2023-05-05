@@ -37,7 +37,7 @@ class QcTrafficLightCheckServiceSpec extends Specification implements IsRoddy, D
     @Override
     Class[] getDomainClassesToMock() {
         return [
-                AbstractMergedBamFile,
+                AbstractBamFile,
                 Comment,
                 DataFile,
                 FastqImportInstance,
@@ -95,10 +95,10 @@ class QcTrafficLightCheckServiceSpec extends Specification implements IsRoddy, D
 
         where:
         status                                                   || callCallback | callNotify
-        AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED     || true         | false
-        AbstractMergedBamFile.QcTrafficLightStatus.WARNING       || true         | true
-        AbstractMergedBamFile.QcTrafficLightStatus.AUTO_ACCEPTED || true         | true
-        AbstractMergedBamFile.QcTrafficLightStatus.UNCHECKED     || true         | false
+        AbstractBamFile.QcTrafficLightStatus.QC_PASSED     || true | false
+        AbstractBamFile.QcTrafficLightStatus.WARNING       || true | true
+        AbstractBamFile.QcTrafficLightStatus.AUTO_ACCEPTED || true | true
+        AbstractBamFile.QcTrafficLightStatus.UNCHECKED     || true | false
 
         text = "${callCallback ? '' : 'do not '}call the callback and ${callNotify ? '' : 'do not '} call the notify"
     }
@@ -128,9 +128,9 @@ class QcTrafficLightCheckServiceSpec extends Specification implements IsRoddy, D
         e.message.contains(status.toString())
 
         where:
-        status << AbstractMergedBamFile.QcTrafficLightStatus.values().findAll {
-            it.jobLinkCase == AbstractMergedBamFile.QcTrafficLightStatus.JobLinkCase.SHOULD_NOT_OCCUR ||
-                    it.jobNotifyCase == AbstractMergedBamFile.QcTrafficLightStatus.JobNotifyCase.SHOULD_NOT_OCCUR
+        status << AbstractBamFile.QcTrafficLightStatus.values().findAll {
+            it.jobLinkCase == AbstractBamFile.QcTrafficLightStatus.JobLinkCase.SHOULD_NOT_OCCUR ||
+                    it.jobNotifyCase == AbstractBamFile.QcTrafficLightStatus.JobNotifyCase.SHOULD_NOT_OCCUR
         }
     }
 }

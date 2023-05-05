@@ -167,6 +167,6 @@ class CellRangerQualityAssessment extends AbstractQualityAssessment implements Q
     }
 
     SingleCellBamFile getBamFile() {
-        return qualityAssessmentMergedPass.abstractMergedBamFile as SingleCellBamFile
+        return qualityAssessmentMergedPass.abstractBamFile as SingleCellBamFile
     }
 }

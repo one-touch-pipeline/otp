@@ -54,7 +54,7 @@ assert project: "Project ${projectName} not found"
 
 //K20K-JRJ7D2 und K20K-ZFA224
 
-List<AbstractMergedBamFile> bamFiles = AbstractMergedBamFile.createCriteria().list {
+List<AbstractBamFile> bamFiles = AbstractBamFile.createCriteria().list {
     workPackage {
         sample {
             individual {
@@ -62,9 +62,9 @@ List<AbstractMergedBamFile> bamFiles = AbstractMergedBamFile.createCriteria().li
             }
         }
     }
-    eq('qcTrafficLightStatus', AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED)
+    eq('qcTrafficLightStatus', AbstractBamFile.QcTrafficLightStatus.BLOCKED)
     eq('withdrawn', false)
-}.findAll { AbstractMergedBamFile bamFile ->
+}.findAll { AbstractBamFile bamFile ->
     bamFile.isMostRecentBamFile()
 }
 
@@ -77,13 +77,13 @@ bamFiles.each { AbstractBamFile bamFile ->
             bamFile.seqType.name == 'RNA' ?
                     RnaQualityAssessment.createCriteria().list {
                         qualityAssessmentMergedPass {
-                            eq('abstractMergedBamFile', bamFile)
+                            eq('abstractBamFile', bamFile)
                         }
                         eq('chromosome', RoddyQualityAssessment.ALL)
                     } :
                     RoddyMergedBamQa.createCriteria().list {
                         qualityAssessmentMergedPass {
-                            eq('abstractMergedBamFile', bamFile)
+                            eq('abstractBamFile', bamFile)
                         }
                         eq('chromosome', RoddyQualityAssessment.ALL)
                     }

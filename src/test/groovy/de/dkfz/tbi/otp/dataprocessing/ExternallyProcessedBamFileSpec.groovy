@@ -28,12 +28,12 @@ import spock.lang.Unroll
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
-class ExternallyProcessedMergedBamFileSpec extends Specification implements DataTest {
+class ExternallyProcessedBamFileSpec extends Specification implements DataTest {
 
     @Override
     Class[] getDomainClassesToMock() {
         return [
-                ExternallyProcessedMergedBamFile,
+                ExternallyProcessedBamFile,
         ]
     }
 
@@ -42,7 +42,7 @@ class ExternallyProcessedMergedBamFileSpec extends Specification implements Data
                 fileName           : 'bamfile.bam',
                 importedFrom       : '/tmp/bamfile',
                 insertSizeFile     : null,
-                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
+                fileOperationStatus: AbstractBamFile.FileOperationStatus.PROCESSED,
                 md5sum             : DomainFactory.DEFAULT_MD5_SUM,
                 maximumReadLength  : 5,
                 workPackage        : new ExternalMergingWorkPackage([
@@ -55,7 +55,7 @@ class ExternallyProcessedMergedBamFileSpec extends Specification implements Data
 
     void "all constraint fine, create object"() {
         given:
-        ExternallyProcessedMergedBamFile bamFile = new ExternallyProcessedMergedBamFile(createMap())
+        ExternallyProcessedBamFile bamFile = new ExternallyProcessedBamFile(createMap())
 
         when:
         bamFile.validate()
@@ -67,7 +67,7 @@ class ExternallyProcessedMergedBamFileSpec extends Specification implements Data
     @Unroll
     void "constraint, if property '#property' is '#value', then validation should not fail"() {
         given:
-        ExternallyProcessedMergedBamFile bamFile = new ExternallyProcessedMergedBamFile(createMap())
+        ExternallyProcessedBamFile bamFile = new ExternallyProcessedBamFile(createMap())
         bamFile[property] = value
 
         when:
@@ -81,14 +81,14 @@ class ExternallyProcessedMergedBamFileSpec extends Specification implements Data
         'importedFrom'        | null
         'insertSizeFile'      | null
         'insertSizeFile'      | 'tmp/tmp'
-        'fileOperationStatus' | AbstractMergedBamFile.FileOperationStatus.DECLARED
+        'fileOperationStatus' | AbstractBamFile.FileOperationStatus.DECLARED
         'maximumReadLength'   | null
     }
 
     @Unroll
     void "constraint, if property '#property' is '#value', then validation should fail for '#constraint'"() {
         given:
-        ExternallyProcessedMergedBamFile bamFile = new ExternallyProcessedMergedBamFile(createMap())
+        ExternallyProcessedBamFile bamFile = new ExternallyProcessedBamFile(createMap())
         bamFile[property] = value
 
         expect:

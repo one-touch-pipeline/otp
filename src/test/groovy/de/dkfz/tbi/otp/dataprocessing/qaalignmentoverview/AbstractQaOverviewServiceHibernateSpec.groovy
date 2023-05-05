@@ -82,7 +82,7 @@ class AbstractQaOverviewServiceHibernateSpec extends HibernateSpec implements Ro
             |from
             |    ${AbstractQualityAssessment.name} qa
             |    join qa.qualityAssessmentMergedPass qaPass
-            |    join qaPass.abstractMergedBamFile bamFile
+            |    join qaPass.abstractBamFile bamFile
             |    join bamFile.workPackage mergingWorkPackage
             |    join mergingWorkPackage.sample sample
             |    join mergingWorkPackage.pipeline pipeline
@@ -147,7 +147,7 @@ class AbstractQaOverviewServiceHibernateSpec extends HibernateSpec implements Ro
             |from
             |    ${AbstractQualityAssessment.name} qa
             |    join qa.qualityAssessmentMergedPass qaPass
-            |    join qaPass.abstractMergedBamFile bamFile
+            |    join qaPass.abstractBamFile bamFile
             |    join bamFile.workPackage mergingWorkPackage
             |    join mergingWorkPackage.sample sample
             |    join mergingWorkPackage.pipeline pipeline
@@ -219,7 +219,7 @@ class AbstractQaOverviewServiceHibernateSpec extends HibernateSpec implements Ro
             |from
             |    ${AbstractQualityAssessment.name} qa
             |    join qa.qualityAssessmentMergedPass qaPass
-            |    join qaPass.abstractMergedBamFile bamFile
+            |    join qaPass.abstractBamFile bamFile
             |    join bamFile.workPackage mergingWorkPackage
             |    join mergingWorkPackage.sample sample
             |    join mergingWorkPackage.pipeline pipeline
@@ -381,7 +381,7 @@ class AbstractQaOverviewServiceHibernateSpec extends HibernateSpec implements Ro
                 libraryPreparationKitName     : 'libraryPreparationKitName',
                 dateFromFileSystem            : Date.from(zonedDateTime.toInstant()),
                 pipelineName                  : Pipeline.Name.PANCAN_ALIGNMENT,
-                qcStatus                      : AbstractMergedBamFile.QcTrafficLightStatus.WARNING,
+                qcStatus                      : AbstractBamFile.QcTrafficLightStatus.WARNING,
                 qcComment                     : 'qcComment',
                 qcAuthor                      : 'qcAuthor',
                 bamId                         : bamId,
@@ -498,7 +498,7 @@ class AbstractQaOverviewServiceHibernateSpec extends HibernateSpec implements Ro
                 libraryPreparationKitName     : 'libraryPreparationKitName',
                 dateFromFileSystem            : Date.from(zonedDateTime.toInstant()),
                 pipelineName                  : Pipeline.Name.PANCAN_ALIGNMENT,
-                qcStatus                      : AbstractMergedBamFile.QcTrafficLightStatus.WARNING,
+                qcStatus                      : AbstractBamFile.QcTrafficLightStatus.WARNING,
                 qcComment                     : 'qcComment',
                 qcAuthor                      : 'qcAuthor',
                 bamId                         : bamId,

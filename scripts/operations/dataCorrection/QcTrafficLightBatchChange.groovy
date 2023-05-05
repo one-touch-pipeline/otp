@@ -23,8 +23,6 @@
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.dataprocessing.*
 
-import static de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.QcTrafficLightStatus.*
-
 /*
 Changes the qcTrafficLightStatus of multiple BamFiles at once.
 
@@ -48,8 +46,8 @@ List<SeqType> seqTypes = [
 ]
 
 // QC_PASSED, ACCEPTED, BLOCKED, REJECTED, AUTO_ACCEPTED, UNCHECKED
-AbstractMergedBamFile.QcTrafficLightStatus fromStatus = BLOCKED
-AbstractMergedBamFile.QcTrafficLightStatus toStatus = ACCEPTED
+AbstractBamFile.QcTrafficLightStatus fromStatus = BLOCKED
+AbstractBamFile.QcTrafficLightStatus toStatus = ACCEPTED
 
 String comment = ""
 String author = ""
@@ -61,7 +59,7 @@ assert toStatus: "define the status the BamFiles should have"
 assert comment: "define a comment for why the status is set"
 assert author: "define which name is set as the author of the comment"
 
-List<AbstractMergedBamFile> bams = AbstractMergedBamFile.createCriteria().list {
+List<AbstractBamFile> bams = AbstractBamFile.createCriteria().list {
     workPackage {
         sample {
             individual {
@@ -74,11 +72,11 @@ List<AbstractMergedBamFile> bams = AbstractMergedBamFile.createCriteria().list {
     }
     eq("qcTrafficLightStatus", fromStatus)
     eq("withdrawn", false)
-    eq("fileOperationStatus", AbstractMergedBamFile.FileOperationStatus.PROCESSED)
+    eq("fileOperationStatus", AbstractBamFile.FileOperationStatus.PROCESSED)
     eq("qualityAssessmentStatus", AbstractBamFile.QaProcessingStatus.FINISHED)
 }
 
-bams.each { AbstractMergedBamFile bam ->
+bams.each { AbstractBamFile bam ->
     println String.format(
             "%-15s %s: %-13s %-20s %-10s '%-13s' by %s",
             bam.class.simpleName,
@@ -94,8 +92,8 @@ println "${bams.size()} BAMs"
 
 assert false: "fail for debug"
 
-AbstractMergedBamFile.withTransaction {
-    bams.each { AbstractMergedBamFile bam ->
+AbstractBamFile.withTransaction {
+    bams.each { AbstractBamFile bam ->
         ctx.qcTrafficLightService.setQcTrafficLightStatusWithComment(bam, toStatus, comment)
         bam.comment.author = author
         bam.comment.save(flush: true)

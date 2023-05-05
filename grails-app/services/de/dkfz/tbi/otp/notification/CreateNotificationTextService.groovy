@@ -238,13 +238,13 @@ class CreateNotificationTextService {
             "${sample} (${seqTracksOfSample*.sampleIdentifier.unique().sort().join(", ")})"
         }.join('\n')
 
-        Collection<AbstractMergedBamFile> allGoodBamFiles = status.mergingWorkPackageProcessingStatuses*.completeProcessableBamFileInProjectFolder
+        Collection<AbstractBamFile> allGoodBamFiles = status.mergingWorkPackageProcessingStatuses*.completeProcessableBamFileInProjectFolder
 
         String links = createOtpLinks(allGoodBamFiles*.project, 'alignmentQualityOverview', 'index')
 
         String directories = getMergingDirectories(allGoodBamFiles)
 
-        List<AbstractMergedBamFile> bamFilesOldSystem = allGoodBamFiles.findAll {
+        List<AbstractBamFile> bamFilesOldSystem = allGoodBamFiles.findAll {
             return !(it instanceof RoddyBamFile && it.workflowArtefact?.producedBy && it.workflowArtefact.producedBy.state != WorkflowRun.State.LEGACY)
         }
 
@@ -289,15 +289,15 @@ class CreateNotificationTextService {
         return message
     }
 
-    private String alignmentInformationProcessingValuesOldSystem(List<AbstractMergedBamFile> bamFiles,
+    private String alignmentInformationProcessingValuesOldSystem(List<AbstractBamFile> bamFiles,
                                                                  Map<AlignmentConfig, AlignmentInfo> alignmentInfoByConfig) {
-        Map<Project, List<AbstractMergedBamFile>> bamFilesByProject = bamFiles.groupBy { it.project }
+        Map<Project, List<AbstractBamFile>> bamFilesByProject = bamFiles.groupBy { it.project }
         boolean multipleProject = bamFilesByProject.size() > 1
         StringBuilder builder = new StringBuilder()
 
         bamFilesByProject.sort {
             it.key.name
-        }.each { Project project, List<AbstractMergedBamFile> projectBamFiles ->
+        }.each { Project project, List<AbstractBamFile> projectBamFiles ->
             if (multipleProject) {
                 builder << "\n***********************\n"
                 builder << project
@@ -306,12 +306,12 @@ class CreateNotificationTextService {
                 it.seqType
             }.sort {
                 it.key.displayNameWithLibraryLayout
-            }.each { SeqType seqType, List<AbstractMergedBamFile> seqTypeBamFiles ->
-                Map<AlignmentConfig, List<AbstractMergedBamFile>> bamFilePerConfig = seqTypeBamFiles.groupBy {
+            }.each { SeqType seqType, List<AbstractBamFile> seqTypeBamFiles ->
+                Map<AlignmentConfig, List<AbstractBamFile>> bamFilePerConfig = seqTypeBamFiles.groupBy {
                     it.alignmentConfig
                 }
                 boolean multipleConfigs = bamFilePerConfig.size() > 1 && project.alignmentDeciderBeanName == AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT
-                bamFilePerConfig.each { AlignmentConfig config, List<AbstractMergedBamFile> configBamFiles ->
+                bamFilePerConfig.each { AlignmentConfig config, List<AbstractBamFile> configBamFiles ->
                     AlignmentInfo alignmentInfo = alignmentInfoByConfig.get(config)
                     String individuals = multipleConfigs && config instanceof RoddyWorkflowConfig ? (config.individual ?: "default") : ""
                     builder << messageSourceService.createMessage("notification.template.alignment.processing", [
@@ -329,14 +329,14 @@ class CreateNotificationTextService {
         return builder.toString()
     }
 
-    private String alignmentInformationProcessingValues(List<AbstractMergedBamFile> bamFiles) {
-        Map<Project, List<AbstractMergedBamFile>> bamFilesByProject = bamFiles.groupBy { it.project }
+    private String alignmentInformationProcessingValues(List<AbstractBamFile> bamFiles) {
+        Map<Project, List<AbstractBamFile>> bamFilesByProject = bamFiles.groupBy { it.project }
         boolean multipleProject = bamFilesByProject.size() > 1
         StringBuilder builder = new StringBuilder()
 
         bamFilesByProject.sort {
             it.key.name
-        }.each { Project project, List<AbstractMergedBamFile> projectBamFiles ->
+        }.each { Project project, List<AbstractBamFile> projectBamFiles ->
             if (multipleProject) {
                 builder << "\n***********************\n"
                 builder << project
@@ -345,11 +345,11 @@ class CreateNotificationTextService {
                 it.seqType
             }.sort {
                 it.key.displayNameWithLibraryLayout
-            }.each { SeqType seqType, List<AbstractMergedBamFile> seqTypeBamFiles ->
-                Map<AlignmentInfo, List<AbstractMergedBamFile>> bamFilePerConfig = seqTypeBamFiles.groupBy {
+            }.each { SeqType seqType, List<AbstractBamFile> seqTypeBamFiles ->
+                Map<AlignmentInfo, List<AbstractBamFile>> bamFilePerConfig = seqTypeBamFiles.groupBy {
                     alignmentInfoService.getAlignmentInformationForRun(it.workflowArtefact.producedBy)
                 }
-                bamFilePerConfig.each { AlignmentInfo alignmentInfo, List<AbstractMergedBamFile> configBamFiles ->
+                bamFilePerConfig.each { AlignmentInfo alignmentInfo, List<AbstractBamFile> configBamFiles ->
                     builder << messageSourceService.createMessage("notification.template.alignment.processing", [
                             seqType           : seqType.displayNameWithLibraryLayout,
                             individuals       : "",

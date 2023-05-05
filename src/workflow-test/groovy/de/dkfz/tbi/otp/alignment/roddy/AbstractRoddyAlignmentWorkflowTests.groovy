@@ -28,7 +28,7 @@ import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.alignment.AbstractAlignmentWorkflowTest
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.ngsdata.*
@@ -306,7 +306,6 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
                 fileOperationStatus: FileOperationStatus.PROCESSED,
                 md5sum: calculateMd5Sum(firstBamFile),
                 fileSize: firstBamFile.size(),
-                fileExists: true,
                 dateFromFileSystem: new Date(firstBamFile.lastModified()),
                 roddyExecutionDirectoryNames: ['exec_123456_123456789_bla_bla']
         )
@@ -361,7 +360,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
 
     void checkQC(RoddyBamFile bamFile) {
         QualityAssessmentMergedPass qaPass = CollectionUtils.atMostOneElement(QualityAssessmentMergedPass.findAllWhere(
-                abstractMergedBamFile: bamFile,
+                abstractBamFile: bamFile,
         ))
         assert qaPass
 
@@ -390,7 +389,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
         assert bamFile.coverageWithN == abstractBamFileService.calculateCoverageWithN(bamFile)
 
         assert bamFile.qualityAssessmentStatus == AbstractBamFile.QaProcessingStatus.FINISHED
-        assert bamFile.qcTrafficLightStatus == AbstractMergedBamFile.QcTrafficLightStatus.UNCHECKED
+        assert bamFile.qcTrafficLightStatus == AbstractBamFile.QcTrafficLightStatus.UNCHECKED
 
         if (bamFile.seqType.wgbs && bamFile.hasMultipleLibraries()) {
             List<RoddyLibraryQa> libraryQas = RoddyLibraryQa.findAllByQualityAssessmentMergedPass(qaPass)
@@ -455,14 +454,12 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
 
     void assertBamFileFileSystemPropertiesSet(RoddyBamFile bamFile) {
         assert bamFile.md5sum =~ /^[a-f0-9]{32}$/
-        assert bamFile.fileExists
         assert null != bamFile.dateFromFileSystem
         assert bamFile.fileSize > 0
     }
 
     void assertBamFileFileSystemPropertiesNotSet(RoddyBamFile bamFile) {
         assert bamFile.md5sum == null
-        assert !bamFile.fileExists
         assert bamFile.dateFromFileSystem == null
         assert bamFile.fileSize == -1L
     }

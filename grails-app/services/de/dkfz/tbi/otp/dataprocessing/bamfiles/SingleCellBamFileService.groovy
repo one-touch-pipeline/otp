@@ -32,9 +32,9 @@ import java.nio.file.Path
 
 @CompileDynamic
 @Transactional
-class SingleCellBamFileService<T extends AbstractMergedBamFile> extends AbstractAbstractMergedBamFileService<SingleCellBamFile> {
+class SingleCellBamFileService<T extends AbstractBamFile> extends AbstractAbstractBamFileService<SingleCellBamFile> {
 
-    AbstractMergedBamFileService abstractMergedBamFileService
+    AbstractBamFileService abstractBamFileService
 
     static final String INPUT_DIRECTORY_NAME = 'cell-ranger-input'
 
@@ -77,7 +77,7 @@ class SingleCellBamFileService<T extends AbstractMergedBamFile> extends Abstract
     ].flatten().asImmutable()
 
     Path getWorkDirectory(SingleCellBamFile bamFile) {
-        return abstractMergedBamFileService.getBaseDirectory(bamFile).resolve(bamFile.workDirectoryName)
+        return abstractBamFileService.getBaseDirectory(bamFile).resolve(bamFile.workDirectoryName)
     }
 
     String buildWorkDirectoryName(CellRangerMergingWorkPackage workPackage, int identifier) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -45,12 +45,11 @@ abstract class AbstractMergingWorkPackage implements Entity {
      * If you want to use the referenced BAM file as input for further processing, use
      * {@link #getProcessableBamFileInProjectFolder()}).
      */
-    /*
+    /**
      * Due some strange behavior of GORM (?), this has to be set on null explicitly where objects of
-     * {@link de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile} or its subclasses are built or created.
-     * See {@link de.dkfz.tbi.otp.ngsdata.DomainFactory#createProcessedMergedBamFile}
+     * {@link de.dkfz.tbi.otp.dataprocessing.AbstractBamFile} or its subclasses are built or created.
      */
-    AbstractMergedBamFile bamFileInProjectFolder
+    AbstractBamFile bamFileInProjectFolder
 
     static belongsTo = [
             sample: Sample,
@@ -60,7 +59,7 @@ abstract class AbstractMergingWorkPackage implements Entity {
         bamFileInProjectFolder nullable: true, validator: { val, obj ->
             if (val) {
                 val.workPackage == obj &&
-                        [AbstractMergedBamFile.FileOperationStatus.INPROGRESS, AbstractMergedBamFile.FileOperationStatus.PROCESSED].contains(
+                        [AbstractBamFile.FileOperationStatus.INPROGRESS, AbstractBamFile.FileOperationStatus.PROCESSED].contains(
                                 val.fileOperationStatus)
             } else {
                 return true
@@ -90,18 +89,18 @@ abstract class AbstractMergingWorkPackage implements Entity {
      *
      * If you use the returned BAM file as input for further processing, ensure that the file on the file system is
      * consistent with the database object by comparing the file size on the file system to
-     * {@link AbstractFileSystemBamFile#fileSize}. Perform this check a second time <em>after</em> reading from the file
+     * {@link AbstractBamFile#fileSize}. Perform this check a second time <em>after</em> reading from the file
      * to ensure that the file has not been overwritten between the first check and starting to read the file.
      */
-    AbstractMergedBamFile getProcessableBamFileInProjectFolder() {
+    AbstractBamFile getProcessableBamFileInProjectFolder() {
         if (bamFileInProjectFolder && !bamFileInProjectFolder.withdrawn &&
-                bamFileInProjectFolder.fileOperationStatus == AbstractMergedBamFile.FileOperationStatus.PROCESSED) {
+                bamFileInProjectFolder.fileOperationStatus == AbstractBamFile.FileOperationStatus.PROCESSED) {
             return bamFileInProjectFolder
         }
         return null
     }
 
-    abstract AbstractMergedBamFile getBamFileThatIsReadyForFurtherAnalysis()
+    abstract AbstractBamFile getBamFileThatIsReadyForFurtherAnalysis()
 
     Project getProject() {
         return sample.project

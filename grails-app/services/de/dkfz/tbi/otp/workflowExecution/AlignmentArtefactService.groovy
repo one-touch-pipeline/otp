@@ -138,7 +138,7 @@ class AlignmentArtefactService {
             libraryPreparationKit,
             seqPlatformGroup
         from
-            AbstractMergedBamFile bamFile
+            AbstractBamFile bamFile
             join bamFile.workflowArtefact wa
             join bamFile.workPackage mergingWorkPackage
             join mergingWorkPackage.sample sample
@@ -254,7 +254,7 @@ class AlignmentArtefactService {
             libraryPreparationKit,
             seqPlatformGroup
         from
-            AbstractMergedBamFile bamFile
+            AbstractBamFile bamFile
             join bamFile.workflowArtefact wa
             join bamFile.workPackage mergingWorkPackage
             join mergingWorkPackage.sample sample
@@ -278,7 +278,7 @@ class AlignmentArtefactService {
                 select
                     max(identifier)
                 from
-                    AbstractMergedBamFile bamFile2
+                    AbstractBamFile bamFile2
                 where
                     bamFile2.workPackage = bamFile.workPackage
             )
@@ -435,7 +435,7 @@ class AlignmentArtefactService {
                 return []
             }
 
-            return AbstractMergedBamFile.executeQuery(HQL_WORKFLOW_VERSION_SELECTOR, [
+            return AbstractBamFile.executeQuery(HQL_WORKFLOW_VERSION_SELECTOR, [
                     seqTracks: seqTracks,
                     workflow : workflow,
             ]) as List<WorkflowVersionSelector>
@@ -444,7 +444,7 @@ class AlignmentArtefactService {
 
     Map<ProjectSeqTypeGroup, Map<Set<SpeciesWithStrain>, ReferenceGenome>> fetchReferenceGenome(Workflow workflow, Collection<SeqTrack> seqTracks) {
         return LogUsedTimeUtils.logUsedTime(log, "          fetchReferenceGenome") {
-            return (AbstractMergedBamFile.executeQuery(HQL_REFERENCE_GENOME, [
+            return (AbstractBamFile.executeQuery(HQL_REFERENCE_GENOME, [
                     seqTracks: seqTracks,
                     workflow : workflow,
             ]) as List<ReferenceGenomeSelector>).groupBy {
@@ -459,7 +459,7 @@ class AlignmentArtefactService {
 
     Map<ProjectSeqTypeGroup, MergingCriteria> fetchMergingCriteria(Collection<SeqTrack> seqTracks) {
         return LogUsedTimeUtils.logUsedTime(log, "          fetchMergingCriteria") {
-            return (AbstractMergedBamFile.executeQuery(HQL_MERGING_CRITERIA, [
+            return (AbstractBamFile.executeQuery(HQL_MERGING_CRITERIA, [
                     seqTracks: seqTracks,
             ]) as List<MergingCriteria>).collectEntries {
                 [(new ProjectSeqTypeGroup(it.project, it.seqType)): it]
@@ -469,7 +469,7 @@ class AlignmentArtefactService {
 
     Map<ProjectSeqTypeGroup, Map<SeqPlatform, SeqPlatformGroup>> fetchSpecificSeqPlatformGroup(Collection<SeqTrack> seqTracks) {
         return LogUsedTimeUtils.logUsedTime(log, "          fetchSeqPlatformGroup") {
-            return (AbstractMergedBamFile.executeQuery(HQL_SPECIFIC_SEQ_PLATFORM_GROUP, [
+            return (AbstractBamFile.executeQuery(HQL_SPECIFIC_SEQ_PLATFORM_GROUP, [
                     seqTracks: seqTracks,
             ]) as List<List<?>>).groupBy {
                 new ProjectSeqTypeGroup(it[INDEX_0] as Project, it[INDEX_1] as SeqType)
@@ -483,7 +483,7 @@ class AlignmentArtefactService {
 
     Map<SeqPlatform, SeqPlatformGroup> fetchDefaultSeqPlatformGroup() {
         return LogUsedTimeUtils.logUsedTime(log, "          fetchDefaultSeqPlatformGroup") {
-            return (AbstractMergedBamFile.executeQuery(HQL_DEFAULT_SEQ_PLATFORM_GROUP) as List<List<?>>).collectEntries {
+            return (AbstractBamFile.executeQuery(HQL_DEFAULT_SEQ_PLATFORM_GROUP) as List<List<?>>).collectEntries {
                 [(it[INDEX_0] as SeqPlatform): it[INDEX_1] as SeqPlatformGroup]
             } as Map<SeqPlatform, SeqPlatformGroup>
         }
@@ -491,7 +491,7 @@ class AlignmentArtefactService {
 
     Map<AlignmentWorkPackageGroup, MergingWorkPackage> fetchMergingWorkPackage(Collection<SeqTrack> seqTracks) {
         return LogUsedTimeUtils.logUsedTime(log, "          fetchMergingWorkPackage") {
-            return (AbstractMergedBamFile.executeQuery(HQL_FETCH_WORK_PACKAGES, [
+            return (AbstractBamFile.executeQuery(HQL_FETCH_WORK_PACKAGES, [
                     seqTracks: seqTracks,
             ]) as List<List<?>>).collectEntries {
                 [(new AlignmentWorkPackageGroup(it[INDEX_0] as Sample, it[INDEX_1] as SeqType, it[INDEX_2] as AntibodyTarget)):
@@ -502,7 +502,7 @@ class AlignmentArtefactService {
 
     Map<SeqTrack, List<DataFile>> fetchDataFiles(Collection<SeqTrack> seqTracks) {
         return LogUsedTimeUtils.logUsedTime(log, "          fetchDataFile") {
-            return (AbstractMergedBamFile.executeQuery(HQL_FETCH_DATA_FILES, [
+            return (AbstractBamFile.executeQuery(HQL_FETCH_DATA_FILES, [
                     seqTracks: seqTracks,
             ]) as List<List<?>>).groupBy {
                 it[INDEX_1] as SeqTrack

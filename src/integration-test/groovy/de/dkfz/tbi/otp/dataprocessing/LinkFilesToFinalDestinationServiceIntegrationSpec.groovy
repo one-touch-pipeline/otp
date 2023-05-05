@@ -139,10 +139,9 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends Specification im
     }
 
     private void assertBamFileIsFine() {
-        assert roddyBamFile.fileOperationStatus == AbstractMergedBamFile.FileOperationStatus.PROCESSED
+        assert roddyBamFile.fileOperationStatus == AbstractBamFile.FileOperationStatus.PROCESSED
         assert roddyBamFile.md5sum == DomainFactory.DEFAULT_MD5_SUM
         assert roddyBamFile.fileSize > 0
-        assert roddyBamFile.fileExists
         assert roddyBamFile.dateFromFileSystem instanceof Date
     }
 
@@ -150,8 +149,8 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends Specification im
         given:
         setupData()
         roddyBamFile = createBamFile([
-                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.NEEDS_PROCESSING,
-                qcTrafficLightStatus: AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED,
+                fileOperationStatus: AbstractBamFile.FileOperationStatus.NEEDS_PROCESSING,
+                qcTrafficLightStatus: AbstractBamFile.QcTrafficLightStatus.QC_PASSED,
         ])
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
         LinkFilesToFinalDestinationService linkFilesToFinalDestinationService = Spy {
@@ -161,7 +160,7 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends Specification im
         linkFilesToFinalDestinationService.md5SumService = new Md5SumService()
         linkFilesToFinalDestinationService.qcTrafficLightCheckService = new QcTrafficLightCheckService()
         linkFilesToFinalDestinationService.qcTrafficLightCheckService.qcTrafficLightNotificationService = Mock(QcTrafficLightNotificationService) {
-            0 * informResultsAreWarned(_) >> { AbstractMergedBamFile bamFile -> }
+            0 * informResultsAreWarned(_) >> { AbstractBamFile bamFile -> }
         }
         linkFilesToFinalDestinationService.executeRoddyCommandService = Mock(ExecuteRoddyCommandService) {
             1 * correctPermissionsAndGroups(_, _) >> { RoddyResult roddyResult, Realm realm -> }
@@ -169,7 +168,7 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends Specification im
         linkFilesToFinalDestinationService.linkFileUtils = Mock(LinkFileUtils) {
             1 * createAndValidateLinks(_, _, _) >> { Map<File, File> sourceLinkMap, Realm realm, String unixGroup -> }
         }
-        linkFilesToFinalDestinationService.abstractMergedBamFileService = Mock(AbstractMergedBamFileService) {
+        linkFilesToFinalDestinationService.abstractBamFileService = Mock(AbstractBamFileService) {
             1 * updateSamplePairStatusToNeedProcessing(_) >> { RoddyBamFile roddyBamFile -> }
         }
 
@@ -182,8 +181,8 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends Specification im
 
     void testValidateAndSetBamFileInProjectFolder_WhenBamFileFileOperationStatusNotInProgress_ShouldFail() {
         given:
-        AbstractMergedBamFile bamFile = createBamFile([
-                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.DECLARED,
+        AbstractBamFile bamFile = createBamFile([
+                fileOperationStatus: AbstractBamFile.FileOperationStatus.DECLARED,
         ])
 
         when:
@@ -195,8 +194,8 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends Specification im
 
     void testValidateAndSetBamFileInProjectFolder_WhenBamFileWithdrawn_ShouldFail() {
         given:
-        AbstractMergedBamFile bamFile = createBamFile([
-                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.INPROGRESS,
+        AbstractBamFile bamFile = createBamFile([
+                fileOperationStatus: AbstractBamFile.FileOperationStatus.INPROGRESS,
                 withdrawn: true,
         ])
 
@@ -211,12 +210,12 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends Specification im
         given:
         MergingWorkPackage mergingWorkPackage = DomainFactory.createMergingWorkPackage(pipeline: DomainFactory.createPanCanPipeline())
 
-        AbstractMergedBamFile bamFile = createRoddyBamFile([
-                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.INPROGRESS,
+        AbstractBamFile bamFile = createRoddyBamFile([
+                fileOperationStatus: AbstractBamFile.FileOperationStatus.INPROGRESS,
         ], mergingWorkPackage, RoddyBamFile)
 
         createRoddyBamFile([
-                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.INPROGRESS,
+                fileOperationStatus: AbstractBamFile.FileOperationStatus.INPROGRESS,
         ], mergingWorkPackage, RoddyBamFile)
 
         when:
@@ -231,7 +230,7 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends Specification im
         MergingWorkPackage mergingWorkPackage = DomainFactory.createMergingWorkPackage(pipeline: DomainFactory.createPanCanPipeline())
 
         createRoddyBamFile([
-                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.DECLARED,
+                fileOperationStatus: AbstractBamFile.FileOperationStatus.DECLARED,
         ], mergingWorkPackage, RoddyBamFile)
 
         createRoddyBamFile([
@@ -239,11 +238,11 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends Specification im
         ], mergingWorkPackage, RoddyBamFile)
 
         createBamFile([
-                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.INPROGRESS,
+                fileOperationStatus: AbstractBamFile.FileOperationStatus.INPROGRESS,
         ])
 
-        AbstractMergedBamFile bamFile = createRoddyBamFile([
-                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.INPROGRESS,
+        AbstractBamFile bamFile = createRoddyBamFile([
+                fileOperationStatus: AbstractBamFile.FileOperationStatus.INPROGRESS,
         ], mergingWorkPackage, RoddyBamFile)
 
         when:

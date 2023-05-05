@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,13 +25,13 @@ import groovy.transform.CompileDynamic
 import groovy.transform.TupleConstructor
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.QcTrafficLightStatus
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.QcTrafficLightStatus
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 @CompileDynamic
-class SamplePairChecker extends PipelinesChecker<AbstractMergedBamFile> {
+class SamplePairChecker extends PipelinesChecker<AbstractBamFile> {
 
     static final String HEADER_UNKNOWN_DISEASE_STATUS =
             'For the following project sampleType combination the sampleType was not classified as disease or control'
@@ -42,7 +42,7 @@ class SamplePairChecker extends PipelinesChecker<AbstractMergedBamFile> {
     static final String HEADER_UNKNOWN_THRESHOLD =
             'For the following project sampleType seqType combination no threshold is defined'
     static final String HEADER_NO_SAMPLE_PAIR =
-            'For the following MergedBamFile no SamplePair could be found'
+            'For the following BamFile no SamplePair could be found'
     static final String HEADER_SAMPLE_PAIR_WITHOUT_DISEASE_BAM_FILE =
             'The following samplePairs have no disease bam file'
     static final String HEADER_SAMPLE_PAIR_WITHOUT_CONTROL_BAM_FILE =
@@ -58,7 +58,7 @@ class SamplePairChecker extends PipelinesChecker<AbstractMergedBamFile> {
     static final String BLOCKED_HAS_REJECTED_QC_STATE = "bam file has rejected qc state"
 
     @Override
-    List<SamplePair> handle(List<AbstractMergedBamFile> bamFilesInput, MonitorOutputCollector output) {
+    List<SamplePair> handle(List<AbstractBamFile> bamFilesInput, MonitorOutputCollector output) {
         if (!bamFilesInput) {
             return []
         }
@@ -76,34 +76,34 @@ class SamplePairChecker extends PipelinesChecker<AbstractMergedBamFile> {
             })
         }
 
-        List<AbstractMergedBamFile> bamFiles = bamFileOfSupportedSeqType[true] ?: []
+        List<AbstractBamFile> bamFiles = bamFileOfSupportedSeqType[true] ?: []
 
-        List<AbstractMergedBamFile> unknownDiseaseStatus = bamFilesWithoutCategory(bamFiles)
+        List<AbstractBamFile> unknownDiseaseStatus = bamFilesWithoutCategory(bamFiles)
         output.showUniqueList(HEADER_UNKNOWN_DISEASE_STATUS, unknownDiseaseStatus, {
             "${it.project.name} ${it.sampleType.name}"
         })
 
         bamFiles = bamFiles - unknownDiseaseStatus
 
-        List<AbstractMergedBamFile> undefinedDiseaseStatus = bamFilesWithCategory(bamFiles, SampleTypePerProject.Category.UNDEFINED)
+        List<AbstractBamFile> undefinedDiseaseStatus = bamFilesWithCategory(bamFiles, SampleTypePerProject.Category.UNDEFINED)
         output.showUniqueList(HEADER_DISEASE_STATE_UNDEFINED, undefinedDiseaseStatus, {
             "${it.project.name} ${it.sampleType.name}"
         })
         bamFiles = bamFiles - undefinedDiseaseStatus
 
-        List<AbstractMergedBamFile> ignoredDiseaseStatus = bamFilesWithCategory(bamFiles, SampleTypePerProject.Category.IGNORED)
+        List<AbstractBamFile> ignoredDiseaseStatus = bamFilesWithCategory(bamFiles, SampleTypePerProject.Category.IGNORED)
         output.showUniqueList(HEADER_DISEASE_STATE_IGNORED, ignoredDiseaseStatus, {
             "${it.project.name} ${it.sampleType.name}"
         })
         bamFiles = bamFiles - ignoredDiseaseStatus
 
-        List<AbstractMergedBamFile> unknownThreshold = bamFilesWithoutThreshold(bamFiles)
+        List<AbstractBamFile> unknownThreshold = bamFilesWithoutThreshold(bamFiles)
         output.showUniqueList(HEADER_UNKNOWN_THRESHOLD, unknownThreshold, {
             "${it.project.name} ${it.sampleType.name} ${it.seqType.name}"
         })
         bamFiles = bamFiles - unknownThreshold
 
-        List<AbstractMergedBamFile> noPairFound = bamFilesWithoutSamplePair(bamFiles)
+        List<AbstractBamFile> noPairFound = bamFilesWithoutSamplePair(bamFiles)
         output.showUniqueList(HEADER_NO_SAMPLE_PAIR, noPairFound)
         bamFiles = bamFiles - noPairFound
 
@@ -111,7 +111,7 @@ class SamplePairChecker extends PipelinesChecker<AbstractMergedBamFile> {
 
         List<SamplePair> samplePairWithoutBamFile = samplePairWithMissingBamFile(allSamplePairs)
         Map diseaseBamFileMissed = samplePairWithoutBamFile.groupBy {
-            CollectionUtils.atMostOneElement(AbstractMergedBamFile.findAllByWorkPackage(it.mergingWorkPackage1, [max: 1])) == null
+            CollectionUtils.atMostOneElement(AbstractBamFile.findAllByWorkPackage(it.mergingWorkPackage1, [max: 1])) == null
         }
         output.showList(HEADER_SAMPLE_PAIR_WITHOUT_DISEASE_BAM_FILE, diseaseBamFileMissed[true])
         output.showList(HEADER_SAMPLE_PAIR_WITHOUT_CONTROL_BAM_FILE, diseaseBamFileMissed[false])
@@ -122,15 +122,15 @@ class SamplePairChecker extends PipelinesChecker<AbstractMergedBamFile> {
         return allSamplePairs - samplePairWithoutBamFile - waitingSamplePairs*.samplePair
     }
 
-    List<AbstractMergedBamFile> bamFilesWithoutCategory(List<AbstractMergedBamFile> bamFiles) {
+    List<AbstractBamFile> bamFilesWithoutCategory(List<AbstractBamFile> bamFiles) {
         if (!bamFiles) {
             return []
         }
-        return AbstractMergedBamFile.executeQuery("""
+        return AbstractBamFile.executeQuery("""
                 select
                     bamFile
                 from
-                    AbstractMergedBamFile bamFile
+                    AbstractBamFile bamFile
                 where
                     bamFile in (:bamFiles)
                     and not exists (
@@ -147,15 +147,15 @@ class SamplePairChecker extends PipelinesChecker<AbstractMergedBamFile> {
         ])
     }
 
-    List<AbstractMergedBamFile> bamFilesWithCategory(List<AbstractMergedBamFile> bamFiles, SampleTypePerProject.Category category) {
+    List<AbstractBamFile> bamFilesWithCategory(List<AbstractBamFile> bamFiles, SampleTypePerProject.Category category) {
         if (!bamFiles) {
             return []
         }
-        return AbstractMergedBamFile.executeQuery("""
+        return AbstractBamFile.executeQuery("""
                 select
                     bamFile
                 from
-                    AbstractMergedBamFile bamFile,
+                    AbstractBamFile bamFile,
                     SampleTypePerProject sampleTypePerProject
                 where
                     bamFile in (:bamFiles)
@@ -167,15 +167,15 @@ class SamplePairChecker extends PipelinesChecker<AbstractMergedBamFile> {
         ])
     }
 
-    List<AbstractMergedBamFile> bamFilesWithoutThreshold(List<AbstractMergedBamFile> bamFiles) {
+    List<AbstractBamFile> bamFilesWithoutThreshold(List<AbstractBamFile> bamFiles) {
         if (!bamFiles) {
             return []
         }
-        return AbstractMergedBamFile.executeQuery("""
+        return AbstractBamFile.executeQuery("""
                 select
                     bamFile
                 from
-                    AbstractMergedBamFile bamFile
+                    AbstractBamFile bamFile
                 where
                     bamFile in (:bamFiles)
                     and not exists (
@@ -193,15 +193,15 @@ class SamplePairChecker extends PipelinesChecker<AbstractMergedBamFile> {
         ])
     }
 
-    List<AbstractMergedBamFile> bamFilesWithoutSamplePair(List<AbstractMergedBamFile> bamFiles) {
+    List<AbstractBamFile> bamFilesWithoutSamplePair(List<AbstractBamFile> bamFiles) {
         if (!bamFiles) {
             return []
         }
-        return AbstractMergedBamFile.executeQuery("""
+        return AbstractBamFile.executeQuery("""
                 select
                     bamFile
                 from
-                    AbstractMergedBamFile bamFile
+                    AbstractBamFile bamFile
                 where
                     bamFile in (:bamFiles)
                     and not exists (
@@ -218,7 +218,7 @@ class SamplePairChecker extends PipelinesChecker<AbstractMergedBamFile> {
         ])
     }
 
-    List<SamplePair> samplePairsForBamFiles(List<AbstractMergedBamFile> bamFiles) {
+    List<SamplePair> samplePairsForBamFiles(List<AbstractBamFile> bamFiles) {
         if (!bamFiles) {
             return []
         }
@@ -247,14 +247,14 @@ class SamplePairChecker extends PipelinesChecker<AbstractMergedBamFile> {
                             select
                                 bamFile
                             from
-                                AbstractMergedBamFile bamFile
+                                AbstractBamFile bamFile
                             where
                                 bamFile.workPackage = samplePair.mergingWorkPackage1
                         ) or not exists (
                             select
                                 bamFile
                             from
-                                AbstractMergedBamFile bamFile
+                                AbstractBamFile bamFile
                             where
                                 bamFile.workPackage = samplePair.mergingWorkPackage2
                         )
@@ -281,7 +281,7 @@ class SamplePairChecker extends PipelinesChecker<AbstractMergedBamFile> {
                             select
                                 max(bamFile.id)
                             from
-                                AbstractMergedBamFile bamFile
+                                AbstractBamFile bamFile
                             where
                                 bamFile.workPackage = bamFile${number}.workPackage
                         )
@@ -309,8 +309,8 @@ class SamplePairChecker extends PipelinesChecker<AbstractMergedBamFile> {
                     )
                 from
                     SamplePair samplePair,
-                    AbstractMergedBamFile bamFile1,
-                    AbstractMergedBamFile bamFile2,
+                    AbstractBamFile bamFile1,
+                    AbstractBamFile bamFile2,
                     ProcessingThresholds processingThresholds1,
                     ProcessingThresholds processingThresholds2,
                     SampleTypePerProject sampleTypePerProject1,
@@ -332,8 +332,8 @@ class SamplePairChecker extends PipelinesChecker<AbstractMergedBamFile> {
     @TupleConstructor
     static class BlockedSamplePair {
         SamplePair samplePair
-        AbstractMergedBamFile bamFile1
-        AbstractMergedBamFile bamFile2
+        AbstractBamFile bamFile1
+        AbstractBamFile bamFile2
         ProcessingThresholds processingThresholds1
         ProcessingThresholds processingThresholds2
 
@@ -350,7 +350,7 @@ class SamplePairChecker extends PipelinesChecker<AbstractMergedBamFile> {
                             processingThresholds: processingThresholds2,
                     ],
             ].each { String key, Map map ->
-                AbstractMergedBamFile bamFile = map.bamFile
+                AbstractBamFile bamFile = map.bamFile
                 ProcessingThresholds processingThresholds = map.processingThresholds
                 if (bamFile.withdrawn) {
                     reasonsForBlocking << "${key} ${BLOCKED_BAM_IS_WITHDRAWN}"

@@ -353,7 +353,7 @@ if (allProcessed) {
                     from
                         RoddyBamFile roddyBamFile join roddyBamFile.seqTracks seqTrack
                     where
-                        roddyBamFile.fileOperationStatus <> '${AbstractMergedBamFile.FileOperationStatus.PROCESSED}'
+                        roddyBamFile.fileOperationStatus <> '${AbstractBamFile.FileOperationStatus.PROCESSED}'
                         and roddyBamFile.withdrawn = false
                     )
             )
@@ -390,19 +390,19 @@ if (allProcessed) {
             (
                 (
                     bamFile${number}.qcTrafficLightStatus not in (
-                        '${AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED.name()}',
-                        '${AbstractMergedBamFile.QcTrafficLightStatus.REJECTED.name()}'
+                        '${AbstractBamFile.QcTrafficLightStatus.BLOCKED.name()}',
+                        '${AbstractBamFile.QcTrafficLightStatus.REJECTED.name()}'
                     )
                 )
                 or bamFile${number}.qcTrafficLightStatus is NULL
             )
             and bamFile${number}.id = (
                 select max( maxBamFile.id)
-                from AbstractMergedBamFile maxBamFile
+                from AbstractBamFile maxBamFile
                 where maxBamFile.workPackage = bamFile${number}.workPackage
             )
             and (
-                bamFile${number}.fileOperationStatus <> '${AbstractMergedBamFile.FileOperationStatus.PROCESSED}'
+                bamFile${number}.fileOperationStatus <> '${AbstractBamFile.FileOperationStatus.PROCESSED}'
                 or exists (
                     from
                         ProcessingThresholds pt
@@ -437,9 +437,9 @@ if (allProcessed) {
         select samplePair
         from
             SamplePair samplePair,
-            AbstractMergedBamFile bamFile1
+            AbstractBamFile bamFile1
                 join bamFile1.workPackage mwp1,
-            AbstractMergedBamFile bamFile2
+            AbstractBamFile bamFile2
                 join bamFile2.workPackage mwp2
         where (
             ${needsProcessing('snvProcessingStatus', Pipeline.Type.SNV)}

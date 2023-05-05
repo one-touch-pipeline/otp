@@ -41,7 +41,7 @@ class RoddyBamFileServiceSpec extends Specification implements ServiceUnitTest<R
     @Override
     Class[] getDomainClassesToMock() {
         [
-                AbstractMergedBamFile,
+                AbstractBamFile,
                 Comment,
                 DataFile,
                 FileType,
@@ -86,7 +86,7 @@ class RoddyBamFileServiceSpec extends Specification implements ServiceUnitTest<R
                 roddyExecutionDirectoryNames: [],
         )
 
-        service.abstractMergedBamFileService = Mock(AbstractMergedBamFileService) {
+        service.abstractBamFileService = Mock(AbstractBamFileService) {
             getBaseDirectory(_) >> Paths.get(baseDir)
         }
     }
@@ -372,7 +372,7 @@ class RoddyBamFileServiceSpec extends Specification implements ServiceUnitTest<R
 
     void "test getLatestWorkExecutionDirectory, all fine"(String roddyExecutionDirName) {
         given:
-        service.abstractMergedBamFileService = Mock(AbstractMergedBamFileService) {
+        service.abstractBamFileService = Mock(AbstractBamFileService) {
             getBaseDirectory(_) >> tempDir.resolve("base-dir")
         }
 
@@ -431,7 +431,7 @@ class RoddyBamFileServiceSpec extends Specification implements ServiceUnitTest<R
         !service.getPathForFurtherProcessing(roddyBamFile)
 
         where:
-        status << [AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED, AbstractMergedBamFile.QcTrafficLightStatus.REJECTED]
+        status << [AbstractBamFile.QcTrafficLightStatus.BLOCKED, AbstractBamFile.QcTrafficLightStatus.REJECTED]
     }
 
     void "test getPathForFurtherProcessing, when old structure is used, should return final directory"() {

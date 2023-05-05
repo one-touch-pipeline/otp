@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -72,4 +72,6 @@ databaseChangeLog = {
     include file: 'changelogs/2023/otp-2006-uuid.groovy'
 
     include file: 'changelogs/2023/otp-2044.groovy'
+
+    include file: 'changelogs/2023/otp-1883.groovy'
 }

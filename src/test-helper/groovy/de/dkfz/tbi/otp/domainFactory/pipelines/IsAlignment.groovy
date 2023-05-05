@@ -21,7 +21,7 @@
  */
 package de.dkfz.tbi.otp.domainFactory.pipelines
 
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.dataprocessing.AbstractQualityAssessment
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
@@ -56,10 +56,10 @@ trait IsAlignment implements IsPipeline {
         return createQa(createBamFile(), properties)
     }
 
-    AbstractQualityAssessment createQa(AbstractMergedBamFile abstractMergedBamFile, Map properties = [:], boolean saveAndValidate = true) {
+    AbstractQualityAssessment createQa(AbstractBamFile abstractBamFile, Map properties = [:], boolean saveAndValidate = true) {
         createDomainObject(qaClass, defaultValuesForAbstractQualityAssessment + [
                 qualityAssessmentMergedPass: DomainFactory.createQualityAssessmentMergedPass(
-                        abstractMergedBamFile: abstractMergedBamFile
+                        abstractBamFile: abstractBamFile
                 ),
         ] + qaValuesProperties, properties, saveAndValidate)
     }

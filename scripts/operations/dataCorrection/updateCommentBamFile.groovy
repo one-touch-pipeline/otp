@@ -21,7 +21,7 @@
  */
 
 import de.dkfz.tbi.otp.CommentService
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.CollectionUtils
@@ -61,13 +61,13 @@ String bamFileDefinition = """
 CommentService commentService = ctx.commentService
 SeqTypeService seqTypeService = ctx.seqTypeService
 
-AbstractMergedBamFile.withTransaction {
+AbstractBamFile.withTransaction {
     assert newComment: 'Comment may not be empty'
     assert author: 'Author may not be empty'
     User user = CollectionUtils.atMostOneElement(User.findAllByUsername(author))
     assert user: "No user with ldap name '${author}' could be found in OTP"
 
-    List<AbstractMergedBamFile> bamFiles = bamFileDefinition.split('\n')*.trim().findAll { String line ->
+    List<AbstractBamFile> bamFiles = bamFileDefinition.split('\n')*.trim().findAll { String line ->
         line && !line.startsWith('#')
     }.collect { String line ->
         List<String> split = line.split(' *[ ,;\t] *')*.trim()
@@ -85,8 +85,8 @@ AbstractMergedBamFile.withTransaction {
         Sample sample = CollectionUtils.exactlyOneElement(Sample.findAllByIndividualAndSampleType(individual, sampleType),
                 "Could not find sample for '${individual.pid}' and '${sampleType.name}'")
 
-        AbstractMergedBamFile bamFile = CollectionUtils.exactlyOneElement(
-                AbstractMergedBamFile.withCriteria {
+        AbstractBamFile bamFile = CollectionUtils.exactlyOneElement(
+                AbstractBamFile.withCriteria {
                     workPackage {
                         eq('sample', sample)
                         eq('seqType', seqType)
@@ -95,12 +95,12 @@ AbstractMergedBamFile.withTransaction {
         )
         assert seqType: "Could not find bam file for: ${sample} ${seqType.displayNameWithLibraryLayout}"
         return bamFile
-    }.each { AbstractMergedBamFile bamFile ->
+    }.each { AbstractBamFile bamFile ->
         println "${bamFile}: ${bamFile.comment?.comment}"
     }
     assert false: "DEBUG: transaction intentionally failed to rollback changes"
 
-    bamFiles.each {AbstractMergedBamFile bamFile ->
+    bamFiles.each { AbstractBamFile bamFile ->
         if (bamFile.comment) {
             bamFile.comment.with {
                 comment = newComment

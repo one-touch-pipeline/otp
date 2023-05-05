@@ -1,6 +1,7 @@
 #!/bin/bash
 
-# Copyright 2011-2019 The OTP authors
+#
+# Copyright 2011-2023 The OTP authors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -19,6 +20,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+#
 
 
 # This scripts creates a database migration script from the gorm to defined database
@@ -61,8 +63,8 @@ joinTables="\
 (ega_submission_bam_file_submission_object)|\
 (ega_submission_data_file_submission_object)|\
 (ega_submission_sample_submission_object)|\
-(externally_processed_merged_bam_file_further_files)|\
-(import_process_externally_processed_merged_bam_file)|\
+(externally_processed_bam_file_further_files)|\
+(import_process_externally_processed_bam_file)|\
 (indel_calling_instance_roddy_execution_directory_names)|\
 (integer_field_definition_allowed_integer_values)|\
 (job_error_definition_job_definition)|\

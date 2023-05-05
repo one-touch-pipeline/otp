@@ -37,7 +37,7 @@ import java.nio.file.Path
 @Transactional
 class SampleSwapService extends AbstractDataSwapService<SampleSwapParameters, SampleSwapData> {
 
-    AbstractMergedBamFileService abstractMergedBamFileService
+    AbstractBamFileService abstractBamFileService
 
     @Override
     protected void logSwapParameters(SampleSwapParameters parameters) {

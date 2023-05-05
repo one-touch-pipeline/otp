@@ -23,17 +23,17 @@ package de.dkfz.tbi.otp.egaSubmission
 
 import grails.gorm.hibernate.annotation.ManagedEntity
 
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.utils.Entity
 
 @ManagedEntity
 class BamFileSubmissionObject implements Entity, SubmissionObject {
 
-    AbstractMergedBamFile bamFile
+    AbstractBamFile bamFile
     SampleSubmissionObject sampleSubmissionObject
 
     static belongsTo = [
-            bamFile               : AbstractMergedBamFile,
+            bamFile               : AbstractBamFile,
             sampleSubmissionObject: SampleSubmissionObject,
     ]
 

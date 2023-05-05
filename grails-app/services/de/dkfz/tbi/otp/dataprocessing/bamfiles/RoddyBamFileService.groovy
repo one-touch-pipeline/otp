@@ -31,9 +31,9 @@ import java.nio.file.Path
 
 @CompileDynamic
 @Transactional
-class RoddyBamFileService extends AbstractAbstractMergedBamFileService<RoddyBamFile> implements RoddyResultServiceTrait<RoddyBamFile> {
+class RoddyBamFileService extends AbstractAbstractBamFileService<RoddyBamFile> implements RoddyResultServiceTrait<RoddyBamFile> {
 
-    AbstractMergedBamFileService abstractMergedBamFileService
+    AbstractBamFileService abstractBamFileService
 
     static final String WORK_DIR_PREFIX = ".merging"
 
@@ -58,16 +58,16 @@ class RoddyBamFileService extends AbstractAbstractMergedBamFileService<RoddyBamF
     // Example: ${OtpProperty#PATH_PROJECT_ROOT}/${project}/sequencing/whole_genome_sequencing/view-by-pid/somePid/control/paired/merged-alignment/.merging_3
     @Override
     Path getWorkDirectory(RoddyBamFile bamFile) {
-        return abstractMergedBamFileService.getBaseDirectory(bamFile).resolve(bamFile.workDirectoryName)
+        return abstractBamFileService.getBaseDirectory(bamFile).resolve(bamFile.workDirectoryName)
     }
 
     @Override
     Path getBaseDirectory(RoddyBamFile bamFile) {
-        return abstractMergedBamFileService.getBaseDirectory(bamFile)
+        return abstractBamFileService.getBaseDirectory(bamFile)
     }
 
     Path getFinalQADirectory(RoddyBamFile bamFile) {
-        return abstractMergedBamFileService.getBaseDirectory(bamFile).resolve(QUALITY_CONTROL_DIR)
+        return abstractBamFileService.getBaseDirectory(bamFile).resolve(QUALITY_CONTROL_DIR)
     }
 
     Path getWorkQADirectory(RoddyBamFile bamFile) {
@@ -79,7 +79,7 @@ class RoddyBamFileService extends AbstractAbstractMergedBamFileService<RoddyBamF
     }
 
     Path getFinalMethylationDirectory(RoddyBamFile bamFile) {
-        return abstractMergedBamFileService.getBaseDirectory(bamFile).resolve(METHYLATION_DIR)
+        return abstractBamFileService.getBaseDirectory(bamFile).resolve(METHYLATION_DIR)
     }
 
     Path getFinalMergedQADirectory(RoddyBamFile bamFile) {
@@ -179,7 +179,7 @@ class RoddyBamFileService extends AbstractAbstractMergedBamFileService<RoddyBamF
     }
 
     Path getFinalExecutionStoreDirectory(RoddyBamFile bamFile) {
-        return abstractMergedBamFileService.getBaseDirectory(bamFile).resolve(RODDY_EXECUTION_STORE_DIR)
+        return abstractBamFileService.getBaseDirectory(bamFile).resolve(RODDY_EXECUTION_STORE_DIR)
     }
 
     List<Path> getFinalExecutionDirectories(RoddyBamFile bamFile) {
@@ -189,7 +189,7 @@ class RoddyBamFileService extends AbstractAbstractMergedBamFileService<RoddyBamF
     }
 
     Path getFinalBamFile(RoddyBamFile bamFile) {
-        return abstractMergedBamFileService.getBaseDirectory(bamFile).resolve(bamFile.bamFileName)
+        return abstractBamFileService.getBaseDirectory(bamFile).resolve(bamFile.bamFileName)
     }
 
     Path getWorkBamFile(RoddyBamFile bamFile) {
@@ -197,7 +197,7 @@ class RoddyBamFileService extends AbstractAbstractMergedBamFileService<RoddyBamF
     }
 
     Path getFinalBaiFile(RoddyBamFile bamFile) {
-        return abstractMergedBamFileService.getBaseDirectory(bamFile).resolve(bamFile.baiFileName)
+        return abstractBamFileService.getBaseDirectory(bamFile).resolve(bamFile.baiFileName)
     }
 
     Path getWorkBaiFile(RoddyBamFile bamFile) {
@@ -205,7 +205,7 @@ class RoddyBamFileService extends AbstractAbstractMergedBamFileService<RoddyBamF
     }
 
     Path getFinalMd5sumFile(RoddyBamFile bamFile) {
-        return abstractMergedBamFileService.getBaseDirectory(bamFile).resolve(getMd5sumFileName(bamFile))
+        return abstractBamFileService.getBaseDirectory(bamFile).resolve(getMd5sumFileName(bamFile))
     }
 
     Path getWorkMd5sumFile(RoddyBamFile bamFile) {
@@ -213,7 +213,7 @@ class RoddyBamFileService extends AbstractAbstractMergedBamFileService<RoddyBamF
     }
 
     Path getFinalMetadataTableFile(RoddyBamFile bamFile) {
-        return abstractMergedBamFileService.getBaseDirectory(bamFile).resolve(METADATATABLE_FILE)
+        return abstractBamFileService.getBaseDirectory(bamFile).resolve(METADATATABLE_FILE)
     }
 
     Path getWorkMetadataTableFile(RoddyBamFile bamFile) {

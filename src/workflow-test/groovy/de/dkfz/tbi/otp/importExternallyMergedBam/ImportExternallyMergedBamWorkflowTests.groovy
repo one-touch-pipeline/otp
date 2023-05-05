@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -67,7 +67,7 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase implements
             FURTHER_FILE_NAME_SUBSUBDIRECTORY221,
     ].asImmutable()
 
-    protected ExternallyProcessedMergedBamFile createFile(Project project, String nameInfix, boolean furtherFiles, boolean useLink = false) {
+    protected ExternallyProcessedBamFile createFile(Project project, String nameInfix, boolean furtherFiles, boolean useLink = false) {
         File baseDir = new File(ftpDir, nameInfix)
         File targetDir = useLink ? new File(baseDir, 'target') : baseDir
 
@@ -105,7 +105,7 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase implements
         }
 
         File bamFile = new File(baseDir, bamFileName)
-        ExternallyProcessedMergedBamFile epmbf = DomainFactory.createExternallyProcessedMergedBamFile(
+        ExternallyProcessedBamFile epmbf = DomainFactory.createExternallyProcessedBamFile(
                 importedFrom: bamFile.path,
                 fileName: bamFileName,
                 fileSize: bamFile.size(),
@@ -160,11 +160,11 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase implements
         SessionUtils.withTransaction {
             Project project = createProject(realm: realm)
             createDirectories([new File(ftpDir), new File(projectService.getProjectDirectory(project).toString())])
-            ExternallyProcessedMergedBamFile epmbf01 = createFile(project, '1', furtherFiles, false)
-            ExternallyProcessedMergedBamFile epmbf02 = createFile(project, '2', furtherFiles, true)
+            ExternallyProcessedBamFile epmbf01 = createFile(project, '1', furtherFiles, false)
+            ExternallyProcessedBamFile epmbf02 = createFile(project, '2', furtherFiles, true)
 
             importProcess = new ImportProcess(
-                    externallyProcessedMergedBamFiles: [epmbf01, epmbf02],
+                    externallyProcessedBamFiles: [epmbf01, epmbf02],
                     state: ImportProcess.State.NOT_STARTED,
                     linkOperation: ImportProcess.LinkOperation.COPY_AND_LINK,
             ).save(flush: true)
@@ -190,7 +190,7 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase implements
         Thread.sleep(1000) //needs a sleep, otherwise the file system cache has not yet the new value
         SessionUtils.withTransaction {
             FileSystem fs = fileSystemService.filesystemForBamImport
-            importProcess.externallyProcessedMergedBamFiles.each {
+            importProcess.externallyProcessedBamFiles.each {
                 it.refresh()
                 Path baseDirSource = fs.getPath(it.importedFrom).parent
                 Path baseDirTarget = fs.getPath(it.importFolder.path)
@@ -233,7 +233,7 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase implements
         Thread.sleep(1000) //needs a sleep, otherwise the file system cache has not yet the new value
 
         SessionUtils.withTransaction {
-            importProcess.externallyProcessedMergedBamFiles.each {
+            importProcess.externallyProcessedBamFiles.each {
                 it.refresh()
                 Path baseDirSource = Paths.get(it.importedFrom).parent
                 Path baseDirTarget = Paths.get(it.importFolder.path)
@@ -267,7 +267,7 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase implements
             importProcess.refresh()
             importProcess.linkOperation = ImportProcess.LinkOperation.LINK_SOURCE
             importProcess.save(flush: true)
-            importProcess.externallyProcessedMergedBamFiles.each { ExternallyProcessedMergedBamFile bamFile ->
+            importProcess.externallyProcessedBamFiles.each { ExternallyProcessedBamFile bamFile ->
                 bamFile.maximumReadLength = 100
                 bamFile.md5sum = HelperUtils.randomMd5sum
                 bamFile.save(flush: true)
@@ -282,11 +282,10 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase implements
 
         SessionUtils.withTransaction {
             FileSystem fs = fileSystemService.filesystemForBamImport
-            importProcess.externallyProcessedMergedBamFiles.each {
+            importProcess.externallyProcessedBamFiles.each {
                 it.refresh()
                 assert it.fileSize > 0
-                assert it.fileExists
-                assert it.fileOperationStatus == AbstractMergedBamFile.FileOperationStatus.PROCESSED
+                assert it.fileOperationStatus == AbstractBamFile.FileOperationStatus.PROCESSED
 
                 Path baseDirSource = fs.getPath(it.importedFrom).parent
                 Path baseDirTarget = fs.getPath(it.importFolder.path)
@@ -316,9 +315,9 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase implements
             FileSystem fs = fileSystemService.filesystemForBamImport
             importProcess = ImportProcess.get(impPro.id)
             assert importProcess.state == ImportProcess.State.FINISHED
-            assert importProcess.externallyProcessedMergedBamFiles.size() == 2
+            assert importProcess.externallyProcessedBamFiles.size() == 2
 
-            importProcess.externallyProcessedMergedBamFiles.each {
+            importProcess.externallyProcessedBamFiles.each {
                 it.refresh()
                 assert it.fileSize > 0
                 File baseDirectory = it.importFolder

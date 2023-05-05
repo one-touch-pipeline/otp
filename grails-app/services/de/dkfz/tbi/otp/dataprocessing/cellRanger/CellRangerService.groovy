@@ -74,7 +74,7 @@ class CellRangerService {
 
     LsdfFilesService lsdfFilesService
 
-    AbstractMergedBamFileService abstractMergedBamFileService
+    AbstractBamFileService abstractBamFileService
 
     ReferenceGenomeIndexService referenceGenomeIndexService
 
@@ -199,9 +199,9 @@ class CellRangerService {
     private void completeBamFile(SingleCellBamFile singleCellBamFile) {
         assert singleCellBamFile.isMostRecentBamFile(): "The BamFile ${singleCellBamFile} is not the most recent one. This must not happen!"
         assert [
-                AbstractMergedBamFile.FileOperationStatus.NEEDS_PROCESSING,
-                AbstractMergedBamFile.FileOperationStatus.INPROGRESS,
-                AbstractMergedBamFile.FileOperationStatus.PROCESSED,
+                AbstractBamFile.FileOperationStatus.NEEDS_PROCESSING,
+                AbstractBamFile.FileOperationStatus.INPROGRESS,
+                AbstractBamFile.FileOperationStatus.PROCESSED,
         ].contains(singleCellBamFile.fileOperationStatus)
 
         updateBamFile(singleCellBamFile)
@@ -209,7 +209,7 @@ class CellRangerService {
         singleCellBamFile.workPackage.bamFileInProjectFolder = singleCellBamFile
         assert singleCellBamFile.workPackage.save(flush: true)
 
-        abstractMergedBamFileService.updateSamplePairStatusToNeedProcessing(singleCellBamFile)
+        abstractBamFileService.updateSamplePairStatusToNeedProcessing(singleCellBamFile)
     }
 
     private void updateBamFile(SingleCellBamFile singleCellBamFile) {
@@ -221,10 +221,9 @@ class CellRangerService {
 
         String md5SumFile = md5SumService.extractMd5Sum(md5SumFileName)
 
-        singleCellBamFile.fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.PROCESSED
+        singleCellBamFile.fileOperationStatus = AbstractBamFile.FileOperationStatus.PROCESSED
         singleCellBamFile.fileSize = Files.size(bamFile)
         singleCellBamFile.md5sum = md5SumFile
-        singleCellBamFile.fileExists = true
         singleCellBamFile.dateFromFileSystem = new Date(Files.getLastModifiedTime(bamFile).toMillis())
         assert singleCellBamFile.save(flush: true)
     }

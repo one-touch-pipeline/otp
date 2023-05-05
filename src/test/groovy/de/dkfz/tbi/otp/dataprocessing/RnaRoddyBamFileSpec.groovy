@@ -35,7 +35,7 @@ class RnaRoddyBamFileSpec extends Specification implements RoddyRnaFactory, Data
     @Override
     Class[] getDomainClassesToMock() {
         return [
-                AbstractMergedBamFile,
+                AbstractBamFile,
                 DataFile,
                 FileType,
                 Individual,

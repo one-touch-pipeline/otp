@@ -38,7 +38,7 @@ class AbstractMergingWorkPackageSpec extends Specification implements DataTest {
     @Override
     Class[] getDomainClassesToMock() {
         [
-                AbstractMergedBamFile,
+                AbstractBamFile,
                 AbstractMergingWorkPackage,
                 AntibodyTarget,
                 Individual,
@@ -51,23 +51,23 @@ class AbstractMergingWorkPackageSpec extends Specification implements DataTest {
                 SampleType,
                 SeqPlatformGroup,
                 SeqType,
-                TestAbstractMergedBamFile,
+                TestAbstractBamFile,
                 TestAbstractMergingWorkPackage,
         ]
     }
 
     TestAbstractMergingWorkPackage testAMWP
     TestAbstractMergingWorkPackage testAMWP2
-    TestAbstractMergedBamFile testAMBF
+    TestAbstractBamFile testAMBF
 
     @Artefact(DomainClassArtefactHandler.TYPE)
     class TestAbstractMergingWorkPackage extends AbstractMergingWorkPackage implements DomainClass, GormEntity<TestAbstractMergingWorkPackage>, Validateable {
 
-        final AbstractMergedBamFile bamFileThatIsReadyForFurtherAnalysis = null
+        final AbstractBamFile bamFileThatIsReadyForFurtherAnalysis = null
     }
 
     @Artefact(DomainClassArtefactHandler.TYPE)
-    class TestAbstractMergedBamFile extends AbstractMergedBamFile implements DomainClass, GormEntity<TestAbstractMergedBamFile>, Validateable {
+    class TestAbstractBamFile extends AbstractBamFile implements DomainClass, GormEntity<TestAbstractBamFile>, Validateable {
 
         final String bamFileName = null
 
@@ -106,14 +106,14 @@ class AbstractMergingWorkPackageSpec extends Specification implements DataTest {
     def setup() {
         testAMWP = new TestAbstractMergingWorkPackage()
         testAMWP2 = new TestAbstractMergingWorkPackage()
-        testAMBF = new TestAbstractMergedBamFile()
+        testAMBF = new TestAbstractBamFile()
     }
 
     void "test constraint bamFileInProjectFolder, when workpackage invalid then validate fails"() {
-        given: "Given an AbstractMergingWorkPackage, you assign a different one to an AbstractMergedBamFile"
+        given: "Given an AbstractMergingWorkPackage, you assign a different one to an AbstractBamFile"
         testAMBF.workPackage = testAMWP2
         testAMWP.bamFileInProjectFolder = testAMBF
-        testAMBF.fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.PROCESSED
+        testAMBF.fileOperationStatus = AbstractBamFile.FileOperationStatus.PROCESSED
 
         expect:
         TestCase.assertAtLeastExpectedValidateError(testAMWP, "bamFileInProjectFolder", "validator.invalid", testAMBF)
@@ -123,7 +123,7 @@ class AbstractMergingWorkPackageSpec extends Specification implements DataTest {
         given:
         testAMBF.workPackage = testAMWP
         testAMWP.bamFileInProjectFolder = testAMBF
-        testAMBF.fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.NEEDS_PROCESSING
+        testAMBF.fileOperationStatus = AbstractBamFile.FileOperationStatus.NEEDS_PROCESSING
 
         expect:
         TestCase.assertAtLeastExpectedValidateError(testAMWP, "bamFileInProjectFolder", "validator.invalid", testAMBF)
@@ -133,7 +133,7 @@ class AbstractMergingWorkPackageSpec extends Specification implements DataTest {
         given:
         testAMBF.workPackage = testAMWP
         testAMWP.bamFileInProjectFolder = testAMBF
-        testAMBF.fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.PROCESSED
+        testAMBF.fileOperationStatus = AbstractBamFile.FileOperationStatus.PROCESSED
 
         when:
         testAMWP.validate()

@@ -48,7 +48,7 @@ class AbstractRoddyAlignmentJobSpec extends Specification implements DataTest, R
     @Override
     Class<?>[] getDomainClassesToMock() {
         return [
-                AbstractMergedBamFile,
+                AbstractBamFile,
                 DataFile,
                 FileType,
                 Individual,
@@ -257,7 +257,7 @@ class AbstractRoddyAlignmentJobSpec extends Specification implements DataTest, R
         }
 
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile([
-                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.INPROGRESS,
+                fileOperationStatus: AbstractBamFile.FileOperationStatus.INPROGRESS,
                 md5sum             : null,
         ])
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
@@ -267,7 +267,7 @@ class AbstractRoddyAlignmentJobSpec extends Specification implements DataTest, R
 
         then:
         AssertionError e = thrown()
-        e.message.contains(AbstractMergedBamFile.FileOperationStatus.INPROGRESS.name())
+        e.message.contains(AbstractBamFile.FileOperationStatus.INPROGRESS.name())
 
         cleanup:
         configService.clean()
@@ -287,7 +287,7 @@ class AbstractRoddyAlignmentJobSpec extends Specification implements DataTest, R
         }
 
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile([
-                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.DECLARED,
+                fileOperationStatus: AbstractBamFile.FileOperationStatus.DECLARED,
                 md5sum             : null,
         ])
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
@@ -318,7 +318,7 @@ class AbstractRoddyAlignmentJobSpec extends Specification implements DataTest, R
         }
 
         RoddyBamFile roddyBamFile = RoddyRnaFactory.super.createBamFile([
-                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.DECLARED,
+                fileOperationStatus: AbstractBamFile.FileOperationStatus.DECLARED,
         ])
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
         roddyBamFile.workSingleLaneQAJsonFiles.values().each { File file ->

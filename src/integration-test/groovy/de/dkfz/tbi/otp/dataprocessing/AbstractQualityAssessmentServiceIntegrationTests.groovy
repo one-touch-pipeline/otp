@@ -80,7 +80,7 @@ class AbstractQualityAssessmentServiceIntegrationTests {
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
         final Long ARBITRARY_UNUSED_VALUE = 1
         RoddyMergedBamQa mergedQa = new RoddyMergedBamQa([
-                qualityAssessmentMergedPass : DomainFactory.createQualityAssessmentMergedPass(abstractMergedBamFile: roddyBamFile),
+                qualityAssessmentMergedPass : DomainFactory.createQualityAssessmentMergedPass(abstractBamFile: roddyBamFile),
                 qcBasesMapped : QC_BASES_MAPPED,
                 genomeWithoutNCoverageQcBases: EXPECTED_COVERAGE,
                 chromosome: RoddyQualityAssessment.ALL,

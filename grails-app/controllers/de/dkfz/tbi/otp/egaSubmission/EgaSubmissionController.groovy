@@ -27,7 +27,7 @@ import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.Errors
 
 import de.dkfz.tbi.otp.*
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFileService
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFileService
 import de.dkfz.tbi.otp.ngsdata.DataFile
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.project.Project
@@ -75,7 +75,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
     EgaSubmissionFileService egaSubmissionFileService
     ProjectSelectionService projectSelectionService
     ProjectService projectService
-    AbstractMergedBamFileService abstractMergedBamFileService
+    AbstractBamFileService abstractBamFileService
 
     final private static String ERROR_TITLE = "Some errors occurred"
 
@@ -529,7 +529,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
                     pushErrors(errors.errors, cmd.submission)
                     Map egaFileAliases = [:]
                     cmd.egaFileAlias.eachWithIndex { it, i ->
-                        egaFileAliases.put(abstractMergedBamFileService.findById(cmd.fileId[i] as long).bamFileName + cmd.egaSampleAlias[i], it)
+                        egaFileAliases.put(abstractBamFileService.findById(cmd.fileId[i] as long).bamFileName + cmd.egaSampleAlias[i], it)
                     }
                     flash.egaFileAliases = egaFileAliases
                 } else {

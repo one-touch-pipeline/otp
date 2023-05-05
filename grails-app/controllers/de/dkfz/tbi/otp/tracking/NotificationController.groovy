@@ -27,7 +27,7 @@ import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.CheckAndCall
 import de.dkfz.tbi.otp.FlashMessage
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.notification.NotificationDigestService
 import de.dkfz.tbi.otp.project.Project
@@ -92,7 +92,7 @@ class NotificationController implements CheckAndCall {
 class PreparedNotification {
     Project project
     List<SeqTrack> seqTracks
-    List<AbstractMergedBamFile> bams
+    List<AbstractBamFile> bams
     List<UserProjectRole> toBeNotifiedProjectUsers
     ProcessingStatus processingStatus
     String subject

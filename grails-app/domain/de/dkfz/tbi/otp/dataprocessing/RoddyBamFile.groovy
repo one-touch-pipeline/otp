@@ -41,7 +41,7 @@ import de.dkfz.tbi.otp.workflowExecution.ExternalWorkflowConfigFragment
  * new SeqTracks which were not merged into the earlier created bam file (base bam file).
  */
 @ManagedEntity
-class RoddyBamFile extends AbstractMergedBamFile implements Artefact, HasIdentifier, ProcessParameterObject, RoddyResult {
+class RoddyBamFile extends AbstractBamFile implements Artefact, HasIdentifier, ProcessParameterObject, RoddyResult {
 
     /**
      * @deprecated use {@link RoddyBamFileService#WORK_DIR_PREFIX} instead
@@ -199,11 +199,11 @@ class RoddyBamFile extends AbstractMergedBamFile implements Artefact, HasIdentif
 
     QualityAssessmentMergedPass findOrSaveQaPass() {
         QualityAssessmentMergedPass assessmentMergedPass = CollectionUtils.atMostOneElement(QualityAssessmentMergedPass.findAllWhere(
-                abstractMergedBamFile: this,
+                abstractBamFile: this,
         ))
         if (!assessmentMergedPass) {
             assessmentMergedPass = new QualityAssessmentMergedPass(
-                    abstractMergedBamFile: this,
+                    abstractBamFile: this,
             )
             assessmentMergedPass.save(flush: true)
         }
@@ -219,7 +219,7 @@ class RoddyBamFile extends AbstractMergedBamFile implements Artefact, HasIdentif
         return CollectionUtils.exactlyOneElement(RoddyMergedBamQa.createCriteria().list {
             eq 'chromosome', RoddyQualityAssessment.ALL
             qualityAssessmentMergedPass {
-                abstractMergedBamFile {
+                abstractBamFile {
                     eq 'id', this.id
                 }
             }

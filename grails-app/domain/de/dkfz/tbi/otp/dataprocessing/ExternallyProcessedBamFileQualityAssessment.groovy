@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,10 +26,10 @@ import grails.gorm.hibernate.annotation.ManagedEntity
 import de.dkfz.tbi.otp.qcTrafficLight.QcThresholdEvaluated
 
 /**
- * Keeps all needed QA parameters for external processed merged BAM files at the moment only for Sophia
+ * Keeps all needed QA parameters for externally processed BAM files at the moment only for Sophia
  */
 @ManagedEntity
-class ExternalProcessedMergedBamFileQualityAssessment extends AbstractQualityAssessment
+class ExternallyProcessedBamFileQualityAssessment extends AbstractQualityAssessment
         implements QualityAssessmentWithMergedPass, SophiaWorkflowQualityAssessment {
 
     /**

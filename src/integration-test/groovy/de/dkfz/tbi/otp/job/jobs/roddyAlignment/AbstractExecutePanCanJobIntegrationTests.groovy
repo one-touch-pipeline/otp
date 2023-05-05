@@ -69,7 +69,7 @@ class AbstractExecutePanCanJobIntegrationTests implements DomainFactoryCore, Dom
 
         roddyBamFile = DomainFactory.createRoddyBamFile([
                 md5sum                      : null,
-                fileOperationStatus         : AbstractMergedBamFile.FileOperationStatus.DECLARED,
+                fileOperationStatus         : AbstractBamFile.FileOperationStatus.DECLARED,
                 roddyExecutionDirectoryNames: [DomainFactory.DEFAULT_RODDY_EXECUTION_STORE_DIRECTORY],
         ])
         roddyBamFile.workPackage.metaClass.seqTracks = SeqTrack.list()

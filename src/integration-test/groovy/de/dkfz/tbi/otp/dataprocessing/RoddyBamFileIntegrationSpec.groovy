@@ -92,7 +92,7 @@ class RoddyBamFileIntegrationSpec extends Specification {
         given:
         RoddyBamFile bamFile = DomainFactory.createRoddyBamFile()
         QualityAssessmentMergedPass qaPass = DomainFactory.createQualityAssessmentMergedPass(
-                abstractMergedBamFile: bamFile,
+                abstractBamFile: bamFile,
         )
         DomainFactory.createRoddyMergedBamQa(
                 NULL_QA_VALUES + [

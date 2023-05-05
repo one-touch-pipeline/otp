@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -100,7 +100,7 @@ class BamMetadataImportService {
         try {
             MetadataImportService.mayImport(context, ignoreWarnings, previousValidationMd5sum)
             importProcess = new ImportProcess([
-                    externallyProcessedMergedBamFiles: [],
+                    externallyProcessedBamFiles: [],
                     state                            : ImportProcess.State.NOT_STARTED,
                     linkOperation                    : linkOperation,
                     triggerAnalysis                  : triggerAnalysis,
@@ -152,7 +152,7 @@ class BamMetadataImportService {
                 )
                 assert emwp.save(flush: true)
 
-                ExternallyProcessedMergedBamFile epmbf = new ExternallyProcessedMergedBamFile(
+                ExternallyProcessedBamFile epmbf = new ExternallyProcessedBamFile(
                         workPackage: emwp,
                         importedFrom: bamFilePath,
                         fileName: getNameFromPath(bamFilePath),
@@ -186,13 +186,13 @@ class BamMetadataImportService {
 
                     def qcValues = new JsonSlurper().parse(qualityControlFilePath.bytes)
 
-                    new ExternalProcessedMergedBamFileQualityAssessment(
+                    new ExternallyProcessedBamFileQualityAssessment(
                             properlyPaired: qcValues.all.properlyPaired,
                             pairedInSequencing: qcValues.all.pairedInSequencing,
                             insertSizeMedian: qcValues.all.insertSizeMedian,
                             insertSizeCV: qcValues.all.insertSizeCV,
                             qualityAssessmentMergedPass: new QualityAssessmentMergedPass([
-                                    abstractMergedBamFile: epmbf,
+                                    abstractBamFile: epmbf,
                             ]).save(flush: true),
                     ).save(flush: true)
 
@@ -206,16 +206,16 @@ class BamMetadataImportService {
 
                 emwp.bamFileInProjectFolder = null
                 assert epmbf.save(flush: true)
-                importProcess.externallyProcessedMergedBamFiles.add(epmbf)
+                importProcess.externallyProcessedBamFiles.add(epmbf)
             }
 
             assert importProcess.save(flush: true)
 
             if (importProcess.triggerAnalysis) {
-                samplePairDeciderService.findOrCreateSamplePairs(importProcess.externallyProcessedMergedBamFiles*.workPackage)
+                samplePairDeciderService.findOrCreateSamplePairs(importProcess.externallyProcessedBamFiles*.workPackage)
             }
 
-            outputProject = importProcess.externallyProcessedMergedBamFiles.first().project
+            outputProject = importProcess.externallyProcessedBamFiles.first().project
         } catch (MetadataFileImportException e) {
             context.addProblem(Collections.emptySet(), LogLevel.INFO, e.message)
         }

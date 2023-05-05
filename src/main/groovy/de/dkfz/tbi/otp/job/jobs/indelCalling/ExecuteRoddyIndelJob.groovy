@@ -58,8 +58,8 @@ class ExecuteRoddyIndelJob extends AbstractExecutePanCanJob<IndelCallingInstance
         indelCallingService.validateInputBamFiles(indelCallingInstance)
         Path workDirectory = indelCallingService.getWorkDirectory(indelCallingInstance)
 
-        AbstractMergedBamFile bamFileDisease = indelCallingInstance.sampleType1BamFile
-        AbstractMergedBamFile bamFileControl = indelCallingInstance.sampleType2BamFile
+        AbstractBamFile bamFileDisease = indelCallingInstance.sampleType1BamFile
+        AbstractBamFile bamFileControl = indelCallingInstance.sampleType2BamFile
 
         Path bamFileDiseasePath = linkBamFileInWorkDirectory(bamFileDisease, workDirectory)
         Path bamFileControlPath = linkBamFileInWorkDirectory(bamFileControl, workDirectory)

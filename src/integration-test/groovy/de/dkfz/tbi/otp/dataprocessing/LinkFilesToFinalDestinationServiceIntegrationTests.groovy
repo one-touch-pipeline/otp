@@ -57,8 +57,8 @@ class LinkFilesToFinalDestinationServiceIntegrationTests implements DomainFactor
         roddyBamFile = DomainFactory.createRoddyBamFile()
         roddyBamFile.md5sum = null
         roddyBamFile.fileSize = -1
-        roddyBamFile.fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.NEEDS_PROCESSING
-        roddyBamFile.qcTrafficLightStatus = AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED
+        roddyBamFile.fileOperationStatus = AbstractBamFile.FileOperationStatus.NEEDS_PROCESSING
+        roddyBamFile.qcTrafficLightStatus = AbstractBamFile.QcTrafficLightStatus.QC_PASSED
         roddyBamFile.roddyExecutionDirectoryNames = ["exec_123456_123456789_test_test"]
         assert roddyBamFile.save(flush: true)
 
@@ -606,7 +606,7 @@ class LinkFilesToFinalDestinationServiceIntegrationTests implements DomainFactor
     void testExecute_RoddyBamFileHasWrongState_ShouldFail() {
         setupData()
         setUp_allFine()
-        roddyBamFile.fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.DECLARED
+        roddyBamFile.fileOperationStatus = AbstractBamFile.FileOperationStatus.DECLARED
         roddyBamFile.save(flush: true)
 
         assert TestCase.shouldFail(AssertionError) {
@@ -621,7 +621,7 @@ class LinkFilesToFinalDestinationServiceIntegrationTests implements DomainFactor
         DomainFactory.createRoddyBamFile([
                 workPackage        : roddyBamFile.workPackage,
                 withdrawn          : false,
-                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.INPROGRESS,
+                fileOperationStatus: AbstractBamFile.FileOperationStatus.INPROGRESS,
                 md5sum             : null,
                 fileSize           : -1,
                 identifier         : roddyBamFile.identifier - 1,
@@ -693,12 +693,12 @@ class LinkFilesToFinalDestinationServiceIntegrationTests implements DomainFactor
         }
 
         linkFilesToFinalDestinationService.linkToFinalDestinationAndCleanup(roddyBamFile, realm)
-        assert roddyBamFile.fileOperationStatus == AbstractMergedBamFile.FileOperationStatus.NEEDS_PROCESSING
+        assert roddyBamFile.fileOperationStatus == AbstractBamFile.FileOperationStatus.NEEDS_PROCESSING
     }
 
     private void finishOperationStateOfRoddyBamFile(RoddyBamFile roddyBamFile) {
         roddyBamFile.md5sum = HelperUtils.randomMd5sum
-        roddyBamFile.fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.PROCESSED
+        roddyBamFile.fileOperationStatus = AbstractBamFile.FileOperationStatus.PROCESSED
         roddyBamFile.fileSize = 1000
         assert roddyBamFile.save(flush: true)
     }

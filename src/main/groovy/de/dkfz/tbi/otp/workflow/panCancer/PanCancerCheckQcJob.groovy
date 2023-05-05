@@ -24,7 +24,7 @@ package de.dkfz.tbi.otp.workflow.panCancer
 import groovy.util.logging.Slf4j
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.workflow.jobs.AbstractCheckQcJob
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
@@ -33,7 +33,7 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 class PanCancerCheckQcJob extends AbstractCheckQcJob implements PanCancerShared {
 
     @Override
-    protected AbstractMergedBamFile getAbstractMergedBamFile(WorkflowStep workflowStep) {
+    protected AbstractBamFile getAbstractBamFile(WorkflowStep workflowStep) {
         return getRoddyBamFile(workflowStep)
     }
 }

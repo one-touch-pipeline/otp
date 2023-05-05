@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -284,13 +284,13 @@ class SeqTrackService {
         } as List<SeqTrack>
     }
 
-    List<ExternallyProcessedMergedBamFile> returnExternallyProcessedMergedBamFiles(List<SeqTrack> seqTracks) {
-        notNull(seqTracks, "The input of returnExternallyProcessedMergedBamFiles is null")
-        assert !seqTracks.empty: "The input list of returnExternallyProcessedMergedBamFiles is empty"
+    List<ExternallyProcessedBamFile> returnExternallyProcessedBamFiles(List<SeqTrack> seqTracks) {
+        notNull(seqTracks, "The input of returnExternallyProcessedBamFiles is null")
+        assert !seqTracks.empty: "The input list of returnExternallyProcessedBamFiles is empty"
 
         return seqTracks.collect { val ->
             CollectionUtils.atMostOneElement(
-                    ExternallyProcessedMergedBamFile.createCriteria().list {
+                    ExternallyProcessedBamFile.createCriteria().list {
                         workPackage {
                             eq('sample', val.sample)
                             eq('seqType', val.seqType)
@@ -383,11 +383,11 @@ class SeqTrackService {
     }
 
     /**
-     * In case there are ExternallyProcessedMergedBamFile attached to the lanes to swap, the script shall stop
+     * In case there are ExternallyProcessedBamFile attached to the lanes to swap, the script shall stop
      */
-    void throwExceptionInCaseOfExternalMergedBamFileIsAttached(List<SeqTrack> seqTracks) {
-        List<ExternallyProcessedMergedBamFile> externallyProcessedMergedBamFiles = returnExternallyProcessedMergedBamFiles(seqTracks)
-        assert externallyProcessedMergedBamFiles.empty: "There are ExternallyProcessedMergedBamFiles attached: ${externallyProcessedMergedBamFiles}"
+    void throwExceptionInCaseOfExternallyProcessedBamFileIsAttached(List<SeqTrack> seqTracks) {
+        List<ExternallyProcessedBamFile> externallyProcessedBamFiles = returnExternallyProcessedBamFiles(seqTracks)
+        assert externallyProcessedBamFiles.empty: "There are ExternallyProcessedBamFiles attached: ${externallyProcessedBamFiles}"
     }
 
     /**

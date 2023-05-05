@@ -39,7 +39,7 @@ class RnaRoddyBamFileServiceSpec extends Specification implements ServiceUnitTes
     @Override
     Class[] getDomainClassesToMock() {
         return [
-                AbstractMergedBamFile,
+                AbstractBamFile,
                 DataFile,
                 FileType,
                 Individual,
@@ -73,7 +73,7 @@ class RnaRoddyBamFileServiceSpec extends Specification implements ServiceUnitTes
     void setup() {
         bamFile = createBamFile()
         testDir = "/base-dir"
-        service.abstractMergedBamFileService = Mock(AbstractMergedBamFileService) {
+        service.abstractBamFileService = Mock(AbstractBamFileService) {
             getBaseDirectory(_) >> Paths.get("/base-dir")
         }
     }

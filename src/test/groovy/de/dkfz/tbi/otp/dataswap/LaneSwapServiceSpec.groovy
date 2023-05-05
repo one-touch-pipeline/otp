@@ -59,7 +59,7 @@ class LaneSwapServiceSpec extends Specification implements DataTest, ServiceUnit
                 Sample,
                 Individual,
                 SeqTrack,
-                ExternallyProcessedMergedBamFile,
+                ExternallyProcessedBamFile,
                 RoddyBamFile,
         ]
     }

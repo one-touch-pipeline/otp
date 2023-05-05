@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,7 +26,7 @@ import grails.testing.mixin.integration.Integration
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
 
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergingWorkPackage
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.project.Project
@@ -40,89 +40,89 @@ class SampleOverviewServiceIntegrationSpec extends Specification implements User
     @Autowired
     SampleOverviewService sampleLaneService
 
-    void "test abstractMergedBamFilesInProjectFolder without MergedBamFiles in Project"() {
+    void "test abstractBamFilesInProjectFolder without bamFiles in Project"() {
         given:
         Project project = DomainFactory.createProject()
 
         expect:
-        sampleLaneService.abstractMergedBamFilesInProjectFolder(project) == []
+        sampleLaneService.abstractBamFilesInProjectFolder(project) == []
     }
 
     @SuppressWarnings("SpaceAfterOpeningBrace")
-    void "test abstractMergedBamFilesInProjectFolder with abstractMergedBamFile in Project"() {
+    void "test abstractBamFilesInProjectFolder with abstractBamFile in Project"() {
         given:
-        AbstractMergedBamFile mergedBamFile = abstractMergedBamFile()
-        mergedBamFile.workPackage.bamFileInProjectFolder = mergedBamFile
-        mergedBamFile.workPackage.save(flush: true)
+        AbstractBamFile bamFile = abstractBamFile()
+        bamFile.workPackage.bamFileInProjectFolder = bamFile
+        bamFile.workPackage.save(flush: true)
 
         when:
-        List result = sampleLaneService.abstractMergedBamFilesInProjectFolder(mergedBamFile.project)
+        List result = sampleLaneService.abstractBamFilesInProjectFolder(bamFile.project)
 
         then:
-        mergedBamFile == CollectionUtils.exactlyOneElement(result)
+        bamFile == CollectionUtils.exactlyOneElement(result)
 
         where:
-        abstractMergedBamFile                                                | _
+        abstractBamFile                                                | _
         ({ createBamFile() })                                                | _
-        ({ DomainFactory.createFinishedExternallyProcessedMergedBamFile() }) | _
+        ({ DomainFactory.createFinishedExternallyProcessedBamFile() }) | _
     }
 
     @SuppressWarnings("SpaceAfterOpeningBrace")
-    void "test abstractMergedBamFilesInProjectFolder with abstractMergedBamFile in different Project"() {
+    void "test abstractBamFilesInProjectFolder with abstractBamFile in different Project"() {
         given:
         Project project = DomainFactory.createProject()
-        abstractMergedBamFile()
+        abstractBamFile()
 
         when:
-        List result = sampleLaneService.abstractMergedBamFilesInProjectFolder(project)
+        List result = sampleLaneService.abstractBamFilesInProjectFolder(project)
 
         then:
         result.isEmpty()
 
         where:
-        abstractMergedBamFile                                                | _
+        abstractBamFile                                                | _
         ({ createBamFile() })                                                | _
-        ({ DomainFactory.createFinishedExternallyProcessedMergedBamFile() }) | _
+        ({ DomainFactory.createFinishedExternallyProcessedBamFile() }) | _
     }
 
     @SuppressWarnings("SpaceAfterOpeningBrace")
-    void "test abstractMergedBamFilesInProjectFolder with MergedBamFiles in Project but without MergingWorkPackage"() {
+    void "test abstractBamFilesInProjectFolder with abstractBamFiles in Project but without MergingWorkPackage"() {
         given:
-        AbstractMergedBamFile mergedBamFile = abstractMergedBamFile()
-        AbstractMergingWorkPackage workPackage = mergedBamFile.workPackage
+        AbstractBamFile bamFile = abstractBamFile()
+        AbstractMergingWorkPackage workPackage = bamFile.workPackage
         workPackage.bamFileInProjectFolder = null
         assert workPackage.save(flush: true)
 
         when:
-        List result = sampleLaneService.abstractMergedBamFilesInProjectFolder(mergedBamFile.project)
+        List result = sampleLaneService.abstractBamFilesInProjectFolder(bamFile.project)
 
         then:
         result.isEmpty()
 
         where:
-        abstractMergedBamFile                                                | _
+        abstractBamFile                                                | _
         ({ createBamFile() })                                                | _
-        ({ DomainFactory.createFinishedExternallyProcessedMergedBamFile() }) | _
+        ({ DomainFactory.createFinishedExternallyProcessedBamFile() }) | _
     }
 
     @SuppressWarnings("SpaceAfterOpeningBrace")
-    void "test abstractMergedBamFilesInProjectFolder with two MergedBamFiles in Project but one not Finished yet"() {
+    void "test abstractBamFilesInProjectFolder with two abstractBamFiles in Project but one not Finished yet"() {
         given:
-        AbstractMergedBamFile mergedBamFile1 = finishedAbstractMergedBamFile()
-        unfinishedAbstractMergedBamFile(mergedBamFile1.mergingWorkPackage)
-        mergedBamFile1.workPackage.bamFileInProjectFolder = mergedBamFile1
-        mergedBamFile1.workPackage.save(flush: true)
+        AbstractBamFile bamFile = finishedAbstractBamFile()
+        unfinishedAbstractBamFile(bamFile.mergingWorkPackage)
+        bamFile.workPackage.bamFileInProjectFolder = bamFile
+        bamFile.workPackage.save(flush: true)
 
         when:
-        List result = sampleLaneService.abstractMergedBamFilesInProjectFolder(mergedBamFile1.project)
+        List result = sampleLaneService.abstractBamFilesInProjectFolder(bamFile.project)
 
         then:
-        mergedBamFile1 == CollectionUtils.exactlyOneElement(result)
+        bamFile == CollectionUtils.exactlyOneElement(result)
 
         where:
-        finishedAbstractMergedBamFile                                        | unfinishedAbstractMergedBamFile
+        finishedAbstractBamFile                                        | unfinishedAbstractBamFile
         ({ createBamFile() })                                                | ({ createBamFile(workPackage: it) })
-        ({ DomainFactory.createFinishedExternallyProcessedMergedBamFile() }) | ({ DomainFactory.createExternallyProcessedMergedBamFile(workPackage: it) })
+        ({ DomainFactory.createFinishedExternallyProcessedBamFile() }) | ({ DomainFactory.createExternallyProcessedBamFile(workPackage: it) })
     }
 
     void "test sampleTypeByProject without SampleTypes in Project"() {

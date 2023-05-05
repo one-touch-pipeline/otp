@@ -101,7 +101,7 @@ class CellRangerDataCleanupJob extends AbstractScheduledJob {
             workPackage {
                 eq("status", CellRangerMergingWorkPackage.Status.UNSET)
             }
-            ne("fileOperationStatus", AbstractMergedBamFile.FileOperationStatus.PROCESSED)
+            ne("fileOperationStatus", AbstractBamFile.FileOperationStatus.PROCESSED)
             lt("lastUpdated", date)
         } as List<SingleCellBamFile>)*.workPackage
 
@@ -138,7 +138,7 @@ class CellRangerDataCleanupJob extends AbstractScheduledJob {
                 isNull("informed")
                 isNotNull('bamFileInProjectFolder')
             }
-            eq("fileOperationStatus", AbstractMergedBamFile.FileOperationStatus.PROCESSED)
+            eq("fileOperationStatus", AbstractBamFile.FileOperationStatus.PROCESSED)
             lt("lastUpdated", reminderDeadline)
         } as List<SingleCellBamFile>)*.workPackage
     }

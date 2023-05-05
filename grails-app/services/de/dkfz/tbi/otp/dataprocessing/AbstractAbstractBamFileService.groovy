@@ -25,10 +25,10 @@ import grails.gorm.transactions.Transactional
 
 import java.nio.file.Path
 
-import static de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.QcTrafficLightStatus
+import static AbstractBamFile.QcTrafficLightStatus
 
 @Transactional
-abstract class AbstractAbstractMergedBamFileService<T extends AbstractMergedBamFile> {
+abstract class AbstractAbstractBamFileService<T extends AbstractBamFile> {
 
     abstract Path getFinalInsertSizeFile(T bamFile)
     protected abstract Path getPathForFurtherProcessingNoCheck(T bamFile)
@@ -38,7 +38,7 @@ abstract class AbstractAbstractMergedBamFileService<T extends AbstractMergedBamF
             return null
         }
         bamFile.mergingWorkPackage.refresh() //Sometimes the mergingWorkPackage.processableBamFileInProjectFolder is empty but should have a value
-        AbstractMergedBamFile processableBamFileInProjectFolder = bamFile.mergingWorkPackage.processableBamFileInProjectFolder
+        AbstractBamFile processableBamFileInProjectFolder = bamFile.mergingWorkPackage.processableBamFileInProjectFolder
         if (bamFile.id == processableBamFileInProjectFolder?.id) {
             return getPathForFurtherProcessingNoCheck(bamFile)
         }

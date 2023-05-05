@@ -47,18 +47,18 @@ class CellRangerStartJob extends AbstractAlignmentStartJob implements Restartabl
     }
 
     @Override
-    AbstractMergedBamFile reallyCreateBamFile(
+    AbstractBamFile reallyCreateBamFile(
             MergingWorkPackage mergingWorkPackage,
             int identifier,
             Set<SeqTrack> seqTracks,
             ConfigPerProjectAndSeqType config,
-            AbstractMergedBamFile baseBamFile = null) {
+            AbstractBamFile baseBamFile = null) {
         return new SingleCellBamFile(
                 workPackage        : mergingWorkPackage,
                 identifier         : identifier,
                 workDirectoryName  : SingleCellBamFile.buildWorkDirectoryName((CellRangerMergingWorkPackage) mergingWorkPackage, identifier),
                 seqTracks          : seqTracks,
-                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.INPROGRESS,
+                fileOperationStatus: AbstractBamFile.FileOperationStatus.INPROGRESS,
         )
     }
 

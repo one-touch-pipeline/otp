@@ -44,7 +44,7 @@ class ParseSophiaQcJobSpec extends Specification implements DataTest {
     @Override
     Class[] getDomainClassesToMock() {
         [
-                AbstractMergedBamFile,
+                AbstractBamFile,
                 DataFile,
                 FileType,
                 Individual,

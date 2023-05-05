@@ -26,7 +26,7 @@ import grails.testing.mixin.integration.Integration
 import spock.lang.*
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.QcTrafficLightStatus
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.QcTrafficLightStatus
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
@@ -38,8 +38,8 @@ class AbstractBamFileAnalysisServiceIntegrationSpec extends Specification {
 
     SamplePair samplePair1
     ConfigPerProjectAndSeqType roddyConfig1
-    AbstractMergedBamFile bamFile1
-    AbstractMergedBamFile bamFile2
+    AbstractBamFile bamFile1
+    AbstractBamFile bamFile2
 
     @Shared
     SnvCallingService snvCallingService
@@ -79,7 +79,7 @@ class AbstractBamFileAnalysisServiceIntegrationSpec extends Specification {
         }
         assert samplePair1.save(flush: true)
 
-        AbstractMergedBamFile bamFile = samplePair1.mergingWorkPackage1.bamFileInProjectFolder
+        AbstractBamFile bamFile = samplePair1.mergingWorkPackage1.bamFileInProjectFolder
         bamFile.comment = DomainFactory.createComment()
         bamFile.qcTrafficLightStatus = qc
         bamFile.save(flush: true)
@@ -144,12 +144,12 @@ class AbstractBamFileAnalysisServiceIntegrationSpec extends Specification {
 
         where:
         processingStatus         | pipeline                                     | service                 | qc
-        "indelProcessingStatus"  | { DomainFactory.createIndelPipelineLazy() }  | { indelCallingService } | AbstractMergedBamFile.QcTrafficLightStatus.REJECTED
-        "sophiaProcessingStatus" | { DomainFactory.createSophiaPipelineLazy() } | { sophiaService }       | AbstractMergedBamFile.QcTrafficLightStatus.REJECTED
-        "aceseqProcessingStatus" | { DomainFactory.createAceseqPipelineLazy() } | { aceseqService }       | AbstractMergedBamFile.QcTrafficLightStatus.REJECTED
-        "indelProcessingStatus"  | { DomainFactory.createIndelPipelineLazy() }  | { indelCallingService } | AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED
-        "sophiaProcessingStatus" | { DomainFactory.createSophiaPipelineLazy() } | { sophiaService }       | AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED
-        "aceseqProcessingStatus" | { DomainFactory.createAceseqPipelineLazy() } | { aceseqService }       | AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED
+        "indelProcessingStatus"  | { DomainFactory.createIndelPipelineLazy() }  | { indelCallingService } | AbstractBamFile.QcTrafficLightStatus.REJECTED
+        "sophiaProcessingStatus" | { DomainFactory.createSophiaPipelineLazy() } | { sophiaService }       | AbstractBamFile.QcTrafficLightStatus.REJECTED
+        "aceseqProcessingStatus" | { DomainFactory.createAceseqPipelineLazy() } | { aceseqService }       | AbstractBamFile.QcTrafficLightStatus.REJECTED
+        "indelProcessingStatus"  | { DomainFactory.createIndelPipelineLazy() }  | { indelCallingService } | AbstractBamFile.QcTrafficLightStatus.BLOCKED
+        "sophiaProcessingStatus" | { DomainFactory.createSophiaPipelineLazy() } | { sophiaService }       | AbstractBamFile.QcTrafficLightStatus.BLOCKED
+        "aceseqProcessingStatus" | { DomainFactory.createAceseqPipelineLazy() } | { aceseqService }       | AbstractBamFile.QcTrafficLightStatus.BLOCKED
     }
 
     @Unroll
@@ -162,18 +162,18 @@ class AbstractBamFileAnalysisServiceIntegrationSpec extends Specification {
 
         where:
         processingStatus         | pipeline                                     | service                 | qc
-        "indelProcessingStatus"  | { DomainFactory.createIndelPipelineLazy() }  | { indelCallingService } | AbstractMergedBamFile.QcTrafficLightStatus.ACCEPTED
-        "sophiaProcessingStatus" | { DomainFactory.createSophiaPipelineLazy() } | { sophiaService }       | AbstractMergedBamFile.QcTrafficLightStatus.ACCEPTED
-        "aceseqProcessingStatus" | { DomainFactory.createAceseqPipelineLazy() } | { aceseqService }       | AbstractMergedBamFile.QcTrafficLightStatus.ACCEPTED
-        "indelProcessingStatus"  | { DomainFactory.createIndelPipelineLazy() }  | { indelCallingService } | AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED
-        "sophiaProcessingStatus" | { DomainFactory.createSophiaPipelineLazy() } | { sophiaService }       | AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED
-        "aceseqProcessingStatus" | { DomainFactory.createAceseqPipelineLazy() } | { aceseqService }       | AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED
+        "indelProcessingStatus"  | { DomainFactory.createIndelPipelineLazy() }  | { indelCallingService } | AbstractBamFile.QcTrafficLightStatus.ACCEPTED
+        "sophiaProcessingStatus" | { DomainFactory.createSophiaPipelineLazy() } | { sophiaService }       | AbstractBamFile.QcTrafficLightStatus.ACCEPTED
+        "aceseqProcessingStatus" | { DomainFactory.createAceseqPipelineLazy() } | { aceseqService }       | AbstractBamFile.QcTrafficLightStatus.ACCEPTED
+        "indelProcessingStatus"  | { DomainFactory.createIndelPipelineLazy() }  | { indelCallingService } | AbstractBamFile.QcTrafficLightStatus.QC_PASSED
+        "sophiaProcessingStatus" | { DomainFactory.createSophiaPipelineLazy() } | { sophiaService }       | AbstractBamFile.QcTrafficLightStatus.QC_PASSED
+        "aceseqProcessingStatus" | { DomainFactory.createAceseqPipelineLazy() } | { aceseqService }       | AbstractBamFile.QcTrafficLightStatus.QC_PASSED
     }
 
     @Unroll
     void "samplePairForProcessing should not return a sample pair when project is archived"() {
         given:
-        setupDataExtended(processingStatus, pipeline, AbstractMergedBamFile.QcTrafficLightStatus.ACCEPTED)
+        setupDataExtended(processingStatus, pipeline, AbstractBamFile.QcTrafficLightStatus.ACCEPTED)
         samplePair1.project.archived = true
         samplePair1.project.save(flush: true)
 

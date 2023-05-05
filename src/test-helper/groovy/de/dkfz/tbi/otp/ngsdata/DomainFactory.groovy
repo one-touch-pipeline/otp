@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,7 +25,7 @@ import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.Comment
 import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerQualityAssessment
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
@@ -261,7 +261,7 @@ class DomainFactory {
 
     static QualityAssessmentMergedPass createQualityAssessmentMergedPass(Map properties = [:]) {
         return createDomainObject(QualityAssessmentMergedPass, [
-                abstractMergedBamFile: { createRoddyBamFile() }
+                abstractBamFile: { createRoddyBamFile() }
         ], properties)
     }
 
@@ -422,7 +422,7 @@ class DomainFactory {
         createProcessingOptionLazy(ProcessingOption.OptionName.COMMAND_ACTIVATION_GROOVY, '')
     }
 
-    static Map getRandomProcessedBamFileProperties() {
+    static Map getRandomBamFileProperties() {
         return [
                 fileSize           : ++counter,
                 md5sum             : HelperUtils.randomMd5sum,
@@ -515,7 +515,7 @@ class DomainFactory {
     static createRoddyMergedBamQa(RoddyBamFile roddyBamFile, Map properties = [:]) {
         return createRoddyMergedBamQa([
                 qualityAssessmentMergedPass: createQualityAssessmentMergedPass(
-                        abstractMergedBamFile: roddyBamFile
+                        abstractBamFile: roddyBamFile
                 ),
                 referenceLength            : 1,
         ] + properties)
@@ -524,7 +524,7 @@ class DomainFactory {
     static Map roddyQualityAssessmentProperties = [
             qualityAssessmentMergedPass  : {
                 createQualityAssessmentMergedPass(
-                        abstractMergedBamFile: createRoddyBamFile()
+                        abstractBamFile: createRoddyBamFile()
                 )
             },
             chromosome                   : RoddyQualityAssessment.ALL,
@@ -656,7 +656,7 @@ class DomainFactory {
     }
 
     static SampleTypePerProject createSampleTypePerProjectForBamFile(
-            AbstractMergedBamFile bamFile, SampleTypePerProject.Category category = SampleTypePerProject.Category.DISEASE) {
+            AbstractBamFile bamFile, SampleTypePerProject.Category category = SampleTypePerProject.Category.DISEASE) {
         return createSampleTypePerProjectForMergingWorkPackage(bamFile.mergingWorkPackage, category)
     }
 
@@ -672,8 +672,8 @@ class DomainFactory {
         def map = createAnalysisInstanceWithRoddyBamFilesMapHelper(properties, [coverage: 30] + bamFile1Properties, [coverage: 30] + bamFile2Properties)
 
         SamplePair samplePair = map.samplePair
-        AbstractMergedBamFile bamFile1 = map.sampleType1BamFile
-        AbstractMergedBamFile bamFile2 = map.sampleType2BamFile
+        AbstractBamFile bamFile1 = map.sampleType1BamFile
+        AbstractBamFile bamFile2 = map.sampleType2BamFile
         bamFile1.mergingWorkPackage.bamFileInProjectFolder = bamFile1
         bamFile2.mergingWorkPackage.bamFileInProjectFolder = bamFile2
 
@@ -694,17 +694,17 @@ class DomainFactory {
         ]
     }
 
-    static SamplePair createSamplePairWithProcessedMergedBamFiles() {
+    static SamplePair createSamplePairWithBamFiles() {
         MergingWorkPackage tumorMwp = createMergingWorkPackage(
                 seqType: createWholeGenomeSeqType(),
                 pipeline: createPanCanPipeline(),
                 referenceGenome: createReferenceGenome(name: 'hs37d5')
         )
-        AbstractMergedBamFile bamFileTumor = AlignmentPipelineFactory.RoddyPancanFactoryInstance.INSTANCE.createRoddyBamFile(
-                randomProcessedBamFileProperties + [coverage: 30.0], tumorMwp, RoddyBamFile)
+        AbstractBamFile bamFileTumor = AlignmentPipelineFactory.RoddyPancanFactoryInstance.INSTANCE.createRoddyBamFile(
+                randomBamFileProperties + [coverage: 30.0], tumorMwp, RoddyBamFile)
 
-        AbstractMergedBamFile bamFileControl = AlignmentPipelineFactory.RoddyPancanFactoryInstance.INSTANCE.createRoddyBamFile(
-                randomProcessedBamFileProperties + [coverage: 30.0], createMergingWorkPackage(bamFileTumor.mergingWorkPackage), RoddyBamFile)
+        AbstractBamFile bamFileControl = AlignmentPipelineFactory.RoddyPancanFactoryInstance.INSTANCE.createRoddyBamFile(
+                randomBamFileProperties + [coverage: 30.0], createMergingWorkPackage(bamFileTumor.mergingWorkPackage), RoddyBamFile)
 
         bamFileTumor.mergingWorkPackage.bamFileInProjectFolder = bamFileTumor
         assert bamFileTumor.mergingWorkPackage.save(flush: true)
@@ -745,7 +745,7 @@ class DomainFactory {
         return samplePair
     }
 
-    static SamplePair createSamplePairWithExternalProcessedMergedBamFiles(boolean initPipelines = false, Map bamFileProperties = [:]) {
+    static SamplePair createSamplePairWithExternallyProcessedBamFiles(boolean initPipelines = false, Map bamFileProperties = [:]) {
         ExternalMergingWorkPackage tumorMwp = createExternalMergingWorkPackage(
                 seqType: createWholeGenomeSeqType(),
                 pipeline: createExternallyProcessedPipelineLazy(),
@@ -764,8 +764,8 @@ class DomainFactory {
                 tumorMwp,
                 controlMwp,
         ].each {
-            ExternallyProcessedMergedBamFile bamFile = createExternallyProcessedMergedBamFile(
-                    randomProcessedBamFileProperties + [
+            ExternallyProcessedBamFile bamFile = createExternallyProcessedBamFile(
+                    randomBamFileProperties + [
                             workPackage      : it,
                             coverage         : 30.0,
                             insertSizeFile   : 'insertSize.txt',
@@ -789,18 +789,18 @@ class DomainFactory {
     }
 
     /**
-     * creates an instance of ExternalProcessedMergedBamFileQualityAssessment
+     * creates an instance of ExternallyProcessedBamFileQualityAssessment
      * with the needed quality control values for sophia
      */
-    static ExternalProcessedMergedBamFileQualityAssessment createExternalProcessedMergedBamFileQualityAssessment(Map properties = [:], AbstractMergedBamFile mbf) {
-        return createDomainObject(ExternalProcessedMergedBamFileQualityAssessment, [
+    static ExternallyProcessedBamFileQualityAssessment createExternallyProcessedBamFileQualityAssessment(Map properties = [:], AbstractBamFile mbf) {
+        return createDomainObject(ExternallyProcessedBamFileQualityAssessment, [
                 properlyPaired             : 1919,
                 pairedInSequencing         : 2120,
                 insertSizeMedian           : 406,
                 insertSizeCV               : 23,
                 qualityAssessmentMergedPass: {
                     createDomainObject(QualityAssessmentMergedPass, [
-                            abstractMergedBamFile: mbf,
+                            abstractBamFile: mbf,
                     ], [:])
                 },
         ], properties)
@@ -877,8 +877,8 @@ class DomainFactory {
         Pipeline pipeline = createPanCanPipeline()
 
         SamplePair samplePair = properties.samplePair
-        AbstractMergedBamFile diseaseBamFile = properties.sampleType1BamFile
-        AbstractMergedBamFile controlBamFile = properties.sampleType2BamFile
+        AbstractBamFile diseaseBamFile = properties.sampleType1BamFile
+        AbstractBamFile controlBamFile = properties.sampleType2BamFile
 
         AbstractMergingWorkPackage diseaseWorkPackage = diseaseBamFile?.mergingWorkPackage
         AbstractMergingWorkPackage controlWorkPackage = controlBamFile?.mergingWorkPackage
@@ -1936,12 +1936,12 @@ class DomainFactory {
     }
 
     @Deprecated
-    static ExternallyProcessedMergedBamFile createExternallyProcessedMergedBamFile(Map properties = [:]) {
+    static ExternallyProcessedBamFile createExternallyProcessedBamFile(Map properties = [:]) {
         return ExternalBamFactoryInstance.INSTANCE.createBamFile(properties)
     }
 
     @Deprecated
-    static ExternallyProcessedMergedBamFile createFinishedExternallyProcessedMergedBamFile(Map properties = [:]) {
+    static ExternallyProcessedBamFile createFinishedExternallyProcessedBamFile(Map properties = [:]) {
         return ExternalBamFactoryInstance.INSTANCE.createFinishedBamFile(properties)
     }
 

@@ -106,9 +106,9 @@ class NotificationDigestServiceIntegrationSpec extends Specification implements 
         ]
     }
 
-    NotificationDigestService setupMockedServiceForPrepareNotificationsTests(Integer buildCalls, Integer sendCalls, List<AbstractMergedBamFile> bams = [], List<UserProjectRole> projectUsers = []) {
+    NotificationDigestService setupMockedServiceForPrepareNotificationsTests(Integer buildCalls, Integer sendCalls, List<AbstractBamFile> bams = [], List<UserProjectRole> projectUsers = []) {
         return new NotificationDigestService(
-                abstractMergedBamFileService: Mock(AbstractMergedBamFileService) {
+                abstractBamFileService: Mock(AbstractBamFileService) {
                     buildCalls * getActiveBlockedBamsContainingSeqTracks(_) >> bams
                 },
                 createNotificationTextService: Mock(CreateNotificationTextService),
@@ -184,8 +184,8 @@ class NotificationDigestServiceIntegrationSpec extends Specification implements 
                     _ * getFaq() >> { return FAQ }
                 },
                 qcTrafficLightNotificationService: Mock(QcTrafficLightNotificationService) {
-                    _ * buildContentForMultipleBamsWarningMessage(_) >> { List<AbstractMergedBamFile> bams ->
-                        // some bug (?) causes bams to be a List<List<AbstractMergedBamFile>>, so I flatten it here
+                    _ * buildContentForMultipleBamsWarningMessage(_) >> { List<AbstractBamFile> bams ->
+                        // some bug (?) causes bams to be a List<List<AbstractBamFile>>, so I flatten it here
                         return bams.flatten()*.id.join(",")
                     }
                 },
@@ -274,7 +274,7 @@ class NotificationDigestServiceIntegrationSpec extends Specification implements 
                 fastqImportInstance: fastqImportInstance,
         )
 
-        List<AbstractMergedBamFile> bams = [
+        List<AbstractBamFile> bams = [
                 createRoddyBamFile(RoddyBamFile),
                 createRoddyBamFile(RoddyBamFile),
         ]

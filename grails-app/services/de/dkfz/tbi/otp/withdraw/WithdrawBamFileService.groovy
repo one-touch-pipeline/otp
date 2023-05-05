@@ -24,8 +24,8 @@ package de.dkfz.tbi.otp.withdraw
 import grails.gorm.transactions.Transactional
 import groovy.transform.CompileDynamic
 
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFileService
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.utils.DeletionService
@@ -37,11 +37,11 @@ import java.util.stream.Stream
 
 @CompileDynamic
 @Transactional
-abstract class WithdrawBamFileService<E extends AbstractMergedBamFile> implements ProcessingWithdrawService<E, SeqTrack> {
+abstract class WithdrawBamFileService<E extends AbstractBamFile> implements ProcessingWithdrawService<E, SeqTrack> {
 
     static final String NON_OTP = 'nonOTP'
 
-    AbstractMergedBamFileService abstractMergedBamFileService
+    AbstractBamFileService abstractBamFileService
     DeletionService deletionService
     FileSystemService fileSystemService
 
@@ -51,7 +51,7 @@ abstract class WithdrawBamFileService<E extends AbstractMergedBamFile> implement
     @Override
     List<String> collectPaths(List<E> entities) {
         return entities.collectMany {
-            Path path = abstractMergedBamFileService.getBaseDirectory(it)
+            Path path = abstractBamFileService.getBaseDirectory(it)
             if (Files.exists(path)) {
                 Stream<Path> stream
                 try {

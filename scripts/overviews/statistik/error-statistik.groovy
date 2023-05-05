@@ -85,7 +85,7 @@ println "start date: ${startDate}"
 println "end date: ${endDate}"
 
 String seqTrackBasedErrors = createErrorQuery('SeqTrack', '')
-String bamFileBasedErrors = createErrorQuery('AbstractMergedBamFile', 'workPackage.')
+String bamFileBasedErrors = createErrorQuery('AbstractBamFile', 'workPackage.')
 String analysisBasedErrors = createErrorQuery('BamFilePairAnalysis', 'samplePair.mergingWorkPackage1.')
 
 List<List> result = [

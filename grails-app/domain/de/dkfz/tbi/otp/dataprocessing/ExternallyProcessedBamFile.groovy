@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,7 +24,7 @@ package de.dkfz.tbi.otp.dataprocessing
 import grails.gorm.hibernate.annotation.ManagedEntity
 import org.hibernate.Hibernate
 
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.ExternallyProcessedMergedBamFileService
+import de.dkfz.tbi.otp.dataprocessing.bamfiles.ExternallyProcessedBamFileService
 import de.dkfz.tbi.otp.ngsdata.MergedAlignmentDataFileService
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.utils.CollectionUtils
@@ -36,7 +36,7 @@ import de.dkfz.tbi.otp.workflowExecution.ExternalWorkflowConfigFragment
  */
 @SuppressWarnings('JavaIoPackageAccess')
 @ManagedEntity
-class ExternallyProcessedMergedBamFile extends AbstractMergedBamFile {
+class ExternallyProcessedBamFile extends AbstractBamFile {
 
     /**
      * Name of the bam file
@@ -93,7 +93,7 @@ class ExternallyProcessedMergedBamFile extends AbstractMergedBamFile {
     }
 
     /**
-     * @deprecated use {@link ExternallyProcessedMergedBamFileService#getPathForFurtherProcessingNoCheck}
+     * @deprecated use {@link ExternallyProcessedBamFileService#getPathForFurtherProcessingNoCheck}
      */
     @Deprecated
     @Override
@@ -108,9 +108,9 @@ class ExternallyProcessedMergedBamFile extends AbstractMergedBamFile {
 
     @Override
     AbstractQualityAssessment getQualityAssessment() {
-        return CollectionUtils.exactlyOneElement(ExternalProcessedMergedBamFileQualityAssessment.createCriteria().list {
+        return CollectionUtils.exactlyOneElement(ExternallyProcessedBamFileQualityAssessment.createCriteria().list {
             qualityAssessmentMergedPass {
-                abstractMergedBamFile {
+                abstractBamFile {
                     eq 'id', this.id
                 }
             }
@@ -127,7 +127,7 @@ class ExternallyProcessedMergedBamFile extends AbstractMergedBamFile {
     }
 
     /**
-     * @deprecated use {@link ExternallyProcessedMergedBamFileService#getBamFile}
+     * @deprecated use {@link ExternallyProcessedBamFileService#getBamFile}
      */
     @Deprecated
     File getBamFile() {
@@ -135,7 +135,7 @@ class ExternallyProcessedMergedBamFile extends AbstractMergedBamFile {
     }
 
     /**
-     * @deprecated use {@link ExternallyProcessedMergedBamFileService#getBaiFile}
+     * @deprecated use {@link ExternallyProcessedBamFileService#getBaiFile}
      */
     @Deprecated
     File getBaiFile() {
@@ -143,7 +143,7 @@ class ExternallyProcessedMergedBamFile extends AbstractMergedBamFile {
     }
 
     /**
-     * @deprecated use {@link ExternallyProcessedMergedBamFileService#getBamMaxReadLengthFile}
+     * @deprecated use {@link ExternallyProcessedBamFileService#getBamMaxReadLengthFile}
      */
     @Deprecated
     File getBamMaxReadLengthFile() {
@@ -151,7 +151,7 @@ class ExternallyProcessedMergedBamFile extends AbstractMergedBamFile {
     }
 
     /**
-     * @deprecated use {@link ExternallyProcessedMergedBamFileService#getNonOtpFolder}
+     * @deprecated use {@link ExternallyProcessedBamFileService#getNonOtpFolder}
      */
     @Deprecated
     File getNonOtpFolder() {
@@ -160,7 +160,7 @@ class ExternallyProcessedMergedBamFile extends AbstractMergedBamFile {
     }
 
     /**
-     * @deprecated use {@link ExternallyProcessedMergedBamFileService#getImportFolder}
+     * @deprecated use {@link ExternallyProcessedBamFileService#getImportFolder}
      */
     @Deprecated
     File getImportFolder() {
@@ -168,7 +168,7 @@ class ExternallyProcessedMergedBamFile extends AbstractMergedBamFile {
     }
 
     /**
-     * @deprecated use {@link ExternallyProcessedMergedBamFileService#getFinalInsertSizeFile}
+     * @deprecated use {@link ExternallyProcessedBamFileService#getFinalInsertSizeFile}
      */
     @Override
     @Deprecated
@@ -185,7 +185,7 @@ class ExternallyProcessedMergedBamFile extends AbstractMergedBamFile {
         importedFrom nullable: true, blank: false, shared: "absolutePath"
         fileName blank: false, shared: "pathComponent"
         workPackage validator: { val, obj ->
-            List<ExternallyProcessedMergedBamFile> epmbfs = ExternallyProcessedMergedBamFile.findAllByFileName(obj.fileName).findAll {
+            List<ExternallyProcessedBamFile> epmbfs = ExternallyProcessedBamFile.findAllByFileName(obj.fileName).findAll {
                 it.sample == val.sample && it.seqType == val.seqType && it.referenceGenome == val.referenceGenome
             }
             if (epmbfs && (epmbfs.size() != 1 || CollectionUtils.exactlyOneElement(epmbfs) != obj)) {
@@ -196,15 +196,10 @@ class ExternallyProcessedMergedBamFile extends AbstractMergedBamFile {
                     ExternalMergingWorkPackage.isAssignableFrom(Hibernate.getClass(val))
         }
         fileOperationStatus validator: { val, obj ->
-            return (val == AbstractMergedBamFile.FileOperationStatus.PROCESSED) ? (obj.md5sum != null) : true
+            return (val == AbstractBamFile.FileOperationStatus.PROCESSED) ? (obj.md5sum != null) : true
         }
         furtherFiles nullable: true
         insertSizeFile nullable: true, blank: false, maxSize: 1000, shared: "relativePath"
         maximumReadLength nullable: true, min: 0
-    }
-
-    @Override
-    List<AbstractBamFile.BamType> getAllowedTypes() {
-        return AbstractBamFile.BamType.values() + [null]
     }
 }

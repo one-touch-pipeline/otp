@@ -39,7 +39,7 @@ import java.nio.file.Path
 @Transactional
 class LaneSwapService extends AbstractDataSwapService<LaneSwapParameters, LaneSwapData> {
 
-    AbstractMergedBamFileService abstractMergedBamFileService
+    AbstractBamFileService abstractBamFileService
     ProjectService projectService
 
     @Override
@@ -140,11 +140,11 @@ class LaneSwapService extends AbstractDataSwapService<LaneSwapParameters, LaneSw
     protected void cleanupLeftOvers(LaneSwapData data) {
         data.moveFilesCommands << "\n\n################ cleanup empty sample and pid directories ################\n\n"
         List<SeqTrack> leftOverSeqTracks = SeqTrack.findAllBySample(data.sampleSwap.old)
-        List<ExternallyProcessedMergedBamFile> leftOverBamFiles = ExternallyProcessedMergedBamFile.withCriteria {
+        List<ExternallyProcessedBamFile> leftOverBamFiles = ExternallyProcessedBamFile.withCriteria {
             'workPackage' {
                 eq('sample', data.sampleSwap.old)
             }
-        } as List<ExternallyProcessedMergedBamFile>
+        } as List<ExternallyProcessedBamFile>
 
         if (!leftOverSeqTracks && !leftOverBamFiles) {
             data.sampleSwap.old.delete(flush: true) // needs to be done here since only LaneSwapData has a sampleSwap object

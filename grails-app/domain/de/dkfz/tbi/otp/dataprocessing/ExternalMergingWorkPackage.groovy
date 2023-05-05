@@ -24,7 +24,7 @@ package de.dkfz.tbi.otp.dataprocessing
 import grails.gorm.hibernate.annotation.ManagedEntity
 
 /**
- * Represents all generations of one merged BAM file (whereas an {@link AbstractMergedBamFile} represents a single
+ * Represents all generations of one merged BAM file (whereas an {@link AbstractBamFile} represents a single
  * generation), which was externally processed (not in OTP).
  */
 @ManagedEntity
@@ -40,7 +40,7 @@ class ExternalMergingWorkPackage extends AbstractMergingWorkPackage {
     }
 
     @Override
-    AbstractMergedBamFile getBamFileThatIsReadyForFurtherAnalysis() {
+    AbstractBamFile getBamFileThatIsReadyForFurtherAnalysis() {
         return processableBamFileInProjectFolder
     }
 }

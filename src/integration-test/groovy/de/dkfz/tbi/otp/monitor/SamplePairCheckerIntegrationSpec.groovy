@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,7 +28,7 @@ import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.QcTrafficLightStatus
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.QcTrafficLightStatus
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.ngsdata.*
@@ -47,7 +47,7 @@ class SamplePairCheckerIntegrationSpec extends Specification implements IsRoddy 
         ] + properties)
     }
 
-    AbstractMergedBamFile createMergedBamFile(Map properties = [:]) {
+    AbstractBamFile createRoddyBamFile(Map properties = [:]) {
         return createRoddyBamFile(
                 properties, DomainFactory.createMergingWorkPackage([
                         seqType : DomainFactory.createWholeGenomeSeqType(),
@@ -60,17 +60,17 @@ class SamplePairCheckerIntegrationSpec extends Specification implements IsRoddy 
         given:
         SamplePairChecker samplePairChecker = new SamplePairChecker()
 
-        AbstractMergedBamFile bamFile1 = createBamFile()
-        AbstractMergedBamFile bamFile2 = createBamFile()
-        AbstractMergedBamFile bamFile3 = createBamFile()
-        AbstractMergedBamFile bamFile4 = createBamFile()
-        AbstractMergedBamFile bamFile5 = createBamFile()
-        List<AbstractMergedBamFile> bamFiles = [bamFile1, bamFile2, bamFile3, bamFile4, bamFile5]
+        AbstractBamFile bamFile1 = createBamFile()
+        AbstractBamFile bamFile2 = createBamFile()
+        AbstractBamFile bamFile3 = createBamFile()
+        AbstractBamFile bamFile4 = createBamFile()
+        AbstractBamFile bamFile5 = createBamFile()
+        List<AbstractBamFile> bamFiles = [bamFile1, bamFile2, bamFile3, bamFile4, bamFile5]
 
         DomainFactory.createSampleTypePerProjectForBamFile(bamFile1)
         DomainFactory.createSampleTypePerProjectForBamFile(bamFile2)
 
-        List<AbstractMergedBamFile> expected = [bamFile3, bamFile4, bamFile5]
+        List<AbstractBamFile> expected = [bamFile3, bamFile4, bamFile5]
 
         when:
         List returnValue = samplePairChecker.bamFilesWithoutCategory(bamFiles)
@@ -84,12 +84,12 @@ class SamplePairCheckerIntegrationSpec extends Specification implements IsRoddy 
         given:
         SamplePairChecker samplePairChecker = new SamplePairChecker()
 
-        AbstractMergedBamFile bamFile1 = createBamFile()
-        AbstractMergedBamFile bamFile2 = createBamFile()
-        AbstractMergedBamFile bamFile3 = createBamFile()
-        AbstractMergedBamFile bamFile4 = createBamFile()
-        AbstractMergedBamFile bamFile5 = createBamFile()
-        List<AbstractMergedBamFile> bamFiles = [bamFile1, bamFile2, bamFile3, bamFile4, bamFile5]
+        AbstractBamFile bamFile1 = createBamFile()
+        AbstractBamFile bamFile2 = createBamFile()
+        AbstractBamFile bamFile3 = createBamFile()
+        AbstractBamFile bamFile4 = createBamFile()
+        AbstractBamFile bamFile5 = createBamFile()
+        List<AbstractBamFile> bamFiles = [bamFile1, bamFile2, bamFile3, bamFile4, bamFile5]
 
         DomainFactory.createSampleTypePerProjectForBamFile(bamFile1)
         DomainFactory.createSampleTypePerProjectForBamFile(bamFile2)
@@ -97,7 +97,7 @@ class SamplePairCheckerIntegrationSpec extends Specification implements IsRoddy 
         DomainFactory.createSampleTypePerProjectForBamFile(bamFile4, SampleTypePerProject.Category.CONTROL)
         DomainFactory.createSampleTypePerProjectForBamFile(bamFile5, category)
 
-        List<AbstractMergedBamFile> expected = [bamFile3, bamFile5]
+        List<AbstractBamFile> expected = [bamFile3, bamFile5]
 
         when:
         List returnValue = samplePairChecker.bamFilesWithCategory(bamFiles, category)
@@ -116,17 +116,17 @@ class SamplePairCheckerIntegrationSpec extends Specification implements IsRoddy 
         given:
         SamplePairChecker samplePairChecker = new SamplePairChecker()
 
-        AbstractMergedBamFile bamFile1 = createBamFile()
-        AbstractMergedBamFile bamFile2 = createBamFile()
-        AbstractMergedBamFile bamFile3 = createBamFile()
-        AbstractMergedBamFile bamFile4 = createBamFile()
-        AbstractMergedBamFile bamFile5 = createBamFile()
-        List<AbstractMergedBamFile> bamFiles = [bamFile1, bamFile2, bamFile3, bamFile4, bamFile5]
+        AbstractBamFile bamFile1 = createBamFile()
+        AbstractBamFile bamFile2 = createBamFile()
+        AbstractBamFile bamFile3 = createBamFile()
+        AbstractBamFile bamFile4 = createBamFile()
+        AbstractBamFile bamFile5 = createBamFile()
+        List<AbstractBamFile> bamFiles = [bamFile1, bamFile2, bamFile3, bamFile4, bamFile5]
 
         DomainFactory.createProcessingThresholdsForBamFile(bamFile1)
         DomainFactory.createProcessingThresholdsForBamFile(bamFile2)
 
-        List<AbstractMergedBamFile> expected = [bamFile3, bamFile4, bamFile5]
+        List<AbstractBamFile> expected = [bamFile3, bamFile4, bamFile5]
 
         when:
         List returnValue = samplePairChecker.bamFilesWithoutThreshold(bamFiles)
@@ -139,17 +139,17 @@ class SamplePairCheckerIntegrationSpec extends Specification implements IsRoddy 
         given:
         SamplePairChecker samplePairChecker = new SamplePairChecker()
 
-        AbstractMergedBamFile bamFile1 = createBamFile()
-        AbstractMergedBamFile bamFile2 = createBamFile()
-        AbstractMergedBamFile bamFile3 = createBamFile()
-        AbstractMergedBamFile bamFile4 = createBamFile()
-        AbstractMergedBamFile bamFile5 = createBamFile()
-        List<AbstractMergedBamFile> bamFiles = [bamFile1, bamFile2, bamFile3, bamFile4, bamFile5]
+        AbstractBamFile bamFile1 = createBamFile()
+        AbstractBamFile bamFile2 = createBamFile()
+        AbstractBamFile bamFile3 = createBamFile()
+        AbstractBamFile bamFile4 = createBamFile()
+        AbstractBamFile bamFile5 = createBamFile()
+        List<AbstractBamFile> bamFiles = [bamFile1, bamFile2, bamFile3, bamFile4, bamFile5]
 
         DomainFactory.createSamplePair(mergingWorkPackage1: bamFile1.mergingWorkPackage)
         DomainFactory.createSamplePair(mergingWorkPackage2: bamFile2.mergingWorkPackage)
 
-        List<AbstractMergedBamFile> expected = [bamFile3, bamFile4, bamFile5]
+        List<AbstractBamFile> expected = [bamFile3, bamFile4, bamFile5]
 
         when:
         List returnValue = samplePairChecker.bamFilesWithoutSamplePair(bamFiles)
@@ -162,12 +162,12 @@ class SamplePairCheckerIntegrationSpec extends Specification implements IsRoddy 
         given:
         SamplePairChecker samplePairChecker = new SamplePairChecker()
 
-        AbstractMergedBamFile bamFile1 = createBamFile()
-        AbstractMergedBamFile bamFile2 = createBamFile()
-        AbstractMergedBamFile bamFile3 = createBamFile()
-        AbstractMergedBamFile bamFile4 = createBamFile()
-        AbstractMergedBamFile bamFile5 = createBamFile()
-        List<AbstractMergedBamFile> bamFiles = [bamFile1, bamFile2, bamFile3, bamFile4, bamFile5]
+        AbstractBamFile bamFile1 = createBamFile()
+        AbstractBamFile bamFile2 = createBamFile()
+        AbstractBamFile bamFile3 = createBamFile()
+        AbstractBamFile bamFile4 = createBamFile()
+        AbstractBamFile bamFile5 = createBamFile()
+        List<AbstractBamFile> bamFiles = [bamFile1, bamFile2, bamFile3, bamFile4, bamFile5]
 
         SamplePair samplePair1 = DomainFactory.createSamplePair(mergingWorkPackage1: bamFile1.mergingWorkPackage)
         SamplePair samplePair2 = DomainFactory.createSamplePair(mergingWorkPackage2: bamFile2.mergingWorkPackage)
@@ -225,7 +225,7 @@ class SamplePairCheckerIntegrationSpec extends Specification implements IsRoddy 
                 seqTracks           : seqTracks1,
                 coverage            : coverage1,
                 withdrawn           : withdrawn1,
-                fileOperationStatus : inProcessing1 ? AbstractMergedBamFile.FileOperationStatus.INPROGRESS : AbstractMergedBamFile.FileOperationStatus.PROCESSED,
+                fileOperationStatus : inProcessing1 ? AbstractBamFile.FileOperationStatus.INPROGRESS : AbstractBamFile.FileOperationStatus.PROCESSED,
                 md5sum              : inProcessing1 ? null : HelperUtils.randomMd5sum,
                 fileSize            : inProcessing1 ? 0 : DomainFactory.counter++,
                 qcTrafficLightStatus: qcTrafficLightStatus1,
@@ -237,7 +237,7 @@ class SamplePairCheckerIntegrationSpec extends Specification implements IsRoddy 
                 seqTracks           : seqTracks2,
                 coverage            : coverage2,
                 withdrawn           : withdrawn2,
-                fileOperationStatus : inProcessing2 ? AbstractMergedBamFile.FileOperationStatus.INPROGRESS : AbstractMergedBamFile.FileOperationStatus.PROCESSED,
+                fileOperationStatus : inProcessing2 ? AbstractBamFile.FileOperationStatus.INPROGRESS : AbstractBamFile.FileOperationStatus.PROCESSED,
                 md5sum              : inProcessing2 ? null : HelperUtils.randomMd5sum,
                 fileSize            : inProcessing2 ? 0 : DomainFactory.counter++,
                 qcTrafficLightStatus: qcTrafficLightStatus2,
@@ -299,66 +299,66 @@ class SamplePairCheckerIntegrationSpec extends Specification implements IsRoddy 
                 seqTracks: [createSeqTrack(seqType: createSeqType(name: "unsupported seq type", dirName: "unsupported_seq_type"))])
 
         and: 'sample type has no disease state'
-        AbstractBamFile unknownDiseaseStatus = createMergedBamFile()
+        AbstractBamFile unknownDiseaseStatus = createRoddyBamFile()
         DomainFactory.createProcessingThresholdsForBamFile(unknownDiseaseStatus)
 
         and: 'sample type has disease state undefined'
-        AbstractBamFile undefinedDiseaseStatus = createMergedBamFile()
+        AbstractBamFile undefinedDiseaseStatus = createRoddyBamFile()
         DomainFactory.createSampleTypePerProjectForBamFile(undefinedDiseaseStatus, SampleTypePerProject.Category.UNDEFINED)
         DomainFactory.createProcessingThresholdsForBamFile(undefinedDiseaseStatus)
 
         and: 'sample type has disease state ignored'
-        AbstractBamFile ignoredDiseaseStatus = createMergedBamFile()
+        AbstractBamFile ignoredDiseaseStatus = createRoddyBamFile()
         DomainFactory.createSampleTypePerProjectForBamFile(ignoredDiseaseStatus, SampleTypePerProject.Category.IGNORED)
         DomainFactory.createProcessingThresholdsForBamFile(ignoredDiseaseStatus)
 
         and: 'sample type has no threshold'
-        AbstractBamFile unknownThreshold = createMergedBamFile()
+        AbstractBamFile unknownThreshold = createRoddyBamFile()
         DomainFactory.createSampleTypePerProjectForBamFile(unknownThreshold, SampleTypePerProject.Category.DISEASE)
 
         and: 'na sample pair exist for bam file'
-        AbstractBamFile noSamplePairFound = createMergedBamFile()
+        AbstractBamFile noSamplePairFound = createRoddyBamFile()
         DomainFactory.createSampleTypePerProjectForBamFile(noSamplePairFound, SampleTypePerProject.Category.DISEASE)
         DomainFactory.createProcessingThresholdsForBamFile(noSamplePairFound)
 
         and: 'sample pair without disease bam file'
-        AbstractBamFile missingDiseaseBamFile = createMergedBamFile()
+        AbstractBamFile missingDiseaseBamFile = createRoddyBamFile()
         DomainFactory.createSampleTypePerProjectForBamFile(missingDiseaseBamFile, SampleTypePerProject.Category.CONTROL)
         DomainFactory.createProcessingThresholdsForBamFile(missingDiseaseBamFile)
         SamplePair missingDiseaseSamplePair = DomainFactory.createSamplePair([mergingWorkPackage2: missingDiseaseBamFile.mergingWorkPackage])
 
         and: 'sample pair without control bam file'
-        AbstractBamFile missingControlBamFile = createMergedBamFile()
+        AbstractBamFile missingControlBamFile = createRoddyBamFile()
         DomainFactory.createSampleTypePerProjectForBamFile(missingControlBamFile, SampleTypePerProject.Category.DISEASE)
         DomainFactory.createProcessingThresholdsForBamFile(missingControlBamFile)
         SamplePair missingControlSamplePair = DomainFactory.createSamplePair([mergingWorkPackage1: missingControlBamFile.mergingWorkPackage])
 
         and: 'bam files of sample pair does not reached threshold'
         SamplePair thresholdSamplePair = createSamplePair()
-        AbstractBamFile thresholdDiseaseBamFile = createMergedBamFile([workPackage: thresholdSamplePair.mergingWorkPackage1, coverage: 10])
+        AbstractBamFile thresholdDiseaseBamFile = createRoddyBamFile([workPackage: thresholdSamplePair.mergingWorkPackage1, coverage: 10])
         DomainFactory.createProcessingThresholdsForBamFile(thresholdDiseaseBamFile, [coverage: 50])
-        AbstractBamFile thresholdControlFile = createMergedBamFile([workPackage: thresholdSamplePair.mergingWorkPackage2, coverage: 10])
+        AbstractBamFile thresholdControlFile = createRoddyBamFile([workPackage: thresholdSamplePair.mergingWorkPackage2, coverage: 10])
         DomainFactory.createProcessingThresholdsForBamFile(thresholdControlFile, [coverage: 50])
         DomainFactory.createSampleTypePerProjectForBamFile(thresholdControlFile)
 
         and: 'fine sample pair'
         SamplePair fineSamplePair = createSamplePair()
         List<SeqTrack> seqTracks = [createSeqTrack(), createSeqTrack()]
-        AbstractBamFile diseaseBamFile = createMergedBamFile([
+        AbstractBamFile diseaseBamFile = createRoddyBamFile([
                 workPackage        : fineSamplePair.mergingWorkPackage1,
                 coverage           : 30,
                 numberOfMergedLanes: 2,
                 seqTracks          : seqTracks,
-                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
+                fileOperationStatus: AbstractBamFile.FileOperationStatus.PROCESSED,
                 md5sum             : HelperUtils.randomMd5sum,
                 fileSize           : DomainFactory.counter++,
         ])
-        AbstractBamFile controlBamFile = createMergedBamFile([
+        AbstractBamFile controlBamFile = createRoddyBamFile([
                 workPackage        : fineSamplePair.mergingWorkPackage2,
                 coverage           : 30,
                 numberOfMergedLanes: 2,
                 seqTracks          : seqTracks,
-                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
+                fileOperationStatus: AbstractBamFile.FileOperationStatus.PROCESSED,
                 md5sum             : HelperUtils.randomMd5sum,
                 fileSize           : DomainFactory.counter++,
         ])
@@ -367,7 +367,7 @@ class SamplePairCheckerIntegrationSpec extends Specification implements IsRoddy 
         DomainFactory.createProcessingThresholdsForBamFile(controlBamFile, [coverage: 10, numberOfLanes: 1])
 
         and: 'other preparing'
-        List<AbstractMergedBamFile> bamFiles = [
+        List<AbstractBamFile> bamFiles = [
                 unsupportedSeqType,
                 unknownDiseaseStatus,
                 undefinedDiseaseStatus,

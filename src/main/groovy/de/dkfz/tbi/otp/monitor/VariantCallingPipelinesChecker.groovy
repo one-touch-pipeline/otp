@@ -21,14 +21,14 @@
  */
 package de.dkfz.tbi.otp.monitor
 
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 
-class VariantCallingPipelinesChecker extends PipelinesChecker<AbstractMergedBamFile> {
+class VariantCallingPipelinesChecker extends PipelinesChecker<AbstractBamFile> {
 
     @Override
-    List handle(List<AbstractMergedBamFile> bamFiles, MonitorOutputCollector output) {
+    List handle(List<AbstractBamFile> bamFiles, MonitorOutputCollector output) {
         if (!bamFiles) {
             return []
         }

@@ -66,41 +66,40 @@ class SeqTrackServiceTests {
     }
 
     @Test
-    void testReturnExternallyProcessedMergedBamFiles_InputIsNull_ShouldFail() {
+    void testReturnExternallyProcessedBamFiles_InputIsNull_ShouldFail() {
         setupData()
         TestCase.shouldFail(IllegalArgumentException) {
-            seqTrackService.returnExternallyProcessedMergedBamFiles(null)
+            seqTrackService.returnExternallyProcessedBamFiles(null)
         }
     }
 
     @Test
-    void testReturnExternallyProcessedMergedBamFiles_InputIsEmpty_ShouldFail() {
+    void testReturnExternallyProcessedBamFiles_InputIsEmpty_ShouldFail() {
         setupData()
         TestCase.shouldFail(AssertionError) {
-            seqTrackService.returnExternallyProcessedMergedBamFiles([])
+            seqTrackService.returnExternallyProcessedBamFiles([])
         }
     }
 
     @Test
-    void testReturnExternallyProcessedMergedBamFiles_NoExternalBamFileAttached_AllFine() {
+    void testReturnExternallyProcessedBamFiles_NoExternalBamFileAttached_AllFine() {
         setupData()
         SeqTrack seqTrack = DomainFactory.createSeqTrack()
-        assert seqTrackService.returnExternallyProcessedMergedBamFiles([seqTrack]).isEmpty()
+        assert seqTrackService.returnExternallyProcessedBamFiles([seqTrack]).isEmpty()
     }
 
     @Test
-    void testReturnExternallyProcessedMergedBamFiles_ExternalBamFileAttached_AllFine() {
+    void testReturnExternallyProcessedBamFiles_ExternalBamFileAttached_AllFine() {
         setupData()
         SeqTrack seqTrack = DomainFactory.createSeqTrack()
         ExternalMergingWorkPackage externalMergingWorkPackage = DomainFactory.createExternalMergingWorkPackage(
                 seqType: seqTrack.seqType,
                 sample:  seqTrack.sample,
         )
-        ExternallyProcessedMergedBamFile bamFile = DomainFactory.createExternallyProcessedMergedBamFile(
+        ExternallyProcessedBamFile bamFile = DomainFactory.createExternallyProcessedBamFile(
                 workPackage: externalMergingWorkPackage,
-                type: AbstractBamFile.BamType.RMDUP,
         ).save(flush: true)
-        assert [bamFile] == seqTrackService.returnExternallyProcessedMergedBamFiles([seqTrack])
+        assert [bamFile] == seqTrackService.returnExternallyProcessedBamFiles([seqTrack])
     }
 
     private static SeqTrack setupSeqTrackProjectAndDataFile() {

@@ -25,7 +25,7 @@ import grails.converters.JSON
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.ProjectSelectionService
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.DataTableCommand
@@ -93,7 +93,7 @@ class SampleOverviewController {
                     registeredLanesCount + " (${it.withdrawnCount})"
         }
 
-        sampleOverviewService.abstractMergedBamFilesInProjectFolder(project).each {
+        sampleOverviewService.abstractBamFilesInProjectFolder(project).each {
             dataLastMap[it.individual.pid][it.sampleType.name].bamFilesInProjectFolder[it.seqType.id][it.pipeline.id].add(it)
         }
 
@@ -121,7 +121,7 @@ class SampleOverviewController {
                     if (laneCount) {
                         columnsToHide.remove(columnNumber)
                     }
-                    Map<Long, Collection<AbstractMergedBamFile>> bamFilesPerWorkflow = informationOfSample.bamFilesInProjectFolder.get(seqType.id)
+                    Map<Long, Collection<AbstractBamFile>> bamFilesPerWorkflow = informationOfSample.bamFilesInProjectFolder.get(seqType.id)
 
                     pipelines.each { Pipeline pipeline ->
                         columnNumber++
@@ -174,5 +174,5 @@ class InfoAboutOneSample {
     // Map<SeqType.id, value>>
     Map<Long, String> laneCountRegistered = [:]
     // Map<SeqType.id, Map<Pipeline.id, Collection<bamFileInProjectFolder>>>
-    Map<Long, Map<Long, Collection<AbstractMergedBamFile>>> bamFilesInProjectFolder = [:].withDefault { [:].withDefault { [] } }
+    Map<Long, Map<Long, Collection<AbstractBamFile>>> bamFilesInProjectFolder = [:].withDefault { [:].withDefault { [] } }
 }

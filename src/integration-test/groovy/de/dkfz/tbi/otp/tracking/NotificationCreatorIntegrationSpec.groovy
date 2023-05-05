@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -351,7 +351,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
             )
             createMergingCriteriaLazy(project: seqTrack1.project, seqType: seqTrack1.seqType)
             createMergingCriteriaLazy(project: seqTrack2.project, seqType: seqTrack2.seqType)
-            AbstractMergedBamFile abstractMergedBamFile = saveBamFileInProjectFolder(
+            AbstractBamFile abstractBamFile = saveBamFileInProjectFolder(
                     DomainFactory.createRoddyBamFile(
                             DomainFactory.createRoddyBamFile([
                                     workPackage: DomainFactory.createMergingWorkPackage(
@@ -359,11 +359,11 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
                                                     [pipeline: DomainFactory.createPanCanPipeline()]
                                     )
                             ]),
-                            DomainFactory.randomProcessedBamFileProperties + [seqTracks: [seqTrack2] as Set],
+                            DomainFactory.randomBamFileProperties + [seqTracks: [seqTrack2] as Set],
                     )
             )
-            ((MergingWorkPackage) (abstractMergedBamFile.workPackage)).seqTracks.add(seqTrack2)
-            abstractMergedBamFile.workPackage.save(flush: true)
+            ((MergingWorkPackage) (abstractBamFile.workPackage)).seqTracks.add(seqTrack2)
+            abstractBamFile.workPackage.save(flush: true)
             ProcessingStatus expectedStatus = [
                     getInstallationProcessingStatus: { -> ALL_DONE },
                     getFastqcProcessingStatus      : { -> ALL_DONE },
@@ -466,7 +466,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
                                             [pipeline: DomainFactory.createPanCanPipeline()]
                             )
                     ]),
-                    DomainFactory.randomProcessedBamFileProperties + [seqTracks: [seqTrack2] as Set],
+                    DomainFactory.randomBamFileProperties + [seqTracks: [seqTrack2] as Set],
             ))
 
             String prefix = "the prefix"
@@ -750,11 +750,11 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
 
     void "fillInMergingWorkPackageProcessingStatuses, 1 MWP ALL_DONE, returns ALL_DONE"() {
         given:
-        AbstractMergedBamFile bamFile
+        AbstractBamFile bamFile
         SeqTrackProcessingStatus seqTrackStatus
         setupData()
         SessionUtils.withTransaction {
-            bamFile = createBamFileInProjectFolder(DomainFactory.randomProcessedBamFileProperties)
+            bamFile = createBamFileInProjectFolder(DomainFactory.randomBamFileProperties)
             seqTrackStatus = createSeqTrackProcessingStatus(bamFile.containedSeqTracks.first())
         }
 
@@ -777,11 +777,11 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
 
     void "fillInMergingWorkPackageProcessingStatuses, 1 MWP NOTHING_DONE_MIGHT_DO, returns NOTHING_DONE_MIGHT_DO"() {
         given:
-        AbstractMergedBamFile bamFile
+        AbstractBamFile bamFile
         SeqTrackProcessingStatus seqTrackStatus
         setupData()
         SessionUtils.withTransaction {
-            bamFile = createBamFileInProjectFolder(DomainFactory.randomProcessedBamFileProperties)
+            bamFile = createBamFileInProjectFolder(DomainFactory.randomBamFileProperties)
             seqTrackStatus = createSeqTrackProcessingStatus(DomainFactory.createSeqTrackWithDataFiles(bamFile.mergingWorkPackage))
         }
 
@@ -806,10 +806,10 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         given:
         SeqTrackProcessingStatus seqTrack1Status
         SeqTrackProcessingStatus seqTrack2Status
-        AbstractMergedBamFile bamFile
+        AbstractBamFile bamFile
         setupData()
         SessionUtils.withTransaction {
-            bamFile = createBamFileInProjectFolder(DomainFactory.randomProcessedBamFileProperties)
+            bamFile = createBamFileInProjectFolder(DomainFactory.randomBamFileProperties)
             Set<SeqTrack> seqTracks = new HashSet<SeqTrack>(((MergingWorkPackage) (bamFile.workPackage)).seqTracks)
             seqTrack1Status = createSeqTrackProcessingStatus(DomainFactory.createSeqTrackWithDataFiles(bamFile.mergingWorkPackage, [:], [fileWithdrawn: true]))
             ((MergingWorkPackage) (bamFile.workPackage)).seqTracks = seqTracks
@@ -861,7 +861,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
 
     void "fillInMergingWorkPackageProcessingStatuses, 1 MWP in progress, returns NOTHING_DONE_MIGHT_DO"() {
         given:
-        AbstractMergedBamFile bamFile
+        AbstractBamFile bamFile
         SeqTrackProcessingStatus seqTrackStatus
         setupData()
         SessionUtils.withTransaction {
@@ -888,12 +888,12 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
 
     void "fillInMergingWorkPackageProcessingStatuses, 2 MergingProperties, 1 MWP ALL_DONE, returns PARTLY_DONE_WONT_DO_MORE"() {
         given:
-        AbstractMergedBamFile bamFile
+        AbstractBamFile bamFile
         SeqTrackProcessingStatus seqTrack1Status, seqTrack2Status
         setupData()
 
         SessionUtils.withTransaction {
-            bamFile = createBamFileInProjectFolder(DomainFactory.randomProcessedBamFileProperties)
+            bamFile = createBamFileInProjectFolder(DomainFactory.randomBamFileProperties)
             seqTrack1Status = createSeqTrackProcessingStatus(bamFile.containedSeqTracks.first())
             seqTrack2Status = createSeqTrackProcessingStatus(createSeqTrackWithOneDataFile())
         }
@@ -919,7 +919,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
 
     void "fillInMergingWorkPackageProcessingStatuses, 2 MergingProperties, 1 MWP in progress, returns NOTHING_DONE_MIGHT_DO"() {
         given:
-        AbstractMergedBamFile bamFile
+        AbstractBamFile bamFile
         SeqTrackProcessingStatus seqTrack1Status, seqTrack2Status
         setupData()
         SessionUtils.withTransaction {
@@ -951,12 +951,12 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         given:
         setupData()
 
-        AbstractMergedBamFile bamFile1, bamFile2
+        AbstractBamFile bamFile1, bamFile2
         SeqTrackProcessingStatus seqTrack1Status, seqTrack2Status, seqTrack3Status
 
         SessionUtils.withTransaction {
-            bamFile1 = createBamFileInProjectFolder(DomainFactory.randomProcessedBamFileProperties)
-            bamFile2 = createBamFileInProjectFolder(DomainFactory.randomProcessedBamFileProperties)
+            bamFile1 = createBamFileInProjectFolder(DomainFactory.randomBamFileProperties)
+            bamFile2 = createBamFileInProjectFolder(DomainFactory.randomBamFileProperties)
             seqTrack1Status = createSeqTrackProcessingStatus(bamFile1.containedSeqTracks.first())
             seqTrack2Status = createSeqTrackProcessingStatus(bamFile2.containedSeqTracks.first())
             seqTrack3Status = createSeqTrackProcessingStatus(DomainFactory.createSeqTrackWithDataFiles(bamFile1.mergingWorkPackage))
@@ -991,7 +991,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         return new MergingWorkPackageProcessingStatus(mergingWorkPackage, processingStatus, null, [])
     }
 
-    private MergingWorkPackageProcessingStatus createMergingWorkPackageProcessingStatus(AbstractMergedBamFile bamFile) {
+    private MergingWorkPackageProcessingStatus createMergingWorkPackageProcessingStatus(AbstractBamFile bamFile) {
         return new MergingWorkPackageProcessingStatus(bamFile.mergingWorkPackage, ALL_DONE, bamFile, [])
     }
 
@@ -1471,13 +1471,13 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         pairAnalysis << listPairAnalysis
     }
 
-    private AbstractMergedBamFile createBamFileInProjectFolder(Map bamFileProperties = [:]) {
-        AbstractMergedBamFile bamFile = createBamFile(bamFileProperties)
+    private AbstractBamFile createBamFileInProjectFolder(Map bamFileProperties = [:]) {
+        AbstractBamFile bamFile = createBamFile(bamFileProperties)
 
         return saveBamFileInProjectFolder(bamFile)
     }
 
-    private static AbstractMergedBamFile saveBamFileInProjectFolder(AbstractMergedBamFile bamFile) {
+    private static AbstractBamFile saveBamFileInProjectFolder(AbstractBamFile bamFile) {
         bamFile.mergingWorkPackage.bamFileInProjectFolder = bamFile
         bamFile.mergingWorkPackage.save(flush: true)
 

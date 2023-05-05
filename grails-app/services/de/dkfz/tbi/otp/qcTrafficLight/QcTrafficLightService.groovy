@@ -78,20 +78,20 @@ class QcTrafficLightService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#bamFile?.project, 'OTP_READ_ACCESS')")
-    void setQcTrafficLightStatusWithComment(AbstractMergedBamFile bamFile, AbstractMergedBamFile.QcTrafficLightStatus qcTrafficLightStatus, String comment) {
+    void setQcTrafficLightStatusWithComment(AbstractBamFile bamFile, AbstractBamFile.QcTrafficLightStatus qcTrafficLightStatus, String comment) {
         assert bamFile: "the bamFile must not be null"
         assert qcTrafficLightStatus: "the qcTrafficLightStatus must not be null"
         assert comment: "the comment must not be null"
 
-        AbstractMergedBamFile.QcTrafficLightStatus prevQcTrafficLightStatus = bamFile.qcTrafficLightStatus
+        AbstractBamFile.QcTrafficLightStatus prevQcTrafficLightStatus = bamFile.qcTrafficLightStatus
 
         commentService.saveComment(bamFile, comment)
         setQcTrafficLightStatus(bamFile, qcTrafficLightStatus)
         //No workflow will be triggered by changing from WARNING to ACCEPTED, since all workflows will be processed.
         //The following block can be removed after migration
-        if ((bamFile.qcTrafficLightStatus == AbstractMergedBamFile.QcTrafficLightStatus.ACCEPTED ||
-             bamFile.qcTrafficLightStatus == AbstractMergedBamFile.QcTrafficLightStatus.WARNING) &&
-                prevQcTrafficLightStatus != AbstractMergedBamFile.QcTrafficLightStatus.WARNING) {
+        if ((bamFile.qcTrafficLightStatus == AbstractBamFile.QcTrafficLightStatus.ACCEPTED ||
+             bamFile.qcTrafficLightStatus == AbstractBamFile.QcTrafficLightStatus.WARNING) &&
+                prevQcTrafficLightStatus != AbstractBamFile.QcTrafficLightStatus.WARNING) {
             otrsTicketService.findAllOtrsTickets(bamFile.containedSeqTracks).each {
                 otrsTicketService.resetAnalysisNotification(it)
             }
@@ -101,36 +101,36 @@ class QcTrafficLightService {
         }
     }
 
-    private void setQcTrafficLightStatus(AbstractMergedBamFile bamFile, AbstractMergedBamFile.QcTrafficLightStatus qcTrafficLightStatus) {
+    private void setQcTrafficLightStatus(AbstractBamFile bamFile, AbstractBamFile.QcTrafficLightStatus qcTrafficLightStatus) {
         bamFile.qcTrafficLightStatus = qcTrafficLightStatus
         assert bamFile.save(flush: true)
     }
 
-    void setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling(AbstractMergedBamFile bamFile, QcTrafficLightValue qc) {
-        if (bamFile.qcTrafficLightStatus == AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED) {
+    void setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling(AbstractBamFile bamFile, QcTrafficLightValue qc) {
+        if (bamFile.qcTrafficLightStatus == AbstractBamFile.QcTrafficLightStatus.BLOCKED) {
             return
         }
 
         Project project = bamFile.project
 
         if (!project.qcThresholdHandling.checksThreshold || qcThresholdService.getThresholds(bamFile.project, bamFile.seqType, qc.class).empty) {
-            setQcTrafficLightStatus(bamFile, AbstractMergedBamFile.QcTrafficLightStatus.UNCHECKED)
+            setQcTrafficLightStatus(bamFile, AbstractBamFile.QcTrafficLightStatus.UNCHECKED)
             return
         }
 
-        AbstractMergedBamFile.QcTrafficLightStatus qcStatus
+        AbstractBamFile.QcTrafficLightStatus qcStatus
         //if QC error occurs, just set status to WARNING and continue with processing
         if (qcValuesExceedErrorThreshold(bamFile, qc)) {
-            qcStatus = AbstractMergedBamFile.QcTrafficLightStatus.WARNING
+            qcStatus = AbstractBamFile.QcTrafficLightStatus.WARNING
             commentService.saveCommentAsOtp(bamFile, "Bam file exceeded threshold")
         } else {
-            qcStatus = AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED
+            qcStatus = AbstractBamFile.QcTrafficLightStatus.QC_PASSED
         }
 
         setQcTrafficLightStatus(bamFile, qcStatus)
     }
 
-    private boolean qcValuesExceedErrorThreshold(AbstractMergedBamFile bamFile, QcTrafficLightValue qc) {
+    private boolean qcValuesExceedErrorThreshold(AbstractBamFile bamFile, QcTrafficLightValue qc) {
         List<String> properties = QcThreshold.getValidQcPropertyForQcClass(qc.class.name)
         Map<String, ?> qcMap = properties.collectEntries {
             [(it): qc[it]]

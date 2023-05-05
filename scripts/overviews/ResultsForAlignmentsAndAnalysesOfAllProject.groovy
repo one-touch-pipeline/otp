@@ -147,7 +147,7 @@ class Globals {
                     "1.0.166",
             ],
             (VersionState.UNIMPORTANT): [
-                    "Unversioned ExternallyProcessedMergedBamFile",
+                    "Unversioned ExternallyProcessedBamFile",
             ],
             (VersionState.UNKNOWN): [
             ]
@@ -156,8 +156,8 @@ class Globals {
 
 // *** *** *** *** *** *** *** *** ***
 
-List<AbstractMergedBamFile> getAbstractMergedBamFilesOfProject(Project project) {
-    return AbstractMergedBamFile.createCriteria().list {
+List<AbstractBamFile> getAbstractBamFilesOfProject(Project project) {
+    return AbstractBamFile.createCriteria().list {
         workPackage {
             sample {
                 individual {
@@ -166,7 +166,7 @@ List<AbstractMergedBamFile> getAbstractMergedBamFilesOfProject(Project project) 
             }
         }
         eq("withdrawn", false)
-        eq("fileOperationStatus", AbstractMergedBamFile.FileOperationStatus.PROCESSED)
+        eq("fileOperationStatus", AbstractBamFile.FileOperationStatus.PROCESSED)
     }
 }
 
@@ -203,10 +203,10 @@ if (selectedProjects) {
 
 // Fill 'table' map, containing processed objects per project, pipeline, seqType and version
 projects.each { Project project ->
-    getAbstractMergedBamFilesOfProject(project).groupBy { it.mergingWorkPackage.pipeline }.each { Pipeline pipeline, List<AbstractMergedBamFile> ambfsOfPipeline ->
+    getAbstractBamFilesOfProject(project).groupBy { it.mergingWorkPackage.pipeline }.each { Pipeline pipeline, List<AbstractBamFile> ambfsOfPipeline ->
         if (pipeline in selectedAndSortedPipelines) {
-            ambfsOfPipeline.groupBy { it.mergingWorkPackage.seqType }.each { SeqType seqType, List<AbstractMergedBamFile> ambfsOfSeqType ->
-                ambfsOfSeqType.groupBy { getVersion(saveGetAlignmentConfig(it), it.class.simpleName) }.each { String version, List<AbstractMergedBamFile> ambfsOfVersion ->
+            ambfsOfPipeline.groupBy { it.mergingWorkPackage.seqType }.each { SeqType seqType, List<AbstractBamFile> ambfsOfSeqType ->
+                ambfsOfSeqType.groupBy { getVersion(saveGetAlignmentConfig(it), it.class.simpleName) }.each { String version, List<AbstractBamFile> ambfsOfVersion ->
                     setValueOfMap(table, project, pipeline, seqType, version, ambfsOfVersion)
                 }
             }
@@ -357,7 +357,7 @@ VersionState getUpToDateClass(String version) {
     return VersionState.UNKNOWN
 }
 
-ConfigPerProjectAndSeqType saveGetAlignmentConfig(AbstractMergedBamFile bamFile) {
+ConfigPerProjectAndSeqType saveGetAlignmentConfig(AbstractBamFile bamFile) {
     try {
         return bamFile.alignmentConfig
     }  catch (MissingPropertyException e) {

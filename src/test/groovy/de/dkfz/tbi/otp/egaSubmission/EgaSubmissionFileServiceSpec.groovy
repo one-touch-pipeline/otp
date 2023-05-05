@@ -53,7 +53,7 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
     @Override
     Class[] getDomainClassesToMock() {
         return [
-                AbstractMergedBamFile,
+                AbstractBamFile,
                 BamFileSubmissionObject,
                 DataFile,
                 DataFileSubmissionObject,

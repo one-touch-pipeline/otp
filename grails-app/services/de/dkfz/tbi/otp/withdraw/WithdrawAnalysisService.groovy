@@ -24,19 +24,19 @@ package de.dkfz.tbi.otp.withdraw
 import grails.gorm.transactions.Transactional
 import groovy.transform.CompileDynamic
 
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.dataprocessing.BamFileAnalysisServiceFactoryService
 import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.AnalysisDeletionService
 
 @CompileDynamic
 @Transactional
-class WithdrawAnalysisService implements ProcessingWithdrawService<BamFilePairAnalysis, AbstractMergedBamFile> {
+class WithdrawAnalysisService implements ProcessingWithdrawService<BamFilePairAnalysis, AbstractBamFile> {
     AnalysisDeletionService analysisDeletionService
     BamFileAnalysisServiceFactoryService bamFileAnalysisServiceFactoryService
 
     @Override
-    List<BamFilePairAnalysis> collectObjects(List<AbstractMergedBamFile> entities) {
+    List<BamFilePairAnalysis> collectObjects(List<AbstractBamFile> entities) {
         return entities ? BamFilePairAnalysis.findAllBySampleType1BamFileInListOrSampleType2BamFileInList(
                 entities,
                 entities,

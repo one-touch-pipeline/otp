@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -97,7 +97,7 @@ class DeletionServiceIntegrationTests extends Specification implements UserAndRo
         setupData()
         AbstractBamFile abstractBamFile = DomainFactory.createRoddyBamFile()
 
-        QualityAssessmentMergedPass qualityAssessmentPass = DomainFactory.createQualityAssessmentMergedPass(abstractMergedBamFile: abstractBamFile)
+        QualityAssessmentMergedPass qualityAssessmentPass = DomainFactory.createQualityAssessmentMergedPass(abstractBamFile: abstractBamFile)
         RoddyLibraryQa roddyLibraryQa = DomainFactory.createRoddyLibraryQa(qualityAssessmentMergedPass: qualityAssessmentPass,
                 genomeWithoutNCoverageQcBases: 0, referenceLength: 0)
         RoddyMergedBamQa roddyMergedBamQa = DomainFactory.createRoddyMergedBamQa(qualityAssessmentMergedPass: qualityAssessmentPass,
@@ -120,7 +120,7 @@ class DeletionServiceIntegrationTests extends Specification implements UserAndRo
         setupData()
         AbstractBamFile abstractBamFile = DomainFactory.proxyCellRanger.createBamFile()
 
-        QualityAssessmentMergedPass qualityAssessmentPass = DomainFactory.createQualityAssessmentMergedPass(abstractMergedBamFile: abstractBamFile)
+        QualityAssessmentMergedPass qualityAssessmentPass = DomainFactory.createQualityAssessmentMergedPass(abstractBamFile: abstractBamFile)
 
         when:
         deletionService.deleteQualityAssessmentInfoForAbstractBamFile(abstractBamFile)
@@ -376,11 +376,11 @@ class DeletionServiceIntegrationTests extends Specification implements UserAndRo
         }
     }
 
-    private void createFastqFiles(AbstractMergedBamFile bamFile) {
+    private void createFastqFiles(AbstractBamFile bamFile) {
         createFastqFiles(bamFile.containedSeqTracks as List)
     }
 
-    private void dataBaseSetupForMergedBamFiles(AbstractMergedBamFile bamFile, boolean addRealm = true) {
+    private void dataBaseSetupForBamFiles(AbstractBamFile bamFile, boolean addRealm = true) {
         AbstractMergingWorkPackage mergingWorkPackage = bamFile.mergingWorkPackage
         mergingWorkPackage.bamFileInProjectFolder = bamFile
         assert mergingWorkPackage.save(flush: true)
@@ -393,7 +393,7 @@ class DeletionServiceIntegrationTests extends Specification implements UserAndRo
     private RoddyBamFile deleteProcessingFilesOfProject_RBF_Setup() {
         RoddyBamFile bamFile = DomainFactory.createRoddyBamFile()
 
-        dataBaseSetupForMergedBamFiles(bamFile)
+        dataBaseSetupForBamFiles(bamFile)
         createFastqFiles(bamFile)
 
         File finalBamFile = bamFile.baseDirectory
@@ -440,12 +440,12 @@ class DeletionServiceIntegrationTests extends Specification implements UserAndRo
     private AbstractSnvCallingInstance deleteProcessingFilesOfProject_RBF_SNV_Setup() {
         AbstractSnvCallingInstance snvCallingInstance = DomainFactory.createSnvInstanceWithRoddyBamFiles(processingState: AnalysisProcessingStates.FINISHED)
 
-        AbstractMergedBamFile tumorBamFiles = snvCallingInstance.sampleType1BamFile
-        dataBaseSetupForMergedBamFiles(tumorBamFiles)
+        AbstractBamFile tumorBamFiles = snvCallingInstance.sampleType1BamFile
+        dataBaseSetupForBamFiles(tumorBamFiles)
         createFastqFiles(tumorBamFiles)
 
-        AbstractMergedBamFile controlBamFiles = snvCallingInstance.sampleType2BamFile
-        dataBaseSetupForMergedBamFiles(controlBamFiles, false)
+        AbstractBamFile controlBamFiles = snvCallingInstance.sampleType2BamFile
+        dataBaseSetupForBamFiles(controlBamFiles, false)
         createFastqFiles(controlBamFiles)
 
         File snvFolder = fileService.toFile(snvCallingService.getWorkDirectory(snvCallingInstance))
@@ -488,7 +488,7 @@ class DeletionServiceIntegrationTests extends Specification implements UserAndRo
         SamplePair.list().empty
     }
 
-    private ExternallyProcessedMergedBamFile deleteProcessingFilesOfProject_ExternalBamFilesAttached_Setup() {
+    private ExternallyProcessedBamFile deleteProcessingFilesOfProject_ExternalBamFilesAttached_Setup() {
         Project project = deleteProcessingFilesOfProject_NoProcessedData_SetupWithFiles()
         SeqTrack seqTrack = SeqTrack.createCriteria().get {
             sample {
@@ -498,7 +498,7 @@ class DeletionServiceIntegrationTests extends Specification implements UserAndRo
             }
         }
 
-        ExternallyProcessedMergedBamFile bamFile = DomainFactory.createExternallyProcessedMergedBamFile(
+        ExternallyProcessedBamFile bamFile = DomainFactory.createExternallyProcessedBamFile(
                 workPackage: DomainFactory.createExternalMergingWorkPackage(
                         sample: seqTrack.sample,
                         seqType: seqTrack.seqType,
@@ -512,7 +512,7 @@ class DeletionServiceIntegrationTests extends Specification implements UserAndRo
     void "testDeleteProcessingFilesOfProject_ExternalBamFilesAttached"() {
         given:
         setupData()
-        ExternallyProcessedMergedBamFile bamFile = deleteProcessingFilesOfProject_ExternalBamFilesAttached_Setup()
+        ExternallyProcessedBamFile bamFile = deleteProcessingFilesOfProject_ExternalBamFilesAttached_Setup()
 
         when:
         deletionService.deleteProcessingFilesOfProject(bamFile.project.name, outputFolder)
@@ -525,7 +525,7 @@ class DeletionServiceIntegrationTests extends Specification implements UserAndRo
     void "testDeleteProcessingFilesOfProject_ExternalBamFilesAttached_Verified"() {
         given:
         setupData()
-        ExternallyProcessedMergedBamFile bamFile = deleteProcessingFilesOfProject_ExternalBamFilesAttached_Setup()
+        ExternallyProcessedBamFile bamFile = deleteProcessingFilesOfProject_ExternalBamFilesAttached_Setup()
 
         when:
         deletionService.deleteProcessingFilesOfProject(bamFile.project.name, outputFolder, true)
@@ -534,13 +534,13 @@ class DeletionServiceIntegrationTests extends Specification implements UserAndRo
         File nonOtpFolder = bamFile.nonOtpFolder
         Path outputFile = outputFolder.resolve("Delete_${bamFile.project.name}.sh")
         !outputFile.text.contains(nonOtpFolder.path)
-        ExternallyProcessedMergedBamFile.list().contains(bamFile)
+        ExternallyProcessedBamFile.list().contains(bamFile)
     }
 
     void "testDeleteProcessingFilesOfProject_ExternalBamFilesAttached_nonMergedSeqTrackExists_Verified"() {
         given:
         setupData()
-        ExternallyProcessedMergedBamFile bamFile = deleteProcessingFilesOfProject_ExternalBamFilesAttached_Setup()
+        ExternallyProcessedBamFile bamFile = deleteProcessingFilesOfProject_ExternalBamFilesAttached_Setup()
 
         SeqTrack seqTrack = DomainFactory.createSeqTrackWithTwoDataFiles([sample: bamFile.sample, seqType: bamFile.seqType])
         createFastqFiles([seqTrack])
@@ -552,6 +552,6 @@ class DeletionServiceIntegrationTests extends Specification implements UserAndRo
         File nonOtpFolder = bamFile.nonOtpFolder
         Path outputFile = outputFolder.resolve("Delete_${bamFile.project.name}.sh")
         !outputFile.text.contains(nonOtpFolder.path)
-        ExternallyProcessedMergedBamFile.list().contains(bamFile)
+        ExternallyProcessedBamFile.list().contains(bamFile)
     }
 }

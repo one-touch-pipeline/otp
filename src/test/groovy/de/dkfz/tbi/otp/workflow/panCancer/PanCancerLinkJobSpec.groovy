@@ -74,7 +74,7 @@ class PanCancerLinkJobSpec extends Specification implements DataTest, WorkflowSy
         job.fileService = new FileService()
         job.logService = Mock(LogService)
         roddyBamFileService = new RoddyBamFileService()
-        roddyBamFileService.abstractMergedBamFileService = Mock(AbstractMergedBamFileService) {
+        roddyBamFileService.abstractBamFileService = Mock(AbstractBamFileService) {
             getBaseDirectory(_) >> Paths.get("/")
         }
         job.roddyBamFileService = roddyBamFileService

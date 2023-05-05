@@ -47,7 +47,7 @@ class RoddyBamFileDomainSpec extends Specification implements DomainUnitTest<Rod
     @Override
     Class<?>[] getDomainClassesToMock() {
         return [
-                AbstractMergedBamFile,
+                AbstractBamFile,
                 SoftwareTool,
                 MergingCriteria,
                 MergingWorkPackage,

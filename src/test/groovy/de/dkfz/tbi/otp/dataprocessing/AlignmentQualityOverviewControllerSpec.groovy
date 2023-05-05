@@ -33,15 +33,15 @@ import de.dkfz.tbi.otp.tracking.OtrsTicketService
 
 class AlignmentQualityOverviewControllerSpec extends Specification implements ControllerUnitTest<AlignmentQualityOverviewController>, DataTest {
 
-    AbstractFileSystemBamFile bamFile = new RoddyBamFile()
+    AbstractBamFile bamFile = new RoddyBamFile()
 
     final String commentUsed      = 'some comments'
-    final String qcAcceptedStatus = AbstractMergedBamFile.QcTrafficLightStatus.ACCEPTED
+    final String qcAcceptedStatus = AbstractBamFile.QcTrafficLightStatus.ACCEPTED
 
     void setupData() {
         bamFile.id                   = 123
         bamFile.version              = 0
-        bamFile.qcTrafficLightStatus = AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED
+        bamFile.qcTrafficLightStatus = AbstractBamFile.QcTrafficLightStatus.BLOCKED
     }
 
     void "Test changeQcStatus, when save valid input posted, then return HTTP OK"() {
@@ -49,11 +49,11 @@ class AlignmentQualityOverviewControllerSpec extends Specification implements Co
         setupData()
 
         controller.qcTrafficLightService = Mock(QcTrafficLightService) {
-            1 * setQcTrafficLightStatusWithComment(_, _, _) >> { AbstractMergedBamFile bamFile,
-                                                                 AbstractMergedBamFile.QcTrafficLightStatus qcTrafficLightStatus,
+            1 * setQcTrafficLightStatusWithComment(_, _, _) >> { AbstractBamFile bamFile,
+                                                                 AbstractBamFile.QcTrafficLightStatus qcTrafficLightStatus,
                                                                  String comment ->
-                assert bamFile.qcTrafficLightStatus == AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED
-                assert qcTrafficLightStatus         == AbstractMergedBamFile.QcTrafficLightStatus.ACCEPTED
+                assert bamFile.qcTrafficLightStatus == AbstractBamFile.QcTrafficLightStatus.BLOCKED
+                assert qcTrafficLightStatus         == AbstractBamFile.QcTrafficLightStatus.ACCEPTED
                 assert comment == commentUsed
             }
         }

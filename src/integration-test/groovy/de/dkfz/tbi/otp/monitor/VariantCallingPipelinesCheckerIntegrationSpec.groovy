@@ -126,7 +126,7 @@ class VariantCallingPipelinesCheckerIntegrationSpec extends Specification {
                 }
 
         and: 'all bam files have a processing threshold set'
-        List<AbstractMergedBamFile> bamFiles = (
+        List<AbstractBamFile> bamFiles = (
         analysesOfAllAnalysisFinishedSamplePair +
                 analysesOfSingleAnalysisFinishedSamplePairs
         ).collectMany {

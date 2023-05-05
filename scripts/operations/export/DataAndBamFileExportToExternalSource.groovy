@@ -133,7 +133,7 @@ FileSystemService fileSystemService = ctx.fileSystemService
 FileService fileService = ctx.fileService
 SeqTypeService seqTypeService = ctx.seqTypeService
 SeqTrackService seqTrackService = ctx.seqTrackService
-AbstractMergedBamFileService abstractMergedBamFileService = ctx.abstractMergedBamFileService
+AbstractBamFileService abstractBamFileService = ctx.abstractBamFileService
 SamplePairService samplePairService = ctx.samplePairService
 DataExportService dataExportService = ctx.dataExportService
 
@@ -157,7 +157,7 @@ assert targetFolder.absolute: "targetOutputFolder is not an absolute path"
 
 // Data structure for processing
 List<SeqTrack> seqTrackList = []
-List<AbstractMergedBamFile> bamFileList = []
+List<AbstractBamFile> bamFileList = []
 Map<PipelineType, List<BamFilePairAnalysis>> analysisListMap = [:].withDefault {[]}
 
 class DataExportOverviewItem {
@@ -172,7 +172,7 @@ class DataExportOverviewItem {
     List<SeqTrack> swappedFastQs = []
     List<SeqTrack> allFastQs = []
 
-    List<AbstractMergedBamFile> externalBamFiles = []
+    List<AbstractBamFile> externalBamFiles = []
 }
 
 List<DataExportOverviewItem> dataExportOverview = []
@@ -228,7 +228,7 @@ scriptInputHelperService.parseAndSplitHelper([selectByIndividual, multiColumnInp
     seqTrackList.addAll(seqTracks)
 
     //find the bam files, which might be used for analysis
-    List<AbstractMergedBamFile> bamFiles = abstractMergedBamFileService.findAllByIndividualSampleTypeSeqType(
+    List<AbstractBamFile> bamFiles = abstractBamFileService.findAllByIndividualSampleTypeSeqType(
             individual,
             sampleType,
             seqType
@@ -263,7 +263,7 @@ scriptInputHelperService.parseAndSplitHelper([selectByIndividual, multiColumnInp
     if (copyBamFiles) {
         if (bamFiles) {
             bamFileList.addAll(bamFiles)
-            bamFiles.collect { AbstractMergedBamFile bam ->
+            bamFiles.collect { AbstractBamFile bam ->
                 [bam.individual, bam.sampleType, bam.seqType]
             }.unique().each {
                 dataExportOverview.add(new DataExportOverviewItem(
@@ -271,7 +271,7 @@ scriptInputHelperService.parseAndSplitHelper([selectByIndividual, multiColumnInp
                         individual: it[0],
                         sampleType: it[1],
                         seqType: it[2],
-                        externalBamFiles: bamFiles.findAll { AbstractMergedBamFile bamFile ->
+                        externalBamFiles: bamFiles.findAll { AbstractBamFile bamFile ->
                             bamFile.workPackage.pipeline.name == Pipeline.Name.EXTERNALLY_PROCESSED
                         },
                 ))

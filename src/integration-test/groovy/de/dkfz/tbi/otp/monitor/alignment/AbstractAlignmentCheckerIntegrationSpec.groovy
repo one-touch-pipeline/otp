@@ -146,13 +146,13 @@ abstract class AbstractAlignmentCheckerIntegrationSpec extends Specification imp
         }
     }
 
-    AbstractMergedBamFile createBamFile(MergingWorkPackage mergingWorkPackage, Map properties = [:]) {
+    AbstractBamFile createBamFile(MergingWorkPackage mergingWorkPackage, Map properties = [:]) {
         DomainFactory.createRoddyBamFile([
                 workPackage: mergingWorkPackage,
         ] + properties)
     }
 
-    List<AbstractMergedBamFile> createBamFiles(Map bamProperties = [:], Map mergingWorkPackageProperties = [:]) {
+    List<AbstractBamFile> createBamFiles(Map bamProperties = [:], Map mergingWorkPackageProperties = [:]) {
         createMergingWorkPackages(mergingWorkPackageProperties).collect {
             createBamFile(it, bamProperties)
         }
@@ -263,16 +263,16 @@ abstract class AbstractAlignmentCheckerIntegrationSpec extends Specification imp
     void "test getBamFileForMergingWorkPackage, when some mergingWorkPackages have BamFiles and some not, return the correct BamFiles (case showFinished=#showFinished, showWithdrawn=#showWithdrawn)"() {
         given:
         setupData()
-        List<AbstractMergedBamFile> expected = []
+        List<AbstractBamFile> expected = []
 
-        List<MergingWorkPackage> mergingWorkPackages = AbstractMergedBamFile.FileOperationStatus.values().collectMany { AbstractMergedBamFile.FileOperationStatus state ->
+        List<MergingWorkPackage> mergingWorkPackages = AbstractBamFile.FileOperationStatus.values().collectMany { AbstractBamFile.FileOperationStatus state ->
             [true, false].collectMany { boolean withDrawnBamFile ->
                 createBamFiles([
                         fileOperationStatus: state,
                         withdrawn          : withDrawnBamFile,
-                ]).collect { AbstractMergedBamFile bamFile ->
+                ]).collect { AbstractBamFile bamFile ->
                     if ((showWithdrawn || !bamFile.withdrawn) &&
-                            (showFinished || bamFile.fileOperationStatus != AbstractMergedBamFile.FileOperationStatus.PROCESSED)) {
+                            (showFinished || bamFile.fileOperationStatus != AbstractBamFile.FileOperationStatus.PROCESSED)) {
                         expected.add(bamFile)
                     }
                     bamFile.mergingWorkPackage
@@ -281,7 +281,7 @@ abstract class AbstractAlignmentCheckerIntegrationSpec extends Specification imp
         }
 
         when:
-        List<AbstractMergedBamFile> returnValue = checker.getBamFileForMergingWorkPackage(mergingWorkPackages, showFinished, showWithdrawn)
+        List<AbstractBamFile> returnValue = checker.getBamFileForMergingWorkPackage(mergingWorkPackages, showFinished, showWithdrawn)
 
         then:
         TestCase.assertContainSame(expected, returnValue)
@@ -307,8 +307,8 @@ abstract class AbstractAlignmentCheckerIntegrationSpec extends Specification imp
 
         List<SeqTrack> noMergingWorkPackage = createSeqTracksWithConfig()
 
-        List<AbstractMergedBamFile> oldInstanceRunning = createBamFiles([
-                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.DECLARED,
+        List<AbstractBamFile> oldInstanceRunning = createBamFiles([
+                fileOperationStatus: AbstractBamFile.FileOperationStatus.DECLARED,
         ], [
                 needsProcessing: true,
         ])
@@ -320,8 +320,8 @@ abstract class AbstractAlignmentCheckerIntegrationSpec extends Specification imp
                     needsProcessing: true,
             ])
         }
-        List<AbstractMergedBamFile> finishedBamFilesWithNeedsProcessing = createBamFiles([
-                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
+        List<AbstractBamFile> finishedBamFilesWithNeedsProcessing = createBamFiles([
+                fileOperationStatus: AbstractBamFile.FileOperationStatus.PROCESSED,
         ], [
                 needsProcessing: true,
         ])
@@ -336,36 +336,36 @@ abstract class AbstractAlignmentCheckerIntegrationSpec extends Specification imp
             ])
         }
 
-        List<AbstractMergedBamFile> bamFilesDeclared = createBamFiles([
-                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.DECLARED,
+        List<AbstractBamFile> bamFilesDeclared = createBamFiles([
+                fileOperationStatus: AbstractBamFile.FileOperationStatus.DECLARED,
         ], [
                 needsProcessing: false,
         ])
         bamFilesDeclared.each { createWorkflowVersionSelector(it.project, it.seqType, workflow) }
 
-        List<AbstractMergedBamFile> bamFilesNeedsProcessing = createBamFiles([
-                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.NEEDS_PROCESSING,
+        List<AbstractBamFile> bamFilesNeedsProcessing = createBamFiles([
+                fileOperationStatus: AbstractBamFile.FileOperationStatus.NEEDS_PROCESSING,
         ], [
                 needsProcessing: false,
         ])
         bamFilesNeedsProcessing.each { createWorkflowVersionSelector(it.project, it.seqType, workflow) }
 
-        List<AbstractMergedBamFile> bamFilesInProgress = createBamFiles([
-                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.INPROGRESS,
+        List<AbstractBamFile> bamFilesInProgress = createBamFiles([
+                fileOperationStatus: AbstractBamFile.FileOperationStatus.INPROGRESS,
         ], [
                 needsProcessing: false,
         ])
         bamFilesInProgress.each { createWorkflowVersionSelector(it.project, it.seqType, workflow) }
 
-        List<AbstractMergedBamFile> bamFilesProcessed = createBamFiles([
-                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
+        List<AbstractBamFile> bamFilesProcessed = createBamFiles([
+                fileOperationStatus: AbstractBamFile.FileOperationStatus.PROCESSED,
         ], [
                 needsProcessing: false,
         ])
         bamFilesProcessed.each { createWorkflowVersionSelector(it.project, it.seqType, workflow) }
 
-        List<AbstractMergedBamFile> bamFilesWithdrawn = createBamFiles([
-                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.DECLARED,
+        List<AbstractBamFile> bamFilesWithdrawn = createBamFiles([
+                fileOperationStatus: AbstractBamFile.FileOperationStatus.DECLARED,
                 withdrawn          : true,
         ], [
                 needsProcessing: false,
@@ -392,10 +392,10 @@ abstract class AbstractAlignmentCheckerIntegrationSpec extends Specification imp
             DomainFactory.createReferenceGenomeProjectSeqTypeLazy(project: it.project, seqType: it.seqType)
         }
 
-        List<AbstractMergedBamFile> finishedBamFiles = bamFilesProcessed
+        List<AbstractBamFile> finishedBamFiles = bamFilesProcessed
 
         when:
-        List<AbstractMergedBamFile> result = checker.handle(seqTracks, output)
+        List<AbstractBamFile> result = checker.handle(seqTracks, output)
 
         then:
         1 * output.showWorkflowOldSystem(workflowName)
@@ -470,7 +470,7 @@ abstract class AbstractAlignmentCheckerIntegrationSpec extends Specification imp
         checker = Spy(checker.class)
 
         when:
-        List<AbstractMergedBamFile> result = checker.handle([], output)
+        List<AbstractBamFile> result = checker.handle([], output)
 
         then:
         0 * output._

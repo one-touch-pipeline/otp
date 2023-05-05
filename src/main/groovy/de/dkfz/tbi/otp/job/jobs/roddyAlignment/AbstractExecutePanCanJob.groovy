@@ -68,14 +68,14 @@ abstract class AbstractExecutePanCanJob<R extends RoddyResult> extends AbstractR
     @Autowired
     ProcessingOptionService processingOptionService
 
-    protected Path linkBamFileInWorkDirectory(AbstractMergedBamFile abstractMergedBamFile, Path workDirectory) {
-        Realm realm = abstractMergedBamFile.realm
+    protected Path linkBamFileInWorkDirectory(AbstractBamFile abstractBamFile, Path workDirectory) {
+        Realm realm = abstractBamFile.realm
         FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
-        String bamFileName = "${abstractMergedBamFile.sampleType.dirName}_${abstractMergedBamFile.individual.pid}_merged.mdup.bam"
+        String bamFileName = "${abstractBamFile.sampleType.dirName}_${abstractBamFile.individual.pid}_merged.mdup.bam"
         String baiFileName = "${bamFileName}.bai"
 
-        Path targetFileBam = fileService.toPath(abstractMergedBamFile.pathForFurtherProcessing, fileSystem)
-        Path targetFileBai = targetFileBam.resolveSibling(abstractMergedBamFile.baiFileName)
+        Path targetFileBam = fileService.toPath(abstractBamFile.pathForFurtherProcessing, fileSystem)
+        Path targetFileBai = targetFileBam.resolveSibling(abstractBamFile.baiFileName)
 
         Path linkBamFile = workDirectory.resolve(bamFileName)
         Path linkBaiFile = workDirectory.resolve(baiFileName)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -147,10 +147,9 @@ abstract class AbstractPanCancerWorkflowWithoutAntibodySpec extends AbstractPanC
                 seqTracks                   : [seqTrack] as Set,
                 config                      : null,
                 numberOfMergedLanes         : 1,
-                fileOperationStatus         : AbstractMergedBamFile.FileOperationStatus.PROCESSED,
+                fileOperationStatus         : AbstractBamFile.FileOperationStatus.PROCESSED,
                 md5sum                      : HelperUtils.randomMd5sum,
                 fileSize                    : Files.size(firstBamFilePath),
-                fileExists                  : true,
                 dateFromFileSystem          : new Date(Files.getLastModifiedTime(firstBamFilePath).toMillis()),
                 roddyExecutionDirectoryNames: ['exec_123456_123456789_bla_bla'],
                 workDirectoryName           : "${RoddyBamFile.WORK_DIR_PREFIX}_0",

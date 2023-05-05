@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -48,8 +48,8 @@ trait ExternalBamFactory implements IsAlignment {
     }
 
     @Override
-    ExternallyProcessedMergedBamFile createBamFile(Map properties = [:]) {
-        return createDomainObject(ExternallyProcessedMergedBamFile, [
+    ExternallyProcessedBamFile createBamFile(Map properties = [:]) {
+        return createDomainObject(ExternallyProcessedBamFile, [
                 fileName           : "bamfile_${nextId}.bam",
                 workPackage        : { createMergingWorkPackage() },
                 numberOfMergedLanes: null,
@@ -58,16 +58,16 @@ trait ExternalBamFactory implements IsAlignment {
         ], properties)
     }
 
-    ExternallyProcessedMergedBamFile createFinishedBamFile(Map properties = [:]) {
-        ExternallyProcessedMergedBamFile externallyProcessedMergedBamFile = createBamFile([
-                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
+    ExternallyProcessedBamFile createFinishedBamFile(Map properties = [:]) {
+        ExternallyProcessedBamFile externallyProcessedBamFile = createBamFile([
+                fileOperationStatus: AbstractBamFile.FileOperationStatus.PROCESSED,
                 md5sum             : HelperUtils.randomMd5sum,
                 fileSize           : nextId,
         ] + properties)
-        ExternalMergingWorkPackage externalMergingWorkPackage = externallyProcessedMergedBamFile.mergingWorkPackage
-        externalMergingWorkPackage.bamFileInProjectFolder = externallyProcessedMergedBamFile
+        ExternalMergingWorkPackage externalMergingWorkPackage = externallyProcessedBamFile.mergingWorkPackage
+        externalMergingWorkPackage.bamFileInProjectFolder = externallyProcessedBamFile
         assert externalMergingWorkPackage.save(flush: true)
-        return externallyProcessedMergedBamFile
+        return externallyProcessedBamFile
     }
 
     @Override
@@ -96,7 +96,7 @@ trait ExternalBamFactory implements IsAlignment {
     @SuppressWarnings('GetterMethodCouldBeProperty')
     @Override
     Class getQaClass() {
-        return ExternalProcessedMergedBamFileQualityAssessment
+        return ExternallyProcessedBamFileQualityAssessment
     }
 
     @Override
@@ -111,7 +111,7 @@ trait ExternalBamFactory implements IsAlignment {
 
     ImportProcess createImportProcess(Map properties) {
         return createDomainObject(ImportProcess, [
-                externallyProcessedMergedBamFiles: { [createBamFile()] as Set },
+                externallyProcessedBamFiles: { [createBamFile()] as Set },
                 state                            : ImportProcess.State.NOT_STARTED,
                 linkOperation                    : ImportProcess.LinkOperation.COPY_AND_KEEP,
         ], properties)

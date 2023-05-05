@@ -25,7 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.AbstractIntegrationSpecWithoutRollbackAnnotation
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.dataprocessing.LinkFilesToFinalDestinationService
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.job.jobs.roddyAlignment.MovePanCanFilesToFinalDestinationJob

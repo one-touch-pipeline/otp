@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,7 +24,7 @@ package de.dkfz.tbi.otp.dataswap.data
 import groovy.transform.CompileDynamic
 import groovy.transform.TupleConstructor
 
-import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedMergedBamFile
+import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedBamFile
 import de.dkfz.tbi.otp.dataswap.Swap
 import de.dkfz.tbi.otp.dataswap.parameters.SampleSwapParameters
 import de.dkfz.tbi.otp.ngsdata.*
@@ -35,9 +35,9 @@ class SampleSwapData extends DataSwapData<SampleSwapParameters> {
 
     static Closure constraints = {
         seqTrackList validator: { seqTrackList, obj ->
-            List<ExternallyProcessedMergedBamFile> externallyProcessedMergedBamFiles = obj.seqTrackService.returnExternallyProcessedMergedBamFiles(seqTrackList)
-            if (!externallyProcessedMergedBamFiles.empty) {
-                return "There are ExternallyProcessedMergedBamFiles attached: ${externallyProcessedMergedBamFiles}"
+            List<ExternallyProcessedBamFile> externallyProcessedBamFiles = obj.seqTrackService.returnExternallyProcessedBamFiles(seqTrackList)
+            if (!externallyProcessedBamFiles.empty) {
+                return "There are ExternallyProcessedBamFiles attached: ${externallyProcessedBamFiles}"
             }
             int linkedSeqTracks = seqTrackList.findAll { SeqTrack seqTrack -> seqTrack.linkedExternally
             }.size()

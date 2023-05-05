@@ -38,7 +38,7 @@ import de.dkfz.tbi.otp.security.SecurityService
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
-import static de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.QcTrafficLightStatus.*
+import static de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.QcTrafficLightStatus.*
 
 @Rollback
 @Integration

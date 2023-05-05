@@ -44,7 +44,7 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
     @Override
     Class[] getDomainClassesToMock() {
         return [
-                AbstractMergedBamFile,
+                AbstractBamFile,
                 CellRangerMergingWorkPackage,
                 CellRangerConfig,
                 DataFile,
@@ -310,14 +310,14 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
                     1 * cleanupOutputDirectory(singleCellBamFile)
                     1 * linkResultFiles(singleCellBamFile)
                 },
-                abstractMergedBamFileService: Mock(AbstractMergedBamFileService) {
+                abstractBamFileService: Mock(AbstractBamFileService) {
                     1 * updateSamplePairStatusToNeedProcessing(singleCellBamFile)
                 },
                 md5SumService               : Mock(Md5SumService) {
                     1 * extractMd5Sum(_) >> md5sum
                 },
                 qcTrafficLightCheckService  : Mock(QcTrafficLightCheckService) {
-                    1 * handleQcCheck(singleCellBamFile, _) >> { AbstractMergedBamFile bam, Closure closure ->
+                    1 * handleQcCheck(singleCellBamFile, _) >> { AbstractBamFile bam, Closure closure ->
                         closure()
                     }
                 },
@@ -332,18 +332,17 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
 
         then:
         singleCellBamFile.refresh()
-        singleCellBamFile.fileOperationStatus == AbstractMergedBamFile.FileOperationStatus.PROCESSED
+        singleCellBamFile.fileOperationStatus == AbstractBamFile.FileOperationStatus.PROCESSED
         singleCellBamFile.fileSize > 0
         singleCellBamFile.md5sum == md5sum
-        singleCellBamFile.fileExists
         singleCellBamFile.dateFromFileSystem != null
         singleCellBamFile.mergingWorkPackage.bamFileInProjectFolder == singleCellBamFile
 
         where:
         state << [
-                AbstractMergedBamFile.FileOperationStatus.NEEDS_PROCESSING,
-                AbstractMergedBamFile.FileOperationStatus.INPROGRESS,
-                AbstractMergedBamFile.FileOperationStatus.PROCESSED,
+                AbstractBamFile.FileOperationStatus.NEEDS_PROCESSING,
+                AbstractBamFile.FileOperationStatus.INPROGRESS,
+                AbstractBamFile.FileOperationStatus.PROCESSED,
         ]
     }
 
@@ -353,7 +352,7 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
 
         String md5sum = HelperUtils.randomMd5sum
         SingleCellBamFile singleCellBamFile = createBamFile([
-                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.DECLARED,
+                fileOperationStatus: AbstractBamFile.FileOperationStatus.DECLARED,
         ])
         singleCellBamFile.metaClass.isMostRecentBamFile = { -> true } //use criteria which do not work in unit tests
 
@@ -364,14 +363,14 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
                     _ * cleanupOutputDirectory(singleCellBamFile)
                     _ * linkResultFiles(singleCellBamFile)
                 },
-                abstractMergedBamFileService: Mock(AbstractMergedBamFileService) {
+                abstractBamFileService: Mock(AbstractBamFileService) {
                     0 * updateSamplePairStatusToNeedProcessing(singleCellBamFile)
                 },
                 md5SumService               : Mock(Md5SumService) {
                     _ * extractMd5Sum(_) >> md5sum
                 },
                 qcTrafficLightCheckService  : Mock(QcTrafficLightCheckService) {
-                    0 * handleQcCheck(singleCellBamFile, _) >> { AbstractMergedBamFile bam, Closure closure ->
+                    0 * handleQcCheck(singleCellBamFile, _) >> { AbstractBamFile bam, Closure closure ->
                         closure()
                     }
                 },
@@ -389,9 +388,8 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
         e.message.contains('contains(singleCellBamFile.fileOperationStatus)')
 
         singleCellBamFile.refresh()
-        singleCellBamFile.fileOperationStatus == AbstractMergedBamFile.FileOperationStatus.DECLARED
+        singleCellBamFile.fileOperationStatus == AbstractBamFile.FileOperationStatus.DECLARED
         singleCellBamFile.md5sum == null
-        !singleCellBamFile.fileExists
         singleCellBamFile.dateFromFileSystem == null
         singleCellBamFile.mergingWorkPackage.bamFileInProjectFolder == null
     }

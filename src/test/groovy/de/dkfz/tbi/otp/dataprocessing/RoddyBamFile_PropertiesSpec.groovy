@@ -46,7 +46,7 @@ class RoddyBamFile_PropertiesSpec extends Specification implements DataTest, Dom
     @Override
     Class<?>[] getDomainClassesToMock() {
         return [
-                AbstractMergedBamFile,
+                AbstractBamFile,
                 DataFile,
                 FileType,
                 Individual,

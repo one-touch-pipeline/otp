@@ -24,7 +24,7 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 import groovy.transform.CompileDynamic
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedMergedBamFile
+import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedBamFile
 import de.dkfz.tbi.otp.ngsdata.DataFile
 import de.dkfz.tbi.otp.ngsdata.MetaDataColumn
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.AbstractMetadataValidationContext
@@ -62,7 +62,7 @@ class Md5sumUniqueValidator extends ValueTuplesValidator<AbstractMetadataValidat
                 context.addProblem(valueTuplesOfMd5sum*.cells.sum(), LogLevel.WARNING, "The MD5 sum '${md5sum}' is not unique in the metadata file.", "At least one MD5 sum is not unique in the metadata file.")
             }
             if (context instanceof BamMetadataValidationContext) {
-                if (ExternallyProcessedMergedBamFile.findAllByMd5sum(md5sum)) {
+                if (ExternallyProcessedBamFile.findAllByMd5sum(md5sum)) {
                     context.addProblem(valueTuplesOfMd5sum*.cells.sum(), LogLevel.WARNING, "A bam file with the MD5 sum '${md5sum}' is already registered in OTP.", "At least one bam file has a MD5 sum is already registered in OTP.")
                 }
             } else {

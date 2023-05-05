@@ -45,7 +45,7 @@ class ExecuteRoddySnvJobSpec extends Specification implements DataTest {
     @Override
     Class[] getDomainClassesToMock() {
         return [
-                AbstractMergedBamFile,
+                AbstractBamFile,
                 DataFile,
                 FileType,
                 Individual,
@@ -119,8 +119,8 @@ class ExecuteRoddySnvJobSpec extends Specification implements DataTest {
 
         RoddySnvCallingInstance roddySnvCallingInstance = DomainFactory.createRoddySnvInstanceWithRoddyBamFiles()
 
-        AbstractMergedBamFile bamFileDisease = roddySnvCallingInstance.sampleType1BamFile
-        AbstractMergedBamFile bamFileControl = roddySnvCallingInstance.sampleType2BamFile
+        AbstractBamFile bamFileDisease = roddySnvCallingInstance.sampleType1BamFile
+        AbstractBamFile bamFileControl = roddySnvCallingInstance.sampleType2BamFile
 
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(bamFileDisease)
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(bamFileControl)
