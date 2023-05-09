@@ -23,7 +23,6 @@ package de.dkfz.tbi.otp.security
 
 import grails.gorm.transactions.Transactional
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 
 import de.dkfz.odcf.audit.impl.DicomAuditLogger
@@ -40,8 +39,7 @@ class DicomAuditConsoleHandler {
     // that always returns true and logs the access to the console as side effect.
     // There is sadly no other way to intercept the access to these URLs.
     boolean log() {
-        DicomAuditLogger.logEmergencyOverrideStart(EventOutcomeIndicator.SUCCESS,
-            dicomAuditUtils.getRealUserName(SecurityContextHolder.context.authentication.principal.username))
+        DicomAuditLogger.logEmergencyOverrideStart(EventOutcomeIndicator.SUCCESS, dicomAuditUtils.realUserName)
         return true
     }
 }
