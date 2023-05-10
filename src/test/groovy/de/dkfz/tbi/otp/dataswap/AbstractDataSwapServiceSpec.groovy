@@ -330,6 +330,7 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
                                 |
                                 |## add entry to new mapping file
                                 |touch '${NEW_MAPPING_PATH}'
+                                |chmod 640 '${NEW_MAPPING_PATH}'
                                 |echo '${NEW_ENTRY}' >> '${NEW_MAPPING_PATH}'
                                 |
                                 |## delete mapping file, if empty
@@ -1054,6 +1055,7 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
                                  |sed -i '\\#${dataFilePaths[it].oldWellMappingFileEntryName}#d' ${dataFilePaths[it].oldWellMappingFile}
                                  |\n## add entry to new mapping file
                                  |touch '${dataFilePaths[it].newWellMappingFile}'
+                                 |chmod 640 '${dataFilePaths[it].newWellMappingFile}'
                                  |echo '${dataFilePaths[it].newWellMappingFileEntryName}' >> '${dataFilePaths[it].newWellMappingFile}'
                                  |\n## delete mapping file, if empty
                                  |if [ ! -s '${dataFilePaths[it].oldWellMappingFile}' ]

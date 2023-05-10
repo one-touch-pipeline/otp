@@ -310,6 +310,7 @@ abstract class AbstractDataSwapService<P extends DataSwapParameters, D extends D
                |
                |## add entry to new mapping file
                |touch '${mappingFile}'
+               |chmod 640 '${mappingFile}'
                |echo '${mappingEntry}' >> '${mappingFile}'
                |
                |## delete mapping file, if empty
