@@ -67,11 +67,9 @@ class FilestoreService {
 
         // UUID is splitted into 3 parts
         String[] uuidFragments = new String[3]
-        [0, 2, 4].eachWithIndex { int pos, int idx ->
-            uuidFragments[idx] = idx == 2
-                    ? uuidString.substring(pos, uuidString.size())
-                    : uuidString.substring(pos, pos + 2)
-        }
+        uuidFragments[0] = uuidString.substring(0, 2)
+        uuidFragments[1] = uuidString.substring(2, 4)
+        uuidFragments[2] = uuidString.substring(4)
 
         return Paths.get(workFolder.baseFolder.path, uuidFragments)
     }
