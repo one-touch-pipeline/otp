@@ -24,10 +24,12 @@ package de.dkfz.tbi.otp.dataprocessing
 import grails.testing.gorm.DataTest
 import grails.testing.services.ServiceUnitTest
 import spock.lang.Specification
+import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.domainFactory.FastqcDomainFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.FastqcWorkflowDomainFactory
+import de.dkfz.tbi.otp.workflow.shared.WorkflowException
 import de.dkfz.tbi.otp.workflowExecution.WorkflowVersion
 
 class FastqcProcessedFileServiceSpec extends Specification implements ServiceUnitTest<FastQcProcessedFileService>, DataTest, FastqcDomainFactory, FastqcWorkflowDomainFactory {
@@ -54,11 +56,12 @@ class FastqcProcessedFileServiceSpec extends Specification implements ServiceUni
         configService?.clean()
     }
 
-    void "buildWorkingPath, when called for bash fastqc workflow, then return expected value"() {
+    @Unroll
+    void "buildWorkingPath, when called for #prefix fastqc workflow, then return expected value"() {
         given:
-        WorkflowVersion workflowVersion = createBashFastqcWorkflowVersion()
+        WorkflowVersion workflowVersion = useWes ? createWesFastqcWorkflowVersion() : createBashFastqcWorkflowVersion()
         String expected = [
-                "bash",
+                prefix,
                 workflowVersion.workflowVersion,
                 "2000-01-23-15-45-55-000",
         ].join('-')
@@ -68,6 +71,11 @@ class FastqcProcessedFileServiceSpec extends Specification implements ServiceUni
 
         then:
         result == expected
+
+        where:
+        useWes || prefix
+        false  || 'bash'
+        true   || 'wes'
     }
 
     void "buildWorkingPath, when called for other workflow, then throw assertion"() {
@@ -78,6 +86,6 @@ class FastqcProcessedFileServiceSpec extends Specification implements ServiceUni
         service.buildWorkingPath(workflowVersion)
 
         then:
-        thrown(AssertionError)
+        thrown(WorkflowException)
     }
 }

@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.domainFactory.workflowSystem
 
 import de.dkfz.tbi.otp.workflow.fastqc.BashFastQcWorkflow
+import de.dkfz.tbi.otp.workflow.fastqc.WesFastQcWorkflow
 import de.dkfz.tbi.otp.workflowExecution.Workflow
 import de.dkfz.tbi.otp.workflowExecution.WorkflowVersion
 
@@ -34,6 +35,17 @@ trait FastqcWorkflowDomainFactory extends WorkflowSystemDomainFactory {
     WorkflowVersion createBashFastqcWorkflowVersion(String version = "0.11.15") {
         return createWorkflowVersion([
                 workflow       : findOrCreateBashFastqcWorkflow(),
+                workflowVersion: version,
+        ])
+    }
+
+    Workflow findOrCreateWesFastqcWorkflow() {
+        return findOrCreateWorkflow(WesFastQcWorkflow.WORKFLOW, [beanName: WesFastQcWorkflow.simpleName.uncapitalize()])
+    }
+
+    WorkflowVersion createWesFastqcWorkflowVersion(String version = "0.11.15") {
+        return createWorkflowVersion([
+                workflow       : findOrCreateWesFastqcWorkflow(),
                 workflowVersion: version,
         ])
     }

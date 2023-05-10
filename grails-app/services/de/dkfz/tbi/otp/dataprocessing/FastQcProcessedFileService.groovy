@@ -28,6 +28,8 @@ import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.ngsdata.DataFile
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.workflow.fastqc.BashFastQcWorkflow
+import de.dkfz.tbi.otp.workflow.fastqc.WesFastQcWorkflow
+import de.dkfz.tbi.otp.workflow.shared.WorkflowException
 import de.dkfz.tbi.otp.workflowExecution.WorkflowVersion
 import de.dkfz.tbi.util.TimeFormats
 
@@ -54,8 +56,18 @@ class FastQcProcessedFileService {
      * Repeated calls create different values, so keep the result if needed multiple times.
      */
     String buildWorkingPath(WorkflowVersion workflowVersion) {
-        assert workflowVersion.workflow.name == BashFastQcWorkflow.WORKFLOW
+        String prefix
+        switch (workflowVersion.workflow.name) {
+            case BashFastQcWorkflow.WORKFLOW:
+                prefix = 'bash'
+                break
+            case WesFastQcWorkflow.WORKFLOW:
+                prefix = 'wes'
+                break
+            default:
+                throw new WorkflowException("unsupported fastqc workflow: ${workflowVersion.workflow.name}")
+        }
         ZonedDateTime zonedDateTime = configService.zonedDateTime
-        return "bash-${workflowVersion.workflowVersion}-${TimeFormats.DATE_TIME_SECONDS_DASHES.getFormattedZonedDateTime(zonedDateTime)}"
+        return "${prefix}-${workflowVersion.workflowVersion}-${TimeFormats.DATE_TIME_SECONDS_DASHES.getFormattedZonedDateTime(zonedDateTime)}"
     }
 }

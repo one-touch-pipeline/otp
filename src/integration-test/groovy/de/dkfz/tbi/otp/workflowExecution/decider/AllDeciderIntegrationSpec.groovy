@@ -39,6 +39,7 @@ class AllDeciderIntegrationSpec extends Specification implements ServiceUnitTest
         given:
         AllDecider allDecider = new AllDecider()
         createBashFastqcWorkflowVersion()
+        createWesFastqcWorkflowVersion()
         createWorkflow(name: PanCancerWorkflow.WORKFLOW)
         createWorkflow(name: WgbsWorkflow.WORKFLOW)
         WorkflowStep workflowStep = createWorkflowStep()

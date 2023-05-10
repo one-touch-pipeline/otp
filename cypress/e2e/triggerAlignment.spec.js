@@ -67,7 +67,10 @@ describe('Check trigger alignment page', () => {
         });
 
         cy.get('#infos li').should('not.be.empty');
-        cy.get('#resultWarning li').should('have.length', 1).should('have.text', 'none');
+        cy.get('#resultWarning li').should('have.length', 12)
+          .each((row) => {
+            cy.wrap(row).contains('skip').contains('since fastqc already exist');
+          });
         cy.get('#resultWorkPackageList li').should('have.length', 6);
 
       });
@@ -97,10 +100,11 @@ describe('Check trigger alignment page', () => {
         // Wait until table is rendered
         cy.get('div#seqTrackTable_processing').should('not.be.visible');
 
-        cy.get('table#seqTrackTable').find('tbody tr').each((row) => {
-          cy.wrap(row).find('td').eq(2).should('satisfy', (el) => alignment[1].pid.includes(el[0].innerText));
-          cy.wrap(row).find('td').eq(4).contains(alignment[1].seqType);
-        });
+        cy.get('table#seqTrackTable').find('tbody tr').should('have.length', 12)
+          .each((row) => {
+            cy.wrap(row).find('td').eq(2).should('satisfy', (el) => alignment[1].pid.includes(el[0].innerText));
+            cy.wrap(row).find('td').eq(4).contains(alignment[1].seqType);
+          });
 
         // TODO otp-2027: Next line should be commented in, when the bug is fixed
         // cy.get('#warnAreaAccordion').should('not.be.visible');
@@ -115,7 +119,10 @@ describe('Check trigger alignment page', () => {
         });
 
         cy.get('#infos li').should('not.be.empty');
-        cy.get('#resultWarning li').should('have.length', 1).should('have.text', 'none');
+        cy.get('#resultWarning li').should('have.length', 12)
+          .each((row) => {
+            cy.wrap(row).contains('skip').contains('since fastqc already exist');
+          });
         cy.get('#resultWorkPackageList li').should('have.length', 6);
       });
     });
@@ -143,9 +150,10 @@ describe('Check trigger alignment page', () => {
         // Wait until table is rendered
         cy.get('div#seqTrackTable_processing').should('not.be.visible');
 
-        cy.get('table#seqTrackTable').find('tbody tr').each((row) => {
-          cy.wrap(row).find('td').eq(0).should('satisfy', (el) => alignment[2].laneIds.includes(el[0].innerText));
-        });
+        cy.get('table#seqTrackTable').find('tbody tr').should('have.length', 2)
+          .each((row) => {
+            cy.wrap(row).find('td').eq(0).should('satisfy', (el) => alignment[2].laneIds.includes(el[0].innerText));
+          });
       });
 
       cy.get('input#ignoreSeqPlatformGroup').uncheck();
@@ -159,7 +167,10 @@ describe('Check trigger alignment page', () => {
 
       cy.get('#warnAreaAccordion').should('not.be.visible');
       cy.get('#infos li').should('not.be.empty');
-      cy.get('#resultWarning li').should('have.length', 1).should('have.text', 'none');
+      cy.get('#resultWarning li').should('have.length', 2)
+        .each((row) => {
+          cy.wrap(row).contains('skip').contains('since fastqc already exist');
+        });
       cy.get('#resultWorkPackageList li').should('have.length', 2);
     });
 
@@ -256,7 +267,10 @@ describe('Check trigger alignment page', () => {
         });
 
         cy.get('#infos li').should('not.be.empty');
-        cy.get('#resultWarning li').should('have.length', 1).should('have.text', 'none');
+        cy.get('#resultWarning li').should('have.length', 2)
+          .each((row) => {
+            cy.wrap(row).contains('skip').contains('since fastqc already exist');
+          });
         cy.get('#resultWorkPackageList li').should('have.length', 1);
       });
     });
