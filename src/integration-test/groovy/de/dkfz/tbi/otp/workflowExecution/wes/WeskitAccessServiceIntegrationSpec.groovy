@@ -88,7 +88,7 @@ class WeskitAccessServiceIntegrationSpec extends Specification {
         String runId = service.runWorkflow(wesWorkflowParameter)
 
         then:
-        1 * api.runWorkflow(_ as String, WesWorkflowType.NEXTFLOW.weskitName, WesWorkflowType.NEXTFLOW.version, _ as String, "", workflow, null
+        1 * api.runWorkflow(_ as String, WesWorkflowType.NEXTFLOW.weskitName, WesWorkflowType.NEXTFLOW.version, _ as String, "{}", workflow, null
         ) >> { String workflowParams, String workflowType, String workflowTypeVersion, String tags, String workflowEngineParameters, String workflowUrl, List<File> workflowAttachment ->
             assert JSON.parse(workflowParams) == JSON.parse(workflowParamsJson.toString(true))
             assert JSON.parse(tags) == JSON.parse(tagsJson.toString(true))

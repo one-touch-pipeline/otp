@@ -101,7 +101,7 @@ work('runWorkflow') {
     String workflowType = "NFL"
     String workflowTypeVersion = "22.10.0"
     String tags = """ { "run_dir" : "test_${de.dkfz.tbi.util.TimeFormats.DATE_TIME_SECONDS_DASHES.getFormattedDate(new Date())}" } """
-    String workflowEngineParameters = ""
+    String workflowEngineParameters = """ { "graph": "true" } """
     String workflowUrl = "nf-seq-qc-1.1.0/main.nf"
     List<byte[]> workflowAttachment = null
 

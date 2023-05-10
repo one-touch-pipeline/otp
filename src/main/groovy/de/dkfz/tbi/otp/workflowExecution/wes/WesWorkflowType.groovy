@@ -28,7 +28,7 @@ import groovy.transform.TupleConstructor
  */
 @TupleConstructor
 enum WesWorkflowType {
-    NEXTFLOW('NextFlow', 'NFL', '21.04.0'),
+    NEXTFLOW('NextFlow', 'NFL', '22.10.0'),
     SNAKE_MAKE('SnakeMake', 'SMK', '6.10.0')
 
     /**

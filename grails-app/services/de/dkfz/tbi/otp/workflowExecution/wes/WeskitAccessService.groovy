@@ -94,7 +94,7 @@ class WeskitAccessService {
                     wesWorkflowParameter.workflowType.weskitName,
                     wesWorkflowParameter.workflowType.version,
                     tags,
-                    "",
+                    "{}",
                     wesWorkflowParameter.workflowUrl,
                     null
             )

@@ -184,7 +184,7 @@ paths:
           schema:
             $ref: '#/definitions/ErrorResponse'
       consumes:
-         - multipart/form-data
+         - application/x-www-form-urlencoded
       parameters:
         - in: formData
           name: workflow_params
