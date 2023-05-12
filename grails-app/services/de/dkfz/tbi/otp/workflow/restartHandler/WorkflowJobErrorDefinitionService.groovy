@@ -26,6 +26,7 @@ import groovy.transform.CompileDynamic
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.workflow.restartHandler.WorkflowJobErrorDefinition.Action
+import de.dkfz.tbi.otp.workflow.restartHandler.logging.RestartHandlerLogService
 import de.dkfz.tbi.otp.workflowExecution.LogService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
@@ -35,7 +36,7 @@ class WorkflowJobErrorDefinitionService {
 
     LogService logService
 
-    List<AbstractRestartHandlerLogService> restartHandlerLogServices
+    List<RestartHandlerLogService> restartHandlerLogServices
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     List<WorkflowJobErrorDefinition> listAll() {
@@ -98,7 +99,7 @@ class WorkflowJobErrorDefinitionService {
             return []
         }
 
-        restartHandlerLogServices.each { AbstractRestartHandlerLogService restartHandlerLogService ->
+        restartHandlerLogServices.each { RestartHandlerLogService restartHandlerLogService ->
             //for mocking, getSourceType() needs to be used instead of sourceType
             WorkflowJobErrorDefinition.SourceType sourceType = restartHandlerLogService.getSourceType()
 

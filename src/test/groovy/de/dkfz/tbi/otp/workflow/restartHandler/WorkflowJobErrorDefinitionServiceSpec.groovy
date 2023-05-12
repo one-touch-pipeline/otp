@@ -27,6 +27,7 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.workflow.restartHandler.logging.RestartHandlerLogService
 import de.dkfz.tbi.otp.workflowExecution.LogService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
@@ -65,9 +66,9 @@ class WorkflowJobErrorDefinitionServiceSpec extends Specification
         LogWithIdentifier logWithIdentifierNoDefinitionFound = new LogWithIdentifier('noDefinition', 'some not matching text')
         LogWithIdentifier logWithIdentifierDefinitionFound = new LogWithIdentifier('definition', 'matching text: doMatch')
 
-        AbstractRestartHandlerLogService sourceTypeNotMatch = Mock(AbstractRestartHandlerLogService)
-        AbstractRestartHandlerLogService sourceTypeMatchNoLogs = Mock(AbstractRestartHandlerLogService)
-        AbstractRestartHandlerLogService sourceTypeMatchWithLogs = Mock(AbstractRestartHandlerLogService)
+        RestartHandlerLogService sourceTypeNotMatch = Mock(RestartHandlerLogService)
+        RestartHandlerLogService sourceTypeMatchNoLogs = Mock(RestartHandlerLogService)
+        RestartHandlerLogService sourceTypeMatchWithLogs = Mock(RestartHandlerLogService)
 
         createWorkflowJobErrorDefinition([
                 sourceType     : WorkflowJobErrorDefinition.SourceType.CLUSTER_JOB,

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,60 +19,53 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflow.restartHandler
+package de.dkfz.tbi.otp.workflow.restartHandler.logging
 
 import grails.gorm.transactions.Transactional
 
-import de.dkfz.tbi.otp.infrastructure.ClusterJob
-import de.dkfz.tbi.otp.infrastructure.FileService
-import de.dkfz.tbi.otp.job.processing.FileSystemService
-import de.dkfz.tbi.otp.workflowExecution.LogService
+import de.dkfz.tbi.otp.workflow.restartHandler.LogWithIdentifier
+import de.dkfz.tbi.otp.workflow.restartHandler.WorkflowJobErrorDefinition
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStepService
-
-import java.nio.file.FileSystem
-import java.nio.file.Path
+import de.dkfz.tbi.otp.workflowExecution.wes.WesLog
+import de.dkfz.tbi.otp.workflowExecution.wes.WesRun
 
 @Transactional
-class ClusterJobLogService extends AbstractRestartHandlerLogService {
-
-    LogService logService
-
-    FileSystemService fileSystemService
-
-    FileService fileService
+class WesTaskLogService implements RestartHandlerLogService {
 
     WorkflowStepService workflowStepService
 
-    static private final long FACTOR_1024 = 1024
-
-    static final long MAX_FILE_SIZE_IN_MIB = 10
-
-    static final long MAX_FILE_SIZE = MAX_FILE_SIZE_IN_MIB * FACTOR_1024 * FACTOR_1024
-
     @Override
     WorkflowJobErrorDefinition.SourceType getSourceType() {
-        return WorkflowJobErrorDefinition.SourceType.CLUSTER_JOB
+        return WorkflowJobErrorDefinition.SourceType.WES_TASK_LOG
     }
 
     @Override
     Collection<LogWithIdentifier> createLogsWithIdentifier(WorkflowStep workflowStep) {
-        FileSystem fileSystem = fileSystemService.getRemoteFileSystem(workflowStep.workflowRun.project.realm)
         WorkflowStep prevRunningWorkflowStep = workflowStepService.getPreviousRunningWorkflowStep(workflowStep)
+        Collection<LogWithIdentifier> logsWithIdentifier = []
 
-        return prevRunningWorkflowStep?.clusterJobs?.findResults { ClusterJob clusterJob ->
-            Path file = fileSystem.getPath(clusterJob.jobLog)
-            if (!FileService.isFileReadable(file)) {
-                logService.addSimpleLogEntry(workflowStep, "The log file '${file}' does not exist.")
-                return
-            } else if (fileService.fileSizeExceeded(file.toFile(), MAX_FILE_SIZE)) {
-                logService.addSimpleLogEntry(workflowStep, "The log file '${file}' is bigger than the ${MAX_FILE_SIZE_IN_MIB} MB threshold.")
-                return
+        prevRunningWorkflowStep.wesRuns.<WesRun>each { WesRun run ->
+            if (run.wesRunLog && run.wesRunLog.taskLogs) {
+                run.wesRunLog.taskLogs.each { WesLog log ->
+                    String identifierPrefix = "${run.wesIdentifier}-${log.name}"
+                    LogWithIdentifier stdoutLogWithIdentifier = createLogWithIdentifier(log.stdout, "${identifierPrefix}-stdout", workflowStep)
+
+                    if (stdoutLogWithIdentifier) {
+                        logsWithIdentifier.add(stdoutLogWithIdentifier)
+                    }
+
+                    LogWithIdentifier sterrLogWithIdentifier = createLogWithIdentifier(log.stderr, "${identifierPrefix}-stderr", workflowStep)
+
+                    if (sterrLogWithIdentifier) {
+                        logsWithIdentifier.add(sterrLogWithIdentifier)
+                    }
+                }
+            } else {
+                logService.addSimpleLogEntry(workflowStep, "No log available for ${run.wesIdentifier}.")
             }
-            return new LogWithIdentifier([
-                    identifier: clusterJob.jobLog,
-                    log       : file.text,
-            ])
         }
+
+        return logsWithIdentifier
     }
 }

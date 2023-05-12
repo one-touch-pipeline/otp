@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,26 +19,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflow.restartHandler
+package de.dkfz.tbi.otp.workflow.restartHandler.logging
 
-import grails.gorm.transactions.Transactional
+import grails.testing.gorm.DataTest
+import grails.testing.services.ServiceUnitTest
+import spock.lang.Specification
 
+import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.workflow.restartHandler.LogWithIdentifier
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
-@Transactional
-class MessageLogService extends AbstractRestartHandlerLogService {
+class MessageLogServiceSpec extends Specification implements ServiceUnitTest<MessageLogService>, DataTest, WorkflowSystemDomainFactory {
 
     @Override
-    WorkflowJobErrorDefinition.SourceType getSourceType() {
-        return WorkflowJobErrorDefinition.SourceType.MESSAGE
+    Class[] getDomainClassesToMock() {
+        return [
+                WorkflowStep,
+        ]
     }
 
-    @Override
-    Collection<LogWithIdentifier> createLogsWithIdentifier(WorkflowStep workflowStep) {
-        LogWithIdentifier log = new LogWithIdentifier([
-                identifier: 'message',
-                log       : workflowStep.workflowError.message,
+    void "test createLogsWithIdentifier for MessageLogService"() {
+        given:
+        WorkflowStep workflowStep = createWorkflowStep([
+                workflowError: createWorkflowError(),
+                state: WorkflowStep.State.FAILED,
         ])
-        return [log]
+
+        when:
+        Collection<LogWithIdentifier> logWithIdentifiers = service.createLogsWithIdentifier(workflowStep)
+
+        then:
+        logWithIdentifiers.size() == 1
+        logWithIdentifiers[0].identifier == "message"
+        logWithIdentifiers[0].log == workflowStep.workflowError.message
     }
 }

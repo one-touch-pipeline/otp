@@ -109,11 +109,6 @@ class WorkflowStep implements Commentable, Entity {
         return CollectionUtils.atMostOneElement(findAllByPrevious(this))
     }
 
-    @SuppressWarnings('GetterMethodCouldBeProperty')
-    String getWesData() {
-        return null
-    }
-
     WorkflowStep getOriginalRestartedFrom() {
         WorkflowStep step = restartedFrom
         while (step?.restartedFrom) {

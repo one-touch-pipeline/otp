@@ -30,7 +30,13 @@ import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.workflow.restartHandler.WorkflowJobErrorDefinition
 import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.otp.workflowExecution.log.*
+import de.dkfz.tbi.otp.workflowExecution.wes.WesLog
+import de.dkfz.tbi.otp.workflowExecution.wes.WesRun
+import de.dkfz.tbi.otp.workflowExecution.wes.WesRunLog
 
+import io.swagger.client.wes.model.State
+
+import java.time.LocalDateTime
 import java.time.ZonedDateTime
 
 trait WorkflowSystemDomainFactory implements DomainFactoryCore, TaxonomyFactory {
@@ -80,6 +86,37 @@ trait WorkflowSystemDomainFactory implements DomainFactoryCore, TaxonomyFactory 
         //otherwise hibernate try to save the step with null for workflow run, which will fail with sql exception
         step.workflowRun.addToWorkflowSteps(step)
         return step.save(flush: true)
+    }
+
+    WesRun createWesRun(Map properties = [:]) {
+        return createDomainObject(WesRun, [
+                workflowStep: { createWorkflowStep() },
+                wesIdentifier: "wes_identifier_${nextId}",
+                subPath: "",
+                state: WesRun.MonitorState.CHECKING,
+                wesRunLog: { createWesRunLog() },
+        ], properties)
+    }
+
+    WesRunLog createWesRunLog(Map properties = [:]) {
+        return createDomainObject(WesRunLog, [
+                state: State.QUEUED,
+                runLog: { createWesLog() },
+                taskLogs: { [ createWesLog() ] },
+                runRequest: null,
+        ], properties)
+    }
+
+    WesLog createWesLog(Map properties = [:]) {
+        return createDomainObject(WesLog, [
+                name: "name_${nextId}",
+                cmd: "cmd_${nextId}",
+                startTime: { LocalDateTime.now() },
+                endTime: { LocalDateTime.now() },
+                stdout: "stdout_${nextId}",
+                stderr: "stderr_${nextId}",
+                exitCode: 0,
+        ], properties)
     }
 
     WorkflowArtefact createWorkflowArtefact(Map properties = [:]) {
