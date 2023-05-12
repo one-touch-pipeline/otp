@@ -33,7 +33,7 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
 /**
  * @deprecated class is part of the old workflow system, use {@link de.dkfz.tbi.otp.workflowExecution.decider.Decider} instead
-*/
+ */
 @CompileDynamic
 @Deprecated
 abstract class AbstractAlignmentDecider implements AlignmentDecider {
@@ -152,7 +152,7 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
             workPackage.save(flush: true)
             workPackage.alignmentProperties = referenceGenomeProjectSeqType.alignmentProperties?.collect {
                 ReferenceGenomeProjectSeqTypeAlignmentProperty alignmentProperty ->
-                new MergingWorkPackageAlignmentProperty(name: alignmentProperty.name, value: alignmentProperty.value, mergingWorkPackage: workPackage)
+                    new MergingWorkPackageAlignmentProperty(name: alignmentProperty.name, value: alignmentProperty.value, mergingWorkPackage: workPackage)
             } as Set
         }
 
