@@ -306,7 +306,9 @@ abstract class AbstractDataSwapService<P extends DataSwapParameters, D extends D
                |ln -sr '${newDirectFileName}' \\\n      '${wellFile}'
                |
                |## remove entry from old mapping file
+               |chmod 640 '${oldMappingFile}'
                |sed -i '\\#${oldValues[WELL_MAPPING_FILE_ENTRY_NAME]}#d' ${oldMappingFile}
+               |chmod 440 '${oldMappingFile}'
                |
                |## add entry to new mapping file
                |touch '${mappingFile}'
@@ -317,8 +319,7 @@ abstract class AbstractDataSwapService<P extends DataSwapParameters, D extends D
                |## delete mapping file, if empty
                |if [ ! -s '${oldMappingFile}' ]
                |then
-               |    chmod 640 '${mappingFile}'
-               |    rm '${oldMappingFile}'
+               |    rm -f '${oldMappingFile}'
                |fi
                |""".stripMargin()
     }

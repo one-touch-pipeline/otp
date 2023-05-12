@@ -326,7 +326,9 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
                                 |ln -sr '${NEW_FINAL_PATH}' \\\n      '${NEW_WELL_PATH}'
                                 |
                                 |## remove entry from old mapping file
+                                |chmod 640 '${OLD_MAPPING_PATH}'
                                 |sed -i '\\#${OLD_ENTRY}#d' ${OLD_MAPPING_PATH}
+                                |chmod 440 '${OLD_MAPPING_PATH}'
                                 |
                                 |## add entry to new mapping file
                                 |touch '${NEW_MAPPING_PATH}'
@@ -337,8 +339,7 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
                                 |## delete mapping file, if empty
                                 |if [ ! -s '${OLD_MAPPING_PATH}' ]
                                 |then
-                                |    chmod 640 '${OLD_MAPPING_PATH}'
-                                |    rm '${OLD_MAPPING_PATH}'
+                                |    rm -f '${OLD_MAPPING_PATH}'
                                 |fi
                                 |""".stripMargin()
 
@@ -1054,7 +1055,9 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
                                  |mkdir -p -m 2750 '${dataFilePaths[it].newVbpPath.parent}'
                                  |ln -sr '${dataFilePaths[it].newPath}' \\\n      '${dataFilePaths[it].newVbpPath}'
                                  |\n## remove entry from old mapping file
+                                 |chmod 640 '${dataFilePaths[it].oldWellMappingFileEntryName}'
                                  |sed -i '\\#${dataFilePaths[it].oldWellMappingFileEntryName}#d' ${dataFilePaths[it].oldWellMappingFile}
+                                 |chmod 440 '${dataFilePaths[it].oldWellMappingFileEntryName}'
                                  |\n## add entry to new mapping file
                                  |touch '${dataFilePaths[it].newWellMappingFile}'
                                  |chmod 640 '${dataFilePaths[it].newWellMappingFile}'
@@ -1063,8 +1066,7 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
                                  |\n## delete mapping file, if empty
                                  |if [ ! -s '${dataFilePaths[it].oldWellMappingFile}' ]
                                  |then
-                                 |    chmod 640 '${dataFilePaths[it].oldWellMappingFile}'
-                                 |    rm '${dataFilePaths[it].oldWellMappingFile}'
+                                 |    rm -f '${dataFilePaths[it].oldWellMappingFile}'
                                  |fi\n""".stripMargin()
             bashScriptToMoveFiles += "\n\n"
         }
