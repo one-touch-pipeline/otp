@@ -332,10 +332,12 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
                                 |touch '${NEW_MAPPING_PATH}'
                                 |chmod 640 '${NEW_MAPPING_PATH}'
                                 |echo '${NEW_ENTRY}' >> '${NEW_MAPPING_PATH}'
+                                |chmod 440 '${NEW_MAPPING_PATH}'
                                 |
                                 |## delete mapping file, if empty
                                 |if [ ! -s '${OLD_MAPPING_PATH}' ]
                                 |then
+                                |    chmod 640 '${OLD_MAPPING_PATH}'
                                 |    rm '${OLD_MAPPING_PATH}'
                                 |fi
                                 |""".stripMargin()
@@ -1057,9 +1059,11 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
                                  |touch '${dataFilePaths[it].newWellMappingFile}'
                                  |chmod 640 '${dataFilePaths[it].newWellMappingFile}'
                                  |echo '${dataFilePaths[it].newWellMappingFileEntryName}' >> '${dataFilePaths[it].newWellMappingFile}'
+                                 |chmod 440 '${dataFilePaths[it].newWellMappingFile}'
                                  |\n## delete mapping file, if empty
                                  |if [ ! -s '${dataFilePaths[it].oldWellMappingFile}' ]
                                  |then
+                                 |    chmod 640 '${dataFilePaths[it].oldWellMappingFile}'
                                  |    rm '${dataFilePaths[it].oldWellMappingFile}'
                                  |fi\n""".stripMargin()
             bashScriptToMoveFiles += "\n\n"

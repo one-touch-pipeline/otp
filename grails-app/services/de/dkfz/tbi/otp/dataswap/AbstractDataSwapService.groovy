@@ -312,10 +312,12 @@ abstract class AbstractDataSwapService<P extends DataSwapParameters, D extends D
                |touch '${mappingFile}'
                |chmod 640 '${mappingFile}'
                |echo '${mappingEntry}' >> '${mappingFile}'
+               |chmod 440 '${mappingFile}'
                |
                |## delete mapping file, if empty
                |if [ ! -s '${oldMappingFile}' ]
                |then
+               |    chmod 640 '${mappingFile}'
                |    rm '${oldMappingFile}'
                |fi
                |""".stripMargin()
