@@ -102,8 +102,7 @@
             <table>
                 <thead>
                 <tr>
-                    <th colspan="3"><g:link controller="seqTrack" action="show"
-                                            id="${track.key.id}">${track.key.laneId} ${track.key.sample}<br/>${track.key.seqType}</g:link></th>
+                    <th colspan="3">${track.key.laneId} ${track.key.sample}<br/>${track.key.seqType}</th>
                     <th colspan="3">insert size: ${track.key.insertSize}</th>
                     <th colspan="3">number of base pairs: ${track.key.nBaseString()}</th>
                 </tr>

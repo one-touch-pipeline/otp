@@ -25,7 +25,6 @@ import grails.gorm.transactions.Transactional
 import groovy.transform.CompileDynamic
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
-import org.springframework.security.access.prepost.PostAuthorize
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.InformationReliability
@@ -242,18 +241,6 @@ class SeqTrackService {
     void fillBaseCount(SeqTrack seqTrack) {
         seqTrack.nBasePairs = seqTrack.dataFilesWhereIndexFileIsFalse.sum { DataFile it -> it.NBasePairs } as Long ?: 0
         assert seqTrack.save(flush: true)
-    }
-
-    @PostAuthorize("hasRole('ROLE_OPERATOR') or (returnObject == null) or hasPermission(returnObject.sample.individual.project, 'OTP_READ_ACCESS')")
-    SeqTrack getSeqTrack(String identifier) {
-        if (!identifier) {
-            return null
-        }
-        SeqTrack seqTrack = null
-        if (identifier.long) {
-            seqTrack = SeqTrack.get(identifier as Long)
-        }
-        return seqTrack
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#individual.project, 'OTP_READ_ACCESS')")

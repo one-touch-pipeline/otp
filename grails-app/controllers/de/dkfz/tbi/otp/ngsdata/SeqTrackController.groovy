@@ -23,33 +23,14 @@ package de.dkfz.tbi.otp.ngsdata
 
 import org.springframework.security.access.prepost.PreAuthorize
 
-import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
-import de.dkfz.tbi.otp.job.processing.ProcessParameterService
-
 @PreAuthorize('isFullyAuthenticated()')
 class SeqTrackController {
 
     SeqTrackService seqTrackService
-    ProcessParameterService processParameterService
 
     static allowedMethods = [
-            show       : "GET",
             seqTrackSet: "GET",
     ]
-
-    def show() {
-        params.id = params.id ?: "0"
-        SeqTrack seqTrack = seqTrackService.getSeqTrack(params.id)
-        if (!seqTrack) {
-            return response.sendError(404)
-        }
-        List<JobExecutionPlan> jobExecutionPlans = processParameterService.getAllJobExecutionPlansBySeqTrackAndClass(seqTrack.id as String, SeqTrack.name)
-
-        return [
-            seqTrack: seqTrack,
-            jobExecutionPlans: jobExecutionPlans,
-        ]
-    }
 
     def seqTrackSet(SeqTrackSelectionCommand cmd) {
         List<SeqTrack> seqTracks = seqTrackService.getSeqTrackSet(cmd.individual, cmd.sampleType, cmd.seqType)

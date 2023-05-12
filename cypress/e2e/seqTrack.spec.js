@@ -50,7 +50,7 @@ describe('Check seq track pages', () => {
       cy.checkPage('seqTrack/seqTrackSet');
     });
 
-    it('should visit the show page by starting on project overview page via the run page', () => {
+    it('should visit the run show page by starting on project overview page via the run page', () => {
       cy.visit('/projectOverview/index');
       cy.get('table#projectOverviewTable tbody').find('tr').eq(12)
         .find('td')
@@ -64,8 +64,6 @@ describe('Check seq track pages', () => {
 
       cy.get('div.run-information').contains('run').click();
       cy.checkPage('run/show');
-      cy.get('a[href*="seqTrack/show"]').click();
-      cy.checkPage('/seqTrack/show');
     });
   });
 });

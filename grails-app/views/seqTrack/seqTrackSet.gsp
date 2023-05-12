@@ -115,7 +115,7 @@
                     <div class="lane-and-datafile-grid-wrapper color-left-border lane slim">
                         <div class="grid-element lane identifier">
                             <strong><g:message code="seqTrack.seqTrackSet.lanesPerRun.laneId"/>:</strong>
-                            <g:link controller="seqTrack" action="show" id="${seqTrack.id}">${seqTrack.laneId}</g:link>
+                            ${seqTrack.laneId}
                         </div>
                         <div class="grid-element lane wellIdentifier">
                             ${seqTrack.singleCellWellLabel}

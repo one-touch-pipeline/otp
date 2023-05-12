@@ -24,22 +24,11 @@ package de.dkfz.tbi.otp.job.processing
 import grails.gorm.transactions.Transactional
 import groovy.transform.CompileDynamic
 
-import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
-
 @CompileDynamic
 @Transactional
 class ProcessParameterService {
 
     List<ProcessParameter> findAllByProcess(Process process) {
         return ProcessParameter.findAllByProcess(process)
-    }
-
-    List<JobExecutionPlan> getAllJobExecutionPlansBySeqTrackAndClass(String seqTrackId, String className) {
-        List<ProcessParameter> processParameters = ProcessParameter.findAllByValueAndClassName(seqTrackId, className)
-        List<JobExecutionPlan> jobExecutionPlans = []
-        processParameters.each { ProcessParameter processParameter ->
-            jobExecutionPlans << processParameter.process.jobExecutionPlan
-        }
-        return jobExecutionPlans
     }
 }
