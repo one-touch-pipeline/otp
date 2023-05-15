@@ -22,6 +22,8 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.converters.JSON
+import grails.databinding.BindUsing
+import grails.databinding.SimpleMapDataBindingSource
 import grails.validation.Validateable
 import grails.validation.ValidationException
 import org.springframework.security.access.prepost.PreAuthorize
@@ -515,6 +517,11 @@ class CreateSeqTypeCommand extends CreateWithLayoutCommand {
     String displayName
     boolean hasAntibodyTarget
     boolean needsBedFile
+
+    @BindUsing({ CreateSeqTypeCommand obj, SimpleMapDataBindingSource source ->
+        Object aliasesObj = source['aliases']
+        return aliasesObj instanceof String[] ? aliasesObj : [aliasesObj]
+    })
     List<String> aliases
 
     static constraints = {

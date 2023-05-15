@@ -121,15 +121,17 @@
         </tbody>
     </table>
     </div>
-    <otp:editorSwitchNewValues
-            roles="ROLE_OPERATOR"
-            labels="${[
-                    g.message(code: "dataFields.libPrepKit.name"),
-                    g.message(code: "dataFields.libPrepKit.adapterFile"),
-                    g.message(code: "dataFields.libPrepKit.reverseComplementAdapterSequenceShort"),
-            ]}"
-            textFields="${["name", "adapterFile", "reverseComplementAdapterSequence"]}"
-            link="${g.createLink(controller: 'metaDataFields', action: 'createLibraryPreparationKit')}"/>
+    <div class="new-lib-prep-kit-container">
+        <otp:editorSwitchNewValues
+                roles="ROLE_OPERATOR"
+                labels="${[
+                        g.message(code: "dataFields.libPrepKit.name"),
+                        g.message(code: "dataFields.libPrepKit.adapterFile"),
+                        g.message(code: "dataFields.libPrepKit.reverseComplementAdapterSequenceShort"),
+                ]}"
+                textFields="${["name", "adapterFile", "reverseComplementAdapterSequence"]}"
+                link="${g.createLink(controller: 'metaDataFields', action: 'createLibraryPreparationKit')}"/>
+    </div>
     <br><br>
 </div>
 </body>

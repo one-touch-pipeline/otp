@@ -52,7 +52,6 @@
         <tbody>
         <g:each status="i" var="seqCenter" in="${seqCenters}">
             <tr class="${seqCenter.legacy ? 'text-muted' : ''}">
-            <tr>
                 <td>${seqCenter.name}</td>
                 <td>${seqCenter.dirName}</td>
                 <td>
@@ -83,13 +82,14 @@
         </tbody>
     </table>
     </div>
-    <otp:editorSwitchNewValues
-            roles="ROLE_OPERATOR"
-            labels="${["Name", "Directory"]}"
-            textFields="${["name", "dirName"]}"
-            link="${g.createLink(controller: 'metaDataFields', action: 'createSeqCenter')}"/>
-    <br>
-    <br>
+    <div class="new-seq-center-container">
+        <otp:editorSwitchNewValues
+                roles="ROLE_OPERATOR"
+                labels="${["Name", "Directory"]}"
+                textFields="${["name", "dirName"]}"
+                link="${g.createLink(controller: 'metaDataFields', action: 'createSeqCenter')}"/>
+    </div>
+    <br><br>
 </div>
 </body>
 </html>

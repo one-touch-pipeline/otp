@@ -97,11 +97,13 @@
         </tbody>
     </table>
     </div>
-    <otp:editorSwitchNewValues
-            roles="ROLE_OPERATOR"
-            labels="${["Platform", "Model", "Kit"]}"
-            textFields="${["platform", "model", "kit"]}"
-            link="${g.createLink(controller: 'metaDataFields', action: 'createSeqPlatform')}"/>
+    <div class="new-seq-platform-container">
+        <otp:editorSwitchNewValues
+                roles="ROLE_OPERATOR"
+                labels="${["Platform", "Model", "Kit"]}"
+                textFields="${["platform", "model", "kit"]}"
+                link="${g.createLink(controller: 'metaDataFields', action: 'createSeqPlatform')}"/>
+    </div>
     <br>
     <br>
 </div>

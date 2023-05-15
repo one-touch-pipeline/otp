@@ -120,73 +120,76 @@
     </table>
     </div>
 
-    <h2><g:message code="dataFields.seqType.create.addSeqTypeTitle"/></h2>
-    <g:form action="createSeqType" useToken="true">
-        <table style="width: 50%">
-            <tbody>
-            <tr>
-                <td><g:message code="dataFields.seqType.create.seqTypeName"/></td>
-                <td><input name="seqTypeName" id="type" type="text" value="${cmd?.seqTypeName}"/></td>
-            </tr>
-            <tr>
-                <td><g:message code="dataFields.seqType.create.aliases"/></td>
-                <td class="multi-input-field">
-                    <g:each in="${cmd?.aliases ?: [""]}" var="alias" status="i">
-                        <div class="field">
-                            <g:textField list="aliasList" name="aliases" value="${alias}" />
-                            <g:if test="${i == 0}">
-                                <button class="add-field">+</button>
-                            </g:if>
-                            <g:else>
-                                <button class="remove-field">-</button>
-                            </g:else>
-                        </div>
-                    </g:each>
-                </td>
-            </tr>
-            <tr>
-                <td><g:message code="dataFields.seqType.create.name"/></td>
-                <td><input name="displayName" id="name" type="text" value="${cmd?.displayName}"/></td>
-            </tr>
-            <tr>
-                <td><g:message code="dataFields.seqType.create.directory"/></td>
-                <td><input name="dirName" id="directory" type="text" value="${cmd?.dirName}"/></td>
-            </tr>
-            <tr>
-                <td><label for="singleCell"><g:message code="dataFields.seqType.create.singleCell"/></label></td>
-                <td><g:checkBox name="singleCell" id="singleCell" value="${cmd?.singleCell ?: false}"/></td>
-            </tr>
-            <tr>
-                <td><label for="hasAntibodyTarget"><g:message code="dataFields.seqType.create.hasAntibodyTarget"/></label></td>
-                <td><g:checkBox name="hasAntibodyTarget" id="hasAntibodyTarget" value="${cmd?.hasAntibodyTarget ?: false}"/></td>
-            </tr>
-            <tr>
-                <td><label for="hasAntibodyTarget"><g:message code="dataFields.seqType.needsBedFile"/></label></td>
-                <td><g:checkBox name="needsBedFile" id="needsBedFile" value="${cmd?.needsBedFile ?: false}"/></td>
-            </tr>
-            <tr>
-                <td><g:message code="dataFields.seqType.create.layout"/></td>
-                <td>
-                    <label class="vertical-align-middle">
-                        <g:message code="dataFields.seqType.create.single"/>
-                        <g:checkBox id="single" name="single" value="${cmd?.single ?: false}"/>
-                    </label>
-                    |
-                    <label class="vertical-align-middle">
-                        <g:message code="dataFields.seqType.create.paired"/>
-                        <g:checkBox id="paired" name="paired" value="${cmd == null || cmd?.paired}"/>
-                    </label>
-                    |
-                    <label class="vertical-align-middle">
-                        <g:message code="dataFields.seqType.create.mate"/>
-                        <g:checkBox id="mate_pair" name="mate_pair" value="${cmd?.mate_pair ?: false}"/>
-                    </label>
-                </td>
-            </tr>
-            </tbody>
-        </table>
-        <g:submitButton name="${g.message(code: "document.createType")}"/>
-    </g:form>
+    <div id="newSeqTypeContainer">
+        <h2><g:message code="dataFields.seqType.create.addSeqTypeTitle"/></h2>
+        <g:form action="createSeqType" useToken="true">
+            <table style="width: 50%">
+                <tbody>
+                <tr>
+                    <td><g:message code="dataFields.seqType.create.seqTypeName"/></td>
+                    <td><input name="seqTypeName" id="type" type="text" value="${cmd?.seqTypeName}"/></td>
+                </tr>
+                <tr>
+                    <td><g:message code="dataFields.seqType.create.aliases"/></td>
+                    <td class="multi-input-field">
+                        <g:each in="${cmd?.aliases ?: [""]}" var="alias" status="i">
+                            <div class="field">
+                                <g:textField list="aliasList" name="aliases" value="${alias}" />
+                                <g:if test="${i == 0}">
+                                    <button class="add-field">+</button>
+                                </g:if>
+                                <g:else>
+                                    <button class="remove-field">-</button>
+                                </g:else>
+                            </div>
+                        </g:each>
+                    </td>
+                </tr>
+                <tr>
+                    <td><g:message code="dataFields.seqType.create.name"/></td>
+                    <td><input name="displayName" id="name" type="text" value="${cmd?.displayName}"/></td>
+                </tr>
+                <tr>
+                    <td><g:message code="dataFields.seqType.create.directory"/></td>
+                    <td><input name="dirName" id="directory" type="text" value="${cmd?.dirName}"/></td>
+                </tr>
+                <tr>
+                    <td><label for="singleCell"><g:message code="dataFields.seqType.create.singleCell"/></label></td>
+                    <td><g:checkBox name="singleCell" id="singleCell" value="${cmd?.singleCell ?: false}"/></td>
+                </tr>
+                <tr>
+                    <td><label for="hasAntibodyTarget"><g:message code="dataFields.seqType.create.hasAntibodyTarget"/></label></td>
+                    <td><g:checkBox name="hasAntibodyTarget" id="hasAntibodyTarget" value="${cmd?.hasAntibodyTarget ?: false}"/></td>
+                </tr>
+                <tr>
+                    <td><label for="hasAntibodyTarget"><g:message code="dataFields.seqType.needsBedFile"/></label></td>
+                    <td><g:checkBox name="needsBedFile" id="needsBedFile" value="${cmd?.needsBedFile ?: false}"/></td>
+                </tr>
+                <tr>
+                    <td><g:message code="dataFields.seqType.create.layout"/></td>
+                    <td>
+                        <label class="vertical-align-middle">
+                            <g:message code="dataFields.seqType.create.single"/>
+                            <g:checkBox id="single" name="single" value="${cmd?.single ?: false}"/>
+                        </label>
+                        |
+                        <label class="vertical-align-middle">
+                            <g:message code="dataFields.seqType.create.paired"/>
+                            <g:checkBox id="paired" name="paired" value="${cmd == null || cmd?.paired}"/>
+                        </label>
+                        |
+                        <label class="vertical-align-middle">
+                            <g:message code="dataFields.seqType.create.mate"/>
+                            <g:checkBox id="mate_pair" name="mate_pair" value="${cmd?.mate_pair ?: false}"/>
+                        </label>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            <g:submitButton name="${g.message(code: "document.createType")}"/>
+        </g:form>
+    </div>
+
 </div>
 </body>
 </html>

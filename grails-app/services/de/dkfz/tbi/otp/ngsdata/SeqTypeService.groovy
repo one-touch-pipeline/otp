@@ -119,7 +119,6 @@ class SeqTypeService extends MetadataFieldsService<SeqType> {
         }
     }
 
-    @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void changeLegacyState(SeqType seqType, boolean legacy) {
         SeqType.findAllByNameAndSingleCell(seqType.name, seqType.singleCell).each {
             it.legacy = legacy
@@ -129,8 +128,10 @@ class SeqTypeService extends MetadataFieldsService<SeqType> {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void toggleNeedsBedFileFlag(SeqType seqType) {
-        seqType.needsBedFile = !seqType.needsBedFile
-        seqType.save(flush: true)
+        SeqType.findAllByNameAndSingleCell(seqType.name, seqType.singleCell).each {
+            it.needsBedFile = !it.needsBedFile
+            assert it.save(flush: true)
+        }
     }
 
     @Override

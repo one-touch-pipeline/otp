@@ -79,11 +79,13 @@
         </tbody>
     </table>
     </div>
-    <otp:editorSwitchNewValues
-            roles="ROLE_OPERATOR"
-            labels="${["Name"]}"
-            textFields="${["name"]}"
-            link="${g.createLink(controller: 'metaDataFields', action: 'createAntibodyTarget')}"/>
+    <div class="new-antibody-target-container">
+        <otp:editorSwitchNewValues
+                roles="ROLE_OPERATOR"
+                labels="${["Name"]}"
+                textFields="${["name"]}"
+                link="${g.createLink(controller: 'metaDataFields', action: 'createAntibodyTarget')}"/>
+    </div>
     <br><br>
 </div>
 </body>
