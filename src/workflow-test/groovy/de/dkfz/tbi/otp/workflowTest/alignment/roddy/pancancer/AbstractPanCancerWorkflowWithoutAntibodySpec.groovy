@@ -188,6 +188,7 @@ abstract class AbstractPanCancerWorkflowWithoutAntibodySpec extends AbstractPanC
                 roddyBamFileService.getWorkBaiFile(firstBamFile),
                 roddyBamFileService.getWorkMd5sumFile(firstBamFile),
                 roddyBamFileService.getWorkMergedQAJsonFile(firstBamFile),
+                roddyConfigService.getConfigFile(workBamFile.parent),
         ]
 
         files.addAll(roddyBamFileService.getWorkSingleLaneQAJsonFiles(firstBamFile).values())
