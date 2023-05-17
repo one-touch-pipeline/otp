@@ -32,14 +32,17 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.domainFactory.FastqcDomainFactory
 import de.dkfz.tbi.otp.domainFactory.pipelines.AlignmentPipelineFactory
+import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.filestore.FilestoreService
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CreateFileHelper
+import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 
 import java.nio.file.*
 import java.nio.file.attribute.PosixFilePermission
 
-class WithdrawHelperServiceSpec extends HibernateSpec implements FastqcDomainFactory {
+class WithdrawHelperServiceSpec extends HibernateSpec implements FastqcDomainFactory, WorkflowSystemDomainFactory {
 
     private static final List<String> PATH_LIST1 = ['/tmp'].asImmutable()
     private static final List<String> PATH_LIST2 = ['/tmp2'].asImmutable()
@@ -394,20 +397,23 @@ class WithdrawHelperServiceSpec extends HibernateSpec implements FastqcDomainFac
         String withdrawnCommentSingleCell = "withdrawnComment\nfor singleCellDataFile"
         final Path finalPathNormal = CreateFileHelper.createFile(tempDir.resolve("finalNormal"))
         final Path finalPathSingleCell = CreateFileHelper.createFile(tempDir.resolve("finalSingleCell"))
+        final Path uuidPathNormal = CreateFileHelper.createFile(tempDir.resolve("uuidNormal"))
+        final Path uuidPathSingleCell = CreateFileHelper.createFile(tempDir.resolve("uuidSingleCell"))
         final String viewByPidPathNormal = "/tmp/viewByPidNormal"
         final String viewByPidPathSingleCell = "/tmp/viewByPidSingleCell"
         final String wellPathSingleCell = "/tmp/wellSingleCell"
         final Path fastqcPathNormal = CreateFileHelper.createFile(tempDir.resolve("fastqcNormal"))
         final Path fastqcPathSingleCell = CreateFileHelper.createFile(tempDir.resolve("fastqcSingleCell"))
-        final Path fastqcOutputMd5sumPath = CreateFileHelper.createFile(tempDir.resolve("fastqcOutputMd5sum"))
-        final Path fastqcOutputMd5sumPathSingleCell = CreateFileHelper.createFile(tempDir.resolve("fastqcOutputMd5sumSingleCell"))
         final Path finalMd5sumNormal = CreateFileHelper.createFile(tempDir.resolve("finalMd5sum"))
         final Path finalMd5sumSingleCell = CreateFileHelper.createFile(tempDir.resolve("finalMd5sumSingleCell"))
-        final Path fastqcHtmlPath = CreateFileHelper.createFile(tempDir.resolve("html"))
-        final Path fastqcHtmlPathSingleCell = CreateFileHelper.createFile(tempDir.resolve("htmlSingleCell"))
+        final WorkflowRun fastqcRun = createWorkflowRun()
+        final WorkflowRun fastqcSingleCellRun = createWorkflowRun()
 
         DataFile dataFile = createDataFile()
-        FastqcProcessedFile fastqcProcessedFile = createFastqcProcessedFile([dataFile: dataFile])
+        FastqcProcessedFile fastqcProcessedFile = createFastqcProcessedFile([
+                dataFile: dataFile,
+                workflowArtefact: createWorkflowArtefact(producedBy: fastqcRun),
+        ])
         DataFile withdrawnDataFile = createDataFile([fileWithdrawn: true])
         DataFile singleCellDataFile = createDataFile([
                 seqTrack: createSeqTrack([
@@ -417,7 +423,10 @@ class WithdrawHelperServiceSpec extends HibernateSpec implements FastqcDomainFac
                         singleCellWellLabel: 'someLabel',
                 ])
         ])
-        FastqcProcessedFile singleCellFastqcProcessedFile = createFastqcProcessedFile([dataFile: singleCellDataFile])
+        FastqcProcessedFile singleCellFastqcProcessedFile = createFastqcProcessedFile([
+                dataFile: singleCellDataFile,
+                workflowArtefact: createWorkflowArtefact(producedBy: fastqcSingleCellRun),
+        ])
         MergingWorkPackage mergingWorkPackage = AlignmentPipelineFactory.RoddyPancanFactoryInstance.INSTANCE.createMergingWorkPackage([
                 seqTracks: [dataFile.seqTrack] as Set,
                 seqType  : dataFile.seqTrack.seqType,
@@ -425,6 +434,7 @@ class WithdrawHelperServiceSpec extends HibernateSpec implements FastqcDomainFac
 
         WithdrawHelperService service = new WithdrawHelperService()
 
+        service.filestoreService = Mock(FilestoreService)
         service.lsdfFilesService = Mock(LsdfFilesService)
         service.fastqcDataFilesService = Mock(FastqcDataFilesService)
         WithdrawStateHolder holder = new WithdrawStateHolder([
@@ -439,14 +449,12 @@ class WithdrawHelperServiceSpec extends HibernateSpec implements FastqcDomainFac
         List<String> pathsToChangeGroup = [
                 finalPathNormal.toString(),
                 finalMd5sumNormal.toString(),
-                fastqcPathNormal.toString(),
-                fastqcHtmlPath.toString(),
-                fastqcOutputMd5sumPath.toString(),
+                tempDir.toString(),
+                uuidPathNormal.toString(),
                 finalPathSingleCell.toString(),
                 finalMd5sumSingleCell.toString(),
-                fastqcPathSingleCell.toString(),
-                fastqcHtmlPathSingleCell.toString(),
-                fastqcOutputMd5sumPathSingleCell.toString(),
+                tempDir.toString(),
+                uuidPathSingleCell.toString(),
         ]
         List<String> pathsToDelete = [
                 viewByPidPathNormal,
@@ -468,15 +476,14 @@ class WithdrawHelperServiceSpec extends HibernateSpec implements FastqcDomainFac
         0 * service.lsdfFilesService._
 
         1 * service.fastqcDataFilesService.fastqcOutputPath(fastqcProcessedFile) >> fastqcPathNormal
-        1 * service.fastqcDataFilesService.fastqcOutputMd5sumPath(fastqcProcessedFile) >> fastqcOutputMd5sumPath
-        1 * service.fastqcDataFilesService.fastqcHtmlPath(fastqcProcessedFile) >> fastqcHtmlPath
         1 * service.fastqcDataFilesService.fastqcOutputPath(singleCellFastqcProcessedFile) >> fastqcPathSingleCell
-        1 * service.fastqcDataFilesService.fastqcOutputMd5sumPath(singleCellFastqcProcessedFile) >> fastqcOutputMd5sumPathSingleCell
-        1 * service.fastqcDataFilesService.fastqcHtmlPath(singleCellFastqcProcessedFile) >> fastqcHtmlPathSingleCell
         0 * service.fastqcDataFilesService._
 
+        1 * service.filestoreService.getWorkFolderPath(fastqcRun) >> uuidPathNormal
+        1 * service.filestoreService.getWorkFolderPath(fastqcSingleCellRun) >> uuidPathSingleCell
+
         and:
-        TestCase.assertContainSame(holder.pathsToChangeGroup, pathsToChangeGroup)
+        TestCase.assertContainSame(holder.pathsToChangeGroup as Set, pathsToChangeGroup as Set)
         TestCase.assertContainSame(holder.pathsToDelete, pathsToDelete)
 
         with(dataFile) {

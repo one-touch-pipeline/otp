@@ -28,6 +28,7 @@ import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.filestore.FilestoreService
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
@@ -58,6 +59,7 @@ class WithdrawHelperService {
     FileSystemService fileSystemService
     LsdfFilesService lsdfFilesService
     ProcessingOptionService processingOptionService
+    FilestoreService filestoreService
 
     @Autowired
     List<WithdrawBamFileService<?>> withdrawBamFileServices
@@ -174,9 +176,10 @@ class WithdrawHelperService {
             filePaths.add(lsdfFilesService.getFileFinalPathAsPath(dataFile))
             filePaths.add(lsdfFilesService.getFileMd5sumFinalPathAsPath(dataFile))
             if (fastqcProcessedFile) {
-                filePaths.add(fastqcDataFilesService.fastqcOutputPath(fastqcProcessedFile))
-                filePaths.add(fastqcDataFilesService.fastqcHtmlPath(fastqcProcessedFile))
-                filePaths.add(fastqcDataFilesService.fastqcOutputMd5sumPath(fastqcProcessedFile))
+                // add the symbolic link
+                filePaths.add(fastqcDataFilesService.fastqcOutputPath(fastqcProcessedFile).parent)
+                // add the uuid folder, which the link pointed to
+                filePaths.add(filestoreService.getWorkFolderPath(fastqcProcessedFile.workflowArtefact.producedBy))
             }
 
             filePaths.findAll { path ->
