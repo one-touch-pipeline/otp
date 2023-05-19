@@ -21,8 +21,10 @@
  */
 package de.dkfz.tbi.otp.workflowExecution
 
+import asset.pipeline.grails.LinkGenerator
 import grails.gorm.transactions.Transactional
 import groovy.transform.Synchronized
+import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.utils.exceptions.FileAccessForArchivedProjectNotAllowedException
 import de.dkfz.tbi.otp.workflow.restartHandler.BeanToRestartNotFoundInWorkflowRunException
@@ -30,6 +32,9 @@ import de.dkfz.tbi.otp.workflow.shared.WorkflowJobIsNotRestartableException
 
 @Transactional
 class JobService {
+
+    @Autowired
+    LinkGenerator linkGenerator
 
     LogService logService
 
@@ -70,10 +75,18 @@ class JobService {
         }
 
         if (!run.jobCanBeRestarted) {
+            String link = linkGenerator.link([
+                    controller: 'workflowRunDetails',
+                    action    : 'index',
+                    id        : run.id,
+                    params    : [:],
+            ])
+
             throw new WorkflowJobIsNotRestartableException(
-                    "Can not restart job of ${run.displayName}, since the job has failed at a timepoint it was working on an not save " +
-                            "repeatable action. To avoid the risk data inconsistency the job shouldn't be restarted. " +
-                            "Please restart the workflow instead, if possible.")
+                    "Can not restart job ${run.id} of '${run.shortDisplayName}', since the job has failed at a timepoint when it was communicating with an " +
+                            "external system. Therefore, the external system may have started already a process, so a restart of the job could cause " +
+                            "multiple processes writing into the same files. To avoid the risk data corruption and inconsistency the job shouldn't be " +
+                            "restarted. Please restart the workflow instead, if possible. See <a href = \"${link}\"> detail page</a>")
         }
 
         assert run.state == WorkflowRun.State.FAILED: "Can not restart job of ${run.displayName}, " +

@@ -30,6 +30,8 @@ describe('Check cluster job detail page', () => {
 
     it('should visit the cluster job detail page via the cluster job general page', () => {
       cy.visit('/clusterJobGeneral/index');
+      cy.get('input#dpFrom').type('2021-06-07');
+      cy.get('input#dpTo').type('2022-03-09');
 
       cy.get('table tbody').find('tr a').each((clusterJobDetailAnkerLink) => {
         cy.visit(clusterJobDetailAnkerLink.prop('href'));

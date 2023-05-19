@@ -88,7 +88,7 @@ describe('Check workflow run details page', () => {
 
       cy.get('table#runs tbody').should('not.be.empty');
 
-      cy.get('table#runs tbody tr').first().find('a').click();
+      cy.get('table#runs tbody tr').last().find('a').click();
       cy.location('pathname').should('contain', '/workflowRunDetails/index');
 
       // Restart step
@@ -108,7 +108,7 @@ describe('Check workflow run details page', () => {
 
       cy.get('table#runs tbody').should('not.be.empty');
 
-      cy.get('table#runs tbody tr').first().find('a').click();
+      cy.get('table#runs tbody tr').last().find('a').click();
       cy.location('pathname').should('contain', '/workflowRunDetails/index');
 
       // Restart run

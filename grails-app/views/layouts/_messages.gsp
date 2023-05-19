@@ -57,7 +57,7 @@ To use it, store a `FlashMessage` object in `flash.message`.
                 <g:elseif test="${flash.message.errorList}">
                     <ul>
                         <g:each in="${flash.message.errorList}" var="error">
-                            <li>${error}</li>
+                            <li>${raw(error)}</li>
                         </g:each>
                     </ul>
                 </g:elseif>

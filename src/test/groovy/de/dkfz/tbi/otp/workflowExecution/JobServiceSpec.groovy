@@ -21,8 +21,8 @@
  */
 package de.dkfz.tbi.otp.workflowExecution
 
+import asset.pipeline.grails.LinkGenerator
 import grails.testing.gorm.DataTest
-import grails.testing.services.ServiceUnitTest
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -31,7 +31,9 @@ import de.dkfz.tbi.otp.workflow.restartHandler.BeanToRestartNotFoundInWorkflowRu
 import de.dkfz.tbi.otp.workflow.shared.WorkflowJobIsNotRestartableException
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowMessageLog
 
-class JobServiceSpec extends Specification implements ServiceUnitTest<JobService>, DataTest, WorkflowSystemDomainFactory {
+class JobServiceSpec extends Specification implements DataTest, WorkflowSystemDomainFactory {
+
+    private JobService service
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -43,6 +45,7 @@ class JobServiceSpec extends Specification implements ServiceUnitTest<JobService
     }
 
     void setup() {
+        service = new JobService()
         service.logService = Mock(LogService) {
             _ * addSimpleLogEntry(_, _)
         }
@@ -197,6 +200,10 @@ class JobServiceSpec extends Specification implements ServiceUnitTest<JobService
                 state      : WorkflowStep.State.FAILED,
         ])
         workflowRun.save(flush: true)
+
+        service.linkGenerator = Mock(LinkGenerator) {
+            1 * link(_) >> "link"
+        }
 
         when:
         service.createRestartedJobAfterJobFailure(stepToRestart)

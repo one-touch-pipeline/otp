@@ -53,13 +53,13 @@ describe('Check workflow run list page', () => {
     });
 
     it('should restart a failed workflow step', () => {
-      cy.get('td button.restart-step-btn').first().click();
+      cy.get('td button.restart-step-btn').last().click();
       cy.get('.toast-body').should('contain.text', 'success');
     });
 
     it('should restart the previous step of a failed workflow', () => {
-      cy.get('button.dropdown-toggle').first().click();
-      cy.get('button.dropdown-item').first().click();
+      cy.get('button.dropdown-toggle').last().click();
+      cy.get('button.dropdown-item').last().click();
       cy.get('.toast-body').should('contain.text', 'success');
     });
 

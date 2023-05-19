@@ -29,20 +29,92 @@ describe('Check cluster job general page', () => {
     });
 
     it('should click through the pages of the table', () => {
+      cy.intercept('/clusterJobGeneral/findAllClusterJobsByDateBetween?*').as('dataTableSource');
+      cy.intercept('/clusterJobGeneral/getAllStatesTimeDistribution?*').as('getAllStatesTimeDistribution');
+      cy.intercept('/clusterJobGeneral/getAllExitCodes?*').as('getAllExitCodes');
+      cy.intercept('/clusterJobGeneral/getAllExitStatuses?*').as('getAllExitStatuses');
+      cy.intercept('/clusterJobGeneral/getAllStates?*').as('getAllStates');
+      cy.intercept('/clusterJobGeneral/getAllFailed?*').as('getAllFailed');
+      cy.intercept('/clusterJobGeneral/getAllAvgCoreUsage?*').as('getAllAvgCoreUsage');
+      cy.intercept('/clusterJobGeneral/getAllMemoryUsage?*').as('getAllMemoryUsage');
+
       cy.visit('/clusterJobGeneral/index');
 
+      //check all async loaded data
+      cy.wait('@dataTableSource').then((interception) => {
+        expect(interception.response.statusCode).to.eq(200);
+      });
+      cy.wait('@getAllStatesTimeDistribution').then((interception) => {
+        expect(interception.response.statusCode).to.eq(200);
+      });
+      cy.wait('@getAllExitCodes').then((interception) => {
+        expect(interception.response.statusCode).to.eq(200);
+      });
+      cy.wait('@getAllExitStatuses').then((interception) => {
+        expect(interception.response.statusCode).to.eq(200);
+      });
+      cy.wait('@getAllStates').then((interception) => {
+        expect(interception.response.statusCode).to.eq(200);
+      });
+      cy.wait('@getAllFailed').then((interception) => {
+        expect(interception.response.statusCode).to.eq(200);
+      });
+      cy.wait('@getAllAvgCoreUsage').then((interception) => {
+        expect(interception.response.statusCode).to.eq(200);
+      });
+      cy.wait('@getAllMemoryUsage').then((interception) => {
+        expect(interception.response.statusCode).to.eq(200);
+      });
+
+      //fixed time to have some data
+      cy.get('input#dpFrom').type('2022-08-20');
+      cy.get('input#dpTo').type('2022-09-10');
+
+      //check all async loaded data
+      cy.wait('@dataTableSource').then((interception) => {
+        expect(interception.response.statusCode).to.eq(200);
+      });
+      cy.wait('@getAllStatesTimeDistribution').then((interception) => {
+        expect(interception.response.statusCode).to.eq(200);
+      });
+      cy.wait('@getAllExitCodes').then((interception) => {
+        expect(interception.response.statusCode).to.eq(200);
+      });
+      cy.wait('@getAllExitStatuses').then((interception) => {
+        expect(interception.response.statusCode).to.eq(200);
+      });
+      cy.wait('@getAllStates').then((interception) => {
+        expect(interception.response.statusCode).to.eq(200);
+      });
+      cy.wait('@getAllFailed').then((interception) => {
+        expect(interception.response.statusCode).to.eq(200);
+      });
+      cy.wait('@getAllAvgCoreUsage').then((interception) => {
+        expect(interception.response.statusCode).to.eq(200);
+      });
+      cy.wait('@getAllMemoryUsage').then((interception) => {
+        expect(interception.response.statusCode).to.eq(200);
+      });
+
+      //go to page 2 checks
       cy.get('a.page-link').contains('2').click();
+      cy.wait('@dataTableSource').then((interception) => {
+        expect(interception.response.statusCode).to.eq(200);
+      });
       cy.get('div#clusterJobGeneralTable_processing').should('not.be.visible');
+
+      //go to next page
       cy.get('a.page-link').contains('Next').click();
+      cy.wait('@dataTableSource').then((interception) => {
+        expect(interception.response.statusCode).to.eq(200);
+      });
       cy.get('div#clusterJobGeneralTable_processing').should('not.be.visible');
+
+      //go again to page 1
       cy.get('a.page-link').contains('1').click();
-    });
-
-    it('should enter from and to date for filtering', () => {
-      cy.visit('/clusterJobGeneral/index');
-
-      cy.get('input#dpFrom').type('2021-06-07');
-      cy.get('input#dpTo').type('2022-03-09');
+      cy.wait('@dataTableSource').then((interception) => {
+        expect(interception.response.statusCode).to.eq(200);
+      });
     });
   });
 });
