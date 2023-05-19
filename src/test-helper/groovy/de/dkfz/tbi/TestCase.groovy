@@ -96,9 +96,9 @@ class TestCase {
     }
 
     static <T> boolean assertContainSame(final Collection<? extends T> c1, final Collection<? extends T> c2) {
-        if (!CollectionUtils.containSame(c1, c2)) {
-            Set c1Set = c1.toSet()
-            Set c2Set = c2.toSet()
+        Set c1Set = c1.toSet()
+        Set c2Set = c2.toSet()
+        if (!CollectionUtils.containSame(c1Set, c2Set)) {
             Set c3Set = c1.toSet()
             c1Set.removeAll(c2)
             c2Set.removeAll(c1)

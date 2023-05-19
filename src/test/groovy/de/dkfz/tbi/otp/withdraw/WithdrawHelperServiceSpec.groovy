@@ -31,6 +31,7 @@ import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.domainFactory.FastqcDomainFactory
+import de.dkfz.tbi.otp.domainFactory.administration.DocumentFactory
 import de.dkfz.tbi.otp.domainFactory.pipelines.AlignmentPipelineFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.filestore.FilestoreService
@@ -42,7 +43,7 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 import java.nio.file.*
 import java.nio.file.attribute.PosixFilePermission
 
-class WithdrawHelperServiceSpec extends HibernateSpec implements FastqcDomainFactory, WorkflowSystemDomainFactory {
+class WithdrawHelperServiceSpec extends HibernateSpec implements FastqcDomainFactory, WorkflowSystemDomainFactory, DocumentFactory {
 
     private static final List<String> PATH_LIST1 = ['/tmp'].asImmutable()
     private static final List<String> PATH_LIST2 = ['/tmp2'].asImmutable()
@@ -406,8 +407,8 @@ class WithdrawHelperServiceSpec extends HibernateSpec implements FastqcDomainFac
         final Path fastqcPathSingleCell = CreateFileHelper.createFile(tempDir.resolve("fastqcSingleCell"))
         final Path finalMd5sumNormal = CreateFileHelper.createFile(tempDir.resolve("finalMd5sum"))
         final Path finalMd5sumSingleCell = CreateFileHelper.createFile(tempDir.resolve("finalMd5sumSingleCell"))
-        final WorkflowRun fastqcRun = createWorkflowRun()
-        final WorkflowRun fastqcSingleCellRun = createWorkflowRun()
+        final WorkflowRun fastqcRun = createWorkflowRun(workFolder: createWorkFolder())
+        final WorkflowRun fastqcSingleCellRun = createWorkflowRun(workFolder: createWorkFolder())
 
         DataFile dataFile = createDataFile()
         FastqcProcessedFile fastqcProcessedFile = createFastqcProcessedFile([
@@ -483,7 +484,7 @@ class WithdrawHelperServiceSpec extends HibernateSpec implements FastqcDomainFac
         1 * service.filestoreService.getWorkFolderPath(fastqcSingleCellRun) >> uuidPathSingleCell
 
         and:
-        TestCase.assertContainSame(holder.pathsToChangeGroup as Set, pathsToChangeGroup as Set)
+        TestCase.assertContainSame(holder.pathsToChangeGroup, pathsToChangeGroup)
         TestCase.assertContainSame(holder.pathsToDelete, pathsToDelete)
 
         with(dataFile) {

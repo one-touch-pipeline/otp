@@ -179,7 +179,9 @@ class WithdrawHelperService {
                 // add the symbolic link
                 filePaths.add(fastqcDataFilesService.fastqcOutputPath(fastqcProcessedFile).parent)
                 // add the uuid folder, which the link pointed to
-                filePaths.add(filestoreService.getWorkFolderPath(fastqcProcessedFile.workflowArtefact.producedBy))
+                if (fastqcProcessedFile.workflowArtefact?.producedBy?.workFolder) {  //guard against data w/o uuid file structure
+                    filePaths.add(filestoreService.getWorkFolderPath(fastqcProcessedFile.workflowArtefact.producedBy))
+                }
             }
 
             filePaths.findAll { path ->
