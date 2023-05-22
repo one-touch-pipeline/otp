@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,42 +21,22 @@
  */
 package de.dkfz.tbi.otp.workflowExecution.wes
 
-import grails.gorm.hibernate.annotation.ManagedEntity
-import io.swagger.client.wes.model.State
+import groovy.transform.CompileDynamic
 
-import de.dkfz.tbi.otp.utils.Entity
+import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
-@ManagedEntity
-class WesRunLog implements Entity {
+class WesRunService {
 
-    State state
-    WesLog runLog
-    Set<WesLog> taskLogs
-    String runRequest
-
-    static hasMany = [
-            taskLogs: WesLog
-    ]
-
-    static Closure constraints = {
-        runRequest nullable: true
+    /**
+     * returns all Run of weskit currently checked by OTP
+     */
+    @CompileDynamic
+    List<WesRun> monitoredRuns() {
+        return WesRun.findAllByState(WesRun.MonitorState.CHECKING)
     }
 
-    static Closure mapping = {
-        state index: 'wes_run_log_state_idx'
-        runLog index: 'wes_run_log_run_log_idx'
-        runRequest type: 'text'
-    }
-
-    @Override
-    String toString() {
-        return """\
-WesRunLog{
-    id=$id,
-    state=$state,
-    runLog=$runLog,
-    taskLogs=$taskLogs,
-    runRequest='$runRequest'
-}"""
+    @CompileDynamic
+    List<WesRun> allByWorkflowStep(WorkflowStep workflowStep) {
+        return WesRun.findAllByWorkflowStep(workflowStep)
     }
 }

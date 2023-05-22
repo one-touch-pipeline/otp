@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,42 +21,19 @@
  */
 package de.dkfz.tbi.otp.workflowExecution.wes
 
-import grails.gorm.hibernate.annotation.ManagedEntity
+import io.swagger.client.wes.model.RunStatus
 import io.swagger.client.wes.model.State
 
-import de.dkfz.tbi.otp.utils.Entity
+class RunStatusService {
 
-@ManagedEntity
-class WesRunLog implements Entity {
+    static final List<State> END_STATES = [
+            State.COMPLETE,
+            State.EXECUTOR_ERROR,
+            State.SYSTEM_ERROR,
+            State.CANCELED,
+    ].asImmutable()
 
-    State state
-    WesLog runLog
-    Set<WesLog> taskLogs
-    String runRequest
-
-    static hasMany = [
-            taskLogs: WesLog
-    ]
-
-    static Closure constraints = {
-        runRequest nullable: true
-    }
-
-    static Closure mapping = {
-        state index: 'wes_run_log_state_idx'
-        runLog index: 'wes_run_log_run_log_idx'
-        runRequest type: 'text'
-    }
-
-    @Override
-    String toString() {
-        return """\
-WesRunLog{
-    id=$id,
-    state=$state,
-    runLog=$runLog,
-    taskLogs=$taskLogs,
-    runRequest='$runRequest'
-}"""
+    boolean isInEndState(RunStatus runStatus) {
+        return END_STATES.contains(runStatus.state)
     }
 }

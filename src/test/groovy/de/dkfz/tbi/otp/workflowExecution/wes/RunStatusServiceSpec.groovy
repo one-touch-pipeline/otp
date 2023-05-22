@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,42 +21,35 @@
  */
 package de.dkfz.tbi.otp.workflowExecution.wes
 
-import grails.gorm.hibernate.annotation.ManagedEntity
+import io.swagger.client.wes.model.RunStatus
 import io.swagger.client.wes.model.State
+import spock.lang.Specification
+import spock.lang.Unroll
 
-import de.dkfz.tbi.otp.utils.Entity
+class RunStatusServiceSpec extends Specification {
 
-@ManagedEntity
-class WesRunLog implements Entity {
+    @Unroll
+    void "isInEndState, if state is #state, then result is #endState"() {
+        given:
+        RunStatusService service = new RunStatusService()
+        RunStatus runStatus = new RunStatus([
+                state: state,
+        ])
 
-    State state
-    WesLog runLog
-    Set<WesLog> taskLogs
-    String runRequest
+        expect:
+        service.isInEndState(runStatus) == endState
 
-    static hasMany = [
-            taskLogs: WesLog
-    ]
-
-    static Closure constraints = {
-        runRequest nullable: true
-    }
-
-    static Closure mapping = {
-        state index: 'wes_run_log_state_idx'
-        runLog index: 'wes_run_log_run_log_idx'
-        runRequest type: 'text'
-    }
-
-    @Override
-    String toString() {
-        return """\
-WesRunLog{
-    id=$id,
-    state=$state,
-    runLog=$runLog,
-    taskLogs=$taskLogs,
-    runRequest='$runRequest'
-}"""
+        where:
+        state                | endState
+        State.UNKNOWN        | false
+        State.QUEUED         | false
+        State.INITIALIZING   | false
+        State.RUNNING        | false
+        State.PAUSED         | false
+        State.COMPLETE       | true
+        State.EXECUTOR_ERROR | true
+        State.SYSTEM_ERROR   | true
+        State.CANCELED       | true
+        State.CANCELING      | false
     }
 }

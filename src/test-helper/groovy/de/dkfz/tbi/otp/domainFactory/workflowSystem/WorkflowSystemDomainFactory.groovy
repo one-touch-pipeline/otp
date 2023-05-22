@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.otp.domainFactory.workflowSystem
 
+import io.swagger.client.wes.model.State
+
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.taxonomy.TaxonomyFactory
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
@@ -30,13 +32,8 @@ import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.workflow.restartHandler.WorkflowJobErrorDefinition
 import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.otp.workflowExecution.log.*
-import de.dkfz.tbi.otp.workflowExecution.wes.WesLog
-import de.dkfz.tbi.otp.workflowExecution.wes.WesRun
-import de.dkfz.tbi.otp.workflowExecution.wes.WesRunLog
+import de.dkfz.tbi.otp.workflowExecution.wes.*
 
-import io.swagger.client.wes.model.State
-
-import java.time.LocalDateTime
 import java.time.ZonedDateTime
 
 trait WorkflowSystemDomainFactory implements DomainFactoryCore, TaxonomyFactory {
@@ -90,32 +87,32 @@ trait WorkflowSystemDomainFactory implements DomainFactoryCore, TaxonomyFactory 
 
     WesRun createWesRun(Map properties = [:]) {
         return createDomainObject(WesRun, [
-                workflowStep: { createWorkflowStep() },
+                workflowStep : { createWorkflowStep() },
                 wesIdentifier: "wes_identifier_${nextId}",
-                subPath: "",
-                state: WesRun.MonitorState.CHECKING,
-                wesRunLog: { createWesRunLog() },
+                subPath      : "",
+                state        : WesRun.MonitorState.CHECKING,
+                wesRunLog    : { createWesRunLog() },
         ], properties)
     }
 
     WesRunLog createWesRunLog(Map properties = [:]) {
         return createDomainObject(WesRunLog, [
-                state: State.QUEUED,
-                runLog: { createWesLog() },
-                taskLogs: { [ createWesLog() ] },
+                state     : State.QUEUED,
+                runLog    : { createWesLog() },
+                taskLogs  : { [createWesLog()] },
                 runRequest: null,
         ], properties)
     }
 
     WesLog createWesLog(Map properties = [:]) {
         return createDomainObject(WesLog, [
-                name: "name_${nextId}",
-                cmd: "cmd_${nextId}",
-                startTime: { LocalDateTime.now() },
-                endTime: { LocalDateTime.now() },
-                stdout: "stdout_${nextId}",
-                stderr: "stderr_${nextId}",
-                exitCode: 0,
+                name     : "name_${nextId}",
+                cmd      : "cmd_${nextId}",
+                startTime: { ZonedDateTime.now() },
+                endTime  : { ZonedDateTime.now() },
+                stdout   : "stdout_${nextId}",
+                stderr   : "stderr_${nextId}",
+                exitCode : 0,
         ], properties)
     }
 

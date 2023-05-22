@@ -70,13 +70,15 @@ class WesRun implements Entity {
      */
     WesRunLog wesRunLog //nullable, since filled by monitor
 
-    static constraints = {
+    static Closure constraints = {
         wesRunLog nullable: true
     }
 
-    static mapping = {
+    static Closure mapping = {
         workflowStep index: 'wes_run_workflow_step_idx'
         wesRunLog index: 'wes_run_wes_run_log_idx'
+        state index: 'wes_run_state_idx'
+        wesIdentifier index: 'wes_run_wes_identifier_idx'
     }
 
     @Override

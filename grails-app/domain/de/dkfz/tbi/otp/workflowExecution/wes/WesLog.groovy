@@ -24,32 +24,47 @@ package de.dkfz.tbi.otp.workflowExecution.wes
 import grails.gorm.hibernate.annotation.ManagedEntity
 
 import de.dkfz.tbi.otp.utils.Entity
+import de.dkfz.tbi.util.TimeFormats
 
-import java.time.LocalDateTime
+import java.time.ZonedDateTime
 
 @ManagedEntity
 class WesLog implements Entity {
     String name
     String cmd
-    LocalDateTime startTime
-    LocalDateTime endTime
+    ZonedDateTime startTime
+    ZonedDateTime endTime
     String stdout
     String stderr
     Integer exitCode
-    WesRunLog wesRunLog
 
-    static constraints = {
+    static Closure constraints = {
         cmd nullable: true
         stdout nullable: true
         stderr nullable: true
         endTime nullable: true
         startTime nullable: true
         exitCode nullable: true
-        wesRunLog nullable: true
     }
-    static mapping = {
+
+    static Closure mapping = {
         stdout type: "text"
         stderr type: "text"
         cmd type: "text"
+    }
+
+    @Override
+    String toString() {
+        return """\
+WesLog{
+    id=$id,
+    name='$name',
+    startTime=${TimeFormats.DATE_TIME_SECONDS.getFormattedZonedDateTime(startTime)},
+    endTime=${TimeFormats.DATE_TIME_SECONDS.getFormattedZonedDateTime(endTime)},
+    exitCode=$exitCode,
+    stdout='$stdout',
+    stderr='$stderr',
+    cmd='$cmd'
+}"""
     }
 }
