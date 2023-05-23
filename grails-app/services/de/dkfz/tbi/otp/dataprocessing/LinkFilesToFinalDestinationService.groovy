@@ -37,8 +37,6 @@ import de.dkfz.tbi.otp.utils.*
 import java.nio.file.FileSystem
 import java.nio.file.Path
 
-import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.threadLog
-
 @CompileDynamic
 @Transactional
 class LinkFilesToFinalDestinationService {
@@ -83,21 +81,6 @@ class LinkFilesToFinalDestinationService {
             )) == bamFile
             bamFile.workPackage.bamFileInProjectFolder = bamFile
             assert bamFile.workPackage.save(flush: true)
-        }
-    }
-
-    void linkToFinalDestinationAndCleanup(RoddyBamFile roddyBamFile, Realm realm) {
-        assert roddyBamFile: "roddyBamFile must not be null"
-        assert realm: "realm must not be null"
-        if (roddyBamFile.withdrawn) {
-            threadLog?.info "The results of ${roddyBamFile} will not be moved since it is marked as withdrawn"
-        } else {
-            cleanupWorkDirectory(roddyBamFile, realm)
-            executeRoddyCommandService.correctPermissionsAndGroups(roddyBamFile, realm)
-            cleanupOldResults(roddyBamFile, realm)
-            handleQcCheckAndSetBamFile(roddyBamFile) {
-                linkNewResults(roddyBamFile, realm)
-            }
         }
     }
 

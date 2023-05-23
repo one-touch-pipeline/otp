@@ -634,42 +634,6 @@ class LinkFilesToFinalDestinationServiceIntegrationTests implements DomainFactor
     }
 
     @Test
-    void testExecute_FailInCleanupWorkDirectory_ShouldFail() {
-        setupData()
-        setUp_allFine()
-        final String FAIL_MESSAGE = HelperUtils.uniqueString
-        linkFilesToFinalDestinationService.metaClass.cleanupWorkDirectory = { RoddyBamFile roddyBamFile, Realm realm -> assert false: FAIL_MESSAGE }
-
-        TestCase.shouldFailWithMessageContaining(AssertionError, FAIL_MESSAGE) {
-            linkFilesToFinalDestinationService.linkToFinalDestinationAndCleanup(roddyBamFile, realm)
-        }
-    }
-
-    @Test
-    void testExecute_FailLinkNewResults_ShouldFail() {
-        setupData()
-        setUp_allFine()
-        final String FAIL_MESSAGE = HelperUtils.uniqueString
-        linkFilesToFinalDestinationService.metaClass.linkNewResults = { RoddyBamFile roddyBamFile, Realm realm -> assert false: FAIL_MESSAGE }
-
-        TestCase.shouldFailWithMessageContaining(AssertionError, FAIL_MESSAGE) {
-            linkFilesToFinalDestinationService.linkToFinalDestinationAndCleanup(roddyBamFile, realm)
-        }
-    }
-
-    @Test
-    void testExecute_FailInCleanupOldResults_ShouldFail() {
-        setupData()
-        setUp_allFine()
-        final String FAIL_MESSAGE = HelperUtils.uniqueString
-        linkFilesToFinalDestinationService.metaClass.cleanupOldResults = { RoddyBamFile roddyBamFile, Realm realm -> assert false: FAIL_MESSAGE }
-
-        TestCase.shouldFailWithMessageContaining(AssertionError, FAIL_MESSAGE) {
-            linkFilesToFinalDestinationService.linkToFinalDestinationAndCleanup(roddyBamFile, realm)
-        }
-    }
-
-    @Test
     void testExecute_RoddyBamFileIsWithdrawn_ShouldNotBeCopied() {
         setupData()
         setUp_allFine()
@@ -692,7 +656,6 @@ class LinkFilesToFinalDestinationServiceIntegrationTests implements DomainFactor
             throw new UnsupportedOperationException("Should not reach this method")
         }
 
-        linkFilesToFinalDestinationService.linkToFinalDestinationAndCleanup(roddyBamFile, realm)
         assert roddyBamFile.fileOperationStatus == AbstractBamFile.FileOperationStatus.NEEDS_PROCESSING
     }
 
