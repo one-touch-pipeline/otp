@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.otp.workflowTest.fastqc
 
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.dataprocessing.FastqcDataFilesService
@@ -30,7 +32,10 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.SessionUtils
 import de.dkfz.tbi.otp.workflow.fastqc.BashFastQcWorkflow
 import de.dkfz.tbi.otp.workflowExecution.ArtefactType
+import de.dkfz.tbi.otp.workflowExecution.Workflow
 import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
+import de.dkfz.tbi.otp.workflowExecution.WorkflowVersion
+import de.dkfz.tbi.otp.workflowExecution.WorkflowVersionSelector
 import de.dkfz.tbi.otp.workflowExecution.decider.FastqcDecider
 import de.dkfz.tbi.otp.workflowTest.AbstractWorkflowSpec
 
@@ -40,6 +45,10 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
 
 class FastqcWorkflowSpec extends AbstractWorkflowSpec {
+
+    //@Slf4j does not work with Spock containing tests and produces problems in closures
+    @SuppressWarnings('PropertyName')
+    final static Logger log = LoggerFactory.getLogger(FastqcWorkflowSpec)
 
     private static final String INPUT_FILE = "fastqFiles/fastqc/input_fastqc.fastq."
     private static final String EXPECTED_RESULT_FILE = "fastqFiles/fastqc/asdf_fastqc.zip"
@@ -53,20 +62,20 @@ class FastqcWorkflowSpec extends AbstractWorkflowSpec {
 
     private Path expectedFastqc
     private DataFile dataFile
+    private SeqType seqType
     private SeqTrack seqTrack
     private WorkflowArtefact workflowArtefact
 
+    private Workflow workflow
+    private WorkflowVersion workflowVersion
+
     void setupWorkflow(String fileExtension) {
+        log.debug("Start setup ${this.class.simpleName}")
         Path sourceFastq = referenceDataDirectory.resolve("${INPUT_FILE}${fileExtension}")
         expectedFastqc = referenceDataDirectory.resolve(EXPECTED_RESULT_FILE)
 
         Run run = createRun()
 
-        seqTrack = createSeqTrack(
-                fastqcState: SeqTrack.DataProcessingState.NOT_STARTED,
-                seqType: SeqTypeService.rnaSingleSeqType,
-                run: run,
-        )
         workflowArtefact = createWorkflowArtefact(
                 state: WorkflowArtefact.State.SUCCESS,
                 artefactType: ArtefactType.FASTQ,
@@ -74,8 +83,15 @@ class FastqcWorkflowSpec extends AbstractWorkflowSpec {
                 outputRole: "FASTQ",
                 producedBy: createWorkflowRun(priority: processingPriority),
         )
-        seqTrack.workflowArtefact = workflowArtefact
-        seqTrack.save(flush: true)
+
+        seqType = SeqTypeService.rnaSingleSeqType
+
+        seqTrack = createSeqTrack(
+                fastqcState: SeqTrack.DataProcessingState.NOT_STARTED,
+                seqType: seqType,
+                run: run,
+                workflowArtefact: workflowArtefact,
+        )
 
         dataFile = createSequenceDataFile(
                 fileExists: true,
@@ -87,9 +103,27 @@ class FastqcWorkflowSpec extends AbstractWorkflowSpec {
                 initialDirectory: workingDirectory.resolve("ftp").resolve(run.name),
                 fastqImportInstance: fastqImportInstance,
         )
+        log.info("Domain data created")
 
         fileService.createLink(lsdfFilesService.getFileViewByPidPathAsPath(dataFile), sourceFastq, realm)
         fileService.createLink(lsdfFilesService.getFileFinalPathAsPath(dataFile), sourceFastq, realm)
+        log.info("File system prepared")
+
+        workflow = CollectionUtils.exactlyOneElement(Workflow.findAllByName(BashFastQcWorkflow.WORKFLOW))
+        log.info("Fetch workflow Fastqc ${workflow}")
+
+        workflowVersion = CollectionUtils.exactlyOneElement(
+                WorkflowVersion.findAllByWorkflow(workflow, [sort: 'id', order: 'desc', max: 1]))
+        log.info("Fetch workflow version ${workflowVersion}")
+
+        WorkflowVersionSelector workflowVersionSelector = createWorkflowVersionSelector([
+                project        : seqTrack.project,
+                seqType        : null,
+                workflowVersion: workflowVersion,
+        ])
+        log.info("Create selectedProjectSeqTypeWorkflowVersion ${workflowVersionSelector}")
+
+        log.debug("Finish setup ${this.class.simpleName}")
     }
 
     void "test FastQcWorkflow, when FastQC result file is available"() {
