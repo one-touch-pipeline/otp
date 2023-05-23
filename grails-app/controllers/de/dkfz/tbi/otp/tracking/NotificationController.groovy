@@ -39,7 +39,7 @@ class NotificationController implements CheckAndCall {
     NotificationDigestService notificationDigestService
 
     static allowedMethods = [
-            notificationPreview:    "POST",
+            notificationPreview   : "POST",
             sendNotificationDigest: "POST",
     ]
 
@@ -52,6 +52,10 @@ class NotificationController implements CheckAndCall {
         }
         try {
             flash.message = new FlashMessage(g.message(code: "notification.notificationPreview.success") as String)
+            List<PreparedNotification> preparedNotifications = notificationDigestService.prepareNotifications(cmd)
+            boolean emptyNotification = preparedNotifications.empty || preparedNotifications.every {
+                it.notification.empty
+            }
             return [
                     cmd                  : cmd,
                     importInstances      : otrsTicketService.getAllFastqImportInstances(cmd.otrsTicket).sort { it.dateCreated },
@@ -59,10 +63,11 @@ class NotificationController implements CheckAndCall {
                     prefixedTicketNumber : otrsTicketService.getPrefixedTicketNumber(cmd.fastqImportInstance.otrsTicket),
                     steps                : cmd.steps,
                     notifyQcThresholds   : cmd.notifyQcThresholds,
-                    preparedNotifications: notificationDigestService.prepareNotifications(cmd),
+                    preparedNotifications: preparedNotifications,
+                    emptyNotification    : emptyNotification,
             ]
         } catch (AssertionError | RuntimeException e) {
-            flash.message = new FlashMessage(g.message(code: "notification.notificationPreview.failure") as String, e.message)
+            flash.message = new FlashMessage(g.message(code: "notification.notificationPreview.failure") as String, e.message as String)
         }
         flash.cmd = cmd
         redirect(controller: "metadataImport", action: "details", id: cmd.fastqImportInstance.id)

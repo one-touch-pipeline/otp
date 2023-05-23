@@ -39,42 +39,48 @@
         <div class="item basic-right-padding">
             <h2><g:message code="notification.notificationPreview.import.header"/></h2>
             <g:each var="importInstance" in="${importInstances}">
-                <g:link controller="metadataImport" action="details" id="${importInstance.id}">${importInstance.id}</g:link>, imported on ${importInstance.dateCreated}
+                <g:link controller="metadataImport" action="details"
+                        id="${importInstance.id}">${importInstance.id}</g:link>, imported on ${importInstance.dateCreated}
                 <ul>
-                    <g:each var="entry" in="${importInstance.dataFiles.groupBy { it.seqTrack?.project ?: it.project}}">
-                        <li><g:message code="notification.notificationPreview.import.import.projectWithDataFiles" args="[entry.key.name, entry.value.size()]"/></li>
+                    <g:each var="entry" in="${importInstance.dataFiles.groupBy { it.seqTrack?.project ?: it.project }}">
+                        <li><g:message code="notification.notificationPreview.import.import.projectWithDataFiles"
+                                       args="[entry.key.name, entry.value.size()]"/></li>
                     </g:each>
                 </ul>
             </g:each>
 
             <h2><a id="summary-anchor"></a><g:message code="notification.notificationPreview.import.summary.header"/></h2>
             <g:each var="preparedNotification" in="${preparedNotifications}">
-                <g:link controller="projectConfig" action="index" params="[(projectParameter): preparedNotification.project.name]">${preparedNotification.project}</g:link>
+                <g:link controller="projectConfig" action="index"
+                        params="[(projectParameter): preparedNotification.project.name]">${preparedNotification.project}</g:link>
                 <g:render template="projectNotifications" model="[project: preparedNotification.project]"/>
 
                 <ul>
-                    <li><a href="#project-anchor-${preparedNotification.project.id}"><g:message code="notification.notificationPreview.import.summary.view"/></a></li>
+                    <li><a href="#project-anchor-${preparedNotification.project.id}"><g:message
+                            code="notification.notificationPreview.import.summary.view"/></a></li>
                     <li><g:message code="notification.notificationPreview.import.summary.lanes" args="[preparedNotification.seqTracks.size()]"/></li>
                     <li><g:message code="notification.notificationPreview.import.summary.bams" args="[preparedNotification.bams.size()]"/></li>
-                    <li><g:message code="notification.notificationPreview.import.summary.users" args="[preparedNotification.toBeNotifiedProjectUsers.size()]"/></li>
+                    <li><g:message code="notification.notificationPreview.import.summary.users"
+                                   args="[preparedNotification.toBeNotifiedProjectUsers.size()]"/></li>
                 </ul>
             </g:each>
         </div>
+
         <div class="item basic-right-padding">
             <h2><g:message code="notification.notificationSelection.notification"/></h2>
             <g:render template="notificationSelection" model="[
-                    otrsTicket         : cmd.otrsTicket,
-                    fastqImportInstance: cmd.fastqImportInstance,
-                    cmd                : cmd,
+                    otrsTicket           : cmd.otrsTicket,
+                    fastqImportInstanceId: cmd.fastqImportInstance.id,
+                    cmd                  : cmd,
             ]"/>
             <br><br>
             <g:actionSubmit controller="notification" action="notificationPreview" name="notificationPreview" value="Prepare notification report"/>
         </div>
+
         <div class="item basic-right-padding">
             <g:actionSubmit id="send-button" name="sendNotificationDigest"
                             action="sendNotificationDigest" value="Send notification"
-                            disabled="${preparedNotifications.size() == 0}"
-            /><br>
+                            disabled="${emptyNotification}"/><br>
             <g:render template="notificationAnnotation"/>
         </div>
     </g:form>

@@ -90,7 +90,7 @@
                 <g:form controller="notification" action="notificationPreview">
                     <g:render template="/notification/notificationSelection" model="[
                             otrsTicket         : otrsTicket,
-                            fastqImportInstanceId: fastqImportInstance,
+                            fastqImportInstanceId: fastqImportInstanceId,
                     ]"/>
                     <br><br>
                     <g:submitButton name="notificationPreview" value="Prepare notification report"/>
