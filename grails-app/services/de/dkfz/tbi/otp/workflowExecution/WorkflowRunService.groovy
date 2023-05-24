@@ -146,11 +146,14 @@ class WorkflowRunService {
     }
 
     /**
-     * helper do get pessimistic lock for workflowRun and wait for 1 second
+     * helper do get pessimistic lock for workflowRun and all its steps and wait therefor for 10 second
      */
-    void lockWorkflowRun(WorkflowRun run) {
+    void lockAndRefreshWorkflowRunWithSteps(WorkflowRun run) {
         WorkflowRun.withSession { Session s ->
-            s.refresh(run, new LockOptions(LockMode.PESSIMISTIC_WRITE).setTimeOut(1000))
+            s.refresh(run, new LockOptions(LockMode.PESSIMISTIC_WRITE).setTimeOut(10000))
+            run.workflowSteps.each {
+                s.refresh(it, new LockOptions(LockMode.PESSIMISTIC_WRITE).setTimeOut(10000))
+            }
         }
     }
 

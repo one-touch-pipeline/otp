@@ -124,7 +124,7 @@ class JobServiceSpec extends Specification implements DataTest, WorkflowSystemDo
         ])
         workflowRun.save(flush: true)
         service.workflowRunService = Mock(WorkflowRunService) {
-            1 * it.lockWorkflowRun(_)
+            1 * it.lockAndRefreshWorkflowRunWithSteps(_)
         }
 
         when:
@@ -153,7 +153,7 @@ class JobServiceSpec extends Specification implements DataTest, WorkflowSystemDo
         ])
         workflowRun.save(flush: true)
         service.workflowRunService = Mock(WorkflowRunService) {
-            1 * it.lockWorkflowRun(_)
+            1 * it.lockAndRefreshWorkflowRunWithSteps(_)
         }
 
         when:
@@ -175,6 +175,11 @@ class JobServiceSpec extends Specification implements DataTest, WorkflowSystemDo
         WorkflowStep failedStep = createWorkflowStep(state: stepState)
         failedStep.workflowRun.state = runState
         failedStep.workflowRun.save(flush: true)
+
+        service.workflowRunService = Mock(WorkflowRunService) {
+            1 * it.lockAndRefreshWorkflowRunWithSteps(_)
+            0 * _
+        }
 
         when:
         service.createRestartedJobAfterJobFailure(failedStep)
@@ -205,6 +210,11 @@ class JobServiceSpec extends Specification implements DataTest, WorkflowSystemDo
             1 * link(_) >> "link"
         }
 
+        service.workflowRunService = Mock(WorkflowRunService) {
+            1 * it.lockAndRefreshWorkflowRunWithSteps(_)
+            0 * _
+        }
+
         when:
         service.createRestartedJobAfterJobFailure(stepToRestart)
 
@@ -223,7 +233,7 @@ class JobServiceSpec extends Specification implements DataTest, WorkflowSystemDo
         ])
         service.workflowStateChangeService = new WorkflowStateChangeService()
         service.workflowRunService = Mock(WorkflowRunService) {
-            1 * it.lockWorkflowRun(_)
+            1 * it.lockAndRefreshWorkflowRunWithSteps(_)
         }
 
         when:
@@ -260,6 +270,11 @@ class JobServiceSpec extends Specification implements DataTest, WorkflowSystemDo
         WorkflowStep workflowStep = createWorkflowStep(state: stepState)
         workflowStep.workflowRun.state = runState
         workflowStep.workflowRun.save(flush: true)
+
+        service.workflowRunService = Mock(WorkflowRunService) {
+            1 * it.lockAndRefreshWorkflowRunWithSteps(_)
+            0 * _
+        }
 
         when:
         service.createRestartedJobAfterJobFailure(workflowStep)

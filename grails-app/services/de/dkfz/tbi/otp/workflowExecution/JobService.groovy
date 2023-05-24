@@ -24,12 +24,14 @@ package de.dkfz.tbi.otp.workflowExecution
 import asset.pipeline.grails.LinkGenerator
 import grails.gorm.transactions.Transactional
 import groovy.transform.Synchronized
+import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.utils.exceptions.FileAccessForArchivedProjectNotAllowedException
 import de.dkfz.tbi.otp.workflow.restartHandler.BeanToRestartNotFoundInWorkflowRunException
 import de.dkfz.tbi.otp.workflow.shared.WorkflowJobIsNotRestartableException
 
+@Slf4j
 @Transactional
 class JobService {
 
@@ -54,7 +56,7 @@ class JobService {
                 jobBeanNames[jobBeanNames.indexOf(workflowRun.workflowSteps.last().beanName) + 1] :
                 jobBeanNames.first()
 
-        new WorkflowStep(
+        WorkflowStep newWorkflowStep = new WorkflowStep(
                 workflowRun: workflowRun,
                 beanName: beanName,
                 state: WorkflowStep.State.CREATED,
@@ -62,11 +64,14 @@ class JobService {
         ).save(flush: true)
         workflowRun.state = WorkflowRun.State.RUNNING_OTP
         workflowRun.save(flush: true)
+        log.debug("create job: ${newWorkflowStep.displayInfo()}")
     }
 
     private void createRestartedJob(WorkflowStep stepToRestart) {
         assert stepToRestart
         WorkflowRun run = stepToRestart.workflowRun
+        workflowRunService.lockAndRefreshWorkflowRunWithSteps(run)
+        List<WorkflowStep> workflowSteps = run.workflowSteps
 
         if (run.project.archived) {
             throw new FileAccessForArchivedProjectNotAllowedException(
@@ -90,17 +95,14 @@ class JobService {
         }
 
         assert run.state == WorkflowRun.State.FAILED: "Can not restart job of ${run.displayName}, " +
-                "since the job has already been restarted."
+                "since the workflow is not in the failed state"
 
-        if (run.state != WorkflowRun.State.PENDING) {
-            workflowRunService.lockWorkflowRun(run)
-            if (run.state != WorkflowRun.State.PENDING) {
-                run.state = WorkflowRun.State.PENDING
-                run.save(flush: true)
-            }
-        }
+        assert workflowSteps.last().state == WorkflowStep.State.FAILED: "Can not restart job of ${run.displayName}, " +
+                "since the last job is not in the failed state"
 
-        List<WorkflowStep> workflowSteps = run.workflowSteps
+        run.state = WorkflowRun.State.PENDING
+        run.save(flush: true)
+
         workflowSteps[workflowSteps.indexOf(stepToRestart)..(workflowSteps.size() - 1)].each { WorkflowStep step ->
             step.obsolete = true
             step.save(flush: true)
@@ -109,7 +111,7 @@ class JobService {
         new WorkflowStep(
                 beanName: stepToRestart.beanName,
                 state: WorkflowStep.State.CREATED,
-                previous: run.workflowSteps.last(),
+                previous: workflowSteps.last(),
                 restartedFrom: stepToRestart,
                 workflowRun: run,
         ).save(flush: true)
@@ -130,12 +132,7 @@ class JobService {
     @Synchronized
     void createRestartedJobAfterJobFailure(WorkflowStep stepToRestart) {
         assert stepToRestart
-
-        WorkflowRun workflowRun = stepToRestart.workflowRun
-        assert workflowRun.state == WorkflowRun.State.FAILED
-
-        WorkflowStep failedStep = workflowRun.workflowSteps.last()
-        assert failedStep.state == WorkflowStep.State.FAILED: "The last step is not in state FAILED"
+        stepToRestart.refresh()
 
         createRestartedJob(stepToRestart)
     }

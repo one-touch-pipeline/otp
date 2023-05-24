@@ -136,6 +136,7 @@ class JobScheduler {
                 workflowStep.refresh()
                 workflowStateChangeService.changeStateToFailed(workflowStep, exceptionInJob)
                 logService.addSimpleLogEntry(workflowStep, "Failed")
+                log.debug("Failed job: ${workflowStep.displayInfo()}")
             }
             WorkflowStep.withTransaction {
                 workflowStep.refresh()
@@ -167,6 +168,7 @@ class JobScheduler {
         notificationCreator.processFinished(errorNotificationService.getSeqTracks(workflowStep))
     }
 }
+
 @InheritConstructors
 class JobSchedulerException extends WorkflowException {
 }
