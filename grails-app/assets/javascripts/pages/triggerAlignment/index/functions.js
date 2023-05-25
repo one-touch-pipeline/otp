@@ -274,7 +274,9 @@ $.otp.triggerAlignment = {
 
   getLibPrepKitWarningsTable: () => $('#libraryPrepKitWarnings').DataTable(),
 
-  getSeqTrackTable: () => $('#seqTrackTable').DataTable()
+  getSeqTrackTable: () => $('#seqTrackTable').DataTable(),
+
+  getMissingLibraryPrepKitWarningsTable: () => $('#missingLibraryPrepKitWarnings').DataTable()
 };
 
 $(document).ready(() => {
@@ -366,6 +368,23 @@ $(document).ready(() => {
           } else {
             $('#missingReferenceGenomeWarningsCard').addClass('d-none');
             $.otp.triggerAlignment.getReferenceGenomeWarningsTable().clear().draw();
+          }
+
+          if (warnings.missingLibPrepKits && warnings.missingLibPrepKits.length) {
+            $('#missingLibraryPrepKitWarningsCard').removeClass('d-none');
+            $.otp.triggerAlignment.getMissingLibraryPrepKitWarningsTable().clear().rows.add(
+              warnings.missingLibPrepKits.map((o) => [
+                o.project,
+                o.individual,
+                o.seqType,
+                o.sampleType,
+                o.lane,
+                o.run
+              ])
+            ).draw();
+          } else {
+            $('#missingLibraryPrepKitWarningsCard').addClass('d-none');
+            $.otp.triggerAlignment.getMissingLibraryPrepKitWarningsTable().clear().draw();
           }
 
           // seqPlatformGroup missmatch
@@ -503,6 +522,13 @@ $(document).ready(() => {
   });
 
   $('#libraryPrepKitWarnings').DataTable({
+    dom: 'B<"toolbar">frtip',
+    buttons: ['csv'],
+    scrollCollapse: true,
+    paging: false
+  });
+
+  $('#missingLibraryPrepKitWarnings').DataTable({
     dom: 'B<"toolbar">frtip',
     buttons: ['csv'],
     scrollCollapse: true,

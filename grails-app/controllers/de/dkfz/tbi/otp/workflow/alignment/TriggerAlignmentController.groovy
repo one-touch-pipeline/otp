@@ -74,6 +74,7 @@ class TriggerAlignmentController {
             ] as JSON)
         }
 
+        List<Map<String, String>> warningsForMissingLibPrepKits = triggerAlignmentService.createWarningsForMissingLibPrepKits(seqTracks)
         List<Map<String, String>> warningsForWithdrawnSeqTracks = triggerAlignmentService.createWarningsForWithdrawnSeqTracks(seqTracks)
         List<Map<String, String>> warningsForMissingAlignmentConfig = triggerAlignmentService.createWarningsForMissingAlignmentConfig(seqTracks)
         List<Map<String, String>> warningsForMissingReferenceGenomeConfiguration =
@@ -90,6 +91,7 @@ class TriggerAlignmentController {
                 warnings: [
                         withdrawnSeqTracks     : warningsForWithdrawnSeqTracks,
                         missingAlignmentConfigs: warningsForMissingAlignmentConfig,
+                        missingLibPrepKits      : warningsForMissingLibPrepKits,
                         missingReferenceGenomes: warningsForMissingReferenceGenomeConfiguration,
                         seqPlatformGroups      : warningsForSamplesHavingMultipleSeqPlatformGroups,
                         libraryPreparationKits : warningsForSamplesHavingMultipleLibPrepKits,

@@ -194,4 +194,35 @@
         </div>
     </div>
 
+    <div class="card d-none" id="missingLibraryPrepKitWarningsCard">
+        <div class="card-header">
+            <button class="btn btn-link w-100 text-left collapsed p-0" type="button" data-toggle="collapse" data-target="#collapseSix"
+                    aria-expanded="true" aria-controls="collapseSix">
+                <i class="bi bi-exclamation-triangle"></i> <g:message code="triggerAlignment.warn.missingPreparationKit.title"/>
+            </button>
+        </div>
+
+        <div id="collapseSix" class="collapse" data-parent="#warnAreaAccordion">
+            <div class="card-body">
+                <div class="alert alert-warning" role="alert">
+                    <p class="card-text"><g:message code="triggerAlignment.warn.missingPreparationKit"/></p>
+                </div>
+
+                <table id="missingLibraryPrepKitWarnings" class="table table-sm table-striped table-hover table-bordered">
+                    <thead>
+                    <tr>
+                        <th><g:message code="triggerAlignment.warn.table.project"/></th>
+                        <th><g:message code="triggerAlignment.warn.table.individual"/></th>
+                        <th><g:message code="triggerAlignment.warn.table.seqType"/></th>
+                        <th><g:message code="triggerAlignment.warn.table.sampleTypeName"/></th>
+                        <th><g:message code="triggerAlignment.warn.table.lane"/></th>
+                        <th><g:message code="triggerAlignment.warn.table.run"/></th>
+                    </tr>
+                    </thead>
+                    <tbody/>
+                </table>
+            </div>
+        </div>
+    </div>
+
 </div>

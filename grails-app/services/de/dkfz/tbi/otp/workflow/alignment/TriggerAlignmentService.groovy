@@ -259,6 +259,32 @@ class TriggerAlignmentService {
         }
     }
 
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    List<Map<String, Object>> createWarningsForMissingLibPrepKits(Collection<SeqTrack> seqTracks) {
+        Set<SeqType> seqTypes = SeqTypeService.seqTypesRequiredLibPrepKit
+        return seqTracks.findAll {
+            !it.libraryPreparationKit && seqTypes.contains(it.seqType)
+        }.collect {
+                [
+                        project                   : it.individual.project.name,
+                        individual                : it.individual.pid,
+                        seqType                   : it.seqType.displayNameWithLibraryLayout,
+                        sampleType                : it.sampleType.name,
+                        lane                      : it.laneId,
+                        run                       : it.run.name,
+                ]
+        }.sort {
+            [
+                    it.project,
+                    it.individual,
+                    it.sampleType,
+                    it.seqType,
+                    it.lane,
+                    it.run,
+            ]
+        }
+    }
+
     /**
      * check that for all project seqType speciesWithStrain combination of the seqTracks an ReferenceGenome is configured.
      * Note: this is only checked for the new workflow system
