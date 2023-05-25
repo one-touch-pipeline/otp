@@ -25,6 +25,7 @@ import grails.converters.JSON
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.authentication.*
 import org.springframework.security.core.AuthenticationException
+import org.springframework.security.web.WebAttributes
 import org.springframework.security.web.authentication.session.SessionAuthenticationException
 
 import de.dkfz.tbi.otp.security.FailedToCreateUserException
@@ -64,7 +65,7 @@ class LoginController {
     /** Callback after a failed login. Redirects to the auth page with a warning message. */
     def authfail() {
         String msg = ''
-        AuthenticationException exception = session[AUTHENTICATION_EXCEPTION] as AuthenticationException
+        AuthenticationException exception = session[WebAttributes.AUTHENTICATION_EXCEPTION] as AuthenticationException
         if (exception) {
             switch (exception.class) {
                 case AccountExpiredException: msg = g.message(code: "security.errors.login.expired"); break
