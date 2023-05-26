@@ -334,7 +334,7 @@ dependencies {
     implementation 'org.liquibase:liquibase-core:4.19.0'
 
     // support for java8 time classes
-    implementation 'org.hibernate:hibernate-java8:5.4.33.Final'
+    implementation 'org.hibernate:hibernate-java8:5.6.15.Final'
 
     // codenarc
     implementation 'org.codenarc:CodeNarc:3.2.0'
