@@ -348,7 +348,7 @@ dependencies {
     implementation 'org.webjars:datatables:1.10.24'
     implementation 'org.webjars:datatables-buttons:1.7.0'
     implementation 'org.webjars:datatables-fixedcolumns:3.0.2'
-    implementation 'org.webjars:datatables-fixedheader:2.1.2-1'
+    implementation 'org.webjars:datatables-fixedheader:3.2.4'
     implementation 'org.webjars.bowergithub.datatables:dist-datatables-scroller:2.0.1'
     implementation 'org.webjars.bowergithub.datatables:dist-datatables-scroller-bootstrap4:2.0.1'
     implementation 'org.webjars:datatables-plugins:1.10.24'
