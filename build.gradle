@@ -303,7 +303,7 @@ dependencies {
     implementation "org.jadira.usertype:usertype.core:7.0.0.CR1"
     implementation "com.opencsv:opencsv:4.4"
 
-    implementation "org.grails:grails-async-gpars:3.3.2"
+    implementation "org.grails:grails-async-gpars:4.0.0"
 
     // bioinformatics tools
     implementation "com.gitlab.one-touch-pipeline:bedutils:0.0.8"
