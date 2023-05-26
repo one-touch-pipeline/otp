@@ -27,6 +27,7 @@
 
 include:
   - local: '.gitlab-ci-core.yml'
+  - local: '.gitlab-ci-base-image.yml'
   - local: '.gitlab-ci-merge-request.yml'
   - template: Dependency-Scanning.gitlab-ci.yml
   - template: License-Scanning.gitlab-ci.yml
@@ -35,13 +36,14 @@ variables:
   #Default is: DS_DEFAULT_ANALYZERS: "gemnasium, gemnasium-python, gemnasium-maven, bundler-audit"`
   DS_DEFAULT_ANALYZERS: "gemnasium, gemnasium-maven, bundler-audit"
   DS_EXCLUDED_ANALYZERS: "gemnasium-python"
-  DS_JAVA_VERSION: 8
+  DS_JAVA_VERSION: 11
 
 stages:
   - create merge request
   - scanning
   - test
   - codestyle
+  - build
   - war
   - doc
   - public doc

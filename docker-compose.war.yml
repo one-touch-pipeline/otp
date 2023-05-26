@@ -19,7 +19,7 @@
 # SOFTWARE.
 
 # Docker file for a war deployment instance of otp.
-# Run docker-compose -f docker-compose.yml -f docker-compose.war.yml up
+# Run docker compose -f docker-compose.yml -f docker-compose.war.yml up
 
 version: '3.0'
 services:

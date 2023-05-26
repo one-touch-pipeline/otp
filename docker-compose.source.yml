@@ -20,7 +20,7 @@
 
 # This file can be used only together with the main composition file.
 # It is for a development instance of otp with enabled hot reloading.
-# Run docker-compose -f docker-compose.yml -f docker-compose.dev.yml -f docker-compose.source.yml up
+# Run docker compose -f docker-compose.yml -f docker-compose.dev.yml -f docker-compose.source.yml up
 
 version: '3.0'
 services:

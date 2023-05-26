@@ -22,8 +22,7 @@
 # This file contains gitlab ci jobs running in all repositories.
 # The jobs shouldn't have dependencies to jobs running not in all repositories
 
-image: registry.gitlab.com/one-touch-pipeline/otp/otp-gitlab-ci
-
+image: registry.gitlab.com/one-touch-pipeline/otp/otp-ci-java-11:2023-05-26
 
 # notes:
 ## recursive expansion of variables does not work
@@ -46,7 +45,6 @@ variables:
 #----------------------------
 
 .abstract_base_template:
-  image: registry.gitlab.com/one-touch-pipeline/otp/otp-gitlab-ci
   stage: test
   dependencies: [ ]
   needs: [ ]

@@ -22,8 +22,9 @@
 # This file contains gitlab ci jobs for automize merge request.
 # Therefore, the both environment variables PROJECT_TOKEN and PROJECT_URL have to be provided
 
+image: registry.gitlab.com/one-touch-pipeline/otp/otp-ci-java-11:2023-05-26
+
 create merge request:
-  image: registry.gitlab.com/one-touch-pipeline/otp/otp-gitlab-ci
   stage: create merge request
   dependencies: [ ]
   needs: [ ]
@@ -35,7 +36,6 @@ create merge request:
     GIT_DEPTH: "0"
 
 update merge request:
-  image: registry.gitlab.com/one-touch-pipeline/otp/otp-gitlab-ci
   stage: update merge request
   dependencies: [ ]
   only:

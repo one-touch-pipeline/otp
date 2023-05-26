@@ -19,7 +19,7 @@
 # SOFTWARE.
 
 # Docker file for a development instance of otp.
-# Run docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
+# Run docker compose -f docker-compose.yml -f docker-compose.dev.yml up
 
 version: '3.0'
 services:

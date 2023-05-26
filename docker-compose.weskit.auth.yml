@@ -21,7 +21,7 @@
 # Extension of the main docker-compose file to add a network connection to the keycloak_oauth
 # network which comes from the WESkit API docker setup.
 #
-# Run `docker-compose -f docker-compose.yml -f docker-compose.weskit.auth.yml up`
+# Run `docker compose -f docker-compose.yml -f docker-compose.weskit.auth.yml up`
 # to start otp within the extended setup.
 
 version: '3.0'

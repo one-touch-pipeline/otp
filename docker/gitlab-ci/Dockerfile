@@ -18,7 +18,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-FROM azul/zulu-openjdk-centos:8
+FROM azul/zulu-openjdk-centos:11-latest
 MAINTAINER OTP Developers <otp-devel@dkfz-heidelberg.de>
 
 RUN rpm -ivh http://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
@@ -47,9 +47,7 @@ RUN yum -y update && \
     yum -y install docker-ce docker-ce-cli containerd.io docker-compose-plugin && \
     yum clean all
 
-
 # Configure system via environment variables
-ENV JAVA_HOME /usr/lib/jvm/zulu8
 ENV GRADLE_USER_HOME /home/otp/.gradle
 
 # User management

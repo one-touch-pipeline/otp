@@ -19,7 +19,7 @@
 # SOFTWARE.
 
 # Main docker-compose file.
-# Run `docker-compose up` to start a otp database, ldap, ssh, mail and admin tool servers.
+# Run `docker compose up` to start an otp database, ldap, ssh, mail and admin tool servers.
 # To run it with otp, you should also run docker-compose.dev.yml or docker-compose.war.yml
 
 version: '3.0'

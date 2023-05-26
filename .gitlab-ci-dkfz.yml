@@ -29,7 +29,6 @@
 include:
   - local: '.gitlab-ci-core.yml'
 
-
 stages:
   - scanning
   - test

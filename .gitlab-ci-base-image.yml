@@ -1,4 +1,5 @@
-# Copyright 2011-2021 The OTP authors
+---
+# Copyright 2011-2019 The OTP authors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -18,12 +19,24 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# This Docker image takes a prebuilt war file and deploys it on a production like tomcat server.
-# It is helpful to test scenarios in a prod-like way. Hot reloading is not available.
+# The ci configuration to create the base image for the gitlab ci
 
-FROM tomcat:8.5-jre11
-
-COPY .otp.war.properties /root/.otp.properties
-COPY build/libs/otp.war /usr/local/tomcat/webapps/
-
-EXPOSE 8080
+build-base-image:
+  image:
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: [ "" ]
+  stage: build
+  needs: []
+  variables:
+    IMAGE_NAME: otp-ci-java-11
+  script:
+    - CURRENT_DATE_TAG=$(date '+%Y-%m-%d')
+    - mkdir -p /kaniko/.docker
+    - echo "{\"auths\":{\"${CI_REGISTRY}\":{\"auth\":\"$(printf "%s:%s" "${CI_REGISTRY_USER}" "${CI_REGISTRY_PASSWORD}" | base64 | tr -d '\n')\"}}}" > /kaniko/.docker/config.json
+    - >-
+      /kaniko/executor
+      --context "${CI_PROJECT_DIR}/docker/gitlab-ci"
+      --dockerfile "./Dockerfile"
+      --destination "${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:${CURRENT_DATE_TAG}"
+      --destination "${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:latest"
+  when: manual

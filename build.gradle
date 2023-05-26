@@ -130,7 +130,7 @@ task generateWes(type: org.openapitools.generator.gradle.plugin.tasks.GenerateTa
     configFile = "${sourceSets.main.resources.srcDirs[0]}/wes-api/workflow_execution_service.swagger.config.json"
     outputDir = generatedSourcesDir
     configOptions = [
-            dateLibrary    : "java8",
+            dateLibrary    : "java11",
             openApiNullable: "false"
     ]
 }
@@ -333,10 +333,6 @@ dependencies {
     }
     implementation 'org.liquibase:liquibase-core:4.19.0'
 
-    // support for java8 time classes
-    implementation 'org.hibernate:hibernate-java8:5.6.15.Final'
-
-    // codenarc
     implementation 'org.codenarc:CodeNarc:3.2.0'
 
     // JS and CSS libraries
