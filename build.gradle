@@ -42,7 +42,7 @@ buildscript {
 }
 
 plugins {
-    id "com.github.monosoul.markdown.page.generator" version "2.1.0.1"
+    id "com.github.monosoul.markdown.page.generator" version "2.4.0.0"
     id "org.openapi.generator" version "6.3.0"
     id "com.github.node-gradle.node" version "5.0.0"
 }
