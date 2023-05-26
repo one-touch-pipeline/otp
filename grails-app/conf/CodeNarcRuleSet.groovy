@@ -181,6 +181,9 @@ All the Rules that will be used for OTP
     MultipleUnaryOperators {
         priority = DEFAULT
     }
+    ParameterAssignmentInFilterClosure {
+        priority = DEFAULT
+    }
     RandomDoubleCoercedToZero {
         priority = DEFAULT
     }
@@ -191,9 +194,6 @@ All the Rules that will be used for OTP
         priority = DEFAULT
     }
     ThrowExceptionFromFinallyBlock {
-        priority = DEFAULT
-    }
-    ParameterAssignmentInFilterClosure {
         priority = DEFAULT
     }
 
@@ -337,7 +337,7 @@ All the Rules that will be used for OTP
     }
 
     // rulesets/convention.xml
-    // CompileStatic //not currently needed since 99% of all Classes are Compile Dynamic
+    // CompileStatic //we add @CompileStatic via groovygc.groovy to '/services/', '/src/main/', '/src/init/', '/codenarcRules/'
     ConfusingTernary {
         priority = CRITICAL
     }
@@ -353,13 +353,12 @@ All the Rules that will be used for OTP
     HashtableIsObsolete {
         priority = CRITICAL
     }
-    ImplicitReturnStatement {
-        priority = LOW
-    }
-
-    //ImplicitClosureParameter //There are more cases where this would deteriorate code quality instead of improving it
     IfStatementCouldBeTernary {
         priority = CRITICAL
+    }
+    //ImplicitClosureParameter //There are more cases where this would deteriorate code quality instead of improving it
+    ImplicitReturnStatement {
+        priority = LOW
     }
     InvertedCondition {
         priority = LOW
@@ -382,12 +381,9 @@ All the Rules that will be used for OTP
         doNotApplyToFileNames = CONTROLLER
         excludeRegex = /hasMany|belongsTo|mappedBy/
     }
-    //NoFloat //Float is fine since we don't use the numbers for calculations
     //NoDouble //Double is fine since we don't use the numbers for calculations
-    /* Since our code use the Date class a lot, it is not possible to avoid it in new code.
-    NoJavaUtilDate {
-        priority = MIDDLE
-    }*/
+    //NoFloat //Float is fine since we don't use the numbers for calculations
+    //NoJavaUtilDate //Since our code use the Date class a lot, it is not possible to avoid it in new code.
     NoTabCharacter {
         priority = CRITICAL
     }
@@ -649,6 +645,15 @@ All the Rules that will be used for OTP
     SpaceAfterIf {
         priority = CRITICAL
     }
+    SpaceAfterMethodCallName {
+        priority = DEFAULT
+    }
+    SpaceAfterMethodDeclarationName {
+        priority = DEFAULT
+    }
+    SpaceAfterNotOperator {
+        priority = DEFAULT
+    }
     SpaceAfterOpeningBrace {
         priority = CRITICAL
     }
@@ -678,19 +683,10 @@ All the Rules that will be used for OTP
     SpaceBeforeOpeningBrace {
         priority = CRITICAL
     }
-    TrailingWhitespace {
-        priority = DEFAULT
-    }
-    SpaceAfterMethodCallName {
-        priority = DEFAULT
-    }
     SpaceInsideParentheses {
         priority = DEFAULT
     }
-    SpaceAfterNotOperator {
-        priority = DEFAULT
-    }
-    SpaceAfterMethodDeclarationName {
+    TrailingWhitespace {
         priority = DEFAULT
     }
 
@@ -724,9 +720,9 @@ All the Rules that will be used for OTP
     }
 
     // rulesets/grails.xml
+    //GrailsDomainGormMethods //GORM domain method are necessary (see issue otp-1005 to replace them with data services)
     //GrailsDomainHasEquals //Entity provides equals()
     //GrailsDomainHasToString //we don't do this in OTP
-    //GrailsDomainGormMethods //GORM domain method are necessary (see issue otp-1005 to replace them with data services)
     GrailsDomainReservedSqlKeywordName {
         priority = DEFAULT
     }
@@ -1088,11 +1084,11 @@ All the Rules that will be used for OTP
     }
     CrapMetric {
         priority = CRITICAL
-    }
+    }   // Requires the GMetrics jar and a Cobertura coverage file
     CyclomaticComplexity {
         priority = HIGH
         doNotApplyToFileNames = TEST
-    }
+    }   // Requires the GMetrics jar
     MethodCount {
         priority = MIDDLE
         doNotApplyToFileNames = TEST
@@ -1232,7 +1228,6 @@ All the Rules that will be used for OTP
     UnnecessaryStringInstantiation {
         priority = DEFAULT
     }
-    //UnnecessarySubstring
     UnnecessaryTernaryExpression {
         priority = DEFAULT
     }

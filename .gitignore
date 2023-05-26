@@ -43,6 +43,7 @@ logs/*
 ### Gradle
 .gradle/
 build/
+reports/
 
 ### Third-party tools
 ## CodeNarc

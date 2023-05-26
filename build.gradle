@@ -336,7 +336,8 @@ dependencies {
     // support for java8 time classes
     implementation 'org.hibernate:hibernate-java8:5.4.33.Final'
 
-    implementation 'org.codenarc:CodeNarc:3.1.0'
+    // codenarc
+    implementation 'org.codenarc:CodeNarc:3.2.0'
 
     // JS and CSS libraries
     implementation 'org.webjars:jquery:3.6.0'
