@@ -259,7 +259,6 @@ dependencies {
     implementation "org.grails.plugins:gsp"
     implementation "javax.mail:javax.mail-api:1.6.2"
     profile "org.grails.profiles:web"
-    runtimeOnly "org.glassfish.web:el-impl:2.2.1-b05"
     runtimeOnly "com.h2database:h2"
     runtimeOnly "org.apache.tomcat:tomcat-jdbc"
     runtimeOnly "javax.xml.bind:jaxb-api:2.3.1"
