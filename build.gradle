@@ -266,10 +266,10 @@ dependencies {
     runtimeOnly "com.bertramlabs.plugins:less-asset-pipeline:3.4.6"
     testImplementation "org.grails:grails-gorm-testing-support"
     testImplementation "org.grails:grails-web-testing-support"
-    testRuntimeOnly "org.junit.vintage:junit-vintage-engine:5.8.2"
+    testRuntimeOnly "org.junit.vintage:junit-vintage-engine:5.9.3"
     workflowTestImplementation "org.grails:grails-gorm-testing-support"
     workflowTestImplementation "org.grails:grails-web-testing-support"
-    workflowTestRuntimeOnly "org.junit.vintage:junit-vintage-engine:5.8.2"
+    workflowTestRuntimeOnly "org.junit.vintage:junit-vintage-engine:5.9.3"
 
     // JDBC
     runtimeOnly 'org.postgresql:postgresql:42.3.6'
