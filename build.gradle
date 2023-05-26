@@ -272,7 +272,7 @@ dependencies {
     workflowTestRuntimeOnly "org.junit.vintage:junit-vintage-engine:5.9.3"
 
     // JDBC
-    runtimeOnly 'org.postgresql:postgresql:42.3.6'
+    runtimeOnly 'org.postgresql:postgresql:42.6.0'
 
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
