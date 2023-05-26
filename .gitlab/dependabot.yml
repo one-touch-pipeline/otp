@@ -25,13 +25,13 @@ updates:
     directory: /
     schedule:
       interval: daily
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 100
     commit-message:
       prefix: "Update: "
   - package-ecosystem: npm
     directory: /
     schedule:
       interval: daily
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 10
     commit-message:
       prefix: "Update: "
