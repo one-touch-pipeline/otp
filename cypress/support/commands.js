@@ -139,8 +139,9 @@ Cypress.Commands.add('checkDownloadByContent', (filename, fileEnding, contentLis
 
   const filepath = path.join(downloadsFolder, `${filename}_${date}${fileEnding}`);
 
-  cy.readFile(filepath, 'binary', { timeout: 5000 }).then((content) => {
+  cy.readFile(filepath, 'utf8', { timeout: 5000 }).then((content) => {
     contentList.forEach((expectedContent) => {
+      cy.log(`Check ${expectedContent}`);
       cy.wrap(content).should('contain', expectedContent);
     });
   });

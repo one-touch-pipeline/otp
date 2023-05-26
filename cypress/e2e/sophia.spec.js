@@ -26,11 +26,12 @@ describe('Check sophia pages', () => {
   context('when user is an operator', () => {
     beforeEach(() => {
       cy.loginAsOperator();
+      cy.fixture('bigProject.json').then((config) => {
+        cy.visit(`/sophia/results?project=${config[0].projectNameUsedForTables}`);
+      });
     });
 
     it('should visit the plots page when clicking on Plots and check if plot exists', () => {
-      cy.visit('/sophia/results');
-
       cy.log('Waiting until loading is done.');
       cy.get('table tbody tr').contains('Loading...').should('not.exist');
 
@@ -39,6 +40,19 @@ describe('Check sophia pages', () => {
 
       cy.get('object[data]:not([data=""])').should('exist');
       cy.checkPage('/sophia/plots');
+    });
+
+    it('should download csv, when button is clicked', () => {
+      cy.get('table tbody tr').contains('Loading...').should('not.exist');
+      cy.get('div#resultsTable_wrapper button').contains('Download').click();
+
+      cy.fixture('bigProject.json').then((config) => {
+        cy.checkDownloadByContent(`SV_Results_(from_SOPHIA)-${config[0].projectNameUsedForTables}`, '.csv', [
+          'Patient ID', 'Sample Types', 'Seq. Type', 'Control Massive inv Prefiltering Level',
+          'Tumor Massive inv Filtering Level', 'RNA Contaminated Genes Count', 'RNA Decontamination Applied',
+          'RNA Contaminated Genes >2 Intron', 'Link to Plots', 'Created with Version', 'Processing Date', 'Progress'
+        ]);
+      });
     });
   });
 });

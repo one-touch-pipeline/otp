@@ -26,10 +26,12 @@ describe('Check Aceseq pages', () => {
   context('when user is an operator', () => {
     beforeEach(() => {
       cy.loginAsOperator();
-      cy.visit('/aceseq/results');
+      cy.fixture('bigProject.json').then((config) => {
+        cy.visit(`/aceseq/results?project=${config[0].projectNameUsedForTables}`);
+      });
     });
 
-    it('should visit the plots page when clicking on Plots on index page', () => {
+    it('should visit the plots page when clicking on Plots and check if plot exists', () => {
       cy.log('Waiting until loading is done.');
       cy.get('table tbody tr').contains('Loading...').should('not.exist');
 
@@ -39,11 +41,15 @@ describe('Check Aceseq pages', () => {
     });
 
     it('should download csv, when button is clicked', () => {
+      cy.get('table tbody tr').contains('Loading...').should('not.exist');
       cy.get('div#resultsTable_wrapper button').contains('Download').click();
-      cy.checkDownloadByContent('CNV_Results_(from_ACEseq)-ExampleProject', '.csv', [
-        'Patient ID', 'Sample Types', 'Tumor Cell Content', 'Ploidy', 'Ploidy Factor', 'Goodness of Fit',
-        'Solution Possible', 'Link to Plots', 'Created with Version', 'Processing Date', 'Progress'
-      ]);
+
+      cy.fixture('bigProject.json').then((config) => {
+        cy.checkDownloadByContent(`CNV_Results_(from_ACEseq)-${config[0].projectNameUsedForTables}`, '.csv', [
+          'Patient ID', 'Sample Types', 'Tumor Cell Content', 'Ploidy', 'Ploidy Factor', 'Goodness of Fit',
+          'Solution Possible', 'Link to Plots', 'Created with Version', 'Processing Date', 'Progress'
+        ]);
+      });
     });
   });
 });

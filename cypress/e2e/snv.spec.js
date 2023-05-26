@@ -26,11 +26,12 @@ describe('Check snv pages', () => {
   context('when user is an operator', () => {
     beforeEach(() => {
       cy.loginAsOperator();
+      cy.fixture('bigProject.json').then((config) => {
+        cy.visit(`/snv/results?project=${config[0].projectNameUsedForTables}`);
+      });
     });
 
-    it('should visit the plots page when clicking on Plots at the results page and check if plot exists', () => {
-      cy.visit('/snv/results');
-
+    it('should visit the plots page when clicking on Plots and check if plot exists', () => {
       cy.log('Waiting until loading is done.');
       cy.get('table tbody tr').contains('Loading...').should('not.exist');
 
@@ -39,6 +40,18 @@ describe('Check snv pages', () => {
 
       cy.get('object[data]:not([data=""])').should('exist');
       cy.checkPage('/snv/plots');
+    });
+
+    it('should download csv, when button is clicked', () => {
+      cy.get('table tbody tr').contains('Loading...').should('not.exist');
+      cy.get('div#resultsTable_wrapper button').contains('Download').click();
+
+      cy.fixture('bigProject.json').then((config) => {
+        cy.checkDownloadByContent(`SNV_Results-${config[0].projectNameUsedForTables}`, '.csv', [
+          'Patient ID', 'Sample Types', 'Seq. Type', 'Library Prep. Kit(s)', 'Link to Plots',
+          'Created with Version', 'Processing Date', 'Progress'
+        ]);
+      });
     });
   });
 });

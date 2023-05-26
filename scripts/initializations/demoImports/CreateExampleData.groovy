@@ -243,6 +243,7 @@ class ExampleData {
     SeqPlatform seqPlatform
     SeqPlatformGroup seqPlatformGroup
     SoftwareTool softwareTool
+    IlseSubmission ilseSubmission
 
     int individualCounter = Individual.count()
     int runCounter = Run.count()
@@ -296,6 +297,7 @@ class ExampleData {
         seqPlatformGroup = findOrCreateSeqPlatformGroup()
         softwareTool = findOrCreateSoftwareTool()
 
+        ilseSubmission = createIlseSubmission()
         fastqImportInstance = createFastqImportInstance()
         createMetaDataFile()
         project = findOrCreateProject(projectName)
@@ -372,10 +374,12 @@ class ExampleData {
     }
 
     void createExampleSeqType() {
-        Individual individual = createIndividual(project)
-        Sample sample = findOrCreateSample(individual, diseaseSampleTypes.find().key, diseaseSampleTypes.find().value)
         SeqType seqType = findOrCreateSeqType("EXAMPLE")
-        createSeqTrack(sample, seqType, false)
+        if (SeqTrack.countBySeqType(seqType) == 0) {
+            Individual individual = createIndividual(project)
+            Sample sample = findOrCreateSample(individual, diseaseSampleTypes.find().key, diseaseSampleTypes.find().value)
+            createSeqTrack(sample, seqType, false)
+        }
     }
 
     void createFiles() {
@@ -869,6 +873,12 @@ class ExampleData {
         ]).save(flush: true)
     }
 
+    IlseSubmission createIlseSubmission() {
+        return new IlseSubmission([
+                ilseNumber: 10000 + IlseSubmission.count()
+        ]).save(flush: true)
+    }
+
     OtrsTicket createOtrsTicket() {
         return new OtrsTicket([
                 ticketNumber: "${OtrsTicket.count()}"
@@ -1011,6 +1021,7 @@ class ExampleData {
                 fastqcState          : SeqTrack.DataProcessingState.FINISHED,
                 libraryPreparationKit: libraryPreparationKit,
                 kitInfoReliability   : InformationReliability.KNOWN,
+                ilseSubmission       : ilseSubmission,
         ]).save(flush: false)
 
         (1..seqType.libraryLayout.mateCount).each {
@@ -1153,7 +1164,7 @@ class ExampleData {
 
         QualityAssessmentMergedPass qualityAssessmentMergedPass = new QualityAssessmentMergedPass([
                 abstractBamFile: roddyBamFile,
-                identifier           : 0,
+                identifier     : 0,
         ]).save(flush: false)
 
         createRoddyMergedBamQaAll(qualityAssessmentMergedPass)
@@ -1189,7 +1200,7 @@ class ExampleData {
 
         QualityAssessmentMergedPass qualityAssessmentMergedPass = new QualityAssessmentMergedPass([
                 abstractBamFile: roddyBamFile,
-                identifier           : 0,
+                identifier     : 0,
         ]).save(flush: false)
 
         createRnaRoddyMergedBamQaAll(qualityAssessmentMergedPass)
@@ -1592,7 +1603,7 @@ enum MixedInSpecies {
 
 Project.withTransaction {
     ExampleData exampleData = new ExampleData([
-            abstractBamFileService  : ctx.abstractBamFileService,
+            abstractBamFileService        : ctx.abstractBamFileService,
             fastqcDataFilesService        : ctx.fastqcDataFilesService,
             fileService                   : ctx.fileService,
             fileSystemService             : ctx.fileSystemService,

@@ -26,10 +26,26 @@ describe('Check run yapsa page', () => {
   context('when user is an operator', () => {
     beforeEach(() => {
       cy.loginAsOperator();
+      cy.fixture('bigProject.json').then((config) => {
+        cy.visit(`/runYapsa/results?project=${config[0].projectNameUsedForTables}`);
+      });
     });
 
-    it('should visit the results page', () => {
-      cy.visit('/runYapsa/results');
+    it('should visit the result page', () => {
+      cy.log('Waiting until loading is done.');
+      cy.get('table tbody tr').contains('Loading...').should('not.exist');
+
+    });
+
+    it('should download csv, when button is clicked', () => {
+      cy.get('table tbody tr').contains('Loading...').should('not.exist');
+      cy.get('div#resultsTable_wrapper button').contains('Download').click();
+
+      cy.fixture('bigProject.json').then((config) => {
+        cy.checkDownloadByContent(`Mutational_Signatures_Results_(from_runYapsa)-${config[0].projectNameUsedForTables}`, '.csv', [
+          'Patient ID', 'Sample Types', 'Seq. Type', 'Library Prep. Kit(s)', 'Created with Version', 'Processing Date', 'Progress'
+        ]);
+      });
     });
   });
 });

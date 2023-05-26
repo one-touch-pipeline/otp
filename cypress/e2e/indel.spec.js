@@ -26,17 +26,34 @@ describe('Check indel pages', () => {
   context('when user is an operator', () => {
     beforeEach(() => {
       cy.loginAsOperator();
+      cy.fixture('bigProject.json').then((config) => {
+        cy.visit(`/indel/results?project=${config[0].projectNameUsedForTables}`);
+      });
     });
 
-    it('should visit the plots page when clicking on Plots on the results page', () => {
-      cy.visit('/indel/results');
-
+    it('should visit the plots page when clicking on Plots and check if plot exists', () => {
       cy.log('Waiting until loading is done.');
       cy.get('table tbody tr').contains('Loading...').should('not.exist');
 
       cy.get('table tbody tr').eq(2).find('a').contains('Plots')
         .click();
       cy.checkPage('/indel/plots');
+    });
+
+    it('should download csv, when button is clicked', () => {
+      cy.get('table tbody tr').contains('Loading...').should('not.exist');
+      cy.get('div#resultsTable_wrapper button').contains('Download').click();
+
+      cy.fixture('bigProject.json').then((config) => {
+        cy.checkDownloadByContent(`Indel_Results-${config[0].projectNameUsedForTables}`, '.csv', [
+          'Patient ID','Sample Types','Seq. Type','Library Prep. Kit(s)','#Indels',
+          '#Insertion','#Deletions','#Size 1_3','#Size 4_10','Link to Plots',
+          'All Somatic Variants (T)','All Somatic Variants (C)','Somatic Common in gnomAD (T)',
+          'Somatic Common in gnomAD (C)','Somatic Pass (T)','Somatic Pass (C)',
+          '#Germline Variants','Somatic Rescue','Control VAF (median)','TiNDA Plot',
+          'Created with Version','Processing Date','Progress'
+        ]);
+      });
     });
   });
 });
