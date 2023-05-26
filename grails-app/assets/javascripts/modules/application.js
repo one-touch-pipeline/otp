@@ -22,14 +22,14 @@
 
 //= require /webjars/jquery/3.6.4/jquery.js
 //= require /webjars/bootstrap/4.6.0/js/bootstrap.bundle.js
-//= require /webjars/datatables/1.10.24/js/jquery.dataTables.js
-//= require /webjars/datatables/1.10.24/js/dataTables.bootstrap4.js
+//= require /webjars/datatables/1.11.4/js/jquery.dataTables.js
+//= require /webjars/datatables/1.11.4/js/dataTables.bootstrap4.js
 //= require /webjars/datatables-fixedcolumns/3.2.2/js/dataTables.fixedColumns.js
 //= require /webjars/datatables-fixedheader/3.2.4/js/dataTables.fixedHeader.js
-//= require /webjars/datatables-buttons/1.7.0/js/dataTables.buttons.js
-//= require /webjars/datatables-buttons/1.7.0/js/buttons.bootstrap4.js
-//= require /webjars/datatables-buttons/1.7.0/js/buttons.html5.js
-//= require /webjars/datatables-plugins/1.10.24/pagination/select.js
+//= require /webjars/datatables-buttons/2.2.2/js/dataTables.buttons.js
+//= require /webjars/datatables-buttons/2.2.2/js/buttons.bootstrap4.js
+//= require /webjars/datatables-buttons/2.2.2/js/buttons.html5.js
+//= require /webjars/datatables-plugins/1.12.0/pagination/select.js
 //= require /webjars/datatables.net-scroller/js/dataTables.scroller.js
 //= require /webjars/datatables.net-scroller-bs4/js/scroller.bootstrap4.js
 //= require /webjars/select2/4.0.13/js/select2.full.js
