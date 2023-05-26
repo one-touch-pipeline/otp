@@ -24,21 +24,21 @@
 
 image: registry.gitlab.com/one-touch-pipeline/otp/otp-ci-java-11:2023-05-26
 
-create merge request:
-  stage: create merge request
-  dependencies: [ ]
-  needs: [ ]
-  only:
-    - /^review\/.*$/
-  script:
-    - devScripts/gitlab-ci/mergeRequest/createMergeRequest.sh
-  variables:
-    GIT_DEPTH: "0"
-
-update merge request:
+update reviewer:
   stage: update merge request
   dependencies: [ ]
   only:
     - branches
   script:
-    - devScripts/gitlab-ci/mergeRequest/updateMergeRequest.sh
+    - devScripts/gitlab-ci/mergeRequest/updateReviewer.sh
+
+update labels from youtrack:
+  stage: update merge request
+  dependencies: [ ]
+  needs: [ ]
+  variables:
+    GIT_DEPTH: "0"
+  only:
+    - branches
+  script:
+    - devScripts/gitlab-ci/mergeRequest/addLabelsFromYoutrack.sh

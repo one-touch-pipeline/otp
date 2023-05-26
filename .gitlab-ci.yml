@@ -39,7 +39,6 @@ variables:
   DS_JAVA_VERSION: 11
 
 stages:
-  - create merge request
   - scanning
   - test
   - codestyle

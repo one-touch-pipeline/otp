@@ -22,42 +22,17 @@
 
 source `dirname $0`/initMergeRequest.sh
 
-if [ "$NO_MERGE_REQUEST_EXIST" == "false" ]
+if [ "$NO_MERGE_REQUEST_EXIST" == "true" ]
 then
-  exit 0
+    exit 0
 fi
 
-echo "check last commit message"
-curl --header "PRIVATE-TOKEN: $PROJECT_TOKEN" "$PROJECT_URL/repository/commits/$CI_COMMIT_SHA" >  responseCommit.json
-jq -C '.' responseCommit.json
-
-DROP_CREATION="$(jq '.message | contains("[CreateNoRequest]")' responseCommit.json)"
-
-if [ "$DROP_CREATION" == "true" ]
-then
-  echo 'no merge request created, since commit contains "[CreateNoRequest]"'
-  exit 0
-fi
+echo "merge request"
+MR_ID=`jq -e '.[0].iid' responseCheck.json`
+echo "Merge request id: ${MR_ID}"
 
 echo "get labels from youtrack"
 source `dirname $0`/extractLabelsFromYoutrack.sh
-
-echo "create merge request"
-curl -X POST --header "PRIVATE-TOKEN: $PROJECT_TOKEN" \
-  --data-urlencode "title=$CI_COMMIT_TITLE" \
-  --data-urlencode "source_branch=$CI_COMMIT_BRANCH" \
-  --data-urlencode "target_branch=master" \
-  --data-urlencode "assignee_id=$GITLAB_USER_ID" \
-  --data-urlencode "description=$CI_COMMIT_DESCRIPTION" \
-  --data-urlencode "squash=true" \
-  --data-urlencode "remove_source_branch=true" \
-  --data-urlencode "labels=waiting for author" \
-  "$PROJECT_URL/merge_requests" > responseLabels.json
-
-jq -C -e '.' responseLabels.json
-
-MR_ID=$(jq -e '.iid' responseLabels.json)
-echo "$MR_ID"
 
 if [[ "$LABEL_VALUES" == "" ]]
 then
