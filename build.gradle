@@ -283,7 +283,7 @@ dependencies {
     implementation 'org.springframework.security:spring-security-ldap:5.7.5'
     implementation 'org.springframework.security:spring-security-oauth2-client:5.7.5'
 
-    implementation "org.openapitools:openapi-generator-gradle-plugin:6.3.0"
+    implementation "org.openapitools:openapi-generator-gradle-plugin:6.6.0"
 
     implementation group: 'commons-io', name: 'commons-io', version: '2.12.0'
 
