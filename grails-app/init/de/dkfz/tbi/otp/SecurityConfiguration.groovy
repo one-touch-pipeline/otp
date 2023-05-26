@@ -59,6 +59,7 @@ import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.security.user.UserService
 import de.dkfz.tbi.otp.security.user.identityProvider.*
+import de.dkfz.tbi.otp.utils.SessionUtils
 import de.dkfz.tbi.otp.workflowExecution.wes.WeskitAuthService
 
 import javax.servlet.ServletException
