@@ -55,6 +55,9 @@ section_regexps = [
     ('Refactor', [
         r'^( *[rR][eE][fF][aA][cC][tT][oO][rR])\s*:\s*([^\n]*)$',
      ]),
+    ('Update', [
+        r'^( *[uU][pP][dD][aA][tT][eE])\s*:\s*([^\n]*)$',
+     ]),
     ('Minor', [
         r'^( *[mM][iI][nN][oO][rR])\s*:\s*([^\n]*)$',
      ]),
