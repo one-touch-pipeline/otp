@@ -30,6 +30,9 @@ updates:
       - Dependabot
     commit-message:
       prefix: "Update: "
+    ignore:
+      - dependency-name: "org.webjars:datatables-plugins"
+        versions: [ "9dcbecd42ad", "15ba23c72a", "b644af9c80", "ca6ec50" ]
   - package-ecosystem: npm
     directory: /
     schedule:
