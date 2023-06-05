@@ -32,7 +32,8 @@ import de.dkfz.tbi.otp.workflowExecution.*
 
 import static groovyx.gpars.GParsPool.withPool
 /**
- * Creates new WorkflowRuns and WorkflowArtefacts based on the current FastqcProcessedFile data
+ * Creates Workflows artefacts for fastqc of index datafile.
+ *
  * @param BATCH_SIZE to process of fastqcProcessedFiles in trunks
  * @param DRY_RUN to test the processing without changes in DB
  *
@@ -56,19 +57,12 @@ int batchSize = 500
  */
 boolean dryRun = true
 
-/**
- * Process priority in the new workflow
- */
-String processPriority = 'NORMAL'
-
 //////////////////////////////////////////////////////////////
 
 assert batchSize > 1
 
 @Field final String OUTPUT_ROLE = 'FastQC'
 @Field final String WORKFLOW_NAME = BashFastQcWorkflow.WORKFLOW
-
-@Field final LsdfFilesService lsdfFilesService = ctx.lsdfFilesService
 
 WorkflowService workflowService = ctx.workflowService
 
@@ -78,61 +72,32 @@ WorkflowService workflowService = ctx.workflowService
 
 void migrateToNewWorkflow(
         List<SeqTrack> seqTracks,
-        Workflow workflow,
-        ProcessingPriority priority,
-        String outputRole,
-        LsdfFilesService lsdfFilesService
+        String outputRole
 ) {
     seqTracks.each { SeqTrack seqTrack ->
         // getting and prepare information
-        String directory = lsdfFilesService.getFileViewByPidPathAsPath(seqTrack.dataFiles.first()).parent
         WorkflowArtefact inputArtefact = seqTrack.workflowArtefact
 
         assert inputArtefact: "input artefact of ${seqTrack} can't be null. Was migration script otp-592 called before to create missing input artifacts?"
 
-        String shortName = "${BashFastQcWorkflow.WORKFLOW}: ${seqTrack.individual.pid} " +
-                "${seqTrack.sampleType.displayName} ${seqTrack.seqType.displayNameWithLibraryLayout}"
-        List<String> runDisplayName = []
-        runDisplayName.with {
-            add("project: ${seqTrack.project.name}")
-            add("individual: ${seqTrack.individual.displayName}")
-            add("sampleType: ${seqTrack.sampleType.displayName}")
-            add("seqType: ${seqTrack.seqType.displayNameWithLibraryLayout}")
-            add("run: ${seqTrack.run.name}")
-            add("lane: ${seqTrack.laneId}")
+        List<DataFile> readDataFiles = DataFile.findAllBySeqTrackAndIndexFile(seqTrack, false)
+        if (!readDataFiles) {
+            println("No read data files for seqTrack: ${seqTrack}")
+            return
         }
-        List<String> artefactDisplayName = runDisplayName
-        artefactDisplayName.remove(0)
+        FastqcProcessedFile readFastqcProcessedFile = CollectionUtils.exactlyOneElement(FastqcProcessedFile.findAllByDataFile(readDataFiles.first()))
+        WorkflowArtefact readWorkflowArtefact = readFastqcProcessedFile.workflowArtefact
 
-        // create workflow run and input artefact for SeqTrack
-        WorkflowRun workflowRun = new WorkflowRun([
-                workDirectory   : directory,
-                state           : WorkflowRun.State.LEGACY,
-                project         : seqTrack.project,
-                combinedConfig  : '{}',
-                priority        : priority,
-                workflowSteps   : [],
-                workflow        : workflow,
-                displayName     : runDisplayName,
-                shortDisplayName: shortName,
-        ]).save()
-
-        new WorkflowRunInputArtefact([
-                workflowRun     : workflowRun,
-                role            : BashFastQcWorkflow.INPUT_FASTQ,
-                workflowArtefact: inputArtefact,
-        ]).save()
-
-        // create workflow artefact for each FastqcProcessedFile of seqTrack
-        DataFile.findAllBySeqTrack(seqTrack).eachWithIndex { DataFile dataFile, int i ->
+        // create workflow artefact for each indexed FastqcProcessedFile of seqTrack
+        DataFile.findAllBySeqTrackAndIndexFile(seqTrack, true).eachWithIndex { DataFile dataFile, int i ->
             WorkflowArtefact workflowArtefact = new WorkflowArtefact([
-                    producedBy  : workflowRun,
+                    producedBy  : readWorkflowArtefact.producedBy,
                     state       : WorkflowArtefact.State.SUCCESS,
-                    outputRole  : "${outputRole}_${i + 1}",
+                    outputRole  : "${outputRole}_i${i + 1}",
                     artefactType: ArtefactType.FASTQC,
                     individual  : seqTrack.individual,
                     seqType     : seqTrack.seqType,
-                    displayName : artefactDisplayName,
+                    displayName : readWorkflowArtefact.displayName,
             ])
 
             FastqcProcessedFile fastqcProcessedFile = CollectionUtils.atMostOneElement(FastqcProcessedFile.findAllWhere(dataFile: dataFile))
@@ -147,14 +112,14 @@ List<List<Long>> seqTrackIdsWithDataFileCount = SeqTrack.executeQuery(
         """SELECT s.id, COUNT(f.id) FROM SeqTrack s
                       INNER JOIN DataFile d ON d.seqTrack.id=s.id
                       INNER JOIN FastqcProcessedFile f ON f.dataFile.id=d.id
-                      WHERE s.workflowArtefact IS NOT NUll AND f.workflowArtefact IS NULL
+                      WHERE s.workflowArtefact IS NOT NUll AND d.indexFile = true AND f.workflowArtefact IS NULL
                       GROUP BY s.id 
                       ORDER BY s.id ASC""")
 
 List<Long> seqTrackIds = seqTrackIdsWithDataFileCount.collect { it[0] } as List<Long>
 int numFastqcProcessedFiles = seqTrackIds ? seqTrackIdsWithDataFileCount.collect { it[1] }.sum() as int : 0
 int numSeqTracks = seqTrackIds.size()
-println "There are ${numFastqcProcessedFiles} Fastqc Processed Files of ${numSeqTracks} Seq. Tracks to be migrated into new workflow system"
+println "There are ${numFastqcProcessedFiles} Fastqc Processed Files of indexed fast files of ${numSeqTracks} Seq. Tracks to be migrated into new workflow system"
 
 if (seqTrackIdsWithDataFileCount) {
 
@@ -176,10 +141,6 @@ if (seqTrackIdsWithDataFileCount) {
     int numCores = Runtime.runtime.availableProcessors()
     println "${numCores} logical CPU core(s) are available"
 
-    //fetch the priority from database
-    ProcessingPriority priority = CollectionUtils.exactlyOneElement(ProcessingPriority.findAllByName(processPriority),
-            "Processing priority ${processPriority} doesnt exist.")
-
     dryRun && println("dry run, nothing is saved")
     print "Processing: "
     withPool(numCores, {
@@ -190,7 +151,7 @@ if (seqTrackIdsWithDataFileCount) {
                 int start = batchSize * it
                 int adjustedSize = Math.min((numSeqTracks - start), batchSize) - 1
                 List<SeqTrack> seqTracks = SeqTrack.findAllByIdInList(seqTrackIds[start..start + adjustedSize])
-                migrateToNewWorkflow(seqTracks, workflow, priority, OUTPUT_ROLE, lsdfFilesService)
+                migrateToNewWorkflow(seqTracks, OUTPUT_ROLE)
                 //flush changes to the database
                 if (!dryRun) {
                     session.flush()
