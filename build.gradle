@@ -285,7 +285,7 @@ dependencies {
 
     implementation "org.openapitools:openapi-generator-gradle-plugin:6.6.0"
 
-    implementation group: 'commons-io', name: 'commons-io', version: '2.12.0'
+    implementation group: 'commons-io', name: 'commons-io', version: '2.13.0'
 
     integrationTestImplementation sourceSets.testHelper.output
     integrationTestRuntimeOnly sourceSets.testHelper.output
