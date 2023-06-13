@@ -21,10 +21,12 @@
  */
 package de.dkfz.tbi.otp.workflowExecution.wes
 
+import grails.gorm.transactions.Transactional
 import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
+@Transactional
 class WesRunService {
 
     /**

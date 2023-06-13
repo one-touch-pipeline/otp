@@ -40,12 +40,16 @@ import java.time.ZonedDateTime
 @Slf4j
 class WesMonitor {
 
+    @Autowired
     JobService jobService
 
+    @Autowired
     RunStatusService runStatusService
 
+    @Autowired
     WeskitAccessService weskitAccessService
 
+    @Autowired
     WesRunService wesRunService
 
     @Autowired
