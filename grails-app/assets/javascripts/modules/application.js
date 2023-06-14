@@ -24,7 +24,7 @@
 //= require /webjars/bootstrap/4.6.0/js/bootstrap.bundle.js
 //= require /webjars/datatables/1.10.24/js/jquery.dataTables.js
 //= require /webjars/datatables/1.10.24/js/dataTables.bootstrap4.js
-//= require /webjars/datatables-fixedcolumns/3.0.2/js/dataTables.fixedColumns.js
+//= require /webjars/datatables-fixedcolumns/3.2.2/js/dataTables.fixedColumns.js
 //= require /webjars/datatables-fixedheader/3.2.4/js/dataTables.fixedHeader.js
 //= require /webjars/datatables-buttons/1.7.0/js/dataTables.buttons.js
 //= require /webjars/datatables-buttons/1.7.0/js/buttons.bootstrap4.js
