@@ -60,6 +60,7 @@ class DocumentService {
         return null
     }
 
+    @CompileDynamic
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     Errors deleteDocumentType(DocumentType documentType) {
         assert documentType: "documentType is null"
@@ -76,6 +77,7 @@ class DocumentService {
         return null
     }
 
+    @CompileDynamic
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     Errors updateDocument(DocumentType documentType, byte[] content, String link, Document.FormatType formatType) {
         Document document = (Document)atMostOneElement(Document.findAllByDocumentType(documentType)) ?: new Document(documentType: documentType)

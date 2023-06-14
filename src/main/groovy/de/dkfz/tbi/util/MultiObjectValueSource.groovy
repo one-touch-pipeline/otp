@@ -40,7 +40,7 @@ import java.time.LocalDate
  */
 class MultiObjectValueSource {
 
-    final private Object[] objects
+    final private Collection<Object> objects
 
     MultiObjectValueSource(Object... objects) {
         this.objects = objects.findAll()
