@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,7 +25,7 @@
 *= require /webjars/bootstrap-icons/1.10.5/font/bootstrap-icons.css
 *= require /webjars/datatables/1.10.24/css/dataTables.bootstrap4.css
 *= require /webjars/datatables-fixedcolumns/3.0.2/css/dataTables.fixedColumns.css
-*= require /webjars/datatables-fixedheader/2.1.2/css/dataTables.fixedHeader.css
+*= require /webjars/datatables-fixedheader/3.2.4/fixedHeader.dataTables.min.css
 *= require /webjars/datatables-buttons/1.7.0/css/buttons.bootstrap4.css
 *= require /webjars/datatables.net-scroller-bs4/css/scroller.bootstrap4.css
 *= require /webjars/select2/4.0.13/css/select2.css

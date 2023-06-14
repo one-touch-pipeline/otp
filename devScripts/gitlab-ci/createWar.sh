@@ -22,14 +22,15 @@
 #
 
 # Run war build and save output to warLogs
-./gradlew --build-cache war 2>&1 | tee warLogs
+mkdir -p tmp
+./gradlew --build-cache war 2>&1 | tee tmp/warLogs.log
 
 # Grep all errors and save them to warErrors
-cat warLogs | grep -e " error(s)," -e "ERROR -" >> warErrors
+cat tmp/warLogs.log | grep -e " error(s)," -e "ERROR -" -e "Unable to Locate Asset:" >> tmp/warErrors.log
 
-if [ -s warErrors ]
+if [ -s tmp/warErrors.log ]
 then
   echo "The following errors occurred:"
-  cat warErrors
+  cat tmp/warErrors.log
   exit 1
 fi
