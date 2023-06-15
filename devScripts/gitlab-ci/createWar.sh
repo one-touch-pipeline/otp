@@ -21,11 +21,14 @@
 # SOFTWARE.
 #
 
-# Run war build and save output to warLogs
+set -e -o pipefail
 mkdir -p tmp
+
+# Run war build and save output to warLogs
 ./gradlew --build-cache war 2>&1 | tee tmp/warLogs.log
 
 # Grep all errors and save them to warErrors
+set +e
 cat tmp/warLogs.log | grep -e " error(s)," -e "ERROR -" -e "Unable to Locate Asset:" >> tmp/warErrors.log
 
 if [ -s tmp/warErrors.log ]

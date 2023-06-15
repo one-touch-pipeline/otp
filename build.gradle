@@ -406,7 +406,12 @@ assets {
             languageMode  : 'ES6',
             targetLanguage: 'ES5',
     ]
-    excludes = ['**/chartjs/**/*', '**/chartjs-plugin-datalabels/**/*']
+    excludes = [
+            '**/chartjs/**/*',
+            '**/chartjs-plugin-datalabels/**/*',
+            '**/datatables-fixedcolumns/*/css/fixedColumns.bootstrap4.scss',
+            '**/ttskch__select2-bootstrap4-theme/**/*.scss',
+    ]
 }
 
 codenarc {
