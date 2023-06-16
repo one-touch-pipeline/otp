@@ -291,14 +291,6 @@ dependencies {
     integrationTestImplementation sourceSets.testHelper.output
     integrationTestRuntimeOnly sourceSets.testHelper.output
 
-    // Dicom Audit Logging
-    if (Environment.isDevelopmentMode()) {
-        implementation "com.gitlab.one-touch-pipeline:dicom-audit-trail-impl:v1.1.0-NOP"
-    } else {
-        implementation "com.gitlab.one-touch-pipeline:dicom-audit-trail-impl:1.1.0"
-    }
-    implementation "com.gitlab.one-touch-pipeline:dicom-audit-trail:1.2.0"
-
     implementation "org.jadira.usertype:usertype.core:7.0.0.CR1"
     implementation "com.opencsv:opencsv:5.7.1"
 

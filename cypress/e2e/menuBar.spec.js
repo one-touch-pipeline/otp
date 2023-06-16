@@ -33,7 +33,7 @@ describe('Click all menu items in the menu bar', () => {
       const menuBar = 'div.menuContainer';
       const menuBarItem = 'li:not(.nav_container)';
       cy.get(menuBar).find(menuBarItem)
-        .should('have.length', 68).and('contain', 'a');
+        .should('have.length', 67).and('contain', 'a');
     });
 
     it('should click the Overview menu item', () => {
@@ -201,7 +201,7 @@ describe('Click all menu items in the menu bar', () => {
 
     it('should check the number of menu items and click all Admin menu items', () => {
       cy.get('li.navigation').contains('Admin').parent().find('li')
-        .should('have.length', 7);
+        .should('have.length', 6);
       cy.get('.navigation li').contains('User Administration').click({ force: true });
       cy.checkPage('/userAdministration/index');
 
@@ -216,9 +216,6 @@ describe('Click all menu items in the menu bar', () => {
 
       cy.get('.navigation li').contains('Job Error Definition').click({ force: true });
       cy.checkPage('/jobErrorDefinition/index');
-
-      cy.get('.navigation li').contains('DICOM Logging').click({ force: true });
-      cy.checkPage('/dicom/dictionary');
 
       cy.get('.navigation li').contains('Plan Server Shutdown').click({ force: true });
       cy.checkPage('/shutdown/index');

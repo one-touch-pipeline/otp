@@ -97,8 +97,6 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         userProjectRoleService.processingOptionService = new ProcessingOptionService()
         userProjectRoleService.configService = configService
         userProjectRoleService.userProjectRoleService = userProjectRoleService
-        userProjectRoleService.dicomAuditUtils = new DicomAuditUtils()
-        userProjectRoleService.dicomAuditUtils.securityService = securityService
 
         userProjectRoleService.mailHelperService = Mock(MailHelperService) {
             getTicketSystemEmailAddress() >> EMAIL_TICKET_SYSTEM

@@ -52,7 +52,6 @@ class NoProjectInterceptor {
                 .except(controller: 'crashRecovery')
                 .except(controller: 'processingOption')
                 .except(controller: 'jobErrorDefinition')
-                .except(controller: 'dicom')
                 .except(controller: 'shutdown')
                 .except(controller: 'console')
                 .except(uri: '/static/**')

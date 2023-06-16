@@ -25,8 +25,6 @@ import grails.converters.JSON
 import grails.core.GrailsApplication
 import grails.util.Environment
 
-import de.dkfz.odcf.audit.impl.DicomAuditLogger
-import de.dkfz.odcf.audit.xml.layer.EventIdentification.EventOutcomeIndicator
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.config.PropertiesValidationService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
@@ -76,7 +74,6 @@ class BootStrap {
         }
 
         JSON.registerObjectMarshaller(Enum, { Enum e -> e.name() })
-        DicomAuditLogger.logActorStart(EventOutcomeIndicator.SUCCESS, configService.dicomInstanceName)
     }
 
     def destroy = {

@@ -27,10 +27,6 @@ import groovy.transform.CompileDynamic
 import groovy.transform.TupleConstructor
 import org.springframework.security.access.prepost.PreAuthorize
 
-import de.dkfz.odcf.audit.impl.DicomAuditLogger
-import de.dkfz.odcf.audit.impl.OtpDicomAuditFactory
-import de.dkfz.odcf.audit.impl.OtpDicomAuditFactory.UniqueIdentifierType
-import de.dkfz.odcf.audit.xml.layer.EventIdentification.EventOutcomeIndicator
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
@@ -50,7 +46,6 @@ class UserProjectRoleService {
     AuditLogService auditLogService
     IdentityProvider identityProvider
     ConfigService configService
-    DicomAuditUtils dicomAuditUtils
     MailHelperService mailHelperService
     MessageSourceService messageSourceService
     ProcessingOptionService processingOptionService
@@ -94,8 +89,6 @@ class UserProjectRoleService {
                 AuditLog.Action.PROJECT_USER_CREATED_PROJECT_USER,
                 "Created Project User: ${userProjectRole.toStringWithAllProperties()}"
         )
-        String studyUID = OtpDicomAuditFactory.generateUID(UniqueIdentifierType.STUDY, String.valueOf(project.id))
-        DicomAuditLogger.logUserActivated(EventOutcomeIndicator.SUCCESS, dicomAuditUtils.realUserName, user.username, studyUID)
 
         return userProjectRole
     }

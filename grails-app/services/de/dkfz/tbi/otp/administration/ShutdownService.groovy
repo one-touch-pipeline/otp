@@ -28,8 +28,6 @@ import org.springframework.beans.factory.DisposableBean
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.Errors
 
-import de.dkfz.odcf.audit.impl.DicomAuditLogger
-import de.dkfz.odcf.audit.xml.layer.EventIdentification.EventOutcomeIndicator
 import de.dkfz.tbi.otp.OtpException
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.job.processing.*
@@ -77,12 +75,9 @@ class ShutdownService implements DisposableBean {
                 suspendResumeableJobs()
                 logRunningWorkflowSteps()
                 log.info("OTP is shutting down")
-                DicomAuditLogger.logActorStop(EventOutcomeIndicator.SUCCESS, info.initiatedBy.username)
             }
         } else {
             log.warn("OTP is shutting down without a planned shutdown")
-            DicomAuditLogger.logActorStop(EventOutcomeIndicator.SUCCESS,
-                    configService.dicomInstanceName)
         }
         shutdownSuccessful = true
     }

@@ -22,7 +22,6 @@
 package de.dkfz.tbi.otp
 
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler
@@ -142,12 +141,6 @@ class SecurityConfiguration {
     }
 
     @Bean
-    // for DicomAuditSecurityEventListener
-    AuthenticationEventPublisher authenticationEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
-        return new DefaultAuthenticationEventPublisher(applicationEventPublisher)
-    }
-
-    @Bean
     IdentityProvider identityProvider() {
         if (configService.oidcEnabled) {
             return keycloakService
@@ -168,7 +161,7 @@ class SecurityConfiguration {
                         authorize.mvcMatchers(
                                 "/console/**",
                                 "/static/console*/**",
-                        ).access("hasRole('ROLE_ADMIN') and @dicomAuditConsoleHandler.log()")
+                        ).access("hasRole('ROLE_ADMIN')")
                     } else {
                         authorize.mvcMatchers(
                                 "/console/**",
