@@ -286,8 +286,6 @@ dependencies {
 
     implementation "org.openapitools:openapi-generator-gradle-plugin:6.6.0"
 
-    implementation group: 'commons-io', name: 'commons-io', version: '2.13.0'
-
     integrationTestImplementation sourceSets.testHelper.output
     integrationTestRuntimeOnly sourceSets.testHelper.output
 
@@ -301,9 +299,7 @@ dependencies {
     implementation "com.github.samtools:htsjdk:3.0.5"
 
     // library for interacting with cluster job schedulers
-    implementation('com.github.theroddywms:BatchEuphoria:0.1.2') {
-        exclude group: 'org.apache.commons', module: 'commons-io'
-    }
+    implementation('com.github.theroddywms:BatchEuphoria:0.1.2')
 
     // ssh, ssh-agent proxy, and sftp libraries
     implementation 'com.jcraft:jsch:0.1.55'

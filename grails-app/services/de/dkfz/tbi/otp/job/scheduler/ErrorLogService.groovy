@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,7 +24,6 @@ package de.dkfz.tbi.otp.job.scheduler
 import grails.gorm.transactions.Transactional
 import groovy.transform.CompileDynamic
 import groovy.xml.MarkupBuilder
-import org.apache.commons.io.FileUtils
 
 import de.dkfz.tbi.otp.config.ConfigService
 
@@ -143,7 +142,10 @@ class ErrorLogService {
             stacktrace(stackString)
             timestamp(new Date())
         }
-        FileUtils.forceMkdir(xmlFile.parentFile)
+        File directory = xmlFile.parentFile
+        if (!directory.mkdirs() && !directory.isDirectory()) {
+            throw new IOException("Cannot create directory '${directory}'.")
+        }
         writeToFile(xmlFile, writer.toString())
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,7 +22,6 @@
 package de.dkfz.tbi.otp.job.scheduler
 
 import grails.testing.gorm.DataTest
-import org.apache.commons.io.FileUtils
 import spock.lang.Specification
 import spock.lang.TempDir
 
@@ -50,8 +49,10 @@ class ErrorLogServiceSpec extends Specification implements DataTest {
         stacktraceFile.parentFile.mkdirs()
     }
 
+    //delete() is used to delete a file, not a domain object
+    @SuppressWarnings("ExplicitFlushForDeleteRule")
     void cleanup() {
-        new FileUtils().deleteQuietly(exceptionStoringFile)
+        exceptionStoringFile?.delete()
         assert stacktraceFile.parentFile.deleteDir()
     }
 

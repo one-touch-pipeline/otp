@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,7 +23,6 @@ package de.dkfz.tbi.otp.ngsdata
 
 import grails.testing.gorm.DataTest
 import grails.testing.services.ServiceUnitTest
-import org.apache.commons.io.FileUtils
 import spock.lang.Specification
 import spock.lang.TempDir
 
@@ -136,7 +135,7 @@ class ReferenceGenomeServiceSpec extends Specification implements DataTest, Serv
     void testRealmFilePathToDirectoryCanNotReadDirectory() {
         given:
         setupTest()
-        FileUtils.deleteDirectory(directory)
+        directory.deleteDir()
 
         when:
         referenceGenomeService.referenceGenomeDirectory(referenceGenome)

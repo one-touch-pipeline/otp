@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,7 +24,6 @@ package de.dkfz.tbi.otp.job.processing
 import grails.gorm.transactions.Rollback
 import grails.testing.mixin.integration.Integration
 import grails.web.mapping.LinkGenerator
-import org.apache.commons.io.FileUtils
 import org.junit.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.AccessDeniedException
@@ -474,7 +473,7 @@ class ProcessServiceIntegrationTests implements UserAndRoles {
         setupData()
         ProcessingError processingError = mockProcessingError()
         File stacktraceFile = errorLogService.getStackTracesFile(processingError.stackTraceIdentifier)
-        FileUtils.forceMkdir(stacktraceFile.parentFile)
+        stacktraceFile.parentFile.mkdirs()
         if (stacktraceFile.exists()) {
             assert stacktraceFile.delete()
         }
