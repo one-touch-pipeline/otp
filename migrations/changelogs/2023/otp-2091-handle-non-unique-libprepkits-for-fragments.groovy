@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,35 +19,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflow.wgbs
 
-import grails.testing.gorm.DataTest
-import spock.lang.Specification
+databaseChangeLog = {
 
-import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPancanFactory
-
-class WgbsWorkflowSpec extends Specification implements RoddyPancanFactory, DataTest {
-
-    WgbsWorkflow wgbsWorkflow
-
-    void setup() {
-        wgbsWorkflow = new WgbsWorkflow()
+    changeSet(author: "-", id: "1686654819544-94") {
+        dropForeignKeyConstraint(baseTableName: "workflow_run_external_workflow_config_fragment", constraintName: "FKmtrmx711o92jkvito9syjsyb6")
     }
 
-    void "getJobBeanNames, should return all WGBS Workflow bean names in correct order"() {
-        expect:
-        wgbsWorkflow.jobBeanNames == [
-                "panCancerFragmentJob",
-                "panCancerConditionalFailJob",
-                "wgbsPrepareJob",
-                "wgbsExecuteJob",
-                "wgbsValidationJob",
-                "wgbsParseJob",
-                "panCancerCheckQcJob",
-                "panCancerCleanUpJob",
-                "wgbsLinkJob",
-                "setCorrectPermissionJob",
-                "panCancerFinishJob",
-        ]
+    changeSet(author: "-", id: "1686654819544-110") {
+        dropTable(tableName: "workflow_run_external_workflow_config_fragment")
+    }
+
+    changeSet(author: "-", id: "1686654819544-5") {
+        dropNotNullConstraint(columnDataType: "clob", columnName: "combined_config", tableName: "workflow_run")
     }
 }

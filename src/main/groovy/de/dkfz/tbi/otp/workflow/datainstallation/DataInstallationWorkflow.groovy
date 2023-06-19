@@ -39,6 +39,7 @@ class DataInstallationWorkflow implements OtpWorkflow {
     @Override
     List<String> getJobBeanNames() {
         return [
+                DataInstallationFragmentJob.simpleName.uncapitalize(),
                 DataInstallationConditionalFailJob.simpleName.uncapitalize(),
                 DataInstallationPrepareJob.simpleName.uncapitalize(),
                 CopyOrLinkFastqsOfLaneJob.simpleName.uncapitalize(),

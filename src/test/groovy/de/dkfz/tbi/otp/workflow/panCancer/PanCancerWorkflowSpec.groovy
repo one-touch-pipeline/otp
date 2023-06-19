@@ -51,6 +51,7 @@ class PanCancerWorkflowSpec extends Specification implements RoddyPancanFactory,
     void "getJobBeanNames, should return all PanCancerJob bean names in correct order"() {
         expect:
         panCancerWorkflow.jobBeanNames == [
+                "panCancerFragmentJob",
                 "panCancerConditionalFailJob",
                 "panCancerPrepareJob",
                 "panCancerExecuteJob",

@@ -303,21 +303,15 @@ class FastqcDeciderSpec extends Specification implements DataTest, WorkflowSyste
             1 * fastqcOutputDirectory(_) >> Paths.get('output')
             0 * _
         }
-        decider.configFragmentService = Mock(ConfigFragmentService) {
-            1 * getSortedFragments(_) >> []
-            0 * _
-        }
         decider.workflowRunService = Mock(WorkflowRunService) {
-            1 * buildWorkflowRun(workflowVersion.workflow, seqTrack.project.processingPriority, _, seqTrack.project, _, _, [], workflowVersion) >> {
+            1 * buildWorkflowRun(workflowVersion.workflow, seqTrack.project.processingPriority, _, seqTrack.project, _, _, workflowVersion) >> {
                 Workflow workflowParam, ProcessingPriority priorityParam, String workDirectoryParam, Project projectParam,
-                List<String> displayNameLinesParam, String shortNameParam, List<ExternalWorkflowConfigFragment> configsParam,
-                WorkflowVersion workflowVersionParam ->
+                List<String> displayNameLinesParam, String shortNameParam, WorkflowVersion workflowVersionParam ->
                     new WorkflowRun([ // codenarc-disable-line
                                       workDirectory   : workDirectoryParam,
                                       state           : WorkflowRun.State.PENDING,
                                       project         : projectParam,
-                                      configs         : configsParam,
-                                      combinedConfig  : '{}',
+                                      combinedConfig  : null,
                                       priority        : priorityParam,
                                       restartedFrom   : null,
                                       omittedMessage  : null,

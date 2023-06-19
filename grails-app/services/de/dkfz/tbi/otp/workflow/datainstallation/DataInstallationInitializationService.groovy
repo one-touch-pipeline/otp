@@ -22,7 +22,7 @@
 package de.dkfz.tbi.otp.workflow.datainstallation
 
 import grails.gorm.transactions.Transactional
-import groovy.transform.CompileDynamic
+import org.springframework.transaction.TransactionStatus
 
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.workflowExecution.*
@@ -32,11 +32,9 @@ import java.nio.file.Paths
 /**
  * A service providing functionality needed by the different jobs for the data installation workflow.
  */
-@CompileDynamic
 @Transactional
 class DataInstallationInitializationService {
 
-    ConfigFragmentService configFragmentService
     LsdfFilesService lsdfFilesService
     WorkflowArtefactService workflowArtefactService
     WorkflowRunService workflowRunService
@@ -54,7 +52,7 @@ class DataInstallationInitializationService {
             createRunForSeqTrack(workflow, seqTrack, dataFiles, priority ?: seqTrack.processingPriority)
         }
 
-        WorkflowRun.withTransaction { status ->
+        WorkflowRun.withTransaction { TransactionStatus status ->
             status.flush()
         }
 
@@ -62,41 +60,28 @@ class DataInstallationInitializationService {
     }
 
     private WorkflowRun createRunForSeqTrack(Workflow workflow, SeqTrack seqTrack, List<DataFile> dataFiles, ProcessingPriority priority) {
-        List<String> runDisplayName = []
-        runDisplayName.with {
-            add("project: ${seqTrack.project.name}")
-            add("individual: ${seqTrack.individual.displayName}")
-            add("sampleType: ${seqTrack.sampleType.displayName}")
-            add("seqType: ${seqTrack.seqType.displayNameWithLibraryLayout}")
-            add("run: ${seqTrack.run.name}")
-            add("lane: ${seqTrack.laneId}")
-        }
+        List<String> runDisplayName = [
+                "project: ${seqTrack.project.name}",
+                "individual: ${seqTrack.individual.displayName}",
+                "sampleType: ${seqTrack.sampleType.displayName}",
+                "seqType: ${seqTrack.seqType.displayNameWithLibraryLayout}",
+                "run: ${seqTrack.run.name}",
+                "lane: ${seqTrack.laneId}",
+        ]*.toString()
 
-        List<String> artefactDisplayName = runDisplayName
+        List<String> artefactDisplayName = new ArrayList<>(runDisplayName)
         artefactDisplayName.remove(0)
 
         String shortName = "DI: ${seqTrack.individual.pid} ${seqTrack.sampleType.displayName} ${seqTrack.seqType.displayNameWithLibraryLayout}"
 
         String directory = Paths.get(lsdfFilesService.getFileViewByPidPath(dataFiles.first())).parent
-        List<ExternalWorkflowConfigFragment> configFragments = getConfigFragments(seqTrack, workflow)
 
-        WorkflowRun run = workflowRunService.buildWorkflowRun(workflow, priority, directory, seqTrack.project, runDisplayName, shortName, configFragments)
+        WorkflowRun run = workflowRunService.buildWorkflowRun(workflow, priority, directory, seqTrack.project, runDisplayName, shortName)
         WorkflowArtefact artefact = workflowArtefactService.buildWorkflowArtefact(new WorkflowArtefactValues(
                 run, DataInstallationWorkflow.OUTPUT_FASTQ, ArtefactType.FASTQ, artefactDisplayName
         ))
         seqTrack.workflowArtefact = artefact
         seqTrack.save(flush: false)
         return run
-    }
-
-    List<ExternalWorkflowConfigFragment> getConfigFragments(SeqTrack seqTrack, Workflow workflow) {
-        return configFragmentService.getSortedFragments(new SingleSelectSelectorExtendedCriteria(
-                workflow,
-                null, //workflowVersion, installation are not versioned
-                seqTrack.project,
-                seqTrack.seqType,
-                null, //referenceGenome, not used for installation
-                seqTrack.libraryPreparationKit,
-        ))
     }
 }

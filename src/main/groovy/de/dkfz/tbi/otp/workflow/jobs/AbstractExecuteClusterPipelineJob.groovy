@@ -37,6 +37,7 @@ abstract class AbstractExecuteClusterPipelineJob extends AbstractExecutePipeline
 
     @Override
     void execute(WorkflowStep workflowStep) {
+        assert workflowStep.workflowRun.combinedConfig
         List<String> scripts = createScripts(workflowStep)
         if (scripts) {
             logService.addSimpleLogEntry(workflowStep, "${scripts.size()} scripts will be send")

@@ -54,18 +54,16 @@ abstract class AbstractAlignmentWorkflowSpec extends AbstractWorkflowSpec {
         workflowArtefacts.each {
             log.debug("- ${it} (${it.artefactType}) for ${it.artefact}")
         }
+        log.debug("Run decider:")
         DeciderResult deciderResult = decider.decide(WorkflowArtefact.list())
         List<WorkflowArtefact> newWorkflowArtefact = deciderResult.newArtefacts
         log.debug("Decide output artefacts ${newWorkflowArtefact.size()}:")
         newWorkflowArtefact.each {
             log.debug("- ${it.toString().replaceAll('\n', ' ')} (${it.artefactType}) for ${it.artefact}")
         }
-        log.debug("Created runs with configs:")
+        log.debug("Created runs:")
         newWorkflowArtefact*.producedBy.unique().sort { it.id }.eachWithIndex { WorkflowRun workflowRun, int i ->
             log.debug("  - run ${i}: ${workflowRun.shortDisplayName}")
-            workflowRun.configs.eachWithIndex { ExternalWorkflowConfigFragment ewcf, int j ->
-                log.debug("    - config ${j} (priority: ${ewcf.findSelector().get().priority}): ${ewcf.name}")
-            }
         }
         assert newWorkflowArtefact.size() == expectedNewWorkflowArtefactCount
     }

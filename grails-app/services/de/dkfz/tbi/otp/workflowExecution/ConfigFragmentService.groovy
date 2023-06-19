@@ -22,18 +22,27 @@
 package de.dkfz.tbi.otp.workflowExecution
 
 import grails.converters.JSON
+import org.grails.web.json.JSONObject
 
 class ConfigFragmentService {
     ConfigSelectorService configSelectorService
 
     List<ExternalWorkflowConfigFragment> getSortedFragments(SingleSelectSelectorExtendedCriteria singleSelectSelectorExtendedCriteria) {
+        return getSortedFragmentSelectors(singleSelectSelectorExtendedCriteria)*.externalWorkflowConfigFragment
+    }
+
+    List<ExternalWorkflowConfigSelector> getSortedFragmentSelectors(SingleSelectSelectorExtendedCriteria singleSelectSelectorExtendedCriteria) {
         return configSelectorService.findAllSelectorsSortedByPriority(
                 singleSelectSelectorExtendedCriteria
-        )*.externalWorkflowConfigFragment
+        )
     }
 
     String mergeSortedFragments(List<ExternalWorkflowConfigFragment> fragments) {
-        return (mergeSortedMaps(fragments*.configValuesToMap()) as JSON).toString()
+        return mergeSortedFragmentsAsJson(fragments).toString()
+    }
+
+    JSONObject mergeSortedFragmentsAsJson(List<ExternalWorkflowConfigFragment> fragments) {
+        return JSON.parse((mergeSortedMaps(fragments*.configValuesToMap()) as JSON).toString()) as JSONObject
     }
 
     private Map mergeSortedMaps(List<Map> prioritySortedHashMaps) {

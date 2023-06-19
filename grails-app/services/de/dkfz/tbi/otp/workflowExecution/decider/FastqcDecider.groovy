@@ -22,13 +22,14 @@
 package de.dkfz.tbi.otp.workflowExecution.decider
 
 import grails.gorm.transactions.Transactional
-import groovy.transform.CompileDynamic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
+import org.springframework.transaction.TransactionStatus
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.DataFile
+import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.LogUsedTimeUtils
 import de.dkfz.tbi.otp.utils.SessionUtils
@@ -37,14 +38,10 @@ import de.dkfz.tbi.otp.workflow.fastqc.WesFastQcWorkflow
 import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.otp.workflowExecution.decider.fastqc.FastqcArtefactData
 
-@CompileDynamic
 @Component
 @Transactional
 @Slf4j
 class FastqcDecider implements Decider {
-
-    @Autowired
-    ConfigFragmentService configFragmentService
 
     @Autowired
     FastqcDataFilesService fastqcDataFilesService
@@ -69,7 +66,7 @@ class FastqcDecider implements Decider {
         DeciderResult deciderResult = new DeciderResult()
         final Workflow workflowWes = workflowService.getExactlyOneWorkflow(WesFastQcWorkflow.WORKFLOW)
         final Workflow workflowBash = workflowService.getExactlyOneWorkflow(BashFastQcWorkflow.WORKFLOW)
-        deciderResult.infos << "start decider for ${workflowWes} / ${workflowBash}"
+        deciderResult.infos << "start decider for ${workflowWes} / ${workflowBash}".toString()
 
         List<FastqcArtefactData<SeqTrack>> seqTrackData = fastqcArtefactService.fetchSeqTrackArtefacts(inputArtefacts)
         List<SeqTrack> seqTracks = seqTrackData*.artefact
@@ -112,10 +109,10 @@ class FastqcDecider implements Decider {
                     WorkflowVersionSelector matchingWorkflows = workflowVersionSelectorMap[project]
                     if (!matchingWorkflows) {
                         log.debug("            skip, since no workflow version is configured")
-                        deciderResult.warnings << "Fastqc: Ignore ${project}, since no workflow version configured"
+                        deciderResult.warnings << "Fastqc: Ignore ${project}, since no workflow version configured".toString()
                         return
                     }
-                    deciderResult.infos << "Fastqc: Use ${matchingWorkflows.workflowVersion} for ${project}"
+                    deciderResult.infos << "Fastqc: Use ${matchingWorkflows.workflowVersion} for ${project}".toString()
 
                     groups.each { FastqcArtefactData<SeqTrack> fastqcArtefactData ->
                         List<FastqcArtefactData<FastqcProcessedFile>> additionalArtefacts = groupedAdditionalDataPerSeqtrack[fastqcArtefactData.artefact]
@@ -129,26 +126,26 @@ class FastqcDecider implements Decider {
                 }
             }
         }
-        deciderResult.infos << "end decider for ${workflowWes} / ${workflowBash}"
-        SessionUtils.withTransaction {
-            it.flush()
+        deciderResult.infos << "end decider for ${workflowWes} / ${workflowBash}".toString()
+        SessionUtils.withTransaction { TransactionStatus status ->
+            status.flush()
         }
         return deciderResult
     }
 
     protected DeciderResult createWorkflowRunsAndOutputArtefacts(FastqcArtefactData<SeqTrack> fastqcArtefactData,
-                                                               List<FastqcArtefactData<FastqcProcessedFile>> additionalArtefacts,
-                                                               Map<SeqTrack, List<DataFile>> dataFilesMap,
-                                                               WorkflowVersionSelector matchingWorkflow) {
+                                                                 List<FastqcArtefactData<FastqcProcessedFile>> additionalArtefacts,
+                                                                 Map<SeqTrack, List<DataFile>> dataFilesMap,
+                                                                 WorkflowVersionSelector matchingWorkflow) {
         DeciderResult deciderResult = new DeciderResult()
         SeqTrack seqTrack = fastqcArtefactData.artefact
         String seqTrackString = seqTrack.toString().replaceAll('<br>', ', ')
-        deciderResult.infos << "process seqTrack ${seqTrackString}"
+        deciderResult.infos << "process seqTrack ${seqTrackString}".toString()
 
         List<DataFile> dataFiles = dataFilesMap[seqTrack]
 
         if (additionalArtefacts && additionalArtefacts.size() == dataFiles.size()) {
-            deciderResult.warnings << "skip ${seqTrackString}, since fastqc already exist"
+            deciderResult.warnings << "skip ${seqTrackString}, since fastqc already exist".toString()
             return deciderResult
         }
 
@@ -169,7 +166,7 @@ class FastqcDecider implements Decider {
         }
 
         List<String> runDisplayName = generateWorkflowRunDisplayName(seqTrack)
-        List<String> artefactDisplayName = runDisplayName.clone()
+        List<String> artefactDisplayName = new ArrayList<>(runDisplayName)
         artefactDisplayName.remove(0)
         String shortName = "${workflow}: ${seqTrack.individual.pid} " +
                 "${seqTrack.sampleType.displayName} ${seqTrack.seqType.displayNameWithLibraryLayout}"
@@ -181,7 +178,6 @@ class FastqcDecider implements Decider {
                 seqTrack.individual.project,
                 runDisplayName,
                 shortName,
-                getConfigFragments(seqTrack, workflowVersion),
                 workflowVersion,
         )
 
@@ -205,21 +201,10 @@ class FastqcDecider implements Decider {
             fastqcProcessedFile.workflowArtefact = workflowArtefact
             fastqcProcessedFile.save(flush: true)
             result << workflowArtefact
-            deciderResult.infos << "--> create fastqc file ${fastqcProcessedFile.toString().replaceAll('<br>', ', ')}"
+            deciderResult.infos << "--> create fastqc file ${fastqcProcessedFile.toString().replaceAll('<br>', ', ')}".toString()
             deciderResult.newArtefacts << workflowArtefact
         }
         return deciderResult
-    }
-
-    List<ExternalWorkflowConfigFragment> getConfigFragments(SeqTrack seqTrack, WorkflowVersion workflowVersion) {
-        return configFragmentService.getSortedFragments(new SingleSelectSelectorExtendedCriteria(
-                workflowVersion.workflow,
-                workflowVersion,
-                seqTrack.project,
-                seqTrack.seqType,
-                null, //referenceGenome, not used for FastQC
-                seqTrack.libraryPreparationKit,
-        ))
     }
 
     /**
@@ -229,15 +214,14 @@ class FastqcDecider implements Decider {
      * @return display name as list of strings
      */
     private List<String> generateWorkflowRunDisplayName(SeqTrack seqTrack) {
-        List<String> runDisplayName = []
-        runDisplayName.with {
-            add("project: ${seqTrack.project.name}")
-            add("individual: ${seqTrack.individual.displayName}")
-            add("sampleType: ${seqTrack.sampleType.displayName}")
-            add("seqType: ${seqTrack.seqType.displayNameWithLibraryLayout}")
-            add("run: ${seqTrack.run.name}")
-            add("lane: ${seqTrack.laneId}")
-        }
+        List<String> runDisplayName = [
+                "project: ${seqTrack.project.name}",
+                "individual: ${seqTrack.individual.displayName}",
+                "sampleType: ${seqTrack.sampleType.displayName}",
+                "seqType: ${seqTrack.seqType.displayNameWithLibraryLayout}",
+                "run: ${seqTrack.run.name}",
+                "lane: ${seqTrack.laneId}",
+        ]*.toString()
         return runDisplayName
     }
 }

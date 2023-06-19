@@ -46,6 +46,7 @@ class DataInstallationWorkflowSpec extends Specification implements DataTest, Do
     void "getJobBeanNames, should return all dataInstallationJob bean names in correct order"() {
         expect:
         dataInstallationWorkflow.jobBeanNames == [
+                "dataInstallationFragmentJob",
                 "dataInstallationConditionalFailJob",
                 "dataInstallationPrepareJob",
                 "copyOrLinkFastqsOfLaneJob",

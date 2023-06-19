@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,35 +19,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflow.wgbs
+package de.dkfz.tbi.otp.workflow.fastqc
 
-import grails.testing.gorm.DataTest
-import spock.lang.Specification
+import groovy.util.logging.Slf4j
+import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPancanFactory
+import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.workflow.jobs.AbstractFragmentJob
+import de.dkfz.tbi.otp.workflowExecution.SingleSelectSelectorExtendedCriteria
+import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
-class WgbsWorkflowSpec extends Specification implements RoddyPancanFactory, DataTest {
+@Component
+@Slf4j
+class FastqcFragmentJob extends AbstractFragmentJob implements FastqcShared {
 
-    WgbsWorkflow wgbsWorkflow
-
-    void setup() {
-        wgbsWorkflow = new WgbsWorkflow()
-    }
-
-    void "getJobBeanNames, should return all WGBS Workflow bean names in correct order"() {
-        expect:
-        wgbsWorkflow.jobBeanNames == [
-                "panCancerFragmentJob",
-                "panCancerConditionalFailJob",
-                "wgbsPrepareJob",
-                "wgbsExecuteJob",
-                "wgbsValidationJob",
-                "wgbsParseJob",
-                "panCancerCheckQcJob",
-                "panCancerCleanUpJob",
-                "wgbsLinkJob",
-                "setCorrectPermissionJob",
-                "panCancerFinishJob",
+    @Override
+    protected List<SingleSelectSelectorExtendedCriteria> fetchSelectors(WorkflowStep workflowStep) {
+        SeqTrack seqTrack = getSeqTrack(workflowStep)
+        return [
+                new SingleSelectSelectorExtendedCriteria(
+                        workflowStep.workflowRun.workflowVersion.workflow,
+                        workflowStep.workflowRun.workflowVersion,
+                        seqTrack.project,
+                        seqTrack.seqType,
+                        null, //referenceGenome, not used for FastQC
+                        seqTrack.libraryPreparationKit,
+                ),
         ]
     }
 }

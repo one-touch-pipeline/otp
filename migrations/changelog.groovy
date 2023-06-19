@@ -78,4 +78,6 @@ databaseChangeLog = {
     include file: 'changelogs/2023/otp-1883.groovy'
 
     include file: 'changelogs/2023/otp-233-fix-wes-tables.groovy'
+
+    include file: 'changelogs/2023/otp-2091-handle-non-unique-libprepkits-for-fragments.groovy'
 }

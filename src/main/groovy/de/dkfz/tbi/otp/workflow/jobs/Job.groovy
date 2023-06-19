@@ -39,6 +39,7 @@ interface Job {
  */
 enum JobStage {
     CONDITIONAL_SKIP,
+    FETCH_FRAGMENTS,
     CONDITIONAL_FAIL,
     PREPARE,
     EXECUTE_PIPELINE,

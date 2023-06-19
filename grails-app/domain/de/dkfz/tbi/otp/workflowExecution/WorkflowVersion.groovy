@@ -68,7 +68,7 @@ class WorkflowVersion implements Entity, Commentable, Comparable<WorkflowVersion
         return 0
     }
 
-    private splitByDot(String s) {
+    private String[] splitByDot(String s) {
         return s.split(/[-\/.]/)
     }
 

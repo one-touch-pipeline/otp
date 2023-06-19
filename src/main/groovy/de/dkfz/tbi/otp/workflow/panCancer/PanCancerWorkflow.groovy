@@ -45,6 +45,7 @@ class PanCancerWorkflow implements OtpWorkflow {
     @Override
     List<String> getJobBeanNames() {
         return [
+                PanCancerFragmentJob.simpleName.uncapitalize(),
                 PanCancerConditionalFailJob.simpleName.uncapitalize(),
                 PanCancerPrepareJob.simpleName.uncapitalize(),
                 PanCancerExecuteJob.simpleName.uncapitalize(),

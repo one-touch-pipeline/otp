@@ -46,8 +46,9 @@ class BashFastqcWorkflowSpec extends Specification implements DataTest, DomainFa
     void "getJobBeanNames, should return all FastqcJob bean names in correct order"() {
         expect:
         fastqcWorkflow.jobBeanNames == [
-                "fastqcPrepareJob",
+                "fastqcFragmentJob",
                 "fastqcConditionalFailJob",
+                "fastqcPrepareJob",
                 "fastqcExecuteClusterPipelineJob",
                 "fastqcClusterValidationJob",
                 "fastqcParseJob",

@@ -60,8 +60,6 @@ class WorkflowRun implements Commentable, Entity {
 
     String workDirectory
 
-    List<ExternalWorkflowConfigFragment> configs
-
     String combinedConfig
 
     ProcessingPriority priority
@@ -107,14 +105,13 @@ class WorkflowRun implements Commentable, Entity {
     WorkFolder workFolder
 
     static hasMany = [
-            configs      : ExternalWorkflowConfigFragment,
             workflowSteps: WorkflowStep,
     ]
 
-    static constraints = {
+    static Closure constraints = {
         workDirectory nullable: true
-        combinedConfig validator: {
-            validateCombinedConfig(it)
+        combinedConfig nullable: true, validator: {
+            !it || validateCombinedConfig(it)
         }
         restartedFrom nullable: true, unique: true, validator: { val, obj ->
             if (val && val.workflow != obj.workflow) {

@@ -19,34 +19,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflowExecution
+package de.dkfz.tbi.otp.workflow.datainstallation
 
-import grails.gorm.hibernate.annotation.ManagedEntity
+import groovy.util.logging.Slf4j
+import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.utils.Entity
+import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.workflow.jobs.AbstractFragmentJob
+import de.dkfz.tbi.otp.workflowExecution.SingleSelectSelectorExtendedCriteria
+import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
-@ManagedEntity
-class WorkflowRunInputArtefact implements Entity {
+@Component
+@Slf4j
+class DataInstallationFragmentJob extends AbstractFragmentJob implements DataInstallationShared {
 
-    WorkflowRun workflowRun
-
-    /**
-     * 'role' of the artefact for the workflow, e.g. "disease" and "control"
-     *
-     * suppressing because changing this would involve refactoring the code as well as the database columns
-     */
-    @SuppressWarnings("GrailsDomainReservedSqlKeywordName")
-    String role
-
-    WorkflowArtefact workflowArtefact
-
-    static Closure constraints = {
-        role unique: 'workflowRun'
-        workflowArtefact unique: 'workflowRun'
-    }
-
-    static Closure mapping = {
-        workflowRun index: 'workflow_run_input_workflow_run_idx'
-        workflowArtefact index: 'workflow_run_input_artefact_workflow_artefact_idx'
+    @Override
+    protected List<SingleSelectSelectorExtendedCriteria> fetchSelectors(WorkflowStep workflowStep) {
+        SeqTrack seqTrack = getSeqTrack(workflowStep)
+        return [
+                new SingleSelectSelectorExtendedCriteria(
+                        workflowStep.workflowRun.workflow,
+                        null, //workflowVersion, not used for data installation
+                        seqTrack.project,
+                        seqTrack.seqType,
+                        null, //referenceGenome, not used for data installation
+                        seqTrack.libraryPreparationKit,
+                ),
+        ]
     }
 }

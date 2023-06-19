@@ -44,6 +44,8 @@ import java.time.LocalDateTime
 @Transactional
 class WorkflowRunService {
 
+    static final int PESSIMISTIC_WRITE_TIME_OUT = 10000
+
     final static List<WorkflowRun.State> STATES_COUNTING_AS_RUNNING = [
             WorkflowRun.State.RUNNING_OTP,
             WorkflowRun.State.RUNNING_WES,
@@ -120,20 +122,18 @@ class WorkflowRunService {
      * @param project The project the run should belong to
      * @param displayNameLines A name for the run. It is used in the GUI to show and also for filtering
      * @param shortName A short display name
-     * @param configs The sorted configs used for this workflow
      * @return the created, saved but not flushed WorkflowRun
      */
+    @SuppressWarnings('ParameterCount')
     WorkflowRun buildWorkflowRun(Workflow workflow, ProcessingPriority priority, String workDirectory, Project project, List<String> displayNameLines,
-                                 String shortName, List<ExternalWorkflowConfigFragment> configs = [], WorkflowVersion workflowVersion = null) {
-        String combinedConfig = configFragmentService.mergeSortedFragments(configs)
+                                 String shortName, WorkflowVersion workflowVersion = null) {
         String displayName = StringUtils.generateMultiLineDisplayName(displayNameLines)
 
         return new WorkflowRun([
                 workDirectory   : workDirectory,
                 state           : WorkflowRun.State.PENDING,
                 project         : project,
-                configs         : configs,
-                combinedConfig  : combinedConfig,
+                combinedConfig  : null,
                 priority        : priority,
                 restartedFrom   : null,
                 omittedMessage  : null,
@@ -145,14 +145,21 @@ class WorkflowRunService {
         ]).save(flush: false, deepValidate: false)
     }
 
+    void saveCombinedConfig(Long id, String combinedConfig) {
+        WorkflowRun workflowRun = WorkflowRun.get(id)
+        assert workflowRun: "No WorkflowRun with id '${id}' found"
+        workflowRun.combinedConfig = combinedConfig
+        workflowRun.save(flush: true)
+    }
+
     /**
      * helper do get pessimistic lock for workflowRun and all its steps and wait therefor for 10 second
      */
     void lockAndRefreshWorkflowRunWithSteps(WorkflowRun run) {
         WorkflowRun.withSession { Session s ->
-            s.refresh(run, new LockOptions(LockMode.PESSIMISTIC_WRITE).setTimeOut(10000))
+            s.refresh(run, new LockOptions(LockMode.PESSIMISTIC_WRITE).setTimeOut(PESSIMISTIC_WRITE_TIME_OUT))
             run.workflowSteps.each {
-                s.refresh(it, new LockOptions(LockMode.PESSIMISTIC_WRITE).setTimeOut(10000))
+                s.refresh(it, new LockOptions(LockMode.PESSIMISTIC_WRITE).setTimeOut(PESSIMISTIC_WRITE_TIME_OUT))
             }
         }
     }

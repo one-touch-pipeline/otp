@@ -46,8 +46,9 @@ class WesFastQcWorkflowSpec extends Specification implements DataTest, DomainFac
     void "getJobBeanNames, should return all WesFastQcJob bean names in correct order"() {
         expect:
         wesFastQcWorkflow.jobBeanNames == [
-                "fastqcPrepareJob",
+                "fastqcFragmentJob",
                 "fastqcConditionalFailJob",
+                "fastqcPrepareJob",
                 "fastqcParseJob",
                 "fastqcFinishJob",
                 "setCorrectPermissionJob",

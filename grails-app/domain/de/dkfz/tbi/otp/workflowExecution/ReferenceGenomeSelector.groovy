@@ -41,7 +41,7 @@ class ReferenceGenomeSelector implements Entity {
 
     ReferenceGenome referenceGenome
 
-    static constraints = {
+    static Closure constraints = {
         referenceGenome validator: { val, obj ->
             if (!(val.species.every { s -> s in obj.species*.species } &&
                     val.speciesWithStrain.every { sws -> sws in obj.species } &&

@@ -21,9 +21,9 @@
  */
 package de.dkfz.tbi.otp.workflowExecution
 
-import grails.converters.JSON
-import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
+import org.grails.web.json.JSONObject
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
@@ -32,38 +32,35 @@ import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 @Integration
 class ConfigFragmentServiceIntegrationSpec extends Specification implements WorkflowSystemDomainFactory {
 
-    void "test getSortedFragments"() {
-        given:
-        ConfigFragmentService service = new ConfigFragmentService()
+    private ConfigFragmentService service
+
+    private List<ExternalWorkflowConfigSelector> selectors
+
+    private List<ExternalWorkflowConfigFragment> prioritySortedHashMaps
+
+    private JSONObject mergedJson
+
+    private void setupData() {
+        service = new ConfigFragmentService()
+    }
+
+    private void setupDataWithSelectorsForQuerying() {
+        setupData()
+
         ExternalWorkflowConfigSelector ewcs1 = createExternalWorkflowConfigSelector()
         ExternalWorkflowConfigSelector ewcs2 = createExternalWorkflowConfigSelector()
         ExternalWorkflowConfigSelector ewcs3 = createExternalWorkflowConfigSelector()
+        selectors = [ewcs2, ewcs3, ewcs1]
+
         service.configSelectorService = Mock(ConfigSelectorService) {
-            1 * findAllSelectorsSortedByPriority(_) >> [ewcs2, ewcs3, ewcs1]
+            1 * findAllSelectorsSortedByPriority(_) >> selectors
         }
-
-        expect:
-        [ewcs2, ewcs3, ewcs1]*.externalWorkflowConfigFragment == service.getSortedFragments(new SingleSelectSelectorExtendedCriteria())
     }
 
-    void "test mergeSortedMaps"() {
-        given:
-        ConfigFragmentService service = new ConfigFragmentService()
-        List<Map> prioritySortedHashMaps = [
-                ["A": "A_ShouldAppear", "B": ["C": "C_ThisSinceHigherPrio", "D": "D_ThisToo"]],
-                ["F": "F_ShouldAppear", "B": ["C": "C_ThisNotSinceLowerPrio", "E": ["G": "G_ThisToo"]]],
-                ["A": "A_ThisNotSinceLowerPrio", "B": ["C": "C_ThisNotSinceLowerPrio", "D": "D_ThisNotSinceLowerPrio"]],
-        ]
+    private void setupDataWithFragmentsForMerging() {
+        setupData()
 
-        expect:
-        ["A": "A_ShouldAppear", "B": ["D": "D_ThisToo", "E": ["G": "G_ThisToo"], "C": "C_ThisSinceHigherPrio"], "F": "F_ShouldAppear"] ==
-                service.mergeSortedMaps(prioritySortedHashMaps)
-    }
-
-    void "test mergeSortedFragments"() {
-        given:
-        ConfigFragmentService service = new ConfigFragmentService()
-        List<ExternalWorkflowConfigFragment> prioritySortedHashMaps = [
+        prioritySortedHashMaps = [
                 createExternalWorkflowConfigFragment(
                         configValues: '{"WORKFLOWS": {"A": "A_ShouldAppear", "B": {"C": "C_ThisSinceHigherPrio", "D": "D_ThisToo"}}}'
                 ),
@@ -75,8 +72,64 @@ class ConfigFragmentServiceIntegrationSpec extends Specification implements Work
                 ),
         ]
 
+        mergedJson = [
+                "WORKFLOWS": [
+                        "A": "A_ShouldAppear",
+                        "B": [
+                                "C": "C_ThisSinceHigherPrio",
+                                "D": "D_ThisToo",
+                                "E": [
+                                        "G": "G_ThisToo",
+                                ] as JSONObject,
+                        ] as JSONObject,
+                        "F": "F_ShouldAppear",
+                ] as JSONObject,
+        ] as JSONObject
+    }
+
+    void "test getSortedFragmentSelectors, when called, then return ExternalWorkflowConfigSelector in expected order"() {
+        given:
+        setupDataWithSelectorsForQuerying()
+
         expect:
-        (["WORKFLOWS": ["A": "A_ShouldAppear", "B": ["C": "C_ThisSinceHigherPrio", "D": "D_ThisToo", "E": ["G": "G_ThisToo"]], "F": "F_ShouldAppear"]]
-                as JSON).toString() == service.mergeSortedFragments(prioritySortedHashMaps)
+        selectors == service.getSortedFragmentSelectors(new SingleSelectSelectorExtendedCriteria())
+    }
+
+    void "test getSortedFragments, when called, then return Fragments in expected order"() {
+        given:
+        setupDataWithSelectorsForQuerying()
+
+        expect:
+        selectors*.externalWorkflowConfigFragment == service.getSortedFragments(new SingleSelectSelectorExtendedCriteria())
+    }
+
+    void "test mergeSortedMaps"() {
+        given:
+        setupData()
+        List<Map> prioritySortedHashMaps = [
+                ["A": "A_ShouldAppear", "B": ["C": "C_ThisSinceHigherPrio", "D": "D_ThisToo"]],
+                ["F": "F_ShouldAppear", "B": ["C": "C_ThisNotSinceLowerPrio", "E": ["G": "G_ThisToo"]]],
+                ["A": "A_ThisNotSinceLowerPrio", "B": ["C": "C_ThisNotSinceLowerPrio", "D": "D_ThisNotSinceLowerPrio"]],
+        ]
+
+        expect:
+        ["A": "A_ShouldAppear", "B": ["D": "D_ThisToo", "E": ["G": "G_ThisToo"], "C": "C_ThisSinceHigherPrio"], "F": "F_ShouldAppear"] ==
+                service.mergeSortedMaps(prioritySortedHashMaps)
+    }
+
+    void "test mergeSortedFragmentsAsJson, when called, then returned the merged json as jsonobject"() {
+        given:
+        setupDataWithFragmentsForMerging()
+
+        expect:
+        mergedJson == service.mergeSortedFragmentsAsJson(prioritySortedHashMaps)
+    }
+
+    void "test mergeSortedFragments, when called, then returned the merged json as string"() {
+        given:
+        setupDataWithFragmentsForMerging()
+
+        expect:
+        mergedJson.toString() == service.mergeSortedFragments(prioritySortedHashMaps)
     }
 }

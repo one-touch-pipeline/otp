@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.workflowExecution
 
 import grails.testing.gorm.DataTest
 import grails.testing.services.ServiceUnitTest
+import grails.validation.ValidationException
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -73,8 +74,7 @@ class WorkflowRunServiceSpec extends Specification implements ServiceUnitTest<Wo
         then:
         run
         run.workDirectory == dir
-        run.configs == []
-        run.combinedConfig == '{"config":"combined"}'
+        run.combinedConfig == null
         run.workflow == workflow
         run.state == WorkflowRun.State.PENDING
         run.restartedFrom == null
@@ -82,6 +82,48 @@ class WorkflowRunServiceSpec extends Specification implements ServiceUnitTest<Wo
         run.workflowSteps == []
         run.displayName == multiLineName[0] + "\n" + multiLineName[1]
         run.shortDisplayName == shortName
+    }
+
+    @Unroll
+    void 'saveCombinedConfig, when called with #combinedConfig, then update the combinedConfig'() {
+        given:
+        WorkflowRun workflowRun = createWorkflowRun()
+
+        when:
+        service.saveCombinedConfig(workflowRun.id, combinedConfig)
+
+        then:
+        workflowRun.refresh()
+        workflowRun.combinedConfig == combinedConfig
+
+        where:
+        combinedConfig | _
+        '{key: value}' | _
+        null           | _
+    }
+
+    void 'saveCombinedConfig, when called with invalid json, then throw a validationException'() {
+        given:
+        WorkflowRun workflowRun = createWorkflowRun()
+        String combinedConfig = "{'invalid':'invalid':'invalid'}"
+
+        when:
+        service.saveCombinedConfig(workflowRun.id, combinedConfig)
+
+        then:
+        thrown(ValidationException)
+    }
+
+    void 'saveCombinedConfig, when called with unknown id, then throw a Assertion'() {
+        given:
+        WorkflowRun workflowRun = createWorkflowRun()
+        String combinedConfig = '{key: value}'
+
+        when:
+        service.saveCombinedConfig(workflowRun.id - 1, combinedConfig)
+
+        then:
+        thrown(AssertionError)
     }
 
     void 'markJobAsNotRestartableInSeparateTransaction, when call, then change mayJobRestarted to true'() {

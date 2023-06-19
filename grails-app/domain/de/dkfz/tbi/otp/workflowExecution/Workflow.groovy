@@ -59,7 +59,7 @@ class Workflow implements Commentable, Entity {
 
     WorkflowVersion defaultVersion
 
-    static constraints = {
+    static Closure constraints = {
         name unique: true
         beanName nullable: true
         deprecatedDate nullable: true
@@ -71,7 +71,7 @@ class Workflow implements Commentable, Entity {
         }
     }
 
-    static mapping = {
+    static Closure mapping = {
         comment cascade: "all-delete-orphan"
     }
 

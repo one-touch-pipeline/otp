@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,35 +19,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflow.wgbs
+package de.dkfz.tbi.otp.workflow.shared
 
-import grails.testing.gorm.DataTest
-import spock.lang.Specification
+import groovy.transform.InheritConstructors
 
-import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPancanFactory
+import de.dkfz.tbi.otp.workflowExecution.ExternalWorkflowConfigFragment
+import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 
-class WgbsWorkflowSpec extends Specification implements RoddyPancanFactory, DataTest {
-
-    WgbsWorkflow wgbsWorkflow
-
-    void setup() {
-        wgbsWorkflow = new WgbsWorkflow()
-    }
-
-    void "getJobBeanNames, should return all WGBS Workflow bean names in correct order"() {
-        expect:
-        wgbsWorkflow.jobBeanNames == [
-                "panCancerFragmentJob",
-                "panCancerConditionalFailJob",
-                "wgbsPrepareJob",
-                "wgbsExecuteJob",
-                "wgbsValidationJob",
-                "wgbsParseJob",
-                "panCancerCheckQcJob",
-                "panCancerCleanUpJob",
-                "wgbsLinkJob",
-                "setCorrectPermissionJob",
-                "panCancerFinishJob",
-        ]
-    }
+/**
+ * Exception is thrown, if there exist more than one different final {@link ExternalWorkflowConfigFragment} for a {@link WorkflowRun}.
+ */
+@InheritConstructors
+class MultipleCombinedFragmentException extends WorkflowException {
 }

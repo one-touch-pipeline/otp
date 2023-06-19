@@ -56,7 +56,7 @@ class WorkflowArtefact implements Withdrawable, Entity {
 
     String displayName
 
-    static constraints = {
+    static Closure constraints = {
         producedBy nullable: true, validator: { val, obj ->
             if (obj.outputRole && !val) {
                 return ['default.when.X.then.Y', 'set', 'outputRole', 'set']
@@ -85,7 +85,7 @@ class WorkflowArtefact implements Withdrawable, Entity {
 
     // gorm/hibernate ignores the property workflowArtefact of trait Artefact if this method returns Artefact
     Optional<Artefact> getArtefact() {
-        Optional.ofNullable(atMostOneElement(
+        return Optional.ofNullable(atMostOneElement(
                 executeQuery("FROM de.dkfz.tbi.otp.workflowExecution.Artefact WHERE workflowArtefact = :wa", [wa: this])
         ) as Artefact)
     }

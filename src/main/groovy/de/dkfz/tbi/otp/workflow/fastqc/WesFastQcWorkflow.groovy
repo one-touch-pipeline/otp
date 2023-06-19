@@ -41,8 +41,9 @@ class WesFastQcWorkflow implements OtpWorkflow {
     @Override
     List<String> getJobBeanNames() {
         return [
-                FastqcPrepareJob.simpleName.uncapitalize(),
+                FastqcFragmentJob.simpleName.uncapitalize(),
                 FastqcConditionalFailJob.simpleName.uncapitalize(),
+                FastqcPrepareJob.simpleName.uncapitalize(),
                 FastqcParseJob.simpleName.uncapitalize(),
                 FastqcFinishJob.simpleName.uncapitalize(),
                 SetCorrectPermissionJob.simpleName.uncapitalize(),

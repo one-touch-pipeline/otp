@@ -41,10 +41,17 @@ class LogService {
     ProcessingOptionService processingOptionService
 
     /**
+     * Add the message as {@link WorkflowMessageLog} to {@link WorkflowStep} in a new transaction, so it is added persistently
+     */
+    void addSimpleLogEntry(WorkflowStep workflowStep, GString message) {
+        addSimpleLogEntry(workflowStep, message.toString())
+    }
+
+    /**
      * Add the massage as {@link WorkflowMessageLog} to {@link WorkflowStep} in a new transaction, so it is added persistently
      */
     void addSimpleLogEntry(WorkflowStep workflowStep, String message) {
-        TransactionUtils.withNewTransaction {
+        SessionUtils.withNewTransaction {
             new WorkflowMessageLog([
                     workflowStep: workflowStep,
                     message     : message,
@@ -58,7 +65,7 @@ class LogService {
      */
     void addSimpleLogEntryWithException(WorkflowStep workflowStep, String message, Throwable t) {
         String stacktrace = StackTraceUtils.getStackTrace(t)
-        TransactionUtils.withNewTransaction {
+        SessionUtils.withNewTransaction {
             new WorkflowMessageLog([
                     workflowStep: workflowStep,
                     message     : "${message}\n\n${stacktrace}",

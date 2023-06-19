@@ -19,35 +19,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflow.wgbs
+package de.dkfz.tbi.otp.domainFactory.workflowSystem
 
-import grails.testing.gorm.DataTest
-import spock.lang.Specification
+import de.dkfz.tbi.otp.workflow.datainstallation.DataInstallationWorkflow
+import de.dkfz.tbi.otp.workflowExecution.Workflow
 
-import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPancanFactory
+trait DataInstallationWorkflowDomainFactory extends WorkflowSystemDomainFactory {
 
-class WgbsWorkflowSpec extends Specification implements RoddyPancanFactory, DataTest {
-
-    WgbsWorkflow wgbsWorkflow
-
-    void setup() {
-        wgbsWorkflow = new WgbsWorkflow()
-    }
-
-    void "getJobBeanNames, should return all WGBS Workflow bean names in correct order"() {
-        expect:
-        wgbsWorkflow.jobBeanNames == [
-                "panCancerFragmentJob",
-                "panCancerConditionalFailJob",
-                "wgbsPrepareJob",
-                "wgbsExecuteJob",
-                "wgbsValidationJob",
-                "wgbsParseJob",
-                "panCancerCheckQcJob",
-                "panCancerCleanUpJob",
-                "wgbsLinkJob",
-                "setCorrectPermissionJob",
-                "panCancerFinishJob",
-        ]
+    Workflow findOrCreateDataInstallationWorkflowWorkflow() {
+        return findOrCreateWorkflow(DataInstallationWorkflow.WORKFLOW, [beanName: DataInstallationWorkflow.simpleName.uncapitalize()])
     }
 }

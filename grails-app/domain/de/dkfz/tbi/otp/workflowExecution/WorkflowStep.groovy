@@ -73,7 +73,7 @@ class WorkflowStep implements Commentable, Entity {
             wesRuns: WesRun,
     ]
 
-    static constraints = {
+    static Closure constraints = {
         workflowError nullable: true, validator: { val, obj ->
             if ((obj.state == State.FAILED) ^ (val != null)) {
                 return false

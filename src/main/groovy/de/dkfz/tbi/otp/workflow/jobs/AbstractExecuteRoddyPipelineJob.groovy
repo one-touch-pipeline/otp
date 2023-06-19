@@ -62,6 +62,7 @@ abstract class AbstractExecuteRoddyPipelineJob extends AbstractExecutePipelineJo
 
     @Override
     final void execute(WorkflowStep workflowStep) {
+        assert workflowStep.workflowRun.combinedConfig
         RoddyResult roddyResult = getRoddyResult(workflowStep)
         Realm realm = workflowStep.workflowRun.realm
         FileSystem fs = fileSystemService.getRemoteFileSystem(realm)

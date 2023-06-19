@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,34 +19,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflow.wgbs
+package de.dkfz.tbi.otp.workflow.panCancer
 
 import groovy.util.logging.Slf4j
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.workflow.jobs.SetCorrectPermissionJob
-import de.dkfz.tbi.otp.workflow.panCancer.*
+import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
+import de.dkfz.tbi.otp.workflow.jobs.AbstractFragmentJob
+import de.dkfz.tbi.otp.workflowExecution.SingleSelectSelectorExtendedCriteria
+import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 @Component
 @Slf4j
-class WgbsWorkflow extends PanCancerWorkflow {
-    static final String WORKFLOW = "WGBS alignment"
-    static final String OUTPUT_BAM = "BAM"
+class PanCancerFragmentJob extends AbstractFragmentJob implements PanCancerShared {
 
     @Override
-    List<String> getJobBeanNames() {
-        return [
-                PanCancerFragmentJob.simpleName.uncapitalize(),
-                PanCancerConditionalFailJob.simpleName.uncapitalize(),
-                WgbsPrepareJob.simpleName.uncapitalize(),
-                WgbsExecuteJob.simpleName.uncapitalize(),
-                WgbsValidationJob.simpleName.uncapitalize(),
-                WgbsParseJob.simpleName.uncapitalize(),
-                PanCancerCheckQcJob.simpleName.uncapitalize(),
-                PanCancerCleanUpJob.simpleName.uncapitalize(),
-                WgbsLinkJob.simpleName.uncapitalize(),
-                SetCorrectPermissionJob.simpleName.uncapitalize(),
-                PanCancerFinishJob.simpleName.uncapitalize(),
-        ]
+    protected List<SingleSelectSelectorExtendedCriteria> fetchSelectors(WorkflowStep workflowStep) {
+        RoddyBamFile bamFile = getRoddyBamFile(workflowStep)
+        return bamFile.containedSeqTracks*.libraryPreparationKit.unique().sort {
+            it?.name
+        }.collect {
+            new SingleSelectSelectorExtendedCriteria(
+                    workflowStep.workflowRun.workflowVersion.workflow,
+                    workflowStep.workflowRun.workflowVersion,
+                    bamFile.project,
+                    bamFile.seqType,
+                    bamFile.referenceGenome,
+                    it,
+            )
+        }
     }
 }

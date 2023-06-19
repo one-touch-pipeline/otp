@@ -42,9 +42,6 @@ abstract class AbstractAlignmentDecider extends AbstractWorkflowDecider<Alignmen
     AlignmentArtefactService alignmentArtefactService
 
     @Autowired
-    ConfigFragmentService configFragmentService
-
-    @Autowired
     MailHelperService mailHelperService
 
     @Autowired
@@ -318,9 +315,6 @@ abstract class AbstractAlignmentDecider extends AbstractWorkflowDecider<Alignmen
         artefactDisplayName.remove(0)
         String shortName = "${workflowName}: ${group.individual.pid} ${group.sampleType.displayName} ${group.seqType.displayNameWithLibraryLayout}"
 
-        List<ExternalWorkflowConfigFragment> configFragments = configFragmentService.getSortedFragments(new SingleSelectSelectorExtendedCriteria(
-                version.workflow, version, projectSeqTypeGroup.project, group.seqType, referenceGenome, workPackage.libraryPreparationKit))
-
         WorkflowRun run = workflowRunService.buildWorkflowRun(
                 version.workflow,
                 projectSeqTypeGroup.project.processingPriority,
@@ -328,7 +322,6 @@ abstract class AbstractAlignmentDecider extends AbstractWorkflowDecider<Alignmen
                 projectSeqTypeGroup.project,
                 runDisplayName,
                 shortName,
-                configFragments,
                 version,
         )
 

@@ -321,7 +321,6 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
             logEntries << "There are ${workflowRuns.size()} WorkflowRuns"
             workflowRuns.eachWithIndex { WorkflowRun workflowRun, int runIndex ->
                 List<WorkflowStep> workflowSteps = workflowRun.workflowSteps
-                List<ExternalWorkflowConfigFragment> configs = workflowRun.configs
                 logEntries << "- run ${runIndex}:"
                 [
                         id                          : workflowRun.id,
@@ -332,13 +331,8 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
                         "priority queue"            : workflowRun.priority.queue,
                         "priority roddyConfigSuffix": workflowRun.priority.roddyConfigSuffix,
                         "job count"                 : workflowSteps.size(),
-                        "config count"              : configs.size(),
                 ].each { key, value ->
                     logEntries << "  - ${key}: ${value}"
-                }
-                configs.eachWithIndex { ExternalWorkflowConfigFragment externalWorkflowConfigFragment, int configIndex ->
-                    int priority = externalWorkflowConfigFragment.findSelector().get().priority
-                    logEntries << "  - config ${runIndex}.${configIndex}: priority: ${priority}, name: ${externalWorkflowConfigFragment.name}"
                 }
                 workflowSteps.eachWithIndex { WorkflowStep workflowStep, int stepIndex ->
                     List<WorkflowLog> workflowLogs = workflowStep.logs

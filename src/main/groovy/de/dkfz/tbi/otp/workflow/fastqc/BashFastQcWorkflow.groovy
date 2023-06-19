@@ -40,8 +40,9 @@ class BashFastQcWorkflow implements OtpWorkflow {
     @Override
     List<String> getJobBeanNames() {
         return [
-                FastqcPrepareJob.simpleName.uncapitalize(),
+                FastqcFragmentJob.simpleName.uncapitalize(),
                 FastqcConditionalFailJob.simpleName.uncapitalize(),
+                FastqcPrepareJob.simpleName.uncapitalize(),
                 FastqcExecuteClusterPipelineJob.simpleName.uncapitalize(),
                 FastqcClusterValidationJob.simpleName.uncapitalize(),
                 FastqcParseJob.simpleName.uncapitalize(),
