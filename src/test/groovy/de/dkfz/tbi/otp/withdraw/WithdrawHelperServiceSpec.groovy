@@ -31,7 +31,6 @@ import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.domainFactory.FastqcDomainFactory
-import de.dkfz.tbi.otp.domainFactory.administration.DocumentFactory
 import de.dkfz.tbi.otp.domainFactory.pipelines.AlignmentPipelineFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.filestore.FilestoreService
@@ -43,7 +42,7 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 import java.nio.file.*
 import java.nio.file.attribute.PosixFilePermission
 
-class WithdrawHelperServiceSpec extends HibernateSpec implements FastqcDomainFactory, WorkflowSystemDomainFactory, DocumentFactory {
+class WithdrawHelperServiceSpec extends HibernateSpec implements FastqcDomainFactory, WorkflowSystemDomainFactory {
 
     private static final List<String> PATH_LIST1 = ['/tmp'].asImmutable()
     private static final List<String> PATH_LIST2 = ['/tmp2'].asImmutable()

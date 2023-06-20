@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,8 +26,6 @@ import org.springframework.mock.web.MockMultipartFile
 import de.dkfz.tbi.otp.administration.Document
 import de.dkfz.tbi.otp.administration.DocumentType
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
-import de.dkfz.tbi.otp.filestore.BaseFolder
-import de.dkfz.tbi.otp.filestore.WorkFolder
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.project.ProjectInfo
 import de.dkfz.tbi.otp.project.dta.*
@@ -96,25 +94,5 @@ trait DocumentFactory implements DomainFactoryCore {
     MockMultipartFile createMultipartFile(String name = "fileName", String originalFilename = "fileName", byte[] content = 0..3) {
         MockMultipartFile mockMultipartFile = new MockMultipartFile(name, originalFilename, null, content)
         return mockMultipartFile
-    }
-
-    BaseFolder createBaseFolder(Map properties = [:], boolean saveAndValidate = true) {
-        String path = properties.path ?: "/${nextId}"
-        boolean writable = properties.writable ?: true
-        return createDomainObject(BaseFolder, [
-                path: path,
-                writable: writable,
-        ], properties, saveAndValidate)
-    }
-
-    WorkFolder createWorkFolder(Map properties = [:], boolean saveAndValidate = true) {
-        BaseFolder baseFolder = properties.baseFolder ?: createBaseFolder()
-        UUID uuid = properties.uuid ?: UUID.randomUUID()
-        long size = properties.size ?: 0
-        return createDomainObject(WorkFolder, [
-                baseFolder: baseFolder,
-                uuid: uuid,
-                size: size,
-        ], properties, saveAndValidate)
     }
 }

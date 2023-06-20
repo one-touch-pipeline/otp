@@ -25,14 +25,13 @@ import grails.testing.gorm.DataTest
 import grails.testing.services.ServiceUnitTest
 import spock.lang.Specification
 
-import de.dkfz.tbi.otp.domainFactory.administration.DocumentFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 
 import java.nio.file.Path
 import java.nio.file.Paths
 
-class FilestoreServiceSpec extends Specification implements ServiceUnitTest<FilestoreService>, DataTest, WorkflowSystemDomainFactory, DocumentFactory {
+class FilestoreServiceSpec extends Specification implements ServiceUnitTest<FilestoreService>, DataTest, WorkflowSystemDomainFactory {
 
     WorkflowRun run
     WorkFolder workFolder

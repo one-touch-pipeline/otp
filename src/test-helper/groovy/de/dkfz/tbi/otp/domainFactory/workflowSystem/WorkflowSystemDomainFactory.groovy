@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,6 +25,8 @@ import io.swagger.client.wes.model.State
 
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.taxonomy.TaxonomyFactory
+import de.dkfz.tbi.otp.filestore.BaseFolder
+import de.dkfz.tbi.otp.filestore.WorkFolder
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
@@ -245,6 +247,26 @@ trait WorkflowSystemDomainFactory implements DomainFactoryCore, TaxonomyFactory 
                 seqType        : { createSeqType() },
                 species        : { new HashSet<SpeciesWithStrain>(referenceGenome.speciesWithStrain + speciesWithStrain) },
                 workflow       : { createWorkflow() },
+        ], properties, saveAndValidate)
+    }
+
+    BaseFolder createBaseFolder(Map properties = [:], boolean saveAndValidate = true) {
+        String path = properties.path ?: "/${nextId}"
+        boolean writable = properties.writable ?: true
+        return createDomainObject(BaseFolder, [
+                path: path,
+                writable: writable,
+        ], properties, saveAndValidate)
+    }
+
+    WorkFolder createWorkFolder(Map properties = [:], boolean saveAndValidate = true) {
+        BaseFolder baseFolder = properties.baseFolder ?: createBaseFolder()
+        UUID uuid = properties.uuid ?: UUID.randomUUID()
+        long size = properties.size ?: 0
+        return createDomainObject(WorkFolder, [
+                baseFolder: baseFolder,
+                uuid: uuid,
+                size: size,
         ], properties, saveAndValidate)
     }
 }

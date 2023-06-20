@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
+import de.dkfz.tbi.otp.filestore.FilestoreService
 import de.dkfz.tbi.otp.infrastructure.CreateLinkOption
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.utils.LinkEntry
@@ -47,30 +48,51 @@ abstract class AbstractPrepareJob extends AbstractJob {
     FileService fileService
 
     @Autowired
+    FilestoreService filestoreService
+
+    @Autowired
     ProcessingOptionService processingOptionService
 
     @Override
     final void execute(WorkflowStep workflowStep) {
-        Path workDirectory = buildWorkDirectoryPath(workflowStep)
-        if (workDirectory) {
-            logService.addSimpleLogEntry(workflowStep, "Creating work directory ${workDirectory}")
+        if (workflowStep.workflowRun.workFolder) {
+            Path workFolder = filestoreService.getWorkFolderPath(workflowStep.workflowRun)
+            String group = processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP)
             fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(
-                    workDirectory,
+                    workFolder.parent,
                     workflowStep.workflowRun.project.realm,
-                    workflowStep.workflowRun.project.unixGroup,
+                    group,
+                    fileService.DIRECTORY_WITH_OTHER_PERMISSION_STRING
             )
-            workflowStep.workflowRun.workDirectory = workDirectory
-            workflowStep.workflowRun.save(flush: true)
-
-            boolean protectWorkDirectory = shouldWorkDirectoryBeProtected()
-            if (protectWorkDirectory) {
-                fileService.setGroupViaBash(
+            fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(
+                    workFolder,
+                    workflowStep.workflowRun.project.realm,
+                    group,
+                    fileService.OWNER_DIRECTORY_PERMISSION_STRING
+            )
+        } else {
+            Path workDirectory = buildWorkDirectoryPath(workflowStep)
+            if (workDirectory) {
+                logService.addSimpleLogEntry(workflowStep, "Creating work directory ${workDirectory}")
+                fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(
                         workDirectory,
                         workflowStep.workflowRun.project.realm,
-                        processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP)
+                        workflowStep.workflowRun.project.unixGroup,
                 )
+                workflowStep.workflowRun.workDirectory = workDirectory
+                workflowStep.workflowRun.save(flush: true)
+
+                boolean protectWorkDirectory = shouldWorkDirectoryBeProtected()
+                if (protectWorkDirectory) {
+                    fileService.setGroupViaBash(
+                            workDirectory,
+                            workflowStep.workflowRun.project.realm,
+                            processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP)
+                    )
+                }
             }
         }
+
         generateMapForLinking(workflowStep).each { LinkEntry entry ->
             logService.addSimpleLogEntry(workflowStep, "Creating link ${entry.link} to ${entry.target}")
             fileService.createLink(

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,6 +27,7 @@ import spock.lang.Specification
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.filestore.FilestoreService
 import de.dkfz.tbi.otp.infrastructure.CreateLinkOption
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.ngsdata.Realm
@@ -104,6 +105,43 @@ class AbstractPrepareJobSpec extends Specification implements DataTest, Workflow
 
         1 * job.processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP) >> testGroup
         1 * job.fileService.setGroupViaBash(workDirectory, _, testGroup)
+
+        1 * job.generateMapForLinking(workflowStep) >> [new LinkEntry(link, target)]
+        1 * job.fileService.createLink(target, link, _, CreateLinkOption.DELETE_EXISTING_FILE) >> null
+
+        1 * job.doFurtherPreparation(workflowStep) >> null
+
+        1 * job.workflowStateChangeService.changeStateToSuccess(workflowStep)
+
+        0 * job.processingOptionService._
+        0 * job.fileService._
+    }
+
+    void "test execute, create work folder"() {
+        given:
+        String testGroup = "TestGroup"
+        Path workFolder = Paths.get("/test")
+        Path link, target
+        AbstractPrepareJob job = Spy(AbstractPrepareJob)
+        job.fileService = Mock(FileService)
+        job.workflowStateChangeService = Mock(WorkflowStateChangeService)
+        job.logService = Mock(LogService)
+        job.processingOptionService = Mock(ProcessingOptionService)
+        job.filestoreService = Mock(FilestoreService)
+
+        WorkflowStep workflowStep = createWorkflowStep()
+        workflowStep.workflowRun.workFolder = createWorkFolder()
+        workflowStep.workflowRun.save(flush: true)
+
+        when:
+        job.execute(workflowStep)
+
+        then:
+        1 * job.filestoreService.getWorkFolderPath(_) >> workFolder
+        1 * job.processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP) >> testGroup
+
+        1 * job.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(workFolder.parent, workflowStep.workflowRun.project.realm, testGroup, "2755")
+        1 * job.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(workFolder, workflowStep.workflowRun.project.realm, testGroup, "2700")
 
         1 * job.generateMapForLinking(workflowStep) >> [new LinkEntry(link, target)]
         1 * job.fileService.createLink(target, link, _, CreateLinkOption.DELETE_EXISTING_FILE) >> null

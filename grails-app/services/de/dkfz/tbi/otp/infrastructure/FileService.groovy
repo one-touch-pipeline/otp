@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -99,6 +99,21 @@ class FileService {
             PosixFilePermission.GROUP_READ,
             PosixFilePermission.GROUP_WRITE,
             PosixFilePermission.GROUP_EXECUTE,
+    ].toSet().asImmutable()
+
+    /**
+     * All read/write (777)
+     */
+    static final Set<PosixFilePermission> ALL_READ_WRITE_EXECUTE_PERMISSION = [
+            PosixFilePermission.OWNER_READ,
+            PosixFilePermission.OWNER_WRITE,
+            PosixFilePermission.OWNER_EXECUTE,
+            PosixFilePermission.GROUP_READ,
+            PosixFilePermission.GROUP_WRITE,
+            PosixFilePermission.GROUP_EXECUTE,
+            PosixFilePermission.OTHERS_READ,
+            PosixFilePermission.OTHERS_WRITE,
+            PosixFilePermission.OTHERS_EXECUTE,
     ].toSet().asImmutable()
 
     /**
