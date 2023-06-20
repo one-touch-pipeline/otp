@@ -52,7 +52,7 @@ class RoddyConfigService {
               "description": "",
               "additionalProperties": false,
               "patternProperties": {
-                "": {
+                ".*": {
                   "anyOf": [
                     {
                       "type": "object",
@@ -128,7 +128,7 @@ class RoddyConfigService {
               "title": "Configuration of resources",
               "additionalProperties": false,
               "patternProperties": {
-                "": {
+                ".*": {
                   "type": "object",
                   "required": [
                     "value",
