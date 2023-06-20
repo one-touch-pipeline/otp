@@ -357,14 +357,28 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
                     clusterJobs.eachWithIndex { ClusterJob clusterJob, int clusterLogIndex ->
                         logEntries << "    - cluster log ${runIndex}.${stepIndex}.${clusterLogIndex}:"
                         [
-                                id            : clusterJob.id,
-                                clusterId     : clusterJob.clusterJobId,
-                                checkStatus   : clusterJob.checkStatus,
-                                exitStatus    : clusterJob.exitStatus,
-                                exitCode      : clusterJob.exitCode,
-                                jobClass      : clusterJob.jobClass,
-                                clusterJobName: clusterJob.clusterJobName,
-                                jobLog        : clusterJob.jobLog,
+                                id               : clusterJob.id,
+                                clusterId        : clusterJob.clusterJobId,
+                                checkStatus      : clusterJob.checkStatus,
+                                exitStatus       : clusterJob.exitStatus,
+                                exitCode         : clusterJob.exitCode,
+                                jobClass         : clusterJob.jobClass,
+                                clusterJobName   : clusterJob.clusterJobName,
+                                jobLog           : clusterJob.jobLog,
+                                queued           : clusterJob.queued,
+                                eligible         : clusterJob.eligible,
+                                started          : clusterJob.started,
+                                ended            : clusterJob.ended,
+                                cpuTime          : clusterJob.cpuTime,
+                                requestedWalltime: clusterJob.requestedWalltime,
+                                usedCores        : clusterJob.usedCores,
+                                requestedCores   : clusterJob.requestedCores,
+                                usedMemory       : clusterJob.usedMemory,
+                                requestedMemory  : clusterJob.requestedMemory,
+                                usedSwap         : clusterJob.usedSwap,
+                                node             : clusterJob.node,
+                                accountName      : clusterJob.accountName,
+                                dependencies     : clusterJob.dependencies*.id.join(","),
                         ].each { key, value ->
                             logEntries << "      - ${key}: ${value}"
                         }
