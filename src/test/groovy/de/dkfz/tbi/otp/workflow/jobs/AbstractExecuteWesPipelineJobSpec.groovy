@@ -1,0 +1,164 @@
+/*
+ * Copyright 2011-2020 The OTP authors
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package de.dkfz.tbi.otp.workflow.jobs
+
+import grails.testing.gorm.DataTest
+import groovy.transform.TupleConstructor
+import spock.lang.Specification
+import spock.lang.TempDir
+
+import de.dkfz.tbi.otp.domainFactory.administration.DocumentFactory
+import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.filestore.FilestoreService
+import de.dkfz.tbi.otp.filestore.WorkFolder
+import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.utils.MapUtilService
+import de.dkfz.tbi.otp.workflowExecution.*
+import de.dkfz.tbi.otp.workflowExecution.wes.WesRunService
+import de.dkfz.tbi.otp.workflowExecution.wes.WesWorkflowType
+import de.dkfz.tbi.otp.workflowExecution.wes.WeskitAccessService
+
+import java.nio.file.Path
+
+class AbstractExecuteWesPipelineJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory, DocumentFactory {
+
+    private WorkflowStep workflowStep
+    private AbstractExecuteWesPipelineJob job
+
+    private WorkFolder workFolder
+
+    @TempDir
+    Path tempDir
+
+    @Override
+    Class[] getDomainClassesToMock() {
+        return [
+                WorkflowArtefact,
+                WorkflowStep,
+        ]
+    }
+
+    @SuppressWarnings("GetterMethodCouldBeProperty")
+    @TupleConstructor
+    private class TestAbstractExecuteWesPipelineJob extends AbstractExecuteWesPipelineJob {
+
+        boolean shouldSend
+
+        @Override
+        WesWorkflowType getWorkflowType() {
+            return WesWorkflowType.NEXTFLOW
+        }
+
+        @Override
+        String getWorkflowTypeVersion() {
+            return "21.04.0"
+        }
+
+        @Override
+        String getWorkflowUrl(WorkflowRun workflowRun) {
+            return "nf-seq-qc-${workflowRun.workflowVersion.workflowVersion}/main.nf"
+        }
+
+        @Override
+        Map<Path, Map<String, String>> getRunSpecificParameters(WorkflowStep workflowStep, Path path) {
+            return [
+                    (tempDir.resolve("1")): ["k1": "v1"],
+                    (tempDir.resolve("2")): ["k2": "v2"],
+            ]
+        }
+
+        @Override
+        boolean shouldWeskitJobSend(WorkflowStep workflowStep) {
+            return shouldSend
+        }
+    }
+
+    private void setupData() {
+        workflowStep = createWorkflowStep()
+        workflowStep.workflowRun.combinedConfig = '{"config":"combined"}'
+        workFolder = createWorkFolder()
+    }
+
+    void "execute, when processed files cannot be copied, then do not submit Weskit jobs and change state to success"() {
+        given:
+        setupData()
+        job = new TestAbstractExecuteWesPipelineJob(false)
+        job.workflowStateChangeService = Mock(WorkflowStateChangeService) {
+            1 * changeStateToSuccess(workflowStep)
+            0 * _
+        }
+        job.filestoreService = Mock(FilestoreService) {
+            1 * getWorkFolderPath(workflowStep.workflowRun) >> tempDir
+        }
+        job.fileService = Mock(FileService) {
+            1 * deleteDirectoryContent(_)
+        }
+        job.logService = Mock(LogService)
+
+        when:
+        job.execute(workflowStep)
+
+        then:
+        true
+    }
+
+    void "execute, when processed files can be copied, then submit Weskit jobs and change state to wait for system"() {
+        given:
+        setupData()
+        job = new TestAbstractExecuteWesPipelineJob(true)
+        job.configFragmentService = new ConfigFragmentService()
+        job.mapUtilService = new MapUtilService()
+
+        job.workflowStateChangeService = Mock(WorkflowStateChangeService) {
+            1 * changeStateToWaitingOnSystem(workflowStep)
+            0 * _
+        }
+        job.filestoreService = Mock(FilestoreService) {
+            1 * getWorkFolderPath(workflowStep.workflowRun) >> tempDir
+        }
+        job.weskitAccessService = Mock(WeskitAccessService) {
+            2 * runWorkflow(_) >> "RUN_ID"
+        }
+        job.workflowRunService = Mock(WorkflowRunService) {
+            1 * markJobAsNotRestartableInSeparateTransaction(_)
+        }
+        job.fileService = Mock(FileService) {
+            1 * deleteDirectoryContent(_)
+        }
+        job.logService = Mock(LogService) {
+            1 * addSimpleLogEntry(workflowStep, "Clean up the output directory ${tempDir}")
+            2 * addSimpleLogEntry(workflowStep, "Workflow job with run id RUN_ID has been sent to Weskit")
+            2 * addSimpleLogEntry(workflowStep, _) >> { WorkflowStep _, GString msg ->
+                assert msg.startsWith("Call Weskit with parameter:")
+            }
+        }
+        job.wesRunService = Mock(WesRunService) {
+            2 * saveWorkflowRun(workflowStep, _, _)
+        }
+
+        when:
+        job.execute(workflowStep)
+
+        then:
+        true
+    }
+}

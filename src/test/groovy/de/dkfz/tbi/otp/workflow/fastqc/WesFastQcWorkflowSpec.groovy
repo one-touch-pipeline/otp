@@ -48,6 +48,7 @@ class WesFastQcWorkflowSpec extends Specification implements DataTest, DomainFac
         wesFastQcWorkflow.jobBeanNames == [
                 "fastqcFragmentJob",
                 "fastqcConditionalFailJob",
+                "fastqcExecuteWesPipelineJob",
                 "fastqcPrepareJob",
                 "fastqcWesValidationJob",
                 "fastqcParseJob",

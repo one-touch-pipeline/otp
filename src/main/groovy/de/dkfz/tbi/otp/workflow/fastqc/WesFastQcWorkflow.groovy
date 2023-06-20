@@ -43,6 +43,7 @@ class WesFastQcWorkflow implements OtpWorkflow {
         return [
                 FastqcFragmentJob.simpleName.uncapitalize(),
                 FastqcConditionalFailJob.simpleName.uncapitalize(),
+                FastqcExecuteWesPipelineJob.simpleName.uncapitalize(),
                 FastqcPrepareJob.simpleName.uncapitalize(),
                 FastqcWesValidationJob.simpleName.uncapitalize(),
                 FastqcParseJob.simpleName.uncapitalize(),

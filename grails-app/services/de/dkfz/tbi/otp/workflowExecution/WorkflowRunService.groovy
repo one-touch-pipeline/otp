@@ -165,7 +165,7 @@ class WorkflowRunService {
     }
 
     /**
-     * Method to change {@link WorkflowRun#jobCanBeRestarted} to true using a separate transaction to ensure that this info doesn't get lost on
+     * Method to change {@link WorkflowRun#jobCanBeRestarted} to false using a separate transaction to ensure that this info doesn't get lost on
      * rollback of the current transaction.
      */
     void markJobAsNotRestartableInSeparateTransaction(WorkflowRun workflowRun) {
@@ -177,6 +177,15 @@ class WorkflowRunService {
             workflowRun2.save(flush: true)
         }
         workflowRun.refresh()
+    }
+
+    /**
+     * Method to change {@link WorkflowRun#jobCanBeRestarted} to true, which should be rolled back in the current transaction if error occurs.
+     */
+    void markJobAsRestartable(WorkflowRun workflowRun) {
+        assert workflowRun
+        workflowRun.jobCanBeRestarted = true
+        workflowRun.save(flush: true)
     }
 
     private Closure getCriteria(Workflow workflow, List<WorkflowRun.State> states, String name) {

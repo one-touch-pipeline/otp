@@ -21,13 +21,122 @@
  */
 package de.dkfz.tbi.otp.workflow.jobs
 
-import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
+import com.fasterxml.jackson.databind.ObjectMapper
+import groovy.util.logging.Slf4j
+import org.grails.web.json.JSONObject
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Component
 
+import de.dkfz.tbi.otp.filestore.FilestoreService
+import de.dkfz.tbi.otp.utils.MapUtilService
+import de.dkfz.tbi.otp.workflowExecution.*
+import de.dkfz.tbi.otp.workflowExecution.wes.*
+
+import java.nio.file.Path
+
+@Component
+@Slf4j
 abstract class AbstractExecuteWesPipelineJob extends AbstractExecutePipelineJob {
 
-    @Override
-    void execute(WorkflowStep workflowStep) {
+    @Autowired
+    WorkflowRunService workflowRunService
+
+    @Autowired
+    WeskitAccessService weskitAccessService
+
+    @Autowired
+    FilestoreService filestoreService
+
+    @Autowired
+    ConfigFragmentService configFragmentService
+
+    @Autowired
+    WesRunService wesRunService
+
+    @Autowired
+    MapUtilService mapUtilService
+
+    /**
+     * Return the used execution system, values needs to be known by Weskit, currently possible: NFL for Nextflow and SMK for Snakemake
+     *
+     * @return workflow type (SnakeMake, Nextflow, ...)
+     */
+    abstract WesWorkflowType getWorkflowType()
+
+    /**
+     * Return the relative url of the workflow according to the base workflow directory
+     *
+     * @return relative url of the workflow
+     */
+    abstract String getWorkflowUrl(WorkflowRun workflowRun)
+
+    /**
+     * Return the parameters for workflow runs. Each element in the list will be used to trigger an own Weskit call
+     *
+     * @param WorkflowStep current workflow step
+     * @param Path path of the base directory
+     * @return a map of map entries, each map entry has a key for the base path ana a value for the parameters
+     */
+    abstract Map<Path, Map<String, String>> getRunSpecificParameters(WorkflowStep workflowStep, Path basePath)
+
+    /**
+     * Check if an Weskit run should be triggered, in most case it should return true
+     *
+     * @param WorkflowStep current workflow step
+     * @return true if job should be triggered at Weskit, otherwise false
+     */
+    abstract boolean shouldWeskitJobSend(WorkflowStep workflowStep)
+
+    /**
+     * Return the version of the execution system, value needs to be known by Weskit for the workflowType
+     *
+     * @return workflow version in string format
+     */
+    String getWorkflowTypeVersion() {
+        return weskitAccessService.serviceInfo.workflowEngineVersions[workflowType]
     }
 
-    abstract void createWesRequest(WorkflowStep workflowStep)
+    /**
+     * Execute the workflow
+     *
+     * @param workflowStep current workflow step
+     */
+    @Override
+    void execute(WorkflowStep workflowStep) {
+        Path basePath = filestoreService.getWorkFolderPath(workflowStep.workflowRun)
+        fileService.deleteDirectoryContent(basePath)
+        logService.addSimpleLogEntry(workflowStep, "Clean up the output directory ${basePath}")
+
+        if (shouldWeskitJobSend(workflowStep)) {
+            workflowRunService.markJobAsNotRestartableInSeparateTransaction(workflowStep.workflowRun)
+
+            WesWorkflowType workflowType = this.workflowType
+            String workflowUrl = getWorkflowUrl(workflowStep.workflowRun)
+
+            ObjectMapper mapper = new ObjectMapper()
+
+            Map<Path, Map<String, String>> parameters = getRunSpecificParameters(workflowStep, basePath)
+            parameters.each { Path path, Map<String, String> parameter ->
+                // define directory to store its output
+                fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(path, workflowStep.realm)
+
+                // config should be created each time since it is modified with mergeSortedMaps method
+                Map<String, String> config = mapper.readValue(workflowStep.workflowRun.combinedConfig, HashMap)
+                JSONObject mergedParameter = mapUtilService.mergeSortedMaps([config, parameter]) as JSONObject
+
+                WesWorkflowParameter wesParameter = new WesWorkflowParameter(mergedParameter, workflowType, path, workflowUrl)
+                logService.addSimpleLogEntry(workflowStep, "Call Weskit with parameter:\n${wesParameter}")
+
+                String runId = weskitAccessService.runWorkflow(wesParameter)
+                logService.addSimpleLogEntry(workflowStep, "Workflow job with run id ${runId} has been sent to Weskit")
+
+                wesRunService.saveWorkflowRun(workflowStep, runId, path.last().toString())
+            }
+            workflowRunService.markJobAsRestartable(workflowStep.workflowRun)
+            workflowStateChangeService.changeStateToWaitingOnSystem(workflowStep)
+        } else {
+            logService.addSimpleLogEntry(workflowStep, "No workflow job sent to Weskit")
+            workflowStateChangeService.changeStateToSuccess(workflowStep)
+        }
+    }
 }

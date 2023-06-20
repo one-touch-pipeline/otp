@@ -24,8 +24,11 @@ package de.dkfz.tbi.otp.workflowExecution
 import grails.converters.JSON
 import org.grails.web.json.JSONObject
 
+import de.dkfz.tbi.otp.utils.MapUtilService
+
 class ConfigFragmentService {
     ConfigSelectorService configSelectorService
+    MapUtilService mapUtilService
 
     List<ExternalWorkflowConfigFragment> getSortedFragments(SingleSelectSelectorExtendedCriteria singleSelectSelectorExtendedCriteria) {
         return getSortedFragmentSelectors(singleSelectSelectorExtendedCriteria)*.externalWorkflowConfigFragment
@@ -42,38 +45,6 @@ class ConfigFragmentService {
     }
 
     JSONObject mergeSortedFragmentsAsJson(List<ExternalWorkflowConfigFragment> fragments) {
-        return JSON.parse((mergeSortedMaps(fragments*.configValuesToMap()) as JSON).toString()) as JSONObject
-    }
-
-    private Map mergeSortedMaps(List<Map> prioritySortedHashMaps) {
-        if (prioritySortedHashMaps) {
-            Map combinedConfiguration = prioritySortedHashMaps.remove(0)
-            return mergeSortedFragmentsRec(combinedConfiguration, prioritySortedHashMaps)
-        }
-        return [:]
-    }
-
-    @SuppressWarnings("Instanceof")
-    private Map mergeSortedFragmentsRec(Map combinedConfigurationPart, List<Map> maps) {
-        maps.each { Map map ->
-            map.entrySet().each { Map.Entry entry ->
-                if (entry.value instanceof Map) {  // case internal node
-                    // if key not existing then create it with subtree and don't go into recursion
-                    if (!(entry.key in combinedConfigurationPart.keySet())) {
-                        combinedConfigurationPart.put(entry.key, entry.value)
-                        return combinedConfigurationPart
-                    }
-                    // if key already existing go deeper to update eventually
-                    mergeSortedFragmentsRec(combinedConfigurationPart[entry.key] as Map, [entry.value as Map])
-                } else {  // case leaf
-                    // only add when key not already set
-                    if (!(entry.key in combinedConfigurationPart.keySet())) {
-                        combinedConfigurationPart.put(entry.key, entry.value)
-                    }
-                }
-                return combinedConfigurationPart
-            }
-        }
-        return combinedConfigurationPart
+        return JSON.parse((mapUtilService.mergeSortedMaps(fragments*.configValuesToMap()) as JSON).toString()) as JSONObject
     }
 }

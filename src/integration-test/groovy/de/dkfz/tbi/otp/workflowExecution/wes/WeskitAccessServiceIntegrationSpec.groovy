@@ -26,6 +26,7 @@ import grails.gorm.transactions.Rollback
 import grails.testing.mixin.integration.Integration
 import io.swagger.client.wes.api.WorkflowExecutionServiceApi
 import io.swagger.client.wes.model.ServiceInfo
+import org.grails.web.json.JSONObject
 import reactor.core.publisher.Mono
 import spock.lang.Specification
 import spock.lang.TempDir
@@ -71,10 +72,10 @@ class WeskitAccessServiceIntegrationSpec extends Specification {
         Path workDir = baseDirectory.resolve('work').resolve("test")
         Files.createDirectories(workDir)
 
-        JSON workflowParamsJson = [
+        JSONObject workflowParamsJson = [
                 input    : "${baseDirectory}/input/run1_1_R1.fastq.gz".toString(),
                 outputDir: "${baseDirectory}/output".toString(),
-        ] as JSON //This JSON has make problems in unit test
+        ] as JSONObject
 
         JSON tagsJson = [
                 run_dir: workDir.toString(),
@@ -90,7 +91,7 @@ class WeskitAccessServiceIntegrationSpec extends Specification {
         then:
         1 * api.runWorkflow(_ as String, WesWorkflowType.NEXTFLOW.weskitName, WesWorkflowType.NEXTFLOW.version, _ as String, "{}", workflow, null
         ) >> { String workflowParams, String workflowType, String workflowTypeVersion, String tags, String workflowEngineParameters, String workflowUrl, List<File> workflowAttachment ->
-            assert JSON.parse(workflowParams) == JSON.parse(workflowParamsJson.toString(true))
+            assert JSON.parse(workflowParams) == workflowParamsJson
             assert JSON.parse(tags) == JSON.parse(tagsJson.toString(true))
             return mockedMonoRunId
         }

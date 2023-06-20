@@ -516,6 +516,34 @@ class FileService {
     }
 
     /**
+     * Delete the whole content within the given directory. The directory is kept.
+     * It writes error message into dev log and silently does nothing if the given
+     * path is not a directory
+     *
+     * @param dir the directory,which content should be deleted
+     */
+    void deleteDirectoryContent(Path dir) {
+        assert dir
+
+        // Log the errors into dev log
+        if (!Files.exists(dir)) {
+            log.info("The given directory ${dir} doesn't exist")
+            return
+        }
+
+        if (!Files.isDirectory(dir)) {
+            log.info("The given directory ${dir} is not a directory.")
+            return
+        }
+
+        // Now delete its content
+        Files.list(dir).each { Path path ->
+            // Files.delete() deletes folder if it is already empty. Use it only to delete files
+            Files.isDirectory(path) ? deleteDirectoryRecursively(path) : Files.delete(path)
+        }
+    }
+
+    /**
      * Create the requested file with the given content and permission over the default realm.
      *
      * The path have to be absolute and may not exist yet. Missing parent directories are created automatically with the

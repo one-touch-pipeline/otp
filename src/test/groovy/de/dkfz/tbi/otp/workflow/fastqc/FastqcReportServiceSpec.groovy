@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,21 +28,21 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.domainFactory.FastqcDomainFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
-import de.dkfz.tbi.otp.job.processing.TestFileSystemService
+import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CreateFileHelper
-import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
+import de.dkfz.tbi.otp.utils.ProcessOutput
 import de.dkfz.tbi.otp.workflowExecution.*
 
 import java.nio.file.*
 
-class FastqcExecuteClusterPipelineJobSpec extends Specification implements DataTest, FastqcDomainFactory, WorkflowSystemDomainFactory {
+class FastqcReportServiceSpec extends Specification implements DataTest, FastqcDomainFactory, WorkflowSystemDomainFactory {
 
-    static final String WORKFLOW = BashFastQcWorkflow.WORKFLOW
-    static final String INPUT_ROLE = BashFastQcWorkflow.INPUT_FASTQ
-    static final String OUTPUT_ROLE = BashFastQcWorkflow.OUTPUT_FASTQC
+    static final String WORKFLOW = WesFastQcWorkflow.WORKFLOW
+    static final String INPUT_ROLE = WesFastQcWorkflow.INPUT_FASTQ
+    static final String OUTPUT_ROLE = WesFastQcWorkflow.OUTPUT_FASTQC
 
-    private FastqcExecuteClusterPipelineJob job
+    FastqcReportService service
     private WorkflowRun run
     private WorkflowStep step
     private WorkflowArtefact artefact
@@ -82,9 +82,6 @@ class FastqcExecuteClusterPipelineJobSpec extends Specification implements DataT
         targetFastqc2 = targetDir.resolve('fastq2')
         targetFastqcHtml1 = targetDir.resolve('html1')
         targetFastqcHtml2 = targetDir.resolve('html2')
-
-        int callOfDelete = outputDirAlreadyExists ? 1 : 0
-        int logEntryCount = outputDirAlreadyExists ? 2 : 1
 
         workflow = createWorkflow([
                 name: WORKFLOW
@@ -129,32 +126,7 @@ class FastqcExecuteClusterPipelineJobSpec extends Specification implements DataT
             CreateFileHelper.createFile(tempOutDir.resolve(targetFastqc2))
         }
 
-        job = new FastqcExecuteClusterPipelineJob()
-        job.concreteArtefactService = Mock(ConcreteArtefactService) {
-            _ * getInputArtefact(step, INPUT_ROLE) >> seqTrack
-            _ * getOutputArtefacts(step, OUTPUT_ROLE) >> [fastqcProcessedFile1, fastqcProcessedFile2]
-            0 * _
-        }
-
-        job.fileSystemService = new TestFileSystemService()
-        job.fileService = Mock(FileService) {
-            _ * ensureFileIsReadableAndNotEmpty(_)
-            _ * convertPermissionsToOctalString(_)
-            callOfDelete * deleteDirectoryRecursively(_)
-            callOfDelete * createDirectoryRecursivelyAndSetPermissionsViaBash(_, _, _)
-            0 * _
-        }
-        job.logService = Mock(LogService) {
-            logEntryCount * addSimpleLogEntry(_, _)
-        }
-        findOrCreateProcessingOption(
-                name: ProcessingOption.OptionName.COMMAND_ENABLE_MODULE,
-                value: 'module load',
-        )
-        findOrCreateProcessingOption(
-                name: ProcessingOption.OptionName.COMMAND_FASTQC,
-                value: 'fastqc',
-        )
+        service = new FastqcReportService()
     }
 
     @Override
@@ -168,8 +140,34 @@ class FastqcExecuteClusterPipelineJobSpec extends Specification implements DataT
         ]
     }
 
+    void "canFastqcReportsBeCopied should return false, if no fastqc processed files are available or no"() {
+        given:
+        createData(false)
+
+        expect:
+        !service.canFastqcReportsBeCopied([])
+    }
+
+    void "canFastqcReportsBeCopied should return true/false depending on if fastqc processed files are available or not"() {
+        given:
+        createData(true)
+
+        CreateFileHelper.createFile(sourceFastqc1)
+        CreateFileHelper.createFile(sourceFastqc2)
+        CreateFileHelper.createFile(sourceFastqcMd5sum1)
+        CreateFileHelper.createFile(sourceFastqcMd5sum2)
+
+        service.fastqcDataFilesService = Mock(FastqcDataFilesService) {
+            1 * pathToFastQcResultFromSeqCenter(fastqcProcessedFile1) >> Paths.get("/not_readable")
+            0 * _
+        }
+
+        expect:
+        !service.canFastqcReportsBeCopied([fastqcProcessedFile1, fastqcProcessedFile2])
+    }
+
     @Unroll
-    void "test, when fastqc reports can be copied #m1, then #m2 copy fastqc"() {
+    void "canFastqcReportsBeCopied should return true if #m1"() {
         given:
         createData(outputDirAlreadyExists)
 
@@ -178,67 +176,51 @@ class FastqcExecuteClusterPipelineJobSpec extends Specification implements DataT
         CreateFileHelper.createFile(sourceFastqcMd5sum1)
         CreateFileHelper.createFile(sourceFastqcMd5sum2)
 
-        job.fastqcReportService = Mock(FastqcReportService) {
-            1 * canFastqcReportsBeCopied([fastqcProcessedFile1, fastqcProcessedFile2]) >> true
-            1 * copyExistingFastqcReports(step.realm, [fastqcProcessedFile1, fastqcProcessedFile2], _)
+        service.fastqcDataFilesService = Mock(FastqcDataFilesService) {
+            1 * pathToFastQcResultFromSeqCenter(fastqcProcessedFile1) >> sourceFastqc1
+            1 * pathToFastQcResultFromSeqCenter(fastqcProcessedFile2) >> sourceFastqc2
             0 * _
         }
 
-        when:
-        List<String> scripts = job.createScripts(step)
-
-        then:
-        scripts.size() == 0
+        expect:
+        service.canFastqcReportsBeCopied([fastqcProcessedFile1, fastqcProcessedFile2])
 
         where:
-        m1                          | m2                     | outputDirAlreadyExists
-        ""                          | ""                     | false
-        " and target exist already" | "delete existing and " | true
+        m1                     | outputDirAlreadyExists
+        "target doesn't exist" | false
+        "target exist already" | true
     }
 
     @Unroll
-    void "test, if fastqc reports can not be copied #m1, then #m2 create copy fastqc scripts"() {
+    void "copyExistingFastqcReports should return true/false depending #m1 #m2 on if fastqc processed files are available or not"() {
         given:
-        createData(outputDirAlreadyExists)
+        createData(true)
 
-        final String cmd_activation_fastqc = "cmd module load fastqc"
-        final String cmd_fastqc = "cmd fastqc"
+        CreateFileHelper.createFile(sourceFastqc1)
+        CreateFileHelper.createFile(sourceFastqc2)
+        CreateFileHelper.createFile(sourceFastqcMd5sum1)
+        CreateFileHelper.createFile(sourceFastqcMd5sum2)
 
-        job.fastqcDataFilesService = Mock(FastqcDataFilesService) {
+        service.fastqcDataFilesService = Mock(FastqcDataFilesService) {
+            1 * pathToFastQcResultFromSeqCenter(fastqcProcessedFile1) >> sourceFastqc1
+            1 * pathToFastQcResultFromSeqCenter(fastqcProcessedFile2) >> sourceFastqc2
+            1 * pathToFastQcResultMd5SumFromSeqCenter(fastqcProcessedFile1) >> sourceFastqcMd5sum1
+            1 * pathToFastQcResultMd5SumFromSeqCenter(fastqcProcessedFile2) >> sourceFastqcMd5sum2
             1 * fastqcOutputPath(fastqcProcessedFile1) >> targetFastqc1
             1 * fastqcOutputPath(fastqcProcessedFile2) >> targetFastqc2
-            1 * fastqcHtmlPath(fastqcProcessedFile1) >> targetFastqcHtml1
-            1 * fastqcHtmlPath(fastqcProcessedFile2) >> targetFastqcHtml2
-            0 * _
-        }
-        job.fastqcReportService = Mock(FastqcReportService) {
-            1 * canFastqcReportsBeCopied([fastqcProcessedFile1, fastqcProcessedFile2]) >> false
-            0 * _
-        }
-        job.lsdfFilesService = Mock(LsdfFilesService) {
-            1 * getFileFinalPath(dataFile1) >> Paths.get('fastq1')
-            1 * getFileFinalPath(dataFile2) >> Paths.get('fastq2')
             0 * _
         }
 
-        job.processingOptionService = Mock(ProcessingOptionService) {
-            _ * findOptionAsString(ProcessingOption.OptionName.COMMAND_ENABLE_MODULE) >> cmd_activation_fastqc
-            _ * findOptionAsString(ProcessingOption.OptionName.COMMAND_FASTQC) >> cmd_fastqc
+        service.fileService = Mock(FileService) {
+            2 * convertPermissionsToOctalString(FileService.DEFAULT_FILE_PERMISSION)
+            0 * _
         }
 
-        when:
-        List<String> scripts = job.createScripts(step)
-
-        then:
-        scripts.size() == 2
-        scripts.each { String it ->
-            assert it.contains(cmd_activation_fastqc + ' fastqc/' + version.workflowVersion)
-            assert it.contains(cmd_fastqc)
+        service.remoteShellHelper = Mock(RemoteShellHelper) {
+            2 * executeCommandReturnProcessOutput(step.realm, _) >> new ProcessOutput("", "", 0)
         }
 
-        where:
-        m1                          | m2                     | outputDirAlreadyExists
-        ""                          | ""                     | false
-        " and target exist already" | "delete existing and " | true
+        expect:
+        service.copyExistingFastqcReports(step.realm, [fastqcProcessedFile1, fastqcProcessedFile2], sourceDir)
     }
 }

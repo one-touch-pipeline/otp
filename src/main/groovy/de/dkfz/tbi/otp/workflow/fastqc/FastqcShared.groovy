@@ -32,7 +32,11 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 trait FastqcShared extends WorkflowShared {
 
-    static final String WORKFLOW = BashFastQcWorkflow.WORKFLOW
+    static final List<String> ALLOWED_WORKFLOWS = [
+            BashFastQcWorkflow.WORKFLOW,
+            WesFastQcWorkflow.WORKFLOW,
+    ]
+
     static final String INPUT_ROLE = BashFastQcWorkflow.INPUT_FASTQ
     static final String OUTPUT_ROLE = BashFastQcWorkflow.OUTPUT_FASTQC
 
@@ -43,12 +47,12 @@ trait FastqcShared extends WorkflowShared {
     ConcreteArtefactService concreteArtefactService
 
     SeqTrack getSeqTrack(WorkflowStep workflowStep) {
-        checkWorkflowName(workflowStep, WORKFLOW)
+        checkWorkflowName(workflowStep, ALLOWED_WORKFLOWS)
         return concreteArtefactService.<SeqTrack> getInputArtefact(workflowStep, INPUT_ROLE)
     }
 
     List<FastqcProcessedFile> getFastqcProcessedFiles(WorkflowStep workflowStep) {
-        checkWorkflowName(workflowStep, WORKFLOW)
+        checkWorkflowName(workflowStep, ALLOWED_WORKFLOWS)
         return concreteArtefactService.<FastqcProcessedFile> getOutputArtefacts(workflowStep, OUTPUT_ROLE)
     }
 }

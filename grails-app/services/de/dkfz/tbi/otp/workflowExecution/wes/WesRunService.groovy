@@ -41,4 +41,21 @@ class WesRunService {
     List<WesRun> allByWorkflowStep(WorkflowStep workflowStep) {
         return WesRun.findAllByWorkflowStep(workflowStep)
     }
+
+    /**
+     * Store the WesRun into database.
+     * The run state will be set as WesRun.MonitorState.CHECKING
+     *
+     * @param workflowStep current workflow step
+     * @param wesIdentifier ID of the wes run
+     * @param subPath last part of the path
+     */
+    void saveWorkflowRun(WorkflowStep workflowStep, String wesIdentifier, String subPath) {
+        WesRun wesRun = new WesRun(
+                workflowStep: workflowStep,
+                wesIdentifier: wesIdentifier,
+                subPath: subPath,// only the last level of the path
+                state: WesRun.MonitorState.CHECKING)
+        wesRun.save(flush: true)
+    }
 }

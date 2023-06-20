@@ -90,7 +90,7 @@ class WeskitAccessService {
 
         return doApiCall { WorkflowExecutionServiceApi api ->
             api.runWorkflow(
-                    wesWorkflowParameter.workflowParams.toString(true),
+                    wesWorkflowParameter.workflowParams.toString(4),
                     wesWorkflowParameter.workflowType.weskitName,
                     wesWorkflowParameter.workflowType.version,
                     tags,

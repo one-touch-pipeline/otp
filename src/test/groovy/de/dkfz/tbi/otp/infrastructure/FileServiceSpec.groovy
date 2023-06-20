@@ -318,7 +318,7 @@ class FileServiceSpec extends Specification implements DataTest {
 
     void "deleteDirectoryRecursively, if path is link, then delete it"() {
         given:
-        Path file = tempDir.resolve('file')
+        Path file = Files.createFile(tempDir.resolve('file'))
         Path link = tempDir.resolve('link')
         Files.createSymbolicLink(link, file)
 
@@ -370,6 +370,92 @@ class FileServiceSpec extends Specification implements DataTest {
 
         then:
         thrown(AssertionError)
+    }
+
+    //----------------------------------------------------------------------------------------------------
+    // test for deleteDirectoryContent
+
+    void "deleteDirectoryContent, if path does not exist, then do nothing"() {
+        given:
+        Path file = tempDir.resolve('file')
+
+        when:
+        fileService.deleteDirectoryContent(file)
+
+        then:
+        noExceptionThrown()
+    }
+
+    void "deleteDirectoryRecursively, if path is an empty directory, then do nothing"() {
+        when:
+        fileService.deleteDirectoryContent(tempDir)
+
+        then:
+        Files.exists(tempDir)
+    }
+
+    void "deleteDirectoryRecursively, if path is an file, then do nothing"() {
+        given:
+        Path filePath = CreateFileHelper.createFile(tempDir.resolve("test.txt"))
+
+        when:
+        fileService.deleteDirectoryContent(filePath)
+
+        then:
+        Files.exists(filePath)
+    }
+
+    void "deleteDirectoryRecursively, if path is link, then do nothing"() {
+        given:
+        Path file = Files.createFile(tempDir.resolve("file"))
+        Path link = tempDir.resolve('link')
+        Files.createSymbolicLink(link, file)
+
+        when:
+        fileService.deleteDirectoryContent(link)
+
+        then:
+        Files.exists(link)
+        Files.exists(file)
+        Files.isSymbolicLink(link)
+    }
+
+    void "deleteDirectoryContent, if path contains a directory structure, then delete all content recursively"() {
+        given:
+        Path basePath = Files.createDirectory(tempDir.resolve("folder"))
+        Path file1 = Files.createFile(basePath.resolve('file1'))
+        Path file2 = Files.createFile(basePath.resolve('file2'))
+
+        Path linkedFolder = Files.createDirectory(tempDir.resolve("linkedFolder"))
+        Path linkedFile = Files.createFile(tempDir.resolve("linkedFile.txt"))
+
+        Path dir1 = Files.createDirectory(basePath.resolve('dir1'))
+        Path subDir = Files.createDirectory(dir1.resolve('subDir'))
+
+        Path dir2 = Files.createDirectory(basePath.resolve('dir2'))
+        Path file = Files.createFile(dir2.resolve('file'))
+
+        Path linkToFolder = dir2.resolve('linkToDir')
+        Path linkToFile = dir2.resolve('linkToFile')
+
+        file.text = 'text'
+        Files.createSymbolicLink(linkToFolder, linkedFolder)
+        Files.createSymbolicLink(linkToFile, linkedFile)
+
+        when:
+        fileService.deleteDirectoryContent(basePath)
+
+        then:
+        Files.exists(basePath)
+
+        !Files.exists(dir1)
+        !Files.exists(subDir)
+        !Files.exists(dir2)
+        !Files.exists(file)
+        !Files.exists(file1)
+        !Files.exists(file2)
+        Files.exists(linkedFile)
+        Files.exists(linkedFolder)
     }
 
     //----------------------------------------------------------------------------------------------------

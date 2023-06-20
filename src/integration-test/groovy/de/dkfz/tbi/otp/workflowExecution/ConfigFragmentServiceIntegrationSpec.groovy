@@ -24,13 +24,18 @@ package de.dkfz.tbi.otp.workflowExecution
 import grails.gorm.transactions.Rollback
 import grails.testing.mixin.integration.Integration
 import org.grails.web.json.JSONObject
+import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.utils.MapUtilService
 
 @Rollback
 @Integration
 class ConfigFragmentServiceIntegrationSpec extends Specification implements WorkflowSystemDomainFactory {
+
+    @Autowired
+    MapUtilService mapUtilService
 
     private ConfigFragmentService service
 
@@ -42,6 +47,7 @@ class ConfigFragmentServiceIntegrationSpec extends Specification implements Work
 
     private void setupData() {
         service = new ConfigFragmentService()
+        service.mapUtilService = mapUtilService
     }
 
     private void setupDataWithSelectorsForQuerying() {
@@ -114,7 +120,7 @@ class ConfigFragmentServiceIntegrationSpec extends Specification implements Work
 
         expect:
         ["A": "A_ShouldAppear", "B": ["D": "D_ThisToo", "E": ["G": "G_ThisToo"], "C": "C_ThisSinceHigherPrio"], "F": "F_ShouldAppear"] ==
-                service.mergeSortedMaps(prioritySortedHashMaps)
+                service.mapUtilService.mergeSortedMaps(prioritySortedHashMaps)
     }
 
     void "test mergeSortedFragmentsAsJson, when called, then returned the merged json as jsonobject"() {

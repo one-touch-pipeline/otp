@@ -80,11 +80,7 @@ class ClusterAccessService {
         clusterJobHandlingService.startMonitorClusterJob(workflowStep, clusterJobs)
 
         //end of not restartable area
-        workflowStep.workflowRun.with {
-            //its done in same transaction in which cluster jobs are saved
-            jobCanBeRestarted = true
-            save(flush: true)
-        }
+        workflowRunService.markJobAsRestartable(workflowStep.workflowRun)
 
         List<String> ids = beJobs*.jobID*.shortID
         logService.addSimpleLogEntry(workflowStep, "Executed jobs and got job IDs: ${ids.join(', ')}")

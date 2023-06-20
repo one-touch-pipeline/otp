@@ -77,6 +77,7 @@ class ClusterAccessServiceSpec extends Specification implements ServiceUnitTest<
         }
         service.workflowRunService = Mock(WorkflowRunService) {
             1 * markJobAsNotRestartableInSeparateTransaction(workflowStep.workflowRun)
+            1 * markJobAsRestartable(workflowStep.workflowRun)
             0 * _
         }
         service.logService = Mock(LogService)

@@ -21,16 +21,16 @@
  */
 package de.dkfz.tbi.otp.workflowExecution.wes
 
-import grails.converters.JSON
 import groovy.transform.ToString
 import groovy.transform.TupleConstructor
+import org.grails.web.json.JSONObject
 
 import java.nio.file.Path
 
 @ToString(includeNames = true)
 @TupleConstructor
 class WesWorkflowParameter {
-    final JSON workflowParams
+    final JSONObject workflowParams
     final WesWorkflowType workflowType
     final Path workDirectory
     final String workflowUrl
