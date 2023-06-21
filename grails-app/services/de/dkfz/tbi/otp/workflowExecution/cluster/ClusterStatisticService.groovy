@@ -29,7 +29,6 @@ import org.slf4j.event.Level
 import de.dkfz.roddy.execution.jobs.*
 import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.processing.ClusterJobManagerFactoryService
-import de.dkfz.tbi.otp.job.scheduler.ClusterJobStatus
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 import de.dkfz.tbi.otp.utils.logging.SimpleLogger
@@ -62,7 +61,7 @@ class ClusterStatisticService {
      * @param userName The name of the user whose jobs should be checked
      * @return A map containing job identifiers and their status
      */
-    Map<ClusterJobIdentifier, ClusterJobStatus> retrieveKnownJobsWithState(Realm realm) throws Exception {
+    Map<ClusterJobIdentifier, JobState> retrieveKnownJobsWithState(Realm realm) throws Exception {
         assert realm: "No realm specified."
         BatchEuphoriaJobManager jobManager = clusterJobManagerFactoryService.getJobManager(realm)
 
@@ -71,10 +70,9 @@ class ClusterStatisticService {
         return jobStates.collectEntries { BEJobID jobId, JobState state ->
             [
                     new ClusterJobIdentifier(realm, jobId.id),
-                    (state in finished || state in failed) ? ClusterJobStatus.COMPLETED :
-                            state == JobState.UNKNOWN ? ClusterJobStatus.UNKNOWN : ClusterJobStatus.NOT_COMPLETED,
+                    state,
             ]
-        } as Map<ClusterJobIdentifier, ClusterJobStatus>
+        } as Map<ClusterJobIdentifier, JobState>
     }
 
     private Map<BEJobID, JobState> queryAndLogAllClusterJobs(BatchEuphoriaJobManager jobManager) {
@@ -123,25 +121,11 @@ class ClusterStatisticService {
         GenericJobInfo jobInfo = jobManager.queryExtendedJobStateById([beJobId]).get(beJobId)
 
         if (jobInfo) {
-            ClusterJob.Status status
+            ClusterJob.Status status = null
             if (jobInfo.jobState && jobInfo.exitCode != null) {
-                status = jobInfo.jobState in finished && jobInfo.exitCode == 0 ? ClusterJob.Status.COMPLETED : ClusterJob.Status.FAILED
+                status = jobInfo.jobState.isCompleted() && jobInfo.exitCode == 0 ? ClusterJob.Status.COMPLETED : ClusterJob.Status.FAILED
             }
             clusterJobService.completeClusterJob(clusterJob, status, jobInfo)
         }
     }
-
-    private final List<JobState> failed = [
-            JobState.FAILED,
-            JobState.ABORTED,
-            JobState.STARTED, //roddy internal
-            JobState.DUMMY,   //roddy internal
-    ].asImmutable()
-
-    // a job is considered complete if it is either has status "completed" or it is not known anymore
-    private final List<JobState> finished = [
-            JobState.COMPLETED_SUCCESSFUL,
-            JobState.COMPLETED_UNKNOWN,
-            //JobState.UNKNOWN, //This state is used if no mapping is available, so it can also be running
-    ].asImmutable()
 }

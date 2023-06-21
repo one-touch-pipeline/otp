@@ -25,6 +25,7 @@ import grails.gorm.transactions.Transactional
 import groovy.util.logging.Slf4j
 import org.springframework.stereotype.Component
 
+import de.dkfz.roddy.execution.jobs.JobState
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
 import de.dkfz.tbi.otp.ngsdata.Realm
@@ -74,7 +75,7 @@ abstract class AbstractClusterJobMonitor {
      */
     @SuppressWarnings('CatchThrowable')
     protected void checkClusterAndClusterJobs(Realm realm, List<ClusterJob> clusterJobs) {
-        Map<ClusterJobIdentifier, ClusterJobStatus> jobStates
+        Map<ClusterJobIdentifier, JobState> jobStates
         try {
             LogUsedTimeUtils.logUsedTime("${name}: fetch cluster jobs state from cluster on realm ${realm.name}") {
                 jobStates = retrieveKnownJobsWithState(realm)
@@ -93,16 +94,14 @@ abstract class AbstractClusterJobMonitor {
     /**
      * Helper to do the finish checking of each job and handler finished jobs via {@link #handleFinishedClusterJobWrapper(ClusterJob)}
      */
-    protected void checkClusterJobs(Realm realm, List<ClusterJob> clusterJobs, Map<ClusterJobIdentifier, ClusterJobStatus> jobStates) {
+    protected void checkClusterJobs(Realm realm, List<ClusterJob> clusterJobs, Map<ClusterJobIdentifier, JobState> jobStates) {
         List<String> finishedClusterJobIds = []
         clusterJobs.each { ClusterJob clusterJob ->
-            ClusterJobStatus status = jobStates.get(new ClusterJobIdentifier(clusterJob), ClusterJobStatus.COMPLETED)
-            boolean completed = (status == ClusterJobStatus.COMPLETED)
-            boolean unknown = (status == ClusterJobStatus.UNKNOWN)
-            log.debug("${name}: Checking cluster job ID ${clusterJob.clusterJobId}: " +
-                    "${completed ? 'finished' : unknown ? 'state UNKNOWN' : 'still running'}")
+            JobState status = jobStates.get(new ClusterJobIdentifier(clusterJob), JobState.COMPLETED_UNKNOWN)
+            log.debug("${name}: Checking cluster job ID ${clusterJob.clusterJobId}: ${status}")
 
-            if (completed) {
+            // .isDummy() and .isStarted() are roddy only states that should not occur
+            if (status.isCompleted() || status.isFailed() || status.isDummy() || status.isStarted()) {
                 handleFinishedClusterJobWrapper(clusterJob)
                 finishedClusterJobIds.add(clusterJob.clusterJobId)
             }
@@ -148,7 +147,7 @@ abstract class AbstractClusterJobMonitor {
      */
     abstract protected void handleFinishedClusterJobs(final ClusterJob clusterJob)
 
-    abstract protected Map<ClusterJobIdentifier, ClusterJobStatus> retrieveKnownJobsWithState(Realm realm)
+    abstract protected Map<ClusterJobIdentifier, JobState> retrieveKnownJobsWithState(Realm realm)
 
     abstract protected void retrieveAndSaveJobStatisticsAfterJobFinished(ClusterJob clusterJob)
 

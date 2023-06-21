@@ -33,7 +33,6 @@ import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.plan.JobDefinition
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
-import de.dkfz.tbi.otp.job.scheduler.ClusterJobStatus
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.ProcessOutput
@@ -109,71 +108,10 @@ class ClusterJobSchedulerServiceSpec extends Specification implements DataTest, 
         }
 
         when:
-        Map<ClusterJobIdentifier, ClusterJobStatus> result = service.retrieveKnownJobsWithState(realm)
+        Map<ClusterJobIdentifier, JobState> result = service.retrieveKnownJobsWithState(realm)
 
         then:
         result.isEmpty() //can not written as .empty
-    }
-
-    @Unroll
-    void "retrieveKnownJobsWithState, when status #pbsStatus appears in qstat, returns correct status #status"(String pbsStatus, ClusterJobStatus status) {
-        given:
-        Realm realm = DomainFactory.createRealm()
-        File logFolder = TestCase.uniqueNonExistentPath
-        String jobId = "5075615"
-        ClusterJobSchedulerService service = new ClusterJobSchedulerService()
-        service.clusterJobManagerFactoryService = new ClusterJobManagerFactoryService()
-        service.clusterJobManagerFactoryService.remoteShellHelper = [
-                executeCommandReturnProcessOutput: { realm1, String command ->
-                    new ProcessOutput(
-                            stdout: qstatOutput(jobId, pbsStatus),
-                            stderr: "",
-                            exitCode: 0,
-                    )
-                },
-        ] as RemoteShellHelper
-        service.clusterJobManagerFactoryService.configService = Mock(ConfigService) {
-            getSshUser() >> SSHUSER
-        }
-        service.configService = Mock(ConfigService) {
-            1 * getLoggingRootPath() >> logFolder
-        }
-        service.fileService = Mock(FileService) {
-            1 * createFileWithContentOnDefaultRealm(_, _)
-        }
-        service.fileSystemService = Mock(FileSystemService) {
-            1 * getRemoteFileSystemOnDefaultRealm() >> FileSystems.default
-        }
-
-        when:
-        Map<ClusterJobIdentifier, ClusterJobStatus> result = service.retrieveKnownJobsWithState(realm)
-
-        then:
-        ClusterJobIdentifier job = new ClusterJobIdentifier(realm, jobId)
-        result.containsKey(job)
-        result.get(job) == status
-
-        where:
-        pbsStatus || status
-        "C"       || ClusterJobStatus.COMPLETED
-        "E"       || ClusterJobStatus.COMPLETED
-        "H"       || ClusterJobStatus.NOT_COMPLETED
-        "Q"       || ClusterJobStatus.NOT_COMPLETED
-        "R"       || ClusterJobStatus.NOT_COMPLETED
-        "T"       || ClusterJobStatus.NOT_COMPLETED
-        "W"       || ClusterJobStatus.NOT_COMPLETED
-        "S"       || ClusterJobStatus.NOT_COMPLETED
-    }
-
-    private static String qstatOutput(String jobId, String status) {
-        return """\
-
-host.long-domain:
-                                                                                  Req'd       Req'd       Elap
-Job ID                  Username    Queue    Jobname          SessID  NDS   TSK   Memory      Time    S   Time
------------------------ ----------- -------- ---------------- ------ ----- ------ --------- --------- - ---------
-${jobId}.host.long-doma  someUser    fast     r160224_18005293    --      1      1     750mb  00:10:00 ${status}       --
-"""
     }
 
     void "test executeJob, succeeds"() {

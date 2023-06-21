@@ -28,11 +28,13 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 
+import de.dkfz.roddy.execution.jobs.JobState
 import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.Realm
+import de.dkfz.tbi.otp.workflowExecution.cluster.ClusterStatisticService
 
 /**
  * This service is able to track the execution of jobs on the cluster.
@@ -58,6 +60,9 @@ class OldClusterJobMonitor extends AbstractClusterJobMonitor {
 
     @Autowired
     ClusterJobSchedulerService clusterJobSchedulerService
+
+    @Autowired
+    ClusterStatisticService clusterStatisticService
 
     OldClusterJobMonitor() {
         super('Old system')
@@ -122,12 +127,12 @@ ${schedulerService.running.collect { "    ${it}  ${it.processingStep}" }.join('\
     }
 
     @Override
-    protected Map<ClusterJobIdentifier, ClusterJobStatus> retrieveKnownJobsWithState(Realm realm) {
+    protected Map<ClusterJobIdentifier, JobState> retrieveKnownJobsWithState(Realm realm) {
         return clusterJobSchedulerService.retrieveKnownJobsWithState(realm)
     }
 
     @Override
     protected void retrieveAndSaveJobStatisticsAfterJobFinished(ClusterJob clusterJob) {
-        clusterJobSchedulerService.retrieveAndSaveJobStatisticsAfterJobFinished(clusterJob)
+        clusterStatisticService.retrieveAndSaveJobStatisticsAfterJobFinished(clusterJob)
     }
 }

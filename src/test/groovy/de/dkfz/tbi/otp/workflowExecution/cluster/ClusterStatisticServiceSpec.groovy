@@ -31,11 +31,9 @@ import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.processing.ClusterJobManagerFactoryService
-import de.dkfz.tbi.otp.job.scheduler.ClusterJobStatus
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.workflowExecution.LogService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
-import de.dkfz.tbi.otp.workflowExecution.cluster.logs.ClusterLogQueryResultFileService
 
 class ClusterStatisticServiceSpec extends Specification implements ServiceUnitTest<ClusterStatisticService>, DataTest, WorkflowSystemDomainFactory {
 
@@ -46,49 +44,6 @@ class ClusterStatisticServiceSpec extends Specification implements ServiceUnitTe
                 Realm,
                 WorkflowStep,
         ]
-    }
-
-    @Unroll
-    void "retrieveKnownJobsWithState, when status #jobState appears, then returns correct clusterJobStatus #clusterJobStatus"() {
-        given:
-        String jobId = "${nextId}"
-        Realm realm = createRealm()
-        service.clusterJobManagerFactoryService = Mock(ClusterJobManagerFactoryService) {
-            1 * getJobManager(realm) >> Mock(BatchEuphoriaJobManager) {
-                1 * queryJobStatusAll() >> [
-                        (new BEJobID(jobId)): jobState]
-            }
-        }
-        service.fileService = Mock(FileService) {
-            1 * createFileWithContentOnDefaultRealm(_, _)
-        }
-        service.clusterLogQueryResultFileService = Mock(ClusterLogQueryResultFileService) {
-            1 * logFileWithCreatingDirectory()
-        }
-
-        ClusterJobIdentifier job = new ClusterJobIdentifier(realm, jobId)
-
-        when:
-        Map<ClusterJobIdentifier, ClusterJobStatus> result = service.retrieveKnownJobsWithState(realm)
-
-        then:
-        result.containsKey(job)
-        result.get(job) == clusterJobStatus
-
-        where:
-        jobState                      || clusterJobStatus
-        JobState.COMPLETED_SUCCESSFUL || ClusterJobStatus.COMPLETED
-        JobState.COMPLETED_UNKNOWN    || ClusterJobStatus.COMPLETED
-        JobState.FAILED               || ClusterJobStatus.COMPLETED
-        JobState.ABORTED              || ClusterJobStatus.COMPLETED
-
-        JobState.UNSTARTED            || ClusterJobStatus.NOT_COMPLETED
-        JobState.HOLD                 || ClusterJobStatus.NOT_COMPLETED
-        JobState.QUEUED               || ClusterJobStatus.NOT_COMPLETED
-        JobState.RUNNING              || ClusterJobStatus.NOT_COMPLETED
-        JobState.SUSPENDED            || ClusterJobStatus.NOT_COMPLETED
-
-        JobState.UNKNOWN              || ClusterJobStatus.UNKNOWN
     }
 
     @Unroll

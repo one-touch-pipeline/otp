@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.job.scheduler
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
+import de.dkfz.roddy.execution.jobs.JobState
 import de.dkfz.tbi.TestConstants
 import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
@@ -38,6 +39,7 @@ import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
+import de.dkfz.tbi.otp.workflowExecution.cluster.ClusterStatisticService
 
 import static de.dkfz.tbi.otp.ngsdata.DomainFactory.createAndSaveProcessingStep
 
@@ -154,23 +156,25 @@ class OldClusterJobMonitorSpec extends Specification implements DataTest {
         clusterJobMonitor.clusterJobSchedulerService = Mock(ClusterJobSchedulerService) {
             1 * retrieveKnownJobsWithState(realm1) >> { Realm realm ->
                 return [
-                        (new ClusterJobIdentifier(realm1, clusterJobCheckingRealm1.clusterJobId)): ClusterJobStatus.COMPLETED,
+                        (new ClusterJobIdentifier(realm1, clusterJobCheckingRealm1.clusterJobId)): JobState.COMPLETED_SUCCESSFUL,
                 ]
             }
             1 * retrieveKnownJobsWithState(realm2) >> { Realm realm ->
                 return [
-                        (new ClusterJobIdentifier(realm2, clusterJobCheckingRealm2a.clusterJobId)): ClusterJobStatus.NOT_COMPLETED,
-                        (new ClusterJobIdentifier(realm2, clusterJobCheckingRealm2b.clusterJobId)): ClusterJobStatus.COMPLETED,
+                        (new ClusterJobIdentifier(realm2, clusterJobCheckingRealm2a.clusterJobId)): JobState.RUNNING,
+                        (new ClusterJobIdentifier(realm2, clusterJobCheckingRealm2b.clusterJobId)): JobState.COMPLETED_SUCCESSFUL,
                 ]
             }
             1 * retrieveKnownJobsWithState(realmFailingGetValues) >> { Realm realm ->
                 throw new OtpRuntimeException('No values')
             }
+            0 * _
+        }
+        clusterJobMonitor.clusterStatisticService = Mock(ClusterStatisticService) {
             1 * retrieveAndSaveJobStatisticsAfterJobFinished(clusterJobCheckingRealm1)
             1 * retrieveAndSaveJobStatisticsAfterJobFinished(clusterJobCheckingRealm2b) >> { ClusterJob clusterJob ->
-                throw new OtpRuntimeException()
+                throw new OtpRuntimeException("")
             }
-            0 * _
         }
         clusterJobMonitor.scheduler = Mock(Scheduler) {
             2 * doWithErrorHandling(_, _, _) >> { MonitoringJob job, Closure closure, boolean rethrow ->

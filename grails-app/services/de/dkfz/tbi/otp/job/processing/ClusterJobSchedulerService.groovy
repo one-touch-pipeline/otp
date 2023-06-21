@@ -35,13 +35,13 @@ import de.dkfz.tbi.otp.OtpException
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.infrastructure.*
-import de.dkfz.tbi.otp.job.scheduler.ClusterJobStatus
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 import de.dkfz.tbi.otp.utils.logging.SimpleLogger
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
+import de.dkfz.tbi.otp.workflowExecution.cluster.ClusterStatisticService
 
 import java.nio.file.FileSystem
 import java.nio.file.Path
@@ -77,6 +77,7 @@ class ClusterJobSchedulerService {
     FileService fileService
     JobStatusLoggingService jobStatusLoggingService
     ProcessingOptionService processingOptionService
+    ClusterStatisticService clusterStatisticService
     FileSystemService fileSystemService
 
     /**
@@ -191,7 +192,7 @@ class ClusterJobSchedulerService {
      * @return A map containing job identifiers and their status
      */
     @Deprecated
-    Map<ClusterJobIdentifier, ClusterJobStatus> retrieveKnownJobsWithState(Realm realm) throws Exception {
+    Map<ClusterJobIdentifier, JobState> retrieveKnownJobsWithState(Realm realm) throws Exception {
         assert realm: "No realm specified."
         BatchEuphoriaJobManager jobManager = clusterJobManagerFactoryService.getJobManager(realm)
 
@@ -200,10 +201,9 @@ class ClusterJobSchedulerService {
         return jobStates.collectEntries { BEJobID jobId, JobState state ->
             [
                     new ClusterJobIdentifier(realm, jobId.id),
-                    (state in finished || state in failed) ? ClusterJobStatus.COMPLETED :
-                            state == JobState.UNKNOWN ? ClusterJobStatus.UNKNOWN : ClusterJobStatus.NOT_COMPLETED,
+                    state,
             ]
-        } as Map<ClusterJobIdentifier, ClusterJobStatus>
+        } as Map<ClusterJobIdentifier, JobState>
     }
 
     @Deprecated
@@ -260,37 +260,6 @@ class ClusterJobSchedulerService {
             clusterJobService.amendClusterJob(clusterJob, jobInfo)
         }
     }
-
-    @Deprecated
-    void retrieveAndSaveJobStatisticsAfterJobFinished(ClusterJob clusterJob) throws Exception {
-        BatchEuphoriaJobManager jobManager = clusterJobManagerFactoryService.getJobManager(clusterJob.realm)
-        BEJobID beJobId = new BEJobID(clusterJob.clusterJobId)
-        GenericJobInfo jobInfo = jobManager.queryExtendedJobStateById([beJobId]).get(beJobId)
-
-        if (jobInfo) {
-            ClusterJob.Status status = null
-            if (jobInfo.jobState && jobInfo.exitCode != null) {
-                status = jobInfo.jobState in finished && jobInfo.exitCode == 0 ? ClusterJob.Status.COMPLETED : ClusterJob.Status.FAILED
-            }
-            clusterJobService.completeClusterJob(clusterJob, status, jobInfo)
-        }
-    }
-
-    @Deprecated
-    private final List<JobState> failed = [
-            JobState.FAILED,
-            JobState.ABORTED,
-            JobState.STARTED, //roddy internal
-            JobState.DUMMY,   //roddy internal
-    ].asImmutable()
-
-    // a job is considered complete if it either has status "completed" or it is not known anymore
-    @Deprecated
-    private final List<JobState> finished = [
-            JobState.COMPLETED_SUCCESSFUL,
-            JobState.COMPLETED_UNKNOWN,
-            //JobState.UNKNOWN, //This state is used if no mapping is available, so it can also be running
-    ].asImmutable()
 }
 
 enum JobSubmissionOption {
