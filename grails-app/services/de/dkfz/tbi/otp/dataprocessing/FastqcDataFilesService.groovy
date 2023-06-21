@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -59,27 +59,22 @@ class FastqcDataFilesService {
         return baseString.resolve(FAST_QC_DIRECTORY_PART).resolve(fastqcProcessedFile.workDirectoryName)
     }
 
-    private Path resolvePathToFastqcOutputDirectory(FastqcProcessedFile fastqcProcessedFile, String path) {
-        Path base = fastqcOutputDirectory(fastqcProcessedFile)
-        return base.resolve(path)
-    }
-
     Path fastqcOutputPath(FastqcProcessedFile fastqcProcessedFile) {
         String fileName = fastqcFileName(fastqcProcessedFile)
-        return resolvePathToFastqcOutputDirectory(fastqcProcessedFile, fileName)
+        return fastqcOutputDirectory(fastqcProcessedFile).resolve(fileName)
     }
 
     Path fastqcHtmlPath(FastqcProcessedFile fastqcProcessedFile) {
         String fileName = fastqcFileNameWithoutZipSuffix(fastqcProcessedFile).concat(HTML_FILE_EXTENSION)
-        return resolvePathToFastqcOutputDirectory(fastqcProcessedFile, fileName)
+        return fastqcOutputDirectory(fastqcProcessedFile).resolve(fileName)
     }
 
     Path fastqcOutputMd5sumPath(FastqcProcessedFile fastqcProcessedFile) {
-        Path path = fastqcOutputPath(fastqcProcessedFile)
-        return path.resolveSibling(path.fileName.toString().concat(MD5SUM_FILE_EXTENSION))
+        String fileName = fastqcFileName(fastqcProcessedFile).concat(MD5SUM_FILE_EXTENSION)
+        return fastqcOutputDirectory(fastqcProcessedFile).resolve(fileName)
     }
 
-    String fastqcFileName(FastqcProcessedFile fastqcProcessedFile) {
+    protected String fastqcFileName(FastqcProcessedFile fastqcProcessedFile) {
         return "${fastqcFileNameWithoutZipSuffix(fastqcProcessedFile)}${FAST_QC_ZIP_SUFFIX}"
     }
 
