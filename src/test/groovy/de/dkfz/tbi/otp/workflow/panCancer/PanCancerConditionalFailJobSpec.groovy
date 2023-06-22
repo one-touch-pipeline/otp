@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,6 +28,7 @@ import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.filestore.PathOption
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
@@ -69,7 +70,7 @@ class PanCancerConditionalFailJobSpec extends Specification implements DataTest,
         }
 
         job.lsdfFilesService = Mock(LsdfFilesService) {
-            getFileViewByPidPathAsPath(_) >> { DataFile file ->
+            getFileViewByPidPathAsPath(_) >> { DataFile file, PathOption... options ->
                 return CreateFileHelper.createFile(tempDir.resolve(file.fileName))
             }
         }
@@ -178,7 +179,7 @@ class PanCancerConditionalFailJobSpec extends Specification implements DataTest,
         }
 
         job.lsdfFilesService = Mock(LsdfFilesService) {
-            getFileViewByPidPathAsPath(_) >> { DataFile file ->
+            getFileViewByPidPathAsPath(_) >> { DataFile file, PathOption... options ->
                 return CreateFileHelper.createFile(tempDir.resolve(file.fileName))
             }
         }
@@ -215,7 +216,7 @@ class PanCancerConditionalFailJobSpec extends Specification implements DataTest,
         }
 
         job.lsdfFilesService = Mock(LsdfFilesService) {
-            getFileViewByPidPathAsPath(_) >> { DataFile file ->
+            getFileViewByPidPathAsPath(_) >> { DataFile file, PathOption... options ->
                 return CreateFileHelper.createFile(tempDir.resolve(file.fileName), "")
             }
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -34,6 +34,7 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.AnalysisDeletionService
 import de.dkfz.tbi.otp.dataswap.data.DataSwapData
 import de.dkfz.tbi.otp.dataswap.parameters.DataSwapParameters
 import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPancanFactory
+import de.dkfz.tbi.otp.filestore.PathOption
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
@@ -776,8 +777,8 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
 
         // service
         service.lsdfFilesService = Mock(LsdfFilesService) {
-            _ * getFileFinalPathAsPath(_) >> { DataFile dataFile -> Paths.get(dataFilePaths[dataFile].newPath.toString()) }
-            _ * getFileViewByPidPathAsPath(_) >> { DataFile dataFile -> Paths.get(dataFilePaths[dataFile].newVbpPath.toString()) }
+            _ * getFileFinalPathAsPath(_) >> { DataFile dataFile, PathOption... options -> Paths.get(dataFilePaths[dataFile].newPath.toString()) }
+            _ * getFileViewByPidPathAsPath(_) >> { DataFile dataFile, PathOption... options -> Paths.get(dataFilePaths[dataFile].newVbpPath.toString()) }
         }
         service.fileSystemService = Mock(FileSystemService) {
             _ * getRemoteFileSystemOnDefaultRealm() >> FileSystems.default
@@ -911,8 +912,8 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
 
         // service
         service.lsdfFilesService = Mock(LsdfFilesService) {
-            _ * getFileFinalPathAsPath(_) >> { DataFile dataFile -> Paths.get(dataFilePaths[dataFile].newPath.toString()) }
-            _ * getFileViewByPidPathAsPath(_) >> { DataFile dataFile -> Paths.get(dataFilePaths[dataFile].newVbpPath.toString()) }
+            _ * getFileFinalPathAsPath(_) >> { DataFile dataFile, PathOption... options -> Paths.get(dataFilePaths[dataFile].newPath.toString()) }
+            _ * getFileViewByPidPathAsPath(_) >> { DataFile dataFile, PathOption... options -> Paths.get(dataFilePaths[dataFile].newVbpPath.toString()) }
         }
         service.fileSystemService = Mock(FileSystemService) {
             _ * getRemoteFileSystemOnDefaultRealm() >> FileSystems.default
@@ -1001,9 +1002,10 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
 
         // service
         service.lsdfFilesService = Mock(LsdfFilesService) {
-            _ * getFileFinalPathAsPath(_) >> { DataFile dataFile -> Paths.get(dataFilePaths[dataFile].newPath.toString()) }
-            _ * getFileViewByPidPathAsPath(_) >> { DataFile dataFile -> Paths.get(dataFilePaths[dataFile].newVbpPath.toString()) }
-            _ * getFileViewByPidPathAsPath(_, WellDirectory.ALL_WELL) >> { DataFile dataFile, _ -> Paths.get(dataFilePaths[dataFile].newVbpPath.toString()) }
+            _ * getFileFinalPathAsPath(_) >> { DataFile dataFile, PathOption... options -> Paths.get(dataFilePaths[dataFile].newPath.toString()) }
+            _ * getFileViewByPidPathAsPath(_) >> { DataFile dataFile, PathOption... options -> Paths.get(dataFilePaths[dataFile].newVbpPath.toString()) }
+            _ * getFileViewByPidPathAsPath(_, WellDirectory.ALL_WELL) >> { DataFile dataFile, _, PathOption... options ->
+                Paths.get(dataFilePaths[dataFile].newVbpPath.toString()) }
         }
 
         service.singleCellService = Mock(SingleCellService) {

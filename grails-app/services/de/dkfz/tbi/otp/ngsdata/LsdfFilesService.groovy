@@ -24,6 +24,8 @@ package de.dkfz.tbi.otp.ngsdata
 import grails.gorm.transactions.Transactional
 import org.springframework.beans.factory.annotation.Autowired
 
+import de.dkfz.tbi.otp.filestore.PathOption
+import de.dkfz.tbi.otp.filestore.FilestoreService
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.project.ProjectService
@@ -47,6 +49,7 @@ class LsdfFilesService {
     ProjectService projectService
 
     FileSystemService fileSystemService
+    FilestoreService filestoreService
 
     /**
      * This function return path to the initial location
@@ -66,7 +69,7 @@ class LsdfFilesService {
         return basePath.resolve(seqTypeDirName)
     }
 
-    Path getRunDirectory(DataFile dataFile) {
+    Path getSeqCenterRunDirectory(DataFile dataFile) {
         if (!checkFinalPathDefined(dataFile)) {
             return null
         }
@@ -75,14 +78,21 @@ class LsdfFilesService {
         return basePath?.resolve(centerDir)?.resolve(dataFile.run.dirName)
     }
 
+    Path getFinalDirPath(DataFile dataFile, PathOption... options) {
+        if (options.contains(PathOption.REAL_PATH) && dataFile.seqTrack.workflowArtefact.producedBy.workFolder) {
+            return filestoreService.getWorkFolderPath(dataFile.seqTrack.workflowArtefact.producedBy)
+        }
+        return getSeqCenterRunDirectory(dataFile)?.resolve(dataFile.pathName)
+    }
+
     /**
      * Important function.
      * This function knows all naming conventions and data organization
      *
      * @return String with path or null if path can not be established
      */
-    Path getFileFinalPathAsPath(DataFile dataFile) {
-        return getRunDirectory(dataFile)?.resolve(dataFile.pathName)?.resolve(dataFile?.fileName)
+    Path getFileFinalPathAsPath(DataFile dataFile, PathOption... options) {
+        return getFinalDirPath(dataFile, options)?.resolve(dataFile?.fileName)
     }
 
     Path getFileMd5sumFinalPathAsPath(DataFile dataFile) {
@@ -115,18 +125,26 @@ class LsdfFilesService {
         return basePath
     }
 
-    Path getFileViewByPidDirectory(DataFile dataFile, WellDirectory wellDirectory = null) {
+    Path getRunDirectory(DataFile dataFile, WellDirectory wellDirectory = null) {
         Path basePath = getSingleCellWellDirectory(dataFile, wellDirectory)
         SeqTrack seqTrack = dataFile.seqTrack
         return basePath.resolve(seqTrack.seqType.libraryLayoutDirName).resolve(seqTrack.run.dirName)
     }
 
-    Path getFileViewByPidPathAsPath(DataFile dataFile, WellDirectory wellDirectory = null) {
-        Path basePath = getFileViewByPidDirectory(dataFile, wellDirectory)
+    Path getFileViewByPidDirectory(DataFile dataFile, WellDirectory wellDirectory = null, PathOption... options) {
+        if (options.contains(PathOption.REAL_PATH) && dataFile.seqTrack.workflowArtefact.producedBy.workFolder) {
+            return getFinalDirPath(dataFile, options)
+        }
+        Path basePath = getRunDirectory(dataFile, wellDirectory)
         // For historic reasons, vbpPath starts and ends with a slash.
         // Remove the slashes here, otherwise it would be interpreted as an absolute path by resolve():
         String vbpPath = Paths.get(dataFile.fileType.vbpPath).getName(0)
-        return basePath.resolve(vbpPath).resolve(dataFile.vbpFileName)
+        return basePath.resolve(vbpPath)
+    }
+
+    Path getFileViewByPidPathAsPath(DataFile dataFile, WellDirectory wellDirectory = null, PathOption... options) {
+        Path basePath = getFileViewByPidDirectory(dataFile, wellDirectory, options)
+        return basePath.resolve(dataFile.vbpFileName)
     }
 
     /**

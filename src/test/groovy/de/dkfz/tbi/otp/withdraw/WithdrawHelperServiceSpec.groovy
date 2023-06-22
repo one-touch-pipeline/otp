@@ -34,6 +34,7 @@ import de.dkfz.tbi.otp.domainFactory.FastqcDomainFactory
 import de.dkfz.tbi.otp.domainFactory.pipelines.AlignmentPipelineFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.filestore.FilestoreService
+import de.dkfz.tbi.otp.filestore.PathOption
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CreateFileHelper
@@ -397,13 +398,11 @@ class WithdrawHelperServiceSpec extends HibernateSpec implements FastqcDomainFac
         String withdrawnCommentSingleCell = "withdrawnComment\nfor singleCellDataFile"
         final Path finalPathNormal = CreateFileHelper.createFile(tempDir.resolve("finalNormal"))
         final Path finalPathSingleCell = CreateFileHelper.createFile(tempDir.resolve("finalSingleCell"))
-        final Path uuidPathNormal = CreateFileHelper.createFile(tempDir.resolve("uuidNormal"))
-        final Path uuidPathSingleCell = CreateFileHelper.createFile(tempDir.resolve("uuidSingleCell"))
+        final Path uuidPath = CreateFileHelper.createFile(tempDir.resolve("uuid"))
         final String viewByPidPathNormal = "/tmp/viewByPidNormal"
         final String viewByPidPathSingleCell = "/tmp/viewByPidSingleCell"
         final String wellPathSingleCell = "/tmp/wellSingleCell"
-        final Path fastqcPathNormal = CreateFileHelper.createFile(tempDir.resolve("fastqcNormal"))
-        final Path fastqcPathSingleCell = CreateFileHelper.createFile(tempDir.resolve("fastqcSingleCell"))
+        final Path fastqcPath = CreateFileHelper.createFile(tempDir.resolve("fastqc"))
         final Path finalMd5sumNormal = CreateFileHelper.createFile(tempDir.resolve("finalMd5sum"))
         final Path finalMd5sumSingleCell = CreateFileHelper.createFile(tempDir.resolve("finalMd5sumSingleCell"))
         final WorkflowRun fastqcRun = createWorkflowRun(workFolder: createWorkFolder())
@@ -449,12 +448,10 @@ class WithdrawHelperServiceSpec extends HibernateSpec implements FastqcDomainFac
         List<String> pathsToChangeGroup = [
                 finalPathNormal.toString(),
                 finalMd5sumNormal.toString(),
-                tempDir.toString(),
-                uuidPathNormal.toString(),
                 finalPathSingleCell.toString(),
                 finalMd5sumSingleCell.toString(),
-                tempDir.toString(),
-                uuidPathSingleCell.toString(),
+                fastqcPath.toString(),
+                uuidPath.toString(),
         ]
         List<String> pathsToDelete = [
                 viewByPidPathNormal,
@@ -475,12 +472,11 @@ class WithdrawHelperServiceSpec extends HibernateSpec implements FastqcDomainFac
         1 * service.lsdfFilesService.getWellAllFileViewByPidPath(singleCellDataFile) >> wellPathSingleCell
         0 * service.lsdfFilesService._
 
-        1 * service.fastqcDataFilesService.fastqcOutputPath(fastqcProcessedFile) >> fastqcPathNormal
-        1 * service.fastqcDataFilesService.fastqcOutputPath(singleCellFastqcProcessedFile) >> fastqcPathSingleCell
+        1 * service.fastqcDataFilesService.fastqcOutputDirectory(fastqcProcessedFile) >> fastqcPath
+        1 * service.fastqcDataFilesService.fastqcOutputDirectory(fastqcProcessedFile, PathOption.REAL_PATH) >> uuidPath
+        1 * service.fastqcDataFilesService.fastqcOutputDirectory(singleCellFastqcProcessedFile) >> fastqcPath
+        1 * service.fastqcDataFilesService.fastqcOutputDirectory(singleCellFastqcProcessedFile, PathOption.REAL_PATH) >> uuidPath
         0 * service.fastqcDataFilesService._
-
-        1 * service.filestoreService.getWorkFolderPath(fastqcRun) >> uuidPathNormal
-        1 * service.filestoreService.getWorkFolderPath(fastqcSingleCellRun) >> uuidPathSingleCell
 
         and:
         TestCase.assertContainSame(holder.pathsToChangeGroup, pathsToChangeGroup)

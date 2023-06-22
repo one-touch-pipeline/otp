@@ -25,6 +25,8 @@ import grails.gorm.transactions.Transactional
 import groovy.transform.CompileDynamic
 import groovy.transform.TupleConstructor
 
+import de.dkfz.tbi.otp.filestore.FilestoreService
+import de.dkfz.tbi.otp.filestore.PathOption
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
@@ -53,25 +55,29 @@ class FastqcDataFilesService {
     LsdfFilesService lsdfFilesService
     FileService fileService
     FileSystemService fileSystemService
+    FilestoreService filestoreService
 
-    Path fastqcOutputDirectory(FastqcProcessedFile fastqcProcessedFile) {
-        Path baseString = lsdfFilesService.getFileViewByPidDirectory(fastqcProcessedFile.dataFile)
+    Path fastqcOutputDirectory(FastqcProcessedFile fastqcProcessedFile, PathOption... options) {
+        if (options.contains(PathOption.REAL_PATH) && fastqcProcessedFile.workflowArtefact.producedBy.workFolder) {
+            return filestoreService.getWorkFolderPath(fastqcProcessedFile.workflowArtefact.producedBy)
+        }
+        Path baseString = lsdfFilesService.getRunDirectory(fastqcProcessedFile.dataFile)
         return baseString.resolve(FAST_QC_DIRECTORY_PART).resolve(fastqcProcessedFile.workDirectoryName)
     }
 
-    Path fastqcOutputPath(FastqcProcessedFile fastqcProcessedFile) {
+    Path fastqcOutputPath(FastqcProcessedFile fastqcProcessedFile, PathOption... options) {
         String fileName = fastqcFileName(fastqcProcessedFile)
-        return fastqcOutputDirectory(fastqcProcessedFile).resolve(fileName)
+        return fastqcOutputDirectory(fastqcProcessedFile, options).resolve(fileName)
     }
 
-    Path fastqcHtmlPath(FastqcProcessedFile fastqcProcessedFile) {
+    Path fastqcHtmlPath(FastqcProcessedFile fastqcProcessedFile, PathOption... options) {
         String fileName = fastqcFileNameWithoutZipSuffix(fastqcProcessedFile).concat(HTML_FILE_EXTENSION)
-        return fastqcOutputDirectory(fastqcProcessedFile).resolve(fileName)
+        return fastqcOutputDirectory(fastqcProcessedFile, options).resolve(fileName)
     }
 
-    Path fastqcOutputMd5sumPath(FastqcProcessedFile fastqcProcessedFile) {
+    Path fastqcOutputMd5sumPath(FastqcProcessedFile fastqcProcessedFile, PathOption... options) {
         String fileName = fastqcFileName(fastqcProcessedFile).concat(MD5SUM_FILE_EXTENSION)
-        return fastqcOutputDirectory(fastqcProcessedFile).resolve(fileName)
+        return fastqcOutputDirectory(fastqcProcessedFile, options).resolve(fileName)
     }
 
     protected String fastqcFileName(FastqcProcessedFile fastqcProcessedFile) {
