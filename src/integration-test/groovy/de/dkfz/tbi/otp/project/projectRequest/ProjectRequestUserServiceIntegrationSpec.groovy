@@ -76,7 +76,7 @@ class ProjectRequestUserServiceIntegrationSpec extends Specification implements 
         ProjectRequestUser result = projectRequestUserService.saveProjectRequestUserFromCommand(cmd)
 
         then:
-        1 * projectRequestUserService.userService.findUserByUsername(user.username) >> user
+        1 * projectRequestUserService.userService.findOrCreateUserWithLdapData(user.username) >> user
         ProjectRequestUser.count == 1
         result.user == user
         result.projectRoles.containsAll(projectRoles)

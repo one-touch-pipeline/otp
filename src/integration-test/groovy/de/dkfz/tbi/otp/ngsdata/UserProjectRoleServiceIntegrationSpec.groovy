@@ -559,7 +559,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
                 mail: mailOfUser,
         )
         userProjectRoleService.userService = new UserService()
-        userProjectRoleService.identityProvider = Mock(IdentityProvider) {
+        userProjectRoleService.userService.identityProvider = Mock(IdentityProvider) {
             getIdpUserDetailsByUsername(_) >> idpUserDetails
         }
 
@@ -593,7 +593,8 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
                 realName: user.realName,
                 mail: user.email,
         )
-        userProjectRoleService.identityProvider = Mock(IdentityProvider) {
+        userProjectRoleService.userService = new UserService()
+        userProjectRoleService.userService.identityProvider = Mock(IdentityProvider) {
             getIdpUserDetailsByUsername(_) >> idpUserDetails
         }
 
@@ -627,7 +628,8 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
         Project project = createProject()
         ProjectRole projectRole = createProjectRole()
-        userProjectRoleService.identityProvider = Mock(IdentityProvider) {
+        userProjectRoleService.userService = new UserService()
+        userProjectRoleService.userService.identityProvider = Mock(IdentityProvider) {
             getIdpUserDetailsByUsername(_) >> null
         }
 
@@ -659,7 +661,8 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
                 projectRoles: [pi],
                 manageUsers: true
         )
-        userProjectRoleService.identityProvider = Mock(IdentityProvider) {
+        userProjectRoleService.userService = new UserService()
+        userProjectRoleService.userService.identityProvider = Mock(IdentityProvider) {
             getIdpUserDetailsByUsername(_) >> idpUserDetails
             getGroupsOfUser(_) >> []
         }
@@ -706,7 +709,8 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
                 mail: user.email,
         )
 
-        userProjectRoleService.identityProvider = Mock(IdentityProvider) {
+        userProjectRoleService.userService = new UserService()
+        userProjectRoleService.userService.identityProvider = Mock(IdentityProvider) {
             getIdpUserDetailsByUsername(_) >> idpUserDetails
         }
 

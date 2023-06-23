@@ -467,6 +467,26 @@ class ProcessingOption implements Entity {
                 Necessity.OPTIONAL, "", TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
         ),
 
+        DEPARTMENT_WITH_ALL_INFO_SCRIPT(
+                "The Script to be executed that provides a list of all Organizational Units with corresponding info. Result has to be JSON.",
+                Necessity.OPTIONAL, "", TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
+        ),
+        ORGANIZATIONAL_UNIT_KEY_NAME(
+                "The Key that is used inside the JSON returned by DEPARTMENT_WITH_ALL_INFO_SCRIPT " +
+                        "to describe the Organizational Unit.",
+                Necessity.OPTIONAL, "", TypeValidators.SINGLE_WORD_TEXT_OPTIONAL
+        ),
+        COST_CENTER_KEY_NAME(
+                "The Key that is used inside the JSON returned by DEPARTMENT_WITH_ALL_INFO_SCRIPT " +
+                        "to describe the Cost Center.",
+                Necessity.OPTIONAL, "", TypeValidators.SINGLE_WORD_TEXT_OPTIONAL
+        ),
+        DEPARTMENT_HEAD_KEY_NAME(
+                "The Key that is used inside the JSON returned by DEPARTMENT_WITH_ALL_INFO_SCRIPT " +
+                        "to describe the Department Head.",
+                Necessity.OPTIONAL, "", TypeValidators.SINGLE_WORD_TEXT_OPTIONAL
+        ),
+
         // cluster job scheduler
         CLUSTER_SUBMISSIONS_OPTION(
                 "Resource requests for job submission, as JSON map",

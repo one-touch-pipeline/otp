@@ -30,7 +30,6 @@ import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.security.user.identityProvider.IdentityProvider
 import de.dkfz.tbi.otp.security.user.identityProvider.data.IdpUserDetails
 import de.dkfz.tbi.otp.utils.CollectionUtils
-import de.dkfz.tbi.otp.utils.exceptions.RightsNotGrantedException
 
 /**
  * @short Service for User administration.
@@ -224,7 +223,7 @@ No user exists yet, create user ${currentUser} with admin rights.
         }
     }
 
-    User findUserByUsername(String username) {
+    User findOrCreateUserWithLdapData(String username) {
         IdpUserDetails idpUserDetails = identityProvider.getIdpUserDetailsByUsername(username)
         if (!idpUserDetails) {
             throw new LdapUserCreationException("'${username}' can not be resolved to a user via LDAP")
@@ -235,42 +234,5 @@ No user exists yet, create user ${currentUser} with admin rights.
 
         return CollectionUtils.atMostOneElement(User.findAllByUsername(idpUserDetails.username)) ?:
                 createUser(idpUserDetails.username, idpUserDetails.mail, idpUserDetails.realName)
-    }
-
-    boolean isPI(User user) {
-        return !Department.findAllByDepartmentHead(user).isEmpty() || !PIUser.findAllByDeputyPI(user).isEmpty()
-    }
-
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#departmentHead, 'IS_DEPARTMENT_HEAD')")
-    void grantDeputyPIRights(User departmentHead, User deputyPI) {
-        assert departmentHead : "Department Head cannot be null"
-        assert deputyPI : "Deputy PI cannot be null"
-        if (departmentHead.headOfDepartment) {
-            new PIUser([pi: departmentHead, deputyPI: deputyPI, dateRightsGranted: new Date()]).save(flush: true)
-        } else {
-            throw new RightsNotGrantedException('The deputy PI was not granted rights because the supplied department head is not the head of any department')
-        }
-    }
-
-    // deletes records from PIUser table if a department head revokes rights for a deputyPI
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#departmentHead, 'IS_DEPARTMENT_HEAD')")
-    void revokeDeputyPIRights(User departmentHead, User deputyPI) {
-        assert departmentHead : "Department Head cannot be null"
-        assert deputyPI : "Deputy PI cannot be null"
-        PIUser.findAllByPiAndDeputyPI(departmentHead, deputyPI)*.delete(flush: true)
-    }
-
-    // deletes all records that match the deputy PI from PIUser table
-    @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    void revokeDeputyPIRights(User deputyPI) {
-        assert deputyPI : "Deputy PI cannot be null"
-        PIUser.findAllByDeputyPI(deputyPI)*.delete(flush: true)
-    }
-
-    // deletes all records from PIUser table if the department head is no longer the head of the department
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#departmentHead, 'IS_DEPARTMENT_HEAD')")
-    void revokeDeputyPIRightsForHead(User departmentHead) {
-        assert departmentHead : "Department Head cannot be null"
-        PIUser.findAllByPi(departmentHead)*.delete(flush: true)
     }
 }

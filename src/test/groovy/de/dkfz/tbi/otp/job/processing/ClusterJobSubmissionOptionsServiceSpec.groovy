@@ -27,7 +27,7 @@ class ClusterJobSubmissionOptionsServiceSpec extends Specification {
 
     void "test jsonStringToMap"() {
         expect:
-        expected == ClusterJobSubmissionOptionsService.convertJsonStringToMap(jsonString)
+        expected == ClusterJobSubmissionOptionsService.convertJsonObjectStringToMap(jsonString)
 
         where:
         jsonString                           || expected
@@ -39,7 +39,7 @@ class ClusterJobSubmissionOptionsServiceSpec extends Specification {
 
     void "test validateOptionString, valid string"() {
         expect:
-        !ClusterJobSubmissionOptionsService.validateJsonString(jsonString)
+        !ClusterJobSubmissionOptionsService.validateJsonObjectString(jsonString)
 
         where:
         jsonString                           | _
@@ -51,7 +51,7 @@ class ClusterJobSubmissionOptionsServiceSpec extends Specification {
 
     void "test validateOptionString, invalid string"() {
         expect:
-        ClusterJobSubmissionOptionsService.validateJsonString(jsonString)
+        ClusterJobSubmissionOptionsService.validateJsonObjectString(jsonString)
 
         where:
         jsonString                           | _

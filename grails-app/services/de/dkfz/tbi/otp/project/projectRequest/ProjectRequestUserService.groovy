@@ -37,7 +37,7 @@ class ProjectRequestUserService {
 
     ProjectRequestUser saveProjectRequestUserFromCommand(ProjectRequestUserCommand cmd) {
         if (cmd.username) {
-            User user = userService.findUserByUsername(cmd.username)
+            User user = userService.findOrCreateUserWithLdapData(cmd.username)
             Map<String, Object> projectRequestUserParameters = [
                     user                  : user,
                     projectRoles          : cmd.projectRoles,

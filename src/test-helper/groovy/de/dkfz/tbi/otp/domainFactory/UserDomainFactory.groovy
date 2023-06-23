@@ -112,6 +112,7 @@ trait UserDomainFactory implements DomainFactoryCore {
         return createDomainObject(Department, [
                 ouNumber: "OU${nextId}",
                 costCenter: "${nextId}",
+                departmentHead: { createUser() },
         ], properties)
     }
 

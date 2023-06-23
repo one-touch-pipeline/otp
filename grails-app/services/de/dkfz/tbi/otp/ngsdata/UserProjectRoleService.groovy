@@ -35,7 +35,6 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.security.user.UserService
 import de.dkfz.tbi.otp.security.user.identityProvider.IdentityProvider
-import de.dkfz.tbi.otp.security.user.identityProvider.data.IdpUserDetails
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 
@@ -130,7 +129,7 @@ class UserProjectRoleService {
     void addUserToProjectAndNotifyGroupManagementAuthority(Project project, Set<ProjectRole> projectRolesSet, String username, Map<String, Boolean> flags = [:])
             throws AssertionError {
         assert project: "project must not be null"
-        User user = createUserWithLdapData(username)
+        User user = userService.findOrCreateUserWithLdapData(username)
 
         applyToRelatedProjects(project.unixGroup) { Project p ->
             createUserProjectRole(user, p, projectRolesSet, flags)
@@ -142,19 +141,6 @@ class UserProjectRoleService {
         }
 
         notifyProjectAuthoritiesAndUser(userProjectRole)
-    }
-
-    User createUserWithLdapData(String username) {
-        IdpUserDetails idpUserDetails = identityProvider.getIdpUserDetailsByUsername(username)
-        if (!idpUserDetails) {
-            throw new LdapUserCreationException("'${username}' can not be resolved to a user via LDAP")
-        }
-        if (!idpUserDetails.mail) {
-            throw new LdapUserCreationException("Could not get a mail for '${username}' via LDAP")
-        }
-
-        return CollectionUtils.atMostOneElement(User.findAllByUsername(idpUserDetails.username)) ?:
-                userService.createUser(idpUserDetails.username, idpUserDetails.mail, idpUserDetails.realName)
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'MANAGE_USERS')")

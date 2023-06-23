@@ -240,7 +240,7 @@ class SecurityConfiguration {
                     OidcIdToken idToken = oidcUserAuthority.idToken
 
                     SessionUtils.withNewSession {
-                        userService.findUserByUsername(idToken.preferredUsername).authorities.each { Role role ->
+                        userService.findOrCreateUserWithLdapData(idToken.preferredUsername).authorities.each { Role role ->
                             mappedAuthorities.add(new SimpleGrantedAuthority(role.authority))
                         }
                     }

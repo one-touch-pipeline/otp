@@ -40,7 +40,7 @@ class ClusterJobSubmissionOptionsService {
     ProcessingOptionService processingOptionService
 
     Map<JobSubmissionOption, String> readDefaultOptions(Realm realm) {
-        return convertJsonStringToMap(realm.defaultJobSubmissionOptions)
+        return convertJsonObjectStringToMap(realm.defaultJobSubmissionOptions)
     }
 
     /**
@@ -61,14 +61,14 @@ class ClusterJobSubmissionOptionsService {
         Map<JobSubmissionOption, String> options = readDefaultOptions(realm)
 
         // options for the job class
-        options.putAll(convertJsonStringToMap(
+        options.putAll(convertJsonObjectStringToMap(
                 processingOptionService.findOptionAsString(OptionName.CLUSTER_SUBMISSIONS_OPTION, "${jobClass}"))
         )
 
         if (seqType) {
             assert seqType.processingOptionName
             // options for the job class and SeqType
-            options.putAll(convertJsonStringToMap(
+            options.putAll(convertJsonObjectStringToMap(
                     processingOptionService.findOptionAsString(OptionName.CLUSTER_SUBMISSIONS_OPTION, "${jobClass}_${seqType.processingOptionName}"))
             )
         }
@@ -76,7 +76,7 @@ class ClusterJobSubmissionOptionsService {
         return options
     }
 
-    static Map<JobSubmissionOption, String> convertJsonStringToMap(String jsonString) {
+    static Map<JobSubmissionOption, String> convertJsonObjectStringToMap(String jsonString) {
         if (!jsonString) {
             return [:]
         }
@@ -86,10 +86,10 @@ class ClusterJobSubmissionOptionsService {
         } catch (ConverterException e) {
             throw new IllegalArgumentException("The string is no valid JSON string", e)
         }
-        return convertJsonStringToMap(jsonElement)
+        return convertJsonObjectStringToMap(jsonElement)
     }
 
-    static Map<JobSubmissionOption, String> convertJsonStringToMap(JSONElement jsonElement) {
+    static Map<JobSubmissionOption, String> convertJsonObjectStringToMap(JSONElement jsonElement) {
         if (!(jsonElement instanceof JSONObject)) {
             throw new IllegalArgumentException("The JSON string doesn't contain a map")
         }
@@ -106,9 +106,9 @@ class ClusterJobSubmissionOptionsService {
         }
     }
 
-    static String validateJsonString(String s) {
+    static String validateJsonObjectString(String s) {
         try {
-            convertJsonStringToMap(s)
+            convertJsonObjectStringToMap(s)
             return null
         } catch (Exception e) {
             return e.message

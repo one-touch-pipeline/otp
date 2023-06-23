@@ -66,7 +66,7 @@ enum TypeValidators {
 
     PLUGIN({ it ==~ /^\d+\.\d+\.\d+(\-\d+)?$/ }, null),
 
-    CLUSTER_JOB_SUBMISSION_OPTION({ !ClusterJobSubmissionOptionsService.validateJsonString(it) }, null),
+    CLUSTER_JOB_SUBMISSION_OPTION({ !ClusterJobSubmissionOptionsService.validateJsonObjectString(it) }, null),
 
     SSH_AUTH_METHOD({ SshAuthMethod.getByConfigName(it) }, { SshAuthMethod.values()*.name() }),
 

@@ -57,10 +57,10 @@ abstract class AbstractExecuteClusterPipelineJob extends AbstractExecutePipeline
     }
 
     private Map<JobSubmissionOption, String> getJobSubmissionOptions(WorkflowRun run) {
-        Map<JobSubmissionOption, String> options = ClusterJobSubmissionOptionsService.convertJsonStringToMap(run.realm.defaultJobSubmissionOptions)
+        Map<JobSubmissionOption, String> options = ClusterJobSubmissionOptionsService.convertJsonObjectStringToMap(run.realm.defaultJobSubmissionOptions)
         JSONElement config = JSON.parse(run.combinedConfig)[ExternalWorkflowConfigFragment.Type.OTP_CLUSTER.name()] as JSONElement
         if (config) {
-            options.putAll(ClusterJobSubmissionOptionsService.convertJsonStringToMap(config))
+            options.putAll(ClusterJobSubmissionOptionsService.convertJsonObjectStringToMap(config))
         }
         return options
     }

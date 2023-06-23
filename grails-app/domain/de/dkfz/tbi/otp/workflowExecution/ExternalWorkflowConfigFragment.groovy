@@ -131,7 +131,7 @@ class ExternalWorkflowConfigFragment implements Commentable, Deprecateable<Exter
     enum Type {
         /** used for jobs that are submitted directly to cluster by OTP */
         OTP_CLUSTER({ String s ->
-            String validation = ClusterJobSubmissionOptionsService.validateJsonString(s)
+            String validation = ClusterJobSubmissionOptionsService.validateJsonObjectString(s)
             if (validation) {
                 Set<String> validationSet = []
                 validationSet.add(validation)
