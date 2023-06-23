@@ -28,7 +28,7 @@ build-base-image:
   stage: build
   needs: []
   variables:
-    IMAGE_NAME: otp-ci-java-11
+    IMAGE_NAME: otp-ci-java-17
   script:
     - CURRENT_DATE_TAG=$(date '+%Y-%m-%d')
     - mkdir -p /kaniko/.docker

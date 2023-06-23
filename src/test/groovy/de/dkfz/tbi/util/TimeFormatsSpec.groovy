@@ -100,9 +100,9 @@ class TimeFormatsSpec extends Specification {
 
         where:
         date                                                                         | formatLocalDateTime
-        new LocalDateTime(new LocalDate(2000, 1, 1), new LocalTime(0, 0, 0, 0))      | '2000-01-01-00-00-00-000'
-        new LocalDateTime(new LocalDate(2000, 5, 15), new LocalTime(16, 23, 48, 0))  | '2000-05-15-16-23-48-000'
-        new LocalDateTime(new LocalDate(2000, 12, 31), new LocalTime(23, 59, 59, 0)) | '2000-12-31-23-59-59-000'
+        LocalDateTime.of(LocalDate.of(2000, 1, 1), LocalTime.of(0, 0, 0, 0))      | '2000-01-01-00-00-00-000'
+        LocalDateTime.of(LocalDate.of(2000, 5, 15), LocalTime.of(16, 23, 48, 0))  | '2000-05-15-16-23-48-000'
+        LocalDateTime.of(LocalDate.of(2000, 12, 31), LocalTime.of(23, 59, 59, 0)) | '2000-12-31-23-59-59-000'
     }
 
     @Unroll

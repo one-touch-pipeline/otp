@@ -194,8 +194,7 @@ class KeycloakService implements IdentityProvider {
     private IdpUserDetails castKeycloakUserIntoIdpUserDetails(KeycloakUser keycloakUser) {
         String realName = keycloakUser.firstName && keycloakUser.lastName ? "${keycloakUser.firstName} ${keycloakUser.lastName}" : keycloakUser.username
         String department = keycloakUser.attributes && keycloakUser.attributes.department ? keycloakUser.attributes.department.first() : ""
-        byte[] thumbnailPhoto = keycloakUser.attributes && keycloakUser.attributes.thumbnailPhoto ?
-                keycloakUser.attributes.thumbnailPhoto.first().bytes : new byte[0]
+        String thumbnailPhoto = keycloakUser.attributes && keycloakUser.attributes.thumbnailPhoto ? keycloakUser.attributes.thumbnailPhoto.first() : ""
         List<String> memberOfGroupList = keycloakUser.attributes && keycloakUser.attributes.memberOf ? keycloakUser.attributes.memberOf : []
 
         return new IdpUserDetails([

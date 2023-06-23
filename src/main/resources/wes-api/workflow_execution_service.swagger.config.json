@@ -1,6 +1,6 @@
 {
   "library": "resttemplate",
-  "dateLibrary": "java11-localdatetime",
+  "dateLibrary": "java17-localdatetime",
   "modelPackage": "io.swagger.client.wes.model",
   "apiPackage": "io.swagger.client.wes.api",
   "invokerPackage": "io.swagger.client.wes"

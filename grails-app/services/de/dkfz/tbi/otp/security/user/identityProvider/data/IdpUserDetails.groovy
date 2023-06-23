@@ -33,7 +33,7 @@ class IdpUserDetails {
     String realName
     String mail
     String department
-    byte[] thumbnailPhoto
+    String thumbnailPhoto
     boolean deactivated
     List<String> memberOfGroupList
 }

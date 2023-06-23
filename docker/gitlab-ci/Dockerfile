@@ -18,7 +18,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-FROM azul/zulu-openjdk-centos:11-latest
+FROM azul/zulu-openjdk-centos:17-latest
 MAINTAINER OTP Developers <otp-devel@dkfz-heidelberg.de>
 
 RUN rpm -ivh http://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm

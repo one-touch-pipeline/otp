@@ -21,7 +21,7 @@
 # This Docker image takes a prebuilt war file and deploys it on a production like tomcat server.
 # It is helpful to test scenarios in a prod-like way. Hot reloading is not available.
 
-FROM tomcat:8.5-jre11
+FROM tomcat:8.5-jre17
 
 COPY .otp.war.properties /root/.otp.properties
 COPY build/libs/otp.war /usr/local/tomcat/webapps/

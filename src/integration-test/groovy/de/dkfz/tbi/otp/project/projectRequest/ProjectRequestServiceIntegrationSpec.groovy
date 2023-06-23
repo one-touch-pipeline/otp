@@ -542,7 +542,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         where:
         storagePeriod              | storageUntil               | resultStorageUntil            | projectRequestExists
         StoragePeriod.TEN_YEARS    | null                       | LocalDate.now().plusYears(10) | true
-        StoragePeriod.USER_DEFINED | new LocalDate(2000, 12, 1) | storageUntil                  | true
+        StoragePeriod.USER_DEFINED | LocalDate.of(2000, 12, 1) | storageUntil                  | true
         StoragePeriod.INFINITELY   | null                       | null                          | false
     }
 

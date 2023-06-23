@@ -833,7 +833,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
         then:
         project.alignmentDeciderBeanName == AlignmentDeciderBeanName.NO_ALIGNMENT
-        ReferenceGenomeProjectSeqType.findAllByProject(project).size == 0
+        ReferenceGenomeProjectSeqType.findAllByProject(project).size() == 0
     }
 
     void "test configureDefaultOtpAlignmentDecider valid input"() {

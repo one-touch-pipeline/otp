@@ -44,8 +44,8 @@ class DateFieldDefinitionSpec extends AbstractFieldDefinitionSpec {
         DateFieldDefinition definition = createDateFieldDefinition()
 
         when:
-        definition.defaultDateValue = new LocalDate(2020, 2, 3)
-        definition.allowedDateValues = [new LocalDate(2020, 1, 1), new LocalDate(2020, 2, 3), new LocalDate(2020, 4, 5)]
+        definition.defaultDateValue = LocalDate.of(2020, 2, 3)
+        definition.allowedDateValues = [LocalDate.of(2020, 1, 1), LocalDate.of(2020, 2, 3), LocalDate.of(2020, 4, 5)]
         definition.validate()
 
         then:
@@ -57,8 +57,8 @@ class DateFieldDefinitionSpec extends AbstractFieldDefinitionSpec {
         DateFieldDefinition definition = createDateFieldDefinition()
 
         when:
-        definition.defaultDateValue = new LocalDate(2020, 2, 3)
-        definition.allowedDateValues = [new LocalDate(2020, 1, 1), new LocalDate(2020, 4, 5)]
+        definition.defaultDateValue = LocalDate.of(2020, 2, 3)
+        definition.allowedDateValues = [LocalDate.of(2020, 1, 1), LocalDate.of(2020, 4, 5)]
 
         then:
         TestCase.assertValidateError(definition, 'allowedDateValues', 'validator.defaultValue.not.in.allowedValues')

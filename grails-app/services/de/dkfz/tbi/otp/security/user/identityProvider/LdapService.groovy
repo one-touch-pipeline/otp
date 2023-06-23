@@ -331,12 +331,13 @@ class LdapUserDetailsAttributesMapper extends AbstractLdapServiceAwareAttributes
         String givenName = a.get(LdapKey.GIVEN_NAME)?.get()
         String sn = a.get(LdapKey.SURNAME)?.get()
         boolean realNameCreatable = givenName && sn
+
         return new IdpUserDetails([
                 username         : a.get(ldapService.configService.ldapSearchAttribute)?.get()?.toString(),
                 realName         : realNameCreatable ? "${givenName} ${sn}" : null,
                 mail             : a.get(LdapKey.MAIL)?.get()?.toString(),
-                department       : a.get(LdapKey.DEPARTMENT)?.get()?.toString(),
-                thumbnailPhoto   : a.get(LdapKey.THUMBNAIL_PHOTO)?.get() as byte[],
+                department       : a.get(LdapKey.DEPARTMENT) ? a.get(LdapKey.DEPARTMENT)?.get()?.toString() : "",
+                thumbnailPhoto   : a.get(LdapKey.THUMBNAIL_PHOTO) ? a.get(LdapKey.THUMBNAIL_PHOTO)?.get()?.toString() : "",
                 deactivated      : deactivated,
                 memberOfGroupList: memberOfList,
         ])
