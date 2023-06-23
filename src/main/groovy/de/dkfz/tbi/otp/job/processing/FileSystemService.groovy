@@ -21,14 +21,12 @@
  */
 package de.dkfz.tbi.otp.job.processing
 
-import com.github.robtimus.filesystems.sftp.SFTPEnvironment
-import com.github.robtimus.filesystems.sftp.SFTPFileSystemProvider
+import com.github.robtimus.filesystems.sftp.*
 import com.jcraft.jsch.IdentityRepository
 import com.jcraft.jsch.agentproxy.*
 import grails.core.GrailsApplication
 import grails.gorm.transactions.Transactional
 import grails.util.Environment
-import groovy.transform.CompileDynamic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.scheduling.annotation.Scheduled
@@ -39,15 +37,14 @@ import de.dkfz.tbi.otp.config.SshAuthMethod
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.infrastructure.LoginFailedRemoteFileSystemException
+import de.dkfz.tbi.otp.infrastructure.RealmService
 import de.dkfz.tbi.otp.ngsdata.Realm
-import de.dkfz.tbi.otp.utils.CollectionUtils
 
 import java.nio.file.*
 
 import static com.github.robtimus.filesystems.sftp.Identity.fromFiles
 import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
 
-@CompileDynamic
 @Slf4j
 @Component
 @Transactional
@@ -62,6 +59,9 @@ class FileSystemService {
     @Autowired
     ProcessingOptionService processingOptionService
 
+    @Autowired
+    RealmService realmService
+
     private Map<Realm, FileSystem> createdFileSystems = [:]
 
     /**
@@ -73,8 +73,8 @@ class FileSystemService {
         FileSystem fileSystem = createdFileSystems[realm]
         if (fileSystem == null || !fileSystem.isOpen()) {
             SFTPEnvironment env = new SFTPEnvironment()
+                    .withPoolConfig(poolConfig)
                     .withUsername(configService.sshUser)
-                    .withClientConnectionCount(processingOptionService.findOptionAsInteger(MAXIMUM_SFTP_CONNECTIONS))
             Properties config = new Properties()
 
             switch (configService.sshAuthenticationMethod) {
@@ -110,9 +110,8 @@ class FileSystemService {
     }
 
     FileSystem getRemoteFileSystemOnDefaultRealm() throws Throwable {
-        String realmName = processingOptionService.findOptionAsString(REALM_DEFAULT_VALUE)
-        Realm realm = CollectionUtils.exactlyOneElement(Realm.findAllByName(realmName),
-                "Default realm could not be resolved")
+        Realm realm = configService.defaultRealm
+        assert realm: "Default realm could not be resolved"
         return getFilesystem(realm)
     }
 
@@ -132,8 +131,8 @@ class FileSystemService {
     FileSystem getRealmOrLocalFileSystemByProcessingOption(ProcessingOption.OptionName optionName) throws Throwable {
         String realmName = processingOptionService.findOptionAsString(optionName)
         if (realmName) {
-            Realm realm = CollectionUtils.exactlyOneElement(Realm.findAllByName(realmName),
-                    "Default realm could not be resolved")
+            Realm realm = realmService.getRealmByName(realmName)
+            assert realm: "Default realm could not be resolved"
             return getFilesystem(realm)
         }
         return FileSystems.default
@@ -196,5 +195,12 @@ class FileSystemService {
             log.debug("closing sftp filesystems for realm ${realm}")
             fileSystem.close()
         }
+    }
+
+    // Return the static connection pool configs
+    private SFTPPoolConfig getPoolConfig() {
+        return SFTPPoolConfig.custom()
+                .withMaxSize(processingOptionService.findOptionAsInteger(MAXIMUM_SFTP_CONNECTIONS))
+                .build()
     }
 }

@@ -305,7 +305,7 @@ dependencies {
     implementation 'com.jcraft:jsch:0.1.55'
     implementation "com.jcraft:jsch.agentproxy.jsch:0.0.9"
     implementation "com.jcraft:jsch.agentproxy.connector-factory:0.0.9"
-    implementation 'com.github.robtimus:sftp-fs:1.2.1'
+    implementation 'com.github.robtimus:sftp-fs:3.2'
 
     // library for easy HTML editing
     implementation 'org.jsoup:jsoup:1.16.1'
