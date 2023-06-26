@@ -41,6 +41,8 @@ updates:
       # Grails/GORM is closely coupled with hibernate and do not allow major updates
       - dependency-name: "org.hibernate:hibernate-core"
         update-types: ["version-update:semver-major"]
+      - dependency-name: "org.liquibase:liquibase-core"
+        update-types: [ "version-update:semver-major", "version-update:semver-minor" ]
     rebase-strategy: none
 
   - package-ecosystem: npm
