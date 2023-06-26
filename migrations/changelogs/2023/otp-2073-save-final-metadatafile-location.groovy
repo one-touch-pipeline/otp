@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,40 +19,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.ngsdata
-
-import grails.gorm.hibernate.annotation.ManagedEntity
-
-import de.dkfz.tbi.otp.utils.Entity
-
-@ManagedEntity
-class MetaDataFile implements Entity {
-
-    String filePathSource
-    String fileNameSource
-
-    String filePathTarget
-
-    /**
-     * Will only be filled by metadata import 2.0.
-     * For metadata import 1.0 this field will stay null.
-     */
-    String md5sum
-
-    FastqImportInstance fastqImportInstance
-
-    static belongsTo = [
-        fastqImportInstance: FastqImportInstance,
-    ]
-
-    static constraints = {
-        fileNameSource(blank: false, shared: "pathComponent")
-        filePathSource(blank: true, shared: "absolutePath")
-        filePathTarget(nullable: true, shared: "absolutePath")
-        md5sum(nullable: true, matches: /^[0-9a-f]{32}$/)
-    }
-
-    static mapping = {
-        fastqImportInstance index: "meta_data_file_fastq_import_instance_idx"
+databaseChangeLog = {
+    changeSet(author: "-", id: "16794064537063-75b") {
+        sql("""
+ALTER TABLE meta_data_file RENAME COLUMN file_name TO file_name_source;
+ALTER TABLE meta_data_file RENAME COLUMN file_path TO file_path_source;
+ALTER TABLE meta_data_file ADD COLUMN file_path_target VARCHAR(255);
+""")
     }
 }

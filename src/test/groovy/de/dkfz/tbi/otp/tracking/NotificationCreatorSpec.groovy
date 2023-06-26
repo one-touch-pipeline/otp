@@ -302,7 +302,7 @@ ILSe 5678, runA, lane 1, ${sampleText}
         then:
         1 * notificationCreator.mailHelperService.sendEmailToTicketSystem(_, _) >> { String emailSubject, String content ->
             assert emailSubject.startsWith("[${ticketPrefix}#${ticket.ticketNumber}]")
-            assert emailSubject.contains("Workflow created successfully for ${metaDataFile.fileName}")
+            assert emailSubject.contains("Workflow created successfully for ${metaDataFile.fileNameSource}")
             assert content.contains("The workflow creation succeeded:")
             assert content.contains("Import id: ${metaDataFile.fastqImportInstance.id}")
             assert content.contains(message)
@@ -330,7 +330,7 @@ ILSe 5678, runA, lane 1, ${sampleText}
         then:
         1 * notificationCreator.mailHelperService.sendEmailToTicketSystem(_, _) >> { String emailSubject, String content ->
             assert emailSubject.startsWith("[${ticketPrefix}#${ticket.ticketNumber}]")
-            assert emailSubject.contains("Failed to create workflows for ${metaDataFile.fileName}")
+            assert emailSubject.contains("Failed to create workflows for ${metaDataFile.fileNameSource}")
             assert content.contains("The workflow creation failed:")
             assert content.contains("Import id: ${metaDataFile.fastqImportInstance.id}")
             assert content.contains("ctx.fastqImportInstanceService.updateState(FastqImportInstance.get(${metaDataFile.fastqImportInstance.id}), " +

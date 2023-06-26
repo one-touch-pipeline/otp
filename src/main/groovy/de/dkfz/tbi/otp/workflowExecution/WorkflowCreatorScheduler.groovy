@@ -103,17 +103,17 @@ class WorkflowCreatorScheduler {
 
             notificationCreator.sendWorkflowCreateSuccessMail(metaDataFile, message)
         } catch (Throwable throwable) {
-            log.debug("  failed workflow creation for ${metaDataFile.fileName}", throwable)
+            log.debug("  failed workflow creation for ${metaDataFile.fileNameSource}", throwable)
             try {
                 notificationCreator.sendWorkflowCreateErrorMail(metaDataFile, throwable)
             } catch (Throwable throwable2) {
-                log.debug("  failed error notification for workflow creation of ${metaDataFile.fileName}", throwable2)
+                log.debug("  failed error notification for workflow creation of ${metaDataFile.fileNameSource}", throwable2)
                 throw throwable2
             }
             try {
                 fastqImportInstanceService.updateState(metaDataFile.fastqImportInstance, FastqImportInstance.WorkflowCreateState.FAILED)
             } catch (Throwable throwable2) {
-                log.debug("  failed update status for failed workflow creation of ${metaDataFile.fileName}", throwable2)
+                log.debug("  failed update status for failed workflow creation of ${metaDataFile.fileNameSource}", throwable2)
                 throw throwable2
             }
         }
@@ -126,7 +126,7 @@ class WorkflowCreatorScheduler {
         FastqImportInstance fastqImportInstance = metaDataFileFromDb.fastqImportInstance
         int count = fastqImportInstance.dataFiles.size()
 
-        log.debug("create workflows starts for ${metaDataFileFromDb.fileName} " +
+        log.debug("create workflows starts for ${metaDataFileFromDb.fileNameSource} " +
                 "(dataFiles: ${count}, ${fastqImportInstanceService.countInstancesInWaitingState()} in queue)")
         log.debug("  create workflow runs started")
         List<WorkflowRun> runs = dataInstallationInitializationService.createWorkflowRuns(fastqImportInstance)
@@ -139,7 +139,7 @@ class WorkflowCreatorScheduler {
         createSamplePairs(deciderResult.newArtefacts, count)
 
         fastqImportInstanceService.updateState(fastqImportInstance, FastqImportInstance.WorkflowCreateState.SUCCESS)
-        log.debug("create workflows finishs for ${metaDataFileFromDb.fileName} " +
+        log.debug("create workflows finishs for ${metaDataFileFromDb.fileNameSource} " +
                 "(dataFiles: ${count}, ${fastqImportInstanceService.countInstancesInWaitingState()} in queue)")
         return deciderResult
     }

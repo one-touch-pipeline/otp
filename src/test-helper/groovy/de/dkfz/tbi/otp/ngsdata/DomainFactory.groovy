@@ -1830,8 +1830,9 @@ class DomainFactory {
 
     static MetaDataFile createMetaDataFile(Map properties = [:]) {
         return createDomainObject(MetaDataFile, [
-                fileName           : "MetaDataFileName_${counter++}",
-                filePath           : TestCase.uniqueNonExistentPath.path,
+                fileNameSource     : "MetaDataFileName_${counter++}",
+                filePathSource     : TestCase.uniqueNonExistentPath.path,
+                filePathTarget     : TestCase.uniqueNonExistentPath.path,
                 fastqImportInstance: { createFastqImportInstance() },
         ], properties)
     }

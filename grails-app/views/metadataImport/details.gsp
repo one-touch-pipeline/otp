@@ -106,7 +106,8 @@
     <ul>
         <g:each in="${metaDataDetails.metaDataFileWrapper}" var="file">
             <li>
-                ${file.fullPath}<br>
+                <g:message code="metadataImport.details.fullPathSource"/>: ${file.fullPathSource}<br>
+                <g:message code="metadataImport.details.fullPathTarget"/>: ${file.fullPathTarget}<br>
                 <g:message code="metadataImport.details.dateCreated"/>: ${file.dateCreated}<br>
                 <g:message code="metadataImport.details.md5"/>: ${file.metaDataFile.md5sum ?: "-"}
             </li>

@@ -190,8 +190,9 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
 
         MetaDataFile metadataFileObject = new MetaDataFile()
         MetadataImportService service = Spy(MetadataImportService) {
-            1 * importMetadataFile(_, FastqImportInstance.ImportMode.MANUAL, TICKET_NUMBER, null, automaticNotification) >> metadataFileObject
-            1 * copyMetadataFile(_, TICKET_NUMBER) >> null
+            1 * createPathTargetForMetadataFile(_, TICKET_NUMBER) >> null
+            1 * importMetadataFile(_, FastqImportInstance.ImportMode.MANUAL, TICKET_NUMBER, null, automaticNotification, _) >> metadataFileObject
+            1 * copyMetadataFile(_, _) >> null
         }
         service.fileSystemService = new TestFileSystemService()
         service.configService = new TestConfigService()
@@ -272,14 +273,14 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
         int imported = 0
 
         MetadataImportService service = Spy(MetadataImportService) {
-            2 * copyMetadataFile(_, TICKET_NUMBER) >> null
+            2 * copyMetadataFile(_, _) >> null
             1 * validateWithAuth(contentWithProblems[0], directoryStructureName, false) >> { assert imported == 0; context1 }
             1 * validateWithAuth(contentWithProblems[1], directoryStructureName, false) >> { assert imported == 0; context2 }
-            1 * importMetadataFile(context1, FastqImportInstance.ImportMode.MANUAL, TICKET_NUMBER, null, true) >> {
+            1 * importMetadataFile(context1, FastqImportInstance.ImportMode.MANUAL, TICKET_NUMBER, null, true, _) >> {
                 imported++
                 metadataFile1
             }
-            1 * importMetadataFile(context2, FastqImportInstance.ImportMode.MANUAL, TICKET_NUMBER, null, true) >> {
+            1 * importMetadataFile(context2, FastqImportInstance.ImportMode.MANUAL, TICKET_NUMBER, null, true, _) >> {
                 imported++
                 metadataFile2
             }
@@ -315,11 +316,11 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
         DomainFactory.createDefaultRealmWithProcessingOption()
 
         MetadataImportService service = Spy(MetadataImportService) {
-            2 * copyMetadataFile(_, TICKET_NUMBER) >> null
+            2 * copyMetadataFile(_, _) >> null
             1 * validatePath(context1.metadataFile, DirectoryStructureBeanName.GPCF_SPECIFIC, _) >> context1
             1 * validatePath(context2.metadataFile, DirectoryStructureBeanName.GPCF_SPECIFIC, _) >> context2
-            1 * importMetadataFile(context1, FastqImportInstance.ImportMode.AUTOMATIC, TICKET_NUMBER, null, true) >> metadataFile1
-            1 * importMetadataFile(context2, FastqImportInstance.ImportMode.AUTOMATIC, TICKET_NUMBER, null, true) >> metadataFile2
+            1 * importMetadataFile(context1, FastqImportInstance.ImportMode.AUTOMATIC, TICKET_NUMBER, null, true, _) >> metadataFile1
+            1 * importMetadataFile(context2, FastqImportInstance.ImportMode.AUTOMATIC, TICKET_NUMBER, null, true, _) >> metadataFile2
         }
         service.fileSystemService = new TestFileSystemService()
         service.configService = new TestConfigService()
@@ -426,7 +427,8 @@ ${SPECIES}                      ${speciesImportAlias}                       ${sp
             }
         }
         MetadataImportService service = Spy(MetadataImportService) {
-            2 * copyMetadataFile(_, TICKET_NUMBER) >> null
+            2 * createPathTargetForMetadataFile(_, TICKET_NUMBER) >> tempDir.resolve("target.tsv")
+            2 * copyMetadataFile(_, _) >> null
             2 * getMetadataFilePathForIlseNumber(_, _) >> file1 >> file2
             _ * notifyAboutUnsetConfig(_, _, _) >> null
             _ * getDirectoryStructure(_) >> directoryStructure
@@ -480,7 +482,7 @@ ${SPECIES}                      ${speciesImportAlias}                       ${sp
 
         then:
         validateAndImportResults1.size() == 1
-        validateAndImportResults1[0].metadataFile.fileName == file1.fileName.toString()
+        validateAndImportResults1[0].metadataFile.fileNameSource == file1.fileName.toString()
         validateAndImportResults1[0].context.spreadsheet.dataRows.size() == 2
         validateAndImportResults1[0].context.spreadsheet.dataRows[0].cells[0].text == fastq11
         validateAndImportResults1[0].context.spreadsheet.dataRows[1].cells[0].text == fastq12
@@ -490,7 +492,7 @@ ${SPECIES}                      ${speciesImportAlias}                       ${sp
 
         then:
         validateAndImportResults2.size() == 1
-        validateAndImportResults2[0].metadataFile.fileName == file2.fileName.toString()
+        validateAndImportResults2[0].metadataFile.fileNameSource == file2.fileName.toString()
         validateAndImportResults2[0].context.spreadsheet.dataRows.size() == 2
         validateAndImportResults2[0].context.spreadsheet.dataRows[0].rowIndex == 3
         validateAndImportResults2[0].context.spreadsheet.dataRows[1].rowIndex == 4
@@ -513,11 +515,11 @@ ${SPECIES}                      ${speciesImportAlias}                       ${sp
                 [metadataFile: Paths.get("${seqCenter.autoImportDir}/003333/data/3333_meta.tsv"), problems: problems])
 
         MetadataImportService service = Spy(MetadataImportService) {
-            1 * copyMetadataFile(_, TICKET_NUMBER) >> null
+            1 * copyMetadataFile(_, _) >> null
             1 * validatePath(context1.metadataFile, DirectoryStructureBeanName.GPCF_SPECIFIC, _) >> context1
             1 * validatePath(context2.metadataFile, DirectoryStructureBeanName.GPCF_SPECIFIC, _) >> context2
             1 * validatePath(context3.metadataFile, DirectoryStructureBeanName.GPCF_SPECIFIC, _) >> context3
-            1 * importMetadataFile(context2, FastqImportInstance.ImportMode.AUTOMATIC, TICKET_NUMBER, null, true) >> DomainFactory.createMetaDataFile()
+            1 * importMetadataFile(context2, FastqImportInstance.ImportMode.AUTOMATIC, TICKET_NUMBER, null, true, _) >> DomainFactory.createMetaDataFile()
         }
 
         service.fileSystemService = new TestFileSystemService()
@@ -787,6 +789,7 @@ ${SPECIES}                      ${speciesImportAlias}                       ${sp
         mockAdditionalServices(service, seqTrackCount)
 
         File file = new File(new File(TestCase.uniqueNonExistentPath, runName1), 'metadata.tsv')
+        Path targetFile = TestCase.uniqueNonExistentPath.toPath()
         DirectoryStructure directoryStructure = new MockDirectoryStructure(file: file)
 
         String metadata = """
@@ -826,7 +829,7 @@ ${ILSE_NO}                      -                           1234          1234  
         )
 
         when:
-        MetaDataFile result = service.importMetadataFile(context, importMode, otrsTicket.ticketNumber, null, otrsTicket.automaticNotification)
+        MetaDataFile result = service.importMetadataFile(context, importMode, otrsTicket.ticketNumber, null, otrsTicket.automaticNotification, targetFile)
 
         then:
 
@@ -858,8 +861,9 @@ ${ILSE_NO}                      -                           1234          1234  
         // metadataFile
         MetaDataFile.count == 1
         MetaDataFile metadataFile = CollectionUtils.atMostOneElement(MetaDataFile.findAllWhere(
-                fileName: file.name,
-                filePath: file.parent,
+                fileNameSource: file.name,
+                filePathSource: file.parent,
+                filePathTarget: targetFile.toString(),
                 md5sum: context.metadataFileMd5sum,
                 fastqImportInstance: fastqImportInstance,
         ))
@@ -1182,6 +1186,7 @@ ${ILSE_NO}                      -                           1234          1234  
         mockAdditionalServices(service)
 
         File file = new File(new File(TestCase.uniqueNonExistentPath, runName), 'metadata.tsv')
+        Path fileTarget = TestCase.uniqueNonExistentPath.toPath()
         DirectoryStructure directoryStructure = Mock(DirectoryStructure) {
             _ * getRequiredColumnTitles() >> [FASTQ_FILE.name()]
             _ * getDataFilePath(_, _) >> { MetadataValidationContext context, Row row ->
@@ -1218,7 +1223,7 @@ ${SPECIES}                      ${human}+${mouse}+${chicken}                ${hu
         )
 
         when:
-        MetaDataFile result = service.importMetadataFile(context, FastqImportInstance.ImportMode.MANUAL, null, null, false)
+        MetaDataFile result = service.importMetadataFile(context, FastqImportInstance.ImportMode.MANUAL, null, null, false, fileTarget)
 
         then:
         // runs
@@ -1242,8 +1247,9 @@ ${SPECIES}                      ${human}+${mouse}+${chicken}                ${hu
         // metadataFile
         MetaDataFile.count == 1
         MetaDataFile metadataFile = CollectionUtils.atMostOneElement(MetaDataFile.findAllWhere(
-                fileName: file.name,
-                filePath: file.parent,
+                fileNameSource: file.name,
+                filePathSource: file.parent,
+                filePathTarget: fileTarget,
                 md5sum: context.metadataFileMd5sum,
                 fastqImportInstance: fastqImportInstance,
         ))
@@ -1359,6 +1365,7 @@ ${SPECIES}                      ${human}+${mouse}+${chicken}                ${hu
         mockAdditionalServices(service)
 
         File file = new File(new File(TestCase.uniqueNonExistentPath, runName), 'metadata.tsv')
+        Path fileTarget = TestCase.uniqueNonExistentPath.toPath()
         DirectoryStructure directoryStructure = Mock(DirectoryStructure) {
             _ * getRequiredColumnTitles() >> [FASTQ_FILE.name()]
             _ * getDataFilePath(_, _) >> { MetadataValidationContext context, Row row ->
@@ -1427,7 +1434,7 @@ ${SPECIES}                      ${human}+${mouse}+${chicken}                ${hu
         )
 
         when:
-        MetaDataFile result = service.importMetadataFile(context, FastqImportInstance.ImportMode.MANUAL, null, null, false)
+        MetaDataFile result = service.importMetadataFile(context, FastqImportInstance.ImportMode.MANUAL, null, null, false, fileTarget)
 
         then:
         // runs
@@ -1451,8 +1458,9 @@ ${SPECIES}                      ${human}+${mouse}+${chicken}                ${hu
         // metadataFile
         MetaDataFile.count == 1
         MetaDataFile metadataFile = CollectionUtils.atMostOneElement(MetaDataFile.findAllWhere(
-                fileName: file.name,
-                filePath: file.parent,
+                fileNameSource: file.name,
+                filePathSource: file.parent,
+                filePathTarget: fileTarget,
                 md5sum: context.metadataFileMd5sum,
                 fastqImportInstance: fastqImportInstance,
         ))
@@ -1753,7 +1761,7 @@ ${SPECIES}                      ${human}+${mouse}+${chicken}                ${hu
         }
 
         when:
-        data.service.copyMetadataFile(data.context, TICKET_NUMBER)
+        data.service.copyMetadataFile(data.context, tempDir.resolve("targetFilePath"))
 
         then:
         CopyingOfFileFailedException e = thrown(CopyingOfFileFailedException)
@@ -1767,9 +1775,10 @@ ${SPECIES}                      ${human}+${mouse}+${chicken}                ${hu
         data.service.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
             3 * executeCommandReturnProcessOutput(_, _) >> { return new ProcessOutput([stderr: "", exitCode: 0]) }
         }
+        Path targetFile = data.service.createPathTargetForMetadataFile(data.context, TICKET_NUMBER)
 
         when:
-        String copiedFile = data.service.copyMetadataFile(data.context, TICKET_NUMBER)
+        String copiedFile = data.service.copyMetadataFile(data.context, targetFile)
 
         then:
         copiedFile ==~ /${data.targetDirectory}\/\d{4}\/\d{2}\/${TICKET_NUMBER}\/[^\/]*metadataFile-.*\.tsv/
@@ -1785,7 +1794,7 @@ ${SPECIES}                      ${human}+${mouse}+${chicken}                ${hu
     void "copyMetaDataFile, if metadata is copied, check the permission string must be 2770"() {
         given:
         Map data = setupForCopyMetaDataFile(null)
-
+        Path targetFile = data.service.createPathTargetForMetadataFile(data.context, TICKET_NUMBER)
         data.service.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
             4 * executeCommandReturnProcessOutput(_, _) >> { Realm realm, String command ->
                 assert command.contains("chmod 2770")
@@ -1801,11 +1810,22 @@ ${SPECIES}                      ${human}+${mouse}+${chicken}                ${hu
         }
 
         when:
-        String copiedFile = data.service.copyMetadataFile(data.context, TICKET_NUMBER)
+        String copiedFile = data.service.copyMetadataFile(data.context, targetFile)
 
         then:
         copiedFile ==~ /${data.targetDirectory}\/\d{4}\/\d{2}\/${TICKET_NUMBER}\/[^\/]*metadataFile-.*\.tsv/
         Files.exists(targetDirectory)
+    }
+
+    void "createPathTargetForMetadataFile, check if return value is correct"() {
+        given:
+        Map data = setupForCopyMetaDataFile(null)
+
+        when:
+        Path copiedFile = data.service.createPathTargetForMetadataFile(data.context, TICKET_NUMBER)
+
+        then:
+        copiedFile.toString() ==~ /${data.targetDirectory}\/\d{4}\/\d{2}\/${TICKET_NUMBER}\/[^\/]*metadataFile-.*\.tsv/
     }
 
     void "test getConfiguredSeqTracks"() {

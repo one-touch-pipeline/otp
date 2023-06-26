@@ -88,7 +88,8 @@
                 <tr>
                     <td class="metaDataDetails-link">
                         <g:link controller="metadataImport" action="details" id="${file.metaDataFile.fastqImportInstanceId}">
-                            ${file.fullPath}
+                            <g:message code="metadataImport.details.fullPathSource"/>: ${file.fullPathSource}<br>
+                            <g:message code="metadataImport.details.fullPathTarget"/>: ${file.fullPathTarget}
                         </g:link>
                     </td>
                     <td>${TimeFormats.DATE.getFormattedDate(file?.metaDataFile?.dateCreated)}</td>

@@ -1704,7 +1704,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
                     createDataFile(initialDirectory: "${blacklisted}"),
                     createDataFile(initialDirectory: "${blacklisted}"),
             ])
-            DomainFactory.createMetaDataFile(fastqImportInstance: fastqImportInstance, filePath: "${blacklisted}")
+            DomainFactory.createMetaDataFile(fastqImportInstance: fastqImportInstance, filePathSource: "${blacklisted}")
 
             notificationCreator.mailHelperService = Mock(MailHelperService) {
                 0 * sendEmail(_, _, _)
@@ -1766,7 +1766,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
             List<DataFile> dataFilesBBlacklisted = [createBlacklistedDataFile(), createBlacklistedDataFile()]
             FastqImportInstance fastqImportInstanceB = createFastqImportInstance(otrsTicket: otrsTicket, dataFiles: dataFilesB + dataFilesBBlacklisted)
 
-            DomainFactory.createMetaDataFile(fastqImportInstance: fastqImportInstanceA, filePath: "${blacklisted}/path/metaDataFile")
+            DomainFactory.createMetaDataFile(fastqImportInstance: fastqImportInstanceA, filePathSource: "${blacklisted}/path/metaDataFile")
             DomainFactory.createMetaDataFile(fastqImportInstance: fastqImportInstanceB)
 
             expected.addAll(dataFilesA*.fullInitialPath)
@@ -1802,8 +1802,8 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
                     createBlacklistedDataFile(),
             ])
 
-            DomainFactory.createMetaDataFile(fastqImportInstance: fastqImportInstanceA, filePath: "${blacklisted}/path/metaDataFile")
-            DomainFactory.createMetaDataFile(fastqImportInstance: fastqImportInstanceB, filePath: "${blacklisted}/path/metaDataFile")
+            DomainFactory.createMetaDataFile(fastqImportInstance: fastqImportInstanceA, filePathSource: "${blacklisted}/path/metaDataFile")
+            DomainFactory.createMetaDataFile(fastqImportInstance: fastqImportInstanceB, filePathSource: "${blacklisted}/path/metaDataFile")
         }
 
         expect:

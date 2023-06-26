@@ -200,8 +200,8 @@ class MetadataImportController implements CheckAndCall, PlainResponseExceptionHa
             MetaDataFile file = metadataImportService.findById(it as long)
 
             new MetaDataFileWrapper([
-                    metaDataFile: file,
-                    fullPath    : metadataImportService.getMetaDataFileFullPath(file),
+                    metaDataFile  : file,
+                    fullPathTarget: file.filePathTarget,
             ])
         }
 
@@ -215,9 +215,10 @@ class MetadataImportController implements CheckAndCall, PlainResponseExceptionHa
 
         List<MetaDataFileWrapper> metaDataFiles = metadataImportService.findAllByFastqImportInstance(importInstance).collect {
             new MetaDataFileWrapper([
-                    metaDataFile: it,
-                    fullPath    : metadataImportService.getMetaDataFileFullPath(it),
-                    dateCreated : TimeFormats.DATE_TIME.getFormattedZonedDateTime(TimeUtils.toZonedDateTime(it.dateCreated)),
+                    metaDataFile  : it,
+                    fullPathSource: metadataImportService.getMetaDataFileFullPath(it),
+                    fullPathTarget: it.filePathTarget,
+                    dateCreated   : TimeFormats.DATE_TIME.getFormattedZonedDateTime(TimeUtils.toZonedDateTime(it.dateCreated)),
             ])
         }
 
@@ -501,7 +502,8 @@ class RemoveBlackListedIlseCommand {
 @TupleConstructor
 class MetaDataFileWrapper {
     MetaDataFile metaDataFile
-    String fullPath
+    String fullPathSource
+    String fullPathTarget
     String dateCreated
 }
 

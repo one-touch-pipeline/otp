@@ -478,12 +478,12 @@ class NotificationCreator {
         long id = metaDataFile.fastqImportInstance.id
 
         String subject = "[${otrsTicketService.getPrefixedTicketNumber(metaDataFile.fastqImportInstance.otrsTicket)}] " +
-                "Workflow created successfully for ${metaDataFile.fileName}"
+                "Workflow created successfully for ${metaDataFile.fileNameSource}"
 
         String body = [
                 "The workflow creation succeeded:",
                 "Import id: ${id}",
-                "File: ${metaDataFile.fileName}",
+                "File: ${metaDataFile.fileNameSource}",
                 "",
                 message,
         ].join('\n')
@@ -497,7 +497,7 @@ class NotificationCreator {
         List<Long> seqTrackIds = metaDataFile.fastqImportInstance.dataFiles*.seqTrack*.id.unique().sort()
 
         String subject = "[${otrsTicketService.getPrefixedTicketNumber(metaDataFile.fastqImportInstance.otrsTicket)}] " +
-                "Failed to create workflows for ${metaDataFile.fileName}"
+                "Failed to create workflows for ${metaDataFile.fileNameSource}"
 
         // Retrieve the names for the code generated in the body
         String className = metaDataFile.fastqImportInstance.class.simpleName
@@ -506,7 +506,7 @@ class NotificationCreator {
         String body = [
                 "The workflow creation failed:",
                 "Import id: ${id}",
-                "File: ${metaDataFile.fileName}",
+                "File: ${metaDataFile.fileNameSource}",
                 "Exception:",
                 StackTraceUtils.getStackTrace(throwable),
                 "",

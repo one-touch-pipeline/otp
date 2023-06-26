@@ -178,8 +178,9 @@ class MetadataImportService {
 
     private ValidateAndImportResult importHelperMethod(MetadataValidationContext context, FastqImportInstance.ImportMode importMode,
                                                        String ticketNumber, String seqCenterComment, boolean automaticNotification) {
-        MetaDataFile metadataFileObject = importMetadataFile(context, importMode, ticketNumber, seqCenterComment, automaticNotification)
-        String copiedFile = copyMetadataFile(context, ticketNumber)
+        Path filePathTarget = createPathTargetForMetadataFile(context, ticketNumber)
+        MetaDataFile metadataFileObject = importMetadataFile(context, importMode, ticketNumber, seqCenterComment, automaticNotification, filePathTarget)
+        String copiedFile = copyMetadataFile(context, filePathTarget)
         return new ValidateAndImportResult(context, metadataFileObject, copiedFile)
     }
 
@@ -194,29 +195,30 @@ class MetadataImportService {
         otrsTicket.finalNotificationSent = finalNotificationSent
         assert otrsTicket.save(flush: true)
     }
+    protected Path createPathTargetForMetadataFile(MetadataValidationContext context, String ticketNumber) {
+        FileSystem fileSystem = fileSystemService.getRemoteFileSystem(configService.defaultRealm)
+        String oldName = context.metadataFile.fileName
 
-    protected String copyMetadataFile(MetadataValidationContext context, String ticketNumber) {
+        Date date = new Date()
+        String yearMonth = TimeFormats.YEAR_MONTH_SLASH.getFormattedDate(date)
+        String timeStamp = TimeFormats.DATE_TIME_SECONDS_DASHES.getFormattedDate(date)
+
+        Path metadataStorage = fileSystem.getPath("${configService.metadataStoragePath}")
+        Path targetDir = metadataStorage.resolve(yearMonth).resolve(ticketNumber)
+
+        int position = oldName.lastIndexOf('.')
+        String newName = "${oldName.substring(0, position)}-${timeStamp}${oldName.substring(position)}"
+
+        return targetDir.resolve(newName)
+    }
+
+    protected String copyMetadataFile(MetadataValidationContext context, Path targetFile) {
         Path source = context.metadataFile
 
         try {
-            FileSystem fileSystem = fileSystemService.getRemoteFileSystem(configService.defaultRealm)
-            String oldName = source.fileName
-
-            Date date = new Date()
-            String yearMonth = TimeFormats.YEAR_MONTH_SLASH.getFormattedDate(date)
-            String timeStamp = TimeFormats.DATE_TIME_SECONDS_DASHES.getFormattedDate(date)
-
-            Path metadataStorage = fileSystem.getPath("${configService.metadataStoragePath}")
-            Path targetDir = metadataStorage.resolve(yearMonth).resolve(ticketNumber)
-
-            int position = oldName.lastIndexOf('.')
-            String newName = "${oldName.substring(0, position)}-${timeStamp}${oldName.substring(position)}"
-
-            Path targetFile = targetDir.resolve(newName)
-
             if (!Files.exists(targetFile)) {
                 //create the directory and set the permission with owner and group access (setgid bit) explicitly
-                fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(targetDir, configService.defaultRealm,
+                fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(targetFile.parent, configService.defaultRealm,
                         "", FileService.OWNER_AND_GROUP_DIRECTORY_PERMISSION_STRING)
                 fileService.createFileWithContentOnDefaultRealm(targetFile, context.content)
             }
@@ -324,7 +326,7 @@ class MetadataImportService {
     }
 
     protected MetaDataFile importMetadataFile(MetadataValidationContext context, FastqImportInstance.ImportMode importMode, String ticketNumber,
-                                              String seqCenterComment, boolean automaticNotification) {
+                                              String seqCenterComment, boolean automaticNotification, Path filePathTarget) {
         Long timeImportStarted = System.currentTimeMillis()
         log.debug("import started ${context.metadataFile.fileName} ${timeImportStarted}")
         FastqImportInstance fastqImportInstance = new FastqImportInstance(
@@ -339,9 +341,10 @@ class MetadataImportService {
         log.debug("  import runs of file  ${context.metadataFile.fileName} stopped took: ${System.currentTimeMillis() - timeStarted}")
 
         MetaDataFile metaDataFile = new MetaDataFile(
-                fileName: context.metadataFile.fileName.toString(),
+                fileNameSource: context.metadataFile.fileName.toString(),
                 // If the file is passed via drag and drop there is no parent directory so we pass just a point
-                filePath: context.metadataFile?.parent?.toString() ?: '',
+                filePathSource: context.metadataFile?.parent?.toString() ?: '',
+                filePathTarget: filePathTarget.toString(),
                 md5sum: context.metadataFileMd5sum,
                 fastqImportInstance: fastqImportInstance,
         ).save(flush: true)
@@ -357,7 +360,7 @@ class MetadataImportService {
 
         metaDataFile.save(flush: true)
 
-        log.debug("import stopped ${metaDataFile.fileName} (lines: ${context.spreadsheet.dataRows.size()}) ${timeImportStarted}: " +
+        log.debug("import stopped ${metaDataFile.fileNameSource} (lines: ${context.spreadsheet.dataRows.size()}) ${timeImportStarted}: " +
                 "${System.currentTimeMillis() - timeImportStarted}")
         return metaDataFile
     }
@@ -675,7 +678,7 @@ class MetadataImportService {
     }
 
     Path getMetaDataFileFullPath(MetaDataFile metaDataFile) {
-        return Paths.get([metaDataFile.filePath, metaDataFile.fileName].findAll().join(FileSystems.default.separator))
+        return Paths.get([metaDataFile.filePathSource, metaDataFile.fileNameSource].findAll().join(FileSystems.default.separator))
     }
 
     MetaDataFile findById(long id) {

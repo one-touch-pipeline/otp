@@ -56,8 +56,9 @@ class RunController {
 
         List<Map<String, Object>> wrappedMetaDataFiles = runService.retrieveMetaDataFiles(run).collect {
             [
-                    metaDataFile: it,
-                    fullPath    : metadataImportService.getMetaDataFileFullPath(it),
+                    metaDataFile  : it,
+                    fullPathSource: metadataImportService.getMetaDataFileFullPath(it),
+                    fullPathTarget: it.filePathTarget,
             ]
         }
 

@@ -894,8 +894,8 @@ class ExampleData {
 
     MetaDataFile createMetaDataFile() {
         return new MetaDataFile([
-                fileName           : "fileName_${MetaDataFile.count()}",
-                filePath           : "/tmp/filePath_${MetaDataFile.count()}",
+                fileNameSource     : "fileName_${MetaDataFile.count()}",
+                filePathSource     : "/tmp/filePath_${MetaDataFile.count()}",
                 md5sum             : HelperUtils.randomMd5sum,
                 fastqImportInstance: fastqImportInstance,
         ]).save(flush: true)

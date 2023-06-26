@@ -121,7 +121,7 @@ class MetadataImportControllerSpec extends Specification implements ControllerUn
         for (int i : 1..3) {
             MetaDataFile metadataFile = DomainFactory.createMetaDataFile()
             resultList.add(new ValidateAndImportResult(
-                    MetadataValidationContextFactory.createContext([metadataFile: Paths.get("${metadataFile.filePath}/${metadataFile.fileName}")]),
+                    MetadataValidationContextFactory.createContext([metadataFile: Paths.get("${metadataFile.filePathSource}/${metadataFile.fileNameSource}")]),
                     metadataFile,
                     "new_path_${i}",
             ))
@@ -175,7 +175,7 @@ class MetadataImportControllerSpec extends Specification implements ControllerUn
             MetaDataFile metadataFile = DomainFactory.createMetaDataFile()
             metaDataFiles.add(metadataFile)
             contexts.add(MetadataValidationContextFactory.createContext([
-                    metadataFile: Paths.get("${metadataFile.filePath}/${metadataFile.fileName}"),
+                    metadataFile: Paths.get("${metadataFile.filePathSource}/${metadataFile.fileNameSource}"),
                     problems    : problems,
             ]))
         }
@@ -237,7 +237,7 @@ class MetadataImportControllerSpec extends Specification implements ControllerUn
         for (int i : 1..3) {
             MetaDataFile metadataFile = DomainFactory.createMetaDataFile()
             resultList.add(new ValidateAndImportResult(
-                    MetadataValidationContextFactory.createContext([metadataFile: Paths.get("${metadataFile.filePath}/${metadataFile.fileName}")]),
+                    MetadataValidationContextFactory.createContext([metadataFile: Paths.get("${metadataFile.filePathSource}/${metadataFile.fileNameSource}")]),
                     metadataFile,
                     "new_path_${i}",
             ))

@@ -32,7 +32,7 @@
     <h3>${g.message(code: "metadataImport.details.multiFiles.headline")}</h3>
     <ul>
     <g:each var="file" in="${metaDataFilesWrapper}" >
-        <li><g:link action="details" id="${file.metaDataFile.fastqImportInstance.id}">${file.fullPath}</g:link></li>
+        <li><g:link action="details" id="${file.metaDataFile.fastqImportInstance.id}">${file.fullPathTarget}</g:link></li>
     </g:each>
     </ul>
 </div>
