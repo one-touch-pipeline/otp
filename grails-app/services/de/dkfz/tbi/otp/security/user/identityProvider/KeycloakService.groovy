@@ -116,6 +116,11 @@ class KeycloakService implements IdentityProvider {
     @Override
     Map<String, String> getAllUserAttributes(User user) {
         KeycloakUser keycloakUser = fetchKeycloakUserByExactUsername(user.username)
+
+        if (!keycloakUser.attributes) {
+            return [:]
+        }
+
         return keycloakUser.attributes.properties + keycloakUser.properties.findAll { it.key != "attributes" } as Map<String, String>
     }
 
@@ -135,7 +140,12 @@ class KeycloakService implements IdentityProvider {
 
     @Override
     Integer getUserAccountControlOfUser(User user) {
-        return user ? fetchKeycloakUserByExactUsername(user.username).attributes.userAccountControl.first() : null
+        if (!user) {
+            return null
+        }
+
+        KeycloakUser keycloakUser = fetchKeycloakUserByExactUsername(user.username)
+        return keycloakUser.attributes && keycloakUser.attributes.userAccountControl ? keycloakUser.attributes.userAccountControl.first() : null
     }
 
     @Override
@@ -182,14 +192,20 @@ class KeycloakService implements IdentityProvider {
     }
 
     private IdpUserDetails castKeycloakUserIntoIdpUserDetails(KeycloakUser keycloakUser) {
+        String realName = keycloakUser.firstName && keycloakUser.lastName ? "${keycloakUser.firstName} ${keycloakUser.lastName}" : keycloakUser.username
+        String department = keycloakUser.attributes && keycloakUser.attributes.department ? keycloakUser.attributes.department.first() : ""
+        byte[] thumbnailPhoto = keycloakUser.attributes && keycloakUser.attributes.thumbnailPhoto ?
+                keycloakUser.attributes.thumbnailPhoto.first().bytes : new byte[0]
+        List<String> memberOfGroupList = keycloakUser.attributes && keycloakUser.attributes.memberOf ? keycloakUser.attributes.memberOf : []
+
         return new IdpUserDetails([
                 username         : keycloakUser.username,
-                realName         : "${keycloakUser.firstName} ${keycloakUser.lastName}",
+                realName         : realName,
                 mail             : keycloakUser.email,
-                department       : keycloakUser.attributes.department.first(),
-                thumbnailPhoto   : keycloakUser.attributes.thumbnailPhoto.first().bytes,
+                department       : department,
+                thumbnailPhoto   : thumbnailPhoto,
                 deactivated      : !keycloakUser.enabled,
-                memberOfGroupList: keycloakUser.attributes.memberOf,
+                memberOfGroupList: memberOfGroupList,
         ])
     }
 }
