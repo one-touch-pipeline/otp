@@ -26,11 +26,15 @@ import grails.validation.Validateable
 import groovy.transform.CompileDynamic
 import org.springframework.security.access.prepost.PreAuthorize
 
+import de.dkfz.tbi.otp.security.AuditLog
+import de.dkfz.tbi.otp.security.AuditLogService
 import de.dkfz.tbi.otp.security.Department
 import de.dkfz.tbi.otp.security.User
 
 @Transactional
 class DepartmentService {
+
+    AuditLogService auditLogService
 
     @CompileDynamic
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
@@ -48,6 +52,7 @@ class DepartmentService {
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void updateDepartment(Department department, DepartmentCommand departmentCommand) {
         if (!departmentCommand || !departmentCommand.departmentHead || !departmentCommand.costCenter) {
+            auditLogService.logAction(AuditLog.Action.DELETED_DEPARTMENT, "Deleted Department: ${department}")
             log.info("Deleted Department: ${department}")
             department.delete(flush: true)
             return
@@ -58,6 +63,7 @@ class DepartmentService {
             String logOutput = "Updated Department from: ${department}"
             department.costCenter = departmentCommand.costCenter
             department.departmentHead = departmentCommand.departmentHead
+            auditLogService.logAction(AuditLog.Action.UPDATED_DEPARTMENT, "Updated Department: ${department}")
             log.info("${logOutput} to: ${department}")
             department.save(flush: true)
         }
@@ -74,6 +80,7 @@ class DepartmentService {
                 costCenter: departmentCommand.costCenter,
                 departmentHead: departmentCommand.departmentHead,
         )
+        auditLogService.logAction(AuditLog.Action.CREATED_DEPARTMENT, "Created Department: ${department}")
         log.info("Created Department: ${department}")
         department.save(flush: true)
     }

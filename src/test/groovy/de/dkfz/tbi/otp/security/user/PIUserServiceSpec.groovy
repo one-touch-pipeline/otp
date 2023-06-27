@@ -30,6 +30,8 @@ import de.dkfz.tbi.otp.utils.exceptions.RightsNotGrantedException
 
 class PIUserServiceSpec extends Specification implements DataTest, UserDomainFactory {
 
+    PIUserService piUserService
+
     @Override
     Class<?>[] getDomainClassesToMock() {
         return [
@@ -41,19 +43,20 @@ class PIUserServiceSpec extends Specification implements DataTest, UserDomainFac
 
     void "cleanUpPIUser, when PI is still department head, keep deputy, then remove Department, remove deputy"() {
         given:
+        piUserService = new PIUserService(auditLogService: Mock(AuditLogService),)
         User departmentHead = createUser()
         Department department = createDepartment([departmentHead: departmentHead])
         createPIUser([pi: departmentHead, dateRightsGranted: new Date()])
 
         when:
-        new PIUserService().cleanUpPIUser()
+        piUserService.cleanUpPIUser()
 
         then:
         PIUser.all.size() == 1
 
         when: 'remove Department'
         department.delete(flush: true)
-        new PIUserService().cleanUpPIUser()
+        piUserService.cleanUpPIUser()
 
         then:
         PIUser.all.size() == 0
@@ -61,26 +64,29 @@ class PIUserServiceSpec extends Specification implements DataTest, UserDomainFac
 
     void "grantDeputyPIRights, when PI is in the list of allowed users"() {
         given:
+        piUserService = new PIUserService(auditLogService: Mock(AuditLogService),)
         User departmentHead = createUser()
         createDepartment([departmentHead: departmentHead])
         User deputyPI = createUser()
 
         when:
-        new PIUserService().grantDeputyPIRights(departmentHead, deputyPI)
+        piUserService.grantDeputyPIRights(departmentHead, deputyPI)
 
         then:
+        1 * piUserService.auditLogService.logAction(_, _) >> _
         PIUser.findAllByDeputyPI(deputyPI).size() == 1
     }
 
     void "grantDeputyPIRights, when PI is NOT in the list of allowed users"() {
         given:
+        piUserService = new PIUserService(auditLogService: Mock(AuditLogService),)
         User user = createUser()
         User anotherHead = createUser()
         createDepartment([departmentHead: anotherHead])
         User deputyPI = createUser()
 
         when:
-        new PIUserService().grantDeputyPIRights(user, deputyPI)
+        piUserService.grantDeputyPIRights(user, deputyPI)
 
         then:
         thrown(RightsNotGrantedException)
@@ -88,39 +94,44 @@ class PIUserServiceSpec extends Specification implements DataTest, UserDomainFac
 
     void "revokeDeputyPIRights, when called with departmentHead and deputyPI"() {
         given:
+        piUserService = new PIUserService(auditLogService: Mock(AuditLogService),)
         User departmentHead = createUser()
         createDepartment([departmentHead: departmentHead])
         User deputyPI = createUser()
         createPIUser([pi: departmentHead, deputyPI: deputyPI, dateRightsGranted: new Date()])
 
         when:
-        new PIUserService().revokeDeputyPIRights(departmentHead, deputyPI)
+        piUserService.revokeDeputyPIRights(departmentHead, deputyPI)
 
         then:
+        1 * piUserService.auditLogService.logAction(_, _) >> _
         PIUser.findAllByPiAndDeputyPI(departmentHead, deputyPI).size() == 0
     }
 
     void "revokeDeputyPIRights, when called with deputyPI"() {
         given:
+        piUserService = new PIUserService(auditLogService: Mock(AuditLogService),)
         User departmentHead = createUser()
         User deputyPI = createUser()
         createPIUser([pi: departmentHead, deputyPI: deputyPI, dateRightsGranted: new Date()])
 
         when:
-        new PIUserService().revokeDeputyPIRights(deputyPI)
+        piUserService.revokeDeputyPIRights(deputyPI)
 
         then:
+        1 * piUserService.auditLogService.logAction(_, _) >> _
         PIUser.findAllByDeputyPI(deputyPI).size() == 0
     }
 
     void "revokeDeputyPIRightsForHead, when called with departmentHead"() {
         given:
+        piUserService = new PIUserService(auditLogService: Mock(AuditLogService),)
         User departmentHead = createUser()
         User deputyPI = createUser()
         createPIUser([pi: departmentHead, deputyPI: deputyPI, dateRightsGranted: new Date()])
 
         when:
-        new PIUserService().revokeDeputyPIRightsForHead(departmentHead)
+        piUserService.revokeDeputyPIRightsForHead(departmentHead)
 
         then:
         PIUser.findAllByPi(departmentHead).size() == 0
@@ -128,28 +139,31 @@ class PIUserServiceSpec extends Specification implements DataTest, UserDomainFac
 
     void "isPI, returns true when user is the head of department"() {
         given:
+        piUserService = new PIUserService()
         User departmentHead = createUser()
         createDepartment([departmentHead: departmentHead])
 
         expect:
-        new PIUserService().isPI(departmentHead)
+        piUserService.isPI(departmentHead)
     }
 
     void "isPI, returns true when user is the deputy PI"() {
         given:
+        piUserService = new PIUserService()
         User departmentHead = createUser()
         User deputyPI = createUser()
         createPIUser([pi: departmentHead, deputyPI: deputyPI, dateRightsGranted: new Date()])
 
         expect:
-        new PIUserService().isPI(deputyPI)
+        piUserService.isPI(deputyPI)
     }
 
     void "isPI, returns false when user is neither department head nor deputy PI"() {
         given:
+        piUserService = new PIUserService()
         User user = createUser()
 
         expect:
-        !new PIUserService().isPI(user)
+        !piUserService.isPI(user)
     }
 }

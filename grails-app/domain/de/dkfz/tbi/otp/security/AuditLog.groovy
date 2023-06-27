@@ -48,6 +48,11 @@ class AuditLog implements Entity {
          * no new entries with this Action should be created.
          */
         PROJECT_USER_CHANGED_PROJECT_ROLE,
+        GRANT_DEPUTY_PI_RIGHTS,
+        REVOKE_DEPUTY_PI_RIGHTS,
+        CREATED_DEPARTMENT,
+        UPDATED_DEPARTMENT,
+        DELETED_DEPARTMENT,
     }
 
     User user

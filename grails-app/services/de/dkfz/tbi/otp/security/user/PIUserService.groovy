@@ -25,6 +25,8 @@ import grails.gorm.transactions.Transactional
 import groovy.transform.CompileDynamic
 import org.springframework.security.access.prepost.PreAuthorize
 
+import de.dkfz.tbi.otp.security.AuditLog
+import de.dkfz.tbi.otp.security.AuditLogService
 import de.dkfz.tbi.otp.security.Department
 import de.dkfz.tbi.otp.security.PIUser
 import de.dkfz.tbi.otp.security.User
@@ -32,6 +34,8 @@ import de.dkfz.tbi.otp.utils.exceptions.RightsNotGrantedException
 
 @Transactional
 class PIUserService {
+
+    AuditLogService auditLogService
 
     @CompileDynamic
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
@@ -59,6 +63,8 @@ class PIUserService {
         assert deputyPI: "Deputy PI cannot be null"
         if (departmentHead.headOfDepartment) {
             new PIUser([pi: departmentHead, deputyPI: deputyPI, dateRightsGranted: new Date()]).save(flush: true)
+            String message = "${deputyPI} was granted deputy PI rights with department head as ${departmentHead}"
+            auditLogService.logAction(AuditLog.Action.GRANT_DEPUTY_PI_RIGHTS, message)
         } else {
             throw new RightsNotGrantedException('The deputy PI was not granted rights because the supplied department head is not the head of any department')
         }
@@ -70,6 +76,8 @@ class PIUserService {
     void revokeDeputyPIRights(User departmentHead, User deputyPI) {
         assert departmentHead: "Department Head cannot be null"
         assert deputyPI: "Deputy PI cannot be null"
+        String message = "Deputy PI rights have been revoked for ${deputyPI} by department head ${departmentHead}"
+        auditLogService.logAction(AuditLog.Action.REVOKE_DEPUTY_PI_RIGHTS, message)
         PIUser.findAllByPiAndDeputyPI(departmentHead, deputyPI)*.delete(flush: true)
     }
 
@@ -78,6 +86,8 @@ class PIUserService {
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void revokeDeputyPIRights(User deputyPI) {
         assert deputyPI: "Deputy PI cannot be null"
+        String message = "Deputy PI rights(All) have been revoked for ${deputyPI}"
+        auditLogService.logAction(AuditLog.Action.REVOKE_DEPUTY_PI_RIGHTS, message)
         PIUser.findAllByDeputyPI(deputyPI)*.delete(flush: true)
     }
 

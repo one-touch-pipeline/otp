@@ -31,6 +31,7 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.domainFactory.UserDomainFactory
 import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.CellRangerFactory
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
+import de.dkfz.tbi.otp.security.AuditLogService
 import de.dkfz.tbi.otp.security.Department
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.security.UserAndRoles
@@ -201,7 +202,9 @@ ${jsonLiteral(departments[0])}
     private UpdateDepartmentHeadsJob createJob(String returnJSON) {
         return new UpdateDepartmentHeadsJob([
                 processingOptionService: new ProcessingOptionService(),
-                departmentService      : new DepartmentService(),
+                departmentService      : new DepartmentService(auditLogService: Mock(AuditLogService) {
+                    _ * logAction(_, _) >> _
+                }),
                 remoteShellHelper      : Mock(RemoteShellHelper) {
                     1 * executeCommandReturnProcessOutput(_, _) >> { return new ProcessOutput(returnJSON, "", 0) }
                     0 * executeCommandReturnProcessOutput(_, _)
