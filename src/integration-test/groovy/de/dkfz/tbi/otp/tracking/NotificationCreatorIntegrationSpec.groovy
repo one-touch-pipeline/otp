@@ -1674,7 +1674,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
 
             String expectedEnd = [
                     dataFile.fullInitialPath,
-            ].collect { "rm ${it}" }.join("\n")
+            ].collect { "rm -f ${it}" }.join("\n")
 
             notificationCreator.mailHelperService = Mock(MailHelperService) {
                 1 * sendEmailToTicketSystem(expectedHeader, { it.endsWith(expectedEnd) })

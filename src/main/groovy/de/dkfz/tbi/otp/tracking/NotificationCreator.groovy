@@ -276,7 +276,7 @@ class NotificationCreator {
                 |""".stripMargin()
 
         List<String> pathsToDelete = getPathsToDelete(ticket)
-        content += pathsToDelete.collect { "rm ${it}" }.join("\n")
+        content += pathsToDelete.collect { "rm -f ${it}" }.join("\n")
 
         if (pathsToDelete) {
             mailHelperService.sendEmailToTicketSystem(subject, content)
