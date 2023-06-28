@@ -97,7 +97,7 @@ class KeycloakService implements IdentityProvider {
 
     @Override
     List<String> getGroupsOfUser(User user) {
-        return new ArrayList<String>(getIdpUserDetailsByUsername(user.username).memberOfGroupList)
+        return new ArrayList<String>(getIdpUserDetailsByUsername(user.username).memberOfGroupList ?: [])
     }
 
     @Override
