@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -202,11 +202,6 @@ class LinkFilesToFinalDestinationService {
         return filesToDelete.collect { fileService.toPath(it, fs) }
     }
 
-    @Deprecated
-    void cleanupWorkDirectory(RoddyBamFile roddyBamFile, Realm realm) {
-        lsdfFilesService.deleteFilesRecursive(realm, getFilesToCleanup(roddyBamFile, realm).collect { fileService.toFile(it) })
-    }
-
     List<Path> getOldResultsToCleanup(RoddyBamFile roddyBamFile, Realm realm) {
         assert roddyBamFile: "Input roddyBamFile must not be null"
         assert realm: "Input realm must not be null"
@@ -244,14 +239,6 @@ class LinkFilesToFinalDestinationService {
         }
         FileSystem fs = fileSystemService.getRemoteFileSystem(realm)
         return filesToDelete.collect { fileService.toPath(it, fs) }
-    }
-
-    @Deprecated
-    void cleanupOldResults(RoddyBamFile roddyBamFile, Realm realm) {
-        List<Path> filesToDelete = getOldResultsToCleanup(roddyBamFile, realm)
-        if (filesToDelete) {
-            lsdfFilesService.deleteFilesRecursive(realm, filesToDelete.collect { fileService.toFile(it) })
-        }
     }
 
     void cleanupOldRnaResults(RnaRoddyBamFile roddyBamFile, Realm realm) {

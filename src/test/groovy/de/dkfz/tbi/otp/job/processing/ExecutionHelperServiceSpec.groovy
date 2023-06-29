@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -61,15 +61,18 @@ class ExecutionHelperServiceSpec extends Specification implements DataTest {
         ] as RemoteShellHelper
 
         then:
+        assert LogThreadLocal.withThreadLog(System.out) {
+            service.getGroup(realmObject, tmpFile)
+        } != group: "Cannot test setGroup if OTP property \"otp.testing.group\" is also the user's primary group." +
+                " Please update your .otp.properties to use a different group that is not your primary group!"
+
         LogThreadLocal.withThreadLog(System.out) {
-            String output = service.getGroup(realmObject, tmpFile)
-            assert group != output: "Cannot test setGroup if OTP property \"otp.testing.group\" is also the user's primary group." +
-                    " Please update your .otp.properties to use a different group that is not your primary group!"
-            output = service.setGroup(realmObject, tmpFile, group)
-            assert output.empty
-            output = service.getGroup(realmObject, tmpFile)
-            assert group == output
-        }
+            service.setGroup(realmObject, tmpFile, group)
+        }.empty
+
+        LogThreadLocal.withThreadLog(System.out) {
+            service.getGroup(realmObject, tmpFile)
+        } == group
     }
 
     void "test getGroup directory is null should fail"() {
@@ -181,14 +184,16 @@ class ExecutionHelperServiceSpec extends Specification implements DataTest {
 
         expect:
         LogThreadLocal.withThreadLog(System.out) {
-            String output = LocalShellHelper.executeAndAssertExitCodeAndErrorOutAndReturnStdout("stat -c '%a' ${tmpFile}")
-            assert PERMISSION != output.trim()
-            output = service.setPermission(new Realm(), tmpFile, PERMISSION)
-            assert output.empty
+            LocalShellHelper.executeAndAssertExitCodeAndErrorOutAndReturnStdout("stat -c '%a' ${tmpFile}")
+        }.trim() != PERMISSION
 
-            output = LocalShellHelper.executeAndAssertExitCodeAndErrorOutAndReturnStdout("stat -c '%a' ${tmpFile}")
-            assert PERMISSION == output.trim()
-        }
+        LogThreadLocal.withThreadLog(System.out) {
+            service.setPermission(new Realm(), tmpFile, PERMISSION)
+        }.empty
+
+        LogThreadLocal.withThreadLog(System.out) {
+            LocalShellHelper.executeAndAssertExitCodeAndErrorOutAndReturnStdout("stat -c '%a' ${tmpFile}")
+        }.trim() == PERMISSION
     }
 
     void "test setPermission realm is null should fail"() {

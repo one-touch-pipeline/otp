@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -66,7 +66,7 @@ class LogThreadLocal {
         JOB_LOG_HOLDER.remove()
     }
 
-    static void withThreadLog(Appendable out, Closure code) {
+    static <T> T withThreadLog(Appendable out, Closure<T> code) {
         assert out != null
         assert code
         assert !threadLog
@@ -79,20 +79,20 @@ class LogThreadLocal {
             }
         }
         try {
-            code()
+            return code()
         } finally {
             removeThreadLog()
         }
     }
 
-    static void withThreadLog(Logger logger, Closure code) {
+    static <T> T withThreadLog(Logger logger, Closure<T> code) {
         assert logger
         assert code
         assert !threadLog
 
         threadLog = logger
         try {
-            code()
+            return code()
         } finally {
             removeThreadLog()
         }
