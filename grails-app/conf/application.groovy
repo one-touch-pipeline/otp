@@ -25,6 +25,14 @@ import de.dkfz.tbi.otp.config.OtpProperty
 
 Properties otpProperties = ConfigService.parsePropertiesFile()
 Boolean consoleEnabled = Boolean.parseBoolean(otpProperties.getProperty(OtpProperty.GRAILS_CONSOLE.key))
+String grailsConsoleRelativePath = otpProperties.getProperty(OtpProperty.GRAILS_CONSOLE_RELATIVE_PATH.key)
+String trustStorePath = otpProperties.getProperty(OtpProperty.TRUSTSTORE_PATH.key)
+String trustStorePassword = otpProperties.getProperty(OtpProperty.TRUSTSTORE_PASSWORD.key)
+String trustStoreType = otpProperties.getProperty(OtpProperty.TRUSTSTORE_TYPE.key)
+String keycloakClientId = otpProperties.getProperty(OtpProperty.KEYCLOAK_CLIENT_ID.key)
+String keycloakClientSecret = otpProperties.getProperty(OtpProperty.KEYCLOAK_CLIENT_SECRET.key)
+String keycloakServer = otpProperties.getProperty(OtpProperty.KEYCLOAK_SERVER.key)
+String keycloakRealm = otpProperties.getProperty(OtpProperty.KEYCLOAK_REALM.key)
 
 spring {
     jmx {
@@ -153,25 +161,25 @@ environments {
 grails.plugin.console.enabled = consoleEnabled
 environments {
     production {
-        grails.plugin.console.baseUrl="/otp/console"
+        grails.plugin.console.baseUrl=grailsConsoleRelativePath
     }
     development {
-        grails.plugin.console.baseUrl="/console"
+        grails.plugin.console.baseUrl=grailsConsoleRelativePath ?: '/console'
     }
 }
 grails.plugin.console.fileStore.remote.defaultPath=System.getenv("CONSOLE_REMOTE_DEFAULTPATH")
 
-if (otpProperties.getProperty(OtpProperty.TRUSTSTORE_PATH.key)) {
-    System.setProperty("javax.net.ssl.trustStore", otpProperties.getProperty(OtpProperty.TRUSTSTORE_PATH.key))
+if (trustStorePath) {
+    System.setProperty("javax.net.ssl.trustStore", trustStorePath)
 }
-if (otpProperties.getProperty(OtpProperty.TRUSTSTORE_PASSWORD.key)) {
-    System.setProperty("javax.net.ssl.trustStorePassword", otpProperties.getProperty(OtpProperty.TRUSTSTORE_PASSWORD.key))
+if (trustStorePassword) {
+    System.setProperty("javax.net.ssl.trustStorePassword", trustStorePassword)
 }
-if (otpProperties.getProperty(OtpProperty.TRUSTSTORE_TYPE.key)) {
-    System.setProperty("javax.net.ssl.trustStoreType", otpProperties.getProperty(OtpProperty.TRUSTSTORE_TYPE.key))
+if (trustStoreType) {
+    System.setProperty("javax.net.ssl.trustStoreType", trustStoreType)
 }
 
 spring.security.oauth2.client.registration.keycloak.authorizationGrantType="client_credentials"
-spring.security.oauth2.client.registration.keycloak.clientId=otpProperties.getProperty(OtpProperty.KEYCLOAK_CLIENT_ID.key)
-spring.security.oauth2.client.registration.keycloak.clientSecret=otpProperties.getProperty(OtpProperty.KEYCLOAK_CLIENT_SECRET.key)
-spring.security.oauth2.client.provider.keycloak.tokenUri="${otpProperties.getProperty(OtpProperty.KEYCLOAK_SERVER.key)}/realms/${otpProperties.getProperty(OtpProperty.KEYCLOAK_REALM.key)}/protocol/openid-connect/token"
+spring.security.oauth2.client.registration.keycloak.clientId=keycloakClientId
+spring.security.oauth2.client.registration.keycloak.clientSecret=keycloakClientSecret
+spring.security.oauth2.client.provider.keycloak.tokenUri="${keycloakServer}/realms/${keycloakRealm}/protocol/openid-connect/token"
