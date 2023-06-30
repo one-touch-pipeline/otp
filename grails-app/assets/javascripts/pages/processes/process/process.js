@@ -46,7 +46,7 @@ $.otp.workflows.registerProcessingStep = function (selector, processId) {
       row[2] = data.processingStep.jobName;
 
       let jobClass = '-';
-      if (data.processingStep) {
+      if (data.processingStep && data.processingStep.jobClass) {
         jobClass = data.processingStep.jobClass;
       }
       row[3] = `<span title="${jobClass}">${jobClass.split('.').pop()}</span><br/>`;
