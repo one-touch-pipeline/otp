@@ -299,7 +299,7 @@ dependencies {
     implementation "com.github.samtools:htsjdk:3.0.5"
 
     // library for interacting with cluster job schedulers
-    implementation('com.github.theroddywms:BatchEuphoria:0.1.2')
+    implementation('com.github.theroddywms:BatchEuphoria:0.1.3')
 
     // ssh, ssh-agent proxy, and sftp libraries
     implementation 'com.jcraft:jsch:0.1.55'
