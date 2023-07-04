@@ -21,46 +21,41 @@
  */
 package de.dkfz.tbi.otp.workflow.fastqc
 
-import grails.testing.gorm.DataTest
-import spock.lang.Specification
+import groovy.util.logging.Slf4j
+import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
-import de.dkfz.tbi.otp.workflowExecution.Artefact
+import de.dkfz.tbi.otp.dataprocessing.FastqcDataFilesService
+import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
+import de.dkfz.tbi.otp.workflow.jobs.AbstractWesValidationJob
+import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
-class WesFastQcWorkflowSpec extends Specification implements DataTest, DomainFactoryCore {
+import java.nio.file.Path
 
-    WesFastQcWorkflow wesFastQcWorkflow
+@Component
+@Slf4j
+class FastqcWesValidationJob extends AbstractWesValidationJob implements FastqcShared {
+
+    @Autowired
+    FastqcDataFilesService fastqcDataFilesService
 
     @Override
-    Class[] getDomainClassesToMock() {
-        return [
-                SeqTrack
-        ]
+    protected List<Path> getExpectedFiles(WorkflowStep workflowStep) {
+        List<Path> result = []
+        getFastqcProcessedFiles(workflowStep).each { FastqcProcessedFile fastqc ->
+            result.add(fastqcDataFilesService.fastqcOutputPath(fastqc))
+            result.add(fastqcDataFilesService.fastqcHtmlPath(fastqc))
+            result.add(fastqcDataFilesService.fastqcOutputMd5sumPath(fastqc))
+        }
+        return result
     }
 
-    void setup() {
-        wesFastQcWorkflow = new WesFastQcWorkflow()
+    @Override
+    protected List<Path> getExpectedDirectories(WorkflowStep workflowStep) {
+        return []
     }
 
-    void "getJobBeanNames, should return all WesFastQcJob bean names in correct order"() {
-        expect:
-        wesFastQcWorkflow.jobBeanNames == [
-                "fastqcFragmentJob",
-                "fastqcConditionalFailJob",
-                "fastqcPrepareJob",
-                "fastqcWesValidationJob",
-                "fastqcParseJob",
-                "fastqcFinishJob",
-                "setCorrectPermissionJob",
-        ]
-    }
-
-    void "createCopyOfArtefact, should only delegate the concrete artefact"() {
-        given:
-        Artefact artefact = createSeqTrack()
-
-        expect:
-        wesFastQcWorkflow.createCopyOfArtefact(artefact) == artefact
+    @Override
+    protected void saveResult(WorkflowStep workflowStep) {
     }
 }
+

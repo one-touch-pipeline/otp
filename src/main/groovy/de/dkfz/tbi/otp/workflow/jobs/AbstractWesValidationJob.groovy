@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,8 +21,12 @@
  */
 package de.dkfz.tbi.otp.workflow.jobs
 
-import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
+import io.swagger.client.wes.model.State
+
+import de.dkfz.tbi.otp.workflow.shared.ValidationJobFailedException
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
+import de.dkfz.tbi.otp.workflowExecution.WorkflowStepService
+import de.dkfz.tbi.otp.workflowExecution.wes.WesRun
 
 /**
  * Base job to do validation after an WES pipeline {@link AbstractExecuteWesPipelineJob} has run.
@@ -31,8 +35,31 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
  */
 abstract class AbstractWesValidationJob extends AbstractValidationJob {
 
+    WorkflowStepService workflowStepService
+
     @Override
     protected void ensureExternalJobsRunThrough(WorkflowStep workflowStep) {
-        throw new OtpRuntimeException("not yet implemented")
+        Set<WesRun> wesRuns = workflowStepService.getPreviousRunningWorkflowStep(workflowStep).wesRuns
+        if (!wesRuns) {
+            logService.addSimpleLogEntry(workflowStep, "No cluster job found to be validated.")
+            return
+        }
+
+        List<String> errorMessages = []
+        wesRuns.each { WesRun wesRun ->
+            if (!(wesRun.wesRunLog.state == State.COMPLETE)) {
+                errorMessages.add("State for WES job '${wesRun.wesRunLogId}' is '${wesRun.wesRunLog.state}' and not 'COMPLETE'.".toString())
+            } else if (!(wesRun.wesRunLog.runLog.exitCode == 0)) {
+                errorMessages.add("Exit code of WES job '${wesRun.wesRunLogId}': ${wesRun.wesRunLog.runLog.exitCode}.".toString())
+            }
+        }
+
+        if (errorMessages.empty) {
+            logService.addSimpleLogEntry(workflowStep, "All WES jobs have finished successfully.")
+        } else {
+            String message = "${errorMessages.size()} WES errors occured in the Workflowstep {workflowStep}:\n${errorMessages.join('\n')}."
+            logService.addSimpleLogEntry(workflowStep, message)
+            throw new ValidationJobFailedException(message)
+        }
     }
 }
