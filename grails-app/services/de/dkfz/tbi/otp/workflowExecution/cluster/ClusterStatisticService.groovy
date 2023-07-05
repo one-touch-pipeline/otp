@@ -99,19 +99,18 @@ class ClusterStatisticService {
             if (jobInfo?.jobState == JobState.UNKNOWN) {
                 throw new ClusterJobException("Jobstate is ${JobState.UNKNOWN} for ${clusterJob.clusterJobId} (${clusterJob.id})")
             }
+            clusterJobService.amendClusterJob(clusterJob, jobInfo)
         } catch (Throwable ignored) {
             logService.addSimpleLogEntry(clusterJob.workflowStep,
                     "Failed to fill in runtime statistics after start for ${clusterJob.clusterJobId}, try again")
             Thread.sleep(WAITING_TIME_FOR_SECOND_TRY_IN_MILLISECONDS)
             try {
                 jobInfo = jobManager.queryExtendedJobStateById([beJobID]).get(beJobID)
+                clusterJobService.amendClusterJob(clusterJob, jobInfo)
             } catch (Throwable ignored2) {
                 logService.addSimpleLogEntry(clusterJob.workflowStep,
                         "Failed to fill in runtime statistics after start for ${clusterJob.clusterJobId} the second time")
             }
-        }
-        if (jobInfo) {
-            clusterJobService.amendClusterJob(clusterJob, jobInfo)
         }
     }
 
