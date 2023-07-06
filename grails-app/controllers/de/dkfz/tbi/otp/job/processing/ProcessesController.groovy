@@ -281,8 +281,13 @@ class ProcessesController {
     // suppressing because this controller will be removed within the old workflow system
     @SuppressWarnings("ClassForName")
     private boolean showRestartButton(Process process) {
-        return (RestartableStartJob.isAssignableFrom(Class.forName(process.startJobClass)) &&
-                !CollectionUtils.atMostOneElement(processService.findAllByRestarted(process)))
+        try {
+            return (RestartableStartJob.isAssignableFrom(Class.forName(process.startJobClass)) &&
+                    !CollectionUtils.atMostOneElement(processService.findAllByRestarted(process)))
+        } catch (ClassNotFoundException ignored) {
+            log.info("Could not find class ${process.startJobClass}")
+            return false
+        }
     }
 
     private Process getRestartedProcess(Process process) {
