@@ -331,7 +331,7 @@ dependencies {
     implementation 'org.webjars.npm:bootstrap-icons:1.10.5'
     implementation 'org.webjars.npm:ttskch__select2-bootstrap4-theme:1.5.2'
     implementation 'org.webjars:select2:4.0.13'
-    implementation 'org.webjars:datatables:1.11.4'
+    implementation 'org.webjars:datatables:1.13.5'
     implementation 'org.webjars:datatables-buttons:2.2.2'
     implementation 'org.webjars:datatables-fixedcolumns:3.2.2'
     implementation 'org.webjars:datatables-fixedheader:3.2.4'
