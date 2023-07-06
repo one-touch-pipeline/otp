@@ -588,7 +588,7 @@ $(() => {
     validateButton.prop('disabled', true);
   }
 
-  $('#paths, #seqCenterComment, #ticketNumber, #file-input, input[type="radio"]').on('input', () => {
+  $('#paths, #file-input, input[type="radio"]').on('input', () => {
     resetButtons();
   });
 
