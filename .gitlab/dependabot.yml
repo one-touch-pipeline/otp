@@ -26,21 +26,17 @@ updates:
     schedule:
       interval: daily
     open-pull-requests-limit: 100
-    assignees:
-      - Dependabot
     commit-message:
       prefix: "Update: "
     ignore:
       - dependency-name: "org.webjars:datatables-plugins"
         versions: [ "9dcbecd42ad", "15ba23c72a", "b644af9c80", "ca6ec50" ]
       - dependency-name: "org.codenarc:CodeNarc"
-        versions: [ "*-groovy-4.0"]
+        versions: [ "3.1.0-groovy-4.0", "3.2.0-groovy-4.0"]
   - package-ecosystem: npm
     directory: /
     schedule:
       interval: daily
     open-pull-requests-limit: 10
-    assignees:
-      - Dependabot
     commit-message:
       prefix: "Update: "
