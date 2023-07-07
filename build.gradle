@@ -405,7 +405,7 @@ assets {
 }
 
 codenarc {
-    toolVersion = '3.1.0'
+    toolVersion = '3.2.0'
     configFile file('grails-app/conf/CodeNarcRuleSet.groovy')
     maxPriority1Violations = 0
     maxPriority2Violations = 119
@@ -441,9 +441,10 @@ tasks.withType(GroovyCompile) {
 tasks.withType(CodeNarc) {
     sourceSets.each { SourceSet s ->
         if (s.name != "script") {
-            codenarcClasspath += s.runtimeClasspath  // required for ast transformations -> too many dependencies, because of this line we have to
-            // set groovy dependency explicitly
-            compilationClasspath += s.runtimeClasspath //too many dependencies for codenarc tasks except all
+            // required for ast transformations -> too many dependencies, because of this line we have to set groovy dependency explicitly
+            codenarcClasspath += s.runtimeClasspath
+            // too many dependencies for codenarc tasks except all
+            compilationClasspath += s.runtimeClasspath
         }
     }
 }

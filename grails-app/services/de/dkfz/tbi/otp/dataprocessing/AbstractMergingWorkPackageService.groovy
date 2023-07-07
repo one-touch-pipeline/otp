@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,18 +21,16 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
-import grails.compiler.GrailsCompileStatic
-import grails.compiler.GrailsTypeChecked
 import grails.gorm.transactions.Transactional
-import groovy.transform.TypeCheckingMode
+import groovy.transform.CompileDynamic
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.ngsdata.*
 
 @Transactional
-@GrailsCompileStatic(TypeCheckingMode.SKIP)
 class AbstractMergingWorkPackageService {
 
+    @CompileDynamic
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     List<AbstractMergingWorkPackage> findMergingWorkPackage(Individual individual, SeqType seqType, AntibodyTarget antibodyTarget = null) {
         assert individual
