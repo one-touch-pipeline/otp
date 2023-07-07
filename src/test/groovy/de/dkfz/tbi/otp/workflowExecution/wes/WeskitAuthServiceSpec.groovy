@@ -51,7 +51,7 @@ class WeskitAuthServiceSpec extends Specification {
         }
 
         service.configService = Mock(ConfigService) {
-            1 * wesAuthBaseUrl >> url
+            1 * wesAuthTokenUri >> url
             1 * wesAuthClientId >> 'wesAuthClientId'
             1 * wesAuthClientSecret >> 'wesAuthClientSecret'
             1 * wesAuthClientUser >> 'wesAuthClientUser'

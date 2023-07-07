@@ -308,7 +308,7 @@ class SecurityConfiguration {
     private ClientRegistration wesClientRegistration() {
         return ClientRegistration
                 .withRegistrationId(WeskitAuthService.CLIENT_REGISTRATION_ID)
-                .tokenUri(configService.wesAuthBaseUrl)
+                .tokenUri(configService.wesAuthTokenUri)
                 .clientId(configService.wesAuthClientId)
                 .clientSecret(configService.wesAuthClientSecret)
                 .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)

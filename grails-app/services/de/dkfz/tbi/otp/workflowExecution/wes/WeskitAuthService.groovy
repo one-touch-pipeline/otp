@@ -53,7 +53,7 @@ class WeskitAuthService {
     String requestWeskitAccessToken() {
         try {
             WebClient.RequestBodyUriSpec requestBuilder = webClient.post()
-            requestBuilder.uri(configService.wesAuthBaseUrl)
+            requestBuilder.uri(configService.wesAuthTokenUri)
             requestBuilder.attributes(ServerOAuth2AuthorizedClientExchangeFilterFunction.clientRegistrationId(CLIENT_REGISTRATION_ID))
             requestBuilder.accept(MediaType.APPLICATION_JSON)
             requestBuilder.body(BodyInserters.fromFormData(createParameters()))
