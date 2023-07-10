@@ -23,6 +23,9 @@
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.AnalysisDeletionService
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
+import de.dkfz.tbi.otp.ngsdata.Individual
+import de.dkfz.tbi.otp.ngsdata.SampleType
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 /**
  * Script to delete ExternallyProcessedBamFile inclusive dependencies for given pids.
@@ -45,12 +48,12 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 //input
 
 /**
- * list of Pids.
+ * list of Pid and sampleType.
  */
-List<String> pidsToDelete = [
-        'pid1',
-        'pid2',
-]
+List<String> multiColumnInput = """
+#pid1
+#pid2 sampleType2
+"""
 
 /**
  * flag to allow a try and rollback the changes at the end (true) or do the changes(false)
@@ -60,14 +63,31 @@ boolean tryRun = true
 //--------------------------------
 //work
 
-def bamFiles = ExternallyProcessedBamFile.createCriteria().listDistinct {
-    workPackage {
-        sample {
-            individual {
-                'in'('pid', pidsToDelete)
+List<ExternallyProcessedBamFile> bamFiles = multiColumnInput.split('\n')*.trim().findAll { String line ->
+    line && !line.startsWith('#')
+}.collectMany { String line ->
+    List<String> values = line.split('[ ,;\t]+')*.trim()
+    int valueSize = values.size()
+    assert valueSize in [1, 2]: "A multi input is defined by 1 or 2 columns"
+    Individual individual = CollectionUtils.exactlyOneElement(Individual.findAllByPid(values[0]),
+            "Could not find one individual with name ${values[0]}")
+    SampleType sampleType
+    if (valueSize == 2) {
+        sampleType = CollectionUtils.exactlyOneElement(SampleType.findAllByNameIlike(values[1]),
+                "Could not find one sampleType with name ${values[1]}")
+    }
+    List<ExternallyProcessedBamFile> bamFiles = ExternallyProcessedBamFile.createCriteria().listDistinct {
+        workPackage {
+            sample {
+                eq('individual', individual)
+                if (valueSize == 2) {
+                    eq('sampleType', sampleType)
+                }
             }
         }
     }
+    assert bamFiles: "Could not find any seqtracks for ${values.join(' ')}"
+    return bamFiles
 }
 
 List<String> dirsToDelete = []
