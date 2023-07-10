@@ -27,14 +27,14 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.AbstractMetadataValidationCont
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidator
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.util.spreadsheet.Cell
-import de.dkfz.tbi.util.spreadsheet.validation.AllCellsValidator
+import de.dkfz.tbi.util.spreadsheet.validation.AbstractAllCellsValidator
 import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
 @Component
-class UnusualCharactersValidator extends AllCellsValidator<AbstractMetadataValidationContext> implements MetadataValidator, BamMetadataValidator {
+class UnusualCharactersValidator extends AbstractAllCellsValidator<AbstractMetadataValidationContext> implements MetadataValidator, BamMetadataValidator {
 
     static final Pattern NORMAL_CHARACTERS =
             Pattern.compile('[^0-9A-Za-z' + Pattern.quote(' !"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~') + ']')

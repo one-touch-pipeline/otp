@@ -34,7 +34,7 @@ import de.dkfz.tbi.otp.workflowExecution.Workflow
 
 @CompileDynamic
 @Transactional
-class SeqTypeService extends MetadataFieldsService<SeqType> {
+class SeqTypeService extends AbstractMetadataFieldsService<SeqType> {
 
     @Autowired
     ApplicationContext context

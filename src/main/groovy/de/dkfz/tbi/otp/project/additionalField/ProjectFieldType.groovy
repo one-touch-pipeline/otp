@@ -83,7 +83,7 @@ enum ProjectFieldType {
     /**
      * Reference the {@link AbstractFieldValue} to hold a value of this type of field
      */
-    final Class<? extends ProjectFieldsCreateCommand> commandClass
+    final Class<? extends AbstractProjectFieldsCreateCommand> commandClass
 
     final String templateDefaultValue
     final String propertyDefaultValue

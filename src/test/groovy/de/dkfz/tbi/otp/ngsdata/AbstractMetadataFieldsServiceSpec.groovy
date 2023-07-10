@@ -23,9 +23,9 @@ package de.dkfz.tbi.otp.ngsdata
 
 import spock.lang.Specification
 
-abstract class MetadataFieldsServiceSpec<T> extends Specification {
+abstract class AbstractMetadataFieldsServiceSpec<T> extends Specification {
 
-    abstract protected MetadataFieldsService getService()
+    abstract protected AbstractMetadataFieldsService getService()
     Map properties = [:]
     Map otherProperties = [:]
     protected final static String NAME = "metadata_name"

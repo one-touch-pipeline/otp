@@ -49,9 +49,9 @@ class ValueTuplesValidatorSpec extends Specification {
 
     void test_ValueTuplesValidator_WithMissingRequiredColumn() {
         given:
-        ValueTuplesValidator<ValidationContext> validator = [
+        AbstractValueTuplesValidator<ValidationContext> validator = [
                 getRequiredColumnTitles: { ValidationContext context -> ['B', 'C', 'D'] },
-        ] as ValueTuplesValidator<ValidationContext>
+        ] as AbstractValueTuplesValidator<ValidationContext>
 
         when:
         validator.validate(context)
@@ -65,7 +65,7 @@ class ValueTuplesValidatorSpec extends Specification {
     void test_ValueTuplesValidator_WithMissingOptionalColumn() {
         given:
         Collection<ValueTuple> calledFor = null
-        ValueTuplesValidator<ValidationContext> validator = new ValueTuplesValidator<ValidationContext>() {
+        AbstractValueTuplesValidator<ValidationContext> validator = new AbstractValueTuplesValidator<ValidationContext>() {
             @Override
             List<String> getRequiredColumnTitles(ValidationContext context) {
                 return []
@@ -101,13 +101,13 @@ class ValueTuplesValidatorSpec extends Specification {
     void test_SingleValueValidator() {
         given:
         Collection calledFor = []
-        SingleValueValidator<ValidationContext> validator = [
+        AbstractSingleValueValidator<ValidationContext> validator = [
                 getColumnTitle  : { 'B' },
                 validateValue: { ValidationContext ctx, String value, Set<Cell> cells ->
                     assert ctx == context
                     calledFor.add([value, cells])
                 },
-        ] as SingleValueValidator<ValidationContext>
+        ] as AbstractSingleValueValidator<ValidationContext>
 
         when:
         validator.validate(context)

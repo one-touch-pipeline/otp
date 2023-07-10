@@ -38,7 +38,7 @@ import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.PROJECT
 
 @CompileDynamic
 @Component
-class TagmentationLibraryProjectValidator extends ValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
+class TagmentationLibraryProjectValidator extends AbstractValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
 
     @Autowired
     SampleIdentifierService sampleIdentifierService

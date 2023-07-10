@@ -29,12 +29,12 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
 import de.dkfz.tbi.util.spreadsheet.Cell
 import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
-import de.dkfz.tbi.util.spreadsheet.validation.SingleValueValidator
+import de.dkfz.tbi.util.spreadsheet.validation.AbstractSingleValueValidator
 
 import java.util.regex.Matcher
 
 @Component
-class TagmentationLibraryValidator extends SingleValueValidator<MetadataValidationContext> implements MetadataValidator {
+class TagmentationLibraryValidator extends AbstractSingleValueValidator<MetadataValidationContext> implements MetadataValidator {
 
     static final String REGEX = /^(?:lib(?:[1-9]\d*|NA)|)$/
 

@@ -28,10 +28,10 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationConte
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidator
 import de.dkfz.tbi.util.spreadsheet.Cell
 import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
-import de.dkfz.tbi.util.spreadsheet.validation.SingleValueValidator
+import de.dkfz.tbi.util.spreadsheet.validation.AbstractSingleValueValidator
 
 @Component
-class MaximalReadLengthValidator extends SingleValueValidator<BamMetadataValidationContext> implements BamMetadataValidator {
+class MaximalReadLengthValidator extends AbstractSingleValueValidator<BamMetadataValidationContext> implements BamMetadataValidator {
 
     @Override
     Collection<String> getDescriptions() {

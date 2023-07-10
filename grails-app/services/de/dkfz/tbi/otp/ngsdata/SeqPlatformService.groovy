@@ -67,11 +67,11 @@ class SeqPlatformService {
                     name               : it.name,
                     modelId            : it.seqPlatformModelLabel?.id,
                     model              : it.seqPlatformModelLabel?.name,
-                    modelImportAliases : it.seqPlatformModelLabel?.importAlias?.sort()?.join(MetadataFieldsService.MULTILINE_JOIN_STRING),
+                    modelImportAliases : it.seqPlatformModelLabel?.importAlias?.sort()?.join(AbstractMetadataFieldsService.MULTILINE_JOIN_STRING),
                     hasModel           : it.seqPlatformModelLabel ? true : false,
                     seqKitId           : it.sequencingKitLabel?.id,
                     seqKit             : it.sequencingKitLabel?.name,
-                    seqKitImportAliases: it.sequencingKitLabel?.importAlias?.sort()?.join(MetadataFieldsService.MULTILINE_JOIN_STRING),
+                    seqKitImportAliases: it.sequencingKitLabel?.importAlias?.sort()?.join(AbstractMetadataFieldsService.MULTILINE_JOIN_STRING),
                     hasSeqKit          : it.sequencingKitLabel?.name ? true : false,
                     legacy             : it.legacy,
             ]

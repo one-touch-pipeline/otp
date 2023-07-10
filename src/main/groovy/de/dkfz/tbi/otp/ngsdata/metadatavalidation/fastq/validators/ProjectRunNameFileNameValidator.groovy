@@ -35,7 +35,7 @@ import de.dkfz.tbi.util.spreadsheet.validation.*
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 
 @Component
-class ProjectRunNameFileNameValidator extends ValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
+class ProjectRunNameFileNameValidator extends AbstractValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
 
     @Autowired
     SampleIdentifierService sampleIdentifierService

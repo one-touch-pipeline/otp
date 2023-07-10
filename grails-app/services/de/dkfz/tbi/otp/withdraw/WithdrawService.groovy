@@ -37,7 +37,7 @@ class WithdrawService {
     FileSystemService fileSystemService
 
     @Autowired
-    List<WithdrawBamFileService<?>> withdrawBamFileServices
+    List<AbstractWithdrawBamFileService<?>> withdrawBamFileServices
     WithdrawAnalysisService withdrawAnalysisService
     WithdrawHelperService withdrawHelperService
 
@@ -46,7 +46,7 @@ class WithdrawService {
                 withdrawParameters: withdrawParameters,
                 remoteFileSystem  : fileSystemService.remoteFileSystemOnDefaultRealm,
         ])
-        Map<WithdrawBamFileService, List<AbstractBamFile>> bamFileMap = withdrawBamFileServices.collectEntries {
+        Map<AbstractWithdrawBamFileService, List<AbstractBamFile>> bamFileMap = withdrawBamFileServices.collectEntries {
             [(it), it.collectObjects(withdrawStateHolder.seqTracks)]
         }
         withdrawStateHolder.bamFiles = bamFileMap.values().flatten()

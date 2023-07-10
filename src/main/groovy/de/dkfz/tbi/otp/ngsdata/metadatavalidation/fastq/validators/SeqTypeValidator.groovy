@@ -33,7 +33,7 @@ import de.dkfz.tbi.util.spreadsheet.validation.*
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.SEQUENCING_TYPE
 
 @Component
-class SeqTypeValidator extends ValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
+class SeqTypeValidator extends AbstractValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
 
     @Autowired
     SeqTypeService seqTypeService

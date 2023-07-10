@@ -37,7 +37,7 @@ import java.util.stream.Stream
 
 @CompileDynamic
 @Transactional
-abstract class WithdrawBamFileService<E extends AbstractBamFile> implements ProcessingWithdrawService<E, SeqTrack> {
+abstract class AbstractWithdrawBamFileService<E extends AbstractBamFile> implements ProcessingWithdrawService<E, SeqTrack> {
 
     static final String NON_OTP = 'nonOTP'
 

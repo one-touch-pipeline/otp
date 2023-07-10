@@ -28,7 +28,7 @@ import de.dkfz.tbi.otp.project.additionalField.ProjectFieldType
 
 @CompileDynamic
 @ToString(includeNames = true, includeSuperProperties = true)
-class ProjectFieldsCreateFlagCommand extends ProjectFieldsCreateCommand {
+class ProjectFieldsCreateFlagCommand extends AbstractProjectFieldsCreateCommand {
 
     Boolean defaultValue
 

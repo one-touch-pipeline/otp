@@ -47,7 +47,7 @@ class UnwithdrawService {
     WithdrawAnalysisService withdrawAnalysisService
 
     @Autowired
-    List<WithdrawBamFileService<?>> withdrawBamFileServices
+    List<AbstractWithdrawBamFileService<?>> withdrawBamFileServices
 
     void unwithdrawSeqTracks(UnwithdrawStateHolder unwithdrawStateHolder) {
         unwithdrawStateHolder.seqTracksWithComment.each { seqTrackWithComment ->
@@ -86,7 +86,7 @@ class UnwithdrawService {
     }
 
     void unwithdrawBamFiles(UnwithdrawStateHolder withdrawStateHolder) {
-        Map<WithdrawBamFileService, List<AbstractBamFile>> bamFileMap = withdrawBamFileServices.collectEntries {
+        Map<AbstractWithdrawBamFileService, List<AbstractBamFile>> bamFileMap = withdrawBamFileServices.collectEntries {
             [(it), it.collectObjects(withdrawStateHolder.seqTracks).unique().findAll { bamFile ->
                 bamFile.fileOperationStatus == AbstractBamFile.FileOperationStatus.PROCESSED &&
                         !bamFile.containedSeqTracks.any { it.withdrawn } &&

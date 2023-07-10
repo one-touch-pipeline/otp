@@ -28,7 +28,7 @@ import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPancanFactory
 
-class RoddyBamFileWithdrawServiceSpec extends WithdrawBamFileServiceSpec<RoddyBamFileWithdrawService> implements ServiceUnitTest<RoddyBamFileWithdrawService>, RoddyPancanFactory {
+class RoddyBamFileWithdrawServiceSpec extends AbstractWithdrawBamFileServiceSpec<RoddyBamFileWithdrawService> implements ServiceUnitTest<RoddyBamFileWithdrawService>, RoddyPancanFactory {
 
     @Override
     Class[] getDomainClassesToMock() {

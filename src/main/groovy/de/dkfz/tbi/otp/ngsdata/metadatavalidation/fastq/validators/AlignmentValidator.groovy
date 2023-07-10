@@ -42,7 +42,7 @@ import de.dkfz.tbi.util.spreadsheet.validation.*
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 
 @Component
-class AlignmentValidator extends ValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
+class AlignmentValidator extends AbstractValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
 
     @Autowired
     SeqTypeService seqTypeService

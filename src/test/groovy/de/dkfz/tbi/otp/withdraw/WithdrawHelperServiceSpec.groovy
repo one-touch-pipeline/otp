@@ -367,7 +367,7 @@ class WithdrawHelperServiceSpec extends HibernateSpec implements FastqcDomainFac
             1 * collectPaths([singleCellBamFile]) >> PATH_LIST2
         }
 
-        Map<WithdrawBamFileService, List<AbstractBamFile>> bamFileMap = [
+        Map<AbstractWithdrawBamFileService, List<AbstractBamFile>> bamFileMap = [
                 (roddyBamFileWithdrawService)     : [roddyBamFile],
                 (cellRangerBamFileWithdrawService): [singleCellBamFile],
         ]

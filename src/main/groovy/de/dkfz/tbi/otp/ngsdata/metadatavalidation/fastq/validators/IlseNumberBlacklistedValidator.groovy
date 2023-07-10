@@ -30,12 +30,12 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.util.spreadsheet.Cell
 import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
-import de.dkfz.tbi.util.spreadsheet.validation.SingleValueValidator
+import de.dkfz.tbi.util.spreadsheet.validation.AbstractSingleValueValidator
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.ILSE_NO
 
 @Component
-class IlseNumberBlacklistedValidator extends SingleValueValidator<MetadataValidationContext> implements MetadataValidator {
+class IlseNumberBlacklistedValidator extends AbstractSingleValueValidator<MetadataValidationContext> implements MetadataValidator {
 
     @Override
     Collection<String> getDescriptions() {

@@ -39,7 +39,7 @@ import de.dkfz.tbi.util.spreadsheet.validation.*
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 
 @Component
-class LibPrepKitAdapterValidator extends ValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
+class LibPrepKitAdapterValidator extends AbstractValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
 
     @Autowired
     LibraryPreparationKitService libraryPreparationKitService

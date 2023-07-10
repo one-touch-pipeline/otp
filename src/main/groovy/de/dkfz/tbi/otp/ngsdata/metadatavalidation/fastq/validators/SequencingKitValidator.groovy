@@ -30,10 +30,10 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContex
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.util.spreadsheet.Cell
 import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
-import de.dkfz.tbi.util.spreadsheet.validation.SingleValueValidator
+import de.dkfz.tbi.util.spreadsheet.validation.AbstractSingleValueValidator
 
 @Component
-class SequencingKitValidator extends SingleValueValidator<MetadataValidationContext> implements MetadataValidator {
+class SequencingKitValidator extends AbstractSingleValueValidator<MetadataValidationContext> implements MetadataValidator {
 
     @Autowired
     SequencingKitLabelService sequencingKitLabelService

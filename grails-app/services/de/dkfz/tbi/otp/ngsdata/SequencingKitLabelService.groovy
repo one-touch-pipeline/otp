@@ -21,7 +21,7 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-class SequencingKitLabelService extends MetadataFieldsService<SequencingKitLabel> {
+class SequencingKitLabelService extends AbstractMetadataFieldsService<SequencingKitLabel> {
 
     @Override
     protected Class getClazz() {

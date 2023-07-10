@@ -30,12 +30,12 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
 import de.dkfz.tbi.util.spreadsheet.Cell
 import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
-import de.dkfz.tbi.util.spreadsheet.validation.SingleValueValidator
+import de.dkfz.tbi.util.spreadsheet.validation.AbstractSingleValueValidator
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.FASTQ_FILE
 
 @Component
-class FilenameValidator extends SingleValueValidator<MetadataValidationContext> implements MetadataValidator {
+class FilenameValidator extends AbstractSingleValueValidator<MetadataValidationContext> implements MetadataValidator {
 
     /**
      * '_' is required because the AlignmentAndQCWorkflows Roddy Plugin uses it as a

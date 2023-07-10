@@ -37,7 +37,7 @@ import static de.dkfz.tbi.otp.ngsdata.BamMetadataColumn.BAM_FILE_PATH
 import static de.dkfz.tbi.otp.ngsdata.BamMetadataColumn.QUALITY_CONTROL_FILE
 
 @Component
-class QualityControlFileValidator extends ValueTuplesValidator<BamMetadataValidationContext> implements BamMetadataValidator {
+class QualityControlFileValidator extends AbstractValueTuplesValidator<BamMetadataValidationContext> implements BamMetadataValidator {
 
     @Override
     Collection<String> getDescriptions() {

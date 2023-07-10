@@ -35,7 +35,7 @@ import static de.dkfz.tbi.otp.ngsdata.BamMetadataColumn.SAMPLE_TYPE
 
 @CompileDynamic
 @Component
-class SampleTypeIndividualValidator extends ValueTuplesValidator<BamMetadataValidationContext> implements BamMetadataValidator {
+class SampleTypeIndividualValidator extends AbstractValueTuplesValidator<BamMetadataValidationContext> implements BamMetadataValidator {
 
     @Override
     Collection<String> getDescriptions() {

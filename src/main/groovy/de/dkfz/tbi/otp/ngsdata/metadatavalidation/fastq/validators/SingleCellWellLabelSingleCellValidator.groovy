@@ -36,7 +36,7 @@ import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 
 @Slf4j
 @Component
-class SingleCellWellLabelSingleCellValidator extends ValueTuplesValidator<AbstractMetadataValidationContext> implements MetadataValidator {
+class SingleCellWellLabelSingleCellValidator extends AbstractValueTuplesValidator<AbstractMetadataValidationContext> implements MetadataValidator {
 
     static final String WARNING_MESSAGE = "The submission contains single cell data without a well label " +
             "(provided via column ${SINGLE_CELL_WELL_LABEL} or by project parser)"

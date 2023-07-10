@@ -28,7 +28,7 @@ import de.dkfz.tbi.util.spreadsheet.Row
 /**
  * Fetches all cells (including header cells), uniquifies their values and validates each of them once
  */
-abstract class AllCellsValidator<C extends ValidationContext> implements Validator<C> {
+abstract class AbstractAllCellsValidator<C extends ValidationContext> implements Validator<C> {
 
     @Override
     void validate(C context) {

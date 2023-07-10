@@ -71,7 +71,7 @@ class LogThreadLocal {
         assert code
         assert !threadLog
 
-        threadLog = new SimpleLogger() {
+        threadLog = new AbstractSimpleLogger() {
             @Override
             protected void write(String buffer) {
                 out.append(buffer)
@@ -99,7 +99,7 @@ class LogThreadLocal {
     }
 }
 
-abstract class SimpleLogger extends MarkerIgnoringBase implements Logger {
+abstract class AbstractSimpleLogger extends MarkerIgnoringBase implements Logger {
 
     Level level = Level.INFO
 

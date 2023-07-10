@@ -29,7 +29,7 @@ import de.dkfz.tbi.otp.ngsdata.SeqTrack
 
 @CompileDynamic
 @Transactional
-class RoddyBamFileWithdrawService extends WithdrawBamFileService<RoddyBamFile> {
+class RoddyBamFileWithdrawService extends AbstractWithdrawBamFileService<RoddyBamFile> {
 
     @Override
     List<RoddyBamFile> collectObjects(List<SeqTrack> seqTrackList) {

@@ -23,7 +23,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import grails.testing.gorm.DataTest
 
-class AntibodyTargetServiceSpec extends MetadataFieldsServiceSpec<AntibodyTarget> implements DataTest {
+class AntibodyTargetServiceSpec extends AbstractMetadataFieldsServiceSpec<AntibodyTarget> implements DataTest {
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -35,7 +35,7 @@ class AntibodyTargetServiceSpec extends MetadataFieldsServiceSpec<AntibodyTarget
     AntibodyTargetService antibodyTargetService = new AntibodyTargetService()
 
     @Override
-    protected MetadataFieldsService getService() {
+    protected AbstractMetadataFieldsService getService() {
         return antibodyTargetService
     }
 }

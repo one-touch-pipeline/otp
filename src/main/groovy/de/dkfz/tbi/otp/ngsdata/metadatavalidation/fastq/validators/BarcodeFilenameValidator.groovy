@@ -33,7 +33,7 @@ import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.FASTQ_FILE
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.INDEX
 
 @Component
-class BarcodeFilenameValidator extends ValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
+class BarcodeFilenameValidator extends AbstractValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
 
     @CompileDynamic
     @Override

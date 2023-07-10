@@ -31,7 +31,7 @@ import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.CENTER_NAME
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.ILSE_NO
 
 @Component
-class IlseNumberSeqCenterValidator extends ValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
+class IlseNumberSeqCenterValidator extends AbstractValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
 
     @Override
     Collection<String> getDescriptions() {

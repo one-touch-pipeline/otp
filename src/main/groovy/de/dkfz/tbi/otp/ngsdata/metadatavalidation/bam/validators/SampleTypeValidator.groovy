@@ -29,10 +29,10 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationConte
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidator
 import de.dkfz.tbi.util.spreadsheet.Cell
 import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
-import de.dkfz.tbi.util.spreadsheet.validation.SingleValueValidator
+import de.dkfz.tbi.util.spreadsheet.validation.AbstractSingleValueValidator
 
 @Component
-class SampleTypeValidator extends SingleValueValidator<BamMetadataValidationContext> implements BamMetadataValidator {
+class SampleTypeValidator extends AbstractSingleValueValidator<BamMetadataValidationContext> implements BamMetadataValidator {
 
     @Override
     Collection<String> getDescriptions() {

@@ -33,7 +33,7 @@ import de.dkfz.tbi.util.spreadsheet.validation.*
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.ILSE_NO
 
 @Component
-class IlseNumberValidator extends ValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
+class IlseNumberValidator extends AbstractValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
 
     final static String ILSE_RANGE = "[${IlseSubmission.MIN_ILSE_VALUE}..${IlseSubmission.MAX_ILSE_NUMBER}]"
 

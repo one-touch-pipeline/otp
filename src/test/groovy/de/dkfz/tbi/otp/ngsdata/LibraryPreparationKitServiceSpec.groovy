@@ -33,7 +33,7 @@ import java.nio.file.*
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
-class LibraryPreparationKitServiceSpec extends MetadataFieldsServiceSpec<LibraryPreparationKit> implements DataTest, DomainFactoryCore {
+class LibraryPreparationKitServiceSpec extends AbstractMetadataFieldsServiceSpec<LibraryPreparationKit> implements DataTest, DomainFactoryCore {
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -266,7 +266,7 @@ class LibraryPreparationKitServiceSpec extends MetadataFieldsServiceSpec<Library
     }
 
     @Override
-    protected MetadataFieldsService getService() {
+    protected AbstractMetadataFieldsService getService() {
         return libraryPreparationKitService
     }
 }

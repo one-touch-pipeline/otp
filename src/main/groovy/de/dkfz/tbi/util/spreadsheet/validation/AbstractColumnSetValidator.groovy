@@ -29,7 +29,7 @@ import de.dkfz.tbi.util.spreadsheet.Column
 /**
  * A base class for validators which validate values from a specific set of columns
  */
-abstract class ColumnSetValidator<C extends ValidationContext> implements Validator<C> {
+abstract class AbstractColumnSetValidator<C extends ValidationContext> implements Validator<C> {
 
     /**
      * A List of all Columns that are required for the Validator to run

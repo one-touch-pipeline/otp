@@ -29,13 +29,13 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidator
 import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
 import de.dkfz.tbi.util.spreadsheet.Cell
 import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
-import de.dkfz.tbi.util.spreadsheet.validation.SingleValueValidator
+import de.dkfz.tbi.util.spreadsheet.validation.AbstractSingleValueValidator
 
 import java.nio.file.Files
 import java.nio.file.Path
 
 @Component
-class BamFilePathValidator extends SingleValueValidator<BamMetadataValidationContext> implements BamMetadataValidator {
+class BamFilePathValidator extends AbstractSingleValueValidator<BamMetadataValidationContext> implements BamMetadataValidator {
 
     @Override
     Collection<String> getDescriptions() {

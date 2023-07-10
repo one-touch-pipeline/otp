@@ -21,7 +21,7 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-class SeqPlatformModelLabelService extends MetadataFieldsService<SeqPlatformModelLabel> {
+class SeqPlatformModelLabelService extends AbstractMetadataFieldsService<SeqPlatformModelLabel> {
 
     @Override
     protected Class getClazz() {

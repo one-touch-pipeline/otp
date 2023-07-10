@@ -23,7 +23,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import grails.testing.gorm.DataTest
 
-class SeqTypeServiceSpec extends MetadataFieldsServiceSpec<SeqType> implements DataTest {
+class SeqTypeServiceSpec extends AbstractMetadataFieldsServiceSpec<SeqType> implements DataTest {
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -158,7 +158,7 @@ class SeqTypeServiceSpec extends MetadataFieldsServiceSpec<SeqType> implements D
     }
 
     @Override
-    protected MetadataFieldsService getService() {
+    protected AbstractMetadataFieldsService getService() {
         return seqTypeService
     }
 }

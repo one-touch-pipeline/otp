@@ -32,7 +32,7 @@ import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.READ
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.SEQUENCING_READ_TYPE
 
 @Component
-class MateNumberLibraryLayoutValidator extends ValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
+class MateNumberLibraryLayoutValidator extends AbstractValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
 
     @Override
     Collection<String> getDescriptions() {

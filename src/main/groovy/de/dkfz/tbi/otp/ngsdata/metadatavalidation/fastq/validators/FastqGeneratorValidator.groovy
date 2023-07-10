@@ -28,12 +28,12 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContex
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.util.spreadsheet.Cell
 import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
-import de.dkfz.tbi.util.spreadsheet.validation.SingleValueValidator
+import de.dkfz.tbi.util.spreadsheet.validation.AbstractSingleValueValidator
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.FASTQ_GENERATOR
 
 @Component
-class FastqGeneratorValidator extends SingleValueValidator<MetadataValidationContext> implements MetadataValidator {
+class FastqGeneratorValidator extends AbstractSingleValueValidator<MetadataValidationContext> implements MetadataValidator {
 
     @Override
     Collection<String> getDescriptions() {

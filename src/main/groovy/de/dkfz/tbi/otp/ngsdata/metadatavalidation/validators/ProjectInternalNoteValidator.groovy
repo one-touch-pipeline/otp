@@ -34,7 +34,7 @@ import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.PROJECT
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.SAMPLE_NAME
 
 @Component
-class ProjectInternalNoteValidator extends ValueTuplesValidator<ValidationContext> implements MetadataValidator, BamMetadataValidator {
+class ProjectInternalNoteValidator extends AbstractValueTuplesValidator<ValidationContext> implements MetadataValidator, BamMetadataValidator {
 
     @Autowired
     ValidatorHelperService validatorHelperService

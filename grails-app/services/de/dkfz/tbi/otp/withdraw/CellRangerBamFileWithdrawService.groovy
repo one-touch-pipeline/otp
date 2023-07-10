@@ -29,7 +29,7 @@ import de.dkfz.tbi.otp.ngsdata.SeqTrack
 
 @CompileDynamic
 @Transactional
-class CellRangerBamFileWithdrawService extends WithdrawBamFileService<SingleCellBamFile> {
+class CellRangerBamFileWithdrawService extends AbstractWithdrawBamFileService<SingleCellBamFile> {
 
     @Override
     List<SingleCellBamFile> collectObjects(List<SeqTrack> seqTrackList) {

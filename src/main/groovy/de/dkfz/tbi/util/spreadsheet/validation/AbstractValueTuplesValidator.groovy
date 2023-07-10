@@ -29,7 +29,7 @@ import de.dkfz.tbi.util.spreadsheet.*
 /**
  * Fetches the values in specified columns of all data rows, uniquifies these value tuples and validates the set
  */
-abstract class ValueTuplesValidator<C extends ValidationContext> extends ColumnSetValidator<C> {
+abstract class AbstractValueTuplesValidator<C extends ValidationContext> extends AbstractColumnSetValidator<C> {
 
     @Override
     final void validate(C context) {
@@ -73,7 +73,7 @@ class ValueTuple {
     final Set<Cell> cells
 }
 
-abstract class SingleValueValidator<C extends ValidationContext> extends ValueTuplesValidator<C> {
+abstract class AbstractSingleValueValidator<C extends ValidationContext> extends AbstractValueTuplesValidator<C> {
 
     @Override
     final List<String> getRequiredColumnTitles(C context) {

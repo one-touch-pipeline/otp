@@ -76,7 +76,7 @@ class ProjectFieldsController extends AbstractGeneralDomainPropertyUpdateControl
     }
 
     def create() {
-        ProjectFieldsCreateCommand cmd = flash.cmd ?: new ProjectFieldsCreateTextCommand()
+        AbstractProjectFieldsCreateCommand cmd = flash.cmd ?: new ProjectFieldsCreateTextCommand()
         // set the default value to true, so that this checkBox is checked in create.gsp
         cmd.changeOnlyByOperator = true
         return [
@@ -110,7 +110,7 @@ class ProjectFieldsController extends AbstractGeneralDomainPropertyUpdateControl
         handleSubmitEvent(cmd)
     }
 
-    private void handleSubmitEvent(ProjectFieldsCreateCommand cmd) {
+    private void handleSubmitEvent(AbstractProjectFieldsCreateCommand cmd) {
         if (params.create) {
             handleCreateEvent(cmd)
             return
@@ -118,14 +118,14 @@ class ProjectFieldsController extends AbstractGeneralDomainPropertyUpdateControl
         handleChangeTypeEvent(cmd)
     }
 
-    private void handleChangeTypeEvent(ProjectFieldsCreateCommand cmd) {
+    private void handleChangeTypeEvent(AbstractProjectFieldsCreateCommand cmd) {
         flash.cmd = cmd
         flash.message = new FlashMessage(g.message(code: 'projectFields.create.changeType', args: [cmd.projectFieldType]))
         redirect(action: "create")
     }
 
     @SuppressWarnings('CatchRuntimeException')
-    private void handleCreateEvent(ProjectFieldsCreateCommand cmd) {
+    private void handleCreateEvent(AbstractProjectFieldsCreateCommand cmd) {
         cmd.validate()
         if (cmd.hasErrors()) {
             flash.cmd = cmd

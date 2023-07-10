@@ -36,7 +36,7 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.util.spreadsheet.Cell
 import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.ValueTuple
-import de.dkfz.tbi.util.spreadsheet.validation.ValueTuplesValidator
+import de.dkfz.tbi.util.spreadsheet.validation.AbstractValueTuplesValidator
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.BASE_MATERIAL
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.LOW_COVERAGE_REQUESTED
@@ -46,7 +46,7 @@ import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.SEQUENCING_READ_TYPE
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.SEQUENCING_TYPE
 
 @Component
-class SampleLowCoverageRequestedValidator extends ValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
+class SampleLowCoverageRequestedValidator extends AbstractValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
 
     @Autowired
     MetadataImportService metadataImportService

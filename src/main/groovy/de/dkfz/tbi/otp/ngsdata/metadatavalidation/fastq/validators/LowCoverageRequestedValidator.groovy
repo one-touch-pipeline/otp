@@ -32,7 +32,7 @@ import de.dkfz.tbi.util.spreadsheet.validation.*
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 
 @Component
-class LowCoverageRequestedValidator extends ValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
+class LowCoverageRequestedValidator extends AbstractValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
     static final List<String> VALID_VALUES = ["true", "false"]
     static final List<String> EMPTY_VALUES = [null, ""]
 

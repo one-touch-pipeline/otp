@@ -28,7 +28,7 @@ import de.dkfz.tbi.otp.project.additionalField.ProjectFieldType
 
 @CompileDynamic
 @ToString(includeNames = true, includeSuperProperties = true)
-class ProjectFieldsCreateDomainReferenceCommand extends ProjectFieldsCreateCommand {
+class ProjectFieldsCreateDomainReferenceCommand extends AbstractProjectFieldsCreateCommand {
 
     Long defaultValue
 

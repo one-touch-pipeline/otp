@@ -29,7 +29,7 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.util.TimeFormats
 import de.dkfz.tbi.util.spreadsheet.Cell
 import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
-import de.dkfz.tbi.util.spreadsheet.validation.SingleValueValidator
+import de.dkfz.tbi.util.spreadsheet.validation.AbstractSingleValueValidator
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -38,7 +38,7 @@ import java.time.format.DateTimeParseException
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.RUN_DATE
 
 @Component
-class RunDateValidator extends SingleValueValidator<MetadataValidationContext> implements MetadataValidator {
+class RunDateValidator extends AbstractSingleValueValidator<MetadataValidationContext> implements MetadataValidator {
 
     /**
      * The date format used in the run names.

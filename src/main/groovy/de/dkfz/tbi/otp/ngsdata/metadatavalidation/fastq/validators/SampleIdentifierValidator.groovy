@@ -38,7 +38,7 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
 @CompileDynamic
 @Component
-class SampleIdentifierValidator extends ValueTuplesValidator<AbstractMetadataValidationContext> implements MetadataValidator {
+class SampleIdentifierValidator extends AbstractValueTuplesValidator<AbstractMetadataValidationContext> implements MetadataValidator {
 
     @Autowired
     SampleIdentifierService sampleIdentifierService

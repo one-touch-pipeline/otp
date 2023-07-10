@@ -28,12 +28,12 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContex
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.util.spreadsheet.Cell
 import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
-import de.dkfz.tbi.util.spreadsheet.validation.SingleValueValidator
+import de.dkfz.tbi.util.spreadsheet.validation.AbstractSingleValueValidator
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.WITHDRAWN
 
 @Component
-class WithdrawnValidator extends SingleValueValidator<MetadataValidationContext> implements MetadataValidator {
+class WithdrawnValidator extends AbstractSingleValueValidator<MetadataValidationContext> implements MetadataValidator {
 
     static final String NONE = 'NONE'
 

@@ -56,7 +56,7 @@ class ProjectFieldsService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    AbstractFieldDefinition create(ProjectFieldsCreateCommand cmd) {
+    AbstractFieldDefinition create(AbstractProjectFieldsCreateCommand cmd) {
         assert cmd
         assert cmd.validate()
 

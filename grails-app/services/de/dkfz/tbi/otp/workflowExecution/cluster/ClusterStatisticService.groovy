@@ -31,7 +31,7 @@ import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.processing.ClusterJobManagerFactoryService
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
-import de.dkfz.tbi.otp.utils.logging.SimpleLogger
+import de.dkfz.tbi.otp.utils.logging.AbstractSimpleLogger
 import de.dkfz.tbi.otp.workflowExecution.LogService
 import de.dkfz.tbi.otp.workflowExecution.cluster.logs.ClusterLogQueryResultFileService
 
@@ -79,7 +79,7 @@ class ClusterStatisticService {
         Map<BEJobID, JobState> jobStates
         StringBuilder logStringBuilder = new StringBuilder()
         LogThreadLocal.withThreadLog(logStringBuilder) {
-            ((SimpleLogger) LogThreadLocal.threadLog).level = Level.DEBUG
+            ((AbstractSimpleLogger) LogThreadLocal.threadLog).level = Level.DEBUG
             jobStates = jobManager.queryJobStatusAll()
         }
 

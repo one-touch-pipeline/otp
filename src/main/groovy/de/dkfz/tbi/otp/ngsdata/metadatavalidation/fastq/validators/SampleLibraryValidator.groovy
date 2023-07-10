@@ -32,7 +32,7 @@ import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.TAGMENTATION_LIBRARY
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.SAMPLE_NAME
 
 @Component
-class SampleLibraryValidator extends ValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
+class SampleLibraryValidator extends AbstractValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
 
     static final String LIB = "lib"
 

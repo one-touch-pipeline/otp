@@ -23,7 +23,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import grails.testing.gorm.DataTest
 
-class SequencingKitLabelServiceSpec extends MetadataFieldsServiceSpec<SequencingKitLabel> implements DataTest {
+class SequencingKitLabelServiceSpec extends AbstractMetadataFieldsServiceSpec<SequencingKitLabel> implements DataTest {
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -35,7 +35,7 @@ class SequencingKitLabelServiceSpec extends MetadataFieldsServiceSpec<Sequencing
     SequencingKitLabelService sequencingKitLabelService = new SequencingKitLabelService()
 
     @Override
-    protected MetadataFieldsService getService() {
+    protected AbstractMetadataFieldsService getService() {
         return sequencingKitLabelService
     }
 }

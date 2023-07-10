@@ -35,7 +35,7 @@ import static de.dkfz.tbi.otp.ngsdata.BamMetadataColumn.BAM_FILE_PATH
 import static de.dkfz.tbi.otp.ngsdata.BamMetadataColumn.INSERT_SIZE_FILE
 
 @Component
-class InsertSizeFileValidator extends ValueTuplesValidator<BamMetadataValidationContext> implements BamMetadataValidator {
+class InsertSizeFileValidator extends AbstractValueTuplesValidator<BamMetadataValidationContext> implements BamMetadataValidator {
 
     @Override
     Collection<String> getDescriptions() {

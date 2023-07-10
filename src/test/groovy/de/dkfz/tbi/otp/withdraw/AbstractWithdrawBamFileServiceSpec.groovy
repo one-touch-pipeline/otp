@@ -34,7 +34,7 @@ import de.dkfz.tbi.otp.utils.DeletionService
 
 import java.nio.file.Path
 
-abstract class WithdrawBamFileServiceSpec<T extends WithdrawBamFileService> extends Specification implements ServiceUnitTest<T>, DataTest {
+abstract class AbstractWithdrawBamFileServiceSpec<T extends AbstractWithdrawBamFileService> extends Specification implements ServiceUnitTest<T>, DataTest {
 
     @TempDir
     Path tempDir

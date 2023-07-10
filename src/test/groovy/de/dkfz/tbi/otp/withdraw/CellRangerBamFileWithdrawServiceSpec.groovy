@@ -29,7 +29,7 @@ import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerMergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.CellRangerFactory
 
-class CellRangerBamFileWithdrawServiceSpec extends WithdrawBamFileServiceSpec<CellRangerBamFileWithdrawService> implements ServiceUnitTest<CellRangerBamFileWithdrawService>, CellRangerFactory {
+class CellRangerBamFileWithdrawServiceSpec extends AbstractWithdrawBamFileServiceSpec<CellRangerBamFileWithdrawService> implements ServiceUnitTest<CellRangerBamFileWithdrawService>, CellRangerFactory {
 
     @Override
     Class[] getDomainClassesToMock() {

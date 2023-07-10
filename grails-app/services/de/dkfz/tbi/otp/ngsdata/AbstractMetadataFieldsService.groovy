@@ -30,7 +30,7 @@ import de.dkfz.tbi.otp.utils.MetadataField
 
 @CompileDynamic
 @Transactional
-abstract class MetadataFieldsService<T extends MetadataField> {
+abstract class AbstractMetadataFieldsService<T extends MetadataField> {
 
     // explicit protected is required, see: https://stackoverflow.com/a/20472740/6921511
     protected final static String MULTILINE_JOIN_STRING = ";\n"

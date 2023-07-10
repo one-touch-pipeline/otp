@@ -34,7 +34,7 @@ import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.CENTER_NAME
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.RUN_ID
 
 @Component
-class RunSeqCenterValidator extends ValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
+class RunSeqCenterValidator extends AbstractValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
 
     @CompileDynamic
     @Override

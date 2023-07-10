@@ -32,7 +32,7 @@ import de.dkfz.tbi.util.spreadsheet.validation.*
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 
 @Component
-class SeqPlatformValidator extends ValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
+class SeqPlatformValidator extends AbstractValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
 
     @Autowired
     SeqPlatformService seqPlatformService

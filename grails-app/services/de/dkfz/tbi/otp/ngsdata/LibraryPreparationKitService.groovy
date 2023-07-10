@@ -34,7 +34,7 @@ import java.nio.file.*
 
 @CompileDynamic
 @Transactional
-class LibraryPreparationKitService extends MetadataFieldsService<LibraryPreparationKit> {
+class LibraryPreparationKitService extends AbstractMetadataFieldsService<LibraryPreparationKit> {
 
     FileSystemService fileSystemService
     FileService fileService

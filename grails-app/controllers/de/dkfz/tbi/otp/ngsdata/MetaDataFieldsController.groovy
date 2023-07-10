@@ -278,7 +278,7 @@ class MetaDataFieldsController implements CheckAndCall {
         })
     }
 
-    private void createImportAlias(CreateImportAliasCommand cmd) {
+    private void createImportAlias(AbstractCreateImportAliasCommand cmd) {
         checkErrorAndCallMethod(cmd) {
             cmd.service.addNewAlias(cmd.id, cmd.importAlias)
         }
@@ -413,8 +413,8 @@ class CreateSeqPlatformCommand implements Validateable {
     }
 }
 
-abstract class CreateImportAliasCommand implements Validateable {
-    abstract MetadataFieldsService getService()
+abstract class AbstractCreateImportAliasCommand implements Validateable {
+    abstract AbstractMetadataFieldsService getService()
     Long id
     String importAlias
 
@@ -432,55 +432,55 @@ abstract class CreateImportAliasCommand implements Validateable {
     }
 }
 
-class CreateSeqPlatformModelLabelImportAliasCommand extends CreateImportAliasCommand {
+class CreateSeqPlatformModelLabelImportAliasCommand extends AbstractCreateImportAliasCommand {
     SeqPlatformModelLabelService seqPlatformModelLabelService
 
     @Override
-    MetadataFieldsService getService() {
+    AbstractMetadataFieldsService getService() {
         return seqPlatformModelLabelService
     }
 }
 
-class CreateSequencingKitLabelImportAliasCommand extends CreateImportAliasCommand {
+class CreateSequencingKitLabelImportAliasCommand extends AbstractCreateImportAliasCommand {
     SequencingKitLabelService sequencingKitLabelService
 
     @Override
-    MetadataFieldsService getService() {
+    AbstractMetadataFieldsService getService() {
         return sequencingKitLabelService
     }
 }
 
-class CreateSeqTypeImportAliasCommand extends CreateImportAliasCommand {
+class CreateSeqTypeImportAliasCommand extends AbstractCreateImportAliasCommand {
     SeqTypeService seqTypeService
     boolean singleCell
 
     @Override
-    MetadataFieldsService getService() {
+    AbstractMetadataFieldsService getService() {
         return seqTypeService
     }
 }
 
-class CreateAntibodyTargetImportAliasCommand extends CreateImportAliasCommand {
+class CreateAntibodyTargetImportAliasCommand extends AbstractCreateImportAliasCommand {
     AntibodyTargetService antibodyTargetService
 
     @Override
-    MetadataFieldsService getService() {
+    AbstractMetadataFieldsService getService() {
         return antibodyTargetService
     }
 }
 
-class CreateLibraryPreparationKitImportAliasCommand extends CreateImportAliasCommand {
+class CreateLibraryPreparationKitImportAliasCommand extends AbstractCreateImportAliasCommand {
     LibraryPreparationKitService libraryPreparationKitService
 
     @Override
-    MetadataFieldsService getService() {
+    AbstractMetadataFieldsService getService() {
         libraryPreparationKitService
     }
 }
 
 // SuppressWarnings PropertyName: The variable mate_pair should be refactored to be matePair. Too risky to do during bulk violation removal.
 @SuppressWarnings("PropertyName")
-abstract class CreateWithLayoutCommand implements Validateable {
+abstract class AbstractCreateWithLayoutCommand implements Validateable {
     SeqTypeService seqTypeService
     boolean single
     boolean paired
@@ -511,7 +511,7 @@ abstract class CreateWithLayoutCommand implements Validateable {
     }
 }
 
-class CreateSeqTypeCommand extends CreateWithLayoutCommand {
+class CreateSeqTypeCommand extends AbstractCreateWithLayoutCommand {
     String seqTypeName
     String dirName
     String displayName
@@ -564,7 +564,7 @@ class CreateSeqTypeCommand extends CreateWithLayoutCommand {
     }
 }
 
-class CreateLayoutCommand extends CreateWithLayoutCommand {
+class CreateLayoutCommand extends AbstractCreateWithLayoutCommand {
     String name
 
     static constraints = {
@@ -591,11 +591,11 @@ class CreateLayoutCommand extends CreateWithLayoutCommand {
     }
 }
 
-abstract class SeqCenterCommand implements Validateable {
+abstract class AbstractSeqCenterCommand implements Validateable {
     SeqCenter seqCenter
 }
 
-class UpdateSeqCenterFlagCommand extends SeqCenterCommand {
+class UpdateSeqCenterFlagCommand extends AbstractSeqCenterCommand {
     boolean flag
 
     void setValue(String value) {
@@ -603,7 +603,7 @@ class UpdateSeqCenterFlagCommand extends SeqCenterCommand {
     }
 }
 
-class UpdateSeqCenterAbsolutePathCommand extends SeqCenterCommand {
+class UpdateSeqCenterAbsolutePathCommand extends AbstractSeqCenterCommand {
     String absolutePath
 
     static constraints = {

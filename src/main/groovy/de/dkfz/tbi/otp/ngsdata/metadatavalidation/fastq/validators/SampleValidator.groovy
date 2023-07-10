@@ -40,7 +40,7 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 @CompileDynamic
 @Component
-class SampleValidator extends ValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
+class SampleValidator extends AbstractValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
 
     static final String ERROR_NEITHER_REGISTERED_NOR_PARSEABLE = "At least one sample name is neither registered in OTP nor can be parsed."
     static final String ERROR_PARSED_PROJECT_UNKNOWN = "At least for one sample name the parsed project is not registered in OTP"

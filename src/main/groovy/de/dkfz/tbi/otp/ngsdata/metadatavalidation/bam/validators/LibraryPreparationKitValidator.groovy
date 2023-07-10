@@ -33,7 +33,7 @@ import de.dkfz.tbi.util.spreadsheet.validation.*
 import static de.dkfz.tbi.otp.ngsdata.BamMetadataColumn.*
 
 @Component
-class LibraryPreparationKitValidator extends ValueTuplesValidator<BamMetadataValidationContext> implements BamMetadataValidator {
+class LibraryPreparationKitValidator extends AbstractValueTuplesValidator<BamMetadataValidationContext> implements BamMetadataValidator {
 
     @Autowired
     LibraryPreparationKitService libraryPreparationKitService

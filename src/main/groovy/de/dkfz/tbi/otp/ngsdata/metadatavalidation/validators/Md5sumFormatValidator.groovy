@@ -30,10 +30,10 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidator
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.util.spreadsheet.Cell
 import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
-import de.dkfz.tbi.util.spreadsheet.validation.SingleValueValidator
+import de.dkfz.tbi.util.spreadsheet.validation.AbstractSingleValueValidator
 
 @Component
-class Md5sumFormatValidator extends SingleValueValidator<AbstractMetadataValidationContext> implements MetadataValidator, BamMetadataValidator {
+class Md5sumFormatValidator extends AbstractSingleValueValidator<AbstractMetadataValidationContext> implements MetadataValidator, BamMetadataValidator {
 
     @Override
     Collection<String> getDescriptions() {

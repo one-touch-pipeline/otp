@@ -30,7 +30,7 @@ import de.dkfz.tbi.otp.ngsdata.SeqPlatformGroup
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.util.spreadsheet.validation.ValueTuple
-import de.dkfz.tbi.util.spreadsheet.validation.ValueTuplesValidator
+import de.dkfz.tbi.util.spreadsheet.validation.AbstractValueTuplesValidator
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 
@@ -68,7 +68,7 @@ import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
  *    - {@link MergingCriteria#useSeqPlatformGroup} is {@link MergingCriteria.SpecificSeqPlatformGroups#USE_OTP_DEFAULT}
  */
 @Component
-class MergingPreventionValidator extends ValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
+class MergingPreventionValidator extends AbstractValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
 
     @Autowired
     MergingPreventionService mergingPreventionService

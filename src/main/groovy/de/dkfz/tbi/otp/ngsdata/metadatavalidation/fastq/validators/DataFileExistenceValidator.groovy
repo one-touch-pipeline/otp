@@ -36,7 +36,7 @@ import java.nio.file.Path
 import static de.dkfz.tbi.otp.ngsdata.metadatavalidation.AbstractMetadataValidationContext.pathForMessage
 
 @Component
-class DataFileExistenceValidator extends ValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
+class DataFileExistenceValidator extends AbstractValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
 
     @Override
     Collection<String> getDescriptions() {

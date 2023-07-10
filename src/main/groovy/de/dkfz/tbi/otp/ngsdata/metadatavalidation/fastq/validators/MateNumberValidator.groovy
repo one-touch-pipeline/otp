@@ -28,10 +28,10 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContex
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.util.spreadsheet.Cell
 import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
-import de.dkfz.tbi.util.spreadsheet.validation.SingleValueValidator
+import de.dkfz.tbi.util.spreadsheet.validation.AbstractSingleValueValidator
 
 @Component
-class MateNumberValidator extends SingleValueValidator<MetadataValidationContext> implements MetadataValidator {
+class MateNumberValidator extends AbstractSingleValueValidator<MetadataValidationContext> implements MetadataValidator {
 
     static final private String MATE_NUMBER_EXPRESSION = /^(i|I)?[1-9]\d*$/
 

@@ -37,7 +37,7 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 import static de.dkfz.tbi.otp.utils.StringUtils.extractDistinguishingCharacter
 
 @Component
-class SeqTrackValidator extends ColumnSetValidator<MetadataValidationContext> implements MetadataValidator {
+class SeqTrackValidator extends AbstractColumnSetValidator<MetadataValidationContext> implements MetadataValidator {
 
     static final Collection<MetaDataColumn> EQUAL_ATTRIBUTES = [
             ANTIBODY,

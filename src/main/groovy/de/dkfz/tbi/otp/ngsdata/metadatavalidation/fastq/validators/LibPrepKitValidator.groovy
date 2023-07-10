@@ -31,12 +31,12 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContex
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.util.spreadsheet.Cell
 import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
-import de.dkfz.tbi.util.spreadsheet.validation.SingleValueValidator
+import de.dkfz.tbi.util.spreadsheet.validation.AbstractSingleValueValidator
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.LIB_PREP_KIT
 
 @Component
-class LibPrepKitValidator extends SingleValueValidator<MetadataValidationContext> implements MetadataValidator {
+class LibPrepKitValidator extends AbstractSingleValueValidator<MetadataValidationContext> implements MetadataValidator {
 
     @Autowired
     LibraryPreparationKitService libraryPreparationKitService

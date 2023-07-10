@@ -29,7 +29,7 @@ import de.dkfz.tbi.otp.project.additionalField.ProjectFieldType
 
 @CompileDynamic
 @ToString(includeNames = true, includeSuperProperties = true)
-class ProjectFieldsCreateTextCommand extends ProjectFieldsCreateCommand {
+class ProjectFieldsCreateTextCommand extends AbstractProjectFieldsCreateCommand {
 
     TypeValidators typeValidator
 

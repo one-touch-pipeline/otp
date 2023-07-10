@@ -28,7 +28,7 @@ import de.dkfz.tbi.otp.project.additionalField.ProjectFieldType
 
 @CompileDynamic
 @ToString(includeNames = true, includeSuperProperties = true)
-class ProjectFieldsCreateDecimalNumbersCommand extends ProjectFieldsCreateCommand {
+class ProjectFieldsCreateDecimalNumbersCommand extends AbstractProjectFieldsCreateCommand {
 
     List<BigDecimal> allowedValues = []
 

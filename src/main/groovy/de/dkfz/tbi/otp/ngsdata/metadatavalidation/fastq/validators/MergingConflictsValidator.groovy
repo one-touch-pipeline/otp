@@ -36,7 +36,7 @@ import de.dkfz.tbi.util.spreadsheet.validation.*
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 
 @Component
-class MergingConflictsValidator extends ValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
+class MergingConflictsValidator extends AbstractValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
 
     @Autowired
     ValidatorHelperService validatorHelperService

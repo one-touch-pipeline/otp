@@ -37,12 +37,12 @@ class AllCellsValidatorSpec extends Specification {
         Set yCells = [spreadsheet.header.cells[1], spreadsheet.dataRows[0].cells[0]] as Set
         ValidationContext context = new ValidationContext(spreadsheet)
         Collection calledFor = []
-        AllCellsValidator validator = [
+        AbstractAllCellsValidator validator = [
                 validateValue: { ValidationContext ctx, String value, Set<Cell> cells ->
                     assert ctx == context
                     calledFor.add([value, cells])
                 },
-        ] as AllCellsValidator<ValidationContext>
+        ] as AbstractAllCellsValidator<ValidationContext>
 
         when:
         validator.validate(context)

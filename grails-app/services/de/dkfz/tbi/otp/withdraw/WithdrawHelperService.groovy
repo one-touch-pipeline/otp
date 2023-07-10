@@ -63,7 +63,7 @@ class WithdrawHelperService {
     FilestoreService filestoreService
 
     @Autowired
-    List<WithdrawBamFileService<?>> withdrawBamFileServices
+    List<AbstractWithdrawBamFileService<?>> withdrawBamFileServices
     WithdrawAnalysisService withdrawAnalysisService
     WithdrawDisplayDomainService withdrawDisplayDomainService
 
@@ -146,7 +146,7 @@ class WithdrawHelperService {
         }
     }
 
-    void handleBamFiles(WithdrawStateHolder withdrawStateHolder, Map<WithdrawBamFileService, List<AbstractBamFile>> bamFileMap) {
+    void handleBamFiles(WithdrawStateHolder withdrawStateHolder, Map<AbstractWithdrawBamFileService, List<AbstractBamFile>> bamFileMap) {
         if (withdrawStateHolder.deleteBamFile) {
             bamFileMap.each {
                 withdrawStateHolder.pathsToDelete.addAll(it.key.collectPaths(it.value))

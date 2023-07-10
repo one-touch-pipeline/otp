@@ -34,7 +34,7 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.util.spreadsheet.validation.*
 
 @Component
-class Md5sumUniqueValidator extends ValueTuplesValidator<AbstractMetadataValidationContext> implements MetadataValidator, BamMetadataValidator {
+class Md5sumUniqueValidator extends AbstractValueTuplesValidator<AbstractMetadataValidationContext> implements MetadataValidator, BamMetadataValidator {
 
     @Override
     Collection<String> getDescriptions() {

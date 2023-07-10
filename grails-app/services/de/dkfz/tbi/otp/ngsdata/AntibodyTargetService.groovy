@@ -27,7 +27,7 @@ import org.springframework.security.access.prepost.PreAuthorize
 import de.dkfz.tbi.otp.utils.StringUtils
 
 @Transactional
-class AntibodyTargetService extends MetadataFieldsService<AntibodyTarget> {
+class AntibodyTargetService extends AbstractMetadataFieldsService<AntibodyTarget> {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     List<Map> displayableMetadata() {

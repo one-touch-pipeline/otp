@@ -30,7 +30,7 @@ import java.time.LocalDate
 
 @CompileDynamic
 @ToString(includeNames = true, includeSuperProperties = true)
-class ProjectFieldsCreateDateCommand extends ProjectFieldsCreateCommand {
+class ProjectFieldsCreateDateCommand extends AbstractProjectFieldsCreateCommand {
 
     List<LocalDate> allowedValues = []
 

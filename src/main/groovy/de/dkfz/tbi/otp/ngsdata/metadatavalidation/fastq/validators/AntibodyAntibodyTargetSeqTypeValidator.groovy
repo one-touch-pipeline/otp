@@ -33,7 +33,7 @@ import de.dkfz.tbi.util.spreadsheet.validation.*
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 
 @Component
-class AntibodyAntibodyTargetSeqTypeValidator extends ValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
+class AntibodyAntibodyTargetSeqTypeValidator extends AbstractValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
 
     @Autowired
     SeqTypeService seqTypeService

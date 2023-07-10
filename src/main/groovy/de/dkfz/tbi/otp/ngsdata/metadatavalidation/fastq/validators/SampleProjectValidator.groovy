@@ -39,7 +39,7 @@ import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.SAMPLE_NAME
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
 @Component
-class SampleProjectValidator extends ValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
+class SampleProjectValidator extends AbstractValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
 
     @Autowired
     SampleIdentifierService sampleIdentifierService

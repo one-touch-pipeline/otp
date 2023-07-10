@@ -36,7 +36,7 @@ import de.dkfz.tbi.util.spreadsheet.validation.*
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 
 @Component
-class SeqTypeLibraryLayoutValidator extends ValueTuplesValidator<AbstractMetadataValidationContext> implements MetadataValidator, BamMetadataValidator {
+class SeqTypeLibraryLayoutValidator extends AbstractValueTuplesValidator<AbstractMetadataValidationContext> implements MetadataValidator, BamMetadataValidator {
 
     @Autowired
     SeqTypeService seqTypeService

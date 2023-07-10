@@ -29,7 +29,7 @@ import de.dkfz.tbi.otp.project.additionalField.*
 
 @CompileDynamic
 @ToString(includeNames = true)
-abstract class ProjectFieldsCreateCommand implements Validateable {
+abstract class AbstractProjectFieldsCreateCommand implements Validateable {
 
     ProjectFieldType projectFieldType
 
@@ -67,11 +67,11 @@ abstract class ProjectFieldsCreateCommand implements Validateable {
 
     abstract List<Object> getAllowedValues()
 
-    protected ProjectFieldsCreateCommand(ProjectFieldType projectFieldType) {
+    protected AbstractProjectFieldsCreateCommand(ProjectFieldType projectFieldType) {
         this.projectFieldType = projectFieldType
     }
 
-    final void copyValuesFrom(ProjectFieldsCreateCommand cmd) {
+    final void copyValuesFrom(AbstractProjectFieldsCreateCommand cmd) {
         projectFieldType = cmd.projectFieldType
         cardinalityType = cmd.cardinalityType
         name = cmd.name

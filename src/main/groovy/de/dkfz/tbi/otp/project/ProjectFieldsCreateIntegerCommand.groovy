@@ -28,7 +28,7 @@ import de.dkfz.tbi.otp.project.additionalField.ProjectFieldType
 
 @CompileDynamic
 @ToString(includeNames = true, includeSuperProperties = true)
-class ProjectFieldsCreateIntegerCommand extends ProjectFieldsCreateCommand {
+class ProjectFieldsCreateIntegerCommand extends AbstractProjectFieldsCreateCommand {
 
     List<Integer> allowedValues = []
 

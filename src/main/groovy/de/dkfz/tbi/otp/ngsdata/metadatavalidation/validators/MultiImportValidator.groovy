@@ -34,7 +34,7 @@ import de.dkfz.tbi.util.spreadsheet.validation.*
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 
 @Component
-class MultiImportValidator extends ValueTuplesValidator<AbstractMetadataValidationContext> implements MetadataValidator, ExtractProjectSampleType {
+class MultiImportValidator extends AbstractValueTuplesValidator<AbstractMetadataValidationContext> implements MetadataValidator, ExtractProjectSampleType {
 
     @Override
     Collection<String> getDescriptions() {

@@ -37,7 +37,7 @@ import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.RUN_DATE
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.RUN_ID
 
 @Component
-class RunRunDateValidator extends ValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
+class RunRunDateValidator extends AbstractValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
 
     @Autowired
     RunDateParserService runDateParserService

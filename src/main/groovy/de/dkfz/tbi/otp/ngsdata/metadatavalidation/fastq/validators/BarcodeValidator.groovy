@@ -28,12 +28,12 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContex
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.util.spreadsheet.Cell
 import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
-import de.dkfz.tbi.util.spreadsheet.validation.SingleValueValidator
+import de.dkfz.tbi.util.spreadsheet.validation.AbstractSingleValueValidator
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.INDEX
 
 @Component
-class BarcodeValidator extends SingleValueValidator<MetadataValidationContext> implements MetadataValidator {
+class BarcodeValidator extends AbstractSingleValueValidator<MetadataValidationContext> implements MetadataValidator {
 
     final static String MUST_REGEX = /^[ACGTN\-,]*$/
 
