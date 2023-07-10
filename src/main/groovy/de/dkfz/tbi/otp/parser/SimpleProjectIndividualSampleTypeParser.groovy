@@ -68,15 +68,15 @@ class SimpleProjectIndividualSampleTypeParser implements SampleIdentifierParser 
     }
 
     private static String getProjectRegex() {
-        return "[A-Za-z0-9_-]+"
+        return "[+A-Za-z0-9_-]+"
     }
 
     private static String getPidRegex() {
-        return "[A-Za-z0-9_-]+"
+        return "[+A-Za-z0-9_-]+"
     }
 
     private static String getSampleType() {
-        return "[A-Za-z0-9-]+"
+        return "[+A-Za-z0-9-]+"
     }
 
     private static SampleType.SpecificReferenceGenome getSpecificReferenceGenomeFromSampleType(String sampleType) {
