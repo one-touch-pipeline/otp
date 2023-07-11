@@ -33,6 +33,9 @@ updates:
         versions: [ "9dcbecd42ad", "15ba23c72a", "b644af9c80", "ca6ec50" ]
       - dependency-name: "org.codenarc:CodeNarc"
         versions: [ "3.1.0-groovy-4.0", "3.2.0-groovy-4.0"]
+      - dependency-name: "org.springframework.security:spring-security-*"
+        versions: [ "31d4ce8", "acf1d34", "2686af0", "8407c9e", "f66a5ba" ]
+        update-types: [ "version-update:semver-major" ]
   - package-ecosystem: npm
     directory: /
     schedule:
