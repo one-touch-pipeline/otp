@@ -45,7 +45,7 @@ class PIUserServiceSpec extends Specification implements DataTest, UserDomainFac
         given:
         piUserService = new PIUserService(auditLogService: Mock(AuditLogService),)
         User departmentHead = createUser()
-        Department department = createDepartment([departmentHead: departmentHead])
+        Department department = createDepartment([departmentHeads: [departmentHead, createUser()]])
         createPIUser([pi: departmentHead, dateRightsGranted: new Date()])
 
         when:
@@ -64,9 +64,12 @@ class PIUserServiceSpec extends Specification implements DataTest, UserDomainFac
 
     void "grantDeputyPIRights, when PI is in the list of allowed users"() {
         given:
-        piUserService = new PIUserService(auditLogService: Mock(AuditLogService),)
+        UserService userService = Mock(UserService)
+        piUserService = new PIUserService(
+                auditLogService: Mock(AuditLogService),
+                userService: userService,
+        )
         User departmentHead = createUser()
-        createDepartment([departmentHead: departmentHead])
         User deputyPI = createUser()
 
         when:
@@ -74,21 +77,22 @@ class PIUserServiceSpec extends Specification implements DataTest, UserDomainFac
 
         then:
         1 * piUserService.auditLogService.logAction(_, _) >> _
+        1 * userService.isDepartmentHead(departmentHead) >> true
         PIUser.findAllByDeputyPI(deputyPI).size() == 1
     }
 
     void "grantDeputyPIRights, when PI is NOT in the list of allowed users"() {
         given:
-        piUserService = new PIUserService(auditLogService: Mock(AuditLogService),)
+        UserService userService = Mock(UserService)
+        piUserService = new PIUserService(auditLogService: Mock(AuditLogService), userService: userService)
         User user = createUser()
-        User anotherHead = createUser()
-        createDepartment([departmentHead: anotherHead])
         User deputyPI = createUser()
 
         when:
         piUserService.grantDeputyPIRights(user, deputyPI)
 
         then:
+        1 * userService.isDepartmentHead(user) >> false
         thrown(RightsNotGrantedException)
     }
 
@@ -96,7 +100,7 @@ class PIUserServiceSpec extends Specification implements DataTest, UserDomainFac
         given:
         piUserService = new PIUserService(auditLogService: Mock(AuditLogService),)
         User departmentHead = createUser()
-        createDepartment([departmentHead: departmentHead])
+        createDepartment([departmentHeads: [departmentHead, createUser()]])
         User deputyPI = createUser()
         createPIUser([pi: departmentHead, deputyPI: deputyPI, dateRightsGranted: new Date()])
 
@@ -139,9 +143,11 @@ class PIUserServiceSpec extends Specification implements DataTest, UserDomainFac
 
     void "isPI, returns true when user is the head of department"() {
         given:
-        piUserService = new PIUserService()
+        UserService userService = Mock(UserService) {
+            1 * isDepartmentHead(_) >> true
+        }
+        piUserService = new PIUserService(userService: userService)
         User departmentHead = createUser()
-        createDepartment([departmentHead: departmentHead])
 
         expect:
         piUserService.isPI(departmentHead)
@@ -149,7 +155,10 @@ class PIUserServiceSpec extends Specification implements DataTest, UserDomainFac
 
     void "isPI, returns true when user is the deputy PI"() {
         given:
-        piUserService = new PIUserService()
+        UserService userService = Mock(UserService) {
+            1 * isDepartmentHead(_) >> false
+        }
+        piUserService = new PIUserService(userService: userService)
         User departmentHead = createUser()
         User deputyPI = createUser()
         createPIUser([pi: departmentHead, deputyPI: deputyPI, dateRightsGranted: new Date()])
@@ -160,7 +169,10 @@ class PIUserServiceSpec extends Specification implements DataTest, UserDomainFac
 
     void "isPI, returns false when user is neither department head nor deputy PI"() {
         given:
-        piUserService = new PIUserService()
+        UserService userService = Mock(UserService) {
+            1 * isDepartmentHead(_) >> false
+        }
+        piUserService = new PIUserService(userService: userService)
         User user = createUser()
 
         expect:

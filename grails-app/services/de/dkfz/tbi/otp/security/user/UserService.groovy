@@ -71,8 +71,8 @@ class UserService {
     User createUser(String username, String email, String realName) {
         User user = new User([
                 username: username,
-                email: email,
-                enabled: true,
+                email   : email,
+                enabled : true,
                 password: "*",
                 realName: realName,
         ])
@@ -82,7 +82,7 @@ class UserService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(null, 'ADD_USER')")
     User createUser(String username, String email, String realName, List<Role> roles) {
-        User user = createUser(username, email,  realName)
+        User user = createUser(username, email, realName)
         roles.each { Role role ->
             addRoleToUser(user, role)
         }
@@ -139,8 +139,8 @@ class UserService {
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     void addRoleToUser(User user, Role role) {
-        assert user : "User can not be null"
-        assert role : "Role can not be null"
+        assert user: "User can not be null"
+        assert role: "Role can not be null"
         if (!CollectionUtils.atMostOneElement(UserRole.findAllByUserAndRole(user, role))) {
             UserRole.create(user, role)
         }
@@ -148,12 +148,21 @@ class UserService {
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     void removeRoleFromUser(User user, Role role) {
-        assert user : "User can not be null"
-        assert role : "Role can not be null"
+        assert user: "User can not be null"
+        assert role: "Role can not be null"
         UserRole userRole = CollectionUtils.atMostOneElement(UserRole.findAllByUserAndRole(user, role))
         if (userRole) {
             userRole.delete(flush: true)
         }
+    }
+
+    boolean isDepartmentHead(User user) {
+        return Department.createCriteria().list {
+            departmentHeads {
+                eq("id", user.id)
+            }
+            maxResults(1)
+        } as boolean
     }
 
     boolean isPrivacyPolicyAccepted() {
@@ -206,11 +215,11 @@ No user exists yet, create user ${currentUser} with admin rights.
 --------------------------------------------------------------------------------
 \n"""
                 User user = new User([
-                        username       : currentUser,
-                        email          : "admin@dummy.de",
-                        enabled        : true,
-                        password       : "*", //need for plugin, but unused in OTP
-                        realName       : currentUser,
+                        username: currentUser,
+                        email   : "admin@dummy.de",
+                        enabled : true,
+                        password: "*", //need for plugin, but unused in OTP
+                        realName: currentUser,
                 ]).save(flush: true)
 
                 [Role.ROLE_ADMIN].each {

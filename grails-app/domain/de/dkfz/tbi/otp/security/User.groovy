@@ -66,8 +66,6 @@ class User implements Entity {
         password column: '`password`'
     }
 
-    static hasMany = [headOfDepartment: Department]
-
     Set<Role> getAuthorities() {
         return UserRole.findAllByUser(this)*.role as Set
     }

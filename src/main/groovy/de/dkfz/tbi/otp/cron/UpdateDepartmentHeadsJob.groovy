@@ -24,8 +24,8 @@ package de.dkfz.tbi.otp.cron
 import grails.converters.JSON
 import groovy.transform.CompileDynamic
 import groovy.util.logging.Slf4j
-import org.grails.web.converters.exceptions.ConverterException
 import org.grails.web.json.JSONArray
+import org.grails.web.json.JSONException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
@@ -86,11 +86,14 @@ class UpdateDepartmentHeadsJob extends AbstractScheduledJob {
         List<DepartmentCommand> departmentCommands = []
 
         departmentInfo.each {
-            User departmentHead = userService.findOrCreateUserWithLdapData(it[dhKey])
+            JSONArray departmentHeadsUsernames = it[dhKey] ?: []
+            List<User> departmentHeads = departmentHeadsUsernames.collect { departmentHeadUsername ->
+                userService.findOrCreateUserWithLdapData(departmentHeadUsername as String)
+            }
             departmentCommands << new DepartmentCommand(
                     ouNumber: it[ouKey],
                     costCenter: it[ccKey],
-                    departmentHead: departmentHead
+                    departmentHeads: departmentHeads
             )
         }
 
@@ -113,12 +116,12 @@ class UpdateDepartmentHeadsJob extends AbstractScheduledJob {
 
     static JSONArray convertJsonArrayStringToList(String jsonString) {
         if (!jsonString) {
-            return []
+            return new JSONArray([])
         }
         JSONArray jsonArray
         try {
-            jsonArray = JSON.parse(jsonString) as JSONArray
-        } catch (ConverterException e) {
+            jsonArray = new JSONArray(jsonString)
+        } catch (JSONException e) {
             throw new IllegalArgumentException("The string is no valid JSON string", e)
         }
         return jsonArray

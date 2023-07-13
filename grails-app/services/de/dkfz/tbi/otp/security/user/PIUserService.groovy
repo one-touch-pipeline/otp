@@ -36,11 +36,12 @@ import de.dkfz.tbi.otp.utils.exceptions.RightsNotGrantedException
 class PIUserService {
 
     AuditLogService auditLogService
+    UserService userService
 
     @CompileDynamic
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void cleanUpPIUser() {
-        List<User> departmentHeads = Department.all*.departmentHead
+        List<User> departmentHeads = Department.all*.departmentHeads.flatten().unique() as List<User>
         if (departmentHeads) {
             PIUser.findAllByPiNotInList(departmentHeads)?.each { PIUser piUser ->
                 revokeDeputyPIRightsForHead(piUser.pi)
@@ -54,14 +55,14 @@ class PIUserService {
 
     @CompileDynamic
     boolean isPI(User user) {
-        return !Department.findAllByDepartmentHead(user).isEmpty() || !PIUser.findAllByDeputyPI(user).isEmpty()
+        return userService.isDepartmentHead(user) || !PIUser.findAllByDeputyPI(user).isEmpty()
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#departmentHead, 'IS_DEPARTMENT_HEAD')")
     void grantDeputyPIRights(User departmentHead, User deputyPI) {
         assert departmentHead: "Department Head cannot be null"
         assert deputyPI: "Deputy PI cannot be null"
-        if (departmentHead.headOfDepartment) {
+        if (userService.isDepartmentHead(departmentHead)) {
             new PIUser([pi: departmentHead, deputyPI: deputyPI, dateRightsGranted: new Date()]).save(flush: true)
             String message = "${deputyPI} was granted deputy PI rights with department head as ${departmentHead}"
             auditLogService.logAction(AuditLog.Action.GRANT_DEPUTY_PI_RIGHTS, message)

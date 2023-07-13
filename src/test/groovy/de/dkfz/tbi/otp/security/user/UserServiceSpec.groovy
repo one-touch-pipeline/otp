@@ -25,11 +25,13 @@ import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+import de.dkfz.tbi.otp.domainFactory.UserDomainFactory
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.security.*
 
-class UserServiceSpec extends Specification implements DataTest, DomainFactoryCore {
+class UserServiceSpec extends Specification implements DataTest, UserDomainFactory {
+
+    UserService userService
 
     @Override
     Class<?>[] getDomainClassesToMock() {
@@ -37,6 +39,7 @@ class UserServiceSpec extends Specification implements DataTest, DomainFactoryCo
                 Role,
                 User,
                 UserRole,
+                Department,
         ]
     }
 
@@ -67,6 +70,7 @@ class UserServiceSpec extends Specification implements DataTest, DomainFactoryCo
 
     void "getAllUsersInAdList"() {
         given:
+        userService = new UserService()
         DomainFactory.createUser()
         User user1 = DomainFactory.createUser()
         DomainFactory.createUser()
@@ -82,9 +86,33 @@ class UserServiceSpec extends Specification implements DataTest, DomainFactoryCo
         ]
 
         when:
-        Set<String> users = new UserService().getAllUserNamesOfOtpUsers(names)
+        Set<String> users = userService.getAllUserNamesOfOtpUsers(names)
 
         then:
         TestCase.assertContainSame([user1, user2]*.username, users)
+    }
+
+    void "isDepartmentHead, should be true, when user is head of an department"() {
+        given:
+        userService = new UserService()
+        User user = createUser()
+        createDepartment()
+        createDepartment([
+                departmentHeads: [user, createUser()]
+        ])
+
+        expect:
+        userService.isDepartmentHead(user)
+    }
+
+    void "isDepartmentHead, should be false, when user is not head of any department"() {
+        given:
+        userService = new UserService()
+        User user = createUser()
+        createDepartment()
+        createDepartment()
+
+        expect:
+        !userService.isDepartmentHead(user)
     }
 }

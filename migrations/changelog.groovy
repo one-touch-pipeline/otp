@@ -82,4 +82,6 @@ databaseChangeLog = {
     include file: 'changelogs/2023/otp-2091-handle-non-unique-libprepkits-for-fragments.groovy'
 
     include file: 'changelogs/2023/otp-2073-save-final-metadatafile-location.groovy'
+
+    include file: 'changelogs/2023/otp-2123.groovy'
 }

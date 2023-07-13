@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.cron
 
 import grails.gorm.transactions.Rollback
 import grails.testing.mixin.integration.Integration
+import org.codehaus.groovy.runtime.typehandling.GroovyCastException
 import org.grails.web.json.JSONArray
 import spock.lang.Specification
 
@@ -51,7 +52,7 @@ class UpdateDepartmentHeadsJobIntegrationSpec extends Specification implements C
 
     private static final String OU = "organizational_unit"
     private static final String CC = "cost_center"
-    private static final String DH = "department_head"
+    private static final String DH = "department_heads"
     private static final String INVALID_JSON = "[{]"
     private static final String DEPARTMENT_API = "bashScript"
 
@@ -80,7 +81,7 @@ ${jsonLiteral(departments[1])}
         departmentInfo.eachWithIndex { Map department, int i ->
             assert department[OU] == departments[i].ouNumber
             assert department[CC] == departments[i].costCenter
-            assert department[DH] == departments[i].departmentHead.username
+            assert department[DH] == departments[i].departmentHeads*.username
         }
     }
 
@@ -96,7 +97,7 @@ ${jsonLiteral(departments[1])}
         thrown(IllegalArgumentException)
     }
 
-    void "wrappedExecute, keeps, removes, changes and adds department, succeeds"() {
+    void "wrappedExecute, keeps, removes, changes and adds department successfully"() {
         given:
         setupData()
         List<Department> departments = [createDepartment(), createDepartment(), createDepartment()]
@@ -104,20 +105,22 @@ ${jsonLiteral(departments[1])}
         User departmentHeadForDep1 = createUser()
         String ouNumber = "OU${nextId}"
         String costCenter = "${nextId}"
-        User departmentHead = createUser()
+        User departmentHead1 = createUser()
+        User departmentHead2 = createUser()
+        List<User> departmentHeads = [departmentHead1, departmentHead2]
         String validDepartmentAPIResult = """[
 ${jsonLiteral(departments[0])}
 {
 "${OU}": "${departments[1].ouNumber}",
 "${CC}": "${costCenterForDep1}",
-"${DH}": "${departmentHeadForDep1.username}",
+"${DH}": ["${departmentHeadForDep1.username}"],
 "key1": "${HelperUtils.uniqueString}",
 "key2": "${HelperUtils.uniqueString}",
 },
 {
 "${OU}": "${ouNumber}",
 "${CC}": "${costCenter}",
-"${DH}": "${departmentHead.username}",
+"${DH}": ["${departmentHeads*.username.join('","')}"],
 "key1": "${HelperUtils.uniqueString}",
 "key2": "${HelperUtils.uniqueString}",
 },
@@ -125,9 +128,10 @@ ${jsonLiteral(departments[0])}
 
         UpdateDepartmentHeadsJob job = createJob(validDepartmentAPIResult)
         job.userService = Mock(UserService) {
-            1 * findOrCreateUserWithLdapData(departments[0].departmentHead.username) >> { departments[0].departmentHead }
+            1 * findOrCreateUserWithLdapData(departments[0].departmentHeads[0].username) >> { departments[0].departmentHeads[0] }
             1 * findOrCreateUserWithLdapData(departmentHeadForDep1.username) >> { departmentHeadForDep1 }
-            1 * findOrCreateUserWithLdapData(departmentHead.username) >> { departmentHead }
+            1 * findOrCreateUserWithLdapData(departmentHead1.username) >> { departmentHead1 }
+            1 * findOrCreateUserWithLdapData(departmentHead2.username) >> { departmentHead2 }
             0 * findOrCreateUserWithLdapData(_)
         }
 
@@ -136,25 +140,31 @@ ${jsonLiteral(departments[0])}
 
         then:
         Department.all.size() == 3
-        Department.findAllByOuNumberAndCostCenterAndDepartmentHead(departments[0].ouNumber, departments[0].costCenter, departments[0].departmentHead)
-        Department.findAllByOuNumberAndCostCenterAndDepartmentHead(departments[1].ouNumber, costCenterForDep1, departmentHeadForDep1)
-        Department.findAllByOuNumberAndCostCenterAndDepartmentHead(ouNumber, costCenter, departmentHead)
+        Department department1 = Department.findByOuNumber(departments[0].ouNumber)
+        department1.costCenter == departments[0].costCenter
+        CollectionUtils.containSame(department1.departmentHeads, departments[0].departmentHeads)
+        Department department2 = Department.findByOuNumber(departments[1].ouNumber)
+        department2.costCenter == costCenterForDep1
+        CollectionUtils.containSame(department2.departmentHeads, [departmentHeadForDep1])
+        Department department3 = Department.findByOuNumber(ouNumber)
+        department3.costCenter == costCenter
+        CollectionUtils.containSame(department3.departmentHeads, departmentHeads)
     }
 
-    void "wrappedExecute, missing cost center, deleted"() {
+    void "wrappedExecute, deletes department, when cost center is missing"() {
         given:
         setupData()
         Department department = createDepartment()
         String validDepartmentAPIResult = """[
 {
 "${OU}": "${department.ouNumber}",
-"${DH}": "${department.departmentHead.username}",
+"${DH}": ["${department.departmentHeads*.username.join('","')}"],
 },
 ]"""
 
         UpdateDepartmentHeadsJob job = createJob(validDepartmentAPIResult)
         job.userService = Mock(UserService) {
-            1 * findOrCreateUserWithLdapData(department.departmentHead.username) >> { department.departmentHead }
+            1 * findOrCreateUserWithLdapData(department.departmentHeads[0].username) >> { department.departmentHeads[0] }
             0 * findOrCreateUserWithLdapData(_)
         }
 
@@ -165,7 +175,7 @@ ${jsonLiteral(departments[0])}
         Department.all.size() == 0
     }
 
-    void "wrappedExecute, missing department head, deleted"() {
+    void "wrappedExecute, should delete department, when department head is missing"() {
         given:
         setupData()
         Department department = createDepartment()
@@ -178,7 +188,6 @@ ${jsonLiteral(departments[0])}
 
         UpdateDepartmentHeadsJob job = createJob(validDepartmentAPIResult)
         job.userService = Mock(UserService) {
-            1 * findOrCreateUserWithLdapData(null) >> { null }
             0 * findOrCreateUserWithLdapData(_)
         }
 
@@ -187,13 +196,35 @@ ${jsonLiteral(departments[0])}
 
         then:
         Department.all.size() == 0
+    }
+
+    void "wrappedExecute, should fail, when called with wrong departmentHeads input"() {
+        given:
+        setupData()
+        Department department = createDepartment()
+        String invalidDepartmentAPIResult = """[
+{
+"${OU}": "${department.ouNumber}",
+"${CC}": "${department.costCenter}",
+"${DH}": "${department.departmentHeads[0].username}",
+},
+]"""
+
+        UpdateDepartmentHeadsJob job = createJob(invalidDepartmentAPIResult)
+        job.userService = Mock(UserService)
+
+        when:
+        job.wrappedExecute()
+
+        then:
+        thrown(GroovyCastException)
     }
 
     private static String jsonLiteral(Department department) {
         return """{
 "${OU}": "${department.ouNumber}",
 "${CC}": "${department.costCenter}",
-"${DH}": "${department.departmentHead.username}",
+"${DH}": ["${department.departmentHeads*.username.join('","')}"],
 "key1": "${HelperUtils.uniqueString}",
 "key2": "${HelperUtils.uniqueString}",
 },"""

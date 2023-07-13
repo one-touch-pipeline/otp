@@ -33,11 +33,15 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectRequest
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.project.projectRequest.ProjectRequestPersistentStateService
+import de.dkfz.tbi.otp.security.user.UserService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 @Component
 @GrailsCompileStatic
 class ProjectPermissionEvaluator implements PermissionEvaluator {
+
+    @Autowired
+    UserService userService
 
     @Autowired
     SecurityService securityService
@@ -176,6 +180,7 @@ class ProjectPermissionEvaluator implements PermissionEvaluator {
         if (!activeUser) {
             return false
         }
-        return (permission == 'IS_DEPARTMENT_HEAD' && user == activeUser && Department.findAllByDepartmentHead(user))
+
+        return (permission == 'IS_DEPARTMENT_HEAD' && user == activeUser && userService.isDepartmentHead(user))
     }
 }

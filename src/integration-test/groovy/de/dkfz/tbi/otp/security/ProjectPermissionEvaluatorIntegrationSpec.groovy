@@ -295,10 +295,30 @@ class ProjectPermissionEvaluatorIntegrationSpec extends Specification implements
         setupData()
         User otherUser = createUser()
         UserProjectRole otherUserProjectRole = createUserProjectRole(
-            user: otherUser
+                user: otherUser
         )
 
         expect:
         !permissionEvaluator.hasPermission(authentication, otherUserProjectRole, "IS_USER")
+    }
+
+    void "hasPermission, IS_DEPARTMENT_HEAD allows permission when user is head of an department"() {
+        given:
+        setupData()
+        createDepartment([
+                departmentHeads: [user, createUser()],
+        ])
+        createDepartment()
+
+        expect:
+        permissionEvaluator.hasPermission(authentication, user, "IS_DEPARTMENT_HEAD")
+    }
+
+    void "hasPermission, IS_DEPARTMENT_HEAD restricts when user is not head of any department"() {
+        given:
+        setupData()
+
+        expect:
+        !permissionEvaluator.hasPermission(authentication, user, "IS_DEPARTMENT_HEAD")
     }
 }

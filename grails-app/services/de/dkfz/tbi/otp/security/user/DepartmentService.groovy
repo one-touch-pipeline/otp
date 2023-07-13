@@ -50,8 +50,8 @@ class DepartmentService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    void updateDepartment(Department department, DepartmentCommand departmentCommand) {
-        if (!departmentCommand || !departmentCommand.departmentHead || !departmentCommand.costCenter) {
+    private void updateDepartment(Department department, DepartmentCommand departmentCommand) {
+        if (!departmentCommand || !departmentCommand.departmentHeads || !departmentCommand.costCenter) {
             auditLogService.logAction(AuditLog.Action.DELETED_DEPARTMENT, "Deleted Department: ${department}")
             log.info("Deleted Department: ${department}")
             department.delete(flush: true)
@@ -62,7 +62,7 @@ class DepartmentService {
         } else {
             String logOutput = "Updated Department from: ${department}"
             department.costCenter = departmentCommand.costCenter
-            department.departmentHead = departmentCommand.departmentHead
+            department.departmentHeads = departmentCommand.departmentHeads
             auditLogService.logAction(AuditLog.Action.UPDATED_DEPARTMENT, "Updated Department: ${department}")
             log.info("${logOutput} to: ${department}")
             department.save(flush: true)
@@ -71,14 +71,14 @@ class DepartmentService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void createDepartment(DepartmentCommand departmentCommand) {
-        if (!departmentCommand || !departmentCommand.departmentHead || !departmentCommand.costCenter) {
+        if (!departmentCommand || !departmentCommand.departmentHeads || !departmentCommand.costCenter) {
             log.info("Could not create ${departmentCommand}.")
             return
         }
         Department department = new Department(
                 ouNumber: departmentCommand.ouNumber,
                 costCenter: departmentCommand.costCenter,
-                departmentHead: departmentCommand.departmentHead,
+                departmentHeads: departmentCommand.departmentHeads,
         )
         auditLogService.logAction(AuditLog.Action.CREATED_DEPARTMENT, "Created Department: ${department}")
         log.info("Created Department: ${department}")
@@ -89,16 +89,16 @@ class DepartmentService {
 class DepartmentCommand implements Validateable {
     String ouNumber
     String costCenter
-    User departmentHead
+    Set<User> departmentHeads
 
     boolean equalDepartment(Department department) {
         return department.ouNumber == ouNumber &&
                 department.costCenter == costCenter &&
-                department.departmentHead == departmentHead
+                department.departmentHeads == departmentHeads
     }
 
     @Override
     String toString() {
-        return "${ouNumber} ${costCenter} -> ${departmentHead.realName}"
+        return "${ouNumber} ${costCenter} -> [${departmentHeads*.realName.join(', ')}]"
     }
 }

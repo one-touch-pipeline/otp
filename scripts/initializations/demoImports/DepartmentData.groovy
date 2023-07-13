@@ -19,35 +19,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.security
 
-import grails.gorm.hibernate.annotation.ManagedEntity
+import de.dkfz.tbi.otp.security.User
+import de.dkfz.tbi.otp.security.user.DepartmentCommand
+import de.dkfz.tbi.otp.security.user.DepartmentService
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
-import de.dkfz.tbi.otp.utils.Entity
+/**
+ * Script to create example Data for Departments with department heads.
+ */
 
-@ManagedEntity
-class Department implements Entity {
-    String ouNumber
-    String costCenter
-    Set<User> departmentHeads
+DepartmentService departmentService = ctx.departmentService
 
-    static hasMany = [
-            departmentHeads: User,
-    ]
-
-    static mapping = {
-        ouNumber unique: true
-        costCenter index: "department_cost_center_idx"
-        departmentHeads column: "department_id",
-                joinTable: "department_users"
-    }
-
-    static constraints = {
-        ouNumber unique: true
-    }
-
-    @Override
-    String toString() {
-        return "${ouNumber} ${costCenter} -> [${departmentHeads*.realName.join(', ')}]"
-    }
-}
+User otp = CollectionUtils.exactlyOneElement(User.findAllByUsername('otp'))
+User dave = CollectionUtils.exactlyOneElement(User.findAllByUsername('dave'))
+departmentService.createDepartment([ouNumber       : '123',
+                                    costCenter     : ' cost_center',
+                                    departmentHeads: [otp, dave],
+] as DepartmentCommand)
