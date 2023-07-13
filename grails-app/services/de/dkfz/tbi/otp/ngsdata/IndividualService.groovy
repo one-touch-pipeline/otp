@@ -342,4 +342,9 @@ class IndividualService {
     Path getViewByPidPath(Individual individual, final SeqType seqType) {
         return getViewByPidPathBase(individual, seqType).resolve(individual.pid)
     }
+
+    String getEscapedPid(Individual individual) {
+        String toEscapedChars = /[+]/
+        return individual.pid.replaceAll(toEscapedChars, /\\$0/)
+    }
 }

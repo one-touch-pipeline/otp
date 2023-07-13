@@ -57,7 +57,7 @@ class SnvCallingService extends AbstractBamFileAnalysisService<AbstractSnvCallin
         final Path workDirectory = getWorkDirectory(bamFilePairAnalysis.samplePair.findLatestSnvCallingInstance())
         final String minConfScore = /[0-9]/
         final String matcherForFileRequiredForRunYapsa =
-                ".*${SNV_RESULTS_PREFIX}${bamFilePairAnalysis.individual.pid}_somatic_snvs_conf_${minConfScore}_to_10.vcf"
+                /.*${SNV_RESULTS_PREFIX}${individualService.getEscapedPid(bamFilePairAnalysis.individual)}_somatic_snvs_conf_${minConfScore}_to_10.vcf/
         return fileService.getFoundFileInPathEnsureIsReadableAndNotEmpty(workDirectory, matcherForFileRequiredForRunYapsa)
     }
 

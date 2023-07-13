@@ -306,4 +306,19 @@ a: 2
         then:
         thrown(AssertionError)
     }
+
+    void "getEscapedPidForRegex, should return properly escaped pid"() {
+        given:
+        String notEscapedPid = "test+Pid"
+        Individual individual = createIndividual(pid: notEscapedPid)
+
+        expect:
+        !(individual ==~ notEscapedPid)
+
+        when:
+        String escapedPid = individualService.getEscapedPid(individual)
+
+        then:
+        individual.pid ==~ escapedPid
+    }
 }

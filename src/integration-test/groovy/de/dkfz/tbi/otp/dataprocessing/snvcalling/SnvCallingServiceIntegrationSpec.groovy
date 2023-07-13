@@ -419,7 +419,7 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
         setupData()
 
         configService.addOtpProperties(tempDir)
-        IndividualService individualService = Mock(IndividualService) {
+        IndividualService individualService = Spy(IndividualService) {
             getViewByPidPath(_, _) >> tempDir
         }
         SnvCallingService snvCallingService = new SnvCallingService(
