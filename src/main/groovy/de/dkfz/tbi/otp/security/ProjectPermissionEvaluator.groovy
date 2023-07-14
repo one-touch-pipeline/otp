@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.security
 
 import grails.compiler.GrailsCompileStatic
 import groovy.transform.CompileDynamic
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.PermissionEvaluator
 import org.springframework.security.core.Authentication
 import org.springframework.stereotype.Component
@@ -37,6 +38,9 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 @Component
 @GrailsCompileStatic
 class ProjectPermissionEvaluator implements PermissionEvaluator {
+
+    @Autowired
+    SecurityService securityService
 
     private static final List PERMISSIONS = ["OTP_READ_ACCESS", "MANAGE_USERS", "DELEGATE_USER_MANAGEMENT", "ADD_USER", "IS_USER",
                                              "PROJECT_REQUEST_NEEDED_PIS", "PROJECT_REQUEST_CURRENT_OWNER", "PROJECT_REQUEST_PI", "IS_DEPARTMENT_HEAD"]
@@ -85,7 +89,7 @@ class ProjectPermissionEvaluator implements PermissionEvaluator {
 
     @CompileDynamic
     private boolean checkObjectIndependentPermission(Authentication auth, String permission) {
-        User activeUser = CollectionUtils.atMostOneElement(User.findAllByUsername(auth.principal.username))
+        User activeUser = CollectionUtils.atMostOneElement(User.findAllByUsername(securityService.getUsername(auth.principal)))
         if (!activeUser) {
             return false
         }
@@ -111,7 +115,7 @@ class ProjectPermissionEvaluator implements PermissionEvaluator {
 
     @CompileDynamic
     private boolean checkProjectRequestRolePermission(Authentication auth, ProjectRequest projectRequest, String permission) {
-        User activeUser = CollectionUtils.atMostOneElement(User.findAllByUsername(auth.principal.username))
+        User activeUser = CollectionUtils.atMostOneElement(User.findAllByUsername(securityService.getUsername(auth.principal)))
         if (!activeUser) {
             return false
         }
@@ -129,7 +133,7 @@ class ProjectPermissionEvaluator implements PermissionEvaluator {
 
     @CompileDynamic
     private boolean checkUserProjectRolePermission(Authentication auth, UserProjectRole userProjectRole, String permission) {
-        User activeUser = CollectionUtils.atMostOneElement(User.findAllByUsername(auth.principal.username))
+        User activeUser = CollectionUtils.atMostOneElement(User.findAllByUsername(securityService.getUsername(auth.principal)))
         if (!activeUser) {
             return false
         }
@@ -141,7 +145,7 @@ class ProjectPermissionEvaluator implements PermissionEvaluator {
      */
     @CompileDynamic
     private boolean checkProjectRolePermission(Authentication auth, Project project, String permission) {
-        User activeUser = CollectionUtils.atMostOneElement(User.findAllByUsername(auth.principal.username))
+        User activeUser = CollectionUtils.atMostOneElement(User.findAllByUsername(securityService.getUsername(auth.principal)))
         if (!activeUser) {
             return false
         }
@@ -168,7 +172,7 @@ class ProjectPermissionEvaluator implements PermissionEvaluator {
 
     @CompileDynamic
     private boolean checkUserPermission(Authentication auth, User user, String permission) {
-        User activeUser = CollectionUtils.atMostOneElement(User.findAllByUsername(auth.principal.username))
+        User activeUser = CollectionUtils.atMostOneElement(User.findAllByUsername(securityService.getUsername(auth.principal)))
         if (!activeUser) {
             return false
         }

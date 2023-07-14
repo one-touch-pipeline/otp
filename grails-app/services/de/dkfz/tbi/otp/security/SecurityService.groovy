@@ -65,11 +65,11 @@ class SecurityService {
         return SecurityContextHolder.context?.authentication
     }
 
-    private getPrincipal() {
+    private Object getPrincipal() {
         return authentication?.principal
     }
 
-    String getUsername() {
+    String getUsername(Object principal = this.principal) {
         if (configService.oidcEnabled) {
             DefaultOidcUser oidcUser = (DefaultOidcUser) principal
             return oidcUser ? oidcUser.userInfo["preferredUsername"] : ""
