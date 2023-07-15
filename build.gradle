@@ -411,7 +411,7 @@ dependencies {
     implementation 'org.webjars.npm:ttskch__select2-bootstrap4-theme:1.5.2'
     implementation 'org.webjars:select2:4.0.13'
     implementation 'org.webjars:datatables:1.13.5'
-    implementation 'org.webjars:datatables-buttons:2.2.2'
+    implementation 'org.webjars:datatables-buttons:2.4.1'
     implementation 'org.webjars:datatables-fixedcolumns:3.2.2'
     implementation 'org.webjars:datatables-fixedheader:3.2.4'
     implementation 'org.webjars.bowergithub.datatables:dist-datatables-scroller:2.2.0'
