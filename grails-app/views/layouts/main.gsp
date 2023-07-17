@@ -22,6 +22,8 @@
 <g:applyLayout name="common">
     <head>
         <title><g:layoutTitle default="OTP"/></title>
+        <script type="text/javascript" src="${otp.serverUrl()}/webjars/chart.js/4.3.0/dist/chart.umd.js"></script>
+        <script type="text/javascript" src="${otp.serverUrl()}/webjars/chartjs-plugin-datalabels/2.2.0/dist/chartjs-plugin-datalabels.js"></script>
         <asset:javascript src="modules/defaultPageDependencies.js"/>
         <asset:stylesheet src="modules/defaultPageDependencies.css"/>
         <g:layoutHead/>

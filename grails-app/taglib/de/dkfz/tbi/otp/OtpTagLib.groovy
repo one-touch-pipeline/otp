@@ -108,6 +108,10 @@ class OtpTagLib {
         out << configService.environmentName
     }
 
+    def serverUrl = {
+        out << configService.configServerUrl
+    }
+
     /**
      * Returns an environment depending favicon
      */

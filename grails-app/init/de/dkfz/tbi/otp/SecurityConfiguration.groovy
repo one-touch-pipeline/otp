@@ -192,6 +192,8 @@ class SecurityConfiguration {
                                     "/metadataImport/autoImport",
                                     "/grails-errorhandler/**",
                                     "/error/**",
+                                    "/webjars/chart.js/**",
+                                    "/webjars/chartjs-plugin-datalabels/**",
                             ).permitAll()
                             .anyRequest().fullyAuthenticated()
                 }
