@@ -23,6 +23,8 @@ package de.dkfz.tbi.otp.errors
 
 import groovy.util.logging.Slf4j
 
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.utils.ExceptionUtils
 import de.dkfz.tbi.otp.utils.RequestUtilService
 
@@ -33,6 +35,7 @@ import javax.servlet.http.HttpServletResponse
 class ErrorController {
 
     RequestUtilService requestUtilService
+    ProcessingOptionService processingOptionService
 
     static List<String> allHttpMethods = ["GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "TRACE", "PATCH"]
 
@@ -92,8 +95,11 @@ class ErrorController {
     }
 
     def noProject() {
+        String gainAccess = processingOptionService.findOptionAsString(ProcessingOption.OptionName.GUI_GAIN_PROJECT_ACCESS)
         response.status = HttpServletResponse.SC_NOT_FOUND
-        return [:]
+        return [
+                gainAccess: gainAccess,
+        ]
     }
 
     def switchedUserDeniedException() {

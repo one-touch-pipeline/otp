@@ -578,6 +578,11 @@ class ProcessingOption implements Entity {
                 "Imprint",
                 Necessity.OPTIONAL, "", TypeValidators.MULTI_LINE_TEXT
         ),
+        GUI_GAIN_PROJECT_ACCESS(
+                "Text shown on Project pages when user is not in a Project",
+                Necessity.OPTIONAL, "<li>To be added to an existing project, ask a PI to give you access to their project(s). " +
+                "They can do so via the User Management page on the OTP GUI.</li>", TypeValidators.MULTI_LINE_TEXT
+        ),
         GUI_LOGO(
                 "Location specific logo",
                 Necessity.OPTIONAL, "NONE", TypeValidators.INSTANCE_LOGO
