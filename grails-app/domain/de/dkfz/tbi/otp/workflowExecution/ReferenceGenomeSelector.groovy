@@ -42,13 +42,31 @@ class ReferenceGenomeSelector implements Entity {
     ReferenceGenome referenceGenome
 
     static Closure constraints = {
-        referenceGenome validator: { val, obj ->
+        referenceGenome(validator: { val, obj ->
             if (!(val.species.every { s -> s in obj.species*.species } &&
                     val.speciesWithStrain.every { sws -> sws in obj.species } &&
                     obj.species.every { sws -> sws in val.speciesWithStrain || sws.species in val.species })) {
                 return "species"
             }
-        }
+        })
+        // List of Species has to be unique in combination with seqType, workflow and project
+        species(validator: { val, obj ->
+            List<ReferenceGenomeSelector> matchingSelectors = createCriteria().list {
+                and {
+                    eq("workflow", obj.workflow)
+                    eq("seqType", obj.seqType)
+                    eq("project", obj.project)
+                    species {
+                        for (currentSpecies in obj.species) {
+                            eq('id', currentSpecies.id)
+                        }
+                    }
+                    sizeEq("species", obj.species.size())
+                    ne("id", obj.id)
+                }
+            }
+            return matchingSelectors.size() == 0
+        })
     }
 
     static Closure mapping = {

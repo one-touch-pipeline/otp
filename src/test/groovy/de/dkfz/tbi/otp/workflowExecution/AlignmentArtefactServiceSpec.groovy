@@ -289,13 +289,6 @@ class AlignmentArtefactServiceSpec extends HibernateSpec implements WorkflowSyst
                 speciesWithStrain: speciesWithStrain1,
                 species          : [],
         ])
-        createReferenceGenomeSelector([
-                referenceGenome: referenceGenome1,
-                project        : seqTrack1.project,
-                seqType        : seqTrack1.seqType,
-                workflow       : workflow,
-                species        : speciesWithStrain1,
-        ])
         ProjectSeqTypeGroup group1 = new ProjectSeqTypeGroup(seqTrack1.project, seqTrack1.seqType)
 
         Set<SpeciesWithStrain> speciesWithStrain2 = [fastqc1.dataFile.individual.species] as Set
