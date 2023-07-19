@@ -555,7 +555,7 @@
       "backchannel.logout.session.required": "true",
       "backchannel.logout.revoke.offline.tokens": "false",
       "request.uris": "",
-      "post.logout.redirect.uris": "",
+      "post.logout.redirect.uris": "http://localhost:8080/otp/logout##http://localhost:8080/logout",
       "consent.screen.text": "",
       "frontchannel.logout.url": "",
       "backchannel.logout.url": "",
@@ -2167,7 +2167,7 @@
     "frontendUrl" : "",
     "acr.loa.map" : "[]"
   },
-  "keycloakVersion" : "20.0.3",
+  "keycloakVersion" : "22.0.0",
   "userManagedAccessAllowed" : false,
   "clientProfiles" : {
     "profiles" : [ ]

@@ -33,7 +33,7 @@
             </form>
         </g:if>
         <g:else>
-            <a href="${createLink(uri: "${request.contextPath}/oauth2/authorization/keycloakLogin")}">
+            <a href="${createLink(uri: "${otp.serverUrl()}/oauth2/authorization/keycloakLogin")}">
                 <input id="oidcLoginButton" type="submit" value="${g.message(code: "security.login.button")}"/>
             </a>
         </g:else>

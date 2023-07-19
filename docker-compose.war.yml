@@ -36,5 +36,4 @@ services:
       - filesystem:/home/otp/filesystem
     depends_on:
       - postgres
-    networks:
-      otp:
+    network_mode: host

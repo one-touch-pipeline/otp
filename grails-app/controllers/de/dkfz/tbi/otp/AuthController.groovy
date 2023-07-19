@@ -30,23 +30,26 @@ import org.springframework.security.web.authentication.session.SessionAuthentica
 
 import de.dkfz.tbi.otp.security.FailedToCreateUserException
 import de.dkfz.tbi.otp.security.SecurityService
+import de.dkfz.tbi.otp.security.user.identityProvider.IdentityProvider
 import de.dkfz.tbi.otp.utils.RequestUtilService
 
 @PreAuthorize("permitAll()")
-class LoginController {
+class AuthController {
 
     RequestUtilService requestUtilService
     SecurityService securityService
+    IdentityProvider identityProvider
 
     final static String LAST_USERNAME_KEY = "LAST_USERNAME_KEY"
     final static String LAST_TARGET_KEY = "LAST_TARGET_KEY"
 
     static allowedMethods = [
-            index   : "GET",
+            login   : "GET",
+            logout  : "GET",
             authfail: "GET",
     ]
 
-    def index(LoginCommand cmd) {
+    def login(LoginCommand cmd) {
         assert cmd.validate()
 
         if (securityService.isLoggedIn()) {
@@ -56,10 +59,14 @@ class LoginController {
 
         String postUrl = "${request.contextPath}/authenticate"
         return [
-                target             : cmd.target,
-                username           : flash.username,
-                postUrl            : postUrl,
+                target  : cmd.target,
+                username: flash.username,
+                postUrl : postUrl,
         ]
+    }
+
+    def logout() {
+        redirect uri: identityProvider.logoutUri
     }
 
     /** Callback after a failed login. Redirects to the auth page with a warning message. */
@@ -86,7 +93,8 @@ class LoginController {
         flash.message = msg
         flash.username = session[LAST_USERNAME_KEY]
         String target = session[LAST_TARGET_KEY]
-        redirect uri: "${request.contextPath}/login", params: [target: target ?: ""]
+
+        redirect action: 'login', params: [target: target ?: ""]
     }
 }
 

@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.security.user.identityProvider
 
+import grails.core.GrailsApplication
 import grails.gorm.transactions.Transactional
 import groovy.transform.CompileDynamic
 import groovy.transform.ToString
@@ -36,10 +37,15 @@ import de.dkfz.tbi.otp.security.user.identityProvider.data.IdpUserDetails
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.util.ldap.UserAccountControl
 
+import java.nio.charset.StandardCharsets
+
 @Transactional
 class KeycloakService implements IdentityProvider {
 
     static final String CLIENT_REGISTRATION_ID = "keycloak"
+
+    @Autowired
+    GrailsApplication grailsApplication
 
     @Autowired
     ConfigService configService
@@ -157,6 +163,16 @@ class KeycloakService implements IdentityProvider {
         return UserAccountControl.values().collectEntries { UserAccountControl field ->
             [(field): UserAccountControl.isSet(field, value)]
         }
+    }
+
+    @Override
+    String getLogoutUri() {
+        String serverUrl = grailsApplication.config.getProperty("grails.serverURL")
+        String postLogoutRedirectUrl = URLEncoder.encode("${serverUrl}/logout", StandardCharsets.UTF_8.toString())
+
+        return "${configService.keycloakServer}/realms/${configService.keycloakRealm}/protocol/openid-connect/logout" +
+                "?post_logout_redirect_uri=${postLogoutRedirectUrl}" +
+                "&client_id=${configService.oidcClientId}"
     }
 
     private String getApiBaseUrl() {

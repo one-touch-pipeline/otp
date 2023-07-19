@@ -201,7 +201,7 @@
             <div class="menuContainer menuContainerR">
                 <ul>
                     <sec:ifLoggedIn>
-                        <li class="menuContainerItem"><g:link controller="logout"><g:message code="otp.menu.logout"/></g:link></li>
+                        <li class="menuContainerItem"><g:link controller="auth" action="logout"><g:message code="otp.menu.logout"/></g:link></li>
                         <li class="navigation menuContainerItem infoMenu">
                             <ul>
                                 <li class="nav_container"><a class="menuLinkContainer"><g:message code="info.info.link"/> &#9661;</a>

@@ -37,6 +37,7 @@ class PrivacyPolicyInterceptor {
         matchAll()
                 .except(controller: "privacyPolicy", action: "accept")
                 .except(controller: "logout", action: "index")
+                .except(controller: "auth", action: "logout")
                 .except(controller: "info", action: "newsBanner")
     }
 

@@ -57,11 +57,11 @@
                     </div>
                 </a>
             </g:if>
-            
+
         </div>
 
         <sec:ifNotLoggedIn>
-            <g:render template="/login/login"/>
+            <g:render template="/auth/login"/>
         </sec:ifNotLoggedIn>
 
         <div id="content">

@@ -251,10 +251,16 @@ describe('Click all menu items in the menu bar', () => {
     });
 
     it('should click the logout menu item', () => {
-      // Some problem with the session doesn't display Logout Button
-      cy.get('li.menuContainerItem').contains('Overview').click();
-      cy.get('li.menuContainerItem').contains('Logout').click();
-      cy.checkPage('');
+      cy.intercept('/auth/logout*').as('logout');
+      cy.intercept('/logout*').as('postLogout');
+
+      cy.get('li.menuContainerItem').contains('Logout').click({ force: true });
+
+      cy.wait('@logout').then(() => {
+        cy.wait('@postLogout').then(() => {
+          cy.checkPage('');
+        });
+      });
     });
   });
 });

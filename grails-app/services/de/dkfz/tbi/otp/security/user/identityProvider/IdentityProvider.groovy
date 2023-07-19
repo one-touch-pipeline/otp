@@ -60,4 +60,6 @@ interface IdentityProvider {
     Integer getUserAccountControlOfUser(User user)
 
     Map<UserAccountControl, Boolean> getAllUserAccountControlFlagsOfUser(User user)
+
+    String getLogoutUri()
 }

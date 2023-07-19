@@ -23,7 +23,6 @@ import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser
-import org.springframework.security.web.authentication.switchuser.SwitchUserFilter
 import org.springframework.security.web.authentication.switchuser.SwitchUserGrantedAuthority
 import org.springframework.util.StringUtils
 
@@ -70,9 +69,9 @@ class SecurityService {
     }
 
     String getUsername(Object principal = this.principal) {
-        if (configService.oidcEnabled) {
+        if (configService.oidcEnabled && !switched) {
             DefaultOidcUser oidcUser = (DefaultOidcUser) principal
-            return oidcUser ? oidcUser.userInfo["preferredUsername"] : ""
+            return oidcUser ? oidcUser.userInfo.preferredUsername : ""
         }
 
         return principal ? principal["username"] : ""
@@ -88,17 +87,17 @@ class SecurityService {
      */
     User getUserSwitchInitiator() {
         if (switched) {
-            return CollectionUtils.exactlyOneElement(User.findAllByUsername(
-                    ((SwitchUserGrantedAuthority) authentication.authorities.find({ it instanceof SwitchUserGrantedAuthority }))?.source?.name
-            ))
+            SwitchUserGrantedAuthority authority = authentication.authorities
+                    .find({ it instanceof SwitchUserGrantedAuthority }) as SwitchUserGrantedAuthority
+            String name = configService.oidcEnabled ? ((DefaultOidcUser) authority?.source?.principal)?.userInfo?.preferredUsername : authority?.source?.name
+            return CollectionUtils.exactlyOneElement(User.findAllByUsername(name))
         }
         return currentUser
     }
 
     boolean isSwitched() {
         return (roleHierarchy.getReachableGrantedAuthorities(principalAuthorities) ?: []).any { authority ->
-            (authority instanceof SwitchUserGrantedAuthority) ||
-                    SwitchUserFilter.ROLE_PREVIOUS_ADMINISTRATOR == ((GrantedAuthority) authority).authority
+            return authority instanceof SwitchUserGrantedAuthority
         }
     }
 
@@ -177,7 +176,7 @@ class SecurityService {
      * @return a list of authorities (empty if not authenticated).
      */
     Collection<GrantedAuthority> getPrincipalAuthorities() {
-        if (!authentication) {
+        if (!authentication || !authentication.authorities) {
             return Collections.emptyList()
         }
 

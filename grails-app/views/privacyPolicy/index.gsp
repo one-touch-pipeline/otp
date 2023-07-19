@@ -218,7 +218,7 @@ Hat der Verantwortliche die Sie betreffenden personenbezogenen Daten öffentlich
         <input type="checkbox" name="accept" id="accept"/> <label for="accept">${g.message(code: "privacyPolicy.acceptance")}</label><br><br>
             <button>${g.message(code: "privacyPolicy.continue")}</button>
     </g:form>
-    <g:form controller="logout" action="index" method="GET" class="inline-element">
+    <g:form controller="auth" action="logout" method="GET" class="inline-element">
             <g:submitButton name="Logout"/>
     </g:form>
     <br>

@@ -41,6 +41,7 @@ class NoProjectInterceptor {
                 .except(controller: 'projectCreation')
                 .except(controller: 'privacyPolicy')
                 .except(controller: 'logout', action: 'index')
+                .except(controller: 'auth', action: 'logout')
                 .except(controller: 'info')
                 .except(controller: 'document')
                 .except(controller: 'metaDataFields')

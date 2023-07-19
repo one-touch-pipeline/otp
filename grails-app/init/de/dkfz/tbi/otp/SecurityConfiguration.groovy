@@ -178,7 +178,7 @@ class SecurityConfiguration {
                             ).hasRole("SWITCH_USER")
                             .mvcMatchers(
                                     "/",
-                                    "/login/**",
+                                    "/auth/**",
                                     "/info/about",
                                     "/info/numbers",
                                     "/info/contact",
@@ -216,7 +216,7 @@ class SecurityConfiguration {
                     .exceptionHandling { exceptionHandling ->
                         exceptionHandling
                                 .accessDeniedPage("/error/error403")
-                                .authenticationEntryPoint(new ParameterAuthenticationEntryPoint("/login"))
+                                .authenticationEntryPoint(new ParameterAuthenticationEntryPoint("/auth/login"))
                     }
                     .anonymous { withDefaults() }
                     .logout { logout ->
@@ -331,16 +331,16 @@ class SecurityConfiguration {
                                          AuthenticationException exception) throws IOException, ServletException {
                 String[] username = request.parameterMap.get("username")
                 if (username) {
-                    request.session.setAttribute(LoginController.LAST_USERNAME_KEY, username.first())
+                    request.session.setAttribute(AuthController.LAST_USERNAME_KEY, username.first())
                 }
                 String[] target = request.parameterMap.get("target")
                 if (target) {
-                    request.session.setAttribute(LoginController.LAST_TARGET_KEY, target.first())
+                    request.session.setAttribute(AuthController.LAST_TARGET_KEY, target.first())
                 }
                 super.onAuthenticationFailure(request, response, exception)
             }
         }
-        failureHandler.defaultFailureUrl = "/login/authfail"
+        failureHandler.defaultFailureUrl = "/auth/authfail"
         return failureHandler
     }
 

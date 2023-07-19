@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.security.user.identityProvider
 
+import grails.core.GrailsApplication
 import grails.gorm.transactions.Transactional
 import groovy.transform.CompileDynamic
 import org.springframework.beans.factory.InitializingBean
@@ -53,6 +54,9 @@ import static org.springframework.ldap.query.LdapQueryBuilder.query
 @SuppressWarnings(["ExplicitCallToAndMethod", "ExplicitCallToOrMethod"])
 @Transactional
 class LdapService implements InitializingBean, IdentityProvider {
+
+    @Autowired
+    GrailsApplication grailsApplication
 
     @Autowired
     ConfigService configService
@@ -235,6 +239,11 @@ class LdapService implements InitializingBean, IdentityProvider {
         return UserAccountControl.values().collectEntries { UserAccountControl field ->
             [(field): UserAccountControl.isSet(field, value)]
         }
+    }
+
+    @Override
+    String getLogoutUri() {
+        return "${grailsApplication.config.getProperty("grails.serverURL")}/logout"
     }
 
     boolean getIsDeactivatedFromAttributes(Attributes attributes) {
