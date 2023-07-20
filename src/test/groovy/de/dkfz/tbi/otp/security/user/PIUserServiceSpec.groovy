@@ -138,6 +138,7 @@ class PIUserServiceSpec extends Specification implements DataTest, UserDomainFac
         piUserService.revokeDeputyPIRightsForHead(departmentHead)
 
         then:
+        1 * piUserService.auditLogService.logAction(_, _) >> _
         PIUser.findAllByPi(departmentHead).size() == 0
     }
 

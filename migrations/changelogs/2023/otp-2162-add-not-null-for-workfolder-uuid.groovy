@@ -19,46 +19,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.filestore
 
-import grails.gorm.hibernate.annotation.ManagedEntity
+databaseChangeLog = {
 
-import de.dkfz.tbi.otp.utils.Entity
-
-/**
- * WorkFolder represents a storage identified by an UUID.
- * The implementation on a file system is a chain of subfolders under the base folder
- * based on the given UUID
- *
- * UUID is defined by RFC 4122, ISO/IEC 9834-8:2005
- * @see <a href="https://datatracker.ietf.org/doc/html/rfc4122">RFC 4122</a>
- */
-@ManagedEntity
-class WorkFolder implements Entity {
-
-    static final String UUID_SEPARATOR = '-'
-
-    /**
-     * An UUID identifying an unique subfolder created under the base folder
-     *
-     * UUID is represented by 32 hexadecimal digits
-     * E.g.: a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11
-     */
-    UUID uuid
-
-    /**
-     * Size of the subfolder
-     * null means unknown or cannot be calculated
-     */
-    @SuppressWarnings("GrailsDomainReservedSqlKeywordName")
-    Long size
-
-    /**
-     * Reference to the base folder, under which work folder starts
-     */
-    BaseFolder baseFolder
-
-    static constraints = {
-        size nullable: true
+    changeSet(author: "-", id: "1689851724803-43") {
+        addNotNullConstraint(columnDataType: "uuid", columnName: "uuid", tableName: "work_folder", validate: "true")
     }
 }

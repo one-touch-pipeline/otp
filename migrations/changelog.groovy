@@ -86,4 +86,6 @@ databaseChangeLog = {
     include file: 'changelogs/2023/otp-2123.groovy'
 
     include file: 'changelogs/2023/otp-1982.groovy'
+
+    include file: 'changelogs/2023/otp-2162-add-not-null-for-workfolder-uuid.groovy'
 }

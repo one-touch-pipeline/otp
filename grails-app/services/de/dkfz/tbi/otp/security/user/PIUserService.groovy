@@ -97,6 +97,10 @@ class PIUserService {
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#departmentHead, 'IS_DEPARTMENT_HEAD')")
     void revokeDeputyPIRightsForHead(User departmentHead) {
         assert departmentHead: "Department Head cannot be null"
-        PIUser.findAllByPi(departmentHead)*.delete(flush: true)
+        PIUser.findAllByPi(departmentHead).each {
+            String message = "Deputy PI rights for ${it} have been revoked, since ${departmentHead} is no longer head of any department"
+            auditLogService.logAction(AuditLog.Action.REVOKE_DEPUTY_PI_RIGHTS, message)
+            it.delete(flush: true)
+        }
     }
 }
