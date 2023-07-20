@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -44,15 +44,15 @@ class FastqcResultsController {
     ]
 
     def show() {
-        DataFile dataFile = metaDataService.getDataFile(params.id as long)
-        if (!dataFile) {
+        RawSequenceFile rawSequenceFile = metaDataService.getRawSequenceFile(params.id as long)
+        if (!rawSequenceFile) {
             return response.sendError(404)
         }
 
         String result
 
-        if (fastqcResultsService.isFastqcAvailable(dataFile)) {
-            FastqcProcessedFile fastqcProcessedFile = fastQcProcessedFileService.findSingleByDataFile(dataFile)
+        if (fastqcResultsService.isFastqcAvailable(rawSequenceFile)) {
+            FastqcProcessedFile fastqcProcessedFile = fastQcProcessedFileService.findSingleByRawSequenceFile(rawSequenceFile)
             String html = fastqcDataFilesService.getInputStreamFromZipFile(fastqcProcessedFile, "fastqc_report.html").text
 
             Elements elements = Jsoup.parse(html).select("div.summary, div.main, div.footer")
@@ -65,7 +65,7 @@ class FastqcResultsController {
                 if (!file.startsWith("data:")) {
                     link = createLink(controller: "fastqcResults",
                             action: "renderFile",
-                            params: ["dataFile.id": dataFile.id, path: file]
+                            params: ["dataFile.id": rawSequenceFile.id, path: file]
                     )
                     img.attr("src", link)
                 }
@@ -76,10 +76,10 @@ class FastqcResultsController {
         }
         return [
                 html      : result,
-                pid       : dataFile.individual.displayName,
-                runName   : dataFile.run.name,
-                laneId    : dataFile.seqTrack.laneId,
-                mateNumber: dataFile.mateNumber,
+                pid       : rawSequenceFile.individual.displayName,
+                runName   : rawSequenceFile.run.name,
+                laneId    : rawSequenceFile.seqTrack.laneId,
+                mateNumber: rawSequenceFile.mateNumber,
         ]
     }
 
@@ -93,8 +93,8 @@ class FastqcResultsController {
         }
         InputStream stream
         try {
-            DataFile dataFile = metaDataService.getDataFile(cmd.dataFile.id as long)
-            FastqcProcessedFile fastqcProcessedFile = fastQcProcessedFileService.findSingleByDataFile(dataFile)
+            RawSequenceFile rawSequenceFile = metaDataService.getRawSequenceFile(cmd.dataFile.id as long)
+            FastqcProcessedFile fastqcProcessedFile = fastQcProcessedFileService.findSingleByRawSequenceFile(rawSequenceFile)
             stream = fastqcDataFilesService.getInputStreamFromZipFile(fastqcProcessedFile, cmd.path)
         } catch (FileNotReadableException e) {
             render(status: 404)
@@ -105,7 +105,7 @@ class FastqcResultsController {
 }
 
 class RenderFileCommand {
-    DataFile dataFile
+    RawSequenceFile dataFile
     String path
 
     static constraints = {

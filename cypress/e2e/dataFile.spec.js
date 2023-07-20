@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-describe('Check dataFile pages', () => {
+describe('Check rawSequenceFile pages', () => {
   'use strict';
 
   context('when user is an operator', () => {
@@ -30,7 +30,7 @@ describe('Check dataFile pages', () => {
 
     it('should visit show details page by starting on project overview page and save a comment there', () => {
       cy.intercept('/projectOverview/dataTableSource?project=*').as('dataTableSource');
-      cy.intercept('/dataFile/saveDataFileComment*').as('saveDataFileComment');
+      cy.intercept('/rawSequenceFile/saveDataFileComment*').as('saveDataFileComment');
       cy.visit('/projectOverview/index');
       cy.wait('@dataTableSource').then((interception) => {
         expect(interception.response.statusCode).to.be.eq(200);
@@ -45,7 +45,7 @@ describe('Check dataFile pages', () => {
         cy.checkPage('seqTrack/seqTrackSet');
 
         cy.get('div.identifier.dataFile a').eq(2).click();
-        cy.checkPage('dataFile/showDetails');
+        cy.checkPage('rawSequenceFile/showDetails');
 
         const comment = `This is a random ${Cypress._.random(0, 1e6)} comment.`;
         cy.get('textarea#comment-content').clear().type(comment);

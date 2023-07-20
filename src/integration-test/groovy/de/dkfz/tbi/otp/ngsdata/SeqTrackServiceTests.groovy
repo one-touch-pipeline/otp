@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -58,7 +58,7 @@ class SeqTrackServiceTests {
     @Test
     void testDecideAndPrepareForAlignment_noAlignmentDecider_shouldReturnEmptyList() {
         setupData()
-        SeqTrack seqTrack = setupSeqTrackProjectAndDataFile()
+        SeqTrack seqTrack = setupSeqTrackProjectAndRawSequenceFile()
 
         Collection<MergingWorkPackage> workPackages = seqTrackService.decideAndPrepareForAlignment(seqTrack)
 
@@ -102,7 +102,7 @@ class SeqTrackServiceTests {
         assert [bamFile] == seqTrackService.returnExternallyProcessedBamFiles([seqTrack])
     }
 
-    private static SeqTrack setupSeqTrackProjectAndDataFile() {
+    private static SeqTrack setupSeqTrackProjectAndRawSequenceFile() {
         SeqTrack seqTrack = DomainFactory.createSeqTrack(
                 seqType: DomainFactory.createDefaultOtpAlignableSeqTypes().first(),
         )

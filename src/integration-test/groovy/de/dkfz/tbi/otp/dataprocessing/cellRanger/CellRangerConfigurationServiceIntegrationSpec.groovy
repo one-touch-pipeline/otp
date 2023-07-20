@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -185,10 +185,10 @@ class CellRangerConfigurationServiceIntegrationSpec extends Specification implem
         given:
         setupData()
         FastqImportInstance fastqImportInstance = createFastqImportInstance(
-                dataFiles: [
-                        createDataFile(seqTrack: seqTrackA),
-                        createDataFile(seqTrack: seqTrackB),
-                ] as Set<DataFile>,
+                sequenceFiles: [
+                        createFastqFile(seqTrack: seqTrackA),
+                        createFastqFile(seqTrack: seqTrackB),
+                ] as Set<RawSequenceFile>,
                 otrsTicket: createOtrsTicketWithEndDatesAndNotificationSent(),
         )
         CellRangerMwpParameter expectedParameter = createCellRangerMwpParameter()
@@ -247,7 +247,7 @@ class CellRangerConfigurationServiceIntegrationSpec extends Specification implem
 
         Closure<FastqImportInstance> createImportInstanceHelper = {
             return createFastqImportInstance(
-                    dataFiles: [createDataFile()] as Set<DataFile>,
+                    sequenceFiles: [createFastqFile()] as Set<RawSequenceFile>,
                     otrsTicket: createOtrsTicketWithEndDatesAndNotificationSent(),
             )
         }
@@ -256,7 +256,7 @@ class CellRangerConfigurationServiceIntegrationSpec extends Specification implem
         FastqImportInstance instanceResetB = createImportInstanceHelper()
         FastqImportInstance instanceUntouched = createImportInstanceHelper()
 
-        Set<SeqTrack> seqTracks = [instanceResetA, instanceResetB].collectMany { it.dataFiles }*.seqTrack as Set<SeqTrack>
+        Set<SeqTrack> seqTracks = [instanceResetA, instanceResetB].collectMany { it.sequenceFiles }*.seqTrack as Set<SeqTrack>
 
         when:
         cellRangerConfigurationService.resetAllTicketsOfSeqTracksForCellRangerExecution(seqTracks)

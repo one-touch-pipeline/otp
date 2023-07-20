@@ -67,26 +67,26 @@ class DeletionServiceIntegrationTests extends Specification implements UserAndRo
         configService.clean()
     }
 
-    void "testDeleteFastQCInformationFromDataFile"() {
+    void "deleteFastQCInformationFromRawSequenceFile"() {
         given:
         setupData()
-        DataFile dataFile = DomainFactory.createDataFile()
-        FastqcProcessedFile fastqcProcessedFile = DomainFactory.createFastqcProcessedFile(dataFile: dataFile)
+        RawSequenceFile rawSequenceFile = DomainFactory.createFastqFile()
+        FastqcProcessedFile fastqcProcessedFile = DomainFactory.createFastqcProcessedFile(sequenceFile: rawSequenceFile)
 
         when:
-        deletionService.deleteFastQCInformationFromDataFile(dataFile)
+        deletionService.deleteFastQCInformationFromRawSequenceFile(rawSequenceFile)
 
         then:
         !FastqcProcessedFile.get(fastqcProcessedFile.id)
     }
 
-    void "testDeleteMetaDataEntryForDataFile"() {
+    void "deleteMetaDataEntryForRawSequenceFile"() {
         given:
-        DataFile dataFile = DomainFactory.createDataFile()
-        MetaDataEntry metaDataEntry = DomainFactory.createMetaDataEntry(dataFile: dataFile)
+        RawSequenceFile rawSequenceFile = DomainFactory.createFastqFile()
+        MetaDataEntry metaDataEntry = DomainFactory.createMetaDataEntry(sequenceFile: rawSequenceFile)
 
         when:
-        deletionService.deleteMetaDataEntryForDataFile(dataFile)
+        deletionService.deleteMetaDataEntryForRawSequenceFile(rawSequenceFile)
 
         then:
         !MetaDataEntry.get(metaDataEntry.id)
@@ -144,23 +144,23 @@ class DeletionServiceIntegrationTests extends Specification implements UserAndRo
         message == "The input AbstractBamFile is null"
     }
 
-    void "testDeleteDataFile"() {
+    void "deleteRawSequenceFile"() {
         given:
         setupData()
-        DataFile dataFile = DomainFactory.createDataFile()
-        FastqcProcessedFile fastqcProcessedFile = DomainFactory.createFastqcProcessedFile(dataFile: dataFile)
+        RawSequenceFile rawSequenceFile = DomainFactory.createFastqFile()
+        FastqcProcessedFile fastqcProcessedFile = DomainFactory.createFastqcProcessedFile(sequenceFile: rawSequenceFile)
 
-        DomainFactory.createMetaDataEntry(dataFile: dataFile)
+        DomainFactory.createMetaDataEntry(sequenceFile: rawSequenceFile)
 
-        String fileFinalPath = lsdfFilesService.getFileFinalPath(dataFile)
+        String fileFinalPath = lsdfFilesService.getFileFinalPath(rawSequenceFile)
         List<File> expected = [
                 fileFinalPath,
                 "${fileFinalPath}.md5sum",
-                lsdfFilesService.getFileViewByPidPath(dataFile),
+                lsdfFilesService.getFileViewByPidPath(rawSequenceFile),
         ].collect { new File(it) }
 
         when:
-        List<File> result = deletionService.deleteDataFile(dataFile)
+        List<File> result = deletionService.deleteRawSequenceFile(rawSequenceFile)
 
         then:
         expected == result
@@ -201,21 +201,21 @@ class DeletionServiceIntegrationTests extends Specification implements UserAndRo
         given:
         setupData()
         SeqTrack seqTrack = DomainFactory.createSeqTrack()
-        DataFile dataFile = DomainFactory.createDataFile(seqTrack: seqTrack)
+        RawSequenceFile rawSequenceFile = DomainFactory.createFastqFile(seqTrack: seqTrack)
 
         when:
         deletionService.deleteSeqTrack(seqTrack)
 
         then:
         !SeqTrack.get(seqTrack.id)
-        !DataFile.get(dataFile.id)
+        !RawSequenceFile.get(rawSequenceFile.id)
     }
 
     void "testDeleteSeqTrack_seqTrackIsOnlyLinked"() {
         given:
         setupData()
         SeqTrack seqTrack = DomainFactory.createSeqTrack(linkedExternally: true)
-        DomainFactory.createDataFile(seqTrack: seqTrack)
+        DomainFactory.createFastqFile(seqTrack: seqTrack)
 
         when:
         deletionService.deleteSeqTrack(seqTrack)
@@ -342,7 +342,7 @@ class DeletionServiceIntegrationTests extends Specification implements UserAndRo
     }
 
     private SeqTrack deleteProcessingFilesOfProject_NoProcessedData_Setup() {
-        SeqTrack seqTrack = DomainFactory.createSeqTrackWithTwoDataFiles()
+        SeqTrack seqTrack = DomainFactory.createSeqTrackWithTwoFastqFiles()
 
         return seqTrack
     }
@@ -362,14 +362,14 @@ class DeletionServiceIntegrationTests extends Specification implements UserAndRo
     }
 
     private void markFilesAsWithdrawn(List<SeqTrack> seqTracks) {
-        List<DataFile> dataFiles = DataFile.findAllBySeqTrackInList(seqTracks)
-        dataFiles*.fileWithdrawn = true
-        assert dataFiles*.save(flush: true)
+        List<RawSequenceFile> rawSequenceFiles = RawSequenceFile.findAllBySeqTrackInList(seqTracks)
+        rawSequenceFiles*.fileWithdrawn = true
+        assert rawSequenceFiles*.save(flush: true)
     }
 
     private void createFastqFiles(List<SeqTrack> seqTracks) {
         FastqImportInstance fastqImportInstance = DomainFactory.createFastqImportInstance()
-        DataFile.findAllBySeqTrackInList(seqTracks).each {
+        RawSequenceFile.findAllBySeqTrackInList(seqTracks).each {
             it.fastqImportInstance = fastqImportInstance
             assert it.save(flush: true)
             CreateFileHelper.createFile(new File(lsdfFilesService.getFileViewByPidPath(it)))
@@ -542,7 +542,7 @@ class DeletionServiceIntegrationTests extends Specification implements UserAndRo
         setupData()
         ExternallyProcessedBamFile bamFile = deleteProcessingFilesOfProject_ExternalBamFilesAttached_Setup()
 
-        SeqTrack seqTrack = DomainFactory.createSeqTrackWithTwoDataFiles([sample: bamFile.sample, seqType: bamFile.seqType])
+        SeqTrack seqTrack = DomainFactory.createSeqTrackWithTwoFastqFiles([sample: bamFile.sample, seqType: bamFile.seqType])
         createFastqFiles([seqTrack])
 
         when:

@@ -82,8 +82,8 @@ class DeletionService {
         }
 
         // There are files which are not connected to a seqTrack -> they have to be deleted, too
-        DataFile.findAllByProject(project).each { dataFile ->
-            deleteDataFile(dataFile)
+        RawSequenceFile.findAllByProject(project).each { rawSequenceFile ->
+            deleteRawSequenceFile(rawSequenceFile)
         }
 
         workflowDeletionService.deleteWorkflowVersionSelector(project)
@@ -118,8 +118,8 @@ class DeletionService {
             List<SeqTrack> seqTracks = SeqTrack.findAllBySample(sample)
 
             seqTracks.each { SeqTrack seqTrack ->
-                seqTrack.dataFiles.each { DataFile dataFile ->
-                    String filePath = lsdfFilesService.getFileFinalPath(dataFile)
+                seqTrack.sequenceFiles.each { RawSequenceFile rawSequenceFile ->
+                    String filePath = lsdfFilesService.getFileFinalPath(rawSequenceFile)
                     if (filePath) {
                         deletionScript << "rm -rf ${new File(filePath).absolutePath}\n"
                     }
@@ -180,10 +180,10 @@ class DeletionService {
 
         StringBuilder output = new StringBuilder()
 
-        List<DataFile> dataFiles
+        List<RawSequenceFile> rawSequenceFiles
 
         if (explicitSeqTracks.empty) {
-            dataFiles = DataFile.createCriteria().list {
+            rawSequenceFiles = RawSequenceFile.createCriteria().list {
                 seqTrack {
                     sample {
                         individual {
@@ -194,19 +194,19 @@ class DeletionService {
             }
         } else {
             assert CollectionUtils.exactlyOneElement(explicitSeqTracks*.project.unique()) == project
-            dataFiles = explicitSeqTracks ? DataFile.findAllBySeqTrackInList(explicitSeqTracks) : []
+            rawSequenceFiles = explicitSeqTracks ? RawSequenceFile.findAllBySeqTrackInList(explicitSeqTracks) : []
         }
 
-        output << "found ${dataFiles.size()} data files for this project\n\n"
-        assert !dataFiles.empty: "There are no SeqTracks attached to this project ${projectName}"
+        output << "found ${rawSequenceFiles.size()} data files for this project\n\n"
+        assert !rawSequenceFiles.empty: "There are no SeqTracks attached to this project ${projectName}"
 
-        List<DataFile> withdrawnDataFiles = []
-        List<DataFile> missingFiles = []
+        List<RawSequenceFile> withdrawnFiles = []
+        List<RawSequenceFile> missingFiles = []
         List<String> filesToClarify = []
 
         boolean throwException = false
 
-        dataFiles.each {
+        rawSequenceFiles.each {
             if (new File(lsdfFilesService.getFileViewByPidPath(it)).exists()) {
                 if (it.seqTrack.linkedExternally && !everythingVerified) {
                     filesToClarify << lsdfFilesService.getFileInitialPath(it)
@@ -217,7 +217,7 @@ class DeletionService {
                 // to distinguish between missing files and withdrawn files this gets queried
                 // an error is thrown as long as ignoreWithdrawn is false
                 if (it.fileWithdrawn) {
-                    withdrawnDataFiles << it
+                    withdrawnFiles << it
                     if (!ignoreWithdrawn) {
                         throwException = true
                     }
@@ -228,8 +228,8 @@ class DeletionService {
             }
         }
 
-        if (withdrawnDataFiles) {
-            output << "The fastq files of the following ${withdrawnDataFiles.size()} data files are withdrawn: \n${withdrawnDataFiles.join("\n")}\n\n"
+        if (withdrawnFiles) {
+            output << "The fastq files of the following ${withdrawnFiles.size()} data files are withdrawn: \n${withdrawnFiles.join("\n")}\n\n"
         }
 
         if (missingFiles) {
@@ -241,8 +241,8 @@ class DeletionService {
                     "\n ${filesToClarify.join("\n")}\n\n"
         }
 
-        dataFiles = dataFiles - withdrawnDataFiles
-        List<SeqTrack> seqTracks = dataFiles*.seqTrack.unique()
+        rawSequenceFiles = rawSequenceFiles - withdrawnFiles
+        List<SeqTrack> seqTracks = rawSequenceFiles*.seqTrack.unique()
 
         // in case there are no dataFiles/seqTracks left this can be ignored.
         if (seqTracks) {
@@ -538,10 +538,10 @@ class DeletionService {
         List<File> seqTrackDelete = deleteAllProcessingInformationAndResultOfOneSeqTrack(seqTrack, check)
         dirsToDelete.addAll(seqTrackDelete)
 
-        List<DataFile> dataFiles = seqTrack.dataFiles
+        List<RawSequenceFile> rawSequenceFiles = seqTrack.sequenceFiles
 
-        DataFile.findAllBySeqTrack(seqTrack).each { DataFile df ->
-            dirsToDelete.addAll(deleteDataFile(df))
+        RawSequenceFile.findAllBySeqTrack(seqTrack).each { RawSequenceFile df ->
+            dirsToDelete.addAll(deleteRawSequenceFile(df))
         }
 
         Sample sample1 = seqTrack.sample
@@ -565,7 +565,7 @@ class DeletionService {
         } as List<ExternallyProcessedBamFile>
 
         if (!leftOverSeqTracks && !leftOverBamFiles) {
-            dataFiles.collect {
+            rawSequenceFiles.collect {
                 dirsToDelete.add(fileService.toFile(lsdfFilesService.getSampleTypeDirectory(it)))
             }
         } else {
@@ -577,7 +577,7 @@ class DeletionService {
                 }
             } as List<SeqTrack>
             if (seqTrackSampleList.empty) {
-                dataFiles.collect {
+                rawSequenceFiles.collect {
                     dirsToDelete.add(fileService.toFile(lsdfFilesService.getSampleTypeDirectory(it)))
                 }
             }
@@ -606,13 +606,13 @@ class DeletionService {
     }
 
     /**
-     * Removes all metadata-entries, which belong to the dataFile
+     * Removes all metadata-entries, which belong to the sequenceFile
      *
      * The function should be called inside a transaction (DOMAIN.withTransaction{}) to roll back changes if an exception occurs or a check fails.
      */
-    private void deleteMetaDataEntryForDataFile(DataFile dataFile) {
-        notNull(dataFile, "The input dataFiles is null")
-        MetaDataEntry.findAllByDataFile(dataFile)*.delete(flush: true)
+    private void deleteMetaDataEntryForRawSequenceFile(RawSequenceFile rawSequenceFile) {
+        notNull(rawSequenceFile, "The input dataFiles is null")
+        MetaDataEntry.findAllBySequenceFile(rawSequenceFile)*.delete(flush: true)
     }
 
     /**
@@ -640,32 +640,32 @@ class DeletionService {
     }
 
     /**
-     * Deletes a dataFile and all corresponding information
+     * Deletes a sequenceFile and all corresponding information
      */
     @SuppressWarnings('JavaIoPackageAccess')
-    private List<File> deleteDataFile(DataFile dataFile) {
-        notNull(dataFile, "The dataFile input of method deleteDataFile is null")
+    private List<File> deleteRawSequenceFile(RawSequenceFile rawSequenceFile) {
+        notNull(rawSequenceFile, "The dataFile input of method deleteDataFile is null")
 
-        String fileFinalPath = lsdfFilesService.getFileFinalPath(dataFile)
+        String fileFinalPath = lsdfFilesService.getFileFinalPath(rawSequenceFile)
         List<File> dirs = [
                 fileFinalPath,
                 "${fileFinalPath}.md5sum",
-                lsdfFilesService.getFileViewByPidPath(dataFile),
+                lsdfFilesService.getFileViewByPidPath(rawSequenceFile),
         ].collect { new File(it) }
 
-        dirs.addAll(deleteFastQCInformationFromDataFile(dataFile))
-        deleteMetaDataEntryForDataFile(dataFile)
-        dataFile.delete(flush: true)
+        dirs.addAll(deleteFastQCInformationFromRawSequenceFile(rawSequenceFile))
+        deleteMetaDataEntryForRawSequenceFile(rawSequenceFile)
+        rawSequenceFile.delete(flush: true)
         return dirs
     }
 
     /**
-     * Removes all fastQC information about the dataFile
+     * Removes all fastQC information about the sequenceFile
      */
     @SuppressWarnings('JavaIoPackageAccess')
-    private List<File> deleteFastQCInformationFromDataFile(DataFile dataFile) {
-        notNull(dataFile, "The input dataFile is null")
-        List<FastqcProcessedFile> fastqcProcessedFiles = FastqcProcessedFile.findAllByDataFile(dataFile)
+    private List<File> deleteFastQCInformationFromRawSequenceFile(RawSequenceFile rawSequenceFile) {
+        notNull(rawSequenceFile, "The input dataFile is null")
+        List<FastqcProcessedFile> fastqcProcessedFiles = FastqcProcessedFile.findAllBySequenceFile(rawSequenceFile)
         List<File> filesToDelete = []
 
         if (fastqcProcessedFiles) {

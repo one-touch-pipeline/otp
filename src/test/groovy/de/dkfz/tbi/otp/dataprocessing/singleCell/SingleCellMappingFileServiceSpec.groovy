@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,7 +28,8 @@ import spock.lang.TempDir
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
-import de.dkfz.tbi.otp.ngsdata.DataFile
+import de.dkfz.tbi.otp.ngsdata.FastqFile
+import de.dkfz.tbi.otp.ngsdata.RawSequenceFile
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 
 import java.nio.file.*
@@ -41,7 +42,8 @@ class SingleCellMappingFileServiceSpec extends Specification implements DataTest
     @Override
     Class[] getDomainClassesToMock() {
         return [
-                DataFile,
+                FastqFile,
+                RawSequenceFile,
         ]
     }
 
@@ -51,19 +53,19 @@ class SingleCellMappingFileServiceSpec extends Specification implements DataTest
     class AddMappingFileEntryIfMissing implements DomainFactoryCore {
 
         SingleCellMappingFileService service
-        List<DataFile> dataFiles = []
-        Map<DataFile, Path> mappingFileOfDataFile = [:]
+        List<RawSequenceFile> rawSequenceFile = []
+        Map<RawSequenceFile, Path> mappingFileOfRawSequenceFile = [:]
 
-        AddMappingFileEntryIfMissing(List<DataFile> dataFiles) {
-            this.dataFiles = dataFiles
-            this.mappingFileOfDataFile = dataFiles.collectEntries { DataFile dataFile ->
-                return [(dataFile): CreateFileHelper.createFile(tempDir.resolve("test.txt"))]
+        AddMappingFileEntryIfMissing(List<RawSequenceFile> rawSequenceFiles) {
+            this.rawSequenceFile = rawSequenceFiles
+            this.mappingFileOfRawSequenceFile = rawSequenceFiles.collectEntries { RawSequenceFile rawSequenceFile ->
+                return [(rawSequenceFile): CreateFileHelper.createFile(tempDir.resolve("test.txt"))]
             }
         }
     }
 
-    private AddMappingFileEntryIfMissing createDataAddMappingFileEntryIfMissing(List<DataFile> dataFiles) {
-        AddMappingFileEntryIfMissing data = new AddMappingFileEntryIfMissing(dataFiles)
+    private AddMappingFileEntryIfMissing createDataAddMappingFileEntryIfMissing(List<RawSequenceFile> rawSequenceFiles) {
+        AddMappingFileEntryIfMissing data = new AddMappingFileEntryIfMissing(rawSequenceFiles)
 
         data.service = new SingleCellMappingFileService([
                 fileSystemService: Mock(FileSystemService) {
@@ -71,7 +73,7 @@ class SingleCellMappingFileServiceSpec extends Specification implements DataTest
                 },
                 fileService      : new FileService(),
                 singleCellService: Mock(SingleCellService) {
-                    _ * singleCellMappingFile(_) >> { DataFile df -> data.mappingFileOfDataFile[df] }
+                    _ * singleCellMappingFile(_) >> { RawSequenceFile df -> data.mappingFileOfRawSequenceFile[df] }
                     _ * mappingEntry(_) >> ENTRY
                 },
         ])
@@ -82,15 +84,15 @@ class SingleCellMappingFileServiceSpec extends Specification implements DataTest
     @SuppressWarnings('ExplicitFlushForDeleteRule')
     void "addMappingFileEntryIfMissing, when file not exist, then create it with entry"() {
         given:
-        List<DataFile> dataFiles = [createDataFile()]
-        AddMappingFileEntryIfMissing data = createDataAddMappingFileEntryIfMissing(dataFiles)
-        DataFile dataFile = data.dataFiles[0]
-        Path mappingFile = data.mappingFileOfDataFile[(dataFile)]
+        List<RawSequenceFile> rawSequenceFiles = [createFastqFile()]
+        AddMappingFileEntryIfMissing data = createDataAddMappingFileEntryIfMissing(rawSequenceFiles)
+        RawSequenceFile rawSequenceFile = data.rawSequenceFile[0]
+        Path mappingFile = data.mappingFileOfRawSequenceFile[(rawSequenceFile)]
 
         Files.delete(mappingFile)
 
         when:
-        data.service.addMappingFileEntryIfMissing(dataFile)
+        data.service.addMappingFileEntryIfMissing(rawSequenceFile)
 
         then:
         Files.exists(mappingFile)
@@ -99,15 +101,15 @@ class SingleCellMappingFileServiceSpec extends Specification implements DataTest
 
     void "addMappingFileEntryIfMissing, when file exist but has not the entry, then add entry"() {
         given:
-        List<DataFile> dataFiles = [createDataFile()]
-        AddMappingFileEntryIfMissing data = createDataAddMappingFileEntryIfMissing(dataFiles)
-        DataFile dataFile = data.dataFiles[0]
-        Path mappingFile = data.mappingFileOfDataFile[(dataFile)]
+        List<RawSequenceFile> rawSequenceFiles = [createFastqFile()]
+        AddMappingFileEntryIfMissing data = createDataAddMappingFileEntryIfMissing(rawSequenceFiles)
+        RawSequenceFile rawSequenceFile = data.rawSequenceFile[0]
+        Path mappingFile = data.mappingFileOfRawSequenceFile[(rawSequenceFile)]
 
         mappingFile.text = DATA
 
         when:
-        data.service.addMappingFileEntryIfMissing(dataFile)
+        data.service.addMappingFileEntryIfMissing(rawSequenceFile)
 
         then:
         Files.exists(mappingFile)
@@ -116,16 +118,16 @@ class SingleCellMappingFileServiceSpec extends Specification implements DataTest
 
     void "addMappingFileEntryIfMissing, when file exist and has the entry, then do not add the entry again"() {
         given:
-        List<DataFile> dataFiles = [createDataFile()]
-        AddMappingFileEntryIfMissing data = createDataAddMappingFileEntryIfMissing(dataFiles)
-        DataFile dataFile = data.dataFiles[0]
-        Path mappingFile = data.mappingFileOfDataFile[(dataFile)]
+        List<RawSequenceFile> rawSequenceFiles = [createFastqFile()]
+        AddMappingFileEntryIfMissing data = createDataAddMappingFileEntryIfMissing(rawSequenceFiles)
+        RawSequenceFile rawSequenceFile = data.rawSequenceFile[0]
+        Path mappingFile = data.mappingFileOfRawSequenceFile[(rawSequenceFile)]
 
         String existingData = "${DATA}\n${ENTRY}\n"
         mappingFile.text = existingData
 
         when:
-        data.service.addMappingFileEntryIfMissing(dataFile)
+        data.service.addMappingFileEntryIfMissing(rawSequenceFile)
 
         then:
         Files.exists(mappingFile)

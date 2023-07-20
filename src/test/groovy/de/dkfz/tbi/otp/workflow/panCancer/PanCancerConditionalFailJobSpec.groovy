@@ -47,7 +47,8 @@ class PanCancerConditionalFailJobSpec extends Specification implements DataTest,
     @Override
     Class[] getDomainClassesToMock() {
         return [
-                DataFile,
+                FastqFile,
+                RawSequenceFile,
                 WorkflowStep,
         ]
     }
@@ -57,8 +58,8 @@ class PanCancerConditionalFailJobSpec extends Specification implements DataTest,
         given:
         WorkflowStep workflowStep = createWorkflowStep()
         List<SeqTrack> seqTracks = [
-                createSeqTrackWithTwoDataFile([:], [mateNumber: mateFile1, fileName: file1], [mateNumber: mateFile2, fileName: file2]),
-                createSeqTrackWithTwoDataFile([:], [fileName: "SecondSeqTrack_123_R1.gz"], [fileName: "SecondSeqTrack_123_R2.gz"]),
+                createSeqTrackWithTwoFastqFile([:], [mateNumber: mateFile1, fileName: file1], [mateNumber: mateFile2, fileName: file2]),
+                createSeqTrackWithTwoFastqFile([:], [fileName: "SecondSeqTrack_123_R1.gz"], [fileName: "SecondSeqTrack_123_R2.gz"]),
         ]
 
         PanCancerConditionalFailJob job = Spy(PanCancerConditionalFailJob) {
@@ -70,7 +71,7 @@ class PanCancerConditionalFailJobSpec extends Specification implements DataTest,
         }
 
         job.lsdfFilesService = Mock(LsdfFilesService) {
-            getFileViewByPidPathAsPath(_) >> { DataFile file, PathOption... options ->
+            getFileViewByPidPathAsPath(_) >> { RawSequenceFile file, PathOption... options ->
                 return CreateFileHelper.createFile(tempDir.resolve(file.fileName))
             }
         }
@@ -116,7 +117,7 @@ class PanCancerConditionalFailJobSpec extends Specification implements DataTest,
     void "test check, fails because a seqTrack has not exactly two dataFiles"() {
         given:
         WorkflowStep workflowStep = createWorkflowStep()
-        List<SeqTrack> seqTracks = [createSeqTrackWithOneDataFile()]
+        List<SeqTrack> seqTracks = [createSeqTrackWithOneFastqFile()]
 
         PanCancerConditionalFailJob job = Spy(PanCancerConditionalFailJob) {
             getSeqTracks(workflowStep) >> seqTracks
@@ -138,8 +139,8 @@ class PanCancerConditionalFailJobSpec extends Specification implements DataTest,
         given:
         WorkflowStep workflowStep = createWorkflowStep()
         List<SeqTrack> seqTracks = [
-                createSeqTrackWithTwoDataFile([:], [fileName: "DataFileFileName_123_R1.gz"], [fileName: "DataFileFileName_123_R2.gz"]),
-                createSeqTrackWithTwoDataFile(),
+                createSeqTrackWithTwoFastqFile([:], [fileName: "DataFileFileName_123_R1.gz"], [fileName: "DataFileFileName_123_R2.gz"]),
+                createSeqTrackWithTwoFastqFile(),
         ]
 
         PanCancerConditionalFailJob job = Spy(PanCancerConditionalFailJob) {
@@ -166,8 +167,8 @@ class PanCancerConditionalFailJobSpec extends Specification implements DataTest,
         given:
         WorkflowStep workflowStep = createWorkflowStep()
         List<SeqTrack> seqTracks = [
-                createSeqTrackWithTwoDataFile([:], [fileName: "A_R1.gz"], [fileName: "B_R2.gz"]),
-                createSeqTrackWithTwoDataFile([:], [fileName: "DataFileFileName_123_R1.gz"], [fileName: "DataFileFileName_123_R2.gz"]),
+                createSeqTrackWithTwoFastqFile([:], [fileName: "A_R1.gz"], [fileName: "B_R2.gz"]),
+                createSeqTrackWithTwoFastqFile([:], [fileName: "DataFileFileName_123_R1.gz"], [fileName: "DataFileFileName_123_R2.gz"]),
         ]
 
         PanCancerConditionalFailJob job = Spy(PanCancerConditionalFailJob) {
@@ -179,7 +180,7 @@ class PanCancerConditionalFailJobSpec extends Specification implements DataTest,
         }
 
         job.lsdfFilesService = Mock(LsdfFilesService) {
-            getFileViewByPidPathAsPath(_) >> { DataFile file, PathOption... options ->
+            getFileViewByPidPathAsPath(_) >> { RawSequenceFile file, PathOption... options ->
                 return CreateFileHelper.createFile(tempDir.resolve(file.fileName))
             }
         }
@@ -197,14 +198,14 @@ class PanCancerConditionalFailJobSpec extends Specification implements DataTest,
         e.message.contains("file name inconsistency")
     }
 
-    void "test check, fails whith multiple errors in one exception"() {
+    void "test check, fails with multiple errors in one exception"() {
         given:
         WorkflowStep workflowStep = createWorkflowStep()
         List<SeqTrack> seqTracks = [
                 createSeqTrack(),
-                createSeqTrackWithOneDataFile(),
-                createSeqTrackWithTwoDataFile([:], [fileName: "A_R1.gz"], [fileName: "A_R2.gz"]),
-                createSeqTrackWithTwoDataFile([:], [fileName: "DataFileFileName_123_R1.gz"], [fileName: "DataFileFileName_123_R2.gz"]),
+                createSeqTrackWithOneFastqFile(),
+                createSeqTrackWithTwoFastqFile([:], [fileName: "A_R1.gz"], [fileName: "A_R2.gz"]),
+                createSeqTrackWithTwoFastqFile([:], [fileName: "DataFileFileName_123_R1.gz"], [fileName: "DataFileFileName_123_R2.gz"]),
         ]
 
         PanCancerConditionalFailJob job = Spy(PanCancerConditionalFailJob) {
@@ -216,7 +217,7 @@ class PanCancerConditionalFailJobSpec extends Specification implements DataTest,
         }
 
         job.lsdfFilesService = Mock(LsdfFilesService) {
-            getFileViewByPidPathAsPath(_) >> { DataFile file, PathOption... options ->
+            getFileViewByPidPathAsPath(_) >> { RawSequenceFile file, PathOption... options ->
                 return CreateFileHelper.createFile(tempDir.resolve(file.fileName), "")
             }
         }

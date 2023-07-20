@@ -70,7 +70,7 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends Specification im
         seqTrack.fastqcState = SeqTrack.DataProcessingState.FINISHED
         seqTrack.save(flush: true)
 
-        DataFile.findAllBySeqTrack(seqTrack).each {
+        RawSequenceFile.findAllBySeqTrack(seqTrack).each {
             it.nReads = numberOfReads
             it.save(flush: true)
         }
@@ -197,7 +197,7 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends Specification im
         setupData()
         MergingWorkPackage workPackage = roddyBamFile.mergingWorkPackage
 
-        SeqTrack seqTrack = DomainFactory.createSeqTrackWithDataFiles(workPackage, [libraryName: 'library14', normalizedLibraryName: SeqTrack.normalizeLibraryName('library14')])
+        SeqTrack seqTrack = DomainFactory.createSeqTrackWithFastqFiles(workPackage, [libraryName: 'library14', normalizedLibraryName: SeqTrack.normalizeLibraryName('library14')])
         seqTrack.save(flush: true)
 
         roddyBamFile.seqTracks.add(seqTrack)

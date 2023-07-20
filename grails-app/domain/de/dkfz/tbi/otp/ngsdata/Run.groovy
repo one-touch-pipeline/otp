@@ -109,7 +109,7 @@ class Run implements ProcessParameterObject, Entity {
      */
     @Override
     ProcessingPriority getProcessingPriority() {
-        return DataFile.findAllByRun(this)*.project*.processingPriority.max {
+        return RawSequenceFile.findAllByRun(this)*.project*.processingPriority.max {
             it.priority
         }
     }

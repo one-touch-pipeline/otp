@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -33,7 +33,8 @@ class FastqcUploadServiceSpec extends Specification implements DataTest {
     @Override
     Class[] getDomainClassesToMock() {
         return [
-                DataFile,
+                RawSequenceFile,
+                FastqFile,
                 FastqcProcessedFile,
                 FileType,
                 Individual,
@@ -232,12 +233,12 @@ Sequences flagged as poor quality\t0\t
         e.message.contains("No FastQC file defined")
     }
 
-    void "uploadFastQCFileContentsToDataBase, fails when DataFile has no SeqTrack"() {
+    void "uploadFastQCFileContentsToDataBase, fails when RawSequenceFile has no SeqTrack"() {
         given:
         setupData()
 
-        fastqcProcessedFile.dataFile.seqTrack = null
-        fastqcProcessedFile.dataFile.save(flush: true)
+        fastqcProcessedFile.sequenceFile.seqTrack = null
+        fastqcProcessedFile.sequenceFile.save(flush: true)
 
         when:
         fastqcUploadService.uploadFastQCFileContentsToDataBase(fastqcProcessedFile)
@@ -247,7 +248,7 @@ Sequences flagged as poor quality\t0\t
         e.message.contains("Cannot invoke method getInputStreamFromZipFile() on null object")
     }
 
-    void "uploadFastQCFileContentsToDataBase, fills DataFile for fine data"() {
+    void "uploadFastQCFileContentsToDataBase, fills RawSequenceFile for fine data"() {
         given:
         setupData()
 
@@ -259,13 +260,13 @@ Sequences flagged as poor quality\t0\t
             parseFastQCFile(_, _) >> { [nReads : parsedNReads as String, sequenceLength : parsedSequenceLength] }
         }
 
-        fastqcProcessedFile = DomainFactory.createFastqcProcessedFile(dataFile: DomainFactory.createDataFile(nReads: parsedNReads))
+        fastqcProcessedFile = DomainFactory.createFastqcProcessedFile(sequenceFile: DomainFactory.createFastqFile(nReads: parsedNReads))
 
         fastqcUploadService.uploadFastQCFileContentsToDataBase(fastqcProcessedFile)
 
         then:
-        parsedNReads == fastqcProcessedFile.dataFile.nReads
-        parsedSequenceLength == fastqcProcessedFile.dataFile.sequenceLength
+        parsedNReads == fastqcProcessedFile.sequenceFile.nReads
+        parsedSequenceLength == fastqcProcessedFile.sequenceFile.sequenceLength
         fastqcProcessedFile.contentUploaded == true
     }
 }

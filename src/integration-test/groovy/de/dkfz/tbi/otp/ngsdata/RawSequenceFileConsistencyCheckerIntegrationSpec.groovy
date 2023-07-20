@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -31,7 +31,7 @@ import de.dkfz.tbi.otp.utils.CreateFileHelper
 import java.nio.file.Files
 import java.nio.file.Path
 
-class DataFileConsistencyCheckerIntegrationSpec extends AbstractIntegrationSpecWithoutRollbackAnnotation {
+class RawSequenceFileConsistencyCheckerIntegrationSpec extends AbstractIntegrationSpecWithoutRollbackAnnotation {
 
     Path rootDir
     Path initialDir
@@ -49,14 +49,14 @@ class DataFileConsistencyCheckerIntegrationSpec extends AbstractIntegrationSpecW
 
     //false positives, since rule can not recognize calling class
     @SuppressWarnings('ExplicitFlushForDeleteRule')
-    void "test setFileExistsForAllDataFiles"() {
+    void "test setFileExistsForAllRawSequenceFiles"() {
         given:
         setupData()
-        DataFile dataFile1
-        DataFile dataFile2
-        DataFile dataFile3
-        DataFile dataFile4
-        DataFileConsistencyChecker dataFileConsistencyChecker = new DataFileConsistencyChecker()
+        RawSequenceFile rawSequenceFile1
+        RawSequenceFile rawSequenceFile2
+        RawSequenceFile rawSequenceFile3
+        RawSequenceFile rawSequenceFile4
+        RawSequenceFileConsistencyChecker consistencyChecker = new RawSequenceFileConsistencyChecker()
 
         SessionUtils.withTransaction {
             Path initialFile1 = CreateFileHelper.createFile(initialDir.resolve("fileName1"))
@@ -70,22 +70,22 @@ class DataFileConsistencyCheckerIntegrationSpec extends AbstractIntegrationSpecW
                     seqTrack        : DomainFactory.createSeqTrack(dataInstallationState: SeqTrack.DataProcessingState.FINISHED),
                     initialDirectory: initialDir,
             ]
-            dataFile1 = DomainFactory.createDataFile(commonProperties + [fileName: initialFile1.toFile().name, fileLinked: false])
-            dataFile2 = DomainFactory.createDataFile(commonProperties + [fileName: initialFile2.toFile().name, fileLinked: false])
-            dataFile3 = DomainFactory.createDataFile(commonProperties + [fileName: initialFile3.toFile().name, fileLinked: true])
-            dataFile4 = DomainFactory.createDataFile(commonProperties + [fileName: initialFile4.toFile().name, fileLinked: true])
+            rawSequenceFile1 = DomainFactory.createFastqFile(commonProperties + [fileName: initialFile1.toFile().name, fileLinked: false])
+            rawSequenceFile2 = DomainFactory.createFastqFile(commonProperties + [fileName: initialFile2.toFile().name, fileLinked: false])
+            rawSequenceFile3 = DomainFactory.createFastqFile(commonProperties + [fileName: initialFile3.toFile().name, fileLinked: true])
+            rawSequenceFile4 = DomainFactory.createFastqFile(commonProperties + [fileName: initialFile4.toFile().name, fileLinked: true])
             Files.copy(initialFile1, copiedFile1)
             Files.copy(initialFile2, copiedFile2)
             Files.createSymbolicLink(copiedOrLinkedDir.resolve("fileName3"), initialFile3)
             Files.createSymbolicLink(copiedOrLinkedDir.resolve("fileName4"), initialFile4)
 
-            dataFileConsistencyChecker.lsdfFilesService = Mock(LsdfFilesService) {
-                1 * getFileFinalPath(dataFile1) >> "${copiedOrLinkedDir}/fileName1"
-                1 * getFileFinalPath(dataFile2) >> "${copiedOrLinkedDir}/fileName2"
-                1 * getFileFinalPath(dataFile3) >> "${copiedOrLinkedDir}/fileName3"
-                1 * getFileFinalPath(dataFile4) >> "${copiedOrLinkedDir}/fileName4"
+            consistencyChecker.lsdfFilesService = Mock(LsdfFilesService) {
+                1 * getFileFinalPath(rawSequenceFile1) >> "${copiedOrLinkedDir}/fileName1"
+                1 * getFileFinalPath(rawSequenceFile2) >> "${copiedOrLinkedDir}/fileName2"
+                1 * getFileFinalPath(rawSequenceFile3) >> "${copiedOrLinkedDir}/fileName3"
+                1 * getFileFinalPath(rawSequenceFile4) >> "${copiedOrLinkedDir}/fileName4"
             }
-            dataFileConsistencyChecker.schedulerService = Mock(SchedulerService) {
+            consistencyChecker.schedulerService = Mock(SchedulerService) {
                 1 * isActive() >> true
             }
 
@@ -95,52 +95,52 @@ class DataFileConsistencyCheckerIntegrationSpec extends AbstractIntegrationSpecW
 
         when:
         SessionUtils.withTransaction {
-            dataFileConsistencyChecker.setFileExistsForAllDataFiles()
+            consistencyChecker.setFileExistsForAllRawSequenceFiles()
         }
 
         then:
         SessionUtils.withTransaction {
-            dataFile1.refresh()
-            dataFile2.refresh()
-            dataFile3.refresh()
-            dataFile4.refresh()
-            assert dataFile1.fileExists
-            assert !dataFile2.fileExists
-            assert dataFile3.fileExists
-            assert !dataFile4.fileExists
+            rawSequenceFile1.refresh()
+            rawSequenceFile2.refresh()
+            rawSequenceFile3.refresh()
+            rawSequenceFile4.refresh()
+            assert rawSequenceFile1.fileExists
+            assert !rawSequenceFile2.fileExists
+            assert rawSequenceFile3.fileExists
+            assert !rawSequenceFile4.fileExists
             return true
         }
     }
 
-    void "test setFileExistsForAllDataFiles with invalid datafile, sends email"() {
+    void "test setFileExistsForAllRawSequenceFiles with invalid datafile, sends email"() {
         given:
         setupData()
 
-        DataFileConsistencyChecker dataFileConsistencyChecker = new DataFileConsistencyChecker()
-        DataFile dataFile
+        RawSequenceFileConsistencyChecker consistencyChecker = new RawSequenceFileConsistencyChecker()
+        RawSequenceFile rawSequenceFile
         SessionUtils.withTransaction {
             FileType fileType = DomainFactory.createFileType(type: FileType.Type.SEQUENCE, subType: 'fastq', vbpPath: "/sequence/")
             SeqTrack seqTrack = DomainFactory.createSeqTrack(dataInstallationState: SeqTrack.DataProcessingState.FINISHED)
-            dataFile = DomainFactory.createDataFile(fileType: fileType, seqTrack: seqTrack, fileLinked: false)
-            dataFile.mateNumber = null
-            dataFile.save(flush: true, validate: false)
+            rawSequenceFile = DomainFactory.createFastqFile(fileType: fileType, seqTrack: seqTrack, fileLinked: false)
+            rawSequenceFile.mateNumber = null
+            rawSequenceFile.save(flush: true, validate: false)
         }
 
-        dataFileConsistencyChecker.schedulerService = Mock(SchedulerService) {
+        consistencyChecker.schedulerService = Mock(SchedulerService) {
             1 * isActive() >> true
         }
-        dataFileConsistencyChecker.mailHelperService = Mock(MailHelperService) {
-            1 * sendEmailToTicketSystem('Error: DataFileConsistencyChecker.setFileExistsForAllDataFiles() failed', _) >> { String emailSubject, String content ->
-                assert content.contains("Error while saving datafile with id: ${dataFile.id}")
+        consistencyChecker.mailHelperService = Mock(MailHelperService) {
+            1 * sendEmailToTicketSystem('Error: RawSequenceFileConsistencyChecker.setFileExistsForAllDataFiles() failed', _) >> { String emailSubject, String content ->
+                assert content.contains("Error while saving datafile with id: ${rawSequenceFile.id}")
                 assert content.contains("on field 'mateNumber': rejected value [null]")
             }
         }
-        dataFileConsistencyChecker.lsdfFilesService = Mock(LsdfFilesService) {
-            1 * getFileFinalPath(dataFile) >> "path"
+        consistencyChecker.lsdfFilesService = Mock(LsdfFilesService) {
+            1 * getFileFinalPath(rawSequenceFile) >> "path"
         }
-        dataFileConsistencyChecker.processingOptionService = new ProcessingOptionService()
+        consistencyChecker.processingOptionService = new ProcessingOptionService()
 
         expect:
-        dataFileConsistencyChecker.setFileExistsForAllDataFiles()
+        consistencyChecker.setFileExistsForAllRawSequenceFiles()
     }
 }

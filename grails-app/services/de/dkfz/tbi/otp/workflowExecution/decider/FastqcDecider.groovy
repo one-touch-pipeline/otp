@@ -28,7 +28,7 @@ import org.springframework.stereotype.Component
 import org.springframework.transaction.TransactionStatus
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.ngsdata.DataFile
+import de.dkfz.tbi.otp.ngsdata.RawSequenceFile
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.LogUsedTimeUtils
@@ -78,7 +78,7 @@ class FastqcDecider implements Decider {
             return deciderResult
         }
 
-        Map<SeqTrack, List<DataFile>> dataFilesMap = fastqcArtefactService.fetchDataFiles(seqTracks)
+        Map<SeqTrack, List<RawSequenceFile>> rawSequenceFilesMap = fastqcArtefactService.fetchRawSequenceFiles(seqTracks)
         List<FastqcArtefactData<FastqcProcessedFile>> fastqcProcessedFileData = fastqcArtefactService.fetchRelatedFastqcArtefactsForSeqTracks(seqTracks)
 
         Map<Project, WorkflowVersionSelector> workflowVersionSelectorMap =
@@ -92,7 +92,7 @@ class FastqcDecider implements Decider {
         Map<SeqTrack, List<FastqcArtefactData<FastqcProcessedFile>>> groupedAdditionalDataPerSeqtrack =
                 LogUsedTimeUtils.logUsedTime(log, "        group additional Artefacts") {
                     fastqcProcessedFileData.groupBy {
-                        it.artefact.dataFile.seqTrack
+                        it.artefact.sequenceFile.seqTrack
                     }
                 }
 
@@ -119,7 +119,7 @@ class FastqcDecider implements Decider {
                         deciderResult.add(createWorkflowRunsAndOutputArtefacts(
                                 fastqcArtefactData,
                                 additionalArtefacts,
-                                dataFilesMap,
+                                rawSequenceFilesMap,
                                 matchingWorkflows)
                         )
                     }
@@ -135,31 +135,31 @@ class FastqcDecider implements Decider {
 
     protected DeciderResult createWorkflowRunsAndOutputArtefacts(FastqcArtefactData<SeqTrack> fastqcArtefactData,
                                                                  List<FastqcArtefactData<FastqcProcessedFile>> additionalArtefacts,
-                                                                 Map<SeqTrack, List<DataFile>> dataFilesMap,
+                                                                 Map<SeqTrack, List<RawSequenceFile>> rawSequenceFilesMap,
                                                                  WorkflowVersionSelector matchingWorkflow) {
         DeciderResult deciderResult = new DeciderResult()
         SeqTrack seqTrack = fastqcArtefactData.artefact
         String seqTrackString = seqTrack.toString().replaceAll('<br>', ', ')
         deciderResult.infos << "process seqTrack ${seqTrackString}".toString()
 
-        List<DataFile> dataFiles = dataFilesMap[seqTrack]
+        List<RawSequenceFile> rawSequenceFiles = rawSequenceFilesMap[seqTrack]
 
-        if (additionalArtefacts && additionalArtefacts.size() == dataFiles.size()) {
+        if (additionalArtefacts && additionalArtefacts.size() == rawSequenceFiles.size()) {
             deciderResult.warnings << "skip ${seqTrackString}, since fastqc already exist".toString()
             return deciderResult
         }
 
-        Map<DataFile, FastqcProcessedFile> fastqcPerDataFile = additionalArtefacts ? additionalArtefacts.collectEntries {
-            [(it.artefact.dataFile): it.artefact]
+        Map<RawSequenceFile, FastqcProcessedFile> fastqcPerRawSequenceFile = additionalArtefacts ? additionalArtefacts.collectEntries {
+            [(it.artefact.sequenceFile): it.artefact]
         } : [:]
 
         WorkflowVersion workflowVersion = matchingWorkflow.workflowVersion
         Workflow workflow = workflowVersion.workflow
 
         String workDirectory = fastQcProcessedFileService.buildWorkingPath(workflowVersion)
-        Map<DataFile, FastqcProcessedFile> fastqcProcessedFiles = dataFiles.collectEntries {
-            FastqcProcessedFile fastqcProcessedFile = fastqcPerDataFile[it] ?: new FastqcProcessedFile([
-                    dataFile         : it,
+        Map<RawSequenceFile, FastqcProcessedFile> fastqcProcessedFiles = rawSequenceFiles.collectEntries {
+            FastqcProcessedFile fastqcProcessedFile = fastqcPerRawSequenceFile[it] ?: new FastqcProcessedFile([
+                    sequenceFile     : it,
                     workDirectoryName: workDirectory,
             ]).save(flush: false)
             [(it): fastqcProcessedFile]
@@ -189,7 +189,7 @@ class FastqcDecider implements Decider {
 
         List<WorkflowArtefact> result = []
 
-        dataFiles.eachWithIndex { DataFile it, int i ->
+        rawSequenceFiles.eachWithIndex { RawSequenceFile it, int i ->
             WorkflowArtefact workflowArtefact = workflowArtefactService.buildWorkflowArtefact(new WorkflowArtefactValues(
                     run,
                     "${BashFastQcWorkflow.OUTPUT_FASTQC}_${i + 1}",

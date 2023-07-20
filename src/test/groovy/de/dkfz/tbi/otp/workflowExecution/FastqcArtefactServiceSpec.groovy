@@ -55,6 +55,7 @@ class FastqcArtefactServiceSpec extends HibernateSpec implements WorkflowSystemD
     @Override
     List<Class> getDomainClasses() {
         return [
+                FastqFile,
                 FastqImportInstance,
                 FastqcProcessedFile,
                 WorkflowArtefact,
@@ -69,7 +70,7 @@ class FastqcArtefactServiceSpec extends HibernateSpec implements WorkflowSystemD
     void setupData() {
         //artefact in input and seqType in input
         workflowArtefactSeqTrack1 = createWorkflowArtefact([artefactType: ArtefactType.FASTQ])
-        seqTrack1 = createSeqTrackWithTwoDataFileAndSpecies([workflowArtefact: workflowArtefactSeqTrack1])
+        seqTrack1 = createSeqTrackWithTwoFastqFileAndSpecies([workflowArtefact: workflowArtefactSeqTrack1])
         workflowArtefactFastqc1 = createWorkflowArtefact([artefactType: ArtefactType.FASTQC])
         fastqc1 = createFastqcProcessedFileWithSpecies([workflowArtefact: workflowArtefactFastqc1])
 
@@ -80,12 +81,12 @@ class FastqcArtefactServiceSpec extends HibernateSpec implements WorkflowSystemD
         ]
         seqTypes = [
                 seqTrack1.seqType,
-                fastqc1.dataFile.seqType,
+                fastqc1.sequenceFile.seqType,
         ]
 
         seqTracks = [
                 seqTrack1,
-                fastqc1.dataFile.seqTrack,
+                fastqc1.sequenceFile.seqTrack,
         ]
     }
 
@@ -164,24 +165,24 @@ class FastqcArtefactServiceSpec extends HibernateSpec implements WorkflowSystemD
         result.first() == selector
     }
 
-    void "fetchDataFiles, when called for workflow and seqTracks, then return dataFileMap"() {
+    void "fetchRawSequenceFiles, when called for workflow and seqTracks, then return dataFileMap"() {
         given:
         setupData()
 
-        Map<SeqTrack, List<DataFile>> expected = [
-                (seqTrack1)                : seqTrack1.dataFiles,
-                (fastqc1.dataFile.seqTrack): [fastqc1.dataFile],
+        Map<SeqTrack, List<RawSequenceFile>> expected = [
+                (seqTrack1)                    : seqTrack1.sequenceFiles,
+                (fastqc1.sequenceFile.seqTrack): [fastqc1.sequenceFile],
         ]
 
         when:
-        Map<SeqTrack, List<DataFile>> result = fastqcArtefactService.fetchDataFiles(seqTracks)
+        Map<SeqTrack, List<RawSequenceFile>> result = fastqcArtefactService.fetchRawSequenceFiles(seqTracks)
 
         then:
         TestCase.assertContainSame(result, expected)
     }
 
-    private SeqTrack createSeqTrackWithTwoDataFileAndSpecies(Map parameters) {
-        return createSeqTrackWithTwoDataFile([
+    private SeqTrack createSeqTrackWithTwoFastqFileAndSpecies(Map parameters) {
+        return createSeqTrackWithTwoFastqFile([
                 sample: createSample([
                         individual: createIndividual([
                                 species: createSpeciesWithStrain(),
@@ -192,7 +193,7 @@ class FastqcArtefactServiceSpec extends HibernateSpec implements WorkflowSystemD
 
     private FastqcProcessedFile createFastqcProcessedFileWithSpecies(Map parameters) {
         return createFastqcProcessedFile([
-                dataFile: createDataFile([
+                sequenceFile: createFastqFile([
                         seqTrack: createSeqTrack([
                                 sample: createSample([
                                         individual: createIndividual([
@@ -213,7 +214,7 @@ class FastqcArtefactServiceSpec extends HibernateSpec implements WorkflowSystemD
     }
 
     private FastqcArtefactData<FastqcProcessedFile> createFastqcArtefactDataForFastqcProcessedFile(FastqcProcessedFile fastqcProcessedFile) {
-        SeqTrack seqTrack = fastqcProcessedFile.dataFile.seqTrack
+        SeqTrack seqTrack = fastqcProcessedFile.sequenceFile.seqTrack
         return new FastqcArtefactData<FastqcProcessedFile>(
                 fastqcProcessedFile.workflowArtefact,
                 fastqcProcessedFile,

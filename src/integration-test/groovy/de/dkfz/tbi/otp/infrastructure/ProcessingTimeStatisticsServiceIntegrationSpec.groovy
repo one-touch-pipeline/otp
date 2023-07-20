@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -149,8 +149,8 @@ class ProcessingTimeStatisticsServiceIntegrationSpec extends Specification {
         Individual individualB = DomainFactory.createIndividual(project: projectB)
         Sample sampleA = DomainFactory.createSample(individual: individualA)
         Sample sampleB = DomainFactory.createSample(individual: individualB)
-        SeqTrack seqTrackA = DomainFactory.createSeqTrackWithOneDataFile([run: run, sample: sampleA, ilseSubmission: DomainFactory.createIlseSubmission(ilseNumber: 1234)], [fastqImportInstance: fastqImportInstance])
-        SeqTrack seqTrackB = DomainFactory.createSeqTrackWithOneDataFile([run: run, sample: sampleB, ilseSubmission: DomainFactory.createIlseSubmission(ilseNumber: 5678)], [fastqImportInstance: fastqImportInstance])
+        SeqTrack seqTrackA = DomainFactory.createSeqTrackWithOneFastqFile([run: run, sample: sampleA, ilseSubmission: DomainFactory.createIlseSubmission(ilseNumber: 1234)], [fastqImportInstance: fastqImportInstance])
+        SeqTrack seqTrackB = DomainFactory.createSeqTrackWithOneFastqFile([run: run, sample: sampleB, ilseSubmission: DomainFactory.createIlseSubmission(ilseNumber: 5678)], [fastqImportInstance: fastqImportInstance])
 
         when:
         List result = processingTimeStatisticsService.formatData(ticket)
@@ -192,7 +192,7 @@ class ProcessingTimeStatisticsServiceIntegrationSpec extends Specification {
     private static List createOtrsTicketWithSeqTrack(Map otrsTicketProperties = [:], Map seqTrackProperties = [:]) {
         OtrsTicket ticket = DomainFactory.createOtrsTicket(otrsTicketProperties)
         FastqImportInstance fastqImportInstance = DomainFactory.createFastqImportInstance(otrsTicket: ticket)
-        SeqTrack seqTrack = DomainFactory.createSeqTrackWithOneDataFile(seqTrackProperties, [fastqImportInstance: fastqImportInstance])
+        SeqTrack seqTrack = DomainFactory.createSeqTrackWithOneFastqFile(seqTrackProperties, [fastqImportInstance: fastqImportInstance])
 
         return [ticket, seqTrack]
     }

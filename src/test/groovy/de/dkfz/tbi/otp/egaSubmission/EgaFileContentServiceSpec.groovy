@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -38,8 +38,9 @@ class EgaFileContentServiceSpec extends Specification implements EgaSubmissionFa
     Class[] getDomainClassesToMock() {
         [
                 BamFileSubmissionObject,
-                DataFileSubmissionObject,
+                RawSequenceFileSubmissionObject,
                 EgaSubmission,
+                FastqFile,
                 MergingWorkPackage,
                 ReferenceGenomeProjectSeqType,
                 RoddyBamFile,
@@ -47,10 +48,10 @@ class EgaFileContentServiceSpec extends Specification implements EgaSubmissionFa
     }
 
     @Unroll
-    void "createKeyForFastq, when dataFileSubmissionObject is given, then create expected key #expectedKey"() {
+    void "createKeyForFastq, when submission object is given, then create expected key #expectedKey"() {
         given:
-        DataFileSubmissionObject dataFileSubmissionObject = createDataFileSubmissionObject([
-                dataFile: createDataFile([
+        RawSequenceFileSubmissionObject submissionObject = createRawSequenceFileSubmissionObject([
+                sequenceFile: createFastqFile([
                         seqTrack: createSeqTrack([
                                 seqType              : createSeqType([
                                         displayName  : seqTypeDisplayName,
@@ -72,17 +73,17 @@ class EgaFileContentServiceSpec extends Specification implements EgaSubmissionFa
         ])
 
         when:
-        String key = new EgaFileContentService().createKeyForFastq(dataFileSubmissionObject)
+        String key = new EgaFileContentService().createKeyForFastq(submissionObject)
 
         then:
         key == expectedKey
 
         where:
-        seqTypeDisplayName | libraryLayout        | seqPlatformName | seqPlatformModelLabelName | libraryPreparationKitName || expectedKey
-        'seqType'          | SequencingReadType.SINGLE | 'platform' | 'model' | 'kit' || 'seqType-SINGLE-seqType-model-kit'
-        'seqType'          | SequencingReadType.SINGLE | 'platform' | 'model' | null  || 'seqType-SINGLE-seqType-model-unspecified'
-        'seqType'          | SequencingReadType.SINGLE | 'platform' | null    | 'kit' || 'seqType-SINGLE-seqType-unspecified-kit'
-        'seqType'          | SequencingReadType.PAIRED | 'platform' | 'model' | 'kit' || 'seqType-PAIRED-seqType-model-kit'
+        seqTypeDisplayName | libraryLayout             | seqPlatformName | seqPlatformModelLabelName | libraryPreparationKitName || expectedKey
+        'seqType'          | SequencingReadType.SINGLE | 'platform'      | 'model'                   | 'kit'                     || 'seqType-SINGLE-seqType-model-kit'
+        'seqType'          | SequencingReadType.SINGLE | 'platform'      | 'model'                   | null                      || 'seqType-SINGLE-seqType-model-unspecified'
+        'seqType'          | SequencingReadType.SINGLE | 'platform'      | null                      | 'kit'                     || 'seqType-SINGLE-seqType-unspecified-kit'
+        'seqType'          | SequencingReadType.PAIRED | 'platform'      | 'model'                   | 'kit'                     || 'seqType-PAIRED-seqType-model-kit'
     }
 
     @Unroll
@@ -119,11 +120,11 @@ class EgaFileContentServiceSpec extends Specification implements EgaSubmissionFa
         key == expectedKey
 
         where:
-        seqTypeDisplayName | libraryLayout        | seqPlatformName | seqPlatformModelLabelName | libraryPreparationKitName || expectedKey
-        'seqType'          | SequencingReadType.SINGLE | 'platform' | 'model' | 'kit' || 'seqType-SINGLE-seqType-model-kit'
-        'seqType'          | SequencingReadType.SINGLE | 'platform' | 'model' | null  || 'seqType-SINGLE-seqType-model-unspecified'
-        'seqType'          | SequencingReadType.SINGLE | 'platform' | null    | 'kit' || 'seqType-SINGLE-seqType-unspecified-kit'
-        'seqType'          | SequencingReadType.PAIRED | 'platform' | 'model' | 'kit' || 'seqType-PAIRED-seqType-model-kit'
+        seqTypeDisplayName | libraryLayout             | seqPlatformName | seqPlatformModelLabelName | libraryPreparationKitName || expectedKey
+        'seqType'          | SequencingReadType.SINGLE | 'platform'      | 'model'                   | 'kit'                     || 'seqType-SINGLE-seqType-model-kit'
+        'seqType'          | SequencingReadType.SINGLE | 'platform'      | 'model'                   | null                      || 'seqType-SINGLE-seqType-model-unspecified'
+        'seqType'          | SequencingReadType.SINGLE | 'platform'      | null                      | 'kit'                     || 'seqType-SINGLE-seqType-unspecified-kit'
+        'seqType'          | SequencingReadType.PAIRED | 'platform'      | 'model'                   | 'kit'                     || 'seqType-PAIRED-seqType-model-kit'
     }
 
     void "createKeyForBamFile, when bamFileSubmissionObject with multiple seqplatform is given, then create expected key #expectedKey"() {
@@ -258,7 +259,7 @@ class EgaFileContentServiceSpec extends Specification implements EgaSubmissionFa
                 egaAliasName: 'sampleAlias2',
         ])
 
-        List<DataFileSubmissionObject> dataFileSubmissionObjects = [
+        List<RawSequenceFileSubmissionObject> submissionObjects = [
                 [seqTypeSingle1, seqPlatform1, libraryPreparationKit1, 'fileAlias-111-1', sampleSubmissionObject1,],
                 [seqTypeSingle1, seqPlatform1, libraryPreparationKit1, 'fileAlias-111-2', sampleSubmissionObject1,],
                 [seqTypeSingle1, seqPlatform1, libraryPreparationKit1, 'fileAlias-111-3', sampleSubmissionObject1,],
@@ -269,8 +270,8 @@ class EgaFileContentServiceSpec extends Specification implements EgaSubmissionFa
                 [seqTypeSingle2, seqPlatform1, libraryPreparationKit1, 'fileAlias-211-1', sampleSubmissionObject1,],
                 [seqTypeSingle2, seqPlatform2, libraryPreparationKit2, 'fileAlias-222-1', sampleSubmissionObject2,],
         ].collect {
-            createDataFileSubmissionObject([
-                    dataFile              : createDataFile([
+            createRawSequenceFileSubmissionObject([
+                    sequenceFile              : createFastqFile([
                             seqTrack: createSeqTrack([
                                     sample               : sample,
                                     seqType              : it[0],
@@ -285,8 +286,8 @@ class EgaFileContentServiceSpec extends Specification implements EgaSubmissionFa
             ])
         }
 
-        dataFileSubmissionObjects.add(createDataFileSubmissionObject([
-                dataFile: createDataFile([
+        submissionObjects.add(createRawSequenceFileSubmissionObject([
+                sequenceFile: createFastqFile([
                         seqTrack: createSeqTrack([
                                 sample : sample,
                                 seqType: seqTypePaired,
@@ -295,7 +296,7 @@ class EgaFileContentServiceSpec extends Specification implements EgaSubmissionFa
         ]))
 
         EgaSubmission egaSubmission = createEgaSubmission([
-                dataFilesToSubmit: dataFileSubmissionObjects as Set,
+                rawSequenceFilesToSubmit: submissionObjects as Set,
         ])
         Map expectedMap = [
                 ('runs-fastqs-seqtype1-SINGLE-platform1-model1-library1.csv'): '''\
@@ -372,7 +373,7 @@ sampleAlias2,fileAlias-222-1,,
                 egaAliasName: 'sampleAlias2',
         ])
 
-        List<DataFileSubmissionObject> dataFileSubmissionObjects = [
+        List<RawSequenceFileSubmissionObject> submissionObjects = [
                 [seqTypePaired1, seqPlatform1, libraryPreparationKit1, 'fileAlias-111-1-r1', 'fileAlias-111-1-r2', sampleSubmissionObject1,],
                 [seqTypePaired1, seqPlatform1, libraryPreparationKit1, 'fileAlias-111-2-r1', 'fileAlias-111-2-r2', sampleSubmissionObject1,],
                 [seqTypePaired1, seqPlatform1, libraryPreparationKit1, 'fileAlias-111-3-r1', 'fileAlias-111-3-r2', sampleSubmissionObject1,],
@@ -392,15 +393,15 @@ sampleAlias2,fileAlias-222-1,,
                     libraryPreparationKit: it[2],
             ])
             [
-                    createDataFileSubmissionObject([
-                            dataFile              : createDataFile([
+                    createRawSequenceFileSubmissionObject([
+                            sequenceFile              : createFastqFile([
                                     seqTrack: seqTrack,
                             ]),
                             egaAliasName          : it[3],
                             sampleSubmissionObject: it[5],
                     ]),
-                    createDataFileSubmissionObject([
-                            dataFile              : createDataFile([
+                    createRawSequenceFileSubmissionObject([
+                            sequenceFile              : createFastqFile([
                                     seqTrack: seqTrack,
                             ]),
                             egaAliasName          : it[4],
@@ -408,8 +409,8 @@ sampleAlias2,fileAlias-222-1,,
                     ]),
             ]
         }
-        dataFileSubmissionObjects.add(createDataFileSubmissionObject([
-                dataFile: createDataFile([
+        submissionObjects.add(createRawSequenceFileSubmissionObject([
+                sequenceFile: createFastqFile([
                         seqTrack: createSeqTrack([
                                 sample : sample,
                                 seqType: seqTypeSingle,
@@ -418,7 +419,7 @@ sampleAlias2,fileAlias-222-1,,
         ]))
 
         EgaSubmission egaSubmission = createEgaSubmission([
-                dataFilesToSubmit: dataFileSubmissionObjects as Set,
+                rawSequenceFilesToSubmit: submissionObjects as Set,
         ])
 
         Map expectedMap = [

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,7 +25,8 @@ import grails.test.hibernate.HibernateSpec
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.domainFactory.FastqcDomainFactory
-import de.dkfz.tbi.otp.ngsdata.DataFile
+import de.dkfz.tbi.otp.ngsdata.FastqFile
+import de.dkfz.tbi.otp.ngsdata.RawSequenceFile
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 
 class FastqcProcessedFileSpec extends HibernateSpec implements FastqcDomainFactory {
@@ -33,6 +34,7 @@ class FastqcProcessedFileSpec extends HibernateSpec implements FastqcDomainFacto
     @Override
     List<Class> getDomainClasses() {
         return [
+                FastqFile,
                 FastqcProcessedFile,
         ]
     }
@@ -41,12 +43,12 @@ class FastqcProcessedFileSpec extends HibernateSpec implements FastqcDomainFacto
         given:
         String workDir = "workdir"
         SeqTrack seqTrack = createSeqTrack()
-        DataFile dataFile1 = createDataFile([seqTrack: seqTrack])
-        DataFile dataFile2 = createDataFile([seqTrack: seqTrack])
+        RawSequenceFile rawSequenceFile1 = createFastqFile([seqTrack: seqTrack])
+        RawSequenceFile rawSequenceFile2 = createFastqFile([seqTrack: seqTrack])
 
         when:
-        createFastqcProcessedFile(dataFile: dataFile1, workDirectoryName: workDir)
-        createFastqcProcessedFile(dataFile: dataFile2, workDirectoryName: workDir)
+        createFastqcProcessedFile(sequenceFile: rawSequenceFile1, workDirectoryName: workDir)
+        createFastqcProcessedFile(sequenceFile: rawSequenceFile2, workDirectoryName: workDir)
 
         then:
         noExceptionThrown()
@@ -58,12 +60,12 @@ class FastqcProcessedFileSpec extends HibernateSpec implements FastqcDomainFacto
         String otherWorkDir = "otherWorkDir"
 
         SeqTrack seqTrack = createSeqTrack()
-        DataFile dataFile1 = createDataFile([seqTrack: seqTrack])
-        DataFile dataFile2 = createDataFile([seqTrack: seqTrack])
-        createFastqcProcessedFile(dataFile: dataFile1, workDirectoryName: workDir)
+        RawSequenceFile rawSequenceFile1 = createFastqFile([seqTrack: seqTrack])
+        RawSequenceFile rawSequenceFile2 = createFastqFile([seqTrack: seqTrack])
+        createFastqcProcessedFile(sequenceFile: rawSequenceFile1, workDirectoryName: workDir)
 
         when:
-        FastqcProcessedFile fastqcProcessedFile2 = createFastqcProcessedFile(dataFile: dataFile2, workDirectoryName: otherWorkDir, false)
+        FastqcProcessedFile fastqcProcessedFile2 = createFastqcProcessedFile(sequenceFile: rawSequenceFile2, workDirectoryName: otherWorkDir, false)
 
         then:
         TestCase.assertValidateError(fastqcProcessedFile2, "workDirectoryName", "fastqcProcessedFile.workDirectoryName.differ")

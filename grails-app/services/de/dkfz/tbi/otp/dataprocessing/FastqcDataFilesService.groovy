@@ -61,7 +61,7 @@ class FastqcDataFilesService {
         if (options.contains(PathOption.REAL_PATH) && fastqcProcessedFile.workflowArtefact.producedBy.workFolder) {
             return filestoreService.getWorkFolderPath(fastqcProcessedFile.workflowArtefact.producedBy)
         }
-        Path baseString = lsdfFilesService.getRunDirectory(fastqcProcessedFile.dataFile)
+        Path baseString = lsdfFilesService.getRunDirectory(fastqcProcessedFile.sequenceFile)
         return baseString.resolve(FAST_QC_DIRECTORY_PART).resolve(fastqcProcessedFile.workDirectoryName)
     }
 
@@ -85,7 +85,7 @@ class FastqcDataFilesService {
     }
 
     private String fastqcFileNameWithoutZipSuffix(FastqcProcessedFile fastqcProcessedFile) {
-        return fastqcFileNameWithoutZipSuffix(inputFileNameAdaption(fastqcProcessedFile.dataFile.fileName))
+        return fastqcFileNameWithoutZipSuffix(inputFileNameAdaption(fastqcProcessedFile.sequenceFile.fileName))
     }
 
     /**
@@ -149,7 +149,6 @@ class FastqcDataFilesService {
 
     /**
      * Returns an inputStream from the contents of a fastqc zip file
-     * @param dataFile The dataFile the zip file belongs to
      * @param withinZipPath Path to the resource within the zip file
      * @return An inputStream for the combination of zipPath and the withinZipPath parameters
      */
@@ -170,20 +169,20 @@ class FastqcDataFilesService {
 
     /**
      * Returns an inputStream from the contents of a fastqc zip file
-     * @param dataFile The dataFile the zip file belongs to
+     * @param rawSequenceFile The sequenceFile the zip file belongs to
      * @param withinZipPath Path to the resource within the zip file
      * @return An inputStream for the combination of zipPath and the withinZipPath parameters
      *
      * @Deprecated Please use {@link #fastqcFileNameWithoutZipSuffix(FastqcProcessedFile)}}
      */
     @Deprecated
-    InputStream getInputStreamFromZipFile(DataFile dataFile, String withinZipPath) {
-        return getInputStreamFromZipFile(CollectionUtils.atMostOneElement(FastqcProcessedFile.findAllByDataFile(dataFile)), withinZipPath)
+    InputStream getInputStreamFromZipFile(RawSequenceFile rawSequenceFile, String withinZipPath) {
+        return getInputStreamFromZipFile(CollectionUtils.atMostOneElement(FastqcProcessedFile.findAllBySequenceFile(rawSequenceFile)), withinZipPath)
     }
 
     Path pathToFastQcResultFromSeqCenter(FastqcProcessedFile fastqcProcessedFile) {
         FileSystem fileSystem = fileSystemService.remoteFileSystemOnDefaultRealm
-        String initialPath = fastqcProcessedFile.dataFile.initialDirectory
+        String initialPath = fastqcProcessedFile.sequenceFile.initialDirectory
         String fastqcFileName = fastqcFileName(fastqcProcessedFile)
         return fileSystem.getPath(initialPath, fastqcFileName)
     }

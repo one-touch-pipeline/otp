@@ -43,7 +43,7 @@ class MergingPreventionServiceSpec extends Specification implements DataTest, Do
     Class[] getDomainClassesToMock() {
         return [
                 CellRangerMergingWorkPackage,
-                DataFile,
+                RawSequenceFile,
                 MergingWorkPackage,
                 ProcessingOption,
                 SampleIdentifier,

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -59,7 +59,7 @@ class UpdateSubmissionStateSubmitCommand implements Validateable {
                 if (!obj.submission.samplesToSubmit) {
                     return 'no.samples'
                 }
-                if (!obj.submission.bamFilesToSubmit && !obj.submission.dataFilesToSubmit) {
+                if (!obj.submission.bamFilesToSubmit && !obj.submission.rawSequenceFilesToSubmit) {
                     return 'no.files'
                 }
             }
@@ -138,7 +138,7 @@ class SampleInformationFormsSubmitCommand implements Validateable {
 }
 
 @CompileDynamic
-class SelectFilesDataFilesFormSubmitCommand implements Validateable {
+class SelectFilesRawSequenceFilesFormSubmitCommand implements Validateable {
     EgaSubmission submission
     String saveSelection
     String download

@@ -30,7 +30,8 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.domainFactory.FastqcDomainFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.FastqcWorkflowDomainFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
-import de.dkfz.tbi.otp.ngsdata.DataFile
+import de.dkfz.tbi.otp.ngsdata.FastqFile
+import de.dkfz.tbi.otp.ngsdata.RawSequenceFile
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.workflow.fastqc.BashFastQcWorkflow
@@ -51,6 +52,7 @@ class FastqcDeciderSpec extends Specification implements DataTest, WorkflowSyste
     @Override
     Class[] getDomainClassesToMock() {
         return [
+                FastqFile,
                 FastqcProcessedFile,
                 WorkflowRunInputArtefact,
                 WorkflowVersionSelector,
@@ -73,12 +75,12 @@ class FastqcDeciderSpec extends Specification implements DataTest, WorkflowSyste
         WorkflowArtefact workflowArtefact = createWorkflowArtefact([
                 artefactType: ArtefactType.FASTQ,
         ])
-        SeqTrack seqTrack = createSeqTrackWithTwoDataFile([
+        SeqTrack seqTrack = createSeqTrackWithTwoFastqFile([
                 workflowArtefact: workflowArtefact
         ])
         FastqcArtefactData<SeqTrack> fastqcArtefactData = new FastqcArtefactData<SeqTrack>(workflowArtefact, seqTrack, seqTrack.project)
 
-        Map<SeqTrack, List<DataFile>> dataFileMap = seqTrack.dataFiles.groupBy {
+        Map<SeqTrack, List<RawSequenceFile>> rawSequenceFileMap = seqTrack.sequenceFiles.groupBy {
             it.seqTrack
         }
 
@@ -92,7 +94,7 @@ class FastqcDeciderSpec extends Specification implements DataTest, WorkflowSyste
         createServicesForCreateWorkflowRunsAndOutputArtefacts(usedVersion, seqTrack)
         decider.fastqcArtefactService = Mock(FastqcArtefactService) {
             1 * fetchSeqTrackArtefacts([workflowArtefact]) >> [fastqcArtefactData]
-            1 * fetchDataFiles([seqTrack]) >> dataFileMap
+            1 * fetchRawSequenceFiles([seqTrack]) >> rawSequenceFileMap
             1 * fetchRelatedFastqcArtefactsForSeqTracks([seqTrack]) >> []
             1 * fetchWorkflowVersionSelectorForSeqTracks([seqTrack], _) >> [selector]
             0 * _
@@ -155,19 +157,19 @@ class FastqcDeciderSpec extends Specification implements DataTest, WorkflowSyste
         WorkflowArtefact workflowArtefact = createWorkflowArtefact([
                 artefactType: ArtefactType.FASTQ,
         ])
-        SeqTrack seqTrack = createSeqTrackWithTwoDataFile([
+        SeqTrack seqTrack = createSeqTrackWithTwoFastqFile([
                 workflowArtefact: workflowArtefact
         ])
         FastqcArtefactData<SeqTrack> fastqcArtefactData = new FastqcArtefactData<SeqTrack>(workflowArtefact, seqTrack, seqTrack.project)
 
-        Map<SeqTrack, List<DataFile>> dataFileMap = seqTrack.dataFiles.groupBy {
+        Map<SeqTrack, List<RawSequenceFile>> rawSequenceFileMap = seqTrack.sequenceFiles.groupBy {
             it.seqTrack
         }
 
         and: 'services'
         decider.fastqcArtefactService = Mock(FastqcArtefactService) {
             1 * fetchSeqTrackArtefacts([workflowArtefact]) >> [fastqcArtefactData]
-            1 * fetchDataFiles([seqTrack]) >> dataFileMap
+            1 * fetchRawSequenceFiles([seqTrack]) >> rawSequenceFileMap
             1 * fetchRelatedFastqcArtefactsForSeqTracks([seqTrack]) >> []
             1 * fetchWorkflowVersionSelectorForSeqTracks([seqTrack], _) >> []
             0 * _
@@ -200,12 +202,12 @@ class FastqcDeciderSpec extends Specification implements DataTest, WorkflowSyste
         WorkflowArtefact workflowArtefact = createWorkflowArtefact([
                 artefactType: ArtefactType.FASTQ,
         ])
-        SeqTrack seqTrack = createSeqTrackWithTwoDataFile([
+        SeqTrack seqTrack = createSeqTrackWithTwoFastqFile([
                 workflowArtefact: workflowArtefact
         ])
         FastqcArtefactData<SeqTrack> fastqcArtefactData = new FastqcArtefactData<SeqTrack>(workflowArtefact, seqTrack, seqTrack.project)
 
-        Map<SeqTrack, List<DataFile>> dataFileMap = seqTrack.dataFiles.groupBy {
+        Map<SeqTrack, List<RawSequenceFile>> rawSequenceFileMap = seqTrack.sequenceFiles.groupBy {
             it.seqTrack
         }
 
@@ -219,7 +221,7 @@ class FastqcDeciderSpec extends Specification implements DataTest, WorkflowSyste
         createServicesForCreateWorkflowRunsAndOutputArtefacts(usedVersion, seqTrack)
 
         when:
-        DeciderResult deciderResult = decider.createWorkflowRunsAndOutputArtefacts(fastqcArtefactData, [], dataFileMap, selector)
+        DeciderResult deciderResult = decider.createWorkflowRunsAndOutputArtefacts(fastqcArtefactData, [], rawSequenceFileMap, selector)
 
         then:
         deciderResult.newArtefacts.size() == 2
@@ -239,7 +241,7 @@ class FastqcDeciderSpec extends Specification implements DataTest, WorkflowSyste
 
         List<FastqcProcessedFile> fastqcProcessedFiles = FastqcProcessedFile.list()
         fastqcProcessedFiles.size() == 2
-        TestCase.assertContainSame(fastqcProcessedFiles*.dataFile, seqTrack.dataFiles)
+        TestCase.assertContainSame(fastqcProcessedFiles*.sequenceFile, seqTrack.sequenceFiles)
 
         where:
         name   | useWes
@@ -255,23 +257,23 @@ class FastqcDeciderSpec extends Specification implements DataTest, WorkflowSyste
         WorkflowArtefact workflowArtefact = createWorkflowArtefact([
                 artefactType: ArtefactType.FASTQ,
         ])
-        SeqTrack seqTrack = createSeqTrackWithTwoDataFile([
+        SeqTrack seqTrack = createSeqTrackWithTwoFastqFile([
                 workflowArtefact: workflowArtefact
         ])
         FastqcArtefactData<SeqTrack> fastqcArtefactDataSeqTrack = new FastqcArtefactData<SeqTrack>(workflowArtefact, seqTrack, seqTrack.project)
 
-        Map<SeqTrack, List<DataFile>> dataFileMap = seqTrack.dataFiles.groupBy {
+        Map<SeqTrack, List<RawSequenceFile>> rawSequenceFileMap = seqTrack.sequenceFiles.groupBy {
             it.seqTrack
         }
 
-        List<FastqcArtefactData> fastqcArtefactDataFasqc = seqTrack.dataFiles.collect {
+        List<FastqcArtefactData> fastqcArtefactDataFasqc = seqTrack.sequenceFiles.collect {
             FastqcProcessedFile fastqcProcessedFile = createFastqcProcessedFile([
-                    dataFile        : it,
+                    sequenceFile    : it,
                     workflowArtefact: createWorkflowArtefact([
                             artefactType: ArtefactType.FASTQC,
                     ]),
             ])
-            new FastqcArtefactData<FastqcProcessedFile>(fastqcProcessedFile.workflowArtefact, fastqcProcessedFile, fastqcProcessedFile.dataFile.project)
+            new FastqcArtefactData<FastqcProcessedFile>(fastqcProcessedFile.workflowArtefact, fastqcProcessedFile, fastqcProcessedFile.sequenceFile.project)
         }
 
         WorkflowVersionSelector selector = createWorkflowVersionSelector([
@@ -281,7 +283,7 @@ class FastqcDeciderSpec extends Specification implements DataTest, WorkflowSyste
         ])
 
         when:
-        DeciderResult deciderResult = decider.createWorkflowRunsAndOutputArtefacts(fastqcArtefactDataSeqTrack, fastqcArtefactDataFasqc, dataFileMap, selector)
+        DeciderResult deciderResult = decider.createWorkflowRunsAndOutputArtefacts(fastqcArtefactDataSeqTrack, fastqcArtefactDataFasqc, rawSequenceFileMap, selector)
 
         then:
         deciderResult.newArtefacts.empty

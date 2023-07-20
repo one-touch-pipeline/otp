@@ -42,7 +42,7 @@
                 <g:link controller="metadataImport" action="details"
                         id="${importInstance.id}">${importInstance.id}</g:link>, imported on ${importInstance.dateCreated}
                 <ul>
-                    <g:each var="entry" in="${importInstance.dataFiles.groupBy { it.seqTrack?.project ?: it.project }}">
+                    <g:each var="entry" in="${importInstance.sequenceFiles.groupBy { it.seqTrack?.project ?: it.project }}">
                         <li><g:message code="notification.notificationPreview.import.import.projectWithDataFiles"
                                        args="[entry.key.name, entry.value.size()]"/></li>
                     </g:each>

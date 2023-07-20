@@ -27,14 +27,14 @@ import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.utils.Entity
 
 /**
- * An import of one or more {@linkplain MetaDataFile}s and {@linkplain DataFile}s.
+ * An import of one or more {@linkplain MetaDataFile}s and {@linkplain RawSequenceFile}s.
  */
 @ManagedEntity
 class FastqImportInstance implements Entity {
 
-    Set<DataFile> dataFiles
+    Set<RawSequenceFile> sequenceFiles
     static hasMany = [
-            dataFiles: DataFile,
+            sequenceFiles: RawSequenceFile,
     ]
 
     OtrsTicket otrsTicket

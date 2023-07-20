@@ -353,7 +353,7 @@ class MetadataImportService {
 
         Long timeGeneratedThresholds = System.currentTimeMillis()
         log.debug("  generatedThresholds started")
-        List<SeqTrack> analysableSeqTracks = SeqTrackService.getAnalysableSeqTracks((fastqImportInstance.dataFiles*.seqTrack as List).unique())
+        List<SeqTrack> analysableSeqTracks = SeqTrackService.getAnalysableSeqTracks((fastqImportInstance.sequenceFiles*.seqTrack as List).unique())
         List<ProcessingThresholds> generatedThresholds = processingThresholdsService.generateDefaultThresholds(analysableSeqTracks)
         notifyAboutUnsetConfig(analysableSeqTracks, generatedThresholds, fastqImportInstance.otrsTicket)
         log.debug("  generatedThresholds stopped took: ${System.currentTimeMillis() - timeGeneratedThresholds}")
@@ -588,12 +588,12 @@ class MetadataImportService {
             String mate = matcher.group('number')
             boolean indexFile = matcher.group('index')
 
-            DataFile dataFile = new DataFile(
+            RawSequenceFile dataFile = new FastqFile(
                     pathName: '',
                     fileName: file.fileName.toString(),
                     initialDirectory: file.parent.toString(),
                     vbpFileName: file.fileName.toString(),
-                    md5sum: row.getCellByColumnTitle(MD5.name()).text.toLowerCase(Locale.ENGLISH),
+                    fastqMd5sum: row.getCellByColumnTitle(MD5.name()).text.toLowerCase(Locale.ENGLISH),
                     project: seqTrack.project,
                     dateExecuted: seqTrack.run.dateExecuted,
                     used: true,
@@ -612,7 +612,7 @@ class MetadataImportService {
         }
     }
 
-    private static void importMetadataEntries(MetadataValidationContext context, DataFile dataFile, Row row) {
+    private static void importMetadataEntries(MetadataValidationContext context, RawSequenceFile dataFile, Row row) {
         for (Cell it : context.spreadsheet.header.cells) {
             MetaDataKey metaDataKey = CollectionUtils.atMostOneElement(MetaDataKey.findAllWhere(name: it.text))
             if (!metaDataKey) {
@@ -620,7 +620,7 @@ class MetadataImportService {
                 metaDataKey.save(flush: true)
             }
             new MetaDataEntry(
-                    dataFile: dataFile,
+                    sequenceFile: dataFile,
                     key: metaDataKey,
                     value: row.cells[it.columnIndex].text,
             ).save(flush: false)

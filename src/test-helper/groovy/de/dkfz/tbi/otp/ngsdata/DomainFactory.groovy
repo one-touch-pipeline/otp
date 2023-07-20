@@ -494,7 +494,7 @@ class DomainFactory {
                 identifier         : baseBamFile.identifier + 1,
                 numberOfMergedLanes: baseBamFile.numberOfMergedLanes + 1,
                 workDirectoryName  : "${RoddyBamFile.WORK_DIR_PREFIX}_${counter++}",
-                seqTracks          : bamFileProperties.seqTracks ?: [createSeqTrackWithDataFiles(baseBamFile.workPackage)],
+                seqTracks          : bamFileProperties.seqTracks ?: [createSeqTrackWithFastqFiles(baseBamFile.workPackage)],
                 md5sum             : HelperUtils.randomMd5sum,
                 fileOperationStatus: FileOperationStatus.PROCESSED,
                 fileSize           : 10000,
@@ -1410,8 +1410,8 @@ class DomainFactory {
     }
 
     @Deprecated
-    static DataFile createDataFile(Map properties = [:], boolean saveAndValidate = true) {
-        return proxyCore.createDataFile(properties, saveAndValidate)
+    static RawSequenceFile createFastqFile(Map properties = [:], boolean saveAndValidate = true) {
+        return proxyCore.createFastqFile(properties, saveAndValidate)
     }
 
     static private Map createRoddyWorkflowConfigMapHelper(Map properties = [:]) {
@@ -1485,15 +1485,15 @@ class DomainFactory {
         return properties
     }
 
-    static SeqTrack createSeqTrackWithDataFiles(MergingWorkPackage mergingWorkPackage, Map seqTrackProperties = [:], Map dataFileProperties = [:]) {
+    static SeqTrack createSeqTrackWithFastqFiles(MergingWorkPackage mergingWorkPackage, Map seqTrackProperties = [:], Map fastqFileProperties = [:]) {
         Map map = getMergingProperties(mergingWorkPackage) + [
                 kitInfoReliability: mergingWorkPackage.libraryPreparationKit ? InformationReliability.KNOWN : InformationReliability.UNKNOWN_UNVERIFIED,
         ] + seqTrackProperties
         SeqTrack seqTrack
         if (mergingWorkPackage.seqType.libraryLayout == SequencingReadType.PAIRED) {
-            seqTrack = createSeqTrackWithTwoDataFiles(map, dataFileProperties, dataFileProperties)
+            seqTrack = createSeqTrackWithTwoFastqFiles(map, fastqFileProperties, fastqFileProperties)
         } else {
-            seqTrack = createSeqTrackWithOneDataFile(map, dataFileProperties)
+            seqTrack = createSeqTrackWithOneFastqFile(map, fastqFileProperties)
         }
 
         createMergingCriteriaLazy(project: seqTrack.project, seqType: seqTrack.seqType)
@@ -1506,15 +1506,15 @@ class DomainFactory {
     }
 
     @Deprecated
-    static SeqTrack createSeqTrackWithOneDataFile(Map seqTrackProperties = [:], Map dataFileProperties = [:]) {
-        return proxyCore.createSeqTrackWithOneDataFile(seqTrackProperties, dataFileProperties)
+    static SeqTrack createSeqTrackWithOneFastqFile(Map seqTrackProperties = [:], Map fastqFileProperties = [:]) {
+        return proxyCore.createSeqTrackWithOneFastqFile(seqTrackProperties, fastqFileProperties)
     }
 
-    static SeqTrack createSeqTrackWithTwoDataFiles(MergingWorkPackage mergingWorkPackage, Map seqTrackProperties = [:], Map dataFileProperties1 = [:], Map dataFileProperties2 = [:]) {
-        return createSeqTrackWithTwoDataFiles(getMergingProperties(mergingWorkPackage) + seqTrackProperties, dataFileProperties1, dataFileProperties2)
+    static SeqTrack createSeqTrackWithTwoFastqFiles(MergingWorkPackage mergingWorkPackage, Map seqTrackProperties = [:], Map fastqFileProperties1 = [:], Map fastqFileProperties2 = [:]) {
+        return createSeqTrackWithTwoFastqFiles(getMergingProperties(mergingWorkPackage) + seqTrackProperties, fastqFileProperties1, fastqFileProperties2)
     }
 
-    static SeqTrack createSeqTrackWithTwoDataFiles(Map seqTrackProperties = [:], Map dataFileProperties1 = [:], Map dataFileProperties2 = [:]) {
+    static SeqTrack createSeqTrackWithTwoFastqFiles(Map seqTrackProperties = [:], Map fastqFileProperties1 = [:], Map fastqFileProperties2 = [:]) {
         FileType fileType = createFileType()
         Map defaultMap1 = [
                 fileName   : 'DataFileFileName_R1.gz',
@@ -1528,13 +1528,13 @@ class DomainFactory {
                 fileType   : fileType,
                 mateNumber : 2,
         ]
-        SeqTrack seqTrack = createSeqTrackWithOneDataFile([seqType: createSeqType(libraryLayout: SequencingReadType.PAIRED)] + seqTrackProperties, defaultMap1 + dataFileProperties1)
-        createSequenceDataFile(defaultMap2 + dataFileProperties2 + [seqTrack: seqTrack])
+        SeqTrack seqTrack = createSeqTrackWithOneFastqFile([seqType: createSeqType(libraryLayout: SequencingReadType.PAIRED)] + seqTrackProperties, defaultMap1 + fastqFileProperties1)
+        createSequenceDataFile(defaultMap2 + fastqFileProperties2 + [seqTrack: seqTrack])
         return seqTrack
     }
 
     @Deprecated
-    static DataFile createSequenceDataFile(final Map properties = [:]) {
+    static RawSequenceFile createSequenceDataFile(final Map properties = [:]) {
         return proxyCore.createSequenceDataFile(properties)
     }
 
@@ -1808,24 +1808,24 @@ class DomainFactory {
 
     static MetaDataEntry createMetaDataEntry(Map properties = [:]) {
         return createDomainObject(MetaDataEntry, [
-                value   : "value_${counter++}",
-                dataFile: { createDataFile() },
-                key     : { createMetaDataKey() },
+                value       : "value_${counter++}",
+                sequenceFile: { createFastqFile() },
+                key         : { createMetaDataKey() },
         ], properties)
     }
 
-    static MetaDataEntry createMetaDataKeyAndEntry(DataFile dataFile, String key, String value) {
+    static MetaDataEntry createMetaDataKeyAndEntry(RawSequenceFile sequenceFile, String key, String value) {
         MetaDataKey metaDataKey = createMetaDataKeyLazy(name: key)
 
         return createMetaDataEntry(
                 value: value,
-                dataFile: dataFile,
+                sequenceFile: sequenceFile,
                 key: metaDataKey,
         )
     }
 
-    static MetaDataEntry createMetaDataKeyAndEntry(DataFile dataFile, MetaDataColumn key, String value) {
-        return createMetaDataKeyAndEntry(dataFile, key.name(), value)
+    static MetaDataEntry createMetaDataKeyAndEntry(RawSequenceFile sequenceFile, MetaDataColumn key, String value) {
+        return createMetaDataKeyAndEntry(sequenceFile, key.name(), value)
     }
 
     static MetaDataFile createMetaDataFile(Map properties = [:]) {

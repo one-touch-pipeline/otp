@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -226,12 +226,12 @@ List<SeqTrack> seqTracksSampleIdentifier = selectBySampleName.split('\n')*.trim(
 List<SeqTrack> seqTracksPerMd5sum = selectByMd5Sum.split('\n')*.trim().findAll {
     it && !it.startsWith('#')
 }.collectMany {
-    List<DataFile> dataFiles = exportWithdrawn ? DataFile.findAllByMd5sum(it) : DataFile.findAllByMd5sumAndFileWithdrawn(it, exportWithdrawn)
+    List<RawSequenceFile> rawSequenceFiles = exportWithdrawn ? RawSequenceFile.findAllByFastqMd5sum(it) : RawSequenceFile.findAllByFastqMd5sumAndFileWithdrawn(it, exportWithdrawn)
 
-    if (!dataFiles) {
+    if (!rawSequenceFiles) {
         throw new AssertionError("Could not find any datafile with the md5sum ${it}")
     }
-    return dataFiles*.seqTrack
+    return rawSequenceFiles*.seqTrack
 }
 
 List<SampleType> sampleTypes = parseHelper(filterBySampleType, 'SampleTYpe') {
@@ -309,7 +309,7 @@ if (seqTrackPerMultiImport && seqTypes && !seqTypes.containsAll(seqTrackPerMulti
 //=============================================
 // work area
 
-Collection<DataFile> dataFiles = DataFile.createCriteria().list {
+Collection<RawSequenceFile> rawSequenceFiles = RawSequenceFile.createCriteria().list {
     if (!exportWithdrawn) {
         eq('fileWithdrawn', false)
     }
@@ -366,8 +366,8 @@ Collection<DataFile> dataFiles = DataFile.createCriteria().list {
     order('fileName')
 }
 
-if (dataFiles) {
-    println "Found ${dataFiles.size()} lanes"
+if (rawSequenceFiles) {
+    println "Found ${rawSequenceFiles.size()} lanes"
 } else {
     throw new OtpRuntimeException("Could not find any Datafiles for the Criteria.")
 }
@@ -380,16 +380,16 @@ class MetaDataExport {
     ProcessingOptionService processingOptionService
 
     /**
-     * Creates a TSV file containing the metadata of the specified {@linkplain DataFile}s.
+     * Creates a TSV file containing the metadata of the specified {@linkplain RawSequenceFile}s.
      * The output file has a format which is processable by the {@linkplain MetadataImportService}.
      */
-    void writeMetadata(Collection<DataFile> dataFiles, Path metadataOutputFile, boolean exportOnlyWhiteListedColumns) {
-        metadataOutputFile.bytes = getMetadata(dataFiles, exportOnlyWhiteListedColumns).getBytes(StandardCharsets.UTF_8)
+    void writeMetadata(Collection<RawSequenceFile> rawSequenceFiles, Path metadataOutputFile, boolean exportOnlyWhiteListedColumns) {
+        metadataOutputFile.bytes = getMetadata(rawSequenceFiles, exportOnlyWhiteListedColumns).getBytes(StandardCharsets.UTF_8)
     }
 
-    String getMetadata(Collection<DataFile> dataFiles, boolean exportOnlyWhiteListedColumns) {
+    String getMetadata(Collection<RawSequenceFile> rawSequenceFiles, boolean exportOnlyWhiteListedColumns) {
         MetaDataKey.list()
-        Collection<Map<String, String>> allProperties = dataFiles.collect { getMetadata(it) }
+        Collection<Map<String, String>> allProperties = rawSequenceFiles.collect { getMetadata(it) }
         List<String> allColumnsList = MetaDataColumn.values()*.name() + (allProperties*.keySet().sum() as List<String>).sort().unique() as List<String>
         List<String> headers = []
         if (exportOnlyWhiteListedColumns) {
@@ -414,9 +414,9 @@ class MetaDataExport {
         return s.toString()
     }
 
-    Map<String, String> getMetadata(DataFile dataFile) {
+    Map<String, String> getMetadata(RawSequenceFile rawSequenceFile) {
         Map<String, String> properties = [:]
-        MetaDataEntry.findAllByDataFile(dataFile).each {
+        MetaDataEntry.findAllBySequenceFile(rawSequenceFile).each {
             properties.put(it.key.name, it.value)
         }
 
@@ -426,17 +426,17 @@ class MetaDataExport {
             }
         }
 
-        put(FASTQ_FILE, lsdfFilesService.getFileFinalPath(dataFile).replaceAll('//+', '/'))
-        put(MD5, dataFile.md5sum)
-        put(READ, (dataFile.indexFile ? 'I' : '') + dataFile.mateNumber?.toString())
-        put(WITHDRAWN, dataFile.fileWithdrawn ? '1' : null)
-        put(WITHDRAWN_DATE, TimeFormats.DATE.getFormattedDate(dataFile.withdrawnDate))
-        put(WITHDRAWN_COMMENT, dataFile.withdrawnComment?.trim()?.replace("\t", ", ")?.replace("\n", "; "))
+        put(FASTQ_FILE, lsdfFilesService.getFileFinalPath(rawSequenceFile).replaceAll('//+', '/'))
+        put(MD5, rawSequenceFile.fastqMd5sum)
+        put(READ, (rawSequenceFile.indexFile ? 'I' : '') + rawSequenceFile.mateNumber?.toString())
+        put(WITHDRAWN, rawSequenceFile.fileWithdrawn ? '1' : null)
+        put(WITHDRAWN_DATE, TimeFormats.DATE.getFormattedDate(rawSequenceFile.withdrawnDate))
+        put(WITHDRAWN_COMMENT, rawSequenceFile.withdrawnComment?.trim()?.replace("\t", ", ")?.replace("\n", "; "))
 
         //export, if the fastq file is available or is a dead link. It use the cached flag in the database.
-        put(FILE_EXISTS, dataFile.fileExists.toString())
+        put(FILE_EXISTS, rawSequenceFile.fileExists.toString())
 
-        Run run = dataFile.run
+        Run run = rawSequenceFile.run
         put(RUN_ID, run.name)
         put(RUN_DATE, TimeFormats.DATE.getFormattedDate(run.dateExecuted))
         put(CENTER_NAME, run.seqCenter.name)
@@ -444,7 +444,7 @@ class MetaDataExport {
         put(INSTRUMENT_MODEL, run.seqPlatform.seqPlatformModelLabel?.name)
         put(SEQUENCING_KIT, run.seqPlatform.sequencingKitLabel?.name)
 
-        SeqTrack seqTrack = dataFile.seqTrack
+        SeqTrack seqTrack = rawSequenceFile.seqTrack
         String[] laneId = seqTrack.laneId.split('_', 2)
         put(LANE_NO, laneId[0])
         put(INDEX, laneId.length > 1 ? laneId[1] : null)
@@ -470,10 +470,10 @@ class MetaDataExport {
         put(SWAPPED, seqTrack.swapped.toString())
 
         List<SpeciesWithStrain> speciesList = []
-        if (dataFile.individual.species) {
-            speciesList.add(dataFile.individual.species)
-            if (dataFile.sample.mixedInSpecies) {
-                speciesList.addAll(dataFile.sample.mixedInSpecies.unique())
+        if (rawSequenceFile.individual.species) {
+            speciesList.add(rawSequenceFile.individual.species)
+            if (rawSequenceFile.sample.mixedInSpecies) {
+                speciesList.addAll(rawSequenceFile.sample.mixedInSpecies.unique())
             }
         }
         put(SPECIES, speciesList ? speciesList*.importAlias*.first().join(' + ') : '')
@@ -485,7 +485,7 @@ class MetaDataExport {
         return all.contains(preferred) ? preferred : all.max { it.length() }
     }
 
-    Path handleCreationOfMetadataFile(Collection<DataFile> dataFiles, String fileName, boolean overwriteExisting, boolean exportOnlyWhiteListedColumns) {
+    Path handleCreationOfMetadataFile(Collection<RawSequenceFile> rawSequenceFiles, String fileName, boolean overwriteExisting, boolean exportOnlyWhiteListedColumns) {
         assert fileName: 'No file name given, but this is required'
         assert !fileName.contains(' '): 'File name contains spaces, which is not allowed'
 
@@ -514,7 +514,7 @@ class MetaDataExport {
 
         fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(outputFile.parent, realm)
 
-        writeMetadata(dataFiles, outputFile, exportOnlyWhiteListedColumns)
+        writeMetadata(rawSequenceFiles, outputFile, exportOnlyWhiteListedColumns)
         fileService.setPermission(outputFile, [
                 PosixFilePermission.OWNER_READ,
                 PosixFilePermission.OWNER_WRITE,
@@ -535,6 +535,6 @@ MetaDataExport metaDataExport = new MetaDataExport([
         processingOptionService: ctx.processingOptionService,
 ])
 
-Path file = metaDataExport.handleCreationOfMetadataFile(dataFiles, fileName, overwriteExisting, exportOnlyWhiteListedColumns)
+Path file = metaDataExport.handleCreationOfMetadataFile(rawSequenceFiles, fileName, overwriteExisting, exportOnlyWhiteListedColumns)
 
 println "Metadata exported to ${file}"

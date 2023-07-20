@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -34,7 +34,8 @@ class FastqImportInstanceServiceHibernateSpec extends HibernateSpec implements S
     @Override
     List<Class> getDomainClasses() {
         return [
-                DataFile,
+                RawSequenceFile,
+                FastqFile,
                 FastqImportInstance,
         ]
     }
@@ -114,8 +115,8 @@ class FastqImportInstanceServiceHibernateSpec extends HibernateSpec implements S
         FastqImportInstance fastqImportInstance = createFastqImportInstance([
                 state: state,
         ])
-        fastqImportInstance.dataFiles = projectNames.collect { String projectName ->
-            createDataFile([
+        fastqImportInstance.sequenceFiles = projectNames.collect { String projectName ->
+            createFastqFile([
                     fastqImportInstance: fastqImportInstance,
                     seqTrack           : createSeqTrack([
                             sample: createSample([

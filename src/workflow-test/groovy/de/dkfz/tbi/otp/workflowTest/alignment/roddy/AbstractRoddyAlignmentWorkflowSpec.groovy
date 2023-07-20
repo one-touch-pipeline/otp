@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -337,9 +337,9 @@ abstract class AbstractRoddyAlignmentWorkflowSpec extends AbstractAlignmentWorkf
         ] + properties)
         log.info("Create seqTrack ${seqTrack}")
 
-        List<DataFile> dataFiles = (1..seqType.libraryLayout.mateCount).collect { int index ->
+        List<RawSequenceFile> rawSequenceFiles = (1..seqType.libraryLayout.mateCount).collect { int index ->
             String fileName = "fastq_${seqTrack.individual.pid}_${seqTrack.sampleType.name}_${seqTrack.laneId}_${index}.fastq.gz"
-            DataFile dataFile = createDataFile([
+            RawSequenceFile rawSequenceFile = createFastqFile([
                     seqTrack           : seqTrack,
                     mateNumber         : index,
                     vbpFileName        : fileName,
@@ -347,16 +347,16 @@ abstract class AbstractRoddyAlignmentWorkflowSpec extends AbstractAlignmentWorkf
                     nReads             : NUMBER_OF_READS,
                     fastqImportInstance: fastqImportInstance,
             ])
-            log.info("Create dataFile ${dataFile}")
-            return dataFile
+            log.info("Create sequenceFile ${rawSequenceFile}")
+            return rawSequenceFile
         }
         createWorkflowArtefacts(workflowDataInstallation, seqTrack, ArtefactType.FASTQ)
         log.info("Create workflow artefact for seqTrack")
 
         if (isFastQcRequired()) {
-            List<FastqcProcessedFile> fastqcProcessedFiles = dataFiles.collect { DataFile dataFile ->
+            List<FastqcProcessedFile> fastqcProcessedFiles = rawSequenceFiles.collect { RawSequenceFile rawSequenceFile ->
                 createFastqcProcessedFile([
-                        dataFile         : dataFile,
+                        sequenceFile     : rawSequenceFile,
                         workDirectoryName: "workDirectoryName",
                 ])
             }
@@ -574,9 +574,9 @@ abstract class AbstractRoddyAlignmentWorkflowSpec extends AbstractAlignmentWorkf
     }
 
     protected void verifyInputIsNotDeleted() {
-        DataFile.list().each { DataFile dataFile ->
-            FileAssertHelper.assertFileIsReadableAndNotEmpty(lsdfFilesService.getFileFinalPathAsPath(dataFile))
-            FileAssertHelper.assertFileIsReadableAndNotEmpty(lsdfFilesService.getFileViewByPidPathAsPath(dataFile))
+        RawSequenceFile.list().each { RawSequenceFile rawSequenceFile ->
+            FileAssertHelper.assertFileIsReadableAndNotEmpty(lsdfFilesService.getFileFinalPathAsPath(rawSequenceFile))
+            FileAssertHelper.assertFileIsReadableAndNotEmpty(lsdfFilesService.getFileViewByPidPathAsPath(rawSequenceFile))
         }
     }
 

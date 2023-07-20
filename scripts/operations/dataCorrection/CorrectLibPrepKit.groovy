@@ -100,8 +100,8 @@ SeqTrack.withTransaction {
             println "Change:\t$seqTrack  ${seqTrack.libraryPreparationKit}"
             seqTrack.libraryPreparationKit = libraryPreparationKit
             seqTrack.kitInfoReliability = InformationReliability.KNOWN
-            DataFile.findAllBySeqTrack(seqTrack).each {
-                MetaDataEntry entry = CollectionUtils.atMostOneElement(MetaDataEntry.findAllByDataFileAndKey(it, key))
+            RawSequenceFile.findAllBySeqTrack(seqTrack).each {
+                MetaDataEntry entry = CollectionUtils.atMostOneElement(MetaDataEntry.findAllBySequenceFileAndKey(it, key))
 
                 String oldComment = it.comment?.comment ?: ''
                 String newComment = "Correct ${entry?.value} to ${libPrepKit},\n${commentInfo}".trim()

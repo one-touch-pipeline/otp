@@ -43,6 +43,7 @@ class WorkflowCreatorSchedulerSpec extends HibernateSpec implements ServiceUnitT
     @Override
     List<Class> getDomainClasses() {
         return [
+                FastqFile,
                 MergingWorkPackage,
                 MetaDataFile,
                 ProcessingOption,

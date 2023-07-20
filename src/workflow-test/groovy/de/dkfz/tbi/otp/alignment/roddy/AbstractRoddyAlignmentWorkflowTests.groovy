@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -228,17 +228,17 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
                 fastqcState          : SeqTrack.DataProcessingState.FINISHED,
                 dataInstallationState: SeqTrack.DataProcessingState.FINISHED,
         ] + properties
-        SeqTrack seqTrack = DomainFactory.createSeqTrackWithDataFiles(workPackage, seqTrackProperties)
+        SeqTrack seqTrack = DomainFactory.createSeqTrackWithFastqFiles(workPackage, seqTrackProperties)
         if (findSeqType().wgbs || findSeqType().chipSeq) {
             seqTrack.libraryPreparationKit = exactlyOneElement(LibraryPreparationKit.findAll())
             seqTrack.kitInfoReliability = InformationReliability.KNOWN
             seqTrack.save(flush: true)
         }
 
-        DataFile.findAllBySeqTrack(seqTrack).eachWithIndex { DataFile dataFile, int index ->
-            dataFile.vbpFileName = dataFile.fileName = "fastq_${seqTrack.individual.pid}_${seqTrack.sampleType.name}_${seqTrack.laneId}_${index + 1}.fastq.gz"
-            dataFile.nReads = NUMBER_OF_READS
-            dataFile.save(flush: true)
+        RawSequenceFile.findAllBySeqTrack(seqTrack).eachWithIndex { RawSequenceFile rawSequenceFile, int index ->
+            rawSequenceFile.vbpFileName = rawSequenceFile.fileName = "fastq_${seqTrack.individual.pid}_${seqTrack.sampleType.name}_${seqTrack.laneId}_${index + 1}.fastq.gz"
+            rawSequenceFile.nReads = NUMBER_OF_READS
+            rawSequenceFile.save(flush: true)
         }
 
         linkFastqFiles(seqTrack, testFastqFiles.get(readGroupNum))
@@ -642,10 +642,10 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
     }
 
     void checkInputIsNotDeleted() {
-        List<DataFile> fastqFiles = DataFile.findAll()
-        fastqFiles.each { DataFile dataFile ->
-            FileService.ensureFileIsReadableAndNotEmpty((lsdfFilesService.getFileFinalPath(dataFile) as File).toPath())
-            FileService.ensureFileIsReadableAndNotEmpty((lsdfFilesService.getFileViewByPidPath(dataFile) as File).toPath())
+        List<RawSequenceFile> fastqFiles = RawSequenceFile.findAll()
+        fastqFiles.each { RawSequenceFile rawSequenceFile ->
+            FileService.ensureFileIsReadableAndNotEmpty((lsdfFilesService.getFileFinalPath(rawSequenceFile) as File).toPath())
+            FileService.ensureFileIsReadableAndNotEmpty((lsdfFilesService.getFileViewByPidPath(rawSequenceFile) as File).toPath())
         }
     }
 

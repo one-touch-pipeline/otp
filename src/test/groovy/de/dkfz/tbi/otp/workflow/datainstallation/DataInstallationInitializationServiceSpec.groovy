@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -36,6 +36,7 @@ class DataInstallationInitializationServiceSpec extends Specification
     @Override
     Class[] getDomainClassesToMock() {
         return [
+                FastqFile,
                 FastqImportInstance,
                 SeqTrack,
                 WorkflowArtefact,
@@ -51,11 +52,11 @@ class DataInstallationInitializationServiceSpec extends Specification
         ])
 
         Collection<SeqTrack> seqTracks = (1..3).collect {
-            createSeqTrackWithTwoDataFile()
+            createSeqTrackWithTwoFastqFile()
         }
 
         FastqImportInstance instance = createFastqImportInstance([
-                dataFiles: seqTracks*.dataFiles.flatten(),
+                sequenceFiles: seqTracks*.sequenceFiles.flatten(),
         ])
         DataInstallationInitializationService service = Spy(DataInstallationInitializationService) {
             getConfigFragments(_, _) >> []

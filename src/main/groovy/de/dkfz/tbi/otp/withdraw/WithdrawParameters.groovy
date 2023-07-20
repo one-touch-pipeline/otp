@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -49,7 +49,7 @@ class WithdrawParameters {
     boolean deleteAnalysis = false
 
     /**
-     * Should withdrawing stop if files are not existing in file system (using cached value 'dataFile.fileExists')
+     * Should withdrawing stop if files are not existing in file system (using cached value 'sequenceFile.fileExists')
      */
     boolean stopOnMissingFiles = true
 

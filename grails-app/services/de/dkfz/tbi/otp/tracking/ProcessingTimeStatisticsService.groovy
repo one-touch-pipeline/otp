@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -53,11 +53,11 @@ class ProcessingTimeStatisticsService {
 FROM OtrsTicket otrsTicket
  WHERE
 ${search ? """
-  (EXISTS (FROM DataFile dataFile WHERE
-   dataFile.fastqImportInstance.otrsTicket = otrsTicket AND (
-    lower(dataFile.seqTrack.sample.individual.project.name) LIKE :search OR
-    str(dataFile.seqTrack.ilseSubmission.ilseNumber) LIKE :search OR
-    lower(dataFile.seqTrack.run.name) LIKE :search
+  (EXISTS (FROM RawSequenceFile sequenceFile WHERE
+   sequenceFile.fastqImportInstance.otrsTicket = otrsTicket AND (
+    lower(sequenceFile.seqTrack.sample.individual.project.name) LIKE :search OR
+    str(sequenceFile.seqTrack.ilseSubmission.ilseNumber) LIKE :search OR
+    lower(sequenceFile.seqTrack.run.name) LIKE :search
    )
   ) OR (otrsTicket.ticketNumber LIKE :search)
  ) AND

@@ -20,7 +20,7 @@
   - SOFTWARE.
   --}%
 
-<%@ page import="de.dkfz.tbi.otp.ngsdata.DataFile" contentType="text/html;charset=UTF-8"%>
+<%@ page import="de.dkfz.tbi.otp.ngsdata.RawSequenceFile" contentType="text/html;charset=UTF-8"%>
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -42,7 +42,7 @@
                 <div class="dialog">
                     <input type="file" name="file" id="file"/>
                     <g:hiddenField name="submission.id" value="${submission.id}"/>
-                    <g:submitButton name="upload" value="${message(code: 'egaSubmission.uploadCsv')}" disabled="${!hasDataFiles || dataFilesHasFileAliases}"/>
+                    <g:submitButton name="upload" value="${message(code: 'egaSubmission.uploadCsv')}" disabled="${!hasRawSequenceFiles || rawSequenceFilesHasFileAliases}"/>
                 </div>
             </g:uploadForm>
         </p>
@@ -52,7 +52,7 @@
                 <table id="dataTable">
                     <thead>
                     <tr>
-                        <g:if test="${!hasDataFiles}">
+                        <g:if test="${!hasRawSequenceFiles}">
                             <th></th>
                         </g:if>
                         <th></th>
@@ -72,51 +72,51 @@
                     </tr>
                     </thead>
                     <tbody>
-                        <g:each status="i" in="${dataFileList}" var="it">
-                            <tr class="${it.dataFile.fileWithdrawn ? "withdrawn " : ""}">
-                                <g:if test="${!hasDataFiles}">
+                        <g:each status="i" in="${rawSequenceFileList}" var="it">
+                            <tr class="${it.rawSequenceFile.fileWithdrawn ? "withdrawn " : ""}">
+                                <g:if test="${!hasRawSequenceFiles}">
                                     <td>
-                                        <g:checkBox name="selectBox[${i}]" checked="true" value="${true}" data-group="group${it.dataFile.run}${it.dataFile.seqTrack.laneId}"/>
+                                        <g:checkBox name="selectBox[${i}]" checked="true" value="${true}" data-group="group${it.rawSequenceFile.run}${it.rawSequenceFile.seqTrack.laneId}"/>
                                     </td>
                                 </g:if>
                                 <td>
-                                    <g:hiddenField name="fastqFile[${i}]" value="${it.dataFile.id}"/>
+                                    <g:hiddenField name="fastqFile[${i}]" value="${it.rawSequenceFile.id}"/>
                                     <g:hiddenField name="egaSample[${i}]" value="${it.sampleSubmissionObject.id}"/>
-                                    <g:if test="${it.dataFile.fileWithdrawn}">
+                                    <g:if test="${it.rawSequenceFile.fileWithdrawn}">
                                         <span title="${g.message(code: "egaSubmission.withdrawn.tooltip")}">
                                             <img src="${assetPath(src: 'warning.png')}"/> ${g.message(code: "egaSubmission.withdrawn")}
                                         </span>
                                     </g:if>
                                 </td>
-                                <td>${it.dataFile.individual.displayName}</td>
-                                <td>${it.dataFile.seqType.displayName}</td>
-                                <td>${it.dataFile.seqType.libraryLayout}</td>
-                                <td>${it.dataFile.seqType.singleCellDisplayName}</td>
-                                <td>${it.dataFile.sampleType.displayName}</td>
+                                <td>${it.rawSequenceFile.individual.displayName}</td>
+                                <td>${it.rawSequenceFile.seqType.displayName}</td>
+                                <td>${it.rawSequenceFile.seqType.libraryLayout}</td>
+                                <td>${it.rawSequenceFile.seqType.singleCellDisplayName}</td>
+                                <td>${it.rawSequenceFile.sampleType.displayName}</td>
                                 <td>${it.sampleSubmissionObject.egaAliasName}</td>
-                                <td>${it.dataFile.run.seqCenter}</td>
-                                <td>${it.dataFile.run}</td>
-                                <td>${it.dataFile.seqTrack.laneId}</td>
-                                <td>${it.dataFile.seqTrack.normalizedLibraryName}</td>
-                                <td>${it.dataFile.seqTrack.ilseId}</td>
-                                <g:if test="${dataFilesHasFileAliases}">
-                                    <td>${dataFileSubmissionObject.find { dataFileSubmissionObject ->
-                                        dataFileSubmissionObject.dataFile == it.dataFile
+                                <td>${it.rawSequenceFile.run.seqCenter}</td>
+                                <td>${it.rawSequenceFile.run}</td>
+                                <td>${it.rawSequenceFile.seqTrack.laneId}</td>
+                                <td>${it.rawSequenceFile.seqTrack.normalizedLibraryName}</td>
+                                <td>${it.rawSequenceFile.seqTrack.ilseId}</td>
+                                <g:if test="${rawSequenceFilesHasFileAliases}">
+                                    <td>${submissionObjects.find { submissionObject ->
+                                        submissionObject.sequenceFile == it.rawSequenceFile
                                     }.egaAliasName}</td>
                                 </g:if>
                                 <g:else>
-                                    <td><g:textField name="egaFileAlias[${i}]" size="50" value="${egaFileAliases?.getAt(it.dataFile.fileName + it.dataFile.run)}" disabled="${!hasDataFiles}"/></td>
+                                    <td><g:textField name="egaFileAlias[${i}]" size="50" value="${egaFileAliases?.getAt(it.rawSequenceFile.fileName + it.rawSequenceFile.run)}" disabled="${!hasRawSequenceFiles}"/></td>
                                 </g:else>
-                                <td>${it.dataFile.fileName}</td>
+                                <td>${it.rawSequenceFile.fileName}</td>
                             </tr>
                         </g:each>
                     </tbody>
                 </table>
                 <p>
-                    <g:submitButton name="saveSelection" value="${message(code: 'egaSubmission.selectFiles.saveSelection')}" disabled="${hasDataFiles}"/>
+                    <g:submitButton name="saveSelection" value="${message(code: 'egaSubmission.selectFiles.saveSelection')}" disabled="${hasRawSequenceFiles}"/>
                     >>
-                    <g:submitButton name="saveAliases" value="${message(code: 'egaSubmission.selectFiles.saveAliases')}" disabled="${!hasDataFiles || dataFilesHasFileAliases}"/>
-                    <g:submitButton name="download" value="${message(code: 'egaSubmission.downloadCsv')}" disabled="${!hasDataFiles || dataFilesHasFileAliases}"/>
+                    <g:submitButton name="saveAliases" value="${message(code: 'egaSubmission.selectFiles.saveAliases')}" disabled="${!hasRawSequenceFiles || rawSequenceFilesHasFileAliases}"/>
+                    <g:submitButton name="download" value="${message(code: 'egaSubmission.downloadCsv')}" disabled="${!hasRawSequenceFiles || rawSequenceFilesHasFileAliases}"/>
                 </p>
             </g:form>
         </div>

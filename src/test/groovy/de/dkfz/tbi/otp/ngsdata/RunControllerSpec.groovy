@@ -37,7 +37,7 @@ class RunControllerSpec extends Specification implements ControllerUnitTest<RunC
                 SeqPlatformGroup,
                 Role,
                 User,
-                DataFile,
+                RawSequenceFile,
                 UserRole,
                 Run,
                 SeqCenter,

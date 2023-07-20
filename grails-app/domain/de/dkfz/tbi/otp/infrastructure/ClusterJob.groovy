@@ -142,7 +142,7 @@ class ClusterJob implements Entity {
      */
     Long nReads
     /**
-     * file size of all {@link DataFile} that belong to this job
+     * file size of all {@link RawSequenceFile} that belong to this job
      */
     Long fileSize
     /**

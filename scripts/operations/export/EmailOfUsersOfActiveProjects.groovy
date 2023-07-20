@@ -47,7 +47,7 @@ Date end = new Date()
 Set<Project> projects = [] as Set<Project>;
 Set<User> users = [] as Set<User>;
 
-DataFile.createCriteria().listDistinct {
+RawSequenceFile.createCriteria().listDistinct {
     between("dateCreated", start, end)
     projections {
         seqTrack {

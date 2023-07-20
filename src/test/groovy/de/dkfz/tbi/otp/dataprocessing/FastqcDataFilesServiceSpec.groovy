@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -44,6 +44,7 @@ class FastqcDataFilesServiceSpec extends Specification implements ServiceUnitTes
     @Override
     Class[] getDomainClassesToMock() {
         return [
+                FastqFile,
                 FastqcProcessedFile,
                 FastqImportInstance,
                 SeqPlatform,
@@ -59,7 +60,7 @@ class FastqcDataFilesServiceSpec extends Specification implements ServiceUnitTes
     private static final String FAST_QC = FastqcDataFilesService.FAST_QC_DIRECTORY_PART
 
     SeqTrack seqTrack
-    DataFile dataFile
+    RawSequenceFile rawSequenceFile
     FastqcProcessedFile fastqcProcessedFile
     Realm realm
 
@@ -75,17 +76,17 @@ class FastqcDataFilesServiceSpec extends Specification implements ServiceUnitTes
         seqTrack = createSeqTrack()
         realm = seqTrack.project.realm
 
-        dataFile = createDataFile([seqTrack: seqTrack, project: seqTrack.project, run: seqTrack.run])
-        fastqcProcessedFile = createFastqcProcessedFile([dataFile: dataFile])
+        rawSequenceFile = createFastqFile([seqTrack: seqTrack, project: seqTrack.project, run: seqTrack.run])
+        fastqcProcessedFile = createFastqcProcessedFile([sequenceFile: rawSequenceFile])
     }
 
     @Unroll
     void "fastqcFileName, when fastq name is #input, then fastqc name is #output"() {
         given:
-        DataFile dataFile = new DataFile()
-        dataFile.fileName = input
+        RawSequenceFile rawSequenceFile = new FastqFile()
+        rawSequenceFile.fileName = input
         FastqcProcessedFile fastqcProcessedFile = new FastqcProcessedFile([
-                dataFile         : dataFile,
+                sequenceFile     : rawSequenceFile,
                 workDirectoryName: "workDirectoryName",
         ])
 
@@ -266,7 +267,7 @@ class FastqcDataFilesServiceSpec extends Specification implements ServiceUnitTes
     void "pathToFastQcResultFromSeqCenter, when called, then return correct path"() {
         given:
         String fastqcName = service.fastqcFileName(fastqcProcessedFile)
-        Path expected = Paths.get(dataFile.initialDirectory, fastqcName)
+        Path expected = Paths.get(rawSequenceFile.initialDirectory, fastqcName)
 
         when:
         Path path = service.pathToFastQcResultFromSeqCenter(fastqcProcessedFile)
@@ -278,7 +279,7 @@ class FastqcDataFilesServiceSpec extends Specification implements ServiceUnitTes
     void "pathToFastQcResultMd5SumFromSeqCenter, when called, then return correct path"() {
         given:
         String fastqcName = service.fastqcFileName(fastqcProcessedFile).concat('.md5sum')
-        Path expected = Paths.get(dataFile.initialDirectory, fastqcName)
+        Path expected = Paths.get(rawSequenceFile.initialDirectory, fastqcName)
 
         when:
         Path path = service.pathToFastQcResultMd5SumFromSeqCenter(fastqcProcessedFile)

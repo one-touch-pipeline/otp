@@ -61,6 +61,6 @@ println SeqTrack.createCriteria().list {
             key,
             seqTracks*.seqPlatform*.toString().unique().sort().join(';'),
             seqTracks*.libraryPreparationKit*.name.unique().sort().join(';'),
-            seqTracks ? DataFile.findAllBySeqTrackInList(seqTracks)*.nReads.join(';') : [],
+            seqTracks ? RawSequenceFile.findAllBySeqTrackInList(seqTracks)*.nReads.join(';') : [],
     ].join(',')
 }.sort().join('\n')

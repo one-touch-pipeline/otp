@@ -84,7 +84,7 @@ void migrateToNewWorkflow(List<SeqTrack> seqTracks, Workflow workflow, Processin
             }
 
             //prepare attributes needed for the WF runs
-            String directory = lsdfFilesService.getFileViewByPidPathAsPath(seqTrack.dataFiles.first()).parent
+            String directory = lsdfFilesService.getFileViewByPidPathAsPath(seqTrack.sequenceFiles.first()).parent
             String shortName = "DI: ${seqTrack.individual.pid} ${seqTrack.sampleType.displayName} ${seqTrack.seqType.displayNameWithLibraryLayout}"
             List<String> runDisplayName = []
             runDisplayName.with {

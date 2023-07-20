@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -163,7 +163,7 @@ faq:${faq}
         OtrsTicket ticket = createOtrsTicket(
                 seqCenterComment: otrsTicketSeqCenterComment,
         )
-        createDataFile(
+        createFastqFile(
                 fastqImportInstance: createFastqImportInstance(
                         otrsTicket: ticket,
                 ),
@@ -260,24 +260,24 @@ faq:
         OtrsTicket ticket = createOtrsTicket(
                 seqCenterComment: otrsTicketSeqCenterComment,
         )
-        DataFile dataFile1 = createDataFile(
+        RawSequenceFile rawSequenceFile1 = createFastqFile(
                 fastqImportInstance: createFastqImportInstance(
                         otrsTicket: ticket,
                 ),
         )
-        DataFile dataFile2 = createDataFile(
+        RawSequenceFile rawSequenceFile2 = createFastqFile(
                 fastqImportInstance: createFastqImportInstance(
                         otrsTicket: ticket,
                 ),
         )
         DomainFactory.createProcessingOptionLazy(
                 name: ProcessingOption.OptionName.NOTIFICATION_TEMPLATE_SEQ_CENTER_NOTE,
-                type: dataFile1.run.seqCenter.name,
+                type: rawSequenceFile1.run.seqCenter.name,
                 value: seqCenterMessage1
         )
         DomainFactory.createProcessingOptionLazy(
                 name: ProcessingOption.OptionName.NOTIFICATION_TEMPLATE_SEQ_CENTER_NOTE,
-                type: dataFile2.run.seqCenter.name,
+                type: rawSequenceFile2.run.seqCenter.name,
                 value: seqCenterMessage2
         )
         ProcessingStatus processingStatus = new ProcessingStatus()

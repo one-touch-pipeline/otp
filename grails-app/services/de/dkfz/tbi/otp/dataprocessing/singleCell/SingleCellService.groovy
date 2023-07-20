@@ -38,13 +38,13 @@ class SingleCellService {
         return "${individual.pid}_${sampleType.name}_${MAPPING_FILE_SUFFIX}"
     }
 
-    String buildMappingFileName(DataFile dataFile) {
-        Sample sample = dataFile.seqTrack.sample
+    String buildMappingFileName(RawSequenceFile rawSequenceFile) {
+        Sample sample = rawSequenceFile.seqTrack.sample
         return buildMappingFileName(sample.individual, sample.sampleType)
     }
 
-    Path singleCellMappingFile(DataFile dataFile) {
-        return lsdfFilesService.getSingleCellWellDirectory(dataFile, WellDirectory.ALL_WELL).resolve(buildMappingFileName(dataFile))
+    Path singleCellMappingFile(RawSequenceFile rawSequenceFile) {
+        return lsdfFilesService.getSingleCellWellDirectory(rawSequenceFile, WellDirectory.ALL_WELL).resolve(buildMappingFileName(rawSequenceFile))
     }
 
     /**
@@ -52,10 +52,10 @@ class SingleCellService {
      *
      * When changing this you will have to recreate all existing files after the change is released.
      *
-     * @param dataFile to build an entry for
+     * @param rawSequenceFile to build an entry for
      * @return an entry in the expected format for the mapping file
      */
-    String mappingEntry(DataFile dataFile) {
-        return "${lsdfFilesService.getFileViewByPidPath(dataFile)}\t${dataFile.seqTrack.singleCellWellLabel}"
+    String mappingEntry(RawSequenceFile rawSequenceFile) {
+        return "${lsdfFilesService.getFileViewByPidPath(rawSequenceFile)}\t${rawSequenceFile.seqTrack.singleCellWellLabel}"
     }
 }

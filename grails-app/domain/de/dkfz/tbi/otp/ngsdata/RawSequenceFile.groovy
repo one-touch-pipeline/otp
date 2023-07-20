@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -30,12 +30,13 @@ import de.dkfz.tbi.otp.utils.Entity
 
 /** This table is used externally. Please discuss a change in the team */
 @ManagedEntity
-class DataFile implements CommentableWithProject, Entity {
+abstract class RawSequenceFile implements CommentableWithProject, Entity {
 
     String fileName                // file name
     String pathName                // path from run folder to file
     String vbpFileName             // file name used in view-by-pid linking
-    String md5sum
+    String fastqMd5sum
+
     /**
      * Absolute path of the directory which this data file has been imported from.
      */
@@ -97,10 +98,12 @@ class DataFile implements CommentableWithProject, Entity {
     /** @deprecated OTP-2311: Redundant with seqTrack.run   */
     @Deprecated
     Run run
-    /* OTP-2311: fastqImportInstance shall be the same for all DataFiles belonging to the same
+    /* OTP-2311: fastqImportInstance shall be the same for all RawSequenceFiles belonging to the same
      * SeqTrack, so actually this field should be defined in the SeqTrack class. */
     FastqImportInstance fastqImportInstance
     SeqTrack seqTrack
+
+    @Deprecated
     FileType fileType
 
     static belongsTo = [
@@ -115,17 +118,17 @@ class DataFile implements CommentableWithProject, Entity {
         vbpFileName(blank: false, shared: "pathComponent")
 
         pathName(shared: "relativePath")
-        md5sum(matches: /^([0-9a-f]{32})|(n\/a)$/) //should not be n/a, but legacy data exists
+        fastqMd5sum matches: /^([0-9a-f]{32})$/
         initialDirectory(blank: false, shared: "absolutePath")
 
         project nullable: true,  // Shall not be null, but legacy data exists
-                validator: { Project val, DataFile obj ->
+                validator: { Project val, RawSequenceFile obj ->
                     obj.seqTrack == null || val == obj.seqTrack.sample.individual.project
                 }
         dateExecuted(nullable: true)  // Shall not be null, but legacy data exists
         dateFileSystem(nullable: true)
 
-        run(validator: { Run val, DataFile obj -> obj.seqTrack == null || val == obj.seqTrack.run })
+        run(validator: { Run val, RawSequenceFile obj -> obj.seqTrack == null || val == obj.seqTrack.run })
         seqTrack(nullable: true)  // Shall not be null, but legacy data exists
 
         nReads(nullable: true)
@@ -193,20 +196,20 @@ class DataFile implements CommentableWithProject, Entity {
 
     static Closure mapping = {
         withdrawnComment type: 'text'
-        run index: "data_file_run_idx"
-        project index: "data_file_project_idx"
-        fastqImportInstance index: "data_file_fastq_import_instance_idx"
-        seqTrack index: "data_file_seq_track_idx"
-        md5sum index: 'data_file_md5sum_idx'
-        fileType index: "data_file_file_type_idx"
+        run index: "raw_sequence_file_run_idx"
+        project index: "raw_sequence_file_project_idx"
+        fastqImportInstance index: "raw_sequence_file_fastq_import_instance_idx"
+        seqTrack index: "raw_sequence_file_seq_track_idx"
+        fastqMd5sum index: 'raw_sequence_file_fastq_md5sum_idx'
+        fileType index: "raw_sequence_file_file_type_idx"
         initialDirectory type: 'text'
-        dateLastChecked index: 'data_file_date_last_checked_idx'
+        dateLastChecked index: 'raw_sequence_file_date_last_checked_idx'
         comment cascade: "all-delete-orphan"
     }
 
     long getNBasePairs() {
-        assert nReads: "nReads for datafile ${this} is not provided."
-        assert sequenceLength: "Sequence length for datafile ${this} is not provided."
+        assert nReads: "nReads for sequence file ${this} is not provided."
+        assert sequenceLength: "Sequence length for sequence file ${this} is not provided."
         return meanSequenceLength * nReads
     }
 

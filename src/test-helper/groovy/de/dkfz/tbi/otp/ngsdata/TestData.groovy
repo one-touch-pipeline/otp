@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -88,7 +88,7 @@ class TestData {
     FileType fileType
 
     @Deprecated
-    DataFile dataFile
+    RawSequenceFile dataFile
 
     @Deprecated
     ReferenceGenome referenceGenome
@@ -218,7 +218,7 @@ class TestData {
     }
 
     @Deprecated
-    DataFile createDataFile(SeqTrack seqTrack, FastqImportInstance fastqImportInstance, FileType fileType = this.fileType) {
+    RawSequenceFile createDataFile(SeqTrack seqTrack, FastqImportInstance fastqImportInstance, FileType fileType = this.fileType) {
         return createDataFile(
             seqTrack           : seqTrack,
             fastqImportInstance: fastqImportInstance,
@@ -227,8 +227,8 @@ class TestData {
     }
 
     @Deprecated
-    DataFile createDataFile(Map properties = [:]) {
-        return DomainFactory.createDataFile([
+    RawSequenceFile createDataFile(Map properties = [:]) {
+        return DomainFactory.createFastqFile([
             fileName           : "datafile",
             initialDirectory   : TestCase.uniqueNonExistentPath.path,
             fileExists         : true,

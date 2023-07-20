@@ -86,7 +86,7 @@ class MetadataImportController implements CheckAndCall, PlainResponseExceptionHa
 
     CommentService commentService
     ConfigService configService
-    DataFileService dataFileService
+    RawSequenceFileService rawSequenceFileService
     FileSystemService fileSystemService
     IlseSubmissionService ilseSubmissionService
     MetadataImportService metadataImportService
@@ -211,7 +211,7 @@ class MetadataImportController implements CheckAndCall, PlainResponseExceptionHa
     }
 
     private MetadataDetails getMetadataDetails(FastqImportInstance importInstance) {
-        List<DataFile> dataFilesNotAssignedToSeqTrack = []
+        List<RawSequenceFile> dataFilesNotAssignedToSeqTrack = []
 
         List<MetaDataFileWrapper> metaDataFiles = metadataImportService.findAllByFastqImportInstance(importInstance).collect {
             new MetaDataFileWrapper([
@@ -222,10 +222,10 @@ class MetadataImportController implements CheckAndCall, PlainResponseExceptionHa
             ])
         }
 
-        List<DataFile> dataFiles = dataFileService.findAllByFastqImportInstance(importInstance)
+        List<RawSequenceFile> dataFiles = rawSequenceFileService.findAllByFastqImportInstance(importInstance)
 
         List<RunWithSeqTracks> runs = []
-        dataFiles.each { DataFile dataFile ->
+        dataFiles.each { RawSequenceFile dataFile ->
             if (dataFile.seqTrack) {
                 RunWithSeqTracks run = runs.find { it.run.id == dataFile.run.id }
                 if (run) {
@@ -510,7 +510,7 @@ class MetaDataFileWrapper {
 @Immutable
 class MetadataDetails {
     List<MetaDataFileWrapper> metaDataFileWrapper
-    List<DataFile> dataFilesNotAssignedToSeqTrack
+    List<RawSequenceFile> dataFilesNotAssignedToSeqTrack
     List<RunWithSeqTracks> runs
 }
 
@@ -523,7 +523,7 @@ class RunWithSeqTracks {
 @TupleConstructor
 class SeqTrackWithDataFiles {
     SeqTrack seqTrack
-    List<DataFile> dataFiles
+    List<RawSequenceFile> dataFiles
 }
 
 class MetadataImportControllerSubmitCommand implements Serializable, Validateable {

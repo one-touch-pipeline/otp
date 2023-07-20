@@ -109,7 +109,7 @@
                     </div>
                 </div>
                 <g:each var="seqTrack" in="${lanesPerRun[run]}">
-                    <g:set var="dataFiles" value="${seqTrack.dataFiles.sort { it.readName }}" />
+                    <g:set var="rawSequenceFiles" value="${seqTrack.sequenceFiles.sort { it.readName }}" />
                     <g:set var="totalFileSize" value="${seqTrack.totalFileSize()}" />
                     <g:set var="totalNReads" value="${seqTrack.NReads}" />
                     <div class="lane-and-datafile-grid-wrapper color-left-border lane slim">
@@ -134,19 +134,19 @@
                             <div class="grid-element lane commentSwapped" title="${g.message(code: "seqTrack.seqTrackSet.lanesPerRun.swapped.tooltip")}">&nbsp;</div>
                         </g:if>
 
-                        <g:each var="dataFile" status="i" in="${dataFiles}">
+                        <g:each var="rawSequenceFile" status="i" in="${rawSequenceFiles}">
                             <g:set var="row" value="${i+3}"/>
-                            <g:set var="withdrawn" value="${dataFile.fileWithdrawn ? 'withdrawn' : ''}"/>
-                            <g:set var="withdrawnComment" value="Withdrawn Comment: ${dataFile.fileWithdrawn ? dataFile.withdrawnComment : ''}"/>
-                            <g:set var="withdrawnDate" value="Withdrawn Date: ${dataFile.fileWithdrawn ? dataFile.withdrawnDate : ''}"/>
-                            <g:set var="exists" value="${dataFile.fileExists ? '' : 'nonexistent'}"/>
-                            <g:set var="nBasePairs" value="${dataFile.NBasePairsOrNull}"/>
-                            <g:set var="fileType" value="${dataFile.indexFile ? "index" : "fastq"}"/>
+                            <g:set var="withdrawn" value="${rawSequenceFile.fileWithdrawn ? 'withdrawn' : ''}"/>
+                            <g:set var="withdrawnComment" value="Withdrawn Comment: ${rawSequenceFile.fileWithdrawn ? rawSequenceFile.withdrawnComment : ''}"/>
+                            <g:set var="withdrawnDate" value="Withdrawn Date: ${rawSequenceFile.fileWithdrawn ? rawSequenceFile.withdrawnDate : ''}"/>
+                            <g:set var="exists" value="${rawSequenceFile.fileExists ? '' : 'nonexistent'}"/>
+                            <g:set var="nBasePairs" value="${rawSequenceFile.NBasePairsOrNull}"/>
+                            <g:set var="fileType" value="${rawSequenceFile.indexFile ? "index" : "fastq"}"/>
                             <div class="grid-element identifier dataFile color-left-border ${fileType} ${withdrawn} ${exists} ${archivedClickable} trim-text-with-ellipsis"
                                  style="grid-row: ${row};"
-                                 title="${dataFile.fileName}">
-                                <g:link controller="dataFile" action="showDetails" id="${dataFile.id}">${dataFile.fileName}</g:link>
-                                <g:if test="${dataFile.fileWithdrawn}">
+                                 title="${rawSequenceFile.fileName}">
+                                <g:link controller="rawSequenceFile" action="showDetails" id="${rawSequenceFile.id}">${rawSequenceFile.fileName}</g:link>
+                                <g:if test="${rawSequenceFile.fileWithdrawn}">
                                     <img src="/assets/warning.png" title="${withdrawnComment}&#013;${withdrawnDate}">
                                 </g:if>
                                 <g:if test="${archivedClickable}">
@@ -156,11 +156,11 @@
                             <div class="grid-element dataFile bases" style="grid-row: ${row}" title="${UnitHelper.asNucleobases(nBasePairs)}">
                                 ${UnitHelper.asNucleobases(nBasePairs, true)}
                             </div>
-                            <div class="grid-element dataFile fileSize" style="grid-row: ${row}" title="${UnitHelper.asBytes(dataFile.fileSize)}">
-                                ${UnitHelper.asBytes(dataFile.fileSize, true)}
+                            <div class="grid-element dataFile fileSize" style="grid-row: ${row}" title="${UnitHelper.asBytes(rawSequenceFile.fileSize)}">
+                                ${UnitHelper.asBytes(rawSequenceFile.fileSize, true)}
                             </div>
-                            <div class="grid-element dataFile reads" style="grid-row: ${row}" title="${UnitHelper.asReads(dataFile.nReads)}">
-                                ${UnitHelper.asReads(dataFile.nReads, true)} (${dataFile.sequenceLength ?: "N/A"})
+                            <div class="grid-element dataFile reads" style="grid-row: ${row}" title="${UnitHelper.asReads(rawSequenceFile.nReads)}">
+                                ${UnitHelper.asReads(rawSequenceFile.nReads, true)} (${rawSequenceFile.sequenceLength ?: "N/A"})
                             </div>
                         </g:each>
                     </div>

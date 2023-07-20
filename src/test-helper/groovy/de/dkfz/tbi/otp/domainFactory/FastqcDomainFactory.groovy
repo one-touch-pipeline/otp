@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,7 +27,7 @@ trait FastqcDomainFactory extends DomainFactoryCore {
 
     FastqcProcessedFile createFastqcProcessedFile(Map properties = [:], boolean saveAndValidate = true) {
         return createDomainObject(FastqcProcessedFile, [
-                dataFile         : { createDataFile() },
+                sequenceFile     : { createFastqFile() },
                 workDirectoryName: { "workDirectoryName_${nextId}" },
         ], properties, saveAndValidate)
     }

@@ -80,7 +80,7 @@ class ProjectRunNameFileNameValidator extends AbstractValueTuplesValidator<Metad
             return
         }
 
-        Integer result = DataFile.createCriteria().count {
+        Integer result = RawSequenceFile.createCriteria().count {
             eq("fileName", fileName)
             seqTrack {
                 sample {

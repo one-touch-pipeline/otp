@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -40,7 +40,8 @@ class SeqTrackSpec extends Specification implements DataTest, DomainFactoryCore 
     @Override
     Class[] getDomainClassesToMock() {
         [
-                DataFile,
+                RawSequenceFile,
+                FastqFile,
                 MergingWorkPackage,
                 Realm,
                 SeqTrack,
@@ -163,8 +164,8 @@ class SeqTrackSpec extends Specification implements DataTest, DomainFactoryCore 
 
     void "getReadGroupName, when SeqTrack has only one dataFile, then throw AssertionError"() {
         given:
-        SeqTrack seqTrack = DomainFactory.createSeqTrackWithDataFiles(DomainFactory.createMergingWorkPackage())
-        DataFile.findAllBySeqTrack(seqTrack)[0].delete(flush: true)
+        SeqTrack seqTrack = DomainFactory.createSeqTrackWithFastqFiles(DomainFactory.createMergingWorkPackage())
+        RawSequenceFile.findAllBySeqTrack(seqTrack)[0].delete(flush: true)
 
         when:
         seqTrack.readGroupName
@@ -175,7 +176,7 @@ class SeqTrackSpec extends Specification implements DataTest, DomainFactoryCore 
 
     void "getReadGroupName, when SeqTrack has more then two files, then throw AssertionError"() {
         given:
-        SeqTrack seqTrack = DomainFactory.createSeqTrackWithDataFiles(DomainFactory.createMergingWorkPackage())
+        SeqTrack seqTrack = DomainFactory.createSeqTrackWithFastqFiles(DomainFactory.createMergingWorkPackage())
         DomainFactory.createSequenceDataFile([seqTrack: seqTrack])
 
         when:
@@ -188,12 +189,13 @@ class SeqTrackSpec extends Specification implements DataTest, DomainFactoryCore 
     void "getReadGroupName, when sequencing read type is paired, then return name consist of: 'run', runname, common file name till underscore"() {
         given:
         MergingWorkPackage mwp = DomainFactory.createMergingWorkPackage(seqType: DomainFactory.createRnaPairedSeqType())
-        SeqTrack seqTrack = DomainFactory.createSeqTrackWithDataFiles(mwp)
+        SeqTrack seqTrack = DomainFactory.createSeqTrackWithFastqFiles(mwp)
 
         when:
-        List<DataFile> dataFiles = DataFile.findAllBySeqTrack(seqTrack)
-        dataFiles[0].vbpFileName = '4_NoIndex_L004_R1_complete_filtered.fastq.gz'
-        dataFiles[1].vbpFileName = '4_NoIndex_L004_R2_complete_filtered.fastq.gz'
+        List<RawSequenceFile> rawSequenceFiles = RawSequenceFile.findAllBySeqTrack(seqTrack)
+        rawSequenceFiles[0].vbpFileName = '4_NoIndex_L004_R1_complete_filtered.fastq.gz'
+        rawSequenceFiles[1].vbpFileName = '4_NoIndex_L004_R2_complete_filtered.fastq.gz'
+        rawSequenceFiles*.save(flush: true)
 
         then:
         "run${seqTrack.run.name}_4_NoIndex_L004" == seqTrack.readGroupName
@@ -201,7 +203,7 @@ class SeqTrackSpec extends Specification implements DataTest, DomainFactoryCore 
 
     void "getReadGroupName, when sequencing read type is single, then return file name consist of: 'run', runname, file name till first dot"() {
         given:
-        SeqTrack seqTrack = createSeqTrackWithOneDataFile([:], [vbpFileName: "fileName.fastq.gz"])
+        SeqTrack seqTrack = createSeqTrackWithOneFastqFile([:], [vbpFileName: "fileName.fastq.gz"])
 
         expect:
         "run${seqTrack.run.name}_${'fileName'}" == seqTrack.readGroupName
@@ -210,8 +212,8 @@ class SeqTrackSpec extends Specification implements DataTest, DomainFactoryCore 
     void "test getNReads, returns null"() {
         given:
         SeqTrack seqTrack = createSeqTrack()
-        createDataFile([seqTrack: seqTrack, nReads: null])
-        createDataFile([seqTrack: seqTrack, nReads: input])
+        createFastqFile([seqTrack: seqTrack, nReads: null])
+        createFastqFile([seqTrack: seqTrack, nReads: input])
 
         expect:
         seqTrack.NReads == null
@@ -225,8 +227,8 @@ class SeqTrackSpec extends Specification implements DataTest, DomainFactoryCore 
     void "test getNReads, returns sum"() {
         given:
         SeqTrack seqTrack = createSeqTrack()
-        createDataFile([seqTrack: seqTrack, nReads: 525])
-        createDataFile([seqTrack: seqTrack, nReads: 25])
+        createFastqFile([seqTrack: seqTrack, nReads: 525])
+        createFastqFile([seqTrack: seqTrack, nReads: 25])
 
         expect:
         seqTrack.NReads == 550
@@ -235,8 +237,8 @@ class SeqTrackSpec extends Specification implements DataTest, DomainFactoryCore 
     void "totalFileSize, returns total fileSize of all DataFiles"() {
         given:
         SeqTrack seqTrack = createSeqTrack()
-        createDataFile([seqTrack: seqTrack, fileSize: 100])
-        createDataFile([seqTrack: seqTrack, fileSize: 200])
+        createFastqFile([seqTrack: seqTrack, fileSize: 100])
+        createFastqFile([seqTrack: seqTrack, fileSize: 200])
 
         expect:
         seqTrack.totalFileSize() == 300

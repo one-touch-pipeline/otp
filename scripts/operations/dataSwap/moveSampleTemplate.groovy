@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -78,7 +78,7 @@ try {
                         projectNameSwap      : new Swap('oldProjectName', 'newProjectName'),
                         pidSwap              : new Swap('oldPid', substitute: 'newPid'),
                         sampleTypeSwap       : new Swap('oldSampleTypeName', 'newSampleTypeName'),
-                        dataFileSwaps        : [
+                        rawSequenceFileSwaps: [
                                 new Swap('oldFileName1', 'newFileName1'),
                                 new Swap('oldFileName2', 'newFileName2'),
                                 new Swap('oldFileName3', ''),

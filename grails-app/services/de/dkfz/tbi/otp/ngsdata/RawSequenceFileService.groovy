@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -30,11 +30,11 @@ import de.dkfz.tbi.otp.project.Project
 
 @CompileDynamic
 @Transactional
-class DataFileService {
+class RawSequenceFileService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'OTP_READ_ACCESS')")
-    List<DataFile> getAllDataFilesOfProject(Project project) {
-        return DataFile.withCriteria {
+    List<RawSequenceFile> getAllRawSequenceFilesOfProject(Project project) {
+        return RawSequenceFile.withCriteria {
             seqTrack {
                 sample {
                     individual {
@@ -69,25 +69,25 @@ class DataFileService {
             }
             resultTransformer(new ResultTransformer() {
                 @Override
-                DataFile transformTuple(Object[] tuple, String[] aliases) {
-                    DataFile dataFile = new DataFile()
-                    dataFile.withdrawnComment = tuple[0]
-                    dataFile.fileWithdrawn = tuple[1]
-                    dataFile.seqTrack = new SeqTrack()
-                    dataFile.seqTrack.sampleIdentifier = tuple[2]
-                    dataFile.seqTrack.sample = new Sample()
-                    dataFile.seqTrack.sample.individual = new Individual()
-                    dataFile.seqTrack.sample.individual.id = tuple[3] as Long
-                    dataFile.seqTrack.sample.individual.pid = tuple[4]
-                    dataFile.seqTrack.sample.sampleType = new SampleType()
-                    dataFile.seqTrack.sample.sampleType.id = tuple[5] as Long
-                    dataFile.seqTrack.sample.sampleType.name = tuple[6]
-                    dataFile.seqTrack.seqType = new SeqType()
-                    dataFile.seqTrack.seqType.id = tuple[7] as long
-                    dataFile.seqTrack.seqType.displayName = tuple[8]
-                    dataFile.seqTrack.seqType.singleCell = tuple[9]
-                    dataFile.seqTrack.seqType.libraryLayout = tuple[10] as SequencingReadType
-                    return dataFile
+                RawSequenceFile transformTuple(Object[] tuple, String[] aliases) {
+                    RawSequenceFile file = new FastqFile()
+                    file.withdrawnComment = tuple[0]
+                    file.fileWithdrawn = tuple[1]
+                    file.seqTrack = new SeqTrack()
+                    file.seqTrack.sampleIdentifier = tuple[2]
+                    file.seqTrack.sample = new Sample()
+                    file.seqTrack.sample.individual = new Individual()
+                    file.seqTrack.sample.individual.id = tuple[3] as Long
+                    file.seqTrack.sample.individual.pid = tuple[4]
+                    file.seqTrack.sample.sampleType = new SampleType()
+                    file.seqTrack.sample.sampleType.id = tuple[5] as Long
+                    file.seqTrack.sample.sampleType.name = tuple[6]
+                    file.seqTrack.seqType = new SeqType()
+                    file.seqTrack.seqType.id = tuple[7] as long
+                    file.seqTrack.seqType.displayName = tuple[8]
+                    file.seqTrack.seqType.singleCell = tuple[9]
+                    file.seqTrack.seqType.libraryLayout = tuple[10] as SequencingReadType
+                    return file
                 }
 
                 @Override
@@ -95,21 +95,21 @@ class DataFileService {
                     return collection
                 }
             })
-        } as List<DataFile>
+        } as List<RawSequenceFile>
     }
 
-    List<DataFile> findAllBySeqTrack(SeqTrack seqTrack) {
-        return DataFile.findAllBySeqTrack(seqTrack)
+    List<RawSequenceFile> findAllBySeqTrack(SeqTrack seqTrack) {
+        return RawSequenceFile.findAllBySeqTrack(seqTrack)
     }
 
-    List<DataFile> findAllByFastqImportInstance(FastqImportInstance importInstance) {
-        return DataFile.createCriteria().list {
+    List<RawSequenceFile> findAllByFastqImportInstance(FastqImportInstance importInstance) {
+        return RawSequenceFile.createCriteria().list {
             createAlias('run', 'r')
             createAlias('seqTrack', 'st')
             eq('fastqImportInstance', importInstance)
             order('r.name', 'asc')
             order('st.laneId', 'asc')
             order('mateNumber', 'asc')
-        } as List<DataFile>
+        } as List<RawSequenceFile>
     }
 }

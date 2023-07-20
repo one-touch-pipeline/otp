@@ -67,6 +67,7 @@ class AlignmentArtefactServiceSpec extends HibernateSpec implements WorkflowSyst
     @Override
     List<Class> getDomainClasses() {
         return [
+                FastqFile,
                 FastqImportInstance,
                 FastqcProcessedFile,
                 MergingWorkPackage,
@@ -85,7 +86,7 @@ class AlignmentArtefactServiceSpec extends HibernateSpec implements WorkflowSyst
     void setupData() {
         //artefact in input and seqType in input
         workflowArtefactSeqTrack1 = createWorkflowArtefact([artefactType: ArtefactType.FASTQ])
-        seqTrack1 = createSeqTrackWithTwoDataFileAndSpecies([workflowArtefact: workflowArtefactSeqTrack1])
+        seqTrack1 = createSeqTrackWithTwoFastqFileAndSpecies([workflowArtefact: workflowArtefactSeqTrack1])
         workflowArtefactFastqc1 = createWorkflowArtefact([artefactType: ArtefactType.FASTQC])
         fastqc1 = createFastqcProcessedFileWithSpecies([workflowArtefact: workflowArtefactFastqc1])
         workflowArtefactBam1 = createWorkflowArtefact([artefactType: ArtefactType.BAM])
@@ -93,7 +94,7 @@ class AlignmentArtefactServiceSpec extends HibernateSpec implements WorkflowSyst
 
         //artefact in input, but seqType not in input
         workflowArtefactSeqTrack2 = createWorkflowArtefact([artefactType: ArtefactType.FASTQ])
-        seqTrack2 = createSeqTrackWithTwoDataFileAndSpecies([workflowArtefact: workflowArtefactSeqTrack2])
+        seqTrack2 = createSeqTrackWithTwoFastqFileAndSpecies([workflowArtefact: workflowArtefactSeqTrack2])
         workflowArtefactFastqc2 = createWorkflowArtefact([artefactType: ArtefactType.FASTQC])
         fastqc2 = createFastqcProcessedFileWithSpecies([workflowArtefact: workflowArtefactFastqc2])
         workflowArtefactBam2 = createWorkflowArtefact([artefactType: ArtefactType.BAM])
@@ -110,13 +111,13 @@ class AlignmentArtefactServiceSpec extends HibernateSpec implements WorkflowSyst
         ]
         seqTypes = [
                 seqTrack1.seqType,
-                fastqc1.dataFile.seqType,
+                fastqc1.sequenceFile.seqType,
                 bamFile1.seqType,
         ]
 
         seqTracks = [
                 seqTrack1,
-                fastqc1.dataFile.seqTrack,
+                fastqc1.sequenceFile.seqTrack,
         ] + bamFile1.containedSeqTracks
     }
 
@@ -125,7 +126,7 @@ class AlignmentArtefactServiceSpec extends HibernateSpec implements WorkflowSyst
 
         //artefact related to input, but not part of the artefact input
         workflowArtefactSeqTrackRelated = createWorkflowArtefact([artefactType: ArtefactType.FASTQ])
-        seqTrackRelated = createSeqTrackWithTwoDataFile([
+        seqTrackRelated = createSeqTrackWithTwoFastqFile([
                 workflowArtefact: workflowArtefactSeqTrackRelated,
                 sample          : seqTrack1.sample,
                 seqType         : seqTrack1.seqType,
@@ -133,10 +134,10 @@ class AlignmentArtefactServiceSpec extends HibernateSpec implements WorkflowSyst
         workflowArtefactFastqcRelated = createWorkflowArtefact([artefactType: ArtefactType.FASTQC])
         fastqcRelated = createFastqcProcessedFile([
                 workflowArtefact: workflowArtefactFastqcRelated,
-                dataFile        : createDataFile([
+                sequenceFile    : createFastqFile([
                         seqTrack: createSeqTrack([
-                                sample : fastqc1.dataFile.sample,
-                                seqType: fastqc1.dataFile.seqType,
+                                sample : fastqc1.sequenceFile.sample,
+                                seqType: fastqc1.sequenceFile.seqType,
                         ]),
                 ]),
         ])
@@ -291,19 +292,19 @@ class AlignmentArtefactServiceSpec extends HibernateSpec implements WorkflowSyst
         ])
         ProjectSeqTypeGroup group1 = new ProjectSeqTypeGroup(seqTrack1.project, seqTrack1.seqType)
 
-        Set<SpeciesWithStrain> speciesWithStrain2 = [fastqc1.dataFile.individual.species] as Set
+        Set<SpeciesWithStrain> speciesWithStrain2 = [fastqc1.sequenceFile.individual.species] as Set
         ReferenceGenome referenceGenome2 = createReferenceGenome([
                 speciesWithStrain: speciesWithStrain2,
                 species          : [],
         ])
         createReferenceGenomeSelector([
                 referenceGenome: referenceGenome2,
-                project        : fastqc1.dataFile.project,
-                seqType        : fastqc1.dataFile.seqType,
+                project        : fastqc1.sequenceFile.project,
+                seqType        : fastqc1.sequenceFile.seqType,
                 workflow       : workflow,
                 species        : speciesWithStrain2,
         ])
-        ProjectSeqTypeGroup group2 = new ProjectSeqTypeGroup(fastqc1.dataFile.project, fastqc1.dataFile.seqType)
+        ProjectSeqTypeGroup group2 = new ProjectSeqTypeGroup(fastqc1.sequenceFile.project, fastqc1.sequenceFile.seqType)
 
         Set<SpeciesWithStrain> speciesWithStrain3 = [bamFile1.individual.species] as Set
         ReferenceGenome referenceGenome3 = createReferenceGenome([
@@ -380,10 +381,10 @@ class AlignmentArtefactServiceSpec extends HibernateSpec implements WorkflowSyst
         ProjectSeqTypeGroup group1 = new ProjectSeqTypeGroup(seqTrack1.project, seqTrack1.seqType)
 
         MergingCriteria mergingCriteria2 = createMergingCriteria([
-                project: fastqc1.dataFile.project,
-                seqType: fastqc1.dataFile.seqType,
+                project: fastqc1.sequenceFile.project,
+                seqType: fastqc1.sequenceFile.seqType,
         ])
-        ProjectSeqTypeGroup group2 = new ProjectSeqTypeGroup(fastqc1.dataFile.project, fastqc1.dataFile.seqType)
+        ProjectSeqTypeGroup group2 = new ProjectSeqTypeGroup(fastqc1.sequenceFile.project, fastqc1.sequenceFile.seqType)
 
         MergingCriteria mergingCriteria3 = createMergingCriteriaLazy([
                 project: bamFile1.project,
@@ -427,15 +428,15 @@ class AlignmentArtefactServiceSpec extends HibernateSpec implements WorkflowSyst
         ProjectSeqTypeGroup group1 = new ProjectSeqTypeGroup(seqTrack1.project, seqTrack1.seqType)
 
         MergingCriteria mergingCriteria2 = createMergingCriteria([
-                project            : fastqc1.dataFile.project,
-                seqType            : fastqc1.dataFile.seqType,
+                project            : fastqc1.sequenceFile.project,
+                seqType            : fastqc1.sequenceFile.seqType,
                 useSeqPlatformGroup: MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC,
         ])
         SeqPlatformGroup seqPlatformGroup2 = createSeqPlatformGroup([
                 mergingCriteria: mergingCriteria2,
-                seqPlatforms   : [fastqc1.dataFile.seqTrack.seqPlatform],
+                seqPlatforms   : [fastqc1.sequenceFile.seqTrack.seqPlatform],
         ])
-        ProjectSeqTypeGroup group2 = new ProjectSeqTypeGroup(fastqc1.dataFile.project, fastqc1.dataFile.seqType)
+        ProjectSeqTypeGroup group2 = new ProjectSeqTypeGroup(fastqc1.sequenceFile.project, fastqc1.sequenceFile.seqType)
 
         MergingCriteria mergingCriteria3 = createMergingCriteriaLazy([
                 project: bamFile1.project,
@@ -464,7 +465,7 @@ class AlignmentArtefactServiceSpec extends HibernateSpec implements WorkflowSyst
                         (seqTrack1.seqPlatform): seqPlatformGroup1,
                 ],
                 (group2): [
-                        (fastqc1.dataFile.seqTrack.seqPlatform): seqPlatformGroup2,
+                        (fastqc1.sequenceFile.seqTrack.seqPlatform): seqPlatformGroup2,
                 ],
                 (group3): [
                         (seqPlatform3): seqPlatformGroup3,
@@ -539,25 +540,25 @@ class AlignmentArtefactServiceSpec extends HibernateSpec implements WorkflowSyst
         TestCase.assertContainSame(result, expected)
     }
 
-    void "fetchDataFiles, when called for workflow and seqTracks, then return WorkflowVersionSelector"() {
+    void "fetchRawSequenceFiles, when called for workflow and seqTracks, then return WorkflowVersionSelector"() {
         given:
         setupData()
 
-        Map<SeqTrack, List<DataFile>> expected = [
-                (seqTrack1)                 : seqTrack1.dataFiles,
-                (fastqc1.dataFile.seqTrack) : [fastqc1.dataFile],
-                (bamFile1.seqTracks.first()): bamFile1.seqTracks.first().dataFiles,
+        Map<SeqTrack, List<RawSequenceFile>> expected = [
+                (seqTrack1)                    : seqTrack1.sequenceFiles,
+                (fastqc1.sequenceFile.seqTrack): [fastqc1.sequenceFile],
+                (bamFile1.seqTracks.first())   : bamFile1.seqTracks.first().sequenceFiles,
         ]
 
         when:
-        Map<SeqTrack, List<DataFile>> result = alignmentArtefactService.fetchDataFiles(seqTracks)
+        Map<SeqTrack, List<RawSequenceFile>> result = alignmentArtefactService.fetchRawSequenceFiles(seqTracks)
 
         then:
         TestCase.assertContainSame(result, expected)
     }
 
-    private SeqTrack createSeqTrackWithTwoDataFileAndSpecies(Map parameters) {
-        return createSeqTrackWithTwoDataFile([
+    private SeqTrack createSeqTrackWithTwoFastqFileAndSpecies(Map parameters) {
+        return createSeqTrackWithTwoFastqFile([
                 sample: createSample([
                         individual: createIndividual([
                                 species: createSpeciesWithStrain(),
@@ -568,7 +569,7 @@ class AlignmentArtefactServiceSpec extends HibernateSpec implements WorkflowSyst
 
     private FastqcProcessedFile createFastqcProcessedFileWithSpecies(Map parameters) {
         return createFastqcProcessedFile([
-                dataFile: createDataFile([
+                sequenceFile: createFastqFile([
                         seqTrack: createSeqTrack([
                                 sample: createSample([
                                         individual: createIndividual([
@@ -609,7 +610,7 @@ class AlignmentArtefactServiceSpec extends HibernateSpec implements WorkflowSyst
     }
 
     private AlignmentArtefactData<FastqcProcessedFile> createAlignmentArtefactDataForFastqcProcessedFile(FastqcProcessedFile fastqcProcessedFile) {
-        SeqTrack seqTrack = fastqcProcessedFile.dataFile.seqTrack
+        SeqTrack seqTrack = fastqcProcessedFile.sequenceFile.seqTrack
         return new AlignmentArtefactData<FastqcProcessedFile>(
                 fastqcProcessedFile.workflowArtefact,
                 fastqcProcessedFile,

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -34,7 +34,7 @@ class SampleIdentifierOverviewServiceIntegrationSpec extends Specification imple
 
     SampleIdentifierOverviewService sampleIdentifierOverviewService
 
-    void "dataFilesOfProjectBySampleAndSeqType, basic testcase"() {
+    void "rawSequenceFilesOfProjectBySampleAndSeqType, basic testcase"() {
         given:
         Sample sample1 = createSample()
         Sample sample2 = createSample()
@@ -49,25 +49,25 @@ class SampleIdentifierOverviewServiceIntegrationSpec extends Specification imple
                 createSeqTrack(sample: sample2, seqType: seqType2),
         ]
 
-        List<DataFile> dataFiles = seqTracks.collect { SeqTrack seqTrack ->
-            createDataFile(seqTrack: seqTrack)
+        List<RawSequenceFile> rawSequenceFiles = seqTracks.collect { SeqTrack seqTrack ->
+            createFastqFile(seqTrack: seqTrack)
         }
 
         sampleIdentifierOverviewService = new SampleIdentifierOverviewService(
-                dataFileService: Mock(DataFileService) {
-                    _ * getAllDataFilesOfProject(_) >> dataFiles
+                rawSequenceFileService: Mock(RawSequenceFileService) {
+                    _ * getAllRawSequenceFilesOfProject(_) >> rawSequenceFiles
                 }
         )
 
-        Map<List, List<DataFile>> expected = [
-            [sample1, seqType1]: [dataFiles[0]],
-            [sample1, seqType2]: dataFiles[1, 2],
-            [sample2, seqType1]: [dataFiles[3]],
-            [sample2, seqType2]: [dataFiles[4]],
+        Map<List, List<RawSequenceFile>> expected = [
+            [sample1, seqType1]: [rawSequenceFiles[0]],
+            [sample1, seqType2]: rawSequenceFiles[1, 2],
+            [sample2, seqType1]: [rawSequenceFiles[3]],
+            [sample2, seqType2]: [rawSequenceFiles[4]],
         ]
 
         when:
-        Map<List, List<DataFile>> result = sampleIdentifierOverviewService.dataFilesOfProjectBySampleAndSeqType(createProject())
+        Map<List, List<RawSequenceFile>> result = sampleIdentifierOverviewService.rawSequenceFilesOfProjectBySampleAndSeqType(createProject())
 
         then:
         TestCase.assertContainSame(expected, result)
@@ -79,22 +79,22 @@ class SampleIdentifierOverviewServiceIntegrationSpec extends Specification imple
             createSeqTrack()
         }
 
-        List<DataFile> dataFiles = [
+        List<RawSequenceFile> rawSequenceFiles = [
                 // normal not withdrawn file
-                createDataFile(seqTrack: seqTracks[0], fileWithdrawn: false, withdrawnComment: null),
+                createFastqFile(seqTrack: seqTracks[0], fileWithdrawn: false, withdrawnComment: null),
                 // same comments, get combined
-                createDataFile(seqTrack: seqTracks[1], fileWithdrawn: true, withdrawnComment: "comment"),
-                createDataFile(seqTrack: seqTracks[1], fileWithdrawn: true, withdrawnComment: "comment"),
+                createFastqFile(seqTrack: seqTracks[1], fileWithdrawn: true, withdrawnComment: "comment"),
+                createFastqFile(seqTrack: seqTracks[1], fileWithdrawn: true, withdrawnComment: "comment"),
                 // differing comments, get joined
-                createDataFile(seqTrack: seqTracks[2], fileWithdrawn: true, withdrawnComment: "commentA"),
-                createDataFile(seqTrack: seqTracks[2], fileWithdrawn: true, withdrawnComment: "commentB"),
+                createFastqFile(seqTrack: seqTracks[2], fileWithdrawn: true, withdrawnComment: "commentA"),
+                createFastqFile(seqTrack: seqTracks[2], fileWithdrawn: true, withdrawnComment: "commentB"),
                 // comments, with html escaped character
-                createDataFile(seqTrack: seqTracks[3], fileWithdrawn: true, withdrawnComment: "comment \" comment"),
+                createFastqFile(seqTrack: seqTracks[3], fileWithdrawn: true, withdrawnComment: "comment \" comment"),
                 // not withdrawn file, but comment given
-                createDataFile(seqTrack: seqTracks[4], fileWithdrawn: false, withdrawnComment: "comment"),
+                createFastqFile(seqTrack: seqTracks[4], fileWithdrawn: false, withdrawnComment: "comment"),
                 // partially withdrawn
-                createDataFile(seqTrack: seqTracks[5], fileWithdrawn: false, withdrawnComment: null),
-                createDataFile(seqTrack: seqTracks[5], fileWithdrawn: true, withdrawnComment: "comment"),
+                createFastqFile(seqTrack: seqTracks[5], fileWithdrawn: false, withdrawnComment: null),
+                createFastqFile(seqTrack: seqTracks[5], fileWithdrawn: true, withdrawnComment: "comment"),
         ]
 
         sampleIdentifierOverviewService = new SampleIdentifierOverviewService()
@@ -109,7 +109,7 @@ class SampleIdentifierOverviewServiceIntegrationSpec extends Specification imple
         ]
 
         when:
-        List<Map> result = sampleIdentifierOverviewService.extractSampleIdentifiers(dataFiles)
+        List<Map> result = sampleIdentifierOverviewService.extractSampleIdentifiers(rawSequenceFiles)
 
         then:
         TestCase.assertContainSame(expected, result)
@@ -117,18 +117,18 @@ class SampleIdentifierOverviewServiceIntegrationSpec extends Specification imple
 
     void "handleSampleIdentifierEntry, test map building"() {
         given:
-        DataFile dataFile = createDataFile(
+        RawSequenceFile rawSequenceFile = createFastqFile(
                 seqTrack: createSeqTrack(
 
                 ),
         )
-        Sample sample = dataFile.seqTrack.sample
-        SeqType seqType = dataFile.seqTrack.seqType
+        Sample sample = rawSequenceFile.seqTrack.sample
+        SeqType seqType = rawSequenceFile.seqTrack.seqType
 
         sampleIdentifierOverviewService = new SampleIdentifierOverviewService()
 
         Map sampleIdentifier = [
-                text     : dataFile.seqTrack.sampleIdentifier,
+                text     : rawSequenceFile.seqTrack.sampleIdentifier,
                 withdrawn: false,
                 comments : "",
         ]
@@ -150,7 +150,7 @@ class SampleIdentifierOverviewServiceIntegrationSpec extends Specification imple
         ]
 
         when:
-        Map result = sampleIdentifierOverviewService.handleSampleIdentifierEntry(dataFile.seqTrack.sample, dataFile.seqTrack.seqType, [dataFile])
+        Map result = sampleIdentifierOverviewService.handleSampleIdentifierEntry(rawSequenceFile.seqTrack.sample, rawSequenceFile.seqTrack.seqType, [rawSequenceFile])
 
         then:
         TestCase.assertContainSame(expected, result)

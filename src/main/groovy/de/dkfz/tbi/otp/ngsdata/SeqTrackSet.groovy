@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,7 +28,7 @@ class SeqTrackSet {
 
     final Set<SeqTrack> seqTracks
 
-    final Set<DataFile> dataFiles
+    final Set<RawSequenceFile> rawSequenceFiles
     final Long totalFileSize
     final Boolean containsWithdrawnData
     final Boolean containsSwappedLane
@@ -41,9 +41,9 @@ class SeqTrackSet {
     SeqTrackSet(List<SeqTrack> seqTracks) {
         this.seqTracks = seqTracks as Set<SeqTrack>
 
-        this.dataFiles = seqTracks.collectMany { it.dataFiles } as Set<DataFile>
-        this.totalFileSize = this.dataFiles.sum { it.fileSize } as Long
-        this.containsWithdrawnData = this.dataFiles.any { it.fileWithdrawn }
+        this.rawSequenceFiles = seqTracks.collectMany { it.sequenceFiles } as Set<RawSequenceFile>
+        this.totalFileSize = this.rawSequenceFiles.sum { it.fileSize } as Long
+        this.containsWithdrawnData = this.rawSequenceFiles.any { it.fileWithdrawn }
         this.containsSwappedLane = this.seqTracks.any { it.swapped }
 
         this.seqPlatforms = this.seqTracks*.seqPlatform.unique()
@@ -55,8 +55,8 @@ class SeqTrackSet {
     @SuppressWarnings('ReturnNullFromCatchBlock') //if the number can not be calculated, null should be return
     private Long getTotalNumberOfBasesOrNull() {
         try {
-            return dataFiles.findAll { !it.indexFile }.sum { DataFile dataFile ->
-                dataFile.NBasePairs
+            return rawSequenceFiles.findAll { !it.indexFile }.sum { RawSequenceFile rawSequenceFile ->
+                rawSequenceFile.NBasePairs
             } as Long
         } catch (AssertionError e) {
             return null

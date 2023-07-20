@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -42,9 +42,10 @@ class MetadataValidationContextSpec extends Specification implements DomainFacto
     @Override
     Class[] getDomainClassesToMock() {
         return [
+                FastqFile,
                 SeqType,
                 Realm,
-                DataFile,
+                RawSequenceFile,
         ]
     }
 
@@ -59,9 +60,9 @@ class MetadataValidationContextSpec extends Specification implements DomainFacto
     void 'createFromFile, when file contains undetermined entries, or with ignoreMd5sum flag, ignores them'() {
         given:
         final String md5sum = '123456789012345678901234567890ab'
-        createDataFile(
+        createFastqFile(
                 fileName: 'fastq',
-                md5sum: md5sum,
+                fastqMd5sum: md5sum,
         )
         Path file = CreateFileHelper.createFile(tempDir.resolve("${HelperUtils.uniqueString}.tsv"))
         file.bytes = ("c ${FASTQ_FILE} ${SAMPLE_NAME} ${INDEX} ${MD5}\n" +

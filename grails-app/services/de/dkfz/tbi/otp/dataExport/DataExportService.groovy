@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -48,8 +48,8 @@ class DataExportService {
         return exportFilesWrapper(dataExportInput, exportHeaderInfoClosure,)
     }
 
-    DataExportOutput exportDataFiles(DataExportInput dataExportInput) {
-        return exportFilesWrapper(dataExportInput, exportDataFilesClosure)
+    DataExportOutput exportRawSequenceFiles(DataExportInput dataExportInput) {
+        return exportFilesWrapper(dataExportInput, exportRawSequenceFilesClosure)
     }
 
     DataExportOutput exportBamFiles(DataExportInput dataExportInput) {
@@ -84,7 +84,8 @@ class DataExportService {
         }
     }
 
-    private final Closure exportDataFilesClosure = { dataExportInput, scriptFileBuilder, scriptListBuilder, consoleBuilder, copyConnection, copyTargetBase ->
+    private final Closure exportRawSequenceFilesClosure = { dataExportInput, scriptFileBuilder, scriptListBuilder, consoleBuilder, copyConnection,
+                                                            copyTargetBase ->
         if (dataExportInput.checkFileStatus) {
             consoleBuilder.append("\n************************************ FASTQ ************************************\n")
             consoleBuilder.append("Found ${dataExportInput.seqTrackList.size()} lanes:\n")
@@ -99,14 +100,14 @@ class DataExportService {
             if (dataExportInput.checkFileStatus) {
                 consoleBuilder.append("\n${seqTrack.individual}\t${seqTrack.seqType}\t${seqTrack.sampleType.name}\n")
             }
-            seqTrack.dataFiles.findAll { dataExportInput.copyWithdrawnData ? true : !it.fileWithdrawn }.each { DataFile dataFile ->
-                Path currentFile = fileSystem.getPath(lsdfFilesService.getFileFinalPath(dataFile))
+            seqTrack.sequenceFiles.findAll { dataExportInput.copyWithdrawnData ? true : !it.fileWithdrawn }.each { RawSequenceFile rawSequenceFile ->
+                Path currentFile = fileSystem.getPath(lsdfFilesService.getFileFinalPath(rawSequenceFile))
                 if (Files.exists(currentFile)) {
                     if (!dataExportInput.checkFileStatus) {
-                        Path targetFolderWithPid = dataExportInput.targetFolder.resolve(dataFile.individual.pid)
+                        Path targetFolderWithPid = dataExportInput.targetFolder.resolve(rawSequenceFile.individual.pid)
                         Path targetFastqFolder = targetFolderWithPid.resolve(seqTrack.seqType.dirName).
-                                resolve(individualService.getViewByPidPath(dataFile.individual, dataFile.seqType)
-                                        .relativize(lsdfFilesService.getFileViewByPidPathAsPath(dataFile)).parent)
+                                resolve(individualService.getViewByPidPath(rawSequenceFile.individual, rawSequenceFile.seqType)
+                                        .relativize(lsdfFilesService.getFileViewByPidPathAsPath(rawSequenceFile)).parent)
                         scriptFileBuilder.append("[[ -n \"\${ECHO_LOG}\" ]] && echo ${currentFile}\n")
                         scriptFileBuilder.append("mkdir -p ${copyTargetBase}${targetFastqFolder}\n")
                         String search = "${currentFile.toString().replaceAll("(_|.)R([1,2])(_|.)", "\$1*\$2\$3")}*"

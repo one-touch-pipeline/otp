@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -95,15 +95,15 @@ class RoddyConfigValueService {
     Map<String, String> getFilesToMerge(RoddyBamFile roddyBamFile) {
         assert roddyBamFile
 
-        List vbpDataFiles = []
+        List vbpSequenceFiles = []
 
         roddyBamFile.seqTracks.each { SeqTrack seqTrack ->
-            List<DataFile> dataFiles = seqTrack.dataFilesWhereIndexFileIsFalse
-            dataFiles.sort { it.mateNumber }.each { DataFile dataFile ->
-                vbpDataFiles.add(lsdfFilesService.getFileViewByPidPath(dataFile))
+            List<RawSequenceFile> rawSequenceFiles = seqTrack.sequenceFilesWhereIndexFileIsFalse
+            rawSequenceFiles.sort { it.mateNumber }.each { RawSequenceFile rawSequenceFile ->
+                vbpSequenceFiles.add(lsdfFilesService.getFileViewByPidPath(rawSequenceFile))
             }
         }
-        return ["fastq_list": vbpDataFiles.join(";")]
+        return ["fastq_list": vbpSequenceFiles.join(";")]
     }
 
     Map<String, String> getChromosomeIndexParameterWithMitochondrion(ReferenceGenome referenceGenome) {
@@ -121,15 +121,15 @@ class RoddyConfigValueService {
     String createMetadataTable(List<SeqTrack> seqTracks) {
         StringBuilder builder = new StringBuilder()
         builder << "Sample\tLibrary\tPID\tReadLayout\tRun\tMate\tSequenceFile\n"
-        builder << DataFile.findAllBySeqTrackInListAndIndexFile(seqTracks, false).sort { it.mateNumber }.collect { DataFile dataFile ->
+        builder << RawSequenceFile.findAllBySeqTrackInListAndIndexFile(seqTracks, false).sort { it.mateNumber }.collect { RawSequenceFile rawSequenceFile ->
             [
-                    dataFile.sampleType.dirName, // it is correct that the header is 'Sample', this is because of the different names for the same things
-                    dataFile.seqTrack.libraryDirectoryName,
-                    dataFile.individual.pid,
-                    dataFile.seqType.libraryLayoutDirName,
-                    dataFile.run.dirName,
-                    dataFile.mateNumber,
-                    lsdfFilesService.getFileViewByPidPathAsPath(dataFile),
+                    rawSequenceFile.sampleType.dirName, // it is correct that the header is 'Sample', this is because of the different names for the same things
+                    rawSequenceFile.seqTrack.libraryDirectoryName,
+                    rawSequenceFile.individual.pid,
+                    rawSequenceFile.seqType.libraryLayoutDirName,
+                    rawSequenceFile.run.dirName,
+                    rawSequenceFile.mateNumber,
+                    lsdfFilesService.getFileViewByPidPathAsPath(rawSequenceFile),
             ].join("\t")
         }.join("\n")
         return builder.toString()

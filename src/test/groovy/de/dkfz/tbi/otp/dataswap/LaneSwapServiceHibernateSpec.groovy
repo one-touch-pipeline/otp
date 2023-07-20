@@ -41,7 +41,7 @@ class LaneSwapServiceHibernateSpec extends HibernateSpec implements ServiceUnitT
     @Override
     List<Class> getDomainClasses() {
         return [
-                DataFile,
+                RawSequenceFile,
                 Project,
                 SampleType,
                 SeqType,

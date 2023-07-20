@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -34,7 +34,7 @@ import de.dkfz.tbi.otp.withdraw.WithdrawService
  * For all file changes a bash script is created, which needs to be executed manually.
  *
  * The script does the following:
- * - DataFile:
+ * - RawSequenceFile:
  *   - withdraw in OTP
  *   - change unix group for file in run folder
  *   - delete link from viewByPidFolder
@@ -143,7 +143,7 @@ comment'
 String fileName = ''
 
 /**
- * Should withdrawing stop if files are not existing in file system (using cached value 'dataFile.fileExists')
+ * Should withdrawing stop if files are not existing in file system (using cached value 'sequenceFile.fileExists')
  */
 boolean stopOnMissingFiles = true
 

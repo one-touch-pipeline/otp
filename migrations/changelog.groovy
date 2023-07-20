@@ -84,4 +84,6 @@ databaseChangeLog = {
     include file: 'changelogs/2023/otp-2073-save-final-metadatafile-location.groovy'
 
     include file: 'changelogs/2023/otp-2123.groovy'
+
+    include file: 'changelogs/2023/otp-1982.groovy'
 }

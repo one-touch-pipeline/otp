@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -49,9 +49,9 @@ class FastqcUploadService {
     void uploadFastQCFileContentsToDataBase(FastqcProcessedFile fastqc) {
         assert fastqc : "No FastQC file defined"
         Map parsedFastqcFile = parseFastQCFile(fastqc, PROPERTIES_REGEX_TO_BE_PARSED)
-        fastqc.dataFile.nReads = parsedFastqcFile["nReads"] as long
-        fastqc.dataFile.sequenceLength = parsedFastqcFile["sequenceLength"]
-        fastqc.dataFile.save(flush: true)
+        fastqc.sequenceFile.nReads = parsedFastqcFile["nReads"] as long
+        fastqc.sequenceFile.sequenceLength = parsedFastqcFile["sequenceLength"]
+        fastqc.sequenceFile.save(flush: true)
         fastqc.contentUploaded = true
         fastqc.save(flush: true)
     }

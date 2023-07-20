@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,9 +22,7 @@
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
 import grails.testing.gorm.DataTest
-import spock.lang.Specification
-import spock.lang.TempDir
-import spock.lang.Unroll
+import spock.lang.*
 
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.config.OtpProperty
@@ -49,7 +47,8 @@ class AbstractRoddyAlignmentJobSpec extends Specification implements DataTest, R
     Class<?>[] getDomainClassesToMock() {
         return [
                 AbstractBamFile,
-                DataFile,
+                RawSequenceFile,
+                FastqFile,
                 FileType,
                 Individual,
                 LibraryPreparationKit,
@@ -357,7 +356,7 @@ class AbstractRoddyAlignmentJobSpec extends Specification implements DataTest, R
         roddyBamFile.workBamFile.parentFile.mkdirs()
         roddyBamFile.workBamFile.text = createMinimalSamFile(roddyBamFile.containedSeqTracks*.readGroupName)
 
-        SeqTrack seqTrack = DomainFactory.createSeqTrackWithTwoDataFiles(roddyBamFile.mergingWorkPackage)
+        SeqTrack seqTrack = DomainFactory.createSeqTrackWithTwoFastqFiles(roddyBamFile.mergingWorkPackage)
         roddyBamFile.seqTracks.add(seqTrack)
         roddyBamFile.numberOfMergedLanes++
         roddyBamFile.save(flush: true)
@@ -390,7 +389,7 @@ class AbstractRoddyAlignmentJobSpec extends Specification implements DataTest, R
         TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): tempDir.toString()])
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
 
-        SeqTrack seqTrack = DomainFactory.createSeqTrackWithTwoDataFiles(roddyBamFile.mergingWorkPackage)
+        SeqTrack seqTrack = DomainFactory.createSeqTrackWithTwoFastqFiles(roddyBamFile.mergingWorkPackage)
         roddyBamFile.seqTracks.add(seqTrack)
         roddyBamFile.numberOfMergedLanes++
         roddyBamFile.save(flush: true)

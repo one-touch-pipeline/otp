@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -74,21 +74,21 @@ class CommentServiceIntegrationSpec extends Specification implements UserAndRole
         individual.comment == comment
     }
 
-    void "test saveComment with Datafile"() {
+    void "test saveComment with Fastq file"() {
         given:
         setupData()
-        CommentableWithProject datafile = DomainFactory.createDataFile()
+        CommentableWithProject commentable = DomainFactory.createFastqFile()
         Comment comment
 
         when:
         comment = doWithAuth(ADMIN) {
-            commentService.saveComment(datafile, TEST_MESSAGE)
+            commentService.saveComment(commentable, TEST_MESSAGE)
         }
 
         then:
         comment.comment == TEST_MESSAGE
         comment.author == ADMIN
-        datafile.comment == comment
+        commentable.comment == comment
     }
 
     void "test saveComment with Process"() {

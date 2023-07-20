@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -105,12 +105,12 @@ withPool(numCores, {
                 }
 
                 if (oldToNewMap) {
-                    String projectUnixGroup = it.dataFile.project.unixGroup
-                    String fileUnixGroup = it.dataFile.fileWithdrawn ? withdrawnUnixGroup : projectUnixGroup
+                    String projectUnixGroup = it.sequenceFile.project.unixGroup
+                    String fileUnixGroup = it.sequenceFile.fileWithdrawn ? withdrawnUnixGroup : projectUnixGroup
 
                     scriptPerProject << """
                     |
-                    |# ${it.dataFile} ${it.dataFile.seqTrack}
+                    |# ${it.sequenceFile} ${it.sequenceFile.seqTrack}
                     |mkdir -p ${newDirectory}
                     |chgrp ${projectUnixGroup} ${newDirectory}
                     |chmod 2750 ${newDirectory}

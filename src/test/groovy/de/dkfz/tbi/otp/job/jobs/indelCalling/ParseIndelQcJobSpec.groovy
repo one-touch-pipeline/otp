@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,9 +22,7 @@
 package de.dkfz.tbi.otp.job.jobs.indelCalling
 
 import grails.testing.gorm.DataTest
-import spock.lang.Specification
-import spock.lang.TempDir
-import spock.lang.Unroll
+import spock.lang.*
 
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.config.OtpProperty
@@ -46,7 +44,8 @@ class ParseIndelQcJobSpec extends Specification implements DataTest {
     Class[] getDomainClassesToMock() {
         return [
                 AbstractBamFile,
-                DataFile,
+                RawSequenceFile,
+                FastqFile,
                 FileType,
                 IndelCallingInstance,
                 IndelSampleSwapDetection,

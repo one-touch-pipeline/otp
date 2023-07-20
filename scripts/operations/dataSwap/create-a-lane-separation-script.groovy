@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -127,14 +127,14 @@ Closure<ScriptBuilder> createSwapScript = { String swapLabel ->
 
         builder.addMetaInfo("${parsedEntry.oldSample} [${parsedEntry.identifier}] --> ${parsedEntry.newSample}")
 
-        Map<SeqTrack, List<DataFile>> dataFilesPerSeqTrack = getDataFilesBySampleIdentifierString(parsedEntry).groupBy { it.seqTrack }
-        dataFilesPerSeqTrack.eachWithIndex { SeqTrack seqTrack, List<DataFile> dataFiles, int index ->
+        Map<SeqTrack, List<RawSequenceFile>> rawSequenceFilesPerSeqTrack = getRawSequenceFilesBySampleIdentifierString(parsedEntry).groupBy { it.seqTrack }
+        rawSequenceFilesPerSeqTrack.eachWithIndex { SeqTrack seqTrack, List<RawSequenceFile> rawSequenceFiles, int index ->
             String fileName = "mv_${counter++}_${parsedEntry.oldSampleString}_ST_${index}_${seqTrack.laneId}__to__${parsedEntry.newSampleString}"
 
             builder.addMetaInfo("  * ${seqTrack.laneId}  ${seqTrack.seqType}")
 
-            dataFiles.each { DataFile dataFile ->
-                builder.addMetaInfo("    - ${dataFile}")
+            rawSequenceFiles.each { RawSequenceFile rawSequenceFile ->
+                builder.addMetaInfo("    - ${rawSequenceFile}")
             }
 
             builder.addGroovyCommand(Snippets.indent(Snippets.swapLane(seqTrack, fileName, parsedEntry.newSample), 2))
@@ -173,8 +173,8 @@ println createSwapScript(swapLabel).build("lane-swap-${swapLabel}.sh")
  * Utility Functions and Classes
  ********************************************************************************/
 
-private List<DataFile> getDataFilesBySampleIdentifierString(ParsedSwapMapEntry entry) {
-    return DataFile.withCriteria {
+private List<RawSequenceFile> getRawSequenceFilesBySampleIdentifierString(ParsedSwapMapEntry entry) {
+    return RawSequenceFile.withCriteria {
         seqTrack {
             eq('sampleIdentifier', entry.identifier)
             eq('sample', entry.oldSample)
@@ -324,10 +324,10 @@ class Snippets {
                 "\t\trunName: '${seqTrack.run.name}',\n" +
                 "\t\tlanes: ['${seqTrack.laneId}',],\n" +
                 "\t\tsampleNeedsToBeCreated: false,\n" +
-                "\t\tdataFileSwaps        : [\n"
+                "\t\trawSequenceFileSwaps        : [\n"
 
-        DataFile.findAllBySeqTrack(seqTrack, [sort: 'id']).each { datafile ->
-            snippet << "\t\t\tnew Swap('${datafile.fileName}', ''),\n"
+        RawSequenceFile.findAllBySeqTrack(seqTrack, [sort: 'id']).each { rawSequenceFile ->
+            snippet << "\t\t\tnew Swap('${rawSequenceFile.fileName}', ''),\n"
         }
 
         snippet << "\t\t],\n" +

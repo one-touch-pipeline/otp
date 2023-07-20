@@ -143,7 +143,7 @@ Closure<List<String>> nameStringToList = { String nameString ->
 
 Closure<List<SeqTrack>> findNotWithdrawn = { List<SeqTrack> seqTracks ->
     Map<Boolean, List<SeqTrack>> map = seqTracks.groupBy {
-        DataFile.findAllBySeqTrackAndFileWithdrawn(it, true) as Boolean
+        RawSequenceFile.findAllBySeqTrackAndFileWithdrawn(it, true) as Boolean
     }
     if (map[true]) {
         output << "the ${map[true].size()} withdrawn lanes are filtered out"
@@ -335,7 +335,7 @@ if (allProcessed) {
             select
                 seqTrack.id
             from
-                DataFile datafile
+                RawSequenceFile datafile
                 join datafile.seqTrack seqTrack
             where
                 datafile.fileWithdrawn = true

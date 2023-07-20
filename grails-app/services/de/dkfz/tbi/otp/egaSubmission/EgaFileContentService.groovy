@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -57,8 +57,8 @@ class EgaFileContentService {
         log.debug("creating mapping file for ${submission}")
         StringBuilder out = new StringBuilder()
 
-        submission.dataFilesToSubmit.each {
-            out << lsdfFilesService.getFileFinalPath(it.dataFile) << '\t' << it.egaAliasName << '\n'
+        submission.rawSequenceFilesToSubmit.each {
+            out << lsdfFilesService.getFileFinalPath(it.sequenceFile) << '\t' << it.egaAliasName << '\n'
         }
 
         submission.bamFilesToSubmit.each {
@@ -82,9 +82,9 @@ class EgaFileContentService {
      *
      * @return a string of underscore-separated experiment components, as far as known to OTP.
      */
-    String createKeyForFastq(DataFileSubmissionObject dataFileSubmissionObject) {
-        DataFile dataFile = dataFileSubmissionObject.dataFile
-        SeqTrack seqTrack = dataFile.seqTrack
+    String createKeyForFastq(RawSequenceFileSubmissionObject submissionObject) {
+        RawSequenceFile rawSequenceFile = submissionObject.sequenceFile
+        SeqTrack seqTrack = rawSequenceFile.seqTrack
         SeqType seqType = seqTrack.seqType
         return [
                 seqType.displayName,
@@ -150,17 +150,17 @@ class EgaFileContentService {
     Map<String, String> createSingleFastqFileMapping(EgaSubmission egaSubmission) {
         log.debug("creating single fastq mappings for ${egaSubmission}")
         Map<String, String> fileFileContent = [:]
-        egaSubmission.dataFilesToSubmit.findAll { DataFileSubmissionObject dataFileSubmissionObject ->
-            dataFileSubmissionObject.dataFile.seqType.libraryLayout == SequencingReadType.SINGLE
-        }.groupBy { DataFileSubmissionObject dataFileSubmissionObject ->
-            createKeyForFastq(dataFileSubmissionObject)
-        }.each { String key, List<DataFileSubmissionObject> dataFileSubmissionObjects ->
+        egaSubmission.rawSequenceFilesToSubmit.findAll { RawSequenceFileSubmissionObject submissionObject ->
+            submissionObject.sequenceFile.seqType.libraryLayout == SequencingReadType.SINGLE
+        }.groupBy { RawSequenceFileSubmissionObject submissionObject ->
+            createKeyForFastq(submissionObject)
+        }.each { String key, List<RawSequenceFileSubmissionObject> submissionObjects ->
             String fileName = "runs-fastqs-${key}.csv"
             log.debug("    ${fileName}")
-            String content = dataFileSubmissionObjects.collect { DataFileSubmissionObject dataFileSubmissionObject ->
+            String content = submissionObjects.collect { RawSequenceFileSubmissionObject submissionObject ->
                 [
-                        dataFileSubmissionObject.sampleSubmissionObject.egaAliasName,
-                        dataFileSubmissionObject.egaAliasName,
+                        submissionObject.sampleSubmissionObject.egaAliasName,
+                        submissionObject.egaAliasName,
                         '',
                         '',
                 ].join(',')
@@ -184,20 +184,20 @@ class EgaFileContentService {
     Map<String, String> createPairedFastqFileMapping(EgaSubmission egaSubmission) {
         log.debug("creating paired fastq mappings for ${egaSubmission}")
         Map<String, String> fileFileContent = [:]
-        egaSubmission.dataFilesToSubmit.findAll { DataFileSubmissionObject dataFileSubmissionObject ->
-            dataFileSubmissionObject.dataFile.seqType.libraryLayout == SequencingReadType.PAIRED
-        }.groupBy { DataFileSubmissionObject dataFileSubmissionObject ->
-            createKeyForFastq(dataFileSubmissionObject)
-        }.each { String key, List<DataFileSubmissionObject> dataFileSubmissionObjects ->
+        egaSubmission.rawSequenceFilesToSubmit.findAll { RawSequenceFileSubmissionObject submissionObject ->
+            submissionObject.sequenceFile.seqType.libraryLayout == SequencingReadType.PAIRED
+        }.groupBy { RawSequenceFileSubmissionObject submissionObject ->
+            createKeyForFastq(submissionObject)
+        }.each { String key, List<RawSequenceFileSubmissionObject> submissionObjects ->
             String fileName = "runs-fastqs-${key}.csv"
             log.debug("    ${fileName}")
-            String content = dataFileSubmissionObjects.groupBy {
-                it.dataFile.seqTrack
-            }.collect { SeqTrack seqTrack, List<DataFileSubmissionObject> dataFileSubmissionObjectPerSeqTrack ->
-                assert dataFileSubmissionObjectPerSeqTrack.size() == 2
-                List<String> fileAlias = dataFileSubmissionObjectPerSeqTrack*.egaAliasName.sort()
+            String content = submissionObjects.groupBy {
+                it.sequenceFile.seqTrack
+            }.collect { SeqTrack seqTrack, List<RawSequenceFileSubmissionObject> submissionObjectPerSeqTrack ->
+                assert submissionObjectPerSeqTrack.size() == 2
+                List<String> fileAlias = submissionObjectPerSeqTrack*.egaAliasName.sort()
                 SampleSubmissionObject sampleSubmissionObject = CollectionUtils.exactlyOneElement(
-                        dataFileSubmissionObjectPerSeqTrack*.sampleSubmissionObject.unique())
+                        submissionObjectPerSeqTrack*.sampleSubmissionObject.unique())
                 return [
                         sampleSubmissionObject.egaAliasName,
                         fileAlias[0],

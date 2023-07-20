@@ -286,8 +286,8 @@ class NotificationCreator {
     private List<String> getPathsToDelete(OtrsTicket otrsTicket) {
         List<String> allPaths = []
         otrsTicketService.getMetaDataFilesOfOtrsTicket(otrsTicket).each { MetaDataFile metaDataFile ->
-            List<String> dataFilePaths = metaDataFile.fastqImportInstance.dataFiles*.fullInitialPath
-            allPaths.addAll(dataFilePaths)
+            List<String> initialPaths = metaDataFile.fastqImportInstance.sequenceFiles*.fullInitialPath
+            allPaths.addAll(initialPaths)
         }
         return getPrefixBlacklistFilteredStrings(allPaths)
     }
@@ -494,7 +494,7 @@ class NotificationCreator {
     void sendWorkflowCreateErrorMail(MetaDataFile metaDataFile, Throwable throwable) {
         metaDataFile.refresh()
         long id = metaDataFile.fastqImportInstance.id
-        List<Long> seqTrackIds = metaDataFile.fastqImportInstance.dataFiles*.seqTrack*.id.unique().sort()
+        List<Long> seqTrackIds = metaDataFile.fastqImportInstance.sequenceFiles*.seqTrack*.id.unique().sort()
 
         String subject = "[${otrsTicketService.getPrefixedTicketNumber(metaDataFile.fastqImportInstance.otrsTicket)}] " +
                 "Failed to create workflows for ${metaDataFile.fileNameSource}"

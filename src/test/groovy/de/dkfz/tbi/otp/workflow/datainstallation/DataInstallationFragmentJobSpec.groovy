@@ -26,8 +26,7 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.DataInstallationWorkflowDomainFactory
-import de.dkfz.tbi.otp.ngsdata.DataFile
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflowExecution.SingleSelectSelectorExtendedCriteria
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
@@ -37,7 +36,8 @@ class DataInstallationFragmentJobSpec extends Specification implements DataTest,
     @Override
     Class[] getDomainClassesToMock() {
         return [
-                DataFile,
+                FastqFile,
+                RawSequenceFile,
                 WorkflowStep,
         ]
     }
@@ -51,7 +51,7 @@ class DataInstallationFragmentJobSpec extends Specification implements DataTest,
                         workflow       : findOrCreateDataInstallationWorkflowWorkflow(),
                 ]),
         ])
-        SeqTrack seqTrack = createSeqTrackWithTwoDataFile([
+        SeqTrack seqTrack = createSeqTrackWithTwoFastqFile([
                 libraryPreparationKit: libIsNull ? null : createLibraryPreparationKit(),
         ])
 

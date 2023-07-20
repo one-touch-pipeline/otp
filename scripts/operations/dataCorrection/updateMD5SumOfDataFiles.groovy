@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,16 +28,16 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 /**
  * script to change md5Sums of Datafiles
- * runName = Name of {@link Run}, the {@link DataFile} belongs to as String
- * dataFileMap = Map of {@link DataFile} fileName as String and its new md5Sum as String
- *               dataFileMap = [fileName: md5Sum, fileName: md5Sum]
+ * runName = Name of {@link Run}, the {@link RawSequenceFile} belongs to as String
+ * rawSequenceFileMap = Map of {@link RawSequenceFile} fileName as String and its new md5Sum as String
+ *               rawSequenceFileMap = [fileName: md5Sum, fileName: md5Sum]
  */
 
 String executingUser = ""
 List<String> runNames = [""]
-Map<String, String> dataFileMap = [:]
+Map<String, String> rawSequenceFileMap = [:]
 
-assert executingUser: "Your username is used to set a comment that informs of the changes to the DataFile"
+assert executingUser: "Your username is used to set a comment that informs of the changes to the RawSequenceFile"
 assert runNames: "Define the Runs"
 runNames.each {
     assert it: "Invalid run in list of runs"
@@ -46,29 +46,29 @@ runNames.each {
 List<Run> runs = Run.findAllByNameInList(runNames)
 assert runs.size() == runNames.size(): "Didn't find Runs for all run names"
 
-DataFile.withTransaction {
-    dataFileMap.each { String fileName, String newMd5sum ->
-        DataFile dataFile = exactlyOneElement(DataFile.findAllByRunInListAndFileName(runs, fileName))
+RawSequenceFile.withTransaction {
+    rawSequenceFileMap.each { String fileName, String newMd5sum ->
+        RawSequenceFile rawSequenceFile = exactlyOneElement(RawSequenceFile.findAllByRunInListAndFileName(runs, fileName))
 
-        String fromMd5 = dataFile.md5sum
+        String fromMd5 = rawSequenceFile.fastqMd5sum
         String toMd5 = newMd5sum
-        Long fromFileSize = dataFile.fileSize
-        Long toFileSize = new File(ctx.lsdfFilesService.getFileViewByPidPath(dataFile)).size()
+        Long fromFileSize = rawSequenceFile.fileSize
+        Long toFileSize = new File(ctx.lsdfFilesService.getFileViewByPidPath(rawSequenceFile)).size()
 
         if (fromMd5 != toMd5) {
-            dataFile.md5sum = newMd5sum
-            dataFile.fileSize = toFileSize
+            rawSequenceFile.fastqMd5sum = newMd5sum
+            rawSequenceFile.fileSize = toFileSize
             String newComment = """${TimeFormats.DATE_TIME.getFormattedDate(new Date())}
   changed md5sum   from: ${fromMd5} to: ${toMd5}
   changed fileSize from: ${fromFileSize} to: ${toFileSize}"""
             println(newComment)
-            String previous = dataFile.comment?.comment
+            String previous = rawSequenceFile.comment?.comment
             ctx.commentService.createOrUpdateComment(
-                    dataFile,
+                    rawSequenceFile,
                     previous + (previous? "\n\n" : "") + newComment,
                     executingUser
             )
-            dataFile.save(flush: true)
+            rawSequenceFile.save(flush: true)
         } else {
             println "Nothing done for ${fileName} with md5sum ${newMd5sum}"
         }

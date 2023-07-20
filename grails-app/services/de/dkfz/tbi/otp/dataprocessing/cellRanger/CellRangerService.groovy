@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -103,11 +103,11 @@ class CellRangerService {
             Path sampleIdentifierDirectory = sampleDirectory.resolve(sampleIdentifierDirName)
             fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(sampleIdentifierDirectory, realm, unixGroup)
             seqTracks.sort { it.id }.withIndex(1).each { SeqTrack seqTrack, int laneCounter ->
-                seqTrack.dataFilesWhereIndexFileIsFalse.sort { it.id }.each { DataFile dataFile ->
+                seqTrack.sequenceFilesWhereIndexFileIsFalse.sort { it.id }.each { RawSequenceFile rawSequenceFile ->
                     String formattedLaneNumber = String.valueOf(laneCounter).padLeft(3, '0')
-                    String fileName = "${sampleName}_S1_L${formattedLaneNumber}_R${dataFile.mateNumber}_${formattedLaneNumber}.fastq.gz"
+                    String fileName = "${sampleName}_S1_L${formattedLaneNumber}_R${rawSequenceFile.mateNumber}_${formattedLaneNumber}.fastq.gz"
                     Path link = sampleIdentifierDirectory.resolve(fileName)
-                    Path target = fileSystem.getPath(lsdfFilesService.getFileViewByPidPath(dataFile))
+                    Path target = fileSystem.getPath(lsdfFilesService.getFileViewByPidPath(rawSequenceFile))
                     fileService.createLink(link, target, realm, unixGroup)
                 }
             }

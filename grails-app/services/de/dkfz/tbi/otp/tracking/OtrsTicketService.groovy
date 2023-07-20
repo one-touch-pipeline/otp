@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -135,7 +135,7 @@ class OtrsTicketService {
         if (!seqTracks) {
             return [] as Set
         }
-        List<OtrsTicket> otrsTickets = DataFile.createCriteria().listDistinct {
+        List<OtrsTicket> otrsTickets = RawSequenceFile.createCriteria().listDistinct {
             'in'('seqTrack', seqTracks)
             fastqImportInstance {
                 isNotNull('otrsTicket')
@@ -152,7 +152,7 @@ class OtrsTicketService {
 
     Set<SeqTrack> findAllSeqTracks(OtrsTicket otrsTicket) {
         return new LinkedHashSet<SeqTrack>(SeqTrack.findAll(
-                'FROM SeqTrack st WHERE EXISTS (FROM DataFile df WHERE df.seqTrack = st AND df.fastqImportInstance.otrsTicket = :otrsTicket)',
+                'FROM SeqTrack st WHERE EXISTS (FROM RawSequenceFile df WHERE df.seqTrack = st AND df.fastqImportInstance.otrsTicket = :otrsTicket)',
                 [otrsTicket: otrsTicket]
         ))
     }

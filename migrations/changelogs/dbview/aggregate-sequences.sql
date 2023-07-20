@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -82,8 +82,8 @@ FROM seq_track AS st
 
 WHERE st.id NOT IN (SELECT DISTINCT seq.id
                     FROM seq_track AS seq
-                             INNER JOIN data_file AS df ON df.seq_track_id = seq.id
-                    WHERE df.file_withdrawn != FALSE)
+                             INNER JOIN raw_sequence_file AS sf ON sf.seq_track_id = seq.id
+                    WHERE sf.file_withdrawn != FALSE)
 
 GROUP BY st.seq_type_id,
          r.seq_platform_id,

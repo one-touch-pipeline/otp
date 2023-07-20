@@ -203,7 +203,7 @@ String createString(Object entity, boolean isSample, List<SpeciesWithStrain> spe
     }
     value << "- species in metadata:"
     MetaDataEntry.withCriteria {
-        'in'('dataFile', dataFiles)
+        'in'('sequenceFile', dataFiles)
         key {
             'eq'('name', MetaDataColumn.SPECIES.name())
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -43,7 +43,8 @@ class DataInstallationConditionalFailJobSpec extends Specification implements Da
     @Override
     Class[] getDomainClassesToMock() {
         return [
-                DataFile,
+                FastqFile,
+                RawSequenceFile,
                 Sample,
                 SampleType,
                 WorkflowStep,
@@ -53,7 +54,7 @@ class DataInstallationConditionalFailJobSpec extends Specification implements Da
     void "test check, succeeds"() {
         given:
         WorkflowStep workflowStep = createWorkflowStep()
-        SeqTrack seqTrack = createSeqTrackWithTwoDataFile()
+        SeqTrack seqTrack = createSeqTrackWithTwoFastqFile()
 
         DataInstallationConditionalFailJob job = Spy(DataInstallationConditionalFailJob) {
             getSeqTrack(workflowStep) >> seqTrack
@@ -90,7 +91,7 @@ class DataInstallationConditionalFailJobSpec extends Specification implements Da
     void "test check, fails because physical files are missing"() {
         given:
         WorkflowStep workflowStep = createWorkflowStep()
-        SeqTrack seqTrack = createSeqTrackWithTwoDataFile()
+        SeqTrack seqTrack = createSeqTrackWithTwoFastqFile()
 
         DataInstallationConditionalFailJob job = Spy(DataInstallationConditionalFailJob) {
             getSeqTrack(workflowStep) >> seqTrack

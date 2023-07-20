@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -168,8 +168,8 @@ class AbstractAlignmentDeciderIntegrationSpec extends Specification {
         OtrsTicket ticket = DomainFactory.createOtrsTicket()
         FastqImportInstance fastqImportInstance = DomainFactory.createFastqImportInstance(otrsTicket: ticket)
         SeqTrack seqTrack = buildSeqTrack()
-        seqTrack.dataFiles*.fastqImportInstance = fastqImportInstance
-        seqTrack.dataFiles*.save(flush: true)
+        seqTrack.sequenceFiles*.fastqImportInstance = fastqImportInstance
+        seqTrack.sequenceFiles*.save(flush: true)
 
         DomainFactory.createMergingWorkPackage(
                 sample: seqTrack.sample,
@@ -203,8 +203,8 @@ class AbstractAlignmentDeciderIntegrationSpec extends Specification {
         DomainFactory.createProcessingOptionForOtrsTicketPrefix(prefix)
         OtrsTicket ticket = DomainFactory.createOtrsTicket()
         FastqImportInstance fastqImportInstance = DomainFactory.createFastqImportInstance(otrsTicket: ticket)
-        seqTrack.dataFiles*.fastqImportInstance = fastqImportInstance
-        seqTrack.dataFiles*.save(flush: true)
+        seqTrack.sequenceFiles*.fastqImportInstance = fastqImportInstance
+        seqTrack.sequenceFiles*.save(flush: true)
 
         decider.mailHelperService = Mock(MailHelperService) {
             1 * sendEmailToTicketSystem(_, _) >> { String subject, String content ->
@@ -328,8 +328,8 @@ class AbstractAlignmentDeciderIntegrationSpec extends Specification {
         seqTrack.kitInfoReliability = InformationReliability.UNKNOWN_UNVERIFIED
         seqTrack.save(flush: true)
 
-        DataFile dataFile = testData.createDataFile(seqTrack: seqTrack)
-        dataFile.save(flush: true)
+        RawSequenceFile rawSequenceFile = testData.createDataFile(seqTrack: seqTrack)
+        rawSequenceFile.save(flush: true)
 
         expect:
         shouldFail RuntimeException, {
@@ -450,8 +450,8 @@ class AbstractAlignmentDeciderIntegrationSpec extends Specification {
         SeqTrack seqTrack = testData.createSeqTrack()
         seqTrack.save(flush: true)
         DomainFactory.createMergingCriteriaLazy(project: seqTrack.project, seqType: seqTrack.seqType)
-        DataFile dataFile = testData.createDataFile(seqTrack: seqTrack)
-        dataFile.save(flush: true)
+        RawSequenceFile rawSequenceFile = testData.createDataFile(seqTrack: seqTrack)
+        rawSequenceFile.save(flush: true)
 
         DomainFactory.createRoddyWorkflowConfig(project: seqTrack.project, seqType: seqTrack.seqType,
                 pipeline: findOrSaveByNameAndType(Pipeline.Name.RODDY_RNA_ALIGNMENT, Pipeline.Type.ALIGNMENT))

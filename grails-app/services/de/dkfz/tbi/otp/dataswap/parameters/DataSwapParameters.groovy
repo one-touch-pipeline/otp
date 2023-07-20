@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -44,7 +44,7 @@ class DataSwapParameters implements Validateable {
                 return "neither the old nor the new pid name may be null or blank"
             }
         }
-        dataFileSwaps nullable: false, validator: {
+        rawSequenceFileSwaps nullable: false, validator: {
             if (it*.old.any { !it }) {
                 return "None of the old file names may be null or blank"
             }
@@ -56,7 +56,7 @@ class DataSwapParameters implements Validateable {
 
     Swap<String> projectNameSwap
     Swap<String> pidSwap
-    List<Swap<String>> dataFileSwaps
+    List<Swap<String>> rawSequenceFileSwaps
     String bashScriptName
     StringBuilder log
     boolean failOnMissingFiles = false

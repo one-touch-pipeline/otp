@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -116,10 +116,10 @@ class WithdrawServiceSpec extends Specification implements DataTest, DomainFacto
         1 * withdrawHelperService.createOverviewSummary(_)
 
         then:
-        1 * withdrawHelperService.checkNonExistingDataFiles(_)
+        1 * withdrawHelperService.checkNonExistingRawSequenceFiles(_)
 
         then:
-        1 * withdrawHelperService.checkForAlreadyWithdrawnDatafiles(_)
+        1 * withdrawHelperService.checkForAlreadyWithdrawnRawSequenceFiles(_)
 
         then:
         1 * withdrawHelperService.handleAnalysis(_)
@@ -128,7 +128,7 @@ class WithdrawServiceSpec extends Specification implements DataTest, DomainFacto
         1 * withdrawHelperService.handleBamFiles(_, _)
 
         then:
-        1 * withdrawHelperService.handleDataFiles(_)
+        1 * withdrawHelperService.handleRawSequenceFiles(_)
 
         then:
         1 * withdrawHelperService.createAndWriteBashScript(_)

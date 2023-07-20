@@ -143,7 +143,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         setupData()
         SessionUtils.withTransaction {
             ticketA = createOtrsTicket()
-            seqTrackA = createSeqTrackWithOneDataFile(
+            seqTrackA = createSeqTrackWithOneFastqFile(
                     [
                             dataInstallationState: SeqTrack.DataProcessingState.FINISHED,
                             fastqcState          : SeqTrack.DataProcessingState.IN_PROGRESS,
@@ -151,13 +151,13 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
                     [fastqImportInstance: createFastqImportInstance(otrsTicket: ticketA), fileLinked: true])
 
             ticketB = createOtrsTicket()
-            seqTrackB = createSeqTrackWithOneDataFile(
+            seqTrackB = createSeqTrackWithOneFastqFile(
                     [
                             dataInstallationState: SeqTrack.DataProcessingState.FINISHED,
                             fastqcState          : SeqTrack.DataProcessingState.FINISHED,
                     ],
                     [fastqImportInstance: createFastqImportInstance(otrsTicket: ticketB), fileLinked: true])
-            createSeqTrackWithOneDataFile(
+            createSeqTrackWithOneFastqFile(
                     [
                             dataInstallationState: SeqTrack.DataProcessingState.FINISHED,
                             fastqcState          : SeqTrack.DataProcessingState.IN_PROGRESS,
@@ -194,7 +194,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
                     finalNotificationSent: true,
             )
             FastqImportInstance fastqImportInstance = createFastqImportInstance(otrsTicket: ticket)
-            createSeqTrackWithOneDataFile(
+            createSeqTrackWithOneFastqFile(
                     [fastqcState: SeqTrack.DataProcessingState.FINISHED],
                     [fastqImportInstance: fastqImportInstance, fileLinked: true])
 
@@ -230,10 +230,10 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
                     installationFinished: installationFinished,
             )
             FastqImportInstance fastqImportInstance = createFastqImportInstance(otrsTicket: ticket)
-            createSeqTrackWithOneDataFile(
+            createSeqTrackWithOneFastqFile(
                     [fastqcState: SeqTrack.DataProcessingState.FINISHED],
                     [fastqImportInstance: fastqImportInstance, fileLinked: true])
-            createSeqTrackWithOneDataFile(
+            createSeqTrackWithOneFastqFile(
                     [fastqcState: SeqTrack.DataProcessingState.IN_PROGRESS],
                     [fastqImportInstance: fastqImportInstance, fileLinked: true])
 
@@ -266,7 +266,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
             // SNV:          finished timestamp not set, nothing done, won't do more
             ticket = createOtrsTicket()
             FastqImportInstance fastqImportInstance = createFastqImportInstance(otrsTicket: ticket)
-            SeqTrack seqTrack = createSeqTrackWithOneDataFile(
+            SeqTrack seqTrack = createSeqTrackWithOneFastqFile(
                     [
                             dataInstallationState: SeqTrack.DataProcessingState.FINISHED,
                             fastqcState          : SeqTrack.DataProcessingState.IN_PROGRESS,
@@ -323,7 +323,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
             // SNV:          finished timestamp not set, nothing done, won't do more
             ticket = createOtrsTicket()
             FastqImportInstance fastqImportInstance = createFastqImportInstance(otrsTicket: ticket)
-            SeqTrack seqTrack1 = createSeqTrackWithOneDataFile(
+            SeqTrack seqTrack1 = createSeqTrackWithOneFastqFile(
                     [
                             dataInstallationState: SeqTrack.DataProcessingState.FINISHED,
                             fastqcState          : SeqTrack.DataProcessingState.FINISHED,
@@ -333,7 +333,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
                             fileLinked         : true,
                     ],
             )
-            SeqTrack seqTrack2 = createSeqTrackWithOneDataFile(
+            SeqTrack seqTrack2 = createSeqTrackWithOneFastqFile(
                     [
                             sample               : createSample(individual: createIndividual(project: seqTrack1.project)),
                             dataInstallationState: SeqTrack.DataProcessingState.FINISHED,
@@ -433,14 +433,14 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
             // SNV:          finished timestamp not set, nothing done, won't do more
             ticket = createOtrsTicket()
             FastqImportInstance fastqImportInstance = createFastqImportInstance(otrsTicket: ticket)
-            SeqTrack seqTrack1 = createSeqTrackWithOneDataFile(
+            SeqTrack seqTrack1 = createSeqTrackWithOneFastqFile(
                     [
                             dataInstallationState: SeqTrack.DataProcessingState.FINISHED,
                             fastqcState          : SeqTrack.DataProcessingState.FINISHED,
                     ],
                     [fastqImportInstance: fastqImportInstance, fileLinked: true,],
             )
-            SeqTrack seqTrack2 = createSeqTrackWithOneDataFile(
+            SeqTrack seqTrack2 = createSeqTrackWithOneFastqFile(
                     [
                             sample               : createSample(individual: createIndividual(project: seqTrack1.project)),
                             dataInstallationState: SeqTrack.DataProcessingState.IN_PROGRESS,
@@ -731,7 +731,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         ProcessingStatus processingStatus
         setupData()
         SessionUtils.withTransaction {
-            seqTrackStatus = createSeqTrackProcessingStatus(createSeqTrackWithOneDataFile([:], [fileWithdrawn: true]))
+            seqTrackStatus = createSeqTrackProcessingStatus(createSeqTrackWithOneFastqFile([:], [fileWithdrawn: true]))
             processingStatus = createProcessingStatus(seqTrackStatus)
         }
 
@@ -782,7 +782,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         setupData()
         SessionUtils.withTransaction {
             bamFile = createBamFileInProjectFolder(DomainFactory.randomBamFileProperties)
-            seqTrackStatus = createSeqTrackProcessingStatus(DomainFactory.createSeqTrackWithDataFiles(bamFile.mergingWorkPackage))
+            seqTrackStatus = createSeqTrackProcessingStatus(DomainFactory.createSeqTrackWithFastqFiles(bamFile.mergingWorkPackage))
         }
 
         when:
@@ -811,7 +811,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         SessionUtils.withTransaction {
             bamFile = createBamFileInProjectFolder(DomainFactory.randomBamFileProperties)
             Set<SeqTrack> seqTracks = new HashSet<SeqTrack>(((MergingWorkPackage) (bamFile.workPackage)).seqTracks)
-            seqTrack1Status = createSeqTrackProcessingStatus(DomainFactory.createSeqTrackWithDataFiles(bamFile.mergingWorkPackage, [:], [fileWithdrawn: true]))
+            seqTrack1Status = createSeqTrackProcessingStatus(DomainFactory.createSeqTrackWithFastqFiles(bamFile.mergingWorkPackage, [:], [fileWithdrawn: true]))
             ((MergingWorkPackage) (bamFile.workPackage)).seqTracks = seqTracks
             bamFile.workPackage.save(flush: true)
             seqTrack2Status = createSeqTrackProcessingStatus(bamFile.containedSeqTracks.first())
@@ -842,7 +842,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         ProcessingStatus processingStatus
         setupData()
         SessionUtils.withTransaction {
-            seqTrackStatus = createSeqTrackProcessingStatus(createSeqTrackWithOneDataFile())
+            seqTrackStatus = createSeqTrackProcessingStatus(createSeqTrackWithOneFastqFile())
             processingStatus = createProcessingStatus(seqTrackStatus)
         }
 
@@ -895,7 +895,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         SessionUtils.withTransaction {
             bamFile = createBamFileInProjectFolder(DomainFactory.randomBamFileProperties)
             seqTrack1Status = createSeqTrackProcessingStatus(bamFile.containedSeqTracks.first())
-            seqTrack2Status = createSeqTrackProcessingStatus(createSeqTrackWithOneDataFile())
+            seqTrack2Status = createSeqTrackProcessingStatus(createSeqTrackWithOneFastqFile())
         }
 
         when:
@@ -925,7 +925,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         SessionUtils.withTransaction {
             bamFile = createBamFile()
             seqTrack1Status = createSeqTrackProcessingStatus(bamFile.containedSeqTracks.first())
-            seqTrack2Status = createSeqTrackProcessingStatus(createSeqTrackWithOneDataFile())
+            seqTrack2Status = createSeqTrackProcessingStatus(createSeqTrackWithOneFastqFile())
         }
 
         when:
@@ -959,7 +959,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
             bamFile2 = createBamFileInProjectFolder(DomainFactory.randomBamFileProperties)
             seqTrack1Status = createSeqTrackProcessingStatus(bamFile1.containedSeqTracks.first())
             seqTrack2Status = createSeqTrackProcessingStatus(bamFile2.containedSeqTracks.first())
-            seqTrack3Status = createSeqTrackProcessingStatus(DomainFactory.createSeqTrackWithDataFiles(bamFile1.mergingWorkPackage))
+            seqTrack3Status = createSeqTrackProcessingStatus(DomainFactory.createSeqTrackWithFastqFiles(bamFile1.mergingWorkPackage))
         }
 
         when:
@@ -1595,7 +1595,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
     }
 
     SeqTrack createSeqTrack(Sample sample, SeqType seqType, SeqPlatformGroup groupA) {
-        SeqTrack seqTrackA = createSeqTrackWithOneDataFile([
+        SeqTrack seqTrackA = createSeqTrackWithOneFastqFile([
                 sample : sample,
                 seqType: seqType,
                 run    : createRun(
@@ -1618,7 +1618,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         SessionUtils.withTransaction {
             ticket = createOtrsTicket()
             userProjectRole = DomainFactory.createUserProjectRole(project: createProject(customFinalNotification: true))
-            seqTrack = createSeqTrackWithOneDataFile(
+            seqTrack = createSeqTrackWithOneFastqFile(
                     [
                             ilseSubmission: null,
                             sample        : createSample(
@@ -1664,8 +1664,8 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
 
             otrsTicket = createOtrsTicket()
 
-            DataFile dataFile = createDataFile()
-            FastqImportInstance fastqImportInstance = createFastqImportInstance(otrsTicket: otrsTicket, dataFiles: [dataFile])
+            RawSequenceFile rawSequenceFile = createFastqFile()
+            FastqImportInstance fastqImportInstance = createFastqImportInstance(otrsTicket: otrsTicket, sequenceFiles: [rawSequenceFile])
 
             DomainFactory.createMetaDataFile(fastqImportInstance: fastqImportInstance)
 
@@ -1673,7 +1673,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
             String expectedHeader = "Import source ready for deletion [${prefix}]"
 
             String expectedEnd = [
-                    dataFile.fullInitialPath,
+                    rawSequenceFile.fullInitialPath,
             ].collect { "rm -f ${it}" }.join("\n")
 
             notificationCreator.mailHelperService = Mock(MailHelperService) {
@@ -1700,9 +1700,9 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
             String blacklisted = setupBlacklistImportSourceNotificationProcessingOption("/blacklisted").value
             otrsTicket = createOtrsTicket()
 
-            FastqImportInstance fastqImportInstance = createFastqImportInstance(otrsTicket: otrsTicket, dataFiles: [
-                    createDataFile(initialDirectory: "${blacklisted}"),
-                    createDataFile(initialDirectory: "${blacklisted}"),
+            FastqImportInstance fastqImportInstance = createFastqImportInstance(otrsTicket: otrsTicket, sequenceFiles: [
+                    createFastqFile(initialDirectory: "${blacklisted}"),
+                    createFastqFile(initialDirectory: "${blacklisted}"),
             ])
             DomainFactory.createMetaDataFile(fastqImportInstance: fastqImportInstance, filePathSource: "${blacklisted}")
 
@@ -1726,17 +1726,17 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         SessionUtils.withTransaction {
             otrsTicket = createOtrsTicket()
 
-            List<DataFile> dataFilesA = [createDataFile(), createDataFile()]
-            FastqImportInstance fastqImportInstanceA = createFastqImportInstance(otrsTicket: otrsTicket, dataFiles: dataFilesA)
+            List<RawSequenceFile> rawSequenceFilesA = [createFastqFile(), createFastqFile()]
+            FastqImportInstance fastqImportInstanceA = createFastqImportInstance(otrsTicket: otrsTicket, sequenceFiles: rawSequenceFilesA)
 
-            List<DataFile> dataFilesB = [createDataFile(), createDataFile(), createDataFile()]
-            FastqImportInstance fastqImportInstanceB = createFastqImportInstance(otrsTicket: otrsTicket, dataFiles: dataFilesB)
+            List<RawSequenceFile> rawSequenceFilesB = [createFastqFile(), createFastqFile(), createFastqFile()]
+            FastqImportInstance fastqImportInstanceB = createFastqImportInstance(otrsTicket: otrsTicket, sequenceFiles: rawSequenceFilesB)
 
             DomainFactory.createMetaDataFile(fastqImportInstance: fastqImportInstanceA)
             DomainFactory.createMetaDataFile(fastqImportInstance: fastqImportInstanceB)
 
-            expected.addAll(dataFilesA*.fullInitialPath)
-            expected.addAll(dataFilesB*.fullInitialPath)
+            expected.addAll(rawSequenceFilesA*.fullInitialPath)
+            expected.addAll(rawSequenceFilesB*.fullInitialPath)
         }
 
         expect:
@@ -1756,21 +1756,21 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
 
             otrsTicket = createOtrsTicket()
 
-            List<DataFile> dataFilesA = [createDataFile(), createDataFile()]
-            FastqImportInstance fastqImportInstanceA = createFastqImportInstance(otrsTicket: otrsTicket, dataFiles: dataFilesA)
+            List<RawSequenceFile> rawSequenceFilesA = [createFastqFile(), createFastqFile()]
+            FastqImportInstance fastqImportInstanceA = createFastqImportInstance(otrsTicket: otrsTicket, sequenceFiles: rawSequenceFilesA)
 
-            Closure<DataFile> createBlacklistedDataFile = {
-                createDataFile(initialDirectory: "${blacklisted}/path/dataFile")
+            Closure<RawSequenceFile> createBlacklistedRawSequenceFile = {
+                createFastqFile(initialDirectory: "${blacklisted}/path/dataFile")
             }
-            List<DataFile> dataFilesB = [createDataFile()]
-            List<DataFile> dataFilesBBlacklisted = [createBlacklistedDataFile(), createBlacklistedDataFile()]
-            FastqImportInstance fastqImportInstanceB = createFastqImportInstance(otrsTicket: otrsTicket, dataFiles: dataFilesB + dataFilesBBlacklisted)
+            List<RawSequenceFile> rawSequenceFilesB = [createFastqFile()]
+            List<RawSequenceFile> rawSequenceFilesBBlacklisted = [createBlacklistedRawSequenceFile(), createBlacklistedRawSequenceFile()]
+            FastqImportInstance fastqImportInstanceB = createFastqImportInstance(otrsTicket: otrsTicket, sequenceFiles: rawSequenceFilesB + rawSequenceFilesBBlacklisted)
 
             DomainFactory.createMetaDataFile(fastqImportInstance: fastqImportInstanceA, filePathSource: "${blacklisted}/path/metaDataFile")
             DomainFactory.createMetaDataFile(fastqImportInstance: fastqImportInstanceB)
 
-            expected.addAll(dataFilesA*.fullInitialPath)
-            expected.addAll(dataFilesB*.fullInitialPath)
+            expected.addAll(rawSequenceFilesA*.fullInitialPath)
+            expected.addAll(rawSequenceFilesB*.fullInitialPath)
         }
 
         expect:
@@ -1789,17 +1789,17 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
 
             otrsTicket = createOtrsTicket()
 
-            Closure<DataFile> createBlacklistedDataFile = {
-                createDataFile(initialDirectory: "${blacklisted}/path/dataFile")
+            Closure<RawSequenceFile> createBlacklistedRawSequenceFile = {
+                createFastqFile(initialDirectory: "${blacklisted}/path/dataFile")
             }
 
-            FastqImportInstance fastqImportInstanceA = createFastqImportInstance(otrsTicket: otrsTicket, dataFiles: [
-                    createBlacklistedDataFile(),
+            FastqImportInstance fastqImportInstanceA = createFastqImportInstance(otrsTicket: otrsTicket, sequenceFiles: [
+                    createBlacklistedRawSequenceFile(),
             ])
 
-            FastqImportInstance fastqImportInstanceB = createFastqImportInstance(otrsTicket: otrsTicket, dataFiles: [
-                    createBlacklistedDataFile(),
-                    createBlacklistedDataFile(),
+            FastqImportInstance fastqImportInstanceB = createFastqImportInstance(otrsTicket: otrsTicket, sequenceFiles: [
+                    createBlacklistedRawSequenceFile(),
+                    createBlacklistedRawSequenceFile(),
             ])
 
             DomainFactory.createMetaDataFile(fastqImportInstance: fastqImportInstanceA, filePathSource: "${blacklisted}/path/metaDataFile")

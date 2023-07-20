@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -47,7 +47,8 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
                 AbstractBamFile,
                 CellRangerMergingWorkPackage,
                 CellRangerConfig,
-                DataFile,
+                RawSequenceFile,
+                FastqFile,
                 Individual,
                 LibraryPreparationKit,
                 FileType,
@@ -85,7 +86,7 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
 
         String sampleIdentifier1 = "qwert"
         CellRangerMergingWorkPackage mwp = createMergingWorkPackage()
-        SeqTrack seqTrack1 = DomainFactory.createSeqTrackWithDataFiles(mwp,
+        SeqTrack seqTrack1 = DomainFactory.createSeqTrackWithFastqFiles(mwp,
                 [ sampleIdentifier: sampleIdentifier1, ]
         )
         SingleCellBamFile singleCellBamFile = createBamFile([workPackage: mwp, seqTracks: [seqTrack1]])
@@ -113,7 +114,7 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
 
         Path sampleIdentifierPath = sampleDirectory.resolve(singleCellBamFile.seqTracks.first().sampleIdentifier)
 
-        SeqTrack seqTrack2 = DomainFactory.createSeqTrackWithDataFiles(CellRangerMergingWorkPackage.all.find(),
+        SeqTrack seqTrack2 = DomainFactory.createSeqTrackWithFastqFiles(CellRangerMergingWorkPackage.all.find(),
                 [ sampleIdentifier: sampleIdentifier2, ]
         )
         singleCellBamFile.seqTracks.add(seqTrack2)
@@ -257,7 +258,7 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
                 expectedCells: expectedCells,
                 enforcedCells: enforcedCells,
         ])
-        SeqTrack seqTrack1 = DomainFactory.createSeqTrackWithDataFiles(mwp,
+        SeqTrack seqTrack1 = DomainFactory.createSeqTrackWithFastqFiles(mwp,
                 [ sampleIdentifier: sampleIdentifier, ]
         )
         SingleCellBamFile singleCellBamFile = createBamFile([workPackage: mwp, seqTracks: [seqTrack1]])

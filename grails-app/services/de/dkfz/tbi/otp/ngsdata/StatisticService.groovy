@@ -116,7 +116,7 @@ class StatisticService {
             |        SELECT
             |            df.seqTrack
             |        FROM
-            |            DataFile df
+            |            RawSequenceFile df
             |        WHERE
             |            df.fileWithdrawn = true
             |            AND df.seqTrack = st
@@ -126,7 +126,7 @@ class StatisticService {
             |    ${dateTimeFormatString}
             |ORDER BY
             |    ${dateTimeFormatString}""".stripMargin()
-        return DataFile.findAll(hql)
+        return RawSequenceFile.findAll(hql)
     }
 
     List projectCountPerSequenceType(ProjectGroup projectGroup) {

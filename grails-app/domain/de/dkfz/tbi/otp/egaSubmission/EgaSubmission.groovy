@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -41,12 +41,12 @@ class EgaSubmission implements Entity {
 
     Set<SampleSubmissionObject> samplesToSubmit = [] as Set<SampleSubmissionObject>
     Set<BamFileSubmissionObject> bamFilesToSubmit = [] as Set<BamFileSubmissionObject>
-    Set<DataFileSubmissionObject> dataFilesToSubmit = [] as Set<DataFileSubmissionObject>
+    Set<RawSequenceFileSubmissionObject> rawSequenceFilesToSubmit = [] as Set<RawSequenceFileSubmissionObject>
 
     static hasMany = [
-            samplesToSubmit  : SampleSubmissionObject,
-            bamFilesToSubmit : BamFileSubmissionObject,
-            dataFilesToSubmit: DataFileSubmissionObject,
+            samplesToSubmit         : SampleSubmissionObject,
+            bamFilesToSubmit        : BamFileSubmissionObject,
+            rawSequenceFilesToSubmit: RawSequenceFileSubmissionObject,
     ]
 
     static belongsTo = [
@@ -59,9 +59,9 @@ class EgaSubmission implements Entity {
             return (val || obj.state == State.SELECTION)
         }
         bamFilesToSubmit validator: { val, obj ->
-            return (val || obj.state == State.SELECTION || !obj.dataFilesToSubmit?.empty)
+            return (val || obj.state == State.SELECTION || !obj.rawSequenceFilesToSubmit?.empty)
         }
-        dataFilesToSubmit validator: { val, obj ->
+        rawSequenceFilesToSubmit validator: { val, obj ->
             return (val || obj.state == State.SELECTION || !obj.bamFilesToSubmit?.empty)
         }
     }

@@ -66,6 +66,7 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
     @Override
     Class[] getDomainClassesToMock() {
         return [
+                FastqFile,
                 FastqcProcessedFile,
                 MergingWorkPackage,
                 ReferenceGenomeProjectSeqType,
@@ -134,7 +135,7 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
     void "fetchAdditionalData"() {
         given:
         Workflow workflow = createWorkflow(name: decider.workflowName)
-        SeqTrack seqTrack = createSeqTrackWithTwoDataFile()
+        SeqTrack seqTrack = createSeqTrackWithTwoFastqFile()
         RoddyBamFile roddyBamFile = createBamFile()
         Pipeline pipeline = findOrCreatePipeline(Pipeline.Name.PANCAN_ALIGNMENT, Pipeline.Type.ALIGNMENT)
 
@@ -180,9 +181,9 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
                 (alignmentWorkPackageGroup): roddyBamFile.workPackage,
         ]
 
-        and: 'objects for fetchDataFiles'
-        Map<SeqTrack, List<DataFile>> dataFileMap = [
-                (seqTrack): seqTrack.dataFiles,
+        and: 'objects for fetchRawSequenceFiles'
+        Map<SeqTrack, List<RawSequenceFile>> rawSequenceFileMap = [
+                (seqTrack): seqTrack.sequenceFiles,
         ]
 
         and: 'input objects'
@@ -199,7 +200,7 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
             1 * fetchSpecificSeqPlatformGroup([seqTrack]) >> specificSeqPlatformGroupMap
             1 * fetchDefaultSeqPlatformGroup() >> defaultSeqPlatformGroupMap
             1 * fetchMergingWorkPackage([seqTrack]) >> mergingWorkPackageMap
-            useFastqcCount * fetchDataFiles([seqTrack]) >> dataFileMap
+            useFastqcCount * fetchRawSequenceFiles([seqTrack]) >> rawSequenceFileMap
         }
         decider.pipelineService = Mock(PipelineService) {
             0 * _
@@ -215,7 +216,7 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
         alignmentAdditionalData.specificSeqPlatformGroupMap == specificSeqPlatformGroupMap
         alignmentAdditionalData.defaultSeqPlatformGroupMap == defaultSeqPlatformGroupMap
         alignmentAdditionalData.mergingWorkPackageMap == mergingWorkPackageMap
-        alignmentAdditionalData.dataFileMap == (useFastqcCount ? dataFileMap : [:])
+        alignmentAdditionalData.rawSequenceFileMap == (useFastqcCount ? rawSequenceFileMap : [:])
         alignmentAdditionalData.pipeline == pipeline
     }
 
@@ -246,14 +247,14 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
 
     void "groupData, one SeqTrack"() {
         given:
-        SeqTrack seqTrack = createSeqTrackWithTwoDataFile()
+        SeqTrack seqTrack = createSeqTrackWithTwoFastqFile()
         Project project = seqTrack.project
         SeqType seqType = seqTrack.seqType
         SeqPlatform seqPlatform = seqTrack.seqPlatform
 
         SeqPlatformGroup seqPlatformGroup = createSeqPlatformGroup([seqPlatforms: [seqPlatform]])
-        List<FastqcProcessedFile> fastqcProcessedFiles = seqTrack.dataFiles.collect {
-            createFastqcProcessedFile([dataFile: it])
+        List<FastqcProcessedFile> fastqcProcessedFiles = seqTrack.sequenceFiles.collect {
+            createFastqcProcessedFile([sequenceFile: it])
         }
 
         and: 'AlignmentArtefactDataList'
@@ -279,8 +280,8 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
                 (seqPlatform): seqPlatformGroup,
         ]
         Map<AlignmentWorkPackageGroup, MergingWorkPackage> mergingWorkPackageMap = [:]
-        Map<SeqTrack, List<DataFile>> dataFileMap = [
-                (seqTrack): seqTrack.dataFiles
+        Map<SeqTrack, List<RawSequenceFile>> rawSequenceFileMap = [
+                (seqTrack): seqTrack.sequenceFiles
         ]
 
         AlignmentAdditionalData additionalData = new AlignmentAdditionalData(referenceGenomeMap,
@@ -288,7 +289,7 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
                 specificSeqPlatformGroupMap,
                 defaultSeqPlatformGroupMap,
                 mergingWorkPackageMap,
-                dataFileMap,
+                rawSequenceFileMap,
                 findOrCreatePanCanPipeline())
 
         and: 'useParams'
@@ -308,24 +309,24 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
 
     void "groupData, two SeqTracks with same referenced data"() {
         given:
-        SeqTrack seqTrack1 = createSeqTrackWithTwoDataFile()
+        SeqTrack seqTrack1 = createSeqTrackWithTwoFastqFile()
         Project project = seqTrack1.project
         SeqType seqType = seqTrack1.seqType
         SeqPlatform seqPlatform = seqTrack1.seqPlatform
         SeqPlatformGroup seqPlatformGroup = createSeqPlatformGroup([seqPlatforms: [seqPlatform]])
-        List<FastqcProcessedFile> fastqcProcessedFiles1 = seqTrack1.dataFiles.collect {
-            createFastqcProcessedFile([dataFile: it])
+        List<FastqcProcessedFile> fastqcProcessedFiles1 = seqTrack1.sequenceFiles.collect {
+            createFastqcProcessedFile([sequenceFile: it])
         }
 
         and: 'create second seqtrack'
-        SeqTrack seqTrack2 = createSeqTrackWithTwoDataFile([
+        SeqTrack seqTrack2 = createSeqTrackWithTwoFastqFile([
                 sample               : seqTrack1.sample,
                 seqType              : seqTrack1.seqType,
                 libraryPreparationKit: seqTrack1.libraryPreparationKit,
                 run                  : seqTrack1.run,
         ])
-        List<FastqcProcessedFile> fastqcProcessedFiles2 = seqTrack2.dataFiles.collect {
-            createFastqcProcessedFile([dataFile: it])
+        List<FastqcProcessedFile> fastqcProcessedFiles2 = seqTrack2.sequenceFiles.collect {
+            createFastqcProcessedFile([sequenceFile: it])
         }
 
         and: 'AlignmentArtefactDataList'
@@ -362,9 +363,9 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
 
         Map<AlignmentWorkPackageGroup, MergingWorkPackage> mergingWorkPackageMap = [:]
 
-        Map<SeqTrack, List<DataFile>> dataFileMap = [
-                (seqTrack1): seqTrack1.dataFiles,
-                (seqTrack2): seqTrack2.dataFiles,
+        Map<SeqTrack, List<RawSequenceFile>> rawSequenceFileMap = [
+                (seqTrack1): seqTrack1.sequenceFiles,
+                (seqTrack2): seqTrack2.sequenceFiles,
         ]
 
         AlignmentAdditionalData additionalData = new AlignmentAdditionalData(referenceGenomeMap,
@@ -372,7 +373,7 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
                 specificSeqPlatformGroupMap,
                 defaultSeqPlatformGroupMap,
                 mergingWorkPackageMap,
-                dataFileMap,
+                rawSequenceFileMap,
                 findOrCreatePanCanPipeline())
 
         and: 'useParams'
@@ -392,24 +393,24 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
 
     void "groupData, two SeqTracks without shared references"() {
         given: 'first seqTrack'
-        SeqTrack seqTrack1 = createSeqTrackWithTwoDataFile()
+        SeqTrack seqTrack1 = createSeqTrackWithTwoFastqFile()
         Project project1 = seqTrack1.project
         SeqType seqType1 = seqTrack1.seqType
         SeqPlatform seqPlatform1 = seqTrack1.seqPlatform
         SeqPlatformGroup seqPlatformGroup1 = createSeqPlatformGroup([seqPlatforms: [seqPlatform1]])
-        List<FastqcProcessedFile> fastqcProcessedFiles1 = seqTrack1.dataFiles.collect {
-            createFastqcProcessedFile([dataFile: it])
+        List<FastqcProcessedFile> fastqcProcessedFiles1 = seqTrack1.sequenceFiles.collect {
+            createFastqcProcessedFile([sequenceFile: it])
         }
 
         and: 'second seqTrack'
-        SeqTrack seqTrack2 = createSeqTrackWithTwoDataFile()
+        SeqTrack seqTrack2 = createSeqTrackWithTwoFastqFile()
         Project project2 = seqTrack2.project
         SeqType seqType2 = seqTrack2.seqType
         SeqPlatform seqPlatform2 = seqTrack2.seqPlatform
         SeqPlatformGroup seqPlatformGroup2 = createSeqPlatformGroup([seqPlatforms: [seqPlatform2]])
 
-        List<FastqcProcessedFile> fastqcProcessedFiles2 = seqTrack2.dataFiles.collect {
-            createFastqcProcessedFile([dataFile: it])
+        List<FastqcProcessedFile> fastqcProcessedFiles2 = seqTrack2.sequenceFiles.collect {
+            createFastqcProcessedFile([sequenceFile: it])
         }
 
         and: 'AlignmentArtefactDataList 1'
@@ -450,9 +451,9 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
                 (seqPlatform2): seqPlatformGroup2,
         ]
         Map<AlignmentWorkPackageGroup, MergingWorkPackage> mergingWorkPackageMap = [:]
-        Map<SeqTrack, List<DataFile>> dataFileMap = [
-                (seqTrack1): seqTrack1.dataFiles,
-                (seqTrack2): seqTrack2.dataFiles,
+        Map<SeqTrack, List<RawSequenceFile>> rawSequenceFileMap = [
+                (seqTrack1): seqTrack1.sequenceFiles,
+                (seqTrack2): seqTrack2.sequenceFiles,
         ]
 
         AlignmentAdditionalData additionalData = new AlignmentAdditionalData(
@@ -461,7 +462,7 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
                 specificSeqPlatformGroupMap,
                 defaultSeqPlatformGroupMap,
                 mergingWorkPackageMap,
-                dataFileMap,
+                rawSequenceFileMap,
                 findOrCreatePanCanPipeline()
         )
 
@@ -585,12 +586,14 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
         }
         List<FastqcProcessedFile> fastqcProcessedFiles = useFastqcCount ? seqTracks.collectMany { SeqTrack seqTrack ->
             (1..2).collect { int mate ->
+                // don't validate/save objects because it is very slow with lots of objects
+                // (not needed because objects are passed directly and not queried from the database)
                 createFastqcProcessedFile([
-                        dataFile: createDataFile([
+                        sequenceFile: createFastqFile([
                                 seqTrack  : seqTrack,
                                 mateNumber: mate,
-                        ])
-                ])
+                        ], false)
+                ], false)
             }
         } : []
 
@@ -626,8 +629,8 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
         }
 
         Map<AlignmentWorkPackageGroup, MergingWorkPackage> mergingWorkPackageMap = [:]
-        Map<SeqTrack, List<DataFile>> dataFileMap = seqTracks.collectEntries {
-            [(it): it.dataFiles]
+        Map<SeqTrack, List<RawSequenceFile>> rawSequenceFileMap = seqTracks.collectEntries {
+            [(it): it.sequenceFiles]
         }
 
         AlignmentAdditionalData additionalData = new AlignmentAdditionalData(referenceGenomeMap,
@@ -635,7 +638,7 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
                 specificSeqPlatformGroupMap,
                 defaultSeqPlatformGroupMap,
                 mergingWorkPackageMap,
-                dataFileMap,
+                rawSequenceFileMap,
                 findOrCreatePanCanPipeline())
 
         and: 'set useParams'
@@ -646,7 +649,7 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
             createAlignmentDeciderGroup(it.artefact, defaultSeqPlatformGroupMap[it.seqPlatform])
         }
         Map<AlignmentDeciderGroup, AlignmentArtefactData<FastqcProcessedFile>> fastqcDeciderGroups = fastqcProcessedFileData.groupBy {
-            SeqTrack seqTrack = it.artefact.dataFile.seqTrack
+            SeqTrack seqTrack = it.artefact.sequenceFile.seqTrack
             createAlignmentDeciderGroup(seqTrack, defaultSeqPlatformGroupMap[seqTrack.seqPlatform])
         }
 
@@ -697,7 +700,7 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
                 (seqTrack.seqPlatform): seqPlatformGroupDefault,
         ]
         Map<AlignmentWorkPackageGroup, MergingWorkPackage> mergingWorkPackageMap = [:]
-        Map<SeqTrack, List<DataFile>> dataFileMap = [:]
+        Map<SeqTrack, List<RawSequenceFile>> rawSequenceFileMap = [:]
 
         AlignmentAdditionalData additionalData = new AlignmentAdditionalData(
                 referenceGenomeMap,
@@ -705,7 +708,7 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
                 specificSeqPlatformGroupMap,
                 defaultSeqPlatformGroupMap,
                 mergingWorkPackageMap,
-                dataFileMap,
+                rawSequenceFileMap,
                 findOrCreatePanCanPipeline()
         )
 
@@ -889,7 +892,7 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
     }
 
     protected AlignmentArtefactData<FastqcProcessedFile> createAlignmentArtefactDataForFastqcProcessedFile(FastqcProcessedFile fastqcProcessedFile) {
-        SeqTrack seqTrack = fastqcProcessedFile.dataFile.seqTrack
+        SeqTrack seqTrack = fastqcProcessedFile.sequenceFile.seqTrack
         return new AlignmentArtefactData<FastqcProcessedFile>(
                 fastqcProcessedFile.workflowArtefact,
                 fastqcProcessedFile,
@@ -959,7 +962,7 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
         Individual individual = createIndividual([
                 species: values.noSpecies ? null : speciesWithStrain,
         ])
-        seqTrack1 = createSeqTrackWithTwoDataFile([
+        seqTrack1 = createSeqTrackWithTwoFastqFile([
                 workflowArtefact: createWorkflowArtefact([artefactType: ArtefactType.FASTQ]),
                 sample          : createSample([
                         individual: individual,
@@ -977,8 +980,8 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
         }
 
         seqPlatformGroup = seqTrack1.seqPlatform.seqPlatformGroups.first()
-        fastqcProcessedFiles = useFastqcCount ? seqTracksForFastqc*.dataFiles.flatten().collect {
-            createFastqcProcessedFile([dataFile: it, workflowArtefact: createWorkflowArtefact([artefactType: ArtefactType.FASTQC])])
+        fastqcProcessedFiles = useFastqcCount ? seqTracksForFastqc*.sequenceFiles.flatten().collect {
+            createFastqcProcessedFile([sequenceFile: it, workflowArtefact: createWorkflowArtefact([artefactType: ArtefactType.FASTQC])])
         } : []
         if (values.missingFastqc) {
             seqTracks << createCorrespondingSeqTrack(seqTrack1)
@@ -1022,11 +1025,11 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
                         (referenceGenome.speciesWithStrain): referenceGenome,
                 ],
         ]
-        Map<SeqTrack, List<DataFile>> dataFileMap = seqTracks.collectEntries {
-            [(it): it.dataFiles]
+        Map<SeqTrack, List<RawSequenceFile>> rawSequenceFileMap = seqTracks.collectEntries {
+            [(it): it.sequenceFiles]
         }
 
-        additionalData = new AlignmentAdditionalData(referenceGenomeMap, [:], [:], [:], [:], dataFileMap, findOrCreatePanCanPipeline())
+        additionalData = new AlignmentAdditionalData(referenceGenomeMap, [:], [:], [:], [:], rawSequenceFileMap, findOrCreatePanCanPipeline())
 
         // base bam file
         if (createMwp) {
@@ -1059,7 +1062,7 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
     }
 
     private SeqTrack createCorrespondingSeqTrack(SeqTrack seqTrack) {
-        return createSeqTrackWithTwoDataFile([
+        return createSeqTrackWithTwoFastqFile([
                 workflowArtefact     : createWorkflowArtefact([artefactType: ArtefactType.FASTQ]),
                 sample               : seqTrack.sample,
                 seqType              : seqTrack.seqType,

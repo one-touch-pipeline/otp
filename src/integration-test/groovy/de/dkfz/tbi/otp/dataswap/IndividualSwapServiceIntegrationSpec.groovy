@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -77,13 +77,13 @@ class IndividualSwapServiceIntegrationSpec extends Specification implements User
         Project newProject = DomainFactory.createProject(realm: bamFile.project.realm)
         String scriptName = "TEST-MOVE-INDIVIDUAL"
         SeqTrack seqTrack = bamFile.seqTracks.iterator().next()
-        List<String> dataFileLinks = []
-        List<String> dataFilePaths = []
-        DataFile.findAllBySeqTrack(seqTrack).each {
+        List<String> fastqFileLinks = []
+        List<String> fastqFilePaths = []
+        RawSequenceFile.findAllBySeqTrack(seqTrack).each {
             new File(lsdfFilesService.getFileFinalPath(it)).parentFile.mkdirs()
             assert new File(lsdfFilesService.getFileFinalPath(it)).createNewFile()
-            dataFileLinks.add(lsdfFilesService.getFileViewByPidPath(it))
-            dataFilePaths.add(lsdfFilesService.getFileFinalPath(it))
+            fastqFileLinks.add(lsdfFilesService.getFileViewByPidPath(it))
+            fastqFilePaths.add(lsdfFilesService.getFileFinalPath(it))
         }
         File missedFile = bamFile.finalMd5sumFile
         File unexpectedFile = new File(bamFile.baseDirectory, 'notExpectedFile.txt')
@@ -113,7 +113,7 @@ class IndividualSwapServiceIntegrationSpec extends Specification implements User
                             sampleTypeSwaps: [
                                     new Swap((bamFile.sampleType.name), ""),
                             ],
-                            dataFileSwaps: [
+                            rawSequenceFileSwaps: [
                                     new Swap('DataFileFileName_R1.gz', ""),
                                     new Swap('DataFileFileName_R2.gz', ""),
                             ],
@@ -137,11 +137,11 @@ class IndividualSwapServiceIntegrationSpec extends Specification implements User
         String copyScriptContent = copyScript.text
         copyScriptContent.contains("rm -rf ${destinationDirectory}")
         copyScriptContent.startsWith(AbstractDataSwapService.BASH_HEADER)
-        DataFile.findAllBySeqTrack(seqTrack).eachWithIndex { DataFile it, int i ->
+        RawSequenceFile.findAllBySeqTrack(seqTrack).eachWithIndex { RawSequenceFile it, int i ->
             assert copyScriptContent.contains("mkdir -p -m 2750 '${new File(lsdfFilesService.getFileFinalPath(it)).parent}'")
-            assert copyScriptContent.contains("mv '${dataFilePaths[i]}' \\\n   '${lsdfFilesService.getFileFinalPath(it)}'")
-            assert copyScriptContent.contains("mv '${dataFilePaths[i]}.md5sum' \\\n     '${lsdfFilesService.getFileFinalPath(it)}.md5sum'")
-            assert copyScriptContent.contains("rm -f '${dataFileLinks[i]}'")
+            assert copyScriptContent.contains("mv '${fastqFilePaths[i]}' \\\n   '${lsdfFilesService.getFileFinalPath(it)}'")
+            assert copyScriptContent.contains("mv '${fastqFilePaths[i]}.md5sum' \\\n     '${lsdfFilesService.getFileFinalPath(it)}.md5sum'")
+            assert copyScriptContent.contains("rm -f '${fastqFileLinks[i]}'")
             assert copyScriptContent.contains("mkdir -p -m 2750 '${new File(lsdfFilesService.getFileViewByPidPath(it)).parent}'")
             assert copyScriptContent.contains("ln -sr '${lsdfFilesService.getFileFinalPath(it)}' \\\n      '${lsdfFilesService.getFileViewByPidPath(it)}'")
             assert it.comment.comment == "Attention: Datafile swapped!"

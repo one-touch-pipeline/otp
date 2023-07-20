@@ -43,23 +43,10 @@ import static org.springframework.util.Assert.notNull
 @Transactional
 class SeqTrackService {
 
-    FileTypeService fileTypeService
-
-    /**
-     * Dependency Injection of Project Service.
-     *
-     * Needed for access control on data protected by Projects.
-     */
-    ProjectService projectService
-    /**
-     * Dependency Injection of LSDF File Service.
-     *
-     * Required for exporting the view by pid path of a datafile
-     */
-    LsdfFilesService lsdfFilesService
-
     AlignmentDeciderService alignmentDeciderService
-
+    FileTypeService fileTypeService
+    LsdfFilesService lsdfFilesService
+    ProjectService projectService
     SeqTypeService seqTypeService
 
     @Autowired
@@ -196,7 +183,7 @@ class SeqTrackService {
             return false
         }
 
-        if (!DataFile.withCriteria {
+        if (!RawSequenceFile.withCriteria {
             eq 'seqTrack', seqTrack
             fileType {
                 eq 'type', FileType.Type.SEQUENCE
@@ -227,11 +214,11 @@ class SeqTrackService {
         assert (seqTrack.save(flush: true))
     }
 
-    List<DataFile> getSequenceFilesForSeqTrack(SeqTrack seqTrack) {
-        List<DataFile> files = DataFile.findAllBySeqTrack(seqTrack)
-        List<DataFile> filteredFiles = []
+    List<RawSequenceFile> getSequenceFilesForSeqTrack(SeqTrack seqTrack) {
+        List<RawSequenceFile> files = RawSequenceFile.findAllBySeqTrack(seqTrack)
+        List<RawSequenceFile> filteredFiles = []
         files.each {
-            if (fileTypeService.isGoodSequenceDataFile(it)) {
+            if (fileTypeService.isGoodSequenceFile(it)) {
                 filteredFiles.add(it)
             }
         }
@@ -239,7 +226,7 @@ class SeqTrackService {
     }
 
     void fillBaseCount(SeqTrack seqTrack) {
-        seqTrack.nBasePairs = seqTrack.dataFilesWhereIndexFileIsFalse.sum { DataFile it -> it.NBasePairs } as Long ?: 0
+        seqTrack.nBasePairs = seqTrack.sequenceFilesWhereIndexFileIsFalse.sum { RawSequenceFile it -> it.NBasePairs } as Long ?: 0
         assert seqTrack.save(flush: true)
     }
 
@@ -315,7 +302,7 @@ class SeqTrackService {
     List<SeqTrack> findAllByIndividualSampleTypeSeqTypeSampleNameMd5sum(Individual individual,
                                                                         SampleType sampleType = null, SeqType seqType = null, String sampleName = null,
                                                                         String md5sum = null) {
-        return DataFile.withCriteria {
+        return RawSequenceFile.withCriteria {
             seqTrack {
                 sample {
                     eq('individual', individual)

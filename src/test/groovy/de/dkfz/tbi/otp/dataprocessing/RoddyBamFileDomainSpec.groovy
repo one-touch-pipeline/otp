@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -70,10 +70,11 @@ class RoddyBamFileDomainSpec extends Specification implements DomainUnitTest<Rod
                 ReferenceGenomeProjectSeqType,
                 FastqImportInstance,
                 FileType,
-                DataFile,
+                RawSequenceFile,
                 Realm,
                 RoddyWorkflowConfig,
                 Run,
+                FastqFile,
         ]
     }
 
@@ -265,7 +266,7 @@ class RoddyBamFileDomainSpec extends Specification implements DomainUnitTest<Rod
         given:
         setupTest()
         SeqTrack seqTrack = roddyBamFile.seqTracks.iterator()[0]
-        updateDataFileNames(seqTrack)
+        updateRawSequenceFileNames(seqTrack)
         File dir = new File("${testDir}/${roddyBamFile.workDirectoryName}/${RoddyBamFile.QUALITY_CONTROL_DIR}/run${seqTrack.run.name}_${COMMON_PREFIX}")
 
         expect:
@@ -275,9 +276,9 @@ class RoddyBamFileDomainSpec extends Specification implements DomainUnitTest<Rod
     void testGetWorkSingleLaneQADirectories_TwoSeqTracks() {
         given:
         setupTest()
-        updateDataFileNames(roddyBamFile.seqTracks.iterator()[0])
-        SeqTrack seqTrack = DomainFactory.createSeqTrackWithDataFiles(roddyBamFile.workPackage)
-        updateDataFileNames(seqTrack)
+        updateRawSequenceFileNames(roddyBamFile.seqTracks.iterator()[0])
+        SeqTrack seqTrack = DomainFactory.createSeqTrackWithFastqFiles(roddyBamFile.workPackage)
+        updateRawSequenceFileNames(seqTrack)
         roddyBamFile.seqTracks.add(seqTrack)
         Map<SeqTrack, File> expected = [:]
         roddyBamFile.seqTracks.each {
@@ -295,7 +296,7 @@ class RoddyBamFileDomainSpec extends Specification implements DomainUnitTest<Rod
         given:
         setupTest()
         SeqTrack seqTrack = roddyBamFile.seqTracks.iterator()[0]
-        updateDataFileNames(seqTrack)
+        updateRawSequenceFileNames(seqTrack)
         File file = new File("${testDir}/${roddyBamFile.workDirectoryName}/${RoddyBamFile.QUALITY_CONTROL_DIR}/run${seqTrack.run.name}_${COMMON_PREFIX}/${RoddyBamFile.QUALITY_CONTROL_JSON_FILE_NAME}")
 
         expect:
@@ -315,7 +316,7 @@ class RoddyBamFileDomainSpec extends Specification implements DomainUnitTest<Rod
         given:
         setupTest()
         SeqTrack seqTrack = roddyBamFile.seqTracks.iterator()[0]
-        updateDataFileNames(seqTrack)
+        updateRawSequenceFileNames(seqTrack)
         File dir = new File("${testDir}/${RoddyBamFile.QUALITY_CONTROL_DIR}/run${seqTrack.run.name}_${COMMON_PREFIX}")
 
         expect:
@@ -325,9 +326,9 @@ class RoddyBamFileDomainSpec extends Specification implements DomainUnitTest<Rod
     void testGetFinalRoddySingleLaneQADirectories_TwoSeqTracks() {
         given:
         setupTest()
-        updateDataFileNames(roddyBamFile.seqTracks.iterator()[0])
-        SeqTrack seqTrack = DomainFactory.createSeqTrackWithDataFiles(roddyBamFile.workPackage)
-        updateDataFileNames(seqTrack)
+        updateRawSequenceFileNames(roddyBamFile.seqTracks.iterator()[0])
+        SeqTrack seqTrack = DomainFactory.createSeqTrackWithFastqFiles(roddyBamFile.workPackage)
+        updateRawSequenceFileNames(seqTrack)
         roddyBamFile.seqTracks.add(seqTrack)
         Map<SeqTrack, File> expected = [:]
         roddyBamFile.seqTracks.each {
@@ -345,7 +346,7 @@ class RoddyBamFileDomainSpec extends Specification implements DomainUnitTest<Rod
         given:
         setupTest()
         SeqTrack seqTrack = roddyBamFile.seqTracks.iterator()[0]
-        updateDataFileNames(seqTrack)
+        updateRawSequenceFileNames(seqTrack)
         File file = new File("${testDir}/${RoddyBamFile.QUALITY_CONTROL_DIR}/run${seqTrack.run.name}_${COMMON_PREFIX}/${RoddyBamFile.QUALITY_CONTROL_JSON_FILE_NAME}")
 
         expect:
@@ -356,7 +357,7 @@ class RoddyBamFileDomainSpec extends Specification implements DomainUnitTest<Rod
         given:
         setupTest()
         SeqTrack seqTrack = roddyBamFile.seqTracks.iterator()[0]
-        updateDataFileNames(seqTrack)
+        updateRawSequenceFileNames(seqTrack)
         File dir = new File("${testDir}/${RoddyBamFile.QUALITY_CONTROL_DIR}/run${seqTrack.run.name}_${COMMON_PREFIX}")
 
         expect:
@@ -367,7 +368,7 @@ class RoddyBamFileDomainSpec extends Specification implements DomainUnitTest<Rod
         given:
         setupTest()
         SeqTrack seqTrack = roddyBamFile.seqTracks.iterator()[0]
-        updateDataFileNames(seqTrack)
+        updateRawSequenceFileNames(seqTrack)
         File dir = new File("${testDir}/${roddyBamFile.workDirectoryName}/${RoddyBamFile.QUALITY_CONTROL_DIR}/run${seqTrack.run.name}_${COMMON_PREFIX}")
 
         expect:
@@ -549,9 +550,10 @@ class RoddyBamFileDomainSpec extends Specification implements DomainUnitTest<Rod
         return expectedResult == roddyBamFile.finalExecutionDirectories*.path
     }
 
-    private void updateDataFileNames(SeqTrack seqTrack) {
-        List<DataFile> dataFiles = DataFile.findAllBySeqTrack(seqTrack)
-        dataFiles[0].vbpFileName = FIRST_DATAFILE_NAME
-        dataFiles[1].vbpFileName = SECOND_DATAFILE_NAME
+    private void updateRawSequenceFileNames(SeqTrack seqTrack) {
+        List<RawSequenceFile> rawSequenceFiles = FastqFile.findAllBySeqTrack(seqTrack)
+        rawSequenceFiles[0].vbpFileName = FIRST_DATAFILE_NAME
+        rawSequenceFiles[1].vbpFileName = SECOND_DATAFILE_NAME
+        rawSequenceFiles*.save(flush: true)
     }
 }

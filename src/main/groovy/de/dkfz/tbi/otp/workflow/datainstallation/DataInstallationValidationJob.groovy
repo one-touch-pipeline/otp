@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -43,8 +43,8 @@ class DataInstallationValidationJob extends AbstractOtpClusterValidationJob impl
         SeqTrack seqTrack = getSeqTrack(workflowStep)
         FileSystem fs = getFileSystem(workflowStep)
 
-        return seqTrack.dataFiles.collect { DataFile dataFile ->
-            fs.getPath(lsdfFilesService.getFileFinalPath(dataFile))
+        return seqTrack.sequenceFiles.collect { RawSequenceFile rawSequenceFile ->
+            fs.getPath(lsdfFilesService.getFileFinalPath(rawSequenceFile))
         }
     }
 
@@ -57,9 +57,9 @@ class DataInstallationValidationJob extends AbstractOtpClusterValidationJob impl
     protected List<String> doFurtherValidationAndReturnProblems(WorkflowStep workflowStep) {
         List<String> problems = []
         SeqTrack seqTrack = getSeqTrack(workflowStep)
-        seqTrack.dataFiles.each { DataFile dataFile ->
-            if (!checksumFileService.compareMd5(dataFile)) {
-                problems.add("The md5sum of file ${dataFile.fileName} is not the expected ${dataFile.md5sum}" as String)
+        seqTrack.sequenceFiles.each { RawSequenceFile rawSequenceFile ->
+            if (!checksumFileService.compareMd5(rawSequenceFile)) {
+                problems.add("The md5sum of file ${rawSequenceFile.fileName} is not the expected ${(rawSequenceFile as FastqFile).fastqMd5sum}" as String)
             }
         }
         return problems
@@ -70,13 +70,13 @@ class DataInstallationValidationJob extends AbstractOtpClusterValidationJob impl
         SeqTrack seqTrack = getSeqTrack(workflowStep)
         FileSystem fs = getFileSystem(workflowStep)
 
-        seqTrack.dataFiles.collect { DataFile dataFile ->
-            Path targetPath = fs.getPath(lsdfFilesService.getFileFinalPath(dataFile))
+        seqTrack.sequenceFiles.collect { RawSequenceFile rawSequenceFile ->
+            Path targetPath = fs.getPath(lsdfFilesService.getFileFinalPath(rawSequenceFile))
 
-            dataFile.fileSize = Files.size(targetPath)
-            dataFile.dateFileSystem = new Date(Files.getLastModifiedTime(targetPath).toMillis())
-            dataFile.fileExists = true
-            assert dataFile.save(flush: true)
+            rawSequenceFile.fileSize = Files.size(targetPath)
+            rawSequenceFile.dateFileSystem = new Date(Files.getLastModifiedTime(targetPath).toMillis())
+            rawSequenceFile.fileExists = true
+            assert rawSequenceFile.save(flush: true)
         }
     }
 }

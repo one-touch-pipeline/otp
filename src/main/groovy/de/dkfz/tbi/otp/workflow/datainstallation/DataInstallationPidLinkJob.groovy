@@ -24,7 +24,7 @@ package de.dkfz.tbi.otp.workflow.datainstallation
 import groovy.util.logging.Slf4j
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.ngsdata.DataFile
+import de.dkfz.tbi.otp.ngsdata.RawSequenceFile
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.utils.LinkEntry
 import de.dkfz.tbi.otp.workflow.jobs.AbstractLinkJob
@@ -40,9 +40,9 @@ class DataInstallationPidLinkJob extends AbstractLinkJob implements DataInstalla
     protected List<LinkEntry> getLinkMap(WorkflowStep workflowStep) {
         SeqTrack seqTrack = getSeqTrack(workflowStep)
 
-        return seqTrack.dataFiles.collect { DataFile dataFile ->
-            Path target = lsdfFilesService.getFileFinalPathAsPath(dataFile)
-            Path link = lsdfFilesService.getFileViewByPidPathAsPath(dataFile)
+        return seqTrack.sequenceFiles.collect { RawSequenceFile rawSequenceFile ->
+            Path target = lsdfFilesService.getFileFinalPathAsPath(rawSequenceFile)
+            Path link = lsdfFilesService.getFileViewByPidPathAsPath(rawSequenceFile)
             return new LinkEntry(target: target, link: link)
         }
     }
@@ -53,10 +53,10 @@ class DataInstallationPidLinkJob extends AbstractLinkJob implements DataInstalla
     @Override
     protected void saveResult(WorkflowStep workflowStep) {
         SeqTrack seqTrack = getSeqTrack(workflowStep)
-        seqTrack.dataFiles.each { DataFile dataFile ->
-            dataFile.fileLinked = true
-            dataFile.dateLastChecked = new Date()
-            dataFile.save(flush: true)
+        seqTrack.sequenceFiles.each { RawSequenceFile rawSequenceFile ->
+            rawSequenceFile.fileLinked = true
+            rawSequenceFile.dateLastChecked = new Date()
+            rawSequenceFile.save(flush: true)
         }
         seqTrack.dataInstallationState = SeqTrack.DataProcessingState.FINISHED
         seqTrack.fastqcState = SeqTrack.DataProcessingState.NOT_STARTED

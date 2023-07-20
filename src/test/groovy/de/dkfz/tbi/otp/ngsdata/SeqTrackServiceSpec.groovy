@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -37,7 +37,8 @@ class SeqTrackServiceSpec extends Specification implements DataTest, DomainFacto
     @Override
     Class[] getDomainClassesToMock() {
         return [
-                DataFile,
+                RawSequenceFile,
+                FastqFile,
                 LogMessage,
                 MergingCriteria,
                 Pipeline,
@@ -58,7 +59,7 @@ class SeqTrackServiceSpec extends Specification implements DataTest, DomainFacto
 
     void "test mayAlign, when everything is okay, return true"() {
         given:
-        SeqTrack seqTrack = createSeqTrackWithOneDataFile(
+        SeqTrack seqTrack = createSeqTrackWithOneFastqFile(
                 run: createRun(
                         seqPlatform: createSeqPlatformWithSeqPlatformGroup(
                                 seqPlatformGroups: [createSeqPlatformGroup()])))
@@ -70,7 +71,7 @@ class SeqTrackServiceSpec extends Specification implements DataTest, DomainFacto
 
     void "test mayAlign, when data file is withdrawn, return false"() {
         given:
-        SeqTrack seqTrack = createSeqTrackWithOneDataFile([:], [
+        SeqTrack seqTrack = createSeqTrackWithOneFastqFile([:], [
                 fileWithdrawn: true,
         ])
 
@@ -88,7 +89,7 @@ class SeqTrackServiceSpec extends Specification implements DataTest, DomainFacto
 
     void "test mayAlign, when wrong file type, return false"() {
         given:
-        SeqTrack seqTrack = createSeqTrackWithOneDataFile([:], [
+        SeqTrack seqTrack = createSeqTrackWithOneFastqFile([:], [
                 fileType: createFileType(type: FileType.Type.SOURCE),
         ])
 
@@ -102,7 +103,7 @@ class SeqTrackServiceSpec extends Specification implements DataTest, DomainFacto
                 libraryPreparationKit: null,
                 kitInfoReliability: InformationReliability.UNKNOWN_VERIFIED,
         )
-        DomainFactory.createDataFile(seqTrack: seqTrack)
+        DomainFactory.createFastqFile(seqTrack: seqTrack)
 
         expect:
         !SeqTrackService.mayAlign(seqTrack)
@@ -110,7 +111,7 @@ class SeqTrackServiceSpec extends Specification implements DataTest, DomainFacto
 
     void "test mayAlign, when seq platform group is null, return false"() {
         given:
-        SeqTrack seqTrack = createSeqTrackWithOneDataFile([
+        SeqTrack seqTrack = createSeqTrackWithOneFastqFile([
                 run: createRun(seqPlatform: createSeqPlatform()),
         ])
         createMergingCriteriaLazy(project: seqTrack.project, seqType: seqTrack.seqType)
@@ -122,8 +123,8 @@ class SeqTrackServiceSpec extends Specification implements DataTest, DomainFacto
     void "test fillBaseCount, throws exception when one of the DataFiles does not contain nReads or SequenceLength"() {
         given:
         SeqTrack seqTrack = createSeqTrack()
-        createDataFile(seqTrack: seqTrack)
-        createDataFile([seqTrack: seqTrack] + add)
+        createFastqFile(seqTrack: seqTrack)
+        createFastqFile([seqTrack: seqTrack] + add)
 
         when:
         seqTrackService.fillBaseCount(seqTrack)
@@ -151,9 +152,9 @@ class SeqTrackServiceSpec extends Specification implements DataTest, DomainFacto
     void "test fillBaseCount, ignores indexFiles"() {
         given:
         SeqTrack seqTrack = createSeqTrack()
-        createDataFile(seqTrack: seqTrack, nReads: 1, sequenceLength: 1)
-        createDataFile(seqTrack: seqTrack, nReads: 2, sequenceLength: 1)
-        createDataFile(seqTrack: seqTrack, nReads: 3, sequenceLength: 1, indexFile: true)
+        createFastqFile(seqTrack: seqTrack, nReads: 1, sequenceLength: 1)
+        createFastqFile(seqTrack: seqTrack, nReads: 2, sequenceLength: 1)
+        createFastqFile(seqTrack: seqTrack, nReads: 3, sequenceLength: 1, indexFile: true)
 
         when:
         seqTrackService.fillBaseCount(seqTrack)

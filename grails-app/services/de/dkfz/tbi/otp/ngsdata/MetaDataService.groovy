@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -35,19 +35,19 @@ class MetaDataService {
      * @param id The id of the MetaDataEntry to retrieve
      * @return The MetaDataEntry if present, otherwise null
      */
-    @PostAuthorize("hasRole('ROLE_OPERATOR') or (returnObject == null) or ((returnObject.dataFile.project != null) and hasPermission(returnObject.dataFile.project, 'OTP_READ_ACCESS'))")
+    @PostAuthorize("hasRole('ROLE_OPERATOR') or (returnObject == null) or ((returnObject.sequenceFile.project != null) and hasPermission(returnObject.sequenceFile.project, 'OTP_READ_ACCESS'))")
     MetaDataEntry getMetaDataEntryById(Long id) {
         return MetaDataEntry.get(id)
     }
 
     /**
-     * Retrieves the DataFile identified by the given ID in permission aware manner.
-     * @param id The Id of the DataFile.
-     * @return DataFile if it exists, otherwise null
+     * Retrieves the RawSequenceFile identified by the given ID in permission aware manner.
+     * @param id The Id of the RawSequenceFile.
+     * @return RawSequenceFile if it exists, otherwise null
      */
     @PostAuthorize("hasRole('ROLE_OPERATOR') or (returnObject == null) or ((returnObject.project != null) and hasPermission(returnObject.project, 'OTP_READ_ACCESS'))")
-    DataFile getDataFile(Long id) {
-        return DataFile.get(id)
+    RawSequenceFile getRawSequenceFile(Long id) {
+        return RawSequenceFile.get(id)
     }
 
     /**

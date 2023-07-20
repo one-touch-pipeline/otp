@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -42,8 +42,9 @@ class EgaSubmissionServiceSpec extends Specification implements EgaSubmissionFac
         return [
                 AbstractBamFile,
                 BamFileSubmissionObject,
-                DataFile,
-                DataFileSubmissionObject,
+                RawSequenceFile,
+                RawSequenceFileSubmissionObject,
+                FastqFile,
                 FileType,
                 Individual,
                 LibraryPreparationKit,
@@ -141,11 +142,11 @@ class EgaSubmissionServiceSpec extends Specification implements EgaSubmissionFac
         BamFileSubmissionObject bamFileSubmissionObject = createBamFileSubmissionObject(
                 sampleSubmissionObject: sampleSubmissionObject,
         )
-        DataFileSubmissionObject dataFileSubmissionObject = createDataFileSubmissionObject(
+        RawSequenceFileSubmissionObject submissionObject = createRawSequenceFileSubmissionObject(
                 sampleSubmissionObject: sampleSubmissionObject,
         )
         submission.addToBamFilesToSubmit(bamFileSubmissionObject)
-        submission.addToDataFilesToSubmit(dataFileSubmissionObject)
+        submission.addToRawSequenceFilesToSubmit(submissionObject)
         submission.addToSamplesToSubmit(sampleSubmissionObject)
         submission.save(flush: true)
 
@@ -351,7 +352,7 @@ class EgaSubmissionServiceSpec extends Specification implements EgaSubmissionFac
         l == ["${sampleSubmissionObject.sample.id}-${sampleSubmissionObject.seqType.id}"]
     }
 
-    void "test createDataFileSubmissionObjects"() {
+    void "test createRawSequenceFileSubmissionObjects"() {
         given:
         EgaSubmission submission = createEgaSubmission()
         List<Boolean> selectBox = [
@@ -363,10 +364,10 @@ class EgaSubmissionServiceSpec extends Specification implements EgaSubmissionFac
         ]
         int size = selectBox.size()
 
-        List<String> fastQFileIds = (1..size).collect { createDataFile() }*.id*.toString()
+        List<String> fastQFileIds = (1..size).collect { createFastqFile() }*.id*.toString()
         List<String> egaSampleIds = (1..size).collect { createSampleSubmissionObject() }*.id*.toString()
 
-        SelectFilesDataFilesFormSubmitCommand cmd = new SelectFilesDataFilesFormSubmitCommand([
+        SelectFilesRawSequenceFilesFormSubmitCommand cmd = new SelectFilesRawSequenceFilesFormSubmitCommand([
                 submission: submission,
                 selectBox : selectBox,
                 fastqFile : fastQFileIds,
@@ -374,34 +375,34 @@ class EgaSubmissionServiceSpec extends Specification implements EgaSubmissionFac
         ])
 
         when:
-        egaSubmissionService.createDataFileSubmissionObjects(cmd)
+        egaSubmissionService.createRawSequenceFileSubmissionObjects(cmd)
 
         then:
-        submission.dataFilesToSubmit.size() == DataFileSubmissionObject.findAll().size()
+        submission.rawSequenceFilesToSubmit.size() == RawSequenceFileSubmissionObject.findAll().size()
     }
 
-    void "test updateDataFileSubmissionObjects"() {
+    void "test updateRawSequenceFileSubmissionObjects"() {
         given:
         EgaSubmission submission = createEgaSubmission()
         String egaFileAlias = "someMagicAlias"
-        DataFile dataFile = createDataFile()
-        DataFileSubmissionObject dataFileSubmissionObject = createDataFileSubmissionObject(
-                dataFile: dataFile,
+        RawSequenceFile rawSequenceFile = createFastqFile()
+        RawSequenceFileSubmissionObject submissionObject = createRawSequenceFileSubmissionObject(
+                sequenceFile: rawSequenceFile,
         )
-        submission.addToDataFilesToSubmit(dataFileSubmissionObject)
+        submission.addToRawSequenceFilesToSubmit(submissionObject)
 
-        SelectFilesDataFilesFormSubmitCommand cmd = new SelectFilesDataFilesFormSubmitCommand([
+        SelectFilesRawSequenceFilesFormSubmitCommand cmd = new SelectFilesRawSequenceFilesFormSubmitCommand([
                 submission  : submission,
-                fastqFile   : [dataFile.id.toString()],
-                egaSample   : [dataFileSubmissionObject.sampleSubmissionObject.id.toString()],
+                fastqFile   : [rawSequenceFile.id.toString()],
+                egaSample   : [submissionObject.sampleSubmissionObject.id.toString()],
                 egaFileAlias: [egaFileAlias],
         ])
 
         when:
-        egaSubmissionService.updateDataFileSubmissionObjects(cmd)
+        egaSubmissionService.updateRawSequenceFileSubmissionObjects(cmd)
 
         then:
-        dataFileSubmissionObject.egaAliasName == egaFileAlias
+        submissionObject.egaAliasName == egaFileAlias
     }
 
     void "test update bam file submission objects"() {
@@ -428,26 +429,26 @@ class EgaSubmissionServiceSpec extends Specification implements EgaSubmissionFac
         Run run = DomainFactory.createRun(
                 name: runName
         )
-        DataFile dataFile = DomainFactory.createDataFile(
+        RawSequenceFile rawSequenceFile = DomainFactory.createFastqFile(
                 run: run
         )
 
         String alias = "someAlias"
-        List dataFilesAndAliases = [new DataFileAndSampleAlias(dataFile, new SampleSubmissionObject(egaAliasName: alias))]
+        List rawSequenceFileAndAliases = [new RawSequenceFileAndSampleAlias(rawSequenceFile, new SampleSubmissionObject(egaAliasName: alias))]
 
         when:
-        Map defaultEgaAliasesForDataFiles = egaSubmissionService.generateDefaultEgaAliasesForDataFiles(dataFilesAndAliases)
+        Map defaultEgaAliasesForRawSequenceFiles = egaSubmissionService.generateDefaultEgaAliasesForRawSequenceFiles(rawSequenceFileAndAliases)
 
         then:
         List aliasNameHelper = [
-                dataFile.seqType.displayName,
-                dataFile.seqType.libraryLayout,
+                rawSequenceFile.seqType.displayName,
+                rawSequenceFile.seqType.libraryLayout,
                 alias,
                 runNameWithoutDate,
-                dataFile.seqTrack.laneId,
-                "R${dataFile.mateNumber}",
+                rawSequenceFile.seqTrack.laneId,
+                "R${rawSequenceFile.mateNumber}",
         ]
-        defaultEgaAliasesForDataFiles.get(dataFile.fileName + dataFile.run) == "${aliasNameHelper.join("_")}.fastq.gz"
+        defaultEgaAliasesForRawSequenceFiles.get(rawSequenceFile.fileName + rawSequenceFile.run) == "${aliasNameHelper.join("_")}.fastq.gz"
 
         where:
         runName                            || runNameWithoutDate
@@ -483,9 +484,9 @@ class EgaSubmissionServiceSpec extends Specification implements EgaSubmissionFac
         ]
 
         when:
-        Map defaultEgaAliasesForDataFiles = egaSubmissionService.generateDefaultEgaAliasesForBamFiles(bamFilesAndAliases)
+        Map defaultEgaAliasesForRawSequenceFiles = egaSubmissionService.generateDefaultEgaAliasesForBamFiles(bamFilesAndAliases)
 
         then:
-        defaultEgaAliasesForDataFiles.get(bamFile.bamFileName + alias) == "${aliasNameHelper.join("_")}.bam"
+        defaultEgaAliasesForRawSequenceFiles.get(bamFile.bamFileName + alias) == "${aliasNameHelper.join("_")}.bam"
     }
 }

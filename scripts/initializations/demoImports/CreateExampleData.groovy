@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -121,7 +121,7 @@ class ExampleData {
      *
      * Usually there is no need to set this to false, only if you want to create data with missing files.
      */
-    boolean markDataFilesAsExisting = true
+    boolean markRawSequenceFilesAsExisting = true
 
     /**
      * The SeqTypes using panCancer / wgbs alignment
@@ -248,7 +248,7 @@ class ExampleData {
     int individualCounter = Individual.count()
     int runCounter = Run.count()
     int seqTrackCounter = SeqTrack.count()
-    int dataFileCounter = DataFile.count()
+    int rawSequenceFileCounter = RawSequenceFile.count()
     int commentCounter = Comment.count()
 
     Map<SampleType, MixedInSpecies> diseaseSampleTypes = [:]
@@ -262,7 +262,7 @@ class ExampleData {
     List<SophiaInstance> sophiaInstances = []
     List<AceseqInstance> aceseqInstances = []
     List<RunYapsaInstance> runYapsaInstances = []
-    List<DataFile> dataFiles = []
+    List<RawSequenceFile> rawSequenceFiles = []
     List<FastqcProcessedFile> fastqcProcessedFiles = []
 
     List<SeqType> analyseAbleSeqType = []
@@ -384,7 +384,7 @@ class ExampleData {
 
     void createFiles() {
         if (createFilesOnFilesystem) {
-            createDataFilesFilesOnFilesystem()
+            createRawSequenceFilesFilesOnFilesystem()
             createFastqcFilesOnFilesystem()
             createPanCancerBamFilesOnFilesystem()
             createRnaBamFilesOnFilesystem()
@@ -400,12 +400,12 @@ class ExampleData {
         }
     }
 
-    void createDataFilesFilesOnFilesystem() {
+    void createRawSequenceFilesFilesOnFilesystem() {
         println "creating dummy datafiles on file system"
-        dataFiles.each { DataFile dataFile ->
-            Path directPath = lsdfFilesService.getFileFinalPathAsPath(dataFile)
-            Path directPathMd5sum = directPath.resolveSibling("${dataFile.fileName}.md5sum")
-            Path vbpPath = lsdfFilesService.getFileViewByPidPathAsPath(dataFile)
+        rawSequenceFiles.each { RawSequenceFile rawSequenceFile ->
+            Path directPath = lsdfFilesService.getFileFinalPathAsPath(rawSequenceFile)
+            Path directPathMd5sum = directPath.resolveSibling("${rawSequenceFile.fileName}.md5sum")
+            Path vbpPath = lsdfFilesService.getFileViewByPidPathAsPath(rawSequenceFile)
             [
                     directPath,
                     directPathMd5sum,
@@ -432,14 +432,14 @@ class ExampleData {
 
     void createSingleCellWellLabelOnFilesystem() {
         println "creating additional files or links for well labeled lanes on file system"
-        dataFiles.each { DataFile dataFile ->
-            if (dataFile.seqTrack.singleCellWellLabel) {
-                Path target = lsdfFilesService.getFileFinalPathAsPath(dataFile)
-                Path link = lsdfFilesService.getFileViewByPidPathAsPath(dataFile, WellDirectory.ALL_WELL)
+        rawSequenceFiles.each { RawSequenceFile rawSequenceFile ->
+            if (rawSequenceFile.seqTrack.singleCellWellLabel) {
+                Path target = lsdfFilesService.getFileFinalPathAsPath(rawSequenceFile)
+                Path link = lsdfFilesService.getFileViewByPidPathAsPath(rawSequenceFile, WellDirectory.ALL_WELL)
 
                 fileService.createLink(link, target, realm, CreateLinkOption.DELETE_EXISTING_FILE)
 
-                singleCellMappingFileService.addMappingFileEntryIfMissing(dataFile)
+                singleCellMappingFileService.addMappingFileEntryIfMissing(rawSequenceFile)
             }
         }
     }
@@ -1025,7 +1025,7 @@ class ExampleData {
         ]).save(flush: false)
 
         (1..seqType.libraryLayout.mateCount).each {
-            createDataFile(seqTrack, it)
+            createFastqFile(seqTrack, it)
         }
 
         return seqTrack
@@ -1041,9 +1041,9 @@ class ExampleData {
         ]).save(flush: false)
     }
 
-    DataFile createDataFile(SeqTrack seqTrack, int mateNumber) {
-        String fileName = "file_${dataFileCounter++}_L${seqTrack.laneId}_R${mateNumber}.fastq.gz"
-        DataFile dataFile = new DataFile([
+    RawSequenceFile createFastqFile(SeqTrack seqTrack, int mateNumber) {
+        String fileName = "file_${rawSequenceFileCounter++}_L${seqTrack.laneId}_R${mateNumber}.fastq.gz"
+        RawSequenceFile rawSequenceFile = new FastqFile([
                 seqTrack           : seqTrack,
                 mateNumber         : mateNumber,
                 fastqImportInstance: fastqImportInstance,
@@ -1052,26 +1052,26 @@ class ExampleData {
                 fileName           : fileName,
                 pathName           : '',
                 initialDirectory   : '/tmp',
-                md5sum             : "0" * 32,
+                fastqMd5sum        : "0" * 32,
                 run                : seqTrack.run,
                 project            : seqTrack.project,
                 used               : true,
-                fileExists         : !createFilesOnFilesystem ? markDataFilesAsExisting : true,
+                fileExists         : !createFilesOnFilesystem ? markRawSequenceFilesAsExisting : true,
                 fileLinked         : true,
                 fileSize           : 1000000000,
                 nReads             : 185000000,
                 dateLastChecked    : new Date()
         ]).save(flush: false)
 
-        dataFiles << dataFile
-        createFastqcProcessedFiles(dataFile)
+        rawSequenceFiles << rawSequenceFile
+        createFastqcProcessedFiles(rawSequenceFile)
 
-        return dataFile
+        return rawSequenceFile
     }
 
-    FastqcProcessedFile createFastqcProcessedFiles(DataFile dataFile) {
+    FastqcProcessedFile createFastqcProcessedFiles(RawSequenceFile rawSequenceFile) {
         FastqcProcessedFile fastqcProcessedFile = new FastqcProcessedFile([
-                dataFile         : dataFile,
+                sequenceFile     : rawSequenceFile,
                 workDirectoryName: "bash-unknown-version-2000-01-01-00-00-00"
         ]).save(flush: false)
 

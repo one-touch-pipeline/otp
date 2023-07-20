@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -34,16 +34,16 @@ class FastqcResultsService {
 
     SeqTrackService seqTrackService
 
-    boolean isFastqcAvailable(DataFile dataFile) {
-        return CollectionUtils.atMostOneElement(FastqcProcessedFile.findAllByDataFileAndContentUploaded(dataFile, true))
+    boolean isFastqcAvailable(RawSequenceFile rawSequenceFile) {
+        return CollectionUtils.atMostOneElement(FastqcProcessedFile.findAllBySequenceFileAndContentUploaded(rawSequenceFile, true))
     }
 
     Map<Long, Boolean> fastqcLinkMap(Run run) {
         Map<Long, Boolean> map = [:]
         List<SeqTrack> seqTracks = SeqTrack.findAllByRun(run) // to be protected by ACLs
         seqTracks.each { SeqTrack seqTrack ->
-            List<DataFile> files = seqTrackService.getSequenceFilesForSeqTrack(seqTrack)
-            files.each { DataFile file ->
+            List<RawSequenceFile> files = seqTrackService.getSequenceFilesForSeqTrack(seqTrack)
+            files.each { RawSequenceFile file ->
                 map.put(file.id, isFastqcAvailable(file))
             }
         }
@@ -51,7 +51,7 @@ class FastqcResultsService {
     }
 
     /**
-     * Retrieves the FastQC {@link DataFile}s for the given {@link Sequence}s where FastQC is finished.
+     * Retrieves the FastQC {@link RawSequenceFile}s for the given {@link Sequence}s where FastQC is finished.
      *
      * The returned list includes the found DataFiles but does not order them by
      * Sequences. If a mapping to the Sequence is needed it's the task of the
@@ -59,14 +59,14 @@ class FastqcResultsService {
      * @param sequences The Sequences for which the FastQC DataFiles should be retrieved
      * @return The FastQC DataFiles found by the Sequences
      */
-    List<DataFile> fastQCFiles(List<Sequence> sequences) {
+    List<RawSequenceFile> fastQCFiles(List<Sequence> sequences) {
         return FastqcProcessedFile.createCriteria().list {
-            dataFile {
+            sequenceFile {
                 seqTrack {
                     'in'('id', sequences*.seqTrackId)
                     eq('fastqcState', SeqTrack.DataProcessingState.FINISHED)
                 }
             }
-        }*.dataFile
+        }*.sequenceFile
     }
 }

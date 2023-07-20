@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -59,7 +59,8 @@ class CreateNotificationTextServiceSpec extends Specification implements Alignme
                 AntibodyTarget,
                 CellRangerConfig,
                 CellRangerMergingWorkPackage,
-                DataFile,
+                RawSequenceFile,
+                FastqFile,
                 FileType,
                 Individual,
                 LibraryPreparationKit,
@@ -200,8 +201,8 @@ class CreateNotificationTextServiceSpec extends Specification implements Alignme
 
     void "getSeqTypeDirectories, return correct paths"() {
         given:
-        SeqTrack seqTrack1 = DomainFactory.createSeqTrackWithTwoDataFiles()
-        SeqTrack seqTrack2 = DomainFactory.createSeqTrackWithTwoDataFiles()
+        SeqTrack seqTrack1 = DomainFactory.createSeqTrackWithTwoFastqFiles()
+        SeqTrack seqTrack2 = DomainFactory.createSeqTrackWithTwoFastqFiles()
         CreateNotificationTextService createNotificationTextService = new CreateNotificationTextService(lsdfFilesService: new LsdfFilesService())
         createNotificationTextService.lsdfFilesService.projectService = new ProjectService()
         createNotificationTextService.lsdfFilesService.projectService.configService = configService
@@ -1146,7 +1147,7 @@ samplePairsNotProcessed: ${expectedSamplePairsNotProcessed}
         String sampleId1 = properties.sampleId1 ?: "sampleId_${DomainFactory.counter++}"
         String sampleId2 = properties.sampleId2
 
-        SeqTrack seqTrack = DomainFactory.createSeqTrackWithTwoDataFiles([
+        SeqTrack seqTrack = DomainFactory.createSeqTrackWithTwoFastqFiles([
                 seqType: seqType,
                 sample : DomainFactory.createSample([
                         individual: DomainFactory.createIndividual([
@@ -1156,7 +1157,7 @@ samplePairsNotProcessed: ${expectedSamplePairsNotProcessed}
                 ]),
                 run    : run,
         ])
-        seqTrack.dataFiles.each {
+        seqTrack.sequenceFiles.each {
             DomainFactory.createMetaDataKeyAndEntry(it, MetaDataColumn.SAMPLE_NAME, sampleId1)
             if (sampleId2) {
                 DomainFactory.createMetaDataKeyAndEntry(it, MetaDataColumn.SAMPLE_NAME, sampleId2)

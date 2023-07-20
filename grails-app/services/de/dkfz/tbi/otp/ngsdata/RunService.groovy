@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -79,8 +79,10 @@ class RunService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     Collection<MetaDataFile> retrieveMetaDataFiles(Run run) {
-        Collection<DataFile> dataFiles = DataFile.findAllByRun(run)
-        return dataFiles ? (dataFiles*.fastqImportInstance ? MetaDataFile.findAllByFastqImportInstanceInList(dataFiles*.fastqImportInstance) : []) : []
+        Collection<RawSequenceFile> rawSequenceFiles = RawSequenceFile.findAllByRun(run)
+        return rawSequenceFiles ?
+                (rawSequenceFiles*.fastqImportInstance ? MetaDataFile.findAllByFastqImportInstanceInList(rawSequenceFiles*.fastqImportInstance) : []) :
+                []
     }
 
     /**
@@ -92,7 +94,7 @@ class RunService {
      * Summarized the structure looks like the following
      * <ul>
      * <li>SeqTrack:<ul>
-     *   <li>files: [DataFile, DataFile]</li>
+     *   <li>files: [RawSequenceFile, RawSequenceFile]</li>
      * </ul></li>
      * <ul>
      * @param run The Run for which the Sequence Track information should be retrieved
@@ -105,7 +107,7 @@ class RunService {
             return returnData
         }
         SeqTrack.findAllByRun(run, [sort: 'laneId']).each { track ->
-            Map dataElement = [files: DataFile.findAllBySeqTrack(track)]
+            Map dataElement = [files: RawSequenceFile.findAllBySeqTrack(track)]
             returnData.put(track, dataElement)
         }
         returnData
@@ -119,8 +121,8 @@ class RunService {
      * @return List of DataFiles with errors.
      * */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    List<DataFile> dataFilesWithError(Run run) {
-        return DataFile.findAllByRunAndUsed(run, false, [sort: "fileName"])
+    List<RawSequenceFile> rawSequenceFilesWithError(Run run) {
+        return RawSequenceFile.findAllByRunAndUsed(run, false, [sort: "fileName"])
     }
 
     /**
@@ -130,6 +132,6 @@ class RunService {
      * */
     boolean isRunEmpty(Run run) {
         assert run: "The input run of the method isRunEmpty is null"
-        return !(DataFile.findAllByRun(run) || SeqTrack.findAllByRun(run))
+        return !(RawSequenceFile.findAllByRun(run) || SeqTrack.findAllByRun(run))
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -107,7 +107,7 @@ ORDER BY r.id ASC
 
 @Field final String querySeqTrackAndFastqc = """
 SELECT s, f FROM FastqcProcessedFile f
-JOIN f.dataFile d
+JOIN f.sequenceFile d
 JOIN d.seqTrack s
 JOIN s.sample.individual i
 WHERE d.indexFile = false

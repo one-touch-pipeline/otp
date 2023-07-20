@@ -42,7 +42,7 @@ class FastqImportInstanceService {
                     fii2.id
                 from
                     FastqImportInstance fii2
-                    join fii2.dataFiles df2
+                    join fii2.sequenceFiles df2
                 where
                     fii2.state = 'PROCESSING'
                     and df2.seqTrack.sample.individual.project in (
@@ -50,7 +50,7 @@ class FastqImportInstanceService {
                             df3.seqTrack.sample.individual.project
                         from
                             FastqImportInstance fii3
-                            join fii3.dataFiles df3
+                            join fii3.sequenceFiles df3
                         where
                             fii3 = fii
                     )

@@ -684,7 +684,7 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
         }
 
         log.debug("check correct connection of datafiles to fastqImportInstance")
-        DataFile.list().each {
+        RawSequenceFile.list().each {
             assert it.fastqImportInstance == fastqImportInstance
         }
     }

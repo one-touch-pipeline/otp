@@ -98,7 +98,7 @@
             </g:each>
         </table>
 
-        <h3><g:message code="run.show.dataFiles"/></h3>
+        <h3><g:message code="run.show.rawSequenceFiles"/></h3>
         <g:each var="track" in="${seqTracks}">
             <table>
                 <thead>
@@ -115,7 +115,7 @@
                     <tr>
                         <td>-</td>
                         <td>s</td>
-                        <td><g:link controller="dataFile" action="showDetails" id="${file.id}" class="${archivedClickable}">${file.fileName}
+                        <td><g:link controller="rawSequenceFile" action="showDetails" id="${file.id}" class="${archivedClickable}">${file.fileName}
                             <g:if test="${archivedClickable}">
                                 <span title="${track.key.project} is archived">&#128451;</span>
                             </g:if>
@@ -147,9 +147,9 @@
             <g:each var="file" in="${errorFiles}">
                 <tr>
                     %{--This code require metadata fields, since there is no connection to a SeqTrack--}%
-                    <td><g:link controller="dataFile" action="showDetails" id="${file.id}">${file.fileName}</g:link></td>
-                    <td>${CollectionUtils.atMostOneElement(MetaDataEntry.findAllByDataFileAndKey(file, keys[0]))?.value}</td>
-                    <td>${MetaDataEntry.findAllByDataFileAndKey(file, keys[1])}</td>
+                    <td><g:link controller="rawSequenceFile" action="showDetails" id="${file.id}">${file.fileName}</g:link></td>
+                    <td>${CollectionUtils.atMostOneElement(MetaDataEntry.findAllBySequenceFileAndKey(file, keys[0]))?.value}</td>
+                    <td>${MetaDataEntry.findAllBySequenceFileAndKey(file, keys[1])}</td>
                     <td class="true"><g:message code="run.show.metaData"/></td>
                 </tr>
             </g:each>

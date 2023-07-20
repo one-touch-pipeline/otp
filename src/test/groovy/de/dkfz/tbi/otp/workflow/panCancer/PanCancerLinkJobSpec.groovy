@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -49,6 +49,7 @@ class PanCancerLinkJobSpec extends Specification implements DataTest, WorkflowSy
     @Override
     Class[] getDomainClassesToMock() {
         return [
+                FastqFile,
                 FastqImportInstance,
                 FileType,
                 LibraryPreparationKit,

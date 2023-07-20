@@ -69,19 +69,19 @@ abstract class AbstractAlignmentWorkflowSpec extends AbstractWorkflowSpec {
     }
 
     protected void linkFastqFiles(SeqTrack seqTrack, List<Path> testFastqFiles) {
-        List<DataFile> dataFiles = DataFile.findAllBySeqTrack(seqTrack)
-        assert seqTrack.seqType.libraryLayout.mateCount == dataFiles.size()
+        List<RawSequenceFile> rawSequenceFiles = RawSequenceFile.findAllBySeqTrack(seqTrack)
+        assert seqTrack.seqType.libraryLayout.mateCount == rawSequenceFiles.size()
 
-        dataFiles.sort {
+        rawSequenceFiles.sort {
             it.mateNumber
-        }.eachWithIndex { dataFile, index ->
+        }.eachWithIndex { rawSequenceFile, index ->
             Path sourceFastqFile = testFastqFiles[index]
             assert Files.exists(sourceFastqFile)
             assert Files.isReadable(sourceFastqFile)
-            dataFile.fileSize = Files.size(sourceFastqFile)
-            dataFile.save(flush: true)
-            Path linkFastqFile = lsdfFilesService.getFileFinalPathAsPath(dataFile)
-            Path linkViewByPid = lsdfFilesService.getFileViewByPidPathAsPath(dataFile)
+            rawSequenceFile.fileSize = Files.size(sourceFastqFile)
+            rawSequenceFile.save(flush: true)
+            Path linkFastqFile = lsdfFilesService.getFileFinalPathAsPath(rawSequenceFile)
+            Path linkViewByPid = lsdfFilesService.getFileViewByPidPathAsPath(rawSequenceFile)
             fileService.createLink(linkFastqFile, sourceFastqFile, realm)
             fileService.createLink(linkViewByPid, linkFastqFile, realm)
         }

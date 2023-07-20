@@ -174,7 +174,7 @@ class EgaSubmissionValidationService {
     @CompileDynamic
     private List<String> findAlreadyUsedAliases(List<String> alias) {
         List<String> existingAliases = []
-        existingAliases.addAll(DataFileSubmissionObject.findAllByEgaAliasNameInList(alias)*.egaAliasName)
+        existingAliases.addAll(RawSequenceFileSubmissionObject.findAllByEgaAliasNameInList(alias)*.egaAliasName)
         existingAliases.addAll(BamFileSubmissionObject.findAllByEgaAliasNameInList(alias)*.egaAliasName)
         return existingAliases.unique().sort()
     }

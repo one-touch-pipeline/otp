@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -48,7 +48,7 @@ class SampleSwapService extends AbstractDataSwapService<SampleSwapParameters, Sa
     @Override
     protected void completeOmittedNewSwapValuesAndLog(SampleSwapParameters parameters) {
         parameters.log << "\n  swapping datafiles:"
-        parameters.dataFileSwaps = completeOmittedNewSwapValuesAndLog(parameters.dataFileSwaps, parameters.log)
+        parameters.rawSequenceFileSwaps = completeOmittedNewSwapValuesAndLog(parameters.rawSequenceFileSwaps, parameters.log)
     }
 
     @Override
@@ -58,12 +58,12 @@ class SampleSwapService extends AbstractDataSwapService<SampleSwapParameters, Sa
 
         Sample sample = getSampleByIndividualAndSampleType(individualSwap.old, sampleTypeSwap.old, parameters)
         List<SeqTrack> seqTrackList = getSeqTracksBySample(sample, parameters)
-        List<DataFile> dataFiles = getFastQDataFilesBySeqTrackInList(seqTrackList, parameters)
+        List<RawSequenceFile> rawSequenceFiles = getRawSequenceFilesBySeqTrackInList(seqTrackList, parameters)
 
         List<Path> individualPaths = seqTrackList*.seqType.unique().collect {
             individualService.getViewByPidPath(individualSwap.old, it)
         }
-        List<Path> sampleDirs = dataFiles.collect {
+        List<Path> sampleDirs = rawSequenceFiles.collect {
             lsdfFilesService.getSampleTypeDirectory(it)
         }
 
@@ -74,9 +74,9 @@ class SampleSwapService extends AbstractDataSwapService<SampleSwapParameters, Sa
                 sampleTypeSwap: sampleTypeSwap,
                 sample: sample,
                 seqTrackList: seqTrackList,
-                dataFiles: dataFiles,
-                oldDataFileNameMap: collectFileNamesOfDataFiles(dataFiles),
-                oldFastQcFileNames: getFastQcOutputFileNamesByDataFilesInList(dataFiles),
+                rawSequenceFiles: rawSequenceFiles,
+                oldRawSequenceFileNameMap: collectFileNamesOfRawSequenceFiles(rawSequenceFiles),
+                oldFastQcFileNames: getFastQcOutputFileNamesByRawSequenceFilesInList(rawSequenceFiles),
                 seqTrackService: seqTrackService,
                 cleanupIndividualPaths: individualPaths,
                 cleanupSampleTypePaths: sampleDirs,
@@ -87,11 +87,11 @@ class SampleSwapService extends AbstractDataSwapService<SampleSwapParameters, Sa
     protected void performDataSwap(SampleSwapData data) {
         swapSample(data)
 
-        createMoveDataFilesCommands(data)
+        createMoveRawSequenceFilesCommands(data)
 
         SampleIdentifier.findAllBySample(data.sample)*.delete(flush: true)
 
-        Map<FastqcProcessedFile, String> newFastQcFileNames = getFastQcOutputFileNamesByDataFilesInList(data.dataFiles)
+        Map<FastqcProcessedFile, String> newFastQcFileNames = getFastQcOutputFileNamesByRawSequenceFilesInList(data.rawSequenceFiles)
         data.moveFilesCommands << "\n\n\n################ move fastqc files ################\n"
         data.oldFastQcFileNames.each { fastqcProcessedFile, oldFastQcFileName ->
             data.moveFilesCommands << copyAndRemoveFastQcFile(oldFastQcFileName, newFastQcFileNames[fastqcProcessedFile], data)
@@ -113,7 +113,7 @@ class SampleSwapService extends AbstractDataSwapService<SampleSwapParameters, Sa
                 pid       : data.individualSwap.new.pid,
                 sampleType: data.sampleTypeSwap.new.name,
         ])
-        createCommentForSwappedDatafiles(data)
+        createCommentForSwappedRawSequenceFiles(data)
     }
 
     @Override

@@ -53,36 +53,36 @@ class LsdfFilesService {
 
     /**
      * This function return path to the initial location
-     * of the given dataFile
+     * of the given sequenceFile
      */
-    Path getFileInitialPathAsPath(DataFile dataFile) {
+    Path getFileInitialPathAsPath(RawSequenceFile rawSequenceFile) {
         FileSystem fileSystem = fileSystemService.remoteFileSystemOnDefaultRealm
-        return fileSystem.getPath(getFileInitialPath(dataFile))
+        return fileSystem.getPath(getFileInitialPath(rawSequenceFile))
     }
 
-    Path getSeqTypeDirectory(DataFile dataFile) {
-        Path basePath = projectService.getSequencingDirectory(dataFile.project)
-        String seqTypeDirName = dataFile.seqTrack?.seqType?.dirName
+    Path getSeqTypeDirectory(RawSequenceFile rawSequenceFile) {
+        Path basePath = projectService.getSequencingDirectory(rawSequenceFile.project)
+        String seqTypeDirName = rawSequenceFile.seqTrack?.seqType?.dirName
         if (!seqTypeDirName) {
             return null
         }
         return basePath.resolve(seqTypeDirName)
     }
 
-    Path getSeqCenterRunDirectory(DataFile dataFile) {
-        if (!checkFinalPathDefined(dataFile)) {
+    Path getSeqCenterRunDirectory(RawSequenceFile rawSequenceFile) {
+        if (!checkFinalPathDefined(rawSequenceFile)) {
             return null
         }
-        Path basePath = getSeqTypeDirectory(dataFile)
-        String centerDir = dataFile.run.seqCenter.dirName
-        return basePath?.resolve(centerDir)?.resolve(dataFile.run.dirName)
+        Path basePath = getSeqTypeDirectory(rawSequenceFile)
+        String centerDir = rawSequenceFile.run.seqCenter.dirName
+        return basePath?.resolve(centerDir)?.resolve(rawSequenceFile.run.dirName)
     }
 
-    Path getFinalDirPath(DataFile dataFile, PathOption... options) {
-        if (options.contains(PathOption.REAL_PATH) && dataFile.seqTrack.workflowArtefact.producedBy.workFolder) {
-            return filestoreService.getWorkFolderPath(dataFile.seqTrack.workflowArtefact.producedBy)
+    Path getFinalDirPath(RawSequenceFile rawSequenceFile, PathOption... options) {
+        if (options.contains(PathOption.REAL_PATH) && rawSequenceFile.seqTrack.workflowArtefact.producedBy.workFolder) {
+            return filestoreService.getWorkFolderPath(rawSequenceFile.seqTrack.workflowArtefact.producedBy)
         }
-        return getSeqCenterRunDirectory(dataFile)?.resolve(dataFile.pathName)
+        return getSeqCenterRunDirectory(rawSequenceFile)?.resolve(rawSequenceFile.pathName)
     }
 
     /**
@@ -91,60 +91,60 @@ class LsdfFilesService {
      *
      * @return String with path or null if path can not be established
      */
-    Path getFileFinalPathAsPath(DataFile dataFile, PathOption... options) {
-        return getFinalDirPath(dataFile, options)?.resolve(dataFile?.fileName)
+    Path getFileFinalPathAsPath(RawSequenceFile rawSequenceFile, PathOption... options) {
+        return getFinalDirPath(rawSequenceFile, options)?.resolve(rawSequenceFile?.fileName)
     }
 
-    Path getFileMd5sumFinalPathAsPath(DataFile dataFile) {
-        return getFileFinalPathAsPath(dataFile)?.resolveSibling(dataFile.fileName.concat(".md5sum"))
+    Path getFileMd5sumFinalPathAsPath(RawSequenceFile rawSequenceFile) {
+        return getFileFinalPathAsPath(rawSequenceFile)?.resolveSibling(rawSequenceFile.fileName.concat(".md5sum"))
     }
 
-    private boolean checkFinalPathDefined(DataFile dataFile) {
-        if (!dataFile) {
+    private boolean checkFinalPathDefined(RawSequenceFile rawSequenceFile) {
+        if (!rawSequenceFile) {
             return false
         }
-        return dataFile.used
+        return rawSequenceFile.used
     }
 
     /**
-     * Attention: In most cases the method {@link #getSingleCellWellDirectory(DataFile)} is to use instead of this one to include the well label level.
+     * Attention: In most cases the method {@link #getSingleCellWellDirectory(RawSequenceFile)} is to use instead of this one to include the well label level.
      */
-    Path getSampleTypeDirectory(DataFile dataFile) {
-        Path basePath = individualService.getViewByPidPath(dataFile.individual, dataFile.seqType)
-        SeqTrack seqTrack = dataFile.seqTrack
+    Path getSampleTypeDirectory(RawSequenceFile rawSequenceFile) {
+        Path basePath = individualService.getViewByPidPath(rawSequenceFile.individual, rawSequenceFile.seqType)
+        SeqTrack seqTrack = rawSequenceFile.seqTrack
         String antiBodyTarget = seqTrack.seqType.hasAntibodyTarget ? "-${seqTrack.antibodyTarget.name}" : ""
         return basePath.resolve("${seqTrack.sample.sampleType.dirName}${antiBodyTarget}")
     }
 
-    Path getSingleCellWellDirectory(DataFile dataFile, WellDirectory wellDirectory = null) {
-        Path basePath = getSampleTypeDirectory(dataFile)
-        SeqTrack seqTrack = dataFile.seqTrack
+    Path getSingleCellWellDirectory(RawSequenceFile rawSequenceFile, WellDirectory wellDirectory = null) {
+        Path basePath = getSampleTypeDirectory(rawSequenceFile)
+        SeqTrack seqTrack = rawSequenceFile.seqTrack
         if (seqTrack.singleCellWellLabel && seqTrack.seqType.singleCell) {
             return basePath.resolve(wellDirectory == WellDirectory.ALL_WELL ? SINGLE_CELL_ALL_WELL : seqTrack.singleCellWellLabel)
         }
         return basePath
     }
 
-    Path getRunDirectory(DataFile dataFile, WellDirectory wellDirectory = null) {
-        Path basePath = getSingleCellWellDirectory(dataFile, wellDirectory)
-        SeqTrack seqTrack = dataFile.seqTrack
+    Path getRunDirectory(RawSequenceFile rawSequenceFile, WellDirectory wellDirectory = null) {
+        Path basePath = getSingleCellWellDirectory(rawSequenceFile, wellDirectory)
+        SeqTrack seqTrack = rawSequenceFile.seqTrack
         return basePath.resolve(seqTrack.seqType.libraryLayoutDirName).resolve(seqTrack.run.dirName)
     }
 
-    Path getFileViewByPidDirectory(DataFile dataFile, WellDirectory wellDirectory = null, PathOption... options) {
-        if (options.contains(PathOption.REAL_PATH) && dataFile.seqTrack.workflowArtefact.producedBy.workFolder) {
-            return getFinalDirPath(dataFile, options)
+    Path getFileViewByPidDirectory(RawSequenceFile rawSequenceFile, WellDirectory wellDirectory = null, PathOption... options) {
+        if (options.contains(PathOption.REAL_PATH) && rawSequenceFile.seqTrack.workflowArtefact.producedBy.workFolder) {
+            return getFinalDirPath(rawSequenceFile, options)
         }
-        Path basePath = getRunDirectory(dataFile, wellDirectory)
+        Path basePath = getRunDirectory(rawSequenceFile, wellDirectory)
         // For historic reasons, vbpPath starts and ends with a slash.
         // Remove the slashes here, otherwise it would be interpreted as an absolute path by resolve():
-        String vbpPath = Paths.get(dataFile.fileType.vbpPath).getName(0)
+        String vbpPath = Paths.get(rawSequenceFile.fileType.vbpPath).getName(0)
         return basePath.resolve(vbpPath)
     }
 
-    Path getFileViewByPidPathAsPath(DataFile dataFile, WellDirectory wellDirectory = null, PathOption... options) {
-        Path basePath = getFileViewByPidDirectory(dataFile, wellDirectory, options)
-        return basePath.resolve(dataFile.vbpFileName)
+    Path getFileViewByPidPathAsPath(RawSequenceFile rawSequenceFile, WellDirectory wellDirectory = null, PathOption... options) {
+        Path basePath = getFileViewByPidDirectory(rawSequenceFile, wellDirectory, options)
+        return basePath.resolve(rawSequenceFile.vbpFileName)
     }
 
     /**
@@ -177,11 +177,11 @@ class LsdfFilesService {
 
     /**
      * This function return path to the initial location
-     * of the given dataFile
+     * of the given sequenceFile
      * @deprecated use {@link #getFileInitialPathAsPath}
      */
     @Deprecated
-    static String getFileInitialPath(DataFile dataFile) {
+    static String getFileInitialPath(RawSequenceFile dataFile) {
         return "${dataFile.initialDirectory}/${dataFile.fileName}"
     }
 
@@ -189,7 +189,7 @@ class LsdfFilesService {
      * @deprecated use {@link #getFileFinalPathAsPath}
      */
     @Deprecated
-    String getFileFinalPath(DataFile dataFile) {
+    String getFileFinalPath(RawSequenceFile dataFile) {
         return getFileFinalPathAsPath(dataFile)?.toString()
     }
 
@@ -198,7 +198,7 @@ class LsdfFilesService {
      */
     @Deprecated
     String getFileViewByPidPath(long fileId) {
-        DataFile file = DataFile.get(fileId)
+        RawSequenceFile file = RawSequenceFile.get(fileId)
         if (!file) {
             return null
         }
@@ -209,16 +209,16 @@ class LsdfFilesService {
      * @deprecated use {@link #getFileViewByPidPathAsPath}
      */
     @Deprecated
-    String getFileViewByPidPath(DataFile file) {
+    String getFileViewByPidPath(RawSequenceFile file) {
         return getFileViewByPidPathAsPath(file)
     }
     /**
      * for single cell data with well identifier, the path in the all directory is returned.
      * For all other data the same as {@link #getFileViewByPidPath} is returned
-     * @deprecated use {@link #getFileViewByPidPathAsPath(DataFile, WellDirectory#ALL_WELL)}
+     * @deprecated use {@link #getFileViewByPidPathAsPath(RawSequenceFile, WellDirectory#ALL_WELL)}
      */
     @Deprecated
-    String getWellAllFileViewByPidPath(DataFile file) {
+    String getWellAllFileViewByPidPath(RawSequenceFile file) {
         return getFileViewByPidPathAsPath(file, WellDirectory.ALL_WELL)
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -32,7 +32,7 @@ import de.dkfz.tbi.otp.project.Project
 @Transactional
 class SampleIdentifierOverviewService {
 
-    DataFileService dataFileService
+    RawSequenceFileService rawSequenceFileService
 
     @Autowired
     LinkGenerator linkGenerator
@@ -41,25 +41,26 @@ class SampleIdentifierOverviewService {
      * Returns the DataFiles of the given Project, grouped by a combined key of Sample and SeqType
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'OTP_READ_ACCESS')")
-    Map<List, List<DataFile>> dataFilesOfProjectBySampleAndSeqType(Project project) {
-        return dataFileService.getAllDataFilesOfProject(project).groupBy { [it.sample, it.seqType] }
+    Map<List, List<RawSequenceFile>> rawSequenceFilesOfProjectBySampleAndSeqType(Project project) {
+        return rawSequenceFileService.getAllRawSequenceFilesOfProject(project).groupBy { [it.sample, it.seqType] }
     }
 
-    List<Map> extractSampleIdentifiers(List<DataFile> dataFiles) {
-        return dataFiles.groupBy { it.seqTrack.sampleIdentifier }.sort { it.key }.collect { String sampleIdentifier, List<DataFile> dataFilesPerIdentifier ->
-            return [
-                text     : sampleIdentifier,
-                withdrawn: dataFilesPerIdentifier.any { it.fileWithdrawn },
-                comments : StringEscapeUtils.escapeHtml(dataFilesPerIdentifier*.withdrawnComment.findAll().unique().join("; ")),
-            ]
-        }
+    List<Map> extractSampleIdentifiers(List<RawSequenceFile> rawSequenceFiles) {
+        return rawSequenceFiles.groupBy { it.seqTrack.sampleIdentifier }.sort { it.key }
+                .collect { String sampleIdentifier, List<RawSequenceFile> rawSequenceFilesPerIdentifier ->
+                    return [
+                            text     : sampleIdentifier,
+                            withdrawn: rawSequenceFilesPerIdentifier.any { it.fileWithdrawn },
+                            comments : StringEscapeUtils.escapeHtml(rawSequenceFilesPerIdentifier*.withdrawnComment.findAll().unique().join("; ")),
+                    ]
+                }
     }
 
-    Map handleSampleIdentifierEntry(Map.Entry<List, List<DataFile>> entry) {
+    Map handleSampleIdentifierEntry(Map.Entry<List, List<RawSequenceFile>> entry) {
         return handleSampleIdentifierEntry(entry.key[0] as Sample, entry.key[1] as SeqType, entry.value)
     }
 
-    Map handleSampleIdentifierEntry(Sample sample, SeqType seqType, List<DataFile> dataFiles) {
+    Map handleSampleIdentifierEntry(Sample sample, SeqType seqType, List<RawSequenceFile> rawSequenceFiles) {
         return [
                 individual      : [
                         id  : sample.individual.id,
@@ -73,7 +74,7 @@ class SampleIdentifierOverviewService {
                         id         : seqType.id,
                         displayText: seqType.displayNameWithLibraryLayout,
                 ],
-                sampleIdentifier: extractSampleIdentifiers(dataFiles),
+                sampleIdentifier: extractSampleIdentifiers(rawSequenceFiles),
         ]
     }
 }

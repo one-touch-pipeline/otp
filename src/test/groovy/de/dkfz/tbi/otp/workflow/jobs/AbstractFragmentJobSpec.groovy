@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,7 +27,7 @@ import org.grails.testing.GrailsUnitTest
 import org.grails.web.json.JSONObject
 
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
-import de.dkfz.tbi.otp.ngsdata.DataFile
+import de.dkfz.tbi.otp.ngsdata.RawSequenceFile
 import de.dkfz.tbi.otp.workflow.shared.MultipleCombinedFragmentException
 import de.dkfz.tbi.otp.workflowExecution.*
 
@@ -40,8 +40,8 @@ class AbstractFragmentJobSpec extends HibernateSpec implements GrailsUnitTest, W
     @Override
     List<Class> getDomainClasses() {
         return [
-                DataFile,
                 ExternalWorkflowConfigSelector,
+                RawSequenceFile,
                 WorkflowStep,
         ]
     }

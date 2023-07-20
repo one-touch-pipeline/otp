@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -67,7 +67,7 @@ class MetadataValidationContext extends AbstractMetadataValidationContext {
         }, { Row row ->
             !row.getCellByColumnTitle(FASTQ_FILE.name())?.text?.startsWith('Undetermined') &&
                     // Add additional filter to skip rows containing known md5sum in database
-                    (!ignoreAlreadyKnownMd5sum || DataFile.findAllByMd5sum(row.getCellByColumnTitle(MD5.name())?.text).empty)
+                    (!ignoreAlreadyKnownMd5sum || RawSequenceFile.findAllByFastqMd5sum(row.getCellByColumnTitle(MD5.name())?.text).empty)
         })
 
         return new MetadataValidationContext(metadataFile, parametersForFile.metadataFileMd5sum,
@@ -85,7 +85,7 @@ class MetadataValidationContext extends AbstractMetadataValidationContext {
         }, { Row row ->
             !row.getCellByColumnTitle(FASTQ_FILE.name())?.text?.startsWith('Undetermined') &&
                     // Add additional filter to skip rows containing known md5sum in database
-                    (!ignoreAlreadyKnownMd5sum || DataFile.findAllByMd5sum(row.getCellByColumnTitle(MD5.name())?.text).empty)
+                    (!ignoreAlreadyKnownMd5sum || RawSequenceFile.findAllByFastqMd5sum(row.getCellByColumnTitle(MD5.name())?.text).empty)
         })
 
         return new MetadataValidationContext(contentWithPathAndProblems.path, parametersForFile.metadataFileMd5sum,

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -39,8 +39,9 @@ class EgaSubmissionSpec extends Specification implements EgaSubmissionFactory, I
         return [
                 AbstractBamFile,
                 BamFileSubmissionObject,
-                DataFile,
-                DataFileSubmissionObject,
+                RawSequenceFile,
+                RawSequenceFileSubmissionObject,
+                FastqFile,
                 FileType,
                 Individual,
                 LibraryPreparationKit,
@@ -73,18 +74,18 @@ class EgaSubmissionSpec extends Specification implements EgaSubmissionFactory, I
         given:
         EgaSubmission submission = createEgaSubmission()
         BamFileSubmissionObject bamFileSubmissionObject = createBamFileSubmissionObject()
-        DataFileSubmissionObject dataFileSubmissionObject = createDataFileSubmissionObject()
+        RawSequenceFileSubmissionObject submissionObject = createRawSequenceFileSubmissionObject()
         SampleSubmissionObject sampleSubmissionObject = createSampleSubmissionObject()
 
         when:
         submission.addToBamFilesToSubmit(bamFileSubmissionObject)
-        submission.addToDataFilesToSubmit(dataFileSubmissionObject)
+        submission.addToRawSequenceFilesToSubmit(submissionObject)
         submission.addToSamplesToSubmit(sampleSubmissionObject)
         submission.save(flush: true)
 
         then:
         CollectionUtils.exactlyOneElement(submission.bamFilesToSubmit) == bamFileSubmissionObject
-        CollectionUtils.exactlyOneElement(submission.dataFilesToSubmit) == dataFileSubmissionObject
+        CollectionUtils.exactlyOneElement(submission.rawSequenceFilesToSubmit) == submissionObject
         CollectionUtils.exactlyOneElement(submission.samplesToSubmit) == sampleSubmissionObject
     }
 }

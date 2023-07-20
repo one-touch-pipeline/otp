@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -51,7 +51,8 @@ class LaneSwapServiceSpec extends Specification implements DataTest, ServiceUnit
     @Override
     Class[] getDomainClassesToMock() {
         return [
-                DataFile,
+                RawSequenceFile,
+                FastqFile,
                 FastqcProcessedFile,
                 Project,
                 SampleType,
@@ -132,26 +133,26 @@ class LaneSwapServiceSpec extends Specification implements DataTest, ServiceUnit
                 individual: oldIndividual,
         ])
         final SeqType falsySampleSeqType = createSeqType()
-        SeqTrack seqTrackWithFalsySample1 = createSeqTrackWithOneDataFile([
+        SeqTrack seqTrackWithFalsySample1 = createSeqTrackWithOneFastqFile([
                 seqType: falsySampleSeqType,
                 sample : falsyLabeledSample,
         ])
-        SeqTrack seqTrackWithFalsySample2 = createSeqTrackWithOneDataFile([
+        SeqTrack seqTrackWithFalsySample2 = createSeqTrackWithOneFastqFile([
                 sample : falsyLabeledSample,
                 run    : seqTrackWithFalsySample1.run,
                 seqType: seqTrackWithFalsySample1.seqType,
         ])
-        SeqTrack seqTrackWithCorrectlyLabeledSample = createSeqTrackWithOneDataFile([
+        SeqTrack seqTrackWithCorrectlyLabeledSample = createSeqTrackWithOneFastqFile([
                 sample: correctlyLabeledSample,
                 run   : seqTrackWithFalsySample1.run,
         ])
         createSeqTrack()  // a unconnected SeqTrack
 
         // prepare input
-        DataFile seqTrack1File = DataFile.findAllBySeqTrack(seqTrackWithFalsySample1).first()
+        RawSequenceFile seqTrack1File = RawSequenceFile.findAllBySeqTrack(seqTrackWithFalsySample1).first()
         Files.createDirectories(service.lsdfFilesService.getFileFinalPathAsPath(seqTrack1File).parent)
         Files.createFile(service.lsdfFilesService.getFileFinalPathAsPath(seqTrack1File))
-        DataFile seqTrack2File = DataFile.findAllBySeqTrack(seqTrackWithFalsySample2).first()
+        RawSequenceFile seqTrack2File = RawSequenceFile.findAllBySeqTrack(seqTrackWithFalsySample2).first()
         Files.createFile(service.lsdfFilesService.getFileFinalPathAsPath(seqTrack2File))
 
         LaneSwapParameters parameters = new LaneSwapParameters(
@@ -167,7 +168,7 @@ class LaneSwapServiceSpec extends Specification implements DataTest, ServiceUnit
                         seqTrackWithFalsySample2.laneId,
                 ],
                 sampleNeedsToBeCreated: true,
-                dataFileSwaps: [new Swap(seqTrack1File.fileName, 'newFileName1'), new Swap(seqTrack2File.fileName, 'newFileName2')],
+                rawSequenceFileSwaps: [new Swap(seqTrack1File.fileName, 'newFileName1'), new Swap(seqTrack2File.fileName, 'newFileName2')],
                 bashScriptName: scriptName,
                 log: new StringBuilder(),
                 failOnMissingFiles: true,
@@ -207,11 +208,11 @@ class LaneSwapServiceSpec extends Specification implements DataTest, ServiceUnit
         assert resultBoolList.every { it }
 
         and: "DataFiles to the new SeqTracks have the new name"
-        CollectionUtils.containSame(DataFile.findAllBySeqTrackInList(seqTracks)*.fileName, ['newFileName1', 'newFileName2'])
+        CollectionUtils.containSame(RawSequenceFile.findAllBySeqTrackInList(seqTracks)*.fileName, ['newFileName1', 'newFileName2'])
 
         and: "Old dataFiles are untouched"
-        DataFile.findAll().size() == 3
-        DataFile.findAllBySeqTrack(seqTrackWithCorrectlyLabeledSample).size() == 1
+        RawSequenceFile.findAll().size() == 3
+        RawSequenceFile.findAllBySeqTrack(seqTrackWithCorrectlyLabeledSample).size() == 1
 
         and: "Old SeqTracks connection is removed"
         CollectionUtils.containSame(SeqTrack.findAllBySampleInList(Sample.findAllByIndividual(oldIndividual))*.id, [seqTrackWithCorrectlyLabeledSample.id])

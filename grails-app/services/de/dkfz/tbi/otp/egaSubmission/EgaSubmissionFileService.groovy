@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -177,27 +177,27 @@ class EgaSubmissionFileService {
         return "${contentHeader}\n${contentBody}"
     }
 
-    String generateDataFilesCsvFile(EgaSubmission submission) {
+    String generateRawSequenceFilesCsvFile(EgaSubmission submission) {
         StringBuilder contentBody = new StringBuilder()
 
-        List<DataFileAndSampleAlias> dataFilesAndSampleAliases = egaSubmissionService.getDataFilesAndAlias(submission)
-        Map dataFileFileAliases = egaSubmissionService.generateDefaultEgaAliasesForDataFiles(dataFilesAndSampleAliases)
+        List<RawSequenceFileAndSampleAlias> dataFilesAndSampleAliases = egaSubmissionService.getRawSequenceFilesAndAlias(submission)
+        Map dataFileFileAliases = egaSubmissionService.generateDefaultEgaAliasesForRawSequenceFiles(dataFilesAndSampleAliases)
 
         dataFilesAndSampleAliases.each {
             contentBody.append([
-                    it.dataFile.individual.displayName,
-                    it.dataFile.seqType.displayName,
-                    it.dataFile.seqType.libraryLayout,
-                    it.dataFile.seqType.singleCellDisplayName,
-                    it.dataFile.sampleType.displayName,
+                    it.rawSequenceFile.individual.displayName,
+                    it.rawSequenceFile.seqType.displayName,
+                    it.rawSequenceFile.seqType.libraryLayout,
+                    it.rawSequenceFile.seqType.singleCellDisplayName,
+                    it.rawSequenceFile.sampleType.displayName,
                     it.sampleSubmissionObject.egaAliasName,
-                    it.dataFile.run.seqCenter,
-                    it.dataFile.run,
-                    it.dataFile.seqTrack.laneId,
-                    it.dataFile.seqTrack.normalizedLibraryName ?: "N/A",
-                    it.dataFile.seqTrack.ilseId ?: "N/A",
-                    dataFileFileAliases.get(it.dataFile.fileName + it.dataFile.run),
-                    it.dataFile.fileName,
+                    it.rawSequenceFile.run.seqCenter,
+                    it.rawSequenceFile.run,
+                    it.rawSequenceFile.seqTrack.laneId,
+                    it.rawSequenceFile.seqTrack.normalizedLibraryName ?: "N/A",
+                    it.rawSequenceFile.seqTrack.ilseId ?: "N/A",
+                    dataFileFileAliases.get(it.rawSequenceFile.fileName + it.rawSequenceFile.run),
+                    it.rawSequenceFile.fileName,
             ].join(",") + "\n")
         }
 
@@ -285,7 +285,7 @@ class EgaSubmissionFileService {
                 user         : mailHelperService.senderName,
                 project      : submission.project.name,
                 submission   : submission.id,
-                numberOfFiles: submission.dataFilesToSubmit.size() + submission.bamFilesToSubmit.size(),
+                numberOfFiles: submission.rawSequenceFilesToSubmit.size() + submission.bamFilesToSubmit.size(),
                 path         : basePath,
         ])
         mailHelperService.sendEmailToTicketSystem(subject, content, user.email)

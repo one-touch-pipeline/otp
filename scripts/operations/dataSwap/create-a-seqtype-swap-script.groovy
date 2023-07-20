@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -162,10 +162,10 @@ seqTracks.each { seqTrack ->
             "\t\trunName: '${seqTrack.run.name}',\n" +
             "\t\tlanes: ['${seqTrack.laneId}',],\n" +
             "\t\tsampleNeedsToBeCreated: false,\n" +
-            "\t\tdataFileSwaps        : [\n")
+            "\t\trawSequenceFileSwaps        : [\n")
 
-    seqTrack.dataFiles.each { dataFile ->
-        builder.addGroovyCommand( "\t\t\tnew Swap('${dataFile.fileName}', ''),\n")
+    seqTrack.sequenceFiles.each { rawSequenceFile ->
+        builder.addGroovyCommand( "\t\t\tnew Swap('${rawSequenceFile.fileName}', ''),\n")
     }
 
     builder.addGroovyCommand("\t\t],\n" +

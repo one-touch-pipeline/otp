@@ -114,7 +114,7 @@
         </g:each>
     </ul>
 
-    <h2><g:message code="metadataImport.details.dataFiles"/></h2>
+    <h2><g:message code="metadataImport.details.rawSequenceFiles"/></h2>
     <g:each in="${metaDataDetails.runs}" var="run">
         <h3>
             <g:message code="metadataImport.details.run"/>
@@ -151,7 +151,7 @@
                                     <g:message code="metadataImport.details.indexNumber" />
                                 </g:if>
                                 ${dataFile.mateNumber}:
-                                <g:link controller="dataFile" action="showDetails" id="${dataFile.id}">
+                                <g:link controller="rawSequenceFile" action="showDetails" id="${dataFile.id}">
                                     ${dataFile.fileName}
                                 </g:link>
                             </li>
@@ -170,7 +170,7 @@
     <g:if test="${metaDataDetails.dataFilesNotAssignedToSeqTrack}">
         <ul>
             <g:each in="${metaDataDetails.dataFilesNotAssignedToSeqTrack}" var="dataFile">
-                <li><g:link controller="dataFile" action="showDetails" id="${dataFile.id}">${dataFile.fileName}</g:link></li>
+                <li><g:link controller="rawSequenceFile" action="showDetails" id="${dataFile.id}">${dataFile.fileName}</g:link></li>
             </g:each>
         </ul>
     </g:if><g:else>

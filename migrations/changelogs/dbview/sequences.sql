@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -65,17 +65,17 @@ SELECT st.id                                                                    
        sampleType.name                                                                                    AS sample_type_name,
        i.type,
        i.pid,
-       re.name                                                                                            AS realm_name,
-       p.name                                                                                             AS project_name,
-       p.dir_name                                                                                         AS project_dir_name,
-       p.archived                                                                                         AS file_archived,
-       sc.name                                                                                            AS seq_center_name,
-       sc.dir_name                                                                                        AS seq_center_dir_name,
-       COALESCE((SELECT BOOL_AND(file_exists) FROM data_file df WHERE df.seq_track_id = st.id), FALSE)    AS file_exists,
-       COALESCE((SELECT BOOL_AND(file_withdrawn) FROM data_file df WHERE df.seq_track_id = st.id), FALSE) AS file_withdrawn,
-       scn.name                                                                                           AS species_common_name,
-       spe.scientific_name                                                                                AS scientific_name,
-       strn.name                                                                                          AS strain,
+       re.name                                                                                                    AS realm_name,
+       p.name                                                                                                     AS project_name,
+       p.dir_name                                                                                                 AS project_dir_name,
+       p.archived                                                                                                 AS file_archived,
+       sc.name                                                                                                    AS seq_center_name,
+       sc.dir_name                                                                                                AS seq_center_dir_name,
+       COALESCE((SELECT BOOL_AND(file_exists) FROM raw_sequence_file sf WHERE sf.seq_track_id = st.id), FALSE)    AS file_exists,
+       COALESCE((SELECT BOOL_AND(file_withdrawn) FROM raw_sequence_file sf WHERE sf.seq_track_id = st.id), FALSE) AS file_withdrawn,
+       scn.name                                                                                                   AS species_common_name,
+       spe.scientific_name                                                                                        AS scientific_name,
+       strn.name                                                                                                  AS strain,
        (SELECT STRING_AGG(
                        (SELECT CONCAT(
                                        (SELECT name

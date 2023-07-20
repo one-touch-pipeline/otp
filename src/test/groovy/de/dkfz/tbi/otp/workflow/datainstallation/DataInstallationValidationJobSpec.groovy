@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -39,6 +39,7 @@ class DataInstallationValidationJobSpec extends Specification implements DataTes
     @Override
     Class[] getDomainClassesToMock() {
         return [
+                FastqFile,
                 FastqImportInstance,
                 Sample,
                 SampleType,
@@ -48,13 +49,13 @@ class DataInstallationValidationJobSpec extends Specification implements DataTes
 
     void "test getExpectedFiles"() {
         given:
-        SeqTrack seqTrack = createSeqTrackWithOneDataFile()
+        SeqTrack seqTrack = createSeqTrackWithOneFastqFile()
         WorkflowStep workflowStep = createWorkflowStep()
         DataInstallationValidationJob job = Spy(DataInstallationValidationJob) {
             _ * getSeqTrack(workflowStep) >> seqTrack
         }
         job.lsdfFilesService = Mock(LsdfFilesService) {
-            1 * getFileFinalPath(_) >> { DataFile dataFile -> dataFile.fileName }
+            1 * getFileFinalPath(_) >> { RawSequenceFile rawSequenceFile -> rawSequenceFile.fileName }
         }
         job.fileSystemService = Mock(FileSystemService) {
             getRemoteFileSystem(_) >> FileSystems.default
@@ -64,7 +65,7 @@ class DataInstallationValidationJobSpec extends Specification implements DataTes
         List<Path> result = job.getExpectedFiles(workflowStep)
 
         then:
-        containSame(result*.fileName*.toString(), seqTrack.dataFiles*.fileName)
+        containSame(result*.fileName*.toString(), seqTrack.sequenceFiles*.fileName)
     }
 
     void "test getExpectedDirectories"() {
@@ -79,7 +80,7 @@ class DataInstallationValidationJobSpec extends Specification implements DataTes
     @Unroll
     void "test doFurtherValidation, when md5Sum is correct, then return empty list"() {
         given:
-        SeqTrack seqTrack = createSeqTrackWithTwoDataFile()
+        SeqTrack seqTrack = createSeqTrackWithTwoFastqFile()
         WorkflowStep workflowStep = createWorkflowStep()
         DataInstallationValidationJob job = Spy(DataInstallationValidationJob) {
             _ * getSeqTrack(workflowStep) >> seqTrack
@@ -90,15 +91,15 @@ class DataInstallationValidationJobSpec extends Specification implements DataTes
         List<String> result = job.doFurtherValidationAndReturnProblems(workflowStep)
 
         then:
-        1 * job.checksumFileService.compareMd5(seqTrack.dataFiles.first()) >> true
-        1 * job.checksumFileService.compareMd5(seqTrack.dataFiles.last()) >> true
+        1 * job.checksumFileService.compareMd5(seqTrack.sequenceFiles.first()) >> true
+        1 * job.checksumFileService.compareMd5(seqTrack.sequenceFiles.last()) >> true
 
         result == []
     }
 
     void "test doFurtherValidation, when md5Sum is incorrect, then return list with problems"() {
         given:
-        SeqTrack seqTrack = createSeqTrackWithTwoDataFile()
+        SeqTrack seqTrack = createSeqTrackWithTwoFastqFile()
         WorkflowStep workflowStep = createWorkflowStep()
         DataInstallationValidationJob job = Spy(DataInstallationValidationJob) {
             _ * getSeqTrack(workflowStep) >> seqTrack
@@ -109,8 +110,8 @@ class DataInstallationValidationJobSpec extends Specification implements DataTes
         List<String> result = job.doFurtherValidationAndReturnProblems(workflowStep)
 
         then:
-        1 * job.checksumFileService.compareMd5(seqTrack.dataFiles.first()) >> false
-        1 * job.checksumFileService.compareMd5(seqTrack.dataFiles.last()) >> false
+        1 * job.checksumFileService.compareMd5(seqTrack.sequenceFiles.first()) >> false
+        1 * job.checksumFileService.compareMd5(seqTrack.sequenceFiles.last()) >> false
 
         result.size() == 2
         result.each {
@@ -120,7 +121,7 @@ class DataInstallationValidationJobSpec extends Specification implements DataTes
 
     void "test saveResult"() {
         given:
-        SeqTrack seqTrack = createSeqTrackWithOneDataFile()
+        SeqTrack seqTrack = createSeqTrackWithOneFastqFile()
         WorkflowStep workflowStep = createWorkflowStep()
 
         DataInstallationValidationJob job = Spy(DataInstallationValidationJob) {
@@ -137,8 +138,8 @@ class DataInstallationValidationJobSpec extends Specification implements DataTes
         job.saveResult(workflowStep)
 
         then:
-        seqTrack.dataFiles.every { it.fileSize }
-        seqTrack.dataFiles.every { it.dateFileSystem }
-        seqTrack.dataFiles.every { it.fileExists }
+        seqTrack.sequenceFiles.every { it.fileSize }
+        seqTrack.sequenceFiles.every { it.dateFileSystem }
+        seqTrack.sequenceFiles.every { it.fileExists }
     }
 }

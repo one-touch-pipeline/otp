@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,7 +27,7 @@ import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
-import de.dkfz.tbi.otp.ngsdata.DataFile
+import de.dkfz.tbi.otp.ngsdata.RawSequenceFile
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 
 /**
@@ -77,16 +77,16 @@ class WithdrawDisplayDomainService {
         ].join('\t')
     }
 
-    String dataFileInfo(DataFile dataFile, boolean includeWithdrawnColumns = false) {
+    String rawSequenceFileInfo(RawSequenceFile rawSequenceFile, boolean includeWithdrawnColumns = false) {
         List<String> info = [
-                seqTrackInfo(dataFile.seqTrack),
-                dataFile.mateNumber.toString(),
-                dataFile.fileName,
+                seqTrackInfo(rawSequenceFile.seqTrack),
+                rawSequenceFile.mateNumber.toString(),
+                rawSequenceFile.fileName,
         ]
         if (includeWithdrawnColumns) {
-            info << dataFile.fileWithdrawn
-            info << dataFile.withdrawnDate
-            info << dataFile.withdrawnComment?.replace('[\n\r]+', ' ')
+            info << rawSequenceFile.fileWithdrawn
+            info << rawSequenceFile.withdrawnDate
+            info << rawSequenceFile.withdrawnComment?.replace('[\n\r]+', ' ')
         }
         return info.join('\t')
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -299,7 +299,7 @@ class AbstractAlignmentStartJobIntegrationTests implements DomainFactoryProcessi
 
     RoddyBamFile helperTestCreateRoddyBamFile_WhenBaseBamFileIsNull(MergingWorkPackage mwp) {
         setupData()
-        Collection<SeqTrack> seqTracks = [DomainFactory.createSeqTrackWithDataFiles(mwp)]
+        Collection<SeqTrack> seqTracks = [DomainFactory.createSeqTrackWithFastqFiles(mwp)]
         mwp.seqTracks = seqTracks
         mwp.save(flush: true)
         DomainFactory.createRoddyProcessingOptions(TestCase.uniqueNonExistentPath)
@@ -323,9 +323,9 @@ class AbstractAlignmentStartJobIntegrationTests implements DomainFactoryProcessi
         RoddyBamFile baseBamFile = DomainFactory.createRoddyBamFile()
         MergingWorkPackage mwp = baseBamFile.mergingWorkPackage
         Collection<SeqTrack> additionalSeqTracks = [
-                DomainFactory.createSeqTrackWithDataFiles(mwp),
-                DomainFactory.createSeqTrackWithDataFiles(mwp),
-                DomainFactory.createSeqTrackWithDataFiles(mwp),
+                DomainFactory.createSeqTrackWithFastqFiles(mwp),
+                DomainFactory.createSeqTrackWithFastqFiles(mwp),
+                DomainFactory.createSeqTrackWithFastqFiles(mwp),
         ]
         mwp.seqTracks.addAll(additionalSeqTracks)
         mwp.save(flush: true)
@@ -347,7 +347,7 @@ class AbstractAlignmentStartJobIntegrationTests implements DomainFactoryProcessi
     void testCreateRoddyBamFile_WhenBaseBamFileIsNullAndNoConfigAvailable_ShouldFail() {
         setupData()
         MergingWorkPackage mwp = createMergingWorkPackage()
-        DomainFactory.createSeqTrackWithDataFiles(mwp)
+        DomainFactory.createSeqTrackWithFastqFiles(mwp)
         DomainFactory.createRoddyProcessingOptions()
         RoddyWorkflowConfig.list()*.delete(flush: true)
         assert RoddyWorkflowConfig.list().size() == 0
@@ -396,7 +396,7 @@ class AbstractAlignmentStartJobIntegrationTests implements DomainFactoryProcessi
         setupData()
         MergingWorkPackage mwp = createMergingWorkPackageWithSeqTrackInState(SeqTrack.DataProcessingState.FINISHED)
         OtrsTicket otrsTicket = DomainFactory.createOtrsTicket()
-        DataFile.findAll()*.fastqImportInstance = DomainFactory.createFastqImportInstance(otrsTicket: otrsTicket)
+        RawSequenceFile.findAll()*.fastqImportInstance = DomainFactory.createFastqImportInstance(otrsTicket: otrsTicket)
         DomainFactory.createRoddyProcessingOptions(TestCase.uniqueNonExistentPath)
         DomainFactory.createRoddyWorkflowConfig([pipeline: mwp.pipeline, project: mwp.project])
 
@@ -430,7 +430,7 @@ class AbstractAlignmentStartJobIntegrationTests implements DomainFactoryProcessi
 
     MergingWorkPackage createMergingWorkPackageWithSeqTrackInState(SeqTrack.DataProcessingState dataInstallationState) {
         MergingWorkPackage mergingWorkPackage = createMergingWorkPackage()
-        mergingWorkPackage.seqTracks = [DomainFactory.createSeqTrackWithDataFiles(mergingWorkPackage, [dataInstallationState: dataInstallationState])]
+        mergingWorkPackage.seqTracks = [DomainFactory.createSeqTrackWithFastqFiles(mergingWorkPackage, [dataInstallationState: dataInstallationState])]
         mergingWorkPackage.save(flush: true)
         return mergingWorkPackage
     }

@@ -77,7 +77,8 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
     Class[] getDomainClassesToMock() {
         return [
                 AntibodyTarget,
-                DataFile,
+                RawSequenceFile,
+                FastqFile,
                 FileType,
                 IlseSubmission,
                 Individual,
@@ -684,7 +685,7 @@ ${SPECIES}                      ${speciesImportAlias}                       ${sp
         def (md5a, md5b, md5c, md5d, md5e, md5f, md5g, md5h, md5i) = (1..9).collect { HelperUtils.randomMd5sum }
 
         int seqTrackCount = includeOptional ? 7 : 1
-        int dataFileCount = includeOptional ? 9 : 1
+        int rawSequenceFileCount = includeOptional ? 9 : 1
 
         String scMaterial = SeqType.SINGLE_CELL_DNA
 
@@ -870,21 +871,21 @@ ${ILSE_NO}                      -                           1234          1234  
         result == metadataFile
 
         SeqTrack.count == seqTrackCount
-        DataFile.count == dataFileCount
+        RawSequenceFile.count == rawSequenceFileCount
         MetaDataKey.count == context.spreadsheet.header.cells.size()
-        MetaDataEntry.count == context.spreadsheet.header.cells.size() * dataFileCount
+        MetaDataEntry.count == context.spreadsheet.header.cells.size() * rawSequenceFileCount
 
-        Map commonDataFileProperties = [
+        Map commonRawSequenceFileProperties = [
                 pathName           : '',
                 used               : true,
                 fastqImportInstance: fastqImportInstance,
                 fileType           : fileType,
         ]
-        Map commonRun1DataFileProperties = commonDataFileProperties + [
+        Map commonRun1RawSequenceFileProperties = commonRawSequenceFileProperties + [
                 dateExecuted: run1Date,
                 run         : run1,
         ]
-        Map commonRun2DataFileProperties = commonDataFileProperties + [
+        Map commonRun2RawSequenceFileProperties = commonRawSequenceFileProperties + [
                 dateExecuted: run2Date,
                 run         : run2,
         ]
@@ -904,20 +905,20 @@ ${ILSE_NO}                      -                           1234          1234  
         seqTrack1.individual.species == humanSpecies
         seqTrack1.sample.mixedInSpecies.size() == 1
         seqTrack1.sample.mixedInSpecies.first() == mouseSpecies
-        DataFile dataFile1 = CollectionUtils.atMostOneElement(DataFile.findAllWhere(commonRun1DataFileProperties + [
+        FastqFile rawSequenceFile1 = CollectionUtils.atMostOneElement(FastqFile.findAllWhere(commonRun1RawSequenceFileProperties + [
                 fileName   : fastq1,
                 vbpFileName: fastq1,
-                md5sum     : md5a,
+                fastqMd5sum: md5a,
                 project    : sample2.project,
                 mateNumber : 1,
                 indexFile  : false,
                 seqTrack   : seqTrack1,
         ]))
-        dataFile1 != null
+        rawSequenceFile1 != null
         MetaDataKey key = CollectionUtils.atMostOneElement(MetaDataKey.findAllWhere(name: MD5.name()))
         key != null
         CollectionUtils.atMostOneElement(MetaDataEntry.findAllWhere(
-                dataFile: dataFile1,
+                sequenceFile: rawSequenceFile1,
                 key: key,
                 value: md5a,
         ))
@@ -937,19 +938,19 @@ ${ILSE_NO}                      -                           1234          1234  
             assert seqTrack2.ilseId == 1234
             assert seqTrack2.individual.species == mouseSpecies
             assert seqTrack2.sample.mixedInSpecies.size() == 0
-            assert CollectionUtils.atMostOneElement(DataFile.findAllWhere(commonRun1DataFileProperties + [
+            assert CollectionUtils.atMostOneElement(FastqFile.findAllWhere(commonRun1RawSequenceFileProperties + [
                     fileName   : fastq2,
                     vbpFileName: fastq2,
-                    md5sum     : md5b,
+                    fastqMd5sum: md5b,
                     project    : sample1.project,
                     mateNumber : 1,
                     indexFile  : false,
                     seqTrack   : seqTrack2,
             ]))
-            assert CollectionUtils.atMostOneElement(DataFile.findAllWhere(commonRun1DataFileProperties + [
+            assert CollectionUtils.atMostOneElement(FastqFile.findAllWhere(commonRun1RawSequenceFileProperties + [
                     fileName   : fastq3,
                     vbpFileName: fastq3,
-                    md5sum     : md5c,
+                    fastqMd5sum: md5c,
                     project    : sample1.project,
                     mateNumber : 2,
                     indexFile  : false,
@@ -973,19 +974,19 @@ ${ILSE_NO}                      -                           1234          1234  
             assert seqTrack3.individual.species == humanSpecies
             assert seqTrack3.sample.mixedInSpecies.size() == 1
             assert seqTrack3.sample.mixedInSpecies.first() == mouseSpecies
-            assert CollectionUtils.atMostOneElement(DataFile.findAllWhere(commonRun1DataFileProperties + [
+            assert CollectionUtils.atMostOneElement(FastqFile.findAllWhere(commonRun1RawSequenceFileProperties + [
                     fileName   : fastq4,
                     vbpFileName: fastq4,
-                    md5sum     : md5d,
+                    fastqMd5sum: md5d,
                     project    : sample2.project,
                     mateNumber : 1,
                     indexFile  : false,
                     seqTrack   : seqTrack3,
             ]))
-            assert CollectionUtils.atMostOneElement(DataFile.findAllWhere(commonRun1DataFileProperties + [
+            assert CollectionUtils.atMostOneElement(FastqFile.findAllWhere(commonRun1RawSequenceFileProperties + [
                     fileName   : fastq5,
                     vbpFileName: fastq5,
-                    md5sum     : md5e,
+                    fastqMd5sum: md5e,
                     project    : sample2.project,
                     mateNumber : 2,
                     indexFile  : false,
@@ -1008,10 +1009,10 @@ ${ILSE_NO}                      -                           1234          1234  
             assert seqTrack4.ilseId == 2345
             assert seqTrack4.individual.species == mouseSpecies
             assert seqTrack4.sample.mixedInSpecies.size() == 0
-            assert CollectionUtils.atMostOneElement(DataFile.findAllWhere(commonRun1DataFileProperties + [
+            assert CollectionUtils.atMostOneElement(FastqFile.findAllWhere(commonRun1RawSequenceFileProperties + [
                     fileName   : fastq6,
                     vbpFileName: fastq6,
-                    md5sum     : md5f,
+                    fastqMd5sum: md5f,
                     project    : sample1.project,
                     mateNumber : 1,
                     indexFile  : false,
@@ -1033,10 +1034,10 @@ ${ILSE_NO}                      -                           1234          1234  
             assert seqTrack5.individual.species == humanSpecies
             assert seqTrack5.sample.mixedInSpecies.size() == 1
             assert seqTrack5.sample.mixedInSpecies.first() == mouseSpecies
-            assert CollectionUtils.atMostOneElement(DataFile.findAllWhere(commonRun1DataFileProperties + [
+            assert CollectionUtils.atMostOneElement(FastqFile.findAllWhere(commonRun1RawSequenceFileProperties + [
                     fileName   : fastq7,
                     vbpFileName: fastq7,
-                    md5sum     : md5g,
+                    fastqMd5sum: md5g,
                     project    : sample2.project,
                     mateNumber : 1,
                     indexFile  : false,
@@ -1058,10 +1059,10 @@ ${ILSE_NO}                      -                           1234          1234  
             assert seqTrack6.individual.species == humanSpecies
             assert seqTrack6.sample.mixedInSpecies.size() == 1
             assert seqTrack6.sample.mixedInSpecies.first() == mouseSpecies
-            assert CollectionUtils.atMostOneElement(DataFile.findAllWhere(commonRun2DataFileProperties + [
+            assert CollectionUtils.atMostOneElement(FastqFile.findAllWhere(commonRun2RawSequenceFileProperties + [
                     fileName   : fastq8,
                     vbpFileName: fastq8,
-                    md5sum     : md5h,
+                    fastqMd5sum: md5h,
                     project    : sample2.project,
                     mateNumber : 1,
                     indexFile  : false,
@@ -1083,10 +1084,10 @@ ${ILSE_NO}                      -                           1234          1234  
             assert seqTrack7.individual.species == humanSpecies
             assert seqTrack7.sample.mixedInSpecies.size() == 1
             assert seqTrack7.sample.mixedInSpecies.first() == mouseSpecies
-            assert CollectionUtils.atMostOneElement(DataFile.findAllWhere(commonRun1DataFileProperties + [
+            assert CollectionUtils.atMostOneElement(FastqFile.findAllWhere(commonRun1RawSequenceFileProperties + [
                     fileName   : fastq9,
                     vbpFileName: fastq9,
-                    md5sum     : md5i,
+                    fastqMd5sum: md5i,
                     project    : sample2.project,
                     mateNumber : 1,
                     indexFile  : false,
@@ -1256,7 +1257,7 @@ ${SPECIES}                      ${human}+${mouse}+${chicken}                ${hu
         result == metadataFile
 
         SeqTrack.count == 1
-        DataFile.count == 2
+        RawSequenceFile.count == 2
         MetaDataKey.count == context.spreadsheet.header.cells.size()
         MetaDataEntry.count == context.spreadsheet.header.cells.size() * 2
 
@@ -1276,7 +1277,7 @@ ${SPECIES}                      ${human}+${mouse}+${chicken}                ${hu
         seqTrack.individual.species == humanSpecies
         seqTrack.sample.mixedInSpecies.size() == 2
 
-        Map commonRunDataFileProperties = [
+        Map commonRunRawSequenceFileProperties = [
                 pathName           : '',
                 used               : true,
                 fastqImportInstance: fastqImportInstance,
@@ -1287,23 +1288,23 @@ ${SPECIES}                      ${human}+${mouse}+${chicken}                ${hu
                 seqTrack           : seqTrack,
         ]
 
-        DataFile dataFile1 = CollectionUtils.atMostOneElement(DataFile.findAllWhere(commonRunDataFileProperties + [
+        RawSequenceFile rawSequenceFile1 = CollectionUtils.atMostOneElement(FastqFile.findAllWhere(commonRunRawSequenceFileProperties + [
                 fileName   : fastq1,
                 vbpFileName: fastq1,
-                md5sum     : md5sum1,
+                fastqMd5sum: md5sum1,
                 mateNumber : 1,
                 indexFile  : false,
         ]))
-        dataFile1 != null
+        rawSequenceFile1 != null
 
-        DataFile dataFile2 = CollectionUtils.atMostOneElement(DataFile.findAllWhere(commonRunDataFileProperties + [
+        RawSequenceFile rawSequenceFile2 = CollectionUtils.atMostOneElement(FastqFile.findAllWhere(commonRunRawSequenceFileProperties + [
                 fileName   : fastq2,
                 vbpFileName: fastq2,
-                md5sum     : md5sum2,
+                fastqMd5sum: md5sum2,
                 mateNumber : 2,
                 indexFile  : false,
         ]))
-        dataFile2 != null
+        rawSequenceFile2 != null
     }
 
     void "importMetadataFile imports correctly data index files"() {
@@ -1467,9 +1468,9 @@ ${SPECIES}                      ${human}+${mouse}+${chicken}                ${hu
         result == metadataFile
 
         SeqTrack.count == 1
-        DataFile.count == 4
+        RawSequenceFile.count == 4
         MetaDataKey.count == context.spreadsheet.header.cells.size()
-        MetaDataEntry.count == context.spreadsheet.header.cells.size() * DataFile.count
+        MetaDataEntry.count == context.spreadsheet.header.cells.size() * RawSequenceFile.count
 
         // seqTrack1
         SeqTrack seqTrack = CollectionUtils.atMostOneElement(SeqTrack.findAllWhere(
@@ -1488,7 +1489,7 @@ ${SPECIES}                      ${human}+${mouse}+${chicken}                ${hu
         seqTrack.sample.mixedInSpecies.size() == 1
         seqTrack.sample.mixedInSpecies.first() == mouseSpecies
 
-        Map commonRunDataFileProperties = [
+        Map commonRunRawSequenceFileProperties = [
                 pathName           : '',
                 used               : true,
                 fastqImportInstance: fastqImportInstance,
@@ -1499,41 +1500,41 @@ ${SPECIES}                      ${human}+${mouse}+${chicken}                ${hu
                 seqTrack           : seqTrack,
         ]
 
-        DataFile dataFile1 = CollectionUtils.atMostOneElement(DataFile.findAllWhere(commonRunDataFileProperties + [
+        RawSequenceFile rawSequenceFile1 = CollectionUtils.atMostOneElement(FastqFile.findAllWhere(commonRunRawSequenceFileProperties + [
                 fileName   : fastq1,
                 vbpFileName: fastq1,
-                md5sum     : md5sum1,
+                fastqMd5sum: md5sum1,
                 mateNumber : 1,
                 indexFile  : false,
         ]))
-        dataFile1 != null
+        rawSequenceFile1 != null
 
-        DataFile dataFile2 = CollectionUtils.atMostOneElement(DataFile.findAllWhere(commonRunDataFileProperties + [
+        RawSequenceFile rawSequenceFile2 = CollectionUtils.atMostOneElement(FastqFile.findAllWhere(commonRunRawSequenceFileProperties + [
                 fileName   : fastq2,
                 vbpFileName: fastq2,
-                md5sum     : md5sum2,
+                fastqMd5sum: md5sum2,
                 mateNumber : 2,
                 indexFile  : false,
         ]))
-        dataFile2 != null
+        rawSequenceFile2 != null
 
-        DataFile dataFileIndex1 = CollectionUtils.atMostOneElement(DataFile.findAllWhere(commonRunDataFileProperties + [
+        RawSequenceFile rawSequenceFileIndex1 = CollectionUtils.atMostOneElement(FastqFile.findAllWhere(commonRunRawSequenceFileProperties + [
                 fileName   : fastqIndex1,
                 vbpFileName: fastqIndex1,
-                md5sum     : md5sumIndex1,
+                fastqMd5sum: md5sumIndex1,
                 mateNumber : 1,
                 indexFile  : true,
         ]))
-        dataFileIndex1 != null
+        rawSequenceFileIndex1 != null
 
-        DataFile dataFileIndex2 = CollectionUtils.atMostOneElement(DataFile.findAllWhere(commonRunDataFileProperties + [
+        RawSequenceFile rawSequenceFileIndex2 = CollectionUtils.atMostOneElement(FastqFile.findAllWhere(commonRunRawSequenceFileProperties + [
                 fileName   : fastqIndex2,
                 vbpFileName: fastqIndex2,
-                md5sum     : md5sumIndex2,
+                fastqMd5sum: md5sumIndex2,
                 mateNumber : 2,
                 indexFile  : true,
         ]))
-        dataFileIndex2 != null
+        rawSequenceFileIndex2 != null
     }
 
     void "extractBarcode, when both INDEX and FASTQ_FILE columns are missing, returns null"() {

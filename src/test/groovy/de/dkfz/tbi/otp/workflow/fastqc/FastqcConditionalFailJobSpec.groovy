@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -41,7 +41,8 @@ class FastqcConditionalFailJobSpec extends Specification implements DataTest, Wo
     @Override
     Class[] getDomainClassesToMock() {
         return [
-                DataFile,
+                FastqFile,
+                RawSequenceFile,
                 WorkflowStep,
         ]
     }
@@ -52,7 +53,7 @@ class FastqcConditionalFailJobSpec extends Specification implements DataTest, Wo
     void "test check, succeeds"() {
         given:
         WorkflowStep workflowStep = createWorkflowStep()
-        SeqTrack seqTrack = createSeqTrackWithTwoDataFile()
+        SeqTrack seqTrack = createSeqTrackWithTwoFastqFile()
 
         Path path = CreateFileHelper.createFile(tempDir.resolve("test.txt"))
         path.text = "non-empty"
@@ -94,7 +95,7 @@ class FastqcConditionalFailJobSpec extends Specification implements DataTest, Wo
     void "test check, fails because physical files are missing"() {
         given:
         WorkflowStep workflowStep = createWorkflowStep()
-        SeqTrack seqTrack = createSeqTrackWithTwoDataFile()
+        SeqTrack seqTrack = createSeqTrackWithTwoFastqFile()
 
         FastqcConditionalFailJob job = Spy(FastqcConditionalFailJob) {
             getSeqTrack(workflowStep) >> seqTrack

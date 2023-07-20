@@ -25,7 +25,7 @@ import groovy.util.logging.Slf4j
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.infrastructure.FileService
-import de.dkfz.tbi.otp.ngsdata.DataFile
+import de.dkfz.tbi.otp.ngsdata.RawSequenceFile
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.workflow.jobs.AbstractConditionalFailJob
 import de.dkfz.tbi.otp.workflow.shared.WorkflowException
@@ -40,12 +40,12 @@ class DataInstallationConditionalFailJob extends AbstractConditionalFailJob impl
     @Override
     protected void check(WorkflowStep workflowStep) {
         SeqTrack seqTrack = getSeqTrack(workflowStep)
-        List<DataFile> dataFiles = seqTrack.dataFiles
-        if (!dataFiles) {
+        List<RawSequenceFile> rawSequenceFiles = seqTrack.sequenceFiles
+        if (!rawSequenceFiles) {
             throw new WorkflowException("SeqTrack '${seqTrack}' has no dataFiles")
         }
 
-        final Collection<Path> missingPaths = dataFiles.collect { DataFile file ->
+        final Collection<Path> missingPaths = rawSequenceFiles.collect { RawSequenceFile file ->
             lsdfFilesService.getFileInitialPathAsPath(file)
         }.findAll { Path path ->
             !FileService.isFileReadableAndNotEmpty(path)

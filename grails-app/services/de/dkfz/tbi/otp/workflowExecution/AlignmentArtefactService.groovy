@@ -83,7 +83,7 @@ class AlignmentArtefactService {
                 select
                     id
                 from
-                    DataFile df
+                    RawSequenceFile df
                 where
                     df.seqTrack = st
                     and df.fileWithdrawn = true
@@ -105,7 +105,7 @@ class AlignmentArtefactService {
         from
             FastqcProcessedFile fastqc
             join fastqc.workflowArtefact wa
-            join fetch fastqc.dataFile df
+            join fetch fastqc.sequenceFile df
             join df.seqTrack st
             join st.sample sample
             join sample.sampleType sampleType
@@ -195,7 +195,7 @@ class AlignmentArtefactService {
                 select
                     id
                 from
-                    DataFile df
+                    RawSequenceFile df
                 where
                     df.seqTrack = st
                     and df.fileWithdrawn = true
@@ -217,7 +217,7 @@ class AlignmentArtefactService {
         from
             FastqcProcessedFile fastqc
             join fastqc.workflowArtefact wa
-            join fetch fastqc.dataFile df
+            join fetch fastqc.sequenceFile df
             join fetch df.fastqImportInstance
             join fetch df.fileType
             join df.seqTrack st
@@ -380,7 +380,7 @@ class AlignmentArtefactService {
             df,
             st
         from
-            DataFile df
+            RawSequenceFile df
             left outer join fetch df.comment
             join df.seqTrack st,
             SeqTrack st2
@@ -500,7 +500,7 @@ class AlignmentArtefactService {
         }
     }
 
-    Map<SeqTrack, List<DataFile>> fetchDataFiles(Collection<SeqTrack> seqTracks) {
+    Map<SeqTrack, List<RawSequenceFile>> fetchRawSequenceFiles(Collection<SeqTrack> seqTracks) {
         return LogUsedTimeUtils.logUsedTime(log, "          fetchDataFile") {
             return (AbstractBamFile.executeQuery(HQL_FETCH_DATA_FILES, [
                     seqTracks: seqTracks,
@@ -508,9 +508,9 @@ class AlignmentArtefactService {
                 it[INDEX_1] as SeqTrack
             }.collectEntries {
                 [(it.key): (it.value.collect {
-                    it[INDEX_0] as DataFile
+                    it[INDEX_0] as RawSequenceFile
                 })]
-            } as Map<SeqTrack, List<DataFile>>
+            } as Map<SeqTrack, List<RawSequenceFile>>
         }
     }
 

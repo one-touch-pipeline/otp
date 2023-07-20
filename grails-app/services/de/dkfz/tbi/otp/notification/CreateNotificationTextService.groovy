@@ -505,7 +505,7 @@ class CreateNotificationTextService {
     String getSeqTypeDirectories(List<SeqTrack> seqTracks) {
         assert seqTracks
 
-        return DataFile.findAllBySeqTrackInList(seqTracks).collect { DataFile file ->
+        return RawSequenceFile.findAllBySeqTrackInList(seqTracks).collect { RawSequenceFile file ->
             lsdfFilesService.getSeqTypeDirectory(file)
         }.unique().sort().join('\n')
     }

@@ -100,37 +100,37 @@ class WithdrawHelperService {
         }
     }
 
-    void checkNonExistingDataFiles(WithdrawStateHolder withdrawStateHolder) {
-        List<DataFile> nonExistingDataFiles = DataFile.findAllBySeqTrackInListAndFileExists(withdrawStateHolder.seqTracks, false)
+    void checkNonExistingRawSequenceFiles(WithdrawStateHolder withdrawStateHolder) {
+        List<RawSequenceFile> nonExistingRawSequenceFiles = RawSequenceFile.findAllBySeqTrackInListAndFileExists(withdrawStateHolder.seqTracks, false)
 
-        if (nonExistingDataFiles) {
-            List<String> nonExistingData = nonExistingDataFiles.collect {
-                withdrawDisplayDomainService.dataFileInfo(it)
+        if (nonExistingRawSequenceFiles) {
+            List<String> nonExistingData = nonExistingRawSequenceFiles.collect {
+                withdrawDisplayDomainService.rawSequenceFileInfo(it)
             }.sort()
 
             if (withdrawStateHolder.stopOnMissingFiles) {
-                throw new WithdrawnException("Stop, since ${nonExistingDataFiles.size()} datafiles are not existing on file system:\n" +
+                throw new WithdrawnException("Stop, since ${nonExistingRawSequenceFiles.size()} datafiles are not existing on file system:\n" +
                         nonExistingData.join('\n'))
             }
 
-            withdrawStateHolder.summary << "\n${nonExistingDataFiles.size()} datafiles not existing on file system found:"
+            withdrawStateHolder.summary << "\n${nonExistingRawSequenceFiles.size()} datafiles not existing on file system found:"
             withdrawStateHolder.summary.addAll(nonExistingData)
             withdrawStateHolder.summary << "\n${NOTE_IGNORE_MISSING_FILES}"
         }
     }
 
-    void checkForAlreadyWithdrawnDatafiles(WithdrawStateHolder withdrawStateHolder) {
-        List<DataFile> withdrawnDataFiles = DataFile.findAllBySeqTrackInListAndFileWithdrawn(withdrawStateHolder.seqTracks, true)
+    void checkForAlreadyWithdrawnRawSequenceFiles(WithdrawStateHolder withdrawStateHolder) {
+        List<RawSequenceFile> withdrawnRawSequenceFiles = RawSequenceFile.findAllBySeqTrackInListAndFileWithdrawn(withdrawStateHolder.seqTracks, true)
 
-        if (withdrawnDataFiles) {
-            List<String> withdrawnData = withdrawnDataFiles.collect {
-                withdrawDisplayDomainService.dataFileInfo(it, true)
+        if (withdrawnRawSequenceFiles) {
+            List<String> withdrawnData = withdrawnRawSequenceFiles.collect {
+                withdrawDisplayDomainService.rawSequenceFileInfo(it, true)
             }.sort()
 
             if (withdrawStateHolder.stopOnAlreadyWithdrawnData) {
-                throw new WithdrawnException("Stop, since ${withdrawnDataFiles.size()} datafiles are already withdrawn:\n${withdrawnData.join('\n')}")
+                throw new WithdrawnException("Stop, since ${withdrawnRawSequenceFiles.size()} datafiles are already withdrawn:\n${withdrawnData.join('\n')}")
             }
-            withdrawStateHolder.summary << "\n${withdrawnDataFiles.size()} datafiles are already withdrawn: "
+            withdrawStateHolder.summary << "\n${withdrawnRawSequenceFiles.size()} datafiles are already withdrawn: "
             withdrawStateHolder.summary.addAll(withdrawnData)
             withdrawStateHolder.summary << "\n${NOTE_IGNORE_ALREADY_WITHDRAWN}"
         }
@@ -160,22 +160,23 @@ class WithdrawHelperService {
         }
     }
 
-    void handleDataFiles(WithdrawStateHolder withdrawStateHolder) {
-        List<DataFile> dataFiles = DataFile.findAllBySeqTrackInListAndFileWithdrawn(withdrawStateHolder.seqTracksWithComments*.seqTrack, false)
+    void handleRawSequenceFiles(WithdrawStateHolder withdrawStateHolder) {
+        List<RawSequenceFile> rawSequenceFiles = RawSequenceFile.findAllBySeqTrackInListAndFileWithdrawn(withdrawStateHolder.seqTracksWithComments*.seqTrack,
+                false)
         Map<SeqTrack, String> commentBySeqTrack = withdrawStateHolder.seqTracksWithComments.collectEntries {
             [(it.seqTrack): it.comment]
         }
-        dataFiles.each { DataFile dataFile ->
-            FastqcProcessedFile fastqcProcessedFile = CollectionUtils.atMostOneElement(FastqcProcessedFile.findAllByDataFile(dataFile))
+        rawSequenceFiles.each { RawSequenceFile rawSequenceFile ->
+            FastqcProcessedFile fastqcProcessedFile = CollectionUtils.atMostOneElement(FastqcProcessedFile.findAllBySequenceFile(rawSequenceFile))
 
-            dataFile.fileWithdrawn = true
-            dataFile.withdrawnDate = new Date()
-            dataFile.withdrawnComment = commentBySeqTrack[dataFile.seqTrack]
-            dataFile.save(flush: true)
+            rawSequenceFile.fileWithdrawn = true
+            rawSequenceFile.withdrawnDate = new Date()
+            rawSequenceFile.withdrawnComment = commentBySeqTrack[rawSequenceFile.seqTrack]
+            rawSequenceFile.save(flush: true)
 
             List<Path> filePaths = []
-            filePaths.add(lsdfFilesService.getFileFinalPathAsPath(dataFile))
-            filePaths.add(lsdfFilesService.getFileMd5sumFinalPathAsPath(dataFile))
+            filePaths.add(lsdfFilesService.getFileFinalPathAsPath(rawSequenceFile))
+            filePaths.add(lsdfFilesService.getFileMd5sumFinalPathAsPath(rawSequenceFile))
             if (fastqcProcessedFile) {
                 // add the symbolic link
                 filePaths.add(fastqcDataFilesService.fastqcOutputDirectory(fastqcProcessedFile))
@@ -189,17 +190,17 @@ class WithdrawHelperService {
                 withdrawStateHolder.pathsToChangeGroup << existingPath.toString()
             }
 
-            withdrawStateHolder.pathsToDelete << lsdfFilesService.getFileViewByPidPath(dataFile)
-            if (dataFile.seqType.singleCell && dataFile.seqTrack.singleCellWellLabel) {
-                withdrawStateHolder.pathsToDelete << lsdfFilesService.getWellAllFileViewByPidPath(dataFile)
+            withdrawStateHolder.pathsToDelete << lsdfFilesService.getFileViewByPidPath(rawSequenceFile)
+            if (rawSequenceFile.seqType.singleCell && rawSequenceFile.seqTrack.singleCellWellLabel) {
+                withdrawStateHolder.pathsToDelete << lsdfFilesService.getWellAllFileViewByPidPath(rawSequenceFile)
             }
 
             MergingWorkPackage.withCriteria {
                 seqTracks {
-                    eq('id', dataFile.seqTrack.id)
+                    eq('id', rawSequenceFile.seqTrack.id)
                 }
             }.each { MergingWorkPackage mergingWorkPackage ->
-                mergingWorkPackage.seqTracks.remove(dataFile.seqTrack)
+                mergingWorkPackage.seqTracks.remove(rawSequenceFile.seqTrack)
                 mergingWorkPackage.save(flush: true)
             }
         }

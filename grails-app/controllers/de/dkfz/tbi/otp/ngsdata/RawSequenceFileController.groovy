@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -30,7 +30,7 @@ import de.dkfz.tbi.otp.utils.CommentCommand
 import de.dkfz.tbi.util.TimeFormats
 
 @PreAuthorize('isFullyAuthenticated()')
-class DataFileController {
+class RawSequenceFileController {
 
     LsdfFilesService lsdfFilesService
     MetaDataService metaDataService
@@ -47,33 +47,36 @@ class DataFileController {
             return response.sendError(404)
         }
 
-        DataFile dataFile = metaDataService.getDataFile(cmd.id)
-        if (!dataFile) {
+        RawSequenceFile rawSequenceFile = metaDataService.getRawSequenceFile(cmd.id)
+        if (!rawSequenceFile) {
             return response.sendError(404)
         }
 
         return [
-                dataFile       : dataFile,
-                dataFileSize   : formatDataFileSize(dataFile.fileSize),
-                dateExecuted   : TimeFormats.DATE.getFormattedDate(dataFile.dateExecuted),
-                dateFileSystem : TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(dataFile.dateFileSystem),
-                dateCreated    : TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(dataFile.dateCreated),
-                withdrawnDate  : TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(dataFile.withdrawnDate),
-                entries        : MetaDataEntry.findAllByDataFile(dataFile, [sort: "key.id"]),
-                fullPath       : lsdfFilesService.getFileFinalPath(dataFile),
-                vbpPath        : lsdfFilesService.getFileViewByPidPath(dataFile),
-                fastqcAvailable: fastqcResultsService.isFastqcAvailable(dataFile),
+                rawSequenceFile: rawSequenceFile,
+                fileSize       : formatFileSize(rawSequenceFile.fileSize),
+                dateExecuted   : TimeFormats.DATE.getFormattedDate(rawSequenceFile.dateExecuted),
+                dateFileSystem : TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(rawSequenceFile.dateFileSystem),
+                dateCreated    : TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(rawSequenceFile.dateCreated),
+                withdrawnDate  : TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(rawSequenceFile.withdrawnDate),
+                entries        : MetaDataEntry.findAllBySequenceFile(rawSequenceFile, [sort: "key.id"]),
+                fullPath       : lsdfFilesService.getFileFinalPath(rawSequenceFile),
+                vbpPath        : lsdfFilesService.getFileViewByPidPath(rawSequenceFile),
+                fastqcAvailable: fastqcResultsService.isFastqcAvailable(rawSequenceFile),
         ]
     }
 
     JSON saveDataFileComment(CommentCommand cmd) {
-        DataFile dataFile = metaDataService.getDataFile(cmd.id)
-        commentService.saveComment(dataFile, cmd.comment)
-        Map dataToRender = [date: TimeFormats.WEEKDAY_DATE_TIME.getFormattedDate(dataFile.comment.modificationDate), author: dataFile.comment.author]
+        RawSequenceFile rawSequenceFile = metaDataService.getRawSequenceFile(cmd.id)
+        commentService.saveComment(rawSequenceFile, cmd.comment)
+        Map dataToRender = [
+                date: TimeFormats.WEEKDAY_DATE_TIME.getFormattedDate(rawSequenceFile.comment.modificationDate),
+                author: rawSequenceFile.comment.author,
+        ]
         render(dataToRender as JSON)
     }
 
-    private String formatDataFileSize(long fileSize) {
+    private String formatFileSize(long fileSize) {
         if (fileSize > 1e9) {
             return String.format("%.2f GB", fileSize / 1e9)
         } else if (fileSize > 1e6) {

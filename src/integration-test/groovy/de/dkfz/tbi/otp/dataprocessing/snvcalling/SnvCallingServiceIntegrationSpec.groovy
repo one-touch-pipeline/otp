@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -163,9 +163,9 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
         setupData()
 
         if (number == 1) {
-            DomainFactory.createSeqTrackWithDataFiles(bamFile1.mergingWorkPackage)
+            DomainFactory.createSeqTrackWithFastqFiles(bamFile1.mergingWorkPackage)
         } else {
-            DomainFactory.createSeqTrackWithDataFiles(bamFile2.mergingWorkPackage)
+            DomainFactory.createSeqTrackWithFastqFiles(bamFile2.mergingWorkPackage)
         }
 
         expect:

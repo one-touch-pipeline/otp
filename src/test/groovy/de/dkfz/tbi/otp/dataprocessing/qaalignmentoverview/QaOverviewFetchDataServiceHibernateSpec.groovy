@@ -37,6 +37,7 @@ class QaOverviewFetchDataServiceHibernateSpec extends HibernateSpec implements R
     @Override
     List<Class> getDomainClasses() {
         return [
+                FastqFile,
                 FastqImportInstance,
                 MergingWorkPackage,
                 RoddyBamFile,
@@ -126,7 +127,7 @@ class QaOverviewFetchDataServiceHibernateSpec extends HibernateSpec implements R
     }
 
     private SeqTrack createSeqTrackForQa(MergingWorkPackage mergingWorkPackage, LibraryPreparationKit libraryPreparationKit, String sequenceLength = "100") {
-        SeqTrack seqTrack = createSeqTrackWithTwoDataFile([
+        SeqTrack seqTrack = createSeqTrackWithTwoFastqFile([
                 sample               : mergingWorkPackage.sample,
                 seqType              : mergingWorkPackage.seqType,
                 libraryPreparationKit: libraryPreparationKit

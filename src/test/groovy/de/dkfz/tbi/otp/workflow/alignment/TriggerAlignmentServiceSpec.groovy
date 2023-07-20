@@ -48,8 +48,9 @@ class TriggerAlignmentServiceSpec extends HibernateSpec implements ServiceUnitTe
         return [
                 AbstractBamFile,
                 BamFilePairAnalysis,
-                DataFile,
                 ExternallyProcessedBamFile,
+                RawSequenceFile,
+                FastqFile,
                 Individual,
                 MergingWorkPackage,
                 Project,
@@ -90,18 +91,18 @@ class TriggerAlignmentServiceSpec extends HibernateSpec implements ServiceUnitTe
                 producedBy: run
         ])
 
-        SeqTrack seqTrack1 = createSeqTrackWithTwoDataFile([
+        SeqTrack seqTrack1 = createSeqTrackWithTwoFastqFile([
                 sample          : createSample(individual: individual),
                 seqType         : st1,
                 workflowArtefact: workflowArtefact1,
         ])
-        SeqTrack seqTrack2 = createSeqTrackWithTwoDataFile([
+        SeqTrack seqTrack2 = createSeqTrackWithTwoFastqFile([
                 sample          : createSample(individual: individual),
                 seqType         : st2,
                 workflowArtefact: workflowArtefact2,
         ])
 
-        SeqTrack seqTrack3 = createSeqTrackWithTwoDataFile([
+        SeqTrack seqTrack3 = createSeqTrackWithTwoFastqFile([
                 seqType: st3,
         ])
 
@@ -495,7 +496,7 @@ class TriggerAlignmentServiceSpec extends HibernateSpec implements ServiceUnitTe
                 seqTract5,
                 seqTract6,
         ].each {
-            createDataFile([seqTrack: it, fileWithdrawn: true])
+            createFastqFile([seqTrack: it, fileWithdrawn: true])
         }
 
         List<SeqTrack> allSeqTracks = [

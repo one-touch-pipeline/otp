@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -134,7 +134,7 @@ IlseSubmission.withTransaction { def transaction ->
         Map<String, Map<String, ?>> entriesByFastqFileName = MetaDataEntry.withCriteria {
             resultTransformer(CriteriaSpecification.ALIAS_TO_ENTITY_MAP)
             projections {
-                dataFile {
+                sequenceFile {
                     seqTrack {
                         eq('ilseSubmission', ilseSubmissionParam)
                         ilseSubmission {
@@ -146,7 +146,7 @@ IlseSubmission.withTransaction { def transaction ->
                 key {
                     property('name', 'name')
                 }
-                dataFile {
+                sequenceFile {
                     property('fileName', 'fileName')
                 }
                 property('value', 'value')

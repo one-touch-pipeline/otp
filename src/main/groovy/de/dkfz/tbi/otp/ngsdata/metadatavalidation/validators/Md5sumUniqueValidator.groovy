@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,8 +25,8 @@ import groovy.transform.CompileDynamic
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedBamFile
-import de.dkfz.tbi.otp.ngsdata.DataFile
 import de.dkfz.tbi.otp.ngsdata.MetaDataColumn
+import de.dkfz.tbi.otp.ngsdata.RawSequenceFile
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.AbstractMetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidator
@@ -66,7 +66,7 @@ class Md5sumUniqueValidator extends AbstractValueTuplesValidator<AbstractMetadat
                     context.addProblem(valueTuplesOfMd5sum*.cells.sum(), LogLevel.WARNING, "A bam file with the MD5 sum '${md5sum}' is already registered in OTP.", "At least one bam file has a MD5 sum is already registered in OTP.")
                 }
             } else {
-                if (DataFile.findAllByMd5sum(md5sum)) {
+                if (RawSequenceFile.findAllByFastqMd5sum(md5sum)) {
                     context.addProblem(valueTuplesOfMd5sum*.cells.sum(), LogLevel.WARNING, "A fastq file with the MD5 sum '${md5sum}' is already registered in OTP.", "At least one fastq file has a MD5 sum which is already registered in OTP.")
                 }
             }

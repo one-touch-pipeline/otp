@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -40,7 +40,8 @@ class RoddyBamFileSpec extends Specification implements IsRoddy, DataTest {
         [
                 AbstractBamFile,
                 Comment,
-                DataFile,
+                RawSequenceFile,
+                FastqFile,
                 FileType,
                 Individual,
                 LibraryPreparationKit,
@@ -103,7 +104,7 @@ class RoddyBamFileSpec extends Specification implements IsRoddy, DataTest {
     @Unroll
     void "test getFinalLibraryQAJsonFiles MultipleSeqTrack libraryName is #libraryName"() {
         given:
-        SeqTrack seqTrack = DomainFactory.createSeqTrackWithDataFiles(roddyBamFile.workPackage as MergingWorkPackage, [
+        SeqTrack seqTrack = DomainFactory.createSeqTrackWithFastqFiles(roddyBamFile.workPackage as MergingWorkPackage, [
                 libraryName          : libraryName,
                 normalizedLibraryName: normalizedName,
         ])
@@ -136,9 +137,9 @@ class RoddyBamFileSpec extends Specification implements IsRoddy, DataTest {
 
         roddyBamFile.numberOfMergedLanes = 3
         roddyBamFile.seqTracks = [
-                DomainFactory.createSeqTrackWithDataFiles(roddyBamFile.mergingWorkPackage, [fastqcState: SeqTrack.DataProcessingState.FINISHED], [nReads: numberOfReads1]),
-                DomainFactory.createSeqTrackWithDataFiles(roddyBamFile.mergingWorkPackage, [fastqcState: SeqTrack.DataProcessingState.FINISHED], [nReads: numberOfReads2]),
-                DomainFactory.createSeqTrackWithDataFiles(roddyBamFile.mergingWorkPackage, [fastqcState: SeqTrack.DataProcessingState.FINISHED], [nReads: numberOfReads3]),
+                DomainFactory.createSeqTrackWithFastqFiles(roddyBamFile.mergingWorkPackage, [fastqcState: SeqTrack.DataProcessingState.FINISHED], [nReads: numberOfReads1]),
+                DomainFactory.createSeqTrackWithFastqFiles(roddyBamFile.mergingWorkPackage, [fastqcState: SeqTrack.DataProcessingState.FINISHED], [nReads: numberOfReads2]),
+                DomainFactory.createSeqTrackWithFastqFiles(roddyBamFile.mergingWorkPackage, [fastqcState: SeqTrack.DataProcessingState.FINISHED], [nReads: numberOfReads3]),
         ]
         assert roddyBamFile.save(flush: true)
 
@@ -150,9 +151,9 @@ class RoddyBamFileSpec extends Specification implements IsRoddy, DataTest {
         given:
         roddyBamFile.numberOfMergedLanes = 3
         roddyBamFile.seqTracks = [
-                DomainFactory.createSeqTrackWithDataFiles(roddyBamFile.mergingWorkPackage, [fastqcState: SeqTrack.DataProcessingState.FINISHED], [nReads: DomainFactory.counter++]),
-                DomainFactory.createSeqTrackWithDataFiles(roddyBamFile.mergingWorkPackage, [fastqcState: SeqTrack.DataProcessingState.IN_PROGRESS], [nReads: DomainFactory.counter++]),
-                DomainFactory.createSeqTrackWithDataFiles(roddyBamFile.mergingWorkPackage, [fastqcState: SeqTrack.DataProcessingState.FINISHED], [nReads: DomainFactory.counter++]),
+                DomainFactory.createSeqTrackWithFastqFiles(roddyBamFile.mergingWorkPackage, [fastqcState: SeqTrack.DataProcessingState.FINISHED], [nReads: DomainFactory.counter++]),
+                DomainFactory.createSeqTrackWithFastqFiles(roddyBamFile.mergingWorkPackage, [fastqcState: SeqTrack.DataProcessingState.IN_PROGRESS], [nReads: DomainFactory.counter++]),
+                DomainFactory.createSeqTrackWithFastqFiles(roddyBamFile.mergingWorkPackage, [fastqcState: SeqTrack.DataProcessingState.FINISHED], [nReads: DomainFactory.counter++]),
         ]
         assert roddyBamFile.save(flush: true)
 
@@ -168,9 +169,9 @@ class RoddyBamFileSpec extends Specification implements IsRoddy, DataTest {
         given:
         roddyBamFile.numberOfMergedLanes = 3
         roddyBamFile.seqTracks = [
-                DomainFactory.createSeqTrackWithDataFiles(roddyBamFile.mergingWorkPackage, [fastqcState: SeqTrack.DataProcessingState.FINISHED], [nReads: DomainFactory.counter++]),
-                DomainFactory.createSeqTrackWithDataFiles(roddyBamFile.mergingWorkPackage, [fastqcState: SeqTrack.DataProcessingState.FINISHED], [nReads: null]),
-                DomainFactory.createSeqTrackWithDataFiles(roddyBamFile.mergingWorkPackage, [fastqcState: SeqTrack.DataProcessingState.FINISHED], [nReads: DomainFactory.counter++]),
+                DomainFactory.createSeqTrackWithFastqFiles(roddyBamFile.mergingWorkPackage, [fastqcState: SeqTrack.DataProcessingState.FINISHED], [nReads: DomainFactory.counter++]),
+                DomainFactory.createSeqTrackWithFastqFiles(roddyBamFile.mergingWorkPackage, [fastqcState: SeqTrack.DataProcessingState.FINISHED], [nReads: null]),
+                DomainFactory.createSeqTrackWithFastqFiles(roddyBamFile.mergingWorkPackage, [fastqcState: SeqTrack.DataProcessingState.FINISHED], [nReads: DomainFactory.counter++]),
         ]
         assert roddyBamFile.save(flush: true)
 
@@ -202,7 +203,7 @@ class RoddyBamFileSpec extends Specification implements IsRoddy, DataTest {
 
     void "test getMaximalReadLength method, when sequenceLength is not set, should fail"() {
         given:
-        roddyBamFile.seqTracks*.dataFilesWhereIndexFileIsFalse.flatten().each {
+        roddyBamFile.seqTracks*.sequenceFilesWhereIndexFileIsFalse.flatten().each {
             it.sequenceLength = null
             assert it.save(flush: true)
         }
@@ -217,9 +218,9 @@ class RoddyBamFileSpec extends Specification implements IsRoddy, DataTest {
 
     void "test getMaximalReadLength method, only one value available for sequenceLength, should return this value"() {
         when:
-        roddyBamFile.seqTracks*.dataFilesWhereIndexFileIsFalse.flatten().each { DataFile dataFile ->
-            dataFile.sequenceLength = 100
-            assert dataFile.save(flush: true)
+        roddyBamFile.seqTracks*.sequenceFilesWhereIndexFileIsFalse.flatten().each { RawSequenceFile rawSequenceFile ->
+            rawSequenceFile.sequenceLength = 100
+            assert rawSequenceFile.save(flush: true)
         }
 
         then:
@@ -228,9 +229,9 @@ class RoddyBamFileSpec extends Specification implements IsRoddy, DataTest {
 
     void "test getMaximalReadLength method, two values available for sequenceLength, should return higher value"() {
         when:
-        roddyBamFile.seqTracks*.dataFilesWhereIndexFileIsFalse.flatten().each { DataFile dataFile ->
-            dataFile.sequenceLength = 100
-            assert dataFile.save(flush: true)
+        roddyBamFile.seqTracks*.sequenceFilesWhereIndexFileIsFalse.flatten().each { RawSequenceFile rawSequenceFile ->
+            rawSequenceFile.sequenceLength = 100
+            assert rawSequenceFile.save(flush: true)
         }
 
         SeqTrack seqTrack = DomainFactory.createSeqTrack(

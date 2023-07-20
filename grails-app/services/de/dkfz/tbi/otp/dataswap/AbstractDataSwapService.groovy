@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -244,15 +244,15 @@ abstract class AbstractDataSwapService<P extends DataSwapParameters, D extends D
      * It is also checked, that the files and the view by pid links do not exist anymore in the old directory, but exist in
      * the new directory.
      */
-    String renameDataFiles(D data) throws AssertionError {
-        assert data.dataFiles*.id as Set == data.oldDataFileNameMap.keySet()*.id as Set
+    String renameRawSequenceFiles(D data) throws AssertionError {
+        assert data.rawSequenceFiles*.id as Set == data.oldRawSequenceFileNameMap.keySet()*.id as Set
 
         String bashScriptToMoveFiles = ""
 
-        data.dataFiles.each {
+        data.rawSequenceFiles.each {
             String oldFilename = it.fileName
             it.project = data.projectSwap.new
-            it.fileName = it.vbpFileName = data.dataFileSwaps.find { swap -> swap.old == it.fileName }.new
+            it.fileName = it.vbpFileName = data.rawSequenceFileSwaps.find { swap -> swap.old == it.fileName }.new
             if (it.mateNumber == null && it.fileWithdrawn && it.fileType &&
                     it.fileType.type == FileType.Type.SEQUENCE && it.fileType.vbpPath == "/sequence/") {
                 data.log << "\n====> set mate number for withdrawn data file"
@@ -262,7 +262,7 @@ abstract class AbstractDataSwapService<P extends DataSwapParameters, D extends D
             it.save(flush: true)
             data.log << "\n    changed ${oldFilename} to ${it.fileName}"
 
-            bashScriptToMoveFiles += createRenameDataFileCommands(oldFilename, it, data)
+            bashScriptToMoveFiles += createRenameRawSequenceFileCommands(oldFilename, it, data)
         }
         return bashScriptToMoveFiles
     }
@@ -270,31 +270,31 @@ abstract class AbstractDataSwapService<P extends DataSwapParameters, D extends D
     /**
      * creates a map containing for every Datafile of the list the direct and the viewByPid file name as map.
      */
-    Map<DataFile, Map<String, String>> collectFileNamesOfDataFiles(List<DataFile> dataFiles) {
-        Map<DataFile, Map<String, String>> map = [:]
-        dataFiles.each { DataFile dataFile ->
-            String directFileName = lsdfFilesService.getFileFinalPathAsPath(dataFile)
-            String vbpFileName = lsdfFilesService.getFileViewByPidPathAsPath(dataFile)
-            map[dataFile] = [(DIRECT_FILE_NAME): directFileName, (VBP_FILE_NAME): vbpFileName]
-            if (dataFile.seqType.singleCell && dataFile.seqTrack.singleCellWellLabel) {
-                map[dataFile][WELL_FILE_NAME] = lsdfFilesService.getFileViewByPidPathAsPath(dataFile, WellDirectory.ALL_WELL).toString()
-                map[dataFile][WELL_MAPPING_FILE_NAME] = singleCellService.singleCellMappingFile(dataFile).toString()
-                map[dataFile][WELL_MAPPING_FILE_ENTRY_NAME] = singleCellService.mappingEntry(dataFile)
+    Map<RawSequenceFile, Map<String, String>> collectFileNamesOfRawSequenceFiles(List<RawSequenceFile> rawSequenceFiles) {
+        Map<RawSequenceFile, Map<String, String>> map = [:]
+        rawSequenceFiles.each { RawSequenceFile rawSequenceFile ->
+            String directFileName = lsdfFilesService.getFileFinalPathAsPath(rawSequenceFile)
+            String vbpFileName = lsdfFilesService.getFileViewByPidPathAsPath(rawSequenceFile)
+            map[rawSequenceFile] = [(DIRECT_FILE_NAME): directFileName, (VBP_FILE_NAME): vbpFileName]
+            if (rawSequenceFile.seqType.singleCell && rawSequenceFile.seqTrack.singleCellWellLabel) {
+                map[rawSequenceFile][WELL_FILE_NAME] = lsdfFilesService.getFileViewByPidPathAsPath(rawSequenceFile, WellDirectory.ALL_WELL).toString()
+                map[rawSequenceFile][WELL_MAPPING_FILE_NAME] = singleCellService.singleCellMappingFile(rawSequenceFile).toString()
+                map[rawSequenceFile][WELL_MAPPING_FILE_ENTRY_NAME] = singleCellService.mappingEntry(rawSequenceFile)
             }
         }
         return map
     }
 
-    String createSingeCellScript(DataFile dataFile, Map<String, String> oldValues) {
-        if (!dataFile.seqType.singleCell || !dataFile.seqTrack.singleCellWellLabel) {
+    String createSingeCellScript(RawSequenceFile rawSequenceFile, Map<String, String> oldValues) {
+        if (!rawSequenceFile.seqType.singleCell || !rawSequenceFile.seqTrack.singleCellWellLabel) {
             return ''
         }
-        String newDirectFileName = lsdfFilesService.getFileFinalPathAsPath(dataFile)
-        String newWellFileName = lsdfFilesService.getFileViewByPidPathAsPath(dataFile, WellDirectory.ALL_WELL)
+        String newDirectFileName = lsdfFilesService.getFileFinalPathAsPath(rawSequenceFile)
+        String newWellFileName = lsdfFilesService.getFileViewByPidPathAsPath(rawSequenceFile, WellDirectory.ALL_WELL)
         File wellFile = new File(newWellFileName)
 
-        Path mappingFile = singleCellService.singleCellMappingFile(dataFile)
-        String mappingEntry = singleCellService.mappingEntry(dataFile)
+        Path mappingFile = singleCellService.singleCellMappingFile(rawSequenceFile)
+        String mappingEntry = singleCellService.mappingEntry(rawSequenceFile)
 
         String oldMappingFile = oldValues[WELL_MAPPING_FILE_NAME]
 
@@ -327,9 +327,9 @@ abstract class AbstractDataSwapService<P extends DataSwapParameters, D extends D
     /**
      * function to get the copy and remove command for one fastqc file
      */
-    String copyAndRemoveFastQcFile(String oldDataFileName, String newDataFileName, DataSwapData data) {
-        Path oldData = Paths.get(oldDataFileName)
-        Path newData = Paths.get(newDataFileName)
+    String copyAndRemoveFastQcFile(String oldFileName, String newFileName, DataSwapData data) {
+        Path oldData = Paths.get(oldFileName)
+        Path newData = Paths.get(newFileName)
         String mvFastqCommand = generateMaybeMoveBashCommand(oldData, newData, data)
 
         // also move the fastqc checksums, if they exist
@@ -362,20 +362,20 @@ abstract class AbstractDataSwapService<P extends DataSwapParameters, D extends D
      *
      * @param data DTO containing all entities necessary to perform a swap
      */
-    void createMoveDataFilesCommands(D data) {
+    void createMoveRawSequenceFilesCommands(D data) {
         data.moveFilesCommands << "\n\n################ move data files ################\n"
-        data.moveFilesCommands << renameDataFiles(data)
+        data.moveFilesCommands << renameRawSequenceFiles(data)
     }
 
     /**
      * Create a warning comment in case the datafile is swapped
      */
-    void createCommentForSwappedDatafiles(DataSwapData data) {
-        data.dataFiles.each { DataFile dataFile ->
-            if (dataFile.comment?.comment) {
-                commentService.saveComment(dataFile, dataFile.comment.comment + "\nAttention: Datafile swapped!")
+    void createCommentForSwappedRawSequenceFiles(DataSwapData data) {
+        data.rawSequenceFiles.each { RawSequenceFile rawSequenceFile ->
+            if (rawSequenceFile.comment?.comment) {
+                commentService.saveComment(rawSequenceFile, rawSequenceFile.comment.comment + "\nAttention: Datafile swapped!")
             } else {
-                commentService.saveComment(dataFile, "Attention: Datafile swapped!")
+                commentService.saveComment(rawSequenceFile, "Attention: Datafile swapped!")
             }
         }
     }
@@ -497,17 +497,17 @@ abstract class AbstractDataSwapService<P extends DataSwapParameters, D extends D
      * Creates rename/move commands for one data file and adds them to an given bash script.
      *
      * @param oldFilename which the data file had before it was changed in the database
-     * @param dataFile which should be renamed.
+     * @param rawSequenceFile which should be renamed.
      * @param data DTO containing all entities necessary to perform a swap.
      * @return outPutBashCommands with added bash commands.
      */
-    private String createRenameDataFileCommands(String oldFilename, DataFile dataFile, D data) throws FileNotFoundException {
+    private String createRenameRawSequenceFileCommands(String oldFilename, RawSequenceFile rawSequenceFile, D data) throws FileNotFoundException {
         FileSystem fileSystem = fileSystemService.remoteFileSystemOnDefaultRealm
         String outPutBashCommands = ""
         // fill local variables
-        String oldDirectFileName = data.oldDataFileNameMap[dataFile][DIRECT_FILE_NAME]
-        String oldVbpFileName = data.oldDataFileNameMap[dataFile][VBP_FILE_NAME]
-        String oldWellName = data.oldDataFileNameMap[dataFile][WELL_FILE_NAME]
+        String oldDirectFileName = data.oldRawSequenceFileNameMap[rawSequenceFile][DIRECT_FILE_NAME]
+        String oldVbpFileName = data.oldRawSequenceFileNameMap[rawSequenceFile][VBP_FILE_NAME]
+        String oldWellName = data.oldRawSequenceFileNameMap[rawSequenceFile][WELL_FILE_NAME]
         Path oldDirectFilePath = fileSystem.getPath(oldDirectFileName)
 
         // check if old files are already gone and moved
@@ -516,8 +516,8 @@ abstract class AbstractDataSwapService<P extends DataSwapParameters, D extends D
         String bashMoveVbpFile = "rm -f '${oldVbpFileName}';\n"
         String bashMoveDirectFile
 
-        Path newDirectPath = lsdfFilesService.getFileFinalPathAsPath(dataFile)
-        Path newVbpPath = lsdfFilesService.getFileViewByPidPathAsPath(dataFile)
+        Path newDirectPath = lsdfFilesService.getFileFinalPathAsPath(rawSequenceFile)
+        Path newVbpPath = lsdfFilesService.getFileViewByPidPathAsPath(rawSequenceFile)
 
         if (Files.exists(newDirectPath)) {
             if (!filesAlreadyMoved && (oldDirectFilePath != newDirectPath)) {
@@ -527,11 +527,11 @@ abstract class AbstractDataSwapService<P extends DataSwapParameters, D extends D
             }
         } else {
             if (filesAlreadyMoved) {
-                throw new FileNotFoundException("The direct-fastqFiles of dataFile (${oldFilename} / ${dataFile.fileName})" +
-                        " of project (${dataFile.project}) can not be found")
+                throw new FileNotFoundException("The direct-fastqFiles of raw sequence file (${oldFilename} / ${rawSequenceFile.fileName})" +
+                        " of project (${rawSequenceFile.project}) can not be found")
             }
             bashMoveDirectFile = """\n
-                                     # ${dataFile.seqTrack} ${dataFile}
+                                     # ${rawSequenceFile.seqTrack} ${rawSequenceFile}
                                      mkdir -p -m 2750 '${newDirectPath.parent}';""".stripIndent()
 
             bashMoveDirectFile += """
@@ -551,7 +551,7 @@ abstract class AbstractDataSwapService<P extends DataSwapParameters, D extends D
 
         outPutBashCommands += "${bashMoveDirectFile}\n${bashMoveVbpFile}\n"
         if (oldWellName) {
-            outPutBashCommands += createSingeCellScript(dataFile, data.oldDataFileNameMap[dataFile])
+            outPutBashCommands += createSingeCellScript(rawSequenceFile, data.oldRawSequenceFileNameMap[rawSequenceFile])
         }
         outPutBashCommands += '\n\n'
         return outPutBashCommands
@@ -614,10 +614,10 @@ abstract class AbstractDataSwapService<P extends DataSwapParameters, D extends D
      * @param parameters containing the StringBuilder for logging
      * @return found list of fastq data files
      */
-    protected List<DataFile> getFastQDataFilesBySeqTrackInList(List<SeqTrack> seqTrackList, P parameters) {
-        List<DataFile> fastqDataFiles = seqTrackList ? DataFile.findAllBySeqTrackInList(seqTrackList) : []
-        logListEntries(fastqDataFiles, "dataFiles", parameters.log)
-        return fastqDataFiles
+    protected List<RawSequenceFile> getRawSequenceFilesBySeqTrackInList(List<SeqTrack> seqTrackList, P parameters) {
+        List<RawSequenceFile> rawSequenceFiles = seqTrackList ? RawSequenceFile.findAllBySeqTrackInList(seqTrackList) : []
+        logListEntries(rawSequenceFiles, "dataFiles", parameters.log)
+        return rawSequenceFiles
     }
 
     /**
@@ -626,9 +626,9 @@ abstract class AbstractDataSwapService<P extends DataSwapParameters, D extends D
      * @param seqTrackList as parameters for searching for corresponding data filenames.
      * @return found list of fastq data filenames
      */
-    protected Map<FastqcProcessedFile, String> getFastQcOutputFileNamesByDataFilesInList(List<DataFile> dataFiles) {
-        return dataFiles ? FastqcProcessedFile.findAllByDataFileInList(dataFiles).collectEntries {
-            [(it.dataFile): fastqcDataFilesService.fastqcOutputPath(it).toString()]
+    protected Map<FastqcProcessedFile, String> getFastQcOutputFileNamesByRawSequenceFilesInList(List<RawSequenceFile> rawSequenceFiles) {
+        return rawSequenceFiles ? FastqcProcessedFile.findAllBySequenceFileInList(rawSequenceFiles).collectEntries {
+            [(it.sequenceFile): fastqcDataFilesService.fastqcOutputPath(it).toString()]
         } : [:]
     }
 }

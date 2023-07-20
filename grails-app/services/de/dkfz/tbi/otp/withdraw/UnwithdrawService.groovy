@@ -52,18 +52,21 @@ class UnwithdrawService {
     void unwithdrawSeqTracks(UnwithdrawStateHolder unwithdrawStateHolder) {
         unwithdrawStateHolder.seqTracksWithComment.each { seqTrackWithComment ->
             unwithdrawStateHolder.summary << "\n\nUnwithdraw ${seqTrackWithComment.seqTrack}"
-            DataFile.findAllBySeqTrack(seqTrackWithComment.seqTrack).each { unwithdrawDataFiles(it, seqTrackWithComment.comment, unwithdrawStateHolder) }
+            RawSequenceFile.findAllBySeqTrack(seqTrackWithComment.seqTrack).each {
+                unwithdrawRawSequenceFiles(it, seqTrackWithComment.comment, unwithdrawStateHolder)
+            }
         }
     }
 
-    private void unwithdrawDataFiles(final DataFile dataFile, String comment, UnwithdrawStateHolder unwithdrawStateHolder) {
-        unwithdrawStateHolder.summary << "Unwithdrawing DataFile: ${dataFile}: ${dataFile.withdrawnComment}"
-        unwithdrawStateHolder.linksToCreate.put(lsdfFilesService.getFileFinalPathAsPath(dataFile), lsdfFilesService.getFileViewByPidPathAsPath(dataFile))
-        unwithdrawStateHolder.pathsToChangeGroup.put(lsdfFilesService.getFileViewByPidPathAsPath(dataFile).toString(), dataFile.project.unixGroup)
-        FastqcProcessedFile fastqcProcessedFile = CollectionUtils.atMostOneElement(FastqcProcessedFile.findAllByDataFile(dataFile))
+    private void unwithdrawRawSequenceFiles(final RawSequenceFile rawSequenceFile, String comment, UnwithdrawStateHolder unwithdrawStateHolder) {
+        unwithdrawStateHolder.summary << "Unwithdrawing RawSequenceFile: ${rawSequenceFile}: ${rawSequenceFile.withdrawnComment}"
+        unwithdrawStateHolder.linksToCreate.put(lsdfFilesService.getFileFinalPathAsPath(rawSequenceFile),
+                lsdfFilesService.getFileViewByPidPathAsPath(rawSequenceFile))
+        unwithdrawStateHolder.pathsToChangeGroup.put(lsdfFilesService.getFileViewByPidPathAsPath(rawSequenceFile).toString(), rawSequenceFile.project.unixGroup)
+        FastqcProcessedFile fastqcProcessedFile = CollectionUtils.atMostOneElement(FastqcProcessedFile.findAllBySequenceFile(rawSequenceFile))
         List<Path> files = [
-                lsdfFilesService.getFileFinalPathAsPath(dataFile),
-                lsdfFilesService.getFileMd5sumFinalPathAsPath(dataFile),
+                lsdfFilesService.getFileFinalPathAsPath(rawSequenceFile),
+                lsdfFilesService.getFileMd5sumFinalPathAsPath(rawSequenceFile),
         ]
         if (fastqcProcessedFile) {
             files.addAll([
@@ -75,14 +78,14 @@ class UnwithdrawService {
         files.findAll { path ->
             Files.exists(path)
         }.collect { filePath ->
-            unwithdrawStateHolder.pathsToChangeGroup.put(filePath.toString(), dataFile.project.unixGroup)
+            unwithdrawStateHolder.pathsToChangeGroup.put(filePath.toString(), rawSequenceFile.project.unixGroup)
         }
-        dataFile.withdrawnDate = null
-        if (!dataFile.withdrawnComment?.contains(comment)) {
-            dataFile.withdrawnComment = "${dataFile.withdrawnComment ? "${dataFile.withdrawnComment}\n" : ""}${comment}"
+        rawSequenceFile.withdrawnDate = null
+        if (!rawSequenceFile.withdrawnComment?.contains(comment)) {
+            rawSequenceFile.withdrawnComment = "${rawSequenceFile.withdrawnComment ? "${rawSequenceFile.withdrawnComment}\n" : ""}${comment}"
         }
-        dataFile.fileWithdrawn = false
-        dataFile.save(flush: true)
+        rawSequenceFile.fileWithdrawn = false
+        rawSequenceFile.save(flush: true)
     }
 
     void unwithdrawBamFiles(UnwithdrawStateHolder withdrawStateHolder) {

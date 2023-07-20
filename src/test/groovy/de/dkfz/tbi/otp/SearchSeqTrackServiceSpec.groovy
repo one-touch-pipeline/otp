@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -37,7 +37,7 @@ class SearchSeqTrackServiceSpec extends HibernateSpec implements ServiceUnitTest
         return [
                 AbstractBamFile,
                 RoddyBamFile,
-                DataFile,
+                RawSequenceFile,
                 Project,
                 SampleType,
                 SeqType,
@@ -46,6 +46,7 @@ class SearchSeqTrackServiceSpec extends HibernateSpec implements ServiceUnitTest
                 SeqTrack,
                 ExternallyProcessedBamFile,
                 ExternalMergingWorkPackage,
+                FastqFile,
         ]
     }
 
@@ -57,21 +58,21 @@ class SearchSeqTrackServiceSpec extends HibernateSpec implements ServiceUnitTest
 
         final Project project = createProject()
         final Individual individual = createIndividual(project: project)
-        final SeqTrack seqTrack1 = createSeqTrackWithTwoDataFile([
+        final SeqTrack seqTrack1 = createSeqTrackWithTwoFastqFile([
                 sample: createSample(individual: individual),
                 seqType: st1,
         ])
-        final SeqTrack seqTrack2 = createSeqTrackWithTwoDataFile([
+        final SeqTrack seqTrack2 = createSeqTrackWithTwoFastqFile([
                 sample: createSample(individual: individual),
                 seqType: st2,
         ])
 
-        createSeqTrackWithTwoDataFile([
+        createSeqTrackWithTwoFastqFile([
                 sample: createSample(),
                 seqType: st2,
         ])
 
-        final SeqTrack seqTrack4 = createSeqTrackWithTwoDataFile([
+        final SeqTrack seqTrack4 = createSeqTrackWithTwoFastqFile([
                 sample: createSample(individual: individual),
                 seqType: st3,
         ])
@@ -106,17 +107,17 @@ class SearchSeqTrackServiceSpec extends HibernateSpec implements ServiceUnitTest
                 project: project,
                 pid: 'ind_3',
         ])
-        SeqTrack seqTrack1 = createSeqTrackWithTwoDataFile([
+        SeqTrack seqTrack1 = createSeqTrackWithTwoFastqFile([
                 sample: createSample(individual: individual1),
                 seqType: st1,
         ])
-        SeqTrack seqTrack2 = createSeqTrackWithTwoDataFile([
+        SeqTrack seqTrack2 = createSeqTrackWithTwoFastqFile([
                 sample: createSample(individual: individual2),
                 seqType: st2,
         ])
 
         // this seqTrack below shouldn't be in the found list
-        createSeqTrackWithTwoDataFile([
+        createSeqTrackWithTwoFastqFile([
                 sample: createSample(individual: individual3),
                 seqType: st2,
         ])
@@ -141,17 +142,17 @@ class SearchSeqTrackServiceSpec extends HibernateSpec implements ServiceUnitTest
         Individual individual = createIndividual([
                 project: project,
         ])
-        SeqTrack seqTrack1 = createSeqTrackWithTwoDataFile([
+        SeqTrack seqTrack1 = createSeqTrackWithTwoFastqFile([
                 sample: createSample(individual: individual),
                 seqType: st1,
         ])
-        SeqTrack seqTrack2 = createSeqTrackWithTwoDataFile([
+        SeqTrack seqTrack2 = createSeqTrackWithTwoFastqFile([
                 sample: createSample(individual: individual),
                 seqType: st2,
         ])
 
         // this seqTrack below shouldn't be in the found list
-        createSeqTrackWithTwoDataFile([
+        createSeqTrackWithTwoFastqFile([
                 sample: createSample(individual: individual),
                 seqType: st2,
         ])
@@ -177,19 +178,19 @@ class SearchSeqTrackServiceSpec extends HibernateSpec implements ServiceUnitTest
         Individual individual = createIndividual([
                 project: project,
         ])
-        SeqTrack seqTrack1 = createSeqTrackWithTwoDataFile([
+        SeqTrack seqTrack1 = createSeqTrackWithTwoFastqFile([
                 sample: createSample(individual: individual),
                 seqType: st1,
                 ilseSubmission: ilseSubmission1,
         ])
-        SeqTrack seqTrack2 = createSeqTrackWithTwoDataFile([
+        SeqTrack seqTrack2 = createSeqTrackWithTwoFastqFile([
                 sample: createSample(individual: individual),
                 seqType: st2,
                 ilseSubmission: ilseSubmission2,
         ])
 
         // this seqTrack below shouldn't be in the found list
-        createSeqTrackWithTwoDataFile([
+        createSeqTrackWithTwoFastqFile([
                 sample: createSample(individual: individual),
                 seqType: st2,
                 ilseSubmission: ilseSubmission3,

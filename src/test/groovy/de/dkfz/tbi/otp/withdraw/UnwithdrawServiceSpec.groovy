@@ -22,9 +22,7 @@
 package de.dkfz.tbi.otp.withdraw
 
 import grails.testing.gorm.DataTest
-import spock.lang.Specification
-import spock.lang.TempDir
-import spock.lang.Unroll
+import spock.lang.*
 
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
@@ -54,6 +52,7 @@ class UnwithdrawServiceSpec extends Specification implements DomainFactoryCore, 
         return [
                 CellRangerConfig,
                 CellRangerMergingWorkPackage,
+                FastqFile,
                 FastqcProcessedFile,
                 FastqImportInstance,
                 FileType,
@@ -111,17 +110,17 @@ class UnwithdrawServiceSpec extends Specification implements DomainFactoryCore, 
                 fastqcDataFilesService : fastqcDataFilesService,
         ])
 
-        SeqTrack seqTrack = createSeqTrackWithTwoDataFile([:], [fileWithdrawn: true])
+        SeqTrack seqTrack = createSeqTrackWithTwoFastqFile([:], [fileWithdrawn: true])
         List<FastqcProcessedFile> fastqcProcessedFiles = []
         if (fastqcAvailable) {
-            seqTrack.dataFiles.each {
-                fastqcProcessedFiles << createFastqcProcessedFile([dataFile: it,])
+            seqTrack.sequenceFiles.each {
+                fastqcProcessedFiles << createFastqcProcessedFile([sequenceFile: it,])
             }
         }
         state.seqTracksWithComment = [new SeqTrackWithComment(seqTrack, "comment")]
 
         List<Path> files = []
-        seqTrack.dataFiles.each {
+        seqTrack.sequenceFiles.each {
             files.addAll([
                     lsdfFilesService.getFileFinalPathAsPath(it),
                     lsdfFilesService.getFileMd5sumFinalPathAsPath(it),
@@ -144,12 +143,12 @@ class UnwithdrawServiceSpec extends Specification implements DomainFactoryCore, 
 
         then:
         state.linksToCreate == [
-                (lsdfFilesService.getFileFinalPathAsPath(seqTrack.dataFiles.first())): lsdfFilesService.getFileViewByPidPathAsPath(seqTrack.dataFiles.first()),
-                (lsdfFilesService.getFileFinalPathAsPath(seqTrack.dataFiles.last())) : lsdfFilesService.getFileViewByPidPathAsPath(seqTrack.dataFiles.last()),
+                (lsdfFilesService.getFileFinalPathAsPath(seqTrack.sequenceFiles.first())): lsdfFilesService.getFileViewByPidPathAsPath(seqTrack.sequenceFiles.first()),
+                (lsdfFilesService.getFileFinalPathAsPath(seqTrack.sequenceFiles.last())) : lsdfFilesService.getFileViewByPidPathAsPath(seqTrack.sequenceFiles.last()),
         ]
         state.pathsToChangeGroup.size() == pathsToChangeGroup
         state.bamFiles == []
-        seqTrack.dataFiles.every { !it.isFileWithdrawn() }
+        seqTrack.sequenceFiles.every { !it.isFileWithdrawn() }
 
         where:
         fastqcAvailable | pathsToChangeGroup
@@ -225,8 +224,10 @@ class UnwithdrawServiceSpec extends Specification implements DomainFactoryCore, 
         SingleCellBamFile bamFileDataFileWithdrawn = AlignmentPipelineFactory.CellRangerFactoryInstance.INSTANCE.createBamFile(withdrawn: true)
         CreateFileHelper.createFile(abstractBamFileService.getBaseDirectory(bamFileDataFileWithdrawn).resolve(bamFileDataFileWithdrawn.bamFileName))
         bamFileDataFileWithdrawn.containedSeqTracks.each {
-            it.dataFiles*.fileWithdrawn = true
-            it.dataFiles*.save()
+            it.sequenceFiles.each {
+                it.fileWithdrawn = true
+                it.save()
+            }
         }
         state.seqTracksWithComment.addAll(bamFileDataFileWithdrawn.containedSeqTracks.collect { new SeqTrackWithComment(it, "") })
 

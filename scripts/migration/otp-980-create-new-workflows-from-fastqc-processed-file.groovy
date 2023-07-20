@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -85,7 +85,7 @@ void migrateToNewWorkflow(
 ) {
     seqTracks.each { SeqTrack seqTrack ->
         // getting and prepare information
-        String directory = lsdfFilesService.getFileViewByPidPathAsPath(seqTrack.dataFiles.first()).parent
+        String directory = lsdfFilesService.getFileViewByPidPathAsPath(seqTrack.sequenceFiles.first()).parent
         WorkflowArtefact inputArtefact = seqTrack.workflowArtefact
 
         assert inputArtefact: "input artefact of ${seqTrack} can't be null. Was migration script otp-592 called before to create missing input artifacts?"
@@ -124,7 +124,7 @@ void migrateToNewWorkflow(
         ]).save()
 
         // create workflow artefact for each FastqcProcessedFile of seqTrack
-        DataFile.findAllBySeqTrack(seqTrack).eachWithIndex { DataFile dataFile, int i ->
+        RawSequenceFile.findAllBySeqTrack(seqTrack).eachWithIndex { RawSequenceFile rawSequenceFile, int i ->
             WorkflowArtefact workflowArtefact = new WorkflowArtefact([
                     producedBy  : workflowRun,
                     state       : WorkflowArtefact.State.SUCCESS,
@@ -135,7 +135,7 @@ void migrateToNewWorkflow(
                     displayName : artefactDisplayName,
             ])
 
-            FastqcProcessedFile fastqcProcessedFile = CollectionUtils.atMostOneElement(FastqcProcessedFile.findAllWhere(dataFile: dataFile))
+            FastqcProcessedFile fastqcProcessedFile = CollectionUtils.atMostOneElement(FastqcProcessedFile.findAllWhere(sequenceFile: rawSequenceFile))
             fastqcProcessedFile.workflowArtefact = workflowArtefact
             fastqcProcessedFile.save()
         }
@@ -143,20 +143,20 @@ void migrateToNewWorkflow(
 }
 //=================================================
 
-List<List<Long>> seqTrackIdsWithDataFileCount = SeqTrack.executeQuery(
+List<List<Long>> seqTrackIdsWithRawSequenceFileCount = SeqTrack.executeQuery(
         """SELECT s.id, COUNT(f.id) FROM SeqTrack s
-                      INNER JOIN DataFile d ON d.seqTrack.id=s.id
-                      INNER JOIN FastqcProcessedFile f ON f.dataFile.id=d.id
+                      INNER JOIN RawSequenceFile d ON d.seqTrack.id=s.id
+                      INNER JOIN FastqcProcessedFile f ON f.sequenceFile.id=d.id
                       WHERE s.workflowArtefact IS NOT NUll AND f.workflowArtefact IS NULL
                       GROUP BY s.id 
                       ORDER BY s.id ASC""")
 
-List<Long> seqTrackIds = seqTrackIdsWithDataFileCount.collect { it[0] } as List<Long>
-int numFastqcProcessedFiles = seqTrackIds ? seqTrackIdsWithDataFileCount.collect { it[1] }.sum() as int : 0
+List<Long> seqTrackIds = seqTrackIdsWithRawSequenceFileCount.collect { it[0] } as List<Long>
+int numFastqcProcessedFiles = seqTrackIds ? seqTrackIdsWithRawSequenceFileCount.collect { it[1] }.sum() as int : 0
 int numSeqTracks = seqTrackIds.size()
 println "There are ${numFastqcProcessedFiles} Fastqc Processed Files of ${numSeqTracks} Seq. Tracks to be migrated into new workflow system"
 
-if (seqTrackIdsWithDataFileCount) {
+if (seqTrackIdsWithRawSequenceFileCount) {
 
     //process the SeqTracks in chunks
     long numBatches = Math.ceil(numSeqTracks / batchSize) as long

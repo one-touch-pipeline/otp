@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -39,7 +39,8 @@ class QcTrafficLightCheckServiceSpec extends Specification implements IsRoddy, D
         return [
                 AbstractBamFile,
                 Comment,
-                DataFile,
+                RawSequenceFile,
+                FastqFile,
                 FastqImportInstance,
                 FileType,
                 Individual,

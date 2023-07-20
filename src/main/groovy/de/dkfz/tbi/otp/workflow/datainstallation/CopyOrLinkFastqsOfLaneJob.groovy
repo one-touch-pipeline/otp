@@ -45,11 +45,11 @@ class CopyOrLinkFastqsOfLaneJob extends AbstractExecuteClusterPipelineJob implem
     }
 
     private List<String> createCopyJob(SeqTrack seqTrack) {
-        return seqTrack.dataFiles.collect { DataFile dataFile ->
-            Path source = lsdfFilesService.getFileInitialPathAsPath(dataFile)
-            Path destination = lsdfFilesService.getFileFinalPathAsPath(dataFile)
+        return seqTrack.sequenceFiles.collect { RawSequenceFile rawSequenceFile ->
+            Path source = lsdfFilesService.getFileInitialPathAsPath(rawSequenceFile)
+            Path destination = lsdfFilesService.getFileFinalPathAsPath(rawSequenceFile)
 
-            String md5SumFileName = checksumFileService.md5FileName(dataFile)
+            String md5SumFileName = checksumFileService.md5FileName(rawSequenceFile)
             return """
                 |cd ${destination.parent}
                 |if [ -e "${destination}" ]; then

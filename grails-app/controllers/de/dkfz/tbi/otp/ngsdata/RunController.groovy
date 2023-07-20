@@ -49,7 +49,7 @@ class RunController {
         if (!run || run.project?.archived) {
             return response.sendError(404)
         }
-        //This page requires using SAMPLE_NAME, since the DataFile has no connection to a SeqTrack. Its only used for legacy objects
+        //This page requires using SAMPLE_NAME, since the RawSequenceFile has no connection to a SeqTrack. Its only used for legacy objects
         List<MetaDataKey> keys = []
         keys[0] = CollectionUtils.atMostOneElement(MetaDataKey.findAllByName(MetaDataColumn.SAMPLE_NAME.name()))
         keys[1] = CollectionUtils.atMostOneElement(MetaDataKey.findAllByName(MetaDataColumn.WITHDRAWN.name()))
@@ -62,8 +62,9 @@ class RunController {
             ]
         }
 
-        List<String> finalPaths = DataFile.findAllByRun(run).collect { DataFile dataFile ->
-            lsdfFilesService.getSeqCenterRunDirectory(dataFile) as String ?: dataFile.initialDirectory }.unique().sort()
+        List<String> finalPaths = RawSequenceFile.findAllByRun(run).collect { RawSequenceFile dataFile ->
+            lsdfFilesService.getSeqCenterRunDirectory(dataFile) as String ?: dataFile.initialDirectory
+        }.unique().sort()
 
         return [
                 run                : run,
@@ -72,7 +73,7 @@ class RunController {
                 processParameters  : runService.retrieveProcessParameters(run),
                 metaDataFileWrapper: wrappedMetaDataFiles,
                 seqTracks          : runService.retrieveSequenceTrackInformation(run),
-                errorFiles         : runService.dataFilesWithError(run),
+                errorFiles         : runService.rawSequenceFilesWithError(run),
                 fastqcLinks        : fastqcResultsService.fastqcLinkMap(run),
         ]
     }

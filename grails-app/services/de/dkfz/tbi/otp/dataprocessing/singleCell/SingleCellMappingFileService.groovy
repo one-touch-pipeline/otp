@@ -26,7 +26,7 @@ import groovy.transform.Synchronized
 
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
-import de.dkfz.tbi.otp.ngsdata.DataFile
+import de.dkfz.tbi.otp.ngsdata.RawSequenceFile
 
 import java.nio.file.*
 
@@ -40,21 +40,21 @@ class SingleCellMappingFileService {
     SingleCellService singleCellService
 
     /**
-     * Adds the mapping entry for the given DataFile to the mapping file in a safe manner.
+     * Adds the mapping entry for the given RawSequenceFile to the mapping file in a safe manner.
      *
      * It creates the mapping file if it does not already exist and only adds the entry
      * if it was not already added.
      *
-     * @param dataFile to add entry for
+     * @param rawSequenceFile to add entry for
      */
     @Synchronized
-    void addMappingFileEntryIfMissing(DataFile dataFile) {
+    void addMappingFileEntryIfMissing(RawSequenceFile rawSequenceFile) {
         FileSystem fileSystem = fileSystemService.remoteFileSystemOnDefaultRealm
-        Path mappingFile = fileService.changeFileSystem(singleCellService.singleCellMappingFile(dataFile), fileSystem)
-        String value = singleCellService.mappingEntry(dataFile)
+        Path mappingFile = fileService.changeFileSystem(singleCellService.singleCellMappingFile(rawSequenceFile), fileSystem)
+        String value = singleCellService.mappingEntry(rawSequenceFile)
 
         if (!Files.exists(mappingFile)) {
-            fileService.createFileWithContent(mappingFile, "", dataFile.project.realm, FileService.OWNER_READ_WRITE_GROUP_READ_FILE_PERMISSION)
+            fileService.createFileWithContent(mappingFile, "", rawSequenceFile.project.realm, FileService.OWNER_READ_WRITE_GROUP_READ_FILE_PERMISSION)
         }
 
         if (!mappingFile.text.contains(value)) {

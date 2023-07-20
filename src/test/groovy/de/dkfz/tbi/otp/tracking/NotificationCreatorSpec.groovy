@@ -43,12 +43,13 @@ class NotificationCreatorSpec extends Specification implements DataTest, DomainF
     @Override
     Class[] getDomainClassesToMock() {
         return [
-                DataFile,
+                RawSequenceFile,
                 ProcessingOption,
                 OtrsTicket,
                 MetaDataFile,
                 SeqTrack,
                 UserProjectRole,
+                FastqFile,
         ]
     }
 
@@ -312,14 +313,14 @@ ILSe 5678, runA, lane 1, ${sampleText}
     void 'sendWorkflowCreateErrorMail, when called, then send error mail'() {
         given:
         OtrsTicket ticket = createOtrsTicket()
-        List<DataFile> dataFiles = [
-                createDataFile(),
-                createDataFile(),
+        List<RawSequenceFile> rawSequenceFiles = [
+                createFastqFile(),
+                createFastqFile(),
         ]
         MetaDataFile metaDataFile = DomainFactory.createMetaDataFile([
                 fastqImportInstance: createFastqImportInstance([
                         otrsTicket: ticket,
-                        dataFiles : dataFiles,
+                        sequenceFiles: rawSequenceFiles,
                 ]),
         ])
         notificationCreator.mailHelperService = Mock(MailHelperService)
@@ -336,7 +337,7 @@ ILSe 5678, runA, lane 1, ${sampleText}
             assert content.contains("ctx.fastqImportInstanceService.updateState(FastqImportInstance.get(${metaDataFile.fastqImportInstance.id}), " +
                     "FastqImportInstance.WorkflowCreateState.WAITING)")
             assert content.contains("https://gitlab.com/one-touch-pipeline/otp/-/blob/master/scripts/operations/dataCleanup/DeleteSeqtracks.groovy")
-            dataFiles*.seqTrack.unique().each {
+            rawSequenceFiles*.seqTrack.unique().each {
                 assert content.contains(it.id.toString())
             }
         }
@@ -410,7 +411,7 @@ ILSe 5678, runA, lane 1, ${sampleText}
     }
 
     private SeqTrack createSeqTrackforCustomFinalNotification(Project project, IlseSubmission ilseSubmission, OtrsTicket ticket) {
-        SeqTrack seqTrack = createSeqTrackWithOneDataFile(
+        SeqTrack seqTrack = createSeqTrackWithOneFastqFile(
                 [
                         ilseSubmission: ilseSubmission,
                         sample        : createSample(

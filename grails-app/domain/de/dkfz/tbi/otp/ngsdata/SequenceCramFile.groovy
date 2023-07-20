@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,31 +19,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.egaSubmission
+package de.dkfz.tbi.otp.ngsdata
 
 import grails.gorm.hibernate.annotation.ManagedEntity
 
-import de.dkfz.tbi.otp.ngsdata.DataFile
-import de.dkfz.tbi.otp.utils.Entity
-
+/**
+ * unaligned or aligned single read single lane CRAM file
+ */
 @ManagedEntity
-class DataFileSubmissionObject implements Entity, SubmissionObject {
-
-    DataFile dataFile
-    SampleSubmissionObject sampleSubmissionObject
-
-    static belongsTo = [
-            dataFile              : DataFile,
-            sampleSubmissionObject: SampleSubmissionObject,
-    ]
+class SequenceCramFile extends RawSequenceFile {
+    String cramMd5sum
+    ReferenceGenome referenceGenome
 
     static constraints = {
-        egaAliasName nullable: true, unique: true
-    }
-
-    static mapping = {
-        dataFile index: 'data_file_submission_object_data_file_idx'
-        sampleSubmissionObject index: 'data_file_submission_object_sample_submission_object_idx'
-        egaAliasName index: 'data_file_submission_ega_alias_name_idx'
+        cramMd5sum nullable: true,  matches: /^[0-9a-f]{32}$/
+        referenceGenome nullable: true
     }
 }

@@ -106,8 +106,8 @@ class PanCancerDeciderSpec extends AbstractAlignmentDeciderSpec {
         deciderResult.warnings.first().contains(warningMessagePart)
 
         where:
-        name                     | createMwp | key             | value | mailCount || warningMessagePart
-        'missing fastqc'         | false     | 'missingFastqc' | true  | 0         || "since input contains the following fastq without all corresponding fastqc"
-        'fastqc without seqrack' | false     | 'toManyFastqc'  | true  | 0         || "since input contains the following fastqc without corresponding fastq"
+        name                       | createMwp | key             | value | mailCount || warningMessagePart
+        'missing fastqc'           | false     | 'missingFastqc' | true  | 0         || "since input contains the following fastq without all corresponding fastqc"
+        'fastqc without seq track' | false     | 'toManyFastqc'  | true  | 0         || "since input contains the following fastqc without corresponding fastq"
     }
 }

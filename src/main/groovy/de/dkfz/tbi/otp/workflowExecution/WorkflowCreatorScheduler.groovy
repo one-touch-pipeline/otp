@@ -124,7 +124,7 @@ class WorkflowCreatorScheduler {
         MetaDataFile metaDataFileFromDb = MetaDataFile.get(metaDataFile.id)
         Long timeCreateWorkflowRuns = System.currentTimeMillis()
         FastqImportInstance fastqImportInstance = metaDataFileFromDb.fastqImportInstance
-        int count = fastqImportInstance.dataFiles.size()
+        int count = fastqImportInstance.sequenceFiles.size()
 
         log.debug("create workflows starts for ${metaDataFileFromDb.fileNameSource} " +
                 "(dataFiles: ${count}, ${fastqImportInstanceService.countInstancesInWaitingState()} in queue)")

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -37,6 +37,7 @@ class DataInstallationPidLinkJobSpec extends Specification implements DataTest, 
     @Override
     Class[] getDomainClassesToMock() {
         return [
+                FastqFile,
                 FastqImportInstance,
                 Sample,
                 SampleType,
@@ -47,7 +48,7 @@ class DataInstallationPidLinkJobSpec extends Specification implements DataTest, 
     void "test getLinkMap"() {
         given:
         WorkflowStep workflowStep = createWorkflowStep()
-        SeqTrack seqTrack = createSeqTrackWithTwoDataFile()
+        SeqTrack seqTrack = createSeqTrackWithTwoFastqFile()
         Path target1 = Paths.get("target1")
         Path target2 = Paths.get("target2")
         Path link1 = Paths.get("link1")
@@ -68,7 +69,7 @@ class DataInstallationPidLinkJobSpec extends Specification implements DataTest, 
     void "test saveResult"() {
         given:
         WorkflowStep workflowStep = createWorkflowStep()
-        SeqTrack seqTrack = createSeqTrackWithTwoDataFile()
+        SeqTrack seqTrack = createSeqTrackWithTwoFastqFile()
 
         DataInstallationPidLinkJob job = Spy(DataInstallationPidLinkJob) {
             1 * getSeqTrack(workflowStep) >> seqTrack
@@ -78,8 +79,8 @@ class DataInstallationPidLinkJobSpec extends Specification implements DataTest, 
         job.saveResult(workflowStep)
 
         then:
-        seqTrack.dataFiles.every { it.fileLinked }
-        seqTrack.dataFiles.every { it.dateLastChecked }
+        seqTrack.sequenceFiles.every { it.fileLinked }
+        seqTrack.sequenceFiles.every { it.dateLastChecked }
         seqTrack.dataInstallationState == SeqTrack.DataProcessingState.FINISHED
         seqTrack.fastqcState == SeqTrack.DataProcessingState.NOT_STARTED
     }

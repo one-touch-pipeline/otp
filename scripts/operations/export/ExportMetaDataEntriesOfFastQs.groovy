@@ -46,7 +46,7 @@ import java.nio.file.Path
 String output_name = "ticketnumber-something-metadata"
 
 // query for which fastq files to export the metadata
-List<DataFile> fastq_to_export = DataFile.createCriteria().listDistinct {
+List<RawSequenceFile> fastq_to_export = RawSequenceFile.createCriteria().listDistinct {
     seqTrack {
         or {
             sample {
@@ -97,9 +97,9 @@ List<MetaDataKey> keys = MetaDataKey.findAllByNameInList(wanted_columns*.name())
 
 // get metadata columns for our datafiles
 List<MetaDataEntry> metaDataEntries = MetaDataEntry.createCriteria().list {
-    'in'('dataFile', fastq_to_export)
+    'in'('sequenceFile', fastq_to_export)
     'in'('key', keys)
-    order('dataFile') // Caveat: ordering clause is vitally important for output-logic below to be correct
+    order('sequenceFile') // Caveat: ordering clause is vitally important for output-logic below to be correct
 }
 
 // output our data ============================================================
@@ -112,10 +112,10 @@ output.withPrintWriter { w ->
 
     // combine entries per datafile into a single line.
     Map<String, String> line_buffer = new HashMap()
-    DataFile previous_fastq
+    RawSequenceFile previous_fastq
 
     for (MetaDataEntry mde : metaDataEntries) {
-        current_fastq = mde.dataFile
+        current_fastq = mde.sequenceFile
         // They're sorted by datafile, so if it "changes", we've just iterated into a new data-file
         // and our line_buffer should hold the complete selection for the "old" one
         if (current_fastq != previous_fastq && previous_fastq != null) { // "!= null" skip outputting almost-empty ...
@@ -138,7 +138,7 @@ output.withPrintWriter { w ->
     writeln(line_buffer, previous_fastq, w, wanted_columns)
 } // END printwriter
 
-private void writeln(Map<String, String> line_buffer, DataFile the_file, PrintWriter w, List<MetaDataColumn> wanted_columns) {
+private void writeln(Map<String, String> line_buffer, RawSequenceFile the_file, PrintWriter w, List<MetaDataColumn> wanted_columns) {
     line = []
 
     // emit the column values in header-order

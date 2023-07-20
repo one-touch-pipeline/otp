@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -46,10 +46,10 @@ class DataInstallationInitializationService {
      */
     List<WorkflowRun> createWorkflowRuns(FastqImportInstance instance, ProcessingPriority priority = null) {
         Workflow workflow = workflowService.getExactlyOneWorkflow(DataInstallationWorkflow.WORKFLOW)
-        List<WorkflowRun> workflowRuns = instance.dataFiles.groupBy {
+        List<WorkflowRun> workflowRuns = instance.sequenceFiles.groupBy {
             it.seqTrack
-        }.collect { SeqTrack seqTrack, List<DataFile> dataFiles ->
-            createRunForSeqTrack(workflow, seqTrack, dataFiles, priority ?: seqTrack.processingPriority)
+        }.collect { SeqTrack seqTrack, List<RawSequenceFile> rawSequenceFiles ->
+            createRunForSeqTrack(workflow, seqTrack, rawSequenceFiles, priority ?: seqTrack.processingPriority)
         }
 
         WorkflowRun.withTransaction { TransactionStatus status ->
@@ -59,7 +59,7 @@ class DataInstallationInitializationService {
         return workflowRuns
     }
 
-    private WorkflowRun createRunForSeqTrack(Workflow workflow, SeqTrack seqTrack, List<DataFile> dataFiles, ProcessingPriority priority) {
+    private WorkflowRun createRunForSeqTrack(Workflow workflow, SeqTrack seqTrack, List<RawSequenceFile> rawSequenceFiles, ProcessingPriority priority) {
         List<String> runDisplayName = [
                 "project: ${seqTrack.project.name}",
                 "individual: ${seqTrack.individual.displayName}",
@@ -74,7 +74,7 @@ class DataInstallationInitializationService {
 
         String shortName = "DI: ${seqTrack.individual.pid} ${seqTrack.sampleType.displayName} ${seqTrack.seqType.displayNameWithLibraryLayout}"
 
-        String directory = Paths.get(lsdfFilesService.getFileViewByPidPath(dataFiles.first())).parent
+        String directory = Paths.get(lsdfFilesService.getFileViewByPidPath(rawSequenceFiles.first())).parent
 
         WorkflowRun run = workflowRunService.buildWorkflowRun(workflow, priority, directory, seqTrack.project, runDisplayName, shortName)
         WorkflowArtefact artefact = workflowArtefactService.buildWorkflowArtefact(new WorkflowArtefactValues(

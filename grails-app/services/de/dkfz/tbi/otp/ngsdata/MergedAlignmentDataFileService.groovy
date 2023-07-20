@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,6 +26,7 @@ import grails.gorm.transactions.Transactional
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFileService
 
 @Transactional
+@Deprecated
 class MergedAlignmentDataFileService {
     /**
      * @deprecated can not handle {@link SeqType} with {@link AntibodyTarget} correctly, use {@link AbstractBamFileService#getBaseDirectory()} instead

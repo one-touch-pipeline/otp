@@ -156,7 +156,7 @@
                                     ${seqTrackSet.numberOfBases ? UnitHelper.asNucleobases(seqTrackSet.numberOfBases, true) : "N/A"}
                                 </td>
 
-                                <td>${seqTrackSet.dataFiles.size()}</td>
+                                <td>${seqTrackSet.rawSequenceFiles.size()}</td>
                                 <td title="${UnitHelper.asBytes(seqTrackSet.totalFileSize)}">${UnitHelper.asBytes(seqTrackSet.totalFileSize, true)}</td>
 
                                 <td>${seqTrackSet.seqPlatforms.join(", ")}</td>

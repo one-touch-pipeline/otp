@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -649,6 +649,6 @@ class RoddyBamFile extends AbstractBamFile implements Artefact, HasIdentifier, P
 
     @Override
     Integer getMaximalReadLength() {
-        return seqTracks*.dataFilesWhereIndexFileIsFalse.flatten().max { it.meanSequenceLength }.meanSequenceLength
+        return seqTracks*.sequenceFilesWhereIndexFileIsFalse.flatten().max { it.meanSequenceLength }.meanSequenceLength
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -43,7 +43,8 @@ class RoddyBamFileServiceSpec extends Specification implements ServiceUnitTest<R
         [
                 AbstractBamFile,
                 Comment,
-                DataFile,
+                RawSequenceFile,
+                FastqFile,
                 FileType,
                 Individual,
                 LibraryPreparationKit,
@@ -212,7 +213,7 @@ class RoddyBamFileServiceSpec extends Specification implements ServiceUnitTest<R
     void "test getWorkSingleLaneQADirectories, one seq track"() {
         given:
         SeqTrack seqTrack = roddyBamFile.seqTracks.iterator()[0]
-        updateDataFileNames(seqTrack)
+        updateRawSequenceFileNames(seqTrack)
         Path dir = Paths.get("${baseDir}/${roddyBamFile.workDirectoryName}/${RoddyBamFileService.QUALITY_CONTROL_DIR}/" +
                 "run${seqTrack.run.name}_${COMMON_PREFIX}")
 
@@ -222,9 +223,9 @@ class RoddyBamFileServiceSpec extends Specification implements ServiceUnitTest<R
 
     void "test getWorkSingleLaneQADirectories, two seq tracks"() {
         given:
-        updateDataFileNames(roddyBamFile.seqTracks.iterator()[0])
-        SeqTrack seqTrack = DomainFactory.createSeqTrackWithDataFiles(roddyBamFile.workPackage)
-        updateDataFileNames(seqTrack)
+        updateRawSequenceFileNames(roddyBamFile.seqTracks.iterator()[0])
+        SeqTrack seqTrack = DomainFactory.createSeqTrackWithFastqFiles(roddyBamFile.workPackage)
+        updateRawSequenceFileNames(seqTrack)
         roddyBamFile.seqTracks.add(seqTrack)
         Map<SeqTrack, Path> expected = [:]
         roddyBamFile.seqTracks.each {
@@ -239,7 +240,7 @@ class RoddyBamFileServiceSpec extends Specification implements ServiceUnitTest<R
     void "test getWorkSingleLaneQAJsonFiles, one seq track"() {
         given:
         SeqTrack seqTrack = roddyBamFile.seqTracks.iterator()[0]
-        updateDataFileNames(seqTrack)
+        updateRawSequenceFileNames(seqTrack)
         Path file = Paths.get("${baseDir}/${roddyBamFile.workDirectoryName}/${RoddyBamFileService.QUALITY_CONTROL_DIR}/" +
                 "run${seqTrack.run.name}_${COMMON_PREFIX}/${RoddyBamFileService.QUALITY_CONTROL_JSON_FILE_NAME}")
 
@@ -258,7 +259,7 @@ class RoddyBamFileServiceSpec extends Specification implements ServiceUnitTest<R
     void "test getFinalRoddySingleLaneQADirectories, one seq track"() {
         given:
         SeqTrack seqTrack = roddyBamFile.seqTracks.iterator()[0]
-        updateDataFileNames(seqTrack)
+        updateRawSequenceFileNames(seqTrack)
         Path dir = Paths.get("${baseDir}/${RoddyBamFileService.QUALITY_CONTROL_DIR}/run${seqTrack.run.name}_${COMMON_PREFIX}")
 
         expect:
@@ -267,9 +268,9 @@ class RoddyBamFileServiceSpec extends Specification implements ServiceUnitTest<R
 
     void "test getFinalRoddySingleLaneQADirectories, two seq tracks"() {
         given:
-        updateDataFileNames(roddyBamFile.seqTracks.iterator()[0])
-        SeqTrack seqTrack = DomainFactory.createSeqTrackWithDataFiles(roddyBamFile.workPackage)
-        updateDataFileNames(seqTrack)
+        updateRawSequenceFileNames(roddyBamFile.seqTracks.iterator()[0])
+        SeqTrack seqTrack = DomainFactory.createSeqTrackWithFastqFiles(roddyBamFile.workPackage)
+        updateRawSequenceFileNames(seqTrack)
         roddyBamFile.seqTracks.add(seqTrack)
         Map<SeqTrack, Path> expected = [:]
         roddyBamFile.seqTracks.each {
@@ -284,7 +285,7 @@ class RoddyBamFileServiceSpec extends Specification implements ServiceUnitTest<R
     void "test getFinalRoddySingleLaneQAJsonFiles, one seq track"() {
         given:
         SeqTrack seqTrack = roddyBamFile.seqTracks.iterator()[0]
-        updateDataFileNames(seqTrack)
+        updateRawSequenceFileNames(seqTrack)
         Path file = Paths.get("${baseDir}/${RoddyBamFileService.QUALITY_CONTROL_DIR}/run${seqTrack.run.name}_${COMMON_PREFIX}/" +
                 "${RoddyBamFileService.QUALITY_CONTROL_JSON_FILE_NAME}")
 
@@ -295,7 +296,7 @@ class RoddyBamFileServiceSpec extends Specification implements ServiceUnitTest<R
     void "test getRoddySingleLaneQADirectoriesHelper, final folder, one seq track"() {
         given:
         SeqTrack seqTrack = roddyBamFile.seqTracks.iterator()[0]
-        updateDataFileNames(seqTrack)
+        updateRawSequenceFileNames(seqTrack)
         Path dir = Paths.get("${baseDir}/${RoddyBamFileService.QUALITY_CONTROL_DIR}/run${seqTrack.run.name}_${COMMON_PREFIX}")
 
         expect:
@@ -305,7 +306,7 @@ class RoddyBamFileServiceSpec extends Specification implements ServiceUnitTest<R
     void "test getRoddySingleLaneQADirectoriesHelper, work folder, one seq track"() {
         given:
         SeqTrack seqTrack = roddyBamFile.seqTracks.iterator()[0]
-        updateDataFileNames(seqTrack)
+        updateRawSequenceFileNames(seqTrack)
         Path dir = Paths.get("${baseDir}/${roddyBamFile.workDirectoryName}/${RoddyBamFileService.QUALITY_CONTROL_DIR}/" +
                 "run${seqTrack.run.name}_${COMMON_PREFIX}")
 
@@ -468,9 +469,10 @@ class RoddyBamFileServiceSpec extends Specification implements ServiceUnitTest<R
         thrown(IllegalStateException)
     }
 
-    private void updateDataFileNames(SeqTrack seqTrack) {
-        List<DataFile> dataFiles = DataFile.findAllBySeqTrack(seqTrack)
-        dataFiles[0].vbpFileName = FIRST_DATAFILE_NAME
-        dataFiles[1].vbpFileName = SECOND_DATAFILE_NAME
+    private void updateRawSequenceFileNames(SeqTrack seqTrack) {
+        List<RawSequenceFile> rawSequenceFiles = FastqFile.findAllBySeqTrack(seqTrack)
+        rawSequenceFiles[0].vbpFileName = FIRST_DATAFILE_NAME
+        rawSequenceFiles[1].vbpFileName = SECOND_DATAFILE_NAME
+        rawSequenceFiles*.save(flush: true)
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -41,8 +41,9 @@ class EgaSubmissionValidationServiceSpec extends Specification implements EgaSub
         return [
                 AbstractBamFile,
                 BamFileSubmissionObject,
-                DataFile,
-                DataFileSubmissionObject,
+                RawSequenceFile,
+                RawSequenceFileSubmissionObject,
+                FastqFile,
                 FileType,
                 Individual,
                 LibraryPreparationKit,
@@ -135,8 +136,8 @@ class EgaSubmissionValidationServiceSpec extends Specification implements EgaSub
     @Unroll
     void "validateAliases, when '#name', then hasError: #hasError and errorMessage contains '#message'"() {
         given:
-        createDataFileSubmissionObject([
-                egaAliasName: 'existingDataFileAlias',
+        createRawSequenceFileSubmissionObject([
+                egaAliasName: 'existingRSFAlias',
         ])
         createBamFileSubmissionObject([
                 egaAliasName: 'existingBamFileAlias',
@@ -155,12 +156,12 @@ class EgaSubmissionValidationServiceSpec extends Specification implements EgaSub
         }
 
         where:
-        name                               | aliases                        || hasError | message
-        'all fine'                         | ['a', 'b']                     || false    | ''
-        'alias missing'                    | ['a', '', '']                  || true     | 'For some samples no alias is configured'
-        'alias not unique'                 | ['a', 'a', 'b', 'b']           || true     | 'The following aliases are not unique'
-        'alias already exist for datafile' | ['a', 'existingDataFileAlias'] || true     | 'The following aliases already exist'
-        'alias already exist for bam file' | ['a', 'existingBamFileAlias']  || true     | 'The following aliases already exist'
+        name                                        | aliases                       || hasError | message
+        'all fine'                                  | ['a', 'b']                    || false    | ''
+        'alias missing'                             | ['a', '', '']                 || true     | 'For some samples no alias is configured'
+        'alias not unique'                          | ['a', 'a', 'b', 'b']          || true     | 'The following aliases are not unique'
+        'alias already exist for raw sequence file' | ['a', 'existingRSFAlias']     || true     | 'The following aliases already exist'
+        'alias already exist for bam file'          | ['a', 'existingBamFileAlias'] || true     | 'The following aliases already exist'
     }
 
     @Unroll

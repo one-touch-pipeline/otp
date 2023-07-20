@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -43,6 +43,7 @@ class LsdfFileServiceSpec extends Specification implements DataTest, DomainFacto
     @Override
     Class[] getDomainClassesToMock() {
         return [
+                FastqFile,
                 FastqImportInstance,
                 Realm,
                 SeqTrack,
@@ -234,7 +235,7 @@ class LsdfFileServiceSpec extends Specification implements DataTest, DomainFacto
         AntibodyTarget antibodyTarget = antiBody ? createAntibodyTarget([
                 name: antiBody,
         ]) : null
-        DataFile dataFile = createDataFile([
+        RawSequenceFile rawSequenceFile = createFastqFile([
                 seqTrack: createSeqTrack([
                         seqType            : seqType,
                         sample             : createSample([
@@ -251,16 +252,16 @@ class LsdfFileServiceSpec extends Specification implements DataTest, DomainFacto
                 seqDir,
                 seqType.dirName,
                 "view-by-pid",
-                dataFile.individual.pid,
+                rawSequenceFile.individual.pid,
                 sampleTypeDirPart,
                 seqType.libraryLayoutDirName,
-                "run${dataFile.run.name}",
-                dataFile.fileType.vbpPath,
-                dataFile.vbpFileName,
+                "run${rawSequenceFile.run.name}",
+                rawSequenceFile.fileType.vbpPath,
+                rawSequenceFile.vbpFileName,
         ].join('/')
 
         return [
-                dataFile: dataFile,
+                rawSequenceFile: rawSequenceFile,
                 expected: expected,
         ]
     }
@@ -271,7 +272,7 @@ class LsdfFileServiceSpec extends Specification implements DataTest, DomainFacto
         Map<String, ?> data = setUpViewByPidTests(antiBody, well, sampleType, sampleTypePart)
 
         when:
-        String path = service.getFileViewByPidPath(data.dataFile)
+        String path = service.getFileViewByPidPath(data.rawSequenceFile)
 
         then:
         data.expected == path
@@ -292,7 +293,7 @@ class LsdfFileServiceSpec extends Specification implements DataTest, DomainFacto
         Map<String, ?> data = setUpViewByPidTests(antiBody, well, sampleType, sampleTypePart)
 
         when:
-        String path = service.getWellAllFileViewByPidPath(data.dataFile)
+        String path = service.getWellAllFileViewByPidPath(data.rawSequenceFile)
 
         then:
         data.expected == path
@@ -309,7 +310,7 @@ class LsdfFileServiceSpec extends Specification implements DataTest, DomainFacto
         given:
         SeqTrack seqTrack = createSeqTrack()
 
-        DataFile dataFile = createDataFile([
+        RawSequenceFile rawSequenceFile = createFastqFile([
                 seqTrack    : seqTrack,
         ])
 
@@ -321,12 +322,12 @@ class LsdfFileServiceSpec extends Specification implements DataTest, DomainFacto
                 seqTrack.sampleType.dirName,
                 seqTrack.seqType.libraryLayoutDirName,
                 "run${seqTrack.run.name}",
-                dataFile.fileType.vbpPath,
-                dataFile.vbpFileName,
+                rawSequenceFile.fileType.vbpPath,
+                rawSequenceFile.vbpFileName,
         ].join('/')
 
         when:
-        String path = service.getFileViewByPidPath(dataFile)
+        String path = service.getFileViewByPidPath(rawSequenceFile)
 
         then:
         expected == path

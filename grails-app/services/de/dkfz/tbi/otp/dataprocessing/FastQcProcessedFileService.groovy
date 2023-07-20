@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,7 +25,7 @@ import grails.gorm.transactions.Transactional
 import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.config.ConfigService
-import de.dkfz.tbi.otp.ngsdata.DataFile
+import de.dkfz.tbi.otp.ngsdata.RawSequenceFile
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.workflow.fastqc.BashFastQcWorkflow
 import de.dkfz.tbi.otp.workflow.fastqc.WesFastQcWorkflow
@@ -41,8 +41,8 @@ class FastQcProcessedFileService {
     ConfigService configService
 
     @CompileDynamic
-    FastqcProcessedFile findSingleByDataFile(DataFile dataFile) {
-        return CollectionUtils.atMostOneElement(FastqcProcessedFile.findAllByDataFile(dataFile))
+    FastqcProcessedFile findSingleByRawSequenceFile(RawSequenceFile rawSequenceFile) {
+        return CollectionUtils.atMostOneElement(FastqcProcessedFile.findAllBySequenceFile(rawSequenceFile))
     }
 
     /**

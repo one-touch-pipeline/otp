@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,7 +23,7 @@
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
-import de.dkfz.tbi.otp.ngsdata.DataFile
+import de.dkfz.tbi.otp.ngsdata.RawSequenceFile
 import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
@@ -76,7 +76,7 @@ String analysis = BamFilePairAnalysis.findAllByWithdrawn(true).collect {
     "${chgrp} ${it}" as String
 }.sort().join('\n')
 
-String dataFiles = DataFile.findAllBySeqTrackIsNotNullAndFileWithdrawn(true).collect {
+String rawSequenceFiles = RawSequenceFile.findAllBySeqTrackIsNotNullAndFileWithdrawn(true).collect {
     lsdfFilesService.getFileFinalPathAsPath(it)
 }.findAll { path ->
     path && Files.exists(path)
@@ -84,7 +84,7 @@ String dataFiles = DataFile.findAllBySeqTrackIsNotNullAndFileWithdrawn(true).col
     "${chgrp} ${it}" as String
 }.sort().join('\n')
 
-String md5sumDataFile = DataFile.findAllByFileWithdrawn(true).collect {
+String md5sumRawSequenceFile = RawSequenceFile.findAllByFileWithdrawn(true).collect {
     lsdfFilesService.getFileMd5sumFinalPathAsPath(it)
 }.findAll { path ->
     path && Files.exists(path)
@@ -92,8 +92,8 @@ String md5sumDataFile = DataFile.findAllByFileWithdrawn(true).collect {
     "${chgrp} ${it}" as String
 }.sort().join('\n')
 
-String zipFiles = DataFile.findAllBySeqTrackIsNotNullAndFileWithdrawn(true).collect {
-    CollectionUtils.atMostOneElement(FastqcProcessedFile.findAllByDataFile(it))
+String zipFiles = RawSequenceFile.findAllBySeqTrackIsNotNullAndFileWithdrawn(true).collect {
+    CollectionUtils.atMostOneElement(FastqcProcessedFile.findAllBySequenceFile(it))
 }.findAll().collect {
     fastqcDataFilesService.fastqcOutputPath(it)
 }.findAll { path ->
@@ -102,8 +102,8 @@ String zipFiles = DataFile.findAllBySeqTrackIsNotNullAndFileWithdrawn(true).coll
     "${chgrp} ${it}" as String
 }.sort().join('\n')
 
-String htmlFiles = DataFile.findAllBySeqTrackIsNotNullAndFileWithdrawn(true).collect {
-    CollectionUtils.atMostOneElement(FastqcProcessedFile.findAllByDataFile(it))
+String htmlFiles = RawSequenceFile.findAllBySeqTrackIsNotNullAndFileWithdrawn(true).collect {
+    CollectionUtils.atMostOneElement(FastqcProcessedFile.findAllBySequenceFile(it))
 }.findAll().collect {
     fastqcDataFilesService.fastqcHtmlPath(it)
 }.findAll { path ->
@@ -112,8 +112,8 @@ String htmlFiles = DataFile.findAllBySeqTrackIsNotNullAndFileWithdrawn(true).col
     "${chgrp} ${it}" as String
 }.sort().join('\n')
 
-String md5sumFiles = DataFile.findAllBySeqTrackIsNotNullAndFileWithdrawn(true).collect {
-    CollectionUtils.atMostOneElement(FastqcProcessedFile.findAllByDataFile(it))
+String md5sumFiles = RawSequenceFile.findAllBySeqTrackIsNotNullAndFileWithdrawn(true).collect {
+    CollectionUtils.atMostOneElement(FastqcProcessedFile.findAllBySequenceFile(it))
 }.findAll().collect {
     fastqcDataFilesService.fastqcOutputMd5sumPath(it)
 }.findAll { path ->
@@ -122,7 +122,7 @@ String md5sumFiles = DataFile.findAllBySeqTrackIsNotNullAndFileWithdrawn(true).c
     "${chgrp} ${it}" as String
 }.sort().join('\n')
 
-String dataFilesViewByPid = DataFile.findAllBySeqTrackIsNotNullAndFileWithdrawn(true).collect {
+String rawSequenceFilesViewByPid = RawSequenceFile.findAllBySeqTrackIsNotNullAndFileWithdrawn(true).collect {
     lsdfFilesService.getFileViewByPidPathAsPath(it)
 }.findAll { path ->
     path && Files.exists(path)
@@ -133,14 +133,14 @@ String dataFilesViewByPid = DataFile.findAllBySeqTrackIsNotNullAndFileWithdrawn(
 String script = [
         "#/bin/bash",
         "set -ev",
-        dataFiles,
+        rawSequenceFiles,
         bamFiles,
         analysis,
         zipFiles,
         htmlFiles,
         md5sumFiles,
-        md5sumDataFile,
-        dataFilesViewByPid
+        md5sumRawSequenceFile,
+        rawSequenceFilesViewByPid
 ].join('\n')
 
 Path path = fileSystemService.remoteFileSystemOnDefaultRealm.getPath(file)

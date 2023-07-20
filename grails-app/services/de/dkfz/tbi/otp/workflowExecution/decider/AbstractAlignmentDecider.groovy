@@ -132,7 +132,7 @@ abstract class AbstractAlignmentDecider extends AbstractWorkflowDecider<Alignmen
                 alignmentArtefactService.fetchSpecificSeqPlatformGroup((seqTracks)),
                 alignmentArtefactService.fetchDefaultSeqPlatformGroup(),
                 alignmentArtefactService.fetchMergingWorkPackage(seqTracks),
-                requiresFastqcResults() ? alignmentArtefactService.fetchDataFiles(seqTracks) : [:],
+                requiresFastqcResults() ? alignmentArtefactService.fetchRawSequenceFiles(seqTracks) : [:],
                 pipelineService.findByPipelineName(Pipeline.Name.PANCAN_ALIGNMENT),
         )
     }
@@ -225,8 +225,8 @@ abstract class AbstractAlignmentDecider extends AbstractWorkflowDecider<Alignmen
             Set<SeqTrack> seqTrackSet = seqTracks as Set
             List<FastqcProcessedFile> fastqcProcessedFiles = allArtefacts.fastqcProcessedFileData*.artefact
             List<SeqTrack> seqTracksWithMissingFastqc = seqTracks.findAll { SeqTrack seqTrack ->
-                !additionalData.dataFileMap[seqTrack].every { DataFile dataFile ->
-                    fastqcProcessedFiles.find { it.dataFile == dataFile }
+                !additionalData.rawSequenceFileMap[seqTrack].every { RawSequenceFile rawSequenceFile ->
+                    fastqcProcessedFiles.find { it.sequenceFile == rawSequenceFile }
                 }
             }
             if (seqTracksWithMissingFastqc) {
@@ -236,7 +236,7 @@ abstract class AbstractAlignmentDecider extends AbstractWorkflowDecider<Alignmen
                 return deciderResult
             }
             List<FastqcProcessedFile> fastqcWithOutSeqTrack = fastqcProcessedFiles.findAll {
-                !seqTrackSet.contains(it.dataFile.seqTrack)
+                !seqTrackSet.contains(it.sequenceFile.seqTrack)
             }
             if (fastqcWithOutSeqTrack) {
                 deciderResult.warnings <<
@@ -336,7 +336,7 @@ abstract class AbstractAlignmentDecider extends AbstractWorkflowDecider<Alignmen
         }
         if (requiresFastqcResults()) {
             allArtefacts.fastqcProcessedFileData.findAll {
-                useSeqTracks.contains(it.artefact.dataFile.seqTrack)
+                useSeqTracks.contains(it.artefact.sequenceFile.seqTrack)
             }.each {
                 new WorkflowRunInputArtefact(
                         workflowRun: run,

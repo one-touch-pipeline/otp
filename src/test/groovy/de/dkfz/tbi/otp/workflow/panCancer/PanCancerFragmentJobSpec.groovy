@@ -39,8 +39,9 @@ class PanCancerFragmentJobSpec extends Specification implements DataTest, PanCan
     @Override
     Class[] getDomainClassesToMock() {
         return [
-                FileType,
+                FastqFile,
                 FastqImportInstance,
+                FileType,
                 MergingWorkPackage,
                 RoddyBamFile,
                 WorkflowStep,
@@ -87,7 +88,7 @@ class PanCancerFragmentJobSpec extends Specification implements DataTest, PanCan
         setupData(workPackageLibIsNull, seqTrackLibIsNull)
 
         List<SeqTrack> seqTracks = (1..countOfSeqTracks).collect {
-            DomainFactory.createSeqTrackWithDataFiles(workPackage, [
+            DomainFactory.createSeqTrackWithTwoFastqFiles(workPackage, [
                     libraryPreparationKit: seqTrackLibPrepKit,
             ])
         }
@@ -130,11 +131,11 @@ class PanCancerFragmentJobSpec extends Specification implements DataTest, PanCan
         setupData(true, oneSeqTrackIsNull)
 
         List<SeqTrack> seqTracks = [
-                DomainFactory.createSeqTrackWithDataFiles(workPackage, [
+                DomainFactory.createSeqTrackWithFastqFiles(workPackage, [
                         libraryPreparationKit: seqTrackLibPrepKit,
                 ]),
         ] + (2..countOfSeqTracks).collect {
-            DomainFactory.createSeqTrackWithDataFiles(workPackage, [
+            DomainFactory.createSeqTrackWithFastqFiles(workPackage, [
                     libraryPreparationKit: createLibraryPreparationKit(),
             ])
         }

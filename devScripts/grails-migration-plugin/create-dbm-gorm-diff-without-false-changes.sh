@@ -61,7 +61,7 @@ joinTables="\
 (ega_library_strategy_seq_type)|\
 (ega_platform_model_seq_platform_model_label)|\
 (ega_submission_bam_file_submission_object)|\
-(ega_submission_data_file_submission_object)|\
+(ega_submission_raw_sequence_file_submission_object)|\
 (ega_submission_sample_submission_object)|\
 (externally_processed_bam_file_further_files)|\
 (import_process_externally_processed_bam_file)|\

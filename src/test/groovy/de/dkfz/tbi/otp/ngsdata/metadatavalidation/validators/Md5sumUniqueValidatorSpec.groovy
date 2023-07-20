@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -41,9 +41,10 @@ class Md5sumUniqueValidatorSpec extends Specification implements DataTest {
     @Override
     Class[] getDomainClassesToMock() {
         [
-                DataFile,
                 ExternallyProcessedBamFile,
+                RawSequenceFile,
                 ExternalMergingWorkPackage,
+                FastqFile,
                 FileType,
                 Individual,
                 Pipeline,
@@ -96,8 +97,8 @@ ${md5sum2}
 ${md5sum3}
 ${md5sum2}
 """)
-        DomainFactory.createDataFile(md5sum: md5sum3)
-        DomainFactory.createDataFile(md5sum: md5sum4)
+        DomainFactory.createFastqFile(fastqMd5sum: md5sum3)
+        DomainFactory.createFastqFile(fastqMd5sum: md5sum4)
 
         Collection<Problem> expectedProblems = [
                 new Problem(context.spreadsheet.dataRows[1].cells + context.spreadsheet.dataRows[3].cells as Set, LogLevel.WARNING,

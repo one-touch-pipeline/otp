@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,8 +21,6 @@
  */
 
 import de.dkfz.tbi.otp.ngsdata.*
-
-import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 /**
  * This script looks up DataFiles for the given md5sums. It lists Project, PID, SeqType, SampleType and SAMPLE_NAME.
@@ -53,15 +51,15 @@ Closure<List<String>> nameStringToList = { String nameString ->
 List<String> md5sumList = nameStringToList(md5sums)
 
 md5sumList.each { String md5sum ->
-    List<DataFile> dataFiles = DataFile.findAllByMd5sum(md5sum)
+    List<RawSequenceFile> rawSequenceFiles = RawSequenceFile.findAllByFastqMd5sum(md5sum)
 
-    int numberOfFoundFiles = dataFiles.size()
+    int numberOfFoundFiles = rawSequenceFiles.size()
     println "${md5sum} ${numberOfFoundFiles > 1 ? "[found ${numberOfFoundFiles} files with the given md5!]" : ''}"
-    dataFiles.each { DataFile dataFile ->
-        SeqTrack dfSeqTrack = dataFile.seqTrack
+    rawSequenceFiles.each { RawSequenceFile rawSequenceFile ->
+        SeqTrack dfSeqTrack = rawSequenceFile.seqTrack
         println """\
-        ---> ${dataFile.fileName}
-             ${ctx.lsdfFilesService.getFileFinalPath(dataFile)}
+        ---> ${rawSequenceFile.fileName}
+             ${ctx.lsdfFilesService.getFileFinalPath(rawSequenceFile)}
              Project:     ${dfSeqTrack.project}
              PID:         ${dfSeqTrack.individual.pid}
              SeqType:     ${dfSeqTrack.seqType}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -85,7 +85,7 @@ class MetaDataServiceTests implements UserAndRoles {
             assertNull(metaDataService.getMetaDataEntryById(entry.id + 1))
         }
 
-        addUserWithReadAccessToProject(CollectionUtils.atMostOneElement(User.findAllByUsername(TESTUSER)), entry.dataFile.project)
+        addUserWithReadAccessToProject(CollectionUtils.atMostOneElement(User.findAllByUsername(TESTUSER)), entry.sequenceFile.project)
         doWithAuth(TESTUSER) {
             // now our test user should have access
             assertSame(entry, metaDataService.getMetaDataEntryById(entry.id))
@@ -131,13 +131,13 @@ class MetaDataServiceTests implements UserAndRoles {
      * Creates a very simple MetaDataEntry with minimum required fields.
      */
     private MetaDataEntry mockEntry() {
-        DataFile dataFile = DomainFactory.createDataFile()
-        assertTrue(dataFile.validate())
-        assertNotNull(dataFile.save(flush: true))
+        RawSequenceFile rawSequenceFile = DomainFactory.createFastqFile()
+        assertTrue(rawSequenceFile.validate())
+        assertNotNull(rawSequenceFile.save(flush: true))
         MetaDataKey key = new MetaDataKey(name: "Test")
         assertTrue(key.validate())
         assertNotNull(key.save(flush: true))
-        MetaDataEntry entry = new MetaDataEntry(value: "test", dataFile: dataFile, key: key)
+        MetaDataEntry entry = new MetaDataEntry(value: "test", sequenceFile: rawSequenceFile, key: key)
         assertTrue(entry.validate())
         entry = entry.save(flush: true)
         assertNotNull(entry)

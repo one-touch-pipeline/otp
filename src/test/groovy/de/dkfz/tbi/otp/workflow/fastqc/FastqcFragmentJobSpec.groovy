@@ -26,7 +26,8 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.FastqcWorkflowDomainFactory
-import de.dkfz.tbi.otp.ngsdata.DataFile
+import de.dkfz.tbi.otp.ngsdata.FastqFile
+import de.dkfz.tbi.otp.ngsdata.RawSequenceFile
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflowExecution.SingleSelectSelectorExtendedCriteria
@@ -37,7 +38,8 @@ class FastqcFragmentJobSpec extends Specification implements DataTest, FastqcWor
     @Override
     Class[] getDomainClassesToMock() {
         return [
-                DataFile,
+                FastqFile,
+                RawSequenceFile,
                 WorkflowStep,
         ]
     }
@@ -50,7 +52,7 @@ class FastqcFragmentJobSpec extends Specification implements DataTest, FastqcWor
                         workflowVersion: createBashFastqcWorkflowVersion(),
                 ]),
         ])
-        SeqTrack seqTrack = createSeqTrackWithTwoDataFile([
+        SeqTrack seqTrack = createSeqTrackWithTwoFastqFile([
                 libraryPreparationKit: libIsNull ? null : createLibraryPreparationKit(),
         ])
 

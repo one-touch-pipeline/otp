@@ -66,7 +66,7 @@ Individual.withTransaction() {
         sampleIdentifiers*.delete(flush: true)
 
         List<SeqTrack> seqTracks = seqTracksPerSample[sample]
-        assert !seqTracks || DataFile.findAllBySeqTrackInList(seqTracks).isEmpty(): "Found data for Sample ${sample}. Take care of the data before deleting the individual"
+        assert !seqTracks || RawSequenceFile.findAllBySeqTrackInList(seqTracks).isEmpty(): "Found data for Sample ${sample}. Take care of the data before deleting the individual"
 
         sample.delete(flush: true)
     }

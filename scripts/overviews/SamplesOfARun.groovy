@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -34,8 +34,8 @@ List output = []
 List<FastqImportInstance> fastqImportInstances = FastqImportInstance.findAllByRun(run).sort{it.id}
 fastqImportInstances.each { FastqImportInstance fastqImportInstance ->
     output << "fastqImportInstance: ${fastqImportInstance.id}"
-    List<DataFile> dataFiles = DataFile.findAllByFastqImportInstance(fastqImportInstance)
-    output << dataFiles.findAll{it?.seqTrack}.collect { "${TimeFormats.DATE.getFormattedDate(it.dateCreated)}  ${it.seqTrack.sample} ${it.seqTrack.seqType} ${SampleIdentifier.findAllBySample(it.seqTrack.sample)}" }.sort().unique().join("\n")
+    List<RawSequenceFile> rawSequenceFiles = RawSequenceFile.findAllByFastqImportInstance(fastqImportInstance)
+    output << rawSequenceFiles.findAll{it?.seqTrack}.collect { "${TimeFormats.DATE.getFormattedDate(it.dateCreated)}  ${it.seqTrack.sample} ${it.seqTrack.seqType} ${SampleIdentifier.findAllBySample(it.seqTrack.sample)}" }.sort().unique().join("\n")
     output << ""
 }
 

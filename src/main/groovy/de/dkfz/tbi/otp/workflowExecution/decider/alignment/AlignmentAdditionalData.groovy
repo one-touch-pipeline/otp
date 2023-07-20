@@ -39,6 +39,6 @@ class AlignmentAdditionalData implements AdditionalData {
     Map<ProjectSeqTypeGroup, Map<SeqPlatform, SeqPlatformGroup>> specificSeqPlatformGroupMap
     Map<SeqPlatform, SeqPlatformGroup> defaultSeqPlatformGroupMap
     Map<AlignmentWorkPackageGroup, MergingWorkPackage> mergingWorkPackageMap
-    Map<SeqTrack, List<DataFile>> dataFileMap
+    Map<SeqTrack, List<RawSequenceFile>> rawSequenceFileMap
     Pipeline pipeline
 }

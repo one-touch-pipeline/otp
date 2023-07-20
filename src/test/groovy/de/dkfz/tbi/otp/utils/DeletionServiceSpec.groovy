@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,7 +29,8 @@ import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPancanFactory
-import de.dkfz.tbi.otp.ngsdata.DataFile
+import de.dkfz.tbi.otp.ngsdata.FastqFile
+import de.dkfz.tbi.otp.ngsdata.RawSequenceFile
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeProjectSeqType
 
 class DeletionServiceSpec extends Specification implements ServiceUnitTest<DeletionService>, DataTest, RoddyPancanFactory {
@@ -37,7 +38,8 @@ class DeletionServiceSpec extends Specification implements ServiceUnitTest<Delet
     @Override
     Class[] getDomainClassesToMock() {
         return [
-                DataFile,
+                FastqFile,
+                RawSequenceFile,
                 MergingWorkPackage,
                 RoddyBamFile,
                 ReferenceGenomeProjectSeqType,

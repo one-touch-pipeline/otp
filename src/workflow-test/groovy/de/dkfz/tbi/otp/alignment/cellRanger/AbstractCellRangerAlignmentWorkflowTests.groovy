@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -105,16 +105,16 @@ abstract class AbstractCellRangerAlignmentWorkflowTests extends AbstractAlignmen
     }
 
     SeqTrack createSeqTrack(String fastq1, String fastq2) {
-        SeqTrack seqTrack = DomainFactory.createSeqTrackWithTwoDataFiles(mwp, [
+        SeqTrack seqTrack = DomainFactory.createSeqTrackWithTwoFastqFiles(mwp, [
                 seqType              : seqType,
                 dataInstallationState: SeqTrack.DataProcessingState.FINISHED,
                 sample               : sample,
         ], [:], [:])
 
-        DataFile.findAllBySeqTrack(seqTrack).eachWithIndex { DataFile dataFile, int index ->
-            dataFile.vbpFileName = dataFile.fileName = "fastq_${seqTrack.individual.pid}_${seqTrack.sampleType.name}_${seqTrack.laneId}_${index + 1}.fastq.gz"
-            dataFile.save(flush: true)
-            DomainFactory.createMetaDataKeyAndEntry(dataFile, MetaDataColumn.SAMPLE_NAME.name(), "asdfg")
+        RawSequenceFile.findAllBySeqTrack(seqTrack).eachWithIndex { RawSequenceFile rawSequenceFile, int index ->
+            rawSequenceFile.vbpFileName = rawSequenceFile.fileName = "fastq_${seqTrack.individual.pid}_${seqTrack.sampleType.name}_${seqTrack.laneId}_${index + 1}.fastq.gz"
+            rawSequenceFile.save(flush: true)
+            DomainFactory.createMetaDataKeyAndEntry(rawSequenceFile, MetaDataColumn.SAMPLE_NAME.name(), "asdfg")
         }
 
         linkFastqFiles(seqTrack, [

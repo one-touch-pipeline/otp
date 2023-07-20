@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -33,7 +33,8 @@ class RunServiceSpec extends Specification implements DataTest, DomainFactoryCor
     @Override
     Class[] getDomainClassesToMock() {
         return [
-                DataFile,
+                RawSequenceFile,
+                FastqFile,
                 FileType,
                 Individual,
                 MetaDataFile,
@@ -59,37 +60,37 @@ class RunServiceSpec extends Specification implements DataTest, DomainFactoryCor
         given:
         SeqPlatform seqPlatform = DomainFactory.createSeqPlatformWithSeqPlatformGroup(seqPlatformGroups: null)
 
-        Run runWithoutDataFile = DomainFactory.createRun(seqPlatform: seqPlatform)
+        Run runWithoutRawSequenceFile = DomainFactory.createRun(seqPlatform: seqPlatform)
 
         Run run1 = DomainFactory.createRun(seqPlatform: seqPlatform)
         MetaDataFile run1MetaDataFileA = DomainFactory.createMetaDataFile()
-        DomainFactory.createDataFile(run: run1, fastqImportInstance: run1MetaDataFileA.fastqImportInstance)
+        DomainFactory.createFastqFile(run: run1, fastqImportInstance: run1MetaDataFileA.fastqImportInstance)
         MetaDataFile run1MetaDataFileB = DomainFactory.createMetaDataFile()
         MetaDataFile run1MetaDataFileC = DomainFactory.createMetaDataFile(fastqImportInstance: run1MetaDataFileB.fastqImportInstance)
-        DomainFactory.createDataFile(run: run1, fastqImportInstance: run1MetaDataFileB.fastqImportInstance)
+        DomainFactory.createFastqFile(run: run1, fastqImportInstance: run1MetaDataFileB.fastqImportInstance)
 
         Run run2 = DomainFactory.createRun(seqPlatform: seqPlatform)
         MetaDataFile run2MetaDataFile = DomainFactory.createMetaDataFile()
-        DomainFactory.createDataFile(run: run2, fastqImportInstance: run2MetaDataFile.fastqImportInstance)
-        DomainFactory.createDataFile(run: run2, fastqImportInstance: run2MetaDataFile.fastqImportInstance)
+        DomainFactory.createFastqFile(run: run2, fastqImportInstance: run2MetaDataFile.fastqImportInstance)
+        DomainFactory.createFastqFile(run: run2, fastqImportInstance: run2MetaDataFile.fastqImportInstance)
 
         expect:
-        runService.retrieveMetaDataFiles(runWithoutDataFile).isEmpty()
+        runService.retrieveMetaDataFiles(runWithoutRawSequenceFile).isEmpty()
         TestCase.assertContainSame(runService.retrieveMetaDataFiles(run1), [run1MetaDataFileA, run1MetaDataFileB, run1MetaDataFileC])
         TestCase.assertContainSame(runService.retrieveMetaDataFiles(run2), [run2MetaDataFile])
     }
 
     void 'check if run is empty'() {
         given:
-        Run run1 = createRun() // will contain SeqTrack and DataFile
+        Run run1 = createRun() // will contain SeqTrack and RawSequenceFile
         SeqTrack seqTrack1 = createSeqTrack(run: run1)
-        createDataFile(seqTrack: seqTrack1)
+        createFastqFile(seqTrack: seqTrack1)
 
         Run run2 = createRun() // will contain SeqTrack only
         createSeqTrack(run: run2)
 
-        Run run3 = createRun() // will contain DataFile only
-        createDataFile(run: run3)
+        Run run3 = createRun() // will contain RawSequenceFile only
+        createFastqFile(run: run3)
 
         Run run4 = createRun() // empty
 

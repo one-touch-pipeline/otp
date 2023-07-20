@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -47,8 +47,8 @@ class FastqcExecuteWesPipelineJobSpec extends Specification implements DataTest,
     private WorkflowArtefact artefact
     private SeqTrack seqTrack
     private FileSystem fileSystem = FileSystems.default
-    private DataFile dataFile1
-    private DataFile dataFile2
+    private RawSequenceFile rawSequenceFile1
+    private RawSequenceFile rawSequenceFile2
     private FastqcProcessedFile fastqcProcessedFile1
     private FastqcProcessedFile fastqcProcessedFile2
     private Workflow workflow
@@ -102,17 +102,17 @@ class FastqcExecuteWesPipelineJobSpec extends Specification implements DataTest,
         seqTrack = createSeqTrack([
                 workflowArtefact: artefact,
         ])
-        dataFile1 = createDataFile([
+        rawSequenceFile1 = createFastqFile([
                 seqTrack: seqTrack,
         ])
-        dataFile2 = createDataFile([
+        rawSequenceFile2 = createFastqFile([
                 seqTrack: seqTrack,
         ])
         fastqcProcessedFile1 = createFastqcProcessedFile([
-                dataFile: dataFile1,
+                sequenceFile: rawSequenceFile1,
         ])
         fastqcProcessedFile2 = createFastqcProcessedFile([
-                dataFile         : dataFile2,
+                sequenceFile     : rawSequenceFile2,
                 workDirectoryName: fastqcProcessedFile1.workDirectoryName,
         ])
 
@@ -122,6 +122,7 @@ class FastqcExecuteWesPipelineJobSpec extends Specification implements DataTest,
     @Override
     Class[] getDomainClassesToMock() {
         return [
+                FastqFile,
                 FastqcProcessedFile,
                 WorkflowArtefact,
                 WorkflowStep,
@@ -141,8 +142,8 @@ class FastqcExecuteWesPipelineJobSpec extends Specification implements DataTest,
             1 * getOutputArtefacts(step, OUTPUT_ROLE) >> [fastqcProcessedFile1, fastqcProcessedFile2]
         }
         job.lsdfFilesService = Mock(LsdfFilesService) {
-            1 * getFileViewByPidPathAsPath(dataFile1) >> Paths.get('fastq1')
-            1 * getFileViewByPidPathAsPath(dataFile2) >> Paths.get('fastq2')
+            1 * getFileViewByPidPathAsPath(rawSequenceFile1) >> Paths.get('fastq1')
+            1 * getFileViewByPidPathAsPath(rawSequenceFile2) >> Paths.get('fastq2')
             0 * _
         }
 

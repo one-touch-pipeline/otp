@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -54,136 +54,136 @@ List<Project> projects = Project.findAllByNameInList(projectNames)
 assert projects.size() == projectNames.size(): "Not all project names could be resolved to a project"
 
 @TupleConstructor
-enum DataFileColumns {
-    DATA_FILE_ID("DataFile ID", { DataFile dataFile, Map properties = [:] ->
-        return dataFile.id
+enum RawSequenceFileColumns {
+    DATA_FILE_ID("DataFile ID", { RawSequenceFile rawSequenceFile, Map properties = [:] ->
+        return rawSequenceFile.id
     }),
-    SEQ_TRACK_ID("SeqTrack ID", { DataFile dataFile, Map properties = [:] ->
-        return dataFile.seqTrack.id
+    SEQ_TRACK_ID("SeqTrack ID", { RawSequenceFile rawSequenceFile, Map properties = [:] ->
+        return rawSequenceFile.seqTrack.id
     }),
-    SAMPLE_ID("Sample ID", { DataFile dataFile, Map properties = [:] ->
-        return dataFile.sample.id
+    SAMPLE_ID("Sample ID", { RawSequenceFile rawSequenceFile, Map properties = [:] ->
+        return rawSequenceFile.sample.id
     }),
-    INDIVIDUAL_ID("Individual ID", { DataFile dataFile, Map properties = [:] ->
-        return dataFile.individual.id
+    INDIVIDUAL_ID("Individual ID", { RawSequenceFile rawSequenceFile, Map properties = [:] ->
+        return rawSequenceFile.individual.id
     }),
-    PID("PID", { DataFile dataFile, Map properties = [:] ->
-        return dataFile.seqTrack.sample.individual.pid
+    PID("PID", { RawSequenceFile rawSequenceFile, Map properties = [:] ->
+        return rawSequenceFile.seqTrack.sample.individual.pid
     }),
-    COMMON_NAME("Species Common Name", { DataFile dataFile, Map properties = [:] ->
-        return dataFile.individual.species ? dataFile.individual.species.species.speciesCommonName.name : ""
+    COMMON_NAME("Species Common Name", { RawSequenceFile rawSequenceFile, Map properties = [:] ->
+        return rawSequenceFile.individual.species ? rawSequenceFile.individual.species.species.speciesCommonName.name : ""
     }),
-    SCIENTIFIC_NAME("Species Scientific Name", { DataFile dataFile, Map properties = [:] ->
-        return dataFile.individual.species ? dataFile.individual.species.species.scientificName : ""
+    SCIENTIFIC_NAME("Species Scientific Name", { RawSequenceFile rawSequenceFile, Map properties = [:] ->
+        return rawSequenceFile.individual.species ? rawSequenceFile.individual.species.species.scientificName : ""
     }),
-    STRAIN_NAME("Species Strain Name", { DataFile dataFile, Map properties = [:] ->
-        return dataFile.individual.species ? dataFile.individual.species.strain.name : ""
+    STRAIN_NAME("Species Strain Name", { RawSequenceFile rawSequenceFile, Map properties = [:] ->
+        return rawSequenceFile.individual.species ? rawSequenceFile.individual.species.strain.name : ""
     }),
-    MIXED_IN_COMMON_NAME("Mixed-in Species Common Name", { DataFile dataFile, Map properties = [:] ->
-        return (dataFile.sample.mixedInSpecies ?: [] as List<SpeciesWithStrain>)*.species*.speciesCommonName*.name.join(',')
+    MIXED_IN_COMMON_NAME("Mixed-in Species Common Name", { RawSequenceFile rawSequenceFile, Map properties = [:] ->
+        return (rawSequenceFile.sample.mixedInSpecies ?: [] as List<SpeciesWithStrain>)*.species*.speciesCommonName*.name.join(',')
     }),
-    MIXED_IN_SCIENTIFIC_NAME("Mixed-in Species Scientific Name", { DataFile dataFile, Map properties = [:] ->
-        return (dataFile.sample.mixedInSpecies ?: [] as List<SpeciesWithStrain>)*.species*.scientificName.join(',')
+    MIXED_IN_SCIENTIFIC_NAME("Mixed-in Species Scientific Name", { RawSequenceFile rawSequenceFile, Map properties = [:] ->
+        return (rawSequenceFile.sample.mixedInSpecies ?: [] as List<SpeciesWithStrain>)*.species*.scientificName.join(',')
     }),
-    MIXED_IN_STRAIN_NAME("Mixed-in Species Strain Name", { DataFile dataFile, Map properties = [:] ->
-        return (dataFile.sample.mixedInSpecies ?: [] as List<SpeciesWithStrain>)*.strain*.name.join(',')
+    MIXED_IN_STRAIN_NAME("Mixed-in Species Strain Name", { RawSequenceFile rawSequenceFile, Map properties = [:] ->
+        return (rawSequenceFile.sample.mixedInSpecies ?: [] as List<SpeciesWithStrain>)*.strain*.name.join(',')
     }),
-    SAMPLE_IDENTIFIER("Sample Identifier", { DataFile dataFile, Map properties = [:] ->
-        return dataFile.seqTrack.sampleIdentifier
+    SAMPLE_IDENTIFIER("Sample Identifier", { RawSequenceFile rawSequenceFile, Map properties = [:] ->
+        return rawSequenceFile.seqTrack.sampleIdentifier
     }),
-    SAMPLE_TYPE_ID("Sample Type ID", { DataFile dataFile, Map properties = [:] ->
-        return dataFile.sampleType.id
+    SAMPLE_TYPE_ID("Sample Type ID", { RawSequenceFile rawSequenceFile, Map properties = [:] ->
+        return rawSequenceFile.sampleType.id
     }),
-    SAMPLE_TYPE("Sample Type", { DataFile dataFile, Map properties = [:] ->
-        return dataFile.seqTrack.sample.sampleType.name
+    SAMPLE_TYPE("Sample Type", { RawSequenceFile rawSequenceFile, Map properties = [:] ->
+        return rawSequenceFile.seqTrack.sample.sampleType.name
     }),
-    FASTQ_PATH("FastQ Path", { DataFile dataFile, Map properties = [:] ->
-        return (properties["lsdfFilesService"] as LsdfFilesService).getFileFinalPath(dataFile)
+    FASTQ_PATH("FastQ Path", { RawSequenceFile rawSequenceFile, Map properties = [:] ->
+        return (properties["lsdfFilesService"] as LsdfFilesService).getFileFinalPath(rawSequenceFile)
     }),
-    MD5SUM("md5sum", { DataFile dataFile, Map properties = [:] ->
-        return dataFile.md5sum
+    MD5SUM("md5sum", { RawSequenceFile rawSequenceFile, Map properties = [:] ->
+        return rawSequenceFile.fastqMd5sum
     }),
-    DATE_CREATED("Date Created", { DataFile dataFile, Map properties = [:] ->
-        return dataFile.dateCreated
+    DATE_CREATED("Date Created", { RawSequenceFile rawSequenceFile, Map properties = [:] ->
+        return rawSequenceFile.dateCreated
     }),
-    N_READS("Number of Reads", { DataFile dataFile, Map properties = [:] ->
-        return dataFile.nReads
+    N_READS("Number of Reads", { RawSequenceFile rawSequenceFile, Map properties = [:] ->
+        return rawSequenceFile.nReads
     }),
-    SEQ_LENGTH("Sequence Length", { DataFile dataFile, Map properties = [:] ->
-        return dataFile.sequenceLength
+    SEQ_LENGTH("Sequence Length", { RawSequenceFile rawSequenceFile, Map properties = [:] ->
+        return rawSequenceFile.sequenceLength
     }),
-    FASTQC_ID("FastQC ID", { DataFile dataFile, Map properties = [:] ->
-        return CollectionUtils.atMostOneElement(FastqcProcessedFile.findAllByDataFile(dataFile))?.id
+    FASTQC_ID("FastQC ID", { RawSequenceFile rawSequenceFile, Map properties = [:] ->
+        return CollectionUtils.atMostOneElement(FastqcProcessedFile.findAllBySequenceFile(rawSequenceFile))?.id
     }),
-    FASTQC_PATH("FastQC Path", { DataFile dataFile, Map properties = [:] ->
-        FastqcProcessedFile fastqcProcessedFile = CollectionUtils.atMostOneElement(FastqcProcessedFile.findAllByDataFile(dataFile))
+    FASTQC_PATH("FastQC Path", { RawSequenceFile rawSequenceFile, Map properties = [:] ->
+        FastqcProcessedFile fastqcProcessedFile = CollectionUtils.atMostOneElement(FastqcProcessedFile.findAllBySequenceFile(rawSequenceFile))
         return fastqcProcessedFile ? (properties["fastqcDataFilesService"] as FastqcDataFilesService).fastqcOutputPath(fastqcProcessedFile).toString() : ""
     }),
-    RUN_ID("Run ID", { DataFile dataFile, Map properties = [:] ->
-        return dataFile.seqTrack.run.id
+    RUN_ID("Run ID", { RawSequenceFile rawSequenceFile, Map properties = [:] ->
+        return rawSequenceFile.seqTrack.run.id
     }),
-    RUN_NAME("Run Name", { DataFile dataFile, Map properties = [:] ->
-        return dataFile.seqTrack.run.name
+    RUN_NAME("Run Name", { RawSequenceFile rawSequenceFile, Map properties = [:] ->
+        return rawSequenceFile.seqTrack.run.name
     }),
-    RUN_DATE_EXECUTED("Run Date Executed", { DataFile dataFile, Map properties = [:] ->
-        return dataFile.seqTrack.run.dateExecuted
+    RUN_DATE_EXECUTED("Run Date Executed", { RawSequenceFile rawSequenceFile, Map properties = [:] ->
+        return rawSequenceFile.seqTrack.run.dateExecuted
     }),
-    SEQ_CENTER_ID("Seq Center ID", { DataFile dataFile, Map properties = [:] ->
-        return dataFile.seqTrack.run.seqCenter.id
+    SEQ_CENTER_ID("Seq Center ID", { RawSequenceFile rawSequenceFile, Map properties = [:] ->
+        return rawSequenceFile.seqTrack.run.seqCenter.id
     }),
-    SEQ_CENTER("Seq Center", { DataFile dataFile, Map properties = [:] ->
-        return dataFile.seqTrack.run.seqCenter.name
+    SEQ_CENTER("Seq Center", { RawSequenceFile rawSequenceFile, Map properties = [:] ->
+        return rawSequenceFile.seqTrack.run.seqCenter.name
     }),
-    SEQ_PLATFORM_ID("Seq Platform ID", { DataFile dataFile, Map properties = [:] ->
-        return dataFile.seqTrack.run.seqPlatform.id
+    SEQ_PLATFORM_ID("Seq Platform ID", { RawSequenceFile rawSequenceFile, Map properties = [:] ->
+        return rawSequenceFile.seqTrack.run.seqPlatform.id
     }),
-    SEQ_PLATFORM("Seq Platform", { DataFile dataFile, Map properties = [:] ->
-        return dataFile.seqTrack.run.seqPlatform.name
+    SEQ_PLATFORM("Seq Platform", { RawSequenceFile rawSequenceFile, Map properties = [:] ->
+        return rawSequenceFile.seqTrack.run.seqPlatform.name
     }),
-    SEQ_PLATFORM_MODEL_LABEL("Seq Platform Model Label", { DataFile dataFile, Map properties = [:] ->
-        return dataFile.seqTrack.run.seqPlatform.seqPlatformModelLabel.name
+    SEQ_PLATFORM_MODEL_LABEL("Seq Platform Model Label", { RawSequenceFile rawSequenceFile, Map properties = [:] ->
+        return rawSequenceFile.seqTrack.run.seqPlatform.seqPlatformModelLabel.name
     }),
-    SEQ_KIT_LABEL("Seq Kit Label", { DataFile dataFile, Map properties = [:] ->
-        return dataFile.seqTrack.run.seqPlatform.sequencingKitLabel?.name
+    SEQ_KIT_LABEL("Seq Kit Label", { RawSequenceFile rawSequenceFile, Map properties = [:] ->
+        return rawSequenceFile.seqTrack.run.seqPlatform.sequencingKitLabel?.name
     }),
-    SEQ_TYPE_ID("Sequencing Type Id", { DataFile dataFile, Map properties = [:] ->
-        return dataFile.seqTrack.seqType.id
+    SEQ_TYPE_ID("Sequencing Type Id", { RawSequenceFile rawSequenceFile, Map properties = [:] ->
+        return rawSequenceFile.seqTrack.seqType.id
     }),
-    SEQ_TYPE("Sequencing Type Name", { DataFile dataFile, Map properties = [:] ->
-        return dataFile.seqTrack.seqType.name
+    SEQ_TYPE("Sequencing Type Name", { RawSequenceFile rawSequenceFile, Map properties = [:] ->
+        return rawSequenceFile.seqTrack.seqType.name
     }),
-    SEQ_TYPE_SINGLE_CELL("Sequencing Type is Single Cell", { DataFile dataFile, Map properties = [:] ->
-        return dataFile.seqTrack.seqType.singleCell
+    SEQ_TYPE_SINGLE_CELL("Sequencing Type is Single Cell", { RawSequenceFile rawSequenceFile, Map properties = [:] ->
+        return rawSequenceFile.seqTrack.seqType.singleCell
     }),
-    LIB_LAYOUT("Lib Layout", { DataFile dataFile, Map properties = [:] ->
-        return dataFile.seqTrack.seqType.libraryLayout.name()
+    LIB_LAYOUT("Lib Layout", { RawSequenceFile rawSequenceFile, Map properties = [:] ->
+        return rawSequenceFile.seqTrack.seqType.libraryLayout.name()
     }),
-    LIB_NAME("Lib Name", { DataFile dataFile, Map properties = [:] ->
-        return dataFile.seqTrack.libraryName
+    LIB_NAME("Lib Name", { RawSequenceFile rawSequenceFile, Map properties = [:] ->
+        return rawSequenceFile.seqTrack.libraryName
     }),
-    LIB_PREP_KIT_ID("Lib Prep Kit ID", { DataFile dataFile, Map properties = [:] ->
-        return dataFile.seqTrack.libraryPreparationKit?.id
+    LIB_PREP_KIT_ID("Lib Prep Kit ID", { RawSequenceFile rawSequenceFile, Map properties = [:] ->
+        return rawSequenceFile.seqTrack.libraryPreparationKit?.id
     }),
-    LIB_PREP_KIT("Lib Prep Kit", { DataFile dataFile, Map properties = [:] ->
-        return dataFile.seqTrack.libraryPreparationKit?.name
+    LIB_PREP_KIT("Lib Prep Kit", { RawSequenceFile rawSequenceFile, Map properties = [:] ->
+        return rawSequenceFile.seqTrack.libraryPreparationKit?.name
     }),
-    ANTIBODY_TARGET_ID("Antibody Target ID", { DataFile dataFile, Map properties = [:] ->
-        return dataFile.seqTrack.antibodyTarget?.id
+    ANTIBODY_TARGET_ID("Antibody Target ID", { RawSequenceFile rawSequenceFile, Map properties = [:] ->
+        return rawSequenceFile.seqTrack.antibodyTarget?.id
     }),
-    ANTIBODY_TARGET("Antibody Target", { DataFile dataFile, Map properties = [:] ->
-        return dataFile.seqTrack.antibodyTarget?.name
+    ANTIBODY_TARGET("Antibody Target", { RawSequenceFile rawSequenceFile, Map properties = [:] ->
+        return rawSequenceFile.seqTrack.antibodyTarget?.name
     }),
-    ANTIBODY("Antibody", { DataFile dataFile, Map properties = [:] ->
-        return dataFile.seqTrack.antibody
+    ANTIBODY("Antibody", { RawSequenceFile rawSequenceFile, Map properties = [:] ->
+        return rawSequenceFile.seqTrack.antibody
     }),
-    INSERT_SIZE("Insert Size", { DataFile dataFile, Map properties = [:] ->
-        return dataFile.seqTrack.insertSize
+    INSERT_SIZE("Insert Size", { RawSequenceFile rawSequenceFile, Map properties = [:] ->
+        return rawSequenceFile.seqTrack.insertSize
     }),
-    LANE_ID("Lane ID", { DataFile dataFile, Map properties = [:] ->
-        return dataFile.seqTrack.laneId
+    LANE_ID("Lane ID", { RawSequenceFile rawSequenceFile, Map properties = [:] ->
+        return rawSequenceFile.seqTrack.laneId
     }),
-    INDIVIDUAL_COMMENT("Individual comment", { DataFile dataFile, Map properties = [:] ->
-        return dataFile.seqTrack.individual.comment?.comment
+    INDIVIDUAL_COMMENT("Individual comment", { RawSequenceFile rawSequenceFile, Map properties = [:] ->
+        return rawSequenceFile.seqTrack.individual.comment?.comment
     })
 
     String columnName
@@ -261,20 +261,20 @@ abstract class MolgenisEntity {
     }
 }
 
-class MolgenisDataFile extends MolgenisEntity {
+class MolgenisRawSequenceFile extends MolgenisEntity {
 
-    List<String> header = DataFileColumns.values()*.columnName + MetaDataKey.list()*.name.sort()
+    List<String> header = RawSequenceFileColumns.values()*.columnName + MetaDataKey.list()*.name.sort()
 
     static Map properties = [:]
 
-    MolgenisDataFile(Map<String, String> map = [:]) {
+    MolgenisRawSequenceFile(Map<String, String> map = [:]) {
         super(map)
     }
 
-    static MolgenisDataFile export(DataFile dataFile) {
-        return new MolgenisDataFile(DataFileColumns.values().collectEntries {
-            [(it.columnName): it.value(dataFile, properties)]
-        } + MetaDataEntry.findAllByDataFile(dataFile).collectEntries {
+    static MolgenisRawSequenceFile export(RawSequenceFile rawSequenceFile) {
+        return new MolgenisRawSequenceFile(RawSequenceFileColumns.values().collectEntries {
+            [(it.columnName): it.value(rawSequenceFile, properties)]
+        } + MetaDataEntry.findAllBySequenceFile(rawSequenceFile).collectEntries {
             [(it.key.name): it.value]
         })
     }
@@ -301,10 +301,10 @@ class MolgenisExporter {
 
     ApplicationContext ctx
 
-    String exportDataFiles(List<DataFile> dataFiles) {
-        MolgenisDataFile.properties["lsdfFilesService"] = ctx.lsdfFilesService
-        MolgenisDataFile.properties["fastqcDataFilesService"] = ctx.fastqcDataFilesService
-        return ([new MolgenisDataFile().headerAsCsv] + dataFiles.collect { DataFile df -> MolgenisDataFile.export(df).toCsvLine() }).join("\n")
+    String exportRawSequenceFiles(List<RawSequenceFile> rawSequenceFiles) {
+        MolgenisRawSequenceFile.properties["lsdfFilesService"] = ctx.lsdfFilesService
+        MolgenisRawSequenceFile.properties["fastqcDataFilesService"] = ctx.fastqcDataFilesService
+        return ([new MolgenisRawSequenceFile().headerAsCsv] + rawSequenceFiles.collect { RawSequenceFile df -> MolgenisRawSequenceFile.export(df).toCsvLine() }).join("\n")
     }
 
     String exportBams(List<AbstractBamFile> bams) {
@@ -330,7 +330,7 @@ final Path baseDirectory = ctx.fileService.toPath(ctx.configService.scriptOutput
 final Path outputExportDirectory = baseDirectory.resolve("export").resolve("molgenis").resolve(timestamp)
 
 projects.each { Project project ->
-    List<DataFile> dataFiles = DataFile.withCriteria {
+    List<RawSequenceFile> rawSequenceFiles = RawSequenceFile.withCriteria {
         seqTrack {
             sample {
                 individual {
@@ -338,7 +338,7 @@ projects.each { Project project ->
                 }
             }
         }
-    } as List<DataFile>
+    } as List<RawSequenceFile>
 
     List<AbstractBamFile> bams = AbstractBamFile.withCriteria {
         workPackage {
@@ -358,7 +358,7 @@ projects.each { Project project ->
 
     println "Writing to: ${outputDirectory}"
     [
-            ["data-files", exporter.exportDataFiles(dataFiles)],
+            ["data-files", exporter.exportRawSequenceFiles(rawSequenceFiles)],
             ["bams", exporter.exportBams(bams)],
     ].each {
         Path path = outputDirectory.resolve("${it[0]}.csv")

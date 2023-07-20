@@ -45,12 +45,12 @@ script part
 LsdfFilesService lsdfFilesService = ctx.lsdfFilesService
 FileService fileService = ctx.fileService
 
-static def transferDataAndCorrectDB(Path finalPath, Path originalPathResolved, DataFile df, def script, boolean validateMd5, def md5Check, FileService fileService) {
+static def transferDataAndCorrectDB(Path finalPath, Path originalPathResolved, RawSequenceFile df, def script, boolean validateMd5, def md5Check, FileService fileService) {
     Path md5sumPath = finalPath.parent.resolve("${finalPath.fileName}.md5sum")
     if (Files.exists(md5sumPath)) {
         Files.delete(md5sumPath)
     }
-    String content = "${df.md5sum}  ${finalPath.fileName}"
+    String content = "${df.fastqMd5sum}  ${finalPath.fileName}"
     fileService.createFileWithContentOnDefaultRealm(md5sumPath, content)
 
     script << "rsync -uvL --group=${df.project.unixGroup} --perms=440 ${originalPathResolved} ${finalPath}"
@@ -92,7 +92,7 @@ SeqTrack.withTransaction {
 
     submissions.each { IlseSubmission submission ->
         SeqTrack.findAllByIlseSubmission(submission).each { SeqTrack seqTrack ->
-            seqTrack.dataFiles.each { DataFile df ->
+            seqTrack.sequenceFiles.each { RawSequenceFile df ->
                 Path finalPath = lsdfFilesService.getFileFinalPathAsPath(df)
                 Path initialPath = lsdfFilesService.getFileInitialPathAsPath(df)
 
@@ -122,7 +122,7 @@ SeqTrack.withTransaction {
                                 if (overview) {
                                     println "SKIP SINCE FILE EXISTS with unknown md5sum: copy ${originalPathResolved} to ${finalPath.parent}"
                                 }
-                            } else if (md5sum.text.contains(df.md5sum)) {
+                            } else if (md5sum.text.contains(df.fastqMd5sum)) {
                                 if (overview) {
                                     println "SKIP SINCE FILE EXISTS with correct md5sum: copy ${originalPathResolved} to ${finalPath.parent}"
                                 }

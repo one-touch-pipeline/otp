@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,12 +25,13 @@ import grails.testing.gorm.DataTest
 import spock.lang.Specification
 import spock.lang.Unroll
 
-class DataFileConsistencyCheckerSpec extends Specification implements DataTest {
+class RawSequenceFileConsistencyCheckerSpec extends Specification implements DataTest {
 
     @Override
     Class[] getDomainClassesToMock() {
         return [
-                DataFile,
+                RawSequenceFile,
+                FastqFile,
                 FileType,
                 FastqImportInstance,
                 SeqTrack,
@@ -40,15 +41,15 @@ class DataFileConsistencyCheckerSpec extends Specification implements DataTest {
     @Unroll
     void "test getFastqDataFiles"() {
         when:
-        DataFileConsistencyChecker dataFileConsistencyChecker = new DataFileConsistencyChecker()
-        DomainFactory.createDataFile(
+        RawSequenceFileConsistencyChecker consistencyChecker = new RawSequenceFileConsistencyChecker()
+        DomainFactory.createFastqFile(
                 fileType: DomainFactory.createFileType(type: type, subType: subType),
                 seqTrack: DomainFactory.createSeqTrack(dataInstallationState: state),
                 fileWithdrawn: fileWithdrawn,
         )
 
         then:
-        dataFileConsistencyChecker.fastqDataFiles.size() == size
+        consistencyChecker.rawSequenceFiles.size() == size
 
         where:
         type                   | subType    | state                                    | fileWithdrawn || size

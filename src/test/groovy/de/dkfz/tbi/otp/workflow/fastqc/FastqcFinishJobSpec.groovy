@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -33,14 +33,14 @@ import de.dkfz.tbi.otp.workflowExecution.*
 
 class FastqcFinishJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory {
 
-    DataFile dataFile1
-    DataFile dataFile2
+    RawSequenceFile rawSequenceFile1
+    RawSequenceFile rawSequenceFile2
 
     FastqcProcessedFile fastqcProcessedFile1 = new FastqcProcessedFile([
-            dataFile: dataFile1,
+            sequenceFile: rawSequenceFile1,
     ])
     FastqcProcessedFile fastqcProcessedFile2 = new FastqcProcessedFile([
-            dataFile: dataFile2,
+            sequenceFile: rawSequenceFile2,
     ])
 
     List<FastqcProcessedFile> fastqcProcessedFileList = [
@@ -51,7 +51,8 @@ class FastqcFinishJobSpec extends Specification implements DataTest, WorkflowSys
     @Override
     Class[] getDomainClassesToMock() {
         return [
-                DataFile,
+                FastqFile,
+                RawSequenceFile,
                 WorkflowStep,
         ]
     }
@@ -59,7 +60,7 @@ class FastqcFinishJobSpec extends Specification implements DataTest, WorkflowSys
     void "test updateDomain method"() {
         given:
         WorkflowStep workflowStep = createWorkflowStep()
-        SeqTrack seqTrack = createSeqTrackWithTwoDataFile()
+        SeqTrack seqTrack = createSeqTrackWithTwoFastqFile()
 
         FastqcFinishJob job = Spy(FastqcFinishJob) {
             getSeqTrack(workflowStep) >> seqTrack
@@ -87,7 +88,7 @@ class FastqcFinishJobSpec extends Specification implements DataTest, WorkflowSys
     void "test inherited method execute(), JobStage is in finished state"() {
         given:
         WorkflowStep workflowStep = createWorkflowStep()
-        SeqTrack seqTrack = createSeqTrackWithTwoDataFile()
+        SeqTrack seqTrack = createSeqTrackWithTwoFastqFile()
 
         FastqcFinishJob job = Spy(FastqcFinishJob) {
             getSeqTrack(workflowStep) >> seqTrack

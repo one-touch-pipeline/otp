@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -39,7 +39,7 @@ import de.dkfz.tbi.util.TimeUtils
 
 @Component
 @Slf4j
-class DataFileConsistencyChecker {
+class RawSequenceFileConsistencyChecker {
 
     static final int MAX_RESULTS = 1000
 
@@ -57,14 +57,14 @@ class DataFileConsistencyChecker {
 
     //12h
     @Scheduled(fixedDelay = 43200000L, initialDelay = 60000L)
-    void setFileExistsForAllDataFiles() {
+    void setFileExistsForAllRawSequenceFiles() {
         if (schedulerService.isActive()) {
             Date startDate = new Date()
             try {
-                (0..countDataFiles() / MAX_RESULTS).each {
+                (0..countSequenceFiles() / MAX_RESULTS).each {
                     SessionUtils.withNewSession {
-                        DataFile.withTransaction {
-                            fastqDataFiles.each {
+                        RawSequenceFile.withTransaction {
+                            rawSequenceFiles.each {
                                 String path = lsdfFilesService.getFileFinalPath(it)
                                 if (path) {
                                     File file = new File(path)
@@ -85,18 +85,18 @@ class DataFileConsistencyChecker {
                 log.error("error ${e.localizedMessage}", e)
                 SessionUtils.withNewSession {
                     mailHelperService.sendEmailToTicketSystem(
-                            "Error: DataFileConsistencyChecker.setFileExistsForAllDataFiles() failed",
+                            "Error: RawSequenceFileConsistencyChecker.setFileExistsForAllDataFiles() failed",
                             "${e.localizedMessage}\n${e.cause}")
                 }
             }
-            log.info("DataFileConsistencyChecker.setFileExistsForAllDataFiles() duration: " +
+            log.info("RawSequenceFileConsistencyChecker.setFileExistsForAllDataFiles() duration: " +
                     "${TimeUtils.getFormattedDurationWithDays(startDate, new Date())}")
         }
     }
 
     @CompileDynamic
-    List<DataFile> getFastqDataFiles() {
-        return DataFile.createCriteria().list {
+    List<RawSequenceFile> getRawSequenceFiles() {
+        return RawSequenceFile.createCriteria().list {
             eq('fileWithdrawn', false)
             fileType {
                 eq('type', Type.SEQUENCE)
@@ -115,8 +115,8 @@ class DataFileConsistencyChecker {
     }
 
     @CompileDynamic
-    int countDataFiles() {
-        return DataFile.createCriteria().count {
+    int countSequenceFiles() {
+        return RawSequenceFile.createCriteria().count {
             eq('fileWithdrawn', false)
             fileType {
                 eq('type', Type.SEQUENCE)

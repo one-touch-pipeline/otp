@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,7 +26,8 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
-import de.dkfz.tbi.otp.ngsdata.DataFile
+import de.dkfz.tbi.otp.ngsdata.FastqFile
+import de.dkfz.tbi.otp.ngsdata.RawSequenceFile
 import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 import de.dkfz.tbi.otp.ngsdata.WellDirectory
 
@@ -40,12 +41,13 @@ class SingleCellServiceSpec extends Specification implements DataTest, DomainFac
     @Override
     Class[] getDomainClassesToMock() {
         return [
-                DataFile,
+                FastqFile,
+                RawSequenceFile,
         ]
     }
 
-    private DataFile createDataFileHelper(String wellLabel = WELL, boolean singleCell = true, Map properties = [:]) {
-        return createDataFile([
+    private RawSequenceFile createRawSequenceFileHelper(String wellLabel = WELL, boolean singleCell = true, Map properties = [:]) {
+        return createFastqFile([
                 seqTrack: createSeqTrack([
                         singleCellWellLabel: wellLabel,
                         seqType            : createSeqType(singleCell: singleCell),
@@ -53,28 +55,28 @@ class SingleCellServiceSpec extends Specification implements DataTest, DomainFac
         ] + properties)
     }
 
-    void "buildMappingFileName, from DataFile"() {
+    void "buildMappingFileName, from RawSequenceFile"() {
         given:
-        DataFile dataFile = createDataFileHelper()
+        RawSequenceFile rawSequenceFile = createRawSequenceFileHelper()
         SingleCellService service = new SingleCellService()
 
         when:
-        String entry = service.buildMappingFileName(dataFile)
+        String entry = service.buildMappingFileName(rawSequenceFile)
 
         then:
-        "${dataFile.individual.pid}_${dataFile.sampleType.name}_${SingleCellService.MAPPING_FILE_SUFFIX}" == entry
+        "${rawSequenceFile.individual.pid}_${rawSequenceFile.sampleType.name}_${SingleCellService.MAPPING_FILE_SUFFIX}" == entry
     }
 
     void "buildMappingFileName, from Individual and SampleType"() {
         given:
-        DataFile dataFile = createDataFileHelper()
+        RawSequenceFile rawSequenceFile = createRawSequenceFileHelper()
         SingleCellService service = new SingleCellService()
 
         when:
-        String entry = service.buildMappingFileName(dataFile.individual, dataFile.sampleType)
+        String entry = service.buildMappingFileName(rawSequenceFile.individual, rawSequenceFile.sampleType)
 
         then:
-        "${dataFile.individual.pid}_${dataFile.sampleType.name}_${SingleCellService.MAPPING_FILE_SUFFIX}" == entry
+        "${rawSequenceFile.individual.pid}_${rawSequenceFile.sampleType.name}_${SingleCellService.MAPPING_FILE_SUFFIX}" == entry
     }
 
     void "singleCellMappingFile, when all fine, then return path to mapping file"() {
@@ -82,19 +84,19 @@ class SingleCellServiceSpec extends Specification implements DataTest, DomainFac
         new TestConfigService()
 
         Path allWellDir = Paths.get('/vbpPath/0_all')
-        DataFile dataFile = createDataFileHelper()
+        RawSequenceFile rawSequenceFile = createRawSequenceFileHelper()
 
         SingleCellService service = new SingleCellService([
                 lsdfFilesService: Mock(LsdfFilesService) {
-                    1 * getSingleCellWellDirectory(dataFile, WellDirectory.ALL_WELL) >> allWellDir
+                    1 * getSingleCellWellDirectory(rawSequenceFile, WellDirectory.ALL_WELL) >> allWellDir
                     0 * _
                 },
         ])
 
-        Path expected = allWellDir.resolve(service.buildMappingFileName(dataFile))
+        Path expected = allWellDir.resolve(service.buildMappingFileName(rawSequenceFile))
 
         when:
-        Path path = service.singleCellMappingFile(dataFile)
+        Path path = service.singleCellMappingFile(rawSequenceFile)
 
         then:
         expected == path
@@ -104,19 +106,19 @@ class SingleCellServiceSpec extends Specification implements DataTest, DomainFac
         given:
         new TestConfigService()
 
-        DataFile dataFile = createDataFileHelper()
-        String dataFilePath = "pathToFastq/fastq.fastq"
+        RawSequenceFile rawSequenceFile = createRawSequenceFileHelper()
+        String rawSequenceFilePath = "pathToFastq/fastq.fastq"
 
         SingleCellService service = new SingleCellService(
                 lsdfFilesService: Mock(LsdfFilesService) {
-                    1 * getFileViewByPidPath(_) >> dataFilePath
+                    1 * getFileViewByPidPath(_) >> rawSequenceFilePath
                 }
         )
 
-        String expected = "${dataFilePath}\t${WELL}"
+        String expected = "${rawSequenceFilePath}\t${WELL}"
 
         when:
-        String entry = service.mappingEntry(dataFile)
+        String entry = service.mappingEntry(rawSequenceFile)
 
         then:
         expected == entry

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -297,8 +297,8 @@ class ClusterJobServiceIntegrationSpec extends Specification implements DomainFa
 
         def (job, run) = setupClusterJobsOfSameProcessingStepAndRun()
 
-        DomainFactory.createSeqTrackWithOneDataFile([run: run], [fileSize: 150L])
-        DomainFactory.createSeqTrackWithOneDataFile([run: run], [fileSize: 150L])
+        DomainFactory.createSeqTrackWithOneFastqFile([run: run], [fileSize: 150L])
+        DomainFactory.createSeqTrackWithOneFastqFile([run: run], [fileSize: 150L])
 
         expect:
         ClusterJobService.getFileSizesSum(job) == 100L
@@ -320,8 +320,8 @@ class ClusterJobServiceIntegrationSpec extends Specification implements DomainFa
 
         def (job, run) = setupClusterJobsOfSameProcessingStepAndRun()
 
-        DomainFactory.createSeqTrackWithOneDataFile([run: run], [nReads: 150L])
-        DomainFactory.createSeqTrackWithOneDataFile([run: run], [nReads: 150L])
+        DomainFactory.createSeqTrackWithOneFastqFile([run: run], [nReads: 150L])
+        DomainFactory.createSeqTrackWithOneFastqFile([run: run], [nReads: 150L])
 
         expect:
         ClusterJobService.getReadsSum(job) == 100L

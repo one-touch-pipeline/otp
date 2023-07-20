@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -49,6 +49,7 @@ class WgbsPrepareJobSpec extends Specification implements DataTest, WgbsAlignmen
     @Override
     Class[] getDomainClassesToMock() {
         return [
+                FastqFile,
                 WorkflowStep,
                 MergingWorkPackage,
                 FileType,
@@ -156,7 +157,7 @@ class WgbsPrepareJobSpec extends Specification implements DataTest, WgbsAlignmen
         Path metadataFile = tempDir.resolve("file.tsv")
 
         setupData()
-        List<SeqTrack> seqTracks = [createSeqTrackWithTwoDataFile(), createSeqTrackWithTwoDataFile()]
+        List<SeqTrack> seqTracks = [createSeqTrackWithTwoFastqFile(), createSeqTrackWithTwoFastqFile()]
 
         WgbsPrepareJob job = new WgbsPrepareJob([
                 concreteArtefactService: Mock(ConcreteArtefactService) {

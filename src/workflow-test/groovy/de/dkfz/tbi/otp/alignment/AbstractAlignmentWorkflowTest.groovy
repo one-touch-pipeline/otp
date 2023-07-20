@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,18 +29,18 @@ abstract class AbstractAlignmentWorkflowTest extends WorkflowTestCase {
     LsdfFilesService lsdfFilesService
 
     void linkFastqFiles(SeqTrack seqTrack, List<File> testFastqFiles) {
-        List<DataFile> dataFiles = DataFile.findAllBySeqTrack(seqTrack)
-        assert seqTrack.seqType.libraryLayout.mateCount == dataFiles.size()
+        List<RawSequenceFile> rawSequenceFiles = RawSequenceFile.findAllBySeqTrack(seqTrack)
+        assert seqTrack.seqType.libraryLayout.mateCount == rawSequenceFiles.size()
 
         Map<File, File> sourceLinkMap = [:]
-        dataFiles.eachWithIndex { dataFile, index ->
+        rawSequenceFiles.eachWithIndex { rawSequenceFile, index ->
             File sourceFastqFile = testFastqFiles[index]
             assert sourceFastqFile.exists()
-            dataFile.fileSize = sourceFastqFile.length()
-            dataFile.save(flush: true)
-            File linkFastqFile = new File(lsdfFilesService.getFileFinalPath(dataFile))
+            rawSequenceFile.fileSize = sourceFastqFile.length()
+            rawSequenceFile.save(flush: true)
+            File linkFastqFile = new File(lsdfFilesService.getFileFinalPath(rawSequenceFile))
             sourceLinkMap.put(sourceFastqFile, linkFastqFile)
-            File linkViewByPidFastqFile = new File(lsdfFilesService.getFileViewByPidPath(dataFile))
+            File linkViewByPidFastqFile = new File(lsdfFilesService.getFileViewByPidPath(rawSequenceFile))
             sourceLinkMap.put(linkFastqFile, linkViewByPidFastqFile)
         }
         createDirectories(sourceLinkMap.values()*.parentFile.unique())

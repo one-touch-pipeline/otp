@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -41,9 +41,9 @@ import de.dkfz.tbi.util.spreadsheet.validation.Problem
 @Integration
 class MultipleImportValidatorIntegrationSpec extends Specification implements DomainFactoryCore {
 
-    void setupDataFileHelper(Project project, SampleType sampleType, String md5sum) {
-        createDataFile(
-                md5sum: md5sum,
+    void setupRawSequenceFileHelper(Project project, SampleType sampleType, String md5sum) {
+        createFastqFile(
+                fastqMd5sum: md5sum,
                 seqTrack: createSeqTrack([
                         sample: createSample([
                                 sampleType: sampleType,
@@ -60,7 +60,7 @@ class MultipleImportValidatorIntegrationSpec extends Specification implements Do
         SampleIdentifier sampleIdentifier = createSampleIdentifier()
         Project project = sampleIdentifier.project
         SampleType sampleType = sampleIdentifier.sampleType
-        setupDataFileHelper(project, sampleType, HelperUtils.randomMd5sum)
+        setupRawSequenceFileHelper(project, sampleType, HelperUtils.randomMd5sum)
 
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
         ${MetaDataColumn.MD5}\t${MetaDataColumn.SAMPLE_NAME}\t${MetaDataColumn.PROJECT}
@@ -83,7 +83,7 @@ class MultipleImportValidatorIntegrationSpec extends Specification implements Do
         SampleIdentifier sampleIdentifier = createSampleIdentifier()
         Project project = sampleIdentifier.project
         SampleType sampleType = sampleIdentifier.sampleType
-        setupDataFileHelper(project, sampleType, md5sum1)
+        setupRawSequenceFileHelper(project, sampleType, md5sum1)
 
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
         ${MetaDataColumn.MD5}\t${MetaDataColumn.SAMPLE_NAME}\t${MetaDataColumn.PROJECT}
@@ -112,7 +112,7 @@ class MultipleImportValidatorIntegrationSpec extends Specification implements Do
         SampleIdentifier sampleIdentifier = createSampleIdentifier()
         Project project = sampleIdentifier.project
         SampleType sampleType = sampleIdentifier.sampleType
-        setupDataFileHelper(project, sampleType, md5sum1)
+        setupRawSequenceFileHelper(project, sampleType, md5sum1)
 
         String idToParse = "${project.name};someIndividual;${sampleType.name};anyId"
 

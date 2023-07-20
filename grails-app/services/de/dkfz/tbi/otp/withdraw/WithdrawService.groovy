@@ -56,14 +56,14 @@ class WithdrawService {
         withdrawHelperService.with {
             checkArchivedProject(withdrawStateHolder)
             createOverviewSummary(withdrawStateHolder)
-            checkNonExistingDataFiles(withdrawStateHolder)
-            checkForAlreadyWithdrawnDatafiles(withdrawStateHolder)
+            checkNonExistingRawSequenceFiles(withdrawStateHolder)
+            checkForAlreadyWithdrawnRawSequenceFiles(withdrawStateHolder)
 
             handleAnalysis(withdrawStateHolder)
 
             handleBamFiles(withdrawStateHolder, bamFileMap)
 
-            handleDataFiles(withdrawStateHolder)
+            handleRawSequenceFiles(withdrawStateHolder)
 
             createAndWriteBashScript(withdrawStateHolder)
         }

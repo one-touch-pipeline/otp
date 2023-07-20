@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -82,15 +82,15 @@ class SampleSwapServiceIntegrationSpec extends Specification implements UserAndR
                 TaxonomyFactoryInstance.INSTANCE.createSpeciesWithStrain(),
         ]
 
-        List<String> dataFileLinks = []
-        DataFile.findAllBySeqTrack(seqTrack).each {
+        List<String> fastqFileLinks = []
+        RawSequenceFile.findAllBySeqTrack(seqTrack).each {
             new File(lsdfFilesService.getFileFinalPath(it)).parentFile.mkdirs()
             assert new File(lsdfFilesService.getFileFinalPath(it)).createNewFile()
-            dataFileLinks.add(lsdfFilesService.getFileViewByPidPath(it))
+            fastqFileLinks.add(lsdfFilesService.getFileViewByPidPath(it))
         }
 
-        String dataFileName1 = 'DataFileFileName_R1.gz'
-        String dataFileName2 = 'DataFileFileName_R2.gz'
+        String rawSequenceFileName1 = 'DataFileFileName_R1.gz'
+        String rawSequenceFileName2 = 'DataFileFileName_R2.gz'
 
         CreateRoddyFileHelper.createRoddyAlignmentFinalResultFiles(bamFile)
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(bamFile)
@@ -112,7 +112,7 @@ class SampleSwapServiceIntegrationSpec extends Specification implements UserAndR
                             projectNameSwap: new Swap(bamFile.project.name, bamFile.project.name),
                             pidSwap: new Swap(oldIndividual.pid, individual.pid),
                             sampleTypeSwap: new Swap(sampleType.name, sampleType.name),
-                            dataFileSwaps: [new Swap(dataFileName1, ""), new Swap(dataFileName2, "")],
+                            rawSequenceFileSwaps: [new Swap(rawSequenceFileName1, ""), new Swap(rawSequenceFileName2, "")],
                             bashScriptName: script,
                             log: new StringBuilder(),
                             failOnMissingFiles: false,
@@ -136,8 +136,8 @@ class SampleSwapServiceIntegrationSpec extends Specification implements UserAndR
         String copyScriptContent = copyScript.text
         copyScriptContent.startsWith(AbstractDataSwapService.BASH_HEADER)
         copyScriptContent.contains("rm -rf ${destinationDirectory}")
-        DataFile.findAllBySeqTrack(seqTrack).eachWithIndex { DataFile it, int i ->
-            assert copyScriptContent.contains("rm -f '${dataFileLinks[i]}'")
+        RawSequenceFile.findAllBySeqTrack(seqTrack).eachWithIndex { RawSequenceFile it, int i ->
+            assert copyScriptContent.contains("rm -f '${fastqFileLinks[i]}'")
             assert copyScriptContent.contains("mkdir -p -m 2750 '${new File(lsdfFilesService.getFileViewByPidPath(it)).parent}'")
             assert copyScriptContent.contains("ln -sr '${lsdfFilesService.getFileFinalPath(it)}' \\\n      '${lsdfFilesService.getFileViewByPidPath(it)}'")
             assert it.comment.comment == "Attention: Datafile swapped!"

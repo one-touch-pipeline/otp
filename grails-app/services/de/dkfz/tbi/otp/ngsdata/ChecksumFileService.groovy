@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -38,12 +38,12 @@ class ChecksumFileService {
     LsdfFilesService lsdfFilesService
     FileSystemService fileSystemService
 
-    String pathToMd5File(DataFile file) {
+    String pathToMd5File(RawSequenceFile file) {
         String path = lsdfFilesService.getFileFinalPath(file)
         return "${path}.md5sum"
     }
 
-    String md5FileName(DataFile file) {
+    String md5FileName(RawSequenceFile file) {
         return "${file.fileName}.md5sum"
     }
 
@@ -54,7 +54,7 @@ class ChecksumFileService {
         return "${fileName}.md5sum"
     }
 
-    boolean compareMd5(DataFile file) {
+    boolean compareMd5(RawSequenceFile file) {
         String path = pathToMd5File(file)
 
         FileSystem fs = fileSystemService.filesystemForProcessingForRealm
@@ -64,8 +64,12 @@ class ChecksumFileService {
         String md5sum
         List<String> lines = md5File.readLines()
         List<String> tokens = lines.get(0).tokenize()
-        md5sum = tokens.get(0)
-        return (md5sum.trim().toLowerCase(Locale.ENGLISH) == file.md5sum)
+        md5sum = tokens.get(0).trim().toLowerCase(Locale.ENGLISH)
+        if (file instanceof FastqFile) {
+            return (md5sum == file.fastqMd5sum)
+        } else if (file instanceof SequenceCramFile) {
+            return (md5sum == file.cramMd5sum)
+        }
     }
 
     /**

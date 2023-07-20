@@ -340,7 +340,7 @@ List<DataExportOutput> outputList = [
         //Output header information
         headerInfoOutput = dataExportService.exportHeaderInfo(dataExportParameters),
         //Processing FASTQ Files
-        seqTrackOutput = copyFastqFiles ? dataExportService.exportDataFiles(dataExportParameters) : emptyOutput,
+        seqTrackOutput = copyFastqFiles ? dataExportService.exportRawSequenceFiles(dataExportParameters) : emptyOutput,
         //Processing BAM Files
         bamFileOutput = copyBamFiles ? dataExportService.exportBamFiles(dataExportParameters) : emptyOutput,
         //Processing Analysis Files

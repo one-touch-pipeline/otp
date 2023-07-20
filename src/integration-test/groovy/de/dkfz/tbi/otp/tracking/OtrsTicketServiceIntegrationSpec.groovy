@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -126,13 +126,13 @@ class OtrsTicketServiceIntegrationSpec extends Specification implements DomainFa
         OtrsTicket ticketA = createOtrsTicket()
         FastqImportInstance fastqImportInstanceA1 = createFastqImportInstance(otrsTicket: ticketA)
         FastqImportInstance fastqImportInstanceA2 = createFastqImportInstance(otrsTicket: ticketA)
-        SeqTrack seqTrackA1 = createSeqTrackWithOneDataFile([:], [fastqImportInstance: fastqImportInstanceA1])
-        SeqTrack seqTrackA2 = createSeqTrackWithOneDataFile([:], [fastqImportInstance: fastqImportInstanceA2])
-        SeqTrack seqTrackA3 = createSeqTrackWithOneDataFile([:], [fastqImportInstance: fastqImportInstanceA2])
+        SeqTrack seqTrackA1 = createSeqTrackWithOneFastqFile([:], [fastqImportInstance: fastqImportInstanceA1])
+        SeqTrack seqTrackA2 = createSeqTrackWithOneFastqFile([:], [fastqImportInstance: fastqImportInstanceA2])
+        SeqTrack seqTrackA3 = createSeqTrackWithOneFastqFile([:], [fastqImportInstance: fastqImportInstanceA2])
 
         OtrsTicket ticketB = createOtrsTicket()
         FastqImportInstance fastqImportInstanceB1 = createFastqImportInstance(otrsTicket: ticketB)
-        SeqTrack seqTrackB1 = DomainFactory.createSeqTrackWithTwoDataFiles([:], [fastqImportInstance: fastqImportInstanceB1], [:])
+        SeqTrack seqTrackB1 = DomainFactory.createSeqTrackWithTwoFastqFiles([:], [fastqImportInstance: fastqImportInstanceB1], [:])
 
         OtrsTicket ticketC = createOtrsTicket()
 
@@ -158,28 +158,28 @@ class OtrsTicketServiceIntegrationSpec extends Specification implements DomainFa
     void 'findAllOtrsTickets'() {
         given: "a handfull of tickets and linked and unlinked seqtracks"
         OtrsTicket otrsTicket01, otrsTicket02, otrsTicket03
-        SeqTrack seqTrack1A, seqTrack1B, seqTrack02, seqTrack03, seqTrackOrphanNoDatafile, seqTrackOrphanWithDatafile
-        Set<OtrsTicket> actualBatch, actualSingle, actualOrphanNoDatafile, actualOrphanWithDatafile
+        SeqTrack seqTrack1A, seqTrack1B, seqTrack02, seqTrack03, seqTrackOrphanNoRawSequenceFile, seqTrackOrphanWithRawSequenceFile
+        Set<OtrsTicket> actualBatch, actualSingle, actualOrphanNoRawSequenceFile, actualOrphanWithRawSequenceFile
 
         // one ticket, with two seqtracks
         otrsTicket01 = createOtrsTicket()
         seqTrack1A = createSeqTrack()
-        createDataFile(fastqImportInstance: createFastqImportInstance(otrsTicket: otrsTicket01), seqTrack: seqTrack1A)
+        createFastqFile(fastqImportInstance: createFastqImportInstance(otrsTicket: otrsTicket01), seqTrack: seqTrack1A)
         seqTrack1B = createSeqTrack()
-        createDataFile(fastqImportInstance: createFastqImportInstance(otrsTicket: otrsTicket01), seqTrack: seqTrack1B)
+        createFastqFile(fastqImportInstance: createFastqImportInstance(otrsTicket: otrsTicket01), seqTrack: seqTrack1B)
         // one ticket, one seqtrack
         otrsTicket02 = createOtrsTicket()
         seqTrack02 = createSeqTrack()
-        createDataFile(fastqImportInstance: createFastqImportInstance(otrsTicket: otrsTicket02), seqTrack: seqTrack02)
+        createFastqFile(fastqImportInstance: createFastqImportInstance(otrsTicket: otrsTicket02), seqTrack: seqTrack02)
         // another ticket, again one seqtrack
         otrsTicket03 = createOtrsTicket()
         seqTrack03 = createSeqTrack()
-        createDataFile(fastqImportInstance: createFastqImportInstance(otrsTicket: otrsTicket03), seqTrack: seqTrack03)
+        createFastqFile(fastqImportInstance: createFastqImportInstance(otrsTicket: otrsTicket03), seqTrack: seqTrack03)
         // an orphaned seqtrack, no ticket, no datafile
-        seqTrackOrphanNoDatafile = createSeqTrack()
+        seqTrackOrphanNoRawSequenceFile = createSeqTrack()
         // an orphaned seqtrack, no ticket, but with a datafile
-        seqTrackOrphanWithDatafile = createSeqTrack()
-        createDataFile(fastqImportInstance: createFastqImportInstance(), seqTrack: seqTrackOrphanWithDatafile)
+        seqTrackOrphanWithRawSequenceFile = createSeqTrack()
+        createFastqFile(fastqImportInstance: createFastqImportInstance(), seqTrack: seqTrackOrphanWithRawSequenceFile)
 
         when: "looking for seqtrack batches, find all (unique) tickets"
         actualBatch = otrsTicketService.findAllOtrsTickets([seqTrack1A, seqTrack02, seqTrack1B])
@@ -194,16 +194,16 @@ class OtrsTicketServiceIntegrationSpec extends Specification implements DomainFa
         TestCase.assertContainSame(actualSingle, [otrsTicket03])
 
         when: "looking for orphans without datafiles, find nothing"
-        actualOrphanNoDatafile = otrsTicketService.findAllOtrsTickets([seqTrackOrphanNoDatafile])
+        actualOrphanNoRawSequenceFile = otrsTicketService.findAllOtrsTickets([seqTrackOrphanNoRawSequenceFile])
 
         then:
-        TestCase.assertContainSame(actualOrphanNoDatafile, [])
+        TestCase.assertContainSame(actualOrphanNoRawSequenceFile, [])
 
         when: "looking for orphans with datafiles, find nothing"
-        actualOrphanWithDatafile = otrsTicketService.findAllOtrsTickets([seqTrackOrphanWithDatafile])
+        actualOrphanWithRawSequenceFile = otrsTicketService.findAllOtrsTickets([seqTrackOrphanWithRawSequenceFile])
 
         then:
-        TestCase.assertContainSame(actualOrphanWithDatafile, [])
+        TestCase.assertContainSame(actualOrphanWithRawSequenceFile, [])
     }
 
     void "assignOtrsTicketToFastqImportInstance, assign new ticketNumber, ticket already exists"() {

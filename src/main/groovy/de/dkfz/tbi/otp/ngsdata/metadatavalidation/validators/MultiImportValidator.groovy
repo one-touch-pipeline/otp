@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,7 +24,7 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 import groovy.transform.CompileDynamic
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.ngsdata.DataFile
+import de.dkfz.tbi.otp.ngsdata.RawSequenceFile
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.AbstractMetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.extractData.ExtractProjectSampleType
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.extractData.ProjectSampleType
@@ -72,8 +72,8 @@ class MultiImportValidator extends AbstractValueTuplesValidator<AbstractMetadata
             return
         }
 
-        Integer result = DataFile.createCriteria().count {
-            eq("md5sum", md5sum)
+        Integer result = RawSequenceFile.createCriteria().count {
+            eq("fastqMd5sum", md5sum)
             seqTrack {
                 sample {
                     individual {

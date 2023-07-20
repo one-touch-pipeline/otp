@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -50,12 +50,12 @@ class DataSwapData<P extends DataSwapParameters> implements Validateable {
                         "  ${obj.projectSwap.new.name}, but was in ${individualSwap.new.project}"
             }
         }
-        dataFiles minSize: 1, validator: { dataFiles, obj, err ->
-            List<String> dataFilesGiven = obj.dataFileSwaps*.old.sort()
-            List<String> dataFilesFound = dataFiles*.fileName.sort()
-            List<String> difference = dataFilesGiven - dataFilesFound
-            if (dataFilesGiven != dataFilesFound) {
-                return "DataFiles: ${difference} not found in database, and ${dataFilesFound} were missed in map"
+        rawSequenceFiles minSize: 1, validator: { rawSequenceFiles, obj, err ->
+            List<String> rawSequenceFilesGiven = obj.rawSequenceFileSwaps*.old.sort()
+            List<String> rawSequenceFilesFound = rawSequenceFiles*.fileName.sort()
+            List<String> difference = rawSequenceFilesGiven - rawSequenceFilesFound
+            if (rawSequenceFilesGiven != rawSequenceFilesFound) {
+                return "DataFiles: ${difference} not found in database, and ${rawSequenceFilesFound} were missed in map"
             }
         }
         cleanupSampleTypePaths nullable: true
@@ -66,8 +66,8 @@ class DataSwapData<P extends DataSwapParameters> implements Validateable {
     Swap<Project> projectSwap
     Swap<Individual> individualSwap
     List<SeqTrack> seqTrackList
-    List<DataFile> dataFiles
-    Map<DataFile, Map<String, String>> oldDataFileNameMap
+    List<RawSequenceFile> rawSequenceFiles
+    Map<RawSequenceFile, Map<String, String>> oldRawSequenceFileNameMap
     Map<FastqcProcessedFile, String> oldFastQcFileNames
     List<File> dirsToDelete = []
     List<String> moveFilesCommands = [AbstractDataSwapService.BASH_HEADER]
@@ -78,8 +78,8 @@ class DataSwapData<P extends DataSwapParameters> implements Validateable {
         return parameters.pidSwap
     }
 
-    List<Swap<String>> getDataFileSwaps() {
-        return parameters.dataFileSwaps
+    List<Swap<String>> getRawSequenceFileSwaps() {
+        return parameters.rawSequenceFileSwaps
     }
 
     String getBashScriptName() {

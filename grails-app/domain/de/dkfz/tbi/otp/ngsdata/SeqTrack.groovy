@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -82,8 +82,8 @@ class SeqTrack implements ProcessParameterObject, Entity, Artefact {
     /**
      * The number of bases of all FASTQ files belonging to a single {@link SeqTrack}
      * <p>
-     * SeqTrack.nBasePairs = sum of the product {@link DataFile#nReads} * {@link DataFile#sequenceLength} of all
-     * DataFiles belonging to the SeqTrack
+     * SeqTrack.nBasePairs = sum of the product {@link RawSequenceFile#nReads} * {@link RawSequenceFile#sequenceLength} of all
+     * sequence files belonging to the SeqTrack
      * <p>
      * Typical values:
      * <ul>
@@ -252,11 +252,11 @@ class SeqTrack implements ProcessParameterObject, Entity, Artefact {
     }
 
     /**
-     * Indicates, if at least one {@link DataFile} belongs to this {@link SeqTrack}, which is marked as withdrawn
-     * (see {@link DataFile#fileWithdrawn})
+     * Indicates, if at least one {@link RawSequenceFile} belongs to this {@link SeqTrack}, which is marked as withdrawn
+     * (see {@link RawSequenceFile#fileWithdrawn})
      */
     boolean isWithdrawn() {
-        return DataFile.findAllBySeqTrackAndFileWithdrawn(this, true)
+        return RawSequenceFile.findAllBySeqTrackAndFileWithdrawn(this, true)
     }
 
     Integer getIlseId() {
@@ -292,7 +292,7 @@ class SeqTrack implements ProcessParameterObject, Entity, Artefact {
     Long getNReads() {
         Long nReads = 0
         Boolean isNull = false
-        dataFilesWhereIndexFileIsFalse.each {
+        sequenceFilesWhereIndexFileIsFalse.each {
             if (it.nReads == null) {
                 isNull = true
             } else {
@@ -303,7 +303,7 @@ class SeqTrack implements ProcessParameterObject, Entity, Artefact {
     }
 
     String getSequenceLength() {
-        return exactlyOneElement(dataFilesWhereIndexFileIsFalse*.sequenceLength.unique())
+        return exactlyOneElement(sequenceFilesWhereIndexFileIsFalse*.sequenceLength.unique())
     }
 
     @Override
@@ -324,12 +324,12 @@ class SeqTrack implements ProcessParameterObject, Entity, Artefact {
         ReferenceGenomeProjectSeqTypeService.getConfiguredReferenceGenomeProjectSeqType(this)
     }
 
-    List<DataFile> getDataFiles() {
-        return DataFile.findAllBySeqTrack(this)
+    List<RawSequenceFile> getSequenceFiles() {
+        return RawSequenceFile.findAllBySeqTrack(this)
     }
 
-    List<DataFile> getDataFilesWhereIndexFileIsFalse() {
-        return DataFile.findAllBySeqTrackAndIndexFile(this, false)
+    List<RawSequenceFile> getSequenceFilesWhereIndexFileIsFalse() {
+        return RawSequenceFile.findAllBySeqTrackAndIndexFile(this, false)
     }
 
     /**
@@ -342,15 +342,15 @@ class SeqTrack implements ProcessParameterObject, Entity, Artefact {
 
     String getReadGroupName() {
         if (seqType.libraryLayout == SequencingReadType.SINGLE) {
-            DataFile dataFile = exactlyOneElement(dataFilesWhereIndexFileIsFalse)
-            String fileNameWithoutExtension = dataFile.vbpFileName.split(/\./).first()
+            RawSequenceFile rawSequenceFile = exactlyOneElement(sequenceFilesWhereIndexFileIsFalse)
+            String fileNameWithoutExtension = rawSequenceFile.vbpFileName.split(/\./).first()
             return "${RUN_PREFIX}${run.name}_${fileNameWithoutExtension}"
         }
-        List<DataFile> dataFiles = dataFilesWhereIndexFileIsFalse
-        assert dataFiles.size() == 2
+        List<RawSequenceFile> rawSequenceFiles = sequenceFilesWhereIndexFileIsFalse
+        assert rawSequenceFiles.size() == 2
         // if the names of datafile1 and datafile2 of one seqTrack are the same, something strange happened -> should fail
-        assert dataFiles[0].vbpFileName != dataFiles[1].vbpFileName
-        String commonFastQFilePrefix = getLongestCommonPrefixBeforeLastUnderscore(dataFiles[0].vbpFileName, dataFiles[1].vbpFileName)
+        assert rawSequenceFiles[0].vbpFileName != rawSequenceFiles[1].vbpFileName
+        String commonFastQFilePrefix = getLongestCommonPrefixBeforeLastUnderscore(rawSequenceFiles[0].vbpFileName, rawSequenceFiles[1].vbpFileName)
         return "${RUN_PREFIX}${run.name}_${commonFastQFilePrefix}"
     }
 
@@ -367,7 +367,7 @@ class SeqTrack implements ProcessParameterObject, Entity, Artefact {
     }
 
     long totalFileSize() {
-        return dataFiles.sum { it.fileSize } as Long ?: 0
+        return sequenceFiles.sum { it.fileSize } as Long ?: 0
     }
 
     static Closure mapping = {

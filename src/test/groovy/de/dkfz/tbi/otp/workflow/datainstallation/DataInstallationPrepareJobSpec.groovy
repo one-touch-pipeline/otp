@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -40,7 +40,8 @@ class DataInstallationPrepareJobSpec extends Specification implements DataTest, 
     @Override
     Class[] getDomainClassesToMock() {
         return [
-                DataFile,
+                FastqFile,
+                RawSequenceFile,
                 Sample,
                 SampleType,
                 WorkflowStep,
@@ -50,7 +51,7 @@ class DataInstallationPrepareJobSpec extends Specification implements DataTest, 
     void "test doFurtherPreparation"() {
         given:
         WorkflowStep workflowStep = createWorkflowStep()
-        SeqTrack seqTrack = createSeqTrackWithTwoDataFile()
+        SeqTrack seqTrack = createSeqTrackWithTwoFastqFile()
         Path path = Paths.get("/tmp/somePath${nextId}")
         Path file = path.resolve("file${nextId}")
 
@@ -59,7 +60,7 @@ class DataInstallationPrepareJobSpec extends Specification implements DataTest, 
         }
         job.notificationCreator = Mock(NotificationCreator)
         job.lsdfFilesService = Mock(LsdfFilesService) {
-            1 * getFileFinalPathAsPath(_ as DataFile) >> file
+            1 * getFileFinalPathAsPath(_ as RawSequenceFile) >> file
             0 * _
         }
         job.fileService = Mock(FileService) {
@@ -79,7 +80,7 @@ class DataInstallationPrepareJobSpec extends Specification implements DataTest, 
     void "test buildWorkDirectoryPath"() {
         given:
         WorkflowStep workflowStep = createWorkflowStep()
-        SeqTrack seqTrack = createSeqTrackWithTwoDataFile()
+        SeqTrack seqTrack = createSeqTrackWithTwoFastqFile()
         Path workDirectory = Paths.get('/workDirectory')
         DataInstallationPrepareJob job = Spy(DataInstallationPrepareJob) {
             1 * getSeqTrack(workflowStep) >> seqTrack

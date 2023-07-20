@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,16 +23,16 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import grails.gorm.hibernate.annotation.ManagedEntity
 
-import de.dkfz.tbi.otp.ngsdata.DataFile
+import de.dkfz.tbi.otp.ngsdata.RawSequenceFile
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.utils.Entity
 import de.dkfz.tbi.otp.workflowExecution.Artefact
 
 /**
  * One object of FastqcProcessedFile represents one output file
- * of "fastqc" program. It belongs to dataFile object which represents
- * original sequence file and keep track of the status: if the file exists
- * and if it content was uploaded to data base.
+ * of "fastqc" program. It belongs to sequence file object which
+ * keeps track of the status: if the file exists
+ * and if it content was uploaded to database.
  */
 @ManagedEntity
 class FastqcProcessedFile implements Artefact, Entity {
@@ -43,22 +43,22 @@ class FastqcProcessedFile implements Artefact, Entity {
 
     Date dateFromFileSystem = null
 
-    DataFile dataFile
+    RawSequenceFile sequenceFile
 
     String workDirectoryName
 
     static belongsTo = [
-            dataFile: DataFile,
+            sequenceFile: RawSequenceFile,
     ]
 
     static constraints = {
         dateFromFileSystem(nullable: true)
-        dataFile(unique: true)
+        sequenceFile(unique: true)
         workflowArtefact nullable: true
         workDirectoryName validator: { String value, FastqcProcessedFile obj ->
-            if (value && obj.dataFile && FastqcProcessedFile.withCriteria {
-                dataFile {
-                    eq('seqTrack', obj.dataFile.seqTrack)
+            if (value && obj.sequenceFile && FastqcProcessedFile.withCriteria {
+                sequenceFile {
+                    eq('seqTrack', obj.sequenceFile.seqTrack)
                 }
                 ne('workDirectoryName', value)
             }) {
@@ -68,16 +68,16 @@ class FastqcProcessedFile implements Artefact, Entity {
     }
 
     static mapping = {
-        dataFile index: "fastqc_processed_file_data_file_idx"
+        sequenceFile index: "fastqc_processed_file_sequence_file_idx"
     }
 
     @Override
     Set<SeqTrack> getContainedSeqTracks() {
-        return [dataFile.seqTrack] as Set
+        return [sequenceFile.seqTrack] as Set
     }
 
     @Override
     String toString() {
-        return "Fastqc ${id} for ${dataFile} for ${dataFile.seqTrack}"
+        return "Fastqc ${id} for ${sequenceFile} for ${sequenceFile.seqTrack}"
     }
 }

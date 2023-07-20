@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -47,7 +47,7 @@ class SampleIdentifierOverviewController {
         Map dataToRender = cmd.dataToRender()
         Project project = projectSelectionService.requestedProject
 
-        Map<List, List<DataFile>> data = sampleIdentifierOverviewService.dataFilesOfProjectBySampleAndSeqType(project)
+        Map<List, List<RawSequenceFile>> data = sampleIdentifierOverviewService.rawSequenceFilesOfProjectBySampleAndSeqType(project)
 
         dataToRender.iTotalRecords = data.size()
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords

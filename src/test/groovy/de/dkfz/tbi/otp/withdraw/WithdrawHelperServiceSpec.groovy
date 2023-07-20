@@ -58,7 +58,8 @@ class WithdrawHelperServiceSpec extends HibernateSpec implements FastqcDomainFac
     @Override
     List<Class> getDomainClasses() {
         return [
-                DataFile,
+                RawSequenceFile,
+                FastqFile,
                 FastqcProcessedFile,
                 MergingWorkPackage,
         ]
@@ -144,38 +145,38 @@ class WithdrawHelperServiceSpec extends HibernateSpec implements FastqcDomainFac
         false         | false           | "Withdrawing"     | "Withdrawing"
     }
 
-    void "checkNonExistingDataFiles, when dataFiles exist, then put them not to the summary"() {
+    void "checkNonExistingRawSequenceFiles, when dataFiles exist, then put them not to the summary"() {
         given:
         WithdrawHelperService service = new WithdrawHelperService()
 
-        DataFile dataFile = createDataFile([
+        RawSequenceFile fastqFile = createFastqFile([
                 fileExists: true
         ])
 
         WithdrawStateHolder holder = new WithdrawStateHolder([
                 withdrawParameters: new WithdrawParameters([
                         seqTracksWithComments: [
-                                new SeqTrackWithComment(dataFile.seqTrack, ""),
+                                new SeqTrackWithComment(fastqFile.seqTrack, ""),
                         ],
                 ]),
         ])
 
         when:
-        service.checkNonExistingDataFiles(holder)
+        service.checkNonExistingRawSequenceFiles(holder)
 
         then:
         holder.summary.empty
     }
 
-    void "checkNonExistingDataFiles, when dataFiles does not exist and stopOnMissingFiles is set to false, then put them to the summary"() {
+    void "checkNonExistingRawSequenceFiles, when dataFiles does not exist and stopOnMissingFiles is set to false, then put them to the summary"() {
         given:
-        DataFile dataFile = createDataFile([
+        RawSequenceFile fastqFile = createFastqFile([
                 fileExists: false
         ])
 
         WithdrawHelperService service = new WithdrawHelperService([
                 withdrawDisplayDomainService: Mock(WithdrawDisplayDomainService) {
-                    1 * dataFileInfo(dataFile) >> "datafile"
+                    1 * rawSequenceFileInfo(fastqFile) >> "datafile"
                     0 * _
                 }
         ])
@@ -183,14 +184,14 @@ class WithdrawHelperServiceSpec extends HibernateSpec implements FastqcDomainFac
         WithdrawStateHolder holder = new WithdrawStateHolder([
                 withdrawParameters: new WithdrawParameters([
                         seqTracksWithComments: [
-                                new SeqTrackWithComment(dataFile.seqTrack, ""),
+                                new SeqTrackWithComment(fastqFile.seqTrack, ""),
                         ],
                         stopOnMissingFiles   : false,
                 ]),
         ])
 
         when:
-        service.checkNonExistingDataFiles(holder)
+        service.checkNonExistingRawSequenceFiles(holder)
 
         then:
         holder.summary.size() == 3
@@ -198,15 +199,15 @@ class WithdrawHelperServiceSpec extends HibernateSpec implements FastqcDomainFac
         holder.summary[2].contains(WithdrawHelperService.NOTE_IGNORE_MISSING_FILES)
     }
 
-    void "checkNonExistingDataFiles, when dataFiles does not exist and stopOnMissingFiles is set to true, then throw exception containing them"() {
+    void "checkNonExistingRawSequenceFiles, when dataFiles does not exist and stopOnMissingFiles is set to true, then throw exception containing them"() {
         given:
-        DataFile dataFile = createDataFile([
+        RawSequenceFile fastqFile = createFastqFile([
                 fileExists: false
         ])
 
         WithdrawHelperService service = new WithdrawHelperService([
                 withdrawDisplayDomainService: Mock(WithdrawDisplayDomainService) {
-                    1 * dataFileInfo(dataFile) >> "datafile"
+                    1 * rawSequenceFileInfo(fastqFile) >> "datafile"
                     0 * _
                 }
         ])
@@ -214,52 +215,52 @@ class WithdrawHelperServiceSpec extends HibernateSpec implements FastqcDomainFac
         WithdrawStateHolder holder = new WithdrawStateHolder([
                 withdrawParameters: new WithdrawParameters([
                         seqTracksWithComments: [
-                                new SeqTrackWithComment(dataFile.seqTrack, "")
+                                new SeqTrackWithComment(fastqFile.seqTrack, "")
                         ],
                         stopOnMissingFiles   : true,
                 ]),
         ])
 
         when:
-        service.checkNonExistingDataFiles(holder)
+        service.checkNonExistingRawSequenceFiles(holder)
 
         then:
         WithdrawnException e = thrown()
         e.message.contains("datafile")
     }
 
-    void "checkForAlreadyWithdrawnDatafiles, when no dataFiles already withdrawn, then put them not to the summary"() {
+    void "checkForAlreadyWithdrawnRawSequenceFiles, when no dataFiles already withdrawn, then put them not to the summary"() {
         given:
         WithdrawHelperService service = new WithdrawHelperService()
 
-        DataFile dataFile = createDataFile([
+        RawSequenceFile fastqFile = createFastqFile([
                 fileWithdrawn: false,
         ])
 
         WithdrawStateHolder holder = new WithdrawStateHolder([
                 withdrawParameters: new WithdrawParameters([
                         seqTracksWithComments: [
-                                new SeqTrackWithComment(dataFile.seqTrack, ""),
+                                new SeqTrackWithComment(fastqFile.seqTrack, ""),
                         ],
                 ]),
         ])
 
         when:
-        service.checkForAlreadyWithdrawnDatafiles(holder)
+        service.checkForAlreadyWithdrawnRawSequenceFiles(holder)
 
         then:
         holder.summary.empty
     }
 
-    void "checkForAlreadyWithdrawnDatafiles, when dataFiles already withdrawn and stopOnAlreadyWithdrawnData is set to false, then put them to the summary"() {
+    void "checkForAlreadyWithdrawnRawSequenceFiles, when dataFiles already withdrawn and stopOnAlreadyWithdrawnData is set to false, then put them to the summary"() {
         given:
-        DataFile dataFile = createDataFile([
+        RawSequenceFile fastqFile = createFastqFile([
                 fileWithdrawn: true,
         ])
 
         WithdrawHelperService service = new WithdrawHelperService([
                 withdrawDisplayDomainService: Mock(WithdrawDisplayDomainService) {
-                    1 * dataFileInfo(dataFile, true) >> "datafile"
+                    1 * rawSequenceFileInfo(fastqFile, true) >> "datafile"
                     0 * _
                 }
         ])
@@ -267,14 +268,14 @@ class WithdrawHelperServiceSpec extends HibernateSpec implements FastqcDomainFac
         WithdrawStateHolder holder = new WithdrawStateHolder([
                 withdrawParameters: new WithdrawParameters([
                         seqTracksWithComments     : [
-                                new SeqTrackWithComment(dataFile.seqTrack, ""),
+                                new SeqTrackWithComment(fastqFile.seqTrack, ""),
                         ],
                         stopOnAlreadyWithdrawnData: false,
                 ]),
         ])
 
         when:
-        service.checkForAlreadyWithdrawnDatafiles(holder)
+        service.checkForAlreadyWithdrawnRawSequenceFiles(holder)
 
         then:
         holder.summary.size() == 3
@@ -282,15 +283,15 @@ class WithdrawHelperServiceSpec extends HibernateSpec implements FastqcDomainFac
         holder.summary[2].contains(WithdrawHelperService.NOTE_IGNORE_ALREADY_WITHDRAWN)
     }
 
-    void "checkForAlreadyWithdrawnDatafiles, when dataFiles already withdrawn and stopOnAlreadyWithdrawnData is set to true, then throw exception containing them"() {
+    void "checkForAlreadyWithdrawnRawSequenceFiles, when dataFiles already withdrawn and stopOnAlreadyWithdrawnData is set to true, then throw exception containing them"() {
         given:
-        DataFile dataFile = createDataFile([
+        RawSequenceFile fastqFile = createFastqFile([
                 fileWithdrawn: true,
         ])
 
         WithdrawHelperService service = new WithdrawHelperService([
                 withdrawDisplayDomainService: Mock(WithdrawDisplayDomainService) {
-                    1 * dataFileInfo(dataFile, true) >> "datafile"
+                    1 * rawSequenceFileInfo(fastqFile, true) >> "datafile"
                     0 * _
                 }
         ])
@@ -298,14 +299,14 @@ class WithdrawHelperServiceSpec extends HibernateSpec implements FastqcDomainFac
         WithdrawStateHolder holder = new WithdrawStateHolder([
                 withdrawParameters: new WithdrawParameters([
                         seqTracksWithComments     : [
-                                new SeqTrackWithComment(dataFile.seqTrack, ""),
+                                new SeqTrackWithComment(fastqFile.seqTrack, ""),
                         ],
                         stopOnAlreadyWithdrawnData: true,
                 ]),
         ])
 
         when:
-        service.checkForAlreadyWithdrawnDatafiles(holder)
+        service.checkForAlreadyWithdrawnRawSequenceFiles(holder)
 
         then:
         WithdrawnException e = thrown()
@@ -391,7 +392,7 @@ class WithdrawHelperServiceSpec extends HibernateSpec implements FastqcDomainFac
         true          || 0             | 1           | []                 | PATH_LIST_TOGETHER
     }
 
-    void "handleDataFiles, when datafiles given, then collect the needed path to the correct list"() {
+    void "handleRawSequenceFiles, when datafiles given, then collect the needed path to the correct list"() {
         given:
         String withdrawnCommentNormal = "withdrawnComment \nover\nmultiple lines"
         String withdrawnCommentWithdrawn = "withdrawnComment\nfor withdrawnDataFile"
@@ -408,13 +409,13 @@ class WithdrawHelperServiceSpec extends HibernateSpec implements FastqcDomainFac
         final WorkflowRun fastqcRun = createWorkflowRun(workFolder: createWorkFolder())
         final WorkflowRun fastqcSingleCellRun = createWorkflowRun(workFolder: createWorkFolder())
 
-        DataFile dataFile = createDataFile()
+        RawSequenceFile fastqFile = createFastqFile()
         FastqcProcessedFile fastqcProcessedFile = createFastqcProcessedFile([
-                dataFile: dataFile,
+                sequenceFile: fastqFile,
                 workflowArtefact: createWorkflowArtefact(producedBy: fastqcRun),
         ])
-        DataFile withdrawnDataFile = createDataFile([fileWithdrawn: true])
-        DataFile singleCellDataFile = createDataFile([
+        RawSequenceFile withdrawnFastqFile = createFastqFile([fileWithdrawn: true])
+        RawSequenceFile singleCellFastqFile = createSequenceDataFile([
                 seqTrack: createSeqTrack([
                         seqType            : createSeqType([
                                 singleCell: true,
@@ -423,12 +424,12 @@ class WithdrawHelperServiceSpec extends HibernateSpec implements FastqcDomainFac
                 ])
         ])
         FastqcProcessedFile singleCellFastqcProcessedFile = createFastqcProcessedFile([
-                dataFile: singleCellDataFile,
+                sequenceFile: singleCellFastqFile,
                 workflowArtefact: createWorkflowArtefact(producedBy: fastqcSingleCellRun),
         ])
         MergingWorkPackage mergingWorkPackage = AlignmentPipelineFactory.RoddyPancanFactoryInstance.INSTANCE.createMergingWorkPackage([
-                seqTracks: [dataFile.seqTrack] as Set,
-                seqType  : dataFile.seqTrack.seqType,
+                seqTracks: [fastqFile.seqTrack] as Set,
+                seqType  : fastqFile.seqTrack.seqType,
         ])
 
         WithdrawHelperService service = new WithdrawHelperService()
@@ -439,9 +440,9 @@ class WithdrawHelperServiceSpec extends HibernateSpec implements FastqcDomainFac
         WithdrawStateHolder holder = new WithdrawStateHolder([
                 withdrawParameters: new WithdrawParameters([
                         seqTracksWithComments: [
-                                new SeqTrackWithComment(dataFile.seqTrack, withdrawnCommentNormal),
-                                new SeqTrackWithComment(withdrawnDataFile.seqTrack, withdrawnCommentWithdrawn),
-                                new SeqTrackWithComment(singleCellDataFile.seqTrack, withdrawnCommentSingleCell),
+                                new SeqTrackWithComment(fastqFile.seqTrack, withdrawnCommentNormal),
+                                new SeqTrackWithComment(withdrawnFastqFile.seqTrack, withdrawnCommentWithdrawn),
+                                new SeqTrackWithComment(singleCellFastqFile.seqTrack, withdrawnCommentSingleCell),
                         ],
                 ]),
         ])
@@ -460,16 +461,16 @@ class WithdrawHelperServiceSpec extends HibernateSpec implements FastqcDomainFac
         ]
 
         when:
-        service.handleDataFiles(holder)
+        service.handleRawSequenceFiles(holder)
 
         then:
-        1 * service.lsdfFilesService.getFileFinalPathAsPath(dataFile) >> finalPathNormal
-        1 * service.lsdfFilesService.getFileMd5sumFinalPathAsPath(dataFile) >> finalMd5sumNormal
-        1 * service.lsdfFilesService.getFileViewByPidPath(dataFile) >> viewByPidPathNormal
-        1 * service.lsdfFilesService.getFileFinalPathAsPath(singleCellDataFile) >> finalPathSingleCell
-        1 * service.lsdfFilesService.getFileMd5sumFinalPathAsPath(singleCellDataFile) >> finalMd5sumSingleCell
-        1 * service.lsdfFilesService.getFileViewByPidPath(singleCellDataFile) >> viewByPidPathSingleCell
-        1 * service.lsdfFilesService.getWellAllFileViewByPidPath(singleCellDataFile) >> wellPathSingleCell
+        1 * service.lsdfFilesService.getFileFinalPathAsPath(fastqFile) >> finalPathNormal
+        1 * service.lsdfFilesService.getFileMd5sumFinalPathAsPath(fastqFile) >> finalMd5sumNormal
+        1 * service.lsdfFilesService.getFileViewByPidPath(fastqFile) >> viewByPidPathNormal
+        1 * service.lsdfFilesService.getFileFinalPathAsPath(singleCellFastqFile) >> finalPathSingleCell
+        1 * service.lsdfFilesService.getFileMd5sumFinalPathAsPath(singleCellFastqFile) >> finalMd5sumSingleCell
+        1 * service.lsdfFilesService.getFileViewByPidPath(singleCellFastqFile) >> viewByPidPathSingleCell
+        1 * service.lsdfFilesService.getWellAllFileViewByPidPath(singleCellFastqFile) >> wellPathSingleCell
         0 * service.lsdfFilesService._
 
         1 * service.fastqcDataFilesService.fastqcOutputDirectory(fastqcProcessedFile) >> fastqcPath
@@ -482,19 +483,19 @@ class WithdrawHelperServiceSpec extends HibernateSpec implements FastqcDomainFac
         TestCase.assertContainSame(holder.pathsToChangeGroup, pathsToChangeGroup)
         TestCase.assertContainSame(holder.pathsToDelete, pathsToDelete)
 
-        with(dataFile) {
+        with(fastqFile) {
             fileWithdrawn == true
             withdrawnDate != null
             withdrawnComment == withdrawnCommentNormal
         }
 
-        with(singleCellDataFile) {
+        with(singleCellFastqFile) {
             fileWithdrawn == true
             withdrawnDate != null
             withdrawnComment == withdrawnCommentSingleCell
         }
 
-        with(withdrawnDataFile) {
+        with(withdrawnFastqFile) {
             fileWithdrawn == true
             withdrawnComment != withdrawnCommentWithdrawn
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -49,10 +49,10 @@ trait EgaSubmissionFactory implements IsPipeline, DomainFactoryCore {
         ], properties)
     }
 
-    DataFileSubmissionObject createDataFileSubmissionObject(Map properties = [:]) {
-        return createDomainObject(DataFileSubmissionObject, [
+    RawSequenceFileSubmissionObject createRawSequenceFileSubmissionObject(Map properties = [:]) {
+        return createDomainObject(RawSequenceFileSubmissionObject, [
                 egaAliasName          : "data_file_alias_${nextId}",
-                dataFile              : { createDataFile() },
+                sequenceFile          : { createFastqFile() },
                 sampleSubmissionObject: { createSampleSubmissionObject() },
         ], properties)
     }

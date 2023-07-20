@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -49,21 +49,21 @@ Path baseOutputDir = fileService.toPath(configService.scriptOutputPath, fileSyst
 FastqImportInstance.withTransaction {
     FastqImportInstance fastqImportInstance = FastqImportInstance.get(fastqImportInstanceId)
     assert fastqImportInstance
-    DataFile.findAllByFastqImportInstance(fastqImportInstance).each { DataFile dataFile ->
-        MetaDataEntry.findAllByDataFile(dataFile).each { MetaDataEntry entry ->
+    RawSequenceFile.findAllByFastqImportInstance(fastqImportInstance).each { RawSequenceFile rawSequenceFile ->
+        MetaDataEntry.findAllBySequenceFile(rawSequenceFile).each { MetaDataEntry entry ->
             entry.delete(flush: true)
         }
-        assert MetaDataEntry.countByDataFile(dataFile) == 0
-        CollectionUtils.atMostOneElement(FastqcProcessedFile.findAllByDataFile(dataFile))?.delete(flush: true)
-        SeqTrack seqTrack = dataFile.seqTrack
+        assert MetaDataEntry.countBySequenceFile(rawSequenceFile) == 0
+        CollectionUtils.atMostOneElement(FastqcProcessedFile.findAllBySequenceFile(rawSequenceFile))?.delete(flush: true)
+        SeqTrack seqTrack = rawSequenceFile.seqTrack
         deletionService.deleteProcessingFilesOfProject(seqTrack.individual.project.name, baseOutputDir, false, false, [seqTrack])
 
-        dataFile.delete(flush: true)
-        if (!seqTrack.dataFiles) {
+        rawSequenceFile.delete(flush: true)
+        if (!seqTrack.sequenceFiles) {
             seqTrack.delete(flush: true)
         }
     }
-    assert DataFile.countByFastqImportInstance(fastqImportInstance) == 0
+    assert RawSequenceFile.countByFastqImportInstance(fastqImportInstance) == 0
     MetaDataFile.findAllByFastqImportInstance(fastqImportInstance).each {
         it.delete(flush: true)
     }

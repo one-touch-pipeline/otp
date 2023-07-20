@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -157,7 +157,7 @@ class EgaSubmissionService {
             from
                 EgaSubmission egaSubmission
                     join egaSubmission.samplesToSubmit samplesToSubmit,
-                DataFile datafile
+                RawSequenceFile datafile
                     join datafile.seqTrack seqTrack
             where
                 egaSubmission = :egaSubmission
@@ -243,16 +243,16 @@ class EgaSubmissionService {
         return samplesWithSeqType
     }
 
-    void updateDataFileSubmissionObjects(SelectFilesDataFilesFormSubmitCommand cmd) {
+    void updateRawSequenceFileSubmissionObjects(SelectFilesRawSequenceFilesFormSubmitCommand cmd) {
         EgaSubmission submission = cmd.submission
         List<String> egaFileAlias = cmd.egaFileAlias
-        Map<Long, DataFileSubmissionObject> dataFileSubmissionObjectMap = cmd.submission.dataFilesToSubmit.collectEntries {
-            [(it.dataFile.id): it]
+        Map<Long, RawSequenceFileSubmissionObject> dataFileSubmissionObjectMap = cmd.submission.rawSequenceFilesToSubmit.collectEntries {
+            [(it.sequenceFile.id): it]
         }
 
         cmd.fastqFile.eachWithIndex { fastqIdString, i ->
             long fastqId = fastqIdString as long
-            DataFileSubmissionObject dataFileSubmissionObject = dataFileSubmissionObjectMap[fastqId]
+            RawSequenceFileSubmissionObject dataFileSubmissionObject = dataFileSubmissionObjectMap[fastqId]
             dataFileSubmissionObject.egaAliasName = egaFileAlias[i]
             dataFileSubmissionObject.save(flush: false)
         }
@@ -262,8 +262,8 @@ class EgaSubmissionService {
         submission.save(flush: true)
     }
 
-    void updateDataFileAndPrepareSubmissionForUpload(SelectFilesDataFilesFormSubmitCommand cmd) {
-        updateDataFileSubmissionObjects(cmd)
+    void updateRawSequenceFileAndPrepareSubmissionForUpload(SelectFilesRawSequenceFilesFormSubmitCommand cmd) {
+        updateRawSequenceFileSubmissionObjects(cmd)
         if (cmd.submission.selectionState != EgaSubmission.SelectionState.SELECT_BAM_FILES) {
             egaSubmissionFileService.prepareSubmissionForUpload(cmd.submission)
         }
@@ -274,10 +274,10 @@ class EgaSubmissionService {
         egaSubmissionFileService.prepareSubmissionForUpload(submission)
     }
 
-    List<DataFileAndSampleAlias> getDataFilesAndAlias(EgaSubmission egaSubmission) {
-        if (egaSubmission.dataFilesToSubmit) {
-            return egaSubmission.dataFilesToSubmit.collect {
-                return new DataFileAndSampleAlias(it.dataFile, it.sampleSubmissionObject)
+    List<RawSequenceFileAndSampleAlias> getRawSequenceFilesAndAlias(EgaSubmission egaSubmission) {
+        if (egaSubmission.rawSequenceFilesToSubmit) {
+            return egaSubmission.rawSequenceFilesToSubmit.collect {
+                return new RawSequenceFileAndSampleAlias(it.sequenceFile, it.sampleSubmissionObject)
             }.sort()
         }
         String queryFastqFiles = """
@@ -287,7 +287,7 @@ class EgaSubmissionService {
             from
                 EgaSubmission egaSubmission
                     join egaSubmission.samplesToSubmit samplesToSubmit,
-                DataFile dataFile
+                RawSequenceFile dataFile
                     join dataFile.seqTrack seqTrack
             where
                 egaSubmission = :egaSubmission
@@ -298,11 +298,11 @@ class EgaSubmissionService {
                 and dataFile.fileType.type = '${de.dkfz.tbi.otp.ngsdata.FileType.Type.SEQUENCE}'
             """
 
-        return DataFile.executeQuery(queryFastqFiles, [
+        return RawSequenceFile.executeQuery(queryFastqFiles, [
                 egaSubmission: egaSubmission,
         ]).collect {
             List list = it as List
-            new DataFileAndSampleAlias(list[0] as DataFile, list[1] as SampleSubmissionObject)
+            new RawSequenceFileAndSampleAlias(list[0] as RawSequenceFile, list[1] as SampleSubmissionObject)
         }.sort()
     }
 
@@ -350,15 +350,15 @@ class EgaSubmissionService {
     }
 
     @CompileDynamic
-    void createDataFileSubmissionObjects(SelectFilesDataFilesFormSubmitCommand cmd) {
+    void createRawSequenceFileSubmissionObjects(SelectFilesRawSequenceFilesFormSubmitCommand cmd) {
         EgaSubmission submission = cmd.submission
         cmd.selectBox.eachWithIndex { it, i ->
             if (it) {
-                DataFileSubmissionObject dataFileSubmissionObject = new DataFileSubmissionObject(
-                        dataFile: DataFile.get(cmd.fastqFile[i]),
+                RawSequenceFileSubmissionObject submissionObject = new RawSequenceFileSubmissionObject(
+                        sequenceFile: RawSequenceFile.get(cmd.fastqFile[i]),
                         sampleSubmissionObject: SampleSubmissionObject.get(cmd.egaSample[i])
                 ).save(flush: false)
-                submission.addToDataFilesToSubmit(dataFileSubmissionObject)
+                submission.addToRawSequenceFilesToSubmit(submissionObject)
             }
         }
         submission.save(flush: true)
@@ -379,12 +379,12 @@ class EgaSubmissionService {
 
     @CompileDynamic
     List<SampleAndSeqTypeAndDataFileProjection> getSamplesWithSeqType(Project project) {
-        String hqlQuery = """SELECT sample.id, individual.pid, sampleType.name, seqType, dataFile.fileExists FROM SeqTrack seqTrack
+        String hqlQuery = """SELECT sample.id, individual.pid, sampleType.name, seqType, sequenceFile.fileExists FROM SeqTrack seqTrack
            INNER JOIN Sample sample ON sample.id=seqTrack.sample.id
            INNER JOIN SampleType sampleType ON sampleType.id=sample.sampleType.id
            INNER JOIN Individual individual ON individual.id=sample.individual.id
            INNER JOIN SeqType seqType ON seqType.id=seqTrack.seqType.id
-           INNER JOIN DataFile dataFile ON dataFile.seqTrack.id=seqTrack.id
+           INNER JOIN RawSequenceFile sequenceFile ON sequenceFile.seqTrack.id=seqTrack.id
            WHERE individual.project.id = :projectId
            ORDER BY individual.pid ASC
         """
@@ -403,22 +403,22 @@ class EgaSubmissionService {
         }
     }
 
-    Map generateDefaultEgaAliasesForDataFiles(List<DataFileAndSampleAlias> dataFilesAndAliases) {
+    Map generateDefaultEgaAliasesForRawSequenceFiles(List<RawSequenceFileAndSampleAlias> rawSequenceFileAndAliases) {
         Map<String, String> dataFileAliases = [:]
 
-        dataFilesAndAliases.each {
-            String runNameWithoutDate = it.dataFile.run.name.replaceAll("(?<!\\d)((?:20)?[0-2]\\d)-?(0\\d|1[012])-?([0-2]\\d|3[01])[-_]", "")
+        rawSequenceFileAndAliases.each {
+            String runNameWithoutDate = it.rawSequenceFile.run.name.replaceAll("(?<!\\d)((?:20)?[0-2]\\d)-?(0\\d|1[012])-?([0-2]\\d|3[01])[-_]", "")
             List aliasNameHelper = [
-                    it.dataFile.seqType.displayName,
-                    it.dataFile.seqType.libraryLayout,
+                    it.rawSequenceFile.seqType.displayName,
+                    it.rawSequenceFile.seqType.libraryLayout,
                     it.sampleSubmissionObject.egaAliasName,
-                    it.dataFile.seqTrack.normalizedLibraryName,
+                    it.rawSequenceFile.seqTrack.normalizedLibraryName,
                     runNameWithoutDate,
-                    it.dataFile.seqTrack.laneId,
-                    "R${it.dataFile.mateNumber}",
+                    it.rawSequenceFile.seqTrack.laneId,
+                    "R${it.rawSequenceFile.mateNumber}",
             ].findAll()
             String aliasName = "${aliasNameHelper.join("_")}.fastq.gz"
-            dataFileAliases.put(it.dataFile.fileName + it.dataFile.run, aliasName)
+            dataFileAliases.put(it.rawSequenceFile.fileName + it.rawSequenceFile.run, aliasName)
         }
 
         return dataFileAliases
@@ -432,11 +432,11 @@ class EgaSubmissionService {
         String seqPlatformName
         LibraryPreparationKit libraryPreparationKit
 
-        ExperimentalDataRow(DataFileSubmissionObject dataFileSubmissionObject) {
-            seqType = dataFileSubmissionObject.dataFile.seqType
-            seqPlatformModelLabel = dataFileSubmissionObject.dataFile.run.seqPlatform.seqPlatformModelLabel
-            seqPlatformName = dataFileSubmissionObject.dataFile.run.seqPlatform.name
-            libraryPreparationKit = dataFileSubmissionObject.dataFile.seqTrack.libraryPreparationKit
+        ExperimentalDataRow(RawSequenceFileSubmissionObject submissionObject) {
+            seqType = submissionObject.sequenceFile.seqType
+            seqPlatformModelLabel = submissionObject.sequenceFile.run.seqPlatform.seqPlatformModelLabel
+            seqPlatformName = submissionObject.sequenceFile.run.seqPlatform.name
+            libraryPreparationKit = submissionObject.sequenceFile.seqTrack.libraryPreparationKit
         }
 
         ExperimentalDataRow(SeqTrack seqTrack) {
@@ -452,8 +452,8 @@ class EgaSubmissionService {
         List metadata = []
         List<ExperimentalDataRow> experimentalDataRows = []
 
-        submission.dataFilesToSubmit.each { DataFileSubmissionObject dataFileSubmissionObject ->
-            experimentalDataRows << new ExperimentalDataRow(dataFileSubmissionObject)
+        submission.rawSequenceFilesToSubmit.each { RawSequenceFileSubmissionObject submissionObject ->
+            experimentalDataRows << new ExperimentalDataRow(submissionObject)
         }
 
         submission.bamFilesToSubmit.each { BamFileSubmissionObject bamFileSubmissionObject ->
@@ -536,19 +536,19 @@ class EgaSubmissionService {
 }
 
 @Canonical
-class DataFileAndSampleAlias implements Comparable<DataFileAndSampleAlias> {
+class RawSequenceFileAndSampleAlias implements Comparable<RawSequenceFileAndSampleAlias> {
 
-    DataFile dataFile
+    RawSequenceFile rawSequenceFile
     SampleSubmissionObject sampleSubmissionObject
 
     @Override
-    int compareTo(DataFileAndSampleAlias other) {
-        return this.dataFile.individual.displayName <=> other.dataFile.individual.displayName ?:
-                this.dataFile.seqType.toString() <=> other.dataFile.seqType.toString() ?:
-                        this.dataFile.sampleType.displayName <=> other.dataFile.sampleType.displayName ?:
-                                this.dataFile.seqTrack.run.name <=> other.dataFile.seqTrack.run.name ?:
-                                        this.dataFile.seqTrack.laneId <=> other.dataFile.seqTrack.laneId ?:
-                                                this.dataFile.mateNumber <=> other.dataFile.mateNumber
+    int compareTo(RawSequenceFileAndSampleAlias other) {
+        return this.rawSequenceFile.individual.displayName <=> other.rawSequenceFile.individual.displayName ?:
+                this.rawSequenceFile.seqType.toString() <=> other.rawSequenceFile.seqType.toString() ?:
+                        this.rawSequenceFile.sampleType.displayName <=> other.rawSequenceFile.sampleType.displayName ?:
+                                this.rawSequenceFile.seqTrack.run.name <=> other.rawSequenceFile.seqTrack.run.name ?:
+                                        this.rawSequenceFile.seqTrack.laneId <=> other.rawSequenceFile.seqTrack.laneId ?:
+                                                this.rawSequenceFile.mateNumber <=> other.rawSequenceFile.mateNumber
     }
 }
 

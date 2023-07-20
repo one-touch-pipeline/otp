@@ -48,8 +48,8 @@ class FastqcReportServiceSpec extends Specification implements DataTest, FastqcD
     private WorkflowArtefact artefact
     private SeqTrack seqTrack
     private FileSystem fileSystem = FileSystems.default
-    private DataFile dataFile1
-    private DataFile dataFile2
+    private RawSequenceFile rawSequenceFile1
+    private RawSequenceFile rawSequenceFile2
     private FastqcProcessedFile fastqcProcessedFile1
     private FastqcProcessedFile fastqcProcessedFile2
     private Workflow workflow
@@ -106,17 +106,17 @@ class FastqcReportServiceSpec extends Specification implements DataTest, FastqcD
         seqTrack = createSeqTrack([
                 workflowArtefact: artefact,
         ])
-        dataFile1 = createDataFile([
+        rawSequenceFile1 = createFastqFile([
                 seqTrack: seqTrack,
         ])
-        dataFile2 = createDataFile([
+        rawSequenceFile2 = createFastqFile([
                 seqTrack: seqTrack,
         ])
         fastqcProcessedFile1 = createFastqcProcessedFile([
-                dataFile: dataFile1,
+                sequenceFile: rawSequenceFile1,
         ])
         fastqcProcessedFile2 = createFastqcProcessedFile([
-                dataFile         : dataFile2,
+                sequenceFile     : rawSequenceFile2,
                 workDirectoryName: fastqcProcessedFile1.workDirectoryName,
         ])
 
@@ -132,6 +132,7 @@ class FastqcReportServiceSpec extends Specification implements DataTest, FastqcD
     @Override
     Class[] getDomainClassesToMock() {
         return [
+                FastqFile,
                 FastqcProcessedFile,
                 WorkflowArtefact,
                 WorkflowStep,

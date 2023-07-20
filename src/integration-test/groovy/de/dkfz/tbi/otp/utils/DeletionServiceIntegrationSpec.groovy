@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -126,8 +126,8 @@ class DeletionServiceIntegrationSpec extends Specification implements EgaSubmiss
                         ])
                 ])
         ])
-        createDataFile([seqTrack: seqTrack])
-        createDataFile([seqTrack: seqTrack])
+        createFastqFile([seqTrack: seqTrack])
+        createFastqFile([seqTrack: seqTrack])
         createReferenceGenomeSelector(project: project)
         createWorkflowVersionSelector(project: project)
         createWorkflowVersionSelector(project: project)
@@ -141,7 +141,7 @@ class DeletionServiceIntegrationSpec extends Specification implements EgaSubmiss
         deletionService.deleteProjectContent(project)
 
         then:
-        DataFile.count() == 0
+        RawSequenceFile.count() == 0
         Individual.count() == 0
         WorkflowVersionSelector.count == 0
         ReferenceGenomeSelector.count == 0
@@ -272,20 +272,20 @@ class DeletionServiceIntegrationSpec extends Specification implements EgaSubmiss
         AntibodyTarget antibodyTarget1 = createAntibodyTarget(name: "abt1")
         AntibodyTarget antibodyTarget2 = createAntibodyTarget(name: "abt2")
 
-        SeqTrack seqTrack1 = createSeqTrackWithOneDataFile([laneId: "lane1", sample: sample1, seqType: seqType1, run: run], [fileName: "df1.gz", vbpFileName: "df1.gz"])
-        SeqTrack seqTrack2 = createSeqTrackWithOneDataFile([laneId: "lane2", sample: sample1, seqType: seqType1, run: run], [fileName: "df2.gz", vbpFileName: "df2.gz"])
-        SeqTrack seqTrack3 = createSeqTrackWithOneDataFile([laneId: "lane3", sample: sample2, seqType: seqType1, run: run], [fileName: "df3.gz", vbpFileName: "df3.gz"])
-        SeqTrack seqTrack4 = createSeqTrackWithOneDataFile([laneId: "lane4", sample: sample2, seqType: seqType1, run: run], [fileName: "df4.gz", vbpFileName: "df4.gz"])
+        SeqTrack seqTrack1 = createSeqTrackWithOneFastqFile([laneId: "lane1", sample: sample1, seqType: seqType1, run: run], [fileName: "df1.gz", vbpFileName: "df1.gz"])
+        SeqTrack seqTrack2 = createSeqTrackWithOneFastqFile([laneId: "lane2", sample: sample1, seqType: seqType1, run: run], [fileName: "df2.gz", vbpFileName: "df2.gz"])
+        SeqTrack seqTrack3 = createSeqTrackWithOneFastqFile([laneId: "lane3", sample: sample2, seqType: seqType1, run: run], [fileName: "df3.gz", vbpFileName: "df3.gz"])
+        SeqTrack seqTrack4 = createSeqTrackWithOneFastqFile([laneId: "lane4", sample: sample2, seqType: seqType1, run: run], [fileName: "df4.gz", vbpFileName: "df4.gz"])
 
-        SeqTrack seqTrack1a = createSeqTrackWithOneDataFile([laneId: "lane1a", sample: sample1, seqType: seqType3, run: run, antibodyTarget: antibodyTarget1], [fileName: "df1.gz", vbpFileName: "df1.gz"])
-        SeqTrack seqTrack2a = createSeqTrackWithOneDataFile([laneId: "lane2a", sample: sample1, seqType: seqType3, run: run, antibodyTarget: antibodyTarget1], [fileName: "df2.gz", vbpFileName: "df2.gz"])
-        SeqTrack seqTrack3a = createSeqTrackWithOneDataFile([laneId: "lane3a", sample: sample1, seqType: seqType3, run: run, antibodyTarget: antibodyTarget2], [fileName: "df3.gz", vbpFileName: "df3.gz"])
-        SeqTrack seqTrack4a = createSeqTrackWithOneDataFile([laneId: "lane4a", sample: sample1, seqType: seqType3, run: run, antibodyTarget: antibodyTarget2], [fileName: "df4.gz", vbpFileName: "df4.gz"])
+        SeqTrack seqTrack1a = createSeqTrackWithOneFastqFile([laneId: "lane1a", sample: sample1, seqType: seqType3, run: run, antibodyTarget: antibodyTarget1], [fileName: "df1.gz", vbpFileName: "df1.gz"])
+        SeqTrack seqTrack2a = createSeqTrackWithOneFastqFile([laneId: "lane2a", sample: sample1, seqType: seqType3, run: run, antibodyTarget: antibodyTarget1], [fileName: "df2.gz", vbpFileName: "df2.gz"])
+        SeqTrack seqTrack3a = createSeqTrackWithOneFastqFile([laneId: "lane3a", sample: sample1, seqType: seqType3, run: run, antibodyTarget: antibodyTarget2], [fileName: "df3.gz", vbpFileName: "df3.gz"])
+        SeqTrack seqTrack4a = createSeqTrackWithOneFastqFile([laneId: "lane4a", sample: sample1, seqType: seqType3, run: run, antibodyTarget: antibodyTarget2], [fileName: "df4.gz", vbpFileName: "df4.gz"])
 
-        SeqTrack seqTrack5 = createSeqTrackWithOneDataFile([laneId: "lane5", sample: sample1, seqType: seqType2, run: run], [fileName: "df5.gz", vbpFileName: "df5.gz"])
-        SeqTrack seqTrack6 = createSeqTrackWithOneDataFile([laneId: "lane6", sample: sample1, seqType: seqType2, run: run], [fileName: "df6.gz", vbpFileName: "df6.gz"])
-        SeqTrack seqTrack7 = createSeqTrackWithOneDataFile([laneId: "lane7", sample: sample2, seqType: seqType2, run: run], [fileName: "df7.gz", vbpFileName: "df7.gz"])
-        SeqTrack seqTrack8 = createSeqTrackWithOneDataFile([laneId: "lane8", sample: sample2, seqType: seqType2, run: run], [fileName: "df8.gz", vbpFileName: "df8.gz"])
+        SeqTrack seqTrack5 = createSeqTrackWithOneFastqFile([laneId: "lane5", sample: sample1, seqType: seqType2, run: run], [fileName: "df5.gz", vbpFileName: "df5.gz"])
+        SeqTrack seqTrack6 = createSeqTrackWithOneFastqFile([laneId: "lane6", sample: sample1, seqType: seqType2, run: run], [fileName: "df6.gz", vbpFileName: "df6.gz"])
+        SeqTrack seqTrack7 = createSeqTrackWithOneFastqFile([laneId: "lane7", sample: sample2, seqType: seqType2, run: run], [fileName: "df7.gz", vbpFileName: "df7.gz"])
+        SeqTrack seqTrack8 = createSeqTrackWithOneFastqFile([laneId: "lane8", sample: sample2, seqType: seqType2, run: run], [fileName: "df8.gz", vbpFileName: "df8.gz"])
 
         expect:
         deletionService.deleteSeqTrack(seqTrack1) == [
@@ -382,14 +382,14 @@ class DeletionServiceIntegrationSpec extends Specification implements EgaSubmiss
                         ])
                 ])
         ])
-        createDataFile([seqTrack: seqTrack])
-        createDataFile([seqTrack: seqTrack])
+        createFastqFile([seqTrack: seqTrack])
+        createFastqFile([seqTrack: seqTrack])
 
         when:
         deletionService.deleteProject(project)
 
         then:
-        DataFile.count() == 0
+        RawSequenceFile.count() == 0
         Individual.count() == 0
         Project.count() == 0
     }
@@ -638,19 +638,19 @@ class DeletionServiceIntegrationSpec extends Specification implements EgaSubmiss
         )
         createClusterJob(individual: individual)
 
-        final DataFile dataFile = createDataFile(seqTrack: seqTrack)
+        final RawSequenceFile rawSequenceFile = createFastqFile(seqTrack: seqTrack)
         createSampleIdentifier(sample: seqTrack.sample)
 
-        final String seqCenterName = dataFile.run.seqCenter.dirName
-        final String runDirName = dataFile.run.dirName
+        final String seqCenterName = rawSequenceFile.run.seqCenter.dirName
+        final String runDirName = rawSequenceFile.run.dirName
         final String seqTypeDirName = seqTrack.seqType.dirName
         final String sampleTypeDirName = seqTrack.sample.sampleType.dirName
-        final String vbpPath = dataFile.fileType.vbpPath
-        final String vbpFileName = dataFile.vbpFileName
+        final String vbpPath = rawSequenceFile.fileType.vbpPath
+        final String vbpFileName = rawSequenceFile.vbpFileName
         final String expectedScriptCommand = """\
-rm -rf $seqDir/$seqTypeDirName/$seqCenterName/$runDirName/${dataFile.pathName}${dataFile?.fileName}
-rm -rf $seqDir/$seqTypeDirName/$seqCenterName/$runDirName/${dataFile.pathName}${dataFile?.fileName}
-rm -rf $seqDir/$seqTypeDirName/$seqCenterName/$runDirName/${dataFile.pathName}${dataFile?.fileName}.md5sum
+rm -rf $seqDir/$seqTypeDirName/$seqCenterName/$runDirName/${rawSequenceFile.pathName}${rawSequenceFile?.fileName}
+rm -rf $seqDir/$seqTypeDirName/$seqCenterName/$runDirName/${rawSequenceFile.pathName}${rawSequenceFile?.fileName}
+rm -rf $seqDir/$seqTypeDirName/$seqCenterName/$runDirName/${rawSequenceFile.pathName}${rawSequenceFile?.fileName}.md5sum
 rm -rf $seqDir/$seqTypeDirName/${individual.pid}/$sampleTypeDirName/single/$runDirName/$vbpPath/$vbpFileName
 rm -rf $seqDir/$seqTypeDirName/${individual.pid}/$sampleTypeDirName
 rm -rf $seqDir/$seqTypeDirName/${individual.pid}

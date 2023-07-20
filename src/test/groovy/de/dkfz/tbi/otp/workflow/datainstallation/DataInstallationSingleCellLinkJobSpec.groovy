@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -42,6 +42,7 @@ class DataInstallationSingleCellLinkJobSpec extends Specification implements Dat
     @Override
     Class[] getDomainClassesToMock() {
         return [
+                FastqFile,
                 FastqImportInstance,
                 Sample,
                 SampleType,
@@ -51,7 +52,7 @@ class DataInstallationSingleCellLinkJobSpec extends Specification implements Dat
 
     void setupData(boolean isSingleCell) {
         workflowStep = createWorkflowStep()
-        seqTrack = createSeqTrackWithTwoDataFile()
+        seqTrack = createSeqTrackWithTwoFastqFile()
         if (isSingleCell) {
             seqTrack.seqType = DomainFactory.createCellRangerAlignableSeqTypes().first()
             seqTrack.singleCellWellLabel = "label"

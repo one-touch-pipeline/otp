@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,12 +29,13 @@ import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.project.Project
 
-class DataFileSpec extends Specification implements DataTest, DomainFactoryCore {
+class RawSequenceFileSpec extends Specification implements DataTest, DomainFactoryCore {
 
     @Override
     Class[] getDomainClassesToMock() {
         [
-                DataFile,
+                RawSequenceFile,
+                FastqFile,
                 FileType,
                 Individual,
                 Project,
@@ -56,7 +57,7 @@ class DataFileSpec extends Specification implements DataTest, DomainFactoryCore 
         FileType fileType = createFileType([type: FileType.Type.ALIGNMENT])
 
         expect:
-        createDataFile(fileType: fileType)
+        createFastqFile(fileType: fileType)
     }
 
     void "test validate, when mateNumber is whatever and file type is sequence (not fastq)"() {
@@ -64,14 +65,14 @@ class DataFileSpec extends Specification implements DataTest, DomainFactoryCore 
         FileType fileType = createFileType([type: FileType.Type.SEQUENCE, vbpPath: 'SomeOtherDirectory'])
 
         expect:
-        createDataFile(fileType: fileType)
+        createFastqFile(fileType: fileType)
     }
 
     @Unroll
     void "test validate, when fileType is file type is sequence (fastq) and mateNumber is #matNumber and sequenceType is #sequencingReadType and indexFile is :indexFile, then it should be valid"() {
         given:
         FileType fileType = createFileType([type: FileType.Type.SEQUENCE, vbpPath: SEQUENCE_DIRECTORY])
-        DataFile dataFile = createDataFile([
+        RawSequenceFile rawSequenceFile = createFastqFile([
                 seqTrack  : createSeqTrack([
                         seqType: createSeqType([
                                 libraryLayout: sequencingReadType,
@@ -83,7 +84,7 @@ class DataFileSpec extends Specification implements DataTest, DomainFactoryCore 
         ], false)
 
         expect:
-        dataFile.validate()
+        rawSequenceFile.validate()
 
         where:
         sequencingReadType        | matNumber | indexFile
@@ -104,10 +105,10 @@ class DataFileSpec extends Specification implements DataTest, DomainFactoryCore 
     void "test validate, when mateNumber is null and indexFile is #indexFile, should fail"() {
         given:
         FileType fileType = createFileType([type: FileType.Type.SEQUENCE, vbpPath: SEQUENCE_DIRECTORY])
-        DataFile dataFile = createDataFile([fileType: fileType, mateNumber: null, indexFile: indexFile], false)
+        RawSequenceFile rawSequenceFile = createFastqFile([fileType: fileType, mateNumber: null, indexFile: indexFile], false)
 
         expect:
-        TestCase.assertValidateError(dataFile, "mateNumber", "validator.invalid", null)
+        TestCase.assertValidateError(rawSequenceFile, "mateNumber", "validator.invalid", null)
 
         where:
         indexFile << [
@@ -119,45 +120,45 @@ class DataFileSpec extends Specification implements DataTest, DomainFactoryCore 
     void "test validate, when mateNumber is zero, should fail"() {
         given:
         FileType fileType = createFileType([type: FileType.Type.SEQUENCE, vbpPath: SEQUENCE_DIRECTORY])
-        DataFile dataFile = createDataFile([fileType: fileType, mateNumber: 0], false)
+        RawSequenceFile rawSequenceFile = createFastqFile([fileType: fileType, mateNumber: 0], false)
 
         expect:
-        TestCase.assertAtLeastExpectedValidateError(dataFile, "mateNumber", "validator.invalid", 0)
+        TestCase.assertAtLeastExpectedValidateError(rawSequenceFile, "mateNumber", "validator.invalid", 0)
     }
 
     void "test validate, when mateNumber is too big, should fail"() {
         given:
         FileType fileType = createFileType([type: FileType.Type.SEQUENCE, vbpPath: SEQUENCE_DIRECTORY])
-        DataFile dataFile = createDataFile([fileType: fileType, mateNumber: 3], false)
+        RawSequenceFile rawSequenceFile = createFastqFile([fileType: fileType, mateNumber: 3], false)
 
         expect:
-        TestCase.assertValidateError(dataFile, "mateNumber", "validator.invalid", 3)
+        TestCase.assertValidateError(rawSequenceFile, "mateNumber", "validator.invalid", 3)
     }
 
     void "test validate, when sequenceLength is a number"() {
         expect:
-        createDataFile(sequenceLength: "123")
+        createFastqFile(sequenceLength: "123")
     }
 
     void "test validate, when sequenceLength is a range"() {
         expect:
-        createDataFile(sequenceLength: "123-321")
+        createFastqFile(sequenceLength: "123-321")
     }
 
     void "test validate, when sequenceLength is invalid, should fail"() {
         given:
-        DataFile dataFile = createDataFile([sequenceLength: "!1§2%3&"], false)
+        RawSequenceFile rawSequenceFile = createFastqFile([sequenceLength: "!1§2%3&"], false)
 
         expect:
-        TestCase.assertValidateError(dataFile, "sequenceLength", "invalid", "!1§2%3&")
+        TestCase.assertValidateError(rawSequenceFile, "sequenceLength", "invalid", "!1§2%3&")
     }
 
     void "getNBasePairs, fails when required properties are null"() {
         given:
-        DataFile dataFile = createDataFile(nReads: nReads, sequenceLength: sequenceLength)
+        RawSequenceFile rawSequenceFile = createFastqFile(nReads: nReads, sequenceLength: sequenceLength)
 
         when:
-        dataFile.NBasePairs
+        rawSequenceFile.NBasePairs
 
         then:
         AssertionError e = thrown()
@@ -172,11 +173,11 @@ class DataFileSpec extends Specification implements DataTest, DomainFactoryCore 
 
     void "getNBasePairs, multiplies meanSequenceLength times nReads"() {
         given:
-        DataFile dataFile = createDataFile(nReads: 100, sequenceLength: sequenceLength)
+        RawSequenceFile rawSequenceFile = createFastqFile(nReads: 100, sequenceLength: sequenceLength)
         long result
 
         when:
-        result = dataFile.NBasePairs
+        result = rawSequenceFile.NBasePairs
 
         then:
         result == 10000

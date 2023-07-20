@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -69,19 +69,19 @@ class NotificationDigestServiceIntegrationSpec extends Specification implements 
     Map<String, Object> setupNotificationCommand() {
         OtrsTicket otrsTicket = createOtrsTicket()
 
-        SeqTrack seqTrack1 = createSeqTrackWithOneDataFile()
-        SeqTrack seqTrack2 = createSeqTrackWithOneDataFile()
-        List<DataFile> dataFiles1 = ([seqTrack1, seqTrack2]*.dataFiles).flatten()
-        FastqImportInstance fastqImportInstance1 = createFastqImportInstance(otrsTicket: otrsTicket, dataFiles: dataFiles1)
-        dataFiles1.each {
+        SeqTrack seqTrack1 = createSeqTrackWithOneFastqFile()
+        SeqTrack seqTrack2 = createSeqTrackWithOneFastqFile()
+        List<RawSequenceFile> rawSequenceFiles1 = ([seqTrack1, seqTrack2]*.sequenceFiles).flatten()
+        FastqImportInstance fastqImportInstance1 = createFastqImportInstance(otrsTicket: otrsTicket, sequenceFiles: rawSequenceFiles1)
+        rawSequenceFiles1.each {
             it.fastqImportInstance = fastqImportInstance1
             it.save(flush: true)
         }
 
-        SeqTrack seqTrack3 = createSeqTrackWithOneDataFile()
-        List<DataFile> dataFiles2 = ([seqTrack3]*.dataFiles).flatten()
-        FastqImportInstance fastqImportInstance2 = createFastqImportInstance(otrsTicket: otrsTicket, dataFiles: dataFiles2)
-        dataFiles2.each {
+        SeqTrack seqTrack3 = createSeqTrackWithOneFastqFile()
+        List<RawSequenceFile> rawSequenceFiles2 = ([seqTrack3]*.sequenceFiles).flatten()
+        FastqImportInstance fastqImportInstance2 = createFastqImportInstance(otrsTicket: otrsTicket, sequenceFiles: rawSequenceFiles2)
+        rawSequenceFiles2.each {
             it.fastqImportInstance = fastqImportInstance2
             it.save(flush: true)
         }
@@ -237,7 +237,7 @@ class NotificationDigestServiceIntegrationSpec extends Specification implements 
 
         NotificationDigestService service = setupMockedServiceForBuildNotificationDigestTest(steps as List<OtrsTicket.ProcessingStep>)
 
-        FastqImportInstance fastqImportInstance = createFastqImportInstance(dataFiles: [createDataFile()])
+        FastqImportInstance fastqImportInstance = createFastqImportInstance(sequenceFiles: [createFastqFile()])
         NotificationCommand cmd = createNotificationCommand(
                 otrsTicket         : fastqImportInstance.otrsTicket,
                 fastqImportInstance: fastqImportInstance,
@@ -268,7 +268,7 @@ class NotificationDigestServiceIntegrationSpec extends Specification implements 
         setupData()
         NotificationDigestService service = setupMockedServiceForBuildNotificationDigestTest(OtrsTicket.ProcessingStep.values() as List)
 
-        FastqImportInstance fastqImportInstance = createFastqImportInstance(dataFiles: [createDataFile()])
+        FastqImportInstance fastqImportInstance = createFastqImportInstance(sequenceFiles: [createFastqFile()])
         NotificationCommand cmd = createNotificationCommand(
                 otrsTicket         : fastqImportInstance.otrsTicket,
                 fastqImportInstance: fastqImportInstance,

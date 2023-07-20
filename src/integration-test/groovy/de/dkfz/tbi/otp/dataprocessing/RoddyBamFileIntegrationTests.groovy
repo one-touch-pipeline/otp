@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -164,9 +164,9 @@ class RoddyBamFileIntegrationTests {
     @Test
     void testIsConsistentAndContainsNoWithdrawnData_withdrawnBamFileWithWithdrawnSeqTracks_succeeds() {
         RoddyBamFile bamFile = DomainFactory.createRoddyBamFile([withdrawn: true])
-        List<DataFile> dataFiles = DataFile.findAll()
-        dataFiles*.fileWithdrawn = true
-        dataFiles*.save(flush: true)
+        List<RawSequenceFile> rawSequenceFiles = RawSequenceFile.findAll()
+        rawSequenceFiles*.fileWithdrawn = true
+        rawSequenceFiles*.save(flush: true)
         assert [] == bamFile.isConsistentAndContainsNoWithdrawnData()
     }
 
@@ -179,9 +179,9 @@ class RoddyBamFileIntegrationTests {
     @Test
     void testIsConsistentAndContainsNoWithdrawnData_notWithdrawnBamFileWithWithdrawnSeqTracks_shouldReturnErrorMessage() {
         RoddyBamFile bamFile = DomainFactory.createRoddyBamFile()
-        List<DataFile> dataFiles = DataFile.findAll()
-        dataFiles*.fileWithdrawn = true
-        dataFiles*.save(flush: true)
+        List<RawSequenceFile> rawSequenceFiles = RawSequenceFile.findAll()
+        rawSequenceFiles*.fileWithdrawn = true
+        rawSequenceFiles*.save(flush: true)
         assert ["not withdrawn bam file has withdrawn seq tracks"] == bamFile.isConsistentAndContainsNoWithdrawnData()
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -51,7 +51,7 @@ class LaneSwapService extends AbstractDataSwapService<LaneSwapParameters, LaneSw
     @Override
     protected void completeOmittedNewSwapValuesAndLog(LaneSwapParameters parameters) {
         parameters.log << "\n  swapping datafiles:"
-        parameters.dataFileSwaps = completeOmittedNewSwapValuesAndLog(parameters.dataFileSwaps, parameters.log)
+        parameters.rawSequenceFileSwaps = completeOmittedNewSwapValuesAndLog(parameters.rawSequenceFileSwaps, parameters.log)
     }
 
     @Override
@@ -63,10 +63,10 @@ class LaneSwapService extends AbstractDataSwapService<LaneSwapParameters, LaneSw
         Swap<SequencingReadType> sequencingReadTypeSwap = getSequencingReadTypeSwaps(parameters)
         Swap<SeqType> seqTypeSwap = getSeqTypeSwap(parameters, sequencingReadTypeSwap)
         List<SeqTrack> seqTrackList = getSeqTracksBySampleAndRunAndLaneIdInList(parameters, sampleSwap, run)
-        List<DataFile> dataFiles = getFastQDataFilesBySeqTrackInList(seqTrackList, parameters)
+        List<RawSequenceFile> rawSequenceFiles = getRawSequenceFilesBySeqTrackInList(seqTrackList, parameters)
 
         Path individualPath = individualService.getViewByPidPath(individualSwap.old, seqTypeSwap.old)
-        List<Path> sampleDirs = dataFiles.collect {
+        List<Path> sampleDirs = rawSequenceFiles.collect {
             lsdfFilesService.getSampleTypeDirectory(it)
         }
 
@@ -80,9 +80,9 @@ class LaneSwapService extends AbstractDataSwapService<LaneSwapParameters, LaneSw
                 sequencingReadTypeSwap: sequencingReadTypeSwap,
                 seqTypeSwap: seqTypeSwap,
                 seqTrackList: seqTrackList,
-                dataFiles: dataFiles,
-                oldDataFileNameMap: collectFileNamesOfDataFiles(dataFiles),
-                oldFastQcFileNames: getFastQcOutputFileNamesByDataFilesInList(dataFiles),
+                rawSequenceFiles: rawSequenceFiles,
+                oldRawSequenceFileNameMap: collectFileNamesOfRawSequenceFiles(rawSequenceFiles),
+                oldFastQcFileNames: getFastQcOutputFileNamesByRawSequenceFilesInList(rawSequenceFiles),
                 cleanupIndividualPaths: [individualPath],
                 cleanupSampleTypePaths: sampleDirs,
                 wellLabelSwap: parameters.wellLabelSwap,
@@ -94,11 +94,11 @@ class LaneSwapService extends AbstractDataSwapService<LaneSwapParameters, LaneSw
         createRemoveAnalysisAndAlignmentsCommands(data)
         swapLanes(data)
 
-        createMoveDataFilesCommands(data)
+        createMoveRawSequenceFilesCommands(data)
 
         // files need to be already renamed at this point
-        Map<FastqcProcessedFile, String> newFastqcFileNames = getFastQcOutputFileNamesByDataFilesInList(
-                getFastQDataFilesBySeqTrackInList(data.seqTrackList, data.parameters)
+        Map<FastqcProcessedFile, String> newFastqcFileNames = getFastQcOutputFileNamesByRawSequenceFilesInList(
+                getRawSequenceFilesBySeqTrackInList(data.seqTrackList, data.parameters)
         )
         data.moveFilesCommands << "\n\n################ move fastqc files ################\n\n"
         data.oldFastQcFileNames.each { fastqcProcessedFile, oldFastQcFileName ->
@@ -133,7 +133,7 @@ class LaneSwapService extends AbstractDataSwapService<LaneSwapParameters, LaneSw
                 ],
                 "run: ${data.run.name}\nlane: ${data.lanes}"
         )
-        createCommentForSwappedDatafiles(data)
+        createCommentForSwappedRawSequenceFiles(data)
     }
 
     @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -53,24 +53,24 @@ class PanCancerConditionalFailJob extends AbstractConditionalFailJob implements 
     protected void check(WorkflowStep workflowStep) {
         List<SeqTrack> seqTracks = getSeqTracks(workflowStep)
         List<String> errorMessages = []
-        List<Path> allDataFiles = []
+        List<Path> allRawSequenceFiles = []
 
         seqTracks.each { SeqTrack seqTrack ->
-            List<DataFile> nonIndexDataFiles = seqTrack.dataFilesWhereIndexFileIsFalse.sort {
+            List<RawSequenceFile> nonIndexRawSequenceFiles = seqTrack.sequenceFilesWhereIndexFileIsFalse.sort {
                 it.mateNumber
             }
 
-            if (!nonIndexDataFiles) {
+            if (!nonIndexRawSequenceFiles) {
                 return errorMessages.push("SeqTrack '${seqTrack}' has no dataFiles." as String)
             }
 
-            if (nonIndexDataFiles.size() != 2) {
+            if (nonIndexRawSequenceFiles.size() != 2) {
                 return errorMessages.push("SeqTrack '${seqTrack}' has not exactly two dataFiles. " +
-                        "It has ${nonIndexDataFiles} (index files are ignored)." as String)
+                        "It has ${nonIndexRawSequenceFiles} (index files are ignored)." as String)
             }
 
-            final Collection<Path> paths = nonIndexDataFiles.collect { DataFile dataFile ->
-                lsdfFilesService.getFileViewByPidPathAsPath(dataFile)
+            final Collection<Path> paths = nonIndexRawSequenceFiles.collect { RawSequenceFile rawSequenceFile ->
+                lsdfFilesService.getFileViewByPidPathAsPath(rawSequenceFile)
             }
 
             final Collection<Path> missingPaths = paths.findAll { Path path ->
@@ -81,17 +81,17 @@ class PanCancerConditionalFailJob extends AbstractConditionalFailJob implements 
                 return errorMessages.push("The following ${missingPaths.size()} files are missing:\n${missingPaths.join("\n")}" as String)
             }
 
-            allDataFiles.addAll(paths)
+            allRawSequenceFiles.addAll(paths)
 
             try {
-                MetaDataService.ensurePairedSequenceFileNameConsistency(nonIndexDataFiles[0].fileName, nonIndexDataFiles[1].fileName)
+                MetaDataService.ensurePairedSequenceFileNameConsistency(nonIndexRawSequenceFiles[0].fileName, nonIndexRawSequenceFiles[1].fileName)
             } catch (IllegalFileNameException e) {
                 return errorMessages.push("SeqTrack '${seqTrack}' file name inconsistency:\n" + e.message as String)
             }
         }
 
         try {
-            MetaDataService.ensurePairedSequenceFileNameOrder(allDataFiles.collect {
+            MetaDataService.ensurePairedSequenceFileNameOrder(allRawSequenceFiles.collect {
                 fileService.toFile(it)
             })
         } catch (IllegalFileNameException e) {

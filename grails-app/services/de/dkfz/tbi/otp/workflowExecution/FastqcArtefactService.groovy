@@ -26,7 +26,7 @@ import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 
 import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
-import de.dkfz.tbi.otp.ngsdata.DataFile
+import de.dkfz.tbi.otp.ngsdata.RawSequenceFile
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.LogUsedTimeUtils
@@ -67,7 +67,7 @@ class FastqcArtefactService {
                 select
                     id
                 from
-                    DataFile df
+                    RawSequenceFile df
                 where
                     df.seqTrack = st
                     and df.fileWithdrawn = true
@@ -82,7 +82,7 @@ class FastqcArtefactService {
         from
             FastqcProcessedFile fastqc
             join fastqc.workflowArtefact wa
-            join fetch fastqc.dataFile df
+            join fetch fastqc.sequenceFile df
             join df.seqTrack st
             join st.sample sample
             join sample.individual individual
@@ -114,7 +114,7 @@ class FastqcArtefactService {
             df,
             st
         from
-            DataFile df
+            RawSequenceFile df
             left outer join fetch df.comment
             join df.seqTrack st
         where
@@ -154,7 +154,7 @@ class FastqcArtefactService {
         }
     }
 
-    Map<SeqTrack, List<DataFile>> fetchDataFiles(Collection<SeqTrack> seqTracks) {
+    Map<SeqTrack, List<RawSequenceFile>> fetchRawSequenceFiles(Collection<SeqTrack> seqTracks) {
         return LogUsedTimeUtils.logUsedTime(log, "        fetchDataFile") {
             return (SeqTrack.executeQuery(HQL_FETCH_DATA_FILES, [
                     seqTracks: seqTracks,
@@ -162,9 +162,9 @@ class FastqcArtefactService {
                 it[INDEX_1] as SeqTrack
             }.collectEntries {
                 [(it.key): (it.value.collect {
-                    it[INDEX_0] as DataFile
+                    it[INDEX_0] as RawSequenceFile
                 })]
-            } as Map<SeqTrack, List<DataFile>>
+            } as Map<SeqTrack, List<RawSequenceFile>>
         }
     }
 

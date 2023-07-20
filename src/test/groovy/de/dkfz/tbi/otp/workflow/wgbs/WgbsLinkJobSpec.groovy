@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -44,6 +44,7 @@ class WgbsLinkJobSpec extends Specification implements DataTest, WorkflowSystemD
     @Override
     Class[] getDomainClassesToMock() {
         return [
+                FastqFile,
                 FastqImportInstance,
                 FileType,
                 LibraryPreparationKit,
@@ -87,7 +88,7 @@ class WgbsLinkJobSpec extends Specification implements DataTest, WorkflowSystemD
         if (multipleLibraries) {
             roddyBamFile.seqTracks.first().libraryName = "2"
             roddyBamFile.seqTracks.first().normalizedLibraryName = "2"
-            roddyBamFile.seqTracks.add(createSeqTrackWithTwoDataFile(libraryName: "1"))
+            roddyBamFile.seqTracks.add(createSeqTrackWithTwoFastqFile(libraryName: "1"))
             roddyBamFile.numberOfMergedLanes = 2
             roddyBamFile.save(flush: true)
         }

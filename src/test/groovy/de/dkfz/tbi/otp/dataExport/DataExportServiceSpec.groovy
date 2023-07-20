@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -46,7 +46,8 @@ class DataExportServiceSpec extends Specification implements DataTest, DomainFac
     @Override
     Class[] getDomainClassesToMock() {
         return [
-                DataFile,
+                FastqFile,
+                RawSequenceFile,
                 SampleType,
                 SeqType,
                 Sample,
@@ -98,7 +99,7 @@ class DataExportServiceSpec extends Specification implements DataTest, DomainFac
     private DataExportInput createDataFileInput(boolean checkFileStatus, boolean getFileList) {
         //two seqTracks
         List<SeqTrack> seqTrackList = TEST_PID_LIST.collect {
-            createSeqTrackWithOneDataFile(sample: createSample(
+            createSeqTrackWithOneFastqFile(sample: createSample(
                     individual: createIndividual(
                             pid: it,
                     )
@@ -120,7 +121,7 @@ class DataExportServiceSpec extends Specification implements DataTest, DomainFac
     }
 
     @Unroll
-    void "exportDataFiles, combination of different inputs, should return correct scripts"() {
+    void "exportRawSequenceFiles, combination of different inputs, should return correct scripts"() {
         given:
         final DataExportInput dataExportInput = createDataFileInput(checkFileStatus, getFileList)
 
@@ -139,7 +140,7 @@ class DataExportServiceSpec extends Specification implements DataTest, DomainFac
         }
 
         when:
-        DataExportOutput output = service.exportDataFiles(dataExportInput)
+        DataExportOutput output = service.exportRawSequenceFiles(dataExportInput)
 
         then:
         switch (cases) {

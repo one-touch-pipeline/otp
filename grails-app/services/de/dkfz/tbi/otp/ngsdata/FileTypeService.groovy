@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,15 +28,15 @@ import groovy.transform.CompileDynamic
 @Transactional
 class FileTypeService {
 
-    boolean isGoodSequenceDataFile(DataFile dataFile) {
-        if (dataFile.fileWithdrawn) {
+    boolean isGoodSequenceFile(RawSequenceFile rawSequenceFile) {
+        if (rawSequenceFile.fileWithdrawn) {
             return false
         }
-        return isSequenceDataFile(dataFile)
+        return isSequenceFile(rawSequenceFile)
     }
 
-    boolean isSequenceDataFile(DataFile dataFile) {
-        return dataFile.fileType.type == FileType.Type.SEQUENCE
+    boolean isSequenceFile(RawSequenceFile rawSequenceFile) {
+        return rawSequenceFile.fileType.type == FileType.Type.SEQUENCE
     }
 
     List<FileType> alignmentSequenceTypes() {

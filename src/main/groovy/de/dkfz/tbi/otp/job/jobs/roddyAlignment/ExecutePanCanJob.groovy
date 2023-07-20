@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -87,16 +87,16 @@ class ExecutePanCanJob extends AbstractRoddyAlignmentJob implements AutoRestarta
         List<File> vbpDataFiles = []
 
         roddyBamFile.seqTracks.each { SeqTrack seqTrack ->
-            List<DataFile> dataFiles = DataFile.findAllBySeqTrackAndIndexFile(seqTrack, false)
-            assert seqTrack.seqType.libraryLayout.mateCount == dataFiles.size()
-            dataFiles.sort { it.mateNumber }.each { DataFile dataFile ->
-                String pathName = lsdfFilesService.getFileViewByPidPath(dataFile)
-                FileSystem fs = dataFile.fileLinked ?
+            List<RawSequenceFile> rawSequenceFiles = RawSequenceFile.findAllBySeqTrackAndIndexFile(seqTrack, false)
+            assert seqTrack.seqType.libraryLayout.mateCount == rawSequenceFiles.size()
+            rawSequenceFiles.sort { it.mateNumber }.each { RawSequenceFile rawSequenceFile ->
+                String pathName = lsdfFilesService.getFileViewByPidPath(rawSequenceFile)
+                FileSystem fs = rawSequenceFile.fileLinked ?
                         fileSystemService.filesystemForFastqImport :
                         fileSystemService.filesystemForProcessingForRealm
                 Path path = fs.getPath(pathName)
                 FileService.ensureFileIsReadableAndNotEmpty(path)
-                assert dataFile.fileSize == Files.size(path)
+                assert rawSequenceFile.fileSize == Files.size(path)
                 vbpDataFiles.add(new File(pathName))
             }
         }

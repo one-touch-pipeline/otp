@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -45,7 +45,7 @@ class ProjectRunNameFileNameValidatorIntegrationSpec extends Specification {
     static final String DATAFILE_PATH = "/tmp/DataFileFileName.gz"
     static final String DATAFILE_NEW = "DataFileFileNameNew.gz"
 
-    static DataFile dataFile
+    static RawSequenceFile rawSequenceFile
 
     static final String VALID_METADATA =
             "${MetaDataColumn.FASTQ_FILE}\t${MetaDataColumn.RUN_ID}\t${MetaDataColumn.PROJECT}\n" +
@@ -57,13 +57,13 @@ class ProjectRunNameFileNameValidatorIntegrationSpec extends Specification {
         Individual individual = DomainFactory.createIndividual(["project": project])
         Sample sample = DomainFactory.createSample(["individual": individual])
         SeqTrack seq = DomainFactory.createSeqTrack(["run": run, "sample": sample])
-        dataFile = DomainFactory.createDataFile(["fileName": DATAFILE, "seqTrack": seq])
+        rawSequenceFile = DomainFactory.createFastqFile(["fileName": DATAFILE, "seqTrack": seq])
     }
 
     void 'validate, when file name does not exist for specified run and project (not using parseSampleIdentifier)'() {
         given:
         setupData()
-        DomainFactory.createSampleIdentifier(["name": SAMPLE_NAME, "sample": dataFile.seqTrack.sample]).name
+        DomainFactory.createSampleIdentifier(["name": SAMPLE_NAME, "sample": rawSequenceFile.seqTrack.sample]).name
 
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${MetaDataColumn.FASTQ_FILE}\t${MetaDataColumn.RUN_ID}\t${MetaDataColumn.PROJECT}\n" +
@@ -102,7 +102,7 @@ class ProjectRunNameFileNameValidatorIntegrationSpec extends Specification {
     void 'validate, when file name already exists for specified run and project (not using parseSampleIdentifier)'() {
         given:
         setupData()
-        DomainFactory.createSampleIdentifier(["name": PROJECT, "sample": dataFile.seqTrack.sample]).name
+        DomainFactory.createSampleIdentifier(["name": PROJECT, "sample": rawSequenceFile.seqTrack.sample]).name
 
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 VALID_METADATA

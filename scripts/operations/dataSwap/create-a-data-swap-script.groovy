@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -99,20 +99,20 @@ Closure<SampleType> newSampleTypeClosure = { SampleType sampleType ->
 }
 
 /**
- * User-defined function to map old DataFile names into new DataFile names.
+ * User-defined function to map old RawSequenceFile names into new RawSequenceFile names.
  *
  * This closure is passed into the swapping-logic to handle more complicated swaps
  * default: replace old-pid with new-pid, keep rest unchanged.
  */
-Closure<String> newDataFileNameClosure = { DataFile dataFile, String oldPatientName, String newPatientName ->
-    String oldFileName = dataFile.fileName
+Closure<String> newRawSequenceFileNameClosure = { RawSequenceFile rawSequenceFile, String oldPatientName, String newPatientName ->
+    String oldFileName = rawSequenceFile.fileName
     String newFileName = oldFileName.replace(oldPatientName, newPatientName)
 
     if (oldFileName == newFileName) {
         println "\t- data file name remains unchanged: ${newFileName}"
         return ''
     } else {
-        println "\t- data file name changing from ${dataFile.fileName} to ${newFileName}"
+        println "\t- data file name changing from ${rawSequenceFile.fileName} to ${newFileName}"
         return newFileName
     }
 }
@@ -137,11 +137,11 @@ Closure<Integer> newSampleSwapScript = { ScriptBuilder builder, Project newProje
             "\t\tprojectNameSwap: new Swap('${oldIndividual.project.name}', '${newProject.name}'),\n" +
             "\t\tpidSwap: new Swap('${oldIndividual.pid}', '${newIndividualName}'),\n" +
             "\t\tsampleTypeSwap: new Swap('${oldSample.sampleType.name}', '${newSampleType.name}'),\n" +
-            "\t\tdataFileSwaps        : [\n")
+            "\t\trawSequenceFileSwaps        : [\n")
 
     SeqTrack.findAllBySample(oldSample, [sort: 'id']).each { SeqTrack seqTrack ->
-        DataFile.findAllBySeqTrack(seqTrack, [sort: 'id']).each { datafile ->
-            builder.addGroovyCommand("\t\tnew Swap('${datafile.fileName}', '${newDataFileNameClosure(datafile, oldIndividual.pid, newIndividualName)}'), \n")
+        RawSequenceFile.findAllBySeqTrack(seqTrack, [sort: 'id']).each { rawSequenceFile ->
+            builder.addGroovyCommand("\t\tnew Swap('${rawSequenceFile.fileName}', '${newRawSequenceFileNameClosure(rawSequenceFile, oldIndividual.pid, newIndividualName)}'), \n")
         }
     }
 
@@ -196,7 +196,7 @@ Closure<ScriptBuilder> createScripts = { String swapLabel ->
         if (newSampleType == null && seqTypeWhiteList.empty && // only if we're moving entire, unfiltered patients...
                 (!newIndividual || newProject != oldIndividual.project) // .. either into a shiny new patient, or into another project entirely
         ) {
-            counter = renamePatient(newIndividualName, oldIndividual, newProject, samples, counter, builder, newSampleTypeClosure, newDataFileNameClosure, files)
+            counter = renamePatient(newIndividualName, oldIndividual, newProject, samples, counter, builder, newSampleTypeClosure, newRawSequenceFileNameClosure, files)
         } else { // more complex case: moving partial source, or into non-empty destination
             // moving one single sample in its entirety
             if (oldSampleType || seqTypeWhiteList) {
@@ -204,7 +204,7 @@ Closure<ScriptBuilder> createScripts = { String swapLabel ->
                         oldIndividual, newIndividual, newIndividualName,
                         oldSampleType, newSampleType,
                         seqTypeWhiteList,
-                        newDataFileNameClosure,
+                        newRawSequenceFileNameClosure,
                         newSampleSwapScript,
                         counter, builder, files,
                         createdPids, createdSamples
@@ -294,7 +294,7 @@ private int moveOneSample(Project newProject,
                           Individual oldIndividual, Individual newIndividual, String newIndividualName,
                           SampleType oldSampleType, SampleType newSampleType,
                           List<SeqType> seqTypeWhiteList,
-                          Closure<String> newDataFileNameClosure,
+                          Closure<String> newRawSequenceFileNameClosure,
                           Closure newSampleSwapScript,
                           int counter,
                           ScriptBuilder builder, List<String> files,
@@ -330,7 +330,7 @@ private int moveOneSample(Project newProject,
         }
         oldSeqTracks.each { SeqTrack seqTrack ->
             String fileName = "mv_${counter++}_${oldIndividual.pid}_${oldSampleType.name}_${seqTrack.run.name}_${seqTrack.laneId}__to__${newIndividualName}_${newSampleType.displayName}"
-            builder.addGroovyCommand(Snippets.swapLane(seqTrack, fileName, newDataFileNameClosure,
+            builder.addGroovyCommand(Snippets.swapLane(seqTrack, fileName, newRawSequenceFileNameClosure,
                     newProject,
                     oldIndividual, newIndividualName,
                     oldSampleType, newSampleType))
@@ -347,7 +347,7 @@ private int moveOneSample(Project newProject,
 private int renamePatient(String newIndividualName, Individual oldIndividual,
                           Project newProject,
                           List<Sample> samples, int counter, ScriptBuilder builder,
-                          Closure<SampleType> newSampleTypeClosure, Closure<String> newDataFileNameClosure,
+                          Closure<SampleType> newSampleTypeClosure, Closure<String> newRawSequenceFileNameClosure,
                           List<String> files
 ) {
     String fileName = "mv_${counter++}_${oldIndividual.pid}__to__${newIndividualName}"
@@ -362,11 +362,11 @@ private int renamePatient(String newIndividualName, Individual oldIndividual,
         builder.addGroovyCommand("\t\tnew Swap('${sample.sampleType.name}', '${newSampleTypeClosure(sample.sampleType).name}'), \n")
     }
     builder.addGroovyCommand("\t\t],\n" +
-            "\t\tdataFileSwaps : [\n")
+            "\t\trawSequenceFileSwaps : [\n")
     samples.each { sample ->
         SeqTrack.findAllBySample(sample, [sort: 'id']).each { SeqTrack seqTrack ->
-            DataFile.findAllBySeqTrack(seqTrack, [sort: 'id']).each { datafile ->
-                builder.addGroovyCommand("\t\tnew Swap('${datafile.fileName}', '${newDataFileNameClosure(datafile, oldIndividual.pid, newIndividualName)}'),\n")
+            RawSequenceFile.findAllBySeqTrack(seqTrack, [sort: 'id']).each { rawSequenceFile ->
+                builder.addGroovyCommand("\t\tnew Swap('${rawSequenceFile.fileName}', '${newRawSequenceFileNameClosure(rawSequenceFile, oldIndividual.pid, newIndividualName)}'),\n")
             }
         }
     }
@@ -454,7 +454,7 @@ class Snippets {
                """.stripIndent()
     }
 
-    static String swapLane(SeqTrack seqTrack, String fileName, Closure<String> newDataFileNameClosure,
+    static String swapLane(SeqTrack seqTrack, String fileName, Closure<String> newRawSequenceFileNameClosure,
                            Project newProject,
                            Individual oldIndividual, String newIndividual,
                            SampleType oldSampleType, SampleType newSampleType
@@ -472,10 +472,10 @@ class Snippets {
                 "\t\trunName: '${seqTrack.run.name}',\n" +
                 "\t\tlanes: ['${seqTrack.laneId}',],\n" +
                 "\t\tsampleNeedsToBeCreated: false,\n" +
-                "\t\tdataFileSwaps        : [\n"
+                "\t\trawSequenceFileSwaps        : [\n"
 
-        DataFile.findAllBySeqTrack(seqTrack, [sort: 'id']).each { datafile ->
-            snippet << "\t\t\tnew Swap('${datafile.fileName}', '${newDataFileNameClosure(datafile, oldIndividual.pid, newIndividual)}'),\n"
+        RawSequenceFile.findAllBySeqTrack(seqTrack, [sort: 'id']).each { rawSequenceFile ->
+            snippet << "\t\t\tnew Swap('${rawSequenceFile.fileName}', '${newRawSequenceFileNameClosure(rawSequenceFile, oldIndividual.pid, newIndividual)}'),\n"
         }
 
         snippet << "\t\t],\n" +

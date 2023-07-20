@@ -50,7 +50,7 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
     @Override
     Class[] getDomainClassesToMock() {
         return [
-                DataFile,
+                RawSequenceFile,
                 Project,
                 SampleType,
                 SeqType,
@@ -66,6 +66,7 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
                 AceseqInstance,
                 AceseqQc,
                 MergingWorkPackage,
+                FastqFile,
         ]
     }
 
@@ -202,9 +203,9 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
     }
 
     @Unroll
-    void "collectFileNamesOfDataFiles, when single cell is #singleCell and label is #wellLabel, then return correct list"() {
+    void "collectFileNamesOfRawSequenceFiles, when single cell is #singleCell and label is #wellLabel, then return correct list"() {
         given:
-        final DataFile dataFile = createDataFile(
+        final RawSequenceFile rawSequenceFile = createFastqFile(
                 used: false,
                 seqTrack: createSeqTrack([
                         seqType            : createSeqType([
@@ -215,25 +216,25 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
         )
 
         service.lsdfFilesService = Mock(LsdfFilesService) {
-            1 * getFileFinalPathAsPath(dataFile) >> Paths.get('finalFile')
-            1 * getFileViewByPidPathAsPath(dataFile) >> Paths.get('viewByPidFile')
-            wellCount * getFileViewByPidPathAsPath(dataFile, WellDirectory.ALL_WELL) >> Paths.get('wellFile')
+            1 * getFileFinalPathAsPath(rawSequenceFile) >> Paths.get('finalFile')
+            1 * getFileViewByPidPathAsPath(rawSequenceFile) >> Paths.get('viewByPidFile')
+            wellCount * getFileViewByPidPathAsPath(rawSequenceFile, WellDirectory.ALL_WELL) >> Paths.get('wellFile')
             0 * _
         }
         service.singleCellService = Mock(SingleCellService) {
-            wellCount * singleCellMappingFile(dataFile) >> Paths.get('wellMappingFile')
-            wellCount * mappingEntry(dataFile) >> 'entry'
+            wellCount * singleCellMappingFile(rawSequenceFile) >> Paths.get('wellMappingFile')
+            wellCount * mappingEntry(rawSequenceFile) >> 'entry'
             0 * _
         }
 
-        Map<DataFile, Map<String, ?>> expected = [
-                (dataFile): [
+        Map<RawSequenceFile, Map<String, ?>> expected = [
+                (rawSequenceFile): [
                         (AbstractDataSwapService.DIRECT_FILE_NAME): 'finalFile',
                         (AbstractDataSwapService.VBP_FILE_NAME)   : 'viewByPidFile',
                 ],
         ]
         if (wellCount) {
-            expected[dataFile] << [
+            expected[rawSequenceFile] << [
                     (AbstractDataSwapService.WELL_FILE_NAME)              : 'wellFile',
                     (AbstractDataSwapService.WELL_MAPPING_FILE_NAME)      : 'wellMappingFile',
                     (AbstractDataSwapService.WELL_MAPPING_FILE_ENTRY_NAME): 'entry',
@@ -241,7 +242,7 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
         }
 
         expect:
-        expected == service.collectFileNamesOfDataFiles([dataFile])
+        expected == service.collectFileNamesOfRawSequenceFiles([rawSequenceFile])
 
         where:
         singleCell | wellLabel || wellCount
@@ -254,7 +255,7 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
     @Unroll
     void "createSingeCellScript, when single cell is #singleCell and label is #wellLabel, then return empty list"() {
         given:
-        final DataFile dataFile = createDataFile(
+        final RawSequenceFile rawSequenceFile = createFastqFile(
                 used: false,
                 seqTrack: createSeqTrack([
                         seqType            : createSeqType([
@@ -265,7 +266,7 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
         )
 
         expect:
-        service.createSingeCellScript(dataFile, [:]) == ''
+        service.createSingeCellScript(rawSequenceFile, [:]) == ''
 
         where:
         singleCell | wellLabel
@@ -290,7 +291,7 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
         final String NEW_MAPPING_PATH = "${NEW_ALL_PATH}/mapping"
         final String NEW_ENTRY = 'newEntry\tvalue'
 
-        final DataFile dataFile = createDataFile(
+        final RawSequenceFile rawSequenceFile = createFastqFile(
                 used: false,
                 seqTrack: createSeqTrack([
                         seqType            : createSeqType([
@@ -301,14 +302,14 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
         )
 
         service.lsdfFilesService = Mock(LsdfFilesService) {
-            1 * getFileFinalPathAsPath(dataFile) >> NEW_FINAL_PATH
-            1 * getFileViewByPidPathAsPath(dataFile, WellDirectory.ALL_WELL) >> NEW_WELL_PATH
+            1 * getFileFinalPathAsPath(rawSequenceFile) >> NEW_FINAL_PATH
+            1 * getFileViewByPidPathAsPath(rawSequenceFile, WellDirectory.ALL_WELL) >> NEW_WELL_PATH
             0 * _
         }
 
         service.singleCellService = Mock(SingleCellService) {
-            1 * singleCellMappingFile(dataFile) >> Paths.get(NEW_MAPPING_PATH)
-            1 * mappingEntry(dataFile) >> NEW_ENTRY
+            1 * singleCellMappingFile(rawSequenceFile) >> Paths.get(NEW_MAPPING_PATH)
+            1 * mappingEntry(rawSequenceFile) >> NEW_ENTRY
             0 * _
         }
 
@@ -345,7 +346,7 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
                                 |""".stripMargin()
 
         when:
-        String script = service.createSingeCellScript(dataFile, oldValues)
+        String script = service.createSingeCellScript(rawSequenceFile, oldValues)
 
         then:
         expectedScript == script
@@ -606,15 +607,15 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
     }
 
     @Unroll
-    void "createCommentForSwappedDatafiles, when no comments exists call saveComment #size times with #comment"() {
+    void "createCommentForSwappedRawSequenceFiles, when no comments exists call saveComment #size times with #comment"() {
         given:
-        final List<DataFile> dataFiles = (1..size).collect { createDataFile() }
-        final DataSwapData dataSwapData = new DataSwapData<DataSwapParameters>(dataFiles: dataFiles)
+        final List<RawSequenceFile> rawSequenceFiles = (1..size).collect { createFastqFile() }
+        final DataSwapData dataSwapData = new DataSwapData<DataSwapParameters>(rawSequenceFiles: rawSequenceFiles)
 
         service.commentService = Mock(CommentService)
 
         when:
-        service.createCommentForSwappedDatafiles(dataSwapData)
+        service.createCommentForSwappedRawSequenceFiles(dataSwapData)
 
         then:
         size * service.commentService.saveComment(_, comment)
@@ -625,19 +626,19 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
     }
 
     @Unroll
-    void "createCommentForSwappedDatafiles, when already comments exists call saveComment #size times with #comment"() {
+    void "createCommentForSwappedRawSequenceFiles, when already comments exists call saveComment #size times with #comment"() {
         given:
-        final List<DataFile> dataFiles = (1..size).collect {
-            createDataFile([
+        final List<RawSequenceFile> rawSequenceFiles = (1..size).collect {
+            createFastqFile([
                     comment: new Comment(comment: someComment, modificationDate: new Date(), author: "SomeAuthor")
             ])
         }
-        final DataSwapData dataSwapData = new DataSwapData<DataSwapParameters>(dataFiles: dataFiles)
+        final DataSwapData dataSwapData = new DataSwapData<DataSwapParameters>(rawSequenceFiles: rawSequenceFiles)
 
         service.commentService = Mock(CommentService)
 
         when:
-        service.createCommentForSwappedDatafiles(dataSwapData)
+        service.createCommentForSwappedRawSequenceFiles(dataSwapData)
 
         then:
         size * service.commentService.saveComment(_, comment)
@@ -649,19 +650,19 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
         size = 5
     }
 
-    void "renameDataFiles, when old dataFile is withdrawn and libraryLayout is not SINGLE fail with AssertError"() {
+    void "renameRawSequenceFiles, when old dataFile is withdrawn and libraryLayout is not SINGLE fail with AssertError"() {
         given:
-        final String newDataFileName = 'newDataFileName.gz'
+        final String newRawSequenceFileName = 'newDataFileName.gz'
 
         // domain
-        final SeqTrack seqTrack = createSeqTrackWithOneDataFile([seqType: createSeqType([libraryLayout: SequencingReadType.PAIRED])])
-        DataFile dataFile = CollectionUtils.exactlyOneElement(DataFile.findAllBySeqTrack(seqTrack))
-        dataFile.fileType.vbpPath = "/sequence/"
-        dataFile.mateNumber = null
-        dataFile.fileWithdrawn = true
-        final Path oldFile = tempDir.resolve(dataFile.fileName)
+        final SeqTrack seqTrack = createSeqTrackWithOneFastqFile([seqType: createSeqType([libraryLayout: SequencingReadType.PAIRED])])
+        RawSequenceFile rawSequenceFile = CollectionUtils.exactlyOneElement(RawSequenceFile.findAllBySeqTrack(seqTrack))
+        rawSequenceFile.fileType.vbpPath = "/sequence/"
+        rawSequenceFile.mateNumber = null
+        rawSequenceFile.fileWithdrawn = true
+        final Path oldFile = tempDir.resolve(rawSequenceFile.fileName)
         final Path oldFileViewByPid = tempDir.resolve('oldViewByPidFile')
-        final Path newFile = Paths.get('somePath').resolve(Paths.get(newDataFileName))
+        final Path newFile = Paths.get('somePath').resolve(Paths.get(newRawSequenceFileName))
         final Path newFileViewByPid = Paths.get('linking').resolve(Paths.get('newViewByPidFile'))
 
         // service
@@ -671,48 +672,48 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
         }
 
         // DTO
-        final List<Swap<String>> dataFileSwaps = [new Swap(dataFile.fileName, newDataFileName)]
+        final List<Swap<String>> rawSequenceFileSwaps = [new Swap(rawSequenceFile.fileName, newRawSequenceFileName)]
         StringBuilder log = new StringBuilder()
-        final Map<DataFile, Map<String, ?>> oldDataFileNameMap = [
-                (dataFile): [
+        final Map<RawSequenceFile, Map<String, ?>> oldRawSequenceFileNameMap = [
+                (rawSequenceFile): [
                         (AbstractDataSwapService.DIRECT_FILE_NAME): oldFile.toString(),
                         (AbstractDataSwapService.VBP_FILE_NAME)   : oldFileViewByPid.toString(),
                 ],
         ]
 
         final DataSwapParameters parameters = new DataSwapParameters(
-                dataFileSwaps: dataFileSwaps,
+                rawSequenceFileSwaps: rawSequenceFileSwaps,
                 log: log
         )
 
         final DataSwapData dataSwapData = new DataSwapData(
-                projectSwap: new Swap(dataFile.project, dataFile.project),
+                projectSwap: new Swap(rawSequenceFile.project, rawSequenceFile.project),
                 parameters: parameters,
-                dataFiles: [dataFile],
-                oldDataFileNameMap: oldDataFileNameMap
+                rawSequenceFiles: [rawSequenceFile],
+                oldRawSequenceFileNameMap: oldRawSequenceFileNameMap
         )
 
         when:
-        service.renameDataFiles(dataSwapData)
+        service.renameRawSequenceFiles(dataSwapData)
 
         then:
         thrown AssertionError
     }
 
-    void "renameDataFiles, when old dataFile is withdrawn log it and set mateNumber to 1"() {
+    void "renameRawSequenceFiles, when old dataFile is withdrawn log it and set mateNumber to 1"() {
         given:
-        final String newDataFileName = 'newDataFileName.gz'
+        final String newRawSequenceFileName = 'newDataFileName.gz'
 
         // domain
-        final SeqTrack seqTrack = createSeqTrackWithOneDataFile([seqType: createSeqType([libraryLayout: SequencingReadType.SINGLE])])
-        DataFile dataFile = CollectionUtils.exactlyOneElement(DataFile.findAllBySeqTrack(seqTrack))
-        dataFile.fileType.vbpPath = "/sequence/"
-        dataFile.mateNumber = null
-        dataFile.fileWithdrawn = true
-        final String oldDataFileName = dataFile.fileName
-        final Path oldFile = CreateFileHelper.createFile(tempDir.resolve(dataFile.fileName))
+        final SeqTrack seqTrack = createSeqTrackWithOneFastqFile([seqType: createSeqType([libraryLayout: SequencingReadType.SINGLE])])
+        RawSequenceFile rawSequenceFile = CollectionUtils.exactlyOneElement(RawSequenceFile.findAllBySeqTrack(seqTrack))
+        rawSequenceFile.fileType.vbpPath = "/sequence/"
+        rawSequenceFile.mateNumber = null
+        rawSequenceFile.fileWithdrawn = true
+        final String oldRawSequenceFileName = rawSequenceFile.fileName
+        final Path oldFile = CreateFileHelper.createFile(tempDir.resolve(rawSequenceFile.fileName))
         final Path oldFileViewByPid = CreateFileHelper.createFile(tempDir.resolve('oldViewByPidFile'))
-        final Path newFile = Paths.get('somePath').resolve(Paths.get(newDataFileName))
+        final Path newFile = Paths.get('somePath').resolve(Paths.get(newRawSequenceFileName))
         final Path newFileViewByPid = Paths.get('linking').resolve(Paths.get('newViewByPidFile'))
 
         // service
@@ -725,123 +726,125 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
         }
 
         // DTO
-        final List<Swap<String>> dataFileSwaps = [new Swap(dataFile.fileName, newDataFileName)]
+        final List<Swap<String>> rawSequenceFileSwaps = [new Swap(rawSequenceFile.fileName, newRawSequenceFileName)]
         StringBuilder log = new StringBuilder()
-        final Map<DataFile, Map<String, ?>> oldDataFileNameMap = [
-                (dataFile): [
+        final Map<RawSequenceFile, Map<String, ?>> oldRawSequenceFileNameMap = [
+                (rawSequenceFile): [
                         (AbstractDataSwapService.DIRECT_FILE_NAME): oldFile.toString(),
                         (AbstractDataSwapService.VBP_FILE_NAME)   : oldFileViewByPid.toString(),
                 ],
         ]
 
         final DataSwapParameters parameters = new DataSwapParameters(
-                dataFileSwaps: dataFileSwaps,
+                rawSequenceFileSwaps: rawSequenceFileSwaps,
                 log: log
         )
 
         final DataSwapData dataSwapData = new DataSwapData(
-                projectSwap: new Swap(dataFile.project, dataFile.project),
+                projectSwap: new Swap(rawSequenceFile.project, rawSequenceFile.project),
                 parameters: parameters,
-                dataFiles: [dataFile],
-                oldDataFileNameMap: oldDataFileNameMap
+                rawSequenceFiles: [rawSequenceFile],
+                oldRawSequenceFileNameMap: oldRawSequenceFileNameMap
         )
 
         when:
-        service.renameDataFiles(dataSwapData)
+        service.renameRawSequenceFiles(dataSwapData)
 
         then:
-        dataFile.mateNumber == 1
-        log.toString() == "\n====> set mate number for withdrawn data file\n    changed ${oldDataFileName} to ${dataFile.fileName}"
+        rawSequenceFile.mateNumber == 1
+        log.toString() == "\n====> set mate number for withdrawn data file\n    changed ${oldRawSequenceFileName} to ${rawSequenceFile.fileName}"
     }
 
     @Unroll
-    void "renameDataFiles, when old files exists but new files not then move old files to new location and link new with #seqTrackAmount SeqTrack(s)"() {
+    void "renameRawSequenceFiles, when old files exists but new files not then move old files to new location and link new with #seqTrackAmount SeqTrack(s)"() {
         given:
 
         // domain
         final Project project = createProject()
         final Sample sample = createSample([individual: createIndividual([project: project,]),])
-        final List<DataFile> dataFileList = []
+        final List<RawSequenceFile> rawSequenceFiles = []
 
         for (int i : 1..seqTrackAmount) {
-            final SeqTrack seqTrack = createSeqTrackWithTwoDataFile(
+            final SeqTrack seqTrack = createSeqTrackWithTwoFastqFile(
                     [sample: sample,],
                     [fileName: "DataFileFileName_${i}_R1.gz", project: project,],
                     [fileName: "DataFileFileName_${i}_R2.gz", project: project,],
             )
 
-            final List<DataFile> dataFilesPerSeqTrack = DataFile.findAllBySeqTrack(seqTrack)
-            dataFileList.addAll(dataFilesPerSeqTrack)
+            final List<RawSequenceFile> rawSequenceFilesPerSeqTrack = RawSequenceFile.findAllBySeqTrack(seqTrack)
+            rawSequenceFiles.addAll(rawSequenceFilesPerSeqTrack)
         }
-        final Map<DataFile, Map<String, ?>> dataFilePaths = createPathsForDataFiles(dataFileList, true, false)
+        final Map<RawSequenceFile, Map<String, ?>> rawSequenceFilePaths = createPathsForRawSequenceFiles(rawSequenceFiles, true, false)
 
         // service
         service.lsdfFilesService = Mock(LsdfFilesService) {
-            _ * getFileFinalPathAsPath(_) >> { DataFile dataFile, PathOption... options -> Paths.get(dataFilePaths[dataFile].newPath.toString()) }
-            _ * getFileViewByPidPathAsPath(_) >> { DataFile dataFile, PathOption... options -> Paths.get(dataFilePaths[dataFile].newVbpPath.toString()) }
+            _ * getFileFinalPathAsPath(_) >> { RawSequenceFile rawSequenceFile, PathOption... options ->
+                Paths.get(rawSequenceFilePaths[rawSequenceFile].newPath.toString()) }
+            _ * getFileViewByPidPathAsPath(_) >> { RawSequenceFile rawSequenceFile, PathOption... options ->
+                Paths.get(rawSequenceFilePaths[rawSequenceFile].newVbpPath.toString()) }
         }
         service.fileSystemService = Mock(FileSystemService) {
             _ * getRemoteFileSystemOnDefaultRealm() >> FileSystems.default
         }
 
         // DTO
-        final List<Swap<String>> dataFileSwaps = dataFileList.collect { new Swap(dataFilePaths[it].oldFileName, dataFilePaths[it].newFileName) }
+        final List<Swap<String>> rawSequenceFileSwaps = rawSequenceFiles.collect { new Swap(rawSequenceFilePaths[it].oldFileName, rawSequenceFilePaths[it].newFileName) }
         StringBuilder log = new StringBuilder()
-        final Map<DataFile, Map<String, String>> oldDataFileNameMap = dataFileList.collectEntries {
+        final Map<RawSequenceFile, Map<String, String>> oldRawSequenceFileNameMap = rawSequenceFiles.collectEntries {
             [(it): [
-                    (AbstractDataSwapService.DIRECT_FILE_NAME): dataFilePaths[it].oldPath.toString(),
-                    (AbstractDataSwapService.VBP_FILE_NAME)   : dataFilePaths[it].oldVbpPath.toString(),
+                    (AbstractDataSwapService.DIRECT_FILE_NAME): rawSequenceFilePaths[it].oldPath.toString(),
+                    (AbstractDataSwapService.VBP_FILE_NAME)   : rawSequenceFilePaths[it].oldVbpPath.toString(),
             ]]
         }
 
         final DataSwapParameters parameters = new DataSwapParameters(
-                dataFileSwaps: dataFileSwaps,
+                rawSequenceFileSwaps: rawSequenceFileSwaps,
                 log: log
         )
 
         final DataSwapData dataSwapData = new DataSwapData(
                 projectSwap: new Swap(project, project),
                 parameters: parameters,
-                dataFiles: dataFileList,
-                oldDataFileNameMap: oldDataFileNameMap
+                rawSequenceFiles: rawSequenceFiles,
+                oldRawSequenceFileNameMap: oldRawSequenceFileNameMap
         )
 
         String bashScriptToMoveFiles = ""
-        dataFileList.each {
+        rawSequenceFiles.each {
             final String bashMoveDirectFile = """\n
-                                     |# ${it.seqTrack} ${dataFilePaths[it].newFileName}
-                                     |mkdir -p -m 2750 '${dataFilePaths[it].newPath.parent}';
-                                     |mv '${dataFilePaths[it].oldPath}' \\
-                                     |   '${dataFilePaths[it].newPath}';
-                                     |chgrp -h `stat -c '%G' ${dataFilePaths[it].newPath.parent}` ${dataFilePaths[it].newPath}
-                                     |if [ -e '${dataFilePaths[it].oldPath}.md5sum' ]; then
-                                     |  mv '${dataFilePaths[it].oldPath}.md5sum' \\
-                                     |     '${dataFilePaths[it].newPath}.md5sum';
-                                     |  chgrp -h `stat -c '%G' ${dataFilePaths[it].newPath.parent}` ${dataFilePaths[it].newPath}.md5sum
+                                     |# ${it.seqTrack} ${rawSequenceFilePaths[it].newFileName}
+                                     |mkdir -p -m 2750 '${rawSequenceFilePaths[it].newPath.parent}';
+                                     |mv '${rawSequenceFilePaths[it].oldPath}' \\
+                                     |   '${rawSequenceFilePaths[it].newPath}';
+                                     |chgrp -h `stat -c '%G' ${rawSequenceFilePaths[it].newPath.parent}` ${rawSequenceFilePaths[it].newPath}
+                                     |if [ -e '${rawSequenceFilePaths[it].oldPath}.md5sum' ]; then
+                                     |  mv '${rawSequenceFilePaths[it].oldPath}.md5sum' \\
+                                     |     '${rawSequenceFilePaths[it].newPath}.md5sum';
+                                     |  chgrp -h `stat -c '%G' ${rawSequenceFilePaths[it].newPath.parent}` ${rawSequenceFilePaths[it].newPath}.md5sum
                                      |fi\n""".stripMargin()
 
             final String bashMoveVbpFile = """\
-                                 |rm -f '${dataFilePaths[it].oldVbpPath}';
-                                 |mkdir -p -m 2750 '${dataFilePaths[it].newVbpPath.parent}';
-                                 |ln -sr '${dataFilePaths[it].newPath}' \\
-                                 |      '${dataFilePaths[it].newVbpPath}'""".stripMargin()
+                                 |rm -f '${rawSequenceFilePaths[it].oldVbpPath}';
+                                 |mkdir -p -m 2750 '${rawSequenceFilePaths[it].newVbpPath.parent}';
+                                 |ln -sr '${rawSequenceFilePaths[it].newPath}' \\
+                                 |      '${rawSequenceFilePaths[it].newVbpPath}'""".stripMargin()
 
             bashScriptToMoveFiles += "${bashMoveDirectFile}\n${bashMoveVbpFile}\n"
             bashScriptToMoveFiles += "\n\n"
         }
 
         String expectedLog = ""
-        dataFileList.each {
-            expectedLog += "\n    changed ${dataFilePaths[it].oldFileName} to ${dataFilePaths[it].newFileName}"
+        rawSequenceFiles.each {
+            expectedLog += "\n    changed ${rawSequenceFilePaths[it].oldFileName} to ${rawSequenceFilePaths[it].newFileName}"
         }
 
         when:
-        String script = service.renameDataFiles(dataSwapData)
+        String script = service.renameRawSequenceFiles(dataSwapData)
 
         then:
         bashScriptToMoveFiles == script
-        dataFileList*.fileName == dataFilePaths.values().newFileName
-        dataFileList*.vbpFileName == dataFilePaths.values().newFileName
+        rawSequenceFiles*.fileName == rawSequenceFilePaths.values().newFileName
+        rawSequenceFiles*.vbpFileName == rawSequenceFilePaths.values().newFileName
         log.toString() == expectedLog
 
         where:
@@ -891,81 +894,83 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
     }
 
     @Unroll
-    void "renameDataFiles, when old and new data files exists then remove old files and link new with #seqTrackAmount SeqTrack(s)"() {
+    void "renameRawSequenceFiles, when old and new data files exists then remove old files and link new with #seqTrackAmount SeqTrack(s)"() {
         given:
 
         // domain
         final Project project = createProject()
         final Sample sample = createSample([individual: createIndividual([project: project,]),])
-        final List<DataFile> dataFileList = []
+        final List<RawSequenceFile> rawSequenceFileList = []
 
         for (int i : 1..seqTrackAmount) {
-            final SeqTrack seqTrack = createSeqTrackWithTwoDataFile(
+            final SeqTrack seqTrack = createSeqTrackWithTwoFastqFile(
                     [sample: sample,],
                     [fileName: "DataFileFileName_${i}_R1.gz", project: project,],
                     [fileName: "DataFileFileName_${i}_R2.gz", project: project,]
             )
-            final List<DataFile> dataFilesPerSeqTrack = DataFile.findAllBySeqTrack(seqTrack)
-            dataFileList.addAll(dataFilesPerSeqTrack)
+            final List<RawSequenceFile> rawSequenceFilesPerSeqTrack = RawSequenceFile.findAllBySeqTrack(seqTrack)
+            rawSequenceFileList.addAll(rawSequenceFilesPerSeqTrack)
         }
-        final Map<DataFile, Map<String, ?>> dataFilePaths = createPathsForDataFiles(dataFileList)
+        final Map<RawSequenceFile, Map<String, ?>> rawSequenceFilePaths = createPathsForRawSequenceFiles(rawSequenceFileList)
 
         // service
         service.lsdfFilesService = Mock(LsdfFilesService) {
-            _ * getFileFinalPathAsPath(_) >> { DataFile dataFile, PathOption... options -> Paths.get(dataFilePaths[dataFile].newPath.toString()) }
-            _ * getFileViewByPidPathAsPath(_) >> { DataFile dataFile, PathOption... options -> Paths.get(dataFilePaths[dataFile].newVbpPath.toString()) }
+            _ * getFileFinalPathAsPath(_) >> { RawSequenceFile rawSequenceFile, PathOption... options ->
+                Paths.get(rawSequenceFilePaths[rawSequenceFile].newPath.toString()) }
+            _ * getFileViewByPidPathAsPath(_) >> { RawSequenceFile rawSequenceFile, PathOption... options ->
+                Paths.get(rawSequenceFilePaths[rawSequenceFile].newVbpPath.toString()) }
         }
         service.fileSystemService = Mock(FileSystemService) {
             _ * getRemoteFileSystemOnDefaultRealm() >> FileSystems.default
         }
 
         // DTO
-        final List<Swap<String>> dataFileSwaps = dataFileList.collect { new Swap(dataFilePaths[it].oldFileName, dataFilePaths[it].newFileName) }
+        final List<Swap<String>> rawSequenceFileSwaps = rawSequenceFileList.collect { new Swap(rawSequenceFilePaths[it].oldFileName, rawSequenceFilePaths[it].newFileName) }
         StringBuilder log = new StringBuilder()
-        final Map<DataFile, Map<String, String>> oldDataFileNameMap = dataFileList.collectEntries {
+        final Map<RawSequenceFile, Map<String, String>> oldRawSequenceFileNameMap = rawSequenceFileList.collectEntries {
             [(it): [
-                    (AbstractDataSwapService.DIRECT_FILE_NAME): dataFilePaths[it].oldPath.toString(),
-                    (AbstractDataSwapService.VBP_FILE_NAME)   : dataFilePaths[it].oldVbpPath.toString(),
+                    (AbstractDataSwapService.DIRECT_FILE_NAME): rawSequenceFilePaths[it].oldPath.toString(),
+                    (AbstractDataSwapService.VBP_FILE_NAME)   : rawSequenceFilePaths[it].oldVbpPath.toString(),
             ]]
         }
 
         final DataSwapParameters parameters = new DataSwapParameters(
-                dataFileSwaps: dataFileSwaps,
+                rawSequenceFileSwaps: rawSequenceFileSwaps,
                 log: log
         )
 
         final DataSwapData dataSwapData = new DataSwapData(
                 projectSwap: new Swap(project, project),
                 parameters: parameters,
-                dataFiles: dataFileList,
-                oldDataFileNameMap: oldDataFileNameMap
+                rawSequenceFiles: rawSequenceFileList,
+                oldRawSequenceFileNameMap: oldRawSequenceFileNameMap
         )
 
         String bashScriptToMoveFiles = ""
-        dataFileList.each {
-            final String bashMoveDirectFile = "rm -f '${dataFilePaths[it].oldPath}'"
+        rawSequenceFileList.each {
+            final String bashMoveDirectFile = "rm -f '${rawSequenceFilePaths[it].oldPath}'"
             final String bashMoveVbpFile = """\
-                                 |rm -f '${dataFilePaths[it].oldVbpPath}';
-                                 |mkdir -p -m 2750 '${dataFilePaths[it].newVbpPath.parent}';
-                                 |ln -sr '${dataFilePaths[it].newPath}' \\
-                                 |      '${dataFilePaths[it].newVbpPath}'""".stripMargin()
+                                 |rm -f '${rawSequenceFilePaths[it].oldVbpPath}';
+                                 |mkdir -p -m 2750 '${rawSequenceFilePaths[it].newVbpPath.parent}';
+                                 |ln -sr '${rawSequenceFilePaths[it].newPath}' \\
+                                 |      '${rawSequenceFilePaths[it].newVbpPath}'""".stripMargin()
 
             bashScriptToMoveFiles += "${bashMoveDirectFile}\n${bashMoveVbpFile}\n"
             bashScriptToMoveFiles += "\n\n"
         }
 
         String expectedLog = ""
-        dataFileList.each {
-            expectedLog += "\n    changed ${dataFilePaths[it].oldFileName} to ${dataFilePaths[it].newFileName}"
+        rawSequenceFileList.each {
+            expectedLog += "\n    changed ${rawSequenceFilePaths[it].oldFileName} to ${rawSequenceFilePaths[it].newFileName}"
         }
 
         when:
-        String script = service.renameDataFiles(dataSwapData)
+        String script = service.renameRawSequenceFiles(dataSwapData)
 
         then:
         bashScriptToMoveFiles == script
-        dataFileList*.fileName == dataFilePaths.values().newFileName
-        dataFileList*.vbpFileName == dataFilePaths.values().newFileName
+        rawSequenceFileList*.fileName == rawSequenceFilePaths.values().newFileName
+        rawSequenceFileList*.vbpFileName == rawSequenceFilePaths.values().newFileName
         log.toString() == expectedLog
 
         where:
@@ -973,26 +978,26 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
     }
 
     @Unroll
-    void "renameDataFiles, when old file is singleCell then also create singleCellScript with #seqTrackAmount SeqTrack(s)"() {
+    void "renameRawSequenceFiles, when old file is singleCell then also create singleCellScript with #seqTrackAmount SeqTrack(s)"() {
         given:
 
         // domain
         final Project project = createProject()
         final Sample sample = createSample([individual: createIndividual([project: project])])
-        final List<DataFile> dataFileList = []
+        final List<RawSequenceFile> rawSequenceFileList = []
 
         for (int i : 1..seqTrackAmount) {
-            final SeqTrack seqTrack = createSeqTrackWithTwoDataFile(
+            final SeqTrack seqTrack = createSeqTrackWithTwoFastqFile(
                     [sample: sample, seqType: createSeqType([singleCell: true,]), singleCellWellLabel: 'WELL',],
                     [fileName: "DataFileFileName_${i}_R1.gz", project: project, used: false,],
                     [fileName: "DataFileFileName_${i}_R2.gz", project: project, used: false,]
             )
-            final List<DataFile> dataFilesPerSeqTrack = DataFile.findAllBySeqTrack(seqTrack)
-            dataFileList.addAll(dataFilesPerSeqTrack)
+            final List<RawSequenceFile> rawSequenceFilesPerSeqTrack = RawSequenceFile.findAllBySeqTrack(seqTrack)
+            rawSequenceFileList.addAll(rawSequenceFilesPerSeqTrack)
         }
 
-        final Map<DataFile, Map<String, ?>> dataFilePaths = createPathsForDataFiles(dataFileList)
-        dataFilePaths.each {
+        final Map<RawSequenceFile, Map<String, ?>> rawSequenceFilePaths = createPathsForRawSequenceFiles(rawSequenceFileList)
+        rawSequenceFilePaths.each {
             it.value.put('oldWellFile', tempDir.resolve("${it.key.fileName}_wellFile"))
             it.value.put('wellMappingFile', tempDir.resolve("${it.key.fileName}_oldWellMappingFile"))
             it.value.put('oldWellMappingEntry', "${it.key.fileName}_oldWellMappingEntry")
@@ -1002,136 +1007,138 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
 
         // service
         service.lsdfFilesService = Mock(LsdfFilesService) {
-            _ * getFileFinalPathAsPath(_) >> { DataFile dataFile, PathOption... options -> Paths.get(dataFilePaths[dataFile].newPath.toString()) }
-            _ * getFileViewByPidPathAsPath(_) >> { DataFile dataFile, PathOption... options -> Paths.get(dataFilePaths[dataFile].newVbpPath.toString()) }
-            _ * getFileViewByPidPathAsPath(_, WellDirectory.ALL_WELL) >> { DataFile dataFile, _, PathOption... options ->
-                Paths.get(dataFilePaths[dataFile].newVbpPath.toString()) }
+            _ * getFileFinalPathAsPath(_) >> { RawSequenceFile rawSequenceFile, PathOption... options ->
+                Paths.get(rawSequenceFilePaths[rawSequenceFile].newPath.toString()) }
+            _ * getFileViewByPidPathAsPath(_) >> { RawSequenceFile rawSequenceFile, PathOption... options ->
+                Paths.get(rawSequenceFilePaths[rawSequenceFile].newVbpPath.toString()) }
+            _ * getFileViewByPidPathAsPath(_, WellDirectory.ALL_WELL) >> { RawSequenceFile rawSequenceFile, _, PathOption... options ->
+                Paths.get(rawSequenceFilePaths[rawSequenceFile].newVbpPath.toString()) }
         }
 
         service.singleCellService = Mock(SingleCellService) {
-            _ * singleCellMappingFile(_) >> { DataFile dataFile -> dataFilePaths[dataFile].newWellMappingFile }
-            _ * mappingEntry(_) >> { DataFile dataFile -> dataFilePaths[dataFile].newWellMappingFileEntryName }
+            _ * singleCellMappingFile(_) >> { RawSequenceFile rawSequenceFile -> rawSequenceFilePaths[rawSequenceFile].newWellMappingFile }
+            _ * mappingEntry(_) >> { RawSequenceFile rawSequenceFile -> rawSequenceFilePaths[rawSequenceFile].newWellMappingFileEntryName }
         }
         service.fileSystemService = Mock(FileSystemService) {
             _ * getRemoteFileSystemOnDefaultRealm() >> FileSystems.default
         }
 
-        final List<Swap<String>> dataFileSwaps = dataFileList.collect { new Swap(dataFilePaths[it].oldFileName, dataFilePaths[it].newFileName) }
+        final List<Swap<String>> rawSequenceFileSwaps = rawSequenceFileList.collect { new Swap(rawSequenceFilePaths[it].oldFileName, rawSequenceFilePaths[it].newFileName) }
         StringBuilder log = new StringBuilder()
-        final Map<DataFile, Map<String, String>> oldDataFileNameMap = dataFileList.collectEntries {
+        final Map<RawSequenceFile, Map<String, String>> oldRawSequenceFileNameMap = rawSequenceFileList.collectEntries {
             [(it): [
-                    (AbstractDataSwapService.DIRECT_FILE_NAME)            : dataFilePaths[it].oldPath.toString(),
-                    (AbstractDataSwapService.VBP_FILE_NAME)               : dataFilePaths[it].oldVbpPath.toString(),
-                    (AbstractDataSwapService.WELL_FILE_NAME)              : dataFilePaths[it].oldWellFile.toString(),
-                    (AbstractDataSwapService.WELL_MAPPING_FILE_NAME)      : dataFilePaths[it].oldWellMappingFile,
-                    (AbstractDataSwapService.WELL_MAPPING_FILE_ENTRY_NAME): dataFilePaths[it].oldWellMappingFileEntryName,
+                    (AbstractDataSwapService.DIRECT_FILE_NAME)            : rawSequenceFilePaths[it].oldPath.toString(),
+                    (AbstractDataSwapService.VBP_FILE_NAME)               : rawSequenceFilePaths[it].oldVbpPath.toString(),
+                    (AbstractDataSwapService.WELL_FILE_NAME)              : rawSequenceFilePaths[it].oldWellFile.toString(),
+                    (AbstractDataSwapService.WELL_MAPPING_FILE_NAME)      : rawSequenceFilePaths[it].oldWellMappingFile,
+                    (AbstractDataSwapService.WELL_MAPPING_FILE_ENTRY_NAME): rawSequenceFilePaths[it].oldWellMappingFileEntryName,
             ]]
         }
 
         final DataSwapParameters parameters = new DataSwapParameters(
-                dataFileSwaps: dataFileSwaps,
+                rawSequenceFileSwaps: rawSequenceFileSwaps,
                 log: log
         )
 
         final DataSwapData dataSwapData = new DataSwapData(
                 projectSwap: new Swap(project, project),
                 parameters: parameters,
-                dataFiles: dataFileList,
-                oldDataFileNameMap: oldDataFileNameMap
+                rawSequenceFiles: rawSequenceFileList,
+                oldRawSequenceFileNameMap: oldRawSequenceFileNameMap
         )
 
         String bashScriptToMoveFiles = ""
-        dataFileList.each {
-            final String bashMoveDirectFile = "rm -f '${dataFilePaths[it].oldPath}'"
+        rawSequenceFileList.each {
+            final String bashMoveDirectFile = "rm -f '${rawSequenceFilePaths[it].oldPath}'"
             final String bashMoveVbpFile = """\
-                                 |rm -f '${dataFilePaths[it].oldVbpPath}';
-                                 |mkdir -p -m 2750 '${dataFilePaths[it].newVbpPath.parent}';
-                                 |ln -sr '${dataFilePaths[it].newPath}' \\
-                                 |      '${dataFilePaths[it].newVbpPath}'""".stripMargin()
+                                 |rm -f '${rawSequenceFilePaths[it].oldVbpPath}';
+                                 |mkdir -p -m 2750 '${rawSequenceFilePaths[it].newVbpPath.parent}';
+                                 |ln -sr '${rawSequenceFilePaths[it].newPath}' \\
+                                 |      '${rawSequenceFilePaths[it].newVbpPath}'""".stripMargin()
 
             bashScriptToMoveFiles += "${bashMoveDirectFile}\n${bashMoveVbpFile}\n"
             bashScriptToMoveFiles += """
                                  |# Single Cell structure
                                  |## recreate link
-                                 |rm -f '${dataFilePaths[it].oldWellFile}'
-                                 |mkdir -p -m 2750 '${dataFilePaths[it].newVbpPath.parent}'
-                                 |ln -sr '${dataFilePaths[it].newPath}' \\\n      '${dataFilePaths[it].newVbpPath}'
+                                 |rm -f '${rawSequenceFilePaths[it].oldWellFile}'
+                                 |mkdir -p -m 2750 '${rawSequenceFilePaths[it].newVbpPath.parent}'
+                                 |ln -sr '${rawSequenceFilePaths[it].newPath}' \\\n      '${rawSequenceFilePaths[it].newVbpPath}'
                                  |\n## remove entry from old mapping file
-                                 |chmod 640 '${dataFilePaths[it].oldWellMappingFileEntryName}'
-                                 |sed -i '\\#${dataFilePaths[it].oldWellMappingFileEntryName}#d' ${dataFilePaths[it].oldWellMappingFile}
-                                 |chmod 440 '${dataFilePaths[it].oldWellMappingFileEntryName}'
+                                 |chmod 640 '${rawSequenceFilePaths[it].oldWellMappingFileEntryName}'
+                                 |sed -i '\\#${rawSequenceFilePaths[it].oldWellMappingFileEntryName}#d' ${rawSequenceFilePaths[it].oldWellMappingFile}
+                                 |chmod 440 '${rawSequenceFilePaths[it].oldWellMappingFileEntryName}'
                                  |\n## add entry to new mapping file
-                                 |touch '${dataFilePaths[it].newWellMappingFile}'
-                                 |chmod 640 '${dataFilePaths[it].newWellMappingFile}'
-                                 |echo '${dataFilePaths[it].newWellMappingFileEntryName}' >> '${dataFilePaths[it].newWellMappingFile}'
-                                 |chmod 440 '${dataFilePaths[it].newWellMappingFile}'
+                                 |touch '${rawSequenceFilePaths[it].newWellMappingFile}'
+                                 |chmod 640 '${rawSequenceFilePaths[it].newWellMappingFile}'
+                                 |echo '${rawSequenceFilePaths[it].newWellMappingFileEntryName}' >> '${rawSequenceFilePaths[it].newWellMappingFile}'
+                                 |chmod 440 '${rawSequenceFilePaths[it].newWellMappingFile}'
                                  |\n## delete mapping file, if empty
-                                 |if [ ! -s '${dataFilePaths[it].oldWellMappingFile}' ]
+                                 |if [ ! -s '${rawSequenceFilePaths[it].oldWellMappingFile}' ]
                                  |then
-                                 |    rm -f '${dataFilePaths[it].oldWellMappingFile}'
+                                 |    rm -f '${rawSequenceFilePaths[it].oldWellMappingFile}'
                                  |fi\n""".stripMargin()
             bashScriptToMoveFiles += "\n\n"
         }
 
         String expectedLog = ""
-        dataFileList.each {
-            expectedLog += "\n    changed ${dataFilePaths[it].oldFileName} to ${dataFilePaths[it].newFileName}"
+        rawSequenceFileList.each {
+            expectedLog += "\n    changed ${rawSequenceFilePaths[it].oldFileName} to ${rawSequenceFilePaths[it].newFileName}"
         }
 
         when:
-        String script = service.renameDataFiles(dataSwapData)
+        String script = service.renameRawSequenceFiles(dataSwapData)
 
         then:
         bashScriptToMoveFiles == script
-        dataFileList*.fileName == dataFilePaths.values().newFileName
-        dataFileList*.vbpFileName == dataFilePaths.values().newFileName
+        rawSequenceFileList*.fileName == rawSequenceFilePaths.values().newFileName
+        rawSequenceFileList*.vbpFileName == rawSequenceFilePaths.values().newFileName
         log.toString() == expectedLog
 
         where:
         seqTrackAmount << [1, 3]
     }
 
-    void "renameDataFiles, when old data files can not be found fail with FileNotFoundException"() {
+    void "renameRawSequenceFiles, when old data files can not be found fail with FileNotFoundException"() {
         given:
-        final String newDataFileName = 'newDataFileName.gz'
+        final String newRawSequenceFileName = 'newDataFileName.gz'
 
         // domain
-        final SeqTrack seqTrack = createSeqTrackWithOneDataFile()
-        final DataFile dataFile = CollectionUtils.exactlyOneElement(DataFile.findAllBySeqTrack(seqTrack))
+        final SeqTrack seqTrack = createSeqTrackWithOneFastqFile()
+        final RawSequenceFile rawSequenceFile = CollectionUtils.exactlyOneElement(RawSequenceFile.findAllBySeqTrack(seqTrack))
 
         // service
         service.lsdfFilesService = Mock(LsdfFilesService) {
-            _ * getFileFinalPathAsPath(_) >> Paths.get(dataFile.pathName).resolve(newDataFileName)
-            _ * getFileViewByPidPathAsPath(_) >> Paths.get(dataFile.pathName).resolve(newDataFileName)
+            _ * getFileFinalPathAsPath(_) >> Paths.get(rawSequenceFile.pathName).resolve(newRawSequenceFileName)
+            _ * getFileViewByPidPathAsPath(_) >> Paths.get(rawSequenceFile.pathName).resolve(newRawSequenceFileName)
         }
         service.fileSystemService = Mock(FileSystemService) {
             _ * getRemoteFileSystemOnDefaultRealm() >> FileSystems.default
         }
 
         // DTO
-        final List<Swap<String>> dataFileSwaps = [new Swap(dataFile.fileName, newDataFileName)]
+        final List<Swap<String>> rawSequenceFileSwaps = [new Swap(rawSequenceFile.fileName, newRawSequenceFileName)]
         StringBuilder log = new StringBuilder()
-        final Map<DataFile, Map<String, ?>> oldDataFileNameMap = [
-                (dataFile): [
-                        (AbstractDataSwapService.DIRECT_FILE_NAME): dataFile.fileName,
+        final Map<RawSequenceFile, Map<String, ?>> oldRawSequenceFileNameMap = [
+                (rawSequenceFile): [
+                        (AbstractDataSwapService.DIRECT_FILE_NAME): rawSequenceFile.fileName,
                         (AbstractDataSwapService.VBP_FILE_NAME)   : 'viewByPidFile',
                 ],
         ]
 
         final DataSwapParameters parameters = new DataSwapParameters(
-                dataFileSwaps: dataFileSwaps,
+                rawSequenceFileSwaps: rawSequenceFileSwaps,
                 log: log
         )
 
         final DataSwapData dataSwapData = new DataSwapData(
-                projectSwap: new Swap(dataFile.project, dataFile.project),
+                projectSwap: new Swap(rawSequenceFile.project, rawSequenceFile.project),
                 parameters: parameters,
-                dataFiles: [dataFile],
-                oldDataFileNameMap: oldDataFileNameMap
+                rawSequenceFiles: [rawSequenceFile],
+                oldRawSequenceFileNameMap: oldRawSequenceFileNameMap
         )
 
         when:
-        service.renameDataFiles(dataSwapData)
+        service.renameRawSequenceFiles(dataSwapData)
 
         then:
         thrown FileNotFoundException
@@ -1199,8 +1206,8 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
         return CreateFileHelper.createFile(tempDir.resolve(fileName))
     }
 
-    private Map<DataFile, Map<String, ?>> createPathsForDataFiles(List<DataFile> dataFileList, boolean oldFilesExists = true, boolean newFilesExists = true) {
-        return dataFileList.collectEntries {
+    private Map<RawSequenceFile, Map<String, ?>> createPathsForRawSequenceFiles(List<RawSequenceFile> rawSequenceFiles, boolean oldFilesExists = true, boolean newFilesExists = true) {
+        return rawSequenceFiles.collectEntries {
             [(it): [
                     "oldFileName": it.fileName,
                     "oldPath"    : oldFilesExists ? createExistingFilePath(it.fileName) : createNonExistingFilePath(it.fileName),

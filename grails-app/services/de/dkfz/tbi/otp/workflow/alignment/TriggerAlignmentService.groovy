@@ -326,7 +326,7 @@ class TriggerAlignmentService {
     @SuppressWarnings("DuplicateNumberLiteral")
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     List<Map<String, String>> createWarningsForWithdrawnSeqTracks(Collection<SeqTrack> seqTracks) {
-        List<SeqTrack> seqTracksFiltered = DataFile.withCriteria {
+        List<SeqTrack> seqTracksFiltered = RawSequenceFile.withCriteria {
             'in'('seqTrack', seqTracks)
             eq('fileWithdrawn', true)
             projections {

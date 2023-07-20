@@ -107,8 +107,8 @@ class SequenceController {
 
         List<Sequence> sequences = seqTrackService.listSequences(cmd.iDisplayStart, cmd.iDisplayLength, cmd.sortOrder,
                 SequenceColumn.fromDataTable(cmd.iSortCol_0), filtering)
-        List<DataFile> dataFiles = sequences ? fastqcResultsService.fastQCFiles(sequences) : []
-        Map<Long, List<DataFile>> seqTrackIdDataFileMap = dataFiles.groupBy {
+        List<RawSequenceFile> rawSequenceFiles = sequences ? fastqcResultsService.fastQCFiles(sequences) : []
+        Map<Long, List<RawSequenceFile>> seqTrackIdRawSequenceFileMap = rawSequenceFiles.groupBy {
             it.seqTrack.id
         }
 
@@ -127,7 +127,7 @@ class SequenceController {
 
             data.problemDescription = seq.problem?.description
 
-            data.fastQCFiles = seqTrackIdDataFileMap[seq.seqTrackId]?.sort {
+            data.fastQCFiles = seqTrackIdRawSequenceFileMap[seq.seqTrackId]?.sort {
                 [!it.indexFile, it.mateNumber]
             }?.collect {
                 [

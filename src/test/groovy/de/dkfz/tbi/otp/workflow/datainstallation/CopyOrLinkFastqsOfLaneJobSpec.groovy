@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -42,8 +42,8 @@ class CopyOrLinkFastqsOfLaneJobSpec extends Specification implements DataTest, W
     private WorkflowArtefact artefact
     private SeqTrack seqTrack
     private FileSystem fileSystem = FileSystems.default
-    private DataFile dataFile1
-    private DataFile dataFile2
+    private RawSequenceFile rawSequenceFile1
+    private RawSequenceFile rawSequenceFile2
     private Path source1
     private Path source2
     private Path target1
@@ -54,7 +54,8 @@ class CopyOrLinkFastqsOfLaneJobSpec extends Specification implements DataTest, W
     @Override
     Class[] getDomainClassesToMock() {
         return [
-                DataFile,
+                FastqFile,
+                RawSequenceFile,
                 WorkflowArtefact,
                 WorkflowStep,
         ]
@@ -79,10 +80,10 @@ class CopyOrLinkFastqsOfLaneJobSpec extends Specification implements DataTest, W
                 workflowArtefact: artefact,
                 linkedExternally: false,
         ])
-        dataFile1 = createDataFile([
+        rawSequenceFile1 = createFastqFile([
                 seqTrack: seqTrack,
         ])
-        dataFile2 = createDataFile([
+        rawSequenceFile2 = createFastqFile([
                 seqTrack: seqTrack,
         ])
         source1 = TestCase.uniqueNonExistentPath.toPath()
@@ -97,10 +98,10 @@ class CopyOrLinkFastqsOfLaneJobSpec extends Specification implements DataTest, W
         }
         job.fileSystemService = new TestFileSystemService()
         job.lsdfFilesService = Mock(LsdfFilesService) {
-            1 * getFileInitialPathAsPath(dataFile1) >> source1
-            1 * getFileInitialPathAsPath(dataFile2) >> source2
-            1 * getFileFinalPathAsPath(dataFile1) >> target1
-            1 * getFileFinalPathAsPath(dataFile2) >> target2
+            1 * getFileInitialPathAsPath(rawSequenceFile1) >> source1
+            1 * getFileInitialPathAsPath(rawSequenceFile2) >> source2
+            1 * getFileFinalPathAsPath(rawSequenceFile1) >> target1
+            1 * getFileFinalPathAsPath(rawSequenceFile2) >> target2
             0 * _
         }
     }

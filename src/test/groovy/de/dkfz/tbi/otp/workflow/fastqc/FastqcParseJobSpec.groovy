@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -40,6 +40,7 @@ class FastqcParseJobSpec extends Specification implements DataTest, WorkflowSyst
     @Override
     Class[] getDomainClassesToMock() {
         return [
+                FastqFile,
                 FastqcProcessedFile,
                 Realm,
                 SeqTrack,
@@ -50,10 +51,10 @@ class FastqcParseJobSpec extends Specification implements DataTest, WorkflowSyst
 
     void "test execute"() {
         given:
-        SeqTrack seqTrack = createSeqTrackWithTwoDataFile()
-        List<FastqcProcessedFile> fastqcProcessedFiles = seqTrack.dataFiles.collect {
+        SeqTrack seqTrack = createSeqTrackWithTwoFastqFile()
+        List<FastqcProcessedFile> fastqcProcessedFiles = seqTrack.sequenceFiles.collect {
             createFastqcProcessedFile([
-                    dataFile: it,
+                    sequenceFile: it,
             ])
         }
         final WorkflowRun run = createWorkflowRun([

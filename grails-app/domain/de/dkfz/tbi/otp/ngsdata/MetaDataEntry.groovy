@@ -31,17 +31,17 @@ class MetaDataEntry implements Entity {
     // suppressing because changing this would involve refactoring the code as well as the database columns
     @SuppressWarnings("GrailsDomainReservedSqlKeywordName")
     String value
-    DataFile dataFile
+    RawSequenceFile sequenceFile
     MetaDataKey key
 
     static belongsTo = [
-            dataFile: DataFile,
-            key: MetaDataKey,
+            sequenceFile: RawSequenceFile,
+            key         : MetaDataKey,
     ]
 
     static constraints = {
         key(nullable: false)
-        dataFile(nullable : false)
+        sequenceFile(nullable : false)
         value(nullable: false)
     }
 
@@ -51,7 +51,7 @@ class MetaDataEntry implements Entity {
     }
 
     static mapping = {
-        dataFile index: "meta_data_entry_data_file_idx"
+        sequenceFile index: "meta_data_entry_data_file_idx"
         key index: "meta_data_entry_key_idx"
     }
 }

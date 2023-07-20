@@ -264,7 +264,7 @@ class ClusterJobService {
     }
 
     /**
-     * returns the sum of file sizes of all {@link DataFile} that belong to this job
+     * returns the sum of file sizes of all {@link RawSequenceFile} that belong to this job
      */
     static Long getFileSizesSum(ClusterJob job) {
         if (!job.oldSystem) {
@@ -273,7 +273,7 @@ class ClusterJobService {
         }
         return normalizePropertyToClusterJobs(job) { ProcessParameterObject workflowObject ->
             List<SeqTrack> seqTracks = workflowObject.containedSeqTracks.asList()
-            (seqTracks ? DataFile.findAllBySeqTrackInListAndIndexFile(seqTracks, false) : [])?.sum { it.fileSize }
+            (seqTracks ? RawSequenceFile.findAllBySeqTrackInListAndIndexFile(seqTracks, false) : [])?.sum { it.fileSize }
         }
     }
 

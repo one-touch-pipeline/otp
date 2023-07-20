@@ -32,7 +32,7 @@ import de.dkfz.tbi.otp.project.Project
  *
  * Currently, it fetch the following additional data for the bam file ids of the maps in the list: in the list:
  * - LibraryPreparationKit name and short name
- * - DataFile.sequenceLength
+ * - RawSequenceFile.sequenceLength
  *
  * Each type use single query.
  */
@@ -64,7 +64,7 @@ class QaOverviewFetchDataService {
             |from
             |    MergingWorkPackage mergingWorkPackage
             |    join mergingWorkPackage.seqTracks seqTrack1,
-            |    DataFile dataFile
+            |    RawSequenceFile dataFile
             |    join dataFile.seqTrack seqTrack2
             |where
             |      mergingWorkPackage.id in (:mergingWorkPackageIds)

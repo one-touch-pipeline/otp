@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -61,7 +61,7 @@ class FastqcWorkflowSpec extends AbstractWorkflowSpec {
     LsdfFilesService lsdfFilesService
 
     private Path expectedFastqc
-    private DataFile dataFile
+    private RawSequenceFile rawSequenceFile
     private SeqType seqType
     private SeqTrack seqTrack
     private WorkflowArtefact workflowArtefact
@@ -93,7 +93,7 @@ class FastqcWorkflowSpec extends AbstractWorkflowSpec {
                 workflowArtefact: workflowArtefact,
         )
 
-        dataFile = createSequenceDataFile(
+        rawSequenceFile = createSequenceDataFile(
                 fileExists: true,
                 fileSize: 1,
                 fileName: "${BASE_NAME}.${fileExtension}",
@@ -105,8 +105,8 @@ class FastqcWorkflowSpec extends AbstractWorkflowSpec {
         )
         log.info("Domain data created")
 
-        fileService.createLink(lsdfFilesService.getFileViewByPidPathAsPath(dataFile), sourceFastq, realm)
-        fileService.createLink(lsdfFilesService.getFileFinalPathAsPath(dataFile), sourceFastq, realm)
+        fileService.createLink(lsdfFilesService.getFileViewByPidPathAsPath(rawSequenceFile), sourceFastq, realm)
+        fileService.createLink(lsdfFilesService.getFileFinalPathAsPath(rawSequenceFile), sourceFastq, realm)
         log.info("File system prepared")
 
         workflow = CollectionUtils.exactlyOneElement(Workflow.findAllByName(BashFastQcWorkflow.WORKFLOW))
@@ -130,7 +130,7 @@ class FastqcWorkflowSpec extends AbstractWorkflowSpec {
         given:
         SessionUtils.withTransaction {
             setupWorkflow('gz')
-            Path initialPath = lsdfFilesService.getFileInitialPathAsPath(dataFile).parent
+            Path initialPath = lsdfFilesService.getFileInitialPathAsPath(rawSequenceFile).parent
             fileService.createLink(initialPath.resolve("${BASE_NAME}.zip"), expectedFastqc, realm)
             fastqcDecider.decide([workflowArtefact])
         }
@@ -170,7 +170,7 @@ class FastqcWorkflowSpec extends AbstractWorkflowSpec {
 
     private void checkExistenceOfResultsFiles() {
         SessionUtils.withTransaction {
-            FastqcProcessedFile fastqcProcessedFile = CollectionUtils.atMostOneElement(FastqcProcessedFile.findAllByDataFile(dataFile))
+            FastqcProcessedFile fastqcProcessedFile = CollectionUtils.atMostOneElement(FastqcProcessedFile.findAllBySequenceFile(rawSequenceFile))
             ZipFile expectedResult = new ZipFile(fileService.toFile(expectedFastqc))
             ZipFile actualResult = new ZipFile(fastqcDataFilesService.fastqcOutputPath(fastqcProcessedFile).toString())
 
@@ -194,15 +194,15 @@ class FastqcWorkflowSpec extends AbstractWorkflowSpec {
             assert fastqcProcessedFile.workflowArtefact
             assert fastqcProcessedFile.fileExists
             assert fastqcProcessedFile.contentUploaded
-            assert fastqcProcessedFile.dataFile == dataFile
+            assert fastqcProcessedFile.sequenceFile == rawSequenceFile
         }
     }
 
     private void validateFastQcFileContent() {
         SessionUtils.withTransaction {
-            dataFile.refresh()
-            assert dataFile.sequenceLength
-            assert dataFile.nReads
+            rawSequenceFile.refresh()
+            assert rawSequenceFile.sequenceLength
+            assert rawSequenceFile.nReads
             seqTrack = SeqTrack.get(seqTrack.id) //.refresh() does not work
             assert seqTrack.nBasePairs
         }

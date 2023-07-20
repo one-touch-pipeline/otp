@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -126,11 +126,11 @@ class ExecuteRnaAlignmentJobIntegrationSpec extends Specification implements Rod
         DomainFactory.createProcessingOptionBasePathReferenceGenome(tempDir.toString())
         RnaRoddyBamFile roddyBamFile = createBamFile()
         roddyBamFile.containedSeqTracks.each { SeqTrack s ->
-            s.dataFiles.each { DataFile dataFile ->
-                File file = new File(executeRnaAlignmentJob.lsdfFilesService.getFileViewByPidPath(dataFile))
+            s.sequenceFiles.each { RawSequenceFile rawSequenceFile ->
+                File file = new File(executeRnaAlignmentJob.lsdfFilesService.getFileViewByPidPath(rawSequenceFile))
                 CreateFileHelper.createFile(file)
-                dataFile.fileSize = file.length()
-                assert dataFile.save(flush: true)
+                rawSequenceFile.fileSize = file.length()
+                assert rawSequenceFile.save(flush: true)
             }
         }
         CreateFileHelper.createFile(executeRnaAlignmentJob.referenceGenomeService.fastaFilePath(roddyBamFile.referenceGenome, false))

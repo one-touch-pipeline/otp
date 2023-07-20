@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -55,9 +55,10 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
         return [
                 AbstractBamFile,
                 BamFileSubmissionObject,
-                DataFile,
-                DataFileSubmissionObject,
+                RawSequenceFile,
+                RawSequenceFileSubmissionObject,
                 EgaSubmission,
+                FastqFile,
                 FileType,
                 Individual,
                 LibraryPreparationKit,
@@ -141,26 +142,26 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
         given:
         egaSubmissionFileService.egaSubmissionService = new EgaSubmissionService()
         EgaSubmission submission = createEgaSubmission()
-        DataFile dataFile = DomainFactory.createDataFile()
+        RawSequenceFile rawSequenceFile = DomainFactory.createFastqFile()
         SampleSubmissionObject sampleSubmissionObject = createSampleSubmissionObject(
-                sample: dataFile.seqTrack.sample,
-                seqType: dataFile.seqType,
+                sample: rawSequenceFile.seqTrack.sample,
+                seqType: rawSequenceFile.seqType,
         )
         submission.addToSamplesToSubmit(sampleSubmissionObject)
-        DataFileSubmissionObject dataFileSubmissionObject = createDataFileSubmissionObject(
-                dataFile: dataFile,
+        RawSequenceFileSubmissionObject submissionObject = createRawSequenceFileSubmissionObject(
+                sequenceFile: rawSequenceFile,
                 sampleSubmissionObject: sampleSubmissionObject
         )
-        submission.addToDataFilesToSubmit(dataFileSubmissionObject)
-        String dataFileAlias = egaSubmissionFileService.egaSubmissionService.generateDefaultEgaAliasesForDataFiles([
-                new DataFileAndSampleAlias(
-                        dataFile,
+        submission.addToRawSequenceFilesToSubmit(submissionObject)
+        String rawSequenceFileAlias = egaSubmissionFileService.egaSubmissionService.generateDefaultEgaAliasesForRawSequenceFiles([
+                new RawSequenceFileAndSampleAlias(
+                        rawSequenceFile,
                         sampleSubmissionObject,
                 ),
-        ]).get(dataFile.fileName + dataFile.run)
+        ]).get(rawSequenceFile.fileName + rawSequenceFile.run)
 
         when:
-        String content = egaSubmissionFileService.generateDataFilesCsvFile(submission)
+        String content = egaSubmissionFileService.generateRawSequenceFilesCsvFile(submission)
 
         then:
         content == "${INDIVIDUAL.value}," +
@@ -176,19 +177,19 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
                 "${ILSE.value}," +
                 "${EGA_FILE_ALIAS.value}," +
                 "${FILENAME.value}\n" +
-                "${dataFileSubmissionObject.dataFile.individual.displayName}," +
-                "${dataFileSubmissionObject.dataFile.seqType.displayName}," +
-                "${dataFileSubmissionObject.dataFile.seqType.libraryLayout}," +
-                "${dataFileSubmissionObject.dataFile.seqType.singleCellDisplayName}," +
-                "${dataFileSubmissionObject.dataFile.sampleType}," +
-                "${dataFileSubmissionObject.sampleSubmissionObject.egaAliasName}," +
-                "${dataFileSubmissionObject.dataFile.run.seqCenter}," +
-                "${dataFileSubmissionObject.dataFile.run}," +
-                "${dataFileSubmissionObject.dataFile.seqTrack.laneId}," +
-                "${dataFileSubmissionObject.dataFile.seqTrack.normalizedLibraryName ?: "N/A"}," +
-                "${dataFileSubmissionObject.dataFile.seqTrack.ilseId ?: "N/A"}," +
-                "${dataFileAlias}," +
-                "${dataFileSubmissionObject.dataFile.fileName}\n"
+                "${submissionObject.sequenceFile.individual.displayName}," +
+                "${submissionObject.sequenceFile.seqType.displayName}," +
+                "${submissionObject.sequenceFile.seqType.libraryLayout}," +
+                "${submissionObject.sequenceFile.seqType.singleCellDisplayName}," +
+                "${submissionObject.sequenceFile.sampleType}," +
+                "${submissionObject.sampleSubmissionObject.egaAliasName}," +
+                "${submissionObject.sequenceFile.run.seqCenter}," +
+                "${submissionObject.sequenceFile.run}," +
+                "${submissionObject.sequenceFile.seqTrack.laneId}," +
+                "${submissionObject.sequenceFile.seqTrack.normalizedLibraryName ?: "N/A"}," +
+                "${submissionObject.sequenceFile.seqTrack.ilseId ?: "N/A"}," +
+                "${rawSequenceFileAlias}," +
+                "${submissionObject.sequenceFile.fileName}\n"
     }
 
     void "test generate bam files csv file"() {
@@ -239,31 +240,31 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
         given:
         egaSubmissionFileService.egaSubmissionService = new EgaSubmissionService()
         EgaSubmission submission = createEgaSubmission()
-        DataFile dataFile = createDataFile()
+        RawSequenceFile rawSequenceFile = createFastqFile()
         SampleSubmissionObject sampleSubmissionObject = createSampleSubmissionObject(
-                sample: dataFile.seqTrack.sample,
-                seqType: dataFile.seqType,
+                sample: rawSequenceFile.seqTrack.sample,
+                seqType: rawSequenceFile.seqType,
         )
         submission.addToSamplesToSubmit(sampleSubmissionObject)
-        DataFileSubmissionObject dataFileSubmissionObject = createDataFileSubmissionObject(
-                dataFile: dataFile,
+        RawSequenceFileSubmissionObject submissionObject = createRawSequenceFileSubmissionObject(
+                sequenceFile: rawSequenceFile,
                 sampleSubmissionObject: sampleSubmissionObject,
         )
-        submission.addToDataFilesToSubmit(dataFileSubmissionObject)
-        String content = egaSubmissionFileService.generateDataFilesCsvFile(submission)
+        submission.addToRawSequenceFilesToSubmit(submissionObject)
+        String content = egaSubmissionFileService.generateRawSequenceFilesCsvFile(submission)
         Spreadsheet spreadsheet = new Spreadsheet(content, Delimiter.COMMA)
-        String dataFileAlias = egaSubmissionFileService.egaSubmissionService.generateDefaultEgaAliasesForDataFiles([
-                new DataFileAndSampleAlias(
-                        dataFile,
+        String rawSequenceFileAlias = egaSubmissionFileService.egaSubmissionService.generateDefaultEgaAliasesForRawSequenceFiles([
+                new RawSequenceFileAndSampleAlias(
+                        rawSequenceFile,
                         sampleSubmissionObject,
                 ),
-        ]).get(dataFile.fileName + dataFile.run)
+        ]).get(rawSequenceFile.fileName + rawSequenceFile.run)
 
         when:
         Map fileAliases = egaSubmissionFileService.readEgaFileAliasesFromFile(spreadsheet, false)
 
         then:
-        fileAliases.get(dataFileSubmissionObject.dataFile.fileName + dataFileSubmissionObject.dataFile.run) == dataFileAlias
+        fileAliases.get(submissionObject.sequenceFile.fileName + submissionObject.sequenceFile.run) == rawSequenceFileAlias
     }
 
     void "test read ega file aliases from file with bam file"() {

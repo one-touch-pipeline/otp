@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -93,14 +93,14 @@ class DataInstallationWorkflowSpec extends AbstractWorkflowSpec {
         return md5sum
     }
 
-    private DataFile createDataFile(SeqTrack seqTrack, Integer mateNumber, String fastqFilename, Path fastqFilePath, Map map = [:]) {
-        return createDataFile([
+    private RawSequenceFile createRawSequenceFile(SeqTrack seqTrack, Integer mateNumber, String fastqFilename, Path fastqFilePath, Map map = [:]) {
+        return createFastqFile([
                 mateNumber         : mateNumber,
                 seqTrack           : seqTrack,
                 project            : seqTrack.project,
                 fileName           : fastqFilename,
                 vbpFileName        : fastqFilename,
-                md5sum             : md5sum(fastqFilePath),
+                fastqMd5sum        : md5sum(fastqFilePath),
                 fileExists         : false,
                 fileLinked         : false,
                 fileSize           : 0,
@@ -111,22 +111,22 @@ class DataInstallationWorkflowSpec extends AbstractWorkflowSpec {
         ] + map)
     }
 
-    private void createDataFiles(SeqTrack seqTrack, Map map = [:]) {
-        createDataFile(seqTrack, 1, FASTQ_R1_FILENAME, fastqR1Filepath, map)
-        createDataFile(seqTrack, 2, FASTQ_R2_FILENAME, fastqR2Filepath, map)
+    private void createRawSequenceFiles(SeqTrack seqTrack, Map map = [:]) {
+        createRawSequenceFile(seqTrack, 1, FASTQ_R1_FILENAME, fastqR1Filepath, map)
+        createRawSequenceFile(seqTrack, 2, FASTQ_R2_FILENAME, fastqR2Filepath, map)
     }
 
     private SeqTrack createWholeGenomeSetup() {
         SeqType seqType = DomainFactory.createWholeGenomeSeqType()
         SeqTrack seqTrack = createSeqTrack([seqType: seqType])
-        createDataFiles(seqTrack)
+        createRawSequenceFiles(seqTrack)
         return seqTrack
     }
 
     protected void prepareAndExecute(int expectedWorkflows = 1) {
         SessionUtils.withTransaction {
             fastqImportInstance.refresh()
-            assert fastqImportInstance.dataFiles
+            assert fastqImportInstance.sequenceFiles
             List<WorkflowRun> workflowRuns = dataInstallationInitializationService.createWorkflowRuns(fastqImportInstance)
             assert workflowRuns.size() == expectedWorkflows
         }
@@ -151,7 +151,7 @@ class DataInstallationWorkflowSpec extends AbstractWorkflowSpec {
         SeqTrack seqTrack
         SessionUtils.withTransaction {
             seqTrack = createChipSeqSeqTrack()
-            createDataFiles(seqTrack)
+            createRawSequenceFiles(seqTrack)
         }
 
         when:
@@ -172,7 +172,7 @@ class DataInstallationWorkflowSpec extends AbstractWorkflowSpec {
                     ]),
                     singleCellWellLabel: null,
             ])
-            createDataFiles(seqTrack)
+            createRawSequenceFiles(seqTrack)
         }
 
         when:
@@ -208,8 +208,8 @@ class DataInstallationWorkflowSpec extends AbstractWorkflowSpec {
                         singleCellWellLabel: "well_${it}",
                 ])
 
-                createDataFile(seqTrack, 1, fileNameR1, linkR1)
-                createDataFile(seqTrack, 2, fileNameR2, linkR2)
+                createRawSequenceFile(seqTrack, 1, fileNameR1, linkR1)
+                createRawSequenceFile(seqTrack, 2, fileNameR2, linkR2)
                 return seqTrack
             }
         }
@@ -232,13 +232,13 @@ class DataInstallationWorkflowSpec extends AbstractWorkflowSpec {
                 assert seqTrack.dataInstallationState == SeqTrack.DataProcessingState.FINISHED
                 assert SeqTrack.DataProcessingState.NOT_STARTED == seqTrack.fastqcState
             }
-            DataFile.list().collectMany { DataFile dataFile ->
-                assert dataFile.fileExists
-                assert dataFile.fileLinked
-                assert dataFile.fileSize > 0
+            RawSequenceFile.list().collectMany { RawSequenceFile rawSequenceFile ->
+                assert rawSequenceFile.fileExists
+                assert rawSequenceFile.fileLinked
+                assert rawSequenceFile.fileSize > 0
                 [
-                        lsdfFilesService.getFileFinalPath(dataFile),
-                        lsdfFilesService.getFileViewByPidPath(dataFile),
+                        lsdfFilesService.getFileFinalPath(rawSequenceFile),
+                        lsdfFilesService.getFileViewByPidPath(rawSequenceFile),
                 ]
             }.each {
                 Path path = remoteFileSystem.getPath(it)
@@ -252,7 +252,7 @@ class DataInstallationWorkflowSpec extends AbstractWorkflowSpec {
      */
     protected void checkWellBasedLinksAreCreatedSuccessful() {
         SessionUtils.withTransaction {
-            DataFile.list().collect {
+            RawSequenceFile.list().collect {
                 lsdfFilesService.getWellAllFileViewByPidPath(it)
             }.each {
                 assert new File(it).exists()
@@ -265,18 +265,18 @@ class DataInstallationWorkflowSpec extends AbstractWorkflowSpec {
      */
     protected void checkMappingFileAreCreatedSuccessful() {
         SessionUtils.withTransaction {
-            List<DataFile> dataFiles = DataFile.list()
+            List<RawSequenceFile> rawSequenceFiles = RawSequenceFile.list()
 
             //check mapping file exists
-            Path mappingFile = CollectionUtils.exactlyOneElement(dataFiles.collect {
+            Path mappingFile = CollectionUtils.exactlyOneElement(rawSequenceFiles.collect {
                 singleCellService.singleCellMappingFile(it)
             }.unique())
             assert Files.exists(mappingFile)
 
             //check mappingFileContext
             String mappingFileContent = mappingFile.text
-            assert mappingFileContent.split('\n').size() == dataFiles.size()
-            dataFiles.each {
+            assert mappingFileContent.split('\n').size() == rawSequenceFiles.size()
+            rawSequenceFiles.each {
                 assert mappingFileContent.contains(singleCellService.mappingEntry(it))
             }
         }

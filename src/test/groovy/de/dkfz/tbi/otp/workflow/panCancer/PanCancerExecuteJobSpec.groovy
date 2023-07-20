@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -58,6 +58,7 @@ class PanCancerExecuteJobSpec extends Specification implements DataTest, Workflo
     Class[] getDomainClassesToMock() {
         return [
                 BedFile,
+                FastqFile,
                 FastqImportInstance,
                 FileType,
                 Individual,
@@ -270,8 +271,8 @@ class PanCancerExecuteJobSpec extends Specification implements DataTest, Workflo
 
     private String fastqFilesAsString(RoddyBamFile roddyBamFileToUse = roddyBamFile) {
         return roddyBamFileToUse.seqTracks.collectMany { SeqTrack seqTrack ->
-            DataFile.findAllBySeqTrack(seqTrack).collect { DataFile dataFile ->
-                job.roddyConfigValueService.lsdfFilesService.getFileViewByPidPathAsPath(dataFile).toString()
+            RawSequenceFile.findAllBySeqTrack(seqTrack).collect { RawSequenceFile rawSequenceFile ->
+                job.roddyConfigValueService.lsdfFilesService.getFileViewByPidPathAsPath(rawSequenceFile).toString()
             }
         }.join(';')
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -32,16 +32,16 @@ import de.dkfz.tbi.otp.security.UserAndRoles
 
 @Rollback
 @Integration
-class DataFileServiceIntegrationSpec extends Specification implements UserAndRoles, DomainFactoryCore {
+class RawSequenceFileServiceIntegrationSpec extends Specification implements UserAndRoles, DomainFactoryCore {
 
     @Unroll
-    void "getAllDataFilesOfProject, returns DataFiles of given Project"() {
+    void "getAllRawSequenceFilesOfProject, returns DataFiles of given Project"() {
         given:
         createUserAndRoles()
-        DataFileService dataFileService = new DataFileService()
+        RawSequenceFileService rawSequenceFileService = new RawSequenceFileService()
 
-        Closure<DataFile> createDataFileForProject = { Project project ->
-            return createDataFile(
+        Closure<RawSequenceFile> createRawSequenceFileForProject = { Project project ->
+            return createFastqFile(
                     seqTrack: createSeqTrack(
                             sample: createSample(
                                     individual: createIndividual(
@@ -53,24 +53,24 @@ class DataFileServiceIntegrationSpec extends Specification implements UserAndRol
         }
 
         Project project = createProject()
-        List<DataFile> expected = [
-            createDataFileForProject(project),
-            createDataFileForProject(project),
+        List<RawSequenceFile> expected = [
+            createRawSequenceFileForProject(project),
+            createRawSequenceFileForProject(project),
         ]
 
-        createDataFile()
+        createFastqFile()
 
         when:
-        List<DataFile> result = doWithAuth(ADMIN) {
-            dataFileService.getAllDataFilesOfProject(project)
-        } as List<DataFile>
+        List<RawSequenceFile> result = doWithAuth(ADMIN) {
+            rawSequenceFileService.getAllRawSequenceFilesOfProject(project)
+        } as List<RawSequenceFile>
 
         then:
-        dataFilesContentIsEqual(result[0], expected[0])
-        dataFilesContentIsEqual(result[1], expected[1])
+        rawSequenceFilesContentIsEqual(result[0], expected[0])
+        rawSequenceFilesContentIsEqual(result[1], expected[1])
     }
 
-    private boolean dataFilesContentIsEqual(DataFile file1, DataFile file2) {
+    private boolean rawSequenceFilesContentIsEqual(RawSequenceFile file1, RawSequenceFile file2) {
         return file1.withdrawnComment == file2.withdrawnComment &&
                 file1.fileWithdrawn == file2.fileWithdrawn &&
                 file1.seqTrack.sampleIdentifier == file2.seqTrack.sampleIdentifier &&

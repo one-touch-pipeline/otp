@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,6 +29,7 @@ import de.dkfz.tbi.otp.dataprocessing.FastqcDataFilesService
 import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
 import de.dkfz.tbi.otp.domainFactory.FastqcDomainFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.ngsdata.FastqFile
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
@@ -42,6 +43,7 @@ class FastqcValidationJobSpec extends Specification implements DataTest, Workflo
     @Override
     Class[] getDomainClassesToMock() {
         return [
+                FastqFile,
                 FastqcProcessedFile,
                 WorkflowStep,
                 WorkflowRun,
@@ -52,10 +54,10 @@ class FastqcValidationJobSpec extends Specification implements DataTest, Workflo
         given:
         Path file1 = Paths.get('/file1')
         Path file2 = Paths.get('/file2')
-        SeqTrack seqTrack = createSeqTrackWithTwoDataFile()
-        List<FastqcProcessedFile> fastqcProcessedFiles = seqTrack.dataFiles.collect {
+        SeqTrack seqTrack = createSeqTrackWithTwoFastqFile()
+        List<FastqcProcessedFile> fastqcProcessedFiles = seqTrack.sequenceFiles.collect {
             createFastqcProcessedFile([
-                    dataFile: it,
+                    sequenceFile: it,
             ])
         }
         WorkflowRun run = createWorkflowRun([

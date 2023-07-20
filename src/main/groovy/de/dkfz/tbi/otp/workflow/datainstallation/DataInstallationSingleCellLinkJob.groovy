@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -45,9 +45,9 @@ class DataInstallationSingleCellLinkJob extends AbstractLinkJob implements DataI
         SeqTrack seqTrack = getSeqTrack(workflowStep)
 
         if (seqTrack.seqType.singleCell && seqTrack.singleCellWellLabel) {
-            return seqTrack.dataFiles.collect { DataFile dataFile ->
-                Path target = lsdfFilesService.getFileFinalPathAsPath(dataFile)
-                Path link = lsdfFilesService.getFileViewByPidPathAsPath(dataFile, WellDirectory.ALL_WELL)
+            return seqTrack.sequenceFiles.collect { RawSequenceFile rawSequenceFile ->
+                Path target = lsdfFilesService.getFileFinalPathAsPath(rawSequenceFile)
+                Path link = lsdfFilesService.getFileViewByPidPathAsPath(rawSequenceFile, WellDirectory.ALL_WELL)
                 return new LinkEntry(target: target, link: link)
             }
         }
@@ -60,8 +60,8 @@ class DataInstallationSingleCellLinkJob extends AbstractLinkJob implements DataI
 
         if (seqTrack.seqType.singleCell && seqTrack.singleCellWellLabel) {
             logService.addSimpleLogEntry(workflowStep, "Add all datafiles to single cell mapping file")
-            seqTrack.dataFiles.each { DataFile dataFile ->
-                singleCellMappingFileService.addMappingFileEntryIfMissing(dataFile)
+            seqTrack.sequenceFiles.each { RawSequenceFile rawSequenceFile ->
+                singleCellMappingFileService.addMappingFileEntryIfMissing(rawSequenceFile)
             }
         }
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,7 +28,7 @@ import org.springframework.validation.Errors
 
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFileService
-import de.dkfz.tbi.otp.ngsdata.DataFile
+import de.dkfz.tbi.otp.ngsdata.RawSequenceFile
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
@@ -173,16 +173,16 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
     }
 
     Map selectFastqFiles(EgaSubmission submission) {
-        List<DataFileAndSampleAlias> dataFilesAndAliasList = egaSubmissionService.getDataFilesAndAlias(submission)
-        Map egaFileAliases = flash.egaFileAliases ?: egaSubmissionService.generateDefaultEgaAliasesForDataFiles(dataFilesAndAliasList)
+        List<RawSequenceFileAndSampleAlias> rawSequenceFileAndSampleAliases = egaSubmissionService.getRawSequenceFilesAndAlias(submission)
+        Map egaFileAliases = flash.egaFileAliases ?: egaSubmissionService.generateDefaultEgaAliasesForRawSequenceFiles(rawSequenceFileAndSampleAliases)
 
         return [
-                submission              : submission,
-                dataFileList            : dataFilesAndAliasList,
-                dataFileSubmissionObject: submission.dataFilesToSubmit,
-                egaFileAliases          : egaFileAliases,
-                hasDataFiles            : !submission.dataFilesToSubmit.empty,
-                dataFilesHasFileAliases : !submission.dataFilesToSubmit*.egaAliasName.findAll().empty,
+                submission                    : submission,
+                rawSequenceFileList           : rawSequenceFileAndSampleAliases,
+                submissionObjects             : submission.rawSequenceFilesToSubmit,
+                egaFileAliases                : egaFileAliases,
+                hasRawSequenceFiles           : !submission.rawSequenceFilesToSubmit.empty,
+                rawSequenceFilesHasFileAliases: !submission.rawSequenceFilesToSubmit*.egaAliasName.findAll().empty,
         ]
     }
 
@@ -372,14 +372,14 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
         }
     }
 
-    def selectFilesDataFilesForm(SelectFilesDataFilesFormSubmitCommand cmd) {
+    def selectFilesDataFilesForm(SelectFilesRawSequenceFilesFormSubmitCommand cmd) {
         if (cmd.hasErrors()) {
             pushErrors(cmd.errors, cmd.submission)
             return
         }
 
         if (cmd.download) {
-            String content = egaSubmissionFileService.generateDataFilesCsvFile(cmd.submission)
+            String content = egaSubmissionFileService.generateRawSequenceFilesCsvFile(cmd.submission)
             response.contentType = CSV.mimeType
             response.setHeader("Content-disposition", "filename=fastq_files_information.csv")
             response.outputStream << content.bytes
@@ -387,7 +387,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
         }
 
         if (cmd.saveSelection) {
-            saveDataFileSelection(cmd)
+            saveRawSequenceFileSelection(cmd)
             return
         }
 
@@ -397,19 +397,19 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
             } else {
                 Map errors = egaSubmissionValidationService.validateAliases(cmd.egaFileAlias)
                 if (errors.hasErrors) {
-                    Map<Long, DataFile> dataFileMap = cmd.submission.dataFilesToSubmit*.dataFile.collectEntries {
+                    Map<Long, RawSequenceFile> rawSequenceFileMap = cmd.submission.rawSequenceFilesToSubmit*.sequenceFile.collectEntries {
                         [(it.id): it]
                     }
                     Map egaFileAliases = [:]
                     cmd.egaFileAlias.eachWithIndex { it, i ->
                         long fastqId = cmd.fastqFile[i] as long
-                        DataFile dataFile = dataFileMap[fastqId]
-                        egaFileAliases.put(dataFile.fileName + dataFile.run, it)
+                        RawSequenceFile rawSequenceFile = rawSequenceFileMap[fastqId]
+                        egaFileAliases.put(rawSequenceFile.fileName + rawSequenceFile.run, it)
                     }
                     flash.egaFileAliases = egaFileAliases
                     pushErrors(errors.errors, cmd.submission)
                 } else {
-                    egaSubmissionService.updateDataFileAndPrepareSubmissionForUpload(cmd)
+                    egaSubmissionService.updateRawSequenceFileAndPrepareSubmissionForUpload(cmd)
                     flash.message = new FlashMessage("SAVED")
                     redirect(action: "editSubmission", params: ['id': cmd.submission.id])
                 }
@@ -417,7 +417,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
         }
     }
 
-    private void saveDataFileSelection(SelectFilesDataFilesFormSubmitCommand cmd) {
+    private void saveRawSequenceFileSelection(SelectFilesRawSequenceFilesFormSubmitCommand cmd) {
         if (cmd.selectBox) {
             EgaSubmission submission = cmd.submission
             Set<SampleSubmissionObject> fastqSamples = submission.samplesToSubmit.findAll { it.useFastqFile }
@@ -433,7 +433,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
                 }
                 redirect(action: "editSubmission", params: ['id': cmd.submission.id])
             } else {
-                egaSubmissionService.createDataFileSubmissionObjects(cmd)
+                egaSubmissionService.createRawSequenceFileSubmissionObjects(cmd)
                 redirect(action: "editSubmission", params: ['id': cmd.submission.id])
             }
         } else {
@@ -455,7 +455,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
                         FILENAME,
                         EGA_FILE_ALIAS,
                 ])
-                if (spreadsheet.dataRows.size() != cmd.submission.dataFilesToSubmit.size()) {
+                if (spreadsheet.dataRows.size() != cmd.submission.rawSequenceFilesToSubmit.size()) {
                     pushError("Found and expected number of files are different", cmd.submission)
                 } else if (validateColumns.hasError) {
                     pushError(validateColumns.error, cmd.submission)

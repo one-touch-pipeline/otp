@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -197,11 +197,11 @@ trait DomainFactoryCore implements DomainFactoryHelper {
 
     FastqImportInstance createFastqImportInstance(Map properties = [:]) {
         FastqImportInstance fastqImportInstance = createDomainObject(FastqImportInstance, [
-                importMode: FastqImportInstance.ImportMode.AUTOMATIC,
-                dataFiles : [] as Set,
+                importMode   : FastqImportInstance.ImportMode.AUTOMATIC,
+                sequenceFiles: [] as Set,
         ], properties)
-        properties.dataFiles.each { DataFile dataFile ->
-            fastqImportInstance.addToDataFiles(dataFile)
+        properties.sequenceFiles.each { RawSequenceFile rawSequenceFile ->
+            fastqImportInstance.addToSequenceFiles(rawSequenceFile)
         }
         fastqImportInstance.save(flush: true)
         return fastqImportInstance
@@ -214,14 +214,14 @@ trait DomainFactoryCore implements DomainFactoryHelper {
         ], properties)
     }
 
-    DataFile createDataFile(Map properties = [:], boolean saveAndValidate = true) {
+    FastqFile createFastqFile(Map properties = [:], boolean saveAndValidate = true) {
         SeqTrack seqTrack
         if (properties.containsKey('seqTrack')) {
             seqTrack = properties.seqTrack
         } else {
             seqTrack = createSeqTrack(properties.containsKey('run') ? [run: properties.run] : [:])
         }
-        return createDomainObject(DataFile, [
+        return createDomainObject(FastqFile, [
                 seqTrack           : seqTrack,
                 project            : seqTrack?.project,
                 run                : seqTrack?.run,
@@ -230,7 +230,7 @@ trait DomainFactoryCore implements DomainFactoryHelper {
                 vbpFileName        : "VbpDataFileFileName_${nextId}_R1.gz",
                 pathName           : "",
                 initialDirectory   : TestCase.uniqueNonExistentPath.path,
-                md5sum             : { HelperUtils.randomMd5sum },
+                fastqMd5sum        : { HelperUtils.randomMd5sum },
                 dateExecuted       : new Date(),
                 dateFileSystem     : new Date(),
                 dateCreated        : new Date(),
@@ -246,7 +246,7 @@ trait DomainFactoryCore implements DomainFactoryHelper {
         ], properties, saveAndValidate)
     }
 
-    DataFile createSequenceDataFile(final Map properties = [:]) {
+    RawSequenceFile createSequenceDataFile(final Map properties = [:]) {
         Map defaultProperties = [
                 used          : true,
                 sequenceLength: 100,
@@ -255,7 +255,7 @@ trait DomainFactoryCore implements DomainFactoryHelper {
             defaultProperties.project = properties.seqTrack.project
             defaultProperties.run = properties.seqTrack.run
         }
-        return createDataFile(defaultProperties + properties)
+        return createFastqFile(defaultProperties + properties)
     }
 
     SeqTrack createSeqTrack(Map properties = [:]) {
@@ -274,17 +274,17 @@ trait DomainFactoryCore implements DomainFactoryHelper {
                 (properties.antibodyTarget ? [:] : [antibodyTarget: createAntibodyTarget()]))
     }
 
-    SeqTrack createSeqTrackWithOneDataFile(Map seqTrackProperties = [:], Map dataFileProperties = [:]) {
+    SeqTrack createSeqTrackWithOneFastqFile(Map seqTrackProperties = [:], Map fastqFileProperties = [:]) {
         SeqTrack seqTrack = createSeqTrack(seqTrackProperties)
-        createSequenceDataFile(dataFileProperties + [seqTrack: seqTrack])
+        createSequenceDataFile(fastqFileProperties + [seqTrack: seqTrack])
         return seqTrack
     }
 
-    SeqTrack createSeqTrackWithTwoDataFile(Map seqTrackProperties = [:], Map dataFile1Properties = [:], Map dataFile2Properties = [:]) {
+    SeqTrack createSeqTrackWithTwoFastqFile(Map seqTrackProperties = [:], Map fastqFile1Properties = [:], Map fastqFile2Properties = [:]) {
         SeqType seqType = seqTrackProperties.containsKey('seqType') ? seqTrackProperties.seqType : createSeqTypePaired()
         SeqTrack seqTrack = createSeqTrack([seqType: seqType] + seqTrackProperties)
-        createSequenceDataFile([mateNumber: 1,] + dataFile1Properties + [seqTrack: seqTrack])
-        createSequenceDataFile([mateNumber: 2,] + dataFile2Properties + [seqTrack: seqTrack])
+        createSequenceDataFile([mateNumber: 1,] + fastqFile1Properties + [seqTrack: seqTrack])
+        createSequenceDataFile([mateNumber: 2,] + fastqFile2Properties + [seqTrack: seqTrack])
         return seqTrack
     }
 

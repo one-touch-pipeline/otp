@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -40,17 +40,17 @@ class EgaSubmissionServiceIntegrationSpec extends Specification implements EgaSu
     private final EgaSubmissionService egaSubmissionService = new EgaSubmissionService()
 
     @Unroll
-    void "checkFastqFiles, when withDataFile is #withDataFile and fileExists is #fileExists and withdrawn is #withdrawn, then result is #result"() {
+    void "checkFastqFiles, when withRawSequenceFile is #withRawSequenceFile and fileExists is #fileExists and withdrawn is #withdrawn, then result is #result"() {
         given:
         SeqTrack seqTrack = createSeqTrack()
-        if (withDataFile) {
-            createDataFile([
+        if (withRawSequenceFile) {
+            createFastqFile([
                     seqTrack     : seqTrack,
                     fileWithdrawn: withdrawn,
                     fileExists   : fileExists,
             ])
         } else {
-            createDataFile()
+            createFastqFile()
         }
 
         SampleSubmissionObject sampleSubmissionObject = createSampleSubmissionObject(
@@ -71,12 +71,12 @@ class EgaSubmissionServiceIntegrationSpec extends Specification implements EgaSu
         map.get(sampleSubmissionObject) == result
 
         where:
-        withDataFile | fileExists | withdrawn || result
-        true         | true       | false     || true
-        false        | true       | false     || false
-        true         | true       | true      || true
-        true         | false      | false     || false
-        true         | false      | true      || false
+        withRawSequenceFile | fileExists | withdrawn || result
+        true                | true       | false     || true
+        false               | true       | false     || false
+        true                | true       | true      || true
+        true                | false      | false     || false
+        true                | false      | true      || false
     }
 
     @Unroll
@@ -122,14 +122,14 @@ class EgaSubmissionServiceIntegrationSpec extends Specification implements EgaSu
         true        | false     | false                     | AbstractBamFile.FileOperationStatus.PROCESSED  || false
     }
 
-    void "getDataFilesAndAlias, when already DataFiles are connected with the submission, then return these"() {
+    void "getRawSequenceFilesAndAlias, when already DataFiles are connected with the submission, then return these"() {
         given:
-        SeqTrack seqTrack1 = createSeqTrackWithOneDataFile()
-        SeqTrack seqTrack2 = createSeqTrackWithOneDataFile([
+        SeqTrack seqTrack1 = createSeqTrackWithOneFastqFile()
+        SeqTrack seqTrack2 = createSeqTrackWithOneFastqFile([
                 sample : seqTrack1.sample,
                 seqType: seqTrack1.seqType,
         ])
-        DataFile datafile = CollectionUtils.exactlyOneElement(seqTrack2.dataFiles)
+        RawSequenceFile rawSequenceFile = CollectionUtils.exactlyOneElement(seqTrack2.sequenceFiles)
         EgaSubmission egaSubmission = createEgaSubmission([
                 samplesToSubmit  : [
                         createSampleSubmissionObject([
@@ -138,9 +138,9 @@ class EgaSubmissionServiceIntegrationSpec extends Specification implements EgaSu
                                 useFastqFile: true,
                         ]),
                 ] as Set,
-                dataFilesToSubmit: [
-                        createDataFileSubmissionObject([
-                                dataFile: datafile,
+                rawSequenceFilesToSubmit: [
+                        createRawSequenceFileSubmissionObject([
+                                sequenceFile: rawSequenceFile,
                         ]),
                 ] as Set,
         ])
@@ -149,16 +149,16 @@ class EgaSubmissionServiceIntegrationSpec extends Specification implements EgaSu
         ])
 
         when:
-        List<DataFileAndSampleAlias> list = egaSubmissionService.getDataFilesAndAlias(egaSubmission)
+        List<RawSequenceFileAndSampleAlias> list = egaSubmissionService.getRawSequenceFilesAndAlias(egaSubmission)
 
         then:
-        list*.dataFile == [datafile]
+        list*.rawSequenceFile == [rawSequenceFile]
     }
 
-    void "getDataFilesAndAlias, when sample has two lane, then return both"() {
+    void "getRawSequenceFilesAndAlias, when sample has two lane, then return both"() {
         given:
-        SeqTrack seqTrack1 = createSeqTrackWithOneDataFile()
-        SeqTrack seqTrack2 = createSeqTrackWithOneDataFile([
+        SeqTrack seqTrack1 = createSeqTrackWithOneFastqFile()
+        SeqTrack seqTrack2 = createSeqTrackWithOneFastqFile([
                 sample : seqTrack1.sample,
                 seqType: seqTrack1.seqType,
         ])
@@ -175,25 +175,25 @@ class EgaSubmissionServiceIntegrationSpec extends Specification implements EgaSu
                 fileTypeService: new FileTypeService(),
         ])
 
-        List<DataFile> expectedDataFiles = [
+        List<RawSequenceFile> expectedRawSequenceFiles = [
                 seqTrack1,
                 seqTrack2,
-        ]*.dataFiles.flatten()
+        ]*.sequenceFiles.flatten()
 
         when:
-        List<DataFileAndSampleAlias> list = egaSubmissionService.getDataFilesAndAlias(egaSubmission)
+        List<RawSequenceFileAndSampleAlias> list = egaSubmissionService.getRawSequenceFilesAndAlias(egaSubmission)
 
         then:
-        TestCase.assertContainSame(list*.dataFile, expectedDataFiles)
+        TestCase.assertContainSame(list*.rawSequenceFile, expectedRawSequenceFiles)
     }
 
     @Unroll
-    void "getDataFilesAndAlias, when case '#name', then return datafile: #returnedValue"() {
+    void "getRawSequenceFilesAndAlias, when case '#name', then return datafile: #returnedValue"() {
         given:
         SeqTrack seqTrack = createSeqTrack()
-        DataFile dataFile
-        if (dataFileExist) {
-            dataFile = createDataFile([
+        RawSequenceFile rawSequenceFile
+        if (fileExists) {
+            rawSequenceFile = createFastqFile([
                     seqTrack     : seqTrack,
                     fileWithdrawn: withdrawn,
                     fileExists   : fileExistOnFileSystem,
@@ -215,16 +215,16 @@ class EgaSubmissionServiceIntegrationSpec extends Specification implements EgaSu
                 fileTypeService: new FileTypeService(),
         ])
 
-        List<DataFile> expectedDataFiles = returnedValue ? [dataFile,] : []
+        List<RawSequenceFile> expectedRawSequenceFiles = returnedValue ? [rawSequenceFile,] : []
 
         when:
-        List<DataFileAndSampleAlias> list = egaSubmissionService.getDataFilesAndAlias(egaSubmission)
+        List<RawSequenceFileAndSampleAlias> list = egaSubmissionService.getRawSequenceFilesAndAlias(egaSubmission)
 
         then:
-        TestCase.assertContainSame(list*.dataFile, expectedDataFiles)
+        TestCase.assertContainSame(list*.rawSequenceFile, expectedRawSequenceFiles)
 
         where:
-        name                               | dataFileExist | useFastqFile | withdrawn | fileExistOnFileSystem | fileType               || returnedValue
+        name                               | fileExists    | useFastqFile | withdrawn | fileExistOnFileSystem | fileType               || returnedValue
         'all fine'                         | true          | true         | false     | true                  | FileType.Type.SEQUENCE || true
         'no data file'                     | false         | true         | false     | true                  | FileType.Type.SEQUENCE || false
         'useFastq is false'                | true          | false        | false     | true                  | FileType.Type.SEQUENCE || false
@@ -324,11 +324,11 @@ class EgaSubmissionServiceIntegrationSpec extends Specification implements EgaSu
 
     void "getExperimentalMetadata, when a datafile is given, then return one experiment of this datafile"() {
         given:
-        DataFileSubmissionObject dataFileSubmissionObject = createDataFileSubmissionObject()
-        DataFile dataFile = dataFileSubmissionObject.dataFile
+        RawSequenceFileSubmissionObject submissionObject = createRawSequenceFileSubmissionObject()
+        RawSequenceFile rawSequenceFile = submissionObject.sequenceFile
 
         EgaSubmission submission = createEgaSubmission(
-                dataFilesToSubmit: [dataFileSubmissionObject],
+                rawSequenceFilesToSubmit: [submissionObject],
         )
 
         when:
@@ -337,9 +337,9 @@ class EgaSubmissionServiceIntegrationSpec extends Specification implements EgaSu
         then:
         experimentalMetadata.size() == 1
         Map metadata = experimentalMetadata[0] as Map
-        metadata['libraryLayout'] == dataFile.seqType.libraryLayout
-        metadata['displayName'] == dataFile.seqType.displayName
-        metadata['libraryPreparationKit'] == dataFile.seqTrack.libraryPreparationKit
+        metadata['libraryLayout'] == rawSequenceFile.seqType.libraryLayout
+        metadata['displayName'] == rawSequenceFile.seqType.displayName
+        metadata['libraryPreparationKit'] == rawSequenceFile.seqTrack.libraryPreparationKit
         metadata['mappedEgaPlatformModel']
         metadata['mappedEgaLibrarySource']
         metadata['mappedEgaLibraryStrategy']
@@ -394,16 +394,16 @@ class EgaSubmissionServiceIntegrationSpec extends Specification implements EgaSu
 
     void "getExperimentalMetadata, when a patient has multiple data, then return only the experiment of the data in the submission"() {
         given:
-        DataFileSubmissionObject dataFileSubmissionObject = createDataFileSubmissionObject()
-        DataFile dataFile = dataFileSubmissionObject.dataFile
-        createDataFile([
+        RawSequenceFileSubmissionObject submissionObject = createRawSequenceFileSubmissionObject()
+        RawSequenceFile rawSequenceFile = submissionObject.sequenceFile
+        createFastqFile([
                 seqTrack: createSeqTrack([
-                        sample: dataFile.sample,
+                        sample: rawSequenceFile.sample,
                 ])
         ])
 
         EgaSubmission submission = createEgaSubmission(
-                dataFilesToSubmit: [dataFileSubmissionObject],
+                rawSequenceFilesToSubmit: [submissionObject],
         )
 
         when:

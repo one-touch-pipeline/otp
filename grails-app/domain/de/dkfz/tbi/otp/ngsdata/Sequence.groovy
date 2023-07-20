@@ -137,7 +137,7 @@ class Sequence implements Serializable {
     /** fields from {@link AntibodyTarget} */
     String antibodyTarget
 
-    /** fields from {@link DataFile} */
+    /** fields from {@link RawSequenceFile} */
     boolean fileExists
     boolean fileWithdrawn
     boolean fileArchived
