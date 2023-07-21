@@ -268,7 +268,7 @@ dependencies {
     runtimeOnly "com.bertramlabs.plugins:asset-pipeline-grails:4.3.0"
     runtimeOnly "com.bertramlabs.plugins:less-asset-pipeline:4.3.0"
     runtimeOnly "com.bertramlabs.plugins:sass-asset-pipeline:4.3.0"
-    testImplementation "org.grails:grails-gorm-testing-support:2.6.1"
+    testImplementation "org.grails:grails-gorm-testing-support:3.0.0"
     testImplementation "org.grails:grails-web-testing-support:2.6.1"
     testRuntimeOnly "org.junit.vintage:junit-vintage-engine:5.10.0"
     workflowTestImplementation "org.grails:grails-gorm-testing-support"
