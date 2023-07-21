@@ -35,6 +35,12 @@ import de.dkfz.tbi.otp.workflow.shared.WorkflowJobIsNotRestartableException
 @Transactional
 class JobService {
 
+    static final List<WorkflowRun.State> WORKFLOW_RUN_STATES_ALLOW_NEXT_JOB = [
+            WorkflowRun.State.PENDING,
+            WorkflowRun.State.RUNNING_WES,
+            WorkflowRun.State.RUNNING_OTP,
+    ].asImmutable()
+
     @Autowired
     LinkGenerator linkGenerator
 
@@ -49,18 +55,23 @@ class JobService {
     void createNextJob(WorkflowRun workflowRun) {
         assert workflowRun
         assert workflowRun.workflow.beanName
+        assert workflowRun.state in WORKFLOW_RUN_STATES_ALLOW_NEXT_JOB
+
+        WorkflowStep lastWorkflowStep = workflowRun.workflowSteps ? workflowRun.workflowSteps.last() : null
+        assert !lastWorkflowStep || lastWorkflowStep.state == WorkflowStep.State.SUCCESS:
+                "Can not create next job, since last was not successfully, but ${lastWorkflowStep.state}"
 
         OtpWorkflow otpWorkflow = otpWorkflowService.lookupOtpWorkflowBean(workflowRun)
         List<String> jobBeanNames = otpWorkflow.jobBeanNames
-        String beanName = workflowRun.workflowSteps ?
-                jobBeanNames[jobBeanNames.indexOf(workflowRun.workflowSteps.last().beanName) + 1] :
+        String beanName = lastWorkflowStep ?
+                jobBeanNames[jobBeanNames.indexOf(lastWorkflowStep.beanName) + 1] :
                 jobBeanNames.first()
 
         WorkflowStep newWorkflowStep = new WorkflowStep(
                 workflowRun: workflowRun,
                 beanName: beanName,
                 state: WorkflowStep.State.CREATED,
-                previous: workflowRun.workflowSteps ? workflowRun.workflowSteps.last() : null,
+                previous: lastWorkflowStep,
         ).save(flush: true)
         workflowRun.state = WorkflowRun.State.RUNNING_OTP
         workflowRun.save(flush: true)
@@ -100,21 +111,19 @@ class JobService {
         assert workflowSteps.last().state == WorkflowStep.State.FAILED: "Can not restart job of ${run.displayName}, " +
                 "since the last job is not in the failed state"
 
-        run.state = WorkflowRun.State.PENDING
-        run.save(flush: true)
-
         workflowSteps[workflowSteps.indexOf(stepToRestart)..(workflowSteps.size() - 1)].each { WorkflowStep step ->
             step.obsolete = true
             step.save(flush: true)
         }
 
-        new WorkflowStep(
+        WorkflowStep restartedWorkflowStep = new WorkflowStep(
                 beanName: stepToRestart.beanName,
                 state: WorkflowStep.State.CREATED,
                 previous: workflowSteps.last(),
                 restartedFrom: stepToRestart,
                 workflowRun: run,
         ).save(flush: true)
+        log.debug("create restarted job: ${restartedWorkflowStep.displayInfo()}")
     }
 
     void createRestartedJobAfterJobFailures(List<WorkflowStep> stepsToRestart) {

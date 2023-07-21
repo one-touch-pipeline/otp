@@ -33,6 +33,14 @@ import de.dkfz.tbi.otp.workflowExecution.log.WorkflowMessageLog
 
 class JobServiceSpec extends Specification implements DataTest, WorkflowSystemDomainFactory {
 
+    static private final List<WorkflowRun.State> ALLOWED_STATE = [
+            WorkflowRun.State.PENDING,
+            WorkflowRun.State.RUNNING_OTP,
+            WorkflowRun.State.RUNNING_WES,
+    ].asImmutable()
+
+    static private final List<WorkflowRun.State> NOT_ALLOWED_STATE = (WorkflowRun.State.values().toList() - ALLOWED_STATE).asImmutable()
+
     private JobService service
 
     @Override
@@ -51,7 +59,7 @@ class JobServiceSpec extends Specification implements DataTest, WorkflowSystemDo
         }
     }
 
-    void "test createNextJob, first step"() {
+    void "test createNextJob, when first step, then create first job"() {
         given:
         WorkflowRun workflowRun = createWorkflowRun()
         service.otpWorkflowService = Mock(OtpWorkflowService) {
@@ -74,10 +82,11 @@ class JobServiceSpec extends Specification implements DataTest, WorkflowSystemDo
         workflowRun.workflowSteps == WorkflowStep.all
     }
 
-    void "test createNextJob, existing step"() {
+    @Unroll
+    void "test createNextJob, existing step, when run is in state #state, then create new job"() {
         given:
-        WorkflowRun workflowRun = createWorkflowRun()
-        WorkflowStep existingStep = createWorkflowStep(workflowRun: workflowRun, beanName: "1st job bean")
+        WorkflowRun workflowRun = createWorkflowRun(state: state)
+        WorkflowStep existingStep = createWorkflowStep(workflowRun: workflowRun, beanName: "1st job bean", state: WorkflowStep.State.SUCCESS)
         service.otpWorkflowService = Mock(OtpWorkflowService) {
             1 * lookupOtpWorkflowBean(workflowRun) >> Mock(OtpWorkflow) {
                 1 * getJobBeanNames() >> ["1st job bean", "2nd job bean"]
@@ -98,6 +107,41 @@ class JobServiceSpec extends Specification implements DataTest, WorkflowSystemDo
         newStep.workflowRun == workflowRun
         newStep.beanName == "2nd job bean"
         workflowRun.workflowSteps == WorkflowStep.all
+
+        where:
+        state << ALLOWED_STATE
+    }
+
+    @Unroll
+    void "test createNextJob, existing step, when run is in state #state, then throw assertion"() {
+        given:
+        WorkflowRun workflowRun = createWorkflowRun(state: state)
+        createWorkflowStep(workflowRun: workflowRun, beanName: "1st job bean", state: WorkflowStep.State.SUCCESS)
+
+        when:
+        service.createNextJob(workflowRun)
+
+        then:
+        thrown(AssertionError)
+
+        where:
+        state << NOT_ALLOWED_STATE
+    }
+
+    @Unroll
+    void "test createNextJob, existing step, when step is in state #state, then throw assertion"() {
+        given:
+        WorkflowRun workflowRun = createWorkflowRun()
+        createWorkflowStep(workflowRun: workflowRun, beanName: "1st job bean", state: state)
+
+        when:
+        service.createNextJob(workflowRun)
+
+        then:
+        thrown(AssertionError)
+
+        where:
+        state << WorkflowStep.State.values().toList() - WorkflowStep.State.SUCCESS
     }
 
     void "test createNextJob, workflow.beanName not set"() {

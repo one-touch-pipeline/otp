@@ -64,6 +64,7 @@ trait WorkflowSystemDomainFactory implements DomainFactoryCore, TaxonomyFactory 
     WorkflowRun createWorkflowRun(Map properties = [:]) {
         Workflow workflow = properties.workflow ?: properties.restartedFrom?.workflow ?: properties.workflowVersion?.workflow ?: createWorkflow()
         return createDomainObject(WorkflowRun, [
+                state           : WorkflowRun.State.PENDING,
                 workflow        : { workflow },
                 workflowVersion : { properties.restartedFrom?.workflowVersion ?: createWorkflowVersion(workflow: workflow) },
                 priority        : { createProcessingPriority() },
@@ -254,7 +255,7 @@ trait WorkflowSystemDomainFactory implements DomainFactoryCore, TaxonomyFactory 
         String path = properties.path ?: "/${nextId}"
         boolean writable = properties.writable ?: true
         return createDomainObject(BaseFolder, [
-                path: path,
+                path    : path,
                 writable: writable,
         ], properties, saveAndValidate)
     }
@@ -265,8 +266,8 @@ trait WorkflowSystemDomainFactory implements DomainFactoryCore, TaxonomyFactory 
         long size = properties.size ?: 0
         return createDomainObject(WorkFolder, [
                 baseFolder: baseFolder,
-                uuid: uuid,
-                size: size,
+                uuid      : uuid,
+                size      : size,
         ], properties, saveAndValidate)
     }
 }
