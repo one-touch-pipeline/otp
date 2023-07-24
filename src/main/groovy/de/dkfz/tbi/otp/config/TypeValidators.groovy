@@ -39,6 +39,7 @@ import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 import java.time.DateTimeException
 import java.time.ZoneId
 
+@SuppressWarnings('UnusedObject')
 @CompileDynamic
 enum TypeValidators {
 
@@ -99,6 +100,11 @@ enum TypeValidators {
     DEFAULT_FASTQC_TYPE({ FastqcType.getByName(it) }, { FastqcType.values()*.name() }),
 
     CRONJOB_CLASS({ it in AbstractScheduledJob.ALL_JOB_CLASSES*.canonicalName }, { AbstractScheduledJob.ALL_JOB_CLASSES*.canonicalName }),
+
+    URI_STRING({ try { new URI(it); return true } catch (URISyntaxException ignored) { return false } }, null),
+
+    // toURI() needed to ensure that the URL is valid AND compliant with RC 2396
+    URL_STRING({ try { new URL(it).toURI(); return true } catch (MalformedURLException ignored) { return false } catch (URISyntaxException ignored) { return false } }, null),
 
     private final Closure validator
     private final Closure<List<String>> allowedValues

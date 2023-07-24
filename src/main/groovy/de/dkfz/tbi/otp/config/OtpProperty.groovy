@@ -26,7 +26,7 @@ import grails.util.Environment
 enum OtpProperty {
     OIDC_ENABLED('otp.security.oidc.enabled', TypeValidators.BOOLEAN, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT), 'false'),
     OIDC_CLIENT('otp.security.oidc.client', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.DEVELOPMENT)),
-    OIDC_REDIRECT_URI('otp.security.oidc.redirectUri', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.DEVELOPMENT)),
+    OIDC_REDIRECT_URI('otp.security.oidc.redirectUri', TypeValidators.URI_STRING, EnumSet.of(UsedIn.DEVELOPMENT)),
 
     LDAP_ENABLED('otp.security.ldap.enabled', TypeValidators.BOOLEAN, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT), 'true'),
     LDAP_SERVER('otp.security.ldap.server', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT)),
@@ -89,11 +89,11 @@ enum OtpProperty {
     /**
      * The url of the wes server, for example: https://localhost:443/ga4gh/wes/v1
      */
-    WES_URL('otp.wes.url', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT, UsedIn.WORKFLOW_TEST)),
+    WES_URL('otp.wes.url', TypeValidators.URL_STRING, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT, UsedIn.WORKFLOW_TEST)),
     /**
      * Base URL of the authentication Endpoint (Example: http://keycloak-server:8080/auth/realms/WESkit/protocol/openid-connect/token)
      */
-    WES_AUTH_TOKEN_URI('otp.wes.auth.tokenUri', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT, UsedIn.WORKFLOW_TEST)),
+    WES_AUTH_TOKEN_URI('otp.wes.auth.tokenUri', TypeValidators.URI_STRING, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT, UsedIn.WORKFLOW_TEST)),
     /**
      * oAuth2 client_id of the otp user on the oAuth2 server used for the wes authentication
      */
@@ -115,7 +115,7 @@ enum OtpProperty {
             EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT, UsedIn.WORKFLOW_TEST)),
 
     CONFIG_JOB_SYSTEM_START('otp.jobsystem.start', TypeValidators.BOOLEAN, EnumSet.of(UsedIn.PRODUCTION), 'false'),
-    CONFIG_SERVER_URL('otp.server.url', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.PRODUCTION)),
+    CONFIG_SERVER_URL('otp.server.url', TypeValidators.URL_STRING, EnumSet.of(UsedIn.PRODUCTION)),
     CONFIG_ENVIRONMENT_NAME('otp.environment.name', TypeValidators.SINGLE_LINE_TEXT_OPTIONAL, EnumSet.of(UsedIn.PRODUCTION), null),
     CONFIG_AUTO_IMPORT_SECRET('otp.autoimport.secret', TypeValidators.SINGLE_LINE_TEXT_OPTIONAL, EnumSet.of(UsedIn.PRODUCTION), ''),
 

@@ -94,7 +94,7 @@ class AuthController {
         flash.username = session[LAST_USERNAME_KEY]
         String target = session[LAST_TARGET_KEY]
 
-        redirect action: 'login', params: [target: target ?: ""]
+        redirect(action: "login", params: [target: target ?: ""])
     }
 }
 
