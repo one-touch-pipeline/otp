@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,6 +28,7 @@ import org.springframework.stereotype.Component
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.workflow.jobs.AbstractRoddyClusterValidationJob
+import de.dkfz.tbi.otp.workflow.shared.ValidationJobFailedException
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 import java.nio.file.Path
@@ -89,25 +90,24 @@ class PanCancerValidationJob extends AbstractRoddyClusterValidationJob implement
     }
 
     /**
-     * Returns errors if expected read groups are different from the read groups created
-     * Empty list means no further validation error
-     *
-     * @return currently only one error in the list if any exists
+     * Throws an exception if expected read groups are different from the read groups created
      */
     @Override
-    protected List<String> doFurtherValidationAndReturnProblems(WorkflowStep workflowStep) {
+    protected void doFurtherValidation(WorkflowStep workflowStep) {
         RoddyBamFile roddyBamFile = getRoddyBamFile(workflowStep)
         final List<String> readGroupsInBam    = roddyService.getReadGroupsInBam(workflowStep)
         final List<String> expectedReadGroups = roddyService.getReadGroupsExpected(workflowStep)
 
-        return (readGroupsInBam == expectedReadGroups) ? Collections.<String> emptyList() : [
-                """Read groups in BAM file are not as expected.
+        if (readGroupsInBam != expectedReadGroups) {
+            throw new ValidationJobFailedException("""
+                |Read groups in BAM file are not as expected.
                 |Read groups in ${roddyBamFileService.getWorkBamFile(roddyBamFile)}:
                 |${readGroupsInBam.join('\n')}
                 |Expected read groups:
                 |${expectedReadGroups.join('\n')}
-                |""".stripMargin(),
-        ]
+                |""".stripMargin()
+            )
+        }
     }
 
     @Override

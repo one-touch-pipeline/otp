@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,7 +24,6 @@ package de.dkfz.tbi.otp.workflow.jobs
 import groovy.transform.CompileDynamic
 import org.springframework.beans.factory.annotation.Autowired
 
-import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.workflow.shared.ValidationJobFailedException
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
@@ -35,11 +34,11 @@ import java.nio.file.Path
 /**
  * Base job that does validation after an external pipeline {@link AbstractExecutePipelineJob} ran.
  *
- * Class provides an interface for the typicall checks to do after running an external pipeline:
+ * Class provides an interface for the typical checks to do after running an external pipeline:
  * - did the pipeline finish (using the callback {@link #ensureExternalJobsRunThrough})
  * - have all expected directories been created (Directories are fetched via callback {@link #getExpectedDirectories})
  * - have all expected files been created (Files are fetched via callback {@link #getExpectedDirectories})
- * - allows to do any further checking using using the callback {@link #doFurtherValidationAndReturnProblems}
+ * - allows to do any further checking using using the callback {@link #doFurtherValidation}
  *
  * Moreover, it allows to do updates of {@link #saveResult}.
  *
@@ -79,17 +78,14 @@ abstract class AbstractValidationJob extends AbstractJob {
             }
         }
 
-        try {
-            errors.addAll(doFurtherValidationAndReturnProblems(workflowStep))
-        } catch (OtpRuntimeException e) {
-            errors << "Further validation failed with exception, ${e.message}"
-        }
-
         if (errors) {
             String message = "${errors.size()} errors occured:\n${errors.join("\n")}"
             logService.addSimpleLogEntry(workflowStep, message)
             throw new ValidationJobFailedException(message)
         }
+
+        doFurtherValidation(workflowStep)
+
         saveResult(workflowStep)
         workflowStateChangeService.changeStateToSuccess(workflowStep)
     }
@@ -115,11 +111,10 @@ abstract class AbstractValidationJob extends AbstractJob {
     abstract protected List<Path> getExpectedDirectories(WorkflowStep workflowStep)
 
     /**
-     * optional callback to do further checks. It should collect problems and return them as List of Strings
+     * optional callback to do further checks. It should throw a ValidationJobFailedException if problems occur
      */
     @SuppressWarnings("UnusedMethodParameter")
-    protected List<String> doFurtherValidationAndReturnProblems(WorkflowStep workflowStep) {
-        return []
+    protected void doFurtherValidation(WorkflowStep workflowStep) throws ValidationJobFailedException {
     }
 
     /**

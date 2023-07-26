@@ -85,8 +85,7 @@ class PanCancerValidationJobSpec extends Specification implements WorkflowSystem
         configService.clean()
     }
 
-    @Unroll
-    void "test doFurtherValidationAndReturnProblems, when called the readGroups are checked for errors"() {
+    void "test doFurtherValidation, when the readGroups are identical, don't throw exception"() {
         given:
         final PanCancerValidationJob job = new PanCancerValidationJob()
         final RoddyBamFile bamFile = createRoddyBamFile(RoddyBamFile)
@@ -102,16 +101,42 @@ class PanCancerValidationJobSpec extends Specification implements WorkflowSystem
         job.roddyBamFileService = Mock(RoddyBamFileService)
 
         when:
-        List<String> errors = job.doFurtherValidationAndReturnProblems(workflowStep)
+        job.doFurtherValidation(workflowStep)
 
         then:
-        errors.size() == nErrors
+        notThrown(ValidationJobFailedException)
 
         where:
-        nErrors | readGroupsInBam      | readGroupsExpected
-        0       | ["group1", "group2"] | ["group1", "group2"]
-        1       | ["group1", "group2"] | ["group1"]
-        1       | []                   | ["group1", "group2"]
+        readGroupsInBam      | readGroupsExpected
+        ["group1", "group2"] | ["group1", "group2"]
+    }
+
+    @Unroll
+    void "test doFurtherValidation, when the readGroups are different, throw exception"() {
+        given:
+        final PanCancerValidationJob job = new PanCancerValidationJob()
+        final RoddyBamFile bamFile = createRoddyBamFile(RoddyBamFile)
+
+        job.fileSystemService = new TestFileSystemService()
+        job.roddyService = Mock(RoddyService) {
+            1 * getReadGroupsInBam(_) >> readGroupsInBam
+            1 * getReadGroupsExpected(_) >> readGroupsExpected
+        }
+        job.concreteArtefactService = Mock(ConcreteArtefactService) {
+            _ * getOutputArtefact(_, _) >> bamFile
+        }
+        job.roddyBamFileService = Mock(RoddyBamFileService)
+
+        when:
+        job.doFurtherValidation(workflowStep)
+
+        then:
+        thrown(ValidationJobFailedException)
+
+        where:
+        readGroupsInBam      | readGroupsExpected
+        ["group1", "group2"] | ["group1"]
+        []                   | ["group1", "group2"]
     }
 
     @Unroll

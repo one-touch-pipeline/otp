@@ -28,6 +28,7 @@ import spock.lang.Unroll
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.workflow.shared.ValidationJobFailedException
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 import java.nio.file.*
@@ -88,13 +89,13 @@ class DataInstallationValidationJobSpec extends Specification implements DataTes
         job.checksumFileService = Mock(ChecksumFileService)
 
         when:
-        List<String> result = job.doFurtherValidationAndReturnProblems(workflowStep)
+        job.doFurtherValidation(workflowStep)
 
         then:
         1 * job.checksumFileService.compareMd5(seqTrack.sequenceFiles.first()) >> true
         1 * job.checksumFileService.compareMd5(seqTrack.sequenceFiles.last()) >> true
 
-        result == []
+        notThrown(ValidationJobFailedException)
     }
 
     void "test doFurtherValidation, when md5Sum is incorrect, then return list with problems"() {
@@ -107,14 +108,16 @@ class DataInstallationValidationJobSpec extends Specification implements DataTes
         job.checksumFileService = Mock(ChecksumFileService)
 
         when:
-        List<String> result = job.doFurtherValidationAndReturnProblems(workflowStep)
+        job.doFurtherValidation(workflowStep)
 
         then:
         1 * job.checksumFileService.compareMd5(seqTrack.sequenceFiles.first()) >> false
         1 * job.checksumFileService.compareMd5(seqTrack.sequenceFiles.last()) >> false
 
-        result.size() == 2
-        result.each {
+        Exception e = thrown(ValidationJobFailedException)
+        String[] messages = e.message.split('\n')
+        messages.size() == 2
+        messages.each {
             assert it ==~ ("The md5sum of file .* is not the expected .*")
         }
     }

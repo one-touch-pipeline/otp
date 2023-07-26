@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,6 +25,7 @@ import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.workflow.shared.ValidationJobFailedException
 import de.dkfz.tbi.otp.workflow.shared.WorkflowException
 import de.dkfz.tbi.otp.workflowExecution.*
 
@@ -54,7 +55,7 @@ class AbstractValidationJobSpec extends Specification implements DataTest, Workf
         then:
         1 * job.getExpectedFiles(workflowStep) >> []
         1 * job.getExpectedDirectories(workflowStep) >> []
-        1 * job.doFurtherValidationAndReturnProblems(workflowStep) >> []
+        1 * job.doFurtherValidation(workflowStep)
 
         then:
         1 * job.saveResult(workflowStep) >> null
@@ -76,7 +77,7 @@ class AbstractValidationJobSpec extends Specification implements DataTest, Workf
         1 * job.ensureExternalJobsRunThrough(workflowStep) >> { throw new WorkflowException("pipeline check fail") }
         0 * job.getExpectedFiles(workflowStep)
         0 * job.getExpectedDirectories(workflowStep)
-        0 * job.doFurtherValidationAndReturnProblems(workflowStep)
+        0 * job.doFurtherValidation(workflowStep)
         0 * job.saveResult(workflowStep) >> null
         0 * job.workflowStateChangeService.changeStateToSuccess(workflowStep)
 
@@ -84,7 +85,7 @@ class AbstractValidationJobSpec extends Specification implements DataTest, Workf
         e.message.contains("pipeline check fail")
     }
 
-    void "test execute, ensureExternalJobsRunThrough fine, but other checks fails"() {
+    void "test execute, ensureExternalJobsRunThrough fine, but file checks fail"() {
         given:
         AbstractValidationJob job = Spy(AbstractValidationJob)
         job.workflowStateChangeService = Mock(WorkflowStateChangeService)
@@ -98,7 +99,7 @@ class AbstractValidationJobSpec extends Specification implements DataTest, Workf
         1 * job.ensureExternalJobsRunThrough(workflowStep) >> { }
         1 * job.getExpectedFiles(workflowStep) >> [Paths.get("file-not-found")]
         1 * job.getExpectedDirectories(workflowStep) >> [Paths.get("dir-not-found")]
-        1 * job.doFurtherValidationAndReturnProblems(workflowStep) >> ["further-error1", "further-error2",]
+        0 * job.doFurtherValidation(workflowStep)
 
         0 * job.saveResult(workflowStep) >> null
         0 * job.workflowStateChangeService.changeStateToSuccess(workflowStep)
@@ -106,6 +107,28 @@ class AbstractValidationJobSpec extends Specification implements DataTest, Workf
         WorkflowException e = thrown(WorkflowException)
         e.message.contains("file-not-found")
         e.message.contains("dir-not-found")
+    }
+
+    void "test execute, ensureExternalJobsRunThrough and file checks fine, but further validation fails"() {
+        given:
+        AbstractValidationJob job = Spy(AbstractValidationJob)
+        job.workflowStateChangeService = Mock(WorkflowStateChangeService)
+        WorkflowStep workflowStep = createWorkflowStep()
+        job.logService = Mock(LogService)
+
+        when:
+        job.execute(workflowStep)
+
+        then:
+        1 * job.ensureExternalJobsRunThrough(workflowStep) >> { }
+        1 * job.getExpectedFiles(workflowStep) >> []
+        1 * job.getExpectedDirectories(workflowStep) >> []
+        1 * job.doFurtherValidation(workflowStep) >> { throw new ValidationJobFailedException(["further-error1", "further-error2"].join("\n")) }
+
+        0 * job.saveResult(workflowStep) >> null
+        0 * job.workflowStateChangeService.changeStateToSuccess(workflowStep)
+
+        WorkflowException e = thrown(WorkflowException)
         e.message.contains("further-error1")
         e.message.contains("further-error2")
     }

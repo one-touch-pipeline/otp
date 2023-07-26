@@ -27,6 +27,7 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.workflow.jobs.AbstractOtpClusterValidationJob
+import de.dkfz.tbi.otp.workflow.shared.ValidationJobFailedException
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 import java.nio.file.*
@@ -54,7 +55,7 @@ class DataInstallationValidationJob extends AbstractOtpClusterValidationJob impl
     }
 
     @Override
-    protected List<String> doFurtherValidationAndReturnProblems(WorkflowStep workflowStep) {
+    protected void doFurtherValidation(WorkflowStep workflowStep) {
         List<String> problems = []
         SeqTrack seqTrack = getSeqTrack(workflowStep)
         seqTrack.sequenceFiles.each { RawSequenceFile rawSequenceFile ->
@@ -62,7 +63,9 @@ class DataInstallationValidationJob extends AbstractOtpClusterValidationJob impl
                 problems.add("The md5sum of file ${rawSequenceFile.fileName} is not the expected ${(rawSequenceFile as FastqFile).fastqMd5sum}" as String)
             }
         }
-        return problems
+        if (problems) {
+            throw new ValidationJobFailedException(problems.join('\n'))
+        }
     }
 
     @Override

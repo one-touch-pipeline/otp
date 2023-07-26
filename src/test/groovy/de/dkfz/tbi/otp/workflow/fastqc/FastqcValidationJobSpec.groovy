@@ -32,6 +32,7 @@ import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.ngsdata.FastqFile
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
+import de.dkfz.tbi.otp.workflow.shared.ValidationJobFailedException
 import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
@@ -93,12 +94,15 @@ class FastqcValidationJobSpec extends Specification implements DataTest, Workflo
         [] == job.getExpectedDirectories(workflowStep)
     }
 
-    void "test doFurtherValidationAndReturnProblems"() {
+    void "test doFurtherValidation"() {
         given:
         FastqcClusterValidationJob job = new FastqcClusterValidationJob()
         WorkflowStep workflowStep = createWorkflowStep()
 
-        expect:
-        [] == job.doFurtherValidationAndReturnProblems(workflowStep)
+        when:
+        job.doFurtherValidation(workflowStep)
+
+        then:
+        notThrown(ValidationJobFailedException)
     }
 }
