@@ -34,6 +34,7 @@ import de.dkfz.tbi.otp.workflow.fastqc.BashFastQcWorkflow
 import de.dkfz.tbi.otp.workflowExecution.ArtefactType
 import de.dkfz.tbi.otp.workflowExecution.Workflow
 import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
+import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 import de.dkfz.tbi.otp.workflowExecution.WorkflowVersion
 import de.dkfz.tbi.otp.workflowExecution.WorkflowVersionSelector
 import de.dkfz.tbi.otp.workflowExecution.decider.FastqcDecider
@@ -81,7 +82,7 @@ class FastqcWorkflowSpec extends AbstractWorkflowSpec {
                 artefactType: ArtefactType.FASTQ,
                 displayName: "display name",
                 outputRole: "FASTQ",
-                producedBy: createWorkflowRun(priority: processingPriority),
+                producedBy: createWorkflowRun(priority: processingPriority, state: WorkflowRun.State.LEGACY),
         )
 
         seqType = SeqTypeService.rnaSingleSeqType
@@ -105,8 +106,8 @@ class FastqcWorkflowSpec extends AbstractWorkflowSpec {
         )
         log.info("Domain data created")
 
-        fileService.createLink(lsdfFilesService.getFileViewByPidPathAsPath(rawSequenceFile), sourceFastq, realm)
         fileService.createLink(lsdfFilesService.getFileFinalPathAsPath(rawSequenceFile), sourceFastq, realm)
+        fileService.createLink(lsdfFilesService.getFileViewByPidPathAsPath(rawSequenceFile), lsdfFilesService.getFileFinalPathAsPath(rawSequenceFile), realm)
         log.info("File system prepared")
 
         workflow = CollectionUtils.exactlyOneElement(Workflow.findAllByName(BashFastQcWorkflow.WORKFLOW))
@@ -131,7 +132,7 @@ class FastqcWorkflowSpec extends AbstractWorkflowSpec {
         SessionUtils.withTransaction {
             setupWorkflow('gz')
             Path initialPath = lsdfFilesService.getFileInitialPathAsPath(rawSequenceFile).parent
-            fileService.createLink(initialPath.resolve("${BASE_NAME}.zip"), expectedFastqc, realm)
+            fileService.createLink(initialPath.resolve(expectedFastqc.fileName), expectedFastqc, realm)
             fastqcDecider.decide([workflowArtefact])
         }
 

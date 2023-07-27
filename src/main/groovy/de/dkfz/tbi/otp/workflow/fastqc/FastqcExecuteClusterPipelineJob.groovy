@@ -70,10 +70,11 @@ class FastqcExecuteClusterPipelineJob extends AbstractExecuteClusterPipelineJob 
         //check if fastqc reports are provided and can be copied
         if (fastqcReportService.canFastqcReportsBeCopied(fastqcProcessedFiles)) {
             //remotely run a script to copy the existing result files
-            logService.addSimpleLogEntry(workflowStep, "Copying fastqc reports")
+            logService.addSimpleLogEntry(workflowStep, "fastqc reports found, copy them")
             fastqcReportService.copyExistingFastqcReports(realm, fastqcProcessedFiles, outputDir)
             return []
         }
+        logService.addSimpleLogEntry(workflowStep, "no fastqc reports found, create script to create them")
         //create and return the shell script only (w/o running it)
         logService.addSimpleLogEntry(workflowStep, "Creating cluster scripts")
         return createFastQcClusterScript(fastqcProcessedFiles, outputDir, workflowStep)

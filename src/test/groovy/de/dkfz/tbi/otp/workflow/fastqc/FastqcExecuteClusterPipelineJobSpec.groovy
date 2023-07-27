@@ -70,7 +70,7 @@ class FastqcExecuteClusterPipelineJobSpec extends Specification implements DataT
     Path tempDir
     Path tempOutDir
 
-    private void createData(boolean outputDirAlreadyExists) {
+    private void createData(boolean outputDirAlreadyExists, boolean copyFile) {
         fileSystem = FileSystems.default
         sourceDir = tempDir.resolve("src")
         targetDir = tempDir.resolve("tgt")
@@ -84,7 +84,7 @@ class FastqcExecuteClusterPipelineJobSpec extends Specification implements DataT
         targetFastqcHtml2 = targetDir.resolve('html2')
 
         int callOfDelete = outputDirAlreadyExists ? 1 : 0
-        int logEntryCount = outputDirAlreadyExists ? 2 : 1
+        int logEntryCount = (outputDirAlreadyExists ? 2 : 1) + (copyFile ? 0 : 1)
 
         workflow = createWorkflow([
                 name: WORKFLOW
@@ -172,7 +172,7 @@ class FastqcExecuteClusterPipelineJobSpec extends Specification implements DataT
     @Unroll
     void "test, when fastqc reports can be copied #m1, then #m2 copy fastqc"() {
         given:
-        createData(outputDirAlreadyExists)
+        createData(outputDirAlreadyExists, true)
 
         CreateFileHelper.createFile(sourceFastqc1)
         CreateFileHelper.createFile(sourceFastqc2)
@@ -200,7 +200,7 @@ class FastqcExecuteClusterPipelineJobSpec extends Specification implements DataT
     @Unroll
     void "test, if fastqc reports can not be copied #m1, then #m2 create copy fastqc scripts"() {
         given:
-        createData(outputDirAlreadyExists)
+        createData(outputDirAlreadyExists, false)
 
         final String cmd_activation_fastqc = "cmd module load fastqc"
         final String cmd_fastqc = "cmd fastqc"

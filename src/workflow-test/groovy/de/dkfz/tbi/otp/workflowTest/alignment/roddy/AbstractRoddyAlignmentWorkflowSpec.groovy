@@ -377,6 +377,7 @@ abstract class AbstractRoddyAlignmentWorkflowSpec extends AbstractAlignmentWorkf
                 workflow: workflow,
                 project : sample.project,
                 priority: processingPriority,
+                state: WorkflowRun.State.LEGACY,
         ])
 
         List<WorkflowArtefact> workflowArtefacts = artefacts.collect { Artefact artefact ->
