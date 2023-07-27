@@ -359,6 +359,56 @@ class DeletionServiceIntegrationSpec extends Specification implements EgaSubmiss
         ]
     }
 
+    void "deleteSeqTrack, should delete individual"() {
+        given:
+        setupData()
+        SeqTrack seqTrack = createSeqTrack()
+
+        when:
+        deletionService.deleteSeqTrack(seqTrack)
+
+        then:
+        Individual.all.empty
+    }
+
+    void "deleteSeqTrack, should not delete individual"() {
+        given:
+        setupData()
+        SeqTrack seqTrack = createSeqTrack()
+        createSeqTrack(sample: seqTrack.sample)
+
+        when:
+        deletionService.deleteSeqTrack(seqTrack)
+
+        then:
+        !Individual.all.empty
+    }
+
+    void "deleteSeqTrack, should delete sample"() {
+        given:
+        setupData()
+        SeqTrack seqTrack = createSeqTrack()
+
+        when:
+        deletionService.deleteSeqTrack(seqTrack)
+
+        then:
+        Sample.all.empty
+    }
+
+    void "deleteSeqTrack, should not delete sample"() {
+        given:
+        setupData()
+        SeqTrack seqTrack = createSeqTrack()
+        createSeqTrack(sample: seqTrack.sample)
+
+        when:
+        deletionService.deleteSeqTrack(seqTrack)
+
+        then:
+        !Sample.all.empty
+    }
+
     void "deleteProjectContent without any content"() {
         given:
         setupData()

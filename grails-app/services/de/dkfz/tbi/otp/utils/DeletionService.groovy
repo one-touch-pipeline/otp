@@ -134,8 +134,7 @@ class DeletionService {
                 deleteProcessParameters(ProcessParameter.findAllByValueAndClassName(seqTrack.id.toString(), seqTrack.class.name))
             }
 
-            SampleIdentifier.findAllBySample(sample)*.delete(flush: true)
-            sample.delete(flush: true)
+            deleteSample(sample)
         }
 
         seqTypes.unique().each { SeqType seqType ->
@@ -143,7 +142,9 @@ class DeletionService {
         }
 
         deleteClusterJobs(ClusterJob.findAllByIndividual(individual))
-        individual.delete(flush: true)
+        if (Individual.exists(individual.id)) {
+            individual.delete(flush: true)
+        }
 
         return deletionScript.toString()
     }
@@ -151,7 +152,9 @@ class DeletionService {
     void deleteEmptyRun(Run run) {
         assert run: "The input run of the method deleteRun is null"
         deleteProcessParameters(ProcessParameter.findAllByValueAndClassName(run.id.toString(), Run.name))
-        run.delete(flush: true)
+        if (Run.exists(run.id)) {
+            run.delete(flush: true)
+        }
     }
 
     /**
@@ -549,7 +552,9 @@ class DeletionService {
         Individual individual = seqTrack.individual
         AntibodyTarget antibodyTarget = seqTrack.antibodyTarget
 
-        seqTrack.delete(flush: true)
+        if (SeqTrack.exists(seqTrack.id)) {
+            seqTrack.delete(flush: true)
+        }
 
         List<SeqTrack> leftOverSeqTracks
         if (seqType.hasAntibodyTarget) {
@@ -567,6 +572,9 @@ class DeletionService {
         if (!leftOverSeqTracks && !leftOverBamFiles) {
             rawSequenceFiles.collect {
                 dirsToDelete.add(fileService.toFile(lsdfFilesService.getSampleTypeDirectory(it)))
+            }
+            if (!SeqTrack.findAllBySample(sample1)) {
+                deleteSample(sample1)
             }
         } else {
             List<SeqTrack> seqTrackSampleList = SeqTrack.createCriteria().list {
@@ -591,6 +599,17 @@ class DeletionService {
         } as List<SeqTrack>
         if (seqTrackIndividualList.empty) {
             dirsToDelete.add(fileService.toFile(individualService.getViewByPidPath(individual, seqType)))
+            if (!leftOverBamFiles && !SeqTrack.createCriteria().list {
+                sample {
+                    eq('individual', individual)
+                }
+            }) {
+                if (Individual.exists(individual.id)) {
+                    deleteClusterJobs(ClusterJob.findAllByIndividual(individual))
+                    Sample.findAllByIndividual(individual).each { deleteSample(it) }
+                    individual.delete(flush: true)
+                }
+            }
         }
 
         //delete ilseSubmission if it is not used by other seqTracks and is not blacklisted
@@ -603,6 +622,13 @@ class DeletionService {
         }
 
         return dirsToDelete
+    }
+
+    private void deleteSample(Sample sample) {
+        if (Sample.exists(sample.id)) {
+            SampleIdentifier.findAllBySample(sample)*.delete(flush: true)
+            sample.delete(flush: true)
+        }
     }
 
     /**
