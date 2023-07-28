@@ -92,6 +92,7 @@ abstract class AbstractQaOverviewService {
             new PropertyColumnDefinition('referenceGenome', 'name', 'referenceGenomeName'),
             new PropertyColumnDefinition('toolName', 'name', 'toolNameName'),
             new PropertyColumnDefinition('referenceGenomeIndex', 'indexToolVersion', 'indexToolVersion'),
+            new PropertyColumnDefinition('run', 'state', 'state'),
     ].asImmutable()
 
     final static List<String> KEY_BASE = [

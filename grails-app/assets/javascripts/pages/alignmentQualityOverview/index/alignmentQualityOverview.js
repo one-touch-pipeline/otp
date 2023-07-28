@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -47,12 +47,19 @@ $(() => {
   };
 
   /**
-     * Format a TableCellValue dataset to DataTable cell format.
-     *
-     * @param tableCellData
-     * @returns {string|*|Window.jQuery}
-     */
+   * Format a TableCellValue dataset to DataTable cell format.
+   *
+   * @param tableCellData
+   * @returns {string|*|Window.jQuery}
+   */
   const tableCellFormatter = function (tableCellData) {
+    if (Array.isArray(tableCellData)) {
+      return tableCellData.map((it) => tableCellFormatter1(it)).join(' | ');
+    }
+    return tableCellFormatter1(tableCellData);
+  };
+
+  const tableCellFormatter1 = function (tableCellData) {
     if (tableCellData === null || tableCellData === undefined) {
       return '';
     }
@@ -214,7 +221,8 @@ $(() => {
         { data: 'pipelineName' },
         { data: 'createdWithVersion' },
         { data: 'referenceGenome' },
-        { data: 'dateFromFileSystem' }
+        { data: 'dateFromFileSystem' },
+        { data: 'configFile' }
       ]);
     }
     return columnNames;

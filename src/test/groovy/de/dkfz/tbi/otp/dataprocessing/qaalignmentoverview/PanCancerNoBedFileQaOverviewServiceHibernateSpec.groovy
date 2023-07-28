@@ -31,6 +31,7 @@ import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.qcTrafficLight.QcThresholdService
 import de.dkfz.tbi.otp.workflow.panCancer.PanCancerWorkflow
 import de.dkfz.tbi.otp.workflow.wgbs.WgbsWorkflow
+import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 import de.dkfz.tbi.otp.workflowExecution.WorkflowService
 
 class PanCancerNoBedFileQaOverviewServiceHibernateSpec extends HibernateSpec implements RoddyPancanFactory {
@@ -192,12 +193,15 @@ class PanCancerNoBedFileQaOverviewServiceHibernateSpec extends HibernateSpec imp
                 coverageWithoutN: inputCoverage,
                 coverageX       : inputCoverageX,
                 coverageY       : inputCoverageY,
+                bamId           : 0,
+                state           : WorkflowRun.State.LEGACY,
         ]
         Map<String, String> expected = [
                 createdWithVersion: "NA",
                 coverageWithoutN  : outputCoverage,
                 coverageX         : outputCoverageX,
                 coverageY         : outputCoverageY,
+                configFile        : 'N/A',
         ]
 
         expect:

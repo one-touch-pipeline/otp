@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.dataprocessing.qaalignmentoverview
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractQualityAssessment
 import de.dkfz.tbi.otp.dataprocessing.RoddyMergedBamQa
@@ -29,6 +30,7 @@ import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.FormatHelper
 import de.dkfz.tbi.otp.workflow.panCancer.PanCancerWorkflow
+import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 import de.dkfz.tbi.otp.workflowExecution.WorkflowService
 
 @Transactional(readOnly = true)
@@ -84,11 +86,14 @@ class PanCancerBedFileQaOverviewService extends AbstractRoddyQaOverviewService {
     }
 
     @Override
+    @CompileDynamic
     protected Map<String, ?> extractSpecificValues(Project project, Map<String, ?> qaMap) {
-        return [
+        Map<String, ?> result = [
                 createdWithVersion: "${(qaMap.programVersion2 ?: qaMap.workflowVersion) ?: 'NA'}",
-                targetCoverage: FormatHelper.formatNumber((Double) qaMap.targetCoverage),
+                targetCoverage    : FormatHelper.formatNumber((Double) qaMap.targetCoverage),
         ]
+        result.putAll(getRoddyConfig(qaMap.bamId as long, qaMap.state as WorkflowRun.State))
+        return result
     }
 
     @Override

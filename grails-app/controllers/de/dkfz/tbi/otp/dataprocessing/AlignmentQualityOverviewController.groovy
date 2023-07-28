@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -34,6 +34,7 @@ import de.dkfz.tbi.otp.dataprocessing.qaalignmentoverview.QcStatusCellService
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.job.processing.FileSystemService
+import de.dkfz.tbi.otp.job.processing.RoddyConfigService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 import de.dkfz.tbi.otp.project.Project
@@ -54,6 +55,7 @@ class AlignmentQualityOverviewController implements CheckAndCall {
             dataTableSource      : "POST",
             viewCellRangerSummary: "GET",
             renderPDF            : "GET",
+            viewConfigFile       : "GET",
     ]
 
     private static final List<String> HEADER_COMMON = [
@@ -82,6 +84,7 @@ class AlignmentQualityOverviewController implements CheckAndCall {
             'alignment.quality.createdWithVersion',
             'alignment.quality.referenceGenome',
             'alignment.quality.date',
+            'alignment.quality.configFile',
     ].asImmutable()
 
     private static final List<String> HEADER_RNA = HEADER_COMMON + [
@@ -128,6 +131,7 @@ class AlignmentQualityOverviewController implements CheckAndCall {
             'alignment.quality.createdWithVersion',
             'alignment.quality.referenceGenome',
             'alignment.quality.date',
+            'alignment.quality.configFile',
     ].asImmutable()
 
     private static final List<String> HEADER_CELL_RANGER = HEADER_COMMON + [
@@ -167,6 +171,8 @@ class AlignmentQualityOverviewController implements CheckAndCall {
     ReferenceGenomeService referenceGenomeService
     SeqTypeService seqTypeService
     WorkflowService workflowService
+    RoddyResultServiceFactoryService roddyResultServiceFactoryService
+    RoddyConfigService roddyConfigService
 
     def index(AlignmentQcCommand cmd) {
         Project project = projectSelectionService.selectedProject
@@ -310,6 +316,22 @@ class AlignmentQualityOverviewController implements CheckAndCall {
             render(file: file.bytes, contentType: "application/pdf")
         } else {
             render(text: "no plot available", contentType: "text/plain")
+        }
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#roddyResult.project, 'OTP_READ_ACCESS')")
+    def viewConfigFile(RoddyBamFile roddyResult, String to) {
+        Path workDir = roddyResultServiceFactoryService.getService(roddyResult).getWorkDirectory(roddyResult)
+        Path configFile = roddyConfigService.getConfigFile(workDir)
+
+        if (Files.isReadable(configFile)) {
+            render(
+                    file: configFile.bytes,
+                    contentType: "text/plain",
+                    fileName: (to == 'DOWNLOAD') ? "config.txt" : null,
+            )
+        } else {
+            render(text: "no config file available", contentType: "text/plain")
         }
     }
 }

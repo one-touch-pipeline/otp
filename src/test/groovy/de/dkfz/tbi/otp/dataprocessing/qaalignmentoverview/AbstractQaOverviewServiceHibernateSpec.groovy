@@ -80,7 +80,8 @@ class AbstractQaOverviewServiceHibernateSpec extends HibernateSpec implements Ro
             |        version.workflowVersion as workflowVersion,
             |        referenceGenome.name as referenceGenomeName,
             |        toolName.name as toolNameName,
-            |        referenceGenomeIndex.indexToolVersion as indexToolVersion
+            |        referenceGenomeIndex.indexToolVersion as indexToolVersion,
+            |        run.state as state
             |    )
             |from
             |    ${AbstractQualityAssessment.name} qa
@@ -150,6 +151,7 @@ class AbstractQaOverviewServiceHibernateSpec extends HibernateSpec implements Ro
             |        referenceGenome.name as referenceGenomeName,
             |        toolName.name as toolNameName,
             |        referenceGenomeIndex.indexToolVersion as indexToolVersion,
+            |        run.state as state,
             |        domain1.property1 as alias1,
             |        domain2.property2 as alias2
             |    )
@@ -228,6 +230,7 @@ class AbstractQaOverviewServiceHibernateSpec extends HibernateSpec implements Ro
             |        referenceGenome.name as referenceGenomeName,
             |        toolName.name as toolNameName,
             |        referenceGenomeIndex.indexToolVersion as indexToolVersion,
+            |        run.state as state,
             |        domain1.property1 as alias1,
             |        domain2.property2 as alias2
             |    )

@@ -30,7 +30,9 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPancanFactory
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.qcTrafficLight.QcThresholdService
+import de.dkfz.tbi.otp.qcTrafficLight.TableCellValue
 import de.dkfz.tbi.otp.workflow.panCancer.PanCancerWorkflow
+import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 import de.dkfz.tbi.otp.workflowExecution.WorkflowService
 
 class PanCancerBedFileQaOverviewServiceHibernateSpec extends HibernateSpec implements RoddyPancanFactory {
@@ -169,10 +171,13 @@ class PanCancerBedFileQaOverviewServiceHibernateSpec extends HibernateSpec imple
 
         Map<String, ?> qaMap = [
                 targetCoverage: input,
+                bamId         : 0,
+                state         : WorkflowRun.State.LEGACY,
         ]
         Map<String, String> expected = [
                 createdWithVersion: 'NA',
                 targetCoverage    : output,
+                configFile        : 'N/A',
         ]
 
         expect:
@@ -187,6 +192,35 @@ class PanCancerBedFileQaOverviewServiceHibernateSpec extends HibernateSpec imple
         1.2345  || "1.23"
         1.238   || "1.24"
         null    || ""
+    }
+
+    @Unroll
+    void "extractSpecificValues, when called with map containing needed values, then should return map with link to config file"() {
+        given:
+        setupData()
+        LinkGenerator linkGenerator = Mock(LinkGenerator) {
+            link(_) >> 'test-link'
+        }
+        service.linkGenerator = linkGenerator
+
+        Map<String, ?> qaMap = [
+                targetCoverage: 0,
+                bamId         : 0,
+                state         : state,
+        ]
+        Map<String, String> expected = [
+                createdWithVersion: 'NA',
+                targetCoverage    : '0.00',
+                configFile        : output,
+        ]
+
+        expect:
+        service.extractSpecificValues(null, qaMap) == expected
+
+        where:
+        state                     | bamId || output
+        WorkflowRun.State.LEGACY  | 1     || 'N/A'
+        WorkflowRun.State.SUCCESS | 1     || [new TableCellValue(value: 'View', linkTarget: '_blank', link: 'test-link'), new TableCellValue(value: 'Download', link: 'test-link')]
     }
 
     @Unroll

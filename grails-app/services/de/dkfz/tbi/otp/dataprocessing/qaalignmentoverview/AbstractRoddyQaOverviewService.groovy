@@ -24,6 +24,8 @@ package de.dkfz.tbi.otp.dataprocessing.qaalignmentoverview
 import grails.gorm.transactions.Transactional
 
 import de.dkfz.tbi.otp.dataprocessing.RoddyQualityAssessment
+import de.dkfz.tbi.otp.qcTrafficLight.TableCellValue
+import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 
 @Transactional(readOnly = true)
 abstract class AbstractRoddyQaOverviewService extends AbstractQaOverviewService {
@@ -40,5 +42,36 @@ abstract class AbstractRoddyQaOverviewService extends AbstractQaOverviewService 
         return [
                 allChromosomes: RoddyQualityAssessment.ALL,
         ]
+    }
+
+    protected Map<String, ?> getRoddyConfig(long bamId, WorkflowRun.State state) {
+        return state == WorkflowRun.State.LEGACY ?
+                [configFile: 'N/A'] :
+                [
+                        configFile: [
+                                new TableCellValue(
+                                        value: 'View',
+                                        linkTarget: '_blank',
+                                        link: linkGenerator.link(
+                                                controller: 'alignmentQualityOverview',
+                                                action: 'viewConfigFile',
+                                                params: [
+                                                        'roddyResult.id': bamId,
+                                                ],
+                                        ).toString()
+                                ),
+                                new TableCellValue(
+                                        value: 'Download',
+                                        link: linkGenerator.link(
+                                                controller: 'alignmentQualityOverview',
+                                                action: 'viewConfigFile',
+                                                params: [
+                                                        'roddyResult.id': bamId,
+                                                        'to'            : 'DOWNLOAD',
+                                                ],
+                                        ).toString()
+                                ),
+                        ]
+                ]
     }
 }
