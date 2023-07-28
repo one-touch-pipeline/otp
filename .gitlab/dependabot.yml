@@ -38,13 +38,12 @@ updates:
       - dependency-name: "org.springframework.security:spring-security-*"
         versions: [ "31d4ce8", "acf1d34", "2686af0", "8407c9e", "f66a5ba" ]
         update-types: [ "version-update:semver-major" ]
-      # Grails/GORM is closely coupled with hibernate and do not allow major updates
+      # Grails/GORM is closely coupled with hibernate and does not allow major or minor updates
       - dependency-name: "org.hibernate:hibernate-core"
-        update-types: ["version-update:semver-major"]
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
       - dependency-name: "org.liquibase:liquibase-core"
         update-types: [ "version-update:semver-major", "version-update:semver-minor" ]
     rebase-strategy: none
-
   - package-ecosystem: npm
     directory: /
     schedule:
