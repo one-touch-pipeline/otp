@@ -25,6 +25,7 @@
     <title>${g.message(code: "workflowSelection.title")}</title>
     <asset:javascript src="taglib/EditorSwitch.js"/>
     <asset:javascript src="common/CommentBox.js"/>
+    <asset:javascript src="pages/workflowSelection/index.js"/>
 </head>
 
 <body>
@@ -47,6 +48,33 @@
     <br>
 
     <h1>${g.message(code: "workflowSelection.title")}</h1>
+
+    <h2>${g.message(code: "workflowSelection.fastqc")}</h2>
+    <otp:annotation type="info">
+            ${g.message(code: "workflowSelection.fastqc.info", args: [contactDataSupportEmail, faqLink])}
+    </otp:annotation>
+    <table class="table table-sm table-striped">
+        <tr>
+            <th>${g.message(code: "workflowSelection.workflow")}</th>
+            <th>${g.message(code: "workflowSelection.version")}</th>
+        </tr>
+        <g:each in="${fastqcVersions}" var="fastqcVersion">
+            <tr>
+                <td>${fastqcVersion.workflow.name}</td>
+                <td><otp:editorSwitch
+                        roles="ROLE_OPERATOR"
+                        template="dropDown"
+                        optionKey="id"
+                        optionValue="nameWithDefault"
+                        link="${g.createLink(controller: 'workflowSelection', action: 'updateVersion', params: ['workflow': fastqcVersion.workflow.id])}"
+                        sucessHandler="workflowSelectionUpdateSuccessHandler"
+                        values="${fastqcVersion.versions}"
+                        value="${fastqcVersion.version?.id}"
+                        noSelection="${["": g.message(code: "workflowSelection.notConfigured")]}"/>
+                </td>
+            </tr>
+        </g:each>
+    </table>
 
     <h2>${g.message(code: "workflowSelection.alignment")}</h2>
     <table class="table table-sm table-striped">
@@ -90,7 +118,7 @@
                             noSelection="${[(null): g.message(code: "workflowSelection.notConfigured")]}"/>
                     </td>
                 </g:each>
-            <g:if test="${!workflow.refGens}"><td>${g.message(code: "workflowSelection.noSpecies")}</td><td></td></g:if>
+                <g:if test="${!workflow.refGens}"><td>${g.message(code: "workflowSelection.noSpecies")}</td><td></td></g:if>
             </tr>
             <g:each in="${workflow.refGens.drop(1)}" var="r">
                 <tr>

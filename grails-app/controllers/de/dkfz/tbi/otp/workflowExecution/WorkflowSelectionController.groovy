@@ -35,6 +35,8 @@ import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.workflow.fastqc.BashFastQcWorkflow
+import de.dkfz.tbi.otp.workflow.fastqc.WesFastQcWorkflow
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
@@ -49,6 +51,11 @@ class WorkflowSelectionController implements CheckAndCall {
             updateMergingCriteriaSPG: "POST",
     ]
 
+    static final Set<String> FASTQC_WORKFLOWS = [
+            BashFastQcWorkflow.WORKFLOW,
+            WesFastQcWorkflow.WORKFLOW,
+    ]
+
     MergingCriteriaService mergingCriteriaService
     ProjectSelectionService projectSelectionService
     ReferenceGenomeSelectorService referenceGenomeSelectorService
@@ -57,6 +64,8 @@ class WorkflowSelectionController implements CheckAndCall {
     @PreAuthorize('isFullyAuthenticated()')
     def index() {
         Map<String, OtpWorkflow> workflowBeans = applicationContext.getBeansOfType(OtpWorkflow)
+        List<String> fastqcWorkflowNames = FASTQC_WORKFLOWS.collect { Workflow.findAllByName(it).beanName }.unique()
+        List<Workflow> fastqcWorkflows = Workflow.findAllByBeanNameInListAndDeprecatedDateIsNull(fastqcWorkflowNames).sort { it.beanName }
         List<String> alignmentWorkflowNames = workflowBeans.findAll { it.value.isAlignment() }*.key
         List<Workflow> alignmentWorkflows = alignmentWorkflowNames ?
                 Workflow.findAllByBeanNameInListAndDeprecatedDateIsNull(alignmentWorkflowNames).sort { it.name } : []
@@ -71,6 +80,18 @@ class WorkflowSelectionController implements CheckAndCall {
 
         List<ConfValue> alignmentConf = []
         List<ConfValue> analysisConf = []
+        List<FastQcValues> fastqcVersions = []
+        fastqcWorkflows.each { Workflow workflow ->
+            WorkflowVersion version = atMostOneElement(WorkflowVersionSelector.findAllByProjectAndDeprecationDateIsNull(project).findAll {
+                it.workflowVersion.workflow == workflow
+            })?.workflowVersion
+            List<Version> versions = WorkflowVersion.findAllByWorkflow(workflow).sort { a, b ->
+                new WorkflowVersionComparatorConsideringDefaultAndDeprecated(workflow.defaultVersion).compare(a, b)
+            }.collect {
+                new Version(it.id, it.workflowVersion, it == workflow.defaultVersion, it.deprecatedDate as boolean)
+            }
+            fastqcVersions.add(new FastQcValues(workflow, versions, version))
+        }
 
         alignmentWorkflows.each { workflow ->
             workflow.supportedSeqTypes.sort { it.displayNameWithLibraryLayout }.each { seqType ->
@@ -119,6 +140,7 @@ class WorkflowSelectionController implements CheckAndCall {
 
         return [
                 alignmentConf         : alignmentConf,
+                fastqcVersions        : fastqcVersions,
                 analysisConf          : analysisConf,
                 seqTypeMergingCriteria: seqTypeMergingCriteria,
         ]
@@ -167,6 +189,13 @@ class Version {
 }
 
 @Canonical
+class FastQcValues {
+    Workflow workflow
+    List<Version> versions
+    WorkflowVersion version
+}
+
+@Canonical
 class ConfValue {
     Workflow workflow
     SeqType seqType
@@ -193,6 +222,7 @@ class UpdateWorkflowVersionCommand implements Validateable {
 
     static constraints = {
         workflowVersion nullable: true
+        seqType nullable: true
     }
 }
 
