@@ -23,9 +23,6 @@
 //= require /webjars/bootstrap/4.6.0/js/bootstrap.bundle.js
 //= require /webjars/datatables-fixedcolumns/3.2.2/js/dataTables.fixedColumns.js
 //= require /webjars/datatables-fixedheader/3.2.4/js/dataTables.fixedHeader.js
-//= require /webjars/datatables-buttons/2.2.2/js/dataTables.buttons.js
-//= require /webjars/datatables-buttons/2.2.2/js/buttons.bootstrap4.js
-//= require /webjars/datatables-buttons/2.2.2/js/buttons.html5.js
 //= require /webjars/select2/4.0.13/js/select2.full.js
 //= require /webjars/corejs-typeahead/1.3.1/dist/typeahead.jquery.js
 

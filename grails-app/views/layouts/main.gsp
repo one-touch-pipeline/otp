@@ -30,6 +30,8 @@
         <asset:javascript src="modules/defaultPageDependencies.js"/>
         <script type="text/javascript" src="${otp.serverUrl()}/webjars/datatables.net-scroller/js/dataTables.scroller.js"></script>
         <asset:stylesheet src="modules/defaultPageDependencies.css"/>
+        <script type="text/javascript" src="${otp.serverUrl()}/webjars/datatables-buttons/2.4.1/js/dataTables.buttons.js"></script>
+        <script type="text/javascript" src="${otp.serverUrl()}/webjars/datatables-buttons/2.4.1/js/buttons.html5.js"></script>
         <g:layoutHead/>
     </head>
 

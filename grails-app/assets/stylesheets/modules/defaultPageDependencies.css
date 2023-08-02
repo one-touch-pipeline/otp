@@ -25,7 +25,7 @@
 *= require /webjars/datatables/1.13.5/css/jquery.dataTables_themeroller.css
 *= require /webjars/datatables-fixedcolumns/3.2.2/css/fixedColumns.dataTables.scss
 *= require /webjars/datatables-fixedheader/3.2.4/fixedHeader.dataTables.min.css
-*= require /webjars/datatables-buttons/2.2.2/css/buttons.dataTables.css
+*= require /webjars/datatables-buttons/2.4.1/css/buttons.dataTables.css
 *= require /webjars/select2/4.0.13/css/select2.css
 
 *= require otp.less
