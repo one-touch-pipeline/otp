@@ -452,6 +452,7 @@ tasks.withType(CodeNarc) {
 
 war {
     archiveName = 'otp.war'
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     enabled = true
 }
 
