@@ -26,6 +26,7 @@
         <script type="text/javascript" src="${otp.serverUrl()}/webjars/chartjs-plugin-datalabels/2.2.0/dist/chartjs-plugin-datalabels.js"></script>
         <asset:javascript src="modules/application.js"/>
         <asset:stylesheet src="modules/application.css"/>
+        <script type="text/javascript" src="${otp.serverUrl()}/webjars/datatables-plugins/1.13.5/pagination/select.js"></script>
         <g:layoutHead/>
     </head>
 

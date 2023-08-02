@@ -401,6 +401,7 @@ assets {
             '**/chartjs-plugin-datalabels/**/*',
             '**/datatables-fixedcolumns/*/css/fixedColumns.bootstrap4.scss',
             '**/ttskch__select2-bootstrap4-theme/**/*.scss',
+            '**/datatables-plugins/**/*',
     ]
 }
 

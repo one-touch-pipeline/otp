@@ -56,6 +56,7 @@ class NoProjectInterceptor {
                 .except(controller: 'shutdown')
                 .except(controller: 'console')
                 .except(uri: '/static/**')
+                .except(uri: '/webjars/**')
     }
 
     @Override

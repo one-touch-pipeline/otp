@@ -29,7 +29,6 @@
 //= require /webjars/datatables-buttons/2.2.2/js/dataTables.buttons.js
 //= require /webjars/datatables-buttons/2.2.2/js/buttons.bootstrap4.js
 //= require /webjars/datatables-buttons/2.2.2/js/buttons.html5.js
-//= require /webjars/datatables-plugins/1.12.0/pagination/select.js
 //= require /webjars/datatables.net-scroller/js/dataTables.scroller.js
 //= require /webjars/datatables.net-scroller-bs4/js/scroller.bootstrap4.js
 //= require /webjars/select2/4.0.13/js/select2.full.js
