@@ -35,6 +35,7 @@
         <script type="text/javascript" src="${otp.serverUrl()}/webjars/datatables-buttons/2.4.1/js/dataTables.buttons.js"></script>
         <script type="text/javascript" src="${otp.serverUrl()}/webjars/datatables-buttons/2.4.1/js/buttons.bootstrap4.js"></script>
         <script type="text/javascript" src="${otp.serverUrl()}/webjars/datatables-buttons/2.4.1/js/buttons.html5.js"></script>
+        <asset:javascript src="dataTable.js"/>
         <g:layoutHead/>
     </head>
 

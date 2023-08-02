@@ -27,7 +27,6 @@
 //= require /webjars/corejs-typeahead/1.3.1/dist/typeahead.jquery.js
 
 //= require otp.js
-//= require dataTable.js
 //= require banner.js
 //= require common/toaster.js
 //= require common/globalInitializer.js
