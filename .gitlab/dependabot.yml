@@ -19,6 +19,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+#documentation config file: https://dependabot-gitlab.gitlab.io/dependabot/config/configuration.html
+
 version: 2
 updates:
   - package-ecosystem: gradle
@@ -39,6 +41,7 @@ updates:
       # Grails/GORM is closely coupled with hibernate and do not allow major updates
       - dependency-name: "org.hibernate:hibernate-core"
         update-types: ["version-update:semver-major"]
+    rebase-strategy: none
 
   - package-ecosystem: npm
     directory: /
@@ -47,3 +50,4 @@ updates:
     open-pull-requests-limit: 10
     commit-message:
       prefix: "Update: "
+    rebase-strategy: none
