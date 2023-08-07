@@ -155,7 +155,7 @@
     <h2>${g.message(code: "workflowRun.details.input")}</h2>
     <g:each in="${workflowRun.inputArtefacts}" var="artefact" status="index">
         <div class="alert alert-secondary">
-            <b>${artefact.key} (${artefact.value.id}):</b><br>
+            <b>${artefact.key} (workflow artefact ID ${artefact.value.id}, object ID ${artefact.value.artefact.map { it.id.toString() }.orElse('N/A')}):</b><br>
             <g:link controller="workflowArtefact" action="index" id="${artefact.value.id}">
                 ${raw(artefact.value.displayName.replace("\n", "<br>"))}</g:link>
         </div>
@@ -167,7 +167,7 @@
     <h2>${g.message(code: "workflowRun.details.output")}</h2>
     <g:each in="${workflowRun.outputArtefacts}" var="artefact" status="index">
         <div class="alert alert-secondary">
-            <b>${artefact.key} (${artefact.value.id}):</b><br>
+            <b>${artefact.key} (workflow artefact ID ${artefact.value.id}, object ID ${artefact.value.artefact.map { it.id.toString() }.orElse('N/A')}):</b><br>
             <g:link controller="workflowArtefact" action="index" id="${artefact.value.id}">
                 ${raw(artefact.value.displayName.replace("\n", "<br>"))}</g:link>
         </div>

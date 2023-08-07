@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,7 +25,6 @@ import grails.converters.JSON
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.CommentService
-import de.dkfz.tbi.otp.infrastructure.ClusterJobService
 import de.dkfz.tbi.otp.utils.CommentCommand
 import de.dkfz.tbi.otp.utils.DataTablesCommand
 import de.dkfz.tbi.util.TimeFormats
@@ -35,11 +34,9 @@ import javax.servlet.http.HttpServletResponse
 @PreAuthorize("hasRole('ROLE_OPERATOR')")
 class WorkflowRunDetailsController extends AbstractWorkflowRunController {
 
-    ClusterJobService clusterJobService
     CommentService commentService
     WorkflowLogService workflowLogService
     WorkflowRunService workflowRunService
-    WorkflowStepService workflowStepService
 
     static allowedMethods = [
             index      : "GET",
