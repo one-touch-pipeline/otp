@@ -183,7 +183,7 @@ private List<RawSequenceFile> getRawSequenceFilesBySampleIdentifierString(Parsed
 }
 
 private SampleComponents parseSampleAndGetComponents(String sampleName) {
-    return new SampleComponents(sampleName.split(" "))
+    return new SampleComponents(sampleName.split(/[,; \t]/))
 }
 
 class SampleComponents {
