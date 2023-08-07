@@ -214,9 +214,8 @@ describe('Check projectRequest page', () => {
         cy.get('select#seqTypesList').select(0, { force: true });
 
         const username = Cypress.env('user_username');
-        cy.get('button#clone-add').click();
-        cy.get('input.username-input').eq(1).type(username);
-        cy.get('select.project-role-select').eq(1).select('PI', { force: true });
+        cy.get('input.username-input').eq(0).type(username);
+        cy.get('select.project-role-select').eq(0).select('PI', { force: true });
 
         cy.get('input#submitIndex-request-btn').click();
 

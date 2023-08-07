@@ -47,6 +47,7 @@ import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.security.user.SwitchedUserDeniedException
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.StringUtils
+import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 import de.dkfz.tbi.otp.workflow.shared.WorkflowException
 import de.dkfz.tbi.util.TimeFormats
 
@@ -308,11 +309,11 @@ class ProjectRequestController implements CheckAndCall {
         } catch (ValidationException e) {
             flash.message = new FlashMessage(g.message(code: "projectRequest.store.failure") as String, e.errors)
             flash.cmd = cmd
-        } catch (LdapUserCreationException e) {
-            flash.message = new FlashMessage(g.message(code: "projectRequest.store.failure") as String, [e.message])
-            flash.cmd = cmd
         } catch (SwitchedUserDeniedException e) {
             flash.message = new FlashMessage(g.message(code: "error.switchedUserDeniedException.header") as String, e.message)
+        } catch (LdapUserCreationException | OtpRuntimeException e) {
+            flash.message = new FlashMessage(g.message(code: "projectRequest.store.failure") as String, [e.message])
+            flash.cmd = cmd
         }
         redirect(action: ACTION_INDEX)
     }

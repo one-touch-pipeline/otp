@@ -131,6 +131,10 @@ class UserProjectRoleService {
         assert project: "project must not be null"
         User user = userService.findOrCreateUserWithLdapData(username)
 
+        if (!user.enabled) {
+            throw new OtpRuntimeException("User is disabled.")
+        }
+
         applyToRelatedProjects(project.unixGroup) { Project p ->
             createUserProjectRole(user, p, projectRolesSet, flags)
         }
@@ -450,6 +454,9 @@ class UserProjectRoleService {
         }
         if (userProjectRole.user != currentUser && !securityService.hasCurrentUserAdministrativeRoles() && userProjectRole.isPi()) {
             throw new InsufficientRightsException("You don't have enough rights to execute this operation! Please ask your administrator.")
+        }
+        if (!userProjectRole.user.enabled && value) {
+            throw new OtpRuntimeException("User is disabled.")
         }
         boolean hadFileAccess = userProjectRole.accessToFiles
         if (checkRelatedUserProjectRolesFor(userProjectRole) { UserProjectRole upr -> upr.enabled == value }) {

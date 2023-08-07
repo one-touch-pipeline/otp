@@ -42,6 +42,7 @@ import de.dkfz.tbi.otp.security.user.UserService
 import de.dkfz.tbi.otp.security.user.identityProvider.IdentityProvider
 import de.dkfz.tbi.otp.security.user.identityProvider.data.IdpUserDetails
 import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 
 import java.nio.file.Path
 import java.time.*
@@ -543,6 +544,40 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         thrown(InsufficientRightsException)
     }
 
+    void "setEnabled setting enabled should fail, when user is not enabled"() {
+        given:
+        setupData()
+
+        User user = createUser(enabled: false)
+        UserProjectRole userProjectRole = createUserProjectRole(user: user, projectRoles: [pi], enabled: false)
+
+        when:
+        doWithAuth(OPERATOR) {
+            userProjectRoleService.setEnabled(userProjectRole, true)
+        }
+
+        then:
+        OtpRuntimeException e = thrown()
+        e.message == "User is disabled."
+    }
+
+    void "setEnabled setting disabled should not fail, when user is not enabled"() {
+        given:
+        setupData()
+
+        User user = createUser(enabled: false)
+        UserProjectRole userProjectRole = createUserProjectRole(user: user, projectRoles: [pi], enabled: true)
+
+        when:
+        doWithAuth(OPERATOR) {
+            userProjectRoleService.setEnabled(userProjectRole, false)
+        }
+
+        then:
+        noExceptionThrown()
+        !userProjectRole.enabled
+    }
+
     @Unroll
     void "addUserToProjectAndNotifyGroupManagementAuthority, create User if non is found for username for #name"() {
         given:
@@ -721,6 +756,34 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
         then:
         UserProjectRole.findAllByUserAndProjectInList(user, [projectA, projectB]).size() == 2
+    }
+
+    void "addUserToProjectAndNotifyGroupManagementAuthority should fail, when user is not enabled"() {
+        given:
+        setupData()
+        Project project = createProject()
+
+        User user = createUser(enabled: false)
+        IdpUserDetails idpUserDetails = new IdpUserDetails(
+                username: user.username,
+                realName: user.realName,
+                mail: user.email,
+        )
+
+        userProjectRoleService.userService = new UserService()
+        userProjectRoleService.userService.identityProvider = Mock(IdentityProvider) {
+            getIdpUserDetailsByUsername(_) >> idpUserDetails
+        }
+
+        when:
+        doWithAuth(OPERATOR) {
+            userProjectRoleService.addUserToProjectAndNotifyGroupManagementAuthority(project, createProjectRole() as Set<ProjectRole>, user.username)
+        }
+
+        then:
+        OtpRuntimeException e = thrown()
+        e.message == "User is disabled."
+        UserProjectRole.findAllByUserAndProjectInList(user, [project]).size() == 0
     }
 
     void "addExternalUserToProject, create User if non is found for realName or email"() {

@@ -32,6 +32,7 @@ import de.dkfz.tbi.otp.ngsdata.ProjectRole
 import de.dkfz.tbi.otp.project.ProjectRequestUser
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.security.UserAndRoles
+import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 
 @Rollback
 @Integration
@@ -41,7 +42,7 @@ class ProjectRequestUserServiceIntegrationSpec extends Specification implements 
 
     ProjectRequestUserCommand createProjectRequestUserCommand(Map properties = [:]) {
         return new ProjectRequestUserCommand([
-                username     : createUser(),
+                username     : createUser().username,
                 projectRoles : [createProjectRole()],
                 accessToFiles: true,
                 manageUsers  : true,
@@ -93,6 +94,23 @@ class ProjectRequestUserServiceIntegrationSpec extends Specification implements 
         ["bioinformatician"]       | false       | true          | false       | false             || false                  | false
         ["pi", "bioinformatician"] | true        | true          | true        | true              || true                   | true
         ["pi", "bioinformatician"] | true        | true          | true        | true              || true                   | false
+    }
+
+    void "saveProjectRequestUsersFromCommands, should throw OtpRuntimeException when it contains a disabled user"() {
+        given:
+        User disabledUser = createUser(enabled: false)
+        ProjectRequestUserCommand cmd = createProjectRequestUserCommand(username: disabledUser.username)
+
+        projectRequestUserService.userService = Mock(UserService) {
+            findOrCreateUserWithLdapData(disabledUser.username) >> disabledUser
+        }
+
+        when:
+        projectRequestUserService.saveProjectRequestUsersFromCommands([cmd])
+
+        then:
+        OtpRuntimeException e = thrown()
+        e.message.contains("Project request contains at least one disabled user.")
     }
 
     void "deleteProjectRequestUser, should remove the db entry for the ProjectRequestUser"() {

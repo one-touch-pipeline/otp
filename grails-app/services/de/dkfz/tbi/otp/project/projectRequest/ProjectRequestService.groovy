@@ -39,6 +39,7 @@ import de.dkfz.tbi.otp.project.additionalField.*
 import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.security.user.SwitchedUserDeniedException
 import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 
 import java.time.LocalDate
 
@@ -60,7 +61,7 @@ class ProjectRequestService {
     UserProjectRoleService userProjectRoleService
     ConfigService configService
 
-    ProjectRequest saveProjectRequestFromCommand(ProjectRequestCreationCommand cmd) throws SwitchedUserDeniedException {
+    ProjectRequest saveProjectRequestFromCommand(ProjectRequestCreationCommand cmd) throws OtpRuntimeException {
         securityService.ensureNotSwitchedUser()
         ProjectRequest projectRequest
         Set<ProjectRequestUser> users = projectRequestUserService.saveProjectRequestUsersFromCommands(cmd.users)

@@ -86,7 +86,7 @@ class Approved implements ProjectRequestState {
 
     @Override
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    Long save(ProjectRequestCreationCommand cmd) throws ProjectRequestBeingEditedException{
+    Long save(ProjectRequestCreationCommand cmd) throws ProjectRequestBeingEditedException {
         if (cmd.projectRequest.state.currentOwner == securityService.currentUser) {
             return projectRequestService.saveProjectRequestFromCommand(cmd).id
         }

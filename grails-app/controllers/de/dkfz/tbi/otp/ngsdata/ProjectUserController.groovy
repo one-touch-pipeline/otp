@@ -153,7 +153,7 @@ class ProjectUserController implements CheckAndCall {
                     )
                 }
                 flash.message = new FlashMessage("Data stored successfully")
-            } catch (LdapUserCreationException | AssertionError | AccessDeniedException e) {
+            } catch (LdapUserCreationException | AssertionError | AccessDeniedException | OtpRuntimeException e) {
                 flash.message = new FlashMessage("An error occurred", e.message)
             }
         }
