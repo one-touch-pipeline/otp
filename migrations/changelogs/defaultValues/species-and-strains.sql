@@ -55,11 +55,6 @@ VALUES (NEXTVAL('hibernate_sequence'), 0, 'Mus musculus', NOW(), NOW(), (SELECT 
 ON CONFLICT DO NOTHING;
 
 INSERT INTO species_with_strain(id, version, species_id, strain_id, date_created, last_updated, legacy)
-VALUES (NEXTVAL('hibernate_sequence'), 0, (SELECT id FROM species WHERE scientific_name = 'Mus musculus'),
-        (SELECT id FROM strain WHERE name = 'No strain available'), NOW(), NOW(), FALSE)
-ON CONFLICT DO NOTHING;
-
-INSERT INTO species_with_strain(id, version, species_id, strain_id, date_created, last_updated, legacy)
 VALUES (NEXTVAL('hibernate_sequence'), 0, (SELECT id FROM species WHERE scientific_name = 'Mus musculus'), (SELECT id FROM strain WHERE name = 'Unknown'),
         NOW(), NOW(), FALSE)
 ON CONFLICT DO NOTHING;
