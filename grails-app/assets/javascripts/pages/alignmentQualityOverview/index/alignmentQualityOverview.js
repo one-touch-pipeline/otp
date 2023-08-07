@@ -173,12 +173,12 @@ $(() => {
       columnNames = columnNames.concat([
         { data: 'kit' },
         { data: 'createdWithVersion' },
+        { data: 'referenceGenome' },
         { data: 'dateFromFileSystem' }
       ]);
     } else if (workflow === 'CELL_RANGER') {
       columnNames = columnNames.concat([
         { data: 'summary' },
-        { data: 'referenceGenome' },
         { data: 'expectedCells' },
         { data: 'enforcedCells' },
         { data: 'estimatedNumberOfCells' },
@@ -199,6 +199,7 @@ $(() => {
         { data: 'medianUmiCountsPerCell' },
         { data: 'kit' },
         { data: 'createdWithVersion' },
+        { data: 'referenceGenome' },
         { data: 'dateFromFileSystem' }
       ]);
     } else {
@@ -212,6 +213,7 @@ $(() => {
         { data: 'percentDiffChr' },
         { data: 'pipelineName' },
         { data: 'createdWithVersion' },
+        { data: 'referenceGenome' },
         { data: 'dateFromFileSystem' }
       ]);
     }

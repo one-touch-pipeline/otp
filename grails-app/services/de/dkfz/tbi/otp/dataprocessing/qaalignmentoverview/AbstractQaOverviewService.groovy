@@ -51,6 +51,9 @@ abstract class AbstractQaOverviewService {
             "left outer join bamFile.workflowArtefact artefact",
             "left outer join artefact.producedBy run",
             "left outer join run.workflowVersion version",
+            "left outer join mergingWorkPackage.referenceGenomeIndex referenceGenomeIndex",
+            "left outer join referenceGenomeIndex.referenceGenome referenceGenome",
+            "left outer join referenceGenomeIndex.toolName toolName",
     ].asImmutable()
 
     final static List<String> BASE_RESTRICTION = [
@@ -86,6 +89,9 @@ abstract class AbstractQaOverviewService {
             new PropertyColumnDefinition('config', 'programVersion', 'programVersion1'),
             new PropertyColumnDefinition('config2', 'programVersion', 'programVersion2'),
             new PropertyColumnDefinition('version', 'workflowVersion', 'workflowVersion'),
+            new PropertyColumnDefinition('referenceGenome', 'name', 'referenceGenomeName'),
+            new PropertyColumnDefinition('toolName', 'name', 'toolNameName'),
+            new PropertyColumnDefinition('referenceGenomeIndex', 'indexToolVersion', 'indexToolVersion'),
     ].asImmutable()
 
     final static List<String> KEY_BASE = [
@@ -211,6 +217,7 @@ abstract class AbstractQaOverviewService {
                     dateFromFileSystem: TimeFormats.DATE.getFormattedDate((Date) qaMap.dateFromFileSystem),
                     qcStatusGui       : qcStatusCellService.generateQcStatusCell(qaMap),
                     pipelineName      : ((Pipeline.Name) qaMap.pipelineName).displayName,
+                    referenceGenome   : "${qaMap.referenceGenomeName ?: "NA"} ${qaMap.toolNameName ?: ""} ${qaMap.indexToolVersion ?: ""}".trim(),
             ]
             Map<String, Double> keyMapBase = [
                     insertSizeMedian: (Double) qaMap.readLength,

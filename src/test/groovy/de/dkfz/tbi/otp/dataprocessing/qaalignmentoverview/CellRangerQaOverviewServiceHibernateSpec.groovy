@@ -78,16 +78,12 @@ class CellRangerQaOverviewServiceHibernateSpec extends HibernateSpec implements 
         service.supportedSeqTypes() == seqTypes
     }
 
-    void "additionalJoinDomains, when called, should return domains to index, tool and config"() {
+    void "additionalJoinDomains, when called, should return empty list"() {
         given:
         setupData()
 
         expect:
-        service.additionalJoinDomains() == [
-                "join mergingWorkPackage.referenceGenomeIndex referenceGenomeIndex",
-                "join referenceGenomeIndex.referenceGenome referenceGenome",
-                "join referenceGenomeIndex.toolName toolName",
-        ]
+        service.additionalJoinDomains() == []
     }
 
     void "additionalDomainHierarchies, when called, should return empty list"() {
@@ -168,9 +164,8 @@ class CellRangerQaOverviewServiceHibernateSpec extends HibernateSpec implements 
         then:
         service.linkGenerator.link(linkMap) >> link
 
-        ret.size() == 3
+        ret.size() == 2
         ret.createdWithVersion == 'NA'
-        ret.referenceGenome == 'referenceGenomeName toolNameName indexToolVersion'
         ret.containsKey('summary')
         TableCellValue summary = ret.summary
         summary.archived == archived

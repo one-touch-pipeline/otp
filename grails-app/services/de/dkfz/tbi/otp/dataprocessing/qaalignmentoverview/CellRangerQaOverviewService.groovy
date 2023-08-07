@@ -52,9 +52,6 @@ class CellRangerQaOverviewService extends AbstractQaOverviewService {
             new PropertyColumnDefinition('qa', 'fractionReadsInCells', 'fractionReadsInCells'),
             new PropertyColumnDefinition('qa', 'totalGenesDetected', 'totalGenesDetected'),
             new PropertyColumnDefinition('qa', 'medianUmiCountsPerCell', 'medianUmiCountsPerCell'),
-            new PropertyColumnDefinition('referenceGenome', 'name', 'referenceGenomeName'),
-            new PropertyColumnDefinition('toolName', 'name', 'toolNameName'),
-            new PropertyColumnDefinition('referenceGenomeIndex', 'indexToolVersion', 'indexToolVersion'),
     ].asImmutable()
 
     final static List<String> QC_KEY = [
@@ -91,9 +88,6 @@ class CellRangerQaOverviewService extends AbstractQaOverviewService {
     @Override
     protected List<String> additionalJoinDomains() {
         return [
-                "join mergingWorkPackage.referenceGenomeIndex referenceGenomeIndex",
-                "join referenceGenomeIndex.referenceGenome referenceGenome",
-                "join referenceGenomeIndex.toolName toolName",
         ]
     }
 
@@ -131,7 +125,6 @@ class CellRangerQaOverviewService extends AbstractQaOverviewService {
     protected Map<String, ?> extractSpecificValues(Project project, Map<String, ?> qaMap) {
         return [
                 createdWithVersion: "${(qaMap.programVersion1 ?: qaMap.workflowVersion) ?: 'NA'}",
-                referenceGenome   : "${qaMap.referenceGenomeName} ${qaMap.toolNameName} ${qaMap.indexToolVersion}",
                 summary           : new TableCellValue(
                         archived: project.archived,
                         value: "Summary",

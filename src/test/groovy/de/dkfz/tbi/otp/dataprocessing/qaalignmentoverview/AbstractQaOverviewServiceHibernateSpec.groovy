@@ -77,7 +77,10 @@ class AbstractQaOverviewServiceHibernateSpec extends HibernateSpec implements Ro
             |        qa.insertSizeMedian as insertSizeMedian,
             |        config.programVersion as programVersion1,
             |        config2.programVersion as programVersion2,
-            |        version.workflowVersion as workflowVersion
+            |        version.workflowVersion as workflowVersion,
+            |        referenceGenome.name as referenceGenomeName,
+            |        toolName.name as toolNameName,
+            |        referenceGenomeIndex.indexToolVersion as indexToolVersion
             |    )
             |from
             |    ${AbstractQualityAssessment.name} qa
@@ -95,6 +98,9 @@ class AbstractQaOverviewServiceHibernateSpec extends HibernateSpec implements Ro
             |    left outer join bamFile.workflowArtefact artefact
             |    left outer join artefact.producedBy run
             |    left outer join run.workflowVersion version
+            |    left outer join mergingWorkPackage.referenceGenomeIndex referenceGenomeIndex
+            |    left outer join referenceGenomeIndex.referenceGenome referenceGenome
+            |    left outer join referenceGenomeIndex.toolName toolName
             |where
             |    project = :project
             |    and bamFile.fileOperationStatus = 'PROCESSED'
@@ -141,6 +147,9 @@ class AbstractQaOverviewServiceHibernateSpec extends HibernateSpec implements Ro
             |        config.programVersion as programVersion1,
             |        config2.programVersion as programVersion2,
             |        version.workflowVersion as workflowVersion,
+            |        referenceGenome.name as referenceGenomeName,
+            |        toolName.name as toolNameName,
+            |        referenceGenomeIndex.indexToolVersion as indexToolVersion,
             |        domain1.property1 as alias1,
             |        domain2.property2 as alias2
             |    )
@@ -160,6 +169,9 @@ class AbstractQaOverviewServiceHibernateSpec extends HibernateSpec implements Ro
             |    left outer join bamFile.workflowArtefact artefact
             |    left outer join artefact.producedBy run
             |    left outer join run.workflowVersion version
+            |    left outer join mergingWorkPackage.referenceGenomeIndex referenceGenomeIndex
+            |    left outer join referenceGenomeIndex.referenceGenome referenceGenome
+            |    left outer join referenceGenomeIndex.toolName toolName
             |    join qa.property1 property1
             |    left outer join qa.property2 property2
             |    join property1.property3 property3,
@@ -213,6 +225,9 @@ class AbstractQaOverviewServiceHibernateSpec extends HibernateSpec implements Ro
             |        config.programVersion as programVersion1,
             |        config2.programVersion as programVersion2,
             |        version.workflowVersion as workflowVersion,
+            |        referenceGenome.name as referenceGenomeName,
+            |        toolName.name as toolNameName,
+            |        referenceGenomeIndex.indexToolVersion as indexToolVersion,
             |        domain1.property1 as alias1,
             |        domain2.property2 as alias2
             |    )
@@ -232,6 +247,9 @@ class AbstractQaOverviewServiceHibernateSpec extends HibernateSpec implements Ro
             |    left outer join bamFile.workflowArtefact artefact
             |    left outer join artefact.producedBy run
             |    left outer join run.workflowVersion version
+            |    left outer join mergingWorkPackage.referenceGenomeIndex referenceGenomeIndex
+            |    left outer join referenceGenomeIndex.referenceGenome referenceGenome
+            |    left outer join referenceGenomeIndex.toolName toolName
             |    join qa.property1 property1
             |    left outer join qa.property2 property2
             |    join property1.property3 property3,

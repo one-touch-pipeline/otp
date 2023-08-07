@@ -80,6 +80,7 @@ class AlignmentQualityOverviewController implements CheckAndCall {
             'alignment.quality.diffChr',
             'alignment.quality.workflow',
             'alignment.quality.createdWithVersion',
+            'alignment.quality.referenceGenome',
             'alignment.quality.date',
     ].asImmutable()
 
@@ -109,6 +110,7 @@ class AlignmentQualityOverviewController implements CheckAndCall {
             'alignment.quality.rRNARate',
             'alignment.quality.kit',
             'alignment.quality.createdWithVersion',
+            'alignment.quality.referenceGenome',
             'alignment.quality.date',
     ].asImmutable()
 
@@ -124,12 +126,12 @@ class AlignmentQualityOverviewController implements CheckAndCall {
             'alignment.quality.diffChr',
             'alignment.quality.workflow',
             'alignment.quality.createdWithVersion',
+            'alignment.quality.referenceGenome',
             'alignment.quality.date',
     ].asImmutable()
 
     private static final List<String> HEADER_CELL_RANGER = HEADER_COMMON + [
             'alignment.quality.cell.ranger.summary',
-            'alignment.quality.cell.ranger.referenceGenome',
             'alignment.quality.cell.ranger.cells.expected',
             'alignment.quality.cell.ranger.cells.enforced',
             'alignment.quality.cell.ranger.estimatedNumberOfCells',
@@ -150,6 +152,7 @@ class AlignmentQualityOverviewController implements CheckAndCall {
             'alignment.quality.cell.ranger.medianUmiCountsPerCell',
             'alignment.quality.kit',
             'alignment.quality.createdWithVersion',
+            'alignment.quality.referenceGenome',
             'alignment.quality.date',
     ].asImmutable()
 
