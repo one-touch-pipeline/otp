@@ -138,6 +138,11 @@ enum OtpProperty {
     TEST_WORKFLOW_FASTTRACK_QUEUE('otp.testing.workflows.roddy.fasttrack.queue', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.WORKFLOW_TEST)),
     TEST_WORKFLOW_FASTTRACK_CONFIG_SUFFIX('otp.testing.workflows.config.fasttrack.suffix', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.WORKFLOW_TEST)),
 
+    /**
+     * Enable scheduler in development mode
+     */
+    SCHEDULER_ENABLED('otp.scheduler.enabled', TypeValidators.BOOLEAN, EnumSet.of(UsedIn.DEVELOPMENT), 'false'),
+
     final String key
 
     final TypeValidators validator

@@ -35,6 +35,8 @@ environments {
     development {
         grails.logging.jul.usebridge = true
         grails.serverURL = otpProperties.getProperty(OtpProperty.CONFIG_SERVER_URL.key) ?: "http://localhost:8080"
+        scheduler.enabled = otpProperties.getProperty(OtpProperty.SCHEDULER_ENABLED.key) ?: OtpProperty.SCHEDULER_ENABLED.defaultValue
+
     }
     production {
         grails.logging.jul.usebridge = false
@@ -99,8 +101,8 @@ environments {
     // Everything is set in general data source
     development {
         dataSource {
-           // logSql = true
-           // formatSql = true
+            // logSql = true
+            // formatSql = true
         }
     }
     test {
@@ -164,7 +166,7 @@ grails.mail.password = otpProperties.getProperty(OtpProperty.CONFIG_EMAIL_PASSWO
 // * OTP-1126
 // * http://grails.1312388.n4.nabble.com/unit-testing-grails-gorm-failOnError-true-td4231435.html
 // * http://grails.1312388.n4.nabble.com/Unit-testing-with-failOnError-true-td2718543.html
-grails.gorm.failOnError=true
+grails.gorm.failOnError = true
 
 // Shared constraints
 grails.gorm.default.constraints = {
@@ -190,5 +192,5 @@ grails.gorm.default.constraints = {
     }
 }
 grails.gorm.default.mapping = {
-    id generator:'sequence'
+    id generator: 'sequence'
 }

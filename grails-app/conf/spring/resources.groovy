@@ -35,7 +35,8 @@ beans = {
             processingOptionService = ref('processingOptionService')
         }
     }
-    if (Environment.current in [Environment.PRODUCTION, Environment.DEVELOPMENT]) {
+    if (Environment.current == Environment.PRODUCTION || (Environment.current == Environment.DEVELOPMENT &&
+            grailsApplication.config.getProperty("scheduler.enabled", Boolean.class))) {
         // proper thread pool
         xmlns task: "http://www.springframework.org/schema/task"
         task.executor(id: "taskExecutor", "pool-size": 10)
