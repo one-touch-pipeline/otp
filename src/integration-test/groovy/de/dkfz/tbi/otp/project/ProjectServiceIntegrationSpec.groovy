@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -256,7 +256,6 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 dirAnalysis: dirAnalysis,
                 relatedProjects: relatedProjects,
                 sampleIdentifierParserBeanName: sampleIdentifierParserBeanName,
-                qcThresholdHandling: qcThresholdHandling,
                 unixGroup: unixGroup,
                 projectGroup: projectGroup,
                 nameInMetadataFiles: nameInMetadataFiles,
@@ -276,7 +275,6 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         project.dirAnalysis == dirAnalysis
         project.relatedProjects == relatedProjects
         project.sampleIdentifierParserBeanName == sampleIdentifierParserBeanName
-        project.qcThresholdHandling == qcThresholdHandling
         project.unixGroup == unixGroup
         project.projectGroup == CollectionUtils.atMostOneElement(ProjectGroup.findAllByName(projectGroup))
         project.nameInMetadataFiles == nameInMetadataFiles
@@ -287,11 +285,11 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         WorkflowVersionSelector.findAll().first().workflowVersion == workflowVersion
 
         where:
-        name      | dirName | dirAnalysis | relatedProjects | projectGroup   | nameInMetadataFiles | description   | processingPriority            | sampleIdentifierParserBeanName           | qcThresholdHandling
-        'project' | 'dir'   | ''          | ''              | ''             | null                | ''            | ProcessingPriority.FAST_TRACK | SampleIdentifierParserBeanName.INFORM    | QcThresholdHandling.CHECK_AND_NOTIFY
-        'project' | 'dir'   | ''          | ''              | 'projectGroup' | 'project'           | 'description' | ProcessingPriority.NORMAL     | SampleIdentifierParserBeanName.HIPO      | QcThresholdHandling.NO_CHECK
-        'project' | 'dir'   | ''          | ''              | ''             | 'project'           | 'description' | ProcessingPriority.NORMAL     | SampleIdentifierParserBeanName.DEEP      | QcThresholdHandling.CHECK_AND_NOTIFY
-        'project' | 'dir'   | '/dirA'     | ''              | ''             | 'project'           | 'description' | ProcessingPriority.FAST_TRACK | SampleIdentifierParserBeanName.NO_PARSER | QcThresholdHandling.NO_CHECK
+        name      | dirName | dirAnalysis | relatedProjects | projectGroup   | nameInMetadataFiles | description   | processingPriority            | sampleIdentifierParserBeanName
+        'project' | 'dir'   | ''          | ''              | ''             | null                | ''            | ProcessingPriority.FAST_TRACK | SampleIdentifierParserBeanName.INFORM
+        'project' | 'dir'   | ''          | ''              | 'projectGroup' | 'project'           | 'description' | ProcessingPriority.NORMAL     | SampleIdentifierParserBeanName.HIPO
+        'project' | 'dir'   | ''          | ''              | ''             | 'project'           | 'description' | ProcessingPriority.NORMAL     | SampleIdentifierParserBeanName.DEEP
+        'project' | 'dir'   | '/dirA'     | ''              | ''             | 'project'           | 'description' | ProcessingPriority.FAST_TRACK | SampleIdentifierParserBeanName.NO_PARSER
     }
 
     @Unroll
@@ -346,7 +344,6 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 description: '',
                 processingPriority: createProcessingPriority(),
                 sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.NO_PARSER,
-                qcThresholdHandling: QcThresholdHandling.NO_CHECK,
                 projectType: Project.ProjectType.SEQUENCING,
                 storageUntil: LocalDate.now(),
         )
@@ -395,7 +392,6 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 description: '',
                 processingPriority: createProcessingPriority(),
                 sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.NO_PARSER,
-                qcThresholdHandling: QcThresholdHandling.NO_CHECK,
                 projectType: Project.ProjectType.SEQUENCING,
                 storageUntil: LocalDate.now(),
         )
@@ -442,7 +438,6 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 description: '',
                 processingPriority: createProcessingPriority(),
                 sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.NO_PARSER,
-                qcThresholdHandling: QcThresholdHandling.NO_CHECK,
                 projectType: Project.ProjectType.SEQUENCING,
                 storageUntil: LocalDate.now(),
         )
@@ -491,7 +486,6 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 description: '',
                 processingPriority: createProcessingPriority(),
                 sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.NO_PARSER,
-                qcThresholdHandling: QcThresholdHandling.NO_CHECK,
                 projectType: Project.ProjectType.SEQUENCING,
                 storageUntil: LocalDate.now(),
         )
@@ -535,7 +529,6 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 description: '',
                 processingPriority: createProcessingPriority(),
                 sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.NO_PARSER,
-                qcThresholdHandling: QcThresholdHandling.NO_CHECK,
                 projectType: Project.ProjectType.SEQUENCING,
                 storageUntil: LocalDate.now(),
         )
@@ -571,7 +564,6 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 nameInMetadataFiles: null,
                 description: '',
                 processingPriority: createProcessingPriority(),
-                qcThresholdHandling: QcThresholdHandling.NO_CHECK,
                 projectType: Project.ProjectType.SEQUENCING,
                 storageUntil: LocalDate.now(),
         )
@@ -616,7 +608,6 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 processingPriority: createProcessingPriority(),
                 projectInfoFile: mockMultipartFile,
                 sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.NO_PARSER,
-                qcThresholdHandling: QcThresholdHandling.NO_CHECK,
                 projectType: Project.ProjectType.SEQUENCING,
                 storageUntil: LocalDate.now(),
         )
@@ -685,7 +676,6 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 projectGroup: '',
                 nameInMetadataFiles: 'project',
                 description: '',
-                qcThresholdHandling: QcThresholdHandling.NO_CHECK,
                 processingPriority: createProcessingPriority(),
                 storageUntil: LocalDate.now(),
         )

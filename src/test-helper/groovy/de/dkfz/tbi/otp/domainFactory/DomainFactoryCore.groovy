@@ -77,7 +77,6 @@ trait DomainFactoryCore implements DomainFactoryHelper {
                 storageUntil                  : LocalDate.now(),
                 realm                         : { createRealm() },
                 sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.NO_PARSER,
-                qcThresholdHandling           : QcThresholdHandling.CHECK_AND_NOTIFY,
                 unixGroup                     : "unixGroup_${nextId}",
                 processingPriority            : { createProcessingPriority() },
         ], properties, saveAndValidate)

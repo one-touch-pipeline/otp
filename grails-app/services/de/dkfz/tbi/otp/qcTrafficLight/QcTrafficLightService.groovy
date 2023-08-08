@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -32,7 +32,6 @@ import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerWorkflowService
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.tracking.OtrsTicketService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
@@ -111,9 +110,7 @@ class QcTrafficLightService {
             return
         }
 
-        Project project = bamFile.project
-
-        if (!project.qcThresholdHandling.checksThreshold || qcThresholdService.getThresholds(bamFile.project, bamFile.seqType, qc.class).empty) {
+        if (qcThresholdService.getThresholds(bamFile.project, bamFile.seqType, qc.class).empty) {
             setQcTrafficLightStatus(bamFile, AbstractBamFile.QcTrafficLightStatus.UNCHECKED)
             return
         }

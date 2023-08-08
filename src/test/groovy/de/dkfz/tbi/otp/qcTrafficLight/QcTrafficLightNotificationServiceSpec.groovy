@@ -151,11 +151,6 @@ class QcTrafficLightNotificationServiceSpec extends Specification implements Dat
                     assert content == BODY
                     assert receivers == emails
                 }
-            } else {
-                1 * sendEmailToTicketSystem(_, _) >> { String emailSubject, String content ->
-                    assert emailSubject == subjectHeader + HEADER
-                    assert content == BODY
-                }
             }
         }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -70,7 +70,6 @@ class ProjectConfigController implements CheckAndCall {
             updateTumorEntity                   : "POST",
             updateProjectGroup                  : "POST",
             updateSampleIdentifierParserBeanName: "POST",
-            updateQcThresholdHandling           : "POST",
             updateCopyFiles                     : "POST",
             updatePubliclyAvailable             : "POST",
             updateClosed                        : "POST",
@@ -106,7 +105,6 @@ class ProjectConfigController implements CheckAndCall {
                 projectTypes                   : Project.ProjectType.values(),
                 processingPriority             : project?.processingPriority,
                 processingPriorities           : processingPriorityService.allSortedByPriority(),
-                qcThresholdHandlingDropdown    : QcThresholdHandling.values(),
                 allSpeciesWithStrain           : speciesWithStrainService.list().sort { it.toString() } ?: [],
                 allProjectGroups               : projectGroupService.list(),
                 publiclyAvailable              : project?.publiclyAvailable,
@@ -176,12 +174,6 @@ class ProjectConfigController implements CheckAndCall {
     def updateSampleIdentifierParserBeanName(UpdateProjectCommand cmd) {
         checkErrorAndCallMethod(cmd) {
             projectService.updateProjectField(SampleIdentifierParserBeanName.valueOf(cmd.value), cmd.fieldName, projectSelectionService.requestedProject)
-        }
-    }
-
-    def updateQcThresholdHandling(UpdateProjectCommand cmd) {
-        checkErrorAndCallMethod(cmd) {
-            projectService.updateProjectField(QcThresholdHandling.valueOf(cmd.value), cmd.fieldName, projectSelectionService.requestedProject)
         }
     }
 

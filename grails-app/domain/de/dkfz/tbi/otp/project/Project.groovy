@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -79,9 +79,7 @@ class Project implements CommentableWithProject, ProjectPropertiesGivenWithReque
     boolean processingNotification = true
 
     /**
-     * flag to send qcTrafficLight notification to end users.
-     *
-     * The mail is send nevertheless to the ticketing system.
+     * flag to send qcTrafficLight notification to end users and ticket system.
      */
     boolean qcTrafficLightNotification = true
 
@@ -119,8 +117,6 @@ class Project implements CommentableWithProject, ProjectPropertiesGivenWithReque
 
     /** This attribute is used externally. Please discuss a change in the team */
     SampleIdentifierParserBeanName sampleIdentifierParserBeanName = SampleIdentifierParserBeanName.NO_PARSER
-
-    QcThresholdHandling qcThresholdHandling
 
     static hasMany = [
             speciesWithStrains    : SpeciesWithStrain,

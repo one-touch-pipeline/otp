@@ -301,12 +301,6 @@
                 <g:render template="baseValueColumns" model="[fieldName: 'sampleIdentifierParserBeanName', cmd: cmd]"/>
             </tr>
             <tr>
-                <td><g:message code="project.qcThresholdHandling"/></td>
-                <td><g:select name="qcThresholdHandling" class="use-select-2"
-                              from="${qcThresholdHandlings}" value="${source.getByFieldName("qcThresholdHandling")}" required="true"/></td>
-                <g:render template="baseValueColumns" model="[fieldName: 'qcThresholdHandling', cmd: cmd]"/>
-            </tr>
-            <tr>
                 <td><g:message code="project.internalNotes"/></td>
                 <td><g:textArea class="resize-vertical" name="internalNotes" value="${source.getByFieldName("internalNotes")}"/></td>
                 <g:render template="baseValueColumns" model="[fieldName: 'internalNotes', cmd: cmd, type: 'multi-line-string']"/>

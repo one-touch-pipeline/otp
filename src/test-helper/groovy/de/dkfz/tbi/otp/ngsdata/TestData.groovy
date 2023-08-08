@@ -178,7 +178,6 @@ class TestData {
         return DomainFactory.createProject([
             name: "project",
             dirName: "dirName",
-            qcThresholdHandling: QcThresholdHandling.NO_CHECK,
         ] + properties)
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -97,7 +97,6 @@ class ProjectCreationController {
         }
 
         Map<String, ?> defaults = [
-                qcThresholdHandling            : QcThresholdHandling.CHECK_AND_NOTIFY,
                 processingPriority             : processingPriorityService.defaultPriority(),
                 storageUntil                   : "3000-01-01",
                 projectType                    : Project.ProjectType.SEQUENCING,
@@ -132,7 +131,6 @@ class ProjectCreationController {
                 projectGroups                  : projectGroupService.availableProjectGroups()*.name,
                 tumorEntities                  : TumorEntity.list().sort { it.name },
                 sampleIdentifierParserBeanNames: SampleIdentifierParserBeanName.values(),
-                qcThresholdHandlings           : QcThresholdHandling.values(),
                 processingPriorities           : processingPriorityService.allSortedByPriority(),
                 projectTypes                   : Project.ProjectType.values(),
                 allSpeciesWithStrains          : SpeciesWithStrain.list().sort { it.toString() },
@@ -269,7 +267,6 @@ class ProjectCreationCommand extends ProjectCreationBasisCommand {
     })
     Set<UserProjectRole> usersToCopyFromBaseProject
     SampleIdentifierParserBeanName sampleIdentifierParserBeanName
-    QcThresholdHandling qcThresholdHandling
     TumorEntity tumorEntity
 
     @BindUsing({ ProjectCreationCommand obj, SimpleMapDataBindingSource source ->

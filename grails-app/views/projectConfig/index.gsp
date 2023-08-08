@@ -249,18 +249,6 @@
                 </td>
             </tr>
             <tr>
-                <td><g:message code="project.qcThresholdHandling"/></td>
-                <td></td>
-                <td>
-                    <otp:editorSwitch
-                            roles="ROLE_OPERATOR"
-                            template="dropDown"
-                            link="${g.createLink(controller: 'projectConfig', action: 'updateQcThresholdHandling', params: ['fieldName': 'qcThresholdHandling'])}"
-                            values="${qcThresholdHandlingDropdown}"
-                            value="${selectedProject.qcThresholdHandling}"/>
-                </td>
-            </tr>
-            <tr>
                 <td><g:message code="project.fingerPrinting"/></td>
                 <td></td>
                 <td>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -259,24 +259,6 @@ describe('Check projectConfig page', () => {
       cy.wait('@updateSampleIdentifierParserBeanName').its('response.statusCode').should('eq', 200);
     });
 
-    it('should update the qc trashold handling', () => {
-      const cellKey = 'QC Threshold Handling';
-
-      cy.intercept('/projectConfig/updateQcThresholdHandling*').as('updateQcThresholdHandling');
-
-      cy.get('td').contains(cellKey).siblings().last()
-        .find('button.edit')
-        .click();
-      cy.get('td').contains(cellKey).siblings().last()
-        .find('select')
-        .select(1, { force: true });
-      cy.get('td').contains(cellKey).siblings().last()
-        .find('button.save')
-        .click();
-
-      cy.wait('@updateQcThresholdHandling').its('response.statusCode').should('eq', 200);
-    });
-
     it('should update the finger printing flag', () => {
       const cellKey = 'Finger Printing';
 
@@ -296,7 +278,7 @@ describe('Check projectConfig page', () => {
     });
 
     it('should update the processing notification flag', () => {
-      const cellKey = 'Processing Notification';
+      const cellKey = 'Send Processing Notifications';
 
       cy.intercept('/projectConfig/updateProcessingNotification*').as('updateProcessingNotification');
 
@@ -314,7 +296,7 @@ describe('Check projectConfig page', () => {
     });
 
     it('should update the qc traffic light notification flag', () => {
-      const cellKey = 'QC Traffic Light Notification';
+      const cellKey = 'Send QC status warning notifications';
 
       cy.intercept('/projectConfig/updateQcTrafficLightNotification*').as('updateQcTrafficLightNotification');
 
@@ -332,7 +314,7 @@ describe('Check projectConfig page', () => {
     });
 
     it('should update the custom final notification flag', () => {
-      const cellKey = 'Custom Final Notification';
+      const cellKey = 'Send Custom Final Notifications';
 
       cy.intercept('/projectConfig/updateCustomFinalNotification*').as('updateCustomFinalNotification');
 

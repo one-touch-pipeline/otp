@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -33,7 +33,6 @@ import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.pipelines.AlignmentPipelineFactory
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.ngsdata.QcThresholdHandling
 import de.dkfz.tbi.otp.security.SecurityService
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.CollectionUtils
@@ -184,31 +183,12 @@ class QcTrafficLightServiceIntegrationSpec extends Specification implements Doma
         9             | 9                   || true
     }
 
-    void "setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling, NO_CHECK causes UNCHECKED regardless of thresholds"() {
-        given:
-        setupData()
-
-        bamFile.individual.project = createProject(qcThresholdHandling: QcThresholdHandling.NO_CHECK)
-
-        cellRangerQualityAssessment.qcBasesMapped = qcBasesMapped
-        cellRangerQualityAssessment.onTargetMappedBases = 5
-
-        when:
-        qcTrafficLightService.setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling(bamFile, cellRangerQualityAssessment)
-
-        then:
-        bamFile.qcTrafficLightStatus == UNCHECKED
-
-        where:
-        qcBasesMapped << [0, 2, 4, 5, 6, 8, 10]
-    }
-
     @Unroll
-    void "setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling, CHECK_AND_NOTIFY only causes AUTO_ACCEPTED if the threshold would fail"() {
+    void "setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling"() {
         given:
         setupData()
 
-        bamFile.individual.project = createProject(qcThresholdHandling: QcThresholdHandling.CHECK_AND_NOTIFY)
+        bamFile.individual.project = createProject()
 
         cellRangerQualityAssessment.qcBasesMapped = qcBasesMapped
         cellRangerQualityAssessment.onTargetMappedBases = 5
