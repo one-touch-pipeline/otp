@@ -48,9 +48,6 @@ variables:
   stage: test
   dependencies: [ ]
   needs: [ ]
-  only:
-    - branches
-    - tags
   cache:
     - key:
         files:
@@ -97,6 +94,23 @@ unit tests:
   script:
     - set -e
     - ./gradlew --build-cache test
+  rules:
+    - if: $CI_COMMIT_BRANCH
+      changes:
+        compare_to: 'refs/heads/master'
+        paths:
+          - gradle/**/*
+          - grails-app/conf/**/*
+          - grails-app/controllers/**/*
+          - grails-app/domain/**/*
+          - grails-app/i18n/**/*
+          - grails-app/init/**/*
+          - grails-app/services/**/*
+          - src/main/**/*
+          - src/test/**/*
+          - src/test-helper/**/*
+          - build.gradle
+          - gradle.properties
   artifacts:
     <<: *artifacts_template
     paths:
@@ -112,6 +126,23 @@ integration tests:
   script:
     - set -e
     - ./gradlew --build-cache integrationTest
+  rules:
+    - if: $CI_COMMIT_BRANCH
+      changes:
+        compare_to: 'refs/heads/master'
+        paths:
+        - gradle/**/*
+          - grails-app/conf/**/*
+          - grails-app/controllers/**/*
+          - grails-app/domain/**/*
+          - grails-app/i18n/**/*
+          - grails-app/init/**/*
+          - grails-app/services/**/*
+        - src/main/**/*
+        - src/integration-test/**/*
+        - src/test-helper/**/*
+        - build.gradle
+        - gradle.properties
   artifacts:
     <<: *artifacts_template
     paths:
@@ -148,12 +179,20 @@ test migration:
 
 cypress tests:
   extends: .abstract_base_template
-  only:
-    refs:
-      - branches
-      - tags
-    variables:
-      - $ENABLE_CYPRESS == 'true'
+  rules:
+    - if: '$CI_COMMIT_BRANCH && $ENABLE_CYPRESS == "true"'
+      changes:
+        compare_to: 'refs/heads/master'
+        paths:
+        - gradle/**/*
+        - grails-app/**/*
+        - src/main/**/*
+        - cypress/**/*
+        - build.gradle
+        - gradle.properties
+        - cypress.config.js
+        - package.json
+        - package-lock.json
   stage: test
   variables:
     DOCKER_HOST: tcp://docker:2375
