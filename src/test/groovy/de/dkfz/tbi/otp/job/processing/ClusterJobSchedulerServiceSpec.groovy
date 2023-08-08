@@ -167,8 +167,8 @@ class ClusterJobSchedulerServiceSpec extends Specification implements DataTest, 
     void "retrieveAndSaveJobInformationAfterJobStarted, #name"() {
         given:
         String clusterId = 1234
-        Realm realm = new Realm()
-        ClusterJob job = new ClusterJob([
+        Realm realm = DomainFactory.createRealm()
+        ClusterJob job = DomainFactory.createClusterJob([
                 clusterJobId: clusterId,
                 realm       : realm,
         ])

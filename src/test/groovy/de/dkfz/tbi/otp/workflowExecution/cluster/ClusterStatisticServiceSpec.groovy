@@ -50,8 +50,8 @@ class ClusterStatisticServiceSpec extends Specification implements ServiceUnitTe
     void "retrieveAndSaveJobInformationAfterJobStarted, #name"() {
         given:
         String clusterId = "${nextId}"
-        Realm realm = new Realm()
-        ClusterJob job = new ClusterJob([
+        Realm realm = createRealm()
+        ClusterJob job = createClusterJob([
                 clusterJobId: clusterId,
                 realm       : realm,
         ])

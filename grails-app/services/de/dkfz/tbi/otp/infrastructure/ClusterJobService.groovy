@@ -160,8 +160,6 @@ class ClusterJobService {
                 )
             } : []
         }
-
-        assert job.save(flush: true)
     }
 
     /**
