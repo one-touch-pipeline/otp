@@ -341,9 +341,13 @@
         <p><span class="icon-asterisk"></span>${g.message(code: 'projectUser.table.fileAccess.legend')}</p>
     </div>
     <sec:access expression="hasRole('ROLE_OPERATOR')">
-        <button class="btn btn-primary" id="listEmails" title="${g.message(code: 'projectUser.table.tooltip.copyEmail')}"
-                data-project="${selectedProject?.name}" data-emails="${emails}">
+        <button class="btn btn-primary listEmails" title="${g.message(code: 'projectUser.table.tooltip.copyEmail')}"
+                data-project="${selectedProject?.name}" data-emails="${emailsIfEnabled}">
             <g:message code="projectUser.table.copyEmail"/>
+        </button>
+        <button class="btn btn-primary listEmails" title="${g.message(code: 'projectUser.table.tooltip.copyEmailAll')}"
+                data-project="${selectedProject?.name}" data-emails="${emailsIfDisabled}">
+            <g:message code="projectUser.table.copyEmailAll"/>
         </button>
     </sec:access>
     <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'MANAGE_USERS')">

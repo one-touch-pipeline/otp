@@ -567,10 +567,12 @@ class UserProjectRoleService {
         applyUserProjectRolesOntoProject(UserProjectRole.findAllByProject(sourceProject), targetProject)
     }
 
-    List<UserProjectRole> getProjectUsersToBeNotified(List<Project> projects) {
+    List<UserProjectRole> getProjectUsersToBeNotified(List<Project> projects, boolean onlyNotificationsEnabled = true) {
         return UserProjectRole.withCriteria {
             'in'('project', projects)
-            eq("receivesNotifications", true)
+            if (onlyNotificationsEnabled) {
+                eq("receivesNotifications", true)
+            }
             eq("enabled", true)
             user {
                 eq("enabled", true)
@@ -578,8 +580,8 @@ class UserProjectRoleService {
         } as List<UserProjectRole>
     }
 
-    List<String> getEmailsOfToBeNotifiedProjectUsers(List<Project> projects) {
-        return getProjectUsersToBeNotified(projects)*.user*.email
+    List<String> getEmailsOfToBeNotifiedProjectUsers(List<Project> projects, boolean onlyNotificationsEnabled = true) {
+        return getProjectUsersToBeNotified(projects, onlyNotificationsEnabled)*.user*.email
     }
 
     /**

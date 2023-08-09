@@ -1732,7 +1732,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         userProjectRoleService.getEmailsOfToBeNotifiedProjectUsers([createProject()]) == []
     }
 
-    void "getProjectUsersToBeNotified, only fully enabled project users with notification true of given project"() {
+    void "getProjectUsersToBeNotified, only fully enabled project users and consider notification flag depending on #onlyNotificationsEnabled of given project"() {
         given:
         setupData()
 
@@ -1742,14 +1742,17 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         List<UserProjectRole> projectUsers = setupProjectUserForAllNotificationCombinations(project)
 
         List<UserProjectRole> expected = projectUsers.findAll { UserProjectRole projectUser ->
-            projectUser.enabled && projectUser.user.enabled && projectUser.receivesNotifications
+                projectUser.enabled && projectUser.user.enabled && (onlyNotificationsEnabled ? projectUser.receivesNotifications : true)
         }
 
         when:
-        List<UserProjectRole> projectUsersToBeNotified = userProjectRoleService.getProjectUsersToBeNotified([project])
+        List<UserProjectRole> projectUsersToBeNotified = userProjectRoleService.getProjectUsersToBeNotified([project], onlyNotificationsEnabled)
 
         then:
         TestCase.assertContainSame(projectUsersToBeNotified, expected)
+
+        where:
+        onlyNotificationsEnabled << [true, false]
     }
 
     void "getProjectUsersToBeNotified, on project without users, returns empty list"() {

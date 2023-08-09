@@ -120,7 +120,8 @@ class ProjectUserController implements CheckAndCall {
                 availableRoles             : projectRoleService.listAvailableProjectRolesAuthenticatedByCurrentUser(),
                 hasErrors                  : params.hasErrors,
                 message                    : params.message,
-                emails                     : userProjectRoleService.getEmailsOfToBeNotifiedProjectUsers([project]).sort().join(','),
+                emailsIfEnabled            : userProjectRoleService.getEmailsOfToBeNotifiedProjectUsers([project], true).sort().join(','),
+                emailsIfDisabled           : userProjectRoleService.getEmailsOfToBeNotifiedProjectUsers([project], false).sort().join(','),
                 currentUser                : securityService.currentUser,
         ]
     }

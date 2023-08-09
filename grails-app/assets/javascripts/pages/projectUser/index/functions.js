@@ -161,7 +161,7 @@ $(() => {
     $('.ldap-user .project-role-select').trigger('change');
   }).filter(':checked').trigger('change');
 
-  $('#listEmails').on('click', function () {
+  $('.listEmails').on('click', function () {
     const project = $(this).data('project');
     const emails = $(this).data('emails');
     prompt(`Emails for ${project}`, emails);
