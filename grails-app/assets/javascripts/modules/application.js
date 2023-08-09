@@ -20,10 +20,7 @@
  * SOFTWARE.
  */
 
-//= require /webjars/jquery/3.7.0/jquery.js
 //= require /webjars/bootstrap/4.6.0/js/bootstrap.bundle.js
-//= require /webjars/datatables/1.11.4/js/jquery.dataTables.js
-//= require /webjars/datatables/1.11.4/js/dataTables.bootstrap4.js
 //= require /webjars/datatables-fixedcolumns/3.2.2/js/dataTables.fixedColumns.js
 //= require /webjars/datatables-fixedheader/3.2.4/js/dataTables.fixedHeader.js
 //= require /webjars/datatables-buttons/2.2.2/js/dataTables.buttons.js

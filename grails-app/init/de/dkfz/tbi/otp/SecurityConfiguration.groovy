@@ -195,6 +195,8 @@ class SecurityConfiguration {
                                     "/webjars/chart.js/**",
                                     "/webjars/chartjs-plugin-datalabels/**",
                                     "/webjars/datatables-plugins/**",
+                                    "/webjars/datatables/**",
+                                    "/webjars/jquery/**",
                             ).permitAll()
                             .anyRequest().fullyAuthenticated()
                 }

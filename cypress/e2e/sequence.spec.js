@@ -39,7 +39,7 @@ describe('Check statistics page', () => {
     it('should download the csv file and verify the download', () => {
       cy.visit('/sequence/index');
 
-      cy.get('div').contains('Processing...').should('not.be.visible');
+      cy.get('#sequenceTable_processing').should('exist');
       cy.get('div#sequenceTable_wrapper button').contains('Download').click();
       cy.checkDownloadByContent('Sequence_Export', '.csv', [
         'Project', 'Patient ID', 'Sample Type', 'Seq. Type', 'Sequencing Read Type', 'Single Cell',
@@ -54,7 +54,7 @@ describe('Check statistics page', () => {
 
       cy.visit('/sequence/index');
 
-      cy.get('div').contains('Processing...').should('not.be.visible');
+      cy.get('#sequenceTable_processing').should('exist');
       cy.get('div#data-table-filter-container').find('span#select2--container')
         .contains('No Search Criteria')
         .click();
