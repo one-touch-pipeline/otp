@@ -197,6 +197,8 @@ class SecurityConfiguration {
                                     "/webjars/datatables-plugins/**",
                                     "/webjars/datatables/**",
                                     "/webjars/jquery/**",
+                                    "/webjars/datatables.net-scroller/**",
+                                    "/webjars/datatables.net-scroller-bs4/**",
                             ).permitAll()
                             .anyRequest().fullyAuthenticated()
                 }
