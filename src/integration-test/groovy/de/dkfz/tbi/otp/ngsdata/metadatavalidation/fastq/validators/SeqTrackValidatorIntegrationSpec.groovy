@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,10 +21,12 @@
  */
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 
-import grails.testing.gorm.DataTest
+import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.project.Project
@@ -41,27 +43,9 @@ import static de.dkfz.tbi.otp.ngsdata.SequencingReadType.PAIRED
 import static de.dkfz.tbi.otp.ngsdata.SequencingReadType.SINGLE
 import static de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory.createContext
 
-class SeqTrackValidatorSpec extends Specification implements DataTest {
-
-    @Override
-    Class[] getDomainClassesToMock() {
-        [
-                Individual,
-                Project,
-                Realm,
-                Run,
-                Sample,
-                SampleType,
-                SeqCenter,
-                SeqPlatform,
-                SeqPlatformGroup,
-                SeqPlatformModelLabel,
-                SeqTrack,
-                SeqType,
-                SoftwareTool,
-        ]
-    }
-
+@Rollback
+@Integration
+class SeqTrackValidatorIntegrationSpec extends Specification implements DomainFactoryCore {
     SeqTrackValidator validator = new SeqTrackValidator()
 
     private static final Collection<MetaDataColumn> SEQ_TRACK_COLUMNS = [RUN_ID, LANE_NO, INDEX].asImmutable()
@@ -83,42 +67,43 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
 
     private static MetadataValidationContext createContextWithoutBarcode() {
         return createContext((
-                "${RUN_ID} ${LANE_NO} ${INDEX} UNRELATED_COLUMN\n" +
-                        "runA L1\n" +
-                        "runA L1\n" +
-                        "runA L2\n" +  // unrelated lane
-                        "runB L1"      // unrelated run
+                "${PROJECT} ${RUN_ID} ${LANE_NO} ${INDEX} UNRELATED_COLUMN\n" +
+                        "projectA runA L1\n" +
+                        "projectA runA L1\n" +
+                        "projectA runA L2\n" +  // unrelated lane
+                        "projectA runB L1"      // unrelated run
         ).replace(' ', '\t'))
     }
 
     private static MetadataValidationContext createContextWithBarcode() {
         return createContext((
-                "${RUN_ID} ${LANE_NO} ${INDEX} UNRELATED_COLUMN\n" +
-                        "runA L1 ABC\n" +
-                        "runA L1 ABC\n" +
-                        "runA L2 ABC\n" +  // unrelated lane
-                        "runB L1 ABC"      // unrelated run
+                "${PROJECT} ${RUN_ID} ${LANE_NO} ${INDEX} UNRELATED_COLUMN\n" +
+                        "projectA runA L1 ABC\n" +
+                        "projectA runA L1 ABC\n" +
+                        "projectA runA L2 ABC\n" +  // unrelated lane
+                        "projectA runB L1 ABC"      // unrelated run
         ).replace(' ', '\t'))
     }
 
     private static MetadataValidationContext createContextWithAndWithoutBarcode() {
         return createContext((
-                "${RUN_ID} ${LANE_NO} ${INDEX} UNRELATED_COLUMN\n" +
-                        "runA L1\n" +
-                        "runA L1 ABC"
+                "${PROJECT} ${RUN_ID} ${LANE_NO} ${INDEX} UNRELATED_COLUMN\n" +
+                        "projectA runA L1\n" +
+                        "projectA runA L1 ABC"
         ).replace(' ', '\t'))
     }
 
-    private static void createSeqTrack(String runName, String laneNumber, String barcode = null) {
-        DomainFactory.createSeqTrack(
-                run: CollectionUtils.atMostOneElement(Run.findAllByName(runName)) ?: DomainFactory.createRun(name: runName),
+    private void createSpecificSeqTrack(String runName, String laneNumber, String barcode = null, Sample sample = null) {
+        createSeqTrack(
+                run: CollectionUtils.atMostOneElement(Run.findAllByName(runName)) ?: createRun(name: runName),
                 laneId: combineLaneNumberAndBarcode(laneNumber, barcode),
+                sample: sample ?: createSample(),
         )
     }
 
     void 'validate, when lane number column is missing, does not crash'() {
         given:
-        MetadataValidationContext context = createContext("${RUN_ID}\nrunA")
+        MetadataValidationContext context = createContext("${RUN_ID}\t${PROJECT}\nrunA\tproject")
         Collection<Problem> expectedProblems = [
                 new Problem(Collections.emptySet(), LogLevel.ERROR, "Required column 'LANE_NO' is missing."),
         ]
@@ -133,11 +118,11 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
     void 'validate, when barcode extraction fails, does not complain'() {
         given:
         MetadataValidationContext context = createContext((
-                "${RUN_ID} ${LANE_NO}\n" +
-                        "runA L1\n" +
-                        "runA L1"
+                "${RUN_ID} ${LANE_NO} ${PROJECT}\n" +
+                        "runA L1 project\n" +
+                        "runA L1 project"
         ).replace(' ', '\t'))
-        createSeqTrack('runA', 'L1')
+        createSpecificSeqTrack('runA', 'L1')
 
         when:
         validator.validate(context)
@@ -151,8 +136,8 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
     void 'validate, given data without barcode and no data for same lane in database, succeeds'() {
         given:
         MetadataValidationContext context = createContextWithoutBarcode()
-        createSeqTrack('runA', 'L8')
-        createSeqTrack('runZ', 'L1')
+        createSpecificSeqTrack('runA', 'L8')
+        createSpecificSeqTrack('runZ', 'L1')
 
         when:
         validator.validate(context)
@@ -164,7 +149,7 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
     void 'validate, given data without barcode and data without barcode for same lane in database, adds error'() {
         given:
         MetadataValidationContext context = createContextWithoutBarcode()
-        createSeqTrack('runA', 'L1')
+        createSpecificSeqTrack('runA', 'L1')
         Collection<Problem> expectedProblems = [
                 new Problem(cells(context, SEQ_TRACK_COLUMNS, 0, 1),
                         LogLevel.WARNING, "For run 'runA', lane 'L1', no barcode, data is already registered in OTP.", "For at least one seqTrack, data is already registered in OTP."),
@@ -180,7 +165,7 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
     void 'validate, given data without barcode and data with barcode for same lane in database, adds warning'() {
         given:
         MetadataValidationContext context = createContextWithoutBarcode()
-        createSeqTrack('runA', 'L1', 'ABC')
+        createSpecificSeqTrack('runA', 'L1', 'ABC')
         Collection<Problem> expectedProblems = [
                 new Problem(cells(context, SEQ_TRACK_COLUMNS, 0, 1),
                         LogLevel.WARNING, "At least one row for run 'runA', lane 'L1' has no barcode, but for that run and lane there already is data with a barcode registered in OTP.", "At least one row has no barcode, but for that run and lane there already is data with a barcode registered in OTP."),
@@ -196,8 +181,8 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
     void 'validate, given data without barcode and data with and without barcode for same lane in database, adds error and warning'() {
         given:
         MetadataValidationContext context = createContextWithoutBarcode()
-        createSeqTrack('runA', 'L1')
-        createSeqTrack('runA', 'L1', 'ABC')
+        createSpecificSeqTrack('runA', 'L1')
+        createSpecificSeqTrack('runA', 'L1', 'ABC')
         Collection<Problem> expectedProblems = [
                 new Problem(cells(context, SEQ_TRACK_COLUMNS, 0, 1),
                         LogLevel.WARNING, "For run 'runA', lane 'L1', no barcode, data is already registered in OTP.", "For at least one seqTrack, data is already registered in OTP."),
@@ -217,8 +202,8 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
     void 'validate, given data with barcode and no data for same lane in database, succeeds'() {
         given:
         MetadataValidationContext context = createContextWithBarcode()
-        createSeqTrack('runA', 'L8', 'ABC')
-        createSeqTrack('runZ', 'L1', 'ABC')
+        createSpecificSeqTrack('runA', 'L8', 'ABC')
+        createSpecificSeqTrack('runZ', 'L1', 'ABC')
 
         when:
         validator.validate(context)
@@ -230,7 +215,7 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
     void 'validate, given data with barcode and data without barcode for same lane in database, adds warning'() {
         given:
         MetadataValidationContext context = createContextWithBarcode()
-        createSeqTrack('runA', 'L1')
+        createSpecificSeqTrack('runA', 'L1')
         Collection<Problem> expectedProblems = [
                 new Problem(cells(context, SEQ_TRACK_COLUMNS, 0, 1),
                         LogLevel.WARNING, "At least one row for run 'runA', lane 'L1' has a barcode, but for that run and lane there already is data without a barcode registered in OTP.", "At least one row has a barcode, but for that run and lane there already is data without a barcode registered in OTP."),
@@ -246,7 +231,7 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
     void 'validate, given data with barcode and data with same barcode for same lane in database, adds error'() {
         given:
         MetadataValidationContext context = createContextWithBarcode()
-        createSeqTrack('runA', 'L1', 'ABC')
+        createSpecificSeqTrack('runA', 'L1', 'ABC')
         Collection<Problem> expectedProblems = [
                 new Problem(cells(context, SEQ_TRACK_COLUMNS, 0, 1),
                         LogLevel.WARNING, "For run 'runA', lane 'L1', barcode 'ABC', data is already registered in OTP.", "For at least one seqTrack, data is already registered in OTP."),
@@ -262,7 +247,7 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
     void 'validate, given data with barcode and data with other barcode for same lane in database, succeeds'() {
         given:
         MetadataValidationContext context = createContextWithBarcode()
-        createSeqTrack('runA', 'L1', 'DEF')
+        createSpecificSeqTrack('runA', 'L1', 'DEF')
 
         when:
         validator.validate(context)
@@ -274,8 +259,8 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
     void 'validate, given data with barcode and data with same and without barcode for same lane in database, adds error and warning'() {
         given:
         MetadataValidationContext context = createContextWithBarcode()
-        createSeqTrack('runA', 'L1')
-        createSeqTrack('runA', 'L1', 'ABC')
+        createSpecificSeqTrack('runA', 'L1')
+        createSpecificSeqTrack('runA', 'L1', 'ABC')
         Collection<Problem> expectedProblems = [
                 new Problem(cells(context, SEQ_TRACK_COLUMNS, 0, 1),
                         LogLevel.WARNING, "For run 'runA', lane 'L1', barcode 'ABC', data is already registered in OTP.", "For at least one seqTrack, data is already registered in OTP."),
@@ -293,8 +278,8 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
     void 'validate, given data with barcode and data with other and without barcode for same lane in database, adds warning'() {
         given:
         MetadataValidationContext context = createContextWithBarcode()
-        createSeqTrack('runA', 'L1')
-        createSeqTrack('runA', 'L1', 'DEF')
+        createSpecificSeqTrack('runA', 'L1')
+        createSpecificSeqTrack('runA', 'L1', 'DEF')
         Collection<Problem> expectedProblems = [
                 new Problem(cells(context, SEQ_TRACK_COLUMNS, 0, 1),
                         LogLevel.WARNING, "At least one row for run 'runA', lane 'L1' has a barcode, but for that run and lane there already is data without a barcode registered in OTP.", "At least one row has a barcode, but for that run and lane there already is data without a barcode registered in OTP."),
@@ -312,10 +297,10 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
     void 'validate, given data with and without barcode and no data for same lane in database, adds warning'() {
         given:
         MetadataValidationContext context = createContextWithAndWithoutBarcode()
-        createSeqTrack('runA', 'L8')
-        createSeqTrack('runZ', 'L1')
-        createSeqTrack('runA', 'L8', 'ABC')
-        createSeqTrack('runZ', 'L1', 'ABC')
+        createSpecificSeqTrack('runA', 'L8')
+        createSpecificSeqTrack('runZ', 'L1')
+        createSpecificSeqTrack('runA', 'L8', 'ABC')
+        createSpecificSeqTrack('runZ', 'L1', 'ABC')
         Collection<Problem> expectedProblems = [
                 new Problem(cells(context, SEQ_TRACK_COLUMNS, 0, 1),
                         LogLevel.WARNING, "For run 'runA', lane 'L1' there are rows with and without barcode.", "There are rows with and without barcode."),
@@ -331,7 +316,7 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
     void 'validate, given data with and without barcode and data without barcode for same lane in database, adds error and warnings'() {
         given:
         MetadataValidationContext context = createContextWithAndWithoutBarcode()
-        createSeqTrack('runA', 'L1')
+        createSpecificSeqTrack('runA', 'L1')
         Collection<Problem> expectedProblems = [
                 new Problem(cells(context, SEQ_TRACK_COLUMNS, 0),
                         LogLevel.WARNING, "For run 'runA', lane 'L1', no barcode, data is already registered in OTP.", "For at least one seqTrack, data is already registered in OTP."),
@@ -351,7 +336,7 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
     void 'validate, given data with and without barcode and data with same barcode for same lane in database, adds error and warnings'() {
         given:
         MetadataValidationContext context = createContextWithAndWithoutBarcode()
-        createSeqTrack('runA', 'L1', 'ABC')
+        createSpecificSeqTrack('runA', 'L1', 'ABC')
         Collection<Problem> expectedProblems = [
                 new Problem(cells(context, SEQ_TRACK_COLUMNS, 1),
                         LogLevel.WARNING, "For run 'runA', lane 'L1', barcode 'ABC', data is already registered in OTP.", "For at least one seqTrack, data is already registered in OTP."),
@@ -371,7 +356,7 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
     void 'validate, given data with and without barcode and data with other barcode for same lane in database, adds warnings'() {
         given:
         MetadataValidationContext context = createContextWithAndWithoutBarcode()
-        createSeqTrack('runA', 'L1', 'DEF')
+        createSpecificSeqTrack('runA', 'L1', 'DEF')
         Collection<Problem> expectedProblems = [
                 new Problem(cells(context, SEQ_TRACK_COLUMNS, 0, 1),
                         LogLevel.WARNING, "For run 'runA', lane 'L1' there are rows with and without barcode.", "There are rows with and without barcode."),
@@ -389,8 +374,8 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
     void 'validate, given data with and without barcode and data with same and without barcode for same lane in database, adds errors and warning'() {
         given:
         MetadataValidationContext context = createContextWithAndWithoutBarcode()
-        createSeqTrack('runA', 'L1')
-        createSeqTrack('runA', 'L1', 'ABC')
+        createSpecificSeqTrack('runA', 'L1')
+        createSpecificSeqTrack('runA', 'L1', 'ABC')
         Collection<Problem> expectedProblems = [
                 new Problem(cells(context, SEQ_TRACK_COLUMNS, 0),
                         LogLevel.WARNING, "For run 'runA', lane 'L1', no barcode, data is already registered in OTP.", "For at least one seqTrack, data is already registered in OTP."),
@@ -414,8 +399,8 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
     void 'validate, given data with and without barcode and data with other and without barcode for same lane in database, adds error and warning'() {
         given:
         MetadataValidationContext context = createContextWithAndWithoutBarcode()
-        createSeqTrack('runA', 'L1')
-        createSeqTrack('runA', 'L1', 'DEF')
+        createSpecificSeqTrack('runA', 'L1')
+        createSpecificSeqTrack('runA', 'L1', 'DEF')
         Collection<Problem> expectedProblems = [
                 new Problem(cells(context, SEQ_TRACK_COLUMNS, 0),
                         LogLevel.WARNING, "For run 'runA', lane 'L1', no barcode, data is already registered in OTP.", "For at least one seqTrack, data is already registered in OTP."),
@@ -438,14 +423,14 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
     void 'validate, when column #column which must have equal values for a SeqTrack has different values, adds errors'() {
         given:
         MetadataValidationContext context = createContext((
-                "${column} ${RUN_ID} ${LANE_NO} ${INDEX}\n" +
-                        "A runA L1\n" +
-                        "B runA L1\n" +
-                        "C runB L2 ABC\n" +
-                        "D runB L2 ABC\n" +
-                        "E runB L2 DEF\n" +  // unrelated barcode
-                        "F runA L3\n" +  // unrelated lane
-                        "G runC L1\n"      // unrelated run
+                "${column} ${PROJECT} ${RUN_ID} ${LANE_NO} ${INDEX}\n" +
+                        "A project runA L1\n" +
+                        "B project runA L1\n" +
+                        "C project runB L2 ABC\n" +
+                        "D project runB L2 ABC\n" +
+                        "E project runB L2 DEF\n" +  // unrelated barcode
+                        "F project runA L3\n" +  // unrelated lane
+                        "G project runC L1\n"      // unrelated run
         ).replace(' ', '\t'))
         Collection<Problem> expectedProblems = [
                 new Problem(cells(context, SEQ_TRACK_COLUMNS + column, 0, 1),
@@ -469,7 +454,6 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
                    LIB_PREP_KIT,
                    FRAGMENT_SIZE,
                    FASTQ_GENERATOR,
-                   PROJECT,
                    BASE_MATERIAL,
                    SINGLE_CELL_WELL_LABEL,
                    ILSE_NO,
@@ -479,10 +463,10 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
     void 'validate, when mate extraction fails, does not complain'() {
         given:
         MetadataValidationContext context = createContext((
-                "${FASTQ_FILE} ${RUN_ID} ${LANE_NO} ${SEQUENCING_READ_TYPE}\n" +
-                        "a.fastq.gz runA L1 ${PAIRED}\n" +
-                        "b.fastq.gz runA L2 ${SINGLE}\n" +
-                        "c.fastq.gz runA L3 ${SINGLE}\n"
+                "${PROJECT} ${FASTQ_FILE} ${RUN_ID} ${LANE_NO} ${SEQUENCING_READ_TYPE}\n" +
+                        "project a.fastq.gz runA L1 ${PAIRED}\n" +
+                        "project b.fastq.gz runA L2 ${SINGLE}\n" +
+                        "project c.fastq.gz runA L3 ${SINGLE}\n"
         ).replace(' ', '\t'))
 
         when:
@@ -495,13 +479,13 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
     void 'validate, when no mate is missing, succeeds'() {
         given:
         MetadataValidationContext context = createContext((
-                "${FASTQ_FILE} ${READ} ${RUN_ID} ${LANE_NO} ${SEQUENCING_READ_TYPE}\n" +
-                        "s_101202_7_r1.fastq.gz 1 runA L1 ${PAIRED}\n" +
-                        "s_101202_7_r2.fastq.gz 2 runA L1 ${PAIRED}\n" +
-                        "s_101202_7_i1.fastq.gz I1 runA L1 ${PAIRED}\n" +
-                        "s_101202_7_i2.fastq.gz I2 runA L1 ${PAIRED}\n" +
-                        "s_101202_7_1.fastq.gz 1 runA L2 ${SINGLE}\n" +
-                        "do_not_care_.fastq.gz 1 runA L3 ${SINGLE}\n"
+                "${PROJECT} ${FASTQ_FILE} ${READ} ${RUN_ID} ${LANE_NO} ${SEQUENCING_READ_TYPE}\n" +
+                        "project s_101202_7_r1.fastq.gz 1 runA L1 ${PAIRED}\n" +
+                        "project s_101202_7_r2.fastq.gz 2 runA L1 ${PAIRED}\n" +
+                        "project s_101202_7_i1.fastq.gz I1 runA L1 ${PAIRED}\n" +
+                        "project s_101202_7_i2.fastq.gz I2 runA L1 ${PAIRED}\n" +
+                        "project s_101202_7_1.fastq.gz 1 runA L2 ${SINGLE}\n" +
+                        "project do_not_care_.fastq.gz 1 runA L3 ${SINGLE}\n"
         ).replace(' ', '\t'))
 
         when:
@@ -514,12 +498,12 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
     void 'validate, given duplicate mates for a SeqTrack, adds errors'() {
         given:
         MetadataValidationContext context = createContext((
-                "${FASTQ_FILE} ${READ} ${RUN_ID} ${LANE_NO} ${INDEX} UNRELATED_COLUMN\n" +
-                        "s_101202_7_1.fastq.gz 1 runA L1 ABC\n" +
-                        "s_101202_7_1.fastq.gz 1 runA L1 ABC\n" +
-                        "s_101202_7_1.fastq.gz 1 runB L1 ABC\n" +
-                        "s_101202_7_1.fastq.gz 1 runB L2 ABC\n" +
-                        "s_101202_7_1.fastq.gz 1 runA L1 DEF\n"
+                "${PROJECT} ${FASTQ_FILE} ${READ} ${RUN_ID} ${LANE_NO} ${INDEX} UNRELATED_COLUMN\n" +
+                        "project s_101202_7_1.fastq.gz 1 runA L1 ABC\n" +
+                        "project s_101202_7_1.fastq.gz 1 runA L1 ABC\n" +
+                        "project s_101202_7_1.fastq.gz 1 runB L1 ABC\n" +
+                        "project s_101202_7_1.fastq.gz 1 runB L2 ABC\n" +
+                        "project s_101202_7_1.fastq.gz 1 runA L1 DEF\n"
         ).replace(' ', '\t'))
         Collection<Problem> expectedProblems = [
                 new Problem(cells(context, MATE_COLUMNS, 0, 1),
@@ -538,14 +522,14 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
     void 'validate, when one mate is missing, adds error'() {
         given:
         MetadataValidationContext context = createContext((
-                "${SEQUENCING_READ_TYPE} ${FASTQ_FILE} ${READ} ${RUN_ID} ${LANE_NO} ${INDEX} UNRELATED_COLUMN\n" +
-                        "${PAIRED} s_101202_4_1.fastq.gz 1 runA L1 ABC\n" +
-                        "${PAIRED} s_101202_5_1.fastq.gz 1 runB L1 ABC\n" +
-                        "${PAIRED} s_101202_5_2.fastq.gz 2 runB L1 ABC\n" +
-                        "${PAIRED} s_101202_6_1.fastq.gz 1 runB L2 ABC\n" +
-                        "${PAIRED} s_101202_6_2.fastq.gz 2 runB L2 ABC\n" +
-                        "${PAIRED} s_101202_7_1.fastq.gz 1 runA L1 DEF\n" +
-                        "${PAIRED} s_101202_7_2.fastq.gz 2 runA L1 DEF\n"
+                "${PROJECT} ${SEQUENCING_READ_TYPE} ${FASTQ_FILE} ${READ} ${RUN_ID} ${LANE_NO} ${INDEX} UNRELATED_COLUMN\n" +
+                        "project ${PAIRED} s_101202_4_1.fastq.gz 1 runA L1 ABC\n" +
+                        "project ${PAIRED} s_101202_5_1.fastq.gz 1 runB L1 ABC\n" +
+                        "project ${PAIRED} s_101202_5_2.fastq.gz 2 runB L1 ABC\n" +
+                        "project ${PAIRED} s_101202_6_1.fastq.gz 1 runB L2 ABC\n" +
+                        "project ${PAIRED} s_101202_6_2.fastq.gz 2 runB L2 ABC\n" +
+                        "project ${PAIRED} s_101202_7_1.fastq.gz 1 runA L1 DEF\n" +
+                        "project ${PAIRED} s_101202_7_2.fastq.gz 2 runA L1 DEF\n"
         ).replace(' ', '\t'))
         Collection<Problem> expectedProblems = [
                 new Problem(cells(context, MATE_COLUMNS + SEQUENCING_READ_TYPE, 0),
@@ -562,14 +546,14 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
     void 'validate, when two mates are missing, adds error'() {
         given:
         MetadataValidationContext context = createContext((
-                "${SEQUENCING_READ_TYPE} ${READ} ${RUN_ID} ${LANE_NO} ${INDEX} UNRELATED_COLUMN\n" +
-                        "${PAIRED} 3 runA L1 ABC\n" +
-                        "${PAIRED} 1 runB L1 ABC\n" +
-                        "${PAIRED} 2 runB L1 ABC\n" +
-                        "${PAIRED} 1 runB L2 ABC\n" +
-                        "${PAIRED} 2 runB L2 ABC\n" +
-                        "${PAIRED} 1 runA L1 DEF\n" +
-                        "${PAIRED} 2 runA L1 DEF\n"
+                "${PROJECT} ${SEQUENCING_READ_TYPE} ${READ} ${RUN_ID} ${LANE_NO} ${INDEX} UNRELATED_COLUMN\n" +
+                        "project ${PAIRED} 3 runA L1 ABC\n" +
+                        "project ${PAIRED} 1 runB L1 ABC\n" +
+                        "project ${PAIRED} 2 runB L1 ABC\n" +
+                        "project ${PAIRED} 1 runB L2 ABC\n" +
+                        "project ${PAIRED} 2 runB L2 ABC\n" +
+                        "project ${PAIRED} 1 runA L1 DEF\n" +
+                        "project ${PAIRED} 2 runA L1 DEF\n"
         ).replace(' ', '\t'))
         Collection<Problem> expectedProblems = [
                 new Problem(cells(context, MATE_COLUMNS + SEQUENCING_READ_TYPE, 0),
@@ -586,8 +570,8 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
     void 'validate, when sequencing read type column is missing, does not complain about missing mates'() {
         given:
         MetadataValidationContext context = createContext((
-                "${FASTQ_FILE} ${READ} ${RUN_ID} ${LANE_NO}\n" +
-                        "s_101202_1_1.fastq.gz 1 runA L1\n"
+                "${PROJECT} ${FASTQ_FILE} ${READ} ${RUN_ID} ${LANE_NO}\n" +
+                        "project s_101202_1_1.fastq.gz 1 runA L1\n"
         ).replace(' ', '\t'))
 
         when:
@@ -600,9 +584,9 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
     void 'validate, when sequencing read type is not unique for a SeqTrack, does not complain about missing mates'() {
         given:
         MetadataValidationContext context = createContext((
-                "${SEQUENCING_READ_TYPE} ${FASTQ_FILE} ${READ} ${RUN_ID} ${LANE_NO} ${INDEX} UNRELATED_COLUMN\n" +
-                        "${PAIRED} s_101202_7_1.fastq.gz 1 runA L1 ABC\n" +
-                        "FOOBARFOO s_101202_7_2.fastq.gz 2 runA L1 ABC\n"
+                "${PROJECT} ${SEQUENCING_READ_TYPE} ${FASTQ_FILE} ${READ} ${RUN_ID} ${LANE_NO} ${INDEX} UNRELATED_COLUMN\n" +
+                        "project ${PAIRED} s_101202_7_1.fastq.gz 1 runA L1 ABC\n" +
+                        "project FOOBARFOO s_101202_7_2.fastq.gz 2 runA L1 ABC\n"
         ).replace(' ', '\t'))
         Collection<Problem> expectedProblems = [
                 new Problem(cells(context, SEQ_TRACK_COLUMNS + SEQUENCING_READ_TYPE, 0, 1),
@@ -619,8 +603,8 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
     void 'validate, when sequencing read type is not known to OTP, does not complain about missing mates'() {
         given:
         MetadataValidationContext context = createContext((
-                "${SEQUENCING_READ_TYPE} ${FASTQ_FILE} ${READ} ${RUN_ID} ${LANE_NO}\n" +
-                        "FOOBARFOO s_101202_7_1.fastq.gz 1 runA L1\n"
+                "${PROJECT} ${SEQUENCING_READ_TYPE} ${FASTQ_FILE} ${READ} ${RUN_ID} ${LANE_NO}\n" +
+                        "project FOOBARFOO s_101202_7_1.fastq.gz 1 runA L1\n"
         ).replace(' ', '\t'))
 
         when:
@@ -635,11 +619,11 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
     void 'validate, when mate column exists, but filename column does not, does not crash'() {
         given:
         MetadataValidationContext context = createContext((
-                "${READ} ${RUN_ID} ${LANE_NO}\n" +
-                        "1 runA L1\n" +
-                        "2 runA L1\n" +
-                        "i1 runA L1\n" +
-                        "i2 runA L1\n"
+                "${PROJECT} ${READ} ${RUN_ID} ${LANE_NO}\n" +
+                        "project 1 runA L1\n" +
+                        "project 2 runA L1\n" +
+                        "project i1 runA L1\n" +
+                        "project i2 runA L1\n"
         ).replace(' ', '\t'))
 
         when:
@@ -652,9 +636,9 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
     void 'validate, given only one row for a SeqTrack, does not complain about inconsistencies between mate number and filename'() {
         given:
         MetadataValidationContext context = createContext((
-                "${FASTQ_FILE} ${READ} ${RUN_ID} ${LANE_NO}\n" +
-                        "s_101202_4_1.fastq.gz 2 runA L1\n" +
-                        "not_parseable_4.gz 2 runB L1\n"
+                "${PROJECT} ${FASTQ_FILE} ${READ} ${RUN_ID} ${LANE_NO}\n" +
+                        "project s_101202_4_1.fastq.gz 2 runA L1\n" +
+                        "project not_parseable_4.gz 2 runB L1\n"
         ).replace(' ', '\t'))
 
         when:
@@ -667,15 +651,15 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
     void 'validate, when filenames of a SeqTrack do not differ in exactly one character, adds error'() {
         given:
         MetadataValidationContext context = createContext((
-                "${FASTQ_FILE} ${READ} ${RUN_ID} ${LANE_NO} ${INDEX} UNRELATED_COLUMN\n" +
-                        "s_101202_4_1.fastq.gz 1 runA L1 ABC\n" +
-                        "s_101202_4_1.fastq.gz 1 runA L1 ABC\n" +
-                        "s_101202_6_1.fastq.gz 1 runA L1 DEF\n" +
-                        "s_101202_5_2.fastq.gz 2 runA L1 DEF\n" +
-                        "not_parseable_4_1.fastq.gz 1 runB L1 ABC\n" +
-                        "not_parseable_4_1.fastq.gz 1 runB L1 ABC\n" +
-                        "not_parseable_6_1.fastq.gz 1 runB L1 DEF\n" +
-                        "not_parseable_5_2.fastq.gz 2 runB L1 DEF\n"
+                "${PROJECT} ${FASTQ_FILE} ${READ} ${RUN_ID} ${LANE_NO} ${INDEX} UNRELATED_COLUMN\n" +
+                        "project s_101202_4_1.fastq.gz 1 runA L1 ABC\n" +
+                        "project s_101202_4_1.fastq.gz 1 runA L1 ABC\n" +
+                        "project s_101202_6_1.fastq.gz 1 runA L1 DEF\n" +
+                        "project s_101202_5_2.fastq.gz 2 runA L1 DEF\n" +
+                        "project not_parseable_4_1.fastq.gz 1 runB L1 ABC\n" +
+                        "project not_parseable_4_1.fastq.gz 1 runB L1 ABC\n" +
+                        "project not_parseable_6_1.fastq.gz 1 runB L1 DEF\n" +
+                        "project not_parseable_5_2.fastq.gz 2 runB L1 DEF\n"
         ).replace(' ', '\t'))
         Collection<Problem> expectedProblems = [
                 new Problem(cells(context, MATE_COLUMNS, 0, 1),
@@ -702,13 +686,13 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
     void 'validate, when distinguishing character in filenames of a SeqTrack is not the mate number, adds error'() {
         given:
         MetadataValidationContext context = createContext((
-                "${FASTQ_FILE} ${READ} ${RUN_ID} ${LANE_NO} ${INDEX} UNRELATED_COLUMN\n" +
-                        "s_101202_3_1.fastq.gz 1 runA L1 ABC\n" +
-                        "s_101202_4_1.fastq.gz 2 runA L1 ABC\n" +
-                        "s_101202_1_1.fastq.gz 1 runA L2 ABC\n" +
-                        "s_101202_3_1.fastq.gz 2 runA L2 ABC\n" +
-                        "not_parseable_2.fastq.gz 1 runB L1 ABC\n" +
-                        "not_parseable_1.fastq.gz 2 runB L1 ABC\n"
+                "${PROJECT} ${FASTQ_FILE} ${READ} ${RUN_ID} ${LANE_NO} ${INDEX} UNRELATED_COLUMN\n" +
+                        "project s_101202_3_1.fastq.gz 1 runA L1 ABC\n" +
+                        "project s_101202_4_1.fastq.gz 2 runA L1 ABC\n" +
+                        "project s_101202_1_1.fastq.gz 1 runA L2 ABC\n" +
+                        "project s_101202_3_1.fastq.gz 2 runA L2 ABC\n" +
+                        "project not_parseable_2.fastq.gz 1 runB L1 ABC\n" +
+                        "project not_parseable_1.fastq.gz 2 runB L1 ABC\n"
         ).replace(' ', '\t'))
         Collection<Problem> expectedProblems = [
                 new Problem(cells(context, SEQ_TRACK_COLUMNS + FASTQ_FILE, 0, 1) + cells(context, MATE_COLUMNS, 0),
@@ -733,20 +717,20 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
     void 'validate, when filenames of a SeqTrack differ in exactly one character which is the mate number, succeeds'() {
         given:
         MetadataValidationContext context = createContext((
-                "${FASTQ_FILE} ${READ} ${RUN_ID} ${LANE_NO}\n" +
-                        "s_101202_7_r1.fastq.gz 1 runA L1\n" +
-                        "s_101202_7_r2.fastq.gz 2 runA L1\n" +
-                        "s_101202_7_r1.fastq.gz 1 runA L2\n" +
-                        "s_101202_7_r2.fastq.gz 2 runA L2\n" +
-                        "s_101202_7_i1.fastq.gz i1 runA L1\n" +
-                        "s_101202_7_i2.fastq.gz i2 runA L1\n" +
-                        "s_101202_7_I1.fastq.gz I1 runA L2\n" +
-                        "s_101202_7_I2.fastq.gz I2 runA L2\n" +
-                        "not_parseable_1.fastq.gz 1 runC L1\n" +
-                        "not_parseable_2.fastq.gz 2 runC L1\n" +
-                        "not_parseable_4.fastq.gz 4 runC L2\n" +
-                        "not_parseable_5.fastq.gz 5 runC L2\n" +
-                        "not_parseable_6.fastq.gz 6 runC L2\n"
+                "${PROJECT} ${FASTQ_FILE} ${READ} ${RUN_ID} ${LANE_NO}\n" +
+                        "project s_101202_7_r1.fastq.gz 1 runA L1\n" +
+                        "project s_101202_7_r2.fastq.gz 2 runA L1\n" +
+                        "project s_101202_7_r1.fastq.gz 1 runA L2\n" +
+                        "project s_101202_7_r2.fastq.gz 2 runA L2\n" +
+                        "project s_101202_7_i1.fastq.gz i1 runA L1\n" +
+                        "project s_101202_7_i2.fastq.gz i2 runA L1\n" +
+                        "project s_101202_7_I1.fastq.gz I1 runA L2\n" +
+                        "project s_101202_7_I2.fastq.gz I2 runA L2\n" +
+                        "project not_parseable_1.fastq.gz 1 runC L1\n" +
+                        "project not_parseable_2.fastq.gz 2 runC L1\n" +
+                        "project not_parseable_4.fastq.gz 4 runC L2\n" +
+                        "project not_parseable_5.fastq.gz 5 runC L2\n" +
+                        "project not_parseable_6.fastq.gz 6 runC L2\n"
         ).replace(' ', '\t'))
 
         when:
@@ -771,7 +755,7 @@ abc
 """)
 
         List<RowWithExtractedValues> rows = context.spreadsheet.dataRows.collect {
-            new RowWithExtractedValues(it, null, null, null, new ExtractedValue(it.cells[0].text, it.cells as Set))
+            new RowWithExtractedValues(it, null, null, null, null, new ExtractedValue(it.cells[0].text, it.cells as Set))
         }
         List<RowWithExtractedValues> expectedRows = rows[0, 1, 6, 7]
 
@@ -783,5 +767,51 @@ abc
                 expectedRows,
                 filteredRows,
         )
+    }
+
+    @Unroll
+    void "validate, when data already exists adds #description"() {
+        given:
+        Project projectA = createProject(name: "projectA")
+        Sample sample1 = createSample(individual: createIndividual(project: projectA))
+        Sample sample2 = createSample(individual: createIndividual(project: projectA))
+        Sample sampleOtherProject = createSample(individual: createIndividual(project: createProject(name: "projectB")))
+        createRun(name: "runA")
+        createRun(name: "runB")
+        createSpecificSeqTrack("runA", "1", null, sample1)
+        createSpecificSeqTrack("runA", "2", null, sample1)
+        createSpecificSeqTrack("runB", "1", null, sample2)
+        createSpecificSeqTrack("runA", "1", null, sampleOtherProject)
+        MetadataValidationContext context = createContext((
+                "${PROJECT} ${RUN_ID} ${LANE_NO} ${INDEX}\n" +
+                        "project${error ? 'A' : 'C'} runA 1\n" +
+                        "project${error ? 'A' : 'C'} runA 2\n" +
+                        "project${error ? 'A' : 'C'} runB 1\n" +
+                        "projectA runC 1\n" +
+                        "projectA runA 4\n"
+        ).replace(' ', '\t'))
+
+        Collection<Problem> expectedProblems = [
+                new Problem(cells(context, SEQ_TRACK_COLUMNS, 0), error ? LogLevel.ERROR : LogLevel.WARNING,
+                        "For run 'runA', lane '1', no barcode${error ? ' and project \'projectA\'' : ''}, data is already registered in OTP.",
+                        "For at least one seqTrack, data is already registered in OTP."),
+                new Problem(cells(context, SEQ_TRACK_COLUMNS, 1), error ? LogLevel.ERROR : LogLevel.WARNING,
+                        "For run 'runA', lane '2', no barcode${error ? ' and project \'projectA\'' : ''}, data is already registered in OTP.",
+                        "For at least one seqTrack, data is already registered in OTP."),
+                new Problem(cells(context, SEQ_TRACK_COLUMNS, 2), error ? LogLevel.ERROR : LogLevel.WARNING,
+                        "For run 'runB', lane '1', no barcode${error ? ' and project \'projectA\'' : ''}, data is already registered in OTP.",
+                        "For at least one seqTrack, data is already registered in OTP."),
+        ]
+
+        when:
+        validator.validate(context)
+
+        then:
+        assertContainSame(context.problems, expectedProblems)
+
+        where:
+        error | description
+        false | "warnings"
+        true  | "errors"
     }
 }

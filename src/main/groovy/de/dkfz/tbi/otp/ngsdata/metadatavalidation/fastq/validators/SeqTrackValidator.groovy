@@ -28,6 +28,8 @@ import org.springframework.stereotype.Component
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
+import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.util.spreadsheet.*
 import de.dkfz.tbi.util.spreadsheet.validation.*
 
@@ -72,6 +74,7 @@ class SeqTrackValidator extends AbstractColumnSetValidator<MetadataValidationCon
         return [
                 RUN_ID,
                 LANE_NO,
+                PROJECT,
         ]*.name()
     }
 
@@ -95,16 +98,19 @@ class SeqTrackValidator extends AbstractColumnSetValidator<MetadataValidationCon
     private List<RowWithExtractedValues> getRowsWithExtractedValues(MetadataValidationContext context) {
         Column runColumn
         Column laneNumberColumn
+        Column projectColumn
         try {
-            (runColumn, laneNumberColumn) = findColumns(context)
+            (runColumn, laneNumberColumn, projectColumn) = findColumns(context)
         } catch (ColumnsMissingException ignored) {
             return []
         }
         return context.spreadsheet.dataRows.collect {
             Cell runCell = it.getCell(runColumn)
             Cell laneNumberCell = it.getCell(laneNumberColumn)
+            Cell projectCell = it.getCell(projectColumn)
             new RowWithExtractedValues(
                     it,
+                    new ExtractedValue(projectCell.text, [projectCell] as Set),
                     new ExtractedValue(runCell.text, [runCell] as Set),
                     new ExtractedValue(laneNumberCell.text, [laneNumberCell] as Set),
                     MetadataImportService.extractBarcode(it),
@@ -122,7 +128,26 @@ class SeqTrackValidator extends AbstractColumnSetValidator<MetadataValidationCon
                 }
                 property('laneId')
             }
-        } as Set
+        } as Set<String>
+    }
+
+    @CompileDynamic
+    private Set<String> findAllProjectsForRunAndLaneId(String runName, String laneId) {
+        return SeqTrack.withCriteria {
+            projections {
+                run {
+                    eq 'name', runName
+                }
+                eq 'laneId', laneId
+                sample {
+                    individual {
+                        project {
+                            property 'name'
+                        }
+                    }
+                }
+            }
+        } as Set<String>
     }
 
     private void validateMultiplexing(MetadataValidationContext context, Map<String, List<RowWithExtractedValues>> laneRowsByBarcode, Set<String> laneIds) {
@@ -184,10 +209,15 @@ class SeqTrackValidator extends AbstractColumnSetValidator<MetadataValidationCon
         }
 
         if (anySeqTrackRow.laneNumber.value) {
-            if (laneIds.contains(combineLaneNumberAndBarcode(anySeqTrackRow.laneNumber.value, anySeqTrackRow.barcode.value))) {
+            String laneId = combineLaneNumberAndBarcode(anySeqTrackRow.laneNumber.value, anySeqTrackRow.barcode.value)
+            if (laneId in laneIds) {
+                Project project = ProjectService.findByNameOrNameInMetadataFiles(anySeqTrackRow.projectName.value)
+                Set<String> projectNames = findAllProjectsForRunAndLaneId(anySeqTrackRow.runName.value, laneId)
+                boolean error = project && project.name in projectNames
                 context.addProblem(seqTrackCells(seqTrackRows),
-                        LogLevel.WARNING,
-                        "For ${anySeqTrackRow.seqTrackString}, data is already registered in OTP.",
+                        error ? LogLevel.ERROR : LogLevel.WARNING,
+                        "For ${anySeqTrackRow.seqTrackString}${error ? " and project '${anySeqTrackRow.projectName.value}'" : ""}, " +
+                                "data is already registered in OTP.",
                         "For at least one seqTrack, data is already registered in OTP.")
             }
         }
@@ -287,6 +317,7 @@ class SeqTrackValidator extends AbstractColumnSetValidator<MetadataValidationCon
 @TupleConstructor
 class RowWithExtractedValues {
     final Row row
+    final ExtractedValue projectName
     final ExtractedValue runName
     final ExtractedValue laneNumber
     final ExtractedValue barcode
