@@ -26,12 +26,17 @@ import org.springframework.context.ApplicationContext
 import spock.lang.Specification
 
 import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.BamMetadataValidationService
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidator
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.utils.LocalShellHelper
 import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 
 import java.nio.file.Path
@@ -108,6 +113,12 @@ class BamMetadataImportServiceSpec extends Specification implements DomainFactor
                     ]
         }
         service.fileSystemService = new TestFileSystemService()
+        service.bamMetadataValidationService = new BamMetadataValidationService()
+        service.bamMetadataValidationService.configService = Mock(ConfigService)
+        service.bamMetadataValidationService.fileService = new FileService()
+        service.bamMetadataValidationService.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
+            executeCommandReturnProcessOutput(_, _) >> { realm1, cmd -> LocalShellHelper.executeAndWait(cmd) }
+        }
 
         when:
         BamMetadataValidationContext context = service.validate(metadataFile.toString(), furtherFiles, false)

@@ -38,6 +38,7 @@ import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.*
 
+import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 
@@ -91,6 +92,7 @@ class ExecuteRoddyAceseqJobSpec extends Specification implements DataTest {
 
     TestConfigService configService
     IndividualService individualService
+    FileService fileService
 
     void setup() {
         aceseqInstance = DomainFactory.createAceseqInstanceWithRoddyBamFiles()
@@ -118,6 +120,7 @@ class ExecuteRoddyAceseqJobSpec extends Specification implements DataTest {
         e.message.contains('assert aceseqInstance')
     }
 
+    @SuppressWarnings('NoFilesReadableRule')
     void "prepareAndReturnWorkflowSpecificCValues, when all fine, return correct value list"() {
         given:
         File fasta = CreateFileHelper.createFile(tempDir.resolve("fasta.fa").toFile())
@@ -193,7 +196,11 @@ class ExecuteRoddyAceseqJobSpec extends Specification implements DataTest {
 
         then:
         expectedList == returnedList
-        FileService.ensureFileIsReadableAndNotEmpty(job.sophiaService.getFinalAceseqInputFile(sophiaInstance))
+        Path file = job.sophiaService.getFinalAceseqInputFile(sophiaInstance)
+        Files.size(file) > 0L
+        file.absolute
+        Files.isRegularFile(file)
+        Files.isReadable(file)
     }
 
     @Unroll

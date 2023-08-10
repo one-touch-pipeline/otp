@@ -26,6 +26,7 @@ import groovy.transform.CompileDynamic
 import groovy.transform.TupleConstructor
 import org.springframework.security.access.prepost.PreAuthorize
 
+import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.infrastructure.FileService
@@ -86,6 +87,8 @@ class CellRangerService {
 
     CellRangerWorkflowService cellRangerWorkflowService
 
+    ConfigService configService
+
     void createInputDirectoryStructure(SingleCellBamFile singleCellBamFile) {
         Realm realm = singleCellBamFile.realm
         String sampleName = singleCellBamFile.singleCellSampleName
@@ -127,11 +130,11 @@ class CellRangerService {
         Path resultDir = fileService.toPath(singleCellBamFile.resultDirectory, fileSystem)
 
         SingleCellBamFile.CREATED_RESULT_FILES.each {
-            fileService.ensureFileIsReadableAndNotEmpty(resultDir.resolve(it))
+            fileService.ensureFileIsReadableAndNotEmpty(resultDir.resolve(it), configService.defaultRealm)
         }
 
         SingleCellBamFile.CREATED_RESULT_DIRS.each {
-            fileService.ensureDirIsReadableAndNotEmpty(resultDir.resolve(it))
+            fileService.ensureDirIsReadableAndNotEmpty(resultDir.resolve(it), configService.defaultRealm)
         }
     }
 
@@ -240,7 +243,7 @@ class CellRangerService {
         if (!Files.exists(file)) {
             throw new NoSuchFileException(file.toAbsolutePath().toString())
         }
-        if (!Files.isReadable(file)) {
+        if (!fileService.fileIsReadable(file, configService.defaultRealm)) {
             throw new AccessDeniedException(file.toAbsolutePath().toString())
         }
         return file.text

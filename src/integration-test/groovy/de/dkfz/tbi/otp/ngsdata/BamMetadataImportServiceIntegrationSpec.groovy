@@ -24,19 +24,21 @@ package de.dkfz.tbi.otp.ngsdata
 import grails.gorm.transactions.Rollback
 import grails.testing.mixin.integration.Integration
 import org.springframework.beans.factory.annotation.Autowired
-import spock.lang.Specification
-import spock.lang.TempDir
-import spock.lang.Unroll
+import org.springframework.test.annotation.DirtiesContext
+import spock.lang.*
 
 import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPancanFactory
+import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.validators.BamFilePathValidator
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators.Md5sumFormatValidator
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.UserAndRoles
-import de.dkfz.tbi.otp.utils.CreateFileHelper
-import de.dkfz.tbi.otp.utils.HelperUtils
+import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 
 import java.nio.file.Files
@@ -48,10 +50,27 @@ import static de.dkfz.tbi.otp.utils.HelperUtils.byteArrayToHexString
 
 @Rollback
 @Integration
+@DirtiesContext
 class BamMetadataImportServiceIntegrationSpec extends Specification implements RoddyPancanFactory, UserAndRoles {
 
     @Autowired
     BamMetadataImportService bamMetadataImportService
+
+    @Autowired
+    BamFilePathValidator bamFilePathValidator
+
+    void setup() {
+        bamMetadataImportService.bamMetadataValidationService.configService = Mock(ConfigService)
+        bamMetadataImportService.bamMetadataValidationService.fileService = new FileService()
+        bamMetadataImportService.bamMetadataValidationService.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
+            executeCommandReturnProcessOutput(_, _) >> { realm1, cmd -> LocalShellHelper.executeAndWait(cmd) }
+        }
+        bamFilePathValidator.configService = Mock(ConfigService)
+        bamFilePathValidator.fileService = new FileService()
+        bamFilePathValidator.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
+            executeCommandReturnProcessOutput(_, _) >> { realm1, cmd -> LocalShellHelper.executeAndWait(cmd) }
+        }
+    }
 
     void 'getBamMetadataValidators returns BamMetadataValidators'() {
         expect:

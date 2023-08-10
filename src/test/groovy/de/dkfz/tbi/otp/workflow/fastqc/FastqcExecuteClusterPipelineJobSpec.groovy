@@ -138,7 +138,7 @@ class FastqcExecuteClusterPipelineJobSpec extends Specification implements DataT
 
         job.fileSystemService = new TestFileSystemService()
         job.fileService = Mock(FileService) {
-            _ * ensureFileIsReadableAndNotEmpty(_)
+            _ * ensureFileIsReadableAndNotEmpty(_, _)
             _ * convertPermissionsToOctalString(_)
             callOfDelete * deleteDirectoryRecursively(_)
             callOfDelete * createDirectoryRecursivelyAndSetPermissionsViaBash(_, _, _)

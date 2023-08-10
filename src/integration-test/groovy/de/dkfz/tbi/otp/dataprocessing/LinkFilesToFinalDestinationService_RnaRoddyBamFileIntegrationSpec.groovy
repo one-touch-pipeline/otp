@@ -29,6 +29,7 @@ import spock.lang.TempDir
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
 import de.dkfz.tbi.otp.domainFactory.pipelines.roddyRna.RoddyRnaFactory
@@ -160,6 +161,11 @@ class LinkFilesToFinalDestinationService_RnaRoddyBamFileIntegrationSpec extends 
             1 * cleanupOldRnaResults(_, _) >> { RoddyBamFile roddyBamFile, Realm realm -> }
         }
         linkFilesToFinalDestinationService.md5SumService = new Md5SumService()
+        linkFilesToFinalDestinationService.md5SumService.configService = Mock(ConfigService)
+        linkFilesToFinalDestinationService.md5SumService.fileService = new FileService()
+        linkFilesToFinalDestinationService.md5SumService.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
+            executeCommandReturnProcessOutput(_, _) >> { realm1, cmd -> LocalShellHelper.executeAndWait(cmd) }
+        }
         linkFilesToFinalDestinationService.qcTrafficLightCheckService = new QcTrafficLightCheckService()
         linkFilesToFinalDestinationService.qcTrafficLightCheckService.qcTrafficLightNotificationService = Mock(QcTrafficLightNotificationService) {
             0 * informResultsAreWarned(_) >> { AbstractBamFile bamFile -> }

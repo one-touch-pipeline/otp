@@ -27,16 +27,17 @@ import spock.lang.Specification
 import spock.lang.TempDir
 
 import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
+import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.CreateFileHelper
+import de.dkfz.tbi.otp.utils.LocalShellHelper
 import de.dkfz.tbi.otp.workflow.restartHandler.LogWithIdentifier
-import de.dkfz.tbi.otp.workflowExecution.LogService
-import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
-import de.dkfz.tbi.otp.workflowExecution.WorkflowStepService
+import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowMessageLog
 
 import java.nio.file.FileSystems
@@ -60,7 +61,11 @@ class ClusterJobLogServiceSpec extends Specification implements ServiceUnitTest<
             getRemoteFileSystem(_ as Realm) >> FileSystems.default
         }
         service.logService = Mock(LogService)
-        service.fileService = Mock(FileService)
+        service.configService = Mock(ConfigService)
+        service.fileService = Spy(FileService)
+        service.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
+            executeCommandReturnProcessOutput(_, _) >> { realm1, cmd -> LocalShellHelper.executeAndWait(cmd) }
+        }
     }
 
     void "test createLogsWithIdentifier for ClusterJobLogService"() {
@@ -139,9 +144,7 @@ class ClusterJobLogServiceSpec extends Specification implements ServiceUnitTest<
         Path file = CreateFileHelper.createFile(tempDir.resolve("test.txt"))
 
         setupData()
-        service.fileService = Spy(FileService) {
-            1 * fileSizeExceeded(file.toFile(), _) >> true
-        }
+        1 * service.fileService.fileSizeExceeded(file, _) >> true
 
         Set<ClusterJob> clusterJobs = [
                 createClusterJob([

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,18 +19,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.validators
+package de.dkfz.tbi.otp.ngsdata.metadatavalidation
 
 import spock.lang.Specification
 import spock.lang.TempDir
 
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.AbstractMetadataValidationContext
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.BamMetadataValidationContextFactory
+import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
-import de.dkfz.tbi.otp.utils.CreateFileHelper
-import de.dkfz.tbi.otp.utils.HelperUtils
-import de.dkfz.tbi.otp.utils.LocalShellHelper
+import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.util.spreadsheet.validation.*
 
 import java.nio.file.*
@@ -39,17 +38,18 @@ import static de.dkfz.tbi.otp.ngsdata.BamMetadataColumn.BAM_FILE_PATH
 import static de.dkfz.tbi.otp.ngsdata.BamMetadataColumn.SEQUENCING_READ_TYPE
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
-class BamMetadataValidationContextSpec extends Specification {
+class BamMetadataValidationServiceSpec extends Specification {
 
     @TempDir
     Path tempDir
 
-    BamMetadataValidationContext context
     Problems problems
 
+    BamMetadataValidationService bamMetadataValidationFileService
+
     def setup() {
-        context = BamMetadataValidationContextFactory.createContext()
         problems = new Problems()
+        bamMetadataValidationFileService = new BamMetadataValidationService()
     }
 
     void 'createFromFile, when file header contains alias, replace it'() {
@@ -58,11 +58,20 @@ class BamMetadataValidationContextSpec extends Specification {
         file.bytes = ("UNKNOWN ${BAM_FILE_PATH} ${SEQUENCING_READ_TYPE.importAliases.first()}\n" +
                 "1 2 3"
         ).replaceAll(' ', '\t').getBytes(MetadataValidationContext.CHARSET)
+        Realm realm = new Realm()
 
         when:
-        BamMetadataValidationContext context = BamMetadataValidationContext.createFromFile(file, [], FileSystems.default, false)
+        BamMetadataValidationContext context = bamMetadataValidationFileService.createFromFile(file, [], FileSystems.default, false)
 
         then:
+        bamMetadataValidationFileService.configService = Mock(ConfigService) {
+            1 * getDefaultRealm() >> realm
+        }
+        bamMetadataValidationFileService.fileService = Mock(FileService) {
+            1 * fileIsReadable(_, realm) >> true
+        }
+
+        and:
         context.spreadsheet.header.cells[0].text == "UNKNOWN"
         context.spreadsheet.header.cells[1].text == BAM_FILE_PATH.name()
         context.spreadsheet.header.cells[2].text == SEQUENCING_READ_TYPE.name()
@@ -74,7 +83,7 @@ class BamMetadataValidationContextSpec extends Specification {
         Files.createDirectory(emptyFolder)
 
         when:
-        context.checkFilesInDirectory(emptyFolder, problems)
+        bamMetadataValidationFileService.checkFilesInDirectory(emptyFolder, problems)
 
         then:
         Problem problem = exactlyOneElement(problems.problems)
@@ -89,11 +98,20 @@ class BamMetadataValidationContextSpec extends Specification {
         assert Files.createDirectories(subfolder)
         Path file2 = subfolder.resolve("file2.txt")
         file2.write("something other")
+        Realm realm = new Realm()
 
         when:
-        context.checkFilesInDirectory(folder, problems)
+        bamMetadataValidationFileService.checkFilesInDirectory(folder, problems)
 
         then:
+        bamMetadataValidationFileService.configService = Mock(ConfigService) {
+            1 * getDefaultRealm() >> realm
+        }
+        bamMetadataValidationFileService.fileService = Mock(FileService) {
+            1 * fileIsReadable(_, realm) >> true
+        }
+
+        and:
         problems.problems.empty
     }
 
@@ -101,12 +119,20 @@ class BamMetadataValidationContextSpec extends Specification {
         given:
         Path notReadAble = CreateFileHelper.createFile(tempDir.resolve('notReadable.txt'))
         assert LocalShellHelper.executeAndAssertExitCodeAndErrorOutAndReturnStdout("chmod a-r ${notReadAble.toAbsolutePath()} && echo OK").trim() == 'OK'
-        assert !Files.isReadable(notReadAble)
+        Realm realm = new Realm()
 
         when:
-        context.checkFile(notReadAble, problems)
+        bamMetadataValidationFileService.checkFile(notReadAble, problems)
 
         then:
+        bamMetadataValidationFileService.configService = Mock(ConfigService) {
+            1 * getDefaultRealm() >> realm
+        }
+        bamMetadataValidationFileService.fileService = Mock(FileService) {
+            1 * fileIsReadable(_, realm) >> false
+        }
+
+        and:
         Problem problem = exactlyOneElement(problems.problems)
         problem.level == LogLevel.ERROR
         problem.message.contains("is not readable.")
@@ -115,11 +141,20 @@ class BamMetadataValidationContextSpec extends Specification {
     void "checkFile, when is empty, add the corresponding problem"() {
         given:
         Path emptyFile = CreateFileHelper.createFile(tempDir.resolve('emptyFile.txt'), "")
+        Realm realm = new Realm()
 
         when:
-        context.checkFile(emptyFile, problems)
+        bamMetadataValidationFileService.checkFile(emptyFile, problems)
 
         then:
+        bamMetadataValidationFileService.configService = Mock(ConfigService) {
+            1 * getDefaultRealm() >> realm
+        }
+        bamMetadataValidationFileService.fileService = Mock(FileService) {
+            1 * fileIsReadable(_, realm) >> true
+        }
+
+        and:
         Problem problem = exactlyOneElement(problems.problems)
         problem.level == LogLevel.WARNING
         problem.message.contains("is empty.")
@@ -127,20 +162,24 @@ class BamMetadataValidationContextSpec extends Specification {
 
     void "checkFile, when is to large, add the corresponding problem"() {
         given:
-        Files.metaClass.static.size = { Path path ->
-            return AbstractMetadataValidationContext.MAX_ADDITIONAL_FILE_SIZE_IN_GIB * 1024L * 1024L * 1024L + 1
-        }
+        bamMetadataValidationFileService.configService = Mock(ConfigService)
+        bamMetadataValidationFileService.fileService = Mock(FileService)
+
         Path bigFile = CreateFileHelper.createFile(tempDir.resolve('bigFile.txt'))
+        Realm realm = new Realm()
+
+        bamMetadataValidationFileService.fileService.fileSizeExceeded(_, _) >> true
 
         when:
-        context.checkFile(bigFile, problems)
+        bamMetadataValidationFileService.checkFile(bigFile, problems)
 
         then:
+        1 * bamMetadataValidationFileService.configService.defaultRealm >> realm
+        1 * bamMetadataValidationFileService.fileService.fileIsReadable(_, realm) >> true
+
+        and:
         Problem problem = exactlyOneElement(problems.problems)
         problem.level == LogLevel.WARNING
         problem.message.contains("is larger than ${AbstractMetadataValidationContext.MAX_ADDITIONAL_FILE_SIZE_IN_GIB} GiB.")
-
-        cleanup:
-        GroovySystem.metaClassRegistry.removeMetaClass(Files)
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,7 +27,9 @@ import spock.lang.TempDir
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
+import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.utils.HelperUtils
+import de.dkfz.tbi.otp.utils.LocalShellHelper
 
 import java.nio.file.*
 
@@ -215,9 +217,15 @@ class LibraryPreparationKitServiceSpec extends AbstractMetadataFieldsServiceSpec
         adapterFile.text = content
 
         LibraryPreparationKit kit = createLibraryPreparationKit(adapterFile: adapterFile.toAbsolutePath())
+        Realm realm = new Realm()
+
+        service.fileService = new FileService()
+        service.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
+            executeCommandReturnProcessOutput(_, _) >> { realm1, cmd -> LocalShellHelper.executeAndWait(cmd) }
+        }
 
         expect:
-        content == service.getAdapterFileContentToRender(kit)
+        content == service.getAdapterFileContentToRender(kit, realm)
 
         where:
         content << ["some content", ""]
@@ -231,9 +239,15 @@ class LibraryPreparationKitServiceSpec extends AbstractMetadataFieldsServiceSpec
         new RandomAccessFile(adapterFile.toFile(), "rw").length = 5242880L + 1L
 
         LibraryPreparationKit kit = createLibraryPreparationKit(adapterFile: adapterFile.toAbsolutePath())
+        Realm realm = new Realm()
+
+        service.fileService = new FileService()
+        service.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
+            executeCommandReturnProcessOutput(_, _) >> { realm1, cmd -> LocalShellHelper.executeAndWait(cmd) }
+        }
 
         when:
-        service.getAdapterFileContentToRender(kit)
+        service.getAdapterFileContentToRender(kit, realm)
 
         then:
         AssertionError e = thrown(AssertionError)
@@ -250,9 +264,15 @@ class LibraryPreparationKitServiceSpec extends AbstractMetadataFieldsServiceSpec
         Files.setPosixFilePermissions(adapterFile, [] as Set)
 
         LibraryPreparationKit kit = createLibraryPreparationKit(adapterFile: adapterFile.toAbsolutePath())
+        Realm realm = new Realm()
+
+        service.fileService = new FileService()
+        service.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
+            executeCommandReturnProcessOutput(_, _) >> { realm1, cmd -> LocalShellHelper.executeAndWait(cmd) }
+        }
 
         when:
-        service.getAdapterFileContentToRender(kit)
+        service.getAdapterFileContentToRender(kit, realm)
 
         then:
         thrown(AssertionError)

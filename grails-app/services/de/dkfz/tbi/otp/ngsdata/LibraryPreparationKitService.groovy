@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -78,12 +78,12 @@ class LibraryPreparationKitService extends AbstractMetadataFieldsService<Library
         return fs.getPath(libraryPreparationKit.adapterFile)
     }
 
-    String getAdapterFileContentToRender(LibraryPreparationKit libraryPreparationKit) {
+    String getAdapterFileContentToRender(LibraryPreparationKit libraryPreparationKit, Realm realm) {
         Path path = getAdapterFileAsPath(libraryPreparationKit)
-        fileService.ensureFileIsReadable(path)
+        fileService.ensureFileIsReadable(path, realm)
         long size = Files.size(path)
         assert size <= 5242880L: "Adapter file is too large to be displayed in the GUI (${size} > 5MB)"
-        return FileService.readFileToString(path, StandardCharsets.US_ASCII)
+        return fileService.readFileToString(path, StandardCharsets.US_ASCII)
     }
 
     @Override

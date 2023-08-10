@@ -38,7 +38,6 @@ import de.dkfz.tbi.util.TimeUtils
 
 import javax.sql.DataSource
 import java.nio.file.FileSystem
-import java.nio.file.Files
 import java.time.*
 
 import static java.util.concurrent.TimeUnit.HOURS
@@ -48,6 +47,7 @@ import static java.util.concurrent.TimeUnit.HOURS
 class ClusterJobService {
 
     FileSystemService fileSystemService
+    FileService fileService
     DataSource dataSource
 
     static final Long HOURS_TO_MILLIS = HOURS.toMillis(1)
@@ -201,7 +201,7 @@ class ClusterJobService {
             return false
         }
         FileSystem fs = fileSystemService.getRemoteFileSystem(clusterJob.realm)
-        return Files.isReadable(fs.getPath(clusterJob.jobLog))
+        return fileService.fileIsReadable(fs.getPath(clusterJob.jobLog), clusterJob.realm)
     }
 
     /**

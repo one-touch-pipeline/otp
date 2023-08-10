@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,7 +26,11 @@ import spock.lang.Specification
 import spock.lang.TempDir
 import spock.lang.Unroll
 
+import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.utils.CreateFileHelper
+import de.dkfz.tbi.otp.utils.LocalShellHelper
 import de.dkfz.tbi.otp.utils.exceptions.FileIsEmptyException
 
 import java.nio.file.Files
@@ -57,6 +61,12 @@ class ChecksumFileServiceSpec extends Specification implements DataTest {
 
     private void setupFirstMD5ChecksumFromFile() {
         checksumFileService = new ChecksumFileService()
+        checksumFileService.configService = Mock(ConfigService)
+        checksumFileService.fileService = new FileService()
+        checksumFileService.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
+            executeCommandReturnProcessOutput(_, _) >> { realm1, cmd -> LocalShellHelper.executeAndWait(cmd) }
+        }
+
         file = CreateFileHelper.createFile(tempDir.resolve("asdf.md5"), "")
     }
 

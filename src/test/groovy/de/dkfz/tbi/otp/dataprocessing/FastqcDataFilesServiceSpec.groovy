@@ -28,8 +28,10 @@ import spock.lang.TempDir
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.domainFactory.FastqcDomainFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.ProjectService
@@ -49,6 +51,7 @@ class FastqcDataFilesServiceSpec extends Specification implements ServiceUnitTes
                 FastqImportInstance,
                 SeqPlatform,
                 SeqPlatformGroup,
+                ProcessingOption,
         ]
     }
 
@@ -249,6 +252,14 @@ class FastqcDataFilesServiceSpec extends Specification implements ServiceUnitTes
         service.updateFastqcProcessedFile(fastqcProcessedFile)
 
         then:
+        service.configService = Mock(ConfigService) {
+            1 * getDefaultRealm() >> realm
+        }
+        service.fileService = Mock(FileService) {
+            1 * fileIsReadable(path, realm) >> true
+        }
+
+        and:
         fastqcProcessedFile.fileExists
         fastqcProcessedFile.fileSize > 0
         fastqcProcessedFile.dateFromFileSystem
@@ -259,6 +270,14 @@ class FastqcDataFilesServiceSpec extends Specification implements ServiceUnitTes
         service.updateFastqcProcessedFile(fastqcProcessedFile)
 
         then:
+        service.configService = Mock(ConfigService) {
+            1 * getDefaultRealm() >> realm
+        }
+        service.fileService = Mock(FileService) {
+            1 * fileIsReadable(_, realm) >> false
+        }
+
+        and:
         !fastqcProcessedFile.fileExists
         fastqcProcessedFile.fileSize == -1
         !fastqcProcessedFile.dateFromFileSystem

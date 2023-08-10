@@ -24,19 +24,18 @@ package de.dkfz.tbi.otp.alignment.roddy
 import grails.converters.JSON
 import org.grails.web.json.JSONObject
 
-import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.alignment.AbstractAlignmentWorkflowTest
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
-import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.PanCanAlignmentConfiguration
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.SessionUtils
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
+import de.dkfz.tbi.otp.workflowTest.FileAssertHelper
 import de.dkfz.tbi.otp.workflowTest.roddy.RoddyReferences
 
 import java.time.Duration
@@ -87,6 +86,8 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
     AbstractBamFileService abstractBamFileService
 
     ProjectService projectService
+
+    FileAssertHelper fileAssertHelper
 
     @Override
     List<String> getWorkflowScripts() {
@@ -523,7 +524,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
             if (bamFile.baseBamFile && !bamFile.baseBamFile.oldStructureUsed) {
                 rootDirs << bamFile.baseBamFile.workDirectory
             }
-            TestCase.checkDirectoryContentHelper(bamFile.baseDirectory.toPath(), rootDirs*.toPath(), [], rootLinks*.toPath())
+            fileAssertHelper.assertDirectoryContent(bamFile.baseDirectory.toPath(), rootDirs*.toPath(), [], rootLinks*.toPath())
         }
 
         //check work directories
@@ -549,7 +550,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
             if (bamFile.seqType.wgbs && bamFile.hasMultipleLibraries()) {
                 qaDirs.addAll(bamFile.finalLibraryQADirectories.values())
             }
-            TestCase.checkDirectoryContentHelper(bamFile.finalQADirectory.toPath(), qaSubDirs*.toPath(), [], qaDirs*.toPath())
+            fileAssertHelper.assertDirectoryContent(bamFile.finalQADirectory.toPath(), qaSubDirs*.toPath(), [], qaDirs*.toPath())
         }
 
         // qa only for merged and one for each read group
@@ -566,7 +567,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
         if (bamFile.baseBamFile) {
             expectedRoddyExecutionDirs += bamFile.baseBamFile.finalExecutionDirectories
         }
-        TestCase.checkDirectoryContentHelper(bamFile.finalExecutionStoreDirectory.toPath(), expectedRoddyExecutionDirs*.toPath())
+        fileAssertHelper.assertDirectoryContent(bamFile.finalExecutionStoreDirectory.toPath(), expectedRoddyExecutionDirs*.toPath())
 
         // content of the bam file
         LogThreadLocal.withThreadLog(System.out) {
@@ -610,7 +611,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
                             bamFile.workLibraryQADirectories.values()
                 }
             }
-            TestCase.checkDirectoryContentHelper(bamFile.workDirectory.toPath(), rootDirs*.toPath(), rootFiles*.toPath())
+            fileAssertHelper.assertDirectoryContent(bamFile.workDirectory.toPath(), rootDirs*.toPath(), rootFiles*.toPath())
         }
 
         // content of the work dir: qa
@@ -623,7 +624,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
                 qaDirs.addAll(bamFile.workLibraryQADirectories.values())
                 qaJson.addAll(bamFile.workLibraryQAJsonFiles.values())
             }
-            TestCase.checkDirectoryContentHelper(bamFile.workQADirectory.toPath(), qaDirs*.toPath())
+            fileAssertHelper.assertDirectoryContent(bamFile.workQADirectory.toPath(), qaDirs*.toPath())
         }
         qaJson.each {
             assert it.exists() && it.file && it.canRead() && it.size() > 0
@@ -631,12 +632,12 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
         }
 
         //  content of the work dir: executionStoreDirectory
-        TestCase.checkDirectoryContentHelper(bamFile.workExecutionStoreDirectory.toPath(), bamFile.workExecutionDirectories*.toPath())
+        fileAssertHelper.assertDirectoryContent(bamFile.workExecutionStoreDirectory.toPath(), bamFile.workExecutionDirectories*.toPath())
 
         //check that given files exist in the execution store:
         bamFile.workExecutionDirectories.each { executionStore ->
             filesInRoddyExecutionDir.each { String fileName ->
-                FileService.ensureFileIsReadableAndNotEmpty(new File(executionStore.absolutePath, fileName).toPath())
+                fileService.ensureFileIsReadableAndNotEmpty(new File(executionStore.absolutePath, fileName).toPath(), realm)
             }
         }
     }
@@ -644,8 +645,8 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
     void checkInputIsNotDeleted() {
         List<RawSequenceFile> fastqFiles = RawSequenceFile.findAll()
         fastqFiles.each { RawSequenceFile rawSequenceFile ->
-            FileService.ensureFileIsReadableAndNotEmpty((lsdfFilesService.getFileFinalPath(rawSequenceFile) as File).toPath())
-            FileService.ensureFileIsReadableAndNotEmpty((lsdfFilesService.getFileViewByPidPath(rawSequenceFile) as File).toPath())
+            fileService.ensureFileIsReadableAndNotEmpty((lsdfFilesService.getFileFinalPath(rawSequenceFile) as File).toPath(), realm)
+            fileService.ensureFileIsReadableAndNotEmpty((lsdfFilesService.getFileViewByPidPath(rawSequenceFile) as File).toPath(), realm)
         }
     }
 

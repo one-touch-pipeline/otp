@@ -33,9 +33,12 @@ import de.dkfz.tbi.otp.workflowTest.roddy.RoddyFileAssertHelper
 /**
  * base class for all PanCancer workflow tests
  */
+@SuppressWarnings('SpringJavaInjectionPointsAutowiringInspection')
 abstract class AbstractPanCancerWorkflowSpec extends AbstractRoddyAlignmentWorkflowSpec {
 
     PanCancerDecider panCancerDecider
+
+    RoddyFileAssertHelper roddyFileAssertHelper
 
     Class<? extends OtpWorkflow> workflowComponentClass = PanCancerWorkflow
 
@@ -70,11 +73,11 @@ abstract class AbstractPanCancerWorkflowSpec extends AbstractRoddyAlignmentWorkf
 
     @Override
     protected void assertWorkflowFileSystemState(RoddyBamFile bamFile) {
-        RoddyFileAssertHelper.assertFileSystemState(bamFile, roddyBamFileService)
+        roddyFileAssertHelper.assertFileSystemState(bamFile, roddyBamFileService)
     }
 
     @Override
     protected void assertWorkflowWorkDirectoryFileSystemState(RoddyBamFile bamFile, boolean isBaseBamFile) {
-        RoddyFileAssertHelper.assertWorkDirectoryFileSystemState(bamFile, isBaseBamFile, roddyBamFileService, roddyConfigService)
+        roddyFileAssertHelper.assertWorkDirectoryFileSystemState(bamFile, isBaseBamFile, roddyBamFileService, roddyConfigService)
     }
 }

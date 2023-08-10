@@ -83,6 +83,8 @@ abstract class AbstractRoddyAlignmentWorkflowSpec extends AbstractAlignmentWorkf
 
     RoddyBamFileService roddyBamFileService
 
+    FileAssertHelper fileAssertHelper
+
     // holds references to the the fastq files on the file system
     protected Map<String, List<Path>> testFastqFiles
 
@@ -534,19 +536,19 @@ abstract class AbstractRoddyAlignmentWorkflowSpec extends AbstractAlignmentWorkf
 
     protected void assertWorkDirectoryFileSystemState(RoddyBamFile bamFile, boolean isBaseBamFile) {
         //  content of the work dir: executionStoreDirectory
-        FileAssertHelper.assertDirectoryContent(roddyBamFileService.getWorkExecutionStoreDirectory(bamFile),
+        fileAssertHelper.assertDirectoryContent(roddyBamFileService.getWorkExecutionStoreDirectory(bamFile),
                 roddyBamFileService.getWorkExecutionDirectories(bamFile))
 
         //check that given files exist in the execution store:
         roddyBamFileService.getWorkExecutionDirectories(bamFile).each { executionStore ->
             filesInRoddyExecutionDir.each { String fileName ->
-                FileAssertHelper.assertFileIsReadableAndNotEmpty(executionStore.resolve(fileName))
+                fileAssertHelper.assertFileIsReadableAndNotEmpty(executionStore.resolve(fileName))
             }
         }
 
         //check default json, additional needs to be checked in the subclass
         Path qaJson = roddyBamFileService.getWorkMergedQAJsonFile(bamFile)
-        FileAssertHelper.assertFileIsReadableAndNotEmpty(qaJson)
+        fileAssertHelper.assertFileIsReadableAndNotEmpty(qaJson)
         JSON.parse(qaJson.text) // throws ConverterException when the JSON content is not valid
 
         assertWorkflowWorkDirectoryFileSystemState(bamFile, isBaseBamFile)
@@ -557,7 +559,7 @@ abstract class AbstractRoddyAlignmentWorkflowSpec extends AbstractAlignmentWorkf
         if (bamFile.baseBamFile) {
             expectedRoddyExecutionDirs.addAll(roddyBamFileService.getFinalExecutionDirectories(bamFile.baseBamFile))
         }
-        FileAssertHelper.assertDirectoryContent(roddyBamFileService.getFinalExecutionStoreDirectory(bamFile), expectedRoddyExecutionDirs)
+        fileAssertHelper.assertDirectoryContent(roddyBamFileService.getFinalExecutionStoreDirectory(bamFile), expectedRoddyExecutionDirs)
     }
 
     private void assertBamFileFileOnFileSystem(RoddyBamFile bamFile) {
@@ -576,8 +578,8 @@ abstract class AbstractRoddyAlignmentWorkflowSpec extends AbstractAlignmentWorkf
 
     protected void verifyInputIsNotDeleted() {
         RawSequenceFile.list().each { RawSequenceFile rawSequenceFile ->
-            FileAssertHelper.assertFileIsReadableAndNotEmpty(lsdfFilesService.getFileFinalPathAsPath(rawSequenceFile))
-            FileAssertHelper.assertFileIsReadableAndNotEmpty(lsdfFilesService.getFileViewByPidPathAsPath(rawSequenceFile))
+            fileAssertHelper.assertFileIsReadableAndNotEmpty(lsdfFilesService.getFileFinalPathAsPath(rawSequenceFile))
+            fileAssertHelper.assertFileIsReadableAndNotEmpty(lsdfFilesService.getFileViewByPidPathAsPath(rawSequenceFile))
         }
     }
 

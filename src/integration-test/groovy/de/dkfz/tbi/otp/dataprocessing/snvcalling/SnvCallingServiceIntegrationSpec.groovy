@@ -29,13 +29,16 @@ import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryProcessingPriority
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.utils.LocalShellHelper
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
 import java.nio.file.Files
@@ -426,6 +429,11 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
                 fileService: new FileService(),
                 individualService: individualService,
         )
+        snvCallingService.configService = Mock(ConfigService)
+        snvCallingService.fileService = new FileService()
+        snvCallingService.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
+            executeCommandReturnProcessOutput(_, _) >> { realm1, cmd -> LocalShellHelper.executeAndWait(cmd) }
+        }
 
         RoddySnvCallingInstance instance = DomainFactory.createRoddySnvCallingInstance(
                 instanceName: ARBITRARY_INSTANCE_NAME,

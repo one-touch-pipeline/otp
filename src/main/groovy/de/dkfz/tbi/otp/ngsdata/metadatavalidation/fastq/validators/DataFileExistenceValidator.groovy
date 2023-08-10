@@ -33,7 +33,7 @@ import de.dkfz.tbi.util.spreadsheet.validation.*
 import java.nio.file.Files
 import java.nio.file.Path
 
-import static de.dkfz.tbi.otp.ngsdata.metadatavalidation.AbstractMetadataValidationContext.pathForMessage
+import static de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationService.pathForMessage
 
 @Component
 class DataFileExistenceValidator extends AbstractValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {

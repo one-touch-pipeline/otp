@@ -30,6 +30,7 @@ import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.CheckAndCall
 import de.dkfz.tbi.otp.FlashMessage
+import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.utils.StringUtils
 import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
 
@@ -74,6 +75,8 @@ class MetaDataFieldsController implements CheckAndCall {
     SeqPlatformService seqPlatformService
     SeqTypeService seqTypeService
 
+    ConfigService configService
+
     def index() {
         redirect action: 'libraryPreparationKits'
     }
@@ -105,7 +108,7 @@ class MetaDataFieldsController implements CheckAndCall {
         String content = ""
         if (cmd.libraryPreparationKit) {
             try {
-                content = libraryPreparationKitService.getAdapterFileContentToRender(cmd.libraryPreparationKit)
+                content = libraryPreparationKitService.getAdapterFileContentToRender(cmd.libraryPreparationKit, configService.defaultRealm)
             } catch (AssertionError e) {
                 flash.message = new FlashMessage(g.message(code: "dataFields.adapterFile.error") as String, e.message)
                 redirect(action: "libraryPreparationKits")

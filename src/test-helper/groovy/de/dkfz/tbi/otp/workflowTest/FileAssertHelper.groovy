@@ -21,51 +21,50 @@
  */
 package de.dkfz.tbi.otp.workflowTest
 
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Component
+
+import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.infrastructure.FileService
 
 import java.nio.file.Files
 import java.nio.file.Path
-import java.util.stream.Stream
 
+@Component
 class FileAssertHelper {
 
-    static void assertPathIsReadable(final Path file) {
+    @Autowired
+    FileService fileService
+
+    @Autowired
+    ConfigService configService
+
+    void assertPathIsReadable(final Path file) {
         assert file.absolute
-        assert Files.isReadable(file)
+        assert fileService.fileIsReadable(file, configService.defaultRealm)
     }
 
-    static void assertFileIsReadable(final Path file) {
+    void assertFileIsReadable(final Path file) {
         assertPathIsReadable(file)
         assert Files.isRegularFile(file)
     }
 
-    static void assertFileIsReadableAndNotEmpty(final Path file) {
+    void assertFileIsReadableAndNotEmpty(final Path file) {
         assertFileIsReadable(file)
         assert Files.size(file) > 0L
     }
 
-    static void assertDirectoryIsReadable(final Path dir) {
+    void assertDirectoryIsReadable(final Path dir) {
         assertPathIsReadable(dir)
         assert Files.isDirectory(dir)
     }
 
-    static void assertDirectoryIsReadableAndNotEmpty(final Path dir) {
-        assertDirectoryIsReadable(dir)
-        Stream<Path> stream = null
-        try {
-            stream = Files.list(dir)
-            assert stream.count() != 0
-        } finally {
-            stream?.close()
-        }
-    }
-
-    static void assertDirectoryIsReadableAndExecutable(final Path dir) {
+    void assertDirectoryIsReadableAndExecutable(final Path dir) {
         assertDirectoryIsReadable(dir)
         assert Files.isExecutable(dir)
     }
 
-    static void assertDirectoryContent(Path baseDir, List<Path> expectedDirs, List<Path> expectedFiles = [], List<Path> expectedLinks = []) {
+    void assertDirectoryContent(Path baseDir, List<Path> expectedDirs, List<Path> expectedFiles = [], List<Path> expectedLinks = []) {
         expectedDirs.each {
             assertDirectoryIsReadableAndExecutable(it)
         }
@@ -80,7 +79,7 @@ class FileAssertHelper {
         Set<Path> expectedEntries = (expectedDirs + expectedFiles + expectedLinks).findAll {
             it.parent == baseDir
         } as Set
-        Set<Path> foundEntries = FileService.findAllFilesInPath(baseDir)
+        Set<Path> foundEntries = fileService.findAllFilesInPath(baseDir, configService.defaultRealm)
         assert expectedEntries == foundEntries
     }
 }

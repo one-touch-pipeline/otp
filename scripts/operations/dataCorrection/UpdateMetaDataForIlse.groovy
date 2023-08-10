@@ -25,6 +25,7 @@ import org.hibernate.criterion.CriteriaSpecification
 
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.FastqMetadataValidationService
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.DirectoryStructureBeanName
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.utils.CollectionUtils
@@ -79,6 +80,7 @@ boolean testRun = true
 
 FileSystemService fileSystemService = ctx.fileSystemService
 FileSystem fileSystem = fileSystemService.remoteFileSystemOnDefaultRealm
+FastqMetadataValidationService fastqcMetadataValidationService = ctx.fastqMetadataValidationService
 
 Path midTermPath = fileSystem.getPath(midTermDirectory)
 
@@ -126,7 +128,7 @@ IlseSubmission.withTransaction { def transaction ->
         assert Files.exists(metadataFile): "Could not find file ${metadataFile}. Does it exist?"
         assert Files.isReadable(metadataFile): "Could not read file ${metadataFile}. Is it readable for icgcdata?"
 
-        MetadataValidationContext context = MetadataValidationContext.createFromFile(
+        MetadataValidationContext context = fastqcMetadataValidationService.createFromFile(
                 metadataFile,
                 ctx.dataFilesInGpcfSpecificStructure,
                 DirectoryStructureBeanName.GPCF_SPECIFIC.name(),

@@ -25,6 +25,7 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
+import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.workflow.jobs.AbstractConditionalFailJob
@@ -39,6 +40,9 @@ class PanCancerConditionalFailJob extends AbstractConditionalFailJob implements 
 
     @Autowired
     FileService fileService
+
+    @Autowired
+    ConfigService configService
 
     /**
      * Check that:
@@ -74,7 +78,7 @@ class PanCancerConditionalFailJob extends AbstractConditionalFailJob implements 
             }
 
             final Collection<Path> missingPaths = paths.findAll { Path path ->
-                !FileService.isFileReadableAndNotEmpty(path)
+                !fileService.isFileReadableAndNotEmpty(path, configService.defaultRealm)
             }
 
             if (missingPaths) {

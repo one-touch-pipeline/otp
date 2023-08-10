@@ -38,6 +38,8 @@ class WgbsAlignmentWorkflowSpec extends AbstractRoddyAlignmentWorkflowSpec imple
 
     WgbsDecider wgbsDecider
 
+    RoddyFileAssertHelper roddyFileAssertHelper
+
     Class<? extends OtpWorkflow> workflowComponentClass = WgbsWorkflow
 
     @Override
@@ -121,11 +123,11 @@ class WgbsAlignmentWorkflowSpec extends AbstractRoddyAlignmentWorkflowSpec imple
 
     @Override
     protected void assertWorkflowFileSystemState(RoddyBamFile bamFile) {
-        RoddyFileAssertHelper.assertFileSystemState(bamFile, roddyBamFileService)
+        roddyFileAssertHelper.assertFileSystemState(bamFile, roddyBamFileService)
     }
 
     @Override
     protected void assertWorkflowWorkDirectoryFileSystemState(RoddyBamFile bamFile, boolean isBaseBamFile) {
-        RoddyFileAssertHelper.assertWorkDirectoryFileSystemState(bamFile, isBaseBamFile, roddyBamFileService, roddyConfigService)
+        roddyFileAssertHelper.assertWorkDirectoryFileSystemState(bamFile, isBaseBamFile, roddyBamFileService, roddyConfigService)
     }
 }

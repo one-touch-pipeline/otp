@@ -25,6 +25,7 @@ import com.github.robtimus.filesystems.sftp.SFTPFileSystemProvider
 import grails.gorm.transactions.Transactional
 import grails.util.Environment
 import groovy.transform.CompileDynamic
+import groovy.util.logging.Slf4j
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -33,8 +34,7 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.job.processing.ProcessingException
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.ngsdata.Realm
-import de.dkfz.tbi.otp.utils.StaticApplicationContextWrapper
-import de.dkfz.tbi.otp.utils.ThreadUtils
+import de.dkfz.tbi.otp.utils.*
 
 import java.nio.charset.Charset
 import java.nio.file.*
@@ -48,6 +48,7 @@ import java.util.stream.Stream
  */
 @CompileDynamic
 @Transactional
+@Slf4j
 class FileService {
 
     /**
@@ -208,20 +209,38 @@ class FileService {
         return toPath(toFile(path), fileSystem)
     }
 
-    static boolean isFileReadableAndNotEmpty(final Path file) {
+    boolean isFileReadableAndNotEmpty(final Path file, Realm realm) {
         assert file.absolute
         try {
             waitUntilExists(file)
         } catch (AssertionError ignored) {
         }
-        return Files.exists(file) && Files.isRegularFile(file) && Files.isReadable(file) && Files.size(file) > 0L
+        return Files.exists(file) && Files.isRegularFile(file) && fileIsReadable(file, realm) && Files.size(file) > 0L
+    }
+
+    /**
+     * Tests at command line level whether a path is readable.
+     *
+     * @param path Path to test
+     * @param realm Realm to use
+     * @return True, if the path was tested as readable, otherwise false
+     */
+    boolean fileIsReadable(Path path, Realm realm) {
+        ProcessOutput output
+        try {
+            output = remoteShellHelper.executeCommandReturnProcessOutput(realm, "test -r ${path}")
+            return output.exitCode == 0
+        } catch (ProcessingException e) {
+            log.error("error while trying to read file: ${e.message}")
+        }
+        return false
     }
 
     /**
      * Finds and returns first available file with the filename matching the given regex
      */
-    static Path findFileInPath(final Path dir, final String fileRegex) {
-        ensureDirIsReadable(dir)
+    Path findFileInPath(final Path dir, final String fileRegex, Realm realm) {
+        ensureDirIsReadable(dir, realm)
         Path match = null
         assert ThreadUtils.waitFor({
             Stream<Path> stream = null
@@ -240,8 +259,8 @@ class FileService {
     /**
      * Finds and returns all available files with filenames matching the given regex
      */
-    static List<Path> findAllFilesInPath(final Path dir, final String fileRegex = ".*") {
-        ensureDirIsReadable(dir)
+    List<Path> findAllFilesInPath(final Path dir, final String fileRegex = ".*", Realm realm) {
+        ensureDirIsReadable(dir, realm)
         List<Path> matches = []
         assert ThreadUtils.waitFor({
             Stream<Path> stream = null
@@ -260,39 +279,54 @@ class FileService {
     /**
      * Finds first available file using the given regex and ensures match is readable and not empty.
      */
-    Path getFoundFileInPathEnsureIsReadableAndNotEmpty(final Path workDirectory, final String regex) {
-        Path foundFile = findFileInPath(workDirectory, regex)
-        ensureFileIsReadableAndNotEmpty(foundFile)
+    Path getFoundFileInPathEnsureIsReadableAndNotEmpty(final Path workDirectory, final String regex, Realm realm) {
+        Path foundFile = findFileInPath(workDirectory, regex, realm)
+        ensureFileIsReadableAndNotEmpty(foundFile, realm)
         return foundFile
     }
 
+    /**
+     * @deprecated Only used in the old workflow system
+     *
+     * use non-static version.
+     */
+    @Deprecated
     static void ensureFileIsReadableAndNotEmpty(final Path file) {
         ensureFileIsReadable(file)
         assert Files.size(file) > 0L
     }
 
+    void ensureFileIsReadableAndNotEmpty(final Path file, Realm realm) {
+        ensureFileIsReadable(file, realm)
+        assert Files.size(file) > 0L
+    }
+
+    /**
+     * @deprecated Only used in the old workflow system
+     *
+     * use non-static version.
+     */
+    @Deprecated
     static void ensureFileIsReadable(final Path file) {
         assert file.absolute
         waitUntilExists(file)
         assert Files.isRegularFile(file)
-        assert Files.isReadable(file)
+        assert Files.isReadable(file) // codenarc-disable NoFilesReadableRule
     }
 
-    static void ensurePathIsReadable(final Path file) {
+    void ensureFileIsReadable(final Path file, Realm realm) {
         assert file.absolute
         waitUntilExists(file)
-        assert Files.isReadable(file)
+        assert Files.isRegularFile(file)
+        assert fileIsReadable(file, realm)
     }
 
-    static boolean isFileReadable(final Path file) {
-        try {
-            ensureFileIsReadable(file)
-        } catch (AssertionError ignored) {
-            return false
-        }
-        return true
-    }
-
+    /**
+     * @deprecated Only used in the old workflow system
+     *
+     * use non-static version.
+     */
+    @Deprecated
     static void ensureDirIsReadableAndNotEmpty(final Path dir) {
         ensureDirIsReadable(dir)
         Stream<Path> stream = null
@@ -304,19 +338,43 @@ class FileService {
         }
     }
 
+    void ensureDirIsReadableAndNotEmpty(final Path dir, Realm realm) {
+        ensureDirIsReadable(dir, realm)
+        Stream<Path> stream = null
+        try {
+            stream = Files.list(dir)
+            assert stream.count() != 0
+        } finally {
+            stream?.close()
+        }
+    }
+
+    /**
+     * @deprecated Only used in the old workflow system
+     *
+     * use non-static version.
+     */
+    @Deprecated
     static void ensureDirIsReadable(final Path dir) {
         assert dir.absolute
         waitUntilExists(dir)
         assert Files.isDirectory(dir)
-        assert Files.isReadable(dir)
+        assert Files.isReadable(dir) // codenarc-disable NoFilesReadableRule
     }
 
-    static void ensureDirIsReadableAndExecutable(final Path dir) {
-        ensureDirIsReadable(dir)
+    void ensureDirIsReadable(final Path dir, Realm realm) {
+        assert dir.absolute
+        waitUntilExists(dir)
+        assert Files.isDirectory(dir)
+        assert fileIsReadable(dir, realm)
+    }
+
+    void ensureDirIsReadableAndExecutable(final Path dir, Realm realm) {
+        ensureDirIsReadable(dir, realm)
         assert Files.isExecutable(dir)
     }
 
-    static String readFileToString(Path path, Charset encoding) throws IOException {
+    String readFileToString(Path path, Charset encoding) throws IOException {
         return new String(Files.readAllBytes(path), encoding)
     }
 
@@ -369,8 +427,8 @@ class FileService {
         )
     }
 
-    boolean fileSizeExceeded(File file, long limitInBytes) {
-        return file.size() > limitInBytes
+    boolean fileSizeExceeded(Path file, long limitInBytes) {
+        return Files.size(file) > limitInBytes
     }
 
     /**

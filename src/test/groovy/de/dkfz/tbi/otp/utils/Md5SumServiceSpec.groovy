@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,6 +26,10 @@ import spock.lang.Specification
 import spock.lang.TempDir
 import spock.lang.Unroll
 
+import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
+
 import java.nio.file.Path
 import java.nio.file.Paths
 
@@ -34,6 +38,17 @@ class Md5SumServiceSpec extends Specification implements DataTest {
     @TempDir
     Path tempDir
 
+    Md5SumService service
+
+    void setup() {
+        service = new Md5SumService()
+        service.configService = Mock(ConfigService)
+        service.fileService = new FileService()
+        service.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
+            executeCommandReturnProcessOutput(_, _) >> { realm1, cmd -> LocalShellHelper.executeAndWait(cmd) }
+        }
+    }
+
     @Unroll
     void "extractMd5Sum, if valid md5sum, return md5sum value"() {
         given:
@@ -41,7 +56,7 @@ class Md5SumServiceSpec extends Specification implements DataTest {
         md5sumFile.text = prefix + md5sum + postfix
 
         when:
-        String extractedMd5Sum = new Md5SumService().extractMd5Sum(md5sumFile)
+        String extractedMd5Sum = service.extractMd5Sum(md5sumFile)
 
         then:
         extractedMd5Sum == md5sum
@@ -58,7 +73,7 @@ class Md5SumServiceSpec extends Specification implements DataTest {
 
     void "extractMd5Sum, if md5sum file is null, then throw an assertion"() {
         when:
-        new Md5SumService().extractMd5Sum(null)
+        service.extractMd5Sum(null)
 
         then:
         AssertionError e = thrown()
@@ -67,7 +82,7 @@ class Md5SumServiceSpec extends Specification implements DataTest {
 
     void "extractMd5Sum, if md5sum file is relative, then throw an assertion"() {
         when:
-        new Md5SumService().extractMd5Sum(Paths.get('tmp'))
+        service.extractMd5Sum(Paths.get('tmp'))
 
         then:
         AssertionError e = thrown()
@@ -82,7 +97,7 @@ class Md5SumServiceSpec extends Specification implements DataTest {
         file.delete()
 
         when:
-        new Md5SumService().extractMd5Sum(file.toPath())
+        service.extractMd5Sum(file.toPath())
 
         then:
         AssertionError e = thrown()
@@ -91,7 +106,7 @@ class Md5SumServiceSpec extends Specification implements DataTest {
 
     void "extractMd5Sum, if md5sum file is not a regular file, then throw an assertion"() {
         when:
-        new Md5SumService().extractMd5Sum(tempDir)
+        service.extractMd5Sum(tempDir)
 
         then:
         AssertionError e = thrown()
@@ -105,7 +120,7 @@ class Md5SumServiceSpec extends Specification implements DataTest {
         file.readable = false
 
         when:
-        new Md5SumService().extractMd5Sum(file.toPath())
+        service.extractMd5Sum(file.toPath())
 
         then:
         AssertionError e = thrown()
@@ -118,7 +133,7 @@ class Md5SumServiceSpec extends Specification implements DataTest {
         file.text = ''
 
         when:
-        new Md5SumService().extractMd5Sum(file.toPath())
+        service.extractMd5Sum(file.toPath())
 
         then:
         AssertionError e = thrown()
@@ -132,7 +147,7 @@ class Md5SumServiceSpec extends Specification implements DataTest {
         file.text = input
 
         when:
-        new Md5SumService().extractMd5Sum(file.toPath())
+        service.extractMd5Sum(file.toPath())
 
         then:
         AssertionError e = thrown()

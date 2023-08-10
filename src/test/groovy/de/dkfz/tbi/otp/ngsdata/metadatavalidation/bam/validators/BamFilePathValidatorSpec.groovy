@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,9 +26,13 @@ import org.junit.ClassRule
 import spock.lang.*
 
 import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.ngsdata.FileType
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.BamMetadataValidationContextFactory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
+import de.dkfz.tbi.otp.utils.LocalShellHelper
 import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
@@ -93,9 +97,15 @@ class BamFilePathValidatorSpec extends Specification implements DataTest {
                 new Problem(context.spreadsheet.dataRows[7].cells as Set, LogLevel.ERROR,
                           "'${notReadableFile.absolutePath}' is not readable.", "At least one file is not readable."),
         ]
+        BamFilePathValidator validator = new BamFilePathValidator()
+        validator.configService = Mock(ConfigService)
+        validator.fileService = new FileService()
+        validator.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
+            executeCommandReturnProcessOutput(_, _) >> { realm1, cmd -> LocalShellHelper.executeAndWait(cmd) }
+        }
 
         when:
-        new BamFilePathValidator().validate(context)
+        validator.validate(context)
 
         then:
         TestCase.assertContainSame(expectedProblems, context.problems)

@@ -27,12 +27,15 @@ import spock.lang.TempDir
 import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.filestore.PathOption
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
+import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CreateFileHelper
+import de.dkfz.tbi.otp.utils.LocalShellHelper
 import de.dkfz.tbi.otp.workflow.shared.WorkflowException
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
@@ -75,10 +78,10 @@ class PanCancerConditionalFailJobSpec extends Specification implements DataTest,
                 return CreateFileHelper.createFile(tempDir.resolve(file.fileName))
             }
         }
-        job.fileService = Mock(FileService) {
-            _ * toFile(_) >> { Path path ->
-                new File(path.toString())
-            }
+        job.configService = Mock(ConfigService)
+        job.fileService = new FileService()
+        job.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
+            executeCommandReturnProcessOutput(_, _) >> { realm1, cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
 
         when:
@@ -154,6 +157,11 @@ class PanCancerConditionalFailJobSpec extends Specification implements DataTest,
         job.lsdfFilesService = Mock(LsdfFilesService) {
             getFileViewByPidPathAsPath(_) >> TestCase.uniqueNonExistentPath.toPath()
         }
+        job.configService = Mock(ConfigService)
+        job.fileService = new FileService()
+        job.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
+            executeCommandReturnProcessOutput(_, _) >> { realm1, cmd -> LocalShellHelper.executeAndWait(cmd) }
+        }
 
         when:
         job.check(workflowStep)
@@ -184,10 +192,10 @@ class PanCancerConditionalFailJobSpec extends Specification implements DataTest,
                 return CreateFileHelper.createFile(tempDir.resolve(file.fileName))
             }
         }
-        job.fileService = Mock(FileService) {
-            _ * toFile(_) >> { Path path ->
-                new File(path.toString())
-            }
+        job.configService = Mock(ConfigService)
+        job.fileService = new FileService()
+        job.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
+            executeCommandReturnProcessOutput(_, _) >> { realm1, cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
 
         when:
@@ -220,6 +228,11 @@ class PanCancerConditionalFailJobSpec extends Specification implements DataTest,
             getFileViewByPidPathAsPath(_) >> { RawSequenceFile file, PathOption... options ->
                 return CreateFileHelper.createFile(tempDir.resolve(file.fileName), "")
             }
+        }
+        job.configService = Mock(ConfigService)
+        job.fileService = new FileService()
+        job.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
+            executeCommandReturnProcessOutput(_, _) >> { realm1, cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
 
         when:

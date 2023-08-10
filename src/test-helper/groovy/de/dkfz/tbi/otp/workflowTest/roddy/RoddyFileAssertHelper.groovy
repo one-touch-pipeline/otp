@@ -22,6 +22,8 @@
 package de.dkfz.tbi.otp.workflowTest.roddy
 
 import grails.converters.JSON
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
@@ -32,9 +34,13 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.util.stream.Stream
 
+@Component
 class RoddyFileAssertHelper {
 
-    static void assertFileSystemState(RoddyBamFile bamFile, RoddyBamFileService roddyBamFileService) {
+    @Autowired
+    FileAssertHelper fileAssertHelper
+
+    void assertFileSystemState(RoddyBamFile bamFile, RoddyBamFileService roddyBamFileService) {
         //content of the final dir: root
         List<Path> rootDirs = [
                 roddyBamFileService.getFinalQADirectory(bamFile),
@@ -61,12 +67,12 @@ class RoddyFileAssertHelper {
         if (bamFile.baseBamFile) {
             rootDirs << roddyBamFileService.getWorkDirectory(bamFile.baseBamFile)
         }
-        FileAssertHelper.assertDirectoryContent(roddyBamFileService.getBaseDirectory(bamFile), rootDirs, [], rootLinks)
+        fileAssertHelper.assertDirectoryContent(roddyBamFileService.getBaseDirectory(bamFile), rootDirs, [], rootLinks)
 
         assertQaFileSystemState(bamFile, roddyBamFileService)
     }
 
-    static private void assertQaFileSystemState(RoddyBamFile bamFile, RoddyBamFileService roddyBamFileService) {
+    private void assertQaFileSystemState(RoddyBamFile bamFile, RoddyBamFileService roddyBamFileService) {
         // content of the final qa dir
         List<Path> qaDirs = roddyBamFileService.getFinalSingleLaneQADirectories(bamFile).values() + [roddyBamFileService.getFinalMergedQADirectory(bamFile)]
         if (bamFile.baseBamFile) {
@@ -75,7 +81,7 @@ class RoddyFileAssertHelper {
         if (bamFile.seqType.wgbs && bamFile.hasMultipleLibraries()) {
             qaDirs.addAll(roddyBamFileService.getFinalLibraryQADirectories(bamFile).values())
         }
-        FileAssertHelper.assertDirectoryContent(roddyBamFileService.getFinalQADirectory(bamFile), [], [], qaDirs)
+        fileAssertHelper.assertDirectoryContent(roddyBamFileService.getFinalQADirectory(bamFile), [], [], qaDirs)
 
         // qa for merged and one for each read group and for each library (if available)
         int numberOfFilesInFinalQaDir = bamFile.numberOfMergedLanes + 1
@@ -91,7 +97,7 @@ class RoddyFileAssertHelper {
         }
     }
 
-    static protected void assertWorkDirectoryFileSystemState(RoddyBamFile bamFile, boolean isBaseBamFile, RoddyBamFileService roddyBamFileService,
+    void assertWorkDirectoryFileSystemState(RoddyBamFile bamFile, boolean isBaseBamFile, RoddyBamFileService roddyBamFileService,
                                                              RoddyConfigService roddyConfigService) {
         List<Path> rootDirs = [
                 roddyBamFileService.getWorkQADirectory(bamFile),
@@ -117,12 +123,12 @@ class RoddyFileAssertHelper {
                 rootDirs.addAll(roddyBamFileService.getWorkLibraryQADirectories(bamFile).values())
             }
         }
-        FileAssertHelper.assertDirectoryContent(roddyBamFileService.getWorkDirectory(bamFile), rootDirs, rootFiles)
+        fileAssertHelper.assertDirectoryContent(roddyBamFileService.getWorkDirectory(bamFile), rootDirs, rootFiles)
 
         assertQaWorkDirectoryFileSystemState(bamFile, roddyBamFileService)
     }
 
-    static private void assertQaWorkDirectoryFileSystemState(RoddyBamFile bamFile, RoddyBamFileService roddyBamFileService) {
+    private void assertQaWorkDirectoryFileSystemState(RoddyBamFile bamFile, RoddyBamFileService roddyBamFileService) {
         //the default json is checked in the base class, here only additional json are checked
         List<Path> qaJson = []
         List<Path> qaDirs = [roddyBamFileService.getWorkMergedQADirectory(bamFile)]
@@ -135,10 +141,10 @@ class RoddyFileAssertHelper {
             qaJson.addAll(roddyBamFileService.getWorkLibraryQAJsonFiles(bamFile).values())
         }
 
-        FileAssertHelper.assertDirectoryContent(roddyBamFileService.getWorkQADirectory(bamFile), qaDirs)
+        fileAssertHelper.assertDirectoryContent(roddyBamFileService.getWorkQADirectory(bamFile), qaDirs)
 
         qaJson.each {
-            FileAssertHelper.assertFileIsReadableAndNotEmpty(it)
+            fileAssertHelper.assertFileIsReadableAndNotEmpty(it)
             JSON.parse(it.text) // throws ConverterException when the JSON content is not valid
         }
     }

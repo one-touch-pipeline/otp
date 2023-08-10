@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,6 +25,7 @@ import grails.gorm.transactions.Transactional
 import groovy.transform.CompileDynamic
 import groovy.transform.TupleConstructor
 
+import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
@@ -42,8 +43,10 @@ import java.util.regex.Pattern
 @Transactional
 class RoddyWorkflowConfigService {
 
+    FileService fileService
     FileSystemService fileSystemService
     WorkflowConfigService workflowConfigService
+    ConfigService configService
 
     @SuppressWarnings('Println') //The method is written for scripts, so it needs the output in stdout
     void loadPanCanConfigAndTriggerAlignment(Project project, SeqType seqType, String programVersionToUse, Pipeline pipeline, String configFilePath,
@@ -129,7 +132,7 @@ class RoddyWorkflowConfigService {
         FileSystem fs = fileSystemService.filesystemForConfigFileChecksForRealm
         Path configFile = fs.getPath(config.configFilePath)
 
-        FileService.ensureFileIsReadableAndNotEmpty(configFile)
+        fileService.ensureFileIsReadableAndNotEmpty(configFile, configService.defaultRealm)
         List<String> patternHelper = [
                 "${Pattern.quote(config.pipeline.name.name())}",
                 "${Pattern.quote(config.seqType.roddyName)}",

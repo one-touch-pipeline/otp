@@ -27,11 +27,14 @@ import spock.lang.Specification
 import spock.lang.TempDir
 
 import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
+import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.CreateFileHelper
+import de.dkfz.tbi.otp.utils.LocalShellHelper
 import de.dkfz.tbi.otp.workflow.restartHandler.LogWithIdentifier
 import de.dkfz.tbi.otp.workflowExecution.LogService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
@@ -61,7 +64,11 @@ class WesTaskLogServiceSpec extends Specification implements ServiceUnitTest<Wes
             getRemoteFileSystem(_ as Realm) >> FileSystems.default
         }
         service.logService = Mock(LogService)
-        service.fileService = Mock(FileService)
+        service.configService = Mock(ConfigService)
+        service.fileService = Spy(FileService)
+        service.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
+            executeCommandReturnProcessOutput(_, _) >> { realm1, cmd -> LocalShellHelper.executeAndWait(cmd) }
+        }
     }
 
     void "test createLogsWithIdentifier should return logs with identifier when wesIdentifier is defined and task logs exist"() {
@@ -150,12 +157,10 @@ class WesTaskLogServiceSpec extends Specification implements ServiceUnitTest<Wes
         Path stderr1 = CreateFileHelper.createFile(tempDir.resolve("stderr.txt"))
         Path stderr2 = CreateFileHelper.createFile(tempDir.resolve("stderr.txt"))
 
-        service.fileService = Spy(FileService) {
-            1 * fileSizeExceeded(stdout1.toFile(), _) >> true
-            1 * fileSizeExceeded(stdout2.toFile(), _) >> true
-            1 * fileSizeExceeded(stderr1.toFile(), _) >> true
-            1 * fileSizeExceeded(stderr2.toFile(), _) >> true
-        }
+        1 * service.fileService.fileSizeExceeded(stdout1, _) >> true
+        1 * service.fileService.fileSizeExceeded(stdout2, _) >> true
+        1 * service.fileService.fileSizeExceeded(stderr1, _) >> true
+        1 * service.fileService.fileSizeExceeded(stderr2, _) >> true
 
         WesLog wesLog1 = createWesLog(stdout: stdout1, stderr: stderr1)
         WesLog wesLog2 = createWesLog(stdout: stdout2, stderr: stderr2)

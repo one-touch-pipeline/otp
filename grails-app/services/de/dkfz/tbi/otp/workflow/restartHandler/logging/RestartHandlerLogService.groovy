@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.workflow.restartHandler.logging
 
+import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.workflow.restartHandler.LogWithIdentifier
@@ -33,17 +34,14 @@ import java.nio.file.Path
 
 trait RestartHandlerLogService {
 
+    ConfigService configService
     LogService logService
-
     FileSystemService fileSystemService
-
     FileService fileService
 
-    static private final long FACTOR_1024 = 1024
-
-    static final long MAX_FILE_SIZE_IN_MIB = 10
-
-    static final long MAX_FILE_SIZE = MAX_FILE_SIZE_IN_MIB * FACTOR_1024 * FACTOR_1024
+    final long factor1024 = 1024
+    final long maxFileSizeInMiB = 10
+    final long maxFileSize = maxFileSizeInMiB * factor1024 * factor1024
 
     abstract WorkflowJobErrorDefinition.SourceType getSourceType()
 
@@ -53,10 +51,10 @@ trait RestartHandlerLogService {
         FileSystem fileSystem = fileSystemService.getRemoteFileSystem(workflowStep.workflowRun.project.realm)
         Path file = fileSystem.getPath(filePath)
 
-        if (!FileService.isFileReadable(file)) {
+        if (!fileService.fileIsReadable(file, configService.defaultRealm)) {
             logService.addSimpleLogEntry(workflowStep, "The log file '${file}' does not exist.")
-        } else if (fileService.fileSizeExceeded(file.toFile(), MAX_FILE_SIZE)) {
-            logService.addSimpleLogEntry(workflowStep, "The log file '${file}' is bigger than the ${MAX_FILE_SIZE_IN_MIB} MB threshold.")
+        } else if (fileService.fileSizeExceeded(file, maxFileSize)) {
+            logService.addSimpleLogEntry(workflowStep, "The log file '${file}' is bigger than the ${maxFileSizeInMiB} MB threshold.")
         } else {
             return new LogWithIdentifier(
                     identifier: identifier,

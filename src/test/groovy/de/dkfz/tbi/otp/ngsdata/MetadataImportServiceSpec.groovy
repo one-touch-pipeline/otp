@@ -24,13 +24,12 @@ package de.dkfz.tbi.otp.ngsdata
 import grails.testing.gorm.DataTest
 import groovy.transform.TupleConstructor
 import org.springframework.context.ApplicationContext
-import spock.lang.Specification
-import spock.lang.TempDir
-import spock.lang.Unroll
+import spock.lang.*
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
@@ -42,8 +41,7 @@ import de.dkfz.tbi.otp.infrastructure.CreateFileException
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.ContentWithPathAndProblems
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.DirectoryStructure
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.DirectoryStructureBeanName
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
@@ -163,6 +161,12 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
                     ]
             getBean(directoryStructureName.beanName, DirectoryStructure) >> directoryStructure
         }
+        service.fastqMetadataValidationService = new FastqMetadataValidationService()
+        service.fastqMetadataValidationService.configService = Mock(ConfigService)
+        service.fastqMetadataValidationService.fileService = new FileService()
+        service.fastqMetadataValidationService.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
+            executeCommandReturnProcessOutput(_, _) >> { realm1, cmd -> LocalShellHelper.executeAndWait(cmd) }
+        }
 
         when:
         MetadataValidationContext context = service.validatePath(metadataFile, directoryStructureName)
@@ -206,6 +210,7 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
                 contentWithPathAndProblems: new ContentWithPathAndProblems(metadataFile.bytes, metadataFile.fileName),
                 previousMd5sum            : null,
         ] as ContentWithProblemsAndPreviousMd5sum
+        service.fastqMetadataValidationService = new FastqMetadataValidationService()
 
         when:
         List<ValidateAndImportResult> results = service.validateAndImport(
@@ -477,6 +482,12 @@ ${SPECIES}                      ${speciesImportAlias}                       ${sp
         service.fileSystemService = new TestFileSystemService()
         service.configService = new TestConfigService()
         service.configService.processingOptionService = new ProcessingOptionService()
+        service.fastqMetadataValidationService = new FastqMetadataValidationService()
+        service.fastqMetadataValidationService.configService = Mock(ConfigService)
+        service.fastqMetadataValidationService.fileService = new FileService()
+        service.fastqMetadataValidationService.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
+            executeCommandReturnProcessOutput(_, _) >> { realm1, cmd -> LocalShellHelper.executeAndWait(cmd) }
+        }
 
         when:
         List<ValidateAndImportResult> validateAndImportResults1 = service.validateAndImportMultiple(TICKET_NUMBER, '1111', true)

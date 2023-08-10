@@ -21,20 +21,13 @@
  */
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq
 
-import groovy.transform.CompileDynamic
-
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.SampleIdentifier
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.AbstractMetadataValidationContext
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.ContentWithPathAndProblems
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.DirectoryStructure
-import de.dkfz.tbi.util.spreadsheet.Row
 import de.dkfz.tbi.util.spreadsheet.Spreadsheet
 import de.dkfz.tbi.util.spreadsheet.validation.Problems
 
 import java.nio.file.Path
-
-import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.FASTQ_FILE
-import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.MD5
 
 class MetadataValidationContext extends AbstractMetadataValidationContext {
 
@@ -46,51 +39,17 @@ class MetadataValidationContext extends AbstractMetadataValidationContext {
      */
     final Set<SampleIdentifier> usedSampleIdentifiers
 
-    private MetadataValidationContext(Path metadataFile,
-                                      String metadataFileMd5sum,
-                                      Spreadsheet spreadsheet,
-                                      Problems problems,
-                                      DirectoryStructure directoryStructure,
-                                      String directoryStructureDescription,
-                                      byte[] content) {
+    MetadataValidationContext(Path metadataFile,
+                              String metadataFileMd5sum,
+                              Spreadsheet spreadsheet,
+                              Problems problems,
+                              DirectoryStructure directoryStructure,
+                              String directoryStructureDescription,
+                              byte[] content) {
         super(metadataFile, metadataFileMd5sum, spreadsheet, problems, content)
         this.directoryStructure = directoryStructure
         this.directoryStructureDescription = directoryStructureDescription
         this.usedSampleIdentifiers = [] as Set
-    }
-
-    @CompileDynamic
-    static MetadataValidationContext createFromFile(Path metadataFile, DirectoryStructure directoryStructure, String directoryStructureDescription,
-                                                    boolean ignoreAlreadyKnownMd5sum = false) {
-        Map parametersForFile = readAndCheckFile(metadataFile, { String s ->
-            MetaDataColumn.getColumnForName(s)?.name() ?: s
-        }, { Row row ->
-            !row.getCellByColumnTitle(FASTQ_FILE.name())?.text?.startsWith('Undetermined') &&
-                    // Add additional filter to skip rows containing known md5sum in database
-                    (!ignoreAlreadyKnownMd5sum || RawSequenceFile.findAllByFastqMd5sum(row.getCellByColumnTitle(MD5.name())?.text).empty)
-        })
-
-        return new MetadataValidationContext(metadataFile, parametersForFile.metadataFileMd5sum,
-                parametersForFile.spreadsheet, parametersForFile.problems, directoryStructure,
-                directoryStructureDescription, parametersForFile.bytes)
-    }
-
-    @CompileDynamic
-    static MetadataValidationContext createFromContent(ContentWithPathAndProblems contentWithPathAndProblems,
-                                                       DirectoryStructure directoryStructure,
-                                                       String directoryStructureDescription,
-                                                       boolean ignoreAlreadyKnownMd5sum = false) {
-        Map parametersForFile = checkContent(contentWithPathAndProblems.content, { String s ->
-            MetaDataColumn.getColumnForName(s)?.name() ?: s
-        }, { Row row ->
-            !row.getCellByColumnTitle(FASTQ_FILE.name())?.text?.startsWith('Undetermined') &&
-                    // Add additional filter to skip rows containing known md5sum in database
-                    (!ignoreAlreadyKnownMd5sum || RawSequenceFile.findAllByFastqMd5sum(row.getCellByColumnTitle(MD5.name())?.text).empty)
-        })
-
-        return new MetadataValidationContext(contentWithPathAndProblems.path, parametersForFile.metadataFileMd5sum,
-                parametersForFile.spreadsheet, parametersForFile.problems.addProblems(contentWithPathAndProblems.problems),
-                directoryStructure, directoryStructureDescription, contentWithPathAndProblems.content)
     }
 
     List<String> getSummary() {

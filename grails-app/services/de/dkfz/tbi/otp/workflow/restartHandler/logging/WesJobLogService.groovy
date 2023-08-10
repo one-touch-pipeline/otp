@@ -53,10 +53,10 @@ class WesJobLogService implements RestartHandlerLogService {
                     logsWithIdentifier.add(stdoutLogWithIdentifier)
                 }
 
-                LogWithIdentifier sterrLogWithIdentifier = createLogWithIdentifier(run.wesRunLog.runLog.stderr, "${identifierPrefix}-stderr", workflowStep)
+                LogWithIdentifier stderrLogWithIdentifier = createLogWithIdentifier(run.wesRunLog.runLog.stderr, "${identifierPrefix}-stderr", workflowStep)
 
-                if (sterrLogWithIdentifier) {
-                    logsWithIdentifier.add(sterrLogWithIdentifier)
+                if (stderrLogWithIdentifier) {
+                    logsWithIdentifier.add(stderrLogWithIdentifier)
                 }
             } else {
                 logService.addSimpleLogEntry(workflowStep, "No log available for ${run.wesIdentifier}.")

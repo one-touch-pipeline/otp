@@ -459,7 +459,7 @@ echo \$TEMP_DIR
                 chromosomeSuffix: '',
                 chromosomePrefix: '',
         )
-        FileService.ensureFileIsReadableAndNotEmpty(source.toPath())
+        fileService.ensureFileIsReadableAndNotEmpty(source.toPath(), realm)
 
         ["21", "22"].each { String chromosomeName ->
             DomainFactory.createReferenceGenomeEntry(

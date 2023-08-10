@@ -22,8 +22,10 @@
 package de.dkfz.tbi.otp.workflow.fastqc
 
 import groovy.util.logging.Slf4j
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
+import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.ngsdata.RawSequenceFile
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
@@ -37,6 +39,12 @@ import java.nio.file.Path
 @Slf4j
 class FastqcConditionalFailJob extends AbstractConditionalFailJob implements FastqcShared {
 
+    @Autowired
+    FileService fileService
+
+    @Autowired
+    ConfigService configService
+
     @Override
     protected void check(WorkflowStep workflowStep) {
         SeqTrack seqTrack = getSeqTrack(workflowStep)
@@ -48,7 +56,7 @@ class FastqcConditionalFailJob extends AbstractConditionalFailJob implements Fas
         final Collection<Path> missingPaths = rawSequenceFiles.collect { RawSequenceFile file ->
             lsdfFilesService.getFileViewByPidPathAsPath(file)
         }.findAll { Path path ->
-            !FileService.isFileReadableAndNotEmpty(path)
+            !fileService.isFileReadableAndNotEmpty(path, configService.defaultRealm)
         }
         if (missingPaths) {
             throw new WorkflowException("The following ${missingPaths.size()} files are missing:\n${missingPaths.join("\n")}")

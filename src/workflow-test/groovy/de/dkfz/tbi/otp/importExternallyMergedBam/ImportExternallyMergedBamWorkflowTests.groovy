@@ -26,7 +26,6 @@ import spock.lang.Unroll
 import de.dkfz.tbi.otp.WorkflowTestCase
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
-import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.HelperUtils
@@ -246,7 +245,7 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase implements
                     Path source = baseDirSource.resolve(it)
                     Path target = baseDirTarget.resolve(it)
                     assert Files.isSymbolicLink(source)
-                    FileService.ensureFileIsReadableAndNotEmpty(target)
+                    fileService.ensureFileIsReadableAndNotEmpty(target, realm)
                     assert source.toRealPath() == target
                 }
             }
@@ -345,12 +344,12 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase implements
         }
     }
 
-    protected static void checkThatDirectoryExistAndIsNotLink(Path path) {
-        FileService.ensureDirIsReadable(path)
+    protected void checkThatDirectoryExistAndIsNotLink(Path path) {
+        fileService.ensureDirIsReadable(path, configService.defaultRealm)
     }
 
-    protected static void checkThatFileExistAndIsNotLink(Path path) {
-        FileService.ensureFileIsReadableAndNotEmpty(path)
+    protected void checkThatFileExistAndIsNotLink(Path path) {
+        fileService.ensureFileIsReadableAndNotEmpty(path, realm)
         assert !Files.isSymbolicLink(path)
     }
 

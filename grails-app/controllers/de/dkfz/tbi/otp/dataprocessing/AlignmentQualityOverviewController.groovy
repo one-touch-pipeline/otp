@@ -27,12 +27,14 @@ import org.springframework.http.HttpStatus
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.*
+import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerConfigurationService
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerService
 import de.dkfz.tbi.otp.dataprocessing.qaalignmentoverview.QaOverviewService
 import de.dkfz.tbi.otp.dataprocessing.qaalignmentoverview.QcStatusCellService
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
+import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.job.processing.RoddyConfigService
 import de.dkfz.tbi.otp.ngsdata.*
@@ -162,6 +164,8 @@ class AlignmentQualityOverviewController implements CheckAndCall {
 
     CellRangerConfigurationService cellRangerConfigurationService
     CellRangerService cellRangerService
+    ConfigService configService
+    FileService fileService
     FileSystemService fileSystemService
     ProcessingOptionService processingOptionService
     ProjectSelectionService projectSelectionService
@@ -169,10 +173,10 @@ class AlignmentQualityOverviewController implements CheckAndCall {
     QcStatusCellService qcStatusCellService
     QcTrafficLightService qcTrafficLightService
     ReferenceGenomeService referenceGenomeService
+    RoddyConfigService roddyConfigService
+    RoddyResultServiceFactoryService roddyResultServiceFactoryService
     SeqTypeService seqTypeService
     WorkflowService workflowService
-    RoddyResultServiceFactoryService roddyResultServiceFactoryService
-    RoddyConfigService roddyConfigService
 
     def index(AlignmentQcCommand cmd) {
         Project project = projectSelectionService.selectedProject
@@ -312,7 +316,7 @@ class AlignmentQualityOverviewController implements CheckAndCall {
         FileSystem fileSystem = fileSystemService.getRemoteFileSystem(cmd.abstractBamFile.realm)
         Path file = fileSystem.getPath(rrbf.workArribaFusionPlotPdf)
 
-        if (Files.isReadable(file)) {
+        if (fileService.fileIsReadable(file, configService.defaultRealm)) {
             render(file: file.bytes, contentType: "application/pdf")
         } else {
             render(text: "no plot available", contentType: "text/plain")
@@ -324,7 +328,7 @@ class AlignmentQualityOverviewController implements CheckAndCall {
         Path workDir = roddyResultServiceFactoryService.getService(roddyResult).getWorkDirectory(roddyResult)
         Path configFile = roddyConfigService.getConfigFile(workDir)
 
-        if (Files.isReadable(configFile)) {
+        if (fileService.fileIsReadable(configFile, configService.defaultRealm)) {
             render(
                     file: configFile.bytes,
                     contentType: "text/plain",

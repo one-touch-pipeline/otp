@@ -26,11 +26,13 @@ import spock.lang.*
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.CellRangerFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
+import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeIndexService
 import de.dkfz.tbi.otp.project.Project
@@ -87,7 +89,7 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
         String sampleIdentifier1 = "qwert"
         CellRangerMergingWorkPackage mwp = createMergingWorkPackage()
         SeqTrack seqTrack1 = DomainFactory.createSeqTrackWithFastqFiles(mwp,
-                [ sampleIdentifier: sampleIdentifier1, ]
+                [sampleIdentifier: sampleIdentifier1,]
         )
         SingleCellBamFile singleCellBamFile = createBamFile([workPackage: mwp, seqTracks: [seqTrack1]])
         Path sampleDirectory = singleCellBamFile.sampleDirectory.toPath()
@@ -115,7 +117,7 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
         Path sampleIdentifierPath = sampleDirectory.resolve(singleCellBamFile.seqTracks.first().sampleIdentifier)
 
         SeqTrack seqTrack2 = DomainFactory.createSeqTrackWithFastqFiles(CellRangerMergingWorkPackage.all.find(),
-                [ sampleIdentifier: sampleIdentifier2, ]
+                [sampleIdentifier: sampleIdentifier2,]
         )
         singleCellBamFile.seqTracks.add(seqTrack2)
         singleCellBamFile.save(flush: true)
@@ -184,6 +186,7 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
     void "validateFilesExistsInResultDirectory, if singleCellBamFile given and all files exist, then throw no exception"() {
         given:
         new TestConfigService(tempDir)
+        Realm realm = new Realm()
 
         SingleCellBamFile singleCellBamFile = createBamFile()
         File result = singleCellBamFile.resultDirectory
@@ -197,12 +200,18 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
         }
 
         CellRangerService cellRangerService = new CellRangerService([
+                configService    : Mock(ConfigService) {
+                    _ * getDefaultRealm() >> realm
+                },
                 fileSystemService: Mock(FileSystemService) {
                     1 * getRemoteFileSystem(_) >> FileSystems.default
                     0 * _
                 },
                 fileService      : new FileService(),
         ])
+        cellRangerService.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
+            executeCommandReturnProcessOutput(_, _) >> { realm1, cmd -> LocalShellHelper.executeAndWait(cmd) }
+        }
 
         when:
         cellRangerService.validateFilesExistsInResultDirectory(singleCellBamFile)
@@ -215,6 +224,7 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
     void "validateFilesExistsInResultDirectory, if singleCellBamFile given and file/directory '#missingFile' does not exist, then throw an assert"() {
         given:
         new TestConfigService(tempDir)
+        Realm realm = new Realm()
 
         SingleCellBamFile singleCellBamFile = createBamFile()
         File result = singleCellBamFile.resultDirectory
@@ -228,12 +238,18 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
         }
 
         CellRangerService cellRangerService = new CellRangerService([
+                configService    : Mock(ConfigService) {
+                    _ * getDefaultRealm() >> realm
+                },
                 fileSystemService: Mock(FileSystemService) {
                     1 * getRemoteFileSystem(_) >> FileSystems.default
                     0 * _
                 },
                 fileService      : new FileService(),
         ])
+        cellRangerService.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
+            executeCommandReturnProcessOutput(_, _) >> { realm1, String cmd -> LocalShellHelper.executeAndWait(cmd) }
+        }
 
         when:
         cellRangerService.validateFilesExistsInResultDirectory(singleCellBamFile)
@@ -259,7 +275,7 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
                 enforcedCells: enforcedCells,
         ])
         SeqTrack seqTrack1 = DomainFactory.createSeqTrackWithFastqFiles(mwp,
-                [ sampleIdentifier: sampleIdentifier, ]
+                [sampleIdentifier: sampleIdentifier,]
         )
         SingleCellBamFile singleCellBamFile = createBamFile([workPackage: mwp, seqTracks: [seqTrack1]])
 
@@ -307,22 +323,22 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
         createResultFiles(singleCellBamFile)
 
         CellRangerService cellRangerService = new CellRangerService([
-                cellRangerWorkflowService   : Mock(CellRangerWorkflowService) {
+                cellRangerWorkflowService : Mock(CellRangerWorkflowService) {
                     1 * cleanupOutputDirectory(singleCellBamFile)
                     1 * linkResultFiles(singleCellBamFile)
                 },
-                abstractBamFileService: Mock(AbstractBamFileService) {
+                abstractBamFileService    : Mock(AbstractBamFileService) {
                     1 * updateSamplePairStatusToNeedProcessing(singleCellBamFile)
                 },
-                md5SumService               : Mock(Md5SumService) {
+                md5SumService             : Mock(Md5SumService) {
                     1 * extractMd5Sum(_) >> md5sum
                 },
-                qcTrafficLightCheckService  : Mock(QcTrafficLightCheckService) {
+                qcTrafficLightCheckService: Mock(QcTrafficLightCheckService) {
                     1 * handleQcCheck(singleCellBamFile, _) >> { AbstractBamFile bam, Closure closure ->
                         closure()
                     }
                 },
-                fileSystemService           : Mock(FileSystemService) {
+                fileSystemService         : Mock(FileSystemService) {
                     _ * getRemoteFileSystem(_) >> FileSystems.default
                     0 * _
                 },
@@ -360,22 +376,22 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
         createResultFiles(singleCellBamFile)
 
         CellRangerService cellRangerService = new CellRangerService([
-                cellRangerWorkflowService   : Mock(CellRangerWorkflowService) {
+                cellRangerWorkflowService : Mock(CellRangerWorkflowService) {
                     _ * cleanupOutputDirectory(singleCellBamFile)
                     _ * linkResultFiles(singleCellBamFile)
                 },
-                abstractBamFileService: Mock(AbstractBamFileService) {
+                abstractBamFileService    : Mock(AbstractBamFileService) {
                     0 * updateSamplePairStatusToNeedProcessing(singleCellBamFile)
                 },
-                md5SumService               : Mock(Md5SumService) {
+                md5SumService             : Mock(Md5SumService) {
                     _ * extractMd5Sum(_) >> md5sum
                 },
-                qcTrafficLightCheckService  : Mock(QcTrafficLightCheckService) {
+                qcTrafficLightCheckService: Mock(QcTrafficLightCheckService) {
                     0 * handleQcCheck(singleCellBamFile, _) >> { AbstractBamFile bam, Closure closure ->
                         closure()
                     }
                 },
-                fileSystemService           : Mock(FileSystemService) {
+                fileSystemService         : Mock(FileSystemService) {
                     _ * getRemoteFileSystem(_) >> FileSystems.default
                     0 * _
                 },

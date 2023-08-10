@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import grails.gorm.transactions.Transactional
 
+import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.ParsingException
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
@@ -37,6 +38,8 @@ class ChecksumFileService {
 
     LsdfFilesService lsdfFilesService
     FileSystemService fileSystemService
+    FileService fileService
+    ConfigService configService
 
     String pathToMd5File(RawSequenceFile file) {
         String path = lsdfFilesService.getFileFinalPath(file)
@@ -60,7 +63,7 @@ class ChecksumFileService {
         FileSystem fs = fileSystemService.filesystemForProcessingForRealm
         Path md5File = fs.getPath(path)
 
-        FileService.ensureFileIsReadableAndNotEmpty(md5File)
+        fileService.ensureFileIsReadableAndNotEmpty(md5File, configService.defaultRealm)
         String md5sum
         List<String> lines = md5File.readLines()
         List<String> tokens = lines.get(0).tokenize()
@@ -78,7 +81,7 @@ class ChecksumFileService {
      */
     String firstMD5ChecksumFromFile(Path file) {
         notNull(file, "the input file for the method firstMD5ChecksumFromFile is null")
-        if (!Files.isReadable(file)) {
+        if (!fileService.fileIsReadable(file, configService.defaultRealm)) {
             throw new FileNotReadableException("MD5 file \"${file}\" is not readable or does not exist")
         }
         if (Files.size(file) == 0) {

@@ -30,6 +30,7 @@ import spock.lang.*
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
@@ -122,6 +123,11 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         projectService.roddyWorkflowConfigService = new RoddyWorkflowConfigService()
         projectService.roddyWorkflowConfigService.fileSystemService = new TestFileSystemService()
         projectService.roddyWorkflowConfigService.workflowConfigService = new WorkflowConfigService()
+        projectService.roddyWorkflowConfigService.configService = Mock(ConfigService)
+        projectService.roddyWorkflowConfigService.fileService = new FileService()
+        projectService.roddyWorkflowConfigService.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
+            executeCommandReturnProcessOutput(_, _) >> { realm1, cmd -> LocalShellHelper.executeAndWait(cmd) }
+        }
         projectService.mailHelperService = Mock(MailHelperService) {
             0 * sendEmail(_, _, _)
         }

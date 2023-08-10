@@ -26,10 +26,14 @@ import spock.lang.Specification
 import spock.lang.TempDir
 
 import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CreateFileHelper
+import de.dkfz.tbi.otp.utils.LocalShellHelper
 import de.dkfz.tbi.otp.workflow.shared.WorkflowException
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
@@ -62,6 +66,11 @@ class DataInstallationConditionalFailJobSpec extends Specification implements Da
         job.fileSystemService = new TestFileSystemService()
         job.lsdfFilesService = Mock(LsdfFilesService) {
             getFileInitialPathAsPath(_) >> CreateFileHelper.createFile(tempDir.resolve("test.txt"))
+        }
+        job.configService = Mock(ConfigService)
+        job.fileService = new FileService()
+        job.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
+            executeCommandReturnProcessOutput(_, _) >> { realm1, cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
 
         when:
@@ -100,6 +109,11 @@ class DataInstallationConditionalFailJobSpec extends Specification implements Da
         job.lsdfFilesService = Mock(LsdfFilesService) {
             getFileInitialPathAsPath(_) >> TestCase.uniqueNonExistentPath.toPath()
             0 * _
+        }
+        job.configService = Mock(ConfigService)
+        job.fileService = new FileService()
+        job.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
+            executeCommandReturnProcessOutput(_, _) >> { realm1, cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
 
         when:

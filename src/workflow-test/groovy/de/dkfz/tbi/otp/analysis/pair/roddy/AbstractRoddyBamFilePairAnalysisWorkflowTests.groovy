@@ -27,7 +27,6 @@ import spock.lang.Shared
 import de.dkfz.tbi.otp.analysis.pair.AbstractBamFilePairAnalysisWorkflowTests
 import de.dkfz.tbi.otp.dataprocessing.AnalysisProcessingStates
 import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
-import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 import de.dkfz.tbi.otp.utils.SessionUtils
 
@@ -95,7 +94,7 @@ abstract class AbstractRoddyBamFilePairAnalysisWorkflowTests<Instance extends Ba
             assert createdInstance.sampleType2BamFile == bamFileControl
 
             filesToCheck(createdInstance).flatten().each { Path file ->
-                FileService.ensureFileIsReadableAndNotEmpty(file)
+                fileService.ensureFileIsReadableAndNotEmpty(file, realm)
             }
             checkAnalysisSpecific(createdInstance)
         }

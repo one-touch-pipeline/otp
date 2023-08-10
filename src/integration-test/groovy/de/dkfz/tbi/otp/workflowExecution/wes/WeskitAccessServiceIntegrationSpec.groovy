@@ -31,6 +31,11 @@ import reactor.core.publisher.Mono
 import spock.lang.Specification
 import spock.lang.TempDir
 
+import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
+import de.dkfz.tbi.otp.utils.LocalShellHelper
+
 import java.nio.file.Files
 import java.nio.file.Path
 
@@ -52,6 +57,11 @@ class WeskitAccessServiceIntegrationSpec extends Specification {
         service.weskitApiService = Mock(WeskitApiService) {
             1 * createApiInstance() >> api
             0 * _
+        }
+        service.configService = Mock(ConfigService)
+        service.fileService = new FileService()
+        service.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
+            executeCommandReturnProcessOutput(_, _) >> { realm1, cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
     }
 

@@ -43,6 +43,7 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.ContentWithPathAndProblems
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.FastqMetadataValidationService
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.DirectoryStructureBeanName
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.metadatasource.MetaDataFileSourceEnum
@@ -92,6 +93,7 @@ class MetadataImportController implements CheckAndCall, PlainResponseExceptionHa
     MetadataImportService metadataImportService
     OtrsTicketService otrsTicketService
     ProcessingOptionService processingOptionService
+    FastqMetadataValidationService fastqMetadataValidationService
     RunService runService
 
     def index() {
@@ -110,7 +112,7 @@ class MetadataImportController implements CheckAndCall, PlainResponseExceptionHa
             if (cmd.metadataFileSource == MetaDataFileSourceEnum.PATH && cmd.paths) {
                 FileSystem fs = fileSystemService.filesystemForFastqImport
                 contentsWithPathAndProblems = cmd.paths.collect { metadataFilePath ->
-                    return MetadataValidationContext.readPath(fs.getPath(metadataFilePath))
+                    return fastqMetadataValidationService.readPath(fs.getPath(metadataFilePath))
                 }
             } else if (cmd.metadataFileSource == MetaDataFileSourceEnum.FILE && cmd.contentList) {
                 contentsWithPathAndProblems = cmd.contentList.collect { content ->
@@ -145,7 +147,7 @@ class MetadataImportController implements CheckAndCall, PlainResponseExceptionHa
                     if (cmd.metadataFileSource == MetaDataFileSourceEnum.PATH && cmd.paths) {
                         contentsWithProblemsAndPreviousMd5sum = cmd.paths.withIndex().collect { String path, Integer index ->
                             [
-                                    contentWithPathAndProblems: MetadataValidationContext.readPath(fs.getPath(path)),
+                                    contentWithPathAndProblems: fastqMetadataValidationService.readPath(fs.getPath(path)),
                                     previousMd5sum            : cmd.md5.get(index),
                             ] as ContentWithProblemsAndPreviousMd5sum
                         }

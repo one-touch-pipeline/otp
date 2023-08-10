@@ -27,6 +27,9 @@ import io.swagger.client.wes.model.*
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import reactor.core.publisher.Mono
 
+import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.infrastructure.FileService
+
 import java.nio.file.Files
 import java.time.Duration
 
@@ -43,6 +46,10 @@ class WeskitAccessService {
     static final Duration TIMEOUT = Duration.ofMinutes(30)
 
     WeskitApiService weskitApiService
+
+    FileService fileService
+
+    ConfigService configService
 
     /**
      * return the server info.
@@ -130,6 +137,6 @@ class WeskitAccessService {
         assert parameter.workDirectory.absolute
         assert Files.exists(parameter.workDirectory)
         assert Files.isDirectory(parameter.workDirectory)
-        assert Files.isReadable(parameter.workDirectory)
+        assert fileService.fileIsReadable(parameter.workDirectory, configService.defaultRealm)
     }
 }

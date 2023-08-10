@@ -27,18 +27,17 @@ import spock.lang.Specification
 import spock.lang.TempDir
 
 import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
+import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.CreateFileHelper
+import de.dkfz.tbi.otp.utils.LocalShellHelper
 import de.dkfz.tbi.otp.workflow.restartHandler.LogWithIdentifier
-import de.dkfz.tbi.otp.workflowExecution.LogService
-import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
-import de.dkfz.tbi.otp.workflowExecution.WorkflowStepService
-import de.dkfz.tbi.otp.workflowExecution.wes.WesLog
-import de.dkfz.tbi.otp.workflowExecution.wes.WesRun
-import de.dkfz.tbi.otp.workflowExecution.wes.WesRunLog
+import de.dkfz.tbi.otp.workflowExecution.*
+import de.dkfz.tbi.otp.workflowExecution.wes.*
 
 import java.nio.file.FileSystems
 import java.nio.file.Path
@@ -61,7 +60,11 @@ class WesJobLogServiceSpec extends Specification implements ServiceUnitTest<WesJ
             getRemoteFileSystem(_ as Realm) >> FileSystems.default
         }
         service.logService = Mock(LogService)
-        service.fileService = Mock(FileService)
+        service.configService = Mock(ConfigService)
+        service.fileService = Spy(FileService)
+        service.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
+            executeCommandReturnProcessOutput(_, _) >> { realm1, cmd -> LocalShellHelper.executeAndWait(cmd) }
+        }
     }
 
     void "test createLogsWithIdentifier should return logs with identifier when wesIdentifier is defined"() {
@@ -129,10 +132,8 @@ class WesJobLogServiceSpec extends Specification implements ServiceUnitTest<WesJ
         Path stdout = CreateFileHelper.createFile(tempDir.resolve("stdout.txt"))
         Path stderr = CreateFileHelper.createFile(tempDir.resolve("stderr.txt"))
 
-        service.fileService = Spy(FileService) {
-            1 * fileSizeExceeded(stdout.toFile(), _) >> true
-            1 * fileSizeExceeded(stderr.toFile(), _) >> true
-        }
+        1 * service.fileService.fileSizeExceeded(stdout, _) >> true
+        1 * service.fileService.fileSizeExceeded(stderr, _) >> true
 
         WesLog wesLog = createWesLog(stdout: stdout, stderr: stderr)
 

@@ -22,9 +22,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.gorm.transactions.Transactional
-import groovy.transform.CompileDynamic
-import groovy.transform.ToString
-import groovy.transform.TupleConstructor
+import groovy.transform.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 import org.springframework.security.access.prepost.PreAuthorize
@@ -36,8 +34,7 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePairDeciderService
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.AbstractMetadataValidationContext
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.ContentWithPathAndProblems
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.DirectoryStructure
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.DirectoryStructureBeanName
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
@@ -96,6 +93,7 @@ class MetadataImportService {
     SeqTrackService seqTrackService
     SeqTypeService seqTypeService
     SpeciesWithStrainService speciesWithStrainService
+    FastqMetadataValidationService fastqMetadataValidationService
 
     static final int MAX_ILSE_NUMBER_RANGE_SIZE = 20
 
@@ -111,7 +109,7 @@ class MetadataImportService {
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     MetadataValidationContext validateWithAuth(ContentWithPathAndProblems contentWithPathAndProblems,
                                                DirectoryStructureBeanName directoryStructure, boolean ignoreAlreadyKnownMd5sum = false) {
-        MetadataValidationContext context = MetadataValidationContext.createFromContent(
+        MetadataValidationContext context = fastqMetadataValidationService.createFromContent(
                 contentWithPathAndProblems,
                 getDirectoryStructure(directoryStructure),
                 directoryStructure.displayName,
@@ -121,7 +119,7 @@ class MetadataImportService {
     }
 
     MetadataValidationContext validatePath(Path metadataPath, DirectoryStructureBeanName directoryStructure, boolean ignoreAlreadyKnownMd5sum = false) {
-        MetadataValidationContext context = MetadataValidationContext.createFromFile(
+        MetadataValidationContext context = fastqMetadataValidationService.createFromFile(
                 metadataPath,
                 getDirectoryStructure(directoryStructure),
                 directoryStructure.displayName,

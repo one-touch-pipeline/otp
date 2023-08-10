@@ -32,6 +32,7 @@ import de.dkfz.tbi.otp.SqlUtil
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePairDeciderService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.BamMetadataValidationService
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidator
 import de.dkfz.tbi.otp.project.Project
@@ -57,6 +58,8 @@ class BamMetadataImportService {
 
     SeqTypeService seqTypeService
 
+    BamMetadataValidationService bamMetadataValidationService
+
     /**
      * @return A collection of descriptions of the validations which are performed
      */
@@ -70,12 +73,10 @@ class BamMetadataImportService {
 
     BamMetadataValidationContext validate(String metadataFile, List<String> furtherFiles, boolean linkSourceFiles) {
         FileSystem fileSystem = fileSystemService.filesystemForBamImport
-        BamMetadataValidationContext context = BamMetadataValidationContext.createFromFile(
-                fileSystem.getPath(metadataFile),
+        BamMetadataValidationContext context = bamMetadataValidationService.createFromFile(fileSystem.getPath(metadataFile),
                 furtherFiles,
                 fileSystem,
-                linkSourceFiles
-        )
+                linkSourceFiles)
         if (context.spreadsheet) {
             bamMetadataValidators.each {
                 try {
@@ -99,12 +100,10 @@ class BamMetadataImportService {
         BamMetadataValidationContext context = validate(metadataFile, furtherFiles, linkOperation.linkSource)
         try {
             MetadataImportService.mayImport(context, ignoreWarnings, previousValidationMd5sum)
-            importProcess = new ImportProcess([
-                    externallyProcessedBamFiles: [],
-                    state                            : ImportProcess.State.NOT_STARTED,
-                    linkOperation                    : linkOperation,
-                    triggerAnalysis                  : triggerAnalysis,
-            ])
+            importProcess = new ImportProcess([externallyProcessedBamFiles: [],
+                                               state                      : ImportProcess.State.NOT_STARTED,
+                                               linkOperation              : linkOperation,
+                                               triggerAnalysis            : triggerAnalysis,])
 
             context.spreadsheet.dataRows.each { Row row ->
                 String _referenceGenome = uniqueColumnValue(row, BamMetadataColumn.REFERENCE_GENOME)
@@ -143,30 +142,25 @@ class BamMetadataImportService {
                 ReferenceGenome referenceGenome = CollectionUtils.atMostOneElement(ReferenceGenome.findAllByName(_referenceGenome))
                 assert referenceGenome: "no reference genom found for ${_referenceGenome}"
 
-                ExternalMergingWorkPackage emwp = new ExternalMergingWorkPackage(
-                        referenceGenome: referenceGenome,
+                ExternalMergingWorkPackage emwp = new ExternalMergingWorkPackage(referenceGenome: referenceGenome,
                         sample: sample,
                         seqType: seqType,
                         pipeline: CollectionUtils.atMostOneElement(Pipeline.findAllByNameAndType(Pipeline.Name.EXTERNALLY_PROCESSED, Pipeline.Type.ALIGNMENT)),
-                        libraryPreparationKit: libraryPreparationKit ? libraryPreparationKitService.findByNameOrImportAlias(libraryPreparationKit) : null,
-                )
+                        libraryPreparationKit: libraryPreparationKit ? libraryPreparationKitService.findByNameOrImportAlias(libraryPreparationKit) : null,)
                 assert emwp.save(flush: true)
 
-                ExternallyProcessedBamFile epmbf = new ExternallyProcessedBamFile(
-                        workPackage: emwp,
+                ExternallyProcessedBamFile epmbf = new ExternallyProcessedBamFile(workPackage: emwp,
                         importedFrom: bamFilePath,
                         fileName: getNameFromPath(bamFilePath),
                         coverage: coverage ? Double.parseDouble(coverage) : null,
                         md5sum: md5sum ?: null,
                         maximumReadLength: maximalReadLength ? Integer.parseInt(maximalReadLength) : null,
                         furtherFiles: [] as Set,
-                        insertSizeFile: insertSizeFile
-                ).save(flush: true)
+                        insertSizeFile: insertSizeFile).save(flush: true)
 
                 Path bamFileParent = fileSystem.getPath(epmbf.importedFrom).parent
 
-                furtherFiles.findAll().findAll { String path ->
-                    Files.exists(bamFileParent.resolve(path))
+                furtherFiles.findAll().findAll { String path -> Files.exists(bamFileParent.resolve(path))
                 }.each {
                     epmbf.furtherFiles.add(it)
                 }
@@ -186,15 +180,11 @@ class BamMetadataImportService {
 
                     def qcValues = new JsonSlurper().parse(qualityControlFilePath.bytes)
 
-                    new ExternallyProcessedBamFileQualityAssessment(
-                            properlyPaired: qcValues.all.properlyPaired,
+                    new ExternallyProcessedBamFileQualityAssessment(properlyPaired: qcValues.all.properlyPaired,
                             pairedInSequencing: qcValues.all.pairedInSequencing,
                             insertSizeMedian: qcValues.all.insertSizeMedian,
                             insertSizeCV: qcValues.all.insertSizeCV,
-                            qualityAssessmentMergedPass: new QualityAssessmentMergedPass([
-                                    abstractBamFile: epmbf,
-                            ]).save(flush: true),
-                    ).save(flush: true)
+                            qualityAssessmentMergedPass: new QualityAssessmentMergedPass([abstractBamFile: epmbf,]).save(flush: true),).save(flush: true)
 
                     if (!epmbf.furtherFiles.find {
                         Path furtherPath = bamFileParent.resolve(it)
@@ -220,11 +210,9 @@ class BamMetadataImportService {
             context.addProblem(Collections.emptySet(), LogLevel.INFO, e.message)
         }
 
-        return [
-                context      : context,
+        return [context      : context,
                 importProcess: importProcess,
-                project      : outputProject,
-        ]
+                project      : outputProject,]
     }
 
     private static String getNameFromPath(String path) {

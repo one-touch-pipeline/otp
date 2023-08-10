@@ -27,6 +27,7 @@ import spock.lang.TempDir
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.domainFactory.pipelines.externalBam.ExternalBamFactory
@@ -577,6 +578,11 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
 
         importExternallyMergedBamJob.configService = configService
         importExternallyMergedBamJob.checksumFileService = new ChecksumFileService()
+        importExternallyMergedBamJob.checksumFileService.configService = Mock(ConfigService)
+        importExternallyMergedBamJob.checksumFileService.fileService = new FileService()
+        importExternallyMergedBamJob.checksumFileService.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
+            executeCommandReturnProcessOutput(_, _) >> { realm1, cmd -> LocalShellHelper.executeAndWait(cmd) }
+        }
         importExternallyMergedBamJob.executionHelperService = Mock(ExecutionHelperService) {
             _ * getGroup(_, _) >> 'someGroup'
         }

@@ -55,10 +55,10 @@ class WesTaskLogService implements RestartHandlerLogService {
                         logsWithIdentifier.add(stdoutLogWithIdentifier)
                     }
 
-                    LogWithIdentifier sterrLogWithIdentifier = createLogWithIdentifier(log.stderr, "${identifierPrefix}-stderr", workflowStep)
+                    LogWithIdentifier stderrLogWithIdentifier = createLogWithIdentifier(log.stderr, "${identifierPrefix}-stderr", workflowStep)
 
-                    if (sterrLogWithIdentifier) {
-                        logsWithIdentifier.add(sterrLogWithIdentifier)
+                    if (stderrLogWithIdentifier) {
+                        logsWithIdentifier.add(stderrLogWithIdentifier)
                     }
                 }
             } else {
