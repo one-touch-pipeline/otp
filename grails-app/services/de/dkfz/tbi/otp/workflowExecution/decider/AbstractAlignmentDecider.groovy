@@ -62,8 +62,6 @@ abstract class AbstractAlignmentDecider extends AbstractWorkflowDecider<Alignmen
     @Autowired
     WorkflowService workflowService
 
-    abstract boolean supportsIncrementalMerging()
-
     abstract boolean requiresFastqcResults()
 
     abstract String getWorkflowName()
@@ -71,8 +69,6 @@ abstract class AbstractAlignmentDecider extends AbstractWorkflowDecider<Alignmen
     abstract String getInputFastqRole()
 
     abstract String getInputFastqcRole()
-
-    abstract String getInputBaseBamRole()
 
     abstract String getOutputBamRole()
 
@@ -86,9 +82,6 @@ abstract class AbstractAlignmentDecider extends AbstractWorkflowDecider<Alignmen
         Set<ArtefactType> types = [ArtefactType.FASTQ] as Set
         if (requiresFastqcResults()) {
             types.add(ArtefactType.FASTQC)
-        }
-        if (supportsIncrementalMerging()) {
-            types.add(ArtefactType.BAM)
         }
         return types
     }
@@ -219,10 +212,10 @@ abstract class AbstractAlignmentDecider extends AbstractWorkflowDecider<Alignmen
             deciderResult.warnings << "skip ${group}, since no new seqTracks found".toString()
             return deciderResult
         }
-        Set<SeqTrack> useSeqTracks = (supportsIncrementalMerging() ? newSeqTracks : seqTracks) as Set
+
+        Set<SeqTrack> seqTrackSet = seqTracks as Set
 
         if (requiresFastqcResults()) {
-            Set<SeqTrack> seqTrackSet = seqTracks as Set
             List<FastqcProcessedFile> fastqcProcessedFiles = allArtefacts.fastqcProcessedFileData*.artefact
             List<SeqTrack> seqTracksWithMissingFastqc = seqTracks.findAll { SeqTrack seqTrack ->
                 !additionalData.rawSequenceFileMap[seqTrack].every { RawSequenceFile rawSequenceFile ->
@@ -326,7 +319,7 @@ abstract class AbstractAlignmentDecider extends AbstractWorkflowDecider<Alignmen
         )
 
         allArtefacts.seqTrackData.findAll {
-            useSeqTracks.contains(it.artefact)
+            seqTrackSet.contains(it.artefact)
         }.each {
             new WorkflowRunInputArtefact(
                     workflowRun: run,
@@ -336,20 +329,11 @@ abstract class AbstractAlignmentDecider extends AbstractWorkflowDecider<Alignmen
         }
         if (requiresFastqcResults()) {
             allArtefacts.fastqcProcessedFileData.findAll {
-                useSeqTracks.contains(it.artefact.sequenceFile.seqTrack)
+                seqTrackSet.contains(it.artefact.sequenceFile.seqTrack)
             }.each {
                 new WorkflowRunInputArtefact(
                         workflowRun: run,
                         role: "${inputFastqcRole}_${it.artefact.id}",
-                        workflowArtefact: it.workflowArtefact,
-                ).save(flush: false, deepValidate: false)
-            }
-        }
-        if (supportsIncrementalMerging()) {
-            allArtefacts.bamData.each {
-                new WorkflowRunInputArtefact(
-                        workflowRun: run,
-                        role: "${inputBaseBamRole}_${it.artefact.id}",
                         workflowArtefact: it.workflowArtefact,
                 ).save(flush: false, deepValidate: false)
             }
@@ -368,9 +352,9 @@ abstract class AbstractAlignmentDecider extends AbstractWorkflowDecider<Alignmen
                 workPackage: workPackage,
                 identifier: identifier,
                 workDirectoryName: "${RoddyBamFileService.WORK_DIR_PREFIX}_${identifier}",
-                baseBamFile: supportsIncrementalMerging() ? baseBamFile : null,
-                seqTracks: useSeqTracks,
-                numberOfMergedLanes: useSeqTracks.size() + (supportsIncrementalMerging() && baseBamFile ? baseBamFile.numberOfMergedLanes : 0)
+                baseBamFile: null,
+                seqTracks: seqTrackSet,
+                numberOfMergedLanes: seqTrackSet.size()
         ).save(flush: false, deepValidate: false)
 
         run.workDirectory = roddyBamFileService.getWorkDirectory(bamFile)

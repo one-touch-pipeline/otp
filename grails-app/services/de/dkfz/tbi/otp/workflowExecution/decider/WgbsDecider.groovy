@@ -33,11 +33,6 @@ import de.dkfz.tbi.otp.workflow.wgbs.WgbsWorkflow
 class WgbsDecider extends AbstractAlignmentDecider {
 
     @Override
-    final boolean supportsIncrementalMerging() {
-        return false
-    }
-
-    @Override
     final boolean requiresFastqcResults() {
         return false
     }
@@ -53,8 +48,6 @@ class WgbsDecider extends AbstractAlignmentDecider {
     }
 
     final String inputFastqcRole = null
-
-    final String inputBaseBamRole = null
 
     @Override
     final String getOutputBamRole() {

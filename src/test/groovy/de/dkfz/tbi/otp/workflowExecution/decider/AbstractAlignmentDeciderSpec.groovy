@@ -755,11 +755,8 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
         ])
 
         and: 'expected input artefacts'
-        boolean hasBaseBamFile = existingBaseBamFile && !baseBamFileWithdrawn && decider.supportsIncrementalMerging()
-        List<SeqTrack> expectedSeqTracks = hasBaseBamFile ? [seqTrack2] : seqTracks
-        List<WorkflowArtefact> expectedInputArtefacts = (hasBaseBamFile ?
-                [seqTrack2, fastqcProcessedFiles[2], fastqcProcessedFiles[3], baseBamFile] :
-                (seqTracks + fastqcProcessedFiles))*.workflowArtefact
+        List<SeqTrack> expectedSeqTracks = seqTracks
+        List<WorkflowArtefact> expectedInputArtefacts = (seqTracks + fastqcProcessedFiles)*.workflowArtefact
 
         and: 'services'
         createServicesForCreateWorkflowRunsAndOutputArtefacts(workflowVersion, seqTrack1)
@@ -782,7 +779,7 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
         bamFile.workflowArtefact == workflowArtefact
         CollectionUtils.containSame(bamFile.seqTracks, expectedSeqTracks)
         CollectionUtils.containSame(bamFile.containedSeqTracks, seqTracks)
-        bamFile.baseBamFile == (hasBaseBamFile ? baseBamFile : null)
+        bamFile.baseBamFile == null
         bamFile.numberOfMergedLanes == 2
 
         MergingWorkPackage mergingWorkPackage = bamFile.mergingWorkPackage

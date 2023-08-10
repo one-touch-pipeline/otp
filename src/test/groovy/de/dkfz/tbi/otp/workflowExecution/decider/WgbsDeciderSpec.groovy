@@ -33,11 +33,6 @@ class WgbsDeciderSpec extends AbstractAlignmentDeciderSpec {
         useFastqcCount = 0
     }
 
-    void "supportsIncrementalMerging"() {
-        expect:
-        decider.supportsIncrementalMerging() == false
-    }
-
     void "requiresFastqcResults"() {
         expect:
         decider.requiresFastqcResults() == false
@@ -56,11 +51,6 @@ class WgbsDeciderSpec extends AbstractAlignmentDeciderSpec {
     void "getInputFastqcRole"() {
         expect:
         decider.inputFastqcRole == null
-    }
-
-    void "getInputBaseBamRole"() {
-        expect:
-        decider.inputBaseBamRole == null
     }
 
     void "getOutputBamRole"() {

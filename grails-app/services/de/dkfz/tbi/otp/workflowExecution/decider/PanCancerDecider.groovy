@@ -33,11 +33,6 @@ import de.dkfz.tbi.otp.workflow.panCancer.PanCancerWorkflow
 class PanCancerDecider extends AbstractAlignmentDecider {
 
     @Override
-    final boolean supportsIncrementalMerging() {
-        return true
-    }
-
-    @Override
     final boolean requiresFastqcResults() {
         return true
     }
@@ -55,11 +50,6 @@ class PanCancerDecider extends AbstractAlignmentDecider {
     @Override
     final String getInputFastqcRole() {
         return PanCancerWorkflow.INPUT_FASTQC
-    }
-
-    @Override
-    final String getInputBaseBamRole() {
-        return PanCancerWorkflow.INPUT_BASE_BAM_FILE
     }
 
     @Override

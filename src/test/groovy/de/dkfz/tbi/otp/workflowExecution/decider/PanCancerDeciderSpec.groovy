@@ -35,11 +35,6 @@ class PanCancerDeciderSpec extends AbstractAlignmentDeciderSpec {
         useFastqcCount = 1
     }
 
-    void "supportsIncrementalMerging"() {
-        expect:
-        decider.supportsIncrementalMerging() == true
-    }
-
     void "requiresFastqcResults"() {
         expect:
         decider.requiresFastqcResults() == true
@@ -58,11 +53,6 @@ class PanCancerDeciderSpec extends AbstractAlignmentDeciderSpec {
     void "getInputFastqcRole"() {
         expect:
         decider.inputFastqcRole == PanCancerWorkflow.INPUT_FASTQC
-    }
-
-    void "getInputBaseBamRole"() {
-        expect:
-        decider.inputBaseBamRole == PanCancerWorkflow.INPUT_BASE_BAM_FILE
     }
 
     void "getOutputBamRole"() {
@@ -84,7 +74,6 @@ class PanCancerDeciderSpec extends AbstractAlignmentDeciderSpec {
         TestCase.assertContainSame(decider.supportedInputArtefactTypes, [
                 ArtefactType.FASTQ,
                 ArtefactType.FASTQC,
-                ArtefactType.BAM,
         ])
     }
 
