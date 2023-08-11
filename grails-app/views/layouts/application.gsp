@@ -27,7 +27,7 @@
         <script type="text/javascript" src="${otp.serverUrl()}/webjars/chartjs-plugin-datalabels/2.2.0/dist/chartjs-plugin-datalabels.js"></script>
         <script type="text/javascript" src="${otp.serverUrl()}/webjars/datatables/1.13.5/js/jquery.dataTables.js"></script>
         <script type="text/javascript" src="${otp.serverUrl()}/webjars/datatables/1.13.5/js/dataTables.bootstrap4.js"></script>
-        <script type="text/javascript" src="${otp.serverUrl()}/webjars/datatables-plugins/1.13.5/pagination/select.js"></script>
+        <script type="text/javascript" src="${otp.serverUrl()}/webjars/datatables-plugins/1.13.6/pagination/select.js"></script>
         <asset:javascript src="modules/application.js"/>
         <script type="text/javascript" src="${otp.serverUrl()}/webjars/datatables.net-scroller/js/dataTables.scroller.js"></script>
         <script type="text/javascript" src="${otp.serverUrl()}/webjars/datatables.net-scroller-bs4/js/scroller.bootstrap4.js"></script>
