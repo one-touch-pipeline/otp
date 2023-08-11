@@ -28,7 +28,6 @@ import org.springframework.stereotype.Component
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
-import java.nio.file.FileSystem
 import java.nio.file.Path
 
 /**
@@ -52,8 +51,7 @@ class SetCorrectPermissionJob extends AbstractJob {
     }
 
     void correctPermission(WorkflowStep workflowStep) {
-        FileSystem fileSystem = getFileSystem(workflowStep)
-        Path workDirectory = fileSystem.getPath(workflowStep.workflowRun.workDirectory)
+        Path workDirectory = getWorkDirectory(workflowStep)
         fileService.correctPathPermissionAndGroupRecursive(workDirectory, workflowStep.realm, workflowStep.workflowRun.project.unixGroup)
         workflowStateChangeService.changeStateToSuccess(workflowStep)
     }

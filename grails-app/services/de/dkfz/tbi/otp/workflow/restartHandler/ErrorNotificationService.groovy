@@ -32,7 +32,9 @@ import de.dkfz.tbi.otp.tracking.OtrsTicketService
 import de.dkfz.tbi.otp.utils.MailHelperService
 import de.dkfz.tbi.otp.utils.StackTraceUtils
 import de.dkfz.tbi.otp.workflowExecution.*
+import de.dkfz.tbi.otp.workflowExecution.wes.WesLog
 import de.dkfz.tbi.otp.workflowExecution.wes.WesRun
+import de.dkfz.tbi.otp.workflowExecution.wes.WesRunLog
 import de.dkfz.tbi.util.TimeFormats
 
 import java.time.LocalDateTime
@@ -245,14 +247,22 @@ class ErrorNotificationService {
         message << header("WES jobs")
         if (prevRunningWorkflowStep?.wesRuns) {
             prevRunningWorkflowStep.wesRuns.sort { it.id }.each { WesRun wesRun ->
-                message << "ID: ${wesRun.wesIdentifier}"
-                message << "State: ${wesRun.state}"
-                message << "SubPath: ${wesRun.subPath}"
-                message << "Start time: ${TimeFormats.DATE_TIME.getFormattedZonedDateTime((ZonedDateTime) wesRun.wesRunLog?.runLog?.startTime)}"
-                message << "End time: ${TimeFormats.DATE_TIME.getFormattedZonedDateTime((ZonedDateTime) wesRun.wesRunLog?.runLog?.endTime)}"
-                message << "Log file command: ${wesRun.wesRunLog.runLog.cmd}"
-                message << "Stdout: ${wesRun.wesRunLog.runLog.stdout}"
-                message << "Stderr: ${wesRun.wesRunLog.runLog.stderr}"
+                message << "WES run ID: ${wesRun.id}"
+                message << "WES identifier: ${wesRun.wesIdentifier}"
+                message << "Work directory: ${wesRun.workflowStep.workflowRun.workDirectory}/${wesRun.subPath}"
+
+                WesRunLog wesRunLog = wesRun.wesRunLog
+                message << "State: ${wesRunLog.state}"
+                message << "Request: ${wesRunLog?.runRequest}"
+
+                WesLog runLog = wesRunLog?.runLog
+                message << "Name: ${runLog?.name}"
+                message << "Start time: ${TimeFormats.DATE_TIME.getFormattedZonedDateTime((ZonedDateTime) runLog?.startTime)}"
+                message << "End time: ${TimeFormats.DATE_TIME.getFormattedZonedDateTime((ZonedDateTime) runLog?.endTime)}"
+                message << "Log file command: ${runLog?.cmd?.replaceAll('\n', '\n    ')}"
+                message << "Stdout: ${runLog?.stdout}"
+                message << "Stderr: ${runLog?.stderr}"
+                message << "ExitCode: ${runLog?.exitCode}"
                 message << ""
             }
         } else {

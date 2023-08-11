@@ -59,35 +59,50 @@ class FastqcDataFilesService {
     FilestoreService filestoreService
     ConfigService configService
 
+    private Path fastqcUUidFolder(FastqcProcessedFile fastqcProcessedFile) {
+        return filestoreService.getWorkFolderPath(fastqcProcessedFile.workflowArtefact.producedBy)
+    }
+
     Path fastqcOutputDirectory(FastqcProcessedFile fastqcProcessedFile, PathOption... options) {
         if (options.contains(PathOption.REAL_PATH) && fastqcProcessedFile.workflowArtefact.producedBy.workFolder) {
-            return filestoreService.getWorkFolderPath(fastqcProcessedFile.workflowArtefact.producedBy)
+            return fastqcUUidFolder(fastqcProcessedFile)
         }
         Path baseString = lsdfFilesService.getRunDirectory(fastqcProcessedFile.sequenceFile)
         return baseString.resolve(FAST_QC_DIRECTORY_PART).resolve(fastqcProcessedFile.workDirectoryName)
     }
 
     Path fastqcOutputPath(FastqcProcessedFile fastqcProcessedFile, PathOption... options) {
+        if (options.contains(PathOption.REAL_PATH) && fastqcProcessedFile.pathInWorkFolder) {
+            return fastqcUUidFolder(fastqcProcessedFile).resolve(fastqcProcessedFile.pathInWorkFolder)
+        }
         String fileName = fastqcFileName(fastqcProcessedFile)
         return fastqcOutputDirectory(fastqcProcessedFile, options).resolve(fileName)
     }
 
     Path fastqcHtmlPath(FastqcProcessedFile fastqcProcessedFile, PathOption... options) {
-        String fileName = fastqcFileNameWithoutZipSuffix(fastqcProcessedFile).concat(HTML_FILE_EXTENSION)
-        return fastqcOutputDirectory(fastqcProcessedFile, options).resolve(fileName)
+        Path fastqc = fastqcOutputPath(fastqcProcessedFile, options)
+        String fileName = fastqc.fileName.toString().replace(FAST_QC_ZIP_SUFFIX, HTML_FILE_EXTENSION)
+        return fastqc.resolveSibling(fileName)
     }
 
     Path fastqcOutputMd5sumPath(FastqcProcessedFile fastqcProcessedFile, PathOption... options) {
-        String fileName = fastqcFileName(fastqcProcessedFile).concat(MD5SUM_FILE_EXTENSION)
-        return fastqcOutputDirectory(fastqcProcessedFile, options).resolve(fileName)
+        Path fastqc = fastqcOutputPath(fastqcProcessedFile, options)
+        String fileName = fastqc.fileName.toString().concat(MD5SUM_FILE_EXTENSION)
+        return fastqc.resolveSibling(fileName)
     }
 
-    protected String fastqcFileName(FastqcProcessedFile fastqcProcessedFile) {
+    /**
+     * returns the calculated name for the fastqc file, base on the fastq name, including the zip suffix
+     */
+    String fastqcFileName(FastqcProcessedFile fastqcProcessedFile) {
         return "${fastqcFileNameWithoutZipSuffix(fastqcProcessedFile)}${FAST_QC_ZIP_SUFFIX}"
     }
 
-    private String fastqcFileNameWithoutZipSuffix(FastqcProcessedFile fastqcProcessedFile) {
-        return fastqcFileNameWithoutZipSuffix(inputFileNameAdaption(fastqcProcessedFile.sequenceFile.fileName))
+    /**
+     * returns the calculated name for the fastqc file, base on the fastq name, and without the zip suffix
+     */
+    String fastqcFileNameWithoutZipSuffix(FastqcProcessedFile fastqcProcessedFile) {
+        return fastqcFileNameWithoutZipSuffixHelper(inputFileNameAdaption(fastqcProcessedFile.sequenceFile.fileName))
     }
 
     /**
@@ -98,7 +113,7 @@ class FastqcDataFilesService {
         return suffixLength ? fileName[0..<-suffixLength] : fileName
     }
 
-    private String fastqcFileNameWithoutZipSuffix(String fileName) {
+    private String fastqcFileNameWithoutZipSuffixHelper(String fileName) {
         /*
          * The fastqc tool does not allow to specify the output file name, only the output directory.
          * To access the file we need code to create the same name for the output file as the fastqc tool.
@@ -154,17 +169,23 @@ class FastqcDataFilesService {
      * @param withinZipPath Path to the resource within the zip file
      * @return An inputStream for the combination of zipPath and the withinZipPath parameters
      */
+    // zip file only works local, not remote
+    @SuppressWarnings("JavaIoPackageAccess")
     InputStream getInputStreamFromZipFile(FastqcProcessedFile fastqcProcessedFile, String withinZipPath) {
-        Path zipPath = fastqcOutputPath(fastqcProcessedFile)
-        String zipEntryPath = "${fastqcFileNameWithoutZipSuffix(fastqcProcessedFile)}/${withinZipPath}"
+        Path zipPath = fastqcOutputPath(fastqcProcessedFile, PathOption.REAL_PATH)
+
         File input = new File(zipPath.toString())
         if (!input.canRead()) {
             throw new FileNotReadableException(input.path)
         }
+
         ZipFile zipFile = new ZipFile(input)
-        ZipEntry zipEntry = zipFile.getEntry(zipEntryPath)
+        ZipEntry zipEntry = zipFile.entries().find {
+            it.name.endsWith(withinZipPath)
+        }
+
         if (!zipEntry) {
-            throw new FileNotReadableException(zipEntryPath)
+            throw new CouldNotFindFastqcDataInZipFileException(zipPath, withinZipPath)
         }
         return zipFile.getInputStream(zipEntry)
     }

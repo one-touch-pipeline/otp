@@ -46,9 +46,9 @@ import java.util.stream.Stream
 /**
  * Helper methods to work with file paths
  */
+@Slf4j
 @CompileDynamic
 @Transactional
-@Slf4j
 class FileService {
 
     /**
@@ -828,6 +828,37 @@ class FileService {
         return BAM_FILE_EXTENSIONS.any {
             fileName.endsWith(it)
         }
+    }
+
+    /**
+     * Calculate the size of the path.
+     *
+     * For files its simple return the file size.
+     * For directories its iterates over all children recursively and summarize the size of all found regular files and directories.
+     * Links are ignored (including the size of the link itself).
+     */
+    long calculateSizeRecursive(Path path) {
+        assert path
+        assert path.absolute
+        assert Files.exists(path)
+
+        long size = 0
+        Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
+            @Override
+            FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                // Files.size() can not be used, since it always follow symbolic links,
+                // but we want count symbolic links only with the size of the link, not the size of the linked file
+                size += Files.readAttributes(file, BasicFileAttributes, LinkOption.NOFOLLOW_LINKS).size()
+                return FileVisitResult.CONTINUE
+            }
+
+            @Override
+            FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+                size += Files.size(dir)
+                return FileVisitResult.CONTINUE
+            }
+        })
+        return size
     }
 }
 

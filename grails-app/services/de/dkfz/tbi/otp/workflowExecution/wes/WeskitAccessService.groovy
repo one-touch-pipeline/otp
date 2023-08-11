@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.workflowExecution.wes
 import grails.converters.JSON
 import io.swagger.client.wes.api.WorkflowExecutionServiceApi
 import io.swagger.client.wes.model.*
+import org.grails.web.json.JSONObject
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import reactor.core.publisher.Mono
 
@@ -31,6 +32,7 @@ import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.infrastructure.FileService
 
 import java.nio.file.Files
+import java.nio.file.Path
 import java.time.Duration
 
 /**
@@ -45,11 +47,13 @@ class WeskitAccessService {
      */
     static final Duration TIMEOUT = Duration.ofMinutes(30)
 
+    static final int JSON_INDENT_FACTOR = 4
+
+    ConfigService configService
+
     WeskitApiService weskitApiService
 
     FileService fileService
-
-    ConfigService configService
 
     /**
      * return the server info.
@@ -87,17 +91,21 @@ class WeskitAccessService {
      * @param wesWorkflowParameter Parameter to the workflow
      * @return the id of the workflow run.
      */
-    String runWorkflow(WesWorkflowParameter wesWorkflowParameter) {
-        checkWesWorkflowParameter(wesWorkflowParameter)
+    RunId runWorkflow(WesWorkflowParameter wesWorkflowParameter) {
         log.debug("Create new WES Run for: ${wesWorkflowParameter}")
+        checkWesWorkflowParameter(wesWorkflowParameter)
+
+        Path baseDataPath = configService.wesDataDirectory
+        Path workDirectory = wesWorkflowParameter.workDirectory
+        Path runDir = baseDataPath.relativize(workDirectory)
 
         String tags = ([
-                run_dir: wesWorkflowParameter.workDirectory.toString()
+                run_dir: runDir.toString()
         ] as JSON).toString(true)
 
         return doApiCall { WorkflowExecutionServiceApi api ->
             api.runWorkflow(
-                    wesWorkflowParameter.workflowParams.toString(4),
+                    wesWorkflowParameter.workflowParams.toString(JSON_INDENT_FACTOR),
                     wesWorkflowParameter.workflowType.weskitName,
                     wesWorkflowParameter.workflowType.version,
                     tags,
@@ -116,15 +124,43 @@ class WeskitAccessService {
         try {
             mono = closure(api)
         } catch (WebClientResponseException e) {
-            throw new WeskitAccessException("Failed to call weskit: ${e.message}", e)
+            throw new WeskitAccessException("Failed to call weskit:\n${extractInfos(e)}", e)
         }
         T data
         try {
             data = mono.block(TIMEOUT)
+        } catch (WebClientResponseException e) {
+            throw new WeskitHandleResponseException("Failed to handle the response of weskit:\n${extractInfos(e)}", e)
         } catch (RuntimeException e) {
             throw new WeskitHandleResponseException("Failed to handle the response of weskit: ${e.message}", e)
         }
         return data
+    }
+
+    /**
+     * helper to extract some information from the {@link WebClientResponseException} and provide it as message
+     */
+    private String extractInfos(WebClientResponseException e) {
+        String response = e.responseBodyAsString
+        String body
+        try {
+            JSONObject jsonObject = JSON.parse(response) as JSONObject
+            body = jsonObject.toString(JSON_INDENT_FACTOR)
+        } catch (ignored) {
+            body = response
+        }
+        String header = e.headers.entrySet().collect {
+            "\n - ${it}"
+        }.join('')
+        String request = "${e.request.methodValue} ${e.request.URI}"
+        return [
+                "message: ${e.message}",
+                "statusCode: ${e.statusCode}",
+                "statusText: ${e.statusText}",
+                "request: ${request}",
+                "headers: ${header}",
+                "responseBody: ${body}",
+        ].join('\n')
     }
 
     private void checkWesWorkflowParameter(WesWorkflowParameter parameter) {

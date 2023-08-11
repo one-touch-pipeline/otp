@@ -29,16 +29,21 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 
+import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.utils.LogUsedTimeUtils
 import de.dkfz.tbi.otp.workflowExecution.JobService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowSystemService
 import de.dkfz.tbi.otp.workflowExecution.wes.*
 
-import java.time.ZonedDateTime
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 @Component
 @Slf4j
 class WesMonitor {
+
+    @Autowired
+    ConfigService configService
 
     @Autowired
     JobService jobService
@@ -76,7 +81,7 @@ class WesMonitor {
         try {
             runStatus = weskitAccessService.getRunStatus(wesRun.wesIdentifier)
         } catch (AbstractWeskitException e) {
-            log.debug("Fail to fetch state for ${wesRun.wesIdentifier} (${e.message}), skipp")
+            log.debug("Fail to fetch state for ${wesRun.wesIdentifier} (${e.message}), retry next round")
             return
         }
         boolean endState = runStatusService.isInEndState(runStatus)
@@ -98,7 +103,7 @@ class WesMonitor {
         if (wesRuns.every {
             it.state == WesRun.MonitorState.FINISHED
         }) {
-            log.debug("all WesRuns finished for ${wesRun.wesIdentifier}")
+            log.debug("all WesRuns finished for ${wesRun.workflowStep}")
             jobService.createNextJob(wesRun.workflowStep.workflowRun)
         }
     }
@@ -108,8 +113,8 @@ class WesMonitor {
             new WesLog([
                     name     : it.name,
                     cmd      : it.cmd.join('\n'),
-                    startTime: ZonedDateTime.parse(it.startTime),
-                    endTime  : ZonedDateTime.parse(it.endTime),
+                    startTime: LocalDateTime.parse(it.startTime, DateTimeFormatter.ISO_LOCAL_DATE_TIME).atZone(configService.timeZoneId),
+                    endTime  : LocalDateTime.parse(it.endTime, DateTimeFormatter.ISO_LOCAL_DATE_TIME).atZone(configService.timeZoneId),
                     stdout   : it.stdout,
                     stderr   : it.stderr,
                     exitCode : it.exitCode,
@@ -120,8 +125,8 @@ class WesMonitor {
         WesLog wesLog = new WesLog([
                 name     : logLog.name,
                 cmd      : logLog.cmd.join('\n'),
-                startTime: ZonedDateTime.parse(logLog.startTime),
-                endTime  : ZonedDateTime.parse(logLog.endTime),
+                startTime: LocalDateTime.parse(logLog.startTime, DateTimeFormatter.ISO_LOCAL_DATE_TIME).atZone(configService.timeZoneId),
+                endTime  : LocalDateTime.parse(logLog.endTime, DateTimeFormatter.ISO_LOCAL_DATE_TIME).atZone(configService.timeZoneId),
                 stdout   : logLog.stdout,
                 stderr   : logLog.stderr,
                 exitCode : logLog.exitCode,

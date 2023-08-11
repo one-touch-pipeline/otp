@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.workflowExecution
 
 import grails.gorm.transactions.Transactional
+import grails.util.Environment
 
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
@@ -41,6 +42,13 @@ class LogService {
     ProcessingOptionService processingOptionService
 
     /**
+     * Flag containing the information, whether workflow test are currently running.
+     *
+     * The information is used to log all workflow jobs additional to Slf4j to see the message directly during running the test.
+     */
+    final boolean workflowTest = (Environment.current.name == "WORKFLOW_TEST")
+
+    /**
      * Add the message as {@link WorkflowMessageLog} to {@link WorkflowStep} in a new transaction, so it is added persistently
      */
     void addSimpleLogEntry(WorkflowStep workflowStep, GString message) {
@@ -58,6 +66,9 @@ class LogService {
                     createdBy   : userName(),
             ]).save(flush: true)
         }
+        if (workflowTest) {
+            log.debug("Message to ${workflowStep.id}: ${message}")
+        }
     }
 
     /**
@@ -72,13 +83,16 @@ class LogService {
                     createdBy   : userName(),
             ]).save(flush: true)
         }
+        if (workflowTest) {
+            log.debug("Message to ${workflowStep.id}: ${message}\n${stacktrace}")
+        }
     }
 
     /**
      * Add the message as {@link WorkflowCommandLog} to {@link WorkflowStep} in a new transaction, so it is added persistently
      */
     void addCommandLogEntry(WorkflowStep workflowStepParam, String commandParam, ProcessOutput processOutput) {
-        TransactionUtils.withNewTransaction {
+        SessionUtils.withNewTransaction {
             //map constructor won't work, if a string is empty, since that is mapped to null and then the validation fail
             WorkflowCommandLog log = new WorkflowCommandLog()
             log.with {
@@ -90,6 +104,9 @@ class LogService {
                 createdBy = userName()
                 save(flush: true)
             }
+        }
+        if (workflowTest) {
+            log.debug("Command to ${workflowStepParam.id}: ${commandParam}\n${processOutput}")
         }
     }
 

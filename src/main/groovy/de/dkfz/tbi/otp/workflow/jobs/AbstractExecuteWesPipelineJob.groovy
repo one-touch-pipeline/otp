@@ -23,11 +23,11 @@ package de.dkfz.tbi.otp.workflow.jobs
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.util.logging.Slf4j
+import io.swagger.client.wes.model.RunId
 import org.grails.web.json.JSONObject
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.filestore.FilestoreService
 import de.dkfz.tbi.otp.utils.MapUtilService
 import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.otp.workflowExecution.wes.*
@@ -43,9 +43,6 @@ abstract class AbstractExecuteWesPipelineJob extends AbstractExecutePipelineJob 
 
     @Autowired
     WeskitAccessService weskitAccessService
-
-    @Autowired
-    FilestoreService filestoreService
 
     @Autowired
     ConfigFragmentService configFragmentService
@@ -103,7 +100,7 @@ abstract class AbstractExecuteWesPipelineJob extends AbstractExecutePipelineJob 
      */
     @Override
     void execute(WorkflowStep workflowStep) {
-        Path basePath = filestoreService.getWorkFolderPath(workflowStep.workflowRun)
+        Path basePath = getWorkDirectory(workflowStep)
         fileService.deleteDirectoryContent(basePath)
         logService.addSimpleLogEntry(workflowStep, "Clean up the output directory ${basePath}")
 
@@ -116,6 +113,7 @@ abstract class AbstractExecuteWesPipelineJob extends AbstractExecutePipelineJob 
             ObjectMapper mapper = new ObjectMapper()
 
             Map<Path, Map<String, String>> parameters = getRunSpecificParameters(workflowStep, basePath)
+            logService.addSimpleLogEntry(workflowStep, "Create ${parameters.size()} weskit calls")
             parameters.each { Path path, Map<String, String> parameter ->
                 // define directory to store its output
                 fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(path, workflowStep.realm)
@@ -125,12 +123,14 @@ abstract class AbstractExecuteWesPipelineJob extends AbstractExecutePipelineJob 
                 JSONObject mergedParameter = mapUtilService.mergeSortedMaps([config, parameter]) as JSONObject
 
                 WesWorkflowParameter wesParameter = new WesWorkflowParameter(mergedParameter, workflowType, path, workflowUrl)
-                logService.addSimpleLogEntry(workflowStep, "Call Weskit with parameter:\n${wesParameter}")
+                logService.addSimpleLogEntry(workflowStep, "Call Weskit with ${wesParameter}")
+                logService.addSimpleLogEntry(workflowStep, "Work directory ${path}")
 
-                String runId = weskitAccessService.runWorkflow(wesParameter)
-                logService.addSimpleLogEntry(workflowStep, "Workflow job with run id ${runId} has been sent to Weskit")
+                RunId runId = weskitAccessService.runWorkflow(wesParameter)
+                String runIdValue = runId.runId
+                logService.addSimpleLogEntry(workflowStep, "Workflow job with run id ${runIdValue} has been sent to Weskit")
 
-                wesRunService.saveWorkflowRun(workflowStep, runId, path.last().toString())
+                wesRunService.saveWorkflowRun(workflowStep, runIdValue, path.last().toString())
             }
             workflowRunService.markJobAsRestartable(workflowStep.workflowRun)
             workflowStateChangeService.changeStateToWaitingOnSystem(workflowStep)

@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.dataprocessing.FastqcDataFilesService
 import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
+import de.dkfz.tbi.otp.filestore.PathOption
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.ngsdata.Realm
@@ -50,6 +51,10 @@ class FastqcReportService {
         }
     }
 
+    /**
+     * @deprecated old system
+     */
+    @Deprecated
     void copyExistingFastqcReports(Realm realm, List<FastqcProcessedFile> fastqcProcessedFiles, Path outDir) {
         fastqcProcessedFiles.each { FastqcProcessedFile fastqcProcessedFile ->
             Path seqCenterFastQcFile = fastqcDataFilesService.pathToFastQcResultFromSeqCenter(fastqcProcessedFile)
@@ -70,6 +75,33 @@ class FastqcReportService {
                 |
                 |#check md5sum
                 |cd ${outDir}
+                |md5sum -c ${seqCenterFastQcFileMd5Sum.fileName}
+                |""".stripMargin()
+
+            remoteShellHelper.executeCommandReturnProcessOutput(realm, copyAndMd5sumCommand).assertExitCodeZeroAndStderrEmpty()
+            FileService.ensureFileIsReadableAndNotEmpty(seqCenterFastQcFile)
+        }
+    }
+
+    void copyExistingFastqcReportsNewSystem(Realm realm, List<FastqcProcessedFile> fastqcProcessedFiles) {
+        fastqcProcessedFiles.each { FastqcProcessedFile fastqcProcessedFile ->
+            Path seqCenterFastQcFile = fastqcDataFilesService.pathToFastQcResultFromSeqCenter(fastqcProcessedFile)
+            Path seqCenterFastQcFileMd5Sum = fastqcDataFilesService.pathToFastQcResultMd5SumFromSeqCenter(fastqcProcessedFile)
+            FileService.ensureFileIsReadableAndNotEmpty(seqCenterFastQcFile)
+
+            Path realPath = fastqcDataFilesService.fastqcOutputPath(fastqcProcessedFile, PathOption.REAL_PATH)
+            fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(realPath.parent, realm)
+
+            String copyAndMd5sumCommand = """|
+                |set -e
+                |
+                |#copy file
+                |cd ${seqCenterFastQcFile.parent}
+                |md5sum ${seqCenterFastQcFile.fileName} > ${realPath.parent}/${seqCenterFastQcFileMd5Sum.fileName}
+                |cp ${seqCenterFastQcFile} ${realPath}
+                |
+                |#check md5sum
+                |cd ${realPath.parent}
                 |md5sum -c ${seqCenterFastQcFileMd5Sum.fileName}
                 |""".stripMargin()
 

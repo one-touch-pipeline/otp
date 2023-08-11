@@ -27,7 +27,7 @@ ON CONFLICT DO NOTHING;
 
 -- WES fastqc versions
 INSERT INTO workflow_version(id, version, workflow_id, workflow_version, date_created, last_updated)
-VALUES (NEXTVAL('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'WES FastQC'), '0.11.5', NOW(), NOW())
+VALUES (NEXTVAL('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'WES FastQC'), '1.1.0', NOW(), NOW())
 ON CONFLICT DO NOTHING;
 
 -- pancancer versions

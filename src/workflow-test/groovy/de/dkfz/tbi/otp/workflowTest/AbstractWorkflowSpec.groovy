@@ -40,6 +40,7 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.UserDomainFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.filestore.BaseFolder
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.*
@@ -48,6 +49,7 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
+import de.dkfz.tbi.otp.workflow.scheduler.WesMonitor
 import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowError
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowLog
@@ -150,6 +152,11 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
     protected FastqImportInstance fastqImportInstance
 
     /**
+     * a base folder for uuid
+     */
+    protected BaseFolder baseFolder
+
+    /**
      * The file holding the dump for restore the database afterwards
      */
     protected File schemaDump
@@ -227,6 +234,7 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
             initFastqImportInstance()
             initRealm()
             initFileSystem()
+            initBaseFolder()
             createUserAndRoles()
             loadInitialisationScripts()
             initProcessingOption()
@@ -307,7 +315,7 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
         SessionUtils.withTransaction {
             logEntries << "Tree of the file structure"
             if (workingDirectory && Files.exists(workingDirectory)) {
-                logEntries << LocalShellHelper.executeAndWait("tree -augp ${workingDirectory}").assertExitCodeZero().stdout
+                logEntries << remoteShellHelper.executeCommandReturnProcessOutput(realm, "tree -augp ${workingDirectory}").assertExitCodeZero().stdout
             } else {
                 logEntries << "workflowResultDirectory doesn't exist yet"
             }
@@ -502,6 +510,9 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
      */
     private void initFileSystem() {
         log.debug("initializing fileSystem and depending options")
+        findOrCreateProcessingOption(name: OptionName.MAXIMUM_PARALLEL_SSH_CALLS, value: '2')
+        findOrCreateProcessingOption(name: OptionName.MAXIMUM_SFTP_CONNECTIONS, value: '2')
+
         configService.addOtpProperty((OtpProperty.SSH_USER), configService.workflowTestAccountName)
 
         remoteFileSystem = fileSystemService.remoteFileSystemOnDefaultRealm
@@ -528,6 +539,17 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
         }
 
         log.debug "Base directory: ${workingDirectory}"
+    }
+
+    /**
+     * init the base folder for uuid
+     */
+    private void initBaseFolder() {
+        log.debug("creating base folder object")
+        baseFolder = createBaseFolder([
+                path    : workingDirectory.resolve('baseFolder'),
+                writable: true,
+        ])
     }
 
     /**
@@ -563,6 +585,7 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
         findOrCreateProcessingOption(name: OptionName.OTP_USER_LINUX_GROUP, value: configService.testingGroup)
         findOrCreateProcessingOption(name: OptionName.WITHDRAWN_UNIX_GROUP, value: configService.testingGroup)
         findOrCreateProcessingOption(name: OptionName.PROCESSING_PRIORITY_DEFAULT_NAME, value: processingPriority.name)
+        findOrCreateProcessingOption(name: OptionName.FILESYSTEM_TIMEOUT, value: '1')
 
         //other values
         findOrCreateProcessingOption(name: OptionName.LDAP_ACCOUNT_DEACTIVATION_GRACE_PERIOD, value: "90")
@@ -654,6 +677,7 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
         }
         waitUntilWorkflowStarts(requiredWorkflowRunCount, existingRuns)
         waitUntilWorkflowFinishes(runningTimeout, requiredWorkflowRunCount, existingRuns)
+        log.debug("workflows finished")
 
         if (ensureNoFailure) {
             ensureThatWorkflowFinishedSuccessfully(existingRuns)
@@ -810,6 +834,12 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
             @Override
             void execute() {
                 Holders.applicationContext.getBean(ClusterJobMonitor).check()
+            }
+        },
+        CHECK_WES("check wes", 5, TimeUnit.SECONDS){
+            @Override
+            void execute() {
+                Holders.applicationContext.getBean(WesMonitor).check()
             }
         },
         KEEP_ALIVE_REMOTE_SHELL_HELPER("keep alive for RemoteShellHelper", 1, TimeUnit.MINUTES){

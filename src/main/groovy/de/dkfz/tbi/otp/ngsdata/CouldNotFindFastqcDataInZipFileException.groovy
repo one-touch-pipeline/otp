@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2019 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,28 +19,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflowExecution.wes
+package de.dkfz.tbi.otp.ngsdata
 
-import groovy.transform.TupleConstructor
-import org.grails.web.json.JSONObject
+import de.dkfz.tbi.otp.job.processing.ProcessingException
 
 import java.nio.file.Path
 
-@TupleConstructor
-class WesWorkflowParameter {
-    final JSONObject workflowParams
-    final WesWorkflowType workflowType
-    final Path workDirectory
-    final String workflowUrl
+class CouldNotFindFastqcDataInZipFileException extends ProcessingException {
 
-    @Override
-    String toString() {
-        return [
-                "WesWorkflowParameter:",
-                "workflowParams: ${workflowParams.toString(4)}",
-                "workflowType: ${workflowType}",
-                "workDirectory: ${workDirectory}",
-                "workflowUrl: ${workflowUrl}",
-        ].join('\n- ')
+    CouldNotFindFastqcDataInZipFileException(Path file, String fastqcData) {
+        super("can not find ${fastqcData} in zip file ${file}")
     }
 }

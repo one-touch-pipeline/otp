@@ -22,9 +22,7 @@
 package de.dkfz.tbi.otp.infrastructure
 
 import grails.testing.gorm.DataTest
-import spock.lang.Specification
-import spock.lang.TempDir
-import spock.lang.Unroll
+import spock.lang.*
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.TestConfigService
@@ -34,9 +32,7 @@ import de.dkfz.tbi.otp.utils.*
 
 import java.nio.charset.StandardCharsets
 import java.nio.file.*
-import java.nio.file.attribute.PosixFileAttributeView
-import java.nio.file.attribute.PosixFilePermission
-import java.nio.file.attribute.PosixFilePermissions
+import java.nio.file.attribute.*
 
 class FileServiceSpec extends Specification implements DataTest {
 
@@ -1559,5 +1555,47 @@ class FileServiceSpec extends Specification implements DataTest {
 
         expect:
         !fileService.fileSizeExceeded(newFile, newFile.size() + 1)
+    }
+
+    void "calculateSizeRecursive, returns size of files and folders"() {
+        given:
+        List<Path> dirs = (1..3).collect {
+            tempDir.resolve("testDir${it}")
+        }
+        List<Path> subDirs = dirs.collectMany { Path base ->
+            (1..3).collect {
+                base.resolve("subTestDir${it}")
+            }
+        }
+        int count = 1
+        List<Path> files = subDirs.collectMany { Path base ->
+            (1..3).collect {
+                Path path = base.resolve("subTestDir${it}")
+                CreateFileHelper.createFile(path, path.toString() + " " * (count++))
+            }
+        }
+        long size = [
+                [tempDir],
+                dirs,
+                subDirs,
+                files,
+        ].collectMany {
+            it.collect {
+                Files.size(it)
+            }
+        }.sum()
+
+        expect:
+        fileService.calculateSizeRecursive(tempDir) == size
+    }
+
+    void "calculateSizeRecursive, if input contains links, then use size of link instead size of file"() {
+        given:
+        Path target = CreateFileHelper.createFile(tempDir.resolve('targetFile'), " " * 1000)
+        Path link = tempDir.resolve('link')
+        Files.createSymbolicLink(link, target)
+
+        expect:
+        fileService.calculateSizeRecursive(link) < 100
     }
 }

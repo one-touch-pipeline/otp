@@ -76,7 +76,7 @@ class FastqcExecuteClusterPipelineJob extends AbstractExecuteClusterPipelineJob 
         }
         logService.addSimpleLogEntry(workflowStep, "no fastqc reports found, create script to create them")
         //create and return the shell script only (w/o running it)
-        logService.addSimpleLogEntry(workflowStep, "Creating cluster scripts")
+        logService.addSimpleLogEntry(workflowStep, "no fastqc reports found, creating cluster scripts")
         return createFastQcClusterScript(fastqcProcessedFiles, outputDir, workflowStep)
     }
 

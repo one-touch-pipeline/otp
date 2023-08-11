@@ -23,19 +23,17 @@ package de.dkfz.tbi.otp.workflow.jobs
 
 import grails.testing.gorm.DataTest
 import groovy.transform.TupleConstructor
+import io.swagger.client.wes.model.RunId
 import spock.lang.Specification
 import spock.lang.TempDir
 
 import de.dkfz.tbi.otp.domainFactory.administration.DocumentFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
-import de.dkfz.tbi.otp.filestore.FilestoreService
-import de.dkfz.tbi.otp.filestore.WorkFolder
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.utils.MapUtilService
 import de.dkfz.tbi.otp.workflowExecution.*
-import de.dkfz.tbi.otp.workflowExecution.wes.WesRunService
-import de.dkfz.tbi.otp.workflowExecution.wes.WesWorkflowType
-import de.dkfz.tbi.otp.workflowExecution.wes.WeskitAccessService
+import de.dkfz.tbi.otp.workflowExecution.wes.*
 
 import java.nio.file.Path
 
@@ -43,8 +41,6 @@ class AbstractExecuteWesPipelineJobSpec extends Specification implements DataTes
 
     private WorkflowStep workflowStep
     private AbstractExecuteWesPipelineJob job
-
-    private WorkFolder workFolder
 
     @TempDir
     Path tempDir
@@ -95,7 +91,6 @@ class AbstractExecuteWesPipelineJobSpec extends Specification implements DataTes
     private void setupData() {
         workflowStep = createWorkflowStep()
         workflowStep.workflowRun.combinedConfig = '{"config":"combined"}'
-        workFolder = createWorkFolder()
     }
 
     void "execute, when processed files cannot be copied, then do not submit Weskit jobs and change state to success"() {
@@ -106,9 +101,7 @@ class AbstractExecuteWesPipelineJobSpec extends Specification implements DataTes
             1 * changeStateToSuccess(workflowStep)
             0 * _
         }
-        job.filestoreService = Mock(FilestoreService) {
-            1 * getWorkFolderPath(workflowStep.workflowRun) >> tempDir
-        }
+        job.fileSystemService = new TestFileSystemService()
         job.fileService = Mock(FileService) {
             1 * deleteDirectoryContent(_)
         }
@@ -132,11 +125,9 @@ class AbstractExecuteWesPipelineJobSpec extends Specification implements DataTes
             1 * changeStateToWaitingOnSystem(workflowStep)
             0 * _
         }
-        job.filestoreService = Mock(FilestoreService) {
-            1 * getWorkFolderPath(workflowStep.workflowRun) >> tempDir
-        }
+        job.fileSystemService = new TestFileSystemService()
         job.weskitAccessService = Mock(WeskitAccessService) {
-            2 * runWorkflow(_) >> "RUN_ID"
+            2 * runWorkflow(_) >> new RunId().runId("RUN_ID")
         }
         job.workflowRunService = Mock(WorkflowRunService) {
             1 * markJobAsNotRestartableInSeparateTransaction(_)
@@ -145,11 +136,12 @@ class AbstractExecuteWesPipelineJobSpec extends Specification implements DataTes
             1 * deleteDirectoryContent(_)
         }
         job.logService = Mock(LogService) {
-            1 * addSimpleLogEntry(workflowStep, "Clean up the output directory ${tempDir}")
+            1 * addSimpleLogEntry(workflowStep, "Clean up the output directory ${workflowStep.workflowRun.workDirectory}")
+            1 * addSimpleLogEntry(workflowStep, "Create 2 weskit calls")
             2 * addSimpleLogEntry(workflowStep, "Workflow job with run id RUN_ID has been sent to Weskit")
-            2 * addSimpleLogEntry(workflowStep, _) >> { WorkflowStep _, GString msg ->
-                assert msg.startsWith("Call Weskit with parameter:")
-            }
+            2 * addSimpleLogEntry(workflowStep) { it.startsWith("Call Weskit with ") }
+            2 * addSimpleLogEntry(workflowStep) { it.startsWith("Work directory ") }
+            0 * _
         }
         job.wesRunService = Mock(WesRunService) {
             2 * saveWorkflowRun(workflowStep, _, _)

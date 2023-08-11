@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,41 +19,42 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflow.fastqc
+package de.dkfz.tbi.otp.workflow.jobs
 
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.dataprocessing.FastqcDataFilesService
-import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
-import de.dkfz.tbi.otp.filestore.PathOption
-import de.dkfz.tbi.otp.workflow.jobs.AbstractWesValidationJob
+import de.dkfz.tbi.otp.filestore.*
+import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
-import java.nio.file.Path
-
+/**
+ * Attach a uuid work folder to the {@link WorkflowRun}, if not already one is attached
+ */
 @Component
 @Slf4j
-class FastqcWesValidationJob extends AbstractWesValidationJob implements FastqcShared {
+class AttachUuidJob extends AbstractJob {
 
     @Autowired
-    FastqcDataFilesService fastqcDataFilesService
+    FilestoreService filestoreService
 
     @Override
-    protected List<Path> getExpectedFiles(WorkflowStep workflowStep) {
-        return getFastqcProcessedFiles(workflowStep).collect { FastqcProcessedFile fastqc ->
-            fastqcDataFilesService.fastqcOutputPath(fastqc, PathOption.REAL_PATH)
+    void execute(WorkflowStep workflowStep) {
+        if (workflowStep.workflowRun.workFolder) {
+            logService.addSimpleLogEntry(workflowStep, "Reuse existing attached workfolder: ${workflowStep.workflowRun.workFolder}")
+        } else {
+            BaseFolder baseFolder = filestoreService.findAnyWritableBaseFolder()
+            WorkFolder workFolder = filestoreService.createWorkFolder(baseFolder)
+            filestoreService.attachWorkFolder(workflowStep.workflowRun, workFolder)
+            logService.addSimpleLogEntry(workflowStep, "Attach new workfolder: ${workflowStep.workflowRun.workFolder}")
         }
+
+        workflowStateChangeService.changeStateToSuccess(workflowStep)
     }
 
     @Override
-    protected List<Path> getExpectedDirectories(WorkflowStep workflowStep) {
-        return []
-    }
-
-    @Override
-    protected void saveResult(WorkflowStep workflowStep) {
+    final JobStage getJobStage() {
+        return JobStage.ATTACH_UUID
     }
 }
-

@@ -48,11 +48,17 @@ String TEST_INPUT_EXTERN = ""
  */
 String TEST_OUTPUT_EXTERN = ""
 
+/**
+ * base work directory, relative to data dir of the container
+ */
+String BASE_WORK_DIR = ""
+
 //-------------------
 //work
 
 assert TEST_INPUT_EXTERN
 assert TEST_OUTPUT_EXTERN
+assert BASE_WORK_DIR
 
 String uuid = "24d5d211-234b-4b24-8d8b-70ae7b1b19b0"
 
@@ -100,7 +106,7 @@ work('runWorkflow') {
 """
     String workflowType = "NFL"
     String workflowTypeVersion = "22.10.0"
-    String tags = """ { "run_dir" : "test_${de.dkfz.tbi.util.TimeFormats.DATE_TIME_SECONDS_DASHES.getFormattedDate(new Date())}" } """
+    String tags = """ { "run_dir" : "${BASE_WORK_DIR}/test_${de.dkfz.tbi.util.TimeFormats.DATE_TIME_SECONDS_DASHES.getFormattedDate(new Date())}" } """
     String workflowEngineParameters = """ { "graph": "true" } """
     String workflowUrl = "nf-seq-qc-1.1.0/main.nf"
     List<byte[]> workflowAttachment = null

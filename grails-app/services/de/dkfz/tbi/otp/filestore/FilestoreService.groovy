@@ -23,16 +23,40 @@ package de.dkfz.tbi.otp.filestore
 
 import groovy.util.logging.Slf4j
 
+import de.dkfz.tbi.otp.job.processing.FileSystemService
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 
 import java.nio.file.Path
-import java.nio.file.Paths
 
 /**
  * Service for operations on an UUID based file structure
  */
 @Slf4j
 class FilestoreService {
+
+    private final static int INDEX_0 = 0
+    private final static int INDEX_1 = 1
+    private final static int INDEX_2 = 2
+
+    private final static int OFFSET_0 = 0
+    private final static int OFFSET_2 = 2
+    private final static int OFFSET_4 = 4
+
+    FileSystemService fileSystemService
+
+    /**
+     * returns a writable {@link BaseFolder}.
+     *
+     * If multiple exist, one of them are returned
+     */
+    BaseFolder findAnyWritableBaseFolder() {
+        return CollectionUtils.exactlyOneElement(BaseFolder.findAllWhere([
+                writable: true,
+        ], [
+                max: 1,
+        ])) as BaseFolder
+    }
 
     /**
      * Create a WorkFolder with assigned BaseFolder, which can be assigned to WorkFlowRun
@@ -45,7 +69,6 @@ class FilestoreService {
         WorkFolder workFolder = new WorkFolder([
                 baseFolder: baseFolder,
                 uuid      : uuid,
-                size      : 0,
         ])
         workFolder.save(flush: true)
 
@@ -67,11 +90,11 @@ class FilestoreService {
 
         // UUID is splitted into 3 parts
         String[] uuidFragments = new String[3]
-        uuidFragments[0] = uuidString.substring(0, 2)
-        uuidFragments[1] = uuidString.substring(2, 4)
-        uuidFragments[2] = uuidString.substring(4)
+        uuidFragments[INDEX_0] = uuidString.substring(OFFSET_0, OFFSET_2)
+        uuidFragments[INDEX_1] = uuidString.substring(OFFSET_2, OFFSET_4)
+        uuidFragments[INDEX_2] = uuidString.substring(OFFSET_4)
 
-        return Paths.get(workFolder.baseFolder.path, uuidFragments)
+        return fileSystemService.remoteFileSystemOnDefaultRealm.getPath(workFolder.baseFolder.path, uuidFragments)
     }
     /**
      * Create an UUID and assign to the given {@link de.dkfz.tbi.otp.workflowExecution.WorkflowRun}
@@ -93,10 +116,7 @@ class FilestoreService {
      * @param workFolder is a WorkFolder
      */
     void attachWorkFolder(WorkflowRun run, WorkFolder workFolder) {
-        if (!run.workFolder) {
-            log.warn("WorkFolder ${run.workFolder} has been attached to this WorkflowRun ${run}, which will be overwritten by ${workFolder} ")
-            // data in the old folder should be moved to the new location and delete the old folder?
-        }
+        assert !run.workFolder : "work folder already attached and may not be changed"
         run.workFolder = workFolder
         run.save(flush: true)
     }

@@ -72,5 +72,5 @@ VALUES (NEXTVAL('hibernate_sequence'), 0, 'runYapsa (mutational signature analys
 ON CONFLICT DO NOTHING;
 
 INSERT INTO workflow(id, version, name, bean_name, enabled, priority, date_created, last_updated, max_parallel_workflows)
-VALUES (NEXTVAL('hibernate_sequence'), 0, 'WES FastQC', 'wesFastQcWorkflow', FALSE, 0, NOW(), NOW(), 10)
+VALUES (NEXTVAL('hibernate_sequence'), 0, 'WES FastQC', 'wesFastQcWorkflow', TRUE, 0, NOW(), NOW(), 10)
 ON CONFLICT DO NOTHING;

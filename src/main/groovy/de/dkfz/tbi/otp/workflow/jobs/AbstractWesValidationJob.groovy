@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.workflow.jobs
 
 import io.swagger.client.wes.model.State
+import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.workflow.shared.ValidationJobFailedException
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
@@ -35,6 +36,7 @@ import de.dkfz.tbi.otp.workflowExecution.wes.WesRun
  */
 abstract class AbstractWesValidationJob extends AbstractValidationJob {
 
+    @Autowired
     WorkflowStepService workflowStepService
 
     @Override

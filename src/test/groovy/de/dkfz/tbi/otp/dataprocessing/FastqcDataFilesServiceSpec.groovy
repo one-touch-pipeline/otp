@@ -23,14 +23,14 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import grails.testing.gorm.DataTest
 import grails.testing.services.ServiceUnitTest
-import spock.lang.Specification
-import spock.lang.TempDir
-import spock.lang.Unroll
+import spock.lang.*
 
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.domainFactory.FastqcDomainFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.filestore.FilestoreService
+import de.dkfz.tbi.otp.filestore.PathOption
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
@@ -62,10 +62,18 @@ class FastqcDataFilesServiceSpec extends Specification implements ServiceUnitTes
 
     private static final String FAST_QC = FastqcDataFilesService.FAST_QC_DIRECTORY_PART
 
+    private static final String FASTQC_NAME = "fastqPath.zip"
+
+    private static final String FASTQC_NAME_MD5SUM = "fastqPath.zip.md5sum"
+
+    private static final String FASTQC_NAME_HTML = "fastqPath.html"
+
     SeqTrack seqTrack
     RawSequenceFile rawSequenceFile
     FastqcProcessedFile fastqcProcessedFile
     Realm realm
+
+    private PathOption[] pathOptions
 
     void setup() {
         configService = new TestConfigService(tempDir)
@@ -205,42 +213,79 @@ class FastqcDataFilesServiceSpec extends Specification implements ServiceUnitTes
         "asdf.bz2.tar" || "asdf.bz2.tar"
     }
 
-    void "fastqcOutputDirectory, when called, then return correct path"() {
+    @Unroll
+    void "fastqcOutputDirectory, when called with useRealPath=#useRealPath and hasPathInWorkFolder=#hasPathInWorkFolder, then return correct path"() {
         given:
-        Path expectedPath = fastqcPath()
+        setupDataForDirectories(useRealPath, hasPathInWorkFolder)
+
+        Path expectedPath = (useRealPath && hasPathInWorkFolder) ? Paths.get('/tmp') : fastqcPath()
 
         expect:
-        service.fastqcOutputDirectory(fastqcProcessedFile) == expectedPath
+        service.fastqcOutputDirectory(fastqcProcessedFile, pathOptions) == expectedPath
+
+        where:
+        useRealPath | hasPathInWorkFolder
+        false       | false
+        false       | true
+        true        | false
+        true        | true
     }
 
-    void "fastqcOutputPath, when called, then return correct path"() {
+    @Unroll
+    void "fastqcOutputPath, when called with useRealPath=#useRealPath and hasPathInWorkFolder=#hasPathInWorkFolder, then return correct path"() {
         given:
         String fastqcName = service.fastqcFileName(fastqcProcessedFile)
+        setupDataForDirectories(useRealPath, hasPathInWorkFolder)
 
-        Path expectedPath = fastqcPath().resolve(fastqcName)
+        Path expectedPath = ((useRealPath && hasPathInWorkFolder) ? Paths.get('/tmp').resolve(FASTQC_NAME) : fastqcPath().resolve(fastqcName))
 
         expect:
-        service.fastqcOutputPath(fastqcProcessedFile) == expectedPath
+        service.fastqcOutputPath(fastqcProcessedFile, pathOptions) == expectedPath
+
+        where:
+        useRealPath | hasPathInWorkFolder
+        false       | false
+        false       | true
+        true        | false
+        true        | true
     }
 
-    void "fastqcHtmlPath, when called, then return correct path"() {
+    @Unroll
+    void "fastqcHtmlPath, when called with useRealPath=#useRealPath and hasPathInWorkFolder=#hasPathInWorkFolder, then return correct path"() {
         given:
-        String fastqcName = service.fastqcFileName(fastqcProcessedFile).replaceAll(/\.zip$/, '')
+        String fastqcHtmlName = service.fastqcFileName(fastqcProcessedFile).replaceAll(/\.zip$/, '.html')
+        setupDataForDirectories(useRealPath, hasPathInWorkFolder)
 
-        Path expectedPath = fastqcPath().resolve("${fastqcName}.html")
+        Path expectedPath = (useRealPath && hasPathInWorkFolder) ? Paths.get('/tmp').resolve(FASTQC_NAME_HTML) : fastqcPath().resolve(fastqcHtmlName)
 
         expect:
-        service.fastqcHtmlPath(fastqcProcessedFile) == expectedPath
+        service.fastqcHtmlPath(fastqcProcessedFile, pathOptions) == expectedPath
+
+        where:
+        useRealPath | hasPathInWorkFolder
+        false       | false
+        false       | true
+        true        | false
+        true        | true
     }
 
-    void "fastqcOutputMd5sumPath, when called, then return correct path"() {
+    @Unroll
+    void "fastqcOutputMd5sumPath, when called with useRealPath=#useRealPath and hasPathInWorkFolder=#hasPathInWorkFolder, then return correct path"() {
         given:
-        String fastqcName = service.fastqcFileName(fastqcProcessedFile)
+        String fastqcMd5sumName = service.fastqcFileName(fastqcProcessedFile) + '.md5sum'
+        setupDataForDirectories(useRealPath, hasPathInWorkFolder)
 
-        Path expectedPath = fastqcPath().resolve("${fastqcName}.md5sum")
+        Path expectedPath = ((useRealPath && hasPathInWorkFolder) ? Paths.get('/tmp').resolve(FASTQC_NAME_MD5SUM) : fastqcPath().resolve(fastqcMd5sumName))
 
         expect:
-        service.fastqcOutputMd5sumPath(fastqcProcessedFile) == expectedPath
+        service.fastqcOutputMd5sumPath(fastqcProcessedFile, pathOptions) == expectedPath
+
+        where:
+        useRealPath | hasPathInWorkFolder
+        false       | false
+        false       | true
+        true        | false
+        true        | true
     }
 
     void "updateFastqcProcessedFile, when file exist, then update fastqcProcessedFile"() {
@@ -311,5 +356,26 @@ class FastqcDataFilesServiceSpec extends Specification implements ServiceUnitTes
         String viewByPidPath = "${configService.rootPath}/${seqTrack.project.dirName}/sequencing/${seqTrack.seqType.dirName}/view-by-pid"
         return Paths.get("${viewByPidPath}/${seqTrack.individual.pid}/${seqTrack.sampleType.dirName}/" +
                 "${seqTrack.seqType.libraryLayoutDirName}/run${seqTrack.run.name}/${FAST_QC}/${fastqcProcessedFile.workDirectoryName}")
+    }
+
+    private void setupDataForDirectories(boolean useRealPath, boolean hasPathInWorkFolder) {
+        fastqcProcessedFile.workflowArtefact = createWorkflowArtefact([
+                producedBy: createWorkflowRun([
+                        workFolder: hasPathInWorkFolder ? createWorkFolder() : null
+                ]),
+        ])
+
+        pathOptions = (useRealPath ? [PathOption.REAL_PATH] : []).toArray(new PathOption[0])
+
+        if (hasPathInWorkFolder) {
+            fastqcProcessedFile.pathInWorkFolder = FASTQC_NAME
+        }
+
+        if (useRealPath && hasPathInWorkFolder) {
+            service.filestoreService = Mock(FilestoreService) {
+                1 * getWorkFolderPath(_) >> Paths.get('/tmp')
+                0 * _
+            }
+        }
     }
 }

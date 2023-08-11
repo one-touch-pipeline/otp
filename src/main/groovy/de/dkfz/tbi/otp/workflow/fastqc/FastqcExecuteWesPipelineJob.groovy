@@ -56,33 +56,30 @@ class FastqcExecuteWesPipelineJob extends AbstractExecuteWesPipelineJob implemen
         return "nf-seq-qc-${workflowRun.workflowVersion.workflowVersion}/main.nf"
     }
 
+    //false positives for UnsafeImplementationAsMap & UnnecessaryCast
+    @SuppressWarnings(["UnsafeImplementationAsMap", "UnnecessaryCast"])
     @Override
     Map<Path, Map<String, String>> getRunSpecificParameters(WorkflowStep workflowStep, Path basePath) {
-        Map<Path, Map<String, String>> parameters = [:]
-
         List<FastqcProcessedFile> fastqcProcessedFiles = getFastqcProcessedFiles(workflowStep)
-        fastqcProcessedFiles.eachWithIndex { FastqcProcessedFile fastqcProcessedFile, int idx ->
-            Path inputPath = lsdfFilesService.getFileViewByPidPathAsPath(fastqcProcessedFile.sequenceFile)
-            Path outputPath = basePath.resolve(idx.toString())
-
-            parameters.put(outputPath, [
-                    input    : inputPath.toString(),
-                    outputDir: outputPath.toString(),
-            ])
-        }
-
-        return parameters
+        return [
+                (basePath): [
+                        input    : fastqcProcessedFiles.collect {
+                            lsdfFilesService.getFileViewByPidPathAsPath(it.sequenceFile)
+                        }.join(','),
+                        outputDir: basePath.toString(),
+                ],
+        ] as Map<Path, Map<String, String>>
     }
 
     @Override
     boolean shouldWeskitJobSend(WorkflowStep workflowStep) {
         List<FastqcProcessedFile> fastqcProcessedFiles = getFastqcProcessedFiles(workflowStep)
-        if (fastqcReportService.canFastqcReportsBeCopied(fastqcProcessedFiles)) {
-            logService.addSimpleLogEntry(workflowStep, "Copying fastqc reports for Weskit")
-            fastqcReportService.copyExistingFastqcReports(workflowStep.realm, fastqcProcessedFiles,
-                    filestoreService.getWorkFolderPath(workflowStep.workflowRun))
+        if (fastqcProcessedFiles.every { it.fileCopied }) {
+            logService.addSimpleLogEntry(workflowStep, "fastqc reports found, copy them")
+            fastqcReportService.copyExistingFastqcReportsNewSystem(workflowStep.realm, fastqcProcessedFiles)
             return false
         }
+        logService.addSimpleLogEntry(workflowStep, "no fastqc reports found, create wes call")
         return true
     }
 }

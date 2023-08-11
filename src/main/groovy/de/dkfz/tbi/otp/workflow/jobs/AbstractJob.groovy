@@ -27,6 +27,7 @@ import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.workflowExecution.*
 
 import java.nio.file.FileSystem
+import java.nio.file.Path
 
 /**
  * Base job, providing services needed almost always.
@@ -42,7 +43,17 @@ abstract class AbstractJob implements Job {
     @Autowired
     WorkflowStateChangeService workflowStateChangeService
 
+    /**
+     * returns the remote file system
+     */
     protected FileSystem getFileSystem(WorkflowStep workflowStep) {
         return fileSystemService.getRemoteFileSystem(workflowStep.workflowRun.project.realm)
+    }
+
+    /**
+     * returns the work directory as remote Path
+     */
+    protected Path getWorkDirectory(WorkflowStep workflowStep) {
+        return getFileSystem(workflowStep).getPath(workflowStep.workflowRun.workDirectory)
     }
 }

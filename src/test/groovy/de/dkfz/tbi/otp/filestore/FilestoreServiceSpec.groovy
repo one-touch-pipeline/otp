@@ -26,6 +26,7 @@ import grails.testing.services.ServiceUnitTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 
 import java.nio.file.Path
@@ -56,6 +57,37 @@ class FilestoreServiceSpec extends Specification implements ServiceUnitTest<File
         run = createWorkflowRun([
                 workFolder: workFolder
         ])
+        service.fileSystemService = new TestFileSystemService()
+    }
+
+    void "findAnyWritableBaseFolder: when call, should return any of the writable base folders"() {
+        given:
+        (1..3).each {
+            createBaseFolder(writable: true)
+            createBaseFolder(writable: false)
+        }
+
+        when:
+        BaseFolder returnedBaseFolder = service.findAnyWritableBaseFolder()
+
+        then:
+        returnedBaseFolder
+        returnedBaseFolder.writable
+    }
+
+    void "findAnyWritableBaseFolder: when no writable baseFolder exist, then throw an assertion."() {
+        given:
+        baseFolder.writable = false
+        baseFolder.save(flush: true)
+        (1..3).each {
+            createBaseFolder(writable: false)
+        }
+
+        when:
+        service.findAnyWritableBaseFolder()
+
+        then:
+        thrown(AssertionError)
     }
 
     void "test createUuid: should create a valid UUID"() {
@@ -108,7 +140,7 @@ class FilestoreServiceSpec extends Specification implements ServiceUnitTest<File
         thrown(grails.validation.ValidationException)
     }
 
-    void "test attachWorkFolder to a WorkflowRun that already attached to a folder: just overwrite it and no exception should be thrown"() {
+    void "test attachWorkFolder to a WorkflowRun that already attached to a folder: should throw assertion"() {
         given:
         WorkFolder anotherWorkFolder = createWorkFolder(
                 baseFolder: baseFolder
@@ -118,7 +150,7 @@ class FilestoreServiceSpec extends Specification implements ServiceUnitTest<File
         service.attachWorkFolder(run, anotherWorkFolder)
 
         then:
-        noExceptionThrown()
-        service.getWorkFolderPath(run)
+        AssertionError e = thrown()
+        e.message.contains('work folder already attached and may not be changed')
     }
 }

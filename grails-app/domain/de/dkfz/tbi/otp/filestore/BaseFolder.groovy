@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.filestore
 
 import grails.gorm.hibernate.annotation.ManagedEntity
+import groovy.transform.ToString
 
 import de.dkfz.tbi.otp.utils.Entity
 
@@ -31,6 +32,7 @@ import java.nio.file.Paths
  * BaseFolder is part of the UUID based file system
  * It persists all attributes about the base folder, which can contain subfolders and files
  */
+@ToString(includeNames = true, includes = ["path", "writable"])
 @ManagedEntity
 class BaseFolder implements Entity {
 
@@ -45,7 +47,7 @@ class BaseFolder implements Entity {
      */
     boolean writable
 
-    static constraints = {
+    static Closure constraints = {
         path(unique: true, validator: {
             if (!Paths.get(it).isAbsolute()) {
                 return "not.absolute"

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,41 +19,51 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflow.fastqc
+package de.dkfz.tbi.otp.workflow.jobs
 
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.dataprocessing.FastqcDataFilesService
-import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
-import de.dkfz.tbi.otp.filestore.PathOption
-import de.dkfz.tbi.otp.workflow.jobs.AbstractWesValidationJob
+import de.dkfz.tbi.otp.filestore.WorkFolder
+import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 import java.nio.file.Path
+import java.text.NumberFormat
 
+/**
+ * Calculate the size of the uuid work folder
+ */
 @Component
 @Slf4j
-class FastqcWesValidationJob extends AbstractWesValidationJob implements FastqcShared {
+class CalculateSizeJob extends AbstractJob {
 
     @Autowired
-    FastqcDataFilesService fastqcDataFilesService
+    FileService fileService
 
     @Override
-    protected List<Path> getExpectedFiles(WorkflowStep workflowStep) {
-        return getFastqcProcessedFiles(workflowStep).collect { FastqcProcessedFile fastqc ->
-            fastqcDataFilesService.fastqcOutputPath(fastqc, PathOption.REAL_PATH)
+    void execute(WorkflowStep workflowStep) {
+        if (workflowStep.workflowRun.workFolder) {
+            Path workDirectory = getWorkDirectory(workflowStep)
+            logService.addSimpleLogEntry(workflowStep, "Start calculation size of uuid folder: ${workDirectory}")
+
+            long size = fileService.calculateSizeRecursive(workDirectory)
+            WorkFolder workFolder = workflowStep.workflowRun.workFolder
+            workFolder.size = size
+            workFolder.save(flush: true)
+
+            NumberFormat numberFormat = NumberFormat.integerInstance
+            logService.addSimpleLogEntry(workflowStep, "Calculated size: ${numberFormat.format(size)}")
+        } else {
+            logService.addSimpleLogEntry(workflowStep, "Skip size calculation, since no uuid work folder")
         }
+
+        workflowStateChangeService.changeStateToSuccess(workflowStep)
     }
 
     @Override
-    protected List<Path> getExpectedDirectories(WorkflowStep workflowStep) {
-        return []
-    }
-
-    @Override
-    protected void saveResult(WorkflowStep workflowStep) {
+    final JobStage getJobStage() {
+        return JobStage.CALCULATE_SIZE
     }
 }
-

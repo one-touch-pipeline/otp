@@ -27,6 +27,7 @@ import org.springframework.context.ApplicationContext
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.config.*
+import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.LocalShellHelper
 
@@ -72,6 +73,7 @@ class TestConfigService extends ConfigService {
                     (OtpProperty.WES_AUTH_CLIENT_SECRET)  : '-',
                     (OtpProperty.WES_AUTH_CLIENT_USER)    : '-',
                     (OtpProperty.WES_AUTH_CLIENT_PASSWORD): '-',
+                    (OtpProperty.WES_BASE_DATA_DIRECTORY) : '/tmp',
             ]
         }
         otpProperties += [
@@ -100,6 +102,8 @@ class TestConfigService extends ConfigService {
                     throw new IllegalArgumentException("Test tried to get a bean from application context that was not the ConfigService: \"${beanName}\"")
                 },
         ] as ApplicationContext
+
+        fileSystemService = new TestFileSystemService()
     }
 
     /**
@@ -127,6 +131,11 @@ class TestConfigService extends ConfigService {
     void clean() {
         this.otpProperties = new HashMap<>(cleanProperties)
         this.fixedClock = null
+    }
+
+    @Override
+    ZoneId getTimeZoneId() {
+        return ZoneId.systemDefault()
     }
 
     @Override

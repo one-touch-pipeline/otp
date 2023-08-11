@@ -26,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.infrastructure.CreateLinkOption
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.LinkEntry
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
@@ -42,6 +43,11 @@ abstract class AbstractLinkJob extends AbstractJob {
     final void execute(WorkflowStep workflowStep) {
         getLinkMap(workflowStep).each { LinkEntry entry ->
             logService.addSimpleLogEntry(workflowStep, "Creating link ${entry.link} to ${entry.target}")
+            Project project = workflowStep.workflowRun.project
+
+            //create directory before linking to set it with correct group
+            fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(entry.link.parent, project.realm, project.unixGroup)
+
             fileService.createLink(
                     entry.link,
                     entry.target,

@@ -64,6 +64,7 @@ abstract class AbstractValidationJob extends AbstractJob {
 
         getExpectedFiles(workflowStep).each {
             try {
+                logService.addSimpleLogEntry(workflowStep, "Check file ${it}")
                 FileService.ensureFileIsReadableAndNotEmpty(it)
             } catch (AssertionError e) {
                 errors << "Expected file ${it} not found, ${e.message}"
@@ -72,6 +73,7 @@ abstract class AbstractValidationJob extends AbstractJob {
 
         getExpectedDirectories(workflowStep).each {
             try {
+                logService.addSimpleLogEntry(workflowStep, "Check directory ${it}")
                 FileService.ensureDirIsReadable(it)
             } catch (AssertionError e) {
                 errors << "Expected directory ${it} not found, ${e.message}"
@@ -84,6 +86,7 @@ abstract class AbstractValidationJob extends AbstractJob {
             throw new ValidationJobFailedException(message)
         }
 
+        logService.addSimpleLogEntry(workflowStep, "Do further checks.")
         doFurtherValidation(workflowStep)
 
         saveResult(workflowStep)
@@ -113,7 +116,7 @@ abstract class AbstractValidationJob extends AbstractJob {
     /**
      * optional callback to do further checks. It should throw a ValidationJobFailedException if problems occur
      */
-    @SuppressWarnings("UnusedMethodParameter")
+    @SuppressWarnings(["UnusedMethodParameter", "EmptyMethodInAbstractClass"])
     protected void doFurtherValidation(WorkflowStep workflowStep) throws ValidationJobFailedException {
     }
 

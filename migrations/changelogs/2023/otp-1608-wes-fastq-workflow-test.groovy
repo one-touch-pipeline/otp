@@ -19,28 +19,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflowExecution.wes
 
-import groovy.transform.TupleConstructor
-import org.grails.web.json.JSONObject
-
-import java.nio.file.Path
-
-@TupleConstructor
-class WesWorkflowParameter {
-    final JSONObject workflowParams
-    final WesWorkflowType workflowType
-    final Path workDirectory
-    final String workflowUrl
-
-    @Override
-    String toString() {
-        return [
-                "WesWorkflowParameter:",
-                "workflowParams: ${workflowParams.toString(4)}",
-                "workflowType: ${workflowType}",
-                "workDirectory: ${workDirectory}",
-                "workflowUrl: ${workflowUrl}",
-        ].join('\n- ')
+databaseChangeLog = {
+    changeSet(author: "-", id: "1691652665494-89") {
+        addColumn(tableName: "fastqc_processed_file") {
+            column(name: "file_copied", type: "boolean", value="false") {
+                constraints(nullable: "false")
+            }
+        }
+    }
+    changeSet(author: "-", id: "1691652665494-90") {
+        addColumn(tableName: "fastqc_processed_file") {
+            column(name: "path_in_work_folder", type: "varchar(255)")
+        }
     }
 }

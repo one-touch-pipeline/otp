@@ -26,12 +26,13 @@ import io.swagger.client.wes.model.*
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.workflow.scheduler.WesMonitor
 import de.dkfz.tbi.otp.workflowExecution.JobService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowSystemService
 
-import java.time.ZonedDateTime
+import java.time.LocalDateTime
 
 class WesMonitorSpec extends Specification implements DataTest, WorkflowSystemDomainFactory {
 
@@ -61,6 +62,7 @@ class WesMonitorSpec extends Specification implements DataTest, WorkflowSystemDo
         monitor.workflowSystemService = Mock(WorkflowSystemService) {
             0 * _
         }
+        monitor.configService = new TestConfigService()
     }
 
     void "check, when job system is disabled, then return without fetching runs"() {
@@ -271,8 +273,8 @@ class WesMonitorSpec extends Specification implements DataTest, WorkflowSystemDo
                         "cmd_${nextId}",
                         "cmd_${nextId}",
                 ],
-                startTime: ZonedDateTime.now().toString(),
-                endTime  : ZonedDateTime.now().toString(),
+                startTime: LocalDateTime.now().toString(),
+                endTime  : LocalDateTime.now().toString(),
                 stdout   : "stdout_${nextId}",
                 stderr   : "stderr_${nextId}",
                 exitCode : 0,
@@ -284,8 +286,8 @@ class WesMonitorSpec extends Specification implements DataTest, WorkflowSystemDo
         WesLog wesLog = wesLogMap[log.name]
         assert wesLog.name == log.name
         assert wesLog.cmd == log.cmd.join('\n')
-        assert wesLog.startTime == ZonedDateTime.parse(log.startTime)
-        assert wesLog.endTime == ZonedDateTime.parse(log.endTime)
+        assert wesLog.startTime.toLocalDateTime() == LocalDateTime.parse(log.startTime)
+        assert wesLog.endTime.toLocalDateTime() == LocalDateTime.parse(log.endTime)
         assert wesLog.stdout == log.stdout
         assert wesLog.stderr == log.stderr
         assert wesLog.exitCode == log.exitCode

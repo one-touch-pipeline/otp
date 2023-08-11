@@ -44,15 +44,18 @@ class AbstractValidationJobSpec extends Specification implements DataTest, Workf
         given:
         AbstractValidationJob job = Spy(AbstractValidationJob)
         job.workflowStateChangeService = Mock(WorkflowStateChangeService)
+        job.logService = Mock(LogService)
         WorkflowStep workflowStep = createWorkflowStep()
 
         when:
         job.execute(workflowStep)
 
         then:
-        1 * job.ensureExternalJobsRunThrough(workflowStep) >> { }
+        1 * job.ensureExternalJobsRunThrough(workflowStep) >> {
+        }
 
         then:
+        1 * job.logService.addSimpleLogEntry(workflowStep, "Do further checks.")
         1 * job.getExpectedFiles(workflowStep) >> []
         1 * job.getExpectedDirectories(workflowStep) >> []
         1 * job.doFurtherValidation(workflowStep)
@@ -96,7 +99,8 @@ class AbstractValidationJobSpec extends Specification implements DataTest, Workf
         job.execute(workflowStep)
 
         then:
-        1 * job.ensureExternalJobsRunThrough(workflowStep) >> { }
+        1 * job.ensureExternalJobsRunThrough(workflowStep) >> {
+        }
         1 * job.getExpectedFiles(workflowStep) >> [Paths.get("file-not-found")]
         1 * job.getExpectedDirectories(workflowStep) >> [Paths.get("dir-not-found")]
         0 * job.doFurtherValidation(workflowStep)
@@ -120,7 +124,8 @@ class AbstractValidationJobSpec extends Specification implements DataTest, Workf
         job.execute(workflowStep)
 
         then:
-        1 * job.ensureExternalJobsRunThrough(workflowStep) >> { }
+        1 * job.ensureExternalJobsRunThrough(workflowStep) >> {
+        }
         1 * job.getExpectedFiles(workflowStep) >> []
         1 * job.getExpectedDirectories(workflowStep) >> []
         1 * job.doFurtherValidation(workflowStep) >> { throw new ValidationJobFailedException(["further-error1", "further-error2"].join("\n")) }

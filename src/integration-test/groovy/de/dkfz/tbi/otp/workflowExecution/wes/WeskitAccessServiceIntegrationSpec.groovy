@@ -25,26 +25,29 @@ import grails.converters.JSON
 import grails.gorm.transactions.Rollback
 import grails.testing.mixin.integration.Integration
 import io.swagger.client.wes.api.WorkflowExecutionServiceApi
-import io.swagger.client.wes.model.ServiceInfo
+import io.swagger.client.wes.model.RunId
 import org.grails.web.json.JSONObject
 import reactor.core.publisher.Mono
 import spock.lang.Specification
 import spock.lang.TempDir
 
 import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.utils.LocalShellHelper
 
-import java.nio.file.Files
-import java.nio.file.Path
+import java.nio.file.*
 
 @Rollback
 @Integration
-class WeskitAccessServiceIntegrationSpec extends Specification {
+class WeskitAccessServiceIntegrationSpec extends Specification implements DomainFactoryCore {
 
     private WeskitAccessService service
     private WorkflowExecutionServiceApi api
+
+    ConfigService configService
 
     @TempDir
     Path baseDirectory
@@ -58,7 +61,7 @@ class WeskitAccessServiceIntegrationSpec extends Specification {
             1 * createApiInstance() >> api
             0 * _
         }
-        service.configService = Mock(ConfigService)
+        service.configService = configService
         service.fileService = new FileService()
         service.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
             executeCommandReturnProcessOutput(_, _) >> { realm1, cmd -> LocalShellHelper.executeAndWait(cmd) }
@@ -74,9 +77,10 @@ class WeskitAccessServiceIntegrationSpec extends Specification {
         given:
         setupData()
         String givenRunId = "1"
-        Mono<ServiceInfo> mockedMonoRunId = Mock(Mono) {
-            1 * block(_) >> givenRunId
+        Mono<RunId> mockedMonoRunId = Mock(Mono) {
+            1 * block(_) >> new RunId().runId(givenRunId)
         }
+        findOrCreateProcessingOption(ProcessingOption.OptionName.REALM_DEFAULT_VALUE, createRealm().name)
 
         and:
         Path workDir = baseDirectory.resolve('work').resolve("test")
@@ -88,7 +92,7 @@ class WeskitAccessServiceIntegrationSpec extends Specification {
         ] as JSONObject
 
         JSON tagsJson = [
-                run_dir: workDir.toString(),
+                run_dir: Paths.get('/tmp').relativize(workDir).toString(),
         ] as JSON
 
         String workflow = "nf-seq-qc-1.0.0/main.nf"
@@ -96,7 +100,7 @@ class WeskitAccessServiceIntegrationSpec extends Specification {
         WesWorkflowParameter wesWorkflowParameter = new WesWorkflowParameter(workflowParamsJson, WesWorkflowType.NEXTFLOW, workDir, workflow)
 
         when:
-        String runId = service.runWorkflow(wesWorkflowParameter)
+        RunId runId = service.runWorkflow(wesWorkflowParameter)
 
         then:
         1 * api.runWorkflow(_ as String, WesWorkflowType.NEXTFLOW.weskitName, WesWorkflowType.NEXTFLOW.version, _ as String, "{}", workflow, null
@@ -107,6 +111,6 @@ class WeskitAccessServiceIntegrationSpec extends Specification {
         }
 
         and:
-        runId == givenRunId
+        runId.runId == givenRunId
     }
 }

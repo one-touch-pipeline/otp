@@ -26,14 +26,15 @@ import grails.testing.services.ServiceUnitTest
 import grails.web.mapping.LinkGenerator
 import spock.lang.Specification
 
-import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryProcessingPriority
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.utils.MailHelperService
+import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 import de.dkfz.tbi.otp.workflowExecution.*
+import de.dkfz.tbi.otp.workflowExecution.wes.*
 
 class ErrorNotificationServiceSpec extends Specification
         implements ServiceUnitTest<ErrorNotificationService>, DataTest, DomainFactoryProcessingPriority, WorkflowSystemDomainFactory {
@@ -291,6 +292,75 @@ class ErrorNotificationServiceSpec extends Specification
                 "WES job",
                 "=+",
                 "None",
+        ].flatten().join('(?:.*\\n)+') + "[.\\n]*\$"
+
+        when:
+        String content = service.createLogInformation(step)
+
+        then:
+        content ==~ expectedExpression
+    }
+
+    void "test createLogInformation with Wes jobs"() {
+        given:
+        ErrorNotificationService service = new ErrorNotificationService()
+
+        service.grailsLinkGenerator = Mock(LinkGenerator) {
+            _ * link(_) >> { return "link" }
+        }
+
+        WorkflowStep prevStep = createWorkflowStep()
+
+        List<WesRun> wesRuns = (1..3).collect {
+            createWesRun([
+                    workflowStep: prevStep,
+                    wesRunLog   : createWesRunLog([
+                            runLog: createWesLog([
+                                    exitCode: nextId,
+                            ]),
+                    ]),
+            ])
+        }
+
+        WorkflowStep step = createWorkflowStep(previous: prevStep)
+        step.workflowError = createWorkflowError()
+
+        service.workflowStepService = Mock(WorkflowStepService) {
+            1 * getPreviousRunningWorkflowStep(step) >> prevStep
+        }
+
+        String expectedExpression = [
+                "^(?:.*\\n)*OTP message",
+                "=+",
+                step.workflowError.message,
+                "",
+                "Cluster jobs",
+                "=+",
+                "None",
+                "",
+                "WES job",
+                "=+",
+                wesRuns.collect { WesRun wesRun ->
+                    WesRunLog wesRunLog = wesRun.wesRunLog
+                    WesLog runLog = wesRunLog?.runLog
+                    [
+                            "WES run ID: ${wesRun.id}",
+                            "WES identifier: ${wesRun.wesIdentifier}",
+                            "Work directory: ${wesRun.workflowStep.workflowRun.workDirectory}/${wesRun.subPath}",
+
+                            "State: ${wesRunLog.state}",
+                            "Request: ${wesRunLog?.runRequest}",
+
+                            "Name: ${runLog?.name}",
+                            "Start time:",
+                            "End time:",
+                            "Log file command:",
+                            "Stdout:",
+                            "Stderr:",
+                            "ExitCode:",
+                            "",
+                    ]
+                },
         ].flatten().join('(?:.*\\n)+') + "[.\\n]*\$"
 
         when:

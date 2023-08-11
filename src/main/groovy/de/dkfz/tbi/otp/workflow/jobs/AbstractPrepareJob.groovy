@@ -57,6 +57,7 @@ abstract class AbstractPrepareJob extends AbstractJob {
     final void execute(WorkflowStep workflowStep) {
         if (workflowStep.workflowRun.workFolder) {
             Path workFolder = filestoreService.getWorkFolderPath(workflowStep.workflowRun)
+            logService.addSimpleLogEntry(workflowStep, "Creating uuid work directory ${workFolder}")
             String group = processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP)
             fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(
                     workFolder.parent,
@@ -70,6 +71,8 @@ abstract class AbstractPrepareJob extends AbstractJob {
                     group,
                     fileService.OWNER_DIRECTORY_PERMISSION_STRING
             )
+            workflowStep.workflowRun.workDirectory = workFolder.toString()
+            workflowStep.workflowRun.save(flush: true)
         } else {
             Path workDirectory = buildWorkDirectoryPath(workflowStep)
             if (workDirectory) {
@@ -116,11 +119,17 @@ abstract class AbstractPrepareJob extends AbstractJob {
      *
      * Most of our workflows do protect it, but there are two old workflows not using it.
      * Since all new one should protect it, the default value 'true' is here directly returned.
+     *
+     * Uuid work folder are always protected, this method is only considered for not uuid folder
      */
     protected boolean shouldWorkDirectoryBeProtected() {
         return true
     }
 
+    /**
+     * Only used for non UUId workflows
+     */
+    @Deprecated
     abstract protected Path buildWorkDirectoryPath(WorkflowStep workflowStep)
 
     abstract protected Collection<LinkEntry> generateMapForLinking(WorkflowStep workflowStep)

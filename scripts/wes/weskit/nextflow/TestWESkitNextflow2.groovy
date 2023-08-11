@@ -21,7 +21,7 @@
  */
 package wes.weskit.nextflow
 
-import grails.converters.JSON
+import org.grails.web.json.JSONObject
 
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.workflowExecution.wes.*
@@ -33,7 +33,6 @@ import java.nio.file.*
  *
  * for setup weskit: see https://gitlab.com/one-touch-pipeline/otp-wes-config
  */
-
 
 //-------------------
 //input
@@ -71,6 +70,7 @@ def work = { String message, Closure cl ->
 }
 
 work('serviceInfo') { weskitAccessService.serviceInfo }
+
 work('run state') { weskitAccessService.getRunStatus(uuid) }
 work('run log') { weskitAccessService.getRunLog(uuid) }
 
@@ -78,10 +78,10 @@ work('runWorkflow') {
     Path workDir = fileSystem.getPath(TEST_OUTPUT_EXTERN).resolve("test_${de.dkfz.tbi.util.TimeFormats.DATE_TIME_SECONDS_DASHES.getFormattedDate(new Date())}")
     Files.createDirectories(workDir)
 
-    JSON workflowParams = [
+    JSONObject workflowParams = [
             "input"    : "$TEST_INPUT_EXTERN/run1_gerald_D1VCPACXX_1_R1.sorted.fastq.tar.bz2,$TEST_INPUT_EXTERN/run1_gerald_D1VCPACXX_1_R1.sorted.fastq.gz",
             "outputDir": "$TEST_OUTPUT_EXTERN"
-    ] as JSON
+    ] as JSONObject
     String workflowUrl = "nf-seq-qc-1.1.0/main.nf"
 
     WesWorkflowParameter parameter = new WesWorkflowParameter(workflowParams, WesWorkflowType.NEXTFLOW, workDir, workflowUrl)

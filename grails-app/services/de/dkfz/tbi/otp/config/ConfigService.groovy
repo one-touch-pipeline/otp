@@ -25,13 +25,17 @@ import grails.gorm.transactions.Transactional
 import grails.util.Environment
 import groovy.transform.CompileDynamic
 import org.springframework.beans.BeansException
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationContextAware
 
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
+import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.Realm
 
+import java.nio.file.FileSystem
+import java.nio.file.Path
 import java.time.*
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
@@ -39,6 +43,9 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 @CompileDynamic
 @Transactional
 class ConfigService implements ApplicationContextAware {
+
+    @Autowired
+    FileSystemService fileSystemService
 
     protected Map<OtpProperty, String> otpProperties
 
@@ -229,6 +236,11 @@ class ConfigService implements ApplicationContextAware {
 
     String getWesUrl() {
         return otpProperties.get(OtpProperty.WES_URL)
+    }
+
+    Path getWesDataDirectory() {
+        FileSystem fileSystem = fileSystemService.remoteFileSystemOnDefaultRealm
+        return fileSystem.getPath(otpProperties.get(OtpProperty.WES_BASE_DATA_DIRECTORY))
     }
 
     String getWesAuthTokenUri() {

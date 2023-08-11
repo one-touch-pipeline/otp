@@ -28,7 +28,6 @@ import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.domainFactory.FastqcDomainFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
-import de.dkfz.tbi.otp.filestore.FilestoreService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflowExecution.*
@@ -67,7 +66,7 @@ class FastqcExecuteWesPipelineJobSpec extends Specification implements DataTest,
     Path tempDir
     Path baseDir
 
-    private void createData() {
+    private void createData(boolean canBeCopied = false) {
         fileSystem = FileSystems.default
         baseDir = tempDir.resolve("base")
         sourceDir = tempDir.resolve("src")
@@ -110,10 +109,12 @@ class FastqcExecuteWesPipelineJobSpec extends Specification implements DataTest,
         ])
         fastqcProcessedFile1 = createFastqcProcessedFile([
                 sequenceFile: rawSequenceFile1,
+                fileCopied  : canBeCopied,
         ])
         fastqcProcessedFile2 = createFastqcProcessedFile([
                 sequenceFile     : rawSequenceFile2,
                 workDirectoryName: fastqcProcessedFile1.workDirectoryName,
+                fileCopied       : canBeCopied,
         ])
 
         job = new FastqcExecuteWesPipelineJob()
@@ -135,15 +136,14 @@ class FastqcExecuteWesPipelineJobSpec extends Specification implements DataTest,
         given:
         createData()
 
-        final List<Path> inputPaths  = [ Paths.get('fastq1'),      Paths.get('fastq2')]
-        final List<Path> outputPaths = [ baseDir.resolve(0.toString()), baseDir.resolve(1.toString())]
+        final List<Path> inputPaths = [Paths.get('fastq1'), Paths.get('fastq2')]
 
         job.concreteArtefactService = Mock(ConcreteArtefactService) {
             1 * getOutputArtefacts(step, OUTPUT_ROLE) >> [fastqcProcessedFile1, fastqcProcessedFile2]
         }
         job.lsdfFilesService = Mock(LsdfFilesService) {
-            1 * getFileViewByPidPathAsPath(rawSequenceFile1) >> Paths.get('fastq1')
-            1 * getFileViewByPidPathAsPath(rawSequenceFile2) >> Paths.get('fastq2')
+            1 * getFileViewByPidPathAsPath(rawSequenceFile1) >> inputPaths[0]
+            1 * getFileViewByPidPathAsPath(rawSequenceFile2) >> inputPaths[1]
             0 * _
         }
 
@@ -151,40 +151,39 @@ class FastqcExecuteWesPipelineJobSpec extends Specification implements DataTest,
         Map<Path, Map<String, String>> parameters = job.getRunSpecificParameters(step, baseDir)
 
         then:
-        parameters.size() == 2
-        parameters.eachWithIndex { Path path, Map<String, String> param, idx ->
-            assert param["input"] == inputPaths[idx].toString()
-            assert param["outputDir"] == outputPaths[idx].toString()
-            assert path == outputPaths[idx]
-        }
+        parameters == [
+                (baseDir): [
+                        input    : inputPaths.join(','),
+                        outputDir: baseDir.toString(),
+                ]
+        ]
     }
 
     @Unroll
     void "shouldWeskitJobSend, when fastqc reports can be copied, then copy fastqc"() {
         given:
-        createData()
+        createData(canBeCopied)
 
         job.concreteArtefactService = Mock(ConcreteArtefactService) {
             1 * getOutputArtefacts(step, OUTPUT_ROLE) >> [fastqcProcessedFile1, fastqcProcessedFile2]
+            0 * _
         }
         job.fastqcReportService = Mock(FastqcReportService) {
-            1 * canFastqcReportsBeCopied([fastqcProcessedFile1, fastqcProcessedFile2]) >> canBeCopied
-            n * copyExistingFastqcReports(step.realm, _, _)
-        }
-
-        job.filestoreService = Mock(FilestoreService) {
-            n * getWorkFolderPath(step.workflowRun)
+            n * copyExistingFastqcReportsNewSystem(step.realm, _)
+            0 * _
         }
         job.logService = Mock(LogService) {
-            n * addSimpleLogEntry(step, "Copying fastqc reports for Weskit")
+            n * addSimpleLogEntry(step, "fastqc reports found, copy them")
+            m * addSimpleLogEntry(step, "no fastqc reports found, create wes call")
+            0 * _
         }
 
         expect:
         job.shouldWeskitJobSend(step) != canBeCopied
 
         where:
-        canBeCopied | n
-        true        | 1
-        false       | 0
+        canBeCopied | n | m
+        true        | 1 | 0
+        false       | 0 | 1
     }
 }

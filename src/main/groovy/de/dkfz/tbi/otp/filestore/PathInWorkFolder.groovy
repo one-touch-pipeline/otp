@@ -19,28 +19,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflowExecution.wes
+package de.dkfz.tbi.otp.filestore
 
-import groovy.transform.TupleConstructor
-import org.grails.web.json.JSONObject
+import de.dkfz.tbi.otp.workflowExecution.Artefact
 
-import java.nio.file.Path
+/**
+ * trait to use for all {@link Artefact} of workflows using uuid.
+ */
+trait PathInWorkFolder {
 
-@TupleConstructor
-class WesWorkflowParameter {
-    final JSONObject workflowParams
-    final WesWorkflowType workflowType
-    final Path workDirectory
-    final String workflowUrl
-
-    @Override
-    String toString() {
-        return [
-                "WesWorkflowParameter:",
-                "workflowParams: ${workflowParams.toString(4)}",
-                "workflowType: ${workflowType}",
-                "workDirectory: ${workDirectory}",
-                "workflowUrl: ${workflowUrl}",
-        ].join('\n- ')
-    }
+    /**
+     * path inside the uuid ({@link WorkFolder})
+     *
+     * only used for WES workflows, so it needs to be nullable
+     */
+    String pathInWorkFolder
 }

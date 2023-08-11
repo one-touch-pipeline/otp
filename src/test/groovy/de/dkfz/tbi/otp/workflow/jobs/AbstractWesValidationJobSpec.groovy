@@ -91,10 +91,7 @@ class AbstractWesValidationJobSpec extends Specification implements DataTest, Wo
         e.message.contains(state.toString())
 
         where:
-        state << [
-                State.INITIALIZING,
-                State.RUNNING,
-        ]
+        state << State.values() - State.COMPLETE
     }
 
     void "ensureExternalJobsRunThrough, when WES job has exit code #exitCode, then fail"() {

@@ -70,4 +70,18 @@ class FastQcProcessedFileService {
         ZonedDateTime zonedDateTime = configService.zonedDateTime
         return "${prefix}-${workflowVersion.workflowVersion}-${TimeFormats.DATE_TIME_SECONDS_DASHES.getFormattedZonedDateTime(zonedDateTime)}"
     }
+
+    /**
+     * check, if the given fastqc workflow use uuids
+     */
+    boolean useUuid(WorkflowVersion workflowVersion) {
+        switch (workflowVersion.workflow.name) {
+            case BashFastQcWorkflow.WORKFLOW:
+                return false
+            case WesFastQcWorkflow.WORKFLOW:
+                return true
+            default:
+                throw new WorkflowException("unsupported fastqc workflow: ${workflowVersion.workflow.name}")
+        }
+    }
 }

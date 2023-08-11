@@ -30,9 +30,7 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.domainFactory.FastqcDomainFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.FastqcWorkflowDomainFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
-import de.dkfz.tbi.otp.ngsdata.FastqFile
-import de.dkfz.tbi.otp.ngsdata.RawSequenceFile
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.workflow.fastqc.BashFastQcWorkflow
 import de.dkfz.tbi.otp.workflow.fastqc.WesFastQcWorkflow
@@ -297,12 +295,14 @@ class FastqcDeciderSpec extends Specification implements DataTest, WorkflowSyste
     }
 
     private void createServicesForCreateWorkflowRunsAndOutputArtefacts(WorkflowVersion workflowVersion, SeqTrack seqTrack) {
+        boolean uuidUsed = (workflowVersion == wesWorkflowVersion)
         decider.fastQcProcessedFileService = Mock(FastQcProcessedFileService) {
             1 * buildWorkingPath(workflowVersion) >> "path"
+            1 * useUuid(workflowVersion) >> uuidUsed
             0 * _
         }
         decider.fastqcDataFilesService = Mock(FastqcDataFilesService) {
-            1 * fastqcOutputDirectory(_) >> Paths.get('output')
+            (uuidUsed ? 0 : 1) * fastqcOutputDirectory(_) >> Paths.get('output')
             0 * _
         }
         decider.workflowRunService = Mock(WorkflowRunService) {

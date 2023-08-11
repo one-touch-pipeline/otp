@@ -24,7 +24,7 @@ package de.dkfz.tbi.otp.workflow.fastqc
 import groovy.util.logging.Slf4j
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.workflow.jobs.SetCorrectPermissionJob
+import de.dkfz.tbi.otp.workflow.jobs.*
 import de.dkfz.tbi.otp.workflowExecution.*
 
 /**
@@ -43,13 +43,16 @@ class WesFastQcWorkflow implements OtpWorkflow {
         return [
                 FastqcFragmentJob.simpleName.uncapitalize(),
                 FastqcConditionalFailJob.simpleName.uncapitalize(),
-                FastqcPrepareJob.simpleName.uncapitalize(),
+                AttachUuidJob.simpleName.uncapitalize(),
+                FastqcWesPrepareJob.simpleName.uncapitalize(),
                 FastqcExecuteWesPipelineJob.simpleName.uncapitalize(),
                 FastqcWesValidationJob.simpleName.uncapitalize(),
-                FastqcParseJob.simpleName.uncapitalize(),
-                FastqcFinishJob.simpleName.uncapitalize(),
+                //permission needs to be changed, since accessing of the zip content is only possible on local file system
                 SetCorrectPermissionJob.simpleName.uncapitalize(),
+                FastqcParseJob.simpleName.uncapitalize(),
                 FastqcLinkJob.simpleName.uncapitalize(),
+                CalculateSizeJob.simpleName.uncapitalize(),
+                FastqcFinishJob.simpleName.uncapitalize(),
         ]
     }
 

@@ -91,6 +91,10 @@ enum OtpProperty {
      */
     WES_URL('otp.wes.url', TypeValidators.URL_STRING, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT, UsedIn.WORKFLOW_TEST)),
     /**
+     * The base data directory as configured in weskit
+     */
+    WES_BASE_DATA_DIRECTORY('otp.wes.data.directory', TypeValidators.ABSOLUTE_PATH, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT, UsedIn.WORKFLOW_TEST)),
+    /**
      * Base URL of the authentication Endpoint (Example: http://keycloak-server:8080/auth/realms/WESkit/protocol/openid-connect/token)
      */
     WES_AUTH_TOKEN_URI('otp.wes.auth.tokenUri', TypeValidators.URI_STRING, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT, UsedIn.WORKFLOW_TEST)),

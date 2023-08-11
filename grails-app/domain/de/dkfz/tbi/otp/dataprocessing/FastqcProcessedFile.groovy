@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import grails.gorm.hibernate.annotation.ManagedEntity
 
+import de.dkfz.tbi.otp.filestore.PathInWorkFolder
 import de.dkfz.tbi.otp.ngsdata.RawSequenceFile
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.utils.Entity
@@ -35,7 +36,7 @@ import de.dkfz.tbi.otp.workflowExecution.Artefact
  * and if it content was uploaded to database.
  */
 @ManagedEntity
-class FastqcProcessedFile implements Artefact, Entity {
+class FastqcProcessedFile implements Artefact, PathInWorkFolder, Entity {
 
     boolean fileExists = false
     boolean contentUploaded = false
@@ -47,14 +48,20 @@ class FastqcProcessedFile implements Artefact, Entity {
 
     String workDirectoryName
 
+    /**
+     * flag to indicate, that the file was copied and not processed
+     */
+    boolean fileCopied = false
+
     static belongsTo = [
             sequenceFile: RawSequenceFile,
     ]
 
-    static constraints = {
+    static Closure constraints = {
         dateFromFileSystem(nullable: true)
         sequenceFile(unique: true)
         workflowArtefact nullable: true
+        pathInWorkFolder(nullable: true) // only used for wes fastqc
         workDirectoryName validator: { String value, FastqcProcessedFile obj ->
             if (value && obj.sequenceFile && FastqcProcessedFile.withCriteria {
                 sequenceFile {
@@ -67,7 +74,7 @@ class FastqcProcessedFile implements Artefact, Entity {
         }
     }
 
-    static mapping = {
+    static Closure mapping = {
         sequenceFile index: "fastqc_processed_file_sequence_file_idx"
     }
 

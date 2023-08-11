@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.filestore
 
 import grails.gorm.hibernate.annotation.ManagedEntity
+import groovy.transform.ToString
 
 import de.dkfz.tbi.otp.utils.Entity
 
@@ -33,6 +34,7 @@ import de.dkfz.tbi.otp.utils.Entity
  * UUID is defined by RFC 4122, ISO/IEC 9834-8:2005
  * @see <a href="https://datatracker.ietf.org/doc/html/rfc4122">RFC 4122</a>
  */
+@ToString(includeNames = true, includes = ["uuid", "baseFolder", "size"])
 @ManagedEntity
 class WorkFolder implements Entity {
 
@@ -58,7 +60,7 @@ class WorkFolder implements Entity {
      */
     BaseFolder baseFolder
 
-    static constraints = {
+    static Closure constraints = {
         size nullable: true
     }
 }

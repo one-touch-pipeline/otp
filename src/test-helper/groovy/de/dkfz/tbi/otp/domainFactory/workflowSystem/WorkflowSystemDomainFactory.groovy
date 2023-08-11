@@ -253,10 +253,9 @@ trait WorkflowSystemDomainFactory implements DomainFactoryCore, TaxonomyFactory 
 
     BaseFolder createBaseFolder(Map properties = [:], boolean saveAndValidate = true) {
         String path = properties.path ?: "/${nextId}"
-        boolean writable = properties.writable ?: true
         return createDomainObject(BaseFolder, [
                 path    : path,
-                writable: writable,
+                writable: true,
         ], properties, saveAndValidate)
     }
 
