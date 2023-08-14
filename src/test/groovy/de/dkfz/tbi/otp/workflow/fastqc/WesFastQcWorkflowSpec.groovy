@@ -54,6 +54,7 @@ class WesFastQcWorkflowSpec extends Specification implements DataTest, DomainFac
                 "fastqcParseJob",
                 "fastqcFinishJob",
                 "setCorrectPermissionJob",
+                "fastqcLinkJob",
         ]
     }
 

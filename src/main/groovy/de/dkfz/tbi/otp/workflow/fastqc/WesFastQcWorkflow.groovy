@@ -49,6 +49,7 @@ class WesFastQcWorkflow implements OtpWorkflow {
                 FastqcParseJob.simpleName.uncapitalize(),
                 FastqcFinishJob.simpleName.uncapitalize(),
                 SetCorrectPermissionJob.simpleName.uncapitalize(),
+                FastqcLinkJob.simpleName.uncapitalize(),
         ]
     }
 
