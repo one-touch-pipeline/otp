@@ -136,7 +136,11 @@ class KeycloakService implements IdentityProvider {
             return true
         }
 
-        return getIdpUserDetailsByUsername(user.username).deactivated
+        if (!user.enabled) {
+            return true
+        }
+
+        return getIdpUserDetailsByUsername(user.username).deactivated || isUserDeactivatedInFederatedLdap(user)
     }
 
     @Override
@@ -222,6 +226,11 @@ class KeycloakService implements IdentityProvider {
                 deactivated      : !keycloakUser.enabled,
                 memberOfGroupList: memberOfGroupList,
         ])
+    }
+
+    private boolean isUserDeactivatedInFederatedLdap(User user) {
+        Integer uaControl = getUserAccountControlOfUser(user)
+        return uaControl ? UserAccountControl.isSet(UserAccountControl.ACCOUNTDISABLE, uaControl) : false
     }
 }
 

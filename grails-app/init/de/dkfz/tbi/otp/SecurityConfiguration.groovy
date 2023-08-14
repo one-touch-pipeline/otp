@@ -81,6 +81,9 @@ class SecurityConfiguration {
     @Autowired
     LdapService ldapService
 
+    @Autowired
+    SecurityService securityService
+
     @Bean
     static MethodSecurityExpressionHandler securityExpressionHandler(ProjectPermissionEvaluator projectPermissionEvaluator) {
         DefaultMethodSecurityExpressionHandler expressionHandler = new DefaultMethodSecurityExpressionHandler()
@@ -248,8 +251,14 @@ class SecurityConfiguration {
                     OidcIdToken idToken = oidcUserAuthority.idToken
 
                     SessionUtils.withNewSession {
-                        userService.findOrCreateUserWithLdapData(idToken.preferredUsername).authorities.each { Role role ->
-                            mappedAuthorities.add(new SimpleGrantedAuthority(role.authority))
+                        User user = userService.findOrCreateUserWithLdapData(idToken.preferredUsername)
+
+                        user.authorities.each { Role role ->
+                                mappedAuthorities.add(new SimpleGrantedAuthority(role.authority))
+                        }
+
+                        if (keycloakService.isUserDeactivated(user)) {
+                            throw new DisabledException("User is disabled.")
                         }
                     }
                 }
