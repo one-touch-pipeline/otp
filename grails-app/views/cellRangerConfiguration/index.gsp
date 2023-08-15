@@ -97,6 +97,60 @@
         </sec:ifAllGranted>
     </g:if>
     <br>
+
+    <hr>
+
+    <h2>${g.message(code: "cellRanger.automaticRun")}</h2>
+    <g:if test="${configExists}">
+        <div id="updateAutomaticExecution">
+            <g:form action="updateAutomaticExecution" params='["seqType.id": seqType.id, overviewController: controllerName]' method='POST'>
+                <g:checkBox id="enableAutoExec" name="enableAutoExec" value="${config.autoExec}"/><label for="enableAutoExec">${g.message(code: "cellRanger.automaticRun.enable")}</label>
+                <br><br>
+
+                <div class="automaticSettings">
+                    <div>
+                        <strong>${g.message(code: "cellRanger.create.referenceGenomeIndex")}:</strong>
+                        <g:select id="referenceGenomeIndex2" name="referenceGenomeIndex.id" class="use-select-2"
+                                  from="${referenceGenomeIndexes}"
+                                  value="${updateAutomaticExecutionCmd ? updateAutomaticExecutionCmd.referenceGenomeIndex.id == 'expected' : config.referenceGenomeIndex?.id}"
+                                  optionKey="id" noSelection="${[(""): "Select a reference"]}"
+                                  required="true"/>
+                    </div>
+
+                    <div>
+                        <strong>${g.message(code: "cellRanger.create.expectedOrEnforcedCells")}:</strong><br>
+                        <label>
+                            <g:radio name="expectedOrEnforcedCells" value="neither"
+                                     checked="${updateAutomaticExecutionCmd ? (updateAutomaticExecutionCmd.expectedCellsValue == null && updateAutomaticExecutionCmd.enforcedCellsValue == null) : (config.expectedCells == null && config.enforcedCells == null)}"/>
+                            ${g.message(code: "cellRanger.default")}
+                        </label>
+                        <br>
+                        <label>
+                            <g:radio name="expectedOrEnforcedCells" value="expected"
+                                     checked="${updateAutomaticExecutionCmd ? updateAutomaticExecutionCmd.expectedCellsValue : config.expectedCells}"/>
+                            ${g.message(code: "cellRanger.expectedCells")}
+                        </label>
+                        <input name="expectedCellsValue" value="${updateAutomaticExecutionCmd?.expectedCellsValue ?: config.expectedCells}" required/>
+                        <br>
+                        <label>
+                            <g:radio name="expectedOrEnforcedCells" value="enforced"
+                                     checked="${updateAutomaticExecutionCmd ? updateAutomaticExecutionCmd.enforcedCellsValue : config.enforcedCells}"/>
+                            ${g.message(code: "cellRanger.enforcedCells")}
+                        </label>
+                        <input name="enforcedCellsValue" value="${updateAutomaticExecutionCmd?.enforcedCellsValue ?: config.enforcedCells}" required/>
+                        <br><br>
+                    </div>
+                </div>
+                <g:submitButton id="save" name="Save"/>
+            </g:form>
+        </div>
+    </g:if>
+    <g:else>
+        <otp:annotation type="info">${g.message(code: "cellRanger.noConfig")}</otp:annotation>
+    </g:else>
+
+    <hr>
+
     <h2>${g.message(code: "cellRanger.select")}</h2>
     <otp:annotation type="info">${g.message(code: "cellRanger.hashedSamplesInfo")}</otp:annotation>
     <otp:annotation type="info">${g.message(code: "cellRanger.xenograftSamplesInfo")}</otp:annotation>
@@ -133,8 +187,8 @@
                     <div class="row one">
                         <div>
                             <strong>${g.message(code: "cellRanger.create.referenceGenomeIndex")}:</strong>
-                            <g:select name="referenceGenomeIndex.id" class="use-select-2"
-                                      from="${referenceGenomeIndexes}" value="${cmd?.referenceGenomeIndex?.id ?: referenceGenomeIndex?.id}"
+                            <g:select id="referenceGenomeIndex" name="referenceGenomeIndex.id" class="use-select-2"
+                                      from="${referenceGenomeIndexes}" value="${createMwpCmd?.referenceGenomeIndex?.id ?: referenceGenomeIndex?.id}"
                                       optionKey="id" noSelection="${[(""): "Select a reference"]}"
                                       required="true"/>
                         </div>
@@ -159,28 +213,26 @@
                         <div>
                             <strong>${g.message(code: "cellRanger.create.expectedOrEnforcedCells")}:</strong><br><br>
                             <label>
-                                <g:radio name="expectedOrEnforcedCells" value="neither" checked="${cmd == null || cmd.expectedOrEnforcedCells == "neither"}"/>
+                                <g:radio name="expectedOrEnforcedCells" value="neither" checked="${createMwpCmd ? (createMwpCmd.expectedCellsValue == null && createMwpCmd.enforcedCellsValue == null) : false}"/>
                                 ${g.message(code: "cellRanger.default")}
                             </label>
                             <br>
                             <label>
-                                <g:radio name="expectedOrEnforcedCells" value="expected" checked="${cmd?.expectedOrEnforcedCells == "expected"}"/>
+                                <g:radio name="expectedOrEnforcedCells" value="expected" checked="${createMwpCmd ? createMwpCmd.expectedCellsValue : false}"/>
                                 ${g.message(code: "cellRanger.expectedCells")}
                             </label>
+                            <input name="expectedCellsValue" value="${createMwpCmd?.expectedCellsValue}" required/>
                             <br>
                             <label>
-                                <g:radio name="expectedOrEnforcedCells" value="enforced" checked="${cmd?.expectedOrEnforcedCells == "enforced"}"/>
+                                <g:radio name="expectedOrEnforcedCells" value="enforced" checked="${createMwpCmd ? createMwpCmd.enforcedCellsValue : false}"/>
                                 ${g.message(code: "cellRanger.enforcedCells")}
                             </label>
+                            <input name="enforcedCellsValue" value="${createMwpCmd?.enforcedCellsValue}" required/>
                             <br><br>
-                            <label id="expectedOrEnforcedCellsValue">
-                                ${g.message(code: "cellRanger.value")}:<br>
-                                <input name="expectedOrEnforcedCellsValue" value="${cmd?.expectedOrEnforcedCellsValue}"/>
-                            </label>
                         </div>
                     </div>
                     <div class="row three ${archived}">
-                        <g:submitButton name="Execute CellRanger"/>
+                        <g:submitButton id="execute" name="Execute Cell Ranger"/>
                     </div>
                 </div>
             </g:form>

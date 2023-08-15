@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -32,6 +32,7 @@ import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.security.SecurityService
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.tracking.OtrsTicket
@@ -44,6 +45,7 @@ import de.dkfz.tbi.otp.utils.exceptions.FileAccessForArchivedProjectNotAllowedEx
 @Transactional
 class CellRangerConfigurationService {
 
+    ProjectService projectService
     SecurityService securityService
 
     @Immutable
@@ -107,6 +109,32 @@ class CellRangerConfigurationService {
                         obsoleteDate: null,
                 )
         )
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'OTP_READ_ACCESS')")
+    Errors configureAutoRun(Project project,
+                            boolean enableAutoExec,
+                            Integer expectedCells,
+                            Integer enforcedCells,
+                            ReferenceGenomeIndex referenceGenomeIndex) {
+        CellRangerConfig config = getWorkflowConfig(project)
+
+        try {
+            config.autoExec = enableAutoExec
+            if (enableAutoExec) {
+                config.referenceGenomeIndex = referenceGenomeIndex
+                config.expectedCells = expectedCells
+                config.enforcedCells = enforcedCells
+            } else {
+                config.referenceGenomeIndex = null
+                config.expectedCells = null
+                config.enforcedCells = null
+            }
+            config.save(flush: true)
+        } catch (ValidationException e) {
+            return e.errors
+        }
+        return null
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'OTP_READ_ACCESS')")
@@ -198,6 +226,15 @@ class CellRangerConfigurationService {
     List<CellRangerMergingWorkPackage> createMergingWorkPackagesForSamples(List<Sample> samples, CellRangerMwpParameter parameter, User requester) {
         return samples.collectMany { Sample sample ->
             return findAllMergingWorkPackagesBySamplesAndPipeline(sample, parameter, requester)
+        }
+    }
+
+    void runOnImport(Project project, Sample sample) {
+        CellRangerConfig config = getWorkflowConfig(project)
+
+        if (config && config.autoExec) {
+            CellRangerMwpParameter parameter = new CellRangerMwpParameter(config.expectedCells, config.enforcedCells, config.referenceGenomeIndex, seqType)
+            findAllMergingWorkPackagesBySamplesAndPipeline(sample, parameter, null)
         }
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -41,8 +41,39 @@ describe('Check cell ranger configuration page', () => {
       cy.get('input#submit').click();
       cy.checkPage('/cellRangerConfiguration/index');
 
+      cy.get('div.annotation-box').should('not.contain.text', 'Please configure the Cell Ranger version to use');
+      cy.get('input[type=submit]#save').should('exist');
+      cy.get('input[type=submit]#execute').should('exist');
+
       cy.get('#invalidateConfig').click();
       cy.checkPage('/cellRangerConfiguration/index');
+
+      cy.get('div.annotation-box').should('contain.text', 'Please configure the Cell Ranger version to use');
+      cy.get('input[type=submit]#save').should('not.exist');
+      cy.get('input[type=submit]#execute').should('not.exist');
+    });
+
+    it('should select cell ranger version, then activate and deactivate automatic running', () => {
+      cy.visit('/cellRangerConfiguration/index');
+
+      cy.get('#select2-programVersion-container').click();
+      cy.get('li').contains('cellranger/4.0.0').click();
+
+      cy.get('input#submit').click();
+      cy.checkPage('/cellRangerConfiguration/index');
+
+      cy.get('#updateAutomaticExecution #enableAutoExec').click();
+      cy.get('#updateAutomaticExecution #referenceGenomeIndex2').select('hg_GRCh38 CELL_RANGER 1.2.0', { force: true });
+      cy.get('input[type=submit]#execute').click();
+
+      cy.checkPage('/cellRangerConfiguration/index');
+      cy.get('#updateAutomaticExecution #enableAutoExec').should('be.checked');
+
+      cy.get('#updateAutomaticExecution #enableAutoExec').click();
+      cy.get('input[type=submit]#execute').click();
+
+      cy.checkPage('/cellRangerConfiguration/index');
+      cy.get('#updateAutomaticExecution #enableAutoExec').should('not.be.checked');
     });
   });
 });

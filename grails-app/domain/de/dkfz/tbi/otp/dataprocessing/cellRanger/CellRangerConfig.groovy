@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.dataprocessing.cellRanger
 import grails.gorm.hibernate.annotation.ManagedEntity
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeIndex
 import de.dkfz.tbi.otp.workflowExecution.ExternalWorkflowConfigFragment
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
@@ -34,6 +35,11 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 @Deprecated
 @ManagedEntity
 class CellRangerConfig extends ConfigPerProjectAndSeqType implements AlignmentConfig {
+
+    boolean autoExec
+    ReferenceGenomeIndex referenceGenomeIndex
+    Integer expectedCells
+    Integer enforcedCells
 
     static constraints = {
         obsoleteDate validator: { val, obj ->
@@ -47,6 +53,22 @@ class CellRangerConfig extends ConfigPerProjectAndSeqType implements AlignmentCo
                 return !cellRangerConfig || cellRangerConfig == obj
             }
         }
+        autoExec validator: { val, obj ->
+            if (!val && (obj.referenceGenomeIndex || obj.expectedCells || obj.enforcedCells)) {
+                return false
+            }
+        }
+        referenceGenomeIndex nullable: true
+        expectedCells(nullable: true, validator: { val, obj ->
+            if (val != null && obj.enforcedCells != null) {
+                return "nand"
+            }
+        })
+        enforcedCells(nullable: true, validator: { val, obj ->
+            if (val != null && obj.expectedCells != null) {
+                return "nand"
+            }
+        })
     }
 
     @Override

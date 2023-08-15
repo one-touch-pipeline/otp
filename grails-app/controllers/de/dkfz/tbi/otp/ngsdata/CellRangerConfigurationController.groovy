@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -41,9 +41,10 @@ class CellRangerConfigurationController extends AbstractConfigureNonRoddyPipelin
     ToolNameService toolNameService
 
     static allowedMethods = [
-            index        : "GET",
-            updateVersion: "POST",
-            createMwp    : "POST",
+            index                   : "GET",
+            updateVersion           : "POST",
+            updateAutomaticExecution: "POST",
+            createMwp               : "POST",
     ]
 
     static final List<String> ALLOWED_CELL_TYPE = ["neither", "expected", "enforced"]
@@ -55,7 +56,8 @@ class CellRangerConfigurationController extends AbstractConfigureNonRoddyPipelin
         List<SeqType> seqTypes = cellRangerConfigurationService.seqTypes
         Pipeline pipeline = cellRangerConfigurationService.pipeline
 
-        boolean configExists = cellRangerConfigurationService.getWorkflowConfig(project) && cellRangerConfigurationService.getMergingCriteria(project)
+        CellRangerConfig config = cellRangerConfigurationService.getWorkflowConfig(project)
+        boolean configExists = config && cellRangerConfigurationService.getMergingCriteria(project)
 
         CellRangerConfigurationService.Samples samples = cellRangerConfigurationService.getSamples(project, cmd.individual, cmd.sampleType)
 
@@ -74,20 +76,22 @@ class CellRangerConfigurationController extends AbstractConfigureNonRoddyPipelin
         ToolName toolName = toolNameService.findToolNameByNameAndType('CELL_RANGER', ToolName.Type.SINGLE_CELL)
 
         return getModelValues(seqType) + [
-                cmd                   : flash.cmd as CellRangerConfigurationCommand,
-                configExists          : configExists,
-                allIndividuals        : allIndividuals,
-                individual            : cmd.individual,
-                allSampleTypes        : allSampleTypes,
-                sampleType            : cmd.sampleType,
-                seqType               : seqType,
-                seqTypes              : seqTypes,
-                samples               : samples.selectedSamples,
-                referenceGenomeIndex  : cmd.reference,
-                referenceGenomeIndexes: toolName?.referenceGenomeIndexes,
-                selectedIndividuals   : selectedIndividuals,
-                selectedSampleTypes   : selectedSampleTypes,
-                mwps                  : mwps,
+                createMwpCmd               : flash.createMwpCmd as CreateMwpCommand,
+                updateAutomaticExecutionCmd: flash.updateAutomaticExecutionCmd as UpdateAutomaticExecutionCommand,
+                configExists               : configExists,
+                config                     : config,
+                allIndividuals             : allIndividuals,
+                individual                 : cmd.individual,
+                allSampleTypes             : allSampleTypes,
+                sampleType                 : cmd.sampleType,
+                seqType                    : seqType,
+                seqTypes                   : seqTypes,
+                samples                    : samples.selectedSamples,
+                referenceGenomeIndex       : cmd.reference,
+                referenceGenomeIndexes     : toolName?.referenceGenomeIndexes,
+                selectedIndividuals        : selectedIndividuals,
+                selectedSampleTypes        : selectedSampleTypes,
+                mwps                       : mwps,
         ]
     }
 
@@ -102,33 +106,39 @@ class CellRangerConfigurationController extends AbstractConfigureNonRoddyPipelin
         )
     }
 
-    def createMwp(CellRangerConfigurationCommand cmd) {
+    def updateAutomaticExecution(UpdateAutomaticExecutionCommand cmd) {
+        Project project = projectSelectionService.requestedProject
+
+        if (!cmd.validate()) {
+            flash.updateAutomaticExecutionCmd = cmd
+            flash.message = new FlashMessage(g.message(code: "cellRanger.store.failure") as String, cmd.errors)
+            return redirect(action: "index", params: params)
+        }
+
+        Errors errors = cellRangerConfigurationService.configureAutoRun(project, cmd.enableAutoExec, cmd.expectedCellsValue, cmd.enforcedCellsValue,
+                cmd.referenceGenomeIndex)
+        if (errors) {
+            flash.updateAutomaticExecutionCmd = cmd
+            flash.message = new FlashMessage(g.message(code: "cellRanger.store.failure") as String, errors)
+        } else {
+            flash.message = new FlashMessage(g.message(code: "cellRanger.store.success") as String)
+        }
+        redirect(action: "index", params: params)
+    }
+
+    def createMwp(CreateMwpCommand cmd) {
         Map<String, Object> params = [:]
         params.put("individual.id", cmd.individual?.id ?: "")
         params.put("sampleType.id", cmd.sampleType?.id ?: "")
 
         if (!cmd.validate()) {
-            flash.cmd = cmd
+            flash.createMwpCmd = cmd
             flash.message = new FlashMessage(g.message(code: "cellRanger.store.failure") as String, cmd.errors)
-            redirect(action: "index", params: params)
-            return
-        }
-        Integer expectedCells, enforcedCells
-        switch (cmd.expectedOrEnforcedCells) {
-            case "expected":
-                expectedCells = cmd.expectedOrEnforcedCellsValue as Integer
-                break
-            case "enforced":
-                enforcedCells = cmd.expectedOrEnforcedCellsValue as Integer
-                break
-            case "neither":
-                break
-            default:
-                throw new UnsupportedOperationException("expectedOrEnforcedCells must be one of ${ALLOWED_CELL_TYPE}")
+            return redirect(action: "index", params: params)
         }
         Errors errors = cellRangerConfigurationService.prepareCellRangerExecution(
-                expectedCells,
-                enforcedCells,
+                cmd.expectedCellsValue,
+                cmd.enforcedCellsValue,
                 cmd.referenceGenomeIndex,
                 projectSelectionService.requestedProject,
                 cmd.individual,
@@ -136,7 +146,7 @@ class CellRangerConfigurationController extends AbstractConfigureNonRoddyPipelin
                 cmd.seqType,
         )
         if (errors) {
-            flash.cmd = cmd
+            flash.createMwpCmd = cmd
             flash.message = new FlashMessage(g.message(code: "cellRanger.store.failure") as String, errors)
         } else {
             flash.message = new FlashMessage(g.message(code: "cellRanger.store.success") as String)
@@ -165,6 +175,18 @@ class CellRangerConfigurationController extends AbstractConfigureNonRoddyPipelin
     }
 }
 
+class UpdateAutomaticExecutionCommand {
+    boolean enableAutoExec
+    Integer expectedCellsValue
+    Integer enforcedCellsValue
+    ReferenceGenomeIndex referenceGenomeIndex
+
+    static constraints = {
+        expectedCellsValue nullable: true
+        enforcedCellsValue nullable: true
+    }
+}
+
 class CellRangerSelectionCommand extends BaseConfigurePipelineSubmitCommand {
     Individual individual
     SampleType sampleType
@@ -178,20 +200,13 @@ class CellRangerSelectionCommand extends BaseConfigurePipelineSubmitCommand {
     }
 }
 
-class CellRangerConfigurationCommand extends CellRangerSelectionCommand {
-    String expectedOrEnforcedCells
-    String expectedOrEnforcedCellsValue
+class CreateMwpCommand extends CellRangerSelectionCommand {
+    Integer expectedCellsValue
+    Integer enforcedCellsValue
     ReferenceGenomeIndex referenceGenomeIndex
 
     static constraints = {
-        expectedOrEnforcedCellsValue nullable: true, validator: { val, obj ->
-            if (val != null) {
-                if (!val.isInteger()) {
-                    return "validator.not.an.integer"
-                } else if ((val as int) < 0) {
-                    return 'validator.greater.or.equal.zero'
-                }
-            }
-        }
+        expectedCellsValue nullable: true
+        enforcedCellsValue nullable: true
     }
 }

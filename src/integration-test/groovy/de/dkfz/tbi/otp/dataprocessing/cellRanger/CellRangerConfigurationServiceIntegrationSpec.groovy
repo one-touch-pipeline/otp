@@ -556,4 +556,48 @@ class CellRangerConfigurationServiceIntegrationSpec extends Specification implem
         then:
         crmwp.informed == Timestamp.valueOf(LocalDate.now().atStartOfDay())
     }
+
+    void "test configureAutoRun, when enabling automatic run"() {
+        given:
+        CellRangerConfigurationService service = new CellRangerConfigurationService()
+
+        CellRangerConfig config = createCellRangerConfig([
+                project : createProject(),
+                seqType : createSeqType(),
+                pipeline: findOrCreatePipeline(),
+        ])
+
+        ReferenceGenomeIndex referenceGenomeIndex = createReferenceGenomeIndex()
+
+        when:
+        service.configureAutoRun(config.project, true, null, 1000, referenceGenomeIndex,)
+
+        then:
+        config.autoExec
+        config.expectedCells == null
+        config.enforcedCells == 1000
+        config.referenceGenomeIndex == referenceGenomeIndex
+    }
+
+    void "test configureAutoRun, when disabling automatic run"() {
+        given:
+        CellRangerConfigurationService service = new CellRangerConfigurationService()
+
+        CellRangerConfig config = createCellRangerConfig([
+                project : createProject(),
+                seqType : createSeqType(),
+                pipeline: findOrCreatePipeline(),
+        ])
+
+        ReferenceGenomeIndex referenceGenomeIndex = createReferenceGenomeIndex()
+
+        when:
+        service.configureAutoRun(config.project, false, 1000, null, referenceGenomeIndex)
+
+        then:
+        !config.autoExec
+        config.expectedCells == null
+        config.enforcedCells == null
+        config.referenceGenomeIndex == null
+    }
 }

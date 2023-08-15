@@ -102,4 +102,6 @@ databaseChangeLog = {
     include file: 'changelogs/2023/otp-2206-create-gui-to-delegate-department-rights.groovy'
 
     include file: 'changelogs/2023/otp-2172-roddy_alignment_prepare_job.groovy'
+
+    include file: 'changelogs/2023/otp-564.groovy'
 }

@@ -30,6 +30,7 @@ import org.springframework.security.access.prepost.PreAuthorize
 import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerConfigurationService
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePairDeciderService
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
@@ -78,6 +79,7 @@ class MetadataImportService {
     AntibodyTargetService antibodyTargetService
     DataInstallationInitializationService dataInstallationInitializationService
 
+    CellRangerConfigurationService cellRangerConfigurationService
     ConfigService configService
     FileService fileService
     FileSystemService fileSystemService
@@ -396,16 +398,6 @@ class MetadataImportService {
         }
     }
 
-    protected List<SeqTrack> getSeqTracksWithConfiguredAlignment(List<SeqTrack> seqTracks) {
-        return seqTracks.findAll { SeqTrack seqTrack ->
-            ConfigPerProjectAndSeqType.findAllByProjectAndSeqTypeAndPipelineInListAndObsoleteDateIsNull(
-                    seqTrack.project,
-                    seqTrack.seqType,
-                    Pipeline.findAllByTypeInList(Pipeline.Type.values().findAll { it == Pipeline.Type.ALIGNMENT })
-            )
-        }
-    }
-
     private void importRuns(MetadataValidationContext context, FastqImportInstance fastqImportInstance, Collection<Row> metadataFileRows) {
         Map<String, List<Row>> seqTrackPerRun = metadataFileRows.groupBy {
             it.getCellByColumnTitle(RUN_ID.name()).text
@@ -457,6 +449,7 @@ class MetadataImportService {
             MultiplexingService.combineLaneNumberAndBarcode(it.getCellByColumnTitle(LANE_NO.name()).text, extractBarcode(it).value)
         }
         int amountOfRows = runsGroupedByLane.size()
+        Set<Sample> samples = [] as Set
         runsGroupedByLane.eachWithIndex { String laneId, List<Row> rows, int index ->
             String projectName = uniqueColumnValue(rows, PROJECT)
             Project project = ProjectService.findByNameOrNameInMetadataFiles(projectName)
@@ -566,6 +559,10 @@ class MetadataImportService {
             mergingCriteriaService.createDefaultMergingCriteria(sampleIdentifier.project, seqType)
             Collection<MergingWorkPackage> mergingWorkPackages = seqTrackService.decideAndPrepareForAlignment(seqTrack)
             samplePairDeciderService.findOrCreateSamplePairs(mergingWorkPackages)
+            samples.add(sampleIdentifier.sample)
+        }
+        samples.each {
+            cellRangerConfigurationService.runOnImport(it.individual.project, it)
         }
     }
 

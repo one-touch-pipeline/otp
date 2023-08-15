@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,13 +23,27 @@
 $(() => {
   'use strict';
 
-  $('input:radio[name=expectedOrEnforcedCells]').on('change', () => {
-    if ($('input:radio[name=expectedOrEnforcedCells]:checked').val() === 'neither') {
-      $('input[name=expectedOrEnforcedCellsValue]').prop('disabled', true);
-      $('label[id=expectedOrEnforcedCellsValue]').hide();
+  $('input:checkbox#enableAutoExec').on('change', (e) => {
+    if (e.target.checked) {
+      $('.automaticSettings').show();
     } else {
-      $('input[name=expectedOrEnforcedCellsValue]').prop('disabled', false);
-      $('label[id=expectedOrEnforcedCellsValue]').show();
+      $('.automaticSettings').hide();
+    }
+  }).trigger('change');
+
+  $('input:radio[name=expectedOrEnforcedCells]').on('change', (e) => {
+    const target = $(e.target);
+    const container = target.closest('div');
+    const value = container.find('input:radio[name=expectedOrEnforcedCells]:checked').val();
+    const expected = container.find('input[name=expectedCellsValue]');
+    const enforced = container.find('input[name=enforcedCellsValue]');
+
+    expected.prop('disabled', true);
+    enforced.prop('disabled', true);
+    if (value === 'expected') {
+      expected.prop('disabled', false);
+    } else if (value === 'enforced') {
+      enforced.prop('disabled', false);
     }
   }).trigger('change');
 });

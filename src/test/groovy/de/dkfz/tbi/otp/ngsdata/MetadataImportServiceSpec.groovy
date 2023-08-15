@@ -32,6 +32,7 @@ import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerConfigurationService
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePairDeciderService
@@ -488,6 +489,7 @@ ${SPECIES}                      ${speciesImportAlias}                       ${sp
         service.fastqMetadataValidationService.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
             executeCommandReturnProcessOutput(_, _) >> { realm1, cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
+        service.cellRangerConfigurationService = Mock(CellRangerConfigurationService)
 
         when:
         List<ValidateAndImportResult> validateAndImportResults1 = service.validateAndImportMultiple(TICKET_NUMBER, '1111', true)
@@ -1840,21 +1842,6 @@ ${SPECIES}                      ${human}+${mouse}+${chicken}                ${hu
         copiedFile.toString() ==~ /${data.targetDirectory}\/\d{4}\/\d{2}\/${TICKET_NUMBER}\/[^\/]*metadataFile-.*\.tsv/
     }
 
-    void "test getConfiguredSeqTracks"() {
-        given:
-        MetadataImportService service = new MetadataImportService()
-        SeqTrack seqTrackWithWorkflowConfig = createSeqTrack()
-        SeqTrack seqTrackWithoutWorkflowConfig = createSeqTrack()
-
-        DomainFactory.createRoddyWorkflowConfig(
-                project: seqTrackWithWorkflowConfig.project,
-                seqType: seqTrackWithWorkflowConfig.seqType,
-        )
-
-        expect:
-        [seqTrackWithWorkflowConfig] == service.getSeqTracksWithConfiguredAlignment([seqTrackWithWorkflowConfig, seqTrackWithoutWorkflowConfig])
-    }
-
     class DataForGetOrCreateRun implements DomainFactoryCore {
         Run run = createRun()
         SeqCenter seqCenter = run.seqCenter
@@ -2014,5 +2001,6 @@ ${SPECIES}                      ${human}+${mouse}+${chicken}                ${hu
             _ * createWorkflowRuns(_) >> []
         }
         service.processingThresholdsService = Mock(ProcessingThresholdsService)
+        service.cellRangerConfigurationService = Mock(CellRangerConfigurationService)
     }
 }
