@@ -44,9 +44,10 @@ $(() => {
         .find(`.set-and-block-for-${role}`)
     }));
 
-    // remove disabled from checkboxes
+    // remove disabled and checked from checkboxes
     setAndBlockMap.forEach((map) => {
       map.boxes.prop('disabled', false);
+      map.boxes.prop('checked', false);
     });
 
     // remove hidden checkboxes
@@ -61,6 +62,8 @@ $(() => {
 
     $(e.target).find('option:selected').each(function () {
       setForMap.forEach((map) => {
+        map.boxes.prop('checked', false);
+
         if (this.text === map.role) {
           map.boxes.prop('checked', true);
         }
