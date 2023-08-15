@@ -18,7 +18,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-FROM postgres:9.5.9
+FROM postgres:14.9-bullseye
 MAINTAINER OTP Developers <otp-devel@dkfz-heidelberg.de>
 
 ADD *.sql /docker-entrypoint-initdb.d/

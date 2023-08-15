@@ -19,6 +19,6 @@
 # SOFTWARE.
 
 integration:
-  image: postgres:9.5.9
+  image: postgres:14.9-bullseye
   ports:
     - "5432"

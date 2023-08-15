@@ -246,7 +246,7 @@ test migration:
   extends: .abstract_base_template
   stage: test
   services:
-    - postgres:9.5.9
+    - postgres:14.9-bullseye
   variables:
     POSTGRES_DB: otp
     POSTGRES_USER: otp
