@@ -35,6 +35,7 @@ variables:
   GRADLE_USER_HOME: $CI_PROJECT_DIR/cache/gradle # overrides GRADLE_USER_HOME default for caching
   NPM_CACHE: $CI_PROJECT_DIR/cache/npm
   CYPRESS_CACHE: $CI_PROJECT_DIR/cache/cypress
+  BUILD_DIR: 'build'
   ARTIFACT_DOWNLOAD_ATTEMPTS: "3"
   GET_SOURCES_ATTEMPTS: "3"
   RESTORE_CACHE_ATTEMPTS: "3"
@@ -98,6 +99,7 @@ unit tests:
     - if: $CI_COMMIT_BRANCH
       changes:
         compare_to: 'refs/heads/master'
+        ##have to be the same list as in integration tests & test coverage
         paths:
           - gradle/**/*
           - grails-app/conf/**/*
@@ -108,17 +110,32 @@ unit tests:
           - grails-app/services/**/*
           - src/main/**/*
           - src/test/**/*
+          - src/integration-test/**/*
           - src/test-helper/**/*
           - build.gradle
           - gradle.properties
+          - .gitlab-ci-core.yml
   artifacts:
     <<: *artifacts_template
     paths:
       - build/test-results/test/*.xml
       - build/reports/tests
+      - build/jacoco
     reports:
       junit: build/test-results/test/*.xml
     when: always
+  cache:
+    - key:
+        files:
+          - $CI_PROJECT_DIR/gradle/wrapper/gradle-wrapper.properties
+        prefix: gradle-$CI_JOB_NAME
+      paths:
+        - $GRADLE_USER_HOME
+    - key: jacoco-unit-$CI_PIPELINE_ID
+      when: 'always'
+      policy: push
+      paths:
+        - $BUILD_DIR
 
 integration tests:
   extends: .abstract_base_template
@@ -130,27 +147,100 @@ integration tests:
     - if: $CI_COMMIT_BRANCH
       changes:
         compare_to: 'refs/heads/master'
+        ##have to be the same list as in unit tests & test coverage
         paths:
-        - gradle/**/*
+          - gradle/**/*
           - grails-app/conf/**/*
           - grails-app/controllers/**/*
           - grails-app/domain/**/*
           - grails-app/i18n/**/*
           - grails-app/init/**/*
           - grails-app/services/**/*
-        - src/main/**/*
-        - src/integration-test/**/*
-        - src/test-helper/**/*
-        - build.gradle
-        - gradle.properties
+          - src/main/**/*
+          - src/test/**/*
+          - src/integration-test/**/*
+          - src/test-helper/**/*
+          - build.gradle
+          - gradle.properties
+          - .gitlab-ci-core.yml
   artifacts:
     <<: *artifacts_template
     paths:
       - build/test-results/integrationTest/*.xml
       - build/reports/tests
+      - build/jacoco
     reports:
       junit: build/test-results/integrationTest/*.xml
     when: always
+  cache:
+    - key:
+        files:
+          - $CI_PROJECT_DIR/gradle/wrapper/gradle-wrapper.properties
+        prefix: gradle-$CI_JOB_NAME
+      paths:
+        - $GRADLE_USER_HOME
+    - key: jacoco-integration-$CI_PIPELINE_ID
+      when: 'always'
+      policy: push
+      paths:
+        - $BUILD_DIR
+
+test coverage:
+  extends: .abstract_base_template
+  stage: test
+  needs:
+    - unit tests
+    - integration tests
+  coverage: '/Instruction Coverage: (\d+(?:\.\d+)?)%/'
+  script:
+    - set -e
+    - ./gradlew --build-cache --exclude-task test --exclude-task integrationTest --rerun-tasks jacocoAllTestReport jacocoToCobertura
+  when: always
+  rules:
+    - if: $CI_COMMIT_BRANCH
+      changes:
+        compare_to: 'refs/heads/master'
+        ##have to be the same list as in unit tests & integration test
+        paths:
+          - gradle/**/*
+          - grails-app/conf/**/*
+          - grails-app/controllers/**/*
+          - grails-app/domain/**/*
+          - grails-app/i18n/**/*
+          - grails-app/init/**/*
+          - grails-app/services/**/*
+          - src/main/**/*
+          - src/test/**/*
+          - src/integration-test/**/*
+          - src/test-helper/**/*
+          - build.gradle
+          - gradle.properties
+          - .gitlab-ci-core.yml
+  artifacts:
+    <<: *artifacts_template
+    paths:
+      - build/reports/jacoco/allTest
+      - build/reports/jacocoToCobertura
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: build/reports/jacocoToCobertura/*.xml
+    when: always
+  cache:
+    - key:
+        files:
+          - $CI_PROJECT_DIR/gradle/wrapper/gradle-wrapper.properties
+        prefix: gradle-$CI_JOB_NAME
+      paths:
+        - $GRADLE_USER_HOME
+    - key: jacoco-unit-$CI_PIPELINE_ID
+      policy: pull
+      paths:
+        - $BUILD_DIR
+    - key: jacoco-integration-$CI_PIPELINE_ID
+      policy: pull
+      paths:
+        - $BUILD_DIR
 
 test migration:
   extends: .abstract_base_template

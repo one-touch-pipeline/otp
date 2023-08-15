@@ -46,6 +46,15 @@ plugins {
     id "com.github.monosoul.markdown.page.generator" version "2.4.0.0"
     id "org.openapi.generator" version "6.6.0"
     id "com.github.node-gradle.node" version "5.0.0"
+    // plugin to calculate coverage
+    id 'jacoco'
+    // plugin to convert the jacoco report in the the cobertura format, needed by gitlab.com
+    // https://github.com/razvn/jacoco-to-cobertura-gradle-plugin
+    id "net.razvan.jacoco-to-cobertura" version "1.2.0"
+    // plugin to show total jacoco coverage on the console
+    // https://gitlab.com/barfuin/gradle-jacoco-log
+    id 'org.barfuin.gradle.jacocolog' version '3.1.0'
+
 }
 
 buildScan {
@@ -144,12 +153,82 @@ processResources.dependsOn tasks.generateOpenApi
 sourceSets.main.java.srcDir "${generatedSourcesDir}/src/main/java"
 sourceSets.main.resources.srcDir "${generatedSourcesDir}/src/main/resources"
 
+
+Closure filterCoverage = { classDirectories ->
+    classDirectories.setFrom(files(classDirectories.files.collect {
+        fileTree(dir: it, exclude: [
+                "**/*Controller*",
+                "**/*Command*",
+                "*Visitor*",
+                "*Rule*",
+                "io/swagger/client/wes/**",
+        ])
+    }))
+}
+
+jacocoTestReport {
+    dependsOn test // tests are required to run before generating the report
+    doLast {
+        println "Coverage unit report is created in file://${project.projectDir}/build/reports/jacoco/test/html/index.html"
+    }
+    afterEvaluate {
+        filterCoverage(classDirectories)
+    }
+}
+
+task jacocoIntegrationTestReport(type: JacocoReport) {
+    dependsOn integrationTest // tests are required to run before generating the report
+    group = LifecycleBasePlugin.VERIFICATION_GROUP
+    executionData integrationTest
+    sourceSets sourceSets.main
+    shouldRunAfter "jacocoTestReport"
+    reports {
+        html.outputLocation = layout.buildDirectory.dir('reports/jacoco/integrationTest')
+    }
+    afterEvaluate {
+        filterCoverage(classDirectories)
+    }
+
+    doLast {
+        println "Coverage integration report is created in file://${project.projectDir}/build/reports/jacoco/integrationTest/index.html"
+    }
+}
+
+task jacocoAllTestReport(type: JacocoReport) {
+    dependsOn test, integrationTest // tests are required to run before generating the report
+    executionData test, integrationTest
+    group = LifecycleBasePlugin.VERIFICATION_GROUP
+    sourceSets sourceSets.main
+    reports {
+        xml.required = true
+        xml.outputLocation = file('build/reports/jacoco/allTest/jacoco.xml')
+        html.outputLocation = layout.buildDirectory.dir('reports/jacoco/allTest')
+    }
+    afterEvaluate {
+        filterCoverage(classDirectories)
+    }
+
+    doLast {
+        println "Coverage unit & integration report is created in file://${project.projectDir}/build/reports/jacoco/allTest/index.html"
+    }
+}
+
+jacocoToCobertura {
+    dependsOn jacocoAllTestReport
+    splitByPackage.set(true)
+    inputFile.set(layout.buildDirectory.file("reports/jacoco/allTest/jacoco.xml"))
+    outputFile.set(layout.buildDirectory.file("reports/jacocoToCobertura/cobertura.xml"))
+}
+
 test {
     useJUnitPlatform()
+    finalizedBy jacocoTestReport // report is always generated after tests run
 }
+
 
 integrationTest {
     useJUnitPlatform()
+    finalizedBy jacocoIntegrationTestReport // report is always generated after tests run
     boolean usePostgresDocker = "TRUE".equalsIgnoreCase(System.getenv('USE_POSTGRES'))
     systemProperty "usePostgresDocker", usePostgresDocker.toString()
 
