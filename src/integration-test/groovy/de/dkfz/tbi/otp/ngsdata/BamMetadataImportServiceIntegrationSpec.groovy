@@ -322,6 +322,7 @@ class BamMetadataImportServiceIntegrationSpec extends Specification implements R
         'unknown reference genome'              | ImportProcess.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.REFERENCE_GENOME): 'unknownReferenceGenome',]                                                                                 || ["The reference genome 'unknownReferenceGenome' is not registered in OTP."]
     }
 
+    @Unroll
     void "validateAndImport, when further files given, then imported bam files has them if they exist on file system"() {
         given:
         DataBamImportRow dataBamImportRow = new DataBamImportRow(tempDir, [:])
@@ -349,6 +350,12 @@ class BamMetadataImportServiceIntegrationSpec extends Specification implements R
                 dataBamImportRow.qualityControlFile.name,
         ]
 
+        if (addDefaultFiles) {
+            furtherFiles.addAll(BamMetadataImportService.DEFAULT_RODDY_FILE_PATHS)
+            expected.addAll(BamMetadataImportService.DEFAULT_RODDY_FILE_PATHS)
+            dataBamImportRow.createDirectories(*BamMetadataImportService.DEFAULT_RODDY_FILE_PATHS)
+        }
+
         dataBamImportRow.createDirectories(qualityDirExistAndCopy, qualityDirExistAndNotCopy)
         dataBamImportRow.createFiles(qualityFileExistAndCopy, qualityFileExistAndNotCopy)
 
@@ -357,7 +364,7 @@ class BamMetadataImportServiceIntegrationSpec extends Specification implements R
         when:
         results = doWithAuth(OPERATOR) {
             bamMetadataImportService.validateAndImport(dataBamImportMetaData.metadataFile.toString(), true,
-                    dataBamImportMetaData.md5sum, ImportProcess.LinkOperation.COPY_AND_KEEP, false, furtherFiles)
+                    dataBamImportMetaData.md5sum, ImportProcess.LinkOperation.COPY_AND_KEEP, false, furtherFiles, addDefaultFiles)
         }
 
         then:
@@ -365,5 +372,8 @@ class BamMetadataImportServiceIntegrationSpec extends Specification implements R
         TestCase.assertContainSame(results.importProcess.externallyProcessedBamFiles[0].furtherFiles, expected)
         ExternallyProcessedBamFileQualityAssessment.findAll().size() == 1
         ExternallyProcessedBamFileQualityAssessment.findAll().get(0).insertSizeCV == 23
+
+        where:
+        addDefaultFiles << [true, false]
     }
 }

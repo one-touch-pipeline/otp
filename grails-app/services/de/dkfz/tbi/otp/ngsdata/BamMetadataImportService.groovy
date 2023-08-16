@@ -47,6 +47,13 @@ import java.nio.file.*
 @Transactional
 class BamMetadataImportService {
 
+    final static List<String> DEFAULT_RODDY_FILE_PATHS = [
+            "qualitycontrol/merged/coverage",
+            "qualitycontrol/merged/flagstats",
+            "qualitycontrol/merged/insertsize_distribution",
+            "qualitycontrol/merged/structural_variation",
+    ]
+
     @Autowired
     ApplicationContext applicationContext
 
@@ -93,17 +100,24 @@ class BamMetadataImportService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     Map validateAndImport(String metadataFile, boolean ignoreWarnings, String previousValidationMd5sum, ImportProcess.LinkOperation linkOperation,
-                          boolean triggerAnalysis, List<String> furtherFiles) {
+                          boolean triggerAnalysis, List<String> furtherFiles, boolean addDefaultFiles = false) {
         FileSystem fileSystem = fileSystemService.filesystemForBamImport
         Project outputProject
         ImportProcess importProcess
+
+        if (addDefaultFiles) {
+            furtherFiles.addAll(DEFAULT_RODDY_FILE_PATHS)
+        }
+
         BamMetadataValidationContext context = validate(metadataFile, furtherFiles, linkOperation.linkSource)
         try {
             MetadataImportService.mayImport(context, ignoreWarnings, previousValidationMd5sum)
-            importProcess = new ImportProcess([externallyProcessedBamFiles: [],
-                                               state                      : ImportProcess.State.NOT_STARTED,
-                                               linkOperation              : linkOperation,
-                                               triggerAnalysis            : triggerAnalysis,])
+            importProcess = new ImportProcess([
+                    externallyProcessedBamFiles: [],
+                    state                      : ImportProcess.State.NOT_STARTED,
+                    linkOperation              : linkOperation,
+                    triggerAnalysis            : triggerAnalysis,
+            ])
 
             context.spreadsheet.dataRows.each { Row row ->
                 String _referenceGenome = uniqueColumnValue(row, BamMetadataColumn.REFERENCE_GENOME)

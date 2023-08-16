@@ -142,6 +142,8 @@
             <tr>
                 <td><label><g:message code="bamMetadataImport.furtherFile"/></label></td>
                 <td class="multi-input-field">
+                    <g:checkBox id="addDefaultRoddyBamFilePaths" name="addDefaultRoddyBamFilePaths" checked="${cmd?.addDefaultRoddyBamFilePaths}"/>
+                    <label for="addDefaultRoddyBamFilePaths"><g:message code="bamMetadataImport.addAdditionalRoddyBamFilePaths"/></label>
                     <g:each in="${furtherFiles}" var="file" status="i">
                         <div class="field">
                             <g:textField name="furtherFilePaths" style="width: 1000px" value="${file}"/>

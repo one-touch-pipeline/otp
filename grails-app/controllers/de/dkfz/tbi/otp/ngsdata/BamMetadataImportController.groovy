@@ -62,7 +62,7 @@ class BamMetadataImportController {
                 flash.message = new FlashMessage("Error", cmd.errors)
             } else if (cmd.submit == "Import") {
                 Map results = bamMetadataImportService.validateAndImport(cmd.path, cmd.ignoreWarnings, cmd.md5,
-                        cmd.linkOperation, cmd.triggerAnalysis, cmd.furtherFilePaths)
+                        cmd.linkOperation, cmd.triggerAnalysis, cmd.furtherFilePaths, cmd.addDefaultRoddyBamFilePaths)
                 bamMetadataValidationContext = results.context
                 if (results.project != null) {
                     redirect(controller: "sampleOverview", action: "index", params: [project: results.project.name])
@@ -80,6 +80,7 @@ class BamMetadataImportController {
                     furtherFilePaths: cmd.furtherFilePaths,
                     linkOperation   : cmd.linkOperation,
                     triggerAnalysis : cmd.triggerAnalysis,
+                    addDefaultRoddyBamFilePaths: cmd.addDefaultRoddyBamFilePaths
             ])
         }
     }
@@ -93,6 +94,7 @@ class BamMetadataControllerSubmitCommand implements Serializable {
     ImportProcess.LinkOperation linkOperation
     boolean triggerAnalysis
     boolean ignoreWarnings
+    boolean addDefaultRoddyBamFilePaths
 
     static constraints = {
         path blank: false
