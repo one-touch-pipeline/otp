@@ -37,6 +37,7 @@ variables:
   DS_DEFAULT_ANALYZERS: "gemnasium, gemnasium-maven, bundler-audit"
   DS_EXCLUDED_ANALYZERS: "gemnasium-python"
   DS_JAVA_VERSION: 17
+  LICENSE_MANAGEMENT_VERSION: 4
 
 stages:
   - scanning
