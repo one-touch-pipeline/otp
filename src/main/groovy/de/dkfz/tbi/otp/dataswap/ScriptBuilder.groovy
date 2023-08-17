@@ -68,11 +68,13 @@ class ScriptBuilder {
         return this
     }
 
-    String build(String filename) {
+    String build(String filename, boolean returnBashScript = false) {
+        String bashScriptContent = buildBashScript()
         if (!bashCommands.empty) {
             writeBashScriptToFileSystem(filename, buildBashScript())
         }
-        return buildConsoleOutput()
+        String consoleOutput = buildConsoleOutput()
+        return returnBashScript ? consoleOutput + "\n" + bashScriptContent : consoleOutput
     }
 
     private String buildMetaInformation() {
@@ -80,11 +82,17 @@ class ScriptBuilder {
     }
 
     private String buildGroovyScript() {
+        if (groovyCommands.empty) {
+            return ""
+        }
         return encloseInGroovyDescription(groovyCommands.join("\n"))
     }
 
     private String buildConsoleOutput() {
-        return encloseInMetaDescription(buildMetaInformation() + "\n" + buildGroovyScript())
+        if (groovyCommands.empty && metaInformation.empty) {
+            return ""
+        }
+        return encloseInMetaDescription([buildMetaInformation(), buildGroovyScript()].join("\n"))
     }
 
     String buildBashScript() {
@@ -123,7 +131,7 @@ class ScriptBuilder {
                   |""".stripMargin()
     }
 
-    private void writeBashScriptToFileSystem(String filename, String content) {
+    void writeBashScriptToFileSystem(String filename, String content) {
         Realm realm = configService.getDefaultRealm() // codenarc-disable-line
         FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
         Path outDir = fileService.toPath(configService.scriptOutputPath, fileSystem).resolve(this.relativeOutputDir.toString())
