@@ -71,8 +71,6 @@ class TestConfigService extends ConfigService {
                     (OtpProperty.WES_AUTH_TOKEN_URI)      : '-',
                     (OtpProperty.WES_AUTH_CLIENT_ID)      : '-',
                     (OtpProperty.WES_AUTH_CLIENT_SECRET)  : '-',
-                    (OtpProperty.WES_AUTH_CLIENT_USER)    : '-',
-                    (OtpProperty.WES_AUTH_CLIENT_PASSWORD): '-',
                     (OtpProperty.WES_BASE_DATA_DIRECTORY) : '/tmp',
             ]
         }

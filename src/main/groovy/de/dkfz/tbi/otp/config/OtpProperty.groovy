@@ -107,16 +107,6 @@ enum OtpProperty {
      */
     WES_AUTH_CLIENT_SECRET('otp.wes.auth.clientSecret', TypeValidators.SINGLE_WORD_TEXT,
             EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT, UsedIn.WORKFLOW_TEST)),
-    /**
-     * oAuth2 user name of the otp user on the oAuth2 server used for the wes authentication
-     */
-    WES_AUTH_CLIENT_USER('otp.wes.auth.clientUser', TypeValidators.SINGLE_WORD_TEXT,
-            EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT, UsedIn.WORKFLOW_TEST)),
-    /**
-     * oAuth2 password of the otp user on the oAuth2 server used for the wes authentication
-     */
-    WES_AUTH_CLIENT_PASSWORD('otp.wes.auth.clientPassword', TypeValidators.SINGLE_WORD_TEXT,
-            EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT, UsedIn.WORKFLOW_TEST)),
 
     CONFIG_JOB_SYSTEM_START('otp.jobsystem.start', TypeValidators.BOOLEAN, EnumSet.of(UsedIn.PRODUCTION), 'false'),
     CONFIG_SERVER_URL('otp.server.url', TypeValidators.URL_STRING, EnumSet.of(UsedIn.PRODUCTION)),

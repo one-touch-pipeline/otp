@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.workflowExecution.wes
 
+import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono
@@ -54,8 +55,6 @@ class WeskitAuthServiceSpec extends Specification {
             1 * wesAuthTokenUri >> url
             1 * wesAuthClientId >> 'wesAuthClientId'
             1 * wesAuthClientSecret >> 'wesAuthClientSecret'
-            1 * wesAuthClientUser >> 'wesAuthClientUser'
-            1 * wesAuthClientPassword >> 'wesAuthClientPassword'
             0 * _
         }
         service.webClient = Mock(WebClient) {
@@ -70,6 +69,7 @@ class WeskitAuthServiceSpec extends Specification {
         1 * requestBuilder.uri(url) >> requestBuilder
         1 * requestBuilder.attributes(_) >> requestBuilder
         1 * requestBuilder.accept(MediaType.APPLICATION_JSON) >> requestBuilder
+        1 * requestBuilder.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
         1 * requestBuilder.body(_) >> requestBuilder
         1 * requestBuilder.retrieve() >> responseSpec
         1 * responseSpec.bodyToMono(String) >> mono

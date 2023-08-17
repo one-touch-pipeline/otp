@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.workflowExecution.wes
 import grails.converters.JSON
 import org.grails.web.json.JSONElement
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.security.oauth2.client.web.reactive.function.client.ServerOAuth2AuthorizedClientExchangeFilterFunction
 import org.springframework.util.LinkedMultiValueMap
@@ -56,6 +57,7 @@ class WeskitAuthService {
             requestBuilder.uri(configService.wesAuthTokenUri)
             requestBuilder.attributes(ServerOAuth2AuthorizedClientExchangeFilterFunction.clientRegistrationId(CLIENT_REGISTRATION_ID))
             requestBuilder.accept(MediaType.APPLICATION_JSON)
+            requestBuilder.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
             requestBuilder.body(BodyInserters.fromFormData(createParameters()))
 
             String accessTokenJsonString = requestBuilder.retrieve()
@@ -74,11 +76,9 @@ class WeskitAuthService {
      */
     private MultiValueMap<String, String> createParameters() {
         MultiValueMap<String, String> bodyValues = new LinkedMultiValueMap<>()
-        bodyValues.add('grant_type', 'password')
+        bodyValues.add('grant_type', 'client_credentials')
         bodyValues.add('client_id', configService.wesAuthClientId)
         bodyValues.add('client_secret', configService.wesAuthClientSecret)
-        bodyValues.add('username', configService.wesAuthClientUser)
-        bodyValues.add('password', configService.wesAuthClientPassword)
         return bodyValues
     }
 }
