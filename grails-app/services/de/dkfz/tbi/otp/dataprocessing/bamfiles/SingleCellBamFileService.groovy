@@ -40,6 +40,8 @@ class SingleCellBamFileService<T extends AbstractBamFile> extends AbstractAbstra
 
     static final String OUTPUT_DIRECTORY_NAME = 'outs'
 
+    static final String ANALYSIS_DIRECTORY_NAME = 'analysis'
+
     static final String ORIGINAL_BAM_FILE_NAME = 'possorted_genome_bam.bam'
 
     static final String ORIGINAL_BAI_FILE_NAME = 'possorted_genome_bam.bam.bai'

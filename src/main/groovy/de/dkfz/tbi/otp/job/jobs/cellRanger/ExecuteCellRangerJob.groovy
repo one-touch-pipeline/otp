@@ -29,6 +29,7 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
+import de.dkfz.tbi.otp.dataprocessing.bamfiles.SingleCellBamFileService
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerService
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.infrastructure.FileService
@@ -60,6 +61,9 @@ class ExecuteCellRangerJob extends AbstractOtpJob implements AutoRestartableJob 
 
     @Autowired
     ProcessingOptionService processingOptionService
+
+    @Autowired
+    SingleCellBamFileService singleCellBamFileService
 
     @Override
     protected NextAction maybeSubmit() throws Throwable {
@@ -109,10 +113,28 @@ class ExecuteCellRangerJob extends AbstractOtpJob implements AutoRestartableJob 
             echo \"${command}\" > ${Paths.get(singleCellBamFile.resultDirectory.toString(), "${singleCellBamFile.singleCellSampleName}_" +
                 "${SingleCellBamFile.CELL_RANGER_COMMAND_FILE_NAME}").toAbsolutePath()}
 
+            ${fixCellRangerChgrpProblem(singleCellBamFile)}
+
             ${createMd5SumCommand(singleCellBamFile)}
             """
 
         return script
+    }
+
+    /**
+     * There currently is a Problem with the cellranger workflow.
+     * The Analysis folder is created with a ACL that prevennts chgrp.
+     * To prevent this we replace the folder with a copy of itself where this problem does not occur.
+     */
+    private String fixCellRangerChgrpProblem(SingleCellBamFile singleCellBamFile) {
+        return """\
+        cd ${singleCellBamFileService.getResultDirectory(singleCellBamFile)}
+
+        mv ${SingleCellBamFileService.ANALYSIS_DIRECTORY_NAME} _${SingleCellBamFileService.ANALYSIS_DIRECTORY_NAME}
+
+        cp -r _${SingleCellBamFileService.ANALYSIS_DIRECTORY_NAME} ${SingleCellBamFileService.ANALYSIS_DIRECTORY_NAME}
+
+        rm -rf _${SingleCellBamFileService.ANALYSIS_DIRECTORY_NAME}"""
     }
 
     private String createCommand(SingleCellBamFile singleCellBamFile) {
