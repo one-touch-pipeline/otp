@@ -21,8 +21,63 @@
  */
 package de.dkfz.tbi.otp.workflow.rna
 
-class RnaAlignmentWorkflow {
+import groovy.util.logging.Slf4j
+import org.springframework.stereotype.Component
+
+import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
+import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
+import de.dkfz.tbi.otp.workflow.jobs.SetCorrectPermissionJob
+import de.dkfz.tbi.otp.workflowExecution.Artefact
+import de.dkfz.tbi.otp.workflowExecution.OtpWorkflow
+import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
+
+@Component
+@Slf4j
+class RnaAlignmentWorkflow implements OtpWorkflow {
     static final String WORKFLOW = "RNA alignment"
     static final String INPUT_FASTQ = "FASTQ"
     static final String OUTPUT_BAM = "BAM"
+
+    final String userDocumentation = null
+
+    @Override
+    List<String> getJobBeanNames() {
+        return [
+                SetCorrectPermissionJob.simpleName.uncapitalize(),
+        ]
+    }
+
+    @Override
+    Artefact createCopyOfArtefact(Artefact artefact) {
+        RnaRoddyBamFile rnaRoddyBamFile = artefact as RnaRoddyBamFile
+
+        MergingWorkPackage mergingWorkPackage = rnaRoddyBamFile.mergingWorkPackage
+        int identifier = RnaRoddyBamFile .nextIdentifier(mergingWorkPackage)
+
+        RnaRoddyBamFile outputRnaRoddyBamFile = new RnaRoddyBamFile([
+                workPackage        : mergingWorkPackage,
+                identifier         : identifier,
+                workDirectoryName  : "${RnaRoddyBamFile.WORK_DIR_PREFIX}_${identifier}",
+                baseBamFile        : rnaRoddyBamFile.baseBamFile,
+                seqTracks          : rnaRoddyBamFile.seqTracks.collect() as Set,
+                config             : rnaRoddyBamFile.config,
+                numberOfMergedLanes: rnaRoddyBamFile.containedSeqTracks.size(),
+        ]).save(flush: true)
+
+        return outputRnaRoddyBamFile
+    }
+
+    @Override
+    void reconnectDependencies(Artefact artefact, WorkflowArtefact newWorkflowArtefact) {
+    }
+
+    @Override
+    boolean isAlignment() {
+        return true
+    }
+
+    @Override
+    boolean isAnalysis() {
+        return false
+    }
 }
