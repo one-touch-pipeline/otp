@@ -19,11 +19,11 @@
   - OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
   - SOFTWARE.
   --}%
-<%@ page import="de.dkfz.tbi.otp.tracking.OtrsTicket" %>
+<%@ page import="de.dkfz.tbi.otp.tracking.Ticket" %>
 
 <table>
     <g:set var="map" value="${processingStatus.workflowProcessingStatusPerProcessingStep}"/>
-    <g:each var="step" in="${OtrsTicket.ProcessingStep.values()}">
+    <g:each var="step" in="${Ticket.ProcessingStep.values()}">
         <tr>
             <td>${step.displayName.capitalize()}</td>
             <td>${map[step]}</td>

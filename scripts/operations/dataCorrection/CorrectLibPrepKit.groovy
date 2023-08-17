@@ -39,7 +39,7 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 
 String libPrepKit = '' // new lib prep kit
 
-String commentInfo = '' // some additional Information about the change, perhaps link to OTRS ticket
+String commentInfo = '' // some additional Information about the change, perhaps link to ticket
 
 boolean overrideLibPrepKit = false // if a lib prep kit already exist, override it
 

@@ -30,7 +30,7 @@ import de.dkfz.tbi.otp.job.jobs.AbstractBamFilePairAnalysis.WithReferenceGenomeR
 import de.dkfz.tbi.otp.job.jobs.AbstractBamFilePairAnalysisStartJobIntegrationSpec
 import de.dkfz.tbi.otp.job.jobs.bamFilePairAnalysis.AbstractBamFilePairAnalysisStartJob
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.tracking.OtrsTicket
+import de.dkfz.tbi.otp.tracking.Ticket
 
 class RoddySophiaStartJobIntegrationSpec extends AbstractBamFilePairAnalysisStartJobIntegrationSpec implements RoddyJobSpec, WithReferenceGenomeRestrictionSpec {
 
@@ -53,8 +53,8 @@ class RoddySophiaStartJobIntegrationSpec extends AbstractBamFilePairAnalysisStar
     }
 
     @Override
-    Date getStartedDate(OtrsTicket otrsTicket) {
-        return otrsTicket.sophiaStarted
+    Date getStartedDate(Ticket ticket) {
+        return ticket.sophiaStarted
     }
 
     @Override

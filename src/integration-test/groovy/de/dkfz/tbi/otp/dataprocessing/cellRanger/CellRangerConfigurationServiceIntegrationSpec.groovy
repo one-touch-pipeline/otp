@@ -37,7 +37,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.security.UserAndRoles
-import de.dkfz.tbi.otp.tracking.OtrsTicket
+import de.dkfz.tbi.otp.tracking.Ticket
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 import java.sql.Timestamp
@@ -189,7 +189,7 @@ class CellRangerConfigurationServiceIntegrationSpec extends Specification implem
                         createFastqFile(seqTrack: seqTrackA),
                         createFastqFile(seqTrack: seqTrackB),
                 ] as Set<RawSequenceFile>,
-                otrsTicket: createOtrsTicketWithEndDatesAndNotificationSent(),
+                ticket: createTicketWithEndDatesAndNotificationSent(),
         )
         CellRangerMwpParameter expectedParameter = createCellRangerMwpParameter()
 
@@ -215,24 +215,24 @@ class CellRangerConfigurationServiceIntegrationSpec extends Specification implem
 
         and: "affected ticket reset"
         fastqImportInstance.with {
-            !otrsTicket.finalNotificationSent
-            !otrsTicket.alignmentFinished
+            !ticket.finalNotificationSent
+            !ticket.alignmentFinished
         }
     }
 
     void "resetTicketForCellRangerExecution properly prepares ticket"() {
         given:
-        OtrsTicket otrsTicket = createOtrsTicket(
+        Ticket ticket = createTicket(
                 finalNotificationSent: finalNotification,
                 alignmentFinished: finished ? new Date() : null,
         )
 
         when:
-        cellRangerConfigurationService.resetTicketForCellRangerExecution(otrsTicket)
+        cellRangerConfigurationService.resetTicketForCellRangerExecution(ticket)
 
         then:
-        !otrsTicket.finalNotificationSent
-        !otrsTicket.alignmentFinished
+        !ticket.finalNotificationSent
+        !ticket.alignmentFinished
 
         where:
         finalNotification | finished
@@ -248,7 +248,7 @@ class CellRangerConfigurationServiceIntegrationSpec extends Specification implem
         Closure<FastqImportInstance> createImportInstanceHelper = {
             return createFastqImportInstance(
                     sequenceFiles: [createFastqFile()] as Set<RawSequenceFile>,
-                    otrsTicket: createOtrsTicketWithEndDatesAndNotificationSent(),
+                    ticket: createTicketWithEndDatesAndNotificationSent(),
             )
         }
 
@@ -263,16 +263,16 @@ class CellRangerConfigurationServiceIntegrationSpec extends Specification implem
 
         then:
         instanceResetA.with {
-            !otrsTicket.finalNotificationSent
-            !otrsTicket.alignmentFinished
+            !ticket.finalNotificationSent
+            !ticket.alignmentFinished
         }
         instanceResetB.with {
-            !otrsTicket.finalNotificationSent
-            !otrsTicket.alignmentFinished
+            !ticket.finalNotificationSent
+            !ticket.alignmentFinished
         }
         instanceUntouched.with {
-            otrsTicket.finalNotificationSent
-            otrsTicket.alignmentFinished
+            ticket.finalNotificationSent
+            ticket.alignmentFinished
         }
     }
 

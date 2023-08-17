@@ -28,8 +28,8 @@ import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
-import de.dkfz.tbi.otp.tracking.OtrsTicket
-import de.dkfz.tbi.otp.tracking.OtrsTicketService
+import de.dkfz.tbi.otp.tracking.Ticket
+import de.dkfz.tbi.otp.tracking.TicketService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.MailHelperService
 import de.dkfz.tbi.util.TimeFormats
@@ -46,7 +46,7 @@ class JobMailService {
 
     JobStatusLoggingService jobStatusLoggingService
 
-    OtrsTicketService otrsTicketService
+    TicketService ticketService
 
     void sendErrorNotification(Job job, String errorMessage) {
         assert job: 'job may not be null'
@@ -61,11 +61,11 @@ class JobMailService {
         String subjectPrefix = object.processingPriority?.errorMailPrefix ?: "ERROR"
         Collection<SeqTrack> seqTracks = object.containedSeqTracks
         String ilseNumbers = seqTracks*.ilseSubmission*.ilseNumber.unique().sort().join(', ')
-        Set<OtrsTicket> openTickets = seqTracks ? otrsTicketService.findAllOtrsTickets(seqTracks).findAll { OtrsTicket otrsTicket ->
-            !otrsTicket.finalNotificationSent
+        Set<Ticket> openTickets = seqTracks ? ticketService.findAllTickets(seqTracks).findAll { Ticket ticket ->
+            !ticket.finalNotificationSent
         } : []
         Set<String> openTicketsUrl = openTickets.collect {
-            otrsTicketService.buildTicketDirectLink(it)
+            ticketService.buildTicketDirectLink(it)
         }
 
         List<ClusterJob> clusterJobs = ClusterJob.findAllByProcessingStep(step)

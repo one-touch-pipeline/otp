@@ -31,7 +31,7 @@ import de.dkfz.tbi.otp.domainFactory.FastqcDomainFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.NotificationCreator
-import de.dkfz.tbi.otp.tracking.OtrsTicket
+import de.dkfz.tbi.otp.tracking.Ticket
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflowExecution.*
 
@@ -87,7 +87,7 @@ class FastqcWesPrepareJobSpec extends Specification implements DataTest, FastqcD
         job.doFurtherPreparation(workflowStep)
 
         then:
-        1 * job.notificationCreator.setStartedForSeqTracks([seqTrack], OtrsTicket.ProcessingStep.FASTQC)
+        1 * job.notificationCreator.setStartedForSeqTracks([seqTrack], Ticket.ProcessingStep.FASTQC)
         seqTrack.fastqcState == SeqTrack.DataProcessingState.IN_PROGRESS
         fastqcProcessedFile.fileCopied == canBeCopied
         fastqcProcessedFile.pathInWorkFolder == pathInWorkFolder

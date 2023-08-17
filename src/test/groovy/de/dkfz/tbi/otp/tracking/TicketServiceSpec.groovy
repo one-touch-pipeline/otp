@@ -29,12 +29,12 @@ import spock.lang.Unroll
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 
-class OtrsTicketServiceSpec extends Specification implements DataTest, DomainFactoryCore {
+class TicketServiceSpec extends Specification implements DataTest, DomainFactoryCore {
 
     @Override
     Class[] getDomainClassesToMock() {
         return [
-                OtrsTicket,
+                Ticket,
                 ProcessingOption,
         ]
     }
@@ -42,16 +42,16 @@ class OtrsTicketServiceSpec extends Specification implements DataTest, DomainFac
     private final static String TICKET_NUMBER = "2000010112345678"
 
     @Unroll
-    void 'createOrResetOtrsTicket, when no OtrsTicket with ticket number exists, creates one (comment: #comment)'() {
+    void 'createOrResetTicket, when no ticket with ticket number exists, creates one (comment: #comment)'() {
         given:
-        OtrsTicketService otrsTicketService = new OtrsTicketService()
+        TicketService ticketService = new TicketService()
 
         when:
-        OtrsTicket otrsTicket = otrsTicketService.createOrResetOtrsTicket(TICKET_NUMBER, comment, true)
+        Ticket ticket = ticketService.createOrResetTicket(TICKET_NUMBER, comment, true)
 
         then:
-        assertTicket(otrsTicket)
-        otrsTicket.seqCenterComment == comment
+        assertTicket(ticket)
+        ticket.seqCenterComment == comment
 
         where:
         comment << [
@@ -62,10 +62,10 @@ class OtrsTicketServiceSpec extends Specification implements DataTest, DomainFac
         ]
     }
 
-    void 'createOrResetOtrsTicket, when OtrsTicket with ticket number exists, resets it'() {
+    void 'createOrResetTicket, when ticket with ticket number exists, resets it'() {
         given:
-        OtrsTicketService otrsTicketService = new OtrsTicketService()
-        createOtrsTicket([
+        TicketService ticketService = new TicketService()
+        createTicket([
                 ticketNumber         : TICKET_NUMBER,
                 installationFinished : new Date(),
                 fastqcFinished       : new Date(),
@@ -80,26 +80,26 @@ class OtrsTicketServiceSpec extends Specification implements DataTest, DomainFac
         ])
 
         when:
-        OtrsTicket otrsTicket = otrsTicketService.createOrResetOtrsTicket(TICKET_NUMBER, null, true)
+        Ticket ticket = ticketService.createOrResetTicket(TICKET_NUMBER, null, true)
 
         then:
-        assertTicket(otrsTicket)
+        assertTicket(ticket)
     }
 
     @Unroll
-    void 'createOrResetOtrsTicket, when OtrsTicket with ticket number exists, combine the seq center comment'() {
+    void 'createOrResetTicket, when ticket with ticket number exists, combine the seq center comment'() {
         given:
-        OtrsTicketService otrsTicketService = new OtrsTicketService()
-        createOtrsTicket([
+        TicketService ticketService = new TicketService()
+        createTicket([
                 ticketNumber    : TICKET_NUMBER,
                 seqCenterComment: comment1,
         ])
 
         when:
-        OtrsTicket otrsTicket = otrsTicketService.createOrResetOtrsTicket(TICKET_NUMBER, comment2, true)
+        Ticket ticket = ticketService.createOrResetTicket(TICKET_NUMBER, comment2, true)
 
         then:
-        resultComment == otrsTicket.seqCenterComment
+        resultComment == ticket.seqCenterComment
 
         where:
         comment1     | comment2     || resultComment
@@ -110,59 +110,75 @@ class OtrsTicketServiceSpec extends Specification implements DataTest, DomainFac
         'Something1' | 'Something2' || 'Something1\n\nSomething2'
     }
 
-    void 'createOrResetOtrsTicket, when ticket number is null, throws ValidationException'() {
+    void 'createOrResetTicket, when ticket number is null, throws ValidationException'() {
         given:
-        OtrsTicketService otrsTicketService = new OtrsTicketService()
+        TicketService ticketService = new TicketService()
 
         when:
-        otrsTicketService.createOrResetOtrsTicket(null, null, true)
+        ticketService.createOrResetTicket(null, null, true)
 
         then:
         ValidationException ex = thrown()
         ex.message.contains("on field 'ticketNumber': rejected value [null]")
     }
 
-    void 'createOrResetOtrsTicket, when ticket number is blank, throws ValidationException'() {
+    void 'createOrResetTicket, when ticket number is blank, throws ValidationException'() {
         given:
-        OtrsTicketService otrsTicketService = new OtrsTicketService()
+        TicketService ticketService = new TicketService()
 
         when:
-        otrsTicketService.createOrResetOtrsTicket("", null, true)
+        ticketService.createOrResetTicket("", null, true)
 
         then:
         ValidationException ex = thrown()
         ex.message.contains("on field 'ticketNumber': rejected value []")
     }
 
-    void 'resetAnalysisNotification, when OtrsTicket is reset, then final flag is false and finish date of analysis dates are null'() {
+    void 'resetAnalysisNotification, when ticket is reset, then final flag is false and finish date of analysis dates are null'() {
         given:
-        OtrsTicketService otrsTicketService = new OtrsTicketService()
-        OtrsTicket otrsTicket = createOtrsTicketWithEndDatesAndNotificationSent([
+        TicketService ticketService = new TicketService()
+        Ticket ticket = createTicketWithEndDatesAndNotificationSent([
                 ticketNumber         : TICKET_NUMBER,
                 automaticNotification: true,
         ])
 
         when:
-        otrsTicketService.resetAnalysisNotification(otrsTicket)
+        ticketService.resetAnalysisNotification(ticket)
 
         then:
-        otrsTicket.snvFinished == null
-        otrsTicket.indelFinished == null
-        otrsTicket.sophiaFinished == null
-        otrsTicket.aceseqFinished == null
-        otrsTicket.runYapsaFinished == null
-        otrsTicket.finalNotificationSent == false
+        ticket.snvFinished == null
+        ticket.indelFinished == null
+        ticket.sophiaFinished == null
+        ticket.aceseqFinished == null
+        ticket.runYapsaFinished == null
+        ticket.finalNotificationSent == false
     }
 
-    private boolean assertTicket(OtrsTicket otrsTicket) {
-        assert otrsTicket.ticketNumber == TICKET_NUMBER
-        assert otrsTicket.installationFinished == null
-        assert otrsTicket.fastqcFinished == null
-        assert otrsTicket.alignmentFinished == null
-        assert otrsTicket.snvFinished == null
-        assert otrsTicket.indelFinished == null
-        assert otrsTicket.aceseqFinished == null
-        assert !otrsTicket.finalNotificationSent
+    @SuppressWarnings("GStringExpressionWithinString")
+    void "buildTicketDirectLink, when build direct link then should return direct link with ticket number"() {
+        given:
+        TicketService ticketService = new TicketService()
+        final String TICKET_SYSTEM_URL = "https://ticketsystem:8080/index.pl?Action=AgentTicketZoom;TicketNumber="
+        final String TICKET_NUMBER = "\${ticketNumber}"
+        Ticket ticket = createTicket()
+        findOrCreateProcessingOption(ProcessingOption.OptionName.TICKET_SYSTEM_URL, TICKET_SYSTEM_URL + TICKET_NUMBER)
+
+        when:
+        String directLink = ticketService.buildTicketDirectLink(ticket)
+
+        then:
+        directLink == "${TICKET_SYSTEM_URL}${ticket.ticketNumber}"
+    }
+
+    private boolean assertTicket(Ticket ticket) {
+        assert ticket.ticketNumber == TICKET_NUMBER
+        assert ticket.installationFinished == null
+        assert ticket.fastqcFinished == null
+        assert ticket.alignmentFinished == null
+        assert ticket.snvFinished == null
+        assert ticket.indelFinished == null
+        assert ticket.aceseqFinished == null
+        assert !ticket.finalNotificationSent
         return true
     }
 }

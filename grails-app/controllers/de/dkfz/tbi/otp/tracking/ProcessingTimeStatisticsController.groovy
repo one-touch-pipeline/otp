@@ -53,15 +53,15 @@ class ProcessingTimeStatisticsController {
 
     def dataTableSource(DataTableCommand cmd) {
         Map dataToRender = cmd.dataToRender()
-        dataToRender.iTotalRecords = OtrsTicket.count()
+        dataToRender.iTotalRecords = Ticket.count()
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
 
         LocalDate dateFrom = LocalDate.parse(params.from)
         LocalDate dateTo = LocalDate.parse(params.to)
 
-        List<OtrsTicket> tickets = processingTimeStatisticsService.findAllOtrsTicketsByDateBetweenAndSearch(dateFrom, dateTo, cmd.sSearch)
+        List<Ticket> tickets = processingTimeStatisticsService.findAllTicketsByDateBetweenAndSearch(dateFrom, dateTo, cmd.sSearch)
 
-        dataToRender.aaData = tickets.collect { OtrsTicket ticket ->
+        dataToRender.aaData = tickets.collect { Ticket ticket ->
             return processingTimeStatisticsService.formatData(ticket)
         }
 
@@ -71,7 +71,7 @@ class ProcessingTimeStatisticsController {
     def editValue() {
         Map data = [:]
 
-        OtrsTicket ticket = OtrsTicket.get(params.id as long)
+        Ticket ticket = Ticket.get(params.id as long)
         assert ticket
 
         switch (params.type) {

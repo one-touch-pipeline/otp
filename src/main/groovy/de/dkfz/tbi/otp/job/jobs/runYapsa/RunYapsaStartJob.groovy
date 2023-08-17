@@ -34,7 +34,7 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.job.jobs.bamFilePairAnalysis.AbstractBamFilePairAnalysisStartJob
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.otp.tracking.OtrsTicket
+import de.dkfz.tbi.otp.tracking.Ticket
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 @CompileDynamic
@@ -49,7 +49,7 @@ class RunYapsaStartJob extends AbstractBamFilePairAnalysisStartJob {
     void prepareCreatingTheProcessAndTriggerTracking(BamFilePairAnalysis bamFilePairAnalysis) {
         assert bamFilePairAnalysis : "bamFilePairAnalysis must not be null"
 
-        notificationCreator.setStartedForSeqTracks(bamFilePairAnalysis.containedSeqTracks, OtrsTicket.ProcessingStep.RUN_YAPSA)
+        notificationCreator.setStartedForSeqTracks(bamFilePairAnalysis.containedSeqTracks, Ticket.ProcessingStep.RUN_YAPSA)
         bamFilePairAnalysis.samplePair.runYapsaProcessingStatus = SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED
         bamFilePairAnalysis.samplePair.save(flush: true)
     }

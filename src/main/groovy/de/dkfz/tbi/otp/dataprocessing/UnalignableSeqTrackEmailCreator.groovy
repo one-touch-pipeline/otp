@@ -27,8 +27,8 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.Sample
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
-import de.dkfz.tbi.otp.tracking.OtrsTicket
-import de.dkfz.tbi.otp.tracking.OtrsTicketService
+import de.dkfz.tbi.otp.tracking.Ticket
+import de.dkfz.tbi.otp.tracking.TicketService
 import de.dkfz.tbi.otp.utils.MailHelperService
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
@@ -41,7 +41,7 @@ class UnalignableSeqTrackEmailCreator {
     MailHelperService mailHelperService
 
     @Autowired
-    OtrsTicketService otrsTicketService
+    TicketService ticketService
 
     MailContent getMailContent(MergingWorkPackage workPackage, SeqTrack seqTrack) {
         return new MailContent(
@@ -51,9 +51,9 @@ class UnalignableSeqTrackEmailCreator {
     }
 
     private String getSubject(SeqTrack seqTrack) {
-        OtrsTicket ticket = atMostOneElement(otrsTicketService.findAllOtrsTickets([seqTrack]))
+        Ticket ticket = atMostOneElement(ticketService.findAllTickets([seqTrack]))
         return [
-                ticket ? "[${otrsTicketService.getPrefixedTicketNumber(ticket)}]" : null,
+                ticket ? "[${ticketService.getPrefixedTicketNumber(ticket)}]" : null,
                 "Will not be aligned:",
                 seqTrack.ilseId ? "[ILSe ${seqTrack.ilseId}]" : null,
                 seqTrack.run.name,

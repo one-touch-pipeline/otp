@@ -35,7 +35,7 @@ import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.RoddyConfigValueService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.NotificationCreator
-import de.dkfz.tbi.otp.tracking.OtrsTicket
+import de.dkfz.tbi.otp.tracking.Ticket
 import de.dkfz.tbi.otp.utils.LinkEntry
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflow.alignment.RoddyAlignmentPrepareService
@@ -122,7 +122,7 @@ class WgbsPrepareJobSpec extends Specification implements DataTest, WgbsAlignmen
         job.doFurtherPreparation(workflowStep)
 
         then:
-        1 * job.roddyAlignmentPrepareService.notificationCreator.setStartedForSeqTracks(seqTracks, OtrsTicket.ProcessingStep.ALIGNMENT)
+        1 * job.roddyAlignmentPrepareService.notificationCreator.setStartedForSeqTracks(seqTracks, Ticket.ProcessingStep.ALIGNMENT)
     }
 
     void "test doFurtherPreparation should mark start of workflow in MergingWorkPackage"() {

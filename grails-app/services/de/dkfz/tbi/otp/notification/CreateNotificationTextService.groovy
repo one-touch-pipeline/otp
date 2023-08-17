@@ -37,11 +37,11 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.tracking.*
-import de.dkfz.tbi.otp.tracking.OtrsTicket.ProcessingStep
+import de.dkfz.tbi.otp.tracking.Ticket.ProcessingStep
 import de.dkfz.tbi.otp.utils.MessageSourceService
 import de.dkfz.tbi.otp.workflowExecution.*
 
-import static de.dkfz.tbi.otp.tracking.OtrsTicket.ProcessingStep.*
+import static de.dkfz.tbi.otp.tracking.Ticket.ProcessingStep.*
 import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus
 import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus.ALL_DONE
 import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO
@@ -58,14 +58,14 @@ class CreateNotificationTextService {
     MessageSourceService messageSourceService
     ProcessingOptionService processingOptionService
     ProjectService projectService
-    OtrsTicketService otrsTicketService
+    TicketService ticketService
 
     /**
      * Helper function to create the notification for exactly one ProcessingStep.
      */
-    String notification(OtrsTicket otrsTicket, ProcessingStatus status, ProcessingStep processingStep, Project project) {
+    String notification(Ticket ticket, ProcessingStatus status, ProcessingStep processingStep, Project project) {
         assert processingStep
-        return multiStepNotification(otrsTicket, status, [processingStep], project)
+        return multiStepNotification(ticket, status, [processingStep], project)
     }
 
     /**
@@ -75,8 +75,8 @@ class CreateNotificationTextService {
      * notification of all provided steps, followed by the seqCenterComment, followed by a common
      * conclusion and ended with a reference to the FAQs.
      */
-    String multiStepNotification(OtrsTicket otrsTicket, ProcessingStatus status, List<ProcessingStep> processingSteps, Project project) {
-        assert otrsTicket
+    String multiStepNotification(Ticket ticket, ProcessingStatus status, List<ProcessingStep> processingSteps, Project project) {
+        assert ticket
         assert status
         assert project
 
@@ -88,7 +88,7 @@ class CreateNotificationTextService {
 
         return messageSourceService.createMessage('notification.template.base', [
                 stepInformation      : stepInformation,
-                seqCenterComment     : buildSeqCenterComment(otrsTicket),
+                seqCenterComment     : buildSeqCenterComment(ticket),
                 emailSenderSalutation: processingOptionService.findOptionAsString(OptionName.HELP_DESK_TEAM_NAME),
                 faq                  : faq,
         ])
@@ -122,10 +122,10 @@ class CreateNotificationTextService {
      * The comment is SeqCenter specific. Should there be data from more than one SeqCenter connected
      * to the ticket it will return an empty comment string.
      */
-    String buildSeqCenterComment(OtrsTicket otrsTicket) {
-        String ticketComment = otrsTicket.seqCenterComment ?: ""
+    String buildSeqCenterComment(Ticket ticket) {
+        String ticketComment = ticket.seqCenterComment ?: ""
 
-        List<SeqCenter> seqCenters = otrsTicketService.findAllSeqTracks(otrsTicket)*.seqCenter.unique()
+        List<SeqCenter> seqCenters = ticketService.findAllSeqTracks(ticket)*.seqCenter.unique()
         String generalComment = seqCenters.size() == 1 ? processingOptionService.findOptionAsString(
                 OptionName.NOTIFICATION_TEMPLATE_SEQ_CENTER_NOTE,
                 seqCenters.first().name

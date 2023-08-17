@@ -59,20 +59,20 @@ class NotificationDigestServiceIntegrationSpec extends Specification implements 
 
     NotificationCommand createNotificationCommand(Map properties = [:]) {
         return new NotificationCommand([
-                otrsTicket         : properties.otrsTicket ?: createOtrsTicket(),
+                ticket         : properties.ticket ?: createTicket(),
                 fastqImportInstance: properties.fastqImportInstance ?: createFastqImportInstance(),
-                steps              : properties.steps ?: OtrsTicket.ProcessingStep.values() - OtrsTicket.ProcessingStep.FASTQC,
+                steps              : properties.steps ?: Ticket.ProcessingStep.values() - Ticket.ProcessingStep.FASTQC,
                 notifyQcThresholds : properties.notifyQcThresholds ?: true,
         ] + properties)
     }
 
     Map<String, Object> setupNotificationCommand() {
-        OtrsTicket otrsTicket = createOtrsTicket()
+        Ticket ticket = createTicket()
 
         SeqTrack seqTrack1 = createSeqTrackWithOneFastqFile()
         SeqTrack seqTrack2 = createSeqTrackWithOneFastqFile()
         List<RawSequenceFile> rawSequenceFiles1 = ([seqTrack1, seqTrack2]*.sequenceFiles).flatten()
-        FastqImportInstance fastqImportInstance1 = createFastqImportInstance(otrsTicket: otrsTicket, sequenceFiles: rawSequenceFiles1)
+        FastqImportInstance fastqImportInstance1 = createFastqImportInstance(ticket: ticket, sequenceFiles: rawSequenceFiles1)
         rawSequenceFiles1.each {
             it.fastqImportInstance = fastqImportInstance1
             it.save(flush: true)
@@ -80,20 +80,20 @@ class NotificationDigestServiceIntegrationSpec extends Specification implements 
 
         SeqTrack seqTrack3 = createSeqTrackWithOneFastqFile()
         List<RawSequenceFile> rawSequenceFiles2 = ([seqTrack3]*.sequenceFiles).flatten()
-        FastqImportInstance fastqImportInstance2 = createFastqImportInstance(otrsTicket: otrsTicket, sequenceFiles: rawSequenceFiles2)
+        FastqImportInstance fastqImportInstance2 = createFastqImportInstance(ticket: ticket, sequenceFiles: rawSequenceFiles2)
         rawSequenceFiles2.each {
             it.fastqImportInstance = fastqImportInstance2
             it.save(flush: true)
         }
 
-        List<OtrsTicket.ProcessingStep> processingSteps = [
-                OtrsTicket.ProcessingStep.INSTALLATION,
-                OtrsTicket.ProcessingStep.ALIGNMENT,
-                OtrsTicket.ProcessingStep.SNV,
+        List<Ticket.ProcessingStep> processingSteps = [
+                Ticket.ProcessingStep.INSTALLATION,
+                Ticket.ProcessingStep.ALIGNMENT,
+                Ticket.ProcessingStep.SNV,
         ]
 
         NotificationCommand cmd = createNotificationCommand(
-                otrsTicket         : otrsTicket,
+                ticket         : ticket,
                 fastqImportInstance: fastqImportInstance1,
                 steps              : processingSteps,
                 notifyQcThresholds : true,
@@ -123,7 +123,7 @@ class NotificationDigestServiceIntegrationSpec extends Specification implements 
                     sendCalls * sendEmail(_, _, _)
                 },
                 qcTrafficLightNotificationService: Mock(QcTrafficLightNotificationService),
-                otrsTicketService: new OtrsTicketService(
+                ticketService: new TicketService(
                         processingOptionService: new ProcessingOptionService(),
                 ),
         )
@@ -171,13 +171,13 @@ class NotificationDigestServiceIntegrationSpec extends Specification implements 
         preparedNotifications*.toBeNotifiedProjectUsers.flatten().unique() == [projectUser]
     }
 
-    NotificationDigestService setupMockedServiceForBuildNotificationDigestTest(List<OtrsTicket.ProcessingStep> finishedSteps = []) {
-        Map<OtrsTicket.ProcessingStep, Boolean> stepsToNotify = OtrsTicket.ProcessingStep.values().collectEntries { OtrsTicket.ProcessingStep step ->
+    NotificationDigestService setupMockedServiceForBuildNotificationDigestTest(List<Ticket.ProcessingStep> finishedSteps = []) {
+        Map<Ticket.ProcessingStep, Boolean> stepsToNotify = Ticket.ProcessingStep.values().collectEntries { Ticket.ProcessingStep step ->
             [(step): (step in finishedSteps)]
         }
         return new NotificationDigestService(
                 createNotificationTextService    : Mock(CreateNotificationTextService) {
-                    _ * buildStepNotifications(_, _) >> { List<OtrsTicket.ProcessingStep> processingSteps, ProcessingStatus status ->
+                    _ * buildStepNotifications(_, _) >> { List<Ticket.ProcessingStep> processingSteps, ProcessingStatus status ->
                         return processingSteps.findAll { stepsToNotify[it] }*.name().sort().join(",")
                     }
                     _ * buildSeqCenterComment(_) >> { return SEQ_CENTER_COMMENT }
@@ -203,10 +203,10 @@ class NotificationDigestServiceIntegrationSpec extends Specification implements 
         given:
         setupData()
 
-        List<OtrsTicket.ProcessingStep> steps = [
-                OtrsTicket.ProcessingStep.INSTALLATION,
-                OtrsTicket.ProcessingStep.ALIGNMENT,
-                OtrsTicket.ProcessingStep.SNV,
+        List<Ticket.ProcessingStep> steps = [
+                Ticket.ProcessingStep.INSTALLATION,
+                Ticket.ProcessingStep.ALIGNMENT,
+                Ticket.ProcessingStep.SNV,
         ]
         NotificationDigestService service = setupMockedServiceForBuildNotificationDigestTest(stepsHaveResult ? steps : [])
 
@@ -235,11 +235,11 @@ class NotificationDigestServiceIntegrationSpec extends Specification implements 
         given:
         setupData()
 
-        NotificationDigestService service = setupMockedServiceForBuildNotificationDigestTest(steps as List<OtrsTicket.ProcessingStep>)
+        NotificationDigestService service = setupMockedServiceForBuildNotificationDigestTest(steps as List<Ticket.ProcessingStep>)
 
         FastqImportInstance fastqImportInstance = createFastqImportInstance(sequenceFiles: [createFastqFile()])
         NotificationCommand cmd = createNotificationCommand(
-                otrsTicket         : fastqImportInstance.otrsTicket,
+                ticket         : fastqImportInstance.ticket,
                 fastqImportInstance: fastqImportInstance,
                 notifyQcThresholds : false,
         )
@@ -259,18 +259,18 @@ class NotificationDigestServiceIntegrationSpec extends Specification implements 
 
         where:
         testCase        | steps                                                                                                        | _
-        "with steps"    | [OtrsTicket.ProcessingStep.INSTALLATION, OtrsTicket.ProcessingStep.ALIGNMENT, OtrsTicket.ProcessingStep.SNV] | _
+        "with steps"    | [Ticket.ProcessingStep.INSTALLATION, Ticket.ProcessingStep.ALIGNMENT, Ticket.ProcessingStep.SNV] | _
         "without steps" | []                                                                                                           | _
     }
 
     void "buildNotificationDigest, everything given and expected"() {
         given:
         setupData()
-        NotificationDigestService service = setupMockedServiceForBuildNotificationDigestTest(OtrsTicket.ProcessingStep.values() as List)
+        NotificationDigestService service = setupMockedServiceForBuildNotificationDigestTest(Ticket.ProcessingStep.values() as List)
 
         FastqImportInstance fastqImportInstance = createFastqImportInstance(sequenceFiles: [createFastqFile()])
         NotificationCommand cmd = createNotificationCommand(
-                otrsTicket         : fastqImportInstance.otrsTicket,
+                ticket         : fastqImportInstance.ticket,
                 fastqImportInstance: fastqImportInstance,
         )
 

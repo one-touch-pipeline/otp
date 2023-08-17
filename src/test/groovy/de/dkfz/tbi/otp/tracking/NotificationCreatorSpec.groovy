@@ -44,7 +44,7 @@ class NotificationCreatorSpec extends Specification implements DataTest, DomainF
         return [
                 RawSequenceFile,
                 ProcessingOption,
-                OtrsTicket,
+                Ticket,
                 MetaDataFile,
                 SeqTrack,
                 UserProjectRole,
@@ -59,56 +59,56 @@ class NotificationCreatorSpec extends Specification implements DataTest, DomainF
     void setup() {
         notificationCreator.processingOptionService = new ProcessingOptionService()
         notificationCreator.userProjectRoleService = new UserProjectRoleService()
-        notificationCreator.otrsTicketService = new OtrsTicketService(
+        notificationCreator.ticketService = new TicketService(
                 processingOptionService: new ProcessingOptionService(),
         )
         notificationCreator.createNotificationTextService = Stub(CreateNotificationTextService) {
             getMessageSourceService() >> Mock(MessageSourceService)
         }
-        DomainFactory.createProcessingOptionForOtrsTicketPrefix(ticketPrefix)
+        DomainFactory.createProcessingOptionForTicketPrefix(ticketPrefix)
         DomainFactory.createProcessingOptionForTicketSystemEmail()
 
         GroovyMock([global: true], GrailsArtefactCheckHelper)
     }
 
     @Unroll
-    void 'setStarted, when otrsTickets are given, then call saveStartTimeIfNeeded for with given #step'() {
+    void 'setStarted, when tickets are given, then call saveStartTimeIfNeeded for with given #step'() {
         given:
-        OtrsTicket otrsTicket1 = createOtrsTicket()
-        OtrsTicket otrsTicket2 = createOtrsTicket()
-        createOtrsTicket()
+        Ticket ticket1 = createTicket()
+        Ticket ticket2 = createTicket()
+        createTicket()
 
         NotificationCreator notificationCreator = new NotificationCreator([
-                otrsTicketService: Mock(OtrsTicketService) {
-                    1 * saveStartTimeIfNeeded(otrsTicket1, step)
-                    1 * saveStartTimeIfNeeded(otrsTicket2, step)
+                ticketService: Mock(TicketService) {
+                    1 * saveStartTimeIfNeeded(ticket1, step)
+                    1 * saveStartTimeIfNeeded(ticket2, step)
                 }
         ])
 
         when:
-        notificationCreator.setStarted([otrsTicket1, otrsTicket2], step)
+        notificationCreator.setStarted([ticket1, ticket2], step)
 
         then:
         true
 
         where:
-        step << OtrsTicket.ProcessingStep.values()
+        step << Ticket.ProcessingStep.values()
     }
 
     @Unroll
-    void 'setStartedForSeqTracks, when seqTracks are given, then call for each corresponding OtrsTicket the saveStartTimeIfNeeded with given #step'() {
+    void 'setStartedForSeqTracks, when seqTracks are given, then call for each corresponding ticket the saveStartTimeIfNeeded with given #step'() {
         given:
-        OtrsTicket otrsTicket1 = createOtrsTicket()
-        OtrsTicket otrsTicket2 = createOtrsTicket()
-        createOtrsTicket()
+        Ticket ticket1 = createTicket()
+        Ticket ticket2 = createTicket()
+        createTicket()
 
         Set<SeqTrack> seqTracks = [createSeqTrack()] as Set
 
         NotificationCreator notificationCreator = new NotificationCreator([
-                otrsTicketService: Mock(OtrsTicketService) {
-                    1 * findAllOtrsTickets(_) >> ([otrsTicket1, otrsTicket2] as Set)
-                    1 * saveStartTimeIfNeeded(otrsTicket1, step)
-                    1 * saveStartTimeIfNeeded(otrsTicket2, step)
+                ticketService: Mock(TicketService) {
+                    1 * findAllTickets(_) >> ([ticket1, ticket2] as Set)
+                    1 * saveStartTimeIfNeeded(ticket1, step)
+                    1 * saveStartTimeIfNeeded(ticket2, step)
                 },
         ])
 
@@ -119,12 +119,12 @@ class NotificationCreatorSpec extends Specification implements DataTest, DomainF
         true
 
         where:
-        step << OtrsTicket.ProcessingStep.values()
+        step << Ticket.ProcessingStep.values()
     }
 
     void 'sendProcessingStatusOperatorNotification, when finalNotification is false, sends normal notification with correct subject and content'() {
         given:
-        OtrsTicket ticket = createOtrsTicket()
+        Ticket ticket = createTicket()
         ProcessingStatus status = [
                 getInstallationProcessingStatus: { -> ALL_DONE },
                 getFastqcProcessingStatus      : { -> PARTLY_DONE_MIGHT_DO_MORE },
@@ -188,7 +188,7 @@ ILSe 5678, runA, lane 1, ${sampleText}
 
     void 'sendProcessingStatusOperatorNotification, when finalNotification is true, sends final notification with correct subject'() {
         given:
-        OtrsTicket ticket = createOtrsTicket()
+        Ticket ticket = createTicket()
         notificationCreator.mailHelperService = Mock(MailHelperService) {
             1 * sendEmailToTicketSystem("${ticketPrefix}#${ticket.ticketNumber} Final Processing Status Update", _)
         }
@@ -200,11 +200,11 @@ ILSe 5678, runA, lane 1, ${sampleText}
     void 'sendProcessingStatusOperatorNotification, when finalNotification is true, sending message contains a link to the import detail page'() {
         given:
         // one ticket with three imports
-        OtrsTicket ticket = createOtrsTicket()
+        Ticket ticket = createTicket()
         List<FastqImportInstance> fastqImportInstances = [
-                createFastqImportInstance([otrsTicket: ticket]),
-                createFastqImportInstance([otrsTicket: ticket]),
-                createFastqImportInstance([otrsTicket: ticket]),
+                createFastqImportInstance([ticket: ticket]),
+                createFastqImportInstance([ticket: ticket]),
+                createFastqImportInstance([ticket: ticket]),
         ]
 
         final Map linkProperties = [
@@ -250,11 +250,11 @@ ILSe 5678, runA, lane 1, ${sampleText}
 
     void 'sendWorkflowCreateSuccessMail, when called, the send success mail'() {
         given:
-        OtrsTicket ticket = createOtrsTicket()
+        Ticket ticket = createTicket()
         String message = "Some text ${nextId}"
         MetaDataFile metaDataFile = DomainFactory.createMetaDataFile([
                 fastqImportInstance: createFastqImportInstance([
-                        otrsTicket: ticket,
+                        ticket: ticket,
                 ]),
         ])
         notificationCreator.mailHelperService = Mock(MailHelperService)
@@ -274,14 +274,14 @@ ILSe 5678, runA, lane 1, ${sampleText}
 
     void 'sendWorkflowCreateErrorMail, when called, then send error mail'() {
         given:
-        OtrsTicket ticket = createOtrsTicket()
+        Ticket ticket = createTicket()
         List<RawSequenceFile> rawSequenceFiles = [
                 createFastqFile(),
                 createFastqFile(),
         ]
         MetaDataFile metaDataFile = DomainFactory.createMetaDataFile([
                 fastqImportInstance: createFastqImportInstance([
-                        otrsTicket: ticket,
+                        ticket: ticket,
                         sequenceFiles: rawSequenceFiles,
                 ]),
         ])

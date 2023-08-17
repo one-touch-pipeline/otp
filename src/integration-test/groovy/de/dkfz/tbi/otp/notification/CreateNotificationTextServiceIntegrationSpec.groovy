@@ -35,13 +35,13 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.otp.tracking.OtrsTicket
-import de.dkfz.tbi.otp.tracking.OtrsTicketService
+import de.dkfz.tbi.otp.tracking.Ticket
+import de.dkfz.tbi.otp.tracking.TicketService
 import de.dkfz.tbi.otp.tracking.ProcessingStatus
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.MessageSourceService
 
-import static de.dkfz.tbi.otp.tracking.OtrsTicket.ProcessingStep.*
+import static de.dkfz.tbi.otp.tracking.Ticket.ProcessingStep.*
 
 @Rollback
 @Integration
@@ -60,7 +60,7 @@ faq:${faq}
 '''
 
     CreateNotificationTextService createNotificationTextService
-    OtrsTicketService otrsTicketService
+    TicketService ticketService
 
     @Autowired
     LinkGenerator linkGenerator
@@ -103,7 +103,7 @@ faq:${faq}
         given:
         Project project = createProject()
         DomainFactory.createProcessingOptionForEmailSenderSalutation()
-        OtrsTicket ticket = createOtrsTicket()
+        Ticket ticket = createTicket()
         DomainFactory.createProcessingOptionLazy(ProcessingOption.OptionName.NOTIFICATION_TEMPLATE_FAQ_LINK, "some_link")
         DomainFactory.createProcessingOptionLazy(ProcessingOption.OptionName.EMAIL_REPLY_TO, "a.b@c.de")
         ProcessingStatus processingStatus = new ProcessingStatus()
@@ -112,7 +112,7 @@ faq:${faq}
             1 * alignmentNotification(_) >> "something"
         }
         createNotificationTextService.processingOptionService = new ProcessingOptionService()
-        createNotificationTextService.otrsTicketService = new OtrsTicketService()
+        createNotificationTextService.ticketService = new TicketService()
 
         createNotificationTextService.messageSourceService = new MessageSourceService(
                 messageSource: Mock(PluginAwareResourceBundleMessageSource) {
@@ -132,14 +132,14 @@ faq:${faq}
         given:
         Project project = createProject()
         DomainFactory.createProcessingOptionForEmailSenderSalutation()
-        OtrsTicket ticket = createOtrsTicket()
+        Ticket ticket = createTicket()
         ProcessingStatus processingStatus = new ProcessingStatus()
 
         CreateNotificationTextService createNotificationTextService = Spy(CreateNotificationTextService) {
             1 * alignmentNotification(processingStatus) >> "something"
         }
         createNotificationTextService.processingOptionService = new ProcessingOptionService()
-        createNotificationTextService.otrsTicketService = new OtrsTicketService()
+        createNotificationTextService.ticketService = new TicketService()
 
         createNotificationTextService.messageSourceService = new MessageSourceService(
                 messageSource: Mock(PluginAwareResourceBundleMessageSource) {
@@ -156,21 +156,21 @@ faq:${faq}
     }
 
     @Unroll
-    void "notification, return message (#processingStep, otrs comment: #otrsTicketSeqCenterComment, default: #generalSeqCenterComment)"() {
+    void "notification, return message (#processingStep, comment: #ticketSeqCenterComment, default: #generalSeqCenterComment)"() {
         given:
         Project project = createProject()
         DomainFactory.createProcessingOptionForEmailSenderSalutation()
-        OtrsTicket ticket = createOtrsTicket(
-                seqCenterComment: otrsTicketSeqCenterComment,
+        Ticket ticket = createTicket(
+                seqCenterComment: ticketSeqCenterComment,
         )
         createFastqFile(
                 fastqImportInstance: createFastqImportInstance(
-                        otrsTicket: ticket,
+                        ticket: ticket,
                 ),
         )
         DomainFactory.createProcessingOptionLazy(
                 name: ProcessingOption.OptionName.NOTIFICATION_TEMPLATE_SEQ_CENTER_NOTE,
-                type: CollectionUtils.exactlyOneElement(otrsTicketService.findAllSeqTracks(ticket)*.seqCenter.unique()).name,
+                type: CollectionUtils.exactlyOneElement(ticketService.findAllSeqTracks(ticket)*.seqCenter.unique()).name,
                 value: generalSeqCenterComment
         )
 
@@ -194,27 +194,27 @@ faq:${faq}
         }
         createNotificationTextService.messageSourceService = new MessageSourceService(
                 messageSource: Mock(PluginAwareResourceBundleMessageSource) {
-                    _ * getMessageInternal("notification.template.seqCenterNote.${CollectionUtils.exactlyOneElement(otrsTicketService.findAllSeqTracks(ticket)*.seqCenter.unique()).name.toLowerCase()}", [], _) >> generalSeqCenterComment
+                    _ * getMessageInternal("notification.template.seqCenterNote.${CollectionUtils.exactlyOneElement(ticketService.findAllSeqTracks(ticket)*.seqCenter.unique()).name.toLowerCase()}", [], _) >> generalSeqCenterComment
                     _ * getMessageInternal("notification.template.base", [], _) >> NOTIFICATION_MESSAGE
                 }
         )
         createNotificationTextService.processingOptionService = new ProcessingOptionService()
-        createNotificationTextService.otrsTicketService = new OtrsTicketService()
+        createNotificationTextService.ticketService = new TicketService()
 
         String expectedSeqCenterComment = ""
 
-        if (otrsTicketSeqCenterComment || generalSeqCenterComment) {
-            if (otrsTicketSeqCenterComment?.contains(generalSeqCenterComment)) {
+        if (ticketSeqCenterComment || generalSeqCenterComment) {
+            if (ticketSeqCenterComment?.contains(generalSeqCenterComment)) {
                 expectedSeqCenterComment = """\
 ******************************
 Note from sequencing center:
-${otrsTicketSeqCenterComment}
+${ticketSeqCenterComment}
 ******************************"""
             } else {
                 expectedSeqCenterComment = """\
 ******************************
 Note from sequencing center:
-${otrsTicketSeqCenterComment}${otrsTicketSeqCenterComment ? "\n" : ""}${generalSeqCenterComment}
+${ticketSeqCenterComment}${ticketSeqCenterComment ? "\n" : ""}${generalSeqCenterComment}
 ******************************"""
             }
         }
@@ -233,22 +233,22 @@ faq:
         expected == message
 
         where:
-        processingStep | otrsTicketSeqCenterComment | generalSeqCenterComment
-        INSTALLATION   | null                       | ''
-        ALIGNMENT      | null                       | ''
-        SNV            | null                       | ''
-        INDEL          | null                       | ''
-        RUN_YAPSA      | null                       | ''
-        INSTALLATION   | 'Some comment'             | ''
-        ALIGNMENT      | 'Some comment'             | ''
-        SNV            | 'Some comment'             | ''
-        INDEL          | 'Some comment'             | ''
-        SOPHIA         | 'Some comment'             | ''
-        ACESEQ         | 'Some comment'             | ''
-        RUN_YAPSA      | 'Some comment'             | ''
-        INSTALLATION   | ''                         | 'Some general comment'
-        INSTALLATION   | 'Some otrs comment'        | 'Some general comment'
-        INSTALLATION   | NOTE                       | NOTE
+        processingStep | ticketSeqCenterComment | generalSeqCenterComment
+        INSTALLATION   | null                   | ''
+        ALIGNMENT      | null                   | ''
+        SNV            | null                   | ''
+        INDEL          | null                   | ''
+        RUN_YAPSA      | null                   | ''
+        INSTALLATION   | 'Some comment'         | ''
+        ALIGNMENT      | 'Some comment'         | ''
+        SNV            | 'Some comment'         | ''
+        INDEL          | 'Some comment'         | ''
+        SOPHIA         | 'Some comment'         | ''
+        ACESEQ         | 'Some comment'         | ''
+        RUN_YAPSA      | 'Some comment'         | ''
+        INSTALLATION   | ''                     | 'Some general comment'
+        INSTALLATION   | 'Some comment'         | 'Some general comment'
+        INSTALLATION   | NOTE                   | NOTE
     }
 
     void "notification, when ticket has more than one seq center, ignore seq center default message"() {
@@ -257,17 +257,17 @@ faq:
         String seqCenterMessage2 = "Message of seq center 2"
         Project project = createProject()
         DomainFactory.createProcessingOptionForEmailSenderSalutation()
-        OtrsTicket ticket = createOtrsTicket(
-                seqCenterComment: otrsTicketSeqCenterComment,
+        Ticket ticket = createTicket(
+                seqCenterComment: ticketSeqCenterComment,
         )
         RawSequenceFile rawSequenceFile1 = createFastqFile(
                 fastqImportInstance: createFastqImportInstance(
-                        otrsTicket: ticket,
+                        ticket: ticket,
                 ),
         )
         RawSequenceFile rawSequenceFile2 = createFastqFile(
                 fastqImportInstance: createFastqImportInstance(
-                        otrsTicket: ticket,
+                        ticket: ticket,
                 ),
         )
         DomainFactory.createProcessingOptionLazy(
@@ -296,15 +296,15 @@ faq:
                 }
         )
         createNotificationTextService.processingOptionService = new ProcessingOptionService()
-        createNotificationTextService.otrsTicketService = new OtrsTicketService()
+        createNotificationTextService.ticketService = new TicketService()
 
         String expectedSeqCenterComment
 
-        if (otrsTicketSeqCenterComment) {
+        if (ticketSeqCenterComment) {
             expectedSeqCenterComment = """\
 ******************************
 Note from sequencing center:
-${otrsTicketSeqCenterComment}
+${ticketSeqCenterComment}
 ******************************"""
         } else {
             expectedSeqCenterComment = ""
@@ -324,7 +324,7 @@ faq:
         expected == message
 
         where:
-        processingStep | otrsTicketSeqCenterComment
+        processingStep | ticketSeqCenterComment
         ALIGNMENT      | ''
         ALIGNMENT      | 'Some comment'
     }

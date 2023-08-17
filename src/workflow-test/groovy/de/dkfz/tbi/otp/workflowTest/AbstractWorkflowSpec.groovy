@@ -452,12 +452,12 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
     }
 
     /**
-     * create fastqImportInstance & otrsTicket
+     * create fastqImportInstance & ticket
      */
     private void initFastqImportInstance() {
-        log.debug("creating fastqImportInstance & otrsTicket")
+        log.debug("creating fastqImportInstance & ticket")
         fastqImportInstance = createFastqImportInstance([
-                otrsTicket: createOtrsTicket()
+                ticket: createTicket()
         ])
     }
 
@@ -691,7 +691,7 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
      *   - processingPriority
      * - WorkflowRun:
      *   - priority
-     * - connect dataFiles to fastqImportInstance with otrsTicket
+     * - connect dataFiles to fastqImportInstance with ticket
      */
     private void updateDomainValuesForTesting() {
         String unixGroup = configService.workflowProjectUnixGroup

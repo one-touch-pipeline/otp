@@ -26,7 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.tracking.OtrsTicketService
+import de.dkfz.tbi.otp.tracking.TicketService
 import de.dkfz.tbi.otp.utils.MailHelperService
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
@@ -45,7 +45,7 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
     MailHelperService mailHelperService
 
     @Autowired
-    OtrsTicketService otrsTicketService
+    TicketService ticketService
 
     @Autowired
     SeqTypeService seqTypeService

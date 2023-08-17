@@ -35,7 +35,7 @@ import de.dkfz.tbi.otp.project.Project
 @PreAuthorize("hasRole('ROLE_OPERATOR')")
 class NotificationController implements CheckAndCall {
 
-    OtrsTicketService otrsTicketService
+    TicketService ticketService
     NotificationDigestService notificationDigestService
 
     static allowedMethods = [
@@ -58,9 +58,9 @@ class NotificationController implements CheckAndCall {
             }
             return [
                     cmd                  : cmd,
-                    importInstances      : otrsTicketService.getAllFastqImportInstances(cmd.otrsTicket).sort { it.dateCreated },
-                    otrsTicketLink       : otrsTicketService.buildTicketDirectLinkNullPointerSave(cmd.otrsTicket),
-                    prefixedTicketNumber : otrsTicketService.getPrefixedTicketNumber(cmd.fastqImportInstance.otrsTicket),
+                    importInstances      : ticketService.getAllFastqImportInstances(cmd.ticket).sort { it.dateCreated },
+                    ticketLink           : ticketService.buildTicketDirectLinkNullPointerSave(cmd.ticket),
+                    prefixedTicketNumber : ticketService.getPrefixedTicketNumber(cmd.fastqImportInstance.ticket),
                     steps                : cmd.steps,
                     notifyQcThresholds   : cmd.notifyQcThresholds,
                     preparedNotifications: preparedNotifications,
@@ -106,8 +106,8 @@ class PreparedNotification {
 
 @ToString(includeNames = true)
 class NotificationCommand implements Validateable {
-    OtrsTicket otrsTicket
+    Ticket ticket
     FastqImportInstance fastqImportInstance
-    List<OtrsTicket.ProcessingStep> steps
+    List<Ticket.ProcessingStep> steps
     boolean notifyQcThresholds
 }

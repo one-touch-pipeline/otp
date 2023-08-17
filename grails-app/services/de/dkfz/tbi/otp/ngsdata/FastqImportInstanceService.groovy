@@ -82,7 +82,7 @@ class FastqImportInstanceService {
     @Transactional(readOnly = false)
     void changeProcessToWait() {
         FastqImportInstance.findAllByState(FastqImportInstance.WorkflowCreateState.PROCESSING).each { FastqImportInstance fastqImportInstance ->
-            log.info("Change import ${fastqImportInstance.otrsTicket.ticketNumber} from ${FastqImportInstance.WorkflowCreateState.PROCESSING} back " +
+            log.info("Change import ${fastqImportInstance.ticket.ticketNumber} from ${FastqImportInstance.WorkflowCreateState.PROCESSING} back " +
                     "to ${FastqImportInstance.WorkflowCreateState.WAITING}")
             updateState(fastqImportInstance, FastqImportInstance.WorkflowCreateState.WAITING)
         }

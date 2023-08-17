@@ -29,8 +29,8 @@ import spock.lang.Unroll
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.tracking.OtrsTicket
-import de.dkfz.tbi.otp.tracking.OtrsTicketService
+import de.dkfz.tbi.otp.tracking.Ticket
+import de.dkfz.tbi.otp.tracking.TicketService
 
 @Rollback
 @Integration
@@ -38,22 +38,22 @@ class QcTrafficLightNotificationServiceIntegrationSpec extends Specification imp
 
     QcTrafficLightNotificationService qcTrafficLightNotificationService
 
-    OtrsTicketService otrsTicketService
+    TicketService ticketService
 
     @Unroll
     void "createResultsAreWarnedSubject, properly builds subject"() {
         given:
-        DomainFactory.createProcessingOptionForOtrsTicketPrefix()
+        DomainFactory.createProcessingOptionForTicketPrefix()
 
-        List<OtrsTicket> otrsTickets = (1..2).collect {
-            return useOtrsTickets ? createOtrsTicket() : null
+        List<Ticket> tickets = (1..2).collect {
+            return useTickets ? createTicket() : null
         }.sort { it?.ticketCreated }
 
         SeqType seqType = createSeqType()
         Sample sample = createSample()
-        List<SeqTrack> seqTracks = otrsTickets.collect { OtrsTicket otrsTicket ->
+        List<SeqTrack> seqTracks = tickets.collect { Ticket ticket ->
             createFastqFile(
-                    fastqImportInstance: createFastqImportInstance(otrsTicket: otrsTicket),
+                    fastqImportInstance: createFastqImportInstance(ticket: ticket),
                     seqTrack           : createSeqTrack(
                             sample        : sample,
                             seqType       : seqType,
@@ -63,17 +63,17 @@ class QcTrafficLightNotificationServiceIntegrationSpec extends Specification imp
         }
         RoddyBamFile bamFile = createBamFile(seqTracks: seqTracks)
 
-        String otrsPrefix = useOtrsTickets ? "${otrsTicketService.getPrefixedTicketNumber(otrsTickets.last())} " : ""
+        String prefix = useTickets ? "${ticketService.getPrefixedTicketNumber(tickets.last())} " : ""
         String base = "[S#${seqTracks*.ilseSubmission.ilseNumber.sort().join(',')}] QC issues for bam file of ${bamFile.sample} ${bamFile.seqType}"
 
         when:
         String result = qcTrafficLightNotificationService.createResultsAreWarnedSubject(bamFile, false)
 
         then:
-        otrsPrefix + base == result
+        prefix + base == result
 
         where:
-        useOtrsTickets | _
+        useTickets | _
         true           | _
         false          | _
     }

@@ -30,7 +30,7 @@ import de.dkfz.tbi.otp.ngsdata.FastqFile
 import de.dkfz.tbi.otp.ngsdata.RawSequenceFile
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.tracking.NotificationCreator
-import de.dkfz.tbi.otp.tracking.OtrsTicket
+import de.dkfz.tbi.otp.tracking.Ticket
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
@@ -70,7 +70,7 @@ class FastqcPrepareJobSpec extends Specification implements DataTest, WorkflowSy
         job.doFurtherPreparation(workflowStep)
 
         then:
-        1 * job.notificationCreator.setStartedForSeqTracks([seqTrack], OtrsTicket.ProcessingStep.FASTQC)
+        1 * job.notificationCreator.setStartedForSeqTracks([seqTrack], Ticket.ProcessingStep.FASTQC)
         seqTrack.fastqcState == SeqTrack.DataProcessingState.IN_PROGRESS
     }
 

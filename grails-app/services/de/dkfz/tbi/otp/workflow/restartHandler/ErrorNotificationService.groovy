@@ -27,8 +27,8 @@ import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
-import de.dkfz.tbi.otp.tracking.OtrsTicket
-import de.dkfz.tbi.otp.tracking.OtrsTicketService
+import de.dkfz.tbi.otp.tracking.Ticket
+import de.dkfz.tbi.otp.tracking.TicketService
 import de.dkfz.tbi.otp.utils.MailHelperService
 import de.dkfz.tbi.otp.utils.StackTraceUtils
 import de.dkfz.tbi.otp.workflowExecution.*
@@ -46,7 +46,7 @@ class ErrorNotificationService {
 
     MailHelperService mailHelperService
 
-    OtrsTicketService otrsTicketService
+    TicketService ticketService
 
     LinkGenerator grailsLinkGenerator
 
@@ -285,11 +285,11 @@ class ErrorNotificationService {
     }
 
     String getTicketUrls(Set<SeqTrack> seqTracks) {
-        Set<OtrsTicket> otrsTickets = seqTracks ? otrsTicketService.findAllOtrsTickets(seqTracks).findAll { OtrsTicket otrsTicket ->
-            !otrsTicket.finalNotificationSent
+        Set<Ticket> tickets = seqTracks ? ticketService.findAllTickets(seqTracks).findAll { Ticket ticket ->
+            !ticket.finalNotificationSent
         } : []
-        return otrsTickets.collect {
-            otrsTicketService.buildTicketDirectLink(it)
+        return tickets.collect {
+            ticketService.buildTicketDirectLink(it)
         }.join(',')
     }
 

@@ -30,8 +30,8 @@ import spock.lang.Specification
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.tracking.OtrsTicket
-import de.dkfz.tbi.otp.tracking.OtrsTicketService
+import de.dkfz.tbi.otp.tracking.Ticket
+import de.dkfz.tbi.otp.tracking.TicketService
 import de.dkfz.tbi.otp.utils.*
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
@@ -48,17 +48,17 @@ class AbstractAlignmentDeciderIntegrationSpec extends Specification {
     final shouldFail = new GroovyTestCase().&shouldFail
 
     void setupData() {
-        OtrsTicketService otrsTicketService = new OtrsTicketService(
+        TicketService ticketService = new TicketService(
                 processingOptionService: new ProcessingOptionService(),
         )
 
         decider = newDecider()
-        decider.otrsTicketService = otrsTicketService
+        decider.ticketService = ticketService
         decider.unalignableSeqTrackEmailCreator = new UnalignableSeqTrackEmailCreator(
-                otrsTicketService: otrsTicketService
+                ticketService: ticketService
         )
         decider.unalignableSeqTrackEmailCreator.mailHelperService = Mock(MailHelperService)
-        decider.unalignableSeqTrackEmailCreator.otrsTicketService = otrsTicketService
+        decider.unalignableSeqTrackEmailCreator.ticketService = ticketService
         DomainFactory.createRoddyAlignableSeqTypes()
     }
 
@@ -163,10 +163,10 @@ class AbstractAlignmentDeciderIntegrationSpec extends Specification {
         given:
         setupData()
         String prefix = "PRFX"
-        DomainFactory.createProcessingOptionForOtrsTicketPrefix(prefix)
+        DomainFactory.createProcessingOptionForTicketPrefix(prefix)
 
-        OtrsTicket ticket = DomainFactory.createOtrsTicket()
-        FastqImportInstance fastqImportInstance = DomainFactory.createFastqImportInstance(otrsTicket: ticket)
+        Ticket ticket = DomainFactory.createTicket()
+        FastqImportInstance fastqImportInstance = DomainFactory.createFastqImportInstance(ticket: ticket)
         SeqTrack seqTrack = buildSeqTrack()
         seqTrack.sequenceFiles*.fastqImportInstance = fastqImportInstance
         seqTrack.sequenceFiles*.save(flush: true)
@@ -200,9 +200,9 @@ class AbstractAlignmentDeciderIntegrationSpec extends Specification {
         (seqTrack, workPackage) = prepareDifferentLibraryPreparationKit()
 
         String prefix = "PRFX"
-        DomainFactory.createProcessingOptionForOtrsTicketPrefix(prefix)
-        OtrsTicket ticket = DomainFactory.createOtrsTicket()
-        FastqImportInstance fastqImportInstance = DomainFactory.createFastqImportInstance(otrsTicket: ticket)
+        DomainFactory.createProcessingOptionForTicketPrefix(prefix)
+        Ticket ticket = DomainFactory.createTicket()
+        FastqImportInstance fastqImportInstance = DomainFactory.createFastqImportInstance(ticket: ticket)
         seqTrack.sequenceFiles*.fastqImportInstance = fastqImportInstance
         seqTrack.sequenceFiles*.save(flush: true)
 

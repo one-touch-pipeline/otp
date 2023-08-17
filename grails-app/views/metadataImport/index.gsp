@@ -55,7 +55,7 @@
         <sec:ifAllGranted roles="ROLE_OPERATOR">
             <div class="form-group row">
                 <label for="ticketNumber" class="col-sm-2 col-form-label">
-                    <g:message code="metadataImport.otrs"/>
+                    <g:message code="metadataImport.ticketNumber"/>
                 </label>
 
                 <div class="col-sm-6">
@@ -66,14 +66,14 @@
                     <input class="form-check-input" name="automaticNotification" type="checkbox" ${cmd?.automaticNotification == false ? '' : 'checked'}
                            id="automaticNotification">
                     <label class="form-check-label" for="automaticNotification">
-                        <g:message code="metadataImport.otrs.automaticNotificationFlag"/>
+                        <g:message code="metadataImport.ticket.automaticNotificationFlag"/>
                     </label>
                 </div>
             </div>
 
             <div class="form-group row">
                 <label for="seqCenterComment" class="col-sm-2 col-form-label">
-                    <g:message code="metadataImport.otrs.seqCenter.comment"/>
+                    <g:message code="metadataImport.ticket.seqCenter.comment"/>
                 </label>
 
                 <div class="col-sm-10">

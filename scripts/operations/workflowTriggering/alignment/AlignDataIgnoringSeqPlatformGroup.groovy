@@ -24,7 +24,7 @@ package operations.workflowTriggering.alignment
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.PanCanAlignmentDecider
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.tracking.OtrsTicketService
+import de.dkfz.tbi.otp.tracking.TicketService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 /**
@@ -60,7 +60,7 @@ String multiColumnInput = """
 // -------------------------------
 // work area
 
-OtrsTicketService otrsTicketService = ctx.otrsTicketService
+TicketService ticketService = ctx.ticketService
 
 SeqTypeService seqTypeService = ctx.seqTypeService
 
@@ -154,8 +154,8 @@ IlseSubmission.withTransaction {
     println "\nadded ${retriggeredSeqTracks.size()} lanes to ${retriggeredMergingWorkPackages.size()} mergingWorkPackages\n"
 
     if (retriggeredSeqTracks) {
-        otrsTicketService.findAllOtrsTickets(retriggeredSeqTracks).each {
-            otrsTicketService.resetAlignmentAndAnalysisNotification(it)
+        ticketService.findAllTickets(retriggeredSeqTracks).each {
+            ticketService.resetAlignmentAndAnalysisNotification(it)
             println "reset notification for ticket ${it}"
         }
     }

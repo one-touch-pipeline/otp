@@ -32,7 +32,7 @@ import de.dkfz.tbi.otp.job.jobs.bamFilePairAnalysis.AbstractBamFilePairAnalysisS
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.tracking.OtrsTicket
+import de.dkfz.tbi.otp.tracking.Ticket
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
@@ -102,21 +102,21 @@ abstract class AbstractBamFilePairAnalysisStartJobIntegrationSpec extends Specif
     void "prepareCreatingTheProcessAndTriggerTracking, when all fine"() {
         given:
         BamFilePairAnalysis instance = this.instance
-        OtrsTicket otrsTicket = DomainFactory.createOtrsTicket()
+        Ticket ticket = DomainFactory.createTicket()
         FastqImportInstance.list().each {
-            it.otrsTicket = otrsTicket
+            it.ticket = ticket
             it.save(flush: true)
         }
 
         expect:
-        getStartedDate(otrsTicket) == null
+        getStartedDate(ticket) == null
         getProcessingStatus(instance.samplePair) != SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED
 
         when:
         service.prepareCreatingTheProcessAndTriggerTracking(instance)
 
         then:
-        getStartedDate(otrsTicket) != null
+        getStartedDate(ticket) != null
         getProcessingStatus(instance.samplePair) == SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED
     }
 

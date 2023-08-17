@@ -28,7 +28,7 @@ import de.dkfz.tbi.otp.Commentable
 import de.dkfz.tbi.otp.utils.Entity
 
 @ManagedEntity
-class OtrsTicket implements Commentable, Entity {
+class Ticket implements Commentable, Entity {
 
     @TupleConstructor
     enum ProcessingStep {
@@ -75,7 +75,7 @@ class OtrsTicket implements Commentable, Entity {
      */
     Date submissionReceivedNotice
     /**
-     * Timestamp when the ticket gets created in OTRS.
+     * Timestamp when the ticket gets created in ticket system.
      */
     Date ticketCreated
 
@@ -155,6 +155,6 @@ class OtrsTicket implements Commentable, Entity {
 
     @Override
     String toString() {
-        return "OtrsTicket ${id}: #${ticketNumber}"
+        return "Ticket ${id}: #${ticketNumber}"
     }
 }

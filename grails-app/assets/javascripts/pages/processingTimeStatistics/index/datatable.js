@@ -122,7 +122,7 @@ $.otp.processingTimeStatistics = {
             for (let i = 0; i < json.aaData.length; i += 1) {
               const row = json.aaData[i];
 
-              // link OTRS ticket url
+              // link ticket url
               row[0] = $.otp.processingTimeStatistics.createIsFinished(
                 row[27],
                 `<a href="${row[0]}">${row[29]}</a>`

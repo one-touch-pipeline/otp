@@ -24,7 +24,7 @@ import de.dkfz.tbi.otp.ngsdata.UserProjectRoleService
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.notification.CreateNotificationTextService
 import de.dkfz.tbi.otp.tracking.NotificationCreator
-import de.dkfz.tbi.otp.tracking.OtrsTicket
+import de.dkfz.tbi.otp.tracking.Ticket
 import de.dkfz.tbi.otp.tracking.ProcessingStatus
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
@@ -41,14 +41,14 @@ String ticketNumber = ""
 String projectName = ""
 boolean all = false
 
-// OtrsTicket.ProcessingStep processingStep = OtrsTicket.ProcessingStep.INSTALLATION
-// OtrsTicket.ProcessingStep processingStep = OtrsTicket.ProcessingStep.FASTQC
-// OtrsTicket.ProcessingStep processingStep = OtrsTicket.ProcessingStep.ALIGNMENT
-// OtrsTicket.ProcessingStep processingStep = OtrsTicket.ProcessingStep.SNV
-// OtrsTicket.ProcessingStep processingStep = OtrsTicket.ProcessingStep.INDEL
-// OtrsTicket.ProcessingStep processingStep = OtrsTicket.ProcessingStep.SOPHIA
-// OtrsTicket.ProcessingStep processingStep = OtrsTicket.ProcessingStep.ACESEQ
-// OtrsTicket.ProcessingStep processingStep = OtrsTicket.ProcessingStep.RUN_YAPSA
+//Ticket.ProcessingStep processingStep = Ticket.ProcessingStep.INSTALLATION
+//Ticket.ProcessingStep processingStep = Ticket.ProcessingStep.FASTQC
+//Ticket.ProcessingStep processingStep = Ticket.ProcessingStep.ALIGNMENT
+//Ticket.ProcessingStep processingStep = Ticket.ProcessingStep.SNV
+//Ticket.ProcessingStep processingStep = Ticket.ProcessingStep.INDEL
+//Ticket.ProcessingStep processingStep = Ticket.ProcessingStep.SOPHIA
+//Ticket.ProcessingStep processingStep = Ticket.ProcessingStep.ACESEQ
+//Ticket.ProcessingStep processingStep = Ticket.ProcessingStep.RUN_YAPSA
 
 // ---------------------------------
 
@@ -57,7 +57,7 @@ NotificationCreator notificationCreator = ctx.notificationCreator
 CreateNotificationTextService notificationTextService = ctx.createNotificationTextService
 UserProjectRoleService userProjectRoleService = ctx.userProjectRoleService
 
-OtrsTicket otrsTicket = exactlyOneElement(OtrsTicket.findAllByTicketNumber(ticketNumber))
+Ticket ticket = exactlyOneElement(Ticket.findAllByTicketNumber(ticketNumber))
 
 Project project = CollectionUtils.atMostOneElement(Project.findAllByName(projectName))
 
@@ -68,7 +68,7 @@ println ""
 try {
     if (all) {
 
-        ProcessingStatus status = ctx.notificationCreator.getProcessingStatus(ctx.otrsTicketService.findAllSeqTracks(otrsTicket))
+        ProcessingStatus status = ctx.notificationCreator.getProcessingStatus(ctx.ticketService.findAllSeqTracks(ticket))
         println ctx.createNotificationTextService.installationNotification(status).trim()
         println "\n-----------------------\n"
         println ctx.createNotificationTextService.alignmentNotification(status).trim()
@@ -82,8 +82,8 @@ try {
         println ctx.createNotificationTextService.aceseqNotification(status).trim()
 
     } else {
-        println notificationTextService.notification(otrsTicket,
-                notificationCreator.getProcessingStatus(ctx.otrsTicketService.findAllSeqTracks(otrsTicket)), processingStep, project)
+        println notificationTextService.notification(ticket,
+                notificationCreator.getProcessingStatus(ctx.ticketService.findAllSeqTracks(ticket)), processingStep, project)
     }
 }catch (Exception e) {
     println "Please provide the processingStep you want to notify or set all = true in case you want to notify about all steps"

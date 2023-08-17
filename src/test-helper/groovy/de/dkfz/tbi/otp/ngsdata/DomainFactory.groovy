@@ -50,7 +50,7 @@ import de.dkfz.tbi.otp.project.ProjectRequestUser
 import de.dkfz.tbi.otp.qcTrafficLight.QcThreshold
 import de.dkfz.tbi.otp.security.Role
 import de.dkfz.tbi.otp.security.User
-import de.dkfz.tbi.otp.tracking.OtrsTicket
+import de.dkfz.tbi.otp.tracking.Ticket
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.HelperUtils
 
@@ -380,7 +380,7 @@ class DomainFactory {
         ], properties)
     }
 
-    static ProcessingOption createProcessingOptionForOtrsTicketPrefix(String prefix = "Prefix ${counter++}") {
+    static ProcessingOption createProcessingOptionForTicketPrefix(String prefix = "Prefix ${counter++}") {
         return createProcessingOptionLazy(
                 name: OptionName.TICKET_SYSTEM_NUMBER_PREFIX,
                 type: null,
@@ -1838,13 +1838,13 @@ class DomainFactory {
     }
 
     @Deprecated
-    static OtrsTicket createOtrsTicket(Map properties = [:]) {
-        return proxyCore.createOtrsTicket(properties)
+    static Ticket createTicket(Map properties = [:]) {
+        return proxyCore.createTicket(properties)
     }
 
     @Deprecated
-    static OtrsTicket createOtrsTicketWithEndDatesAndNotificationSent(Map properties = [:]) {
-        return proxyCore.createOtrsTicketWithEndDatesAndNotificationSent(properties)
+    static Ticket createTicketWithEndDatesAndNotificationSent(Map properties = [:]) {
+        return proxyCore.createTicketWithEndDatesAndNotificationSent(properties)
     }
 
     static TumorEntity createTumorEntity(Map properties = [:]) {

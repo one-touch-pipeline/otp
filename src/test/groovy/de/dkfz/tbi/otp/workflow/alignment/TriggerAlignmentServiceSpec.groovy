@@ -32,7 +32,7 @@ import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.otp.tracking.OtrsTicketService
+import de.dkfz.tbi.otp.tracking.TicketService
 import de.dkfz.tbi.otp.withdraw.RoddyBamFileWithdrawService
 import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerWorkflow
 import de.dkfz.tbi.otp.workflowExecution.*
@@ -140,9 +140,9 @@ class TriggerAlignmentServiceSpec extends HibernateSpec implements ServiceUnitTe
             0 * _
         }
 
-        // Check resetting OTRS tickets works
-        service.otrsTicketService = Mock(OtrsTicketService) {
-            1 * findAllOtrsTickets(_) >> [createOtrsTicket(), createOtrsTicket()]
+        // Check resetting tickets works
+        service.ticketService = Mock(TicketService) {
+            1 * findAllTickets(_) >> [createTicket(), createTicket()]
             2 * resetAlignmentAndAnalysisNotification(_)
         }
 

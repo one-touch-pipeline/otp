@@ -51,8 +51,8 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.directorystructures.Data
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrainService
 import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.otp.tracking.OtrsTicket
-import de.dkfz.tbi.otp.tracking.OtrsTicketService
+import de.dkfz.tbi.otp.tracking.Ticket
+import de.dkfz.tbi.otp.tracking.TicketService
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.exceptions.CopyingOfFileFailedException
 import de.dkfz.tbi.otp.utils.exceptions.MetadataFileImportException
@@ -85,7 +85,7 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
                 MetaDataEntry,
                 MetaDataFile,
                 MetaDataKey,
-                OtrsTicket,
+                Ticket,
                 Pipeline,
                 ProcessingOption,
                 Project,
@@ -376,7 +376,7 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
                 type: FileType.Type.SEQUENCE,
                 signature: '_',
         )
-        OtrsTicket otrsTicket = createOtrsTicket()
+        Ticket ticket = createTicket()
 
         String metadata1 = """
 ${FASTQ_FILE}                   ${fastq11}                                  ${fastq12}
@@ -463,8 +463,8 @@ ${SPECIES}                      ${speciesImportAlias}                       ${sp
         service.applicationContext = Mock(ApplicationContext) {
             4 * getBeansOfType(MetadataValidator) >> [:]
         }
-        service.otrsTicketService = Mock(OtrsTicketService) {
-            2 * createOrResetOtrsTicket(_, _, _) >> otrsTicket
+        service.ticketService = Mock(TicketService) {
+            2 * createOrResetTicket(_, _, _) >> ticket
         }
         service.antibodyTargetService = Mock(AntibodyTargetService) {
             2 * findByNameOrImportAlias(_) >> antibodyTarget
@@ -721,7 +721,7 @@ ${SPECIES}                      ${speciesImportAlias}                       ${sp
                     seqPlatform: seqPlatform,
             )
         }
-        OtrsTicket otrsTicket = createOtrsTicket(automaticNotification: true)
+        Ticket ticket = createTicket(automaticNotification: true)
         SpeciesWithStrain humanSpecies = createSpeciesWithStrain(importAlias: ['human'] as Set)
         SpeciesWithStrain mouseSpecies = createSpeciesWithStrain(importAlias: ['mouse'] as Set)
         SpeciesWithStrain chickenSpecies = createSpeciesWithStrain(importAlias: ['chicken'] as Set)
@@ -779,8 +779,8 @@ ${SPECIES}                      ${speciesImportAlias}                       ${sp
             findSeqPlatform(seqPlatform.name, seqPlatform.seqPlatformModelLabel.name, null) >> seqPlatform
             findSeqPlatform(seqPlatform2.name, seqPlatform2.seqPlatformModelLabel.name, null) >> seqPlatform2
         }
-        service.otrsTicketService = Mock(OtrsTicketService) {
-            createOrResetOtrsTicket(otrsTicket.ticketNumber, null, true) >> otrsTicket
+        service.ticketService = Mock(TicketService) {
+            createOrResetTicket(ticket.ticketNumber, null, true) >> ticket
         }
         service.libraryPreparationKitService = Mock(LibraryPreparationKitService) {
             findByNameOrImportAlias(libraryPreparationKit1.name) >> libraryPreparationKit1
@@ -843,7 +843,7 @@ ${ILSE_NO}                      -                           1234          1234  
         )
 
         when:
-        MetaDataFile result = service.importMetadataFile(context, importMode, otrsTicket.ticketNumber, null, otrsTicket.automaticNotification, targetFile)
+        MetaDataFile result = service.importMetadataFile(context, importMode, ticket.ticketNumber, null, ticket.automaticNotification, targetFile)
 
         then:
 
@@ -867,7 +867,7 @@ ${ILSE_NO}                      -                           1234          1234  
         // fastqImportInstance
         FastqImportInstance.count == 1
         FastqImportInstance fastqImportInstance = CollectionUtils.atMostOneElement(FastqImportInstance.findAllWhere(
-                otrsTicket: otrsTicket,
+                ticket: ticket,
                 importMode: importMode,
         ))
         fastqImportInstance != null
@@ -1253,7 +1253,7 @@ ${SPECIES}                      ${human}+${mouse}+${chicken}                ${hu
         // fastqImportInstance
         FastqImportInstance.count == 1
         FastqImportInstance fastqImportInstance = CollectionUtils.atMostOneElement(FastqImportInstance.findAllWhere(
-                otrsTicket: null,
+                ticket: null,
                 importMode: FastqImportInstance.ImportMode.MANUAL
         ))
         fastqImportInstance != null
@@ -1464,7 +1464,7 @@ ${SPECIES}                      ${human}+${mouse}+${chicken}                ${hu
         // fastqImportInstance
         FastqImportInstance.count == 1
         FastqImportInstance fastqImportInstance = CollectionUtils.atMostOneElement(FastqImportInstance.findAllWhere(
-                otrsTicket: null,
+                ticket: null,
                 importMode: FastqImportInstance.ImportMode.MANUAL
         ))
         fastqImportInstance != null

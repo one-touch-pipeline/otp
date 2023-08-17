@@ -57,7 +57,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
     CreateNotificationTextService createNotificationTextService
     ProcessingOptionService processingOptionService
     UserProjectRoleService userProjectRoleService
-    OtrsTicketService otrsTicketService
+    TicketService ticketService
 
     List<ProcessingOption> referenceGenomeProcessingOptions
 
@@ -67,27 +67,27 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
 
     static List listPairAnalysis = [
             [
-                    analysisType           : OtrsTicket.ProcessingStep.INDEL,
+                    analysisType           : Ticket.ProcessingStep.INDEL,
                     createRoddyBamFile     : "createIndelCallingInstanceWithRoddyBamFiles",
                     completeCallingInstance: "completeIndelCallingInstance",
                     processingStatus       : "indelProcessingStatus",
             ], [
-                    analysisType           : OtrsTicket.ProcessingStep.SNV,
+                    analysisType           : Ticket.ProcessingStep.SNV,
                     createRoddyBamFile     : "createRoddySnvInstanceWithRoddyBamFiles",
                     completeCallingInstance: "completeSnvCallingInstance",
                     processingStatus       : "snvProcessingStatus",
             ], [
-                    analysisType           : OtrsTicket.ProcessingStep.SOPHIA,
+                    analysisType           : Ticket.ProcessingStep.SOPHIA,
                     createRoddyBamFile     : "createSophiaInstanceWithRoddyBamFiles",
                     completeCallingInstance: "completeSophiaInstance",
                     processingStatus       : "sophiaProcessingStatus",
             ], [
-                    analysisType           : OtrsTicket.ProcessingStep.ACESEQ,
+                    analysisType           : Ticket.ProcessingStep.ACESEQ,
                     createRoddyBamFile     : "createAceseqInstanceWithRoddyBamFiles",
                     completeCallingInstance: "completeAceseqInstance",
                     processingStatus       : "aceseqProcessingStatus",
             ], [
-                    analysisType           : OtrsTicket.ProcessingStep.RUN_YAPSA,
+                    analysisType           : Ticket.ProcessingStep.RUN_YAPSA,
                     createRoddyBamFile     : "createRunYapsaInstanceWithRoddyBamFiles",
                     completeCallingInstance: "completeRunYapsaInstance",
                     processingStatus       : "runYapsaProcessingStatus",
@@ -106,7 +106,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
                 createNotificationTextService: createNotificationTextService,
                 processingOptionService: processingOptionService,
                 userProjectRoleService: userProjectRoleService,
-                otrsTicketService: otrsTicketService,
+                ticketService: ticketService,
                 grailsApplication: grailsApplication,
         )
         SessionUtils.withTransaction {
@@ -123,13 +123,13 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
 
     void "check that all analyses are provided in the list 'listPairAnalysis'"() {
         given:
-        List<OtrsTicket.ProcessingStep> analysisProcessingSteps
+        List<Ticket.ProcessingStep> analysisProcessingSteps
         setupData()
 
-        analysisProcessingSteps = OtrsTicket.ProcessingStep.values() - [
-                OtrsTicket.ProcessingStep.INSTALLATION,
-                OtrsTicket.ProcessingStep.FASTQC,
-                OtrsTicket.ProcessingStep.ALIGNMENT,
+        analysisProcessingSteps = Ticket.ProcessingStep.values() - [
+                Ticket.ProcessingStep.INSTALLATION,
+                Ticket.ProcessingStep.FASTQC,
+                Ticket.ProcessingStep.ALIGNMENT,
         ]
 
         expect:
@@ -138,39 +138,39 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
 
     void 'processFinished calls setFinishedTimestampsAndNotify for the tickets of the passed SeqTracks'() {
         given: "tickets with (at least one) fastQC still in progress"
-        OtrsTicket ticketA, ticketB
+        Ticket ticketA, ticketB
         SeqTrack seqTrackA, seqTrackB
         setupData()
         SessionUtils.withTransaction {
-            ticketA = createOtrsTicket()
+            ticketA = createTicket()
             seqTrackA = createSeqTrackWithOneFastqFile(
                     [
                             dataInstallationState: SeqTrack.DataProcessingState.FINISHED,
                             fastqcState          : SeqTrack.DataProcessingState.IN_PROGRESS,
                     ],
-                    [fastqImportInstance: createFastqImportInstance(otrsTicket: ticketA), fileLinked: true])
+                    [fastqImportInstance: createFastqImportInstance(ticket: ticketA), fileLinked: true])
 
-            ticketB = createOtrsTicket()
+            ticketB = createTicket()
             seqTrackB = createSeqTrackWithOneFastqFile(
                     [
                             dataInstallationState: SeqTrack.DataProcessingState.FINISHED,
                             fastqcState          : SeqTrack.DataProcessingState.FINISHED,
                     ],
-                    [fastqImportInstance: createFastqImportInstance(otrsTicket: ticketB), fileLinked: true])
+                    [fastqImportInstance: createFastqImportInstance(ticket: ticketB), fileLinked: true])
             createSeqTrackWithOneFastqFile(
                     [
                             dataInstallationState: SeqTrack.DataProcessingState.FINISHED,
                             fastqcState          : SeqTrack.DataProcessingState.IN_PROGRESS,
                     ],
-                    [fastqImportInstance: createFastqImportInstance(otrsTicket: ticketB), fileLinked: true])
-            DomainFactory.createProcessingOptionForOtrsTicketPrefix("the prefix")
+                    [fastqImportInstance: createFastqImportInstance(ticket: ticketB), fileLinked: true])
+            DomainFactory.createProcessingOptionForTicketPrefix("the prefix")
         }
 
         when: "running our tracking update"
         SessionUtils.withTransaction {
             notificationCreator.processFinished([seqTrackA, seqTrackB] as Set)
-            ticketA = OtrsTicket.get(ticketA.id)
-            ticketB = OtrsTicket.get(ticketA.id)
+            ticketA = Ticket.get(ticketA.id)
+            ticketB = Ticket.get(ticketA.id)
         }
 
         then: "installation should be marked as done, but fastQC as still running"
@@ -181,7 +181,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
 
     void 'setFinishedTimestampsAndNotify, when final notification has already been sent, does nothing'() {
         given:
-        OtrsTicket ticket
+        Ticket ticket
         Date installationFinished = new Date()
         setupData()
         SessionUtils.withTransaction {
@@ -189,11 +189,11 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
             // FastQC:       finished timestamp not set, all done,     won't do more
             // Alignment:    finished timestamp not set, nothing done, won't do more
             // SNV:          finished timestamp not set, nothing done, won't do more
-            ticket = createOtrsTicket(
+            ticket = createTicket(
                     installationFinished: installationFinished,
                     finalNotificationSent: true,
             )
-            FastqImportInstance fastqImportInstance = createFastqImportInstance(otrsTicket: ticket)
+            FastqImportInstance fastqImportInstance = createFastqImportInstance(ticket: ticket)
             createSeqTrackWithOneFastqFile(
                     [fastqcState: SeqTrack.DataProcessingState.FINISHED],
                     [fastqImportInstance: fastqImportInstance, fileLinked: true])
@@ -218,7 +218,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
 
     void 'setFinishedTimestampsAndNotify, when nothing just completed, does nothing'() {
         given:
-        OtrsTicket ticket
+        Ticket ticket
         Date installationFinished = new Date()
         setupData()
         SessionUtils.withTransaction {
@@ -226,10 +226,10 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
             // FastQC:       finished timestamp not set, partly done,  might do more
             // Alignment:    finished timestamp not set, nothing done, won't do more
             // SNV:          finished timestamp not set, nothing done, won't do more
-            ticket = createOtrsTicket(
+            ticket = createTicket(
                     installationFinished: installationFinished,
             )
-            FastqImportInstance fastqImportInstance = createFastqImportInstance(otrsTicket: ticket)
+            FastqImportInstance fastqImportInstance = createFastqImportInstance(ticket: ticket)
             createSeqTrackWithOneFastqFile(
                     [fastqcState: SeqTrack.DataProcessingState.FINISHED],
                     [fastqImportInstance: fastqImportInstance, fileLinked: true])
@@ -257,15 +257,15 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
 
     void 'setFinishedTimestampsAndNotify, when something just completed and might do more, sends normal notification'() {
         given:
-        OtrsTicket ticket
+        Ticket ticket
         setupData()
         SessionUtils.withTransaction {
             // Installation: finished timestamp not set, all done,     won't do more
             // FastQC:       finished timestamp not set, nothing done, might do more
             // Alignment:    finished timestamp not set, nothing done, won't do more
             // SNV:          finished timestamp not set, nothing done, won't do more
-            ticket = createOtrsTicket()
-            FastqImportInstance fastqImportInstance = createFastqImportInstance(otrsTicket: ticket)
+            ticket = createTicket()
+            FastqImportInstance fastqImportInstance = createFastqImportInstance(ticket: ticket)
             SeqTrack seqTrack = createSeqTrackWithOneFastqFile(
                     [
                             dataInstallationState: SeqTrack.DataProcessingState.FINISHED,
@@ -280,7 +280,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
             ] as ProcessingStatus
 
             String prefix = "the prefix"
-            DomainFactory.createProcessingOptionForOtrsTicketPrefix(prefix)
+            DomainFactory.createProcessingOptionForTicketPrefix(prefix)
 
             String expectedEmailSubjectOperator = "${prefix}#${ticket.ticketNumber} Processing Status Update"
             String expectedEmailSubjectCustomer = "[${prefix}#${ticket.ticketNumber}] TO BE SENT: ${seqTrack.project.name} sequencing data installed"
@@ -296,13 +296,13 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
 
         when:
         SessionUtils.withTransaction {
-            OtrsTicket ticketToFinish = OtrsTicket.get(ticket.id)
+            Ticket ticketToFinish = Ticket.get(ticket.id)
             notificationCreator.notifyAndSetFinishedTimestamps(ticketToFinish)
         }
 
         then:
         SessionUtils.withTransaction {
-            OtrsTicket result = OtrsTicket.get(ticket.id)
+            Ticket result = Ticket.get(ticket.id)
             assert result.installationFinished != null
             assert result.fastqcFinished == null
             assert result.alignmentFinished == null
@@ -314,15 +314,15 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
 
     void "setFinishedTimestampsAndNotify, when something just completed and won't do more, sends final notification"() {
         given:
-        OtrsTicket ticket
+        Ticket ticket
         setupData()
         SessionUtils.withTransaction {
             // Installation: finished timestamp not set, all done,     won't do more
             // FastQC:       finished timestamp not set, all done,     won't do more
             // Alignment:    finished timestamp not set, partly done,  won't do more
             // SNV:          finished timestamp not set, nothing done, won't do more
-            ticket = createOtrsTicket()
-            FastqImportInstance fastqImportInstance = createFastqImportInstance(otrsTicket: ticket)
+            ticket = createTicket()
+            FastqImportInstance fastqImportInstance = createFastqImportInstance(ticket: ticket)
             SeqTrack seqTrack1 = createSeqTrackWithOneFastqFile(
                     [
                             dataInstallationState: SeqTrack.DataProcessingState.FINISHED,
@@ -373,15 +373,15 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
             ] as ProcessingStatus
 
             String prefix = "the prefix"
-            DomainFactory.createProcessingOptionForOtrsTicketPrefix(prefix)
+            DomainFactory.createProcessingOptionForTicketPrefix(prefix)
 
             String notificationText1 = HelperUtils.uniqueString
             String notificationText2 = HelperUtils.uniqueString
 
             String expectedEmailSubjectOperator = "${prefix}#${ticket.ticketNumber} Final Processing Status Update"
             String expectedEmailSubjectCustomer = "[${prefix}#${ticket.ticketNumber}] TO BE SENT: ${seqTrack1.project.name} sequencing data "
-            String expectedEmailSubjectCustomer1 = expectedEmailSubjectCustomer + OtrsTicket.ProcessingStep.INSTALLATION.notificationSubject
-            String expectedEmailSubjectCustomer2 = expectedEmailSubjectCustomer + OtrsTicket.ProcessingStep.ALIGNMENT.notificationSubject
+            String expectedEmailSubjectCustomer1 = expectedEmailSubjectCustomer + Ticket.ProcessingStep.INSTALLATION.notificationSubject
+            String expectedEmailSubjectCustomer2 = expectedEmailSubjectCustomer + Ticket.ProcessingStep.ALIGNMENT.notificationSubject
 
             notificationCreator.mailHelperService = Mock(MailHelperService) {
                 1 * sendEmailToTicketSystem(expectedEmailSubjectOperator, _) >> { String emailSubject, String content ->
@@ -394,8 +394,8 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
 
             notificationCreator.createNotificationTextService = Mock(CreateNotificationTextService) {
                 getMessageSourceService() >> Mock(MessageSourceService)
-                1 * notification(ticket, _, OtrsTicket.ProcessingStep.INSTALLATION, seqTrack1.project) >> notificationText1
-                1 * notification(ticket, _, OtrsTicket.ProcessingStep.ALIGNMENT, seqTrack1.project) >> notificationText2
+                1 * notification(ticket, _, Ticket.ProcessingStep.INSTALLATION, seqTrack1.project) >> notificationText1
+                1 * notification(ticket, _, Ticket.ProcessingStep.ALIGNMENT, seqTrack1.project) >> notificationText2
                 0 * notification(_, _, _, _)
                 getLinkGenerator() >> Mock(LinkGenerator)
             }
@@ -403,13 +403,13 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
 
         when:
         SessionUtils.withTransaction {
-            OtrsTicket ticketToNotify = OtrsTicket.get(ticket.id)
+            Ticket ticketToNotify = Ticket.get(ticket.id)
             notificationCreator.notifyAndSetFinishedTimestamps(ticketToNotify)
         }
 
         then:
         SessionUtils.withTransaction {
-            OtrsTicket result = OtrsTicket.get(ticket.id)
+            Ticket result = Ticket.get(ticket.id)
             assert result.installationFinished != null
             assert result.fastqcFinished != null
             assert result.alignmentFinished != null
@@ -425,15 +425,15 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
 
     void "setFinishedTimestampsAndNotify, when alignment is finished but installation is not, don't send notification"() {
         given:
-        OtrsTicket ticket
+        Ticket ticket
         setupData()
         SessionUtils.withTransaction {
             // Installation: finished timestamp not set, all done,     won't do more
             // FastQC:       finished timestamp not set, all done,     won't do more
             // Alignment:    finished timestamp not set, partly done,  won't do more
             // SNV:          finished timestamp not set, nothing done, won't do more
-            ticket = createOtrsTicket()
-            FastqImportInstance fastqImportInstance = createFastqImportInstance(otrsTicket: ticket)
+            ticket = createTicket()
+            FastqImportInstance fastqImportInstance = createFastqImportInstance(ticket: ticket)
             SeqTrack seqTrack1 = createSeqTrackWithOneFastqFile(
                     [
                             dataInstallationState: SeqTrack.DataProcessingState.FINISHED,
@@ -472,7 +472,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
             ))
 
             String prefix = "the prefix"
-            DomainFactory.createProcessingOptionForOtrsTicketPrefix(prefix)
+            DomainFactory.createProcessingOptionForTicketPrefix(prefix)
 
             notificationCreator.mailHelperService = Mock(MailHelperService) {
                 0 * _
@@ -503,9 +503,9 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
     @SuppressWarnings('Indentation')
     @Unroll
     void 'sendCustomerNotification sends expected notification'(int dataCase, boolean automaticNotification, boolean processingNotification,
-                                                                OtrsTicket.ProcessingStep notificationStep, List<String> recipients, String subject) {
+                                                                Ticket.ProcessingStep notificationStep, List<String> recipients, String subject) {
         given:
-        OtrsTicket ticket
+        Ticket ticket
         ProcessingStatus status
         setupData()
         SessionUtils.withTransaction {
@@ -582,10 +582,10 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
                     break
             }
 
-            ticket = createOtrsTicket(automaticNotification: automaticNotification)
+            ticket = createTicket(automaticNotification: automaticNotification)
             status = new ProcessingStatus(seqTracks.collect { new SeqTrackProcessingStatus(it) })
             String prefix = HelperUtils.uniqueString
-            DomainFactory.createProcessingOptionForOtrsTicketPrefix(prefix)
+            DomainFactory.createProcessingOptionForTicketPrefix(prefix)
             String finalSubject = "[${prefix}#${ticket.ticketNumber}] ${subject}"
             int callCount = subject ? 1 : 0
             String content = HelperUtils.randomEmail
@@ -603,7 +603,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
             notificationCreator.createNotificationTextService = Mock(CreateNotificationTextService) {
                 Project project = exactlyOneElement(seqTracks*.project.unique())
                 callCount * notification(ticket, _, notificationStep, project) >> {
-                    OtrsTicket ticket1, ProcessingStatus status1, OtrsTicket.ProcessingStep processingStep, Project project1 ->
+                    Ticket ticket1, ProcessingStatus status1, Ticket.ProcessingStep processingStep, Project project1 ->
                         TestCase.assertContainSame(status.seqTrackProcessingStatuses, status1.seqTrackProcessingStatuses)
                         return content
                 }
@@ -618,22 +618,22 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
 
         where:
         dataCase | automaticNotification | processingNotification | notificationStep                       | recipients | subject
-        1        | true                  | true                   | OtrsTicket.ProcessingStep.INSTALLATION | [EMAIL]    | 'Project1 sequencing data installed'
-        2        | false                 | true                   | OtrsTicket.ProcessingStep.INSTALLATION | []         | 'TO BE SENT: Project1 sequencing data installed'
-        3        | true                  | true                   | OtrsTicket.ProcessingStep.INSTALLATION | [EMAIL]    | '[S#1234] Project1 sequencing data installed'
-        4        | true                  | true                   | OtrsTicket.ProcessingStep.FASTQC       | []         | null
-        5        | true                  | true                   | OtrsTicket.ProcessingStep.ALIGNMENT    | []         | 'TO BE SENT: Project2 sequencing data aligned'
-        6        | true                  | true                   | OtrsTicket.ProcessingStep.SNV          | []         | 'TO BE SENT: [S#1234,9876] Project2 sequencing data SNV-called'
-        7        | true                  | false                  | OtrsTicket.ProcessingStep.INSTALLATION | []         | 'TO BE SENT: Project1 sequencing data installed'
+        1        | true                  | true                   | Ticket.ProcessingStep.INSTALLATION | [EMAIL] | 'Project1 sequencing data installed'
+        2        | false                 | true                   | Ticket.ProcessingStep.INSTALLATION | []      | 'TO BE SENT: Project1 sequencing data installed'
+        3        | true                  | true                   | Ticket.ProcessingStep.INSTALLATION | [EMAIL] | '[S#1234] Project1 sequencing data installed'
+        4        | true                  | true                   | Ticket.ProcessingStep.FASTQC       | []      | null
+        5        | true                  | true                   | Ticket.ProcessingStep.ALIGNMENT    | []      | 'TO BE SENT: Project2 sequencing data aligned'
+        6        | true                  | true                   | Ticket.ProcessingStep.SNV          | []      | 'TO BE SENT: [S#1234,9876] Project2 sequencing data SNV-called'
+        7        | true                  | false                  | Ticket.ProcessingStep.INSTALLATION | []      | 'TO BE SENT: Project1 sequencing data installed'
     }
 
     void 'sendCustomerNotification, with multiple projects, sends multiple notifications'() {
         given:
-        OtrsTicket ticket
+        Ticket ticket
         ProcessingStatus status
         setupData()
         SessionUtils.withTransaction {
-            ticket = createOtrsTicket()
+            ticket = createTicket()
             status = new ProcessingStatus([1, 2].collect { int index ->
                 UserProjectRole userProjectRole = DomainFactory.createUserProjectRole(
                         user: DomainFactory.createUser(email: "project${index}@test.com"),
@@ -648,7 +648,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
                 ))
             })
             String prefix = HelperUtils.uniqueString
-            DomainFactory.createProcessingOptionForOtrsTicketPrefix(prefix)
+            DomainFactory.createProcessingOptionForTicketPrefix(prefix)
 
             notificationCreator.mailHelperService = Mock(MailHelperService) {
                 1 * sendEmail("[${prefix}#${ticket.ticketNumber}] Project_X1 sequencing data installed",
@@ -658,8 +658,8 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
                 0 * sendEmail(_, _, _)
             }
             notificationCreator.createNotificationTextService = Mock(CreateNotificationTextService) {
-                notification(ticket, _, OtrsTicket.ProcessingStep.INSTALLATION, _) >> { OtrsTicket ticket1, ProcessingStatus status1,
-                                                                                        OtrsTicket.ProcessingStep processingStep, Project project ->
+                notification(ticket, _, Ticket.ProcessingStep.INSTALLATION, _) >> { Ticket ticket1, ProcessingStatus status1,
+                                                                                    Ticket.ProcessingStep processingStep, Project project ->
                     return project.name
                 }
             }
@@ -667,18 +667,18 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
 
         expect:
         SessionUtils.withTransaction {
-            notificationCreator.sendCustomerNotification(ticket, status, OtrsTicket.ProcessingStep.INSTALLATION)
+            notificationCreator.sendCustomerNotification(ticket, status, Ticket.ProcessingStep.INSTALLATION)
             return true
         }
     }
 
     void 'sendCustomerNotification, with multiple projects, when non are finished, doesnt send emails'() {
         given:
-        OtrsTicket ticket
+        Ticket ticket
         ProcessingStatus status
         setupData()
         SessionUtils.withTransaction {
-            ticket = createOtrsTicket()
+            ticket = createTicket()
             status = new ProcessingStatus([1, 2].collect { int index ->
                 UserProjectRole userProjectRole = DomainFactory.createUserProjectRole(
                         user: DomainFactory.createUser(email: "project${index}@test.com"),
@@ -694,7 +694,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
             })
 
             String prefix = HelperUtils.uniqueString
-            DomainFactory.createProcessingOptionForOtrsTicketPrefix(prefix)
+            DomainFactory.createProcessingOptionForTicketPrefix(prefix)
 
             notificationCreator.mailHelperService = Mock(MailHelperService) {
                 0 * sendEmail(_, _, _)
@@ -703,7 +703,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
 
         expect:
         SessionUtils.withTransaction {
-            notificationCreator.sendCustomerNotification(ticket, status, OtrsTicket.ProcessingStep.INSTALLATION)
+            notificationCreator.sendCustomerNotification(ticket, status, Ticket.ProcessingStep.INSTALLATION)
             return true
         }
     }
@@ -1134,12 +1134,12 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
             }
 
             switch (pairAnalysis.analysisType) {
-                case OtrsTicket.ProcessingStep.ACESEQ:
+                case Ticket.ProcessingStep.ACESEQ:
                     analysisInstance.samplePair.sophiaProcessingStatus = SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED
                     analysisInstance.samplePair.save(flush: true)
                     DomainFactory.createSophiaInstance(analysisInstance.samplePair)
                     break
-                case OtrsTicket.ProcessingStep.RUN_YAPSA:
+                case Ticket.ProcessingStep.RUN_YAPSA:
                     analysisInstance.samplePair.snvProcessingStatus = SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED
                     analysisInstance.samplePair.save(flush: true)
                     DomainFactory.createRoddySnvInstanceWithRoddyBamFiles([samplePair: analysisInstance.samplePair])
@@ -1613,12 +1613,12 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         given:
         setupData()
 
-        OtrsTicket ticket
+        Ticket ticket
         UserProjectRole userProjectRole
         SeqTrack seqTrack
 
         SessionUtils.withTransaction {
-            ticket = createOtrsTicket()
+            ticket = createTicket()
             userProjectRole = DomainFactory.createUserProjectRole(project: createProject())
             seqTrack = createSeqTrackWithOneFastqFile(
                     [
@@ -1629,9 +1629,9 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
                                     )
                             ),
                     ],
-                    [fastqImportInstance: createFastqImportInstance(otrsTicket: ticket), fileLinked: true])
-            DomainFactory.createProcessingOptionForOtrsTicketPrefix(PREFIX)
-            String prefix = otrsTicketService.getPrefixedTicketNumber(ticket)
+                    [fastqImportInstance: createFastqImportInstance(ticket: ticket), fileLinked: true])
+            DomainFactory.createProcessingOptionForTicketPrefix(PREFIX)
+            String prefix = ticketService.getPrefixedTicketNumber(ticket)
             String expectedHeader = "${prefix} Final Processing Status Update"
             notificationCreator.mailHelperService = Mock(MailHelperService) {
                 1 * sendEmailToTicketSystem(expectedHeader, _)
@@ -1658,20 +1658,20 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         given:
         setupData()
 
-        OtrsTicket otrsTicket
+        Ticket ticket
 
         SessionUtils.withTransaction {
-            DomainFactory.createProcessingOptionForOtrsTicketPrefix(PREFIX)
+            DomainFactory.createProcessingOptionForTicketPrefix(PREFIX)
             setupBlacklistImportSourceNotificationProcessingOption("")
 
-            otrsTicket = createOtrsTicket()
+            ticket = createTicket()
 
             RawSequenceFile rawSequenceFile = createFastqFile()
-            FastqImportInstance fastqImportInstance = createFastqImportInstance(otrsTicket: otrsTicket, sequenceFiles: [rawSequenceFile])
+            FastqImportInstance fastqImportInstance = createFastqImportInstance(ticket: ticket, sequenceFiles: [rawSequenceFile])
 
             DomainFactory.createMetaDataFile(fastqImportInstance: fastqImportInstance)
 
-            String prefix = otrsTicketService.getPrefixedTicketNumber(otrsTicket)
+            String prefix = ticketService.getPrefixedTicketNumber(ticket)
             String expectedHeader = "Import source ready for deletion [${prefix}]"
 
             String expectedEnd = [
@@ -1685,7 +1685,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
 
         expect:
         SessionUtils.withTransaction {
-            notificationCreator.sendImportSourceOperatorNotification(otrsTicket)
+            notificationCreator.sendImportSourceOperatorNotification(ticket)
             return true
         }
     }
@@ -1694,15 +1694,15 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         given:
         setupData()
 
-        OtrsTicket otrsTicket
+        Ticket ticket
 
         SessionUtils.withTransaction {
-            DomainFactory.createProcessingOptionForOtrsTicketPrefix(PREFIX)
+            DomainFactory.createProcessingOptionForTicketPrefix(PREFIX)
 
             String blacklisted = setupBlacklistImportSourceNotificationProcessingOption("/blacklisted").value
-            otrsTicket = createOtrsTicket()
+            ticket = createTicket()
 
-            FastqImportInstance fastqImportInstance = createFastqImportInstance(otrsTicket: otrsTicket, sequenceFiles: [
+            FastqImportInstance fastqImportInstance = createFastqImportInstance(ticket: ticket, sequenceFiles: [
                     createFastqFile(initialDirectory: "${blacklisted}"),
                     createFastqFile(initialDirectory: "${blacklisted}"),
             ])
@@ -1715,24 +1715,24 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
 
         expect:
         SessionUtils.withTransaction {
-            notificationCreator.sendImportSourceOperatorNotification(otrsTicket)
+            notificationCreator.sendImportSourceOperatorNotification(ticket)
             return true
         }
     }
 
     void "getPathsToDelete returns the paths of all DataFiles associated with the ticket"() {
         given:
-        OtrsTicket otrsTicket
+        Ticket ticket
         List<String> expected = []
 
         SessionUtils.withTransaction {
-            otrsTicket = createOtrsTicket()
+            ticket = createTicket()
 
             List<RawSequenceFile> rawSequenceFilesA = [createFastqFile(), createFastqFile()]
-            FastqImportInstance fastqImportInstanceA = createFastqImportInstance(otrsTicket: otrsTicket, sequenceFiles: rawSequenceFilesA)
+            FastqImportInstance fastqImportInstanceA = createFastqImportInstance(ticket: ticket, sequenceFiles: rawSequenceFilesA)
 
             List<RawSequenceFile> rawSequenceFilesB = [createFastqFile(), createFastqFile(), createFastqFile()]
-            FastqImportInstance fastqImportInstanceB = createFastqImportInstance(otrsTicket: otrsTicket, sequenceFiles: rawSequenceFilesB)
+            FastqImportInstance fastqImportInstanceB = createFastqImportInstance(ticket: ticket, sequenceFiles: rawSequenceFilesB)
 
             DomainFactory.createMetaDataFile(fastqImportInstance: fastqImportInstanceA)
             DomainFactory.createMetaDataFile(fastqImportInstance: fastqImportInstanceB)
@@ -1743,30 +1743,30 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
 
         expect:
         SessionUtils.withTransaction {
-            assert notificationCreator.getPathsToDelete(otrsTicket).sort() == expected.sort()
+            assert notificationCreator.getPathsToDelete(ticket).sort() == expected.sort()
             return true
         }
     }
 
     void "getPathsToDelete leaves out blacklisted paths"() {
         given:
-        OtrsTicket otrsTicket
+        Ticket ticket
         List<String> expected = []
 
         SessionUtils.withTransaction {
             String blacklisted = setupBlacklistImportSourceNotificationProcessingOption("/blacklisted").value
 
-            otrsTicket = createOtrsTicket()
+            ticket = createTicket()
 
             List<RawSequenceFile> rawSequenceFilesA = [createFastqFile(), createFastqFile()]
-            FastqImportInstance fastqImportInstanceA = createFastqImportInstance(otrsTicket: otrsTicket, sequenceFiles: rawSequenceFilesA)
+            FastqImportInstance fastqImportInstanceA = createFastqImportInstance(ticket: ticket, sequenceFiles: rawSequenceFilesA)
 
             Closure<RawSequenceFile> createBlacklistedRawSequenceFile = {
                 createFastqFile(initialDirectory: "${blacklisted}/path/dataFile")
             }
             List<RawSequenceFile> rawSequenceFilesB = [createFastqFile()]
             List<RawSequenceFile> rawSequenceFilesBBlacklisted = [createBlacklistedRawSequenceFile(), createBlacklistedRawSequenceFile()]
-            FastqImportInstance fastqImportInstanceB = createFastqImportInstance(otrsTicket: otrsTicket, sequenceFiles: rawSequenceFilesB + rawSequenceFilesBBlacklisted)
+            FastqImportInstance fastqImportInstanceB = createFastqImportInstance(ticket: ticket, sequenceFiles: rawSequenceFilesB + rawSequenceFilesBBlacklisted)
 
             DomainFactory.createMetaDataFile(fastqImportInstance: fastqImportInstanceA, filePathSource: "${blacklisted}/path/metaDataFile")
             DomainFactory.createMetaDataFile(fastqImportInstance: fastqImportInstanceB)
@@ -1777,29 +1777,29 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
 
         expect:
         SessionUtils.withTransaction {
-            assert notificationCreator.getPathsToDelete(otrsTicket).sort() == expected.sort()
+            assert notificationCreator.getPathsToDelete(ticket).sort() == expected.sort()
             return true
         }
     }
 
     void "getPathsToDelete returns empty list if all paths are blacklisted"() {
         given:
-        OtrsTicket otrsTicket
+        Ticket ticket
 
         SessionUtils.withTransaction {
             String blacklisted = setupBlacklistImportSourceNotificationProcessingOption("/blacklisted").value
 
-            otrsTicket = createOtrsTicket()
+            ticket = createTicket()
 
             Closure<RawSequenceFile> createBlacklistedRawSequenceFile = {
                 createFastqFile(initialDirectory: "${blacklisted}/path/dataFile")
             }
 
-            FastqImportInstance fastqImportInstanceA = createFastqImportInstance(otrsTicket: otrsTicket, sequenceFiles: [
+            FastqImportInstance fastqImportInstanceA = createFastqImportInstance(ticket: ticket, sequenceFiles: [
                     createBlacklistedRawSequenceFile(),
             ])
 
-            FastqImportInstance fastqImportInstanceB = createFastqImportInstance(otrsTicket: otrsTicket, sequenceFiles: [
+            FastqImportInstance fastqImportInstanceB = createFastqImportInstance(ticket: ticket, sequenceFiles: [
                     createBlacklistedRawSequenceFile(),
                     createBlacklistedRawSequenceFile(),
             ])
@@ -1810,7 +1810,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
 
         expect:
         SessionUtils.withTransaction {
-            assert notificationCreator.getPathsToDelete(otrsTicket).sort() == []
+            assert notificationCreator.getPathsToDelete(ticket).sort() == []
             return true
         }
     }

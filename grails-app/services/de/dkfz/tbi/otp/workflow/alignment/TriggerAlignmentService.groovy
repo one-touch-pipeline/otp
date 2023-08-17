@@ -30,7 +30,7 @@ import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePairDeciderService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.otp.tracking.OtrsTicketService
+import de.dkfz.tbi.otp.tracking.TicketService
 import de.dkfz.tbi.otp.utils.LogUsedTimeUtils
 import de.dkfz.tbi.otp.withdraw.RoddyBamFileWithdrawService
 import de.dkfz.tbi.otp.workflowExecution.*
@@ -43,7 +43,7 @@ class TriggerAlignmentService {
 
     SeqTrackService seqTrackService
     SamplePairDeciderService samplePairDeciderService
-    OtrsTicketService otrsTicketService
+    TicketService ticketService
     AllDecider allDecider
     RoddyBamFileWithdrawService roddyBamFileWithdrawService
     MergingCriteriaService mergingCriteriaService
@@ -63,8 +63,8 @@ class TriggerAlignmentService {
         }
 
         // Modify the notification status
-        otrsTicketService.findAllOtrsTickets(seqTracks).each {
-            otrsTicketService.resetAlignmentAndAnalysisNotification(it)
+        ticketService.findAllTickets(seqTracks).each {
+            ticketService.resetAlignmentAndAnalysisNotification(it)
         }
 
         // Start alignment workflows

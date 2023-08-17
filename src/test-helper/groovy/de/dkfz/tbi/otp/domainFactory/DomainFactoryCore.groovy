@@ -31,7 +31,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.searchability.Keyword
-import de.dkfz.tbi.otp.tracking.OtrsTicket
+import de.dkfz.tbi.otp.tracking.Ticket
 import de.dkfz.tbi.otp.utils.HelperUtils
 import de.dkfz.tbi.otp.workflow.alignment.wgbs.WgbsWorkflow
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
@@ -411,14 +411,14 @@ trait DomainFactoryCore implements DomainFactoryHelper {
         ], properties)
     }
 
-    OtrsTicket createOtrsTicket(Map properties = [:]) {
-        return createDomainObject(OtrsTicket, [
+    Ticket createTicket(Map properties = [:]) {
+        return createDomainObject(Ticket, [
                 ticketNumber: "20000101" + String.format("%08d", nextId),
         ], properties)
     }
 
-    OtrsTicket createOtrsTicketWithEndDatesAndNotificationSent(Map properties = [:]) {
-        return createOtrsTicket([
+    Ticket createTicketWithEndDatesAndNotificationSent(Map properties = [:]) {
+        return createTicket([
                 installationStarted  : new Date(),
                 installationFinished : new Date(),
                 fastqcStarted        : new Date(),

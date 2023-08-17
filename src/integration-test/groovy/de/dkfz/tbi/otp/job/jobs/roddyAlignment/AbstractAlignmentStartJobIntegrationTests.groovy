@@ -38,7 +38,7 @@ import de.dkfz.tbi.otp.job.processing.Process
 import de.dkfz.tbi.otp.job.processing.ProcessParameter
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.tracking.OtrsTicket
+import de.dkfz.tbi.otp.tracking.Ticket
 import de.dkfz.tbi.otp.utils.SessionUtils
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
@@ -395,8 +395,8 @@ class AbstractAlignmentStartJobIntegrationTests implements DomainFactoryProcessi
     void executeCallsSetStartedForSeqTracks() {
         setupData()
         MergingWorkPackage mwp = createMergingWorkPackageWithSeqTrackInState(SeqTrack.DataProcessingState.FINISHED)
-        OtrsTicket otrsTicket = DomainFactory.createOtrsTicket()
-        RawSequenceFile.findAll()*.fastqImportInstance = DomainFactory.createFastqImportInstance(otrsTicket: otrsTicket)
+        Ticket ticket = DomainFactory.createTicket()
+        RawSequenceFile.findAll()*.fastqImportInstance = DomainFactory.createFastqImportInstance(ticket: ticket)
         DomainFactory.createRoddyProcessingOptions(TestCase.uniqueNonExistentPath)
         DomainFactory.createRoddyWorkflowConfig([pipeline: mwp.pipeline, project: mwp.project])
 
@@ -404,7 +404,7 @@ class AbstractAlignmentStartJobIntegrationTests implements DomainFactoryProcessi
             testAbstractAlignmentStartJob.startAlignment()
         }
 
-        assert otrsTicket.alignmentStarted != null
+        assert ticket.alignmentStarted != null
     }
 
     private void assertRoddyBamFileConsistencyWithMwp(RoddyBamFile rbf, MergingWorkPackage mwp) {

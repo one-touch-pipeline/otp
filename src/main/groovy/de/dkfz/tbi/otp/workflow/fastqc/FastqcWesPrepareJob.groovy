@@ -29,7 +29,7 @@ import de.dkfz.tbi.otp.dataprocessing.FastqcDataFilesService
 import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.tracking.NotificationCreator
-import de.dkfz.tbi.otp.tracking.OtrsTicket
+import de.dkfz.tbi.otp.tracking.Ticket
 import de.dkfz.tbi.otp.utils.LinkEntry
 import de.dkfz.tbi.otp.workflow.jobs.AbstractPrepareJob
 import de.dkfz.tbi.otp.workflowExecution.FastqcReportService
@@ -58,7 +58,7 @@ class FastqcWesPrepareJob extends AbstractPrepareJob implements FastqcShared {
     @Override
     protected void doFurtherPreparation(WorkflowStep workflowStep) {
         SeqTrack seqTrack = getSeqTrack(workflowStep)
-        notificationCreator.setStartedForSeqTracks([seqTrack], OtrsTicket.ProcessingStep.FASTQC)
+        notificationCreator.setStartedForSeqTracks([seqTrack], Ticket.ProcessingStep.FASTQC)
         seqTrack.fastqcState = SeqTrack.DataProcessingState.IN_PROGRESS
         seqTrack.save(flush: true)
 

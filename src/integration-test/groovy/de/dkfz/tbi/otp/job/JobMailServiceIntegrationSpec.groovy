@@ -34,8 +34,8 @@ import de.dkfz.tbi.otp.domainFactory.DomainFactoryProcessingPriority
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.tracking.OtrsTicket
-import de.dkfz.tbi.otp.tracking.OtrsTicketService
+import de.dkfz.tbi.otp.tracking.Ticket
+import de.dkfz.tbi.otp.tracking.TicketService
 import de.dkfz.tbi.otp.utils.MailHelperService
 
 import java.nio.file.Path
@@ -46,7 +46,7 @@ class JobMailServiceIntegrationSpec extends Specification implements DomainFacto
 
     TestConfigService configService
 
-    OtrsTicketService otrsTicketService
+    TicketService ticketService
 
     @TempDir
     Path tempDir
@@ -58,7 +58,7 @@ class JobMailServiceIntegrationSpec extends Specification implements DomainFacto
         configService.addOtpProperties(tempDir)
         jobStatusLoggingService.configService = configService
 
-        OtrsTicket otrsTicket = createOtrsTicket()
+        Ticket ticket = createTicket()
         SeqTrack seqTrack = createSeqTrack()
         seqTrack.ilseSubmission = createIlseSubmission()
         seqTrack.save(flush: true)
@@ -68,7 +68,7 @@ class JobMailServiceIntegrationSpec extends Specification implements DomainFacto
         DomainFactory.createFastqFile([
                 seqTrack: seqTrack,
                 fastqImportInstance: createFastqImportInstance([
-                        otrsTicket: otrsTicket,
+                        ticket: ticket,
                 ]),
         ])
 
@@ -80,7 +80,7 @@ class JobMailServiceIntegrationSpec extends Specification implements DomainFacto
                 type: null,
                 value: "http:/localhost:8080",
         ])
-        String url = otrsTicketService.buildTicketDirectLink(otrsTicket)
+        String url = ticketService.buildTicketDirectLink(ticket)
 
         ProcessingStep step = DomainFactory.createProcessingStepUpdate().processingStep
 
@@ -137,7 +137,7 @@ class JobMailServiceIntegrationSpec extends Specification implements DomainFacto
                     processUrl(_) >> 'url'
                 },
                 jobStatusLoggingService: jobStatusLoggingService,
-                otrsTicketService      : new OtrsTicketService(),
+                ticketService      : new TicketService(),
         ])
 
         when:

@@ -27,13 +27,13 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.otp.ngsdata.*
 
-class OtrsTicketSpec extends Specification implements DataTest {
+class TicketSpec extends Specification implements DataTest {
 
     @Override
     Class[] getDomainClassesToMock() {
         return [
                 MetaDataFile,
-                OtrsTicket,
+                Ticket,
                 Run,
                 FastqImportInstance,
                 SeqCenter,
@@ -44,18 +44,18 @@ class OtrsTicketSpec extends Specification implements DataTest {
 
     def 'test creation, correct String'() {
         given:
-        OtrsTicket otrsTicket
+        Ticket ticket
 
         when:
-        otrsTicket = DomainFactory.createOtrsTicket([ticketNumber: '2000010112345678'])
+        ticket = DomainFactory.createTicket([ticketNumber: '2000010112345678'])
 
         then:
-        otrsTicket.ticketNumber == '2000010112345678'
+        ticket.ticketNumber == '2000010112345678'
     }
 
     def 'test creation, incorrect String'() {
         when:
-        DomainFactory.createOtrsTicket([ticketNumber: '20000101a2345678'])
+        DomainFactory.createTicket([ticketNumber: '20000101a2345678'])
 
         then:
         ValidationException ex = thrown()
@@ -64,11 +64,11 @@ class OtrsTicketSpec extends Specification implements DataTest {
 
     def 'test creation, duplicate String'() {
         when:
-        DomainFactory.createOtrsTicket([ticketNumber: '2000010112345678'])
-        DomainFactory.createOtrsTicket([ticketNumber: '2000010112345678'])
+        DomainFactory.createTicket([ticketNumber: '2000010112345678'])
+        DomainFactory.createTicket([ticketNumber: '2000010112345678'])
 
         then:
         ValidationException ex = thrown()
-        ex.message.contains("OtrsTicket.ticketNumber.unique.error")
+        ex.message.contains("ticket.ticketNumber.unique.error")
     }
 }

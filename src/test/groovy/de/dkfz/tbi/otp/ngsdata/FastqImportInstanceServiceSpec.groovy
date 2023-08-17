@@ -62,7 +62,7 @@ class FastqImportInstanceServiceSpec extends Specification implements ServiceUni
         given:
         FastqImportInstance fastqImportInstance = createFastqImportInstance([
                 state     : FastqImportInstance.WorkflowCreateState.PROCESSING,
-                otrsTicket: createOtrsTicket(),
+                ticket: createTicket(),
         ])
 
         when:
@@ -77,7 +77,7 @@ class FastqImportInstanceServiceSpec extends Specification implements ServiceUni
         given:
         FastqImportInstance fastqImportInstance = createFastqImportInstance([
                 state     : state,
-                otrsTicket: createOtrsTicket(),
+                ticket: createTicket(),
         ])
 
         when:

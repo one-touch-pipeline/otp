@@ -35,61 +35,61 @@
 
     <div class="basic-flex-box">
         <div class="item basic-right-padding">
-            <h2><g:message code="metadataImport.details.otrsTicket"/></h2>
+            <h2><g:message code="metadataImport.details.ticket"/></h2>
             <table>
                 <tr>
-                    <td><g:message code="metadataImport.details.otrsTicketNumber"/></td>
+                    <td><g:message code="metadataImport.details.ticketNumber"/></td>
                     <td>
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
                                 template="urlValue"
-                                link="${g.createLink(controller: 'metadataImport', action: 'assignOtrsTicketToFastqImportInstance', id: fastqImportInstanceId)}"
-                                url="${otrsTicketUrl ?: "#"}"
-                                value="${otrsTicket?.ticketNumber ?: g.message(code: "metadataImport.details.ticketless")}"/>
+                                link="${g.createLink(controller: 'metadataImport', action: 'assignTicketToFastqImportInstance', id: fastqImportInstanceId)}"
+                                url="${ticketUrl ?: "#"}"
+                                value="${ticket?.ticketNumber ?: g.message(code: "metadataImport.details.ticketless")}"/>
                     </td>
                 </tr>
-                <g:if test="${otrsTicket}">
+                <g:if test="${ticket}">
                     <tr>
-                        <td><g:message code="metadataImport.otrs.automaticNotificationFlag"/>:</td>
+                        <td><g:message code="metadataImport.ticket.automaticNotificationFlag"/>:</td>
                         <td>
                             <otp:editorSwitch
                                     roles="ROLE_OPERATOR"
                                     template="dropDown"
-                                    link="${g.createLink(controller: "metadataImport", action: "updateAutomaticNotificationFlag", params: ["otrsTicket.id": otrsTicket.id])}"
+                                    link="${g.createLink(controller: "metadataImport", action: "updateAutomaticNotificationFlag", params: ["ticket.id": ticket.id])}"
                                     values="${["true", "false"]}"
-                                    value="${otrsTicket.automaticNotification}"/>
+                                    value="${ticket.automaticNotification}"/>
                         </td>
                     </tr>
                     <tr>
-                        <td><g:message code="metadataImport.otrs.finalNotificationFlag"/>:</td>
+                        <td><g:message code="metadataImport.ticket.finalNotificationFlag"/>:</td>
                         <td>
                             <otp:editorSwitch
                                     roles="ROLE_OPERATOR"
                                     template="dropDown"
-                                    link="${g.createLink(controller: "metadataImport", action: "updateFinalNotificationFlag", params: ["otrsTicket.id": otrsTicket.id])}"
+                                    link="${g.createLink(controller: "metadataImport", action: "updateFinalNotificationFlag", params: ["ticket.id": ticket.id])}"
                                     values="${["true", "false"]}"
-                                    value="${otrsTicket.finalNotificationSent}"/>
+                                    value="${ticket.finalNotificationSent}"/>
                         </td>
                     </tr>
                     <tr>
-                        <td><g:message code="metadataImport.details.otrsTicket.seqCenter.comment"/></td>
+                        <td><g:message code="metadataImport.details.ticket.seqCenter.comment"/></td>
                         <td class="comment-td">
                             <otp:editorSwitch
                                     roles="ROLE_OPERATOR"
                                     template="textArea"
-                                    link="${g.createLink(controller: "metadataImport", action: "updateSeqCenterComment", params: ["otrsTicket.id": otrsTicket.id])}"
-                                    value="${otrsTicket.seqCenterComment}"/>
+                                    link="${g.createLink(controller: "metadataImport", action: "updateSeqCenterComment", params: ["ticket.id": ticket.id])}"
+                                    value="${ticket.seqCenterComment}"/>
                         </td>
                     </tr>
                 </g:if>
             </table>
         </div>
-        <g:if test="${otrsTicket}">
+        <g:if test="${ticket}">
             <div class="item basic-right-padding">
                 <h2><g:message code="notification.notificationSelection.notification"/></h2>
                 <g:form controller="notification" action="notificationPreview">
                     <g:render template="/notification/notificationSelection" model="[
-                            otrsTicket         : otrsTicket,
+                            ticket         : ticket,
                             fastqImportInstanceId: fastqImportInstanceId,
                     ]"/>
                     <br><br>

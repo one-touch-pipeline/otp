@@ -25,7 +25,7 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.job.jobs.bamFilePairAnalysis.AbstractBamFilePairAnalysisStartJob
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.tracking.OtrsTicket
+import de.dkfz.tbi.otp.tracking.Ticket
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
 trait StartJobIntegrationSpec {
@@ -45,7 +45,7 @@ trait StartJobIntegrationSpec {
 
     abstract BamFilePairAnalysis getInstance()
 
-    abstract Date getStartedDate(OtrsTicket otrsTicket)
+    abstract Date getStartedDate(Ticket ticket)
 
     abstract SamplePair.ProcessingStatus getProcessingStatus(SamplePair samplePair)
 

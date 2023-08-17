@@ -23,7 +23,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import grails.gorm.hibernate.annotation.ManagedEntity
 
-import de.dkfz.tbi.otp.tracking.OtrsTicket
+import de.dkfz.tbi.otp.tracking.Ticket
 import de.dkfz.tbi.otp.utils.Entity
 
 /**
@@ -37,7 +37,7 @@ class FastqImportInstance implements Entity {
             sequenceFiles: RawSequenceFile,
     ]
 
-    OtrsTicket otrsTicket
+    Ticket ticket
 
     enum ImportMode {
         MANUAL,
@@ -56,11 +56,11 @@ class FastqImportInstance implements Entity {
 
     static constraints = {
         // the field can be null, since for the old data the information is not needed; only for new incoming fastqImportInstances
-        otrsTicket(nullable: true)
+        ticket(nullable: true)
     }
 
     static mapping = {
-        otrsTicket index: "fastq_import_instance_otrs_ticket_idx"
+        ticket index: "fastq_import_instance_ticket_idx"
         state index: "fastq_import_instance_state_idx"
     }
 }

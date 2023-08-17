@@ -68,7 +68,7 @@ class NotificationCreator {
     MailHelperService mailHelperService
 
     @Autowired
-    OtrsTicketService otrsTicketService
+    TicketService ticketService
 
     @Autowired
     ProcessingOptionService processingOptionService
@@ -88,41 +88,41 @@ class NotificationCreator {
     @Autowired
     GrailsApplication grailsApplication
 
-    void setStartedForSeqTracks(Collection<SeqTrack> seqTracks, OtrsTicket.ProcessingStep step) {
-        setStarted(otrsTicketService.findAllOtrsTickets(seqTracks), step)
+    void setStartedForSeqTracks(Collection<SeqTrack> seqTracks, Ticket.ProcessingStep step) {
+        setStarted(ticketService.findAllTickets(seqTracks), step)
     }
 
-    void setStarted(Collection<OtrsTicket> otrsTickets, OtrsTicket.ProcessingStep step) {
-        otrsTickets.unique().each {
-            otrsTicketService.saveStartTimeIfNeeded(it, step)
+    void setStarted(Collection<Ticket> tickets, Ticket.ProcessingStep step) {
+        tickets.unique().each {
+            ticketService.saveStartTimeIfNeeded(it, step)
         }
     }
 
     void processFinished(Set<SeqTrack> seqTracks) {
-        Set<OtrsTicket> otrsTickets = otrsTicketService.findAllOtrsTickets(seqTracks)
-        LogThreadLocal.threadLog?.debug("evaluating processFinished for OtrsTickets: ${otrsTickets}; " +
+        Set<Ticket> tickets = ticketService.findAllTickets(seqTracks)
+        LogThreadLocal.threadLog?.debug("evaluating processFinished for tickets: ${tickets}; " +
                 "SeqTracks: ${seqTracks*.id}")
-        for (OtrsTicket ticket : otrsTickets) {
+        for (Ticket ticket : tickets) {
             notifyAndSetFinishedTimestamps(ticket)
         }
     }
 
-    void notifyAndSetFinishedTimestamps(OtrsTicket ticket) {
+    void notifyAndSetFinishedTimestamps(Ticket ticket) {
         if (ticket.finalNotificationSent) {
             return
         }
-        Set<SeqTrack> seqTracks = otrsTicketService.findAllSeqTracks(ticket)
+        Set<SeqTrack> seqTracks = ticketService.findAllSeqTracks(ticket)
         ProcessingStatus status = getProcessingStatus(seqTracks)
-        List<OtrsTicket.ProcessingStep> justCompletedProcessingSteps = []
+        List<Ticket.ProcessingStep> justCompletedProcessingSteps = []
         boolean mightDoMore = false
-        for (OtrsTicket.ProcessingStep step : OtrsTicket.ProcessingStep.values()) {
+        for (Ticket.ProcessingStep step : Ticket.ProcessingStep.values()) {
             WorkflowProcessingStatus stepStatus = status."${step}ProcessingStatus"
             boolean previousStepFinished = step.dependsOn ? (ticket."${step.dependsOn}Finished" != null) : true
             if (ticket."${step}Finished" == null && stepStatus.done != NOTHING && !stepStatus.mightDoMore && previousStepFinished) {
                 justCompletedProcessingSteps.add(step)
-                if (otrsTicketService.saveEndTimeIfNeeded(ticket, step)) {
+                if (ticketService.saveEndTimeIfNeeded(ticket, step)) {
                     sendCustomerNotification(ticket, status, step)
-                    LogThreadLocal.threadLog?.info("sent customer notification for OTRS Ticket ${ticket.ticketNumber}: ${step}")
+                    LogThreadLocal.threadLog?.info("sent customer notification for Ticket ${ticket.ticketNumber}: ${step}")
                 }
             }
             if (stepStatus.mightDoMore) {
@@ -134,16 +134,16 @@ class NotificationCreator {
             sendProcessingStatusOperatorNotification(ticket, seqTracks, status, !mightDoMore)
             if (!mightDoMore) {
                 LogThreadLocal.threadLog?.debug("!mightDoMore: marking as finalNotificationSent")
-                otrsTicketService.markFinalNotificationSent(ticket)
+                ticketService.markFinalNotificationSent(ticket)
             }
-            if (justCompletedProcessingSteps.contains(OtrsTicket.ProcessingStep.INSTALLATION)) {
+            if (justCompletedProcessingSteps.contains(Ticket.ProcessingStep.INSTALLATION)) {
                 LogThreadLocal.threadLog?.debug("installation just completed")
                 sendImportSourceOperatorNotification(ticket)
             }
         }
     }
 
-    void sendCustomerNotification(OtrsTicket ticket, ProcessingStatus status, OtrsTicket.ProcessingStep notificationStep) {
+    void sendCustomerNotification(Ticket ticket, ProcessingStatus status, Ticket.ProcessingStep notificationStep) {
         if (notificationStep.notificationSubject != null) {
             status.seqTrackProcessingStatuses.groupBy { it.seqTrack.project }.values().each {
                 sendCustomerNotificationForOneProject(ticket, new ProcessingStatus(it), notificationStep)
@@ -151,7 +151,7 @@ class NotificationCreator {
         }
     }
 
-    void sendCustomerNotificationForOneProject(OtrsTicket ticket, ProcessingStatus status, OtrsTicket.ProcessingStep notificationStep) {
+    void sendCustomerNotificationForOneProject(Ticket ticket, ProcessingStatus status, Ticket.ProcessingStep notificationStep) {
         if (notificationStep.notificationSubject != null) {
             Collection<SeqTrack> seqTracks = status.seqTrackProcessingStatuses*.seqTrack
             if (!seqTracks) {
@@ -164,7 +164,7 @@ class NotificationCreator {
             if (ticket.automaticNotification && project.processingNotification) {
                 recipients = userProjectRoleService.getEmailsOfToBeNotifiedProjectUsers([project])
             }
-            StringBuilder subject = new StringBuilder("[${otrsTicketService.getPrefixedTicketNumber(ticket)}] ")
+            StringBuilder subject = new StringBuilder("[${ticketService.getPrefixedTicketNumber(ticket)}] ")
             if (!recipients) {
                 subject.append('TO BE SENT: ')
             }
@@ -188,10 +188,10 @@ class NotificationCreator {
         }
     }
 
-    void sendProcessingStatusOperatorNotification(OtrsTicket ticket, Set<SeqTrack> seqTracks, ProcessingStatus status, boolean finalNotification) {
+    void sendProcessingStatusOperatorNotification(Ticket ticket, Set<SeqTrack> seqTracks, ProcessingStatus status, boolean finalNotification) {
         StringBuilder subject = new StringBuilder()
 
-        subject.append(otrsTicketService.getPrefixedTicketNumber(ticket))
+        subject.append(ticketService.getPrefixedTicketNumber(ticket))
         if (finalNotification) {
             subject.append(' Final')
         }
@@ -216,7 +216,7 @@ class NotificationCreator {
         mailHelperService.sendEmailToTicketSystem(subject.toString(), content.toString())
     }
 
-    private StringBuilder createLinksToImportDetailPage(OtrsTicket ticket) {
+    private StringBuilder createLinksToImportDetailPage(Ticket ticket) {
         StringBuilder content = new StringBuilder()
 
         final String metadataImportController = "metadataImport"
@@ -224,7 +224,7 @@ class NotificationCreator {
 
         GrailsArtefactCheckHelper.check(grailsApplication, metadataImportController, metadataImportAction)
 
-        otrsTicketService.getAllFastqImportInstances(ticket).each {
+        ticketService.getAllFastqImportInstances(ticket).each {
             content.append('\n')
             content.append(createNotificationTextService.linkGenerator.link([
                     (LinkGenerator.ATTRIBUTE_CONTROLLER): metadataImportController,
@@ -237,14 +237,14 @@ class NotificationCreator {
         return content
     }
 
-    void sendImportSourceOperatorNotification(OtrsTicket ticket) {
-        String prefixedTicketNumber = otrsTicketService.getPrefixedTicketNumber(ticket)
+    void sendImportSourceOperatorNotification(Ticket ticket) {
+        String prefixedTicketNumber = ticketService.getPrefixedTicketNumber(ticket)
         String subject = "Import source ready for deletion [${prefixedTicketNumber}]"
-        String otrsTicketUrl = otrsTicketService.buildTicketDirectLink(ticket)
+        String ticketUrl = ticketService.buildTicketDirectLink(ticket)
 
         String content = """\
                 |Related Ticket: ${prefixedTicketNumber}
-                |${otrsTicketUrl}
+                |${ticketUrl}
                 |
                 |Deletion Script:
                 |
@@ -261,9 +261,9 @@ class NotificationCreator {
         }
     }
 
-    private List<String> getPathsToDelete(OtrsTicket otrsTicket) {
+    private List<String> getPathsToDelete(Ticket ticket) {
         List<String> allPaths = []
-        otrsTicketService.getMetaDataFilesOfOtrsTicket(otrsTicket).each { MetaDataFile metaDataFile ->
+        ticketService.getMetaDataFilesOfTicket(ticket).each { MetaDataFile metaDataFile ->
             List<String> initialPaths = metaDataFile.fastqImportInstance.sequenceFiles*.fullInitialPath
             allPaths.addAll(initialPaths)
         }
@@ -455,7 +455,7 @@ class NotificationCreator {
         metaDataFile.refresh()
         long id = metaDataFile.fastqImportInstance.id
 
-        String subject = "[${otrsTicketService.getPrefixedTicketNumber(metaDataFile.fastqImportInstance.otrsTicket)}] " +
+        String subject = "[${ticketService.getPrefixedTicketNumber(metaDataFile.fastqImportInstance.ticket)}] " +
                 "Workflow created successfully for ${metaDataFile.fileNameSource}"
 
         String body = [
@@ -474,7 +474,7 @@ class NotificationCreator {
         long id = metaDataFile.fastqImportInstance.id
         List<Long> seqTrackIds = metaDataFile.fastqImportInstance.sequenceFiles*.seqTrack*.id.unique().sort()
 
-        String subject = "[${otrsTicketService.getPrefixedTicketNumber(metaDataFile.fastqImportInstance.otrsTicket)}] " +
+        String subject = "[${ticketService.getPrefixedTicketNumber(metaDataFile.fastqImportInstance.ticket)}] " +
                 "Failed to create workflows for ${metaDataFile.fileNameSource}"
 
         // Retrieve the names for the code generated in the body

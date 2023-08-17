@@ -32,8 +32,8 @@ import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.DirectoryStructureBeanName
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.directorystructures.DataFilesInSameDirectory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators.Md5sumFormatValidator
-import de.dkfz.tbi.otp.tracking.OtrsTicket
-import de.dkfz.tbi.otp.tracking.OtrsTicketService
+import de.dkfz.tbi.otp.tracking.Ticket
+import de.dkfz.tbi.otp.tracking.TicketService
 import de.dkfz.tbi.otp.utils.MailHelperService
 
 @Rollback
@@ -58,7 +58,7 @@ class MetadataImportServiceIntegrationSpec extends Specification implements Doma
         MetadataImportService service = Spy(MetadataImportService) {
             getSeqTracksWithConfiguredAlignment(_) >> null
         }
-        OtrsTicket ticket = createOtrsTicket()
+        Ticket ticket = createTicket()
         SeqTrack st1 = createSeqTrack()
         SeqTrack st2 = createSeqTrack()
         ProcessingThresholds p1 = DomainFactory.createProcessingThresholds()
@@ -83,7 +83,7 @@ class MetadataImportServiceIntegrationSpec extends Specification implements Doma
                 assert body.contains(p2.seqType.displayName)
             }
         }
-        service.otrsTicketService = Mock(OtrsTicketService) {
+        service.ticketService = Mock(TicketService) {
             1 * getPrefixedTicketNumber(_) >> "TICKET_PREFIX"
         }
 

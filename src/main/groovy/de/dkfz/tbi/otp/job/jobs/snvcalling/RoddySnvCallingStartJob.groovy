@@ -32,7 +32,7 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingService
 import de.dkfz.tbi.otp.job.jobs.bamFilePairAnalysis.AbstractBamFilePairAnalysisStartJob
 import de.dkfz.tbi.otp.job.jobs.bamFilePairAnalysis.RoddyBamFilePairAnalysisStartJob
-import de.dkfz.tbi.otp.tracking.OtrsTicket
+import de.dkfz.tbi.otp.tracking.Ticket
 
 @Component("roddySnvStartJob")
 @Scope("singleton")
@@ -45,7 +45,7 @@ class RoddySnvCallingStartJob extends AbstractBamFilePairAnalysisStartJob implem
     @Override
     void prepareCreatingTheProcessAndTriggerTracking(BamFilePairAnalysis bamFilePairAnalysis) {
         assert bamFilePairAnalysis : "bamFilePairAnalysis must not be null"
-        notificationCreator.setStartedForSeqTracks(bamFilePairAnalysis.containedSeqTracks, OtrsTicket.ProcessingStep.SNV)
+        notificationCreator.setStartedForSeqTracks(bamFilePairAnalysis.containedSeqTracks, Ticket.ProcessingStep.SNV)
         bamFilePairAnalysis.samplePair.snvProcessingStatus = SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED
         bamFilePairAnalysis.samplePair.save(flush: true)
     }

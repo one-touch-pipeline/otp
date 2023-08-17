@@ -19,14 +19,14 @@
   - OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
   - SOFTWARE.
   --}%
-<%@ page import="de.dkfz.tbi.otp.tracking.OtrsTicket" %>
+<%@ page import="de.dkfz.tbi.otp.tracking.Ticket" %>
 
-<g:hiddenField name="otrsTicket.id" value="${otrsTicket.id}"/>
+<g:hiddenField name="ticket.id" value="${ticket.id}"/>
 <g:hiddenField name="fastqImportInstance.id" value="${fastqImportInstanceId}"/>
 
 <div id="notification-selection-container">
     <h3><g:message code="notification.notificationSelection.notification.processing"/></h3>
-    <g:each var="step" status="i" in="${OtrsTicket.ProcessingStep.values() - OtrsTicket.ProcessingStep.FASTQC}">
+    <g:each var="step" status="i" in="${Ticket.ProcessingStep.values() - Ticket.ProcessingStep.FASTQC}">
         <label class="vertical-align-middle">
             <g:checkBox name="steps[${i}]" value="${step.name()}" checked="${cmd ? ((step in cmd.steps) ? "true" : "false") : "true"}"/> ${step.displayName.capitalize()}
         </label>

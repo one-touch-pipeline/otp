@@ -29,7 +29,7 @@ import spock.lang.Specification
 import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.dataprocessing.qaalignmentoverview.QcStatusCellService
 import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightService
-import de.dkfz.tbi.otp.tracking.OtrsTicketService
+import de.dkfz.tbi.otp.tracking.TicketService
 
 class AlignmentQualityOverviewControllerSpec extends Specification implements ControllerUnitTest<AlignmentQualityOverviewController>, DataTest {
 
@@ -85,8 +85,8 @@ class AlignmentQualityOverviewControllerSpec extends Specification implements Co
         controller.qcTrafficLightService.commentService = Mock(CommentService) {
             0 * saveComment(_, _)
         }
-        controller.qcTrafficLightService.otrsTicketService = Mock(OtrsTicketService) {
-            0 * findAllOtrsTickets(_)
+        controller.qcTrafficLightService.ticketService = Mock(TicketService) {
+            0 * findAllTickets(_)
         }
 
         controller.qcStatusCellService = new QcStatusCellService()

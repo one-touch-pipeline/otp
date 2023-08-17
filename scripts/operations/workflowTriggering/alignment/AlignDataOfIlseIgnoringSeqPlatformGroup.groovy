@@ -25,7 +25,7 @@ import de.dkfz.tbi.otp.ngsdata.IlseSubmission
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.ngsdata.SeqTypeService
-import de.dkfz.tbi.otp.tracking.OtrsTicketService
+import de.dkfz.tbi.otp.tracking.TicketService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 /**
@@ -47,7 +47,7 @@ Integer ilseNumber = 0
 // -------------------------------
 // work area
 
-OtrsTicketService otrsTicketService = ctx.otrsTicketService
+TicketService ticketService = ctx.ticketService
 
 PanCanAlignmentDecider panCanAlignmentDecider = ctx.panCanAlignmentDecider
 
@@ -107,8 +107,8 @@ IlseSubmission.withTransaction {
     println "\nadded ${retriggeredSeqTracks.size()} lanes to ${retriggeredMergingWorkPackages.size()} mergingWorkPackages\n"
 
     if (retriggeredSeqTracks) {
-        otrsTicketService.findAllOtrsTickets(retriggeredSeqTracks).each {
-            otrsTicketService.resetAlignmentAndAnalysisNotification(it)
+        ticketService.findAllTickets(retriggeredSeqTracks).each {
+            ticketService.resetAlignmentAndAnalysisNotification(it)
             println "reset notification for ticket ${it}"
         }
     }

@@ -27,7 +27,7 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.tracking.NotificationCreator
-import de.dkfz.tbi.otp.tracking.OtrsTicket
+import de.dkfz.tbi.otp.tracking.Ticket
 import de.dkfz.tbi.otp.utils.LinkEntry
 import de.dkfz.tbi.otp.workflow.jobs.AbstractPrepareJob
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
@@ -49,7 +49,7 @@ class DataInstallationPrepareJob extends AbstractPrepareJob implements DataInsta
     @Override
     protected void doFurtherPreparation(WorkflowStep workflowStep) {
         SeqTrack seqTrack = getSeqTrack(workflowStep)
-        notificationCreator.setStartedForSeqTracks([seqTrack], OtrsTicket.ProcessingStep.INSTALLATION)
+        notificationCreator.setStartedForSeqTracks([seqTrack], Ticket.ProcessingStep.INSTALLATION)
         seqTrack.dataInstallationState = SeqTrack.DataProcessingState.IN_PROGRESS
         assert seqTrack.save(flush: true)
 

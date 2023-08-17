@@ -31,8 +31,8 @@ import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.Comment
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.otp.tracking.OtrsTicket
-import de.dkfz.tbi.otp.tracking.OtrsTicketService
+import de.dkfz.tbi.otp.tracking.Ticket
+import de.dkfz.tbi.otp.tracking.TicketService
 import de.dkfz.tbi.otp.tracking.ProcessingTimeStatisticsService
 import de.dkfz.tbi.util.TimeFormats
 import de.dkfz.tbi.util.TimeUtils
@@ -48,71 +48,71 @@ class ProcessingTimeStatisticsServiceIntegrationSpec extends Specification {
     @Autowired
     ProcessingTimeStatisticsService processingTimeStatisticsService
 
-    void "findAllOtrsTicketsByDateBetweenAndSearch, when no dateFrom and no dateTo and no search, throw Exception"() {
+    void "findAllTicketsByDateBetweenAndSearch, when no dateFrom and no dateTo and no search, throw Exception"() {
         when:
-        processingTimeStatisticsService.findAllOtrsTicketsByDateBetweenAndSearch(null, null, null)
+        processingTimeStatisticsService.findAllTicketsByDateBetweenAndSearch(null, null, null)
 
         then:
         AssertionError e = thrown()
         e.message.contains('No date')
     }
 
-    void "findAllOtrsTicketsByDateBetweenAndSearch, when no search, ignore search"() {
+    void "findAllTicketsByDateBetweenAndSearch, when no search, ignore search"() {
         given:
         LocalDate dateFrom = LocalDate.now()
         LocalDate dateTo = LocalDate.now().plusDays(1)
 
-        OtrsTicket ticket = DomainFactory.createOtrsTicket(dateCreated: TimeUtils.toDate(dateTo))
+        Ticket ticket = DomainFactory.createTicket(dateCreated: TimeUtils.toDate(dateTo))
 
         expect:
-        [ticket] == processingTimeStatisticsService.findAllOtrsTicketsByDateBetweenAndSearch(dateFrom, dateTo, null)
+        [ticket] == processingTimeStatisticsService.findAllTicketsByDateBetweenAndSearch(dateFrom, dateTo, null)
     }
 
-    void "findAllOtrsTicketsByDateBetweenAndSearch, when string to search for is too small, throw Exception"() {
+    void "findAllTicketsByDateBetweenAndSearch, when string to search for is too small, throw Exception"() {
         given:
         LocalDate dateFrom = LocalDate.now()
         LocalDate dateTo = LocalDate.now().plusDays(1)
 
-        createOtrsTicketWithSeqTrack([dateCreated: TimeUtils.toDate(dateFrom)])
+        createTicketWithSeqTrack([dateCreated: TimeUtils.toDate(dateFrom)])
 
         when:
-        processingTimeStatisticsService.findAllOtrsTicketsByDateBetweenAndSearch(dateFrom, dateTo, "56")
+        processingTimeStatisticsService.findAllTicketsByDateBetweenAndSearch(dateFrom, dateTo, "56")
 
         then:
         RuntimeException e = thrown()
         e.message.contains('String to search for is too short')
     }
 
-    void "findAllOtrsTicketsByDateBetweenAndSearch, when string to search in ILSe ID, return ticket with searched ILSe ID"() {
+    void "findAllTicketsByDateBetweenAndSearch, when string to search in ILSe ID, return ticket with searched ILSe ID"() {
         LocalDate dateFrom = LocalDate.now()
         LocalDate dateTo = LocalDate.now().plusDays(1)
 
         // values that are searched for are set explicitly, otherwise they could contain the search term depending on the order tests are executed
-        def (ticketA, seqTrackA) = createOtrsTicketWithSeqTrack([dateCreated: TimeUtils.toDate(dateFrom), ticketNumber: "2016122411111111",], [ilseSubmission: DomainFactory.createIlseSubmission(ilseNumber: 1234)])
+        def (ticketA, seqTrackA) = createTicketWithSeqTrack([dateCreated: TimeUtils.toDate(dateFrom), ticketNumber: "2016122411111111",], [ilseSubmission: DomainFactory.createIlseSubmission(ilseNumber: 1234)])
         seqTrackA.sample.individual.project.name = "proj_1"
         seqTrackA.sample.individual.project.save(flush: true)
         seqTrackA.run.name = "run_1"
         seqTrackA.run.save(flush: true)
-        SeqTrack seqTrackB = createOtrsTicketWithSeqTrack([dateCreated: TimeUtils.toDate(dateFrom), ticketNumber: "2016122422222222",], [ilseSubmission: DomainFactory.createIlseSubmission(ilseNumber: 5678)])[1] as SeqTrack
+        SeqTrack seqTrackB = createTicketWithSeqTrack([dateCreated: TimeUtils.toDate(dateFrom), ticketNumber: "2016122422222222",], [ilseSubmission: DomainFactory.createIlseSubmission(ilseNumber: 5678)])[1] as SeqTrack
         seqTrackB.sample.individual.project.name = "proj_2"
         seqTrackB.sample.individual.project.save(flush: true)
         seqTrackB.run.name = "run_2"
         seqTrackB.run.save(flush: true)
 
         expect:
-        [ticketA] == processingTimeStatisticsService.findAllOtrsTicketsByDateBetweenAndSearch(dateFrom, dateTo, '234')
+        [ticketA] == processingTimeStatisticsService.findAllTicketsByDateBetweenAndSearch(dateFrom, dateTo, '234')
     }
 
     @Ignore('Fails with H2, succeeds with PostgreSQL -> OTP-1874')
-    void "findAllOtrsTicketsByDateBetweenAndSearch, when string to search in project name, return ticket with searched project name"() {
+    void "findAllTicketsByDateBetweenAndSearch, when string to search in project name, return ticket with searched project name"() {
         LocalDate dateFrom = LocalDate.now()
         LocalDate dateTo = LocalDate.now().plusDays(1)
 
-        def (ticketA, projectA) = createOtrsTicketWithProject([dateCreated: TimeUtils.toDate(dateFrom)])
-        createOtrsTicketWithProject([dateCreated: TimeUtils.toDate(dateFrom)])
+        def (ticketA, projectA) = createTicketWithProject([dateCreated: TimeUtils.toDate(dateFrom)])
+        createTicketWithProject([dateCreated: TimeUtils.toDate(dateFrom)])
 
         expect:
-        [ticketA] == processingTimeStatisticsService.findAllOtrsTicketsByDateBetweenAndSearch(dateFrom, dateTo, projectA.name)
+        [ticketA] == processingTimeStatisticsService.findAllTicketsByDateBetweenAndSearch(dateFrom, dateTo, projectA.name)
     }
 
     void "formatData, when all fine, return formatted ticket information"() {
@@ -120,7 +120,7 @@ class ProcessingTimeStatisticsServiceIntegrationSpec extends Specification {
         Comment comment = new Comment(comment: "comment", author: "me", modificationDate: new Date())
         comment.save(flush: true)
 
-        OtrsTicket ticket = DomainFactory.createOtrsTicket(
+        Ticket ticket = DomainFactory.createTicket(
                 submissionReceivedNotice: Date.from(Instant.now().minus(1, ChronoUnit.DAYS)),
                 ticketCreated: new Date(),
                 dateCreated: Date.from(Instant.now().plus(1, ChronoUnit.DAYS)),
@@ -137,11 +137,11 @@ class ProcessingTimeStatisticsServiceIntegrationSpec extends Specification {
         )
 
         String url = "url.url"
-        processingTimeStatisticsService.otrsTicketService = Spy(OtrsTicketService) {
+        processingTimeStatisticsService.ticketService = Spy(TicketService) {
             1 * buildTicketDirectLink(_) >> url
         }
 
-        FastqImportInstance fastqImportInstance = DomainFactory.createFastqImportInstance(otrsTicket: ticket)
+        FastqImportInstance fastqImportInstance = DomainFactory.createFastqImportInstance(ticket: ticket)
         Run run = DomainFactory.createRun()
         Project projectA = DomainFactory.createProject()
         Project projectB = DomainFactory.createProject()
@@ -189,20 +189,20 @@ class ProcessingTimeStatisticsServiceIntegrationSpec extends Specification {
         result[29] == ticket.ticketNumber
     }
 
-    private static List createOtrsTicketWithSeqTrack(Map otrsTicketProperties = [:], Map seqTrackProperties = [:]) {
-        OtrsTicket ticket = DomainFactory.createOtrsTicket(otrsTicketProperties)
-        FastqImportInstance fastqImportInstance = DomainFactory.createFastqImportInstance(otrsTicket: ticket)
+    private static List createTicketWithSeqTrack(Map ticketProperties = [:], Map seqTrackProperties = [:]) {
+        Ticket ticket = DomainFactory.createTicket(ticketProperties)
+        FastqImportInstance fastqImportInstance = DomainFactory.createFastqImportInstance(ticket: ticket)
         SeqTrack seqTrack = DomainFactory.createSeqTrackWithOneFastqFile(seqTrackProperties, [fastqImportInstance: fastqImportInstance])
 
         return [ticket, seqTrack]
     }
 
-    private static List createOtrsTicketWithProject(Map otrsTicketProperties = [:], Map projectProperties = [:]) {
+    private static List createTicketWithProject(Map ticketProperties = [:], Map projectProperties = [:]) {
         Project project = DomainFactory.createProject(projectProperties)
         Individual individual = DomainFactory.createIndividual(project: project)
         Sample sample = DomainFactory.createSample(individual: individual)
 
-        OtrsTicket ticket = createOtrsTicketWithSeqTrack(otrsTicketProperties, [sample: sample])[0] as OtrsTicket
+        Ticket ticket = createTicketWithSeqTrack(ticketProperties, [sample: sample])[0] as Ticket
 
         return [ticket, project]
     }

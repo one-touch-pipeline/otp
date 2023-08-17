@@ -25,8 +25,8 @@ import grails.gorm.hibernate.annotation.ManagedEntity
 import groovy.transform.TupleConstructor
 
 import de.dkfz.tbi.otp.security.User
-import de.dkfz.tbi.otp.tracking.OtrsTicket
-import de.dkfz.tbi.otp.tracking.OtrsTicketService
+import de.dkfz.tbi.otp.tracking.Ticket
+import de.dkfz.tbi.otp.tracking.TicketService
 import de.dkfz.tbi.otp.utils.Entity
 import de.dkfz.tbi.util.TimeFormats
 
@@ -125,10 +125,10 @@ class DataTransfer implements Entity {
     }
 
     boolean isTicketLinkable() {
-        return OtrsTicket.ticketNumberConstraint(ticketID) == null
+        return Ticket.ticketNumberConstraint(ticketID) == null
     }
 
     String getTicketLink() {
-        return ticketLinkable ? OtrsTicketService.buildTicketDirectLink(ticketID) : ""
+        return ticketLinkable ? TicketService.buildTicketDirectLink(ticketID) : ""
     }
 }

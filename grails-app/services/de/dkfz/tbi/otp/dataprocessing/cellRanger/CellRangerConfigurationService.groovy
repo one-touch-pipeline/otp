@@ -35,8 +35,8 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.security.SecurityService
 import de.dkfz.tbi.otp.security.User
-import de.dkfz.tbi.otp.tracking.OtrsTicket
-import de.dkfz.tbi.otp.tracking.OtrsTicketService
+import de.dkfz.tbi.otp.tracking.Ticket
+import de.dkfz.tbi.otp.tracking.TicketService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.Entity
 import de.dkfz.tbi.otp.utils.exceptions.FileAccessForArchivedProjectNotAllowedException
@@ -70,7 +70,7 @@ class CellRangerConfigurationService {
     }
 
     CellRangerWorkflowService cellRangerWorkflowService
-    OtrsTicketService otrsTicketService
+    TicketService ticketService
 
     SeqType getSeqType() {
         return CollectionUtils.exactlyOneElement(seqTypes)
@@ -208,12 +208,12 @@ class CellRangerConfigurationService {
     }
 
     void resetAllTicketsOfSeqTracksForCellRangerExecution(Set<SeqTrack> seqTracks) {
-        otrsTicketService.findAllOtrsTickets(seqTracks).each { OtrsTicket ticket ->
+        ticketService.findAllTickets(seqTracks).each { Ticket ticket ->
             resetTicketForCellRangerExecution(ticket)
         }
     }
 
-    void resetTicketForCellRangerExecution(OtrsTicket ticket) {
+    void resetTicketForCellRangerExecution(Ticket ticket) {
         ticket.finalNotificationSent = false
         ticket.alignmentFinished = null
         ticket.save(flush: true)

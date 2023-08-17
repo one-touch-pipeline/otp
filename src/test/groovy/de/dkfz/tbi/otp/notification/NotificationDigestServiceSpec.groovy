@@ -31,8 +31,8 @@ import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.pipelines.AlignmentPipelineFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.otp.tracking.OtrsTicket
-import de.dkfz.tbi.otp.tracking.OtrsTicketService
+import de.dkfz.tbi.otp.tracking.Ticket
+import de.dkfz.tbi.otp.tracking.TicketService
 import de.dkfz.tbi.otp.tracking.PreparedNotification
 import de.dkfz.tbi.otp.utils.MailHelperService
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
@@ -45,7 +45,7 @@ class NotificationDigestServiceSpec extends Specification implements DomainFacto
                 Comment,
                 IlseSubmission,
                 Individual,
-                OtrsTicket,
+                Ticket,
                 ProcessingOption,
                 ProcessingPriority,
                 Project,
@@ -69,12 +69,12 @@ class NotificationDigestServiceSpec extends Specification implements DomainFacto
         setupData()
         NotificationDigestService service = new NotificationDigestService(
                 ilseSubmissionService: new IlseSubmissionService(),
-                otrsTicketService: new OtrsTicketService(
+                ticketService: new TicketService(
                         processingOptionService: new ProcessingOptionService(),
                 ),
         )
 
-        OtrsTicket ticket = createOtrsTicket()
+        Ticket ticket = createTicket()
         Project project = createProject()
         List<SeqTrack> seqTracks = [
             createSeqTrack(ilseSubmission: createIlseSubmission(ilseNumber: 1)),

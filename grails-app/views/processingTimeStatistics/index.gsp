@@ -45,7 +45,7 @@
         </div>
         <div class="temp-processing-time-statistics-table-wrapper">
             <otp:dataTable codes="${[
-                    'processingTimeStatistics.tableHeader.otrsTicketNumber',
+                    'processingTimeStatistics.tableHeader.ticketNumber',
                     'processingTimeStatistics.tableHeader.ilseId',
                     'processingTimeStatistics.tableHeader.project',
                     'processingTimeStatistics.tableHeader.numberOfRuns',

@@ -30,7 +30,7 @@ import de.dkfz.tbi.otp.job.jobs.AbstractBamFilePairAnalysis.RoddyJobSpec
 import de.dkfz.tbi.otp.job.jobs.AbstractBamFilePairAnalysisStartJobIntegrationSpec
 import de.dkfz.tbi.otp.job.jobs.bamFilePairAnalysis.AbstractBamFilePairAnalysisStartJob
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.tracking.OtrsTicket
+import de.dkfz.tbi.otp.tracking.Ticket
 
 class RoddySnvCallingStartJobIntegrationSpec extends AbstractBamFilePairAnalysisStartJobIntegrationSpec implements RoddyJobSpec {
 
@@ -57,8 +57,8 @@ class RoddySnvCallingStartJobIntegrationSpec extends AbstractBamFilePairAnalysis
     }
 
     @Override
-    Date getStartedDate(OtrsTicket otrsTicket) {
-        return otrsTicket.snvStarted
+    Date getStartedDate(Ticket ticket) {
+        return ticket.snvStarted
     }
 
     @Override

@@ -31,8 +31,8 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.notification.CreateNotificationTextService
 import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.otp.tracking.OtrsTicket
-import de.dkfz.tbi.otp.tracking.OtrsTicketService
+import de.dkfz.tbi.otp.tracking.Ticket
+import de.dkfz.tbi.otp.tracking.TicketService
 import de.dkfz.tbi.otp.utils.*
 
 @CompileDynamic
@@ -42,7 +42,7 @@ class QcTrafficLightNotificationService {
     @Autowired
     LinkGenerator linkGenerator
 
-    OtrsTicketService otrsTicketService
+    TicketService ticketService
     CreateNotificationTextService createNotificationTextService
     ProcessingOptionService processingOptionService
     UserProjectRoleService userProjectRoleService
@@ -55,8 +55,8 @@ class QcTrafficLightNotificationService {
             subject << 'TO BE SENT: '
         }
 
-        Set<OtrsTicket> tickets = otrsTicketService.findAllOtrsTickets(bamFile.containedSeqTracks)
-        String ticketNumber = tickets ? "${otrsTicketService.getPrefixedTicketNumber(tickets.last())} " : ""
+        Set<Ticket> tickets = ticketService.findAllTickets(bamFile.containedSeqTracks)
+        String ticketNumber = tickets ? "${ticketService.getPrefixedTicketNumber(tickets.last())} " : ""
 
         List<IlseSubmission> ilseSubmissions = bamFile.containedSeqTracks*.ilseSubmission.findAll().unique()
         String ilse = ilseSubmissions ? "[S#${ilseSubmissions*.ilseNumber.sort().join(',')}] " : ""
@@ -113,7 +113,7 @@ class QcTrafficLightNotificationService {
 
     void informResultsAreWarned(AbstractBamFile bamFile) {
         boolean projectNotification = bamFile.project.processingNotification
-        boolean ticketNotification = otrsTicketService.findAllOtrsTickets(bamFile.containedSeqTracks).find {
+        boolean ticketNotification = ticketService.findAllTickets(bamFile.containedSeqTracks).find {
             !it.finalNotificationSent && it.automaticNotification
         } as boolean
         boolean shouldSendEmailToProjectReceiver = projectNotification && ticketNotification

@@ -32,11 +32,11 @@ import org.hibernate.sql.JoinType
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePairDeciderService
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.tracking.OtrsTicket
-import de.dkfz.tbi.otp.tracking.OtrsTicketService
+import de.dkfz.tbi.otp.tracking.Ticket
+import de.dkfz.tbi.otp.tracking.TicketService
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
-OtrsTicketService otrsTicketService = ctx.otrsTicketService
+TicketService ticketService = ctx.ticketService
 SeqTrackService seqTrackService = ctx.seqTrackService
 SamplePairDeciderService samplePairDeciderService = ctx.samplePairDeciderService
 
@@ -130,11 +130,11 @@ LogThreadLocal.withThreadLog(System.out, {
         println samplePairDeciderService.findOrCreateSamplePairs(mergingWorkPackages).join('\n')
         println "\n----------------------\n"
 
-        // reset ticket only for seqTracks which gets aligned.
-        List<OtrsTicket> otrsTickets = (mergingWorkPackages ? otrsTicketService.findAllOtrsTickets(mergingWorkPackages*.seqTracks.flatten()) : []) as List<OtrsTicket>
-        println "found ${otrsTickets.size()} coresponding tickets: ${otrsTickets*.ticketNumber.sort().join(',')}"
-        otrsTickets.each {
-            otrsTicketService.resetAlignmentAndAnalysisNotification(it)
+        //reset ticket only for seqTracks which gets aligned.
+        List<Ticket> tickets = (mergingWorkPackages ? ticketService.findAllTickets(mergingWorkPackages*.seqTracks.flatten()) : []) as List<Ticket>
+        println "found ${tickets.size()} coresponding tickets: ${tickets*.ticketNumber.sort().join(',')}"
+        tickets.each {
+            ticketService.resetAlignmentAndAnalysisNotification(it)
         }
         println "reset notification state of tickets"
     }

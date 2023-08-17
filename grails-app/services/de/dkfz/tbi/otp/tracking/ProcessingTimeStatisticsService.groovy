@@ -39,9 +39,9 @@ import java.time.LocalDate
 @Transactional
 class ProcessingTimeStatisticsService {
 
-    OtrsTicketService otrsTicketService
+    TicketService ticketService
 
-    List<OtrsTicket> findAllOtrsTicketsByDateBetweenAndSearch(LocalDate dateFrom, LocalDate dateTo, String search) {
+    List<Ticket> findAllTicketsByDateBetweenAndSearch(LocalDate dateFrom, LocalDate dateTo, String search) {
         assert dateFrom: "No date 'from' is defined."
         assert dateTo: "No date 'to' is defined."
 
@@ -50,22 +50,22 @@ class ProcessingTimeStatisticsService {
         }
 
         String query = """
-FROM OtrsTicket otrsTicket
+FROM Ticket ticket
  WHERE
 ${search ? """
   (EXISTS (FROM RawSequenceFile sequenceFile WHERE
-   sequenceFile.fastqImportInstance.otrsTicket = otrsTicket AND (
+   sequenceFile.fastqImportInstance.ticket = ticket AND (
     lower(sequenceFile.seqTrack.sample.individual.project.name) LIKE :search OR
     str(sequenceFile.seqTrack.ilseSubmission.ilseNumber) LIKE :search OR
     lower(sequenceFile.seqTrack.run.name) LIKE :search
    )
-  ) OR (otrsTicket.ticketNumber LIKE :search)
+  ) OR (ticket.ticketNumber LIKE :search)
  ) AND
 """ : ""
         }
- otrsTicket.dateCreated >= :dateFrom AND
- otrsTicket.dateCreated < :dateTo
- ORDER BY otrsTicket.dateCreated DESC
+ ticket.dateCreated >= :dateFrom AND
+ ticket.dateCreated < :dateTo
+ ORDER BY ticket.dateCreated DESC
 """
 
         Map<String, ?> queryOptions = [
@@ -77,22 +77,22 @@ ${search ? """
             queryOptions.put('search', '%' + StringUtils.escapeForSqlLike(search).toLowerCase(Locale.ENGLISH) + '%')
         }
 
-        List<OtrsTicket> tickets = OtrsTicket.executeQuery(query.toString(), queryOptions)
+        List<Ticket> tickets = Ticket.executeQuery(query.toString(), queryOptions)
 
         return tickets
     }
 
-    List formatData(OtrsTicket ticket) {
-        assert ticket: "No OTRS ticket defined."
+    List formatData(Ticket ticket) {
+        assert ticket: "No ticket defined."
 
-        List<SeqTrack> seqTracks = otrsTicketService.findAllSeqTracks(ticket) as List
+        List<SeqTrack> seqTracks = ticketService.findAllSeqTracks(ticket) as List
         List<String> ilseIds = seqTracks.collect { it.ilseSubmission?.ilseNumber as String }.unique().sort()
         List<String> projectNames = seqTracks.collect { it.sample.individual.project.name }.unique().sort()
         List<String> sampleNames = seqTracks.collect { "${it.sample.individual.pid} ${it.sample.sampleType.name}" }.unique().sort()
         List<String> runs = seqTracks.collect { it.run.name }.unique().sort()
 
         List data = [
-                otrsTicketService.buildTicketDirectLink(ticket),
+                ticketService.buildTicketDirectLink(ticket),
                 ilseIds ?: ['none'],
                 projectNames,
                 runs,
@@ -105,10 +105,10 @@ ${search ? """
 
         String previousProcessingStep
         [
-                OtrsTicket.ProcessingStep.INSTALLATION,
-                OtrsTicket.ProcessingStep.FASTQC,
-                OtrsTicket.ProcessingStep.ALIGNMENT,
-                OtrsTicket.ProcessingStep.SNV,
+                Ticket.ProcessingStep.INSTALLATION,
+                Ticket.ProcessingStep.FASTQC,
+                Ticket.ProcessingStep.ALIGNMENT,
+                Ticket.ProcessingStep.SNV,
         ].each {
             if (previousProcessingStep) {
                 data << TimeUtils.getFormattedDurationWithDays(ticket."${previousProcessingStep}Finished" as Date, ticket."${it}Started" as Date)
@@ -138,7 +138,7 @@ ${search ? """
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    void editTimestampProperty(OtrsTicket ticket, String property, String dateString) {
+    void editTimestampProperty(Ticket ticket, String property, String dateString) {
         if (dateString == "") {
             ticket."${property}" = null
         } else {

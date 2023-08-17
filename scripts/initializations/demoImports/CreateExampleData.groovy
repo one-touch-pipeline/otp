@@ -43,7 +43,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.taxonomy.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.User
-import de.dkfz.tbi.otp.tracking.OtrsTicket
+import de.dkfz.tbi.otp.tracking.Ticket
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 import de.dkfz.tbi.util.TimeFormats
@@ -879,16 +879,16 @@ class ExampleData {
         ]).save(flush: true)
     }
 
-    OtrsTicket createOtrsTicket() {
-        return new OtrsTicket([
-                ticketNumber: "${OtrsTicket.count()}"
+    Ticket createTicket() {
+        return new Ticket([
+                ticketNumber: "${Ticket.count()}"
         ]).save(flush: true)
     }
 
     FastqImportInstance createFastqImportInstance() {
         return new FastqImportInstance([
                 importMode: FastqImportInstance.ImportMode.MANUAL,
-                otrsTicket: createOtrsTicket(),
+                ticket: createTicket(),
         ]).save(flush: true)
     }
 

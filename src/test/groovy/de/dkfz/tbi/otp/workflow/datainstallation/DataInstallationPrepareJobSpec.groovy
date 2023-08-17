@@ -28,7 +28,7 @@ import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.NotificationCreator
-import de.dkfz.tbi.otp.tracking.OtrsTicket
+import de.dkfz.tbi.otp.tracking.Ticket
 import de.dkfz.tbi.otp.workflowExecution.LogService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
@@ -73,7 +73,7 @@ class DataInstallationPrepareJobSpec extends Specification implements DataTest, 
         job.doFurtherPreparation(workflowStep)
 
         then:
-        1 * job.notificationCreator.setStartedForSeqTracks([seqTrack], OtrsTicket.ProcessingStep.INSTALLATION)
+        1 * job.notificationCreator.setStartedForSeqTracks([seqTrack], Ticket.ProcessingStep.INSTALLATION)
         seqTrack.dataInstallationState == SeqTrack.DataProcessingState.IN_PROGRESS
     }
 

@@ -19,27 +19,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflow.alignment
 
-import grails.gorm.transactions.Transactional
-import org.springframework.beans.factory.annotation.Autowired
+databaseChangeLog = {
 
-import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
-import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
-import de.dkfz.tbi.otp.tracking.NotificationCreator
-import de.dkfz.tbi.otp.tracking.Ticket
-
-@Transactional
-class RoddyAlignmentPrepareService {
-
-    @Autowired
-    NotificationCreator notificationCreator
-
-    void prepare(RoddyBamFile roddyBamFile, List<SeqTrack> seqTracks) {
-        notificationCreator.setStartedForSeqTracks(seqTracks, Ticket.ProcessingStep.ALIGNMENT)
-        MergingWorkPackage mergingWorkPackage = roddyBamFile.mergingWorkPackage
-        mergingWorkPackage.needsProcessing = false
-        mergingWorkPackage.save(flush: true)
+    changeSet(author: "-", id: "4685033775340-1") {
+        sql("ALTER TABLE otrs_ticket RENAME TO ticket;")
+        sql("ALTER TABLE fastq_import_instance RENAME COLUMN otrs_ticket_id TO ticket_id;")
     }
 }

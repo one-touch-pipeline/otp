@@ -48,8 +48,8 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.DirectoryS
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.metadatasource.MetaDataFileSourceEnum
 import de.dkfz.tbi.otp.security.Role
-import de.dkfz.tbi.otp.tracking.OtrsTicket
-import de.dkfz.tbi.otp.tracking.OtrsTicketService
+import de.dkfz.tbi.otp.tracking.Ticket
+import de.dkfz.tbi.otp.tracking.TicketService
 import de.dkfz.tbi.otp.user.UserException
 import de.dkfz.tbi.otp.utils.CommentCommand
 import de.dkfz.tbi.otp.utils.StringUtils
@@ -69,20 +69,20 @@ import java.util.regex.Pattern
 class MetadataImportController implements CheckAndCall, PlainResponseExceptionHandler {
 
     static allowedMethods = [
-            index                                : "GET",
-            importByPathOrContent                : "POST",
-            details                              : "GET",
-            multiDetails                         : "GET",
-            autoImport                           : "GET",
-            blacklistedIlseNumbers               : "GET",
-            addBlacklistedIlseNumbers            : "POST",
-            unBlacklistIlseSubmissions           : "POST",
-            saveComment                          : "POST",
-            assignOtrsTicketToFastqImportInstance: "POST",
-            updateSeqCenterComment               : "POST",
-            updateAutomaticNotificationFlag      : "POST",
-            updateFinalNotificationFlag          : "POST",
-            validatePathsOrFiles                 : "POST",
+            index                            : "GET",
+            importByPathOrContent            : "POST",
+            details                          : "GET",
+            multiDetails                     : "GET",
+            autoImport                       : "GET",
+            blacklistedIlseNumbers           : "GET",
+            addBlacklistedIlseNumbers        : "POST",
+            unBlacklistIlseSubmissions       : "POST",
+            saveComment                      : "POST",
+            assignTicketToFastqImportInstance: "POST",
+            updateSeqCenterComment           : "POST",
+            updateAutomaticNotificationFlag  : "POST",
+            updateFinalNotificationFlag      : "POST",
+            validatePathsOrFiles             : "POST",
     ]
 
     CommentService commentService
@@ -91,7 +91,7 @@ class MetadataImportController implements CheckAndCall, PlainResponseExceptionHa
     FileSystemService fileSystemService
     IlseSubmissionService ilseSubmissionService
     MetadataImportService metadataImportService
-    OtrsTicketService otrsTicketService
+    TicketService ticketService
     ProcessingOptionService processingOptionService
     FastqMetadataValidationService fastqMetadataValidationService
     RunService runService
@@ -192,8 +192,8 @@ class MetadataImportController implements CheckAndCall, PlainResponseExceptionHa
         return [
                 metaDataDetails      : getMetadataDetails(fastqImportInstance),
                 fastqImportInstanceId: fastqImportInstance.id,
-                otrsTicket           : fastqImportInstance.otrsTicket,
-                otrsTicketUrl        : otrsTicketService.buildTicketDirectLinkNullPointerSave(fastqImportInstance.otrsTicket),
+                ticket           : fastqImportInstance.ticket,
+                ticketUrl        : ticketService.buildTicketDirectLinkNullPointerSave(fastqImportInstance.ticket),
         ]
     }
 
@@ -253,11 +253,11 @@ class MetadataImportController implements CheckAndCall, PlainResponseExceptionHa
         ])
     }
 
-    def assignOtrsTicketToFastqImportInstance() {
+    def assignTicketToFastqImportInstance() {
         def dataToRender = [:]
 
         try {
-            otrsTicketService.assignOtrsTicketToFastqImportInstance(params.value, params.id as Long)
+            ticketService.assignTicketToFastqImportInstance(params.value, params.id as Long)
             dataToRender.put("success", true)
         } catch (UserException e) {
             dataToRender.put("error", e.toString())
@@ -291,14 +291,14 @@ class MetadataImportController implements CheckAndCall, PlainResponseExceptionHa
         }
     }
 
-    private StringBuilder doAutoImport(String otrsTicketNumber, String ilseNumbers, boolean ignoreAlreadyKnownMd5sum) {
+    private StringBuilder doAutoImport(String ticketNumber, String ilseNumbers, boolean ignoreAlreadyKnownMd5sum) {
         boolean autoImport = processingOptionService.findOptionAsBoolean(OptionName.TICKET_SYSTEM_AUTO_IMPORT_ENABLED)
         if (!autoImport) {
             throw new IllegalStateException('Automatic import is currently disabled. Set processing option autoImportEnabled to "true" to enable it.')
         }
         StringBuilder text = new StringBuilder()
         try {
-            Collection<ValidateAndImportResult> results = metadataImportService.validateAndImportMultiple(otrsTicketNumber, ilseNumbers,
+            Collection<ValidateAndImportResult> results = metadataImportService.validateAndImportMultiple(ticketNumber, ilseNumbers,
                     ignoreAlreadyKnownMd5sum)
             text.append('Automatic import succeeded :-)')
             results.each {
@@ -322,7 +322,7 @@ class MetadataImportController implements CheckAndCall, PlainResponseExceptionHa
                     action  : 'index',
                     absolute: 'true',
                     params  : [
-                            'ticketNumber'      : otrsTicketNumber,
+                            'ticketNumber'      : ticketNumber,
                             'paths'             : e.allPaths,
                             'directoryStructure': DirectoryStructureBeanName.GPCF_SPECIFIC,
                     ],
@@ -372,20 +372,20 @@ class MetadataImportController implements CheckAndCall, PlainResponseExceptionHa
         redirect action: 'blacklistedIlseNumbers'
     }
 
-    JSON updateSeqCenterComment(OtrsTicket otrsTicket, String value) {
-        otrsTicketService.saveSeqCenterComment(otrsTicket, value)
+    JSON updateSeqCenterComment(Ticket ticket, String value) {
+        ticketService.saveSeqCenterComment(ticket, value)
         Map map = [success: true]
         return render(map as JSON)
     }
 
-    JSON updateAutomaticNotificationFlag(OtrsTicket otrsTicket, String value) {
-        metadataImportService.updateAutomaticNotificationFlag(otrsTicket, value.toBoolean())
+    JSON updateAutomaticNotificationFlag(Ticket ticket, String value) {
+        metadataImportService.updateAutomaticNotificationFlag(ticket, value.toBoolean())
         Map map = [success: true]
         return render(map as JSON)
     }
 
-    JSON updateFinalNotificationFlag(OtrsTicket otrsTicket, String value) {
-        metadataImportService.updateFinalNotificationFlag(otrsTicket, value.toBoolean())
+    JSON updateFinalNotificationFlag(Ticket ticket, String value) {
+        metadataImportService.updateFinalNotificationFlag(ticket, value.toBoolean())
         Map map = [success: true]
         return render(map as JSON)
     }
@@ -554,7 +554,7 @@ class MetadataImportControllerSubmitCommand implements Serializable, Validateabl
             if (val == null) {
                 return true
             }
-            return OtrsTicket.ticketNumberConstraint(val) ?: true
+            return Ticket.ticketNumberConstraint(val) ?: true
         })
     }
 

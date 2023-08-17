@@ -44,8 +44,8 @@ import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrainService
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
-import de.dkfz.tbi.otp.tracking.OtrsTicket
-import de.dkfz.tbi.otp.tracking.OtrsTicketService
+import de.dkfz.tbi.otp.tracking.Ticket
+import de.dkfz.tbi.otp.tracking.TicketService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.MailHelperService
 import de.dkfz.tbi.otp.utils.exceptions.CopyingOfFileFailedException
@@ -87,7 +87,7 @@ class MetadataImportService {
     LsdfFilesService lsdfFilesService
     MailHelperService mailHelperService
     MergingCriteriaService mergingCriteriaService
-    OtrsTicketService otrsTicketService
+    TicketService ticketService
     ProcessingThresholdsService processingThresholdsService
     SampleIdentifierService sampleIdentifierService
     SamplePairDeciderService samplePairDeciderService
@@ -186,15 +186,15 @@ class MetadataImportService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    void updateAutomaticNotificationFlag(OtrsTicket otrsTicket, boolean automaticNotification) {
-        otrsTicket.automaticNotification = automaticNotification
-        assert otrsTicket.save(flush: true)
+    void updateAutomaticNotificationFlag(Ticket ticket, boolean automaticNotification) {
+        ticket.automaticNotification = automaticNotification
+        assert ticket.save(flush: true)
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    void updateFinalNotificationFlag(OtrsTicket otrsTicket, boolean finalNotificationSent) {
-        otrsTicket.finalNotificationSent = finalNotificationSent
-        assert otrsTicket.save(flush: true)
+    void updateFinalNotificationFlag(Ticket ticket, boolean finalNotificationSent) {
+        ticket.finalNotificationSent = finalNotificationSent
+        assert ticket.save(flush: true)
     }
     protected Path createPathTargetForMetadataFile(MetadataValidationContext context, String ticketNumber) {
         FileSystem fileSystem = fileSystemService.getRemoteFileSystem(configService.defaultRealm)
@@ -233,17 +233,17 @@ class MetadataImportService {
         }
     }
 
-    List<ValidateAndImportResult> validateAndImportMultiple(String otrsTicketNumber, String ilseNumbers, boolean ignoreAlreadyKnownMd5sum) {
+    List<ValidateAndImportResult> validateAndImportMultiple(String ticketNumber, String ilseNumbers, boolean ignoreAlreadyKnownMd5sum) {
         FileSystem fs = fileSystemService.filesystemForFastqImport
         return validateAndImportMultiple(
-                otrsTicketNumber,
+                ticketNumber,
                 parseIlseNumbers(ilseNumbers).collect { getMetadataFilePathForIlseNumber(it, fs) },
                 DirectoryStructureBeanName.GPCF_SPECIFIC,
                 ignoreAlreadyKnownMd5sum
         )
     }
 
-    List<ValidateAndImportResult> validateAndImportMultiple(String otrsTicketNumber, List<Path> metadataFiles, DirectoryStructureBeanName directoryStructure,
+    List<ValidateAndImportResult> validateAndImportMultiple(String ticketNumber, List<Path> metadataFiles, DirectoryStructureBeanName directoryStructure,
                                                             boolean ignoreAlreadyKnownMd5sum) {
         List<MetadataValidationContext> failedValidations = []
         List<MetadataValidationContext> contexts = metadataFiles.collect {
@@ -252,7 +252,7 @@ class MetadataImportService {
         List<ValidateAndImportResult> results = contexts.collect { context ->
             try {
                 mayImport(context, false, null)
-                return importHelperMethod(context, FastqImportInstance.ImportMode.AUTOMATIC, otrsTicketNumber, null, true)
+                return importHelperMethod(context, FastqImportInstance.ImportMode.AUTOMATIC, ticketNumber, null, true)
             } catch (MetadataFileImportException e) {
                 failedValidations.push(context)
                 return new ValidateAndImportResult()
@@ -331,7 +331,7 @@ class MetadataImportService {
         Long timeImportStarted = System.currentTimeMillis()
         log.debug("import started ${context.metadataFile.fileName} ${timeImportStarted}")
         FastqImportInstance fastqImportInstance = new FastqImportInstance(
-                otrsTicket: ticketNumber ? otrsTicketService.createOrResetOtrsTicket(ticketNumber, seqCenterComment, automaticNotification) : null,
+                ticket: ticketNumber ? ticketService.createOrResetTicket(ticketNumber, seqCenterComment, automaticNotification) : null,
                 importMode: importMode,
                 state: FastqImportInstance.WorkflowCreateState.WAITING,
         ).save(flush: true)
@@ -356,7 +356,7 @@ class MetadataImportService {
         log.debug("  generatedThresholds started")
         List<SeqTrack> analysableSeqTracks = SeqTrackService.getAnalysableSeqTracks((fastqImportInstance.sequenceFiles*.seqTrack as List).unique())
         List<ProcessingThresholds> generatedThresholds = processingThresholdsService.generateDefaultThresholds(analysableSeqTracks)
-        notifyAboutUnsetConfig(analysableSeqTracks, generatedThresholds, fastqImportInstance.otrsTicket)
+        notifyAboutUnsetConfig(analysableSeqTracks, generatedThresholds, fastqImportInstance.ticket)
         log.debug("  generatedThresholds stopped took: ${System.currentTimeMillis() - timeGeneratedThresholds}")
 
         metaDataFile.save(flush: true)
@@ -370,13 +370,13 @@ class MetadataImportService {
      * Send an email notification with a list of the unset categories
      * and the generated default thresholds.
      */
-    protected void notifyAboutUnsetConfig(List<SeqTrack> seqTracks, List<ProcessingThresholds> defaultThresholds, OtrsTicket ticket) {
+    protected void notifyAboutUnsetConfig(List<SeqTrack> seqTracks, List<ProcessingThresholds> defaultThresholds, Ticket ticket) {
         List<SeqTrack> withoutCategory = sampleTypeService.getSeqTracksWithoutSampleCategory(seqTracks)
 
         if (withoutCategory || defaultThresholds) {
             StringBuilder subject = new StringBuilder()
             if (ticket) {
-                subject.append("[${otrsTicketService.getPrefixedTicketNumber(ticket)}] ")
+                subject.append("[${ticketService.getPrefixedTicketNumber(ticket)}] ")
             }
             subject.append("Configuration missing for ")
             subject.append([withoutCategory ? "category" : "", defaultThresholds ? "threshold" : ""].findAll().join(" and "))

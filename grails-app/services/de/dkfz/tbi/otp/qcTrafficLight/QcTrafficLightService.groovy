@@ -32,7 +32,7 @@ import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerWorkflowService
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.tracking.OtrsTicketService
+import de.dkfz.tbi.otp.tracking.TicketService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 import static de.dkfz.tbi.otp.qcTrafficLight.QcThreshold.ThresholdLevel.ERROR
@@ -47,7 +47,7 @@ class QcTrafficLightService {
 
     CellRangerWorkflowService cellRangerWorkflowService
 
-    OtrsTicketService otrsTicketService
+    TicketService ticketService
 
     SeqTypeService seqTypeService
     QcThresholdService qcThresholdService
@@ -91,8 +91,8 @@ class QcTrafficLightService {
         if ((bamFile.qcTrafficLightStatus == AbstractBamFile.QcTrafficLightStatus.ACCEPTED ||
              bamFile.qcTrafficLightStatus == AbstractBamFile.QcTrafficLightStatus.WARNING) &&
                 prevQcTrafficLightStatus != AbstractBamFile.QcTrafficLightStatus.WARNING) {
-            otrsTicketService.findAllOtrsTickets(bamFile.containedSeqTracks).each {
-                otrsTicketService.resetAnalysisNotification(it)
+            ticketService.findAllTickets(bamFile.containedSeqTracks).each {
+                ticketService.resetAnalysisNotification(it)
             }
             Closure<Void> qcHandler = qcHandlerMap[bamFile.seqType]
             assert qcHandler

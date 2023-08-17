@@ -48,7 +48,7 @@ import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerWorkflow
 import de.dkfz.tbi.otp.workflowExecution.Workflow
 import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 
-import static de.dkfz.tbi.otp.tracking.OtrsTicket.ProcessingStep.*
+import static de.dkfz.tbi.otp.tracking.Ticket.ProcessingStep.*
 
 class CreateNotificationTextServiceSpec extends Specification implements AlignmentPipelineFactory, WorkflowSystemDomainFactory, DataTest {
 
@@ -68,7 +68,7 @@ class CreateNotificationTextServiceSpec extends Specification implements Alignme
                 MergingWorkPackage,
                 MetaDataEntry,
                 MetaDataKey,
-                OtrsTicket,
+                Ticket,
                 Pipeline,
                 ProcessingOption,
                 Project,
@@ -1031,7 +1031,7 @@ ${expectedAlign}"""
                 data3.seqTrackProcessingStatus,
         ])
 
-        OtrsTicket.ProcessingStep processingStep = (OtrsTicket.ProcessingStep) dataList.processingStep
+        Ticket.ProcessingStep processingStep = (Ticket.ProcessingStep) dataList.processingStep
         boolean expectsLinks = processingStep.controllerName && processingStep.actionName
 
         int projectCount = 0
@@ -1100,7 +1100,7 @@ samplePairsNotProcessed: ${expectedSamplePairsNotProcessed}
     void "notification, when an argument is null, throw assert"() {
         when:
         new CreateNotificationTextService().notification(
-                ticketFlag ? DomainFactory.createOtrsTicket() : null,
+                ticketFlag ? DomainFactory.createTicket() : null,
                 statusFlag ? new ProcessingStatus() : null,
                 processingStepFlag ? SNV : null,
                 projectFlag ? DomainFactory.createProject() : null)
@@ -1113,12 +1113,12 @@ samplePairsNotProcessed: ${expectedSamplePairsNotProcessed}
         true       | true       | true               | false       || 'project'
         true       | true       | false              | true        || 'processingStep'
         true       | false      | true               | true        || 'status'
-        false      | true       | true               | true        || 'otrsTicket'
+        false      | true       | true               | true        || 'ticket'
     }
 
     void "notification, when call for ProcessingStep FASTQC, throw an exception"() {
         when:
-        new CreateNotificationTextService().notification(DomainFactory.createOtrsTicket(), new ProcessingStatus(), FASTQC, new Project())
+        new CreateNotificationTextService().notification(DomainFactory.createTicket(), new ProcessingStatus(), FASTQC, new Project())
 
         then:
         thrown(MissingMethodException)

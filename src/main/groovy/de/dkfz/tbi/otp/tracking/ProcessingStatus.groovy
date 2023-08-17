@@ -107,22 +107,22 @@ class ProcessingStatus {
         }
     }
 
-    Map<OtrsTicket.ProcessingStep, WorkflowProcessingStatus> getWorkflowProcessingStatusPerProcessingStep() {
+    Map<Ticket.ProcessingStep, WorkflowProcessingStatus> getWorkflowProcessingStatusPerProcessingStep() {
         return [
-                (OtrsTicket.ProcessingStep.INSTALLATION): installationProcessingStatus,
-                (OtrsTicket.ProcessingStep.FASTQC)      : fastqcProcessingStatus,
-                (OtrsTicket.ProcessingStep.ALIGNMENT)   : alignmentProcessingStatus,
-                (OtrsTicket.ProcessingStep.SNV)         : snvProcessingStatus,
-                (OtrsTicket.ProcessingStep.INDEL)       : indelProcessingStatus,
-                (OtrsTicket.ProcessingStep.SOPHIA)      : sophiaProcessingStatus,
-                (OtrsTicket.ProcessingStep.ACESEQ)      : aceseqProcessingStatus,
-                (OtrsTicket.ProcessingStep.RUN_YAPSA)   : runYapsaProcessingStatus,
+                (Ticket.ProcessingStep.INSTALLATION): installationProcessingStatus,
+                (Ticket.ProcessingStep.FASTQC)      : fastqcProcessingStatus,
+                (Ticket.ProcessingStep.ALIGNMENT)   : alignmentProcessingStatus,
+                (Ticket.ProcessingStep.SNV)         : snvProcessingStatus,
+                (Ticket.ProcessingStep.INDEL)       : indelProcessingStatus,
+                (Ticket.ProcessingStep.SOPHIA)      : sophiaProcessingStatus,
+                (Ticket.ProcessingStep.ACESEQ)      : aceseqProcessingStatus,
+                (Ticket.ProcessingStep.RUN_YAPSA)   : runYapsaProcessingStatus,
         ]
     }
 
     @Override
     String toString() {
-        return workflowProcessingStatusPerProcessingStep.collect { OtrsTicket.ProcessingStep step, WorkflowProcessingStatus status ->
+        return workflowProcessingStatusPerProcessingStep.collect { Ticket.ProcessingStep step, WorkflowProcessingStatus status ->
             String.format("%-13s %s", "${step.name()}:", status)
         }.join("\n")
     }

@@ -19,7 +19,7 @@
   - OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
   - SOFTWARE.
   --}%
-<%@ page import="de.dkfz.tbi.otp.tracking.OtrsTicket" %>
+<%@ page import="de.dkfz.tbi.otp.tracking.Ticket" %>
 
 <div class="basic-flex-box project-notification-box">
     <div class="item ${project.processingNotification}"

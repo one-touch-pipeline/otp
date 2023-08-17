@@ -32,8 +32,8 @@ import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.domainFactory.pipelines.roddyRna.RoddyRnaFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.otp.tracking.OtrsTicket
-import de.dkfz.tbi.otp.tracking.OtrsTicketService
+import de.dkfz.tbi.otp.tracking.Ticket
+import de.dkfz.tbi.otp.tracking.TicketService
 
 class QcTrafficLightServiceSpec extends Specification implements RoddyRnaFactory, DataTest {
 
@@ -52,7 +52,7 @@ class QcTrafficLightServiceSpec extends Specification implements RoddyRnaFactory
                 Pipeline,
                 Project,
                 ProcessingOption,
-                OtrsTicket,
+                Ticket,
                 Realm,
                 ReferenceGenome,
                 ReferenceGenomeProjectSeqType,
@@ -93,8 +93,8 @@ class QcTrafficLightServiceSpec extends Specification implements RoddyRnaFactory
         qcTrafficLightService.commentService = Mock(CommentService) {
             1 * saveComment(roddyBamFile, "comment")
         }
-        qcTrafficLightService.otrsTicketService = Mock(OtrsTicketService) {
-            otrsCount * findAllOtrsTickets(roddyBamFile.seqTracks) >> []
+        qcTrafficLightService.ticketService = Mock(TicketService) {
+            ticketCount * findAllTickets(roddyBamFile.seqTracks) >> []
         }
         qcTrafficLightService.configService = testConfigService
         qcTrafficLightService.configService.processingOptionService = new ProcessingOptionService()
@@ -106,7 +106,7 @@ class QcTrafficLightServiceSpec extends Specification implements RoddyRnaFactory
         roddyBamFile.qcTrafficLightStatus == qcStatus
 
         where:
-        rna   | prevQcStatus                                           | qcStatus                                            | linkCount | linkRnaCount | otrsCount
+        rna   | prevQcStatus                                           | qcStatus                                            | linkCount | linkRnaCount | ticketCount
         false | AbstractBamFile.QcTrafficLightStatus.NOT_RUN_YET | AbstractBamFile.QcTrafficLightStatus.ACCEPTED | 1 | 0 | 1
         false | AbstractBamFile.QcTrafficLightStatus.NOT_RUN_YET | AbstractBamFile.QcTrafficLightStatus.WARNING  | 1 | 0 | 1
         false | AbstractBamFile.QcTrafficLightStatus.WARNING     | AbstractBamFile.QcTrafficLightStatus.ACCEPTED | 0 | 0 | 0
@@ -138,14 +138,14 @@ class QcTrafficLightServiceSpec extends Specification implements RoddyRnaFactory
         false      | AbstractBamFile.QcTrafficLightStatus.REJECTED | "comment"
     }
 
-    void "test setQcTrafficLightStatusWithComment set analysis of otrs to not sent"() {
+    void "test setQcTrafficLightStatusWithComment set analysis of ticket system to not sent"() {
         given:
         DomainFactory.createAllAlignableSeqTypes()
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile([
                 qcTrafficLightStatus: AbstractBamFile.QcTrafficLightStatus.REJECTED,
         ])
-        OtrsTicket otrsTicket1 = DomainFactory.createOtrsTicketWithEndDatesAndNotificationSent()
-        OtrsTicket otrsTicket2 = DomainFactory.createOtrsTicketWithEndDatesAndNotificationSent()
+        Ticket ticket1 = DomainFactory.createTicketWithEndDatesAndNotificationSent()
+        Ticket ticket2 = DomainFactory.createTicketWithEndDatesAndNotificationSent()
         DomainFactory.createDefaultRealmWithProcessingOption()
 
         testConfigService = new TestConfigService()
@@ -156,8 +156,8 @@ class QcTrafficLightServiceSpec extends Specification implements RoddyRnaFactory
         qcTrafficLightService.commentService = Mock(CommentService) {
             1 * saveComment(roddyBamFile, "comment")
         }
-        qcTrafficLightService.otrsTicketService = Spy(OtrsTicketService) {
-            1 * findAllOtrsTickets(roddyBamFile.seqTracks) >> [otrsTicket1, otrsTicket2]
+        qcTrafficLightService.ticketService = Spy(TicketService) {
+            1 * findAllTickets(roddyBamFile.seqTracks) >> [ticket1, ticket2]
         }
         qcTrafficLightService.configService = testConfigService
         qcTrafficLightService.configService.processingOptionService = new ProcessingOptionService()
@@ -169,18 +169,18 @@ class QcTrafficLightServiceSpec extends Specification implements RoddyRnaFactory
                 "comment")
 
         then:
-        false == otrsTicket1.finalNotificationSent
-        null == otrsTicket1.snvFinished
-        null == otrsTicket1.indelFinished
-        null == otrsTicket1.sophiaFinished
-        null == otrsTicket1.aceseqFinished
-        null == otrsTicket1.runYapsaFinished
+        false == ticket1.finalNotificationSent
+        null == ticket1.snvFinished
+        null == ticket1.indelFinished
+        null == ticket1.sophiaFinished
+        null == ticket1.aceseqFinished
+        null == ticket1.runYapsaFinished
 
-        false == otrsTicket2.finalNotificationSent
-        null == otrsTicket1.snvFinished
-        null == otrsTicket2.indelFinished
-        null == otrsTicket2.sophiaFinished
-        null == otrsTicket2.aceseqFinished
-        null == otrsTicket2.runYapsaFinished
+        false == ticket2.finalNotificationSent
+        null == ticket1.snvFinished
+        null == ticket2.indelFinished
+        null == ticket2.sophiaFinished
+        null == ticket2.aceseqFinished
+        null == ticket2.runYapsaFinished
     }
 }

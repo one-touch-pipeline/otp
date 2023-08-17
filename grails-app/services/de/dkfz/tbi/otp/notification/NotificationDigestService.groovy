@@ -28,7 +28,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightNotificationService
 import de.dkfz.tbi.otp.tracking.*
-import de.dkfz.tbi.otp.tracking.OtrsTicket.ProcessingStep
+import de.dkfz.tbi.otp.tracking.Ticket.ProcessingStep
 import de.dkfz.tbi.otp.utils.MailHelperService
 import de.dkfz.tbi.otp.utils.MessageSourceService
 
@@ -44,10 +44,10 @@ class NotificationDigestService {
     MailHelperService mailHelperService
     IlseSubmissionService ilseSubmissionService
     AbstractBamFileService abstractBamFileService
-    OtrsTicketService otrsTicketService
+    TicketService ticketService
 
     List<PreparedNotification> prepareNotifications(NotificationCommand cmd) {
-        return otrsTicketService.findAllSeqTracks(cmd.otrsTicket).groupBy { it.project }.collect { Project project, List<SeqTrack> seqTracksOfProject ->
+        return ticketService.findAllSeqTracks(cmd.ticket).groupBy { it.project }.collect { Project project, List<SeqTrack> seqTracksOfProject ->
             ProcessingStatus status = notificationCreator.getProcessingStatus(seqTracksOfProject)
             List<AbstractBamFile> blockedBams = abstractBamFileService.getActiveBlockedBamsContainingSeqTracks(seqTracksOfProject)
             return new PreparedNotification(
@@ -56,15 +56,15 @@ class NotificationDigestService {
                     bams                    : blockedBams,
                     toBeNotifiedProjectUsers: userProjectRoleService.getProjectUsersToBeNotified([project]).sort { it.user.username },
                     processingStatus        : status,
-                    subject                 : buildNotificationSubject(cmd.otrsTicket, seqTracksOfProject, project),
+                    subject                 : buildNotificationSubject(cmd.ticket, seqTracksOfProject, project),
                     notification            : buildNotificationDigest(cmd, status, blockedBams),
             )
         }.sort { it.project.name }
     }
 
-    String buildNotificationSubject(OtrsTicket otrsTicket, List<SeqTrack> seqTracks, Project project) {
+    String buildNotificationSubject(Ticket ticket, List<SeqTrack> seqTracks, Project project) {
         String ilseIdentifier = ilseSubmissionService.buildIlseIdentifierFromSeqTracks(seqTracks)
-        return "[${otrsTicketService.getPrefixedTicketNumber(otrsTicket)}]${ilseIdentifier} - ${project.name} - OTP processing completed"
+        return "[${ticketService.getPrefixedTicketNumber(ticket)}]${ilseIdentifier} - ${project.name} - OTP processing completed"
     }
 
     String buildNotificationDigest(NotificationCommand cmd, ProcessingStatus status, List<AbstractBamFile> bams) {
@@ -74,7 +74,7 @@ class NotificationDigestService {
             String stepContent = createNotificationTextService.buildStepNotifications(processingSteps, status)
             if (stepContent) {
                 content << stepContent
-                content << createNotificationTextService.buildSeqCenterComment(cmd.otrsTicket)
+                content << createNotificationTextService.buildSeqCenterComment(cmd.ticket)
             }
         }
 

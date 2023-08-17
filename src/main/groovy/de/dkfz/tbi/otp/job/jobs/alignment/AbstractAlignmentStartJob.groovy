@@ -31,7 +31,7 @@ import de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl
 import de.dkfz.tbi.otp.job.processing.Process
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.ngsdata.SeqType
-import de.dkfz.tbi.otp.tracking.OtrsTicket
+import de.dkfz.tbi.otp.tracking.Ticket
 import de.dkfz.tbi.otp.utils.SessionUtils
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
@@ -58,7 +58,7 @@ abstract class AbstractAlignmentStartJob extends AbstractStartJobImpl implements
             mergingWorkPackage.needsProcessing = false
             assert mergingWorkPackage.save(flush: true)
             AbstractBamFile bamFile = createBamFile(mergingWorkPackage, findUsableBaseBamFile(mergingWorkPackage))
-            notificationCreator.setStartedForSeqTracks(bamFile.containedSeqTracks, OtrsTicket.ProcessingStep.ALIGNMENT)
+            notificationCreator.setStartedForSeqTracks(bamFile.containedSeqTracks, Ticket.ProcessingStep.ALIGNMENT)
             createProcess(bamFile)
         }
     }

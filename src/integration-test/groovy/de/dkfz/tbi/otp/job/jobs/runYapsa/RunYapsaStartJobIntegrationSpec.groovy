@@ -29,7 +29,7 @@ import de.dkfz.tbi.otp.job.jobs.AbstractBamFilePairAnalysis.WithReferenceGenomeR
 import de.dkfz.tbi.otp.job.jobs.AbstractBamFilePairAnalysisStartJobWithDependenciesIntegrationSpec
 import de.dkfz.tbi.otp.job.jobs.bamFilePairAnalysis.AbstractBamFilePairAnalysisStartJob
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.tracking.OtrsTicket
+import de.dkfz.tbi.otp.tracking.Ticket
 
 class RunYapsaStartJobIntegrationSpec extends AbstractBamFilePairAnalysisStartJobWithDependenciesIntegrationSpec implements WithReferenceGenomeRestrictionSpec {
 
@@ -56,8 +56,8 @@ class RunYapsaStartJobIntegrationSpec extends AbstractBamFilePairAnalysisStartJo
     }
 
     @Override
-    Date getStartedDate(OtrsTicket otrsTicket) {
-        return otrsTicket.runYapsaStarted
+    Date getStartedDate(Ticket ticket) {
+        return ticket.runYapsaStarted
     }
 
     @Override

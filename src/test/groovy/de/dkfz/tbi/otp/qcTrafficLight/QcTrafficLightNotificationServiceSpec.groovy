@@ -34,8 +34,8 @@ import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.notification.CreateNotificationTextService
 import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.otp.tracking.OtrsTicket
-import de.dkfz.tbi.otp.tracking.OtrsTicketService
+import de.dkfz.tbi.otp.tracking.Ticket
+import de.dkfz.tbi.otp.tracking.TicketService
 import de.dkfz.tbi.otp.utils.MailHelperService
 import de.dkfz.tbi.otp.utils.MessageSourceService
 
@@ -54,7 +54,7 @@ class QcTrafficLightNotificationServiceSpec extends Specification implements Dat
                 LibraryPreparationKit,
                 MergingCriteria,
                 MergingWorkPackage,
-                OtrsTicket,
+                Ticket,
                 Pipeline,
                 ProcessingOption,
                 Project,
@@ -91,9 +91,9 @@ class QcTrafficLightNotificationServiceSpec extends Specification implements Dat
         bamFile.project.save(flush: true)
 
         String emailSenderSalutation = DomainFactory.createProcessingOptionForEmailSenderSalutation().value
-        DomainFactory.createProcessingOptionForOtrsTicketPrefix(TICKET_PREFIX)
-        Set<OtrsTicket> otrsTickets = [
-                createOtrsTicket([
+        DomainFactory.createProcessingOptionForTicketPrefix(TICKET_PREFIX)
+        Set<Ticket> tickets = [
+                createTicket([
                         finalNotificationSent: finalNotificationSent,
                         automaticNotification: automaticNotification,
                 ]),
@@ -110,8 +110,8 @@ class QcTrafficLightNotificationServiceSpec extends Specification implements Dat
         String prefixedTicketNumber = "prefixedTicketNumber"
         QcTrafficLightNotificationService service = new QcTrafficLightNotificationService([
                 processingOptionService: new ProcessingOptionService(),
-                otrsTicketService      : Mock(OtrsTicketService) {
-                    2 * findAllOtrsTickets(_) >> otrsTickets
+                ticketService      : Mock(TicketService) {
+                    2 * findAllTickets(_) >> tickets
                     1 * getPrefixedTicketNumber(_) >> prefixedTicketNumber
                 },
         ])
