@@ -65,6 +65,14 @@
                                     params="[(projectParameter): individual.project.name]">${individual.project.displayName}</g:link>
                         </td>
                     </tr>
+
+                    <sec:ifAllGranted roles="ROLE_OPERATOR">
+                        <tr>
+                            <td class="myKey"><g:message code="individual.show.uuid"/></td>
+                            <td class="myValue">${individual.uuid}</td>
+                        </tr>
+                    </sec:ifAllGranted>
+
                 </table>
             </div>
             <div class="grid-element comment-box">

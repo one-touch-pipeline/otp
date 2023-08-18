@@ -46,6 +46,8 @@ class Individual implements CommentableWithProject, Entity {
      */
     String pid
 
+    UUID uuid = UUID.randomUUID()
+
     enum Type { REAL, POOL, CELLLINE, UNDEFINED }
     Type type
 
@@ -60,6 +62,7 @@ class Individual implements CommentableWithProject, Entity {
 
     static constraints = {
         pid(unique: true, nullable: false, blank: false, shared: "pathComponent")
+        uuid(unique: true, nullable: false)
         species(nullable: true)
         comment(nullable: true)
     }
@@ -114,6 +117,7 @@ class Individual implements CommentableWithProject, Entity {
     static mapping = {
         project index: "individual_project_idx"
         pid index: "individual_pid_idx"
+        uuid index: "individual_uuid_idx"
         comment cascade: "all-delete-orphan"
         species index: "individual_species_idx"
     }
