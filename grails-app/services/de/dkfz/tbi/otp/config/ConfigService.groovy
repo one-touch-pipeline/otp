@@ -281,6 +281,10 @@ class ConfigService implements ApplicationContextAware {
         return getBooleanValue(OtpProperty.GRAILS_CONSOLE)
     }
 
+    boolean isSchedulerEnabled() {
+        return getBooleanValue(OtpProperty.SCHEDULER_ENABLED)
+    }
+
     private File getAndCheckPathFromProperty(OtpProperty property) {
         return new File(otpProperties.get(property) ?: property.defaultValue)
     }

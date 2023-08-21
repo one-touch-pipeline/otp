@@ -22,20 +22,28 @@
 package de.dkfz.tbi.otp
 
 import grails.util.Environment
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.scheduling.TaskScheduler
 import org.springframework.scheduling.Trigger
+import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler
+
+import de.dkfz.tbi.otp.config.ConfigService
 
 import java.util.concurrent.ScheduledFuture
 
 @Configuration
+@EnableScheduling
 class SchedulingConfiguration {
+
+    @Autowired
+    ConfigService configService
 
     @Bean
     TaskScheduler threadPoolTaskScheduler() {
-        if (Environment.current in [Environment.PRODUCTION, Environment.DEVELOPMENT]) {
+        if (Environment.current == Environment.PRODUCTION || (Environment.current == Environment.DEVELOPMENT && configService.isSchedulerEnabled())) {
             ThreadPoolTaskScheduler threadPoolTaskScheduler = new ThreadPoolTaskScheduler()
             threadPoolTaskScheduler.threadNamePrefix = "ThreadPoolTaskScheduler"
             threadPoolTaskScheduler.poolSize = 10

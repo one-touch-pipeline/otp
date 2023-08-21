@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -40,7 +40,6 @@ String keycloakClientSecret = otpProperties.getProperty(OtpProperty.KEYCLOAK_CLI
 String keycloakServer = otpProperties.getProperty(OtpProperty.KEYCLOAK_SERVER.key)
 String keycloakRealm = otpProperties.getProperty(OtpProperty.KEYCLOAK_REALM.key)
 String serverURL = otpProperties.getProperty(OtpProperty.CONFIG_SERVER_URL.key)
-String schedulerEnabled = otpProperties.getProperty(OtpProperty.SCHEDULER_ENABLED.key)
 String server = otpProperties.getProperty(OtpProperty.DATABASE_SERVER.key)
 String port = otpProperties.getProperty(OtpProperty.DATABASE_PORT.key)
 String database = otpProperties.getProperty(OtpProperty.DATABASE_SCHEMA.key)
@@ -52,7 +51,6 @@ environments {
     development {
         grails.logging.jul.usebridge = true
         grails.serverURL = serverURL ?: "http://localhost:8080"
-        scheduler.enabled = schedulerEnabled ?: OtpProperty.SCHEDULER_ENABLED.defaultValue
     }
     production {
         grails.logging.jul.usebridge = false

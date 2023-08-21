@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -38,14 +38,6 @@ beans = {
         configService(Class.forName("de.dkfz.tbi.otp.TestConfigService")) {
             processingOptionService = ref('processingOptionService')
         }
-    }
-    if (Environment.current == Environment.PRODUCTION || (Environment.current == Environment.DEVELOPMENT &&
-            grailsApplication.config.getProperty("scheduler.enabled", Boolean.class))) {
-        // proper thread pool
-        xmlns task: "http://www.springframework.org/schema/task"
-        task.executor(id: "taskExecutor", "pool-size": 10)
-        task.scheduler(id: "taskScheduler", "pool-size": 10)
-        task.'annotation-driven'(executor: "taskExecutor", scheduler: "taskScheduler")
     }
 
     // don't use the default locale specific value converter
