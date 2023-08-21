@@ -19,27 +19,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-import grails.util.Environment
+package de.dkfz.tbi.otp
 
-import de.dkfz.tbi.otp.ProjectLinkGenerator
-import de.dkfz.tbi.otp.handler.CustomExceptionResolver
+import grails.converters.JSON
+import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
+import org.grails.web.json.JSONElement
+import spock.lang.Specification
 
-beans = {
-    exceptionHandler(CustomExceptionResolver) {
-        // this is required so that calls to super work
-        exceptionMappings = ['java.lang.Exception': '/error']
-    }
-    if (Environment.current == Environment.TEST) {
-        // use Class.forName because classes in test-helper are not found in production env
-        fileSystemService(Class.forName("de.dkfz.tbi.otp.job.processing.TestFileSystemService"))
-    }
-    if (Environment.current == Environment.TEST || Environment.current.name == "WORKFLOW_TEST") {
-        configService(Class.forName("de.dkfz.tbi.otp.TestConfigService")) {
-            processingOptionService = ref('processingOptionService')
-        }
-    }
+import de.dkfz.tbi.otp.dataprocessing.AceseqQc
 
-    grailsLinkGenerator(ProjectLinkGenerator, grailsApplication.config.getProperty("grails.serverURL", String.class)) { bean ->
-        bean.autowire = true
+@Rollback
+@Integration
+class NumberConverterBeanSpec extends Specification {
+
+    void "test conversion of double"() {
+        given:
+        String jsonString = """
+{
+"gender":"male",
+"solutionPossible":"3",
+"tcc":"0.5",
+"goodnessOfFit":"0.904231625835189",
+"ploidyFactor":"2.27",
+"ploidy":"2",
+}"""
+
+        JSONElement json = JSON.parse(jsonString)
+
+        when:
+        AceseqQc qc = new AceseqQc(json)
+
+        then:
+        qc.tcc == 0.5d
     }
 }

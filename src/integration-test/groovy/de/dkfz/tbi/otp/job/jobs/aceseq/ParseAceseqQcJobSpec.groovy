@@ -21,7 +21,8 @@
  */
 package de.dkfz.tbi.otp.job.jobs.aceseq
 
-import grails.testing.gorm.DataTest
+import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import spock.lang.Specification
 import spock.lang.TempDir
 
@@ -29,76 +30,18 @@ import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.otp.qcTrafficLight.QcThreshold
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.CreateFileHelper
-import de.dkfz.tbi.otp.utils.NumberConverter
 
 import java.nio.file.Path
 
-class ParseAceseqQcJobSpec extends Specification implements DataTest {
+@Rollback
+@Integration
+class ParseAceseqQcJobSpec extends Specification {
 
-    @Override
-    Class[] getDomainClassesToMock() {
-        return [
-                AbstractBamFile,
-                AceseqInstance,
-                AceseqQc,
-                RawSequenceFile,
-                FastqFile,
-                FileType,
-                Individual,
-                LibraryPreparationKit,
-                MergingCriteria,
-                MergingWorkPackage,
-                Pipeline,
-                Project,
-                QcThreshold,
-                Realm,
-                ReferenceGenome,
-                RoddyBamFile,
-                RoddyWorkflowConfig,
-                Run,
-                FastqImportInstance,
-                Sample,
-                SamplePair,
-                SampleType,
-                SampleTypePerProject,
-                SeqCenter,
-                SeqPlatform,
-                SeqPlatformGroup,
-                SeqPlatformModelLabel,
-                SeqTrack,
-                SeqType,
-                SoftwareTool,
-        ]
-    }
-
-    // copied form resources.groovy
-    // using loadExternalBeans() would be preferable but doesn't work
-    @Override
-    Closure doWithSpring() {
-        return { ->
-            [
-                    Short, Short.TYPE,
-                    Integer, Integer.TYPE,
-                    Long, Long.TYPE,
-                    Float, Float.TYPE,
-                    Double, Double.TYPE,
-                    BigInteger,
-                    BigDecimal,
-            ].each { numberType ->
-                "defaultGrails${numberType.simpleName}Converter"(NumberConverter) {
-                    targetType = numberType
-                }
-            }
-        }
-    }
+    TestConfigService configService
 
     @TempDir
     Path tempDir
@@ -112,7 +55,7 @@ class ParseAceseqQcJobSpec extends Specification implements DataTest {
 
         AceseqInstance instance = DomainFactory.createAceseqInstanceWithRoddyBamFiles()
 
-        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): tempDir.toString()])
+        configService.addOtpProperty(OtpProperty.PATH_PROJECT_ROOT, tempDir.toString())
 
         DomainFactory.createAceseqQaFileOnFileSystem(qcJson)
 

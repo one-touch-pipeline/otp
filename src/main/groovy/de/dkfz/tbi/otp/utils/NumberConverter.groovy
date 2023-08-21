@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,8 +22,9 @@
 package de.dkfz.tbi.otp.utils
 
 import grails.databinding.converters.ValueConverter
+import org.springframework.core.PriorityOrdered
 
-class NumberConverter implements ValueConverter {
+class NumberConverter implements ValueConverter, PriorityOrdered {
 
     Class<?> targetType
 
@@ -59,4 +60,6 @@ class NumberConverter implements ValueConverter {
             return new BigDecimal(value)
         }
     }
+
+    final int order = HIGHEST_PRECEDENCE
 }

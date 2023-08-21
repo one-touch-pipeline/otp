@@ -21,13 +21,80 @@
  */
 package de.dkfz.tbi.otp
 
+import grails.databinding.converters.ValueConverter
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.web.servlet.LocaleResolver
 import org.springframework.web.servlet.i18n.FixedLocaleResolver
 
+import de.dkfz.tbi.otp.utils.NumberConverter
+
 @Configuration
 class BeanConfiguration {
+    // don't use the default locale specific value converter
+    @Bean
+    ValueConverter defaultGrailsShortConverter() {
+        return new NumberConverter(targetType: Short)
+    }
+
+    @Bean
+    @SuppressWarnings("ConfusingMethodName") // primitive type is lowercase
+    ValueConverter defaultGrailsshortConverter() {
+        return new NumberConverter(targetType: Short.TYPE)
+    }
+
+    @Bean
+    ValueConverter defaultGrailsIntegerConverter() {
+        return new NumberConverter(targetType: Integer)
+    }
+
+    @Bean
+    @SuppressWarnings("ConfusingMethodName") // primitive type is lowercase
+    ValueConverter defaultGrailsintegerConverter() {
+        return new NumberConverter(targetType: Integer.TYPE)
+    }
+
+    @Bean
+    ValueConverter defaultGrailsLongConverter() {
+        return new NumberConverter(targetType: Long)
+    }
+
+    @Bean
+    @SuppressWarnings("ConfusingMethodName") // primitive type is lowercase
+    ValueConverter defaultGrailslongConverter() {
+        return new NumberConverter(targetType: Long.TYPE)
+    }
+
+    @Bean
+    ValueConverter defaultGrailsFloatConverter() {
+        return new NumberConverter(targetType: Float)
+    }
+
+    @Bean
+    @SuppressWarnings("ConfusingMethodName") // primitive type is lowercase
+    ValueConverter defaultGrailsfloatConverter() {
+        return new NumberConverter(targetType: Float.TYPE)
+    }
+
+    @Bean
+    ValueConverter defaultGrailsDoubleConverter() {
+        return new NumberConverter(targetType: Double)
+    }
+
+    @Bean
+    ValueConverter defaultGrailsConverter() {
+        return new NumberConverter(targetType: Double.TYPE)
+    }
+
+    @Bean
+    ValueConverter defaultGrailsBigIntegerConverter() {
+        return new NumberConverter(targetType: BigInteger)
+    }
+
+    @Bean
+    ValueConverter defaultGrailsBigDecimalConverter() {
+        return new NumberConverter(targetType: BigDecimal)
+    }
 
     // only use English (prevents translations included in plugins being used)
     @Bean
