@@ -134,7 +134,7 @@ class ExecuteRoddyAceseqJobSpec extends Specification implements DataTest {
                 configService         : configService,
                 fileService           : Mock(FileService) {
                     toFile(_) >> { new File() }
-                    ensureFileIsReadableAndNotEmpty(_) >> true
+                    ensureFileIsReadableAndNotEmptyStatic(_) >> true
                 },
                 aceseqService         : Mock(AceseqService) {
                     1 * validateInputBamFiles(_) >> { }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -42,12 +42,12 @@ abstract class AbstractLogDirectoryService {
     protected Path createAndGetLogDirectoryHelper(Date date, String logType) {
         assert date
 
-        Path baseLogDirectory = fileSystemService.remoteFileSystemOnDefaultRealm.getPath(configService.loggingRootPath.absolutePath)
+        Path baseLogDirectory = fileSystemService.remoteFileSystem.getPath(configService.loggingRootPath.absolutePath)
         String dateDirectory = TimeFormats.DATE_DIRECTORY.getFormattedDate(date)
 
         Path logPath = baseLogDirectory.resolve(logType).resolve(dateDirectory)
         if (!Files.exists(logPath)) {
-            FileSystem fileSystem = fileSystemService.remoteFileSystemOnDefaultRealm
+            FileSystem fileSystem = fileSystemService.remoteFileSystem
             Path remoteLogPath = fileService.changeFileSystem(logPath, fileSystem)
             fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(remoteLogPath, configService.defaultRealm)
         }

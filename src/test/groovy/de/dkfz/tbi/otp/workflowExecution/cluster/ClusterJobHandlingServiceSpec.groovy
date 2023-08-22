@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -101,7 +101,7 @@ class ClusterJobHandlingServiceSpec extends Specification implements ServiceUnit
         ]
 
         service.clusterJobHelperService = Mock(ClusterJobHelperService) {
-            1 * mergeResources(workflowStep.workflowRun.priority, realm, jobSubmissionOptionMapInitial) >> jobSubmissionOptionMapMerged
+            1 * mergeResources(workflowStep.workflowRun.priority, jobSubmissionOptionMapInitial) >> jobSubmissionOptionMapMerged
             1 * createResourceSet(jobSubmissionOptionMapMerged) >> resourceSet
             1 * constructJobName(workflowStep) >> jobName
             1 * wrapScript(script1, logFileName, logMessage) >> wrappedScript1

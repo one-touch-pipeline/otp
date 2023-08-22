@@ -91,7 +91,7 @@ class DataExportService {
             consoleBuilder.append("Found ${dataExportInput.seqTrackList.size()} lanes:\n")
         }
 
-        FileSystem fileSystem = fileSystemService.remoteFileSystemOnDefaultRealm
+        FileSystem fileSystem = fileSystemService.remoteFileSystem
 
         dataExportInput.seqTrackList.each { SeqTrack seqTrack ->
             String seqTrackPid = seqTrack.individual.pid
@@ -135,7 +135,7 @@ class DataExportService {
             consoleBuilder.append("Found BAM files ${dataExportInput.bamFileList.size()}\n")
         }
 
-        FileSystem fileSystem = fileSystemService.remoteFileSystemOnDefaultRealm
+        FileSystem fileSystem = fileSystemService.remoteFileSystem
 
         dataExportInput.bamFileList.each { AbstractBamFile bamFile ->
             Path basePath = Paths.get(bamFile.baseDirectory.absolutePath)

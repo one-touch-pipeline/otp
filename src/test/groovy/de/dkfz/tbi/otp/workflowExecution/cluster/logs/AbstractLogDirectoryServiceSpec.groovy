@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -66,7 +66,7 @@ abstract class AbstractLogDirectoryServiceSpec extends Specification implements 
 
     protected void mockPathDoesNotExist(Path expected, int countRemoteFileSystem = 1) {
         service.fileSystemService = Mock(FileSystemService) {
-            countRemoteFileSystem * getRemoteFileSystemOnDefaultRealm() >> FileSystems.default
+            countRemoteFileSystem * getRemoteFileSystem() >> FileSystems.default
             0 * _
         }
         service.fileService = Mock(FileService) {
@@ -78,7 +78,7 @@ abstract class AbstractLogDirectoryServiceSpec extends Specification implements 
 
     protected void mockPathExist(int countRemoteFileSystem = 0) {
         service.fileSystemService = Mock(FileSystemService) {
-            countRemoteFileSystem * getRemoteFileSystemOnDefaultRealm() >> FileSystems.default
+            countRemoteFileSystem * getRemoteFileSystem() >> FileSystems.default
             0 * _
         }
         service.fileService = Mock(FileService) {

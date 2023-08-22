@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -112,14 +112,11 @@ class AbstractExecuteClusterPipelineJobSpec extends Specification implements Dat
         workflowStep.workflowRun.combinedConfig = '{"OTP_CLUSTER": {"CORES": "cores_1", "NODE_FEATURE": "node_2"}}'
         workflowStep.workflowRun.save(flush: true)
 
-        workflowStep.workflowRun.project.realm.defaultJobSubmissionOptions = '{"MEMORY": "memory_3", "NODE_FEATURE": "node_4"}'
-        workflowStep.workflowRun.project.realm.save(flush: true)
-
         when:
         job.execute(workflowStep)
 
         then:
         1 * job.clusterAccessService.executeJobs(workflowStep.workflowRun.project.realm, workflowStep, scripts,
-                [(JobSubmissionOption.MEMORY): 'memory_3', (JobSubmissionOption.NODE_FEATURE): 'node_2', (JobSubmissionOption.CORES): 'cores_1'])
+                [(JobSubmissionOption.NODE_FEATURE): 'node_2', (JobSubmissionOption.CORES): 'cores_1'])
     }
 }

@@ -786,11 +786,6 @@ class ExampleData {
     Realm findOrCreateRealm() {
         return CollectionUtils.atMostOneElement(Realm.findAllByName(realmName)) ?: new Realm([
                 name                       : realmName,
-                jobScheduler               : Realm.JobScheduler.LSF,
-                host                       : "localhost",
-                port                       : 22,
-                timeout                    : 0,
-                defaultJobSubmissionOptions: "",
         ]).save(flush: false)
     }
 
@@ -1245,7 +1240,7 @@ class ExampleData {
         }
         String file = "/tmp/file_${RoddyWorkflowConfig.count()}.xml"
         if (createFilesOnFilesystem) {
-            Path path = fileSystemService.remoteFileSystemOnDefaultRealm.getPath(file)
+            Path path = fileSystemService.remoteFileSystem.getPath(file)
             path.text = "someDummyContent"
         }
         return new RoddyWorkflowConfig([

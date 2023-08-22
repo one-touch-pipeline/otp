@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -86,7 +86,7 @@ class ClusterJobSchedulerServiceSpec extends Specification implements DataTest, 
         ClusterJobSchedulerService service = new ClusterJobSchedulerService()
         service.clusterJobManagerFactoryService = new ClusterJobManagerFactoryService()
         service.clusterJobManagerFactoryService.remoteShellHelper = [
-                executeCommandReturnProcessOutput: { realm1, command ->
+                executeCommandReturnProcessOutput: { command ->
                     new ProcessOutput(
                             stdout: command.tokenize().last(),
                             stderr: "",
@@ -96,6 +96,7 @@ class ClusterJobSchedulerServiceSpec extends Specification implements DataTest, 
         ] as RemoteShellHelper
         service.clusterJobManagerFactoryService.configService = Mock(ConfigService) {
             getSshUser() >> SSHUSER
+            getJobScheduler() >> JobScheduler.PBS
         }
         service.configService = Mock(ConfigService) {
             1 * getLoggingRootPath() >> logFolder
@@ -104,7 +105,7 @@ class ClusterJobSchedulerServiceSpec extends Specification implements DataTest, 
             1 * createFileWithContentOnDefaultRealm(_, _)
         }
         service.fileSystemService = Mock(FileSystemService) {
-            1 * getRemoteFileSystemOnDefaultRealm() >> FileSystems.default
+            1 * getRemoteFileSystem() >> FileSystems.default
         }
 
         when:
@@ -146,6 +147,7 @@ class ClusterJobSchedulerServiceSpec extends Specification implements DataTest, 
         service.clusterJobManagerFactoryService.remoteShellHelper = Mock(RemoteShellHelper)
         service.clusterJobManagerFactoryService.configService = Mock(ConfigService) {
             getSshUser() >> SSHUSER
+            getJobScheduler() >> JobScheduler.PBS
         }
 
         ProcessOutput out = new ProcessOutput("${clusterJobId}.pbs", "", 0)
@@ -156,7 +158,7 @@ class ClusterJobSchedulerServiceSpec extends Specification implements DataTest, 
         String result = service.executeJob(realm, "run the job")
 
         then:
-        4 * service.clusterJobManagerFactoryService.remoteShellHelper.executeCommandReturnProcessOutput(realm, _ as String) >> out
+        4 * service.clusterJobManagerFactoryService.remoteShellHelper.executeCommandReturnProcessOutput(_ as String) >> out
         1 * service.clusterJobService.createClusterJob(realm, clusterJobId, SSHUSER, step, seqType, _ as String) >> clusterJob
         1 * service.clusterJobLoggingService.createAndGetLogDirectory(_, _) >> { TestCase.uniqueNonExistentPath }
         result == clusterJobId

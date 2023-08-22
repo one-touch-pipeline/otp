@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -51,10 +51,10 @@ class AbstractMaybeSubmitWaitValidateJobIntegrationTests extends TestCase {
         setupData()
         Realm realm = DomainFactory.createRealm()
 
-        ClusterJob clusterJob1 = clusterJobService.createClusterJob(realm, "1111", configService.sshUser, processingStep)
+        ClusterJob clusterJob1 = clusterJobService.createClusterJob(realm, "1111", 'user', processingStep)
         ClusterJobIdentifier identifier1 = new ClusterJobIdentifier(clusterJob1)
 
-        ClusterJob clusterJob2 = clusterJobService.createClusterJob(realm, "2222", configService.sshUser, processingStep)
+        ClusterJob clusterJob2 = clusterJobService.createClusterJob(realm, "2222", 'user', processingStep)
         ClusterJobIdentifier identifier2 = new ClusterJobIdentifier(clusterJob2)
 
         Map failedClusterJobs = [(identifier2): "Failed2.", (identifier1): "Failed1."]

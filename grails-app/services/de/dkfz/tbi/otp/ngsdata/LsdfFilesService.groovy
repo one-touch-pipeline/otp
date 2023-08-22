@@ -56,7 +56,7 @@ class LsdfFilesService {
      * of the given sequenceFile
      */
     Path getFileInitialPathAsPath(RawSequenceFile rawSequenceFile) {
-        FileSystem fileSystem = fileSystemService.remoteFileSystemOnDefaultRealm
+        FileSystem fileSystem = fileSystemService.remoteFileSystem
         return fileSystem.getPath(getFileInitialPath(rawSequenceFile))
     }
 
@@ -227,7 +227,7 @@ class LsdfFilesService {
      */
     @Deprecated
     static void ensureFileIsReadableAndNotEmpty(final File file) {
-        FileService.ensureFileIsReadableAndNotEmpty(file.toPath())
+        FileService.ensureFileIsReadableAndNotEmptyStatic(file.toPath())
     }
 
     /**
@@ -235,7 +235,7 @@ class LsdfFilesService {
      */
     @Deprecated
     static void ensureDirIsReadableAndNotEmpty(final File dir) {
-        FileService.ensureDirIsReadableAndNotEmpty(dir.toPath())
+        FileService.ensureDirIsReadableAndNotEmptyStatic(dir.toPath())
     }
 
     /**
@@ -243,7 +243,7 @@ class LsdfFilesService {
      */
     @Deprecated
     static void ensureDirIsReadable(final File dir) {
-        FileService.ensureDirIsReadable(dir.toPath())
+        FileService.ensureDirIsReadableStatic(dir.toPath())
     }
 
     /**

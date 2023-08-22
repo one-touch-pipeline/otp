@@ -502,7 +502,7 @@ abstract class AbstractDataSwapService<P extends DataSwapParameters, D extends D
      * @return outPutBashCommands with added bash commands.
      */
     private String createRenameRawSequenceFileCommands(String oldFilename, RawSequenceFile rawSequenceFile, D data) throws FileNotFoundException {
-        FileSystem fileSystem = fileSystemService.remoteFileSystemOnDefaultRealm
+        FileSystem fileSystem = fileSystemService.remoteFileSystem
         String outPutBashCommands = ""
         // fill local variables
         String oldDirectFileName = data.oldRawSequenceFileNameMap[rawSequenceFile][DIRECT_FILE_NAME]

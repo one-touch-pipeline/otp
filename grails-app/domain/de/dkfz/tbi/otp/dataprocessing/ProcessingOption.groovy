@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -366,22 +366,6 @@ class ProcessingOption implements Entity {
         ),
 
         // FileSystem
-        FILESYSTEM_FASTQ_IMPORT(
-                "Realm to use for filesystem access when importing FASTQs, local is used if empty",
-                Necessity.OPTIONAL, "", TypeValidators.SINGLE_WORD_TEXT_OPTIONAL
-        ),
-        FILESYSTEM_BAM_IMPORT(
-                "Realm to use for filesystem access when importing BAMs, local is used if empty",
-                Necessity.OPTIONAL, "", TypeValidators.SINGLE_WORD_TEXT_OPTIONAL
-        ),
-        FILESYSTEM_PROCESSING_USE_REMOTE(
-                "Use remote (true) or local (false) filesystem when processing files",
-                Necessity.REQUIRED, null, TypeValidators.BOOLEAN
-        ),
-        FILESYSTEM_CONFIG_FILE_CHECKS_USE_REMOTE(
-                "Use remote (true) or local (false) filesystem for config file checks",
-                Necessity.REQUIRED, null, TypeValidators.BOOLEAN
-        ),
         FILESYSTEM_TIMEOUT(
                 "The amount of time (im minutes) the FileService allows the filesystem until a given commands times out",
                 Necessity.OPTIONAL, "0", TypeValidators.POSITIVE_NUMBER
@@ -394,9 +378,10 @@ class ProcessingOption implements Entity {
         ),
 
         // realm
+        /** @deprecated */
         REALM_DEFAULT_VALUE(
                 "The default realm by name",
-                Necessity.REQUIRED, null, TypeValidators.SINGLE_WORD_TEXT
+                Necessity.REQUIRED, null, TypeValidators.SINGLE_WORD_TEXT, null, true
         ),
 
         // email
@@ -489,6 +474,7 @@ class ProcessingOption implements Entity {
         ),
 
         // cluster job scheduler
+        /** @deprecated */
         CLUSTER_SUBMISSIONS_OPTION(
                 "Resource requests for job submission, as JSON map",
                 Necessity.OPTIONAL, "", TypeValidators.CLUSTER_JOB_SUBMISSION_OPTION,

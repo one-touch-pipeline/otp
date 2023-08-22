@@ -70,7 +70,7 @@ class RemoteShellHelper {
 
     private JSch jsch
 
-    private Map<Realm, Session> sessionPerRealm = [:]
+    private Session session = null
 
     private static Semaphore maxSshCalls
 
@@ -80,40 +80,56 @@ class RemoteShellHelper {
     private final Object synchronizeVariable = new Object()
 
     /**
-     * Executes a command on a specified host and logs stdout and stderr
+     * Executes a command remotely and logs stdout and stderr
      *
-     * @param realm The realm which identifies the host
+     * @param realm ignored
      * @param command The command to be executed
      * @return standard output of the command executed
      * @deprecated use executeCommandReturnProcessOutput instead
      */
     @Deprecated
+    @SuppressWarnings("UnusedMethodParameter")
     String executeCommand(Realm realm, String command) {
         return executeCommandReturnProcessOutput(realm, command).stdout
     }
 
     /**
-     * Executes a command on a specified host and logs stdout and stderr
+     * Executes a command remotely and logs stdout and stderr
      *
-     * @param realm The realm which identifies the host
+     * @param realm ignored
+     * @param command The command to be executed
+     * @return process output of the command executed
+     * @deprecated use executeCommandReturnProcessOutput instead
+     */
+    @Deprecated
+    @SuppressWarnings("UnusedMethodParameter")
+    ProcessOutput executeCommandReturnProcessOutput(Realm realm, String command) {
+        return executeCommandReturnProcessOutput(command)
+    }
+
+    /**
+     * Executes a command remotely and logs stdout and stderr
+     *
      * @param command The command to be executed
      * @return process output of the command executed
      */
-    ProcessOutput executeCommandReturnProcessOutput(Realm realm, String command) {
-        assert realm: "No realm specified."
+    ProcessOutput executeCommandReturnProcessOutput(String command) {
         assert command: "No command specified to be run remotely."
+        String host = configService.sshHost
+        int port = configService.sshPort
+        int timeout = configService.sshTimeout
         String sshUser = configService.sshUser
         String password = configService.sshPassword
         File keyFile = configService.sshKeyFile
         SshAuthMethod sshAuthMethod = configService.sshAuthenticationMethod
         try {
-            return querySsh(realm, sshUser, password, keyFile, sshAuthMethod, command)
+            return querySsh(host, port, timeout, sshUser, password, keyFile, sshAuthMethod, command)
         } catch (ProcessingException e) {
             if (e.cause && e.cause instanceof JSchException && e.cause.message.contains('channel is not opened.')) {
                 logToJob("'channel is not opened' error occur, try again in ${TIME_FOR_RETRY_REMOTE_ACCESS} seconds")
                 log.error("'channel is not opened' error occur, try again in ${TIME_FOR_RETRY_REMOTE_ACCESS} seconds")
                 Thread.sleep(TIME_FOR_RETRY_REMOTE_ACCESS * MILLI_SECONDS_PER_SECOND)
-                return querySsh(realm, sshUser, password, keyFile, sshAuthMethod, command)
+                return querySsh(host, port, timeout, sshUser, password, keyFile, sshAuthMethod, command)
             }
             throw e
         }
@@ -136,7 +152,8 @@ class RemoteShellHelper {
      */
     // maxSshCalls is initialized here, since during loading the class the database can not be accessed (not ready)
     @SuppressWarnings(['AssignmentToStaticFieldFromInstanceMethod', 'CatchException'])
-    protected ProcessOutput querySsh(Realm realm, String username, String password, File keyFile, SshAuthMethod sshAuthMethod, String command) {
+    protected ProcessOutput querySsh(String host, int port, int timeout, String username, String password, File keyFile, SshAuthMethod sshAuthMethod,
+                                     String command) {
         assert command: "No command specified."
         if (!password && !keyFile) {
             throw new ProcessingException("Neither password nor key file for remote connection specified.")
@@ -150,7 +167,7 @@ class RemoteShellHelper {
         }
         maxSshCalls.acquire()
         try {
-            Session session = connectSshIfNeeded(realm, username, password, keyFile, sshAuthMethod)
+            Session session = connectSshIfNeeded(host, port, timeout, username, password, keyFile, sshAuthMethod)
 
             ChannelExec channel = (ChannelExec) session.openChannel("exec")
             logToJob("executed command: " + command)
@@ -171,7 +188,7 @@ class RemoteShellHelper {
         } catch (Exception e) {
             log.info(e.toString(), e)
             synchronized (synchronizeVariable) {
-                sessionPerRealm.remove(realm)
+                session = null
             }
             throw new ProcessingException(e)
         } finally {
@@ -179,17 +196,15 @@ class RemoteShellHelper {
         }
     }
 
-    private Session connectSshIfNeeded(Realm realm, String username, String password, File keyFile, SshAuthMethod sshAuthMethod) {
-        Session session = sessionPerRealm[realm]
+    private Session connectSshIfNeeded(String host, int port, int timeout, String username, String password, File keyFile, SshAuthMethod sshAuthMethod) {
         if (session == null || !session.isConnected()) {
-            session = createSessionAndJsch(realm, username, password, keyFile, sshAuthMethod)
+            session = createSessionAndJsch(host, port, timeout, username, password, keyFile, sshAuthMethod)
         }
         return session
     }
 
     @Synchronized
-    private Session createSessionAndJsch(Realm realm, String username, String password, File keyFile, SshAuthMethod sshAuthMethod) {
-        Session session = sessionPerRealm[realm]
+    private Session createSessionAndJsch(String host, int port, int timeout, String username, String password, File keyFile, SshAuthMethod sshAuthMethod) {
         if (session == null || !session.isConnected()) {
             log.info("create new session for ${username}")
             Properties config = new Properties()
@@ -212,19 +227,18 @@ class RemoteShellHelper {
                 }
             }
 
-            session = jsch.getSession(username, realm.host, realm.port)
+            session = jsch.getSession(username, host, port)
             if (sshAuthMethod == SshAuthMethod.PASSWORD) {
                 session.password = password
             }
-            session.timeout = realm.timeout
+            session.timeout = timeout
             config.put("StrictHostKeyChecking", "no")
             session.config = config
             try {
                 session.connect()
             } catch (JSchException e) {
-                throw new ProcessingException("Connecting to ${realm.host}:${realm.port} with username ${username} failed.", e)
+                throw new ProcessingException("Connecting to ${host}:${port} with username ${username} failed.", e)
             }
-            sessionPerRealm[realm] = session
         }
         return session
     }
@@ -257,47 +271,35 @@ class RemoteShellHelper {
     @Scheduled(fixedDelay = 60000L)
     @SuppressWarnings('CatchThrowable')
     void keepAlive() {
-        sessionPerRealm.each { Realm realm, Session session ->
-            log.debug("Send SSH session keep alive for ${realm}")
+        if (session) {
+            log.debug("Send SSH session keep alive")
             try {
                 session.sendKeepAliveMsg()
             } catch (Throwable e) {
-                log.error("Send SSH session keep alive failed for ${realm} ${session}", e)
+                log.error("Send SSH session keep alive failed ${session}", e)
                 synchronized (synchronizeVariable) {
-                    sessionPerRealm.remove(realm)
+                    session = null
                 }
             }
         }
     }
 
     /**
-     * Check, if currently cached remote session exist
-     */
-    boolean hasRemoteFileSystems() {
-        return !sessionPerRealm.isEmpty()
-    }
-
-    /**
-     * Close the used remote file systems.
+     * Close the used session.
      *
      * <b>Attention:</b>
-     * This method is only for running workflow tests and for development and should never be used in production.
+     * This method is only for development and should never be used in production.
      *
-     * Since each workflow tests starts with an empty database, each test have other realms and therefore can not reuse the cached file system.
-     * To avoid collecting more and more not needed cached file system and references to not valid realm, the cache are closed after each test.
-     *
-     * Since in production always the same realm is used, the cache shouldn't cleared and therefore this method also not used.
-     *
-     * A similar problem occurred during development with the otp restart triggered by spring-devtools.
+     * It is necessary during development to support reloading by spring-devtools.
      */
-    void closeFileSystem() {
-        assert Environment.current != Environment.PRODUCTION
+    void closeSession() {
+        assert Environment.current == Environment.DEVELOPMENT
         log.debug("start closing SSH session")
-        Map<Realm, Session> sessionPerRealmCopy = sessionPerRealm
-        sessionPerRealm = [:]
-        sessionPerRealmCopy.each { Realm realm, Session session ->
-            log.debug("closing SSH session for realm ${realm}")
-            session.disconnect()
+        Session sessionCopy = session
+        session = null
+        if (sessionCopy) {
+            log.debug("closing SSH session")
+            sessionCopy.disconnect()
         }
     }
 

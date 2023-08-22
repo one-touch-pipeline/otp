@@ -114,7 +114,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         }
         projectService.fileService = new FileService()
         projectService.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
-            _ * executeCommandReturnProcessOutput(_, _) >> { Realm realm2, String command ->
+            _ * executeCommandReturnProcessOutput(_) >> { String command ->
                 return new ProcessOutput(command, '', 0)
             }
         }
@@ -126,7 +126,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         projectService.roddyWorkflowConfigService.configService = Mock(ConfigService)
         projectService.roddyWorkflowConfigService.fileService = new FileService()
         projectService.roddyWorkflowConfigService.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
-            executeCommandReturnProcessOutput(_, _) >> { realm1, cmd -> LocalShellHelper.executeAndWait(cmd) }
+            executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
         projectService.mailHelperService = Mock(MailHelperService) {
             0 * sendEmail(_, _, _)

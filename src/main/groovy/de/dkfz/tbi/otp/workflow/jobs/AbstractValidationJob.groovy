@@ -65,7 +65,7 @@ abstract class AbstractValidationJob extends AbstractJob {
         getExpectedFiles(workflowStep).each {
             try {
                 logService.addSimpleLogEntry(workflowStep, "Check file ${it}")
-                FileService.ensureFileIsReadableAndNotEmpty(it)
+                FileService.ensureFileIsReadableAndNotEmptyStatic(it)
             } catch (AssertionError e) {
                 errors << "Expected file ${it} not found, ${e.message}"
             }
@@ -74,7 +74,7 @@ abstract class AbstractValidationJob extends AbstractJob {
         getExpectedDirectories(workflowStep).each {
             try {
                 logService.addSimpleLogEntry(workflowStep, "Check directory ${it}")
-                FileService.ensureDirIsReadable(it)
+                FileService.ensureDirIsReadableStatic(it)
             } catch (AssertionError e) {
                 errors << "Expected directory ${it} not found, ${e.message}"
             }

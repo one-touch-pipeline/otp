@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -86,7 +86,7 @@ class ExecuteRoddyAceseqJob extends AbstractExecutePanCanJob<AceseqInstance> imp
         SophiaInstance sophiaInstance = SophiaInstance.getLatestValidSophiaInstanceForSamplePair(aceseqInstance.samplePair)
         Path aceseqInputFile = sophiaService.getFinalAceseqInputFile(sophiaInstance)
         assert aceseqInputFile : "Path to the ACEseq input file is null"
-        fileService.ensureFileIsReadableAndNotEmpty(aceseqInputFile)
+        fileService.ensureFileIsReadableAndNotEmptyStatic(aceseqInputFile)
 
         fileService.createLink(
                 aceseqService.getWorkDirectory(aceseqInstance).resolve(aceseqInputFile.fileName), aceseqInputFile,

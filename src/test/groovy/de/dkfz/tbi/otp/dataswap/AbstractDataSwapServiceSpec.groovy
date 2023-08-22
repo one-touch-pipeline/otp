@@ -722,7 +722,7 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
             _ * getFileViewByPidPathAsPath(_) >> newFileViewByPid
         }
         service.fileSystemService = Mock(FileSystemService) {
-            getRemoteFileSystemOnDefaultRealm() >> FileSystems.default
+            getRemoteFileSystem() >> FileSystems.default
         }
 
         // DTO
@@ -784,7 +784,7 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
                 Paths.get(rawSequenceFilePaths[rawSequenceFile].newVbpPath.toString()) }
         }
         service.fileSystemService = Mock(FileSystemService) {
-            _ * getRemoteFileSystemOnDefaultRealm() >> FileSystems.default
+            _ * getRemoteFileSystem() >> FileSystems.default
         }
 
         // DTO
@@ -921,7 +921,7 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
                 Paths.get(rawSequenceFilePaths[rawSequenceFile].newVbpPath.toString()) }
         }
         service.fileSystemService = Mock(FileSystemService) {
-            _ * getRemoteFileSystemOnDefaultRealm() >> FileSystems.default
+            _ * getRemoteFileSystem() >> FileSystems.default
         }
 
         // DTO
@@ -1020,7 +1020,7 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
             _ * mappingEntry(_) >> { RawSequenceFile rawSequenceFile -> rawSequenceFilePaths[rawSequenceFile].newWellMappingFileEntryName }
         }
         service.fileSystemService = Mock(FileSystemService) {
-            _ * getRemoteFileSystemOnDefaultRealm() >> FileSystems.default
+            _ * getRemoteFileSystem() >> FileSystems.default
         }
 
         final List<Swap<String>> rawSequenceFileSwaps = rawSequenceFileList.collect { new Swap(rawSequenceFilePaths[it].oldFileName, rawSequenceFilePaths[it].newFileName) }
@@ -1112,7 +1112,7 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
             _ * getFileViewByPidPathAsPath(_) >> Paths.get(rawSequenceFile.pathName).resolve(newRawSequenceFileName)
         }
         service.fileSystemService = Mock(FileSystemService) {
-            _ * getRemoteFileSystemOnDefaultRealm() >> FileSystems.default
+            _ * getRemoteFileSystem() >> FileSystems.default
         }
 
         // DTO

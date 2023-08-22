@@ -210,7 +210,7 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
                 fileService      : new FileService(),
         ])
         cellRangerService.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
-            executeCommandReturnProcessOutput(_, _) >> { realm1, cmd -> LocalShellHelper.executeAndWait(cmd) }
+            executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
 
         when:
@@ -248,7 +248,7 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
                 fileService      : new FileService(),
         ])
         cellRangerService.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
-            executeCommandReturnProcessOutput(_, _) >> { realm1, String cmd -> LocalShellHelper.executeAndWait(cmd) }
+            executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
 
         when:

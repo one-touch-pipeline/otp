@@ -66,7 +66,7 @@ class IndividualSwapService extends AbstractDataSwapService<IndividualSwapParame
 
         List<RawSequenceFile> rawSequenceFiles = getRawSequenceFilesBySeqTrackInList(seqTrackList, parameters)
 
-        FileSystem fileSystem = fileSystemService.remoteFileSystemOnDefaultRealm
+        FileSystem fileSystem = fileSystemService.remoteFileSystem
         List<Path> individualPaths = seqTrackList*.seqType.unique().collect {
             fileSystem.getPath(individualSwap.old
                     .getViewByPidPath(it).absoluteDataManagementPath

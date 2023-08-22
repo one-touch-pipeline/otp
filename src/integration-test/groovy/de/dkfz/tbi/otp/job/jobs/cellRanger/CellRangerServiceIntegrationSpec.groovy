@@ -70,7 +70,7 @@ class CellRangerServiceIntegrationSpec extends Specification implements UserAndR
         cellRangerService.configService = Mock(ConfigService)
         cellRangerService.fileService = new FileService()
         cellRangerService.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
-            executeCommandReturnProcessOutput(_, _) >> { realm1, cmd -> LocalShellHelper.executeAndWait(cmd) }
+            executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
         setupSingleCellBamFile()
     }

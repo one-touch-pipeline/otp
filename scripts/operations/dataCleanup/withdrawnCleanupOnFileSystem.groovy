@@ -143,6 +143,6 @@ String script = [
         rawSequenceFilesViewByPid
 ].join('\n')
 
-Path path = fileSystemService.remoteFileSystemOnDefaultRealm.getPath(file)
+Path path = fileSystemService.remoteFileSystem.getPath(file)
 
 fileService.createFileWithContentOnDefaultRealm(path, script)

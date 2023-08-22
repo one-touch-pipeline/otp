@@ -114,7 +114,7 @@ class UnwithdrawService {
     }
 
     void unwithdrawAnalysis(UnwithdrawStateHolder withdrawStateHolder) {
-        FileSystem fileSystem = fileSystemService.remoteFileSystemOnDefaultRealm
+        FileSystem fileSystem = fileSystemService.remoteFileSystem
         List<BamFilePairAnalysis> analysis = withdrawAnalysisService.collectObjects(withdrawStateHolder.bamFiles).unique()
         analysis = analysis.findAll {
             it.processingState == AnalysisProcessingStates.FINISHED &&
@@ -134,7 +134,7 @@ class UnwithdrawService {
     }
 
     void writeBashScript(UnwithdrawStateHolder withdrawStateHolder) {
-        FileSystem fileSystem = fileSystemService.remoteFileSystemOnDefaultRealm
+        FileSystem fileSystem = fileSystemService.remoteFileSystem
         Path outputFile = fileService.toPath(configService.scriptOutputPath, fileSystem).resolve('withdrawn').resolve(withdrawStateHolder.scriptFileName)
 
         fileService.deleteDirectoryRecursively(outputFile) // delete file if already exists

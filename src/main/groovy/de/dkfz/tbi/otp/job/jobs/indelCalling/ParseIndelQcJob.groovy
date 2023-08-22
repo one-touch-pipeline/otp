@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -55,9 +55,9 @@ class ParseIndelQcJob extends AbstractEndStateAwareJobImpl implements AutoRestar
         final IndelCallingInstance instance = processParameterObject
 
         Path indelQcFile = indelCallingService.getIndelQcJsonFile(instance)
-        FileService.ensureFileIsReadableAndNotEmpty(indelQcFile)
+        FileService.ensureFileIsReadableAndNotEmptyStatic(indelQcFile)
         Path sampleSwapFile = indelCallingService.getSampleSwapJsonFile(instance)
-        FileService.ensureFileIsReadableAndNotEmpty(sampleSwapFile)
+        FileService.ensureFileIsReadableAndNotEmptyStatic(sampleSwapFile)
         JSONObject qcJson = JSON.parse(indelQcFile.text)
         JSONObject sampleSwapJson = JSON.parse(sampleSwapFile.text)
         IndelCallingInstance.withTransaction {

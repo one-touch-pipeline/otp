@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -226,7 +226,7 @@ class ClusterJobSchedulerService {
     private Path pathForLogging() {
         String dateDirectory = LocalDateTime.now().format(PATH_FORMATTER)
 
-        FileSystem fileSystem = fileSystemService.remoteFileSystemOnDefaultRealm
+        FileSystem fileSystem = fileSystemService.remoteFileSystem
 
         Path baseLogDir = fileSystem.getPath(configService.loggingRootPath.path)
 

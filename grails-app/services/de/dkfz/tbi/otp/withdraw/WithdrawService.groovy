@@ -44,7 +44,7 @@ class WithdrawService {
     String withdraw(WithdrawParameters withdrawParameters) {
         WithdrawStateHolder withdrawStateHolder = new WithdrawStateHolder([
                 withdrawParameters: withdrawParameters,
-                remoteFileSystem  : fileSystemService.remoteFileSystemOnDefaultRealm,
+                remoteFileSystem  : fileSystemService.remoteFileSystem,
         ])
         Map<AbstractWithdrawBamFileService, List<AbstractBamFile>> bamFileMap = withdrawBamFileServices.collectEntries {
             [(it), it.collectObjects(withdrawStateHolder.seqTracks)]

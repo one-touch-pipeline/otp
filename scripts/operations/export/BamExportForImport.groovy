@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -229,7 +229,7 @@ class BamExportImport {
     Path convertAndCheckPath(String fileName, boolean overwriteExisting) {
         assert fileName: 'No file name given, but this is required'
 
-        FileSystem fileSystem = fileSystemService.remoteFileSystemOnDefaultRealm
+        FileSystem fileSystem = fileSystemService.remoteFileSystem
         Path path = fileSystem.getPath(fileName)
 
         assert path.absolute: '"The file name is not absolute, but that is required'

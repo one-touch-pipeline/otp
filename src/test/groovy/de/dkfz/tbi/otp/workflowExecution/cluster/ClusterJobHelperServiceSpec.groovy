@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -30,7 +30,6 @@ import spock.lang.Unroll
 import de.dkfz.roddy.config.ResourceSet
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
-import de.dkfz.tbi.otp.job.processing.ClusterJobSubmissionOptionsService
 import de.dkfz.tbi.otp.job.processing.JobSubmissionOption
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
@@ -49,31 +48,23 @@ class ClusterJobHelperServiceSpec extends Specification implements ServiceUnitTe
     }
 
     @Unroll
-    void "mergeResources, when realm is #realmMap and jobSubmissionOptions is #jobSubmissionOptions and queue is queue, then result is #result"() {
+    void "mergeResources, when jobSubmissionOptions is #jobSubmissionOptions and queue is queue, then result is #result"() {
         given:
         ProcessingPriority processingPriority = createProcessingPriority([
                 queue: QUEUE_NAME,
         ])
-        Realm realm = createRealm()
-
-        service.clusterJobSubmissionOptionsService = Mock(ClusterJobSubmissionOptionsService) {
-            1 * readDefaultOptions(realm) >> realmMap
-        }
 
         when:
-        Map<JobSubmissionOption, String> mergedMap = service.mergeResources(processingPriority, realm, jobSubmissionOptions)
+        Map<JobSubmissionOption, String> mergedMap = service.mergeResources(processingPriority, jobSubmissionOptions)
 
         then:
         TestCase.assertContainSame(mergedMap, result)
 
         where:
-        realmMap                              | jobSubmissionOptions                  || result
-        [:]                                   | [:]                                   || [(JobSubmissionOption.QUEUE): QUEUE_NAME]
-        [(JobSubmissionOption.WALLTIME): "5"] | [:]                                   || [(JobSubmissionOption.QUEUE): QUEUE_NAME, (JobSubmissionOption.WALLTIME): "5"]
-        [:]                                   | [(JobSubmissionOption.WALLTIME): "7"] || [(JobSubmissionOption.QUEUE): QUEUE_NAME, (JobSubmissionOption.WALLTIME): "7"]
-        [(JobSubmissionOption.WALLTIME): "5"] | [(JobSubmissionOption.WALLTIME): "7"] || [(JobSubmissionOption.QUEUE): QUEUE_NAME, (JobSubmissionOption.WALLTIME): "7"]
-        [(JobSubmissionOption.WALLTIME): "5"] | [(JobSubmissionOption.MEMORY): "3"]   || [(JobSubmissionOption.QUEUE): QUEUE_NAME, (JobSubmissionOption.WALLTIME): "5", (JobSubmissionOption.MEMORY): "3"]
-        [(JobSubmissionOption.QUEUE): "q"]    | [:]                                   || [(JobSubmissionOption.QUEUE): QUEUE_NAME]
+        jobSubmissionOptions                  || result
+        [:]                                   || [(JobSubmissionOption.QUEUE): QUEUE_NAME]
+        [(JobSubmissionOption.WALLTIME): "7"] || [(JobSubmissionOption.QUEUE): QUEUE_NAME, (JobSubmissionOption.WALLTIME): "7"]
+        [(JobSubmissionOption.MEMORY): "3"]   || [(JobSubmissionOption.QUEUE): QUEUE_NAME, (JobSubmissionOption.MEMORY): "3"]
     }
 
     void "createResourceSet, when jobSubmissionOptions given, then create the correct ResourceSet"() {

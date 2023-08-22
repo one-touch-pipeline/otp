@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -70,7 +70,7 @@ class ParseAceseqQcJob extends AbstractEndStateAwareJobImpl implements AutoResta
 
             List<Path> files = aceseqService.getAllFiles(aceseqInstance)
             files.each {
-                FileService.ensureFileIsReadableAndNotEmpty(it)
+                FileService.ensureFileIsReadableAndNotEmptyStatic(it)
             }
 
             aceseqInstance.processingState = AnalysisProcessingStates.FINISHED

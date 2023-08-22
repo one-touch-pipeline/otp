@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -39,26 +39,23 @@ class ClusterJobSubmissionOptionsService {
 
     ProcessingOptionService processingOptionService
 
-    Map<JobSubmissionOption, String> readDefaultOptions(Realm realm) {
-        return convertJsonObjectStringToMap(realm.defaultJobSubmissionOptions)
-    }
-
     /**
      * Method to read options for job submission to the cluster job scheduler from the database.
-     * Options are read in the following order: from Realm, from job-specific processing option,
+     * Options are read in the following order: from job-specific processing option,
      * from job- and seqType-specific processing option; if an options is specified more than once,
      * the last value is used.
      *
      * Options are Map<JobSubmissionOption, String> serialized as JSON
      */
+    @Deprecated // old workflow system
+    @SuppressWarnings("UnusedMethodParameter")
     Map<JobSubmissionOption, String> readOptionsFromDatabase(ProcessingStep processingStep, Realm realm) {
         ProcessParameterObject parameterObject = processingStep.processParameterObject
         assert parameterObject
         SeqType seqType = parameterObject.seqType
         String jobClass = processingStep.nonQualifiedJobClass
 
-        // default options for the realm
-        Map<JobSubmissionOption, String> options = readDefaultOptions(realm)
+        Map<JobSubmissionOption, String> options = [:]
 
         // options for the job class
         options.putAll(convertJsonObjectStringToMap(

@@ -432,7 +432,7 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
         snvCallingService.configService = Mock(ConfigService)
         snvCallingService.fileService = new FileService()
         snvCallingService.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
-            executeCommandReturnProcessOutput(_, _) >> { realm1, cmd -> LocalShellHelper.executeAndWait(cmd) }
+            executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
 
         RoddySnvCallingInstance instance = DomainFactory.createRoddySnvCallingInstance(

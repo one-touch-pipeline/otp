@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -80,7 +80,7 @@ class BootStrap {
         if (Environment.current == Environment.DEVELOPMENT) {
             // destroy file system to avoid problems on spring dev-tools restart
             fileSystemService.closeFileSystem()
-            remoteShellHelper.closeFileSystem()
+            remoteShellHelper.closeSession()
         }
     }
 }

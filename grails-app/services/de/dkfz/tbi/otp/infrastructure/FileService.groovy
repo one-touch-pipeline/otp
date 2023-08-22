@@ -209,7 +209,7 @@ class FileService {
         return toPath(toFile(path), fileSystem)
     }
 
-    boolean isFileReadableAndNotEmpty(final Path file, Realm realm) {
+    boolean isFileReadableAndNotEmpty(final Path file, @Deprecated Realm realm = null) {
         assert file.absolute
         try {
             waitUntilExists(file)
@@ -222,13 +222,13 @@ class FileService {
      * Tests at command line level whether a path is readable.
      *
      * @param path Path to test
-     * @param realm Realm to use
      * @return True, if the path was tested as readable, otherwise false
      */
-    boolean fileIsReadable(Path path, Realm realm) {
+    @SuppressWarnings("UnusedMethodParameter")
+    boolean fileIsReadable(Path path, @Deprecated Realm realm = null) {
         ProcessOutput output
         try {
-            output = remoteShellHelper.executeCommandReturnProcessOutput(realm, "test -r ${path}")
+            output = remoteShellHelper.executeCommandReturnProcessOutput("test -r ${path}")
             return output.exitCode == 0
         } catch (ProcessingException e) {
             log.error("error while trying to read file: ${e.message}")
@@ -239,7 +239,7 @@ class FileService {
     /**
      * Finds and returns first available file with the filename matching the given regex
      */
-    Path findFileInPath(final Path dir, final String fileRegex, Realm realm) {
+    Path findFileInPath(final Path dir, final String fileRegex, @Deprecated Realm realm = null) {
         ensureDirIsReadable(dir, realm)
         Path match = null
         assert ThreadUtils.waitFor({
@@ -259,7 +259,7 @@ class FileService {
     /**
      * Finds and returns all available files with filenames matching the given regex
      */
-    List<Path> findAllFilesInPath(final Path dir, final String fileRegex = ".*", Realm realm) {
+    List<Path> findAllFilesInPath(final Path dir, final String fileRegex = ".*", @Deprecated Realm realm = null) {
         ensureDirIsReadable(dir, realm)
         List<Path> matches = []
         assert ThreadUtils.waitFor({
@@ -279,7 +279,7 @@ class FileService {
     /**
      * Finds first available file using the given regex and ensures match is readable and not empty.
      */
-    Path getFoundFileInPathEnsureIsReadableAndNotEmpty(final Path workDirectory, final String regex, Realm realm) {
+    Path getFoundFileInPathEnsureIsReadableAndNotEmpty(final Path workDirectory, final String regex, @Deprecated Realm realm = null) {
         Path foundFile = findFileInPath(workDirectory, regex, realm)
         ensureFileIsReadableAndNotEmpty(foundFile, realm)
         return foundFile
@@ -291,12 +291,12 @@ class FileService {
      * use non-static version.
      */
     @Deprecated
-    static void ensureFileIsReadableAndNotEmpty(final Path file) {
-        ensureFileIsReadable(file)
+    static void ensureFileIsReadableAndNotEmptyStatic(final Path file) {
+        ensureFileIsReadableStatic(file)
         assert Files.size(file) > 0L
     }
 
-    void ensureFileIsReadableAndNotEmpty(final Path file, Realm realm) {
+    void ensureFileIsReadableAndNotEmpty(final Path file, @Deprecated Realm realm = null) {
         ensureFileIsReadable(file, realm)
         assert Files.size(file) > 0L
     }
@@ -307,14 +307,14 @@ class FileService {
      * use non-static version.
      */
     @Deprecated
-    static void ensureFileIsReadable(final Path file) {
+    static void ensureFileIsReadableStatic(final Path file) {
         assert file.absolute
         waitUntilExists(file)
         assert Files.isRegularFile(file)
         assert Files.isReadable(file) // codenarc-disable NoFilesReadableRule
     }
 
-    void ensureFileIsReadable(final Path file, Realm realm) {
+    void ensureFileIsReadable(final Path file, @Deprecated Realm realm = null) {
         assert file.absolute
         waitUntilExists(file)
         assert Files.isRegularFile(file)
@@ -327,8 +327,8 @@ class FileService {
      * use non-static version.
      */
     @Deprecated
-    static void ensureDirIsReadableAndNotEmpty(final Path dir) {
-        ensureDirIsReadable(dir)
+    static void ensureDirIsReadableAndNotEmptyStatic(final Path dir) {
+        ensureDirIsReadableStatic(dir)
         Stream<Path> stream = null
         try {
             stream = Files.list(dir)
@@ -338,7 +338,7 @@ class FileService {
         }
     }
 
-    void ensureDirIsReadableAndNotEmpty(final Path dir, Realm realm) {
+    void ensureDirIsReadableAndNotEmpty(final Path dir, @Deprecated Realm realm = null) {
         ensureDirIsReadable(dir, realm)
         Stream<Path> stream = null
         try {
@@ -355,21 +355,21 @@ class FileService {
      * use non-static version.
      */
     @Deprecated
-    static void ensureDirIsReadable(final Path dir) {
+    static void ensureDirIsReadableStatic(final Path dir) {
         assert dir.absolute
         waitUntilExists(dir)
         assert Files.isDirectory(dir)
         assert Files.isReadable(dir) // codenarc-disable NoFilesReadableRule
     }
 
-    void ensureDirIsReadable(final Path dir, Realm realm) {
+    void ensureDirIsReadable(final Path dir, @Deprecated Realm realm = null) {
         assert dir.absolute
         waitUntilExists(dir)
         assert Files.isDirectory(dir)
         assert fileIsReadable(dir, realm)
     }
 
-    void ensureDirIsReadableAndExecutable(final Path dir, Realm realm) {
+    void ensureDirIsReadableAndExecutable(final Path dir, @Deprecated Realm realm = null) {
         ensureDirIsReadable(dir, realm)
         assert Files.isExecutable(dir)
     }
@@ -456,7 +456,7 @@ class FileService {
      *
      * It won't fail if the directory already exist, but then the group and permissions are not changed.
      */
-    void createDirectoryRecursivelyAndSetPermissionsViaBash(Path path, Realm realm, String groupString = '',
+    void createDirectoryRecursivelyAndSetPermissionsViaBash(Path path, @Deprecated Realm realm = null, String groupString = '',
                                                             String permissions = DEFAULT_DIRECTORY_PERMISSION_STRING) {
         assert path
         assert path.absolute
@@ -464,7 +464,7 @@ class FileService {
         createDirectoryRecursivelyAndSetPermissionsViaBashInternal(path, realm, groupString, permissions)
     }
 
-    private void createDirectoryRecursivelyAndSetPermissionsViaBashInternal(Path path, Realm realm, String groupString, String permissions) {
+    private void createDirectoryRecursivelyAndSetPermissionsViaBashInternal(Path path, @Deprecated Realm realm = null, String groupString, String permissions) {
         if (Files.exists(path)) {
             if (!Files.isDirectory(path)) {
                 throw new CreateDirectoryException("The path ${path} already exist, but is not a directory")
@@ -486,26 +486,29 @@ class FileService {
         }
     }
 
-    void setDefaultDirectoryPermissionViaBash(Path path, Realm realm) {
+    void setDefaultDirectoryPermissionViaBash(Path path, @Deprecated Realm realm = null) {
         setPermissionViaBash(path, realm, DEFAULT_DIRECTORY_PERMISSION_STRING)
     }
 
-    void setPermissionViaBash(Path path, Realm realm, String permissions) throws ChangeFilePermissionException {
+    @SuppressWarnings("UnusedMethodParameter")
+    void setPermissionViaBash(Path path, @Deprecated Realm realm = null, String permissions) throws ChangeFilePermissionException {
         try {
-            remoteShellHelper.executeCommandReturnProcessOutput(realm, "chmod ${permissions} ${path}").assertExitCodeZeroAndStderrEmpty()
+            remoteShellHelper.executeCommandReturnProcessOutput("chmod ${permissions} ${path}").assertExitCodeZeroAndStderrEmpty()
         } catch (ProcessingException | AssertionError e) {
             throw new ChangeFilePermissionException("Failed to change permission to ${permissions} for path ${path}", e)
         }
     }
 
-    String getPermissionViaBash(Path path, Realm realm, LinkOption... options) {
-        return remoteShellHelper.executeCommandReturnProcessOutput(realm, "stat ${LinkOption.NOFOLLOW_LINKS in options ? "" : "-L"} -c %a ${path}")
+    @SuppressWarnings("UnusedMethodParameter")
+    String getPermissionViaBash(Path path, @Deprecated Realm realm = null, LinkOption... options) {
+        return remoteShellHelper.executeCommandReturnProcessOutput("stat ${LinkOption.NOFOLLOW_LINKS in options ? "" : "-L"} -c %a ${path}")
                 .assertExitCodeZeroAndStderrEmpty().stdout.trim()
     }
 
-    void setGroupViaBash(Path path, Realm realm, String groupString) throws ChangeFileGroupException {
+    @SuppressWarnings("UnusedMethodParameter")
+    void setGroupViaBash(Path path, @Deprecated Realm realm = null, String groupString) throws ChangeFileGroupException {
         try {
-            remoteShellHelper.executeCommandReturnProcessOutput(realm, "chgrp -h ${groupString} ${path}").assertExitCodeZeroAndStderrEmpty()
+            remoteShellHelper.executeCommandReturnProcessOutput("chgrp -h ${groupString} ${path}").assertExitCodeZeroAndStderrEmpty()
         } catch (ProcessingException | AssertionError e) {
             throw new ChangeFileGroupException("Failed to change group to ${groupString} for path ${path}", e)
         }
@@ -602,11 +605,12 @@ class FileService {
     }
 
     /**
-     * Create the requested file with the given content and permission over the default realm.
+     * Create the requested file with the given content and permission.
      *
      * The path have to be absolute and may not exist yet. Missing parent directories are created automatically with the
      * {@link #DEFAULT_DIRECTORY_PERMISSION_STRING}.
      */
+    @Deprecated
     void createFileWithContentOnDefaultRealm(Path path,
                                              String content,
                                              Set<PosixFilePermission> filePermission = DEFAULT_FILE_PERMISSION,
@@ -615,14 +619,14 @@ class FileService {
     }
 
     /**
-     * Create the requested file with the given content and permission over the given realm.
+     * Create the requested file with the given content and permission.
      *
      * The path have to be absolute and may not exist yet. Missing parent directories are created automatically with the
      * {@link #DEFAULT_DIRECTORY_PERMISSION_STRING}.
      */
     void createFileWithContent(Path path,
                                String content,
-                               Realm realm,
+                               @Deprecated Realm realm = null,
                                Set<PosixFilePermission> filePermission = DEFAULT_FILE_PERMISSION,
                                boolean overwrite = false) {
         createFileWithContentCommonPartHelper(path, realm, filePermission, overwrite) {
@@ -631,11 +635,12 @@ class FileService {
     }
 
     /**
-     * Create the requested file with the given byte content and permission over the default realm.
+     * Create the requested file with the given byte content and permission.
      *
      * The path have to be absolute and may not exist yet. Missing parent directories are created automatically with the
      * {@link #DEFAULT_DIRECTORY_PERMISSION_STRING}.
      */
+    @Deprecated
     void createFileWithContentOnDefaultRealm(Path path,
                                              byte[] content,
                                              Set<PosixFilePermission> filePermission = DEFAULT_FILE_PERMISSION,
@@ -644,14 +649,14 @@ class FileService {
     }
 
     /**
-     * Create the requested file with the given byte content and permission over the given realm.
+     * Create the requested file with the given byte content and permission.
      *
      * The path have to be absolute and may not exist yet. Missing parent directories are created automatically with the
      * {@link #DEFAULT_DIRECTORY_PERMISSION_STRING}.
      */
     void createFileWithContent(Path path,
                                byte[] content,
-                               Realm realm,
+                               @Deprecated Realm realm = null,
                                Set<PosixFilePermission> filePermission = DEFAULT_FILE_PERMISSION,
                                boolean overwrite = false) {
         createFileWithContentCommonPartHelper(path, realm, filePermission, overwrite) {
@@ -662,7 +667,7 @@ class FileService {
     // delete is for file system, not on domain class
     @SuppressWarnings('ExplicitFlushForDeleteRule')
     private void createFileWithContentCommonPartHelper(Path path,
-                                                       Realm realm,
+                                                       @Deprecated Realm realm = null,
                                                        Set<PosixFilePermission> filePermission,
                                                        boolean overwrite,
                                                        Closure closure) {
@@ -698,7 +703,7 @@ class FileService {
      */
     // false positives, since rule can not recognize calling class
     @SuppressWarnings('ExplicitFlushForDeleteRule')
-    Path createOrOverwriteScriptOutputFile(Path outputFolder, String fileName, Realm realm) {
+    Path createOrOverwriteScriptOutputFile(Path outputFolder, String fileName, @Deprecated Realm realm = null) {
         Path p = outputFolder.resolve(fileName)
 
         createDirectoryRecursivelyAndSetPermissionsViaBash(outputFolder, realm)
@@ -731,13 +736,12 @@ class FileService {
      *
      * @param link the path of the link
      * @param target the exiting path the link point to
-     * @param realm the realm to use for remote access
      * @param groupString the name of the unix group of the associated project
      * @param options Option to adapt the behavior, see {@link CreateLinkOption}
      */
     // false positives, since rule can not recognize calling class
     @SuppressWarnings(['ExplicitFlushForDeleteRule', 'Instanceof'])
-    void createLink(Path link, Path target, Realm realm, String groupString = '', CreateLinkOption... options) {
+    void createLink(Path link, Path target, @Deprecated Realm realm = null, String groupString = '', CreateLinkOption... options) {
         assert link
         assert target
         assert link.absolute
@@ -770,7 +774,7 @@ class FileService {
         // SFTP does not support creating symbolic links
         if (link.fileSystem.provider() instanceof SFTPFileSystemProvider) {
             // use -T option so behaviour is the same as createSymbolicLink()
-            remoteShellHelper.executeCommandReturnProcessOutput(realm, "ln -Ts '${targetPath}' '${link}'")
+            remoteShellHelper.executeCommandReturnProcessOutput("ln -Ts '${targetPath}' '${link}'")
         } else {
             Files.createSymbolicLink(link, targetPath)
         }
@@ -784,7 +788,7 @@ class FileService {
      * - bam/bai files to: {@link #DEFAULT_BAM_FILE_PERMISSION}
      * - other files to: {@link #DEFAULT_FILE_PERMISSION}
      */
-    void correctPathPermissionAndGroupRecursive(Path path, Realm realm, String group) {
+    void correctPathPermissionAndGroupRecursive(Path path, @Deprecated Realm realm = null, String group) {
         assert path
         assert path.absolute
         assert Files.exists(path)
@@ -795,7 +799,7 @@ class FileService {
     }
 
     @SuppressWarnings('ThrowRuntimeException')
-    private void correctPathAndGroupPermissionRecursiveInternal(Path path, Realm realm, String group) {
+    private void correctPathAndGroupPermissionRecursiveInternal(Path path, @Deprecated Realm realm = null, String group) {
         if (Files.isDirectory(path, LinkOption.NOFOLLOW_LINKS)) {
             Stream<Path> stream = null
             try {

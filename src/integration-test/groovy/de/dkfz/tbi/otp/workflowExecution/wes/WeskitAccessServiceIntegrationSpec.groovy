@@ -64,7 +64,7 @@ class WeskitAccessServiceIntegrationSpec extends Specification implements Domain
         service.configService = configService
         service.fileService = new FileService()
         service.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
-            executeCommandReturnProcessOutput(_, _) >> { realm1, cmd -> LocalShellHelper.executeAndWait(cmd) }
+            executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
     }
 

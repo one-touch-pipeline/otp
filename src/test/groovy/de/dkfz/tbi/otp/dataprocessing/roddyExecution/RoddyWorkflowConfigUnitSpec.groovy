@@ -393,7 +393,7 @@ class RoddyWorkflowConfigUnitSpec extends Specification implements DataTest {
         service.configService = Mock(ConfigService)
         service.fileService = new FileService()
         service.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
-            executeCommandReturnProcessOutput(_, _) >> { realm1, cmd -> LocalShellHelper.executeAndWait(cmd) }
+            executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
         return service
     }

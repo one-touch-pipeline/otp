@@ -63,12 +63,12 @@ class BamMetadataImportServiceIntegrationSpec extends Specification implements R
         bamMetadataImportService.bamMetadataValidationService.configService = Mock(ConfigService)
         bamMetadataImportService.bamMetadataValidationService.fileService = new FileService()
         bamMetadataImportService.bamMetadataValidationService.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
-            executeCommandReturnProcessOutput(_, _) >> { realm1, cmd -> LocalShellHelper.executeAndWait(cmd) }
+            executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
         bamFilePathValidator.configService = Mock(ConfigService)
         bamFilePathValidator.fileService = new FileService()
         bamFilePathValidator.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
-            executeCommandReturnProcessOutput(_, _) >> { realm1, cmd -> LocalShellHelper.executeAndWait(cmd) }
+            executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
     }
 

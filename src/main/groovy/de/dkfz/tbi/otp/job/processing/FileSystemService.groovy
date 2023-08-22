@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -34,16 +34,14 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.config.SshAuthMethod
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.infrastructure.LoginFailedRemoteFileSystemException
-import de.dkfz.tbi.otp.infrastructure.RealmService
 import de.dkfz.tbi.otp.ngsdata.Realm
 
 import java.nio.file.*
 
 import static com.github.robtimus.filesystems.sftp.Identity.fromFiles
-import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
+import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.MAXIMUM_SFTP_CONNECTIONS
 
 @Slf4j
 @Component
@@ -59,18 +57,14 @@ class FileSystemService {
     @Autowired
     ProcessingOptionService processingOptionService
 
-    @Autowired
-    RealmService realmService
-
-    private Map<Realm, FileSystem> createdFileSystems = [:]
+    private FileSystem fileSystem = null
 
     /**
-     * Creates a SFTP-backed FileSystem based on the connection information in the Realm passed
-     * If the method is called multiple times with the same Realm, the same FileSystem is returned.
+     * Creates a SFTP-backed FileSystem
+     * If the method is called multiple times, the same FileSystem is returned.
      * The same authentication values as in RemoteShellHelper are used.
      */
-    private FileSystem getFilesystem(Realm realm) throws Throwable {
-        FileSystem fileSystem = createdFileSystems[realm]
+    FileSystem getRemoteFileSystem() throws Throwable {
         if (fileSystem == null || !fileSystem.isOpen()) {
             SFTPEnvironment env = new SFTPEnvironment()
                     .withPoolConfig(poolConfig)
@@ -94,106 +88,51 @@ class FileSystemService {
                     break
             }
 
-            env.withTimeout(realm.timeout)
+            env.withTimeout(configService.sshTimeout)
             config.put("StrictHostKeyChecking", "no")
             env.withConfig(config)
 
             try {
-                fileSystem = FileSystems.newFileSystem(URI.create("sftp://${realm.host}:${realm.port}"), env, grailsApplication.classLoader)
+                fileSystem = FileSystems.newFileSystem(URI.create("sftp://${configService.sshHost}:${configService.sshPort}"),
+                        env, grailsApplication.classLoader)
             } catch (FileSystemException exception) {
-                throw new LoginFailedRemoteFileSystemException("Fail to login ${configService.sshUser}@${realm.host}:${realm.port} using authentication " +
-                        "method ${configService.sshAuthenticationMethod}", exception)
+                throw new LoginFailedRemoteFileSystemException("Fail to login ${configService.sshUser}@${configService.sshHost}:${configService.sshPort} " +
+                        "using authentication method ${configService.sshAuthenticationMethod}", exception)
             }
-            createdFileSystems[realm] = fileSystem
         }
         return fileSystem
     }
 
-    FileSystem getRemoteFileSystemOnDefaultRealm() throws Throwable {
-        Realm realm = configService.defaultRealm
-        assert realm: "Default realm could not be resolved"
-        return getFilesystem(realm)
-    }
-
-    FileSystem getRemoteFileSystem(Realm realm) throws Throwable {
-        assert realm
-        return getFilesystem(realm)
-    }
-
-    FileSystem getRemoteOrLocalFileSystemByProcessingOption(ProcessingOption.OptionName optionName) throws Throwable {
-        boolean useRemote = processingOptionService.findOptionAsBoolean(optionName)
-        if (useRemote) {
-            return remoteFileSystemOnDefaultRealm
-        }
-        return FileSystems.default
-    }
-
-    FileSystem getRealmOrLocalFileSystemByProcessingOption(ProcessingOption.OptionName optionName) throws Throwable {
-        String realmName = processingOptionService.findOptionAsString(optionName)
-        if (realmName) {
-            Realm realm = realmService.getRealmByName(realmName)
-            assert realm: "Default realm could not be resolved"
-            return getFilesystem(realm)
-        }
-        return FileSystems.default
-    }
-
-    FileSystem getFilesystemForProcessingForRealm() throws Throwable {
-        return getRemoteOrLocalFileSystemByProcessingOption(FILESYSTEM_PROCESSING_USE_REMOTE)
-    }
-
-    FileSystem getFilesystemForConfigFileChecksForRealm() throws Throwable {
-        return getRemoteOrLocalFileSystemByProcessingOption(FILESYSTEM_CONFIG_FILE_CHECKS_USE_REMOTE)
-    }
-
-    /**
-     * @Deprecated old workflow system
-     */
     @Deprecated
-    FileSystem getFilesystemForFastqImport() throws Throwable {
-        return getRealmOrLocalFileSystemByProcessingOption(FILESYSTEM_FASTQ_IMPORT)
-    }
-
-    FileSystem getFilesystemForBamImport() throws Throwable {
-        return getRealmOrLocalFileSystemByProcessingOption(FILESYSTEM_BAM_IMPORT)
+    @SuppressWarnings("UnusedMethodParameter")
+    FileSystem getRemoteFileSystem(Realm realm) throws Throwable {
+        return remoteFileSystem
     }
 
     @Scheduled(fixedDelay = 30000L)
     void keepAlive() {
-        createdFileSystems.each { Realm realm, FileSystem fileSystem ->
-            log.debug("Send keep alive for ${realm}")
+        if (fileSystem) {
+            log.debug("Send keep alive for remote sftp file system")
             SFTPFileSystemProvider.keepAlive(fileSystem)
         }
-    }
-
-    /**
-     * Check, if currently remote file systems exist
-     */
-    boolean hasRemoteFileSystems() {
-        return !createdFileSystems.isEmpty()
     }
 
     /**
      * Close the used remote file systems.
      *
      * <b>Attention:</b>
-     * This method is only for running workflow tests and for development and should never be used in production.
+     * This method is only for development and should never be used in production.
      *
-     * Since each workflow tests starts with an empty database, each test have other realms and therefore can not reuse the cached file system.
-     * To avoid collecting more and more not needed cached file system and references to not valid realm, the cache are closed after each test.
-     *
-     * Since in production always the same realm is used, the cache shouldn't cleared and therefore this method also not used.
-     *
-     * A similar problem occurred during development with the otp restart triggered by spring-devtools.
+     * It is necessary during development to support reloading by spring-devtools.
      */
     void closeFileSystem() {
-        assert Environment.current != Environment.PRODUCTION
+        assert Environment.current == Environment.DEVELOPMENT
         log.debug("start closing sftp filesystems")
-        Map<Realm, FileSystem> fileSystems = createdFileSystems
-        createdFileSystems = [:]
-        fileSystems.each { Realm realm, FileSystem fileSystem ->
-            log.debug("closing sftp filesystems for realm ${realm}")
-            fileSystem.close()
+        FileSystem fileSystemCopy = fileSystem
+        fileSystem = null
+        if (fileSystemCopy) {
+            log.debug("closing sftp filesystem")
+            fileSystemCopy.close()
         }
     }
 

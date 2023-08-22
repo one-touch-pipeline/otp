@@ -26,6 +26,7 @@ import groovy.transform.CompileDynamic
 import groovy.transform.TupleConstructor
 import org.springframework.beans.factory.annotation.Autowired
 
+import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
@@ -46,6 +47,7 @@ class ExecuteRoddyCommandService {
     @Autowired
     RemoteShellHelper remoteShellHelper
 
+    ConfigService configService
     ExecutionHelperService executionHelperService
     ProcessingOptionService processingOptionService
     IndividualService individualService
@@ -99,7 +101,7 @@ class ExecuteRoddyCommandService {
         String roddyCommand = [
                 roddyBaseCommand(nameInConfigFile, analysisIDinConfigFile, RoddyInvocationType.EXECUTE),
                 "${roddyResult.individual.pid}",
-                commonRoddy(config, roddyResult.project.realm.jobScheduler),
+                commonRoddy(config, configService.jobScheduler),
                 "--useiodir=${viewByPid},${workOutputDir}",
         ].join(" ")
 
@@ -129,7 +131,7 @@ class ExecuteRoddyCommandService {
      * @deprecated use {@link RoddyCommandService} for the new WF system
      */
     @Deprecated
-    String commonRoddy(RoddyWorkflowConfig config, Realm.JobScheduler jobScheduler) {
+    String commonRoddy(RoddyWorkflowConfig config, JobScheduler jobScheduler) {
         File roddyBaseConfigsPath = processingOptionService.findOptionAsString(OptionName.RODDY_BASE_CONFIGS_PATH) as File
         File applicationIniPath = processingOptionService.findOptionAsString(OptionName.RODDY_APPLICATION_INI) as File
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -72,7 +72,7 @@ class ExecuteRoddySophiaJobIntegrationSpec extends Specification {
                 },
                 fileService      : new FileService([
                         remoteShellHelper: Mock(RemoteShellHelper) {
-                            _ * executeCommandReturnProcessOutput(_, _) >> { Realm realm, String command ->
+                            _ * executeCommandReturnProcessOutput(_) >> { String command ->
                                 return new ProcessOutput(command, '', 0)
                             }
                         }

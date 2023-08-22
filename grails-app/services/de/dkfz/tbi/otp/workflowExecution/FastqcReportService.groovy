@@ -59,7 +59,8 @@ class FastqcReportService {
         fastqcProcessedFiles.each { FastqcProcessedFile fastqcProcessedFile ->
             Path seqCenterFastQcFile = fastqcDataFilesService.pathToFastQcResultFromSeqCenter(fastqcProcessedFile)
             Path seqCenterFastQcFileMd5Sum = fastqcDataFilesService.pathToFastQcResultMd5SumFromSeqCenter(fastqcProcessedFile)
-            FileService.ensureFileIsReadableAndNotEmpty(seqCenterFastQcFile)
+            Path fastqcOutputPath = fastqcDataFilesService.fastqcOutputPath(fastqcProcessedFile)
+            fileService.ensureFileIsReadableAndNotEmpty(seqCenterFastQcFile)
 
             String permission = fileService.convertPermissionsToOctalString(FileService.DEFAULT_FILE_PERMISSION)
 
@@ -71,7 +72,7 @@ class FastqcReportService {
                 |md5sum ${seqCenterFastQcFile.fileName} > ${outDir}/${seqCenterFastQcFileMd5Sum.fileName}
                 |chmod ${permission} ${outDir}/${seqCenterFastQcFileMd5Sum.fileName}
                 |cp ${seqCenterFastQcFile} ${outDir}
-                |chmod ${permission} ${fastqcDataFilesService.fastqcOutputPath(fastqcProcessedFile)}
+                |chmod ${permission} ${fastqcOutputPath}
                 |
                 |#check md5sum
                 |cd ${outDir}
@@ -79,7 +80,7 @@ class FastqcReportService {
                 |""".stripMargin()
 
             remoteShellHelper.executeCommandReturnProcessOutput(realm, copyAndMd5sumCommand).assertExitCodeZeroAndStderrEmpty()
-            FileService.ensureFileIsReadableAndNotEmpty(seqCenterFastQcFile)
+            fileService.ensureFileIsReadableAndNotEmpty(fastqcOutputPath)
         }
     }
 
@@ -87,7 +88,7 @@ class FastqcReportService {
         fastqcProcessedFiles.each { FastqcProcessedFile fastqcProcessedFile ->
             Path seqCenterFastQcFile = fastqcDataFilesService.pathToFastQcResultFromSeqCenter(fastqcProcessedFile)
             Path seqCenterFastQcFileMd5Sum = fastqcDataFilesService.pathToFastQcResultMd5SumFromSeqCenter(fastqcProcessedFile)
-            FileService.ensureFileIsReadableAndNotEmpty(seqCenterFastQcFile)
+            fileService.ensureFileIsReadableAndNotEmpty(seqCenterFastQcFile)
 
             Path realPath = fastqcDataFilesService.fastqcOutputPath(fastqcProcessedFile, PathOption.REAL_PATH)
             fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(realPath.parent, realm)
@@ -106,7 +107,7 @@ class FastqcReportService {
                 |""".stripMargin()
 
             remoteShellHelper.executeCommandReturnProcessOutput(realm, copyAndMd5sumCommand).assertExitCodeZeroAndStderrEmpty()
-            FileService.ensureFileIsReadableAndNotEmpty(seqCenterFastQcFile)
+            fileService.ensureFileIsReadableAndNotEmpty(realPath)
         }
     }
 }

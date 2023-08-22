@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -32,7 +32,6 @@ import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.domainFactory.administration.DocumentFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.utils.ProcessOutput
@@ -59,7 +58,7 @@ class DataTransferAgreementServiceIntegrationSpec extends Specification implemen
                 },
                 fileService: new FileService([
                         remoteShellHelper: Mock(RemoteShellHelper) {
-                            _ * executeCommandReturnProcessOutput(_, _) >> { Realm realm, String command ->
+                            _ * executeCommandReturnProcessOutput(_) >> { String command ->
                                 return new ProcessOutput(command, '', 0)
                             }
                         }

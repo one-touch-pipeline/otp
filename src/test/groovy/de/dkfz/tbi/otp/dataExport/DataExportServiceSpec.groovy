@@ -136,7 +136,7 @@ class DataExportServiceSpec extends Specification implements DataTest, DomainFac
             getFilePathInViewByPidCount * getViewByPidPath(_, _) >> Paths.get('/vbp/')
         }
         service.fileSystemService = Mock(FileSystemService) {
-            getRemoteFileSystemOnDefaultRealm() >> new TestFileSystemService().remoteFileSystemOnDefaultRealm
+            getRemoteFileSystem() >> new TestFileSystemService().remoteFileSystem
         }
 
         when:
@@ -231,7 +231,7 @@ class DataExportServiceSpec extends Specification implements DataTest, DomainFac
         Files.exists(_) >> fileExists
 
         service.fileSystemService = Mock(FileSystemService) {
-            getRemoteFileSystemOnDefaultRealm() >> new TestFileSystemService().remoteFileSystemOnDefaultRealm
+            getRemoteFileSystem() >> new TestFileSystemService().remoteFileSystem
         }
 
         String copyConnection = copyExternal ? /\$\{COPY_CONNECTION\}/ : ""
@@ -309,7 +309,7 @@ class DataExportServiceSpec extends Specification implements DataTest, DomainFac
         Files.exists(_) >> true
 
         service.fileSystemService = Mock(FileSystemService) {
-            getRemoteFileSystemOnDefaultRealm() >> new TestFileSystemService().remoteFileSystemOnDefaultRealm
+            getRemoteFileSystem() >> new TestFileSystemService().remoteFileSystem
         }
 
         when:
@@ -333,7 +333,7 @@ class DataExportServiceSpec extends Specification implements DataTest, DomainFac
         Files.exists(_) >> true
 
         service.fileSystemService = Mock(FileSystemService) {
-            getRemoteFileSystemOnDefaultRealm() >> new TestFileSystemService().remoteFileSystemOnDefaultRealm
+            getRemoteFileSystem() >> new TestFileSystemService().remoteFileSystem
         }
 
         when:

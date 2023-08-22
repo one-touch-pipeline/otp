@@ -64,7 +64,7 @@ class ChecksumFileServiceSpec extends Specification implements DataTest {
         checksumFileService.configService = Mock(ConfigService)
         checksumFileService.fileService = new FileService()
         checksumFileService.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
-            executeCommandReturnProcessOutput(_, _) >> { realm1, cmd -> LocalShellHelper.executeAndWait(cmd) }
+            executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
 
         file = CreateFileHelper.createFile(tempDir.resolve("asdf.md5"), "")

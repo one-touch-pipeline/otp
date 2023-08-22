@@ -117,7 +117,7 @@ class ExecuteRoddyIndelJobSpec extends Specification implements DataTest {
                 },
                 fileService           : new FileService([
                         remoteShellHelper: Mock(RemoteShellHelper) {
-                            _ * executeCommandReturnProcessOutput(_, _) >> { Realm realm, String command ->
+                            _ * executeCommandReturnProcessOutput(_) >> { String command ->
                                 return new ProcessOutput(command, '', 0)
                             }
                         }
@@ -202,7 +202,7 @@ class ExecuteRoddyIndelJobSpec extends Specification implements DataTest {
                 },
                 fileService           : new FileService([
                         remoteShellHelper: Mock(RemoteShellHelper) {
-                            _ * executeCommandReturnProcessOutput(_, _) >> { Realm realm, String command ->
+                            _ * executeCommandReturnProcessOutput(_) >> { String command ->
                                 return new ProcessOutput(command, '', 0)
                             }
                         }

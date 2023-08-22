@@ -234,7 +234,7 @@ class MetadataImportService {
     }
 
     List<ValidateAndImportResult> validateAndImportMultiple(String ticketNumber, String ilseNumbers, boolean ignoreAlreadyKnownMd5sum) {
-        FileSystem fs = fileSystemService.filesystemForFastqImport
+        FileSystem fs = fileSystemService.remoteFileSystem
         return validateAndImportMultiple(
                 ticketNumber,
                 parseIlseNumbers(ilseNumbers).collect { getMetadataFilePathForIlseNumber(it, fs) },
@@ -308,7 +308,7 @@ class MetadataImportService {
 
     protected DirectoryStructure getDirectoryStructure(DirectoryStructureBeanName name) {
         DirectoryStructure directoryStructure = applicationContext.getBean(name.beanName, DirectoryStructure)
-        directoryStructure.fileSystem = fileSystemService?.filesystemForFastqImport
+        directoryStructure.fileSystem = fileSystemService?.remoteFileSystem
         return directoryStructure
     }
 

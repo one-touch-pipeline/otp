@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,9 +27,7 @@ import grails.util.Environment
 
 import de.dkfz.roddy.config.ResourceSet
 import de.dkfz.roddy.tools.BufferValue
-import de.dkfz.tbi.otp.job.processing.ClusterJobSubmissionOptionsService
 import de.dkfz.tbi.otp.job.processing.JobSubmissionOption
-import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
@@ -42,10 +40,8 @@ import java.time.Duration
 @Transactional
 class ClusterJobHelperService {
 
-    ClusterJobSubmissionOptionsService clusterJobSubmissionOptionsService
-
-    Map<JobSubmissionOption, String> mergeResources(ProcessingPriority processingPriority, Realm realm, Map<JobSubmissionOption, String> jobSubmissionOptions) {
-        Map<JobSubmissionOption, String> options = clusterJobSubmissionOptionsService.readDefaultOptions(realm)
+    Map<JobSubmissionOption, String> mergeResources(ProcessingPriority processingPriority, Map<JobSubmissionOption, String> jobSubmissionOptions) {
+        Map<JobSubmissionOption, String> options = [:]
 
         options.putAll(jobSubmissionOptions)
 

@@ -184,6 +184,12 @@ abstract class AbstractCellRangerAlignmentWorkflowTests extends AbstractAlignmen
         return Duration.ofHours(5)
     }
 
+    @SuppressWarnings("GetterMethodCouldBeProperty")
+    @Override
+    String getJobName() {
+        return 'ExecuteCellRangerJob'
+    }
+
     @Override
     String getJobSubmissionOptions() {
         return JsonOutput.toJson([

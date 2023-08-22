@@ -60,7 +60,7 @@ class ChecksumFileService {
     boolean compareMd5(RawSequenceFile file) {
         String path = pathToMd5File(file)
 
-        FileSystem fs = fileSystemService.filesystemForProcessingForRealm
+        FileSystem fs = fileSystemService.remoteFileSystem
         Path md5File = fs.getPath(path)
 
         fileService.ensureFileIsReadableAndNotEmpty(md5File, configService.defaultRealm)

@@ -221,7 +221,7 @@ class LibraryPreparationKitServiceSpec extends AbstractMetadataFieldsServiceSpec
 
         service.fileService = new FileService()
         service.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
-            executeCommandReturnProcessOutput(_, _) >> { realm1, cmd -> LocalShellHelper.executeAndWait(cmd) }
+            executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
 
         expect:
@@ -243,7 +243,7 @@ class LibraryPreparationKitServiceSpec extends AbstractMetadataFieldsServiceSpec
 
         service.fileService = new FileService()
         service.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
-            executeCommandReturnProcessOutput(_, _) >> { realm1, cmd -> LocalShellHelper.executeAndWait(cmd) }
+            executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
 
         when:
@@ -268,7 +268,7 @@ class LibraryPreparationKitServiceSpec extends AbstractMetadataFieldsServiceSpec
 
         service.fileService = new FileService()
         service.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
-            executeCommandReturnProcessOutput(_, _) >> { realm1, cmd -> LocalShellHelper.executeAndWait(cmd) }
+            executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
 
         when:
@@ -280,7 +280,7 @@ class LibraryPreparationKitServiceSpec extends AbstractMetadataFieldsServiceSpec
 
     void setupServiceForAdapterFileReading() {
         service.fileSystemService = Mock(FileSystemService) {
-            1 * getRemoteFileSystemOnDefaultRealm() >> { return FileSystems.default }
+            1 * getRemoteFileSystem() >> { return FileSystems.default }
         }
         service.fileService = new FileService()
     }

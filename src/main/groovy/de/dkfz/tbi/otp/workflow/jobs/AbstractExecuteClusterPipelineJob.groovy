@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -57,7 +57,7 @@ abstract class AbstractExecuteClusterPipelineJob extends AbstractExecutePipeline
     }
 
     private Map<JobSubmissionOption, String> getJobSubmissionOptions(WorkflowRun run) {
-        Map<JobSubmissionOption, String> options = ClusterJobSubmissionOptionsService.convertJsonObjectStringToMap(run.realm.defaultJobSubmissionOptions)
+        Map<JobSubmissionOption, String> options = [:]
         JSONElement config = JSON.parse(run.combinedConfig)[ExternalWorkflowConfigFragment.Type.OTP_CLUSTER.name()] as JSONElement
         if (config) {
             options.putAll(ClusterJobSubmissionOptionsService.convertJsonObjectStringToMap(config))

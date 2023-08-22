@@ -147,11 +147,6 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase implements
                     type: null,
                     value: "groovy"
             )
-            DomainFactory.createProcessingOptionLazy(
-                    name: FILESYSTEM_BAM_IMPORT,
-                    type: null,
-                    value: realm.name
-            )
         }
     }
 
@@ -188,7 +183,7 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase implements
 
         Thread.sleep(1000) // needs a sleep, otherwise the file system cache has not yet the new value
         SessionUtils.withTransaction {
-            FileSystem fs = fileSystemService.filesystemForBamImport
+            FileSystem fs = fileSystemService.remoteFileSystem
             importProcess.externallyProcessedBamFiles.each {
                 it.refresh()
                 Path baseDirSource = fs.getPath(it.importedFrom).parent
@@ -280,7 +275,7 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase implements
         Thread.sleep(1000) // needs a sleep, otherwise the file system cache has not yet the new value
 
         SessionUtils.withTransaction {
-            FileSystem fs = fileSystemService.filesystemForBamImport
+            FileSystem fs = fileSystemService.remoteFileSystem
             importProcess.externallyProcessedBamFiles.each {
                 it.refresh()
                 assert it.fileSize > 0
@@ -311,7 +306,7 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase implements
 
     protected void checkThatFileCopyingWasSuccessful(ImportProcess impPro, boolean furtherFiles) {
         SessionUtils.withTransaction {
-            FileSystem fs = fileSystemService.filesystemForBamImport
+            FileSystem fs = fileSystemService.remoteFileSystem
             importProcess = ImportProcess.get(impPro.id)
             assert importProcess.state == ImportProcess.State.FINISHED
             assert importProcess.externallyProcessedBamFiles.size() == 2
@@ -361,5 +356,11 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase implements
     @Override
     Duration getTimeout() {
         return Duration.ofHours(5)
+    }
+
+    @SuppressWarnings("GetterMethodCouldBeProperty")
+    @Override
+    String getJobName() {
+        return 'ImportExternallyMergedBamJob'
     }
 }

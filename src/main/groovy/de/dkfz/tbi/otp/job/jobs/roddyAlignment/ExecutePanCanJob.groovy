@@ -92,10 +92,10 @@ class ExecutePanCanJob extends AbstractRoddyAlignmentJob implements AutoRestarta
             rawSequenceFiles.sort { it.mateNumber }.each { RawSequenceFile rawSequenceFile ->
                 String pathName = lsdfFilesService.getFileViewByPidPath(rawSequenceFile)
                 FileSystem fs = rawSequenceFile.fileLinked ?
-                        fileSystemService.filesystemForFastqImport :
-                        fileSystemService.filesystemForProcessingForRealm
+                        fileSystemService.remoteFileSystem :
+                        fileSystemService.remoteFileSystem
                 Path path = fs.getPath(pathName)
-                FileService.ensureFileIsReadableAndNotEmpty(path)
+                FileService.ensureFileIsReadableAndNotEmptyStatic(path)
                 assert rawSequenceFile.fileSize == Files.size(path)
                 vbpDataFiles.add(new File(pathName))
             }

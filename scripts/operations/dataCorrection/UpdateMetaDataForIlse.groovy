@@ -79,7 +79,7 @@ boolean testRun = true
 // work
 
 FileSystemService fileSystemService = ctx.fileSystemService
-FileSystem fileSystem = fileSystemService.remoteFileSystemOnDefaultRealm
+FileSystem fileSystem = fileSystemService.remoteFileSystem
 FastqMetadataValidationService fastqcMetadataValidationService = ctx.fastqMetadataValidationService
 
 Path midTermPath = fileSystem.getPath(midTermDirectory)

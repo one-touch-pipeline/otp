@@ -56,7 +56,7 @@ String uuid = "24d5d211-234b-4b24-8d8b-70ae7b1b19b0"
 
 WeskitAccessService weskitAccessService = ctx.weskitAccessService
 FileSystemService fileSystemService = ctx.fileSystemService
-FileSystem fileSystem = fileSystemService.remoteFileSystemOnDefaultRealm
+FileSystem fileSystem = fileSystemService.remoteFileSystem
 
 def work = { String message, Closure cl ->
     try {

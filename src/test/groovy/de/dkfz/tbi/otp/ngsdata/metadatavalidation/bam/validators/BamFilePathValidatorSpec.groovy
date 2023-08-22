@@ -101,7 +101,7 @@ class BamFilePathValidatorSpec extends Specification implements DataTest {
         validator.configService = Mock(ConfigService)
         validator.fileService = new FileService()
         validator.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
-            executeCommandReturnProcessOutput(_, _) >> { realm1, cmd -> LocalShellHelper.executeAndWait(cmd) }
+            executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
 
         when:

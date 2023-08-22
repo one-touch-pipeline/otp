@@ -164,7 +164,7 @@ class LinkFilesToFinalDestinationService_RnaRoddyBamFileIntegrationSpec extends 
         linkFilesToFinalDestinationService.md5SumService.configService = Mock(ConfigService)
         linkFilesToFinalDestinationService.md5SumService.fileService = new FileService()
         linkFilesToFinalDestinationService.md5SumService.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
-            executeCommandReturnProcessOutput(_, _) >> { realm1, cmd -> LocalShellHelper.executeAndWait(cmd) }
+            executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
         linkFilesToFinalDestinationService.qcTrafficLightCheckService = new QcTrafficLightCheckService()
         linkFilesToFinalDestinationService.qcTrafficLightCheckService.qcTrafficLightNotificationService = Mock(QcTrafficLightNotificationService) {

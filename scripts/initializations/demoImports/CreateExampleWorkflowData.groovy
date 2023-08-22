@@ -375,7 +375,7 @@ WorkflowRun.withNewTransaction {
 FileSystemService fileSystemService = ctx.fileSystemService
 FileService fileService = ctx.fileService
 
-FileSystem fileSystem = fileSystemService.remoteFileSystemOnDefaultRealm
+FileSystem fileSystem = fileSystemService.remoteFileSystem
 (1..3).each {
     Path path = fileSystem.getPath("/tmp/log${it}.out")
     if (!Files.exists(path)) {

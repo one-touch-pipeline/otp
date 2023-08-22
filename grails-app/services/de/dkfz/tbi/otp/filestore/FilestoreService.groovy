@@ -94,7 +94,7 @@ class FilestoreService {
         uuidFragments[INDEX_1] = uuidString.substring(OFFSET_2, OFFSET_4)
         uuidFragments[INDEX_2] = uuidString.substring(OFFSET_4)
 
-        return fileSystemService.remoteFileSystemOnDefaultRealm.getPath(workFolder.baseFolder.path, uuidFragments)
+        return fileSystemService.remoteFileSystem.getPath(workFolder.baseFolder.path, uuidFragments)
     }
     /**
      * Create an UUID and assign to the given {@link de.dkfz.tbi.otp.workflowExecution.WorkflowRun}

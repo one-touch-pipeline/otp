@@ -166,7 +166,7 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
         service.fastqMetadataValidationService.configService = Mock(ConfigService)
         service.fastqMetadataValidationService.fileService = new FileService()
         service.fastqMetadataValidationService.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
-            executeCommandReturnProcessOutput(_, _) >> { realm1, cmd -> LocalShellHelper.executeAndWait(cmd) }
+            executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
 
         when:
@@ -487,7 +487,7 @@ ${SPECIES}                      ${speciesImportAlias}                       ${sp
         service.fastqMetadataValidationService.configService = Mock(ConfigService)
         service.fastqMetadataValidationService.fileService = new FileService()
         service.fastqMetadataValidationService.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
-            executeCommandReturnProcessOutput(_, _) >> { realm1, cmd -> LocalShellHelper.executeAndWait(cmd) }
+            executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
         service.cellRangerConfigurationService = Mock(CellRangerConfigurationService)
 
@@ -1787,7 +1787,7 @@ ${SPECIES}                      ${human}+${mouse}+${chicken}                ${hu
         given:
         Map data = setupForCopyMetaDataFile(null)
         data.service.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
-            3 * executeCommandReturnProcessOutput(_, _) >> { return new ProcessOutput([stderr: "", exitCode: 0]) }
+            3 * executeCommandReturnProcessOutput(_) >> { return new ProcessOutput([stderr: "", exitCode: 0]) }
         }
         Path targetFile = data.service.createPathTargetForMetadataFile(data.context, TICKET_NUMBER)
 
@@ -1810,7 +1810,7 @@ ${SPECIES}                      ${human}+${mouse}+${chicken}                ${hu
         Map data = setupForCopyMetaDataFile(null)
         Path targetFile = data.service.createPathTargetForMetadataFile(data.context, TICKET_NUMBER)
         data.service.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
-            4 * executeCommandReturnProcessOutput(_, _) >> { Realm realm, String command ->
+            4 * executeCommandReturnProcessOutput(_) >> { String command ->
                 assert command.contains("chmod 2770")
                 return new ProcessOutput(command, '', 0)
             }

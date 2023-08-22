@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -93,7 +93,7 @@ ProjectService projectService = ctx.projectService
 FileSystemService fileSystemService = ctx.fileSystemService
 FileService fileService = ctx.fileService
 
-FileSystem fileSystem = fileSystemService.remoteFileSystemOnDefaultRealm
+FileSystem fileSystem = fileSystemService.remoteFileSystem
 Path outputFile = fileSystem.getPath(pathName)
 
 String realmName = fileSystemService.processingOptionService.findOptionAsString(REALM_DEFAULT_VALUE)

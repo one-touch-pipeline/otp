@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -73,7 +73,7 @@ enum TypeValidators {
 
     PIPELINE_TYPE({ Pipeline.Type.getByName(it) }, { Pipeline.Type.values()*.name() }),
 
-    JOB_SCHEDULER({ Realm.JobScheduler.getByName(it) }, { Realm.JobScheduler.values()*.name() }),
+    JOB_SCHEDULER({ JobScheduler.getByName(it) }, { JobScheduler.values()*.name() }),
 
     INSTANCE_LOGO({ InstanceLogo.getByName(it) }, { InstanceLogo.values()*.name() }),
 

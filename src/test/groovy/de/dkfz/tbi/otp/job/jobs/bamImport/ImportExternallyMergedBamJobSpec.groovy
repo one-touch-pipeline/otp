@@ -581,12 +581,12 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
         importExternallyMergedBamJob.checksumFileService.configService = Mock(ConfigService)
         importExternallyMergedBamJob.checksumFileService.fileService = new FileService()
         importExternallyMergedBamJob.checksumFileService.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
-            executeCommandReturnProcessOutput(_, _) >> { realm1, cmd -> LocalShellHelper.executeAndWait(cmd) }
+            executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
         importExternallyMergedBamJob.executionHelperService = Mock(ExecutionHelperService) {
             _ * getGroup(_, _) >> 'someGroup'
         }
-        importExternallyMergedBamJob.fileSystemService = new FileSystemService()
+        importExternallyMergedBamJob.fileSystemService = new TestFileSystemService()
         importExternallyMergedBamJob.fileSystemService.processingOptionService = new ProcessingOptionService()
         importExternallyMergedBamJob.processingOptionService = new ProcessingOptionService()
         importExternallyMergedBamJob.projectService = new ProjectService()

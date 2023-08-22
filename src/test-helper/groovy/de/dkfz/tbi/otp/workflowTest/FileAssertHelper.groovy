@@ -79,7 +79,7 @@ class FileAssertHelper {
         Set<Path> expectedEntries = (expectedDirs + expectedFiles + expectedLinks).findAll {
             it.parent == baseDir
         } as Set
-        Set<Path> foundEntries = fileService.findAllFilesInPath(baseDir, configService.defaultRealm)
+        Set<Path> foundEntries = fileService.findAllFilesInPath(baseDir)
         assert expectedEntries == foundEntries
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -89,7 +89,7 @@ class MolgenisGlobal {
 Realm realm = ctx.configService.defaultRealm
 
 String timestamp = TimeFormats.DATE_TIME_DASHES.getFormattedDate(new Date())
-final Path outputDirectory = ctx.fileService.toPath(ctx.configService.scriptOutputPath, ctx.fileSystemService.remoteFileSystemOnDefaultRealm).resolve("export").resolve("molgenis").resolve("${timestamp}-projects-and-users")
+final Path outputDirectory = ctx.fileService.toPath(ctx.configService.scriptOutputPath, ctx.fileSystemService.getRemoteFilesystem).resolve("export").resolve("molgenis").resolve("${timestamp}-projects-and-users")
 ctx.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(outputDirectory, realm)
 ctx.fileService.setPermission(outputDirectory, ctx.fileService.OWNER_AND_GROUP_READ_WRITE_EXECUTE_PERMISSION)
 

@@ -79,7 +79,7 @@ class BamMetadataImportService {
     }
 
     BamMetadataValidationContext validate(String metadataFile, List<String> furtherFiles, boolean linkSourceFiles) {
-        FileSystem fileSystem = fileSystemService.filesystemForBamImport
+        FileSystem fileSystem = fileSystemService.remoteFileSystem
         BamMetadataValidationContext context = bamMetadataValidationService.createFromFile(fileSystem.getPath(metadataFile),
                 furtherFiles,
                 fileSystem,
@@ -101,7 +101,7 @@ class BamMetadataImportService {
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     Map validateAndImport(String metadataFile, boolean ignoreWarnings, String previousValidationMd5sum, ImportProcess.LinkOperation linkOperation,
                           boolean triggerAnalysis, List<String> furtherFiles, boolean addDefaultFiles = false) {
-        FileSystem fileSystem = fileSystemService.filesystemForBamImport
+        FileSystem fileSystem = fileSystemService.remoteFileSystem
         Project outputProject
         ImportProcess importProcess
 

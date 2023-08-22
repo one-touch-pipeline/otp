@@ -215,6 +215,10 @@ class FastqcReportServiceSpec extends Specification implements DataTest, FastqcD
 
         service.fileService = Mock(FileService) {
             2 * convertPermissionsToOctalString(FileService.DEFAULT_FILE_PERMISSION)
+            1 * ensureFileIsReadableAndNotEmpty(sourceFastqc1)
+            1 * ensureFileIsReadableAndNotEmpty(sourceFastqc2)
+            1 * ensureFileIsReadableAndNotEmpty(targetFastqc1)
+            1 * ensureFileIsReadableAndNotEmpty(targetFastqc2)
             0 * _
         }
 
@@ -247,8 +251,12 @@ class FastqcReportServiceSpec extends Specification implements DataTest, FastqcD
         }
 
         service.fileService = Mock(FileService) {
-            0 * _
             2 * createDirectoryRecursivelyAndSetPermissionsViaBash(targetDir, step.realm)
+            1 * ensureFileIsReadableAndNotEmpty(sourceFastqc1)
+            1 * ensureFileIsReadableAndNotEmpty(sourceFastqc2)
+            1 * ensureFileIsReadableAndNotEmpty(targetFastqc1)
+            1 * ensureFileIsReadableAndNotEmpty(targetFastqc2)
+            0 * _
         }
 
         service.remoteShellHelper = Mock(RemoteShellHelper) {

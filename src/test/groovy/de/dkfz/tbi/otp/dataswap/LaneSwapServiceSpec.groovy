@@ -111,7 +111,7 @@ class LaneSwapServiceSpec extends Specification implements DataTest, ServiceUnit
         ])
 
         service.fileSystemService = Mock(FileSystemService) {
-            _ * getRemoteFileSystemOnDefaultRealm() >> FileSystems.default
+            _ * getRemoteFileSystem() >> FileSystems.default
         }
         service.deletionService = Mock(DeletionService)
 

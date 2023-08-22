@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,13 +26,12 @@ import grails.testing.services.ServiceUnitTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.job.plan.JobDefinition
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.ngsdata.Realm
+import de.dkfz.tbi.otp.ngsdata.*
 
 class JobStatusLoggingServiceSpec extends Specification implements ServiceUnitTest<JobStatusLoggingService>, DataTest {
 
@@ -116,8 +115,9 @@ class JobStatusLoggingServiceSpec extends Specification implements ServiceUnitTe
         given:
         ProcessingStep processingStep = createFakeProcessingStep()
         service.clusterJobManagerFactoryService = new ClusterJobManagerFactoryService()
-        service.clusterJobManagerFactoryService.configService = new TestConfigService()
-        service.clusterJobManagerFactoryService.configService.processingOptionService = new ProcessingOptionService()
+        service.clusterJobManagerFactoryService.configService = Mock(ConfigService) {
+            getJobScheduler() >> JobScheduler.PBS
+        }
 
         expect:
         service.constructLogFileLocation(realm, processingStep) ==
@@ -144,8 +144,9 @@ class JobStatusLoggingServiceSpec extends Specification implements ServiceUnitTe
         given:
         ProcessingStep processingStep = createFakeProcessingStep()
         service.clusterJobManagerFactoryService = new ClusterJobManagerFactoryService()
-        service.clusterJobManagerFactoryService.configService = new TestConfigService()
-        service.clusterJobManagerFactoryService.configService.processingOptionService = new ProcessingOptionService()
+        service.clusterJobManagerFactoryService.configService = Mock(ConfigService) {
+            getJobScheduler() >> JobScheduler.PBS
+        }
 
         expect:
         service.constructMessage(realm, processingStep) ==

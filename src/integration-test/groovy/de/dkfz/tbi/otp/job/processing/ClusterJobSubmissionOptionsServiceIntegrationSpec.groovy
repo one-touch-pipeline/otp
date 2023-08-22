@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,8 +21,8 @@
  */
 package de.dkfz.tbi.otp.job.processing
 
-import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -36,14 +36,12 @@ import de.dkfz.tbi.otp.ngsdata.*
 class ClusterJobSubmissionOptionsServiceIntegrationSpec extends Specification {
 
     @Unroll
-    void "test readOptionsFromDatabase ('#realmOption', ''#jobSpecificOption', '#jobAndSeqTypeSpecific')"() {
+    void "test readOptionsFromDatabase ('#jobSpecificOption', '#jobAndSeqTypeSpecific')"() {
         given:
         ClusterJobSubmissionOptionsService service = new ClusterJobSubmissionOptionsService()
         service.processingOptionService = new ProcessingOptionService()
 
-        Realm realm = DomainFactory.createRealm(
-                defaultJobSubmissionOptions: realmOption,
-        )
+        Realm realm = DomainFactory.createRealm()
 
         SeqType seqType = DomainFactory.createWholeGenomeSeqType()
         ProcessParameterObject ppo = DomainFactory.createSeqTrack(seqType: seqType)
@@ -64,15 +62,11 @@ class ClusterJobSubmissionOptionsServiceIntegrationSpec extends Specification {
         result == service.readOptionsFromDatabase(processingStep, realm)
 
         where:
-        realmOption      | jobSpecificOption   | jobAndSeqTypeSpecific || result
-        '{"NODES": "1"}' | '{"WALLTIME": "2"}' | '{"QUEUE": "3"}'      || [(JobSubmissionOption.NODES): "1", (JobSubmissionOption.WALLTIME): "2", (JobSubmissionOption.QUEUE): "3"]
-        ''               | ''                  | ''                    || [:]
-        ''               | ''                  | '{"NODES": "3"}'      || [(JobSubmissionOption.NODES): "3"]
-        ''               | '{"NODES": "2"}'    | ''                    || [(JobSubmissionOption.NODES): "2"]
-        ''               | '{"NODES": "2"}'    | '{"NODES": "3"}'      || [(JobSubmissionOption.NODES): "3"]
-        '{"NODES": "1"}' | ''                  | ''                    || [(JobSubmissionOption.NODES): "1"]
-        '{"NODES": "1"}' | ''                  | '{"NODES": "3"}'      || [(JobSubmissionOption.NODES): "3"]
-        '{"NODES": "1"}' | '{"NODES": "2"}'    | ''                    || [(JobSubmissionOption.NODES): "2"]
-        '{"NODES": "1"}' | '{"NODES": "2"}'    | '{"NODES": "3"}'      || [(JobSubmissionOption.NODES): "3"]
+        jobSpecificOption   | jobAndSeqTypeSpecific || result
+        '{"WALLTIME": "2"}' | '{"QUEUE": "3"}'      || [(JobSubmissionOption.WALLTIME): "2", (JobSubmissionOption.QUEUE): "3"]
+        ''                  | ''                    || [:]
+        ''                  | '{"NODES": "3"}'      || [(JobSubmissionOption.NODES): "3"]
+        '{"NODES": "2"}'    | ''                    || [(JobSubmissionOption.NODES): "2"]
+        '{"NODES": "2"}'    | '{"NODES": "3"}'      || [(JobSubmissionOption.NODES): "3"]
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,7 +24,6 @@ package de.dkfz.tbi.otp.job.processing
 import de.dkfz.roddy.execution.BEExecutionService
 import de.dkfz.roddy.execution.io.ExecutionResult
 import de.dkfz.roddy.execution.jobs.Command
-import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.ProcessOutput
 
 import java.time.Duration
@@ -32,16 +31,14 @@ import java.time.Duration
 class BEExecutionServiceAdapter implements BEExecutionService {
 
     private final RemoteShellHelper remoteShellHelper
-    private final Realm realm
 
-    BEExecutionServiceAdapter(RemoteShellHelper remoteShellHelper, Realm realm) {
+    BEExecutionServiceAdapter(RemoteShellHelper remoteShellHelper) {
         this.remoteShellHelper = remoteShellHelper
-        this.realm = realm
     }
 
     @Override
     ExecutionResult execute(String command) {
-        ProcessOutput p = remoteShellHelper.executeCommandReturnProcessOutput(realm, command)
+        ProcessOutput p = remoteShellHelper.executeCommandReturnProcessOutput(command)
         return new ExecutionResult([command], (p.exitCode == 0), p.exitCode, p.stdout.split("\n") as List, p.stderr.split("\n") as List)
     }
 

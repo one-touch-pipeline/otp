@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,7 +28,6 @@ import org.springframework.context.ApplicationContext
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
-import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.LocalShellHelper
 
 import java.nio.file.Files
@@ -67,15 +66,14 @@ class TestConfigService extends ConfigService {
                 ]
             }
             otpProperties += [
-                    (OtpProperty.WES_URL)                 : '-',
-                    (OtpProperty.WES_AUTH_TOKEN_URI)      : '-',
-                    (OtpProperty.WES_AUTH_CLIENT_ID)      : '-',
-                    (OtpProperty.WES_AUTH_CLIENT_SECRET)  : '-',
-                    (OtpProperty.WES_BASE_DATA_DIRECTORY) : '/tmp',
+                    (OtpProperty.WES_URL)                : '-',
+                    (OtpProperty.WES_AUTH_TOKEN_URI)     : '-',
+                    (OtpProperty.WES_AUTH_CLIENT_ID)     : '-',
+                    (OtpProperty.WES_AUTH_CLIENT_SECRET) : '-',
+                    (OtpProperty.WES_BASE_DATA_DIRECTORY): '/tmp',
             ]
         }
         otpProperties += [
-                (OtpProperty.SSH_USER)              : "user",
                 (OtpProperty.PATH_PROJECT_ROOT)     : TestCase.uniqueNonExistentPath.path + '/root_path',
                 (OtpProperty.PATH_PROCESSING_ROOT)  : TestCase.uniqueNonExistentPath.path + '/processing_root_path',
                 (OtpProperty.PATH_CLUSTER_LOGS_OTP) : TestCase.uniqueNonExistentPath.path + '/logging_root_path',
@@ -185,18 +183,6 @@ class TestConfigService extends ConfigService {
                 "'${OtpProperty.TEST_TESTING_GROUP.key}' with value '${testingGroup}' does not differ from " +
                         "'${OtpProperty.TEST_TESTING_PROJECT_UNIX_GROUP.key}' with value '${projectGroup}.'" +
                         "OTP needs the primary/'default' group and the 'project' group to differ, in order to test if data re-owning works."
-    }
-
-    String getWorkflowTestAccountName() {
-        return getAndAssertValue(OtpProperty.TEST_WORKFLOW_ACCOUNT)
-    }
-
-    Realm.JobScheduler getWorkflowTestScheduler() {
-        return Realm.JobScheduler.valueOf(getAndAssertValue(OtpProperty.TEST_WORKFLOW_SCHEDULER))
-    }
-
-    String getWorkflowTestHost() {
-        return getAndAssertValue(OtpProperty.TEST_WORKFLOW_HOST)
     }
 
     File getWorkflowTestInputRootDir() {

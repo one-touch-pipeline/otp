@@ -70,7 +70,7 @@ class FileServiceSpec extends Specification implements DataTest {
 
     private void mockRemoteShellHelper() {
         fileService.remoteShellHelper = Mock(RemoteShellHelper) {
-            _ * executeCommandReturnProcessOutput(_, _) >> { Realm realm2, String command ->
+            _ * executeCommandReturnProcessOutput(_) >> { String command ->
                 return LocalShellHelper.executeAndWait(command)
             }
             0 * _
@@ -678,7 +678,7 @@ class FileServiceSpec extends Specification implements DataTest {
         Path target = targetName ? Paths.get(targetName) : null
         Path link = linkName ? Paths.get(linkName) : null
         fileService.remoteShellHelper = Mock(RemoteShellHelper) {
-            executeCommandReturnProcessOutput(Realm, String) >> { realm, cmd -> LocalShellHelper.executeAndWait(cmd) }
+            executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
 
         when:
@@ -706,7 +706,7 @@ class FileServiceSpec extends Specification implements DataTest {
         target.text = 'text'
 
         when:
-        fileService.createLink(link, target, null)
+        fileService.createLink(link, target)
 
         then:
         Files.isSymbolicLink(link)
@@ -721,7 +721,7 @@ class FileServiceSpec extends Specification implements DataTest {
         Path link = linkName ? Paths.get(linkName) : null
 
         when:
-        fileService.createLink(link, target, null)
+        fileService.createLink(link, target)
 
         then:
         AssertionError e = thrown()
@@ -790,7 +790,7 @@ class FileServiceSpec extends Specification implements DataTest {
         callback(link)
 
         when:
-        fileService.createLink(link, target, null)
+        fileService.createLink(link, target)
 
         then:
         AssertionError e = thrown()
@@ -864,7 +864,7 @@ class FileServiceSpec extends Specification implements DataTest {
         CreateFileHelper.createFile(tempDir.resolve("Test1_ABC.csv"))
         Realm realm = new Realm()
         fileService.remoteShellHelper = Mock(RemoteShellHelper) {
-            executeCommandReturnProcessOutput(_, _) >> { realm1, cmd -> LocalShellHelper.executeAndWait(cmd) }
+            executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
 
         String matcher = "Test[0-9]_XYZ.csv"
@@ -878,7 +878,7 @@ class FileServiceSpec extends Specification implements DataTest {
         CreateFileHelper.createFile(tempDir.resolve("file.txt"))
         Realm realm = new Realm()
         fileService.remoteShellHelper = Mock(RemoteShellHelper) {
-            executeCommandReturnProcessOutput(_, _) >> { realm1, cmd -> LocalShellHelper.executeAndWait(cmd) }
+            executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
 
         when:
@@ -896,7 +896,7 @@ class FileServiceSpec extends Specification implements DataTest {
         CreateFileHelper.createFile(tempDir.resolve("${matcher}/file.txt"))
         Realm realm = new Realm()
         fileService.remoteShellHelper = Mock(RemoteShellHelper) {
-            executeCommandReturnProcessOutput(_, _) >> { realm1, cmd -> LocalShellHelper.executeAndWait(cmd) }
+            executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
 
         when:
@@ -915,7 +915,7 @@ class FileServiceSpec extends Specification implements DataTest {
             CreateFileHelper.createFile(tempDir.resolve(it))
         }
         fileService.remoteShellHelper = Mock(RemoteShellHelper) {
-            executeCommandReturnProcessOutput(_, _) >> { realm1, cmd -> LocalShellHelper.executeAndWait(cmd) }
+            executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
 
         when:
@@ -936,7 +936,7 @@ class FileServiceSpec extends Specification implements DataTest {
         CreateFileHelper.createFile(tempDir.resolve("fileNotFound.txt"))
         Realm realm = new Realm()
         fileService.remoteShellHelper = Mock(RemoteShellHelper) {
-            executeCommandReturnProcessOutput(_, _) >> { realm1, cmd -> LocalShellHelper.executeAndWait(cmd) }
+            executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
 
         when:
@@ -955,7 +955,7 @@ class FileServiceSpec extends Specification implements DataTest {
         CreateFileHelper.createFile(tempDir.resolve("${matcher}/file2.txt"))
         Realm realm = new Realm()
         fileService.remoteShellHelper = Mock(RemoteShellHelper) {
-            executeCommandReturnProcessOutput(_, _) >> { realm1, cmd -> LocalShellHelper.executeAndWait(cmd) }
+            executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
 
         when:
@@ -975,7 +975,7 @@ class FileServiceSpec extends Specification implements DataTest {
         Realm realm = new Realm()
         file.text = SOME_CONTENT
         fileService.remoteShellHelper = Mock(RemoteShellHelper) {
-            executeCommandReturnProcessOutput(_, _) >> { realm1, cmd -> LocalShellHelper.executeAndWait(cmd) }
+            executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
 
         expect:
@@ -988,7 +988,7 @@ class FileServiceSpec extends Specification implements DataTest {
         Path file = CreateFileHelper.createFile(tempDir.resolve("test.txt"))
         file.text = ''
         fileService.remoteShellHelper = Mock(RemoteShellHelper) {
-            executeCommandReturnProcessOutput(_, _) >> { realm1, cmd -> LocalShellHelper.executeAndWait(cmd) }
+            executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
 
         expect:
@@ -1001,7 +1001,7 @@ class FileServiceSpec extends Specification implements DataTest {
         Path file = CreateFileHelper.createFile(tempDir.resolve("test.txt"), SOME_CONTENT)
         Files.setPosixFilePermissions(file, [] as Set)
         fileService.remoteShellHelper = Mock(RemoteShellHelper) {
-            executeCommandReturnProcessOutput(_, _) >> { realm1, cmd -> LocalShellHelper.executeAndWait(cmd) }
+            executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
 
         expect:
@@ -1031,7 +1031,7 @@ class FileServiceSpec extends Specification implements DataTest {
         Path link = path.resolve("link")
         Files.createSymbolicLink(link, file)
         fileService.remoteShellHelper = Mock(RemoteShellHelper) {
-            executeCommandReturnProcessOutput(_, _) >> { realm1, cmd -> LocalShellHelper.executeAndWait(cmd) }
+            executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
 
         expect:
@@ -1070,7 +1070,7 @@ class FileServiceSpec extends Specification implements DataTest {
         file.readable = false
         Realm realm = new Realm()
         fileService.remoteShellHelper = Mock(RemoteShellHelper) {
-            executeCommandReturnProcessOutput(_, _) >> { realm1, cmd -> LocalShellHelper.executeAndWait(cmd) }
+            executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
 
         when:
@@ -1089,7 +1089,7 @@ class FileServiceSpec extends Specification implements DataTest {
         path.text = SOME_CONTENT
         Realm realm = new Realm()
         fileService.remoteShellHelper = Mock(RemoteShellHelper) {
-            executeCommandReturnProcessOutput(_, _) >> { realm1, cmd -> LocalShellHelper.executeAndWait(cmd) }
+            executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
 
         when:
@@ -1105,7 +1105,7 @@ class FileServiceSpec extends Specification implements DataTest {
         path.text = ''
         Realm realm = new Realm()
         fileService.remoteShellHelper = Mock(RemoteShellHelper) {
-            executeCommandReturnProcessOutput(_, _) >> { realm1, cmd -> LocalShellHelper.executeAndWait(cmd) }
+            executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
 
         when:
@@ -1122,7 +1122,7 @@ class FileServiceSpec extends Specification implements DataTest {
         Files.setPosixFilePermissions(path, [] as Set)
         Realm realm = new Realm()
         fileService.remoteShellHelper = Mock(RemoteShellHelper) {
-            executeCommandReturnProcessOutput(_, _) >> { realm1, cmd -> LocalShellHelper.executeAndWait(cmd) }
+            executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
 
         when:
@@ -1186,7 +1186,7 @@ class FileServiceSpec extends Specification implements DataTest {
         Files.createDirectory(tempDir.resolve('newFolder'))
         Realm realm = new Realm()
         fileService.remoteShellHelper = Mock(RemoteShellHelper) {
-            executeCommandReturnProcessOutput(_, _) >> { realm1, cmd -> LocalShellHelper.executeAndWait(cmd) }
+            executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
 
         when:
@@ -1200,7 +1200,7 @@ class FileServiceSpec extends Specification implements DataTest {
         given:
         Realm realm = new Realm()
         fileService.remoteShellHelper = Mock(RemoteShellHelper) {
-            executeCommandReturnProcessOutput(_, _) >> { realm1, cmd -> LocalShellHelper.executeAndWait(cmd) }
+            executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
 
         when:
@@ -1278,7 +1278,7 @@ class FileServiceSpec extends Specification implements DataTest {
         assert Files.isDirectory(dir)
         Realm realm = new Realm()
         fileService.remoteShellHelper = Mock(RemoteShellHelper) {
-            executeCommandReturnProcessOutput(_, _) >> { realm1, cmd -> LocalShellHelper.executeAndWait(cmd) }
+            executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
 
         when:
@@ -1347,7 +1347,7 @@ class FileServiceSpec extends Specification implements DataTest {
         tempDir.toFile().executable = true
         Realm realm = new Realm()
         fileService.remoteShellHelper = Mock(RemoteShellHelper) {
-            executeCommandReturnProcessOutput(_, _) >> { realm1, cmd -> LocalShellHelper.executeAndWait(cmd) }
+            executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
 
         when:
@@ -1386,7 +1386,7 @@ class FileServiceSpec extends Specification implements DataTest {
         Files.createDirectory(tempDir.resolve('newFolder'))
         Realm realm = new Realm()
         fileService.remoteShellHelper = Mock(RemoteShellHelper) {
-            executeCommandReturnProcessOutput(_, _) >> { realm1, cmd -> LocalShellHelper.executeAndWait(cmd) }
+            executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
 
         when:
@@ -1400,7 +1400,7 @@ class FileServiceSpec extends Specification implements DataTest {
         given:
         Realm realm = new Realm()
         fileService.remoteShellHelper = Mock(RemoteShellHelper) {
-            executeCommandReturnProcessOutput(_, _) >> { realm1, cmd -> LocalShellHelper.executeAndWait(cmd) }
+            executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
 
         when:
@@ -1416,7 +1416,7 @@ class FileServiceSpec extends Specification implements DataTest {
         Files.setPosixFilePermissions(path, [] as Set)
         Realm realm = new Realm()
         fileService.remoteShellHelper = Mock(RemoteShellHelper) {
-            executeCommandReturnProcessOutput(_, _) >> { realm1, cmd -> LocalShellHelper.executeAndWait(cmd) }
+            executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
 
         when:

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -204,11 +204,11 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
     /**
      * This method can be overridden if other job submission options are needed.
      */
-    protected String getJobSubmissionOptions() {
-        return JsonOutput.toJson([
+    protected Map<JobSubmissionOption, String> getJobSubmissionOptions() {
+        return [
                 (JobSubmissionOption.WALLTIME): Duration.ofMinutes(15).toString(),
                 (JobSubmissionOption.MEMORY)  : "5g",
-        ])
+        ]
     }
 
     /**
@@ -238,6 +238,7 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
             createUserAndRoles()
             loadInitialisationScripts()
             initProcessingOption()
+            initSubmissionOptions()
 
             initScheduler()
 
@@ -263,11 +264,6 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
             killRemainingClusterJobs()
 
             showState()
-
-            log.debug("closing remote file system")
-            fileSystemService.closeFileSystem()
-            remoteShellHelper.closeFileSystem()
-            log.debug("remote file system are closed")
 
             log.debug("reset database")
             sql.execute("DROP ALL OBJECTS")
@@ -427,10 +423,6 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
         assert !ExternalWorkflowConfigFragment.list()
         assert !ClusterJob.list()
 
-        log.debug("checking that no remote file system exist")
-        assert !fileSystemService.hasRemoteFileSystems()
-        assert !remoteShellHelper.hasRemoteFileSystems()
-
         log.debug("checking that workflowSystem is stopped")
         assert !workflowSystemService.enabled
     }
@@ -484,11 +476,6 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
         log.debug("creating realm and set it to default")
         realm = DomainFactoryCore.super.createRealm([
                 name                       : 'WorkflowTest',
-                jobScheduler               : configService.workflowTestScheduler,
-                host                       : configService.workflowTestHost,
-                port                       : 22,
-                timeout                    : 0,
-                defaultJobSubmissionOptions: jobSubmissionOptions,
         ])
         findOrCreateProcessingOption(name: OptionName.REALM_DEFAULT_VALUE, value: realm.name)
     }
@@ -513,9 +500,7 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
         findOrCreateProcessingOption(name: OptionName.MAXIMUM_PARALLEL_SSH_CALLS, value: '2')
         findOrCreateProcessingOption(name: OptionName.MAXIMUM_SFTP_CONNECTIONS, value: '2')
 
-        configService.addOtpProperty((OtpProperty.SSH_USER), configService.workflowTestAccountName)
-
-        remoteFileSystem = fileSystemService.remoteFileSystemOnDefaultRealm
+        remoteFileSystem = fileSystemService.remoteFileSystem
 
         String workSubDirectory = [
                 System.getProperty('user.name'),
@@ -576,10 +561,6 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
 
         // cluster and file system
         findOrCreateProcessingOption(name: OptionName.CLUSTER_NAME, value: 'CLUSTER NAME')
-        findOrCreateProcessingOption(name: OptionName.FILESYSTEM_BAM_IMPORT, value: realm.name)
-        findOrCreateProcessingOption(name: OptionName.FILESYSTEM_FASTQ_IMPORT, value: realm.name)
-        findOrCreateProcessingOption(name: OptionName.FILESYSTEM_CONFIG_FILE_CHECKS_USE_REMOTE, value: "true")
-        findOrCreateProcessingOption(name: OptionName.FILESYSTEM_PROCESSING_USE_REMOTE, value: "true")
         findOrCreateProcessingOption(name: OptionName.FILESYSTEM_TIMEOUT, value: 2)
         findOrCreateProcessingOption(name: OptionName.OTP_SYSTEM_USER, value: createUser().username)
         findOrCreateProcessingOption(name: OptionName.OTP_USER_LINUX_GROUP, value: configService.testingGroup)
@@ -591,6 +572,24 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
         findOrCreateProcessingOption(name: OptionName.LDAP_ACCOUNT_DEACTIVATION_GRACE_PERIOD, value: "90")
         findOrCreateProcessingOption(name: OptionName.TICKET_SYSTEM_URL, value: "url ${nextId}")
         findOrCreateProcessingOption(name: OptionName.TICKET_SYSTEM_NUMBER_PREFIX, value: "prefix${nextId}")
+    }
+
+    /**
+     * initialize submission options
+     */
+    private void initSubmissionOptions() {
+        ExternalWorkflowConfigFragment fragment = createExternalWorkflowConfigFragment(
+                configValues: JsonOutput.toJson([OTP_CLUSTER: jobSubmissionOptions])
+        )
+        createExternalWorkflowConfigSelector(
+                workflowVersions: [],
+                workflows: [],
+                referenceGenomes: [],
+                libraryPreparationKits: [],
+                seqTypes: [],
+                projects: [],
+                externalWorkflowConfigFragment: fragment,
+        )
     }
 
     /**
@@ -815,7 +814,7 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
      * enum for defining needed cron jobs
      */
     // the nested enum is not abstracts itself, its only inside an abstract class
-    @SuppressWarnings("AbstractClassName")
+    @SuppressWarnings(["AbstractClassName", "UnnecessaryPackageReference"])
     @TupleConstructor
     enum TestCronJob {
         WORKFLOW_STARTING("starting workflows", 5, TimeUnit.SECONDS){
@@ -827,7 +826,7 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
         JOB_STARTING("starting jobs", 1, TimeUnit.SECONDS){
             @Override
             void execute() {
-                Holders.applicationContext.getBean(JobScheduler).scheduleJob()
+                Holders.applicationContext.getBean(de.dkfz.tbi.otp.workflowExecution.JobScheduler).scheduleJob()
             }
         },
         CHECK_CLUSTER("check cluster", 5, TimeUnit.SECONDS){

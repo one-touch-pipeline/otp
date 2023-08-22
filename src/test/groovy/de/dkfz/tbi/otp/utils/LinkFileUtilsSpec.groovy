@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -137,7 +137,7 @@ class LinkFileUtilsSpec extends Specification implements DataTest {
         File linkFile = new File(linkDir, "linkFile")
 
         linkFileUtils.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
-            1 * executeCommandReturnProcessOutput(_, _) >> { Realm realm, String command ->
+            1 * executeCommandReturnProcessOutput(_) >> { String command ->
                 command ==~ "chmod 2750 ${linkDir}"
                 return new ProcessOutput(command, '', 0)
             }

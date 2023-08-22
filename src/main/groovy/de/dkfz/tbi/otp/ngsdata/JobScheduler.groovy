@@ -19,20 +19,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.infrastructure
+package de.dkfz.tbi.otp.ngsdata
 
-import grails.gorm.transactions.Transactional
-import groovy.transform.CompileDynamic
+enum JobScheduler {
+    LSF,
+    PBS,
+    SLURM,
 
-import de.dkfz.tbi.otp.ngsdata.Realm
-
-import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
-
-@Transactional(readOnly = true)
-class RealmService {
-
-    @CompileDynamic
-    Realm getRealmByName(String name) {
-        return exactlyOneElement(Realm.findAllByName(name))
+    static JobScheduler getByName(String name) {
+        return values().find {
+            it.name() == name
+        }
     }
 }

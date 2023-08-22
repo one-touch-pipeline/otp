@@ -27,6 +27,7 @@ import spock.lang.Specification
 import spock.lang.TempDir
 
 import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.job.processing.ExecutionHelperService
@@ -71,6 +72,7 @@ class ExecuteRoddyCommandServiceIntegrationSpec extends Specification {
     File roddyBaseConfigsPath
     File applicationIniPath
     File featureTogglesConfigPath
+    JobScheduler scheduler
 
     void setupData() {
         DomainFactory.createRoddyProcessingOptions(tempDir.toFile())
@@ -95,6 +97,7 @@ class ExecuteRoddyCommandServiceIntegrationSpec extends Specification {
         applicationIniPath = new File(processingOptionService.findOptionAsString(OptionName.RODDY_APPLICATION_INI))
         assert CreateFileHelper.createFile(applicationIniPath)
         featureTogglesConfigPath = new File(processingOptionService.findOptionAsString(OptionName.RODDY_FEATURE_TOGGLES_CONFIG_PATH))
+        scheduler = JobScheduler.PBS
 
         executeRoddyCommandService.processingOptionService = new ProcessingOptionService()
         executeRoddyCommandService.individualService = new IndividualService()
@@ -278,6 +281,10 @@ class ExecuteRoddyCommandServiceIntegrationSpec extends Specification {
             }
         }
         executeRoddyCommandService.processingOptionService = new ProcessingOptionService()
+        executeRoddyCommandService.configService = Mock(ConfigService) {
+            getJobScheduler() >> JobScheduler.PBS
+        }
+
         assert applicationIniPath.delete()
 
         when:
@@ -299,6 +306,10 @@ class ExecuteRoddyCommandServiceIntegrationSpec extends Specification {
             }
         }
         executeRoddyCommandService.processingOptionService = new ProcessingOptionService()
+        executeRoddyCommandService.configService = Mock(ConfigService) {
+            getJobScheduler() >> JobScheduler.PBS
+        }
+
         assert roddyBaseConfigsPath.deleteDir()
 
         when:
@@ -317,7 +328,7 @@ class ExecuteRoddyCommandServiceIntegrationSpec extends Specification {
                 "--usefeaturetoggleconfig=${featureTogglesConfigPath} " +
                 "--usePluginVersion=${roddyBamFile.config.programVersion} " +
                 "--configurationDirectories=${new File(roddyBamFile.config.configFilePath).parent},${roddyBaseConfigsPath}," +
-                "${roddyBaseConfigsPath}/${ExecuteRoddyCommandService.RESOURCE_PATH}/${roddyBamFile.project.realm.jobScheduler.toString().toLowerCase()} " +
+                "${roddyBaseConfigsPath}/${ExecuteRoddyCommandService.RESOURCE_PATH}/${scheduler.toString().toLowerCase()} " +
                 "--useiodir=/view-by-pid-path,${roddyBamFile.workDirectory}"
     }
 
@@ -333,6 +344,9 @@ class ExecuteRoddyCommandServiceIntegrationSpec extends Specification {
             }
         }
         executeRoddyCommandService.processingOptionService = new ProcessingOptionService()
+        executeRoddyCommandService.configService = Mock(ConfigService) {
+            getJobScheduler() >> scheduler
+        }
 
         when:
         String actualCmd = LogThreadLocal.withThreadLog(System.out) {
@@ -362,6 +376,9 @@ class ExecuteRoddyCommandServiceIntegrationSpec extends Specification {
             }
         }
         executeRoddyCommandService.processingOptionService = new ProcessingOptionService()
+        executeRoddyCommandService.configService = Mock(ConfigService) {
+            getJobScheduler() >> scheduler
+        }
 
         when:
         String actualCmd = LogThreadLocal.withThreadLog(System.out) {
@@ -392,6 +409,9 @@ class ExecuteRoddyCommandServiceIntegrationSpec extends Specification {
             }
         }
         executeRoddyCommandService.processingOptionService = new ProcessingOptionService()
+        executeRoddyCommandService.configService = Mock(ConfigService) {
+            getJobScheduler() >> scheduler
+        }
 
         when:
         String actualCmd = LogThreadLocal.withThreadLog(System.out) {

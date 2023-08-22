@@ -148,11 +148,6 @@ class DomainFactory {
     static Realm createRealm(Map realmProperties = [:]) {
         return createDomainObject(Realm, [
                 name                       : 'realmName_' + (counter++),
-                jobScheduler               : Realm.JobScheduler.PBS,
-                host                       : 'test.host.invalid',
-                port                       : -1,
-                timeout                    : -1,
-                defaultJobSubmissionOptions: '',
         ], realmProperties)
     }
 

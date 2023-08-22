@@ -108,7 +108,7 @@ class ReplaceSourceWithLinkJob extends AbstractEndStateAwareJobImpl {
     }
 
     protected void createLinkMap(File source, File target, Map linkMap) {
-        FileSystem fs = fileSystemService.filesystemForBamImport
+        FileSystem fs = fileSystemService.remoteFileSystem
         createLinkMap(fs.getPath(source.absolutePath).toRealPath(), fs.getPath(target.absolutePath).toRealPath(), linkMap)
     }
 

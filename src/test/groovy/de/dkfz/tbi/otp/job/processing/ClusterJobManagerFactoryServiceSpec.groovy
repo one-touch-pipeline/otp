@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,10 +27,10 @@ import spock.lang.Specification
 import de.dkfz.roddy.execution.jobs.BatchEuphoriaJobManager
 import de.dkfz.roddy.execution.jobs.cluster.lsf.LSFJobManager
 import de.dkfz.roddy.execution.jobs.cluster.pbs.PBSJobManager
+import de.dkfz.roddy.execution.jobs.cluster.slurm.SlurmJobManager
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.ngsdata.Realm
+import de.dkfz.tbi.otp.ngsdata.JobScheduler
 
 class ClusterJobManagerFactoryServiceSpec extends Specification implements DataTest {
 
@@ -38,65 +38,29 @@ class ClusterJobManagerFactoryServiceSpec extends Specification implements DataT
     Class[] getDomainClassesToMock() {
         return [
                 ProcessingOption,
-                Realm,
         ]
     }
 
     final static String SSH_USER = "user"
 
-    void "test getJobManager, get correct manager"(Realm.JobScheduler type, Class managerClass) {
+    void "test getJobManager, get correct manager"(JobScheduler type, Class managerClass) {
         given:
         ClusterJobManagerFactoryService service = new ClusterJobManagerFactoryService()
         service.configService = Mock(ConfigService) {
             getSshUser() >> SSH_USER
+            getJobScheduler() >> type
         }
-        Realm realm = DomainFactory.createRealm(
-                jobScheduler: type,
-        )
 
         when:
-        BatchEuphoriaJobManager manager = service.getJobManager(realm)
+        BatchEuphoriaJobManager manager = service.jobManager
 
         then:
         manager.class == managerClass
 
         where:
-        type                   || managerClass
-        Realm.JobScheduler.LSF || LSFJobManager
-        Realm.JobScheduler.PBS || PBSJobManager
-    }
-
-    void "test getJobManager, get the different manager for the different realm"() {
-        given:
-        ClusterJobManagerFactoryService service = new ClusterJobManagerFactoryService()
-        service.configService = Mock(ConfigService) {
-            getSshUser() >> SSH_USER
-        }
-        Realm realm = DomainFactory.createRealm(
-                jobScheduler: Realm.JobScheduler.LSF,
-        )
-        BatchEuphoriaJobManager manager = service.getJobManager(realm)
-
-        Realm realm2 = DomainFactory.createRealm(
-                jobScheduler: Realm.JobScheduler.LSF,
-        )
-
-        expect:
-        manager != service.getJobManager(realm2)
-    }
-
-    void "test getJobManager, get the same manager for the same realm"() {
-        given:
-        ClusterJobManagerFactoryService service = new ClusterJobManagerFactoryService()
-        service.configService = Mock(ConfigService) {
-            getSshUser() >> SSH_USER
-        }
-        Realm realm = DomainFactory.createRealm(
-                jobScheduler: Realm.JobScheduler.LSF,
-        )
-        BatchEuphoriaJobManager manager = service.getJobManager(realm)
-
-        expect:
-        manager == service.getJobManager(realm)
+        type               || managerClass
+        JobScheduler.LSF   || LSFJobManager
+        JobScheduler.PBS   || PBSJobManager
+        JobScheduler.SLURM || SlurmJobManager
     }
 }

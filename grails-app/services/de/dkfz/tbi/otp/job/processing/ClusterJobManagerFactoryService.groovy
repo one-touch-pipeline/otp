@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -31,6 +31,7 @@ import de.dkfz.roddy.execution.jobs.cluster.lsf.LSFJobManager
 import de.dkfz.roddy.execution.jobs.cluster.pbs.PBSJobManager
 import de.dkfz.roddy.execution.jobs.cluster.slurm.SlurmJobManager
 import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.ngsdata.JobScheduler
 import de.dkfz.tbi.otp.ngsdata.Realm
 
 import java.time.Duration
@@ -41,20 +42,23 @@ class ClusterJobManagerFactoryService {
     RemoteShellHelper remoteShellHelper
     ConfigService configService
 
-    private final Map<Realm, BatchEuphoriaJobManager> managerPerRealm = [:]
+    private BatchEuphoriaJobManager manager = null
 
+    @Deprecated
+    @SuppressWarnings("UnusedMethodParameter")
     BatchEuphoriaJobManager getJobManager(Realm realm) {
-        BatchEuphoriaJobManager manager = managerPerRealm[realm]
+        return jobManager
+    }
 
+    BatchEuphoriaJobManager getJobManager() {
         if (manager == null) {
-            manager = createJobManager(realm)
+            manager = createJobManager()
         }
         return manager
     }
 
     @Synchronized
-    private BatchEuphoriaJobManager createJobManager(Realm realm) {
-        BatchEuphoriaJobManager manager = managerPerRealm[realm]
+    private BatchEuphoriaJobManager createJobManager() {
         if (!manager) {
             JobManagerOptions jobManagerParameters = JobManagerOptions.create()
                     .setCreateDaemon(false)
@@ -65,22 +69,21 @@ class ClusterJobManagerFactoryService {
                     .setPassEnvironment(true) // module system
                     .setTimeZoneId(configService.timeZoneId)
                     .build()
-            BEExecutionServiceAdapter bEExecutionServiceAdapter = new BEExecutionServiceAdapter(remoteShellHelper, realm)
+            BEExecutionServiceAdapter bEExecutionServiceAdapter = new BEExecutionServiceAdapter(remoteShellHelper)
 
-            switch (realm.jobScheduler) {
-                case Realm.JobScheduler.PBS:
+            switch (configService.jobScheduler) {
+                case JobScheduler.PBS:
                     manager = new PBSJobManager(bEExecutionServiceAdapter, jobManagerParameters)
                     break
-                case Realm.JobScheduler.LSF:
+                case JobScheduler.LSF:
                     manager = new LSFJobManager(bEExecutionServiceAdapter, jobManagerParameters)
                     break
-                case Realm.JobScheduler.SLURM:
+                case JobScheduler.SLURM:
                     manager = new SlurmJobManager(bEExecutionServiceAdapter, jobManagerParameters)
                     break
                 default:
-                    throw new IllegalArgumentException("Unsupported cluster job scheduler \"${realm.jobScheduler}\"")
+                    throw new IllegalArgumentException("Unsupported cluster job scheduler \"${configService.jobScheduler}\"")
             }
-            managerPerRealm[realm] = manager
         }
         return manager
     }

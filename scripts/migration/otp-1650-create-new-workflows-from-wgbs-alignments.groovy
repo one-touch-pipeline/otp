@@ -187,7 +187,7 @@ void migrateToNewWorkflow(
 }
 // =================================================
 
-fileSystemService.getRemoteFileSystemOnDefaultRealm()
+fileSystemService.getRemoteFileSystem()
 
 List<List<Long>> individualsIdsWithRoddyBamFileCount = SeqTrack.executeQuery(
         queryIndividualsToMigrate)

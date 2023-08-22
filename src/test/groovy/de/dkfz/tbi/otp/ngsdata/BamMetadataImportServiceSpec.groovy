@@ -117,7 +117,7 @@ class BamMetadataImportServiceSpec extends Specification implements DomainFactor
         service.bamMetadataValidationService.configService = Mock(ConfigService)
         service.bamMetadataValidationService.fileService = new FileService()
         service.bamMetadataValidationService.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
-            executeCommandReturnProcessOutput(_, _) >> { realm1, cmd -> LocalShellHelper.executeAndWait(cmd) }
+            executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
 
         when:

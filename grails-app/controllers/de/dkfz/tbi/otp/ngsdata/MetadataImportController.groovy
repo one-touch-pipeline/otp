@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -110,7 +110,7 @@ class MetadataImportController implements CheckAndCall, PlainResponseExceptionHa
         checkDefaultErrorsAndCallMethod(cmd) {
             List<ContentWithPathAndProblems> contentsWithPathAndProblems = null
             if (cmd.metadataFileSource == MetaDataFileSourceEnum.PATH && cmd.paths) {
-                FileSystem fs = fileSystemService.filesystemForFastqImport
+                FileSystem fs = fileSystemService.remoteFileSystem
                 contentsWithPathAndProblems = cmd.paths.collect { metadataFilePath ->
                     return fastqMetadataValidationService.readPath(fs.getPath(metadataFilePath))
                 }
@@ -142,7 +142,7 @@ class MetadataImportController implements CheckAndCall, PlainResponseExceptionHa
         checkDefaultErrorsAndCallMethod(cmd) {
             try {
                 withForm {
-                    FileSystem fs = fileSystemService.filesystemForFastqImport
+                    FileSystem fs = fileSystemService.remoteFileSystem
                     List<ContentWithProblemsAndPreviousMd5sum> contentsWithProblemsAndPreviousMd5sum = []
                     if (cmd.metadataFileSource == MetaDataFileSourceEnum.PATH && cmd.paths) {
                         contentsWithProblemsAndPreviousMd5sum = cmd.paths.withIndex().collect { String path, Integer index ->

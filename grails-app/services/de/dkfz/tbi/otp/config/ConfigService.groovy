@@ -32,6 +32,7 @@ import org.springframework.context.ApplicationContextAware
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
+import de.dkfz.tbi.otp.ngsdata.JobScheduler
 import de.dkfz.tbi.otp.ngsdata.Realm
 
 import java.nio.file.FileSystem
@@ -80,6 +81,7 @@ class ConfigService implements ApplicationContextAware {
         return context.getBean("configService")
     }
 
+    @Deprecated
     Realm getDefaultRealm() {
         return exactlyOneElement(Realm.findAllByName(processingOptionService.findOptionAsString(ProcessingOption.OptionName.REALM_DEFAULT_VALUE)))
     }
@@ -120,6 +122,22 @@ class ConfigService implements ApplicationContextAware {
 
     File getMetadataStoragePath() {
         return new File(otpProperties.get(OtpProperty.PATH_METADATA_STORAGE).toString() ?: "")
+    }
+
+    JobScheduler getJobScheduler() {
+        return JobScheduler.getByName(otpProperties.get(OtpProperty.SCHEDULER))
+    }
+
+    String getSshHost() {
+        return otpProperties.get(OtpProperty.SSH_HOST)
+    }
+
+    int getSshPort() {
+        return getIntegerValue(OtpProperty.SSH_PORT)
+    }
+
+    int getSshTimeout() {
+        return getIntegerValue(OtpProperty.SSH_TIMEOUT)
     }
 
     String getSshUser() {
@@ -239,7 +257,7 @@ class ConfigService implements ApplicationContextAware {
     }
 
     Path getWesDataDirectory() {
-        FileSystem fileSystem = fileSystemService.remoteFileSystemOnDefaultRealm
+        FileSystem fileSystem = fileSystemService.remoteFileSystem
         return fileSystem.getPath(otpProperties.get(OtpProperty.WES_BASE_DATA_DIRECTORY))
     }
 
@@ -274,6 +292,11 @@ class ConfigService implements ApplicationContextAware {
 
     private boolean getBooleanValue(OtpProperty otpPropertiesValue, boolean defaultValue) {
         return otpProperties.get(otpPropertiesValue) ? Boolean.parseBoolean(otpProperties.get(otpPropertiesValue)) : defaultValue
+    }
+
+    private int getIntegerValue(OtpProperty otpPropertiesValue) {
+        return otpProperties.get(otpPropertiesValue) ? Integer.parseInt(otpProperties.get(otpPropertiesValue)) :
+                Integer.parseInt(otpPropertiesValue.defaultValue)
     }
 
     @Override

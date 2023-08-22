@@ -63,7 +63,7 @@ class WesJobLogServiceSpec extends Specification implements ServiceUnitTest<WesJ
         service.configService = Mock(ConfigService)
         service.fileService = Spy(FileService)
         service.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
-            executeCommandReturnProcessOutput(_, _) >> { realm1, cmd -> LocalShellHelper.executeAndWait(cmd) }
+            executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
     }
 

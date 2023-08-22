@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,40 +23,21 @@ package de.dkfz.tbi.otp.ngsdata
 
 import grails.gorm.hibernate.annotation.ManagedEntity
 
-import de.dkfz.tbi.otp.job.processing.ClusterJobSubmissionOptionsService
 import de.dkfz.tbi.otp.utils.Entity
 
 @ManagedEntity
+@Deprecated
 class Realm implements Entity, Serializable {
 
-    enum JobScheduler {
-        LSF,
-        PBS,
-        SLURM,
-
-        static Realm.JobScheduler getByName(String name) {
-            return values().find {
-                it.name() == name
-            }
-        }
-    }
-
+    @Deprecated
     String name
-
-    JobScheduler jobScheduler
-    String host                         // job submission host name
-    int port                            // job submission host port
-    int timeout
-    String defaultJobSubmissionOptions  // default options for job submission
 
     static constraints = {
         name unique: true, blank: false
-        defaultJobSubmissionOptions validator: {
-            ClusterJobSubmissionOptionsService.validateJsonObjectString(it)
-        }
     }
 
     @Override
+    @Deprecated
     String toString() {
         return "Realm ${id} ${name}"
     }

@@ -19,23 +19,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.job.processing
-
-import de.dkfz.tbi.otp.ngsdata.Realm
-
-import java.nio.file.FileSystem
-import java.nio.file.FileSystems
-
-class TestFileSystemService extends FileSystemService {
-
-    @Override
-    FileSystem getRemoteFileSystem() throws Throwable {
-        return FileSystems.default
+databaseChangeLog = {
+    changeSet(author: "-", id: "1692698247205-130") {
+        dropColumn(columnName: "job_scheduler", tableName: "realm")
     }
 
-    @Override
-    @Deprecated
-    FileSystem getRemoteFileSystem(Realm realm) throws Throwable {
-        return FileSystems.default
+    changeSet(author: "-", id: "1692698247205-131") {
+        dropColumn(columnName: "host", tableName: "realm")
+    }
+
+    changeSet(author: "-", id: "1692698247205-132") {
+        dropColumn(columnName: "port", tableName: "realm")
+    }
+
+    changeSet(author: "-", id: "1692698247205-133") {
+        dropColumn(columnName: "timeout", tableName: "realm")
+    }
+
+    changeSet(author: "-", id: "1692698247205-134") {
+        dropColumn(columnName: "default_job_submission_options", tableName: "realm")
+    }
+
+    changeSet(author: "-", id: "1692698247205-135") {
+        sql("""
+            DELETE FROM processing_option WHERE name IN (
+                'FILESYSTEM_FASTQ_IMPORT',
+                'FILESYSTEM_BAM_IMPORT',
+                'FILESYSTEM_PROCESSING_USE_REMOTE',
+                'FILESYSTEM_CONFIG_FILE_CHECKS_USE_REMOTE'
+            )
+        """)
     }
 }

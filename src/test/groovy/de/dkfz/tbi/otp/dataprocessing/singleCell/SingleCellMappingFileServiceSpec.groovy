@@ -69,7 +69,7 @@ class SingleCellMappingFileServiceSpec extends Specification implements DataTest
 
         data.service = new SingleCellMappingFileService([
                 fileSystemService: Mock(FileSystemService) {
-                    _ * getRemoteFileSystemOnDefaultRealm() >> FileSystems.default
+                    _ * getRemoteFileSystem() >> FileSystems.default
                 },
                 fileService      : new FileService(),
                 singleCellService: Mock(SingleCellService) {

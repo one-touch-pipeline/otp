@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -125,6 +125,11 @@ abstract class WorkflowTestCase extends Specification implements UserAndRoles, G
      */
     abstract Duration getTimeout()
 
+    @SuppressWarnings("GetterMethodCouldBeProperty")
+    String getJobName() {
+        return null
+    }
+
     /**
      * This method can be overridden if a workflow script needs some additional setup
      * before it can be loaded.
@@ -162,10 +167,6 @@ abstract class WorkflowTestCase extends Specification implements UserAndRoles, G
             findOrCreateProcessingOption(name: OptionName.WITHDRAWN_UNIX_GROUP, value: configService.testingGroup)
             findOrCreateProcessingOption(name: OptionName.TICKET_SYSTEM_URL, value: "1234")
             findOrCreateProcessingOption(name: OptionName.TICKET_SYSTEM_NUMBER_PREFIX, value: "asdf")
-            findOrCreateProcessingOption(name: OptionName.FILESYSTEM_FASTQ_IMPORT, value: "")
-            findOrCreateProcessingOption(name: OptionName.FILESYSTEM_BAM_IMPORT, value: "")
-            findOrCreateProcessingOption(name: OptionName.FILESYSTEM_PROCESSING_USE_REMOTE, value: "true")
-            findOrCreateProcessingOption(name: OptionName.FILESYSTEM_CONFIG_FILE_CHECKS_USE_REMOTE, value: "true")
             findOrCreateProcessingOption(name: OptionName.REALM_DEFAULT_VALUE, value: realm.name)
             findOrCreateProcessingOption(name: OptionName.EMAIL_REPLY_TO, value: HelperUtils.randomEmail)
             findOrCreateProcessingOption(name: OptionName.EMAIL_TICKET_SYSTEM, value: HelperUtils.randomEmail)
@@ -177,6 +178,9 @@ abstract class WorkflowTestCase extends Specification implements UserAndRoles, G
             findOrCreateProcessingOption(name: OptionName.RODDY_SHARED_FILES_BASE_DIRECTORY, value: configService.workflowTestRoddySharedFilesBaseDir)
             findOrCreateProcessingOption(name: OptionName.LDAP_ACCOUNT_DEACTIVATION_GRACE_PERIOD, value: "90")
             findOrCreateProcessingOption(name: OptionName.PROCESSING_PRIORITY_DEFAULT_NAME, value: processingPriority.name)
+            if (jobName) {
+                findOrCreateProcessingOption(name: OptionName.CLUSTER_SUBMISSIONS_OPTION, value: jobSubmissionOptions, type: jobName)
+            }
 
             createUserAndRoles()
             loadWorkflow()
@@ -256,15 +260,6 @@ abstract class WorkflowTestCase extends Specification implements UserAndRoles, G
         schedulerService.running.clear()
         schedulerService.queue.clear()
 
-        fileSystemService.createdFileSystems.each { Realm realm, FileSystem fileSystem ->
-            fileSystem.close()
-        }
-        remoteShellHelper.sessionPerRealm.each { Realm realm, com.jcraft.jsch.Session session ->
-            session.disconnect()
-        }
-        remoteShellHelper.sessionPerRealm = [:]
-        fileSystemService.createdFileSystems = [:]
-
         if (sql) {
             sql.execute("DROP ALL OBJECTS")
             sql.execute("RUNSCRIPT FROM ?", [schemaDump.absolutePath])
@@ -278,15 +273,8 @@ abstract class WorkflowTestCase extends Specification implements UserAndRoles, G
         File rootDirectory = inputRootDirectory
         assert rootDirectory.list()?.size(): "${rootDirectory} seems not to be mounted"
 
-        configService.addOtpProperty((OtpProperty.SSH_USER), configService.workflowTestAccountName)
-
         Map realmParams = [
                 name                       : 'REALM_NAME',
-                jobScheduler               : configService.workflowTestScheduler,
-                host                       : configService.workflowTestHost,
-                port                       : 22,
-                timeout                    : 0,
-                defaultJobSubmissionOptions: jobSubmissionOptions,
         ]
 
         realm = Realm.list().find() ?: DomainFactory.createRealm(realmParams)
@@ -594,9 +582,9 @@ echo \$TEMP_DIR
 
     protected void setPermissionsRecursive(File directory, String modeDir, String modeFile) {
         assert directory.absolutePath.startsWith(baseDirectory.absolutePath)
-        String cmd = "find -L ${directory} -user ${configService.workflowTestAccountName} -type d -not -perm ${modeDir} -exec chmod ${modeDir} '{}' \\; 2>&1"
+        String cmd = "find -L ${directory} -user ${configService.sshUser} -type d -not -perm ${modeDir} -exec chmod ${modeDir} '{}' \\; 2>&1"
         assert remoteShellHelper.executeCommand(realm, cmd).empty
-        cmd = "find -L ${directory} -user ${configService.workflowTestAccountName} -type f -not -perm ${modeFile} -exec chmod ${modeFile} '{}' \\; 2>&1"
+        cmd = "find -L ${directory} -user ${configService.sshUser} -type f -not -perm ${modeFile} -exec chmod ${modeFile} '{}' \\; 2>&1"
         assert remoteShellHelper.executeCommand(realm, cmd).empty
     }
 }

@@ -76,7 +76,7 @@ class ImportExternallyMergedBamJob extends AbstractOtpJob {
     }
 
     private NextAction linkSource(ImportProcess importProcess) throws Throwable {
-        FileSystem fileSystem = fileSystemService.filesystemForBamImport
+        FileSystem fileSystem = fileSystemService.remoteFileSystem
         importProcess.externallyProcessedBamFiles.each { ExternallyProcessedBamFile epmbf ->
             Realm realm = epmbf.realm
             Path targetBaseDir = fileSystem.getPath(epmbf.importedFrom).parent
@@ -210,7 +210,7 @@ touch ${checkpoint}
     }
 
     private void validateLink(ImportProcess importProcess) throws Throwable {
-        FileSystem fileSystem = fileSystemService.filesystemForBamImport
+        FileSystem fileSystem = fileSystemService.remoteFileSystem
         importProcess.externallyProcessedBamFiles.each { ExternallyProcessedBamFile bamFile ->
             Path sourceBaseDir = fileSystem.getPath(bamFile.importedFrom).parent
             Path targetBaseDir = fileSystem.getPath(bamFile.importFolder.absolutePath)
@@ -235,7 +235,7 @@ touch ${checkpoint}
     }
 
     private void validateCopy(ImportProcess importProcess) throws Throwable {
-        FileSystem fs = fileSystemService.filesystemForBamImport
+        FileSystem fs = fileSystemService.remoteFileSystem
 
         final Collection<String> problems = importProcess.externallyProcessedBamFiles.collect {
             String path = it.bamFile.path
@@ -243,18 +243,18 @@ touch ${checkpoint}
             Path targetBai = fs.getPath(it.baiFile.path)
 
             try {
-                FileService.ensureFileIsReadableAndNotEmpty(target)
-                FileService.ensureFileIsReadableAndNotEmpty(targetBai)
+                FileService.ensureFileIsReadableAndNotEmptyStatic(target)
+                FileService.ensureFileIsReadableAndNotEmptyStatic(targetBai)
 
                 if (!it.maximumReadLength) {
                     Path maxReadLengthPath = fs.getPath(it.bamMaxReadLengthFile.absolutePath)
-                    FileService.ensureFileIsReadableAndNotEmpty(maxReadLengthPath)
+                    FileService.ensureFileIsReadableAndNotEmptyStatic(maxReadLengthPath)
                     it.maximumReadLength = maxReadLengthPath.text as Integer
                 }
 
                 if (!it.md5sum) {
                     Path md5Path = fs.getPath(checksumFileService.md5FileName(path))
-                    FileService.ensureFileIsReadableAndNotEmpty(md5Path)
+                    FileService.ensureFileIsReadableAndNotEmptyStatic(md5Path)
                     it.md5sum = checksumFileService.firstMD5ChecksumFromFile(md5Path)
                 }
 

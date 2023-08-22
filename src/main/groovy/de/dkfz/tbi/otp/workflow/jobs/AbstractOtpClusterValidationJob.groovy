@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -76,7 +76,7 @@ abstract class AbstractOtpClusterValidationJob extends AbstractValidationJob {
 
         Path logFile = fileSystem.getPath(jobStatusLoggingFileService.constructLogFileLocation(realm, clusterJob.workflowStep, clusterJob.clusterJobId))
         try {
-            FileService.ensureFileIsReadableAndNotEmpty(logFile)
+            FileService.ensureFileIsReadableAndNotEmptyStatic(logFile)
         } catch (AssertionError e) {
             return "Cluster job ${clusterJob.clusterJobId} status log file ${logFile} has the following problem: ${e.message}"
         }

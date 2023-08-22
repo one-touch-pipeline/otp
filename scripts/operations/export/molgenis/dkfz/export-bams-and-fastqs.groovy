@@ -326,7 +326,7 @@ class MolgenisExporter {
 String timestamp = TimeFormats.DATE_TIME_DASHES.getFormattedDate(new Date())
 Realm realm = ctx.configService.defaultRealm
 
-final Path baseDirectory = ctx.fileService.toPath(ctx.configService.scriptOutputPath, ctx.fileSystemService.remoteFileSystemOnDefaultRealm)
+final Path baseDirectory = ctx.fileService.toPath(ctx.configService.scriptOutputPath, ctx.fileSystemService.getRemoteFilesystem)
 final Path outputExportDirectory = baseDirectory.resolve("export").resolve("molgenis").resolve(timestamp)
 
 projects.each { Project project ->

@@ -204,7 +204,7 @@ class FastqcDataFilesService {
     }
 
     Path pathToFastQcResultFromSeqCenter(FastqcProcessedFile fastqcProcessedFile) {
-        FileSystem fileSystem = fileSystemService.remoteFileSystemOnDefaultRealm
+        FileSystem fileSystem = fileSystemService.remoteFileSystem
         String initialPath = fastqcProcessedFile.sequenceFile.initialDirectory
         String fastqcFileName = fastqcFileName(fastqcProcessedFile)
         return fileSystem.getPath(initialPath, fastqcFileName)

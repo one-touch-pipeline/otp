@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -129,5 +129,11 @@ abstract class AbstractRunYapsaWorkflowTests extends AbstractRoddyBamFilePairAna
     @Override
     Duration getTimeout() {
         return Duration.ofHours(24)
+    }
+
+    @SuppressWarnings("GetterMethodCouldBeProperty")
+    @Override
+    String getJobName() {
+        return 'ExecuteRunYapsaJob'
     }
 }

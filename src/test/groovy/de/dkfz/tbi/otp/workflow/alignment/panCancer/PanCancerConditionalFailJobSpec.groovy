@@ -81,7 +81,7 @@ class PanCancerConditionalFailJobSpec extends Specification implements DataTest,
         job.configService = Mock(ConfigService)
         job.fileService = new FileService()
         job.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
-            executeCommandReturnProcessOutput(_, _) >> { realm1, cmd -> LocalShellHelper.executeAndWait(cmd) }
+            executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
 
         when:
@@ -160,7 +160,7 @@ class PanCancerConditionalFailJobSpec extends Specification implements DataTest,
         job.configService = Mock(ConfigService)
         job.fileService = new FileService()
         job.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
-            executeCommandReturnProcessOutput(_, _) >> { realm1, cmd -> LocalShellHelper.executeAndWait(cmd) }
+            executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
 
         when:
@@ -195,7 +195,7 @@ class PanCancerConditionalFailJobSpec extends Specification implements DataTest,
         job.configService = Mock(ConfigService)
         job.fileService = new FileService()
         job.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
-            executeCommandReturnProcessOutput(_, _) >> { realm1, cmd -> LocalShellHelper.executeAndWait(cmd) }
+            executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
 
         when:
@@ -232,7 +232,7 @@ class PanCancerConditionalFailJobSpec extends Specification implements DataTest,
         job.configService = Mock(ConfigService)
         job.fileService = new FileService()
         job.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
-            executeCommandReturnProcessOutput(_, _) >> { realm1, cmd -> LocalShellHelper.executeAndWait(cmd) }
+            executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
 
         when:

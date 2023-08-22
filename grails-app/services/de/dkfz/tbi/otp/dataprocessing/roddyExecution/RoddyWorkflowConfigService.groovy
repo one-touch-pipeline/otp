@@ -129,7 +129,7 @@ class RoddyWorkflowConfigService {
     }
 
     void validateConfig(RoddyWorkflowConfig config) {
-        FileSystem fs = fileSystemService.filesystemForConfigFileChecksForRealm
+        FileSystem fs = fileSystemService.remoteFileSystem
         Path configFile = fs.getPath(config.configFilePath)
 
         fileService.ensureFileIsReadableAndNotEmpty(configFile, configService.defaultRealm)
@@ -154,7 +154,7 @@ class RoddyWorkflowConfigService {
     ConfigState getCurrentFilesystemState(Project project, SeqType seqType, Pipeline pipeline) {
         RoddyWorkflowConfig config = RoddyWorkflowConfig.getLatestForProject(project, seqType, pipeline)
         if (config) {
-            FileSystem fs = fileSystemService.filesystemForConfigFileChecksForRealm
+            FileSystem fs = fileSystemService.remoteFileSystem
             String currentConfigContent = fs.getPath(config.configFilePath).text
             return new ConfigState(currentConfigContent, currentConfigContent.encodeAsMD5() != config.md5sum)
         }

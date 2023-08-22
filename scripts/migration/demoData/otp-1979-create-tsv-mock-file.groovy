@@ -40,7 +40,7 @@ FileSystemService fileSystemService = ctx.fileSystemService
 ConfigService configService = ctx.configService
 
 String pathName = "otp-1979-demo-migration"
-Path baseDir = fileSystemService.remoteFileSystemOnDefaultRealm.getPath(configService.scriptOutputPath.toString()).resolve('cram').resolve(pathName)
+Path baseDir = fileSystemService.remoteFileSystem.getPath(configService.scriptOutputPath.toString()).resolve('cram').resolve(pathName)
 println "Write to Folder: ${baseDir}"
 
 List<SeqType> seqTypes = [
