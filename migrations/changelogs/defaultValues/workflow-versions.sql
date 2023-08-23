@@ -75,6 +75,18 @@ ON CONFLICT DO NOTHING;
 
 -- rna versions
 INSERT INTO workflow_version(id, version, workflow_id, workflow_version, date_created, last_updated)
+VALUES (NEXTVAL('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'RNA alignment'), '1.2.22-6', NOW(), NOW())
+ON CONFLICT DO NOTHING;
+
+INSERT INTO workflow_version(id, version, workflow_id, workflow_version, date_created, last_updated)
+VALUES (NEXTVAL('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'RNA alignment'), '1.2.22-7', NOW(), NOW())
+ON CONFLICT DO NOTHING;
+
+INSERT INTO workflow_version(id, version, workflow_id, workflow_version, date_created, last_updated)
+VALUES (NEXTVAL('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'RNA alignment'), '1.3.0', NOW(), NOW())
+ON CONFLICT DO NOTHING;
+
+INSERT INTO workflow_version(id, version, workflow_id, workflow_version, date_created, last_updated)
 VALUES (NEXTVAL('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'RNA alignment'), '1.3.0-1', NOW(), NOW())
 ON CONFLICT DO NOTHING;
 

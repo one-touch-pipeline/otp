@@ -44,7 +44,7 @@ import java.util.regex.Matcher
 /**
  * script to check migration.
  *
- * Currently configured for wgbs alignment. For other please adapt the input.
+ * Currently configured for rna alignment. For other please adapt the input.
  *
  * In case more config files are needed, add content of file to new variable and adapt creation at place of creation of config files.
  */
@@ -55,33 +55,25 @@ import java.util.regex.Matcher
 // the seqtypes to check for workflow
 @Field
 List<SeqType> seqTypes = [
-        SeqTypeService.wholeGenomeBisulfitePairedSeqType,
-        SeqTypeService.wholeGenomeBisulfiteTagmentationPairedSeqType,
+        SeqTypeService.rnaPairedSeqType,
+        SeqTypeService.rnaSingleSeqType,
 ]
 
 // the pipeline to check
 @Field
-Pipeline pipeline = Pipeline.findByName(Pipeline.Name.PANCAN_ALIGNMENT)
+Pipeline pipeline = Pipeline.findByName(Pipeline.Name.RODDY_RNA_ALIGNMENT)
 
 // the name of the new workflow in the new system
 @Field
-String nameNewWorkflow = WgbsWorkflow.WGBS_WORKFLOW
+String nameNewWorkflow = de.dkfz.tbi.otp.workflow.rna.RnaAlignmentWorkflow.WORKFLOW
 
 // name of the roddy plugin
 @Field
-String roddyWorkflowPlugin = "AlignmentAndQCWorkflows"
+String roddyWorkflowPlugin = "RNAseqWorkflow"
 
 // name of the roddy analysis
 @Field
-String roddyAnalysisConfiguration = 'bisulfiteCoreAnalysis'
-
-// additinal config file need for wgbs alignment, if not needed, remove it again
-@Field
-String coAppAndRef = """
-            |<configuration name='coAppAndRef'
-            |               description='This file is a workaround since Roddy plugin imports this config.'>
-            |</configuration>
-            |""".stripMargin()
+String roddyAnalysisConfiguration = 'RNAseqAnalysis'
 
 // ----------------------------------
 // script
@@ -288,7 +280,6 @@ GParsPool.withPool(parallel) {
 
                 Path configDir = work.resolve('config')
                 fileService.createFileWithContent(configDir.resolve('config.xml'), newXml, realm)
-                fileService.createFileWithContent(configDir.resolve('coAppAndRef.xml'), coAppAndRef, realm)
 
                 String cmdNew = [
                         loadModule,

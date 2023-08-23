@@ -31,12 +31,11 @@ import de.dkfz.tbi.otp.workflowExecution.*
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 // input
-Pipeline.Name oldPipelineName = Pipeline.Name.PANCAN_ALIGNMENT
-String newWorkflowName = "PanCancer alignment"
+Pipeline.Name oldPipelineName = Pipeline.Name.RODDY_RNA_ALIGNMENT
+String newWorkflowName = de.dkfz.tbi.otp.workflow.rna.RnaAlignmentWorkflow.WORKFLOW
 List<SeqType> seqTypes = [
-        SeqTypeService.exomePairedSeqType,
-        SeqTypeService.wholeGenomePairedSeqType,
-        SeqTypeService.chipSeqPairedSeqType,
+        SeqTypeService.rnaPairedSeqType,
+        SeqTypeService.rnaSingleSeqType,
 ]
 
 // script
