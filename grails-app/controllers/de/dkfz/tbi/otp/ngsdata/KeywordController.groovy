@@ -83,8 +83,11 @@ class KeywordController implements CheckAndCall {
         if (cmd.hasErrors()) {
             flash.message = new FlashMessage(g.message(code: "keyword.index.removeKeywordFailure") as String, cmd.errors)
         } else {
-            keywordService.removeKeywordFromProject(cmd.keyword, projectSelectionService.requestedProject)
-            flash.message = new FlashMessage(g.message(code: "keyword.index.removeKeywordSuccess") as String)
+            if (keywordService.removeKeywordFromProjectAndUnusedKeyword(cmd.keyword, projectSelectionService.requestedProject)) {
+                flash.message = new FlashMessage(g.message(code: "keyword.index.removeAndDeleteKeywordSuccess") as String)
+            } else {
+                flash.message = new FlashMessage(g.message(code: "keyword.index.removeKeywordSuccess") as String)
+            }
         }
         redirect(action: "index")
     }

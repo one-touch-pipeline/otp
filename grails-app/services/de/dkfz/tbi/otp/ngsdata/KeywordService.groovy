@@ -48,9 +48,14 @@ class KeywordService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    void removeKeywordFromProject(Keyword keyword, Project project) {
+    boolean removeKeywordFromProjectAndUnusedKeyword(Keyword keyword, Project project) {
         keyword.removeFromProjects(project)
         keyword.save(flush: true)
+        if (keyword.projects.isEmpty()) {
+            keyword.delete(flush: true)
+            return true
+        }
+        return false
     }
 
     List<Keyword> list() {
