@@ -95,6 +95,9 @@ class RoddyBamFile extends AbstractBamFile implements Artefact, HasIdentifier, P
 
     RoddyBamFile baseBamFile
 
+    /**
+     * Contains all seqTracks including the parents
+     */
     Set<SeqTrack> seqTracks
 
     static hasMany = [
@@ -113,6 +116,10 @@ class RoddyBamFile extends AbstractBamFile implements Artefact, HasIdentifier, P
         seqTracks minSize: 1, validator: { val, obj, errors ->
             obj.isConsistentAndContainsNoWithdrawnData().each {
                 errors.reject(null, it)
+            }
+            // Should contain all SeqTracks of the baseBamFile
+            if (obj.baseBamFile && !val.containsAll(obj.baseBamFile.seqTracks)) {
+                errors.reject("RoddyBamFile has to contain all its baseBamFiles seqTracks", it)
             }
         }
         baseBamFile nullable: true
@@ -163,10 +170,6 @@ class RoddyBamFile extends AbstractBamFile implements Artefact, HasIdentifier, P
 
             assertAndTrackOnError withdrawn || !baseBamFile.withdrawn,
                     "base bam file is withdrawn for not withdrawn bam file ${this}"
-
-            List<Long> duplicatedSeqTracksIds = baseBamFile.containedSeqTracks*.id.intersect(seqTracks*.id)
-            assertAndTrackOnError duplicatedSeqTracksIds.empty,
-                    "the same seqTrack is going to be merged for the second time: ${seqTracks.findAll { duplicatedSeqTracksIds.contains(it.id) }}"
         }
 
         Set<SeqTrack> allContainedSeqTracks = this.containedSeqTracks
@@ -192,9 +195,7 @@ class RoddyBamFile extends AbstractBamFile implements Artefact, HasIdentifier, P
 
     @Override
     Set<SeqTrack> getContainedSeqTracks() {
-        def tmpSet = baseBamFile?.containedSeqTracks ?: []
-        tmpSet.addAll(seqTracks)
-        return tmpSet as Set
+        return seqTracks
     }
 
     QualityAssessmentMergedPass findOrSaveQaPass() {

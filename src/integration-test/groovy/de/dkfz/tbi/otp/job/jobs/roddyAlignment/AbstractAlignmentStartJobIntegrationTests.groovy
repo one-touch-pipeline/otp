@@ -336,7 +336,7 @@ class AbstractAlignmentStartJobIntegrationTests implements DomainFactoryProcessi
 
         assertRoddyBamFileConsistencyWithMwp(rbf, mwp)
         assert baseBamFile == rbf.baseBamFile
-        assert TestCase.containSame(additionalSeqTracks, rbf.seqTracks)
+        assert TestCase.containSame(baseBamFile.seqTracks + additionalSeqTracks, rbf.seqTracks)
         assert baseBamFile.numberOfMergedLanes + additionalSeqTracks.size() == rbf.numberOfMergedLanes
         assert TestCase.containSame(additionalSeqTracks + baseBamFile.containedSeqTracks, rbf.containedSeqTracks)
         assert rbf.workDirectoryName && rbf.workDirectoryName.startsWith(RoddyBamFile.WORK_DIR_PREFIX)

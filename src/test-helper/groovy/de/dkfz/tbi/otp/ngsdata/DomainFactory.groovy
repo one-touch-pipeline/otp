@@ -494,7 +494,7 @@ class DomainFactory {
                 identifier         : baseBamFile.identifier + 1,
                 numberOfMergedLanes: baseBamFile.numberOfMergedLanes + 1,
                 workDirectoryName  : "${RoddyBamFile.WORK_DIR_PREFIX}_${counter++}",
-                seqTracks          : bamFileProperties.seqTracks ?: [createSeqTrackWithFastqFiles(baseBamFile.workPackage)],
+                seqTracks          : bamFileProperties.seqTracks ? bamFileProperties.seqTracks + baseBamFile.seqTracks : [createSeqTrackWithFastqFiles(baseBamFile.workPackage)] + baseBamFile.seqTracks,
                 md5sum             : HelperUtils.randomMd5sum,
                 fileOperationStatus: FileOperationStatus.PROCESSED,
                 fileSize           : 10000,

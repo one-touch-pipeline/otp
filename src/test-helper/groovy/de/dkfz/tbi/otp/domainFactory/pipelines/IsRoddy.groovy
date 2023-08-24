@@ -70,6 +70,9 @@ trait IsRoddy implements IsPipeline {
         )
 
         Collection<SeqTrack> seqTracks = properties.seqTracks ?: [DomainFactory.createSeqTrackWithFastqFiles(workPackage)]
+        if (properties.baseBamFile && properties.baseBamFile.seqTracks) {
+            seqTracks += properties.baseBamFile.seqTracks
+        }
         workPackage.seqTracks = seqTracks
         workPackage.save(flush: true)
 

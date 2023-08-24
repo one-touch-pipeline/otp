@@ -351,15 +351,16 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
             )
             createMergingCriteriaLazy(project: seqTrack1.project, seqType: seqTrack1.seqType)
             createMergingCriteriaLazy(project: seqTrack2.project, seqType: seqTrack2.seqType)
+            RoddyBamFile baseBamFile = DomainFactory.createRoddyBamFile([
+                    workPackage: DomainFactory.createMergingWorkPackage(
+                            MergingWorkPackage.getMergingProperties(seqTrack2) +
+                                    [pipeline: DomainFactory.createPanCanPipeline()]
+                    )
+            ])
             AbstractBamFile abstractBamFile = saveBamFileInProjectFolder(
                     DomainFactory.createRoddyBamFile(
-                            DomainFactory.createRoddyBamFile([
-                                    workPackage: DomainFactory.createMergingWorkPackage(
-                                            MergingWorkPackage.getMergingProperties(seqTrack2) +
-                                                    [pipeline: DomainFactory.createPanCanPipeline()]
-                                    )
-                            ]),
-                            DomainFactory.randomBamFileProperties + [seqTracks: [seqTrack2] as Set],
+                            baseBamFile,
+                            DomainFactory.randomBamFileProperties + [seqTracks: [seqTrack2] + baseBamFile.seqTracks],
                     )
             )
             ((MergingWorkPackage) (abstractBamFile.workPackage)).seqTracks.add(seqTrack2)
@@ -459,14 +460,15 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
             createMergingCriteriaLazy(project: seqTrack1.project, seqType: seqTrack1.seqType)
             createMergingCriteriaLazy(project: seqTrack2.project, seqType: seqTrack2.seqType)
 
+            RoddyBamFile baseBamFile = DomainFactory.createRoddyBamFile([
+                    workPackage: DomainFactory.createMergingWorkPackage(
+                            MergingWorkPackage.getMergingProperties(seqTrack2) +
+                                    [pipeline: DomainFactory.createPanCanPipeline()]
+                    )
+            ])
             saveBamFileInProjectFolder(DomainFactory.createRoddyBamFile(
-                    DomainFactory.createRoddyBamFile([
-                            workPackage: DomainFactory.createMergingWorkPackage(
-                                    MergingWorkPackage.getMergingProperties(seqTrack2) +
-                                            [pipeline: DomainFactory.createPanCanPipeline()]
-                            )
-                    ]),
-                    DomainFactory.randomBamFileProperties + [seqTracks: [seqTrack2] as Set],
+                    baseBamFile,
+                    DomainFactory.randomBamFileProperties + [seqTracks: [seqTrack2] + baseBamFile.seqTracks],
             ))
 
             String prefix = "the prefix"

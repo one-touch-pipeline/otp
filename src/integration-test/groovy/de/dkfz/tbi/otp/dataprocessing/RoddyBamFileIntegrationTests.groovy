@@ -155,13 +155,6 @@ class RoddyBamFileIntegrationTests {
     }
 
     @Test
-    void testIsConsistentAndContainsNoWithdrawnData_seqTrackIsMergedSecondTime_shouldReturnErrorMessage() {
-        RoddyBamFile bamFile = createRoddyBamFileWithBaseBamFile()
-        bamFile.seqTracks.addAll(bamFile.baseBamFile.seqTracks)
-        assert bamFile.isConsistentAndContainsNoWithdrawnData().first()?.startsWith("the same seqTrack is going to be merged for the second time")
-    }
-
-    @Test
     void testIsConsistentAndContainsNoWithdrawnData_withdrawnBamFileWithWithdrawnSeqTracks_succeeds() {
         RoddyBamFile bamFile = DomainFactory.createRoddyBamFile([withdrawn: true])
         List<RawSequenceFile> rawSequenceFiles = RawSequenceFile.findAll()

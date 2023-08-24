@@ -157,8 +157,7 @@ abstract class AbstractAlignmentStartJob extends AbstractStartJobImpl implements
         assert mergingWorkPackage
         AbstractBamFile previousBamFile = mergingWorkPackage.bamFileInProjectFolder
         List<Long> mergableSeqTracks = mergingWorkPackage.seqTracks*.id
-        List<Long> containedSeqTracks = baseBamFile?.containedSeqTracks*.id
-        Set<SeqTrack> seqTracks = SeqTrack.getAll(mergableSeqTracks - containedSeqTracks) as Set
+        Set<SeqTrack> seqTracks = SeqTrack.getAll(mergableSeqTracks) as Set
 
         ConfigPerProjectAndSeqType config = getConfig(mergingWorkPackage)
 
