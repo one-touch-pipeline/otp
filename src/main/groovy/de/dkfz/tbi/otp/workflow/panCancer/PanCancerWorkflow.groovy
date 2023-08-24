@@ -26,6 +26,9 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
+import de.dkfz.tbi.otp.workflow.alignment.RoddyAlignmentCheckQcJob
+import de.dkfz.tbi.otp.workflow.alignment.RoddyAlignmentFinishJob
+import de.dkfz.tbi.otp.workflow.alignment.RoddyAlignmentFragmentJob
 import de.dkfz.tbi.otp.workflow.jobs.SetCorrectPermissionJob
 import de.dkfz.tbi.otp.workflowExecution.*
 
@@ -45,17 +48,17 @@ class PanCancerWorkflow implements OtpWorkflow {
     @Override
     List<String> getJobBeanNames() {
         return [
-                PanCancerFragmentJob.simpleName.uncapitalize(),
+                RoddyAlignmentFragmentJob.simpleName.uncapitalize(),
                 PanCancerConditionalFailJob.simpleName.uncapitalize(),
                 PanCancerPrepareJob.simpleName.uncapitalize(),
                 PanCancerExecuteJob.simpleName.uncapitalize(),
                 PanCancerValidationJob.simpleName.uncapitalize(),
                 PanCancerParseJob.simpleName.uncapitalize(),
-                PanCancerCheckQcJob.simpleName.uncapitalize(),
+                RoddyAlignmentCheckQcJob.simpleName.uncapitalize(),
                 PanCancerCleanUpJob.simpleName.uncapitalize(),
                 SetCorrectPermissionJob.simpleName.uncapitalize(),
                 PanCancerLinkJob.simpleName.uncapitalize(),
-                PanCancerFinishJob.simpleName.uncapitalize(),
+                RoddyAlignmentFinishJob.simpleName.uncapitalize(),
         ]
     }
 

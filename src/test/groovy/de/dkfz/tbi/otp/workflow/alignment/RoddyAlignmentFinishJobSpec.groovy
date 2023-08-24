@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflow.panCancer
+package de.dkfz.tbi.otp.workflow.alignment
 
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
@@ -41,7 +41,7 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 import java.nio.file.Files
 import java.nio.file.Path
 
-class PanCancerFinishJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory, IsRoddy {
+class RoddyAlignmentFinishJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory, IsRoddy {
 
     @TempDir
     Path tempDir
@@ -72,7 +72,7 @@ class PanCancerFinishJobSpec extends Specification implements DataTest, Workflow
         Path testWorkBamFile = CreateFileHelper.createFile(roddyBamFile.workBamFile.toPath())
         String md5Sum = "098f6bcd4621d373cade4e832627b4f6"
 
-        PanCancerFinishJob job = Spy(PanCancerFinishJob) {
+        RoddyAlignmentFinishJob job = Spy(RoddyAlignmentFinishJob) {
             1 * getRoddyBamFile(workflowStep) >> roddyBamFile
         }
 

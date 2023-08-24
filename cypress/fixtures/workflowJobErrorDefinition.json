@@ -1,7 +1,7 @@
 [
   {
     "name": "workflow job error definition",
-    "jobBeanName": "panCancerCheckQcJob",
+    "jobBeanName": "roddyAlignmentCheckQcJob",
     "sourceType": "MESSAGE",
     "restartAction": "RESTART_JOB",
     "beanToRestart": "checkQcJob",

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,35 +19,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflow.wgbs
+package de.dkfz.tbi.otp.workflow.alignment
 
-import grails.testing.gorm.DataTest
-import spock.lang.Specification
+import groovy.util.logging.Slf4j
+import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPancanFactory
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
+import de.dkfz.tbi.otp.workflow.jobs.AbstractCheckQcJob
+import de.dkfz.tbi.otp.workflow.panCancer.PanCancerShared
+import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
-class WgbsWorkflowSpec extends Specification implements RoddyPancanFactory, DataTest {
+@Component
+@Slf4j
+class RoddyAlignmentCheckQcJob extends AbstractCheckQcJob implements PanCancerShared {
 
-    WgbsWorkflow wgbsWorkflow
-
-    void setup() {
-        wgbsWorkflow = new WgbsWorkflow()
-    }
-
-    void "getJobBeanNames, should return all WGBS Workflow bean names in correct order"() {
-        expect:
-        wgbsWorkflow.jobBeanNames == [
-                "roddyAlignmentFragmentJob",
-                "panCancerConditionalFailJob",
-                "wgbsPrepareJob",
-                "wgbsExecuteJob",
-                "wgbsValidationJob",
-                "wgbsParseJob",
-                "roddyAlignmentCheckQcJob",
-                "panCancerCleanUpJob",
-                "wgbsLinkJob",
-                "setCorrectPermissionJob",
-                "roddyAlignmentFinishJob",
-        ]
+    @Override
+    protected AbstractBamFile getAbstractBamFile(WorkflowStep workflowStep) {
+        return getRoddyBamFile(workflowStep)
     }
 }

@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflow.panCancer
+package de.dkfz.tbi.otp.workflow.alignment
 
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
@@ -31,10 +31,11 @@ import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.PanCancerWorkflowDomainFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
+import de.dkfz.tbi.otp.workflow.panCancer.PanCancerWorkflow
 import de.dkfz.tbi.otp.workflowExecution.SingleSelectSelectorExtendedCriteria
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
-class PanCancerFragmentJobSpec extends Specification implements DataTest, PanCancerWorkflowDomainFactory, IsRoddy {
+class RoddyAlignmentFragmentJobSpec extends Specification implements DataTest, PanCancerWorkflowDomainFactory, IsRoddy {
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -48,7 +49,7 @@ class PanCancerFragmentJobSpec extends Specification implements DataTest, PanCan
         ]
     }
 
-    private PanCancerFragmentJob job
+    private RoddyAlignmentFragmentJob job
     private WorkflowStep workflowStep
     private LibraryPreparationKit seqTrackLibPrepKit
     private LibraryPreparationKit workPackageLibPrepKit
@@ -75,7 +76,7 @@ class PanCancerFragmentJobSpec extends Specification implements DataTest, PanCan
                 useLibPrepKit: !workPackageLibIsNull,
         ])
 
-        job = new PanCancerFragmentJob()
+        job = new RoddyAlignmentFragmentJob()
         job.concreteArtefactService = Mock(ConcreteArtefactService) {
             1 * getOutputArtefact(workflowStep, PanCancerWorkflow.OUTPUT_BAM) >> { roddyBamFile }
             0 * _

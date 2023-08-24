@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflow.panCancer
+package de.dkfz.tbi.otp.workflow.alignment
 
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
@@ -32,9 +32,10 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightNotificationService
 import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightService
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
+import de.dkfz.tbi.otp.workflow.panCancer.PanCancerWorkflow
 import de.dkfz.tbi.otp.workflowExecution.*
 
-class PanCancerCheckQcJobSpec extends Specification implements WorkflowSystemDomainFactory, DataTest, RoddyPancanFactory {
+class RoddyAlignmentCheckQcJobSpec extends Specification implements WorkflowSystemDomainFactory, DataTest, RoddyPancanFactory {
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -63,7 +64,7 @@ class PanCancerCheckQcJobSpec extends Specification implements WorkflowSystemDom
         final WorkflowStep workflowStep = createWorkflowStep([workflowRun: run])
         final RoddyBamFile bamFile = createRoddyBamFile(RoddyBamFile)
         final RoddyMergedBamQa qa = createQa(bamFile)
-        final PanCancerCheckQcJob job = new PanCancerCheckQcJob()
+        final RoddyAlignmentCheckQcJob job = new RoddyAlignmentCheckQcJob()
 
         job.qcTrafficLightService = Mock(QcTrafficLightService)
         job.workflowStateChangeService = Mock(WorkflowStateChangeService)

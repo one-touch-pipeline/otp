@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,21 +19,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflow.panCancer
 
-import groovy.util.logging.Slf4j
-import org.springframework.stereotype.Component
+databaseChangeLog = {
 
-import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
-import de.dkfz.tbi.otp.workflow.jobs.AbstractCheckQcJob
-import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
+    String searchString1 = 'panCancerFragmentJob'
+    String searchString2 = 'panCancerCheckQcJob'
+    String searchString3 = 'panCancerFinishJob'
 
-@Component
-@Slf4j
-class PanCancerCheckQcJob extends AbstractCheckQcJob implements PanCancerShared {
+    changeSet(author: "-", id: "1689851724804-99") {
+        sql("""
+UPDATE workflow_step
+SET bean_name = 'roddyAlignmentFragmentJob'
+WHERE bean_name = '${searchString1}';
 
-    @Override
-    protected AbstractBamFile getAbstractBamFile(WorkflowStep workflowStep) {
-        return getRoddyBamFile(workflowStep)
+UPDATE workflow_step
+SET bean_name = 'roddyAlignmentCheckQcJob'
+WHERE bean_name = '${searchString2}';
+
+UPDATE workflow_step
+SET bean_name = 'roddyAlignmentFinishJob'
+WHERE bean_name = '${searchString3}';
+""")
     }
 }

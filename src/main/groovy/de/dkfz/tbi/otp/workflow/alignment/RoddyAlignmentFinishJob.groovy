@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflow.panCancer
+package de.dkfz.tbi.otp.workflow.alignment
 
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
@@ -30,6 +30,7 @@ import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.utils.Md5SumService
 import de.dkfz.tbi.otp.workflow.jobs.AbstractFinishJob
+import de.dkfz.tbi.otp.workflow.panCancer.PanCancerShared
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 import java.nio.file.Files
@@ -37,7 +38,7 @@ import java.nio.file.Path
 
 @Component
 @Slf4j
-class PanCancerFinishJob extends AbstractFinishJob implements PanCancerShared {
+class RoddyAlignmentFinishJob extends AbstractFinishJob implements PanCancerShared {
 
     @Autowired
     FileService fileService

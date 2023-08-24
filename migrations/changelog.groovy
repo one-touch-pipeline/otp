@@ -95,5 +95,7 @@ databaseChangeLog = {
 
     include file: 'changelogs/2023/otp-2228-set-rna-bean.groovy'
 
+    include file: 'changelogs/2023/otp-2181-rename-pancancer-to-roddy.groovy'
+
     include file: 'changelogs/2023/otp-1608-wes-fastq-workflow-test.groovy'
 }

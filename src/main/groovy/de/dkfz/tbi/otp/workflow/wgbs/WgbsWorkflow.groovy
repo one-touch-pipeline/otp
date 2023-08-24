@@ -24,6 +24,9 @@ package de.dkfz.tbi.otp.workflow.wgbs
 import groovy.util.logging.Slf4j
 import org.springframework.stereotype.Component
 
+import de.dkfz.tbi.otp.workflow.alignment.RoddyAlignmentCheckQcJob
+import de.dkfz.tbi.otp.workflow.alignment.RoddyAlignmentFinishJob
+import de.dkfz.tbi.otp.workflow.alignment.RoddyAlignmentFragmentJob
 import de.dkfz.tbi.otp.workflow.jobs.SetCorrectPermissionJob
 import de.dkfz.tbi.otp.workflow.panCancer.*
 
@@ -36,17 +39,17 @@ class WgbsWorkflow extends PanCancerWorkflow {
     @Override
     List<String> getJobBeanNames() {
         return [
-                PanCancerFragmentJob.simpleName.uncapitalize(),
+                RoddyAlignmentFragmentJob.simpleName.uncapitalize(),
                 PanCancerConditionalFailJob.simpleName.uncapitalize(),
                 WgbsPrepareJob.simpleName.uncapitalize(),
                 WgbsExecuteJob.simpleName.uncapitalize(),
                 WgbsValidationJob.simpleName.uncapitalize(),
                 WgbsParseJob.simpleName.uncapitalize(),
-                PanCancerCheckQcJob.simpleName.uncapitalize(),
+                RoddyAlignmentCheckQcJob.simpleName.uncapitalize(),
                 PanCancerCleanUpJob.simpleName.uncapitalize(),
                 WgbsLinkJob.simpleName.uncapitalize(),
                 SetCorrectPermissionJob.simpleName.uncapitalize(),
-                PanCancerFinishJob.simpleName.uncapitalize(),
+                RoddyAlignmentFinishJob.simpleName.uncapitalize(),
         ]
     }
 }
