@@ -750,8 +750,11 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
     void "createWorkflowRunsAndOutputArtefacts, when #name, then create new bam file and add no warning"() {
         given:
         createDataForCreateWorkflowRunsAndOutputArtefacts(existingMergingWorkPackage, [
-                existingBaseBamFile : existingBaseBamFile,
-                baseBamFileWithdrawn: baseBamFileWithdrawn,
+                existingBaseBamFile       : existingBaseBamFile,
+                baseBamFileWithdrawn      : baseBamFileWithdrawn,
+                noSeqPlatformGroupSeqTrack: noSeqPlatformGroupSeqTrack,
+                noSeqPlatformGroupMwp     : noSeqPlatformGroupMwp,
+
         ])
 
         and: 'expected input artefacts'
@@ -787,7 +790,7 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
         mergingWorkPackage.seqType == seqTrack1.seqType
         mergingWorkPackage.antibodyTarget == seqTrack1.antibodyTarget
         mergingWorkPackage.libraryPreparationKit == seqTrack1.libraryPreparationKit
-        mergingWorkPackage.seqPlatformGroup == seqPlatformGroup
+        noSeqPlatformGroupMwp || noSeqPlatformGroupSeqTrack || mergingWorkPackage.seqPlatformGroup == seqPlatformGroup
         mergingWorkPackage.referenceGenome == referenceGenome
         TestCase.assertContainSame(mergingWorkPackage.seqTracks, seqTracks)
         !existingMergingWorkPackage || (mergingWorkPackage == baseMergingWorkPackage)
@@ -799,11 +802,15 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
         TestCase.assertContainSame(run.inputArtefacts.values(), expectedInputArtefacts)
 
         where:
-        name                                        | existingMergingWorkPackage | existingBaseBamFile | baseBamFileWithdrawn
-        'no mergingWorkPackage'                     | false                      | false               | false
-        'mergingWorkPackage exist, but no bam file' | true                       | false               | false
-        'base bam exist and is not withdrawn'       | true                       | true                | false
-        'base bam exist and is withdrawn'           | true                       | true                | true
+        name                                                  | existingMergingWorkPackage | existingBaseBamFile | baseBamFileWithdrawn | noSeqPlatformGroupSeqTrack | noSeqPlatformGroupMwp
+        'no mergingWorkPackage'                               | false                      | false               | false                | false                      | false
+        'mergingWorkPackage exist, but no bam file'           | true                       | false               | false                | false                      | false
+        'base bam exist and is not withdrawn'                 | true                       | true                | false                | false                      | false
+        'base bam exist and is withdrawn'                     | true                       | true                | true                 | false                      | false
+        'no seqplatformgroup for SeqTrack & MWP do not exist' | false                      | false               | false                | true                       | false
+        'no seqplatformgroup for SeqTrack & MWP  exist'       | true                       | false               | false                | true                       | false
+        'no seqplatformgroup for MWP'                         | true                       | false               | false                | false                      | true
+        'no seqplatformgroup for MWP & SeqTrack'              | true                       | false               | false                | true                       | true
     }
 
     @Unroll
@@ -930,20 +937,22 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
 
     private Map<String, ?> createDefaultMapForCreateWorkflowRunsAndOutputArtefactsDomains() {
         return [
-                existingBaseBamFile  : false,
-                baseBamFileWithdrawn : false,
+                existingBaseBamFile       : false,
+                baseBamFileWithdrawn      : false,
 
-                noSeqTrack           : false,
-                noNewSeqTrack        : false,
-                missingFastqc        : false,
-                toManyFastqc         : false,
-                noSpecies            : false,
-                noReferenceGenome    : false,
-                wrongLibPrepKit      : false,
-                wrongSeqPlatformGroup: false,
-                wrongReferenceGenome : false,
+                noSeqTrack                : false,
+                noNewSeqTrack             : false,
+                missingFastqc             : false,
+                toManyFastqc              : false,
+                noSpecies                 : false,
+                noReferenceGenome         : false,
+                wrongLibPrepKit           : false,
+                wrongSeqPlatformGroup     : false,
+                wrongReferenceGenome      : false,
 
-                wrongMergingWorkPage : false,
+                noSeqPlatformGroupMwp     : false,
+                noSeqPlatformGroupSeqTrack: false,
+                wrongMergingWorkPage      : false,
         ]
     }
 
@@ -1000,7 +1009,7 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
         // dto objects
         projectSeqTypeGroup = new ProjectSeqTypeGroup(seqTrack1.project, seqTrack1.seqType)
 
-        alignmentDeciderGroup = createAlignmentDeciderGroup(seqTrack1, seqPlatformGroup)
+        alignmentDeciderGroup = createAlignmentDeciderGroup(seqTrack1, (values.noSeqPlatformGroupSeqTrack || values.noSeqPlatformGroupMwp) ? null : seqPlatformGroup)
 
         // AlignmentArtefactDataList
         List<AlignmentArtefactData<SeqTrack>> seqTrackData = values.noSeqTrack ? [] : seqTracks.collect {
@@ -1034,7 +1043,7 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
                     sample               : seqTrack1.sample,
                     seqType              : seqTrack1.seqType,
                     antibodyTarget       : seqTrack1.antibodyTarget,
-                    seqPlatformGroup     : values.wrongSeqPlatformGroup ? createSeqPlatformGroup() : seqPlatformGroup,
+                    seqPlatformGroup     : values.noSeqPlatformGroupMwp ? null : values.wrongSeqPlatformGroup ? createSeqPlatformGroup() : seqPlatformGroup,
                     libraryPreparationKit: values.wrongLibPrepKit ? createLibraryPreparationKit() : seqTrack1.libraryPreparationKit,
                     referenceGenome      : values.wrongReferenceGenome ? createReferenceGenome() : referenceGenome,
                     pipeline             : findOrCreatePipeline(),

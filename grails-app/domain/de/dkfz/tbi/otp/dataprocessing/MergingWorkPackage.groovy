@@ -73,6 +73,7 @@ class MergingWorkPackage extends AbstractMergingWorkPackage {
                     pipeline.name != Pipeline.Name.EXTERNALLY_PROCESSED
         })
 
+        seqPlatformGroup(nullable: true)
         libraryPreparationKit validator: { val, obj ->
             if (obj.seqType?.needsBedFile) {
                 return val != null

@@ -81,7 +81,7 @@ class TriggerAlignmentService {
             it.artefactType == ArtefactType.BAM
         }*.artefact*.get()*.workPackage
 
-        Collection<MergingWorkPackage> mergingWorkPackagesOld = LogUsedTimeUtils.logUsedTime(log, "trigger alignment old system") {
+        Collection<MergingWorkPackage> mergingWorkPackagesOld = LogUsedTimeUtils.logUsedTimeStartEnd(log, "trigger alignment old system") {
             seqTracksInOldWorkflowSystem.collectMany {
                 seqTrackService.decideAndPrepareForAlignment(it)
             }.unique()
@@ -97,7 +97,7 @@ class TriggerAlignmentService {
         Collection<MergingWorkPackage> mergingWorkPackages = mergingWorkPackagesNew + mergingWorkPackagesOld
 
         if (mergingWorkPackages) {
-            LogUsedTimeUtils.logUsedTime(log, "create analyses") {
+            LogUsedTimeUtils.logUsedTimeStartEnd(log, "create analyses") {
                 samplePairDeciderService.findOrCreateSamplePairs(mergingWorkPackages)
             }
         }

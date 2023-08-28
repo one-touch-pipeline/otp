@@ -266,11 +266,14 @@ abstract class AbstractAlignmentDecider extends AbstractWorkflowDecider<Alignmen
                 return deciderResult
             }
             SeqTrack seqTrack = seqTracks.first()
-            if (!workPackage.satisfiesCriteria(seqTrack)) {
-                Map<String, Entity> properties = MergingWorkPackage.getMergingProperties(seqTrack)
-                Map<String, Entity> nonMatchingProperties = properties.findAll { String key, Entity value ->
-                    value != workPackage[key]
-                }
+            Map<String, Entity> properties = MergingWorkPackage.getMergingProperties(seqTrack)
+            if (!group.seqPlatformGroup) {
+                properties.remove('seqPlatformGroup') //since seqPlatformGroup may be ignored, it should not part of the check
+            }
+            Map<String, Entity> nonMatchingProperties = properties.findAll { String key, Entity value ->
+                value != workPackage[key]
+            }
+            if (nonMatchingProperties) {
                 String nonMatchingString = nonMatchingProperties.collect { String key, Entity value ->
                     [
                             key,
